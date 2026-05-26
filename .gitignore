@@ -1,0 +1,14 @@
+.env
+*.db
+*.sqlite
+*.sqlite3
+*.conf
+*.qr.png
+servers.yml
+backups/
+tmp/
+__pycache__/
+.pytest_cache/
+.venv/
+.codex_deps/
+*.egg-info/

@@ -1,0 +1,215 @@
+import io
+import json
+import sqlite3
+import tarfile
+import tempfile
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+from app.backup.manifest import (
+    build_manifest,
+    checksum_sha256,
+    validate_manifest,
+)
+from app.backup.storage import (
+    decrypt_archive_bytes,
+    encrypt_archive_bytes,
+    secret_box_from_env,
+)
+from app.security.crypto import SecretBoxError
+
+
+DATABASE_ENTRY = "database.sqlite3"
+MANIFEST_ENTRY = "manifest.json"
+EXPECTED_MEMBERS = {DATABASE_ENTRY, MANIFEST_ENTRY}
+REQUIRED_TABLES = {"users", "servers", "devices", "orders", "admin_actions"}
+
+
+class BackupService:
+    def __init__(self, app_version: str) -> None:
+        self.app_version = app_version
+
+    def create(self, db_path: Path, output_dir: Path) -> Path:
+        db_path = Path(db_path)
+        if not db_path.is_file():
+            raise ValueError("database path must be a regular file")
+
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        manifest = build_manifest(
+            app_version=self.app_version,
+            database_checksum_sha256=checksum_sha256(db_path),
+        )
+        archive_bytes = self._build_archive(db_path, manifest)
+        encrypted_bytes = encrypt_archive_bytes(archive_bytes)
+
+        backup_path = output_dir / f"amneziya-backup-{self._timestamp()}.tar.enc"
+        backup_path.write_bytes(encrypted_bytes)
+        return backup_path
+
+    def verify(self, backup_path: Path) -> dict[str, Any]:
+        archive_bytes = decrypt_archive_bytes(Path(backup_path).read_bytes())
+        manifest, database_bytes = self._read_archive(archive_bytes)
+        validate_manifest(manifest)
+        self._verify_database_checksum(manifest, database_bytes)
+        return manifest
+
+    def restore(
+        self,
+        backup_path: Path,
+        target_db_path: Path,
+        force: bool = False,
+    ) -> Path:
+        target_db_path = Path(target_db_path)
+        if target_db_path.exists() and not force:
+            raise FileExistsError(target_db_path)
+
+        archive_bytes = decrypt_archive_bytes(Path(backup_path).read_bytes())
+        manifest, database_bytes = self._read_archive(archive_bytes)
+        validate_manifest(manifest)
+        self._verify_database_checksum(manifest, database_bytes)
+        self._validate_restorable_database(database_bytes)
+
+        target_db_path.parent.mkdir(parents=True, exist_ok=True)
+        target_db_path.write_bytes(database_bytes)
+        return target_db_path
+
+    def _build_archive(self, db_path: Path, manifest: dict[str, Any]) -> bytes:
+        archive = io.BytesIO()
+        with tarfile.open(fileobj=archive, mode="w") as tar:
+            database_bytes = db_path.read_bytes()
+            database_info = tarfile.TarInfo(DATABASE_ENTRY)
+            database_info.size = len(database_bytes)
+            tar.addfile(database_info, io.BytesIO(database_bytes))
+
+            manifest_bytes = json.dumps(
+                manifest,
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
+            manifest_info = tarfile.TarInfo(MANIFEST_ENTRY)
+            manifest_info.size = len(manifest_bytes)
+            tar.addfile(manifest_info, io.BytesIO(manifest_bytes))
+        return archive.getvalue()
+
+    def _read_archive(self, archive_bytes: bytes) -> tuple[dict[str, Any], bytes]:
+        try:
+            with tarfile.open(fileobj=io.BytesIO(archive_bytes), mode="r") as tar:
+                members = tar.getmembers()
+                member_names = [member.name for member in members]
+                if len(member_names) != len(EXPECTED_MEMBERS):
+                    raise ValueError("Backup archive has unexpected members")
+                if set(member_names) != EXPECTED_MEMBERS:
+                    raise ValueError("Backup archive has unexpected members")
+
+                member_by_name = {member.name: member for member in members}
+                if not all(member_by_name[name].isfile() for name in EXPECTED_MEMBERS):
+                    raise ValueError("Backup archive entries must be regular files")
+
+                database_file = tar.extractfile(member_by_name[DATABASE_ENTRY])
+                manifest_file = tar.extractfile(member_by_name[MANIFEST_ENTRY])
+                if database_file is None or manifest_file is None:
+                    raise ValueError("Backup archive is missing required files")
+                database_bytes = database_file.read()
+                manifest = json.loads(manifest_file.read().decode("utf-8"))
+        except (tarfile.TarError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise ValueError("Invalid backup archive") from exc
+        if not isinstance(manifest, dict):
+            raise ValueError("Invalid backup manifest")
+        return manifest, database_bytes
+
+    def _verify_database_checksum(
+        self,
+        manifest: dict[str, Any],
+        database_bytes: bytes,
+    ) -> None:
+        import hashlib
+
+        checksum = hashlib.sha256(database_bytes).hexdigest()
+        if checksum != manifest["database_checksum_sha256"]:
+            raise ValueError("Backup database checksum mismatch")
+
+    def _validate_restorable_database(self, database_bytes: bytes) -> None:
+        temp_path: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".sqlite3", delete=False) as temp_file:
+                temp_file.write(database_bytes)
+                temp_path = Path(temp_file.name)
+
+            conn = sqlite3.connect(temp_path)
+            try:
+                conn.row_factory = sqlite3.Row
+                integrity = conn.execute("PRAGMA integrity_check").fetchone()
+                if integrity is None or integrity[0] != "ok":
+                    raise ValueError("Backup database failed integrity check")
+
+                tables = {
+                    str(row["name"])
+                    for row in conn.execute(
+                        """
+                        SELECT name
+                        FROM sqlite_master
+                        WHERE type = 'table'
+                        """
+                    )
+                }
+                missing_tables = REQUIRED_TABLES - tables
+                if missing_tables:
+                    missing = ", ".join(sorted(missing_tables))
+                    raise ValueError(f"Backup database is missing required tables: {missing}")
+
+                self._validate_active_device_rows(conn)
+                self._validate_device_secrets(conn)
+            finally:
+                conn.close()
+        except sqlite3.DatabaseError as exc:
+            raise ValueError("Backup database is not a usable SQLite database") from exc
+        finally:
+            if temp_path is not None:
+                temp_path.unlink(missing_ok=True)
+
+    def _validate_active_device_rows(self, conn: sqlite3.Connection) -> None:
+        rows = conn.execute(
+            """
+            SELECT id, name, vpn_ip, peer_public_key, config_version, expires_at
+            FROM devices
+            WHERE status IN ('active', 'pending')
+            """
+        ).fetchall()
+        for row in rows:
+            for column in (
+                "name",
+                "vpn_ip",
+                "peer_public_key",
+                "config_version",
+                "expires_at",
+            ):
+                if not row[column]:
+                    raise ValueError(
+                        f"Backup database device {row['id']} is missing {column}"
+                    )
+
+    def _validate_device_secrets(self, conn: sqlite3.Connection) -> None:
+        secret_box = secret_box_from_env()
+        rows = conn.execute(
+            """
+            SELECT id, peer_private_key_encrypted, preshared_key_encrypted
+            FROM devices
+            WHERE status IN ('active', 'pending')
+            """
+        ).fetchall()
+        for row in rows:
+            for column in ("peer_private_key_encrypted", "preshared_key_encrypted"):
+                encrypted_value = row[column]
+                try:
+                    secret_box.decrypt_text(str(encrypted_value))
+                except SecretBoxError as exc:
+                    raise ValueError(
+                        f"Backup database device {row['id']} {column} could not be "
+                        "decrypted with current APP_SECRET_KEY"
+                    ) from exc
+
+    def _timestamp(self) -> str:
+        return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")

@@ -1,0 +1,66 @@
+from pathlib import Path
+
+import pytest
+
+from app.server_config.loader import ConfigError, load_server_config, select_server
+
+
+VALID_YAML = """
+servers:
+  - name: debian-vps-1
+    enabled: true
+    location: default
+    ssh:
+      host: 203.0.113.10
+      port: 22
+      user: root
+      auth:
+        type: key
+        private_key_path: C:/Users/me/.ssh/id_ed25519
+    vpn:
+      endpoint_host: 203.0.113.10
+      port: 30001
+      interface: awg0
+      network_cidr: 10.8.0.0/24
+      server_address: 10.8.0.1/24
+      dns: 1.1.1.1
+      allowed_ips: 0.0.0.0/0
+      max_devices: 254
+    firewall:
+      provider: ufw
+      open_vpn_port: true
+    runtime:
+      type: host_systemd
+      service_name: awg-quick@awg0
+"""
+
+
+def test_load_server_config_reads_valid_servers_yml(tmp_path: Path):
+    path = tmp_path / "servers.yml"
+    path.write_text(VALID_YAML, encoding="utf-8")
+
+    config = load_server_config(path)
+    server = select_server(config, "debian-vps-1")
+
+    assert server.name == "debian-vps-1"
+    assert server.ssh.host == "203.0.113.10"
+    assert server.vpn.interface == "awg0"
+    assert server.runtime.service_name == "awg-quick@awg0"
+
+
+def test_select_server_lists_available_names(tmp_path: Path):
+    path = tmp_path / "servers.yml"
+    path.write_text(VALID_YAML, encoding="utf-8")
+
+    config = load_server_config(path)
+
+    with pytest.raises(ConfigError, match="debian-vps-1"):
+        select_server(config, "missing")
+
+
+def test_loader_rejects_placeholder_values(tmp_path: Path):
+    path = tmp_path / "servers.yml"
+    path.write_text(VALID_YAML.replace("203.0.113.10", "CHANGE_ME_SERVER_IP"), encoding="utf-8")
+
+    with pytest.raises(ConfigError, match="placeholder"):
+        load_server_config(path)
