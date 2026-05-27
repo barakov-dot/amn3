@@ -4,8 +4,81 @@ from app.db.repositories import Repository
 from app.db.schema import initialize_schema
 from app.security.crypto import SecretBox
 from app.services.access import AccessService
+from app.services.traffic import PeerTraffic, TrafficService
 
 SECRET = "bot-workflow-secret-value-with-more-than-32-chars"
+
+
+def test_smoke_request_approve_delivery_traffic_and_revoke_flow(tmp_path):
+    repo = _repo(tmp_path)
+    repo.seed_default_plans()
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    peer_applier = RecordingPeerApplier()
+    peer_remover = RecordingPeerRemover()
+    workflow = BotWorkflow(
+        repo=repo,
+        admin_telegram_ids={9001},
+        access_service=AccessService(
+            repo=repo,
+            secret_box=SecretBox.from_app_secret(SECRET),
+            max_devices_per_user=5,
+            duration_days=7,
+            peer_applier=peer_applier,
+        ),
+        default_server_id=server_id,
+        secret_box=SecretBox.from_app_secret(SECRET),
+        peer_remover=peer_remover,
+    )
+
+    request = workflow.request_access(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+        config_version="amneziawg_v2",
+        plan_id="days_7",
+    )
+    approval = workflow.approve_order(
+        admin_telegram_id=9001,
+        order_id=request.order_id,
+        config_version="amneziawg_v2",
+    )
+    device = repo.get_device(approval.device_id)
+    TrafficService(repo).collect_and_store(
+        server_id,
+        StaticTrafficCollector(
+            [
+                PeerTraffic(
+                    peer_public_key=str(device["peer_public_key"]),
+                    rx_bytes=1024,
+                    tx_bytes=2048,
+                    collected_at="2026-05-27T12:00:00Z",
+                    source="smoke",
+                )
+            ]
+        ),
+    )
+    traffic_views = workflow.build_user_traffic_views(
+        telegram_id=1001,
+        now="2026-05-27T12:05:00Z",
+    )
+    revoked = workflow.revoke_user_device(
+        telegram_id=1001,
+        device_id=approval.device_id,
+        revoked_at="2026-05-27T12:10:00Z",
+    )
+
+    assert request.order_id == 1
+    assert peer_applier.calls[0]["peer_public_key"] == device["peer_public_key"]
+    assert approval.delivery.config_filename.endswith(".conf")
+    assert approval.delivery.qr_png_bytes.startswith(b"\x89PNG")
+    assert traffic_views[0].total == "3.0 KiB"
+    assert traffic_views[0].is_connected is True
+    assert revoked is True
+    assert peer_remover.calls == [
+        {"server_id": server_id, "peer_public_key": device["peer_public_key"]}
+    ]
+    assert repo.get_device(approval.device_id)["status"] == "revoked"
 
 def test_request_access_creates_order_with_selected_config_version(tmp_path):
     repo = _repo(tmp_path)
@@ -634,3 +707,29 @@ class RecordingPeerRemover:
         )
         if self._error is not None:
             raise self._error
+
+
+class RecordingPeerApplier:
+    def __init__(self, *, error=None):
+        self.calls = []
+        self._error = error
+
+    def apply_peer(self, *, server, peer_public_key, preshared_key, vpn_ip):
+        self.calls.append(
+            {
+                "server_id": int(server["id"]),
+                "peer_public_key": peer_public_key,
+                "preshared_key": preshared_key,
+                "vpn_ip": vpn_ip,
+            }
+        )
+        if self._error is not None:
+            raise self._error
+
+
+class StaticTrafficCollector:
+    def __init__(self, peers):
+        self._peers = peers
+
+    def collect(self, server_id: int):
+        return self._peers

@@ -228,6 +228,7 @@ def test_handle_user_revoke_device_confirm_reports_server_remove_error():
 
     assert workflow.revoked_devices == [7]
     assert "failed" in callback.message.answers[0]["text"]
+    assert "revoke-peer --dry-run" in callback.message.answers[0]["text"]
     assert "secret-psk" not in callback.message.answers[0]["text"]
     assert callback.answered is True
 
@@ -283,6 +284,7 @@ def test_handle_user_reset_devices_confirm_reports_server_remove_error():
 
     assert workflow.reset_requests == [1001]
     assert "failed" in callback.message.answers[0]["text"]
+    assert "revoke-peer --dry-run" in callback.message.answers[0]["text"]
     assert "secret-psk" not in callback.message.answers[0]["text"]
     assert callback.answered is True
 
@@ -388,6 +390,8 @@ def test_handle_admin_approve_reports_apply_error_without_sending_config():
 
     assert workflow.approvals == [(11, "amneziawg_v1_5")]
     assert "failed" in callback.message.answers[0]["text"]
+    assert "server check" in callback.message.answers[0]["text"]
+    assert "apply-peer --dry-run" in callback.message.answers[0]["text"]
     assert "secret-psk" not in callback.message.answers[0]["text"]
     assert callback.bot.sent_messages == []
     assert callback.bot.sent_documents == []

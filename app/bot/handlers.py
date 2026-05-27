@@ -179,7 +179,8 @@ async def handle_user_revoke_device_confirm(callback, *, workflow) -> None:
     except PeerApplyError as exc:
         await callback.message.answer(
             "VPS peer revoke failed. Device was not removed in the bot.\n"
-            f"Error type: {type(exc).__name__}"
+            f"Error type: {type(exc).__name__}\n"
+            "Next checks: run server check, then revoke-peer --dry-run for this peer."
         )
         await callback.answer()
         return
@@ -209,7 +210,8 @@ async def handle_user_reset_devices_confirm(callback, *, workflow) -> None:
     except PeerApplyError as exc:
         await callback.message.answer(
             "VPS peer revoke failed. Devices were not removed in the bot.\n"
-            f"Error type: {type(exc).__name__}"
+            f"Error type: {type(exc).__name__}\n"
+            "Next checks: run server check, then revoke-peer --dry-run for affected peers."
         )
         await callback.answer()
         return
@@ -272,7 +274,8 @@ async def handle_admin_approve(callback, *, workflow) -> None:
     except PeerApplyError as exc:
         await callback.message.answer(
             "VPS peer apply failed. Config was not sent to the user.\n"
-            f"Error type: {type(exc).__name__}"
+            f"Error type: {type(exc).__name__}\n"
+            "Next checks: run server check, then apply-peer --dry-run for a test peer."
         )
         await callback.answer()
         return
@@ -287,7 +290,7 @@ async def handle_admin_approve(callback, *, workflow) -> None:
     except Exception:
         await callback.message.answer(
             "Could not deliver config to the user automatically. "
-            "Manual delivery package follows."
+            "Manual delivery package follows. Check that the user has opened the bot."
         )
         await callback.message.answer(result.delivery.message_text)
         await callback.message.answer(result.config_text)

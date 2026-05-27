@@ -22,7 +22,27 @@
 - [Модель данных MVP](docs/DATA_MODEL.md)
 - [Управление VPN-серверами](docs/SERVER_MANAGEMENT.md)
 - [Шаблон конфигурации серверов](docs/SERVER_CONFIG_TEMPLATE.md)
+- [Production VPS checklist RU](docs/PRODUCTION_VPS_CHECKLIST.ru.md)
+- [Production VPS checklist EN](docs/PRODUCTION_VPS_CHECKLIST.en.md)
+- [Emergency restore checklist RU](docs/EMERGENCY_RESTORE_CHECKLIST.ru.md)
+- [Emergency restore checklist EN](docs/EMERGENCY_RESTORE_CHECKLIST.en.md)
+- [Traffic collection schedule RU](docs/TRAFFIC_COLLECTION_SCHEDULE.ru.md)
+- [Traffic collection schedule EN](docs/TRAFFIC_COLLECTION_SCHEDULE.en.md)
+- [Beginner guide RU](docs/NEXT_STAGE_BEGINNER_GUIDE.ru.md)
+- [Beginner guide EN](docs/NEXT_STAGE_BEGINNER_GUIDE.en.md)
 - [Открытые вопросы](docs/OPEN_QUESTIONS.md)
+
+## VPS Preflight
+
+Before enabling live VPS changes, keep `VPS_APPLY_ENABLED=false` and run:
+
+```powershell
+python -m app.cli server preflight --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
+python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
+```
+
+Only after dry-runs and live read-only checks pass, test `apply-peer --apply`
+with a test peer and then enable `VPS_APPLY_ENABLED=true`.
 
 ## Рекомендуемый стек
 
