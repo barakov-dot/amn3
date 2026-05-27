@@ -6,6 +6,9 @@ from aiogram.types import Message
 from app.bot.handlers import (
     handle_admin_approve,
     handle_admin_pending,
+    handle_admin_resend_config,
+    handle_admin_reset_template,
+    handle_admin_template,
     handle_config_request,
     handle_my_traffic,
     handle_request_config_prompt,
@@ -14,6 +17,9 @@ from app.bot.handlers import (
 from app.bot.ux import (
     ADMIN_APPROVE_PREFIX,
     ADMIN_PENDING_CALLBACK,
+    ADMIN_RESEND_PREFIX,
+    ADMIN_TEMPLATE_RESET_CALLBACK,
+    ADMIN_TEMPLATES_CALLBACK,
     MY_TRAFFIC_CALLBACK,
     REQUEST_CONFIG_PREFIX,
 )
@@ -44,6 +50,18 @@ def create_dispatcher(*, workflow=None) -> Dispatcher:
     @router.callback_query(F.data == ADMIN_PENDING_CALLBACK)
     async def admin_pending(callback: CallbackQuery) -> None:
         await handle_admin_pending(callback, workflow=workflow)
+
+    @router.callback_query(F.data == ADMIN_TEMPLATES_CALLBACK)
+    async def admin_template(callback: CallbackQuery) -> None:
+        await handle_admin_template(callback, workflow=workflow)
+
+    @router.callback_query(F.data == ADMIN_TEMPLATE_RESET_CALLBACK)
+    async def admin_template_reset(callback: CallbackQuery) -> None:
+        await handle_admin_reset_template(callback, workflow=workflow)
+
+    @router.callback_query(F.data.startswith(f"{ADMIN_RESEND_PREFIX}:"))
+    async def admin_resend(callback: CallbackQuery) -> None:
+        await handle_admin_resend_config(callback, workflow=workflow)
 
     @router.callback_query(F.data.startswith(f"{ADMIN_APPROVE_PREFIX}:"))
     async def admin_approve(callback: CallbackQuery) -> None:

@@ -5,6 +5,9 @@ from aiogram.types import BufferedInputFile
 from app.bot.ux import (
     ADMIN_APPROVE_PREFIX,
     ADMIN_PENDING_CALLBACK,
+    ADMIN_RESEND_PREFIX,
+    ADMIN_TEMPLATE_RESET_CALLBACK,
+    ADMIN_TEMPLATES_CALLBACK,
     MY_TRAFFIC_CALLBACK,
     REQUEST_CONFIG_PREFIX,
     build_config_version_keyboard,
@@ -12,6 +15,7 @@ from app.bot.ux import (
     build_main_menu,
     parse_admin_approve_callback,
     parse_config_version_callback,
+    render_admin_template,
     render_admin_pending_orders,
     render_config_version_prompt,
     render_start_text,
@@ -119,6 +123,54 @@ async def handle_admin_approve(callback, *, workflow) -> None:
     await callback.answer()
 
 
+async def handle_admin_template(callback, *, workflow) -> None:
+    admin_telegram_id = int(callback.from_user.id)
+    template_text = workflow.get_config_ready_template(
+        admin_telegram_id=admin_telegram_id
+    )
+    if template_text is None:
+        await callback.message.answer("Admin access required.")
+        await callback.answer()
+        return
+
+    text, keyboard = render_admin_template(template_text)
+    await callback.message.answer(text, reply_markup=keyboard)
+    await callback.answer()
+
+
+async def handle_admin_reset_template(callback, *, workflow) -> None:
+    admin_telegram_id = int(callback.from_user.id)
+    if not workflow.reset_config_ready_template(admin_telegram_id=admin_telegram_id):
+        await callback.message.answer("Admin access required.")
+        await callback.answer()
+        return
+
+    await callback.message.answer("Config ready template was reset.")
+    await callback.answer()
+
+
+async def handle_admin_resend_config(callback, *, workflow) -> None:
+    admin_telegram_id = int(callback.from_user.id)
+    device_id = _parse_int_suffix(str(callback.data), ADMIN_RESEND_PREFIX)
+    if device_id is None:
+        await callback.message.answer("Unknown resend request.")
+        await callback.answer()
+        return
+
+    result = workflow.build_resend_delivery(
+        admin_telegram_id=admin_telegram_id,
+        device_id=device_id,
+    )
+    if result is None:
+        await callback.message.answer("Admin access required.")
+        await callback.answer()
+        return
+
+    await _send_delivery(callback.bot, result)
+    await callback.message.answer(f"Config for device #{device_id} was resent.")
+    await callback.answer()
+
+
 def is_request_config_callback(data: str) -> bool:
     return data == REQUEST_CONFIG_PREFIX
 
@@ -137,6 +189,18 @@ def is_admin_pending_callback(data: str) -> bool:
 
 def is_admin_approve_callback(data: str) -> bool:
     return data.startswith(f"{ADMIN_APPROVE_PREFIX}:")
+
+
+def is_admin_template_callback(data: str) -> bool:
+    return data == ADMIN_TEMPLATES_CALLBACK
+
+
+def is_admin_template_reset_callback(data: str) -> bool:
+    return data == ADMIN_TEMPLATE_RESET_CALLBACK
+
+
+def is_admin_resend_callback(data: str) -> bool:
+    return data.startswith(f"{ADMIN_RESEND_PREFIX}:")
 
 
 async def _send_delivery(bot, result) -> None:
@@ -160,3 +224,13 @@ async def _send_delivery(bot, result) -> None:
         ),
         caption="VPN config QR code",
     )
+
+
+def _parse_int_suffix(data: str, prefix: str) -> int | None:
+    marker = f"{prefix}:"
+    if not data.startswith(marker):
+        return None
+    try:
+        return int(data.removeprefix(marker))
+    except ValueError:
+        return None

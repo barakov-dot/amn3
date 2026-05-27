@@ -1,14 +1,19 @@
 from app.bot.ux import (
     ADMIN_PENDING_CALLBACK,
+    ADMIN_RESEND_PREFIX,
+    ADMIN_TEMPLATES_CALLBACK,
+    ADMIN_TEMPLATE_RESET_CALLBACK,
     ADMIN_TRAFFIC_CALLBACK,
     MY_TRAFFIC_CALLBACK,
     REQUEST_CONFIG_PREFIX,
     VERSION_LABELS,
     build_admin_order_keyboard,
+    build_admin_resend_keyboard,
     build_config_version_keyboard,
     build_main_menu,
     render_admin_approval,
     render_admin_pending_orders,
+    render_admin_template,
     render_admin_traffic,
     render_my_tariff,
     render_user_traffic,
@@ -141,7 +146,39 @@ def test_admin_traffic_keyboard_links_pending_orders_and_traffic():
     assert "Admin traffic" in text
     assert "tablet" in text
     assert "12.0 KiB" in text
-    assert _callback_data(keyboard) == [[ADMIN_PENDING_CALLBACK], [ADMIN_TRAFFIC_CALLBACK]]
+    assert _callback_data(keyboard) == [
+        [ADMIN_PENDING_CALLBACK],
+        [ADMIN_TRAFFIC_CALLBACK],
+        [ADMIN_TEMPLATES_CALLBACK],
+    ]
+
+
+def test_admin_navigation_includes_templates_and_traffic_actions():
+    from app.bot.ux import build_admin_navigation_keyboard
+
+    keyboard = build_admin_navigation_keyboard()
+
+    assert _button_texts(keyboard) == [["Pending orders"], ["Traffic"], ["Templates"]]
+    assert _callback_data(keyboard) == [
+        [ADMIN_PENDING_CALLBACK],
+        [ADMIN_TRAFFIC_CALLBACK],
+        [ADMIN_TEMPLATES_CALLBACK],
+    ]
+
+
+def test_render_admin_template_shows_reset_action():
+    text, keyboard = render_admin_template("Hello {device_id}")
+
+    assert "Config ready template" in text
+    assert "Hello {device_id}" in text
+    assert _callback_data(keyboard) == [[ADMIN_TEMPLATE_RESET_CALLBACK]]
+
+
+def test_build_admin_resend_keyboard_targets_device():
+    keyboard = build_admin_resend_keyboard(device_id=7)
+
+    assert _button_texts(keyboard) == [["Resend config"]]
+    assert _callback_data(keyboard) == [[f"{ADMIN_RESEND_PREFIX}:7"]]
 
 
 def test_render_admin_approval_mentions_order_device_and_user():

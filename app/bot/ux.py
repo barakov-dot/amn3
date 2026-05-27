@@ -13,7 +13,10 @@ REQUEST_CONFIG_PREFIX = "user:request_config"
 MY_TRAFFIC_CALLBACK = "user:traffic"
 ADMIN_PENDING_CALLBACK = "admin:pending"
 ADMIN_TRAFFIC_CALLBACK = "admin:traffic"
+ADMIN_TEMPLATES_CALLBACK = "admin:templates"
+ADMIN_TEMPLATE_RESET_CALLBACK = "admin:template:reset"
 ADMIN_APPROVE_PREFIX = "admin:approve"
+ADMIN_RESEND_PREFIX = "admin:resend"
 
 VERSION_LABELS = {
     "amneziawg_v1_5": "AmneziaWG 1.5",
@@ -77,6 +80,19 @@ def build_admin_order_keyboard(*, order_id: int) -> InlineKeyboardMarkup:
     )
 
 
+def build_admin_resend_keyboard(*, device_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Resend config",
+                    callback_data=f"{ADMIN_RESEND_PREFIX}:{device_id}",
+                )
+            ]
+        ]
+    )
+
+
 def build_admin_navigation_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
@@ -90,6 +106,12 @@ def build_admin_navigation_keyboard() -> InlineKeyboardMarkup:
                 InlineKeyboardButton(
                     text="Traffic",
                     callback_data=ADMIN_TRAFFIC_CALLBACK,
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Templates",
+                    callback_data=ADMIN_TEMPLATES_CALLBACK,
                 )
             ],
         ]
@@ -141,6 +163,25 @@ def render_my_tariff(devices: Iterable[Mapping[str, object]], *, now: str) -> st
     if not has_devices:
         lines.append("No active tariff yet.")
     return "\n".join(lines)
+
+
+def render_admin_template(template_text: str) -> tuple[str, InlineKeyboardMarkup]:
+    text = (
+        "Config ready template\n\n"
+        f"{template_text}\n\n"
+        "Edit support is handled through the template workflow; reset is available below."
+    )
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Reset template",
+                    callback_data=ADMIN_TEMPLATE_RESET_CALLBACK,
+                )
+            ]
+        ]
+    )
+    return text, keyboard
 
 
 def _days_left(expires_at: str, now: str) -> int:

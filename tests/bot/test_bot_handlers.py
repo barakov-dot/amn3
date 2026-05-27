@@ -4,6 +4,9 @@ from types import SimpleNamespace
 from app.bot.handlers import (
     handle_admin_approve,
     handle_admin_pending,
+    handle_admin_resend_config,
+    handle_admin_reset_template,
+    handle_admin_template,
     handle_config_request,
     handle_my_traffic,
     handle_request_config_prompt,
@@ -145,6 +148,60 @@ def test_handle_admin_approve_rejects_non_admin():
     assert callback.answered is True
 
 
+def test_handle_admin_template_shows_editable_template_and_reset_button():
+    callback = FakeCallback(
+        data="admin:templates",
+        user_id=9001,
+        username="admin",
+        first_name="Admin",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_template(callback, workflow=workflow))
+
+    assert "Config ready template" in callback.message.answers[0]["text"]
+    assert "DefaultVPN" in callback.message.answers[0]["text"]
+    assert _button_texts(callback.message.answers[0]["reply_markup"]) == [
+        ["Reset template"]
+    ]
+    assert callback.answered is True
+
+
+def test_handle_admin_reset_template_resets_template():
+    callback = FakeCallback(
+        data="admin:template:reset",
+        user_id=9001,
+        username="admin",
+        first_name="Admin",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_reset_template(callback, workflow=workflow))
+
+    assert workflow.template_reset is True
+    assert "reset" in callback.message.answers[0]["text"]
+    assert callback.answered is True
+
+
+def test_handle_admin_resend_config_sends_delivery_to_user():
+    callback = FakeCallback(
+        data="admin:resend:7",
+        user_id=9001,
+        username="admin",
+        first_name="Admin",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_resend_config(callback, workflow=workflow))
+
+    assert workflow.resends == [7]
+    assert callback.bot.sent_messages[0]["chat_id"] == 1001
+    assert callback.bot.sent_documents[0]["document"].filename.endswith(".conf")
+    assert callback.bot.sent_photos[0]["photo"].filename.endswith(".qr.png")
+    assert "resent" in callback.message.answers[0]["text"]
+    assert callback.answered is True
+
+
 class FakeMessage:
     def __init__(self, *, user_id, username=None, first_name=None, last_name=None):
         self.from_user = SimpleNamespace(
@@ -187,6 +244,8 @@ class FakeWorkflow:
         self._traffic_text_marker = traffic_text_marker
         self.requests = []
         self.approvals = []
+        self.resends = []
+        self.template_reset = False
 
     def is_admin(self, telegram_id):
         return telegram_id in self._admin_ids
@@ -250,6 +309,34 @@ class FakeWorkflow:
                 config_filename="amneziya-device-7.conf",
                 config_bytes=b"[Interface]\nPrivateKey = test",
                 qr_filename="amneziya-device-7.qr.png",
+                qr_png_bytes=b"\x89PNG\r\n\x1a\n",
+            ),
+        )
+
+    def get_config_ready_template(self, *, admin_telegram_id):
+        if not self.is_admin(admin_telegram_id):
+            return None
+        return "DefaultVPN template {device_id}"
+
+    def reset_config_ready_template(self, *, admin_telegram_id):
+        if not self.is_admin(admin_telegram_id):
+            return False
+        self.template_reset = True
+        return True
+
+    def build_resend_delivery(self, *, admin_telegram_id, device_id):
+        if not self.is_admin(admin_telegram_id):
+            return None
+        self.resends.append(device_id)
+        return SimpleNamespace(
+            device_id=device_id,
+            user_telegram_id=1001,
+            config_text="[Interface]\nPrivateKey = test",
+            delivery=SimpleNamespace(
+                message_text="Your VPN config is ready.",
+                config_filename=f"amneziya-device-{device_id}.conf",
+                config_bytes=b"[Interface]\nPrivateKey = test",
+                qr_filename=f"amneziya-device-{device_id}.qr.png",
                 qr_png_bytes=b"\x89PNG\r\n\x1a\n",
             ),
         )
