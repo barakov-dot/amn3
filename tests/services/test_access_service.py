@@ -16,6 +16,7 @@ from app.services.access import (
     OrderAlreadyFulfilled,
     OrderNotApprovable,
 )
+from app.server.peer_apply import PeerApplyError
 
 
 def test_approve_order_creates_active_device_with_encrypted_secrets(tmp_path):
@@ -156,6 +157,59 @@ def test_approve_order_rolls_back_device_and_order_when_admin_audit_fails(tmp_pa
     assert order["device_id"] is None
 
 
+def test_approve_order_applies_peer_before_fulfilling_order(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id = repo.upsert_user(telegram_id=1001, username="alice", first_name="Alice", last_name=None)
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    order_id = repo.create_order(user_id=user_id, plan_id=None, payment_mode="free_test")
+    peer_applier = RecordingPeerApplier()
+
+    service = AccessService(
+        repo=repo,
+        secret_box=SecretBox.from_app_secret("test-secret-for-access-service-1234567890"),
+        peer_applier=peer_applier,
+    )
+    result = service.approve_order(order_id, server_id, "iPhone", admin_telegram_id=999)
+
+    device = repo.get_device(result.device_id)
+    assert peer_applier.calls == [
+        {
+            "server_id": server_id,
+            "peer_public_key": device["peer_public_key"],
+            "preshared_key": SecretBox.from_app_secret(
+                "test-secret-for-access-service-1234567890"
+            ).decrypt_text(device["preshared_key_encrypted"]),
+            "vpn_ip": "10.8.0.2",
+        }
+    ]
+    assert repo.get_order(order_id)["status"] == "fulfilled"
+
+
+def test_approve_order_rolls_back_device_and_order_when_peer_apply_fails(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id = repo.upsert_user(telegram_id=1001, username="alice", first_name="Alice", last_name=None)
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    order_id = repo.create_order(user_id=user_id, plan_id=None, payment_mode="free_test")
+
+    service = AccessService(
+        repo=repo,
+        secret_box=SecretBox.from_app_secret("test-secret-for-access-service-1234567890"),
+        peer_applier=RecordingPeerApplier(error=PeerApplyError("apply failed")),
+    )
+
+    with pytest.raises(PeerApplyError):
+        service.approve_order(order_id, server_id, "iPhone", admin_telegram_id=999)
+
+    order = repo.get_order(order_id)
+    assert repo.count_active_devices(user_id) == 0
+    assert order["status"] == "manual_review"
+    assert order["device_id"] is None
+
+
 def test_approve_order_retries_ip_allocation_after_duplicate_ip_race(tmp_path):
     conn = connect(tmp_path / "test.sqlite3")
     initialize_schema(conn)
@@ -211,6 +265,24 @@ def test_approve_order_raises_clear_error_when_retry_refresh_exhausts_ips(tmp_pa
 class FailingAdminActionRepository(Repository):
     def record_admin_action(self, **kwargs):
         raise RuntimeError("audit failed")
+
+
+class RecordingPeerApplier:
+    def __init__(self, *, error=None):
+        self.calls = []
+        self._error = error
+
+    def apply_peer(self, *, server, peer_public_key, preshared_key, vpn_ip):
+        self.calls.append(
+            {
+                "server_id": int(server["id"]),
+                "peer_public_key": peer_public_key,
+                "preshared_key": preshared_key,
+                "vpn_ip": vpn_ip,
+            }
+        )
+        if self._error is not None:
+            raise self._error
 
 
 class DuplicateIpRaceRepository(Repository):

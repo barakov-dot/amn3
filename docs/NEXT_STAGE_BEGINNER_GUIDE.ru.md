@@ -376,6 +376,9 @@ TELEGRAM_BOT_TOKEN=CHANGE_ME_TOKEN_FROM_BOTFATHER
 APP_SECRET_KEY=CHANGE_ME_GENERATED_RANDOM_SECRET_32_PLUS_CHARS
 ADMIN_TELEGRAM_IDS=твой_telegram_id
 VPS_SSH_PASSWORD=пароль_от_vps_если_используешь_password_auth
+VPS_APPLY_ENABLED=false
+SERVER_CONFIG_PATH=servers.yml
+SERVER_NAME=debian-vps-1
 CONTROL_PANEL_AUTH_METHODS=telegram_admin,password,key
 CONTROL_PANEL_ADMIN_USERNAME=admin
 CONTROL_PANEL_PASSWORD_HASH=
@@ -494,6 +497,25 @@ python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 -
 ```
 
 Команда показывает план `awg set`, но не выполняет его и не выводит PSK открытым текстом.
+
+Реальное применение peer включается только явным флагом `--apply`:
+
+```powershell
+python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key PEER_PSK --vpn-ip 10.8.0.2 --apply
+```
+
+Для бота автоматическое применение к VPS также выключено по умолчанию. Когда
+`server check` и dry-run прошли успешно, можно включить:
+
+```env
+VPS_APPLY_ENABLED=true
+SERVER_CONFIG_PATH=servers.yml
+SERVER_NAME=debian-vps-1
+```
+
+После этого approve-flow работает осторожно: если добавление peer на VPS не
+прошло, бот не отправляет пользователю конфиг и показывает админу ошибку без
+секретов.
 
 Ожидаемый результат:
 

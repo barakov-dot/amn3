@@ -3,6 +3,7 @@ from __future__ import annotations
 import ipaddress
 import sqlite3
 from dataclasses import dataclass
+from typing import Protocol
 
 from app.db.repositories import Repository
 from app.security.crypto import SecretBox
@@ -36,6 +37,18 @@ class AccessApprovalResult:
     config_text: str
 
 
+class PeerApplier(Protocol):
+    def apply_peer(
+        self,
+        *,
+        server,
+        peer_public_key: str,
+        preshared_key: str,
+        vpn_ip: str,
+    ) -> None:
+        pass
+
+
 class AccessService:
     def __init__(
         self,
@@ -44,11 +57,13 @@ class AccessService:
         secret_box: SecretBox,
         max_devices_per_user: int = 5,
         duration_days: int = 30,
+        peer_applier: PeerApplier | None = None,
     ) -> None:
         self._repo = repo
         self._secret_box = secret_box
         self._max_devices_per_user = max_devices_per_user
         self._duration_days = duration_days
+        self._peer_applier = peer_applier
 
     def approve_order(
         self,
@@ -185,6 +200,13 @@ class AccessService:
                     raise
                 last_error = exc
             else:
+                if self._peer_applier is not None:
+                    self._peer_applier.apply_peer(
+                        server=server,
+                        peer_public_key=public_key,
+                        preshared_key=preshared_key,
+                        vpn_ip=vpn_ip,
+                    )
                 return device_id, config_text
 
         raise IpAllocationConflict("Could not allocate a unique VPN IP address") from last_error

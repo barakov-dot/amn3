@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     default_vpn_network_cidr: str = Field(default="10.8.0.0/24", alias="DEFAULT_VPN_NETWORK_CIDR")
     database_path: str = Field(default="data/amneziya.sqlite3", alias="DATABASE_PATH")
     vps_ssh_password: str = Field(default="", alias="VPS_SSH_PASSWORD")
+    vps_apply_enabled: bool = Field(default=False, alias="VPS_APPLY_ENABLED")
+    server_config_path: str = Field(default="servers.yml", alias="SERVER_CONFIG_PATH")
+    server_name: str = Field(default="debian-vps-1", alias="SERVER_NAME")
     control_panel_auth_methods: str = Field(
         default="telegram_admin,password,key",
         alias="CONTROL_PANEL_AUTH_METHODS",

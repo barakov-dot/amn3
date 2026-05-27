@@ -4,7 +4,7 @@ from pathlib import Path
 from app import __version__
 from app.backup.service import BackupService
 from app.server.checks import planned_check_commands, run_server_checks
-from app.server.peer_apply import PeerApplyInput, build_peer_apply_dry_run
+from app.server.peer_apply import PeerApplyInput, apply_peer, build_peer_apply_dry_run
 from app.server.ssh import SystemSshClient
 from app.server_config.loader import load_server_config, select_server
 from app.server_config.models import ServerConfig
@@ -43,7 +43,9 @@ def build_parser() -> argparse.ArgumentParser:
     apply_peer.add_argument("--public-key", required=True)
     apply_peer.add_argument("--preshared-key", required=True)
     apply_peer.add_argument("--vpn-ip", required=True)
-    apply_peer.add_argument("--dry-run", action="store_true", required=True)
+    apply_mode = apply_peer.add_mutually_exclusive_group(required=True)
+    apply_mode.add_argument("--dry-run", action="store_true")
+    apply_mode.add_argument("--apply", action="store_true")
 
     return parser
 
@@ -71,7 +73,10 @@ def main() -> None:
             preshared_key=args.preshared_key,
             vpn_ip=args.vpn_ip,
         )
-        print(build_peer_apply_dry_run(server, peer))
+        if args.dry_run:
+            print(build_peer_apply_dry_run(server, peer))
+        else:
+            print(apply_peer(server, peer, ssh_client=SystemSshClient(server)))
 
 
 def run_server_check(server: ServerConfig, *, dry_run: bool) -> str:

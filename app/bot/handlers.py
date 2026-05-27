@@ -40,6 +40,7 @@ from app.bot.ux import (
     render_start_text,
     render_user_traffic,
 )
+from app.server.peer_apply import PeerApplyError
 
 
 async def handle_start(message, *, workflow) -> None:
@@ -244,11 +245,19 @@ async def handle_admin_approve(callback, *, workflow) -> None:
         return
 
     order_id, config_version = parsed
-    result = workflow.approve_order(
-        admin_telegram_id=admin_telegram_id,
-        order_id=order_id,
-        config_version=config_version,
-    )
+    try:
+        result = workflow.approve_order(
+            admin_telegram_id=admin_telegram_id,
+            order_id=order_id,
+            config_version=config_version,
+        )
+    except PeerApplyError as exc:
+        await callback.message.answer(
+            "VPS peer apply failed. Config was not sent to the user.\n"
+            f"Error type: {type(exc).__name__}"
+        )
+        await callback.answer()
+        return
     if result is None:
         await callback.message.answer(text("handler.admin_required"))
         await callback.answer()

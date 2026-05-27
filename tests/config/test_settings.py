@@ -86,6 +86,21 @@ def test_settings_reads_vps_ssh_password_from_env_settings():
     assert settings.vps_ssh_password == "secret-password"
 
 
+def test_settings_reads_vps_apply_settings():
+    settings = Settings(
+        _env_file=None,
+        telegram_bot_token="CHANGE_ME",
+        app_secret_key="test-secret",
+        vps_apply_enabled=True,
+        server_config_path="server.yml",
+        server_name="debian-vps-1",
+    )
+
+    assert settings.vps_apply_enabled is True
+    assert settings.server_config_path == "server.yml"
+    assert settings.server_name == "debian-vps-1"
+
+
 def test_settings_rejects_unknown_control_panel_auth_method():
     with pytest.raises(ValidationError):
         Settings(

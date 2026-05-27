@@ -13,7 +13,7 @@ class CommandResult:
 
 
 class SshClient(Protocol):
-    def run(self, command: str) -> CommandResult:
+    def run(self, command: str, stdin: str | None = None) -> CommandResult:
         pass
 
 
@@ -22,7 +22,7 @@ class SystemSshClient:
         self._server = server
         self._timeout_seconds = timeout_seconds
 
-    def run(self, command: str) -> CommandResult:
+    def run(self, command: str, stdin: str | None = None) -> CommandResult:
         if self._server.ssh.auth.type == "password":
             return CommandResult(
                 exit_code=125,
@@ -51,6 +51,7 @@ class SystemSshClient:
                 args,
                 capture_output=True,
                 check=False,
+                input=stdin,
                 text=True,
                 timeout=self._timeout_seconds,
             )

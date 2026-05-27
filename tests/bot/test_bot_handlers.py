@@ -36,6 +36,7 @@ from app.bot.ux import (
     USER_REVOKE_CONFIRM_PREFIX,
     USER_REVOKE_PREFIX,
 )
+from app.server.peer_apply import PeerApplyError
 
 
 def test_handle_start_renders_main_menu_for_admin():
@@ -334,6 +335,26 @@ def test_handle_admin_approve_calls_workflow_and_returns_config_preview():
     assert callback.answered is True
 
 
+def test_handle_admin_approve_reports_apply_error_without_sending_config():
+    callback = FakeCallback(
+        data="admin:approve:11:amneziawg_v1_5",
+        user_id=9001,
+        username="admin",
+        first_name="Admin",
+    )
+    workflow = FakeWorkflow(admin_ids={9001}, approval_error=PeerApplyError("failed secret-psk"))
+
+    asyncio.run(handle_admin_approve(callback, workflow=workflow))
+
+    assert workflow.approvals == [(11, "amneziawg_v1_5")]
+    assert "failed" in callback.message.answers[0]["text"]
+    assert "secret-psk" not in callback.message.answers[0]["text"]
+    assert callback.bot.sent_messages == []
+    assert callback.bot.sent_documents == []
+    assert callback.bot.sent_photos == []
+    assert callback.answered is True
+
+
 def test_handle_admin_approve_rejects_non_admin():
     callback = FakeCallback(
         data="admin:approve:11:amneziawg_v1_5",
@@ -475,9 +496,10 @@ class FakeCallback:
 
 
 class FakeWorkflow:
-    def __init__(self, *, admin_ids, traffic_text_marker=None):
+    def __init__(self, *, admin_ids, traffic_text_marker=None, approval_error=None):
         self._admin_ids = admin_ids
         self._traffic_text_marker = traffic_text_marker
+        self._approval_error = approval_error
         self.requests = []
         self.approvals = []
         self.resends = []
@@ -645,6 +667,8 @@ class FakeWorkflow:
         if not self.is_admin(admin_telegram_id):
             return None
         self.approvals.append((order_id, config_version))
+        if self._approval_error is not None:
+            raise self._approval_error
         return SimpleNamespace(
             device_id=7,
             user_telegram_id=1001,
