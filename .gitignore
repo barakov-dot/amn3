@@ -5,6 +5,7 @@
 *.conf
 *.qr.png
 servers.yml
+server.yml
 backups/
 tmp/
 __pycache__/
