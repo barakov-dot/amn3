@@ -178,6 +178,21 @@ class Repository:
     def get_device(self, device_id: int) -> sqlite3.Row:
         return self._fetch_one("SELECT * FROM devices WHERE id = ?", (device_id,))
 
+    def get_device_by_server_peer_public_key(
+        self,
+        server_id: int,
+        peer_public_key: str,
+    ) -> sqlite3.Row | None:
+        return self._conn.execute(
+            """
+            SELECT *
+            FROM devices
+            WHERE server_id = ?
+              AND peer_public_key = ?
+            """,
+            (server_id, peer_public_key),
+        ).fetchone()
+
     def count_active_devices(self, user_id: int) -> int:
         row = self._conn.execute(
             """
@@ -254,6 +269,55 @@ class Repository:
         )
         self._commit()
         return int(cursor.lastrowid)
+
+    def record_device_traffic_snapshot(
+        self,
+        *,
+        device_id: int,
+        server_id: int,
+        peer_public_key: str,
+        rx_bytes: int,
+        tx_bytes: int,
+        source: str,
+        collected_at: str,
+    ) -> int:
+        cursor = self._conn.execute(
+            """
+            INSERT INTO device_traffic_snapshots (
+                device_id,
+                server_id,
+                peer_public_key,
+                rx_bytes,
+                tx_bytes,
+                source,
+                collected_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                device_id,
+                server_id,
+                peer_public_key,
+                rx_bytes,
+                tx_bytes,
+                source,
+                collected_at,
+            ),
+        )
+        self._commit()
+        return int(cursor.lastrowid)
+
+    def get_latest_device_traffic(self, device_id: int) -> sqlite3.Row | None:
+        return self._conn.execute(
+            """
+            SELECT *
+            FROM device_traffic_snapshots
+            WHERE device_id = ?
+            ORDER BY collected_at DESC, id DESC
+            LIMIT 1
+            """,
+            (device_id,),
+        ).fetchone()
 
     def _commit(self) -> None:
         if self._transaction_depth == 0:

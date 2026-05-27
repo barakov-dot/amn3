@@ -6,8 +6,9 @@ from dataclasses import dataclass
 
 from app.db.repositories import Repository
 from app.security.crypto import SecretBox
-from app.vpn.amneziawg_v2.config import ClientConfigInput, render_client_config
+from app.vpn.amneziawg_v2.config import ClientConfigInput
 from app.vpn.amneziawg_v2.keys import generate_key, generate_keypair
+from app.vpn.config_versions import render_client_config_for_version, validate_config_version
 
 
 IP_ALLOCATION_ATTEMPTS = 3
@@ -56,6 +57,7 @@ class AccessService:
         device_name: str,
         *,
         admin_telegram_id: int,
+        config_version: str = "amneziawg_v2",
     ) -> AccessApprovalResult:
         with self._repo.transaction():
             return self._approve_order(
@@ -63,6 +65,7 @@ class AccessService:
                 server_id=server_id,
                 device_name=device_name,
                 admin_telegram_id=admin_telegram_id,
+                config_version=config_version,
             )
 
     def _approve_order(
@@ -72,7 +75,9 @@ class AccessService:
         server_id: int,
         device_name: str,
         admin_telegram_id: int,
+        config_version: str,
     ) -> AccessApprovalResult:
+        config_version = validate_config_version(config_version)
         order = self._repo.get_order(order_id)
         user_id = int(order["user_id"])
         if order["status"] == "fulfilled" or order["device_id"] is not None:
@@ -97,6 +102,7 @@ class AccessService:
             private_key=keypair.private_key,
             public_key=keypair.public_key,
             preshared_key=preshared_key,
+            config_version=config_version,
         )
         self._repo.mark_order_fulfilled(order_id, device_id)
         self._repo.record_admin_action(
@@ -119,6 +125,7 @@ class AccessService:
         private_key: str,
         public_key: str,
         preshared_key: str,
+        config_version: str,
     ) -> tuple[int, str]:
         last_error: sqlite3.IntegrityError | None = None
 
@@ -131,7 +138,7 @@ class AccessService:
                 )
             except RuntimeError as exc:
                 raise IpAllocationConflict("Could not allocate a unique VPN IP address") from exc
-            config_text = render_client_config(
+            config_text = render_client_config_for_version(
                 ClientConfigInput(
                     private_key=private_key,
                     address=f"{vpn_ip}/32",
@@ -150,7 +157,8 @@ class AccessService:
                     h2=2,
                     h3=3,
                     h4=4,
-                )
+                ),
+                config_version,
             )
 
             try:
@@ -163,7 +171,7 @@ class AccessService:
                     peer_public_key=public_key,
                     peer_private_key_encrypted=self._secret_box.encrypt_text(private_key),
                     preshared_key_encrypted=self._secret_box.encrypt_text(preshared_key),
-                    config_version="amneziawg_v2",
+                    config_version=config_version,
                 )
             except sqlite3.IntegrityError as exc:
                 if not _is_duplicate_ip_integrity_error(exc):

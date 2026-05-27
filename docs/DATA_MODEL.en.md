@@ -102,6 +102,23 @@ Administrator audit log.
 
 Fields: `id`, `admin_telegram_id`, `action`, `target_user_id`, `target_device_id`, `metadata_json`, `created_at`.
 
+### `device_traffic_snapshots`
+
+Traffic statistic snapshots for devices.
+
+Fields:
+
+- `id`;
+- `device_id` - reference to `devices.id`;
+- `server_id` - reference to `servers.id`;
+- `peer_public_key` - peer public key used to match statistics to a device;
+- `rx_bytes` - received traffic, non-negative;
+- `tx_bytes` - transmitted traffic, non-negative;
+- `source` - statistics source, for example `fake`, later `awg`;
+- `collected_at` - collection time.
+
+The latest device snapshot is used to display statistics to users and administrators in the Telegram bot.
+
 ## Mode Settings
 
 Minimum `.env` settings:
@@ -131,3 +148,12 @@ FREE_TEST_REQUIRES_APPROVAL=true
 ## Key Storage
 
 For config resend, the system must either store the private key or store an encrypted complete config. For the MVP, prefer storing `peer_private_key_encrypted` and regenerating `.conf` from database and server parameters.
+
+## Config Versions
+
+Supported `devices.config_version` values:
+
+- `amneziawg_v1_5`;
+- `amneziawg_v2`.
+
+The selected version is stored on the device and must be used when resending the config.

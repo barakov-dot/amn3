@@ -93,6 +93,13 @@ Each user device gets a separate peer:
 - persistent keepalive;
 - AmneziaWG 2.0 parameters `I1-I5`, `S1-S4`, `Jc`, `Jmin`, `Jmax`, `H1-H4`.
 
+Users and administrators must be able to select the config format version:
+
+- `amneziawg_v1_5`;
+- `amneziawg_v2`.
+
+The selected version is stored on the device and used when the config is resent.
+
 MVP client settings:
 
 - DNS: `1.1.1.1`;
@@ -157,6 +164,7 @@ Required background tasks:
 - check VPS availability;
 - back up the database and server configs;
 - collect server health/status.
+- collect peer traffic statistics and show them to users and administrators.
 
 ## 12. Security
 

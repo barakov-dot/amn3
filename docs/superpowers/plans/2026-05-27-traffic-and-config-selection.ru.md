@@ -1,4 +1,4 @@
-# План реализации статистики трафика и выбора версии конфига
+﻿# План реализации статистики трафика и выбора версии конфига
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -33,7 +33,7 @@
 - Create: `app/vpn/amneziawg_v1_5/config.py`
 - Test: `tests/vpn/test_config_versions.py`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create `tests/vpn/test_config_versions.py`:
 
@@ -99,7 +99,7 @@ def test_v1_5_renderer_omits_v2_only_s3_s4_and_keeps_basic_shape():
     assert "S4 =" not in config
 ```
 
-- [ ] **Step 2: Run focused test and confirm failure**
+- [x] **Step 2: Run focused test and confirm failure**
 
 Run:
 
@@ -109,7 +109,7 @@ $env:PYTHONPATH='.codex_deps;.'; python -m pytest tests/vpn/test_config_versions
 
 Expected: FAIL because `app.vpn.config_versions` does not exist.
 
-- [ ] **Step 3: Implement minimal registry and v1.5 renderer**
+- [x] **Step 3: Implement minimal registry and v1.5 renderer**
 
 `config_versions.py` must expose:
 
@@ -120,7 +120,7 @@ Expected: FAIL because `app.vpn.config_versions` does not exist.
 
 `amneziawg_v1_5.config.render_client_config` can reuse the same input dataclass and render the common AmneziaWG shape needed by current tests.
 
-- [ ] **Step 4: Run focused test**
+- [x] **Step 4: Run focused test**
 
 Expected: PASS.
 
@@ -134,7 +134,7 @@ Expected: PASS.
 - Modify: `app/db/repositories.py`
 - Test: `tests/db/test_traffic_repository.py`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create tests for:
 
@@ -168,7 +168,7 @@ def test_get_device_by_server_peer_public_key(tmp_path):
     pass
 ```
 
-- [ ] **Step 2: Run focused test and confirm failure**
+- [x] **Step 2: Run focused test and confirm failure**
 
 ```powershell
 $env:PYTHONPATH='.codex_deps;.'; python -m pytest tests/db/test_traffic_repository.py -v
@@ -176,11 +176,11 @@ $env:PYTHONPATH='.codex_deps;.'; python -m pytest tests/db/test_traffic_reposito
 
 Expected: FAIL because repository methods/table do not exist.
 
-- [ ] **Step 3: Implement schema**
+- [x] **Step 3: Implement schema**
 
 Add `device_traffic_snapshots` table and indexes exactly as defined in the RU/EN spec.
 
-- [ ] **Step 4: Implement repository methods**
+- [x] **Step 4: Implement repository methods**
 
 Add methods:
 
@@ -201,7 +201,7 @@ get_device_by_server_peer_public_key(server_id: int, peer_public_key: str)
 
 Return `None` for missing latest traffic or unknown peer lookup.
 
-- [ ] **Step 5: Run focused test**
+- [x] **Step 5: Run focused test**
 
 Expected: PASS.
 
@@ -214,7 +214,7 @@ Expected: PASS.
 - Modify: `app/services/access.py`
 - Test: `tests/services/test_access_config_version.py`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create tests:
 
@@ -240,11 +240,11 @@ The first test approves an order with `config_version="amneziawg_v1_5"` and asse
 
 The second test passes `config_version="wireguard"` and asserts no device is created.
 
-- [ ] **Step 2: Run focused test and confirm failure**
+- [x] **Step 2: Run focused test and confirm failure**
 
 Expected: FAIL because `approve_order` does not accept `config_version`.
 
-- [ ] **Step 3: Implement service change**
+- [x] **Step 3: Implement service change**
 
 Add keyword argument:
 
@@ -254,7 +254,7 @@ config_version: str = "amneziawg_v2"
 
 Validate before key generation/device creation. Use `render_client_config_for_version`.
 
-- [ ] **Step 4: Run focused test**
+- [x] **Step 4: Run focused test**
 
 Expected: PASS.
 
@@ -267,7 +267,7 @@ Expected: PASS.
 - Create: `app/services/traffic.py`
 - Test: `tests/services/test_traffic_service.py`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create fake collector tests:
 
@@ -293,11 +293,11 @@ Use dataclass `PeerTraffic` with:
 - `collected_at`;
 - `source`.
 
-- [ ] **Step 2: Run focused test and confirm failure**
+- [x] **Step 2: Run focused test and confirm failure**
 
 Expected: FAIL because `app.services.traffic` does not exist.
 
-- [ ] **Step 3: Implement traffic service**
+- [x] **Step 3: Implement traffic service**
 
 Implement:
 
@@ -308,7 +308,7 @@ Implement:
 
 Known peers create snapshots. Unknown peers are counted/listed in the report and not inserted.
 
-- [ ] **Step 4: Run focused test**
+- [x] **Step 4: Run focused test**
 
 Expected: PASS.
 
@@ -321,7 +321,7 @@ Expected: PASS.
 - Modify: `app/services/traffic.py`
 - Test: `tests/services/test_traffic_display.py`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Test:
 
@@ -329,7 +329,7 @@ Test:
 - user-facing DTO includes rx, tx, total, and stale flag;
 - missing stats are displayed as unavailable.
 
-- [ ] **Step 2: Implement display helpers**
+- [x] **Step 2: Implement display helpers**
 
 Add:
 
@@ -338,7 +338,7 @@ format_bytes(value: int) -> str
 build_device_traffic_view(device, latest_snapshot, *, stale_after_minutes: int = 60)
 ```
 
-- [ ] **Step 3: Run focused test**
+- [x] **Step 3: Run focused test**
 
 Expected: PASS.
 
@@ -353,11 +353,11 @@ Expected: PASS.
 - Modify: `docs/TECH_SPEC.ru.md`
 - Modify: `docs/TECH_SPEC.en.md`
 
-- [ ] **Step 1: Update bilingual docs**
+- [x] **Step 1: Update bilingual docs**
 
 Update both RU and EN docs with the final implemented table, config versions, and traffic display behavior.
 
-- [ ] **Step 2: Run full tests**
+- [x] **Step 2: Run full tests**
 
 ```powershell
 $env:PYTHONPATH='.codex_deps;.'; python -m pytest tests -v
@@ -365,7 +365,7 @@ $env:PYTHONPATH='.codex_deps;.'; python -m pytest tests -v
 
 Expected: all tests pass.
 
-- [ ] **Step 3: Run safety checks**
+- [x] **Step 3: Run safety checks**
 
 ```powershell
 git diff --check

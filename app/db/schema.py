@@ -99,6 +99,19 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             FOREIGN KEY (target_device_id) REFERENCES devices(id)
         );
 
+        CREATE TABLE IF NOT EXISTS device_traffic_snapshots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            device_id INTEGER NOT NULL,
+            server_id INTEGER NOT NULL,
+            peer_public_key TEXT NOT NULL,
+            rx_bytes INTEGER NOT NULL CHECK (rx_bytes >= 0),
+            tx_bytes INTEGER NOT NULL CHECK (tx_bytes >= 0),
+            source TEXT NOT NULL,
+            collected_at TEXT NOT NULL,
+            FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE,
+            FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE CASCADE
+        );
+
         CREATE INDEX IF NOT EXISTS idx_devices_user_status
             ON devices(user_id, status);
         CREATE INDEX IF NOT EXISTS idx_devices_server_status
@@ -108,6 +121,10 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
         CREATE UNIQUE INDEX IF NOT EXISTS idx_devices_reserved_ip_unique
             ON devices(server_id, vpn_ip)
             WHERE status IN ('pending', 'active');
+        CREATE INDEX IF NOT EXISTS idx_device_traffic_device_collected
+            ON device_traffic_snapshots(device_id, collected_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_device_traffic_server_collected
+            ON device_traffic_snapshots(server_id, collected_at DESC);
         """
     )
     conn.commit()
