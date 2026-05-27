@@ -49,6 +49,41 @@ def test_approve_order_stores_selected_config_version(tmp_path):
     assert device["config_version"] == "amneziawg_v1_5"
 
 
+def test_approve_order_uses_requested_order_config_version_by_default(tmp_path):
+    conn = connect(tmp_path / "access-requested-version.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id = repo.upsert_user(
+        telegram_id=2001,
+        username="version_user",
+        first_name="Version",
+        last_name="User",
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    order_id = repo.create_order(
+        user_id=user_id,
+        plan_id=None,
+        payment_mode="free_test",
+        requested_config_version="amneziawg_v1_5",
+    )
+    service = AccessService(
+        repo=repo,
+        secret_box=SecretBox.from_app_secret(SECRET),
+        max_devices_per_user=5,
+        duration_days=7,
+    )
+
+    result = service.approve_order(
+        order_id,
+        server_id,
+        "phone",
+        admin_telegram_id=1,
+    )
+
+    device = repo.get_device(result.device_id)
+    assert device["config_version"] == "amneziawg_v1_5"
+
+
 def test_approve_order_rejects_unknown_config_version_without_creating_device(tmp_path):
     repo, service, order_id, server_id = _service(tmp_path)
 

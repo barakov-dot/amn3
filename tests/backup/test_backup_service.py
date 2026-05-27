@@ -51,6 +51,51 @@ def _drop_table(path, table_name):
     conn.close()
 
 
+def _drop_orders_requested_config_version_column(path):
+    conn = connect(path)
+    conn.executescript(
+        """
+        ALTER TABLE orders RENAME TO orders_old;
+        CREATE TABLE orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            device_id INTEGER,
+            plan_id TEXT,
+            status TEXT NOT NULL DEFAULT 'manual_review',
+            payment_mode TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            approved_at TEXT,
+            fulfilled_at TEXT
+        );
+        INSERT INTO orders (
+            id,
+            user_id,
+            device_id,
+            plan_id,
+            status,
+            payment_mode,
+            created_at,
+            approved_at,
+            fulfilled_at
+        )
+        SELECT
+            id,
+            user_id,
+            device_id,
+            plan_id,
+            status,
+            payment_mode,
+            created_at,
+            approved_at,
+            fulfilled_at
+        FROM orders_old;
+        DROP TABLE orders_old;
+        """
+    )
+    conn.commit()
+    conn.close()
+
+
 def _blank_device_fields(path, *fields):
     conn = connect(path)
     assignments = ", ".join(f"{field} = ''" for field in fields)
@@ -231,6 +276,25 @@ def test_restore_rejects_database_without_traffic_snapshot_table_before_writing_
     backup_path = service.create(db_path=db_path, output_dir=tmp_path / "backups")
 
     with pytest.raises(ValueError, match="device_traffic_snapshots"):
+        service.restore(backup_path=backup_path, target_db_path=target_path)
+
+    assert not target_path.exists()
+
+
+def test_restore_rejects_database_without_requested_config_version_before_writing_target(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setenv("APP_SECRET_KEY", STRONG_SECRET)
+    db_path = tmp_path / "source.sqlite3"
+    target_path = tmp_path / "restored.sqlite3"
+    _create_database_with_encrypted_device(db_path, app_secret=STRONG_SECRET)
+    _drop_orders_requested_config_version_column(db_path)
+
+    service = BackupService(app_version="0.1.0")
+    backup_path = service.create(db_path=db_path, output_dir=tmp_path / "backups")
+
+    with pytest.raises(ValueError, match="orders.requested_config_version"):
         service.restore(backup_path=backup_path, target_db_path=target_path)
 
     assert not target_path.exists()

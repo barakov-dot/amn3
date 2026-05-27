@@ -57,7 +57,7 @@ class AccessService:
         device_name: str,
         *,
         admin_telegram_id: int,
-        config_version: str = "amneziawg_v2",
+        config_version: str | None = None,
     ) -> AccessApprovalResult:
         with self._repo.transaction():
             return self._approve_order(
@@ -75,10 +75,12 @@ class AccessService:
         server_id: int,
         device_name: str,
         admin_telegram_id: int,
-        config_version: str,
+        config_version: str | None,
     ) -> AccessApprovalResult:
-        config_version = validate_config_version(config_version)
         order = self._repo.get_order(order_id)
+        config_version = validate_config_version(
+            config_version or str(order["requested_config_version"])
+        )
         user_id = int(order["user_id"])
         if order["status"] == "fulfilled" or order["device_id"] is not None:
             raise OrderAlreadyFulfilled("Order has already been fulfilled")

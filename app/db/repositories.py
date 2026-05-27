@@ -57,6 +57,12 @@ class Repository:
         ).fetchone()
         return int(row["id"])
 
+    def get_user_by_telegram_id(self, telegram_id: int) -> sqlite3.Row | None:
+        return self._conn.execute(
+            "SELECT * FROM users WHERE telegram_id = ?",
+            (telegram_id,),
+        ).fetchone()
+
     def ensure_default_server(self, *, name: str, network_cidr: str) -> int:
         self._conn.execute(
             """
@@ -103,13 +109,19 @@ class Repository:
         user_id: int,
         plan_id: str | None,
         payment_mode: str,
+        requested_config_version: str = "amneziawg_v2",
     ) -> int:
         cursor = self._conn.execute(
             """
-            INSERT INTO orders (user_id, plan_id, payment_mode)
-            VALUES (?, ?, ?)
+            INSERT INTO orders (
+                user_id,
+                plan_id,
+                payment_mode,
+                requested_config_version
+            )
+            VALUES (?, ?, ?, ?)
             """,
-            (user_id, plan_id, payment_mode),
+            (user_id, plan_id, payment_mode, requested_config_version),
         )
         self._commit()
         return int(cursor.lastrowid)
@@ -177,6 +189,28 @@ class Repository:
 
     def get_device(self, device_id: int) -> sqlite3.Row:
         return self._fetch_one("SELECT * FROM devices WHERE id = ?", (device_id,))
+
+    def list_user_devices(
+        self,
+        user_id: int,
+        *,
+        statuses: tuple[str, ...] = ("active",),
+        limit: int = 20,
+    ) -> list[sqlite3.Row]:
+        if not statuses:
+            return []
+        placeholders = ", ".join("?" for _ in statuses)
+        return self._conn.execute(
+            f"""
+            SELECT *
+            FROM devices
+            WHERE user_id = ?
+              AND status IN ({placeholders})
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (user_id, *statuses, limit),
+        ).fetchall()
 
     def get_device_by_server_peer_public_key(
         self,
@@ -269,6 +303,43 @@ class Repository:
         )
         self._commit()
         return int(cursor.lastrowid)
+
+    def list_pending_orders(self, *, limit: int = 20) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                orders.*,
+                users.telegram_id,
+                users.username,
+                users.first_name,
+                users.last_name
+            FROM orders
+            JOIN users ON users.id = orders.user_id
+            WHERE orders.status IN ('manual_review', 'approved')
+              AND orders.device_id IS NULL
+            ORDER BY orders.created_at ASC, orders.id ASC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+
+    def list_active_devices_with_users(self, *, limit: int = 50) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                devices.*,
+                users.telegram_id,
+                users.username,
+                users.first_name,
+                users.last_name
+            FROM devices
+            JOIN users ON users.id = devices.user_id
+            WHERE devices.status = 'active'
+            ORDER BY devices.id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
 
     def record_device_traffic_snapshot(
         self,

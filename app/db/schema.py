@@ -68,6 +68,7 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             user_id INTEGER NOT NULL,
             device_id INTEGER,
             plan_id TEXT,
+            requested_config_version TEXT NOT NULL DEFAULT 'amneziawg_v2',
             status TEXT NOT NULL DEFAULT 'manual_review'
                 CHECK (
                     status IN (
@@ -127,4 +128,26 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             ON device_traffic_snapshots(server_id, collected_at DESC);
         """
     )
+    _ensure_column(
+        conn,
+        "orders",
+        "requested_config_version",
+        "TEXT NOT NULL DEFAULT 'amneziawg_v2'",
+    )
     conn.commit()
+
+
+def _ensure_column(
+    conn: sqlite3.Connection,
+    table_name: str,
+    column_name: str,
+    column_definition: str,
+) -> None:
+    columns = {
+        row["name"] if isinstance(row, sqlite3.Row) else row[1]
+        for row in conn.execute(f"PRAGMA table_info({table_name})")
+    }
+    if column_name not in columns:
+        conn.execute(
+            f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_definition}"
+        )

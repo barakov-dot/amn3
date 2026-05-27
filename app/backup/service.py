@@ -32,6 +32,9 @@ REQUIRED_TABLES = {
     "admin_actions",
     "device_traffic_snapshots",
 }
+REQUIRED_COLUMNS = {
+    "orders": {"requested_config_version"},
+}
 
 
 class BackupService:
@@ -168,6 +171,8 @@ class BackupService:
                     missing = ", ".join(sorted(missing_tables))
                     raise ValueError(f"Backup database is missing required tables: {missing}")
 
+                self._validate_required_columns(conn)
+                self._validate_order_rows(conn)
                 self._validate_active_device_rows(conn)
                 self._validate_device_secrets(conn)
             finally:
@@ -201,6 +206,37 @@ class BackupService:
             if row["config_version"] not in SUPPORTED_CONFIG_VERSIONS:
                 raise ValueError(
                     f"Backup database device {row['id']} has unsupported config_version"
+                )
+
+    def _validate_required_columns(self, conn: sqlite3.Connection) -> None:
+        for table_name, required_columns in REQUIRED_COLUMNS.items():
+            columns = {
+                str(row["name"])
+                for row in conn.execute(f"PRAGMA table_info({table_name})")
+            }
+            missing_columns = required_columns - columns
+            if missing_columns:
+                missing = ", ".join(
+                    f"{table_name}.{column}" for column in sorted(missing_columns)
+                )
+                raise ValueError(
+                    f"Backup database is missing required columns: {missing}"
+                )
+
+    def _validate_order_rows(self, conn: sqlite3.Connection) -> None:
+        rows = conn.execute(
+            """
+            SELECT id, requested_config_version
+            FROM orders
+            WHERE status IN ('manual_review', 'approved')
+              AND device_id IS NULL
+            """
+        ).fetchall()
+        for row in rows:
+            if row["requested_config_version"] not in SUPPORTED_CONFIG_VERSIONS:
+                raise ValueError(
+                    f"Backup database order {row['id']} has unsupported "
+                    "requested_config_version"
                 )
 
     def _validate_device_secrets(self, conn: sqlite3.Connection) -> None:
