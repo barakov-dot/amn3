@@ -380,6 +380,9 @@ python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-
 
 It prints read-only SSH commands only and does not change the server.
 
+If `ssh` is missing or the server does not respond, the normal check returns a
+clear report error instead of crashing.
+
 If tests fail, do not continue to the VPS.
 
 ## Step 4. Back Up the Local Database

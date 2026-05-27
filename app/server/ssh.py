@@ -35,13 +35,26 @@ class SystemSshClient:
         if self._server.ssh.auth.private_key_path:
             args.extend(["-i", self._server.ssh.auth.private_key_path])
         args.extend([f"{self._server.ssh.user}@{self._server.ssh.host}", command])
-        completed = subprocess.run(
-            args,
-            capture_output=True,
-            check=False,
-            text=True,
-            timeout=self._timeout_seconds,
-        )
+        try:
+            completed = subprocess.run(
+                args,
+                capture_output=True,
+                check=False,
+                text=True,
+                timeout=self._timeout_seconds,
+            )
+        except FileNotFoundError:
+            return CommandResult(
+                exit_code=127,
+                stdout="",
+                stderr="ssh executable was not found in PATH",
+            )
+        except subprocess.TimeoutExpired:
+            return CommandResult(
+                exit_code=124,
+                stdout="",
+                stderr=f"ssh command timed out after {self._timeout_seconds} seconds",
+            )
         return CommandResult(
             exit_code=completed.returncode,
             stdout=completed.stdout,
