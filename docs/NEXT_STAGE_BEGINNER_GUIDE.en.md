@@ -286,6 +286,7 @@ Fill required values:
 TELEGRAM_BOT_TOKEN=CHANGE_ME_TOKEN_FROM_BOTFATHER
 APP_SECRET_KEY=CHANGE_ME_GENERATED_RANDOM_SECRET_32_PLUS_CHARS
 ADMIN_TELEGRAM_IDS=123456789
+VPS_SSH_PASSWORD=your_vps_password_if_you_use_password_auth
 CONTROL_PANEL_AUTH_METHODS=telegram_admin,password,key
 CONTROL_PANEL_ADMIN_USERNAME=admin
 CONTROL_PANEL_PASSWORD_HASH=
@@ -345,8 +346,7 @@ servers:
       port: 22
       user: "root"
       auth:
-        type: "key"
-        private_key_path: "C:/Users/you/.ssh/id_ed25519"
+        type: "password"
     vpn:
       endpoint_host: "YOUR_SERVER_IP"
       port: "auto"
@@ -382,6 +382,12 @@ It prints read-only SSH commands only and does not change the server.
 
 If `ssh` is missing or the server does not respond, the normal check returns a
 clear report error instead of crashing.
+
+With `auth.type: "password"`, store the password in `.env` as
+`VPS_SSH_PASSWORD`, not in `servers.yml`. The current system SSH client does not
+enter passwords automatically; a separate non-interactive password backend is
+needed before live password checks. For the first live check, SSH key auth is
+still more reliable.
 
 Dry-run adding a peer on the VPS:
 

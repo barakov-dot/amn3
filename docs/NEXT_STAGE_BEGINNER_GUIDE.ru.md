@@ -375,6 +375,7 @@ Copy-Item .env.example .env
 TELEGRAM_BOT_TOKEN=CHANGE_ME_TOKEN_FROM_BOTFATHER
 APP_SECRET_KEY=CHANGE_ME_GENERATED_RANDOM_SECRET_32_PLUS_CHARS
 ADMIN_TELEGRAM_IDS=твой_telegram_id
+VPS_SSH_PASSWORD=пароль_от_vps_если_используешь_password_auth
 CONTROL_PANEL_AUTH_METHODS=telegram_admin,password,key
 CONTROL_PANEL_ADMIN_USERNAME=admin
 CONTROL_PANEL_PASSWORD_HASH=
@@ -439,8 +440,7 @@ servers:
       port: 22
       user: "root"
       auth:
-        type: "key"
-        private_key_path: "C:/Users/you/.ssh/id_ed25519"
+        type: "password"
 
     vpn:
       endpoint_host: "YOUR_SERVER_IP"
@@ -481,6 +481,11 @@ python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-
 
 Если `ssh` не установлен или сервер не отвечает, обычная проверка вернет
 понятную ошибку в отчете вместо аварийного завершения.
+
+При `auth.type: "password"` пароль хранится в `.env` как `VPS_SSH_PASSWORD`, а
+не в `servers.yml`. Текущий системный SSH-клиент не вводит пароль автоматически:
+для живой non-interactive проверки по паролю потребуется отдельный password
+backend. Для первого живого check сейчас надежнее SSH key auth.
 
 Dry-run добавления peer на VPS:
 

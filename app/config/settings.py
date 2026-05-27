@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     vpn_server_runtime: str = Field(default="host_systemd", alias="VPN_SERVER_RUNTIME")
     default_vpn_network_cidr: str = Field(default="10.8.0.0/24", alias="DEFAULT_VPN_NETWORK_CIDR")
     database_path: str = Field(default="data/amneziya.sqlite3", alias="DATABASE_PATH")
+    vps_ssh_password: str = Field(default="", alias="VPS_SSH_PASSWORD")
     control_panel_auth_methods: str = Field(
         default="telegram_admin,password,key",
         alias="CONTROL_PANEL_AUTH_METHODS",

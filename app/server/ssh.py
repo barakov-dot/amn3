@@ -23,6 +23,17 @@ class SystemSshClient:
         self._timeout_seconds = timeout_seconds
 
     def run(self, command: str) -> CommandResult:
+        if self._server.ssh.auth.type == "password":
+            return CommandResult(
+                exit_code=125,
+                stdout="",
+                stderr=(
+                    "Password auth is configured. Store the password in "
+                    "VPS_SSH_PASSWORD, but a non-interactive password SSH backend "
+                    "is not enabled yet. Use SSH key auth for live checks or add "
+                    "a password backend before running this check."
+                ),
+            )
         args = [
             "ssh",
             "-p",

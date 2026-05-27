@@ -33,7 +33,17 @@ def test_system_ssh_client_reports_timeout(tmp_path, monkeypatch):
     assert "timed out" in result.stderr
 
 
-def _server(tmp_path):
+def test_system_ssh_client_reports_password_auth_backend_requirement(tmp_path):
+    server = _server(tmp_path, auth_type="password")
+
+    result = SystemSshClient(server).run("cat /etc/os-release")
+
+    assert result.exit_code == 125
+    assert "VPS_SSH_PASSWORD" in result.stderr
+    assert "non-interactive password SSH backend" in result.stderr
+
+
+def _server(tmp_path, *, auth_type="key"):
     path = tmp_path / "servers.yml"
-    path.write_text(VALID_YAML, encoding="utf-8")
+    path.write_text(VALID_YAML.replace("type: key", f"type: {auth_type}"), encoding="utf-8")
     return select_server(load_server_config(path), "debian-vps-1")

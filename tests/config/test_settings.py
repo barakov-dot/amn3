@@ -75,6 +75,17 @@ def test_settings_parses_control_panel_auth_methods():
     assert settings.control_panel_public_key_path == "/etc/amneziya/admin.pub"
 
 
+def test_settings_reads_vps_ssh_password_from_env_settings():
+    settings = Settings(
+        _env_file=None,
+        telegram_bot_token="CHANGE_ME",
+        app_secret_key="test-secret",
+        vps_ssh_password="secret-password",
+    )
+
+    assert settings.vps_ssh_password == "secret-password"
+
+
 def test_settings_rejects_unknown_control_panel_auth_method():
     with pytest.raises(ValidationError):
         Settings(
