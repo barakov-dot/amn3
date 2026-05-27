@@ -248,17 +248,24 @@ def build_admin_navigation_keyboard(
 
 
 def render_start_text(*, first_name: str | None, is_admin: bool) -> str:
-    greeting = f"Hello, {first_name}." if first_name else "Hello."
-    role = "Admin mode is available." if is_admin else "User mode is available."
-    return f"{greeting}\n{role}\nChoose an action."
+    greeting = (
+        text("start.hello_name", first_name=first_name)
+        if first_name
+        else text("start.hello")
+    )
+    role = text("start.admin_role") if is_admin else text("start.user_role")
+    return f"{greeting}\n{role}\n{text('start.choose_action')}"
 
 
 def render_config_version_prompt() -> str:
-    return "Choose the AmneziaWG config version for this device."
+    return text("prompt.config_version")
 
 
 def render_plan_prompt(*, config_version: str) -> str:
-    return f"Choose tariff for {_version_label(config_version)}."
+    return text(
+        "prompt.plan",
+        config_version_label=_version_label(config_version),
+    )
 
 
 def render_access_request_created(
@@ -267,17 +274,18 @@ def render_access_request_created(
     config_version: str,
     plan_name: str | None = None,
 ) -> str:
-    text = (
-        f"Access request #{order_id} was created.\n"
-        f"Requested config: {_version_label(config_version)}.\n"
-    )
+    lines = [
+        text("access.created", order_id=order_id),
+        text("access.requested_config", config_version_label=_version_label(config_version)),
+    ]
     if plan_name is not None:
-        text += f"Plan: {plan_name}.\n"
-    return text + "An admin can approve it from the admin menu."
+        lines.append(text("access.plan", plan_name=plan_name))
+    lines.append(text("access.admin_notice"))
+    return "\n".join(lines)
 
 
 def render_my_tariff(devices: Iterable[Mapping[str, object]], *, now: str) -> str:
-    lines = ["My tariff"]
+    lines = [text("my_tariff.title")]
     has_devices = False
     for device in devices:
         has_devices = True
@@ -287,19 +295,19 @@ def render_my_tariff(devices: Iterable[Mapping[str, object]], *, now: str) -> st
             [
                 "",
                 str(device["name"]),
-                f"Status: {device['status']}",
-                f"Tariff: {duration_days} days",
-                f"Expires: {expires_at or 'unknown'}",
-                f"Days left: {_days_left(expires_at, now) if expires_at else 'unknown'}",
+                f"{text('common.status')}: {device['status']}",
+                f"{text('common.tariff')}: {duration_days} days",
+                f"{text('common.expires')}: {expires_at or 'unknown'}",
+                f"{text('common.days_left')}: {_days_left(expires_at, now) if expires_at else 'unknown'}",
             ]
         )
     if not has_devices:
-        lines.append("No active tariff yet.")
+        lines.append(text("my_tariff.empty"))
     return "\n".join(lines)
 
 
 def render_my_devices(devices: Iterable[Mapping[str, object]], *, now: str) -> str:
-    lines = ["My devices"]
+    lines = [text("my_devices.title")]
     has_devices = False
     for device in devices:
         has_devices = True
@@ -309,15 +317,15 @@ def render_my_devices(devices: Iterable[Mapping[str, object]], *, now: str) -> s
             [
                 "",
                 f"#{device['id']} {device['name']}",
-                f"Config: {_version_label(str(device['config_version']))}",
-                f"Status: {device['status']}",
-                f"Tariff: {int(device['duration_days'])} days",
-                f"Days left: {_days_left(expires_at, now) if expires_at else 'unknown'}",
-                f"Connected: {'yes' if connected else 'no'}",
+                f"{text('common.config')}: {_version_label(str(device['config_version']))}",
+                f"{text('common.status')}: {device['status']}",
+                f"{text('common.tariff')}: {int(device['duration_days'])} days",
+                f"{text('common.days_left')}: {_days_left(expires_at, now) if expires_at else 'unknown'}",
+                f"{text('common.connected')}: {text('common.yes') if connected else text('common.no')}",
             ]
         )
     if not has_devices:
-        lines.append("No active devices yet.")
+        lines.append(text("my_devices.empty"))
     return "\n".join(lines)
 
 
@@ -375,18 +383,18 @@ def render_user_config_ready(*, config_version: str) -> str:
 
 
 def render_user_traffic(views: Iterable[DeviceTrafficView]) -> str:
-    lines = ["Your traffic"]
+    lines = [text("traffic.user_title")]
     has_devices = False
     for view in views:
         has_devices = True
         lines.extend(_render_device_traffic_lines(view))
     if not has_devices:
-        lines.append("No active devices yet.")
+        lines.append(text("my_devices.empty"))
     return "\n".join(lines)
 
 
 def render_admin_pending_orders(orders: Iterable[Mapping[str, object]]) -> str:
-    lines = ["Pending orders"]
+    lines = [text("admin.pending_title")]
     has_orders = False
     for order in orders:
         has_orders = True
@@ -397,27 +405,27 @@ def render_admin_pending_orders(orders: Iterable[Mapping[str, object]]) -> str:
             f"({order['status']}, {order['created_at']})"
         )
     if not has_orders:
-        lines.append("No pending orders.")
+        lines.append(text("admin.no_pending"))
     return "\n".join(lines)
 
 
 def render_admin_traffic(
     views: Iterable[DeviceTrafficView],
 ) -> tuple[str, InlineKeyboardMarkup]:
-    lines = ["Admin traffic"]
+    lines = [text("traffic.admin_title")]
     has_devices = False
     for view in views:
         has_devices = True
         lines.extend(_render_device_traffic_lines(view))
     if not has_devices:
-        lines.append("No active devices yet.")
+        lines.append(text("my_devices.empty"))
     return "\n".join(lines), build_admin_navigation_keyboard()
 
 
 def render_admin_users(
     users: Iterable[Mapping[str, object]],
 ) -> tuple[str, InlineKeyboardMarkup]:
-    lines = ["Admin users"]
+    lines = [text("admin.users_title")]
     has_users = False
     for user in users:
         has_users = True
@@ -425,14 +433,14 @@ def render_admin_users(
             [
                 "",
                 _format_user_identity(user),
-                f"status: {user['status']}",
-                f"admin: {'yes' if int(user['is_admin']) == 1 else 'no'}",
-                f"active devices: {int(user['active_device_count'])}",
-                f"total devices: {int(user['total_device_count'])}",
+                f"{text('common.status')}: {user['status']}",
+                f"{text('admin.flag')}: {text('common.yes') if int(user['is_admin']) == 1 else text('common.no')}",
+                f"{text('admin.active_devices')}: {int(user['active_device_count'])}",
+                f"{text('admin.total_devices')}: {int(user['total_device_count'])}",
             ]
         )
     if not has_users:
-        lines.append("No users yet.")
+        lines.append(text("admin.no_users"))
     return "\n".join(lines), build_admin_navigation_keyboard()
 
 
@@ -458,22 +466,22 @@ def _render_device_traffic_lines(view: DeviceTrafficView) -> list[str]:
         "",
         f"{view.device_name} ({_version_label(view.config_version)})",
         f"Status: {view.status}",
-        f"Connected: {'yes' if getattr(view, 'is_connected', False) else 'no'}",
+        f"{text('common.connected')}: {text('common.yes') if getattr(view, 'is_connected', False) else text('common.no')}",
     ]
     if not view.is_available:
-        lines.append("No traffic data yet.")
+        lines.append(text("traffic.no_data"))
         return lines
 
     lines.extend(
         [
-            f"Received: {view.rx}",
-            f"Sent: {view.tx}",
-            f"Total: {view.total}",
-            f"Updated: {view.collected_at}",
+            f"{text('common.received')}: {view.rx}",
+            f"{text('common.sent')}: {view.tx}",
+            f"{text('common.total')}: {view.total}",
+            f"{text('common.updated')}: {view.collected_at}",
         ]
     )
     if view.is_stale:
-        lines.append("Traffic data may be stale.")
+        lines.append(text("traffic.stale"))
     return lines
 
 

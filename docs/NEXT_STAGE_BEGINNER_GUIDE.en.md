@@ -310,9 +310,9 @@ The admin menu also has a `Users` section. It shows service users, whether the
 user has admin rights, and active/total device counts. Manual commands remain
 available as a fallback until the full button-based admin flow is added.
 
-Bot button labels are stored in a text catalog. Russian is the default language,
-and English remains available as a fallback for future interface language
-switching.
+Bot button labels and core bot messages are stored in a text catalog. Russian is
+the default language, and English remains available as a fallback for future
+interface language switching.
 
 The bot can create a manual user and order before the person uses `/start`.
 Telegram delivery may still require the person to open the bot first; if delivery

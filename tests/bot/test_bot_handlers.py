@@ -44,7 +44,7 @@ def test_handle_start_renders_main_menu_for_admin():
 
     asyncio.run(handle_start(message, workflow=workflow))
 
-    assert "Hello, Admin." in message.answers[0]["text"]
+    assert "Здравствуйте, Admin." in message.answers[0]["text"]
     assert _button_texts(message.answers[0]["reply_markup"])[-1] == ["Админ"]
 
 
@@ -58,7 +58,7 @@ def test_handle_request_config_prompt_shows_version_choices():
 
     asyncio.run(handle_request_config_prompt(callback))
 
-    assert "Choose the AmneziaWG config version" in callback.message.answers[0]["text"]
+    assert "Выберите версию AmneziaWG" in callback.message.answers[0]["text"]
     assert _button_texts(callback.message.answers[0]["reply_markup"]) == [
         ["AmneziaWG 1.5"],
         ["AmneziaWG 2.0"],
@@ -78,7 +78,7 @@ def test_handle_config_request_shows_tariff_choices_for_selected_version():
     asyncio.run(handle_config_request(callback, workflow=workflow))
 
     assert workflow.requests == []
-    assert "Choose tariff" in callback.message.answers[0]["text"]
+    assert "Выберите тариф" in callback.message.answers[0]["text"]
     assert _button_texts(callback.message.answers[0]["reply_markup"]) == [
         ["7 days"],
         ["30 days"],
@@ -113,7 +113,7 @@ def test_handle_my_traffic_renders_user_traffic():
 
     asyncio.run(handle_my_traffic(callback, workflow=workflow))
 
-    assert "Your traffic" in callback.message.answers[0]["text"]
+    assert "Мой трафик" in callback.message.answers[0]["text"]
     assert "phone" in callback.message.answers[0]["text"]
     assert callback.answered is True
 
@@ -129,7 +129,7 @@ def test_handle_my_tariff_renders_user_tariff():
 
     asyncio.run(handle_my_tariff(callback, workflow=workflow))
 
-    assert "My tariff" in callback.message.answers[0]["text"]
+    assert "Мой тариф" in callback.message.answers[0]["text"]
     assert "phone" in callback.message.answers[0]["text"]
     assert callback.answered is True
 
@@ -145,7 +145,7 @@ def test_handle_my_devices_renders_device_actions_and_reset():
 
     asyncio.run(handle_my_devices(callback, workflow=workflow))
 
-    assert "My devices" in callback.message.answers[0]["text"]
+    assert "Мои устройства" in callback.message.answers[0]["text"]
     assert callback.message.answers[1]["text"] == "Device #7"
     assert _button_texts(callback.message.answers[1]["reply_markup"]) == [
         ["Отправить конфиг"],
@@ -172,7 +172,7 @@ def test_handle_user_resend_config_sends_owned_config_to_user():
     assert callback.bot.sent_messages[0]["chat_id"] == 1001
     assert callback.bot.sent_documents[0]["document"].filename.endswith(".conf")
     assert callback.bot.sent_photos[0]["photo"].filename.endswith(".qr.png")
-    assert "resent" in callback.message.answers[0]["text"]
+    assert "отправлен повторно" in callback.message.answers[0]["text"]
     assert callback.answered is True
 
 
@@ -188,7 +188,7 @@ def test_handle_user_revoke_device_revokes_owned_device():
     asyncio.run(handle_user_revoke_device(callback, workflow=workflow))
 
     assert workflow.revoked_devices == []
-    assert "Confirm device deletion" in callback.message.answers[0]["text"]
+    assert "Подтвердите удаление" in callback.message.answers[0]["text"]
     assert _button_texts(callback.message.answers[0]["reply_markup"]) == [
         ["Подтвердить удаление"]
     ]
@@ -207,7 +207,7 @@ def test_handle_user_revoke_device_confirm_revokes_owned_device():
     asyncio.run(handle_user_revoke_device_confirm(callback, workflow=workflow))
 
     assert workflow.revoked_devices == [7]
-    assert "removed" in callback.message.answers[0]["text"]
+    assert "удалено" in callback.message.answers[0]["text"]
     assert callback.answered is True
 
 
@@ -223,7 +223,7 @@ def test_handle_user_reset_devices_asks_for_confirmation():
     asyncio.run(handle_user_reset_devices(callback, workflow=workflow))
 
     assert workflow.reset_requests == []
-    assert "Confirm reset" in callback.message.answers[0]["text"]
+    assert "Подтвердите сброс" in callback.message.answers[0]["text"]
     assert _button_texts(callback.message.answers[0]["reply_markup"]) == [
         ["Подтвердить сброс"]
     ]
@@ -242,7 +242,7 @@ def test_handle_user_reset_devices_confirm_revokes_all_owned_devices():
     asyncio.run(handle_user_reset_devices_confirm(callback, workflow=workflow))
 
     assert workflow.reset_requests == [1001]
-    assert "2 device" in callback.message.answers[0]["text"]
+    assert "Удалено устройств: 2" in callback.message.answers[0]["text"]
     assert callback.answered is True
 
 
@@ -257,7 +257,7 @@ def test_handle_admin_pending_rejects_non_admin():
 
     asyncio.run(handle_admin_pending(callback, workflow=workflow))
 
-    assert callback.message.answers[0]["text"] == "Admin access required."
+    assert callback.message.answers[0]["text"] == "Нужны права администратора."
     assert callback.answered is True
 
 
@@ -272,7 +272,7 @@ def test_handle_admin_pending_renders_approve_buttons_for_each_order():
 
     asyncio.run(handle_admin_pending(callback, workflow=workflow))
 
-    assert "Pending orders" in callback.message.answers[0]["text"]
+    assert "Заявки" in callback.message.answers[0]["text"]
     assert callback.message.answers[1]["text"] == "Order #11"
     assert _button_texts(callback.message.answers[1]["reply_markup"]) == [
         ["Одобрить: AmneziaWG 1.5"],
@@ -292,7 +292,7 @@ def test_handle_admin_users_renders_service_users_for_admin():
 
     asyncio.run(handle_admin_users(callback, workflow=workflow))
 
-    assert "Admin users" in callback.message.answers[0]["text"]
+    assert "Пользователи" in callback.message.answers[0]["text"]
     assert "@alice" in callback.message.answers[0]["text"]
     assert callback.answered is True
 
@@ -308,7 +308,7 @@ def test_handle_admin_users_rejects_non_admin():
 
     asyncio.run(handle_admin_users(callback, workflow=workflow))
 
-    assert callback.message.answers[0]["text"] == "Admin access required."
+    assert callback.message.answers[0]["text"] == "Нужны права администратора."
     assert callback.answered is True
 
 
@@ -345,7 +345,7 @@ def test_handle_admin_approve_rejects_non_admin():
 
     asyncio.run(handle_admin_approve(callback, workflow=workflow))
 
-    assert callback.message.answers[0]["text"] == "Admin access required."
+    assert callback.message.answers[0]["text"] == "Нужны права администратора."
     assert workflow.approvals == []
     assert callback.answered is True
 
@@ -381,7 +381,7 @@ def test_handle_admin_reset_template_resets_template():
     asyncio.run(handle_admin_reset_template(callback, workflow=workflow))
 
     assert workflow.template_reset is True
-    assert "reset" in callback.message.answers[0]["text"]
+    assert "сброшен" in callback.message.answers[0]["text"]
     assert callback.answered is True
 
 
@@ -400,7 +400,7 @@ def test_handle_admin_resend_config_sends_delivery_to_user():
     assert callback.bot.sent_messages[0]["chat_id"] == 1001
     assert callback.bot.sent_documents[0]["document"].filename.endswith(".conf")
     assert callback.bot.sent_photos[0]["photo"].filename.endswith(".qr.png")
-    assert "resent" in callback.message.answers[0]["text"]
+    assert "отправлен повторно" in callback.message.answers[0]["text"]
     assert callback.answered is True
 
 

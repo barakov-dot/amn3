@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from aiogram.types import BufferedInputFile
 
+from app.bot.texts import text
 from app.bot.ux import (
     ADMIN_APPROVE_PREFIX,
     ADMIN_PENDING_CALLBACK,
@@ -66,7 +67,7 @@ async def handle_config_request(callback, *, workflow) -> None:
         prefix=REQUEST_CONFIG_PREFIX,
     )
     if config_version is None:
-        await callback.message.answer("Unknown config request.")
+        await callback.message.answer(text("handler.unknown_config"))
         await callback.answer()
         return
 
@@ -81,7 +82,7 @@ async def handle_config_request(callback, *, workflow) -> None:
 async def handle_plan_request(callback, *, workflow) -> None:
     parsed = _parse_plan_callback(str(callback.data))
     if parsed is None:
-        await callback.message.answer("Unknown tariff request.")
+        await callback.message.answer(text("handler.unknown_tariff"))
         await callback.answer()
         return
 
@@ -130,7 +131,7 @@ async def handle_my_devices(callback, *, workflow) -> None:
 async def handle_user_resend_config(callback, *, workflow) -> None:
     device_id = _parse_int_suffix(str(callback.data), USER_RESEND_PREFIX)
     if device_id is None:
-        await callback.message.answer("Unknown resend request.")
+        await callback.message.answer(text("handler.unknown_resend"))
         await callback.answer()
         return
 
@@ -139,24 +140,24 @@ async def handle_user_resend_config(callback, *, workflow) -> None:
         device_id=device_id,
     )
     if result is None:
-        await callback.message.answer("Device was not found.")
+        await callback.message.answer(text("handler.device_not_found"))
         await callback.answer()
         return
 
     await _send_delivery(callback.bot, result)
-    await callback.message.answer(f"Config for device #{device_id} was resent.")
+    await callback.message.answer(text("handler.config_resent", device_id=device_id))
     await callback.answer()
 
 
 async def handle_user_revoke_device(callback, *, workflow) -> None:
     device_id = _parse_int_suffix(str(callback.data), USER_REVOKE_PREFIX)
     if device_id is None:
-        await callback.message.answer("Unknown delete request.")
+        await callback.message.answer(text("handler.unknown_delete"))
         await callback.answer()
         return
 
     await callback.message.answer(
-        f"Confirm device deletion for device #{device_id}.",
+        text("handler.confirm_device_delete", device_id=device_id),
         reply_markup=build_user_revoke_confirm_keyboard(device_id=device_id),
     )
     await callback.answer()
@@ -165,7 +166,7 @@ async def handle_user_revoke_device(callback, *, workflow) -> None:
 async def handle_user_revoke_device_confirm(callback, *, workflow) -> None:
     device_id = _parse_int_suffix(str(callback.data), USER_REVOKE_CONFIRM_PREFIX)
     if device_id is None:
-        await callback.message.answer("Unknown delete confirmation.")
+        await callback.message.answer(text("handler.unknown_delete_confirm"))
         await callback.answer()
         return
 
@@ -173,20 +174,19 @@ async def handle_user_revoke_device_confirm(callback, *, workflow) -> None:
         telegram_id=int(callback.from_user.id),
         device_id=device_id,
     ):
-        await callback.message.answer("Device was not found.")
+        await callback.message.answer(text("handler.device_not_found"))
         await callback.answer()
         return
 
     await callback.message.answer(
-        f"Device #{device_id} was removed. "
-        "Server-side peer removal will run when VPS integration is enabled."
+        text("handler.device_removed", device_id=device_id)
     )
     await callback.answer()
 
 
 async def handle_user_reset_devices(callback, *, workflow) -> None:
     await callback.message.answer(
-        "Confirm reset of all devices.",
+        text("handler.confirm_reset"),
         reply_markup=build_user_reset_confirm_keyboard(),
     )
     await callback.answer()
@@ -195,8 +195,7 @@ async def handle_user_reset_devices(callback, *, workflow) -> None:
 async def handle_user_reset_devices_confirm(callback, *, workflow) -> None:
     changed = workflow.reset_user_devices(telegram_id=int(callback.from_user.id))
     await callback.message.answer(
-        f"{changed} device(s) were removed. "
-        "Server-side peer removal will run when VPS integration is enabled."
+        text("handler.devices_removed", count=changed)
     )
     await callback.answer()
 
@@ -204,7 +203,7 @@ async def handle_user_reset_devices_confirm(callback, *, workflow) -> None:
 async def handle_admin_pending(callback, *, workflow) -> None:
     admin_telegram_id = int(callback.from_user.id)
     if not workflow.is_admin(admin_telegram_id):
-        await callback.message.answer("Admin access required.")
+        await callback.message.answer(text("handler.admin_required"))
         await callback.answer()
         return
 
@@ -221,14 +220,14 @@ async def handle_admin_pending(callback, *, workflow) -> None:
 async def handle_admin_users(callback, *, workflow) -> None:
     admin_telegram_id = int(callback.from_user.id)
     if not workflow.is_admin(admin_telegram_id):
-        await callback.message.answer("Admin access required.")
+        await callback.message.answer(text("handler.admin_required"))
         await callback.answer()
         return
 
-    text, keyboard = render_admin_users(
+    rendered_text, keyboard = render_admin_users(
         workflow.list_users(admin_telegram_id=admin_telegram_id)
     )
-    await callback.message.answer(text, reply_markup=keyboard)
+    await callback.message.answer(rendered_text, reply_markup=keyboard)
     await callback.answer()
 
 
@@ -240,7 +239,7 @@ async def handle_admin_approve(callback, *, workflow) -> None:
         await callback.answer()
         return
     if not workflow.is_admin(admin_telegram_id):
-        await callback.message.answer("Admin access required.")
+        await callback.message.answer(text("handler.admin_required"))
         await callback.answer()
         return
 
@@ -251,7 +250,7 @@ async def handle_admin_approve(callback, *, workflow) -> None:
         config_version=config_version,
     )
     if result is None:
-        await callback.message.answer("Admin access required.")
+        await callback.message.answer(text("handler.admin_required"))
         await callback.answer()
         return
 
@@ -274,7 +273,7 @@ async def handle_admin_template(callback, *, workflow) -> None:
         admin_telegram_id=admin_telegram_id
     )
     if template_text is None:
-        await callback.message.answer("Admin access required.")
+        await callback.message.answer(text("handler.admin_required"))
         await callback.answer()
         return
 
@@ -286,11 +285,11 @@ async def handle_admin_template(callback, *, workflow) -> None:
 async def handle_admin_reset_template(callback, *, workflow) -> None:
     admin_telegram_id = int(callback.from_user.id)
     if not workflow.reset_config_ready_template(admin_telegram_id=admin_telegram_id):
-        await callback.message.answer("Admin access required.")
+        await callback.message.answer(text("handler.admin_required"))
         await callback.answer()
         return
 
-    await callback.message.answer("Config ready template was reset.")
+    await callback.message.answer(text("handler.template_reset"))
     await callback.answer()
 
 
@@ -298,7 +297,7 @@ async def handle_admin_resend_config(callback, *, workflow) -> None:
     admin_telegram_id = int(callback.from_user.id)
     device_id = _parse_int_suffix(str(callback.data), ADMIN_RESEND_PREFIX)
     if device_id is None:
-        await callback.message.answer("Unknown resend request.")
+        await callback.message.answer(text("handler.unknown_resend"))
         await callback.answer()
         return
 
@@ -307,12 +306,12 @@ async def handle_admin_resend_config(callback, *, workflow) -> None:
         device_id=device_id,
     )
     if result is None:
-        await callback.message.answer("Admin access required.")
+        await callback.message.answer(text("handler.admin_required"))
         await callback.answer()
         return
 
     await _send_delivery(callback.bot, result)
-    await callback.message.answer(f"Config for device #{device_id} was resent.")
+    await callback.message.answer(text("handler.config_resent", device_id=device_id))
     await callback.answer()
 
 
@@ -330,7 +329,7 @@ async def handle_admin_grant(message, *, workflow) -> None:
         first_name=first_name,
         last_name=None,
     ):
-        await message.answer("Admin access required.")
+        await message.answer(text("handler.admin_required"))
         return
     await message.answer(f"Admin role granted to telegram_id={target_telegram_id}.")
 
@@ -350,7 +349,7 @@ async def handle_admin_add_user(message, *, workflow) -> None:
         last_name=None,
     )
     if user_id is None:
-        await message.answer("Admin access required.")
+        await message.answer(text("handler.admin_required"))
         return
     await message.answer(f"User was added: #{user_id}, telegram_id={target_telegram_id}.")
 
@@ -374,7 +373,7 @@ async def handle_admin_create_order(message, *, workflow) -> None:
         plan_id=plan_id,
     )
     if result is None:
-        await message.answer("Admin access required.")
+        await message.answer(text("handler.admin_required"))
         return
     await message.answer(result.text)
 

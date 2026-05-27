@@ -136,14 +136,14 @@ def test_render_user_traffic_lists_devices_and_marks_stale_stats():
 
     text = render_user_traffic(views)
 
-    assert "Your traffic" in text
+    assert "Мой трафик" in text
     assert "phone" in text
     assert "AmneziaWG 1.5" in text
-    assert "Total: 3.0 KiB" in text
-    assert "Connected: yes" in text
+    assert "Всего: 3.0 KiB" in text
+    assert "Подключался: да" in text
     assert "laptop" in text
-    assert "Connected: no" in text
-    assert "No traffic data yet" in text
+    assert "Подключался: нет" in text
+    assert "Данных о трафике пока нет" in text
 
 
 def test_admin_pending_orders_render_with_per_order_version_keyboard():
@@ -162,7 +162,7 @@ def test_admin_pending_orders_render_with_per_order_version_keyboard():
     text = render_admin_pending_orders(orders)
     keyboard = build_admin_order_keyboard(order_id=11)
 
-    assert "Pending orders" in text
+    assert "Заявки" in text
     assert "#11" in text
     assert "@alice" in text
     assert _button_texts(keyboard) == [
@@ -194,7 +194,7 @@ def test_admin_traffic_keyboard_links_pending_orders_and_traffic():
         ]
     )
 
-    assert "Admin traffic" in text
+    assert "Трафик пользователей" in text
     assert "tablet" in text
     assert "12.0 KiB" in text
     assert _callback_data(keyboard) == [
@@ -236,11 +236,11 @@ def test_render_admin_users_lists_users_and_device_counts():
         ]
     )
 
-    assert "Admin users" in text
+    assert "Пользователи" in text
     assert "@alice" in text
-    assert "admin: yes" in text
-    assert "active devices: 1" in text
-    assert "total devices: 2" in text
+    assert "админ: да" in text
+    assert "активных устройств: 1" in text
+    assert "всего устройств: 2" in text
     assert _callback_data(keyboard) == [
         [ADMIN_PENDING_CALLBACK],
         [ADMIN_TRAFFIC_CALLBACK],
@@ -291,10 +291,10 @@ def test_render_my_tariff_shows_device_expiration_and_days_left():
         now="2026-05-27T12:00:00Z",
     )
 
-    assert "My tariff" in text
+    assert "Мой тариф" in text
     assert "phone" in text
     assert "30 days" in text
-    assert "Days left: 30" in text
+    assert "Дней осталось: 30" in text
 
 
 def test_render_my_devices_lists_devices_with_tariff_and_connection_state():
@@ -314,12 +314,12 @@ def test_render_my_devices_lists_devices_with_tariff_and_connection_state():
         now="2026-05-27T12:00:00Z",
     )
 
-    assert "My devices" in text
+    assert "Мои устройства" in text
     assert "#7 phone" in text
     assert "AmneziaWG 2.0" in text
-    assert "Tariff: 30 days" in text
-    assert "Days left: 30" in text
-    assert "Connected: yes" in text
+    assert "Тариф: 30 days" in text
+    assert "Дней осталось: 30" in text
+    assert "Подключался: да" in text
 
 
 def test_user_device_keyboard_offers_resend_and_revoke_actions():
