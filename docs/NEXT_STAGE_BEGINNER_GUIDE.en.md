@@ -306,6 +306,10 @@ Manual admin commands already available in the bot foundation:
 /admin_create_order <telegram_id> <amneziawg_v1_5|amneziawg_v2> [plan_id]
 ```
 
+The admin menu also has a `Users` section. It shows service users, whether the
+user has admin rights, and active/total device counts. Manual commands remain
+available as a fallback until the full button-based admin flow is added.
+
 The bot can create a manual user and order before the person uses `/start`.
 Telegram delivery may still require the person to open the bot first; if delivery
 fails, the administrator keeps the generated config package for manual transfer.

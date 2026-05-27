@@ -8,6 +8,7 @@ from app.bot.ux import (
     ADMIN_RESEND_PREFIX,
     ADMIN_TEMPLATE_RESET_CALLBACK,
     ADMIN_TEMPLATES_CALLBACK,
+    ADMIN_USERS_CALLBACK,
     MY_DEVICES_CALLBACK,
     MY_TARIFF_CALLBACK,
     MY_TRAFFIC_CALLBACK,
@@ -30,6 +31,7 @@ from app.bot.ux import (
     parse_config_version_callback,
     render_admin_template,
     render_admin_pending_orders,
+    render_admin_users,
     render_config_version_prompt,
     render_my_devices,
     render_my_tariff,
@@ -213,6 +215,20 @@ async def handle_admin_pending(callback, *, workflow) -> None:
             f"Order #{order['id']}",
             reply_markup=build_admin_order_keyboard(order_id=int(order["id"])),
         )
+    await callback.answer()
+
+
+async def handle_admin_users(callback, *, workflow) -> None:
+    admin_telegram_id = int(callback.from_user.id)
+    if not workflow.is_admin(admin_telegram_id):
+        await callback.message.answer("Admin access required.")
+        await callback.answer()
+        return
+
+    text, keyboard = render_admin_users(
+        workflow.list_users(admin_telegram_id=admin_telegram_id)
+    )
+    await callback.message.answer(text, reply_markup=keyboard)
     await callback.answer()
 
 
@@ -417,6 +433,10 @@ def is_admin_approve_callback(data: str) -> bool:
 
 def is_admin_template_callback(data: str) -> bool:
     return data == ADMIN_TEMPLATES_CALLBACK
+
+
+def is_admin_users_callback(data: str) -> bool:
+    return data == ADMIN_USERS_CALLBACK
 
 
 def is_admin_template_reset_callback(data: str) -> bool:

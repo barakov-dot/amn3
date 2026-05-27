@@ -12,6 +12,7 @@ from app.bot.handlers import (
     handle_admin_resend_config,
     handle_admin_reset_template,
     handle_admin_template,
+    handle_admin_users,
     handle_config_request,
     handle_my_devices,
     handle_my_tariff,
@@ -31,6 +32,7 @@ from app.bot.ux import (
     ADMIN_RESEND_PREFIX,
     ADMIN_TEMPLATE_RESET_CALLBACK,
     ADMIN_TEMPLATES_CALLBACK,
+    ADMIN_USERS_CALLBACK,
     MY_DEVICES_CALLBACK,
     MY_TARIFF_CALLBACK,
     MY_TRAFFIC_CALLBACK,
@@ -117,6 +119,10 @@ def create_dispatcher(*, workflow=None) -> Dispatcher:
     @router.callback_query(F.data == ADMIN_TEMPLATES_CALLBACK)
     async def admin_template(callback: CallbackQuery) -> None:
         await handle_admin_template(callback, workflow=workflow)
+
+    @router.callback_query(F.data == ADMIN_USERS_CALLBACK)
+    async def admin_users(callback: CallbackQuery) -> None:
+        await handle_admin_users(callback, workflow=workflow)
 
     @router.callback_query(F.data == ADMIN_TEMPLATE_RESET_CALLBACK)
     async def admin_template_reset(callback: CallbackQuery) -> None:

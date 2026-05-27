@@ -11,6 +11,7 @@ from app.bot.handlers import (
     handle_admin_create_order,
     handle_admin_grant,
     handle_config_request,
+    handle_admin_users,
     handle_my_devices,
     handle_my_tariff,
     handle_my_traffic,
@@ -277,6 +278,37 @@ def test_handle_admin_pending_renders_approve_buttons_for_each_order():
         ["Approve: AmneziaWG 1.5"],
         ["Approve: AmneziaWG 2.0"],
     ]
+    assert callback.answered is True
+
+
+def test_handle_admin_users_renders_service_users_for_admin():
+    callback = FakeCallback(
+        data="admin:users",
+        user_id=9001,
+        username="admin",
+        first_name="Admin",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_users(callback, workflow=workflow))
+
+    assert "Admin users" in callback.message.answers[0]["text"]
+    assert "@alice" in callback.message.answers[0]["text"]
+    assert callback.answered is True
+
+
+def test_handle_admin_users_rejects_non_admin():
+    callback = FakeCallback(
+        data="admin:users",
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_users(callback, workflow=workflow))
+
+    assert callback.message.answers[0]["text"] == "Admin access required."
     assert callback.answered is True
 
 
@@ -588,6 +620,23 @@ class FakeWorkflow:
                 "first_name": "Alice",
                 "last_name": None,
                 "status": "manual_review",
+                "created_at": "2026-05-27 12:00:00",
+            }
+        ]
+
+    def list_users(self, *, admin_telegram_id):
+        if not self.is_admin(admin_telegram_id):
+            return []
+        return [
+            {
+                "telegram_id": 1001,
+                "username": "alice",
+                "first_name": "Alice",
+                "last_name": None,
+                "status": "active",
+                "is_admin": 0,
+                "active_device_count": 1,
+                "total_device_count": 1,
                 "created_at": "2026-05-27 12:00:00",
             }
         ]

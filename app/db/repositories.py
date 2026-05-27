@@ -470,6 +470,25 @@ class Repository:
             (target_user_id,),
         ).fetchall()
 
+    def list_users_for_admin(self, *, limit: int = 50) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                users.*,
+                COUNT(devices.id) AS total_device_count,
+                COALESCE(
+                    SUM(CASE WHEN devices.status = 'active' THEN 1 ELSE 0 END),
+                    0
+                ) AS active_device_count
+            FROM users
+            LEFT JOIN devices ON devices.user_id = users.id
+            GROUP BY users.id
+            ORDER BY users.id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+
     def list_pending_orders(self, *, limit: int = 20) -> list[sqlite3.Row]:
         return self._conn.execute(
             """

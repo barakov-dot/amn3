@@ -22,6 +22,7 @@ USER_RESET_DEVICES_CONFIRM_CALLBACK = "user:reset_devices_confirm"
 ADMIN_PENDING_CALLBACK = "admin:pending"
 ADMIN_TRAFFIC_CALLBACK = "admin:traffic"
 ADMIN_TEMPLATES_CALLBACK = "admin:templates"
+ADMIN_USERS_CALLBACK = "admin:users"
 ADMIN_TEMPLATE_RESET_CALLBACK = "admin:template:reset"
 ADMIN_APPROVE_PREFIX = "admin:approve"
 ADMIN_RESEND_PREFIX = "admin:resend"
@@ -210,6 +211,12 @@ def build_admin_navigation_keyboard() -> InlineKeyboardMarkup:
                     callback_data=ADMIN_TEMPLATES_CALLBACK,
                 )
             ],
+            [
+                InlineKeyboardButton(
+                    text="Users",
+                    callback_data=ADMIN_USERS_CALLBACK,
+                )
+            ],
         ]
     )
 
@@ -378,6 +385,28 @@ def render_admin_traffic(
         lines.extend(_render_device_traffic_lines(view))
     if not has_devices:
         lines.append("No active devices yet.")
+    return "\n".join(lines), build_admin_navigation_keyboard()
+
+
+def render_admin_users(
+    users: Iterable[Mapping[str, object]],
+) -> tuple[str, InlineKeyboardMarkup]:
+    lines = ["Admin users"]
+    has_users = False
+    for user in users:
+        has_users = True
+        lines.extend(
+            [
+                "",
+                _format_user_identity(user),
+                f"status: {user['status']}",
+                f"admin: {'yes' if int(user['is_admin']) == 1 else 'no'}",
+                f"active devices: {int(user['active_device_count'])}",
+                f"total devices: {int(user['total_device_count'])}",
+            ]
+        )
+    if not has_users:
+        lines.append("No users yet.")
     return "\n".join(lines), build_admin_navigation_keyboard()
 
 

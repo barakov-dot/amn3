@@ -453,6 +453,37 @@ def test_admin_can_create_manual_access_request_for_user(tmp_path):
     assert repo.list_pending_orders()[0]["telegram_id"] == 1001
 
 
+def test_admin_can_list_service_users(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    repo.upsert_user(
+        telegram_id=2002,
+        username="bob",
+        first_name="Bob",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    _create_encrypted_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="phone",
+    )
+    workflow = BotWorkflow(repo=repo, admin_telegram_ids={9001})
+
+    users = workflow.list_users(admin_telegram_id=9001)
+    denied = workflow.list_users(admin_telegram_id=2002)
+
+    assert [user["telegram_id"] for user in users] == [2002, 1001]
+    assert users[1]["active_device_count"] == 1
+    assert denied == []
+
+
 def _repo(tmp_path):
     conn = connect(tmp_path / "bot-workflows.sqlite3")
     initialize_schema(conn)

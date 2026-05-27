@@ -245,6 +245,11 @@ class BotWorkflow:
             return []
         return self._repo.list_pending_orders()
 
+    def list_users(self, *, admin_telegram_id: int):
+        if not self.is_admin(admin_telegram_id):
+            return []
+        return self._repo.list_users_for_admin()
+
     def approve_order(
         self,
         *,

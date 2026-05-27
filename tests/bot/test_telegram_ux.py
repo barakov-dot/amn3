@@ -4,6 +4,7 @@ from app.bot.ux import (
     ADMIN_TEMPLATES_CALLBACK,
     ADMIN_TEMPLATE_RESET_CALLBACK,
     ADMIN_TRAFFIC_CALLBACK,
+    ADMIN_USERS_CALLBACK,
     MY_DEVICES_CALLBACK,
     MY_TARIFF_CALLBACK,
     MY_TRAFFIC_CALLBACK,
@@ -28,6 +29,7 @@ from app.bot.ux import (
     render_admin_pending_orders,
     render_admin_template,
     render_admin_traffic,
+    render_admin_users,
     render_my_devices,
     render_my_tariff,
     render_user_traffic,
@@ -187,6 +189,7 @@ def test_admin_traffic_keyboard_links_pending_orders_and_traffic():
         [ADMIN_PENDING_CALLBACK],
         [ADMIN_TRAFFIC_CALLBACK],
         [ADMIN_TEMPLATES_CALLBACK],
+        [ADMIN_USERS_CALLBACK],
     ]
 
 
@@ -195,11 +198,47 @@ def test_admin_navigation_includes_templates_and_traffic_actions():
 
     keyboard = build_admin_navigation_keyboard()
 
-    assert _button_texts(keyboard) == [["Pending orders"], ["Traffic"], ["Templates"]]
+    assert _button_texts(keyboard) == [
+        ["Pending orders"],
+        ["Traffic"],
+        ["Templates"],
+        ["Users"],
+    ]
     assert _callback_data(keyboard) == [
         [ADMIN_PENDING_CALLBACK],
         [ADMIN_TRAFFIC_CALLBACK],
         [ADMIN_TEMPLATES_CALLBACK],
+        [ADMIN_USERS_CALLBACK],
+    ]
+
+
+def test_render_admin_users_lists_users_and_device_counts():
+    text, keyboard = render_admin_users(
+        [
+            {
+                "telegram_id": 1001,
+                "username": "alice",
+                "first_name": "Alice",
+                "last_name": None,
+                "status": "active",
+                "is_admin": 1,
+                "active_device_count": 1,
+                "total_device_count": 2,
+                "created_at": "2026-05-27 12:00:00",
+            }
+        ]
+    )
+
+    assert "Admin users" in text
+    assert "@alice" in text
+    assert "admin: yes" in text
+    assert "active devices: 1" in text
+    assert "total devices: 2" in text
+    assert _callback_data(keyboard) == [
+        [ADMIN_PENDING_CALLBACK],
+        [ADMIN_TRAFFIC_CALLBACK],
+        [ADMIN_TEMPLATES_CALLBACK],
+        [ADMIN_USERS_CALLBACK],
     ]
 
 

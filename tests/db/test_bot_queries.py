@@ -225,6 +225,43 @@ def test_set_user_admin_updates_user_role_and_records_audit_action(tmp_path):
     assert actions[0]["target_user_id"] == user_id
 
 
+def test_list_users_for_admin_returns_latest_users_with_device_counts(tmp_path):
+    repo = _repo(tmp_path)
+    first_user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    second_user_id = repo.upsert_user(
+        telegram_id=2002,
+        username="bob",
+        first_name="Bob",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    _create_device(repo, user_id=first_user_id, server_id=server_id, name="phone")
+    revoked_device_id = _create_device(
+        repo,
+        user_id=first_user_id,
+        server_id=server_id,
+        name="old-phone",
+    )
+    repo.revoke_device(
+        revoked_device_id,
+        reason="test",
+        revoked_at="2026-05-27T12:00:00Z",
+    )
+    _create_device(repo, user_id=second_user_id, server_id=server_id, name="laptop")
+
+    users = repo.list_users_for_admin()
+
+    assert [user["telegram_id"] for user in users] == [2002, 1001]
+    assert users[0]["active_device_count"] == 1
+    assert users[1]["active_device_count"] == 1
+    assert users[1]["total_device_count"] == 2
+
+
 def _repo(tmp_path):
     conn = connect(tmp_path / "bot-queries.sqlite3")
     initialize_schema(conn)
