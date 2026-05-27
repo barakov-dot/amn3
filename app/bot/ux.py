@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
+from app.bot.texts import DEFAULT_LOCALE, text
 from app.services.traffic import DeviceTrafficView
 from app.vpn.config_versions import SUPPORTED_CONFIG_VERSIONS
 
@@ -33,29 +34,29 @@ VERSION_LABELS = {
 }
 
 
-def build_main_menu(*, is_admin: bool) -> InlineKeyboardMarkup:
+def build_main_menu(*, is_admin: bool, locale: str = DEFAULT_LOCALE) -> InlineKeyboardMarkup:
     rows = [
         [
             InlineKeyboardButton(
-                text="Request config",
+                text=text("button.request_config", locale=locale),
                 callback_data=REQUEST_CONFIG_PREFIX,
             )
         ],
         [
             InlineKeyboardButton(
-                text="My tariff",
+                text=text("button.my_tariff", locale=locale),
                 callback_data=MY_TARIFF_CALLBACK,
             )
         ],
         [
             InlineKeyboardButton(
-                text="My traffic",
+                text=text("button.my_traffic", locale=locale),
                 callback_data=MY_TRAFFIC_CALLBACK,
             )
         ],
         [
             InlineKeyboardButton(
-                text="My devices",
+                text=text("button.my_devices", locale=locale),
                 callback_data=MY_DEVICES_CALLBACK,
             )
         ],
@@ -64,7 +65,7 @@ def build_main_menu(*, is_admin: bool) -> InlineKeyboardMarkup:
         rows.append(
             [
                 InlineKeyboardButton(
-                    text="Admin",
+                    text=text("button.admin", locale=locale),
                     callback_data=ADMIN_PENDING_CALLBACK,
                 )
             ]
@@ -104,13 +105,17 @@ def build_plan_keyboard(
     )
 
 
-def build_admin_order_keyboard(*, order_id: int) -> InlineKeyboardMarkup:
+def build_admin_order_keyboard(
+    *,
+    order_id: int,
+    locale: str = DEFAULT_LOCALE,
+) -> InlineKeyboardMarkup:
     prefix = f"{ADMIN_APPROVE_PREFIX}:{order_id}"
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text=f"Approve: {VERSION_LABELS[version]}",
+                    text=f"{text('button.approve', locale=locale)}: {VERSION_LABELS[version]}",
                     callback_data=f"{prefix}:{version}",
                 )
             ]
@@ -119,12 +124,16 @@ def build_admin_order_keyboard(*, order_id: int) -> InlineKeyboardMarkup:
     )
 
 
-def build_admin_resend_keyboard(*, device_id: int) -> InlineKeyboardMarkup:
+def build_admin_resend_keyboard(
+    *,
+    device_id: int,
+    locale: str = DEFAULT_LOCALE,
+) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Resend config",
+                    text=text("button.resend_config", locale=locale),
                     callback_data=f"{ADMIN_RESEND_PREFIX}:{device_id}",
                 )
             ]
@@ -132,18 +141,22 @@ def build_admin_resend_keyboard(*, device_id: int) -> InlineKeyboardMarkup:
     )
 
 
-def build_user_device_keyboard(*, device_id: int) -> InlineKeyboardMarkup:
+def build_user_device_keyboard(
+    *,
+    device_id: int,
+    locale: str = DEFAULT_LOCALE,
+) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Resend config",
+                    text=text("button.resend_config", locale=locale),
                     callback_data=f"{USER_RESEND_PREFIX}:{device_id}",
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Delete device",
+                    text=text("button.delete_device", locale=locale),
                     callback_data=f"{USER_REVOKE_PREFIX}:{device_id}",
                 )
             ],
@@ -151,12 +164,15 @@ def build_user_device_keyboard(*, device_id: int) -> InlineKeyboardMarkup:
     )
 
 
-def build_user_devices_reset_keyboard() -> InlineKeyboardMarkup:
+def build_user_devices_reset_keyboard(
+    *,
+    locale: str = DEFAULT_LOCALE,
+) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Reset all devices",
+                    text=text("button.reset_all_devices", locale=locale),
                     callback_data=USER_RESET_DEVICES_CALLBACK,
                 )
             ]
@@ -164,12 +180,16 @@ def build_user_devices_reset_keyboard() -> InlineKeyboardMarkup:
     )
 
 
-def build_user_revoke_confirm_keyboard(*, device_id: int) -> InlineKeyboardMarkup:
+def build_user_revoke_confirm_keyboard(
+    *,
+    device_id: int,
+    locale: str = DEFAULT_LOCALE,
+) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Confirm delete",
+                    text=text("button.confirm_delete", locale=locale),
                     callback_data=f"{USER_REVOKE_CONFIRM_PREFIX}:{device_id}",
                 )
             ]
@@ -177,12 +197,15 @@ def build_user_revoke_confirm_keyboard(*, device_id: int) -> InlineKeyboardMarku
     )
 
 
-def build_user_reset_confirm_keyboard() -> InlineKeyboardMarkup:
+def build_user_reset_confirm_keyboard(
+    *,
+    locale: str = DEFAULT_LOCALE,
+) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Confirm reset",
+                    text=text("button.confirm_reset", locale=locale),
                     callback_data=USER_RESET_DEVICES_CONFIRM_CALLBACK,
                 )
             ]
@@ -190,30 +213,33 @@ def build_user_reset_confirm_keyboard() -> InlineKeyboardMarkup:
     )
 
 
-def build_admin_navigation_keyboard() -> InlineKeyboardMarkup:
+def build_admin_navigation_keyboard(
+    *,
+    locale: str = DEFAULT_LOCALE,
+) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Pending orders",
+                    text=text("button.pending_orders", locale=locale),
                     callback_data=ADMIN_PENDING_CALLBACK,
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Traffic",
+                    text=text("button.traffic", locale=locale),
                     callback_data=ADMIN_TRAFFIC_CALLBACK,
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Templates",
+                    text=text("button.templates", locale=locale),
                     callback_data=ADMIN_TEMPLATES_CALLBACK,
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Users",
+                    text=text("button.users", locale=locale),
                     callback_data=ADMIN_USERS_CALLBACK,
                 )
             ],

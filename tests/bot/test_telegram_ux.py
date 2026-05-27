@@ -42,10 +42,10 @@ def test_main_menu_shows_user_actions_and_admin_entry_for_admins():
     admin_menu = build_main_menu(is_admin=True)
 
     assert _button_texts(user_menu) == [
-        ["Request config"],
-        ["My tariff"],
-        ["My traffic"],
-        ["My devices"],
+        ["Получить конфиг"],
+        ["Мой тариф"],
+        ["Мой трафик"],
+        ["Мои устройства"],
     ]
     assert _callback_data(user_menu) == [
         [REQUEST_CONFIG_PREFIX],
@@ -53,8 +53,20 @@ def test_main_menu_shows_user_actions_and_admin_entry_for_admins():
         [MY_TRAFFIC_CALLBACK],
         [MY_DEVICES_CALLBACK],
     ]
-    assert _button_texts(admin_menu)[-1] == ["Admin"]
+    assert _button_texts(admin_menu)[-1] == ["Админ"]
     assert _callback_data(admin_menu)[-1] == [ADMIN_PENDING_CALLBACK]
+
+
+def test_main_menu_can_render_english_button_labels():
+    menu = build_main_menu(is_admin=True, locale="en")
+
+    assert _button_texts(menu) == [
+        ["Request config"],
+        ["My tariff"],
+        ["My traffic"],
+        ["My devices"],
+        ["Admin"],
+    ]
 
 
 def test_config_version_keyboard_offers_amnezia_1_5_and_2_0():
@@ -154,8 +166,8 @@ def test_admin_pending_orders_render_with_per_order_version_keyboard():
     assert "#11" in text
     assert "@alice" in text
     assert _button_texts(keyboard) == [
-        [f"Approve: {VERSION_LABELS['amneziawg_v1_5']}"],
-        [f"Approve: {VERSION_LABELS['amneziawg_v2']}"],
+        [f"Одобрить: {VERSION_LABELS['amneziawg_v1_5']}"],
+        [f"Одобрить: {VERSION_LABELS['amneziawg_v2']}"],
     ]
     assert _callback_data(keyboard) == [
         ["admin:approve:11:amneziawg_v1_5"],
@@ -198,12 +210,7 @@ def test_admin_navigation_includes_templates_and_traffic_actions():
 
     keyboard = build_admin_navigation_keyboard()
 
-    assert _button_texts(keyboard) == [
-        ["Pending orders"],
-        ["Traffic"],
-        ["Templates"],
-        ["Users"],
-    ]
+    assert _button_texts(keyboard) == [["Заявки"], ["Трафик"], ["Шаблоны"], ["Пользователи"]]
     assert _callback_data(keyboard) == [
         [ADMIN_PENDING_CALLBACK],
         [ADMIN_TRAFFIC_CALLBACK],
@@ -253,7 +260,7 @@ def test_render_admin_template_shows_reset_action():
 def test_build_admin_resend_keyboard_targets_device():
     keyboard = build_admin_resend_keyboard(device_id=7)
 
-    assert _button_texts(keyboard) == [["Resend config"]]
+    assert _button_texts(keyboard) == [["Отправить конфиг"]]
     assert _callback_data(keyboard) == [[f"{ADMIN_RESEND_PREFIX}:7"]]
 
 
@@ -318,7 +325,7 @@ def test_render_my_devices_lists_devices_with_tariff_and_connection_state():
 def test_user_device_keyboard_offers_resend_and_revoke_actions():
     keyboard = build_user_device_keyboard(device_id=7)
 
-    assert _button_texts(keyboard) == [["Resend config"], ["Delete device"]]
+    assert _button_texts(keyboard) == [["Отправить конфиг"], ["Удалить устройство"]]
     assert _callback_data(keyboard) == [
         [f"{USER_RESEND_PREFIX}:7"],
         [f"{USER_REVOKE_PREFIX}:7"],
@@ -328,21 +335,21 @@ def test_user_device_keyboard_offers_resend_and_revoke_actions():
 def test_user_revoke_confirm_keyboard_targets_confirmed_device_delete():
     keyboard = build_user_revoke_confirm_keyboard(device_id=7)
 
-    assert _button_texts(keyboard) == [["Confirm delete"]]
+    assert _button_texts(keyboard) == [["Подтвердить удаление"]]
     assert _callback_data(keyboard) == [[f"{USER_REVOKE_CONFIRM_PREFIX}:7"]]
 
 
 def test_user_devices_reset_keyboard_targets_all_user_devices():
     keyboard = build_user_devices_reset_keyboard()
 
-    assert _button_texts(keyboard) == [["Reset all devices"]]
+    assert _button_texts(keyboard) == [["Сбросить все устройства"]]
     assert _callback_data(keyboard) == [[USER_RESET_DEVICES_CALLBACK]]
 
 
 def test_user_reset_confirm_keyboard_targets_confirmed_reset():
     keyboard = build_user_reset_confirm_keyboard()
 
-    assert _button_texts(keyboard) == [["Confirm reset"]]
+    assert _button_texts(keyboard) == [["Подтвердить сброс"]]
     assert _callback_data(keyboard) == [[USER_RESET_DEVICES_CONFIRM_CALLBACK]]
 
 

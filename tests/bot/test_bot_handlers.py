@@ -45,7 +45,7 @@ def test_handle_start_renders_main_menu_for_admin():
     asyncio.run(handle_start(message, workflow=workflow))
 
     assert "Hello, Admin." in message.answers[0]["text"]
-    assert _button_texts(message.answers[0]["reply_markup"])[-1] == ["Admin"]
+    assert _button_texts(message.answers[0]["reply_markup"])[-1] == ["Админ"]
 
 
 def test_handle_request_config_prompt_shows_version_choices():
@@ -148,11 +148,11 @@ def test_handle_my_devices_renders_device_actions_and_reset():
     assert "My devices" in callback.message.answers[0]["text"]
     assert callback.message.answers[1]["text"] == "Device #7"
     assert _button_texts(callback.message.answers[1]["reply_markup"]) == [
-        ["Resend config"],
-        ["Delete device"],
+        ["Отправить конфиг"],
+        ["Удалить устройство"],
     ]
     assert _button_texts(callback.message.answers[2]["reply_markup"]) == [
-        ["Reset all devices"]
+        ["Сбросить все устройства"]
     ]
     assert callback.answered is True
 
@@ -190,7 +190,7 @@ def test_handle_user_revoke_device_revokes_owned_device():
     assert workflow.revoked_devices == []
     assert "Confirm device deletion" in callback.message.answers[0]["text"]
     assert _button_texts(callback.message.answers[0]["reply_markup"]) == [
-        ["Confirm delete"]
+        ["Подтвердить удаление"]
     ]
     assert callback.answered is True
 
@@ -225,7 +225,7 @@ def test_handle_user_reset_devices_asks_for_confirmation():
     assert workflow.reset_requests == []
     assert "Confirm reset" in callback.message.answers[0]["text"]
     assert _button_texts(callback.message.answers[0]["reply_markup"]) == [
-        ["Confirm reset"]
+        ["Подтвердить сброс"]
     ]
     assert callback.answered is True
 
@@ -275,8 +275,8 @@ def test_handle_admin_pending_renders_approve_buttons_for_each_order():
     assert "Pending orders" in callback.message.answers[0]["text"]
     assert callback.message.answers[1]["text"] == "Order #11"
     assert _button_texts(callback.message.answers[1]["reply_markup"]) == [
-        ["Approve: AmneziaWG 1.5"],
-        ["Approve: AmneziaWG 2.0"],
+        ["Одобрить: AmneziaWG 1.5"],
+        ["Одобрить: AmneziaWG 2.0"],
     ]
     assert callback.answered is True
 
