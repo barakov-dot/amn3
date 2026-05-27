@@ -10,7 +10,12 @@ from app.vpn.config_versions import SUPPORTED_CONFIG_VERSIONS
 
 
 REQUEST_CONFIG_PREFIX = "user:request_config"
+MY_TARIFF_CALLBACK = "user:tariff"
 MY_TRAFFIC_CALLBACK = "user:traffic"
+MY_DEVICES_CALLBACK = "user:devices"
+USER_RESEND_PREFIX = "user:resend"
+USER_REVOKE_PREFIX = "user:revoke"
+USER_RESET_DEVICES_CALLBACK = "user:reset_devices"
 ADMIN_PENDING_CALLBACK = "admin:pending"
 ADMIN_TRAFFIC_CALLBACK = "admin:traffic"
 ADMIN_TEMPLATES_CALLBACK = "admin:templates"
@@ -34,8 +39,20 @@ def build_main_menu(*, is_admin: bool) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
+                text="My tariff",
+                callback_data=MY_TARIFF_CALLBACK,
+            )
+        ],
+        [
+            InlineKeyboardButton(
                 text="My traffic",
                 callback_data=MY_TRAFFIC_CALLBACK,
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="My devices",
+                callback_data=MY_DEVICES_CALLBACK,
             )
         ],
     ]
@@ -87,6 +104,38 @@ def build_admin_resend_keyboard(*, device_id: int) -> InlineKeyboardMarkup:
                 InlineKeyboardButton(
                     text="Resend config",
                     callback_data=f"{ADMIN_RESEND_PREFIX}:{device_id}",
+                )
+            ]
+        ]
+    )
+
+
+def build_user_device_keyboard(*, device_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Resend config",
+                    callback_data=f"{USER_RESEND_PREFIX}:{device_id}",
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Delete device",
+                    callback_data=f"{USER_REVOKE_PREFIX}:{device_id}",
+                )
+            ],
+        ]
+    )
+
+
+def build_user_devices_reset_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Reset all devices",
+                    callback_data=USER_RESET_DEVICES_CALLBACK,
                 )
             ]
         ]
@@ -162,6 +211,29 @@ def render_my_tariff(devices: Iterable[Mapping[str, object]], *, now: str) -> st
         )
     if not has_devices:
         lines.append("No active tariff yet.")
+    return "\n".join(lines)
+
+
+def render_my_devices(devices: Iterable[Mapping[str, object]], *, now: str) -> str:
+    lines = ["My devices"]
+    has_devices = False
+    for device in devices:
+        has_devices = True
+        expires_at = str(device["expires_at"]) if device["expires_at"] is not None else None
+        connected = bool(device.get("first_connected_at") or device.get("last_connected_at"))
+        lines.extend(
+            [
+                "",
+                f"#{device['id']} {device['name']}",
+                f"Config: {_version_label(str(device['config_version']))}",
+                f"Status: {device['status']}",
+                f"Tariff: {int(device['duration_days'])} days",
+                f"Days left: {_days_left(expires_at, now) if expires_at else 'unknown'}",
+                f"Connected: {'yes' if connected else 'no'}",
+            ]
+        )
+    if not has_devices:
+        lines.append("No active devices yet.")
     return "\n".join(lines)
 
 

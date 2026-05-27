@@ -68,6 +68,34 @@ class Repository:
     def get_user(self, user_id: int) -> sqlite3.Row:
         return self._fetch_one("SELECT * FROM users WHERE id = ?", (user_id,))
 
+    def set_user_admin(
+        self,
+        *,
+        telegram_id: int,
+        is_admin: bool,
+        granted_by_admin_telegram_id: int,
+    ) -> bool:
+        user = self.get_user_by_telegram_id(telegram_id)
+        if user is None:
+            return False
+        self._conn.execute(
+            """
+            UPDATE users
+            SET is_admin = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE telegram_id = ?
+            """,
+            (int(is_admin), telegram_id),
+        )
+        self.record_admin_action(
+            admin_telegram_id=granted_by_admin_telegram_id,
+            action="grant_admin" if is_admin else "revoke_admin",
+            target_user_id=int(user["id"]),
+            metadata={"target_telegram_id": telegram_id},
+        )
+        self._commit()
+        return True
+
     def ensure_default_server(self, *, name: str, network_cidr: str) -> int:
         self._conn.execute(
             """
@@ -264,6 +292,17 @@ class Repository:
     def get_device(self, device_id: int) -> sqlite3.Row:
         return self._fetch_one("SELECT * FROM devices WHERE id = ?", (device_id,))
 
+    def get_user_device(self, *, user_id: int, device_id: int) -> sqlite3.Row | None:
+        return self._conn.execute(
+            """
+            SELECT *
+            FROM devices
+            WHERE id = ?
+              AND user_id = ?
+            """,
+            (device_id, user_id),
+        ).fetchone()
+
     def list_user_devices(
         self,
         user_id: int,
@@ -285,6 +324,48 @@ class Repository:
             """,
             (user_id, *statuses, limit),
         ).fetchall()
+
+    def revoke_device(
+        self,
+        device_id: int,
+        *,
+        reason: str,
+        revoked_at: str,
+    ) -> bool:
+        cursor = self._conn.execute(
+            """
+            UPDATE devices
+            SET status = 'revoked',
+                revoked_at = ?,
+                revoke_reason = ?
+            WHERE id = ?
+              AND status IN ('pending', 'active')
+            """,
+            (revoked_at, reason, device_id),
+        )
+        self._commit()
+        return cursor.rowcount > 0
+
+    def revoke_user_devices(
+        self,
+        user_id: int,
+        *,
+        reason: str,
+        revoked_at: str,
+    ) -> int:
+        cursor = self._conn.execute(
+            """
+            UPDATE devices
+            SET status = 'revoked',
+                revoked_at = ?,
+                revoke_reason = ?
+            WHERE user_id = ?
+              AND status IN ('pending', 'active')
+            """,
+            (revoked_at, reason, user_id),
+        )
+        self._commit()
+        return int(cursor.rowcount)
 
     def get_device_by_server_peer_public_key(
         self,
@@ -377,6 +458,17 @@ class Repository:
         )
         self._commit()
         return int(cursor.lastrowid)
+
+    def list_admin_actions_for_target_user(self, target_user_id: int):
+        return self._conn.execute(
+            """
+            SELECT *
+            FROM admin_actions
+            WHERE target_user_id = ?
+            ORDER BY id DESC
+            """,
+            (target_user_id,),
+        ).fetchall()
 
     def list_pending_orders(self, *, limit: int = 20) -> list[sqlite3.Row]:
         return self._conn.execute(

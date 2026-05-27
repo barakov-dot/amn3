@@ -114,6 +114,117 @@ def test_mark_device_connected_records_first_and_last_seen(tmp_path):
     assert device["last_connected_at"] == "2026-05-27T12:30:00Z"
 
 
+def test_get_user_device_requires_matching_owner(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    other_user_id = repo.upsert_user(
+        telegram_id=2002,
+        username="bob",
+        first_name="Bob",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    device_id = _create_device(repo, user_id=user_id, server_id=server_id, name="phone")
+
+    assert repo.get_user_device(user_id=user_id, device_id=device_id)["id"] == device_id
+    assert repo.get_user_device(user_id=other_user_id, device_id=device_id) is None
+
+
+def test_revoke_device_marks_device_revoked_and_frees_allocated_ip(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    device_id = _create_device(repo, user_id=user_id, server_id=server_id, name="phone")
+
+    changed = repo.revoke_device(
+        device_id,
+        reason="user_requested",
+        revoked_at="2026-05-27T12:00:00Z",
+    )
+
+    device = repo.get_device(device_id)
+    assert changed is True
+    assert device["status"] == "revoked"
+    assert device["revoked_at"] == "2026-05-27T12:00:00Z"
+    assert device["revoke_reason"] == "user_requested"
+    assert device["vpn_ip"] not in repo.list_allocated_ips(server_id)
+
+
+def test_revoke_user_devices_marks_only_owned_active_devices(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    other_user_id = repo.upsert_user(
+        telegram_id=2002,
+        username="bob",
+        first_name="Bob",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    first_id = _create_device(repo, user_id=user_id, server_id=server_id, name="phone")
+    second_id = _create_device(repo, user_id=user_id, server_id=server_id, name="laptop")
+    other_id = _create_device(
+        repo,
+        user_id=other_user_id,
+        server_id=server_id,
+        name="tablet",
+    )
+
+    changed = repo.revoke_user_devices(
+        user_id,
+        reason="user_reset",
+        revoked_at="2026-05-27T12:00:00Z",
+    )
+
+    assert changed == 2
+    assert repo.get_device(first_id)["status"] == "revoked"
+    assert repo.get_device(second_id)["status"] == "revoked"
+    assert repo.get_device(other_id)["status"] == "active"
+
+
+def test_set_user_admin_updates_user_role_and_records_audit_action(tmp_path):
+    repo = _repo(tmp_path)
+    repo.upsert_user(
+        telegram_id=9001,
+        username="admin",
+        first_name="Admin",
+        last_name=None,
+    )
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+
+    changed = repo.set_user_admin(
+        telegram_id=1001,
+        is_admin=True,
+        granted_by_admin_telegram_id=9001,
+    )
+
+    user = repo.get_user(user_id)
+    assert changed is True
+    assert user["is_admin"] == 1
+    actions = repo.list_admin_actions_for_target_user(user_id)
+    assert actions[0]["action"] == "grant_admin"
+    assert actions[0]["target_user_id"] == user_id
+
+
 def _repo(tmp_path):
     conn = connect(tmp_path / "bot-queries.sqlite3")
     initialize_schema(conn)

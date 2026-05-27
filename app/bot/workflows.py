@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 from app.bot.delivery import (
     CONFIG_READY_TEMPLATE_KEY,
@@ -59,7 +60,10 @@ class BotWorkflow:
         self._secret_box = secret_box
 
     def is_admin(self, telegram_id: int) -> bool:
-        return telegram_id in self._admin_telegram_ids
+        if telegram_id in self._admin_telegram_ids:
+            return True
+        user = self._repo.get_user_by_telegram_id(telegram_id)
+        return bool(user is not None and int(user["is_admin"]) == 1)
 
     def request_access(
         self,
@@ -94,6 +98,104 @@ class BotWorkflow:
             ),
         )
 
+    def create_manual_user(
+        self,
+        *,
+        admin_telegram_id: int,
+        target_telegram_id: int,
+        username: str | None,
+        first_name: str | None,
+        last_name: str | None,
+    ) -> int | None:
+        if not self.is_admin(admin_telegram_id):
+            return None
+        user_id = self._repo.upsert_user(
+            telegram_id=target_telegram_id,
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+        )
+        self._repo.record_admin_action(
+            admin_telegram_id=admin_telegram_id,
+            action="create_manual_user",
+            target_user_id=user_id,
+            metadata={"target_telegram_id": target_telegram_id},
+        )
+        return user_id
+
+    def create_manual_access_request(
+        self,
+        *,
+        admin_telegram_id: int,
+        target_telegram_id: int,
+        username: str | None,
+        first_name: str | None,
+        last_name: str | None,
+        config_version: str,
+        plan_id: str | None,
+    ) -> AccessRequestResult | None:
+        if not self.is_admin(admin_telegram_id):
+            return None
+        user_id = self.create_manual_user(
+            admin_telegram_id=admin_telegram_id,
+            target_telegram_id=target_telegram_id,
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+        )
+        if user_id is None:
+            return None
+        config_version = validate_config_version(config_version)
+        plan = self._repo.get_plan(plan_id) if plan_id is not None else None
+        order_id = self._repo.create_order(
+            user_id=user_id,
+            plan_id=plan_id,
+            payment_mode="manual_admin",
+            requested_config_version=config_version,
+        )
+        self._repo.record_admin_action(
+            admin_telegram_id=admin_telegram_id,
+            action="create_manual_access_request",
+            target_user_id=user_id,
+            metadata={
+                "order_id": order_id,
+                "target_telegram_id": target_telegram_id,
+                "config_version": config_version,
+                "plan_id": plan_id,
+            },
+        )
+        return AccessRequestResult(
+            order_id=order_id,
+            text=render_access_request_created(
+                order_id=order_id,
+                config_version=config_version,
+                plan_name=str(plan["name"]) if plan is not None else None,
+            ),
+        )
+
+    def grant_admin(
+        self,
+        *,
+        admin_telegram_id: int,
+        target_telegram_id: int,
+        username: str | None,
+        first_name: str | None,
+        last_name: str | None,
+    ) -> bool:
+        if not self.is_admin(admin_telegram_id):
+            return False
+        self._repo.upsert_user(
+            telegram_id=target_telegram_id,
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+        )
+        return self._repo.set_user_admin(
+            telegram_id=target_telegram_id,
+            is_admin=True,
+            granted_by_admin_telegram_id=admin_telegram_id,
+        )
+
     def build_user_traffic_views(
         self,
         *,
@@ -111,6 +213,12 @@ class BotWorkflow:
             )
             for device in self._repo.list_user_devices(int(user["id"]))
         ]
+
+    def list_user_devices(self, *, telegram_id: int):
+        user = self._repo.get_user_by_telegram_id(telegram_id)
+        if user is None:
+            return []
+        return self._repo.list_user_devices(int(user["id"]))
 
     def build_admin_traffic_views(
         self,
@@ -214,6 +322,66 @@ class BotWorkflow:
             raise RuntimeError("Config resend workflow is not configured")
 
         device = self._repo.get_device(device_id)
+        return self._build_delivery_for_device(device)
+
+    def build_user_resend_delivery(
+        self,
+        *,
+        telegram_id: int,
+        device_id: int,
+    ) -> ResendResult | None:
+        if self._secret_box is None:
+            raise RuntimeError("Config resend workflow is not configured")
+
+        user = self._repo.get_user_by_telegram_id(telegram_id)
+        if user is None:
+            return None
+        device = self._repo.get_user_device(
+            user_id=int(user["id"]),
+            device_id=device_id,
+        )
+        if device is None:
+            return None
+        return self._build_delivery_for_device(device)
+
+    def revoke_user_device(
+        self,
+        *,
+        telegram_id: int,
+        device_id: int,
+        revoked_at: str | None = None,
+    ) -> bool:
+        user = self._repo.get_user_by_telegram_id(telegram_id)
+        if user is None:
+            return False
+        device = self._repo.get_user_device(
+            user_id=int(user["id"]),
+            device_id=device_id,
+        )
+        if device is None:
+            return False
+        return self._repo.revoke_device(
+            device_id,
+            reason="user_requested",
+            revoked_at=revoked_at or _utc_now(),
+        )
+
+    def reset_user_devices(
+        self,
+        *,
+        telegram_id: int,
+        revoked_at: str | None = None,
+    ) -> int:
+        user = self._repo.get_user_by_telegram_id(telegram_id)
+        if user is None:
+            return 0
+        return self._repo.revoke_user_devices(
+            int(user["id"]),
+            reason="user_reset",
+            revoked_at=revoked_at or _utc_now(),
+        )
+
+    def _build_delivery_for_device(self, device) -> ResendResult:
         user = self._repo.get_user(int(device["user_id"]))
         server = self._repo.get_server(int(device["server_id"]))
         private_key = self._secret_box.decrypt_text(device["peer_private_key_encrypted"])
@@ -246,13 +414,13 @@ class BotWorkflow:
             default_text=DEFAULT_CONFIG_READY_TEMPLATE,
         )
         delivery = build_config_delivery(
-            device_id=device_id,
+            device_id=int(device["id"]),
             config_version=config_version,
             config_text=config_text,
             template_text=template_text,
         )
         return ResendResult(
-            device_id=device_id,
+            device_id=int(device["id"]),
             user_telegram_id=int(user["telegram_id"]),
             config_text=config_text,
             delivery=delivery,
@@ -261,3 +429,7 @@ class BotWorkflow:
 
 def _default_device_name(order_id: int) -> str:
     return f"device-{order_id}"
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")

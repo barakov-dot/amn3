@@ -8,8 +8,15 @@ from app.bot.ux import (
     ADMIN_RESEND_PREFIX,
     ADMIN_TEMPLATE_RESET_CALLBACK,
     ADMIN_TEMPLATES_CALLBACK,
+    MY_DEVICES_CALLBACK,
+    MY_TARIFF_CALLBACK,
     MY_TRAFFIC_CALLBACK,
     REQUEST_CONFIG_PREFIX,
+    USER_RESEND_PREFIX,
+    USER_RESET_DEVICES_CALLBACK,
+    USER_REVOKE_PREFIX,
+    build_user_device_keyboard,
+    build_user_devices_reset_keyboard,
     build_config_version_keyboard,
     build_admin_order_keyboard,
     build_main_menu,
@@ -18,6 +25,8 @@ from app.bot.ux import (
     render_admin_template,
     render_admin_pending_orders,
     render_config_version_prompt,
+    render_my_devices,
+    render_my_tariff,
     render_start_text,
     render_user_traffic,
 )
@@ -67,6 +76,80 @@ async def handle_config_request(callback, *, workflow) -> None:
 async def handle_my_traffic(callback, *, workflow) -> None:
     views = workflow.build_user_traffic_views(telegram_id=int(callback.from_user.id))
     await callback.message.answer(render_user_traffic(views))
+    await callback.answer()
+
+
+async def handle_my_tariff(callback, *, workflow) -> None:
+    devices = workflow.list_user_devices(telegram_id=int(callback.from_user.id))
+    await callback.message.answer(render_my_tariff(devices, now=_utc_now()))
+    await callback.answer()
+
+
+async def handle_my_devices(callback, *, workflow) -> None:
+    devices = workflow.list_user_devices(telegram_id=int(callback.from_user.id))
+    await callback.message.answer(render_my_devices(devices, now=_utc_now()))
+    for device in devices:
+        await callback.message.answer(
+            f"Device #{device['id']}",
+            reply_markup=build_user_device_keyboard(device_id=int(device["id"])),
+        )
+    if devices:
+        await callback.message.answer(
+            "Reset all devices",
+            reply_markup=build_user_devices_reset_keyboard(),
+        )
+    await callback.answer()
+
+
+async def handle_user_resend_config(callback, *, workflow) -> None:
+    device_id = _parse_int_suffix(str(callback.data), USER_RESEND_PREFIX)
+    if device_id is None:
+        await callback.message.answer("Unknown resend request.")
+        await callback.answer()
+        return
+
+    result = workflow.build_user_resend_delivery(
+        telegram_id=int(callback.from_user.id),
+        device_id=device_id,
+    )
+    if result is None:
+        await callback.message.answer("Device was not found.")
+        await callback.answer()
+        return
+
+    await _send_delivery(callback.bot, result)
+    await callback.message.answer(f"Config for device #{device_id} was resent.")
+    await callback.answer()
+
+
+async def handle_user_revoke_device(callback, *, workflow) -> None:
+    device_id = _parse_int_suffix(str(callback.data), USER_REVOKE_PREFIX)
+    if device_id is None:
+        await callback.message.answer("Unknown delete request.")
+        await callback.answer()
+        return
+
+    if not workflow.revoke_user_device(
+        telegram_id=int(callback.from_user.id),
+        device_id=device_id,
+    ):
+        await callback.message.answer("Device was not found.")
+        await callback.answer()
+        return
+
+    await callback.message.answer(
+        f"Device #{device_id} was removed. "
+        "Server-side peer removal will run when VPS integration is enabled."
+    )
+    await callback.answer()
+
+
+async def handle_user_reset_devices(callback, *, workflow) -> None:
+    changed = workflow.reset_user_devices(telegram_id=int(callback.from_user.id))
+    await callback.message.answer(
+        f"{changed} device(s) were removed. "
+        "Server-side peer removal will run when VPS integration is enabled."
+    )
     await callback.answer()
 
 
@@ -171,6 +254,69 @@ async def handle_admin_resend_config(callback, *, workflow) -> None:
     await callback.answer()
 
 
+async def handle_admin_grant(message, *, workflow) -> None:
+    admin_telegram_id = int(message.from_user.id)
+    parsed = _parse_target_user_command(str(getattr(message, "text", "")))
+    if parsed is None:
+        await message.answer("Usage: /admin_grant <telegram_id> [username] [first_name]")
+        return
+    target_telegram_id, username, first_name = parsed
+    if not workflow.grant_admin(
+        admin_telegram_id=admin_telegram_id,
+        target_telegram_id=target_telegram_id,
+        username=username,
+        first_name=first_name,
+        last_name=None,
+    ):
+        await message.answer("Admin access required.")
+        return
+    await message.answer(f"Admin role granted to telegram_id={target_telegram_id}.")
+
+
+async def handle_admin_add_user(message, *, workflow) -> None:
+    admin_telegram_id = int(message.from_user.id)
+    parsed = _parse_target_user_command(str(getattr(message, "text", "")))
+    if parsed is None:
+        await message.answer("Usage: /admin_add_user <telegram_id> [username] [first_name]")
+        return
+    target_telegram_id, username, first_name = parsed
+    user_id = workflow.create_manual_user(
+        admin_telegram_id=admin_telegram_id,
+        target_telegram_id=target_telegram_id,
+        username=username,
+        first_name=first_name,
+        last_name=None,
+    )
+    if user_id is None:
+        await message.answer("Admin access required.")
+        return
+    await message.answer(f"User was added: #{user_id}, telegram_id={target_telegram_id}.")
+
+
+async def handle_admin_create_order(message, *, workflow) -> None:
+    admin_telegram_id = int(message.from_user.id)
+    parsed = _parse_create_order_command(str(getattr(message, "text", "")))
+    if parsed is None:
+        await message.answer(
+            "Usage: /admin_create_order <telegram_id> <config_version> [plan_id]"
+        )
+        return
+    target_telegram_id, config_version, plan_id = parsed
+    result = workflow.create_manual_access_request(
+        admin_telegram_id=admin_telegram_id,
+        target_telegram_id=target_telegram_id,
+        username=None,
+        first_name=None,
+        last_name=None,
+        config_version=config_version,
+        plan_id=plan_id,
+    )
+    if result is None:
+        await message.answer("Admin access required.")
+        return
+    await message.answer(result.text)
+
+
 def is_request_config_callback(data: str) -> bool:
     return data == REQUEST_CONFIG_PREFIX
 
@@ -181,6 +327,26 @@ def is_config_version_callback(data: str) -> bool:
 
 def is_my_traffic_callback(data: str) -> bool:
     return data == MY_TRAFFIC_CALLBACK
+
+
+def is_my_tariff_callback(data: str) -> bool:
+    return data == MY_TARIFF_CALLBACK
+
+
+def is_my_devices_callback(data: str) -> bool:
+    return data == MY_DEVICES_CALLBACK
+
+
+def is_user_resend_callback(data: str) -> bool:
+    return data.startswith(f"{USER_RESEND_PREFIX}:")
+
+
+def is_user_revoke_callback(data: str) -> bool:
+    return data.startswith(f"{USER_REVOKE_PREFIX}:")
+
+
+def is_user_reset_devices_callback(data: str) -> bool:
+    return data == USER_RESET_DEVICES_CALLBACK
 
 
 def is_admin_pending_callback(data: str) -> bool:
@@ -234,3 +400,34 @@ def _parse_int_suffix(data: str, prefix: str) -> int | None:
         return int(data.removeprefix(marker))
     except ValueError:
         return None
+
+
+def _parse_target_user_command(text: str) -> tuple[int, str | None, str | None] | None:
+    parts = text.split()
+    if len(parts) < 2:
+        return None
+    try:
+        target_telegram_id = int(parts[1])
+    except ValueError:
+        return None
+    username = parts[2] if len(parts) >= 3 else None
+    first_name = parts[3] if len(parts) >= 4 else None
+    return target_telegram_id, username, first_name
+
+
+def _parse_create_order_command(text: str) -> tuple[int, str, str | None] | None:
+    parts = text.split()
+    if len(parts) < 3:
+        return None
+    try:
+        target_telegram_id = int(parts[1])
+    except ValueError:
+        return None
+    plan_id = parts[3] if len(parts) >= 4 else None
+    return target_telegram_id, parts[2], plan_id
+
+
+def _utc_now() -> str:
+    from datetime import datetime, timezone
+
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")

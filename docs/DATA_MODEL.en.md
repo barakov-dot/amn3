@@ -22,7 +22,12 @@ Fields:
 - `created_at`;
 - `updated_at`;
 - `status` - `active`, `blocked`, `deleted`;
-- `is_admin` - MVP shortcut, later replaceable with roles.
+- `is_admin` - MVP admin delegation flag, later replaceable with roles.
+
+Users may be created either by Telegram `/start` or manually by an administrator
+through the bot command layer. Manual users still use `telegram_id` as the stable
+identity, so administrators can create orders, generate configs, QR codes, and
+later see those users together with regular bot users.
 
 ### `devices`
 
@@ -102,6 +107,9 @@ Administrator audit log.
 
 Fields: `id`, `admin_telegram_id`, `action`, `target_user_id`, `target_device_id`, `metadata_json`, `created_at`.
 
+Current actions include manual user creation, manual access request creation,
+admin role grants, order approvals, and config resend operations.
+
 ### `device_traffic_snapshots`
 
 Traffic statistic snapshots for devices.
@@ -137,6 +145,10 @@ CLIENT_DNS=1.1.1.1
 CLIENT_ALLOWED_IPS=0.0.0.0/0
 MAX_DEVICES_PER_USER=5
 FREE_TEST_REQUIRES_APPROVAL=true
+CONTROL_PANEL_AUTH_METHODS=telegram_admin,password,key
+CONTROL_PANEL_ADMIN_USERNAME=admin
+CONTROL_PANEL_PASSWORD_HASH=
+CONTROL_PANEL_PUBLIC_KEY_PATH=
 ```
 
 `ACCESS_MODE` values:
@@ -144,6 +156,16 @@ FREE_TEST_REQUIRES_APPROVAL=true
 - `free_test`;
 - `manual`;
 - `payment`.
+
+`CONTROL_PANEL_AUTH_METHODS` prepares the future management panel for several
+administrator entry modes:
+
+- `telegram_admin` - Telegram admin allowlist and delegated DB admins;
+- `password` - administrator username plus password hash;
+- `key` - administrator public key path for key-based login.
+
+Do not store a plain administrator password in `.env`. Store only a strong
+password hash when the panel layer is implemented.
 
 ## Key Storage
 

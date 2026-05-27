@@ -375,10 +375,32 @@ Copy-Item .env.example .env
 TELEGRAM_BOT_TOKEN=CHANGE_ME_TOKEN_FROM_BOTFATHER
 APP_SECRET_KEY=CHANGE_ME_GENERATED_RANDOM_SECRET_32_PLUS_CHARS
 ADMIN_TELEGRAM_IDS=твой_telegram_id
+CONTROL_PANEL_AUTH_METHODS=telegram_admin,password,key
+CONTROL_PANEL_ADMIN_USERNAME=admin
+CONTROL_PANEL_PASSWORD_HASH=
+CONTROL_PANEL_PUBLIC_KEY_PATH=
 DATABASE_PATH=data/amneziya.sqlite3
 ```
 
 Важно: `APP_SECRET_KEY` нужен для расшифровки peer-секретов. Если его потерять, восстановить сохраненные private keys будет нельзя.
+
+Доступ администратора состоит из двух слоев:
+
+- админ-доступ в Telegram-боте: `ADMIN_TELEGRAM_IDS` плюс админы, которым позже выдали права командой `/admin_grant`;
+- будущий доступ к панели управления: `CONTROL_PANEL_AUTH_METHODS` заранее резервирует вход через Telegram-админа, hash пароля и public key.
+
+Команды администратора, которые уже заложены в основу бота:
+
+```text
+/admin_grant <telegram_id> [username] [first_name]
+/admin_add_user <telegram_id> [username] [first_name]
+/admin_create_order <telegram_id> <amneziawg_v1_5|amneziawg_v2> [plan_id]
+```
+
+Бот может создать пользователя и заявку вручную еще до того, как человек нажмет
+`/start`. Но Telegram может не дать отправить сообщение пользователю, который
+никогда не открывал бота; в таком случае администратор сохраняет сформированный
+конфиг и QR-код для ручной передачи.
 
 ## Шаг 2. Создать `servers.yml`
 

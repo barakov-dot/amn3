@@ -4,17 +4,25 @@ from app.bot.ux import (
     ADMIN_TEMPLATES_CALLBACK,
     ADMIN_TEMPLATE_RESET_CALLBACK,
     ADMIN_TRAFFIC_CALLBACK,
+    MY_DEVICES_CALLBACK,
+    MY_TARIFF_CALLBACK,
     MY_TRAFFIC_CALLBACK,
     REQUEST_CONFIG_PREFIX,
+    USER_RESEND_PREFIX,
+    USER_RESET_DEVICES_CALLBACK,
+    USER_REVOKE_PREFIX,
     VERSION_LABELS,
     build_admin_order_keyboard,
     build_admin_resend_keyboard,
     build_config_version_keyboard,
     build_main_menu,
+    build_user_device_keyboard,
+    build_user_devices_reset_keyboard,
     render_admin_approval,
     render_admin_pending_orders,
     render_admin_template,
     render_admin_traffic,
+    render_my_devices,
     render_my_tariff,
     render_user_traffic,
 )
@@ -25,10 +33,17 @@ def test_main_menu_shows_user_actions_and_admin_entry_for_admins():
     user_menu = build_main_menu(is_admin=False)
     admin_menu = build_main_menu(is_admin=True)
 
-    assert _button_texts(user_menu) == [["Request config"], ["My traffic"]]
+    assert _button_texts(user_menu) == [
+        ["Request config"],
+        ["My tariff"],
+        ["My traffic"],
+        ["My devices"],
+    ]
     assert _callback_data(user_menu) == [
         [REQUEST_CONFIG_PREFIX],
+        [MY_TARIFF_CALLBACK],
         [MY_TRAFFIC_CALLBACK],
+        [MY_DEVICES_CALLBACK],
     ]
     assert _button_texts(admin_menu)[-1] == ["Admin"]
     assert _callback_data(admin_menu)[-1] == [ADMIN_PENDING_CALLBACK]
@@ -212,6 +227,48 @@ def test_render_my_tariff_shows_device_expiration_and_days_left():
     assert "phone" in text
     assert "30 days" in text
     assert "Days left: 30" in text
+
+
+def test_render_my_devices_lists_devices_with_tariff_and_connection_state():
+    text = render_my_devices(
+        [
+            {
+                "id": 7,
+                "name": "phone",
+                "duration_days": 30,
+                "expires_at": "2026-06-26T12:00:00Z",
+                "status": "active",
+                "config_version": "amneziawg_v2",
+                "first_connected_at": "2026-05-27T12:00:00Z",
+                "last_connected_at": "2026-05-27T12:30:00Z",
+            }
+        ],
+        now="2026-05-27T12:00:00Z",
+    )
+
+    assert "My devices" in text
+    assert "#7 phone" in text
+    assert "AmneziaWG 2.0" in text
+    assert "Tariff: 30 days" in text
+    assert "Days left: 30" in text
+    assert "Connected: yes" in text
+
+
+def test_user_device_keyboard_offers_resend_and_revoke_actions():
+    keyboard = build_user_device_keyboard(device_id=7)
+
+    assert _button_texts(keyboard) == [["Resend config"], ["Delete device"]]
+    assert _callback_data(keyboard) == [
+        [f"{USER_RESEND_PREFIX}:7"],
+        [f"{USER_REVOKE_PREFIX}:7"],
+    ]
+
+
+def test_user_devices_reset_keyboard_targets_all_user_devices():
+    keyboard = build_user_devices_reset_keyboard()
+
+    assert _button_texts(keyboard) == [["Reset all devices"]]
+    assert _callback_data(keyboard) == [[USER_RESET_DEVICES_CALLBACK]]
 
 
 def _button_texts(markup):

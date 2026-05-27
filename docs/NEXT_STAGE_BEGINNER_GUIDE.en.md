@@ -286,8 +286,29 @@ Fill required values:
 TELEGRAM_BOT_TOKEN=CHANGE_ME_TOKEN_FROM_BOTFATHER
 APP_SECRET_KEY=CHANGE_ME_GENERATED_RANDOM_SECRET_32_PLUS_CHARS
 ADMIN_TELEGRAM_IDS=123456789
+CONTROL_PANEL_AUTH_METHODS=telegram_admin,password,key
+CONTROL_PANEL_ADMIN_USERNAME=admin
+CONTROL_PANEL_PASSWORD_HASH=
+CONTROL_PANEL_PUBLIC_KEY_PATH=
 DATABASE_PATH=data/amneziya.sqlite3
 ```
+
+Admin access has two layers:
+
+- Telegram bot admin access: `ADMIN_TELEGRAM_IDS` plus admins delegated later with `/admin_grant`.
+- Future control panel access: `CONTROL_PANEL_AUTH_METHODS` reserves login modes for Telegram admin, password hash, and public key login.
+
+Manual admin commands already available in the bot foundation:
+
+```text
+/admin_grant <telegram_id> [username] [first_name]
+/admin_add_user <telegram_id> [username] [first_name]
+/admin_create_order <telegram_id> <amneziawg_v1_5|amneziawg_v2> [plan_id]
+```
+
+The bot can create a manual user and order before the person uses `/start`.
+Telegram delivery may still require the person to open the bot first; if delivery
+fails, the administrator keeps the generated config package for manual transfer.
 
 ## Step 2. Create `servers.yml`
 

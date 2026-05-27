@@ -22,6 +22,22 @@ class Settings(BaseSettings):
     vpn_server_runtime: str = Field(default="host_systemd", alias="VPN_SERVER_RUNTIME")
     default_vpn_network_cidr: str = Field(default="10.8.0.0/24", alias="DEFAULT_VPN_NETWORK_CIDR")
     database_path: str = Field(default="data/amneziya.sqlite3", alias="DATABASE_PATH")
+    control_panel_auth_methods: str = Field(
+        default="telegram_admin,password,key",
+        alias="CONTROL_PANEL_AUTH_METHODS",
+    )
+    control_panel_admin_username: str = Field(
+        default="admin",
+        alias="CONTROL_PANEL_ADMIN_USERNAME",
+    )
+    control_panel_password_hash: str = Field(
+        default="",
+        alias="CONTROL_PANEL_PASSWORD_HASH",
+    )
+    control_panel_public_key_path: str = Field(
+        default="",
+        alias="CONTROL_PANEL_PUBLIC_KEY_PATH",
+    )
 
     @field_validator("telegram_bot_token", "app_secret_key")
     @classmethod
@@ -38,6 +54,13 @@ class Settings(BaseSettings):
             raise ValueError("VPN_PORT_MAX must be in 1..65535")
         if self.vpn_port_min > self.vpn_port_max:
             raise ValueError("VPN_PORT_MIN must be less than or equal to VPN_PORT_MAX")
+        allowed_panel_auth_methods = {"telegram_admin", "password", "key"}
+        unknown_methods = set(self.panel_auth_methods) - allowed_panel_auth_methods
+        if unknown_methods:
+            raise ValueError(
+                "CONTROL_PANEL_AUTH_METHODS contains unsupported method(s): "
+                + ", ".join(sorted(unknown_methods))
+            )
         return self
 
     @cached_property
@@ -49,3 +72,11 @@ class Settings(BaseSettings):
     @cached_property
     def notice_days(self) -> list[int]:
         return [int(part.strip()) for part in self.expiration_notice_days.split(",") if part.strip()]
+
+    @cached_property
+    def panel_auth_methods(self) -> list[str]:
+        return [
+            part.strip()
+            for part in self.control_panel_auth_methods.split(",")
+            if part.strip()
+        ]

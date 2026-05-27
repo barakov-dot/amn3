@@ -221,7 +221,235 @@ def test_resend_device_config_rebuilds_delivery_from_encrypted_device_secrets(tm
     assert "[Interface]" in resend.config_text
 
 
+def test_user_can_resend_only_owned_device_config(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    other_user_id = repo.upsert_user(
+        telegram_id=2002,
+        username="bob",
+        first_name="Bob",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    device_id = _create_encrypted_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="phone",
+    )
+    other_device_id = _create_encrypted_device(
+        repo,
+        user_id=other_user_id,
+        server_id=server_id,
+        name="tablet",
+    )
+    workflow = BotWorkflow(
+        repo=repo,
+        admin_telegram_ids={9001},
+        secret_box=SecretBox.from_app_secret(SECRET),
+    )
+
+    resend = workflow.build_user_resend_delivery(
+        telegram_id=1001,
+        device_id=device_id,
+    )
+    forbidden = workflow.build_user_resend_delivery(
+        telegram_id=1001,
+        device_id=other_device_id,
+    )
+
+    assert resend.user_telegram_id == 1001
+    assert resend.delivery.config_filename == f"amneziya-device-{device_id}.conf"
+    assert forbidden is None
+
+
+def test_user_can_revoke_one_owned_device(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    other_user_id = repo.upsert_user(
+        telegram_id=2002,
+        username="bob",
+        first_name="Bob",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    device_id = _create_encrypted_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="phone",
+    )
+    other_device_id = _create_encrypted_device(
+        repo,
+        user_id=other_user_id,
+        server_id=server_id,
+        name="tablet",
+    )
+    workflow = BotWorkflow(repo=repo, admin_telegram_ids={9001})
+
+    revoked = workflow.revoke_user_device(
+        telegram_id=1001,
+        device_id=device_id,
+        revoked_at="2026-05-27T12:00:00Z",
+    )
+    forbidden = workflow.revoke_user_device(
+        telegram_id=1001,
+        device_id=other_device_id,
+        revoked_at="2026-05-27T12:00:00Z",
+    )
+
+    assert revoked is True
+    assert forbidden is False
+    assert repo.get_device(device_id)["status"] == "revoked"
+    assert repo.get_device(other_device_id)["status"] == "active"
+
+
+def test_user_can_reset_all_owned_devices(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    other_user_id = repo.upsert_user(
+        telegram_id=2002,
+        username="bob",
+        first_name="Bob",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    first_id = _create_encrypted_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="phone",
+    )
+    second_id = _create_encrypted_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="laptop",
+    )
+    other_id = _create_encrypted_device(
+        repo,
+        user_id=other_user_id,
+        server_id=server_id,
+        name="tablet",
+    )
+    workflow = BotWorkflow(repo=repo, admin_telegram_ids={9001})
+
+    changed = workflow.reset_user_devices(
+        telegram_id=1001,
+        revoked_at="2026-05-27T12:00:00Z",
+    )
+
+    assert changed == 2
+    assert repo.get_device(first_id)["status"] == "revoked"
+    assert repo.get_device(second_id)["status"] == "revoked"
+    assert repo.get_device(other_id)["status"] == "active"
+
+
+def test_database_admin_role_grants_workflow_admin_access(tmp_path):
+    repo = _repo(tmp_path)
+    repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    repo.set_user_admin(
+        telegram_id=1001,
+        is_admin=True,
+        granted_by_admin_telegram_id=9001,
+    )
+    workflow = BotWorkflow(repo=repo, admin_telegram_ids={9001})
+
+    assert workflow.is_admin(1001) is True
+
+
+def test_admin_can_delegate_admin_role_by_telegram_id(tmp_path):
+    repo = _repo(tmp_path)
+    workflow = BotWorkflow(repo=repo, admin_telegram_ids={9001})
+
+    granted = workflow.grant_admin(
+        admin_telegram_id=9001,
+        target_telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    denied = workflow.grant_admin(
+        admin_telegram_id=2002,
+        target_telegram_id=3003,
+        username="bob",
+        first_name="Bob",
+        last_name=None,
+    )
+
+    assert granted is True
+    assert denied is False
+    assert workflow.is_admin(1001) is True
+    assert workflow.is_admin(3003) is False
+
+
+def test_admin_can_create_manual_access_request_for_user(tmp_path):
+    repo = _repo(tmp_path)
+    repo.seed_default_plans()
+    workflow = BotWorkflow(repo=repo, admin_telegram_ids={9001})
+
+    result = workflow.create_manual_access_request(
+        admin_telegram_id=9001,
+        target_telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+        config_version="amneziawg_v2",
+        plan_id="days_30",
+    )
+    denied = workflow.create_manual_access_request(
+        admin_telegram_id=2002,
+        target_telegram_id=3003,
+        username="bob",
+        first_name="Bob",
+        last_name=None,
+        config_version="amneziawg_v2",
+        plan_id="days_30",
+    )
+
+    assert result is not None
+    assert result.order_id == 1
+    assert "30 days" in result.text
+    assert denied is None
+    assert repo.list_pending_orders()[0]["telegram_id"] == 1001
+
+
 def _repo(tmp_path):
     conn = connect(tmp_path / "bot-workflows.sqlite3")
     initialize_schema(conn)
     return Repository(conn)
+
+
+def _create_encrypted_device(repo, *, user_id, server_id, name):
+    secret_box = SecretBox.from_app_secret(SECRET)
+    return repo.create_device(
+        user_id=user_id,
+        server_id=server_id,
+        name=name,
+        duration_days=30,
+        vpn_ip=f"10.8.0.{user_id + len(name)}",
+        peer_public_key=f"peer-{name}",
+        peer_private_key_encrypted=secret_box.encrypt_text(f"private-{name}"),
+        preshared_key_encrypted=secret_box.encrypt_text(f"psk-{name}"),
+        config_version="amneziawg_v2",
+    )

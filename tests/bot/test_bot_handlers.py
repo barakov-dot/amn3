@@ -7,12 +7,28 @@ from app.bot.handlers import (
     handle_admin_resend_config,
     handle_admin_reset_template,
     handle_admin_template,
+    handle_admin_add_user,
+    handle_admin_create_order,
+    handle_admin_grant,
     handle_config_request,
+    handle_my_devices,
+    handle_my_tariff,
     handle_my_traffic,
     handle_request_config_prompt,
     handle_start,
+    handle_user_resend_config,
+    handle_user_reset_devices,
+    handle_user_revoke_device,
 )
-from app.bot.ux import MY_TRAFFIC_CALLBACK, REQUEST_CONFIG_PREFIX
+from app.bot.ux import (
+    MY_DEVICES_CALLBACK,
+    MY_TARIFF_CALLBACK,
+    MY_TRAFFIC_CALLBACK,
+    REQUEST_CONFIG_PREFIX,
+    USER_RESEND_PREFIX,
+    USER_RESET_DEVICES_CALLBACK,
+    USER_REVOKE_PREFIX,
+)
 
 
 def test_handle_start_renders_main_menu_for_admin():
@@ -72,6 +88,96 @@ def test_handle_my_traffic_renders_user_traffic():
 
     assert "Your traffic" in callback.message.answers[0]["text"]
     assert "phone" in callback.message.answers[0]["text"]
+    assert callback.answered is True
+
+
+def test_handle_my_tariff_renders_user_tariff():
+    callback = FakeCallback(
+        data=MY_TARIFF_CALLBACK,
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_my_tariff(callback, workflow=workflow))
+
+    assert "My tariff" in callback.message.answers[0]["text"]
+    assert "phone" in callback.message.answers[0]["text"]
+    assert callback.answered is True
+
+
+def test_handle_my_devices_renders_device_actions_and_reset():
+    callback = FakeCallback(
+        data=MY_DEVICES_CALLBACK,
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_my_devices(callback, workflow=workflow))
+
+    assert "My devices" in callback.message.answers[0]["text"]
+    assert callback.message.answers[1]["text"] == "Device #7"
+    assert _button_texts(callback.message.answers[1]["reply_markup"]) == [
+        ["Resend config"],
+        ["Delete device"],
+    ]
+    assert _button_texts(callback.message.answers[2]["reply_markup"]) == [
+        ["Reset all devices"]
+    ]
+    assert callback.answered is True
+
+
+def test_handle_user_resend_config_sends_owned_config_to_user():
+    callback = FakeCallback(
+        data=f"{USER_RESEND_PREFIX}:7",
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_user_resend_config(callback, workflow=workflow))
+
+    assert workflow.user_resends == [7]
+    assert callback.bot.sent_messages[0]["chat_id"] == 1001
+    assert callback.bot.sent_documents[0]["document"].filename.endswith(".conf")
+    assert callback.bot.sent_photos[0]["photo"].filename.endswith(".qr.png")
+    assert "resent" in callback.message.answers[0]["text"]
+    assert callback.answered is True
+
+
+def test_handle_user_revoke_device_revokes_owned_device():
+    callback = FakeCallback(
+        data=f"{USER_REVOKE_PREFIX}:7",
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_user_revoke_device(callback, workflow=workflow))
+
+    assert workflow.revoked_devices == [7]
+    assert "removed" in callback.message.answers[0]["text"]
+    assert callback.answered is True
+
+
+def test_handle_user_reset_devices_revokes_all_owned_devices():
+    callback = FakeCallback(
+        data=USER_RESET_DEVICES_CALLBACK,
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_user_reset_devices(callback, workflow=workflow))
+
+    assert workflow.reset_requests == [1001]
+    assert "2 device" in callback.message.answers[0]["text"]
     assert callback.answered is True
 
 
@@ -202,6 +308,39 @@ def test_handle_admin_resend_config_sends_delivery_to_user():
     assert callback.answered is True
 
 
+def test_handle_admin_grant_delegates_admin_role_by_telegram_id():
+    message = FakeMessage(user_id=9001, username="admin", first_name="Admin")
+    message.text = "/admin_grant 1001 alice"
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_grant(message, workflow=workflow))
+
+    assert workflow.grants == [1001]
+    assert "Admin role granted" in message.answers[0]["text"]
+
+
+def test_handle_admin_add_user_creates_manual_user_record():
+    message = FakeMessage(user_id=9001, username="admin", first_name="Admin")
+    message.text = "/admin_add_user 1001 alice Alice"
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_add_user(message, workflow=workflow))
+
+    assert workflow.manual_users == [1001]
+    assert "User was added" in message.answers[0]["text"]
+
+
+def test_handle_admin_create_order_creates_manual_access_request():
+    message = FakeMessage(user_id=9001, username="admin", first_name="Admin")
+    message.text = "/admin_create_order 1001 amneziawg_v2 days_30"
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_create_order(message, workflow=workflow))
+
+    assert workflow.manual_orders == [(1001, "amneziawg_v2", "days_30")]
+    assert "request #77" in message.answers[0]["text"]
+
+
 class FakeMessage:
     def __init__(self, *, user_id, username=None, first_name=None, last_name=None):
         self.from_user = SimpleNamespace(
@@ -211,6 +350,7 @@ class FakeMessage:
             last_name=last_name,
         )
         self.answers = []
+        self.text = ""
 
     async def answer(self, text, reply_markup=None):
         self.answers.append({"text": text, "reply_markup": reply_markup})
@@ -245,7 +385,13 @@ class FakeWorkflow:
         self.requests = []
         self.approvals = []
         self.resends = []
+        self.user_resends = []
+        self.revoked_devices = []
+        self.reset_requests = []
         self.template_reset = False
+        self.grants = []
+        self.manual_users = []
+        self.manual_orders = []
 
     def is_admin(self, telegram_id):
         return telegram_id in self._admin_ids
@@ -278,6 +424,87 @@ class FakeWorkflow:
                 is_stale=False,
             )
         ]
+
+    def list_user_devices(self, *, telegram_id):
+        return [
+            {
+                "id": 7,
+                "name": "phone",
+                "duration_days": 30,
+                "expires_at": "2026-06-26T12:00:00Z",
+                "status": "active",
+                "config_version": "amneziawg_v2",
+                "first_connected_at": "2026-05-27T12:00:00Z",
+                "last_connected_at": "2026-05-27T12:30:00Z",
+            }
+        ]
+
+    def build_user_resend_delivery(self, *, telegram_id, device_id):
+        self.user_resends.append(device_id)
+        return SimpleNamespace(
+            device_id=device_id,
+            user_telegram_id=telegram_id,
+            config_text="[Interface]\nPrivateKey = test",
+            delivery=SimpleNamespace(
+                message_text="Your VPN config is ready.",
+                config_filename=f"amneziya-device-{device_id}.conf",
+                config_bytes=b"[Interface]\nPrivateKey = test",
+                qr_filename=f"amneziya-device-{device_id}.qr.png",
+                qr_png_bytes=b"\x89PNG\r\n\x1a\n",
+            ),
+        )
+
+    def revoke_user_device(self, *, telegram_id, device_id, revoked_at=None):
+        self.revoked_devices.append(device_id)
+        return True
+
+    def reset_user_devices(self, *, telegram_id, revoked_at=None):
+        self.reset_requests.append(telegram_id)
+        return 2
+
+    def grant_admin(
+        self,
+        *,
+        admin_telegram_id,
+        target_telegram_id,
+        username,
+        first_name,
+        last_name,
+    ):
+        if not self.is_admin(admin_telegram_id):
+            return False
+        self.grants.append(target_telegram_id)
+        return True
+
+    def create_manual_user(
+        self,
+        *,
+        admin_telegram_id,
+        target_telegram_id,
+        username,
+        first_name,
+        last_name,
+    ):
+        if not self.is_admin(admin_telegram_id):
+            return None
+        self.manual_users.append(target_telegram_id)
+        return 123
+
+    def create_manual_access_request(
+        self,
+        *,
+        admin_telegram_id,
+        target_telegram_id,
+        username,
+        first_name,
+        last_name,
+        config_version,
+        plan_id,
+    ):
+        if not self.is_admin(admin_telegram_id):
+            return None
+        self.manual_orders.append((target_telegram_id, config_version, plan_id))
+        return SimpleNamespace(order_id=77, text="Access request #77 was created.")
 
     def list_pending_orders(self, *, admin_telegram_id):
         if not self.is_admin(admin_telegram_id):

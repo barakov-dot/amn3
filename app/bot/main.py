@@ -1,18 +1,26 @@
 from aiogram import Dispatcher, F, Router
-from aiogram.filters import CommandStart
+from aiogram.filters import Command, CommandStart
 from aiogram.types import CallbackQuery
 from aiogram.types import Message
 
 from app.bot.handlers import (
+    handle_admin_add_user,
     handle_admin_approve,
+    handle_admin_create_order,
+    handle_admin_grant,
     handle_admin_pending,
     handle_admin_resend_config,
     handle_admin_reset_template,
     handle_admin_template,
     handle_config_request,
+    handle_my_devices,
+    handle_my_tariff,
     handle_my_traffic,
     handle_request_config_prompt,
     handle_start,
+    handle_user_resend_config,
+    handle_user_reset_devices,
+    handle_user_revoke_device,
 )
 from app.bot.ux import (
     ADMIN_APPROVE_PREFIX,
@@ -20,8 +28,13 @@ from app.bot.ux import (
     ADMIN_RESEND_PREFIX,
     ADMIN_TEMPLATE_RESET_CALLBACK,
     ADMIN_TEMPLATES_CALLBACK,
+    MY_DEVICES_CALLBACK,
+    MY_TARIFF_CALLBACK,
     MY_TRAFFIC_CALLBACK,
     REQUEST_CONFIG_PREFIX,
+    USER_RESEND_PREFIX,
+    USER_RESET_DEVICES_CALLBACK,
+    USER_REVOKE_PREFIX,
 )
 
 
@@ -35,6 +48,18 @@ def create_dispatcher(*, workflow=None) -> Dispatcher:
             return
         await handle_start(message, workflow=workflow)
 
+    @router.message(Command("admin_grant"))
+    async def admin_grant(message: Message) -> None:
+        await handle_admin_grant(message, workflow=workflow)
+
+    @router.message(Command("admin_add_user"))
+    async def admin_add_user(message: Message) -> None:
+        await handle_admin_add_user(message, workflow=workflow)
+
+    @router.message(Command("admin_create_order"))
+    async def admin_create_order(message: Message) -> None:
+        await handle_admin_create_order(message, workflow=workflow)
+
     @router.callback_query(F.data == REQUEST_CONFIG_PREFIX)
     async def request_config(callback: CallbackQuery) -> None:
         await handle_request_config_prompt(callback)
@@ -46,6 +71,26 @@ def create_dispatcher(*, workflow=None) -> Dispatcher:
     @router.callback_query(F.data == MY_TRAFFIC_CALLBACK)
     async def my_traffic(callback: CallbackQuery) -> None:
         await handle_my_traffic(callback, workflow=workflow)
+
+    @router.callback_query(F.data == MY_TARIFF_CALLBACK)
+    async def my_tariff(callback: CallbackQuery) -> None:
+        await handle_my_tariff(callback, workflow=workflow)
+
+    @router.callback_query(F.data == MY_DEVICES_CALLBACK)
+    async def my_devices(callback: CallbackQuery) -> None:
+        await handle_my_devices(callback, workflow=workflow)
+
+    @router.callback_query(F.data.startswith(f"{USER_RESEND_PREFIX}:"))
+    async def user_resend(callback: CallbackQuery) -> None:
+        await handle_user_resend_config(callback, workflow=workflow)
+
+    @router.callback_query(F.data.startswith(f"{USER_REVOKE_PREFIX}:"))
+    async def user_revoke(callback: CallbackQuery) -> None:
+        await handle_user_revoke_device(callback, workflow=workflow)
+
+    @router.callback_query(F.data == USER_RESET_DEVICES_CALLBACK)
+    async def user_reset_devices(callback: CallbackQuery) -> None:
+        await handle_user_reset_devices(callback, workflow=workflow)
 
     @router.callback_query(F.data == ADMIN_PENDING_CALLBACK)
     async def admin_pending(callback: CallbackQuery) -> None:
