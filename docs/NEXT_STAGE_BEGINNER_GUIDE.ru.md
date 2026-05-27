@@ -482,6 +482,14 @@ python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-
 Если `ssh` не установлен или сервер не отвечает, обычная проверка вернет
 понятную ошибку в отчете вместо аварийного завершения.
 
+Dry-run добавления peer на VPS:
+
+```powershell
+python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key PEER_PSK --vpn-ip 10.8.0.2 --dry-run
+```
+
+Команда показывает план `awg set`, но не выполняет его и не выводит PSK открытым текстом.
+
 Ожидаемый результат:
 
 ```text

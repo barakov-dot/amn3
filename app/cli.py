@@ -4,6 +4,7 @@ from pathlib import Path
 from app import __version__
 from app.backup.service import BackupService
 from app.server.checks import planned_check_commands, run_server_checks
+from app.server.peer_apply import PeerApplyInput, build_peer_apply_dry_run
 from app.server.ssh import SystemSshClient
 from app.server_config.loader import load_server_config, select_server
 from app.server_config.models import ServerConfig
@@ -36,6 +37,14 @@ def build_parser() -> argparse.ArgumentParser:
     check.add_argument("--server", required=True)
     check.add_argument("--dry-run", action="store_true")
 
+    apply_peer = server_sub.add_parser("apply-peer")
+    apply_peer.add_argument("--config", default="servers.yml")
+    apply_peer.add_argument("--server", required=True)
+    apply_peer.add_argument("--public-key", required=True)
+    apply_peer.add_argument("--preshared-key", required=True)
+    apply_peer.add_argument("--vpn-ip", required=True)
+    apply_peer.add_argument("--dry-run", action="store_true", required=True)
+
     return parser
 
 
@@ -54,6 +63,15 @@ def main() -> None:
         config = load_server_config(Path(args.config))
         server = select_server(config, args.server)
         print(run_server_check(server, dry_run=args.dry_run))
+    elif args.command == "server" and args.server_command == "apply-peer":
+        config = load_server_config(Path(args.config))
+        server = select_server(config, args.server)
+        peer = PeerApplyInput(
+            public_key=args.public_key,
+            preshared_key=args.preshared_key,
+            vpn_ip=args.vpn_ip,
+        )
+        print(build_peer_apply_dry_run(server, peer))
 
 
 def run_server_check(server: ServerConfig, *, dry_run: bool) -> str:

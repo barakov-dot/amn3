@@ -29,3 +29,32 @@ def test_run_server_check_dry_run_prints_read_only_commands(tmp_path):
     assert "cat /etc/os-release" in output
     assert "systemctl is-active awg-quick@awg0" in output
     assert "No changes will be made" in output
+
+
+def test_cli_accepts_server_apply_peer_dry_run_arguments():
+    parser = build_parser()
+
+    args = parser.parse_args(
+        [
+            "server",
+            "apply-peer",
+            "--config",
+            "servers.yml",
+            "--server",
+            "debian-vps-1",
+            "--public-key",
+            "peer-public",
+            "--preshared-key",
+            "secret-psk",
+            "--vpn-ip",
+            "10.8.0.2",
+            "--dry-run",
+        ]
+    )
+
+    assert args.command == "server"
+    assert args.server_command == "apply-peer"
+    assert args.public_key == "peer-public"
+    assert args.preshared_key == "secret-psk"
+    assert args.vpn_ip == "10.8.0.2"
+    assert args.dry_run is True

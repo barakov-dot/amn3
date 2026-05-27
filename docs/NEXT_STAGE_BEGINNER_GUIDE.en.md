@@ -383,6 +383,15 @@ It prints read-only SSH commands only and does not change the server.
 If `ssh` is missing or the server does not respond, the normal check returns a
 clear report error instead of crashing.
 
+Dry-run adding a peer on the VPS:
+
+```powershell
+python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key PEER_PSK --vpn-ip 10.8.0.2 --dry-run
+```
+
+The command prints the planned `awg set` operation, but does not execute it and
+does not print the PSK in clear text.
+
 If tests fail, do not continue to the VPS.
 
 ## Step 4. Back Up the Local Database
