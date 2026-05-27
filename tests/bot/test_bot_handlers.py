@@ -212,6 +212,26 @@ def test_handle_user_revoke_device_confirm_revokes_owned_device():
     assert callback.answered is True
 
 
+def test_handle_user_revoke_device_confirm_reports_server_remove_error():
+    callback = FakeCallback(
+        data=f"{USER_REVOKE_CONFIRM_PREFIX}:7",
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(
+        admin_ids={9001},
+        revoke_error=PeerApplyError("revoke failed secret-psk"),
+    )
+
+    asyncio.run(handle_user_revoke_device_confirm(callback, workflow=workflow))
+
+    assert workflow.revoked_devices == [7]
+    assert "failed" in callback.message.answers[0]["text"]
+    assert "secret-psk" not in callback.message.answers[0]["text"]
+    assert callback.answered is True
+
+
 def test_handle_user_reset_devices_asks_for_confirmation():
     callback = FakeCallback(
         data=USER_RESET_DEVICES_CALLBACK,
@@ -244,6 +264,26 @@ def test_handle_user_reset_devices_confirm_revokes_all_owned_devices():
 
     assert workflow.reset_requests == [1001]
     assert "Удалено устройств: 2" in callback.message.answers[0]["text"]
+    assert callback.answered is True
+
+
+def test_handle_user_reset_devices_confirm_reports_server_remove_error():
+    callback = FakeCallback(
+        data=USER_RESET_DEVICES_CONFIRM_CALLBACK,
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(
+        admin_ids={9001},
+        revoke_error=PeerApplyError("reset failed secret-psk"),
+    )
+
+    asyncio.run(handle_user_reset_devices_confirm(callback, workflow=workflow))
+
+    assert workflow.reset_requests == [1001]
+    assert "failed" in callback.message.answers[0]["text"]
+    assert "secret-psk" not in callback.message.answers[0]["text"]
     assert callback.answered is True
 
 
@@ -496,10 +536,18 @@ class FakeCallback:
 
 
 class FakeWorkflow:
-    def __init__(self, *, admin_ids, traffic_text_marker=None, approval_error=None):
+    def __init__(
+        self,
+        *,
+        admin_ids,
+        traffic_text_marker=None,
+        approval_error=None,
+        revoke_error=None,
+    ):
         self._admin_ids = admin_ids
         self._traffic_text_marker = traffic_text_marker
         self._approval_error = approval_error
+        self._revoke_error = revoke_error
         self.requests = []
         self.approvals = []
         self.resends = []
@@ -581,10 +629,14 @@ class FakeWorkflow:
 
     def revoke_user_device(self, *, telegram_id, device_id, revoked_at=None):
         self.revoked_devices.append(device_id)
+        if self._revoke_error is not None:
+            raise self._revoke_error
         return True
 
     def reset_user_devices(self, *, telegram_id, revoked_at=None):
         self.reset_requests.append(telegram_id)
+        if self._revoke_error is not None:
+            raise self._revoke_error
         return 2
 
     def grant_admin(

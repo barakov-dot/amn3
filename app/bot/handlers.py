@@ -171,10 +171,20 @@ async def handle_user_revoke_device_confirm(callback, *, workflow) -> None:
         await callback.answer()
         return
 
-    if not workflow.revoke_user_device(
-        telegram_id=int(callback.from_user.id),
-        device_id=device_id,
-    ):
+    try:
+        revoked = workflow.revoke_user_device(
+            telegram_id=int(callback.from_user.id),
+            device_id=device_id,
+        )
+    except PeerApplyError as exc:
+        await callback.message.answer(
+            "VPS peer revoke failed. Device was not removed in the bot.\n"
+            f"Error type: {type(exc).__name__}"
+        )
+        await callback.answer()
+        return
+
+    if not revoked:
         await callback.message.answer(text("handler.device_not_found"))
         await callback.answer()
         return
@@ -194,7 +204,15 @@ async def handle_user_reset_devices(callback, *, workflow) -> None:
 
 
 async def handle_user_reset_devices_confirm(callback, *, workflow) -> None:
-    changed = workflow.reset_user_devices(telegram_id=int(callback.from_user.id))
+    try:
+        changed = workflow.reset_user_devices(telegram_id=int(callback.from_user.id))
+    except PeerApplyError as exc:
+        await callback.message.answer(
+            "VPS peer revoke failed. Devices were not removed in the bot.\n"
+            f"Error type: {type(exc).__name__}"
+        )
+        await callback.answer()
+        return
     await callback.message.answer(
         text("handler.devices_removed", count=changed)
     )

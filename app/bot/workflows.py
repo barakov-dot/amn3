@@ -43,6 +43,11 @@ class ResendResult:
     delivery: ConfigDeliveryPackage
 
 
+class PeerRemover:
+    def remove_peer(self, *, server, peer_public_key: str) -> None:
+        pass
+
+
 class BotWorkflow:
     def __init__(
         self,
@@ -52,12 +57,14 @@ class BotWorkflow:
         access_service: AccessService | None = None,
         default_server_id: int | None = None,
         secret_box: SecretBox | None = None,
+        peer_remover: PeerRemover | None = None,
     ) -> None:
         self._repo = repo
         self._admin_telegram_ids = admin_telegram_ids
         self._access_service = access_service
         self._default_server_id = default_server_id
         self._secret_box = secret_box
+        self._peer_remover = peer_remover
 
     def is_admin(self, telegram_id: int) -> bool:
         if telegram_id in self._admin_telegram_ids:
@@ -368,6 +375,11 @@ class BotWorkflow:
         )
         if device is None:
             return False
+        if self._peer_remover is not None:
+            self._peer_remover.remove_peer(
+                server=self._repo.get_server(int(device["server_id"])),
+                peer_public_key=str(device["peer_public_key"]),
+            )
         return self._repo.revoke_device(
             device_id,
             reason="user_requested",
@@ -383,6 +395,16 @@ class BotWorkflow:
         user = self._repo.get_user_by_telegram_id(telegram_id)
         if user is None:
             return 0
+        devices = sorted(
+            self._repo.list_user_devices(int(user["id"])),
+            key=lambda device: int(device["id"]),
+        )
+        if self._peer_remover is not None:
+            for device in devices:
+                self._peer_remover.remove_peer(
+                    server=self._repo.get_server(int(device["server_id"])),
+                    peer_public_key=str(device["peer_public_key"]),
+                )
         return self._repo.revoke_user_devices(
             int(user["id"]),
             reason="user_reset",

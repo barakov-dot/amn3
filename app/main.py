@@ -75,6 +75,7 @@ def create_workflow(
         access_service=access_service,
         default_server_id=default_server_id,
         secret_box=secret_box,
+        peer_remover=peer_applier,
     )
     return workflow
 

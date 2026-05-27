@@ -3,7 +3,14 @@ from dataclasses import dataclass
 from app.db.connection import connect
 from app.db.repositories import Repository
 from app.db.schema import initialize_schema
-from app.services.traffic import PeerTraffic, TrafficService
+from app.server.ssh import CommandResult
+from app.services.traffic import (
+    AwgDumpTrafficCollector,
+    PeerTraffic,
+    TrafficCollectionError,
+    TrafficService,
+    parse_awg_show_dump,
+)
 
 
 @dataclass
@@ -109,3 +116,98 @@ def test_collect_and_store_traffic_reports_unknown_peer_without_snapshot(tmp_pat
     assert report.stored_count == 0
     assert report.unknown_peers == ("unknown-peer",)
     assert repo.get_latest_device_traffic(device_id) is None
+
+
+def test_parse_awg_show_dump_reads_peer_transfer_counters():
+    dump = "\n".join(
+        [
+            "awg0\tserver-public\tserver-private\t51820\toff",
+            "known-peer\tpsk\t203.0.113.20:50000\t10.8.0.2/32\t1700000000\t1024\t2048\t25",
+            "idle-peer\t(none)\t(none)\t10.8.0.3/32\t0\t0\t0\toff",
+        ]
+    )
+
+    peers = parse_awg_show_dump(
+        dump,
+        collected_at="2026-05-27T12:00:00Z",
+        source="awg:debian-vps-1",
+    )
+
+    assert peers == [
+        PeerTraffic(
+            peer_public_key="known-peer",
+            rx_bytes=1024,
+            tx_bytes=2048,
+            collected_at="2026-05-27T12:00:00Z",
+            source="awg:debian-vps-1",
+        ),
+        PeerTraffic(
+            peer_public_key="idle-peer",
+            rx_bytes=0,
+            tx_bytes=0,
+            collected_at="2026-05-27T12:00:00Z",
+            source="awg:debian-vps-1",
+        ),
+    ]
+
+
+def test_awg_dump_traffic_collector_runs_read_only_dump_command(tmp_path):
+    ssh = RecordingSshClient(
+        result=CommandResult(
+            exit_code=0,
+            stdout="\n".join(
+                [
+                    "awg0\tserver-public\tserver-private\t51820\toff",
+                    "known-peer\tpsk\t203.0.113.20:50000\t10.8.0.2/32\t1700000000\t1024\t2048\t25",
+                ]
+            ),
+            stderr="",
+        )
+    )
+    collector = AwgDumpTrafficCollector(
+        interface="awg0",
+        source="awg:debian-vps-1",
+        ssh_client=ssh,
+        now=lambda: "2026-05-27T12:00:00Z",
+    )
+
+    peers = collector.collect(server_id=1)
+
+    assert ssh.calls == [("awg show awg0 dump", None)]
+    assert peers[0].peer_public_key == "known-peer"
+    assert peers[0].rx_bytes == 1024
+    assert peers[0].tx_bytes == 2048
+
+
+def test_awg_dump_traffic_collector_raises_redacted_error_on_failure():
+    ssh = RecordingSshClient(
+        result=CommandResult(
+            exit_code=1,
+            stdout="",
+            stderr="failed with secret-psk",
+        )
+    )
+    collector = AwgDumpTrafficCollector(
+        interface="awg0",
+        source="awg:debian-vps-1",
+        ssh_client=ssh,
+        now=lambda: "2026-05-27T12:00:00Z",
+    )
+
+    try:
+        collector.collect(server_id=1)
+    except TrafficCollectionError as exc:
+        assert "Traffic collection failed" in str(exc)
+        assert "secret-psk" not in str(exc)
+    else:
+        raise AssertionError("collector must fail on non-zero awg exit")
+
+
+class RecordingSshClient:
+    def __init__(self, *, result):
+        self.calls = []
+        self._result = result
+
+    def run(self, command: str, stdin: str | None = None) -> CommandResult:
+        self.calls.append((command, stdin))
+        return self._result

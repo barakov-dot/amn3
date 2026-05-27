@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import shlex
 from typing import Protocol
 
 from app.db.repositories import Repository
+from app.server.ssh import SshClient
 
 
 @dataclass(frozen=True)
@@ -43,6 +45,41 @@ class TrafficCollector(Protocol):
         pass
 
 
+class TrafficCollectionError(RuntimeError):
+    pass
+
+
+class AwgDumpTrafficCollector:
+    def __init__(
+        self,
+        *,
+        interface: str,
+        source: str,
+        ssh_client: SshClient,
+        now=None,
+    ) -> None:
+        self._interface = interface
+        self._source = source
+        self._ssh_client = ssh_client
+        self._now = now or _utc_now
+
+    def collect(self, server_id: int) -> list[PeerTraffic]:
+        command = f"awg show {shlex.quote(self._interface)} dump"
+        result = self._ssh_client.run(command)
+        if result.exit_code != 0:
+            raise TrafficCollectionError(
+                "Traffic collection failed "
+                f"(exit_code={result.exit_code}). "
+                f"stdout={_stream_status(result.stdout)} "
+                f"stderr={_stream_status(result.stderr)}"
+            )
+        return parse_awg_show_dump(
+            result.stdout,
+            collected_at=self._now(),
+            source=self._source,
+        )
+
+
 class TrafficService:
     def __init__(self, repo: Repository) -> None:
         self._repo = repo
@@ -81,6 +118,33 @@ class TrafficService:
             stored_count=stored_count,
             unknown_peers=tuple(unknown_peers),
         )
+
+
+def parse_awg_show_dump(
+    dump: str,
+    *,
+    collected_at: str,
+    source: str,
+) -> list[PeerTraffic]:
+    peers: list[PeerTraffic] = []
+    for index, line in enumerate(dump.splitlines()):
+        if not line.strip():
+            continue
+        parts = line.split("\t")
+        if index == 0 and len(parts) >= 5 and not _looks_like_peer_row(parts):
+            continue
+        if len(parts) < 7:
+            continue
+        peers.append(
+            PeerTraffic(
+                peer_public_key=parts[0],
+                rx_bytes=int(parts[5]),
+                tx_bytes=int(parts[6]),
+                collected_at=collected_at,
+                source=source,
+            )
+        )
+    return peers
 
 
 def format_bytes(value: int) -> str:
@@ -172,3 +236,15 @@ def _row_get(row, key: str):
         return row[key]
     except (KeyError, IndexError):
         return None
+
+
+def _looks_like_peer_row(parts: list[str]) -> bool:
+    return len(parts) >= 8 and parts[4].isdigit() and parts[5].isdigit() and parts[6].isdigit()
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _stream_status(value: str) -> str:
+    return "present" if value else "empty"

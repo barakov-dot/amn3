@@ -5,6 +5,8 @@ from app.server.peer_apply import (
     PeerApplyInput,
     apply_peer,
     build_peer_apply_dry_run,
+    build_peer_revoke_dry_run,
+    revoke_peer,
 )
 from app.server.ssh import CommandResult
 from app.server_config.loader import load_server_config, select_server
@@ -71,6 +73,31 @@ def test_apply_peer_raises_redacted_error_when_remote_command_fails(tmp_path):
 
     assert "Peer apply failed" in str(exc_info.value)
     assert "secret-psk" not in str(exc_info.value)
+
+
+def test_build_peer_revoke_dry_run_lists_remove_command(tmp_path):
+    server = _server(tmp_path)
+
+    report = build_peer_revoke_dry_run(server, "peer-public")
+
+    assert "Dry-run peer revoke" in report
+    assert "awg set awg0 peer peer-public remove" in report
+    assert "systemctl reload awg-quick@awg0" in report
+    assert "No changes will be made" in report
+
+
+def test_revoke_peer_runs_guarded_remove_command(tmp_path):
+    server = _server(tmp_path)
+    ssh = RecordingSshClient()
+
+    report = revoke_peer(server, "peer-public", ssh_client=ssh)
+
+    assert "Peer revoke succeeded" in report
+    assert len(ssh.calls) == 1
+    command, stdin = ssh.calls[0]
+    assert "awg set awg0 peer peer-public remove" in command
+    assert "systemctl reload awg-quick@awg0" in command
+    assert stdin is None
 
 
 def _server(tmp_path):

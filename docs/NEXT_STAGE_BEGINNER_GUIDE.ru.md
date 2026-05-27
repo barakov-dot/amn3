@@ -509,6 +509,31 @@ python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 -
 python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key PEER_PSK --vpn-ip 10.8.0.2 --apply
 ```
 
+Dry-run удаления peer:
+
+```powershell
+python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --dry-run
+```
+
+Реальное удаление peer также требует явный `--apply`:
+
+```powershell
+python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --apply
+```
+
+Dry-run сбора трафика:
+
+```powershell
+python -m app.cli server collect-traffic --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3 --dry-run
+```
+
+Живой сбор трафика читает `awg show awg0 dump`, сохраняет snapshots в БД и
+обновляет отметки первого/последнего подключения:
+
+```powershell
+python -m app.cli server collect-traffic --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
+```
+
 Для бота автоматическое применение к VPS также выключено по умолчанию. Когда
 `server check` и dry-run прошли успешно, можно включить:
 

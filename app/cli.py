@@ -3,11 +3,21 @@ from pathlib import Path
 
 from app import __version__
 from app.backup.service import BackupService
+from app.db.connection import connect
+from app.db.repositories import Repository
+from app.db.schema import initialize_schema
 from app.server.checks import planned_check_commands, run_server_checks
-from app.server.peer_apply import PeerApplyInput, apply_peer, build_peer_apply_dry_run
+from app.server.peer_apply import (
+    PeerApplyInput,
+    apply_peer,
+    build_peer_apply_dry_run,
+    build_peer_revoke_dry_run,
+    revoke_peer,
+)
 from app.server.ssh import SystemSshClient
 from app.server_config.loader import load_server_config, select_server
 from app.server_config.models import ServerConfig
+from app.services.traffic import AwgDumpTrafficCollector, TrafficService
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -47,6 +57,20 @@ def build_parser() -> argparse.ArgumentParser:
     apply_mode.add_argument("--dry-run", action="store_true")
     apply_mode.add_argument("--apply", action="store_true")
 
+    revoke_peer_parser = server_sub.add_parser("revoke-peer")
+    revoke_peer_parser.add_argument("--config", default="servers.yml")
+    revoke_peer_parser.add_argument("--server", required=True)
+    revoke_peer_parser.add_argument("--public-key", required=True)
+    revoke_mode = revoke_peer_parser.add_mutually_exclusive_group(required=True)
+    revoke_mode.add_argument("--dry-run", action="store_true")
+    revoke_mode.add_argument("--apply", action="store_true")
+
+    collect_traffic = server_sub.add_parser("collect-traffic")
+    collect_traffic.add_argument("--config", default="servers.yml")
+    collect_traffic.add_argument("--server", required=True)
+    collect_traffic.add_argument("--db", default="data/amneziya.sqlite3")
+    collect_traffic.add_argument("--dry-run", action="store_true")
+
     return parser
 
 
@@ -77,6 +101,20 @@ def main() -> None:
             print(build_peer_apply_dry_run(server, peer))
         else:
             print(apply_peer(server, peer, ssh_client=SystemSshClient(server)))
+    elif args.command == "server" and args.server_command == "revoke-peer":
+        config = load_server_config(Path(args.config))
+        server = select_server(config, args.server)
+        if args.dry_run:
+            print(build_peer_revoke_dry_run(server, args.public_key))
+        else:
+            print(revoke_peer(server, args.public_key, ssh_client=SystemSshClient(server)))
+    elif args.command == "server" and args.server_command == "collect-traffic":
+        config = load_server_config(Path(args.config))
+        server = select_server(config, args.server)
+        if args.dry_run:
+            print(run_server_traffic_collection_dry_run(server))
+        else:
+            print(run_server_traffic_collection(server, db_path=Path(args.db)))
 
 
 def run_server_check(server: ServerConfig, *, dry_run: bool) -> str:
@@ -92,6 +130,48 @@ def run_server_check(server: ServerConfig, *, dry_run: bool) -> str:
 
     report = run_server_checks(server, SystemSshClient(server))
     return report.to_text()
+
+
+def run_server_traffic_collection_dry_run(server: ServerConfig) -> str:
+    return "\n".join(
+        [
+            f"Dry-run traffic collection: {server.name}",
+            "No changes will be made.",
+            f"Target: ssh {server.ssh.user}@{server.ssh.host} -p {server.ssh.port}",
+            f"Read-only command: awg show {server.vpn.interface} dump",
+        ]
+    )
+
+
+def run_server_traffic_collection(server: ServerConfig, *, db_path: Path) -> str:
+    conn = connect(db_path)
+    initialize_schema(conn)
+    repo = Repository(conn)
+    server_id = repo.upsert_server_config(
+        name=server.name,
+        host=server.ssh.host,
+        ssh_port=server.ssh.port,
+        endpoint_host=server.vpn.endpoint_host,
+        vpn_port=int(server.vpn.port),
+        vpn_network_cidr=server.vpn.network_cidr,
+        server_address=server.vpn.server_address,
+        server_public_key=server.vpn.server_public_key or "",
+        runtime=server.runtime.type,
+        firewall=server.firewall.provider,
+        max_devices=server.vpn.max_devices,
+    )
+    report = TrafficService(repo).collect_and_store(
+        server_id,
+        AwgDumpTrafficCollector(
+            interface=server.vpn.interface,
+            source=f"awg:{server.name}",
+            ssh_client=SystemSshClient(server),
+        ),
+    )
+    return (
+        f"Traffic collection stored snapshots: {report.stored_count}\n"
+        f"Unknown peers: {len(report.unknown_peers)}"
+    )
 
 
 if __name__ == "__main__":

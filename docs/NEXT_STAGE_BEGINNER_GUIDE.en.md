@@ -412,6 +412,31 @@ Real peer application requires the explicit `--apply` flag:
 python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key PEER_PSK --vpn-ip 10.8.0.2 --apply
 ```
 
+Dry-run peer removal:
+
+```powershell
+python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --dry-run
+```
+
+Real peer removal also requires the explicit `--apply` flag:
+
+```powershell
+python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --apply
+```
+
+Dry-run traffic collection:
+
+```powershell
+python -m app.cli server collect-traffic --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3 --dry-run
+```
+
+Live traffic collection reads `awg show awg0 dump`, stores snapshots in the
+database, and updates first/last connection markers:
+
+```powershell
+python -m app.cli server collect-traffic --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
+```
+
 Automatic VPS application in the bot is also disabled by default. After
 `server check` and dry-run succeed, enable:
 

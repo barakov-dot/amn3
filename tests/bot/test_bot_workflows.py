@@ -333,6 +333,79 @@ def test_user_can_revoke_one_owned_device(tmp_path):
     assert repo.get_device(other_device_id)["status"] == "active"
 
 
+def test_user_revoke_removes_peer_before_marking_device_revoked(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    device_id = _create_encrypted_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="phone",
+    )
+    peer_remover = RecordingPeerRemover()
+    workflow = BotWorkflow(
+        repo=repo,
+        admin_telegram_ids={9001},
+        peer_remover=peer_remover,
+    )
+
+    revoked = workflow.revoke_user_device(
+        telegram_id=1001,
+        device_id=device_id,
+        revoked_at="2026-05-27T12:00:00Z",
+    )
+
+    assert revoked is True
+    assert peer_remover.calls == [
+        {
+            "server_id": server_id,
+            "peer_public_key": "peer-phone",
+        }
+    ]
+    assert repo.get_device(device_id)["status"] == "revoked"
+
+
+def test_user_revoke_keeps_device_active_when_peer_remove_fails(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    device_id = _create_encrypted_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="phone",
+    )
+    workflow = BotWorkflow(
+        repo=repo,
+        admin_telegram_ids={9001},
+        peer_remover=RecordingPeerRemover(error=RuntimeError("remove failed")),
+    )
+
+    try:
+        workflow.revoke_user_device(
+            telegram_id=1001,
+            device_id=device_id,
+            revoked_at="2026-05-27T12:00:00Z",
+        )
+    except RuntimeError as exc:
+        assert "remove failed" in str(exc)
+    else:
+        raise AssertionError("revoke must fail when server-side peer removal fails")
+
+    assert repo.get_device(device_id)["status"] == "active"
+
+
 def test_user_can_reset_all_owned_devices(tmp_path):
     repo = _repo(tmp_path)
     user_id = repo.upsert_user(
@@ -377,6 +450,48 @@ def test_user_can_reset_all_owned_devices(tmp_path):
     assert repo.get_device(first_id)["status"] == "revoked"
     assert repo.get_device(second_id)["status"] == "revoked"
     assert repo.get_device(other_id)["status"] == "active"
+
+
+def test_user_reset_removes_all_owned_peers_before_marking_devices_revoked(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    first_id = _create_encrypted_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="phone",
+    )
+    second_id = _create_encrypted_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="laptop",
+    )
+    peer_remover = RecordingPeerRemover()
+    workflow = BotWorkflow(
+        repo=repo,
+        admin_telegram_ids={9001},
+        peer_remover=peer_remover,
+    )
+
+    changed = workflow.reset_user_devices(
+        telegram_id=1001,
+        revoked_at="2026-05-27T12:00:00Z",
+    )
+
+    assert changed == 2
+    assert peer_remover.calls == [
+        {"server_id": server_id, "peer_public_key": "peer-phone"},
+        {"server_id": server_id, "peer_public_key": "peer-laptop"},
+    ]
+    assert repo.get_device(first_id)["status"] == "revoked"
+    assert repo.get_device(second_id)["status"] == "revoked"
 
 
 def test_database_admin_role_grants_workflow_admin_access(tmp_path):
@@ -503,3 +618,19 @@ def _create_encrypted_device(repo, *, user_id, server_id, name):
         preshared_key_encrypted=secret_box.encrypt_text(f"psk-{name}"),
         config_version="amneziawg_v2",
     )
+
+
+class RecordingPeerRemover:
+    def __init__(self, *, error=None):
+        self.calls = []
+        self._error = error
+
+    def remove_peer(self, *, server, peer_public_key):
+        self.calls.append(
+            {
+                "server_id": int(server["id"]),
+                "peer_public_key": peer_public_key,
+            }
+        )
+        if self._error is not None:
+            raise self._error
