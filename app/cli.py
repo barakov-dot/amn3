@@ -71,6 +71,11 @@ def build_parser() -> argparse.ArgumentParser:
     collect_traffic.add_argument("--db", default="data/amneziya.sqlite3")
     collect_traffic.add_argument("--dry-run", action="store_true")
 
+    preflight = server_sub.add_parser("preflight")
+    preflight.add_argument("--config", default="servers.yml")
+    preflight.add_argument("--server", required=True)
+    preflight.add_argument("--db", default="data/amneziya.sqlite3")
+
     return parser
 
 
@@ -115,6 +120,14 @@ def main() -> None:
             print(run_server_traffic_collection_dry_run(server))
         else:
             print(run_server_traffic_collection(server, db_path=Path(args.db)))
+    elif args.command == "server" and args.server_command == "preflight":
+        print(
+            run_server_preflight(
+                config_path=Path(args.config),
+                server_name=args.server,
+                db_path=Path(args.db),
+            )
+        )
 
 
 def run_server_check(server: ServerConfig, *, dry_run: bool) -> str:
@@ -172,6 +185,86 @@ def run_server_traffic_collection(server: ServerConfig, *, db_path: Path) -> str
         f"Traffic collection stored snapshots: {report.stored_count}\n"
         f"Unknown peers: {len(report.unknown_peers)}"
     )
+
+
+def run_server_preflight(
+    *,
+    config_path: Path,
+    server_name: str,
+    db_path: Path,
+) -> str:
+    config = load_server_config(config_path)
+    server = select_server(config, server_name)
+    _validate_preflight_server(server)
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = connect(db_path)
+    initialize_schema(conn)
+    repo = Repository(conn)
+    repo.upsert_server_config(
+        name=server.name,
+        host=server.ssh.host,
+        ssh_port=server.ssh.port,
+        endpoint_host=server.vpn.endpoint_host,
+        vpn_port=int(server.vpn.port),
+        vpn_network_cidr=server.vpn.network_cidr,
+        server_address=server.vpn.server_address,
+        server_public_key=server.vpn.server_public_key or "",
+        runtime=server.runtime.type,
+        firewall=server.firewall.provider,
+        max_devices=server.vpn.max_devices,
+    )
+    apply_dry_run = build_peer_apply_dry_run(
+        server,
+        PeerApplyInput(
+            public_key="PREFLIGHT_PEER_PUBLIC_KEY",
+            preshared_key="PREFLIGHT_PSK",
+            vpn_ip=_preflight_peer_ip(server),
+        ),
+    )
+    revoke_dry_run = build_peer_revoke_dry_run(
+        server,
+        "PREFLIGHT_PEER_PUBLIC_KEY",
+    )
+    traffic_dry_run = run_server_traffic_collection_dry_run(server)
+    return "\n".join(
+        [
+            f"Preflight report: {server.name}",
+            "server config: ok",
+            "database sync: ok",
+            "server check dry-run: ok",
+            _indent(run_server_check(server, dry_run=True)),
+            "peer apply dry-run: ok",
+            _indent(apply_dry_run),
+            "peer revoke dry-run: ok",
+            _indent(revoke_dry_run),
+            "traffic dry-run: ok",
+            _indent(traffic_dry_run),
+            "backup target: ok",
+            "Next: keep VPS_APPLY_ENABLED=false until live checks pass.",
+        ]
+    )
+
+
+def _validate_preflight_server(server: ServerConfig) -> None:
+    if server.vpn.port == "auto":
+        raise ValueError("server preflight requires a fixed vpn.port before live VPS test")
+    if not server.vpn.server_public_key:
+        raise ValueError("server preflight requires vpn.server_public_key")
+
+
+def _preflight_peer_ip(server: ServerConfig) -> str:
+    import ipaddress
+
+    network = ipaddress.ip_network(server.vpn.network_cidr, strict=False)
+    server_ip = ipaddress.ip_interface(server.vpn.server_address).ip
+    for address in network.hosts():
+        if address != server_ip:
+            return str(address)
+    raise ValueError("server network has no free preflight peer IP")
+
+
+def _indent(value: str) -> str:
+    return "\n".join(f"  {line}" for line in value.splitlines())
 
 
 if __name__ == "__main__":

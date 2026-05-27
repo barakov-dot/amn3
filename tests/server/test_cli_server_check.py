@@ -1,4 +1,5 @@
 from app.cli import build_parser
+from app.cli import run_server_preflight
 from app.cli import run_server_traffic_collection_dry_run
 from app.cli import run_server_check
 from app.server_config.loader import load_server_config, select_server
@@ -197,3 +198,54 @@ def test_run_server_traffic_collection_dry_run_prints_read_only_command(tmp_path
     assert "Dry-run traffic collection" in output
     assert "awg show awg0 dump" in output
     assert "No changes will be made" in output
+
+
+def test_cli_accepts_server_preflight_arguments():
+    parser = build_parser()
+
+    args = parser.parse_args(
+        [
+            "server",
+            "preflight",
+            "--config",
+            "servers.yml",
+            "--server",
+            "debian-vps-1",
+            "--db",
+            "data/amneziya.sqlite3",
+        ]
+    )
+
+    assert args.command == "server"
+    assert args.server_command == "preflight"
+    assert args.config == "servers.yml"
+    assert args.server == "debian-vps-1"
+    assert args.db == "data/amneziya.sqlite3"
+
+
+def test_run_server_preflight_reports_local_readiness(tmp_path):
+    path = tmp_path / "servers.yml"
+    db_path = tmp_path / "amneziya.sqlite3"
+    path.write_text(
+        VALID_YAML.replace(
+            "allowed_ips: 0.0.0.0/0",
+            "allowed_ips: 0.0.0.0/0\n      server_public_key: real-server-public-key",
+        ),
+        encoding="utf-8",
+    )
+
+    output = run_server_preflight(
+        config_path=path,
+        server_name="debian-vps-1",
+        db_path=db_path,
+    )
+
+    assert "Preflight report: debian-vps-1" in output
+    assert "server config: ok" in output
+    assert "database sync: ok" in output
+    assert "server check dry-run: ok" in output
+    assert "peer apply dry-run: ok" in output
+    assert "peer revoke dry-run: ok" in output
+    assert "traffic dry-run: ok" in output
+    assert "backup target: ok" in output
+    assert "VPS_APPLY_ENABLED=false" in output
