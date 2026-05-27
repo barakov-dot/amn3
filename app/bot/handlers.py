@@ -12,10 +12,16 @@ from app.bot.ux import (
     MY_TARIFF_CALLBACK,
     MY_TRAFFIC_CALLBACK,
     REQUEST_CONFIG_PREFIX,
+    REQUEST_PLAN_PREFIX,
     USER_RESEND_PREFIX,
+    USER_RESET_DEVICES_CONFIRM_CALLBACK,
     USER_RESET_DEVICES_CALLBACK,
+    USER_REVOKE_CONFIRM_PREFIX,
     USER_REVOKE_PREFIX,
+    build_plan_keyboard,
     build_user_device_keyboard,
+    build_user_reset_confirm_keyboard,
+    build_user_revoke_confirm_keyboard,
     build_user_devices_reset_keyboard,
     build_config_version_keyboard,
     build_admin_order_keyboard,
@@ -27,6 +33,7 @@ from app.bot.ux import (
     render_config_version_prompt,
     render_my_devices,
     render_my_tariff,
+    render_plan_prompt,
     render_start_text,
     render_user_traffic,
 )
@@ -61,6 +68,22 @@ async def handle_config_request(callback, *, workflow) -> None:
         await callback.answer()
         return
 
+    plans = workflow.list_active_plans()
+    await callback.message.answer(
+        render_plan_prompt(config_version=config_version),
+        reply_markup=build_plan_keyboard(config_version=config_version, plans=plans),
+    )
+    await callback.answer()
+
+
+async def handle_plan_request(callback, *, workflow) -> None:
+    parsed = _parse_plan_callback(str(callback.data))
+    if parsed is None:
+        await callback.message.answer("Unknown tariff request.")
+        await callback.answer()
+        return
+
+    config_version, plan_id = parsed
     user = callback.from_user
     result = workflow.request_access(
         telegram_id=int(user.id),
@@ -68,6 +91,7 @@ async def handle_config_request(callback, *, workflow) -> None:
         first_name=user.first_name,
         last_name=user.last_name,
         config_version=config_version,
+        plan_id=plan_id,
     )
     await callback.message.answer(result.text)
     await callback.answer()
@@ -129,6 +153,20 @@ async def handle_user_revoke_device(callback, *, workflow) -> None:
         await callback.answer()
         return
 
+    await callback.message.answer(
+        f"Confirm device deletion for device #{device_id}.",
+        reply_markup=build_user_revoke_confirm_keyboard(device_id=device_id),
+    )
+    await callback.answer()
+
+
+async def handle_user_revoke_device_confirm(callback, *, workflow) -> None:
+    device_id = _parse_int_suffix(str(callback.data), USER_REVOKE_CONFIRM_PREFIX)
+    if device_id is None:
+        await callback.message.answer("Unknown delete confirmation.")
+        await callback.answer()
+        return
+
     if not workflow.revoke_user_device(
         telegram_id=int(callback.from_user.id),
         device_id=device_id,
@@ -145,6 +183,14 @@ async def handle_user_revoke_device(callback, *, workflow) -> None:
 
 
 async def handle_user_reset_devices(callback, *, workflow) -> None:
+    await callback.message.answer(
+        "Confirm reset of all devices.",
+        reply_markup=build_user_reset_confirm_keyboard(),
+    )
+    await callback.answer()
+
+
+async def handle_user_reset_devices_confirm(callback, *, workflow) -> None:
     changed = workflow.reset_user_devices(telegram_id=int(callback.from_user.id))
     await callback.message.answer(
         f"{changed} device(s) were removed. "
@@ -325,6 +371,10 @@ def is_config_version_callback(data: str) -> bool:
     return data.startswith(f"{REQUEST_CONFIG_PREFIX}:")
 
 
+def is_plan_request_callback(data: str) -> bool:
+    return data.startswith(f"{REQUEST_PLAN_PREFIX}:")
+
+
 def is_my_traffic_callback(data: str) -> bool:
     return data == MY_TRAFFIC_CALLBACK
 
@@ -345,8 +395,16 @@ def is_user_revoke_callback(data: str) -> bool:
     return data.startswith(f"{USER_REVOKE_PREFIX}:")
 
 
+def is_user_revoke_confirm_callback(data: str) -> bool:
+    return data.startswith(f"{USER_REVOKE_CONFIRM_PREFIX}:")
+
+
 def is_user_reset_devices_callback(data: str) -> bool:
     return data == USER_RESET_DEVICES_CALLBACK
+
+
+def is_user_reset_devices_confirm_callback(data: str) -> bool:
+    return data == USER_RESET_DEVICES_CONFIRM_CALLBACK
 
 
 def is_admin_pending_callback(data: str) -> bool:
@@ -400,6 +458,16 @@ def _parse_int_suffix(data: str, prefix: str) -> int | None:
         return int(data.removeprefix(marker))
     except ValueError:
         return None
+
+
+def _parse_plan_callback(data: str) -> tuple[str, str] | None:
+    marker = f"{REQUEST_PLAN_PREFIX}:"
+    if not data.startswith(marker):
+        return None
+    parts = data.removeprefix(marker).split(":", maxsplit=1)
+    if len(parts) != 2:
+        return None
+    return parts[0], parts[1]
 
 
 def _parse_target_user_command(text: str) -> tuple[int, str | None, str | None] | None:

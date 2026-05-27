@@ -28,6 +28,25 @@ def test_request_access_creates_order_with_selected_config_version(tmp_path):
     assert "14 days" in result.text
 
 
+def test_list_active_plans_returns_available_tariffs_for_bot_flow(tmp_path):
+    repo = _repo(tmp_path)
+    repo.seed_default_plans()
+    workflow = BotWorkflow(repo=repo, admin_telegram_ids={9001})
+
+    plans = workflow.list_active_plans()
+
+    assert [plan["id"] for plan in plans] == [
+        "days_3",
+        "days_7",
+        "days_10",
+        "days_14",
+        "days_30",
+        "days_60",
+        "days_90",
+        "days_180",
+    ]
+
+
 def test_build_user_traffic_views_reads_user_devices_and_latest_stats(tmp_path):
     repo = _repo(tmp_path)
     user_id = repo.upsert_user(

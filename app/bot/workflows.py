@@ -196,6 +196,9 @@ class BotWorkflow:
             granted_by_admin_telegram_id=admin_telegram_id,
         )
 
+    def list_active_plans(self):
+        return self._repo.list_active_plans()
+
     def build_user_traffic_views(
         self,
         *,

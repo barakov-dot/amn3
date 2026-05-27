@@ -310,6 +310,17 @@ The bot can create a manual user and order before the person uses `/start`.
 Telegram delivery may still require the person to open the bot first; if delivery
 fails, the administrator keeps the generated config package for manual transfer.
 
+Current user bot flow:
+
+1. User opens `/start`.
+2. User selects `Request config`.
+3. User selects AmneziaWG version: `amneziawg_v1_5` or `amneziawg_v2`.
+4. User selects an active tariff such as `7 days` or `30 days`.
+5. Bot creates an admin-review order.
+
+Device deletion and full device reset require a separate confirmation tap. This
+prevents accidental removal from the bot account area.
+
 ## Step 2. Create `servers.yml`
 
 `servers.yml` must not be committed.

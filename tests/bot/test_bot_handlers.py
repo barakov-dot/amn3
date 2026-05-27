@@ -14,19 +14,25 @@ from app.bot.handlers import (
     handle_my_devices,
     handle_my_tariff,
     handle_my_traffic,
+    handle_plan_request,
     handle_request_config_prompt,
     handle_start,
     handle_user_resend_config,
     handle_user_reset_devices,
+    handle_user_reset_devices_confirm,
     handle_user_revoke_device,
+    handle_user_revoke_device_confirm,
 )
 from app.bot.ux import (
     MY_DEVICES_CALLBACK,
     MY_TARIFF_CALLBACK,
     MY_TRAFFIC_CALLBACK,
     REQUEST_CONFIG_PREFIX,
+    REQUEST_PLAN_PREFIX,
     USER_RESEND_PREFIX,
+    USER_RESET_DEVICES_CONFIRM_CALLBACK,
     USER_RESET_DEVICES_CALLBACK,
+    USER_REVOKE_CONFIRM_PREFIX,
     USER_REVOKE_PREFIX,
 )
 
@@ -59,7 +65,7 @@ def test_handle_request_config_prompt_shows_version_choices():
     assert callback.answered is True
 
 
-def test_handle_config_request_creates_order_for_selected_version():
+def test_handle_config_request_shows_tariff_choices_for_selected_version():
     callback = FakeCallback(
         data=f"{REQUEST_CONFIG_PREFIX}:amneziawg_v1_5",
         user_id=1001,
@@ -70,7 +76,27 @@ def test_handle_config_request_creates_order_for_selected_version():
 
     asyncio.run(handle_config_request(callback, workflow=workflow))
 
-    assert workflow.requests == [("alice", "amneziawg_v1_5")]
+    assert workflow.requests == []
+    assert "Choose tariff" in callback.message.answers[0]["text"]
+    assert _button_texts(callback.message.answers[0]["reply_markup"]) == [
+        ["7 days"],
+        ["30 days"],
+    ]
+    assert callback.answered is True
+
+
+def test_handle_plan_request_creates_order_for_selected_version_and_plan():
+    callback = FakeCallback(
+        data=f"{REQUEST_PLAN_PREFIX}:amneziawg_v1_5:days_30",
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_plan_request(callback, workflow=workflow))
+
+    assert workflow.requests == [("alice", "amneziawg_v1_5", "days_30")]
     assert "request #42" in callback.message.answers[0]["text"]
     assert callback.answered is True
 
@@ -160,12 +186,31 @@ def test_handle_user_revoke_device_revokes_owned_device():
 
     asyncio.run(handle_user_revoke_device(callback, workflow=workflow))
 
+    assert workflow.revoked_devices == []
+    assert "Confirm device deletion" in callback.message.answers[0]["text"]
+    assert _button_texts(callback.message.answers[0]["reply_markup"]) == [
+        ["Confirm delete"]
+    ]
+    assert callback.answered is True
+
+
+def test_handle_user_revoke_device_confirm_revokes_owned_device():
+    callback = FakeCallback(
+        data=f"{USER_REVOKE_CONFIRM_PREFIX}:7",
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_user_revoke_device_confirm(callback, workflow=workflow))
+
     assert workflow.revoked_devices == [7]
     assert "removed" in callback.message.answers[0]["text"]
     assert callback.answered is True
 
 
-def test_handle_user_reset_devices_revokes_all_owned_devices():
+def test_handle_user_reset_devices_asks_for_confirmation():
     callback = FakeCallback(
         data=USER_RESET_DEVICES_CALLBACK,
         user_id=1001,
@@ -175,6 +220,25 @@ def test_handle_user_reset_devices_revokes_all_owned_devices():
     workflow = FakeWorkflow(admin_ids={9001})
 
     asyncio.run(handle_user_reset_devices(callback, workflow=workflow))
+
+    assert workflow.reset_requests == []
+    assert "Confirm reset" in callback.message.answers[0]["text"]
+    assert _button_texts(callback.message.answers[0]["reply_markup"]) == [
+        ["Confirm reset"]
+    ]
+    assert callback.answered is True
+
+
+def test_handle_user_reset_devices_confirm_revokes_all_owned_devices():
+    callback = FakeCallback(
+        data=USER_RESET_DEVICES_CONFIRM_CALLBACK,
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_user_reset_devices_confirm(callback, workflow=workflow))
 
     assert workflow.reset_requests == [1001]
     assert "2 device" in callback.message.answers[0]["text"]
@@ -404,9 +468,16 @@ class FakeWorkflow:
         first_name,
         last_name,
         config_version,
+        plan_id=None,
     ):
-        self.requests.append((username, config_version))
+        self.requests.append((username, config_version, plan_id))
         return SimpleNamespace(order_id=42, text="Access request #42 was created.")
+
+    def list_active_plans(self):
+        return [
+            {"id": "days_7", "name": "7 days"},
+            {"id": "days_30", "name": "30 days"},
+        ]
 
     def build_user_traffic_views(self, *, telegram_id, now=None):
         return [

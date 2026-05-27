@@ -16,11 +16,14 @@ from app.bot.handlers import (
     handle_my_devices,
     handle_my_tariff,
     handle_my_traffic,
+    handle_plan_request,
     handle_request_config_prompt,
     handle_start,
     handle_user_resend_config,
     handle_user_reset_devices,
+    handle_user_reset_devices_confirm,
     handle_user_revoke_device,
+    handle_user_revoke_device_confirm,
 )
 from app.bot.ux import (
     ADMIN_APPROVE_PREFIX,
@@ -32,8 +35,11 @@ from app.bot.ux import (
     MY_TARIFF_CALLBACK,
     MY_TRAFFIC_CALLBACK,
     REQUEST_CONFIG_PREFIX,
+    REQUEST_PLAN_PREFIX,
     USER_RESEND_PREFIX,
+    USER_RESET_DEVICES_CONFIRM_CALLBACK,
     USER_RESET_DEVICES_CALLBACK,
+    USER_REVOKE_CONFIRM_PREFIX,
     USER_REVOKE_PREFIX,
 )
 
@@ -68,6 +74,10 @@ def create_dispatcher(*, workflow=None) -> Dispatcher:
     async def request_config_version(callback: CallbackQuery) -> None:
         await handle_config_request(callback, workflow=workflow)
 
+    @router.callback_query(F.data.startswith(f"{REQUEST_PLAN_PREFIX}:"))
+    async def request_plan(callback: CallbackQuery) -> None:
+        await handle_plan_request(callback, workflow=workflow)
+
     @router.callback_query(F.data == MY_TRAFFIC_CALLBACK)
     async def my_traffic(callback: CallbackQuery) -> None:
         await handle_my_traffic(callback, workflow=workflow)
@@ -88,9 +98,17 @@ def create_dispatcher(*, workflow=None) -> Dispatcher:
     async def user_revoke(callback: CallbackQuery) -> None:
         await handle_user_revoke_device(callback, workflow=workflow)
 
+    @router.callback_query(F.data.startswith(f"{USER_REVOKE_CONFIRM_PREFIX}:"))
+    async def user_revoke_confirm(callback: CallbackQuery) -> None:
+        await handle_user_revoke_device_confirm(callback, workflow=workflow)
+
     @router.callback_query(F.data == USER_RESET_DEVICES_CALLBACK)
     async def user_reset_devices(callback: CallbackQuery) -> None:
         await handle_user_reset_devices(callback, workflow=workflow)
+
+    @router.callback_query(F.data == USER_RESET_DEVICES_CONFIRM_CALLBACK)
+    async def user_reset_devices_confirm(callback: CallbackQuery) -> None:
+        await handle_user_reset_devices_confirm(callback, workflow=workflow)
 
     @router.callback_query(F.data == ADMIN_PENDING_CALLBACK)
     async def admin_pending(callback: CallbackQuery) -> None:

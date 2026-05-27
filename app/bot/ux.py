@@ -10,12 +10,15 @@ from app.vpn.config_versions import SUPPORTED_CONFIG_VERSIONS
 
 
 REQUEST_CONFIG_PREFIX = "user:request_config"
+REQUEST_PLAN_PREFIX = "user:request_plan"
 MY_TARIFF_CALLBACK = "user:tariff"
 MY_TRAFFIC_CALLBACK = "user:traffic"
 MY_DEVICES_CALLBACK = "user:devices"
 USER_RESEND_PREFIX = "user:resend"
 USER_REVOKE_PREFIX = "user:revoke"
+USER_REVOKE_CONFIRM_PREFIX = "user:revoke_confirm"
 USER_RESET_DEVICES_CALLBACK = "user:reset_devices"
+USER_RESET_DEVICES_CONFIRM_CALLBACK = "user:reset_devices_confirm"
 ADMIN_PENDING_CALLBACK = "admin:pending"
 ADMIN_TRAFFIC_CALLBACK = "admin:traffic"
 ADMIN_TEMPLATES_CALLBACK = "admin:templates"
@@ -82,6 +85,24 @@ def build_config_version_keyboard(*, prefix: str) -> InlineKeyboardMarkup:
     )
 
 
+def build_plan_keyboard(
+    *,
+    config_version: str,
+    plans: Iterable[Mapping[str, object]],
+) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=str(plan["name"]),
+                    callback_data=f"{REQUEST_PLAN_PREFIX}:{config_version}:{plan['id']}",
+                )
+            ]
+            for plan in plans
+        ]
+    )
+
+
 def build_admin_order_keyboard(*, order_id: int) -> InlineKeyboardMarkup:
     prefix = f"{ADMIN_APPROVE_PREFIX}:{order_id}"
     return InlineKeyboardMarkup(
@@ -142,6 +163,32 @@ def build_user_devices_reset_keyboard() -> InlineKeyboardMarkup:
     )
 
 
+def build_user_revoke_confirm_keyboard(*, device_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Confirm delete",
+                    callback_data=f"{USER_REVOKE_CONFIRM_PREFIX}:{device_id}",
+                )
+            ]
+        ]
+    )
+
+
+def build_user_reset_confirm_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Confirm reset",
+                    callback_data=USER_RESET_DEVICES_CONFIRM_CALLBACK,
+                )
+            ]
+        ]
+    )
+
+
 def build_admin_navigation_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
@@ -175,6 +222,10 @@ def render_start_text(*, first_name: str | None, is_admin: bool) -> str:
 
 def render_config_version_prompt() -> str:
     return "Choose the AmneziaWG config version for this device."
+
+
+def render_plan_prompt(*, config_version: str) -> str:
+    return f"Choose tariff for {_version_label(config_version)}."
 
 
 def render_access_request_created(

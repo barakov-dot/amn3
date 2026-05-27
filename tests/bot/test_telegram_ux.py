@@ -8,15 +8,21 @@ from app.bot.ux import (
     MY_TARIFF_CALLBACK,
     MY_TRAFFIC_CALLBACK,
     REQUEST_CONFIG_PREFIX,
+    REQUEST_PLAN_PREFIX,
     USER_RESEND_PREFIX,
+    USER_RESET_DEVICES_CONFIRM_CALLBACK,
     USER_RESET_DEVICES_CALLBACK,
+    USER_REVOKE_CONFIRM_PREFIX,
     USER_REVOKE_PREFIX,
     VERSION_LABELS,
     build_admin_order_keyboard,
     build_admin_resend_keyboard,
     build_config_version_keyboard,
     build_main_menu,
+    build_plan_keyboard,
     build_user_device_keyboard,
+    build_user_reset_confirm_keyboard,
+    build_user_revoke_confirm_keyboard,
     build_user_devices_reset_keyboard,
     render_admin_approval,
     render_admin_pending_orders,
@@ -59,6 +65,22 @@ def test_config_version_keyboard_offers_amnezia_1_5_and_2_0():
     assert _callback_data(keyboard) == [
         [f"{REQUEST_CONFIG_PREFIX}:amneziawg_v1_5"],
         [f"{REQUEST_CONFIG_PREFIX}:amneziawg_v2"],
+    ]
+
+
+def test_plan_keyboard_uses_selected_config_version_and_plan_ids():
+    keyboard = build_plan_keyboard(
+        config_version="amneziawg_v2",
+        plans=[
+            {"id": "days_7", "name": "7 days"},
+            {"id": "days_30", "name": "30 days"},
+        ],
+    )
+
+    assert _button_texts(keyboard) == [["7 days"], ["30 days"]]
+    assert _callback_data(keyboard) == [
+        [f"{REQUEST_PLAN_PREFIX}:amneziawg_v2:days_7"],
+        [f"{REQUEST_PLAN_PREFIX}:amneziawg_v2:days_30"],
     ]
 
 
@@ -264,11 +286,25 @@ def test_user_device_keyboard_offers_resend_and_revoke_actions():
     ]
 
 
+def test_user_revoke_confirm_keyboard_targets_confirmed_device_delete():
+    keyboard = build_user_revoke_confirm_keyboard(device_id=7)
+
+    assert _button_texts(keyboard) == [["Confirm delete"]]
+    assert _callback_data(keyboard) == [[f"{USER_REVOKE_CONFIRM_PREFIX}:7"]]
+
+
 def test_user_devices_reset_keyboard_targets_all_user_devices():
     keyboard = build_user_devices_reset_keyboard()
 
     assert _button_texts(keyboard) == [["Reset all devices"]]
     assert _callback_data(keyboard) == [[USER_RESET_DEVICES_CALLBACK]]
+
+
+def test_user_reset_confirm_keyboard_targets_confirmed_reset():
+    keyboard = build_user_reset_confirm_keyboard()
+
+    assert _button_texts(keyboard) == [["Confirm reset"]]
+    assert _callback_data(keyboard) == [[USER_RESET_DEVICES_CONFIRM_CALLBACK]]
 
 
 def _button_texts(markup):
