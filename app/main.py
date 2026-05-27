@@ -12,6 +12,7 @@ from app.db.schema import initialize_schema
 from app.security.crypto import SecretBox
 from app.server.peer_apply import ServerConfigPeerApplier
 from app.server_config.loader import load_server_config, select_server
+from app.server_config.models import ServerConfig
 from app.services.access import AccessService
 
 
@@ -49,14 +50,16 @@ def create_workflow(
     initialize_schema(conn)
     repo = Repository(conn)
     repo.seed_default_plans()
-    default_server_id = repo.ensure_default_server(
-        name="local",
-        network_cidr=default_vpn_network_cidr,
-    )
     peer_applier = None
     if vps_apply_enabled:
         server_config = select_server(load_server_config(server_config_path), server_name)
+        default_server_id = _sync_server_config(repo, server_config)
         peer_applier = ServerConfigPeerApplier(server_config)
+    else:
+        default_server_id = repo.ensure_default_server(
+            name="local",
+            network_cidr=default_vpn_network_cidr,
+        )
 
     access_service = AccessService(
         repo=repo,
@@ -74,6 +77,26 @@ def create_workflow(
         secret_box=secret_box,
     )
     return workflow
+
+
+def _sync_server_config(repo: Repository, server: ServerConfig) -> int:
+    if server.vpn.port == "auto":
+        raise ValueError("VPS_APPLY_ENABLED requires a fixed vpn.port")
+    if not server.vpn.server_public_key:
+        raise ValueError("VPS_APPLY_ENABLED requires vpn.server_public_key in servers.yml")
+    return repo.upsert_server_config(
+        name=server.name,
+        host=server.ssh.host,
+        ssh_port=server.ssh.port,
+        endpoint_host=server.vpn.endpoint_host,
+        vpn_port=int(server.vpn.port),
+        vpn_network_cidr=server.vpn.network_cidr,
+        server_address=server.vpn.server_address,
+        server_public_key=server.vpn.server_public_key,
+        runtime=server.runtime.type,
+        firewall=server.firewall.provider,
+        max_devices=server.vpn.max_devices,
+    )
 
 
 if __name__ == "__main__":

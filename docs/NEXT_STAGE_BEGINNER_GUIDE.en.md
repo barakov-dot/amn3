@@ -360,6 +360,7 @@ servers:
       server_address: "10.8.0.1/24"
       dns: "1.1.1.1"
       allowed_ips: "0.0.0.0/0"
+      server_public_key: "PUBLIC_KEY_FROM_AWG_SERVER"
       max_devices: 254
     firewall:
       provider: "ufw"
@@ -368,6 +369,10 @@ servers:
       type: "host_systemd"
       service_name: "awg-quick@awg0"
 ```
+
+`server_public_key` is required for client configs. When
+`VPS_APPLY_ENABLED=true`, the bot synchronizes this server into the database and
+issues user configs with the real endpoint, port, CIDR, and public key.
 
 ## Step 3. Run Local Tests
 

@@ -455,6 +455,7 @@ servers:
       server_address: "10.8.0.1/24"
       dns: "1.1.1.1"
       allowed_ips: "0.0.0.0/0"
+      server_public_key: "PUBLIC_KEY_FROM_AWG_SERVER"
       max_devices: 254
 
     firewall:
@@ -465,6 +466,10 @@ servers:
       type: "host_systemd"
       service_name: "awg-quick@awg0"
 ```
+
+`server_public_key` нужен для клиентских конфигов. Когда включен
+`VPS_APPLY_ENABLED=true`, бот синхронизирует параметры этого сервера в БД и
+выдает пользователю конфиг с реальным endpoint, портом, CIDR и public key.
 
 ## Шаг 3. Проверить локальные тесты
 

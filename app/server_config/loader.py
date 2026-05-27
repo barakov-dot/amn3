@@ -67,6 +67,11 @@ def _parse_server(item: Any) -> ServerConfig:
             dns=str(_required(vpn, "dns")),
             allowed_ips=str(_required(vpn, "allowed_ips")),
             max_devices=int(_required(vpn, "max_devices")),
+            server_public_key=(
+                None
+                if vpn.get("server_public_key") is None
+                else str(vpn["server_public_key"])
+            ),
         ),
         firewall=FirewallConfig(
             provider=str(_required(firewall, "provider")),

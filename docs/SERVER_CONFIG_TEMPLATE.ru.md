@@ -37,6 +37,7 @@ servers:
       server_address: "10.8.0.1/24"
       dns: "1.1.1.1"
       allowed_ips: "0.0.0.0/0"
+      server_public_key: "CHANGE_ME_AWG_SERVER_PUBLIC_KEY"
       max_devices: 254
 
     firewall:
@@ -106,6 +107,7 @@ VPN_SERVER_RUNTIME=host_systemd
 - `ssh.user`;
 - `ssh.auth.private_key_path` или другой способ доступа;
 - `vpn.endpoint_host`;
+- `vpn.server_public_key`;
 - Telegram bot token;
 - Telegram ID администраторов.
 

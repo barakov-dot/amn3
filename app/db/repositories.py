@@ -136,6 +136,72 @@ class Repository:
         ).fetchone()
         return int(row["id"])
 
+    def upsert_server_config(
+        self,
+        *,
+        name: str,
+        host: str,
+        ssh_port: int,
+        endpoint_host: str,
+        vpn_port: int,
+        vpn_network_cidr: str,
+        server_address: str,
+        server_public_key: str,
+        runtime: str,
+        firewall: str,
+        max_devices: int,
+    ) -> int:
+        normalized_server_address = _host_address(server_address)
+        self._conn.execute(
+            """
+            INSERT INTO servers (
+                name,
+                host,
+                ssh_port,
+                endpoint_host,
+                vpn_port,
+                vpn_network_cidr,
+                server_address,
+                server_public_key,
+                runtime,
+                firewall,
+                max_devices
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(name) DO UPDATE SET
+                host = excluded.host,
+                ssh_port = excluded.ssh_port,
+                endpoint_host = excluded.endpoint_host,
+                vpn_port = excluded.vpn_port,
+                vpn_network_cidr = excluded.vpn_network_cidr,
+                server_address = excluded.server_address,
+                server_public_key = excluded.server_public_key,
+                runtime = excluded.runtime,
+                firewall = excluded.firewall,
+                max_devices = excluded.max_devices,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (
+                name,
+                host,
+                ssh_port,
+                endpoint_host,
+                vpn_port,
+                vpn_network_cidr,
+                normalized_server_address,
+                server_public_key,
+                runtime,
+                firewall,
+                max_devices,
+            ),
+        )
+        self._commit()
+        row = self._conn.execute(
+            "SELECT id FROM servers WHERE name = ?",
+            (name,),
+        ).fetchone()
+        return int(row["id"])
+
     def seed_default_plans(self) -> None:
         for duration_days in DEFAULT_PLAN_DAYS:
             self.upsert_plan(
@@ -623,3 +689,10 @@ class Repository:
 def _first_host_address(network_cidr: str) -> str:
     network = ipaddress.ip_network(network_cidr, strict=False)
     return str(next(network.hosts(), network.network_address))
+
+
+def _host_address(value: str) -> str:
+    try:
+        return str(ipaddress.ip_interface(value).ip)
+    except ValueError:
+        return str(ipaddress.ip_address(value))

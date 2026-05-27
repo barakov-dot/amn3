@@ -25,6 +25,7 @@ class VpnConfig:
     dns: str
     allowed_ips: str
     max_devices: int
+    server_public_key: str | None = None
 
 
 @dataclass(frozen=True)

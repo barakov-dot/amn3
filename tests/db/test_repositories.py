@@ -37,6 +37,50 @@ def test_repository_creates_user_server_order_and_device(tmp_path):
     assert repo.get_device(device_id)["vpn_ip"] == "10.8.0.2"
 
 
+def test_upsert_server_config_updates_existing_server_for_live_vps(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+
+    first_id = repo.upsert_server_config(
+        name="debian-vps-1",
+        host="203.0.113.10",
+        ssh_port=22,
+        endpoint_host="203.0.113.10",
+        vpn_port=30001,
+        vpn_network_cidr="10.8.0.0/24",
+        server_address="10.8.0.1/24",
+        server_public_key="server-public-v1",
+        runtime="host_systemd",
+        firewall="ufw",
+        max_devices=254,
+    )
+    second_id = repo.upsert_server_config(
+        name="debian-vps-1",
+        host="203.0.113.11",
+        ssh_port=2222,
+        endpoint_host="vpn.example.com",
+        vpn_port=30002,
+        vpn_network_cidr="10.9.0.0/24",
+        server_address="10.9.0.1/24",
+        server_public_key="server-public-v2",
+        runtime="host_systemd",
+        firewall="ufw",
+        max_devices=128,
+    )
+
+    server = repo.get_server(first_id)
+    assert second_id == first_id
+    assert server["host"] == "203.0.113.11"
+    assert server["ssh_port"] == 2222
+    assert server["endpoint_host"] == "vpn.example.com"
+    assert server["vpn_port"] == 30002
+    assert server["vpn_network_cidr"] == "10.9.0.0/24"
+    assert server["server_address"] == "10.9.0.1"
+    assert server["server_public_key"] == "server-public-v2"
+    assert server["max_devices"] == 128
+
+
 def test_invalid_device_status_fails(tmp_path):
     conn = connect(tmp_path / "test.sqlite3")
     initialize_schema(conn)
