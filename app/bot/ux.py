@@ -113,6 +113,24 @@ def render_access_request_created(*, order_id: int, config_version: str) -> str:
     )
 
 
+def render_admin_approval(
+    *,
+    order_id: int,
+    device_id: int,
+    user_telegram_id: int,
+    config_version: str,
+) -> str:
+    return (
+        f"Access request #{order_id} approved.\n"
+        f"Created device #{device_id} for telegram_id={user_telegram_id}.\n"
+        f"Config: {_version_label(config_version)}."
+    )
+
+
+def render_user_config_ready(*, config_version: str) -> str:
+    return f"Your {_version_label(config_version)} VPN config is ready."
+
+
 def render_user_traffic(views: Iterable[DeviceTrafficView]) -> str:
     lines = ["Your traffic"]
     has_devices = False

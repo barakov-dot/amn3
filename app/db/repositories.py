@@ -63,6 +63,9 @@ class Repository:
             (telegram_id,),
         ).fetchone()
 
+    def get_user(self, user_id: int) -> sqlite3.Row:
+        return self._fetch_one("SELECT * FROM users WHERE id = ?", (user_id,))
+
     def ensure_default_server(self, *, name: str, network_cidr: str) -> int:
         self._conn.execute(
             """

@@ -2,6 +2,7 @@ import asyncio
 from types import SimpleNamespace
 
 from app.bot.handlers import (
+    handle_admin_approve,
     handle_admin_pending,
     handle_config_request,
     handle_my_traffic,
@@ -86,6 +87,59 @@ def test_handle_admin_pending_rejects_non_admin():
     assert callback.answered is True
 
 
+def test_handle_admin_pending_renders_approve_buttons_for_each_order():
+    callback = FakeCallback(
+        data="admin:pending",
+        user_id=9001,
+        username="admin",
+        first_name="Admin",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_pending(callback, workflow=workflow))
+
+    assert "Pending orders" in callback.message.answers[0]["text"]
+    assert callback.message.answers[1]["text"] == "Order #11"
+    assert _button_texts(callback.message.answers[1]["reply_markup"]) == [
+        ["Approve: AmneziaWG 1.5"],
+        ["Approve: AmneziaWG 2.0"],
+    ]
+    assert callback.answered is True
+
+
+def test_handle_admin_approve_calls_workflow_and_returns_config_preview():
+    callback = FakeCallback(
+        data="admin:approve:11:amneziawg_v1_5",
+        user_id=9001,
+        username="admin",
+        first_name="Admin",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_approve(callback, workflow=workflow))
+
+    assert workflow.approvals == [(11, "amneziawg_v1_5")]
+    assert "approved" in callback.message.answers[0]["text"]
+    assert "[Interface]" in callback.message.answers[1]["text"]
+    assert callback.answered is True
+
+
+def test_handle_admin_approve_rejects_non_admin():
+    callback = FakeCallback(
+        data="admin:approve:11:amneziawg_v1_5",
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_approve(callback, workflow=workflow))
+
+    assert callback.message.answers[0]["text"] == "Admin access required."
+    assert workflow.approvals == []
+    assert callback.answered is True
+
+
 class FakeMessage:
     def __init__(self, *, user_id, username=None, first_name=None, last_name=None):
         self.from_user = SimpleNamespace(
@@ -126,6 +180,7 @@ class FakeWorkflow:
         self._admin_ids = admin_ids
         self._traffic_text_marker = traffic_text_marker
         self.requests = []
+        self.approvals = []
 
     def is_admin(self, telegram_id):
         return telegram_id in self._admin_ids
@@ -158,6 +213,33 @@ class FakeWorkflow:
                 is_stale=False,
             )
         ]
+
+    def list_pending_orders(self, *, admin_telegram_id):
+        if not self.is_admin(admin_telegram_id):
+            return []
+        return [
+            {
+                "id": 11,
+                "telegram_id": 1001,
+                "username": "alice",
+                "first_name": "Alice",
+                "last_name": None,
+                "status": "manual_review",
+                "created_at": "2026-05-27 12:00:00",
+            }
+        ]
+
+    def approve_order(self, *, admin_telegram_id, order_id, config_version):
+        if not self.is_admin(admin_telegram_id):
+            return None
+        self.approvals.append((order_id, config_version))
+        return SimpleNamespace(
+            device_id=7,
+            user_telegram_id=1001,
+            admin_text="Access request #11 approved.",
+            user_text="Your VPN config is ready.",
+            config_text="[Interface]\nPrivateKey = test",
+        )
 
 
 def _button_texts(markup):

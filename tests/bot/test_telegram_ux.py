@@ -7,6 +7,7 @@ from app.bot.ux import (
     build_admin_order_keyboard,
     build_config_version_keyboard,
     build_main_menu,
+    render_admin_approval,
     render_admin_pending_orders,
     render_admin_traffic,
     render_user_traffic,
@@ -132,6 +133,20 @@ def test_admin_traffic_keyboard_links_pending_orders_and_traffic():
     assert "tablet" in text
     assert "12.0 KiB" in text
     assert _callback_data(keyboard) == [[ADMIN_PENDING_CALLBACK], [ADMIN_TRAFFIC_CALLBACK]]
+
+
+def test_render_admin_approval_mentions_order_device_and_user():
+    text = render_admin_approval(
+        order_id=11,
+        device_id=7,
+        user_telegram_id=1001,
+        config_version="amneziawg_v2",
+    )
+
+    assert "Access request #11 approved" in text
+    assert "device #7" in text
+    assert "telegram_id=1001" in text
+    assert "AmneziaWG 2.0" in text
 
 
 def _button_texts(markup):

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from app.bot.ux import (
+    ADMIN_APPROVE_PREFIX,
     ADMIN_PENDING_CALLBACK,
     MY_TRAFFIC_CALLBACK,
     REQUEST_CONFIG_PREFIX,
     build_config_version_keyboard,
+    build_admin_order_keyboard,
     build_main_menu,
+    parse_admin_approve_callback,
     parse_config_version_callback,
     render_admin_pending_orders,
     render_config_version_prompt,
@@ -68,11 +71,41 @@ async def handle_admin_pending(callback, *, workflow) -> None:
         await callback.answer()
         return
 
-    await callback.message.answer(
-        render_admin_pending_orders(
-            workflow.list_pending_orders(admin_telegram_id=admin_telegram_id)
+    orders = workflow.list_pending_orders(admin_telegram_id=admin_telegram_id)
+    await callback.message.answer(render_admin_pending_orders(orders))
+    for order in orders:
+        await callback.message.answer(
+            f"Order #{order['id']}",
+            reply_markup=build_admin_order_keyboard(order_id=int(order["id"])),
         )
+    await callback.answer()
+
+
+async def handle_admin_approve(callback, *, workflow) -> None:
+    admin_telegram_id = int(callback.from_user.id)
+    parsed = parse_admin_approve_callback(str(callback.data))
+    if parsed is None:
+        await callback.message.answer("Unknown admin approval request.")
+        await callback.answer()
+        return
+    if not workflow.is_admin(admin_telegram_id):
+        await callback.message.answer("Admin access required.")
+        await callback.answer()
+        return
+
+    order_id, config_version = parsed
+    result = workflow.approve_order(
+        admin_telegram_id=admin_telegram_id,
+        order_id=order_id,
+        config_version=config_version,
     )
+    if result is None:
+        await callback.message.answer("Admin access required.")
+        await callback.answer()
+        return
+
+    await callback.message.answer(result.admin_text)
+    await callback.message.answer(result.config_text)
     await callback.answer()
 
 
@@ -90,3 +123,7 @@ def is_my_traffic_callback(data: str) -> bool:
 
 def is_admin_pending_callback(data: str) -> bool:
     return data == ADMIN_PENDING_CALLBACK
+
+
+def is_admin_approve_callback(data: str) -> bool:
+    return data.startswith(f"{ADMIN_APPROVE_PREFIX}:")
