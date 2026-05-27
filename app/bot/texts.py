@@ -67,8 +67,8 @@ TEXTS = {
         "handler.config_resent": "Конфиг для устройства #{device_id} отправлен повторно.",
         "handler.confirm_device_delete": "Подтвердите удаление устройства #{device_id}.",
         "handler.confirm_reset": "Подтвердите сброс всех устройств.",
-        "handler.device_removed": "Устройство #{device_id} удалено. Удаление peer на сервере будет выполнено после подключения VPS-интеграции.",
-        "handler.devices_removed": "Удалено устройств: {count}. Удаление peer на сервере будет выполнено после подключения VPS-интеграции.",
+        "handler.device_removed": "Устройство #{device_id} удалено.",
+        "handler.devices_removed": "Удалено устройств: {count}.",
         "handler.template_reset": "Шаблон сообщения с конфигом сброшен.",
     },
     "en": {
@@ -135,8 +135,8 @@ TEXTS = {
         "handler.config_resent": "Config for device #{device_id} was resent.",
         "handler.confirm_device_delete": "Confirm device deletion for device #{device_id}.",
         "handler.confirm_reset": "Confirm reset of all devices.",
-        "handler.device_removed": "Device #{device_id} was removed. Server-side peer removal will run when VPS integration is enabled.",
-        "handler.devices_removed": "{count} device(s) were removed. Server-side peer removal will run when VPS integration is enabled.",
+        "handler.device_removed": "Device #{device_id} was removed.",
+        "handler.devices_removed": "{count} device(s) were removed.",
         "handler.template_reset": "Config ready template was reset.",
     },
 }

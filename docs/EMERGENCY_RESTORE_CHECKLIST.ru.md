@@ -35,9 +35,9 @@ cp /secure-copy/servers.yml servers.yml
 Проверить:
 
 ```env
-APP_SECRET_KEY=тот_же_ключ_что_при_backup
-TELEGRAM_BOT_TOKEN=токен_бота
-ADMIN_TELEGRAM_IDS=telegram_id_админов
+APP_SECRET_KEY=CHANGE_ME_SAME_KEY_USED_WHEN_BACKUP_WAS_CREATED
+TELEGRAM_BOT_TOKEN=CHANGE_ME_BOT_TOKEN
+ADMIN_TELEGRAM_IDS=CHANGE_ME_ADMIN_TELEGRAM_IDS
 VPS_APPLY_ENABLED=false
 ```
 
