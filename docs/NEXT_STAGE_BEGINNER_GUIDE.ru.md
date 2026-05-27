@@ -471,6 +471,14 @@ servers:
 python -m pytest tests -v
 ```
 
+Перед реальным применением на VPS можно выполнить безопасный dry-run:
+
+```powershell
+python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
+```
+
+Он покажет только read-only SSH-команды и ничего не изменит на сервере.
+
 Ожидаемый результат:
 
 ```text

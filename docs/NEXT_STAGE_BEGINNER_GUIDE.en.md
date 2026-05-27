@@ -372,6 +372,14 @@ servers:
 python -m pytest tests -v
 ```
 
+Before applying anything on a real VPS, run a safe dry-run:
+
+```powershell
+python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
+```
+
+It prints read-only SSH commands only and does not change the server.
+
 If tests fail, do not continue to the VPS.
 
 ## Step 4. Back Up the Local Database

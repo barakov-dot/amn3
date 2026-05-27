@@ -48,6 +48,23 @@ _MUTATING_WORDS = {
     "wget",
 }
 
+READ_ONLY_CHECK_COMMANDS = (
+    "cat /etc/os-release",
+    "command -v systemctl",
+    "command -v awg",
+    "command -v awg-quick",
+    "command -v ufw",
+    "systemctl is-active awg-quick@{interface}",
+    "ss -lun",
+)
+
+
+def planned_check_commands(server: ServerConfig) -> list[str]:
+    return [
+        command.format(interface=server.vpn.interface)
+        for command in READ_ONLY_CHECK_COMMANDS
+    ]
+
 
 def ensure_read_only_command(command: str) -> None:
     normalized = " ".join(command.strip().split())
@@ -66,13 +83,13 @@ def ensure_read_only_command(command: str) -> None:
 
 def run_server_checks(server: ServerConfig, ssh: SshClient) -> ServerCheckReport:
     results = [
-        _check_debian(_run(ssh, "cat /etc/os-release")),
-        _check_command("systemd", _run(ssh, "command -v systemctl"), missing_status="error"),
-        _check_command("awg", _run(ssh, "command -v awg"), missing_status="warning"),
-        _check_command("awg-quick", _run(ssh, "command -v awg-quick"), missing_status="warning"),
-        _check_command("ufw", _run(ssh, "command -v ufw"), missing_status="warning"),
-        _check_interface(server, _run(ssh, f"systemctl is-active awg-quick@{server.vpn.interface}")),
-        _check_udp_port(server, _run(ssh, "ss -lun")),
+        _check_debian(_run(ssh, planned_check_commands(server)[0])),
+        _check_command("systemd", _run(ssh, planned_check_commands(server)[1]), missing_status="error"),
+        _check_command("awg", _run(ssh, planned_check_commands(server)[2]), missing_status="warning"),
+        _check_command("awg-quick", _run(ssh, planned_check_commands(server)[3]), missing_status="warning"),
+        _check_command("ufw", _run(ssh, planned_check_commands(server)[4]), missing_status="warning"),
+        _check_interface(server, _run(ssh, planned_check_commands(server)[5])),
+        _check_udp_port(server, _run(ssh, planned_check_commands(server)[6])),
     ]
     return ServerCheckReport(server_name=server.name, results=results)
 

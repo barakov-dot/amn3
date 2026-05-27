@@ -3,7 +3,10 @@ from pathlib import Path
 
 from app import __version__
 from app.backup.service import BackupService
+from app.server.checks import planned_check_commands, run_server_checks
+from app.server.ssh import SystemSshClient
 from app.server_config.loader import load_server_config, select_server
+from app.server_config.models import ServerConfig
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -31,6 +34,7 @@ def build_parser() -> argparse.ArgumentParser:
     check = server_sub.add_parser("check")
     check.add_argument("--config", default="servers.yml")
     check.add_argument("--server", required=True)
+    check.add_argument("--dry-run", action="store_true")
 
     return parser
 
@@ -48,8 +52,23 @@ def main() -> None:
         print(service.restore(Path(args.file), Path(args.target_db), force=args.force))
     elif args.command == "server" and args.server_command == "check":
         config = load_server_config(Path(args.config))
-        select_server(config, args.server)
-        parser.error("server check parser is ready, but real SSH backend is not configured yet")
+        server = select_server(config, args.server)
+        print(run_server_check(server, dry_run=args.dry_run))
+
+
+def run_server_check(server: ServerConfig, *, dry_run: bool) -> str:
+    if dry_run:
+        lines = [
+            f"Dry-run server check: {server.name}",
+            "No changes will be made.",
+            f"Target: ssh {server.ssh.user}@{server.ssh.host} -p {server.ssh.port}",
+            "Read-only commands:",
+        ]
+        lines.extend(f"- {command}" for command in planned_check_commands(server))
+        return "\n".join(lines)
+
+    report = run_server_checks(server, SystemSshClient(server))
+    return report.to_text()
 
 
 if __name__ == "__main__":

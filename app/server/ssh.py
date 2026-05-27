@@ -1,5 +1,8 @@
 from dataclasses import dataclass
+import subprocess
 from typing import Protocol
+
+from app.server_config.models import ServerConfig
 
 
 @dataclass(frozen=True)
@@ -12,3 +15,35 @@ class CommandResult:
 class SshClient(Protocol):
     def run(self, command: str) -> CommandResult:
         pass
+
+
+class SystemSshClient:
+    def __init__(self, server: ServerConfig, *, timeout_seconds: int = 20) -> None:
+        self._server = server
+        self._timeout_seconds = timeout_seconds
+
+    def run(self, command: str) -> CommandResult:
+        args = [
+            "ssh",
+            "-p",
+            str(self._server.ssh.port),
+            "-o",
+            "BatchMode=yes",
+            "-o",
+            f"ConnectTimeout={self._timeout_seconds}",
+        ]
+        if self._server.ssh.auth.private_key_path:
+            args.extend(["-i", self._server.ssh.auth.private_key_path])
+        args.extend([f"{self._server.ssh.user}@{self._server.ssh.host}", command])
+        completed = subprocess.run(
+            args,
+            capture_output=True,
+            check=False,
+            text=True,
+            timeout=self._timeout_seconds,
+        )
+        return CommandResult(
+            exit_code=completed.returncode,
+            stdout=completed.stdout,
+            stderr=completed.stderr,
+        )
