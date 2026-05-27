@@ -18,12 +18,20 @@ from app.backup.storage import (
     secret_box_from_env,
 )
 from app.security.crypto import SecretBoxError
+from app.vpn.config_versions import SUPPORTED_CONFIG_VERSIONS
 
 
 DATABASE_ENTRY = "database.sqlite3"
 MANIFEST_ENTRY = "manifest.json"
 EXPECTED_MEMBERS = {DATABASE_ENTRY, MANIFEST_ENTRY}
-REQUIRED_TABLES = {"users", "servers", "devices", "orders", "admin_actions"}
+REQUIRED_TABLES = {
+    "users",
+    "servers",
+    "devices",
+    "orders",
+    "admin_actions",
+    "device_traffic_snapshots",
+}
 
 
 class BackupService:
@@ -190,6 +198,10 @@ class BackupService:
                     raise ValueError(
                         f"Backup database device {row['id']} is missing {column}"
                     )
+            if row["config_version"] not in SUPPORTED_CONFIG_VERSIONS:
+                raise ValueError(
+                    f"Backup database device {row['id']} has unsupported config_version"
+                )
 
     def _validate_device_secrets(self, conn: sqlite3.Connection) -> None:
         secret_box = secret_box_from_env()

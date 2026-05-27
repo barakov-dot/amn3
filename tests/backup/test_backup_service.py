@@ -44,6 +44,13 @@ def _create_database_with_encrypted_device(path, app_secret=STRONG_SECRET):
     conn.close()
 
 
+def _drop_table(path, table_name):
+    conn = connect(path)
+    conn.execute(f"DROP TABLE {table_name}")
+    conn.commit()
+    conn.close()
+
+
 def _blank_device_fields(path, *fields):
     conn = connect(path)
     assignments = ", ".join(f"{field} = ''" for field in fields)
@@ -166,6 +173,69 @@ def test_restore_accepts_database_with_encrypted_peer_secrets_for_current_secret
     conn.close()
 
 
+def test_restore_preserves_device_traffic_snapshots(tmp_path, monkeypatch):
+    monkeypatch.setenv("APP_SECRET_KEY", STRONG_SECRET)
+    db_path = tmp_path / "source.sqlite3"
+    target_path = tmp_path / "restored.sqlite3"
+    _create_database_with_encrypted_device(db_path, app_secret=STRONG_SECRET)
+    conn = connect(db_path)
+    device = conn.execute("SELECT id, server_id, peer_public_key FROM devices").fetchone()
+    conn.execute(
+        """
+        INSERT INTO device_traffic_snapshots (
+            device_id,
+            server_id,
+            peer_public_key,
+            rx_bytes,
+            tx_bytes,
+            source,
+            collected_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            device["id"],
+            device["server_id"],
+            device["peer_public_key"],
+            1024,
+            2048,
+            "test",
+            "2026-05-27T12:00:00Z",
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    service = BackupService(app_version="0.1.0")
+    backup_path = service.create(db_path=db_path, output_dir=tmp_path / "backups")
+    service.restore(backup_path=backup_path, target_db_path=target_path)
+
+    restored = connect(target_path)
+    snapshot = restored.execute("SELECT * FROM device_traffic_snapshots").fetchone()
+    assert snapshot["rx_bytes"] == 1024
+    assert snapshot["tx_bytes"] == 2048
+    restored.close()
+
+
+def test_restore_rejects_database_without_traffic_snapshot_table_before_writing_target(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setenv("APP_SECRET_KEY", STRONG_SECRET)
+    db_path = tmp_path / "source.sqlite3"
+    target_path = tmp_path / "restored.sqlite3"
+    _create_database_with_encrypted_device(db_path, app_secret=STRONG_SECRET)
+    _drop_table(db_path, "device_traffic_snapshots")
+
+    service = BackupService(app_version="0.1.0")
+    backup_path = service.create(db_path=db_path, output_dir=tmp_path / "backups")
+
+    with pytest.raises(ValueError, match="device_traffic_snapshots"):
+        service.restore(backup_path=backup_path, target_db_path=target_path)
+
+    assert not target_path.exists()
+
+
 def test_restore_rejects_database_with_peer_secrets_encrypted_for_different_secret_without_overwriting_target(
     tmp_path,
     monkeypatch,
@@ -219,6 +289,28 @@ def test_restore_rejects_active_device_with_empty_required_fields_before_writing
     backup_path = service.create(db_path=db_path, output_dir=tmp_path / "backups")
 
     with pytest.raises(ValueError, match="name"):
+        service.restore(backup_path=backup_path, target_db_path=target_path)
+
+    assert not target_path.exists()
+
+
+def test_restore_rejects_active_device_with_unsupported_config_version_before_writing_target(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setenv("APP_SECRET_KEY", STRONG_SECRET)
+    db_path = tmp_path / "source.sqlite3"
+    target_path = tmp_path / "restored.sqlite3"
+    _create_database_with_encrypted_device(db_path, app_secret=STRONG_SECRET)
+    conn = connect(db_path)
+    conn.execute("UPDATE devices SET config_version = 'wireguard'")
+    conn.commit()
+    conn.close()
+
+    service = BackupService(app_version="0.1.0")
+    backup_path = service.create(db_path=db_path, output_dir=tmp_path / "backups")
+
+    with pytest.raises(ValueError, match="unsupported config_version"):
         service.restore(backup_path=backup_path, target_db_path=target_path)
 
     assert not target_path.exists()
