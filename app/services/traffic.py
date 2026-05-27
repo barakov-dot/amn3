@@ -33,6 +33,9 @@ class DeviceTrafficView:
     collected_at: str | None
     is_available: bool
     is_stale: bool
+    first_connected_at: str | None = None
+    last_connected_at: str | None = None
+    is_connected: bool = False
 
 
 class TrafficCollector(Protocol):
@@ -68,6 +71,11 @@ class TrafficService:
                 source=peer.source,
                 collected_at=peer.collected_at,
             )
+            if peer.rx_bytes > 0 or peer.tx_bytes > 0:
+                self._repo.mark_device_connected(
+                    int(device["id"]),
+                    connected_at=peer.collected_at,
+                )
             stored_count += 1
         return TrafficCollectionReport(
             stored_count=stored_count,
@@ -111,6 +119,9 @@ def build_device_traffic_view(
             collected_at=None,
             is_available=False,
             is_stale=True,
+            first_connected_at=_row_get(device, "first_connected_at"),
+            last_connected_at=_row_get(device, "last_connected_at"),
+            is_connected=_row_get(device, "first_connected_at") is not None,
         )
 
     rx_bytes = int(latest_snapshot["rx_bytes"])
@@ -132,6 +143,9 @@ def build_device_traffic_view(
             now=now,
             stale_after_minutes=stale_after_minutes,
         ),
+        first_connected_at=_row_get(device, "first_connected_at"),
+        last_connected_at=_row_get(device, "last_connected_at"),
+        is_connected=_row_get(device, "first_connected_at") is not None,
     )
 
 
@@ -149,3 +163,12 @@ def _parse_utc_datetime(value: str) -> datetime:
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
+
+
+def _row_get(row, key: str):
+    if isinstance(row, dict):
+        return row.get(key)
+    try:
+        return row[key]
+    except (KeyError, IndexError):
+        return None

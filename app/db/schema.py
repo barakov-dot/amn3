@@ -56,6 +56,8 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             preshared_key_encrypted TEXT NOT NULL,
             config_version TEXT NOT NULL,
             last_config_sent_at TEXT,
+            first_connected_at TEXT,
+            last_connected_at TEXT,
             revoked_at TEXT,
             revoke_reason TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id),
@@ -113,6 +115,12 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE CASCADE
         );
 
+        CREATE TABLE IF NOT EXISTS message_templates (
+            key TEXT PRIMARY KEY,
+            text TEXT NOT NULL,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
         CREATE INDEX IF NOT EXISTS idx_devices_user_status
             ON devices(user_id, status);
         CREATE INDEX IF NOT EXISTS idx_devices_server_status
@@ -134,6 +142,8 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
         "requested_config_version",
         "TEXT NOT NULL DEFAULT 'amneziawg_v2'",
     )
+    _ensure_column(conn, "devices", "first_connected_at", "TEXT")
+    _ensure_column(conn, "devices", "last_connected_at", "TEXT")
     conn.commit()
 
 

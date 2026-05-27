@@ -120,7 +120,12 @@ def test_handle_admin_approve_calls_workflow_and_returns_config_preview():
 
     assert workflow.approvals == [(11, "amneziawg_v1_5")]
     assert "approved" in callback.message.answers[0]["text"]
-    assert "[Interface]" in callback.message.answers[1]["text"]
+    assert callback.bot.sent_messages[0]["chat_id"] == 1001
+    assert "VPN config is ready" in callback.bot.sent_messages[0]["text"]
+    assert callback.bot.sent_documents[0]["chat_id"] == 1001
+    assert callback.bot.sent_documents[0]["document"].filename.endswith(".conf")
+    assert callback.bot.sent_photos[0]["chat_id"] == 1001
+    assert callback.bot.sent_photos[0]["photo"].filename.endswith(".qr.png")
     assert callback.answered is True
 
 
@@ -169,6 +174,7 @@ class FakeCallback:
             first_name=first_name,
             last_name=last_name,
         )
+        self.bot = FakeBot()
         self.answered = False
 
     async def answer(self):
@@ -239,6 +245,35 @@ class FakeWorkflow:
             admin_text="Access request #11 approved.",
             user_text="Your VPN config is ready.",
             config_text="[Interface]\nPrivateKey = test",
+            delivery=SimpleNamespace(
+                message_text="Your VPN config is ready.",
+                config_filename="amneziya-device-7.conf",
+                config_bytes=b"[Interface]\nPrivateKey = test",
+                qr_filename="amneziya-device-7.qr.png",
+                qr_png_bytes=b"\x89PNG\r\n\x1a\n",
+            ),
+        )
+
+
+class FakeBot:
+    def __init__(self):
+        self.sent_messages = []
+        self.sent_documents = []
+        self.sent_photos = []
+
+    async def send_message(self, chat_id, text, reply_markup=None):
+        self.sent_messages.append(
+            {"chat_id": chat_id, "text": text, "reply_markup": reply_markup}
+        )
+
+    async def send_document(self, chat_id, document, caption=None):
+        self.sent_documents.append(
+            {"chat_id": chat_id, "document": document, "caption": caption}
+        )
+
+    async def send_photo(self, chat_id, photo, caption=None):
+        self.sent_photos.append(
+            {"chat_id": chat_id, "photo": photo, "caption": caption}
         )
 
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from aiogram.types import BufferedInputFile
+
 from app.bot.ux import (
     ADMIN_APPROVE_PREFIX,
     ADMIN_PENDING_CALLBACK,
@@ -105,7 +107,15 @@ async def handle_admin_approve(callback, *, workflow) -> None:
         return
 
     await callback.message.answer(result.admin_text)
-    await callback.message.answer(result.config_text)
+    try:
+        await _send_delivery(callback.bot, result)
+    except Exception:
+        await callback.message.answer(
+            "Could not deliver config to the user automatically. "
+            "Manual delivery package follows."
+        )
+        await callback.message.answer(result.delivery.message_text)
+        await callback.message.answer(result.config_text)
     await callback.answer()
 
 
@@ -127,3 +137,26 @@ def is_admin_pending_callback(data: str) -> bool:
 
 def is_admin_approve_callback(data: str) -> bool:
     return data.startswith(f"{ADMIN_APPROVE_PREFIX}:")
+
+
+async def _send_delivery(bot, result) -> None:
+    await bot.send_message(
+        chat_id=result.user_telegram_id,
+        text=result.delivery.message_text,
+    )
+    await bot.send_document(
+        chat_id=result.user_telegram_id,
+        document=BufferedInputFile(
+            result.delivery.config_bytes,
+            filename=result.delivery.config_filename,
+        ),
+        caption="VPN config file",
+    )
+    await bot.send_photo(
+        chat_id=result.user_telegram_id,
+        photo=BufferedInputFile(
+            result.delivery.qr_png_bytes,
+            filename=result.delivery.qr_filename,
+        ),
+        caption="VPN config QR code",
+    )

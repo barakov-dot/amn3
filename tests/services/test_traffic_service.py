@@ -62,6 +62,31 @@ def test_collect_and_store_traffic_records_known_peer(tmp_path):
     assert latest is not None
     assert latest["rx_bytes"] == 1024
     assert latest["tx_bytes"] == 2048
+    device = repo.get_device(device_id)
+    assert device["first_connected_at"] == "2026-05-27T12:00:00Z"
+    assert device["last_connected_at"] == "2026-05-27T12:00:00Z"
+
+
+def test_collect_and_store_traffic_does_not_mark_zero_byte_peer_connected(tmp_path):
+    repo, server_id, device_id = _repo_with_device(tmp_path)
+    service = TrafficService(repo)
+    collector = FakeCollector(
+        [
+            PeerTraffic(
+                peer_public_key="known-peer",
+                rx_bytes=0,
+                tx_bytes=0,
+                collected_at="2026-05-27T12:00:00Z",
+                source="fake",
+            )
+        ]
+    )
+
+    service.collect_and_store(server_id, collector)
+
+    device = repo.get_device(device_id)
+    assert device["first_connected_at"] is None
+    assert device["last_connected_at"] is None
 
 
 def test_collect_and_store_traffic_reports_unknown_peer_without_snapshot(tmp_path):

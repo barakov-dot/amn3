@@ -55,6 +55,9 @@ def test_render_user_traffic_lists_devices_and_marks_stale_stats():
             collected_at="2026-05-27T12:00:00Z",
             is_available=True,
             is_stale=False,
+            first_connected_at="2026-05-27T12:00:00Z",
+            last_connected_at="2026-05-27T12:30:00Z",
+            is_connected=True,
         ),
         DeviceTrafficView(
             device_id=2,
@@ -68,6 +71,9 @@ def test_render_user_traffic_lists_devices_and_marks_stale_stats():
             collected_at=None,
             is_available=False,
             is_stale=True,
+            first_connected_at=None,
+            last_connected_at=None,
+            is_connected=False,
         ),
     ]
 
@@ -77,7 +83,9 @@ def test_render_user_traffic_lists_devices_and_marks_stale_stats():
     assert "phone" in text
     assert "AmneziaWG 1.5" in text
     assert "Total: 3.0 KiB" in text
+    assert "Connected: yes" in text
     assert "laptop" in text
+    assert "Connected: no" in text
     assert "No traffic data yet" in text
 
 

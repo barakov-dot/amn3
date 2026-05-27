@@ -31,9 +31,11 @@ REQUIRED_TABLES = {
     "orders",
     "admin_actions",
     "device_traffic_snapshots",
+    "message_templates",
 }
 REQUIRED_COLUMNS = {
     "orders": {"requested_config_version"},
+    "devices": {"first_connected_at", "last_connected_at"},
 }
 
 

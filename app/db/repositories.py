@@ -393,6 +393,40 @@ class Repository:
             (device_id,),
         ).fetchone()
 
+    def mark_device_connected(self, device_id: int, *, connected_at: str) -> None:
+        self._conn.execute(
+            """
+            UPDATE devices
+            SET first_connected_at = COALESCE(first_connected_at, ?),
+                last_connected_at = ?
+            WHERE id = ?
+            """,
+            (connected_at, connected_at, device_id),
+        )
+        self._commit()
+
+    def get_message_template(self, key: str, *, default_text: str) -> str:
+        row = self._conn.execute(
+            "SELECT text FROM message_templates WHERE key = ?",
+            (key,),
+        ).fetchone()
+        if row is None:
+            return default_text
+        return str(row["text"])
+
+    def set_message_template(self, key: str, text: str) -> None:
+        self._conn.execute(
+            """
+            INSERT INTO message_templates (key, text)
+            VALUES (?, ?)
+            ON CONFLICT(key) DO UPDATE SET
+                text = excluded.text,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (key, text),
+        )
+        self._commit()
+
     def _commit(self) -> None:
         if self._transaction_depth == 0:
             self._conn.commit()

@@ -96,6 +96,75 @@ def _drop_orders_requested_config_version_column(path):
     conn.close()
 
 
+def _drop_devices_connection_columns(path):
+    conn = connect(path)
+    conn.executescript(
+        """
+        ALTER TABLE devices RENAME TO devices_old;
+        CREATE TABLE devices (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            server_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            activated_at TEXT,
+            expires_at TEXT,
+            duration_days INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'active',
+            vpn_ip TEXT NOT NULL,
+            peer_public_key TEXT NOT NULL,
+            peer_private_key_encrypted TEXT NOT NULL,
+            preshared_key_encrypted TEXT NOT NULL,
+            config_version TEXT NOT NULL,
+            last_config_sent_at TEXT,
+            revoked_at TEXT,
+            revoke_reason TEXT
+        );
+        INSERT INTO devices (
+            id,
+            user_id,
+            server_id,
+            name,
+            created_at,
+            activated_at,
+            expires_at,
+            duration_days,
+            status,
+            vpn_ip,
+            peer_public_key,
+            peer_private_key_encrypted,
+            preshared_key_encrypted,
+            config_version,
+            last_config_sent_at,
+            revoked_at,
+            revoke_reason
+        )
+        SELECT
+            id,
+            user_id,
+            server_id,
+            name,
+            created_at,
+            activated_at,
+            expires_at,
+            duration_days,
+            status,
+            vpn_ip,
+            peer_public_key,
+            peer_private_key_encrypted,
+            preshared_key_encrypted,
+            config_version,
+            last_config_sent_at,
+            revoked_at,
+            revoke_reason
+        FROM devices_old;
+        DROP TABLE devices_old;
+        """
+    )
+    conn.commit()
+    conn.close()
+
+
 def _blank_device_fields(path, *fields):
     conn = connect(path)
     assignments = ", ".join(f"{field} = ''" for field in fields)
@@ -295,6 +364,44 @@ def test_restore_rejects_database_without_requested_config_version_before_writin
     backup_path = service.create(db_path=db_path, output_dir=tmp_path / "backups")
 
     with pytest.raises(ValueError, match="orders.requested_config_version"):
+        service.restore(backup_path=backup_path, target_db_path=target_path)
+
+    assert not target_path.exists()
+
+
+def test_restore_rejects_database_without_message_templates_table_before_writing_target(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setenv("APP_SECRET_KEY", STRONG_SECRET)
+    db_path = tmp_path / "source.sqlite3"
+    target_path = tmp_path / "restored.sqlite3"
+    _create_database_with_encrypted_device(db_path, app_secret=STRONG_SECRET)
+    _drop_table(db_path, "message_templates")
+
+    service = BackupService(app_version="0.1.0")
+    backup_path = service.create(db_path=db_path, output_dir=tmp_path / "backups")
+
+    with pytest.raises(ValueError, match="message_templates"):
+        service.restore(backup_path=backup_path, target_db_path=target_path)
+
+    assert not target_path.exists()
+
+
+def test_restore_rejects_database_without_device_connection_columns_before_writing_target(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setenv("APP_SECRET_KEY", STRONG_SECRET)
+    db_path = tmp_path / "source.sqlite3"
+    target_path = tmp_path / "restored.sqlite3"
+    _create_database_with_encrypted_device(db_path, app_secret=STRONG_SECRET)
+    _drop_devices_connection_columns(db_path)
+
+    service = BackupService(app_version="0.1.0")
+    backup_path = service.create(db_path=db_path, output_dir=tmp_path / "backups")
+
+    with pytest.raises(ValueError, match="devices.first_connected_at"):
         service.restore(backup_path=backup_path, target_db_path=target_path)
 
     assert not target_path.exists()

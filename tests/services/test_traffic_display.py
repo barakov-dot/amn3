@@ -14,6 +14,8 @@ def test_build_device_traffic_view_formats_latest_snapshot():
         "config_version": "amneziawg_v2",
         "status": "active",
         "expires_at": "2026-06-03T12:00:00Z",
+        "first_connected_at": "2026-05-27T12:00:00Z",
+        "last_connected_at": "2026-05-27T12:30:00Z",
     }
     snapshot = {
         "rx_bytes": 1024,
@@ -34,6 +36,8 @@ def test_build_device_traffic_view_formats_latest_snapshot():
     assert view.total == "3.0 KiB"
     assert view.is_stale is False
     assert view.is_available is True
+    assert view.is_connected is True
+    assert view.first_connected_at == "2026-05-27T12:00:00Z"
 
 
 def test_build_device_traffic_view_marks_missing_stats_unavailable():
@@ -43,6 +47,8 @@ def test_build_device_traffic_view_marks_missing_stats_unavailable():
         "config_version": "amneziawg_v1_5",
         "status": "active",
         "expires_at": None,
+        "first_connected_at": None,
+        "last_connected_at": None,
     }
 
     view = build_device_traffic_view(device, None, now="2026-05-27T12:30:00Z")
@@ -51,6 +57,7 @@ def test_build_device_traffic_view_marks_missing_stats_unavailable():
     assert view.tx == "unavailable"
     assert view.total == "unavailable"
     assert view.is_available is False
+    assert view.is_connected is False
 
 
 def test_build_device_traffic_view_marks_old_stats_stale():

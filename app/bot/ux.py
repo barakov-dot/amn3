@@ -193,6 +193,7 @@ def _render_device_traffic_lines(view: DeviceTrafficView) -> list[str]:
         "",
         f"{view.device_name} ({_version_label(view.config_version)})",
         f"Status: {view.status}",
+        f"Connected: {'yes' if getattr(view, 'is_connected', False) else 'no'}",
     ]
     if not view.is_available:
         lines.append("No traffic data yet.")

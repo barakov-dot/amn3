@@ -2,6 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from app.bot.delivery import (
+    CONFIG_READY_TEMPLATE_KEY,
+    DEFAULT_CONFIG_READY_TEMPLATE,
+    ConfigDeliveryPackage,
+    build_config_delivery,
+)
 from app.bot.ux import render_access_request_created, render_admin_approval, render_user_config_ready
 from app.db.repositories import Repository
 from app.services.access import AccessService
@@ -22,6 +28,7 @@ class ApprovalResult:
     admin_text: str
     user_text: str
     config_text: str
+    delivery: ConfigDeliveryPackage
 
 
 class BotWorkflow:
@@ -132,6 +139,16 @@ class BotWorkflow:
             admin_telegram_id=admin_telegram_id,
             config_version=config_version,
         )
+        template_text = self._repo.get_message_template(
+            CONFIG_READY_TEMPLATE_KEY,
+            default_text=DEFAULT_CONFIG_READY_TEMPLATE,
+        )
+        delivery = build_config_delivery(
+            device_id=result.device_id,
+            config_version=config_version,
+            config_text=result.config_text,
+            template_text=template_text,
+        )
         return ApprovalResult(
             device_id=result.device_id,
             user_telegram_id=int(user["telegram_id"]),
@@ -143,6 +160,7 @@ class BotWorkflow:
             ),
             user_text=render_user_config_ready(config_version=config_version),
             config_text=result.config_text,
+            delivery=delivery,
         )
 
 

@@ -78,6 +78,42 @@ def test_list_active_devices_with_users_includes_user_identity(tmp_path):
     assert devices[0]["username"] == "alice"
 
 
+def test_message_template_can_be_read_and_updated_by_key(tmp_path):
+    repo = _repo(tmp_path)
+
+    default_text = repo.get_message_template(
+        "config_ready",
+        default_text="Default text {device_id}",
+    )
+    repo.set_message_template("config_ready", "Custom text {device_id}")
+    updated_text = repo.get_message_template(
+        "config_ready",
+        default_text="Default text {device_id}",
+    )
+
+    assert default_text == "Default text {device_id}"
+    assert updated_text == "Custom text {device_id}"
+
+
+def test_mark_device_connected_records_first_and_last_seen(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    device_id = _create_device(repo, user_id=user_id, server_id=server_id, name="phone")
+
+    repo.mark_device_connected(device_id, connected_at="2026-05-27T12:00:00Z")
+    repo.mark_device_connected(device_id, connected_at="2026-05-27T12:30:00Z")
+
+    device = repo.get_device(device_id)
+    assert device["first_connected_at"] == "2026-05-27T12:00:00Z"
+    assert device["last_connected_at"] == "2026-05-27T12:30:00Z"
+
+
 def _repo(tmp_path):
     conn = connect(tmp_path / "bot-queries.sqlite3")
     initialize_schema(conn)
