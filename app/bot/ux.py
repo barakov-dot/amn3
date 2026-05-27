@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
+from datetime import datetime, timezone
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -105,12 +106,57 @@ def render_config_version_prompt() -> str:
     return "Choose the AmneziaWG config version for this device."
 
 
-def render_access_request_created(*, order_id: int, config_version: str) -> str:
-    return (
+def render_access_request_created(
+    *,
+    order_id: int,
+    config_version: str,
+    plan_name: str | None = None,
+) -> str:
+    text = (
         f"Access request #{order_id} was created.\n"
         f"Requested config: {_version_label(config_version)}.\n"
-        "An admin can approve it from the admin menu."
     )
+    if plan_name is not None:
+        text += f"Plan: {plan_name}.\n"
+    return text + "An admin can approve it from the admin menu."
+
+
+def render_my_tariff(devices: Iterable[Mapping[str, object]], *, now: str) -> str:
+    lines = ["My tariff"]
+    has_devices = False
+    for device in devices:
+        has_devices = True
+        duration_days = int(device["duration_days"])
+        expires_at = str(device["expires_at"]) if device["expires_at"] is not None else None
+        lines.extend(
+            [
+                "",
+                str(device["name"]),
+                f"Status: {device['status']}",
+                f"Tariff: {duration_days} days",
+                f"Expires: {expires_at or 'unknown'}",
+                f"Days left: {_days_left(expires_at, now) if expires_at else 'unknown'}",
+            ]
+        )
+    if not has_devices:
+        lines.append("No active tariff yet.")
+    return "\n".join(lines)
+
+
+def _days_left(expires_at: str, now: str) -> int:
+    expires_dt = _parse_datetime(expires_at)
+    now_dt = _parse_datetime(now)
+    seconds_left = (expires_dt - now_dt).total_seconds()
+    if seconds_left <= 0:
+        return 0
+    return int((seconds_left + 86399) // 86400)
+
+
+def _parse_datetime(value: str) -> datetime:
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 def render_admin_approval(

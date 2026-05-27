@@ -81,6 +81,9 @@ class AccessService:
         config_version = validate_config_version(
             config_version or str(order["requested_config_version"])
         )
+        duration_days = self._duration_days
+        if order["plan_id"] is not None:
+            duration_days = int(self._repo.get_plan(str(order["plan_id"]))["duration_days"])
         user_id = int(order["user_id"])
         if order["status"] == "fulfilled" or order["device_id"] is not None:
             raise OrderAlreadyFulfilled("Order has already been fulfilled")
@@ -101,6 +104,7 @@ class AccessService:
             server_id=server_id,
             device_name=device_name,
             server=server,
+            duration_days=duration_days,
             private_key=keypair.private_key,
             public_key=keypair.public_key,
             preshared_key=preshared_key,
@@ -124,6 +128,7 @@ class AccessService:
         server_id: int,
         device_name: str,
         server,
+        duration_days: int,
         private_key: str,
         public_key: str,
         preshared_key: str,
@@ -168,7 +173,7 @@ class AccessService:
                     user_id=user_id,
                     server_id=server_id,
                     name=device_name,
-                    duration_days=self._duration_days,
+                    duration_days=duration_days,
                     vpn_ip=vpn_ip,
                     peer_public_key=public_key,
                     peer_private_key_encrypted=self._secret_box.encrypt_text(private_key),

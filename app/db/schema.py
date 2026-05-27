@@ -39,6 +39,18 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
 
+        CREATE TABLE IF NOT EXISTS plans (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            duration_days INTEGER NOT NULL CHECK (duration_days > 0),
+            price INTEGER NOT NULL DEFAULT 0 CHECK (price >= 0),
+            currency TEXT NOT NULL DEFAULT 'RUB',
+            is_free INTEGER NOT NULL DEFAULT 1 CHECK (is_free IN (0, 1)),
+            is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
         CREATE TABLE IF NOT EXISTS devices (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,

@@ -388,6 +388,25 @@ def test_restore_rejects_database_without_message_templates_table_before_writing
     assert not target_path.exists()
 
 
+def test_restore_rejects_database_without_plans_table_before_writing_target(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setenv("APP_SECRET_KEY", STRONG_SECRET)
+    db_path = tmp_path / "source.sqlite3"
+    target_path = tmp_path / "restored.sqlite3"
+    _create_database_with_encrypted_device(db_path, app_secret=STRONG_SECRET)
+    _drop_table(db_path, "plans")
+
+    service = BackupService(app_version="0.1.0")
+    backup_path = service.create(db_path=db_path, output_dir=tmp_path / "backups")
+
+    with pytest.raises(ValueError, match="plans"):
+        service.restore(backup_path=backup_path, target_db_path=target_path)
+
+    assert not target_path.exists()
+
+
 def test_restore_rejects_database_without_device_connection_columns_before_writing_target(
     tmp_path,
     monkeypatch,

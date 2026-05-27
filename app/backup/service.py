@@ -27,6 +27,7 @@ EXPECTED_MEMBERS = {DATABASE_ENTRY, MANIFEST_ENTRY}
 REQUIRED_TABLES = {
     "users",
     "servers",
+    "plans",
     "devices",
     "orders",
     "admin_actions",

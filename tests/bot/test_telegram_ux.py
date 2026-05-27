@@ -10,6 +10,7 @@ from app.bot.ux import (
     render_admin_approval,
     render_admin_pending_orders,
     render_admin_traffic,
+    render_my_tariff,
     render_user_traffic,
 )
 from app.services.traffic import DeviceTrafficView
@@ -155,6 +156,25 @@ def test_render_admin_approval_mentions_order_device_and_user():
     assert "device #7" in text
     assert "telegram_id=1001" in text
     assert "AmneziaWG 2.0" in text
+
+
+def test_render_my_tariff_shows_device_expiration_and_days_left():
+    text = render_my_tariff(
+        [
+            {
+                "name": "phone",
+                "duration_days": 30,
+                "expires_at": "2026-06-26T12:00:00Z",
+                "status": "active",
+            }
+        ],
+        now="2026-05-27T12:00:00Z",
+    )
+
+    assert "My tariff" in text
+    assert "phone" in text
+    assert "30 days" in text
+    assert "Days left: 30" in text
 
 
 def _button_texts(markup):

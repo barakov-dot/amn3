@@ -5,6 +5,8 @@ from contextlib import contextmanager
 from collections.abc import Iterator
 from typing import Any
 
+DEFAULT_PLAN_DAYS = (3, 7, 10, 14, 30, 60, 90, 180)
+
 
 class Repository:
     def __init__(self, conn: sqlite3.Connection) -> None:
@@ -105,6 +107,75 @@ class Repository:
             (name,),
         ).fetchone()
         return int(row["id"])
+
+    def seed_default_plans(self) -> None:
+        for duration_days in DEFAULT_PLAN_DAYS:
+            self.upsert_plan(
+                plan_id=f"days_{duration_days}",
+                name=f"{duration_days} days",
+                duration_days=duration_days,
+                price=0,
+                currency="RUB",
+                is_free=True,
+                is_active=True,
+            )
+
+    def upsert_plan(
+        self,
+        *,
+        plan_id: str,
+        name: str,
+        duration_days: int,
+        price: int = 0,
+        currency: str = "RUB",
+        is_free: bool = True,
+        is_active: bool = True,
+    ) -> None:
+        self._conn.execute(
+            """
+            INSERT INTO plans (
+                id,
+                name,
+                duration_days,
+                price,
+                currency,
+                is_free,
+                is_active
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                name = excluded.name,
+                duration_days = excluded.duration_days,
+                price = excluded.price,
+                currency = excluded.currency,
+                is_free = excluded.is_free,
+                is_active = excluded.is_active,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (
+                plan_id,
+                name,
+                duration_days,
+                price,
+                currency,
+                int(is_free),
+                int(is_active),
+            ),
+        )
+        self._commit()
+
+    def get_plan(self, plan_id: str) -> sqlite3.Row:
+        return self._fetch_one("SELECT * FROM plans WHERE id = ?", (plan_id,))
+
+    def list_active_plans(self) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT *
+            FROM plans
+            WHERE is_active = 1
+            ORDER BY duration_days ASC
+            """
+        ).fetchall()
 
     def create_order(
         self,

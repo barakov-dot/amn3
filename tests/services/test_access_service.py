@@ -47,6 +47,40 @@ def test_approve_order_creates_active_device_with_encrypted_secrets(tmp_path):
     assert device["peer_public_key"] == derived_public_key
 
 
+def test_approve_order_uses_plan_duration_when_order_has_plan(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    repo.seed_default_plans()
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    order_id = repo.create_order(
+        user_id=user_id,
+        plan_id="days_30",
+        payment_mode="free_test",
+    )
+
+    service = AccessService(
+        repo=repo,
+        secret_box=SecretBox.from_app_secret("test-secret-for-access-service-1234567890"),
+        duration_days=7,
+    )
+    result = service.approve_order(
+        order_id=order_id,
+        server_id=server_id,
+        device_name="iPhone",
+        admin_telegram_id=999,
+    )
+
+    device = repo.get_device(result.device_id)
+    assert device["duration_days"] == 30
+
+
 def test_approve_order_enforces_max_devices(tmp_path):
     conn = connect(tmp_path / "test.sqlite3")
     initialize_schema(conn)

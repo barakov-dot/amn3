@@ -40,6 +40,7 @@ def create_workflow(
     conn = connect(database_path)
     initialize_schema(conn)
     repo = Repository(conn)
+    repo.seed_default_plans()
     default_server_id = repo.ensure_default_server(
         name="local",
         network_cidr=default_vpn_network_cidr,
@@ -50,11 +51,13 @@ def create_workflow(
         max_devices_per_user=max_devices_per_user,
         duration_days=default_plan_days,
     )
+    secret_box = SecretBox.from_app_secret(app_secret_key)
     workflow = BotWorkflow(
         repo=repo,
         admin_telegram_ids=admin_telegram_ids,
         access_service=access_service,
         default_server_id=default_server_id,
+        secret_box=secret_box,
     )
     return workflow
 

@@ -9,6 +9,7 @@ SECRET = "bot-workflow-secret-value-with-more-than-32-chars"
 
 def test_request_access_creates_order_with_selected_config_version(tmp_path):
     repo = _repo(tmp_path)
+    repo.seed_default_plans()
     workflow = BotWorkflow(repo=repo, admin_telegram_ids={9001})
 
     result = workflow.request_access(
@@ -17,11 +18,14 @@ def test_request_access_creates_order_with_selected_config_version(tmp_path):
         first_name="Alice",
         last_name=None,
         config_version="amneziawg_v1_5",
+        plan_id="days_14",
     )
 
     order = repo.get_order(result.order_id)
     assert order["requested_config_version"] == "amneziawg_v1_5"
+    assert order["plan_id"] == "days_14"
     assert "AmneziaWG 1.5" in result.text
+    assert "14 days" in result.text
 
 
 def test_build_user_traffic_views_reads_user_devices_and_latest_stats(tmp_path):
@@ -153,6 +157,68 @@ def test_approve_order_rejects_non_admin_without_creating_device(tmp_path):
 
     assert result is None
     assert repo.count_active_devices(user_id) == 0
+
+
+def test_admin_can_read_update_and_reset_config_ready_template(tmp_path):
+    repo = _repo(tmp_path)
+    workflow = BotWorkflow(repo=repo, admin_telegram_ids={9001})
+
+    original = workflow.get_config_ready_template(admin_telegram_id=9001)
+    workflow.set_config_ready_template(
+        admin_telegram_id=9001,
+        text="Custom template {device_id}",
+    )
+    updated = workflow.get_config_ready_template(admin_telegram_id=9001)
+    workflow.reset_config_ready_template(admin_telegram_id=9001)
+    reset = workflow.get_config_ready_template(admin_telegram_id=9001)
+
+    assert "Android AmneziaVPN" in original
+    assert updated == "Custom template {device_id}"
+    assert reset == original
+
+
+def test_resend_device_config_rebuilds_delivery_from_encrypted_device_secrets(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    order_id = repo.create_order(
+        user_id=user_id,
+        plan_id=None,
+        payment_mode="free_test",
+        requested_config_version="amneziawg_v2",
+    )
+    workflow = BotWorkflow(
+        repo=repo,
+        admin_telegram_ids={9001},
+        access_service=AccessService(
+            repo=repo,
+            secret_box=SecretBox.from_app_secret(SECRET),
+            max_devices_per_user=5,
+            duration_days=7,
+        ),
+        default_server_id=server_id,
+        secret_box=SecretBox.from_app_secret(SECRET),
+    )
+    approval = workflow.approve_order(
+        admin_telegram_id=9001,
+        order_id=order_id,
+        config_version="amneziawg_v2",
+    )
+
+    resend = workflow.build_resend_delivery(
+        admin_telegram_id=9001,
+        device_id=approval.device_id,
+    )
+
+    assert resend.user_telegram_id == 1001
+    assert resend.delivery.config_filename == f"amneziya-device-{approval.device_id}.conf"
+    assert resend.delivery.qr_png_bytes.startswith(b"\x89PNG")
+    assert "[Interface]" in resend.config_text
 
 
 def _repo(tmp_path):

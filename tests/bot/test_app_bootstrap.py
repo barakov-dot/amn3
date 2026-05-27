@@ -15,3 +15,13 @@ def test_create_workflow_wires_access_service_for_admin_approval(tmp_path):
     assert workflow.is_admin(9001) is True
     assert isinstance(workflow._access_service, AccessService)
     assert workflow._default_server_id is not None
+    assert [plan["id"] for plan in workflow._repo.list_active_plans()] == [
+        "days_3",
+        "days_7",
+        "days_10",
+        "days_14",
+        "days_30",
+        "days_60",
+        "days_90",
+        "days_180",
+    ]
