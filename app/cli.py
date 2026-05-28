@@ -1,11 +1,14 @@
 import argparse
+import asyncio
 from pathlib import Path
 
 from app import __version__
 from app.backup.service import BackupService
+from app.config import Settings
 from app.db.connection import connect
 from app.db.repositories import Repository
 from app.db.schema import initialize_schema
+from app.main import check_bot_network
 from app.server.checks import planned_check_commands, run_server_checks
 from app.server.peer_apply import (
     PeerApplyInput,
@@ -23,6 +26,10 @@ from app.services.traffic import AwgDumpTrafficCollector, TrafficService
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="amneziya")
     sub = parser.add_subparsers(dest="command", required=True)
+
+    bot = sub.add_parser("bot")
+    bot_sub = bot.add_subparsers(dest="bot_command", required=True)
+    bot_sub.add_parser("check-network")
 
     backup = sub.add_parser("backup")
     backup_sub = backup.add_subparsers(dest="backup_command", required=True)
@@ -126,6 +133,16 @@ def main() -> None:
                 config_path=Path(args.config),
                 server_name=args.server,
                 db_path=Path(args.db),
+            )
+        )
+    elif args.command == "bot" and args.bot_command == "check-network":
+        settings = Settings()
+        print(
+            asyncio.run(
+                check_bot_network(
+                    telegram_bot_token=settings.telegram_bot_token,
+                    telegram_proxy_url=settings.telegram_proxy_url,
+                )
             )
         )
 

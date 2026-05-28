@@ -14,6 +14,7 @@ def test_gitignore_excludes_sensitive_runtime_files():
         "*.qr.png",
         "servers.yml",
         "backups/",
+        "errors_logs/",
         "tmp/",
     ]
 

@@ -4,6 +4,7 @@ from app.security.redaction import redact
 def test_redaction_removes_tokens_keys_and_config_markers():
     unsafe = """
     TELEGRAM_BOT_TOKEN=123:abc
+    TELEGRAM_PROXY_URL=socks5://user:password@example.com:1080
     PrivateKey = secret-private
     PresharedKey = secret-psk
     [Interface]
@@ -14,6 +15,7 @@ def test_redaction_removes_tokens_keys_and_config_markers():
     safe = redact(unsafe)
 
     assert "123:abc" not in safe
+    assert "user:password@example.com:1080" not in safe
     assert "secret-private" not in safe
     assert "secret-psk" not in safe
     assert "[Interface]" not in safe
@@ -24,6 +26,7 @@ def test_redaction_removes_tokens_keys_and_config_markers():
 def test_redaction_handles_realistic_secret_log_formats():
     unsafe = """
     APP_SECRET_KEY = secret-app
+    TELEGRAM_PROXY_URL = socks5://proxy-user:proxy-pass@proxy.example:1080
     telegram_bot_token: 123456:ABCdef
     {'TELEGRAM_BOT_TOKEN': '123456:ABCdef'}
     "external_payment_id": "pay_123"
@@ -44,6 +47,7 @@ def test_redaction_handles_realistic_secret_log_formats():
 
     for unsafe_value in [
         "secret-app",
+        "proxy-user:proxy-pass@proxy.example:1080",
         "123456:ABCdef",
         "pay_123",
         "pay_456",

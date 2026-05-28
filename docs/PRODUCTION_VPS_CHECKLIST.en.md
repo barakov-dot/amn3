@@ -9,7 +9,27 @@ git clone -b codex-vps-test-prep https://github.com/barakov-dot/amn2.git
 cd amn2
 ```
 
-## 2. Prepare `.env`
+## 2. Prepare Python Environment
+
+On a new VPS:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+python -m pip install -U pip
+python -m pip install -e .
+```
+
+If the project was already cloned and needs fresh changes:
+
+```bash
+git pull
+source venv/bin/activate
+python -m pip install -U pip
+python -m pip install -e .
+```
+
+## 3. Prepare `.env`
 
 ```bash
 cp .env.example .env
@@ -19,6 +39,7 @@ Fill the minimum required values:
 
 ```env
 TELEGRAM_BOT_TOKEN=CHANGE_ME_TOKEN_FROM_BOTFATHER
+TELEGRAM_PROXY_URL=
 APP_SECRET_KEY=CHANGE_ME_GENERATED_RANDOM_SECRET_32_PLUS_CHARS
 ADMIN_TELEGRAM_IDS=CHANGE_ME_ADMIN_TELEGRAM_IDS
 VPS_APPLY_ENABLED=false
@@ -26,10 +47,23 @@ SERVER_CONFIG_PATH=servers.yml
 SERVER_NAME=debian-vps-1
 ```
 
+If the VPS cannot reach `https://api.telegram.org` directly, set a SOCKS5 proxy:
+
+```env
+TELEGRAM_PROXY_URL=socks5://127.0.0.1:1080
+```
+
+Before starting the bot, check access through the same proxy:
+
+```bash
+curl --socks5-hostname 127.0.0.1:1080 -I https://api.telegram.org
+python -m app.cli bot check-network
+```
+
 Store `APP_SECRET_KEY` separately. Losing it means losing access to encrypted
 peer secrets.
 
-## 3. Prepare `servers.yml`
+## 4. Prepare `servers.yml`
 
 Do not commit this file. Required values:
 
@@ -44,14 +78,14 @@ vpn.server_address: 10.8.0.1/24
 vpn.server_public_key: AmneziaWG server public key
 ```
 
-## 4. Local Check
+## 5. Local Check
 
 ```bash
 python -m pytest tests
 python -m app.cli server preflight --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
 ```
 
-## 5. Safe VPS Dry-Runs
+## 6. Safe VPS Dry-Runs
 
 ```bash
 python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
@@ -60,7 +94,7 @@ python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 
 python -m app.cli server collect-traffic --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3 --dry-run
 ```
 
-## 6. First Live Test
+## 7. First Live Test
 
 Run the read-only check first:
 
@@ -75,7 +109,7 @@ after that enable:
 VPS_APPLY_ENABLED=true
 ```
 
-## 7. Backup
+## 8. Backup
 
 ```bash
 python -m app.cli backup create --db data/amneziya.sqlite3 --output backups

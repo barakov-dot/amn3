@@ -9,7 +9,27 @@ git clone -b codex-vps-test-prep https://github.com/barakov-dot/amn2.git
 cd amn2
 ```
 
-## 2. Подготовить `.env`
+## 2. Подготовить Python-окружение
+
+На новом VPS:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+python -m pip install -U pip
+python -m pip install -e .
+```
+
+Если проект уже был склонирован ранее и нужно получить свежие изменения:
+
+```bash
+git pull
+source venv/bin/activate
+python -m pip install -U pip
+python -m pip install -e .
+```
+
+## 3. Подготовить `.env`
 
 ```bash
 cp .env.example .env
@@ -19,6 +39,7 @@ cp .env.example .env
 
 ```env
 TELEGRAM_BOT_TOKEN=CHANGE_ME_TOKEN_FROM_BOTFATHER
+TELEGRAM_PROXY_URL=
 APP_SECRET_KEY=CHANGE_ME_GENERATED_RANDOM_SECRET_32_PLUS_CHARS
 ADMIN_TELEGRAM_IDS=CHANGE_ME_ADMIN_TELEGRAM_IDS
 VPS_APPLY_ENABLED=false
@@ -26,10 +47,23 @@ SERVER_CONFIG_PATH=servers.yml
 SERVER_NAME=debian-vps-1
 ```
 
+Если VPS не открывает `https://api.telegram.org` напрямую, указать SOCKS5 proxy:
+
+```env
+TELEGRAM_PROXY_URL=socks5://127.0.0.1:1080
+```
+
+Перед запуском бота проверить доступ через тот же proxy:
+
+```bash
+curl --socks5-hostname 127.0.0.1:1080 -I https://api.telegram.org
+python -m app.cli bot check-network
+```
+
 `APP_SECRET_KEY` сохранить отдельно. Потеря ключа означает потерю доступа к
 зашифрованным peer-секретам.
 
-## 3. Подготовить `servers.yml`
+## 4. Подготовить `servers.yml`
 
 Файл не коммитить. Обязательные значения:
 
@@ -44,14 +78,14 @@ vpn.server_address: 10.8.0.1/24
 vpn.server_public_key: public key сервера AmneziaWG
 ```
 
-## 4. Локальная проверка
+## 5. Локальная проверка
 
 ```bash
 python -m pytest tests
 python -m app.cli server preflight --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
 ```
 
-## 5. Безопасные VPS dry-run
+## 6. Безопасные VPS dry-run
 
 ```bash
 python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
@@ -60,7 +94,7 @@ python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 
 python -m app.cli server collect-traffic --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3 --dry-run
 ```
 
-## 6. Первый живой тест
+## 7. Первый живой тест
 
 Сначала выполнить read-only check:
 
@@ -75,7 +109,7 @@ python -m app.cli server check --config servers.yml --server debian-vps-1
 VPS_APPLY_ENABLED=true
 ```
 
-## 7. Backup
+## 8. Backup
 
 ```bash
 python -m app.cli backup create --db data/amneziya.sqlite3 --output backups

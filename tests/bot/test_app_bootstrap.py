@@ -1,4 +1,4 @@
-from app.main import create_workflow
+from app.main import create_bot, create_workflow
 from app.services.access import AccessService
 from tests.server_config.test_loader import VALID_YAML
 
@@ -56,3 +56,32 @@ def test_create_workflow_can_enable_vps_peer_apply_from_server_config(tmp_path):
     assert server["vpn_network_cidr"] == "10.8.0.0/24"
     assert server["server_address"] == "10.8.0.1"
     assert server["server_public_key"] == "real-server-public-key"
+
+
+def test_create_bot_uses_proxy_session_when_proxy_url_is_configured(monkeypatch):
+    created_sessions = []
+    created_bots = []
+
+    class FakeSession:
+        def __init__(self, *, proxy):
+            self.proxy = proxy
+            created_sessions.append(self)
+
+    class FakeBot:
+        def __init__(self, *, token, session=None):
+            self.token = token
+            self.session = session
+            created_bots.append(self)
+
+    monkeypatch.setattr("app.main.AiohttpSession", FakeSession)
+    monkeypatch.setattr("app.main.Bot", FakeBot)
+
+    bot = create_bot(
+        telegram_bot_token="123:abc",
+        telegram_proxy_url="socks5://127.0.0.1:1080",
+    )
+
+    assert bot is created_bots[0]
+    assert bot.token == "123:abc"
+    assert bot.session is created_sessions[0]
+    assert bot.session.proxy == "socks5://127.0.0.1:1080"

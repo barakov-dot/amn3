@@ -101,6 +101,17 @@ def test_settings_reads_vps_apply_settings():
     assert settings.server_name == "debian-vps-1"
 
 
+def test_settings_reads_telegram_proxy_url():
+    settings = Settings(
+        _env_file=None,
+        telegram_bot_token="CHANGE_ME",
+        app_secret_key="test-secret",
+        telegram_proxy_url="socks5://127.0.0.1:1080",
+    )
+
+    assert settings.telegram_proxy_url == "socks5://127.0.0.1:1080"
+
+
 def test_settings_rejects_unknown_control_panel_auth_method():
     with pytest.raises(ValidationError):
         Settings(

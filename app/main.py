@@ -1,7 +1,11 @@
 import asyncio
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 from aiogram import Bot
+from aiogram.client.session.aiohttp import AiohttpSession
+from aiogram.exceptions import TelegramNetworkError
 
 from app.bot import create_dispatcher
 from app.bot.workflows import BotWorkflow
@@ -10,6 +14,7 @@ from app.db.connection import connect
 from app.db.repositories import Repository
 from app.db.schema import initialize_schema
 from app.security.crypto import SecretBox
+from app.security.redaction import redact
 from app.server.peer_apply import ServerConfigPeerApplier
 from app.server_config.loader import load_server_config, select_server
 from app.server_config.models import ServerConfig
@@ -29,9 +34,90 @@ async def run() -> None:
         server_config_path=settings.server_config_path,
         server_name=settings.server_name,
     )
-    bot = Bot(token=settings.telegram_bot_token)
+    bot = create_bot(
+        telegram_bot_token=settings.telegram_bot_token,
+        telegram_proxy_url=settings.telegram_proxy_url,
+    )
     dispatcher = create_dispatcher(workflow=workflow)
-    await dispatcher.start_polling(bot)
+    try:
+        await dispatcher.start_polling(bot)
+    except TelegramNetworkError as exc:
+        raise RuntimeError(telegram_network_error_message(settings.telegram_proxy_url)) from exc
+
+
+def create_bot(*, telegram_bot_token: str, telegram_proxy_url: str = "") -> Bot:
+    if telegram_proxy_url.strip():
+        return Bot(
+            token=telegram_bot_token,
+            session=AiohttpSession(proxy=telegram_proxy_url.strip()),
+        )
+    return Bot(token=telegram_bot_token)
+
+
+async def check_bot_network(
+    *,
+    telegram_bot_token: str,
+    telegram_proxy_url: str = "",
+    bot_factory: Callable[..., Any] = create_bot,
+) -> str:
+    bot = bot_factory(
+        telegram_bot_token=telegram_bot_token,
+        telegram_proxy_url=telegram_proxy_url,
+    )
+    try:
+        me = await bot.get_me()
+    except (OSError, TimeoutError, TelegramNetworkError) as exc:
+        raise RuntimeError(telegram_network_error_message(telegram_proxy_url)) from exc
+    finally:
+        close = getattr(bot.session, "close", None)
+        if close is not None:
+            await close()
+
+    username = getattr(me, "username", "")
+    identity = f"@{username}" if username else f"id={getattr(me, 'id', '<unknown>')}"
+    proxy_status = "enabled" if telegram_proxy_url.strip() else "disabled"
+    return "\n".join(
+        [
+            "Telegram API: ok",
+            f"Bot: {identity}",
+            f"Proxy: {proxy_status}",
+        ]
+    )
+
+
+def telegram_network_error_message(telegram_proxy_url: str = "") -> str:
+    proxy_url = telegram_proxy_url.strip()
+    lines = [
+        "Telegram API network check failed.",
+        "The VPS cannot reach https://api.telegram.org directly or through the configured proxy.",
+        "Check TELEGRAM_PROXY_URL in .env when a proxy is required.",
+    ]
+    if proxy_url:
+        lines.extend(
+            [
+                f"Configured proxy: {redact(f'TELEGRAM_PROXY_URL={proxy_url}')}",
+                f"Verify proxy access: curl --socks5-hostname {_proxy_curl_endpoint(proxy_url)} -I https://api.telegram.org",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "Direct check: curl -I https://api.telegram.org",
+                "Proxy example: TELEGRAM_PROXY_URL=socks5://127.0.0.1:1080",
+            ]
+        )
+    return "\n".join(lines)
+
+
+def _proxy_curl_endpoint(proxy_url: str) -> str:
+    from urllib.parse import urlparse
+
+    parsed = urlparse(proxy_url)
+    if not parsed.hostname:
+        return "HOST:PORT"
+    if parsed.port:
+        return f"{parsed.hostname}:{parsed.port}"
+    return parsed.hostname
 
 
 def create_workflow(

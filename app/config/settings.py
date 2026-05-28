@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", populate_by_name=True)
 
     telegram_bot_token: str = Field(alias="TELEGRAM_BOT_TOKEN")
+    telegram_proxy_url: str = Field(default="", alias="TELEGRAM_PROXY_URL")
     app_secret_key: str = Field(alias="APP_SECRET_KEY")
     admin_telegram_ids: str = Field(default="", alias="ADMIN_TELEGRAM_IDS")
     access_mode: str = Field(default="free_test", alias="ACCESS_MODE")

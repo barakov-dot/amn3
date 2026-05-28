@@ -10,7 +10,7 @@ PATTERNS = [
     re.compile(r"\[Interface\][\s\S]*?(?=\n\s*\n|\Z)", re.IGNORECASE),
     re.compile(r"(/bot)[^/\s]+", re.IGNORECASE),
     re.compile(
-        r"([\"']?(?:TELEGRAM_BOT_TOKEN|APP_SECRET_KEY|external_payment_id)[\"']?\s*[:=]\s*)"
+        r"([\"']?(?:TELEGRAM_BOT_TOKEN|TELEGRAM_PROXY_URL|APP_SECRET_KEY|external_payment_id)[\"']?\s*[:=]\s*)"
         r"([\"'])?[^\"'\s,}]+([\"'])?",
         re.IGNORECASE,
     ),
