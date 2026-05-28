@@ -312,7 +312,7 @@ def render_my_devices(devices: Iterable[Mapping[str, object]], *, now: str) -> s
     for device in devices:
         has_devices = True
         expires_at = str(device["expires_at"]) if device["expires_at"] is not None else None
-        connected = bool(device.get("first_connected_at") or device.get("last_connected_at"))
+        connected = bool(_row_get(device, "first_connected_at") or _row_get(device, "last_connected_at"))
         lines.extend(
             [
                 "",
@@ -486,15 +486,25 @@ def _render_device_traffic_lines(view: DeviceTrafficView) -> list[str]:
 
 
 def _format_user_identity(row: Mapping[str, object]) -> str:
-    username = row.get("username")
+    username = _row_get(row, "username")
     if username:
         return f"@{username}"
-    first_name = row.get("first_name")
-    last_name = row.get("last_name")
+    first_name = _row_get(row, "first_name")
+    last_name = _row_get(row, "last_name")
     full_name = " ".join(str(part) for part in (first_name, last_name) if part)
     if full_name:
         return full_name
     return f"telegram_id={row['telegram_id']}"
+
+
+def _row_get(row: Mapping[str, object], key: str, default: object = None) -> object:
+    get = getattr(row, "get", None)
+    if get is not None:
+        return get(key, default)
+    try:
+        return row[key]
+    except (KeyError, IndexError):
+        return default
 
 
 def _version_label(config_version: str) -> str:

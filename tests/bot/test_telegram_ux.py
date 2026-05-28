@@ -1,3 +1,5 @@
+import sqlite3
+
 from app.bot.ux import (
     ADMIN_PENDING_CALLBACK,
     ADMIN_RESEND_PREFIX,
@@ -175,6 +177,25 @@ def test_admin_pending_orders_render_with_per_order_version_keyboard():
     ]
 
 
+def test_admin_pending_orders_accept_sqlite_rows_from_repository():
+    row = _sqlite_row(
+        {
+            "id": 11,
+            "telegram_id": 1001,
+            "username": "alice",
+            "first_name": "Alice",
+            "last_name": None,
+            "status": "manual_review",
+            "created_at": "2026-05-27 12:00:00",
+        }
+    )
+
+    text = render_admin_pending_orders([row])
+
+    assert "#11" in text
+    assert "@alice" in text
+
+
 def test_admin_traffic_keyboard_links_pending_orders_and_traffic():
     text, keyboard = render_admin_traffic(
         [
@@ -322,6 +343,26 @@ def test_render_my_devices_lists_devices_with_tariff_and_connection_state():
     assert "Подключался: да" in text
 
 
+def test_render_my_devices_accepts_sqlite_rows_from_repository():
+    row = _sqlite_row(
+        {
+            "id": 7,
+            "name": "phone",
+            "duration_days": 30,
+            "expires_at": "2026-06-26T12:00:00Z",
+            "status": "active",
+            "config_version": "amneziawg_v2",
+            "first_connected_at": "2026-05-27T12:00:00Z",
+            "last_connected_at": "2026-05-27T12:30:00Z",
+        }
+    )
+
+    text = render_my_devices([row], now="2026-05-27T12:00:00Z")
+
+    assert "#7 phone" in text
+    assert "AmneziaWG 2.0" in text
+
+
 def test_user_device_keyboard_offers_resend_and_revoke_actions():
     keyboard = build_user_device_keyboard(device_id=7)
 
@@ -359,3 +400,10 @@ def _button_texts(markup):
 
 def _callback_data(markup):
     return [[button.callback_data for button in row] for row in markup.inline_keyboard]
+
+
+def _sqlite_row(values: dict[str, object]) -> sqlite3.Row:
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    columns = ", ".join(f"? AS {name}" for name in values)
+    return conn.execute(f"SELECT {columns}", tuple(values.values())).fetchone()
