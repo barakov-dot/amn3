@@ -891,6 +891,34 @@ def test_users_page_lists_users(tmp_path):
     assert "alice" in response.text
 
 
+def test_users_page_lists_existing_telegram_bot_users_with_counts(tmp_path):
+    client, repo = _client(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=2002,
+        username="existing_user",
+        first_name="Existing",
+        last_name="User",
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    repo.create_device(
+        user_id=user_id,
+        server_id=server_id,
+        name="phone",
+        duration_days=7,
+        vpn_ip="10.8.0.2",
+        peer_public_key="peer-public",
+        peer_private_key_encrypted="encrypted-private",
+        preshared_key_encrypted="encrypted-psk",
+        config_version="amneziawg_v2",
+    )
+
+    response = client.get("/users")
+
+    assert response.status_code == 200
+    assert "existing_user" in response.text
+    assert "1/1" in response.text
+
+
 def test_create_user_from_web(tmp_path):
     client, repo = _client(tmp_path)
 

@@ -99,6 +99,7 @@ Deletion must be safe in the first stage:
 
 Minimum actions:
 
+- show all existing users from the current `users` table, including users previously created through the Telegram bot;
 - create user;
 - edit `telegram_id`, `username`, `first_name`, `last_name`, `status`, `is_admin`;
 - block user;
@@ -107,6 +108,8 @@ Minimum actions:
 - view recent admin actions.
 
 Changes should be recorded in `admin_actions` with actions such as `web_user_create`, `web_user_update`, `web_user_block`, and `web_user_delete`.
+
+The web panel does not create a separate users table. The source of truth is the existing `users` table; linked `devices`, `orders`, and `admin_actions` must appear for already-created users without migration or manual import.
 
 ## Server Management
 
@@ -182,6 +185,7 @@ Cover with tests:
 
 - `python -m app.cli web serve --host 0.0.0.0 --port 3030` starts the web panel.
 - `/login` accepts a valid username/password and protects the remaining pages.
+- Users previously created through the Telegram bot appear in `/users` and detail pages with their devices and orders.
 - Users can be added, edited, blocked, and marked as deleted.
 - Servers can be added, edited, and disabled.
 - Every server is shown with live state: online/degraded/offline/unknown, latency, last check time, and latest error.

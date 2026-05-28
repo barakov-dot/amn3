@@ -50,6 +50,7 @@ This English plan mirrors the Russian plan at `docs/superpowers/plans/2026-05-29
 - `python -m app.cli web serve --host 0.0.0.0 --port 3030` starts the panel.
 - `/login` protects every admin page.
 - Users can be created, edited, blocked, and marked as deleted.
+- Existing users previously created through the Telegram bot are listed from the current `users` table without migration or import.
 - Servers can be created, edited, disabled, and shown with live health state.
 - Every server row includes online/degraded/offline/unknown, latency, last checked time, and latest error when available.
 - `/logs` shows redacted recent log lines with depth controlled by `APP_LOG_MAX_LINES`.
