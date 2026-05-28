@@ -34,11 +34,14 @@ APP_LOG_ENABLED=true
 APP_LOG_LEVEL=INFO
 APP_LOG_MAX_LINES=500
 APP_LOG_PATH=logs/app.log
+CLIENT_CONFIG_TEMPLATE_DIR=config_templates
 ```
 
 `WEB_ADMIN_PASSWORD_HASH` хранит hash пароля, не исходный пароль. Если hash пустой или placeholder, web-панель должна отказаться стартовать и вывести понятную ошибку. `WEB_ADMIN_SESSION_SECRET` используется для signed session cookie и должен храниться отдельно вместе с `.env`.
 
 `APP_LOG_ENABLED=false` отключает запись application log. `APP_LOG_LEVEL` поддерживает `DEBUG`, `INFO`, `WARNING`, `ERROR`. `APP_LOG_MAX_LINES` задает глубину просмотра в UI, а не бесконечное хранение. Ротация файла может быть простой: ограничение размера через Python logging rotating handler.
+
+`CLIENT_CONFIG_TEMPLATE_DIR` задает внешнюю директорию с редактируемыми шаблонами клиентских конфигов. Если директория пуста или не задана, используются дефолтные шаблоны из кода. На VPS лучше хранить локальные шаблоны вне package-каталога, чтобы обновление через `git pull` не перетирало ручные правки.
 
 ## Архитектура
 
@@ -51,6 +54,7 @@ flowchart TD
     Repo --> DB["SQLite database"]
     WebApp --> Logs["Log reader / redaction"]
     WebApp --> ServerConfig["servers.yml loader"]
+    WebApp --> ConfigTemplates["Client config templates"]
 ```
 
 Панель запускается отдельным процессом от Telegram bot:
@@ -86,6 +90,7 @@ python -m app.cli web serve --host 0.0.0.0 --port 3030
 - `/servers/{id}`: редактирование host, ssh port, endpoint host, vpn port, network CIDR, server address, server public key, runtime, firewall, status, max devices.
 - `/servers/{id}/health`: карточка live-диагностики сервера: ping/latency, TCP/SSH доступность, read-only `server check`, состояние `awg-quick`, видимость UDP-порта, последняя ошибка.
 - `/orders`: pending/fulfilled/rejected заявки для дебага Telegram flow.
+- `/config-templates`: редактируемые шаблоны доставки и клиентских `.conf` файлов, список placeholders, preview итогового конфига и `vpn://` ссылки без сохранения секретов в логах.
 - `/logs`: просмотр последних `APP_LOG_MAX_LINES`, фильтр по уровню и plain-text поиск.
 - `/settings`: read-only страница ключевых runtime-настроек с redaction секретов.
 
@@ -138,6 +143,34 @@ Live-состояние сервера должно храниться отде�
 
 `ping` в UI означает быструю reachability-проверку. Для MVP допустимо использовать TCP connect к SSH-порту с timeout и полный read-only `server check` по кнопке/обновлению. ICMP ping не обязателен, потому что на VPS/firewall он часто отключен.
 
+## Шаблоны клиентских конфигов и доставка
+
+Сейчас в коде уже заложены такие способы получения конфига пользователем:
+
+- Telegram-сообщение по шаблону `config_ready`;
+- вложенный `.conf` файл;
+- QR PNG, построенный из готового текста конфига;
+- повторная отправка пользователем из раздела устройств;
+- повторная отправка администратором из админского Telegram-интерфейса;
+- аварийный fallback: если отправка файла/QR падает после создания устройства, бот отправляет текст сообщения и сырой конфиг отдельным сообщением.
+
+В доработку web-панели добавляется отдельный слой шаблонов клиентских конфигов:
+
+- дефолтные шаблоны `amneziawg_v1_5.conf.tpl` и `amneziawg_v2.conf.tpl` хранятся в коде;
+- локальные VPS-шаблоны могут лежать в `CLIENT_CONFIG_TEMPLATE_DIR` и переопределять дефолты;
+- шаблон содержит постоянные строки формата `[Interface]`, `[Peer]`, `DNS`, `AllowedIPs`, `PersistentKeepalive`, obfuscation-поля AmneziaWG и placeholders для переменных значений;
+- переменные значения подставляются из текущего flow: `private_key`, `address`, `server_public_key`, `preshared_key`, `endpoint`, `device_id`, `config_version`, параметры сервера и выбранная версия конфига;
+- неизвестные placeholders не должны молча исчезать: preview и тесты должны показывать ошибку, чтобы не выдать пользователю битый конфиг;
+- web-панель должна показывать текущий шаблон, источник шаблона (default или override), список доступных placeholders и preview на тестовых данных;
+- запись шаблона через UI разрешена только во внешнюю директорию `CLIENT_CONFIG_TEMPLATE_DIR`; package defaults остаются read-only.
+
+Для пользователя также добавляется import-link вида `vpn://...`. MVP-формат ссылки выносится в отдельный helper `build_vpn_import_link(config_text)`, чтобы при проверке на реальном AmneziaVPN-клиенте можно было поменять payload в одном месте. Первый вариант payload: URL-safe Base64 от UTF-8 текста готового `.conf` после префикса `vpn://`. Ссылка отображается:
+
+- в Telegram-сообщении через placeholder `{vpn_link}`;
+- в web-карточке устройства;
+- в preview на странице `/config-templates`;
+- в QR payload после подтверждения на реальном клиенте; до подтверждения `.conf` файл остается каноническим способом доставки.
+
 ## Логирование
 
 Нужно добавить централизованную настройку logging:
@@ -178,6 +211,7 @@ Live-состояние сервера должно храниться отде�
 - servers list/create/update/disable;
 - server health check stores online/degraded/offline state and exposes it in UI;
 - logs viewer применяет `APP_LOG_MAX_LINES` и redaction;
+- client config templates render current AmneziaWG configs, expose placeholders, and show `vpn://` import links;
 - CLI принимает `web serve`;
 - startup отказывается стартовать при пустом password hash.
 
@@ -189,6 +223,8 @@ Live-состояние сервера должно храниться отде�
 - Пользователей можно добавить, отредактировать, заблокировать и пометить удаленными.
 - Серверы можно добавить, отредактировать и отключить.
 - Все серверы отображаются с live-состоянием: online/degraded/offline/unknown, latency, временем последней проверки и последней ошибкой.
+- `/config-templates` показывает шаблон сообщения, шаблоны `.conf` по версиям, preview, доступные placeholders и `vpn://` ссылку.
+- Пользователь может получить конфиг как Telegram-текст, `.conf` файл, QR, повторную отправку и `vpn://` ссылку; аварийный fallback сохраняет возможность получить сырой config text.
 - `/logs` показывает последние строки логов с redaction.
 - `APP_LOG_ENABLED`, `APP_LOG_LEVEL`, `APP_LOG_MAX_LINES`, `APP_LOG_PATH` управляют логированием.
 - Все новые behavior-тесты проходят вместе с существующим набором.

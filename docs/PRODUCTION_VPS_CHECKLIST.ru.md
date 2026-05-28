@@ -63,7 +63,30 @@ python -m app.cli bot check-network
 `APP_SECRET_KEY` сохранить отдельно. Потеря ключа означает потерю доступа к
 зашифрованным peer-секретам.
 
-## 4. Подготовить `servers.yml`
+## 4. Шаблоны и выдача конфига
+
+Текущие варианты получения конфига пользователем:
+
+- Telegram-сообщение по шаблону `config_ready`;
+- вложенный `.conf` файл;
+- QR-код;
+- повторная отправка пользователем из своих устройств;
+- повторная отправка администратором;
+- аварийная отправка raw config text, если файл/QR не ушли после создания устройства.
+
+В доработке web-панели добавляется отдельный шаблон клиентского `.conf` по версиям
+`amneziawg_v1_5` и `amneziawg_v2`, а также ссылка вида `vpn://...`.
+После реализации держать VPS-правки шаблонов во внешней директории:
+
+```env
+CLIENT_CONFIG_TEMPLATE_DIR=config_templates
+```
+
+Шаблон содержит постоянные строки конфига и placeholders для переменных значений
+пользователя/устройства. `.conf` файл остается каноническим способом доставки,
+пока `vpn://` импорт не проверен на реальном AmneziaVPN-клиенте.
+
+## 5. Подготовить `servers.yml`
 
 Файл не коммитить. Обязательные значения:
 
@@ -78,14 +101,14 @@ vpn.server_address: 10.8.0.1/24
 vpn.server_public_key: public key сервера AmneziaWG
 ```
 
-## 5. Локальная проверка
+## 6. Локальная проверка
 
 ```bash
 python -m pytest tests
 python -m app.cli server preflight --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
 ```
 
-## 6. Безопасные VPS dry-run
+## 7. Безопасные VPS dry-run
 
 ```bash
 python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
@@ -94,7 +117,7 @@ python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 
 python -m app.cli server collect-traffic --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3 --dry-run
 ```
 
-## 7. Первый живой тест
+## 8. Первый живой тест
 
 Сначала выполнить read-only check:
 
@@ -109,7 +132,7 @@ python -m app.cli server check --config servers.yml --server debian-vps-1
 VPS_APPLY_ENABLED=true
 ```
 
-## 8. Backup
+## 9. Backup
 
 ```bash
 python -m app.cli backup create --db data/amneziya.sqlite3 --output backups

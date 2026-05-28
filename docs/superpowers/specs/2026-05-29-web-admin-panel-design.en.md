@@ -34,11 +34,14 @@ APP_LOG_ENABLED=true
 APP_LOG_LEVEL=INFO
 APP_LOG_MAX_LINES=500
 APP_LOG_PATH=logs/app.log
+CLIENT_CONFIG_TEMPLATE_DIR=config_templates
 ```
 
 `WEB_ADMIN_PASSWORD_HASH` stores a password hash, not the raw password. If the hash is empty or a placeholder, the web panel must refuse to start with an actionable error. `WEB_ADMIN_SESSION_SECRET` is used for signed session cookies and must be stored separately with `.env`.
 
 `APP_LOG_ENABLED=false` disables application log file writing. `APP_LOG_LEVEL` supports `DEBUG`, `INFO`, `WARNING`, and `ERROR`. `APP_LOG_MAX_LINES` controls UI viewing depth, not infinite retention. File rotation can be simple: a Python logging rotating handler with a size limit.
+
+`CLIENT_CONFIG_TEMPLATE_DIR` points to an external directory with editable client config templates. If the directory is empty or unset, package defaults are used. On a VPS, local templates should live outside the package directory so `git pull` does not overwrite manual edits.
 
 ## Architecture
 
@@ -51,6 +54,7 @@ flowchart TD
     Repo --> DB["SQLite database"]
     WebApp --> Logs["Log reader / redaction"]
     WebApp --> ServerConfig["servers.yml loader"]
+    WebApp --> ConfigTemplates["Client config templates"]
 ```
 
 The panel runs as a separate process from the Telegram bot:
@@ -86,6 +90,7 @@ The panel should be an operational workspace, not a landing page:
 - `/servers/{id}`: edit host, SSH port, endpoint host, VPN port, network CIDR, server address, server public key, runtime, firewall, status, max devices.
 - `/servers/{id}/health`: live diagnostics page for one server: ping/latency, TCP/SSH reachability, read-only `server check`, `awg-quick` state, UDP port visibility, latest error.
 - `/orders`: pending/fulfilled/rejected orders for Telegram flow debugging.
+- `/config-templates`: editable delivery templates and client `.conf` templates, placeholder list, rendered preview, and `vpn://` link preview without logging secrets.
 - `/logs`: show last `APP_LOG_MAX_LINES`, filter by level, and plain-text search.
 - `/settings`: read-only runtime settings with secret redaction.
 
@@ -138,6 +143,34 @@ Live server state must be stored separately from the manual `servers.status`. Ad
 
 In the UI, `ping` means a fast reachability check. For the MVP, TCP connect to the SSH port with a timeout is acceptable, and the full read-only `server check` can run from a button/refresh action. ICMP ping is not required because it is often disabled by VPS/firewall policy.
 
+## Client Config Templates And Delivery
+
+The code already includes these user delivery paths:
+
+- Telegram message rendered from the `config_ready` template;
+- attached `.conf` file;
+- QR PNG generated from the rendered config text;
+- user-triggered resend from the devices section;
+- admin-triggered resend from the Telegram admin interface;
+- emergency fallback: if file/QR delivery fails after device creation, the bot sends the message text and raw config text as separate messages.
+
+The web-panel work adds a separate client config template layer:
+
+- default `amneziawg_v1_5.conf.tpl` and `amneziawg_v2.conf.tpl` files live in the package;
+- local VPS templates may live in `CLIENT_CONFIG_TEMPLATE_DIR` and override defaults;
+- templates contain stable config lines such as `[Interface]`, `[Peer]`, `DNS`, `AllowedIPs`, `PersistentKeepalive`, AmneziaWG obfuscation fields, and placeholders for variable values;
+- variable values come from the current flow: `private_key`, `address`, `server_public_key`, `preshared_key`, `endpoint`, `device_id`, `config_version`, server parameters, and the selected config version;
+- unknown placeholders must not disappear silently: preview and tests should report an error so a broken config is not sent to a user;
+- the web panel shows the current template, source (`default` or `override`), available placeholders, and a preview rendered with test data;
+- UI writes are allowed only to the external `CLIENT_CONFIG_TEMPLATE_DIR`; package defaults stay read-only.
+
+Users also get an import link in the form `vpn://...`. The MVP link format is isolated in `build_vpn_import_link(config_text)` so the payload can be changed in one place after testing with a real AmneziaVPN client. The first payload format is URL-safe Base64 of the final UTF-8 `.conf` text after the `vpn://` prefix. The link is shown:
+
+- in the Telegram message through `{vpn_link}`;
+- on the web device detail page;
+- in the `/config-templates` preview;
+- as QR payload after real-client confirmation; until then, the `.conf` file remains the canonical delivery method.
+
 ## Logging
 
 Add centralized logging configuration:
@@ -178,6 +211,7 @@ Cover with tests:
 - servers list/create/update/disable;
 - server health check stores online/degraded/offline state and exposes it in UI;
 - logs viewer applies `APP_LOG_MAX_LINES` and redaction;
+- client config templates render current AmneziaWG configs, expose placeholders, and show `vpn://` import links;
 - CLI accepts `web serve`;
 - startup refuses empty password hash.
 
@@ -189,6 +223,8 @@ Cover with tests:
 - Users can be added, edited, blocked, and marked as deleted.
 - Servers can be added, edited, and disabled.
 - Every server is shown with live state: online/degraded/offline/unknown, latency, last check time, and latest error.
+- `/config-templates` shows the message template, `.conf` templates per version, preview, available placeholders, and a `vpn://` link.
+- Users can receive configs through Telegram text, `.conf` file, QR, resend flows, and a `vpn://` link; the emergency fallback still preserves raw config text delivery.
 - `/logs` shows recent log lines with redaction.
 - `APP_LOG_ENABLED`, `APP_LOG_LEVEL`, `APP_LOG_MAX_LINES`, and `APP_LOG_PATH` control logging.
 - All new behavior tests pass with the existing test suite.

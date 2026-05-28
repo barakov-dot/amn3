@@ -63,7 +63,30 @@ python -m app.cli bot check-network
 Store `APP_SECRET_KEY` separately. Losing it means losing access to encrypted
 peer secrets.
 
-## 4. Prepare `servers.yml`
+## 4. Config Templates And Delivery
+
+Current user config delivery options:
+
+- Telegram message rendered from the `config_ready` template;
+- attached `.conf` file;
+- QR code;
+- user-triggered resend from their devices;
+- admin-triggered resend;
+- emergency raw config text delivery if file/QR delivery fails after device creation.
+
+The web-panel work adds a separate client `.conf` template per version,
+`amneziawg_v1_5` and `amneziawg_v2`, plus an import link in the form `vpn://...`.
+After implementation, keep VPS template edits in an external directory:
+
+```env
+CLIENT_CONFIG_TEMPLATE_DIR=config_templates
+```
+
+The template contains stable config lines and placeholders for user/device
+variables. The `.conf` file remains the canonical delivery path until `vpn://`
+import is verified with a real AmneziaVPN client.
+
+## 5. Prepare `servers.yml`
 
 Do not commit this file. Required values:
 
@@ -78,14 +101,14 @@ vpn.server_address: 10.8.0.1/24
 vpn.server_public_key: AmneziaWG server public key
 ```
 
-## 5. Local Check
+## 6. Local Check
 
 ```bash
 python -m pytest tests
 python -m app.cli server preflight --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
 ```
 
-## 6. Safe VPS Dry-Runs
+## 7. Safe VPS Dry-Runs
 
 ```bash
 python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
@@ -94,7 +117,7 @@ python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 
 python -m app.cli server collect-traffic --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3 --dry-run
 ```
 
-## 7. First Live Test
+## 8. First Live Test
 
 Run the read-only check first:
 
@@ -109,7 +132,7 @@ after that enable:
 VPS_APPLY_ENABLED=true
 ```
 
-## 8. Backup
+## 9. Backup
 
 ```bash
 python -m app.cli backup create --db data/amneziya.sqlite3 --output backups

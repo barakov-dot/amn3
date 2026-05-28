@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a FastAPI/Jinja2 web admin panel on port `3030` with login/password auth, users CRUD, servers CRUD, live server health, logs viewer, and `.env`-controlled logging.
+**Goal:** Build a FastAPI/Jinja2 web admin panel on port `3030` with login/password auth, users CRUD, servers CRUD, live server health, client config templates, `vpn://` delivery links, logs viewer, and `.env`-controlled logging.
 
 **Architecture:** Add a separate `app.web` package that reuses existing `Settings`, SQLite `Repository`, redaction, and server check code. The web panel runs as a separate process through `python -m app.cli web serve`, uses signed cookie sessions, server-rendered templates, and records admin actions through the existing database. Live server state is stored in `server_health_checks` and refreshed by explicit UI/CLI actions.
 
@@ -17,6 +17,12 @@
 - Modify `app/config/settings.py`: add web/log fields and validators.
 - Modify `app/db/schema.py`: add `server_health_checks`.
 - Modify `app/db/repositories.py`: add web admin CRUD/query methods and health persistence.
+- Modify `app/bot/delivery.py`: include `{vpn_link}` and delivery package import link.
+- Modify `app/services/access.py`: render client configs through editable templates.
+- Modify `app/vpn/config_versions.py`: route config rendering through versioned templates.
+- Create `app/vpn/config_templates.py`: load, validate, render, and preview client config templates.
+- Create `app/vpn/templates/amneziawg_v1_5.conf.tpl`: default editable client config template.
+- Create `app/vpn/templates/amneziawg_v2.conf.tpl`: default editable client config template.
 - Create `app/logging_config.py`: configure console/file logging with redaction and log depth support.
 - Create `app/web/__init__.py`: export app factory.
 - Create `app/web/auth.py`: password hashing/checking, session auth, CSRF helpers.
@@ -24,7 +30,7 @@
 - Create `app/web/logs.py`: tail and redact log files.
 - Create `app/web/forms.py`: small validation helpers for users and servers.
 - Create `app/web/app.py`: FastAPI app factory and routes.
-- Create `app/web/templates/*.html`: base, login, dashboard, users, user form/detail, servers, server form/detail/health, orders, logs, settings.
+- Create `app/web/templates/*.html`: base, login, dashboard, users, user form/detail, servers, server form/detail/health, orders, config templates, logs, settings.
 - Create `app/web/static/admin.css`: compact operational UI.
 - Modify `app/cli.py`: add `web serve`.
 - Create tests under `tests/web/`.
@@ -62,6 +68,7 @@ def test_settings_reads_web_admin_and_logging_settings():
         app_log_level="DEBUG",
         app_log_max_lines=250,
         app_log_path="logs/app.log",
+        client_config_template_dir="config_templates",
     )
 
     assert settings.web_admin_enabled is True
@@ -74,6 +81,7 @@ def test_settings_reads_web_admin_and_logging_settings():
     assert settings.app_log_level == "DEBUG"
     assert settings.app_log_max_lines == 250
     assert settings.app_log_path == "logs/app.log"
+    assert settings.client_config_template_dir == "config_templates"
 ```
 
 - [ ] **Step 2: Run settings test to verify it fails**
@@ -110,6 +118,7 @@ APP_LOG_ENABLED=true
 APP_LOG_LEVEL=INFO
 APP_LOG_MAX_LINES=500
 APP_LOG_PATH=logs/app.log
+CLIENT_CONFIG_TEMPLATE_DIR=config_templates
 ```
 
 In `app/config/settings.py`, add fields:
@@ -125,6 +134,7 @@ app_log_enabled: bool = Field(default=True, alias="APP_LOG_ENABLED")
 app_log_level: str = Field(default="INFO", alias="APP_LOG_LEVEL")
 app_log_max_lines: int = Field(default=500, alias="APP_LOG_MAX_LINES")
 app_log_path: str = Field(default="logs/app.log", alias="APP_LOG_PATH")
+client_config_template_dir: str = Field(default="config_templates", alias="CLIENT_CONFIG_TEMPLATE_DIR")
 ```
 
 Extend the existing model validator:
@@ -1460,7 +1470,230 @@ git commit -m "Add web admin logs and settings pages"
 
 ---
 
-### Task 8: CLI Serve, Docs, And Full Verification
+### Task 8: Client Config Templates, `vpn://` Links, And Delivery Display
+
+**Files:**
+- Modify: `.env.example`
+- Modify: `app/config/settings.py`
+- Modify: `app/vpn/config_versions.py`
+- Modify: `app/services/access.py`
+- Modify: `app/bot/delivery.py`
+- Modify: `app/bot/handlers.py`
+- Modify: `app/web/app.py`
+- Create: `app/vpn/config_templates.py`
+- Create: `app/vpn/templates/amneziawg_v1_5.conf.tpl`
+- Create: `app/vpn/templates/amneziawg_v2.conf.tpl`
+- Create: `app/web/templates/config_templates.html`
+- Test: `tests/vpn/test_config_templates.py`
+- Test: `tests/bot/test_delivery.py`
+- Test: `tests/web/test_config_templates.py`
+
+- [ ] **Step 1: Write failing client config template tests**
+
+Create `tests/vpn/test_config_templates.py`:
+
+```python
+import pytest
+
+from app.vpn.amneziawg_v2.config import ClientConfigInput
+from app.vpn.config_templates import (
+    ConfigTemplateError,
+    build_vpn_import_link,
+    render_client_config_template,
+)
+from app.vpn.config_versions import render_client_config_for_version
+
+
+def _input() -> ClientConfigInput:
+    return ClientConfigInput(
+        private_key="client-private",
+        address="10.8.0.2/32",
+        dns="1.1.1.1",
+        jc=4,
+        jmin=40,
+        jmax=70,
+        s1=0,
+        s2=0,
+        h1=1,
+        h2=2,
+        h3=3,
+        h4=4,
+        server_public_key="server-public",
+        preshared_key="psk",
+        endpoint="vpn.example.com:51820",
+        allowed_ips="0.0.0.0/0, ::/0",
+        persistent_keepalive=25,
+    )
+
+
+def test_default_template_matches_current_v2_renderer_shape():
+    config = render_client_config_for_version(_input(), "amneziawg_v2")
+
+    assert "[Interface]" in config
+    assert "PrivateKey = client-private" in config
+    assert "Endpoint = vpn.example.com:51820" in config
+    assert "H4 = 4" in config
+
+
+def test_template_renderer_rejects_unknown_placeholder():
+    with pytest.raises(ConfigTemplateError, match="unknown"):
+        render_client_config_template("PrivateKey = {unknown}", _input())
+
+
+def test_vpn_import_link_uses_vpn_scheme():
+    link = build_vpn_import_link("[Interface]\nPrivateKey = test")
+
+    assert link.startswith("vpn://")
+    assert "PrivateKey" not in link
+```
+
+- [ ] **Step 2: Run template tests to verify they fail**
+
+Run:
+
+```bash
+python -m pytest tests/vpn/test_config_templates.py -q
+```
+
+Expected: FAIL because `app.vpn.config_templates` and template routing do not exist.
+
+- [ ] **Step 3: Add default config templates**
+
+Create `app/vpn/templates/amneziawg_v2.conf.tpl`:
+
+```ini
+[Interface]
+PrivateKey = {private_key}
+Address = {address}
+DNS = {dns}
+Jc = {jc}
+Jmin = {jmin}
+Jmax = {jmax}
+S1 = {s1}
+S2 = {s2}
+H1 = {h1}
+H2 = {h2}
+H3 = {h3}
+H4 = {h4}
+
+[Peer]
+PublicKey = {server_public_key}
+PresharedKey = {preshared_key}
+Endpoint = {endpoint}
+AllowedIPs = {allowed_ips}
+PersistentKeepalive = {persistent_keepalive}
+```
+
+Create `app/vpn/templates/amneziawg_v1_5.conf.tpl` with the same current v1.5 shape. Keep defaults versioned so future AmneziaWG format changes do not rewrite older device rendering.
+
+- [ ] **Step 4: Implement template loading and `vpn://` helper**
+
+Create `app/vpn/config_templates.py` with:
+
+- `AVAILABLE_CLIENT_CONFIG_PLACEHOLDERS`;
+- `load_client_config_template(config_version, template_dir=None)`;
+- `render_client_config_template(template_text, input)`;
+- `render_client_config_from_template(input, config_version, template_dir=None)`;
+- `build_vpn_import_link(config_text)`.
+
+Rules:
+
+- package defaults are read-only;
+- if `CLIENT_CONFIG_TEMPLATE_DIR` contains `{config_version}.conf.tpl`, it overrides the default;
+- unknown placeholders raise `ConfigTemplateError`;
+- `build_vpn_import_link()` returns `vpn://` plus URL-safe Base64 of the final UTF-8 `.conf` text, without logging or exposing raw secrets in the link builder logs.
+
+- [ ] **Step 5: Route config generation through templates**
+
+In `app/vpn/config_versions.py`, render both supported versions through `render_client_config_from_template()`. Preserve the public function `render_client_config_for_version(input, config_version)` so existing callers remain stable.
+
+In `app/services/access.py`, pass `settings.client_config_template_dir` into config rendering when available. Resend must use the stored `devices.config_version` and the current template for that version.
+
+- [ ] **Step 6: Extend delivery package with import link**
+
+Update `app/bot/delivery.py`:
+
+- add `vpn_import_link` to `ConfigDeliveryPackage`;
+- include `{vpn_link}` in template context;
+- keep `.conf` attachment as canonical delivery;
+- keep QR generation; after real-client confirmation, QR payload may switch from raw config text to `vpn_import_link`.
+
+Update `DEFAULT_CONFIG_READY_TEMPLATE` so it mentions the `.conf` file, QR, and `vpn://` link without exposing secrets in logs.
+
+- [ ] **Step 7: Write failing delivery tests**
+
+Extend `tests/bot/test_delivery.py`:
+
+```python
+def test_build_config_delivery_includes_vpn_link_placeholder():
+    package = build_config_delivery(
+        device_id=7,
+        config_version="amneziawg_v2",
+        config_text="[Interface]\nPrivateKey = test",
+        template_text="Import link: {vpn_link}",
+    )
+
+    assert package.vpn_import_link.startswith("vpn://")
+    assert package.vpn_import_link in package.message_text
+```
+
+Run:
+
+```bash
+python -m pytest tests/bot/test_delivery.py -q
+```
+
+Expected: FAIL before delivery is extended, PASS after implementation.
+
+- [ ] **Step 8: Add web config templates page**
+
+Add `/config-templates` route:
+
+- lists delivery template `config_ready`;
+- lists client config templates for `amneziawg_v1_5` and `amneziawg_v2`;
+- shows source `default` or `override`;
+- shows available placeholders;
+- renders preview from safe sample values;
+- shows generated `vpn://` preview link;
+- writes template changes only to `CLIENT_CONFIG_TEMPLATE_DIR`.
+
+Do not display real private keys, PSKs, full production configs, or raw bot tokens on this page.
+
+- [ ] **Step 9: Write web tests**
+
+Create `tests/web/test_config_templates.py`:
+
+```python
+def test_config_templates_page_lists_versions_and_vpn_link(tmp_path):
+    client, _repo = _client(tmp_path)
+
+    response = client.get("/config-templates")
+
+    assert response.status_code == 200
+    assert "amneziawg_v1_5" in response.text
+    assert "amneziawg_v2" in response.text
+    assert "vpn://" in response.text
+    assert "{private_key}" in response.text
+```
+
+Run:
+
+```bash
+python -m pytest tests/vpn/test_config_templates.py tests/bot/test_delivery.py tests/web/test_config_templates.py -q
+```
+
+Expected: PASS.
+
+- [ ] **Step 10: Commit**
+
+```bash
+git add .env.example app/config/settings.py app/vpn app/services/access.py app/bot app/web tests/vpn/test_config_templates.py tests/bot/test_delivery.py tests/web/test_config_templates.py
+git commit -m "Add editable client config templates"
+```
+
+---
+
+### Task 9: CLI Serve, Docs, And Full Verification
 
 **Files:**
 - Modify: `app/cli.py`
@@ -1540,6 +1773,13 @@ python -m app.cli web serve --host 0.0.0.0 --port 3030
 
 Mention that port `3030` should be protected by firewall/VPN/reverse proxy.
 
+Also document:
+
+- `CLIENT_CONFIG_TEMPLATE_DIR` and the recommended VPS path for editable client config templates;
+- default template filenames `amneziawg_v1_5.conf.tpl` and `amneziawg_v2.conf.tpl`;
+- current user delivery options: Telegram text, `.conf` file, QR, user/admin resend, raw config fallback, and `vpn://` link;
+- the need to verify `vpn://` import on a real AmneziaVPN client before switching QR payload fully to the link.
+
 - [ ] **Step 5: Run full tests**
 
 Run:
@@ -1584,7 +1824,7 @@ Expected: no output.
 python -m app.cli web serve --host 127.0.0.1 --port 3030
 ```
 
-Open `http://127.0.0.1:3030/login`, log in, verify Dashboard, Users, Servers, Logs, Settings pages.
+Open `http://127.0.0.1:3030/login`, log in, verify Dashboard, Users, Servers, Config Templates, Logs, Settings pages.
 
 - [ ] VPS update path:
 
@@ -1606,3 +1846,4 @@ python -m app.cli web serve --host 0.0.0.0 --port 3030
 - Uses soft-delete/disable instead of physical deletion.
 - Does not store SSH private keys, passwords, PSK, bot token, proxy credentials, or `APP_SECRET_KEY` in UI.
 - Includes server health display for every server with online/degraded/offline/unknown, latency, check time, and latest error.
+- Includes editable versioned client config templates, explicit user delivery options, and `vpn://` link generation without changing the canonical `.conf` fallback.
