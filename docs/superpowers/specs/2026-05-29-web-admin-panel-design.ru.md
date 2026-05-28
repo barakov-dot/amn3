@@ -81,9 +81,10 @@ python -m app.cli web serve --host 0.0.0.0 --port 3030
 - `/users`: таблица пользователей с поиском по Telegram ID, username, имени; действия добавления, редактирования, блокировки, soft-delete.
 - `/users/new`: создание пользователя по Telegram ID, username, first/last name, admin flag.
 - `/users/{id}`: карточка пользователя, статус, admin flag, устройства, заявки, последние admin actions.
-- `/servers`: таблица серверов из БД и связанной конфигурации; status, host, endpoint, VPN port, devices count.
+- `/servers`: таблица всех серверов из БД и связанной конфигурации; ручной status, live-состояние, ping/latency, SSH reachability, endpoint, VPN port, devices count, время последней проверки.
 - `/servers/new`: добавление серверной записи в БД; секреты не вводятся и не показываются.
 - `/servers/{id}`: редактирование host, ssh port, endpoint host, vpn port, network CIDR, server address, server public key, runtime, firewall, status, max devices.
+- `/servers/{id}/health`: карточка live-диагностики сервера: ping/latency, TCP/SSH доступность, read-only `server check`, состояние `awg-quick`, видимость UDP-порта, последняя ошибка.
 - `/orders`: pending/fulfilled/rejected заявки для дебага Telegram flow.
 - `/logs`: просмотр последних `APP_LOG_MAX_LINES`, фильтр по уровню и plain-text поиск.
 - `/settings`: read-only страница ключевых runtime-настроек с redaction секретов.
@@ -114,9 +115,25 @@ python -m app.cli web serve --host 0.0.0.0 --port 3030
 - создать серверную запись в БД;
 - редактировать основные поля сервера;
 - отключить сервер;
-- посмотреть количество устройств и базовую конфигурацию.
+- посмотреть количество устройств и базовую конфигурацию;
+- увидеть live-состояние всех серверов;
+- вручную запустить health check для одного сервера;
+- обновить health check всех серверов.
 
 Панель не должна хранить SSH private key, пароли или PSK. На первом этапе она управляет серверной записью в БД; `servers.yml` остается runtime-конфигом для SSH/VPS операций. Если поле в БД и `servers.yml` расходятся, UI должен показывать предупреждение на странице сервера.
+
+Live-состояние сервера должно храниться отдельно от ручного `servers.status`. Для этого добавляется таблица `server_health_checks` или эквивалентный repository-слой с полями:
+
+- `server_id`;
+- `status`: `online`, `degraded`, `offline`, `unknown`;
+- `latency_ms`;
+- `ssh_ok`;
+- `awg_ok`;
+- `udp_port_ok`;
+- `checked_at`;
+- `error`.
+
+`ping` в UI означает быструю reachability-проверку. Для MVP допустимо использовать TCP connect к SSH-порту с timeout и полный read-only `server check` по кнопке/обновлению. ICMP ping не обязателен, потому что на VPS/firewall он часто отключен.
 
 ## Логирование
 
@@ -134,6 +151,7 @@ python -m app.cli web serve --host 0.0.0.0 --port 3030
 - успешная/неуспешная web-авторизация без пароля в логе;
 - создание/изменение пользователя;
 - создание/изменение сервера;
+- успешная/неуспешная проверка состояния сервера;
 - ошибки handlers;
 - network check Telegram;
 - VPS apply/revoke/traffic commands и их результат без секретов.
@@ -155,6 +173,7 @@ python -m app.cli web serve --host 0.0.0.0 --port 3030
 - protected route redirect без session;
 - users list/create/update/block/delete;
 - servers list/create/update/disable;
+- server health check stores online/degraded/offline state and exposes it in UI;
 - logs viewer применяет `APP_LOG_MAX_LINES` и redaction;
 - CLI принимает `web serve`;
 - startup отказывается стартовать при пустом password hash.
@@ -165,6 +184,7 @@ python -m app.cli web serve --host 0.0.0.0 --port 3030
 - `/login` принимает корректный логин/пароль и защищает остальные страницы.
 - Пользователей можно добавить, отредактировать, заблокировать и пометить удаленными.
 - Серверы можно добавить, отредактировать и отключить.
+- Все серверы отображаются с live-состоянием: online/degraded/offline/unknown, latency, временем последней проверки и последней ошибкой.
 - `/logs` показывает последние строки логов с redaction.
 - `APP_LOG_ENABLED`, `APP_LOG_LEVEL`, `APP_LOG_MAX_LINES`, `APP_LOG_PATH` управляют логированием.
 - Все новые behavior-тесты проходят вместе с существующим набором.

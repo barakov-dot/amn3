@@ -81,9 +81,10 @@ The panel should be an operational workspace, not a landing page:
 - `/users`: user table with search by Telegram ID, username, and name; create, edit, block, soft-delete actions.
 - `/users/new`: create user by Telegram ID, username, first/last name, admin flag.
 - `/users/{id}`: user profile, status, admin flag, devices, orders, recent admin actions.
-- `/servers`: server table from DB and related config; status, host, endpoint, VPN port, device count.
+- `/servers`: all-server table from DB and related config; manual status, live state, ping/latency, SSH reachability, endpoint, VPN port, device count, last check time.
 - `/servers/new`: create server DB record; secrets are not entered or shown.
 - `/servers/{id}`: edit host, SSH port, endpoint host, VPN port, network CIDR, server address, server public key, runtime, firewall, status, max devices.
+- `/servers/{id}/health`: live diagnostics page for one server: ping/latency, TCP/SSH reachability, read-only `server check`, `awg-quick` state, UDP port visibility, latest error.
 - `/orders`: pending/fulfilled/rejected orders for Telegram flow debugging.
 - `/logs`: show last `APP_LOG_MAX_LINES`, filter by level, and plain-text search.
 - `/settings`: read-only runtime settings with secret redaction.
@@ -114,9 +115,25 @@ Minimum actions:
 - create server DB record;
 - edit main server fields;
 - disable server;
-- view device count and basic configuration.
+- view device count and basic configuration;
+- see live state for every server;
+- manually run a health check for one server;
+- refresh health checks for all servers.
 
 The panel must not store SSH private keys, passwords, or PSKs. In the first stage it manages the server DB record; `servers.yml` remains the runtime config for SSH/VPS operations. If DB fields and `servers.yml` disagree, the UI should show a warning on the server page.
+
+Live server state must be stored separately from the manual `servers.status`. Add a `server_health_checks` table or equivalent repository layer with:
+
+- `server_id`;
+- `status`: `online`, `degraded`, `offline`, `unknown`;
+- `latency_ms`;
+- `ssh_ok`;
+- `awg_ok`;
+- `udp_port_ok`;
+- `checked_at`;
+- `error`.
+
+In the UI, `ping` means a fast reachability check. For the MVP, TCP connect to the SSH port with a timeout is acceptable, and the full read-only `server check` can run from a button/refresh action. ICMP ping is not required because it is often disabled by VPS/firewall policy.
 
 ## Logging
 
@@ -134,6 +151,7 @@ Useful debug events for Telegram/admin operations:
 - successful and failed web login without logging the password;
 - user create/update;
 - server create/update;
+- server health check success/failure;
 - handler errors;
 - Telegram network check;
 - VPS apply/revoke/traffic commands and their result without secrets.
@@ -155,6 +173,7 @@ Cover with tests:
 - protected route redirects without session;
 - users list/create/update/block/delete;
 - servers list/create/update/disable;
+- server health check stores online/degraded/offline state and exposes it in UI;
 - logs viewer applies `APP_LOG_MAX_LINES` and redaction;
 - CLI accepts `web serve`;
 - startup refuses empty password hash.
@@ -165,6 +184,7 @@ Cover with tests:
 - `/login` accepts a valid username/password and protects the remaining pages.
 - Users can be added, edited, blocked, and marked as deleted.
 - Servers can be added, edited, and disabled.
+- Every server is shown with live state: online/degraded/offline/unknown, latency, last check time, and latest error.
 - `/logs` shows recent log lines with redaction.
 - `APP_LOG_ENABLED`, `APP_LOG_LEVEL`, `APP_LOG_MAX_LINES`, and `APP_LOG_PATH` control logging.
 - All new behavior tests pass with the existing test suite.
