@@ -120,6 +120,10 @@ a {
   margin: 0;
 }
 
+.inline-action {
+  margin-top: 8px;
+}
+
 .eyebrow {
   margin: 0 0 4px;
   color: var(--accent);
@@ -497,6 +501,12 @@ tbody tr:last-child td {
 
 .button-danger:hover {
   background: #8f1d14;
+}
+
+.button-small {
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
 }
 
 .alert {

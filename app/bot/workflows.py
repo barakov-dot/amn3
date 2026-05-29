@@ -12,11 +12,10 @@ from app.bot.delivery import (
 from app.bot.ux import render_access_request_created, render_admin_approval, render_user_config_ready
 from app.db.repositories import Repository
 from app.security.crypto import SecretBox
+from app.services.config_delivery import build_device_config_delivery
 from app.services.access import AccessService
 from app.services.traffic import DeviceTrafficView, build_device_traffic_view
-from app.vpn.amneziawg_v2.config import ClientConfigInput
 from app.vpn.config_versions import validate_config_version
-from app.vpn.config_versions import render_client_config_for_version
 
 
 @dataclass(frozen=True)
@@ -414,49 +413,17 @@ class BotWorkflow:
         )
 
     def _build_delivery_for_device(self, device) -> ResendResult:
-        user = self._repo.get_user(int(device["user_id"]))
-        server = self._repo.get_server(int(device["server_id"]))
-        private_key = self._secret_box.decrypt_text(device["peer_private_key_encrypted"])
-        preshared_key = self._secret_box.decrypt_text(device["preshared_key_encrypted"])
-        config_version = str(device["config_version"])
-        config_text = render_client_config_for_version(
-            ClientConfigInput(
-                private_key=private_key,
-                address=f"{device['vpn_ip']}/32",
-                dns="1.1.1.1",
-                server_public_key=str(server["server_public_key"]),
-                preshared_key=preshared_key,
-                endpoint=f"{server['endpoint_host']}:{server['vpn_port']}",
-                allowed_ips="0.0.0.0/0",
-                persistent_keepalive=25,
-                jc=4,
-                jmin=40,
-                jmax=70,
-                s1=0,
-                s2=0,
-                h1=1,
-                h2=2,
-                h3=3,
-                h4=4,
-            ),
-            config_version,
-            template_dir=self._client_config_template_dir,
-        )
-        template_text = self._repo.get_message_template(
-            CONFIG_READY_TEMPLATE_KEY,
-            default_text=DEFAULT_CONFIG_READY_TEMPLATE,
-        )
-        delivery = build_config_delivery(
-            device_id=int(device["id"]),
-            config_version=config_version,
-            config_text=config_text,
-            template_text=template_text,
+        result = build_device_config_delivery(
+            repo=self._repo,
+            secret_box=self._secret_box,
+            device=device,
+            client_config_template_dir=self._client_config_template_dir,
         )
         return ResendResult(
-            device_id=int(device["id"]),
-            user_telegram_id=int(user["telegram_id"]),
-            config_text=config_text,
-            delivery=delivery,
+            device_id=result.device_id,
+            user_telegram_id=result.user_telegram_id,
+            config_text=result.config_text,
+            delivery=result.delivery,
         )
 
 

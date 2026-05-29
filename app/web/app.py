@@ -23,7 +23,15 @@ from app.db.repositories import Repository
 from app.db.repositories import SERVER_STATUSES
 from app.db.repositories import USER_STATUSES
 from app.db.schema import initialize_schema
+from app.security.crypto import SecretBox
 from app.security.redaction import redact
+from app.services.config_delivery import build_device_config_delivery
+from app.services.email_delivery import EmailDeliveryService
+from app.services.email_delivery import EmailSender
+from app.services.email_delivery import build_smtp_sender
+from app.services.email_tokens import create_email_token
+from app.services.email_tokens import hash_email_token
+from app.services.email_tokens import utc_now_iso
 from app.web.auth import check_password
 from app.web.auth import generate_csrf_token
 from app.web.auth import require_web_admin_config
@@ -123,7 +131,11 @@ PATH_SETTING_FIELDS = {
 }
 
 
-def create_web_app(settings: Settings | None = None) -> FastAPI:
+def create_web_app(
+    settings: Settings | None = None,
+    *,
+    email_sender: EmailSender | None = None,
+) -> FastAPI:
     actual_settings = settings or Settings()
     require_web_admin_config(
         password_hash=actual_settings.web_admin_password_hash,
@@ -132,6 +144,13 @@ def create_web_app(settings: Settings | None = None) -> FastAPI:
 
     app = FastAPI(title="Amneziya Web Admin")
     app.state.settings = actual_settings
+    app.state.email_sender = email_sender or build_smtp_sender(
+        host=actual_settings.smtp_host,
+        port=actual_settings.smtp_port,
+        username=actual_settings.smtp_username,
+        password=actual_settings.smtp_password,
+        use_tls=actual_settings.smtp_use_tls,
+    )
     app.add_middleware(
         SessionMiddleware,
         secret_key=actual_settings.web_admin_session_secret,
@@ -408,6 +427,328 @@ def create_web_app(settings: Settings | None = None) -> FastAPI:
                 title=f"User {user_id}",
                 authenticated=True,
                 **detail,
+            ),
+        )
+
+    @app.post("/users/{user_id}/email/verify/start")
+    async def start_email_verification(
+        request: Request,
+        user_id: int,
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+        if not actual_settings.email_delivery_enabled:
+            return PlainTextResponse("Email delivery is disabled", status_code=400)
+
+        try:
+            with _open_repository(actual_settings) as (repo, _conn):
+                with repo.transaction():
+                    user = _row_to_dict(repo.get_user(user_id))
+                    email = _required_user_email(user)
+                    token = create_email_token(
+                        ttl_minutes=actual_settings.email_recovery_token_ttl_minutes,
+                    )
+                    repo.create_email_recovery_token(
+                        user_id=user_id,
+                        email=email,
+                        token_hash=token.token_hash,
+                        purpose="verify_email",
+                        expires_at=token.expires_at,
+                    )
+                    metadata = _email_service(request).send_verification_email(
+                        to_address=email,
+                        user_id=user_id,
+                        token=token.raw_token,
+                    )
+                    _record_web_user_action(
+                        repo,
+                        actual_settings,
+                        request,
+                        action="web_email_verify_start",
+                        target_user_id=user_id,
+                        metadata=metadata,
+                    )
+        except LookupError:
+            return PlainTextResponse("User not found", status_code=404)
+        except ValueError as exc:
+            return PlainTextResponse(str(exc), status_code=400)
+
+        return RedirectResponse(f"/users/{user_id}", status_code=303)
+
+    @app.get("/email/verify")
+    async def verify_email_form(request: Request):
+        return templates.TemplateResponse(
+            request,
+            "email_result.html",
+            _template_context(
+                request,
+                title="Verify email",
+                authenticated=_is_authenticated(request),
+                heading="Verify email",
+                message="Enter the one-time verification code from the email.",
+                form_action="/email/verify",
+                token_label="Verification code",
+                submit_label="Verify email",
+            ),
+        )
+
+    @app.post("/email/verify")
+    async def verify_email(request: Request, token: str = Form("")):
+        if not token:
+            return PlainTextResponse("Verification code is invalid or expired", status_code=400)
+        try:
+            with _open_repository(actual_settings) as (repo, _conn):
+                with repo.transaction():
+                    token_row = repo.get_valid_email_recovery_token(
+                        token_hash=hash_email_token(token),
+                        purpose="verify_email",
+                        now=utc_now_iso(),
+                    )
+                    if token_row is None:
+                        return PlainTextResponse(
+                            "Verification code is invalid or expired",
+                            status_code=400,
+                        )
+                    user = repo.get_user(int(token_row["user_id"]))
+                    if user["email"] != token_row["email"]:
+                        return PlainTextResponse(
+                            "Verification code is invalid or expired",
+                            status_code=400,
+                        )
+                    repo.mark_user_email_verified(int(user["id"]), utc_now_iso())
+                    if not repo.mark_email_recovery_token_used(
+                        int(token_row["id"]),
+                        utc_now_iso(),
+                    ):
+                        return PlainTextResponse(
+                            "Verification code is invalid or expired",
+                            status_code=400,
+                        )
+        except LookupError:
+            return PlainTextResponse("Verification code is invalid or expired", status_code=400)
+
+        return templates.TemplateResponse(
+            request,
+            "email_result.html",
+            _template_context(
+                request,
+                title="Email verified",
+                authenticated=_is_authenticated(request),
+                heading="Email verified",
+                message="Email verified. You can close this page.",
+            ),
+        )
+
+    @app.post("/users/{user_id}/devices/{device_id}/email-config")
+    async def send_device_config_email(
+        request: Request,
+        user_id: int,
+        device_id: int,
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+        if not actual_settings.email_delivery_enabled:
+            return PlainTextResponse("Email delivery is disabled", status_code=400)
+
+        try:
+            with _open_repository(actual_settings) as (repo, _conn):
+                with repo.transaction():
+                    user = _row_to_dict(repo.get_user(user_id))
+                    email = _required_user_email(user)
+                    if actual_settings.email_require_verification and not user["email_verified_at"]:
+                        return PlainTextResponse("Email is not verified", status_code=400)
+                    device = repo.get_user_device(user_id=user_id, device_id=device_id)
+                    if device is None:
+                        return PlainTextResponse("Device not found", status_code=404)
+                    result = build_device_config_delivery(
+                        repo=repo,
+                        secret_box=SecretBox.from_app_secret(actual_settings.app_secret_key),
+                        device=device,
+                        client_config_template_dir=actual_settings.client_config_template_dir,
+                        client_dns=actual_settings.client_dns,
+                        client_allowed_ips=actual_settings.client_allowed_ips,
+                    )
+                    metadata = _email_service(request).send_config_email(
+                        to_address=email,
+                        user_id=user_id,
+                        device_id=device_id,
+                        delivery=result.delivery,
+                    )
+                    _record_web_user_action(
+                        repo,
+                        actual_settings,
+                        request,
+                        action="web_email_config_send",
+                        target_user_id=user_id,
+                        target_device_id=device_id,
+                        metadata=metadata,
+                    )
+        except LookupError:
+            return PlainTextResponse("User not found", status_code=404)
+        except ValueError as exc:
+            return PlainTextResponse(str(exc), status_code=400)
+
+        return RedirectResponse(f"/users/{user_id}", status_code=303)
+
+    @app.post("/users/{user_id}/devices/{device_id}/email-recovery/start")
+    async def start_device_config_recovery(
+        request: Request,
+        user_id: int,
+        device_id: int,
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+        if not actual_settings.email_delivery_enabled:
+            return PlainTextResponse("Email delivery is disabled", status_code=400)
+
+        try:
+            with _open_repository(actual_settings) as (repo, _conn):
+                with repo.transaction():
+                    user = _row_to_dict(repo.get_user(user_id))
+                    email = _required_user_email(user)
+                    if not user["email_verified_at"]:
+                        return PlainTextResponse("Email is not verified", status_code=400)
+                    if repo.get_user_device(user_id=user_id, device_id=device_id) is None:
+                        return PlainTextResponse("Device not found", status_code=404)
+                    token = create_email_token(
+                        ttl_minutes=actual_settings.email_recovery_token_ttl_minutes,
+                    )
+                    repo.create_email_recovery_token(
+                        user_id=user_id,
+                        email=email,
+                        token_hash=token.token_hash,
+                        purpose="recover_config",
+                        expires_at=token.expires_at,
+                        device_id=device_id,
+                    )
+                    metadata = _email_service(request).send_recovery_start_email(
+                        to_address=email,
+                        user_id=user_id,
+                        device_id=device_id,
+                        token=token.raw_token,
+                    )
+                    _record_web_user_action(
+                        repo,
+                        actual_settings,
+                        request,
+                        action="web_email_recovery_start",
+                        target_user_id=user_id,
+                        target_device_id=device_id,
+                        metadata=metadata,
+                    )
+        except LookupError:
+            return PlainTextResponse("User not found", status_code=404)
+        except ValueError as exc:
+            return PlainTextResponse(str(exc), status_code=400)
+
+        return RedirectResponse(f"/users/{user_id}", status_code=303)
+
+    @app.get("/email/recover")
+    async def recover_device_config_form(request: Request):
+        if not actual_settings.email_delivery_enabled:
+            return PlainTextResponse("Email delivery is disabled", status_code=400)
+        return templates.TemplateResponse(
+            request,
+            "email_result.html",
+            _template_context(
+                request,
+                title="Recover config",
+                authenticated=_is_authenticated(request),
+                heading="Recover config",
+                message="Enter the one-time recovery code from the email.",
+                form_action="/email/recover",
+                token_label="Recovery code",
+                submit_label="Send config email",
+            ),
+        )
+
+    @app.post("/email/recover")
+    async def recover_device_config(request: Request, token: str = Form("")):
+        if not actual_settings.email_delivery_enabled:
+            return PlainTextResponse("Email delivery is disabled", status_code=400)
+        if not token:
+            return PlainTextResponse("Recovery code is invalid or expired", status_code=400)
+        try:
+            send_to_address = ""
+            send_user_id = 0
+            send_device_id = 0
+            send_delivery = None
+            with _open_repository(actual_settings) as (repo, _conn):
+                with repo.transaction():
+                    token_row = repo.get_valid_email_recovery_token(
+                        token_hash=hash_email_token(token),
+                        purpose="recover_config",
+                        now=utc_now_iso(),
+                    )
+                    if token_row is None:
+                        return PlainTextResponse(
+                            "Recovery code is invalid or expired",
+                            status_code=400,
+                        )
+                    user = _row_to_dict(repo.get_user(int(token_row["user_id"])))
+                    if user["email"] != token_row["email"] or not user["email_verified_at"]:
+                        return PlainTextResponse(
+                            "Recovery code is invalid or expired",
+                            status_code=400,
+                        )
+                    device = repo.get_user_device(
+                        user_id=int(user["id"]),
+                        device_id=int(token_row["device_id"]),
+                    )
+                    if device is None:
+                        return PlainTextResponse(
+                            "Recovery code is invalid or expired",
+                            status_code=400,
+                        )
+                    result = build_device_config_delivery(
+                        repo=repo,
+                        secret_box=SecretBox.from_app_secret(actual_settings.app_secret_key),
+                        device=device,
+                        client_config_template_dir=actual_settings.client_config_template_dir,
+                        client_dns=actual_settings.client_dns,
+                        client_allowed_ips=actual_settings.client_allowed_ips,
+                    )
+                    if not repo.mark_email_recovery_token_used(
+                        int(token_row["id"]),
+                        utc_now_iso(),
+                    ):
+                        return PlainTextResponse(
+                            "Recovery code is invalid or expired",
+                            status_code=400,
+                        )
+                    send_to_address = str(token_row["email"])
+                    send_user_id = int(user["id"])
+                    send_device_id = int(device["id"])
+                    send_delivery = result.delivery
+            if send_delivery is None:
+                return PlainTextResponse("Recovery code is invalid or expired", status_code=400)
+            _email_service(request).send_config_email(
+                to_address=send_to_address,
+                user_id=send_user_id,
+                device_id=send_device_id,
+                delivery=send_delivery,
+            )
+        except (LookupError, ValueError):
+            return PlainTextResponse("Recovery code is invalid or expired", status_code=400)
+
+        return templates.TemplateResponse(
+            request,
+            "email_result.html",
+            _template_context(
+                request,
+                title="Config recovery email sent",
+                authenticated=_is_authenticated(request),
+                heading="Config recovery email sent",
+                message="Config recovery email sent. You can close this page.",
             ),
         )
 
@@ -1203,6 +1544,23 @@ def _set_user_status_with_action(
             )
 
 
+def _email_service(request: Request) -> EmailDeliveryService:
+    settings = request.app.state.settings
+    return EmailDeliveryService(
+        sender=request.app.state.email_sender,
+        from_address=settings.smtp_from,
+        base_url=str(request.base_url),
+        attach_config=settings.email_config_attachments_enabled,
+    )
+
+
+def _required_user_email(user: dict[str, Any]) -> str:
+    email = str(user.get("email") or "").strip()
+    if not email:
+        raise ValueError("User email is required")
+    return email
+
+
 def _record_web_user_action(
     repo: Repository,
     settings: Settings,
@@ -1210,6 +1568,7 @@ def _record_web_user_action(
     *,
     action: str,
     target_user_id: int,
+    target_device_id: int | None = None,
     metadata: dict[str, Any],
 ) -> None:
     full_metadata = {
@@ -1221,6 +1580,7 @@ def _record_web_user_action(
         admin_telegram_id=_web_admin_actor_id(settings),
         action=action,
         target_user_id=target_user_id,
+        target_device_id=target_device_id,
         metadata=full_metadata,
     )
 

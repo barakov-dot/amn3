@@ -111,9 +111,10 @@ CLIENT_CONFIG_TEMPLATE_DIR=config_templates
 пользователя/устройства. `.conf` файл остается каноническим способом доставки,
 пока `vpn://` импорт не проверен на реальном AmneziaVPN-клиенте.
 
-Если пользователь укажет email, закладывается дополнительная доставка и
-восстановление на почту. Для первого запуска держать канал выключенным, пока не
-заполнены SMTP-настройки:
+Если пользователь укажет email, web-панель может отправить письмо
+подтверждения, а после подтверждения - конфиг устройства или одноразовую
+recovery-code на этот адрес. Для первого живого запуска держать канал
+выключенным, пока SMTP-настройки не заполнены и не проверены:
 
 ```env
 EMAIL_DELIVERY_ENABLED=false
@@ -128,8 +129,15 @@ EMAIL_RECOVERY_TOKEN_TTL_MINUTES=30
 EMAIL_CONFIG_ATTACHMENTS_ENABLED=true
 ```
 
-Конфиги и recovery-письма должны уходить только на подтвержденный email.
-SMTP password, recovery tokens и полный config text не должны попадать в логи.
+При `EMAIL_REQUIRE_VERIFICATION=true` конфиги и recovery-письма уходят только
+на подтвержденный email. Verification/recovery codes одноразовые, в базе
+хранится только SHA-256 hash token, срок жизни задает
+`EMAIL_RECOVERY_TOKEN_TTL_MINUTES`.
+Письмо с конфигом содержит краткую инструкцию и `vpn://` import link; вложение
+`.conf` управляется `EMAIL_CONFIG_ATTACHMENTS_ENABLED`.
+
+SMTP password, raw verification/recovery tokens и полный config text не должны
+попадать в логи и admin-action metadata.
 
 ## 5. Подготовить `servers.yml`
 

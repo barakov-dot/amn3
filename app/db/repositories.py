@@ -1196,16 +1196,18 @@ class Repository:
             (token_hash, purpose, now),
         ).fetchone()
 
-    def mark_email_recovery_token_used(self, token_id: int, used_at: str) -> None:
-        self._conn.execute(
+    def mark_email_recovery_token_used(self, token_id: int, used_at: str) -> bool:
+        cursor = self._conn.execute(
             """
             UPDATE email_recovery_tokens
             SET used_at = ?
             WHERE id = ?
+              AND used_at IS NULL
             """,
             (used_at, token_id),
         )
         self._commit()
+        return cursor.rowcount > 0
 
     def _commit(self) -> None:
         if self._transaction_depth == 0:

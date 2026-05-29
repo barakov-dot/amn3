@@ -471,7 +471,8 @@ def test_email_recovery_token_lifecycle(tmp_path):
         is None
     )
 
-    repo.mark_email_recovery_token_used(token_id, "2026-05-29T11:30:00Z")
+    assert repo.mark_email_recovery_token_used(token_id, "2026-05-29T11:30:00Z")
+    assert not repo.mark_email_recovery_token_used(token_id, "2026-05-29T11:35:00Z")
 
     assert (
         repo.get_valid_email_recovery_token(

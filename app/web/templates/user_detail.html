@@ -31,6 +31,12 @@
           <dd>
             {{ user.email or "-" }}
             <span class="muted-text">{{ "verified" if user.email_verified_at else "unverified" }}</span>
+            {% if user.email %}
+              <form action="/users/{{ user.id }}/email/verify/start" method="post" class="inline-action">
+                <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                <button class="button button-secondary button-small" type="submit">Send verification</button>
+              </form>
+            {% endif %}
           </dd>
         </div>
         <div>
@@ -80,6 +86,7 @@
                 <th>Server</th>
                 <th>Status</th>
                 <th>IP</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -90,6 +97,22 @@
                   <td>{{ device.server_name }}</td>
                   <td><span class="status status-{{ device.status }}">{{ device.status }}</span></td>
                   <td>{{ device.vpn_ip }}</td>
+                  <td>
+                    {% if user.email %}
+                      <div class="button-row">
+                        <form action="/users/{{ user.id }}/devices/{{ device.id }}/email-config" method="post">
+                          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                          <button class="button button-secondary button-small" type="submit">Email config</button>
+                        </form>
+                        <form action="/users/{{ user.id }}/devices/{{ device.id }}/email-recovery/start" method="post">
+                          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                          <button class="button button-secondary button-small" type="submit">Email recovery</button>
+                        </form>
+                      </div>
+                    {% else %}
+                      <span class="muted-text">No email</span>
+                    {% endif %}
+                  </td>
                 </tr>
               {% endfor %}
             </tbody>
