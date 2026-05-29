@@ -49,6 +49,10 @@ class Settings(BaseSettings):
     web_admin_username: str = Field(default="admin", alias="WEB_ADMIN_USERNAME")
     web_admin_password_hash: str = Field(default="", alias="WEB_ADMIN_PASSWORD_HASH")
     web_admin_session_secret: str = Field(default="", alias="WEB_ADMIN_SESSION_SECRET")
+    web_admin_session_cookie_secure: bool = Field(
+        default=True,
+        alias="WEB_ADMIN_SESSION_COOKIE_SECURE",
+    )
     app_log_enabled: bool = Field(default=True, alias="APP_LOG_ENABLED")
     app_log_level: str = Field(default="INFO", alias="APP_LOG_LEVEL")
     app_log_max_lines: int = Field(default=500, alias="APP_LOG_MAX_LINES")

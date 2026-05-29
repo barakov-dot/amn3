@@ -68,6 +68,7 @@ This English plan mirrors the Russian plan at `docs/superpowers/plans/2026-05-29
 - User delivery options are explicit: Telegram text, `.conf` attachment, QR, user/admin resend, raw config fallback, `vpn://` link, and verified email.
 - `CLIENT_CONFIG_TEMPLATE_DIR` controls local editable template overrides so VPS edits are not overwritten by package defaults.
 - Email delivery is disabled by default, requires SMTP settings, uses verified addresses only, and recovery uses one-time TTL tokens.
+- `WEB_ADMIN_SESSION_COOKIE_SECURE=true` is the default; disable it only for a temporary plain-HTTP `:3030` check, while production access should use HTTPS/reverse proxy or SSH tunnel.
 - `/logs` shows redacted recent log lines with depth controlled by `APP_LOG_MAX_LINES`.
 - All settings come from `.env` through `Settings`.
 - Full test suite passes.

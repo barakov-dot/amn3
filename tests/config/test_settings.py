@@ -146,6 +146,7 @@ def test_settings_reads_web_admin_and_logging_settings():
     assert settings.web_admin_username == "admin"
     assert settings.web_admin_password_hash == "sha256$abc"
     assert settings.web_admin_session_secret.startswith("session-secret")
+    assert settings.web_admin_session_cookie_secure is True
     assert settings.app_log_enabled is True
     assert settings.app_log_level == "DEBUG"
     assert settings.app_log_max_lines == 250

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }} | Amneziya Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/admin.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/">Amneziya Admin</a>
+      {% if authenticated %}
+        <nav class="nav" aria-label="Основная навигация">
+          <a class="nav-link" href="/">Обзор</a>
+          <span class="nav-link nav-link-disabled">Пользователи</span>
+          <span class="nav-link nav-link-disabled">Серверы</span>
+          <span class="nav-link nav-link-disabled">Заявки</span>
+          <span class="nav-link nav-link-disabled">Шаблоны</span>
+          <span class="nav-link nav-link-disabled">Email</span>
+          <span class="nav-link nav-link-disabled">Логи</span>
+        </nav>
+        <form action="/logout" method="post" class="logout-form">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-secondary" type="submit">Выйти</button>
+        </form>
+      {% endif %}
+    </header>
+
+    <main class="page">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

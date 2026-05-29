@@ -30,6 +30,7 @@ WEB_ADMIN_PORT=3030
 WEB_ADMIN_USERNAME=admin
 WEB_ADMIN_PASSWORD_HASH=replace-with-password-hash
 WEB_ADMIN_SESSION_SECRET=replace-with-generated-random-secret-32-plus-chars
+WEB_ADMIN_SESSION_COOKIE_SECURE=true
 APP_LOG_ENABLED=true
 APP_LOG_LEVEL=INFO
 APP_LOG_MAX_LINES=500
@@ -47,7 +48,7 @@ EMAIL_RECOVERY_TOKEN_TTL_MINUTES=30
 EMAIL_CONFIG_ATTACHMENTS_ENABLED=true
 ```
 
-`WEB_ADMIN_PASSWORD_HASH` хранит hash пароля, не исходный пароль. Если hash пустой или placeholder, web-панель должна отказаться стартовать и вывести понятную ошибку. `WEB_ADMIN_SESSION_SECRET` используется для signed session cookie и должен храниться отдельно вместе с `.env`.
+`WEB_ADMIN_PASSWORD_HASH` хранит hash пароля, не исходный пароль. Если hash пустой или placeholder, web-панель должна отказаться стартовать и вывести понятную ошибку. `WEB_ADMIN_SESSION_SECRET` используется для signed session cookie и должен храниться отдельно вместе с `.env`. `WEB_ADMIN_SESSION_COOKIE_SECURE=true` включает Secure flag для cookie; при временном plain HTTP-тесте на `:3030` его можно явно выключить, но production-доступ должен идти через HTTPS/reverse proxy или SSH tunnel.
 
 `APP_LOG_ENABLED=false` отключает запись application log. `APP_LOG_LEVEL` поддерживает `DEBUG`, `INFO`, `WARNING`, `ERROR`. `APP_LOG_MAX_LINES` задает глубину просмотра в UI, а не бесконечное хранение. Ротация файла может быть простой: ограничение размера через Python logging rotating handler.
 

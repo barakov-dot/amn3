@@ -137,6 +137,7 @@ WEB_ADMIN_PORT=3030
 WEB_ADMIN_USERNAME=admin
 WEB_ADMIN_PASSWORD_HASH=replace-with-password-hash
 WEB_ADMIN_SESSION_SECRET=replace-with-generated-random-secret-32-plus-chars
+WEB_ADMIN_SESSION_COOKIE_SECURE=true
 APP_LOG_ENABLED=true
 APP_LOG_LEVEL=INFO
 APP_LOG_MAX_LINES=500
@@ -163,6 +164,7 @@ web_admin_port: int = Field(default=3030, alias="WEB_ADMIN_PORT")
 web_admin_username: str = Field(default="admin", alias="WEB_ADMIN_USERNAME")
 web_admin_password_hash: str = Field(default="", alias="WEB_ADMIN_PASSWORD_HASH")
 web_admin_session_secret: str = Field(default="", alias="WEB_ADMIN_SESSION_SECRET")
+web_admin_session_cookie_secure: bool = Field(default=True, alias="WEB_ADMIN_SESSION_COOKIE_SECURE")
 app_log_enabled: bool = Field(default=True, alias="APP_LOG_ENABLED")
 app_log_level: str = Field(default="INFO", alias="APP_LOG_LEVEL")
 app_log_max_lines: int = Field(default=500, alias="APP_LOG_MAX_LINES")
@@ -2049,6 +2051,7 @@ Also document:
 
 - `CLIENT_CONFIG_TEMPLATE_DIR` and the recommended VPS path for editable client config templates;
 - email settings (`EMAIL_DELIVERY_ENABLED`, SMTP, verification, recovery TTL) and the recommendation to start disabled until SMTP is tested;
+- `WEB_ADMIN_SESSION_COOKIE_SECURE=true` as the default, with `false` only for a temporary plain-HTTP `:3030` check; production access should use HTTPS/reverse proxy or SSH tunnel;
 - default template filenames `amneziawg_v1_5.conf.tpl` and `amneziawg_v2.conf.tpl`;
 - current user delivery options: Telegram text, `.conf` file, QR, user/admin resend, raw config fallback, `vpn://` link, and verified email;
 - the need to verify `vpn://` import on a real AmneziaVPN client before switching QR payload fully to the link.

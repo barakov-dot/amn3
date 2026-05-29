@@ -63,6 +63,26 @@ python -m app.cli bot check-network
 `APP_SECRET_KEY` сохранить отдельно. Потеря ключа означает потерю доступа к
 зашифрованным peer-секретам.
 
+### Web-панель администрирования
+
+Для первого запуска web-панель по умолчанию выключена. Когда включаем ее на VPS,
+заполнить отдельные значения:
+
+```env
+WEB_ADMIN_ENABLED=false
+WEB_ADMIN_HOST=0.0.0.0
+WEB_ADMIN_PORT=3030
+WEB_ADMIN_USERNAME=admin
+WEB_ADMIN_PASSWORD_HASH=replace-with-password-hash
+WEB_ADMIN_SESSION_SECRET=replace-with-generated-random-secret-32-plus-chars
+WEB_ADMIN_SESSION_COOKIE_SECURE=true
+```
+
+`WEB_ADMIN_SESSION_COOKIE_SECURE=true` требует HTTPS, reverse proxy с TLS или SSH
+tunnel до панели. Для короткой проверки по plain HTTP на `:3030` можно временно
+поставить `WEB_ADMIN_SESSION_COOKIE_SECURE=false`, но не оставлять так открытую
+панель в интернете.
+
 ## 4. Шаблоны и выдача конфига
 
 Текущие варианты получения конфига пользователем:

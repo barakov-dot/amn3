@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <p class="eyebrow">Оперативный обзор</p>
+    <h1>Панель управления</h1>
+  </section>
+
+  <section class="metrics" aria-label="Сводка">
+    {% for metric in metrics %}
+      <article class="metric-card">
+        <span class="metric-label">{{ metric.label }}</span>
+        <strong class="metric-value">{{ metric.caption }}</strong>
+      </article>
+    {% endfor %}
+  </section>
+
+  <section class="dashboard-grid" aria-label="Рабочие списки">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Пользователи</h2>
+      </div>
+      {% if users %}
+        <table>
+          <thead>
+            <tr>
+              <th>Telegram ID</th>
+              <th>Имя</th>
+              <th>Устройства</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+              <tr>
+                <td>{{ user.telegram_id }}</td>
+                <td>
+                  <span class="primary-text">{{ user.username or "без username" }}</span>
+                  <span class="muted-text">{{ user.first_name or "" }} {{ user.last_name or "" }}</span>
+                </td>
+                <td>{{ user.active_device_count }} / {{ user.total_device_count }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="empty-state">Пользователей пока нет.</p>
+      {% endif %}
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Серверы</h2>
+      </div>
+      {% if servers %}
+        <table>
+          <thead>
+            <tr>
+              <th>Сервер</th>
+              <th>VPN</th>
+              <th>Состояние</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for server in servers %}
+              <tr>
+                <td>
+                  <span class="primary-text">{{ server.name }}</span>
+                  <span class="muted-text">{{ server.host or server.endpoint_host or "host не задан" }}</span>
+                </td>
+                <td>{{ server.active_device_count }} / {{ server.total_device_count }}</td>
+                <td>
+                  <span class="status status-{{ server.health_status or server.status or 'unknown' }}">
+                    {{ server.health_status or server.status or "unknown" }}
+                  </span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="empty-state">Серверов пока нет.</p>
+      {% endif %}
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Заявки</h2>
+      </div>
+      {% if pending_orders %}
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Пользователь</th>
+              <th>Версия</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in pending_orders %}
+              <tr>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.username or order.telegram_id }}</td>
+                <td>{{ order.requested_config_version }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="empty-state">Новых заявок нет.</p>
+      {% endif %}
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Активные устройства</h2>
+      </div>
+      {% if active_devices %}
+        <table>
+          <thead>
+            <tr>
+              <th>Устройство</th>
+              <th>Пользователь</th>
+              <th>IP</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for device in active_devices %}
+              <tr>
+                <td>{{ device.name }}</td>
+                <td>{{ device.username or device.telegram_id }}</td>
+                <td>{{ device.vpn_ip }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="empty-state">Активных устройств пока нет.</p>
+      {% endif %}
+    </article>
+  </section>
+{% endblock %}

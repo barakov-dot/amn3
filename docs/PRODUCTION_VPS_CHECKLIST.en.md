@@ -63,6 +63,26 @@ python -m app.cli bot check-network
 Store `APP_SECRET_KEY` separately. Losing it means losing access to encrypted
 peer secrets.
 
+### Web Admin Panel
+
+The web panel is disabled by default for the first VPS run. When enabling it,
+fill the separate values:
+
+```env
+WEB_ADMIN_ENABLED=false
+WEB_ADMIN_HOST=0.0.0.0
+WEB_ADMIN_PORT=3030
+WEB_ADMIN_USERNAME=admin
+WEB_ADMIN_PASSWORD_HASH=replace-with-password-hash
+WEB_ADMIN_SESSION_SECRET=replace-with-generated-random-secret-32-plus-chars
+WEB_ADMIN_SESSION_COOKIE_SECURE=true
+```
+
+`WEB_ADMIN_SESSION_COOKIE_SECURE=true` requires HTTPS, a TLS reverse proxy, or an
+SSH tunnel to the panel. For a short plain-HTTP check on `:3030`, temporarily set
+`WEB_ADMIN_SESSION_COOKIE_SECURE=false`, but do not leave an internet-facing
+admin panel open that way.
+
 ## 4. Config Templates And Delivery
 
 Current user config delivery options:
