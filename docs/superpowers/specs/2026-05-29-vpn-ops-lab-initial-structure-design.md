@@ -1,30 +1,36 @@
-# VPN Ops Lab Initial Structure Design
+# Дизайн начальной структуры VPN Ops Lab
 
-## Purpose
+## Назначение
 
-`vpn-ops-lab` is a research repository for parallel development of `amn2` and future VPN products. It collects analysis of similar GitHub projects, license findings, architectural notes, UX observations, production practices, feature gaps, candidate ideas, rejected ideas, and lessons that may later be added to a shared Codex skill.
+`vpn-ops-lab` - исследовательский репозиторий для параллельного развития `amn2` и будущих VPN-продуктов. Он нужен, чтобы собирать анализ похожих GitHub-проектов, выводы по лицензиям, архитектурные заметки, UX-наблюдения, production-подходы, feature gap, кандидатные идеи, отклоненные идеи и выводы, которые позже можно добавить в общий Codex skill.
 
-The repository is not production code. It is a controlled research laboratory where external projects are studied, not copied.
+Репозиторий не является production-кодом. Это контролируемая исследовательская лаборатория: внешние проекты изучаются, но их код не копируется без проверки лицензии и отдельного решения.
 
-## Main Rule
+## Язык документов
 
-`amn2` remains the production direction.
+Markdown-документы, спецификации, README, заметки и похожие текстовые артефакты в этом проекте готовятся в первую очередь на русском языке.
 
-`vpn-ops-lab` remains the research laboratory.
+Английский язык используется вторым слоем, когда он нужен для названий файлов, технических терминов, ссылок на внешние проекты, цитирования лицензий или будущей совместимости с англоязычной документацией.
 
-Features move from `vpn-ops-lab` to `amn2` only after checking:
+## Главное правило
 
-- license compatibility;
-- practical value;
-- operational and security risks;
-- architectural compatibility;
-- test plan.
+`amn2` остается production-направлением.
 
-Until an idea passes these checks, it is only a research candidate.
+`vpn-ops-lab` остается исследовательской лабораторией.
 
-## Root Layout
+Функции переходят из `vpn-ops-lab` в `amn2` только после проверки:
 
-The current workspace folder is the repository root. There is no nested `vpn-ops-lab/` directory.
+- совместимости лицензии;
+- практической пользы;
+- operational- и security-рисков;
+- архитектурной совместимости;
+- тестового плана.
+
+Пока идея не прошла эти проверки, она остается только исследовательским кандидатом.
+
+## Корневая структура
+
+Текущая рабочая папка является корнем репозитория. Вложенная директория `vpn-ops-lab/` не создается.
 
 ```text
 README.md
@@ -42,66 +48,66 @@ prototypes/
   README.md
 ```
 
-## Area Responsibilities
+## Ответственность разделов
 
-`README.md` defines the project purpose, safety rules, relationship to `amn2`, and the feature-transfer gate.
+`README.md` фиксирует назначение проекта, правила безопасности, связь с `amn2` и gate для переноса функций.
 
-`research/upstreams/README.md` explains how to analyze external VPN-related projects. Each upstream analysis should record the project link, license, relevant architecture, feature observations, UX notes, production practices, risks, and whether any idea may be useful for `amn2` or a future hybrid project.
+`research/upstreams/README.md` описывает, как анализировать внешние VPN-связанные проекты. Каждый анализ upstream-проекта должен фиксировать ссылку на проект, лицензию, релевантную архитектуру, функции, UX-наблюдения, production-практики, риски и потенциальную пользу для `amn2` или будущего гибридного проекта.
 
-`ideas/candidates-for-amn2.md` tracks ideas that may eventually move into `amn2`. Each candidate must stay in research status until license, value, risk, architecture, and test-plan checks are complete.
+`ideas/candidates-for-amn2.md` хранит идеи, которые потенциально могут перейти в `amn2`. Каждая идея остается в исследовательском статусе, пока не пройдены проверки лицензии, пользы, рисков, архитектуры и тестового плана.
 
-`ideas/candidates-for-hybrid.md` tracks ideas intended for a future hybrid VPN product, separate from immediate `amn2` work.
+`ideas/candidates-for-hybrid.md` хранит идеи для будущего гибридного VPN-продукта, отдельно от ближайших production-задач `amn2`.
 
-`ideas/add-to-skill.md` captures reusable research and implementation lessons that may be folded into a shared Codex skill later.
+`ideas/add-to-skill.md` собирает повторно используемые исследовательские и инженерные выводы, которые позже можно перенести в общий Codex skill.
 
-`ideas/rejected.md` records rejected or deferred ideas with reasons, so the same analysis does not need to be repeated.
+`ideas/rejected.md` фиксирует отклоненные или отложенные идеи с причинами, чтобы не повторять уже сделанный анализ.
 
-`watch-notes/README.md` describes how to keep periodic notes about upstream changes, releases, security-relevant updates, and newly discovered projects.
+`watch-notes/README.md` описывает, как вести периодические наблюдения за upstream-изменениями, релизами, security-relevant обновлениями и новыми найденными проектами.
 
-`prototypes/README.md` defines the boundary for experiments. Prototypes must be original implementations or controlled experiments, not copied external code, and any path from prototype to `amn2` must include tests.
+`prototypes/README.md` задает границы экспериментов. Прототипы должны быть собственными реализациями или контролируемыми проверками гипотез, а не копиями внешнего кода. Любой путь от прототипа к `amn2` должен включать тесты.
 
-## Data Flow
+## Поток данных
 
-Research starts in `research/upstreams/` or `watch-notes/`.
+Исследование начинается в `research/upstreams/` или `watch-notes/`.
 
-Useful findings move into one of the `ideas/` files:
+Полезные находки переходят в один из файлов `ideas/`:
 
-- `candidates-for-amn2.md` for production-relevant ideas;
-- `candidates-for-hybrid.md` for future-product ideas;
-- `add-to-skill.md` for reusable Codex workflow lessons;
-- `rejected.md` for ideas that should not be pursued.
+- `candidates-for-amn2.md` - production-релевантные идеи;
+- `candidates-for-hybrid.md` - идеи для будущего продукта;
+- `add-to-skill.md` - выводы для общего Codex skill;
+- `rejected.md` - идеи, которые не стоит развивать.
 
-Prototype work may happen only after an idea is understood well enough to test safely. Prototype results feed back into the relevant idea file.
+Прототипирование начинается только после того, как идея достаточно понятна для безопасной проверки. Результаты прототипа возвращаются в соответствующий файл идей.
 
-## Safety And Error Handling
+## Безопасность и обработка проблем
 
-If a license is unclear, incompatible, missing, or too restrictive, the idea must not be treated as transferable to `amn2`.
+Если лицензия непонятна, несовместима, отсутствует или слишком ограничительна, идея не считается переносимой в `amn2`.
 
-If a feature depends on copying code from an external project, it must be rejected or redesigned as an original implementation before any production consideration.
+Если функция требует копирования кода из внешнего проекта, ее нужно отклонить или перепроектировать как самостоятельную реализацию до любого production-рассмотрения.
 
-If operational or security risks are not understood, the idea remains in research status.
+Если operational- или security-риски не понятны, идея остается в исследовательском статусе.
 
-If architectural compatibility with `amn2` is unclear, the candidate entry must say what needs to be checked before implementation.
+Если архитектурная совместимость с `amn2` не ясна, карточка кандидата должна явно указать, что нужно проверить до реализации.
 
-## Testing Expectations
+## Ожидания по проверке
 
-The initial repository structure is documentation-first, so verification starts with file presence and content review.
+Начальная структура репозитория документационная, поэтому первая проверка состоит из проверки наличия файлов и ревью содержимого.
 
-Later, any prototype or transferred feature proposal should include:
+Позже любой прототип или предложение о переносе функции должны включать:
 
-- expected behavior;
-- risk notes;
-- test plan;
-- minimum acceptance checks before `amn2` work begins.
+- ожидаемое поведение;
+- заметки о рисках;
+- тестовый план;
+- минимальные acceptance checks перед началом работы в `amn2`.
 
-## First Implementation Scope
+## Первый scope реализации
 
-The first implementation should create the approved Markdown-first repository skeleton in the current workspace root:
+Первая реализация должна создать утвержденный Markdown-first скелет репозитория в текущем корне workspace:
 
-- root `README.md`;
+- корневой `README.md`;
 - `research/upstreams/README.md`;
-- four idea tracking files under `ideas/`;
+- четыре файла для трекинга идей в `ideas/`;
 - `watch-notes/README.md`;
 - `prototypes/README.md`.
 
-No production VPN code, automation scripts, or external code imports are part of the first implementation.
+Production VPN-код, automation-скрипты и импорт внешнего кода не входят в первую реализацию.
