@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading page-heading">
+    <div>
+      <p class="eyebrow">Server management</p>
+      <h1>{{ server.name }}</h1>
+    </div>
+    <div class="button-row">
+      <a class="button button-secondary" href="/servers">Back</a>
+      <a class="button" href="/servers/{{ server.id }}/edit">Edit</a>
+      <a class="button button-secondary" href="/servers/{{ server.id }}/health">Health</a>
+    </div>
+  </section>
+
+  <section class="detail-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Configuration</h2>
+      </div>
+      <dl class="details">
+        <div>
+          <dt>SSH host</dt>
+          <dd>{{ server.host or "-" }}:{{ server.ssh_port or "-" }}</dd>
+        </div>
+        <div>
+          <dt>Endpoint</dt>
+          <dd>{{ server.endpoint_host or "-" }}:{{ server.vpn_port or "-" }}</dd>
+        </div>
+        <div>
+          <dt>Network</dt>
+          <dd>{{ server.vpn_network_cidr }}</dd>
+        </div>
+        <div>
+          <dt>Server address</dt>
+          <dd>{{ server.server_address or "-" }}</dd>
+        </div>
+        <div>
+          <dt>Public key</dt>
+          <dd class="wrap-text">{{ server.server_public_key or "-" }}</dd>
+        </div>
+        <div>
+          <dt>Runtime</dt>
+          <dd>{{ server.runtime or "-" }}</dd>
+        </div>
+        <div>
+          <dt>Firewall</dt>
+          <dd>{{ server.firewall or "-" }}</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd><span class="status status-{{ server.status }}">{{ server.status }}</span></dd>
+        </div>
+        <div>
+          <dt>Devices</dt>
+          <dd>{{ server.active_device_count }} / {{ server.total_device_count }}</dd>
+        </div>
+        <div>
+          <dt>Max devices</dt>
+          <dd>{{ server.max_devices }}</dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Actions</h2>
+      </div>
+      <div class="action-stack">
+        <form action="/servers/{{ server.id }}/health/run" method="post">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button" type="submit">Run health check</button>
+        </form>
+        <form action="/servers/{{ server.id }}/disable" method="post">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-danger" type="submit">Disable</button>
+        </form>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Latest health</h2>
+    </div>
+    {% if latest_health %}
+      <dl class="details">
+        <div>
+          <dt>Status</dt>
+          <dd><span class="status status-{{ latest_health.status }}">{{ latest_health.status }}</span></dd>
+        </div>
+        <div>
+          <dt>Latency</dt>
+          <dd>
+            {% if latest_health.latency_ms is not none %}
+              {{ latest_health.latency_ms }} ms
+            {% else %}
+              -
+            {% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt>Checked</dt>
+          <dd>{{ latest_health.checked_at }}</dd>
+        </div>
+        <div>
+          <dt>Error</dt>
+          <dd>{{ latest_health.error or "-" }}</dd>
+        </div>
+      </dl>
+    {% else %}
+      <p class="empty-state">No health check has been stored yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}

@@ -227,6 +227,10 @@ tbody tr:last-child td {
   display: block;
 }
 
+.wrap-text {
+  overflow-wrap: anywhere;
+}
+
 .empty-state {
   margin: 0;
   padding: 18px 14px;

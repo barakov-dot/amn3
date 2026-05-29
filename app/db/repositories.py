@@ -7,6 +7,7 @@ from typing import Any
 
 DEFAULT_PLAN_DAYS = (3, 7, 10, 14, 30, 60, 90, 180)
 USER_STATUSES = {"active", "blocked", "deleted"}
+SERVER_STATUSES = {"active", "degraded", "disabled"}
 
 
 class Repository:
@@ -332,6 +333,152 @@ class Repository:
             (name,),
         ).fetchone()
         return int(row["id"])
+
+    def create_server_for_admin(
+        self,
+        *,
+        name: str,
+        host: str,
+        ssh_port: int,
+        endpoint_host: str,
+        vpn_port: int,
+        vpn_network_cidr: str,
+        server_address: str,
+        server_public_key: str,
+        runtime: str,
+        firewall: str,
+        status: str,
+        max_devices: int,
+    ) -> int:
+        _validate_server_status(status)
+        _validate_server_fields(
+            name=name,
+            host=host,
+            ssh_port=ssh_port,
+            endpoint_host=endpoint_host,
+            vpn_port=vpn_port,
+            vpn_network_cidr=vpn_network_cidr,
+            server_address=server_address,
+            runtime=runtime,
+            firewall=firewall,
+            max_devices=max_devices,
+        )
+        cursor = self._conn.execute(
+            """
+            INSERT INTO servers (
+                name,
+                host,
+                ssh_port,
+                endpoint_host,
+                vpn_port,
+                vpn_network_cidr,
+                server_address,
+                server_public_key,
+                runtime,
+                firewall,
+                status,
+                max_devices
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                name,
+                host,
+                ssh_port,
+                endpoint_host,
+                vpn_port,
+                vpn_network_cidr,
+                _host_address(server_address),
+                server_public_key,
+                runtime,
+                firewall,
+                status,
+                max_devices,
+            ),
+        )
+        self._commit()
+        return int(cursor.lastrowid)
+
+    def update_server_for_admin(
+        self,
+        *,
+        server_id: int,
+        name: str,
+        host: str,
+        ssh_port: int,
+        endpoint_host: str,
+        vpn_port: int,
+        vpn_network_cidr: str,
+        server_address: str,
+        server_public_key: str,
+        runtime: str,
+        firewall: str,
+        status: str,
+        max_devices: int,
+    ) -> None:
+        self.get_server(server_id)
+        _validate_server_status(status)
+        _validate_server_fields(
+            name=name,
+            host=host,
+            ssh_port=ssh_port,
+            endpoint_host=endpoint_host,
+            vpn_port=vpn_port,
+            vpn_network_cidr=vpn_network_cidr,
+            server_address=server_address,
+            runtime=runtime,
+            firewall=firewall,
+            max_devices=max_devices,
+        )
+        self._conn.execute(
+            """
+            UPDATE servers
+            SET name = ?,
+                host = ?,
+                ssh_port = ?,
+                endpoint_host = ?,
+                vpn_port = ?,
+                vpn_network_cidr = ?,
+                server_address = ?,
+                server_public_key = ?,
+                runtime = ?,
+                firewall = ?,
+                status = ?,
+                max_devices = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (
+                name,
+                host,
+                ssh_port,
+                endpoint_host,
+                vpn_port,
+                vpn_network_cidr,
+                _host_address(server_address),
+                server_public_key,
+                runtime,
+                firewall,
+                status,
+                max_devices,
+                server_id,
+            ),
+        )
+        self._commit()
+
+    def set_server_status_for_admin(self, server_id: int, status: str) -> None:
+        self.get_server(server_id)
+        _validate_server_status(status)
+        self._conn.execute(
+            """
+            UPDATE servers
+            SET status = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (status, server_id),
+        )
+        self._commit()
 
     def seed_default_plans(self) -> None:
         for duration_days in DEFAULT_PLAN_DAYS:
@@ -829,6 +976,36 @@ class Repository:
             (limit,),
         ).fetchall()
 
+    def get_server_for_admin(self, server_id: int) -> sqlite3.Row:
+        return self._fetch_one(
+            """
+            SELECT
+                servers.*,
+                COUNT(devices.id) AS total_device_count,
+                COALESCE(
+                    SUM(CASE WHEN devices.status = 'active' THEN 1 ELSE 0 END),
+                    0
+                ) AS active_device_count,
+                latest_health.status AS health_status,
+                latest_health.latency_ms AS health_latency_ms,
+                latest_health.checked_at AS health_checked_at,
+                latest_health.error AS health_error
+            FROM servers
+            LEFT JOIN devices ON devices.server_id = servers.id
+            LEFT JOIN server_health_checks AS latest_health
+                ON latest_health.id = (
+                    SELECT id
+                    FROM server_health_checks
+                    WHERE server_id = servers.id
+                    ORDER BY checked_at DESC, id DESC
+                    LIMIT 1
+                )
+            WHERE servers.id = ?
+            GROUP BY servers.id
+            """,
+            (server_id,),
+        )
+
     def list_orders_for_admin(self, *, limit: int = 100) -> list[sqlite3.Row]:
         return self._conn.execute(
             """
@@ -1056,3 +1233,45 @@ def _host_address(value: str) -> str:
 def _validate_user_status(status: str) -> None:
     if status not in USER_STATUSES:
         raise ValueError(f"unsupported user status: {status}")
+
+
+def _validate_server_status(status: str) -> None:
+    if status not in SERVER_STATUSES:
+        raise ValueError(f"unsupported server status: {status}")
+
+
+def _validate_server_fields(
+    *,
+    name: str,
+    host: str,
+    ssh_port: int,
+    endpoint_host: str,
+    vpn_port: int,
+    vpn_network_cidr: str,
+    server_address: str,
+    runtime: str,
+    firewall: str,
+    max_devices: int,
+) -> None:
+    for field_name, value in {
+        "name": name,
+        "host": host,
+        "endpoint_host": endpoint_host,
+        "vpn_network_cidr": vpn_network_cidr,
+        "server_address": server_address,
+        "runtime": runtime,
+        "firewall": firewall,
+    }.items():
+        if not value.strip():
+            raise ValueError(f"{field_name} is required")
+    _validate_port("ssh_port", ssh_port)
+    _validate_port("vpn_port", vpn_port)
+    if max_devices < 0:
+        raise ValueError("max_devices must be non-negative")
+    ipaddress.ip_network(vpn_network_cidr, strict=False)
+    _host_address(server_address)
+
+
+def _validate_port(field_name: str, value: int) -> None:
+    if not 1 <= value <= 65535:
+        raise ValueError(f"{field_name} must be in 1..65535")
