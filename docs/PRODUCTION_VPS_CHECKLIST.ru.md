@@ -102,6 +102,11 @@ tunnel до панели. Для короткой проверки по plain HT
 CLIENT_CONFIG_TEMPLATE_DIR=config_templates
 ```
 
+Файлы overrides должны называться ровно так:
+
+- `amneziawg_v1_5.conf.tpl`
+- `amneziawg_v2.conf.tpl`
+
 Шаблон содержит постоянные строки конфига и placeholders для переменных значений
 пользователя/устройства. `.conf` файл остается каноническим способом доставки,
 пока `vpn://` импорт не проверен на реальном AmneziaVPN-клиенте.

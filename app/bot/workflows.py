@@ -58,6 +58,7 @@ class BotWorkflow:
         default_server_id: int | None = None,
         secret_box: SecretBox | None = None,
         peer_remover: PeerRemover | None = None,
+        client_config_template_dir: str | None = None,
     ) -> None:
         self._repo = repo
         self._admin_telegram_ids = admin_telegram_ids
@@ -65,6 +66,7 @@ class BotWorkflow:
         self._default_server_id = default_server_id
         self._secret_box = secret_box
         self._peer_remover = peer_remover
+        self._client_config_template_dir = client_config_template_dir
 
     def is_admin(self, telegram_id: int) -> bool:
         if telegram_id in self._admin_telegram_ids:
@@ -438,6 +440,7 @@ class BotWorkflow:
                 h4=4,
             ),
             config_version,
+            template_dir=self._client_config_template_dir,
         )
         template_text = self._repo.get_message_template(
             CONFIG_READY_TEMPLATE_KEY,

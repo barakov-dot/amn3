@@ -102,6 +102,11 @@ After implementation, keep VPS template edits in an external directory:
 CLIENT_CONFIG_TEMPLATE_DIR=config_templates
 ```
 
+Override files use these exact names:
+
+- `amneziawg_v1_5.conf.tpl`
+- `amneziawg_v2.conf.tpl`
+
 The template contains stable config lines and placeholders for user/device
 variables. The `.conf` file remains the canonical delivery path until `vpn://`
 import is verified with a real AmneziaVPN client.

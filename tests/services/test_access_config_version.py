@@ -84,6 +84,27 @@ def test_approve_order_uses_requested_order_config_version_by_default(tmp_path):
     assert device["config_version"] == "amneziawg_v1_5"
 
 
+def test_approve_order_uses_external_template_dir_when_configured(tmp_path):
+    template_dir = tmp_path / "templates"
+    template_dir.mkdir()
+    (template_dir / "amneziawg_v1_5.conf.tpl").write_text(
+        "Custom config for {address} via {endpoint}\nPrivateKey = {private_key}\n",
+        encoding="utf-8",
+    )
+    repo, service, order_id, server_id = _service_with_template_dir(tmp_path, template_dir)
+
+    result = service.approve_order(
+        order_id,
+        server_id,
+        "laptop",
+        admin_telegram_id=1,
+        config_version="amneziawg_v1_5",
+    )
+
+    assert result.config_text.startswith("Custom config for 10.8.0.2/32")
+    assert "via 127.0.0.1:30001" in result.config_text
+
+
 def test_approve_order_rejects_unknown_config_version_without_creating_device(tmp_path):
     repo, service, order_id, server_id = _service(tmp_path)
 
@@ -97,3 +118,25 @@ def test_approve_order_rejects_unknown_config_version_without_creating_device(tm
         )
 
     assert repo.count_active_devices(repo.get_order(order_id)["user_id"]) == 0
+
+
+def _service_with_template_dir(tmp_path, template_dir):
+    conn = connect(tmp_path / "access-template-dir.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id = repo.upsert_user(
+        telegram_id=2001,
+        username="version_user",
+        first_name="Version",
+        last_name="User",
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    order_id = repo.create_order(user_id=user_id, plan_id=None, payment_mode="free_test")
+    service = AccessService(
+        repo=repo,
+        secret_box=SecretBox.from_app_secret(SECRET),
+        max_devices_per_user=5,
+        duration_days=7,
+        client_config_template_dir=str(template_dir),
+    )
+    return repo, service, order_id, server_id

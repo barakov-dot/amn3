@@ -33,6 +33,7 @@ async def run() -> None:
         vps_apply_enabled=settings.vps_apply_enabled,
         server_config_path=settings.server_config_path,
         server_name=settings.server_name,
+        client_config_template_dir=settings.client_config_template_dir,
     )
     bot = create_bot(
         telegram_bot_token=settings.telegram_bot_token,
@@ -131,6 +132,7 @@ def create_workflow(
     vps_apply_enabled: bool = False,
     server_config_path: str | Path = "servers.yml",
     server_name: str = "debian-vps-1",
+    client_config_template_dir: str | Path | None = None,
 ) -> BotWorkflow:
     conn = connect(database_path)
     initialize_schema(conn)
@@ -153,6 +155,7 @@ def create_workflow(
         max_devices_per_user=max_devices_per_user,
         duration_days=default_plan_days,
         peer_applier=peer_applier,
+        client_config_template_dir=client_config_template_dir,
     )
     secret_box = SecretBox.from_app_secret(app_secret_key)
     workflow = BotWorkflow(
@@ -162,6 +165,9 @@ def create_workflow(
         default_server_id=default_server_id,
         secret_box=secret_box,
         peer_remover=peer_applier,
+        client_config_template_dir=str(client_config_template_dir)
+        if client_config_template_dir is not None
+        else None,
     )
     return workflow
 

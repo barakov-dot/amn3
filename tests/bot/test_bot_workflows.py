@@ -336,6 +336,44 @@ def test_resend_device_config_rebuilds_delivery_from_encrypted_device_secrets(tm
     assert "[Interface]" in resend.config_text
 
 
+def test_resend_device_config_uses_current_external_template_for_stored_version(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    template_dir = tmp_path / "templates"
+    template_dir.mkdir()
+    (template_dir / "amneziawg_v1_5.conf.tpl").write_text(
+        "Resend template {address} through {endpoint}\nPrivateKey = {private_key}\n",
+        encoding="utf-8",
+    )
+    device_id = _create_encrypted_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="phone",
+        config_version="amneziawg_v1_5",
+    )
+    workflow = BotWorkflow(
+        repo=repo,
+        admin_telegram_ids={9001},
+        secret_box=SecretBox.from_app_secret(SECRET),
+        client_config_template_dir=str(template_dir),
+    )
+
+    resend = workflow.build_resend_delivery(
+        admin_telegram_id=9001,
+        device_id=device_id,
+    )
+
+    assert resend.config_text.startswith("Resend template")
+    assert "through 127.0.0.1:30001" in resend.config_text
+
+
 def test_user_can_resend_only_owned_device_config(tmp_path):
     repo = _repo(tmp_path)
     user_id = repo.upsert_user(
@@ -701,7 +739,14 @@ def _repo(tmp_path):
     return Repository(conn)
 
 
-def _create_encrypted_device(repo, *, user_id, server_id, name):
+def _create_encrypted_device(
+    repo,
+    *,
+    user_id,
+    server_id,
+    name,
+    config_version="amneziawg_v2",
+):
     secret_box = SecretBox.from_app_secret(SECRET)
     return repo.create_device(
         user_id=user_id,
@@ -712,7 +757,7 @@ def _create_encrypted_device(repo, *, user_id, server_id, name):
         peer_public_key=f"peer-{name}",
         peer_private_key_encrypted=secret_box.encrypt_text(f"private-{name}"),
         preshared_key_encrypted=secret_box.encrypt_text(f"psk-{name}"),
-        config_version="amneziawg_v2",
+        config_version=config_version,
     )
 
 

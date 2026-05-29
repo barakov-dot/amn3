@@ -3,6 +3,7 @@ from __future__ import annotations
 import ipaddress
 import sqlite3
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Protocol
 
 from app.db.repositories import Repository
@@ -58,12 +59,14 @@ class AccessService:
         max_devices_per_user: int = 5,
         duration_days: int = 30,
         peer_applier: PeerApplier | None = None,
+        client_config_template_dir: str | Path | None = None,
     ) -> None:
         self._repo = repo
         self._secret_box = secret_box
         self._max_devices_per_user = max_devices_per_user
         self._duration_days = duration_days
         self._peer_applier = peer_applier
+        self._client_config_template_dir = client_config_template_dir
 
     def approve_order(
         self,
@@ -181,6 +184,7 @@ class AccessService:
                     h4=4,
                 ),
                 config_version,
+                template_dir=self._client_config_template_dir,
             )
 
             try:

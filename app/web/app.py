@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
+import re
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -16,6 +17,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.staticfiles import StaticFiles
 
 from app.config.settings import Settings
+from app.bot.delivery import CONFIG_READY_TEMPLATE_KEY, DEFAULT_CONFIG_READY_TEMPLATE
 from app.db.connection import connect
 from app.db.repositories import Repository
 from app.db.repositories import SERVER_STATUSES
@@ -29,12 +31,25 @@ from app.web.auth import verify_csrf_token
 from app.web.logs import read_log_tail
 from app.web.server_health import HealthSummary
 from app.web.server_health import run_server_health_check
+from app.vpn.amneziawg_v2.config import ClientConfigInput
+from app.vpn.config_templates import (
+    AVAILABLE_CLIENT_CONFIG_PLACEHOLDERS,
+    ConfigTemplateError,
+    build_vpn_import_link,
+    client_config_template_source,
+    render_client_config_from_template,
+)
+from app.vpn.config_versions import SUPPORTED_CONFIG_VERSIONS
 
 
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATE_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
 SESSION_AUTH_KEY = "web_admin_authenticated"
+SECRET_CONFIG_LINE_RE = re.compile(
+    r"^(\s*(?:PrivateKey|PresharedKey)\s*[:=]\s*).+$",
+    re.IGNORECASE | re.MULTILINE,
+)
 
 templates = Jinja2Templates(directory=TEMPLATE_DIR)
 
@@ -264,6 +279,35 @@ def create_web_app(settings: Settings | None = None) -> FastAPI:
                 title="Settings",
                 authenticated=True,
                 settings_sections=_load_settings_sections(actual_settings),
+            ),
+        )
+
+    @app.get("/config-templates")
+    async def config_templates_index(request: Request):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+
+        return templates.TemplateResponse(
+            request,
+            "config_templates.html",
+            _template_context(
+                request,
+                title="Config templates",
+                authenticated=True,
+                template_dir_name=_display_setting_value(
+                    "CLIENT_CONFIG_TEMPLATE_DIR",
+                    actual_settings.client_config_template_dir,
+                    is_path=True,
+                ),
+                config_templates=_load_client_config_template_views(actual_settings),
+                config_placeholders=[
+                    f"{{{name}}}" for name in AVAILABLE_CLIENT_CONFIG_PLACEHOLDERS
+                ],
+                delivery_template={
+                    "key": CONFIG_READY_TEMPLATE_KEY,
+                    "placeholders": _delivery_template_placeholders(),
+                    "preview": DEFAULT_CONFIG_READY_TEMPLATE,
+                },
             ),
         )
 
@@ -900,6 +944,77 @@ def _load_settings_sections(settings: Settings) -> list[dict[str, Any]]:
             }
         )
     return sections
+
+
+def _load_client_config_template_views(settings: Settings) -> list[dict[str, str]]:
+    sample = _sample_client_config_input()
+    template_dir = settings.client_config_template_dir
+    views: list[dict[str, str]] = []
+    for config_version in SUPPORTED_CONFIG_VERSIONS:
+        try:
+            preview = render_client_config_from_template(
+                sample,
+                config_version,
+                template_dir=template_dir,
+            )
+            safe_preview = _safe_config_preview(preview)
+            vpn_import_link = build_vpn_import_link(safe_preview)
+            error = ""
+        except ConfigTemplateError as exc:
+            safe_preview = ""
+            vpn_import_link = ""
+            error = str(exc)
+        views.append(
+            {
+                "version": config_version,
+                "filename": f"{config_version}.conf.tpl",
+                "source": client_config_template_source(config_version, template_dir),
+                "preview": safe_preview,
+                "vpn_import_link": vpn_import_link,
+                "error": error,
+            }
+        )
+    return views
+
+
+def _sample_client_config_input() -> ClientConfigInput:
+    return ClientConfigInput(
+        private_key="sample-client-private-key",
+        address="10.8.0.2/32",
+        dns="1.1.1.1",
+        server_public_key="sample-server-public-key",
+        preshared_key="sample-preshared-key",
+        endpoint="vpn.example.com:30001",
+        allowed_ips="0.0.0.0/0",
+        persistent_keepalive=25,
+        jc=4,
+        jmin=40,
+        jmax=70,
+        s1=0,
+        s2=0,
+        h1=1,
+        h2=2,
+        h3=3,
+        h4=4,
+    )
+
+
+def _safe_config_preview(config_text: str) -> str:
+    return SECRET_CONFIG_LINE_RE.sub(r"\1<sample-secret>", config_text)
+
+
+def _delivery_template_placeholders() -> list[str]:
+    return [
+        "{device_id}",
+        "{config_version}",
+        "{config_version_label}",
+        "{vpn_link}",
+        "{android_amnezia}",
+        "{android_amneziawg}",
+        "{ios_russia_defaultvpn}",
+        "{windows_amneziawg}",
+        "{defaultvpn_github}",
+    ]
 
 
 def _setting_entry(settings: Settings, field_name: str) -> dict[str, str]:

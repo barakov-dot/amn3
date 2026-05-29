@@ -1,9 +1,13 @@
-from app.vpn.amneziawg_v1_5.config import render_client_config as render_v1_5_config
+from pathlib import Path
+
 from app.vpn.amneziawg_v2.config import ClientConfigInput
-from app.vpn.amneziawg_v2.config import render_client_config as render_v2_config
+from app.vpn.config_templates import (
+    SUPPORTED_CLIENT_CONFIG_VERSIONS,
+    render_client_config_from_template,
+)
 
 
-SUPPORTED_CONFIG_VERSIONS = ("amneziawg_v1_5", "amneziawg_v2")
+SUPPORTED_CONFIG_VERSIONS = SUPPORTED_CLIENT_CONFIG_VERSIONS
 
 
 class ConfigVersionError(ValueError):
@@ -17,8 +21,10 @@ def validate_config_version(version: str) -> str:
     return version
 
 
-def render_client_config_for_version(config: ClientConfigInput, version: str) -> str:
+def render_client_config_for_version(
+    config: ClientConfigInput,
+    version: str,
+    template_dir: str | Path | None = None,
+) -> str:
     validated = validate_config_version(version)
-    if validated == "amneziawg_v1_5":
-        return render_v1_5_config(config)
-    return render_v2_config(config)
+    return render_client_config_from_template(config, validated, template_dir)
