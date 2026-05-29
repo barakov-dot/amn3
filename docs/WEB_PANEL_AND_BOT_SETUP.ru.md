@@ -206,6 +206,23 @@ sudo ufw allow 3030/tcp
 sudo ufw status
 ```
 
+Если панель открывается через HTTPS reverse proxy, но выглядит без CSS, проверить:
+
+```bash
+curl -I https://DOMAIN/static/admin.css
+```
+
+Ожидаемый ответ:
+
+```text
+HTTP/1.1 200 OK
+content-type: text/css
+```
+
+В Nginx Proxy Manager proxy host должен проксировать весь `/` на приложение, а не только `/login`.
+Путь `/static/admin.css` должен уходить на тот же upstream `http://127.0.0.1:3030` или
+`http://SERVER_LAN_IP:3030`.
+
 ## 8. Безопасный доступ через SSH tunnel
 
 Для первого продового теста безопаснее не открывать порт `3030` в интернет, а использовать SSH tunnel.

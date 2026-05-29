@@ -69,6 +69,18 @@ def test_login_failure_does_not_authenticate(tmp_path: Path):
     assert dashboard_response.headers["location"] == "/login"
 
 
+def test_login_page_uses_root_relative_stylesheet_for_reverse_proxy(tmp_path: Path):
+    client = _client(
+        settings=_settings(tmp_path, session_cookie_secure=False),
+        base_url="http://pdf.smart-finance.ru",
+    )
+
+    response = client.get("/login")
+
+    assert 'href="/static/admin.css"' in response.text
+    assert "http://pdf.smart-finance.ru/static/admin.css" not in response.text
+
+
 def test_login_rejects_missing_csrf_token(tmp_path: Path):
     client = _client(tmp_path)
     client.get("/login")
