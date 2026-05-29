@@ -24,12 +24,18 @@ PATTERNS = [
     ),
 ]
 
+CONFIG_BLOCK_REDACTION = "[CONFIG REDACTED]"
+
 
 def redact(value: Any) -> str:
     text = str(value)
     for pattern in PATTERNS:
-        text = pattern.sub(
-            lambda match: f"{match.group(1) if match.lastindex else ''}[REDACTED]",
-            text,
-        )
+        text = pattern.sub(_replacement, text)
     return text
+
+
+def _replacement(match: re.Match[str]) -> str:
+    if match.group(0).lstrip().lower().startswith("[interface]"):
+        return CONFIG_BLOCK_REDACTION
+    prefix = match.group(1) if match.lastindex else ""
+    return f"{prefix}[REDACTED]"

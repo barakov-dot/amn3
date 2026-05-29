@@ -21,10 +21,12 @@ from app.db.repositories import Repository
 from app.db.repositories import SERVER_STATUSES
 from app.db.repositories import USER_STATUSES
 from app.db.schema import initialize_schema
+from app.security.redaction import redact
 from app.web.auth import check_password
 from app.web.auth import generate_csrf_token
 from app.web.auth import require_web_admin_config
 from app.web.auth import verify_csrf_token
+from app.web.logs import read_log_tail
 from app.web.server_health import HealthSummary
 from app.web.server_health import run_server_health_check
 
@@ -35,6 +37,75 @@ STATIC_DIR = BASE_DIR / "static"
 SESSION_AUTH_KEY = "web_admin_authenticated"
 
 templates = Jinja2Templates(directory=TEMPLATE_DIR)
+
+SETTINGS_SECTIONS = {
+    "Core": [
+        "telegram_bot_token",
+        "telegram_proxy_url",
+        "app_secret_key",
+        "admin_telegram_ids",
+        "access_mode",
+        "free_test_requires_approval",
+        "default_plan_days",
+        "max_devices_per_user",
+        "expiration_notice_days",
+        "database_path",
+    ],
+    "Web admin": [
+        "web_admin_enabled",
+        "web_admin_host",
+        "web_admin_port",
+        "web_admin_username",
+        "web_admin_password_hash",
+        "web_admin_session_secret",
+        "web_admin_session_cookie_secure",
+    ],
+    "Logging": [
+        "app_log_enabled",
+        "app_log_level",
+        "app_log_max_lines",
+        "app_log_path",
+    ],
+    "Email": [
+        "email_delivery_enabled",
+        "smtp_host",
+        "smtp_port",
+        "smtp_username",
+        "smtp_password",
+        "smtp_from",
+        "smtp_use_tls",
+        "email_require_verification",
+        "email_recovery_token_ttl_minutes",
+        "email_config_attachments_enabled",
+    ],
+    "VPS": [
+        "vps_apply_enabled",
+        "vps_ssh_password",
+        "server_config_path",
+        "server_name",
+        "vpn_port_min",
+        "vpn_port_max",
+        "vpn_server_runtime",
+        "default_vpn_network_cidr",
+        "client_config_template_dir",
+        "client_dns",
+        "client_allowed_ips",
+    ],
+    "Control panel": [
+        "control_panel_auth_methods",
+        "control_panel_admin_username",
+        "control_panel_password_hash",
+        "control_panel_public_key_path",
+    ],
+}
+
+PATH_SETTING_FIELDS = {
+    "app_log_path",
+    "control_panel_public_key_path",
+    "database_path",
+    "server_config_path",
+    "client_config_template_dir",
+}
 
 
 def create_web_app(settings: Settings | None = None) -> FastAPI:
@@ -130,6 +201,69 @@ def create_web_app(settings: Settings | None = None) -> FastAPI:
                 title="Панель управления",
                 authenticated=True,
                 **dashboard_data,
+            ),
+        )
+
+    @app.get("/orders")
+    async def orders_index(request: Request):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+
+        orders = _load_orders(actual_settings)
+        return templates.TemplateResponse(
+            request,
+            "orders.html",
+            _template_context(
+                request,
+                title="Orders",
+                authenticated=True,
+                orders=orders,
+            ),
+        )
+
+    @app.get("/logs")
+    async def logs_index(request: Request):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+
+        log_lines = []
+        if actual_settings.app_log_enabled:
+            log_lines = read_log_tail(
+                actual_settings.app_log_path,
+                actual_settings.app_log_max_lines,
+            )
+        return templates.TemplateResponse(
+            request,
+            "logs.html",
+            _template_context(
+                request,
+                title="Application logs",
+                authenticated=True,
+                log_enabled=actual_settings.app_log_enabled,
+                log_level=actual_settings.app_log_level,
+                log_path=_display_setting_value(
+                    "APP_LOG_PATH",
+                    actual_settings.app_log_path,
+                    is_path=True,
+                ),
+                log_max_lines=actual_settings.app_log_max_lines,
+                log_lines=log_lines,
+            ),
+        )
+
+    @app.get("/settings")
+    async def settings_index(request: Request):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+
+        return templates.TemplateResponse(
+            request,
+            "settings.html",
+            _template_context(
+                request,
+                title="Settings",
+                authenticated=True,
+                settings_sections=_load_settings_sections(actual_settings),
             ),
         )
 
@@ -730,6 +864,63 @@ def _load_users(settings: Settings) -> list[dict[str, Any]]:
 def _load_servers(settings: Settings) -> list[dict[str, Any]]:
     with _open_repository(settings) as (repo, _conn):
         return [_row_to_dict(row) for row in repo.list_servers_for_admin(limit=500)]
+
+
+def _load_orders(settings: Settings) -> list[dict[str, Any]]:
+    with _open_repository(settings) as (repo, _conn):
+        return [_row_to_dict(row) for row in repo.list_orders_for_admin(limit=200)]
+
+
+def _load_settings_sections(settings: Settings) -> list[dict[str, Any]]:
+    sections = [
+        {
+            "title": section_title,
+            "items": [
+                _setting_entry(settings, field_name)
+                for field_name in field_names
+            ],
+        }
+        for section_title, field_names in SETTINGS_SECTIONS.items()
+    ]
+    grouped_fields = {
+        field_name
+        for field_names in SETTINGS_SECTIONS.values()
+        for field_name in field_names
+    }
+    other_fields = [
+        field_name
+        for field_name in Settings.model_fields
+        if field_name not in grouped_fields
+    ]
+    if other_fields:
+        sections.append(
+            {
+                "title": "Other",
+                "items": [_setting_entry(settings, field_name) for field_name in other_fields],
+            }
+        )
+    return sections
+
+
+def _setting_entry(settings: Settings, field_name: str) -> dict[str, str]:
+    field = Settings.model_fields[field_name]
+    alias = str(field.alias or field_name).upper()
+    value = getattr(settings, field_name)
+    return {
+        "name": alias,
+        "value": _display_setting_value(
+            alias,
+            value,
+            is_path=field_name in PATH_SETTING_FIELDS,
+        ),
+    }
+
+
+def _display_setting_value(name: str, value: Any, *, is_path: bool = False) -> str:
+    if is_path and str(value):
+        value = Path(str(value)).name
+    redacted = redact(f"{name}={value}")
+    return redacted.split("=", maxsplit=1)[1] if "=" in redacted else redacted
 
 
 def _load_user_detail(settings: Settings, user_id: int) -> dict[str, Any]:

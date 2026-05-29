@@ -188,6 +188,10 @@ h2 {
   overflow: hidden;
 }
 
+.panel-spaced {
+  margin-top: 14px;
+}
+
 .table-wrap {
   overflow-x: auto;
 }
@@ -366,6 +370,41 @@ tbody tr:last-child td {
   margin: 4px 0 0;
 }
 
+.settings-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.settings-table td:first-child {
+  width: 42%;
+}
+
+.log-lines {
+  display: grid;
+  gap: 6px;
+  max-height: 520px;
+  margin: 0;
+  overflow: auto;
+  padding: 12px 14px 12px 38px;
+}
+
+.log-lines li {
+  color: var(--muted);
+}
+
+.log-lines code,
+.settings-table code {
+  color: var(--text);
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+}
+
+.log-lines code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .button {
   display: inline-flex;
   min-height: 38px;
@@ -428,6 +467,7 @@ tbody tr:last-child td {
 
   .metrics,
   .dashboard-grid,
+  .settings-grid,
   .detail-grid,
   .form-grid,
   .details {

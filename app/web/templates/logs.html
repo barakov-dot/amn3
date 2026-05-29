@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <p class="eyebrow">Runtime diagnostics</p>
+    <h1>Application logs</h1>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Log source</h2>
+    </div>
+    <dl class="details">
+      <div>
+        <dt>Status</dt>
+        <dd>
+          {% if log_enabled %}
+            <span class="status status-active">enabled</span>
+          {% else %}
+            <span class="status status-disabled">disabled</span>
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>Level</dt>
+        <dd>{{ log_level }}</dd>
+      </div>
+      <div>
+        <dt>Path</dt>
+        <dd class="wrap-text">{{ log_path }}</dd>
+      </div>
+      <div>
+        <dt>Max lines</dt>
+        <dd>{{ log_max_lines }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Recent lines</h2>
+    </div>
+    {% if not log_enabled %}
+      <p class="empty-state">Logging is disabled.</p>
+    {% elif log_lines %}
+      <ol class="log-lines">
+        {% for line in log_lines %}
+          <li><code>{{ line }}</code></li>
+        {% endfor %}
+      </ol>
+    {% else %}
+      <p class="empty-state">No log lines found.</p>
+    {% endif %}
+  </section>
+{% endblock %}
