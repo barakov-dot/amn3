@@ -1,0 +1,641 @@
+# Установка и настройка web-панели и Telegram-бота
+
+Документ описывает ручной запуск на VPS для ветки `codex-vps-test-prep`.
+
+Порядок безопасной настройки:
+
+1. Подготовить проект и `.env`.
+2. Запустить и проверить web-панель вручную.
+3. Запустить и проверить Telegram-бота вручную.
+4. Только после ручной проверки включить `systemd`-сервисы.
+
+## 1. Подготовить проект на VPS
+
+Если проект еще не склонирован:
+
+```bash
+git clone -b codex-vps-test-prep https://github.com/barakov-dot/amn2.git /opt/amn2
+cd /opt/amn2
+```
+
+Если проект уже есть:
+
+```bash
+cd /opt/amn2
+git pull origin codex-vps-test-prep
+```
+
+Подготовить Python-окружение:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+python -m pip install -U pip
+python -m pip install -e .
+```
+
+Создать рабочие директории:
+
+```bash
+mkdir -p data logs backups config_templates
+```
+
+Если приложение запускается от пользователя `amneziya`:
+
+```bash
+sudo chown -R amneziya:amneziya /opt/amn2/data /opt/amn2/logs /opt/amn2/backups /opt/amn2/config_templates
+```
+
+## 2. Подготовить `.env`
+
+Создать файл, если его еще нет:
+
+```bash
+cp .env.example .env
+```
+
+Файл `.env` не коммитить в GitHub. В нем хранятся токены, пароли, ключи и адреса.
+
+Минимальная база для web-панели и бота:
+
+```env
+TELEGRAM_BOT_TOKEN=CHANGE_ME_TOKEN_FROM_BOTFATHER
+TELEGRAM_PROXY_URL=
+APP_SECRET_KEY=CHANGE_ME_GENERATED_RANDOM_SECRET_32_PLUS_CHARS
+ADMIN_TELEGRAM_IDS=CHANGE_ME_ADMIN_TELEGRAM_IDS
+
+DATABASE_PATH=data/amneziya.sqlite3
+SERVER_CONFIG_PATH=servers.yml
+SERVER_NAME=debian-vps-1
+VPS_APPLY_ENABLED=false
+
+WEB_ADMIN_ENABLED=true
+WEB_ADMIN_HOST=0.0.0.0
+WEB_ADMIN_PORT=3030
+WEB_ADMIN_USERNAME=admin
+WEB_ADMIN_PASSWORD_HASH=CHANGE_ME_HASH
+WEB_ADMIN_SESSION_SECRET=CHANGE_ME_RANDOM_SECRET_32_PLUS_CHARS
+WEB_ADMIN_SESSION_COOKIE_SECURE=false
+
+APP_LOG_ENABLED=true
+APP_LOG_LEVEL=DEBUG
+APP_LOG_MAX_LINES=1000
+APP_LOG_PATH=logs/app.log
+
+EMAIL_DELIVERY_ENABLED=false
+```
+
+`APP_SECRET_KEY` должен быть постоянным. Если потерять этот ключ, приложение не сможет расшифровать сохраненные peer-секреты.
+
+Для первой проверки по обычному `http://VPS_IP:3030` нужно оставить:
+
+```env
+WEB_ADMIN_SESSION_COOKIE_SECURE=false
+```
+
+Если поставить `true` без HTTPS, браузер не сохранит session cookie, и после входа панель будет возвращать на `/login`.
+
+После настройки HTTPS через reverse proxy можно вернуть:
+
+```env
+WEB_ADMIN_SESSION_COOKIE_SECURE=true
+```
+
+## 3. Сгенерировать пароль для web-панели
+
+Выполнить на VPS из директории проекта:
+
+```bash
+cd /opt/amn2
+source venv/bin/activate
+python -m app.cli web hash-password
+```
+
+Команда попросит пароль два раза и выведет строку вида:
+
+```text
+pbkdf2_sha256$...$...
+```
+
+Вставить всю строку в `.env`:
+
+```env
+WEB_ADMIN_PASSWORD_HASH=pbkdf2_sha256$...$...
+```
+
+Не вставлять в `WEB_ADMIN_PASSWORD_HASH` обычный пароль. Там должен быть только hash.
+
+## 4. Сгенерировать session secret
+
+```bash
+cd /opt/amn2
+source venv/bin/activate
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Результат вставить в `.env`:
+
+```env
+WEB_ADMIN_SESSION_SECRET=PASTE_GENERATED_VALUE_HERE
+```
+
+Значение должно быть не короче 32 символов.
+
+## 5. Запустить web-панель вручную
+
+```bash
+cd /opt/amn2
+source venv/bin/activate
+python -m app.cli web serve --host 0.0.0.0 --port 3030
+```
+
+Успешный запуск выглядит примерно так:
+
+```text
+Uvicorn running on http://0.0.0.0:3030
+```
+
+Если `--host` и `--port` не указаны, команда берет значения из `.env`:
+
+```bash
+python -m app.cli web serve
+```
+
+## 6. Проверить web-панель на самом VPS
+
+Открыть второе SSH-окно и выполнить:
+
+```bash
+curl -i http://127.0.0.1:3030/login
+curl -i http://127.0.0.1:3030/
+ss -lntp | grep ':3030'
+```
+
+Ожидаемый результат:
+
+- `/login` возвращает `HTTP/1.1 200 OK`;
+- `/` возвращает redirect на `/login`;
+- `ss` показывает, что процесс Python слушает порт `3030`.
+
+## 7. Проверить доступ с компьютера администратора
+
+В браузере:
+
+```text
+http://VPS_IP:3030/login
+```
+
+В PowerShell на Windows:
+
+```powershell
+Test-NetConnection VPS_IP -Port 3030
+curl.exe -I http://VPS_IP:3030/login
+```
+
+Если на VPS `curl http://127.0.0.1:3030/login` работает, а с компьютера нет, проверить:
+
+- приложение запущено с `--host 0.0.0.0`, а не `127.0.0.1`;
+- порт `3030/tcp` открыт в `ufw`;
+- порт `3030/tcp` открыт в firewall панели VPS-провайдера;
+- на сервере нет другого firewall, который блокирует входящие соединения.
+
+Пример для `ufw`:
+
+```bash
+sudo ufw allow 3030/tcp
+sudo ufw status
+```
+
+## 8. Безопасный доступ через SSH tunnel
+
+Для первого продового теста безопаснее не открывать порт `3030` в интернет, а использовать SSH tunnel.
+
+На VPS в `.env`:
+
+```env
+WEB_ADMIN_HOST=127.0.0.1
+WEB_ADMIN_PORT=3030
+WEB_ADMIN_SESSION_COOKIE_SECURE=false
+```
+
+Запуск:
+
+```bash
+cd /opt/amn2
+source venv/bin/activate
+python -m app.cli web serve --host 127.0.0.1 --port 3030
+```
+
+На компьютере администратора:
+
+```bash
+ssh -L 3030:127.0.0.1:3030 root@VPS_IP
+```
+
+Открыть в браузере:
+
+```text
+http://127.0.0.1:3030/login
+```
+
+## 9. Что проверить внутри web-панели
+
+После входа проверить основные разделы:
+
+- Dashboard открывается без ошибок;
+- Users показывает пользователей, созданных ранее через бота;
+- Servers показывает серверы из базы;
+- Server health показывает состояние серверов и результаты проверок;
+- Orders показывает заявки;
+- Logs показывает последние строки `logs/app.log`, если `APP_LOG_ENABLED=true`;
+- Settings показывает текущую конфигурацию с маскировкой секретов;
+- Config templates показывает шаблоны клиентских конфигов и `vpn://` preview.
+
+Если ранее созданные пользователи не видны, проверить, что web-панель и бот используют один и тот же `DATABASE_PATH`.
+
+## 10. Подготовить Telegram-бота
+
+В `.env` заполнить:
+
+```env
+TELEGRAM_BOT_TOKEN=CHANGE_ME_TOKEN_FROM_BOTFATHER
+ADMIN_TELEGRAM_IDS=CHANGE_ME_ADMIN_TELEGRAM_IDS
+APP_SECRET_KEY=CHANGE_ME_GENERATED_RANDOM_SECRET_32_PLUS_CHARS
+DATABASE_PATH=data/amneziya.sqlite3
+SERVER_CONFIG_PATH=servers.yml
+SERVER_NAME=debian-vps-1
+VPS_APPLY_ENABLED=false
+```
+
+Если Telegram с VPS недоступен напрямую, указать SOCKS5 proxy:
+
+```env
+TELEGRAM_PROXY_URL=socks5://USER:PASSWORD@HOST:PORT
+```
+
+Или без авторизации:
+
+```env
+TELEGRAM_PROXY_URL=socks5://HOST:PORT
+```
+
+Проверить доступ к Telegram:
+
+```bash
+cd /opt/amn2
+source venv/bin/activate
+python -m app.cli bot check-network
+```
+
+Если используется локальный proxy на VPS, дополнительно:
+
+```bash
+curl --socks5-hostname 127.0.0.1:1080 -I https://api.telegram.org
+```
+
+## 11. Подготовить `servers.yml`
+
+Файл `servers.yml` хранит параметры VPS и VPN-сервера. Его не коммитить в GitHub.
+
+Минимально в нем должны быть:
+
+- SSH host и port;
+- SSH user;
+- SSH auth type;
+- VPN endpoint host;
+- VPN UDP port;
+- VPN interface;
+- VPN network CIDR;
+- server address;
+- server public key;
+- firewall provider;
+- runtime.
+
+Проверить файл без изменения VPS:
+
+```bash
+cd /opt/amn2
+source venv/bin/activate
+python -m app.cli server preflight --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
+python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
+```
+
+Выполнить read-only проверку реального VPS:
+
+```bash
+python -m app.cli server check --config servers.yml --server debian-vps-1
+```
+
+До успешной проверки держать:
+
+```env
+VPS_APPLY_ENABLED=false
+```
+
+Включать применение peer на живом VPS только после успешных проверок:
+
+```env
+VPS_APPLY_ENABLED=true
+```
+
+## 12. Запустить Telegram-бота вручную
+
+```bash
+cd /opt/amn2
+source venv/bin/activate
+python -m app.main
+```
+
+Проверить в Telegram:
+
+- бот отвечает на `/start`;
+- администратор видит admin-функции;
+- пользователь может отправить заявку;
+- администратор может одобрить заявку;
+- после одобрения создается устройство;
+- пользователь получает `.conf`, QR и текст с данными доставки;
+- ранее созданные пользователи появляются в web-панели.
+
+Если бот падает при старте, смотреть:
+
+```bash
+tail -n 200 logs/app.log
+```
+
+Если бот запущен через systemd:
+
+```bash
+sudo journalctl -u amneziya-bot -n 200 --no-pager
+```
+
+## 13. Включить systemd для web-панели
+
+Сначала убедиться, что ручной запуск работает. После этого:
+
+```bash
+cd /opt/amn2
+sudo cp deploy/systemd/amneziya-web.service.example /etc/systemd/system/amneziya-web.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now amneziya-web
+sudo systemctl status amneziya-web --no-pager
+```
+
+Проверить:
+
+```bash
+curl -i http://127.0.0.1:3030/login
+sudo journalctl -u amneziya-web -n 200 --no-pager
+```
+
+Если проект находится не в `/opt/amn2` или запускается не от пользователя `amneziya`, перед запуском отредактировать:
+
+```bash
+sudo nano /etc/systemd/system/amneziya-web.service
+```
+
+Проверить поля:
+
+```ini
+User=amneziya
+Group=amneziya
+WorkingDirectory=/opt/amn2
+EnvironmentFile=/opt/amn2/.env
+ExecStart=/opt/amn2/venv/bin/python -m app.cli web serve --host 0.0.0.0 --port 3030
+```
+
+После правки:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart amneziya-web
+sudo systemctl status amneziya-web --no-pager
+```
+
+## 14. Включить systemd для Telegram-бота
+
+Сначала убедиться, что ручной запуск `python -m app.main` работает. После этого:
+
+```bash
+cd /opt/amn2
+sudo cp deploy/systemd/amneziya-bot.service.example /etc/systemd/system/amneziya-bot.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now amneziya-bot
+sudo systemctl status amneziya-bot --no-pager
+```
+
+Проверить:
+
+```bash
+sudo journalctl -u amneziya-bot -n 200 --no-pager
+tail -n 200 logs/app.log
+```
+
+Если проект находится не в `/opt/amn2` или запускается не от пользователя `amneziya`, перед запуском отредактировать:
+
+```bash
+sudo nano /etc/systemd/system/amneziya-bot.service
+```
+
+Проверить поля:
+
+```ini
+User=amneziya
+Group=amneziya
+WorkingDirectory=/opt/amn2
+EnvironmentFile=/opt/amn2/.env
+ExecStart=/opt/amn2/venv/bin/python -m app.main
+```
+
+После правки:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart amneziya-bot
+sudo systemctl status amneziya-bot --no-pager
+```
+
+## 15. Проверка обоих сервисов
+
+```bash
+sudo systemctl status amneziya-web --no-pager
+sudo systemctl status amneziya-bot --no-pager
+curl -i http://127.0.0.1:3030/login
+tail -n 200 logs/app.log
+```
+
+Проверить, что оба сервиса используют один `.env`:
+
+```bash
+sudo systemctl cat amneziya-web
+sudo systemctl cat amneziya-bot
+```
+
+В обоих сервисах должно быть:
+
+```ini
+EnvironmentFile=/opt/amn2/.env
+```
+
+## 16. Частые ошибки web-панели
+
+### `WEB_ADMIN_PASSWORD_HASH must be set`
+
+Не заполнен `WEB_ADMIN_PASSWORD_HASH` или осталось значение `replace-with-password-hash`.
+
+Решение:
+
+```bash
+python -m app.cli web hash-password
+```
+
+Вставить полученный hash в `.env`.
+
+### `WEB_ADMIN_PASSWORD_HASH must be a valid pbkdf2_sha256 hash`
+
+В `WEB_ADMIN_PASSWORD_HASH` вставлен обычный пароль или hash обрезан.
+
+Решение: сгенерировать hash заново и вставить всю строку `pbkdf2_sha256$...$...`.
+
+### `WEB_ADMIN_SESSION_SECRET must be at least 32 characters`
+
+Слишком короткий `WEB_ADMIN_SESSION_SECRET` или осталось placeholder-значение.
+
+Решение:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+### Панель возвращает на `/login` после успешного ввода пароля
+
+Частая причина: `WEB_ADMIN_SESSION_COOKIE_SECURE=true` при доступе по обычному HTTP.
+
+Решение для временного теста:
+
+```env
+WEB_ADMIN_SESSION_COOKIE_SECURE=false
+```
+
+После изменения `.env` перезапустить web-панель.
+
+### `Address already in use`
+
+Порт `3030` уже занят.
+
+Проверить:
+
+```bash
+ss -lntp | grep ':3030'
+```
+
+Остановить старый процесс или выбрать другой порт:
+
+```bash
+python -m app.cli web serve --host 0.0.0.0 --port 3031
+```
+
+### `ModuleNotFoundError: app`
+
+Команда запущена не из директории проекта или пакет не установлен.
+
+Решение:
+
+```bash
+cd /opt/amn2
+source venv/bin/activate
+python -m pip install -e .
+```
+
+### Web-панель работает на VPS, но не открывается с компьютера
+
+Проверить:
+
+```bash
+curl -i http://127.0.0.1:3030/login
+ss -lntp | grep ':3030'
+sudo ufw status
+```
+
+Если сервис слушает только `127.0.0.1`, запустить с `--host 0.0.0.0` или использовать SSH tunnel.
+
+## 17. Частые ошибки Telegram-бота
+
+### Telegram недоступен с VPS
+
+Проверить:
+
+```bash
+python -m app.cli bot check-network
+```
+
+Если прямой доступ не работает, заполнить:
+
+```env
+TELEGRAM_PROXY_URL=socks5://USER:PASSWORD@HOST:PORT
+```
+
+После изменения `.env` перезапустить бота.
+
+### Бот и web-панель видят разные данные
+
+Проверить, что у обоих одинаковый:
+
+```env
+DATABASE_PATH=data/amneziya.sqlite3
+APP_SECRET_KEY=...
+```
+
+Если systemd используется для обоих сервисов, проверить:
+
+```bash
+sudo systemctl cat amneziya-web
+sudo systemctl cat amneziya-bot
+```
+
+### Одобрение заявки не применяет peer на VPS
+
+Для первого теста это нормально, если:
+
+```env
+VPS_APPLY_ENABLED=false
+```
+
+Перед включением `true` обязательно выполнить:
+
+```bash
+python -m app.cli server preflight --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
+python -m app.cli server check --config servers.yml --server debian-vps-1
+```
+
+### Ошибка SSH или server health
+
+Проверить `servers.yml`, SSH-доступ и read-only check:
+
+```bash
+python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
+python -m app.cli server check --config servers.yml --server debian-vps-1
+```
+
+## 18. Что прислать для диагностики
+
+Если web-панель или бот не запускаются, собрать:
+
+```bash
+cd /opt/amn2
+git log -1 --oneline
+git status --short
+python -m app.cli web serve --host 0.0.0.0 --port 3030
+sudo journalctl -u amneziya-web -n 200 --no-pager
+sudo journalctl -u amneziya-bot -n 200 --no-pager
+tail -n 200 logs/app.log
+```
+
+Секреты перед отправкой скрыть:
+
+- `TELEGRAM_BOT_TOKEN`;
+- `APP_SECRET_KEY`;
+- `WEB_ADMIN_PASSWORD_HASH`;
+- `WEB_ADMIN_SESSION_SECRET`;
+- `SMTP_PASSWORD`;
+- private keys и preshared keys;
+- полный пользовательский `.conf`.
