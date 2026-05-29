@@ -78,6 +78,27 @@ WEB_ADMIN_SESSION_SECRET=replace-with-generated-random-secret-32-plus-chars
 WEB_ADMIN_SESSION_COOKIE_SECURE=true
 ```
 
+Generate `WEB_ADMIN_PASSWORD_HASH` on the VPS without putting the raw password
+into shell history:
+
+```bash
+python -m app.cli web hash-password
+```
+
+For automation in a trusted shell, the command also accepts `--password`, but the
+interactive prompt is safer for the first setup. Generate
+`WEB_ADMIN_SESSION_SECRET` with any strong random 32+ character value, for
+example from your password manager.
+
+Start the panel with:
+
+```bash
+python -m app.cli web serve --host 0.0.0.0 --port 3030
+```
+
+If `--host` or `--port` are omitted, the command uses `WEB_ADMIN_HOST` and
+`WEB_ADMIN_PORT` from `.env`.
+
 `WEB_ADMIN_SESSION_COOKIE_SECURE=true` requires HTTPS, a TLS reverse proxy, or an
 SSH tunnel to the panel. For a short plain-HTTP check on `:3030`, temporarily set
 `WEB_ADMIN_SESSION_COOKIE_SECURE=false`, but do not leave an internet-facing

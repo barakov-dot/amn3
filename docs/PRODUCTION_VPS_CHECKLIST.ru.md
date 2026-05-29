@@ -78,6 +78,27 @@ WEB_ADMIN_SESSION_SECRET=replace-with-generated-random-secret-32-plus-chars
 WEB_ADMIN_SESSION_COOKIE_SECURE=true
 ```
 
+`WEB_ADMIN_PASSWORD_HASH` сгенерировать на VPS без сохранения raw password в
+shell history:
+
+```bash
+python -m app.cli web hash-password
+```
+
+Для automation в доверенной shell команда также принимает `--password`, но для
+первой настройки безопаснее interactive prompt. `WEB_ADMIN_SESSION_SECRET`
+задать как любое сильное случайное значение длиной 32+ символа, например из
+password manager.
+
+Запуск панели:
+
+```bash
+python -m app.cli web serve --host 0.0.0.0 --port 3030
+```
+
+Если `--host` или `--port` не указаны, команда берет `WEB_ADMIN_HOST` и
+`WEB_ADMIN_PORT` из `.env`.
+
 `WEB_ADMIN_SESSION_COOKIE_SECURE=true` требует HTTPS, reverse proxy с TLS или SSH
 tunnel до панели. Для короткой проверки по plain HTTP на `:3030` можно временно
 поставить `WEB_ADMIN_SESSION_COOKIE_SECURE=false`, но не оставлять так открытую

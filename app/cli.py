@@ -1,6 +1,9 @@
 import argparse
 import asyncio
+import getpass
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 from app import __version__
 from app.backup.service import BackupService
@@ -21,6 +24,7 @@ from app.server.ssh import SystemSshClient
 from app.server_config.loader import load_server_config, select_server
 from app.server_config.models import ServerConfig
 from app.services.traffic import AwgDumpTrafficCollector, TrafficService
+from app.web.auth import create_password_hash
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -82,6 +86,20 @@ def build_parser() -> argparse.ArgumentParser:
     preflight.add_argument("--config", default="servers.yml")
     preflight.add_argument("--server", required=True)
     preflight.add_argument("--db", default="data/amneziya.sqlite3")
+
+    web = sub.add_parser("web")
+    web_sub = web.add_subparsers(dest="web_command", required=True)
+
+    serve = web_sub.add_parser("serve")
+    serve.add_argument("--host", default=None)
+    serve.add_argument("--port", type=int, default=None)
+
+    hash_password = web_sub.add_parser("hash-password")
+    hash_password.add_argument(
+        "--password",
+        default=None,
+        help="Optional; omit to enter the password without shell history.",
+    )
 
     return parser
 
@@ -145,6 +163,47 @@ def main() -> None:
                 )
             )
         )
+    elif args.command == "web" and args.web_command == "hash-password":
+        print(run_web_password_hash(_read_web_password(args.password)))
+    elif args.command == "web" and args.web_command == "serve":
+        run_web_server(host=args.host, port=args.port)
+
+
+def run_web_password_hash(password: str) -> str:
+    if not password.strip():
+        raise ValueError("password cannot be blank")
+    return create_password_hash(password)
+
+
+def run_web_server(
+    *,
+    host: str | None,
+    port: int | None,
+    settings: Settings | None = None,
+    uvicorn_run: Callable[..., Any] | None = None,
+) -> None:
+    import uvicorn
+
+    from app.web.app import create_web_app
+
+    actual_settings = settings or Settings()
+    app = create_web_app(actual_settings)
+    runner = uvicorn_run or uvicorn.run
+    runner(
+        app,
+        host=host or actual_settings.web_admin_host,
+        port=port or actual_settings.web_admin_port,
+    )
+
+
+def _read_web_password(password: str | None) -> str:
+    if password is not None:
+        return password
+    first = getpass.getpass("Web admin password: ")
+    second = getpass.getpass("Repeat web admin password: ")
+    if first != second:
+        raise ValueError("passwords do not match")
+    return first
 
 
 def run_server_check(server: ServerConfig, *, dry_run: bool) -> str:
