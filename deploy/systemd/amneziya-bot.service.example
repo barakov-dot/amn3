@@ -1,0 +1,19 @@
+[Unit]
+Description=Amneziya Telegram bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=amneziya
+Group=amneziya
+WorkingDirectory=/opt/amn2
+EnvironmentFile=/opt/amn2/.env
+ExecStart=/opt/amn2/venv/bin/python -m app.main
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -206,7 +206,25 @@ after that enable:
 VPS_APPLY_ENABLED=true
 ```
 
-## 9. Backup
+## 9. Optional `systemd` Services
+
+If the manual commands work, install the example services. Adjust paths and the
+Linux user if the project is not in `/opt/amn2` or does not run as `amneziya`:
+
+```bash
+sudo cp deploy/systemd/amneziya-bot.service.example /etc/systemd/system/amneziya-bot.service
+sudo cp deploy/systemd/amneziya-web.service.example /etc/systemd/system/amneziya-web.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now amneziya-bot
+sudo systemctl enable --now amneziya-web
+sudo systemctl status amneziya-bot --no-pager
+sudo systemctl status amneziya-web --no-pager
+```
+
+Keep `amneziya-web` stopped if the panel should not be available during the
+first VPN test.
+
+## 10. Backup
 
 ```bash
 python -m app.cli backup create --db data/amneziya.sqlite3 --output backups

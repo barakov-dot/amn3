@@ -206,7 +206,26 @@ python -m app.cli server check --config servers.yml --server debian-vps-1
 VPS_APPLY_ENABLED=true
 ```
 
-## 9. Backup
+## 9. Optional `systemd` services
+
+Если ручные команды работают, можно установить example services. Перед установкой
+поменять пути и Linux user, если проект лежит не в `/opt/amn2` или запускается
+не от пользователя `amneziya`:
+
+```bash
+sudo cp deploy/systemd/amneziya-bot.service.example /etc/systemd/system/amneziya-bot.service
+sudo cp deploy/systemd/amneziya-web.service.example /etc/systemd/system/amneziya-web.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now amneziya-bot
+sudo systemctl enable --now amneziya-web
+sudo systemctl status amneziya-bot --no-pager
+sudo systemctl status amneziya-web --no-pager
+```
+
+Если web-панель не нужна во время первого VPN-теста, держать `amneziya-web`
+остановленным.
+
+## 10. Backup
 
 ```bash
 python -m app.cli backup create --db data/amneziya.sqlite3 --output backups
