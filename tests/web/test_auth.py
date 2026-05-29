@@ -23,7 +23,7 @@ def test_check_password_returns_false_for_malformed_hash():
 
 @pytest.mark.parametrize(
     "password_hash",
-    ["", "   ", "replace-with-generated-password-hash"],
+    ["", "   ", "replace-with-generated-password-hash", " replace-with-generated-password-hash "],
 )
 def test_require_web_admin_config_rejects_invalid_password_hash(password_hash):
     with pytest.raises(ValueError, match="WEB_ADMIN_PASSWORD_HASH"):
@@ -34,20 +34,42 @@ def test_require_web_admin_config_rejects_invalid_password_hash(password_hash):
 
 
 @pytest.mark.parametrize(
+    "password_hash",
+    [
+        "bcrypt$salt$digest",
+        "not-a-valid-hash",
+        "pbkdf2_sha256$salt$",
+        "pbkdf2_sha256$salt$not-hex",
+        "pbkdf2_sha256$salt$abc123",
+        f"pbkdf2_sha256$   ${'a' * 64}",
+    ],
+)
+def test_require_web_admin_config_rejects_unusable_password_hash(password_hash):
+    with pytest.raises(
+        ValueError,
+        match="WEB_ADMIN_PASSWORD_HASH must be a valid pbkdf2_sha256 hash",
+    ):
+        require_web_admin_config(
+            password_hash=password_hash,
+            session_secret="x" * 32,
+        )
+
+
+@pytest.mark.parametrize(
     "session_secret",
-    ["", "short", " " * 32, "replace-with-generated-session-secret"],
+    ["", "short", " " * 32, "replace-with-generated-session-secret", " replace-with-generated-session-secret "],
 )
 def test_require_web_admin_config_rejects_invalid_session_secret(session_secret):
     with pytest.raises(ValueError, match="WEB_ADMIN_SESSION_SECRET"):
         require_web_admin_config(
-            password_hash="pbkdf2_sha256$salt$digest",
+            password_hash=create_password_hash("secret"),
             session_secret=session_secret,
         )
 
 
 def test_require_web_admin_config_accepts_valid_config():
     require_web_admin_config(
-        password_hash="pbkdf2_sha256$salt$digest",
+        password_hash=create_password_hash("secret"),
         session_secret="x" * 32,
     )
 

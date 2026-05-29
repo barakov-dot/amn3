@@ -6,6 +6,9 @@ import secrets
 from collections.abc import MutableMapping
 
 
+PASSWORD_HASH_ERROR = "WEB_ADMIN_PASSWORD_HASH must be a valid pbkdf2_sha256 hash"
+
+
 def create_password_hash(password: str, *, salt: str | None = None) -> str:
     actual_salt = salt or secrets.token_hex(16)
     digest = hashlib.pbkdf2_hmac(
@@ -43,12 +46,32 @@ def verify_csrf_token(session: MutableMapping[str, object], token: str | None) -
     )
 
 
+def _is_valid_password_hash(password_hash: str) -> bool:
+    parts = password_hash.split("$")
+    if len(parts) != 3:
+        return False
+    algorithm, salt, digest = parts
+    if algorithm != "pbkdf2_sha256" or not salt.strip():
+        return False
+    if len(digest) != 64:
+        return False
+    try:
+        bytes.fromhex(digest)
+    except ValueError:
+        return False
+    return True
+
+
 def require_web_admin_config(*, password_hash: str, session_secret: str) -> None:
-    if not password_hash.strip() or password_hash.startswith("replace-with-"):
+    stripped_password_hash = password_hash.strip()
+    stripped_session_secret = session_secret.strip()
+    if not stripped_password_hash or stripped_password_hash.startswith("replace-with-"):
         raise ValueError("WEB_ADMIN_PASSWORD_HASH must be set before starting web admin")
+    if not _is_valid_password_hash(stripped_password_hash):
+        raise ValueError(PASSWORD_HASH_ERROR)
     if (
-        not session_secret.strip()
-        or session_secret.startswith("replace-with-")
-        or len(session_secret) < 32
+        not stripped_session_secret
+        or stripped_session_secret.startswith("replace-with-")
+        or len(stripped_session_secret) < 32
     ):
         raise ValueError("WEB_ADMIN_SESSION_SECRET must be at least 32 characters")
