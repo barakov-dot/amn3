@@ -44,10 +44,10 @@ def verify_csrf_token(session: MutableMapping[str, object], token: str | None) -
 
 
 def require_web_admin_config(*, password_hash: str, session_secret: str) -> None:
-    if not password_hash or password_hash.startswith("replace-with-"):
+    if not password_hash.strip() or password_hash.startswith("replace-with-"):
         raise ValueError("WEB_ADMIN_PASSWORD_HASH must be set before starting web admin")
     if (
-        not session_secret
+        not session_secret.strip()
         or session_secret.startswith("replace-with-")
         or len(session_secret) < 32
     ):
