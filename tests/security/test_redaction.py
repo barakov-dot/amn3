@@ -62,3 +62,57 @@ def test_redaction_handles_realistic_secret_log_formats():
     ]:
         assert unsafe_value not in safe
     assert "[REDACTED" in safe
+
+
+def test_redaction_removes_web_admin_and_smtp_secret_settings():
+    unsafe = """
+    VPS_SSH_PASSWORD=vps-password
+    CONTROL_PANEL_PASSWORD_HASH=control-hash
+    API_PRIVATE_KEY=api-private-key
+    CUSTOM_SERVICE_TOKEN=custom-token
+    CUSTOM_SERVICE_SECRET=custom-secret
+    SMTP_PASSWORD=smtp-secret
+    SMTP_USERNAME=smtp-user
+    WEB_ADMIN_SESSION_SECRET=session-secret-value
+    WEB_ADMIN_PASSWORD_HASH=sha256$hash-value
+    {'SMTP_PASSWORD': 'dict-smtp-secret'}
+    "WEB_ADMIN_SESSION_SECRET": "json-session-secret"
+    """
+
+    safe = redact(unsafe)
+
+    for unsafe_value in [
+        "vps-password",
+        "control-hash",
+        "api-private-key",
+        "custom-token",
+        "custom-secret",
+        "smtp-secret",
+        "smtp-user",
+        "session-secret-value",
+        "sha256$hash-value",
+        "dict-smtp-secret",
+        "json-session-secret",
+    ]:
+        assert unsafe_value not in safe
+    assert safe.count("[REDACTED]") >= 11
+
+
+def test_redaction_removes_quoted_secret_values_with_spaces_and_commas():
+    unsafe = """
+    SMTP_PASSWORD="abc,def ghi"
+    WEB_ADMIN_SESSION_SECRET='secret value, with comma'
+    {"SMTP_PASSWORD": "json abc,def ghi"}
+    {'WEB_ADMIN_SESSION_SECRET': 'dict secret value, with comma'}
+    """
+
+    safe = redact(unsafe)
+
+    for unsafe_value in [
+        "abc,def ghi",
+        "secret value, with comma",
+        "json abc,def ghi",
+        "dict secret value, with comma",
+    ]:
+        assert unsafe_value not in safe
+    assert safe.count("[REDACTED]") >= 4

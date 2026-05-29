@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a FastAPI/Jinja2 web admin panel on port `3030` with login/password auth, users CRUD, servers CRUD, live server health, client config templates, `vpn://` delivery links, logs viewer, and `.env`-controlled logging.
+**Goal:** Build a FastAPI/Jinja2 web admin panel on port `3030` with login/password auth, users CRUD, servers CRUD, live server health, client config templates, `vpn://` delivery links, optional verified-email delivery/recovery, logs viewer, and `.env`-controlled logging.
 
 **Architecture:** Add a separate `app.web` package that reuses existing `Settings`, SQLite `Repository`, redaction, and server check code. The web panel runs as a separate process through `python -m app.cli web serve`, uses signed cookie sessions, server-rendered templates, and records admin actions through the existing database. Live server state is stored in `server_health_checks` and refreshed by explicit UI/CLI actions.
 
@@ -18,7 +18,10 @@
 - Modify `app/db/schema.py`: add `server_health_checks`.
 - Modify `app/db/repositories.py`: add web admin CRUD/query methods and health persistence.
 - Modify `app/bot/delivery.py`: include `{vpn_link}` and delivery package import link.
+- Modify `app/bot/delivery.py`: include email-safe delivery payload fields where needed.
 - Modify `app/services/access.py`: render client configs through editable templates.
+- Create `app/services/email_recovery.py`: verified-email recovery tokens and resend orchestration.
+- Create `app/notifications/email.py`: SMTP email sender with redaction-safe logging.
 - Modify `app/vpn/config_versions.py`: route config rendering through versioned templates.
 - Create `app/vpn/config_templates.py`: load, validate, render, and preview client config templates.
 - Create `app/vpn/templates/amneziawg_v1_5.conf.tpl`: default editable client config template.
@@ -30,7 +33,7 @@
 - Create `app/web/logs.py`: tail and redact log files.
 - Create `app/web/forms.py`: small validation helpers for users and servers.
 - Create `app/web/app.py`: FastAPI app factory and routes.
-- Create `app/web/templates/*.html`: base, login, dashboard, users, user form/detail, servers, server form/detail/health, orders, config templates, logs, settings.
+- Create `app/web/templates/*.html`: base, login, dashboard, users, user form/detail, servers, server form/detail/health, orders, config templates, email, logs, settings.
 - Create `app/web/static/admin.css`: compact operational UI.
 - Modify `app/cli.py`: add `web serve`.
 - Create tests under `tests/web/`.
@@ -69,6 +72,16 @@ def test_settings_reads_web_admin_and_logging_settings():
         app_log_max_lines=250,
         app_log_path="logs/app.log",
         client_config_template_dir="config_templates",
+        email_delivery_enabled=True,
+        smtp_host="smtp.example.com",
+        smtp_port=587,
+        smtp_username="smtp-user",
+        smtp_password="smtp-password",
+        smtp_from="vpn@example.com",
+        smtp_use_tls=True,
+        email_require_verification=True,
+        email_recovery_token_ttl_minutes=30,
+        email_config_attachments_enabled=True,
     )
 
     assert settings.web_admin_enabled is True
@@ -82,6 +95,16 @@ def test_settings_reads_web_admin_and_logging_settings():
     assert settings.app_log_max_lines == 250
     assert settings.app_log_path == "logs/app.log"
     assert settings.client_config_template_dir == "config_templates"
+    assert settings.email_delivery_enabled is True
+    assert settings.smtp_host == "smtp.example.com"
+    assert settings.smtp_port == 587
+    assert settings.smtp_username == "smtp-user"
+    assert settings.smtp_password == "smtp-password"
+    assert settings.smtp_from == "vpn@example.com"
+    assert settings.smtp_use_tls is True
+    assert settings.email_require_verification is True
+    assert settings.email_recovery_token_ttl_minutes == 30
+    assert settings.email_config_attachments_enabled is True
 ```
 
 - [ ] **Step 2: Run settings test to verify it fails**
@@ -108,7 +131,7 @@ In `pyproject.toml`, add:
 In `.env.example`, add:
 
 ```env
-WEB_ADMIN_ENABLED=true
+WEB_ADMIN_ENABLED=false
 WEB_ADMIN_HOST=0.0.0.0
 WEB_ADMIN_PORT=3030
 WEB_ADMIN_USERNAME=admin
@@ -119,12 +142,22 @@ APP_LOG_LEVEL=INFO
 APP_LOG_MAX_LINES=500
 APP_LOG_PATH=logs/app.log
 CLIENT_CONFIG_TEMPLATE_DIR=config_templates
+EMAIL_DELIVERY_ENABLED=false
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USERNAME=
+SMTP_PASSWORD=
+SMTP_FROM=
+SMTP_USE_TLS=true
+EMAIL_REQUIRE_VERIFICATION=true
+EMAIL_RECOVERY_TOKEN_TTL_MINUTES=30
+EMAIL_CONFIG_ATTACHMENTS_ENABLED=true
 ```
 
 In `app/config/settings.py`, add fields:
 
 ```python
-web_admin_enabled: bool = Field(default=True, alias="WEB_ADMIN_ENABLED")
+web_admin_enabled: bool = Field(default=False, alias="WEB_ADMIN_ENABLED")
 web_admin_host: str = Field(default="0.0.0.0", alias="WEB_ADMIN_HOST")
 web_admin_port: int = Field(default=3030, alias="WEB_ADMIN_PORT")
 web_admin_username: str = Field(default="admin", alias="WEB_ADMIN_USERNAME")
@@ -135,6 +168,16 @@ app_log_level: str = Field(default="INFO", alias="APP_LOG_LEVEL")
 app_log_max_lines: int = Field(default=500, alias="APP_LOG_MAX_LINES")
 app_log_path: str = Field(default="logs/app.log", alias="APP_LOG_PATH")
 client_config_template_dir: str = Field(default="config_templates", alias="CLIENT_CONFIG_TEMPLATE_DIR")
+email_delivery_enabled: bool = Field(default=False, alias="EMAIL_DELIVERY_ENABLED")
+smtp_host: str = Field(default="", alias="SMTP_HOST")
+smtp_port: int = Field(default=587, alias="SMTP_PORT")
+smtp_username: str = Field(default="", alias="SMTP_USERNAME")
+smtp_password: str = Field(default="", alias="SMTP_PASSWORD")
+smtp_from: str = Field(default="", alias="SMTP_FROM")
+smtp_use_tls: bool = Field(default=True, alias="SMTP_USE_TLS")
+email_require_verification: bool = Field(default=True, alias="EMAIL_REQUIRE_VERIFICATION")
+email_recovery_token_ttl_minutes: int = Field(default=30, alias="EMAIL_RECOVERY_TOKEN_TTL_MINUTES")
+email_config_attachments_enabled: bool = Field(default=True, alias="EMAIL_CONFIG_ATTACHMENTS_ENABLED")
 ```
 
 Extend the existing model validator:
@@ -147,6 +190,12 @@ if not 1 <= self.web_admin_port <= 65535:
     raise ValueError("WEB_ADMIN_PORT must be in 1..65535")
 if self.app_log_max_lines < 1:
     raise ValueError("APP_LOG_MAX_LINES must be positive")
+if not 1 <= self.smtp_port <= 65535:
+    raise ValueError("SMTP_PORT must be in 1..65535")
+if self.email_recovery_token_ttl_minutes < 1:
+    raise ValueError("EMAIL_RECOVERY_TOKEN_TTL_MINUTES must be positive")
+if self.email_delivery_enabled and (not self.smtp_host.strip() or not self.smtp_from.strip()):
+    raise ValueError("SMTP_HOST and SMTP_FROM are required when EMAIL_DELIVERY_ENABLED=true")
 self.app_log_level = self.app_log_level.upper()
 return self
 ```
@@ -338,6 +387,32 @@ CREATE INDEX IF NOT EXISTS idx_server_health_latest
     ON server_health_checks(server_id, checked_at DESC, id DESC);
 ```
 
+Also add email recovery support:
+
+```sql
+ALTER TABLE users ADD COLUMN email TEXT;
+ALTER TABLE users ADD COLUMN email_verified_at TEXT;
+
+CREATE TABLE IF NOT EXISTS email_recovery_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    email TEXT NOT NULL,
+    token_hash TEXT NOT NULL UNIQUE,
+    purpose TEXT NOT NULL
+        CHECK (purpose IN ('verify_email', 'recover_config')),
+    device_id INTEGER,
+    expires_at TEXT NOT NULL,
+    used_at TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_email_recovery_tokens_user
+    ON email_recovery_tokens(user_id, purpose, expires_at);
+```
+
+Use `_ensure_column()` for `users.email` and `users.email_verified_at` so existing databases migrate in place.
+
 - [ ] **Step 4: Add repository methods**
 
 In `app/db/repositories.py`, add:
@@ -449,6 +524,16 @@ def list_orders_for_admin(self, *, limit: int = 100):
         (limit,),
     ).fetchall()
 ```
+
+Also add focused email methods:
+
+- `update_user_email(user_id, email)` clears `email_verified_at` when the email changes;
+- `mark_user_email_verified(user_id, verified_at)`;
+- `create_email_recovery_token(user_id, email, token_hash, purpose, expires_at, device_id=None)`;
+- `get_valid_email_recovery_token(token_hash, purpose, now)`;
+- `mark_email_recovery_token_used(token_id, used_at)`.
+
+Token methods must never return or log raw token values; only hashes are stored.
 
 - [ ] **Step 6: Run repository tests**
 
@@ -764,6 +849,8 @@ def _require_auth(request: Request):
         <a href="/users">Users</a>
         <a href="/servers">Servers</a>
         <a href="/orders">Orders</a>
+        <a href="/config-templates">Config templates</a>
+        <a href="/email">Email</a>
         <a href="/logs">Logs</a>
         <a href="/settings">Settings</a>
       </nav>
@@ -939,6 +1026,7 @@ def test_create_user_from_web(tmp_path):
             "username": "alice",
             "first_name": "Alice",
             "last_name": "",
+            "email": "alice@example.com",
             "status": "active",
             "is_admin": "1",
         },
@@ -948,6 +1036,8 @@ def test_create_user_from_web(tmp_path):
     assert response.status_code == 303
     user = repo.get_user_by_telegram_id(1001)
     assert user["username"] == "alice"
+    assert user["email"] == "alice@example.com"
+    assert user["email_verified_at"] is None
     assert user["is_admin"] == 1
 ```
 
@@ -974,6 +1064,7 @@ def update_user_admin_fields(
     username: str | None,
     first_name: str | None,
     last_name: str | None,
+    email: str | None,
     status: str,
     is_admin: bool,
 ) -> None:
@@ -984,12 +1075,27 @@ def update_user_admin_fields(
             username = ?,
             first_name = ?,
             last_name = ?,
+            email = ?,
+            email_verified_at = CASE
+                WHEN COALESCE(email, '') = COALESCE(?, '') THEN email_verified_at
+                ELSE NULL
+            END,
             status = ?,
             is_admin = ?,
             updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
         """,
-        (telegram_id, username, first_name, last_name, status, int(is_admin), user_id),
+        (
+            telegram_id,
+            username,
+            first_name,
+            last_name,
+            email,
+            email,
+            status,
+            int(is_admin),
+            user_id,
+        ),
     )
     self._commit()
 ```
@@ -1025,6 +1131,7 @@ async def user_create(
     username: str = Form(""),
     first_name: str = Form(""),
     last_name: str = Form(""),
+    email: str = Form(""),
     status: str = Form("active"),
     is_admin: str = Form("0"),
     repo: Repository = Depends(_repo),
@@ -1044,6 +1151,7 @@ async def user_create(
         username=username or None,
         first_name=first_name or None,
         last_name=last_name or None,
+        email=email or None,
         status=status,
         is_admin=is_admin == "1",
     )
@@ -1080,7 +1188,7 @@ Also add `GET /users/{user_id}`, `GET /users/{user_id}/edit`, `POST /users/{user
 {% endblock %}
 ```
 
-`user_form.html` includes inputs for `telegram_id`, `username`, `first_name`, `last_name`, `status`, `is_admin`.
+`user_form.html` includes inputs for `telegram_id`, `username`, `first_name`, `last_name`, `email`, `status`, `is_admin`. The user detail page shows `email_verified_at` and provides actions to send/refresh email verification once Task 9 email support is implemented.
 
 - [ ] **Step 6: Run users tests**
 
@@ -1693,7 +1801,171 @@ git commit -m "Add editable client config templates"
 
 ---
 
-### Task 9: CLI Serve, Docs, And Full Verification
+### Task 9: Verified Email Delivery And Recovery
+
+**Files:**
+- Modify: `.env.example`
+- Modify: `app/config/settings.py`
+- Modify: `app/db/schema.py`
+- Modify: `app/db/repositories.py`
+- Modify: `app/bot/delivery.py`
+- Modify: `app/web/app.py`
+- Modify: `app/web/templates/user_detail.html`
+- Modify: `app/web/templates/user_form.html`
+- Create: `app/notifications/__init__.py`
+- Create: `app/notifications/email.py`
+- Create: `app/services/email_recovery.py`
+- Create: `app/web/templates/email.html`
+- Test: `tests/notifications/test_email.py`
+- Test: `tests/services/test_email_recovery.py`
+- Test: `tests/web/test_email.py`
+
+- [ ] **Step 1: Write failing email settings and SMTP tests**
+
+Extend `tests/config/test_settings.py` to assert email settings are read and validated:
+
+```python
+def test_settings_requires_smtp_host_and_from_when_email_enabled():
+    with pytest.raises(ValidationError, match="SMTP_HOST and SMTP_FROM"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="TEST_TOKEN",
+            app_secret_key="test-secret",
+            email_delivery_enabled=True,
+            smtp_host="",
+            smtp_from="",
+        )
+```
+
+Create `tests/notifications/test_email.py`:
+
+```python
+from email.message import EmailMessage
+
+from app.notifications.email import build_config_email_message
+
+
+def test_build_config_email_message_includes_vpn_link_and_optional_conf_attachment():
+    message = build_config_email_message(
+        sender="vpn@example.com",
+        recipient="user@example.com",
+        subject="Your VPN config",
+        body="Import link: vpn://abc",
+        config_filename="amneziya-device-7.conf",
+        config_text="[Interface]\nPrivateKey = test",
+        attach_config=True,
+    )
+
+    assert isinstance(message, EmailMessage)
+    assert message["From"] == "vpn@example.com"
+    assert message["To"] == "user@example.com"
+    assert "vpn://abc" in message.get_body(preferencelist=("plain",)).get_content()
+    attachments = list(message.iter_attachments())
+    assert attachments[0].get_filename() == "amneziya-device-7.conf"
+```
+
+- [ ] **Step 2: Run tests to verify they fail**
+
+Run:
+
+```bash
+python -m pytest tests/notifications/test_email.py tests/config/test_settings.py::test_settings_requires_smtp_host_and_from_when_email_enabled -q
+```
+
+Expected: FAIL because email module/settings validation are missing.
+
+- [ ] **Step 3: Implement SMTP message builder and sender**
+
+Create `app/notifications/email.py`:
+
+- `build_config_email_message(...) -> EmailMessage`;
+- `send_email(message, settings) -> None` using stdlib `smtplib`;
+- TLS controlled by `settings.smtp_use_tls`;
+- login only when `settings.smtp_username` is set;
+- never log SMTP password, recovery tokens, raw config text, private key, or PSK.
+
+Keep the sender small and dependency-free; use stdlib `email.message.EmailMessage`.
+
+- [ ] **Step 4: Add recovery service tests**
+
+Create `tests/services/test_email_recovery.py`:
+
+```python
+def test_email_recovery_token_is_hashed_single_use_and_expires(tmp_path):
+    # Arrange user with verified email and one active device.
+    # Start recovery and assert raw token is returned only once.
+    # Assert DB stores token_hash, not raw token.
+    # Consume token once successfully.
+    # Second consume returns None/raises controlled error.
+```
+
+Use real repository and SQLite. The raw token must never be stored.
+
+- [ ] **Step 5: Implement DB/repository recovery methods**
+
+From Task 2 schema support, implement:
+
+- `update_user_email()` clears verification on address change;
+- `mark_user_email_verified()`;
+- `create_email_recovery_token()`;
+- `get_valid_email_recovery_token()`;
+- `mark_email_recovery_token_used()`.
+
+Token values are generated in service code and stored only as SHA-256/HMAC hash using `APP_SECRET_KEY` or another stable app secret.
+
+- [ ] **Step 6: Implement email recovery service**
+
+Create `app/services/email_recovery.py`:
+
+- `start_email_verification(user_id, email)`;
+- `confirm_email_verification(token)`;
+- `start_config_recovery(user_id, device_id=None)`;
+- `consume_config_recovery(token)`;
+- `send_config_to_verified_email(user_id, device_id, delivery_package)`.
+
+Rules:
+
+- email delivery requires `EMAIL_DELIVERY_ENABLED=true`;
+- config delivery requires verified email unless admin explicitly starts verification;
+- recovery tokens are one-time and expire after `EMAIL_RECOVERY_TOKEN_TTL_MINUTES`;
+- if `EMAIL_CONFIG_ATTACHMENTS_ENABLED=false`, email contains `vpn://` and instructions but no `.conf` attachment.
+
+- [ ] **Step 7: Add web email page and user actions**
+
+Add `/email` route:
+
+- shows whether email delivery is enabled;
+- shows SMTP host/from with password redacted;
+- provides a safe SMTP diagnostic status, not a secret dump;
+- lists recent email delivery/recovery events from `admin_actions` or a small repository query.
+
+Extend user forms/details:
+
+- edit `email`;
+- show `email_verified_at`;
+- action: send verification email;
+- action: send config/recovery email for a selected active device when verified.
+
+- [ ] **Step 8: Run email tests**
+
+Run:
+
+```bash
+python -m pytest tests/notifications/test_email.py tests/services/test_email_recovery.py tests/web/test_email.py -q
+```
+
+Expected: PASS.
+
+- [ ] **Step 9: Commit**
+
+```bash
+git add .env.example app/config/settings.py app/db app/notifications app/services app/bot app/web tests/notifications tests/services tests/web/test_email.py tests/config/test_settings.py
+git commit -m "Add verified email config recovery"
+```
+
+---
+
+### Task 10: CLI Serve, Docs, And Full Verification
 
 **Files:**
 - Modify: `app/cli.py`
@@ -1776,8 +2048,9 @@ Mention that port `3030` should be protected by firewall/VPN/reverse proxy.
 Also document:
 
 - `CLIENT_CONFIG_TEMPLATE_DIR` and the recommended VPS path for editable client config templates;
+- email settings (`EMAIL_DELIVERY_ENABLED`, SMTP, verification, recovery TTL) and the recommendation to start disabled until SMTP is tested;
 - default template filenames `amneziawg_v1_5.conf.tpl` and `amneziawg_v2.conf.tpl`;
-- current user delivery options: Telegram text, `.conf` file, QR, user/admin resend, raw config fallback, and `vpn://` link;
+- current user delivery options: Telegram text, `.conf` file, QR, user/admin resend, raw config fallback, `vpn://` link, and verified email;
 - the need to verify `vpn://` import on a real AmneziaVPN client before switching QR payload fully to the link.
 
 - [ ] **Step 5: Run full tests**
@@ -1824,7 +2097,7 @@ Expected: no output.
 python -m app.cli web serve --host 127.0.0.1 --port 3030
 ```
 
-Open `http://127.0.0.1:3030/login`, log in, verify Dashboard, Users, Servers, Config Templates, Logs, Settings pages.
+Open `http://127.0.0.1:3030/login`, log in, verify Dashboard, Users, Servers, Config Templates, Email, Logs, Settings pages.
 
 - [ ] VPS update path:
 
@@ -1847,3 +2120,4 @@ python -m app.cli web serve --host 0.0.0.0 --port 3030
 - Does not store SSH private keys, passwords, PSK, bot token, proxy credentials, or `APP_SECRET_KEY` in UI.
 - Includes server health display for every server with online/degraded/offline/unknown, latency, check time, and latest error.
 - Includes editable versioned client config templates, explicit user delivery options, and `vpn://` link generation without changing the canonical `.conf` fallback.
+- Includes verified-email delivery and config recovery with one-time TTL tokens, disabled-by-default SMTP settings, and no secret logging.

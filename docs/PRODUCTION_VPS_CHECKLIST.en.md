@@ -86,6 +86,26 @@ The template contains stable config lines and placeholders for user/device
 variables. The `.conf` file remains the canonical delivery path until `vpn://`
 import is verified with a real AmneziaVPN client.
 
+If the user provides an email address, the plan includes extra delivery and
+recovery by email. Keep this channel disabled for the first launch until SMTP is
+configured:
+
+```env
+EMAIL_DELIVERY_ENABLED=false
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USERNAME=
+SMTP_PASSWORD=
+SMTP_FROM=
+SMTP_USE_TLS=true
+EMAIL_REQUIRE_VERIFICATION=true
+EMAIL_RECOVERY_TOKEN_TTL_MINUTES=30
+EMAIL_CONFIG_ATTACHMENTS_ENABLED=true
+```
+
+Configs and recovery emails must be sent only to verified email addresses. SMTP
+passwords, recovery tokens, and full config text must not be written to logs.
+
 ## 5. Prepare `servers.yml`
 
 Do not commit this file. Required values:

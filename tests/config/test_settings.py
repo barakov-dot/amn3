@@ -112,6 +112,171 @@ def test_settings_reads_telegram_proxy_url():
     assert settings.telegram_proxy_url == "socks5://127.0.0.1:1080"
 
 
+def test_settings_reads_web_admin_and_logging_settings():
+    settings = Settings(
+        _env_file=None,
+        telegram_bot_token="TEST_TOKEN",
+        app_secret_key="test-secret",
+        web_admin_enabled=True,
+        web_admin_host="0.0.0.0",
+        web_admin_port=3030,
+        web_admin_username="admin",
+        web_admin_password_hash="sha256$abc",
+        web_admin_session_secret="session-secret-value-with-32-plus-chars",
+        app_log_enabled=True,
+        app_log_level="DEBUG",
+        app_log_max_lines=250,
+        app_log_path="logs/app.log",
+        client_config_template_dir="config_templates",
+        email_delivery_enabled=True,
+        smtp_host="smtp.example.com",
+        smtp_port=2525,
+        smtp_username="smtp-user",
+        smtp_password="smtp-password",
+        smtp_from="admin@example.com",
+        smtp_use_tls=False,
+        email_require_verification=True,
+        email_recovery_token_ttl_minutes=45,
+        email_config_attachments_enabled=False,
+    )
+
+    assert settings.web_admin_enabled is True
+    assert settings.web_admin_host == "0.0.0.0"
+    assert settings.web_admin_port == 3030
+    assert settings.web_admin_username == "admin"
+    assert settings.web_admin_password_hash == "sha256$abc"
+    assert settings.web_admin_session_secret.startswith("session-secret")
+    assert settings.app_log_enabled is True
+    assert settings.app_log_level == "DEBUG"
+    assert settings.app_log_max_lines == 250
+    assert settings.app_log_path == "logs/app.log"
+    assert settings.client_config_template_dir == "config_templates"
+    assert settings.email_delivery_enabled is True
+    assert settings.smtp_host == "smtp.example.com"
+    assert settings.smtp_port == 2525
+    assert settings.smtp_username == "smtp-user"
+    assert settings.smtp_password == "smtp-password"
+    assert settings.smtp_from == "admin@example.com"
+    assert settings.smtp_use_tls is False
+    assert settings.email_require_verification is True
+    assert settings.email_recovery_token_ttl_minutes == 45
+    assert settings.email_config_attachments_enabled is False
+
+
+def test_settings_defaults_web_admin_to_disabled():
+    settings = Settings(
+        _env_file=None,
+        telegram_bot_token="TEST_TOKEN",
+        app_secret_key="test-secret",
+    )
+
+    assert settings.web_admin_enabled is False
+
+
+def test_settings_strips_and_normalizes_app_log_level():
+    settings = Settings(
+        _env_file=None,
+        telegram_bot_token="TEST_TOKEN",
+        app_secret_key="test-secret",
+        app_log_level=" info ",
+    )
+
+    assert settings.app_log_level == "INFO"
+
+
+def test_settings_rejects_invalid_app_log_level():
+    with pytest.raises(ValidationError, match="APP_LOG_LEVEL"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="TEST_TOKEN",
+            app_secret_key="test-secret",
+            app_log_level="TRACE",
+        )
+
+
+@pytest.mark.parametrize("web_admin_port", [0, 65536])
+def test_settings_rejects_web_admin_port_outside_valid_range(web_admin_port):
+    with pytest.raises(ValidationError, match="WEB_ADMIN_PORT"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="TEST_TOKEN",
+            app_secret_key="test-secret",
+            web_admin_port=web_admin_port,
+        )
+
+
+def test_settings_rejects_non_positive_app_log_max_lines():
+    with pytest.raises(ValidationError, match="APP_LOG_MAX_LINES"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="TEST_TOKEN",
+            app_secret_key="test-secret",
+            app_log_max_lines=0,
+        )
+
+
+@pytest.mark.parametrize("smtp_port", [0, 65536])
+def test_settings_rejects_smtp_port_outside_valid_range(smtp_port):
+    with pytest.raises(ValidationError, match="SMTP_PORT"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="TEST_TOKEN",
+            app_secret_key="test-secret",
+            smtp_port=smtp_port,
+        )
+
+
+def test_settings_rejects_non_positive_email_recovery_token_ttl():
+    with pytest.raises(ValidationError, match="EMAIL_RECOVERY_TOKEN_TTL_MINUTES"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="TEST_TOKEN",
+            app_secret_key="test-secret",
+            email_recovery_token_ttl_minutes=0,
+        )
+
+
+def test_settings_requires_smtp_host_and_from_when_email_enabled():
+    with pytest.raises(ValidationError, match="SMTP_HOST and SMTP_FROM"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="TEST_TOKEN",
+            app_secret_key="test-secret",
+            email_delivery_enabled=True,
+            smtp_host="",
+            smtp_from="",
+        )
+
+
+@pytest.mark.parametrize("password_hash", ["", "   ", "replace-with-password-hash"])
+def test_settings_requires_web_admin_password_hash_when_enabled(password_hash):
+    with pytest.raises(ValidationError, match="WEB_ADMIN_PASSWORD_HASH must be set"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="TEST_TOKEN",
+            app_secret_key="test-secret",
+            web_admin_enabled=True,
+            web_admin_password_hash=password_hash,
+            web_admin_session_secret="session-secret-value-with-32-plus-chars",
+        )
+
+
+@pytest.mark.parametrize(
+    "session_secret",
+    ["", "   ", "replace-with-generated-random-secret-32-plus-chars"],
+)
+def test_settings_requires_web_admin_session_secret_when_enabled(session_secret):
+    with pytest.raises(ValidationError, match="WEB_ADMIN_SESSION_SECRET must be set"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="TEST_TOKEN",
+            app_secret_key="test-secret",
+            web_admin_enabled=True,
+            web_admin_password_hash="sha256$abc",
+            web_admin_session_secret=session_secret,
+        )
+
+
 def test_settings_rejects_unknown_control_panel_auth_method():
     with pytest.raises(ValidationError):
         Settings(

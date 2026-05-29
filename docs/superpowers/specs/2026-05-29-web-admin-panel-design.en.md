@@ -24,7 +24,7 @@ A React/Vue SPA is not needed yet: it would complicate deployment and authentica
 ## New `.env` Settings
 
 ```env
-WEB_ADMIN_ENABLED=true
+WEB_ADMIN_ENABLED=false
 WEB_ADMIN_HOST=0.0.0.0
 WEB_ADMIN_PORT=3030
 WEB_ADMIN_USERNAME=admin
@@ -35,6 +35,16 @@ APP_LOG_LEVEL=INFO
 APP_LOG_MAX_LINES=500
 APP_LOG_PATH=logs/app.log
 CLIENT_CONFIG_TEMPLATE_DIR=config_templates
+EMAIL_DELIVERY_ENABLED=false
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USERNAME=
+SMTP_PASSWORD=
+SMTP_FROM=
+SMTP_USE_TLS=true
+EMAIL_REQUIRE_VERIFICATION=true
+EMAIL_RECOVERY_TOKEN_TTL_MINUTES=30
+EMAIL_CONFIG_ATTACHMENTS_ENABLED=true
 ```
 
 `WEB_ADMIN_PASSWORD_HASH` stores a password hash, not the raw password. If the hash is empty or a placeholder, the web panel must refuse to start with an actionable error. `WEB_ADMIN_SESSION_SECRET` is used for signed session cookies and must be stored separately with `.env`.
@@ -42,6 +52,8 @@ CLIENT_CONFIG_TEMPLATE_DIR=config_templates
 `APP_LOG_ENABLED=false` disables application log file writing. `APP_LOG_LEVEL` supports `DEBUG`, `INFO`, `WARNING`, and `ERROR`. `APP_LOG_MAX_LINES` controls UI viewing depth, not infinite retention. File rotation can be simple: a Python logging rotating handler with a size limit.
 
 `CLIENT_CONFIG_TEMPLATE_DIR` points to an external directory with editable client config templates. If the directory is empty or unset, package defaults are used. On a VPS, local templates should live outside the package directory so `git pull` does not overwrite manual edits.
+
+The email channel is disabled by default. If `EMAIL_DELIVERY_ENABLED=true`, `SMTP_HOST` and `SMTP_FROM` must be set; the SMTP password lives only in `.env` and is edited outside the UI. `EMAIL_REQUIRE_VERIFICATION=true` means config and recovery email is sent only to verified addresses.
 
 ## Architecture
 
@@ -55,6 +67,7 @@ flowchart TD
     WebApp --> Logs["Log reader / redaction"]
     WebApp --> ServerConfig["servers.yml loader"]
     WebApp --> ConfigTemplates["Client config templates"]
+    WebApp --> Email["Email delivery / recovery"]
 ```
 
 The panel runs as a separate process from the Telegram bot:
@@ -83,14 +96,15 @@ The panel should be an operational workspace, not a landing page:
 
 - `/` Dashboard: database status, user count, active devices, pending orders, servers, recent errors.
 - `/users`: user table with search by Telegram ID, username, and name; create, edit, block, soft-delete actions.
-- `/users/new`: create user by Telegram ID, username, first/last name, admin flag.
-- `/users/{id}`: user profile, status, admin flag, devices, orders, recent admin actions.
+- `/users/new`: create user by Telegram ID, username, first/last name, email, admin flag.
+- `/users/{id}`: user profile, status, admin flag, email/verification status, devices, orders, recent admin actions.
 - `/servers`: all-server table from DB and related config; manual status, live state, ping/latency, SSH reachability, endpoint, VPN port, device count, last check time.
 - `/servers/new`: create server DB record; secrets are not entered or shown.
 - `/servers/{id}`: edit host, SSH port, endpoint host, VPN port, network CIDR, server address, server public key, runtime, firewall, status, max devices.
 - `/servers/{id}/health`: live diagnostics page for one server: ping/latency, TCP/SSH reachability, read-only `server check`, `awg-quick` state, UDP port visibility, latest error.
 - `/orders`: pending/fulfilled/rejected orders for Telegram flow debugging.
 - `/config-templates`: editable delivery templates and client `.conf` templates, placeholder list, rendered preview, and `vpn://` link preview without logging secrets.
+- `/email`: SMTP diagnostics, email delivery/recovery templates, and recent safe delivery events without secrets.
 - `/logs`: show last `APP_LOG_MAX_LINES`, filter by level, and plain-text search.
 - `/settings`: read-only runtime settings with secret redaction.
 
@@ -106,9 +120,10 @@ Minimum actions:
 
 - show all existing users from the current `users` table, including users previously created through the Telegram bot;
 - create user;
-- edit `telegram_id`, `username`, `first_name`, `last_name`, `status`, `is_admin`;
+- edit `telegram_id`, `username`, `first_name`, `last_name`, `email`, `status`, `is_admin`;
 - block user;
 - mark user as deleted;
+- view whether email is verified and start another verification;
 - view active/total devices;
 - view recent admin actions.
 
@@ -171,6 +186,29 @@ Users also get an import link in the form `vpn://...`. The MVP link format is is
 - in the `/config-templates` preview;
 - as QR payload after real-client confirmation; until then, the `.conf` file remains the canonical delivery method.
 
+## Email Delivery And Recovery
+
+If a user provides an email address, the system should support an additional delivery and recovery channel, but only after address verification:
+
+- email is stored in `users.email`, verification status in `users.email_verified_at`;
+- a new or changed email is treated as unverified;
+- verification uses a one-time code/token with TTL, and token/hash is not logged;
+- config can be emailed only when `EMAIL_DELIVERY_ENABLED=true`, SMTP is configured, and email is verified or an admin explicitly starts verification;
+- delivery email contains short setup instructions, the `vpn://` link, and, when `EMAIL_CONFIG_ATTACHMENTS_ENABLED=true`, the attached `.conf`;
+- QR is not included by default to avoid heavy attachments; QR remains in Telegram/web;
+- recovery is sent only to a previously verified email and uses a one-time recovery link/code;
+- a recovery link must not expose the full config without token, TTL, and one-time-use validation;
+- all email events are logged without secrets: user id, device id, channel, status, error type, but not config, token, or SMTP password.
+
+Minimal recovery flow:
+
+1. User or admin starts recovery for a verified email.
+2. The system creates a one-time recovery token with TTL `EMAIL_RECOVERY_TOKEN_TTL_MINUTES`.
+3. The user receives an email with a recovery link/code.
+4. After token validation, the system resends the config to the same verified email or exposes a one-time download inside the authenticated web panel.
+
+For the first VPS launch, admin-triggered recovery from the web panel is acceptable. A public `/recover` form should be enabled only together with rate limiting and clear audit events.
+
 ## Logging
 
 Add centralized logging configuration:
@@ -212,6 +250,7 @@ Cover with tests:
 - server health check stores online/degraded/offline state and exposes it in UI;
 - logs viewer applies `APP_LOG_MAX_LINES` and redaction;
 - client config templates render current AmneziaWG configs, expose placeholders, and show `vpn://` import links;
+- email settings, verified user emails, SMTP disabled/error states, and email recovery tokens are covered without logging secrets;
 - CLI accepts `web serve`;
 - startup refuses empty password hash.
 
@@ -224,7 +263,8 @@ Cover with tests:
 - Servers can be added, edited, and disabled.
 - Every server is shown with live state: online/degraded/offline/unknown, latency, last check time, and latest error.
 - `/config-templates` shows the message template, `.conf` templates per version, preview, available placeholders, and a `vpn://` link.
-- Users can receive configs through Telegram text, `.conf` file, QR, resend flows, and a `vpn://` link; the emergency fallback still preserves raw config text delivery.
+- Users can receive configs through Telegram text, `.conf` file, QR, resend flows, a `vpn://` link, and, when email is verified, email delivery/recovery; the emergency fallback still preserves raw config text delivery.
+- Email recovery works only for verified addresses, with a one-time TTL token and no secret logging.
 - `/logs` shows recent log lines with redaction.
 - `APP_LOG_ENABLED`, `APP_LOG_LEVEL`, `APP_LOG_MAX_LINES`, and `APP_LOG_PATH` control logging.
 - All new behavior tests pass with the existing test suite.

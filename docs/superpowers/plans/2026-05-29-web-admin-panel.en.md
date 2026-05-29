@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a FastAPI/Jinja2 web admin panel on port `3030` with login/password auth, users CRUD, servers CRUD, live server health, client config templates, `vpn://` delivery links, logs viewer, and `.env`-controlled logging.
+**Goal:** Build a FastAPI/Jinja2 web admin panel on port `3030` with login/password auth, users CRUD, servers CRUD, live server health, client config templates, `vpn://` delivery links, optional verified-email delivery/recovery, logs viewer, and `.env`-controlled logging.
 
 **Architecture:** Add a separate `app.web` package that reuses existing `Settings`, SQLite `Repository`, redaction, and server check code. The web panel runs as a separate process through `python -m app.cli web serve`, uses signed cookie sessions, server-rendered templates, and records admin actions through the existing database. Live server state is stored in `server_health_checks` and refreshed by explicit UI/CLI actions.
 
@@ -18,7 +18,10 @@
 - Modify `app/db/schema.py`: add `server_health_checks`.
 - Modify `app/db/repositories.py`: add web admin CRUD/query methods and health persistence.
 - Modify `app/bot/delivery.py`: include `{vpn_link}` and delivery package import link.
+- Modify `app/bot/delivery.py`: include email-safe delivery payload fields where needed.
 - Modify `app/services/access.py`: render client configs through editable templates.
+- Create `app/services/email_recovery.py`: verified-email recovery tokens and resend orchestration.
+- Create `app/notifications/email.py`: SMTP email sender with redaction-safe logging.
 - Modify `app/vpn/config_versions.py`: route config rendering through versioned templates.
 - Create `app/vpn/config_templates.py`: load, validate, render, and preview client config templates.
 - Create `app/vpn/templates/amneziawg_v1_5.conf.tpl`: default editable client config template.
@@ -30,7 +33,7 @@
 - Create `app/web/logs.py`: tail and redact log files.
 - Create `app/web/forms.py`: small validation helpers for users and servers.
 - Create `app/web/app.py`: FastAPI app factory and routes.
-- Create `app/web/templates/*.html`: base, login, dashboard, users, user form/detail, servers, server form/detail/health, orders, config templates, logs, settings.
+- Create `app/web/templates/*.html`: base, login, dashboard, users, user form/detail, servers, server form/detail/health, orders, config templates, email, logs, settings.
 - Create `app/web/static/admin.css`: compact operational UI.
 - Modify `app/cli.py`: add `web serve`.
 - Create tests under `tests/web/`.
@@ -50,7 +53,8 @@ This English plan mirrors the Russian plan at `docs/superpowers/plans/2026-05-29
 6. Servers CRUD and live health.
 7. Orders, logs, and settings pages.
 8. Client config templates, `vpn://` links, and delivery display.
-9. CLI serve, docs, and full verification.
+9. Verified email delivery and recovery.
+10. CLI serve, docs, and full verification.
 
 ## Acceptance Requirements
 
@@ -61,8 +65,9 @@ This English plan mirrors the Russian plan at `docs/superpowers/plans/2026-05-29
 - Servers can be created, edited, disabled, and shown with live health state.
 - Every server row includes online/degraded/offline/unknown, latency, last checked time, and latest error when available.
 - `/config-templates` shows the delivery message template, versioned `.conf` templates, source, placeholders, safe preview, and a generated `vpn://` import link.
-- User delivery options are explicit: Telegram text, `.conf` attachment, QR, user/admin resend, raw config fallback, and `vpn://` link.
+- User delivery options are explicit: Telegram text, `.conf` attachment, QR, user/admin resend, raw config fallback, `vpn://` link, and verified email.
 - `CLIENT_CONFIG_TEMPLATE_DIR` controls local editable template overrides so VPS edits are not overwritten by package defaults.
+- Email delivery is disabled by default, requires SMTP settings, uses verified addresses only, and recovery uses one-time TTL tokens.
 - `/logs` shows redacted recent log lines with depth controlled by `APP_LOG_MAX_LINES`.
 - All settings come from `.env` through `Settings`.
 - Full test suite passes.
@@ -75,4 +80,4 @@ git diff --check
 python -m app.cli web serve --host 127.0.0.1 --port 3030
 ```
 
-Then open `http://127.0.0.1:3030/login` and verify Dashboard, Users, Servers, Config Templates, Logs, and Settings pages.
+Then open `http://127.0.0.1:3030/login` and verify Dashboard, Users, Servers, Config Templates, Email, Logs, and Settings pages.

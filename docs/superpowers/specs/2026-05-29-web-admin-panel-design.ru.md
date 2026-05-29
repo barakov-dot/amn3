@@ -24,7 +24,7 @@ React/Vue SPA пока не нужен: он усложнит деплой и а
 ## Новые настройки `.env`
 
 ```env
-WEB_ADMIN_ENABLED=true
+WEB_ADMIN_ENABLED=false
 WEB_ADMIN_HOST=0.0.0.0
 WEB_ADMIN_PORT=3030
 WEB_ADMIN_USERNAME=admin
@@ -35,6 +35,16 @@ APP_LOG_LEVEL=INFO
 APP_LOG_MAX_LINES=500
 APP_LOG_PATH=logs/app.log
 CLIENT_CONFIG_TEMPLATE_DIR=config_templates
+EMAIL_DELIVERY_ENABLED=false
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USERNAME=
+SMTP_PASSWORD=
+SMTP_FROM=
+SMTP_USE_TLS=true
+EMAIL_REQUIRE_VERIFICATION=true
+EMAIL_RECOVERY_TOKEN_TTL_MINUTES=30
+EMAIL_CONFIG_ATTACHMENTS_ENABLED=true
 ```
 
 `WEB_ADMIN_PASSWORD_HASH` хранит hash пароля, не исходный пароль. Если hash пустой или placeholder, web-панель должна отказаться стартовать и вывести понятную ошибку. `WEB_ADMIN_SESSION_SECRET` используется для signed session cookie и должен храниться отдельно вместе с `.env`.
@@ -42,6 +52,8 @@ CLIENT_CONFIG_TEMPLATE_DIR=config_templates
 `APP_LOG_ENABLED=false` отключает запись application log. `APP_LOG_LEVEL` поддерживает `DEBUG`, `INFO`, `WARNING`, `ERROR`. `APP_LOG_MAX_LINES` задает глубину просмотра в UI, а не бесконечное хранение. Ротация файла может быть простой: ограничение размера через Python logging rotating handler.
 
 `CLIENT_CONFIG_TEMPLATE_DIR` задает внешнюю директорию с редактируемыми шаблонами клиентских конфигов. Если директория пуста или не задана, используются дефолтные шаблоны из кода. На VPS лучше хранить локальные шаблоны вне package-каталога, чтобы обновление через `git pull` не перетирало ручные правки.
+
+Email-канал по умолчанию выключен. Если `EMAIL_DELIVERY_ENABLED=true`, должны быть заданы `SMTP_HOST` и `SMTP_FROM`; пароль SMTP хранится только в `.env` и редактируется вне UI. `EMAIL_REQUIRE_VERIFICATION=true` означает, что конфиги и recovery-письма отправляются только на подтвержденный адрес.
 
 ## Архитектура
 
@@ -55,6 +67,7 @@ flowchart TD
     WebApp --> Logs["Log reader / redaction"]
     WebApp --> ServerConfig["servers.yml loader"]
     WebApp --> ConfigTemplates["Client config templates"]
+    WebApp --> Email["Email delivery / recovery"]
 ```
 
 Панель запускается отдельным процессом от Telegram bot:
@@ -83,14 +96,15 @@ python -m app.cli web serve --host 0.0.0.0 --port 3030
 
 - `/` Dashboard: состояние БД, количество пользователей, активных устройств, pending orders, серверов, последние ошибки.
 - `/users`: таблица пользователей с поиском по Telegram ID, username, имени; действия добавления, редактирования, блокировки, soft-delete.
-- `/users/new`: создание пользователя по Telegram ID, username, first/last name, admin flag.
-- `/users/{id}`: карточка пользователя, статус, admin flag, устройства, заявки, последние admin actions.
+- `/users/new`: создание пользователя по Telegram ID, username, first/last name, email, admin flag.
+- `/users/{id}`: карточка пользователя, статус, admin flag, email/verification status, устройства, заявки, последние admin actions.
 - `/servers`: таблица всех серверов из БД и связанной конфигурации; ручной status, live-состояние, ping/latency, SSH reachability, endpoint, VPN port, devices count, время последней проверки.
 - `/servers/new`: добавление серверной записи в БД; секреты не вводятся и не показываются.
 - `/servers/{id}`: редактирование host, ssh port, endpoint host, vpn port, network CIDR, server address, server public key, runtime, firewall, status, max devices.
 - `/servers/{id}/health`: карточка live-диагностики сервера: ping/latency, TCP/SSH доступность, read-only `server check`, состояние `awg-quick`, видимость UDP-порта, последняя ошибка.
 - `/orders`: pending/fulfilled/rejected заявки для дебага Telegram flow.
 - `/config-templates`: редактируемые шаблоны доставки и клиентских `.conf` файлов, список placeholders, preview итогового конфига и `vpn://` ссылки без сохранения секретов в логах.
+- `/email`: диагностика SMTP-настроек, шаблоны email-доставки и recovery, последние безопасные события отправки без секретов.
 - `/logs`: просмотр последних `APP_LOG_MAX_LINES`, фильтр по уровню и plain-text поиск.
 - `/settings`: read-only страница ключевых runtime-настроек с redaction секретов.
 
@@ -106,9 +120,10 @@ python -m app.cli web serve --host 0.0.0.0 --port 3030
 
 - показывать всех уже существующих пользователей из текущей таблицы `users`, включая созданных ранее через Telegram bot;
 - создать пользователя;
-- редактировать `telegram_id`, `username`, `first_name`, `last_name`, `status`, `is_admin`;
+- редактировать `telegram_id`, `username`, `first_name`, `last_name`, `email`, `status`, `is_admin`;
 - заблокировать пользователя;
 - пометить пользователя удаленным;
+- видеть, подтвержден ли email, и инициировать повторную проверку адреса;
 - посмотреть active/total devices;
 - посмотреть последние admin actions.
 
@@ -171,6 +186,29 @@ Live-состояние сервера должно храниться отде�
 - в preview на странице `/config-templates`;
 - в QR payload после подтверждения на реальном клиенте; до подтверждения `.conf` файл остается каноническим способом доставки.
 
+## Email-доставка и восстановление
+
+Если пользователь указывает email, система должна заложить дополнительный канал доставки и восстановления, но только после проверки адреса:
+
+- email хранится в `users.email`, статус проверки - в `users.email_verified_at`;
+- новый или измененный email считается неподтвержденным;
+- подтверждение выполняется одноразовым кодом/токеном с TTL, token/hash не пишется в лог;
+- конфиг можно отправить на email только если `EMAIL_DELIVERY_ENABLED=true`, SMTP настроен, и email подтвержден или админ явно запускает ручную проверку;
+- письмо доставки содержит краткую инструкцию, `vpn://` ссылку и, если `EMAIL_CONFIG_ATTACHMENTS_ENABLED=true`, вложенный `.conf`;
+- письмо не должно содержать QR по умолчанию, чтобы не плодить тяжелые вложения; QR остается в Telegram/web;
+- восстановление отправляется только на ранее подтвержденный email и использует одноразовую recovery-ссылку/код;
+- recovery-ссылка не должна раскрывать полный конфиг без проверки токена, TTL и одноразовости;
+- все email-события логируются без секретов: user id, device id, канал, статус, тип ошибки, но не конфиг, не токен и не SMTP password.
+
+Минимальный поток восстановления:
+
+1. Пользователь или админ инициирует восстановление для подтвержденного email.
+2. Система создает одноразовый recovery token с TTL `EMAIL_RECOVERY_TOKEN_TTL_MINUTES`.
+3. Пользователь получает письмо с recovery-ссылкой/кодом.
+4. После проверки token система повторно отправляет конфиг на тот же подтвержденный email или показывает в авторизованной web-панели одноразовый download.
+
+Для первого VPS запуска допускается начать с admin-triggered recovery из web-панели. Публичную `/recover` форму можно включать только вместе с rate limiting и понятным аудитом.
+
 ## Логирование
 
 Нужно добавить централизованную настройку logging:
@@ -212,6 +250,7 @@ Live-состояние сервера должно храниться отде�
 - server health check stores online/degraded/offline state and exposes it in UI;
 - logs viewer применяет `APP_LOG_MAX_LINES` и redaction;
 - client config templates render current AmneziaWG configs, expose placeholders, and show `vpn://` import links;
+- email settings, verified user emails, SMTP disabled/error states, and email recovery tokens are covered without logging secrets;
 - CLI принимает `web serve`;
 - startup отказывается стартовать при пустом password hash.
 
@@ -224,7 +263,8 @@ Live-состояние сервера должно храниться отде�
 - Серверы можно добавить, отредактировать и отключить.
 - Все серверы отображаются с live-состоянием: online/degraded/offline/unknown, latency, временем последней проверки и последней ошибкой.
 - `/config-templates` показывает шаблон сообщения, шаблоны `.conf` по версиям, preview, доступные placeholders и `vpn://` ссылку.
-- Пользователь может получить конфиг как Telegram-текст, `.conf` файл, QR, повторную отправку и `vpn://` ссылку; аварийный fallback сохраняет возможность получить сырой config text.
+- Пользователь может получить конфиг как Telegram-текст, `.conf` файл, QR, повторную отправку, `vpn://` ссылку и, если email подтвержден, email-письмо с восстановлением; аварийный fallback сохраняет возможность получить сырой config text.
+- Email-восстановление работает только для подтвержденного адреса, с одноразовым TTL-token и без записи секретов в логи.
 - `/logs` показывает последние строки логов с redaction.
 - `APP_LOG_ENABLED`, `APP_LOG_LEVEL`, `APP_LOG_MAX_LINES`, `APP_LOG_PATH` управляют логированием.
 - Все новые behavior-тесты проходят вместе с существующим набором.

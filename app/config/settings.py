@@ -43,6 +43,36 @@ class Settings(BaseSettings):
         default="",
         alias="CONTROL_PANEL_PUBLIC_KEY_PATH",
     )
+    web_admin_enabled: bool = Field(default=False, alias="WEB_ADMIN_ENABLED")
+    web_admin_host: str = Field(default="0.0.0.0", alias="WEB_ADMIN_HOST")
+    web_admin_port: int = Field(default=3030, alias="WEB_ADMIN_PORT")
+    web_admin_username: str = Field(default="admin", alias="WEB_ADMIN_USERNAME")
+    web_admin_password_hash: str = Field(default="", alias="WEB_ADMIN_PASSWORD_HASH")
+    web_admin_session_secret: str = Field(default="", alias="WEB_ADMIN_SESSION_SECRET")
+    app_log_enabled: bool = Field(default=True, alias="APP_LOG_ENABLED")
+    app_log_level: str = Field(default="INFO", alias="APP_LOG_LEVEL")
+    app_log_max_lines: int = Field(default=500, alias="APP_LOG_MAX_LINES")
+    app_log_path: str = Field(default="logs/app.log", alias="APP_LOG_PATH")
+    client_config_template_dir: str = Field(
+        default="config_templates",
+        alias="CLIENT_CONFIG_TEMPLATE_DIR",
+    )
+    email_delivery_enabled: bool = Field(default=False, alias="EMAIL_DELIVERY_ENABLED")
+    smtp_host: str = Field(default="", alias="SMTP_HOST")
+    smtp_port: int = Field(default=587, alias="SMTP_PORT")
+    smtp_username: str = Field(default="", alias="SMTP_USERNAME")
+    smtp_password: str = Field(default="", alias="SMTP_PASSWORD")
+    smtp_from: str = Field(default="", alias="SMTP_FROM")
+    smtp_use_tls: bool = Field(default=True, alias="SMTP_USE_TLS")
+    email_require_verification: bool = Field(default=True, alias="EMAIL_REQUIRE_VERIFICATION")
+    email_recovery_token_ttl_minutes: int = Field(
+        default=30,
+        alias="EMAIL_RECOVERY_TOKEN_TTL_MINUTES",
+    )
+    email_config_attachments_enabled: bool = Field(
+        default=True,
+        alias="EMAIL_CONFIG_ATTACHMENTS_ENABLED",
+    )
 
     @field_validator("telegram_bot_token", "app_secret_key")
     @classmethod
@@ -65,6 +95,35 @@ class Settings(BaseSettings):
             raise ValueError(
                 "CONTROL_PANEL_AUTH_METHODS contains unsupported method(s): "
                 + ", ".join(sorted(unknown_methods))
+            )
+        self.app_log_level = self.app_log_level.strip().upper()
+        allowed_log_levels = {"DEBUG", "INFO", "WARNING", "ERROR"}
+        if self.app_log_level not in allowed_log_levels:
+            raise ValueError("APP_LOG_LEVEL must be DEBUG, INFO, WARNING, or ERROR")
+        if not 1 <= self.web_admin_port <= 65535:
+            raise ValueError("WEB_ADMIN_PORT must be in 1..65535")
+        if self.app_log_max_lines < 1:
+            raise ValueError("APP_LOG_MAX_LINES must be positive")
+        if self.web_admin_enabled:
+            password_hash = self.web_admin_password_hash.strip()
+            session_secret = self.web_admin_session_secret.strip()
+            if not password_hash or password_hash.startswith("replace-with-"):
+                raise ValueError(
+                    "WEB_ADMIN_PASSWORD_HASH must be set when WEB_ADMIN_ENABLED=true"
+                )
+            if not session_secret or session_secret.startswith("replace-with-"):
+                raise ValueError(
+                    "WEB_ADMIN_SESSION_SECRET must be set when WEB_ADMIN_ENABLED=true"
+                )
+        if not 1 <= self.smtp_port <= 65535:
+            raise ValueError("SMTP_PORT must be in 1..65535")
+        if self.email_recovery_token_ttl_minutes < 1:
+            raise ValueError("EMAIL_RECOVERY_TOKEN_TTL_MINUTES must be positive")
+        if self.email_delivery_enabled and (
+            not self.smtp_host.strip() or not self.smtp_from.strip()
+        ):
+            raise ValueError(
+                "SMTP_HOST and SMTP_FROM are required when EMAIL_DELIVERY_ENABLED=true"
             )
         return self
 

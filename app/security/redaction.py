@@ -10,8 +10,12 @@ PATTERNS = [
     re.compile(r"\[Interface\][\s\S]*?(?=\n\s*\n|\Z)", re.IGNORECASE),
     re.compile(r"(/bot)[^/\s]+", re.IGNORECASE),
     re.compile(
-        r"([\"']?(?:TELEGRAM_BOT_TOKEN|TELEGRAM_PROXY_URL|APP_SECRET_KEY|external_payment_id)[\"']?\s*[:=]\s*)"
-        r"([\"'])?[^\"'\s,}]+([\"'])?",
+        r"([\"']?(?:(?:[A-Z0-9_]*"
+        r"(?:PASSWORD_HASH|PASSWORD|TOKEN|SECRET|PRIVATE_KEY)"
+        r"[A-Z0-9_]*)|TELEGRAM_PROXY_URL|SMTP_USERNAME|external_payment_id)"
+        r"[\"']?\s*[:=]\s*)(?:"
+        r"([\"'])[\s\S]*?\2"
+        r"|[^\s,}]+)",
         re.IGNORECASE,
     ),
     re.compile(
