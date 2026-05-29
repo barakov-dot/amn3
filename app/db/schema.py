@@ -39,6 +39,20 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
 
+        CREATE TABLE IF NOT EXISTS server_health_checks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            server_id INTEGER NOT NULL,
+            status TEXT NOT NULL
+                CHECK (status IN ('online', 'degraded', 'offline', 'unknown')),
+            latency_ms INTEGER,
+            ssh_ok INTEGER NOT NULL DEFAULT 0 CHECK (ssh_ok IN (0, 1)),
+            awg_ok INTEGER NOT NULL DEFAULT 0 CHECK (awg_ok IN (0, 1)),
+            udp_port_ok INTEGER NOT NULL DEFAULT 0 CHECK (udp_port_ok IN (0, 1)),
+            error TEXT,
+            checked_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE CASCADE
+        );
+
         CREATE TABLE IF NOT EXISTS plans (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -133,12 +147,29 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
 
+        CREATE TABLE IF NOT EXISTS email_recovery_tokens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            email TEXT NOT NULL,
+            token_hash TEXT NOT NULL UNIQUE,
+            purpose TEXT NOT NULL
+                CHECK (purpose IN ('verify_email', 'recover_config')),
+            device_id INTEGER,
+            expires_at TEXT NOT NULL,
+            used_at TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+        );
+
         CREATE INDEX IF NOT EXISTS idx_devices_user_status
             ON devices(user_id, status);
         CREATE INDEX IF NOT EXISTS idx_devices_server_status
             ON devices(server_id, status);
         CREATE INDEX IF NOT EXISTS idx_orders_user_status
             ON orders(user_id, status);
+        CREATE INDEX IF NOT EXISTS idx_server_health_latest
+            ON server_health_checks(server_id, checked_at DESC, id DESC);
         CREATE UNIQUE INDEX IF NOT EXISTS idx_devices_reserved_ip_unique
             ON devices(server_id, vpn_ip)
             WHERE status IN ('pending', 'active');
@@ -146,8 +177,12 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             ON device_traffic_snapshots(device_id, collected_at DESC);
         CREATE INDEX IF NOT EXISTS idx_device_traffic_server_collected
             ON device_traffic_snapshots(server_id, collected_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_email_recovery_tokens_user
+            ON email_recovery_tokens(user_id, purpose, expires_at);
         """
     )
+    _ensure_column(conn, "users", "email", "TEXT")
+    _ensure_column(conn, "users", "email_verified_at", "TEXT")
     _ensure_column(
         conn,
         "orders",

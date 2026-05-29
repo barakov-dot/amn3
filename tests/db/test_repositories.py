@@ -250,6 +250,213 @@ def test_mark_order_fulfilled_requires_existing_order(tmp_path):
         repo.mark_order_fulfilled(999, device_id)
 
 
+def test_repository_records_latest_server_health(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+
+    repo.record_server_health(
+        server_id=server_id,
+        status="online",
+        latency_ms=42,
+        ssh_ok=True,
+        awg_ok=True,
+        udp_port_ok=True,
+        error=None,
+    )
+
+    latest = repo.get_latest_server_health(server_id)
+    assert latest["status"] == "online"
+    assert latest["latency_ms"] == 42
+    assert latest["ssh_ok"] == 1
+    assert latest["awg_ok"] == 1
+    assert latest["udp_port_ok"] == 1
+    assert latest["error"] is None
+
+
+def test_list_servers_for_admin_includes_counts_and_latest_health(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id, server_id = _create_user_and_server(repo)
+    _insert_device(
+        conn,
+        user_id=user_id,
+        server_id=server_id,
+        vpn_ip="10.8.0.2",
+        peer_public_key="active-public",
+        status="active",
+    )
+    _insert_device(
+        conn,
+        user_id=user_id,
+        server_id=server_id,
+        vpn_ip="10.8.0.3",
+        peer_public_key="revoked-public",
+        status="revoked",
+    )
+    repo.record_server_health(
+        server_id=server_id,
+        status="degraded",
+        latency_ms=120,
+        ssh_ok=True,
+        awg_ok=False,
+        udp_port_ok=True,
+        error="awg service down",
+    )
+
+    servers = repo.list_servers_for_admin()
+
+    assert len(servers) == 1
+    assert servers[0]["total_device_count"] == 2
+    assert servers[0]["active_device_count"] == 1
+    assert servers[0]["health_status"] == "degraded"
+    assert servers[0]["health_latency_ms"] == 120
+    assert servers[0]["health_checked_at"] is not None
+    assert servers[0]["health_error"] == "awg service down"
+
+
+def test_list_orders_for_admin_joins_users_newest_first(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id = repo.upsert_user(
+        telegram_id=3001,
+        username="dana",
+        first_name="Dana",
+        last_name="D",
+    )
+    first_order_id = repo.create_order(
+        user_id=user_id,
+        plan_id=None,
+        payment_mode="free_test",
+    )
+    second_order_id = repo.create_order(
+        user_id=user_id,
+        plan_id=None,
+        payment_mode="free_test",
+    )
+
+    orders = repo.list_orders_for_admin()
+
+    assert [order["id"] for order in orders] == [second_order_id, first_order_id]
+    assert orders[0]["telegram_id"] == 3001
+    assert orders[0]["username"] == "dana"
+    assert orders[0]["first_name"] == "Dana"
+    assert orders[0]["last_name"] == "D"
+
+
+def test_update_user_email_stores_email_and_clears_verification_on_change(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id, _server_id = _create_user_and_server(repo)
+
+    repo.update_user_email(user_id, "bob@example.com")
+    repo.mark_user_email_verified(user_id, "2026-05-29T10:00:00Z")
+    repo.update_user_email(user_id, "new-bob@example.com")
+
+    user = repo.get_user(user_id)
+    assert user["email"] == "new-bob@example.com"
+    assert user["email_verified_at"] is None
+
+
+def test_update_user_email_keeps_verification_when_address_is_unchanged(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id, _server_id = _create_user_and_server(repo)
+
+    repo.update_user_email(user_id, "bob@example.com")
+    repo.mark_user_email_verified(user_id, "2026-05-29T10:00:00Z")
+    repo.update_user_email(user_id, "bob@example.com")
+
+    user = repo.get_user(user_id)
+    assert user["email"] == "bob@example.com"
+    assert user["email_verified_at"] == "2026-05-29T10:00:00Z"
+
+
+def test_mark_user_email_verified_stores_timestamp(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id, _server_id = _create_user_and_server(repo)
+    repo.update_user_email(user_id, "bob@example.com")
+
+    repo.mark_user_email_verified(user_id, "2026-05-29T10:00:00Z")
+
+    assert repo.get_user(user_id)["email_verified_at"] == "2026-05-29T10:00:00Z"
+
+
+def test_email_recovery_token_lifecycle(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id, server_id = _create_user_and_server(repo)
+    device_id = repo.create_device(
+        user_id=user_id,
+        server_id=server_id,
+        name="Bob phone",
+        duration_days=7,
+        vpn_ip="10.8.0.22",
+        peer_public_key="token-device-public",
+        peer_private_key_encrypted="v1:token-device-private",
+        preshared_key_encrypted="v1:token-device-psk",
+        config_version="amneziawg_v2",
+    )
+
+    token_id = repo.create_email_recovery_token(
+        user_id=user_id,
+        email="bob@example.com",
+        token_hash="sha256:token-hash",
+        purpose="recover_config",
+        expires_at="2026-05-29T12:00:00Z",
+        device_id=device_id,
+    )
+
+    token = repo.get_valid_email_recovery_token(
+        token_hash="sha256:token-hash",
+        purpose="recover_config",
+        now="2026-05-29T11:00:00Z",
+    )
+    assert token["id"] == token_id
+    assert token["user_id"] == user_id
+    assert token["email"] == "bob@example.com"
+    assert token["token_hash"] == "sha256:token-hash"
+    assert token["purpose"] == "recover_config"
+    assert token["expires_at"] == "2026-05-29T12:00:00Z"
+    assert token["device_id"] == device_id
+
+    assert (
+        repo.get_valid_email_recovery_token(
+            token_hash="sha256:token-hash",
+            purpose="verify_email",
+            now="2026-05-29T11:00:00Z",
+        )
+        is None
+    )
+    assert (
+        repo.get_valid_email_recovery_token(
+            token_hash="sha256:token-hash",
+            purpose="recover_config",
+            now="2026-05-29T12:00:00Z",
+        )
+        is None
+    )
+
+    repo.mark_email_recovery_token_used(token_id, "2026-05-29T11:30:00Z")
+
+    assert (
+        repo.get_valid_email_recovery_token(
+            token_hash="sha256:token-hash",
+            purpose="recover_config",
+            now="2026-05-29T11:45:00Z",
+        )
+        is None
+    )
+
+
 def _create_user_and_server(repo: Repository) -> tuple[int, int]:
     user_id = repo.upsert_user(
         telegram_id=2001,

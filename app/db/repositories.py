@@ -68,6 +68,36 @@ class Repository:
     def get_user(self, user_id: int) -> sqlite3.Row:
         return self._fetch_one("SELECT * FROM users WHERE id = ?", (user_id,))
 
+    def update_user_email(self, user_id: int, email: str | None) -> None:
+        user = self.get_user(user_id)
+        email_verified_at = user["email_verified_at"]
+        if user["email"] != email:
+            email_verified_at = None
+
+        self._conn.execute(
+            """
+            UPDATE users
+            SET email = ?,
+                email_verified_at = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (email, email_verified_at, user_id),
+        )
+        self._commit()
+
+    def mark_user_email_verified(self, user_id: int, verified_at: str) -> None:
+        self._conn.execute(
+            """
+            UPDATE users
+            SET email_verified_at = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (verified_at, user_id),
+        )
+        self._commit()
+
     def set_user_admin(
         self,
         *,
@@ -476,6 +506,55 @@ class Repository:
     def get_server(self, server_id: int) -> sqlite3.Row:
         return self._fetch_one("SELECT * FROM servers WHERE id = ?", (server_id,))
 
+    def record_server_health(
+        self,
+        *,
+        server_id: int,
+        status: str,
+        latency_ms: int | None,
+        ssh_ok: bool,
+        awg_ok: bool,
+        udp_port_ok: bool,
+        error: str | None,
+    ) -> int:
+        cursor = self._conn.execute(
+            """
+            INSERT INTO server_health_checks (
+                server_id,
+                status,
+                latency_ms,
+                ssh_ok,
+                awg_ok,
+                udp_port_ok,
+                error
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                server_id,
+                status,
+                latency_ms,
+                int(ssh_ok),
+                int(awg_ok),
+                int(udp_port_ok),
+                error,
+            ),
+        )
+        self._commit()
+        return int(cursor.lastrowid)
+
+    def get_latest_server_health(self, server_id: int) -> sqlite3.Row | None:
+        return self._conn.execute(
+            """
+            SELECT *
+            FROM server_health_checks
+            WHERE server_id = ?
+            ORDER BY checked_at DESC, id DESC
+            LIMIT 1
+            """,
+            (server_id,),
+        ).fetchone()
+
     def mark_order_fulfilled(self, order_id: int, device_id: int) -> None:
         order = self.get_order(order_id)
         device = self.get_device(device_id)
@@ -550,6 +629,54 @@ class Repository:
             LEFT JOIN devices ON devices.user_id = users.id
             GROUP BY users.id
             ORDER BY users.id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+
+    def list_servers_for_admin(self, *, limit: int = 100) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                servers.*,
+                COUNT(devices.id) AS total_device_count,
+                COALESCE(
+                    SUM(CASE WHEN devices.status = 'active' THEN 1 ELSE 0 END),
+                    0
+                ) AS active_device_count,
+                latest_health.status AS health_status,
+                latest_health.latency_ms AS health_latency_ms,
+                latest_health.checked_at AS health_checked_at,
+                latest_health.error AS health_error
+            FROM servers
+            LEFT JOIN devices ON devices.server_id = servers.id
+            LEFT JOIN server_health_checks AS latest_health
+                ON latest_health.id = (
+                    SELECT id
+                    FROM server_health_checks
+                    WHERE server_id = servers.id
+                    ORDER BY checked_at DESC, id DESC
+                    LIMIT 1
+                )
+            GROUP BY servers.id
+            ORDER BY servers.id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+
+    def list_orders_for_admin(self, *, limit: int = 100) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                orders.*,
+                users.telegram_id,
+                users.username,
+                users.first_name,
+                users.last_name
+            FROM orders
+            JOIN users ON users.id = orders.user_id
+            ORDER BY orders.created_at DESC, orders.id DESC
             LIMIT ?
             """,
             (limit,),
@@ -672,6 +799,63 @@ class Repository:
                 updated_at = CURRENT_TIMESTAMP
             """,
             (key, text),
+        )
+        self._commit()
+
+    def create_email_recovery_token(
+        self,
+        *,
+        user_id: int,
+        email: str,
+        token_hash: str,
+        purpose: str,
+        expires_at: str,
+        device_id: int | None = None,
+    ) -> int:
+        cursor = self._conn.execute(
+            """
+            INSERT INTO email_recovery_tokens (
+                user_id,
+                email,
+                token_hash,
+                purpose,
+                device_id,
+                expires_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (user_id, email, token_hash, purpose, device_id, expires_at),
+        )
+        self._commit()
+        return int(cursor.lastrowid)
+
+    def get_valid_email_recovery_token(
+        self,
+        *,
+        token_hash: str,
+        purpose: str,
+        now: str,
+    ) -> sqlite3.Row | None:
+        return self._conn.execute(
+            """
+            SELECT *
+            FROM email_recovery_tokens
+            WHERE token_hash = ?
+              AND purpose = ?
+              AND used_at IS NULL
+              AND expires_at > ?
+            """,
+            (token_hash, purpose, now),
+        ).fetchone()
+
+    def mark_email_recovery_token_used(self, token_id: int, used_at: str) -> None:
+        self._conn.execute(
+            """
+            UPDATE email_recovery_tokens
+            SET used_at = ?
+            WHERE id = ?
+            """,
+            (used_at, token_id),
         )
         self._commit()
 
