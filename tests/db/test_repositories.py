@@ -347,6 +347,32 @@ def test_list_orders_for_admin_joins_users_newest_first(tmp_path):
     assert orders[0]["last_name"] == "D"
 
 
+def test_list_active_devices_with_users_omits_encrypted_device_secrets(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id, server_id = _create_user_and_server(repo)
+    _insert_device(
+        conn,
+        user_id=user_id,
+        server_id=server_id,
+        vpn_ip="10.8.0.2",
+        peer_public_key="active-public",
+        status="active",
+    )
+
+    devices = repo.list_active_devices_with_users()
+
+    assert len(devices) == 1
+    keys = set(devices[0].keys())
+    assert "peer_private_key_encrypted" not in keys
+    assert "preshared_key_encrypted" not in keys
+    assert devices[0]["name"] == "active-device"
+    assert devices[0]["config_version"] == "amneziawg_v2"
+    assert "expires_at" in keys
+    assert devices[0]["telegram_id"] == 2001
+
+
 def test_update_user_email_stores_email_and_clears_verification_on_change(tmp_path):
     conn = connect(tmp_path / "test.sqlite3")
     initialize_schema(conn)

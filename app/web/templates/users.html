@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading page-heading">
+    <div>
+      <p class="eyebrow">User management</p>
+      <h1>Users</h1>
+    </div>
+    <a class="button" href="/users/new">New user</a>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>All users</h2>
+    </div>
+    {% if users %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Telegram ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Role</th>
+              <th>Devices</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+              <tr>
+                <td><a href="/users/{{ user.id }}">{{ user.telegram_id }}</a></td>
+                <td>
+                  <span class="primary-text">{{ user.username or "no username" }}</span>
+                  <span class="muted-text">{{ user.first_name or "" }} {{ user.last_name or "" }}</span>
+                </td>
+                <td>
+                  <span class="primary-text">{{ user.email or "-" }}</span>
+                  <span class="muted-text">{{ "verified" if user.email_verified_at else "unverified" }}</span>
+                </td>
+                <td><span class="status status-{{ user.status }}">{{ user.status }}</span></td>
+                <td>{{ "admin" if user.is_admin else "user" }}</td>
+                <td>{{ user.active_device_count }} / {{ user.total_device_count }}</td>
+                <td><a href="/users/{{ user.id }}">Open</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="empty-state">No users yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}

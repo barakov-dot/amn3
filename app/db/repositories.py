@@ -6,6 +6,7 @@ from collections.abc import Iterator
 from typing import Any
 
 DEFAULT_PLAN_DAYS = (3, 7, 10, 14, 30, 60, 90, 180)
+USER_STATUSES = {"active", "blocked", "deleted"}
 
 
 class Repository:
@@ -83,6 +84,106 @@ class Repository:
             WHERE id = ?
             """,
             (email, email_verified_at, user_id),
+        )
+        self._commit()
+
+    def create_user_for_admin(
+        self,
+        *,
+        telegram_id: int,
+        username: str | None,
+        first_name: str | None,
+        last_name: str | None,
+        email: str | None,
+        status: str,
+        is_admin: bool,
+    ) -> int:
+        _validate_user_status(status)
+        if self.get_user_by_telegram_id(telegram_id) is not None:
+            raise ValueError("telegram_id already exists")
+
+        cursor = self._conn.execute(
+            """
+            INSERT INTO users (
+                telegram_id,
+                username,
+                first_name,
+                last_name,
+                email,
+                status,
+                is_admin
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                telegram_id,
+                username,
+                first_name,
+                last_name,
+                email,
+                status,
+                int(is_admin),
+            ),
+        )
+        self._commit()
+        return int(cursor.lastrowid)
+
+    def update_user_for_admin(
+        self,
+        *,
+        user_id: int,
+        telegram_id: int,
+        username: str | None,
+        first_name: str | None,
+        last_name: str | None,
+        email: str | None,
+        status: str,
+        is_admin: bool,
+    ) -> None:
+        _validate_user_status(status)
+        user = self.get_user(user_id)
+        email_verified_at = user["email_verified_at"]
+        if user["email"] != email:
+            email_verified_at = None
+
+        self._conn.execute(
+            """
+            UPDATE users
+            SET telegram_id = ?,
+                username = ?,
+                first_name = ?,
+                last_name = ?,
+                email = ?,
+                email_verified_at = ?,
+                status = ?,
+                is_admin = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (
+                telegram_id,
+                username,
+                first_name,
+                last_name,
+                email,
+                email_verified_at,
+                status,
+                int(is_admin),
+                user_id,
+            ),
+        )
+        self._commit()
+
+    def set_user_status_for_admin(self, user_id: int, status: str) -> None:
+        _validate_user_status(status)
+        self._conn.execute(
+            """
+            UPDATE users
+            SET status = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (status, user_id),
         )
         self._commit()
 
@@ -615,6 +716,24 @@ class Repository:
             (target_user_id,),
         ).fetchall()
 
+    def get_user_for_admin(self, user_id: int) -> sqlite3.Row:
+        return self._fetch_one(
+            """
+            SELECT
+                users.*,
+                COUNT(devices.id) AS total_device_count,
+                COALESCE(
+                    SUM(CASE WHEN devices.status = 'active' THEN 1 ELSE 0 END),
+                    0
+                ) AS active_device_count
+            FROM users
+            LEFT JOIN devices ON devices.user_id = users.id
+            WHERE users.id = ?
+            GROUP BY users.id
+            """,
+            (user_id,),
+        )
+
     def list_users_for_admin(self, *, limit: int = 50) -> list[sqlite3.Row]:
         return self._conn.execute(
             """
@@ -632,6 +751,51 @@ class Repository:
             LIMIT ?
             """,
             (limit,),
+        ).fetchall()
+
+    def list_user_devices_for_admin(
+        self,
+        user_id: int,
+        *,
+        limit: int = 50,
+    ) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                devices.id,
+                devices.name,
+                devices.status,
+                devices.vpn_ip,
+                servers.name AS server_name
+            FROM devices
+            JOIN servers ON servers.id = devices.server_id
+            WHERE devices.user_id = ?
+            ORDER BY devices.id DESC
+            LIMIT ?
+            """,
+            (user_id, limit),
+        ).fetchall()
+
+    def list_user_orders_for_admin(
+        self,
+        user_id: int,
+        *,
+        limit: int = 50,
+    ) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                orders.*,
+                plans.name AS plan_name,
+                devices.name AS device_name
+            FROM orders
+            LEFT JOIN plans ON plans.id = orders.plan_id
+            LEFT JOIN devices ON devices.id = orders.device_id
+            WHERE orders.user_id = ?
+            ORDER BY orders.created_at DESC, orders.id DESC
+            LIMIT ?
+            """,
+            (user_id, limit),
         ).fetchall()
 
     def list_servers_for_admin(self, *, limit: int = 100) -> list[sqlite3.Row]:
@@ -705,7 +869,14 @@ class Repository:
         return self._conn.execute(
             """
             SELECT
-                devices.*,
+                devices.id,
+                devices.name,
+                devices.config_version,
+                devices.status,
+                devices.expires_at,
+                devices.first_connected_at,
+                devices.last_connected_at,
+                devices.vpn_ip,
                 users.telegram_id,
                 users.username,
                 users.first_name,
@@ -880,3 +1051,8 @@ def _host_address(value: str) -> str:
         return str(ipaddress.ip_interface(value).ip)
     except ValueError:
         return str(ipaddress.ip_address(value))
+
+
+def _validate_user_status(status: str) -> None:
+    if status not in USER_STATUSES:
+        raise ValueError(f"unsupported user status: {status}")

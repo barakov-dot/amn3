@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading page-heading">
+    <div>
+      <p class="eyebrow">User management</p>
+      <h1>{{ user.username or user.telegram_id }}</h1>
+    </div>
+    <div class="button-row">
+      <a class="button button-secondary" href="/users">Back</a>
+      <a class="button" href="/users/{{ user.id }}/edit">Edit</a>
+    </div>
+  </section>
+
+  <section class="detail-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Profile</h2>
+      </div>
+      <dl class="details">
+        <div>
+          <dt>Telegram ID</dt>
+          <dd>{{ user.telegram_id }}</dd>
+        </div>
+        <div>
+          <dt>Name</dt>
+          <dd>{{ user.first_name or "" }} {{ user.last_name or "" }}</dd>
+        </div>
+        <div>
+          <dt>Email</dt>
+          <dd>
+            {{ user.email or "-" }}
+            <span class="muted-text">{{ "verified" if user.email_verified_at else "unverified" }}</span>
+          </dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd><span class="status status-{{ user.status }}">{{ user.status }}</span></dd>
+        </div>
+        <div>
+          <dt>Role</dt>
+          <dd>{{ "admin" if user.is_admin else "user" }}</dd>
+        </div>
+        <div>
+          <dt>Devices</dt>
+          <dd>{{ user.active_device_count }} / {{ user.total_device_count }}</dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Actions</h2>
+      </div>
+      <div class="action-stack">
+        <form action="/users/{{ user.id }}/block" method="post">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-secondary" type="submit">Block</button>
+        </form>
+        <form action="/users/{{ user.id }}/delete" method="post">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-danger" type="submit">Delete</button>
+        </form>
+      </div>
+    </article>
+  </section>
+
+  <section class="dashboard-grid" aria-label="User summaries">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Devices</h2>
+      </div>
+      {% if devices %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Server</th>
+                <th>Status</th>
+                <th>IP</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for device in devices %}
+                <tr>
+                  <td>#{{ device.id }}</td>
+                  <td>{{ device.name }}</td>
+                  <td>{{ device.server_name }}</td>
+                  <td><span class="status status-{{ device.status }}">{{ device.status }}</span></td>
+                  <td>{{ device.vpn_ip }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-state">No devices.</p>
+      {% endif %}
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Orders</h2>
+      </div>
+      {% if orders %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Status</th>
+                <th>Plan</th>
+                <th>Device</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+                <tr>
+                  <td>#{{ order.id }}</td>
+                  <td>{{ order.status }}</td>
+                  <td>{{ order.plan_name or order.plan_id or "-" }}</td>
+                  <td>{{ order.device_name or "-" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-state">No orders.</p>
+      {% endif %}
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Admin actions</h2>
+      </div>
+      {% if admin_actions %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Action</th>
+                <th>Admin</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for action in admin_actions %}
+                <tr>
+                  <td>#{{ action.id }}</td>
+                  <td>{{ action.action }}</td>
+                  <td>{{ action.admin_telegram_id }}</td>
+                  <td>{{ action.created_at }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-state">No admin actions.</p>
+      {% endif %}
+    </article>
+  </section>
+{% endblock %}

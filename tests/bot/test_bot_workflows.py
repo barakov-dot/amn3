@@ -171,6 +171,29 @@ def test_build_admin_traffic_views_requires_admin(tmp_path):
     ) == []
 
 
+def test_build_admin_traffic_views_reads_active_devices(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    _create_encrypted_device(repo, user_id=user_id, server_id=server_id, name="phone")
+    workflow = BotWorkflow(repo=repo, admin_telegram_ids={9001})
+
+    views = workflow.build_admin_traffic_views(
+        admin_telegram_id=9001,
+        now="2026-05-27T12:30:00Z",
+    )
+
+    assert len(views) == 1
+    assert views[0].device_name == "phone"
+    assert views[0].config_version == "amneziawg_v2"
+    assert views[0].is_available is False
+
+
 def test_approve_order_creates_device_with_selected_config_version(tmp_path):
     repo = _repo(tmp_path)
     user_id = repo.upsert_user(
