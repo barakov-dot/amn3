@@ -647,6 +647,25 @@ class Repository:
             (device_id, user_id),
         ).fetchone()
 
+    def get_user_device_for_admin(
+        self,
+        *,
+        user_id: int,
+        device_id: int,
+    ) -> sqlite3.Row | None:
+        return self._conn.execute(
+            """
+            SELECT
+                devices.*,
+                servers.name AS server_name
+            FROM devices
+            JOIN servers ON servers.id = devices.server_id
+            WHERE devices.id = ?
+              AND devices.user_id = ?
+            """,
+            (device_id, user_id),
+        ).fetchone()
+
     def list_user_devices(
         self,
         user_id: int,
@@ -1055,6 +1074,33 @@ class Repository:
         self._conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
         self._commit()
 
+    def hard_delete_device_for_admin(self, *, user_id: int, device_id: int) -> None:
+        device = self.get_user_device(user_id=user_id, device_id=device_id)
+        if device is None:
+            raise LookupError("record not found")
+
+        self._conn.execute(
+            "UPDATE admin_actions SET target_device_id = NULL WHERE target_device_id = ?",
+            (device_id,),
+        )
+        self._conn.execute(
+            "UPDATE orders SET device_id = NULL WHERE device_id = ?",
+            (device_id,),
+        )
+        self._conn.execute(
+            "DELETE FROM device_traffic_snapshots WHERE device_id = ?",
+            (device_id,),
+        )
+        self._conn.execute(
+            "DELETE FROM email_recovery_tokens WHERE device_id = ?",
+            (device_id,),
+        )
+        self._conn.execute(
+            "DELETE FROM devices WHERE id = ? AND user_id = ?",
+            (device_id, user_id),
+        )
+        self._commit()
+
     def ignore_remote_peer(
         self,
         *,
@@ -1088,6 +1134,17 @@ class Repository:
             (server_id,),
         ).fetchall()
         return {str(row["peer_public_key"]) for row in rows}
+
+    def list_ignored_remote_peers(self, server_id: int) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT peer_public_key, allowed_ips, created_at
+            FROM ignored_remote_peers
+            WHERE server_id = ?
+            ORDER BY created_at DESC, id DESC
+            """,
+            (server_id,),
+        ).fetchall()
 
     def list_user_orders_for_admin(
         self,

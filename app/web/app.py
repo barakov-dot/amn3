@@ -958,6 +958,27 @@ def create_web_app(
             ),
         )
 
+    @app.post("/users/{user_id}/devices/{device_id}/delete")
+    async def delete_user_device(
+        request: Request,
+        user_id: int,
+        device_id: int,
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+
+        try:
+            _delete_user_device(actual_settings, request, user_id=user_id, device_id=device_id)
+        except LookupError:
+            return PlainTextResponse("Device not found", status_code=404)
+        except (ConfigError, PeerApplyError, ValueError) as exc:
+            return PlainTextResponse(str(exc), status_code=400)
+
+        return RedirectResponse(f"/users/{user_id}", status_code=303)
+
     @app.post("/users/{user_id}/destroy")
     async def destroy_user(
         request: Request,
@@ -1189,6 +1210,33 @@ def create_web_app(
                     )
         except LookupError:
             return PlainTextResponse("Server not found", status_code=404)
+        except (ConfigError, PeerApplyError, ValueError) as exc:
+            return PlainTextResponse(str(exc), status_code=400)
+
+        request.session.pop(_peer_sync_session_key(server_id), None)
+        return RedirectResponse(f"/servers/{server_id}", status_code=303)
+
+    @app.post("/servers/{server_id}/missing-devices/{device_id}/add")
+    async def add_missing_local_device_to_amnezia(
+        request: Request,
+        server_id: int,
+        device_id: int,
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+
+        try:
+            _add_missing_local_device_to_amnezia(
+                actual_settings,
+                request,
+                server_id=server_id,
+                device_id=device_id,
+            )
+        except LookupError:
+            return PlainTextResponse("Device not found", status_code=404)
         except (ConfigError, PeerApplyError, ValueError) as exc:
             return PlainTextResponse(str(exc), status_code=400)
 
@@ -1643,6 +1691,7 @@ def _collect_server_peer_sync(settings: Settings, server_id: int) -> dict[str, A
             ),
         )
         ignored_keys = repo.list_ignored_remote_peer_keys(server_id)
+        ignored_peers = [_row_to_dict(row) for row in repo.list_ignored_remote_peers(server_id)]
     unknown_peers = [
         peer
         for peer in report.unknown_remote_peers
@@ -1652,7 +1701,7 @@ def _collect_server_peer_sync(settings: Settings, server_id: int) -> dict[str, A
         "known_count": len(report.known_remote_peers),
         "unknown_count": len(unknown_peers),
         "missing_count": len(report.missing_local_peers),
-        "ignored_count": len(ignored_keys),
+        "ignored_count": len(ignored_peers),
         "unknown_peers": [
             {
                 "peer_public_key": peer.peer_public_key,
@@ -1669,6 +1718,7 @@ def _collect_server_peer_sync(settings: Settings, server_id: int) -> dict[str, A
             }
             for peer in report.missing_local_peers
         ],
+        "ignored_peers": ignored_peers,
         "error": "",
     }
 
@@ -1681,6 +1731,7 @@ def _empty_peer_sync_report(*, error: str) -> dict[str, Any]:
         "ignored_count": 0,
         "unknown_peers": [],
         "missing_peers": [],
+        "ignored_peers": [],
         "error": error,
     }
 
@@ -1699,6 +1750,43 @@ def _remove_unknown_remote_peer(
         password=settings.vps_ssh_password or None,
     )
     applier.remove_peer(server=server, peer_public_key=peer_public_key)
+
+
+def _add_missing_local_device_to_amnezia(
+    settings: Settings,
+    request: Request,
+    *,
+    server_id: int,
+    device_id: int,
+) -> None:
+    with _open_repository(settings) as (repo, _conn):
+        repo.get_server(server_id)
+        device = _row_to_dict(repo.get_device(device_id))
+    if int(device["server_id"]) != server_id:
+        raise LookupError("Device not found")
+    if str(device["status"]) not in {"pending", "active"}:
+        raise ValueError("Only pending or active local devices can be added to Amnezia")
+
+    with _open_repository(settings) as (repo, _conn):
+        server_row = _row_to_dict(repo.get_server(server_id))
+    device["server_name"] = server_row["name"]
+    _apply_devices_to_vpn(settings, [device])
+
+    with _open_repository(settings) as (repo, _conn):
+        with repo.transaction():
+            repo.get_device(device_id)
+            _record_web_server_action(
+                repo,
+                settings,
+                request,
+                action="web_server_missing_device_add",
+                server_id=server_id,
+                metadata={
+                    "device_id": device_id,
+                    "peer_public_key": device["peer_public_key"],
+                    "vpn_ip": device["vpn_ip"],
+                },
+            )
 
 
 def _load_configured_server(settings: Settings, repo: Repository, server_id: int):
@@ -1892,7 +1980,7 @@ def _enable_user_vpn(settings: Settings, request: Request, user_id: int) -> int:
         user = _row_to_dict(repo.get_user(user_id))
         devices = [_row_to_dict(row) for row in repo.list_user_devices_for_vpn_enable(user_id)]
 
-    _apply_disabled_devices_to_vpn(settings, devices)
+    _apply_devices_to_vpn(settings, devices)
     with _open_repository(settings) as (repo, _conn):
         with repo.transaction():
             enabled_count = repo.enable_user_devices(user_id)
@@ -1910,6 +1998,42 @@ def _enable_user_vpn(settings: Settings, request: Request, user_id: int) -> int:
                 },
             )
     return enabled_count
+
+
+def _delete_user_device(
+    settings: Settings,
+    request: Request,
+    *,
+    user_id: int,
+    device_id: int,
+) -> None:
+    with _open_repository(settings) as (repo, _conn):
+        user = _row_to_dict(repo.get_user(user_id))
+        device_row = repo.get_user_device_for_admin(user_id=user_id, device_id=device_id)
+        if device_row is None:
+            raise LookupError("Device not found")
+        device = _row_to_dict(device_row)
+
+    if str(device["status"]) in {"pending", "active"}:
+        _revoke_devices_from_vpn(settings, [device])
+
+    with _open_repository(settings) as (repo, _conn):
+        with repo.transaction():
+            repo.hard_delete_device_for_admin(user_id=user_id, device_id=device_id)
+            _record_web_user_action(
+                repo,
+                settings,
+                request,
+                action="web_device_delete",
+                target_user_id=user_id,
+                metadata={
+                    "telegram_id": user["telegram_id"],
+                    "deleted_device_id": device_id,
+                    "peer_public_key": device["peer_public_key"],
+                    "vpn_ip": device["vpn_ip"],
+                    "status": device["status"],
+                },
+            )
 
 
 def _destroy_user(settings: Settings, request: Request, user_id: int) -> None:
@@ -1967,7 +2091,7 @@ def _revoke_devices_from_vpn(settings: Settings, devices: list[dict[str, Any]]) 
         )
 
 
-def _apply_disabled_devices_to_vpn(
+def _apply_devices_to_vpn(
     settings: Settings,
     devices: list[dict[str, Any]],
 ) -> None:

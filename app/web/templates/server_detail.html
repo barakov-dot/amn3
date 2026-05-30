@@ -119,7 +119,7 @@
 
   <section class="panel panel-spaced">
     <div class="panel-header">
-      <h2>Peer sync</h2>
+      <h2>Синхронизация peer</h2>
     </div>
     {% if peer_sync %}
       {% if peer_sync.error %}
@@ -127,15 +127,15 @@
       {% else %}
         <dl class="details">
           <div>
-            <dt>known remote peers</dt>
+            <dt>Известные peer панели</dt>
             <dd>{{ peer_sync.known_count }}</dd>
           </div>
           <div>
-            <dt>unknown / missing</dt>
+            <dt>Amnezia / отсутствуют</dt>
             <dd>{{ peer_sync.known_count }} / {{ peer_sync.unknown_count }} / {{ peer_sync.missing_count }}</dd>
           </div>
           <div>
-            <dt>ignored remote peers</dt>
+            <dt>Созданы в Amnezia</dt>
             <dd>{{ peer_sync.ignored_count }}</dd>
           </div>
         </dl>
@@ -144,7 +144,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>Unknown remote peer</th>
+                  <th>Peer из Amnezia</th>
                   <th>Allowed IPs</th>
                   <th>Actions</th>
                 </tr>
@@ -160,15 +160,32 @@
                           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
                           <input name="peer_public_key" type="hidden" value="{{ peer.peer_public_key }}">
                           <input name="allowed_ips" type="hidden" value="{{ peer.allowed_ips }}">
-                          <button class="button button-secondary button-small" type="submit">Ignore</button>
-                        </form>
-                        <form action="/servers/{{ server.id }}/unknown-peers/remove" method="post">
-                          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
-                          <input name="peer_public_key" type="hidden" value="{{ peer.peer_public_key }}">
-                          <button class="button button-danger button-small" type="submit">Remove from Amnezia</button>
+                          <button class="button button-secondary button-small" type="submit">Пометить как созданный в Amnezia</button>
                         </form>
                       </div>
                     </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+        {% if peer_sync.ignored_peers %}
+          <div class="table-wrap panel-spaced">
+            <table>
+              <thead>
+                <tr>
+                  <th>Созданы в Amnezia</th>
+                  <th>Allowed IPs</th>
+                  <th>Пометка</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for peer in peer_sync.ignored_peers %}
+                  <tr>
+                    <td class="wrap-text">{{ peer.peer_public_key }}</td>
+                    <td>{{ peer.allowed_ips }}</td>
+                    <td>Не трогать, создано в приложении Amnezia</td>
                   </tr>
                 {% endfor %}
               </tbody>
@@ -180,9 +197,10 @@
             <table>
               <thead>
                 <tr>
-                  <th>Missing local device</th>
+                  <th>Локальное устройство без peer на сервере</th>
                   <th>Peer</th>
                   <th>IP</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -191,6 +209,12 @@
                     <td>#{{ peer.device_id }} {{ peer.device_name }}</td>
                     <td class="wrap-text">{{ peer.peer_public_key }}</td>
                     <td>{{ peer.vpn_ip }}/32</td>
+                    <td>
+                      <form action="/servers/{{ server.id }}/missing-devices/{{ peer.device_id }}/add" method="post">
+                        <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                        <button class="button button-secondary button-small" type="submit">Добавить в Amnezia</button>
+                      </form>
+                    </td>
                   </tr>
                 {% endfor %}
               </tbody>
@@ -199,7 +223,7 @@
         {% endif %}
       {% endif %}
     {% else %}
-      <p class="empty-state">Run peer sync to compare live AmneziaWG peers with local devices.</p>
+      <p class="empty-state">Запустите синхронизацию, чтобы сравнить peer в AmneziaWG с локальными устройствами.</p>
     {% endif %}
   </section>
 {% endblock %}

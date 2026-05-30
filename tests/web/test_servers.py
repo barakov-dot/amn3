@@ -9,6 +9,7 @@ from app.config.settings import Settings
 from app.db.connection import connect
 from app.db.repositories import Repository
 from app.db.schema import initialize_schema
+from app.security.crypto import SecretBox
 from app.web.app import create_web_app
 from app.web.auth import create_password_hash
 
@@ -179,6 +180,7 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
             "known_count": 1,
             "unknown_count": 1,
             "missing_count": 1,
+            "ignored_count": 1,
             "unknown_peers": [
                 {
                     "peer_public_key": "unknown-peer",
@@ -191,6 +193,12 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
                     "device_name": "missing-device",
                     "peer_public_key": "missing-peer",
                     "vpn_ip": "10.44.0.2",
+                }
+            ],
+            "ignored_peers": [
+                {
+                    "peer_public_key": "amnezia-created-peer",
+                    "allowed_ips": "10.44.0.10/32",
                 }
             ],
             "error": "",
@@ -208,11 +216,13 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
 
     assert response.status_code == 303
     assert response.headers["location"] == f"/servers/{server_id}"
-    assert "Peer sync" in page.text
-    assert "known remote peers" in page.text
+    assert "Синхронизация peer" in page.text
+    assert "Известные peer панели" in page.text
     assert "1 / 1 / 1" in page.text
     assert "unknown-peer" in page.text
     assert "10.44.0.3/32" in page.text
+    assert "Созданы в Amnezia" in page.text
+    assert "amnezia-created-peer" in page.text
     assert "missing-peer" in page.text
     with _repo(Path(settings.database_path)) as repo:
         action = _latest_admin_action(repo)
@@ -242,6 +252,54 @@ def test_ignore_unknown_remote_peer_records_it_for_server(tmp_path: Path):
         assert repo.list_ignored_remote_peer_keys(server_id) == {"unknown-peer"}
         action = _latest_admin_action(repo)
         assert action["action"] == "web_server_peer_ignore"
+
+
+def test_add_missing_local_device_to_amnezia_applies_stored_peer(
+    tmp_path: Path,
+    monkeypatch,
+):
+    calls: list[tuple[str, str, str, str]] = []
+    monkeypatch.setattr(
+        web_app,
+        "ServerConfigPeerApplier",
+        _fake_peer_applier_with_apply(calls),
+    )
+    server_config_path = _write_server_config(tmp_path, server_name="local")
+    settings = _settings(
+        tmp_path,
+        admin_telegram_ids="9001",
+        server_config_path=server_config_path,
+        vps_apply_enabled=True,
+    )
+    with _repo(Path(settings.database_path)) as repo:
+        user_id = _seed_user(repo)
+        server_id = _seed_server(repo, name="local")
+        device_id = _seed_device(
+            repo,
+            user_id=user_id,
+            server_id=server_id,
+            status="active",
+            vpn_ip="10.44.0.22",
+            peer_public_key="missing-peer",
+            preshared_key="stored-psk",
+            encrypted=True,
+        )
+    client = _authenticated_client(settings)
+    detail = client.get(f"/servers/{server_id}")
+
+    response = client.post(
+        f"/servers/{server_id}/missing-devices/{device_id}/add",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"] == f"/servers/{server_id}"
+    assert calls == [("local", "missing-peer", "stored-psk", "10.44.0.22")]
+    with _repo(Path(settings.database_path)) as repo:
+        action = _latest_admin_action(repo)
+        assert action["action"] == "web_server_missing_device_add"
+        assert '"device_id": ' + str(device_id) in action["metadata_json"]
 
 
 def test_remove_unknown_remote_peer_revokes_it_from_amnezia(
@@ -480,7 +538,7 @@ def _settings(
     return Settings(
         _env_file=None,
         telegram_bot_token="TEST_TOKEN",
-        app_secret_key="test-secret",
+        app_secret_key="test-secret-for-web-servers-1234567890",
         database_path=str(tmp_path / "amneziya.sqlite3"),
         admin_telegram_ids=admin_telegram_ids,
         server_config_path=str(server_config_path or (tmp_path / "servers.yml")),
@@ -569,7 +627,18 @@ def _seed_device(
     status: str,
     vpn_ip: str = "10.44.0.2",
     peer_public_key: str = "active-public",
+    preshared_key: str | None = None,
+    encrypted: bool = False,
 ) -> int:
+    private_key = f"{status}-private"
+    stored_preshared_key = preshared_key or f"{status}-psk"
+    if encrypted:
+        secret_box = SecretBox.from_app_secret("test-secret-for-web-servers-1234567890")
+        private_key = secret_box.encrypt_text(private_key)
+        stored_preshared_key = secret_box.encrypt_text(stored_preshared_key)
+    else:
+        private_key = f"v1:{private_key}"
+        stored_preshared_key = f"v1:{stored_preshared_key}"
     device_id = repo.create_device(
         user_id=user_id,
         server_id=server_id,
@@ -577,8 +646,8 @@ def _seed_device(
         duration_days=7,
         vpn_ip=vpn_ip,
         peer_public_key=peer_public_key,
-        peer_private_key_encrypted=f"v1:{status}-private",
-        preshared_key_encrypted=f"v1:{status}-psk",
+        peer_private_key_encrypted=private_key,
+        preshared_key_encrypted=stored_preshared_key,
         config_version="amneziawg_v2",
     )
     if status == "revoked":
@@ -664,5 +733,23 @@ def _fake_peer_applier(calls: list[tuple[str, str]]):
 
         def remove_peer(self, *, server, peer_public_key: str) -> None:
             calls.append((server.name, peer_public_key))
+
+    return FakePeerApplier
+
+
+def _fake_peer_applier_with_apply(calls: list[tuple[str, str, str, str]]):
+    class FakePeerApplier:
+        def __init__(self, server, *, password=None):
+            self._server = server
+
+        def apply_peer(
+            self,
+            *,
+            server,
+            peer_public_key: str,
+            preshared_key: str,
+            vpn_ip: str,
+        ) -> None:
+            calls.append((server.name, peer_public_key, preshared_key, vpn_ip))
 
     return FakePeerApplier

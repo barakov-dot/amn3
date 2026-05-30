@@ -274,6 +274,60 @@ def test_disable_and_enable_user_devices_preserve_existing_keys_and_ip(tmp_path)
     assert repo.get_device(active_id)["vpn_ip"] == "10.8.0.44"
 
 
+def test_hard_delete_device_for_admin_cleans_references_without_deleting_user(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+
+    user_id, server_id = _create_user_and_server(repo)
+    device_id = repo.create_device(
+        user_id=user_id,
+        server_id=server_id,
+        name="phone",
+        duration_days=7,
+        vpn_ip="10.8.0.44",
+        peer_public_key="active-public",
+        peer_private_key_encrypted="v1:active-private",
+        preshared_key_encrypted="v1:active-psk",
+        config_version="amneziawg_v2",
+    )
+    order_id = repo.create_order(user_id=user_id, plan_id=None, payment_mode="free_test")
+    repo.mark_order_fulfilled(order_id, device_id)
+    repo.record_admin_action(
+        admin_telegram_id=9001,
+        action="seed_device_action",
+        target_user_id=user_id,
+        target_device_id=device_id,
+        metadata={"source": "test"},
+    )
+    repo.record_device_traffic_snapshot(
+        device_id=device_id,
+        server_id=server_id,
+        peer_public_key="active-public",
+        rx_bytes=10,
+        tx_bytes=20,
+        source="test",
+        collected_at="2026-05-30T10:00:00Z",
+    )
+
+    repo.hard_delete_device_for_admin(user_id=user_id, device_id=device_id)
+
+    assert repo.get_user(user_id)["id"] == user_id
+    with pytest.raises(LookupError):
+        repo.get_device(device_id)
+    assert repo.get_order(order_id)["device_id"] is None
+    action = conn.execute(
+        "SELECT target_device_id FROM admin_actions WHERE action = ?",
+        ("seed_device_action",),
+    ).fetchone()
+    assert action["target_device_id"] is None
+    traffic_count = conn.execute(
+        "SELECT COUNT(*) AS count FROM device_traffic_snapshots WHERE device_id = ?",
+        (device_id,),
+    ).fetchone()
+    assert traffic_count["count"] == 0
+
+
 def test_device_ip_can_be_reused_after_revocation(tmp_path):
     conn = connect(tmp_path / "test.sqlite3")
     initialize_schema(conn)
@@ -503,6 +557,26 @@ def test_list_active_devices_with_users_omits_encrypted_device_secrets(tmp_path)
     assert devices[0]["config_version"] == "amneziawg_v2"
     assert "expires_at" in keys
     assert devices[0]["telegram_id"] == 2001
+
+
+def test_list_ignored_remote_peers_returns_rows_for_admin_display(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    _user_id, server_id = _create_user_and_server(repo)
+
+    repo.ignore_remote_peer(
+        server_id=server_id,
+        peer_public_key="amnezia-created-peer",
+        allowed_ips="10.8.0.10/32",
+    )
+
+    ignored = repo.list_ignored_remote_peers(server_id)
+
+    assert len(ignored) == 1
+    assert ignored[0]["peer_public_key"] == "amnezia-created-peer"
+    assert ignored[0]["allowed_ips"] == "10.8.0.10/32"
+    assert ignored[0]["created_at"] is not None
 
 
 def test_update_user_email_stores_email_and_clears_verification_on_change(tmp_path):

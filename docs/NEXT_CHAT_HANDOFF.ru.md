@@ -116,18 +116,19 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
 - Инструкция по web-панели и боту: `docs/WEB_PANEL_AND_BOT_SETUP.ru.md`.
 - Docker runtime для AmneziaWG: чтение и запись persistent `awg0.conf`, затем `docker restart`.
 - Peer sync в карточке сервера:
-  - known remote peers;
-  - unknown remote peers;
-  - missing local peers;
-  - ignored remote peers.
-- Действия для unknown peer:
-  - `Ignore`;
-  - `Remove from Amnezia`.
+  - известные peer панели;
+  - peer, созданные в приложении Amnezia и еще не помеченные;
+  - локальные устройства без peer на сервере;
+  - peer, помеченные как `Созданы в Amnezia`.
+- Действия в карточке сервера:
+  - `Пометить как созданный в Amnezia` для внешнего peer;
+  - `Добавить в Amnezia` для локального устройства без peer на сервере.
 - Действия в карточке пользователя:
   - `Block`;
   - `Soft delete`;
   - `Disable VPN`;
   - `Enable VPN`;
+  - `Удалить устройство` для выборочного удаления одного устройства;
   - `Delete permanently`.
 - `Disable VPN` теперь не делает `revoked`: он удаляет peer из AmneziaWG, но оставляет устройство в базе со статусом `disabled`.
 - `Enable VPN` добавляет `disabled` peer обратно в AmneziaWG с тем же IP/public key/preshared key.
@@ -160,7 +161,7 @@ docker restart <container_name>
 
 Это важно: без рестарта AmneziaWG на тестовом сервере переставала работать корректно.
 
-Unknown remote peer не нужно “adopt”-ить как существующего клиента, потому что private key неизвестен. Если надо взять такой peer под управление, правильный путь: создать нового управляемого пользователя/устройство и выдать новый конфиг.
+Peer, созданные напрямую в приложении Amnezia, не нужно удалять или adopt-ить как существующего клиента, потому что private key неизвестен. Правильная пометка в панели: `Созданы в Amnezia`. Если надо взять такой peer под управление панели, правильный путь: создать нового управляемого пользователя/устройство и выдать новый конфиг.
 
 ## 7. Текущее состояние VPS по последним логам
 
@@ -294,7 +295,7 @@ sudo journalctl -u amneziya-bot -n 200 --no-pager
 2. Подтвердить, что новый IP берется из live `awg0.conf`.
 3. Подтвердить disable/enable на реальном Docker runtime.
 4. Убедиться, что old/local peers из сети `10.8.0.0/24` не мешают новой live-сети `10.8.1.0/24`.
-5. Если останутся unknown remote peers, решить: `Ignore`, `Remove from Amnezia` или создать новых управляемых клиентов.
+5. Если останутся внешние peer из Amnezia, пометить их как `Созданы в Amnezia` или создать новых управляемых клиентов вместо удаления существующих peer.
 
 Некритично, но полезно дальше:
 

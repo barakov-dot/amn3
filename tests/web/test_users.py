@@ -401,6 +401,80 @@ def test_enable_user_vpn_reapplies_disabled_device_with_stored_key_and_ip(
         assert '"enabled_device_count": 1' in latest_action["metadata_json"]
 
 
+def test_delete_single_user_device_revokes_only_selected_peer_and_cleans_links(
+    tmp_path: Path,
+    monkeypatch,
+):
+    calls: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        web_app,
+        "ServerConfigPeerApplier",
+        _fake_peer_applier(calls),
+    )
+    server_config_path = _write_server_config(tmp_path, server_name="local")
+    settings = _settings(
+        tmp_path,
+        admin_telegram_ids="9001",
+        vps_apply_enabled=True,
+        server_config_path=server_config_path,
+    )
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=6260,
+        username="device-owner",
+        first_name="Device",
+        last_name=None,
+    )
+    target_device_id = _seed_encrypted_device(
+        Path(settings.database_path),
+        user_id=user_id,
+        private_key="client-private-key",
+        preshared_key="stored-psk",
+        status="active",
+    )
+    _seed_devices(Path(settings.database_path), user_id=user_id)
+    with _repo(Path(settings.database_path)) as repo:
+        order_id = repo.create_order(
+            user_id=user_id,
+            plan_id=None,
+            payment_mode="free_test",
+        )
+        repo.mark_order_fulfilled(order_id, target_device_id)
+        repo.record_admin_action(
+            admin_telegram_id=9001,
+            action="seed_device_action",
+            target_user_id=user_id,
+            target_device_id=target_device_id,
+            metadata={"source": "test"},
+        )
+    client = _authenticated_client(settings)
+    detail = client.get(f"/users/{user_id}")
+    assert "Удалить устройство" in detail.text
+
+    response = client.post(
+        f"/users/{user_id}/devices/{target_device_id}/delete",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"] == f"/users/{user_id}"
+    assert calls == [("local", "encrypted-public")]
+    with _repo(Path(settings.database_path)) as repo:
+        remaining_devices = repo.list_user_devices_for_admin(user_id)
+        assert target_device_id not in {int(device["id"]) for device in remaining_devices}
+        assert len(remaining_devices) == 2
+        assert repo.get_order(order_id)["device_id"] is None
+        seeded_action = repo._conn.execute(
+            "SELECT * FROM admin_actions WHERE action = ?",
+            ("seed_device_action",),
+        ).fetchone()
+        assert seeded_action["target_device_id"] is None
+        latest_action = repo.list_admin_actions_for_target_user(user_id)[0]
+        assert latest_action["action"] == "web_device_delete"
+        assert f'"deleted_device_id": {target_device_id}' in latest_action["metadata_json"]
+
+
 def test_user_detail_reveals_device_secrets_only_after_explicit_post(tmp_path: Path):
     settings = _settings(tmp_path)
     user_id = _seed_user(

@@ -127,8 +127,8 @@
                     {% endif %}
                   </td>
                   <td>
-                    {% if user.email %}
-                      <div class="button-row">
+                    <div class="button-row">
+                      {% if user.email %}
                         <form action="/users/{{ user.id }}/devices/{{ device.id }}/email-config" method="post">
                           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
                           <button class="button button-secondary button-small" type="submit">Email config</button>
@@ -137,10 +137,14 @@
                           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
                           <button class="button button-secondary button-small" type="submit">Email recovery</button>
                         </form>
-                      </div>
-                    {% else %}
-                      <span class="muted-text">No email</span>
-                    {% endif %}
+                      {% else %}
+                        <span class="muted-text">No email</span>
+                      {% endif %}
+                      <form action="/users/{{ user.id }}/devices/{{ device.id }}/delete" method="post">
+                        <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                        <button class="button button-danger button-small" type="submit">Удалить устройство</button>
+                      </form>
+                    </div>
                   </td>
                 </tr>
               {% endfor %}
