@@ -8,6 +8,10 @@
 - Секреты: `.env` намеренно не читался.
 - Цель: зафиксировать текущую auth surface перед решением о 2FA, route policy matrix и scoped tokens.
 
+## Текущее решение
+
+2026-05-30: 2FA для web-admin поставлена на паузу. Этот route inventory нужен для будущей route policy и security review, но сейчас не запускает 2FA implementation plan.
+
 ## Краткий вывод
 
 Основная HTTP-поверхность сейчас сосредоточена в `app/web/app.py`. Почти все admin/read/write web routes используют ручную проверку `_is_authenticated()`, а state-changing admin routes дополнительно проверяют CSRF через `verify_csrf_token()`.
@@ -94,7 +98,7 @@ Telegram bot surface живет отдельно в `app/bot/main.py` и `app/bo
 
 Статус: `route-inventory-first-pass`.
 
-2FA для web-admin остается полезным кандидатом, но implementation plan должен опираться на эту матрицу:
+2FA для web-admin остается возможным будущим кандидатом, но сейчас имеет статус `paused`. Если позже вернем ее в работу, implementation plan должен опираться на эту матрицу:
 
 - password-only login становится `pending_2fa`, если 2FA включена;
 - public email token endpoints не становятся обходом web-admin 2FA, потому что у них другой purpose и другой risk class;
@@ -104,5 +108,5 @@ Telegram bot surface живет отдельно в `app/bot/main.py` и `app/bo
 ## Следующие рабочие шаги
 
 1. Сверить этот route inventory с [Secret surface inventory](secret-surface-inventory.md).
-2. Обсудить actor model и recovery model для web-admin 2FA.
-3. Затем писать отдельный `amn2` implementation plan для web-admin 2FA или фиксировать, что сначала нужен actor model redesign.
+2. Использовать route inventory для Route Policy Matrix, config delivery и remote operations review.
+3. Вернуться к 2FA только после отдельного решения о необходимости этой доработки.

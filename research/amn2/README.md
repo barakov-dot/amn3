@@ -11,11 +11,14 @@
 
 ## Артефакты
 
+- [Decision log](decisions.md) - зафиксированные продуктовые решения по `amn2` transfer candidates.
 - [Auth/security inventory snapshot](current-auth-security-inventory.md) - первый read-only снимок web-admin auth, CSRF, admin model, secret handling, backup и применимости 2FA.
 - [Route/auth surface inventory](route-auth-surface-inventory.md) - первый проход по web routes, public email token endpoints и Telegram bot admin surface.
 - [Secret surface inventory](secret-surface-inventory.md) - первый проход по secrets, redaction, encrypted backup, email tokens, config delivery и 2FA implications.
 
 ## Следующие рабочие шаги
+
+Текущее решение: 2FA для web-admin поставлена на паузу, implementation plan для нее не пишем до отдельного решения.
 
 1. Config delivery inventory: все места, где config создается, отображается, отправляется, скачивается или восстанавливается.
 2. Remote operations inventory: SSH/sudo/server apply flows, dry-run, audit, redaction и rollback notes.

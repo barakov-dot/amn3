@@ -8,6 +8,10 @@
 - Секреты: `.env` намеренно не читался.
 - Цель: понять, какие secret-bearing surfaces уже есть, и что нужно учесть перед web-admin 2FA, scoped tokens и config delivery changes.
 
+## Текущее решение
+
+2026-05-30: 2FA для web-admin поставлена на паузу. Требования по TOTP storage/redaction/backup остаются справочными, но не запускают implementation plan.
+
 ## Краткий вывод
 
 В `amn2` уже есть сильная база для secret handling:
@@ -18,7 +22,7 @@
 - Backup архивируется как encrypted `.tar.enc`, включает SQLite database и manifest, но исключает app secret, Telegram token, QR files и plain configs.
 - Restore валидирует schema, checksum, device rows и decryptability encrypted device secrets до записи target database.
 
-Для web-admin 2FA это хороший фундамент, но TOTP нельзя добавлять как обычное поле без расширения secret inventory: TOTP secret должен быть encrypted, backup codes должны быть hashed, provisioning URI и raw backup codes не должны попадать в logs, email, audit metadata, backup manifest text или diagnostics.
+Если позже вернемся к web-admin 2FA, этот фундамент полезен, но TOTP нельзя добавлять как обычное поле без расширения secret inventory: TOTP secret должен быть encrypted, backup codes должны быть hashed, provisioning URI и raw backup codes не должны попадать в logs, email, audit metadata, backup manifest text или diagnostics.
 
 ## Secret classes
 
@@ -119,7 +123,7 @@ For `amn2`, conservative first step is single configured web-admin 2FA, but only
 
 Статус: `secret-inventory-first-pass`.
 
-2FA для web-admin можно переводить к design decision, но не прямо к code edit. Перед implementation plan нужно зафиксировать:
+2FA для web-admin сейчас не переводится к code edit. Если позже снимаем паузу, перед implementation plan нужно зафиксировать:
 
 - actor model: single configured web-admin or multi-operator;
 - recovery model: backup codes and local reset path;
@@ -128,6 +132,6 @@ For `amn2`, conservative first step is single configured web-admin 2FA, but only
 
 ## Следующие рабочие шаги
 
-1. Обсудить actor model и recovery model для web-admin 2FA.
-2. Если выбираем single configured web-admin, написать `amn2` implementation plan с TDD steps.
-3. Если выбираем multi-operator, сначала писать actor model design, а 2FA переносить после него.
+1. Использовать этот inventory для config delivery, backup/restore и redaction review.
+2. Не писать `amn2` implementation plan для 2FA, пока статус `paused`.
+3. Если пауза снимается, сначала обсудить actor model и recovery model.

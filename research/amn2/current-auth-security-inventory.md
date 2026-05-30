@@ -8,6 +8,10 @@
 - Секреты: `.env` намеренно не читался.
 - Цель: понять, что уже есть в `amn2` перед решением о 2FA, route policy, secret inventory, config delivery и token work.
 
+## Текущее решение
+
+2026-05-30: 2FA для web-admin поставлена на паузу. Этот snapshot остается полезным security context, но не является основанием писать implementation plan для 2FA без отдельного решения.
+
 ## Проверенные файлы
 
 - `app/web/auth.py`
@@ -25,7 +29,7 @@
 
 `amn2` уже не пустой с точки зрения security foundation. В нем есть password hashing для web-admin, session auth, CSRF, настройки web-admin с обязательными секретами при включении, admin model через Telegram/user flags, audit table для admin actions, hashed email recovery tokens, encrypted device secrets, redaction tests и encrypted backup/restore checks.
 
-Поэтому 2FA для админов выглядит правильным кандидатом, но не первым коммитом в production. Перед ней нужны две короткие карты:
+На момент анализа 2FA для админов выглядела применимым кандидатом, но по текущему решению она не идет в ближайшую работу. Если мы вернемся к этой теме, перед ней нужны две карты:
 
 1. route/auth surface inventory, чтобы 2FA не обходилась через другой auth method;
 2. secret surface inventory, чтобы TOTP secret и backup codes сразу попали в redaction, backup, restore и audit policy.
@@ -81,11 +85,11 @@
 
 ## Следующие рабочие шаги
 
-1. Решить actor model для web-admin 2FA: single configured admin или multi-operator accounts.
-2. После actor decision решить: 2FA для web-admin становится `ready-for-implementation-plan` или требует redesign actor model.
-3. Если 2FA подтверждается, писать отдельный implementation plan для `amn2`, а не править production-код из lab.
+1. Продолжить `amn2` inventory по config delivery и remote operations.
+2. Не писать implementation plan для 2FA, пока она в статусе `paused`.
+3. Если позже возвращаем 2FA в работу, сначала принять actor/recovery decision и только потом писать plan.
 
-## Вопросы для совместного разбора
+## Вопросы при возврате к 2FA
 
 1. Подтверждаем ли, что `C:\Users\SooL\Documents\Amneziya` - актуальный `amn2`, относительно которого принимаем решения?
 2. 2FA должна быть обязательной для включенного web-admin или сначала opt-in через настройку?
