@@ -101,7 +101,8 @@ Docker-сценарий простой: официальный образ `prvtp
 - Auth/session/secrets deep-dive выполнен: [prvtpro-amnezia-web-panel-auth-secrets.md](prvtpro-amnezia-web-panel-auth-secrets.md).
 - API surface deep-dive выполнен: [prvtpro-amnezia-web-panel-api-surface.md](prvtpro-amnezia-web-panel-api-surface.md).
 - Manager/SSH/protocol architecture deep-dive выполнен: [prvtpro-amnezia-web-panel-manager-architecture.md](prvtpro-amnezia-web-panel-manager-architecture.md).
-- Составить feature gap таблицу `amn2` vs Amnezia Web Panel после просмотра текущего `amn2`.
+- Feature gap и очередь решений выполнены: [prvtpro-amnezia-web-panel-feature-gap.md](prvtpro-amnezia-web-panel-feature-gap.md).
+- Следующий шаг: выбрать один `candidate-for-amn2-review` и открыть отдельный design spec уже с контекстом текущего `amn2`.
 
 ## Источники
 
@@ -118,3 +119,4 @@ Docker-сценарий простой: официальный образ `prvtp
 - [Auth, secrets и API tokens](prvtpro-amnezia-web-panel-auth-secrets.md)
 - [API surface и route guards](prvtpro-amnezia-web-panel-api-surface.md)
 - [Manager architecture](prvtpro-amnezia-web-panel-manager-architecture.md)
+- [Feature gap для `amn2` и гибрида](prvtpro-amnezia-web-panel-feature-gap.md)

@@ -132,3 +132,12 @@
 - Польза: снижает риск MITM при управлении production-сервером.
 - Риски: UX сложнее для новичков; нужен recovery-flow при переустановке VPS.
 - Статус: research после manager architecture deep-dive.
+
+### Ближайшая очередь design review
+
+- `RemoteOperationRunner`: command contract, host key enrollment, redaction, audit, dry-run и fake runner.
+- Route policy matrix: endpoint, role, auth method, side effect, risk class, audit и tests.
+- Scoped API tokens: one-time display, hash storage, scopes, expiry, revoke и owner inheritance.
+- Secret inventory and backup policy: redacted backup по умолчанию и encrypted full backup как явный режим.
+- Public/self-service config delivery: ownership tests, hashed share tokens, expiry, revoke и audit.
+- Статус: собрано из feature gap; перед реализацией нужен контекст текущего `amn2`.

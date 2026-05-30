@@ -103,3 +103,10 @@
 - Польза: UI не зависает, а оператор видит понятное состояние remote operation.
 - Риски: job queue, retry semantics, idempotency и восстановление после рестарта панели.
 - Статус: research после manager architecture deep-dive.
+
+### Hybrid feature set из Amnezia Web Panel
+
+- Идея: держать multi-protocol orchestration, attach existing server, DNS/ad-blocking/proxy adjunct services, Telegram delivery и external sync в отдельной гибридной дорожной карте.
+- Польза: `amn2` не раздувается раньше времени, а будущий продукт получает цельную operator platform vision.
+- Риски: широкий scope, сложная support matrix, много secret delivery surfaces и remote operation risks.
+- Статус: feature gap относит это к `hybrid-only` или `needs-amn2-context`, не к прямому переносу в `amn2`.
