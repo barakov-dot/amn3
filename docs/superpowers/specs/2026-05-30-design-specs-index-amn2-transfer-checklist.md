@@ -234,7 +234,7 @@ owner:
 
 | Spec | License gate | Risk gate | `amn2` readiness | Следующий artifact |
 | --- | --- | --- | --- | --- |
-| RemoteOperationRunner | pass as idea-only | high, manageable with fake runner, command policy, audit and consistency tests | `ready-for-implementation-plan-review` | first runner slice plan: health check or telemetry command policy |
+| RemoteOperationRunner | pass as idea-only | high, manageable with fake runner, command policy, audit and consistency tests | `ready-for-implementation-plan-review` | [first runner slice plan](../plans/2026-05-30-remote-operation-runner-first-slice.md) |
 | Route Policy Matrix | pass as idea-only | medium, mostly design/test discipline | `ready-for-amn2-review` | route inventory |
 | Scoped API Tokens | pass as idea-only | high, requires scopes/expiry/audit | `needs-amn2-context` | token/auth inventory |
 | Secret Inventory + Backup Policy | pass as idea-only | high, foundational | `ready-for-amn2-review` | secret inventory |

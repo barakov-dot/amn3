@@ -183,7 +183,7 @@
 
 ### Ближайшая очередь design review
 
-- `RemoteOperationRunner`: updated design готов к review перед implementation plan для первого безопасного slice.
+- `RemoteOperationRunner`: updated design готов к review; первый implementation plan подготовлен для read-only server health slice: [RemoteOperationRunner First Slice](../docs/superpowers/plans/2026-05-30-remote-operation-runner-first-slice.md).
 - `Remote operation partial-failure contract`: local/remote consistency, rollback notes и resume flow.
 - `Route Policy Matrix`: endpoint, role, auth method, side effect, risk class, audit и tests.
 - `Scoped API Tokens`: one-time display, hash storage, scopes, expiry, revoke и owner inheritance.
