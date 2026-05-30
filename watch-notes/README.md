@@ -26,3 +26,4 @@
 ## Активные upstreams
 
 - [PRVTPRO/Amnezia-Web-Panel](../research/upstreams/prvtpro-amnezia-web-panel.md)
+- [PRVTPRO/Amnezia-Web-Panel: auth, secrets и API tokens](../research/upstreams/prvtpro-amnezia-web-panel-auth-secrets.md)

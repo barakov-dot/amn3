@@ -40,3 +40,17 @@
 - Польза: продуктовая готовность для разных рынков.
 - Риски: поддержка переводов, layout regressions, терминология.
 - Статус: research.
+
+### Sensitive config delivery
+
+- Идея: выдавать VPN-конфиги через несколько каналов: web self-service, public share link, Telegram, API.
+- Польза: гибкий user delivery UX для разных сценариев.
+- Риски: каждый канал становится secret delivery path; нужны expiry, audit, revoke, rate limit и clear warnings.
+- Статус: полезно для гибридного продукта, не для быстрого переноса в `amn2`.
+
+### Operator backup/restore
+
+- Идея: иметь UI/API для backup/restore состояния панели.
+- Польза: проще переносить и восстанавливать небольшие инсталляции.
+- Риски: backup почти всегда содержит секреты; нужен redacted/full режим, encryption, restore validation и audit.
+- Статус: research.

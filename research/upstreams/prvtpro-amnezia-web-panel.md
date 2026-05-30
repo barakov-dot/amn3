@@ -98,8 +98,7 @@ Docker-сценарий простой: официальный образ `prvtp
 ## Следующие шаги
 
 - Проверить структуру `managers/` точечно: как разделены SSH, install, status, config generation и user lifecycle.
-- Проверить auth/session модель: default admin, captcha, session middleware, token lifecycle.
-- Проверить хранение sensitive data в `data.json`: server passwords, private keys, API token hashes, Telegram/Remnawave secrets.
+- Auth/session/secrets deep-dive выполнен: [prvtpro-amnezia-web-panel-auth-secrets.md](prvtpro-amnezia-web-panel-auth-secrets.md).
 - Проверить API surface и выделить endpoints, которые стоит сравнить с `amn2`.
 - Составить feature gap таблицу `amn2` vs Amnezia Web Panel после просмотра текущего `amn2`.
 
@@ -112,3 +111,7 @@ Docker-сценарий простой: официальный образ `prvtp
 - `requirements.txt`: https://github.com/PRVTPRO/Amnezia-Web-Panel/blob/main/requirements.txt
 - `docker-compose.yml`: https://github.com/PRVTPRO/Amnezia-Web-Panel/blob/main/docker-compose.yml
 - `Dockerfile`: https://github.com/PRVTPRO/Amnezia-Web-Panel/blob/main/Dockerfile
+
+## Deep-dive материалы
+
+- [Auth, secrets и API tokens](prvtpro-amnezia-web-panel-auth-secrets.md)

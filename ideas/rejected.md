@@ -21,3 +21,33 @@
 - Решение: отклонено для production.
 - Причина: сброс session/security state после рестарта и неявная конфигурация.
 - Допустимая альтернатива: обязательный persistent secret в production-режиме.
+
+### Admin-equivalent API tokens без scopes и expiry
+
+- Решение: отклонено для production как базовая модель.
+- Причина: один leaked token получает слишком широкий доступ.
+- Допустимая альтернатива: scoped tokens, expiry, revoke, audit и отдельные scopes для destructive operations.
+
+### Plaintext share tokens в общем state
+
+- Решение: отклонено для production.
+- Причина: утечка state-файла превращается в доступ к пользовательским config links.
+- Допустимая альтернатива: hashed share tokens, expiry, one-time mode, revoke и audit.
+
+### Хранение SSH passwords/private keys без отдельной secret policy
+
+- Решение: отклонено для production.
+- Причина: компрометация state-файла дает доступ к удаленным серверам.
+- Допустимая альтернатива: secret storage, encryption at rest, SSH keys, ограниченный sudoers-профиль и redacted backup.
+
+### Sudo password inside command string
+
+- Решение: отклонено для production.
+- Причина: пароль может попасть в process command line или логи команд.
+- Допустимая альтернатива: SSH keys, ограниченный sudoers, askpass/pty-less безопасная модель или агентный runner без прокидывания пароля в shell string.
+
+### Raw backup `data.json` как обычный download
+
+- Решение: отклонено для production по умолчанию.
+- Причина: backup содержит секреты и может быть случайно передан дальше.
+- Допустимая альтернатива: redacted backup по умолчанию, encrypted full backup как явный dangerous режим, audit download/restore.
