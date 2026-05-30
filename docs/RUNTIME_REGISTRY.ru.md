@@ -80,6 +80,18 @@ docker exec amnezia-awg awg show awg0
 ss -lun
 ```
 
+## Первый slice `RemoteOperationRunner`
+
+Server health checks используют первый slice `RemoteOperationRunner`:
+
+- risk class: `read-only-remote`;
+- command policy: существующий read-only allowlist;
+- remote side effects: отсутствуют;
+- local side effects: health snapshot и admin audit event при запуске из web;
+- consistency status: `read-only`.
+
+Этот slice не включает peer apply/revoke, Docker live changes, firewall changes или destructive operations.
+
 Live `apply-peer`, `revoke-peer` и `collect-traffic` для Docker пока заблокированы, пока мы не подтвердим постоянный путь к конфигу контейнера и безопасный способ применения peer.
 
 ## Быстрая проверка VPS

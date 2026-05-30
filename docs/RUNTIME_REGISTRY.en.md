@@ -36,6 +36,18 @@ cd /opt/amn2
 AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg AMN_INTERFACE=awg0 bash deploy/runtime/check_vps.sh
 ```
 
+## First `RemoteOperationRunner` Slice
+
+Server health checks use the first `RemoteOperationRunner` slice:
+
+- risk class: `read-only-remote`;
+- command policy: existing read-only allowlist;
+- remote side effects: none;
+- local side effects: health snapshot and admin audit event when launched from web;
+- consistency status: `read-only`.
+
+This slice does not enable peer apply/revoke, Docker live changes, firewall changes, or destructive operations.
+
 The script does not install packages, change firewall rules, restart services, or write files. It only reads VPS state and exits with code `1` when critical errors are found.
 
 ## Debug Snapshot
