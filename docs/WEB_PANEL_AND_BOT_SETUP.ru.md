@@ -40,6 +40,18 @@ python -m pip install -e .
 mkdir -p data logs backups config_templates
 ```
 
+Проверить runtime VPS без изменений сервера можно отдельным read-only скриптом:
+
+```bash
+bash deploy/runtime/check_vps.sh
+```
+
+Для Docker-ноды:
+
+```bash
+AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/check_vps.sh
+```
+
 Если приложение запускается от пользователя `amneziya`:
 
 ```bash
@@ -313,6 +325,16 @@ curl --socks5-hostname 127.0.0.1:1080 -I https://api.telegram.org
 ## 11. Подготовить `servers.yml`
 
 Файл `servers.yml` хранит параметры VPS и VPN-сервера. Его не коммитить в GitHub.
+
+Для старта можно скопировать один из шаблонов:
+
+```bash
+cp deploy/examples/servers.host_systemd.example.yml servers.yml
+# или
+cp deploy/examples/servers.docker.example.yml servers.yml
+```
+
+После копирования обязательно заменить `CHANGE_ME_*` значения.
 
 Минимально в нем должны быть:
 

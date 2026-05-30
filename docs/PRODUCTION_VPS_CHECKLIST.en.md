@@ -175,6 +175,16 @@ vpn.server_address: 10.8.0.1/24
 vpn.server_public_key: AmneziaWG server public key
 ```
 
+For a starter template, copy one of:
+
+```bash
+cp deploy/examples/servers.host_systemd.example.yml servers.yml
+# or
+cp deploy/examples/servers.docker.example.yml servers.yml
+```
+
+Then replace all `CHANGE_ME_*` values.
+
 ## 6. Local Check
 
 ```bash
@@ -189,6 +199,18 @@ python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-
 python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key PEER_PSK --vpn-ip 10.8.0.2 --dry-run
 python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --dry-run
 python -m app.cli server collect-traffic --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3 --dry-run
+```
+
+Before a live check, you can verify the VPS runtime without changing the server:
+
+```bash
+bash deploy/runtime/check_vps.sh
+```
+
+For a Docker node:
+
+```bash
+AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/check_vps.sh
 ```
 
 ## 8. First Live Test

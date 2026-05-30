@@ -1,0 +1,87 @@
+schema_version: 1
+project: amn2
+purpose: "Single source of truth for VPS runtime requirements and safe checks."
+
+git_policy:
+  store:
+    - "runtime manifests"
+    - "read-only check scripts"
+    - "example configs with placeholders"
+    - "documentation"
+  never_store:
+    - ".env"
+    - "servers.yml"
+    - "private SSH keys"
+    - "Telegram bot tokens"
+    - "SQLite databases"
+    - "backup archives"
+    - "generated client .conf files"
+    - "QR images"
+    - "Docker images"
+    - "virtual environments"
+    - "node_modules"
+
+common:
+  required_commands:
+    - python3
+    - git
+    - ss
+  optional_commands:
+    - curl
+    - journalctl
+  project_dirs:
+    - data
+    - logs
+    - backups
+    - config_templates
+  default_paths:
+    project_dir: /opt/amn2
+    env_file: /opt/amn2/.env
+    server_config: /opt/amn2/servers.yml
+    database: /opt/amn2/data/amneziya.sqlite3
+
+ports:
+  web_admin:
+    protocol: tcp
+    default: 3030
+  vpn:
+    protocol: udp
+    default: 30001
+
+runtime_modes:
+  host_systemd:
+    description: "AmneziaWG runs on the VPS host and is managed by systemd."
+    required_commands:
+      - systemctl
+      - awg
+      - awg-quick
+      - ss
+    settings:
+      service_name: "awg-quick@awg0"
+      interface: "awg0"
+    read_only_checks:
+      - "command -v systemctl"
+      - "command -v awg"
+      - "command -v awg-quick"
+      - "systemctl is-active awg-quick@awg0"
+      - "awg show awg0"
+      - "ss -lun"
+
+  docker:
+    description: "AmneziaWG runs inside a Docker container; current support is diagnostics-only."
+    required_commands:
+      - docker
+      - ss
+    settings:
+      container_name: "amnezia-awg"
+      interface: "awg0"
+    read_only_checks:
+      - "command -v docker"
+      - "docker ps --format '{{.Names}}'"
+      - "docker exec amnezia-awg command -v awg"
+      - "docker exec amnezia-awg awg show awg0"
+      - "ss -lun"
+    blocked_live_operations:
+      - apply-peer
+      - revoke-peer
+      - collect-traffic

@@ -13,6 +13,11 @@ Provisioning должен поддерживать два режима:
 
 ## Пример `servers.yml`
 
+Готовые стартовые примеры лежат в:
+
+- `deploy/examples/servers.host_systemd.example.yml`;
+- `deploy/examples/servers.docker.example.yml`.
+
 ```yaml
 servers:
   - name: "debian-vps-1"

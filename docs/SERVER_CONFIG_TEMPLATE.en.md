@@ -13,6 +13,11 @@ Provisioning must support two modes:
 
 ## Example `servers.yml`
 
+Starter examples are available at:
+
+- `deploy/examples/servers.host_systemd.example.yml`;
+- `deploy/examples/servers.docker.example.yml`.
+
 ```yaml
 servers:
   - name: "debian-vps-1"
