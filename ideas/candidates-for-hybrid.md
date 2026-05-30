@@ -142,3 +142,17 @@
 - Польза: будущий гибридный продукт получит нормальный monitoring surface без хаотичных endpoint-ов на каждый протокол.
 - Риски: labels и JSON fields могут раскрывать sensitive metadata; нужны scoped tokens, opt-in detailed mode и retention guidance.
 - Статус: research после [wg-easy metrics surface deep-dive](../research/upstreams/wg-easy-wg-easy-metrics-surface.md).
+
+### Operational docs system
+
+- Идея: строить docs как часть продукта: install, setup, unattended setup, migration, API, CLI, metrics, update, rollback и recovery.
+- Польза: гибридный VPN-продукт будет проще внедрять, обновлять и поддерживать на разных deployment-сценариях.
+- Риски: docs должны быть versioned и проверяемыми; migration/import docs работают с secret-bearing state.
+- Статус: research после [wg-easy operational docs/migration deep-dive](../research/upstreams/wg-easy-wg-easy-operational-docs-migration.md).
+
+### Migration/import wizard
+
+- Идея: добавить безопасный wizard для import existing config/server state: upload, validate, redacted preview, conflict report, apply, rollback note.
+- Польза: дает мягкий onboarding существующих пользователей и серверов.
+- Риски: private keys, pre-shared keys, IP conflicts, partial import, version mismatch и support burden.
+- Статус: hybrid-only candidate после [wg-easy operational docs/migration deep-dive](../research/upstreams/wg-easy-wg-easy-operational-docs-migration.md).

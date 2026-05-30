@@ -212,3 +212,17 @@
 - Польза: снижает риск забытых стандартных паролей после установки.
 - Риски: headless install, recovery, one-time bootstrap token, audit и закрытие setup после completion.
 - Статус: reinforced by [wg-easy permissions/auth/2FA deep-dive](../research/upstreams/wg-easy-wg-easy-auth-permissions-2fa.md).
+
+### Versioned migration/import guide
+
+- Идея: для breaking changes и config import держать versioned migration guide с backup-first flow, compatibility limits, preflight, rollback и test plan.
+- Польза: снижает риск потерять доступ, секреты или client state при обновлениях и переносах.
+- Риски: migration docs должны совпадать с реальным wizard/API behavior; import file содержит private keys и pre-shared keys.
+- Статус: research candidate после [wg-easy operational docs/migration deep-dive](../research/upstreams/wg-easy-wg-easy-operational-docs-migration.md).
+
+### Operational docs as transfer gate
+
+- Идея: feature не считается готовой к переносу в `amn2`, если для нее нет operator-facing docs по backup, update, rollback, recovery, security caveats и tests.
+- Польза: production-перенос становится проверяемым и поддерживаемым, а не только реализованным.
+- Риски: больше upfront work; docs must not drift from route guards and actual behavior.
+- Статус: research candidate после [wg-easy operational docs/migration deep-dive](../research/upstreams/wg-easy-wg-easy-operational-docs-migration.md).

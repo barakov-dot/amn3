@@ -191,3 +191,27 @@
 - Решение: отклонено как backup/export default.
 - Причина: metrics secret или его hash участвуют в auth и должны считаться secret-derived material.
 - Допустимая альтернатива: scoped token hash в secret inventory, redacted backup по умолчанию, rotation и revoke.
+
+### API-доступ, требующий отключить 2FA
+
+- Решение: отклонено для production.
+- Причина: интеграции не должны заставлять оператора ослаблять account security.
+- Допустимая альтернатива: scoped API tokens, route policy, expiry, revoke, owner inheritance и audit.
+
+### Migration/import без preflight и rollback story
+
+- Решение: отклонено для production.
+- Причина: import VPN state может записывать private keys, pre-shared keys, addresses и live config; ошибка может сломать доступ или потерять клиентов.
+- Допустимая альтернатива: schema validation, dry-run/preflight, redacted preview, backup-before-write, rollback note, audit и tests.
+
+### Unattended setup secrets как долгоживущие env values
+
+- Решение: отклонено как production-default.
+- Причина: initial passwords/bootstrap secrets могут остаться в compose files, shell history, process env или support bundles.
+- Допустимая альтернатива: one-time bootstrap token/local first-run secret, complexity check, automatic invalidation и cleanup guidance.
+
+### CLI config/QR output без secret-read policy
+
+- Решение: отклонено для production.
+- Причина: CLI output может раскрывать VPN config так же, как web download или QR endpoint.
+- Допустимая альтернатива: единая policy matrix для API/UI/CLI, audit, redaction и explicit operator confirmation для secret outputs.

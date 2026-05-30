@@ -165,7 +165,8 @@ Per-client firewall filtering использует собственную chain 
 - Config delivery и one-time links deep-dive выполнен: [wg-easy-wg-easy-config-delivery.md](wg-easy-wg-easy-config-delivery.md).
 - Permissions, auth и 2FA deep-dive выполнен: [wg-easy-wg-easy-auth-permissions-2fa.md](wg-easy-wg-easy-auth-permissions-2fa.md).
 - Metrics surface deep-dive выполнен: [wg-easy-wg-easy-metrics-surface.md](wg-easy-wg-easy-metrics-surface.md).
-- Проверить docs/migration guide как operational maturity pattern.
+- Operational docs и migration guide deep-dive выполнен: [wg-easy-wg-easy-operational-docs-migration.md](wg-easy-wg-easy-operational-docs-migration.md).
+- Следующий полезный шаг: собрать итоговый feature gap по `wg-easy` для `amn2` и гибридного проекта.
 
 ## Источники
 
@@ -188,3 +189,4 @@ Per-client firewall filtering использует собственную chain 
 - [Config delivery и one-time links](wg-easy-wg-easy-config-delivery.md)
 - [Permissions, auth и 2FA](wg-easy-wg-easy-auth-permissions-2fa.md)
 - [Metrics surface и privacy risks](wg-easy-wg-easy-metrics-surface.md)
+- [Operational docs и migration guide](wg-easy-wg-easy-operational-docs-migration.md)

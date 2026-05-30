@@ -127,3 +127,18 @@
 - не попадают ли metrics token/password/hash в обычный config export;
 - есть ли rate limit, scrape allowlist или local-only bind;
 - есть ли tests, что private keys, pre-shared keys, raw configs и tokens не попадают в metrics.
+
+## Operational docs/migration checklist для VPN/control-panel upstream
+
+При анализе docs и migration guide проверять:
+
+- есть ли отдельные docs для install, setup, update, migration, API, CLI, recovery;
+- описана ли image/tag/version policy и запрещен ли unsafe `latest` default;
+- начинается ли migration с backup и compatibility limits;
+- есть ли preflight/dry-run, redacted preview, rollback и recovery story;
+- какие secrets содержат backup/import files;
+- совпадает ли setup/migration guide с реальным UI/API flow;
+- есть ли unattended/headless setup и как очищаются bootstrap secrets;
+- требует ли API отключения 2FA или использует password-only auth;
+- какие CLI команды выводят configs, QR, tokens или secret state;
+- есть ли tests или checklist, что docs не расходятся с route guards и behavior.
