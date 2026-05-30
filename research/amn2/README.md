@@ -23,5 +23,5 @@
 Текущее решение: 2FA для web-admin поставлена на паузу, implementation plan для нее не пишем до отдельного решения.
 
 1. Route/config delivery policy design: actor, gate, risk class, audit и tests для каждой выдачи config.
-2. Remote operation contract design update: risk class, dry-run preview, fake runner, audit, redaction, idempotency и rollback notes.
+2. Review updated RemoteOperationRunner design и выбрать первый безопасный implementation slice.
 3. Только после этих шагов - отдельный implementation plan для первой безопасной доработки в `amn2`.

@@ -24,7 +24,7 @@ License verdict upstream: `GPL-3.0`, режим `research-only`.
 
 | Spec | Статус | Что закрывает | Первый возможный перенос в `amn2` |
 | --- | --- | --- | --- |
-| [RemoteOperationRunner](2026-05-30-remote-operation-runner-design.md) | `design-candidate` | SSH/sudo/remote execution, dry-run, audit, redaction, recovery note | inventory существующих remote operations |
+| [RemoteOperationRunner](2026-05-30-remote-operation-runner-design.md) | `design-candidate-updated-after-amn2-inventory` | SSH/sudo/remote execution, dry-run, command policy, audit, redaction, consistency и recovery note | implementation plan для первого безопасного runner slice после review |
 | [Route Policy Matrix](2026-05-30-route-policy-matrix-design.md) | `design-candidate` | route guards, auth methods, roles, scopes, risk classes, access tests | таблица текущих API endpoints |
 | [Scoped API Tokens](2026-05-30-scoped-api-tokens-design.md) | `design-candidate` | one-time token display, hash storage, scopes, expiry, revoke, owner inheritance | read-only integration token после route matrix |
 | [Secret Inventory + Backup Policy](2026-05-30-secret-inventory-backup-policy-design.md) | `design-candidate` | secret classes, inventory, redacted/full backup, restore, redaction, audit | secret inventory текущего state/storage |
@@ -118,8 +118,11 @@ target: amn2 | hybrid | both | lab-only
 - `read-only`
 - `secret-read`
 - `state-write`
+- `read-only-remote`
+- `read-only-remote-telemetry`
+- `remote-state-write`
 - `remote-exec`
-- `destructive`
+- `destructive-remote`
 
 Обязательные проверки:
 
@@ -133,7 +136,7 @@ target: amn2 | hybrid | both | lab-only
 Verdict:
 
 ```text
-risk_class: read-only | secret-read | state-write | remote-exec | destructive
+risk_class: read-only | read-only-remote | read-only-remote-telemetry | secret-read | state-write | remote-state-write | remote-exec | destructive-remote
 risk_verdict: acceptable-with-tests | needs-redesign | blocked
 ```
 
@@ -202,7 +205,7 @@ test_plan: sufficient | incomplete | missing
 
 ### 8. Rollback и recovery
 
-Для `state-write`, `remote-exec` и `destructive`:
+Для `state-write`, `remote-state-write`, `remote-exec` и `destructive-remote`:
 
 - есть recovery note;
 - есть backup-before-write или preview;
@@ -231,7 +234,7 @@ owner:
 
 | Spec | License gate | Risk gate | `amn2` readiness | Следующий artifact |
 | --- | --- | --- | --- | --- |
-| RemoteOperationRunner | pass as idea-only | high, manageable with fake runner and audit | `ready-for-amn2-review` | remote operations inventory |
+| RemoteOperationRunner | pass as idea-only | high, manageable with fake runner, command policy, audit and consistency tests | `ready-for-implementation-plan-review` | first runner slice plan: health check or telemetry command policy |
 | Route Policy Matrix | pass as idea-only | medium, mostly design/test discipline | `ready-for-amn2-review` | route inventory |
 | Scoped API Tokens | pass as idea-only | high, requires scopes/expiry/audit | `needs-amn2-context` | token/auth inventory |
 | Secret Inventory + Backup Policy | pass as idea-only | high, foundational | `ready-for-amn2-review` | secret inventory |
@@ -250,6 +253,8 @@ owner:
 7. Сопоставить найденное с пятью specs.
 
 Цель первой проверки `amn2` - не править код сразу, а получить reality map.
+
+Статус на 2026-05-30: первые route/auth, secret, config delivery и remote operations inventories уже собраны в `research/amn2/`. Следующий шаг для RemoteOperationRunner - не новый inventory, а review updated design и затем implementation plan для узкого безопасного slice.
 
 ## Что пока не переносить
 

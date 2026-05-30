@@ -105,7 +105,7 @@
 - Идея: remote operation должна описываться contract-ом: тип риска, inputs, expected side effects, timeout, allowed exit codes, redaction, audit summary и recovery note.
 - Польза: SSH/sudo/Docker/firewall операции становятся тестируемыми и обозримыми до выполнения.
 - Риски: больше design работы перед первой реализацией; понадобится fake runner и дисциплина в manager-ах.
-- Статус: design candidate описан в [RemoteOperationRunner для `amn2`](../docs/superpowers/specs/2026-05-30-remote-operation-runner-design.md); baseline уточнен в [`amn2` remote operations inventory](../research/amn2/remote-operations-inventory.md).
+- Статус: design candidate updated after [`amn2` remote operations inventory](../research/amn2/remote-operations-inventory.md): [RemoteOperationRunner для `amn2`](../docs/superpowers/specs/2026-05-30-remote-operation-runner-design.md).
 
 ### Dry-run-first remote operations
 
@@ -165,25 +165,25 @@
 - Идея: для live apply/revoke описывать, что делать если remote step уже прошел, а local DB/audit step упал, или если reset нескольких устройств оборвался посередине.
 - Польза: меньше риск рассинхронизации между VPS и локальной базой.
 - Риски: rollback не всегда возможен автоматически, поэтому нужен recovery note и повторяемый resume flow.
-- Статус: `inventory-complete-first-pass`, следующий шаг - обновить RemoteOperationRunner design.
+- Статус: covered by updated [RemoteOperationRunner design](../docs/superpowers/specs/2026-05-30-remote-operation-runner-design.md), следующий шаг - implementation plan review для узкого first slice.
 
 ### Secret-safe peer apply CLI
 
 - Идея: заменить secret-bearing CLI аргумент `--preshared-key` на stdin/file descriptor/one-shot prompt или другой безопасный канал.
 - Польза: PSK не попадает в shell history и process args.
 - Риски: UX CLI станет чуть сложнее; нужны тесты, что dry-run/live output не печатает PSK.
-- Статус: research candidate после `amn2` remote operations inventory.
+- Статус: covered as requirement in updated [RemoteOperationRunner design](../docs/superpowers/specs/2026-05-30-remote-operation-runner-design.md).
 
 ### Shared command policy for telemetry
 
 - Идея: traffic collection должна использовать общий read-only command policy или отдельную allowlist, синхронную с server health checks.
 - Польза: telemetry не станет обходом вокруг SSH command guardrails.
 - Риски: policy должна поддержать runtime-specific команды без расширения до unsafe shell.
-- Статус: research candidate после `amn2` remote operations inventory.
+- Статус: covered as requirement in updated [RemoteOperationRunner design](../docs/superpowers/specs/2026-05-30-remote-operation-runner-design.md).
 
 ### Ближайшая очередь design review
 
-- `RemoteOperationRunner`: command contract, host key enrollment, redaction, audit, dry-run и fake runner.
+- `RemoteOperationRunner`: updated design готов к review перед implementation plan для первого безопасного slice.
 - `Remote operation partial-failure contract`: local/remote consistency, rollback notes и resume flow.
 - `Route Policy Matrix`: endpoint, role, auth method, side effect, risk class, audit и tests.
 - `Scoped API Tokens`: one-time display, hash storage, scopes, expiry, revoke и owner inheritance.
