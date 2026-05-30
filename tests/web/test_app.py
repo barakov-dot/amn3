@@ -77,20 +77,36 @@ def test_login_page_uses_root_relative_static_assets_for_reverse_proxy(tmp_path:
 
     response = client.get("/login")
     stylesheet = client.get("/static/admin.css")
-    header_image = client.get("/static/brand-header.jpg")
-    mark_image = client.get("/static/brand-mark.jpg")
+    brand_image = client.get("/static/brand-full.jpg")
 
     assert 'href="/static/admin.css"' in response.text
-    assert 'src="/static/brand-mark.jpg"' in response.text
+    assert 'src="/static/brand-full.jpg"' in response.text
     assert 'class="login-visual"' in response.text
-    assert 'url("/static/brand-header.jpg")' in stylesheet.text
-    assert header_image.status_code == 200
-    assert header_image.headers["content-type"] == "image/jpeg"
-    assert mark_image.status_code == 200
-    assert mark_image.headers["content-type"] == "image/jpeg"
+    assert 'url("/static/brand' not in stylesheet.text
+    assert brand_image.status_code == 200
+    assert brand_image.headers["content-type"] == "image/jpeg"
     assert "http://pdf.smart-finance.ru/static/admin.css" not in response.text
     assert "http://pdf.smart-finance.ru/static/brand" not in response.text
     assert "http://pdf.smart-finance.ru/static/brand" not in stylesheet.text
+
+
+def test_dashboard_uses_full_brand_image_without_cropping(tmp_path: Path):
+    client = _client(tmp_path)
+    login_page = client.get("/login")
+    client.post(
+        "/login",
+        data={
+            "username": "root",
+            "password": "correct-password",
+            "csrf_token": _csrf_token(login_page.text),
+        },
+    )
+
+    response = client.get("/")
+
+    assert '<figure class="brand-masthead">' in response.text
+    assert 'src="/static/brand-full.jpg"' in response.text
+    assert 'width="1600" height="893"' in response.text
 
 
 def test_login_rejects_missing_csrf_token(tmp_path: Path):
