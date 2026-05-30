@@ -36,3 +36,9 @@
 - [wg-easy/wg-easy: metrics surface и privacy risks](../research/upstreams/wg-easy-wg-easy-metrics-surface.md)
 - [wg-easy/wg-easy: operational docs и migration guide](../research/upstreams/wg-easy-wg-easy-operational-docs-migration.md)
 - [wg-easy/wg-easy: feature gap для `amn2` и гибридного проекта](../research/upstreams/wg-easy-wg-easy-feature-gap.md)
+
+## Текущий `amn2` baseline
+
+- [`amn2`: auth/security inventory snapshot](../research/amn2/current-auth-security-inventory.md)
+- [`amn2`: route/auth surface inventory](../research/amn2/route-auth-surface-inventory.md)
+- [`amn2`: secret surface inventory](../research/amn2/secret-surface-inventory.md)

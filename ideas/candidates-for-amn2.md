@@ -142,7 +142,8 @@
 - `Scoped API Tokens`: one-time display, hash storage, scopes, expiry, revoke и owner inheritance.
 - `Secret Inventory + Backup Policy`: redacted backup по умолчанию и encrypted full backup как явный режим.
 - `Public/Self-service Config Delivery`: ownership tests, hashed share tokens, expiry, revoke и audit.
-- Статус: собрано из feature gap; перед реализацией нужен контекст текущего `amn2`.
+- `Web-admin 2FA`: после [route/auth inventory](../research/amn2/route-auth-surface-inventory.md) и [secret inventory](../research/amn2/secret-surface-inventory.md), чтобы не получить обход через другой auth method и утечку TOTP secret.
+- Статус: собрано из feature gap и первых `amn2` inventories; перед реализацией нужен actor/recovery decision.
 
 ## Из wg-easy/wg-easy
 
@@ -199,7 +200,7 @@
 - Идея: добавить 2FA как account-level security primitive, а не только UI-функцию login form.
 - Польза: снижает риск компрометации operator/user password.
 - Риски: recovery flow, rate limit, lockout, audit, secret inventory для TOTP key, запрет обхода через alternate auth methods.
-- Статус: research candidate после [wg-easy permissions/auth/2FA deep-dive](../research/upstreams/wg-easy-wg-easy-auth-permissions-2fa.md).
+- Статус: `candidate-after-inventory`; первые `amn2` inventories подтверждают пользу для web-admin, route/auth inventory выделил public email token surface, secret inventory зафиксировал TOTP storage/redaction/backup requirements. Перед implementation plan нужен actor/recovery decision: [amn2 auth/security inventory](../research/amn2/current-auth-security-inventory.md), [route/auth inventory](../research/amn2/route-auth-surface-inventory.md), [secret inventory](../research/amn2/secret-surface-inventory.md).
 
 ### Disabled user effective access gate
 

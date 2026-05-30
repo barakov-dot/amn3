@@ -48,11 +48,14 @@ Markdown-документы, README, спецификации, заметки и
 
 ```text
 research/
+  amn2/
   upstreams/
 ideas/
 watch-notes/
 prototypes/
 ```
+
+`research/amn2/` - read-only inventory текущего production-направления `amn2` для проверки применимости идей из lab.
 
 `research/upstreams/` - карточки анализа внешних проектов.
 
