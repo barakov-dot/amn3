@@ -66,3 +66,17 @@
 - как manager распознает existing server layout и отличает read-only detect от auto-fix;
 - как устроены long-running operations: sync request, background job, progress, timeout, cancellation;
 - какие test doubles нужны для SSH runner и protocol manager contract.
+
+## Повторяющиеся сигналы между upstream-проектами
+
+Если две и более независимые VPN/control-panel системы повторяют одну идею, повышать ее приоритет как candidate для design review, но не снижать license/security gate.
+
+После `PRVTPRO/Amnezia-Web-Panel` и `wg-easy/wg-easy` отдельно проверять:
+
+- config delivery как `secret-read` surface;
+- public/share/one-time links: token entropy, hash storage, expiry, revoke, rate limit, audit;
+- public-safe read models без private keys и pre-shared keys;
+- route permission wrappers и обязательный resource/ownership check;
+- metrics labels как возможную утечку user/client/IP metadata;
+- Docker capabilities, sysctls, firewall и host network changes как remote/host risk;
+- client expiration и disable/revoke semantics.

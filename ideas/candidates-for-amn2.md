@@ -143,3 +143,37 @@
 - `Secret Inventory + Backup Policy`: redacted backup по умолчанию и encrypted full backup как явный режим.
 - `Public/Self-service Config Delivery`: ownership tests, hashed share tokens, expiry, revoke и audit.
 - Статус: собрано из feature gap; перед реализацией нужен контекст текущего `amn2`.
+
+## Из wg-easy/wg-easy
+
+Источник: [research/upstreams/wg-easy-wg-easy.md](../research/upstreams/wg-easy-wg-easy.md)
+
+Статус лицензии: AGPL-3.0-only, только самостоятельная реализация идей.
+
+### Public-safe client read models
+
+- Идея: разделять internal client model и public-safe representation, где private key/pre-shared key исключены по умолчанию.
+- Польза: снижает риск случайной утечки client secrets через list/detail endpoints.
+- Риски: нужен secret inventory и тесты, что sensitive fields не попадают в API/backup/logs.
+- Статус: research after second upstream.
+
+### Client expiration
+
+- Идея: добавить expiration как часть lifecycle connection/client.
+- Польза: удобно для временного доступа, trial, support и cleanup.
+- Риски: что значит expiration для уже выданного config, нужен revoke/disable behavior и tests.
+- Статус: research after second upstream.
+
+### Metrics surface для peers
+
+- Идея: read-only metrics endpoint для configured/enabled/connected peers, traffic и latest handshake.
+- Польза: полезно для monitoring без захода в admin UI.
+- Риски: labels могут раскрывать client names/IP, нужен route policy, bearer scope и privacy review.
+- Статус: research after second upstream.
+
+### Permission wrapper with required resource check
+
+- Идея: route wrapper должен заставлять handler выполнить resource-level check, если policy зависит от конкретного resource.
+- Польза: снижает риск забыть ownership check после role check.
+- Риски: требует аккуратного API middleware/dependency design и тестов на denied ownership.
+- Статус: research after second upstream.

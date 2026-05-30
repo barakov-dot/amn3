@@ -110,3 +110,21 @@
 - Польза: `amn2` не раздувается раньше времени, а будущий продукт получает цельную operator platform vision.
 - Риски: широкий scope, сложная support matrix, много secret delivery surfaces и remote operation risks.
 - Статус: feature gap относит это к `hybrid-only` или `needs-amn2-context`, не к прямому переносу в `amn2`.
+
+## Из wg-easy/wg-easy
+
+Источник: [research/upstreams/wg-easy-wg-easy.md](../research/upstreams/wg-easy-wg-easy.md)
+
+### WireGuard-first UX reference
+
+- Идея: использовать focused WireGuard panel как эталон минимального operator UX: clients, QR/config, status, charts, expiration.
+- Польза: помогает не перегружать будущий гибридный продукт до того, как базовый protocol UX станет хорошим.
+- Риски: single-protocol UX нельзя напрямую растянуть на multi-protocol platform.
+- Статус: high-signal reference.
+
+### Per-client firewall filtering
+
+- Идея: advanced access-control для clients через per-client allowed destinations.
+- Польза: полезно для корпоративных или ограниченных VPN-сценариев.
+- Риски: firewall rules являются high-risk host changes; нужен plan/dry-run/audit/recovery.
+- Статус: hybrid-only до отдельного risk design.

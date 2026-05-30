@@ -123,3 +123,23 @@
 - Решение: отклонено как способ планирования.
 - Причина: этот lab-репозиторий не содержит код `amn2`; без ревью текущей архитектуры нельзя честно назначить функции в production backlog.
 - Допустимая альтернатива: сначала feature gap, затем отдельный design spec в контексте `amn2` для каждой выбранной идеи.
+
+## Из wg-easy/wg-easy
+
+### Прямое копирование кода wg-easy
+
+- Решение: отклонено.
+- Причина: AGPL-3.0-only и правило проекта запрещают перенос кода без отдельной проверки лицензии.
+- Допустимая альтернатива: изучать UX и production-сигналы, затем проектировать самостоятельную реализацию.
+
+### Weak one-time link token generation/storage
+
+- Решение: отклонено для production.
+- Причина: one-time/share token должен быть crypto-secure, храниться как hash и проверяться по expiry/revoke/rate limit.
+- Допустимая альтернатива: модель из `Public/Self-service Config Delivery`: hashed token, mandatory expiry, one-time mode, audit и abuse controls.
+
+### Metrics labels без privacy review
+
+- Решение: отклонено как production-default.
+- Причина: client names, IP addresses и interface labels могут раскрывать sensitive metadata.
+- Допустимая альтернатива: отдельная metrics policy: minimal labels, bearer scope, opt-in и privacy review.
