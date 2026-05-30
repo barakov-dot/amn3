@@ -181,9 +181,20 @@
 - Риски: policy должна поддержать runtime-specific команды без расширения до unsafe shell.
 - Статус: covered as requirement in updated [RemoteOperationRunner design](../docs/superpowers/specs/2026-05-30-remote-operation-runner-design.md).
 
+### Domain Zone Exclusion Policy
+
+- Идея: добавить включаемую настройку профиля/сервера, при которой выбранные доменные зоны, например `.ru` и `.рф`, не отправляются через VPN-туннель, а обрабатываются отдельной policy.
+- Важное уточнение: настоящий bypass возможен только на клиенте до входа пакета в VPN. Если трафик уже попал на VPN-сервер, он уже прошел через AmneziaWG/WireGuard; сервер может только выпустить его наружу, заблокировать или отдать DNS policy response.
+- Рекомендуемая архитектура: client-side `domain_exclusions` как основная функция, server-side DNS/egress blocklist как страховка от случайного выхода через VPN.
+- Польза: operator может явно задать split-routing policy для доменных зон, где нужен прямой маршрут клиента или запрет выхода через VPN.
+- Риски: WireGuard/AmneziaWG не поддерживает domain routing нативно; нужны OS/client-specific rules, split DNS, локальный resolver/proxy или обновляемые IP sets. IP-based approximation может устаревать, ломать CDN и давать ложное чувство точности.
+- Guardrails: default off, явное включение, preview affected zones, audit события изменения policy, тесты генерации config/profile и тесты, что server-side fallback не выдает эту функцию за полноценный client bypass.
+- Статус: новый design candidate; если принимаем, реализация должна попасть и в начальный проект `AMNEZIYA`, а не оставаться только идеей для будущего hybrid.
+
 ### Ближайшая очередь design review
 
 - `RemoteOperationRunner`: updated design готов к review; первый implementation plan подготовлен для read-only server health slice: [RemoteOperationRunner First Slice](../docs/superpowers/plans/2026-05-30-remote-operation-runner-first-slice.md).
+- `Domain Zone Exclusion Policy`: client-side split-routing для доменных зон плюс server-side DNS/egress fallback; default off, нужен отдельный design spec перед implementation plan.
 - `Remote operation partial-failure contract`: local/remote consistency, rollback notes и resume flow.
 - `Route Policy Matrix`: endpoint, role, auth method, side effect, risk class, audit и tests.
 - `Scoped API Tokens`: one-time display, hash storage, scopes, expiry, revoke и owner inheritance.

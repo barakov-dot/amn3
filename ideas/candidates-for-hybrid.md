@@ -97,6 +97,13 @@
 - Риски: конфликт IP/ports, migration path, rollback и support matrix.
 - Статус: research после manager architecture deep-dive.
 
+### Domain-aware split routing
+
+- Идея: поддержать policy-driven split routing по доменным зонам и доменам, где часть направлений идет через VPN, а часть остается на прямом маршруте клиента.
+- Польза: гибридный продукт сможет управлять DNS, proxy и VPN-routing как единой policy, а не как набором несвязанных настроек.
+- Риски: domain routing требует client-side поддержки, OS-specific rules, DNS consistency и понятной диагностики. Server-only реализация не дает настоящего bypass, если трафик уже вошел в туннель.
+- Статус: hybrid roadmap candidate; для `amn2` нужен отдельный узкий design spec `Domain Zone Exclusion Policy`, чтобы не смешивать client split-routing с server DNS/egress fallback.
+
 ### Background remote jobs
 
 - Идея: долгие install/clear/reconcile операции выполнять как jobs с progress, structured logs, timeout, cancellation и final audit summary.
