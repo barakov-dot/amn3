@@ -31,3 +31,4 @@
 - [PRVTPRO/Amnezia-Web-Panel: manager architecture](../research/upstreams/prvtpro-amnezia-web-panel-manager-architecture.md)
 - [PRVTPRO/Amnezia-Web-Panel: feature gap для `amn2` и гибрида](../research/upstreams/prvtpro-amnezia-web-panel-feature-gap.md)
 - [wg-easy/wg-easy](../research/upstreams/wg-easy-wg-easy.md)
+- [wg-easy/wg-easy: config delivery и one-time links](../research/upstreams/wg-easy-wg-easy-config-delivery.md)

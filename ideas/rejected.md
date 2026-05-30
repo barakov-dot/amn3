@@ -138,6 +138,18 @@
 - Причина: one-time/share token должен быть crypto-secure, храниться как hash и проверяться по expiry/revoke/rate limit.
 - Допустимая альтернатива: модель из `Public/Self-service Config Delivery`: hashed token, mandatory expiry, one-time mode, audit и abuse controls.
 
+### Public config route без server-side expiry validation
+
+- Решение: отклонено для production.
+- Причина: UI countdown недостаточен; expiry должен проверяться на сервере до генерации и выдачи config.
+- Допустимая альтернатива: server-side expiry check, revoke state, one-time consume transaction, rate limit и audit.
+
+### Config delivery без audit
+
+- Решение: отклонено для production.
+- Причина: VPN config является secret-read artifact; без audit невозможно понять, кто и когда получил доступ.
+- Допустимая альтернатива: audit event без raw config, route policy id, actor, connection id, delivery surface и decision.
+
 ### Metrics labels без privacy review
 
 - Решение: отклонено как production-default.

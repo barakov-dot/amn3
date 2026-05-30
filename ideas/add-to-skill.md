@@ -80,3 +80,18 @@
 - metrics labels как возможную утечку user/client/IP metadata;
 - Docker capabilities, sysctls, firewall и host network changes как remote/host risk;
 - client expiration и disable/revoke semantics.
+
+## Config delivery checklist для VPN/control-panel upstream
+
+При deep-dive по выдаче VPN-конфигов проверять:
+
+- какие delivery surfaces есть: authenticated download, QR, public link, API token, bot;
+- считается ли config/QR/URI `secret-read`;
+- где проверяется ownership/resource permission;
+- как генерируется public/share/one-time token;
+- хранится ли token как hash или plaintext;
+- есть ли server-side expiry check до выдачи config;
+- что происходит при повторном использовании one-time link;
+- есть ли revoke, rate limit и audit;
+- попадают ли config body, QR payload или token в logs/errors/backup;
+- есть ли public-safe read models без private keys и pre-shared keys.

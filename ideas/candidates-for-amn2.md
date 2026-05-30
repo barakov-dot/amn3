@@ -155,14 +155,14 @@
 - Идея: разделять internal client model и public-safe representation, где private key/pre-shared key исключены по умолчанию.
 - Польза: снижает риск случайной утечки client secrets через list/detail endpoints.
 - Риски: нужен secret inventory и тесты, что sensitive fields не попадают в API/backup/logs.
-- Статус: research after second upstream.
+- Статус: reinforced by [wg-easy config delivery deep-dive](../research/upstreams/wg-easy-wg-easy-config-delivery.md).
 
 ### Client expiration
 
 - Идея: добавить expiration как часть lifecycle connection/client.
 - Польза: удобно для временного доступа, trial, support и cleanup.
 - Риски: что значит expiration для уже выданного config, нужен revoke/disable behavior и tests.
-- Статус: research after second upstream.
+- Статус: reinforced by [wg-easy config delivery deep-dive](../research/upstreams/wg-easy-wg-easy-config-delivery.md).
 
 ### Metrics surface для peers
 

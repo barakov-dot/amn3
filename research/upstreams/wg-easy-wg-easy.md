@@ -162,7 +162,7 @@ Per-client firewall filtering использует собственную chain 
 
 ## Следующие шаги
 
-- Сделать отдельный deep-dive по config delivery и one-time links.
+- Config delivery и one-time links deep-dive выполнен: [wg-easy-wg-easy-config-delivery.md](wg-easy-wg-easy-config-delivery.md).
 - Сделать отдельный deep-dive по permissions/auth/2FA.
 - Сравнить metrics surface с будущим `amn2` route policy.
 - Проверить docs/migration guide как operational maturity pattern.
@@ -182,3 +182,7 @@ Per-client firewall filtering использует собственную chain 
 - `cnf/[oneTimeLink].ts`: https://github.com/wg-easy/wg-easy/blob/master/src/server/routes/cnf/%5BoneTimeLink%5D.ts
 - `prometheus.get.ts`: https://github.com/wg-easy/wg-easy/blob/master/src/server/routes/metrics/prometheus.get.ts
 - `firewall.ts`: https://github.com/wg-easy/wg-easy/blob/master/src/server/utils/firewall.ts
+
+## Deep-dive материалы
+
+- [Config delivery и one-time links](wg-easy-wg-easy-config-delivery.md)
