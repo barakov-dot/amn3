@@ -116,6 +116,14 @@ VPN_SERVER_RUNTIME=host_systemd
 - Telegram bot token;
 - Telegram ID администраторов.
 
+Если выбран `ssh.auth.type: password`, пароль не указывать в `servers.yml`. Он хранится только в `.env`:
+
+```env
+VPS_SSH_PASSWORD=CHANGE_ME_REAL_SSH_PASSWORD
+```
+
+Для non-interactive password auth нужен `sshpass` на сервере, где запущены бот/web-панель. SSH key auth остается предпочтительным вариантом.
+
 ## Интерактивный мастер
 
 Если `servers.yml` отсутствует или в нем остались `CHANGE_ME_*` значения, скрипт настройки должен предложить интерактивный режим.

@@ -185,6 +185,19 @@ cp deploy/examples/servers.docker.example.yml servers.yml
 
 Then replace all `CHANGE_ME_*` values.
 
+SSH key auth is preferred for the first production run. If password auth is used temporarily, install `sshpass` on the server that runs the bot/web panel:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y sshpass
+```
+
+Set the password in `.env`:
+
+```env
+VPS_SSH_PASSWORD=CHANGE_ME_REAL_SSH_PASSWORD
+```
+
 ## 6. Local Check
 
 ```bash

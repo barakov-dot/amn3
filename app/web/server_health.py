@@ -85,7 +85,10 @@ def run_server_health_check(settings: Settings, server_name: str) -> HealthSumma
 
     started_at = perf_counter()
     try:
-        report = run_server_checks(server, SystemSshClient(server))
+        report = run_server_checks(
+            server,
+            SystemSshClient(server, password=settings.vps_ssh_password),
+        )
     except Exception as exc:  # pragma: no cover - defensive boundary for UI safety.
         return HealthSummary(
             status="unknown",

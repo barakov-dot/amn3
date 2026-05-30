@@ -348,6 +348,27 @@ cp deploy/examples/servers.docker.example.yml servers.yml
 
 После копирования обязательно заменить `CHANGE_ME_*` значения.
 
+Рекомендуемый вариант для live health check - SSH key auth. Если в `servers.yml` временно указан:
+
+```yaml
+ssh:
+  auth:
+    type: password
+```
+
+то на сервере, где запущены web-панель и бот, установить `sshpass`:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y sshpass
+```
+
+И задать пароль в `.env`:
+
+```env
+VPS_SSH_PASSWORD=CHANGE_ME_REAL_SSH_PASSWORD
+```
+
 Минимально в нем должны быть:
 
 - SSH host и port;

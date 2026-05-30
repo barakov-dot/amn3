@@ -14,6 +14,40 @@ The repository stores lightweight, auditable artifacts only:
 - `deploy/examples/.env.production.example` - production `.env` template without real secrets;
 - `deploy/examples/nginx-proxy-manager-notes.ru.md` - reverse proxy notes for the web panel.
 
+## SSH Auth
+
+Recommended mode for live health checks and future apply/revoke operations is SSH key auth:
+
+```yaml
+ssh:
+  auth:
+    type: key
+    private_key_path: /root/.ssh/id_ed25519
+```
+
+Password auth is also supported, but it requires `sshpass` on the server running the bot/web panel:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y sshpass
+```
+
+In `servers.yml`:
+
+```yaml
+ssh:
+  auth:
+    type: password
+```
+
+In `.env`:
+
+```env
+VPS_SSH_PASSWORD=CHANGE_ME_REAL_SSH_PASSWORD
+```
+
+The password is passed to `sshpass` through `SSHPASS`, not through command-line arguments. If `VPS_SSH_PASSWORD` is not set or `sshpass` is missing, live health checks fail with an explicit local error before remote commands run.
+
 ## Not Stored In Git
 
 Do not store real `.env`, `servers.yml`, SSH private keys, bot tokens, `APP_SECRET_KEY`, SQLite databases, backup archives, generated client configs, QR images, Docker images, virtual environments, `node_modules`, or logs with private data.

@@ -187,6 +187,19 @@ cp deploy/examples/servers.docker.example.yml servers.yml
 
 Затем заменить `CHANGE_ME_*` на реальные значения.
 
+Для первого продового режима предпочтителен SSH key auth. Если временно используется password auth, на сервере, где запущены бот/web-панель, нужен `sshpass`:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y sshpass
+```
+
+В `.env` должен быть задан пароль:
+
+```env
+VPS_SSH_PASSWORD=CHANGE_ME_REAL_SSH_PASSWORD
+```
+
 ## 6. Локальная проверка
 
 ```bash

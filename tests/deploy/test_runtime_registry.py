@@ -16,6 +16,7 @@ def test_runtime_manifest_describes_supported_modes_and_git_policy():
     assert set(manifest["runtime_modes"]) == {"host_systemd", "docker"}
     assert "docker" in manifest["runtime_modes"]["docker"]["required_commands"]
     assert "awg" in manifest["runtime_modes"]["host_systemd"]["required_commands"]
+    assert "sshpass" in manifest["common"]["optional_commands"]
     assert "data" in manifest["common"]["project_dirs"]
     assert "config_templates" in manifest["common"]["project_dirs"]
     assert ".env" in manifest["git_policy"]["never_store"]
@@ -35,6 +36,7 @@ def test_runtime_checker_is_read_only_and_knows_both_runtimes():
     assert "docker ps --format '{{.Names}}'" in text
     assert 'docker exec "$AMN_CONTAINER_NAME" awg show "$AMN_INTERFACE"' in text
     assert "systemctl is-active" in text
+    assert "optional_command sshpass" in text
     for mutating in ("apt install", "systemctl restart", "docker rm", "rm -", "ufw allow"):
         assert mutating not in text
 

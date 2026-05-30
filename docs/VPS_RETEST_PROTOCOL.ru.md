@@ -22,6 +22,20 @@ python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-
 bash deploy/runtime/check_vps.sh
 ```
 
+Если в `servers.yml` стоит `ssh.auth.type: password`, перед live health check проверить:
+
+```bash
+command -v sshpass
+grep '^VPS_SSH_PASSWORD=' .env
+```
+
+Если `sshpass` не установлен:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y sshpass
+```
+
 Для Docker-ноды вместо обычного runtime-check:
 
 ```bash

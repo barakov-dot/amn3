@@ -14,6 +14,40 @@
 - `deploy/examples/.env.production.example` - полный production-шаблон `.env` без реальных секретов;
 - `deploy/examples/nginx-proxy-manager-notes.ru.md` - памятка по reverse proxy для web-панели.
 
+## SSH auth
+
+Рекомендуемый режим для live health check и будущего apply/revoke - SSH key auth:
+
+```yaml
+ssh:
+  auth:
+    type: key
+    private_key_path: /root/.ssh/id_ed25519
+```
+
+Password auth тоже поддержан, но требует `sshpass` на сервере, где запущен бот/web-панель:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y sshpass
+```
+
+В `servers.yml`:
+
+```yaml
+ssh:
+  auth:
+    type: password
+```
+
+В `.env`:
+
+```env
+VPS_SSH_PASSWORD=CHANGE_ME_REAL_SSH_PASSWORD
+```
+
+Пароль передается в `sshpass` через переменную `SSHPASS`, не через аргументы командной строки. Если `VPS_SSH_PASSWORD` не задан или `sshpass` не установлен, live health check вернет понятную ошибку до выполнения удаленных команд.
+
 ## Не храним в Git
 
 Не храним в Git:

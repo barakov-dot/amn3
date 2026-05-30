@@ -29,6 +29,7 @@ common:
   optional_commands:
     - curl
     - journalctl
+    - sshpass
   project_dirs:
     - data
     - logs

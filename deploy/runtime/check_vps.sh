@@ -145,6 +145,7 @@ main() {
     require_command ss
     optional_command curl
     optional_command journalctl
+    optional_command sshpass
 
     check_project_dir data
     check_project_dir logs
