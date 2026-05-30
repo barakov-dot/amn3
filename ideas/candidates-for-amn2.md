@@ -8,6 +8,8 @@
 - архитектурная совместимость с `amn2`;
 - тестовый план.
 
+Общий checklist для переноса: [Design Specs Index + `amn2` Transfer Checklist](../docs/superpowers/specs/2026-05-30-design-specs-index-amn2-transfer-checklist.md).
+
 ## Из PRVTPRO/Amnezia-Web-Panel
 
 Источник: [research/upstreams/prvtpro-amnezia-web-panel.md](../research/upstreams/prvtpro-amnezia-web-panel.md)

@@ -61,3 +61,9 @@ prototypes/
 `watch-notes/` - периодические наблюдения за upstream-проектами, релизами и security-relevant изменениями.
 
 `prototypes/` - собственные эксперименты и проверки гипотез без копирования внешнего кода.
+
+## Design specs и transfer gate
+
+Foundational design specs для будущей оценки переноса в `amn2` собраны в [Design Specs Index + `amn2` Transfer Checklist](docs/superpowers/specs/2026-05-30-design-specs-index-amn2-transfer-checklist.md).
+
+Этот index не разрешает автоматический перенос функций. Он нужен, чтобы перед работой в основном Amneziya/`amn2` проверить лицензию, пользу, риски, архитектурную совместимость, тестовый план и recovery-модель.
