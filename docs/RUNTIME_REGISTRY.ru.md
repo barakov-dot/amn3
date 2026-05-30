@@ -8,6 +8,7 @@
 
 - `deploy/runtime/manifest.yml` - единый manifest runtime-требований;
 - `deploy/runtime/check_vps.sh` - read-only проверка VPS;
+- `deploy/runtime/collect_debug_snapshot.sh` - read-only сбор диагностического snapshot;
 - `deploy/examples/servers.host_systemd.example.yml` - пример `servers.yml` для host/systemd;
 - `deploy/examples/servers.docker.example.yml` - пример `servers.yml` для Docker runtime;
 - `deploy/examples/.env.production.example` - полный production-шаблон `.env` без реальных секретов;
@@ -104,6 +105,24 @@ AMN_WEB_PORT=3030 AMN_VPN_PORT=30001 bash deploy/runtime/check_vps.sh
 ```
 
 Скрипт не устанавливает пакеты, не меняет firewall, не перезапускает сервисы и не пишет файлы. Он только читает состояние VPS и возвращает код `1`, если есть критические ошибки.
+
+## Диагностический snapshot
+
+Когда нужно прислать полный отчет с VPS:
+
+```bash
+cd /opt/amn2
+bash deploy/runtime/collect_debug_snapshot.sh
+```
+
+Для Docker runtime:
+
+```bash
+cd /opt/amn2
+AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg AMN_INTERFACE=awg0 bash deploy/runtime/collect_debug_snapshot.sh
+```
+
+Подробный список команд и правила маскировки секретов описаны в `docs/VPS_LOG_COLLECTION.ru.md`.
 
 ## Как актуализировать
 

@@ -213,6 +213,18 @@ For a Docker node:
 AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/check_vps.sh
 ```
 
+If the check fails or you need to send a full report:
+
+```bash
+bash deploy/runtime/collect_debug_snapshot.sh
+```
+
+For a Docker node:
+
+```bash
+AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/collect_debug_snapshot.sh
+```
+
 ## 8. First Live Test
 
 Run the read-only check first:

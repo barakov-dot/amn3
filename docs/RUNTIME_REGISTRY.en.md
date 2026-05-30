@@ -8,6 +8,7 @@ The repository stores lightweight, auditable artifacts only:
 
 - `deploy/runtime/manifest.yml` - runtime requirement manifest;
 - `deploy/runtime/check_vps.sh` - read-only VPS checker;
+- `deploy/runtime/collect_debug_snapshot.sh` - read-only debug snapshot collector;
 - `deploy/examples/servers.host_systemd.example.yml` - host/systemd server config example;
 - `deploy/examples/servers.docker.example.yml` - Docker server config example;
 - `deploy/examples/.env.production.example` - production `.env` template without real secrets;
@@ -36,3 +37,21 @@ AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg AMN_INTERFACE=awg0 bash deploy
 ```
 
 The script does not install packages, change firewall rules, restart services, or write files. It only reads VPS state and exits with code `1` when critical errors are found.
+
+## Debug Snapshot
+
+When a full VPS report is needed:
+
+```bash
+cd /opt/amn2
+bash deploy/runtime/collect_debug_snapshot.sh
+```
+
+For Docker runtime:
+
+```bash
+cd /opt/amn2
+AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg AMN_INTERFACE=awg0 bash deploy/runtime/collect_debug_snapshot.sh
+```
+
+The detailed command list and redaction rules are documented in `docs/VPS_LOG_COLLECTION.ru.md`.

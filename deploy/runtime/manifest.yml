@@ -40,6 +40,21 @@ common:
     server_config: /opt/amn2/servers.yml
     database: /opt/amn2/data/amneziya.sqlite3
 
+diagnostics:
+  scripts:
+    - deploy/runtime/check_vps.sh
+    - deploy/runtime/collect_debug_snapshot.sh
+  default_log_lines: 200
+  redacted_keys:
+    - TELEGRAM_BOT_TOKEN
+    - APP_SECRET_KEY
+    - WEB_ADMIN_PASSWORD_HASH
+    - WEB_ADMIN_SESSION_SECRET
+    - SMTP_PASSWORD
+    - VPS_SSH_PASSWORD
+    - PrivateKey
+    - PresharedKey
+
 ports:
   web_admin:
     protocol: tcp

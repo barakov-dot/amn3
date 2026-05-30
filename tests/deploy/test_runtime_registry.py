@@ -20,6 +20,8 @@ def test_runtime_manifest_describes_supported_modes_and_git_policy():
     assert "config_templates" in manifest["common"]["project_dirs"]
     assert ".env" in manifest["git_policy"]["never_store"]
     assert "servers.yml" in manifest["git_policy"]["never_store"]
+    assert "deploy/runtime/collect_debug_snapshot.sh" in manifest["diagnostics"]["scripts"]
+    assert "APP_SECRET_KEY" in manifest["diagnostics"]["redacted_keys"]
 
 
 def test_runtime_checker_is_read_only_and_knows_both_runtimes():
@@ -34,6 +36,25 @@ def test_runtime_checker_is_read_only_and_knows_both_runtimes():
     assert 'docker exec "$AMN_CONTAINER_NAME" awg show "$AMN_INTERFACE"' in text
     assert "systemctl is-active" in text
     for mutating in ("apt install", "systemctl restart", "docker rm", "rm -", "ufw allow"):
+        assert mutating not in text
+
+
+def test_debug_snapshot_script_is_read_only_and_redacts_secrets():
+    script_path = ROOT / "deploy/runtime/collect_debug_snapshot.sh"
+
+    text = script_path.read_text(encoding="utf-8")
+
+    assert "AMN_RUNTIME" in text
+    assert "AMN_LOG_LINES" in text
+    assert "redact_stream" in text
+    assert "TELEGRAM_BOT_TOKEN" in text
+    assert "APP_SECRET_KEY" in text
+    assert "WEB_ADMIN_SESSION_SECRET" in text
+    assert "python -m app.cli server check" in text
+    assert "deploy/runtime/check_vps.sh" in text
+    assert "docker inspect" in text
+    assert 'docker exec "$AMN_CONTAINER_NAME" awg show "$AMN_INTERFACE"' in text
+    for mutating in ("apt install", "systemctl restart", "docker rm", "rm -", "ufw allow", "docker stop"):
         assert mutating not in text
 
 
@@ -63,5 +84,21 @@ def test_runtime_docs_point_to_manifest_checker_and_examples():
 
     assert "deploy/runtime/manifest.yml" in text
     assert "deploy/runtime/check_vps.sh" in text
+    assert "deploy/runtime/collect_debug_snapshot.sh" in text
     assert "deploy/examples/servers.docker.example.yml" in text
     assert "Не храним в Git" in text
+
+
+def test_vps_log_collection_doc_lists_commands_and_redaction_rules():
+    doc_path = ROOT / "docs/VPS_LOG_COLLECTION.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+
+    assert "deploy/runtime/collect_debug_snapshot.sh" in text
+    assert "git log -1 --oneline" in text
+    assert "python -m app.cli server check" in text
+    assert "docker ps --format" in text
+    assert "journalctl -u amneziya-web" in text
+    assert "tail -n 200 logs/app.log" in text
+    assert "TELEGRAM_BOT_TOKEN" in text
+    assert "APP_SECRET_KEY" in text

@@ -52,6 +52,18 @@ bash deploy/runtime/check_vps.sh
 AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/check_vps.sh
 ```
 
+Если нужно собрать полный отчет для диагностики:
+
+```bash
+bash deploy/runtime/collect_debug_snapshot.sh
+```
+
+Для Docker-ноды:
+
+```bash
+AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/collect_debug_snapshot.sh
+```
+
 Если приложение запускается от пользователя `amneziya`:
 
 ```bash
