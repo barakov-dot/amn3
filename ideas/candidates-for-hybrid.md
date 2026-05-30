@@ -135,3 +135,10 @@
 - Польза: multi-protocol продукт будет безопаснее расширять, если auth methods и roles заданы до появления integrations, bot и public links.
 - Риски: recovery flow, support role, scoped tokens, audit и secret inventory нужно проектировать вместе, а не отдельными patches.
 - Статус: research после [wg-easy permissions/auth/2FA deep-dive](../research/upstreams/wg-easy-wg-easy-auth-permissions-2fa.md).
+
+### Observability baseline
+
+- Идея: заложить единый metrics registry для протоколов: aggregate counts, per-peer status, traffic, last-seen/handshake и privacy class для каждого field.
+- Польза: будущий гибридный продукт получит нормальный monitoring surface без хаотичных endpoint-ов на каждый протокол.
+- Риски: labels и JSON fields могут раскрывать sensitive metadata; нужны scoped tokens, opt-in detailed mode и retention guidance.
+- Статус: research после [wg-easy metrics surface deep-dive](../research/upstreams/wg-easy-wg-easy-metrics-surface.md).

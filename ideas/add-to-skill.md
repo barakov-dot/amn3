@@ -112,3 +112,18 @@
 - есть ли recovery codes или documented recovery flow;
 - есть ли rate limit, lockout и audit для login/TOTP failures;
 - отделены ли browser session и integration tokens по scopes, expiry и revoke.
+
+## Metrics/observability checklist для VPN/control-panel upstream
+
+При deep-dive по metrics surface проверять:
+
+- какие endpoints есть: Prometheus, JSON, health, status, dashboard API;
+- включены ли metrics по умолчанию или требуют explicit enable;
+- обязательна ли auth, или bearer/password опционален;
+- какие labels/fields раскрывают client name, user identity, IP, endpoint, public key, traffic, handshake;
+- есть ли separate aggregate и detailed modes;
+- какие metrics уходят в long-retention monitoring systems;
+- есть ли scoped token, expiry, revoke, owner inheritance и audit;
+- не попадают ли metrics token/password/hash в обычный config export;
+- есть ли rate limit, scrape allowlist или local-only bind;
+- есть ли tests, что private keys, pre-shared keys, raw configs и tokens не попадают в metrics.

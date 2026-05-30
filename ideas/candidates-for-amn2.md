@@ -169,7 +169,21 @@
 - Идея: read-only metrics endpoint для configured/enabled/connected peers, traffic и latest handshake.
 - Польза: полезно для monitoring без захода в admin UI.
 - Риски: labels могут раскрывать client names/IP, нужен route policy, bearer scope и privacy review.
-- Статус: research after second upstream.
+- Статус: reinforced by [wg-easy metrics surface deep-dive](../research/upstreams/wg-easy-wg-easy-metrics-surface.md).
+
+### Metrics privacy policy
+
+- Идея: для metrics заранее описывать privacy class каждого label/field: aggregate, per-peer pseudonymous, per-user, IP/endpoint, activity metadata.
+- Польза: снижает риск утечки client names, IP, endpoint и usage metadata в Prometheus/Grafana/backup.
+- Риски: меньше удобства в dashboards по умолчанию; нужны opt-in labels и tests.
+- Статус: research candidate после [wg-easy metrics surface deep-dive](../research/upstreams/wg-easy-wg-easy-metrics-surface.md).
+
+### Scoped metrics token
+
+- Идея: metrics endpoint должен использовать scoped token вроде `metrics:read`, а не optional broad password.
+- Польза: expiry, revoke, owner inheritance и audit становятся едиными с общей token model.
+- Риски: нужна связка с `Scoped API Tokens` и migration story для Prometheus scrape configs.
+- Статус: research candidate после [wg-easy metrics surface deep-dive](../research/upstreams/wg-easy-wg-easy-metrics-surface.md).
 
 ### Permission wrapper with required resource check
 

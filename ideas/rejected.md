@@ -173,3 +173,21 @@
 - Решение: отклонено как production-default.
 - Причина: client names, IP addresses и interface labels могут раскрывать sensitive metadata.
 - Допустимая альтернатива: отдельная metrics policy: minimal labels, bearer scope, opt-in и privacy review.
+
+### Internet-facing metrics без обязательной auth/network policy
+
+- Решение: отклонено для production.
+- Причина: read-only metrics могут раскрывать usage, client metadata, topology и activity state.
+- Допустимая альтернатива: disabled by default, local-only/allowlist или scoped `metrics:read` token, rate limit и audit для включения.
+
+### JSON metrics с per-client metadata как public/read-only endpoint
+
+- Решение: отклонено для production.
+- Причина: endpoint/publicKey/handshake/traffic являются sensitive metadata, даже если private keys не возвращаются.
+- Допустимая альтернатива: отдельная detailed-metrics policy, scoped token, minimal fields by default и opt-in privacy review.
+
+### Metrics password/hash как обычное config field
+
+- Решение: отклонено как backup/export default.
+- Причина: metrics secret или его hash участвуют в auth и должны считаться secret-derived material.
+- Допустимая альтернатива: scoped token hash в secret inventory, redacted backup по умолчанию, rotation и revoke.
