@@ -166,7 +166,8 @@ Per-client firewall filtering использует собственную chain 
 - Permissions, auth и 2FA deep-dive выполнен: [wg-easy-wg-easy-auth-permissions-2fa.md](wg-easy-wg-easy-auth-permissions-2fa.md).
 - Metrics surface deep-dive выполнен: [wg-easy-wg-easy-metrics-surface.md](wg-easy-wg-easy-metrics-surface.md).
 - Operational docs и migration guide deep-dive выполнен: [wg-easy-wg-easy-operational-docs-migration.md](wg-easy-wg-easy-operational-docs-migration.md).
-- Следующий полезный шаг: собрать итоговый feature gap по `wg-easy` для `amn2` и гибридного проекта.
+- Итоговый feature gap выполнен: [wg-easy-wg-easy-feature-gap.md](wg-easy-wg-easy-feature-gap.md).
+- Следующий полезный шаг: разобрать вопросы из feature gap и открыть текущий `amn2` для inventory.
 
 ## Источники
 
@@ -190,3 +191,4 @@ Per-client firewall filtering использует собственную chain 
 - [Permissions, auth и 2FA](wg-easy-wg-easy-auth-permissions-2fa.md)
 - [Metrics surface и privacy risks](wg-easy-wg-easy-metrics-surface.md)
 - [Operational docs и migration guide](wg-easy-wg-easy-operational-docs-migration.md)
+- [Feature gap для `amn2` и гибридного проекта](wg-easy-wg-easy-feature-gap.md)

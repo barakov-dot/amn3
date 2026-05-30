@@ -115,6 +115,8 @@
 
 Источник: [research/upstreams/wg-easy-wg-easy.md](../research/upstreams/wg-easy-wg-easy.md)
 
+Итоговый feature gap: [research/upstreams/wg-easy-wg-easy-feature-gap.md](../research/upstreams/wg-easy-wg-easy-feature-gap.md)
+
 ### WireGuard-first UX reference
 
 - Идея: использовать focused WireGuard panel как эталон минимального operator UX: clients, QR/config, status, charts, expiration.

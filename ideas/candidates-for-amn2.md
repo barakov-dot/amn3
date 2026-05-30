@@ -150,6 +150,8 @@
 
 Статус лицензии: AGPL-3.0-only, только самостоятельная реализация идей.
 
+Итоговый feature gap: [research/upstreams/wg-easy-wg-easy-feature-gap.md](../research/upstreams/wg-easy-wg-easy-feature-gap.md)
+
 ### Public-safe client read models
 
 - Идея: разделять internal client model и public-safe representation, где private key/pre-shared key исключены по умолчанию.

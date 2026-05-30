@@ -35,3 +35,4 @@
 - [wg-easy/wg-easy: permissions, auth и 2FA](../research/upstreams/wg-easy-wg-easy-auth-permissions-2fa.md)
 - [wg-easy/wg-easy: metrics surface и privacy risks](../research/upstreams/wg-easy-wg-easy-metrics-surface.md)
 - [wg-easy/wg-easy: operational docs и migration guide](../research/upstreams/wg-easy-wg-easy-operational-docs-migration.md)
+- [wg-easy/wg-easy: feature gap для `amn2` и гибридного проекта](../research/upstreams/wg-easy-wg-easy-feature-gap.md)
