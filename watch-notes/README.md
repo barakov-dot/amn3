@@ -43,3 +43,4 @@
 - [`amn2`: auth/security inventory snapshot](../research/amn2/current-auth-security-inventory.md)
 - [`amn2`: route/auth surface inventory](../research/amn2/route-auth-surface-inventory.md)
 - [`amn2`: secret surface inventory](../research/amn2/secret-surface-inventory.md)
+- [`amn2`: config delivery inventory](../research/amn2/config-delivery-inventory.md)

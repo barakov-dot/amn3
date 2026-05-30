@@ -28,7 +28,7 @@
 - Идея: отделить пользовательские `/my/*` endpoints от admin API.
 - Польза: меньше риска случайно открыть admin-действия обычному пользователю.
 - Риски: authorization boundary, тесты на privilege escalation.
-- Статус: design candidate описан в [Public/Self-service Config Delivery для `amn2`](../docs/superpowers/specs/2026-05-30-public-self-service-config-delivery-design.md).
+- Статус: design candidate описан в [Public/Self-service Config Delivery для `amn2`](../docs/superpowers/specs/2026-05-30-public-self-service-config-delivery-design.md); текущий `amn2` baseline уточнен в [config delivery inventory](../research/amn2/config-delivery-inventory.md).
 
 ### Параллельная проверка статусов
 
@@ -42,7 +42,7 @@
 - Идея: публичные ссылки для получения конфигурации без доступа к панели.
 - Польза: удобная выдача конфигов пользователям.
 - Риски: срок жизни ссылок, одноразовость, аудит, утечки, revoke.
-- Статус: design candidate описан в [Public/Self-service Config Delivery для `amn2`](../docs/superpowers/specs/2026-05-30-public-self-service-config-delivery-design.md).
+- Статус: design candidate описан в [Public/Self-service Config Delivery для `amn2`](../docs/superpowers/specs/2026-05-30-public-self-service-config-delivery-design.md); после `amn2` inventory `vpn://`, QR и `.conf` явно считаются `secret-read` артефактами.
 
 ### OpenAPI-группировка по доменам
 
@@ -135,13 +135,39 @@
 - Риски: UX сложнее для новичков; нужен recovery-flow при переустановке VPS.
 - Статус: research после manager architecture deep-dive.
 
+## Из текущего `amn2` baseline
+
+Источник: [`amn2`: config delivery inventory](../research/amn2/config-delivery-inventory.md)
+
+### Config delivery policy table
+
+- Идея: перед новыми download/share/recovery endpoints описывать actor, gate, risk class, output, audit и tests для каждой выдачи config.
+- Польза: снижает риск случайно сделать public/self-service flow шире, чем задумано.
+- Риски: policy должна оставаться синхронизированной с реальными routes, bot workflows и email recovery.
+- Статус: `inventory-complete-first-pass`, следующий шаг - route/config delivery policy design.
+
+### Secret-bearing import links
+
+- Идея: считать `vpn://` import link таким же чувствительным артефактом, как `.conf` и QR, потому что он reversibly encodes полный config.
+- Польза: меньше риск положить link в audit, logs, metadata, diagnostics или публичный preview.
+- Риски: UX и support могут воспринимать link как “не секрет”, если private key не виден строкой.
+- Статус: добавить в policy/test checklist перед любыми delivery changes.
+
+### Public recovery audit and rate-limit review
+
+- Идея: отдельно проверить rate-limit и audit для public token redemption без сохранения raw token, config, QR или `vpn://` link.
+- Польза: public endpoint остается удобным, но его проще анализировать при инциденте.
+- Риски: audit не должен раскрывать secret-bearing payload, а errors не должны помогать подбирать token/email.
+- Статус: research candidate после `amn2` config delivery inventory.
+
 ### Ближайшая очередь design review
 
 - `RemoteOperationRunner`: command contract, host key enrollment, redaction, audit, dry-run и fake runner.
 - `Route Policy Matrix`: endpoint, role, auth method, side effect, risk class, audit и tests.
 - `Scoped API Tokens`: one-time display, hash storage, scopes, expiry, revoke и owner inheritance.
 - `Secret Inventory + Backup Policy`: redacted backup по умолчанию и encrypted full backup как явный режим.
-- `Public/Self-service Config Delivery`: ownership tests, hashed share tokens, expiry, revoke и audit.
+- `Public/Self-service Config Delivery`: ownership tests, hashed share tokens, expiry, revoke, audit и `secret-read` handling для `.conf`, QR и `vpn://`.
+- `Config delivery policy table`: actor, gate, risk class, output, audit и tests для текущих и будущих config delivery flows.
 - `Web-admin 2FA`: поставлена на паузу решением от 2026-05-30; inventories сохраняем как контекст, но implementation plan не пишем без отдельного решения: [`amn2` decision log](../research/amn2/decisions.md).
 - Статус: `paused`.
 
