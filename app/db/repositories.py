@@ -996,6 +996,40 @@ class Repository:
         self._conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
         self._commit()
 
+    def ignore_remote_peer(
+        self,
+        *,
+        server_id: int,
+        peer_public_key: str,
+        allowed_ips: str,
+    ) -> None:
+        self.get_server(server_id)
+        self._conn.execute(
+            """
+            INSERT INTO ignored_remote_peers (
+                server_id,
+                peer_public_key,
+                allowed_ips
+            )
+            VALUES (?, ?, ?)
+            ON CONFLICT(server_id, peer_public_key) DO UPDATE SET
+                allowed_ips = excluded.allowed_ips
+            """,
+            (server_id, peer_public_key, allowed_ips),
+        )
+        self._commit()
+
+    def list_ignored_remote_peer_keys(self, server_id: int) -> set[str]:
+        rows = self._conn.execute(
+            """
+            SELECT peer_public_key
+            FROM ignored_remote_peers
+            WHERE server_id = ?
+            """,
+            (server_id,),
+        ).fetchall()
+        return {str(row["peer_public_key"]) for row in rows}
+
     def list_user_orders_for_admin(
         self,
         user_id: int,

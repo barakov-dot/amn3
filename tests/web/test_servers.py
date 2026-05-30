@@ -4,6 +4,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
+import app.web.app as web_app
 from app.config.settings import Settings
 from app.db.connection import connect
 from app.db.repositories import Repository
@@ -155,6 +156,131 @@ def test_server_detail_shows_config_health_and_actions(tmp_path: Path):
     assert "online" in response.text
     assert "45 ms" in response.text
     assert f"/servers/{server_id}/health/run" in response.text
+    assert f"/servers/{server_id}/sync/run" in response.text
+
+
+def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypatch):
+    settings = _settings(tmp_path, admin_telegram_ids="9001")
+    with _repo(Path(settings.database_path)) as repo:
+        user_id = _seed_user(repo)
+        server_id = _seed_server(repo, name="local")
+        _seed_device(
+            repo,
+            user_id=user_id,
+            server_id=server_id,
+            status="active",
+            vpn_ip="10.44.0.2",
+            peer_public_key="missing-peer",
+        )
+    monkeypatch.setattr(
+        web_app,
+        "_collect_server_peer_sync",
+        lambda settings, server_id: {
+            "known_count": 1,
+            "unknown_count": 1,
+            "missing_count": 1,
+            "unknown_peers": [
+                {
+                    "peer_public_key": "unknown-peer",
+                    "allowed_ips": "10.44.0.3/32",
+                }
+            ],
+            "missing_peers": [
+                {
+                    "device_id": 1,
+                    "device_name": "missing-device",
+                    "peer_public_key": "missing-peer",
+                    "vpn_ip": "10.44.0.2",
+                }
+            ],
+            "error": "",
+        },
+    )
+    client = _authenticated_client(settings)
+    detail = client.get(f"/servers/{server_id}")
+
+    response = client.post(
+        f"/servers/{server_id}/sync/run",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+    page = client.get(f"/servers/{server_id}")
+
+    assert response.status_code == 303
+    assert response.headers["location"] == f"/servers/{server_id}"
+    assert "Peer sync" in page.text
+    assert "known remote peers" in page.text
+    assert "1 / 1 / 1" in page.text
+    assert "unknown-peer" in page.text
+    assert "10.44.0.3/32" in page.text
+    assert "missing-peer" in page.text
+    with _repo(Path(settings.database_path)) as repo:
+        action = _latest_admin_action(repo)
+        assert action["action"] == "web_server_peer_sync_run"
+
+
+def test_ignore_unknown_remote_peer_records_it_for_server(tmp_path: Path):
+    settings = _settings(tmp_path, admin_telegram_ids="9001")
+    with _repo(Path(settings.database_path)) as repo:
+        server_id = _seed_server(repo, name="local")
+    client = _authenticated_client(settings)
+    detail = client.get(f"/servers/{server_id}")
+
+    response = client.post(
+        f"/servers/{server_id}/unknown-peers/ignore",
+        data={
+            "peer_public_key": "unknown-peer",
+            "allowed_ips": "10.44.0.3/32",
+            "csrf_token": _csrf_token(detail.text),
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"] == f"/servers/{server_id}"
+    with _repo(Path(settings.database_path)) as repo:
+        assert repo.list_ignored_remote_peer_keys(server_id) == {"unknown-peer"}
+        action = _latest_admin_action(repo)
+        assert action["action"] == "web_server_peer_ignore"
+
+
+def test_remove_unknown_remote_peer_revokes_it_from_amnezia(
+    tmp_path: Path,
+    monkeypatch,
+):
+    calls: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        web_app,
+        "ServerConfigPeerApplier",
+        _fake_peer_applier(calls),
+    )
+    server_config_path = _write_server_config(tmp_path, server_name="local")
+    settings = _settings(
+        tmp_path,
+        admin_telegram_ids="9001",
+        server_config_path=server_config_path,
+        vps_apply_enabled=True,
+    )
+    with _repo(Path(settings.database_path)) as repo:
+        server_id = _seed_server(repo, name="local")
+    client = _authenticated_client(settings)
+    detail = client.get(f"/servers/{server_id}")
+
+    response = client.post(
+        f"/servers/{server_id}/unknown-peers/remove",
+        data={
+            "peer_public_key": "unknown-peer",
+            "csrf_token": _csrf_token(detail.text),
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"] == f"/servers/{server_id}"
+    assert calls == [("local", "unknown-peer")]
+    with _repo(Path(settings.database_path)) as repo:
+        action = _latest_admin_action(repo)
+        assert action["action"] == "web_server_peer_remove"
 
 
 def test_edit_server_updates_fields_and_records_action(tmp_path: Path):
@@ -323,11 +449,17 @@ def test_invalid_csrf_does_not_create_edit_disable_or_run_health(tmp_path: Path)
         data={"csrf_token": "bad-token"},
         follow_redirects=False,
     )
+    sync_response = client.post(
+        f"/servers/{server_id}/sync/run",
+        data={"csrf_token": "bad-token"},
+        follow_redirects=False,
+    )
 
     assert create_response.status_code == 403
     assert edit_response.status_code == 403
     assert disable_response.status_code == 403
     assert run_response.status_code == 403
+    assert sync_response.status_code == 403
     with _repo(Path(settings.database_path)) as repo:
         assert _server_by_name(repo, "default-vps") is None
         server = repo.get_server(server_id)
@@ -343,6 +475,7 @@ def _settings(
     *,
     admin_telegram_ids: str = "",
     server_config_path: Path | None = None,
+    vps_apply_enabled: bool = False,
 ) -> Settings:
     return Settings(
         _env_file=None,
@@ -351,6 +484,7 @@ def _settings(
         database_path=str(tmp_path / "amneziya.sqlite3"),
         admin_telegram_ids=admin_telegram_ids,
         server_config_path=str(server_config_path or (tmp_path / "servers.yml")),
+        vps_apply_enabled=vps_apply_enabled,
         web_admin_username="root",
         web_admin_password_hash=create_password_hash(
             "correct-password",
@@ -484,3 +618,51 @@ def _latest_admin_action(repo: Repository):
     return repo._conn.execute(
         "SELECT * FROM admin_actions ORDER BY id DESC LIMIT 1"
     ).fetchone()
+
+
+def _write_server_config(tmp_path: Path, *, server_name: str) -> Path:
+    path = tmp_path / "servers.yml"
+    path.write_text(
+        f"""
+servers:
+  - name: {server_name}
+    enabled: true
+    location: test
+    ssh:
+      host: 127.0.0.1
+      port: 22
+      user: root
+      auth:
+        type: password
+    vpn:
+      endpoint_host: vpn.example.test
+      port: 37661
+      interface: awg0
+      network_cidr: 10.44.0.0/24
+      server_address: 10.44.0.1/24
+      dns: 1.1.1.1
+      allowed_ips: 0.0.0.0/0
+      max_devices: 254
+      server_public_key: server-public-key
+    firewall:
+      provider: ufw
+      open_vpn_port: true
+    runtime:
+      type: docker
+      container_name: amnezia-awg2
+      config_path: /opt/amnezia/awg/awg0.conf
+""".lstrip(),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _fake_peer_applier(calls: list[tuple[str, str]]):
+    class FakePeerApplier:
+        def __init__(self, server, *, password=None):
+            self._server = server
+
+        def remove_peer(self, *, server, peer_public_key: str) -> None:
+            calls.append((server.name, peer_public_key))
+
+    return FakePeerApplier

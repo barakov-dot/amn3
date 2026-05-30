@@ -162,6 +162,16 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
         );
 
+        CREATE TABLE IF NOT EXISTS ignored_remote_peers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            server_id INTEGER NOT NULL,
+            peer_public_key TEXT NOT NULL,
+            allowed_ips TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE CASCADE,
+            UNIQUE (server_id, peer_public_key)
+        );
+
         CREATE INDEX IF NOT EXISTS idx_devices_user_status
             ON devices(user_id, status);
         CREATE INDEX IF NOT EXISTS idx_devices_server_status
@@ -179,6 +189,8 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             ON device_traffic_snapshots(server_id, collected_at DESC);
         CREATE INDEX IF NOT EXISTS idx_email_recovery_tokens_user
             ON email_recovery_tokens(user_id, purpose, expires_at);
+        CREATE INDEX IF NOT EXISTS idx_ignored_remote_peers_server
+            ON ignored_remote_peers(server_id, created_at DESC);
         """
     )
     _ensure_column(conn, "users", "email", "TEXT")

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 import re
 from collections.abc import Iterator
@@ -27,8 +28,10 @@ from app.security.crypto import SecretBox
 from app.security.redaction import redact
 from app.server.peer_apply import PeerApplyError
 from app.server.peer_apply import ServerConfigPeerApplier
+from app.server.ssh import SystemSshClient
 from app.server_config.loader import ConfigError
 from app.server_config.loader import load_server_config
+from app.server_config.loader import select_server
 from app.services.config_delivery import build_device_config_delivery
 from app.services.email_delivery import EmailDeliveryService
 from app.services.email_delivery import EmailSender
@@ -36,6 +39,8 @@ from app.services.email_delivery import build_smtp_sender
 from app.services.email_tokens import create_email_token
 from app.services.email_tokens import hash_email_token
 from app.services.email_tokens import utc_now_iso
+from app.services.peer_inventory import AwgDumpPeerInventoryCollector
+from app.services.peer_inventory import PeerInventoryService
 from app.web.auth import check_password
 from app.web.auth import generate_csrf_token
 from app.web.auth import require_web_admin_config
@@ -1021,9 +1026,116 @@ def create_web_app(
                 request,
                 title=f"Server {server_id}",
                 authenticated=True,
+                peer_sync=_load_peer_sync_from_session(request, server_id),
                 **detail,
             ),
         )
+
+    @app.post("/servers/{server_id}/sync/run")
+    async def run_server_peer_sync(
+        request: Request,
+        server_id: int,
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+
+        try:
+            report = _collect_server_peer_sync(actual_settings, server_id)
+            with _open_repository(actual_settings) as (repo, _conn):
+                with repo.transaction():
+                    _record_web_server_action(
+                        repo,
+                        actual_settings,
+                        request,
+                        action="web_server_peer_sync_run",
+                        server_id=server_id,
+                        metadata={
+                            "known_count": report["known_count"],
+                            "unknown_count": report["unknown_count"],
+                            "missing_count": report["missing_count"],
+                        },
+                    )
+        except LookupError:
+            return PlainTextResponse("Server not found", status_code=404)
+        except (ConfigError, ValueError) as exc:
+            report = _empty_peer_sync_report(error=str(exc))
+
+        request.session[_peer_sync_session_key(server_id)] = json.dumps(report)
+        return RedirectResponse(f"/servers/{server_id}", status_code=303)
+
+    @app.post("/servers/{server_id}/unknown-peers/ignore")
+    async def ignore_unknown_remote_peer(
+        request: Request,
+        server_id: int,
+        peer_public_key: str = Form(...),
+        allowed_ips: str = Form(""),
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+
+        try:
+            with _open_repository(actual_settings) as (repo, _conn):
+                with repo.transaction():
+                    repo.ignore_remote_peer(
+                        server_id=server_id,
+                        peer_public_key=peer_public_key,
+                        allowed_ips=allowed_ips,
+                    )
+                    _record_web_server_action(
+                        repo,
+                        actual_settings,
+                        request,
+                        action="web_server_peer_ignore",
+                        server_id=server_id,
+                        metadata={
+                            "peer_public_key": peer_public_key,
+                            "allowed_ips": allowed_ips,
+                        },
+                    )
+        except LookupError:
+            return PlainTextResponse("Server not found", status_code=404)
+
+        request.session.pop(_peer_sync_session_key(server_id), None)
+        return RedirectResponse(f"/servers/{server_id}", status_code=303)
+
+    @app.post("/servers/{server_id}/unknown-peers/remove")
+    async def remove_unknown_remote_peer(
+        request: Request,
+        server_id: int,
+        peer_public_key: str = Form(...),
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+
+        try:
+            _remove_unknown_remote_peer(actual_settings, server_id, peer_public_key)
+            with _open_repository(actual_settings) as (repo, _conn):
+                with repo.transaction():
+                    repo.get_server(server_id)
+                    _record_web_server_action(
+                        repo,
+                        actual_settings,
+                        request,
+                        action="web_server_peer_remove",
+                        server_id=server_id,
+                        metadata={"peer_public_key": peer_public_key},
+                    )
+        except LookupError:
+            return PlainTextResponse("Server not found", status_code=404)
+        except (ConfigError, PeerApplyError, ValueError) as exc:
+            return PlainTextResponse(str(exc), status_code=400)
+
+        request.session.pop(_peer_sync_session_key(server_id), None)
+        return RedirectResponse(f"/servers/{server_id}", status_code=303)
 
     @app.get("/servers/{server_id}/edit")
     async def edit_server_form(request: Request, server_id: int):
@@ -1454,6 +1566,102 @@ def _load_server_detail(settings: Settings, server_id: int) -> dict[str, Any]:
             _row_to_dict(latest_health) if latest_health is not None else None
         ),
     }
+
+
+def _collect_server_peer_sync(settings: Settings, server_id: int) -> dict[str, Any]:
+    with _open_repository(settings) as (repo, _conn):
+        server = _load_configured_server(settings, repo, server_id)
+        report = PeerInventoryService(repo).compare(
+            server_id,
+            AwgDumpPeerInventoryCollector(
+                interface=server.vpn.interface,
+                container_name=server.runtime.container_name
+                if server.runtime.type == "docker"
+                else None,
+                ssh_client=SystemSshClient(
+                    server,
+                    password=settings.vps_ssh_password or None,
+                ),
+            ),
+        )
+        ignored_keys = repo.list_ignored_remote_peer_keys(server_id)
+    unknown_peers = [
+        peer
+        for peer in report.unknown_remote_peers
+        if peer.peer_public_key not in ignored_keys
+    ]
+    return {
+        "known_count": len(report.known_remote_peers),
+        "unknown_count": len(unknown_peers),
+        "missing_count": len(report.missing_local_peers),
+        "ignored_count": len(ignored_keys),
+        "unknown_peers": [
+            {
+                "peer_public_key": peer.peer_public_key,
+                "allowed_ips": peer.allowed_ips,
+            }
+            for peer in unknown_peers
+        ],
+        "missing_peers": [
+            {
+                "device_id": peer.device_id,
+                "device_name": peer.device_name,
+                "peer_public_key": peer.peer_public_key,
+                "vpn_ip": peer.vpn_ip,
+            }
+            for peer in report.missing_local_peers
+        ],
+        "error": "",
+    }
+
+
+def _empty_peer_sync_report(*, error: str) -> dict[str, Any]:
+    return {
+        "known_count": 0,
+        "unknown_count": 0,
+        "missing_count": 0,
+        "ignored_count": 0,
+        "unknown_peers": [],
+        "missing_peers": [],
+        "error": error,
+    }
+
+
+def _remove_unknown_remote_peer(
+    settings: Settings,
+    server_id: int,
+    peer_public_key: str,
+) -> None:
+    if not settings.vps_apply_enabled:
+        raise ValueError("VPS_APPLY_ENABLED must be true before removing peers from VPN")
+    with _open_repository(settings) as (repo, _conn):
+        server = _load_configured_server(settings, repo, server_id)
+    applier = ServerConfigPeerApplier(
+        server,
+        password=settings.vps_ssh_password or None,
+    )
+    applier.remove_peer(server=server, peer_public_key=peer_public_key)
+
+
+def _load_configured_server(settings: Settings, repo: Repository, server_id: int):
+    server_row = _row_to_dict(repo.get_server(server_id))
+    config = load_server_config(Path(settings.server_config_path))
+    return select_server(config, str(server_row["name"]))
+
+
+def _load_peer_sync_from_session(request: Request, server_id: int) -> dict[str, Any] | None:
+    raw = request.session.get(_peer_sync_session_key(server_id))
+    if not isinstance(raw, str):
+        return None
+    try:
+        value = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def _peer_sync_session_key(server_id: int) -> str:
+    return f"server_peer_sync:{server_id}"
 
 
 def _blank_user_form() -> dict[str, Any]:

@@ -110,6 +110,33 @@ def test_apply_peer_runs_docker_exec_without_putting_psk_in_command(tmp_path):
     assert "secret-psk" not in report
 
 
+def test_apply_peer_blocks_docker_config_network_mismatch(tmp_path):
+    server = _docker_server(tmp_path)
+    peer = PeerApplyInput(
+        public_key="peer-public",
+        preshared_key="secret-psk",
+        vpn_ip="10.8.0.2",
+    )
+    ssh = RecordingSshClient(
+        results=[
+            CommandResult(
+                exit_code=0,
+                stdout=_docker_config(address="10.8.1.0/24"),
+                stderr="",
+            ),
+        ]
+    )
+
+    with pytest.raises(PeerApplyError) as exc_info:
+        apply_peer(server, peer, ssh_client=ssh)
+
+    assert "network mismatch" in str(exc_info.value)
+    assert "10.8.1.0/24" in str(exc_info.value)
+    assert "10.8.0.0/24" in str(exc_info.value)
+    assert len(ssh.calls) == 1
+    assert ssh.calls[0] == ("docker exec amnezia-awg cat /opt/amnezia/awg/awg0.conf", None)
+
+
 def test_apply_peer_raises_redacted_error_when_remote_command_fails(tmp_path):
     server = _server(tmp_path)
     peer = PeerApplyInput(
@@ -216,12 +243,12 @@ class RecordingSshClient:
         return self._result
 
 
-def _docker_config() -> str:
+def _docker_config(*, address: str = "10.8.0.1/24") -> str:
     return "\n".join(
         [
             "[Interface]",
             "PrivateKey = server-private",
-            "Address = 10.8.0.1/24",
+            f"Address = {address}",
             "ListenPort = 30001",
             "",
         ]

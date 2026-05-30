@@ -294,6 +294,15 @@ http://127.0.0.1:3030/login
 
 Если ранее созданные пользователи не видны, проверить, что web-панель и бот используют один и тот же `DATABASE_PATH`.
 
+В карточке сервера доступен `Run peer sync`: read-only проверка сравнивает live peer из AmneziaWG с локальными устройствами в базе. В отчете:
+
+- `known remote peers` — peer есть и на ноде, и в базе;
+- `unknown remote peers` — peer есть на ноде, но не привязан к устройству в базе;
+- `missing local peers` — устройство есть в базе, но peer отсутствует на ноде;
+- `ignored remote peers` — внешние peer, которые админ решил скрыть из unknown-списка.
+
+Для unknown peer доступны действия `Ignore` и `Remove from Amnezia`. `Ignore` только сохраняет исключение в базе. `Remove from Amnezia` удаляет peer с ноды и требует `VPS_APPLY_ENABLED=true`.
+
 В карточке пользователя действия разделены по смыслу:
 
 - `Block` — локально блокирует пользователя, но не удаляет peer из AmneziaWG;

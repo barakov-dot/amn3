@@ -71,6 +71,10 @@
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button class="button" type="submit">Run health check</button>
         </form>
+        <form action="/servers/{{ server.id }}/sync/run" method="post">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-secondary" type="submit">Run peer sync</button>
+        </form>
         <form action="/servers/{{ server.id }}/disable" method="post">
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button class="button button-danger" type="submit">Disable</button>
@@ -110,6 +114,92 @@
       </dl>
     {% else %}
       <p class="empty-state">No health check has been stored yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Peer sync</h2>
+    </div>
+    {% if peer_sync %}
+      {% if peer_sync.error %}
+        <p class="empty-state">{{ peer_sync.error }}</p>
+      {% else %}
+        <dl class="details">
+          <div>
+            <dt>known remote peers</dt>
+            <dd>{{ peer_sync.known_count }}</dd>
+          </div>
+          <div>
+            <dt>unknown / missing</dt>
+            <dd>{{ peer_sync.known_count }} / {{ peer_sync.unknown_count }} / {{ peer_sync.missing_count }}</dd>
+          </div>
+          <div>
+            <dt>ignored remote peers</dt>
+            <dd>{{ peer_sync.ignored_count }}</dd>
+          </div>
+        </dl>
+        {% if peer_sync.unknown_peers %}
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Unknown remote peer</th>
+                  <th>Allowed IPs</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for peer in peer_sync.unknown_peers %}
+                  <tr>
+                    <td class="wrap-text">{{ peer.peer_public_key }}</td>
+                    <td>{{ peer.allowed_ips }}</td>
+                    <td>
+                      <div class="button-row">
+                        <form action="/servers/{{ server.id }}/unknown-peers/ignore" method="post">
+                          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                          <input name="peer_public_key" type="hidden" value="{{ peer.peer_public_key }}">
+                          <input name="allowed_ips" type="hidden" value="{{ peer.allowed_ips }}">
+                          <button class="button button-secondary button-small" type="submit">Ignore</button>
+                        </form>
+                        <form action="/servers/{{ server.id }}/unknown-peers/remove" method="post">
+                          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                          <input name="peer_public_key" type="hidden" value="{{ peer.peer_public_key }}">
+                          <button class="button button-danger button-small" type="submit">Remove from Amnezia</button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+        {% if peer_sync.missing_peers %}
+          <div class="table-wrap panel-spaced">
+            <table>
+              <thead>
+                <tr>
+                  <th>Missing local device</th>
+                  <th>Peer</th>
+                  <th>IP</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for peer in peer_sync.missing_peers %}
+                  <tr>
+                    <td>#{{ peer.device_id }} {{ peer.device_name }}</td>
+                    <td class="wrap-text">{{ peer.peer_public_key }}</td>
+                    <td>{{ peer.vpn_ip }}/32</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      {% endif %}
+    {% else %}
+      <p class="empty-state">Run peer sync to compare live AmneziaWG peers with local devices.</p>
     {% endif %}
   </section>
 {% endblock %}

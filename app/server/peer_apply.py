@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import ipaddress
 import shlex
 
 from app.security.redaction import redact
@@ -215,6 +216,7 @@ def _apply_docker_peer(
 ) -> str:
     config_path = _require_docker_config_path(server)
     config_text = _read_docker_config(server, config_path, ssh_client=ssh_client)
+    _validate_docker_config_network(server, config_text, peer)
     next_config = _upsert_peer_block(config_text, peer)
     _write_docker_config(server, config_path, next_config, ssh_client=ssh_client)
     _restart_docker_container(server, ssh_client=ssh_client)
@@ -259,6 +261,54 @@ def _read_docker_config(
             )
         )
     return result.stdout
+
+
+def _validate_docker_config_network(
+    server: ServerConfig,
+    config_text: str,
+    peer: PeerApplyInput,
+) -> None:
+    actual_network = _docker_config_interface_network(config_text)
+    expected_network = ipaddress.ip_network(server.vpn.network_cidr, strict=False)
+    peer_ip = ipaddress.ip_address(peer.vpn_ip)
+
+    if actual_network != expected_network:
+        raise PeerApplyError(
+            "Docker config network mismatch: "
+            f"runtime.config_path Address is {actual_network}, "
+            f"servers.yml vpn.network_cidr is {expected_network}. "
+            "Refusing to add peer until server config matches live AmneziaWG network."
+        )
+    if peer_ip not in actual_network:
+        raise PeerApplyError(
+            "Peer IP is outside live AmneziaWG network: "
+            f"{peer.vpn_ip} not in {actual_network}"
+        )
+
+
+def _docker_config_interface_network(config_text: str) -> ipaddress.IPv4Network | ipaddress.IPv6Network:
+    in_interface = False
+    for raw_line in config_text.splitlines():
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped.startswith("[") and stripped.endswith("]"):
+            section_name = stripped.strip("[]").strip().lower()
+            in_interface = section_name == "interface"
+            continue
+        if not in_interface or "=" not in stripped:
+            continue
+        key, value = stripped.split("=", 1)
+        if key.strip().lower() != "address":
+            continue
+        first_address = value.split(",", 1)[0].strip()
+        try:
+            return ipaddress.ip_interface(first_address).network
+        except ValueError as exc:
+            raise PeerApplyError(
+                f"Docker config Address is invalid: {first_address}"
+            ) from exc
+    raise PeerApplyError("Docker config Address is missing in [Interface]")
 
 
 def _write_docker_config(
