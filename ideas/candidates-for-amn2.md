@@ -54,7 +54,7 @@
 - Идея: развить концепцию API tokens в сторону granular scopes, expiry, revoke, audit и отдельного scope для destructive operations.
 - Польза: безопаснее для CI, мониторинга и ограниченных внешних интеграций, чем admin-equivalent bearer tokens.
 - Риски: сложность UX, миграции токенов, тесты на privilege escalation, хранение token hashes.
-- Статус: research после deep-dive.
+- Статус: design candidate описан в [Scoped API Tokens для `amn2`](../docs/superpowers/specs/2026-05-30-scoped-api-tokens-design.md).
 
 ### Hardened first-run bootstrap
 
@@ -137,7 +137,7 @@
 
 - `RemoteOperationRunner`: command contract, host key enrollment, redaction, audit, dry-run и fake runner.
 - `Route Policy Matrix`: endpoint, role, auth method, side effect, risk class, audit и tests.
-- Scoped API tokens: one-time display, hash storage, scopes, expiry, revoke и owner inheritance.
+- `Scoped API Tokens`: one-time display, hash storage, scopes, expiry, revoke и owner inheritance.
 - Secret inventory and backup policy: redacted backup по умолчанию и encrypted full backup как явный режим.
 - Public/self-service config delivery: ownership tests, hashed share tokens, expiry, revoke и audit.
 - Статус: собрано из feature gap; перед реализацией нужен контекст текущего `amn2`.
