@@ -579,6 +579,30 @@ def test_list_ignored_remote_peers_returns_rows_for_admin_display(tmp_path):
     assert ignored[0]["created_at"] is not None
 
 
+def test_unignore_remote_peer_removes_amnezia_created_marker(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    _user_id, server_id = _create_user_and_server(repo)
+    repo.ignore_remote_peer(
+        server_id=server_id,
+        peer_public_key="amnezia-created-peer",
+        allowed_ips="10.8.0.10/32",
+    )
+
+    removed = repo.unignore_remote_peer(
+        server_id=server_id,
+        peer_public_key="amnezia-created-peer",
+    )
+
+    assert removed is True
+    assert repo.list_ignored_remote_peers(server_id) == []
+    assert repo.unignore_remote_peer(
+        server_id=server_id,
+        peer_public_key="amnezia-created-peer",
+    ) is False
+
+
 def test_update_user_email_stores_email_and_clears_verification_on_change(tmp_path):
     conn = connect(tmp_path / "test.sqlite3")
     initialize_schema(conn)

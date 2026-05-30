@@ -1146,6 +1146,18 @@ class Repository:
             (server_id,),
         ).fetchall()
 
+    def unignore_remote_peer(self, *, server_id: int, peer_public_key: str) -> bool:
+        cursor = self._conn.execute(
+            """
+            DELETE FROM ignored_remote_peers
+            WHERE server_id = ?
+              AND peer_public_key = ?
+            """,
+            (server_id, peer_public_key),
+        )
+        self._commit()
+        return cursor.rowcount > 0
+
     def list_user_orders_for_admin(
         self,
         user_id: int,

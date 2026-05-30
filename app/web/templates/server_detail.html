@@ -178,6 +178,7 @@
                   <th>Созданы в Amnezia</th>
                   <th>Allowed IPs</th>
                   <th>Пометка</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -186,6 +187,13 @@
                     <td class="wrap-text">{{ peer.peer_public_key }}</td>
                     <td>{{ peer.allowed_ips }}</td>
                     <td>Не трогать, создано в приложении Amnezia</td>
+                    <td>
+                      <form action="/servers/{{ server.id }}/amnezia-peers/unmark" method="post">
+                        <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                        <input name="peer_public_key" type="hidden" value="{{ peer.peer_public_key }}">
+                        <button class="button button-secondary button-small" type="submit">Снять пометку</button>
+                      </form>
+                    </td>
                   </tr>
                 {% endfor %}
               </tbody>

@@ -122,6 +122,7 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
   - peer, помеченные как `Созданы в Amnezia`.
 - Действия в карточке сервера:
   - `Пометить как созданный в Amnezia` для внешнего peer;
+  - `Снять пометку` для peer, ошибочно помеченного как созданный в Amnezia;
   - `Добавить в Amnezia` для локального устройства без peer на сервере.
 - Действия в карточке пользователя:
   - `Block`;

@@ -1183,6 +1183,43 @@ def create_web_app(
         request.session.pop(_peer_sync_session_key(server_id), None)
         return RedirectResponse(f"/servers/{server_id}", status_code=303)
 
+    @app.post("/servers/{server_id}/amnezia-peers/unmark")
+    async def unmark_amnezia_created_peer(
+        request: Request,
+        server_id: int,
+        peer_public_key: str = Form(...),
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+
+        try:
+            with _open_repository(actual_settings) as (repo, _conn):
+                with repo.transaction():
+                    repo.get_server(server_id)
+                    removed = repo.unignore_remote_peer(
+                        server_id=server_id,
+                        peer_public_key=peer_public_key,
+                    )
+                    _record_web_server_action(
+                        repo,
+                        actual_settings,
+                        request,
+                        action="web_server_peer_unmark_amnezia",
+                        server_id=server_id,
+                        metadata={
+                            "peer_public_key": peer_public_key,
+                            "removed": removed,
+                        },
+                    )
+        except LookupError:
+            return PlainTextResponse("Server not found", status_code=404)
+
+        request.session.pop(_peer_sync_session_key(server_id), None)
+        return RedirectResponse(f"/servers/{server_id}", status_code=303)
+
     @app.post("/servers/{server_id}/unknown-peers/remove")
     async def remove_unknown_remote_peer(
         request: Request,

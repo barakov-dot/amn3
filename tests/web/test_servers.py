@@ -223,6 +223,7 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
     assert "10.44.0.3/32" in page.text
     assert "Созданы в Amnezia" in page.text
     assert "amnezia-created-peer" in page.text
+    assert "Снять пометку" in page.text
     assert "missing-peer" in page.text
     with _repo(Path(settings.database_path)) as repo:
         action = _latest_admin_action(repo)
@@ -252,6 +253,35 @@ def test_ignore_unknown_remote_peer_records_it_for_server(tmp_path: Path):
         assert repo.list_ignored_remote_peer_keys(server_id) == {"unknown-peer"}
         action = _latest_admin_action(repo)
         assert action["action"] == "web_server_peer_ignore"
+
+
+def test_unignore_amnezia_created_peer_removes_marker_for_server(tmp_path: Path):
+    settings = _settings(tmp_path, admin_telegram_ids="9001")
+    with _repo(Path(settings.database_path)) as repo:
+        server_id = _seed_server(repo, name="local")
+        repo.ignore_remote_peer(
+            server_id=server_id,
+            peer_public_key="amnezia-created-peer",
+            allowed_ips="10.44.0.10/32",
+        )
+    client = _authenticated_client(settings)
+    detail = client.get(f"/servers/{server_id}")
+
+    response = client.post(
+        f"/servers/{server_id}/amnezia-peers/unmark",
+        data={
+            "peer_public_key": "amnezia-created-peer",
+            "csrf_token": _csrf_token(detail.text),
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"] == f"/servers/{server_id}"
+    with _repo(Path(settings.database_path)) as repo:
+        assert repo.list_ignored_remote_peers(server_id) == []
+        action = _latest_admin_action(repo)
+        assert action["action"] == "web_server_peer_unmark_amnezia"
 
 
 def test_add_missing_local_device_to_amnezia_applies_stored_peer(
