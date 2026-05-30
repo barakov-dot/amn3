@@ -44,3 +44,4 @@
 - [`amn2`: route/auth surface inventory](../research/amn2/route-auth-surface-inventory.md)
 - [`amn2`: secret surface inventory](../research/amn2/secret-surface-inventory.md)
 - [`amn2`: config delivery inventory](../research/amn2/config-delivery-inventory.md)
+- [`amn2`: remote operations inventory](../research/amn2/remote-operations-inventory.md)

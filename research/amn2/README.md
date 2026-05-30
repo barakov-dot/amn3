@@ -16,11 +16,12 @@
 - [Route/auth surface inventory](route-auth-surface-inventory.md) - первый проход по web routes, public email token endpoints и Telegram bot admin surface.
 - [Secret surface inventory](secret-surface-inventory.md) - первый проход по secrets, redaction, encrypted backup, email tokens, config delivery и 2FA implications.
 - [Config delivery inventory](config-delivery-inventory.md) - первый проход по выдаче VPN config через bot, email, QR, `vpn://` link, recovery token и template preview.
+- [Remote operations inventory](remote-operations-inventory.md) - первый проход по SSH/server apply flows, dry-run, health checks, peer apply/revoke, traffic collection, audit, redaction и rollback gaps.
 
 ## Следующие рабочие шаги
 
 Текущее решение: 2FA для web-admin поставлена на паузу, implementation plan для нее не пишем до отдельного решения.
 
-1. Remote operations inventory: SSH/sudo/server apply flows, dry-run, audit, redaction и rollback notes.
-2. Route/config delivery policy design: actor, gate, risk class, audit и tests для каждой выдачи config.
+1. Route/config delivery policy design: actor, gate, risk class, audit и tests для каждой выдачи config.
+2. Remote operation contract design update: risk class, dry-run preview, fake runner, audit, redaction, idempotency и rollback notes.
 3. Только после этих шагов - отдельный implementation plan для первой безопасной доработки в `amn2`.

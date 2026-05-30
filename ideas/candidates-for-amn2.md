@@ -77,7 +77,7 @@
 - Идея: описать безопасный SSH execution layer: host key pinning, no password in command string, secret redaction in logs, dry-run, audit, rollback.
 - Польза: критично для любых операций, которые меняют удаленный VPN-сервер.
 - Риски: сложность реализации, разные sudoers-конфигурации, совместимость с существующими серверами.
-- Статус: research после deep-dive.
+- Статус: reinforced by [`amn2` remote operations inventory](../research/amn2/remote-operations-inventory.md).
 
 ### Route policy matrix
 
@@ -105,21 +105,21 @@
 - Идея: remote operation должна описываться contract-ом: тип риска, inputs, expected side effects, timeout, allowed exit codes, redaction, audit summary и recovery note.
 - Польза: SSH/sudo/Docker/firewall операции становятся тестируемыми и обозримыми до выполнения.
 - Риски: больше design работы перед первой реализацией; понадобится fake runner и дисциплина в manager-ах.
-- Статус: design candidate описан в [RemoteOperationRunner для `amn2`](../docs/superpowers/specs/2026-05-30-remote-operation-runner-design.md).
+- Статус: design candidate описан в [RemoteOperationRunner для `amn2`](../docs/superpowers/specs/2026-05-30-remote-operation-runner-design.md); baseline уточнен в [`amn2` remote operations inventory](../research/amn2/remote-operations-inventory.md).
 
 ### Dry-run-first remote operations
 
 - Идея: install, uninstall, clear, raw config save и firewall/Docker changes сначала строят plan preview, а уже затем применяются.
 - Польза: снижает риск случайно сломать VPS или удалить рабочие контейнеры.
 - Риски: не все remote checks можно идеально эмулировать; dry-run не должен создавать ложное чувство безопасности.
-- Статус: research после manager architecture deep-dive.
+- Статус: reinforced by [`amn2` remote operations inventory](../research/amn2/remote-operations-inventory.md).
 
 ### Remote operation audit events
 
 - Идея: каждая state-changing remote operation пишет audit event до и после выполнения, без секретов в payload.
 - Польза: проще разбирать инциденты, partial failures и действия операторов.
 - Риски: нужно хранить audit отдельно от sensitive outputs и продумать retention.
-- Статус: research после manager architecture deep-dive.
+- Статус: reinforced by [`amn2` remote operations inventory](../research/amn2/remote-operations-inventory.md).
 
 ### Manager interface checklist
 
@@ -133,11 +133,11 @@
 - Идея: добавление VPS должно включать явный SSH host key enrollment/pinning вместо автоматического доверия неизвестному ключу.
 - Польза: снижает риск MITM при управлении production-сервером.
 - Риски: UX сложнее для новичков; нужен recovery-flow при переустановке VPS.
-- Статус: research после manager architecture deep-dive.
+- Статус: reinforced by [`amn2` remote operations inventory](../research/amn2/remote-operations-inventory.md).
 
 ## Из текущего `amn2` baseline
 
-Источник: [`amn2`: config delivery inventory](../research/amn2/config-delivery-inventory.md)
+Источники: [`amn2`: config delivery inventory](../research/amn2/config-delivery-inventory.md), [`amn2`: remote operations inventory](../research/amn2/remote-operations-inventory.md)
 
 ### Config delivery policy table
 
@@ -160,9 +160,31 @@
 - Риски: audit не должен раскрывать secret-bearing payload, а errors не должны помогать подбирать token/email.
 - Статус: research candidate после `amn2` config delivery inventory.
 
+### Remote operation partial-failure contract
+
+- Идея: для live apply/revoke описывать, что делать если remote step уже прошел, а local DB/audit step упал, или если reset нескольких устройств оборвался посередине.
+- Польза: меньше риск рассинхронизации между VPS и локальной базой.
+- Риски: rollback не всегда возможен автоматически, поэтому нужен recovery note и повторяемый resume flow.
+- Статус: `inventory-complete-first-pass`, следующий шаг - обновить RemoteOperationRunner design.
+
+### Secret-safe peer apply CLI
+
+- Идея: заменить secret-bearing CLI аргумент `--preshared-key` на stdin/file descriptor/one-shot prompt или другой безопасный канал.
+- Польза: PSK не попадает в shell history и process args.
+- Риски: UX CLI станет чуть сложнее; нужны тесты, что dry-run/live output не печатает PSK.
+- Статус: research candidate после `amn2` remote operations inventory.
+
+### Shared command policy for telemetry
+
+- Идея: traffic collection должна использовать общий read-only command policy или отдельную allowlist, синхронную с server health checks.
+- Польза: telemetry не станет обходом вокруг SSH command guardrails.
+- Риски: policy должна поддержать runtime-specific команды без расширения до unsafe shell.
+- Статус: research candidate после `amn2` remote operations inventory.
+
 ### Ближайшая очередь design review
 
 - `RemoteOperationRunner`: command contract, host key enrollment, redaction, audit, dry-run и fake runner.
+- `Remote operation partial-failure contract`: local/remote consistency, rollback notes и resume flow.
 - `Route Policy Matrix`: endpoint, role, auth method, side effect, risk class, audit и tests.
 - `Scoped API Tokens`: one-time display, hash storage, scopes, expiry, revoke и owner inheritance.
 - `Secret Inventory + Backup Policy`: redacted backup по умолчанию и encrypted full backup как явный режим.
