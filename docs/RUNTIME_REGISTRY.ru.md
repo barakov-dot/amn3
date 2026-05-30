@@ -94,7 +94,7 @@ ss -lun
 
 ### `docker`
 
-AmneziaWG работает внутри Docker-контейнера. На текущем этапе Docker runtime включен только для диагностики.
+AmneziaWG работает внутри Docker-контейнера. Health check и sync/traffic читают состояние через `docker exec`. Peer apply/revoke для Docker меняют постоянный конфиг внутри контейнера и затем перезапускают контейнер.
 
 Минимальный блок:
 
@@ -102,6 +102,7 @@ AmneziaWG работает внутри Docker-контейнера. На тек
 runtime:
   type: docker
   container_name: amnezia-awg
+  config_path: /etc/amnezia/awg0.conf
 ```
 
 Read-only проверки:
@@ -123,9 +124,9 @@ Server health checks используют первый slice `RemoteOperationRun
 - local side effects: health snapshot и admin audit event при запуске из web;
 - consistency status: `read-only`.
 
-Этот slice не включает peer apply/revoke, Docker live changes, firewall changes или destructive operations.
+Этот slice не включает peer apply/revoke, Docker config writes, firewall changes или destructive operations.
 
-Live `apply-peer`, `revoke-peer` и `collect-traffic` для Docker пока заблокированы, пока мы не подтвердим постоянный путь к конфигу контейнера и безопасный способ применения peer.
+Для Docker `apply-peer` и `revoke-peer` доступны только при заполненном `runtime.config_path`: приложение переписывает этот файл внутри контейнера и выполняет `docker restart <container_name>`. `collect-traffic` и `sync-peers` остаются read-only и читают `awg show <interface> dump`.
 
 ## Быстрая проверка VPS
 

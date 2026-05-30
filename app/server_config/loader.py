@@ -94,12 +94,14 @@ def _parse_runtime(runtime: dict[str, Any]) -> RuntimeConfig:
             type=runtime_type,
             service_name=str(_required(runtime, "service_name")),
             container_name=_optional_str(runtime, "container_name"),
+            config_path=_optional_str(runtime, "config_path"),
         )
     if runtime_type == "docker":
         return RuntimeConfig(
             type=runtime_type,
             service_name=_optional_str(runtime, "service_name"),
             container_name=str(_required(runtime, "container_name")),
+            config_path=_optional_str(runtime, "config_path"),
         )
     raise ConfigError(f"Unsupported runtime type: {runtime_type}")
 

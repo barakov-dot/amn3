@@ -179,6 +179,33 @@ def test_awg_dump_traffic_collector_runs_read_only_dump_command(tmp_path):
     assert peers[0].tx_bytes == 2048
 
 
+def test_awg_dump_traffic_collector_runs_docker_dump_command():
+    ssh = RecordingSshClient(
+        result=CommandResult(
+            exit_code=0,
+            stdout="\n".join(
+                [
+                    "awg0\tserver-public\tserver-private\t51820\toff",
+                    "known-peer\tpsk\t203.0.113.20:50000\t10.8.0.2/32\t1700000000\t1024\t2048\t25",
+                ]
+            ),
+            stderr="",
+        )
+    )
+    collector = AwgDumpTrafficCollector(
+        interface="awg0",
+        source="awg:debian-vps-1",
+        ssh_client=ssh,
+        container_name="amnezia-awg",
+        now=lambda: "2026-05-27T12:00:00Z",
+    )
+
+    peers = collector.collect(server_id=1)
+
+    assert ssh.calls == [("docker exec amnezia-awg awg show awg0 dump", None)]
+    assert peers[0].peer_public_key == "known-peer"
+
+
 def test_awg_dump_traffic_collector_raises_redacted_error_on_failure():
     ssh = RecordingSshClient(
         result=CommandResult(

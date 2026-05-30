@@ -76,6 +76,7 @@ def test_runtime_examples_are_parseable_and_cover_host_and_docker():
     assert docker["servers"][0]["runtime"] == {
         "type": "docker",
         "container_name": "amnezia-awg",
+        "config_path": "/etc/amnezia/awg0.conf",
     }
     assert host["servers"][0]["vpn"]["port"] == 30001
     assert docker["servers"][0]["vpn"]["interface"] == "awg0"
@@ -123,6 +124,6 @@ def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     assert "python -m app.cli bot check-network" in text
     assert "python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run" in text
     assert "bash deploy/runtime/check_vps.sh" in text
-    assert "AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/collect_debug_snapshot.sh" in text
+    assert "AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg AMN_INTERFACE=awg0 bash deploy/runtime/collect_debug_snapshot.sh" in text
     assert "что нажимал" in text
     assert "docs/VPS_RETEST_PROTOCOL.ru.md" in checklist

@@ -25,3 +25,4 @@ servers:
     runtime:
       type: docker
       container_name: amnezia-awg
+      config_path: /etc/amnezia/awg0.conf

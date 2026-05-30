@@ -23,6 +23,7 @@ from app.server.peer_apply import (
 from app.server.ssh import SystemSshClient
 from app.server_config.loader import load_server_config, select_server
 from app.server_config.models import ServerConfig
+from app.services.peer_inventory import AwgDumpPeerInventoryCollector, PeerInventoryService
 from app.services.traffic import AwgDumpTrafficCollector, TrafficService
 from app.web.auth import create_password_hash
 
@@ -81,6 +82,11 @@ def build_parser() -> argparse.ArgumentParser:
     collect_traffic.add_argument("--server", required=True)
     collect_traffic.add_argument("--db", default="data/amneziya.sqlite3")
     collect_traffic.add_argument("--dry-run", action="store_true")
+
+    sync_peers = server_sub.add_parser("sync-peers")
+    sync_peers.add_argument("--config", default="servers.yml")
+    sync_peers.add_argument("--server", required=True)
+    sync_peers.add_argument("--db", default="data/amneziya.sqlite3")
 
     preflight = server_sub.add_parser("preflight")
     preflight.add_argument("--config", default="servers.yml")
@@ -145,6 +151,10 @@ def main() -> None:
             print(run_server_traffic_collection_dry_run(server))
         else:
             print(run_server_traffic_collection(server, db_path=Path(args.db)))
+    elif args.command == "server" and args.server_command == "sync-peers":
+        config = load_server_config(Path(args.config))
+        server = select_server(config, args.server)
+        print(run_server_peer_sync(server, db_path=Path(args.db)))
     elif args.command == "server" and args.server_command == "preflight":
         print(
             run_server_preflight(
@@ -230,8 +240,8 @@ def run_server_traffic_collection_dry_run(server: ServerConfig) -> str:
                 "No changes will be made.",
                 f"Target: ssh {server.ssh.user}@{server.ssh.host} -p {server.ssh.port}",
                 f"Read-only command: docker exec {container} awg show {server.vpn.interface} dump",
-                "Docker traffic collection is not implemented yet.",
-                "Need container persistent config path before enabling stored traffic snapshots.",
+                "Known peers will be stored in the local database as traffic snapshots.",
+                "Unknown peers will be reported for manual import/review.",
             ]
         )
     return "\n".join(
@@ -245,15 +255,65 @@ def run_server_traffic_collection_dry_run(server: ServerConfig) -> str:
 
 
 def run_server_traffic_collection(server: ServerConfig, *, db_path: Path) -> str:
-    if server.runtime.type == "docker":
-        raise RuntimeError(
-            "Docker traffic collection is not implemented yet. "
-            "Need container persistent config path before enabling stored traffic snapshots."
-        )
     conn = connect(db_path)
     initialize_schema(conn)
     repo = Repository(conn)
-    server_id = repo.upsert_server_config(
+    server_id = _sync_server_row(repo, server)
+    report = TrafficService(repo).collect_and_store(
+        server_id,
+        AwgDumpTrafficCollector(
+            interface=server.vpn.interface,
+            source=f"awg:{server.name}",
+            container_name=server.runtime.container_name
+            if server.runtime.type == "docker"
+            else None,
+            ssh_client=SystemSshClient(server),
+        ),
+    )
+    return (
+        f"Traffic collection stored snapshots: {report.stored_count}\n"
+        f"Unknown peers: {len(report.unknown_peers)}"
+    )
+
+
+def run_server_peer_sync(server: ServerConfig, *, db_path: Path) -> str:
+    conn = connect(db_path)
+    initialize_schema(conn)
+    repo = Repository(conn)
+    server_id = _sync_server_row(repo, server)
+    report = PeerInventoryService(repo).compare(
+        server_id,
+        AwgDumpPeerInventoryCollector(
+            interface=server.vpn.interface,
+            container_name=server.runtime.container_name
+            if server.runtime.type == "docker"
+            else None,
+            ssh_client=SystemSshClient(server),
+        ),
+    )
+    lines = [
+        f"Peer sync report: {server.name}",
+        f"known remote peers: {len(report.known_remote_peers)}",
+        f"unknown remote peers: {len(report.unknown_remote_peers)}",
+        f"missing local peers: {len(report.missing_local_peers)}",
+    ]
+    if report.unknown_remote_peers:
+        lines.append("Unknown remote peers:")
+        lines.extend(
+            f"- {peer.peer_public_key} {peer.allowed_ips}"
+            for peer in report.unknown_remote_peers
+        )
+    if report.missing_local_peers:
+        lines.append("Missing local peers:")
+        lines.extend(
+            f"- device #{peer.device_id} {peer.device_name} {peer.peer_public_key} {peer.vpn_ip}/32"
+            for peer in report.missing_local_peers
+        )
+    return "\n".join(lines)
+
+
+def _sync_server_row(repo: Repository, server: ServerConfig) -> int:
+    return repo.upsert_server_config(
         name=server.name,
         host=server.ssh.host,
         ssh_port=server.ssh.port,
@@ -265,18 +325,6 @@ def run_server_traffic_collection(server: ServerConfig, *, db_path: Path) -> str
         runtime=server.runtime.type,
         firewall=server.firewall.provider,
         max_devices=server.vpn.max_devices,
-    )
-    report = TrafficService(repo).collect_and_store(
-        server_id,
-        AwgDumpTrafficCollector(
-            interface=server.vpn.interface,
-            source=f"awg:{server.name}",
-            ssh_client=SystemSshClient(server),
-        ),
-    )
-    return (
-        f"Traffic collection stored snapshots: {report.stored_count}\n"
-        f"Unknown peers: {len(report.unknown_peers)}"
     )
 
 

@@ -56,6 +56,8 @@ If heavy artifacts are needed later, put them in GitHub Releases or separate sto
 
 ## Quick VPS Check
 
+Docker peer apply/revoke requires `runtime.config_path` in `servers.yml`. The app rewrites that persistent config inside the container and then runs `docker restart <container_name>`. Traffic collection and `sync-peers` are read-only and use `awg show <interface> dump`.
+
 Host/systemd runtime:
 
 ```bash
@@ -80,7 +82,7 @@ Server health checks use the first `RemoteOperationRunner` slice:
 - local side effects: health snapshot and admin audit event when launched from web;
 - consistency status: `read-only`.
 
-This slice does not enable peer apply/revoke, Docker live changes, firewall changes, or destructive operations.
+This slice does not enable peer apply/revoke, Docker config writes, firewall changes, or destructive operations.
 
 The script does not install packages, change firewall rules, restart services, or write files. It only reads VPS state and exits with code `1` when critical errors are found.
 

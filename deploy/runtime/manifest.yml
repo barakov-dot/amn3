@@ -84,19 +84,21 @@ runtime_modes:
       - "ss -lun"
 
   docker:
-    description: "AmneziaWG runs inside a Docker container; current support is diagnostics-only."
+    description: "AmneziaWG runs inside a Docker container; peer changes rewrite the persistent config and restart the container."
     required_commands:
       - docker
       - ss
     settings:
       container_name: "amnezia-awg"
       interface: "awg0"
+      config_path: "/etc/amnezia/awg0.conf"
     read_only_checks:
       - "command -v docker"
       - "docker ps --format '{{.Names}}'"
       - "docker exec amnezia-awg awg show awg0"
       - "ss -lun"
-    blocked_live_operations:
-      - apply-peer
-      - revoke-peer
-      - collect-traffic
+    live_operations:
+      apply-peer: "rewrite runtime.config_path inside the container, then docker restart"
+      revoke-peer: "rewrite runtime.config_path inside the container, then docker restart"
+      collect-traffic: "read-only docker exec awg show dump"
+      sync-peers: "read-only compare remote peers with local database"

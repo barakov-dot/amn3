@@ -56,15 +56,20 @@ class AwgDumpTrafficCollector:
         interface: str,
         source: str,
         ssh_client: SshClient,
+        container_name: str | None = None,
         now=None,
     ) -> None:
         self._interface = interface
         self._source = source
         self._ssh_client = ssh_client
+        self._container_name = container_name
         self._now = now or _utc_now
 
     def collect(self, server_id: int) -> list[PeerTraffic]:
-        command = f"awg show {shlex.quote(self._interface)} dump"
+        command = _awg_dump_command(
+            interface=self._interface,
+            container_name=self._container_name,
+        )
         result = self._ssh_client.run(command)
         if result.exit_code != 0:
             raise TrafficCollectionError(
@@ -145,6 +150,13 @@ def parse_awg_show_dump(
             )
         )
     return peers
+
+
+def _awg_dump_command(*, interface: str, container_name: str | None) -> str:
+    interface_arg = shlex.quote(interface)
+    if container_name:
+        return f"docker exec {shlex.quote(container_name)} awg show {interface_arg} dump"
+    return f"awg show {interface_arg} dump"
 
 
 def format_bytes(value: int) -> str:

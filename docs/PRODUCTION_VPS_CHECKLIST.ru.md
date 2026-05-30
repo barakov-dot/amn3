@@ -263,6 +263,7 @@ VPS_APPLY_ENABLED=true
 runtime:
   type: docker
   container_name: amnezia-awg
+  config_path: /etc/amnezia/awg0.conf
 ```
 
 Перед live-проверкой убедиться, что имя контейнера совпадает с реальным:
@@ -276,6 +277,7 @@ docker ps --format '{{.Names}}'
 ```bash
 python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
 python -m app.cli server check --config servers.yml --server debian-vps-1
+python -m app.cli server sync-peers --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
 ```
 
 Ожидаемые read-only команды для Docker:
@@ -287,7 +289,7 @@ docker exec amnezia-awg awg show awg0
 ss -lun
 ```
 
-Для Docker runtime `apply-peer --apply`, `revoke-peer --apply` и live `collect-traffic` пока не включать: код явно блокирует эти операции, пока мы не подтвердим постоянный путь к конфигу внутри контейнера и безопасный способ применения peer.
+Для Docker runtime `apply-peer --apply` и `revoke-peer --apply` меняют файл `runtime.config_path` внутри контейнера и затем выполняют `docker restart <container_name>`. Перед включением `VPS_APPLY_ENABLED=true` обязательно проверить, что `config_path` указывает на реальный постоянный конфиг AmneziaWG, иначе peer может исчезнуть после перезапуска или сломать рабочий контейнер.
 
 ## 9. Optional `systemd` services
 

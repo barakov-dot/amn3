@@ -39,6 +39,7 @@ class RuntimeConfig:
     type: str
     service_name: str | None = None
     container_name: str | None = None
+    config_path: str | None = None
 
 
 @dataclass(frozen=True)

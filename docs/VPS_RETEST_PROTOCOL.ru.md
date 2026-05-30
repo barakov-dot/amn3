@@ -82,13 +82,13 @@ bash deploy/runtime/collect_debug_snapshot.sh
 Docker runtime:
 
 ```bash
-AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/collect_debug_snapshot.sh
+AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg AMN_INTERFACE=awg0 bash deploy/runtime/collect_debug_snapshot.sh
 ```
 
 Если нужно сохранить в файл:
 
 ```bash
-AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/collect_debug_snapshot.sh > debug-snapshot.txt 2>&1
+AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg AMN_INTERFACE=awg0 bash deploy/runtime/collect_debug_snapshot.sh > debug-snapshot.txt 2>&1
 ```
 
 Перед отправкой файла проверить, что секреты скрыты. Правила маскировки и ручной набор команд описаны в `docs/VPS_LOG_COLLECTION.ru.md`.
@@ -118,4 +118,4 @@ AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/collect_de
 
 ## 6. Когда останавливаемся
 
-Если ошибка относится к Docker `apply-peer`, `revoke-peer` или live `collect-traffic`, не включать `VPS_APPLY_ENABLED=true` и не пытаться чинить на VPS вручную до разбора логов. Этот участок пока намеренно защищен, пока не подтвержден постоянный путь к конфигу контейнера.
+Если ошибка относится к Docker `apply-peer` или `revoke-peer`, перед повтором проверить `runtime.config_path` в `servers.yml`: он должен указывать на реальный постоянный конфиг AmneziaWG внутри контейнера. Эти операции переписывают конфиг и выполняют `docker restart <container_name>`, поэтому не включать `VPS_APPLY_ENABLED=true`, пока dry-run и ручной тестовый peer не пройдены.

@@ -58,6 +58,34 @@ def test_create_workflow_can_enable_vps_peer_apply_from_server_config(tmp_path):
     assert server["server_public_key"] == "real-server-public-key"
 
 
+def test_create_workflow_passes_vps_ssh_password_to_peer_applier(tmp_path):
+    server_config_path = tmp_path / "servers.yml"
+    server_config_path.write_text(
+        VALID_YAML.replace(
+            "allowed_ips: 0.0.0.0/0",
+            "allowed_ips: 0.0.0.0/0\n      server_public_key: real-server-public-key",
+        ).replace("type: key", "type: password"),
+        encoding="utf-8",
+    )
+
+    workflow = create_workflow(
+        database_path=tmp_path / "app.sqlite3",
+        app_secret_key="app-bootstrap-secret-value-with-more-than-32-chars",
+        admin_telegram_ids={9001},
+        default_vpn_network_cidr="10.8.0.0/24",
+        max_devices_per_user=5,
+        default_plan_days=7,
+        vps_apply_enabled=True,
+        server_config_path=server_config_path,
+        server_name="debian-vps-1",
+        vps_ssh_password="ssh-secret",
+    )
+
+    peer_applier = workflow._access_service._peer_applier
+    assert peer_applier is not None
+    assert peer_applier._ssh_client._password == "ssh-secret"
+
+
 def test_create_bot_uses_proxy_session_when_proxy_url_is_configured(monkeypatch):
     created_sessions = []
     created_bots = []

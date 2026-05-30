@@ -33,6 +33,7 @@ async def run() -> None:
         vps_apply_enabled=settings.vps_apply_enabled,
         server_config_path=settings.server_config_path,
         server_name=settings.server_name,
+        vps_ssh_password=settings.vps_ssh_password,
         client_config_template_dir=settings.client_config_template_dir,
     )
     bot = create_bot(
@@ -132,6 +133,7 @@ def create_workflow(
     vps_apply_enabled: bool = False,
     server_config_path: str | Path = "servers.yml",
     server_name: str = "debian-vps-1",
+    vps_ssh_password: str = "",
     client_config_template_dir: str | Path | None = None,
 ) -> BotWorkflow:
     conn = connect(database_path)
@@ -142,7 +144,10 @@ def create_workflow(
     if vps_apply_enabled:
         server_config = select_server(load_server_config(server_config_path), server_name)
         default_server_id = _sync_server_config(repo, server_config)
-        peer_applier = ServerConfigPeerApplier(server_config)
+        peer_applier = ServerConfigPeerApplier(
+            server_config,
+            password=vps_ssh_password,
+        )
     else:
         default_server_id = repo.ensure_default_server(
             name="local",

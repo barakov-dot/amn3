@@ -1,10 +1,12 @@
-import pytest
-
 from app.cli import build_parser
+from app.cli import run_server_peer_sync
 from app.cli import run_server_preflight
 from app.cli import run_server_traffic_collection
 from app.cli import run_server_traffic_collection_dry_run
 from app.cli import run_server_check
+from app.db.connection import connect
+from app.db.repositories import Repository
+from app.db.schema import initialize_schema
 from app.server_config.loader import load_server_config, select_server
 from tests.server_config.test_loader import DOCKER_YAML
 from tests.server_config.test_loader import VALID_YAML
@@ -230,18 +232,74 @@ def test_run_server_traffic_collection_dry_run_prints_docker_pending_command(tmp
 
     assert "Dry-run traffic collection" in output
     assert "docker exec amnezia-awg awg show awg0 dump" in output
-    assert "Docker traffic collection is not implemented yet" in output
+    assert "Known peers will be stored in the local database" in output
     assert "No changes will be made" in output
 
 
-def test_run_server_traffic_collection_rejects_docker_runtime_until_persistent_path_is_known(tmp_path):
+def test_run_server_traffic_collection_accepts_docker_runtime(tmp_path, monkeypatch):
     path = tmp_path / "servers.yml"
     path.write_text(DOCKER_YAML, encoding="utf-8")
     config = load_server_config(path)
     server = select_server(config, "debian-vps-1")
+    monkeypatch.setattr(
+        "app.cli.SystemSshClient",
+        lambda server: RecordingSshClient("awg0\tserver-public\tserver-private\t51820\toff\n"),
+    )
 
-    with pytest.raises(RuntimeError, match="Docker traffic collection is not implemented"):
-        run_server_traffic_collection(server, db_path=tmp_path / "amneziya.sqlite3")
+    output = run_server_traffic_collection(server, db_path=tmp_path / "amneziya.sqlite3")
+
+    assert "Traffic collection stored snapshots: 0" in output
+    assert "Unknown peers: 0" in output
+
+
+def test_cli_accepts_server_sync_peers_arguments():
+    parser = build_parser()
+
+    args = parser.parse_args(
+        [
+            "server",
+            "sync-peers",
+            "--config",
+            "servers.yml",
+            "--server",
+            "debian-vps-1",
+            "--db",
+            "data/amneziya.sqlite3",
+        ]
+    )
+
+    assert args.command == "server"
+    assert args.server_command == "sync-peers"
+    assert args.db == "data/amneziya.sqlite3"
+
+
+def test_run_server_peer_sync_reports_known_unknown_and_missing(tmp_path, monkeypatch):
+    path = tmp_path / "servers.yml"
+    db_path = tmp_path / "amneziya.sqlite3"
+    path.write_text(DOCKER_YAML, encoding="utf-8")
+    config = load_server_config(path)
+    server = select_server(config, "debian-vps-1")
+    _seed_known_peer(db_path, server)
+    monkeypatch.setattr(
+        "app.cli.SystemSshClient",
+        lambda server: RecordingSshClient(
+            "\n".join(
+                [
+                    "awg0\tserver-public\tserver-private\t51820\toff",
+                    "known-peer\tpsk\t203.0.113.20:50000\t10.8.0.2/32\t1700000000\t1024\t2048\t25",
+                    "unknown-peer\tpsk\t(none)\t10.8.0.3/32\t0\t0\t0\toff",
+                ]
+            )
+        ),
+    )
+
+    output = run_server_peer_sync(server, db_path=db_path)
+
+    assert "Peer sync report: debian-vps-1" in output
+    assert "known remote peers: 1" in output
+    assert "unknown remote peers: 1" in output
+    assert "missing local peers: 0" in output
+    assert "unknown-peer 10.8.0.3/32" in output
 
 
 def test_cli_accepts_server_preflight_arguments():
@@ -293,3 +351,51 @@ def test_run_server_preflight_reports_local_readiness(tmp_path):
     assert "traffic dry-run: ok" in output
     assert "backup target: ok" in output
     assert "VPS_APPLY_ENABLED=false" in output
+
+
+class RecordingSshClient:
+    def __init__(self, stdout: str):
+        self.calls = []
+        self._stdout = stdout
+
+    def run(self, command: str, stdin: str | None = None):
+        from app.server.ssh import CommandResult
+
+        self.calls.append((command, stdin))
+        return CommandResult(exit_code=0, stdout=self._stdout, stderr="")
+
+
+def _seed_known_peer(db_path, server):
+    conn = connect(db_path)
+    initialize_schema(conn)
+    repo = Repository(conn)
+    server_id = repo.upsert_server_config(
+        name=server.name,
+        host=server.ssh.host,
+        ssh_port=server.ssh.port,
+        endpoint_host=server.vpn.endpoint_host,
+        vpn_port=int(server.vpn.port),
+        vpn_network_cidr=server.vpn.network_cidr,
+        server_address=server.vpn.server_address,
+        server_public_key=server.vpn.server_public_key or "",
+        runtime=server.runtime.type,
+        firewall=server.firewall.provider,
+        max_devices=server.vpn.max_devices,
+    )
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="known",
+        first_name="Known",
+        last_name=None,
+    )
+    repo.create_device(
+        user_id=user_id,
+        server_id=server_id,
+        name="known-device",
+        duration_days=7,
+        vpn_ip="10.8.0.2",
+        peer_public_key="known-peer",
+        peer_private_key_encrypted="v1:encrypted-private",
+        preshared_key_encrypted="v1:encrypted-psk",
+        config_version="amneziawg_v2",
+    )

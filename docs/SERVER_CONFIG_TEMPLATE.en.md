@@ -151,14 +151,14 @@ If AmneziaWG already runs in a Docker container and is not managed through host 
 runtime:
   type: "docker"
   container_name: "amnezia-awg"
+  config_path: "/etc/amnezia/awg0.conf"
 ```
 
-Docker runtime currently supports safe read-only checks only:
+Docker runtime supports safe read-only checks:
 
 - Docker availability on the VPS;
 - running container lookup by `container_name`;
-- `awg` availability inside the container;
 - `docker exec <container_name> awg show <interface>`;
 - UDP port visibility through host `ss -lun`.
 
-`apply-peer`, `revoke-peer`, and live `collect-traffic` intentionally do not change a Docker server yet and return a clear `not implemented yet` message. This stays blocked until the persistent AmneziaWG config path inside the container and the safe peer reload flow are confirmed.
+`apply-peer` and `revoke-peer` require `runtime.config_path`: the app reads this file inside the container, rewrites peer blocks, and runs `docker restart <container_name>`. Point this setting at the real persistent AmneziaWG config; otherwise changes may not survive restart or may break the running container. `collect-traffic` and `sync-peers` read `docker exec <container_name> awg show <interface> dump`.

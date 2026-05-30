@@ -180,14 +180,14 @@ python -m app.cli provision --interactive
 runtime:
   type: "docker"
   container_name: "amnezia-awg"
+  config_path: "/etc/amnezia/awg0.conf"
 ```
 
-Для Docker runtime сейчас включены только безопасные read-only проверки:
+Для Docker runtime включены безопасные read-only проверки:
 
 - наличие Docker на VPS;
 - наличие запущенного контейнера по `container_name`;
-- наличие `awg` внутри контейнера;
 - `docker exec <container_name> awg show <interface>`;
 - видимость UDP-порта через `ss -lun` на хосте.
 
-Команды `apply-peer`, `revoke-peer` и live `collect-traffic` для Docker пока намеренно не меняют сервер и возвращают понятное сообщение `not implemented yet`. Это защита до тех пор, пока не будет подтвержден постоянный путь к конфигу AmneziaWG внутри контейнера и безопасный способ перезагрузки/перечитывания peer.
+Команды `apply-peer` и `revoke-peer` для Docker требуют `runtime.config_path`: приложение читает этот файл внутри контейнера, переписывает peer-блоки и выполняет `docker restart <container_name>`. Указывать нужно именно постоянный конфиг AmneziaWG, иначе изменения не переживут перезапуск или могут сломать рабочий контейнер. `collect-traffic` и `sync-peers` читают `docker exec <container_name> awg show <interface> dump`.

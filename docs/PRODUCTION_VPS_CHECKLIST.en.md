@@ -261,6 +261,7 @@ For a Docker node, set `servers.yml` to:
 runtime:
   type: docker
   container_name: amnezia-awg
+  config_path: /etc/amnezia/awg0.conf
 ```
 
 Before the live check, confirm the real container name:
@@ -274,6 +275,7 @@ Then run the project's safe checks:
 ```bash
 python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
 python -m app.cli server check --config servers.yml --server debian-vps-1
+python -m app.cli server sync-peers --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
 ```
 
 Expected Docker read-only commands:
@@ -285,7 +287,7 @@ docker exec amnezia-awg awg show awg0
 ss -lun
 ```
 
-Do not enable `apply-peer --apply`, `revoke-peer --apply`, or live `collect-traffic` for Docker runtime yet: the code explicitly blocks those operations until the persistent container config path and safe peer reload flow are confirmed.
+For Docker runtime, `apply-peer --apply` and `revoke-peer --apply` rewrite `runtime.config_path` inside the container and then run `docker restart <container_name>`. Before enabling `VPS_APPLY_ENABLED=true`, confirm that `config_path` points to the real persistent AmneziaWG config; otherwise peers may disappear after restart or break the running container.
 
 ## 9. Optional `systemd` Services
 

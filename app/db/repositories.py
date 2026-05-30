@@ -1067,6 +1067,29 @@ class Repository:
             (limit,),
         ).fetchall()
 
+    def list_active_devices_for_server(
+        self,
+        server_id: int,
+        *,
+        limit: int = 1000,
+    ) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                id,
+                name,
+                vpn_ip,
+                peer_public_key,
+                status
+            FROM devices
+            WHERE server_id = ?
+              AND status = 'active'
+            ORDER BY id ASC
+            LIMIT ?
+            """,
+            (server_id, limit),
+        ).fetchall()
+
     def record_device_traffic_snapshot(
         self,
         *,

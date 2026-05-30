@@ -62,6 +62,7 @@ servers:
     runtime:
       type: docker
       container_name: amnezia-awg
+      config_path: /etc/amnezia/awg0.conf
 """
 
 
@@ -87,6 +88,7 @@ def test_load_server_config_reads_docker_runtime(tmp_path: Path):
 
     assert server.runtime.type == "docker"
     assert server.runtime.container_name == "amnezia-awg"
+    assert server.runtime.config_path == "/etc/amnezia/awg0.conf"
     assert server.runtime.service_name is None
 
 
