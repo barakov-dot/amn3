@@ -68,7 +68,7 @@
 - Идея: перед любым backup/restore явно классифицировать секреты и по умолчанию отдавать redacted backup.
 - Польза: снижает риск случайной утечки SSH keys, panel tokens, Telegram tokens и внешних API keys.
 - Риски: пользователю нужен понятный full-backup режим, encryption key management, restore compatibility.
-- Статус: research после deep-dive.
+- Статус: design candidate описан в [Secret Inventory + Backup Policy для `amn2`](../docs/superpowers/specs/2026-05-30-secret-inventory-backup-policy-design.md).
 
 ### Safe SSH/sudo policy
 
@@ -138,6 +138,6 @@
 - `RemoteOperationRunner`: command contract, host key enrollment, redaction, audit, dry-run и fake runner.
 - `Route Policy Matrix`: endpoint, role, auth method, side effect, risk class, audit и tests.
 - `Scoped API Tokens`: one-time display, hash storage, scopes, expiry, revoke и owner inheritance.
-- Secret inventory and backup policy: redacted backup по умолчанию и encrypted full backup как явный режим.
+- `Secret Inventory + Backup Policy`: redacted backup по умолчанию и encrypted full backup как явный режим.
 - Public/self-service config delivery: ownership tests, hashed share tokens, expiry, revoke и audit.
 - Статус: собрано из feature gap; перед реализацией нужен контекст текущего `amn2`.
