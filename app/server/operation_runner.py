@@ -49,21 +49,13 @@ class RemoteOperationRunner:
                         status=status,
                     )
                 )
-                if status == "failed":
-                    return OperationResult(
-                        operation_id=operation.id,
-                        risk_class=operation.risk_class,
-                        status="failed",
-                        consistency_status="read-only",
-                        steps=tuple(step_results),
-                        redacted_stdout_summary=_stream_summary(result.stdout),
-                        redacted_stderr_summary=_stream_summary(result.stderr),
-                        recovery_note=operation.rollback_note,
-                    )
+            operation_status = (
+                "failed" if any(step.status == "failed" for step in step_results) else "completed"
+            )
             return OperationResult(
                 operation_id=operation.id,
                 risk_class=operation.risk_class,
-                status="completed",
+                status=operation_status,
                 consistency_status="read-only",
                 steps=tuple(step_results),
                 redacted_stdout_summary=_combined_summary(step.stdout for step in step_results),
@@ -96,10 +88,6 @@ def _blocked(operation: RemoteOperation, reason: str) -> OperationResult:
         redacted_stderr_summary="empty",
         recovery_note=redact(reason),
     )
-
-
-def _stream_summary(value: str) -> str:
-    return "present" if value else "empty"
 
 
 def _combined_summary(values) -> str:

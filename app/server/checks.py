@@ -1,8 +1,8 @@
 import re
 
+from app.server.operations import CommandStep, RemoteOperation
 from app.server.report import CheckResult, ServerCheckReport
 from app.server.ssh import CommandResult, SshClient
-from app.server.operations import CommandStep, RemoteOperation
 from app.server_config.models import ServerConfig
 
 
@@ -150,26 +150,49 @@ def ensure_read_only_command(command: str) -> None:
 
 
 def run_server_checks(server: ServerConfig, ssh: SshClient) -> ServerCheckReport:
-    commands = planned_check_commands(server)
+    from app.server.operation_runner import RemoteOperationRunner
+
+    operation = build_server_check_operation(
+        server,
+        actor_id="system",
+        actor_auth_method="system",
+    )
+    operation_result = RemoteOperationRunner(ssh).apply(operation)
+    if operation_result.status == "blocked":
+        return ServerCheckReport(
+            server_name=server.name,
+            results=[
+                CheckResult(
+                    "remote-operation-policy",
+                    "error",
+                    operation_result.recovery_note,
+                )
+            ],
+        )
+    commands = [step.command for step in operation_result.steps]
+    command_results = {
+        step.command: CommandResult(step.exit_code, step.stdout, step.stderr)
+        for step in operation_result.steps
+    }
     if server.runtime.type == "docker":
         results = [
-            _check_debian(_run(ssh, commands[0])),
-            _check_command("docker", _run(ssh, commands[1]), missing_status="error"),
-            _check_container(server, _run(ssh, commands[2])),
-            _check_command("awg", _run(ssh, commands[3]), missing_status="warning"),
-            _check_docker_interface(server, _run(ssh, commands[4])),
-            _check_udp_port(server, _run(ssh, commands[5])),
+            _check_debian(command_results[commands[0]]),
+            _check_command("docker", command_results[commands[1]], missing_status="error"),
+            _check_container(server, command_results[commands[2]]),
+            _check_command("awg", command_results[commands[3]], missing_status="warning"),
+            _check_docker_interface(server, command_results[commands[4]]),
+            _check_udp_port(server, command_results[commands[5]]),
         ]
         return ServerCheckReport(server_name=server.name, results=results)
 
     results = [
-        _check_debian(_run(ssh, commands[0])),
-        _check_command("systemd", _run(ssh, commands[1]), missing_status="error"),
-        _check_command("awg", _run(ssh, commands[2]), missing_status="warning"),
-        _check_command("awg-quick", _run(ssh, commands[3]), missing_status="warning"),
-        _check_command("ufw", _run(ssh, commands[4]), missing_status="warning"),
-        _check_interface(server, _run(ssh, commands[5])),
-        _check_udp_port(server, _run(ssh, commands[6])),
+        _check_debian(command_results[commands[0]]),
+        _check_command("systemd", command_results[commands[1]], missing_status="error"),
+        _check_command("awg", command_results[commands[2]], missing_status="warning"),
+        _check_command("awg-quick", command_results[commands[3]], missing_status="warning"),
+        _check_command("ufw", command_results[commands[4]], missing_status="warning"),
+        _check_interface(server, command_results[commands[5]]),
+        _check_udp_port(server, command_results[commands[6]]),
     ]
     return ServerCheckReport(server_name=server.name, results=results)
 

@@ -52,6 +52,45 @@ def test_run_server_checks_reports_ready_debian_server(tmp_path):
     assert all(command in ssh.commands for command in ["cat /etc/os-release", "ss -lun"])
 
 
+def test_run_server_checks_still_runs_host_commands_in_order(tmp_path):
+    server = _server(tmp_path)
+    ssh = FakeSshClient(
+        {
+            "cat /etc/os-release": CommandResult(0, "ID=debian\n", ""),
+            "command -v systemctl": CommandResult(0, "/usr/bin/systemctl\n", ""),
+            "command -v awg": CommandResult(0, "/usr/bin/awg\n", ""),
+            "command -v awg-quick": CommandResult(0, "/usr/bin/awg-quick\n", ""),
+            "command -v ufw": CommandResult(0, "/usr/sbin/ufw\n", ""),
+            "systemctl is-active awg-quick@awg0": CommandResult(0, "active\n", ""),
+            "ss -lun": CommandResult(0, "udp UNCONN 0 0 0.0.0.0:30001 0.0.0.0:*\n", ""),
+        }
+    )
+
+    report = run_server_checks(server, ssh)
+
+    assert ssh.commands == planned_check_commands(server)
+    assert report.ok is True
+
+
+def test_run_server_checks_reports_blocked_policy_violation(tmp_path, monkeypatch):
+    server = _server(tmp_path)
+
+    monkeypatch.setattr(
+        "app.server.checks.planned_check_commands",
+        lambda server: ["systemctl restart awg-quick@awg0"],
+    )
+
+    report = run_server_checks(server, FakeSshClient({}))
+
+    assert report.ok is False
+    assert report.results[0].name == "remote-operation-policy"
+    assert report.results[0].status == "error"
+    assert (
+        "Mutating command" in report.results[0].message
+        or "allowlist" in report.results[0].message
+    )
+
+
 def test_run_server_checks_marks_missing_awg_as_warning(tmp_path):
     server = _server(tmp_path)
     ssh = FakeSshClient(

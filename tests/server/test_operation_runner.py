@@ -141,6 +141,57 @@ def test_runner_executes_read_only_operation():
     assert ssh.calls == [("cat /etc/os-release", None)]
 
 
+def test_runner_continues_read_only_operation_after_failed_step():
+    operation = RemoteOperation(
+        id="server.health.check",
+        risk_class="read-only-remote",
+        server_id="debian-vps-1",
+        actor_id="cli",
+        actor_auth_method="cli",
+        inputs={"server_name": "debian-vps-1"},
+        secret_refs=(),
+        local_side_effects=(),
+        remote_side_effects=(),
+        command_policy="read-only",
+        steps=(
+            CommandStep(
+                id="missing-awg",
+                command="command -v awg",
+                command_policy_class="read-only",
+                expected_remote_effect="none",
+                allowed_exit_codes=(0,),
+                timeout_seconds=20,
+                output_policy="internal-only",
+            ),
+            CommandStep(
+                id="udp-sockets",
+                command="ss -lun",
+                command_policy_class="read-only",
+                expected_remote_effect="none",
+                allowed_exit_codes=(0,),
+                timeout_seconds=20,
+                output_policy="internal-only",
+            ),
+        ),
+        consistency_policy="read-only",
+        audit_summary="Run read-only server health check",
+        rollback_note="No rollback is needed for read-only health checks.",
+        confirmation_required=False,
+    )
+    ssh = RecordingSshClient(
+        results={
+            "command -v awg": CommandResult(exit_code=1, stdout="", stderr="not found"),
+            "ss -lun": CommandResult(exit_code=0, stdout="udp sockets\n", stderr=""),
+        }
+    )
+
+    result = RemoteOperationRunner(ssh).apply(operation)
+
+    assert result.status == "failed"
+    assert [step.step_id for step in result.steps] == ["missing-awg", "udp-sockets"]
+    assert ssh.calls == [("command -v awg", None), ("ss -lun", None)]
+
+
 def test_runner_blocks_mutating_command_before_ssh():
     ssh = RecordingSshClient()
     runner = RemoteOperationRunner(ssh)
