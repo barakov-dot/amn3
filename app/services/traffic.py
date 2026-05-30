@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from ipaddress import ip_network
 import shlex
 from typing import Protocol
 
@@ -132,13 +133,11 @@ def parse_awg_show_dump(
     source: str,
 ) -> list[PeerTraffic]:
     peers: list[PeerTraffic] = []
-    for index, line in enumerate(dump.splitlines()):
+    for line in dump.splitlines():
         if not line.strip():
             continue
         parts = line.split("\t")
-        if index == 0 and len(parts) >= 5 and not _looks_like_peer_row(parts):
-            continue
-        if len(parts) < 7:
+        if len(parts) < 7 or not _looks_like_peer_row(parts):
             continue
         peers.append(
             PeerTraffic(
@@ -251,7 +250,29 @@ def _row_get(row, key: str):
 
 
 def _looks_like_peer_row(parts: list[str]) -> bool:
-    return len(parts) >= 8 and parts[4].isdigit() and parts[5].isdigit() and parts[6].isdigit()
+    return (
+        len(parts) >= 7
+        and _looks_like_allowed_ips(parts[3])
+        and parts[4].isdigit()
+        and parts[5].isdigit()
+        and parts[6].isdigit()
+    )
+
+
+def _looks_like_allowed_ips(value: str) -> bool:
+    if value == "(none)":
+        return True
+    tokens = [token.strip() for token in value.split(",")]
+    if not tokens:
+        return False
+    for token in tokens:
+        if not token:
+            return False
+        try:
+            ip_network(token, strict=False)
+        except ValueError:
+            return False
+    return True
 
 
 def _utc_now() -> str:

@@ -151,6 +151,25 @@ def test_parse_awg_show_dump_reads_peer_transfer_counters():
     ]
 
 
+def test_parse_awg_show_dump_skips_amneziawg_interface_row():
+    dump = "\n".join(
+        [
+            "server-private\tserver-public\t37661\t4\t10\t50\t19\t90\t45\t17\t1622123045-2053868572",
+            "remote-peer\tpsk\t203.0.113.20:50000\t10.8.1.1/32\t1700000000\t1024\t2048\t25",
+            "idle-peer\t(none)\t(none)\t10.8.1.2/32\t0\t0\t0\toff",
+        ]
+    )
+
+    peers = parse_awg_show_dump(
+        dump,
+        collected_at="2026-05-27T12:00:00Z",
+        source="awg:debian-vps-1",
+    )
+
+    assert [peer.peer_public_key for peer in peers] == ["remote-peer", "idle-peer"]
+    assert [peer.rx_bytes for peer in peers] == [1024, 0]
+
+
 def test_awg_dump_traffic_collector_runs_read_only_dump_command(tmp_path):
     ssh = RecordingSshClient(
         result=CommandResult(

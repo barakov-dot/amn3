@@ -27,6 +27,21 @@ def test_parse_awg_peer_inventory_dump_reads_allowed_ips_and_counters():
     assert peers[1].latest_handshake == 0
 
 
+def test_parse_awg_peer_inventory_dump_skips_amneziawg_interface_row():
+    dump = "\n".join(
+        [
+            "server-private\tserver-public\t37661\t4\t10\t50\t19\t90\t45\t17\t1622123045-2053868572",
+            "remote-peer\tpsk\t203.0.113.20:50000\t10.8.1.1/32\t1700000000\t1024\t2048\t25",
+            "idle-peer\t(none)\t(none)\t10.8.1.2/32\t0\t0\t0\toff",
+        ]
+    )
+
+    peers = parse_awg_peer_inventory_dump(dump)
+
+    assert [peer.peer_public_key for peer in peers] == ["remote-peer", "idle-peer"]
+    assert [peer.allowed_ips for peer in peers] == ["10.8.1.1/32", "10.8.1.2/32"]
+
+
 def test_peer_inventory_service_compares_remote_and_local_peers(tmp_path):
     conn = connect(tmp_path / "inventory.sqlite3")
     initialize_schema(conn)

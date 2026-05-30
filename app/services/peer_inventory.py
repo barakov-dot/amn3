@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from ipaddress import ip_network
 import shlex
 from typing import Protocol
 
@@ -104,13 +105,11 @@ class PeerInventoryService:
 
 def parse_awg_peer_inventory_dump(dump: str) -> list[RemotePeer]:
     peers: list[RemotePeer] = []
-    for index, line in enumerate(dump.splitlines()):
+    for line in dump.splitlines():
         if not line.strip():
             continue
         parts = line.split("\t")
-        if index == 0 and len(parts) >= 5 and not _looks_like_peer_row(parts):
-            continue
-        if len(parts) < 7:
+        if len(parts) < 7 or not _looks_like_peer_row(parts):
             continue
         peers.append(
             RemotePeer(
@@ -144,7 +143,29 @@ def _awg_dump_command(*, interface: str, container_name: str | None) -> str:
 
 
 def _looks_like_peer_row(parts: list[str]) -> bool:
-    return len(parts) >= 8 and parts[4].isdigit() and parts[5].isdigit() and parts[6].isdigit()
+    return (
+        len(parts) >= 7
+        and _looks_like_allowed_ips(parts[3])
+        and parts[4].isdigit()
+        and parts[5].isdigit()
+        and parts[6].isdigit()
+    )
+
+
+def _looks_like_allowed_ips(value: str) -> bool:
+    if value == "(none)":
+        return True
+    tokens = [token.strip() for token in value.split(",")]
+    if not tokens:
+        return False
+    for token in tokens:
+        if not token:
+            return False
+        try:
+            ip_network(token, strict=False)
+        except ValueError:
+            return False
+    return True
 
 
 def _safe_int(value: str) -> int:
