@@ -103,7 +103,7 @@
 - Идея: remote operation должна описываться contract-ом: тип риска, inputs, expected side effects, timeout, allowed exit codes, redaction, audit summary и recovery note.
 - Польза: SSH/sudo/Docker/firewall операции становятся тестируемыми и обозримыми до выполнения.
 - Риски: больше design работы перед первой реализацией; понадобится fake runner и дисциплина в manager-ах.
-- Статус: research после manager architecture deep-dive.
+- Статус: design candidate описан в [RemoteOperationRunner для `amn2`](../docs/superpowers/specs/2026-05-30-remote-operation-runner-design.md).
 
 ### Dry-run-first remote operations
 
