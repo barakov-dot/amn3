@@ -2,6 +2,7 @@ import re
 
 from app.server.report import CheckResult, ServerCheckReport
 from app.server.ssh import CommandResult, SshClient
+from app.server.operations import CommandStep, RemoteOperation
 from app.server_config.models import ServerConfig
 
 
@@ -82,6 +83,50 @@ def planned_check_commands(server: ServerConfig) -> list[str]:
         command.format(interface=server.vpn.interface)
         for command in READ_ONLY_CHECK_COMMANDS
     ]
+
+
+def build_server_check_operation(
+    server: ServerConfig,
+    *,
+    actor_id: str,
+    actor_auth_method,
+) -> RemoteOperation:
+    commands = planned_check_commands(server)
+    steps = tuple(
+        CommandStep(
+            id=f"server-check-{index + 1}",
+            command=command,
+            command_policy_class="read-only",
+            expected_remote_effect="none",
+            allowed_exit_codes=(0,),
+            timeout_seconds=20,
+            output_policy="internal-only",
+        )
+        for index, command in enumerate(commands)
+    )
+    return RemoteOperation(
+        id="server.health.check",
+        risk_class="read-only-remote",
+        server_id=server.name,
+        actor_id=actor_id,
+        actor_auth_method=actor_auth_method,
+        inputs={
+            "server_name": server.name,
+            "runtime": server.runtime.type,
+        },
+        secret_refs=(),
+        local_side_effects=("server_health_checks", "admin_actions"),
+        remote_side_effects=(),
+        command_policy="read-only",
+        steps=steps,
+        consistency_policy="read-only",
+        audit_summary=f"Run read-only health check for server {server.name}",
+        rollback_note=(
+            "No rollback is needed for read-only health checks. "
+            "Re-run server check after fixing server access."
+        ),
+        confirmation_required=False,
+    )
 
 
 def ensure_read_only_command(command: str) -> None:
