@@ -283,7 +283,13 @@ def test_health_run_stores_unknown_when_server_config_is_unavailable(tmp_path: P
         assert latest["awg_ok"] == 0
         assert latest["udp_port_ok"] == 0
         assert "Add server 'not-in-config' to" in latest["error"]
-        assert _latest_admin_action(repo)["action"] == "web_server_health_run"
+        action = _latest_admin_action(repo)
+        assert action["action"] == "web_server_health_run"
+        metadata = json.loads(action["metadata_json"])
+        assert metadata["operation_id"] == "server.health.check"
+        assert metadata["risk_class"] == "read-only-remote"
+        assert metadata["consistency_status"] == "read-only"
+        assert metadata["status"] == "unknown"
 
 
 def test_invalid_csrf_does_not_create_edit_disable_or_run_health(tmp_path: Path):

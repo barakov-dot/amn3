@@ -29,6 +29,9 @@ class HealthSummary:
     awg_ok: bool
     udp_port_ok: bool
     error: str | None
+    operation_id: str = "server.health.check"
+    risk_class: str = "read-only-remote"
+    consistency_status: str = "read-only"
 
 
 def summarize_check_report(

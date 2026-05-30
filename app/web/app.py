@@ -1144,6 +1144,9 @@ def create_web_app(
                         action="web_server_health_run",
                         server_id=server_id,
                         metadata={
+                            "operation_id": summary.operation_id,
+                            "risk_class": summary.risk_class,
+                            "consistency_status": summary.consistency_status,
                             "status": summary.status,
                             "error": summary.error,
                         },

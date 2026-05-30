@@ -23,6 +23,9 @@ def test_summarize_check_report_marks_online_when_all_checks_pass():
     assert summary.awg_ok is True
     assert summary.udp_port_ok is True
     assert summary.error is None
+    assert summary.operation_id == "server.health.check"
+    assert summary.risk_class == "read-only-remote"
+    assert summary.consistency_status == "read-only"
 
 
 def test_summarize_check_report_marks_degraded_for_warnings():
@@ -45,6 +48,9 @@ def test_summarize_check_report_marks_degraded_for_warnings():
     assert summary.error is not None
     assert "awg-quick: awg-quick is not installed" in summary.error
     assert "udp-port: UDP port 30001 is not visible" in summary.error
+    assert summary.operation_id == "server.health.check"
+    assert summary.risk_class == "read-only-remote"
+    assert summary.consistency_status == "read-only"
 
 
 def test_summarize_check_report_keeps_ssh_ok_when_reachable_report_has_warnings():
@@ -85,6 +91,9 @@ def test_summarize_check_report_marks_offline_for_errors():
     assert summary.udp_port_ok is False
     assert summary.error is not None
     assert "ssh: SSH connection timed out" in summary.error
+    assert summary.operation_id == "server.health.check"
+    assert summary.risk_class == "read-only-remote"
+    assert summary.consistency_status == "read-only"
 
 
 def test_summarize_check_report_keeps_ssh_ok_for_non_ssh_error_results():
@@ -116,3 +125,6 @@ def test_summarize_check_report_marks_unknown_when_no_results_exist():
     assert summary.awg_ok is False
     assert summary.udp_port_ok is False
     assert summary.error == "No check results returned"
+    assert summary.operation_id == "server.health.check"
+    assert summary.risk_class == "read-only-remote"
+    assert summary.consistency_status == "read-only"
