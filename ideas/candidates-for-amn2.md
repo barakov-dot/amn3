@@ -82,7 +82,7 @@
 - Идея: перед реализацией API фиксировать таблицу endpoint, role, auth method, side effect, audit requirement и tests.
 - Польза: снижает риск разнородных guards и случайного privilege escalation.
 - Риски: требует дисциплины при добавлении endpoints и синхронизации OpenAPI/docs.
-- Статус: research после API surface deep-dive.
+- Статус: design candidate описан в [Route Policy Matrix для `amn2`](../docs/superpowers/specs/2026-05-30-route-policy-matrix-design.md).
 
 ### API operation risk classes
 
@@ -136,7 +136,7 @@
 ### Ближайшая очередь design review
 
 - `RemoteOperationRunner`: command contract, host key enrollment, redaction, audit, dry-run и fake runner.
-- Route policy matrix: endpoint, role, auth method, side effect, risk class, audit и tests.
+- `Route Policy Matrix`: endpoint, role, auth method, side effect, risk class, audit и tests.
 - Scoped API tokens: one-time display, hash storage, scopes, expiry, revoke и owner inheritance.
 - Secret inventory and backup policy: redacted backup по умолчанию и encrypted full backup как явный режим.
 - Public/self-service config delivery: ownership tests, hashed share tokens, expiry, revoke и audit.
