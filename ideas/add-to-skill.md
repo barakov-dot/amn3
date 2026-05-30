@@ -34,3 +34,18 @@
 - backup policy: redacted/full, encrypted/plain, restore validation, audit;
 - SSH host key policy и sudo policy;
 - logging redaction: команды, stderr/stdout, tracebacks, external API errors.
+
+## API surface checklist для VPN/control-panel upstream
+
+При анализе API surface фиксировать:
+
+- OpenAPI/tag groups и совпадают ли они с фактическими route groups;
+- какие endpoints являются UI templates, JSON API, self-service или public links;
+- какой guard используется: session, bearer token, public token, bot callback;
+- какие роли допускаются: admin, support, user, anonymous;
+- где есть secret-read operations: config download, token creation, backup download;
+- где есть remote-exec operations: install, uninstall, restart, reboot, clear;
+- где есть destructive operations и есть ли dry-run/confirmation/audit;
+- где raw config редактируется напрямую;
+- есть ли единая policy matrix или guards разбросаны по handlers;
+- какие tests нужны для forbidden access и ownership boundaries.

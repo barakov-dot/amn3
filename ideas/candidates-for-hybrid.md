@@ -54,3 +54,17 @@
 - Польза: проще переносить и восстанавливать небольшие инсталляции.
 - Риски: backup почти всегда содержит секреты; нужен redacted/full режим, encryption, restore validation и audit.
 - Статус: research.
+
+### Operator API taxonomy
+
+- Идея: сделать API docs продуктовой частью operator UX: отдельные группы для auth, servers, protocols, connections, users, self-service, sharing, settings и integrations.
+- Польза: проще расширять multi-protocol продукт и подключать внешние инструменты.
+- Риски: docs могут расходиться с реальными guards, если нет policy matrix и тестов.
+- Статус: полезно для будущего гибридного проекта.
+
+### Integration-friendly API surface
+
+- Идея: проектировать внешний API не как “те же admin routes”, а как отдельный integration surface со scopes, audit и стабильными contracts.
+- Польза: безопаснее для мониторинга, CI, billing, support tooling и миграций.
+- Риски: больше design работы и больше compatibility obligations.
+- Статус: research.

@@ -76,3 +76,24 @@
 - Польза: критично для любых операций, которые меняют удаленный VPN-сервер.
 - Риски: сложность реализации, разные sudoers-конфигурации, совместимость с существующими серверами.
 - Статус: research после deep-dive.
+
+### Route policy matrix
+
+- Идея: перед реализацией API фиксировать таблицу endpoint, role, auth method, side effect, audit requirement и tests.
+- Польза: снижает риск разнородных guards и случайного privilege escalation.
+- Риски: требует дисциплины при добавлении endpoints и синхронизации OpenAPI/docs.
+- Статус: research после API surface deep-dive.
+
+### API operation risk classes
+
+- Идея: классифицировать API-действия как read-only, secret-read, state-write, remote-exec и destructive.
+- Польза: помогает заранее определить confirmation, audit, dry-run и test requirements.
+- Риски: ошибочная классификация может дать слишком мягкие guardrails.
+- Статус: research после API surface deep-dive.
+
+### Destructive operation test plan
+
+- Идея: для reboot, clear, uninstall, raw config save и restore иметь отдельные тесты отказов, audit events и recovery notes.
+- Польза: production-перенос становится проверяемым, а не только “осторожным”.
+- Риски: нужны test doubles для remote server и аккуратная модель dry-run.
+- Статус: research после API surface deep-dive.

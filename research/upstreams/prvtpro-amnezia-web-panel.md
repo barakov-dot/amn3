@@ -99,7 +99,7 @@ Docker-сценарий простой: официальный образ `prvtp
 
 - Проверить структуру `managers/` точечно: как разделены SSH, install, status, config generation и user lifecycle.
 - Auth/session/secrets deep-dive выполнен: [prvtpro-amnezia-web-panel-auth-secrets.md](prvtpro-amnezia-web-panel-auth-secrets.md).
-- Проверить API surface и выделить endpoints, которые стоит сравнить с `amn2`.
+- API surface deep-dive выполнен: [prvtpro-amnezia-web-panel-api-surface.md](prvtpro-amnezia-web-panel-api-surface.md).
 - Составить feature gap таблицу `amn2` vs Amnezia Web Panel после просмотра текущего `amn2`.
 
 ## Источники
@@ -115,3 +115,4 @@ Docker-сценарий простой: официальный образ `prvtp
 ## Deep-dive материалы
 
 - [Auth, secrets и API tokens](prvtpro-amnezia-web-panel-auth-secrets.md)
+- [API surface и route guards](prvtpro-amnezia-web-panel-api-surface.md)

@@ -51,3 +51,21 @@
 - Решение: отклонено для production по умолчанию.
 - Причина: backup содержит секреты и может быть случайно передан дальше.
 - Допустимая альтернатива: redacted backup по умолчанию, encrypted full backup как явный dangerous режим, audit download/restore.
+
+### Raw config editing без validation и audit
+
+- Решение: отклонено для production.
+- Причина: прямое сохранение server-side config может сломать протокол, потерять клиентов или скрыто изменить security posture.
+- Допустимая альтернатива: schema validation, backup-before-write, diff preview, audit event и rollback note.
+
+### Destructive API endpoints без dry-run и confirmation
+
+- Решение: отклонено для production.
+- Причина: операции reboot, clear, uninstall и restore могут ломать удаленный сервер или состояние панели.
+- Допустимая альтернатива: explicit confirmation, dry-run где возможно, audit, role/scope gate и recovery plan.
+
+### Разнородные route guards без policy matrix
+
+- Решение: отклонено как production-подход.
+- Причина: при росте API легко получить несогласованное поведение между session, bearer token, user self-service и public sharing.
+- Допустимая альтернатива: route policy matrix плюс тесты доступа для каждой роли и auth method.
