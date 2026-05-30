@@ -119,12 +119,6 @@ check_docker_runtime() {
         error "Docker container is not running: $AMN_CONTAINER_NAME"
     fi
 
-    if docker exec "$AMN_CONTAINER_NAME" command -v awg >/dev/null 2>&1; then
-        ok "awg is available inside container: $AMN_CONTAINER_NAME"
-    else
-        warn "awg is not available inside container: $AMN_CONTAINER_NAME"
-    fi
-
     if docker exec "$AMN_CONTAINER_NAME" awg show "$AMN_INTERFACE" >/dev/null 2>&1; then
         ok "awg interface is readable inside container: $AMN_INTERFACE"
     else

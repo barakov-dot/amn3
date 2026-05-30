@@ -132,7 +132,6 @@ collect_docker_snapshot() {
     run "docker containers" docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
     run "docker inspect selected container" docker inspect "$AMN_CONTAINER_NAME" \
         --format '{{.Name}} {{.State.Status}} {{.Config.Image}} {{json .Mounts}}'
-    run "awg path inside container" docker exec "$AMN_CONTAINER_NAME" command -v awg
     run "awg show docker interface" docker exec "$AMN_CONTAINER_NAME" awg show "$AMN_INTERFACE"
 }
 

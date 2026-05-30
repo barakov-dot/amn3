@@ -21,7 +21,6 @@ _EXACT_READ_ONLY_COMMANDS = {
     "ss -lun",
 }
 _SYSTEMD_ACTIVE_RE = re.compile(r"^systemctl is-active awg-quick@[A-Za-z0-9_.:-]+$")
-_DOCKER_EXEC_AWG_COMMAND_RE = re.compile(r"^docker exec [A-Za-z0-9_.:-]+ command -v awg$")
 _DOCKER_EXEC_AWG_SHOW_RE = re.compile(r"^docker exec [A-Za-z0-9_.:-]+ awg show [A-Za-z0-9_.:-]+(?: dump)?$")
 _SHELL_CONTROL_TOKENS = ("|", "&", ";", ">", "<", "`", "$(", "\n", "\r")
 _MUTATING_WORDS = {
@@ -66,7 +65,6 @@ DOCKER_READ_ONLY_CHECK_COMMANDS = (
     "cat /etc/os-release",
     "command -v docker",
     "docker ps --format {{{{.Names}}}}",
-    "docker exec {container} command -v awg",
     "docker exec {container} awg show {interface}",
     "ss -lun",
 )
@@ -138,7 +136,6 @@ def ensure_read_only_command(command: str) -> None:
     if (
         normalized in _EXACT_READ_ONLY_COMMANDS
         or _SYSTEMD_ACTIVE_RE.match(normalized)
-        or _DOCKER_EXEC_AWG_COMMAND_RE.match(normalized)
         or _DOCKER_EXEC_AWG_SHOW_RE.match(normalized)
     ):
         return
@@ -179,9 +176,8 @@ def run_server_checks(server: ServerConfig, ssh: SshClient) -> ServerCheckReport
             _check_debian(command_results[commands[0]]),
             _check_command("docker", command_results[commands[1]], missing_status="error"),
             _check_container(server, command_results[commands[2]]),
-            _check_command("awg", command_results[commands[3]], missing_status="warning"),
-            _check_docker_interface(server, command_results[commands[4]]),
-            _check_udp_port(server, command_results[commands[5]]),
+            _check_docker_interface(server, command_results[commands[3]]),
+            _check_udp_port(server, command_results[commands[4]]),
         ]
         return ServerCheckReport(server_name=server.name, results=results)
 

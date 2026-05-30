@@ -9,7 +9,6 @@ def test_policy_allows_known_read_only_commands():
     ensure_read_only_command("systemctl is-active awg-quick@awg0")
     ensure_read_only_command("command -v docker")
     ensure_read_only_command("docker ps --format {{.Names}}")
-    ensure_read_only_command("docker exec amnezia-awg command -v awg")
     ensure_read_only_command("docker exec amnezia-awg awg show awg0")
     ensure_read_only_command("docker exec amnezia-awg awg show awg0 dump")
     ensure_read_only_command("ss -lun")
@@ -25,6 +24,7 @@ def test_policy_allows_known_read_only_commands():
         "cat /etc/os-release > out.txt",
         "sed -i s/a/b/ file",
         "docker rm amnezia-awg",
+        "docker exec amnezia-awg command -v awg",
         "docker exec amnezia-awg sh -c whoami",
         "docker exec amnezia-awg awg set awg0 peer peer-public remove",
     ],

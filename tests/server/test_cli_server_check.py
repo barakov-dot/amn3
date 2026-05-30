@@ -48,7 +48,7 @@ def test_run_server_check_dry_run_prints_docker_read_only_commands(tmp_path):
     assert "Dry-run server check" in output
     assert "command -v docker" in output
     assert "docker ps --format {{.Names}}" in output
-    assert "docker exec amnezia-awg command -v awg" in output
+    assert "docker exec amnezia-awg command -v awg" not in output
     assert "docker exec amnezia-awg awg show awg0" in output
     assert "systemctl is-active" not in output
 

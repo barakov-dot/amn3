@@ -62,7 +62,6 @@ bash deploy/runtime/collect_debug_snapshot.sh > debug-snapshot.txt 2>&1
 ```bash
 docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
 docker inspect amnezia-awg --format '{{.Name}} {{.State.Status}} {{.Config.Image}} {{json .Mounts}}'
-docker exec amnezia-awg command -v awg
 docker exec amnezia-awg awg show awg0
 ```
 
@@ -95,7 +94,6 @@ tail -n 200 logs/app.log
 ```bash
 docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
 docker inspect amnezia-awg --format '{{.Name}} {{.State.Status}} {{.Config.Image}} {{json .Mounts}}'
-docker exec amnezia-awg command -v awg
 docker exec amnezia-awg awg show awg0
 ```
 

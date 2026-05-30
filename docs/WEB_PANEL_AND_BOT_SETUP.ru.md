@@ -430,7 +430,6 @@ docker ps --format '{{.Names}}'
 
 ```text
 docker ps --format {{.Names}}
-docker exec amnezia-awg command -v awg
 docker exec amnezia-awg awg show awg0
 ```
 

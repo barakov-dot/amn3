@@ -35,6 +35,7 @@ def test_runtime_checker_is_read_only_and_knows_both_runtimes():
     assert "docker" in text
     assert "docker ps --format '{{.Names}}'" in text
     assert 'docker exec "$AMN_CONTAINER_NAME" awg show "$AMN_INTERFACE"' in text
+    assert 'docker exec "$AMN_CONTAINER_NAME" command -v awg' not in text
     assert "systemctl is-active" in text
     assert "optional_command sshpass" in text
     for mutating in ("apt install", "systemctl restart", "docker rm", "rm -", "ufw allow"):
@@ -56,6 +57,7 @@ def test_debug_snapshot_script_is_read_only_and_redacts_secrets():
     assert "deploy/runtime/check_vps.sh" in text
     assert "docker inspect" in text
     assert 'docker exec "$AMN_CONTAINER_NAME" awg show "$AMN_INTERFACE"' in text
+    assert 'docker exec "$AMN_CONTAINER_NAME" command -v awg' not in text
     for mutating in ("apt install", "systemctl restart", "docker rm", "rm -", "ufw allow", "docker stop"):
         assert mutating not in text
 
@@ -88,6 +90,7 @@ def test_runtime_docs_point_to_manifest_checker_and_examples():
     assert "deploy/runtime/check_vps.sh" in text
     assert "deploy/runtime/collect_debug_snapshot.sh" in text
     assert "deploy/examples/servers.docker.example.yml" in text
+    assert "docker exec amnezia-awg command -v awg" not in text
     assert "Не храним в Git" in text
 
 
@@ -100,6 +103,7 @@ def test_vps_log_collection_doc_lists_commands_and_redaction_rules():
     assert "git log -1 --oneline" in text
     assert "python -m app.cli server check" in text
     assert "docker ps --format" in text
+    assert "docker exec amnezia-awg command -v awg" not in text
     assert "journalctl -u amneziya-web" in text
     assert "tail -n 200 logs/app.log" in text
     assert "TELEGRAM_BOT_TOKEN" in text

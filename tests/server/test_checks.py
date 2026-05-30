@@ -121,7 +121,6 @@ def test_planned_check_commands_uses_docker_runtime(tmp_path):
         "cat /etc/os-release",
         "command -v docker",
         "docker ps --format {{.Names}}",
-        "docker exec amnezia-awg command -v awg",
         "docker exec amnezia-awg awg show awg0",
         "ss -lun",
     ]
@@ -156,9 +155,11 @@ def test_build_server_check_operation_describes_docker_health_check(tmp_path):
     )
 
     assert operation.id == "server.health.check"
-    assert "docker exec amnezia-awg command -v awg" in [
+    commands = [
         step.command for step in operation.steps
     ]
+    assert "docker exec amnezia-awg command -v awg" not in commands
+    assert "docker exec amnezia-awg awg show awg0" in commands
     assert operation.inputs == {
         "server_name": "debian-vps-1",
         "runtime": "docker",
@@ -172,7 +173,6 @@ def test_run_server_checks_reports_ready_docker_amnezia_node(tmp_path):
             "cat /etc/os-release": CommandResult(0, 'ID=debian\nVERSION_ID="12"\n', ""),
             "command -v docker": CommandResult(0, "/usr/bin/docker\n", ""),
             "docker ps --format {{.Names}}": CommandResult(0, "amnezia-awg\n", ""),
-            "docker exec amnezia-awg command -v awg": CommandResult(0, "/usr/bin/awg\n", ""),
             "docker exec amnezia-awg awg show awg0": CommandResult(0, "interface: awg0\n", ""),
             "ss -lun": CommandResult(0, "udp UNCONN 0 0 0.0.0.0:30001 0.0.0.0:*\n", ""),
         }
@@ -184,7 +184,6 @@ def test_run_server_checks_reports_ready_docker_amnezia_node(tmp_path):
     assert report.ok is True
     assert statuses["docker"] == "ok"
     assert statuses["container"] == "ok"
-    assert statuses["awg"] == "ok"
     assert statuses["interface"] == "ok"
 
 
@@ -195,7 +194,6 @@ def test_run_server_checks_marks_missing_docker_container_as_error(tmp_path):
             "cat /etc/os-release": CommandResult(0, "ID=debian\n", ""),
             "command -v docker": CommandResult(0, "/usr/bin/docker\n", ""),
             "docker ps --format {{.Names}}": CommandResult(0, "other-container\n", ""),
-            "docker exec amnezia-awg command -v awg": CommandResult(1, "", "container not found"),
             "docker exec amnezia-awg awg show awg0": CommandResult(1, "", "container not found"),
             "ss -lun": CommandResult(0, "", ""),
         }

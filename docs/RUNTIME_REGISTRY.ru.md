@@ -109,7 +109,6 @@ Read-only проверки:
 ```bash
 command -v docker
 docker ps --format '{{.Names}}'
-docker exec amnezia-awg command -v awg
 docker exec amnezia-awg awg show awg0
 ss -lun
 ```
