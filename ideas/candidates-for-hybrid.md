@@ -128,3 +128,10 @@
 - Польза: полезно для корпоративных или ограниченных VPN-сценариев.
 - Риски: firewall rules являются high-risk host changes; нужен plan/dry-run/audit/recovery.
 - Статус: hybrid-only до отдельного risk design.
+
+### Account security baseline
+
+- Идея: для будущего гибридного продукта заранее заложить account page с password update, 2FA, disabled user state и понятной role matrix.
+- Польза: multi-protocol продукт будет безопаснее расширять, если auth methods и roles заданы до появления integrations, bot и public links.
+- Риски: recovery flow, support role, scoped tokens, audit и secret inventory нужно проектировать вместе, а не отдельными patches.
+- Статус: research после [wg-easy permissions/auth/2FA deep-dive](../research/upstreams/wg-easy-wg-easy-auth-permissions-2fa.md).

@@ -150,6 +150,24 @@
 - Причина: VPN config является secret-read artifact; без audit невозможно понять, кто и когда получил доступ.
 - Допустимая альтернатива: audit event без raw config, route policy id, actor, connection id, delivery surface и decision.
 
+### Basic Auth как full API fallback
+
+- Решение: отклонено для production.
+- Причина: password-only API fallback может обходить 2FA и не имеет scopes, expiry, revoke и token audit.
+- Допустимая альтернатива: browser session для UI, scoped API tokens для integrations, owner inheritance и route policy checks.
+
+### 2FA без покрытия всех auth methods
+
+- Решение: отклонено как завершенная security-модель.
+- Причина: 2FA на login form не защищает систему, если другой auth method принимает только password или broad bearer secret.
+- Допустимая альтернатива: единая auth method matrix, TOTP enforcement policy, recovery flow, rate limit, lockout и audit.
+
+### Coarse permission action без policy id
+
+- Решение: отклонено как production-подход.
+- Причина: action вроде `custom` требует ручной дисциплины в handler-ах и плохо проверяется tests/audit-ом.
+- Допустимая альтернатива: stable route policy id, explicit risk class, ownership rule, allowed auth methods и tests per endpoint.
+
 ### Metrics labels без privacy review
 
 - Решение: отклонено как production-default.

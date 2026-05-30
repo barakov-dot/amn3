@@ -95,3 +95,20 @@
 - есть ли revoke, rate limit и audit;
 - попадают ли config body, QR payload или token в logs/errors/backup;
 - есть ли public-safe read models без private keys и pre-shared keys.
+
+## Permissions/auth/2FA checklist для VPN/control-panel upstream
+
+При deep-dive по permissions, auth и 2FA проверять:
+
+- какие auth methods есть: session, Basic Auth, bearer token, public link, bootstrap, bot;
+- может ли какой-то auth method обходить 2FA или role checks;
+- есть ли forced setup/bootstrap вместо default credentials;
+- где хранится session secret и есть ли production persistence/rotation;
+- как устроены роли, actions, ownership и resource checks;
+- заставляет ли route wrapper handler выполнить ownership check;
+- есть ли broad action вроде `custom`, который скрывает разные risk classes;
+- как disabled/demoted user влияет на session и tokens;
+- как хранится TOTP secret и попадает ли он в backup/logs;
+- есть ли recovery codes или documented recovery flow;
+- есть ли rate limit, lockout и audit для login/TOTP failures;
+- отделены ли browser session и integration tokens по scopes, expiry и revoke.

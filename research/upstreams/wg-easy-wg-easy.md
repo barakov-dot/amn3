@@ -163,7 +163,7 @@ Per-client firewall filtering использует собственную chain 
 ## Следующие шаги
 
 - Config delivery и one-time links deep-dive выполнен: [wg-easy-wg-easy-config-delivery.md](wg-easy-wg-easy-config-delivery.md).
-- Сделать отдельный deep-dive по permissions/auth/2FA.
+- Permissions, auth и 2FA deep-dive выполнен: [wg-easy-wg-easy-auth-permissions-2fa.md](wg-easy-wg-easy-auth-permissions-2fa.md).
 - Сравнить metrics surface с будущим `amn2` route policy.
 - Проверить docs/migration guide как operational maturity pattern.
 
@@ -186,3 +186,4 @@ Per-client firewall filtering использует собственную chain 
 ## Deep-dive материалы
 
 - [Config delivery и one-time links](wg-easy-wg-easy-config-delivery.md)
+- [Permissions, auth и 2FA](wg-easy-wg-easy-auth-permissions-2fa.md)

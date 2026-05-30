@@ -176,4 +176,25 @@
 - Идея: route wrapper должен заставлять handler выполнить resource-level check, если policy зависит от конкретного resource.
 - Польза: снижает риск забыть ownership check после role check.
 - Риски: требует аккуратного API middleware/dependency design и тестов на denied ownership.
-- Статус: research after second upstream.
+- Статус: reinforced by [wg-easy permissions/auth/2FA deep-dive](../research/upstreams/wg-easy-wg-easy-auth-permissions-2fa.md).
+
+### Account-level TOTP/2FA
+
+- Идея: добавить 2FA как account-level security primitive, а не только UI-функцию login form.
+- Польза: снижает риск компрометации operator/user password.
+- Риски: recovery flow, rate limit, lockout, audit, secret inventory для TOTP key, запрет обхода через alternate auth methods.
+- Статус: research candidate после [wg-easy permissions/auth/2FA deep-dive](../research/upstreams/wg-easy-wg-easy-auth-permissions-2fa.md).
+
+### Disabled user effective access gate
+
+- Идея: disabled/demoted user должен терять effective access во всех auth methods: session, scoped token, self-service и integration.
+- Польза: проще revoke доступа без ручной очистки каждого канала.
+- Риски: нужны tests для session/token inheritance и понятная UX-модель active sessions.
+- Статус: research candidate после [wg-easy permissions/auth/2FA deep-dive](../research/upstreams/wg-easy-wg-easy-auth-permissions-2fa.md).
+
+### Forced setup/bootstrap flow
+
+- Идея: первый admin создается через явный setup/bootstrap, а не через default credentials.
+- Польза: снижает риск забытых стандартных паролей после установки.
+- Риски: headless install, recovery, one-time bootstrap token, audit и закрытие setup после completion.
+- Статус: reinforced by [wg-easy permissions/auth/2FA deep-dive](../research/upstreams/wg-easy-wg-easy-auth-permissions-2fa.md).
