@@ -923,6 +923,79 @@ class Repository:
             (user_id, limit),
         ).fetchall()
 
+    def list_user_devices_for_vpn_removal(self, user_id: int) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                devices.id,
+                devices.server_id,
+                devices.name,
+                devices.status,
+                devices.vpn_ip,
+                devices.peer_public_key,
+                servers.name AS server_name
+            FROM devices
+            JOIN servers ON servers.id = devices.server_id
+            WHERE devices.user_id = ?
+              AND devices.status IN ('pending', 'active')
+            ORDER BY devices.id ASC
+            """,
+            (user_id,),
+        ).fetchall()
+
+    def hard_delete_user_for_admin(self, user_id: int) -> None:
+        self.get_user(user_id)
+        device_rows = self._conn.execute(
+            "SELECT id FROM devices WHERE user_id = ?",
+            (user_id,),
+        ).fetchall()
+        device_ids = [int(row["id"]) for row in device_rows]
+
+        if device_ids:
+            placeholders = ", ".join("?" for _ in device_ids)
+            self._conn.execute(
+                f"""
+                DELETE FROM admin_actions
+                WHERE target_user_id = ?
+                   OR target_device_id IN ({placeholders})
+                """,
+                (user_id, *device_ids),
+            )
+            self._conn.execute(
+                f"DELETE FROM device_traffic_snapshots WHERE device_id IN ({placeholders})",
+                tuple(device_ids),
+            )
+            self._conn.execute(
+                f"""
+                DELETE FROM email_recovery_tokens
+                WHERE user_id = ?
+                   OR device_id IN ({placeholders})
+                """,
+                (user_id, *device_ids),
+            )
+            self._conn.execute(
+                f"""
+                DELETE FROM orders
+                WHERE user_id = ?
+                   OR device_id IN ({placeholders})
+                """,
+                (user_id, *device_ids),
+            )
+        else:
+            self._conn.execute(
+                "DELETE FROM admin_actions WHERE target_user_id = ?",
+                (user_id,),
+            )
+            self._conn.execute(
+                "DELETE FROM email_recovery_tokens WHERE user_id = ?",
+                (user_id,),
+            )
+            self._conn.execute("DELETE FROM orders WHERE user_id = ?", (user_id,))
+
+        self._conn.execute("DELETE FROM devices WHERE user_id = ?", (user_id,))
+        self._conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        self._commit()
+
     def list_user_orders_for_admin(
         self,
         user_id: int,

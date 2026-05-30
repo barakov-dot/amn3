@@ -63,9 +63,17 @@
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button class="button button-secondary" type="submit">Block</button>
         </form>
+        <form action="/users/{{ user.id }}/disable-vpn" method="post">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-secondary" type="submit">Disable VPN</button>
+        </form>
         <form action="/users/{{ user.id }}/delete" method="post">
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
-          <button class="button button-danger" type="submit">Delete</button>
+          <button class="button button-danger" type="submit">Soft delete</button>
+        </form>
+        <form action="/users/{{ user.id }}/destroy" method="post">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-danger" type="submit">Delete permanently</button>
         </form>
       </div>
     </article>

@@ -3,6 +3,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
+import app.web.app as web_app
 from app.config.settings import Settings
 from app.db.connection import connect
 from app.db.repositories import Repository
@@ -153,6 +154,8 @@ def test_user_detail_shows_profile_summaries_and_actions(tmp_path: Path):
     assert "dana@example.com" in response.text
     assert ">verified<" in response.text
     assert "active-device" in response.text
+    assert "Disable VPN" in response.text
+    assert "Delete permanently" in response.text
     assert "v1:active-private" not in response.text
     assert "v1:active-psk" not in response.text
     assert "manual_review" in response.text
@@ -263,6 +266,139 @@ def test_block_and_delete_mutate_status_but_keep_user_row(tmp_path: Path):
         assert repo.list_admin_actions_for_target_user(user_id)[0]["action"] == "web_user_delete"
 
 
+def test_disable_user_vpn_revokes_remote_peers_and_keeps_user_row(
+    tmp_path: Path,
+    monkeypatch,
+):
+    calls: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        web_app,
+        "ServerConfigPeerApplier",
+        _fake_peer_applier(calls),
+    )
+    server_config_path = _write_server_config(tmp_path, server_name="local")
+    settings = _settings(
+        tmp_path,
+        admin_telegram_ids="9001",
+        vps_apply_enabled=True,
+        server_config_path=server_config_path,
+    )
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=6106,
+        username="frank-vpn",
+        first_name="Frank",
+        last_name=None,
+    )
+    _seed_devices(Path(settings.database_path), user_id=user_id)
+    client = _authenticated_client(settings)
+
+    detail = client.get(f"/users/{user_id}")
+    response = client.post(
+        f"/users/{user_id}/disable-vpn",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"] == f"/users/{user_id}"
+    assert calls == [("local", f"active-public-{user_id}")]
+    with _repo(Path(settings.database_path)) as repo:
+        user = repo.get_user(user_id)
+        devices = repo.list_user_devices_for_admin(user_id)
+        assert user["status"] == "blocked"
+        assert [device["status"] for device in devices] == ["revoked", "revoked"]
+        latest_action = repo.list_admin_actions_for_target_user(user_id)[0]
+        assert latest_action["action"] == "web_user_disable_vpn"
+        assert '"revoked_device_count": 1' in latest_action["metadata_json"]
+
+
+def test_disable_user_vpn_requires_live_apply_for_active_devices(tmp_path: Path):
+    settings = _settings(tmp_path, vps_apply_enabled=False)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=6206,
+        username="gina",
+        first_name="Gina",
+        last_name=None,
+    )
+    _seed_devices(Path(settings.database_path), user_id=user_id)
+    client = _authenticated_client(settings)
+
+    detail = client.get(f"/users/{user_id}")
+    response = client.post(
+        f"/users/{user_id}/disable-vpn",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 400
+    assert "VPS_APPLY_ENABLED" in response.text
+    with _repo(Path(settings.database_path)) as repo:
+        user = repo.get_user(user_id)
+        devices = repo.list_user_devices_for_admin(user_id)
+        assert user["status"] == "active"
+        assert sorted(device["status"] for device in devices) == ["active", "revoked"]
+
+
+def test_destroy_user_revokes_vpn_and_deletes_user_data(
+    tmp_path: Path,
+    monkeypatch,
+):
+    calls: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        web_app,
+        "ServerConfigPeerApplier",
+        _fake_peer_applier(calls),
+    )
+    server_config_path = _write_server_config(tmp_path, server_name="local")
+    settings = _settings(
+        tmp_path,
+        admin_telegram_ids="9001",
+        vps_apply_enabled=True,
+        server_config_path=server_config_path,
+    )
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=6306,
+        username="harry",
+        first_name="Harry",
+        last_name=None,
+    )
+    _seed_devices(Path(settings.database_path), user_id=user_id)
+    _seed_order_and_action(Path(settings.database_path), user_id=user_id)
+    client = _authenticated_client(settings)
+
+    detail = client.get(f"/users/{user_id}")
+    response = client.post(
+        f"/users/{user_id}/destroy",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/users"
+    assert calls == [("local", f"active-public-{user_id}")]
+    conn = connect(Path(settings.database_path))
+    try:
+        initialize_schema(conn)
+        assert conn.execute("SELECT COUNT(*) FROM users WHERE id = ?", (user_id,)).fetchone()[0] == 0
+        assert conn.execute("SELECT COUNT(*) FROM devices WHERE user_id = ?", (user_id,)).fetchone()[0] == 0
+        assert conn.execute("SELECT COUNT(*) FROM orders WHERE user_id = ?", (user_id,)).fetchone()[0] == 0
+        assert conn.execute(
+            "SELECT COUNT(*) FROM admin_actions WHERE target_user_id = ?",
+            (user_id,),
+        ).fetchone()[0] == 0
+        destroy_action = conn.execute(
+            "SELECT * FROM admin_actions WHERE action = 'web_user_destroy'"
+        ).fetchone()
+        assert destroy_action is not None
+        assert destroy_action["target_user_id"] is None
+        assert '"deleted_user_id": ' + str(user_id) in destroy_action["metadata_json"]
+    finally:
+        conn.close()
+
+
 def test_invalid_csrf_does_not_create_edit_block_or_delete(tmp_path: Path):
     settings = _settings(tmp_path)
     user_id = _seed_user(
@@ -310,11 +446,23 @@ def test_invalid_csrf_does_not_create_edit_block_or_delete(tmp_path: Path):
         data={"csrf_token": "bad-token"},
         follow_redirects=False,
     )
+    disable_vpn_response = client.post(
+        f"/users/{user_id}/disable-vpn",
+        data={"csrf_token": "bad-token"},
+        follow_redirects=False,
+    )
+    destroy_response = client.post(
+        f"/users/{user_id}/destroy",
+        data={"csrf_token": "bad-token"},
+        follow_redirects=False,
+    )
 
     assert create_response.status_code == 403
     assert edit_response.status_code == 403
     assert block_response.status_code == 403
     assert delete_response.status_code == 403
+    assert disable_vpn_response.status_code == 403
+    assert destroy_response.status_code == 403
     with _repo(Path(settings.database_path)) as repo:
         assert repo.get_user_by_telegram_id(8008) is None
         user = repo.get_user(user_id)
@@ -329,6 +477,8 @@ def _settings(
     *,
     admin_telegram_ids: str = "",
     session_cookie_secure: bool = True,
+    vps_apply_enabled: bool = False,
+    server_config_path: str | Path | None = None,
 ) -> Settings:
     return Settings(
         _env_file=None,
@@ -343,6 +493,8 @@ def _settings(
         ),
         web_admin_session_secret="s" * 32,
         web_admin_session_cookie_secure=session_cookie_secure,
+        vps_apply_enabled=vps_apply_enabled,
+        server_config_path=str(server_config_path or (tmp_path / "servers.yml")),
     )
 
 
@@ -483,3 +635,51 @@ def _seed_order_and_action(database_path: Path, *, user_id: int) -> None:
         )
     finally:
         conn.close()
+
+
+def _write_server_config(tmp_path: Path, *, server_name: str) -> Path:
+    path = tmp_path / "servers.yml"
+    path.write_text(
+        f"""
+servers:
+  - name: {server_name}
+    enabled: true
+    location: test
+    ssh:
+      host: 127.0.0.1
+      port: 22
+      user: root
+      auth:
+        type: password
+    vpn:
+      endpoint_host: vpn.example.test
+      port: 37661
+      interface: awg0
+      network_cidr: 10.8.0.0/24
+      server_address: 10.8.0.1/24
+      dns: 1.1.1.1
+      allowed_ips: 0.0.0.0/0
+      max_devices: 254
+      server_public_key: server-public-key
+    firewall:
+      provider: ufw
+      open_vpn_port: true
+    runtime:
+      type: docker
+      container_name: amnezia-awg2
+      config_path: /opt/amnezia/awg/awg0.conf
+""".lstrip(),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _fake_peer_applier(calls: list[tuple[str, str]]):
+    class FakePeerApplier:
+        def __init__(self, server, *, password=None):
+            self._server = server
+
+        def remove_peer(self, *, server, peer_public_key: str) -> None:
+            calls.append((server.name, peer_public_key))
+
+    return FakePeerApplier
