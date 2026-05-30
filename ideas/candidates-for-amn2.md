@@ -97,3 +97,38 @@
 - Польза: production-перенос становится проверяемым, а не только “осторожным”.
 - Риски: нужны test doubles для remote server и аккуратная модель dry-run.
 - Статус: research после API surface deep-dive.
+
+### Command execution contract
+
+- Идея: remote operation должна описываться contract-ом: тип риска, inputs, expected side effects, timeout, allowed exit codes, redaction, audit summary и recovery note.
+- Польза: SSH/sudo/Docker/firewall операции становятся тестируемыми и обозримыми до выполнения.
+- Риски: больше design работы перед первой реализацией; понадобится fake runner и дисциплина в manager-ах.
+- Статус: research после manager architecture deep-dive.
+
+### Dry-run-first remote operations
+
+- Идея: install, uninstall, clear, raw config save и firewall/Docker changes сначала строят plan preview, а уже затем применяются.
+- Польза: снижает риск случайно сломать VPS или удалить рабочие контейнеры.
+- Риски: не все remote checks можно идеально эмулировать; dry-run не должен создавать ложное чувство безопасности.
+- Статус: research после manager architecture deep-dive.
+
+### Remote operation audit events
+
+- Идея: каждая state-changing remote operation пишет audit event до и после выполнения, без секретов в payload.
+- Польза: проще разбирать инциденты, partial failures и действия операторов.
+- Риски: нужно хранить audit отдельно от sensitive outputs и продумать retention.
+- Статус: research после manager architecture deep-dive.
+
+### Manager interface checklist
+
+- Идея: для каждого protocol/service manager заранее фиксировать обязательные методы: `detect`, `status`, `plan`, `apply`, `rollback_note`, `audit_summary`, `test_double`.
+- Польза: уменьшает хаос при добавлении новых протоколов и облегчает тестирование.
+- Риски: слишком жесткий interface может мешать нестандартным протоколам; нужен capability-based подход.
+- Статус: research после manager architecture deep-dive.
+
+### Host key enrollment
+
+- Идея: добавление VPS должно включать явный SSH host key enrollment/pinning вместо автоматического доверия неизвестному ключу.
+- Польза: снижает риск MITM при управлении production-сервером.
+- Риски: UX сложнее для новичков; нужен recovery-flow при переустановке VPS.
+- Статус: research после manager architecture deep-dive.

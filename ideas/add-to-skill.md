@@ -49,3 +49,20 @@
 - где raw config редактируется напрямую;
 - есть ли единая policy matrix или guards разбросаны по handlers;
 - какие tests нужны для forbidden access и ownership boundaries.
+
+## Manager architecture checklist для VPN/control-panel upstream
+
+При анализе manager/SSH/protocol слоя обязательно фиксировать:
+
+- есть ли общий remote execution layer или команды разбросаны по manager-ам;
+- как проверяются SSH host keys и есть ли enrollment/pinning;
+- как передаются sudo credentials и могут ли они попасть в command line;
+- логируются ли команды, stdout/stderr и как работает redaction;
+- какие операции являются read-only, state-write, remote-exec и destructive;
+- есть ли dry-run, plan preview, explicit confirmation и recovery note;
+- какие manager-ы меняют firewall, sysctl, Docker networks, volumes, images и host files;
+- используются ли pinned images/artifacts или `latest`/download-at-install;
+- есть ли static network/IP assumptions и conflict detection;
+- как manager распознает existing server layout и отличает read-only detect от auto-fix;
+- как устроены long-running operations: sync request, background job, progress, timeout, cancellation;
+- какие test doubles нужны для SSH runner и protocol manager contract.

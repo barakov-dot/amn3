@@ -28,3 +28,4 @@
 - [PRVTPRO/Amnezia-Web-Panel](../research/upstreams/prvtpro-amnezia-web-panel.md)
 - [PRVTPRO/Amnezia-Web-Panel: auth, secrets и API tokens](../research/upstreams/prvtpro-amnezia-web-panel-auth-secrets.md)
 - [PRVTPRO/Amnezia-Web-Panel: API surface и route guards](../research/upstreams/prvtpro-amnezia-web-panel-api-surface.md)
+- [PRVTPRO/Amnezia-Web-Panel: manager architecture](../research/upstreams/prvtpro-amnezia-web-panel-manager-architecture.md)

@@ -44,6 +44,7 @@ Docker-сценарий простой: официальный образ `prvtp
 
 - Feature gate перед production-переносом: отдельно проверять лицензию, пользу, риски, архитектурную совместимость и тест-план.
 - API tokens для интеграций: raw token показывается один раз, в хранилище лежит только SHA-256 hash.
+- Command execution contract для remote operations: отделять план, выполнение, audit, redaction и recovery note.
 - Ролевые пользователи панели: admin, support, regular user.
 - Self-service endpoints для обычного пользователя, отделенные от admin API.
 - Public sharing через token-protected links без доступа к панели.
@@ -97,9 +98,9 @@ Docker-сценарий простой: официальный образ `prvtp
 
 ## Следующие шаги
 
-- Проверить структуру `managers/` точечно: как разделены SSH, install, status, config generation и user lifecycle.
 - Auth/session/secrets deep-dive выполнен: [prvtpro-amnezia-web-panel-auth-secrets.md](prvtpro-amnezia-web-panel-auth-secrets.md).
 - API surface deep-dive выполнен: [prvtpro-amnezia-web-panel-api-surface.md](prvtpro-amnezia-web-panel-api-surface.md).
+- Manager/SSH/protocol architecture deep-dive выполнен: [prvtpro-amnezia-web-panel-manager-architecture.md](prvtpro-amnezia-web-panel-manager-architecture.md).
 - Составить feature gap таблицу `amn2` vs Amnezia Web Panel после просмотра текущего `amn2`.
 
 ## Источники
@@ -116,3 +117,4 @@ Docker-сценарий простой: официальный образ `prvtp
 
 - [Auth, secrets и API tokens](prvtpro-amnezia-web-panel-auth-secrets.md)
 - [API surface и route guards](prvtpro-amnezia-web-panel-api-surface.md)
+- [Manager architecture](prvtpro-amnezia-web-panel-manager-architecture.md)

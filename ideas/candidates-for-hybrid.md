@@ -68,3 +68,38 @@
 - Польза: безопаснее для мониторинга, CI, billing, support tooling и миграций.
 - Риски: больше design работы и больше compatibility obligations.
 - Статус: research.
+
+### Protocol capability registry
+
+- Идея: описывать каждый протокол через capabilities: install, detect, status, add user, remove user, config export, secret outputs, ports, networks, destructive operations.
+- Польза: гибридный продукт сможет показывать UI и API по возможностям протокола, а не по hardcoded branches.
+- Риски: registry нужно поддерживать синхронно с реальными manager-ами.
+- Статус: research после manager architecture deep-dive.
+
+### Plugin-like protocol managers
+
+- Идея: вынести protocol/service manager-ы в plugin-like modules с общим contract и отдельными tests.
+- Польза: проще добавлять VPN, DNS, proxy и integration modules без переписывания core.
+- Риски: plugin boundary усложняет версии, migrations и security review.
+- Статус: полезно для будущего гибридного продукта.
+
+### Existing server reconciliation
+
+- Идея: attach-flow должен уметь читать existing layout, containers, users и configs, а затем предлагать безопасный reconciliation plan.
+- Польза: мягкая миграция существующих серверов без немедленного изменения host.
+- Риски: распознавание может ошибиться; любые auto-fix действия должны быть отдельно подтверждены.
+- Статус: high-signal для гибридного продукта.
+
+### Service mode model
+
+- Идея: для DNS/ad-blocking/proxy сервисов заранее поддержать режимы `replacement`, `side-by-side`, `disabled`, `external`.
+- Польза: operator может выбирать модель внедрения без ручного изменения Docker networks и ports.
+- Риски: конфликт IP/ports, migration path, rollback и support matrix.
+- Статус: research после manager architecture deep-dive.
+
+### Background remote jobs
+
+- Идея: долгие install/clear/reconcile операции выполнять как jobs с progress, structured logs, timeout, cancellation и final audit summary.
+- Польза: UI не зависает, а оператор видит понятное состояние remote operation.
+- Риски: job queue, retry semantics, idempotency и восстановление после рестарта панели.
+- Статус: research после manager architecture deep-dive.
