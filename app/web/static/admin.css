@@ -44,10 +44,32 @@ a {
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   color: var(--text);
   font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
+}
+
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.brand-masthead {
+  width: min(1180px, calc(100% - 32px));
+  height: 176px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(24, 32, 38, 0.48), rgba(24, 32, 38, 0.08) 42%, rgba(244, 246, 248, 0.12)),
+    url("/static/brand-header.jpg") center 44% / cover no-repeat;
+  margin: 18px auto 0;
 }
 
 .nav {
@@ -281,7 +303,30 @@ tbody tr:last-child td {
 .login-panel {
   width: min(420px, 100%);
   margin: 80px auto 0;
-  padding: 24px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.login-panel .section-heading,
+.login-panel .form {
+  padding-right: 24px;
+  padding-left: 24px;
+}
+
+.login-panel .section-heading {
+  margin-top: 20px;
+}
+
+.login-panel .form {
+  padding-bottom: 24px;
+}
+
+.login-visual {
+  height: 132px;
+  border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(24, 32, 38, 0.08), rgba(24, 32, 38, 0.34)),
+    url("/static/brand-header.jpg") center 43% / cover no-repeat;
 }
 
 .form {
@@ -556,5 +601,15 @@ tbody tr:last-child td {
 
   .login-panel {
     margin-top: 32px;
+  }
+
+  .brand-masthead {
+    width: min(100% - 24px, 1180px);
+    height: 112px;
+    background-position: center 42%;
+  }
+
+  .login-visual {
+    height: 104px;
   }
 }

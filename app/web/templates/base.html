@@ -8,7 +8,10 @@
   </head>
   <body>
     <header class="topbar">
-      <a class="brand" href="/">Amneziya Admin</a>
+      <a class="brand" href="/">
+        <img class="brand-mark" src="/static/brand-mark.jpg" alt="" width="32" height="32">
+        <span>Amneziya Admin</span>
+      </a>
       {% if authenticated %}
         <nav class="nav" aria-label="Основная навигация">
           <a class="nav-link" href="/">Обзор</a>
@@ -26,6 +29,10 @@
         </form>
       {% endif %}
     </header>
+
+    {% if authenticated %}
+      <div class="brand-masthead" aria-label="Необъятная.net"></div>
+    {% endif %}
 
     <main class="page">
       {% block content %}{% endblock %}
