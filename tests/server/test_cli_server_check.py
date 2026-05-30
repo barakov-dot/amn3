@@ -1,8 +1,12 @@
+import pytest
+
 from app.cli import build_parser
 from app.cli import run_server_preflight
+from app.cli import run_server_traffic_collection
 from app.cli import run_server_traffic_collection_dry_run
 from app.cli import run_server_check
 from app.server_config.loader import load_server_config, select_server
+from tests.server_config.test_loader import DOCKER_YAML
 from tests.server_config.test_loader import VALID_YAML
 
 
@@ -31,6 +35,22 @@ def test_run_server_check_dry_run_prints_read_only_commands(tmp_path):
     assert "cat /etc/os-release" in output
     assert "systemctl is-active awg-quick@awg0" in output
     assert "No changes will be made" in output
+
+
+def test_run_server_check_dry_run_prints_docker_read_only_commands(tmp_path):
+    path = tmp_path / "servers.yml"
+    path.write_text(DOCKER_YAML, encoding="utf-8")
+    config = load_server_config(path)
+    server = select_server(config, "debian-vps-1")
+
+    output = run_server_check(server, dry_run=True)
+
+    assert "Dry-run server check" in output
+    assert "command -v docker" in output
+    assert "docker ps --format {{.Names}}" in output
+    assert "docker exec amnezia-awg command -v awg" in output
+    assert "docker exec amnezia-awg awg show awg0" in output
+    assert "systemctl is-active" not in output
 
 
 def test_cli_accepts_server_apply_peer_dry_run_arguments():
@@ -198,6 +218,30 @@ def test_run_server_traffic_collection_dry_run_prints_read_only_command(tmp_path
     assert "Dry-run traffic collection" in output
     assert "awg show awg0 dump" in output
     assert "No changes will be made" in output
+
+
+def test_run_server_traffic_collection_dry_run_prints_docker_pending_command(tmp_path):
+    path = tmp_path / "servers.yml"
+    path.write_text(DOCKER_YAML, encoding="utf-8")
+    config = load_server_config(path)
+    server = select_server(config, "debian-vps-1")
+
+    output = run_server_traffic_collection_dry_run(server)
+
+    assert "Dry-run traffic collection" in output
+    assert "docker exec amnezia-awg awg show awg0 dump" in output
+    assert "Docker traffic collection is not implemented yet" in output
+    assert "No changes will be made" in output
+
+
+def test_run_server_traffic_collection_rejects_docker_runtime_until_persistent_path_is_known(tmp_path):
+    path = tmp_path / "servers.yml"
+    path.write_text(DOCKER_YAML, encoding="utf-8")
+    config = load_server_config(path)
+    server = select_server(config, "debian-vps-1")
+
+    with pytest.raises(RuntimeError, match="Docker traffic collection is not implemented"):
+        run_server_traffic_collection(server, db_path=tmp_path / "amneziya.sqlite3")
 
 
 def test_cli_accepts_server_preflight_arguments():

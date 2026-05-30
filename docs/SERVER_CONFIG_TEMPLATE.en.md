@@ -129,3 +129,23 @@ Minimum questions:
 14. Whether to open the port in `ufw`.
 
 After answers, the wizard must show a secret-free summary, request confirmation, save config, and run provisioning or show the provisioning command.
+
+## Docker Runtime For The First VPS Test
+
+If AmneziaWG already runs in a Docker container and is not managed through host `systemd`, set the runtime in `servers.yml` to `docker` and provide the container name:
+
+```yaml
+runtime:
+  type: "docker"
+  container_name: "amnezia-awg"
+```
+
+Docker runtime currently supports safe read-only checks only:
+
+- Docker availability on the VPS;
+- running container lookup by `container_name`;
+- `awg` availability inside the container;
+- `docker exec <container_name> awg show <interface>`;
+- UDP port visibility through host `ss -lun`.
+
+`apply-peer`, `revoke-peer`, and live `collect-traffic` intentionally do not change a Docker server yet and return a clear `not implemented yet` message. This stays blocked until the persistent AmneziaWG config path inside the container and the safe peer reload flow are confirmed.

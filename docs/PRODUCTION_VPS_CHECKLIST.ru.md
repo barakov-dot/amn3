@@ -206,6 +206,41 @@ python -m app.cli server check --config servers.yml --server debian-vps-1
 VPS_APPLY_ENABLED=true
 ```
 
+### Если AmneziaWG работает в Docker
+
+Для Docker-ноды в `servers.yml` указать:
+
+```yaml
+runtime:
+  type: docker
+  container_name: amnezia-awg
+```
+
+Перед live-проверкой убедиться, что имя контейнера совпадает с реальным:
+
+```bash
+docker ps --format '{{.Names}}'
+```
+
+Затем выполнить безопасные проверки проекта:
+
+```bash
+python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
+python -m app.cli server check --config servers.yml --server debian-vps-1
+```
+
+Ожидаемые read-only команды для Docker:
+
+```text
+command -v docker
+docker ps --format {{.Names}}
+docker exec amnezia-awg command -v awg
+docker exec amnezia-awg awg show awg0
+ss -lun
+```
+
+Для Docker runtime `apply-peer --apply`, `revoke-peer --apply` и live `collect-traffic` пока не включать: код явно блокирует эти операции, пока мы не подтвердим постоянный путь к конфигу внутри контейнера и безопасный способ применения peer.
+
 ## 9. Optional `systemd` services
 
 Если ручные команды работают, можно установить example services. Перед установкой

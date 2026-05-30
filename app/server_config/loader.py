@@ -77,10 +77,7 @@ def _parse_server(item: Any) -> ServerConfig:
             provider=str(_required(firewall, "provider")),
             open_vpn_port=bool(_required(firewall, "open_vpn_port")),
         ),
-        runtime=RuntimeConfig(
-            type=str(_required(runtime, "type")),
-            service_name=str(_required(runtime, "service_name")),
-        ),
+        runtime=_parse_runtime(runtime),
     )
 
 
@@ -88,6 +85,29 @@ def _parse_port(value: Any) -> int | str:
     if value == "auto":
         return "auto"
     return int(value)
+
+
+def _parse_runtime(runtime: dict[str, Any]) -> RuntimeConfig:
+    runtime_type = str(_required(runtime, "type"))
+    if runtime_type == "host_systemd":
+        return RuntimeConfig(
+            type=runtime_type,
+            service_name=str(_required(runtime, "service_name")),
+            container_name=_optional_str(runtime, "container_name"),
+        )
+    if runtime_type == "docker":
+        return RuntimeConfig(
+            type=runtime_type,
+            service_name=_optional_str(runtime, "service_name"),
+            container_name=str(_required(runtime, "container_name")),
+        )
+    raise ConfigError(f"Unsupported runtime type: {runtime_type}")
+
+
+def _optional_str(data: dict[str, Any], key: str) -> str | None:
+    if data.get(key) is None:
+        return None
+    return str(data[key])
 
 
 def _required(data: dict[str, Any], key: str) -> Any:

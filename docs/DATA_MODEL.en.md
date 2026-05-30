@@ -67,7 +67,7 @@ Fields:
 - `vpn_port`;
 - `vpn_network_cidr`;
 - `vpn_network_version`;
-- `runtime` - `host_systemd`, later possibly `docker`;
+- `runtime` - `host_systemd` or `docker`; Docker currently supports read-only node checks, not live apply/revoke;
 - `firewall`, for example `ufw`;
 - `status` - `active`, `degraded`, `disabled`;
 - `max_devices`;

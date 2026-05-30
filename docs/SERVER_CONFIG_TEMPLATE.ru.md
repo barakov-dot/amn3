@@ -158,3 +158,23 @@ python -m app.cli provision --interactive
 ```
 
 В этом режиме скрипт спрашивает данные, создает или обновляет `servers.yml`, а затем запускает provisioning после подтверждения.
+
+## Docker runtime для первого VPS-теста
+
+Если AmneziaWG уже развернут в Docker-контейнере и мы не управляем им через `systemd`, в `servers.yml` нужно указать runtime `docker` и имя контейнера:
+
+```yaml
+runtime:
+  type: "docker"
+  container_name: "amnezia-awg"
+```
+
+Для Docker runtime сейчас включены только безопасные read-only проверки:
+
+- наличие Docker на VPS;
+- наличие запущенного контейнера по `container_name`;
+- наличие `awg` внутри контейнера;
+- `docker exec <container_name> awg show <interface>`;
+- видимость UDP-порта через `ss -lun` на хосте.
+
+Команды `apply-peer`, `revoke-peer` и live `collect-traffic` для Docker пока намеренно не меняют сервер и возвращают понятное сообщение `not implemented yet`. Это защита до тех пор, пока не будет подтвержден постоянный путь к конфигу AmneziaWG внутри контейнера и безопасный способ перезагрузки/перечитывания peer.

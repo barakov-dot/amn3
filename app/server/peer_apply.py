@@ -50,6 +50,9 @@ class ServerConfigPeerApplier:
 
 
 def build_peer_apply_dry_run(server: ServerConfig, peer: PeerApplyInput) -> str:
+    if server.runtime.type == "docker":
+        return _build_docker_peer_apply_pending_dry_run(server, peer)
+
     commands = [
         (
             f"awg set {server.vpn.interface} "
@@ -70,6 +73,9 @@ def build_peer_apply_dry_run(server: ServerConfig, peer: PeerApplyInput) -> str:
 
 
 def build_peer_revoke_dry_run(server: ServerConfig, peer_public_key: str) -> str:
+    if server.runtime.type == "docker":
+        return _build_docker_peer_revoke_pending_dry_run(server, peer_public_key)
+
     commands = [
         (
             f"awg set {server.vpn.interface} "
@@ -89,6 +95,11 @@ def build_peer_revoke_dry_run(server: ServerConfig, peer_public_key: str) -> str
 
 
 def apply_peer(server: ServerConfig, peer: PeerApplyInput, *, ssh_client: SshClient) -> str:
+    if server.runtime.type == "docker":
+        raise PeerApplyError(
+            "Docker peer apply is not implemented yet. "
+            "Need container persistent config path before changing live peers."
+        )
     command = _build_apply_command(server, peer)
     result = ssh_client.run(command, stdin=f"{peer.preshared_key}\n")
     if result.exit_code != 0:
@@ -110,6 +121,11 @@ def revoke_peer(
     *,
     ssh_client: SshClient,
 ) -> str:
+    if server.runtime.type == "docker":
+        raise PeerApplyError(
+            "Docker peer revoke is not implemented yet. "
+            "Need container persistent config path before changing live peers."
+        )
     command = _build_revoke_command(server, peer_public_key)
     result = ssh_client.run(command)
     if result.exit_code != 0:
@@ -127,7 +143,7 @@ def _build_apply_command(server: ServerConfig, peer: PeerApplyInput) -> str:
     interface = shlex.quote(server.vpn.interface)
     public_key = shlex.quote(peer.public_key)
     allowed_ips = shlex.quote(f"{peer.vpn_ip}/32")
-    service_name = shlex.quote(server.runtime.service_name)
+    service_name = shlex.quote(_require_service_name(server))
     return (
         "set -e; "
         'psk_file="$(mktemp)"; '
@@ -144,9 +160,45 @@ def _build_apply_command(server: ServerConfig, peer: PeerApplyInput) -> str:
 def _build_revoke_command(server: ServerConfig, peer_public_key: str) -> str:
     interface = shlex.quote(server.vpn.interface)
     public_key = shlex.quote(peer_public_key)
-    service_name = shlex.quote(server.runtime.service_name)
+    service_name = shlex.quote(_require_service_name(server))
     return (
         "set -e; "
         f"awg set {interface} peer {public_key} remove; "
         f"systemctl reload {service_name}"
     )
+
+
+def _build_docker_peer_apply_pending_dry_run(server: ServerConfig, peer: PeerApplyInput) -> str:
+    container = server.runtime.container_name or "<missing-container>"
+    return "\n".join(
+        [
+            f"Dry-run peer apply: {redact(server.name)}",
+            "No changes will be made.",
+            f"Target: ssh {server.ssh.user}@{redact(server.ssh.host)} -p {server.ssh.port}",
+            "Docker peer apply is not implemented yet.",
+            f"Container: {redact(container)}",
+            f"Pending peer: {redact(peer.public_key)} {redact(peer.vpn_ip)}/32",
+            "Need container persistent config path before changing live peers.",
+        ]
+    )
+
+
+def _build_docker_peer_revoke_pending_dry_run(server: ServerConfig, peer_public_key: str) -> str:
+    container = server.runtime.container_name or "<missing-container>"
+    return "\n".join(
+        [
+            f"Dry-run peer revoke: {redact(server.name)}",
+            "No changes will be made.",
+            f"Target: ssh {server.ssh.user}@{redact(server.ssh.host)} -p {server.ssh.port}",
+            "Docker peer revoke is not implemented yet.",
+            f"Container: {redact(container)}",
+            f"Pending peer: {redact(peer_public_key)}",
+            "Need container persistent config path before changing live peers.",
+        ]
+    )
+
+
+def _require_service_name(server: ServerConfig) -> str:
+    if not server.runtime.service_name:
+        raise PeerApplyError("host_systemd runtime requires runtime.service_name")
+    return server.runtime.service_name

@@ -34,6 +34,36 @@ servers:
       service_name: awg-quick@awg0
 """
 
+DOCKER_YAML = """
+servers:
+  - name: debian-vps-1
+    enabled: true
+    location: default
+    ssh:
+      host: 203.0.113.10
+      port: 22
+      user: root
+      auth:
+        type: key
+        private_key_path: C:/Users/me/.ssh/id_ed25519
+    vpn:
+      endpoint_host: 203.0.113.10
+      port: 30001
+      interface: awg0
+      network_cidr: 10.8.0.0/24
+      server_address: 10.8.0.1/24
+      dns: 1.1.1.1
+      allowed_ips: 0.0.0.0/0
+      max_devices: 254
+      server_public_key: server-public-key
+    firewall:
+      provider: ufw
+      open_vpn_port: true
+    runtime:
+      type: docker
+      container_name: amnezia-awg
+"""
+
 
 def test_load_server_config_reads_valid_servers_yml(tmp_path: Path):
     path = tmp_path / "servers.yml"
@@ -46,6 +76,29 @@ def test_load_server_config_reads_valid_servers_yml(tmp_path: Path):
     assert server.ssh.host == "203.0.113.10"
     assert server.vpn.interface == "awg0"
     assert server.runtime.service_name == "awg-quick@awg0"
+
+
+def test_load_server_config_reads_docker_runtime(tmp_path: Path):
+    path = tmp_path / "servers.yml"
+    path.write_text(DOCKER_YAML, encoding="utf-8")
+
+    config = load_server_config(path)
+    server = select_server(config, "debian-vps-1")
+
+    assert server.runtime.type == "docker"
+    assert server.runtime.container_name == "amnezia-awg"
+    assert server.runtime.service_name is None
+
+
+def test_loader_rejects_docker_runtime_without_container_name(tmp_path: Path):
+    path = tmp_path / "servers.yml"
+    path.write_text(
+        DOCKER_YAML.replace("      container_name: amnezia-awg\n", ""),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigError, match="container_name"):
+        load_server_config(path)
 
 
 def test_select_server_lists_available_names(tmp_path: Path):

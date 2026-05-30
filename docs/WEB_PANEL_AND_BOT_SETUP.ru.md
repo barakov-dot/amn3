@@ -355,6 +355,32 @@ VPS_APPLY_ENABLED=false
 VPS_APPLY_ENABLED=true
 ```
 
+### Docker runtime
+
+Если AmneziaWG работает не на хосте через `systemd`, а внутри Docker-контейнера, в `servers.yml` использовать:
+
+```yaml
+runtime:
+  type: docker
+  container_name: amnezia-awg
+```
+
+Проверить имя контейнера на VPS:
+
+```bash
+docker ps --format '{{.Names}}'
+```
+
+После этого web-панель и CLI смогут выполнять read-only health check через:
+
+```text
+docker ps --format {{.Names}}
+docker exec amnezia-awg command -v awg
+docker exec amnezia-awg awg show awg0
+```
+
+На этом этапе Docker runtime предназначен для диагностики. Применение/отзыв peer и live-сбор трафика в Docker намеренно заблокированы до подтверждения постоянного пути к конфигу контейнера. Поэтому перед включением `VPS_APPLY_ENABLED=true` для Docker-ноды нужно дождаться отдельной доработки по apply/revoke.
+
 ## 12. Запустить Telegram-бота вручную
 
 ```bash

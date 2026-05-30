@@ -222,6 +222,18 @@ def run_server_check(server: ServerConfig, *, dry_run: bool) -> str:
 
 
 def run_server_traffic_collection_dry_run(server: ServerConfig) -> str:
+    if server.runtime.type == "docker":
+        container = server.runtime.container_name or "<missing-container>"
+        return "\n".join(
+            [
+                f"Dry-run traffic collection: {server.name}",
+                "No changes will be made.",
+                f"Target: ssh {server.ssh.user}@{server.ssh.host} -p {server.ssh.port}",
+                f"Read-only command: docker exec {container} awg show {server.vpn.interface} dump",
+                "Docker traffic collection is not implemented yet.",
+                "Need container persistent config path before enabling stored traffic snapshots.",
+            ]
+        )
     return "\n".join(
         [
             f"Dry-run traffic collection: {server.name}",
@@ -233,6 +245,11 @@ def run_server_traffic_collection_dry_run(server: ServerConfig) -> str:
 
 
 def run_server_traffic_collection(server: ServerConfig, *, db_path: Path) -> str:
+    if server.runtime.type == "docker":
+        raise RuntimeError(
+            "Docker traffic collection is not implemented yet. "
+            "Need container persistent config path before enabling stored traffic snapshots."
+        )
     conn = connect(db_path)
     initialize_schema(conn)
     repo = Repository(conn)

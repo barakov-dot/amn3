@@ -68,7 +68,7 @@ VPN-серверы.
 - `vpn_port`;
 - `vpn_network_cidr`;
 - `vpn_network_version` - например `ipv4`;
-- `runtime` - `host_systemd`, позже возможно `docker`;
+- `runtime` - `host_systemd` или `docker`; для Docker на текущем этапе включены read-only проверки ноды, без live apply/revoke;
 - `firewall` - например `ufw`;
 - `status` - `active`, `degraded`, `disabled`;
 - `max_devices`;

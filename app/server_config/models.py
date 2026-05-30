@@ -37,7 +37,8 @@ class FirewallConfig:
 @dataclass(frozen=True)
 class RuntimeConfig:
     type: str
-    service_name: str
+    service_name: str | None = None
+    container_name: str | None = None
 
 
 @dataclass(frozen=True)

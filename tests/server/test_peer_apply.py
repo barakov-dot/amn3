@@ -10,6 +10,7 @@ from app.server.peer_apply import (
 )
 from app.server.ssh import CommandResult
 from app.server_config.loader import load_server_config, select_server
+from tests.server_config.test_loader import DOCKER_YAML
 from tests.server_config.test_loader import VALID_YAML
 
 
@@ -29,6 +30,22 @@ def test_build_peer_apply_dry_run_lists_commands_without_secrets(tmp_path):
     assert "systemctl reload awg-quick@awg0" in report
     assert "secret-psk" not in report
     assert "No changes will be made" in report
+
+
+def test_build_peer_apply_dry_run_marks_docker_runtime_as_pending(tmp_path):
+    server = _docker_server(tmp_path)
+    peer = PeerApplyInput(
+        public_key="peer-public",
+        preshared_key="secret-psk",
+        vpn_ip="10.8.0.2",
+    )
+
+    report = build_peer_apply_dry_run(server, peer)
+
+    assert "Docker peer apply is not implemented yet" in report
+    assert "No changes will be made" in report
+    assert "systemctl reload" not in report
+    assert "secret-psk" not in report
 
 
 def test_apply_peer_runs_guarded_commands_without_putting_psk_in_command(tmp_path):
@@ -51,6 +68,18 @@ def test_apply_peer_runs_guarded_commands_without_putting_psk_in_command(tmp_pat
     assert "secret-psk" not in command
     assert stdin == "secret-psk\n"
     assert "secret-psk" not in report
+
+
+def test_apply_peer_rejects_docker_runtime_until_persistent_config_is_known(tmp_path):
+    server = _docker_server(tmp_path)
+    peer = PeerApplyInput(
+        public_key="peer-public",
+        preshared_key="secret-psk",
+        vpn_ip="10.8.0.2",
+    )
+
+    with pytest.raises(PeerApplyError, match="Docker peer apply is not implemented"):
+        apply_peer(server, peer, ssh_client=RecordingSshClient())
 
 
 def test_apply_peer_raises_redacted_error_when_remote_command_fails(tmp_path):
@@ -103,6 +132,12 @@ def test_revoke_peer_runs_guarded_remove_command(tmp_path):
 def _server(tmp_path):
     path = tmp_path / "servers.yml"
     path.write_text(VALID_YAML, encoding="utf-8")
+    return select_server(load_server_config(path), "debian-vps-1")
+
+
+def _docker_server(tmp_path):
+    path = tmp_path / "servers.yml"
+    path.write_text(DOCKER_YAML, encoding="utf-8")
     return select_server(load_server_config(path), "debian-vps-1")
 
 
