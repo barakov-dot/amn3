@@ -26,7 +26,7 @@
 - Идея: отделить пользовательские `/my/*` endpoints от admin API.
 - Польза: меньше риска случайно открыть admin-действия обычному пользователю.
 - Риски: authorization boundary, тесты на privilege escalation.
-- Статус: research.
+- Статус: design candidate описан в [Public/Self-service Config Delivery для `amn2`](../docs/superpowers/specs/2026-05-30-public-self-service-config-delivery-design.md).
 
 ### Параллельная проверка статусов
 
@@ -40,7 +40,7 @@
 - Идея: публичные ссылки для получения конфигурации без доступа к панели.
 - Польза: удобная выдача конфигов пользователям.
 - Риски: срок жизни ссылок, одноразовость, аудит, утечки, revoke.
-- Статус: research.
+- Статус: design candidate описан в [Public/Self-service Config Delivery для `amn2`](../docs/superpowers/specs/2026-05-30-public-self-service-config-delivery-design.md).
 
 ### OpenAPI-группировка по доменам
 
@@ -139,5 +139,5 @@
 - `Route Policy Matrix`: endpoint, role, auth method, side effect, risk class, audit и tests.
 - `Scoped API Tokens`: one-time display, hash storage, scopes, expiry, revoke и owner inheritance.
 - `Secret Inventory + Backup Policy`: redacted backup по умолчанию и encrypted full backup как явный режим.
-- Public/self-service config delivery: ownership tests, hashed share tokens, expiry, revoke и audit.
+- `Public/Self-service Config Delivery`: ownership tests, hashed share tokens, expiry, revoke и audit.
 - Статус: собрано из feature gap; перед реализацией нужен контекст текущего `amn2`.
