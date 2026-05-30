@@ -76,7 +76,7 @@ def test_runtime_examples_are_parseable_and_cover_host_and_docker():
     assert docker["servers"][0]["runtime"] == {
         "type": "docker",
         "container_name": "amnezia-awg",
-        "config_path": "/etc/amnezia/awg0.conf",
+        "config_path": "/opt/amnezia/awg/awg0.conf",
     }
     assert host["servers"][0]["vpn"]["port"] == 30001
     assert docker["servers"][0]["vpn"]["interface"] == "awg0"

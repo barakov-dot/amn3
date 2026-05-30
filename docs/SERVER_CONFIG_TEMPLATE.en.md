@@ -151,7 +151,7 @@ If AmneziaWG already runs in a Docker container and is not managed through host 
 runtime:
   type: "docker"
   container_name: "amnezia-awg"
-  config_path: "/etc/amnezia/awg0.conf"
+  config_path: "/opt/amnezia/awg/awg0.conf"
 ```
 
 Docker runtime supports safe read-only checks:

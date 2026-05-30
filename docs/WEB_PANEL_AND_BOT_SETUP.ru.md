@@ -418,7 +418,7 @@ VPS_APPLY_ENABLED=true
 runtime:
   type: docker
   container_name: amnezia-awg
-  config_path: /etc/amnezia/awg0.conf
+  config_path: /opt/amnezia/awg/awg0.conf
 ```
 
 Проверить имя контейнера на VPS:

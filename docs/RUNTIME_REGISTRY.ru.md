@@ -102,7 +102,7 @@ AmneziaWG работает внутри Docker-контейнера. Health chec
 runtime:
   type: docker
   container_name: amnezia-awg
-  config_path: /etc/amnezia/awg0.conf
+  config_path: /opt/amnezia/awg/awg0.conf
 ```
 
 Read-only проверки:

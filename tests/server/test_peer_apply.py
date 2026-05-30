@@ -42,7 +42,7 @@ def test_build_peer_apply_dry_run_marks_docker_runtime_as_pending(tmp_path):
 
     report = build_peer_apply_dry_run(server, peer)
 
-    assert "docker exec amnezia-awg cat /etc/amnezia/awg0.conf" in report
+    assert "docker exec amnezia-awg cat /opt/amnezia/awg/awg0.conf" in report
     assert "docker exec -i amnezia-awg sh -c" in report
     assert "docker restart amnezia-awg" in report
     assert "Peer will be written to persistent config" in report
@@ -96,9 +96,9 @@ def test_apply_peer_runs_docker_exec_without_putting_psk_in_command(tmp_path):
     read_command, read_stdin = ssh.calls[0]
     write_command, write_stdin = ssh.calls[1]
     restart_command, restart_stdin = ssh.calls[2]
-    assert read_command == "docker exec amnezia-awg cat /etc/amnezia/awg0.conf"
+    assert read_command == "docker exec amnezia-awg cat /opt/amnezia/awg/awg0.conf"
     assert read_stdin is None
-    assert write_command == "docker exec -i amnezia-awg sh -c 'cat > \"$1\"' sh /etc/amnezia/awg0.conf"
+    assert write_command == "docker exec -i amnezia-awg sh -c 'cat > \"$1\"' sh /opt/amnezia/awg/awg0.conf"
     assert "PublicKey = peer-public" in write_stdin
     assert "PresharedKey = secret-psk" in write_stdin
     assert "AllowedIPs = 10.8.0.2/32" in write_stdin
@@ -149,7 +149,7 @@ def test_build_peer_revoke_dry_run_lists_docker_remove_command(tmp_path):
     report = build_peer_revoke_dry_run(server, "peer-public")
 
     assert "Dry-run peer revoke" in report
-    assert "docker exec amnezia-awg cat /etc/amnezia/awg0.conf" in report
+    assert "docker exec amnezia-awg cat /opt/amnezia/awg/awg0.conf" in report
     assert "docker exec -i amnezia-awg sh -c" in report
     assert "docker restart amnezia-awg" in report
     assert "Peer will be removed from persistent config" in report
@@ -185,8 +185,8 @@ def test_revoke_peer_runs_docker_exec_remove_command(tmp_path):
 
     assert "Peer revoke succeeded" in report
     assert len(ssh.calls) == 3
-    assert ssh.calls[0] == ("docker exec amnezia-awg cat /etc/amnezia/awg0.conf", None)
-    assert ssh.calls[1][0] == "docker exec -i amnezia-awg sh -c 'cat > \"$1\"' sh /etc/amnezia/awg0.conf"
+    assert ssh.calls[0] == ("docker exec amnezia-awg cat /opt/amnezia/awg/awg0.conf", None)
+    assert ssh.calls[1][0] == "docker exec -i amnezia-awg sh -c 'cat > \"$1\"' sh /opt/amnezia/awg/awg0.conf"
     assert "PublicKey = peer-public" not in ssh.calls[1][1]
     assert ssh.calls[2] == ("docker restart amnezia-awg", None)
 

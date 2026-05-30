@@ -180,7 +180,7 @@ python -m app.cli provision --interactive
 runtime:
   type: "docker"
   container_name: "amnezia-awg"
-  config_path: "/etc/amnezia/awg0.conf"
+  config_path: "/opt/amnezia/awg/awg0.conf"
 ```
 
 Для Docker runtime включены безопасные read-only проверки:
