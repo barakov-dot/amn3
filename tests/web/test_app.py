@@ -106,7 +106,7 @@ def test_dashboard_uses_full_brand_image_without_cropping(tmp_path: Path):
 
     assert '<figure class="brand-masthead">' in response.text
     assert 'src="/static/brand-full.jpg"' in response.text
-    assert 'width="1600" height="893"' in response.text
+    assert 'width="2752" height="1536"' in response.text
 
 
 def test_login_rejects_missing_csrf_token(tmp_path: Path):
