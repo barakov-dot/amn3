@@ -1,0 +1,107 @@
+# Протокол повторного VPS-теста
+
+Короткий порядок действий перед следующим заходом на живой VPS. Цель - обновить сервер до последней версии ветки, проверить базовые зависимости, выполнить read-only проверки и при ошибке собрать полный snapshot.
+
+## 1. Обновить код на VPS
+
+```bash
+cd /opt/amn2
+git pull origin codex-vps-test-prep
+git log -1 --oneline
+source venv/bin/activate
+python -m pip install -e .
+```
+
+Сохранить вывод `git log -1 --oneline`: по нему мы понимаем, действительно ли на сервере последняя сборка.
+
+## 2. Проверить окружение перед запуском
+
+```bash
+python -m app.cli bot check-network
+python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
+bash deploy/runtime/check_vps.sh
+```
+
+Для Docker-ноды вместо обычного runtime-check:
+
+```bash
+AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/check_vps.sh
+```
+
+До успешных проверок держать:
+
+```env
+VPS_APPLY_ENABLED=false
+```
+
+## 3. Запустить нужный сценарий теста
+
+Проверить web-панель:
+
+```bash
+python -m app.cli web serve --host 0.0.0.0 --port 3030
+```
+
+Проверить бота:
+
+```bash
+python -m app.main
+```
+
+Если сервисы уже запущены через systemd:
+
+```bash
+sudo systemctl status amneziya-web --no-pager
+sudo systemctl status amneziya-bot --no-pager
+```
+
+В Telegram или web-панели записать, что нажимал перед ошибкой: раздел, кнопка, пользователь, устройство, сервер, примерное время.
+
+## 4. При ошибке собрать snapshot
+
+Обычный runtime:
+
+```bash
+bash deploy/runtime/collect_debug_snapshot.sh
+```
+
+Docker runtime:
+
+```bash
+AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/collect_debug_snapshot.sh
+```
+
+Если нужно сохранить в файл:
+
+```bash
+AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/collect_debug_snapshot.sh > debug-snapshot.txt 2>&1
+```
+
+Перед отправкой файла проверить, что секреты скрыты. Правила маскировки и ручной набор команд описаны в `docs/VPS_LOG_COLLECTION.ru.md`.
+
+## 5. Что прислать для анализа
+
+Прислать:
+
+- последний commit hash из `git log -1 --oneline`;
+- вывод `python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run`;
+- вывод `python -m app.cli server check --config servers.yml --server debian-vps-1`, если запускался;
+- вывод `bash deploy/runtime/check_vps.sh` или Docker-варианта;
+- debug snapshot из `deploy/runtime/collect_debug_snapshot.sh`;
+- последние строки `logs/app.log`, если snapshot не собрался;
+- что нажимал перед ошибкой и в какое время.
+
+Не присылать без маскировки:
+
+- `TELEGRAM_BOT_TOKEN`;
+- `APP_SECRET_KEY`;
+- `WEB_ADMIN_PASSWORD_HASH`;
+- `WEB_ADMIN_SESSION_SECRET`;
+- `SMTP_PASSWORD`;
+- SSH private key;
+- `PrivateKey` и `PresharedKey`;
+- полный пользовательский `.conf`.
+
+## 6. Когда останавливаемся
+
+Если ошибка относится к Docker `apply-peer`, `revoke-peer` или live `collect-traffic`, не включать `VPS_APPLY_ENABLED=true` и не пытаться чинить на VPS вручную до разбора логов. Этот участок пока намеренно защищен, пока не подтвержден постоянный путь к конфигу контейнера.

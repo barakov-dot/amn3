@@ -102,3 +102,21 @@ def test_vps_log_collection_doc_lists_commands_and_redaction_rules():
     assert "tail -n 200 logs/app.log" in text
     assert "TELEGRAM_BOT_TOKEN" in text
     assert "APP_SECRET_KEY" in text
+
+
+def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
+    doc_path = ROOT / "docs/VPS_RETEST_PROTOCOL.ru.md"
+    checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+    checklist = checklist_path.read_text(encoding="utf-8")
+
+    assert "git pull origin codex-vps-test-prep" in text
+    assert "git log -1 --oneline" in text
+    assert "python -m pip install -e ." in text
+    assert "python -m app.cli bot check-network" in text
+    assert "python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run" in text
+    assert "bash deploy/runtime/check_vps.sh" in text
+    assert "AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/collect_debug_snapshot.sh" in text
+    assert "что нажимал" in text
+    assert "docs/VPS_RETEST_PROTOCOL.ru.md" in checklist
