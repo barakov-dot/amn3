@@ -255,6 +255,17 @@ tbody tr:last-child td {
   overflow-wrap: anywhere;
 }
 
+.secret-lines {
+  display: grid;
+  gap: 4px;
+  max-width: 280px;
+}
+
+.secret-lines code {
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+}
+
 .empty-state {
   margin: 0;
   padding: 18px 14px;

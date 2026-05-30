@@ -49,6 +49,9 @@ class PeerApplier(Protocol):
     ) -> None:
         pass
 
+    def list_allocated_ips(self, *, server) -> list[str]:
+        pass
+
 
 class AccessService:
     def __init__(
@@ -160,6 +163,10 @@ class AccessService:
                     network_cidr=str(server["vpn_network_cidr"]),
                     server_address=server["server_address"],
                     allocated_ips=self._repo.list_allocated_ips(server_id),
+                    remote_allocated_ips=_list_remote_allocated_ips(
+                        self._peer_applier,
+                        server=server,
+                    ),
                 )
             except RuntimeError as exc:
                 raise IpAllocationConflict("Could not allocate a unique VPN IP address") from exc
@@ -221,17 +228,48 @@ def _allocate_vpn_ip(
     network_cidr: str,
     server_address: str | None,
     allocated_ips: list[str],
+    remote_allocated_ips: list[str] | None = None,
 ) -> str:
     network = ipaddress.ip_network(network_cidr, strict=False)
-    reserved = {ipaddress.ip_address(ip) for ip in allocated_ips}
+    reserved = {
+        parsed_ip
+        for raw_ip in [*allocated_ips, *(remote_allocated_ips or [])]
+        for parsed_ip in [_parse_allocated_ip(raw_ip)]
+        if parsed_ip in network
+    }
     if server_address is not None:
-        reserved.add(ipaddress.ip_address(server_address))
+        reserved.add(_parse_allocated_ip(server_address))
 
-    for ip_address in network.hosts():
+    hosts = list(network.hosts())
+    first_index = 0
+    remote_reserved = [
+        _parse_allocated_ip(raw_ip)
+        for raw_ip in remote_allocated_ips or []
+        if _parse_allocated_ip(raw_ip) in network
+    ]
+    if remote_reserved:
+        last_remote_ip = max(remote_reserved)
+        first_index = hosts.index(last_remote_ip) + 1 if last_remote_ip in hosts else 0
+
+    for ip_address in hosts[first_index:]:
         if ip_address not in reserved:
             return str(ip_address)
 
     raise RuntimeError("No available VPN IP addresses")
+
+
+def _list_remote_allocated_ips(peer_applier: PeerApplier | None, *, server) -> list[str]:
+    if peer_applier is None or not hasattr(peer_applier, "list_allocated_ips"):
+        return []
+    return list(peer_applier.list_allocated_ips(server=server))
+
+
+def _parse_allocated_ip(value: str):
+    stripped = value.strip()
+    try:
+        return ipaddress.ip_interface(stripped).ip
+    except ValueError:
+        return ipaddress.ip_address(stripped)
 
 
 def _is_duplicate_ip_integrity_error(exc: sqlite3.IntegrityError) -> bool:

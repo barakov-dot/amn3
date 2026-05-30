@@ -75,7 +75,7 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             expires_at TEXT,
             duration_days INTEGER NOT NULL CHECK (duration_days > 0),
             status TEXT NOT NULL DEFAULT 'active'
-                CHECK (status IN ('pending', 'active', 'expired', 'revoked', 'failed')),
+                CHECK (status IN ('pending', 'active', 'disabled', 'expired', 'revoked', 'failed')),
             vpn_ip TEXT NOT NULL,
             peer_public_key TEXT NOT NULL,
             peer_private_key_encrypted TEXT NOT NULL,
@@ -182,7 +182,7 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             ON server_health_checks(server_id, checked_at DESC, id DESC);
         CREATE UNIQUE INDEX IF NOT EXISTS idx_devices_reserved_ip_unique
             ON devices(server_id, vpn_ip)
-            WHERE status IN ('pending', 'active');
+            WHERE status IN ('pending', 'active', 'disabled');
         CREATE INDEX IF NOT EXISTS idx_device_traffic_device_collected
             ON device_traffic_snapshots(device_id, collected_at DESC);
         CREATE INDEX IF NOT EXISTS idx_device_traffic_server_collected
@@ -203,6 +203,7 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
     )
     _ensure_column(conn, "devices", "first_connected_at", "TEXT")
     _ensure_column(conn, "devices", "last_connected_at", "TEXT")
+    _migrate_devices_disabled_status(conn)
     conn.commit()
 
 
@@ -220,3 +221,98 @@ def _ensure_column(
         conn.execute(
             f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_definition}"
         )
+
+
+def _migrate_devices_disabled_status(conn: sqlite3.Connection) -> None:
+    row = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'devices'"
+    ).fetchone()
+    table_sql = str(row["sql"] if isinstance(row, sqlite3.Row) else row[0])
+
+    conn.execute("DROP INDEX IF EXISTS idx_devices_reserved_ip_unique")
+    if "'disabled'" not in table_sql:
+        conn.execute("PRAGMA foreign_keys=OFF")
+        conn.executescript(
+            """
+            CREATE TABLE devices_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                server_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                activated_at TEXT,
+                expires_at TEXT,
+                duration_days INTEGER NOT NULL CHECK (duration_days > 0),
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK (status IN ('pending', 'active', 'disabled', 'expired', 'revoked', 'failed')),
+                vpn_ip TEXT NOT NULL,
+                peer_public_key TEXT NOT NULL,
+                peer_private_key_encrypted TEXT NOT NULL,
+                preshared_key_encrypted TEXT NOT NULL,
+                config_version TEXT NOT NULL,
+                last_config_sent_at TEXT,
+                first_connected_at TEXT,
+                last_connected_at TEXT,
+                revoked_at TEXT,
+                revoke_reason TEXT,
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (server_id) REFERENCES servers(id),
+                UNIQUE (server_id, peer_public_key)
+            );
+
+            INSERT INTO devices_new (
+                id,
+                user_id,
+                server_id,
+                name,
+                created_at,
+                activated_at,
+                expires_at,
+                duration_days,
+                status,
+                vpn_ip,
+                peer_public_key,
+                peer_private_key_encrypted,
+                preshared_key_encrypted,
+                config_version,
+                last_config_sent_at,
+                first_connected_at,
+                last_connected_at,
+                revoked_at,
+                revoke_reason
+            )
+            SELECT
+                id,
+                user_id,
+                server_id,
+                name,
+                created_at,
+                activated_at,
+                expires_at,
+                duration_days,
+                status,
+                vpn_ip,
+                peer_public_key,
+                peer_private_key_encrypted,
+                preshared_key_encrypted,
+                config_version,
+                last_config_sent_at,
+                first_connected_at,
+                last_connected_at,
+                revoked_at,
+                revoke_reason
+            FROM devices;
+
+            DROP TABLE devices;
+            ALTER TABLE devices_new RENAME TO devices;
+            """
+        )
+        conn.execute("PRAGMA foreign_keys=ON")
+
+    conn.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_devices_reserved_ip_unique
+            ON devices(server_id, vpn_ip)
+            WHERE status IN ('pending', 'active', 'disabled')
+        """
+    )

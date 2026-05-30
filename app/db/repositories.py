@@ -711,6 +711,43 @@ class Repository:
         self._commit()
         return int(cursor.rowcount)
 
+    def disable_user_devices(
+        self,
+        user_id: int,
+        *,
+        reason: str,
+        disabled_at: str,
+    ) -> int:
+        cursor = self._conn.execute(
+            """
+            UPDATE devices
+            SET status = 'disabled',
+                revoked_at = ?,
+                revoke_reason = ?
+            WHERE user_id = ?
+              AND status IN ('pending', 'active')
+            """,
+            (disabled_at, reason, user_id),
+        )
+        self._commit()
+        return int(cursor.rowcount)
+
+    def enable_user_devices(self, user_id: int) -> int:
+        cursor = self._conn.execute(
+            """
+            UPDATE devices
+            SET status = 'active',
+                revoked_at = NULL,
+                revoke_reason = NULL,
+                activated_at = COALESCE(activated_at, CURRENT_TIMESTAMP)
+            WHERE user_id = ?
+              AND status = 'disabled'
+            """,
+            (user_id,),
+        )
+        self._commit()
+        return int(cursor.rowcount)
+
     def get_device_by_server_peer_public_key(
         self,
         server_id: int,
@@ -744,7 +781,7 @@ class Repository:
             SELECT vpn_ip
             FROM devices
             WHERE server_id = ?
-              AND status IN ('pending', 'active')
+              AND status IN ('pending', 'active', 'disabled')
             ORDER BY id
             """,
             (server_id,),
@@ -938,6 +975,28 @@ class Repository:
             JOIN servers ON servers.id = devices.server_id
             WHERE devices.user_id = ?
               AND devices.status IN ('pending', 'active')
+            ORDER BY devices.id ASC
+            """,
+            (user_id,),
+        ).fetchall()
+
+    def list_user_devices_for_vpn_enable(self, user_id: int) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                devices.id,
+                devices.server_id,
+                devices.name,
+                devices.status,
+                devices.vpn_ip,
+                devices.peer_public_key,
+                devices.peer_private_key_encrypted,
+                devices.preshared_key_encrypted,
+                servers.name AS server_name
+            FROM devices
+            JOIN servers ON servers.id = devices.server_id
+            WHERE devices.user_id = ?
+              AND devices.status = 'disabled'
             ORDER BY devices.id ASC
             """,
             (user_id,),

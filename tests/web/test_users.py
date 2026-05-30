@@ -8,8 +8,11 @@ from app.config.settings import Settings
 from app.db.connection import connect
 from app.db.repositories import Repository
 from app.db.schema import initialize_schema
+from app.security.crypto import SecretBox
 from app.web.app import create_web_app
 from app.web.auth import create_password_hash
+
+TEST_APP_SECRET = "test-secret-for-web-users-1234567890"
 
 
 def test_users_redirects_when_unauthenticated(tmp_path: Path):
@@ -155,6 +158,8 @@ def test_user_detail_shows_profile_summaries_and_actions(tmp_path: Path):
     assert ">verified<" in response.text
     assert "active-device" in response.text
     assert "Disable VPN" in response.text
+    assert "Enable VPN" in response.text
+    assert "Show secrets" in response.text
     assert "Delete permanently" in response.text
     assert "v1:active-private" not in response.text
     assert "v1:active-psk" not in response.text
@@ -307,10 +312,10 @@ def test_disable_user_vpn_revokes_remote_peers_and_keeps_user_row(
         user = repo.get_user(user_id)
         devices = repo.list_user_devices_for_admin(user_id)
         assert user["status"] == "blocked"
-        assert [device["status"] for device in devices] == ["revoked", "revoked"]
+        assert [device["status"] for device in devices] == ["revoked", "disabled"]
         latest_action = repo.list_admin_actions_for_target_user(user_id)[0]
         assert latest_action["action"] == "web_user_disable_vpn"
-        assert '"revoked_device_count": 1' in latest_action["metadata_json"]
+        assert '"disabled_device_count": 1' in latest_action["metadata_json"]
 
 
 def test_disable_user_vpn_requires_live_apply_for_active_devices(tmp_path: Path):
@@ -339,6 +344,94 @@ def test_disable_user_vpn_requires_live_apply_for_active_devices(tmp_path: Path)
         devices = repo.list_user_devices_for_admin(user_id)
         assert user["status"] == "active"
         assert sorted(device["status"] for device in devices) == ["active", "revoked"]
+
+
+def test_enable_user_vpn_reapplies_disabled_device_with_stored_key_and_ip(
+    tmp_path: Path,
+    monkeypatch,
+):
+    calls: list[tuple[str, str, str, str]] = []
+    monkeypatch.setattr(
+        web_app,
+        "ServerConfigPeerApplier",
+        _fake_peer_applier_with_apply(calls),
+    )
+    server_config_path = _write_server_config(tmp_path, server_name="local")
+    settings = _settings(
+        tmp_path,
+        admin_telegram_ids="9001",
+        vps_apply_enabled=True,
+        server_config_path=server_config_path,
+    )
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=6256,
+        username="gina-vpn",
+        first_name="Gina",
+        last_name=None,
+        status="blocked",
+    )
+    device_id = _seed_encrypted_device(
+        Path(settings.database_path),
+        user_id=user_id,
+        private_key="client-private-key",
+        preshared_key="stored-psk",
+        status="disabled",
+    )
+    client = _authenticated_client(settings)
+
+    detail = client.get(f"/users/{user_id}")
+    response = client.post(
+        f"/users/{user_id}/enable-vpn",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"] == f"/users/{user_id}"
+    assert calls == [("local", "encrypted-public", "stored-psk", "10.8.0.44")]
+    with _repo(Path(settings.database_path)) as repo:
+        user = repo.get_user(user_id)
+        device = repo.get_device(device_id)
+        assert user["status"] == "active"
+        assert device["status"] == "active"
+        assert device["vpn_ip"] == "10.8.0.44"
+        latest_action = repo.list_admin_actions_for_target_user(user_id)[0]
+        assert latest_action["action"] == "web_user_enable_vpn"
+        assert '"enabled_device_count": 1' in latest_action["metadata_json"]
+
+
+def test_user_detail_reveals_device_secrets_only_after_explicit_post(tmp_path: Path):
+    settings = _settings(tmp_path)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=6266,
+        username="secret-user",
+        first_name="Secret",
+        last_name=None,
+    )
+    device_id = _seed_encrypted_device(
+        Path(settings.database_path),
+        user_id=user_id,
+        private_key="client-private-key",
+        preshared_key="stored-psk",
+        status="active",
+    )
+    client = _authenticated_client(settings)
+
+    detail = client.get(f"/users/{user_id}")
+    assert detail.status_code == 200
+    assert "client-private-key" not in detail.text
+    assert "stored-psk" not in detail.text
+
+    revealed = client.post(
+        f"/users/{user_id}/devices/{device_id}/secrets",
+        data={"csrf_token": _csrf_token(detail.text)},
+    )
+
+    assert revealed.status_code == 200
+    assert "client-private-key" in revealed.text
+    assert "stored-psk" in revealed.text
 
 
 def test_destroy_user_revokes_vpn_and_deletes_user_data(
@@ -451,6 +544,16 @@ def test_invalid_csrf_does_not_create_edit_block_or_delete(tmp_path: Path):
         data={"csrf_token": "bad-token"},
         follow_redirects=False,
     )
+    enable_vpn_response = client.post(
+        f"/users/{user_id}/enable-vpn",
+        data={"csrf_token": "bad-token"},
+        follow_redirects=False,
+    )
+    reveal_secrets_response = client.post(
+        f"/users/{user_id}/devices/1/secrets",
+        data={"csrf_token": "bad-token"},
+        follow_redirects=False,
+    )
     destroy_response = client.post(
         f"/users/{user_id}/destroy",
         data={"csrf_token": "bad-token"},
@@ -462,6 +565,8 @@ def test_invalid_csrf_does_not_create_edit_block_or_delete(tmp_path: Path):
     assert block_response.status_code == 403
     assert delete_response.status_code == 403
     assert disable_vpn_response.status_code == 403
+    assert enable_vpn_response.status_code == 403
+    assert reveal_secrets_response.status_code == 403
     assert destroy_response.status_code == 403
     with _repo(Path(settings.database_path)) as repo:
         assert repo.get_user_by_telegram_id(8008) is None
@@ -483,7 +588,7 @@ def _settings(
     return Settings(
         _env_file=None,
         telegram_bot_token="TEST_TOKEN",
-        app_secret_key="test-secret",
+        app_secret_key=TEST_APP_SECRET,
         database_path=str(tmp_path / "amneziya.sqlite3"),
         admin_telegram_ids=admin_telegram_ids,
         web_admin_username="root",
@@ -621,6 +726,45 @@ def _seed_devices(database_path: Path, *, user_id: int) -> None:
         conn.close()
 
 
+def _seed_encrypted_device(
+    database_path: Path,
+    *,
+    user_id: int,
+    private_key: str,
+    preshared_key: str,
+    status: str,
+) -> int:
+    conn = connect(database_path)
+    try:
+        initialize_schema(conn)
+        repo = Repository(conn)
+        server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+        secret_box = SecretBox.from_app_secret(TEST_APP_SECRET)
+        device_id = repo.create_device(
+            user_id=user_id,
+            server_id=server_id,
+            name="encrypted-device",
+            duration_days=7,
+            vpn_ip="10.8.0.44",
+            peer_public_key="encrypted-public",
+            peer_private_key_encrypted=secret_box.encrypt_text(private_key),
+            preshared_key_encrypted=secret_box.encrypt_text(preshared_key),
+            config_version="amneziawg_v2",
+        )
+        if status == "disabled":
+            repo.disable_user_devices(
+                user_id,
+                reason="test",
+                disabled_at="2026-05-30T10:00:00Z",
+            )
+        elif status != "active":
+            conn.execute("UPDATE devices SET status = ? WHERE id = ?", (status, device_id))
+            conn.commit()
+        return device_id
+    finally:
+        conn.close()
+
+
 def _seed_order_and_action(database_path: Path, *, user_id: int) -> None:
     conn = connect(database_path)
     try:
@@ -681,5 +825,16 @@ def _fake_peer_applier(calls: list[tuple[str, str]]):
 
         def remove_peer(self, *, server, peer_public_key: str) -> None:
             calls.append((server.name, peer_public_key))
+
+    return FakePeerApplier
+
+
+def _fake_peer_applier_with_apply(calls: list[tuple[str, str, str, str]]):
+    class FakePeerApplier:
+        def __init__(self, server, *, password=None):
+            self._server = server
+
+        def apply_peer(self, *, server, peer_public_key: str, preshared_key: str, vpn_ip: str) -> None:
+            calls.append((server.name, peer_public_key, preshared_key, vpn_ip))
 
     return FakePeerApplier

@@ -289,7 +289,7 @@ docker exec amnezia-awg awg show awg0
 ss -lun
 ```
 
-Для Docker runtime `apply-peer --apply` и `revoke-peer --apply` меняют файл `runtime.config_path` внутри контейнера и затем выполняют `docker restart <container_name>`. Перед включением `VPS_APPLY_ENABLED=true` обязательно проверить, что `config_path` указывает на реальный постоянный конфиг AmneziaWG, иначе peer может исчезнуть после перезапуска или сломать рабочий контейнер.
+Для Docker runtime `apply-peer --apply` и `revoke-peer --apply` меняют файл `runtime.config_path` внутри контейнера и затем выполняют `docker restart <container_name>`. При создании нового устройства приложение читает `AllowedIPs` из этого же файла и выдает следующий IP после уже существующих peer в `awg0.conf`. Перед включением `VPS_APPLY_ENABLED=true` обязательно проверить, что `config_path` указывает на реальный постоянный конфиг AmneziaWG, иначе peer может исчезнуть после перезапуска или сломать рабочий контейнер.
 
 ## 9. Optional `systemd` services
 

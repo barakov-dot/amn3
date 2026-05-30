@@ -50,6 +50,9 @@ class ServerConfigPeerApplier:
     def remove_peer(self, *, server, peer_public_key: str) -> None:
         revoke_peer(self._server, peer_public_key, ssh_client=self._ssh_client)
 
+    def list_allocated_ips(self, *, server) -> list[str]:
+        return list_allocated_ips(self._server, ssh_client=self._ssh_client)
+
 
 def build_peer_apply_dry_run(server: ServerConfig, peer: PeerApplyInput) -> str:
     if server.runtime.type == "docker":
@@ -133,6 +136,14 @@ def revoke_peer(
             )
         )
     return redact(f"Peer revoke succeeded: {server.name} {peer_public_key}")
+
+
+def list_allocated_ips(server: ServerConfig, *, ssh_client: SshClient) -> list[str]:
+    if server.runtime.type != "docker":
+        return []
+    config_path = _require_docker_config_path(server)
+    config_text = _read_docker_config(server, config_path, ssh_client=ssh_client)
+    return _docker_config_peer_allowed_ips(config_text)
 
 
 def _build_apply_command(server: ServerConfig, peer: PeerApplyInput) -> str:
@@ -309,6 +320,30 @@ def _docker_config_interface_network(config_text: str) -> ipaddress.IPv4Network 
                 f"Docker config Address is invalid: {first_address}"
             ) from exc
     raise PeerApplyError("Docker config Address is missing in [Interface]")
+
+
+def _docker_config_peer_allowed_ips(config_text: str) -> list[str]:
+    allocated_ips: list[str] = []
+    for block in _split_config_blocks(config_text):
+        if not _is_peer_block(block):
+            continue
+        for line in block:
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#") or "=" not in stripped:
+                continue
+            key, value = stripped.split("=", 1)
+            if key.strip().lower() != "allowedips":
+                continue
+            first_allowed_ip = value.split(",", 1)[0].strip()
+            try:
+                ipaddress.ip_interface(first_allowed_ip)
+            except ValueError as exc:
+                raise PeerApplyError(
+                    f"Docker config peer AllowedIPs is invalid: {first_allowed_ip}"
+                ) from exc
+            allocated_ips.append(first_allowed_ip)
+            break
+    return allocated_ips
 
 
 def _write_docker_config(

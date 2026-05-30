@@ -307,10 +307,13 @@ http://127.0.0.1:3030/login
 
 - `Block` — локально блокирует пользователя, но не удаляет peer из AmneziaWG;
 - `Soft delete` — помечает пользователя как `deleted`, строка остается в базе для истории;
-- `Disable VPN` — удаляет активные/pending peer пользователя из AmneziaWG, затем переводит его устройства в `revoked` и блокирует пользователя;
+- `Disable VPN` — удаляет активные/pending peer пользователя из AmneziaWG, затем переводит его устройства в `disabled` и блокирует пользователя. IP, public key, encrypted private key и preshared key остаются в базе, чтобы можно было включить того же клиента повторно;
+- `Enable VPN` — добавляет `disabled` peer обратно в AmneziaWG с тем же public key, preshared key и IP, затем переводит устройства в `active` и разблокирует пользователя;
 - `Delete permanently` — сначала удаляет активные/pending peer из AmneziaWG, затем удаляет пользователя, его устройства, заявки, email-токены, traffic snapshots и связанные audit-записи из базы.
 
-Для `Disable VPN` и `Delete permanently` при наличии активных устройств требуется `VPS_APPLY_ENABLED=true` и корректный `SERVER_CONFIG_PATH`. Если удаление peer на ноде не прошло, база не меняется.
+В таблице устройств секреты показываются замаскированными. Кнопка `Show secrets` расшифровывает private key и preshared key только для выбранного устройства и пишет audit-событие. Без постоянного `APP_SECRET_KEY` восстановить эти значения нельзя.
+
+Для `Disable VPN`, `Enable VPN` и `Delete permanently` при наличии активных или отключенных устройств требуется `VPS_APPLY_ENABLED=true` и корректный `SERVER_CONFIG_PATH`. Если изменение peer на ноде не прошло, база не меняется.
 
 ## 10. Подготовить Telegram-бота
 
@@ -452,7 +455,7 @@ docker ps --format {{.Names}}
 docker exec amnezia-awg awg show awg0
 ```
 
-Для Docker runtime применение и отзыв peer выполняются через постоянный конфиг: приложение читает `runtime.config_path` внутри контейнера, переписывает peer-блоки, затем выполняет `docker restart <container_name>`. Перед включением `VPS_APPLY_ENABLED=true` убедиться, что `config_path` указывает на реальный конфиг AmneziaWG, который переживает перезапуск контейнера.
+Для Docker runtime применение и отзыв peer выполняются через постоянный конфиг: приложение читает `runtime.config_path` внутри контейнера, переписывает peer-блоки, затем выполняет `docker restart <container_name>`. При создании нового устройства приложение также читает `AllowedIPs` из этого файла и выдает следующий IP после уже существующих peer в `awg0.conf`, чтобы не расходиться с живой AmneziaWG-нодой. Перед включением `VPS_APPLY_ENABLED=true` убедиться, что `config_path` указывает на реальный конфиг AmneziaWG, который переживает перезапуск контейнера.
 
 Для сверки того, что уже есть в AmneziaWG, выполнить:
 

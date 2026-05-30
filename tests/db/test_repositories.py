@@ -120,6 +120,55 @@ def test_invalid_device_status_fails(tmp_path):
         )
 
 
+def test_schema_migrates_existing_devices_table_to_allow_disabled_status(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    conn.executescript(
+        """
+        CREATE TABLE devices (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            server_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            activated_at TEXT,
+            expires_at TEXT,
+            duration_days INTEGER NOT NULL CHECK (duration_days > 0),
+            status TEXT NOT NULL DEFAULT 'active'
+                CHECK (status IN ('pending', 'active', 'expired', 'revoked', 'failed')),
+            vpn_ip TEXT NOT NULL,
+            peer_public_key TEXT NOT NULL,
+            peer_private_key_encrypted TEXT NOT NULL,
+            preshared_key_encrypted TEXT NOT NULL,
+            config_version TEXT NOT NULL,
+            last_config_sent_at TEXT,
+            first_connected_at TEXT,
+            last_connected_at TEXT,
+            revoked_at TEXT,
+            revoke_reason TEXT,
+            UNIQUE (server_id, peer_public_key)
+        );
+        CREATE UNIQUE INDEX idx_devices_reserved_ip_unique
+            ON devices(server_id, vpn_ip)
+            WHERE status IN ('pending', 'active');
+        """
+    )
+    conn.commit()
+
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id, server_id = _create_user_and_server(repo)
+
+    _insert_device(
+        conn,
+        user_id=user_id,
+        server_id=server_id,
+        vpn_ip="10.8.0.44",
+        peer_public_key="disabled-after-migration",
+        status="disabled",
+    )
+    assert repo.list_allocated_ips(server_id) == ["10.8.0.44"]
+
+
 def test_list_allocated_ips_only_returns_reserved_statuses(tmp_path):
     conn = connect(tmp_path / "test.sqlite3")
     initialize_schema(conn)
@@ -127,7 +176,7 @@ def test_list_allocated_ips_only_returns_reserved_statuses(tmp_path):
 
     user_id, server_id = _create_user_and_server(repo)
     for index, status in enumerate(
-        ["pending", "active", "revoked", "expired", "failed"],
+        ["pending", "active", "disabled", "revoked", "expired", "failed"],
         start=2,
     ):
         _insert_device(
@@ -139,7 +188,90 @@ def test_list_allocated_ips_only_returns_reserved_statuses(tmp_path):
             status=status,
         )
 
-    assert repo.list_allocated_ips(server_id) == ["10.8.0.2", "10.8.0.3"]
+    assert repo.list_allocated_ips(server_id) == ["10.8.0.2", "10.8.0.3", "10.8.0.4"]
+
+
+def test_disabled_device_keeps_ip_reserved_for_reenable(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+
+    user_id, server_id = _create_user_and_server(repo)
+    _insert_device(
+        conn,
+        user_id=user_id,
+        server_id=server_id,
+        vpn_ip="10.8.0.44",
+        peer_public_key="disabled-public",
+        status="disabled",
+    )
+
+    with pytest.raises(sqlite3.IntegrityError):
+        repo.create_device(
+            user_id=user_id,
+            server_id=server_id,
+            name="replacement",
+            duration_days=7,
+            vpn_ip="10.8.0.44",
+            peer_public_key="new-public",
+            peer_private_key_encrypted="v1:new-private",
+            preshared_key_encrypted="v1:new-psk",
+            config_version="amneziawg_v2",
+        )
+
+
+def test_disable_and_enable_user_devices_preserve_existing_keys_and_ip(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+
+    user_id, server_id = _create_user_and_server(repo)
+    active_id = repo.create_device(
+        user_id=user_id,
+        server_id=server_id,
+        name="phone",
+        duration_days=7,
+        vpn_ip="10.8.0.44",
+        peer_public_key="active-public",
+        peer_private_key_encrypted="v1:active-private",
+        preshared_key_encrypted="v1:active-psk",
+        config_version="amneziawg_v2",
+    )
+    revoked_id = repo.create_device(
+        user_id=user_id,
+        server_id=server_id,
+        name="old-phone",
+        duration_days=7,
+        vpn_ip="10.8.0.45",
+        peer_public_key="revoked-public",
+        peer_private_key_encrypted="v1:revoked-private",
+        preshared_key_encrypted="v1:revoked-psk",
+        config_version="amneziawg_v2",
+    )
+    repo.revoke_device(revoked_id, reason="test", revoked_at="2026-05-29T10:00:00Z")
+
+    disabled_count = repo.disable_user_devices(
+        user_id,
+        reason="web_disable_vpn",
+        disabled_at="2026-05-30T10:00:00Z",
+    )
+    disabled_devices = repo.list_user_devices_for_vpn_enable(user_id)
+
+    assert disabled_count == 1
+    assert len(disabled_devices) == 1
+    disabled = disabled_devices[0]
+    assert disabled["id"] == active_id
+    assert disabled["vpn_ip"] == "10.8.0.44"
+    assert disabled["peer_public_key"] == "active-public"
+    assert disabled["peer_private_key_encrypted"] == "v1:active-private"
+    assert disabled["preshared_key_encrypted"] == "v1:active-psk"
+    assert repo.get_device(revoked_id)["status"] == "revoked"
+
+    enabled_count = repo.enable_user_devices(user_id)
+
+    assert enabled_count == 1
+    assert repo.get_device(active_id)["status"] == "active"
+    assert repo.get_device(active_id)["vpn_ip"] == "10.8.0.44"
 
 
 def test_device_ip_can_be_reused_after_revocation(tmp_path):

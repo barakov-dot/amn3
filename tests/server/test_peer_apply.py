@@ -3,6 +3,7 @@ import pytest
 from app.server.peer_apply import (
     PeerApplyError,
     PeerApplyInput,
+    ServerConfigPeerApplier,
     apply_peer,
     build_peer_apply_dry_run,
     build_peer_revoke_dry_run,
@@ -135,6 +136,34 @@ def test_apply_peer_blocks_docker_config_network_mismatch(tmp_path):
     assert "10.8.0.0/24" in str(exc_info.value)
     assert len(ssh.calls) == 1
     assert ssh.calls[0] == ("docker exec amnezia-awg cat /opt/amnezia/awg/awg0.conf", None)
+
+
+def test_server_config_peer_applier_lists_allocated_ips_from_docker_config(tmp_path):
+    server = _docker_server(tmp_path)
+    ssh = RecordingSshClient(
+        results=[
+            CommandResult(
+                exit_code=0,
+                stdout=_docker_config_with_peer()
+                + "\n".join(
+                    [
+                        "[Peer]",
+                        "PublicKey = second-public",
+                        "PresharedKey = second-psk",
+                        "AllowedIPs = 10.8.0.3/32, 10.8.0.99/32",
+                        "",
+                    ]
+                ),
+                stderr="",
+            ),
+        ]
+    )
+    applier = ServerConfigPeerApplier(server, ssh_client=ssh)
+
+    allocated_ips = applier.list_allocated_ips(server=server)
+
+    assert allocated_ips == ["10.8.0.2/32", "10.8.0.3/32"]
+    assert ssh.calls == [("docker exec amnezia-awg cat /opt/amnezia/awg/awg0.conf", None)]
 
 
 def test_apply_peer_raises_redacted_error_when_remote_command_fails(tmp_path):

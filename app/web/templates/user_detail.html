@@ -67,6 +67,10 @@
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button class="button button-secondary" type="submit">Disable VPN</button>
         </form>
+        <form action="/users/{{ user.id }}/enable-vpn" method="post">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-secondary" type="submit">Enable VPN</button>
+        </form>
         <form action="/users/{{ user.id }}/delete" method="post">
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button class="button button-danger" type="submit">Soft delete</button>
@@ -94,6 +98,7 @@
                 <th>Server</th>
                 <th>Status</th>
                 <th>IP</th>
+                <th>Secrets</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -105,6 +110,22 @@
                   <td>{{ device.server_name }}</td>
                   <td><span class="status status-{{ device.status }}">{{ device.status }}</span></td>
                   <td>{{ device.vpn_ip }}</td>
+                  <td>
+                    {% if revealed_device_id is defined and revealed_device_id == device.id %}
+                      <div class="secret-lines">
+                        <span class="muted-text">PrivateKey</span>
+                        <code class="wrap-text">{{ revealed_secrets.private_key }}</code>
+                        <span class="muted-text">PresharedKey</span>
+                        <code class="wrap-text">{{ revealed_secrets.preshared_key }}</code>
+                      </div>
+                    {% else %}
+                      <span class="muted-text">********</span>
+                      <form action="/users/{{ user.id }}/devices/{{ device.id }}/secrets" method="post" class="inline-action">
+                        <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                        <button class="button button-secondary button-small" type="submit">Show secrets</button>
+                      </form>
+                    {% endif %}
+                  </td>
                   <td>
                     {% if user.email %}
                       <div class="button-row">

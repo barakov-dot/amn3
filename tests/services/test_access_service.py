@@ -187,6 +187,32 @@ def test_approve_order_applies_peer_before_fulfilling_order(tmp_path):
     assert repo.get_order(order_id)["status"] == "fulfilled"
 
 
+def test_approve_order_allocates_after_live_remote_ips_from_peer_applier(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.1.0/24")
+    order_id = repo.create_order(user_id=user_id, plan_id=None, payment_mode="free_test")
+    peer_applier = RecordingPeerApplier(remote_allocated_ips=["10.8.1.1/32", "10.8.1.2/32"])
+
+    service = AccessService(
+        repo=repo,
+        secret_box=SecretBox.from_app_secret("test-secret-for-access-service-1234567890"),
+        peer_applier=peer_applier,
+    )
+    result = service.approve_order(order_id, server_id, "iPhone", admin_telegram_id=999)
+
+    device = repo.get_device(result.device_id)
+    assert device["vpn_ip"] == "10.8.1.3"
+    assert peer_applier.calls[0]["vpn_ip"] == "10.8.1.3"
+
+
 def test_approve_order_rolls_back_device_and_order_when_peer_apply_fails(tmp_path):
     conn = connect(tmp_path / "test.sqlite3")
     initialize_schema(conn)
@@ -268,9 +294,10 @@ class FailingAdminActionRepository(Repository):
 
 
 class RecordingPeerApplier:
-    def __init__(self, *, error=None):
+    def __init__(self, *, error=None, remote_allocated_ips=None):
         self.calls = []
         self._error = error
+        self._remote_allocated_ips = list(remote_allocated_ips or [])
 
     def apply_peer(self, *, server, peer_public_key, preshared_key, vpn_ip):
         self.calls.append(
@@ -283,6 +310,9 @@ class RecordingPeerApplier:
         )
         if self._error is not None:
             raise self._error
+
+    def list_allocated_ips(self, *, server):
+        return list(self._remote_allocated_ips)
 
 
 class DuplicateIpRaceRepository(Repository):

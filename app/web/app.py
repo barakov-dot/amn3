@@ -900,6 +900,64 @@ def create_web_app(
 
         return RedirectResponse(f"/users/{user_id}", status_code=303)
 
+    @app.post("/users/{user_id}/enable-vpn")
+    async def enable_user_vpn(
+        request: Request,
+        user_id: int,
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+
+        try:
+            _enable_user_vpn(actual_settings, request, user_id)
+        except LookupError:
+            return PlainTextResponse("User not found", status_code=404)
+        except (ConfigError, PeerApplyError, ValueError) as exc:
+            return PlainTextResponse(str(exc), status_code=400)
+
+        return RedirectResponse(f"/users/{user_id}", status_code=303)
+
+    @app.post("/users/{user_id}/devices/{device_id}/secrets")
+    async def reveal_device_secrets(
+        request: Request,
+        user_id: int,
+        device_id: int,
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+
+        try:
+            revealed_secrets = _reveal_device_secrets(
+                actual_settings,
+                request,
+                user_id=user_id,
+                device_id=device_id,
+            )
+            detail = _load_user_detail(actual_settings, user_id)
+        except LookupError:
+            return PlainTextResponse("Device not found", status_code=404)
+        except ValueError as exc:
+            return PlainTextResponse(str(exc), status_code=400)
+
+        return templates.TemplateResponse(
+            request,
+            "user_detail.html",
+            _template_context(
+                request,
+                title=f"User {user_id}",
+                authenticated=True,
+                revealed_device_id=device_id,
+                revealed_secrets=revealed_secrets,
+                **detail,
+            ),
+        )
+
     @app.post("/users/{user_id}/destroy")
     async def destroy_user(
         request: Request,
@@ -1805,13 +1863,13 @@ def _disable_user_vpn(settings: Settings, request: Request, user_id: int) -> int
         devices = [_row_to_dict(row) for row in repo.list_user_devices_for_vpn_removal(user_id)]
 
     _revoke_devices_from_vpn(settings, devices)
-    revoked_at = utc_now_iso()
+    disabled_at = utc_now_iso()
     with _open_repository(settings) as (repo, _conn):
         with repo.transaction():
-            revoked_count = repo.revoke_user_devices(
+            disabled_count = repo.disable_user_devices(
                 user_id,
                 reason="web_disable_vpn",
-                revoked_at=revoked_at,
+                disabled_at=disabled_at,
             )
             repo.set_user_status_for_admin(user_id, "blocked")
             _record_web_user_action(
@@ -1823,10 +1881,35 @@ def _disable_user_vpn(settings: Settings, request: Request, user_id: int) -> int
                 metadata={
                     "telegram_id": user["telegram_id"],
                     "status": "blocked",
-                    "revoked_device_count": revoked_count,
+                    "disabled_device_count": disabled_count,
                 },
             )
-    return revoked_count
+    return disabled_count
+
+
+def _enable_user_vpn(settings: Settings, request: Request, user_id: int) -> int:
+    with _open_repository(settings) as (repo, _conn):
+        user = _row_to_dict(repo.get_user(user_id))
+        devices = [_row_to_dict(row) for row in repo.list_user_devices_for_vpn_enable(user_id)]
+
+    _apply_disabled_devices_to_vpn(settings, devices)
+    with _open_repository(settings) as (repo, _conn):
+        with repo.transaction():
+            enabled_count = repo.enable_user_devices(user_id)
+            repo.set_user_status_for_admin(user_id, "active")
+            _record_web_user_action(
+                repo,
+                settings,
+                request,
+                action="web_user_enable_vpn",
+                target_user_id=user_id,
+                metadata={
+                    "telegram_id": user["telegram_id"],
+                    "status": "active",
+                    "enabled_device_count": enabled_count,
+                },
+            )
+    return enabled_count
 
 
 def _destroy_user(settings: Settings, request: Request, user_id: int) -> None:
@@ -1882,6 +1965,76 @@ def _revoke_devices_from_vpn(settings: Settings, devices: list[dict[str, Any]]) 
             server=server,
             peer_public_key=str(device["peer_public_key"]),
         )
+
+
+def _apply_disabled_devices_to_vpn(
+    settings: Settings,
+    devices: list[dict[str, Any]],
+) -> None:
+    if not devices:
+        return
+    if not settings.vps_apply_enabled:
+        raise ValueError("VPS_APPLY_ENABLED must be true before adding peers to VPN")
+
+    config = load_server_config(Path(settings.server_config_path))
+    servers_by_name = {server.name: server for server in config.servers}
+    appliers: dict[str, ServerConfigPeerApplier] = {}
+    secret_box = SecretBox.from_app_secret(settings.app_secret_key)
+    for device in devices:
+        server_name = str(device["server_name"])
+        server = servers_by_name.get(server_name)
+        if server is None:
+            available = ", ".join(sorted(servers_by_name)) or "<none>"
+            raise ConfigError(
+                f"Server '{server_name}' not found in {settings.server_config_path}. "
+                f"Available: {available}"
+            )
+        applier = appliers.get(server_name)
+        if applier is None:
+            applier = ServerConfigPeerApplier(
+                server,
+                password=settings.vps_ssh_password or None,
+            )
+            appliers[server_name] = applier
+        applier.apply_peer(
+            server=server,
+            peer_public_key=str(device["peer_public_key"]),
+            preshared_key=secret_box.decrypt_text(str(device["preshared_key_encrypted"])),
+            vpn_ip=str(device["vpn_ip"]),
+        )
+
+
+def _reveal_device_secrets(
+    settings: Settings,
+    request: Request,
+    *,
+    user_id: int,
+    device_id: int,
+) -> dict[str, str]:
+    with _open_repository(settings) as (repo, _conn):
+        with repo.transaction():
+            device = repo.get_user_device(user_id=user_id, device_id=device_id)
+            if device is None:
+                raise LookupError("Device not found")
+            secret_box = SecretBox.from_app_secret(settings.app_secret_key)
+            secrets = {
+                "private_key": secret_box.decrypt_text(
+                    str(device["peer_private_key_encrypted"])
+                ),
+                "preshared_key": secret_box.decrypt_text(
+                    str(device["preshared_key_encrypted"])
+                ),
+            }
+            _record_web_user_action(
+                repo,
+                settings,
+                request,
+                action="web_device_secret_reveal",
+                target_user_id=user_id,
+                target_device_id=device_id,
+                metadata={"device_id": device_id},
+            )
+            return secrets
 
 
 def _email_service(request: Request) -> EmailDeliveryService:
