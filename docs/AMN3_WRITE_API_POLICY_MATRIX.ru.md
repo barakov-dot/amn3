@@ -12,6 +12,8 @@
 - `tests/agent/test_write_contracts.py`
 - `tests/agent/test_policy.py`
 
+Связанный UX/API flow: `docs/AMN3_WRITE_API_UX_FLOW.ru.md`.
+
 ## Gate
 
 Любой write API включается только после успешного read-only smoke на реальном
@@ -71,6 +73,7 @@ admin/bot/controller слоя.
 - Typed planning for `agent:clients:write`.
 - Проверку, что future write routes остаются inactive before VPS smoke.
 - Обсуждение UX flow: dry-run -> confirmation -> mutation.
+- Синхронизацию web admin, Telegram bot и CLI вокруг `dry-run -> confirmation -> apply/revoke -> audit -> rollback`.
 - Подготовку web admin wording и audit model без реальных mutations.
 
 ## What This Does Not Enable

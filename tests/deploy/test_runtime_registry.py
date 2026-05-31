@@ -279,6 +279,37 @@ def test_amn3_vps_smoke_result_template_records_go_no_go_and_runtime_evidence():
     assert "docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md" in smoke
 
 
+def test_amn3_write_api_ux_flow_doc_maps_surfaces_without_enabling_routes():
+    doc_path = ROOT / "docs/AMN3_WRITE_API_UX_FLOW.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    policy_doc_path = ROOT / "docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    policy_doc = policy_doc_path.read_text(encoding="utf-8")
+
+    assert "dry-run -> confirmation -> apply/revoke -> audit -> rollback" in text
+    assert "Web admin" in text
+    assert "Telegram bot" in text
+    assert "CLI" in text
+    assert "local_agent.clients.apply.dry_run" in text
+    assert "local_agent.clients.apply" in text
+    assert "local_agent.clients.revoke" in text
+    assert "agent:clients:write" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED" in text
+    assert "VPS smoke required" in text
+    assert "preflight_required" in text
+    assert "runtime_degraded" in text
+    assert "mutation_failed" in text
+    assert "raw token" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "docs/AMN3_WRITE_API_UX_FLOW.ru.md" in handoff
+    assert "docs/AMN3_WRITE_API_UX_FLOW.ru.md" in policy_doc
+
+
 def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     doc_path = ROOT / "docs/VPS_RETEST_PROTOCOL.ru.md"
     checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"
