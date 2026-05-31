@@ -151,7 +151,7 @@ Production evidence:
 
 ### 4. Config delivery integrity
 
-Статус: next recommended local-only slice.
+Статус: implemented-pushed-local-gate-complete.
 
 Цель: взять лучшее из PRVTPRO web-panel темы не как UI-копию, а как test/product contract:
 
@@ -163,6 +163,17 @@ Production evidence:
 - единый export/result contract для будущих delivery surfaces.
 
 Gate: сначала local-only. Live VPS нужен только если меняются реальные templates/defaults, которые попадут в client config на сервере.
+
+Production evidence:
+
+- branch: `codex-vps-test-prep`;
+- existing integrity commits: `952cc49`, `4b19cd3`;
+- redaction integration commit: `fc73929`;
+- verified at head: `94ad807`;
+- targeted tests: `16 passed`;
+- full local suite: `528 passed, 1 StarletteDeprecationWarning`.
+
+Следующий local-only critical slice: public-token safety для verify/recover flows перед любыми self-service/public config links.
 
 ## Важные задачи
 

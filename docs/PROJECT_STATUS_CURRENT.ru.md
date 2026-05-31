@@ -261,7 +261,7 @@ Live VPS не трогался. Новые API endpoints не добавляли
 
 1. `amn2` commit `d1d9690` запушен в remote branch `codex-vps-test-prep`.
 2. Следующий local-only slice выбран и выполнен: redaction coverage.
-3. Следующий рекомендуемый safe slice: config delivery integrity.
+3. Следующий local-only slice проверен: config delivery integrity.
 
 ## Redaction Coverage Slice
 
@@ -298,6 +298,43 @@ full local suite: 528 passed, 1 StarletteDeprecationWarning
 
 Live VPS не трогался. Slice не меняет live apply/revoke/config/sync behavior, поэтому VPS gate не нужен.
 
+## Config Delivery Integrity Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex-vps-test-prep
+```
+
+Production head used for verification:
+
+```text
+94ad807 Document secret-bearing delivery artifacts
+```
+
+Relevant production commits already present in branch:
+
+```text
+952cc49 Add config delivery artifact metadata
+4b19cd3 Add config delivery utf8 artifact tests
+fc73929 Add config delivery redaction coverage
+```
+
+Проверка:
+
+```text
+tests/bot/test_delivery.py tests/services/test_config_delivery.py tests/vpn/test_config_templates.py -v
+result: 16 passed
+
+full local suite at same head: 528 passed, 1 StarletteDeprecationWarning
+```
+
+Покрыто: `.conf` UTF-8 bytes, QR payload equality, `vpn://` round-trip, non-ASCII fixture, `client-config-secret` metadata and redaction behavior for text diagnostics.
+
+Live VPS не трогался. Slice не меняет live templates/defaults или apply/sync behavior, поэтому VPS gate не нужен.
+
 ## Local Gate / Live VPS Gate
 
 Новый порядок проверки разделен на два контура.
@@ -323,4 +360,4 @@ Live VPS не трогался. Slice не меняет live apply/revoke/config
 - Docker AmneziaWG write/reload/restart behavior;
 - реальный Local Agent deployment или controller-to-agent calls.
 
-Следующий рекомендуемый local-only шаг: config delivery integrity. Следующий VPS gate пока не запускать, потому что policy matrix и redaction coverage не меняют live behavior.
+Следующий рекомендуемый local-only шаг: public-token safety. Следующий VPS gate пока не запускать, потому что policy matrix, redaction coverage и config delivery integrity не меняют live behavior.

@@ -39,8 +39,8 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Config defaults from `.env` | `verified-live-baseline` | `amn2` | commit `8ecb0b4` и последующие fixes | Использовать как текущий config contract |
 | Docker runtime peer apply/revoke | `verified-live-baseline` | `amn2` | `codex-vps-test-prep`, tag `vps-live-cycle-verified` | Использовать как behavior contract |
 | Redaction coverage | `implemented-pushed-local-gate-complete` | `amn2` | commits `75c235a`..`94ad807` | Использовать как secret-output baseline; VPS gate не нужен |
-| Verified config delivery | `implemented-needs-regression-watch` | `amn2` | current web/email/bot flows | Следующий local-only slice: integrity tests/contract |
-| Public/self-service config delivery | `lab-only-until-policy` | AMN3 -> `amn2` later | `research/amn2/config-delivery-inventory.md` | После API-readiness решить route/config delivery policy |
+| Verified config delivery | `implemented-pushed-local-gate-complete` | `amn2` | commits `952cc49`, `4b19cd3`, `fc73929`; verified at `94ad807` | Использовать как artifact integrity baseline; VPS gate не нужен |
+| Public/self-service config delivery | `lab-only-until-policy` | AMN3 -> `amn2` later | `research/amn2/config-delivery-inventory.md` | Следующий local-only prerequisite: public-token safety |
 
 ## Local Agent Decision
 
@@ -179,3 +179,5 @@ Note: pytest emitted the known Windows temp cleanup `PermissionError` after succ
 Policy matrix commit `d1d9690` остается `local-gate-complete`; live VPS gate для него не нужен.
 
 Redaction coverage commits `75c235a`..`94ad807` также остаются `local-gate-complete`: они усиливают sanitizer, тесты и docs, но не меняют live apply/revoke/config/sync behavior.
+
+Config delivery integrity на head `94ad807` также остается `local-gate-complete`: `.conf` UTF-8 bytes, QR payload, `vpn://` round-trip, non-ASCII fixture и secret metadata подтверждены локальными тестами; live VPS gate не нужен, пока не меняются реальные templates/defaults или apply/sync behavior.
