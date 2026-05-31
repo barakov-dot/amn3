@@ -16,6 +16,8 @@ class EmailToken:
 
 
 def create_email_token(*, ttl_minutes: int, now: datetime | None = None) -> EmailToken:
+    if ttl_minutes <= 0:
+        raise ValueError("email token ttl must be positive")
     raw_token = secrets.token_urlsafe(32)
     issued_at = now or datetime.now(timezone.utc)
     expires_at = issued_at + timedelta(minutes=ttl_minutes)

@@ -272,6 +272,141 @@ def test_recovery_link_does_not_send_when_email_delivery_is_disabled(tmp_path: P
         assert row["used_at"] is None
 
 
+def test_public_verify_rejects_recovery_token_without_consuming_or_echoing_it(
+    tmp_path: Path,
+):
+    sender = RecordingSender()
+    settings = _settings(tmp_path)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=1001,
+        email="alice@example.com",
+        email_verified_at="2026-05-29T10:00:00Z",
+    )
+    device_id = _seed_device(Path(settings.database_path), user_id=user_id)
+    client = _authenticated_client(settings, sender)
+    detail = client.get(f"/users/{user_id}")
+    start = client.post(
+        f"/users/{user_id}/devices/{device_id}/email-recovery/start",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+    token = _plain_token(_plain_body(sender.messages[0]), "One-time recovery code:")
+
+    response = client.post("/email/verify", data={"token": token})
+
+    assert start.status_code == 303
+    assert response.status_code == 400
+    assert "invalid or expired" in response.text
+    assert token not in response.text
+    assert len(sender.messages) == 1
+    with _repo(Path(settings.database_path)) as repo:
+        row = _email_token_row(repo, purpose="recover_config")
+        assert row["used_at"] is None
+
+
+def test_public_recover_rejects_verification_token_without_consuming_or_echoing_it(
+    tmp_path: Path,
+):
+    sender = RecordingSender()
+    settings = _settings(tmp_path)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=1001,
+        email="alice@example.com",
+    )
+    client = _authenticated_client(settings, sender)
+    detail = client.get(f"/users/{user_id}")
+    start = client.post(
+        f"/users/{user_id}/email/verify/start",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+    token = _plain_token(_plain_body(sender.messages[0]), "One-time verification code:")
+
+    response = client.post("/email/recover", data={"token": token})
+
+    assert start.status_code == 303
+    assert response.status_code == 400
+    assert "invalid or expired" in response.text
+    assert token not in response.text
+    assert len(sender.messages) == 1
+    with _repo(Path(settings.database_path)) as repo:
+        row = _email_token_row(repo, purpose="verify_email")
+        assert row["used_at"] is None
+
+
+def test_public_verify_rejects_expired_token_without_echoing_it(tmp_path: Path):
+    sender = RecordingSender()
+    settings = _settings(tmp_path)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=1001,
+        email="alice@example.com",
+    )
+    token = "expired-verify-token"
+    with _repo(Path(settings.database_path)) as repo:
+        repo.create_email_recovery_token(
+            user_id=user_id,
+            email="alice@example.com",
+            token_hash=hashlib.sha256(token.encode("utf-8")).hexdigest(),
+            purpose="verify_email",
+            expires_at="2000-01-01T00:00:00Z",
+        )
+    client = TestClient(
+        create_web_app(settings, email_sender=sender),
+        base_url="https://admin.example.com",
+    )
+
+    response = client.post("/email/verify", data={"token": token})
+
+    assert response.status_code == 400
+    assert "invalid or expired" in response.text
+    assert token not in response.text
+    assert sender.messages == []
+    with _repo(Path(settings.database_path)) as repo:
+        row = _email_token_row(repo, purpose="verify_email")
+        user = repo.get_user(user_id)
+        assert row["used_at"] is None
+        assert user["email_verified_at"] is None
+
+
+def test_public_recover_rejects_expired_token_without_echoing_it(tmp_path: Path):
+    sender = RecordingSender()
+    settings = _settings(tmp_path)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=1001,
+        email="alice@example.com",
+        email_verified_at="2026-05-29T10:00:00Z",
+    )
+    device_id = _seed_device(Path(settings.database_path), user_id=user_id)
+    token = "expired-recovery-token"
+    with _repo(Path(settings.database_path)) as repo:
+        repo.create_email_recovery_token(
+            user_id=user_id,
+            email="alice@example.com",
+            token_hash=hashlib.sha256(token.encode("utf-8")).hexdigest(),
+            purpose="recover_config",
+            device_id=device_id,
+            expires_at="2000-01-01T00:00:00Z",
+        )
+    client = TestClient(
+        create_web_app(settings, email_sender=sender),
+        base_url="https://admin.example.com",
+    )
+
+    response = client.post("/email/recover", data={"token": token})
+
+    assert response.status_code == 400
+    assert "invalid or expired" in response.text
+    assert token not in response.text
+    assert sender.messages == []
+    with _repo(Path(settings.database_path)) as repo:
+        row = _email_token_row(repo, purpose="recover_config")
+        assert row["used_at"] is None
+
+
 class RecordingSender:
     def __init__(self):
         self.messages = []
