@@ -222,7 +222,7 @@ head: 8697b60 Document Local Agent production wiring
 
 ## Route/Auth/Operation Policy Matrix Plan
 
-Статус: `implementation-plan-ready`.
+Статус: `implemented-in-amn2-local-commit`.
 
 Новый AMN3 artifact:
 
@@ -230,11 +230,35 @@ head: 8697b60 Document Local Agent production wiring
 docs/superpowers/plans/2026-05-31-amn2-route-auth-operation-policy-matrix.md
 ```
 
-План уточняет первый production slice: inventory-only policy registry + aggregate tests + production doc. Он не добавляет API endpoints, не включает новые write/config delivery flows и не требует live VPS retest.
+Production branch:
+
+```text
+codex-vps-test-prep
+```
+
+Production commit:
+
+```text
+d1d9690 Add route auth operation policy matrix
+```
+
+Создано в `amn2`:
+
+- `app/security/surface_policy.py`
+- `tests/security/test_surface_policy.py`
+- `docs/ROUTE_AUTH_OPERATION_POLICY.ru.md`
+
+Проверка:
+
+```text
+focused policy/agent/server tests: 46 passed
+web/bot smoke tests: 85 passed, 1 StarletteDeprecationWarning
+```
+
+Live VPS не трогался. Новые API endpoints не добавлялись. Новые write/config delivery flows не включались.
 
 Обновленный порядок:
 
-1. Выполнить этот plan в `C:\Users\SooL\Documents\Amneziya` на branch `codex-vps-test-prep`.
-2. Проверить focused tests policy/agent/server/web/bot.
-3. Commit production slice только после зеленых тестов.
-4. Вернуться в AMN3 и записать production commit/test evidence.
+1. Решить, пушить ли `amn2` commit `d1d9690` в remote branch `codex-vps-test-prep`.
+2. После push открыть или обновить PR/синхронизацию для production branch, если это нужно.
+3. Следующий safe slice: redaction coverage или config delivery integrity, в зависимости от того, какой риск закрываем первым.

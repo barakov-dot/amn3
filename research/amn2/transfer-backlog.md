@@ -100,7 +100,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 
 ## Route/Auth/Operation Policy Matrix Plan
 
-Статус: `implementation-plan-ready`.
+Статус: `implemented-in-amn2-local-commit`.
 
 Plan artifact:
 
@@ -108,7 +108,35 @@ Plan artifact:
 docs/superpowers/plans/2026-05-31-amn2-route-auth-operation-policy-matrix.md
 ```
 
-Следующий production slice для `amn2`: создать inventory-only machine-checkable registry `app/security/surface_policy.py`, aggregate tests `tests/security/test_surface_policy.py` и doc `docs/ROUTE_AUTH_OPERATION_POLICY.ru.md`.
+Production branch:
+
+```text
+codex-vps-test-prep
+```
+
+Production commit:
+
+```text
+d1d9690 Add route auth operation policy matrix
+```
+
+Created in `amn2`:
+
+- `app/security/surface_policy.py`
+- `tests/security/test_surface_policy.py`
+- `docs/ROUTE_AUTH_OPERATION_POLICY.ru.md`
+
+Verification:
+
+```text
+tests/security/test_surface_policy.py tests/agent/test_policy.py tests/server/test_operation_runner.py tests/server/test_checks.py -v
+result: 46 passed
+
+tests/web/test_app.py tests/web/test_users.py tests/web/test_servers.py tests/web/test_email_delivery.py tests/bot/test_bot_workflows.py -v
+result: 85 passed, 1 StarletteDeprecationWarning
+```
+
+Note: pytest emitted the known Windows temp cleanup `PermissionError` after successful sessions; both commands returned exit code 0.
 
 Границы slice:
 
