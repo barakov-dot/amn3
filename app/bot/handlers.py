@@ -240,7 +240,10 @@ async def handle_admin_pending(callback, *, workflow) -> None:
     for order in orders:
         await callback.message.answer(
             f"Order #{order['id']}",
-            reply_markup=build_admin_order_keyboard(order_id=int(order["id"])),
+            reply_markup=build_admin_order_keyboard(
+                order_id=int(order["id"]),
+                requested_config_version=_order_requested_config_version(order),
+            ),
         )
 
 
@@ -504,6 +507,16 @@ async def _send_delivery(bot, result) -> None:
         ),
         caption="VPN config QR code",
     )
+
+
+def _order_requested_config_version(order) -> str | None:
+    try:
+        config_version = order["requested_config_version"]
+    except (KeyError, IndexError):
+        return None
+    if config_version is None:
+        return None
+    return str(config_version)
 
 
 def _parse_int_suffix(data: str, prefix: str) -> int | None:

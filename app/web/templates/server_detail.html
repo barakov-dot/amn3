@@ -187,6 +187,12 @@
       {% if peer_sync.error %}
         <p class="empty-state">{{ peer_sync.error }}</p>
       {% else %}
+        {% if peer_sync.last_operation %}
+          <div class="notice notice-success">
+            <strong>{{ peer_sync.last_operation.title }}</strong>
+            <span>{{ peer_sync.last_operation.detail }}</span>
+          </div>
+        {% endif %}
         <dl class="details">
           <div>
             <dt>Известные peer панели</dt>
@@ -201,6 +207,30 @@
             <dd>{{ peer_sync.ignored_count }}</dd>
           </div>
         </dl>
+        {% if peer_sync.known_peers %}
+          <div class="table-wrap panel-spaced">
+            <table>
+              <thead>
+                <tr>
+                  <th>Known panel peer</th>
+                  <th>Peer</th>
+                  <th>VPN IP</th>
+                  <th>Live Allowed IPs</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for peer in peer_sync.known_peers %}
+                  <tr>
+                    <td>#{{ peer.device_id }} {{ peer.device_name }}</td>
+                    <td class="wrap-text">{{ peer.peer_public_key }}</td>
+                    <td>{{ peer.vpn_ip }}/32</td>
+                    <td>{{ peer.allowed_ips }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
         {% if peer_sync.unknown_peers %}
           <div class="table-wrap">
             <table>

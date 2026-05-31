@@ -71,16 +71,16 @@ def test_main_menu_can_render_english_button_labels():
     ]
 
 
-def test_config_version_keyboard_offers_amnezia_1_5_and_2_0():
+def test_config_version_keyboard_offers_amnezia_2_0_first():
     keyboard = build_config_version_keyboard(prefix=REQUEST_CONFIG_PREFIX)
 
     assert _button_texts(keyboard) == [
-        [VERSION_LABELS["amneziawg_v1_5"]],
         [VERSION_LABELS["amneziawg_v2"]],
+        [VERSION_LABELS["amneziawg_v1_5"]],
     ]
     assert _callback_data(keyboard) == [
-        [f"{REQUEST_CONFIG_PREFIX}:amneziawg_v1_5"],
         [f"{REQUEST_CONFIG_PREFIX}:amneziawg_v2"],
+        [f"{REQUEST_CONFIG_PREFIX}:amneziawg_v1_5"],
     ]
 
 
@@ -175,6 +175,37 @@ def test_admin_pending_orders_render_with_per_order_version_keyboard():
         ["admin:approve:11:amneziawg_v1_5"],
         ["admin:approve:11:amneziawg_v2"],
     ]
+
+
+def test_admin_order_keyboard_prioritizes_requested_config_version():
+    keyboard = build_admin_order_keyboard(
+        order_id=11,
+        requested_config_version="amneziawg_v2",
+    )
+
+    assert _callback_data(keyboard) == [
+        ["admin:approve:11:amneziawg_v2"],
+        ["admin:approve:11:amneziawg_v1_5"],
+    ]
+
+
+def test_admin_pending_orders_render_requested_config_version():
+    text = render_admin_pending_orders(
+        [
+            {
+                "id": 11,
+                "telegram_id": 1001,
+                "username": "alice",
+                "first_name": "Alice",
+                "last_name": None,
+                "status": "manual_review",
+                "created_at": "2026-05-27 12:00:00",
+                "requested_config_version": "amneziawg_v2",
+            }
+        ]
+    )
+
+    assert VERSION_LABELS["amneziawg_v2"] in text
 
 
 def test_admin_pending_orders_accept_sqlite_rows_from_repository():

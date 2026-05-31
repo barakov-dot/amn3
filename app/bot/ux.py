@@ -32,6 +32,7 @@ VERSION_LABELS = {
     "amneziawg_v1_5": "AmneziaWG 1.5",
     "amneziawg_v2": "AmneziaWG 2.0",
 }
+PREFERRED_CONFIG_VERSION = "amneziawg_v2"
 
 
 def build_main_menu(*, is_admin: bool, locale: str = DEFAULT_LOCALE) -> InlineKeyboardMarkup:
@@ -82,7 +83,7 @@ def build_config_version_keyboard(*, prefix: str) -> InlineKeyboardMarkup:
                     callback_data=f"{prefix}:{version}",
                 )
             ]
-            for version in SUPPORTED_CONFIG_VERSIONS
+            for version in _ordered_config_versions(PREFERRED_CONFIG_VERSION)
         ]
     )
 
@@ -108,6 +109,7 @@ def build_plan_keyboard(
 def build_admin_order_keyboard(
     *,
     order_id: int,
+    requested_config_version: str | None = None,
     locale: str = DEFAULT_LOCALE,
 ) -> InlineKeyboardMarkup:
     prefix = f"{ADMIN_APPROVE_PREFIX}:{order_id}"
@@ -119,7 +121,7 @@ def build_admin_order_keyboard(
                     callback_data=f"{prefix}:{version}",
                 )
             ]
-            for version in SUPPORTED_CONFIG_VERSIONS
+            for version in _ordered_config_versions(requested_config_version)
         ]
     )
 
@@ -403,6 +405,7 @@ def render_admin_pending_orders(orders: Iterable[Mapping[str, object]]) -> str:
             f"{order['id']}: "
             f"{_format_user_identity(order)} "
             f"({order['status']}, {order['created_at']})"
+            f"{_format_requested_config_version(order)}"
         )
     if not has_orders:
         lines.append(text("admin.no_pending"))
@@ -505,6 +508,21 @@ def _row_get(row: Mapping[str, object], key: str, default: object = None) -> obj
         return row[key]
     except (KeyError, IndexError):
         return default
+
+
+def _format_requested_config_version(row: Mapping[str, object]) -> str:
+    config_version = _row_get(row, "requested_config_version")
+    if not config_version:
+        return ""
+    return f", config={_version_label(str(config_version))}"
+
+
+def _ordered_config_versions(preferred: str | None) -> tuple[str, ...]:
+    versions = list(SUPPORTED_CONFIG_VERSIONS)
+    if preferred in versions:
+        versions.remove(preferred)
+        versions.insert(0, preferred)
+    return tuple(versions)
 
 
 def _version_label(config_version: str) -> str:

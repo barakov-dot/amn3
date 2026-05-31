@@ -61,8 +61,8 @@ def test_handle_request_config_prompt_shows_version_choices():
 
     assert "Выберите версию AmneziaWG" in callback.message.answers[0]["text"]
     assert _button_texts(callback.message.answers[0]["reply_markup"]) == [
-        ["AmneziaWG 1.5"],
         ["AmneziaWG 2.0"],
+        ["AmneziaWG 1.5"],
     ]
     assert callback.answered is True
 
@@ -387,6 +387,29 @@ def test_handle_admin_pending_renders_approve_buttons_for_each_order():
         ["Одобрить: AmneziaWG 2.0"],
     ]
     assert callback.answered is True
+
+
+def test_handle_admin_pending_prioritizes_requested_config_version():
+    class RequestedVersionWorkflow(FakeWorkflow):
+        def list_pending_orders(self, *, admin_telegram_id):
+            orders = super().list_pending_orders(admin_telegram_id=admin_telegram_id)
+            orders[0]["requested_config_version"] = "amneziawg_v2"
+            return orders
+
+    callback = FakeCallback(
+        data="admin:pending",
+        user_id=9001,
+        username="admin",
+        first_name="Admin",
+    )
+    workflow = RequestedVersionWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_pending(callback, workflow=workflow))
+
+    assert _callback_data(callback.message.answers[1]["reply_markup"]) == [
+        ["admin:approve:11:amneziawg_v2"],
+        ["admin:approve:11:amneziawg_v1_5"],
+    ]
 
 
 def test_handle_admin_pending_answers_callback_before_listing_orders():
@@ -920,3 +943,7 @@ class FakeBot:
 
 def _button_texts(markup):
     return [[button.text for button in row] for row in markup.inline_keyboard]
+
+
+def _callback_data(markup):
+    return [[button.callback_data for button in row] for row in markup.inline_keyboard]

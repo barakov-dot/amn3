@@ -481,7 +481,7 @@ def test_disable_user_vpn_revokes_remote_peers_and_keeps_user_row(
         assert '"disabled_device_count": 1' in latest_action["metadata_json"]
 
 
-def test_disable_user_vpn_requires_live_apply_for_active_devices(tmp_path: Path):
+def test_disable_user_vpn_with_apply_disabled_marks_local_devices_only(tmp_path: Path):
     settings = _settings(tmp_path, vps_apply_enabled=False)
     user_id = _seed_user(
         Path(settings.database_path),
@@ -500,13 +500,16 @@ def test_disable_user_vpn_requires_live_apply_for_active_devices(tmp_path: Path)
         follow_redirects=False,
     )
 
-    assert response.status_code == 400
-    assert "VPS_APPLY_ENABLED" in response.text
+    assert response.status_code == 303
+    assert response.headers["location"] == f"/users/{user_id}"
     with _repo(Path(settings.database_path)) as repo:
         user = repo.get_user(user_id)
         devices = repo.list_user_devices_for_admin(user_id)
-        assert user["status"] == "active"
-        assert sorted(device["status"] for device in devices) == ["active", "revoked"]
+        assert user["status"] == "blocked"
+        assert [device["status"] for device in devices] == ["revoked", "disabled"]
+        latest_action = repo.list_admin_actions_for_target_user(user_id)[0]
+        assert latest_action["action"] == "web_user_disable_vpn"
+        assert '"vps_apply": "skipped"' in latest_action["metadata_json"]
 
 
 def test_disable_user_vpn_returns_redacted_peer_apply_error(
@@ -690,6 +693,50 @@ def test_delete_single_user_device_revokes_only_selected_peer_and_cleans_links(
         latest_action = repo.list_admin_actions_for_target_user(user_id)[0]
         assert latest_action["action"] == "web_device_delete"
         assert f'"deleted_device_id": {target_device_id}' in latest_action["metadata_json"]
+
+
+def test_delete_single_user_device_with_apply_disabled_deletes_local_only(
+    tmp_path: Path,
+    monkeypatch,
+):
+    calls: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        web_app,
+        "ServerConfigPeerApplier",
+        _fake_peer_applier(calls),
+    )
+    settings = _settings(tmp_path, admin_telegram_ids="9001", vps_apply_enabled=False)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=6261,
+        username="local-delete-owner",
+        first_name="Local",
+        last_name=None,
+    )
+    target_device_id = _seed_encrypted_device(
+        Path(settings.database_path),
+        user_id=user_id,
+        private_key="client-private-key",
+        preshared_key="stored-psk",
+        status="active",
+    )
+    client = _authenticated_client(settings)
+    detail = client.get(f"/users/{user_id}")
+
+    response = client.post(
+        f"/users/{user_id}/devices/{target_device_id}/delete",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"] == f"/users/{user_id}"
+    assert calls == []
+    with _repo(Path(settings.database_path)) as repo:
+        assert repo.list_user_devices_for_admin(user_id) == []
+        latest_action = repo.list_admin_actions_for_target_user(user_id)[0]
+        assert latest_action["action"] == "web_device_delete"
+        assert '"vps_apply": "skipped"' in latest_action["metadata_json"]
 
 
 def test_user_detail_reveals_device_secrets_only_after_explicit_post(tmp_path: Path):

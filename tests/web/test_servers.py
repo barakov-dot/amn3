@@ -244,6 +244,15 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
             "unknown_count": 1,
             "missing_count": 1,
             "ignored_count": 1,
+            "known_peers": [
+                {
+                    "device_id": 7,
+                    "device_name": "known-device",
+                    "peer_public_key": "known-peer",
+                    "vpn_ip": "10.44.0.2",
+                    "allowed_ips": "10.44.0.2/32",
+                }
+            ],
             "unknown_peers": [
                 {
                     "peer_public_key": "unknown-peer",
@@ -282,6 +291,9 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
     assert "Синхронизация peer" in page.text
     assert "Известные peer панели" in page.text
     assert "1 / 1 / 1" in page.text
+    assert "known-device" in page.text
+    assert "known-peer" in page.text
+    assert "10.44.0.2/32" in page.text
     assert "unknown-peer" in page.text
     assert "10.44.0.3/32" in page.text
     assert "Созданы в Amnezia" in page.text
@@ -396,6 +408,78 @@ def test_add_missing_local_device_to_amnezia_applies_stored_peer(
         action = _latest_admin_action(repo)
         assert action["action"] == "web_server_missing_device_add"
         assert '"device_id": ' + str(device_id) in action["metadata_json"]
+
+
+def test_add_missing_local_device_refreshes_sync_report_with_added_peer(
+    tmp_path: Path,
+    monkeypatch,
+):
+    calls: list[tuple[str, str, str, str]] = []
+    monkeypatch.setattr(
+        web_app,
+        "ServerConfigPeerApplier",
+        _fake_peer_applier_with_apply(calls),
+    )
+    server_config_path = _write_server_config(tmp_path, server_name="local")
+    settings = _settings(
+        tmp_path,
+        admin_telegram_ids="9001",
+        server_config_path=server_config_path,
+        vps_apply_enabled=True,
+    )
+    with _repo(Path(settings.database_path)) as repo:
+        user_id = _seed_user(repo)
+        server_id = _seed_server(repo, name="local")
+        device_id = _seed_device(
+            repo,
+            user_id=user_id,
+            server_id=server_id,
+            status="active",
+            vpn_ip="10.44.0.22",
+            peer_public_key="missing-peer",
+            preshared_key="stored-psk",
+            encrypted=True,
+        )
+    refreshed_report = {
+        "known_count": 1,
+        "unknown_count": 0,
+        "missing_count": 0,
+        "ignored_count": 0,
+        "known_peers": [
+            {
+                "device_id": device_id,
+                "device_name": "missing-device",
+                "peer_public_key": "missing-peer",
+                "vpn_ip": "10.44.0.22",
+                "allowed_ips": "10.44.0.22/32",
+            }
+        ],
+        "unknown_peers": [],
+        "missing_peers": [],
+        "ignored_peers": [],
+        "error": "",
+    }
+    monkeypatch.setattr(
+        web_app,
+        "_collect_server_peer_sync",
+        lambda settings, server_id: dict(refreshed_report),
+    )
+    client = _authenticated_client(settings)
+    detail = client.get(f"/servers/{server_id}")
+
+    response = client.post(
+        f"/servers/{server_id}/missing-devices/{device_id}/add",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+    page = client.get(f"/servers/{server_id}")
+
+    assert response.status_code == 303
+    assert calls == [("local", "missing-peer", "stored-psk", "10.44.0.22")]
+    assert "Added to Amnezia" in page.text
+    assert "missing-device" in page.text
+    assert "missing-peer" in page.text
+    assert "10.44.0.22/32" in page.text
 
 
 def test_add_missing_local_device_returns_redacted_peer_apply_error(

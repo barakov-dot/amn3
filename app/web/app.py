@@ -1430,7 +1430,12 @@ def create_web_app(
         except ValueError as exc:
             return _plain_error_response(exc)
 
-        request.session.pop(_peer_sync_session_key(server_id), None)
+        peer_sync = _refresh_peer_sync_after_missing_device_add(
+            actual_settings,
+            server_id=server_id,
+            device_id=device_id,
+        )
+        request.session[_peer_sync_session_key(server_id)] = json.dumps(peer_sync)
         return RedirectResponse(f"/servers/{server_id}", status_code=303)
 
     @app.get("/servers/{server_id}/edit")
@@ -2122,6 +2127,23 @@ def _collect_server_peer_sync(settings: Settings, server_id: int) -> dict[str, A
         )
         ignored_keys = repo.list_ignored_remote_peer_keys(server_id)
         ignored_peers = [_row_to_dict(row) for row in repo.list_ignored_remote_peers(server_id)]
+        known_peers = []
+        for peer in report.known_remote_peers:
+            device = repo.get_device_by_server_peer_public_key(
+                server_id,
+                peer.peer_public_key,
+            )
+            if device is None:
+                continue
+            known_peers.append(
+                {
+                    "device_id": int(device["id"]),
+                    "device_name": str(device["name"]),
+                    "peer_public_key": peer.peer_public_key,
+                    "vpn_ip": str(device["vpn_ip"]),
+                    "allowed_ips": peer.allowed_ips,
+                }
+            )
     unknown_peers = [
         peer
         for peer in report.unknown_remote_peers
@@ -2132,6 +2154,7 @@ def _collect_server_peer_sync(settings: Settings, server_id: int) -> dict[str, A
         "unknown_count": len(unknown_peers),
         "missing_count": len(report.missing_local_peers),
         "ignored_count": len(ignored_peers),
+        "known_peers": known_peers,
         "unknown_peers": [
             {
                 "peer_public_key": peer.peer_public_key,
@@ -2159,6 +2182,7 @@ def _empty_peer_sync_report(*, error: str) -> dict[str, Any]:
         "unknown_count": 0,
         "missing_count": 0,
         "ignored_count": 0,
+        "known_peers": [],
         "unknown_peers": [],
         "missing_peers": [],
         "ignored_peers": [],
@@ -2217,6 +2241,23 @@ def _add_missing_local_device_to_amnezia(
                     "vpn_ip": device["vpn_ip"],
                 },
             )
+
+
+def _refresh_peer_sync_after_missing_device_add(
+    settings: Settings,
+    *,
+    server_id: int,
+    device_id: int,
+) -> dict[str, Any]:
+    try:
+        report = _collect_server_peer_sync(settings, server_id)
+    except Exception as exc:
+        report = _empty_peer_sync_report(error=redact(str(exc)))
+    report["last_operation"] = {
+        "title": "Added to Amnezia",
+        "detail": f"Device #{device_id} was added to the VPS config.",
+    }
+    return report
 
 
 def _load_configured_server(settings: Settings, repo: Repository, server_id: int):
@@ -2380,7 +2421,7 @@ def _disable_user_vpn(settings: Settings, request: Request, user_id: int) -> int
         user = _row_to_dict(repo.get_user(user_id))
         devices = [_row_to_dict(row) for row in repo.list_user_devices_for_vpn_removal(user_id)]
 
-    _revoke_devices_from_vpn(settings, devices)
+    vps_apply = _revoke_devices_from_vpn(settings, devices)
     disabled_at = utc_now_iso()
     with _open_repository(settings) as (repo, _conn):
         with repo.transaction():
@@ -2400,6 +2441,7 @@ def _disable_user_vpn(settings: Settings, request: Request, user_id: int) -> int
                     "telegram_id": user["telegram_id"],
                     "status": "blocked",
                     "disabled_device_count": disabled_count,
+                    "vps_apply": vps_apply,
                 },
             )
     return disabled_count
@@ -2444,8 +2486,9 @@ def _delete_user_device(
             raise LookupError("Device not found")
         device = _row_to_dict(device_row)
 
+    vps_apply = "not_needed"
     if str(device["status"]) in {"pending", "active"}:
-        _revoke_devices_from_vpn(settings, [device])
+        vps_apply = _revoke_devices_from_vpn(settings, [device])
 
     with _open_repository(settings) as (repo, _conn):
         with repo.transaction():
@@ -2462,6 +2505,7 @@ def _delete_user_device(
                     "peer_public_key": device["peer_public_key"],
                     "vpn_ip": device["vpn_ip"],
                     "status": device["status"],
+                    "vps_apply": vps_apply,
                 },
             )
 
@@ -2471,7 +2515,7 @@ def _destroy_user(settings: Settings, request: Request, user_id: int) -> None:
         user = _row_to_dict(repo.get_user(user_id))
         devices = [_row_to_dict(row) for row in repo.list_user_devices_for_vpn_removal(user_id)]
 
-    _revoke_devices_from_vpn(settings, devices)
+    vps_apply = _revoke_devices_from_vpn(settings, devices)
     with _open_repository(settings) as (repo, _conn):
         with repo.transaction():
             repo.hard_delete_user_for_admin(user_id)
@@ -2486,15 +2530,16 @@ def _destroy_user(settings: Settings, request: Request, user_id: int) -> None:
                     "deleted_user_id": user_id,
                     "telegram_id": user["telegram_id"],
                     "revoked_device_count": len(devices),
+                    "vps_apply": vps_apply,
                 },
             )
 
 
-def _revoke_devices_from_vpn(settings: Settings, devices: list[dict[str, Any]]) -> None:
+def _revoke_devices_from_vpn(settings: Settings, devices: list[dict[str, Any]]) -> str:
     if not devices:
-        return
+        return "not_needed"
     if not settings.vps_apply_enabled:
-        raise ValueError("VPS_APPLY_ENABLED must be true before removing peers from VPN")
+        return "skipped"
 
     config = load_server_config(Path(settings.server_config_path))
     servers_by_name = {server.name: server for server in config.servers}
@@ -2519,6 +2564,7 @@ def _revoke_devices_from_vpn(settings: Settings, devices: list[dict[str, Any]]) 
             server=server,
             peer_public_key=str(device["peer_public_key"]),
         )
+    return "applied"
 
 
 def _apply_devices_to_vpn(

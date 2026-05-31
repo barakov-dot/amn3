@@ -27,7 +27,7 @@ codex-vps-test-prep
 Текущий актуальный коммит:
 
 ```text
-Align AmneziaWG v2 config generation
+Polish VPS admin sync behavior
 ```
 
 Не начинать отдельный проект с нуля. Новый чат должен открыть эту же папку, проверить ветку и продолжить от текущего состояния.
@@ -72,7 +72,7 @@ cd C:\Users\SooL\Documents\Amneziya
 ## codex-vps-test-prep...origin/codex-vps-test-prep
 ```
 
-В `git log -5` верхний коммит должен иметь сообщение `Align AmneziaWG v2 config generation`.
+В `git log -5` верхний коммит должен иметь сообщение `Polish VPS admin sync behavior`.
 
 Если ветка не совпадает:
 
@@ -94,7 +94,7 @@ $env:PYTHONPATH='.codex_deps;.'
 Последний результат:
 
 ```text
-444 passed, 1 warning
+506 passed, 1 warning
 ```
 
 Предупреждение ожидаемое:
@@ -124,6 +124,7 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
 - Неудачные VPS-операции теперь пишутся в `admin_actions` с action `*_failed`, `error_type` и `redacted_error`; секреты проходят через `redact()`.
 - В карточке сервера добавлен блок `Recent server actions`, где видны последние server-level audit events, включая failed операции.
 - Опасные действия web-панели (`Disable VPN`, `Enable VPN`, `Soft delete`, `Delete permanently`, удаление устройства, отключение сервера, добавление missing device в AmneziaWG) теперь требуют browser confirm перед отправкой формы.
+- Если `VPS_APPLY_ENABLED=false`, удаление отдельного устройства, `Disable VPN` и `Delete permanently` работают локально без попытки трогать VPS; в `admin_actions.metadata_json` пишется `vps_apply: skipped`.
 - В карточке пользователя `Disable VPN` и `Enable VPN` показывают доступность по статусам устройств: active/pending можно отключать, disabled можно включать, а неприменимые действия отображаются disabled с короткой причиной.
 - Добавлен экран `/devices/disabled`: список отключенных устройств с владельцем, сервером, IP, причиной/временем отключения и ссылкой на карточку пользователя для повторного включения.
 - В карточке пользователя таблица `Admin actions` показывает `target_device_id` и `metadata_json`, чтобы failed VPS-события можно было читать без перехода в базу.
@@ -133,6 +134,9 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
   - peer, созданные в приложении Amnezia и еще не помеченные;
   - локальные устройства без peer на сервере;
   - peer, помеченные как `Созданы в Amnezia`.
+- Peer sync теперь показывает таблицу известных peer панели с device id/name, public key, VPN IP и live `AllowedIPs`; после `Добавить в Amnezia` отчет обновляется и показывает `Added to Amnezia` вместе с добавленным peer.
+- В Telegram выбор версии конфига теперь показывает `AmneziaWG 2.0` первой. В админском списке заявок отображается запрошенная версия, а кнопки approve ставят запрошенную версию заявки первой.
+- Если новый `.conf` снова выглядит как старый шаблон без `S3/S4/I1-I5` и с `AllowedIPs = 0.0.0.0/0`, первым делом проверить `devices.config_version`/`orders.requested_config_version`: это почти наверняка `amneziawg_v1_5`, а не `amneziawg_v2`.
 - Действия в карточке сервера:
   - `Пометить как созданный в Amnezia` для внешнего peer;
   - `Снять пометку` для peer, ошибочно помеченного как созданный в Amnezia;
@@ -212,7 +216,7 @@ git log -1 --oneline
 Ожидаемый коммит:
 
 ```text
-Align AmneziaWG v2 config generation
+Polish VPS admin sync behavior
 ```
 
 Проверить server config:
@@ -250,7 +254,7 @@ tail -n 200 logs/app.log
 
 Порядок проверки:
 
-1. `git log -1 --oneline` показывает коммит `Align AmneziaWG v2 config generation`.
+1. `git log -1 --oneline` показывает коммит `Polish VPS admin sync behavior`.
 2. Web-панель открывается.
 3. В карточке сервера блок `VPS readiness` показывает:
    - `VPS_APPLY_ENABLED`;
@@ -264,7 +268,7 @@ tail -n 200 logs/app.log
 6. `Run peer sync` показывает live peers из AmneziaWG, а `VPS readiness` обновляет строку `Peer sync`.
    Блок `Recent server actions` показывает `web_server_peer_sync_run`.
 7. Создать нового пользователя через бота или web flow.
-8. Одобрить заявку.
+8. Одобрить заявку, проверив что выбран `AmneziaWG 2.0`, если нужен новый шаблон с `S3/S4/I1-I5`.
 9. Если снова будет `PeerApplyError`, прислать строку `Details` и проверить failed event в истории действий.
 10. Проверить, что новый клиент получил IP после live `AllowedIPs` из `/opt/amnezia/awg/awg0.conf`.
 11. Проверить, что в `awg0.conf` добавился новый `[Peer]`.
@@ -322,7 +326,7 @@ sudo journalctl -u amneziya-bot -n 200 --no-pager
 
 Критично перед следующим стабильным этапом:
 
-1. Пройти VPS retest после коммита `Align AmneziaWG v2 config generation`.
+1. Пройти VPS retest после коммита `Polish VPS admin sync behavior`.
 2. Подтвердить, что новый IP берется из live `awg0.conf`.
 3. Подтвердить disable/enable на реальном Docker runtime.
 4. Убедиться, что old/local peers из сети `10.8.0.0/24` не мешают новой live-сети `10.8.1.0/24`.
