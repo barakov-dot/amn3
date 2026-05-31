@@ -23,6 +23,7 @@
 - Remote Operation contract / partial-failure / dry-run-audit slices;
 - Local Agent hardening task/review;
 - Web Panel Safe Improvements task/review;
+- Scoped API Token Storage task/review;
 - текущий `MAIN - VPN Ops Lab` coordination chat.
 
 Нерелевантные сессии из других рабочих папок, например `ISP-NEW`, не включались в состояние этого проекта.
@@ -50,7 +51,7 @@ master
 Committed head lab reviewed before this status refresh:
 
 ```text
-d1bd6be Clarify context import follow-up state
+80deebf Clarify reviewed project state head
 ```
 
 `master` синхронизирован с `origin/master`.
@@ -82,12 +83,12 @@ codex-vps-test-prep
 Актуальный head:
 
 ```text
-22dfc37 Clarify web panel operation gates
+1fdcde5 Add scoped API token storage contract
 ```
 
-Текущий local worktree `Amneziya` после web-panel safe-improvements commit должен оставаться чистым и синхронизированным с `amn2/codex-vps-test-prep`.
+Текущий local worktree `Amneziya` после scoped API token storage commit должен оставаться чистым и синхронизированным с `amn2/codex-vps-test-prep`.
 
-Последний web-panel slice добавил operator wording для secret-bearing delivery artifacts, read-only server actions и VPS write gate confirmations без изменения write behavior.
+Последний local-only slice добавил scoped API token storage/auth contract без новых `/api/*` routes и без live VPS behavior changes.
 
 Проверенная stable-точка live VPS cycle:
 
@@ -104,7 +105,7 @@ docs/NEXT_CHAT_HANDOFF.ru.md
 Последняя локальная проверка `amn2`:
 
 ```text
-536 passed, 1 warning
+542 passed, 1 warning
 ```
 
 Ожидаемое предупреждение: `StarletteDeprecationWarning` от `httpx` / `starlette.testclient`.
@@ -157,12 +158,14 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Public Token Safety: `dfe27ee Harden public email token safety`;
 - Remote Operation state-changing contract / partial-failure / dry-run-audit: local branches and AMN3 evidence recorded, dry-run/audit branch `codex/remote-operation-dry-run-audit` commits `0313857`, `063b6c3`;
 - Local Agent Hardening: `c5d7eb6 Harden Local Agent audit contract`;
-- Web Panel Safe Improvements: `22dfc37 Clarify web panel operation gates`.
+- Web Panel Safe Improvements: `22dfc37 Clarify web panel operation gates`;
+- Scoped API Token Storage: `1fdcde5 Add scoped API token storage contract`.
 
 Решение по соседним чатам:
 
-- `VPS OPS LAB - PRVTPRO-Amnezia-Web-Panel`: широкие research-задачи поставить на паузу; оставить как targeted-input для web-panel UX, config delivery integrity, route taxonomy и dangerous-action patterns.
+- `VPS OPS LAB - PRVTPRO-Amnezia-Web-Panel`: широкие research-задачи поставить на паузу; оставить как targeted-input для web-panel UX, config delivery integrity, route taxonomy, scoped API tokens и dangerous-action patterns.
 - `VPN Ops Lab — KYORESUAS-API`: оставить active reference для Local Agent/API architecture; не устанавливать, не копировать и не переносить CRUD/write API до policy/secret/remote-write gates.
+- Оба соседних направления можно переводить к интеграционным решениям только после controlled real VPS evidence: сначала read-only/dry-run, затем single peer apply/revoke по отдельному подтверждению.
 
 ## Что не делать первым
 
@@ -224,10 +227,10 @@ head: 8697b60 Document Local Agent production wiring
 
 ## Рекомендуемый порядок
 
-1. Следующий local-only slice: scoped API tokens design/storage tests, включая token rotation/revoke contract, без новых broad API write routes.
-2. Альтернатива после отдельного подтверждения оператора: controlled real VPS verification gate для `codex/remote-operation-dry-run-audit`.
+1. Рекомендуемый следующий шаг: controlled real VPS verification gate для `codex/remote-operation-dry-run-audit`, потому что KYORESUAS/PRVTPRO интеграционные задачи уже ждут реального VPS evidence.
+2. Начинать VPS gate с read-only check и dry-run apply/revoke preview; single test peer apply/revoke выполнять только после отдельного подтверждения оператора.
 3. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
-4. Read-only clients/metrics endpoints держать после scoped token/privacy review.
+4. Read-only clients/metrics endpoints держать после VPS evidence и privacy classification.
 5. Public/self-service config links, domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
 
 ## Route/Auth/Operation Policy Matrix Plan
@@ -471,6 +474,56 @@ full local suite:
 
 Live VPS не трогался. Slice меняет UI wording/templates и web tests, но не меняет peer apply/revoke/config/sync/runtime behavior; VPS gate не нужен.
 
+## Scoped API Token Storage Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex-vps-test-prep
+```
+
+Production head after push:
+
+```text
+1fdcde5 Add scoped API token storage contract
+```
+
+Покрыто:
+
+- `app.services.api_tokens` добавляет hash-only API token contract;
+- raw token возвращается только через `ApiTokenIssue.raw_token` в момент выдачи;
+- safe metadata содержит `raw_token_display=one-time` и не содержит raw token/hash;
+- first-slice scopes ограничены `server:read` и `metrics:read`;
+- `config:read`, write scopes и destructive scopes отклоняются;
+- `api_tokens` table хранит `token_hash`, sorted `scopes_json`, owner metadata, `expires_at`, `revoked_at`, `last_used_at`;
+- auth проверяет token exists, not revoked, not expired, required scope;
+- docs фиксируют, что `/api/*` routes не добавлены.
+
+Проверка:
+
+```text
+RED:
+tests/services/test_api_tokens.py
+tests/db/test_repositories.py::test_api_token_lifecycle_stores_hash_scopes_and_revoke_state
+result: 1 import error as expected
+
+GREEN focused slice:
+tests/services/test_api_tokens.py
+tests/db/test_repositories.py::test_api_token_lifecycle_stores_hash_scopes_and_revoke_state
+result: 6 passed
+
+focused security/db/services suite:
+tests/services/test_api_tokens.py tests/db/test_repositories.py tests/agent/test_auth.py tests/security/test_surface_policy.py tests/test_file_hygiene.py
+result: 54 passed
+
+full local suite:
+542 passed, 1 StarletteDeprecationWarning
+```
+
+Live VPS не трогался. Slice добавляет local storage/auth contract и docs, но не добавляет API routes, не делает peer apply/revoke/config/sync/runtime writes и не читает live VPS; VPS gate для самого slice не нужен.
+
 ## Remote Operation Dry-run/Audit Slice
 
 Статус: `implemented-pushed-local-gate-complete`.
@@ -522,6 +575,7 @@ Live VPS не трогался. Slice меняет dry-run/audit metadata и д�
 - config delivery artifact tests;
 - web/bot smoke через TestClient;
 - Local Agent read-only/auth/token hardening на fake/local runtime;
+- scoped API token storage/auth tests без `/api/*` routes;
 - remote operation contracts на fake SSH;
 - docs/status/backlog updates.
 
@@ -536,4 +590,4 @@ Live VPS не трогался. Slice меняет dry-run/audit metadata и д�
 - Docker AmneziaWG write/reload/restart behavior;
 - реальный Local Agent deployment или controller-to-agent calls.
 
-Следующий рекомендуемый local-only шаг: scoped API tokens design/storage tests - hash-only token storage, one-time raw token display, scopes, expiry, revoke/rotation and audit metadata без новых broad write endpoints. Отдельная альтернатива после подтверждения оператора: controlled real VPS verification gate для remote-operation dry-run/audit ветки; single test peer apply/revoke выполнять только после отдельного разрешения.
+Следующий рекомендуемый шаг теперь не очередной local-only feature slice, а controlled real VPS verification gate для remote-operation dry-run/audit ветки: read-only check, dry-run apply/revoke preview, затем single test peer apply/revoke только после отдельного разрешения. Это нужно, чтобы параллельные KYORESUAS/PRVTPRO интеграционные задачи не пошли в main project без реального VPS evidence.

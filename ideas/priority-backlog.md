@@ -85,10 +85,11 @@ Backlog не является списком задач к немедленно�
 ### Scoped API tokens
 
 - Цель: `amn2`.
-- Статус: `design-needed`.
+- Статус: `implemented-first-storage-slice`.
 - Суть: granular scopes, expiry, revoke, hash-only storage, audit.
 - Причина: внешним интеграциям нельзя выдавать admin-equivalent bearer tokens.
-- Следующий шаг: начать с `metrics:read`, `config:read`, `server:read`, затем destructive scopes отдельно.
+- Текущий результат: commit `1fdcde5` добавил `api_tokens` table и `app.services.api_tokens` contract: hash-only storage, one-time raw token issue metadata, expiry, revoke, last-used и safe audit metadata. Первый slice разрешает только `server:read` и `metrics:read`.
+- Следующий шаг: не добавлять `/api/*`, `config:read` или write scopes до VPS evidence, route policy entry и privacy/secret-read classification.
 
 ### Public/self-service config delivery
 
@@ -219,9 +220,9 @@ Backlog не является списком задач к немедленно�
 
 ## Ближайшая рекомендуемая очередь
 
-1. Начать scoped API tokens design/storage tests: hash-only storage, one-time raw token display, scopes, expiry, revoke/rotation and audit metadata.
-2. Провести controlled real VPS verification gate на тестовом peer/device: read-only check, dry-run apply/revoke preview, затем single apply/revoke только после отдельного подтверждения.
-3. Зафиксировать VPS evidence в lab notes и решить, нужен ли merge/PR для ветки `codex/remote-operation-dry-run-audit`.
+1. Провести controlled real VPS verification gate на тестовом peer/device: read-only check, dry-run apply/revoke preview, затем single apply/revoke только после отдельного подтверждения.
+2. Зафиксировать VPS evidence в lab notes и решить, нужен ли merge/PR для ветки `codex/remote-operation-dry-run-audit`.
+3. После VPS evidence выбрать первый integration slice из KYORESUAS/PRVTPRO inputs без копирования кода: вероятнее read-only metrics/API route shell или Local Agent runtime metadata.
 4. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
 5. После scoped token policy рассмотреть read-only metrics/client privacy design.
 6. Только после закрытия этих gates возвращаться к self-service links, domain exclusions и 2FA.

@@ -19,7 +19,7 @@ stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 Текущий production head после локальных transfer-срезов:
 
 ```text
-22dfc37 Clarify web panel operation gates
+1fdcde5 Add scoped API token storage contract
 ```
 
 Live VPS cycle подтвержден на Docker AmneziaWG runtime:
@@ -50,6 +50,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Local Agent hardening | `implemented-pushed-local-gate-complete` | `amn2` | commit `c5d7eb6`; focused tests `64 passed`, full suite `536 passed` | Использовать как read-only audit/version contract; VPS gate не нужен |
 | Remote operation dry-run/audit | `implemented-local-gate-complete-awaits-vps-gate` | `amn2` branch + AMN3 evidence | branch `codex/remote-operation-dry-run-audit`, commits `0313857`, `063b6c3`; focused `79 passed`, docs `7 passed`, full `522 passed` | Controlled real VPS verification gate только после отдельного подтверждения |
 | Web panel safe improvements | `implemented-pushed-local-gate-complete` | `amn2` | commit `22dfc37`; RED `4 failed as expected`; focused `75 passed`; full suite `536 passed` | Использовать как operator safety wording baseline; VPS gate не нужен |
+| Scoped API token storage | `implemented-pushed-local-gate-complete` | `amn2` | commit `1fdcde5`; RED `1 import error as expected`; focused `54 passed`; full suite `542 passed` | Использовать как hash-only token baseline; VPS gate не нужен |
 | Public/self-service config delivery | `lab-only-until-policy` | AMN3 -> `amn2` later | `research/amn2/config-delivery-inventory.md` | Не открывать public config links до scoped token/self-service design |
 
 ## Local Agent Decision
@@ -78,10 +79,10 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 
 ## Current Priority Order
 
-1. Следующий local-only slice: scoped API tokens design/storage tests, включая hash-only storage, one-time raw token display, scopes, expiry, revoke/rotation and audit metadata.
-2. Если оператор выбирает VPS lane: подготовить controlled real VPS verification gate для `codex/remote-operation-dry-run-audit`; single test peer apply/revoke только после отдельного подтверждения.
+1. Подготовить controlled real VPS verification gate для `codex/remote-operation-dry-run-audit`; single test peer apply/revoke только после отдельного подтверждения.
+2. Зафиксировать VPS evidence в AMN3 перед интеграционными решениями из `VPN Ops Lab — KYORESUAS-API` и `VPS OPS LAB - PRVTPRO-Amnezia-Web-Panel`.
 3. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
-4. Read-only clients/metrics endpoints рассматривать только после scoped token/privacy classification.
+4. Read-only clients/metrics endpoints рассматривать только после VPS evidence и privacy classification.
 5. Public/self-service links, domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
 
 ## Neighbor Chat Decision
@@ -198,3 +199,5 @@ Local Agent hardening commit `c5d7eb6` также остается `local-gate-c
 Remote operation dry-run/audit branch `codex/remote-operation-dry-run-audit` остается `local-gate-complete-awaits-vps-gate`: dry-run metadata и Runtime Registry подтверждены локально, но real VPS verification еще не запускался.
 
 Web panel safe-improvements commit `22dfc37` также остается `local-gate-complete`: это wording/UI-test слой без изменения apply/revoke/config/sync/runtime behavior. Live VPS gate не нужен.
+
+Scoped API token storage commit `1fdcde5` также остается `local-gate-complete`: добавлены `api_tokens` table, hash-only service contract, one-time raw token issue metadata, expiry/revoke/last-used fields, allowed first-slice scopes `server:read` и `metrics:read`, а `/api/*` routes не добавлены. Live VPS gate не нужен, потому что slice не меняет live apply/revoke/config/sync/runtime behavior.

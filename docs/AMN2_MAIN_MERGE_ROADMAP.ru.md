@@ -195,7 +195,7 @@ Production evidence:
 - focused tests: `14 passed, 1 StarletteDeprecationWarning`;
 - full local suite: `535 passed, 1 StarletteDeprecationWarning`.
 
-После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening и Web Panel Safe Improvements. Текущий следующий local-only шаг: scoped API tokens design/storage tests, включая token rotation/revoke contract. Controlled real VPS verification gate для `codex/remote-operation-dry-run-audit` остается отдельной веткой и требует явного подтверждения оператора.
+После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening, Web Panel Safe Improvements и Scoped API Token Storage. Следующий рекомендуемый шаг - controlled real VPS verification gate для `codex/remote-operation-dry-run-audit`, потому что KYORESUAS/PRVTPRO integration candidates уже ждут реального VPS evidence.
 
 ## Важные задачи
 
@@ -260,14 +260,35 @@ Gate: local-only для auth/token/audit/runtime metadata tests. Live VPS нуж
 
 ### 8. Scoped API tokens
 
-Статус: design-needed после policy matrix.
+Статус: implemented-pushed-local-gate-complete для storage/auth contract; routes еще не добавлены.
 
-Начинать со scopes:
+Первый production slice:
 
 - `server:read`;
 - `metrics:read`;
-- `config:read` только после config delivery policy;
-- destructive scopes отдельно и позже.
+- hash-only storage;
+- one-time raw token issue metadata;
+- expiry;
+- revoke;
+- safe audit metadata.
+
+Запрещено в первом slice:
+
+- `/api/*` routes;
+- `config:read` до отдельного secret-read gate;
+- write/destructive scopes;
+- copied upstream token implementation.
+
+Production evidence:
+
+- branch: `codex-vps-test-prep`;
+- commit: `1fdcde5 Add scoped API token storage contract`;
+- RED tests: `1 import error as expected`;
+- focused slice tests: `6 passed`;
+- focused security/db/services suite: `54 passed`;
+- full local suite: `542 passed, 1 StarletteDeprecationWarning`.
+
+Gate: local-only. Live VPS не нужен, потому что slice не добавляет routes и не меняет peer apply/revoke/config/sync/runtime behavior.
 
 ### 9. Remote operation partial-failure contract
 
@@ -342,12 +363,12 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 5. Remote operation contract/partial-failure/dry-run metadata: done, local-gate-complete.
 6. Local Agent read-only/audit/versioning hardening: done, local-gate-complete.
 7. Web panel safe improvements: done, local-gate-complete.
-8. Design scoped API tokens and token storage tests, including token rotation/revoke.
-9. Consider read-only clients/metrics endpoints only after privacy classification.
+8. Scoped API token storage/auth contract: done, local-gate-complete.
+9. Consider read-only metrics endpoint and API route shell only after VPS evidence and privacy classification.
 
 ### Live VPS verification lane
 
-1. Enter this lane only after local green and a slice that touches live behavior or prepares a remote-operation gate.
+1. Enter this lane now if the goal is to unblock KYORESUAS/PRVTPRO integration decisions; the local API-token storage slice is complete.
 2. Prepare a VPS test checklist with branch/commit, commands, expected state and rollback note.
 3. For `codex/remote-operation-dry-run-audit`, start with read-only check and dry-run apply/revoke preview; single test peer apply/revoke needs separate operator confirmation.
 4. Verify approve/apply, config import, working configs, peer sync, disable/enable/delete and Docker runtime behavior if touched.
@@ -356,4 +377,4 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 
 ## Recommendation
 
-Next local merge work should start from scoped API token policy/tests, not broad API endpoints. The web-panel wording slice is now closed locally; live VPS testing is only the right next lane if the operator explicitly chooses to verify remote-operation dry-run/audit against a real test peer.
+Next recommended work is the controlled real VPS verification gate. It should happen before integrating KYORESUAS/PRVTPRO-derived operational flows into the main project, because those ideas depend on real remote-operation behavior rather than only local contracts.

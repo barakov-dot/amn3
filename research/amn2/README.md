@@ -19,6 +19,7 @@ branch: codex-vps-test-prep
 latest: 91aeb3e Document VPS verified tag
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 handoff: docs/NEXT_CHAT_HANDOFF.ru.md
+current transfer head: 1fdcde5 Add scoped API token storage contract
 ```
 
 Живой VPS-цикл подтвержден: approve, working config, peer sync, disable/enable и выборочное удаление устройства работают на Docker AmneziaWG runtime.
@@ -42,13 +43,13 @@ handoff: docs/NEXT_CHAT_HANDOFF.ru.md
 
 Текущее решение: 2FA для web-admin поставлена на паузу, implementation plan для нее не пишем до отдельного решения.
 
-Текущий фокус после verified VPS cycle, read-only `RemoteOperationRunner` baseline, redaction coverage, state-changing metadata, partial-failure и dry-run/audit metadata local slices:
+Текущий фокус после verified VPS cycle, read-only `RemoteOperationRunner` baseline, redaction coverage, state-changing metadata, partial-failure, dry-run/audit metadata, web-panel safety и scoped API token storage local slices:
 
 1. Подготовить controlled real VPS verification gate на тестовом peer/device.
 2. Начать VPS gate с read-only check и dry-run apply/revoke preview; single apply/revoke выполнять только после отдельного подтверждения оператора.
 3. Зафиксировать VPS evidence в lab notes и решить, нужен ли merge/PR для ветки `codex/remote-operation-dry-run-audit`.
-4. До расширения Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
-5. Затем вернуться к route policy coverage tests.
+4. Только после VPS evidence выбирать первый integration slice из KYORESUAS/PRVTPRO inputs.
+5. До расширения Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
 
 ## Неактуальный риск
 

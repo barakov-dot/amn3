@@ -14,25 +14,25 @@
 repo: C:\Users\SooL\Documents\Amneziya
 branch: codex-vps-test-prep
 remote branch: amn2/codex-vps-test-prep
-latest committed head: 22dfc37 Clarify web panel operation gates
+latest committed head: 1fdcde5 Add scoped API token storage contract
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
-status: remote-synced after web-panel safe-improvements
+status: remote-synced after scoped API token storage
 ```
 
-Последний production slice относится к узкому UI/wording layer:
+Последний production slice относится к scoped API token storage/auth layer:
 
 ```text
-app/web/templates/config_templates.html
-app/web/templates/server_detail.html
-app/web/templates/user_detail.html
-tests/web/test_config_templates.py
-tests/web/test_servers.py
-tests/web/test_users.py
+app/services/api_tokens.py
+app/db/schema.py
+app/db/repositories.py
+docs/API_TOKEN_POLICY.ru.md
+tests/services/test_api_tokens.py
+tests/db/test_repositories.py
 ```
 
-Смысл: добавить secret-aware wording для `.conf`/QR/`vpn://`, read-only notes для health/sync и более точные confirmation texts для действий, которые могут затронуть VPS при `VPS_APPLY_ENABLED=true`.
+Смысл: закрепить hash-only scoped API token baseline без `/api/*` routes: one-time raw token issue metadata, scopes `server:read`/`metrics:read`, expiry, revoke, last-used и safe audit metadata.
 
-Проверка: RED `4 failed as expected`, focused web/security suite `75 passed`, full local suite `536 passed`, warning только `StarletteDeprecationWarning`.
+Проверка: RED `1 import error as expected`, focused security/db/services suite `54 passed`, full local suite `542 passed`, warning только `StarletteDeprecationWarning`.
 
 Дополнительная проверка 2026-06-01: `tests/web/test_config_templates.py tests/web/test_servers.py tests/web/test_users.py -q --basetemp tmp\pytest-web-panel-safe` -> `49 passed, 1 StarletteDeprecationWarning`.
 
@@ -42,7 +42,7 @@ tests/web/test_users.py
 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 branch: master
 remote: https://github.com/barakov-dot/amn3.git
-committed head reviewed before this refresh: d1bd6be Clarify context import follow-up state
+committed head reviewed before this refresh: 80deebf Clarify reviewed project state head
 status: clean and synchronized with origin/master
 ```
 
@@ -54,12 +54,13 @@ status: clean and synchronized with origin/master
 - `dfe27ee Harden public email token safety`;
 - remote operation contract / partial-failure / dry-run-audit local-gate evidence;
 - `c5d7eb6 Harden Local Agent audit contract`;
-- `22dfc37 Clarify web panel operation gates`.
+- `22dfc37 Clarify web panel operation gates`;
+- `1fdcde5 Add scoped API token storage contract`.
 
 Следующий рабочий выбор:
 
-1. Начать scoped API tokens design/storage tests, включая token rotation/revoke contract.
-2. Или отдельно запустить controlled real VPS verification gate для remote-operation dry-run/audit ветки.
+1. Запустить controlled real VPS verification gate для remote-operation dry-run/audit ветки, если цель - начать интеграцию решений из KYORESUAS/PRVTPRO в основной проект.
+2. Локальная альтернатива: read-only metrics/API route shell после privacy classification, без write/client lifecycle.
 
 Старые блоки ниже, где `91aeb3e` указан как latest clean baseline, считать историческим контекстом verified live stage.
 

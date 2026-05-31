@@ -46,7 +46,7 @@
 | Control panel auth methods | `telegram_admin`, `password`, `key` в настройках | Нужно отдельно проверить runtime, чтобы 2FA не имела обхода через password/key flow. |
 | Audit | `admin_actions`, `record_admin_action()`, web action metadata | Есть место для будущих событий enrollment/reset/failed login без записи секретов. |
 | Email recovery tokens | `email_recovery_tokens.token_hash`, TTL, `used_at` | Есть хороший pattern: raw token показывается/отправляется, в БД хранится hash. |
-| Generic API tokens | В первом проходе не найден отдельный production API-token layer | Scoped API Tokens пока остаются design candidate, не quick patch. |
+| Generic API tokens | После local-only slice `1fdcde5` появился scoped storage/auth contract без `/api/*` routes | Использовать как hash-only baseline: `server:read`, `metrics:read`, expiry, revoke, safe audit metadata; `config:read`/write scopes остаются blocked. |
 | Device secrets | `SecretBox`, encrypted peer private key and preshared key | Config delivery уже работает с secret-read surface. |
 | Redaction | tests закрывают web-admin secrets, SMTP, VPS password, control panel hash, custom tokens | Secret inventory можно развивать от уже существующих redaction tests. |
 | Backup/restore | encrypted archive, excludes, schema checks, decryptability checks | Для новых secret fields нужно сразу добавить backup/restore expectations. |
@@ -79,7 +79,7 @@
 | --- | --- | --- |
 | Route Policy Matrix | Guards сейчас видны как `_is_authenticated()` плюс CSRF checks в routes | Первый проход создан: [Route/auth surface inventory](route-auth-surface-inventory.md). |
 | Secret Inventory + Backup Policy | Redaction и encrypted backup уже есть, но inventory по всем secret fields еще нужен | Первый проход создан: [Secret surface inventory](secret-surface-inventory.md). |
-| Scoped API Tokens | Есть hashed email recovery tokens, но не найден generic scoped token layer | Token/auth inventory после route matrix. |
+| Scoped API Tokens | `api_tokens` table и `app.services.api_tokens` добавлены в `1fdcde5` | Следующий шаг не route сразу, а route policy/privacy gate и controlled VPS evidence перед integration flows. |
 | Public/Self-service Config Delivery | `build_device_config_delivery()` decrypts peer secrets and renders config | Config delivery inventory как `secret-read` surface. |
 | RemoteOperationRunner | В этом снимке не разбирался | Отдельный remote operations inventory. |
 
