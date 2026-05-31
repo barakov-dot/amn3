@@ -172,6 +172,25 @@ VPN-серверы.
 
 Последний снимок устройства используется для отображения статистики пользователю и администратору в Telegram-боте.
 
+### `api_tokens`
+
+Scoped API tokens для будущих external integrations.
+
+Поля:
+
+- `id` - стабильный token id для audit/revoke;
+- `name` - операторское имя токена;
+- `owner_user_id` - опциональная ссылка на `users.id`;
+- `owner_label` - человекочитаемый владелец, например `ops` или `monitoring`;
+- `token_hash` - только hash вида `sha256:<digest>`, raw token не хранится;
+- `scopes_json` - JSON-список scopes;
+- `expires_at`;
+- `revoked_at`;
+- `last_used_at`;
+- `created_at`.
+
+В первом slice разрешены только read-only scopes `server:read` и `metrics:read`. `config:read`, write scopes и destructive scopes остаются future gates.
+
 ## Настройки режимов
 
 Минимальные настройки в `.env`:

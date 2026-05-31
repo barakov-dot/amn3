@@ -162,6 +162,20 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
         );
 
+        CREATE TABLE IF NOT EXISTS api_tokens (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            owner_user_id INTEGER,
+            owner_label TEXT NOT NULL,
+            token_hash TEXT NOT NULL UNIQUE,
+            scopes_json TEXT NOT NULL,
+            expires_at TEXT,
+            revoked_at TEXT,
+            last_used_at TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE SET NULL
+        );
+
         CREATE TABLE IF NOT EXISTS ignored_remote_peers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             server_id INTEGER NOT NULL,
@@ -189,6 +203,8 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             ON device_traffic_snapshots(server_id, collected_at DESC);
         CREATE INDEX IF NOT EXISTS idx_email_recovery_tokens_user
             ON email_recovery_tokens(user_id, purpose, expires_at);
+        CREATE INDEX IF NOT EXISTS idx_api_tokens_owner
+            ON api_tokens(owner_user_id, created_at DESC);
         CREATE INDEX IF NOT EXISTS idx_ignored_remote_peers_server
             ON ignored_remote_peers(server_id, created_at DESC);
         """

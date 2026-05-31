@@ -27,6 +27,8 @@
 
 - Не включать `GET /agent/clients`.
 - Не добавлять config/self-service API.
+- Не добавлять `/api/*` routes поверх scoped tokens до storage/auth/local tests.
+- Не выдавать `config:read` или write scopes в первом API-token slice.
 - Не добавлять backup, restore, reboot или generic write API.
 - Не трогать live VPS.
 - Не копировать upstream code.

@@ -1523,6 +1523,90 @@ class Repository:
         self._commit()
         return cursor.rowcount > 0
 
+    def create_api_token(
+        self,
+        *,
+        token_id: str,
+        name: str,
+        owner_user_id: int | None,
+        owner_label: str,
+        token_hash: str,
+        scopes: list[str],
+        expires_at: str | None,
+    ) -> None:
+        if not token_id.strip():
+            raise ValueError("token_id is required")
+        if not name.strip():
+            raise ValueError("name is required")
+        if not owner_label.strip():
+            raise ValueError("owner_label is required")
+        if not token_hash.strip():
+            raise ValueError("token_hash is required")
+        if not scopes:
+            raise ValueError("scopes are required")
+
+        self._conn.execute(
+            """
+            INSERT INTO api_tokens (
+                id,
+                name,
+                owner_user_id,
+                owner_label,
+                token_hash,
+                scopes_json,
+                expires_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                token_id,
+                name,
+                owner_user_id,
+                owner_label,
+                token_hash,
+                json.dumps(scopes),
+                expires_at,
+            ),
+        )
+        self._commit()
+
+    def get_valid_api_token(self, *, token_hash: str, now: str) -> sqlite3.Row | None:
+        return self._conn.execute(
+            """
+            SELECT *
+            FROM api_tokens
+            WHERE token_hash = ?
+              AND revoked_at IS NULL
+              AND (expires_at IS NULL OR expires_at > ?)
+            """,
+            (token_hash, now),
+        ).fetchone()
+
+    def mark_api_token_used(self, token_id: str, used_at: str) -> bool:
+        cursor = self._conn.execute(
+            """
+            UPDATE api_tokens
+            SET last_used_at = ?
+            WHERE id = ?
+            """,
+            (used_at, token_id),
+        )
+        self._commit()
+        return cursor.rowcount > 0
+
+    def revoke_api_token(self, token_id: str, revoked_at: str) -> bool:
+        cursor = self._conn.execute(
+            """
+            UPDATE api_tokens
+            SET revoked_at = ?
+            WHERE id = ?
+              AND revoked_at IS NULL
+            """,
+            (revoked_at, token_id),
+        )
+        self._commit()
+        return cursor.rowcount > 0
+
     def _commit(self) -> None:
         if self._transaction_depth == 0:
             self._conn.commit()

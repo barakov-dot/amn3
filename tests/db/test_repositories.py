@@ -714,6 +714,54 @@ def test_email_recovery_token_lifecycle(tmp_path):
     )
 
 
+def test_api_token_lifecycle_stores_hash_scopes_and_revoke_state(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id, _server_id = _create_user_and_server(repo)
+
+    repo.create_api_token(
+        token_id="api-token-1",
+        name="Monitoring",
+        owner_user_id=user_id,
+        owner_label="ops",
+        token_hash="sha256:api-token-hash",
+        scopes=["metrics:read", "server:read"],
+        expires_at="2026-06-08T10:00:00Z",
+    )
+
+    token = repo.get_valid_api_token(
+        token_hash="sha256:api-token-hash",
+        now="2026-06-01T10:00:00Z",
+    )
+    assert token is not None
+    assert token["id"] == "api-token-1"
+    assert token["name"] == "Monitoring"
+    assert token["owner_user_id"] == user_id
+    assert token["owner_label"] == "ops"
+    assert token["token_hash"] == "sha256:api-token-hash"
+    assert token["scopes_json"] == '["metrics:read", "server:read"]'
+    assert "raw-api-token" not in dict(token).values()
+
+    assert (
+        repo.get_valid_api_token(
+            token_hash="sha256:api-token-hash",
+            now="2026-06-08T10:00:00Z",
+        )
+        is None
+    )
+    assert repo.mark_api_token_used("api-token-1", "2026-06-01T10:01:00Z")
+    assert repo.revoke_api_token("api-token-1", "2026-06-01T10:02:00Z")
+    assert not repo.revoke_api_token("api-token-1", "2026-06-01T10:03:00Z")
+    assert (
+        repo.get_valid_api_token(
+            token_hash="sha256:api-token-hash",
+            now="2026-06-01T10:04:00Z",
+        )
+        is None
+    )
+
+
 def _create_user_and_server(repo: Repository) -> tuple[int, int]:
     user_id = repo.upsert_user(
         telegram_id=2001,
