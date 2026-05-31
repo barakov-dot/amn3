@@ -274,6 +274,38 @@ def test_settings_requires_token_hash_when_local_agent_enabled():
         )
 
 
+def test_settings_normalizes_local_agent_token_hash():
+    settings = Settings(
+        _env_file=None,
+        telegram_bot_token="TEST_TOKEN",
+        app_secret_key="test-secret",
+        local_agent_enabled=True,
+        local_agent_token_hash=(
+            "  sha256:"
+            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef  "
+        ),
+    )
+
+    assert settings.local_agent_token_hash == (
+        "sha256:"
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    )
+
+
+def test_settings_rejects_non_hex_local_agent_token_hash():
+    with pytest.raises(ValidationError, match="LOCAL_AGENT_TOKEN_HASH"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="TEST_TOKEN",
+            app_secret_key="test-secret",
+            local_agent_enabled=True,
+            local_agent_token_hash=(
+                "sha256:"
+                "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+            ),
+        )
+
+
 def test_settings_rejects_write_scope_for_local_agent_first_slice():
     with pytest.raises(ValidationError, match="LOCAL_AGENT_TOKEN_SCOPES"):
         Settings(
