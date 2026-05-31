@@ -1,5 +1,7 @@
 # AMN3 Local Agent VPS Smoke Checklist
 
+Результат реального VPS smoke фиксировать в `docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md`.
+
 Короткий маршрут для первого переноса текущей Local Agent наработки в приватный
 репозиторий `barakov-dot/amn3` и проверки на живом сервере Amneziya.
 
@@ -230,6 +232,9 @@ ss -lntp | grep ':3031' || true
 ```
 
 ## 10. Go / no-go для следующего этапа
+
+Перед решением заполнить `docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md`: commit, Runtime, Local Agent status,
+Web admin status, Degraded reasons, Rollback checked и финальный Go / no-go.
 
 Переходить к write API для пользователей можно только если:
 

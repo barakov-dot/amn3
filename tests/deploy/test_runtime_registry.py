@@ -255,6 +255,30 @@ def test_amn3_write_api_policy_matrix_doc_tracks_vps_gated_scope_and_errors():
     assert "docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md" in handoff
 
 
+def test_amn3_vps_smoke_result_template_records_go_no_go_and_runtime_evidence():
+    doc_path = ROOT / "docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    smoke_path = ROOT / "docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    smoke = smoke_path.read_text(encoding="utf-8")
+
+    assert "Commit" in text
+    assert "Runtime" in text
+    assert "Local Agent status" in text
+    assert "Web admin status" in text
+    assert "Degraded reasons" in text
+    assert "Rollback checked" in text
+    assert "Go / no-go" in text
+    assert "agent:clients:write" in text
+    assert "raw token" in text
+    assert "journalctl -u amneziya-agent" in text
+    assert "bash deploy/runtime/collect_debug_snapshot.sh" in text
+    assert "docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md" in handoff
+    assert "docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md" in smoke
+
+
 def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     doc_path = ROOT / "docs/VPS_RETEST_PROTOCOL.ru.md"
     checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"
