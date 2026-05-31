@@ -101,6 +101,52 @@ def test_settings_reads_vps_apply_settings():
     assert settings.server_name == "debian-vps-1"
 
 
+def test_settings_reads_client_amneziawg_parameters():
+    settings = Settings(
+        _env_file=None,
+        telegram_bot_token="CHANGE_ME",
+        app_secret_key="test-secret",
+        client_dns="9.9.9.9",
+        client_allowed_ips="10.0.0.0/8",
+        client_persistent_keepalive=15,
+        client_awg_jc=8,
+        client_awg_jmin=12,
+        client_awg_jmax=42,
+        client_awg_s1=11,
+        client_awg_s2=22,
+        client_awg_h1=101,
+        client_awg_h2=202,
+        client_awg_h3=303,
+        client_awg_h4=404,
+    )
+
+    defaults = settings.client_config_defaults
+
+    assert defaults.dns == "9.9.9.9"
+    assert defaults.allowed_ips == "10.0.0.0/8"
+    assert defaults.persistent_keepalive == 15
+    assert defaults.jc == 8
+    assert defaults.jmin == 12
+    assert defaults.jmax == 42
+    assert defaults.s1 == 11
+    assert defaults.s2 == 22
+    assert defaults.h1 == 101
+    assert defaults.h2 == 202
+    assert defaults.h3 == 303
+    assert defaults.h4 == 404
+
+
+def test_settings_rejects_invalid_client_amneziawg_parameters():
+    with pytest.raises(ValidationError, match="CLIENT_AWG_JMIN"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="CHANGE_ME",
+            app_secret_key="test-secret",
+            client_awg_jmin=70,
+            client_awg_jmax=40,
+        )
+
+
 def test_settings_reads_telegram_proxy_url():
     settings = Settings(
         _env_file=None,

@@ -2,6 +2,22 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
+class ClientConfigDefaults:
+    dns: str = "1.1.1.1"
+    allowed_ips: str = "0.0.0.0/0"
+    persistent_keepalive: int = 25
+    jc: int = 4
+    jmin: int = 40
+    jmax: int = 70
+    s1: int = 0
+    s2: int = 0
+    h1: int = 1
+    h2: int = 2
+    h3: int = 3
+    h4: int = 4
+
+
+@dataclass(frozen=True)
 class ClientConfigInput:
     private_key: str
     address: str

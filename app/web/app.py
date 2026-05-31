@@ -125,6 +125,16 @@ SETTINGS_SECTIONS = {
         "client_config_template_dir",
         "client_dns",
         "client_allowed_ips",
+        "client_persistent_keepalive",
+        "client_awg_jc",
+        "client_awg_jmin",
+        "client_awg_jmax",
+        "client_awg_s1",
+        "client_awg_s2",
+        "client_awg_h1",
+        "client_awg_h2",
+        "client_awg_h3",
+        "client_awg_h4",
     ],
     "Control panel": [
         "control_panel_auth_methods",
@@ -640,8 +650,7 @@ def create_web_app(
                         secret_box=SecretBox.from_app_secret(actual_settings.app_secret_key),
                         device=device,
                         client_config_template_dir=actual_settings.client_config_template_dir,
-                        client_dns=actual_settings.client_dns,
-                        client_allowed_ips=actual_settings.client_allowed_ips,
+                        client_config_defaults=actual_settings.client_config_defaults,
                     )
                     metadata = _email_service(request).send_config_email(
                         to_address=email,
@@ -783,8 +792,7 @@ def create_web_app(
                         secret_box=SecretBox.from_app_secret(actual_settings.app_secret_key),
                         device=device,
                         client_config_template_dir=actual_settings.client_config_template_dir,
-                        client_dns=actual_settings.client_dns,
-                        client_allowed_ips=actual_settings.client_allowed_ips,
+                        client_config_defaults=actual_settings.client_config_defaults,
                     )
                     if not repo.mark_email_recovery_token_used(
                         int(token_row["id"]),
@@ -1743,7 +1751,7 @@ def _load_settings_sections(settings: Settings) -> list[dict[str, Any]]:
 
 
 def _load_client_config_template_views(settings: Settings) -> list[dict[str, str]]:
-    sample = _sample_client_config_input()
+    sample = _sample_client_config_input(settings)
     template_dir = settings.client_config_template_dir
     views: list[dict[str, str]] = []
     for config_version in SUPPORTED_CONFIG_VERSIONS:
@@ -1772,25 +1780,26 @@ def _load_client_config_template_views(settings: Settings) -> list[dict[str, str
     return views
 
 
-def _sample_client_config_input() -> ClientConfigInput:
+def _sample_client_config_input(settings: Settings) -> ClientConfigInput:
+    defaults = settings.client_config_defaults
     return ClientConfigInput(
         private_key="sample-client-private-key",
         address="10.8.0.2/32",
-        dns="1.1.1.1",
+        dns=defaults.dns,
         server_public_key="sample-server-public-key",
         preshared_key="sample-preshared-key",
         endpoint="vpn.example.com:30001",
-        allowed_ips="0.0.0.0/0",
-        persistent_keepalive=25,
-        jc=4,
-        jmin=40,
-        jmax=70,
-        s1=0,
-        s2=0,
-        h1=1,
-        h2=2,
-        h3=3,
-        h4=4,
+        allowed_ips=defaults.allowed_ips,
+        persistent_keepalive=defaults.persistent_keepalive,
+        jc=defaults.jc,
+        jmin=defaults.jmin,
+        jmax=defaults.jmax,
+        s1=defaults.s1,
+        s2=defaults.s2,
+        h1=defaults.h1,
+        h2=defaults.h2,
+        h3=defaults.h3,
+        h4=defaults.h4,
     )
 
 

@@ -8,7 +8,7 @@ from typing import Protocol
 
 from app.db.repositories import Repository
 from app.security.crypto import SecretBox
-from app.vpn.amneziawg_v2.config import ClientConfigInput
+from app.vpn.amneziawg_v2.config import ClientConfigDefaults, ClientConfigInput
 from app.vpn.amneziawg_v2.keys import generate_key, generate_keypair
 from app.vpn.config_versions import render_client_config_for_version, validate_config_version
 
@@ -63,6 +63,7 @@ class AccessService:
         duration_days: int = 30,
         peer_applier: PeerApplier | None = None,
         client_config_template_dir: str | Path | None = None,
+        client_config_defaults: ClientConfigDefaults | None = None,
     ) -> None:
         self._repo = repo
         self._secret_box = secret_box
@@ -70,6 +71,7 @@ class AccessService:
         self._duration_days = duration_days
         self._peer_applier = peer_applier
         self._client_config_template_dir = client_config_template_dir
+        self._client_config_defaults = client_config_defaults or ClientConfigDefaults()
 
     def approve_order(
         self,
@@ -174,21 +176,21 @@ class AccessService:
                 ClientConfigInput(
                     private_key=private_key,
                     address=f"{vpn_ip}/32",
-                    dns="1.1.1.1",
+                    dns=self._client_config_defaults.dns,
                     server_public_key=str(server["server_public_key"]),
                     preshared_key=preshared_key,
                     endpoint=f"{server['endpoint_host']}:{server['vpn_port']}",
-                    allowed_ips="0.0.0.0/0",
-                    persistent_keepalive=25,
-                    jc=4,
-                    jmin=40,
-                    jmax=70,
-                    s1=0,
-                    s2=0,
-                    h1=1,
-                    h2=2,
-                    h3=3,
-                    h4=4,
+                    allowed_ips=self._client_config_defaults.allowed_ips,
+                    persistent_keepalive=self._client_config_defaults.persistent_keepalive,
+                    jc=self._client_config_defaults.jc,
+                    jmin=self._client_config_defaults.jmin,
+                    jmax=self._client_config_defaults.jmax,
+                    s1=self._client_config_defaults.s1,
+                    s2=self._client_config_defaults.s2,
+                    h1=self._client_config_defaults.h1,
+                    h2=self._client_config_defaults.h2,
+                    h3=self._client_config_defaults.h3,
+                    h4=self._client_config_defaults.h4,
                 ),
                 config_version,
                 template_dir=self._client_config_template_dir,

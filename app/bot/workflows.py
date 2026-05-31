@@ -17,6 +17,7 @@ from app.server.peer_apply import PeerApplyError
 from app.services.config_delivery import build_device_config_delivery
 from app.services.access import AccessService
 from app.services.traffic import DeviceTrafficView, build_device_traffic_view
+from app.vpn.amneziawg_v2.config import ClientConfigDefaults
 from app.vpn.config_versions import validate_config_version
 
 
@@ -60,6 +61,7 @@ class BotWorkflow:
         secret_box: SecretBox | None = None,
         peer_remover: PeerRemover | None = None,
         client_config_template_dir: str | None = None,
+        client_config_defaults: ClientConfigDefaults | None = None,
     ) -> None:
         self._repo = repo
         self._admin_telegram_ids = admin_telegram_ids
@@ -68,6 +70,7 @@ class BotWorkflow:
         self._secret_box = secret_box
         self._peer_remover = peer_remover
         self._client_config_template_dir = client_config_template_dir
+        self._client_config_defaults = client_config_defaults or ClientConfigDefaults()
 
     def is_admin(self, telegram_id: int) -> bool:
         if telegram_id in self._admin_telegram_ids:
@@ -436,6 +439,7 @@ class BotWorkflow:
             secret_box=self._secret_box,
             device=device,
             client_config_template_dir=self._client_config_template_dir,
+            client_config_defaults=self._client_config_defaults,
         )
         return ResendResult(
             device_id=result.device_id,

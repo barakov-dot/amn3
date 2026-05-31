@@ -107,6 +107,19 @@ APP_LOG_MAX_LINES=1000
 APP_LOG_PATH=logs/app.log
 
 EMAIL_DELIVERY_ENABLED=false
+
+CLIENT_DNS=1.1.1.1
+CLIENT_ALLOWED_IPS=0.0.0.0/0
+CLIENT_PERSISTENT_KEEPALIVE=25
+CLIENT_AWG_JC=4
+CLIENT_AWG_JMIN=40
+CLIENT_AWG_JMAX=70
+CLIENT_AWG_S1=0
+CLIENT_AWG_S2=0
+CLIENT_AWG_H1=1
+CLIENT_AWG_H2=2
+CLIENT_AWG_H3=3
+CLIENT_AWG_H4=4
 ```
 
 `APP_SECRET_KEY` должен быть постоянным. Если потерять этот ключ, приложение не сможет расшифровать сохраненные peer-секреты.
@@ -295,6 +308,8 @@ http://127.0.0.1:3030/login
 Если ранее созданные пользователи не видны, проверить, что web-панель и бот используют один и тот же `DATABASE_PATH`.
 
 В разделе `Config templates` можно редактировать клиентские `.conf.tpl` шаблоны для `amneziawg_v1_5` и `amneziawg_v2`. Сохранение пишет override-файл в `CLIENT_CONFIG_TEMPLATE_DIR`, не меняя встроенные шаблоны приложения. Перед сохранением шаблон валидируется: неизвестные placeholders отклоняются, а старый файл остается без изменений. Кнопка `Сбросить к встроенному шаблону` удаляет override-файл и возвращает дефолтный шаблон из пакета. После правки preview и `vpn://` на этой же странице должны отражать новые параметры.
+
+Постоянные параметры клиентского AmneziaWG-конфига берутся из `.env`: `CLIENT_DNS`, `CLIENT_ALLOWED_IPS`, `CLIENT_PERSISTENT_KEEPALIVE`, `CLIENT_AWG_JC`, `CLIENT_AWG_JMIN`, `CLIENT_AWG_JMAX`, `CLIENT_AWG_S1`, `CLIENT_AWG_S2`, `CLIENT_AWG_H1`...`CLIENT_AWG_H4`. Уникальные значения `PrivateKey`, `PresharedKey`, `Address`, имя устройства и имя файла формируются при создании устройства. `PublicKey` сервера и `Endpoint` берутся из `servers.yml`.
 
 В карточке сервера доступна `Синхронизация peer`: read-only проверка сравнивает live peer из AmneziaWG с локальными устройствами в базе. В отчете:
 

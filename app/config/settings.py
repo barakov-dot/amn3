@@ -3,6 +3,8 @@ from functools import cached_property
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.vpn.amneziawg_v2.config import ClientConfigDefaults
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", populate_by_name=True)
@@ -17,6 +19,19 @@ class Settings(BaseSettings):
     max_devices_per_user: int = Field(default=5, alias="MAX_DEVICES_PER_USER")
     client_dns: str = Field(default="1.1.1.1", alias="CLIENT_DNS")
     client_allowed_ips: str = Field(default="0.0.0.0/0", alias="CLIENT_ALLOWED_IPS")
+    client_persistent_keepalive: int = Field(
+        default=25,
+        alias="CLIENT_PERSISTENT_KEEPALIVE",
+    )
+    client_awg_jc: int = Field(default=4, alias="CLIENT_AWG_JC")
+    client_awg_jmin: int = Field(default=40, alias="CLIENT_AWG_JMIN")
+    client_awg_jmax: int = Field(default=70, alias="CLIENT_AWG_JMAX")
+    client_awg_s1: int = Field(default=0, alias="CLIENT_AWG_S1")
+    client_awg_s2: int = Field(default=0, alias="CLIENT_AWG_S2")
+    client_awg_h1: int = Field(default=1, alias="CLIENT_AWG_H1")
+    client_awg_h2: int = Field(default=2, alias="CLIENT_AWG_H2")
+    client_awg_h3: int = Field(default=3, alias="CLIENT_AWG_H3")
+    client_awg_h4: int = Field(default=4, alias="CLIENT_AWG_H4")
     expiration_notice_days: str = Field(default="7,5,3,1", alias="EXPIRATION_NOTICE_DAYS")
     vpn_port_min: int = Field(default=30001, alias="VPN_PORT_MIN")
     vpn_port_max: int = Field(default=65535, alias="VPN_PORT_MAX")
@@ -93,6 +108,22 @@ class Settings(BaseSettings):
             raise ValueError("VPN_PORT_MAX must be in 1..65535")
         if self.vpn_port_min > self.vpn_port_max:
             raise ValueError("VPN_PORT_MIN must be less than or equal to VPN_PORT_MAX")
+        _validate_non_negative(
+            {
+                "CLIENT_PERSISTENT_KEEPALIVE": self.client_persistent_keepalive,
+                "CLIENT_AWG_JC": self.client_awg_jc,
+                "CLIENT_AWG_JMIN": self.client_awg_jmin,
+                "CLIENT_AWG_JMAX": self.client_awg_jmax,
+                "CLIENT_AWG_S1": self.client_awg_s1,
+                "CLIENT_AWG_S2": self.client_awg_s2,
+                "CLIENT_AWG_H1": self.client_awg_h1,
+                "CLIENT_AWG_H2": self.client_awg_h2,
+                "CLIENT_AWG_H3": self.client_awg_h3,
+                "CLIENT_AWG_H4": self.client_awg_h4,
+            }
+        )
+        if self.client_awg_jmin > self.client_awg_jmax:
+            raise ValueError("CLIENT_AWG_JMIN must be less than or equal to CLIENT_AWG_JMAX")
         allowed_panel_auth_methods = {"telegram_admin", "password", "key"}
         unknown_methods = set(self.panel_auth_methods) - allowed_panel_auth_methods
         if unknown_methods:
@@ -148,3 +179,26 @@ class Settings(BaseSettings):
             for part in self.control_panel_auth_methods.split(",")
             if part.strip()
         ]
+
+    @cached_property
+    def client_config_defaults(self) -> ClientConfigDefaults:
+        return ClientConfigDefaults(
+            dns=self.client_dns,
+            allowed_ips=self.client_allowed_ips,
+            persistent_keepalive=self.client_persistent_keepalive,
+            jc=self.client_awg_jc,
+            jmin=self.client_awg_jmin,
+            jmax=self.client_awg_jmax,
+            s1=self.client_awg_s1,
+            s2=self.client_awg_s2,
+            h1=self.client_awg_h1,
+            h2=self.client_awg_h2,
+            h3=self.client_awg_h3,
+            h4=self.client_awg_h4,
+        )
+
+
+def _validate_non_negative(values: dict[str, int]) -> None:
+    for name, value in values.items():
+        if value < 0:
+            raise ValueError(f"{name} must be non-negative")

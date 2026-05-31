@@ -108,6 +108,41 @@ def test_config_template_editor_saves_override_and_updates_preview(tmp_path: Pat
     assert "override" in updated.text
 
 
+def test_config_templates_preview_uses_client_config_settings(tmp_path: Path):
+    settings = _settings(
+        tmp_path,
+        client_dns="9.9.9.9",
+        client_allowed_ips="10.0.0.0/8",
+        client_persistent_keepalive=15,
+        client_awg_jc=8,
+        client_awg_jmin=12,
+        client_awg_jmax=42,
+        client_awg_s1=11,
+        client_awg_s2=22,
+        client_awg_h1=101,
+        client_awg_h2=202,
+        client_awg_h3=303,
+        client_awg_h4=404,
+    )
+    client = _authenticated_client(settings)
+
+    response = client.get("/config-templates")
+
+    assert response.status_code == 200
+    assert "DNS = 9.9.9.9" in response.text
+    assert "AllowedIPs = 10.0.0.0/8" in response.text
+    assert "PersistentKeepalive = 15" in response.text
+    assert "Jc = 8" in response.text
+    assert "Jmin = 12" in response.text
+    assert "Jmax = 42" in response.text
+    assert "S1 = 11" in response.text
+    assert "S2 = 22" in response.text
+    assert "H1 = 101" in response.text
+    assert "H2 = 202" in response.text
+    assert "H3 = 303" in response.text
+    assert "H4 = 404" in response.text
+
+
 def test_config_template_editor_rejects_unknown_placeholder_without_overwrite(
     tmp_path: Path,
 ):
@@ -160,8 +195,9 @@ def _settings(
     *,
     app_secret_key: str = "test-secret",
     client_config_template_dir: str | None = None,
+    **overrides,
 ) -> Settings:
-    return Settings(
+    values = dict(
         _env_file=None,
         telegram_bot_token="TEST_TOKEN",
         app_secret_key=app_secret_key,
@@ -175,6 +211,8 @@ def _settings(
         web_admin_session_cookie_secure=True,
         client_config_template_dir=client_config_template_dir or str(tmp_path / "templates"),
     )
+    values.update(overrides)
+    return Settings(**values)
 
 
 def _client(*, settings: Settings) -> TestClient:

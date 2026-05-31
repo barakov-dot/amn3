@@ -99,11 +99,25 @@ DEFAULT_PLAN_DAYS=7
 MAX_DEVICES_PER_USER=5
 CLIENT_DNS=1.1.1.1
 CLIENT_ALLOWED_IPS=0.0.0.0/0
+CLIENT_PERSISTENT_KEEPALIVE=25
+CLIENT_AWG_JC=4
+CLIENT_AWG_JMIN=40
+CLIENT_AWG_JMAX=70
+CLIENT_AWG_S1=0
+CLIENT_AWG_S2=0
+CLIENT_AWG_H1=1
+CLIENT_AWG_H2=2
+CLIENT_AWG_H3=3
+CLIENT_AWG_H4=4
 EXPIRATION_NOTICE_DAYS=7,5,3,1
 VPN_PORT_MIN=30001
 VPN_PORT_MAX=65535
 VPN_SERVER_RUNTIME=host_systemd
 ```
+
+Эти `CLIENT_*` значения подставляются в клиентский `.conf` шаблон. Ключи,
+`Address`, имя устройства и имя файла формируются отдельно для каждого
+пользователя/устройства; `server_public_key` и `endpoint` берутся из `servers.yml`.
 
 ## Данные, которые нужно будет подставить позже
 

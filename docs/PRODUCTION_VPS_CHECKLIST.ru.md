@@ -123,6 +123,18 @@ tunnel до панели. Для короткой проверки по plain HT
 
 ```env
 CLIENT_CONFIG_TEMPLATE_DIR=config_templates
+CLIENT_DNS=1.1.1.1
+CLIENT_ALLOWED_IPS=0.0.0.0/0
+CLIENT_PERSISTENT_KEEPALIVE=25
+CLIENT_AWG_JC=4
+CLIENT_AWG_JMIN=40
+CLIENT_AWG_JMAX=70
+CLIENT_AWG_S1=0
+CLIENT_AWG_S2=0
+CLIENT_AWG_H1=1
+CLIENT_AWG_H2=2
+CLIENT_AWG_H3=3
+CLIENT_AWG_H4=4
 ```
 
 Файлы overrides должны называться ровно так:
@@ -133,6 +145,10 @@ CLIENT_CONFIG_TEMPLATE_DIR=config_templates
 Шаблон содержит постоянные строки конфига и placeholders для переменных значений
 пользователя/устройства. `.conf` файл остается каноническим способом доставки,
 пока `vpn://` импорт не проверен на реальном AmneziaVPN-клиенте.
+Постоянные строки AmneziaWG-клиента (`DNS`, `AllowedIPs`, `PersistentKeepalive`,
+`Jc/Jmin/Jmax/S1/S2/H1-H4`) задаются через `CLIENT_*` переменные. Ключи,
+`Address`, имя устройства и имя файла генерируются отдельно для каждого
+устройства.
 
 Если пользователь укажет email, web-панель может отправить письмо
 подтверждения, а после подтверждения - конфиг устройства или одноразовую

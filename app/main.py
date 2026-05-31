@@ -19,6 +19,7 @@ from app.server.peer_apply import ServerConfigPeerApplier
 from app.server_config.loader import load_server_config, select_server
 from app.server_config.models import ServerConfig
 from app.services.access import AccessService
+from app.vpn.amneziawg_v2.config import ClientConfigDefaults
 
 
 async def run() -> None:
@@ -35,6 +36,7 @@ async def run() -> None:
         server_name=settings.server_name,
         vps_ssh_password=settings.vps_ssh_password,
         client_config_template_dir=settings.client_config_template_dir,
+        client_config_defaults=settings.client_config_defaults,
     )
     bot = create_bot(
         telegram_bot_token=settings.telegram_bot_token,
@@ -135,6 +137,7 @@ def create_workflow(
     server_name: str = "debian-vps-1",
     vps_ssh_password: str = "",
     client_config_template_dir: str | Path | None = None,
+    client_config_defaults: ClientConfigDefaults | None = None,
 ) -> BotWorkflow:
     conn = connect(database_path)
     initialize_schema(conn)
@@ -161,6 +164,7 @@ def create_workflow(
         duration_days=default_plan_days,
         peer_applier=peer_applier,
         client_config_template_dir=client_config_template_dir,
+        client_config_defaults=client_config_defaults,
     )
     secret_box = SecretBox.from_app_secret(app_secret_key)
     workflow = BotWorkflow(
@@ -173,6 +177,7 @@ def create_workflow(
         client_config_template_dir=str(client_config_template_dir)
         if client_config_template_dir is not None
         else None,
+        client_config_defaults=client_config_defaults,
     )
     return workflow
 
