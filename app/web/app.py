@@ -399,6 +399,23 @@ def create_web_app(
             ),
         )
 
+    @app.get("/devices/disabled")
+    async def disabled_devices_index(request: Request):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+
+        devices = _load_disabled_devices(actual_settings)
+        return templates.TemplateResponse(
+            request,
+            "disabled_devices.html",
+            _template_context(
+                request,
+                title="Disabled devices",
+                authenticated=True,
+                devices=devices,
+            ),
+        )
+
     @app.get("/users/new")
     async def new_user_form(request: Request):
         if not _is_authenticated(request):
@@ -1670,6 +1687,14 @@ def _load_dashboard(settings: Settings) -> dict[str, Any]:
 def _load_users(settings: Settings) -> list[dict[str, Any]]:
     with _open_repository(settings) as (repo, _conn):
         return [_row_to_dict(row) for row in repo.list_users_for_admin(limit=500)]
+
+
+def _load_disabled_devices(settings: Settings) -> list[dict[str, Any]]:
+    with _open_repository(settings) as (repo, _conn):
+        return [
+            _row_to_dict(row)
+            for row in repo.list_disabled_devices_with_users(limit=100)
+        ]
 
 
 def _load_servers(settings: Settings) -> list[dict[str, Any]]:

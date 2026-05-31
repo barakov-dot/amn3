@@ -26,6 +26,15 @@ def test_users_redirects_when_unauthenticated(tmp_path: Path):
     assert response.headers["location"] == "/login"
 
 
+def test_disabled_devices_redirects_when_unauthenticated(tmp_path: Path):
+    client = _client(tmp_path)
+
+    response = client.get("/devices/disabled", follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
 def test_users_lists_existing_telegram_users_and_device_counts(tmp_path: Path):
     settings = _settings(tmp_path)
     user_id = _seed_user(
@@ -51,6 +60,46 @@ def test_users_lists_existing_telegram_users_and_device_counts(tmp_path: Path):
     assert "active" in response.text
     assert "admin" in response.text.lower()
     assert "1 / 2" in response.text
+    assert 'href="/devices/disabled"' in response.text
+
+
+def test_disabled_devices_page_lists_only_disabled_devices(tmp_path: Path):
+    settings = _settings(tmp_path)
+    disabled_user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=1010,
+        username="disabled-owner",
+        first_name="Disabled",
+        last_name="Owner",
+    )
+    active_user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=2020,
+        username="active-owner",
+        first_name="Active",
+        last_name="Owner",
+    )
+    _seed_encrypted_device(
+        Path(settings.database_path),
+        user_id=disabled_user_id,
+        private_key="client-private-key",
+        preshared_key="stored-psk",
+        status="disabled",
+    )
+    _seed_devices(Path(settings.database_path), user_id=active_user_id)
+    client = _authenticated_client(settings)
+
+    response = client.get("/devices/disabled")
+
+    assert response.status_code == 200
+    assert "Disabled devices" in response.text
+    assert "encrypted-device" in response.text
+    assert "disabled-owner" in response.text
+    assert "10.8.0.44" in response.text
+    assert "local" in response.text
+    assert f'href="/users/{disabled_user_id}"' in response.text
+    assert "active-device" not in response.text
+    assert "active-owner" not in response.text
 
 
 def test_create_user_from_web_stores_email_admin_and_records_action(tmp_path: Path):

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading page-heading">
+    <div>
+      <p class="eyebrow">Device management</p>
+      <h1>Disabled devices</h1>
+    </div>
+    <div class="button-row">
+      <a class="button button-secondary" href="/users">Back to users</a>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Can be enabled</h2>
+    </div>
+    {% if devices %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Device</th>
+              <th>User</th>
+              <th>Server</th>
+              <th>IP</th>
+              <th>Disabled</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for device in devices %}
+              <tr>
+                <td>
+                  <span class="primary-text">{{ device.name }}</span>
+                  <span class="muted-text">{{ device.config_version }}</span>
+                </td>
+                <td>
+                  <span class="primary-text">{{ device.username or device.telegram_id }}</span>
+                  <span class="muted-text">{{ device.first_name or "" }} {{ device.last_name or "" }}</span>
+                </td>
+                <td>{{ device.server_name }}</td>
+                <td>{{ device.vpn_ip }}</td>
+                <td>
+                  <span class="primary-text">{{ device.revoked_at or "-" }}</span>
+                  <span class="muted-text">{{ device.revoke_reason or "-" }}</span>
+                </td>
+                <td><a href="/users/{{ device.user_id }}">Open user</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="empty-state">No disabled devices.</p>
+    {% endif %}
+  </section>
+{% endblock %}

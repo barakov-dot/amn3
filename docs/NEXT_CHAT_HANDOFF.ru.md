@@ -27,7 +27,7 @@ codex-vps-test-prep
 Текущий актуальный коммит:
 
 ```text
-Show VPN action availability
+Add disabled devices screen
 ```
 
 Не начинать отдельный проект с нуля. Новый чат должен открыть эту же папку, проверить ветку и продолжить от текущего состояния.
@@ -72,7 +72,7 @@ cd C:\Users\SooL\Documents\Amneziya
 ## codex-vps-test-prep...origin/codex-vps-test-prep
 ```
 
-В `git log -5` верхний коммит должен иметь сообщение `Show VPN action availability`.
+В `git log -5` верхний коммит должен иметь сообщение `Add disabled devices screen`.
 
 Если ветка не совпадает:
 
@@ -94,7 +94,7 @@ $env:PYTHONPATH='.codex_deps;.'
 Последний результат:
 
 ```text
-427 passed, 1 warning
+429 passed, 1 warning
 ```
 
 Предупреждение ожидаемое:
@@ -122,6 +122,7 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
 - В карточке сервера добавлен блок `Recent server actions`, где видны последние server-level audit events, включая failed операции.
 - Опасные действия web-панели (`Disable VPN`, `Enable VPN`, `Soft delete`, `Delete permanently`, удаление устройства, отключение сервера, добавление missing device в AmneziaWG) теперь требуют browser confirm перед отправкой формы.
 - В карточке пользователя `Disable VPN` и `Enable VPN` показывают доступность по статусам устройств: active/pending можно отключать, disabled можно включать, а неприменимые действия отображаются disabled с короткой причиной.
+- Добавлен экран `/devices/disabled`: список отключенных устройств с владельцем, сервером, IP, причиной/временем отключения и ссылкой на карточку пользователя для повторного включения.
 - Peer sync в карточке сервера:
   - известные peer панели;
   - peer, созданные в приложении Amnezia и еще не помеченные;
@@ -205,7 +206,7 @@ git log -1 --oneline
 Ожидаемый коммит:
 
 ```text
-Show VPN action availability
+Add disabled devices screen
 ```
 
 Проверить server config:
@@ -243,7 +244,7 @@ tail -n 200 logs/app.log
 
 Порядок проверки:
 
-1. `git log -1 --oneline` показывает коммит `Show VPN action availability`.
+1. `git log -1 --oneline` показывает коммит `Add disabled devices screen`.
 2. Web-панель открывается.
 3. В карточке сервера блок `VPS readiness` показывает:
    - `VPS_APPLY_ENABLED`;
@@ -266,6 +267,7 @@ tail -n 200 logs/app.log
     - secrets скрыты;
     - `Show secrets` раскрывает private key и preshared key.
     - `Disable VPN`/`Enable VPN` показывают доступность по текущим статусам устройств.
+    - ссылка `Disabled devices` на странице пользователей открывает список отключенных устройств.
 13. Нажать `Disable VPN`:
     - browser confirm появляется перед отправкой формы;
     - peer удаляется из AmneziaWG;
@@ -311,7 +313,7 @@ sudo journalctl -u amneziya-bot -n 200 --no-pager
 
 Критично перед следующим стабильным этапом:
 
-1. Пройти VPS retest после коммита `Show VPN action availability`.
+1. Пройти VPS retest после коммита `Add disabled devices screen`.
 2. Подтвердить, что новый IP берется из live `awg0.conf`.
 3. Подтвердить disable/enable на реальном Docker runtime.
 4. Убедиться, что old/local peers из сети `10.8.0.0/24` не мешают новой live-сети `10.8.1.0/24`.
@@ -320,11 +322,10 @@ sudo journalctl -u amneziya-bot -n 200 --no-pager
 
 Некритично, но полезно дальше:
 
-1. Добавить отдельный экран/фильтр disabled devices.
-2. Сделать более удобный audit в карточке пользователя.
-3. Добавить будущую email-доставку и восстановление конфигов только для подтвержденного email.
-4. Вернуться к идее skill по проекту Amneziya, когда текущий VPS-тест будет стабилен.
-5. Позже продолжить исследовательский параллельный проект/hybrid lab по похожему GitHub-проекту.
+1. Сделать более удобный audit в карточке пользователя.
+2. Добавить будущую email-доставку и восстановление конфигов только для подтвержденного email.
+3. Вернуться к идее skill по проекту Amneziya, когда текущий VPS-тест будет стабилен.
+4. Позже продолжить исследовательский параллельный проект/hybrid lab по похожему GitHub-проекту.
 
 ## 12. Главные файлы проекта
 

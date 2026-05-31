@@ -1319,6 +1319,38 @@ class Repository:
             (limit,),
         ).fetchall()
 
+    def list_disabled_devices_with_users(
+        self,
+        *,
+        limit: int = 100,
+    ) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                devices.id,
+                devices.name,
+                devices.config_version,
+                devices.status,
+                devices.vpn_ip,
+                devices.expires_at,
+                devices.revoked_at,
+                devices.revoke_reason,
+                users.id AS user_id,
+                users.telegram_id,
+                users.username,
+                users.first_name,
+                users.last_name,
+                servers.name AS server_name
+            FROM devices
+            JOIN users ON users.id = devices.user_id
+            JOIN servers ON servers.id = devices.server_id
+            WHERE devices.status = 'disabled'
+            ORDER BY devices.id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+
     def list_active_devices_for_server(
         self,
         server_id: int,
