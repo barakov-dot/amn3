@@ -128,7 +128,10 @@ def test_local_agent_vps_smoke_runbook_lists_safe_install_and_checks():
     assert "LOCAL_AGENT_ENABLED=true" in text
     assert "LOCAL_AGENT_HOST=127.0.0.1" in text
     assert "LOCAL_AGENT_TOKEN_HASH=sha256:" in text
+    assert "LOCAL_AGENT_CONTROLLER_ENABLED=true" in text
+    assert "LOCAL_AGENT_CONTROLLER_TOKEN_PATH=/opt/amn2/secrets/local-agent.token" in text
     assert "python -m app.cli agent hash-token" in text
+    assert "install -m 0600" in text
     assert "read -rsp" in text
     assert "sudo install -m 0644 deploy/systemd/amneziya-agent.service.example /etc/systemd/system/amneziya-agent.service" in text
     assert "sudo systemctl enable --now amneziya-agent" in text

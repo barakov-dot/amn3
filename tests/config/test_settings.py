@@ -250,6 +250,23 @@ def test_settings_reads_local_agent_settings():
     ]
 
 
+def test_settings_reads_local_agent_controller_settings():
+    settings = Settings(
+        _env_file=None,
+        telegram_bot_token="TEST_TOKEN",
+        app_secret_key="test-secret",
+        local_agent_controller_enabled=True,
+        local_agent_controller_base_url=" http://127.0.0.1:3031/ ",
+        local_agent_controller_token_path="/opt/amn2/secrets/local-agent.token",
+    )
+
+    assert settings.local_agent_controller_enabled is True
+    assert settings.local_agent_controller_base_url == "http://127.0.0.1:3031"
+    assert settings.local_agent_controller_token_path == (
+        "/opt/amn2/secrets/local-agent.token"
+    )
+
+
 def test_settings_defaults_local_agent_to_disabled():
     settings = Settings(
         _env_file=None,
@@ -261,6 +278,9 @@ def test_settings_defaults_local_agent_to_disabled():
     assert settings.local_agent_host == "127.0.0.1"
     assert settings.local_agent_port == 3031
     assert settings.local_agent_token_hash == ""
+    assert settings.local_agent_controller_enabled is False
+    assert settings.local_agent_controller_base_url == "http://127.0.0.1:3031"
+    assert settings.local_agent_controller_token_path == ""
 
 
 def test_settings_requires_token_hash_when_local_agent_enabled():
@@ -271,6 +291,17 @@ def test_settings_requires_token_hash_when_local_agent_enabled():
             app_secret_key="test-secret",
             local_agent_enabled=True,
             local_agent_token_hash="",
+        )
+
+
+def test_settings_requires_controller_token_path_when_controller_enabled():
+    with pytest.raises(ValidationError, match="LOCAL_AGENT_CONTROLLER_TOKEN_PATH"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="TEST_TOKEN",
+            app_secret_key="test-secret",
+            local_agent_controller_enabled=True,
+            local_agent_controller_token_path="",
         )
 
 

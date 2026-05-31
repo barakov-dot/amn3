@@ -60,4 +60,34 @@
       <p class="empty-state">No health check has been stored yet.</p>
     {% endif %}
   </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Local Agent</h2>
+    </div>
+    <dl class="details">
+      <div>
+        <dt>Status</dt>
+        <dd><span class="status status-{{ local_agent.status_class }}">{{ local_agent.status }}</span></dd>
+      </div>
+      <div>
+        <dt>Base URL</dt>
+        <dd>{{ local_agent.base_url }}</dd>
+      </div>
+      <div>
+        <dt>Runtime</dt>
+        <dd>
+          {% if local_agent.runtime_status %}
+            {{ local_agent.server_name or "-" }} {{ local_agent.runtime_type or "-" }} {{ local_agent.runtime_status }}
+          {% else %}
+            -
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>Error</dt>
+        <dd>{{ local_agent.error or "-" }}</dd>
+      </div>
+    </dl>
+  </section>
 {% endblock %}

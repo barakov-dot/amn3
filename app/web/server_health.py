@@ -5,6 +5,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import Literal
 
+from app.agent.client import AgentClientError, AgentProtocol, LocalAgentClient
 from app.config.settings import Settings
 from app.security.redaction import redact
 from app.server.checks import run_server_checks
@@ -31,6 +32,22 @@ class HealthSummary:
     error: str | None
     operation_id: str = "server.health.check"
     risk_class: str = "read-only-remote"
+    consistency_status: str = "read-only"
+
+
+@dataclass(frozen=True)
+class LocalAgentSummary:
+    status: HealthStatus
+    status_class: str
+    base_url: str
+    service: str | None
+    server_name: str | None
+    runtime_type: str | None
+    runtime_status: str | None
+    protocols: tuple[AgentProtocol, ...]
+    error: str | None
+    operation_id: str = "local_agent.probe"
+    risk_class: str = "read-only-runtime"
     consistency_status: str = "read-only"
 
 
@@ -106,6 +123,65 @@ def run_server_health_check(settings: Settings, server_name: str) -> HealthSumma
     return summarize_check_report(report, latency_ms=latency_ms)
 
 
+def probe_local_agent_controller(
+    settings: Settings,
+    *,
+    client_factory=LocalAgentClient,
+) -> LocalAgentSummary:
+    base_url = settings.local_agent_controller_base_url
+    if not settings.local_agent_controller_enabled:
+        return LocalAgentSummary(
+            status="disabled",
+            status_class="disabled",
+            base_url=base_url,
+            service=None,
+            server_name=None,
+            runtime_type=None,
+            runtime_status=None,
+            protocols=(),
+            error="LOCAL_AGENT_CONTROLLER_ENABLED=false",
+        )
+
+    token_path = Path(settings.local_agent_controller_token_path)
+    try:
+        raw_token = token_path.read_text(encoding="utf-8").strip()
+    except OSError as exc:
+        return _local_agent_error(
+            base_url,
+            f"Could not read LOCAL_AGENT_CONTROLLER_TOKEN_PATH: {exc}",
+            token="",
+            status="unknown",
+        )
+    if not raw_token:
+        return _local_agent_error(
+            base_url,
+            "LOCAL_AGENT_CONTROLLER_TOKEN_PATH is empty",
+            token="",
+            status="unknown",
+        )
+
+    try:
+        client = client_factory(base_url=base_url, bearer_token=raw_token)
+        health = client.health()
+        runtime = client.runtime()
+        protocols = client.protocols()
+    except AgentClientError as exc:
+        return _local_agent_error(base_url, str(exc), token=raw_token, status="offline")
+
+    status = _local_agent_status(runtime.status)
+    return LocalAgentSummary(
+        status=status,
+        status_class=status,
+        base_url=base_url,
+        service=health.service,
+        server_name=runtime.server_name,
+        runtime_type=runtime.runtime_type,
+        runtime_status=runtime.status,
+        protocols=protocols,
+        error=None,
+    )
+
+
 def _ssh_ok(results: list[CheckResult]) -> bool:
     ssh_results = [result for result in results if result.name == "ssh"]
     if ssh_results:
@@ -130,3 +206,34 @@ def _issue_summary(results: list[CheckResult]) -> str | None:
     if not issues:
         return None
     return redact("; ".join(issues))
+
+
+def _local_agent_status(runtime_status: str) -> HealthStatus:
+    if runtime_status == "running":
+        return "online"
+    if runtime_status == "degraded":
+        return "degraded"
+    if runtime_status == "stopped":
+        return "offline"
+    return "unknown"
+
+
+def _local_agent_error(
+    base_url: str,
+    message: str,
+    *,
+    token: str,
+    status: HealthStatus,
+) -> LocalAgentSummary:
+    safe_message = message.replace(token, "[REDACTED]") if token else message
+    return LocalAgentSummary(
+        status=status,
+        status_class=status,
+        base_url=base_url,
+        service=None,
+        server_name=None,
+        runtime_type=None,
+        runtime_status=None,
+        protocols=(),
+        error=redact(safe_message),
+    )

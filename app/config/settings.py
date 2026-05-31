@@ -88,6 +88,18 @@ class Settings(BaseSettings):
         default="",
         alias="LOCAL_AGENT_TOKEN_EXPIRES_AT",
     )
+    local_agent_controller_enabled: bool = Field(
+        default=False,
+        alias="LOCAL_AGENT_CONTROLLER_ENABLED",
+    )
+    local_agent_controller_base_url: str = Field(
+        default="http://127.0.0.1:3031",
+        alias="LOCAL_AGENT_CONTROLLER_BASE_URL",
+    )
+    local_agent_controller_token_path: str = Field(
+        default="",
+        alias="LOCAL_AGENT_CONTROLLER_TOKEN_PATH",
+    )
     app_log_enabled: bool = Field(default=True, alias="APP_LOG_ENABLED")
     app_log_level: str = Field(default="INFO", alias="APP_LOG_LEVEL")
     app_log_max_lines: int = Field(default=500, alias="APP_LOG_MAX_LINES")
@@ -197,6 +209,23 @@ class Settings(BaseSettings):
             if not token_hash:
                 raise ValueError(
                     "LOCAL_AGENT_TOKEN_HASH must be set when LOCAL_AGENT_ENABLED=true"
+                )
+        self.local_agent_controller_base_url = (
+            self.local_agent_controller_base_url.strip().rstrip("/")
+        )
+        self.local_agent_controller_token_path = (
+            self.local_agent_controller_token_path.strip()
+        )
+        if self.local_agent_controller_enabled:
+            if not self.local_agent_controller_base_url:
+                raise ValueError(
+                    "LOCAL_AGENT_CONTROLLER_BASE_URL must be set when "
+                    "LOCAL_AGENT_CONTROLLER_ENABLED=true"
+                )
+            if not self.local_agent_controller_token_path:
+                raise ValueError(
+                    "LOCAL_AGENT_CONTROLLER_TOKEN_PATH must be set when "
+                    "LOCAL_AGENT_CONTROLLER_ENABLED=true"
                 )
         if not 1 <= self.smtp_port <= 65535:
             raise ValueError("SMTP_PORT must be in 1..65535")

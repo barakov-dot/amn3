@@ -45,6 +45,9 @@ def test_env_examples_include_local_agent_safe_defaults():
         "LOCAL_AGENT_TOKEN_OWNER=local-controller",
         "LOCAL_AGENT_TOKEN_SCOPES=agent:health,agent:read,agent:protocols:read",
         "LOCAL_AGENT_TOKEN_EXPIRES_AT=",
+        "LOCAL_AGENT_CONTROLLER_ENABLED=false",
+        "LOCAL_AGENT_CONTROLLER_BASE_URL=http://127.0.0.1:3031",
+        "LOCAL_AGENT_CONTROLLER_TOKEN_PATH=",
     ]
 
     for path in [Path(".env.example"), Path("deploy/examples/.env.production.example")]:

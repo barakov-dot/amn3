@@ -35,6 +35,18 @@ test -f .env || cp .env.example .env
 ```
 
 Сохранить raw token в password manager. В `.env` его не записывать.
+Для web/server detail raw token хранится только в отдельном файле на VPS:
+
+```bash
+sudo install -d -m 0750 -o amneziya -g amneziya /opt/amn2/secrets
+sudo install -m 0600 -o amneziya -g amneziya /dev/null /opt/amn2/secrets/local-agent.token
+read -rsp "Local Agent raw token: " LOCAL_AGENT_RAW_TOKEN; echo
+printf '%s\n' "$LOCAL_AGENT_RAW_TOKEN" | sudo tee /opt/amn2/secrets/local-agent.token >/dev/null
+unset LOCAL_AGENT_RAW_TOKEN
+```
+
+Этот файл нужен controller-side проверке Local Agent. Raw token не хранится в
+БД, `.env`, issue, chat или shell history.
 
 Сгенерировать hash интерактивно, чтобы raw token не попал в shell history:
 
@@ -61,6 +73,9 @@ LOCAL_AGENT_TOKEN_HASH=sha256:<generated-hash>
 LOCAL_AGENT_TOKEN_OWNER=local-controller
 LOCAL_AGENT_TOKEN_SCOPES=agent:health,agent:read,agent:protocols:read
 LOCAL_AGENT_TOKEN_EXPIRES_AT=
+LOCAL_AGENT_CONTROLLER_ENABLED=true
+LOCAL_AGENT_CONTROLLER_BASE_URL=http://127.0.0.1:3031
+LOCAL_AGENT_CONTROLLER_TOKEN_PATH=/opt/amn2/secrets/local-agent.token
 ```
 
 Проверить, что raw token не записан в `.env`:

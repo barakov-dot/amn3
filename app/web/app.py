@@ -47,6 +47,7 @@ from app.web.auth import require_web_admin_config
 from app.web.auth import verify_csrf_token
 from app.web.logs import read_log_tail
 from app.web.server_health import HealthSummary
+from app.web.server_health import probe_local_agent_controller
 from app.web.server_health import run_server_health_check
 from app.vpn.amneziawg_v2.config import ClientConfigInput
 from app.vpn.config_templates import (
@@ -1230,6 +1231,7 @@ def create_web_app(
                     actual_settings,
                     detail["server"],
                 ),
+                local_agent=probe_local_agent_controller(actual_settings),
                 **detail,
             ),
         )
@@ -1555,6 +1557,7 @@ def create_web_app(
                 request,
                 title=f"Server {server_id} health",
                 authenticated=True,
+                local_agent=probe_local_agent_controller(actual_settings),
                 **detail,
             ),
         )

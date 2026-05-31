@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 import app.web.app as web_app
+from app.agent.client import AgentProtocol
 from app.config.settings import Settings
 from app.db.connection import connect
 from app.db.repositories import Repository
@@ -13,6 +14,7 @@ from app.security.crypto import SecretBox
 from app.server.peer_apply import PeerApplyError
 from app.web.app import create_web_app
 from app.web.auth import create_password_hash
+from app.web.server_health import LocalAgentSummary
 
 
 def test_servers_redirects_when_unauthenticated(tmp_path: Path):
@@ -221,6 +223,51 @@ def test_server_detail_shows_vps_retest_bundle_commands(tmp_path: Path):
     assert f"--db {settings.database_path}" in response.text
     assert "python -m app.cli server preflight" in response.text
     assert "python -m app.cli server sync-peers" in response.text
+
+
+def test_server_detail_shows_local_agent_status(tmp_path: Path, monkeypatch):
+    settings = _settings(tmp_path)
+    with _repo(Path(settings.database_path)) as repo:
+        server_id = _seed_server(repo, name="agent-vps")
+
+    def fake_probe(settings):
+        return LocalAgentSummary(
+            status="online",
+            status_class="online",
+            base_url="http://127.0.0.1:3031",
+            service="local-amnezia-agent",
+            server_name="agent-vps",
+            runtime_type="docker",
+            runtime_status="running",
+            protocols=(
+                AgentProtocol(
+                    name="amneziawg",
+                    status="running",
+                    runtime_type="docker",
+                    capabilities=("detect", "status"),
+                    container_name="amnezia-awg",
+                    interface="awg0",
+                    client_count=2,
+                ),
+            ),
+            error=None,
+        )
+
+    monkeypatch.setattr(web_app, "probe_local_agent_controller", fake_probe)
+    client = _authenticated_client(settings)
+
+    response = client.get(f"/servers/{server_id}")
+
+    assert response.status_code == 200
+    assert "Local Agent" in response.text
+    assert "http://127.0.0.1:3031" in response.text
+    assert "local-amnezia-agent" in response.text
+    assert "agent-vps" in response.text
+    assert "docker" in response.text
+    assert "running" in response.text
+    assert "amnezia-awg" in response.text
+    assert "clients=2" in response.text
+    assert "detect,status" in response.text
 
 
 def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypatch):
