@@ -47,7 +47,7 @@ https://github.com/barakov-dot/amn3.git
 master
 ```
 
-Current committed head lab:
+Committed head lab reviewed before this status refresh:
 
 ```text
 d1bd6be Clarify context import follow-up state

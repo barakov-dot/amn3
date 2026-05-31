@@ -42,7 +42,7 @@ tests/web/test_users.py
 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 branch: master
 remote: https://github.com/barakov-dot/amn3.git
-committed head: d1bd6be Clarify context import follow-up state
+committed head reviewed before this refresh: d1bd6be Clarify context import follow-up state
 status: clean and synchronized with origin/master
 ```
 
