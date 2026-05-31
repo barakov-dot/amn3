@@ -178,6 +178,54 @@ def test_local_command_runtime_adapter_reports_stopped_docker_container():
     assert snapshot.protocols[0].client_count is None
 
 
+def test_local_command_runtime_adapter_reports_degraded_when_docker_listing_fails():
+    runner = FakeCommandRunner(
+        {
+            ("docker", "ps", "--format", "{{.Names}}"): CommandResult(
+                exit_code=1,
+                stdout="",
+                stderr="Cannot connect to the Docker daemon",
+            ),
+        }
+    )
+
+    snapshot = LocalCommandRuntimeAdapter(
+        _server(RuntimeConfig(type="docker", container_name="amnezia-awg2")),
+        runner=runner,
+    ).snapshot()
+
+    assert snapshot.status == "degraded"
+    assert snapshot.protocols[0].status == "degraded"
+    assert snapshot.protocols[0].container_name == "amnezia-awg2"
+    assert snapshot.protocols[0].client_count is None
+
+
+def test_local_command_runtime_adapter_reports_degraded_when_docker_dump_fails():
+    runner = FakeCommandRunner(
+        {
+            ("docker", "ps", "--format", "{{.Names}}"): CommandResult(
+                exit_code=0,
+                stdout="amnezia-awg2\n",
+                stderr="",
+            ),
+            ("docker", "exec", "amnezia-awg2", "awg", "show", "awg0", "dump"): CommandResult(
+                exit_code=1,
+                stdout="",
+                stderr="device not found",
+            ),
+        }
+    )
+
+    snapshot = LocalCommandRuntimeAdapter(
+        _server(RuntimeConfig(type="docker", container_name="amnezia-awg2")),
+        runner=runner,
+    ).snapshot()
+
+    assert snapshot.status == "degraded"
+    assert snapshot.protocols[0].status == "degraded"
+    assert snapshot.protocols[0].client_count is None
+
+
 def test_local_command_runtime_adapter_detects_running_host_systemd():
     runner = FakeCommandRunner(
         {
@@ -203,3 +251,18 @@ def test_local_command_runtime_adapter_detects_running_host_systemd():
     assert snapshot.status == "running"
     assert snapshot.protocols[0].status == "running"
     assert snapshot.protocols[0].client_count == 0
+
+
+def test_local_command_runtime_adapter_reports_unknown_for_unsupported_runtime():
+    runner = FakeCommandRunner({})
+
+    snapshot = LocalCommandRuntimeAdapter(
+        _server(RuntimeConfig(type="manual")),
+        runner=runner,
+    ).snapshot()
+
+    assert snapshot.runtime_type == "manual"
+    assert snapshot.status == "unknown"
+    assert snapshot.protocols[0].status == "unknown"
+    assert snapshot.protocols[0].interface == "awg0"
+    assert runner.calls == []

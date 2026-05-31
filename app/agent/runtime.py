@@ -95,7 +95,9 @@ class LocalCommandRuntimeAdapter:
         container_name = self._server.runtime.container_name
         docker_ps = self._runner.run(("docker", "ps", "--format", "{{.Names}}"))
 
-        if docker_ps.exit_code != 0 or container_name is None:
+        if docker_ps.exit_code != 0:
+            return self._protocol_snapshot(status="degraded", container_name=container_name)
+        if container_name is None:
             return self._protocol_snapshot(status="stopped", container_name=container_name)
 
         containers = {line.strip() for line in docker_ps.stdout.splitlines() if line.strip()}
