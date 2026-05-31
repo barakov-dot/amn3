@@ -41,10 +41,11 @@ Backlog не является списком задач к немедленно�
 ### Route/Auth policy matrix
 
 - Цель: `amn2`.
-- Статус: `design-needed`.
+- Статус: `ready-for-plan`.
 - Суть: для каждого endpoint фиксировать role, auth method, risk class, side effect, audit requirement и tests.
 - Причина: это снижает риск случайного privilege escalation при расширении API, web-admin, bot и интеграций.
-- Следующий шаг: начать с текущих `admin`, `self-service`, `secret-read` и `remote-exec` маршрутов.
+- Текущий результат: создана конкретная [Route/Auth Policy Matrix](../research/amn2/route-policy-matrix.md) для web, bot, public-token и CLI/operator surfaces.
+- Следующий шаг: написать implementation plan для route policy coverage tests или использовать matrix как вход для `RemoteOperationRunner`.
 
 ### SSH host key enrollment
 
@@ -200,7 +201,7 @@ Backlog не является списком задач к немедленно�
 ## Ближайшая рекомендуемая очередь
 
 1. Закрыть PR/branch по `Secret-safe config delivery`, когда GitHub-доступ к приватному `amn2` будет настроен.
-2. Подготовить `Route/Auth policy matrix` для текущих web/API/bot маршрутов, используя обновленный P0 secret inventory.
-3. Продолжить `RemoteOperationRunner` с read-only health slice.
-4. Подготовить redaction coverage plan для `.conf`, QR, `vpn://`, tokens, Local Agent и command output.
+2. Продолжить `RemoteOperationRunner` с read-only health slice, используя `Route/Auth Policy Matrix` как gate для web/API remote surfaces.
+3. Подготовить redaction coverage plan для `.conf`, QR, `vpn://`, tokens, Local Agent и command output.
+4. Позже превратить `Route/Auth Policy Matrix` в machine-checkable route policy coverage tests.
 5. Только после этого возвращаться к self-service links, domain exclusions и 2FA.
