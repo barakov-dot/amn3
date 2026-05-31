@@ -48,7 +48,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Verified config delivery | `implemented-pushed-local-gate-complete` | `amn2` | commits `952cc49`, `4b19cd3`, `fc73929`; verified at `94ad807` | Использовать как artifact integrity baseline; VPS gate не нужен |
 | Public-token safety | `implemented-pushed-local-gate-complete` | `amn2` | commit `dfe27ee`; tests `14 passed`, full suite `535 passed` | Использовать как verify/recover token baseline; VPS gate не нужен |
 | Local Agent hardening | `implemented-pushed-local-gate-complete` | `amn2` | commit `c5d7eb6`; focused tests `64 passed`, full suite `536 passed` | Использовать как read-only audit/version contract; VPS gate не нужен |
-| Remote operation dry-run/audit | `implemented-local-gate-complete-awaits-vps-gate` | `amn2` branch + AMN3 evidence | branch `codex/remote-operation-dry-run-audit`, commits `0313857`, `063b6c3`; focused `79 passed`, docs `7 passed`, full `522 passed` | Controlled real VPS verification gate только после отдельного подтверждения |
+| Remote operation VPS gate candidate | `prepared-pushed-awaits-real-vps-gate` | `amn2` branch + AMN3 runbook | branch `codex/remote-operation-vps-gate-prep`, head `aca6663`; runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; focused `79 passed`, docs `7 passed`, full `551 passed` | Выполнить read-only/dry-run на VPS; single apply/revoke только после отдельного подтверждения |
 | Web panel safe improvements | `implemented-pushed-local-gate-complete` | `amn2` | commit `22dfc37`; RED `4 failed as expected`; focused `75 passed`; full suite `536 passed` | Использовать как operator safety wording baseline; VPS gate не нужен |
 | Scoped API token storage | `implemented-pushed-local-gate-complete` | `amn2` | commit `1fdcde5`; RED `1 import error as expected`; focused `54 passed`; full suite `542 passed` | Использовать как hash-only token baseline; VPS gate не нужен |
 | Public/self-service config delivery | `lab-only-until-policy` | AMN3 -> `amn2` later | `research/amn2/config-delivery-inventory.md` | Не открывать public config links до scoped token/self-service design |
@@ -79,7 +79,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 
 ## Current Priority Order
 
-1. Подготовить controlled real VPS verification gate для `codex/remote-operation-dry-run-audit`; single test peer apply/revoke только после отдельного подтверждения.
+1. Выполнить controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; single test peer apply/revoke только после отдельного подтверждения.
 2. Зафиксировать VPS evidence в AMN3 перед интеграционными решениями из `VPN Ops Lab — KYORESUAS-API` и `VPS OPS LAB - PRVTPRO-Amnezia-Web-Panel`.
 3. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
 4. Read-only clients/metrics endpoints рассматривать только после VPS evidence и privacy classification.
@@ -196,7 +196,7 @@ Public-token safety commit `dfe27ee` также остается `local-gate-com
 
 Local Agent hardening commit `c5d7eb6` также остается `local-gate-complete`: `agent serve` подключает repository-backed audit sink для allowed read routes, `/agent/version` публикует runtime contract metadata, а tests подтверждают отсутствие raw bearer token в audit. Live VPS gate не нужен, потому что slice не делает real agent deployment, controller-to-agent calls, peer apply/revoke/config/sync/runtime writes.
 
-Remote operation dry-run/audit branch `codex/remote-operation-dry-run-audit` остается `local-gate-complete-awaits-vps-gate`: dry-run metadata и Runtime Registry подтверждены локально, но real VPS verification еще не запускался.
+Remote operation VPS gate branch `codex/remote-operation-vps-gate-prep` подготовлена и запушена как fresh candidate поверх `1fdcde5`: dry-run metadata и Runtime Registry подтверждены локально, но real VPS verification еще не запускался.
 
 Web panel safe-improvements commit `22dfc37` также остается `local-gate-complete`: это wording/UI-test слой без изменения apply/revoke/config/sync/runtime behavior. Live VPS gate не нужен.
 

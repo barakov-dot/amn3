@@ -37,6 +37,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 - [Redaction coverage plan](redaction-coverage-plan.md) - P0-план покрытия `.conf`, QR, `vpn://`, tokens, Local Agent headers, command output и diagnostics перед расширением remote operations.
 - [Remote operations inventory](remote-operations-inventory.md) - первый проход по SSH/server apply flows, dry-run, health checks, peer apply/revoke, traffic collection, audit, redaction и rollback gaps.
 - [Local-only task priority](local-only-task-priority.md) - приоритетный список локально выполняемых задач перед controlled real VPS verification gate.
+- [Remote operation VPS gate runbook](vps-gate-remote-operation-dry-run-audit.md) - подготовленный checklist для реального VPS-теста ветки `codex/remote-operation-vps-gate-prep`.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
 ## Следующие рабочие шаги
@@ -45,9 +46,9 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 
 Текущий фокус после verified VPS cycle, read-only `RemoteOperationRunner` baseline, redaction coverage, state-changing metadata, partial-failure, dry-run/audit metadata, web-panel safety и scoped API token storage local slices:
 
-1. Подготовить controlled real VPS verification gate на тестовом peer/device.
+1. Выполнить controlled real VPS verification gate по `vps-gate-remote-operation-dry-run-audit.md` на ветке `codex/remote-operation-vps-gate-prep`.
 2. Начать VPS gate с read-only check и dry-run apply/revoke preview; single apply/revoke выполнять только после отдельного подтверждения оператора.
-3. Зафиксировать VPS evidence в lab notes и решить, нужен ли merge/PR для ветки `codex/remote-operation-dry-run-audit`.
+3. Зафиксировать VPS evidence в lab notes и решить, нужен ли merge/PR для ветки `codex/remote-operation-vps-gate-prep`.
 4. Только после VPS evidence выбирать первый integration slice из KYORESUAS/PRVTPRO inputs.
 5. До расширения Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
 

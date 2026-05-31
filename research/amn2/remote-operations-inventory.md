@@ -108,6 +108,20 @@ Read-only health slice `RemoteOperationRunner` уже присутствует �
 - docs verification: `tests/deploy/test_runtime_registry.py -v` -> `7 passed`;
 - full suite: `pytest tests -v` -> `522 passed, 1 warning`.
 
+## Обновление 2026-06-01: fresh VPS gate candidate
+
+Для реального VPS gate подготовлена fresh branch поверх текущего `codex-vps-test-prep` head `1fdcde5`, потому что историческая `codex/remote-operation-dry-run-audit` расходилась с актуальным baseline.
+
+- branch: `codex/remote-operation-vps-gate-prep`;
+- head: `aca6663 Add VPS gate handoff for remote ops`;
+- base: `1fdcde5 Add scoped API token storage contract`;
+- runbook: `research/amn2/vps-gate-remote-operation-dry-run-audit.md`;
+- focused verification: `79 passed, 1 warning`;
+- docs verification: `7 passed`;
+- full suite: `551 passed, 1 warning`.
+
+Live VPS еще не трогался. Следующий шаг - read-only/dry-run gate на реальном VPS, затем single test peer apply/revoke только после отдельного подтверждения оператора.
+
 Ограничение: срез не выполнял live SSH/Docker apply/revoke и не менял реальное состояние VPS. Следующий шаг - controlled real VPS verification gate, начиная с read-only/dry-run подтверждения и только затем, при отдельном подтверждении оператора, test peer apply/revoke.
 
 ## Карта remote surfaces

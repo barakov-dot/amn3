@@ -19,6 +19,16 @@ stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 status: remote-synced after scoped API token storage
 ```
 
+Текущая VPS-gate candidate branch для remote-operation проверки:
+
+```text
+branch: codex/remote-operation-vps-gate-prep
+head: aca6663 Add VPS gate handoff for remote ops
+base: 1fdcde5 Add scoped API token storage contract
+status: pushed to amn2, local tests green, awaits real VPS gate
+runbook: research/amn2/vps-gate-remote-operation-dry-run-audit.md
+```
+
 Последний production slice относится к scoped API token storage/auth layer:
 
 ```text
@@ -59,7 +69,7 @@ status: clean and synchronized with origin/master
 
 Следующий рабочий выбор:
 
-1. Запустить controlled real VPS verification gate для remote-operation dry-run/audit ветки, если цель - начать интеграцию решений из KYORESUAS/PRVTPRO в основной проект.
+1. Запустить controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, если цель - начать интеграцию решений из KYORESUAS/PRVTPRO в основной проект.
 2. Локальная альтернатива: read-only metrics/API route shell после privacy classification, без write/client lifecycle.
 
 Старые блоки ниже, где `91aeb3e` указан как latest clean baseline, считать историческим контекстом verified live stage.

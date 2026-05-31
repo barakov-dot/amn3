@@ -40,10 +40,10 @@ Backlog не является списком задач к немедленно�
 - Текущий результат 2026-05-31: redaction coverage first slice выполнен в ветке `codex/redaction-coverage-first-slice`; focused suite `61 passed`, full suite `513 passed`.
 - Текущий результат 2026-05-31: state-changing metadata local slice выполнен в ветке `codex/remote-operation-contract-metadata`; focused suite `23 passed`, full suite `517 passed`.
 - Текущий результат 2026-05-31: partial-failure local slice выполнен в ветке `codex/remote-operation-partial-failure`; focused suite `38 passed`, full suite `519 passed`.
-- Текущий результат 2026-06-01: dry-run/audit metadata local slice выполнен в ветке `codex/remote-operation-dry-run-audit`; focused suite `79 passed`, docs suite `7 passed`, full suite `522 passed`.
+- Текущий результат 2026-06-01: dry-run/audit metadata local slice перенесен на fresh VPS-gate candidate `codex/remote-operation-vps-gate-prep`; focused suite `79 passed`, docs suite `7 passed`, full suite `551 passed`.
 - Текущий план 2026-05-31: следующий remote safety блок разделен на local-only gate и controlled real VPS verification gate.
 - Локальная очередь 2026-05-31: [Local-only task priority](../research/amn2/local-only-task-priority.md) фиксирует P0/P1/P2/P3 задачи, которые можно сделать без VPS и без чтения `.env`.
-- Следующий шаг: подготовить controlled real VPS verification gate. Начинать с read-only check и dry-run apply/revoke preview; single test peer apply/revoke выполнять только после отдельного подтверждения.
+- Следующий шаг: выполнить controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`. Начинать с read-only check и dry-run apply/revoke preview; single test peer apply/revoke выполнять только после отдельного подтверждения.
 
 ### Route/Auth policy matrix
 
@@ -220,8 +220,8 @@ Backlog не является списком задач к немедленно�
 
 ## Ближайшая рекомендуемая очередь
 
-1. Провести controlled real VPS verification gate на тестовом peer/device: read-only check, dry-run apply/revoke preview, затем single apply/revoke только после отдельного подтверждения.
-2. Зафиксировать VPS evidence в lab notes и решить, нужен ли merge/PR для ветки `codex/remote-operation-dry-run-audit`.
+1. Провести controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` на тестовом peer/device: read-only check, dry-run apply/revoke preview, затем single apply/revoke только после отдельного подтверждения.
+2. Зафиксировать VPS evidence в lab notes и решить, нужен ли merge/PR для ветки `codex/remote-operation-vps-gate-prep`.
 3. После VPS evidence выбрать первый integration slice из KYORESUAS/PRVTPRO inputs без копирования кода: вероятнее read-only metrics/API route shell или Local Agent runtime metadata.
 4. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
 5. После scoped token policy рассмотреть read-only metrics/client privacy design.

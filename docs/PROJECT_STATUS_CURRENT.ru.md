@@ -156,7 +156,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Redaction Coverage: `94ad807 Document secret-bearing delivery artifacts`;
 - Config Delivery Integrity evidence: verified at `94ad807`;
 - Public Token Safety: `dfe27ee Harden public email token safety`;
-- Remote Operation state-changing contract / partial-failure / dry-run-audit: local branches and AMN3 evidence recorded, dry-run/audit branch `codex/remote-operation-dry-run-audit` commits `0313857`, `063b6c3`;
+- Remote Operation state-changing contract / partial-failure / dry-run-audit: fresh VPS-gate candidate `codex/remote-operation-vps-gate-prep` prepared on top of `1fdcde5`, head `aca6663`, runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`;
 - Local Agent Hardening: `c5d7eb6 Harden Local Agent audit contract`;
 - Web Panel Safe Improvements: `22dfc37 Clarify web panel operation gates`;
 - Scoped API Token Storage: `1fdcde5 Add scoped API token storage contract`.
@@ -227,7 +227,7 @@ head: 8697b60 Document Local Agent production wiring
 
 ## Рекомендуемый порядок
 
-1. Рекомендуемый следующий шаг: controlled real VPS verification gate для `codex/remote-operation-dry-run-audit`, потому что KYORESUAS/PRVTPRO интеграционные задачи уже ждут реального VPS evidence.
+1. Рекомендуемый следующий шаг: controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, потому что KYORESUAS/PRVTPRO интеграционные задачи уже ждут реального VPS evidence.
 2. Начинать VPS gate с read-only check и dry-run apply/revoke preview; single test peer apply/revoke выполнять только после отдельного подтверждения оператора.
 3. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
 4. Read-only clients/metrics endpoints держать после VPS evidence и privacy classification.
@@ -531,20 +531,22 @@ Live VPS не трогался. Slice добавляет local storage/auth cont
 Production worktree:
 
 ```text
-C:\Users\SooL\Documents\VPS-OPS-LAB\worktrees\amn2-remote-operation-contract-metadata
+C:\Users\SooL\Documents\VPS-OPS-LAB\worktrees\amn2-vps-gate-prep
 ```
 
 Production branch:
 
 ```text
-codex/remote-operation-dry-run-audit
+codex/remote-operation-vps-gate-prep
 ```
 
 Production commits:
 
 ```text
-0313857 Add remote operation dry-run metadata
-063b6c3 Document remote operation local gate
+c249bd0 Add state-changing operation metadata
+8af6b5e Add remote partial failure model
+b7a12ca Add remote operation dry-run metadata
+aca6663 Add VPS gate handoff for remote ops
 ```
 
 Покрыто:
@@ -559,10 +561,10 @@ Production commits:
 ```text
 focused server/security/web tests: 79 passed, 1 StarletteDeprecationWarning
 runtime registry docs tests: 7 passed
-full local suite: 522 passed, 1 StarletteDeprecationWarning
+full local suite: 551 passed, 1 StarletteDeprecationWarning
 ```
 
-Live VPS не трогался. Slice меняет dry-run/audit metadata и документацию; следующий шаг - отдельный controlled real VPS verification gate, начиная с read-only/dry-run подтверждения.
+Live VPS не трогался. Candidate branch уже запушена в `amn2`; следующий шаг - отдельный controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, начиная с read-only/dry-run подтверждения.
 
 ## Local Gate / Live VPS Gate
 
@@ -590,4 +592,4 @@ Live VPS не трогался. Slice меняет dry-run/audit metadata и д�
 - Docker AmneziaWG write/reload/restart behavior;
 - реальный Local Agent deployment или controller-to-agent calls.
 
-Следующий рекомендуемый шаг теперь не очередной local-only feature slice, а controlled real VPS verification gate для remote-operation dry-run/audit ветки: read-only check, dry-run apply/revoke preview, затем single test peer apply/revoke только после отдельного разрешения. Это нужно, чтобы параллельные KYORESUAS/PRVTPRO интеграционные задачи не пошли в main project без реального VPS evidence.
+Следующий рекомендуемый шаг теперь не очередной local-only feature slice, а controlled real VPS verification gate для ветки `codex/remote-operation-vps-gate-prep`: read-only check, dry-run apply/revoke preview, затем single test peer apply/revoke только после отдельного разрешения. Это нужно, чтобы параллельные KYORESUAS/PRVTPRO интеграционные задачи не пошли в main project без реального VPS evidence.

@@ -195,7 +195,7 @@ Production evidence:
 - focused tests: `14 passed, 1 StarletteDeprecationWarning`;
 - full local suite: `535 passed, 1 StarletteDeprecationWarning`.
 
-После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening, Web Panel Safe Improvements и Scoped API Token Storage. Следующий рекомендуемый шаг - controlled real VPS verification gate для `codex/remote-operation-dry-run-audit`, потому что KYORESUAS/PRVTPRO integration candidates уже ждут реального VPS evidence.
+После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening, Web Panel Safe Improvements и Scoped API Token Storage. Следующий рекомендуемый шаг - controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, потому что KYORESUAS/PRVTPRO integration candidates уже ждут реального VPS evidence.
 
 ## Важные задачи
 
@@ -292,14 +292,16 @@ Gate: local-only. Live VPS не нужен, потому что slice не до�
 
 ### 9. Remote operation partial-failure contract
 
-Статус: первые local-gate slices выполнены; live VPS gate еще не запускался.
+Статус: fresh VPS-gate candidate подготовлен и запушен; live VPS gate еще не запускался.
 
 Выполнено локально:
 
 - state-changing metadata contract: `codex/remote-operation-contract-metadata`, commit `57d484d`;
 - approve/reset partial-failure model: `codex/remote-operation-partial-failure`, commit `0afb22a`;
-- dry-run/audit metadata: `codex/remote-operation-dry-run-audit`, commits `0313857`, `063b6c3`;
-- full local suite для последнего среза: `522 passed, 1 StarletteDeprecationWarning`.
+- dry-run/audit metadata: историческая branch `codex/remote-operation-dry-run-audit`, commits `0313857`, `063b6c3`;
+- fresh candidate поверх текущего `codex-vps-test-prep`: `codex/remote-operation-vps-gate-prep`, head `aca6663`;
+- VPS gate runbook: `research/amn2/vps-gate-remote-operation-dry-run-audit.md`;
+- full local suite для fresh candidate: `551 passed, 1 StarletteDeprecationWarning`.
 
 Остается перед broader remote-state-write API:
 
@@ -309,7 +311,7 @@ Gate: local-only. Live VPS не нужен, потому что slice не до�
 - no secret-bearing CLI args;
 - shared read-only telemetry command policy.
 
-Gate: local-only срезы закрыли contract/partial-failure/dry-run основу. Следующий шаг - controlled real VPS verification gate на тестовом peer/device перед включением broader remote-state-write в web/API/agent flow.
+Gate: local-only срезы закрыли contract/partial-failure/dry-run основу. Следующий шаг - controlled real VPS verification gate на тестовом peer/device по ветке `codex/remote-operation-vps-gate-prep` перед включением broader remote-state-write в web/API/agent flow.
 
 ## Простые задачи
 
@@ -369,8 +371,8 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 ### Live VPS verification lane
 
 1. Enter this lane now if the goal is to unblock KYORESUAS/PRVTPRO integration decisions; the local API-token storage slice is complete.
-2. Prepare a VPS test checklist with branch/commit, commands, expected state and rollback note.
-3. For `codex/remote-operation-dry-run-audit`, start with read-only check and dry-run apply/revoke preview; single test peer apply/revoke needs separate operator confirmation.
+2. Use the prepared VPS test checklist `research/amn2/vps-gate-remote-operation-dry-run-audit.md` with branch/commit, commands, expected state and rollback note.
+3. For `codex/remote-operation-vps-gate-prep`, start with read-only check and dry-run apply/revoke preview; single test peer apply/revoke needs separate operator confirmation.
 4. Verify approve/apply, config import, working configs, peer sync, disable/enable/delete and Docker runtime behavior if touched.
 5. Record VPS evidence in AMN3 before marking the slice `verified-live`.
 6. Do not use live VPS testing as a substitute for local policy/secret/operation tests.
