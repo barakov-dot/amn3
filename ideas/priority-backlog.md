@@ -28,7 +28,7 @@ Backlog не является списком задач к немедленно�
 - Суть: `.conf`, QR и `vpn://` всегда считать `secret-read` артефактами, а не обычными metadata.
 - Причина: config delivery содержит private key/pre-shared key или import payload, поэтому случайное логирование, share без expiry или неверная кодировка сразу становятся production-рискoм.
 - Уже сделано: metadata-поля delivery package, UTF-8 artifact tests, redaction coverage и config delivery integrity evidence зафиксированы локальным gate.
-- Следующий шаг: не открывать public/self-service delivery до scoped token/self-service design; web-panel wording slice уже уточнил, что `.conf`, QR и `vpn://` являются secret-bearing artifacts.
+- Следующий шаг: не открывать public/self-service delivery до scoped token/self-service design; web-panel wording slice `22dfc37` уже уточнил, что `.conf`, QR и `vpn://` являются secret-bearing artifacts.
 
 ### Remote operations safety
 
