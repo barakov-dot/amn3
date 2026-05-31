@@ -192,6 +192,53 @@ def test_user_detail_marks_dangerous_actions_with_confirmation(tmp_path: Path):
     assert "Delete this device and revoke its peer from AmneziaWG? This cannot be undone." in response.text
 
 
+def test_user_detail_shows_vpn_action_availability_for_active_devices(tmp_path: Path):
+    settings = _settings(tmp_path)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=4204,
+        username="active-vpn-actions",
+        first_name="Active",
+        last_name=None,
+    )
+    _seed_devices(Path(settings.database_path), user_id=user_id)
+    client = _authenticated_client(settings)
+
+    response = client.get(f"/users/{user_id}")
+
+    assert response.status_code == 200
+    assert "1 active/pending device can be disabled" in response.text
+    assert "No disabled devices to enable" in response.text
+    assert 'name="enable_vpn_unavailable"' in response.text
+
+
+def test_user_detail_shows_vpn_action_availability_for_disabled_devices(tmp_path: Path):
+    settings = _settings(tmp_path)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=4304,
+        username="disabled-vpn-actions",
+        first_name="Disabled",
+        last_name=None,
+        status="blocked",
+    )
+    _seed_encrypted_device(
+        Path(settings.database_path),
+        user_id=user_id,
+        private_key="client-private-key",
+        preshared_key="stored-psk",
+        status="disabled",
+    )
+    client = _authenticated_client(settings)
+
+    response = client.get(f"/users/{user_id}")
+
+    assert response.status_code == 200
+    assert "No active or pending devices to disable" in response.text
+    assert "1 disabled device can be enabled" in response.text
+    assert 'name="disable_vpn_unavailable"' in response.text
+
+
 def test_edit_user_preserves_and_clears_email_verification(tmp_path: Path):
     settings = _settings(tmp_path, admin_telegram_ids="9001")
     user_id = _seed_user(

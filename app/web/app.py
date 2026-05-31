@@ -1817,9 +1817,41 @@ def _load_user_detail(settings: Settings, user_id: int) -> dict[str, Any]:
     return {
         "user": user,
         "devices": devices,
+        "vpn_actions": _build_user_vpn_actions(devices),
         "orders": orders,
         "admin_actions": admin_actions,
     }
+
+
+def _build_user_vpn_actions(devices: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    disable_count = sum(
+        1 for device in devices if device["status"] in {"active", "pending"}
+    )
+    enable_count = sum(1 for device in devices if device["status"] == "disabled")
+    return {
+        "disable": {
+            "available": disable_count > 0,
+            "hint": (
+                f"{disable_count} active/pending "
+                f"{_plural(disable_count, 'device', 'devices')} can be disabled"
+                if disable_count
+                else "No active or pending devices to disable"
+            ),
+        },
+        "enable": {
+            "available": enable_count > 0,
+            "hint": (
+                f"{enable_count} disabled "
+                f"{_plural(enable_count, 'device', 'devices')} can be enabled"
+                if enable_count
+                else "No disabled devices to enable"
+            ),
+        },
+    }
+
+
+def _plural(count: int, singular: str, plural: str) -> str:
+    return singular if count == 1 else plural
 
 
 def _load_server_detail(settings: Settings, server_id: int) -> dict[str, Any]:

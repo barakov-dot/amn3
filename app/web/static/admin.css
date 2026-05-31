@@ -136,6 +136,12 @@ a {
   margin: 0;
 }
 
+.action-note {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .inline-action {
   margin-top: 8px;
 }
@@ -544,6 +550,15 @@ tbody tr:last-child td {
   background: var(--accent-strong);
 }
 
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.button:disabled:hover {
+  background: var(--accent);
+}
+
 .button-secondary {
   border-color: var(--line);
   background: var(--surface);
@@ -552,6 +567,10 @@ tbody tr:last-child td {
 
 .button-secondary:hover {
   background: var(--surface-muted);
+}
+
+.button-secondary:disabled:hover {
+  background: var(--surface);
 }
 
 .button-danger {

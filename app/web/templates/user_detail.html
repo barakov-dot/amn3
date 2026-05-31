@@ -65,11 +65,23 @@
         </form>
         <form action="/users/{{ user.id }}/disable-vpn" method="post" data-confirm="Disable VPN for this user and remove active peers from AmneziaWG?">
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
-          <button class="button button-secondary" type="submit">Disable VPN</button>
+          <button
+            class="button button-secondary"
+            name="{{ 'disable_vpn' if vpn_actions.disable.available else 'disable_vpn_unavailable' }}"
+            type="submit"
+            {% if not vpn_actions.disable.available %}disabled{% endif %}
+          >Disable VPN</button>
+          <p class="action-note">{{ vpn_actions.disable.hint }}</p>
         </form>
         <form action="/users/{{ user.id }}/enable-vpn" method="post" data-confirm="Enable VPN for this user and add disabled peers back to AmneziaWG?">
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
-          <button class="button button-secondary" type="submit">Enable VPN</button>
+          <button
+            class="button button-secondary"
+            name="{{ 'enable_vpn' if vpn_actions.enable.available else 'enable_vpn_unavailable' }}"
+            type="submit"
+            {% if not vpn_actions.enable.available %}disabled{% endif %}
+          >Enable VPN</button>
+          <p class="action-note">{{ vpn_actions.enable.hint }}</p>
         </form>
         <form action="/users/{{ user.id }}/delete" method="post" data-confirm="Soft delete this user in the admin database?">
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">

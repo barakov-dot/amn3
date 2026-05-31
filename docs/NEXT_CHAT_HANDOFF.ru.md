@@ -27,7 +27,7 @@ codex-vps-test-prep
 Текущий актуальный коммит:
 
 ```text
-Add dangerous action confirmations
+Show VPN action availability
 ```
 
 Не начинать отдельный проект с нуля. Новый чат должен открыть эту же папку, проверить ветку и продолжить от текущего состояния.
@@ -72,7 +72,7 @@ cd C:\Users\SooL\Documents\Amneziya
 ## codex-vps-test-prep...origin/codex-vps-test-prep
 ```
 
-В `git log -5` верхний коммит должен иметь сообщение `Add dangerous action confirmations`.
+В `git log -5` верхний коммит должен иметь сообщение `Show VPN action availability`.
 
 Если ветка не совпадает:
 
@@ -94,7 +94,7 @@ $env:PYTHONPATH='.codex_deps;.'
 Последний результат:
 
 ```text
-425 passed, 1 warning
+427 passed, 1 warning
 ```
 
 Предупреждение ожидаемое:
@@ -121,6 +121,7 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
 - Неудачные VPS-операции теперь пишутся в `admin_actions` с action `*_failed`, `error_type` и `redacted_error`; секреты проходят через `redact()`.
 - В карточке сервера добавлен блок `Recent server actions`, где видны последние server-level audit events, включая failed операции.
 - Опасные действия web-панели (`Disable VPN`, `Enable VPN`, `Soft delete`, `Delete permanently`, удаление устройства, отключение сервера, добавление missing device в AmneziaWG) теперь требуют browser confirm перед отправкой формы.
+- В карточке пользователя `Disable VPN` и `Enable VPN` показывают доступность по статусам устройств: active/pending можно отключать, disabled можно включать, а неприменимые действия отображаются disabled с короткой причиной.
 - Peer sync в карточке сервера:
   - известные peer панели;
   - peer, созданные в приложении Amnezia и еще не помеченные;
@@ -204,7 +205,7 @@ git log -1 --oneline
 Ожидаемый коммит:
 
 ```text
-Add dangerous action confirmations
+Show VPN action availability
 ```
 
 Проверить server config:
@@ -242,7 +243,7 @@ tail -n 200 logs/app.log
 
 Порядок проверки:
 
-1. `git log -1 --oneline` показывает коммит `Add dangerous action confirmations`.
+1. `git log -1 --oneline` показывает коммит `Show VPN action availability`.
 2. Web-панель открывается.
 3. В карточке сервера блок `VPS readiness` показывает:
    - `VPS_APPLY_ENABLED`;
@@ -264,6 +265,7 @@ tail -n 200 logs/app.log
     - устройство видно;
     - secrets скрыты;
     - `Show secrets` раскрывает private key и preshared key.
+    - `Disable VPN`/`Enable VPN` показывают доступность по текущим статусам устройств.
 13. Нажать `Disable VPN`:
     - browser confirm появляется перед отправкой формы;
     - peer удаляется из AmneziaWG;
@@ -309,7 +311,7 @@ sudo journalctl -u amneziya-bot -n 200 --no-pager
 
 Критично перед следующим стабильным этапом:
 
-1. Пройти VPS retest после коммита `Add dangerous action confirmations`.
+1. Пройти VPS retest после коммита `Show VPN action availability`.
 2. Подтвердить, что новый IP берется из live `awg0.conf`.
 3. Подтвердить disable/enable на реальном Docker runtime.
 4. Убедиться, что old/local peers из сети `10.8.0.0/24` не мешают новой live-сети `10.8.1.0/24`.
@@ -318,12 +320,11 @@ sudo journalctl -u amneziya-bot -n 200 --no-pager
 
 Некритично, но полезно дальше:
 
-1. Улучшить UX действий `Enable VPN`/`Disable VPN`: показывать доступность кнопок по статусам устройств.
-2. Добавить отдельный экран/фильтр disabled devices.
-3. Сделать более удобный audit в карточке пользователя.
-4. Добавить будущую email-доставку и восстановление конфигов только для подтвержденного email.
-5. Вернуться к идее skill по проекту Amneziya, когда текущий VPS-тест будет стабилен.
-6. Позже продолжить исследовательский параллельный проект/hybrid lab по похожему GitHub-проекту.
+1. Добавить отдельный экран/фильтр disabled devices.
+2. Сделать более удобный audit в карточке пользователя.
+3. Добавить будущую email-доставку и восстановление конфигов только для подтвержденного email.
+4. Вернуться к идее skill по проекту Amneziya, когда текущий VPS-тест будет стабилен.
+5. Позже продолжить исследовательский параллельный проект/hybrid lab по похожему GitHub-проекту.
 
 ## 12. Главные файлы проекта
 
