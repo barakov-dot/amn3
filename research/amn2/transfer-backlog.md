@@ -11,7 +11,7 @@
 | Item | Статус | Target repo | Текущий artifact | Следующий шаг |
 | --- | --- | --- | --- | --- |
 | Local Amnezia Agent first slice | `pushed-needs-pr` | `amn2` | `codex/local-agent-first-slice`, commits `3119ee6`, `ac2baa8` | Открыть stacked PR в `codex-vps-test-prep` |
-| Local Agent production wiring | `implementation-plan-ready` | `amn2` | `docs/superpowers/plans/2026-05-31-amn2-local-agent-production-wiring.md` | После PR/review выполнить plan task-by-task |
+| Local Agent production wiring | `pushed-needs-stacked-pr` | `amn2` | `codex/local-agent-production-wiring`, head `8697b60` | Открыть stacked PR в `codex/local-agent-first-slice` |
 | VPS retest bundle | `implemented-needs-live-retest` | `amn2` | commit `573c368` | Проверить на live VPS после Local Agent PR |
 | Config defaults from `.env` | `implemented-needs-live-retest` | `amn2` | commit `8ecb0b4` | Проверить выдаваемые configs и preview на live VPS |
 | Docker runtime peer apply/revoke | `implemented-needs-live-retest` | `amn2` | текущий `codex-vps-test-prep` | Подтвердить disable/enable и selective revoke |
@@ -31,7 +31,32 @@
 Следующий artifact:
 
 ```text
-docs/superpowers/plans/2026-05-31-amn2-local-agent-production-wiring.md
+codex/local-agent-production-wiring
+```
+
+Production wiring branch включает:
+
+- disabled-by-default settings;
+- strict hash-only `LOCAL_AGENT_TOKEN_HASH`;
+- token builder from settings;
+- real read-only runtime detection for Docker and host/systemd;
+- `python -m app.cli agent hash-token`;
+- `python -m app.cli agent serve`;
+- production docs.
+
+Verification:
+
+```text
+tests/agent tests/config/test_settings.py tests/server/test_operation_runner.py tests/server/test_checks.py tests/web/test_cli_web.py -v
+108 passed, 1 existing Starlette/httpx warning
+```
+
+Stacked PR:
+
+```text
+base: codex/local-agent-first-slice
+head: codex/local-agent-production-wiring
+url: https://github.com/barakov-dot/amn2/compare/codex/local-agent-first-slice...codex/local-agent-production-wiring?expand=1
 ```
 
 ## Transfer Gates
@@ -50,7 +75,8 @@ docs/superpowers/plans/2026-05-31-amn2-local-agent-production-wiring.md
 ## Current Priority Order
 
 1. Открыть/смержить Local Agent first slice PR.
-2. Выполнить Local Agent production wiring plan.
-3. Обновить AMN3 status with commits, tests and PR URL.
-4. Вернуться к live VPS retest on latest `codex-vps-test-prep`.
-5. После live retest выбирать следующий slice: runtime write operations или config delivery policy.
+2. Открыть production wiring PR как stacked PR поверх `codex/local-agent-first-slice`.
+3. После merge first slice retarget/rebase production wiring на свежий `codex-vps-test-prep`.
+4. Смержить production wiring после review.
+5. Вернуться к live VPS retest on latest `codex-vps-test-prep`.
+6. После live retest выбирать следующий slice: runtime write operations или config delivery policy.

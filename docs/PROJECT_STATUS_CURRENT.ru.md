@@ -22,10 +22,10 @@ https://github.com/barakov-dot/amn3.git
 master
 ```
 
-Последний опубликованный commit перед Local Agent production wiring plan:
+Последний опубликованный commit перед этим status update:
 
 ```text
-f2aeea6 Extend config delivery integrity test plan
+ddb0081 Ignore local worktrees
 ```
 
 AMN3 теперь является приватной базой знаний проекта: research, design specs, implementation plans, transfer notes и skill-кандидаты.
@@ -38,16 +38,23 @@ AMN3 теперь является приватной базой знаний п
 - AMN3 / Amneziya unification design;
 - `amn2` transfer backlog;
 - Local Agent production wiring implementation plan;
+- config delivery artifact integrity plan;
 - обновления очередей `amn2`, `hybrid`, `skill`.
 
 На момент этого snapshot AMN3 используется как coordination/knowledge repo. Production-код остается в `amn2`.
 
 ## Amneziya / `amn2`
 
-Локальный checkout:
+Основной локальный checkout:
 
 ```text
 C:\Users\SooL\Documents\Amneziya
+```
+
+Важно: основной checkout может содержать отдельные незакоммиченные изменения не из Local Agent work. Local Agent production wiring выполнен в isolated worktree:
+
+```text
+C:\Users\SooL\Documents\Amneziya\.codex_deps\worktrees\local-agent-production-wiring
 ```
 
 Текущая ветка Local Agent:
@@ -92,7 +99,67 @@ Manual PR URL:
 https://github.com/barakov-dot/amn2/pull/new/codex/local-agent-first-slice
 ```
 
+Compare PR URL with explicit base:
+
+```text
+https://github.com/barakov-dot/amn2/compare/codex-vps-test-prep...codex/local-agent-first-slice?expand=1
+```
+
 Автоматическое создание PR из Codex пока заблокировано: GitHub connector не видит приватный `barakov-dot/amn2`, а локальный `gh` не установлен.
+
+## Local Agent production wiring branch
+
+Branch:
+
+```text
+codex/local-agent-production-wiring
+```
+
+Remote branch:
+
+```text
+origin/codex/local-agent-production-wiring
+```
+
+Head:
+
+```text
+8697b60 Document Local Agent production wiring
+```
+
+Stacked base while first slice is not merged:
+
+```text
+codex/local-agent-first-slice @ ac2baa8 Add typed local agent auth errors
+```
+
+Commits:
+
+- `f2f425a Add Local Agent settings`
+- `9d343a1 Harden Local Agent token hash settings`
+- `c46fe2a Validate configured Local Agent token hash`
+- `58d3d07 Build Local Agent tokens from settings`
+- `0eb9ff9 Detect Local Agent runtime status`
+- `4837d28 Add Local Agent CLI commands`
+- `8697b60 Document Local Agent production wiring`
+
+Manual PR URL:
+
+```text
+https://github.com/barakov-dot/amn2/compare/codex/local-agent-first-slice...codex/local-agent-production-wiring?expand=1
+```
+
+После merge первого Local Agent PR эту ветку можно retarget/rebase на обновленный `codex-vps-test-prep`.
+
+Final verification:
+
+```text
+git diff --check
+tests/agent tests/config/test_settings.py tests/server/test_operation_runner.py tests/server/test_checks.py tests/web/test_cli_web.py -v
+108 passed, 1 existing Starlette/httpx warning
+```
+
+Windows pytest cleanup printed a post-summary `PermissionError` for `pytest-current`, but the command exited `0` after the passing summary.
 
 ## Что есть в Local Amnezia Agent first slice
 
@@ -149,14 +216,17 @@ tests/agent tests/server/test_operation_runner.py tests/server/test_checks.py te
 
 1. Открыть stacked PR `codex/local-agent-first-slice` -> `codex-vps-test-prep`.
 2. Review/merge Local Agent slice в `codex-vps-test-prep`.
-3. После этого выполнить Local Agent production wiring plan:
+3. Открыть stacked PR `codex/local-agent-production-wiring` -> `codex/local-agent-first-slice`.
+4. После merge первого PR retarget/rebase production wiring на обновленный `codex-vps-test-prep`, если GitHub не сделал это автоматически.
+5. Review/merge Local Agent production wiring.
+6. После merge обновить AMN3 status with PR/merge result.
+7. Затем возвращаться к live VPS retest на последнем `codex-vps-test-prep`.
+
+Local Agent production wiring plan:
 
 ```text
 docs/superpowers/plans/2026-05-31-amn2-local-agent-production-wiring.md
 ```
-
-4. После production wiring обновить AMN3 status with branch/commits/tests/PR.
-5. Затем возвращаться к live VPS retest на последнем `codex-vps-test-prep`.
 
 Transfer backlog:
 
