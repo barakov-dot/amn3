@@ -115,6 +115,33 @@ ConfigDeliveryPackage
 
 Config package может генерироваться on-demand. Если он сохраняется, он должен быть включен в `Secret Inventory` как `client-config-secret`.
 
+## Artifact integrity model
+
+После PRVTPRO config delivery deep-dive важно разделять не только surfaces, но и конкретные delivery artifacts. Один и тот же VPN config может быть выдан как raw `.conf`, файл для скачивания, QR payload, `vpn://` import URI или future subscription URI. Все эти формы являются `secret-read`, но проверяются по-разному.
+
+```text
+ConfigDeliveryArtifact
+  artifact_id
+  package_id
+  connection_id
+  artifact_type: conf_text | conf_file | qr_payload | qr_image | import_uri | subscription_uri
+  target_client: amnezia_android | amnezia_desktop | wireguard_android | wireguard_desktop | generic
+  content_encoding: utf-8 | binary | base64-uri
+  contains_secret: true
+  generated_at
+  expires_at
+  redaction_policy
+```
+
+Rules:
+
+- `.conf` text and `.conf` file must be byte-equivalent after UTF-8 encoding.
+- QR payload must be explicitly defined: raw config text, import URI or another protocol-specific payload.
+- QR image is not a harmless image; it is a secret-bearing rendering of `qr_payload`.
+- `vpn://` is secret-bearing because it reversibly encodes the full config.
+- Artifact generation must be deterministic enough for tests to compare payloads, even if image pixels vary by QR library.
+- UI and API responses should not silently switch QR payload type by protocol without exposing this in the artifact metadata.
+
 ## Ownership rules
 
 Self-service:
@@ -251,6 +278,30 @@ Backup policy:
 - restore redacted backup не оживляет public links;
 - encrypted full backup может восстановить share records только через explicit dangerous mode.
 
+## Manager export contract
+
+Config delivery не должен зависеть от того, что каждый protocol manager случайно реализовал совместимую сигнатуру `get_client_config`. Для `amn2` нужен единый export contract, который скрывает protocol-specific детали за нормализованным результатом.
+
+```text
+ManagerConfigExportResult
+  protocol
+  connection_id
+  config_text
+  import_uri
+  supported_artifacts
+  target_clients
+  warnings
+  unavailable_reason
+```
+
+Требования:
+
+- каждый manager явно объявляет capability `export_config` или причину отсутствия;
+- manager не возвращает raw traceback в user-facing response;
+- если private key отсутствует и config нельзя восстановить, результат должен быть typed warning/error, а не runtime exception в UI;
+- self-service, public share и admin UI используют один export contract;
+- contract tests запускаются для каждого manager-а и каждого поддержанного artifact type.
+
 ## Audit model
 
 Audit events:
@@ -336,13 +387,36 @@ Denial responses для public share не должны раскрывать, с�
 - bearer token without `configs:read` denied;
 - support role cannot download config unless route policy explicitly allows it.
 
+Artifact integrity tests:
+
+- `.conf` file bytes equal UTF-8 encoded config text;
+- `.conf` round-trip preserves non-ASCII names, включая кириллицу;
+- QR payload decode equals expected raw payload byte-for-byte;
+- QR tests cover at least one non-ASCII connection/user/server name;
+- QR generation failure returns sanitized error and does not leak config body;
+- `vpn://` decode returns the original config text without byte loss;
+- `vpn://` is classified as `client-config-secret` in logs, audit, backup and metrics checks;
+- target client matrix records whether QR contains raw config or import URI;
+- Android/import compatibility smoke exists for each supported artifact where tooling allows it;
+- no config body, QR payload, QR image bytes or import URI appears in user-visible error detail.
+
+Manager export contract tests:
+
+- every protocol manager with config delivery implements the same export contract;
+- every manager declares supported artifact types and target clients;
+- self-service, public share and admin UI use the same export path;
+- missing private key returns typed `unavailable_reason`;
+- signature mismatch cannot reach runtime UI/API response;
+- manager errors are redacted before response/audit/log output.
+
 Aggregate checks:
 
 - every `secret-download` route has audit required;
 - every public-share route has expiry and rate limit;
 - every config payload is classified as `client-config-secret`;
 - every delivery surface has route policy;
-- no share token field is plaintext in storage schema.
+- no share token field is plaintext in storage schema;
+- every artifact type has an integrity test or an explicit documented reason why it cannot be tested yet.
 
 ## Путь внедрения в `amn2`
 
@@ -352,11 +426,13 @@ Aggregate checks:
 2. Классифицировать каждый route через `Route Policy Matrix`.
 3. Добавить ownership tests для существующих user-owned configs.
 4. Ввести audit event на config download.
-5. Ввести share token hash model, если public links уже есть или планируются.
-6. Добавить expiry и revoke как обязательные поля share link.
-7. Связать config payload с `Secret Inventory`.
-8. Проверить backup/export на отсутствие generated configs и share tokens.
-9. Только после этого расширять delivery channels, например Telegram.
+5. Добавить artifact integrity tests для `.conf`, QR и `vpn://` на существующем `build_device_config_delivery()`.
+6. Ввести manager export contract, если появляются новые protocol manager-ы или новый путь выдачи config.
+7. Ввести share token hash model, если public links уже есть или планируются.
+8. Добавить expiry и revoke как обязательные поля share link.
+9. Связать config payload с `Secret Inventory`.
+10. Проверить backup/export на отсутствие generated configs и share tokens.
+11. Только после этого расширять delivery channels, например Telegram.
 
 ## Решение для lab
 
@@ -369,6 +445,7 @@ Aggregate checks:
 - Auth/secrets deep-dive: [research/upstreams/prvtpro-amnezia-web-panel-auth-secrets.md](../../../research/upstreams/prvtpro-amnezia-web-panel-auth-secrets.md)
 - API surface deep-dive: [research/upstreams/prvtpro-amnezia-web-panel-api-surface.md](../../../research/upstreams/prvtpro-amnezia-web-panel-api-surface.md)
 - Feature gap: [research/upstreams/prvtpro-amnezia-web-panel-feature-gap.md](../../../research/upstreams/prvtpro-amnezia-web-panel-feature-gap.md)
+- PRVTPRO config delivery integrity: [research/upstreams/prvtpro-amnezia-web-panel-config-delivery-integrity.md](../../../research/upstreams/prvtpro-amnezia-web-panel-config-delivery-integrity.md)
 - Route Policy Matrix spec: [docs/superpowers/specs/2026-05-30-route-policy-matrix-design.md](2026-05-30-route-policy-matrix-design.md)
 - Secret Inventory + Backup Policy spec: [docs/superpowers/specs/2026-05-30-secret-inventory-backup-policy-design.md](2026-05-30-secret-inventory-backup-policy-design.md)
 - Scoped API Tokens spec: [docs/superpowers/specs/2026-05-30-scoped-api-tokens-design.md](2026-05-30-scoped-api-tokens-design.md)

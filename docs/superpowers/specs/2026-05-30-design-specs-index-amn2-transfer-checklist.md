@@ -28,7 +28,7 @@ License verdict upstream: `GPL-3.0`, режим `research-only`.
 | [Route Policy Matrix](2026-05-30-route-policy-matrix-design.md) | `design-candidate` | route guards, auth methods, roles, scopes, risk classes, access tests | таблица текущих API endpoints |
 | [Scoped API Tokens](2026-05-30-scoped-api-tokens-design.md) | `design-candidate` | one-time token display, hash storage, scopes, expiry, revoke, owner inheritance | read-only integration token после route matrix |
 | [Secret Inventory + Backup Policy](2026-05-30-secret-inventory-backup-policy-design.md) | `design-candidate` | secret classes, inventory, redacted/full backup, restore, redaction, audit | secret inventory текущего state/storage |
-| [Public/Self-service Config Delivery](2026-05-30-public-self-service-config-delivery-design.md) | `design-candidate` | user-owned configs, public links, share token hash, expiry, revoke, audit | ownership tests для текущей выдачи configs |
+| [Public/Self-service Config Delivery](2026-05-30-public-self-service-config-delivery-design.md) | `design-candidate-updated-after-prvtpro-config-integrity` | user-owned configs, public links, share token hash, expiry, revoke, audit, `.conf`/QR/`vpn://` integrity, manager export contract | artifact integrity tests для текущей выдачи configs |
 
 ## Зависимости между specs
 
@@ -46,7 +46,7 @@ License verdict upstream: `GPL-3.0`, режим `research-only`.
 - route policy нужна, чтобы не спорить в каждом handler-е, кто имеет право на действие;
 - remote runner нужен до опасных SSH/sudo операций;
 - token scopes должны опираться на route policy;
-- config delivery зависит от ownership, secret inventory, audit и route policy.
+- config delivery зависит от ownership, secret inventory, audit, route policy и artifact integrity tests.
 
 Если в текущем `amn2` уже есть remote operations, можно параллельно начать с inventory remote actions для `RemoteOperationRunner`, но без немедленной переписи кода.
 
