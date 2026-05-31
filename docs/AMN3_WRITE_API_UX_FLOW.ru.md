@@ -7,6 +7,8 @@
 Документ не включает write routes, не включает `LOCAL_AGENT_WRITE_ENABLED`, не добавляет mutation endpoints и не меняет
 production defaults. Это локальный продуктовый контракт перед VPS gate.
 
+Связанный audit contract: `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md`.
+
 ## 1. Gate
 
 Write API остается закрытым, пока не выполнены все условия:
@@ -104,6 +106,7 @@ Mutation должна быть узкой и атомарной настольк
 
 Каждая операция audit-required. Audit record должен содержать:
 
+- поля и states из `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md`;
 - timestamp;
 - actor surface: `web_admin`, `telegram_bot` или `cli`;
 - actor id без лишних персональных данных;

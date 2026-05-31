@@ -13,6 +13,7 @@
 - `tests/agent/test_policy.py`
 
 Связанный UX/API flow: `docs/AMN3_WRITE_API_UX_FLOW.ru.md`.
+Связанный audit contract: `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md`.
 
 ## Gate
 
@@ -74,7 +75,7 @@ admin/bot/controller слоя.
 - Проверку, что future write routes остаются inactive before VPS smoke.
 - Обсуждение UX flow: dry-run -> confirmation -> mutation.
 - Синхронизацию web admin, Telegram bot и CLI вокруг `dry-run -> confirmation -> apply/revoke -> audit -> rollback`.
-- Подготовку web admin wording и audit model без реальных mutations.
+- Подготовку web admin wording и `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md` без реальных mutations.
 
 ## What This Does Not Enable
 

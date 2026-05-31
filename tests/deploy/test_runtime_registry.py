@@ -310,6 +310,38 @@ def test_amn3_write_api_ux_flow_doc_maps_surfaces_without_enabling_routes():
     assert "docs/AMN3_WRITE_API_UX_FLOW.ru.md" in policy_doc
 
 
+def test_amn3_write_api_audit_model_doc_tracks_safe_audit_contracts():
+    doc_path = ROOT / "docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    ux_flow_path = ROOT / "docs/AMN3_WRITE_API_UX_FLOW.ru.md"
+    policy_doc_path = ROOT / "docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    ux_flow = ux_flow_path.read_text(encoding="utf-8")
+    policy_doc = policy_doc_path.read_text(encoding="utf-8")
+
+    assert "app/agent/write_audit.py" in text
+    assert "tests/agent/test_write_audit.py" in text
+    assert "web_admin" in text
+    assert "telegram_bot" in text
+    assert "cli" in text
+    assert "dry_run_planned" in text
+    assert "mutation_applied" in text
+    assert "mutation_revoked" in text
+    assert "mutation_failed" in text
+    assert "rollback_applied" in text
+    assert "raw token" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "peer_public_key_fingerprint" in text
+    assert "docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md" in handoff
+    assert "docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md" in ux_flow
+    assert "docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md" in policy_doc
+
+
 def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     doc_path = ROOT / "docs/VPS_RETEST_PROTOCOL.ru.md"
     checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"
