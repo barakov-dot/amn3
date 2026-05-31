@@ -2,7 +2,7 @@
 
 Дата снимка: 2026-05-31.
 
-Обновлено: 2026-05-31 после task/review-сессий по Local Amnezia Agent first slice и новых коммитов `amn2`.
+Обновлено: 2026-05-31 после task/review-сессий по Local Amnezia Agent first slice, push AMN3 и hardening-коммита `amn2`.
 
 Документ нужен для главного coordination-чата. Он собирает только рабочий контекст, который нужен для решений по `amn2`, будущему hybrid и общему Codex skill. Это не implementation plan и не разрешение на перенос функций.
 
@@ -31,9 +31,11 @@ GitHub:
 
 ## Главные правила проекта
 
+AMN3 остается coordination/knowledge-направлением.
+
 `amn2` остается production-направлением.
 
-`vpn-ops-lab` остается исследовательской лабораторией.
+`vpn-ops-lab`/AMN3 остается исследовательской лабораторией, design registry и transfer gate.
 
 Код из внешних проектов не копируем. Идея может перейти из lab в `amn2` только после проверки:
 
@@ -66,9 +68,11 @@ C:\Users\SooL\Documents\Amneziya
 Git:
 
 ```text
-branch: codex-vps-test-prep
+base branch: codex-vps-test-prep
+local-agent branch: codex/local-agent-first-slice
 origin: https://github.com/barakov-dot/amn2.git
-latest local commit: 8ecb0b4 Add configurable client config defaults
+local-agent latest commit: ac2baa8 Add typed local agent auth errors
+base latest commit: 8ecb0b4 Add configurable client config defaults
 ```
 
 Последние новые коммиты в `amn2`:
@@ -76,15 +80,14 @@ latest local commit: 8ecb0b4 Add configurable client config defaults
 - `573c368 Add VPS retest bundle`
 - `8ecb0b4 Add configurable client config defaults`
 
-Сейчас ветка `codex-vps-test-prep` синхронизирована с `origin/codex-vps-test-prep`.
+Сейчас ветка `codex/local-agent-first-slice` синхронизирована с `origin/codex/local-agent-first-slice`.
 
-Важно: в рабочем дереве `Amneziya` есть незакоммиченный Local Amnezia Agent first slice:
+Local Amnezia Agent first slice уже закоммичен и запушен в stacked branch:
 
-- `app/agent/`
-- `tests/agent/`
-- `docs/LOCAL_AGENT.ru.md`
+- `3119ee6 Add local Amnezia agent first slice`
+- `ac2baa8 Add typed local agent auth errors`
 
-Эти файлы не закоммичены. Не смешивать их с VPS retest/config-defaults работой без отдельного решения.
+PR нужно открывать как `codex/local-agent-first-slice` -> `codex-vps-test-prep`, чтобы diff содержал только Local Agent slice.
 
 Последний известный полный прогон тестов из handoff:
 
@@ -94,10 +97,11 @@ latest local commit: 8ecb0b4 Add configurable client config defaults
 
 Предупреждение: `StarletteDeprecationWarning` для `httpx` + `starlette.testclient`.
 
-Последний focused прогон Local Agent tests в текущей рабочей копии:
+Последний focused/regression прогон Local Agent branch:
 
 ```text
-33 passed, 1 warning
+tests/agent tests/server/test_operation_runner.py tests/server/test_checks.py tests/web/test_servers.py -v
+70 passed, 1 warning
 ```
 
 Предупреждение то же: `StarletteDeprecationWarning` из `.codex_deps`.
@@ -362,7 +366,7 @@ Main coordination должен принимать от KYORESUAS/API-чата н
 - `ideas/add-to-skill.md`;
 - решение по Local Amnezia Agent / API surface / install-runtime / auth-secrets.
 
-0. Сначала решить судьбу незакоммиченного Local Agent first slice.
+0. Local Agent first slice уже вынесен в отдельную ветку `codex/local-agent-first-slice` и запушен.
 
 Рекомендованный безопасный git-маршрут из review-чата:
 
@@ -378,7 +382,7 @@ Main coordination должен принимать от KYORESUAS/API-чата н
 
 2. После retest review выбрать, продолжаем ли `RemoteOperationRunner first slice` или расширяем `Local Amnezia Agent`.
 
-RemoteOperationRunner ближе к текущему `amn2` VPS flow. Local Agent ближе к будущему API-first управлению Amnezia. Первый read-only slice Local Agent уже реализован локально, но еще не интегрирован через commit/PR.
+RemoteOperationRunner ближе к текущему `amn2` VPS flow. Local Agent ближе к будущему API-first управлению Amnezia. Первый read-only slice Local Agent уже реализован, закоммичен и запушен; дальше нужен PR/review поверх `codex-vps-test-prep`.
 
 3. Для `kyoresuas/amnezia-api` можно продолжить три deep-dive карточки:
 

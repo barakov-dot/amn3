@@ -1,6 +1,12 @@
-# VPN Ops Lab
+# AMN3 / VPN Ops Lab
 
-Исследовательский проект для параллельного развития `amn2` и будущих VPN-продуктов.
+Приватный штаб проекта для параллельного развития `amn2`, будущих VPN-продуктов и Local Amnezia Agent.
+
+GitHub:
+
+```text
+https://github.com/barakov-dot/amn3.git
+```
 
 ## Цели
 
@@ -14,9 +20,11 @@
 
 ## Главное правило
 
+AMN3 остается coordination/knowledge-направлением.
+
 `amn2` остается production-направлением.
 
-`vpn-ops-lab` остается исследовательской лабораторией.
+`vpn-ops-lab`/AMN3 остается исследовательской лабораторией, design registry и transfer gate.
 
 Функции переходят из `vpn-ops-lab` в `amn2` только после проверки:
 
@@ -27,6 +35,22 @@
 - тестового плана.
 
 Пока идея не прошла эти проверки, она остается исследовательским кандидатом.
+
+## Связь с Amneziya / `amn2`
+
+Production-репозиторий:
+
+```text
+https://github.com/barakov-dot/amn2.git
+```
+
+AMN3 хранит решения, статусы, upstream-анализ, implementation plans и ссылки на ветки/commits/PR в `amn2`.
+
+`amn2` хранит production-код, tests и runtime-документы.
+
+Наработки из `amn2` являются обязательным контекстом для новых решений AMN3. Перед переносом любой идеи из upstream или чатов нужно проверить, не решена ли эта задача уже в `amn2`, и не конфликтует ли она с текущими runtime/security constraints.
+
+Рабочая модель объединения описана в [AMN3 / Amneziya Unification design](docs/superpowers/specs/2026-05-31-amn3-amneziya-unification-design.md).
 
 ## Правила безопасности
 
