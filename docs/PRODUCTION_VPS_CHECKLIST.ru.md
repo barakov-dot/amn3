@@ -120,6 +120,7 @@ tunnel до панели. Для короткой проверки по plain HT
 - Service должен слушать только `127.0.0.1:3031`; публично порт не открывать.
 - Для Docker runtime отдельно проверить доступ пользователя `amneziya` к Docker socket перед включением `SupplementaryGroups=docker`.
 - Не добавлять write/config/backup routes без отдельного policy gate.
+- Первый запуск на VPS вести по `docs/LOCAL_AGENT_VPS_SMOKE_RUNBOOK.ru.md`.
 
 ## 4. Шаблоны и выдача конфига
 

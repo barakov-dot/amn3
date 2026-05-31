@@ -116,6 +116,33 @@ def test_vps_log_collection_doc_lists_commands_and_redaction_rules():
     assert "APP_SECRET_KEY" in text
 
 
+def test_local_agent_vps_smoke_runbook_lists_safe_install_and_checks():
+    doc_path = ROOT / "docs/LOCAL_AGENT_VPS_SMOKE_RUNBOOK.ru.md"
+    local_agent_doc_path = ROOT / "docs/LOCAL_AGENT.ru.md"
+    checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+    local_agent_doc = local_agent_doc_path.read_text(encoding="utf-8")
+    checklist = checklist_path.read_text(encoding="utf-8")
+
+    assert "LOCAL_AGENT_ENABLED=true" in text
+    assert "LOCAL_AGENT_HOST=127.0.0.1" in text
+    assert "LOCAL_AGENT_TOKEN_HASH=sha256:" in text
+    assert "python -m app.cli agent hash-token" in text
+    assert "read -rsp" in text
+    assert "sudo install -m 0644 deploy/systemd/amneziya-agent.service.example /etc/systemd/system/amneziya-agent.service" in text
+    assert "sudo systemctl enable --now amneziya-agent" in text
+    assert "curl -fsS -H \"Authorization: Bearer $LOCAL_AGENT_RAW_TOKEN\" http://127.0.0.1:3031/agent/health" in text
+    assert "curl -fsS -H \"Authorization: Bearer $LOCAL_AGENT_RAW_TOKEN\" http://127.0.0.1:3031/agent/runtime" in text
+    assert "curl -fsS -H \"Authorization: Bearer $LOCAL_AGENT_RAW_TOKEN\" http://127.0.0.1:3031/agent/protocols" in text
+    assert "ssh -N -L 3031:127.0.0.1:3031" in text
+    assert "bash deploy/runtime/collect_debug_snapshot.sh" in text
+    assert "--host 0.0.0.0" not in text
+    assert "LOCAL_AGENT_RAW_TOKEN=" not in text
+    assert "docs/LOCAL_AGENT_VPS_SMOKE_RUNBOOK.ru.md" in local_agent_doc
+    assert "docs/LOCAL_AGENT_VPS_SMOKE_RUNBOOK.ru.md" in checklist
+
+
 def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     doc_path = ROOT / "docs/VPS_RETEST_PROTOCOL.ru.md"
     checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"

@@ -123,3 +123,5 @@ Invoke-RestMethod -Headers $headers http://127.0.0.1:3031/agent/protocols
 а не маскировать проблему под `stopped`.
 
 Для первого production режима держать `LOCAL_AGENT_HOST=127.0.0.1` и открывать доступ только через SSH tunnel, reverse proxy с auth или будущий controller-side transport. Публично наружу agent не выставлять.
+
+Подробный VPS smoke runbook: `docs/LOCAL_AGENT_VPS_SMOKE_RUNBOOK.ru.md`.
