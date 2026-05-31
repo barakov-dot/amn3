@@ -52,6 +52,12 @@ The password is passed to `sshpass` through `SSHPASS`, not through command-line 
 
 Do not store real `.env`, `servers.yml`, SSH private keys, bot tokens, `APP_SECRET_KEY`, SQLite databases, backup archives, generated client configs, QR images, Docker images, virtual environments, `node_modules`, or logs with private data.
 
+### Secret-bearing delivery artifacts
+
+`.conf`, QR payload/PNG, and `vpn://` import links are `client-config-secret` artifacts.
+They must not be included in runtime diagnostics, plain backups, audit metadata, logs, or error output.
+If such an artifact reaches text diagnostic output, it must pass through `app.security.redaction.redact()`.
+
 If heavy artifacts are needed later, put them in GitHub Releases or separate storage. Keep only URL, version, and checksum in the repository.
 
 ## Quick VPS Check
