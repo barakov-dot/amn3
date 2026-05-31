@@ -27,7 +27,13 @@ codex-vps-test-prep
 Текущий актуальный коммит:
 
 ```text
-Document verified VPS live cycle
+Document VPS verified tag
+```
+
+Стабильная проверенная точка живого VPS-цикла помечена тегом:
+
+```text
+vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 ```
 
 Не начинать отдельный проект с нуля. Новый чат должен открыть эту же папку, проверить ветку и продолжить от текущего состояния.
@@ -72,7 +78,9 @@ cd C:\Users\SooL\Documents\Amneziya
 ## codex-vps-test-prep...origin/codex-vps-test-prep
 ```
 
-В `git log -5` верхний коммит должен иметь сообщение `Document verified VPS live cycle`.
+В `git log -5` верхний коммит должен иметь сообщение `Document VPS verified tag`.
+
+Тег `vps-live-cycle-verified` должен указывать на коммит `d6eda20 Document verified VPS live cycle`: это последняя точка, где базовый live cycle был проверен на VPS.
 
 Если ветка не совпадает:
 
@@ -219,7 +227,7 @@ git log -1 --oneline
 Ожидаемый коммит:
 
 ```text
-Document verified VPS live cycle
+Document VPS verified tag
 ```
 
 Проверить server config:
