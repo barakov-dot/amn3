@@ -147,6 +147,45 @@ def test_local_agent_vps_smoke_runbook_lists_safe_install_and_checks():
     assert "docs/LOCAL_AGENT_VPS_SMOKE_RUNBOOK.ru.md" in checklist
 
 
+def test_amn3_local_agent_smoke_checklist_tracks_current_branch_and_safe_paths():
+    doc_path = ROOT / "docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md"
+    checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+    checklist = checklist_path.read_text(encoding="utf-8")
+
+    assert "https://github.com/barakov-dot/amn3.git" in text
+    assert "codex/local-agent-production-wiring" in text
+    assert "fdc471a" in text
+    assert "git push -u origin codex/local-agent-production-wiring" in text
+    assert "git fetch origin codex/local-agent-production-wiring" in text
+    assert "LOCAL_AGENT_CONTROLLER_ENABLED=true" in text
+    assert "LOCAL_AGENT_CONTROLLER_TOKEN_PATH=/opt/amn2/secrets/local-agent.token" in text
+    assert "sudo install -m 0600 -o amneziya -g amneziya /dev/null /opt/amn2/secrets/local-agent.token" in text
+    assert "sudo systemctl enable --now amneziya-agent" in text
+    assert "python -m app.cli agent probe --base-url http://127.0.0.1:3031" in text
+    assert "curl -i http://127.0.0.1:3030/login" in text
+    assert "--host 0.0.0.0 --port 3031" not in text
+    assert "LOCAL_AGENT_RAW_TOKEN=" not in text
+    assert "docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md" in checklist
+
+
+def test_amn3_next_chat_handoff_points_to_current_integration_docs():
+    doc_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+
+    assert "https://github.com/barakov-dot/amn3.git" in text
+    assert "codex/local-agent-production-wiring" in text
+    assert "fdc471a" in text
+    assert "docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md" in text
+    assert "docs/LOCAL_AGENT_VPS_SMOKE_RUNBOOK.ru.md" in text
+    assert "git status --short --branch" in text
+    assert "git log -5 --oneline --decorate" in text
+    assert "python -m pytest tests/deploy/test_runtime_registry.py" in text
+    assert "write API" in text
+
+
 def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     doc_path = ROOT / "docs/VPS_RETEST_PROTOCOL.ru.md"
     checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"

@@ -121,6 +121,7 @@ tunnel до панели. Для короткой проверки по plain HT
 - Для Docker runtime отдельно проверить доступ пользователя `amneziya` к Docker socket перед включением `SupplementaryGroups=docker`.
 - Не добавлять write/config/backup routes без отдельного policy gate.
 - Первый запуск на VPS вести по `docs/LOCAL_AGENT_VPS_SMOKE_RUNBOOK.ru.md`.
+- Для текущей AMN3-интеграции использовать короткий маршрут `docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md`.
 
 ## 4. Шаблоны и выдача конфига
 

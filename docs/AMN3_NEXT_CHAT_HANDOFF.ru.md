@@ -1,0 +1,126 @@
+# AMN3 Next Chat Handoff
+
+Этот handoff нужен, чтобы следующий чат внутри VPS Ops Lab продолжил текущую
+линию AMN3 без возврата к старому `amn2` контексту.
+
+## 1. Текущая цель
+
+Собираем собственный качественный продукт вокруг Amneziya:
+
+- web admin и Telegram bot управляют пользователями и устройствами;
+- Local Agent стоит на VPS Amneziya и дает read-only runtime/status API;
+- следующий этап после VPS smoke - первый безопасный write API для управления
+  users/devices/peers;
+- код чужих проектов не копируем, используем их только как источник анализа и
+  продуктовых решений.
+
+## 2. Git и рабочая папка
+
+Локальный worktree:
+
+```text
+C:\Users\SooL\Documents\Amneziya\.codex_deps\worktrees\local-agent-production-wiring
+```
+
+Целевой приватный GitHub repository:
+
+```text
+https://github.com/barakov-dot/amn3.git
+```
+
+Интеграционная ветка:
+
+```text
+codex/local-agent-production-wiring
+```
+
+Baseline, который уже содержит Local Agent в web admin:
+
+```text
+fdc471a Show Local Agent health in web admin
+```
+
+Перед работой проверить:
+
+```powershell
+git status --short --branch
+git log -5 --oneline --decorate
+git remote -v
+```
+
+Если ветка еще не опубликована в `amn3`, использовать команды из
+`docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md`.
+
+## 3. Что уже сделано в текущей ветке
+
+- hardened runtime detection для Local Agent;
+- безопасные defaults и env hygiene;
+- systemd template для `amneziya-agent`;
+- diagnostics snapshot с redaction;
+- VPS smoke runbook;
+- read-only Local Agent client;
+- CLI `agent probe`;
+- web admin блок `Local Agent` на server detail/server health;
+- controller settings:
+  - `LOCAL_AGENT_CONTROLLER_ENABLED`;
+  - `LOCAL_AGENT_CONTROLLER_BASE_URL`;
+  - `LOCAL_AGENT_CONTROLLER_TOKEN_PATH`.
+
+## 4. Главные документы
+
+- `docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md` - короткий маршрут для
+  текущего переноса AMN3 на VPS.
+- `docs/LOCAL_AGENT_VPS_SMOKE_RUNBOOK.ru.md` - полный VPS smoke runbook.
+- `docs/LOCAL_AGENT.ru.md` - архитектура Local Agent.
+- `docs/PRODUCTION_VPS_CHECKLIST.ru.md` - общий production checklist.
+- `docs/WEB_PANEL_AND_BOT_SETUP.ru.md` - web/bot запуск и эксплуатация.
+- `docs/VPS_RETEST_PROTOCOL.ru.md` - повторяемый VPS retest.
+- `docs/VPS_LOG_COLLECTION.ru.md` - сбор логов и диагностики.
+
+## 5. Как проверять локально
+
+В этом окружении tests запускаются через bundled Python и `.codex_deps`:
+
+```powershell
+$env:PYTHONPATH='C:\Users\SooL\Documents\Amneziya\.codex_deps'
+& 'C:\Users\SooL\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -m pytest tests/deploy/test_runtime_registry.py -v
+```
+
+Короткая команда, которую ищут docs tests:
+
+```powershell
+python -m pytest tests/deploy/test_runtime_registry.py
+```
+
+Перед завершением любого slice:
+
+```powershell
+git diff --check
+git status --short --branch
+```
+
+## 6. Ближайший порядок работы
+
+1. Опубликовать или доставить ветку `codex/local-agent-production-wiring` в
+   `barakov-dot/amn3`.
+2. На VPS пройти `docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md`.
+3. Убедиться, что web admin видит Local Agent без raw token.
+4. Зафиксировать результат smoke в docs или commit message.
+5. После успешного smoke начинать первый write API slice.
+
+## 7. Правила write API
+
+Write API делаем только после зеленого read-only smoke.
+
+Обязательные элементы первого write slice:
+
+- route policy matrix;
+- explicit scopes;
+- audit log на каждую операцию;
+- dry-run/preflight перед mutation;
+- redaction секретов;
+- rollback path;
+- тесты на запрет secret leakage.
+
+Первый write API должен быть узким: create/disable/enable device или peer, без
+массовых операций и без публичного root API.
