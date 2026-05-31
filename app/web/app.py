@@ -2135,10 +2135,16 @@ def _collect_server_peer_sync(settings: Settings, server_id: int) -> dict[str, A
             )
             if device is None:
                 continue
+            user = repo.get_user(int(device["user_id"]))
             known_peers.append(
                 {
                     "device_id": int(device["id"]),
                     "device_name": str(device["name"]),
+                    "device_status": str(device["status"]),
+                    "config_version": str(device["config_version"]),
+                    "user_id": int(user["id"]),
+                    "user_display": _format_sync_user_display(user),
+                    "user_telegram_id": int(user["telegram_id"]),
                     "peer_public_key": peer.peer_public_key,
                     "vpn_ip": str(device["vpn_ip"]),
                     "allowed_ips": peer.allowed_ips,
@@ -2188,6 +2194,23 @@ def _empty_peer_sync_report(*, error: str) -> dict[str, Any]:
         "ignored_peers": [],
         "error": error,
     }
+
+
+def _format_sync_user_display(user: Any) -> str:
+    username = str(user["username"] or "").strip()
+    if username:
+        return f"@{username}"
+    name = " ".join(
+        part
+        for part in (
+            str(user["first_name"] or "").strip(),
+            str(user["last_name"] or "").strip(),
+        )
+        if part
+    )
+    if name:
+        return name
+    return f"telegram_id={user['telegram_id']}"
 
 
 def _remove_unknown_remote_peer(

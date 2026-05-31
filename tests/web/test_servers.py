@@ -11,6 +11,7 @@ from app.db.repositories import Repository
 from app.db.schema import initialize_schema
 from app.security.crypto import SecretBox
 from app.server.peer_apply import PeerApplyError
+from app.services.peer_inventory import PeerInventoryReport, RemotePeer
 from app.web.app import create_web_app
 from app.web.auth import create_password_hash
 
@@ -248,6 +249,11 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
                 {
                     "device_id": 7,
                     "device_name": "known-device",
+                    "device_status": "active",
+                    "config_version": "amneziawg_v2",
+                    "user_id": 3,
+                    "user_display": "@alice",
+                    "user_telegram_id": 1001,
                     "peer_public_key": "known-peer",
                     "vpn_ip": "10.44.0.2",
                     "allowed_ips": "10.44.0.2/32",
@@ -291,7 +297,12 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
     assert "Синхронизация peer" in page.text
     assert "Известные peer панели" in page.text
     assert "1 / 1 / 1" in page.text
+    assert "Working configs on server" in page.text
+    assert "@alice" in page.text
+    assert "1001" in page.text
     assert "known-device" in page.text
+    assert "active" in page.text
+    assert "amneziawg_v2" in page.text
     assert "known-peer" in page.text
     assert "10.44.0.2/32" in page.text
     assert "unknown-peer" in page.text
@@ -306,6 +317,63 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
     with _repo(Path(settings.database_path)) as repo:
         action = _latest_admin_action(repo)
         assert action["action"] == "web_server_peer_sync_run"
+
+
+def test_collect_server_peer_sync_enriches_known_peers_with_user_and_device(
+    tmp_path: Path,
+    monkeypatch,
+):
+    server_config_path = _write_server_config(tmp_path, server_name="local")
+    settings = _settings(tmp_path, server_config_path=server_config_path)
+    with _repo(Path(settings.database_path)) as repo:
+        user_id = _seed_user(repo)
+        server_id = _seed_server(repo, name="local")
+        device_id = _seed_device(
+            repo,
+            user_id=user_id,
+            server_id=server_id,
+            status="active",
+            vpn_ip="10.44.0.2",
+            peer_public_key="known-peer",
+        )
+
+    class FakePeerInventoryService:
+        def __init__(self, repo):
+            self._repo = repo
+
+        def compare(self, server_id, collector):
+            return PeerInventoryReport(
+                known_remote_peers=(
+                    RemotePeer(
+                        peer_public_key="known-peer",
+                        allowed_ips="10.44.0.2/32",
+                        latest_handshake=0,
+                        rx_bytes=0,
+                        tx_bytes=0,
+                    ),
+                ),
+                unknown_remote_peers=(),
+                missing_local_peers=(),
+            )
+
+    monkeypatch.setattr(web_app, "PeerInventoryService", FakePeerInventoryService)
+
+    report = web_app._collect_server_peer_sync(settings, server_id)
+
+    assert report["known_peers"] == [
+        {
+            "device_id": device_id,
+            "device_name": "active-device",
+            "device_status": "active",
+            "config_version": "amneziawg_v2",
+            "user_id": user_id,
+            "user_display": "@alice",
+            "user_telegram_id": 1001,
+            "peer_public_key": "known-peer",
+            "vpn_ip": "10.44.0.2",
+            "allowed_ips": "10.44.0.2/32",
+        }
+    ]
 
 
 def test_ignore_unknown_remote_peer_records_it_for_server(tmp_path: Path):
@@ -449,6 +517,11 @@ def test_add_missing_local_device_refreshes_sync_report_with_added_peer(
             {
                 "device_id": device_id,
                 "device_name": "missing-device",
+                "device_status": "active",
+                "config_version": "amneziawg_v2",
+                "user_id": user_id,
+                "user_display": "@alice",
+                "user_telegram_id": 1001,
                 "peer_public_key": "missing-peer",
                 "vpn_ip": "10.44.0.22",
                 "allowed_ips": "10.44.0.22/32",

@@ -209,22 +209,32 @@
         </dl>
         {% if peer_sync.known_peers %}
           <div class="table-wrap panel-spaced">
+            <h3>Working configs on server</h3>
             <table>
               <thead>
                 <tr>
-                  <th>Known panel peer</th>
-                  <th>Peer</th>
+                  <th>Owner</th>
+                  <th>Device</th>
+                  <th>Status</th>
+                  <th>Config</th>
                   <th>VPN IP</th>
                   <th>Live Allowed IPs</th>
+                  <th>Peer</th>
                 </tr>
               </thead>
               <tbody>
                 {% for peer in peer_sync.known_peers %}
                   <tr>
+                    <td>
+                      <a href="/users/{{ peer.user_id }}">{{ peer.user_display }}</a>
+                      <span class="muted-text">{{ peer.user_telegram_id }}</span>
+                    </td>
                     <td>#{{ peer.device_id }} {{ peer.device_name }}</td>
-                    <td class="wrap-text">{{ peer.peer_public_key }}</td>
+                    <td><span class="status status-{{ peer.device_status }}">{{ peer.device_status }}</span></td>
+                    <td>{{ peer.config_version }}</td>
                     <td>{{ peer.vpn_ip }}/32</td>
                     <td>{{ peer.allowed_ips }}</td>
+                    <td class="wrap-text">{{ peer.peer_public_key }}</td>
                   </tr>
                 {% endfor %}
               </tbody>
