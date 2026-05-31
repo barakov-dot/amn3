@@ -1360,15 +1360,22 @@ class Repository:
         return self._conn.execute(
             """
             SELECT
-                id,
-                name,
-                vpn_ip,
-                peer_public_key,
-                status
+                devices.id,
+                devices.user_id,
+                devices.name,
+                devices.config_version,
+                devices.vpn_ip,
+                devices.peer_public_key,
+                devices.status,
+                users.telegram_id,
+                users.username,
+                users.first_name,
+                users.last_name
             FROM devices
+            JOIN users ON users.id = devices.user_id
             WHERE server_id = ?
-              AND status = 'active'
-            ORDER BY id ASC
+              AND devices.status = 'active'
+            ORDER BY devices.id ASC
             LIMIT ?
             """,
             (server_id, limit),

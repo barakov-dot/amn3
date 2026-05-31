@@ -1218,6 +1218,10 @@ def create_web_app(
         except LookupError:
             return PlainTextResponse("Server not found", status_code=404)
         peer_sync = _load_peer_sync_from_session(request, server_id)
+        detail["server_managed_configs"] = _with_live_peer_sync_status(
+            detail["server_managed_configs"],
+            peer_sync,
+        )
 
         return templates.TemplateResponse(
             request,
@@ -1919,12 +1923,17 @@ def _load_server_detail(settings: Settings, server_id: int) -> dict[str, Any]:
             _row_to_dict(row)
             for row in repo.list_admin_actions_for_server(server_id, limit=20)
         ]
+        server_managed_configs = [
+            _managed_config_view(row)
+            for row in repo.list_active_devices_for_server(server_id)
+        ]
     return {
         "server": server,
         "latest_health": (
             _row_to_dict(latest_health) if latest_health is not None else None
         ),
         "server_actions": server_actions,
+        "server_managed_configs": server_managed_configs,
     }
 
 
@@ -2211,6 +2220,77 @@ def _format_sync_user_display(user: Any) -> str:
     if name:
         return name
     return f"telegram_id={user['telegram_id']}"
+
+
+def _managed_config_view(row: Any) -> dict[str, Any]:
+    return {
+        "device_id": int(row["id"]),
+        "device_name": str(row["name"]),
+        "device_status": str(row["status"]),
+        "config_version": str(row["config_version"]),
+        "user_id": int(row["user_id"]),
+        "user_display": _format_sync_user_display(row),
+        "user_telegram_id": int(row["telegram_id"]),
+        "peer_public_key": str(row["peer_public_key"]),
+        "vpn_ip": str(row["vpn_ip"]),
+        "live_allowed_ips": "",
+        "live_status": "not synced",
+        "live_status_class": "pending",
+    }
+
+
+def _with_live_peer_sync_status(
+    managed_configs: list[dict[str, Any]],
+    peer_sync: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    if peer_sync is None:
+        return [dict(config) for config in managed_configs]
+    if peer_sync.get("error"):
+        return [
+            {
+                **config,
+                "live_status": "sync error",
+                "live_status_class": "disabled",
+            }
+            for config in managed_configs
+        ]
+    known_by_key = {
+        str(peer["peer_public_key"]): peer
+        for peer in peer_sync.get("known_peers", [])
+    }
+    missing_keys = {
+        str(peer["peer_public_key"])
+        for peer in peer_sync.get("missing_peers", [])
+    }
+    merged = []
+    for config in managed_configs:
+        peer_public_key = str(config["peer_public_key"])
+        if peer_public_key in known_by_key:
+            merged.append(
+                {
+                    **config,
+                    "live_allowed_ips": str(known_by_key[peer_public_key]["allowed_ips"]),
+                    "live_status": "confirmed live",
+                    "live_status_class": "active",
+                }
+            )
+        elif peer_public_key in missing_keys:
+            merged.append(
+                {
+                    **config,
+                    "live_status": "missing on server",
+                    "live_status_class": "disabled",
+                }
+            )
+        else:
+            merged.append(
+                {
+                    **config,
+                    "live_status": "not in last sync",
+                    "live_status_class": "pending",
+                }
+            )
+    return merged
 
 
 def _remove_unknown_remote_peer(

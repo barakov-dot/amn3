@@ -27,7 +27,7 @@ codex-vps-test-prep
 Текущий актуальный коммит:
 
 ```text
-Show working server configs
+Show approved configs immediately
 ```
 
 Не начинать отдельный проект с нуля. Новый чат должен открыть эту же папку, проверить ветку и продолжить от текущего состояния.
@@ -72,7 +72,7 @@ cd C:\Users\SooL\Documents\Amneziya
 ## codex-vps-test-prep...origin/codex-vps-test-prep
 ```
 
-В `git log -5` верхний коммит должен иметь сообщение `Show working server configs`.
+В `git log -5` верхний коммит должен иметь сообщение `Show approved configs immediately`.
 
 Если ветка не совпадает:
 
@@ -94,7 +94,7 @@ $env:PYTHONPATH='.codex_deps;.'
 Последний результат:
 
 ```text
-507 passed, 1 warning
+508 passed, 1 warning
 ```
 
 Предупреждение ожидаемое:
@@ -134,7 +134,8 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
   - peer, созданные в приложении Amnezia и еще не помеченные;
   - локальные устройства без peer на сервере;
   - peer, помеченные как `Созданы в Amnezia`.
-- Peer sync теперь показывает таблицу `Working configs on server`: это актуальные рабочие конфиги из live `awg0.conf`, которые совпали с устройствами панели. В строке видны владелец, Telegram ID, устройство, статус, версия конфига, VPN IP, live `AllowedIPs` и public key. Это нужно потому, что такие peer могут работать на сервере, но не отображаться в приложении Amnezia.
+- Карточка сервера всегда показывает таблицу `Working configs on server` для активных управляемых конфигов из панели сразу после approve, без ручного `Run peer sync`. В строке видны владелец, Telegram ID, устройство, статус, версия конфига, VPN IP и public key.
+- Последний `Run peer sync` дополняет эту таблицу live-статусом: `confirmed live`, `missing on server`, `not in last sync` или `sync error`, а также live `AllowedIPs`. Это нужно потому, что peer может работать на сервере, но не отображаться в приложении Amnezia.
 - После `Добавить в Amnezia` отчет обновляется и показывает `Added to Amnezia` вместе с добавленным peer.
 - В Telegram выбор версии конфига теперь показывает `AmneziaWG 2.0` первой. В админском списке заявок отображается запрошенная версия, а кнопки approve ставят запрошенную версию заявки первой.
 - Если новый `.conf` снова выглядит как старый шаблон без `S3/S4/I1-I5` и с `AllowedIPs = 0.0.0.0/0`, первым делом проверить `devices.config_version`/`orders.requested_config_version`: это почти наверняка `amneziawg_v1_5`, а не `amneziawg_v2`.
@@ -217,7 +218,7 @@ git log -1 --oneline
 Ожидаемый коммит:
 
 ```text
-Show working server configs
+Show approved configs immediately
 ```
 
 Проверить server config:
@@ -255,7 +256,7 @@ tail -n 200 logs/app.log
 
 Порядок проверки:
 
-1. `git log -1 --oneline` показывает коммит `Show working server configs`.
+1. `git log -1 --oneline` показывает коммит `Show approved configs immediately`.
 2. Web-панель открывается.
 3. В карточке сервера блок `VPS readiness` показывает:
    - `VPS_APPLY_ENABLED`;
@@ -266,15 +267,17 @@ tail -n 200 logs/app.log
    - последнюю health-проверку.
 4. В карточке сервера блок `VPS retest bundle` показывает команды `git pull`, `server retest-plan`, `preflight`, `server check` и `sync-peers`.
 5. `Server check` в панели или CLI показывает `OK`/понятный degraded без SSH/backend ошибок.
-6. `Run peer sync` показывает live peers из AmneziaWG, блок `Working configs on server` с владельцами/устройствами, а `VPS readiness` обновляет строку `Peer sync`.
+6. Блок `Working configs on server` показывает одобренные активные устройства сразу, даже до ручного sync.
+7. `Run peer sync` показывает live peers из AmneziaWG, дополняет `Working configs on server` live-статусами и обновляет строку `Peer sync` в `VPS readiness`.
    Блок `Recent server actions` показывает `web_server_peer_sync_run`.
-7. Создать нового пользователя через бота или web flow.
-8. Одобрить заявку, проверив что выбран `AmneziaWG 2.0`, если нужен новый шаблон с `S3/S4/I1-I5`.
-9. Если снова будет `PeerApplyError`, прислать строку `Details` и проверить failed event в истории действий.
-10. Проверить, что новый клиент получил IP после live `AllowedIPs` из `/opt/amnezia/awg/awg0.conf`.
-11. Проверить, что в `awg0.conf` добавился новый `[Peer]`.
-12. Проверить, что после добавления был `docker restart amnezia-awg2`.
-13. Открыть карточку пользователя в web:
+8. Создать нового пользователя через бота или web flow.
+9. Одобрить заявку, проверив что выбран `AmneziaWG 2.0`, если нужен новый шаблон с `S3/S4/I1-I5`.
+10. Сразу после approve открыть карточку сервера и убедиться, что устройство появилось в `Working configs on server` со статусом `not synced`.
+11. Если снова будет `PeerApplyError`, прислать строку `Details` и проверить failed event в истории действий.
+12. Проверить, что новый клиент получил IP после live `AllowedIPs` из `/opt/amnezia/awg/awg0.conf`.
+13. Проверить, что в `awg0.conf` добавился новый `[Peer]`.
+14. Проверить, что после добавления был `docker restart amnezia-awg2`.
+15. Открыть карточку пользователя в web:
     - устройство видно;
     - secrets скрыты;
     - `Show secrets` раскрывает private key и preshared key.
@@ -282,12 +285,12 @@ tail -n 200 logs/app.log
     - ссылка `Disabled devices` на странице пользователей открывает список отключенных устройств.
     - таблица `Admin actions` показывает metadata последних действий.
     - email config/recovery не отправляются, пока email не подтвержден.
-14. Нажать `Disable VPN`:
+16. Нажать `Disable VPN`:
     - browser confirm появляется перед отправкой формы;
     - peer удаляется из AmneziaWG;
     - устройство остается в базе со статусом `disabled`;
     - IP и ключи сохраняются.
-15. Нажать `Enable VPN`:
+17. Нажать `Enable VPN`:
     - browser confirm появляется перед отправкой формы;
     - peer возвращается в AmneziaWG;
     - IP тот же;
@@ -327,7 +330,7 @@ sudo journalctl -u amneziya-bot -n 200 --no-pager
 
 Критично перед следующим стабильным этапом:
 
-1. Пройти VPS retest после коммита `Show working server configs`.
+1. Пройти VPS retest после коммита `Show approved configs immediately`.
 2. Подтвердить, что новый IP берется из live `awg0.conf`.
 3. Подтвердить disable/enable на реальном Docker runtime.
 4. Убедиться, что old/local peers из сети `10.8.0.0/24` не мешают новой live-сети `10.8.1.0/24`.

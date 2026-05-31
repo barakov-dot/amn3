@@ -235,6 +235,14 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
             server_id=server_id,
             status="active",
             vpn_ip="10.44.0.2",
+            peer_public_key="known-peer",
+        )
+        _seed_device(
+            repo,
+            user_id=user_id,
+            server_id=server_id,
+            status="active",
+            vpn_ip="10.44.0.4",
             peer_public_key="missing-peer",
         )
     monkeypatch.setattr(
@@ -248,7 +256,7 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
             "known_peers": [
                 {
                     "device_id": 7,
-                    "device_name": "known-device",
+                    "device_name": "active-device",
                     "device_status": "active",
                     "config_version": "amneziawg_v2",
                     "user_id": 3,
@@ -300,9 +308,10 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
     assert "Working configs on server" in page.text
     assert "@alice" in page.text
     assert "1001" in page.text
-    assert "known-device" in page.text
+    assert "active-device" in page.text
     assert "active" in page.text
     assert "amneziawg_v2" in page.text
+    assert "confirmed live" in page.text
     assert "known-peer" in page.text
     assert "10.44.0.2/32" in page.text
     assert "unknown-peer" in page.text
@@ -317,6 +326,31 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
     with _repo(Path(settings.database_path)) as repo:
         action = _latest_admin_action(repo)
         assert action["action"] == "web_server_peer_sync_run"
+
+
+def test_server_detail_shows_managed_configs_before_peer_sync(tmp_path: Path):
+    settings = _settings(tmp_path, admin_telegram_ids="9001")
+    with _repo(Path(settings.database_path)) as repo:
+        user_id = _seed_user(repo)
+        server_id = _seed_server(repo, name="local")
+        _seed_device(
+            repo,
+            user_id=user_id,
+            server_id=server_id,
+            status="active",
+            vpn_ip="10.44.0.8",
+            peer_public_key="approved-peer",
+        )
+    client = _authenticated_client(settings)
+
+    response = client.get(f"/servers/{server_id}")
+
+    assert response.status_code == 200
+    assert "Working configs on server" in response.text
+    assert "@alice" in response.text
+    assert "approved-peer" in response.text
+    assert "10.44.0.8/32" in response.text
+    assert "not synced" in response.text
 
 
 def test_collect_server_peer_sync_enriches_known_peers_with_user_and_device(
@@ -514,9 +548,9 @@ def test_add_missing_local_device_refreshes_sync_report_with_added_peer(
         "missing_count": 0,
         "ignored_count": 0,
         "known_peers": [
-            {
-                "device_id": device_id,
-                "device_name": "missing-device",
+                {
+                    "device_id": device_id,
+                    "device_name": "active-device",
                 "device_status": "active",
                 "config_version": "amneziawg_v2",
                 "user_id": user_id,
@@ -550,7 +584,7 @@ def test_add_missing_local_device_refreshes_sync_report_with_added_peer(
     assert response.status_code == 303
     assert calls == [("local", "missing-peer", "stored-psk", "10.44.0.22")]
     assert "Added to Amnezia" in page.text
-    assert "missing-device" in page.text
+    assert "active-device" in page.text
     assert "missing-peer" in page.text
     assert "10.44.0.22/32" in page.text
 
