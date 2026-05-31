@@ -6,6 +6,10 @@ from pathlib import Path
 from typing import Any
 
 from app import __version__
+from app.agent.api import create_agent_app
+from app.agent.auth import hash_agent_token
+from app.agent.config import build_agent_tokens
+from app.agent.runtime import LocalCommandRuntimeAdapter
 from app.backup.service import BackupService
 from app.config import Settings
 from app.db.connection import connect
@@ -98,6 +102,20 @@ def build_parser() -> argparse.ArgumentParser:
     retest_plan.add_argument("--server", required=True)
     retest_plan.add_argument("--db", default="data/amneziya.sqlite3")
 
+    agent = sub.add_parser("agent")
+    agent_sub = agent.add_subparsers(dest="agent_command", required=True)
+
+    agent_hash_token = agent_sub.add_parser("hash-token")
+    agent_hash_token.add_argument(
+        "--token",
+        default=None,
+        help="Optional; omit to enter the token without shell history.",
+    )
+
+    agent_serve = agent_sub.add_parser("serve")
+    agent_serve.add_argument("--host", default=None)
+    agent_serve.add_argument("--port", type=int, default=None)
+
     web = sub.add_parser("web")
     web_sub = web.add_subparsers(dest="web_command", required=True)
 
@@ -186,6 +204,10 @@ def main() -> None:
                 )
             )
         )
+    elif args.command == "agent" and args.agent_command == "hash-token":
+        print(run_agent_token_hash(_read_agent_token(args.token)))
+    elif args.command == "agent" and args.agent_command == "serve":
+        run_agent_server(host=args.host, port=args.port)
     elif args.command == "web" and args.web_command == "hash-password":
         print(run_web_password_hash(_read_web_password(args.password)))
     elif args.command == "web" and args.web_command == "serve":
@@ -217,6 +239,50 @@ def run_web_server(
         host=host or actual_settings.web_admin_host,
         port=port or actual_settings.web_admin_port,
     )
+
+
+def run_agent_token_hash(raw_token: str) -> str:
+    if not raw_token.strip():
+        raise ValueError("token cannot be blank")
+    return hash_agent_token(raw_token.strip())
+
+
+def run_agent_server(
+    *,
+    host: str | None,
+    port: int | None,
+    settings: Settings | None = None,
+    uvicorn_run: Callable[..., Any] | None = None,
+) -> None:
+    import uvicorn
+
+    actual_settings = settings or Settings()
+    tokens = build_agent_tokens(actual_settings)
+    server_config = select_server(
+        load_server_config(actual_settings.server_config_path),
+        actual_settings.server_name,
+    )
+    app = create_agent_app(
+        adapter=LocalCommandRuntimeAdapter(server_config),
+        tokens=tokens,
+        build_version=__version__,
+    )
+    runner = uvicorn_run or uvicorn.run
+    runner(
+        app,
+        host=host or actual_settings.local_agent_host,
+        port=port or actual_settings.local_agent_port,
+    )
+
+
+def _read_agent_token(token: str | None) -> str:
+    if token is not None:
+        return token
+    first = getpass.getpass("Local Agent token: ")
+    second = getpass.getpass("Repeat Local Agent token: ")
+    if first != second:
+        raise ValueError("tokens do not match")
+    return first
 
 
 def _read_web_password(password: str | None) -> str:

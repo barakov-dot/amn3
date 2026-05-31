@@ -75,6 +75,26 @@ class Settings(BaseSettings):
         default=True,
         alias="WEB_ADMIN_SESSION_COOKIE_SECURE",
     )
+    local_agent_enabled: bool = Field(default=False, alias="LOCAL_AGENT_ENABLED")
+    local_agent_host: str = Field(default="127.0.0.1", alias="LOCAL_AGENT_HOST")
+    local_agent_port: int = Field(default=3031, alias="LOCAL_AGENT_PORT")
+    local_agent_token_id: str = Field(
+        default="local-controller",
+        alias="LOCAL_AGENT_TOKEN_ID",
+    )
+    local_agent_token_hash: str = Field(default="", alias="LOCAL_AGENT_TOKEN_HASH")
+    local_agent_token_owner: str = Field(
+        default="local-controller",
+        alias="LOCAL_AGENT_TOKEN_OWNER",
+    )
+    local_agent_token_scopes: str = Field(
+        default="agent:health,agent:read,agent:protocols:read",
+        alias="LOCAL_AGENT_TOKEN_SCOPES",
+    )
+    local_agent_token_expires_at: str = Field(
+        default="",
+        alias="LOCAL_AGENT_TOKEN_EXPIRES_AT",
+    )
     app_log_enabled: bool = Field(default=True, alias="APP_LOG_ENABLED")
     app_log_level: str = Field(default="INFO", alias="APP_LOG_LEVEL")
     app_log_max_lines: int = Field(default=500, alias="APP_LOG_MAX_LINES")
@@ -163,6 +183,34 @@ class Settings(BaseSettings):
                 raise ValueError(
                     "WEB_ADMIN_SESSION_SECRET must be set when WEB_ADMIN_ENABLED=true"
                 )
+        if not 1 <= self.local_agent_port <= 65535:
+            raise ValueError("LOCAL_AGENT_PORT must be in 1..65535")
+        allowed_agent_scopes = {
+            "agent:health",
+            "agent:read",
+            "agent:protocols:read",
+        }
+        unknown_agent_scopes = set(self.local_agent_scopes) - allowed_agent_scopes
+        if unknown_agent_scopes:
+            raise ValueError(
+                "LOCAL_AGENT_TOKEN_SCOPES contains unsupported first-slice scope(s): "
+                + ", ".join(sorted(unknown_agent_scopes))
+            )
+        token_hash = self.local_agent_token_hash.strip()
+        if token_hash:
+            self.local_agent_token_hash = token_hash
+            digest = token_hash.removeprefix("sha256:")
+            if (
+                not token_hash.startswith("sha256:")
+                or len(digest) != 64
+                or any(char not in "0123456789abcdef" for char in digest)
+            ):
+                raise ValueError("LOCAL_AGENT_TOKEN_HASH must be a sha256 token hash")
+        if self.local_agent_enabled:
+            if not token_hash:
+                raise ValueError(
+                    "LOCAL_AGENT_TOKEN_HASH must be set when LOCAL_AGENT_ENABLED=true"
+                )
         if not 1 <= self.smtp_port <= 65535:
             raise ValueError("SMTP_PORT must be in 1..65535")
         if self.email_recovery_token_ttl_minutes < 1:
@@ -190,6 +238,14 @@ class Settings(BaseSettings):
         return [
             part.strip()
             for part in self.control_panel_auth_methods.split(",")
+            if part.strip()
+        ]
+
+    @cached_property
+    def local_agent_scopes(self) -> list[str]:
+        return [
+            part.strip()
+            for part in self.local_agent_token_scopes.split(",")
             if part.strip()
         ]
 

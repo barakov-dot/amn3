@@ -39,3 +39,38 @@
 ## Production правило
 
 Agent считается привилегированным local runtime adapter. Его нельзя публиковать как общий root API к серверу. Любое расширение за пределы read-only routes требует route policy, secret inventory, audit plan и отдельного implementation plan.
+
+## Production wiring
+
+Agent disabled by default:
+
+```text
+LOCAL_AGENT_ENABLED=false
+```
+
+Минимальный production режим:
+
+```text
+LOCAL_AGENT_ENABLED=true
+LOCAL_AGENT_HOST=127.0.0.1
+LOCAL_AGENT_PORT=3031
+LOCAL_AGENT_TOKEN_ID=local-controller
+LOCAL_AGENT_TOKEN_OWNER=local-controller
+LOCAL_AGENT_TOKEN_SCOPES=agent:health,agent:read,agent:protocols:read
+LOCAL_AGENT_TOKEN_EXPIRES_AT=
+LOCAL_AGENT_TOKEN_HASH=sha256:<generated-hash>
+```
+
+Raw token не хранится в `.env`. Сгенерировать hash:
+
+```powershell
+python -m app.cli agent hash-token
+```
+
+Запуск:
+
+```powershell
+python -m app.cli agent serve
+```
+
+Для первого production режима держать `LOCAL_AGENT_HOST=127.0.0.1` и открывать доступ только через SSH tunnel, reverse proxy с auth или будущий controller-side transport. Публично наружу agent не выставлять.

@@ -106,6 +106,18 @@ tunnel до панели. Для короткой проверки по plain HT
 поставить `WEB_ADMIN_SESSION_COOKIE_SECURE=false`, но не оставлять так открытую
 панель в интернете.
 
+### Local Agent
+
+- По умолчанию `LOCAL_AGENT_ENABLED=false`.
+- Включать только после создания hash через `python -m app.cli agent hash-token`.
+- В `.env` хранить только `LOCAL_AGENT_TOKEN_HASH`, raw token не сохранять.
+- Первый адрес bind: `LOCAL_AGENT_HOST=127.0.0.1`.
+- Первый порт: `LOCAL_AGENT_PORT=3031`.
+- Первый scope-набор: `agent:health,agent:read,agent:protocols:read`.
+- Проверить локально: `python -m app.cli agent serve`.
+- Проверить routes только с Bearer token: `/agent/health`, `/agent/version`, `/agent/runtime`, `/agent/protocols`.
+- Не добавлять write/config/backup routes без отдельного policy gate.
+
 ## 4. Шаблоны и выдача конфига
 
 Текущие варианты получения конфига пользователем:
