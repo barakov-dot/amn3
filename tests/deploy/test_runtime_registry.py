@@ -185,6 +185,22 @@ def test_amn3_next_chat_handoff_points_to_current_integration_docs():
     assert "git log -5 --oneline --decorate" in text
     assert "python -m pytest tests/deploy/test_runtime_registry.py" in text
     assert "write API" in text
+    assert "Локально до реального VPS smoke" in text
+    assert "Только после реального VPS smoke" in text
+    assert "не включать write routes" in text
+
+
+def test_local_agent_write_plan_separates_local_work_from_vps_gated_work():
+    doc_path = ROOT / "docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+
+    assert "## Execution Split" in text
+    assert "### Local-Only Work Before VPS Smoke" in text
+    assert "### VPS-Gated Work After Read-Only Smoke" in text
+    assert "Можно делать локально до VPS" in text
+    assert "Нельзя делать до VPS smoke" in text
+    assert "Do not implement write routes before these gates are true." in text
 
 
 def test_vps_retest_protocol_doc_lists_repeatable_test_steps():

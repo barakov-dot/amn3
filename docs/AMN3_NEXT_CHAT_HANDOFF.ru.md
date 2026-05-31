@@ -101,12 +101,26 @@ git status --short --branch
 
 ## 6. Ближайший порядок работы
 
-1. Опубликовать или доставить ветку `codex/local-agent-production-wiring` в
-   `barakov-dot/amn3`.
-2. На VPS пройти `docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md`.
-3. Убедиться, что web admin видит Local Agent без raw token.
-4. Зафиксировать результат smoke в docs или commit message.
-5. После успешного smoke начинать первый write API slice.
+### Локально до реального VPS smoke
+
+Можно продолжать без VPS:
+
+1. Опубликовать или доставить ветку `codex/local-agent-production-wiring` в `barakov-dot/amn3`, когда GitHub credentials будут готовы.
+2. Держать актуальными `docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md` и этот handoff.
+3. Анализировать идеи `kyoresuas/amnezia-api` для user API без копирования кода.
+4. Уточнять policy/scopes/audit/dry-run контракты в плане первого write API slice.
+5. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
+
+До VPS smoke не включать write routes, не добавлять реальные mutation endpoints и не делать Local Agent публичным.
+
+### Только после реального VPS smoke
+
+Дальше идем только после проверки на живом сервере:
+
+1. На VPS пройти `docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md`.
+2. Убедиться, что web admin видит Local Agent без raw token.
+3. Зафиксировать результат smoke в docs или commit message.
+4. После успешного smoke начинать первый write API slice.
 
 План первого write API slice: `docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md`.
 

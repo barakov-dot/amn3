@@ -20,6 +20,38 @@
 
 Do not implement write routes before these gates are true.
 
+## Execution Split
+
+### Local-Only Work Before VPS Smoke
+
+Можно делать локально до VPS:
+
+- keep `docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md` and handoff docs current;
+- configure Git remotes and publish/deliver the branch when credentials are ready;
+- review `kyoresuas/amnezia-api` ideas and record product/API candidates without copying code;
+- refine route policy names, scopes, request/response schemas, and audit requirements in docs;
+- add non-invasive tests that prove write routes are still unavailable by default;
+- prepare fake adapters and dry-run contracts without enabling production mutations;
+- improve runbooks, rollback notes, redaction checks, and smoke result templates.
+
+Нельзя делать до VPS smoke:
+
+- не включать write routes;
+- не добавлять real peer apply/revoke endpoints to the running Local Agent;
+- не менять `.env.example` так, чтобы write mode был enabled by default;
+- не добавлять public bind for Local Agent;
+- не выполнять real user/device/peer mutations through Local Agent.
+
+### VPS-Gated Work After Read-Only Smoke
+
+Только после реального VPS smoke:
+
+- promote the first selected write policies into the active write slice;
+- implement Local Agent peer mutation endpoints behind `LOCAL_AGENT_WRITE_ENABLED=true`;
+- enable `agent:clients:write` only for a dedicated token/scope set;
+- connect web admin mutation buttons to Local Agent dry-run and confirmation flow;
+- run rollback and secret-leak checks on real VPS logs after the first mutation test.
+
 ## File Structure
 
 - Modify `app/agent/policy.py`: promote only selected `/agent/clients` write policies into the active slice when write mode is enabled.
