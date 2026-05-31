@@ -12,6 +12,7 @@ AMN_DB_PATH="${AMN_DB_PATH:-data/amneziya.sqlite3}"
 AMN_LOG_LINES="${AMN_LOG_LINES:-200}"
 AMN_VPN_PORT="${AMN_VPN_PORT:-30001}"
 AMN_WEB_PORT="${AMN_WEB_PORT:-3030}"
+AMN_AGENT_PORT="${AMN_AGENT_PORT:-3031}"
 
 # Manual equivalent: python -m app.cli server check --config servers.yml --server debian-vps-1
 
@@ -30,6 +31,8 @@ redact_stream() {
         -e 's/(APP_SECRET_KEY=)[^[:space:]]+/\1[REDACTED]/g' \
         -e 's/(WEB_ADMIN_PASSWORD_HASH=)[^[:space:]]+/\1[REDACTED]/g' \
         -e 's/(WEB_ADMIN_SESSION_SECRET=)[^[:space:]]+/\1[REDACTED]/g' \
+        -e 's/(LOCAL_AGENT_TOKEN_HASH=)[^[:space:]]+/\1[REDACTED]/g' \
+        -e 's/(Authorization:[[:space:]]*Bearer[[:space:]]+)[^[:space:]]+/\1[REDACTED]/Ig' \
         -e 's/(SMTP_PASSWORD=)[^[:space:]]+/\1[REDACTED]/g' \
         -e 's/(VPS_SSH_PASSWORD=)[^[:space:]]+/\1[REDACTED]/g' \
         -e 's/(private_key_path:[[:space:]]*).+/\1[REDACTED]/g' \
@@ -115,7 +118,17 @@ collect_system_snapshot() {
     run "listening tcp ports" ss -lntp
     run "listening udp ports" ss -lun
     run_shell "web port grep" "ss -lntp | grep -E '[:.]${AMN_WEB_PORT}[[:space:]]' || true"
+    run_shell "agent port grep" "ss -lntp | grep -E '[:.]${AMN_AGENT_PORT}[[:space:]]' || true"
     run_shell "vpn port grep" "ss -lun | grep -E '[:.]${AMN_VPN_PORT}[[:space:]]' || true"
+}
+
+collect_agent_snapshot() {
+    run "agent systemd active state" systemctl is-active amneziya-agent
+    run "agent systemd properties" systemctl show amneziya-agent \
+        -p ActiveState \
+        -p SubState \
+        -p MainPID \
+        -p NRestarts
 }
 
 collect_host_systemd_snapshot() {
@@ -138,6 +151,7 @@ collect_docker_snapshot() {
 collect_logs() {
     run "web systemd logs" journalctl -u amneziya-web -n "$AMN_LOG_LINES" --no-pager
     run "bot systemd logs" journalctl -u amneziya-bot -n "$AMN_LOG_LINES" --no-pager
+    run "agent systemd logs" journalctl -u amneziya-agent -n "$AMN_LOG_LINES" --no-pager
     run "app log tail" tail -n "$AMN_LOG_LINES" "${AMN_PROJECT_DIR}/logs/app.log"
 }
 
@@ -155,6 +169,7 @@ AMN_DB_PATH=${AMN_DB_PATH}
 AMN_LOG_LINES=${AMN_LOG_LINES}
 AMN_VPN_PORT=${AMN_VPN_PORT}
 AMN_WEB_PORT=${AMN_WEB_PORT}
+AMN_AGENT_PORT=${AMN_AGENT_PORT}
 EOF
 
     cd "$AMN_PROJECT_DIR" 2>/dev/null || {
@@ -162,6 +177,7 @@ EOF
     }
 
     collect_system_snapshot
+    collect_agent_snapshot
     collect_app_snapshot
 
     case "$AMN_RUNTIME" in

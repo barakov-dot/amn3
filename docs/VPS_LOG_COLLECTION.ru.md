@@ -53,8 +53,11 @@ bash deploy/runtime/collect_debug_snapshot.sh > debug-snapshot.txt 2>&1
 - `bash deploy/runtime/check_vps.sh`;
 - `python -m app.cli bot check-network`;
 - `ss -lntp` и `ss -lun`;
+- `systemctl is-active amneziya-agent`;
+- `systemctl show amneziya-agent -p ActiveState -p SubState -p MainPID -p NRestarts`;
 - `journalctl -u amneziya-web -n 200 --no-pager`;
 - `journalctl -u amneziya-bot -n 200 --no-pager`;
+- `journalctl -u amneziya-agent -n 200 --no-pager`;
 - `tail -n 200 logs/app.log`.
 
 Для Docker runtime дополнительно:
@@ -84,8 +87,11 @@ git status --short
 python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
 python -m app.cli server check --config servers.yml --server debian-vps-1
 bash deploy/runtime/check_vps.sh
+sudo systemctl is-active amneziya-agent
+sudo systemctl show amneziya-agent -p ActiveState -p SubState -p MainPID -p NRestarts
 sudo journalctl -u amneziya-web -n 200 --no-pager
 sudo journalctl -u amneziya-bot -n 200 --no-pager
+sudo journalctl -u amneziya-agent -n 200 --no-pager
 tail -n 200 logs/app.log
 ```
 
@@ -105,6 +111,8 @@ docker exec amnezia-awg awg show awg0
 - `APP_SECRET_KEY`;
 - `WEB_ADMIN_PASSWORD_HASH`;
 - `WEB_ADMIN_SESSION_SECRET`;
+- `LOCAL_AGENT_TOKEN_HASH`;
+- raw Local Agent Bearer token;
 - `SMTP_PASSWORD`;
 - `VPS_SSH_PASSWORD`;
 - SSH private key;

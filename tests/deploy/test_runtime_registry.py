@@ -49,12 +49,16 @@ def test_debug_snapshot_script_is_read_only_and_redacts_secrets():
 
     assert "AMN_RUNTIME" in text
     assert "AMN_LOG_LINES" in text
+    assert "AMN_AGENT_PORT" in text
     assert "redact_stream" in text
     assert "TELEGRAM_BOT_TOKEN" in text
     assert "APP_SECRET_KEY" in text
     assert "WEB_ADMIN_SESSION_SECRET" in text
+    assert "LOCAL_AGENT_TOKEN_HASH" in text
     assert "python -m app.cli server check" in text
     assert "deploy/runtime/check_vps.sh" in text
+    assert "systemctl is-active amneziya-agent" in text
+    assert "journalctl -u amneziya-agent" in text
     assert "docker inspect" in text
     assert 'docker exec "$AMN_CONTAINER_NAME" awg show "$AMN_INTERFACE"' in text
     assert 'docker exec "$AMN_CONTAINER_NAME" command -v awg' not in text
@@ -106,6 +110,7 @@ def test_vps_log_collection_doc_lists_commands_and_redaction_rules():
     assert "docker ps --format" in text
     assert "docker exec amnezia-awg command -v awg" not in text
     assert "journalctl -u amneziya-web" in text
+    assert "journalctl -u amneziya-agent" in text
     assert "tail -n 200 logs/app.log" in text
     assert "TELEGRAM_BOT_TOKEN" in text
     assert "APP_SECRET_KEY" in text
