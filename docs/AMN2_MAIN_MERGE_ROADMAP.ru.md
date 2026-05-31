@@ -195,13 +195,13 @@ Production evidence:
 - focused tests: `14 passed, 1 StarletteDeprecationWarning`;
 - full local suite: `535 passed, 1 StarletteDeprecationWarning`.
 
-После public-token safety выполнен remote operation dry-run/audit local slice. Текущий следующий шаг: controlled real VPS verification gate для `codex/remote-operation-dry-run-audit`; Local Agent hardening остается следующим local-only направлением, если VPS gate ставим на паузу.
+После public-token safety выполнены remote operation dry-run/audit local slice и Local Agent hardening. Текущий следующий local-only шаг: web panel safe improvements без изменения write behavior. Controlled real VPS verification gate для `codex/remote-operation-dry-run-audit` остается отдельной веткой и требует явного подтверждения оператора.
 
 ## Важные задачи
 
 ### 6. Web panel safe improvements
 
-Статус: начинать после P0 policy/redaction/config integrity/public-token safety и remote operation local gate; лучше вести точечно после VPS gate или ближайшего Local Agent hardening, если изменение связано с API/runtime статусами.
+Статус: следующий рекомендуемый local-only slice после Local Agent hardening.
 
 Порядок web-panel доработок:
 
@@ -222,14 +222,21 @@ Gate: local-only для wording/status/confirmation/UI tests. Live VPS нуже�
 
 ### 7. Local Agent hardening
 
-Статус: следующий local-only slice, если controlled VPS gate ставим на паузу; foundation уже merged в `amn2`, расширять осторожно.
+Статус: implemented-pushed-local-gate-complete; foundation уже merged в `amn2`, расширять осторожно.
 
 Следующие безопасные шаги:
 
-- unified production audit sink для allowed read routes;
-- token rotation/revoke design;
-- version/runtime compatibility response;
-- public-safe runtime metadata.
+- unified production audit sink для allowed read routes - выполнено;
+- version/runtime compatibility response - выполнено;
+- public-safe runtime metadata - закреплено на текущем first-slice contract;
+- token rotation/revoke design - следующий дизайн-срез перед scoped API tokens.
+
+Production evidence:
+
+- branch: `codex-vps-test-prep`;
+- commit: `c5d7eb6 Harden Local Agent audit contract`;
+- focused tests: `64 passed, 1 StarletteDeprecationWarning`;
+- full local suite: `536 passed, 1 StarletteDeprecationWarning`.
 
 Gate: local-only для auth/token/audit/runtime metadata tests. Live VPS нужен только перед реальным agent deployment или controller-to-agent calls на VPS.
 
@@ -322,9 +329,9 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 3. Config delivery integrity: done, local-gate-complete.
 4. Public-token safety: done, local-gate-complete.
 5. Remote operation contract/partial-failure/dry-run metadata: done, local-gate-complete.
-6. Harden Local Agent read-only/audit/versioning with fake/local runtime tests.
+6. Local Agent read-only/audit/versioning hardening: done, local-gate-complete.
 7. Improve existing web panel UX around status/config delivery/dangerous wording without changing write behavior.
-8. Design scoped API tokens and token storage tests.
+8. Design scoped API tokens and token storage tests, including token rotation/revoke.
 9. Consider read-only clients/metrics endpoints only after privacy classification.
 
 ### Live VPS verification lane

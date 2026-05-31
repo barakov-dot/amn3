@@ -75,7 +75,7 @@ codex-vps-test-prep
 Актуальный head:
 
 ```text
-dfe27ee Harden public email token safety
+c5d7eb6 Harden Local Agent audit contract
 ```
 
 Проверенная stable-точка live VPS cycle:
@@ -93,7 +93,7 @@ docs/NEXT_CHAT_HANDOFF.ru.md
 Последняя локальная проверка `amn2`:
 
 ```text
-535 passed, 1 warning
+536 passed, 1 warning
 ```
 
 Ожидаемое предупреждение: `StarletteDeprecationWarning` от `httpx` / `starlette.testclient`.
@@ -363,6 +363,47 @@ full local suite:
 
 Live VPS не трогался. Slice не меняет peer apply/revoke/config/sync/runtime behavior, поэтому VPS gate не нужен.
 
+## Local Agent Hardening Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex-vps-test-prep
+```
+
+Production head after push:
+
+```text
+c5d7eb6 Harden Local Agent audit contract
+```
+
+Покрыто:
+
+- `agent serve` подключает repository-backed audit sink;
+- allowed read routes пишут `local_agent_read` в `admin_actions`;
+- audit metadata содержит route, scope, risk class, token id/owner и result без raw bearer token;
+- `/agent/version` отдает `runtime_contract_version`, `first_slice_routes` и `write_enabled=false`;
+- first-slice boundary остается без `/agent/clients`, `/agent/configs`, backup/restore/reboot и write lifecycle.
+
+Проверка:
+
+```text
+RED:
+tests/agent/test_api.py::test_health_and_version_return_secret_free_metadata
+tests/agent/test_cli.py::test_run_agent_server_records_allowed_read_audit_in_database
+result: 2 failed as expected
+
+focused agent/security tests:
+64 passed, 1 StarletteDeprecationWarning
+
+full local suite:
+536 passed, 1 StarletteDeprecationWarning
+```
+
+Live VPS не трогался. Slice меняет локальный agent audit/version contract и docs, но не делает real agent deployment, controller-to-agent calls, peer apply/revoke/config/sync/runtime writes; VPS gate не нужен.
+
 ## Remote Operation Dry-run/Audit Slice
 
 Статус: `implemented-pushed-local-gate-complete`.
@@ -428,4 +469,4 @@ Live VPS не трогался. Slice меняет dry-run/audit metadata и д�
 - Docker AmneziaWG write/reload/restart behavior;
 - реальный Local Agent deployment или controller-to-agent calls.
 
-Следующий рекомендуемый шаг: controlled real VPS verification gate для remote-operation dry-run/audit ветки. Начать с read-only check и dry-run apply/revoke preview; single test peer apply/revoke выполнять только после отдельного подтверждения оператора. Local Agent hardening остается следующим local-only направлением после закрытия или постановки на паузу VPS gate.
+Следующий рекомендуемый local-only шаг: Web panel safe improvements без изменения write behavior - operator status UX вокруг server health/working configs, secret-aware config delivery wording и safer dangerous-action confirmation tests. Отдельная альтернатива после подтверждения оператора: controlled real VPS verification gate для remote-operation dry-run/audit ветки; single test peer apply/revoke выполнять только после отдельного разрешения.
