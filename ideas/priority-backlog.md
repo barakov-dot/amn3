@@ -60,15 +60,16 @@ Backlog не является списком задач к немедленно�
 - Статус: `design-needed`.
 - Суть: backup/import только через redacted/full режимы, dry-run preview, validation, encryption option и recovery note.
 - Причина: full backup почти всегда содержит private keys, tokens, configs и состояние клиентов.
-- Следующий шаг: сначала secret inventory, затем backup policy.
+- Следующий шаг: использовать обновленный P0 secret inventory как вход для backup/import policy; redacted backup оставить default, full backup считать dangerous explicit mode.
 
 ### Secret inventory
 
 - Цель: `amn2`.
-- Статус: `design-needed`.
+- Статус: `ready-for-plan`.
 - Суть: единая таблица секретов: где хранятся, где могут утечь, как redacted, rotated, revoked и restored.
 - Причина: без inventory нельзя безопасно проектировать backup, config delivery, scoped tokens, agent и audit.
-- Следующий шаг: актуализировать `research/amn2/secret-surface-inventory.md` и связать с test plan.
+- Текущий результат: `research/amn2/secret-surface-inventory.md` расширен до P0-gate для config delivery, backup/import, scoped tokens, Local Agent, SSH/VPS operations, metrics и audit.
+- Следующий шаг: подготовить `Route/Auth policy matrix` и отдельный redaction coverage plan на базе классов секретов.
 
 ## P1. Важные рекомендации
 
@@ -199,7 +200,7 @@ Backlog не является списком задач к немедленно�
 ## Ближайшая рекомендуемая очередь
 
 1. Закрыть PR/branch по `Secret-safe config delivery`, когда GitHub-доступ к приватному `amn2` будет настроен.
-2. Продолжить `RemoteOperationRunner` с read-only health slice.
-3. Обновить `Secret inventory` и связать его с config delivery, backup/import и scoped tokens.
-4. Подготовить `Route/Auth policy matrix` для текущих web/API/bot маршрутов.
+2. Подготовить `Route/Auth policy matrix` для текущих web/API/bot маршрутов, используя обновленный P0 secret inventory.
+3. Продолжить `RemoteOperationRunner` с read-only health slice.
+4. Подготовить redaction coverage plan для `.conf`, QR, `vpn://`, tokens, Local Agent и command output.
 5. Только после этого возвращаться к self-service links, domain exclusions и 2FA.

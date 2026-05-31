@@ -8,6 +8,21 @@
 - Секреты: `.env` намеренно не читался.
 - Цель: понять, какие secret-bearing surfaces уже есть, и что нужно учесть перед web-admin 2FA, scoped tokens и config delivery changes.
 
+## Обновление 2026-05-31: P0 secret inventory expansion
+
+Этот файл повышен из справочного снимка по 2FA до P0-карты секретов для переноса идей из lab в `amn2`.
+
+Главный принцип: любое изменение, которое читает, создает, экспортирует, отправляет, восстанавливает или логирует secret-bearing данные, должно сначала пройти эту карту. Это относится не только к 2FA, но и к config delivery, public/self-service links, backup/import, scoped tokens, Local Agent, SSH/VPS operations, metrics и audit.
+
+Рабочий статус после обновления: `ready-for-plan`.
+
+Ближайшее применение:
+
+- route/auth policy matrix для `secret-read`, `state-write`, `remote-exec` и `public-token-secret-read` surfaces;
+- redaction test plan для `.conf`, QR, `vpn://`, tokens, command output и diagnostics;
+- backup/import policy, где redacted backup остается default, а full backup считается dangerous explicit mode;
+- Local Agent hardening, где agent token, operation payload и runtime outputs не должны попадать в logs/audit plain text.
+
 ## Текущее решение
 
 2026-05-30: 2FA для web-admin поставлена на паузу. Требования по TOTP storage/redaction/backup остаются справочными, но не запускают implementation plan.
@@ -26,6 +41,44 @@
 
 ## Secret classes
 
+### Рабочая классификация P0
+
+| Class | Что означает | Примеры в `amn2` | Backup default | Audit/log default |
+| --- | --- | --- | --- | --- |
+| `credential-secret` | Дает доступ к внешнему сервису или панели | `TELEGRAM_BOT_TOKEN`, SMTP password, VPS password, будущие external API keys | exclude/redact | redact |
+| `password-hash` | Hash, который нельзя раскрывать как metadata | `WEB_ADMIN_PASSWORD_HASH`, `CONTROL_PANEL_PASSWORD_HASH` | redact by default | redact |
+| `session-secret` | Материал подписи или проверки session/token | `WEB_ADMIN_SESSION_SECRET`, `APP_SECRET_KEY` | exclude | redact |
+| `private-key` | Приватный ключ или материал peer/server доступа | peer private key, SSH private key, TLS/private key candidates | encrypted-full-only или exclude | redact |
+| `preshared-key` | VPN peer PSK или аналог | peer preshared key | encrypted-full-only или exclude | redact |
+| `client-config-secret` | Артефакт, который дает VPN-доступ | raw `.conf`, QR payload/PNG, `vpn://` import link | exclude unless explicit encrypted full | redact; audit read only by metadata |
+| `token-raw` | Raw token, показывается или отправляется один раз | email verify/recovery token, future API/share token raw value | never store/never backup | never log |
+| `token-hash` | Hash token-а, usable for validation | email recovery token hash, future scoped token/share token hash | redact by default | metadata only |
+| `remote-command-secret` | Секрет, передаваемый remote operation | peer PSK stdin, future sudo password/token refs | never include in command string | redact command output |
+| `secret-adjacent` | Не секрет сам по себе, но раскрывает sensitive context | client IP, endpoint, traffic/handshake metadata, server host, token prefix | include only after privacy review | aggregate or pseudonymous preferred |
+| `audit-safe-metadata` | Безопасная metadata без secret value | actor id, event type, resource id, risk class | include | include |
+
+Если поле попадает сразу в несколько классов, выбирается самый строгий класс.
+
+### Обязательная запись для новых secret-bearing полей
+
+Каждый новый secret-bearing элемент должен получить запись:
+
+```text
+field_path:
+owner_domain:
+secret_class:
+source: generated | user-provided | imported | external
+storage_policy: env-only | encrypted-db | hash-only | runtime-only | external-ref
+read_policy: admin-only | owner-only | scoped-token | public-token | internal-only
+backup_policy: exclude | redact | encrypted-full-only | metadata-only
+restore_policy: never-restore | restore-disabled | restore-with-rotation | restore-as-is
+redaction_label:
+rotation_or_revoke:
+tests_required:
+```
+
+Без такой записи изменение должно считаться неготовым к переносу в `amn2`.
+
 | Secret / surface | Где найдено | Storage сейчас | Exposure surface | Current controls |
 | --- | --- | --- | --- | --- |
 | `APP_SECRET_KEY` | settings/env, backup storage, `SecretBox` | env only | process env, backup encryption key | required non-blank, weak secret rejection in `SecretBox`, redaction tests |
@@ -42,6 +95,37 @@
 | Config recovery token | `email_recovery_tokens.token_hash` | hashed DB field | raw token sent by email | TTL, `used_at`, one-time tests, raw token not in URL |
 | VPN config text | generated runtime | not stored as plain config in checked files | email attachment, QR PNG, `vpn://` import link | config block redaction, backup excludes plain configs and QR files |
 | Remote peer apply PSK | `app/server/peer_apply.py` runtime input | stdin to SSH command | remote command errors/logs | command avoids raw PSK, stdout/stderr redaction tests |
+
+## P0 secret surfaces для ближайших решений
+
+| Surface | Класс | Что уже видно | Что нельзя делать | Обязательные тесты перед переносом |
+| --- | --- | --- | --- | --- |
+| `.conf` attachment | `client-config-secret` | генерируется runtime из encrypted device secrets | писать в audit/logs, сохранять как plain diagnostics, отдавать без gate | UTF-8 bytes, ownership/token denial, redaction, no logs |
+| QR payload / QR PNG | `client-config-secret` | QR строится из raw config | считать картинкой без секрета, складывать в backup plain | payload round-trip, non-ASCII, no diagnostics leakage |
+| `vpn://` import link | `client-config-secret` | reversibly encodes полный config | считать безопасным из-за отсутствия literal `PrivateKey` | decode round-trip, no raw link in audit/logs |
+| Email recovery raw token | `token-raw` | отправляется пользователю, hash хранится в DB | писать raw token в URL logs/audit metadata | one-time, TTL, generic errors, no raw token in metadata |
+| Email recovery token hash | `token-hash` | используется для проверки token | включать в redacted backup как обычное поле | backup redaction, restore-disabled или explicit policy |
+| Peer private key | `private-key` | encrypted DB field | показывать в list/detail/read-model endpoints | decrypt only in delivery/apply path, backup decryptability |
+| Peer preshared key | `preshared-key` | encrypted DB field, PSK stdin для remote apply | передавать через command arg или shell history | no command string leakage, stdout/stderr redaction |
+| Web-admin session secret | `session-secret` | env-only | включать в backup или settings output | required length, redaction |
+| Telegram bot token | `credential-secret` | env-only | попадание в logs, diagnostics, backup | URL token redaction, backup exclude |
+| VPS SSH password/private key | `credential-secret` / `private-key` | env/settings/runtime candidates | shell command string, process list, diagnostic bundle | no command arg leakage, redaction, host key policy |
+| Local Agent token/hash | `credential-secret` / `token-hash` | design/branch candidate | хранить raw token после enrollment | hash-only storage, rotation, audit without raw token |
+| Metrics labels | `secret-adjacent` | future candidate | раскрывать client names/IP/activity по умолчанию | aggregate default, scoped token, privacy class tests |
+
+## Transfer checklist для secret-bearing изменений
+
+Перед code edit в `amn2` по любой secret-bearing функции нужно ответить:
+
+1. Какой actor получает доступ: web-admin, Telegram admin, Telegram user, public token, scoped token, local agent или CLI operator?
+2. Какой risk class: `secret-read`, `state-write`, `remote-exec`, `destructive`, `public-token-secret-read`?
+3. Где секрет хранится: env-only, encrypted DB, hash-only, runtime-only или external-ref?
+4. Может ли секрет попасть в logs, audit, diagnostics, backup, error response, OpenAPI example или test fixture?
+5. Как revoke/rotation работает после утечки?
+6. Что происходит при restore: secret исчезает, восстанавливается disabled, требует rotation или восстанавливается как есть?
+7. Какие negative tests доказывают, что чужой actor не получает secret?
+8. Какие redaction tests доказывают, что raw secret не попадает в строки ошибок и diagnostic output?
+9. Есть ли recovery note для оператора, если secret restore/import/remote apply частично не сработал?
 
 ## Backup and restore model
 
@@ -112,8 +196,13 @@ For `amn2`, conservative first step is single configured web-admin 2FA, but only
 
 ## Gaps
 
-- Нет explicit secret inventory table in code/docs; this lab file is the first map.
+- Нет machine-checkable secret inventory в `amn2`; этот lab file остается policy-картой, но код пока не может автоматически проверять новое поле против inventory.
 - Backup manifest excludes are fixed; adding new artifact types should update manifest and tests.
+- Config delivery уже признан `client-config-secret`, но audit/logging/read-model policy пока не оформлена как route-level matrix.
+- `vpn://` link теперь тестируется как reversible UTF-8 artifact в первом срезе, но QR decode round-trip без новой dependency еще не закрыт.
+- Для Local Agent token/hash нужна связь с этим inventory: raw token one-time display, hash-only storage, rotation, no audit raw value.
+- Для scoped API/share tokens нужна restore policy: redacted backup не должен оживлять usable tokens.
+- Для metrics labels нужна privacy classification до появления detailed Prometheus/JSON surfaces.
 - Redaction pattern does not explicitly name TOTP/MFA/otpauth terms yet.
 - No current DB schema for web-admin 2FA secrets.
 - No rate limit / lockout storage found in this pass.
@@ -121,7 +210,9 @@ For `amn2`, conservative first step is single configured web-admin 2FA, but only
 
 ## Решение для lab
 
-Статус: `secret-inventory-first-pass`.
+Статус: `secret-inventory-p0-expanded`.
+
+Этот inventory теперь является P0-gate для secret-bearing изменений в `amn2`. Он не означает автоматическую реализацию backup/import, 2FA, scoped tokens или public links; он задает обязательную проверку перед такими изменениями.
 
 2FA для web-admin сейчас не переводится к code edit. Если позже снимаем паузу, перед implementation plan нужно зафиксировать:
 
@@ -132,6 +223,8 @@ For `amn2`, conservative first step is single configured web-admin 2FA, but only
 
 ## Следующие рабочие шаги
 
-1. Использовать этот inventory для config delivery, backup/restore и redaction review.
-2. Не писать `amn2` implementation plan для 2FA, пока статус `paused`.
-3. Если пауза снимается, сначала обсудить actor model и recovery model.
+1. Подготовить `Route/Auth policy matrix` для текущих web/API/bot surfaces, опираясь на классы `secret-read`, `public-token-secret-read`, `remote-exec` и `destructive`.
+2. Добавить отдельный design/plan для redaction coverage: `.conf`, QR payload, `vpn://`, token raw/hash, Local Agent token, command stdout/stderr и diagnostics.
+3. Использовать этот inventory как вход для backup/import policy: redacted backup default, full backup только explicit dangerous mode.
+4. Не писать `amn2` implementation plan для 2FA, пока статус `paused`.
+5. Если пауза снимается, сначала обсудить actor model и recovery model.
