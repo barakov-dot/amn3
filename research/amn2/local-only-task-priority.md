@@ -28,6 +28,7 @@
 - Почему P0: без этого нельзя безопасно отличать read-only диагностику от операций, которые меняют VPS или локальную БД.
 - Локальная проверка: contract tests для state-changing operations и совместимость с уже существующим read-only `RemoteOperationRunner`.
 - Проверено 2026-05-31: `23 passed` для `tests/server/test_operation_runner.py tests/server/test_checks.py`.
+- Full suite 2026-05-31: `517 passed, 1 warning`.
 - Готово, когда: старые read-only tests проходят, а новые state-changing tests требуют явной metadata. Первый срез готов; следующий слой должен подключить fake runner/partial-failure сценарии.
 
 ### Partial-failure model

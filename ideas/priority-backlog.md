@@ -38,7 +38,7 @@ Backlog не является списком задач к немедленно�
 - Причина: удаленные операции могут сломать VPS, firewall, контейнеры или доступ пользователей.
 - Текущий результат: read-only health slice `RemoteOperationRunner` уже присутствует в текущем `amn2` baseline и проверен focused/full тестами.
 - Текущий результат 2026-05-31: redaction coverage first slice выполнен в ветке `codex/redaction-coverage-first-slice`; focused suite `61 passed`, full suite `513 passed`.
-- Текущий результат 2026-05-31: state-changing metadata local slice выполнен в ветке `codex/remote-operation-contract-metadata`; focused suite `23 passed`.
+- Текущий результат 2026-05-31: state-changing metadata local slice выполнен в ветке `codex/remote-operation-contract-metadata`; focused suite `23 passed`, full suite `517 passed`.
 - Текущий план 2026-05-31: следующий remote safety блок разделен на local-only gate и controlled real VPS verification gate.
 - Локальная очередь 2026-05-31: [Local-only task priority](../research/amn2/local-only-task-priority.md) фиксирует P0/P1/P2/P3 задачи, которые можно сделать без VPS и без чтения `.env`.
 - Следующий шаг: продолжить local-only gate с fake runner/fake peer applier harness и partial-failure simulations. Реальный VPS проверяем только после этого на тестовом peer/device.

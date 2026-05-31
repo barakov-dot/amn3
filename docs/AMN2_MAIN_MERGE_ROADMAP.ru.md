@@ -136,15 +136,22 @@ Live VPS gate должен быть отдельным этапом с зафи�
 
 ### 3. Secret/redaction coverage
 
-Статус: next P0 after policy matrix.
+Статус: implemented-pushed-local-gate-complete.
 
 Цель: перед любыми API/web panel выдачами доказать, что `.conf`, QR, `vpn://`, raw tokens, token hashes, Local Agent token, command stdout/stderr и diagnostics не попадают в logs/audit/errors.
 
 Gate: local-only. Live VPS не нужен, пока не меняется delivery/apply runtime behavior.
 
+Production evidence:
+
+- branch: `codex-vps-test-prep`;
+- commits: `75c235a`..`94ad807`;
+- focused tests: `61 passed, 1 StarletteDeprecationWarning`;
+- full local suite: `528 passed, 1 StarletteDeprecationWarning`.
+
 ### 4. Config delivery integrity
 
-Статус: important P0 web-panel slice, но после policy/redaction base.
+Статус: next recommended local-only slice.
 
 Цель: взять лучшее из PRVTPRO web-panel темы не как UI-копию, а как test/product contract:
 

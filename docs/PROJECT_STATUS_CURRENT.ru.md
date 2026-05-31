@@ -259,9 +259,44 @@ Live VPS не трогался. Новые API endpoints не добавляли
 
 Обновленный порядок:
 
-1. Решить, пушить ли `amn2` commit `d1d9690` в remote branch `codex-vps-test-prep`.
-2. После push открыть или обновить PR/синхронизацию для production branch, если это нужно.
-3. Следующий safe slice: redaction coverage или config delivery integrity, в зависимости от того, какой риск закрываем первым.
+1. `amn2` commit `d1d9690` запушен в remote branch `codex-vps-test-prep`.
+2. Следующий local-only slice выбран и выполнен: redaction coverage.
+3. Следующий рекомендуемый safe slice: config delivery integrity.
+
+## Redaction Coverage Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex-vps-test-prep
+```
+
+Production head after push:
+
+```text
+94ad807 Document secret-bearing delivery artifacts
+```
+
+Production commits:
+
+```text
+75c235a Expand redaction primitive coverage
+fc73929 Add config delivery redaction coverage
+f62d5d6 Harden config email audit coverage
+eb735e2 Harden remote output redaction coverage
+94ad807 Document secret-bearing delivery artifacts
+```
+
+Проверка:
+
+```text
+focused redaction/security/delivery/remote/docs tests: 61 passed, 1 StarletteDeprecationWarning
+full local suite: 528 passed, 1 StarletteDeprecationWarning
+```
+
+Live VPS не трогался. Slice не меняет live apply/revoke/config/sync behavior, поэтому VPS gate не нужен.
 
 ## Local Gate / Live VPS Gate
 
@@ -288,4 +323,4 @@ Live VPS не трогался. Новые API endpoints не добавляли
 - Docker AmneziaWG write/reload/restart behavior;
 - реальный Local Agent deployment или controller-to-agent calls.
 
-Следующий рекомендуемый local-only шаг: redaction coverage или config delivery integrity. Следующий VPS gate пока не запускать, потому что policy matrix commit `d1d9690` не меняет live behavior.
+Следующий рекомендуемый local-only шаг: config delivery integrity. Следующий VPS gate пока не запускать, потому что policy matrix и redaction coverage не меняют live behavior.

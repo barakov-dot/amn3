@@ -73,7 +73,8 @@ Read-only health slice `RemoteOperationRunner` уже присутствует �
 - добавлено: `RemoteOperation.consistency_status` с безопасным default `read-only`;
 - добавлено: `OperationPlan` теперь переносит `consistency_status`, `local_side_effects`, `remote_side_effects` и `idempotency_key`;
 - добавлено: validation для `remote-state-write` и `destructive-remote`, требующая recovery metadata, remote side effect metadata и state-changing consistency status;
-- проверено: `tests/server/test_operation_runner.py tests/server/test_checks.py -v` -> `23 passed`.
+- focused verification: `tests/server/test_operation_runner.py tests/server/test_checks.py -v` -> `23 passed`;
+- full suite: `pytest tests -v` -> `517 passed, 1 warning`.
 
 Ограничение: это еще не включает fake peer applier, partial-failure simulations и dry-run/audit metadata для live mutation flows. Следующий локальный шаг - fake runner/fake peer applier harness и partial-failure model.
 
