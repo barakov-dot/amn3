@@ -40,6 +40,29 @@ Read-only health slice `RemoteOperationRunner` уже присутствует �
 
 Итог: read-only remote health baseline считается закрытым. Следующие remote work items не должны расширять runner на state-changing операции без отдельного partial-failure/rollback design.
 
+## Обновление 2026-05-31: local/VPS verification split
+
+Следующий remote safety блок делится на две фазы:
+
+1. `Local-only gate` - проектирование и тестирование state-changing contract без реального VPS:
+   - fake SSH/operation runner;
+   - DB transaction simulations;
+   - dry-run previews;
+   - audit metadata;
+   - rollback/resume notes;
+   - redaction checks;
+   - full `pytest tests -v`.
+2. `Real VPS verification gate` - отдельная controlled проверка после локального зеленого suite:
+   - read-only health baseline;
+   - dry-run apply/revoke preview;
+   - single test peer apply/revoke;
+   - diagnostic snapshot;
+   - lab result note.
+
+Подробный handoff-план: [AMN2 Remote Operations Local/VPS Split Implementation Plan](../../docs/superpowers/plans/2026-05-31-amn2-remote-ops-local-vps-split.md).
+
+Решение: реальные VPS-mutation проверки не запускаются, пока локально не закрыты contract, fake-runner tests, redaction, audit и rollback note. Первый live probe выполняется только на тестовом device/peer, с backup/recovery window и явной командой оператора.
+
 ## Карта remote surfaces
 
 | Surface | Actor / gate | Remote command class | Local side effect | Current controls |
@@ -214,6 +237,6 @@ Current posture:
 
 ## Следующие рабочие шаги
 
-1. Исполнить подготовленный redaction coverage first slice для command stdout/stderr, diagnostics, `.conf`, QR, `vpn://`, token raw/hash и Local Agent token/header.
-2. Описать partial-failure/rollback contract для state-changing remote operations.
+1. Исполнить local-only phase из плана `remote-ops-local-vps-split`: contract, fake runner, partial-failure simulations, dry-run/audit metadata и full local suite.
+2. Только после этого провести controlled real VPS verification gate на тестовом peer/device.
 3. До live Docker apply/revoke отдельно описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.

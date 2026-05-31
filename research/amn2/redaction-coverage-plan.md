@@ -191,6 +191,7 @@ Redaction coverage считается готовым для переноса в 
 
 ## Следующие рабочие шаги
 
-1. Решить, пушим ли ветку `codex/redaction-coverage-first-slice` в private `amn2` сейчас или оставляем локально до GitHub/PR-процесса.
-2. Подготовить partial-failure/rollback contract для state-changing remote operations.
-3. До live Docker apply/revoke отдельно описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
+1. Ветка `codex/redaction-coverage-first-slice` опубликована в private `amn2`.
+2. Исполнить local-only phase для partial-failure/rollback contract state-changing remote operations.
+3. После локального green suite провести controlled real VPS verification gate на тестовом peer/device.
+4. До live Docker apply/revoke отдельно описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.

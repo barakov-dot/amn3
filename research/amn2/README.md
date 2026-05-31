@@ -43,8 +43,8 @@ handoff: docs/NEXT_CHAT_HANDOFF.ru.md
 
 Текущий фокус после verified VPS cycle, read-only `RemoteOperationRunner` baseline и verified redaction coverage first slice:
 
-1. Решить, пушим ли ветку `codex/redaction-coverage-first-slice` в private `amn2` сейчас или оставляем локально до GitHub/PR-процесса.
-2. Подготовить partial-failure/rollback contract для state-changing remote operations.
+1. Исполнить local-only phase для partial-failure/rollback contract: typed contract, fake runner, DB simulations, dry-run/audit metadata, redaction и full local suite.
+2. Только после local green suite провести controlled real VPS verification gate на тестовом peer/device.
 3. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
 4. Затем вернуться к route policy coverage tests.
 
