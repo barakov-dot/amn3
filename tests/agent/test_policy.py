@@ -64,6 +64,19 @@ def test_get_policy_rejects_future_blocked_policy():
         get_policy("POST", "/agent/clients")
 
 
+@pytest.mark.parametrize(
+    ("method", "path"),
+    (
+        ("POST", "/agent/clients/dry-run"),
+        ("POST", "/agent/clients"),
+        ("DELETE", "/agent/clients/{id}"),
+    ),
+)
+def test_local_contract_write_routes_remain_inactive_before_vps_smoke(method, path):
+    with pytest.raises(AgentPolicyError, match="No agent route policy"):
+        get_policy(method, path)
+
+
 def test_every_policy_has_required_fields_and_known_classifications():
     for policy in AGENT_ROUTE_POLICIES:
         assert policy.method

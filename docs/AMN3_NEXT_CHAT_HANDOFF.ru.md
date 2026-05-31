@@ -61,6 +61,8 @@ git remote -v
 - read-only Local Agent client;
 - CLI `agent probe`;
 - web admin блок `Local Agent` на server detail/server health;
+- локальный contract layer будущего write API без endpoints: `app/agent/write_contracts.py`;
+- safety tests для contract layer и заблокированных write routes: `tests/agent/test_write_contracts.py`;
 - controller settings:
   - `LOCAL_AGENT_CONTROLLER_ENABLED`;
   - `LOCAL_AGENT_CONTROLLER_BASE_URL`;
@@ -84,6 +86,13 @@ git remote -v
 ```powershell
 $env:PYTHONPATH='C:\Users\SooL\Documents\Amneziya\.codex_deps'
 & 'C:\Users\SooL\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -m pytest tests/deploy/test_runtime_registry.py -v
+```
+
+Focused проверка Local Agent contracts:
+
+```powershell
+$env:PYTHONPATH='C:\Users\SooL\Documents\Amneziya\.codex_deps'
+& 'C:\Users\SooL\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -m pytest tests/agent/test_write_contracts.py tests/agent/test_policy.py -v
 ```
 
 Короткая команда, которую ищут docs tests:

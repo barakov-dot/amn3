@@ -34,6 +34,12 @@ Do not implement write routes before these gates are true.
 - prepare fake adapters and dry-run contracts without enabling production mutations;
 - improve runbooks, rollback notes, redaction checks, and smoke result templates.
 
+Выполнено локально:
+
+- `app/agent/write_contracts.py` defines future write API request/result contracts without registering FastAPI routes;
+- `tests/agent/test_write_contracts.py` verifies validation, `allowed_ips` normalization, and PSK redaction;
+- `tests/agent/test_policy.py` verifies `/agent/clients*` write routes remain inactive before VPS smoke.
+
 Нельзя делать до VPS smoke:
 
 - не включать write routes;

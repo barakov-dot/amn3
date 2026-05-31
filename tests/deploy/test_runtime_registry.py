@@ -185,6 +185,8 @@ def test_amn3_next_chat_handoff_points_to_current_integration_docs():
     assert "git log -5 --oneline --decorate" in text
     assert "python -m pytest tests/deploy/test_runtime_registry.py" in text
     assert "write API" in text
+    assert "app/agent/write_contracts.py" in text
+    assert "tests/agent/test_write_contracts.py" in text
     assert "Локально до реального VPS smoke" in text
     assert "Только после реального VPS smoke" in text
     assert "не включать write routes" in text
