@@ -273,11 +273,12 @@ tail -n 200 logs/app.log
 8. Создать нового пользователя через бота или web flow.
 9. Одобрить заявку, проверив что выбран `AmneziaWG 2.0`, если нужен новый шаблон с `S3/S4/I1-I5`.
 10. Сразу после approve открыть карточку сервера и убедиться, что устройство появилось в `Working configs on server` со статусом `not synced`.
-11. Если снова будет `PeerApplyError`, прислать строку `Details` и проверить failed event в истории действий.
-12. Проверить, что новый клиент получил IP после live `AllowedIPs` из `/opt/amnezia/awg/awg0.conf`.
-13. Проверить, что в `awg0.conf` добавился новый `[Peer]`.
-14. Проверить, что после добавления был `docker restart amnezia-awg2`.
-15. Открыть карточку пользователя в web:
+11. Нажать `Run peer sync` и убедиться, что эта же строка перешла в `confirmed live`, а `Live Allowed IPs` совпадает с IP устройства.
+12. Если снова будет `PeerApplyError`, прислать строку `Details` и проверить failed event в истории действий.
+13. Проверить, что новый клиент получил IP после live `AllowedIPs` из `/opt/amnezia/awg/awg0.conf`.
+14. Проверить, что в `awg0.conf` добавился новый `[Peer]`.
+15. Проверить, что после добавления был `docker restart amnezia-awg2`.
+16. Открыть карточку пользователя в web:
     - устройство видно;
     - secrets скрыты;
     - `Show secrets` раскрывает private key и preshared key.
@@ -285,12 +286,12 @@ tail -n 200 logs/app.log
     - ссылка `Disabled devices` на странице пользователей открывает список отключенных устройств.
     - таблица `Admin actions` показывает metadata последних действий.
     - email config/recovery не отправляются, пока email не подтвержден.
-16. Нажать `Disable VPN`:
+17. Нажать `Disable VPN`:
     - browser confirm появляется перед отправкой формы;
     - peer удаляется из AmneziaWG;
     - устройство остается в базе со статусом `disabled`;
     - IP и ключи сохраняются.
-17. Нажать `Enable VPN`:
+18. Нажать `Enable VPN`:
     - browser confirm появляется перед отправкой формы;
     - peer возвращается в AmneziaWG;
     - IP тот же;
