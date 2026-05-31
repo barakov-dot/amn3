@@ -2,7 +2,7 @@
 
 Дата: 2026-05-31.
 
-Режим: coordination roadmap в `VPS-OPS-LAB`. Production-код `amn2` не менялся. Upstream code не копируется. Live VPS не трогаем.
+Режим: coordination roadmap в `VPS-OPS-LAB`. Production-код `amn2` меняется только отдельными local-gate slices. Upstream code не копируется. Live VPS не трогаем без отдельного VPS gate.
 
 ## Решение по соседним чатам
 
@@ -173,13 +173,35 @@ Production evidence:
 - targeted tests: `16 passed`;
 - full local suite: `528 passed, 1 StarletteDeprecationWarning`.
 
-Следующий local-only critical slice: public-token safety для verify/recover flows перед любыми self-service/public config links.
+### 5. Public-token safety
+
+Статус: implemented-pushed-local-gate-complete.
+
+Цель: перед любыми self-service/public config links закрепить безопасный контракт публичных verify/recover кодов:
+
+- positive TTL guard;
+- hash-only storage/lookup;
+- strict purpose separation между `verify_email` и `recover_config`;
+- one-time/expired rejection;
+- generic denial без echo сырого token;
+- failed wrong-purpose/expired attempts не consume токен.
+
+Gate: local-only. Live VPS не нужен, потому что slice не меняет peer apply/revoke/config/sync/runtime behavior.
+
+Production evidence:
+
+- branch: `codex-vps-test-prep`;
+- commit: `dfe27ee Harden public email token safety`;
+- focused tests: `14 passed, 1 StarletteDeprecationWarning`;
+- full local suite: `535 passed, 1 StarletteDeprecationWarning`.
+
+Следующий рекомендуемый local-only slice: Local Agent hardening на fake/local runtime.
 
 ## Важные задачи
 
-### 5. Web panel safe improvements
+### 6. Web panel safe improvements
 
-Статус: начинать после P0 policy/redaction/config integrity.
+Статус: начинать после P0 policy/redaction/config integrity/public-token safety; лучше вести точечно после ближайшего Local Agent hardening, если изменение связано с API/runtime статусами.
 
 Порядок web-panel доработок:
 
@@ -198,9 +220,9 @@ Gate: local-only для wording/status/confirmation/UI tests. Live VPS нуже�
 - public share links;
 - multi-protocol dashboard.
 
-### 6. Local Agent hardening
+### 7. Local Agent hardening
 
-Статус: foundation уже merged в `amn2`; расширять осторожно.
+Статус: следующий рекомендуемый local-only slice; foundation уже merged в `amn2`, расширять осторожно.
 
 Следующие безопасные шаги:
 
@@ -218,7 +240,7 @@ Gate: local-only для auth/token/audit/runtime metadata tests. Live VPS нуж
 - write lifecycle;
 - backup/import/reboot.
 
-### 7. Scoped API tokens
+### 8. Scoped API tokens
 
 Статус: design-needed после policy matrix.
 
@@ -229,7 +251,7 @@ Gate: local-only для auth/token/audit/runtime metadata tests. Live VPS нуж
 - `config:read` только после config delivery policy;
 - destructive scopes отдельно и позже.
 
-### 8. Remote operation partial-failure contract
+### 9. Remote operation partial-failure contract
 
 Статус: design-needed перед любым remote-state-write API.
 
@@ -290,13 +312,14 @@ Gate: local-only для contract/fake SSH/idempotency tests. Live VPS обяза
 
 ### Local-only merge lane
 
-1. Push/record `amn2` policy matrix commit after review.
-2. Add redaction coverage plan and implementation.
-3. Add config delivery integrity tests/contract.
-4. Improve existing web panel UX around status/config delivery/dangerous wording without changing write behavior.
-5. Design scoped API tokens and token storage tests.
-6. Harden Local Agent read-only/audit/versioning with fake/local runtime tests.
-7. Consider read-only clients/metrics endpoints only after privacy classification.
+1. Policy matrix: done, local-gate-complete.
+2. Redaction coverage: done, local-gate-complete.
+3. Config delivery integrity: done, local-gate-complete.
+4. Public-token safety: done, local-gate-complete.
+5. Harden Local Agent read-only/audit/versioning with fake/local runtime tests.
+6. Improve existing web panel UX around status/config delivery/dangerous wording without changing write behavior.
+7. Design scoped API tokens and token storage tests.
+8. Consider read-only clients/metrics endpoints only after privacy classification.
 
 ### Live VPS verification lane
 

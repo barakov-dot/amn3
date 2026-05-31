@@ -40,22 +40,13 @@ https://github.com/barakov-dot/amn3.git
 master
 ```
 
-Текущий committed head lab:
+Текущий committed head lab перед этим обновлением:
 
 ```text
-a0ccfef Expand secret inventory priority gate
+e23d4cd Record partial failure local slice
 ```
 
-`master` сейчас ahead of `origin/master` на 2 коммита:
-
-- `3351a46 Add priority backlog`
-- `a0ccfef Expand secret inventory priority gate`
-
-Есть незакоммиченные lab-изменения:
-
-- `docs/PROJECT_STATUS_CURRENT.ru.md`
-- `research/amn2/transfer-backlog.md`
-- `research/amn2/api-readiness-audit-after-live-baseline.md`
+`master` синхронизирован с `origin/master` до фиксации нового public-token evidence.
 
 AMN3 является coordination/knowledge repo: research, design specs, implementation plans, transfer notes и gate для переноса идей в production.
 
@@ -84,7 +75,7 @@ codex-vps-test-prep
 Актуальный head:
 
 ```text
-91aeb3e Document VPS verified tag
+dfe27ee Harden public email token safety
 ```
 
 Проверенная stable-точка live VPS cycle:
@@ -102,7 +93,7 @@ docs/NEXT_CHAT_HANDOFF.ru.md
 Последняя локальная проверка `amn2`:
 
 ```text
-508 passed, 1 warning
+535 passed, 1 warning
 ```
 
 Ожидаемое предупреждение: `StarletteDeprecationWarning` от `httpx` / `starlette.testclient`.
@@ -335,6 +326,43 @@ full local suite at same head: 528 passed, 1 StarletteDeprecationWarning
 
 Live VPS не трогался. Slice не меняет live templates/defaults или apply/sync behavior, поэтому VPS gate не нужен.
 
+## Public Token Safety Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex-vps-test-prep
+```
+
+Production head after push:
+
+```text
+dfe27ee Harden public email token safety
+```
+
+Покрыто:
+
+- `create_email_token` теперь отклоняет `ttl_minutes <= 0`;
+- raw token хранится/сравнивается через hash-only contract;
+- public verify/recover tokens не взаимозаменяемы по `purpose`;
+- expired verify/recover codes отклоняются;
+- denial response не возвращает сырой token;
+- wrong-purpose/expired tokens не consumed.
+
+Проверка:
+
+```text
+tests/services/test_email_tokens.py tests/web/test_email_delivery.py -q --basetemp tmp\pytest-public-token
+result: 14 passed, 1 StarletteDeprecationWarning
+
+full local suite:
+535 passed, 1 StarletteDeprecationWarning
+```
+
+Live VPS не трогался. Slice не меняет peer apply/revoke/config/sync/runtime behavior, поэтому VPS gate не нужен.
+
 ## Local Gate / Live VPS Gate
 
 Новый порядок проверки разделен на два контура.
@@ -360,4 +388,4 @@ Live VPS не трогался. Slice не меняет live templates/defaults 
 - Docker AmneziaWG write/reload/restart behavior;
 - реальный Local Agent deployment или controller-to-agent calls.
 
-Следующий рекомендуемый local-only шаг: public-token safety. Следующий VPS gate пока не запускать, потому что policy matrix, redaction coverage и config delivery integrity не меняют live behavior.
+Следующий рекомендуемый local-only шаг: Local Agent hardening на fake/local runtime: audit sink для allowed read routes, token revoke/rotation design, version/runtime compatibility response и public-safe runtime metadata. Следующий VPS gate пока не запускать, потому что policy matrix, redaction coverage, config delivery integrity и public-token safety не меняют live behavior.
