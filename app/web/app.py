@@ -1140,6 +1140,7 @@ def create_web_app(
             detail = _load_server_detail(actual_settings, server_id)
         except LookupError:
             return PlainTextResponse("Server not found", status_code=404)
+        peer_sync = _load_peer_sync_from_session(request, server_id)
 
         return templates.TemplateResponse(
             request,
@@ -1148,7 +1149,13 @@ def create_web_app(
                 request,
                 title=f"Server {server_id}",
                 authenticated=True,
-                peer_sync=_load_peer_sync_from_session(request, server_id),
+                peer_sync=peer_sync,
+                vps_readiness=_load_vps_readiness(
+                    actual_settings,
+                    server=detail["server"],
+                    latest_health=detail["latest_health"],
+                    peer_sync=peer_sync,
+                ),
                 **detail,
             ),
         )
@@ -1756,6 +1763,154 @@ def _load_server_detail(settings: Settings, server_id: int) -> dict[str, Any]:
         "server": server,
         "latest_health": (
             _row_to_dict(latest_health) if latest_health is not None else None
+        ),
+    }
+
+
+def _load_vps_readiness(
+    settings: Settings,
+    *,
+    server: dict[str, Any],
+    latest_health: dict[str, Any] | None,
+    peer_sync: dict[str, Any] | None,
+) -> dict[str, Any]:
+    config_path = Path(settings.server_config_path)
+    checks = [
+        {
+            "label": "VPS_APPLY_ENABLED",
+            "status": "enabled" if settings.vps_apply_enabled else "disabled",
+            "status_class": "active" if settings.vps_apply_enabled else "disabled",
+            "detail": (
+                "live peer writes are enabled"
+                if settings.vps_apply_enabled
+                else "live peer writes are blocked"
+            ),
+        },
+        {
+            "label": "SERVER_CONFIG_PATH",
+            "status": "configured",
+            "status_class": "active",
+            "detail": _display_setting_value(
+                "SERVER_CONFIG_PATH",
+                settings.server_config_path,
+                is_path=True,
+            ),
+        },
+    ]
+
+    configured_server = None
+    try:
+        configured_server = select_server(
+            load_server_config(config_path),
+            str(server["name"]),
+        )
+    except ConfigError as exc:
+        checks.append(
+            {
+                "label": "Configured server",
+                "status": "error",
+                "status_class": "failed",
+                "detail": redact(str(exc)),
+            }
+        )
+        checks.append(
+            {
+                "label": "Runtime",
+                "status": "unavailable",
+                "status_class": "disabled",
+                "detail": "server config did not load",
+            }
+        )
+    else:
+        checks.append(
+            {
+                "label": "Configured server",
+                "status": "found",
+                "status_class": "active",
+                "detail": (
+                    f"{configured_server.name}; enabled={configured_server.enabled}; "
+                    f"interface={configured_server.vpn.interface}; "
+                    f"network={configured_server.vpn.network_cidr}"
+                ),
+            }
+        )
+        checks.append(
+            {
+                "label": "Runtime",
+                "status": configured_server.runtime.type,
+                "status_class": "active",
+                "detail": _runtime_readiness_detail(configured_server),
+            }
+        )
+
+    checks.append(_health_readiness(latest_health))
+    checks.append(_peer_sync_readiness(peer_sync))
+    return {"checks": checks}
+
+
+def _runtime_readiness_detail(server) -> str:
+    parts = []
+    if server.runtime.container_name:
+        parts.append(f"container={server.runtime.container_name}")
+    if server.runtime.service_name:
+        parts.append(f"service={server.runtime.service_name}")
+    if server.runtime.config_path:
+        parts.append(f"config_path={server.runtime.config_path}")
+    return "; ".join(parts) or "no runtime target configured"
+
+
+def _health_readiness(latest_health: dict[str, Any] | None) -> dict[str, str]:
+    if latest_health is None:
+        return {
+            "label": "Latest health",
+            "status": "not run",
+            "status_class": "disabled",
+            "detail": "no stored health check",
+        }
+    latency = (
+        f"{latest_health['latency_ms']} ms"
+        if latest_health.get("latency_ms") is not None
+        else "no latency"
+    )
+    error = str(latest_health.get("error") or "").strip()
+    detail = f"{latency}; checked_at={latest_health.get('checked_at') or '-'}"
+    if error:
+        detail = f"{detail}; error={error}"
+    return {
+        "label": "Latest health",
+        "status": str(latest_health["status"]),
+        "status_class": str(latest_health["status"]),
+        "detail": detail,
+    }
+
+
+def _peer_sync_readiness(peer_sync: dict[str, Any] | None) -> dict[str, str]:
+    if peer_sync is None:
+        return {
+            "label": "Peer sync",
+            "status": "not run",
+            "status_class": "disabled",
+            "detail": "not run in this browser session",
+        }
+    if peer_sync.get("error"):
+        return {
+            "label": "Peer sync",
+            "status": "error",
+            "status_class": "failed",
+            "detail": redact(peer_sync["error"]),
+        }
+    unknown_count = int(peer_sync.get("unknown_count") or 0)
+    missing_count = int(peer_sync.get("missing_count") or 0)
+    needs_attention = unknown_count > 0 or missing_count > 0
+    return {
+        "label": "Peer sync",
+        "status": "attention" if needs_attention else "ready",
+        "status_class": "degraded" if needs_attention else "active",
+        "detail": (
+            f"known={peer_sync.get('known_count', 0)}; "
+            f"unknown={unknown_count}; "
+            f"missing={missing_count}; "
+            f"amnezia_created={peer_sync.get('ignored_count', 0)}"
         ),
     }
 

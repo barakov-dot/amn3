@@ -161,6 +161,47 @@ def test_server_detail_shows_config_health_and_actions(tmp_path: Path):
     assert f"/servers/{server_id}/sync/run" in response.text
 
 
+def test_server_detail_shows_vps_readiness_block(tmp_path: Path):
+    server_config_path = _write_server_config(tmp_path, server_name="local")
+    settings = _settings(
+        tmp_path,
+        server_config_path=server_config_path,
+        vps_apply_enabled=True,
+    )
+    with _repo(Path(settings.database_path)) as repo:
+        server_id = _seed_server(repo, name="local")
+        repo.record_server_health(
+            server_id=server_id,
+            status="online",
+            latency_ms=64,
+            ssh_ok=True,
+            awg_ok=True,
+            udp_port_ok=True,
+            error=None,
+        )
+    client = _authenticated_client(settings)
+
+    response = client.get(f"/servers/{server_id}")
+
+    assert response.status_code == 200
+    assert "VPS readiness" in response.text
+    assert "VPS_APPLY_ENABLED" in response.text
+    assert "enabled" in response.text
+    assert "SERVER_CONFIG_PATH" in response.text
+    assert "servers.yml" in response.text
+    assert "Configured server" in response.text
+    assert "local" in response.text
+    assert "Runtime" in response.text
+    assert "docker" in response.text
+    assert "amnezia-awg2" in response.text
+    assert "/opt/amnezia/awg/awg0.conf" in response.text
+    assert "Latest health" in response.text
+    assert "online" in response.text
+    assert "64 ms" in response.text
+    assert "Peer sync" in response.text
+    assert "not run in this browser session" in response.text
+
+
 def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypatch):
     settings = _settings(tmp_path, admin_telegram_ids="9001")
     with _repo(Path(settings.database_path)) as repo:

@@ -83,6 +83,23 @@
     </article>
   </section>
 
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>VPS readiness</h2>
+    </div>
+    <dl class="details">
+      {% for check in vps_readiness.checks %}
+        <div>
+          <dt>{{ check.label }}</dt>
+          <dd>
+            <span class="status status-{{ check.status_class }}">{{ check.status }}</span>
+            <span class="muted-text wrap-text">{{ check.detail }}</span>
+          </dd>
+        </div>
+      {% endfor %}
+    </dl>
+  </section>
+
   <section class="panel">
     <div class="panel-header">
       <h2>Latest health</h2>
