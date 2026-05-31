@@ -145,3 +145,34 @@ Note: pytest emitted the known Windows temp cleanup `PermissionError` after succ
 - config/self-service API не добавлять;
 - Local Agent clients/configs/backup/restore/reboot не включать;
 - upstream code не копировать.
+
+## Local Gate / Live VPS Gate
+
+Все следующие transfer items делятся на два контура.
+
+### Local gate
+
+Можно выполнять и коммитить после локальных тестов:
+
+- policy/inventory-only registry;
+- redaction coverage;
+- config delivery artifact tests;
+- web/bot TestClient smoke;
+- Local Agent read-only/auth/token hardening на fake/local runtime;
+- remote operation contract tests на fake SSH/client;
+- docs/status/backlog updates.
+
+### Live VPS gate
+
+Отдельная проверка на реальном VPS нужна только после local green, если item меняет:
+
+- peer apply/revoke;
+- disable/enable/delete;
+- add missing local device to server;
+- remove unknown remote peer;
+- peer sync classification;
+- config templates/defaults, которые попадут в рабочий client config;
+- Docker AmneziaWG write/reload/restart behavior;
+- real Local Agent deployment или controller-to-agent calls.
+
+Policy matrix commit `d1d9690` остается `local-gate-complete`; live VPS gate для него не нужен.

@@ -262,3 +262,30 @@ Live VPS не трогался. Новые API endpoints не добавляли
 1. Решить, пушить ли `amn2` commit `d1d9690` в remote branch `codex-vps-test-prep`.
 2. После push открыть или обновить PR/синхронизацию для production branch, если это нужно.
 3. Следующий safe slice: redaction coverage или config delivery integrity, в зависимости от того, какой риск закрываем первым.
+
+## Local Gate / Live VPS Gate
+
+Новый порядок проверки разделен на два контура.
+
+Локально можно делать:
+
+- policy/inventory-only registry;
+- redaction coverage;
+- config delivery artifact tests;
+- web/bot smoke через TestClient;
+- Local Agent read-only/auth/token hardening на fake/local runtime;
+- remote operation contracts на fake SSH;
+- docs/status/backlog updates.
+
+На real VPS проверяем только после локально зеленого slice, если он меняет:
+
+- peer apply/revoke;
+- disable/enable/delete;
+- add missing local device;
+- remove unknown remote peer;
+- peer sync classification;
+- config templates/defaults, которые попадут в рабочий client config;
+- Docker AmneziaWG write/reload/restart behavior;
+- реальный Local Agent deployment или controller-to-agent calls.
+
+Следующий рекомендуемый local-only шаг: redaction coverage или config delivery integrity. Следующий VPS gate пока не запускать, потому что policy matrix commit `d1d9690` не меняет live behavior.

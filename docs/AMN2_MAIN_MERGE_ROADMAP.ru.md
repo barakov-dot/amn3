@@ -55,6 +55,48 @@
 
 ## Критически важные задачи
 
+## Двухконтурная проверка: local gate и live VPS gate
+
+С этого момента каждый `amn2` slice разделяется на два контура проверки.
+
+### Local gate
+
+Можно делать локально без live VPS:
+
+- policy/inventory-only registry;
+- redaction coverage;
+- config delivery artifact tests: `.conf`, QR decode, `vpn://` round-trip;
+- web/bot/TestClient smoke tests;
+- Local Agent read-only/auth/token tests на fake/local runtime;
+- remote operation contract tests на fake SSH/client;
+- docs/status/backlog updates;
+- UI wording/confirmation tests без изменения apply/revoke logic.
+
+Local gate считается достаточным, если slice:
+
+- не добавляет новый live write flow;
+- не меняет peer apply/revoke;
+- не меняет peer sync classification;
+- не меняет config template/defaults;
+- не меняет IP allocation;
+- не меняет Docker runtime write/restart behavior.
+
+### Live VPS gate
+
+Проверка на реальном VPS нужна отдельно и только после local green, если slice меняет или включает:
+
+- approve/apply peer;
+- revoke/delete/disable/enable peer;
+- add missing local device to server;
+- remove unknown remote peer;
+- peer sync classification;
+- config template/defaults, которые попадают в рабочий client config;
+- Docker AmneziaWG write/reload/restart behavior;
+- server connection/runtime settings;
+- Local Agent deployment на VPS или controller-to-agent calls к реальному host.
+
+Live VPS gate должен быть отдельным этапом с зафиксированными командами, expected result и rollback note. Он не смешивается с обычным локальным commit.
+
 ### 1. Зафиксировать lab baseline
 
 Статус: current.
@@ -98,6 +140,8 @@
 
 Цель: перед любыми API/web panel выдачами доказать, что `.conf`, QR, `vpn://`, raw tokens, token hashes, Local Agent token, command stdout/stderr и diagnostics не попадают в logs/audit/errors.
 
+Gate: local-only. Live VPS не нужен, пока не меняется delivery/apply runtime behavior.
+
 ### 4. Config delivery integrity
 
 Статус: important P0 web-panel slice, но после policy/redaction base.
@@ -110,6 +154,8 @@
 - non-ASCII names;
 - no secret in audit/logs;
 - единый export/result contract для будущих delivery surfaces.
+
+Gate: сначала local-only. Live VPS нужен только если меняются реальные templates/defaults, которые попадут в client config на сервере.
 
 ## Важные задачи
 
@@ -124,6 +170,8 @@
 3. Уточнить config delivery UI language: `.conf`, QR, `vpn://` как secret-bearing artifacts.
 4. Добавить safer dangerous-action wording/confirmation только для уже существующих state-changing actions.
 5. OpenAPI/domain grouping позже, когда будет стабильная API surface.
+
+Gate: local-only для wording/status/confirmation/UI tests. Live VPS нужен только если меняется apply/revoke/sync/config behavior.
 
 Не начинать с:
 
@@ -142,6 +190,8 @@
 - token rotation/revoke design;
 - version/runtime compatibility response;
 - public-safe runtime metadata.
+
+Gate: local-only для auth/token/audit/runtime metadata tests. Live VPS нужен только перед реальным agent deployment или controller-to-agent calls на VPS.
 
 Отложить:
 
@@ -174,6 +224,8 @@
 - resume flow;
 - no secret-bearing CLI args;
 - shared read-only telemetry command policy.
+
+Gate: local-only для contract/fake SSH/idempotency tests. Live VPS обязателен перед включением remote-state-write в web/API/agent flow.
 
 ## Простые задачи
 
@@ -218,16 +270,23 @@
 
 ## Recommended merge order
 
-1. Commit AMN3 audit/roadmap state.
-2. Write `amn2` implementation plan for route/auth/operation policy coverage tests.
-3. Implement policy coverage in `amn2` with tests only, no new behavior.
-4. Add redaction coverage plan and implementation.
-5. Add config delivery integrity tests/contract.
-6. Improve existing web panel UX around status/config delivery/dangerous wording.
-7. Design scoped API tokens.
-8. Harden Local Agent read-only/audit/versioning.
-9. Only then consider read-only clients/metrics endpoints.
-10. Only after remote-write contract consider client lifecycle write API.
+### Local-only merge lane
+
+1. Push/record `amn2` policy matrix commit after review.
+2. Add redaction coverage plan and implementation.
+3. Add config delivery integrity tests/contract.
+4. Improve existing web panel UX around status/config delivery/dangerous wording without changing write behavior.
+5. Design scoped API tokens and token storage tests.
+6. Harden Local Agent read-only/audit/versioning with fake/local runtime tests.
+7. Consider read-only clients/metrics endpoints only after privacy classification.
+
+### Live VPS verification lane
+
+1. Enter this lane only after local green and a slice that touches live behavior.
+2. Prepare a VPS test checklist with branch/commit, commands, expected state and rollback note.
+3. Verify approve/apply, config import, working configs, peer sync, disable/enable/delete and Docker runtime behavior if touched.
+4. Record VPS evidence in AMN3 before marking the slice `verified-live`.
+5. Do not use live VPS testing as a substitute for local policy/secret/operation tests.
 
 ## Recommendation
 
