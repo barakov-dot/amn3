@@ -203,6 +203,26 @@ def test_server_detail_shows_vps_readiness_block(tmp_path: Path):
     assert "not run in this browser session" in response.text
 
 
+def test_server_detail_shows_vps_retest_bundle_commands(tmp_path: Path):
+    server_config_path = _write_server_config(tmp_path, server_name="local")
+    settings = _settings(tmp_path, server_config_path=server_config_path)
+    with _repo(Path(settings.database_path)) as repo:
+        server_id = _seed_server(repo, name="local")
+    client = _authenticated_client(settings)
+
+    response = client.get(f"/servers/{server_id}")
+
+    assert response.status_code == 200
+    assert "VPS retest bundle" in response.text
+    assert "git pull origin codex-vps-test-prep" in response.text
+    assert "python -m app.cli server retest-plan" in response.text
+    assert f"--config {server_config_path}" in response.text
+    assert "--server local" in response.text
+    assert f"--db {settings.database_path}" in response.text
+    assert "python -m app.cli server preflight" in response.text
+    assert "python -m app.cli server sync-peers" in response.text
+
+
 def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypatch):
     settings = _settings(tmp_path, admin_telegram_ids="9001")
     with _repo(Path(settings.database_path)) as repo:

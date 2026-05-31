@@ -1218,6 +1218,10 @@ def create_web_app(
                     latest_health=detail["latest_health"],
                     peer_sync=peer_sync,
                 ),
+                vps_retest_commands=_vps_retest_commands(
+                    actual_settings,
+                    detail["server"],
+                ),
                 **detail,
             ),
         )
@@ -1975,6 +1979,39 @@ def _load_vps_readiness(
     checks.append(_health_readiness(latest_health))
     checks.append(_peer_sync_readiness(peer_sync))
     return {"checks": checks}
+
+
+def _vps_retest_commands(settings: Settings, server: dict[str, Any]) -> list[str]:
+    server_name = str(server["name"])
+    return [
+        "cd /home/amn2",
+        "git pull origin codex-vps-test-prep",
+        "source venv/bin/activate",
+        "python -m pip install -e .",
+        (
+            "python -m app.cli server retest-plan "
+            f"--config {settings.server_config_path} "
+            f"--server {server_name} "
+            f"--db {settings.database_path}"
+        ),
+        (
+            "python -m app.cli server preflight "
+            f"--config {settings.server_config_path} "
+            f"--server {server_name} "
+            f"--db {settings.database_path}"
+        ),
+        (
+            "python -m app.cli server check "
+            f"--config {settings.server_config_path} "
+            f"--server {server_name}"
+        ),
+        (
+            "python -m app.cli server sync-peers "
+            f"--config {settings.server_config_path} "
+            f"--server {server_name} "
+            f"--db {settings.database_path}"
+        ),
+    ]
 
 
 def _runtime_readiness_detail(server) -> str:

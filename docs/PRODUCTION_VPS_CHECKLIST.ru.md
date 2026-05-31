@@ -205,6 +205,7 @@ VPS_SSH_PASSWORD=CHANGE_ME_REAL_SSH_PASSWORD
 
 ```bash
 python -m pytest tests
+python -m app.cli server retest-plan --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
 python -m app.cli server preflight --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
 ```
 

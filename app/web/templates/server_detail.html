@@ -100,6 +100,17 @@
     </dl>
   </section>
 
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>VPS retest bundle</h2>
+    </div>
+    <ol class="command-list">
+      {% for command in vps_retest_commands %}
+        <li><code>{{ command }}</code></li>
+      {% endfor %}
+    </ol>
+  </section>
+
   <section class="panel">
     <div class="panel-header">
       <h2>Latest health</h2>

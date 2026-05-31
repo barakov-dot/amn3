@@ -27,7 +27,7 @@ codex-vps-test-prep
 Текущий актуальный коммит:
 
 ```text
-Require verified email delivery
+Add VPS retest bundle
 ```
 
 Не начинать отдельный проект с нуля. Новый чат должен открыть эту же папку, проверить ветку и продолжить от текущего состояния.
@@ -72,7 +72,7 @@ cd C:\Users\SooL\Documents\Amneziya
 ## codex-vps-test-prep...origin/codex-vps-test-prep
 ```
 
-В `git log -5` верхний коммит должен иметь сообщение `Require verified email delivery`.
+В `git log -5` верхний коммит должен иметь сообщение `Add VPS retest bundle`.
 
 Если ветка не совпадает:
 
@@ -94,7 +94,7 @@ $env:PYTHONPATH='.codex_deps;.'
 Последний результат:
 
 ```text
-432 passed, 1 warning
+435 passed, 1 warning
 ```
 
 Предупреждение ожидаемое:
@@ -118,6 +118,7 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
 - Docker runtime для AmneziaWG: чтение и запись persistent `awg0.conf`, затем `docker restart`.
 - Ошибки `PeerApplyError` в Telegram и web-панели теперь показывают безопасную строку `Details`, очищенную через `redact()`.
 - В карточке сервера добавлен блок `VPS readiness`: `VPS_APPLY_ENABLED`, `SERVER_CONFIG_PATH`, выбранный сервер из `servers.yml`, runtime/container/config_path, последняя health-проверка и текущий peer sync из сессии браузера.
+- В карточке сервера добавлен блок `VPS retest bundle`, а в CLI команда `python -m app.cli server retest-plan`: они печатают безопасный порядок повторного VPS-прогона после `git pull`.
 - Неудачные VPS-операции теперь пишутся в `admin_actions` с action `*_failed`, `error_type` и `redacted_error`; секреты проходят через `redact()`.
 - В карточке сервера добавлен блок `Recent server actions`, где видны последние server-level audit events, включая failed операции.
 - Опасные действия web-панели (`Disable VPN`, `Enable VPN`, `Soft delete`, `Delete permanently`, удаление устройства, отключение сервера, добавление missing device в AmneziaWG) теперь требуют browser confirm перед отправкой формы.
@@ -197,6 +198,7 @@ cd /home/amn2
 git pull origin codex-vps-test-prep
 source venv/bin/activate
 python -m pip install -e .
+python -m app.cli server retest-plan --config servers.yml --server local --db data/amneziya.sqlite3
 ```
 
 Проверить коммит:
@@ -208,7 +210,7 @@ git log -1 --oneline
 Ожидаемый коммит:
 
 ```text
-Require verified email delivery
+Add VPS retest bundle
 ```
 
 Проверить server config:
@@ -255,16 +257,17 @@ tail -n 200 logs/app.log
    - Docker runtime `amnezia-awg2`;
    - `runtime.config_path` `/opt/amnezia/awg/awg0.conf`;
    - последнюю health-проверку.
-4. `Server check` в панели или CLI показывает `OK`/понятный degraded без SSH/backend ошибок.
-5. `Run peer sync` показывает live peers из AmneziaWG, а `VPS readiness` обновляет строку `Peer sync`.
+4. В карточке сервера блок `VPS retest bundle` показывает команды `git pull`, `server retest-plan`, `preflight`, `server check` и `sync-peers`.
+5. `Server check` в панели или CLI показывает `OK`/понятный degraded без SSH/backend ошибок.
+6. `Run peer sync` показывает live peers из AmneziaWG, а `VPS readiness` обновляет строку `Peer sync`.
    Блок `Recent server actions` показывает `web_server_peer_sync_run`.
-6. Создать нового пользователя через бота или web flow.
-7. Одобрить заявку.
-8. Если снова будет `PeerApplyError`, прислать строку `Details` и проверить failed event в истории действий.
-9. Проверить, что новый клиент получил IP после live `AllowedIPs` из `/opt/amnezia/awg/awg0.conf`.
-10. Проверить, что в `awg0.conf` добавился новый `[Peer]`.
-11. Проверить, что после добавления был `docker restart amnezia-awg2`.
-12. Открыть карточку пользователя в web:
+7. Создать нового пользователя через бота или web flow.
+8. Одобрить заявку.
+9. Если снова будет `PeerApplyError`, прислать строку `Details` и проверить failed event в истории действий.
+10. Проверить, что новый клиент получил IP после live `AllowedIPs` из `/opt/amnezia/awg/awg0.conf`.
+11. Проверить, что в `awg0.conf` добавился новый `[Peer]`.
+12. Проверить, что после добавления был `docker restart amnezia-awg2`.
+13. Открыть карточку пользователя в web:
     - устройство видно;
     - secrets скрыты;
     - `Show secrets` раскрывает private key и preshared key.
@@ -272,12 +275,12 @@ tail -n 200 logs/app.log
     - ссылка `Disabled devices` на странице пользователей открывает список отключенных устройств.
     - таблица `Admin actions` показывает metadata последних действий.
     - email config/recovery не отправляются, пока email не подтвержден.
-13. Нажать `Disable VPN`:
+14. Нажать `Disable VPN`:
     - browser confirm появляется перед отправкой формы;
     - peer удаляется из AmneziaWG;
     - устройство остается в базе со статусом `disabled`;
     - IP и ключи сохраняются.
-14. Нажать `Enable VPN`:
+15. Нажать `Enable VPN`:
     - browser confirm появляется перед отправкой формы;
     - peer возвращается в AmneziaWG;
     - IP тот же;
@@ -317,7 +320,7 @@ sudo journalctl -u amneziya-bot -n 200 --no-pager
 
 Критично перед следующим стабильным этапом:
 
-1. Пройти VPS retest после коммита `Require verified email delivery`.
+1. Пройти VPS retest после коммита `Add VPS retest bundle`.
 2. Подтвердить, что новый IP берется из live `awg0.conf`.
 3. Подтвердить disable/enable на реальном Docker runtime.
 4. Убедиться, что old/local peers из сети `10.8.0.0/24` не мешают новой live-сети `10.8.1.0/24`.

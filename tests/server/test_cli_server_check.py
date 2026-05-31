@@ -1,3 +1,4 @@
+import app.cli as cli
 from app.cli import build_parser
 from app.cli import run_server_peer_sync
 from app.cli import run_server_preflight
@@ -325,6 +326,29 @@ def test_cli_accepts_server_preflight_arguments():
     assert args.db == "data/amneziya.sqlite3"
 
 
+def test_cli_accepts_server_retest_plan_arguments():
+    parser = build_parser()
+
+    args = parser.parse_args(
+        [
+            "server",
+            "retest-plan",
+            "--config",
+            "servers.yml",
+            "--server",
+            "debian-vps-1",
+            "--db",
+            "data/amneziya.sqlite3",
+        ]
+    )
+
+    assert args.command == "server"
+    assert args.server_command == "retest-plan"
+    assert args.config == "servers.yml"
+    assert args.server == "debian-vps-1"
+    assert args.db == "data/amneziya.sqlite3"
+
+
 def test_run_server_preflight_reports_local_readiness(tmp_path):
     path = tmp_path / "servers.yml"
     db_path = tmp_path / "amneziya.sqlite3"
@@ -351,6 +375,33 @@ def test_run_server_preflight_reports_local_readiness(tmp_path):
     assert "traffic dry-run: ok" in output
     assert "backup target: ok" in output
     assert "VPS_APPLY_ENABLED=false" in output
+
+
+def test_run_server_retest_plan_prints_safe_vps_sequence(tmp_path):
+    path = tmp_path / "servers.yml"
+    db_path = tmp_path / "amneziya.sqlite3"
+    path.write_text(DOCKER_YAML, encoding="utf-8")
+
+    assert hasattr(cli, "run_server_retest_plan")
+    output = cli.run_server_retest_plan(
+        config_path=path,
+        server_name="debian-vps-1",
+        db_path=db_path,
+    )
+
+    assert "VPS retest plan: debian-vps-1" in output
+    assert "git pull origin codex-vps-test-prep" in output
+    assert "python -m app.cli server preflight" in output
+    assert f"--config {path}" in output
+    assert "--server debian-vps-1" in output
+    assert f"--db {db_path}" in output
+    assert "python -m app.cli server check" in output
+    assert "python -m app.cli server sync-peers" in output
+    assert "VPS_APPLY_ENABLED=false" in output
+    assert "runtime: docker" in output
+    assert "container: amnezia-awg" in output
+    assert "config_path: /opt/amnezia/awg/awg0.conf" in output
+    assert "approve one test order" in output
 
 
 class RecordingSshClient:

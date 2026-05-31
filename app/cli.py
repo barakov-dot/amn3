@@ -93,6 +93,11 @@ def build_parser() -> argparse.ArgumentParser:
     preflight.add_argument("--server", required=True)
     preflight.add_argument("--db", default="data/amneziya.sqlite3")
 
+    retest_plan = server_sub.add_parser("retest-plan")
+    retest_plan.add_argument("--config", default="servers.yml")
+    retest_plan.add_argument("--server", required=True)
+    retest_plan.add_argument("--db", default="data/amneziya.sqlite3")
+
     web = sub.add_parser("web")
     web_sub = web.add_subparsers(dest="web_command", required=True)
 
@@ -158,6 +163,14 @@ def main() -> None:
     elif args.command == "server" and args.server_command == "preflight":
         print(
             run_server_preflight(
+                config_path=Path(args.config),
+                server_name=args.server,
+                db_path=Path(args.db),
+            )
+        )
+    elif args.command == "server" and args.server_command == "retest-plan":
+        print(
+            run_server_retest_plan(
                 config_path=Path(args.config),
                 server_name=args.server,
                 db_path=Path(args.db),
@@ -384,6 +397,84 @@ def run_server_preflight(
             "Next: keep VPS_APPLY_ENABLED=false until live checks pass.",
         ]
     )
+
+
+def run_server_retest_plan(
+    *,
+    config_path: Path,
+    server_name: str,
+    db_path: Path,
+) -> str:
+    config = load_server_config(config_path)
+    server = select_server(config, server_name)
+    lines = [
+        f"VPS retest plan: {server.name}",
+        f"runtime: {server.runtime.type}",
+        f"container: {server.runtime.container_name or '-'}",
+        f"config_path: {server.runtime.config_path or '-'}",
+        "",
+        "1. Update code:",
+        "cd /home/amn2",
+        "git pull origin codex-vps-test-prep",
+        "git log -1 --oneline",
+        "source venv/bin/activate",
+        "python -m pip install -e .",
+        "",
+        "2. Keep peer writes disabled until read-only checks pass:",
+        "VPS_APPLY_ENABLED=false",
+        "",
+        "3. Run read-only checks:",
+        "python -m app.cli bot check-network",
+        f"python -m app.cli server preflight --config {config_path} --server {server.name} --db {db_path}",
+        f"python -m app.cli server check --config {config_path} --server {server.name} --dry-run",
+        f"python -m app.cli server check --config {config_path} --server {server.name}",
+        f"python -m app.cli server sync-peers --config {config_path} --server {server.name} --db {db_path}",
+        _runtime_check_command(server),
+        "",
+        "4. Restart or inspect services:",
+        "sudo systemctl restart amneziya-web",
+        "sudo systemctl restart amneziya-bot",
+        "sudo systemctl status amneziya-web --no-pager",
+        "sudo systemctl status amneziya-bot --no-pager",
+        "curl -i http://127.0.0.1:3030/login",
+        "tail -n 200 logs/app.log",
+        "",
+        "5. Manual checklist:",
+        "- open web server detail and run health check",
+        "- run peer sync and review Amnezia-created peers",
+        "- approve one test order",
+        "- verify new peer IP follows live AllowedIPs",
+        "- test Disable VPN, then Enable VPN for the same device",
+        "- test email config/recovery only after email is verified",
+        "",
+        "6. If it fails, collect safe logs:",
+        _debug_snapshot_command(server),
+        "sudo journalctl -u amneziya-web -n 200 --no-pager",
+        "sudo journalctl -u amneziya-bot -n 200 --no-pager",
+        "Do not send tokens, APP_SECRET_KEY, SSH secrets, PrivateKey, or PresharedKey.",
+    ]
+    return "\n".join(lines)
+
+
+def _runtime_check_command(server: ServerConfig) -> str:
+    if server.runtime.type == "docker":
+        container = server.runtime.container_name or "<container>"
+        return (
+            f"AMN_RUNTIME=docker AMN_CONTAINER_NAME={container} "
+            f"AMN_INTERFACE={server.vpn.interface} bash deploy/runtime/check_vps.sh"
+        )
+    return "bash deploy/runtime/check_vps.sh"
+
+
+def _debug_snapshot_command(server: ServerConfig) -> str:
+    if server.runtime.type == "docker":
+        container = server.runtime.container_name or "<container>"
+        return (
+            f"AMN_RUNTIME=docker AMN_CONTAINER_NAME={container} "
+            f"AMN_INTERFACE={server.vpn.interface} "
+            "bash deploy/runtime/collect_debug_snapshot.sh"
+        )
+    return "bash deploy/runtime/collect_debug_snapshot.sh"
 
 
 def _validate_preflight_server(server: ServerConfig) -> None:

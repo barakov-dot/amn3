@@ -10,14 +10,17 @@ git pull origin codex-vps-test-prep
 git log -1 --oneline
 source venv/bin/activate
 python -m pip install -e .
+python -m app.cli server retest-plan --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
 ```
 
 Сохранить вывод `git log -1 --oneline`: по нему мы понимаем, действительно ли на сервере последняя сборка.
+Команда `server retest-plan` печатает короткий порядок повторного прогона для выбранного сервера и не меняет VPS.
 
 ## 2. Проверить окружение перед запуском
 
 ```bash
 python -m app.cli bot check-network
+python -m app.cli server preflight --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
 python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
 bash deploy/runtime/check_vps.sh
 ```
@@ -70,6 +73,7 @@ sudo systemctl status amneziya-bot --no-pager
 ```
 
 В Telegram или web-панели записать, что нажимал перед ошибкой: раздел, кнопка, пользователь, устройство, сервер, примерное время.
+В карточке сервера web-панель показывает блок `VPS retest bundle` с теми же базовыми командами для `git pull`, `preflight`, `server check` и `sync-peers`.
 
 ## 4. При ошибке собрать snapshot
 

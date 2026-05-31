@@ -419,9 +419,12 @@ VPS_SSH_PASSWORD=CHANGE_ME_REAL_SSH_PASSWORD
 ```bash
 cd /opt/amn2
 source venv/bin/activate
+python -m app.cli server retest-plan --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
 python -m app.cli server preflight --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
 python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
 ```
+
+В карточке сервера web-панель также показывает блок `VPS retest bundle` с коротким набором команд для повторного VPS-прогона: `git pull`, `server retest-plan`, `preflight`, `server check` и `sync-peers`.
 
 Выполнить read-only проверку реального VPS:
 
