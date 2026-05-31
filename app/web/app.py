@@ -630,7 +630,7 @@ def create_web_app(
                 with repo.transaction():
                     user = _row_to_dict(repo.get_user(user_id))
                     email = _required_user_email(user)
-                    if actual_settings.email_require_verification and not user["email_verified_at"]:
+                    if not user["email_verified_at"]:
                         return PlainTextResponse("Email is not verified", status_code=400)
                     device = repo.get_user_device(user_id=user_id, device_id=device_id)
                     if device is None:

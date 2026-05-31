@@ -92,6 +92,31 @@ def test_config_email_rejects_unverified_email_when_required(tmp_path: Path):
     assert sender.messages == []
 
 
+def test_config_email_rejects_unverified_email_even_when_legacy_flag_is_disabled(
+    tmp_path: Path,
+):
+    sender = RecordingSender()
+    settings = _settings(tmp_path, email_require_verification=False)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=1001,
+        email="alice@example.com",
+    )
+    device_id = _seed_device(Path(settings.database_path), user_id=user_id)
+    client = _authenticated_client(settings, sender)
+    detail = client.get(f"/users/{user_id}")
+
+    response = client.post(
+        f"/users/{user_id}/devices/{device_id}/email-config",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 400
+    assert "Email is not verified" in response.text
+    assert sender.messages == []
+
+
 def test_verified_user_device_config_email_sends_without_exposing_encrypted_secrets(
     tmp_path: Path,
 ):
@@ -173,6 +198,32 @@ def test_recovery_start_link_sends_config_to_verified_email_and_is_one_time(
     with _repo(Path(settings.database_path)) as repo:
         row = _email_token_row(repo, purpose="recover_config")
         assert row["used_at"] is not None
+
+
+def test_recovery_start_rejects_unverified_email(tmp_path: Path):
+    sender = RecordingSender()
+    settings = _settings(tmp_path)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=1001,
+        email="alice@example.com",
+    )
+    device_id = _seed_device(Path(settings.database_path), user_id=user_id)
+    client = _authenticated_client(settings, sender)
+    detail = client.get(f"/users/{user_id}")
+
+    response = client.post(
+        f"/users/{user_id}/devices/{device_id}/email-recovery/start",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 400
+    assert "Email is not verified" in response.text
+    assert sender.messages == []
+    with _repo(Path(settings.database_path)) as repo:
+        row = _email_token_row(repo, purpose="recover_config")
+        assert row is None
 
 
 def test_recovery_link_does_not_send_when_email_delivery_is_disabled(tmp_path: Path):

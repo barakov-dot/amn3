@@ -323,6 +323,8 @@ http://127.0.0.1:3030/login
 
 В карточке пользователя блок `Admin actions` показывает не только action/admin/date, но и `target_device_id` с `metadata_json`. Это нужно для разбора failed VPS-событий: в metadata видны `operation`, `error_type` и `redacted_error`, если операция была записана как `*_failed`.
 
+Email-доставка конфигов и recovery доступны только после подтверждения email. Кнопка `Send verification` отправляет одноразовый код подтверждения; `Email config` и `Email recovery` отклоняют неподтвержденный адрес с ошибкой `Email is not verified`. Старый флаг `EMAIL_REQUIRE_VERIFICATION=false` больше не разрешает отправку конфигов на неподтвержденный email.
+
 ## 10. Подготовить Telegram-бота
 
 В `.env` заполнить:

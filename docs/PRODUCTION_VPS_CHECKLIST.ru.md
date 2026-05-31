@@ -152,8 +152,9 @@ EMAIL_RECOVERY_TOKEN_TTL_MINUTES=30
 EMAIL_CONFIG_ATTACHMENTS_ENABLED=true
 ```
 
-При `EMAIL_REQUIRE_VERIFICATION=true` конфиги и recovery-письма уходят только
-на подтвержденный email. Verification/recovery codes одноразовые, в базе
+Конфиги и recovery-письма уходят только на подтвержденный email. Значение
+`EMAIL_REQUIRE_VERIFICATION=false` не разрешает отправку конфигов на
+неподтвержденный адрес. Verification/recovery codes одноразовые, в базе
 хранится только SHA-256 hash token, срок жизни задает
 `EMAIL_RECOVERY_TOKEN_TTL_MINUTES`.
 Письмо с конфигом содержит краткую инструкцию и `vpn://` import link; вложение

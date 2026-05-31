@@ -27,7 +27,7 @@ codex-vps-test-prep
 Текущий актуальный коммит:
 
 ```text
-Show user audit metadata
+Require verified email delivery
 ```
 
 Не начинать отдельный проект с нуля. Новый чат должен открыть эту же папку, проверить ветку и продолжить от текущего состояния.
@@ -72,7 +72,7 @@ cd C:\Users\SooL\Documents\Amneziya
 ## codex-vps-test-prep...origin/codex-vps-test-prep
 ```
 
-В `git log -5` верхний коммит должен иметь сообщение `Show user audit metadata`.
+В `git log -5` верхний коммит должен иметь сообщение `Require verified email delivery`.
 
 Если ветка не совпадает:
 
@@ -94,7 +94,7 @@ $env:PYTHONPATH='.codex_deps;.'
 Последний результат:
 
 ```text
-430 passed, 1 warning
+432 passed, 1 warning
 ```
 
 Предупреждение ожидаемое:
@@ -124,6 +124,7 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
 - В карточке пользователя `Disable VPN` и `Enable VPN` показывают доступность по статусам устройств: active/pending можно отключать, disabled можно включать, а неприменимые действия отображаются disabled с короткой причиной.
 - Добавлен экран `/devices/disabled`: список отключенных устройств с владельцем, сервером, IP, причиной/временем отключения и ссылкой на карточку пользователя для повторного включения.
 - В карточке пользователя таблица `Admin actions` показывает `target_device_id` и `metadata_json`, чтобы failed VPS-события можно было читать без перехода в базу.
+- Email-доставка конфигов и запуск recovery теперь всегда требуют подтвержденный `users.email_verified_at`; старый флаг `EMAIL_REQUIRE_VERIFICATION=false` больше не разрешает отправку конфигов на неподтвержденный адрес.
 - Peer sync в карточке сервера:
   - известные peer панели;
   - peer, созданные в приложении Amnezia и еще не помеченные;
@@ -207,7 +208,7 @@ git log -1 --oneline
 Ожидаемый коммит:
 
 ```text
-Show user audit metadata
+Require verified email delivery
 ```
 
 Проверить server config:
@@ -245,7 +246,7 @@ tail -n 200 logs/app.log
 
 Порядок проверки:
 
-1. `git log -1 --oneline` показывает коммит `Show user audit metadata`.
+1. `git log -1 --oneline` показывает коммит `Require verified email delivery`.
 2. Web-панель открывается.
 3. В карточке сервера блок `VPS readiness` показывает:
    - `VPS_APPLY_ENABLED`;
@@ -270,6 +271,7 @@ tail -n 200 logs/app.log
     - `Disable VPN`/`Enable VPN` показывают доступность по текущим статусам устройств.
     - ссылка `Disabled devices` на странице пользователей открывает список отключенных устройств.
     - таблица `Admin actions` показывает metadata последних действий.
+    - email config/recovery не отправляются, пока email не подтвержден.
 13. Нажать `Disable VPN`:
     - browser confirm появляется перед отправкой формы;
     - peer удаляется из AmneziaWG;
@@ -315,7 +317,7 @@ sudo journalctl -u amneziya-bot -n 200 --no-pager
 
 Критично перед следующим стабильным этапом:
 
-1. Пройти VPS retest после коммита `Show user audit metadata`.
+1. Пройти VPS retest после коммита `Require verified email delivery`.
 2. Подтвердить, что новый IP берется из live `awg0.conf`.
 3. Подтвердить disable/enable на реальном Docker runtime.
 4. Убедиться, что old/local peers из сети `10.8.0.0/24` не мешают новой live-сети `10.8.1.0/24`.
@@ -324,9 +326,8 @@ sudo journalctl -u amneziya-bot -n 200 --no-pager
 
 Некритично, но полезно дальше:
 
-1. Добавить будущую email-доставку и восстановление конфигов только для подтвержденного email.
-2. Вернуться к идее skill по проекту Amneziya, когда текущий VPS-тест будет стабилен.
-3. Позже продолжить исследовательский параллельный проект/hybrid lab по похожему GitHub-проекту.
+1. Вернуться к идее skill по проекту Amneziya, когда текущий VPS-тест будет стабилен.
+2. Позже продолжить исследовательский параллельный проект/hybrid lab по похожему GitHub-проекту.
 
 ## 12. Главные файлы проекта
 
