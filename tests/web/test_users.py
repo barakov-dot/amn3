@@ -169,6 +169,29 @@ def test_user_detail_shows_profile_summaries_and_actions(tmp_path: Path):
     assert "seed_action" in response.text
 
 
+def test_user_detail_marks_dangerous_actions_with_confirmation(tmp_path: Path):
+    settings = _settings(tmp_path)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=4104,
+        username="danger-user",
+        first_name="Danger",
+        last_name=None,
+    )
+    _seed_devices(Path(settings.database_path), user_id=user_id)
+    client = _authenticated_client(settings)
+
+    response = client.get(f"/users/{user_id}")
+
+    assert response.status_code == 200
+    assert "window.confirm(message)" in response.text
+    assert "Disable VPN for this user and remove active peers from AmneziaWG?" in response.text
+    assert "Enable VPN for this user and add disabled peers back to AmneziaWG?" in response.text
+    assert "Soft delete this user in the admin database?" in response.text
+    assert "Permanently delete this user and all related data? This cannot be undone." in response.text
+    assert "Delete this device and revoke its peer from AmneziaWG? This cannot be undone." in response.text
+
+
 def test_edit_user_preserves_and_clears_email_verification(tmp_path: Path):
     settings = _settings(tmp_path, admin_telegram_ids="9001")
     user_id = _seed_user(

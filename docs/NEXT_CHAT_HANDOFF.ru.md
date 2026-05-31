@@ -27,7 +27,7 @@ codex-vps-test-prep
 Текущий актуальный коммит:
 
 ```text
-Log failed VPS operations
+Add dangerous action confirmations
 ```
 
 Не начинать отдельный проект с нуля. Новый чат должен открыть эту же папку, проверить ветку и продолжить от текущего состояния.
@@ -72,7 +72,7 @@ cd C:\Users\SooL\Documents\Amneziya
 ## codex-vps-test-prep...origin/codex-vps-test-prep
 ```
 
-В `git log -5` верхний коммит должен иметь сообщение `Log failed VPS operations`.
+В `git log -5` верхний коммит должен иметь сообщение `Add dangerous action confirmations`.
 
 Если ветка не совпадает:
 
@@ -94,7 +94,7 @@ $env:PYTHONPATH='.codex_deps;.'
 Последний результат:
 
 ```text
-424 passed, 1 warning
+425 passed, 1 warning
 ```
 
 Предупреждение ожидаемое:
@@ -120,6 +120,7 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
 - В карточке сервера добавлен блок `VPS readiness`: `VPS_APPLY_ENABLED`, `SERVER_CONFIG_PATH`, выбранный сервер из `servers.yml`, runtime/container/config_path, последняя health-проверка и текущий peer sync из сессии браузера.
 - Неудачные VPS-операции теперь пишутся в `admin_actions` с action `*_failed`, `error_type` и `redacted_error`; секреты проходят через `redact()`.
 - В карточке сервера добавлен блок `Recent server actions`, где видны последние server-level audit events, включая failed операции.
+- Опасные действия web-панели (`Disable VPN`, `Enable VPN`, `Soft delete`, `Delete permanently`, удаление устройства, отключение сервера, добавление missing device в AmneziaWG) теперь требуют browser confirm перед отправкой формы.
 - Peer sync в карточке сервера:
   - известные peer панели;
   - peer, созданные в приложении Amnezia и еще не помеченные;
@@ -203,7 +204,7 @@ git log -1 --oneline
 Ожидаемый коммит:
 
 ```text
-Log failed VPS operations
+Add dangerous action confirmations
 ```
 
 Проверить server config:
@@ -241,7 +242,7 @@ tail -n 200 logs/app.log
 
 Порядок проверки:
 
-1. `git log -1 --oneline` показывает коммит `Log failed VPS operations`.
+1. `git log -1 --oneline` показывает коммит `Add dangerous action confirmations`.
 2. Web-панель открывается.
 3. В карточке сервера блок `VPS readiness` показывает:
    - `VPS_APPLY_ENABLED`;
@@ -264,10 +265,12 @@ tail -n 200 logs/app.log
     - secrets скрыты;
     - `Show secrets` раскрывает private key и preshared key.
 13. Нажать `Disable VPN`:
+    - browser confirm появляется перед отправкой формы;
     - peer удаляется из AmneziaWG;
     - устройство остается в базе со статусом `disabled`;
     - IP и ключи сохраняются.
 14. Нажать `Enable VPN`:
+    - browser confirm появляется перед отправкой формы;
     - peer возвращается в AmneziaWG;
     - IP тот же;
     - ключ тот же;
@@ -306,7 +309,7 @@ sudo journalctl -u amneziya-bot -n 200 --no-pager
 
 Критично перед следующим стабильным этапом:
 
-1. Пройти VPS retest после коммита `Log failed VPS operations`.
+1. Пройти VPS retest после коммита `Add dangerous action confirmations`.
 2. Подтвердить, что новый IP берется из live `awg0.conf`.
 3. Подтвердить disable/enable на реальном Docker runtime.
 4. Убедиться, что old/local peers из сети `10.8.0.0/24` не мешают новой live-сети `10.8.1.0/24`.

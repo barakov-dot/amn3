@@ -63,19 +63,19 @@
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button class="button button-secondary" type="submit">Block</button>
         </form>
-        <form action="/users/{{ user.id }}/disable-vpn" method="post">
+        <form action="/users/{{ user.id }}/disable-vpn" method="post" data-confirm="Disable VPN for this user and remove active peers from AmneziaWG?">
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button class="button button-secondary" type="submit">Disable VPN</button>
         </form>
-        <form action="/users/{{ user.id }}/enable-vpn" method="post">
+        <form action="/users/{{ user.id }}/enable-vpn" method="post" data-confirm="Enable VPN for this user and add disabled peers back to AmneziaWG?">
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button class="button button-secondary" type="submit">Enable VPN</button>
         </form>
-        <form action="/users/{{ user.id }}/delete" method="post">
+        <form action="/users/{{ user.id }}/delete" method="post" data-confirm="Soft delete this user in the admin database?">
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button class="button button-danger" type="submit">Soft delete</button>
         </form>
-        <form action="/users/{{ user.id }}/destroy" method="post">
+        <form action="/users/{{ user.id }}/destroy" method="post" data-confirm="Permanently delete this user and all related data? This cannot be undone.">
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button class="button button-danger" type="submit">Delete permanently</button>
         </form>
@@ -140,7 +140,7 @@
                       {% else %}
                         <span class="muted-text">No email</span>
                       {% endif %}
-                      <form action="/users/{{ user.id }}/devices/{{ device.id }}/delete" method="post">
+                      <form action="/users/{{ user.id }}/devices/{{ device.id }}/delete" method="post" data-confirm="Delete this device and revoke its peer from AmneziaWG? This cannot be undone.">
                         <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
                         <button class="button button-danger button-small" type="submit">Удалить устройство</button>
                       </form>

@@ -75,7 +75,7 @@
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button class="button button-secondary" type="submit">Run peer sync</button>
         </form>
-        <form action="/servers/{{ server.id }}/disable" method="post">
+        <form action="/servers/{{ server.id }}/disable" method="post" data-confirm="Disable this server in the admin database?">
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button class="button button-danger" type="submit">Disable</button>
         </form>
@@ -269,7 +269,7 @@
                     <td class="wrap-text">{{ peer.peer_public_key }}</td>
                     <td>{{ peer.vpn_ip }}/32</td>
                     <td>
-                      <form action="/servers/{{ server.id }}/missing-devices/{{ peer.device_id }}/add" method="post">
+                      <form action="/servers/{{ server.id }}/missing-devices/{{ peer.device_id }}/add" method="post" data-confirm="Add this local device peer to AmneziaWG on the VPS?">
                         <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
                         <button class="button button-secondary button-small" type="submit">Добавить в Amnezia</button>
                       </form>
