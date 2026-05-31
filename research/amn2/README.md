@@ -33,6 +33,7 @@ handoff: docs/NEXT_CHAT_HANDOFF.ru.md
 - [Route/Auth Policy Matrix](route-policy-matrix.md) - конкретная policy matrix для web, bot, public-token и CLI/operator surfaces.
 - [Secret surface inventory](secret-surface-inventory.md) - первый проход по secrets, redaction, encrypted backup, email tokens, config delivery и 2FA implications.
 - [Config delivery inventory](config-delivery-inventory.md) - первый проход по выдаче VPN config через bot, email, QR, `vpn://` link, recovery token и template preview.
+- [Redaction coverage plan](redaction-coverage-plan.md) - P0-план покрытия `.conf`, QR, `vpn://`, tokens, Local Agent headers, command output и diagnostics перед расширением remote operations.
 - [Remote operations inventory](remote-operations-inventory.md) - первый проход по SSH/server apply flows, dry-run, health checks, peer apply/revoke, traffic collection, audit, redaction и rollback gaps.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
@@ -40,12 +41,12 @@ handoff: docs/NEXT_CHAT_HANDOFF.ru.md
 
 Текущее решение: 2FA для web-admin поставлена на паузу, implementation plan для нее не пишем до отдельного решения.
 
-Текущий фокус после verified VPS cycle:
+Текущий фокус после verified VPS cycle и read-only `RemoteOperationRunner` baseline:
 
-1. API-readiness audit: определить actors, auth, route classes, secret boundaries, audit, dry-run/apply и rollback для будущего API/ops слоя.
-2. Сравнить audit с Local Agent first slice и production wiring branches.
-3. Выбрать первый безопасный implementation slice для `amn2`.
-4. Только после этого писать отдельный implementation plan.
+1. Исполнить [redaction coverage first slice](../../docs/superpowers/plans/2026-05-31-amn2-redaction-coverage-first-slice.md) в изолированной ветке `amn2`.
+2. После focused tests выполнить полный `pytest tests -v`.
+3. Обновить lab-статус до `redaction-coverage-first-slice-verified`.
+4. Затем перейти к partial-failure/rollback contract для state-changing remote operations.
 
 ## Неактуальный риск
 

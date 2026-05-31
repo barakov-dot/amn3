@@ -37,7 +37,7 @@ Backlog не является списком задач к немедленно�
 - Суть: любые SSH/sudo/Docker/firewall операции выполнять через единый runner с dry-run, timeout, redaction, audit и recovery note.
 - Причина: удаленные операции могут сломать VPS, firewall, контейнеры или доступ пользователей.
 - Текущий результат: read-only health slice `RemoteOperationRunner` уже присутствует в текущем `amn2` baseline и проверен focused/full тестами.
-- Следующий шаг: не расширять сразу на state-changing operations; сначала подготовить redaction coverage plan и отдельный design для partial-failure/rollback contract.
+- Следующий шаг: исполнить подготовленный redaction coverage first slice; затем отдельно описать partial-failure/rollback contract.
 
 ### Route/Auth policy matrix
 
@@ -71,7 +71,7 @@ Backlog не является списком задач к немедленно�
 - Суть: единая таблица секретов: где хранятся, где могут утечь, как redacted, rotated, revoked и restored.
 - Причина: без inventory нельзя безопасно проектировать backup, config delivery, scoped tokens, agent и audit.
 - Текущий результат: `research/amn2/secret-surface-inventory.md` расширен до P0-gate для config delivery, backup/import, scoped tokens, Local Agent, SSH/VPS operations, metrics и audit.
-- Следующий шаг: подготовить `Route/Auth policy matrix` и отдельный redaction coverage plan на базе классов секретов.
+- Следующий шаг: использовать `Redaction coverage plan` как первый implementation gate для `.conf`, QR, `vpn://`, tokens, Local Agent headers и command output.
 
 ## P1. Важные рекомендации
 
@@ -202,7 +202,7 @@ Backlog не является списком задач к немедленно�
 ## Ближайшая рекомендуемая очередь
 
 1. Закрыть PR/branch по `Secret-safe config delivery`, когда GitHub-доступ к приватному `amn2` будет настроен.
-2. Подготовить redaction coverage plan для `.conf`, QR, `vpn://`, tokens, Local Agent и command output.
-3. Описать partial-failure/rollback contract для state-changing remote operations.
+2. Исполнить redaction coverage first slice для `.conf`, QR, `vpn://`, tokens, Local Agent headers и command output.
+3. После redaction coverage описать partial-failure/rollback contract для state-changing remote operations.
 4. Позже превратить `Route/Auth Policy Matrix` в machine-checkable route policy coverage tests.
 5. Только после этого возвращаться к self-service links, domain exclusions и 2FA.

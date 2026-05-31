@@ -191,3 +191,15 @@
 - как описаны partial failures между file write, live sync/restart и local metadata update;
 - не попадают ли private key, PSK, API key, config body, QR payload или `vpn://` в logs/errors/metrics;
 - есть ли staging/runtime tests, а не только lint/build.
+
+## Redaction coverage checklist для VPN/control-panel work
+
+Перед переносом любой функции, которая выдает config, token, agent credential или remote command output, проверять:
+
+- считается ли `.conf`, QR payload/PNG и `vpn://` единым `client-config-secret`, даже если секрет закодирован обратимо;
+- редактируется ли entire `vpn://` URI, а не только decoded config text;
+- не попадают ли raw token, bearer header, Local Agent token, TOTP/otpauth URI, backup/recovery codes в logs, audit, diagnostics и errors;
+- есть ли focused tests для `redact()` на realistic log formats, quoted/unquoted values, headers и reversible links;
+- есть ли route/bot/web tests, что audit metadata содержит только ids/status/purpose, но не config/link/token;
+- есть ли remote operation tests, что stdout/stderr/recovery note не раскрывают PSK, config block, private key или agent token;
+- для binary QR PNG фиксировать не text-redaction, а запрет попадания в diagnostics/plain backup и отдельный payload round-trip test.

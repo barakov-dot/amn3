@@ -214,6 +214,6 @@ Current posture:
 
 ## Следующие рабочие шаги
 
-1. Подготовить redaction coverage plan для command stdout/stderr, diagnostics, `.conf`, QR, `vpn://`, token raw/hash и Local Agent token.
+1. Исполнить подготовленный redaction coverage first slice для command stdout/stderr, diagnostics, `.conf`, QR, `vpn://`, token raw/hash и Local Agent token/header.
 2. Описать partial-failure/rollback contract для state-changing remote operations.
 3. До live Docker apply/revoke отдельно описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
