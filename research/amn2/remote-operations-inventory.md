@@ -21,6 +21,25 @@
 
 Главный gap: state-changing remote operations пока не оформлены как единый contract. Для production-доработок нужен слой, который заранее описывает risk class, inputs, remote side effects, local side effects, idempotency, audit, rollback note и test double.
 
+## Обновление 2026-05-31: verified runner baseline
+
+Read-only health slice `RemoteOperationRunner` уже присутствует в текущем `amn2` baseline:
+
+- `app/server/operations.py` задает typed operation contract;
+- `app/server/operation_runner.py` выполняет только `read-only-remote` operation через существующий read-only command policy;
+- `app/server/checks.py` строит `server.health.check` operation и запускает health checks через runner;
+- web health audit получает `operation_id`, `risk_class` и `consistency_status`;
+- `docs/RUNTIME_REGISTRY.ru.md` и `docs/RUNTIME_REGISTRY.en.md` фиксируют границы первого slice.
+
+Проверено в isolated worktree `codex/remote-operation-runner-first-slice`:
+
+- focused verification: `75 passed`;
+- full suite: `508 passed`;
+- hygiene/redaction checks: `6 passed`;
+- предупреждение: один внешний `StarletteDeprecationWarning` из `fastapi.testclient`.
+
+Итог: read-only remote health baseline считается закрытым. Следующие remote work items не должны расширять runner на state-changing операции без отдельного partial-failure/rollback design.
+
 ## Карта remote surfaces
 
 | Surface | Actor / gate | Remote command class | Local side effect | Current controls |
@@ -187,12 +206,14 @@ Current posture:
 
 ## Решение для lab
 
-Статус: `remote-operations-inventory-first-pass`.
+Статус: `remote-operations-read-only-runner-verified`.
 
-Не переносим новые remote-state-write функции в `amn2` как code edit, пока не описан и не утвержден policy/design для remote operation contract. Ближайший безопасный design candidate - `RemoteOperationRunner`: он должен закрепить risk class, dry-run preview, audit, redaction, idempotency и rollback notes.
+Не переносим новые remote-state-write функции в `amn2` как code edit, пока не описан и не утвержден policy/design для partial failure, rollback/resume и audit before/after.
+
+Первый безопасный read-only slice `RemoteOperationRunner` уже есть в baseline и проверен. Дальше работаем не над повторным вводом runner-а, а над его расширением только через отдельные gates.
 
 ## Следующие рабочие шаги
 
-1. Обновить `RemoteOperationRunner` design с учетом этого inventory.
-2. Составить route/operation policy matrix для web, bot и CLI surfaces.
+1. Подготовить redaction coverage plan для command stdout/stderr, diagnostics, `.conf`, QR, `vpn://`, token raw/hash и Local Agent token.
+2. Описать partial-failure/rollback contract для state-changing remote operations.
 3. До live Docker apply/revoke отдельно описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.

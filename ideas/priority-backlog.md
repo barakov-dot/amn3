@@ -33,10 +33,11 @@ Backlog не является списком задач к немедленно�
 ### Remote operations safety
 
 - Цель: `amn2`.
-- Статус: `design-needed`.
+- Статус: `in-progress`.
 - Суть: любые SSH/sudo/Docker/firewall операции выполнять через единый runner с dry-run, timeout, redaction, audit и recovery note.
 - Причина: удаленные операции могут сломать VPS, firewall, контейнеры или доступ пользователей.
-- Следующий шаг: продолжить plan `RemoteOperationRunner` с read-only health slice, затем отдельно добавить state-changing operations.
+- Текущий результат: read-only health slice `RemoteOperationRunner` уже присутствует в текущем `amn2` baseline и проверен focused/full тестами.
+- Следующий шаг: не расширять сразу на state-changing operations; сначала подготовить redaction coverage plan и отдельный design для partial-failure/rollback contract.
 
 ### Route/Auth policy matrix
 
@@ -201,7 +202,7 @@ Backlog не является списком задач к немедленно�
 ## Ближайшая рекомендуемая очередь
 
 1. Закрыть PR/branch по `Secret-safe config delivery`, когда GitHub-доступ к приватному `amn2` будет настроен.
-2. Продолжить `RemoteOperationRunner` с read-only health slice, используя `Route/Auth Policy Matrix` как gate для web/API remote surfaces.
-3. Подготовить redaction coverage plan для `.conf`, QR, `vpn://`, tokens, Local Agent и command output.
+2. Подготовить redaction coverage plan для `.conf`, QR, `vpn://`, tokens, Local Agent и command output.
+3. Описать partial-failure/rollback contract для state-changing remote operations.
 4. Позже превратить `Route/Auth Policy Matrix` в machine-checkable route policy coverage tests.
 5. Только после этого возвращаться к self-service links, domain exclusions и 2FA.
