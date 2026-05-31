@@ -39,6 +39,7 @@ Backlog не является списком задач к немедленно�
 - Текущий результат: read-only health slice `RemoteOperationRunner` уже присутствует в текущем `amn2` baseline и проверен focused/full тестами.
 - Текущий результат 2026-05-31: redaction coverage first slice выполнен в ветке `codex/redaction-coverage-first-slice`; focused suite `61 passed`, full suite `513 passed`.
 - Текущий план 2026-05-31: следующий remote safety блок разделен на local-only gate и controlled real VPS verification gate.
+- Локальная очередь 2026-05-31: [Local-only task priority](../research/amn2/local-only-task-priority.md) фиксирует P0/P1/P2/P3 задачи, которые можно сделать без VPS и без чтения `.env`.
 - Следующий шаг: сначала исполнить local-only gate: contract, fake runner, partial-failure simulations, dry-run/audit metadata и full local suite. Реальный VPS проверяем только после этого на тестовом peer/device.
 
 ### Route/Auth policy matrix
@@ -213,7 +214,7 @@ Backlog не является списком задач к немедленно�
 ## Ближайшая рекомендуемая очередь
 
 1. Закрыть PR/branch по `Secret-safe config delivery`, когда GitHub-доступ к приватному `amn2` будет настроен.
-2. Исполнить local-only phase для partial-failure/rollback contract state-changing remote operations.
+2. Исполнить [local-only priority list](../research/amn2/local-only-task-priority.md): P0 contract/fake runner/partial-failure/redaction, затем P1 dry-run/audit/docs.
 3. После локального green suite провести controlled real VPS verification gate на тестовом peer/device.
 4. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
 5. Позже превратить `Route/Auth Policy Matrix` в machine-checkable route policy coverage tests.
