@@ -50,6 +50,8 @@ def test_config_templates_page_lists_versions_placeholders_and_safe_preview(tmp_
     assert "amneziawg_v2" in response.text
     assert "override" in response.text
     assert "default" in response.text
+    assert "Secret-bearing delivery artifacts" in response.text
+    assert "Treat real .conf, QR, and vpn:// payloads as secrets." in response.text
     assert "{private_key}" in response.text
     assert "{preshared_key}" in response.text
     assert "vpn://" in response.text

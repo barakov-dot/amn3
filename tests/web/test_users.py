@@ -276,11 +276,20 @@ def test_user_detail_marks_dangerous_actions_with_confirmation(tmp_path: Path):
 
     assert response.status_code == 200
     assert "window.confirm(message)" in response.text
-    assert "Disable VPN for this user and remove active peers from AmneziaWG?" in response.text
-    assert "Enable VPN for this user and add disabled peers back to AmneziaWG?" in response.text
+    assert (
+        "Disable VPN for this user? This changes local device status and may remove "
+        "active peers from AmneziaWG when VPS_APPLY_ENABLED=true."
+    ) in response.text
+    assert (
+        "Enable VPN for this user? This changes local device status and may add "
+        "disabled peers back to AmneziaWG when VPS_APPLY_ENABLED=true."
+    ) in response.text
     assert "Soft delete this user in the admin database?" in response.text
     assert "Permanently delete this user and all related data? This cannot be undone." in response.text
-    assert "Delete this device and revoke its peer from AmneziaWG? This cannot be undone." in response.text
+    assert (
+        "Delete this device? This deletes local data and may revoke its peer from "
+        "AmneziaWG when VPS_APPLY_ENABLED=true. This cannot be undone."
+    ) in response.text
 
 
 def test_user_detail_shows_vpn_action_availability_for_active_devices(tmp_path: Path):

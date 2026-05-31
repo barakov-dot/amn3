@@ -160,7 +160,12 @@ def test_server_detail_shows_config_health_and_actions(tmp_path: Path):
     assert "45 ms" in response.text
     assert f"/servers/{server_id}/health/run" in response.text
     assert f"/servers/{server_id}/sync/run" in response.text
-    assert "Disable this server in the admin database?" in response.text
+    assert "Read-only: stores health status only; no VPS changes." in response.text
+    assert "Read-only compare: does not add or remove peers." in response.text
+    assert (
+        "Disable this server in the admin database only? No VPS peers will be changed."
+        in response.text
+    )
 
 
 def test_server_detail_shows_vps_readiness_block(tmp_path: Path):
@@ -320,7 +325,14 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
     assert "amnezia-created-peer" in page.text
     assert "Снять пометку" in page.text
     assert "missing-peer" in page.text
-    assert "Add this local device peer to AmneziaWG on the VPS?" in page.text
+    assert (
+        "VPS write gate: adding a missing local device writes one peer to AmneziaWG."
+        in page.text
+    )
+    assert (
+        "Add this local device peer to AmneziaWG on the VPS? "
+        "This is a live write and should follow the VPS gate."
+    ) in page.text
     assert "Recent server actions" in page.text
     assert "web_server_peer_sync_run" in page.text
     with _repo(Path(settings.database_path)) as repo:

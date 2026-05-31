@@ -63,7 +63,7 @@
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button class="button button-secondary" type="submit">Block</button>
         </form>
-        <form action="/users/{{ user.id }}/disable-vpn" method="post" data-confirm="Disable VPN for this user and remove active peers from AmneziaWG?">
+        <form action="/users/{{ user.id }}/disable-vpn" method="post" data-confirm="Disable VPN for this user? This changes local device status and may remove active peers from AmneziaWG when VPS_APPLY_ENABLED=true.">
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button
             class="button button-secondary"
@@ -73,7 +73,7 @@
           >Disable VPN</button>
           <p class="action-note">{{ vpn_actions.disable.hint }}</p>
         </form>
-        <form action="/users/{{ user.id }}/enable-vpn" method="post" data-confirm="Enable VPN for this user and add disabled peers back to AmneziaWG?">
+        <form action="/users/{{ user.id }}/enable-vpn" method="post" data-confirm="Enable VPN for this user? This changes local device status and may add disabled peers back to AmneziaWG when VPS_APPLY_ENABLED=true.">
           <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
           <button
             class="button button-secondary"
@@ -152,7 +152,7 @@
                       {% else %}
                         <span class="muted-text">No email</span>
                       {% endif %}
-                      <form action="/users/{{ user.id }}/devices/{{ device.id }}/delete" method="post" data-confirm="Delete this device and revoke its peer from AmneziaWG? This cannot be undone.">
+                      <form action="/users/{{ user.id }}/devices/{{ device.id }}/delete" method="post" data-confirm="Delete this device? This deletes local data and may revoke its peer from AmneziaWG when VPS_APPLY_ENABLED=true. This cannot be undone.">
                         <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
                         <button class="button button-danger button-small" type="submit">Удалить устройство</button>
                       </form>

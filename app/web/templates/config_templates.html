@@ -6,6 +6,13 @@
     <h1>Config templates</h1>
   </section>
 
+  <section class="panel panel-spaced" aria-label="Delivery artifact safety">
+    <div class="panel-header">
+      <h2>Secret-bearing delivery artifacts</h2>
+    </div>
+    <p class="empty-state">Treat real .conf, QR, and vpn:// payloads as secrets.</p>
+  </section>
+
   <section class="template-grid" aria-label="Client config templates">
     {% for item in config_templates %}
       <article class="panel">
