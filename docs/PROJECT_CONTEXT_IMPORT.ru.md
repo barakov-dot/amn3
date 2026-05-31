@@ -1,14 +1,71 @@
 # VPN Ops Lab / Amneziya: импорт контекста из чатов
 
-Дата снимка: 2026-05-31.
+Дата снимка: 2026-06-01.
 
-Обновлено: 2026-05-31 после полного прохода по проектным чатам, verified live VPS cycle, merge Local Agent в `amn2` и API-readiness audit в AMN3.
+Обновлено: 2026-06-01 после повторного прохода по проектным чатам, серии local-only transfer slices в `amn2` и синхронизации AMN3 с `barakov-dot/amn3`.
 
 Документ нужен для главного coordination-чата. Он собирает только рабочий контекст, который нужен для решений по `amn2`, будущему hybrid и общему Codex skill. Это не implementation plan и не разрешение на перенос функций.
 
-## Актуализация после verified live VPS cycle
+## Актуализация 2026-06-01
 
-После исходного import-снимка `amn2` прошел первый подтвержденный live VPS cycle. Текущая точка правды:
+Текущая точка правды `amn2`:
+
+```text
+repo: C:\Users\SooL\Documents\Amneziya
+branch: codex-vps-test-prep
+remote branch: amn2/codex-vps-test-prep
+latest committed head: 22dfc37 Clarify web panel operation gates
+stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
+status: remote-synced after web-panel safe-improvements
+```
+
+Последний production slice относится к узкому UI/wording layer:
+
+```text
+app/web/templates/config_templates.html
+app/web/templates/server_detail.html
+app/web/templates/user_detail.html
+tests/web/test_config_templates.py
+tests/web/test_servers.py
+tests/web/test_users.py
+```
+
+Смысл: добавить secret-aware wording для `.conf`/QR/`vpn://`, read-only notes для health/sync и более точные confirmation texts для действий, которые могут затронуть VPS при `VPS_APPLY_ENABLED=true`.
+
+Проверка: RED `4 failed as expected`, focused web/security suite `75 passed`, full local suite `536 passed`, warning только `StarletteDeprecationWarning`.
+
+Дополнительная проверка 2026-06-01: `tests/web/test_config_templates.py tests/web/test_servers.py tests/web/test_users.py -q --basetemp tmp\pytest-web-panel-safe` -> `49 passed, 1 StarletteDeprecationWarning`.
+
+Текущая точка правды AMN3 / lab:
+
+```text
+repo: C:\Users\SooL\Documents\VPS-OPS-LAB
+branch: master
+remote: https://github.com/barakov-dot/amn3.git
+committed head: 51eb239 Record Local Agent hardening slice
+status: clean and synchronized with origin/master before this update
+```
+
+После verified live VPS baseline уже выполнены и записаны в AMN3:
+
+- `d1d9690 Add route auth operation policy matrix`;
+- `94ad807 Document secret-bearing delivery artifacts`;
+- config delivery integrity local evidence at `94ad807`;
+- `dfe27ee Harden public email token safety`;
+- remote operation contract / partial-failure / dry-run-audit local-gate evidence;
+- `c5d7eb6 Harden Local Agent audit contract`;
+- `22dfc37 Clarify web panel operation gates`.
+
+Следующий рабочий выбор:
+
+1. Начать scoped API tokens design/storage tests, включая token rotation/revoke contract.
+2. Или отдельно запустить controlled real VPS verification gate для remote-operation dry-run/audit ветки.
+
+Старые блоки ниже, где `91aeb3e` указан как latest clean baseline, считать историческим контекстом verified live stage.
+
+## Исторический снимок после verified live VPS cycle
+
+После исходного import-снимка `amn2` прошел первый подтвержденный live VPS cycle. Точка правды на тот момент:
 
 ```text
 repo: C:\Users\SooL\Documents\Amneziya

@@ -1,8 +1,8 @@
 # Текущее состояние проекта
 
-Дата: 2026-05-31.
+Дата: 2026-06-01.
 
-Этот snapshot фиксирует переезд из длинного `amn2` VPS-чата в `VPS-OPS-LAB` после подтвержденного live VPS cycle.
+Этот snapshot фиксирует текущее состояние после verified live VPS cycle, серии local-only hardening slices в `amn2` и синхронизации AMN3 с GitHub.
 
 ## Что учтено при обновлении
 
@@ -16,6 +16,13 @@
 - task/review-чаты Local Amnezia Agent first slice;
 - task/review-чаты Local Agent production wiring;
 - live VPS completion / verified tag / migration-to-lab чаты;
+- Route/Auth/Operation Policy Matrix task/review;
+- Redaction Coverage task/review;
+- Config Delivery Integrity evidence;
+- Public Token Safety task/review;
+- Remote Operation contract / partial-failure / dry-run-audit slices;
+- Local Agent hardening task/review;
+- Web Panel Safe Improvements task/review;
 - текущий `MAIN - VPN Ops Lab` coordination chat.
 
 Нерелевантные сессии из других рабочих папок, например `ISP-NEW`, не включались в состояние этого проекта.
@@ -40,13 +47,13 @@ https://github.com/barakov-dot/amn3.git
 master
 ```
 
-Текущий committed head lab перед этим обновлением:
+Committed head lab before this status update:
 
 ```text
-e23d4cd Record partial failure local slice
+51eb239 Record Local Agent hardening slice
 ```
 
-`master` синхронизирован с `origin/master` до фиксации нового public-token evidence.
+`master` синхронизирован с `origin/master`.
 
 AMN3 является coordination/knowledge repo: research, design specs, implementation plans, transfer notes и gate для переноса идей в production.
 
@@ -75,8 +82,12 @@ codex-vps-test-prep
 Актуальный head:
 
 ```text
-c5d7eb6 Harden Local Agent audit contract
+22dfc37 Clarify web panel operation gates
 ```
+
+Текущий local worktree `Amneziya` после web-panel safe-improvements commit должен оставаться чистым и синхронизированным с `amn2/codex-vps-test-prep`.
+
+Последний web-panel slice добавил operator wording для secret-bearing delivery artifacts, read-only server actions и VPS write gate confirmations без изменения write behavior.
 
 Проверенная stable-точка live VPS cycle:
 
@@ -129,7 +140,7 @@ research/amn2/api-readiness-audit-after-live-baseline.md
 docs/AMN2_MAIN_MERGE_ROADMAP.ru.md
 ```
 
-Первый выбранный safe slice для будущего переноса в `amn2`:
+Первый выбранный safe slice уже перенесен в `amn2`:
 
 ```text
 Route/Auth/Operation Policy Matrix for current amn2 surfaces
@@ -137,7 +148,16 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 
 Смысл slice: не добавлять новый production API сразу, а сначала сделать machine-checkable policy/contract для текущих web, bot, Local Agent и remote-operation surfaces: actors, auth, risk class, secret class, audit, idempotency, dry-run/apply, rollback/recovery и live-retest trigger.
 
-Этот slice должен остаться без live VPS calls, без новых config/API/write endpoints и без копирования upstream code.
+Этот slice остался без live VPS calls, без новых config/API/write endpoints и без копирования upstream code.
+
+После него локально выполнены и запушены в `amn2/codex-vps-test-prep` следующие local-only slices:
+
+- Redaction Coverage: `94ad807 Document secret-bearing delivery artifacts`;
+- Config Delivery Integrity evidence: verified at `94ad807`;
+- Public Token Safety: `dfe27ee Harden public email token safety`;
+- Remote Operation state-changing contract / partial-failure / dry-run-audit: local branches and AMN3 evidence recorded, dry-run/audit branch `codex/remote-operation-dry-run-audit` commits `0313857`, `063b6c3`;
+- Local Agent Hardening: `c5d7eb6 Harden Local Agent audit contract`;
+- Web Panel Safe Improvements: `22dfc37 Clarify web panel operation gates`.
 
 Решение по соседним чатам:
 
@@ -200,16 +220,15 @@ status: merged into codex-vps-test-prep via PR #3
 head: 8697b60 Document Local Agent production wiring
 ```
 
-Локальная проверка показала, что эти commits уже содержатся в актуальном production baseline `91aeb3e`. Поэтому следующий slice не должен повторно добавлять Local Agent foundation; он должен закрепить policy boundary вокруг уже существующего read-only/opt-in agent.
+Локальная проверка показала, что эти commits уже содержались в production baseline после `91aeb3e`. Позднее Local Agent получил hardening commit `c5d7eb6`: repository-backed audit sink для allowed read routes, safe `/agent/version` metadata и тесты, что raw bearer token не попадает в audit. Следующий Local Agent slice не должен добавлять clients/configs/write routes; сначала нужны token rotation/revoke design и scoped token policy.
 
 ## Рекомендуемый порядок
 
-1. Commit текущий AMN3 audit/roadmap state.
-2. Review `docs/AMN2_MAIN_MERGE_ROADMAP.ru.md` и `research/amn2/api-readiness-audit-after-live-baseline.md`.
-3. Написать отдельный implementation plan для `Route/Auth/Operation Policy Matrix`.
-4. Не включать в первый plan новые API routes, config delivery endpoints, write operations или live VPS calls.
-5. Только после принятого plan переходить в production branch/worktree.
-6. После production-среза вернуть в AMN3 branch/commit/test evidence.
+1. Следующий local-only slice: scoped API tokens design/storage tests, включая token rotation/revoke contract, без новых broad API write routes.
+2. Альтернатива после отдельного подтверждения оператора: controlled real VPS verification gate для `codex/remote-operation-dry-run-audit`.
+3. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
+4. Read-only clients/metrics endpoints держать после scoped token/privacy review.
+5. Public/self-service config links, domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
 
 ## Route/Auth/Operation Policy Matrix Plan
 
@@ -404,6 +423,54 @@ full local suite:
 
 Live VPS не трогался. Slice меняет локальный agent audit/version contract и docs, но не делает real agent deployment, controller-to-agent calls, peer apply/revoke/config/sync/runtime writes; VPS gate не нужен.
 
+## Web Panel Safe Improvements Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex-vps-test-prep
+```
+
+Production head after push:
+
+```text
+22dfc37 Clarify web panel operation gates
+```
+
+Покрыто:
+
+- server health action помечен как read-only: stores health status only, no VPS changes;
+- peer sync action помечен как read-only compare: does not add or remove peers;
+- add missing local device confirmation явно говорит, что это live VPS write и должен идти через VPS gate;
+- config templates page помечает real `.conf`, QR и `vpn://` payloads как secret-bearing delivery artifacts;
+- user/device dangerous confirmations уточняют local DB status/data changes и VPS write только при `VPS_APPLY_ENABLED=true`.
+
+Проверка:
+
+```text
+RED:
+tests/web/test_servers.py::test_server_detail_shows_config_health_and_actions
+tests/web/test_servers.py::test_server_sync_run_displays_peer_inventory_report
+tests/web/test_config_templates.py::test_config_templates_page_lists_versions_placeholders_and_safe_preview
+tests/web/test_users.py::test_user_detail_marks_dangerous_actions_with_confirmation
+result: 4 failed as expected
+
+GREEN focused slice:
+same 4 tests
+result: 4 passed, 1 StarletteDeprecationWarning
+
+focused web/security suite:
+tests/web/test_servers.py tests/web/test_users.py tests/web/test_config_templates.py tests/web/test_email_delivery.py tests/security/test_surface_policy.py
+result: 75 passed, 1 StarletteDeprecationWarning
+
+full local suite:
+536 passed, 1 StarletteDeprecationWarning
+```
+
+Live VPS не трогался. Slice меняет UI wording/templates и web tests, но не меняет peer apply/revoke/config/sync/runtime behavior; VPS gate не нужен.
+
 ## Remote Operation Dry-run/Audit Slice
 
 Статус: `implemented-pushed-local-gate-complete`.
@@ -469,4 +536,4 @@ Live VPS не трогался. Slice меняет dry-run/audit metadata и д�
 - Docker AmneziaWG write/reload/restart behavior;
 - реальный Local Agent deployment или controller-to-agent calls.
 
-Следующий рекомендуемый local-only шаг: Web panel safe improvements без изменения write behavior - operator status UX вокруг server health/working configs, secret-aware config delivery wording и safer dangerous-action confirmation tests. Отдельная альтернатива после подтверждения оператора: controlled real VPS verification gate для remote-operation dry-run/audit ветки; single test peer apply/revoke выполнять только после отдельного разрешения.
+Следующий рекомендуемый local-only шаг: scoped API tokens design/storage tests - hash-only token storage, one-time raw token display, scopes, expiry, revoke/rotation and audit metadata без новых broad write endpoints. Отдельная альтернатива после подтверждения оператора: controlled real VPS verification gate для remote-operation dry-run/audit ветки; single test peer apply/revoke выполнять только после отдельного разрешения.

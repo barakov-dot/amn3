@@ -1,6 +1,6 @@
 # `amn2`: основной порядок слияния API, web panel и operations
 
-Дата: 2026-05-31.
+Дата: 2026-06-01.
 
 Режим: coordination roadmap в `VPS-OPS-LAB`. Production-код `amn2` меняется только отдельными local-gate slices. Upstream code не копируется. Live VPS не трогаем без отдельного VPS gate.
 
@@ -195,13 +195,13 @@ Production evidence:
 - focused tests: `14 passed, 1 StarletteDeprecationWarning`;
 - full local suite: `535 passed, 1 StarletteDeprecationWarning`.
 
-После public-token safety выполнены remote operation dry-run/audit local slice и Local Agent hardening. Текущий следующий local-only шаг: web panel safe improvements без изменения write behavior. Controlled real VPS verification gate для `codex/remote-operation-dry-run-audit` остается отдельной веткой и требует явного подтверждения оператора.
+После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening и Web Panel Safe Improvements. Текущий следующий local-only шаг: scoped API tokens design/storage tests, включая token rotation/revoke contract. Controlled real VPS verification gate для `codex/remote-operation-dry-run-audit` остается отдельной веткой и требует явного подтверждения оператора.
 
 ## Важные задачи
 
 ### 6. Web panel safe improvements
 
-Статус: следующий рекомендуемый local-only slice после Local Agent hardening.
+Статус: implemented-pushed-local-gate-complete.
 
 Порядок web-panel доработок:
 
@@ -212,6 +212,17 @@ Production evidence:
 5. OpenAPI/domain grouping позже, когда будет стабильная API surface.
 
 Gate: local-only для wording/status/confirmation/UI tests. Live VPS нужен только если меняется apply/revoke/sync/config behavior.
+
+Production evidence:
+
+- branch: `codex-vps-test-prep`;
+- commit: `22dfc37 Clarify web panel operation gates`;
+- RED slice tests: `4 failed as expected`;
+- focused slice tests: `4 passed, 1 StarletteDeprecationWarning`;
+- focused web/security suite: `75 passed, 1 StarletteDeprecationWarning`;
+- full local suite: `536 passed, 1 StarletteDeprecationWarning`.
+
+Итог: server health и peer sync получили явные read-only labels, add missing local device confirmation стал VPS-gate aware, config templates page помечает `.conf`/QR/`vpn://` как secret-bearing artifacts, dangerous user/device confirmations уточняют local DB changes и live VPS writes only when `VPS_APPLY_ENABLED=true`.
 
 Не начинать с:
 
@@ -330,7 +341,7 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 4. Public-token safety: done, local-gate-complete.
 5. Remote operation contract/partial-failure/dry-run metadata: done, local-gate-complete.
 6. Local Agent read-only/audit/versioning hardening: done, local-gate-complete.
-7. Improve existing web panel UX around status/config delivery/dangerous wording without changing write behavior.
+7. Web panel safe improvements: done, local-gate-complete.
 8. Design scoped API tokens and token storage tests, including token rotation/revoke.
 9. Consider read-only clients/metrics endpoints only after privacy classification.
 
@@ -345,4 +356,4 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 
 ## Recommendation
 
-Start merge work from policy and tests, not UI or API endpoints. It is the least glamorous step, but it is the step that lets us safely take useful ideas from both neighboring chats without dragging in their risks.
+Next local merge work should start from scoped API token policy/tests, not broad API endpoints. The web-panel wording slice is now closed locally; live VPS testing is only the right next lane if the operator explicitly chooses to verify remote-operation dry-run/audit against a real test peer.

@@ -27,8 +27,8 @@ Backlog не является списком задач к немедленно�
 - Статус: `in-progress`.
 - Суть: `.conf`, QR и `vpn://` всегда считать `secret-read` артефактами, а не обычными metadata.
 - Причина: config delivery содержит private key/pre-shared key или import payload, поэтому случайное логирование, share без expiry или неверная кодировка сразу становятся production-рискoм.
-- Уже сделано: подготовлен первый срез с metadata-полями delivery package и UTF-8 artifact tests.
-- Следующий шаг: после GitHub-доступа создать PR из ветки `codex/config-delivery-artifact-integrity-isolated`; затем расширить тесты до import-совместимости и audit/redaction.
+- Уже сделано: metadata-поля delivery package, UTF-8 artifact tests, redaction coverage и config delivery integrity evidence зафиксированы локальным gate.
+- Следующий шаг: не открывать public/self-service delivery до scoped token/self-service design; web-panel wording slice уже уточнил, что `.conf`, QR и `vpn://` являются secret-bearing artifacts.
 
 ### Remote operations safety
 
@@ -48,11 +48,11 @@ Backlog не является списком задач к немедленно�
 ### Route/Auth policy matrix
 
 - Цель: `amn2`.
-- Статус: `ready-for-plan`.
+- Статус: `implemented-pushed-local-gate-complete`.
 - Суть: для каждого endpoint фиксировать role, auth method, risk class, side effect, audit requirement и tests.
 - Причина: это снижает риск случайного privilege escalation при расширении API, web-admin, bot и интеграций.
 - Текущий результат: создана конкретная [Route/Auth Policy Matrix](../research/amn2/route-policy-matrix.md) для web, bot, public-token и CLI/operator surfaces.
-- Следующий шаг: написать implementation plan для route policy coverage tests или использовать matrix как вход для `RemoteOperationRunner`.
+- Следующий шаг: использовать matrix как обязательный gate для scoped API tokens, self-service links, Local Agent expansion и remote-state-write surfaces.
 
 ### SSH host key enrollment
 
@@ -112,7 +112,8 @@ Backlog не является списком задач к немедленно�
 - Статус: `in-progress`.
 - Суть: локальный agent рядом с Amnezia управляет users/peers через ограниченный HTTP contract вместо постоянного внешнего SSH control plane.
 - Причина: перспективно для управления Amnezia через API, но agent получает высокий доступ к runtime/config state.
-- Следующий шаг: продолжить production hardening: local-only bind, token hash, rotation, audit и version checks.
+- Текущий результат: first-slice foundation, production wiring и Local Agent hardening выполнены; commit `c5d7eb6` закрепляет audit/version contract для read-only routes.
+- Следующий шаг: token rotation/revoke design и scoped token policy; не добавлять `/agent/clients`, `/agent/configs` или write lifecycle без отдельного gate.
 
 ### Configurable VPN subnet/IPAM
 
@@ -195,9 +196,11 @@ Backlog не является списком задач к немедленно�
 ### Dangerous action UX
 
 - Цель: `amn2`.
-- Статус: `design-needed`.
+- Статус: `in-progress`.
 - Суть: confirmation text, preview, risk class labels и recovery hints для опасных действий.
 - Польза: оператор видит последствия до выполнения, особенно для remote-exec/destructive операций.
+- Текущий результат: commit `22dfc37` уточнил web-panel confirmations для server disable, add missing local device, Disable/Enable VPN и device delete без изменения write behavior.
+- Следующий шаг: preview/risk labels добавлять только через отдельные local-gate tests; live VPS нужен, если меняется apply/revoke/sync/config behavior.
 
 ### VPS Ops Lab DESIGN.md
 
@@ -216,9 +219,9 @@ Backlog не является списком задач к немедленно�
 
 ## Ближайшая рекомендуемая очередь
 
-1. Закрыть PR/branch по `Secret-safe config delivery`, когда GitHub-доступ к приватному `amn2` будет настроен.
+1. Начать scoped API tokens design/storage tests: hash-only storage, one-time raw token display, scopes, expiry, revoke/rotation and audit metadata.
 2. Провести controlled real VPS verification gate на тестовом peer/device: read-only check, dry-run apply/revoke preview, затем single apply/revoke только после отдельного подтверждения.
 3. Зафиксировать VPS evidence в lab notes и решить, нужен ли merge/PR для ветки `codex/remote-operation-dry-run-audit`.
 4. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
-5. Позже превратить `Route/Auth Policy Matrix` в machine-checkable route policy coverage tests.
-6. Только после этого возвращаться к self-service links, domain exclusions и 2FA.
+5. После scoped token policy рассмотреть read-only metrics/client privacy design.
+6. Только после закрытия этих gates возвращаться к self-service links, domain exclusions и 2FA.

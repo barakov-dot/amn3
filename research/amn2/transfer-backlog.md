@@ -1,6 +1,6 @@
 # `amn2` Transfer Backlog
 
-Дата: 2026-05-31.
+Дата: 2026-06-01.
 
 Назначение: единая очередь переноса AMNEZIYA-наработок и upstream-идей из AMN3 в production repo `amn2`.
 
@@ -19,7 +19,7 @@ stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 Текущий production head после локальных transfer-срезов:
 
 ```text
-c5d7eb6 Harden Local Agent audit contract
+22dfc37 Clarify web panel operation gates
 ```
 
 Live VPS cycle подтвержден на Docker AmneziaWG runtime:
@@ -48,6 +48,8 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Verified config delivery | `implemented-pushed-local-gate-complete` | `amn2` | commits `952cc49`, `4b19cd3`, `fc73929`; verified at `94ad807` | Использовать как artifact integrity baseline; VPS gate не нужен |
 | Public-token safety | `implemented-pushed-local-gate-complete` | `amn2` | commit `dfe27ee`; tests `14 passed`, full suite `535 passed` | Использовать как verify/recover token baseline; VPS gate не нужен |
 | Local Agent hardening | `implemented-pushed-local-gate-complete` | `amn2` | commit `c5d7eb6`; focused tests `64 passed`, full suite `536 passed` | Использовать как read-only audit/version contract; VPS gate не нужен |
+| Remote operation dry-run/audit | `implemented-local-gate-complete-awaits-vps-gate` | `amn2` branch + AMN3 evidence | branch `codex/remote-operation-dry-run-audit`, commits `0313857`, `063b6c3`; focused `79 passed`, docs `7 passed`, full `522 passed` | Controlled real VPS verification gate только после отдельного подтверждения |
+| Web panel safe improvements | `implemented-pushed-local-gate-complete` | `amn2` | commit `22dfc37`; RED `4 failed as expected`; focused `75 passed`; full suite `536 passed` | Использовать как operator safety wording baseline; VPS gate не нужен |
 | Public/self-service config delivery | `lab-only-until-policy` | AMN3 -> `amn2` later | `research/amn2/config-delivery-inventory.md` | Не открывать public config links до scoped token/self-service design |
 
 ## Local Agent Decision
@@ -76,12 +78,11 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 
 ## Current Priority Order
 
-1. Commit текущий AMN3 audit/roadmap state.
-2. Review `docs/AMN2_MAIN_MERGE_ROADMAP.ru.md`.
-3. Подготовить отдельный implementation plan для первого safe slice: `Route/Auth/Operation Policy Matrix for current amn2 surfaces`.
-4. В plan не включать новые API routes, config delivery endpoints, write operations или live VPS calls.
-5. Только после принятого plan переходить в production branch/worktree.
-6. После production-среза вернуть в AMN3 branch/commit/test evidence.
+1. Следующий local-only slice: scoped API tokens design/storage tests, включая hash-only storage, one-time raw token display, scopes, expiry, revoke/rotation and audit metadata.
+2. Если оператор выбирает VPS lane: подготовить controlled real VPS verification gate для `codex/remote-operation-dry-run-audit`; single test peer apply/revoke только после отдельного подтверждения.
+3. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
+4. Read-only clients/metrics endpoints рассматривать только после scoped token/privacy classification.
+5. Public/self-service links, domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
 
 ## Neighbor Chat Decision
 
@@ -193,3 +194,7 @@ Config delivery integrity на head `94ad807` также остается `local
 Public-token safety commit `dfe27ee` также остается `local-gate-complete`: TTL guard, hash-only token contract, verify/recover purpose separation, expired-code rejection, generic denial/no raw token echo и no-consume failure behavior подтверждены локальными тестами. Live VPS gate не нужен, потому что slice не меняет peer apply/revoke/config/sync/runtime behavior.
 
 Local Agent hardening commit `c5d7eb6` также остается `local-gate-complete`: `agent serve` подключает repository-backed audit sink для allowed read routes, `/agent/version` публикует runtime contract metadata, а tests подтверждают отсутствие raw bearer token в audit. Live VPS gate не нужен, потому что slice не делает real agent deployment, controller-to-agent calls, peer apply/revoke/config/sync/runtime writes.
+
+Remote operation dry-run/audit branch `codex/remote-operation-dry-run-audit` остается `local-gate-complete-awaits-vps-gate`: dry-run metadata и Runtime Registry подтверждены локально, но real VPS verification еще не запускался.
+
+Web panel safe-improvements commit `22dfc37` также остается `local-gate-complete`: это wording/UI-test слой без изменения apply/revoke/config/sync/runtime behavior. Live VPS gate не нужен.
