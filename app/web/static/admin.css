@@ -344,9 +344,9 @@ tbody tr:last-child td {
 }
 
 .field input,
-.field select {
+.field select,
+.field textarea {
   width: 100%;
-  min-height: 42px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--surface);
@@ -355,8 +355,22 @@ tbody tr:last-child td {
   font: inherit;
 }
 
+.field input,
+.field select {
+  min-height: 42px;
+}
+
+.field textarea {
+  min-height: 360px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .field input:focus,
-.field select:focus {
+.field select:focus,
+.field textarea:focus {
   border-color: var(--accent);
   outline: 3px solid rgba(15, 118, 110, 0.16);
 }

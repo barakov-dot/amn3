@@ -48,6 +48,31 @@ def client_config_template_source(
     return "default"
 
 
+def save_client_config_template_override(
+    config_version: str,
+    template_text: str,
+    template_dir: str | Path | None,
+) -> Path:
+    _validate_config_template_version(config_version)
+    _validate_template_placeholders(template_text)
+    override_path = _require_override_template_path(config_version, template_dir)
+    override_path.parent.mkdir(parents=True, exist_ok=True)
+    override_path.write_text(_ensure_trailing_newline(template_text), encoding="utf-8")
+    return override_path
+
+
+def reset_client_config_template_override(
+    config_version: str,
+    template_dir: str | Path | None,
+) -> bool:
+    _validate_config_template_version(config_version)
+    override_path = _require_override_template_path(config_version, template_dir)
+    if not override_path.exists():
+        return False
+    override_path.unlink()
+    return True
+
+
 def render_client_config_template(
     template_text: str,
     config: ClientConfigInput,
@@ -120,6 +145,16 @@ def _override_template_path(
     return Path(template_dir) / _template_filename(config_version)
 
 
+def _require_override_template_path(
+    config_version: str,
+    template_dir: str | Path | None,
+) -> Path:
+    override_path = _override_template_path(config_version, template_dir)
+    if override_path is None:
+        raise ConfigTemplateError("CLIENT_CONFIG_TEMPLATE_DIR must be configured")
+    return override_path
+
+
 def _package_template_path(config_version: str) -> Path:
     return _PACKAGE_TEMPLATE_DIR / _template_filename(config_version)
 
@@ -133,3 +168,7 @@ def _read_template(path: Path) -> str:
         return path.read_text(encoding="utf-8")
     except OSError as exc:
         raise ConfigTemplateError(f"Could not read client config template {path}") from exc
+
+
+def _ensure_trailing_newline(value: str) -> str:
+    return value if value.endswith("\n") else value + "\n"

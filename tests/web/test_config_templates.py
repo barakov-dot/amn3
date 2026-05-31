@@ -53,9 +53,106 @@ def test_config_templates_page_lists_versions_placeholders_and_safe_preview(tmp_
     assert "{private_key}" in response.text
     assert "{preshared_key}" in response.text
     assert "vpn://" in response.text
-    assert "REAL_PRIVATE_KEY_SHOULD_NOT_APPEAR" not in response.text
-    assert "REAL_PSK_SHOULD_NOT_APPEAR" not in response.text
+    assert "PrivateKey: &lt;sample-secret&gt;" in response.text
+    assert "PresharedKey: &lt;sample-secret&gt;" in response.text
     assert "production-secret-should-not-appear" not in response.text
+
+
+def test_config_template_editor_saves_override_and_updates_preview(tmp_path: Path):
+    template_dir = tmp_path / "client-templates"
+    settings = _settings(tmp_path, client_config_template_dir=str(template_dir))
+    client = _authenticated_client(settings)
+    page = client.get("/config-templates")
+    template_text = "\n".join(
+        [
+            "# edited from admin",
+            "[Interface]",
+            "PrivateKey = {private_key}",
+            "Address = {address}",
+            "DNS = 9.9.9.9",
+            "Jc = {jc}",
+            "Jmin = {jmin}",
+            "Jmax = {jmax}",
+            "S1 = {s1}",
+            "S2 = {s2}",
+            "H1 = {h1}",
+            "H2 = {h2}",
+            "H3 = {h3}",
+            "H4 = {h4}",
+            "",
+            "[Peer]",
+            "PublicKey = {server_public_key}",
+            "PresharedKey = {preshared_key}",
+            "Endpoint = {endpoint}",
+            "AllowedIPs = {allowed_ips}",
+            "PersistentKeepalive = {persistent_keepalive}",
+        ]
+    )
+
+    response = client.post(
+        "/config-templates/amneziawg_v2/save",
+        data={
+            "template_text": template_text,
+            "csrf_token": _csrf_token(page.text),
+        },
+        follow_redirects=False,
+    )
+    saved = template_dir / "amneziawg_v2.conf.tpl"
+    updated = client.get("/config-templates")
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/config-templates"
+    assert saved.read_text(encoding="utf-8") == template_text + "\n"
+    assert "# edited from admin" in updated.text
+    assert "DNS = 9.9.9.9" in updated.text
+    assert "override" in updated.text
+
+
+def test_config_template_editor_rejects_unknown_placeholder_without_overwrite(
+    tmp_path: Path,
+):
+    template_dir = tmp_path / "client-templates"
+    template_dir.mkdir()
+    saved = template_dir / "amneziawg_v2.conf.tpl"
+    saved.write_text("Address = {address}\n", encoding="utf-8")
+    settings = _settings(tmp_path, client_config_template_dir=str(template_dir))
+    client = _authenticated_client(settings)
+    page = client.get("/config-templates")
+
+    response = client.post(
+        "/config-templates/amneziawg_v2/save",
+        data={
+            "template_text": "Address = {unknown}\n",
+            "csrf_token": _csrf_token(page.text),
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 400
+    assert "Unknown client config placeholder" in response.text
+    assert saved.read_text(encoding="utf-8") == "Address = {address}\n"
+
+
+def test_config_template_editor_resets_override_to_default(tmp_path: Path):
+    template_dir = tmp_path / "client-templates"
+    template_dir.mkdir()
+    saved = template_dir / "amneziawg_v2.conf.tpl"
+    saved.write_text("Address = {address}\n", encoding="utf-8")
+    settings = _settings(tmp_path, client_config_template_dir=str(template_dir))
+    client = _authenticated_client(settings)
+    page = client.get("/config-templates")
+
+    response = client.post(
+        "/config-templates/amneziawg_v2/reset",
+        data={"csrf_token": _csrf_token(page.text)},
+        follow_redirects=False,
+    )
+    updated = client.get("/config-templates")
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/config-templates"
+    assert not saved.exists()
+    assert "default" in updated.text
 
 
 def _settings(

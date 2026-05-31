@@ -112,7 +112,7 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
 - Web-панель на порту `3030` с авторизацией по логину и паролю.
 - Управление пользователями, серверами, заявками, логами, настройками.
 - Отображение пользователей, созданных через бота.
-- Шаблоны клиентского конфига и preview `vpn://`.
+- Шаблоны клиентского конфига, редактор `.conf.tpl` override-файлов и preview `vpn://`.
 - Инструкция по web-панели и боту: `docs/WEB_PANEL_AND_BOT_SETUP.ru.md`.
 - Docker runtime для AmneziaWG: чтение и запись persistent `awg0.conf`, затем `docker restart`.
 - Peer sync в карточке сервера:

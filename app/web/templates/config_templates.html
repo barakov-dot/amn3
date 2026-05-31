@@ -25,7 +25,20 @@
         </dl>
         {% if item.error %}
           <p class="empty-state">{{ item.error }}</p>
-        {% else %}
+        {% endif %}
+        <form action="/config-templates/{{ item.version }}/save" method="post" class="form">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <label class="field">
+            Template
+            <textarea name="template_text" rows="22" spellcheck="false">{{ item.template_text }}</textarea>
+          </label>
+          <button class="button button-primary" type="submit">Сохранить шаблон</button>
+        </form>
+        <form action="/config-templates/{{ item.version }}/reset" method="post">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-secondary" type="submit">Сбросить к встроенному шаблону</button>
+        </form>
+        {% if not item.error %}
           <div class="template-block">
             <h3>Preview</h3>
             <pre class="config-preview"><code>{{ item.preview }}</code></pre>

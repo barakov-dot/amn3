@@ -54,7 +54,10 @@ from app.vpn.config_templates import (
     ConfigTemplateError,
     build_vpn_import_link,
     client_config_template_source,
-    render_client_config_from_template,
+    load_client_config_template,
+    render_client_config_template,
+    reset_client_config_template_override,
+    save_client_config_template_override,
 )
 from app.vpn.config_versions import SUPPORTED_CONFIG_VERSIONS
 
@@ -338,6 +341,46 @@ def create_web_app(
                 },
             ),
         )
+
+    @app.post("/config-templates/{config_version}/save")
+    async def save_config_template(
+        request: Request,
+        config_version: str,
+        template_text: str = Form(...),
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+        try:
+            save_client_config_template_override(
+                config_version,
+                template_text,
+                actual_settings.client_config_template_dir,
+            )
+        except ConfigTemplateError as exc:
+            return PlainTextResponse(str(exc), status_code=400)
+        return RedirectResponse("/config-templates", status_code=303)
+
+    @app.post("/config-templates/{config_version}/reset")
+    async def reset_config_template(
+        request: Request,
+        config_version: str,
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+        try:
+            reset_client_config_template_override(
+                config_version,
+                actual_settings.client_config_template_dir,
+            )
+        except ConfigTemplateError as exc:
+            return PlainTextResponse(str(exc), status_code=400)
+        return RedirectResponse("/config-templates", status_code=303)
 
     @app.get("/users")
     async def users_index(request: Request):
@@ -1594,12 +1637,10 @@ def _load_client_config_template_views(settings: Settings) -> list[dict[str, str
     template_dir = settings.client_config_template_dir
     views: list[dict[str, str]] = []
     for config_version in SUPPORTED_CONFIG_VERSIONS:
+        template_text = ""
         try:
-            preview = render_client_config_from_template(
-                sample,
-                config_version,
-                template_dir=template_dir,
-            )
+            template_text = load_client_config_template(config_version, template_dir)
+            preview = render_client_config_template(template_text, sample)
             safe_preview = _safe_config_preview(preview)
             vpn_import_link = build_vpn_import_link(safe_preview)
             error = ""
@@ -1612,6 +1653,7 @@ def _load_client_config_template_views(settings: Settings) -> list[dict[str, str
                 "version": config_version,
                 "filename": f"{config_version}.conf.tpl",
                 "source": client_config_template_source(config_version, template_dir),
+                "template_text": template_text,
                 "preview": safe_preview,
                 "vpn_import_link": vpn_import_link,
                 "error": error,
