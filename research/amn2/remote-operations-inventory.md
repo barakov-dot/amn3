@@ -15,7 +15,7 @@
 - live apply выключен по умолчанию через `VPS_APPLY_ENABLED=false`;
 - CLI `apply-peer` и `revoke-peer` требуют явный выбор `--dry-run` или `--apply`;
 - read-only server checks проходят через allowlist команд;
-- Docker runtime намеренно заблокирован для live `apply-peer`, `revoke-peer` и `collect-traffic`;
+- Docker runtime для live `apply-peer`/`revoke-peer` требует `runtime.config_path`, переписывает persistent config внутри контейнера и перезапускает контейнер; sync/traffic остаются read-only;
 - peer preshared key не вставляется в remote command string, а передается через stdin;
 - ошибки и diagnostic output проходят через redaction.
 
@@ -91,7 +91,24 @@ Read-only health slice `RemoteOperationRunner` уже присутствует �
 - focused verification: `tests/services/test_access_service.py tests/bot/test_bot_workflows.py -v` -> `38 passed`;
 - full suite: `pytest tests -v` -> `519 passed, 1 warning`.
 
-Ограничение: этот срез еще не добавляет dry-run preview contract и safe audit metadata для state-changing mutation outputs. Следующий локальный шаг - dry-run preview + audit/redaction metadata.
+Ограничение: этот срез еще не добавлял dry-run preview contract и safe audit metadata для state-changing mutation outputs. Этот gap закрыт следующим dry-run/audit срезом ниже.
+
+## Обновление 2026-06-01: dry-run/audit metadata local slice
+
+Третий локальный срез для state-changing remote operations выполнен в `amn2`:
+
+- branch: `codex/remote-operation-dry-run-audit`;
+- commits: `0313857 Add remote operation dry-run metadata`, `063b6c3 Document remote operation local gate`;
+- base: `codex/remote-operation-partial-failure`;
+- добавлено: `RemoteOperationRunner.plan()` возвращает `consistency_status=dry-run` для state-changing операций без выполнения SSH;
+- добавлено: `OperationPlan.to_safe_metadata()` публикует operation metadata без command strings и с redaction для audit/rollback/idempotency text;
+- добавлено: `apply-peer` и `revoke-peer` dry-run preview показывают operation ID, risk class, side effects и rollback note без PSK/private config;
+- обновлено: `docs/RUNTIME_REGISTRY.ru.md` и `docs/RUNTIME_REGISTRY.en.md` фиксируют local gate перед real VPS;
+- focused verification: `tests/server/test_operation_runner.py tests/server/test_peer_apply.py tests/security/test_redaction.py tests/web/test_servers.py tests/web/test_users.py -v` -> `79 passed, 1 warning`;
+- docs verification: `tests/deploy/test_runtime_registry.py -v` -> `7 passed`;
+- full suite: `pytest tests -v` -> `522 passed, 1 warning`.
+
+Ограничение: срез не выполнял live SSH/Docker apply/revoke и не менял реальное состояние VPS. Следующий шаг - controlled real VPS verification gate, начиная с read-only/dry-run подтверждения и только затем, при отдельном подтверждении оператора, test peer apply/revoke.
 
 ## Карта remote surfaces
 
@@ -101,11 +118,11 @@ Read-only health slice `RemoteOperationRunner` уже присутствует �
 | CLI `server check` | operator shell | `read-only-remote` | none | `ensure_read_only_command()` allowlist |
 | Web `/servers/{id}/health/run` | web admin session + CSRF | `read-only-remote` | records server health + admin action | session, CSRF, redacted health errors |
 | CLI `server preflight` | operator shell | none, dry-run bundle only | syncs server row in local DB | validates fixed VPN port and server public key |
-| CLI `server collect-traffic` | operator shell | `read-only-remote-telemetry` | writes local traffic snapshots | Docker blocked, remote command is `awg show ... dump` |
+| CLI `server collect-traffic` | operator shell | `read-only-remote-telemetry` | writes local traffic snapshots | host/Docker read-only `awg show ... dump` |
 | Bot approval with `VPS_APPLY_ENABLED=true` | Telegram admin | `remote-state-write` | creates device, fulfills order, audit action | DB transaction, peer apply before fulfill, failure rollback for remote apply error |
-| CLI `server apply-peer --apply` | operator shell | `remote-state-write` | none | explicit apply flag, PSK via stdin, Docker blocked |
+| CLI `server apply-peer --apply` | operator shell | `remote-state-write` | none | explicit apply flag, PSK via stdin, Docker requires `runtime.config_path` |
 | Bot user revoke/reset with `VPS_APPLY_ENABLED=true` | Telegram user ownership gate | `remote-state-write` | marks device(s) revoked | remote remove before local revoke |
-| CLI `server revoke-peer --apply` | operator shell | `remote-state-write` | none | explicit apply flag, Docker blocked |
+| CLI `server revoke-peer --apply` | operator shell | `remote-state-write` | none | explicit apply flag, Docker requires `runtime.config_path` |
 | Runtime scripts | operator shell | read-only diagnostics | none | tests assert no install/restart/remove/firewall mutation commands |
 
 ## SSH execution model
@@ -156,9 +173,9 @@ This is strong and should become the baseline for future read-only remote operat
 Controls:
 
 - PSK is not embedded in the command string.
-- Dry-run output uses `<redacted-psk-file>`.
+- Dry-run output uses `<redacted-psk-file>` and now includes operation ID, risk class, side effects, rollback note and `consistency_status=dry-run`.
 - Errors replace the raw PSK and then pass through `redact()`.
-- Docker runtime raises `PeerApplyError` until persistent container config path is known.
+- Docker runtime requires `runtime.config_path`, writes the persistent config inside the container, then restarts the container.
 
 Open questions:
 
@@ -174,7 +191,7 @@ Open questions:
 - runs `awg set <interface> peer <public-key> remove`;
 - reloads systemd service;
 - redacts failure output;
-- blocks Docker runtime.
+- for Docker runtime, removes the peer from persistent config and restarts the container when `runtime.config_path` is configured.
 
 Bot user flows call remote remove before local DB revoke:
 
@@ -194,7 +211,7 @@ Controls:
 - command is read-only by design;
 - interface name is quoted with `shlex.quote()`;
 - failed stdout/stderr are summarized as present/empty instead of being copied into the error;
-- Docker traffic collection is blocked until persistent config path is known.
+- Docker traffic collection is read-only and uses `docker exec <container> awg show <interface> dump`.
 
 Gap: traffic collection does not currently reuse `ensure_read_only_command()`. It should either reuse the command policy or define an equivalent allowlist for telemetry commands.
 
@@ -226,7 +243,7 @@ Current posture:
 ## Existing tests that protect this area
 
 - `tests/server/test_command_policy.py` checks read-only allowlist and mutating command rejection.
-- `tests/server/test_peer_apply.py` checks dry-run output, PSK handling, redacted errors, Docker blocking, apply and revoke commands.
+- `tests/server/test_peer_apply.py` checks dry-run output, operation metadata, PSK handling, redacted errors, Docker persistent config writes, apply and revoke commands.
 - `tests/server/test_system_ssh.py` checks missing binary, timeout and password backend behavior.
 - `tests/server/test_checks.py` checks host and Docker read-only server reports.
 - `tests/server/test_cli_server_check.py` checks CLI dry-run/apply flag behavior, traffic dry-run and preflight.
@@ -237,15 +254,15 @@ Current posture:
 
 ## Gaps before production changes
 
-- Нет единого `RemoteOperationRunner`/contract layer для state-changing SSH operations.
+- State-changing contract есть для plan/metadata, но live apply/revoke еще не выполняются через полноценный `RemoteOperationRunner`.
 - Нет host key enrollment/pinning flow.
 - Нет sudo/privilege policy: кто и какие команды может выполнять без interactive password.
-- Не найден явный persistent config update и backup после `awg set`.
-- Нет operation id / before-after audit для live apply/revoke.
-- Нет rollback note/resume strategy для частично успешных remote operations.
+- Для host/systemd не найден явный persistent config update и backup после `awg set`.
+- Нет полноценного before/after audit для live apply/revoke.
+- Есть первый partial-failure/recovery-note слой, но нет автоматического rollback/resume flow для частично успешных remote operations.
 - Нет shared command policy for traffic telemetry.
 - CLI `apply-peer --preshared-key` принимает secret через аргумент командной строки.
-- Docker live operations правильно заблокированы, но будущий Docker manager еще не описан до уровня persistent config path, backup и reload/apply semantics.
+- Docker live operations уже требуют `runtime.config_path`, но будущий Docker manager еще нужно описать до уровня backup, reload/apply semantics и rollback note.
 
 ## Transfer gate для идей из lab
 
@@ -259,14 +276,14 @@ Current posture:
 
 ## Решение для lab
 
-Статус: `remote-operations-read-only-runner-verified`.
+Статус: `remote-operations-local-gate-dry-run-verified`.
 
 Не переносим новые remote-state-write функции в `amn2` как code edit, пока не описан и не утвержден policy/design для partial failure, rollback/resume и audit before/after.
 
-Первый безопасный read-only slice `RemoteOperationRunner` уже есть в baseline и проверен. Дальше работаем не над повторным вводом runner-а, а над его расширением только через отдельные gates.
+Read-only slice `RemoteOperationRunner`, state-changing metadata, approve/reset partial-failure и dry-run/audit metadata уже закрыты локальными срезами. Дальше работаем не над повторным вводом runner-а, а над controlled real VPS verification gate и последующими gates.
 
 ## Следующие рабочие шаги
 
-1. Продолжить local-only phase из плана `remote-ops-local-vps-split`: dry-run preview, safe audit/redaction metadata и local gate docs.
-2. Только после этого провести controlled real VPS verification gate на тестовом peer/device.
+1. Подготовить и выполнить controlled real VPS verification gate на тестовом peer/device: read-only check, dry-run apply/revoke preview, затем single apply/revoke только после отдельного подтверждения.
+2. Зафиксировать результат VPS gate в lab notes и не смешивать его с обычным локальным commit.
 3. До live Docker apply/revoke отдельно описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.

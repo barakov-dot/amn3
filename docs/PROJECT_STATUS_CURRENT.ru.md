@@ -363,6 +363,46 @@ full local suite:
 
 Live VPS не трогался. Slice не меняет peer apply/revoke/config/sync/runtime behavior, поэтому VPS gate не нужен.
 
+## Remote Operation Dry-run/Audit Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production worktree:
+
+```text
+C:\Users\SooL\Documents\VPS-OPS-LAB\worktrees\amn2-remote-operation-contract-metadata
+```
+
+Production branch:
+
+```text
+codex/remote-operation-dry-run-audit
+```
+
+Production commits:
+
+```text
+0313857 Add remote operation dry-run metadata
+063b6c3 Document remote operation local gate
+```
+
+Покрыто:
+
+- `RemoteOperationRunner.plan()` возвращает `consistency_status=dry-run` для state-changing операций без SSH;
+- `OperationPlan.to_safe_metadata()` не публикует command strings и redacts audit/rollback/idempotency metadata;
+- `apply-peer` и `revoke-peer` dry-run preview показывает operation ID, risk class, side effects и rollback note без PSK/private config;
+- `docs/RUNTIME_REGISTRY.ru.md` и `docs/RUNTIME_REGISTRY.en.md` фиксируют local gate перед real VPS.
+
+Проверка:
+
+```text
+focused server/security/web tests: 79 passed, 1 StarletteDeprecationWarning
+runtime registry docs tests: 7 passed
+full local suite: 522 passed, 1 StarletteDeprecationWarning
+```
+
+Live VPS не трогался. Slice меняет dry-run/audit metadata и документацию; следующий шаг - отдельный controlled real VPS verification gate, начиная с read-only/dry-run подтверждения.
+
 ## Local Gate / Live VPS Gate
 
 Новый порядок проверки разделен на два контура.
@@ -388,4 +428,4 @@ Live VPS не трогался. Slice не меняет peer apply/revoke/config
 - Docker AmneziaWG write/reload/restart behavior;
 - реальный Local Agent deployment или controller-to-agent calls.
 
-Следующий рекомендуемый local-only шаг: Local Agent hardening на fake/local runtime: audit sink для allowed read routes, token revoke/rotation design, version/runtime compatibility response и public-safe runtime metadata. Следующий VPS gate пока не запускать, потому что policy matrix, redaction coverage, config delivery integrity и public-token safety не меняют live behavior.
+Следующий рекомендуемый шаг: controlled real VPS verification gate для remote-operation dry-run/audit ветки. Начать с read-only check и dry-run apply/revoke preview; single test peer apply/revoke выполнять только после отдельного подтверждения оператора. Local Agent hardening остается следующим local-only направлением после закрытия или постановки на паузу VPS gate.

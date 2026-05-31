@@ -42,12 +42,13 @@ handoff: docs/NEXT_CHAT_HANDOFF.ru.md
 
 Текущее решение: 2FA для web-admin поставлена на паузу, implementation plan для нее не пишем до отдельного решения.
 
-Текущий фокус после verified VPS cycle, read-only `RemoteOperationRunner` baseline и verified redaction coverage first slice:
+Текущий фокус после verified VPS cycle, read-only `RemoteOperationRunner` baseline, redaction coverage, state-changing metadata, partial-failure и dry-run/audit metadata local slices:
 
-1. Исполнить local-only phase для partial-failure/rollback contract: typed contract, fake runner, DB simulations, dry-run/audit metadata, redaction и full local suite.
-2. Только после local green suite провести controlled real VPS verification gate на тестовом peer/device.
-3. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
-4. Затем вернуться к route policy coverage tests.
+1. Подготовить controlled real VPS verification gate на тестовом peer/device.
+2. Начать VPS gate с read-only check и dry-run apply/revoke preview; single apply/revoke выполнять только после отдельного подтверждения оператора.
+3. Зафиксировать VPS evidence в lab notes и решить, нужен ли merge/PR для ветки `codex/remote-operation-dry-run-audit`.
+4. До расширения Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
+5. Затем вернуться к route policy coverage tests.
 
 ## Неактуальный риск
 

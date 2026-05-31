@@ -195,13 +195,13 @@ Production evidence:
 - focused tests: `14 passed, 1 StarletteDeprecationWarning`;
 - full local suite: `535 passed, 1 StarletteDeprecationWarning`.
 
-Следующий рекомендуемый local-only slice: Local Agent hardening на fake/local runtime.
+После public-token safety выполнен remote operation dry-run/audit local slice. Текущий следующий шаг: controlled real VPS verification gate для `codex/remote-operation-dry-run-audit`; Local Agent hardening остается следующим local-only направлением, если VPS gate ставим на паузу.
 
 ## Важные задачи
 
 ### 6. Web panel safe improvements
 
-Статус: начинать после P0 policy/redaction/config integrity/public-token safety; лучше вести точечно после ближайшего Local Agent hardening, если изменение связано с API/runtime статусами.
+Статус: начинать после P0 policy/redaction/config integrity/public-token safety и remote operation local gate; лучше вести точечно после VPS gate или ближайшего Local Agent hardening, если изменение связано с API/runtime статусами.
 
 Порядок web-panel доработок:
 
@@ -222,7 +222,7 @@ Gate: local-only для wording/status/confirmation/UI tests. Live VPS нуже�
 
 ### 7. Local Agent hardening
 
-Статус: следующий рекомендуемый local-only slice; foundation уже merged в `amn2`, расширять осторожно.
+Статус: следующий local-only slice, если controlled VPS gate ставим на паузу; foundation уже merged в `amn2`, расширять осторожно.
 
 Следующие безопасные шаги:
 
@@ -253,19 +253,24 @@ Gate: local-only для auth/token/audit/runtime metadata tests. Live VPS нуж
 
 ### 9. Remote operation partial-failure contract
 
-Статус: design-needed перед любым remote-state-write API.
+Статус: первые local-gate slices выполнены; live VPS gate еще не запускался.
 
-Нужны:
+Выполнено локально:
 
-- operation id;
+- state-changing metadata contract: `codex/remote-operation-contract-metadata`, commit `57d484d`;
+- approve/reset partial-failure model: `codex/remote-operation-partial-failure`, commit `0afb22a`;
+- dry-run/audit metadata: `codex/remote-operation-dry-run-audit`, commits `0313857`, `063b6c3`;
+- full local suite для последнего среза: `522 passed, 1 StarletteDeprecationWarning`.
+
+Остается перед broader remote-state-write API:
+
 - before/after audit;
 - idempotency key или replay policy;
-- recovery note;
 - resume flow;
 - no secret-bearing CLI args;
 - shared read-only telemetry command policy.
 
-Gate: local-only для contract/fake SSH/idempotency tests. Live VPS обязателен перед включением remote-state-write в web/API/agent flow.
+Gate: local-only срезы закрыли contract/partial-failure/dry-run основу. Следующий шаг - controlled real VPS verification gate на тестовом peer/device перед включением broader remote-state-write в web/API/agent flow.
 
 ## Простые задачи
 
@@ -316,18 +321,20 @@ Gate: local-only для contract/fake SSH/idempotency tests. Live VPS обяза
 2. Redaction coverage: done, local-gate-complete.
 3. Config delivery integrity: done, local-gate-complete.
 4. Public-token safety: done, local-gate-complete.
-5. Harden Local Agent read-only/audit/versioning with fake/local runtime tests.
-6. Improve existing web panel UX around status/config delivery/dangerous wording without changing write behavior.
-7. Design scoped API tokens and token storage tests.
-8. Consider read-only clients/metrics endpoints only after privacy classification.
+5. Remote operation contract/partial-failure/dry-run metadata: done, local-gate-complete.
+6. Harden Local Agent read-only/audit/versioning with fake/local runtime tests.
+7. Improve existing web panel UX around status/config delivery/dangerous wording without changing write behavior.
+8. Design scoped API tokens and token storage tests.
+9. Consider read-only clients/metrics endpoints only after privacy classification.
 
 ### Live VPS verification lane
 
-1. Enter this lane only after local green and a slice that touches live behavior.
+1. Enter this lane only after local green and a slice that touches live behavior or prepares a remote-operation gate.
 2. Prepare a VPS test checklist with branch/commit, commands, expected state and rollback note.
-3. Verify approve/apply, config import, working configs, peer sync, disable/enable/delete and Docker runtime behavior if touched.
-4. Record VPS evidence in AMN3 before marking the slice `verified-live`.
-5. Do not use live VPS testing as a substitute for local policy/secret/operation tests.
+3. For `codex/remote-operation-dry-run-audit`, start with read-only check and dry-run apply/revoke preview; single test peer apply/revoke needs separate operator confirmation.
+4. Verify approve/apply, config import, working configs, peer sync, disable/enable/delete and Docker runtime behavior if touched.
+5. Record VPS evidence in AMN3 before marking the slice `verified-live`.
+6. Do not use live VPS testing as a substitute for local policy/secret/operation tests.
 
 ## Recommendation
 

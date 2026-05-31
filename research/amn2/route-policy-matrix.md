@@ -119,10 +119,10 @@
 | `cli.server.check_dry_run` | `server check --dry-run` | `cli-operator` | `read-only` preview | local shell, no remote execution | no | planned commands only |
 | `cli.server.check_live` | `server check` | `cli-operator` | `remote-read` | read-only command allowlist | recommended | mutating command rejection, redacted errors |
 | `cli.server.preflight` | `server preflight` | `cli-operator` | `state-write` local | config validation, fixed VPN port/server public key | recommended | local DB sync behavior, no secrets logged |
-| `cli.server.collect_traffic` | `server collect-traffic` | `cli-operator` | `remote-read` + local state write | telemetry command policy, Docker blocked | recommended | command allowlist candidate, no sensitive stdout in errors |
-| `cli.server.apply_peer_dry_run` | `server apply-peer --dry-run` | `cli-operator` | `remote-exec` preview | explicit dry-run | no | dry-run redacts PSK |
-| `cli.server.apply_peer_live` | `server apply-peer --apply` | `cli-operator` | `remote-exec` | explicit apply, PSK via stdin, Docker blocked | recommended | no PSK in command string/stdout/stderr, failure behavior |
-| `cli.server.revoke_peer_live` | `server revoke-peer --apply` | `cli-operator` | `remote-exec` | explicit apply, Docker blocked | recommended | command shape, failure behavior |
+| `cli.server.collect_traffic` | `server collect-traffic` | `cli-operator` | `remote-read` + local state write | telemetry command policy, host/Docker read-only dump | recommended | command allowlist candidate, no sensitive stdout in errors |
+| `cli.server.apply_peer_dry_run` | `server apply-peer --dry-run` | `cli-operator` | `remote-exec` preview | explicit dry-run, operation metadata | no | dry-run redacts PSK and shows `consistency_status=dry-run` |
+| `cli.server.apply_peer_live` | `server apply-peer --apply` | `cli-operator` | `remote-exec` | explicit apply, PSK via stdin, Docker requires `runtime.config_path` | recommended | no PSK in command string/stdout/stderr, failure behavior |
+| `cli.server.revoke_peer_live` | `server revoke-peer --apply` | `cli-operator` | `remote-exec` | explicit apply, Docker requires `runtime.config_path` | recommended | command shape, failure behavior |
 
 ## Public-token policy
 

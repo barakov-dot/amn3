@@ -54,20 +54,25 @@
 ### Secret-safe audit/redaction gate
 
 - Цель: не допустить утечек `.conf`, QR payload, `vpn://`, private key, PSK, tokens и command output в metadata, logs, audit и diagnostics.
+- Статус 2026-06-01: dry-run/audit metadata slice выполнен в `amn2` branch `codex/remote-operation-dry-run-audit`, commits `0313857` и `063b6c3`.
 - Что должно появиться: tests, которые проверяют redacted output для новых remote mutation metadata.
 - Почему P0: remote operations почти всегда рядом с секретами и конфигами.
 - Локальная проверка: focused redaction/security tests плюс audit serialization tests.
-- Готово, когда: ни один новый dry-run/audit/report path не содержит raw secrets.
+- Проверено 2026-06-01: `79 passed, 1 warning` для focused server/security/web набора.
+- Full suite 2026-06-01: `522 passed, 1 warning`.
+- Готово, когда: ни один новый dry-run/audit/report path не содержит raw secrets. Первый dry-run/audit срез готов; live VPS не трогался.
 
 ## P1. Важные локальные задачи
 
 ### Dry-run preview for mutations
 
 - Цель: до выполнения показать оператору, что будет изменено.
+- Статус 2026-06-01: implementation slice выполнен в `amn2` branch `codex/remote-operation-dry-run-audit`, commit `0313857`.
 - Что должно появиться: preview с `operation_id`, `risk_class`, side effects, rollback/recovery note и `consistency_status=dry-run`.
 - Почему P1: dry-run нужен до live VPS apply/revoke, но опирается на P0 contract.
 - Локальная проверка: tests для apply-peer/revoke-peer dry-run без live execution.
-- Готово, когда: preview понятен оператору и не содержит секретов.
+- Проверено 2026-06-01: `tests/server/test_operation_runner.py tests/server/test_peer_apply.py tests/security/test_redaction.py tests/web/test_servers.py tests/web/test_users.py -v` -> `79 passed, 1 warning`.
+- Готово, когда: preview понятен оператору и не содержит секретов. Первый срез готов: `RemoteOperationRunner.plan()` отдает `dry-run` для state-changing операций, `OperationPlan.to_safe_metadata()` не публикует command strings, `apply-peer`/`revoke-peer` dry-run выводит operation metadata без PSK.
 
 ### Bot/service partial-failure сценарии
 
@@ -88,10 +93,12 @@
 ### Runtime Registry update
 
 - Цель: зафиксировать локальный gate как обязательное условие перед VPS.
+- Статус 2026-06-01: выполнено в `amn2` branch `codex/remote-operation-dry-run-audit`, commit `063b6c3`.
 - Что должно появиться: короткая запись в `docs/RUNTIME_REGISTRY.ru.md` и, при наличии английского слоя, в `docs/RUNTIME_REGISTRY.en.md`.
 - Почему P1: это превращает договоренность в повторяемое правило для следующих чатов и веток.
 - Локальная проверка: docs review, `git diff --check`.
-- Готово, когда: по docs понятно, что real VPS gate начинается только после локального green suite.
+- Проверено 2026-06-01: `tests/deploy/test_runtime_registry.py -v` -> `7 passed`.
+- Готово, когда: по docs понятно, что real VPS gate начинается только после локального green suite. Первый registry update готов.
 
 ## P2. Малая важность или после P0/P1
 
@@ -146,11 +153,11 @@
 1. Сделать `State-changing operation contract` и сохранить совместимость read-only runner - выполнено в `codex/remote-operation-contract-metadata`.
 2. Добавить fake runner/fake peer applier harness - первый approve/reset слой выполнен в `codex/remote-operation-partial-failure`.
 3. Покрыть partial-failure model для approve/revoke/reset - первый approve/reset слой выполнен в `codex/remote-operation-partial-failure`.
-4. Добавить dry-run preview и safe audit/redaction metadata.
-5. Прогнать focused tests.
-6. Прогнать full local suite.
-7. Обновить Runtime Registry и lab notes.
-8. Только после этого перейти к controlled real VPS verification gate.
+4. Добавить dry-run preview и safe audit/redaction metadata - выполнено в `codex/remote-operation-dry-run-audit`.
+5. Прогнать focused tests - выполнено: `79 passed, 1 warning`.
+6. Прогнать full local suite - выполнено: `522 passed, 1 warning`.
+7. Обновить Runtime Registry и lab notes - Runtime Registry выполнен в commit `063b6c3`, lab notes обновлены этим срезом.
+8. Только после этого перейти к controlled real VPS verification gate - следующий шаг, отдельно подтверждаемый оператором.
 
 ## Не переносим в локальную фазу
 
