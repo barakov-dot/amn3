@@ -2,26 +2,42 @@
 
 Дата: 2026-05-31.
 
-## VPN Ops Lab
+## AMN3 / VPN Ops Lab
 
-Главный coordination snapshot обновлен в `docs/PROJECT_CONTEXT_IMPORT.ru.md`.
+Локальный checkout:
 
-Текущее активное направление работы: продолжить deep dive в чате `VPN Ops Lab - KYORESUAS-API`.
+```text
+C:\Users\SooL\Documents\VPS-OPS-LAB
+```
 
-Main coordination сейчас хранит состояние и решения, но не должен начинать новый implementation step, пока KYORESUAS/API-анализ не вернет очередной вывод или решение.
+GitHub remote:
 
-В lab сейчас есть незакоммиченные исследовательские изменения:
+```text
+https://github.com/barakov-dot/amn3.git
+```
 
-- `ideas/add-to-skill.md`
-- `ideas/candidates-for-amn2.md`
-- `ideas/candidates-for-hybrid.md`
-- `docs/NEXT_CHAT_KYORESUAS_API.ru.md`
-- `docs/PROJECT_CONTEXT_IMPORT.ru.md`
-- `docs/superpowers/specs/2026-05-31-local-amnezia-agent-design.md`
-- `docs/superpowers/plans/2026-05-31-local-amnezia-agent-first-slice.md`
-- `research/upstreams/kyoresuas-amnezia-api.md`
+Текущая ветка:
 
-Смысл этих изменений: зафиксировать KYORESUAS upstream, Local Amnezia Agent design/plan и обновленную очередь идей для `amn2`, hybrid и общего skill.
+```text
+master
+```
+
+Последний опубликованный commit:
+
+```text
+b24720f Add AMN3 local agent research
+```
+
+AMN3 теперь является приватной базой знаний проекта: research, design specs, implementation plans, transfer notes и skill-кандидаты.
+
+В AMN3 уже запушены:
+
+- KYORESUAS upstream card;
+- Local Amnezia Agent design spec;
+- Local Amnezia Agent first-slice implementation plan;
+- обновления очередей `amn2`, `hybrid`, `skill`.
+
+На момент этого snapshot в рабочей копии AMN3 есть отдельные незакоммиченные research/watch изменения по PRVTPRO/GitHub watch-направлению. Они не относятся к Local Agent integration и должны коммититься отдельным срезом.
 
 ## Amneziya / `amn2`
 
@@ -31,26 +47,80 @@ Main coordination сейчас хранит состояние и решения
 C:\Users\SooL\Documents\Amneziya
 ```
 
-Текущая ветка:
+Текущая ветка Local Agent:
 
 ```text
-codex-vps-test-prep
+codex/local-agent-first-slice
 ```
 
-Последний коммит:
+Remote branch:
 
 ```text
-8ecb0b4 Add configurable client config defaults
+origin/codex/local-agent-first-slice
 ```
 
-Ветка синхронизирована с `origin/codex-vps-test-prep`.
+Текущий head:
 
-Новые коммиты после старого handoff:
+```text
+ac2baa8 Add typed local agent auth errors
+```
 
-- `573c368 Add VPS retest bundle`
-- `8ecb0b4 Add configurable client config defaults`
+Stacked base:
 
-## Что теперь есть в `amn2`
+```text
+origin/codex-vps-test-prep @ 8ecb0b4 Add configurable client config defaults
+```
+
+Local Agent branch содержит два commit:
+
+- `3119ee6 Add local Amnezia agent first slice`
+- `ac2baa8 Add typed local agent auth errors`
+
+PR нужно открывать как stacked PR:
+
+```text
+base: codex-vps-test-prep
+head: codex/local-agent-first-slice
+```
+
+Manual PR URL:
+
+```text
+https://github.com/barakov-dot/amn2/pull/new/codex/local-agent-first-slice
+```
+
+Автоматическое создание PR из Codex пока заблокировано: GitHub connector не видит приватный `barakov-dot/amn2`, а локальный `gh` не установлен.
+
+## Что есть в Local Amnezia Agent first slice
+
+Файлы:
+
+- `app/agent/`
+- `tests/agent/`
+- `docs/LOCAL_AGENT.ru.md`
+
+Включено:
+
+- route policy matrix;
+- hash-only scoped bearer token auth;
+- typed auth error reasons;
+- fake runtime adapter;
+- protected FastAPI app factory;
+- endpoints `/agent/health`, `/agent/version`, `/agent/runtime`, `/agent/protocols`;
+- disabled public docs/openapi;
+- audit events for allowed read routes;
+- no config/QR/`vpn://`/backup/import/reboot/write routes.
+
+Проверка после последнего commit:
+
+```text
+tests/agent tests/server/test_operation_runner.py tests/server/test_checks.py tests/web/test_servers.py -v
+70 passed, 1 existing Starlette/httpx warning
+```
+
+`git diff --check` чистый.
+
+## Что теперь есть в `amn2` base branch
 
 Практический VPS retest bundle:
 
@@ -72,52 +142,22 @@ codex-vps-test-prep
 
 Эти значения используются для выдаваемых клиентских конфигов, preview и доставки, а уникальные values вроде keys/IP/endpoint остаются в своих источниках.
 
-## Local Amnezia Agent
+## Ближайший безопасный порядок
 
-First slice фактически реализован в рабочей копии, но не закоммичен:
-
-- `app/agent/`
-- `tests/agent/`
-- `docs/LOCAL_AGENT.ru.md`
-
-Включено:
-
-- route policy matrix;
-- hash-only scoped bearer token auth;
-- fake runtime adapter;
-- protected FastAPI app factory;
-- endpoints `/agent/health`, `/agent/version`, `/agent/runtime`, `/agent/protocols`;
-- disabled public docs/openapi;
-- audit events for allowed read routes;
-- no config/QR/`vpn://`/backup/import/reboot/write routes.
-
-Проверка в текущей рабочей копии:
-
-```text
-tests/agent: 33 passed, 1 warning
-```
-
-Финальный review: approved, без blocking findings. Неблокирующая заметка: позже заменить текстовое определение missing scope на typed auth error reason.
-
-## Следующий безопасный шаг
-
-Сначала не смешивать незакоммиченный Local Agent с текущей веткой VPS retest.
-
-Так как работа пока продолжается в KYORESUAS-API deep dive, в main coordination ближайшее действие - принимать оттуда новые выводы и обновлять очереди `amn2`, `hybrid`, `skill`, а не запускать новые правки в `amn2`.
-
-Рекомендуемый порядок:
-
-1. Создать свежую ветку от `8ecb0b4`, например `codex/local-agent-first-slice`.
-2. Stage только `app/agent/`, `tests/agent/`, `docs/LOCAL_AGENT.ru.md`.
-3. Commit: `Add local Amnezia agent first slice`.
-4. Прогнать `tests/agent` и связанные regression tests.
-5. После этого возвращаться к live VPS retest на последнем `codex-vps-test-prep`.
+1. Открыть stacked PR `codex/local-agent-first-slice` -> `codex-vps-test-prep`.
+2. Review/merge Local Agent slice в `codex-vps-test-prep`.
+3. После этого возвращаться к live VPS retest на последнем `codex-vps-test-prep`.
+4. Следующий implementation slice для Local Agent делать только после PR/review:
+   - feature flag / settings для agent app;
+   - real read-only runtime detection;
+   - secure token provisioning;
+   - no write/config/backup routes until отдельный policy gate.
 
 ## Ближайший live VPS retest
 
 На VPS нужно подтвердить:
 
-- установлен коммит `8ecb0b4`;
+- установлен коммит `8ecb0b4` или более свежий commit из `codex-vps-test-prep`;
 - `server retest-plan` работает и ничего не меняет;
 - web block `VPS retest bundle` показывает команды;
 - peer sync корректно различает known panel peers, Amnezia-created peers и local missing devices;
