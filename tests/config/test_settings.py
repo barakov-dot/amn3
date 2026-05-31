@@ -220,6 +220,75 @@ def test_settings_defaults_web_admin_to_disabled():
     assert settings.web_admin_enabled is False
 
 
+def test_settings_reads_local_agent_settings():
+    settings = Settings(
+        _env_file=None,
+        telegram_bot_token="TEST_TOKEN",
+        app_secret_key="test-secret",
+        local_agent_enabled=True,
+        local_agent_host="127.0.0.1",
+        local_agent_port=3041,
+        local_agent_token_id="agent-token-1",
+        local_agent_token_hash=(
+            "sha256:"
+            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        ),
+        local_agent_token_owner="local-controller",
+        local_agent_token_scopes="agent:health,agent:read,agent:protocols:read",
+        local_agent_token_expires_at="2030-01-02T03:04:05+00:00",
+    )
+
+    assert settings.local_agent_enabled is True
+    assert settings.local_agent_host == "127.0.0.1"
+    assert settings.local_agent_port == 3041
+    assert settings.local_agent_token_id == "agent-token-1"
+    assert settings.local_agent_token_owner == "local-controller"
+    assert settings.local_agent_scopes == [
+        "agent:health",
+        "agent:read",
+        "agent:protocols:read",
+    ]
+
+
+def test_settings_defaults_local_agent_to_disabled():
+    settings = Settings(
+        _env_file=None,
+        telegram_bot_token="TEST_TOKEN",
+        app_secret_key="test-secret",
+    )
+
+    assert settings.local_agent_enabled is False
+    assert settings.local_agent_host == "127.0.0.1"
+    assert settings.local_agent_port == 3031
+    assert settings.local_agent_token_hash == ""
+
+
+def test_settings_requires_token_hash_when_local_agent_enabled():
+    with pytest.raises(ValidationError, match="LOCAL_AGENT_TOKEN_HASH"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="TEST_TOKEN",
+            app_secret_key="test-secret",
+            local_agent_enabled=True,
+            local_agent_token_hash="",
+        )
+
+
+def test_settings_rejects_write_scope_for_local_agent_first_slice():
+    with pytest.raises(ValidationError, match="LOCAL_AGENT_TOKEN_SCOPES"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="TEST_TOKEN",
+            app_secret_key="test-secret",
+            local_agent_enabled=True,
+            local_agent_token_hash=(
+                "sha256:"
+                "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+            ),
+            local_agent_token_scopes="agent:health,agent:clients:write",
+        )
+
+
 def test_settings_strips_and_normalizes_app_log_level():
     settings = Settings(
         _env_file=None,
