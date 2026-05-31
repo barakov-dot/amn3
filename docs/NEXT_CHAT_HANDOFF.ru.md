@@ -27,7 +27,7 @@ codex-vps-test-prep
 Текущий актуальный коммит:
 
 ```text
-Add configurable client config defaults
+Allow AmneziaWG H range settings
 ```
 
 Не начинать отдельный проект с нуля. Новый чат должен открыть эту же папку, проверить ветку и продолжить от текущего состояния.
@@ -72,7 +72,7 @@ cd C:\Users\SooL\Documents\Amneziya
 ## codex-vps-test-prep...origin/codex-vps-test-prep
 ```
 
-В `git log -5` верхний коммит должен иметь сообщение `Add configurable client config defaults`.
+В `git log -5` верхний коммит должен иметь сообщение `Allow AmneziaWG H range settings`.
 
 Если ветка не совпадает:
 
@@ -94,7 +94,7 @@ $env:PYTHONPATH='.codex_deps;.'
 Последний результат:
 
 ```text
-440 passed, 1 warning
+442 passed, 1 warning
 ```
 
 Предупреждение ожидаемое:
@@ -114,7 +114,7 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
 - Управление пользователями, серверами, заявками, логами, настройками.
 - Отображение пользователей, созданных через бота.
 - Шаблоны клиентского конфига, редактор `.conf.tpl` override-файлов и preview `vpn://`.
-- Постоянные параметры клиентского AmneziaWG-конфига (`DNS`, `AllowedIPs`, `PersistentKeepalive`, `Jc/Jmin/Jmax/S1/S2/H1-H4`) вынесены в `CLIENT_*` настройки `.env`; ключи, `Address`, имя устройства и имя файла остаются уникальными на каждое устройство.
+- Постоянные параметры клиентского AmneziaWG-конфига (`DNS`, `AllowedIPs`, `PersistentKeepalive`, `Jc/Jmin/Jmax/S1/S2/H1-H4`) вынесены в `CLIENT_*` настройки `.env`; `H1-H4` принимают и числа, и диапазоны из `awg show`, ключи, `Address`, имя устройства и имя файла остаются уникальными на каждое устройство.
 - Инструкция по web-панели и боту: `docs/WEB_PANEL_AND_BOT_SETUP.ru.md`.
 - Docker runtime для AmneziaWG: чтение и запись persistent `awg0.conf`, затем `docker restart`.
 - Ошибки `PeerApplyError` в Telegram и web-панели теперь показывают безопасную строку `Details`, очищенную через `redact()`.
@@ -211,7 +211,7 @@ git log -1 --oneline
 Ожидаемый коммит:
 
 ```text
-Add configurable client config defaults
+Allow AmneziaWG H range settings
 ```
 
 Проверить server config:
@@ -249,7 +249,7 @@ tail -n 200 logs/app.log
 
 Порядок проверки:
 
-1. `git log -1 --oneline` показывает коммит `Add configurable client config defaults`.
+1. `git log -1 --oneline` показывает коммит `Allow AmneziaWG H range settings`.
 2. Web-панель открывается.
 3. В карточке сервера блок `VPS readiness` показывает:
    - `VPS_APPLY_ENABLED`;
@@ -321,7 +321,7 @@ sudo journalctl -u amneziya-bot -n 200 --no-pager
 
 Критично перед следующим стабильным этапом:
 
-1. Пройти VPS retest после коммита `Add configurable client config defaults`.
+1. Пройти VPS retest после коммита `Allow AmneziaWG H range settings`.
 2. Подтвердить, что новый IP берется из live `awg0.conf`.
 3. Подтвердить disable/enable на реальном Docker runtime.
 4. Убедиться, что old/local peers из сети `10.8.0.0/24` не мешают новой live-сети `10.8.1.0/24`.
