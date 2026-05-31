@@ -165,10 +165,10 @@ async def handle_user_revoke_device(callback, *, workflow) -> None:
 
 
 async def handle_user_revoke_device_confirm(callback, *, workflow) -> None:
+    await callback.answer()
     device_id = _parse_int_suffix(str(callback.data), USER_REVOKE_CONFIRM_PREFIX)
     if device_id is None:
         await callback.message.answer(text("handler.unknown_delete_confirm"))
-        await callback.answer()
         return
 
     try:
@@ -182,18 +182,15 @@ async def handle_user_revoke_device_confirm(callback, *, workflow) -> None:
             f"Error type: {type(exc).__name__}\n"
             "Next checks: run server check, then revoke-peer --dry-run for this peer."
         )
-        await callback.answer()
         return
 
     if not revoked:
         await callback.message.answer(text("handler.device_not_found"))
-        await callback.answer()
         return
 
     await callback.message.answer(
         text("handler.device_removed", device_id=device_id)
     )
-    await callback.answer()
 
 
 async def handle_user_reset_devices(callback, *, workflow) -> None:
@@ -205,6 +202,7 @@ async def handle_user_reset_devices(callback, *, workflow) -> None:
 
 
 async def handle_user_reset_devices_confirm(callback, *, workflow) -> None:
+    await callback.answer()
     try:
         changed = workflow.reset_user_devices(telegram_id=int(callback.from_user.id))
     except PeerApplyError as exc:
@@ -213,19 +211,17 @@ async def handle_user_reset_devices_confirm(callback, *, workflow) -> None:
             f"Error type: {type(exc).__name__}\n"
             "Next checks: run server check, then revoke-peer --dry-run for affected peers."
         )
-        await callback.answer()
         return
     await callback.message.answer(
         text("handler.devices_removed", count=changed)
     )
-    await callback.answer()
 
 
 async def handle_admin_pending(callback, *, workflow) -> None:
+    await callback.answer()
     admin_telegram_id = int(callback.from_user.id)
     if not workflow.is_admin(admin_telegram_id):
         await callback.message.answer(text("handler.admin_required"))
-        await callback.answer()
         return
 
     orders = workflow.list_pending_orders(admin_telegram_id=admin_telegram_id)
@@ -235,7 +231,6 @@ async def handle_admin_pending(callback, *, workflow) -> None:
             f"Order #{order['id']}",
             reply_markup=build_admin_order_keyboard(order_id=int(order["id"])),
         )
-    await callback.answer()
 
 
 async def handle_admin_users(callback, *, workflow) -> None:
@@ -253,15 +248,14 @@ async def handle_admin_users(callback, *, workflow) -> None:
 
 
 async def handle_admin_approve(callback, *, workflow) -> None:
+    await callback.answer()
     admin_telegram_id = int(callback.from_user.id)
     parsed = parse_admin_approve_callback(str(callback.data))
     if parsed is None:
         await callback.message.answer("Unknown admin approval request.")
-        await callback.answer()
         return
     if not workflow.is_admin(admin_telegram_id):
         await callback.message.answer(text("handler.admin_required"))
-        await callback.answer()
         return
 
     order_id, config_version = parsed
@@ -277,11 +271,9 @@ async def handle_admin_approve(callback, *, workflow) -> None:
             f"Error type: {type(exc).__name__}\n"
             "Next checks: run server check, then apply-peer --dry-run for a test peer."
         )
-        await callback.answer()
         return
     if result is None:
         await callback.message.answer(text("handler.admin_required"))
-        await callback.answer()
         return
 
     await callback.message.answer(result.admin_text)
@@ -294,7 +286,6 @@ async def handle_admin_approve(callback, *, workflow) -> None:
         )
         await callback.message.answer(result.delivery.message_text)
         await callback.message.answer(result.config_text)
-    await callback.answer()
 
 
 async def handle_admin_template(callback, *, workflow) -> None:

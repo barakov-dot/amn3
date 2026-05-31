@@ -233,6 +233,36 @@ def test_handle_user_revoke_device_confirm_reports_server_remove_error():
     assert callback.answered is True
 
 
+def test_handle_user_revoke_confirm_answers_callback_before_peer_revoke():
+    events = []
+
+    class OrderingCallback(FakeCallback):
+        async def answer(self):
+            events.append("answer")
+            await super().answer()
+
+    class OrderingWorkflow(FakeWorkflow):
+        def revoke_user_device(self, *, telegram_id, device_id, revoked_at=None):
+            events.append("revoke_user_device")
+            return super().revoke_user_device(
+                telegram_id=telegram_id,
+                device_id=device_id,
+                revoked_at=revoked_at,
+            )
+
+    callback = OrderingCallback(
+        data=f"{USER_REVOKE_CONFIRM_PREFIX}:7",
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = OrderingWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_user_revoke_device_confirm(callback, workflow=workflow))
+
+    assert events[:2] == ["answer", "revoke_user_device"]
+
+
 def test_handle_user_reset_devices_asks_for_confirmation():
     callback = FakeCallback(
         data=USER_RESET_DEVICES_CALLBACK,
@@ -289,6 +319,35 @@ def test_handle_user_reset_devices_confirm_reports_server_remove_error():
     assert callback.answered is True
 
 
+def test_handle_user_reset_devices_confirm_answers_callback_before_peer_revoke():
+    events = []
+
+    class OrderingCallback(FakeCallback):
+        async def answer(self):
+            events.append("answer")
+            await super().answer()
+
+    class OrderingWorkflow(FakeWorkflow):
+        def reset_user_devices(self, *, telegram_id, revoked_at=None):
+            events.append("reset_user_devices")
+            return super().reset_user_devices(
+                telegram_id=telegram_id,
+                revoked_at=revoked_at,
+            )
+
+    callback = OrderingCallback(
+        data=USER_RESET_DEVICES_CONFIRM_CALLBACK,
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = OrderingWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_user_reset_devices_confirm(callback, workflow=workflow))
+
+    assert events[:2] == ["answer", "reset_user_devices"]
+
+
 def test_handle_admin_pending_rejects_non_admin():
     callback = FakeCallback(
         data="admin:pending",
@@ -322,6 +381,32 @@ def test_handle_admin_pending_renders_approve_buttons_for_each_order():
         ["Одобрить: AmneziaWG 2.0"],
     ]
     assert callback.answered is True
+
+
+def test_handle_admin_pending_answers_callback_before_listing_orders():
+    events = []
+
+    class OrderingCallback(FakeCallback):
+        async def answer(self):
+            events.append("answer")
+            await super().answer()
+
+    class OrderingWorkflow(FakeWorkflow):
+        def list_pending_orders(self, *, admin_telegram_id):
+            events.append("list_pending")
+            return super().list_pending_orders(admin_telegram_id=admin_telegram_id)
+
+    callback = OrderingCallback(
+        data="admin:pending",
+        user_id=9001,
+        username="admin",
+        first_name="Admin",
+    )
+    workflow = OrderingWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_pending(callback, workflow=workflow))
+
+    assert events[:2] == ["answer", "list_pending"]
 
 
 def test_handle_admin_users_renders_service_users_for_admin():
@@ -375,6 +460,36 @@ def test_handle_admin_approve_calls_workflow_and_returns_config_preview():
     assert callback.bot.sent_photos[0]["chat_id"] == 1001
     assert callback.bot.sent_photos[0]["photo"].filename.endswith(".qr.png")
     assert callback.answered is True
+
+
+def test_handle_admin_approve_answers_callback_before_peer_apply():
+    events = []
+
+    class OrderingCallback(FakeCallback):
+        async def answer(self):
+            events.append("answer")
+            await super().answer()
+
+    class OrderingWorkflow(FakeWorkflow):
+        def approve_order(self, *, admin_telegram_id, order_id, config_version):
+            events.append("approve_order")
+            return super().approve_order(
+                admin_telegram_id=admin_telegram_id,
+                order_id=order_id,
+                config_version=config_version,
+            )
+
+    callback = OrderingCallback(
+        data="admin:approve:11:amneziawg_v1_5",
+        user_id=9001,
+        username="admin",
+        first_name="Admin",
+    )
+    workflow = OrderingWorkflow(admin_ids={9001})
+
+    asyncio.run(handle_admin_approve(callback, workflow=workflow))
+
+    assert events[:2] == ["answer", "approve_order"]
 
 
 def test_handle_admin_approve_reports_apply_error_without_sending_config():
