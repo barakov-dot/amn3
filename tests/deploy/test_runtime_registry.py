@@ -373,6 +373,37 @@ def test_amn3_preflight_confirmation_doc_tracks_nonce_expiry_and_vps_gate():
     assert "docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md" in policy_doc
 
 
+def test_amn3_vps_test_packet_coordinates_neighbor_chat_smoke_run():
+    doc_path = ROOT / "docs/AMN3_VPS_TEST_PACKET.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    smoke_path = ROOT / "docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    smoke = smoke_path.read_text(encoding="utf-8")
+
+    assert "Переводим AMN на API" in text
+    assert "https://github.com/barakov-dot/amn3.git" in text
+    assert "codex/local-agent-production-wiring" in text
+    assert "/opt/amn2" in text
+    assert "git fetch origin codex/local-agent-production-wiring" in text
+    assert "git log -1 --oneline --decorate" in text
+    assert "python -m app.cli agent probe --base-url http://127.0.0.1:3031" in text
+    assert "bash deploy/runtime/collect_debug_snapshot.sh" in text
+    assert "docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md" in text
+    assert "docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED=false" in text
+    assert "write routes" in text
+    assert "raw token" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "Go / no-go" in text
+    assert "docs/AMN3_VPS_TEST_PACKET.ru.md" in handoff
+    assert "docs/AMN3_VPS_TEST_PACKET.ru.md" in smoke
+
+
 def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     doc_path = ROOT / "docs/VPS_RETEST_PROTOCOL.ru.md"
     checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"

@@ -1,5 +1,6 @@
 # AMN3 Local Agent VPS Smoke Checklist
 
+Для соседнего чата `Переводим AMN на API` использовать короткий пакет `docs/AMN3_VPS_TEST_PACKET.ru.md`.
 Результат реального VPS smoke фиксировать в `docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md`.
 
 Короткий маршрут для первого переноса текущей Local Agent наработки в приватный
