@@ -321,6 +321,8 @@ http://127.0.0.1:3030/login
 
 На странице `Users` есть переход `Disabled devices`. Он открывает `/devices/disabled` со списком отключенных устройств, владельцем, сервером, IP и причиной/временем отключения. Для повторного включения открыть пользователя через `Open user` и нажать `Enable VPN`.
 
+В карточке пользователя блок `Admin actions` показывает не только action/admin/date, но и `target_device_id` с `metadata_json`. Это нужно для разбора failed VPS-событий: в metadata видны `operation`, `error_type` и `redacted_error`, если операция была записана как `*_failed`.
+
 ## 10. Подготовить Telegram-бота
 
 В `.env` заполнить:

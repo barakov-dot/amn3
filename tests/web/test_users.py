@@ -218,6 +218,48 @@ def test_user_detail_shows_profile_summaries_and_actions(tmp_path: Path):
     assert "seed_action" in response.text
 
 
+def test_user_detail_admin_actions_show_metadata(tmp_path: Path):
+    settings = _settings(tmp_path, admin_telegram_ids="9001")
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=4054,
+        username="audit-user",
+        first_name="Audit",
+        last_name=None,
+    )
+    device_id = _seed_encrypted_device(
+        Path(settings.database_path),
+        user_id=user_id,
+        private_key="client-private-key",
+        preshared_key="stored-psk",
+        status="disabled",
+    )
+    with _repo(Path(settings.database_path)) as repo:
+        repo.record_admin_action(
+            admin_telegram_id=9001,
+            action="web_user_enable_vpn_failed",
+            target_user_id=user_id,
+            target_device_id=device_id,
+            metadata={
+                "operation": "enable_user_vpn",
+                "error_type": "PeerApplyError",
+                "redacted_error": "Docker apply failed",
+            },
+        )
+    client = _authenticated_client(settings)
+
+    response = client.get(f"/users/{user_id}")
+
+    assert response.status_code == 200
+    assert "Admin actions" in response.text
+    assert "Metadata" in response.text
+    assert "Target device" in response.text
+    assert f"#{device_id}" in response.text
+    assert "enable_user_vpn" in response.text
+    assert "PeerApplyError" in response.text
+    assert "Docker apply failed" in response.text
+
+
 def test_user_detail_marks_dangerous_actions_with_confirmation(tmp_path: Path):
     settings = _settings(tmp_path)
     user_id = _seed_user(

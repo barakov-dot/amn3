@@ -212,7 +212,9 @@
                 <th>ID</th>
                 <th>Action</th>
                 <th>Admin</th>
+                <th>Target device</th>
                 <th>Created</th>
+                <th>Metadata</th>
               </tr>
             </thead>
             <tbody>
@@ -221,7 +223,15 @@
                   <td>#{{ action.id }}</td>
                   <td>{{ action.action }}</td>
                   <td>{{ action.admin_telegram_id }}</td>
+                  <td>
+                    {% if action.target_device_id %}
+                      #{{ action.target_device_id }}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
                   <td>{{ action.created_at }}</td>
+                  <td class="wrap-text">{{ action.metadata_json or "-" }}</td>
                 </tr>
               {% endfor %}
             </tbody>
