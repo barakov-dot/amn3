@@ -42,8 +42,8 @@ tests/web/test_users.py
 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 branch: master
 remote: https://github.com/barakov-dot/amn3.git
-committed head: 1a00be8 Record web panel safety slice
-status: clean and synchronized with origin/master before this update
+committed head before this follow-up: 1a00be8 Record web panel safety slice
+status: clean and synchronized with origin/master before this follow-up
 ```
 
 После verified live VPS baseline уже выполнены и записаны в AMN3:
