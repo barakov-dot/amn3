@@ -63,6 +63,20 @@ Read-only health slice `RemoteOperationRunner` уже присутствует �
 
 Решение: реальные VPS-mutation проверки не запускаются, пока локально не закрыты contract, fake-runner tests, redaction, audit и rollback note. Первый live probe выполняется только на тестовом device/peer, с backup/recovery window и явной командой оператора.
 
+## Обновление 2026-05-31: state-changing metadata local slice
+
+Первый локальный P0-срез для state-changing contract выполнен в `amn2`:
+
+- branch: `codex/remote-operation-contract-metadata`;
+- commit: `57d484d Add state-changing operation metadata`;
+- base: `codex/redaction-coverage-first-slice`;
+- добавлено: `RemoteOperation.consistency_status` с безопасным default `read-only`;
+- добавлено: `OperationPlan` теперь переносит `consistency_status`, `local_side_effects`, `remote_side_effects` и `idempotency_key`;
+- добавлено: validation для `remote-state-write` и `destructive-remote`, требующая recovery metadata, remote side effect metadata и state-changing consistency status;
+- проверено: `tests/server/test_operation_runner.py tests/server/test_checks.py -v` -> `23 passed`.
+
+Ограничение: это еще не включает fake peer applier, partial-failure simulations и dry-run/audit metadata для live mutation flows. Следующий локальный шаг - fake runner/fake peer applier harness и partial-failure model.
+
 ## Карта remote surfaces
 
 | Surface | Actor / gate | Remote command class | Local side effect | Current controls |

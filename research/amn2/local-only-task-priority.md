@@ -23,10 +23,12 @@
 ### State-changing operation contract
 
 - Цель: явно описать любые операции, которые меняют remote/local state.
+- Статус 2026-05-31: первый implementation slice выполнен в `amn2` branch `codex/remote-operation-contract-metadata`, commit `57d484d`.
 - Что должно появиться: `operation_id`, `risk_class`, `consistency_status`, `rollback_note`, `local_side_effects`, `remote_side_effects`, `idempotency_key`.
 - Почему P0: без этого нельзя безопасно отличать read-only диагностику от операций, которые меняют VPS или локальную БД.
 - Локальная проверка: contract tests для state-changing operations и совместимость с уже существующим read-only `RemoteOperationRunner`.
-- Готово, когда: старые read-only tests проходят, а новые state-changing tests требуют явной metadata.
+- Проверено 2026-05-31: `23 passed` для `tests/server/test_operation_runner.py tests/server/test_checks.py`.
+- Готово, когда: старые read-only tests проходят, а новые state-changing tests требуют явной metadata. Первый срез готов; следующий слой должен подключить fake runner/partial-failure сценарии.
 
 ### Partial-failure model
 
@@ -136,7 +138,7 @@
 
 ## Первая партия исполнения
 
-1. Сделать `State-changing operation contract` и сохранить совместимость read-only runner.
+1. Сделать `State-changing operation contract` и сохранить совместимость read-only runner - выполнено в `codex/remote-operation-contract-metadata`.
 2. Добавить fake runner/fake peer applier harness.
 3. Покрыть partial-failure model для approve/revoke/reset.
 4. Добавить dry-run preview и safe audit metadata.
