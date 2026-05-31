@@ -76,6 +76,7 @@ git remote -v
 - `docs/LOCAL_AGENT.ru.md` - архитектура Local Agent.
 - `docs/PRODUCTION_VPS_CHECKLIST.ru.md` - общий production checklist.
 - `docs/AMN3_KYORESUAS_API_ANALYSIS.ru.md` - анализ `kyoresuas/amnezia-api` как источника идей для AMN3 user/client API без копирования кода.
+- `docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md` - локальная матрица future `agent:clients:write` операций, scopes и error contracts без включения routes.
 - `docs/WEB_PANEL_AND_BOT_SETUP.ru.md` - web/bot запуск и эксплуатация.
 - `docs/VPS_RETEST_PROTOCOL.ru.md` - повторяемый VPS retest.
 - `docs/VPS_LOG_COLLECTION.ru.md` - сбор логов и диагностики.
@@ -119,7 +120,8 @@ git status --short --branch
 2. Держать актуальными `docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md` и этот handoff.
 3. Анализировать идеи `kyoresuas/amnezia-api` для user API без копирования кода.
 4. Использовать `docs/AMN3_KYORESUAS_API_ANALYSIS.ru.md` для уточнения policy/scopes/audit/dry-run контрактов в плане первого write API slice.
-5. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
+5. Держать `docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md` синхронизированным с `app/agent/write_policy_matrix.py`.
+6. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
 
 До VPS smoke не включать write routes, не добавлять реальные mutation endpoints и не делать Local Agent публичным.
 
