@@ -8,6 +8,7 @@ from typing import Any
 from app import __version__
 from app.agent.api import create_agent_app
 from app.agent.auth import hash_agent_token
+from app.agent.client import AgentProtocol, LocalAgentClient
 from app.agent.config import build_agent_tokens
 from app.agent.runtime import LocalCommandRuntimeAdapter
 from app.backup.service import BackupService
@@ -116,6 +117,14 @@ def build_parser() -> argparse.ArgumentParser:
     agent_serve.add_argument("--host", default=None)
     agent_serve.add_argument("--port", type=int, default=None)
 
+    agent_probe = agent_sub.add_parser("probe")
+    agent_probe.add_argument("--base-url", required=True)
+    agent_probe.add_argument(
+        "--token",
+        default=None,
+        help="Optional; omit to enter the token without shell history.",
+    )
+
     web = sub.add_parser("web")
     web_sub = web.add_subparsers(dest="web_command", required=True)
 
@@ -208,6 +217,8 @@ def main() -> None:
         print(run_agent_token_hash(_read_agent_token(args.token)))
     elif args.command == "agent" and args.agent_command == "serve":
         run_agent_server(host=args.host, port=args.port)
+    elif args.command == "agent" and args.agent_command == "probe":
+        print(run_agent_probe(base_url=args.base_url, raw_token=_read_agent_token(args.token)))
     elif args.command == "web" and args.web_command == "hash-password":
         print(run_web_password_hash(_read_web_password(args.password)))
     elif args.command == "web" and args.web_command == "serve":
@@ -245,6 +256,38 @@ def run_agent_token_hash(raw_token: str) -> str:
     if not raw_token.strip():
         raise ValueError("token cannot be blank")
     return hash_agent_token(raw_token.strip())
+
+
+def run_agent_probe(
+    *,
+    base_url: str,
+    raw_token: str,
+    client_factory: Callable[..., Any] = LocalAgentClient,
+) -> str:
+    client = client_factory(base_url=base_url, bearer_token=raw_token)
+    health = client.health()
+    runtime = client.runtime()
+    protocols = client.protocols()
+
+    lines = [
+        f"Local Agent probe: {base_url.rstrip('/')}",
+        f"health: {health.status} ({health.service})",
+        f"runtime: {runtime.server_name} {runtime.runtime_type} {runtime.status}",
+    ]
+    lines.extend(_format_agent_protocol(protocol) for protocol in protocols)
+    return "\n".join(lines)
+
+
+def _format_agent_protocol(protocol: AgentProtocol) -> str:
+    container = protocol.container_name or "-"
+    interface = protocol.interface or "-"
+    clients = "-" if protocol.client_count is None else str(protocol.client_count)
+    capabilities = ",".join(protocol.capabilities)
+    return (
+        f"protocol: {protocol.name} {protocol.runtime_type} {protocol.status} "
+        f"interface={interface} container={container} clients={clients} "
+        f"capabilities={capabilities}"
+    )
 
 
 def run_agent_server(

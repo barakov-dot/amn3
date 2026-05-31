@@ -135,6 +135,7 @@ def test_local_agent_vps_smoke_runbook_lists_safe_install_and_checks():
     assert "curl -fsS -H \"Authorization: Bearer $LOCAL_AGENT_RAW_TOKEN\" http://127.0.0.1:3031/agent/health" in text
     assert "curl -fsS -H \"Authorization: Bearer $LOCAL_AGENT_RAW_TOKEN\" http://127.0.0.1:3031/agent/runtime" in text
     assert "curl -fsS -H \"Authorization: Bearer $LOCAL_AGENT_RAW_TOKEN\" http://127.0.0.1:3031/agent/protocols" in text
+    assert "python -m app.cli agent probe --base-url http://127.0.0.1:3031" in text
     assert "ssh -N -L 3031:127.0.0.1:3031" in text
     assert "bash deploy/runtime/collect_debug_snapshot.sh" in text
     assert "--host 0.0.0.0" not in text

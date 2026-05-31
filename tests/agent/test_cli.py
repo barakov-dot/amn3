@@ -3,7 +3,8 @@ from pathlib import Path
 import pytest
 
 from app.agent.auth import hash_agent_token
-from app.cli import build_parser, run_agent_server, run_agent_token_hash
+from app.agent.client import AgentHealth, AgentProtocol, AgentRuntime
+from app.cli import build_parser, run_agent_probe, run_agent_server, run_agent_token_hash
 from app.config.settings import Settings
 
 
@@ -31,6 +32,26 @@ def test_cli_accepts_agent_serve_arguments():
     assert args.port == 3041
 
 
+def test_cli_accepts_agent_probe_arguments():
+    parser = build_parser()
+
+    args = parser.parse_args(
+        [
+            "agent",
+            "probe",
+            "--base-url",
+            "http://127.0.0.1:3031",
+            "--token",
+            "raw-agent-token",
+        ]
+    )
+
+    assert args.command == "agent"
+    assert args.agent_command == "probe"
+    assert args.base_url == "http://127.0.0.1:3031"
+    assert args.token == "raw-agent-token"
+
+
 def test_run_agent_token_hash_outputs_hash_only_value():
     result = run_agent_token_hash("raw-agent-token")
 
@@ -41,6 +62,59 @@ def test_run_agent_token_hash_outputs_hash_only_value():
 def test_run_agent_token_hash_rejects_blank_token():
     with pytest.raises(ValueError, match="token cannot be blank"):
         run_agent_token_hash("   ")
+
+
+def test_run_agent_probe_returns_read_only_summary_without_raw_token():
+    calls = []
+
+    class FakeClient:
+        def __init__(self, *, base_url: str, bearer_token: str):
+            calls.append(("init", base_url, bearer_token))
+
+        def health(self) -> AgentHealth:
+            calls.append(("health",))
+            return AgentHealth(status="ok", service="local-amnezia-agent")
+
+        def runtime(self) -> AgentRuntime:
+            calls.append(("runtime",))
+            return AgentRuntime(
+                server_name="demo-vps",
+                runtime_type="docker",
+                status="running",
+            )
+
+        def protocols(self) -> tuple[AgentProtocol, ...]:
+            calls.append(("protocols",))
+            return (
+                AgentProtocol(
+                    name="amneziawg",
+                    status="running",
+                    runtime_type="docker",
+                    capabilities=("detect", "status"),
+                    container_name="amnezia-awg",
+                    interface="awg0",
+                    client_count=2,
+                ),
+            )
+
+    result = run_agent_probe(
+        base_url="http://127.0.0.1:3031/",
+        raw_token="raw-agent-token",
+        client_factory=FakeClient,
+    )
+
+    assert calls == [
+        ("init", "http://127.0.0.1:3031/", "raw-agent-token"),
+        ("health",),
+        ("runtime",),
+        ("protocols",),
+    ]
+    assert "health: ok (local-amnezia-agent)" in result
+    assert "runtime: demo-vps docker running" in result
+    assert "protocol: amneziawg docker running interface=awg0 container=amnezia-awg clients=2 capabilities=detect,status" in result
+    assert "raw-agent-token" not in result
+    assert "create" not in result.lower()
+    assert "delete" not in result.lower()
 
 
 def test_run_agent_server_requires_enabled_agent(tmp_path: Path):

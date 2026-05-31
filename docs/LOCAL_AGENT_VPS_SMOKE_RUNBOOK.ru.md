@@ -87,6 +87,15 @@ curl -fsS -H "Authorization: Bearer $LOCAL_AGENT_RAW_TOKEN" http://127.0.0.1:303
 unset LOCAL_AGENT_RAW_TOKEN
 ```
 
+Или через штатный read-only controller client:
+
+```bash
+./venv/bin/python -m app.cli agent probe --base-url http://127.0.0.1:3031
+```
+
+Команда попросит raw token интерактивно и не требует передавать его через shell
+history.
+
 Успешный минимум:
 
 - `/agent/health` отвечает `ok`;
@@ -146,6 +155,12 @@ ssh -N -L 3031:127.0.0.1:3031 amneziya@VPS_HOST
 read -rsp "Local Agent raw token: " LOCAL_AGENT_RAW_TOKEN; echo
 curl -fsS -H "Authorization: Bearer $LOCAL_AGENT_RAW_TOKEN" http://127.0.0.1:3031/agent/health
 unset LOCAL_AGENT_RAW_TOKEN
+```
+
+Или:
+
+```bash
+python -m app.cli agent probe --base-url http://127.0.0.1:3031
 ```
 
 Порт `3031` на firewall VPS не открывать. Для первого production режима доступ
