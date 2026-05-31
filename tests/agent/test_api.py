@@ -114,6 +114,13 @@ def test_health_and_version_return_secret_free_metadata():
     assert version_response.json() == {
         "api": "local-amnezia-agent",
         "version": "test-build",
+        "runtime_contract_version": 1,
+        "first_slice_routes": [
+            "/agent/health",
+            "/agent/version",
+            "/agent/runtime",
+            "/agent/protocols",
+        ],
         "write_enabled": False,
     }
     assert [event.path for event in audit.events] == [

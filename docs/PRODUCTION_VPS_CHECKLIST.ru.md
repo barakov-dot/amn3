@@ -116,6 +116,8 @@ tunnel до панели. Для короткой проверки по plain HT
 - Первый scope-набор: `agent:health,agent:read,agent:protocols:read`.
 - Проверить локально: `python -m app.cli agent serve`.
 - Проверить routes только с Bearer token: `/agent/health`, `/agent/version`, `/agent/runtime`, `/agent/protocols`.
+- Проверить, что allowed read routes пишут `local_agent_read` в `admin_actions` без raw token.
+- `/agent/version` должен возвращать `runtime_contract_version`, `first_slice_routes` и `write_enabled=false`.
 - Не добавлять write/config/backup routes без отдельного policy gate.
 
 ## 4. Шаблоны и выдача конфига

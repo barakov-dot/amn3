@@ -7,6 +7,7 @@ from typing import Any
 
 from app import __version__
 from app.agent.api import create_agent_app
+from app.agent.audit import RepositoryAgentAuditSink
 from app.agent.auth import hash_agent_token
 from app.agent.config import build_agent_tokens
 from app.agent.runtime import LocalCommandRuntimeAdapter
@@ -265,6 +266,7 @@ def run_agent_server(
     app = create_agent_app(
         adapter=LocalCommandRuntimeAdapter(server_config),
         tokens=tokens,
+        audit_sink=RepositoryAgentAuditSink(actual_settings.database_path),
         build_version=__version__,
     )
     runner = uvicorn_run or uvicorn.run

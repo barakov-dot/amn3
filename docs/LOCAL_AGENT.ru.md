@@ -15,6 +15,8 @@
 - route policy matrix
 - fake runtime adapter for tests
 - audit events for allowed read routes
+- production audit sink в `admin_actions` при запуске через `agent serve`
+- `runtime_contract_version` и список first-slice routes в `/agent/version`
 - disabled public docs/openapi in the agent app
 
 ## Что не включено
@@ -72,5 +74,7 @@ python -m app.cli agent hash-token
 ```powershell
 python -m app.cli agent serve
 ```
+
+Allowed read-запросы (`/agent/health`, `/agent/version`, `/agent/runtime`, `/agent/protocols`) записываются в `admin_actions` с action `local_agent_read`. Metadata содержит route, scope, risk class, token id, token owner и result. Raw bearer token в audit не пишется.
 
 Для первого production режима держать `LOCAL_AGENT_HOST=127.0.0.1` и открывать доступ только через SSH tunnel, reverse proxy с auth или будущий controller-side transport. Публично наружу agent не выставлять.

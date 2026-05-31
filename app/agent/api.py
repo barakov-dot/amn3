@@ -5,8 +5,11 @@ from fastapi import Depends, FastAPI, Header, HTTPException, status
 
 from app.agent.audit import AgentAuditEvent, AgentAuditSink
 from app.agent.auth import AgentAuthError, AgentToken, authenticate_agent_token
-from app.agent.policy import AgentRoutePolicy, get_policy
+from app.agent.policy import AgentRoutePolicy, first_slice_policies, get_policy
 from app.agent.runtime import LocalRuntimeAdapter
+
+
+AGENT_RUNTIME_CONTRACT_VERSION = 1
 
 
 def create_agent_app(
@@ -39,6 +42,8 @@ def create_agent_app(
 
         return dependency
 
+    first_slice_routes = tuple(policy.path for policy in first_slice_policies())
+
     def audit_allowed(policy: AgentRoutePolicy, token: AgentToken) -> None:
         if audit_sink is None:
             return
@@ -69,11 +74,13 @@ def create_agent_app(
     @app.get("/agent/version")
     def version(
         token: AgentToken = Depends(require_policy(version_policy)),
-    ) -> dict[str, str | bool]:
+    ) -> dict[str, object]:
         audit_allowed(version_policy, token)
         return {
             "api": "local-amnezia-agent",
             "version": build_version,
+            "runtime_contract_version": AGENT_RUNTIME_CONTRACT_VERSION,
+            "first_slice_routes": list(first_slice_routes),
             "write_enabled": False,
         }
 
