@@ -186,11 +186,6 @@ class Settings(BaseSettings):
         token_hash = self.local_agent_token_hash.strip()
         if token_hash:
             self.local_agent_token_hash = token_hash
-        if self.local_agent_enabled:
-            if not token_hash:
-                raise ValueError(
-                    "LOCAL_AGENT_TOKEN_HASH must be set when LOCAL_AGENT_ENABLED=true"
-                )
             digest = token_hash.removeprefix("sha256:")
             if (
                 not token_hash.startswith("sha256:")
@@ -198,6 +193,11 @@ class Settings(BaseSettings):
                 or any(char not in "0123456789abcdef" for char in digest)
             ):
                 raise ValueError("LOCAL_AGENT_TOKEN_HASH must be a sha256 token hash")
+        if self.local_agent_enabled:
+            if not token_hash:
+                raise ValueError(
+                    "LOCAL_AGENT_TOKEN_HASH must be set when LOCAL_AGENT_ENABLED=true"
+                )
         if not 1 <= self.smtp_port <= 65535:
             raise ValueError("SMTP_PORT must be in 1..65535")
         if self.email_recovery_token_ttl_minutes < 1:
