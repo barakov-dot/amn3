@@ -2,22 +2,42 @@
 
 Дата снимка: 2026-05-31.
 
-Обновлено: 2026-05-31 после task/review-сессий по Local Amnezia Agent first slice, push AMN3 и hardening-коммита `amn2`.
+Обновлено: 2026-05-31 после полного прохода по проектным чатам, verified live VPS cycle, merge Local Agent в `amn2` и API-readiness audit в AMN3.
 
 Документ нужен для главного coordination-чата. Он собирает только рабочий контекст, который нужен для решений по `amn2`, будущему hybrid и общему Codex skill. Это не implementation plan и не разрешение на перенос функций.
 
 ## Актуализация после verified live VPS cycle
 
-После этого исходного import-снимка `amn2` прошел первый подтвержденный live VPS cycle. Текущая точка правды:
+После исходного import-снимка `amn2` прошел первый подтвержденный live VPS cycle. Текущая точка правды:
 
 ```text
 repo: C:\Users\SooL\Documents\Amneziya
 branch: codex-vps-test-prep
 latest: 91aeb3e Document VPS verified tag
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
+status: clean, synchronized with origin/codex-vps-test-prep
 ```
 
-Проверено: approve, working config, peer sync, disable/enable и выборочное удаление устройства на Docker AmneziaWG runtime. Более старые блоки ниже, где live retest еще указан как будущая проверка, считать историческим контекстом. Для нового lab-чата использовать `docs/NEXT_CHAT_AFTER_AMN2_VPS_LIVE.ru.md` и `docs/PROJECT_STATUS_CURRENT.ru.md`.
+Проверено: approve, working config, peer sync, disable/enable и выборочное удаление устройства на Docker AmneziaWG runtime. Более старые блоки ниже, где live retest еще указан как будущая проверка, считать историческим контекстом. Для текущей работы использовать `docs/NEXT_CHAT_AFTER_AMN2_VPS_LIVE.ru.md`, `docs/PROJECT_STATUS_CURRENT.ru.md`, `research/amn2/transfer-backlog.md` и `research/amn2/api-readiness-audit-after-live-baseline.md`.
+
+AMN3 / lab:
+
+```text
+repo: C:\Users\SooL\Documents\VPS-OPS-LAB
+branch: master
+remote: https://github.com/barakov-dot/amn3.git
+committed head: a0ccfef Expand secret inventory priority gate
+origin/master: 8212281 Document amn2 live migration to lab
+status: ahead 2, with local uncommitted status/audit/backlog updates
+```
+
+API-readiness audit уже выполнен. Выбран первый безопасный future transfer slice:
+
+```text
+Route/Auth/Operation Policy Matrix for current amn2 surfaces
+```
+
+Это должен быть policy/contract slice без новых production API routes, без secret-readable responses, без write operations и без live VPS calls.
 
 ## Что было прочитано
 
@@ -30,6 +50,8 @@ stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 - `Подготовка запуска на VPS`: первый запуск на живом VPS и handoff в новый чат.
 - архивный ранний чат Amneziya: исходные продуктовые решения по боту, VPS, AmneziaWG 2.0, устройствам и срокам.
 - task/review-сессии 2026-05-31 по Local Amnezia Agent first slice: Task 1-5, spec compliance review, code quality review и финальный review.
+- task/review/worker-сессии 2026-05-31 по Local Agent production wiring: settings, token config builder, runtime adapter, CLI commands, systemd/runbook docs, reviews and PR merge.
+- live VPS transition and API-readiness lab сессии после verified `amn2` cycle.
 
 Локальные проекты:
 
@@ -81,43 +103,48 @@ C:\Users\SooL\Documents\Amneziya
 Git:
 
 ```text
-base branch: codex-vps-test-prep
-local-agent branch: codex/local-agent-first-slice
+branch: codex-vps-test-prep
 origin: https://github.com/barakov-dot/amn2.git
-local-agent latest commit: ac2baa8 Add typed local agent auth errors
-base latest commit: 8ecb0b4 Add configurable client config defaults
+latest commit: 91aeb3e Document VPS verified tag
+stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 ```
 
-Последние новые коммиты в `amn2`:
+Ветка `codex-vps-test-prep` сейчас синхронизирована с `origin/codex-vps-test-prep`, working tree чистый.
 
-- `573c368 Add VPS retest bundle`
-- `8ecb0b4 Add configurable client config defaults`
+Ключевые новые commits/merges после старого handoff:
 
-Сейчас ветка `codex/local-agent-first-slice` синхронизирована с `origin/codex/local-agent-first-slice`.
+- `62ae49e Merge pull request #2 from barakov-dot/codex/config-delivery-artifact-integrity-isolated`
+- `286b5cc Merge pull request #3 from barakov-dot/codex/local-agent-production-wiring`
+- `9d15cbe Polish VPS admin sync behavior`
+- `bfcdd06 Show working server configs`
+- `62e8f1c Show approved configs immediately`
+- `f72eb25 Clarify VPS approve sync checklist`
+- `d6eda20 Document verified VPS live cycle`
+- `91aeb3e Document VPS verified tag`
 
-Local Amnezia Agent first slice уже закоммичен и запушен в stacked branch:
+Local Amnezia Agent first slice и production wiring уже находятся в актуальном production baseline: foundation через PR #2, production wiring через PR #3. Не открывать повторный PR для старых Local Agent branches.
 
-- `3119ee6 Add local Amnezia agent first slice`
-- `ac2baa8 Add typed local agent auth errors`
-
-PR нужно открывать как `codex/local-agent-first-slice` -> `codex-vps-test-prep`, чтобы diff содержал только Local Agent slice.
-
-Последний известный полный прогон тестов из handoff:
+Последняя известная локальная проверка `amn2` после verified baseline:
 
 ```text
-432 passed, 1 warning
+508 passed, 1 warning
 ```
 
 Предупреждение: `StarletteDeprecationWarning` для `httpx` + `starlette.testclient`.
 
-Последний focused/regression прогон Local Agent branch:
+API-readiness audit focused verification:
 
 ```text
-tests/agent tests/server/test_operation_runner.py tests/server/test_checks.py tests/web/test_servers.py -v
-70 passed, 1 warning
+tests/agent
+tests/config/test_settings.py
+tests/server/test_operation_runner.py
+tests/server/test_checks.py
+tests/web/test_cli_web.py
+
+109 passed, 1 warning
 ```
 
-Предупреждение то же: `StarletteDeprecationWarning` из `.codex_deps`.
+Предупреждение то же: `StarletteDeprecationWarning` из `.codex_deps`. В одном запуске после успешного pytest был ignored Windows temp cleanup `PermissionError`; exit code был 0.
 
 ## Продуктовые решения Amneziya / `amn2`
 
@@ -166,16 +193,20 @@ Runtime-решение из ранних документов: предпочт�
 - добавлен `VPS retest bundle`: CLI-команда `python -m app.cli server retest-plan ...` и блок `VPS retest bundle` в карточке сервера с командами повторной проверки;
 - добавлены настраиваемые defaults клиентского AmneziaWG-конфига через `.env`: `CLIENT_DNS`, `CLIENT_ALLOWED_IPS`, `CLIENT_PERSISTENT_KEEPALIVE`, `CLIENT_AWG_JC`, `CLIENT_AWG_JMIN`, `CLIENT_AWG_JMAX`, `CLIENT_AWG_S1`, `CLIENT_AWG_S2`, `CLIENT_AWG_H1`...`CLIENT_AWG_H4`.
 
-Текущий live VPS retest должен проверить:
+Verified live VPS cycle уже подтвердил:
 
-- на VPS установлен последний коммит `8ecb0b4 Add configurable client config defaults`;
-- `server retest-plan` печатает безопасный порядок проверки и не меняет VPS;
-- новый клиент получает следующий IP после live peer из `/opt/amnezia/awg/awg0.conf`;
-- для текущего снимка следующий ожидаемый IP: `10.8.1.3`;
-- `Disable VPN` и `Enable VPN` реально работают на Docker runtime;
-- внешние peer из приложения Amnezia не удаляются, а помечаются как `Созданы в Amnezia`;
-- если `PeerApplyError` повторится, разбирать по строке `Details` и failed audit event.
-- client config defaults из `.env` реально попадают в выдаваемые `.conf`, QR/`vpn://` preview и bot/email delivery без изменения уникальных keys/IP.
+- approve заявки в Telegram создает рабочий peer;
+- клиентский config подключается;
+- web panel показывает working config сразу после approve;
+- `Run peer sync` подтверждает live-состояние;
+- внешние peer, созданные в приложении Amnezia, не удаляются и отображаются отдельно;
+- missing local device можно добавить в AmneziaWG;
+- `Disable VPN` и `Enable VPN` работают;
+- выборочное удаление устройства работает;
+- Docker runtime apply/revoke прошел живую проверку;
+- AmneziaWG 2.0 template/defaults приведены к рабочему формату.
+
+Новый live retest нужен только если меняется apply/revoke/config/sync логика, IP allocation, peer classification, disable/enable/delete или Docker runtime write/restart behavior.
 
 ## `amn2` inventories в lab
 
@@ -271,11 +302,10 @@ Primary verdict:
 
 ## Текущая design queue для `amn2`
 
-Ближайшие кандидаты:
+Ближайшие кандидаты после verified baseline:
 
-- `RemoteOperationRunner`: design готов к review; first slice plan уже есть.
-- `Local Amnezia Agent`: design spec готов; first slice implementation plan подготовлен.
-- `Route Policy Matrix`: нужен как gate для новых endpoints.
+- `Route/Auth/Operation Policy Matrix for current amn2 surfaces`: выбран как первый safe slice после API-readiness audit.
+- `RemoteOperationRunner`: design готов к review; first slice plan уже есть, но после policy matrix.
 - `Scoped API Tokens`: нужен для integration/agent/metrics, но после route policy.
 - `Secret Inventory + Backup Policy`: foundational gate для backup/config/token work.
 - `Public/Self-service Config Delivery`: `.conf`, QR и `vpn://` считать `secret-read`.
@@ -311,25 +341,26 @@ First safe slice по design spec:
 - tests for policy/auth/runtime/API;
 - no configs, QR, `vpn://`, backup, import, reboot, Docker mutation or write operations.
 
-Текущее фактическое состояние first slice в `Amneziya`:
+Текущее фактическое состояние Local Agent в `Amneziya`:
 
-- Task 1 policy matrix: реализован, reviews approved.
-- Task 2 scoped token auth: реализован; code review сначала нашел naive datetime issue, затем fix approved.
-- Task 3 runtime snapshot/fake adapter: реализован, reviews approved.
-- Task 4 protected read-only FastAPI API: реализован, reviews approved.
-- Task 5 docs: `docs/LOCAL_AGENT.ru.md` создан.
-- Финальный review complete slice: approved, без blocking findings.
-- Последний локальный focused test: `33 passed, 1 warning`.
-- Не закоммичено: `app/agent/`, `tests/agent/`, `docs/LOCAL_AGENT.ru.md`.
+- first slice foundation merged into `codex-vps-test-prep` via PR #2;
+- production wiring merged via PR #3;
+- included in baseline `91aeb3e`;
+- disabled by default;
+- default bind `127.0.0.1`;
+- hash-only token settings and CLI helper;
+- read-only runtime/protocol endpoints;
+- LocalCommandRuntimeAdapter for read-only runtime detection;
+- example systemd unit and VPS smoke runbook were created in the production-wiring workstream.
 
-Неблокирующая review-заметка: в `app/agent/api.py` 401/403 сейчас различаются по тексту `AgentAuthError` и слову `scope`; позже лучше заменить на typed auth error reason.
+Историческая review-заметка про brittle 401/403 text matching закрыта typed local agent auth errors.
 
-Открытые вопросы перед implementation:
+Открытые вопросы перед расширением Local Agent:
 
-- agent живет внутри `amn2`, рядом с ним или отдельным пакетом;
-- первый канал controller-agent: localhost, SSH tunnel, private WireGuard network или mTLS;
 - какой runtime state безопасно читать без Docker socket;
 - как минимально детектить AmneziaWG, AmneziaWG 2.0 и Xray.
+- как унифицировать audit sink с production admin actions;
+- как описать clients/configs/backup/reboot как blocked routes до policy gates.
 
 ## Очередь hybrid
 
@@ -369,41 +400,15 @@ First safe slice по design spec:
 
 ## Ближайшие рабочие развилки
 
-Текущий режим coordination: состояние проекта внесено, дальнейшая активная работа временно продолжается в deep-dive чате `VPN Ops Lab - KYORESUAS-API`.
+Текущий режим coordination: AMN3 принял состояние после live VPS stage и выбрал первый безопасный next slice.
 
-Main coordination должен принимать от KYORESUAS/API-чата новые выводы и обновлять:
-
-- `research/upstreams/kyoresuas-amnezia-api*.md`;
-- `ideas/candidates-for-amn2.md`;
-- `ideas/candidates-for-hybrid.md`;
-- `ideas/add-to-skill.md`;
-- решение по Local Amnezia Agent / API surface / install-runtime / auth-secrets.
-
-0. Local Agent first slice уже вынесен в отдельную ветку `codex/local-agent-first-slice` и запушен.
-
-Рекомендованный безопасный git-маршрут из review-чата:
-
-- не использовать старую ветку `codex/local-amnezia-agent-first-slice`, потому что она отстала от `codex-vps-test-prep`;
-- создать свежую ветку от текущего `8ecb0b4`, например `codex/local-agent-first-slice`;
-- stage только `app/agent/`, `tests/agent/`, `docs/LOCAL_AGENT.ru.md`;
-- закоммитить `Add local Amnezia agent first slice`;
-- прогнать `tests/agent`, затем связанные regression tests.
-
-1. Затем стабилизировать live VPS retest в `amn2`.
-
-Это практический путь: подтвердить peer sync, `Созданы в Amnezia`, `Добавить в Amnezia`, выборочное удаление устройства, disable/enable, email verification и Docker runtime behavior.
-
-2. После retest review выбрать, продолжаем ли `RemoteOperationRunner first slice` или расширяем `Local Amnezia Agent`.
-
-RemoteOperationRunner ближе к текущему `amn2` VPS flow. Local Agent ближе к будущему API-first управлению Amnezia. Первый read-only slice Local Agent уже реализован, закоммичен и запушен; дальше нужен PR/review поверх `codex-vps-test-prep`.
-
-3. Для `kyoresuas/amnezia-api` можно продолжить три deep-dive карточки:
-
-- API surface и route policy;
-- install/runtime hardening;
-- auth/secrets.
-
-4. Для coordination-чата держать правило: любая новая идея сначала попадает в очередь с verdict, а не сразу в implementation.
+0. Review `research/amn2/api-readiness-audit-after-live-baseline.md`.
+1. Написать implementation plan для `Route/Auth/Operation Policy Matrix for current amn2 surfaces`.
+2. В plan не включать новые API routes, config delivery endpoints, write operations или live VPS calls.
+3. Только после принятого plan переходить в production branch/worktree.
+4. После production-среза вернуть в AMN3 branch/commit/test evidence.
+5. Для `kyoresuas/amnezia-api` можно продолжить отдельные deep-dive карточки: API surface/route policy, install/runtime hardening, auth/secrets.
+6. Для coordination-чата держать правило: любая новая идея сначала попадает в очередь с verdict, а не сразу в implementation.
 
 ## Источники в workspace
 

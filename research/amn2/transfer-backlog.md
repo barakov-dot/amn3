@@ -31,9 +31,10 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 
 | Item | Статус | Target repo | Текущий artifact | Следующий шаг |
 | --- | --- | --- | --- | --- |
-| API readiness after verified live baseline | `active-lab-design` | AMN3 -> `amn2` later | `docs/NEXT_CHAT_AFTER_AMN2_VPS_LIVE.ru.md` | Сделать audit и выбрать первый safe API/ops slice |
-| Local Amnezia Agent first slice | `pushed-needs-pr` | `amn2` | `codex/local-agent-first-slice`, commits `3119ee6`, `ac2baa8` | Учитывать при API-readiness; PR открывать отдельно при готовности |
-| Local Agent production wiring | `pushed-needs-stacked-pr` | `amn2` | `codex/local-agent-production-wiring`, head `8697b60` | Учитывать как candidate для API/ops boundary |
+| API readiness after verified live baseline | `audit-complete-first-slice-selected` | AMN3 -> `amn2` later | `research/amn2/api-readiness-audit-after-live-baseline.md` | После review написать plan для Route/Auth/Operation Policy Matrix |
+| Main merge roadmap | `active-roadmap` | AMN3 -> `amn2` later | `docs/AMN2_MAIN_MERGE_ROADMAP.ru.md` | Использовать как порядок слияния API, web panel и operations |
+| Local Amnezia Agent first slice | `merged-in-baseline` | `amn2` | merge PR #2, commits `3119ee6`, `ac2baa8` | Использовать как read-only baseline, не расширять до clients/configs без policy gate |
+| Local Agent production wiring | `merged-in-baseline` | `amn2` | merge PR #3, head `8697b60` | Использовать как opt-in local runtime adapter boundary |
 | VPS retest bundle | `verified-live-baseline` | `amn2` | commit `573c368` | Не трогать без изменения VPS apply/sync логики |
 | Config defaults from `.env` | `verified-live-baseline` | `amn2` | commit `8ecb0b4` и последующие fixes | Использовать как текущий config contract |
 | Docker runtime peer apply/revoke | `verified-live-baseline` | `amn2` | `codex-vps-test-prep`, tag `vps-live-cycle-verified` | Использовать как behavior contract |
@@ -66,11 +67,25 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 
 ## Current Priority Order
 
-1. Открыть новый lab-чат по `docs/NEXT_CHAT_AFTER_AMN2_VPS_LIVE.ru.md`.
-2. Сделать API-readiness audit на основе verified `amn2` live behavior.
-3. Выбрать первый safe API/ops slice: read-only Local Agent, controlled write operation, config delivery policy или иной узкий slice.
-4. После выбора написать отдельный implementation plan для `amn2`.
-5. Только потом переходить в production branch/worktree.
+1. Commit текущий AMN3 audit/roadmap state.
+2. Review `docs/AMN2_MAIN_MERGE_ROADMAP.ru.md`.
+3. Подготовить отдельный implementation plan для первого safe slice: `Route/Auth/Operation Policy Matrix for current amn2 surfaces`.
+4. В plan не включать новые API routes, config delivery endpoints, write operations или live VPS calls.
+5. Только после принятого plan переходить в production branch/worktree.
+6. После production-среза вернуть в AMN3 branch/commit/test evidence.
+
+## Neighbor Chat Decision
+
+`VPS OPS LAB - PRVTPRO-Amnezia-Web-Panel`:
+
+- broad research paused;
+- keep as targeted input for web-panel UX, route taxonomy, config delivery integrity and dangerous-action UX;
+- no code/UI/templates/managers/scripts copied because GPL-3.0.
+
+`VPN Ops Lab — KYORESUAS-API`:
+
+- keep active as API/Local-Agent architecture reference;
+- no server install, no implementation copy, no broad CRUD/write API before policy/secret/remote-write gates.
 
 ## Когда нужен новый live retest
 

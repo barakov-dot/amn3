@@ -2,6 +2,17 @@
 
 Здесь фиксируются идеи, которые не обязательно должны попадать в `amn2`, но могут быть полезны для будущего VPN-продукта.
 
+## Из VoltAgent/awesome-design-md
+
+Источник: [research/upstreams/awesome-design-md.md](../research/upstreams/awesome-design-md.md)
+
+### VPS Ops Lab DESIGN.md
+
+- Идея: создать собственный `DESIGN.md` для будущего lab/hybrid UI, используя `awesome-design-md` только как reference library для структуры и сравнения дизайн-подходов.
+- Польза: у проекта появится единый visual/UX contract для operator-first интерфейса: плотные таблицы, ясные статусы, predictable navigation, risk labels, audit-friendly actions и документация как часть продукта.
+- Риски: нельзя копировать узнаваемую визуальную идентичность известных брендов; marketing-site паттерны не должны вытеснить operational/admin ergonomics.
+- Статус: design-needed; лучше вынести в отдельный проектный чат, а главный чат оставить для координации.
+
 ## Из PRVTPRO/Amnezia-Web-Panel
 
 Источник: [research/upstreams/prvtpro-amnezia-web-panel.md](../research/upstreams/prvtpro-amnezia-web-panel.md)

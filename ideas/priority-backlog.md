@@ -192,6 +192,14 @@ Backlog не является списком задач к немедленно�
 - Суть: confirmation text, preview, risk class labels и recovery hints для опасных действий.
 - Польза: оператор видит последствия до выполнения, особенно для remote-exec/destructive операций.
 
+### VPS Ops Lab DESIGN.md
+
+- Цель: lab и будущий hybrid.
+- Статус: `design-needed`.
+- Суть: создать самостоятельный `DESIGN.md` для operator-first VPN панели, используя [VoltAgent/awesome-design-md](../research/upstreams/awesome-design-md.md) как reference-only источник паттернов.
+- Польза: будущие UI-задачи получат единый visual/UX contract: плотность, навигация, таблицы, риск-состояния, secret-read/destructive actions, documentation surfaces.
+- Ограничение: не копировать брендовые DESIGN.md и не делать UI похожим на конкретный известный продукт.
+
 ### Naming cleanup
 
 - Цель: lab.
