@@ -73,6 +73,34 @@ python -m app.cli agent hash-token
 python -m app.cli agent serve
 ```
 
+## Systemd запуск
+
+Шаблон сервиса лежит в `deploy/systemd/amneziya-agent.service.example`.
+Он запускает agent от пользователя `amneziya`, читает `/opt/amn2/.env`,
+биндится только на `127.0.0.1:3031` и не открывает внешний порт.
+
+Базовая установка на сервере:
+
+```bash
+sudo install -m 0644 deploy/systemd/amneziya-agent.service.example /etc/systemd/system/amneziya-agent.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now amneziya-agent
+sudo systemctl status amneziya-agent --no-pager
+```
+
+Для `host_systemd` runtime шаблон дает процессу `CAP_NET_ADMIN`, чтобы read-only
+runtime snapshot мог читать состояние интерфейса. Для Docker runtime сначала
+проверить доступ пользователя `amneziya` к Docker socket и только затем
+раскомментировать `SupplementaryGroups=docker` в service-файле.
+
+После запуска:
+
+```bash
+curl -fsS -H "Authorization: Bearer $LOCAL_AGENT_RAW_TOKEN" http://127.0.0.1:3031/agent/health
+curl -fsS -H "Authorization: Bearer $LOCAL_AGENT_RAW_TOKEN" http://127.0.0.1:3031/agent/runtime
+curl -fsS -H "Authorization: Bearer $LOCAL_AGENT_RAW_TOKEN" http://127.0.0.1:3031/agent/protocols
+```
+
 ## Smoke checklist
 
 1. Скопировать `.env.example` в `.env`.

@@ -1,0 +1,26 @@
+[Unit]
+Description=Amneziya Local Agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=amneziya
+Group=amneziya
+WorkingDirectory=/opt/amn2
+EnvironmentFile=/opt/amn2/.env
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/amn2/venv/bin/python -m app.cli agent serve --host 127.0.0.1 --port 3031
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+CapabilityBoundingSet=CAP_NET_ADMIN
+AmbientCapabilities=CAP_NET_ADMIN
+
+# For Docker runtime, uncomment after adding the amneziya user to docker access:
+# SupplementaryGroups=docker
+
+[Install]
+WantedBy=multi-user.target

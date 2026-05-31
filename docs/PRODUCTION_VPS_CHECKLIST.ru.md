@@ -116,6 +116,9 @@ tunnel до панели. Для короткой проверки по plain HT
 - Первый scope-набор: `agent:health,agent:read,agent:protocols:read`.
 - Проверить локально: `python -m app.cli agent serve`.
 - Проверить routes только с Bearer token: `/agent/health`, `/agent/version`, `/agent/runtime`, `/agent/protocols`.
+- Для постоянного запуска использовать `deploy/systemd/amneziya-agent.service.example`.
+- Service должен слушать только `127.0.0.1:3031`; публично порт не открывать.
+- Для Docker runtime отдельно проверить доступ пользователя `amneziya` к Docker socket перед включением `SupplementaryGroups=docker`.
 - Не добавлять write/config/backup routes без отдельного policy gate.
 
 ## 4. Шаблоны и выдача конфига
