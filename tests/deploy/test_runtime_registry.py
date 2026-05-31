@@ -205,6 +205,33 @@ def test_local_agent_write_plan_separates_local_work_from_vps_gated_work():
     assert "Do not implement write routes before these gates are true." in text
 
 
+def test_amn3_kyoresuas_api_analysis_records_local_candidates_without_code_copying():
+    doc_path = ROOT / "docs/AMN3_KYORESUAS_API_ANALYSIS.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+
+    assert "https://github.com/kyoresuas/amnezia-api" in text
+    assert "Код не копируем" in text
+    assert "MIT" in text
+    assert "Fastify" in text
+    assert "x-api-key" in text
+    assert "AmneziaWG" in text
+    assert "AmneziaWG 2.0" in text
+    assert "Xray" in text
+    assert "GET /clients" in text
+    assert "POST /clients" in text
+    assert "PATCH /clients" in text
+    assert "DELETE /clients" in text
+    assert "GET /server/load" in text
+    assert "backup/import/reboot" in text
+    assert "agent:clients:write" in text
+    assert "dry-run" in text
+    assert "не переносим как есть" in text
+    assert "docs/AMN3_KYORESUAS_API_ANALYSIS.ru.md" in handoff
+
+
 def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     doc_path = ROOT / "docs/VPS_RETEST_PROTOCOL.ru.md"
     checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"
