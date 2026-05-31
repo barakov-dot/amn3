@@ -41,12 +41,12 @@ handoff: docs/NEXT_CHAT_HANDOFF.ru.md
 
 Текущее решение: 2FA для web-admin поставлена на паузу, implementation plan для нее не пишем до отдельного решения.
 
-Текущий фокус после verified VPS cycle и read-only `RemoteOperationRunner` baseline:
+Текущий фокус после verified VPS cycle, read-only `RemoteOperationRunner` baseline и verified redaction coverage first slice:
 
-1. Исполнить [redaction coverage first slice](../../docs/superpowers/plans/2026-05-31-amn2-redaction-coverage-first-slice.md) в изолированной ветке `amn2`.
-2. После focused tests выполнить полный `pytest tests -v`.
-3. Обновить lab-статус до `redaction-coverage-first-slice-verified`.
-4. Затем перейти к partial-failure/rollback contract для state-changing remote operations.
+1. Решить, пушим ли ветку `codex/redaction-coverage-first-slice` в private `amn2` сейчас или оставляем локально до GitHub/PR-процесса.
+2. Подготовить partial-failure/rollback contract для state-changing remote operations.
+3. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
+4. Затем вернуться к route policy coverage tests.
 
 ## Неактуальный риск
 

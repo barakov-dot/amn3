@@ -37,7 +37,8 @@ Backlog не является списком задач к немедленно�
 - Суть: любые SSH/sudo/Docker/firewall операции выполнять через единый runner с dry-run, timeout, redaction, audit и recovery note.
 - Причина: удаленные операции могут сломать VPS, firewall, контейнеры или доступ пользователей.
 - Текущий результат: read-only health slice `RemoteOperationRunner` уже присутствует в текущем `amn2` baseline и проверен focused/full тестами.
-- Следующий шаг: исполнить подготовленный redaction coverage first slice; затем отдельно описать partial-failure/rollback contract.
+- Текущий результат 2026-05-31: redaction coverage first slice выполнен в ветке `codex/redaction-coverage-first-slice`; focused suite `61 passed`, full suite `513 passed`.
+- Следующий шаг: отдельно описать partial-failure/rollback contract.
 
 ### Route/Auth policy matrix
 
@@ -71,7 +72,8 @@ Backlog не является списком задач к немедленно�
 - Суть: единая таблица секретов: где хранятся, где могут утечь, как redacted, rotated, revoked и restored.
 - Причина: без inventory нельзя безопасно проектировать backup, config delivery, scoped tokens, agent и audit.
 - Текущий результат: `research/amn2/secret-surface-inventory.md` расширен до P0-gate для config delivery, backup/import, scoped tokens, Local Agent, SSH/VPS operations, metrics и audit.
-- Следующий шаг: использовать `Redaction coverage plan` как первый implementation gate для `.conf`, QR, `vpn://`, tokens, Local Agent headers и command output.
+- Текущий результат 2026-05-31: `Redaction coverage plan` исполнен как первый implementation gate для `.conf`, QR, `vpn://`, tokens, Local Agent headers и command output.
+- Следующий шаг: использовать verified redaction gate как обязательную предпосылку для partial-failure/rollback и будущих secret-bearing surfaces.
 
 ## P1. Важные рекомендации
 
@@ -210,7 +212,7 @@ Backlog не является списком задач к немедленно�
 ## Ближайшая рекомендуемая очередь
 
 1. Закрыть PR/branch по `Secret-safe config delivery`, когда GitHub-доступ к приватному `amn2` будет настроен.
-2. Исполнить redaction coverage first slice для `.conf`, QR, `vpn://`, tokens, Local Agent headers и command output.
-3. После redaction coverage описать partial-failure/rollback contract для state-changing remote operations.
+2. Описать partial-failure/rollback contract для state-changing remote operations.
+3. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
 4. Позже превратить `Route/Auth Policy Matrix` в machine-checkable route policy coverage tests.
 5. Только после этого возвращаться к self-service links, domain exclusions и 2FA.

@@ -14,11 +14,37 @@
 
 ## Решение
 
-Статус: `redaction-coverage-plan-first-pass`.
+Статус: `redaction-coverage-first-slice-verified`.
 
 Перед расширением `RemoteOperationRunner` на state-changing операции нужно закрыть redaction coverage как P0 gate. Это не новая пользовательская функция, а страховочный слой: он доказывает, что config artifacts, tokens, Local Agent credentials, command output и diagnostics не попадают в logs, audit metadata, error responses, backup/plain exports и debug snapshots.
 
 План не переносит код из внешних проектов. Он использует текущую архитектуру `amn2` и расширяет собственные проверки вокруг уже существующих точек: `app/security/redaction.py`, config delivery, web email flows, peer apply/revoke, runtime diagnostics и hygiene tests.
+
+## Обновление 2026-05-31: first slice verified
+
+Implementation выполнен в isolated worktree:
+
+```text
+branch: codex/redaction-coverage-first-slice
+head: f4bfb51 Document secret-bearing delivery artifacts
+```
+
+Локальные commits в `amn2`:
+
+- `7151336 Expand redaction primitive coverage`
+- `325d52e Add config delivery redaction coverage`
+- `68184a8 Harden config email audit coverage`
+- `36d3b3e Harden remote output redaction coverage`
+- `f4bfb51 Document secret-bearing delivery artifacts`
+
+Проверка:
+
+- focused security/delivery/web/server/runtime suite: `61 passed`, `1 warning`;
+- full suite: `513 passed`, `1 warning`;
+- warning: прежний внешний `StarletteDeprecationWarning` из `fastapi.testclient`;
+- Windows после завершения pytest иногда печатает temp cleanup `PermissionError` для `pytest-current`, но pytest возвращает exit code `0`.
+
+Итог: P0 redaction coverage для `.conf`, QR payload/PNG, `vpn://`, bearer/agent headers, future TOTP/otpauth markers, web/email audit metadata и remote stdout/stderr закрыт первым verified slice. Следующий блок remote safety - partial-failure/rollback contract для state-changing operations.
 
 ## Главный принцип
 
@@ -165,7 +191,6 @@ Redaction coverage считается готовым для переноса в 
 
 ## Следующие рабочие шаги
 
-1. Исполнить implementation plan в изолированной ветке/worktree `amn2`.
-2. После focused tests выполнить полный `pytest tests -v`.
-3. Вернуться в lab и обновить статус этого файла до `redaction-coverage-first-slice-verified`.
-4. Только после этого переходить к partial-failure/rollback contract для state-changing remote operations.
+1. Решить, пушим ли ветку `codex/redaction-coverage-first-slice` в private `amn2` сейчас или оставляем локально до GitHub/PR-процесса.
+2. Подготовить partial-failure/rollback contract для state-changing remote operations.
+3. До live Docker apply/revoke отдельно описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
