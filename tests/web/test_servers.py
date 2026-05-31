@@ -267,6 +267,8 @@ def test_server_sync_run_displays_peer_inventory_report(tmp_path: Path, monkeypa
     assert "amnezia-created-peer" in page.text
     assert "Снять пометку" in page.text
     assert "missing-peer" in page.text
+    assert "Recent server actions" in page.text
+    assert "web_server_peer_sync_run" in page.text
     with _repo(Path(settings.database_path)) as repo:
         action = _latest_admin_action(repo)
         assert action["action"] == "web_server_peer_sync_run"
@@ -426,6 +428,16 @@ def test_add_missing_local_device_returns_redacted_peer_apply_error(
     assert response.status_code == 400
     assert "PeerApplyError: Docker apply failed" in response.text
     assert "secret-psk" not in response.text
+    with _repo(Path(settings.database_path)) as repo:
+        action = _latest_admin_action(repo)
+        metadata = json.loads(action["metadata_json"])
+        assert action["action"] == "web_server_missing_device_add_failed"
+        assert metadata["operation"] == "add_missing_local_device_to_amnezia"
+        assert metadata["server_id"] == server_id
+        assert metadata["device_id"] == device_id
+        assert metadata["error_type"] == "PeerApplyError"
+        assert "Docker apply failed" in metadata["redacted_error"]
+        assert "secret-psk" not in metadata["redacted_error"]
 
 
 def test_remove_unknown_remote_peer_revokes_it_from_amnezia(

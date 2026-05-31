@@ -1,8 +1,13 @@
+import json
+
+import pytest
+
 from app.bot.workflows import BotWorkflow
 from app.db.connection import connect
 from app.db.repositories import Repository
 from app.db.schema import initialize_schema
 from app.security.crypto import SecretBox
+from app.server.peer_apply import PeerApplyError
 from app.services.access import AccessService
 from app.services.traffic import PeerTraffic, TrafficService
 
@@ -235,6 +240,57 @@ def test_approve_order_creates_device_with_selected_config_version(tmp_path):
     assert result.delivery.config_filename == f"amneziya-device-{result.device_id}.conf"
     assert result.delivery.qr_png_bytes.startswith(b"\x89PNG")
     assert "DefaultVPN" in result.delivery.message_text
+
+
+def test_approve_order_records_redacted_vps_failure_audit(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    order_id = repo.create_order(
+        user_id=user_id,
+        plan_id=None,
+        payment_mode="free_test",
+        requested_config_version="amneziawg_v2",
+    )
+    workflow = BotWorkflow(
+        repo=repo,
+        admin_telegram_ids={9001},
+        access_service=AccessService(
+            repo=repo,
+            secret_box=SecretBox.from_app_secret(SECRET),
+            max_devices_per_user=5,
+            duration_days=7,
+            peer_applier=RecordingPeerApplier(
+                error=PeerApplyError("Docker apply failed: PresharedKey = secret-psk")
+            ),
+        ),
+        default_server_id=server_id,
+    )
+
+    with pytest.raises(PeerApplyError):
+        workflow.approve_order(
+            admin_telegram_id=9001,
+            order_id=order_id,
+            config_version="amneziawg_v2",
+        )
+
+    actions = repo.list_admin_actions_for_target_user(user_id)
+    metadata = json.loads(actions[0]["metadata_json"])
+    assert repo.count_active_devices(user_id) == 0
+    assert repo.get_order(order_id)["status"] == "manual_review"
+    assert actions[0]["action"] == "approve_order_vps_failed"
+    assert metadata["operation"] == "approve_order"
+    assert metadata["order_id"] == order_id
+    assert metadata["server_id"] == server_id
+    assert metadata["config_version"] == "amneziawg_v2"
+    assert metadata["error_type"] == "PeerApplyError"
+    assert "Docker apply failed" in metadata["redacted_error"]
+    assert "secret-psk" not in metadata["redacted_error"]
 
 
 def test_approve_order_rejects_non_admin_without_creating_device(tmp_path):

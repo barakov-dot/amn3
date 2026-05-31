@@ -27,7 +27,7 @@ codex-vps-test-prep
 Текущий актуальный коммит:
 
 ```text
-Add web VPS readiness summary
+Log failed VPS operations
 ```
 
 Не начинать отдельный проект с нуля. Новый чат должен открыть эту же папку, проверить ветку и продолжить от текущего состояния.
@@ -72,7 +72,7 @@ cd C:\Users\SooL\Documents\Amneziya
 ## codex-vps-test-prep...origin/codex-vps-test-prep
 ```
 
-В `git log -5` верхний коммит должен иметь сообщение `Add web VPS readiness summary`.
+В `git log -5` верхний коммит должен иметь сообщение `Log failed VPS operations`.
 
 Если ветка не совпадает:
 
@@ -94,7 +94,7 @@ $env:PYTHONPATH='.codex_deps;.'
 Последний результат:
 
 ```text
-423 passed, 1 warning
+424 passed, 1 warning
 ```
 
 Предупреждение ожидаемое:
@@ -118,6 +118,8 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
 - Docker runtime для AmneziaWG: чтение и запись persistent `awg0.conf`, затем `docker restart`.
 - Ошибки `PeerApplyError` в Telegram и web-панели теперь показывают безопасную строку `Details`, очищенную через `redact()`.
 - В карточке сервера добавлен блок `VPS readiness`: `VPS_APPLY_ENABLED`, `SERVER_CONFIG_PATH`, выбранный сервер из `servers.yml`, runtime/container/config_path, последняя health-проверка и текущий peer sync из сессии браузера.
+- Неудачные VPS-операции теперь пишутся в `admin_actions` с action `*_failed`, `error_type` и `redacted_error`; секреты проходят через `redact()`.
+- В карточке сервера добавлен блок `Recent server actions`, где видны последние server-level audit events, включая failed операции.
 - Peer sync в карточке сервера:
   - известные peer панели;
   - peer, созданные в приложении Amnezia и еще не помеченные;
@@ -201,7 +203,7 @@ git log -1 --oneline
 Ожидаемый коммит:
 
 ```text
-Add web VPS readiness summary
+Log failed VPS operations
 ```
 
 Проверить server config:
@@ -239,7 +241,7 @@ tail -n 200 logs/app.log
 
 Порядок проверки:
 
-1. `git log -1 --oneline` показывает коммит `Add web VPS readiness summary`.
+1. `git log -1 --oneline` показывает коммит `Log failed VPS operations`.
 2. Web-панель открывается.
 3. В карточке сервера блок `VPS readiness` показывает:
    - `VPS_APPLY_ENABLED`;
@@ -250,9 +252,10 @@ tail -n 200 logs/app.log
    - последнюю health-проверку.
 4. `Server check` в панели или CLI показывает `OK`/понятный degraded без SSH/backend ошибок.
 5. `Run peer sync` показывает live peers из AmneziaWG, а `VPS readiness` обновляет строку `Peer sync`.
+   Блок `Recent server actions` показывает `web_server_peer_sync_run`.
 6. Создать нового пользователя через бота или web flow.
 7. Одобрить заявку.
-8. Если снова будет `PeerApplyError`, прислать строку `Details`.
+8. Если снова будет `PeerApplyError`, прислать строку `Details` и проверить failed event в истории действий.
 9. Проверить, что новый клиент получил IP после live `AllowedIPs` из `/opt/amnezia/awg/awg0.conf`.
 10. Проверить, что в `awg0.conf` добавился новый `[Peer]`.
 11. Проверить, что после добавления был `docker restart amnezia-awg2`.
@@ -303,7 +306,7 @@ sudo journalctl -u amneziya-bot -n 200 --no-pager
 
 Критично перед следующим стабильным этапом:
 
-1. Пройти VPS retest после коммита `Add web VPS readiness summary`.
+1. Пройти VPS retest после коммита `Log failed VPS operations`.
 2. Подтвердить, что новый IP берется из live `awg0.conf`.
 3. Подтвердить disable/enable на реальном Docker runtime.
 4. Убедиться, что old/local peers из сети `10.8.0.0/24` не мешают новой live-сети `10.8.1.0/24`.

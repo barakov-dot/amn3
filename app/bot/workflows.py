@@ -12,6 +12,8 @@ from app.bot.delivery import (
 from app.bot.ux import render_access_request_created, render_admin_approval, render_user_config_ready
 from app.db.repositories import Repository
 from app.security.crypto import SecretBox
+from app.security.redaction import redact
+from app.server.peer_apply import PeerApplyError
 from app.services.config_delivery import build_device_config_delivery
 from app.services.access import AccessService
 from app.services.traffic import DeviceTrafficView, build_device_traffic_view
@@ -272,13 +274,29 @@ class BotWorkflow:
 
         order = self._repo.get_order(order_id)
         user = self._repo.get_user(int(order["user_id"]))
-        result = self._access_service.approve_order(
-            order_id,
-            self._default_server_id,
-            _default_device_name(order_id),
-            admin_telegram_id=admin_telegram_id,
-            config_version=config_version,
-        )
+        try:
+            result = self._access_service.approve_order(
+                order_id,
+                self._default_server_id,
+                _default_device_name(order_id),
+                admin_telegram_id=admin_telegram_id,
+                config_version=config_version,
+            )
+        except PeerApplyError as exc:
+            self._repo.record_admin_action(
+                admin_telegram_id=admin_telegram_id,
+                action="approve_order_vps_failed",
+                target_user_id=int(user["id"]),
+                metadata={
+                    "operation": "approve_order",
+                    "order_id": order_id,
+                    "server_id": self._default_server_id,
+                    "config_version": config_version,
+                    "error_type": type(exc).__name__,
+                    "redacted_error": redact(str(exc)),
+                },
+            )
+            raise
         template_text = self._repo.get_message_template(
             CONFIG_READY_TEMPLATE_KEY,
             default_text=DEFAULT_CONFIG_READY_TEMPLATE,

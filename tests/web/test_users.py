@@ -1,3 +1,4 @@
+import json
 import re
 from pathlib import Path
 
@@ -387,6 +388,18 @@ def test_disable_user_vpn_returns_redacted_peer_apply_error(
     assert response.status_code == 400
     assert "PeerApplyError: Docker revoke failed" in response.text
     assert "secret-psk" not in response.text
+    with _repo(Path(settings.database_path)) as repo:
+        user = repo.get_user(user_id)
+        devices = repo.list_user_devices_for_admin(user_id)
+        actions = repo.list_admin_actions_for_target_user(user_id)
+        metadata = json.loads(actions[0]["metadata_json"])
+        assert user["status"] == "active"
+        assert sorted(device["status"] for device in devices) == ["active", "revoked"]
+        assert actions[0]["action"] == "web_user_disable_vpn_failed"
+        assert metadata["operation"] == "disable_user_vpn"
+        assert metadata["error_type"] == "PeerApplyError"
+        assert "Docker revoke failed" in metadata["redacted_error"]
+        assert "secret-psk" not in metadata["redacted_error"]
 
 
 def test_enable_user_vpn_reapplies_disabled_device_with_stored_key_and_ip(

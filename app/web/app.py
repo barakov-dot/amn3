@@ -938,7 +938,18 @@ def create_web_app(
             _disable_user_vpn(actual_settings, request, user_id)
         except LookupError:
             return PlainTextResponse("User not found", status_code=404)
-        except (ConfigError, PeerApplyError, ValueError) as exc:
+        except (ConfigError, PeerApplyError) as exc:
+            _record_web_user_vps_failure(
+                actual_settings,
+                request,
+                action="web_user_disable_vpn_failed",
+                target_user_id=user_id,
+                operation="disable_user_vpn",
+                exc=exc,
+                metadata={"user_id": user_id},
+            )
+            return _plain_error_response(exc)
+        except ValueError as exc:
             return _plain_error_response(exc)
 
         return RedirectResponse(f"/users/{user_id}", status_code=303)
@@ -958,7 +969,18 @@ def create_web_app(
             _enable_user_vpn(actual_settings, request, user_id)
         except LookupError:
             return PlainTextResponse("User not found", status_code=404)
-        except (ConfigError, PeerApplyError, ValueError) as exc:
+        except (ConfigError, PeerApplyError) as exc:
+            _record_web_user_vps_failure(
+                actual_settings,
+                request,
+                action="web_user_enable_vpn_failed",
+                target_user_id=user_id,
+                operation="enable_user_vpn",
+                exc=exc,
+                metadata={"user_id": user_id},
+            )
+            return _plain_error_response(exc)
+        except ValueError as exc:
             return _plain_error_response(exc)
 
         return RedirectResponse(f"/users/{user_id}", status_code=303)
@@ -1017,7 +1039,19 @@ def create_web_app(
             _delete_user_device(actual_settings, request, user_id=user_id, device_id=device_id)
         except LookupError:
             return PlainTextResponse("Device not found", status_code=404)
-        except (ConfigError, PeerApplyError, ValueError) as exc:
+        except (ConfigError, PeerApplyError) as exc:
+            _record_web_user_vps_failure(
+                actual_settings,
+                request,
+                action="web_device_delete_failed",
+                target_user_id=user_id,
+                target_device_id=device_id,
+                operation="delete_user_device",
+                exc=exc,
+                metadata={"user_id": user_id, "device_id": device_id},
+            )
+            return _plain_error_response(exc)
+        except ValueError as exc:
             return _plain_error_response(exc)
 
         return RedirectResponse(f"/users/{user_id}", status_code=303)
@@ -1037,7 +1071,18 @@ def create_web_app(
             _destroy_user(actual_settings, request, user_id)
         except LookupError:
             return PlainTextResponse("User not found", status_code=404)
-        except (ConfigError, PeerApplyError, ValueError) as exc:
+        except (ConfigError, PeerApplyError) as exc:
+            _record_web_user_vps_failure(
+                actual_settings,
+                request,
+                action="web_user_destroy_failed",
+                target_user_id=user_id,
+                operation="destroy_user",
+                exc=exc,
+                metadata={"user_id": user_id},
+            )
+            return _plain_error_response(exc)
+        except ValueError as exc:
             return _plain_error_response(exc)
 
         return RedirectResponse("/users", status_code=303)
@@ -1297,7 +1342,18 @@ def create_web_app(
                     )
         except LookupError:
             return PlainTextResponse("Server not found", status_code=404)
-        except (ConfigError, PeerApplyError, ValueError) as exc:
+        except (ConfigError, PeerApplyError) as exc:
+            _record_web_server_vps_failure(
+                actual_settings,
+                request,
+                action="web_server_peer_remove_failed",
+                server_id=server_id,
+                operation="remove_unknown_remote_peer",
+                exc=exc,
+                metadata={"peer_public_key": peer_public_key},
+            )
+            return _plain_error_response(exc)
+        except ValueError as exc:
             return _plain_error_response(exc)
 
         request.session.pop(_peer_sync_session_key(server_id), None)
@@ -1324,7 +1380,18 @@ def create_web_app(
             )
         except LookupError:
             return PlainTextResponse("Device not found", status_code=404)
-        except (ConfigError, PeerApplyError, ValueError) as exc:
+        except (ConfigError, PeerApplyError) as exc:
+            _record_web_server_vps_failure(
+                actual_settings,
+                request,
+                action="web_server_missing_device_add_failed",
+                server_id=server_id,
+                operation="add_missing_local_device_to_amnezia",
+                exc=exc,
+                metadata={"device_id": device_id},
+            )
+            return _plain_error_response(exc)
+        except ValueError as exc:
             return _plain_error_response(exc)
 
         request.session.pop(_peer_sync_session_key(server_id), None)
@@ -1759,11 +1826,16 @@ def _load_server_detail(settings: Settings, server_id: int) -> dict[str, Any]:
     with _open_repository(settings) as (repo, _conn):
         server = _row_to_dict(repo.get_server_for_admin(server_id))
         latest_health = repo.get_latest_server_health(server_id)
+        server_actions = [
+            _row_to_dict(row)
+            for row in repo.list_admin_actions_for_server(server_id, limit=20)
+        ]
     return {
         "server": server,
         "latest_health": (
             _row_to_dict(latest_health) if latest_health is not None else None
         ),
+        "server_actions": server_actions,
     }
 
 
@@ -2463,6 +2535,80 @@ def _record_web_server_action(
         action=action,
         metadata=full_metadata,
     )
+
+
+def _record_web_user_vps_failure(
+    settings: Settings,
+    request: Request,
+    *,
+    action: str,
+    target_user_id: int,
+    operation: str,
+    exc: Exception,
+    metadata: dict[str, Any],
+    target_device_id: int | None = None,
+) -> None:
+    with _open_repository(settings) as (repo, _conn):
+        with repo.transaction():
+            _record_web_user_action(
+                repo,
+                settings,
+                request,
+                action=action,
+                target_user_id=target_user_id,
+                target_device_id=target_device_id,
+                metadata=_failed_vps_metadata(
+                    settings,
+                    operation=operation,
+                    exc=exc,
+                    metadata=metadata,
+                ),
+            )
+
+
+def _record_web_server_vps_failure(
+    settings: Settings,
+    request: Request,
+    *,
+    action: str,
+    server_id: int,
+    operation: str,
+    exc: Exception,
+    metadata: dict[str, Any],
+) -> None:
+    with _open_repository(settings) as (repo, _conn):
+        with repo.transaction():
+            repo.get_server(server_id)
+            _record_web_server_action(
+                repo,
+                settings,
+                request,
+                action=action,
+                server_id=server_id,
+                metadata=_failed_vps_metadata(
+                    settings,
+                    operation=operation,
+                    exc=exc,
+                    metadata=metadata,
+                ),
+            )
+
+
+def _failed_vps_metadata(
+    settings: Settings,
+    *,
+    operation: str,
+    exc: Exception,
+    metadata: dict[str, Any],
+) -> dict[str, Any]:
+    full_metadata = {
+        "operation": operation,
+        "error_type": type(exc).__name__,
+        "redacted_error": redact(str(exc)),
+        "vps_apply_enabled": settings.vps_apply_enabled,
+    }
+    full_metadata.update(metadata)
+    return full_metadata
 
 
 def _record_health_summary(

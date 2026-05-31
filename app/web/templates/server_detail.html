@@ -136,6 +136,40 @@
 
   <section class="panel panel-spaced">
     <div class="panel-header">
+      <h2>Recent server actions</h2>
+    </div>
+    {% if server_actions %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Action</th>
+              <th>Admin</th>
+              <th>Created</th>
+              <th>Metadata</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for action in server_actions %}
+              <tr>
+                <td>#{{ action.id }}</td>
+                <td>{{ action.action }}</td>
+                <td>{{ action.admin_telegram_id }}</td>
+                <td>{{ action.created_at }}</td>
+                <td class="wrap-text">{{ action.metadata_json or "-" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="empty-state">No server actions.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
       <h2>Синхронизация peer</h2>
     </div>
     {% if peer_sync %}

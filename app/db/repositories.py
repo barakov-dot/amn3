@@ -919,6 +919,23 @@ class Repository:
             (target_user_id,),
         ).fetchall()
 
+    def list_admin_actions_for_server(
+        self,
+        server_id: int,
+        *,
+        limit: int = 20,
+    ) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT *
+            FROM admin_actions
+            WHERE metadata_json LIKE ?
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (f'%"server_id": {server_id}%', limit),
+        ).fetchall()
+
     def get_user_for_admin(self, user_id: int) -> sqlite3.Row:
         return self._fetch_one(
             """
