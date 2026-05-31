@@ -45,8 +45,8 @@
 
 - Идея: выдавать VPN-конфиги через несколько каналов: web self-service, public share link, Telegram, API.
 - Польза: гибкий user delivery UX для разных сценариев.
-- Риски: каждый канал становится secret delivery path; нужны expiry, audit, revoke, rate limit и clear warnings.
-- Статус: полезно для гибридного продукта, не для быстрого переноса в `amn2`.
+- Риски: каждый канал становится secret delivery path; нужны expiry, audit, revoke, rate limit, clear warnings и import-level тесты для `.conf`, QR и `vpn://`.
+- Статус: полезно для гибридного продукта, не для быстрого переноса в `amn2`; усилено после [PRVTPRO config delivery integrity](../research/upstreams/prvtpro-amnezia-web-panel-config-delivery-integrity.md).
 
 ### Operator backup/restore
 
@@ -73,7 +73,7 @@
 
 - Идея: описывать каждый протокол через capabilities: install, detect, status, add user, remove user, config export, secret outputs, ports, networks, destructive operations.
 - Польза: гибридный продукт сможет показывать UI и API по возможностям протокола, а не по hardcoded branches.
-- Риски: registry нужно поддерживать синхронно с реальными manager-ами.
+- Риски: registry нужно поддерживать синхронно с реальными manager-ами; config export должен иметь единый result contract, чтобы UI/public share/self-service не зависели от несовместимых signatures.
 - Статус: research после manager architecture deep-dive.
 
 ### Plugin-like protocol managers

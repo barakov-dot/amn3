@@ -48,8 +48,15 @@
 
 - Идея: тестировать `.conf`, QR и `vpn://` links как importable artifacts, а не только как строки, которые успешно сгенерировались.
 - Польза: снижает риск выдать пользователю config, который выглядит корректным в панели, но не импортируется на Android/client side.
-- Риски: нужно поддерживать byte-level encoding tests, non-ASCII names и client-specific import constraints без копирования upstream code.
-- Статус: research candidate после [GitHub watch PRVTPRO](../research/upstreams/prvtpro-amnezia-web-panel-github-watch.md); добавить в `Public/Self-service Config Delivery` test plan.
+- Риски: нужно поддерживать byte-level encoding tests, non-ASCII names, QR decode checks и client-specific import constraints без копирования upstream code.
+- Статус: research candidate после [PRVTPRO config delivery integrity](../research/upstreams/prvtpro-amnezia-web-panel-config-delivery-integrity.md); добавить в `Public/Self-service Config Delivery` test plan.
+
+### Manager config export contract
+
+- Идея: для protocol manager-ов ввести единый `export_config`/`export_artifacts` contract вместо разрозненных `get_client_config` signatures.
+- Польза: снижает риск runtime-ошибок при показе config, public share и self-service выдаче, особенно при добавлении новых протоколов.
+- Риски: нужен capability-based дизайн, чтобы не заставлять все протоколы возвращать одинаковые artifacts, если формат импорта отличается.
+- Статус: research candidate после [PRVTPRO config delivery integrity](../research/upstreams/prvtpro-amnezia-web-panel-config-delivery-integrity.md); связать с manager interface checklist.
 
 ### OpenAPI-группировка по доменам
 
@@ -215,6 +222,7 @@
 - `Secret Inventory + Backup Policy`: redacted backup по умолчанию и encrypted full backup как явный режим.
 - `Public/Self-service Config Delivery`: ownership tests, hashed share tokens, expiry, revoke, audit и `secret-read` handling для `.conf`, QR и `vpn://`.
 - `Config delivery integrity tests`: byte-level QR/config encoding, non-ASCII names, Android/import compatibility и no secret leakage в logs/audit.
+- `Manager config export contract`: единый export/result model для protocol manager-ов, чтобы self-service/share/admin UI не зависели от несовместимых method signatures.
 - `Configurable VPN subnet/IPAM`: CIDR validation, conflict detection, migration story и dry-run/audit перед изменением live server.
 - `Config delivery policy table`: actor, gate, risk class, output, audit и tests для текущих и будущих config delivery flows.
 - `Web-admin 2FA`: поставлена на паузу решением от 2026-05-30; inventories сохраняем как контекст, но implementation plan не пишем без отдельного решения: [`amn2` decision log](../research/amn2/decisions.md).

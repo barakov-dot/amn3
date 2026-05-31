@@ -48,6 +48,7 @@ Docker-сценарий простой: официальный образ `prvtp
 - Ролевые пользователи панели: admin, support, regular user.
 - Self-service endpoints для обычного пользователя, отделенные от admin API.
 - Public sharing через token-protected links без доступа к панели.
+- Config delivery integrity: `.conf`, QR и `vpn://` нужно рассматривать как разные `secret-read` artifacts с отдельными byte-level/import tests.
 - JSON backup/restore как минимальный disaster-recovery механизм для небольшой панели.
 - Live ping indicator и параллельная проверка статусов протоколов, чтобы UI не зависал на медленных endpoint-ах.
 - Группировка OpenAPI-документации по доменам: Authentication, Servers, Protocols, Connections, Users, Settings, API Tokens.
@@ -82,6 +83,8 @@ Docker-сценарий простой: официальный образ `prvtp
 - `SECRET_KEY` берется из environment или генерируется на старте. Для production важно запрещать ephemeral secret без явной конфигурации.
 - Локальное JSON-хранилище удобно для старта, но требует осторожной оценки на backup, concurrency, corruption recovery и масштабирование.
 - Управление через SSH и sudo-скрипты имеет высокий operational-риск: нужны dry-run, audit log, least privilege и rollback-подход.
+- GitHub issues #41 и #51 показывают риск QR/Android import regressions, поэтому config delivery нельзя проверять только по факту генерации строки или картинки.
+- GitHub issue #49 показывает риск несовместимых manager method signatures при выдаче config; для `amn2` нужен единый manager export contract.
 - Dockerfile использует `python:3.14-slim`, а README заявляет prerequisites Python 3.10+. Это стоит проверить отдельно как consistency risk.
 - В requirements одновременно есть FastAPI и Flask/Werkzeug. Возможно, это legacy-зависимости или смешанный стек, нужно проверить перед выводами о чистоте архитектуры.
 - README не показывает тестовый контур. Для production-переноса в `amn2` любая идея должна получить отдельный тест-план.
@@ -103,7 +106,8 @@ Docker-сценарий простой: официальный образ `prvtp
 - Manager/SSH/protocol architecture deep-dive выполнен: [prvtpro-amnezia-web-panel-manager-architecture.md](prvtpro-amnezia-web-panel-manager-architecture.md).
 - Feature gap и очередь решений выполнены: [prvtpro-amnezia-web-panel-feature-gap.md](prvtpro-amnezia-web-panel-feature-gap.md).
 - GitHub watch и repository assembly начаты: [prvtpro-amnezia-web-panel-github-watch.md](prvtpro-amnezia-web-panel-github-watch.md).
-- Следующий шаг: выбрать один `candidate-for-amn2-review` и открыть отдельный design spec уже с контекстом текущего `amn2`.
+- Config delivery integrity deep-dive выполнен: [prvtpro-amnezia-web-panel-config-delivery-integrity.md](prvtpro-amnezia-web-panel-config-delivery-integrity.md).
+- Следующий шаг: расширить `Public/Self-service Config Delivery` test plan для `amn2` с учетом `.conf`, QR, `vpn://` и manager export contract.
 
 ## Источники
 
@@ -114,6 +118,7 @@ Docker-сценарий простой: официальный образ `prvtp
 - `requirements.txt`: https://github.com/PRVTPRO/Amnezia-Web-Panel/blob/main/requirements.txt
 - `docker-compose.yml`: https://github.com/PRVTPRO/Amnezia-Web-Panel/blob/main/docker-compose.yml
 - `Dockerfile`: https://github.com/PRVTPRO/Amnezia-Web-Panel/blob/main/Dockerfile
+- GitHub issues #41, #49, #51: https://github.com/PRVTPRO/Amnezia-Web-Panel/issues
 
 ## Deep-dive материалы
 
@@ -122,3 +127,4 @@ Docker-сценарий простой: официальный образ `prvtp
 - [Manager architecture](prvtpro-amnezia-web-panel-manager-architecture.md)
 - [Feature gap для `amn2` и гибрида](prvtpro-amnezia-web-panel-feature-gap.md)
 - [GitHub watch и repository assembly](prvtpro-amnezia-web-panel-github-watch.md)
+- [Config delivery integrity](prvtpro-amnezia-web-panel-config-delivery-integrity.md)

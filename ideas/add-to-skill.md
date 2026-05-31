@@ -108,7 +108,23 @@
 - что происходит при повторном использовании one-time link;
 - есть ли revoke, rate limit и audit;
 - попадают ли config body, QR payload или token в logs/errors/backup;
-- есть ли public-safe read models без private keys и pre-shared keys.
+- есть ли public-safe read models без private keys и pre-shared keys;
+- разделены ли artifact types: raw `.conf`, import URI, QR payload, downloadable file;
+- ясно ли, для какого target client генерируется QR и что именно в нем закодировано;
+- есть ли byte-level tests для UTF-8, non-ASCII names и QR decode round-trip;
+- проверяется ли `vpn://` как обратимо secret-bearing artifact, а не как обычная ссылка;
+- есть ли единый manager export contract для всех protocol manager-ов;
+- возвращают ли public/self-service endpoints sanitized errors без внутренних signatures, paths, command output и config fragments.
+
+## Config delivery integrity signals
+
+Если open issues upstream показывают, что QR не импортируется на Android, `.conf` ломается на non-ASCII name или manager падает на `get_client_config` signature mismatch, это фиксировать не как единичный баг, а как требование к test plan:
+
+- QR должен декодироваться в тесте и совпадать с ожидаемым payload;
+- `.conf` и import URI должны проходить round-trip без потери UTF-8 bytes;
+- все protocol manager-ы должны проходить contract tests на config export;
+- UI должен различать `.conf`, import URI и QR для конкретного target client;
+- issue/PR выводы пересказывать кратко и со ссылкой, без копирования secret-bearing logs/configs.
 
 ## Permissions/auth/2FA checklist для VPN/control-panel upstream
 
