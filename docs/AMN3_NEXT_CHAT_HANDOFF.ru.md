@@ -108,6 +108,8 @@ git status --short --branch
 4. Зафиксировать результат smoke в docs или commit message.
 5. После успешного smoke начинать первый write API slice.
 
+План первого write API slice: `docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md`.
+
 ## 7. Правила write API
 
 Write API делаем только после зеленого read-only smoke.

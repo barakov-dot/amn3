@@ -180,6 +180,7 @@ def test_amn3_next_chat_handoff_points_to_current_integration_docs():
     assert "fdc471a" in text
     assert "docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md" in text
     assert "docs/LOCAL_AGENT_VPS_SMOKE_RUNBOOK.ru.md" in text
+    assert "docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md" in text
     assert "git status --short --branch" in text
     assert "git log -5 --oneline --decorate" in text
     assert "python -m pytest tests/deploy/test_runtime_registry.py" in text
