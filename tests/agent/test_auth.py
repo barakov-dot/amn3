@@ -82,12 +82,13 @@ def test_authenticate_agent_token_rejects_missing_or_unknown_raw_token(raw_token
         scopes=frozenset({"agent:health"}),
     )
 
-    with pytest.raises(AgentAuthError, match="Invalid agent token"):
+    with pytest.raises(AgentAuthError, match="Invalid agent token") as exc_info:
         authenticate_agent_token(
             raw_token,
             tokens=(agent_token,),
             required_scope="agent:health",
         )
+    assert exc_info.value.reason == "invalid_token"
 
 
 def test_authenticate_agent_token_rejects_insufficient_scope():
@@ -97,12 +98,13 @@ def test_authenticate_agent_token_rejects_insufficient_scope():
         scopes=frozenset({"agent:read"}),
     )
 
-    with pytest.raises(AgentAuthError, match="Missing required scope"):
+    with pytest.raises(AgentAuthError, match="Missing required scope") as exc_info:
         authenticate_agent_token(
             "raw-agent-token",
             tokens=(agent_token,),
             required_scope="agent:health",
         )
+    assert exc_info.value.reason == "missing_scope"
 
 
 def test_authenticate_agent_token_rejects_expired_token():
@@ -114,13 +116,14 @@ def test_authenticate_agent_token_rejects_expired_token():
         expires_at=now - timedelta(seconds=1),
     )
 
-    with pytest.raises(AgentAuthError, match="expired"):
+    with pytest.raises(AgentAuthError, match="expired") as exc_info:
         authenticate_agent_token(
             "raw-agent-token",
             tokens=(agent_token,),
             required_scope="agent:health",
             now=now,
         )
+    assert exc_info.value.reason == "expired_token"
 
 
 def test_authenticate_agent_token_rejects_revoked_token():
@@ -132,10 +135,11 @@ def test_authenticate_agent_token_rejects_revoked_token():
         revoked_at=now - timedelta(seconds=1),
     )
 
-    with pytest.raises(AgentAuthError, match="revoked"):
+    with pytest.raises(AgentAuthError, match="revoked") as exc_info:
         authenticate_agent_token(
             "raw-agent-token",
             tokens=(agent_token,),
             required_scope="agent:health",
             now=now,
         )
+    assert exc_info.value.reason == "revoked_token"

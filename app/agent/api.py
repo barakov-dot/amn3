@@ -32,7 +32,7 @@ def create_agent_app(
             except AgentAuthError as exc:
                 status_code = (
                     status.HTTP_403_FORBIDDEN
-                    if "scope" in str(exc).lower()
+                    if exc.reason == "missing_scope"
                     else status.HTTP_401_UNAUTHORIZED
                 )
                 raise HTTPException(status_code=status_code, detail=str(exc)) from exc

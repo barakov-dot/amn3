@@ -4,11 +4,21 @@ import hashlib
 import secrets
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Sequence
+from typing import Literal, Sequence
+
+
+AgentAuthReason = Literal[
+    "invalid_token",
+    "revoked_token",
+    "expired_token",
+    "missing_scope",
+]
 
 
 class AgentAuthError(ValueError):
-    pass
+    def __init__(self, message: str, *, reason: AgentAuthReason) -> None:
+        super().__init__(message)
+        self.reason = reason
 
 
 @dataclass(frozen=True)
@@ -34,7 +44,7 @@ def authenticate_agent_token(
     now: datetime | None = None,
 ) -> AgentToken:
     if not raw_token:
-        raise AgentAuthError("Invalid agent token")
+        raise AgentAuthError("Invalid agent token", reason="invalid_token")
 
     raw_token_hash = hash_agent_token(raw_token)
     for token in tokens:
@@ -42,18 +52,21 @@ def authenticate_agent_token(
             continue
 
         if token.revoked_at is not None:
-            raise AgentAuthError("Agent token is revoked")
+            raise AgentAuthError("Agent token is revoked", reason="revoked_token")
 
         current_time = _as_utc(now or datetime.now(timezone.utc))
         if token.expires_at is not None and _as_utc(token.expires_at) <= current_time:
-            raise AgentAuthError("Agent token is expired")
+            raise AgentAuthError("Agent token is expired", reason="expired_token")
 
         if required_scope not in token.scopes:
-            raise AgentAuthError(f"Missing required scope: {required_scope}")
+            raise AgentAuthError(
+                f"Missing required scope: {required_scope}",
+                reason="missing_scope",
+            )
 
         return token
 
-    raise AgentAuthError("Invalid agent token")
+    raise AgentAuthError("Invalid agent token", reason="invalid_token")
 
 
 def _as_utc(value: datetime) -> datetime:
