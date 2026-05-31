@@ -221,13 +221,16 @@ def test_handle_user_revoke_device_confirm_reports_server_remove_error():
     )
     workflow = FakeWorkflow(
         admin_ids={9001},
-        revoke_error=PeerApplyError("revoke failed secret-psk"),
+        revoke_error=PeerApplyError(
+            "Docker revoke failed: PresharedKey = secret-psk"
+        ),
     )
 
     asyncio.run(handle_user_revoke_device_confirm(callback, workflow=workflow))
 
     assert workflow.revoked_devices == [7]
     assert "failed" in callback.message.answers[0]["text"]
+    assert "Details: Docker revoke failed" in callback.message.answers[0]["text"]
     assert "revoke-peer --dry-run" in callback.message.answers[0]["text"]
     assert "secret-psk" not in callback.message.answers[0]["text"]
     assert callback.answered is True
@@ -307,13 +310,16 @@ def test_handle_user_reset_devices_confirm_reports_server_remove_error():
     )
     workflow = FakeWorkflow(
         admin_ids={9001},
-        revoke_error=PeerApplyError("reset failed secret-psk"),
+        revoke_error=PeerApplyError(
+            "Docker reset failed: PresharedKey = secret-psk"
+        ),
     )
 
     asyncio.run(handle_user_reset_devices_confirm(callback, workflow=workflow))
 
     assert workflow.reset_requests == [1001]
     assert "failed" in callback.message.answers[0]["text"]
+    assert "Details: Docker reset failed" in callback.message.answers[0]["text"]
     assert "revoke-peer --dry-run" in callback.message.answers[0]["text"]
     assert "secret-psk" not in callback.message.answers[0]["text"]
     assert callback.answered is True
@@ -499,12 +505,18 @@ def test_handle_admin_approve_reports_apply_error_without_sending_config():
         username="admin",
         first_name="Admin",
     )
-    workflow = FakeWorkflow(admin_ids={9001}, approval_error=PeerApplyError("failed secret-psk"))
+    workflow = FakeWorkflow(
+        admin_ids={9001},
+        approval_error=PeerApplyError(
+            "Docker config read failed: PresharedKey = secret-psk"
+        ),
+    )
 
     asyncio.run(handle_admin_approve(callback, workflow=workflow))
 
     assert workflow.approvals == [(11, "amneziawg_v1_5")]
     assert "failed" in callback.message.answers[0]["text"]
+    assert "Details: Docker config read failed" in callback.message.answers[0]["text"]
     assert "server check" in callback.message.answers[0]["text"]
     assert "apply-peer --dry-run" in callback.message.answers[0]["text"]
     assert "secret-psk" not in callback.message.answers[0]["text"]

@@ -40,6 +40,7 @@ from app.bot.ux import (
     render_start_text,
     render_user_traffic,
 )
+from app.security.redaction import redact
 from app.server.peer_apply import PeerApplyError
 
 
@@ -178,9 +179,14 @@ async def handle_user_revoke_device_confirm(callback, *, workflow) -> None:
         )
     except PeerApplyError as exc:
         await callback.message.answer(
-            "VPS peer revoke failed. Device was not removed in the bot.\n"
-            f"Error type: {type(exc).__name__}\n"
-            "Next checks: run server check, then revoke-peer --dry-run for this peer."
+            _peer_apply_failure_message(
+                headline="VPS peer revoke failed. Device was not removed in the bot.",
+                exc=exc,
+                next_checks=(
+                    "Next checks: run server check, then revoke-peer --dry-run "
+                    "for this peer."
+                ),
+            )
         )
         return
 
@@ -207,9 +213,14 @@ async def handle_user_reset_devices_confirm(callback, *, workflow) -> None:
         changed = workflow.reset_user_devices(telegram_id=int(callback.from_user.id))
     except PeerApplyError as exc:
         await callback.message.answer(
-            "VPS peer revoke failed. Devices were not removed in the bot.\n"
-            f"Error type: {type(exc).__name__}\n"
-            "Next checks: run server check, then revoke-peer --dry-run for affected peers."
+            _peer_apply_failure_message(
+                headline="VPS peer revoke failed. Devices were not removed in the bot.",
+                exc=exc,
+                next_checks=(
+                    "Next checks: run server check, then revoke-peer --dry-run "
+                    "for affected peers."
+                ),
+            )
         )
         return
     await callback.message.answer(
@@ -267,9 +278,14 @@ async def handle_admin_approve(callback, *, workflow) -> None:
         )
     except PeerApplyError as exc:
         await callback.message.answer(
-            "VPS peer apply failed. Config was not sent to the user.\n"
-            f"Error type: {type(exc).__name__}\n"
-            "Next checks: run server check, then apply-peer --dry-run for a test peer."
+            _peer_apply_failure_message(
+                headline="VPS peer apply failed. Config was not sent to the user.",
+                exc=exc,
+                next_checks=(
+                    "Next checks: run server check, then apply-peer --dry-run "
+                    "for a test peer."
+                ),
+            )
         )
         return
     if result is None:
@@ -498,6 +514,21 @@ def _parse_int_suffix(data: str, prefix: str) -> int | None:
         return int(data.removeprefix(marker))
     except ValueError:
         return None
+
+
+def _peer_apply_failure_message(
+    *,
+    headline: str,
+    exc: PeerApplyError,
+    next_checks: str,
+) -> str:
+    details = redact(str(exc)).strip() or "<empty>"
+    return (
+        f"{headline}\n"
+        f"Error type: {type(exc).__name__}\n"
+        f"Details: {details}\n"
+        f"{next_checks}"
+    )
 
 
 def _parse_plan_callback(data: str) -> tuple[str, str] | None:

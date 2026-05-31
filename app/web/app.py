@@ -360,7 +360,7 @@ def create_web_app(
                 actual_settings.client_config_template_dir,
             )
         except ConfigTemplateError as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
         return RedirectResponse("/config-templates", status_code=303)
 
     @app.post("/config-templates/{config_version}/reset")
@@ -379,7 +379,7 @@ def create_web_app(
                 actual_settings.client_config_template_dir,
             )
         except ConfigTemplateError as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
         return RedirectResponse("/config-templates", status_code=303)
 
     @app.get("/users")
@@ -457,7 +457,7 @@ def create_web_app(
                         metadata={"telegram_id": telegram_id},
                     )
         except (sqlite3.IntegrityError, ValueError) as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         return RedirectResponse(f"/users/{user_id}", status_code=303)
 
@@ -526,7 +526,7 @@ def create_web_app(
         except LookupError:
             return PlainTextResponse("User not found", status_code=404)
         except ValueError as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         return RedirectResponse(f"/users/{user_id}", status_code=303)
 
@@ -644,7 +644,7 @@ def create_web_app(
         except LookupError:
             return PlainTextResponse("User not found", status_code=404)
         except ValueError as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         return RedirectResponse(f"/users/{user_id}", status_code=303)
 
@@ -700,7 +700,7 @@ def create_web_app(
         except LookupError:
             return PlainTextResponse("User not found", status_code=404)
         except ValueError as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         return RedirectResponse(f"/users/{user_id}", status_code=303)
 
@@ -871,7 +871,7 @@ def create_web_app(
         except LookupError:
             return PlainTextResponse("User not found", status_code=404)
         except (sqlite3.IntegrityError, ValueError) as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         return RedirectResponse(f"/users/{user_id}", status_code=303)
 
@@ -939,7 +939,7 @@ def create_web_app(
         except LookupError:
             return PlainTextResponse("User not found", status_code=404)
         except (ConfigError, PeerApplyError, ValueError) as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         return RedirectResponse(f"/users/{user_id}", status_code=303)
 
@@ -959,7 +959,7 @@ def create_web_app(
         except LookupError:
             return PlainTextResponse("User not found", status_code=404)
         except (ConfigError, PeerApplyError, ValueError) as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         return RedirectResponse(f"/users/{user_id}", status_code=303)
 
@@ -986,7 +986,7 @@ def create_web_app(
         except LookupError:
             return PlainTextResponse("Device not found", status_code=404)
         except ValueError as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         return templates.TemplateResponse(
             request,
@@ -1018,7 +1018,7 @@ def create_web_app(
         except LookupError:
             return PlainTextResponse("Device not found", status_code=404)
         except (ConfigError, PeerApplyError, ValueError) as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         return RedirectResponse(f"/users/{user_id}", status_code=303)
 
@@ -1038,7 +1038,7 @@ def create_web_app(
         except LookupError:
             return PlainTextResponse("User not found", status_code=404)
         except (ConfigError, PeerApplyError, ValueError) as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         return RedirectResponse("/users", status_code=303)
 
@@ -1127,7 +1127,7 @@ def create_web_app(
                         metadata={"name": payload["name"]},
                     )
         except (sqlite3.IntegrityError, ValueError) as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         return RedirectResponse(f"/servers/{server_id}", status_code=303)
 
@@ -1291,7 +1291,7 @@ def create_web_app(
         except LookupError:
             return PlainTextResponse("Server not found", status_code=404)
         except (ConfigError, PeerApplyError, ValueError) as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         request.session.pop(_peer_sync_session_key(server_id), None)
         return RedirectResponse(f"/servers/{server_id}", status_code=303)
@@ -1318,7 +1318,7 @@ def create_web_app(
         except LookupError:
             return PlainTextResponse("Device not found", status_code=404)
         except (ConfigError, PeerApplyError, ValueError) as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         request.session.pop(_peer_sync_session_key(server_id), None)
         return RedirectResponse(f"/servers/{server_id}", status_code=303)
@@ -1403,7 +1403,7 @@ def create_web_app(
         except LookupError:
             return PlainTextResponse("Server not found", status_code=404)
         except (sqlite3.IntegrityError, ValueError) as exc:
-            return PlainTextResponse(str(exc), status_code=400)
+            return _plain_error_response(exc)
 
         return RedirectResponse(f"/servers/{server_id}", status_code=303)
 
@@ -1520,6 +1520,13 @@ def _template_context(request: Request, **context: Any) -> dict[str, Any]:
     }
     base_context.update(context)
     return base_context
+
+
+def _plain_error_response(exc: Exception, *, status_code: int = 400) -> PlainTextResponse:
+    detail = redact(str(exc)).strip() or type(exc).__name__
+    if isinstance(exc, PeerApplyError):
+        detail = f"{type(exc).__name__}: {detail}"
+    return PlainTextResponse(detail, status_code=status_code)
 
 
 @contextmanager

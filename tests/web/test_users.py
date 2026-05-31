@@ -9,6 +9,7 @@ from app.db.connection import connect
 from app.db.repositories import Repository
 from app.db.schema import initialize_schema
 from app.security.crypto import SecretBox
+from app.server.peer_apply import PeerApplyError
 from app.web.app import create_web_app
 from app.web.auth import create_password_hash
 
@@ -344,6 +345,48 @@ def test_disable_user_vpn_requires_live_apply_for_active_devices(tmp_path: Path)
         devices = repo.list_user_devices_for_admin(user_id)
         assert user["status"] == "active"
         assert sorted(device["status"] for device in devices) == ["active", "revoked"]
+
+
+def test_disable_user_vpn_returns_redacted_peer_apply_error(
+    tmp_path: Path,
+    monkeypatch,
+):
+    class FailingPeerApplier:
+        def __init__(self, server, *, password=None):
+            self._server = server
+
+        def remove_peer(self, *, server, peer_public_key: str) -> None:
+            raise PeerApplyError(
+                "Docker revoke failed: PresharedKey = secret-psk"
+            )
+
+    monkeypatch.setattr(web_app, "ServerConfigPeerApplier", FailingPeerApplier)
+    server_config_path = _write_server_config(tmp_path, server_name="local")
+    settings = _settings(
+        tmp_path,
+        vps_apply_enabled=True,
+        server_config_path=server_config_path,
+    )
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=6236,
+        username="redacted-error",
+        first_name="Redacted",
+        last_name=None,
+    )
+    _seed_devices(Path(settings.database_path), user_id=user_id)
+    client = _authenticated_client(settings)
+
+    detail = client.get(f"/users/{user_id}")
+    response = client.post(
+        f"/users/{user_id}/disable-vpn",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 400
+    assert "PeerApplyError: Docker revoke failed" in response.text
+    assert "secret-psk" not in response.text
 
 
 def test_enable_user_vpn_reapplies_disabled_device_with_stored_key_and_ip(

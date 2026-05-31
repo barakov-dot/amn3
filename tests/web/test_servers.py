@@ -10,6 +10,7 @@ from app.db.connection import connect
 from app.db.repositories import Repository
 from app.db.schema import initialize_schema
 from app.security.crypto import SecretBox
+from app.server.peer_apply import PeerApplyError
 from app.web.app import create_web_app
 from app.web.auth import create_password_hash
 
@@ -330,6 +331,60 @@ def test_add_missing_local_device_to_amnezia_applies_stored_peer(
         action = _latest_admin_action(repo)
         assert action["action"] == "web_server_missing_device_add"
         assert '"device_id": ' + str(device_id) in action["metadata_json"]
+
+
+def test_add_missing_local_device_returns_redacted_peer_apply_error(
+    tmp_path: Path,
+    monkeypatch,
+):
+    class FailingPeerApplier:
+        def __init__(self, server, *, password=None):
+            self._server = server
+
+        def apply_peer(
+            self,
+            *,
+            server,
+            peer_public_key: str,
+            preshared_key: str,
+            vpn_ip: str,
+        ) -> None:
+            raise PeerApplyError(
+                "Docker apply failed: PresharedKey = secret-psk"
+            )
+
+    monkeypatch.setattr(web_app, "ServerConfigPeerApplier", FailingPeerApplier)
+    server_config_path = _write_server_config(tmp_path, server_name="local")
+    settings = _settings(
+        tmp_path,
+        server_config_path=server_config_path,
+        vps_apply_enabled=True,
+    )
+    with _repo(Path(settings.database_path)) as repo:
+        user_id = _seed_user(repo)
+        server_id = _seed_server(repo, name="local")
+        device_id = _seed_device(
+            repo,
+            user_id=user_id,
+            server_id=server_id,
+            status="active",
+            vpn_ip="10.44.0.22",
+            peer_public_key="missing-peer",
+            preshared_key="stored-psk",
+            encrypted=True,
+        )
+    client = _authenticated_client(settings)
+    detail = client.get(f"/servers/{server_id}")
+
+    response = client.post(
+        f"/servers/{server_id}/missing-devices/{device_id}/add",
+        data={"csrf_token": _csrf_token(detail.text)},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 400
+    assert "PeerApplyError: Docker apply failed" in response.text
+    assert "secret-psk" not in response.text
 
 
 def test_remove_unknown_remote_peer_revokes_it_from_amnezia(
