@@ -69,7 +69,7 @@ Runtime registry docs:
 
 ```text
 tests\deploy\test_runtime_registry.py
-result: 7 passed, 1 PytestCacheWarning on Windows cache write
+result: 7 passed
 ```
 
 Full local suite:
