@@ -44,6 +44,46 @@ def test_render_client_config_contains_expected_fields():
     assert "H4 = 4" in config
 
 
+def test_render_client_config_contains_full_amneziawg_v2_fields():
+    config = render_client_config(
+        ClientConfigInput(
+            private_key="client-private",
+            address="10.8.1.2/32",
+            dns="8.8.8.8, 8.8.4.4",
+            server_public_key="server-public",
+            preshared_key="psk",
+            endpoint="backup.smart-finance.ru:37661",
+            allowed_ips="0.0.0.0/0, ::/0",
+            persistent_keepalive=25,
+            jc=4,
+            jmin=10,
+            jmax=50,
+            s1=19,
+            s2=90,
+            s3=45,
+            s4=17,
+            h1="1622123045-2053868572",
+            h2="2065609453-2121973747",
+            h3="2144678566-2147363193",
+            h4="2147478675-2147482564",
+            i1="<r 2><b 0x858000010001000000000669636c6f756403636f6d0000010001c00c000100010000105a00044d583737>",
+            i2="",
+            i3="",
+            i4="",
+            i5="",
+        )
+    )
+
+    assert "Address = 10.8.1.2/32" in config
+    assert "DNS = 8.8.8.8, 8.8.4.4" in config
+    assert "S3 = 45" in config
+    assert "S4 = 17" in config
+    assert "I1 = <r 2><b 0x858000010001000000000669636c6f756403636f6d0000010001c00c000100010000105a00044d583737>" in config
+    assert "I2 = " in config
+    assert "I5 = " in config
+    assert "AllowedIPs = 0.0.0.0/0, ::/0" in config
+
+
 def test_generate_key_returns_base64_encoded_32_byte_secret():
     key = generate_key()
 

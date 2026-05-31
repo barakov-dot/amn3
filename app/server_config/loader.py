@@ -1,3 +1,4 @@
+import ipaddress
 from pathlib import Path
 from typing import Any
 
@@ -62,7 +63,7 @@ def _parse_server(item: Any) -> ServerConfig:
             endpoint_host=str(_required(vpn, "endpoint_host")),
             port=_parse_port(_required(vpn, "port")),
             interface=str(_required(vpn, "interface")),
-            network_cidr=str(_required(vpn, "network_cidr")),
+            network_cidr=_effective_network_cidr(vpn),
             server_address=str(_required(vpn, "server_address")),
             dns=str(_required(vpn, "dns")),
             allowed_ips=str(_required(vpn, "allowed_ips")),
@@ -85,6 +86,20 @@ def _parse_port(value: Any) -> int | str:
     if value == "auto":
         return "auto"
     return int(value)
+
+
+def _effective_network_cidr(vpn: dict[str, Any]) -> str:
+    configured_network = str(_required(vpn, "network_cidr"))
+    server_address = str(_required(vpn, "server_address"))
+    if "/" not in server_address:
+        return configured_network
+    try:
+        interface = ipaddress.ip_interface(server_address)
+    except ValueError:
+        return configured_network
+    if interface.network.prefixlen == interface.max_prefixlen:
+        return configured_network
+    return str(interface.network)
 
 
 def _parse_runtime(runtime: dict[str, Any]) -> RuntimeConfig:

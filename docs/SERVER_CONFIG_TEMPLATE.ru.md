@@ -40,8 +40,8 @@ servers:
       interface: "awg0"
       network_cidr: "10.8.0.0/24"
       server_address: "10.8.0.1/24"
-      dns: "1.1.1.1"
-      allowed_ips: "0.0.0.0/0"
+      dns: "8.8.8.8, 8.8.4.4"
+      allowed_ips: "0.0.0.0/0, ::/0"
       server_public_key: "CHANGE_ME_AWG_SERVER_PUBLIC_KEY"
       max_devices: 254
 
@@ -73,6 +73,10 @@ servers:
 
 Пулы разных серверов не должны пересекаться.
 
+Если `server_address` указан с CIDR-префиксом, например `10.8.1.1/24`,
+приложение считает фактической сетью `10.8.1.0/24`. `network_cidr` лучше
+держать таким же, чтобы конфиг читался однозначно.
+
 ## Расширение пула
 
 Если на одном сервере ожидается больше 255 устройств, нужно заранее выбрать более крупную сеть.
@@ -97,18 +101,25 @@ ACCESS_MODE=free_test
 FREE_TEST_REQUIRES_APPROVAL=true
 DEFAULT_PLAN_DAYS=7
 MAX_DEVICES_PER_USER=5
-CLIENT_DNS=1.1.1.1
-CLIENT_ALLOWED_IPS=0.0.0.0/0
+CLIENT_DNS=8.8.8.8, 8.8.4.4
+CLIENT_ALLOWED_IPS=0.0.0.0/0, ::/0
 CLIENT_PERSISTENT_KEEPALIVE=25
 CLIENT_AWG_JC=4
 CLIENT_AWG_JMIN=40
 CLIENT_AWG_JMAX=70
 CLIENT_AWG_S1=0
 CLIENT_AWG_S2=0
+CLIENT_AWG_S3=0
+CLIENT_AWG_S4=0
 CLIENT_AWG_H1=1
 CLIENT_AWG_H2=2
 CLIENT_AWG_H3=3
 CLIENT_AWG_H4=4
+CLIENT_AWG_I1=
+CLIENT_AWG_I2=
+CLIENT_AWG_I3=
+CLIENT_AWG_I4=
+CLIENT_AWG_I5=
 EXPIRATION_NOTICE_DAYS=7,5,3,1
 VPN_PORT_MIN=30001
 VPN_PORT_MAX=65535
@@ -117,6 +128,9 @@ VPN_SERVER_RUNTIME=host_systemd
 
 `CLIENT_AWG_H1`...`CLIENT_AWG_H4` можно оставлять числами или задавать
 диапазонами из `awg show`, например `1622123045-2053868572`.
+
+`CLIENT_AWG_S3`, `CLIENT_AWG_S4` и `CLIENT_AWG_I1`...`CLIENT_AWG_I5`
+заполняются из конфига, который создала Amnezia. Пустые `I2-I5` допустимы.
 
 Эти `CLIENT_*` значения подставляются в клиентский `.conf` шаблон. Ключи,
 `Address`, имя устройства и имя файла формируются отдельно для каждого

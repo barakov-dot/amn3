@@ -114,10 +114,17 @@ def test_settings_reads_client_amneziawg_parameters():
         client_awg_jmax=42,
         client_awg_s1=11,
         client_awg_s2=22,
+        client_awg_s3=33,
+        client_awg_s4=44,
         client_awg_h1=101,
         client_awg_h2=202,
         client_awg_h3=303,
         client_awg_h4=404,
+        client_awg_i1="<r 2><b 0x858000010001000000000669636c6f756403636f6d0000010001c00c000100010000105a00044d583737>",
+        client_awg_i2="",
+        client_awg_i3="",
+        client_awg_i4="",
+        client_awg_i5="",
     )
 
     defaults = settings.client_config_defaults
@@ -130,10 +137,17 @@ def test_settings_reads_client_amneziawg_parameters():
     assert defaults.jmax == 42
     assert defaults.s1 == 11
     assert defaults.s2 == 22
+    assert defaults.s3 == 33
+    assert defaults.s4 == 44
     assert defaults.h1 == 101
     assert defaults.h2 == 202
     assert defaults.h3 == 303
     assert defaults.h4 == 404
+    assert defaults.i1.startswith("<r 2><b 0x8580")
+    assert defaults.i2 == ""
+    assert defaults.i3 == ""
+    assert defaults.i4 == ""
+    assert defaults.i5 == ""
 
 
 def test_settings_accepts_client_awg_h_range_values_from_amneziawg():

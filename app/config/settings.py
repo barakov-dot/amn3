@@ -17,8 +17,8 @@ class Settings(BaseSettings):
     free_test_requires_approval: bool = Field(default=True, alias="FREE_TEST_REQUIRES_APPROVAL")
     default_plan_days: int = Field(default=7, alias="DEFAULT_PLAN_DAYS")
     max_devices_per_user: int = Field(default=5, alias="MAX_DEVICES_PER_USER")
-    client_dns: str = Field(default="1.1.1.1", alias="CLIENT_DNS")
-    client_allowed_ips: str = Field(default="0.0.0.0/0", alias="CLIENT_ALLOWED_IPS")
+    client_dns: str = Field(default="8.8.8.8, 8.8.4.4", alias="CLIENT_DNS")
+    client_allowed_ips: str = Field(default="0.0.0.0/0, ::/0", alias="CLIENT_ALLOWED_IPS")
     client_persistent_keepalive: int = Field(
         default=25,
         alias="CLIENT_PERSISTENT_KEEPALIVE",
@@ -28,10 +28,17 @@ class Settings(BaseSettings):
     client_awg_jmax: int = Field(default=70, alias="CLIENT_AWG_JMAX")
     client_awg_s1: int = Field(default=0, alias="CLIENT_AWG_S1")
     client_awg_s2: int = Field(default=0, alias="CLIENT_AWG_S2")
+    client_awg_s3: int = Field(default=0, alias="CLIENT_AWG_S3")
+    client_awg_s4: int = Field(default=0, alias="CLIENT_AWG_S4")
     client_awg_h1: int | str = Field(default=1, alias="CLIENT_AWG_H1")
     client_awg_h2: int | str = Field(default=2, alias="CLIENT_AWG_H2")
     client_awg_h3: int | str = Field(default=3, alias="CLIENT_AWG_H3")
     client_awg_h4: int | str = Field(default=4, alias="CLIENT_AWG_H4")
+    client_awg_i1: str = Field(default="", alias="CLIENT_AWG_I1")
+    client_awg_i2: str = Field(default="", alias="CLIENT_AWG_I2")
+    client_awg_i3: str = Field(default="", alias="CLIENT_AWG_I3")
+    client_awg_i4: str = Field(default="", alias="CLIENT_AWG_I4")
+    client_awg_i5: str = Field(default="", alias="CLIENT_AWG_I5")
     expiration_notice_days: str = Field(default="7,5,3,1", alias="EXPIRATION_NOTICE_DAYS")
     vpn_port_min: int = Field(default=30001, alias="VPN_PORT_MIN")
     vpn_port_max: int = Field(default=65535, alias="VPN_PORT_MAX")
@@ -116,6 +123,8 @@ class Settings(BaseSettings):
                 "CLIENT_AWG_JMAX": self.client_awg_jmax,
                 "CLIENT_AWG_S1": self.client_awg_s1,
                 "CLIENT_AWG_S2": self.client_awg_s2,
+                "CLIENT_AWG_S3": self.client_awg_s3,
+                "CLIENT_AWG_S4": self.client_awg_s4,
             }
         )
         _validate_awg_h_values(
@@ -195,10 +204,17 @@ class Settings(BaseSettings):
             jmax=self.client_awg_jmax,
             s1=self.client_awg_s1,
             s2=self.client_awg_s2,
+            s3=self.client_awg_s3,
+            s4=self.client_awg_s4,
             h1=self.client_awg_h1,
             h2=self.client_awg_h2,
             h3=self.client_awg_h3,
             h4=self.client_awg_h4,
+            i1=self.client_awg_i1,
+            i2=self.client_awg_i2,
+            i3=self.client_awg_i3,
+            i4=self.client_awg_i4,
+            i5=self.client_awg_i5,
         )
 
 

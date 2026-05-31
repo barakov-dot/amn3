@@ -79,6 +79,20 @@ def test_load_server_config_reads_valid_servers_yml(tmp_path: Path):
     assert server.runtime.service_name == "awg-quick@awg0"
 
 
+def test_load_server_config_uses_server_address_prefix_as_effective_network(tmp_path: Path):
+    path = tmp_path / "servers.yml"
+    path.write_text(
+        VALID_YAML.replace("server_address: 10.8.0.1/24", "server_address: 10.8.1.1/24"),
+        encoding="utf-8",
+    )
+
+    config = load_server_config(path)
+    server = select_server(config, "debian-vps-1")
+
+    assert server.vpn.network_cidr == "10.8.1.0/24"
+    assert server.vpn.server_address == "10.8.1.1/24"
+
+
 def test_load_server_config_reads_docker_runtime(tmp_path: Path):
     path = tmp_path / "servers.yml"
     path.write_text(DOCKER_YAML, encoding="utf-8")
