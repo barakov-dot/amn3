@@ -14,6 +14,7 @@
 
 Связанный UX/API flow: `docs/AMN3_WRITE_API_UX_FLOW.ru.md`.
 Связанный audit contract: `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md`.
+Связанный preflight/confirmation contract: `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`.
 
 ## Gate
 

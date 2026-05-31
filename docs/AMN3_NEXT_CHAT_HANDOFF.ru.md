@@ -83,6 +83,8 @@ git remote -v
   dry-run -> confirmation -> apply/revoke -> audit -> rollback.
 - `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md` - audit contract для будущих write operations: actor surfaces,
   result states, redaction rules и storage note.
+- `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` - contract для dry-run reference, confirmation nonce,
+  expiry и `preflight_required`.
 - `docs/WEB_PANEL_AND_BOT_SETUP.ru.md` - web/bot запуск и эксплуатация.
 - `docs/VPS_RETEST_PROTOCOL.ru.md` - повторяемый VPS retest.
 - `docs/VPS_LOG_COLLECTION.ru.md` - сбор логов и диагностики.
@@ -129,7 +131,8 @@ git status --short --branch
 5. Держать `docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md` синхронизированным с `app/agent/write_policy_matrix.py`.
 6. Держать `docs/AMN3_WRITE_API_UX_FLOW.ru.md` синхронизированным с policy matrix и будущими surface flows.
 7. Держать `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md` синхронизированным с `app/agent/write_audit.py`.
-8. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
+8. Держать `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` синхронизированным с `app/agent/write_confirmation.py`.
+9. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
 
 До VPS smoke не включать write routes, не добавлять реальные mutation endpoints и не делать Local Agent публичным.
 

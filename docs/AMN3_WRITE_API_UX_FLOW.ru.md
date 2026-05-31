@@ -8,6 +8,7 @@
 production defaults. Это локальный продуктовый контракт перед VPS gate.
 
 Связанный audit contract: `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md`.
+Связанный preflight/confirmation contract: `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`.
 
 ## 1. Gate
 
@@ -91,6 +92,8 @@ Mutation запрещена без подтверждения. Подтверж�
 
 Confirmation token или UI nonce живет коротко и не содержит секретов. Повторный apply без свежего preflight должен
 получить `preflight_required`.
+Формальные поля dry-run reference, confirmation nonce и expiry описаны в
+`docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`.
 
 ### Step 4. Apply / revoke
 
