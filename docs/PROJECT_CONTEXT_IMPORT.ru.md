@@ -6,6 +6,19 @@
 
 Документ нужен для главного coordination-чата. Он собирает только рабочий контекст, который нужен для решений по `amn2`, будущему hybrid и общему Codex skill. Это не implementation plan и не разрешение на перенос функций.
 
+## Актуализация после verified live VPS cycle
+
+После этого исходного import-снимка `amn2` прошел первый подтвержденный live VPS cycle. Текущая точка правды:
+
+```text
+repo: C:\Users\SooL\Documents\Amneziya
+branch: codex-vps-test-prep
+latest: 91aeb3e Document VPS verified tag
+stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
+```
+
+Проверено: approve, working config, peer sync, disable/enable и выборочное удаление устройства на Docker AmneziaWG runtime. Более старые блоки ниже, где live retest еще указан как будущая проверка, считать историческим контекстом. Для нового lab-чата использовать `docs/NEXT_CHAT_AFTER_AMN2_VPS_LIVE.ru.md` и `docs/PROJECT_STATUS_CURRENT.ru.md`.
+
 ## Что было прочитано
 
 Локальные Codex-чаты:

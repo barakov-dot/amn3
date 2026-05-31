@@ -2,7 +2,9 @@
 
 Дата: 2026-05-31.
 
-## AMN3 / VPN Ops Lab
+Этот snapshot фиксирует переезд из длинного `amn2` VPS-чата в `VPS-OPS-LAB` после подтвержденного live VPS cycle.
+
+## AMN3 / VPS Ops Lab
 
 Локальный checkout:
 
@@ -22,227 +24,163 @@ https://github.com/barakov-dot/amn3.git
 master
 ```
 
-Последний опубликованный commit перед этим status update:
+Коммит lab перед этим migration update:
 
 ```text
-ddb0081 Ignore local worktrees
+42dea7a Update Local Agent production wiring status
 ```
 
-AMN3 теперь является приватной базой знаний проекта: research, design specs, implementation plans, transfer notes и skill-кандидаты.
+AMN3 является coordination/knowledge repo: research, design specs, implementation plans, transfer notes и gate для переноса идей в production.
 
-В AMN3 уже запушены:
+Production-код остается в `amn2`.
 
-- KYORESUAS upstream card;
-- Local Amnezia Agent design spec;
-- Local Amnezia Agent first-slice implementation plan;
-- AMN3 / Amneziya unification design;
-- `amn2` transfer backlog;
-- Local Agent production wiring implementation plan;
-- config delivery artifact integrity plan;
-- обновления очередей `amn2`, `hybrid`, `skill`.
+## Production baseline: `amn2`
 
-На момент этого snapshot AMN3 используется как coordination/knowledge repo. Production-код остается в `amn2`.
-
-## Amneziya / `amn2`
-
-Основной локальный checkout:
+Локальный checkout:
 
 ```text
 C:\Users\SooL\Documents\Amneziya
 ```
 
-Важно: основной checkout может содержать отдельные незакоммиченные изменения не из Local Agent work. Local Agent production wiring выполнен в isolated worktree:
+GitHub remote:
 
 ```text
-C:\Users\SooL\Documents\Amneziya\.codex_deps\worktrees\local-agent-production-wiring
+https://github.com/barakov-dot/amn2.git
 ```
 
-Текущая ветка Local Agent:
+Текущая production-ветка:
 
 ```text
-codex/local-agent-first-slice
+codex-vps-test-prep
 ```
 
-Remote branch:
+Актуальный head:
 
 ```text
-origin/codex/local-agent-first-slice
+91aeb3e Document VPS verified tag
 ```
 
-Текущий head:
+Проверенная stable-точка live VPS cycle:
 
 ```text
-ac2baa8 Add typed local agent auth errors
+vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 ```
 
-Stacked base:
+Основной handoff production-репозитория:
 
 ```text
-origin/codex-vps-test-prep @ 8ecb0b4 Add configurable client config defaults
+docs/NEXT_CHAT_HANDOFF.ru.md
 ```
 
-Local Agent branch содержит два commit:
-
-- `3119ee6 Add local Amnezia agent first slice`
-- `ac2baa8 Add typed local agent auth errors`
-
-PR нужно открывать как stacked PR:
+Последняя локальная проверка `amn2`:
 
 ```text
-base: codex-vps-test-prep
-head: codex/local-agent-first-slice
+508 passed, 1 warning
 ```
 
-Manual PR URL:
+Ожидаемое предупреждение: `StarletteDeprecationWarning` от `httpx` / `starlette.testclient`.
+
+## Verified live VPS cycle
+
+На живом VPS подтверждено:
+
+- approve заявки в Telegram создает рабочий peer;
+- клиентский config подключается;
+- web panel показывает working config сразу после approve;
+- `Run peer sync` подтверждает live-состояние;
+- внешние peer, созданные в приложении Amnezia, не удаляются и отображаются отдельно;
+- missing local device можно добавить в AmneziaWG;
+- `Disable VPN` и `Enable VPN` работают;
+- выборочное удаление устройства работает;
+- Docker runtime apply/revoke прошел живую проверку;
+- AmneziaWG 2.0 template/defaults приведены к рабочему формату.
+
+Это закрывает прежний пункт `live VPS retest` как основной риск. Новый retest нужен только после изменений в apply/revoke/config/sync логике.
+
+## Что продолжаем теперь
+
+Следующий безопасный этап в lab:
 
 ```text
-https://github.com/barakov-dot/amn2/pull/new/codex/local-agent-first-slice
+API-readiness audit after amn2 live baseline
 ```
 
-Compare PR URL with explicit base:
+Нужно определить первый API / Local Agent / operations slice, который можно будет отдельно перенести в `amn2`.
+
+Ожидаемые вопросы audit:
+
+- кто actor: web admin, Telegram admin, Local Agent, future API client;
+- какая auth model допустима;
+- какие routes являются read-only, secret-read, state-write, remote-write;
+- где нужны dry-run, apply, idempotency, rollback/recovery;
+- какие события должны попадать в audit;
+- как не раскрывать private key, PSK, config, QR, `vpn://`;
+- какие tests нужны до production branch.
+
+## Что не делать первым
+
+Не писать production API сразу.
+
+Не копировать upstream code.
+
+Не трогать live VPS из lab-чата.
+
+Не считать старые заметки `implemented-needs-live-retest` актуальными: они исторические, live baseline уже подтвержден.
+
+## Связанные документы
+
+Главный migration handoff:
 
 ```text
-https://github.com/barakov-dot/amn2/compare/codex-vps-test-prep...codex/local-agent-first-slice?expand=1
+docs/NEXT_CHAT_AFTER_AMN2_VPS_LIVE.ru.md
 ```
 
-Автоматическое создание PR из Codex пока заблокировано: GitHub connector не видит приватный `barakov-dot/amn2`, а локальный `gh` не установлен.
-
-## Local Agent production wiring branch
-
-Branch:
+API/upstream start:
 
 ```text
-codex/local-agent-production-wiring
+docs/NEXT_CHAT_KYORESUAS_API.ru.md
+research/upstreams/kyoresuas-amnezia-api.md
 ```
 
-Remote branch:
+`amn2` transfer context:
 
 ```text
-origin/codex/local-agent-production-wiring
-```
-
-Head:
-
-```text
-8697b60 Document Local Agent production wiring
-```
-
-Stacked base while first slice is not merged:
-
-```text
-codex/local-agent-first-slice @ ac2baa8 Add typed local agent auth errors
-```
-
-Commits:
-
-- `f2f425a Add Local Agent settings`
-- `9d343a1 Harden Local Agent token hash settings`
-- `c46fe2a Validate configured Local Agent token hash`
-- `58d3d07 Build Local Agent tokens from settings`
-- `0eb9ff9 Detect Local Agent runtime status`
-- `4837d28 Add Local Agent CLI commands`
-- `8697b60 Document Local Agent production wiring`
-
-Manual PR URL:
-
-```text
-https://github.com/barakov-dot/amn2/compare/codex/local-agent-first-slice...codex/local-agent-production-wiring?expand=1
-```
-
-После merge первого Local Agent PR эту ветку можно retarget/rebase на обновленный `codex-vps-test-prep`.
-
-Final verification:
-
-```text
-git diff --check
-tests/agent tests/config/test_settings.py tests/server/test_operation_runner.py tests/server/test_checks.py tests/web/test_cli_web.py -v
-108 passed, 1 existing Starlette/httpx warning
-```
-
-Windows pytest cleanup printed a post-summary `PermissionError` for `pytest-current`, but the command exited `0` after the passing summary.
-
-## Что есть в Local Amnezia Agent first slice
-
-Файлы:
-
-- `app/agent/`
-- `tests/agent/`
-- `docs/LOCAL_AGENT.ru.md`
-
-Включено:
-
-- route policy matrix;
-- hash-only scoped bearer token auth;
-- typed auth error reasons;
-- fake runtime adapter;
-- protected FastAPI app factory;
-- endpoints `/agent/health`, `/agent/version`, `/agent/runtime`, `/agent/protocols`;
-- disabled public docs/openapi;
-- audit events for allowed read routes;
-- no config/QR/`vpn://`/backup/import/reboot/write routes.
-
-Проверка после последнего commit:
-
-```text
-tests/agent tests/server/test_operation_runner.py tests/server/test_checks.py tests/web/test_servers.py -v
-70 passed, 1 existing Starlette/httpx warning
-```
-
-`git diff --check` чистый.
-
-## Что теперь есть в `amn2` base branch
-
-Практический VPS retest bundle:
-
-- CLI: `python -m app.cli server retest-plan --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3`;
-- блок `VPS retest bundle` в карточке сервера;
-- обновленные docs и tests.
-
-Настраиваемые defaults клиентского конфига:
-
-- `CLIENT_DNS`;
-- `CLIENT_ALLOWED_IPS`;
-- `CLIENT_PERSISTENT_KEEPALIVE`;
-- `CLIENT_AWG_JC`;
-- `CLIENT_AWG_JMIN`;
-- `CLIENT_AWG_JMAX`;
-- `CLIENT_AWG_S1`;
-- `CLIENT_AWG_S2`;
-- `CLIENT_AWG_H1`...`CLIENT_AWG_H4`.
-
-Эти значения используются для выдаваемых клиентских конфигов, preview и доставки, а уникальные values вроде keys/IP/endpoint остаются в своих источниках.
-
-## Ближайший безопасный порядок
-
-1. Открыть stacked PR `codex/local-agent-first-slice` -> `codex-vps-test-prep`.
-2. Review/merge Local Agent slice в `codex-vps-test-prep`.
-3. Открыть stacked PR `codex/local-agent-production-wiring` -> `codex/local-agent-first-slice`.
-4. После merge первого PR retarget/rebase production wiring на обновленный `codex-vps-test-prep`, если GitHub не сделал это автоматически.
-5. Review/merge Local Agent production wiring.
-6. После merge обновить AMN3 status with PR/merge result.
-7. Затем возвращаться к live VPS retest на последнем `codex-vps-test-prep`.
-
-Local Agent production wiring plan:
-
-```text
-docs/superpowers/plans/2026-05-31-amn2-local-agent-production-wiring.md
-```
-
-Transfer backlog:
-
-```text
+research/amn2/README.md
 research/amn2/transfer-backlog.md
+research/amn2/remote-operations-inventory.md
+research/amn2/config-delivery-inventory.md
 ```
 
-## Ближайший live VPS retest
+Existing unification design:
 
-На VPS нужно подтвердить:
+```text
+docs/superpowers/specs/2026-05-31-amn3-amneziya-unification-design.md
+```
 
-- установлен коммит `8ecb0b4` или более свежий commit из `codex-vps-test-prep`;
-- `server retest-plan` работает и ничего не меняет;
-- web block `VPS retest bundle` показывает команды;
-- peer sync корректно различает known panel peers, Amnezia-created peers и local missing devices;
-- новый peer получает следующий IP из live `/opt/amnezia/awg/awg0.conf`;
-- `Disable VPN` и `Enable VPN` работают на Docker runtime;
-- config defaults из `.env` попадают в выдаваемые client configs и preview;
-- email config/recovery требуют подтвержденный email.
+## Local Agent branches still relevant
+
+Local Agent first slice:
+
+```text
+branch: codex/local-agent-first-slice
+commits: 3119ee6, ac2baa8
+manual PR: https://github.com/barakov-dot/amn2/compare/codex-vps-test-prep...codex/local-agent-first-slice?expand=1
+```
+
+Local Agent production wiring:
+
+```text
+branch: codex/local-agent-production-wiring
+head: 8697b60 Document Local Agent production wiring
+manual PR: https://github.com/barakov-dot/amn2/compare/codex/local-agent-first-slice...codex/local-agent-production-wiring?expand=1
+```
+
+Эти ветки не являются обязательным первым действием нового lab-чата. Их нужно учитывать как уже подготовленные slices при выборе API-readiness направления.
+
+## Рекомендуемый порядок
+
+1. Открыть новый чат в `VPS-OPS-LAB` по `docs/NEXT_CHAT_AFTER_AMN2_VPS_LIVE.ru.md`.
+2. Проверить git status/log в lab и `amn2`.
+3. Сделать API-readiness audit по текущему verified `amn2` behavior.
+4. Выбрать первый безопасный slice.
+5. Только потом писать implementation plan для `amn2`.

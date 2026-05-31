@@ -1,6 +1,6 @@
 # `amn2`: текущий production-контекст
 
-Этот раздел хранит read-only inventory текущего `amn2`, чтобы идеи из `vpn-ops-lab` сравнивались с реальной архитектурой, а не переносились по впечатлению от upstream-проектов.
+Этот раздел хранит read-only inventory текущего `amn2`, чтобы идеи из `VPS-OPS-LAB` сравнивались с реальной архитектурой, а не переносились по впечатлению от upstream-проектов.
 
 ## Правила
 
@@ -8,6 +8,22 @@
 - `.env` и другие файлы с возможными секретами не читаются и не переносятся в заметки.
 - В заметках фиксируются только пути, имена настроек, классы риска, найденные patterns и test surfaces.
 - Любая функция из lab переходит к implementation plan только после license gate, value gate, risk gate, architecture fit и test plan.
+
+## Текущий verified baseline
+
+Актуальная production-точка:
+
+```text
+repo: C:\Users\SooL\Documents\Amneziya
+branch: codex-vps-test-prep
+latest: 91aeb3e Document VPS verified tag
+stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
+handoff: docs/NEXT_CHAT_HANDOFF.ru.md
+```
+
+Живой VPS-цикл подтвержден: approve, working config, peer sync, disable/enable и выборочное удаление устройства работают на Docker AmneziaWG runtime.
+
+Это значит, что дальнейшие lab-решения должны опираться на уже проверенное поведение `amn2`, а не возвращаться к live retest как к незакрытому риску.
 
 ## Артефакты
 
@@ -17,11 +33,19 @@
 - [Secret surface inventory](secret-surface-inventory.md) - первый проход по secrets, redaction, encrypted backup, email tokens, config delivery и 2FA implications.
 - [Config delivery inventory](config-delivery-inventory.md) - первый проход по выдаче VPN config через bot, email, QR, `vpn://` link, recovery token и template preview.
 - [Remote operations inventory](remote-operations-inventory.md) - первый проход по SSH/server apply flows, dry-run, health checks, peer apply/revoke, traffic collection, audit, redaction и rollback gaps.
+- [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
 ## Следующие рабочие шаги
 
 Текущее решение: 2FA для web-admin поставлена на паузу, implementation plan для нее не пишем до отдельного решения.
 
-1. Route/config delivery policy design: actor, gate, risk class, audit и tests для каждой выдачи config.
-2. Review updated RemoteOperationRunner design и выбрать первый безопасный implementation slice.
-3. Только после этих шагов - отдельный implementation plan для первой безопасной доработки в `amn2`.
+Текущий фокус после verified VPS cycle:
+
+1. API-readiness audit: определить actors, auth, route classes, secret boundaries, audit, dry-run/apply и rollback для будущего API/ops слоя.
+2. Сравнить audit с Local Agent first slice и production wiring branches.
+3. Выбрать первый безопасный implementation slice для `amn2`.
+4. Только после этого писать отдельный implementation plan.
+
+## Неактуальный риск
+
+Старые формулировки `implemented-needs-live-retest` считаются историческими: базовый live VPS cycle закрыт и помечен тегом `vps-live-cycle-verified`.
