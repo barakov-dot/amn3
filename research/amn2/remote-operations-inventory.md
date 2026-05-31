@@ -76,7 +76,22 @@ Read-only health slice `RemoteOperationRunner` уже присутствует �
 - focused verification: `tests/server/test_operation_runner.py tests/server/test_checks.py -v` -> `23 passed`;
 - full suite: `pytest tests -v` -> `517 passed, 1 warning`.
 
-Ограничение: это еще не включает fake peer applier, partial-failure simulations и dry-run/audit metadata для live mutation flows. Следующий локальный шаг - fake runner/fake peer applier harness и partial-failure model.
+Ограничение этого metadata-среза: он сам по себе еще не включал fake peer applier, partial-failure simulations и dry-run/audit metadata. Partial-failure слой закрыт следующим срезом ниже; dry-run/audit metadata остаются следующим локальным шагом.
+
+## Обновление 2026-05-31: partial-failure local slice
+
+Второй локальный P0-срез для state-changing remote operations выполнен в `amn2`:
+
+- branch: `codex/remote-operation-partial-failure`;
+- commit: `0afb22a Add remote partial failure model`;
+- base: `codex/remote-operation-contract-metadata`;
+- добавлено: `RemoteMutationResult` и `RemoteOperationPartialFailure`;
+- добавлено: partial-failure wrapper для `AccessService.approve_order`, когда remote peer apply уже завершился, а local fulfill/audit падает;
+- добавлено: partial-failure wrapper для `BotWorkflow.reset_user_devices`, когда один remote peer уже удален, а следующий remove падает до локального revoke;
+- focused verification: `tests/services/test_access_service.py tests/bot/test_bot_workflows.py -v` -> `38 passed`;
+- full suite: `pytest tests -v` -> `519 passed, 1 warning`.
+
+Ограничение: этот срез еще не добавляет dry-run preview contract и safe audit metadata для state-changing mutation outputs. Следующий локальный шаг - dry-run preview + audit/redaction metadata.
 
 ## Карта remote surfaces
 
@@ -166,7 +181,7 @@ Bot user flows call remote remove before local DB revoke:
 - `revoke_user_device()` verifies Telegram ownership, removes the remote peer if remover is configured, then marks the device revoked.
 - `reset_user_devices()` lists owned devices, removes each remote peer, then marks all user devices revoked.
 
-This prevents local revoke when a single remote remove fails before DB mutation. The reset flow still needs a partial-failure plan: if one remote remove succeeds and a later one fails, some remote peers may already be removed while local DB still shows devices active.
+This prevents local revoke when a single remote remove fails before DB mutation. The reset flow now reports a local `RemoteOperationPartialFailure` when one remote remove succeeds and a later one fails, so operators get a recovery note instead of losing partial-apply context.
 
 ## Traffic collection
 
@@ -252,6 +267,6 @@ Current posture:
 
 ## Следующие рабочие шаги
 
-1. Исполнить local-only phase из плана `remote-ops-local-vps-split`: contract, fake runner, partial-failure simulations, dry-run/audit metadata и full local suite.
+1. Продолжить local-only phase из плана `remote-ops-local-vps-split`: dry-run preview, safe audit/redaction metadata и local gate docs.
 2. Только после этого провести controlled real VPS verification gate на тестовом peer/device.
 3. До live Docker apply/revoke отдельно описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.

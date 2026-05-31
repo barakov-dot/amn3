@@ -34,18 +34,22 @@
 ### Partial-failure model
 
 - Цель: описать состояние, когда remote операция уже сработала, а локальная часть, audit или DB transaction не завершились.
+- Статус 2026-05-31: implementation slice выполнен в `amn2` branch `codex/remote-operation-partial-failure`, commit `0afb22a`.
 - Что должно появиться: минимальный result/status contract для `remote-applied`, `local-applied`, `partial-failure`, `manual-review-required`.
 - Почему P0: approve/revoke/reset устройства могут оставить VPS и локальную БД в разных состояниях.
 - Локальная проверка: fake applier успешно применяет remote change, затем искусственно ломается local audit/DB step.
-- Готово, когда: тесты фиксируют recovery note и состояние для ручной проверки, а не теряют факт частичного применения.
+- Проверено 2026-05-31: `38 passed` для `tests/services/test_access_service.py tests/bot/test_bot_workflows.py`.
+- Full suite 2026-05-31: `519 passed, 1 warning`.
+- Готово, когда: тесты фиксируют recovery note и состояние для ручной проверки, а не теряют факт частичного применения. Первый срез готов для approve/reset; следующие surfaces должны использовать тот же result/exception contract.
 
 ### Fake runner and fake peer applier harness
 
 - Цель: проверить опасные сценарии без VPS.
+- Статус 2026-05-31: fake peer applier/remover сценарии для approve/reset выполнены в `codex/remote-operation-partial-failure`.
 - Что должно появиться: тестовые double-объекты для успешного apply, failed apply, failed revoke, timeout и mixed multi-device reset.
 - Почему P0: real VPS gate нельзя начинать, пока поведение не воспроизводится локально.
 - Локальная проверка: pytest-сценарии для approve, revoke, reset и command output.
-- Готово, когда: state-changing flows покрыты fake success/failure сценариями без network access.
+- Готово, когда: state-changing flows покрыты fake success/failure сценариями без network access. Первый approve/reset partial-failure слой закрыт; command timeout/dry-run metadata идут следующим срезом.
 
 ### Secret-safe audit/redaction gate
 
@@ -140,9 +144,9 @@
 ## Первая партия исполнения
 
 1. Сделать `State-changing operation contract` и сохранить совместимость read-only runner - выполнено в `codex/remote-operation-contract-metadata`.
-2. Добавить fake runner/fake peer applier harness.
-3. Покрыть partial-failure model для approve/revoke/reset.
-4. Добавить dry-run preview и safe audit metadata.
+2. Добавить fake runner/fake peer applier harness - первый approve/reset слой выполнен в `codex/remote-operation-partial-failure`.
+3. Покрыть partial-failure model для approve/revoke/reset - первый approve/reset слой выполнен в `codex/remote-operation-partial-failure`.
+4. Добавить dry-run preview и safe audit/redaction metadata.
 5. Прогнать focused tests.
 6. Прогнать full local suite.
 7. Обновить Runtime Registry и lab notes.
