@@ -219,3 +219,22 @@ head: 8697b60 Document Local Agent production wiring
 4. Не включать в первый plan новые API routes, config delivery endpoints, write operations или live VPS calls.
 5. Только после принятого plan переходить в production branch/worktree.
 6. После production-среза вернуть в AMN3 branch/commit/test evidence.
+
+## Route/Auth/Operation Policy Matrix Plan
+
+Статус: `implementation-plan-ready`.
+
+Новый AMN3 artifact:
+
+```text
+docs/superpowers/plans/2026-05-31-amn2-route-auth-operation-policy-matrix.md
+```
+
+План уточняет первый production slice: inventory-only policy registry + aggregate tests + production doc. Он не добавляет API endpoints, не включает новые write/config delivery flows и не требует live VPS retest.
+
+Обновленный порядок:
+
+1. Выполнить этот plan в `C:\Users\SooL\Documents\Amneziya` на branch `codex-vps-test-prep`.
+2. Проверить focused tests policy/agent/server/web/bot.
+3. Commit production slice только после зеленых тестов.
+4. Вернуться в AMN3 и записать production commit/test evidence.

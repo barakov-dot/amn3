@@ -97,3 +97,23 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 - peer sync classification;
 - disable/enable/delete device flows;
 - Docker runtime write/restart behavior.
+
+## Route/Auth/Operation Policy Matrix Plan
+
+Статус: `implementation-plan-ready`.
+
+Plan artifact:
+
+```text
+docs/superpowers/plans/2026-05-31-amn2-route-auth-operation-policy-matrix.md
+```
+
+Следующий production slice для `amn2`: создать inventory-only machine-checkable registry `app/security/surface_policy.py`, aggregate tests `tests/security/test_surface_policy.py` и doc `docs/ROUTE_AUTH_OPERATION_POLICY.ru.md`.
+
+Границы slice:
+
+- live VPS не трогать;
+- новых endpoints не добавлять;
+- config/self-service API не добавлять;
+- Local Agent clients/configs/backup/restore/reboot не включать;
+- upstream code не копировать.
