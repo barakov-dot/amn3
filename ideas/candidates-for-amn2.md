@@ -288,3 +288,37 @@
 - Польза: production-перенос становится проверяемым и поддерживаемым, а не только реализованным.
 - Риски: больше upfront work; docs must not drift from route guards and actual behavior.
 - Статус: research candidate после [wg-easy operational docs/migration deep-dive](../research/upstreams/wg-easy-wg-easy-operational-docs-migration.md).
+
+## Из kyoresuas/amnezia-api
+
+Источник: [research/upstreams/kyoresuas-amnezia-api.md](../research/upstreams/kyoresuas-amnezia-api.md)
+
+Статус лицензии: MIT, но перенос в `amn2` только как самостоятельный дизайн без копирования кода.
+
+### Local Amnezia API agent
+
+- Идея: поставить рядом с Amnezia локальный API-agent, который управляет users/peers через ограниченный HTTP contract, а не через постоянный внешний SSH control plane.
+- Польза: хорошо совпадает с текущей задачей управления пользователями Amnezia по API.
+- Риски: agent получает высокий доступ к Docker/config/secret state; нужны local-only bind, scoped tokens, audit и hardening.
+- Статус: high-priority design candidate.
+
+### Client lifecycle API
+
+- Идея: формализовать lifecycle peer/user: create, list, disable, enable, delete, `expiresAt`, config delivery.
+- Польза: дает основу для панели, Telegram-бота, billing и support tooling.
+- Риски: disable/delete semantics должны быть одинаково понятны для AmneziaWG, AmneziaWG2 и Xray; нужны tests на partial failure.
+- Статус: research candidate.
+
+### Secret-safe `vpn://` and QR delivery
+
+- Идея: считать `vpn://`, QR и downloadable config одинаковым `secret-read` output с явной policy.
+- Польза: снижает риск случайно логировать или отдавать import link как обычное metadata.
+- Риски: нужны redaction, audit, expiry/revoke для share flows и tests на отсутствие secret leakage.
+- Статус: reinforced candidate.
+
+### Backup/import as dangerous API
+
+- Идея: backup/import endpoint проектировать только через redacted/full режимы, validation, dry-run preview, encryption option и recovery note.
+- Польза: полезно для восстановления сервера, но не должно становиться простой кнопкой утечки всех ключей.
+- Риски: full backup содержит private keys, PSK, server configs и client state; import может разрушить runtime.
+- Статус: research-only до отдельного security design.

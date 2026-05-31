@@ -142,3 +142,22 @@
 - требует ли API отключения 2FA или использует password-only auth;
 - какие CLI команды выводят configs, QR, tokens или secret state;
 - есть ли tests или checklist, что docs не расходятся с route guards и behavior.
+
+## Server-installed API wrapper checklist
+
+После анализа `kyoresuas/amnezia-api` добавить отдельный checklist для upstream, которые ставятся на VPN-сервер и дают HTTP API поверх локального runtime:
+
+- какой privilege получает API process: Docker socket, root, sudo, systemd, host filesystem, VPN config paths;
+- открыт ли API наружу или слушает local-only bind за reverse proxy;
+- есть ли TLS story, если setup сам настраивает nginx;
+- защищены ли `/docs`, `/metrics`, `/health`, backup/import и destructive endpoints;
+- один ли shared API key используется для всех операций или есть scoped tokens;
+- есть ли expiry, revoke, rotation, rate limit и audit для integration tokens;
+- какие endpoints являются `read-only`, `secret-read`, `state-write`, `remote-exec`, `destructive`;
+- есть ли redacted backup по умолчанию и отдельный encrypted/full backup режим;
+- считается ли `vpn://` import link secret-bearing artifact наравне с QR и `.conf`;
+- есть ли dry-run/preview для import, delete, reboot, restart и config rewrite;
+- есть ли lock/queue для конкурентных writes в один config/clientsTable;
+- как описаны partial failures между file write, live sync/restart и local metadata update;
+- не попадают ли private key, PSK, API key, config body, QR payload или `vpn://` в logs/errors/metrics;
+- есть ли staging/runtime tests, а не только lint/build.

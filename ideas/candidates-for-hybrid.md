@@ -165,3 +165,28 @@
 - Польза: дает мягкий onboarding существующих пользователей и серверов.
 - Риски: private keys, pre-shared keys, IP conflicts, partial import, version mismatch и support burden.
 - Статус: hybrid-only candidate после [wg-easy operational docs/migration deep-dive](../research/upstreams/wg-easy-wg-easy-operational-docs-migration.md).
+
+## Из kyoresuas/amnezia-api
+
+Источник: [research/upstreams/kyoresuas-amnezia-api.md](../research/upstreams/kyoresuas-amnezia-api.md)
+
+### Per-server API agent
+
+- Идея: будущий hybrid может использовать lightweight agent на каждом VPN-сервере, а центральная панель будет говорить с ним через stable API.
+- Польза: опасные Docker/config операции остаются локально на ноде, а панель получает единый control surface.
+- Риски: agent enrollment, token rotation, mTLS или другой channel security, version skew и compromise blast radius.
+- Статус: high-signal architecture reference.
+
+### Multi-server balancing metadata
+
+- Идея: server endpoint возвращает `region`, `weight`, `maxPeers`, `totalPeers`, protocols и load для выбора подходящей ноды.
+- Польза: база для billing/provisioning/orchestrator, который создает пользователей на разных VPN-серверах.
+- Риски: metrics могут раскрывать capacity/activity metadata; нужна privacy policy и scoped read token.
+- Статус: hybrid roadmap candidate.
+
+### Unified protocol adapter contract
+
+- Идея: для каждого protocol runtime держать общий adapter contract: list, create, update, delete, export/import, status, metrics.
+- Польза: гибридный продукт может добавлять новые runtimes без переписывания панели.
+- Риски: слишком общий contract может скрыть protocol-specific side effects; нужны capabilities и risk classes.
+- Статус: research candidate.
