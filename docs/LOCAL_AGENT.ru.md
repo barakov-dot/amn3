@@ -73,4 +73,25 @@ python -m app.cli agent hash-token
 python -m app.cli agent serve
 ```
 
+## Smoke checklist
+
+1. Скопировать `.env.example` в `.env`.
+2. Сгенерировать hash через `python -m app.cli agent hash-token`.
+3. Записать в `.env` только `LOCAL_AGENT_TOKEN_HASH`; raw token не сохранять.
+4. Оставить `LOCAL_AGENT_HOST=127.0.0.1` и `LOCAL_AGENT_PORT=3031`.
+5. Запустить `python -m app.cli agent serve`.
+6. Проверить read-only routes с Bearer token:
+
+```powershell
+$token = "raw-token-used-for-hash"
+$headers = @{ Authorization = "Bearer $token" }
+Invoke-RestMethod -Headers $headers http://127.0.0.1:3031/agent/health
+Invoke-RestMethod -Headers $headers http://127.0.0.1:3031/agent/runtime
+Invoke-RestMethod -Headers $headers http://127.0.0.1:3031/agent/protocols
+```
+
+Ожидаемые статусы runtime: `running`, `stopped`, `degraded` или `unknown`.
+Если Docker недоступен или `awg dump` не читается, agent должен вернуть `degraded`,
+а не маскировать проблему под `stopped`.
+
 Для первого production режима держать `LOCAL_AGENT_HOST=127.0.0.1` и открывать доступ только через SSH tunnel, reverse proxy с auth или будущий controller-side transport. Публично наружу agent не выставлять.

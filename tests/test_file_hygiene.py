@@ -33,3 +33,21 @@ def test_env_example_uses_placeholders_only():
         text,
         re.MULTILINE,
     )
+
+
+def test_env_examples_include_local_agent_safe_defaults():
+    expected = [
+        "LOCAL_AGENT_ENABLED=false",
+        "LOCAL_AGENT_HOST=127.0.0.1",
+        "LOCAL_AGENT_PORT=3031",
+        "LOCAL_AGENT_TOKEN_ID=local-controller",
+        "LOCAL_AGENT_TOKEN_HASH=",
+        "LOCAL_AGENT_TOKEN_OWNER=local-controller",
+        "LOCAL_AGENT_TOKEN_SCOPES=agent:health,agent:read,agent:protocols:read",
+        "LOCAL_AGENT_TOKEN_EXPIRES_AT=",
+    ]
+
+    for path in [Path(".env.example"), Path("deploy/examples/.env.production.example")]:
+        text = path.read_text(encoding="utf-8")
+        for line in expected:
+            assert line in text, f"{path} is missing {line}"
