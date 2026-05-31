@@ -22,10 +22,10 @@ https://github.com/barakov-dot/amn3.git
 master
 ```
 
-Последний опубликованный commit:
+Последний опубликованный commit перед Local Agent production wiring plan:
 
 ```text
-b24720f Add AMN3 local agent research
+f2aeea6 Extend config delivery integrity test plan
 ```
 
 AMN3 теперь является приватной базой знаний проекта: research, design specs, implementation plans, transfer notes и skill-кандидаты.
@@ -35,9 +35,12 @@ AMN3 теперь является приватной базой знаний п
 - KYORESUAS upstream card;
 - Local Amnezia Agent design spec;
 - Local Amnezia Agent first-slice implementation plan;
+- AMN3 / Amneziya unification design;
+- `amn2` transfer backlog;
+- Local Agent production wiring implementation plan;
 - обновления очередей `amn2`, `hybrid`, `skill`.
 
-На момент этого snapshot в рабочей копии AMN3 есть отдельные незакоммиченные research/watch изменения по PRVTPRO/GitHub watch-направлению. Они не относятся к Local Agent integration и должны коммититься отдельным срезом.
+На момент этого snapshot AMN3 используется как coordination/knowledge repo. Production-код остается в `amn2`.
 
 ## Amneziya / `amn2`
 
@@ -146,12 +149,20 @@ tests/agent tests/server/test_operation_runner.py tests/server/test_checks.py te
 
 1. Открыть stacked PR `codex/local-agent-first-slice` -> `codex-vps-test-prep`.
 2. Review/merge Local Agent slice в `codex-vps-test-prep`.
-3. После этого возвращаться к live VPS retest на последнем `codex-vps-test-prep`.
-4. Следующий implementation slice для Local Agent делать только после PR/review:
-   - feature flag / settings для agent app;
-   - real read-only runtime detection;
-   - secure token provisioning;
-   - no write/config/backup routes until отдельный policy gate.
+3. После этого выполнить Local Agent production wiring plan:
+
+```text
+docs/superpowers/plans/2026-05-31-amn2-local-agent-production-wiring.md
+```
+
+4. После production wiring обновить AMN3 status with branch/commits/tests/PR.
+5. Затем возвращаться к live VPS retest на последнем `codex-vps-test-prep`.
+
+Transfer backlog:
+
+```text
+research/amn2/transfer-backlog.md
+```
 
 ## Ближайший live VPS retest
 
