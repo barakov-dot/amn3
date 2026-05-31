@@ -102,6 +102,7 @@ Docker-сценарий простой: официальный образ `prvtp
 - API surface deep-dive выполнен: [prvtpro-amnezia-web-panel-api-surface.md](prvtpro-amnezia-web-panel-api-surface.md).
 - Manager/SSH/protocol architecture deep-dive выполнен: [prvtpro-amnezia-web-panel-manager-architecture.md](prvtpro-amnezia-web-panel-manager-architecture.md).
 - Feature gap и очередь решений выполнены: [prvtpro-amnezia-web-panel-feature-gap.md](prvtpro-amnezia-web-panel-feature-gap.md).
+- GitHub watch и repository assembly начаты: [prvtpro-amnezia-web-panel-github-watch.md](prvtpro-amnezia-web-panel-github-watch.md).
 - Следующий шаг: выбрать один `candidate-for-amn2-review` и открыть отдельный design spec уже с контекстом текущего `amn2`.
 
 ## Источники
@@ -120,3 +121,4 @@ Docker-сценарий простой: официальный образ `prvtp
 - [API surface и route guards](prvtpro-amnezia-web-panel-api-surface.md)
 - [Manager architecture](prvtpro-amnezia-web-panel-manager-architecture.md)
 - [Feature gap для `amn2` и гибрида](prvtpro-amnezia-web-panel-feature-gap.md)
+- [GitHub watch и repository assembly](prvtpro-amnezia-web-panel-github-watch.md)

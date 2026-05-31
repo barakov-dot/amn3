@@ -104,6 +104,13 @@
 - Риски: domain routing требует client-side поддержки, OS-specific rules, DNS consistency и понятной диагностики. Server-only реализация не дает настоящего bypass, если трафик уже вошел в туннель.
 - Статус: hybrid roadmap candidate; для `amn2` нужен отдельный узкий design spec `Domain Zone Exclusion Policy`, чтобы не смешивать client split-routing с server DNS/egress fallback.
 
+### Chained service routing
+
+- Идея: поддержать последовательную маршрутизацию между VPN/proxy/DNS-сервисами, например service A отправляет исходящий трафик через service B.
+- Польза: дает гибкую multi-service topology для продвинутых операторов.
+- Риски: легко получить routing loops, непрозрачный troubleshooting, портовые конфликты, сложный threat model и слабую observability.
+- Статус: hybrid-only candidate после [GitHub watch PRVTPRO](../research/upstreams/prvtpro-amnezia-web-panel-github-watch.md); не переносить в `amn2` без отдельного topology design.
+
 ### Background remote jobs
 
 - Идея: долгие install/clear/reconcile операции выполнять как jobs с progress, structured logs, timeout, cancellation и final audit summary.

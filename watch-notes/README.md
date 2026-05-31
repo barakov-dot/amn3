@@ -30,6 +30,7 @@
 - [PRVTPRO/Amnezia-Web-Panel: API surface и route guards](../research/upstreams/prvtpro-amnezia-web-panel-api-surface.md)
 - [PRVTPRO/Amnezia-Web-Panel: manager architecture](../research/upstreams/prvtpro-amnezia-web-panel-manager-architecture.md)
 - [PRVTPRO/Amnezia-Web-Panel: feature gap для `amn2` и гибрида](../research/upstreams/prvtpro-amnezia-web-panel-feature-gap.md)
+- [PRVTPRO/Amnezia-Web-Panel: GitHub watch и repository assembly](../research/upstreams/prvtpro-amnezia-web-panel-github-watch.md)
 - [wg-easy/wg-easy](../research/upstreams/wg-easy-wg-easy.md)
 - [wg-easy/wg-easy: config delivery и one-time links](../research/upstreams/wg-easy-wg-easy-config-delivery.md)
 - [wg-easy/wg-easy: permissions, auth и 2FA](../research/upstreams/wg-easy-wg-easy-auth-permissions-2fa.md)

@@ -44,6 +44,13 @@
 - Риски: срок жизни ссылок, одноразовость, аудит, утечки, revoke.
 - Статус: design candidate описан в [Public/Self-service Config Delivery для `amn2`](../docs/superpowers/specs/2026-05-30-public-self-service-config-delivery-design.md); после `amn2` inventory `vpn://`, QR и `.conf` явно считаются `secret-read` артефактами.
 
+### Config delivery integrity tests
+
+- Идея: тестировать `.conf`, QR и `vpn://` links как importable artifacts, а не только как строки, которые успешно сгенерировались.
+- Польза: снижает риск выдать пользователю config, который выглядит корректным в панели, но не импортируется на Android/client side.
+- Риски: нужно поддерживать byte-level encoding tests, non-ASCII names и client-specific import constraints без копирования upstream code.
+- Статус: research candidate после [GitHub watch PRVTPRO](../research/upstreams/prvtpro-amnezia-web-panel-github-watch.md); добавить в `Public/Self-service Config Delivery` test plan.
+
 ### OpenAPI-группировка по доменам
 
 - Идея: группировать API-документацию по понятным доменам.
@@ -135,6 +142,13 @@
 - Риски: UX сложнее для новичков; нужен recovery-flow при переустановке VPS.
 - Статус: reinforced by [`amn2` remote operations inventory](../research/amn2/remote-operations-inventory.md).
 
+### Configurable VPN subnet/IPAM
+
+- Идея: сделать subnet/IPAM для AWG/WireGuard явной настройкой server/profile, а не hardcoded значением.
+- Польза: несколько серверов, routed/site-to-site сценарии и будущая миграция становятся безопаснее.
+- Риски: изменение subnet может ломать existing peers; нужны CIDR validation, conflict detection, migration story, dry-run preview и audit.
+- Статус: research candidate после [GitHub watch PRVTPRO](../research/upstreams/prvtpro-amnezia-web-panel-github-watch.md); открывать design spec только после review текущей IPAM/server model в `amn2`.
+
 ## Из текущего `amn2` baseline
 
 Источники: [`amn2`: config delivery inventory](../research/amn2/config-delivery-inventory.md), [`amn2`: remote operations inventory](../research/amn2/remote-operations-inventory.md)
@@ -200,6 +214,8 @@
 - `Scoped API Tokens`: one-time display, hash storage, scopes, expiry, revoke и owner inheritance.
 - `Secret Inventory + Backup Policy`: redacted backup по умолчанию и encrypted full backup как явный режим.
 - `Public/Self-service Config Delivery`: ownership tests, hashed share tokens, expiry, revoke, audit и `secret-read` handling для `.conf`, QR и `vpn://`.
+- `Config delivery integrity tests`: byte-level QR/config encoding, non-ASCII names, Android/import compatibility и no secret leakage в logs/audit.
+- `Configurable VPN subnet/IPAM`: CIDR validation, conflict detection, migration story и dry-run/audit перед изменением live server.
 - `Config delivery policy table`: actor, gate, risk class, output, audit и tests для текущих и будущих config delivery flows.
 - `Web-admin 2FA`: поставлена на паузу решением от 2026-05-30; inventories сохраняем как контекст, но implementation plan не пишем без отдельного решения: [`amn2` decision log](../research/amn2/decisions.md).
 - Статус: `paused`.

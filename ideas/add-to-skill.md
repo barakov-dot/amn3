@@ -81,6 +81,20 @@
 - Docker capabilities, sysctls, firewall и host network changes как remote/host risk;
 - client expiration и disable/revoke semantics.
 
+## GitHub watch checklist для VPN/control-panel upstream
+
+После первичного deep-dive обязательно делать отдельный GitHub watch pass:
+
+- проверить текущие open issues и PRs, не только README;
+- выделить bug classes, которые повторяются у пользователей: config import, QR, empty state, port conflicts, crashes, partial failures;
+- отличать feature requests от production-regression signals;
+- проверять build/deploy files: Dockerfile, compose, requirements, package lock, workflows;
+- искать mismatch между README prerequisites и Docker/runtime image;
+- фиксировать encoding/build issues как отдельный repository quality signal;
+- превращать issues в test-plan requirements для `amn2`, а не в копирование fixes;
+- если issue содержит logs или configs, не переносить секретные фрагменты в lab docs;
+- ссылаться на issue/PR URL и пересказывать содержание кратко, без длинного копирования текста.
+
 ## Config delivery checklist для VPN/control-panel upstream
 
 При deep-dive по выдаче VPN-конфигов проверять:
