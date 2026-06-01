@@ -50,7 +50,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 
 | Item | Статус | Target repo | Текущий artifact | Следующий шаг |
 | --- | --- | --- | --- | --- |
-| API readiness after verified live baseline | `audit-complete-first-slice-selected` | AMN3 -> `amn2` later | `research/amn2/api-readiness-audit-after-live-baseline.md` | После review написать plan для Route/Auth/Operation Policy Matrix |
+| API readiness after verified live baseline | `implemented-historical-baseline` | AMN3 -> `amn2` | `research/amn2/api-readiness-audit-after-live-baseline.md`; Route/Auth matrix and read-only API shell already implemented | Использовать как historical decision source; текущий active gate - VPS loopback API smoke для `codex/read-only-api-route-shell` |
 | Main merge roadmap | `active-roadmap` | AMN3 -> `amn2` later | `docs/AMN2_MAIN_MERGE_ROADMAP.ru.md` | Использовать как порядок слияния API, web panel и operations |
 | Local Amnezia Agent first slice | `merged-in-baseline` | `amn2` | merge PR #2, commits `3119ee6`, `ac2baa8` | Использовать как read-only baseline, не расширять до clients/configs без policy gate |
 | Local Agent production wiring | `merged-in-baseline` | `amn2` | merge PR #3, head `8697b60` | Использовать как opt-in local runtime adapter boundary |

@@ -52,10 +52,10 @@ https://github.com/barakov-dot/amn3.git
 master
 ```
 
-Committed head lab reviewed before this status refresh:
+Committed head lab reviewed in this status refresh:
 
 ```text
-7fc3aee Set KYORESUAS API integration priority
+8b4cc81 Refresh project coordination state
 ```
 
 `master` синхронизирован с `origin/master`.
@@ -66,6 +66,7 @@ Committed head lab reviewed before this status refresh:
 25e02e9 Add VPS install package
 87da41d Fix VPS installer user creation fallback
 7fc3aee Set KYORESUAS API integration priority
+8b4cc81 Refresh project coordination state
 ```
 
 Актуальный install package для стабильного `amn2` baseline `d0939d8`:

@@ -85,7 +85,7 @@ tests/db/test_repositories.py
 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 branch: master
 remote: https://github.com/barakov-dot/amn3.git
-committed head reviewed before this refresh: 7fc3aee Set KYORESUAS API integration priority
+committed head reviewed in this refresh: 8b4cc81 Refresh project coordination state
 status: clean and synchronized with origin/master
 ```
 
@@ -95,6 +95,7 @@ status: clean and synchronized with origin/master
 25e02e9 Add VPS install package
 87da41d Fix VPS installer user creation fallback
 7fc3aee Set KYORESUAS API integration priority
+8b4cc81 Refresh project coordination state
 ```
 
 Актуальный install package:
@@ -164,13 +165,13 @@ origin/master: 8212281 Document amn2 live migration to lab
 status: ahead 2, with local uncommitted status/audit/backlog updates
 ```
 
-API-readiness audit уже выполнен. Выбран первый безопасный future transfer slice:
+API-readiness audit уже выполнен, а его первый policy slice уже перенесен в `amn2`:
 
 ```text
 Route/Auth/Operation Policy Matrix for current amn2 surfaces
 ```
 
-Это должен быть policy/contract slice без новых production API routes, без secret-readable responses, без write operations и без live VPS calls.
+После него API-направление перешло в активную собственную ветку `codex/read-only-api-route-shell`; текущий gate - VPS loopback API smoke, без расширения до write/config routes.
 
 ## Что было прочитано
 
@@ -435,14 +436,13 @@ Primary verdict:
 
 ## Текущая design queue для `amn2`
 
-Ближайшие кандидаты после verified baseline:
+Актуальная design queue после verified baseline:
 
-- `Route/Auth/Operation Policy Matrix for current amn2 surfaces`: выбран как первый safe slice после API-readiness audit.
-- `RemoteOperationRunner`: design готов к review; first slice plan уже есть, но после policy matrix.
-- `Scoped API Tokens`: нужен для integration/agent/metrics, но после route policy.
-- `Secret Inventory + Backup Policy`: foundational gate для backup/config/token work.
-- `Public/Self-service Config Delivery`: `.conf`, QR и `vpn://` считать `secret-read`.
-- `Domain Zone Exclusion Policy`: новый design candidate, но требует отдельного spec; настоящий bypass возможен только на клиенте.
+- `codex/read-only-api-route-shell`: active API branch, head `2010d60`, ждет real VPS loopback smoke.
+- `codex/remote-operation-vps-gate-prep`: отдельный controlled VPS gate для SSH/sync/config/runtime write surfaces.
+- `Route/Auth Binding`, `Scoped API Token Lifecycle`, `Secret Inventory`, `Public Config Policy`, `Backup/Import Policy`: обязательные baselines перед дальнейшим route expansion.
+- `/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot и public docs/metrics остаются заблокированы до отдельного решения.
+- `Domain Zone Exclusion Policy` и 2FA отложены до закрытия текущих API/VPS safety gates.
 - `Config delivery policy table`: actor, gate, risk class, output, audit, tests.
 
 Пауза:

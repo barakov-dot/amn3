@@ -2,6 +2,8 @@
 
 Дата: 2026-06-01.
 
+Актуализация 2026-06-02: первый read-only API route shell уже реализован и запушен в `amn2/codex/read-only-api-route-shell`, head `2010d60 Add API VPS smoke evidence template`. Этот документ теперь является исходным priority decision и safety boundary; текущий следующий gate - real VPS loopback API smoke по `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`, а не повторная локальная реализация.
+
 Назначение: зафиксировать новый приоритет после успешной установки `amn2` на VPS: API integration становится главной product lane, но переносится как собственный `amn2` contract без копирования `kyoresuas/amnezia-api` implementation.
 
 ## Decision
@@ -71,36 +73,36 @@ Forbidden in first slice:
 - Docker socket/control operations;
 - KYORESUAS Node/Fastify code copy.
 
-## Priority split
+## Priority status
 
 ### Critical
 
-1. Fix `amn2` packaging discovery so VPS installs can use `pip install -e .`.
-2. Finish VPS manual startup/preflight evidence with secrets redacted.
-3. Write implementation plan for read-only aggregate API route shell.
+1. `done-local`: Fix `amn2` packaging discovery so VPS installs can use `pip install -e .` - commit `e99d5f3`.
+2. `done-local`: Write and implement the read-only aggregate API route shell plan - commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`.
+3. `active-vps-gate`: Finish real VPS loopback API smoke evidence with secrets redacted.
 
 ### Important
 
-4. Add route policy entries for the new API endpoints before route code.
-5. Bind endpoints to scoped API token auth and prove `server:read` cannot access `metrics:read`.
-6. Add no-secret response/audit tests for every endpoint.
+4. `done-local`: Add route policy entries for the new API endpoints.
+5. `done-local`: Bind endpoints to scoped API token auth and prove `server:read` cannot access `metrics:read`.
+6. `done-local`: Add no-secret response/audit tests for every endpoint.
 
 ### Simple
 
-7. Document example safe `curl` commands with placeholder tokens only.
-8. Update AMN3 transfer evidence after the branch is pushed.
+7. `done-local`: Document safe smoke flow with placeholder tokens only.
+8. `active-after-vps-smoke`: Update AMN3 transfer evidence after VPS smoke.
 
 ### Cosmetic
 
-9. OpenAPI/docs grouping after route behavior is stable.
-10. Naming cleanup for API terms: server summary, metrics summary, controller-safe fields.
+9. `defer`: OpenAPI/docs grouping after VPS smoke and merge decision.
+10. `defer`: Naming cleanup for API terms only if route behavior changes.
 
-## Next plan artifact
+## Implemented plan artifact
 
-Next implementation plan should be:
+Implementation plan:
 
 ```text
 docs/superpowers/plans/2026-06-01-amn2-read-only-api-route-shell.md
 ```
 
-It should be implemented in `amn2` on a separate branch after the packaging fix and VPS startup/preflight evidence are recorded.
+Implemented in `amn2/codex/read-only-api-route-shell`. Do not start another API implementation branch from AMN3 while this branch is waiting for VPS smoke and PR/merge decision.
