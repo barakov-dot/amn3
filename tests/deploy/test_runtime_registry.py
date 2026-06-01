@@ -475,6 +475,58 @@ def test_amn3_local_agent_write_settings_contract_keeps_read_only_token_separate
     assert "docs/AMN3_LOCAL_AGENT_WRITE_SETTINGS_CONTRACT.ru.md" in policy_doc
 
 
+def test_amn3_local_agent_write_settings_implementation_plan_is_code_ready_and_safe():
+    plan_path = ROOT / "docs/superpowers/plans/2026-06-01-local-agent-write-settings-implementation.ru.md"
+    contract_path = ROOT / "docs/AMN3_LOCAL_AGENT_WRITE_SETTINGS_CONTRACT.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    post_vps_path = ROOT / "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md"
+
+    text = plan_path.read_text(encoding="utf-8")
+    contract = contract_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    post_vps = post_vps_path.read_text(encoding="utf-8")
+
+    assert "# Local Agent Write Settings Implementation Plan" in text
+    assert "GO-1" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED=false" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED=true" in text
+    assert "LOCAL_AGENT_TOKEN_SCOPES remains read-only" in text
+    assert "agent:clients:write must not be added to LOCAL_AGENT_TOKEN_SCOPES" in text
+    assert "dedicated write token set" in text
+    assert "LOCAL_AGENT_WRITE_TOKEN_ID" in text
+    assert "LOCAL_AGENT_WRITE_TOKEN_HASH" in text
+    assert "LOCAL_AGENT_WRITE_TOKEN_OWNER" in text
+    assert "LOCAL_AGENT_WRITE_TOKEN_SCOPES" in text
+    assert "LOCAL_AGENT_WRITE_TOKEN_SCOPES=agent:clients:write" in text
+    assert "LOCAL_AGENT_WRITE_TOKEN_EXPIRES_AT" in text
+    assert "LOCAL_AGENT_CONTROLLER_WRITE_TOKEN_PATH" in text
+    assert "build_agent_tokens" in text
+    assert "parse_agent_scopes" in text
+    assert "AgentToken" in text
+    assert "missing_scope" in text
+    assert "tests/config/test_settings.py" in text
+    assert "tests/agent/test_config.py" in text
+    assert "tests/agent/test_policy.py" in text
+    assert "tests/test_file_hygiene.py" in text
+    assert "app/config/settings.py" in text
+    assert "app/agent/config.py" in text
+    assert "app/agent/auth.py" in text
+    assert ".env.example" in text
+    assert "deploy/examples/.env.production.example" in text
+    assert "read-only token" in text
+    assert "write token" in text
+    assert "raw token" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "no write routes" in text
+    assert "pytest tests/config/test_settings.py tests/agent/test_config.py tests/agent/test_policy.py tests/test_file_hygiene.py" in text
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-settings-implementation.ru.md" in contract
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-settings-implementation.ru.md" in handoff
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-settings-implementation.ru.md" in post_vps
+
+
 def test_amn3_preflight_confirmation_doc_tracks_nonce_expiry_and_vps_gate():
     doc_path = ROOT / "docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md"
     handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"

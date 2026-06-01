@@ -11,6 +11,7 @@
 - `docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md`
 - `docs/AMN3_WRITE_API_UX_FLOW.ru.md`
 - `docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md`
+- `docs/superpowers/plans/2026-06-01-local-agent-write-settings-implementation.ru.md`
 - `docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md`
 
 ## 1. Current invariant
