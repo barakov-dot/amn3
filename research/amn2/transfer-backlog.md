@@ -59,9 +59,10 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Public/self-service config delivery policy | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/public-self-service-config-delivery-policy.md` | Использовать как gate перед share/self-service config routes; first slice только no-route policy/share-token contract |
 | Read-only metrics privacy classification | `classification-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/read-only-metrics-privacy-classification.md` | После VPS evidence писать implementation plan для aggregate-only API route shell |
 | Local Agent runtime metadata alignment | `alignment-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/local-agent-runtime-metadata-alignment.md` | После VPS evidence писать implementation plan для controller-safe runtime summary, не clients/configs |
-| API token rotation/revoke policy | `policy-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/api-token-rotation-revoke-policy.md` | Перед route expansion закрепить expiry, revoke, rotation, owner inheritance и audit-safe lifecycle |
+| API token rotation/revoke policy | `policy-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/api-token-rotation-revoke-policy.md` | Policy остается design source для route expansion и Local Agent token separation |
+| API token lifecycle gate | `implemented-pushed-local-gate-complete` | `amn2` | branch `codex/api-token-lifecycle-gate`, commit `c2ba646`; evidence `research/amn2/api-token-lifecycle-gate-implementation.md`; focused `12 passed`, broader `58 passed`, full `548 passed` | Использовать как service/repository lifecycle baseline; `/api/*` routes, `config:read`, write scopes и bearer-token route exposure остаются отдельными gates |
 | Web panel safe improvements | `implemented-pushed-local-gate-complete` | `amn2` | commit `22dfc37`; RED `4 failed as expected`; focused `75 passed`; full suite `536 passed` | Использовать как operator safety wording baseline; VPS gate не нужен |
-| Scoped API token storage | `implemented-pushed-local-gate-complete` | `amn2` | commit `1fdcde5`; RED `1 import error as expected`; focused `54 passed`; full suite `542 passed` | Использовать как hash-only token baseline; VPS gate не нужен |
+| Scoped API token storage | `implemented-pushed-local-gate-complete` | `amn2` | commit `1fdcde5`; RED `1 import error as expected`; focused `54 passed`; full suite `542 passed` | Использовать как hash-only token baseline; lifecycle gate выполнен отдельным branch `codex/api-token-lifecycle-gate`; VPS gate не нужен |
 | Public/self-service config delivery | `lab-only-until-policy` | AMN3 -> `amn2` later | `research/amn2/config-delivery-inventory.md` | Не открывать public config links до scoped token/self-service design |
 
 ## Local Agent Decision
@@ -99,7 +100,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 7. Manager config export contract подготовлен в `research/amn2/manager-config-export-contract.md`; первым переносить только local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
 8. Public/self-service config delivery policy подготовлен в `research/amn2/public-self-service-config-delivery-policy.md`; public routes не добавлять, первый перенос только no-route policy registry/share-token contract.
 9. Docker manager safety contract уже зафиксирован в `research/amn2/docker-manager-design-note.md`; implementation plan писать только после VPS evidence.
-10. Read-only clients/metrics endpoints рассматривать только после VPS evidence; privacy classification подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, Local Agent runtime metadata alignment - в `research/amn2/local-agent-runtime-metadata-alignment.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
+10. Read-only clients/metrics endpoints рассматривать только после VPS evidence или отдельного route-exposure решения; privacy classification подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, Local Agent runtime metadata alignment - в `research/amn2/local-agent-runtime-metadata-alignment.md`, token lifecycle gate выполнен в `amn2/codex/api-token-lifecycle-gate`.
 11. Domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
 
 ## Neighbor Chat Decision

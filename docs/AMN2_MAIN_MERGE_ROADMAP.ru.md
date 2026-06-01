@@ -425,8 +425,9 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 ### Scoped API token lifecycle lane
 
 1. Rotation/revoke policy is prepared in `research/amn2/api-token-rotation-revoke-policy.md`.
-2. First implementation before route expansion should be a route-connected lifecycle gate: explicit expiry, idempotent service/API revoke, create-new-then-revoke-old rotation, owner inheritance and safe audit metadata.
-3. `config:read`, write, remote-exec, destructive, backup/import and broad admin-equivalent bearer tokens remain blocked.
+2. Local-only lifecycle gate implemented in `amn2/codex/api-token-lifecycle-gate`, commit `c2ba646`: explicit route-connected expiry helper, idempotent revoke event, create-new-then-revoke-old rotation, owner inheritance and safe metadata.
+3. Next implementation should expose only read-only route shell after VPS evidence or a separate route-exposure decision.
+4. `config:read`, write, remote-exec, destructive, backup/import and broad admin-equivalent bearer tokens remain blocked.
 
 ## Recommendation
 

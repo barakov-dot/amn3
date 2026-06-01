@@ -94,6 +94,7 @@ Backlog не является списком задач к немедленно�
 - Причина: внешним интеграциям нельзя выдавать admin-equivalent bearer tokens.
 - Текущий результат: commit `1fdcde5` добавил `api_tokens` table и `app.services.api_tokens` contract: hash-only storage, one-time raw token issue metadata, expiry, revoke, last-used и safe audit metadata. Первый slice разрешает только `server:read` и `metrics:read`.
 - Текущий результат 2026-06-01: `research/amn2/api-token-rotation-revoke-policy.md` фиксирует expiry, revoke, rotation, owner inheritance, backup/restore и audit-safe lifecycle gates.
+- Текущий результат 2026-06-01: local-only lifecycle gate выполнен в `amn2/codex/api-token-lifecycle-gate`, commit `c2ba646`; `/api/*` routes, `config:read`, write/remote-exec scopes не добавлялись.
 - Следующий шаг: не добавлять `/api/*`, `config:read` или write scopes до VPS evidence, route policy entry, privacy/secret-read classification и route-connected lifecycle implementation.
 
 ### Public/self-service config delivery
