@@ -75,6 +75,8 @@ class Settings(BaseSettings):
         default=True,
         alias="WEB_ADMIN_SESSION_COOKIE_SECURE",
     )
+    api_host: str = Field(default="127.0.0.1", alias="API_HOST")
+    api_port: int = Field(default=3040, alias="API_PORT")
     local_agent_enabled: bool = Field(default=False, alias="LOCAL_AGENT_ENABLED")
     local_agent_host: str = Field(default="127.0.0.1", alias="LOCAL_AGENT_HOST")
     local_agent_port: int = Field(default=3031, alias="LOCAL_AGENT_PORT")
@@ -170,6 +172,8 @@ class Settings(BaseSettings):
             raise ValueError("APP_LOG_LEVEL must be DEBUG, INFO, WARNING, or ERROR")
         if not 1 <= self.web_admin_port <= 65535:
             raise ValueError("WEB_ADMIN_PORT must be in 1..65535")
+        if not 1 <= self.api_port <= 65535:
+            raise ValueError("API_PORT must be in 1..65535")
         if self.app_log_max_lines < 1:
             raise ValueError("APP_LOG_MAX_LINES must be positive")
         if self.web_admin_enabled:

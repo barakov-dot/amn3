@@ -131,6 +131,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional; omit to enter the password without shell history.",
     )
 
+    api = sub.add_parser("api")
+    api_sub = api.add_subparsers(dest="api_command", required=True)
+
+    api_serve = api_sub.add_parser("serve")
+    api_serve.add_argument("--host", default=None)
+    api_serve.add_argument("--port", type=int, default=None)
+
     return parser
 
 
@@ -213,6 +220,8 @@ def main() -> None:
         print(run_web_password_hash(_read_web_password(args.password)))
     elif args.command == "web" and args.web_command == "serve":
         run_web_server(host=args.host, port=args.port)
+    elif args.command == "api" and args.api_command == "serve":
+        run_api_server(host=args.host, port=args.port)
 
 
 def run_web_password_hash(password: str) -> str:
@@ -239,6 +248,27 @@ def run_web_server(
         app,
         host=host or actual_settings.web_admin_host,
         port=port or actual_settings.web_admin_port,
+    )
+
+
+def run_api_server(
+    *,
+    host: str | None,
+    port: int | None,
+    settings: Settings | None = None,
+    uvicorn_run: Callable[..., Any] | None = None,
+) -> None:
+    import uvicorn
+
+    from app.api import create_api_app
+
+    actual_settings = settings or Settings()
+    app = create_api_app(actual_settings)
+    runner = uvicorn_run or uvicorn.run
+    runner(
+        app,
+        host=host or actual_settings.api_host,
+        port=port or actual_settings.api_port,
     )
 
 

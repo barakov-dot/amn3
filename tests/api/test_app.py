@@ -1,0 +1,246 @@
+from pathlib import Path
+
+from fastapi.testclient import TestClient
+
+from app.api.app import create_api_app
+from app.config.settings import Settings
+from app.db.connection import connect
+from app.db.repositories import Repository
+from app.db.schema import initialize_schema
+from app.services.api_tokens import hash_api_token
+
+
+def test_api_servers_requires_server_read_scope_and_returns_safe_summary(tmp_path: Path):
+    settings, repo = _seed_api_data(tmp_path)
+    _store_token(repo, raw_token="server-token", scopes=["server:read"])
+    client = TestClient(create_api_app(settings))
+
+    missing = client.get("/api/servers")
+    response = client.get(
+        "/api/servers",
+        headers={"Authorization": "Bearer server-token"},
+    )
+
+    assert missing.status_code == 401
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["servers"] == [
+        {
+            "name": "local",
+            "status": "active",
+            "enabled": True,
+            "configured": True,
+            "runtime": "host_systemd",
+            "device_counts": {"active": 1, "total": 2},
+            "health": {
+                "status": "online",
+                "latency_ms": 20,
+                "checked_at": payload["servers"][0]["health"]["checked_at"],
+                "readiness": {"ssh": True, "awg": True, "udp_port": True},
+            },
+        }
+    ]
+    assert payload["servers"][0]["health"]["checked_at"]
+    assert _forbidden_markers_absent(payload)
+
+
+def test_api_server_summary_returns_one_server_without_secret_fields(tmp_path: Path):
+    settings, repo = _seed_api_data(tmp_path)
+    _store_token(repo, raw_token="server-token", scopes=["server:read"])
+    client = TestClient(create_api_app(settings))
+
+    found = client.get(
+        "/api/servers/local/summary",
+        headers={"Authorization": "Bearer server-token"},
+    )
+    missing = client.get(
+        "/api/servers/missing/summary",
+        headers={"Authorization": "Bearer server-token"},
+    )
+
+    assert found.status_code == 200
+    assert found.json()["server"]["name"] == "local"
+    assert found.json()["server"]["device_counts"] == {"active": 1, "total": 2}
+    assert missing.status_code == 404
+    assert _forbidden_markers_absent(found.json())
+
+
+def test_api_metrics_requires_metrics_read_scope(tmp_path: Path):
+    settings, repo = _seed_api_data(tmp_path)
+    _store_token(repo, raw_token="server-token", scopes=["server:read"])
+    _store_token(repo, raw_token="metrics-token", scopes=["metrics:read"])
+    client = TestClient(create_api_app(settings))
+
+    denied = client.get(
+        "/api/metrics/summary",
+        headers={"Authorization": "Bearer server-token"},
+    )
+    allowed = client.get(
+        "/api/metrics/summary",
+        headers={"Authorization": "Bearer metrics-token"},
+    )
+
+    assert denied.status_code == 403
+    assert allowed.status_code == 200
+    assert allowed.json() == {
+        "users": {"total": 1, "active": 1, "blocked": 0, "deleted": 0},
+        "servers": {"total": 1, "active": 1, "degraded": 0, "disabled": 0},
+        "devices": {"total": 2, "active": 1, "disabled": 0, "revoked": 1},
+        "traffic": {
+            "rx_bytes": 150,
+            "tx_bytes": 250,
+            "source": "latest_device_snapshots",
+        },
+    }
+    assert _forbidden_markers_absent(allowed.json())
+
+
+def test_api_auth_rejects_invalid_token_without_echoing_secret(tmp_path: Path):
+    settings, _repo = _seed_api_data(tmp_path)
+    client = TestClient(create_api_app(settings))
+
+    response = client.get(
+        "/api/servers",
+        headers={"Authorization": "Bearer raw-invalid-token"},
+    )
+
+    assert response.status_code == 401
+    assert "raw-invalid-token" not in response.text
+    assert "token_hash" not in response.text
+
+
+def _seed_api_data(tmp_path: Path) -> tuple[Settings, Repository]:
+    db_path = tmp_path / "api.sqlite3"
+    settings = Settings(
+        _env_file=None,
+        telegram_bot_token="CHANGE_ME",
+        app_secret_key="test-secret",
+        database_path=str(db_path),
+    )
+    conn = connect(db_path)
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id = repo.upsert_user(
+        telegram_id=2001,
+        username="bob",
+        first_name="Bob",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    active_device_id = _insert_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        vpn_ip="10.8.0.2",
+        peer_public_key="active-public",
+        status="active",
+    )
+    _insert_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        vpn_ip="10.8.0.3",
+        peer_public_key="revoked-public",
+        status="revoked",
+    )
+    repo.record_server_health(
+        server_id=server_id,
+        status="online",
+        latency_ms=20,
+        ssh_ok=True,
+        awg_ok=True,
+        udp_port_ok=True,
+        error="must not appear in API",
+    )
+    repo.record_device_traffic_snapshot(
+        device_id=active_device_id,
+        server_id=server_id,
+        peer_public_key="active-public",
+        rx_bytes=100,
+        tx_bytes=200,
+        source="test",
+        collected_at="2026-06-01T10:00:00Z",
+    )
+    repo.record_device_traffic_snapshot(
+        device_id=active_device_id,
+        server_id=server_id,
+        peer_public_key="active-public",
+        rx_bytes=150,
+        tx_bytes=250,
+        source="test",
+        collected_at="2026-06-01T10:05:00Z",
+    )
+    return settings, repo
+
+
+def _store_token(repo: Repository, *, raw_token: str, scopes: list[str]) -> None:
+    repo.create_api_token(
+        token_id=f"token-{raw_token}",
+        name="API token",
+        owner_user_id=None,
+        owner_label="ops",
+        token_hash=hash_api_token(raw_token),
+        scopes=scopes,
+        expires_at="2099-01-01T00:00:00+00:00",
+    )
+
+
+def _insert_device(
+    repo: Repository,
+    *,
+    user_id: int,
+    server_id: int,
+    vpn_ip: str,
+    peer_public_key: str,
+    status: str,
+) -> int:
+    cursor = repo._conn.execute(
+        """
+        INSERT INTO devices (
+            user_id,
+            server_id,
+            name,
+            duration_days,
+            status,
+            vpn_ip,
+            peer_public_key,
+            peer_private_key_encrypted,
+            preshared_key_encrypted,
+            config_version
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            user_id,
+            server_id,
+            f"{status}-device",
+            7,
+            status,
+            vpn_ip,
+            peer_public_key,
+            f"v1:{status}-private",
+            f"v1:{status}-psk",
+            "amneziawg_v2",
+        ),
+    )
+    repo._conn.commit()
+    return int(cursor.lastrowid)
+
+
+def _forbidden_markers_absent(payload: object) -> bool:
+    text = str(payload).lower()
+    forbidden = (
+        "private",
+        "preshared",
+        "psk",
+        "vpn://",
+        "token_hash",
+        "raw-token",
+        "raw token",
+        "peer_public_key",
+        "server_public_key",
+        "ssh_port",
+        "endpoint_host",
+        "must not appear",
+    )
+    return all(marker not in text for marker in forbidden)

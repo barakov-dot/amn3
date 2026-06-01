@@ -47,6 +47,14 @@ REQUIRED_POLICY_IDS = {
     "remote.server.health_check",
     "cli.server.apply_peer_live",
     "cli.server.revoke_peer_live",
+    "api.servers.list",
+    "api.servers.summary",
+    "api.metrics.summary",
+}
+API_ROUTE_SHELL_POLICY_IDS = {
+    "api.servers.list",
+    "api.servers.summary",
+    "api.metrics.summary",
 }
 
 SECRET_RISKS = {"secret-read", "public-token-secret-read"}
@@ -90,14 +98,20 @@ def test_policy_ids_are_unique():
 
 @pytest.mark.parametrize(
     "surface",
-    ("web", "public-token", "bot", "local-agent", "cli", "remote-operation"),
+    ("web", "public-token", "bot", "local-agent", "cli", "remote-operation", "api"),
 )
 def test_each_surface_has_policy_entries(surface):
     assert policies_by_surface(surface)
 
 
 def test_no_policy_enables_new_behavior_in_first_slice():
-    assert all(policy.enables_new_behavior is False for policy in SURFACE_POLICIES)
+    enabled = {
+        policy.policy_id
+        for policy in SURFACE_POLICIES
+        if policy.enables_new_behavior is True
+    }
+
+    assert enabled == API_ROUTE_SHELL_POLICY_IDS
 
 
 def test_local_agent_first_slice_matches_existing_agent_policy():
@@ -165,3 +179,24 @@ def test_live_retest_is_marked_for_vps_write_surfaces():
         policy = get_surface_policy(policy_id)
 
         assert policy.live_retest_required is True
+
+
+def test_api_route_shell_policies_are_read_only_scoped_and_no_live_retest():
+    expected_scopes = {
+        "api.servers.list": "server:read",
+        "api.servers.summary": "server:read",
+        "api.metrics.summary": "metrics:read",
+    }
+
+    for policy_id, scope in expected_scopes.items():
+        policy = get_surface_policy(policy_id)
+
+        assert policy.surface == "api"
+        assert policy.risk_class == "read-only"
+        assert policy.secret_class == "none"
+        assert scope in policy.auth_method
+        assert policy.side_effects == ()
+        assert policy.live_retest_required is False
+        assert policy.implementation_mode == "implemented"
+        assert "aggregate-only" in _gate_text(policy)
+        assert "no raw secret" in _gate_text(policy)

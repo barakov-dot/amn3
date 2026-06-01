@@ -4,7 +4,15 @@ from dataclasses import dataclass
 from typing import Literal
 
 
-SurfaceName = Literal["web", "public-token", "bot", "local-agent", "cli", "remote-operation"]
+SurfaceName = Literal[
+    "web",
+    "public-token",
+    "bot",
+    "local-agent",
+    "cli",
+    "remote-operation",
+    "api",
+]
 RiskClass = Literal[
     "auth-entry",
     "auth-exit",
@@ -27,7 +35,7 @@ SecretClass = Literal[
     "public-token",
     "operation-output",
 ]
-ImplementationMode = Literal["inventory-only", "blocked-future"]
+ImplementationMode = Literal["inventory-only", "blocked-future", "implemented"]
 
 
 class SurfacePolicyError(ValueError):
@@ -72,6 +80,7 @@ def _p(
     implementation_mode: ImplementationMode,
     test_refs: tuple[str, ...],
     notes: str,
+    enables_new_behavior: bool = False,
 ) -> SurfacePolicy:
     return SurfacePolicy(
         policy_id=policy_id,
@@ -88,7 +97,7 @@ def _p(
         operation_contract=operation_contract,
         live_retest_required=live_retest_required,
         implementation_mode=implementation_mode,
-        enables_new_behavior=False,
+        enables_new_behavior=enables_new_behavior,
         test_refs=test_refs,
         notes=notes,
     )
@@ -328,6 +337,63 @@ SURFACE_POLICIES: tuple[SurfacePolicy, ...] = (
         "blocked-future",
         ("tests/agent/test_policy.py",),
         "Reboot remains out of scope.",
+    ),
+    _p(
+        "api.servers.list",
+        "api",
+        "GET",
+        "/api/servers",
+        "api-client",
+        "bearer token + server:read",
+        "read-only",
+        "none",
+        (),
+        ("scoped API token", "aggregate-only", "no raw secret", "no SSH"),
+        False,
+        "Native amn2 read-only API route shell.",
+        False,
+        "implemented",
+        ("tests/api/test_app.py", "tests/services/test_api_tokens.py"),
+        "Lists configured server aliases and aggregate readiness only.",
+        enables_new_behavior=True,
+    ),
+    _p(
+        "api.servers.summary",
+        "api",
+        "GET",
+        "/api/servers/{server_name}/summary",
+        "api-client",
+        "bearer token + server:read",
+        "read-only",
+        "none",
+        (),
+        ("scoped API token", "aggregate-only", "no raw secret", "no SSH"),
+        False,
+        "Native amn2 read-only API route shell.",
+        False,
+        "implemented",
+        ("tests/api/test_app.py", "tests/services/test_api_tokens.py"),
+        "Shows one server alias, local health metadata and aggregate counts.",
+        enables_new_behavior=True,
+    ),
+    _p(
+        "api.metrics.summary",
+        "api",
+        "GET",
+        "/api/metrics/summary",
+        "api-client",
+        "bearer token + metrics:read",
+        "read-only",
+        "none",
+        (),
+        ("scoped API token", "aggregate-only", "no raw secret", "no SSH"),
+        False,
+        "Native amn2 read-only API route shell.",
+        False,
+        "implemented",
+        ("tests/api/test_app.py", "tests/services/test_api_tokens.py"),
+        "Reports global counts and latest-device traffic totals only.",
+        enables_new_behavior=True,
     ),
     _p(
         "web.auth.login_submit",

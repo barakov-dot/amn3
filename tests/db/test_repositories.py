@@ -503,6 +503,121 @@ def test_list_servers_for_admin_includes_counts_and_latest_health(tmp_path):
     assert servers[0]["health_error"] == "awg service down"
 
 
+def test_api_server_summary_queries_expose_safe_aggregate_fields(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id, server_id = _create_user_and_server(repo)
+    _insert_device(
+        conn,
+        user_id=user_id,
+        server_id=server_id,
+        vpn_ip="10.8.0.2",
+        peer_public_key="active-public",
+        status="active",
+    )
+    _insert_device(
+        conn,
+        user_id=user_id,
+        server_id=server_id,
+        vpn_ip="10.8.0.3",
+        peer_public_key="disabled-public",
+        status="disabled",
+    )
+    repo.record_server_health(
+        server_id=server_id,
+        status="online",
+        latency_ms=20,
+        ssh_ok=True,
+        awg_ok=True,
+        udp_port_ok=True,
+        error="redacted from API",
+    )
+
+    summaries = repo.list_api_server_summaries()
+    summary = repo.get_api_server_summary("local")
+
+    assert len(summaries) == 1
+    assert summaries[0]["name"] == "local"
+    assert summary is not None
+    assert summary["name"] == "local"
+    assert summary["status"] == "active"
+    assert summary["runtime"] == "host_systemd"
+    assert summary["active_device_count"] == 1
+    assert summary["total_device_count"] == 2
+    assert summary["health_status"] == "online"
+    assert summary["health_latency_ms"] == 20
+    assert summary["health_ssh_ok"] == 1
+    assert summary["health_awg_ok"] == 1
+    assert summary["health_udp_port_ok"] == 1
+    assert repo.get_api_server_summary("missing") is None
+    assert "host" not in summary.keys()
+    assert "ssh_port" not in summary.keys()
+    assert "endpoint_host" not in summary.keys()
+    assert "server_public_key" not in summary.keys()
+    assert "health_error" not in summary.keys()
+
+
+def test_api_metrics_summary_aggregates_counts_and_latest_traffic(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id, server_id = _create_user_and_server(repo)
+    active_device_id = _insert_device(
+        conn,
+        user_id=user_id,
+        server_id=server_id,
+        vpn_ip="10.8.0.2",
+        peer_public_key="active-public",
+        status="active",
+    )
+    _insert_device(
+        conn,
+        user_id=user_id,
+        server_id=server_id,
+        vpn_ip="10.8.0.3",
+        peer_public_key="revoked-public",
+        status="revoked",
+    )
+    repo.record_device_traffic_snapshot(
+        device_id=active_device_id,
+        server_id=server_id,
+        peer_public_key="active-public",
+        rx_bytes=100,
+        tx_bytes=200,
+        source="test",
+        collected_at="2026-06-01T10:00:00Z",
+    )
+    repo.record_device_traffic_snapshot(
+        device_id=active_device_id,
+        server_id=server_id,
+        peer_public_key="active-public",
+        rx_bytes=150,
+        tx_bytes=250,
+        source="test",
+        collected_at="2026-06-01T10:05:00Z",
+    )
+
+    summary = repo.get_api_metrics_summary()
+
+    assert summary == {
+        "users_total": 1,
+        "users_active": 1,
+        "users_blocked": 0,
+        "users_deleted": 0,
+        "servers_total": 1,
+        "servers_active": 1,
+        "servers_degraded": 0,
+        "servers_disabled": 0,
+        "devices_total": 2,
+        "devices_active": 1,
+        "devices_disabled": 0,
+        "devices_revoked": 1,
+        "traffic_rx_bytes": 150,
+        "traffic_tx_bytes": 250,
+    }
+
+
 def test_list_orders_for_admin_joins_users_newest_first(tmp_path):
     conn = connect(tmp_path / "test.sqlite3")
     initialize_schema(conn)
@@ -824,8 +939,8 @@ def _insert_device(
     vpn_ip: str,
     peer_public_key: str,
     status: str,
-) -> None:
-    conn.execute(
+) -> int:
+    cursor = conn.execute(
         """
         INSERT INTO devices (
             user_id,
@@ -855,3 +970,4 @@ def _insert_device(
         ),
     )
     conn.commit()
+    return int(cursor.lastrowid)

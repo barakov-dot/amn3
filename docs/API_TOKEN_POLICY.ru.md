@@ -2,7 +2,7 @@
 
 Дата: 2026-06-01.
 
-Этот документ фиксирует первый local-only slice для будущих external API tokens. Slice не добавляет `/api/*` endpoints, не меняет web/bot/agent runtime behavior и не трогает live VPS.
+Этот документ фиксирует scoped API token contract и первый подключенный read-only route shell. Slice добавляет только aggregate `/api/*` endpoints, не меняет web/bot/agent runtime behavior и не трогает live VPS.
 
 ## First-slice contract
 
@@ -60,8 +60,22 @@ Safe audit metadata содержит только `token_id`, `name`, `owner_lab
 
 Safe lifecycle metadata не содержит raw token, Authorization header, token hash, `.conf`, QR payload, `vpn://`, private key, PSK или remote command output.
 
+## Connected read-only route shell
+
+Первый route-connected slice разрешает только aggregate read-only endpoints:
+
+- `GET /api/servers` - требует `server:read`;
+- `GET /api/servers/{server_name}/summary` - требует `server:read`;
+- `GET /api/metrics/summary` - требует `metrics:read`.
+
+Маршруты возвращают только безопасные summary/count fields: server name/status/runtime, device counters, latest health readiness и aggregate metrics. Ответы не содержат SSH host/port, endpoint host, public/private keys, PSK, token hash, `.conf`, QR или `vpn://`.
+
+`server:read` не дает доступ к metrics endpoint, а `metrics:read` не дает доступ к server endpoints. Любой bearer token без нужного scope получает отказ без раскрытия raw token или token hash.
+
+Этот shell не выполняет remote operations: нет peer apply/revoke/sync, backup/import/reboot, Docker restart, SSH command execution или выдачи secret-bearing config artifacts.
+
 ## VPS Gate
 
-VPS gate не нужен для этого slice: нет routes, нет live write flow, нет peer apply/revoke/config/sync/runtime changes.
+VPS gate не нужен для этого route shell: нет live write flow, нет peer apply/revoke/config/sync/runtime changes и нет secret-bearing config reads.
 
 VPS gate понадобится только когда API начнет вызывать real remote operations или читать/выдавать live secret-bearing config artifacts.
