@@ -618,6 +618,77 @@ def test_api_metrics_summary_aggregates_counts_and_latest_traffic(tmp_path):
     }
 
 
+def test_api_users_summary_aggregates_without_personal_fields(tmp_path):
+    conn = sqlite3.connect(tmp_path / "test.sqlite3")
+    conn.row_factory = sqlite3.Row
+    initialize_schema(conn)
+    repo = Repository(conn)
+    active_user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice-secret",
+        first_name="Alice",
+        last_name="A",
+    )
+    blocked_user_id = repo.create_user_for_admin(
+        telegram_id=1002,
+        username="blocked-secret",
+        first_name="Blocked",
+        last_name="B",
+        email="blocked@example.com",
+        status="blocked",
+        is_admin=False,
+    )
+    admin_user_id = repo.create_user_for_admin(
+        telegram_id=1003,
+        username="admin-secret",
+        first_name="Admin",
+        last_name="C",
+        email="admin@example.com",
+        status="active",
+        is_admin=True,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    _insert_device(
+        conn,
+        user_id=active_user_id,
+        server_id=server_id,
+        vpn_ip="10.8.0.2",
+        peer_public_key="active-public",
+        status="active",
+    )
+    repo.create_order(user_id=blocked_user_id, plan_id=None, payment_mode="manual")
+    fulfilled_order_id = repo.create_order(
+        user_id=admin_user_id,
+        plan_id=None,
+        payment_mode="manual",
+    )
+    conn.execute(
+        "UPDATE orders SET status = 'fulfilled' WHERE id = ?",
+        (fulfilled_order_id,),
+    )
+    conn.commit()
+
+    summary = repo.get_api_users_summary()
+
+    assert summary == {
+        "users_total": 3,
+        "users_active": 2,
+        "users_blocked": 1,
+        "users_deleted": 0,
+        "users_admins": 1,
+        "users_with_devices": 1,
+        "users_without_devices": 2,
+        "orders_total": 2,
+        "orders_manual_review": 1,
+        "orders_approved": 0,
+        "orders_fulfilled": 1,
+        "orders_payment_pending": 0,
+        "orders_rejected": 0,
+    }
+    assert "alice-secret" not in str(summary)
+    assert "blocked@example.com" not in str(summary)
+
+
 def test_list_orders_for_admin_joins_users_newest_first(tmp_path):
     conn = connect(tmp_path / "test.sqlite3")
     initialize_schema(conn)

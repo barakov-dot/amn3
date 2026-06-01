@@ -50,11 +50,13 @@ REQUIRED_POLICY_IDS = {
     "api.servers.list",
     "api.servers.summary",
     "api.metrics.summary",
+    "api.users.summary",
 }
 API_ROUTE_SHELL_POLICY_IDS = {
     "api.servers.list",
     "api.servers.summary",
     "api.metrics.summary",
+    "api.users.summary",
 }
 
 SECRET_RISKS = {"secret-read", "public-token-secret-read"}
@@ -186,6 +188,7 @@ def test_api_route_shell_policies_are_read_only_scoped_and_no_live_retest():
         "api.servers.list": "server:read",
         "api.servers.summary": "server:read",
         "api.metrics.summary": "metrics:read",
+        "api.users.summary": "metrics:read",
     }
 
     for policy_id, scope in expected_scopes.items():
@@ -196,6 +199,7 @@ def test_api_route_shell_policies_are_read_only_scoped_and_no_live_retest():
         assert policy.secret_class == "none"
         assert scope in policy.auth_method
         assert policy.side_effects == ()
+        assert policy.audit_required is True
         assert policy.live_retest_required is False
         assert policy.implementation_mode == "implemented"
         assert "aggregate-only" in _gate_text(policy)

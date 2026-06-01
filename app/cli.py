@@ -6,6 +6,9 @@ from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError
+from urllib.request import Request
+from urllib.request import urlopen
 
 from app import __version__
 from app.agent.api import create_agent_app
@@ -32,6 +35,7 @@ from app.server_config.loader import load_server_config, select_server
 from app.server_config.models import ServerConfig
 from app.services.api_tokens import create_route_api_token
 from app.services.api_tokens import revoke_api_token
+from app.services.api_smoke import validate_api_smoke_responses
 from app.services.peer_inventory import AwgDumpPeerInventoryCollector, PeerInventoryService
 from app.services.traffic import AwgDumpTrafficCollector, TrafficService
 from app.web.auth import create_password_hash
@@ -142,6 +146,13 @@ def build_parser() -> argparse.ArgumentParser:
     api_serve.add_argument("--host", default=None)
     api_serve.add_argument("--port", type=int, default=None)
 
+    api_smoke = api_sub.add_parser("smoke-check")
+    api_smoke.add_argument("--base-url", default="http://127.0.0.1:3040")
+    api_smoke.add_argument("--token", required=True)
+    api_smoke.add_argument("--server-name", required=True)
+    api_smoke.add_argument("--timeout", type=float, default=5.0)
+    api_smoke.add_argument("--pretty", action="store_true")
+
     api_token = api_sub.add_parser("token")
     api_token_sub = api_token.add_subparsers(dest="api_token_command", required=True)
 
@@ -152,11 +163,13 @@ def build_parser() -> argparse.ArgumentParser:
     api_token_issue.add_argument("--owner-user-id", type=int, default=None)
     api_token_issue.add_argument("--scope", action="append", dest="scopes", required=True)
     api_token_issue.add_argument("--expires-at", required=True)
+    api_token_issue.add_argument("--pretty", action="store_true")
 
     api_token_revoke = api_token_sub.add_parser("revoke")
     api_token_revoke.add_argument("--db", default="data/amneziya.sqlite3")
     api_token_revoke.add_argument("--token-id", required=True)
     api_token_revoke.add_argument("--reason", required=True)
+    api_token_revoke.add_argument("--pretty", action="store_true")
 
     return parser
 
@@ -242,6 +255,16 @@ def main() -> None:
         run_web_server(host=args.host, port=args.port)
     elif args.command == "api" and args.api_command == "serve":
         run_api_server(host=args.host, port=args.port)
+    elif args.command == "api" and args.api_command == "smoke-check":
+        print(
+            run_api_smoke_check(
+                base_url=args.base_url,
+                token=args.token,
+                server_name=args.server_name,
+                timeout=args.timeout,
+                pretty=args.pretty,
+            )
+        )
     elif args.command == "api" and args.api_command == "token":
         if args.api_token_command == "issue":
             print(
@@ -252,6 +275,7 @@ def main() -> None:
                     scopes=args.scopes,
                     expires_at=args.expires_at,
                     owner_user_id=args.owner_user_id,
+                    pretty=args.pretty,
                 )
             )
         elif args.api_token_command == "revoke":
@@ -260,6 +284,7 @@ def main() -> None:
                     db_path=Path(args.db),
                     token_id=args.token_id,
                     reason=args.reason,
+                    pretty=args.pretty,
                 )
             )
 
@@ -321,6 +346,7 @@ def run_api_token_issue(
     expires_at: str,
     owner_user_id: int | None = None,
     raw_token: str | None = None,
+    pretty: bool = False,
 ) -> str:
     if not name.strip():
         raise ValueError("token name cannot be blank")
@@ -350,7 +376,7 @@ def run_api_token_issue(
         **issue.safe_metadata(),
         "raw_token": issue.raw_token,
     }
-    return json.dumps(payload, ensure_ascii=False, sort_keys=True)
+    return _json_dumps(payload, pretty=pretty)
 
 
 def run_api_token_revoke(
@@ -359,6 +385,7 @@ def run_api_token_revoke(
     token_id: str,
     reason: str,
     revoked_at: str | None = None,
+    pretty: bool = False,
 ) -> str:
     if not token_id.strip():
         raise ValueError("token id cannot be blank")
@@ -384,7 +411,35 @@ def run_api_token_revoke(
     finally:
         conn.close()
 
-    return json.dumps(event.safe_metadata(), ensure_ascii=False, sort_keys=True)
+    return _json_dumps(event.safe_metadata(), pretty=pretty)
+
+
+def run_api_smoke_check(
+    *,
+    base_url: str,
+    token: str,
+    server_name: str,
+    timeout: float = 5.0,
+    pretty: bool = False,
+    http_get: Callable[[str, dict[str, str], float], tuple[int, str]] | None = None,
+) -> str:
+    if not token.strip():
+        raise ValueError("token cannot be blank")
+    if not server_name.strip():
+        raise ValueError("server name cannot be blank")
+
+    getter = http_get or _api_http_get
+    root = base_url.rstrip("/")
+    headers = {"Authorization": f"Bearer {token.strip()}"}
+    responses: dict[str, dict[str, object]] = {}
+    for name, path in _api_smoke_paths(server_name.strip()).items():
+        status_code, body = getter(f"{root}{path}", headers, timeout)
+        responses[name] = {
+            "status_code": status_code,
+            "body": _parse_json_body(body),
+        }
+
+    return _json_dumps(validate_api_smoke_responses(responses), pretty=pretty)
 
 
 def run_agent_token_hash(raw_token: str) -> str:
@@ -450,6 +505,37 @@ def _parse_api_datetime(value: str) -> datetime:
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
+
+
+def _json_dumps(payload: object, *, pretty: bool = False) -> str:
+    if pretty:
+        return json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2)
+    return json.dumps(payload, ensure_ascii=False, sort_keys=True)
+
+
+def _api_smoke_paths(server_name: str) -> dict[str, str]:
+    return {
+        "servers": "/api/servers",
+        "server_summary": f"/api/servers/{server_name}/summary",
+        "metrics_summary": "/api/metrics/summary",
+        "users_summary": "/api/users/summary",
+    }
+
+
+def _api_http_get(url: str, headers: dict[str, str], timeout: float) -> tuple[int, str]:
+    request = Request(url, headers=headers, method="GET")
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            return int(response.status), response.read().decode("utf-8", errors="replace")
+    except HTTPError as exc:
+        return int(exc.code), exc.read().decode("utf-8", errors="replace")
+
+
+def _parse_json_body(body: str) -> object:
+    try:
+        return json.loads(body)
+    except json.JSONDecodeError:
+        return body
 
 
 def run_server_check(server: ServerConfig, *, dry_run: bool) -> str:
@@ -638,7 +724,7 @@ def run_server_retest_plan(
         "",
         "1. Update code:",
         "cd /home/amn2",
-        "git pull origin codex-vps-test-prep",
+        "git pull origin codex/read-only-api-route-shell",
         "git log -1 --oneline",
         "source venv/bin/activate",
         "python -m pip install -e .",
@@ -661,6 +747,8 @@ def run_server_retest_plan(
         'curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers',
         f'curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers/{server.name}/summary',
         'curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/metrics/summary',
+        'curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/users/summary',
+        f'python -m app.cli api smoke-check --base-url http://127.0.0.1:3040 --token "$API_TOKEN" --server-name {server.name} --pretty',
         f"python -m app.cli api token revoke --db {db_path} --token-id '<token_id from issue output>' --reason smoke-complete",
         "Do not send raw API token, token hash, Authorization header, .conf, QR, vpn://, PrivateKey, or PresharedKey.",
         "",

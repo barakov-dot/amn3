@@ -63,8 +63,9 @@ Safe lifecycle metadata не содержит raw token, Authorization header, t
 Route-connected токены для VPS smoke выдаются и отзываются через CLI:
 
 ```bash
-python -m app.cli api token issue --db data/amneziya.sqlite3 --name vps-smoke --owner-label ops --scope server:read --scope metrics:read --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')"
-python -m app.cli api token revoke --db data/amneziya.sqlite3 --token-id TOKEN_ID --reason smoke-complete
+python -m app.cli api token issue --db data/amneziya.sqlite3 --name vps-smoke --owner-label ops --scope server:read --scope metrics:read --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')" --pretty
+python -m app.cli api smoke-check --base-url http://127.0.0.1:3040 --token "$API_TOKEN" --server-name debian-vps-1 --pretty
+python -m app.cli api token revoke --db data/amneziya.sqlite3 --token-id TOKEN_ID --reason smoke-complete --pretty
 ```
 
 Raw token показывается только в выводе `issue`; в базе хранится только `sha256:<digest>`.
@@ -76,10 +77,13 @@ Raw token показывается только в выводе `issue`; в ба
 - `GET /api/servers` - требует `server:read`;
 - `GET /api/servers/{server_name}/summary` - требует `server:read`;
 - `GET /api/metrics/summary` - требует `metrics:read`.
+- `GET /api/users/summary` - требует `metrics:read`.
 
-Маршруты возвращают только безопасные summary/count fields: server name/status/runtime, device counters, latest health readiness и aggregate metrics. Ответы не содержат SSH host/port, endpoint host, public/private keys, PSK, token hash, `.conf`, QR или `vpn://`.
+Маршруты возвращают только безопасные summary/count fields: server name/status/runtime, device counters, latest health readiness, user/order aggregates и aggregate metrics. Ответы не содержат Telegram ID, username, email, SSH host/port, endpoint host, public/private keys, PSK, token hash, `.conf`, QR или `vpn://`.
 
-`server:read` не дает доступ к metrics endpoint, а `metrics:read` не дает доступ к server endpoints. Любой bearer token без нужного scope получает отказ без раскрытия raw token или token hash.
+`server:read` не дает доступ к metrics/users endpoints, а `metrics:read` не дает доступ к server endpoints. Любой bearer token без нужного scope получает отказ без раскрытия raw token или token hash.
+
+Каждый successful read пишет `api_read` audit event с safe metadata: method, route template, scope, token id/name и owner label. Audit metadata не содержит raw token, Authorization header, token hash или response body.
 
 Этот shell не выполняет remote operations: нет peer apply/revoke/sync, backup/import/reboot, Docker restart, SSH command execution или выдачи secret-bearing config artifacts.
 

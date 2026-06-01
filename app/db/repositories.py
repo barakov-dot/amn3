@@ -1348,6 +1348,58 @@ class Repository:
             "traffic_tx_bytes": int(traffic["traffic_tx_bytes"]),
         }
 
+    def get_api_users_summary(self) -> dict[str, int]:
+        counts = self._conn.execute(
+            """
+            SELECT
+                (SELECT COUNT(*) FROM users) AS users_total,
+                (SELECT COUNT(*) FROM users WHERE status = 'active') AS users_active,
+                (SELECT COUNT(*) FROM users WHERE status = 'blocked') AS users_blocked,
+                (SELECT COUNT(*) FROM users WHERE status = 'deleted') AS users_deleted,
+                (SELECT COUNT(*) FROM users WHERE is_admin = 1) AS users_admins,
+                (
+                    SELECT COUNT(*)
+                    FROM users
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM devices
+                        WHERE devices.user_id = users.id
+                    )
+                ) AS users_with_devices,
+                (
+                    SELECT COUNT(*)
+                    FROM users
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM devices
+                        WHERE devices.user_id = users.id
+                    )
+                ) AS users_without_devices,
+                (SELECT COUNT(*) FROM orders) AS orders_total,
+                (SELECT COUNT(*) FROM orders WHERE status = 'manual_review') AS orders_manual_review,
+                (SELECT COUNT(*) FROM orders WHERE status = 'approved') AS orders_approved,
+                (SELECT COUNT(*) FROM orders WHERE status = 'fulfilled') AS orders_fulfilled,
+                (SELECT COUNT(*) FROM orders WHERE status = 'payment_pending') AS orders_payment_pending,
+                (SELECT COUNT(*) FROM orders WHERE status = 'rejected') AS orders_rejected
+            """
+        ).fetchone()
+
+        return {
+            "users_total": int(counts["users_total"]),
+            "users_active": int(counts["users_active"]),
+            "users_blocked": int(counts["users_blocked"]),
+            "users_deleted": int(counts["users_deleted"]),
+            "users_admins": int(counts["users_admins"]),
+            "users_with_devices": int(counts["users_with_devices"]),
+            "users_without_devices": int(counts["users_without_devices"]),
+            "orders_total": int(counts["orders_total"]),
+            "orders_manual_review": int(counts["orders_manual_review"]),
+            "orders_approved": int(counts["orders_approved"]),
+            "orders_fulfilled": int(counts["orders_fulfilled"]),
+            "orders_payment_pending": int(counts["orders_payment_pending"]),
+            "orders_rejected": int(counts["orders_rejected"]),
+        }
+
     def get_server_for_admin(self, server_id: int) -> sqlite3.Row:
         return self._fetch_one(
             """

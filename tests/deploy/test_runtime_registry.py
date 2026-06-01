@@ -118,7 +118,7 @@ def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     text = doc_path.read_text(encoding="utf-8")
     checklist = checklist_path.read_text(encoding="utf-8")
 
-    assert "git pull origin codex-vps-test-prep" in text
+    assert "git pull origin codex/read-only-api-route-shell" in text
     assert "git log -1 --oneline" in text
     assert "python -m pip install -e ." in text
     assert "python -m app.cli bot check-network" in text

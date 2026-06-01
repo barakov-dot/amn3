@@ -2022,7 +2022,7 @@ def _vps_retest_commands(settings: Settings, server: dict[str, Any]) -> list[str
     server_name = str(server["name"])
     return [
         "cd /home/amn2",
-        "git pull origin codex-vps-test-prep",
+        "git pull origin codex/read-only-api-route-shell",
         "source venv/bin/activate",
         "python -m pip install -e .",
         (

@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 from fastapi.testclient import TestClient
 
@@ -95,6 +96,100 @@ def test_api_metrics_requires_metrics_read_scope(tmp_path: Path):
     assert _forbidden_markers_absent(allowed.json())
 
 
+def test_api_users_summary_requires_metrics_scope_and_omits_personal_fields(tmp_path: Path):
+    settings, repo = _seed_api_data(tmp_path)
+    blocked_user_id = repo.create_user_for_admin(
+        telegram_id=3002,
+        username="secret-user",
+        first_name="Secret",
+        last_name="Person",
+        email="secret@example.com",
+        status="blocked",
+        is_admin=False,
+    )
+    repo.create_order(user_id=blocked_user_id, plan_id=None, payment_mode="manual")
+    _store_token(repo, raw_token="server-token", scopes=["server:read"])
+    _store_token(repo, raw_token="metrics-token", scopes=["metrics:read"])
+    client = TestClient(create_api_app(settings))
+
+    denied = client.get(
+        "/api/users/summary",
+        headers={"Authorization": "Bearer server-token"},
+    )
+    allowed = client.get(
+        "/api/users/summary",
+        headers={"Authorization": "Bearer metrics-token"},
+    )
+
+    assert denied.status_code == 403
+    assert allowed.status_code == 200
+    assert allowed.json() == {
+        "users": {
+            "total": 2,
+            "active": 1,
+            "blocked": 1,
+            "deleted": 0,
+            "admins": 0,
+        },
+        "devices": {
+            "users_with_devices": 1,
+            "users_without_devices": 1,
+        },
+        "orders": {
+            "total": 1,
+            "manual_review": 1,
+            "approved": 0,
+            "fulfilled": 0,
+            "payment_pending": 0,
+            "rejected": 0,
+        },
+    }
+    serialized = json.dumps(allowed.json())
+    assert "secret-user" not in serialized
+    assert "secret@example.com" not in serialized
+    assert "3002" not in serialized
+    assert _forbidden_markers_absent(allowed.json())
+
+
+def test_api_read_routes_record_safe_audit_metadata(tmp_path: Path):
+    settings, repo = _seed_api_data(tmp_path)
+    _store_token(
+        repo,
+        raw_token="metrics-token",
+        scopes=["metrics:read"],
+        token_id="api_metrics_read",
+    )
+    client = TestClient(create_api_app(settings))
+
+    response = client.get(
+        "/api/metrics/summary",
+        headers={"Authorization": "Bearer metrics-token"},
+    )
+
+    assert response.status_code == 200
+    row = repo._conn.execute(
+        "SELECT admin_telegram_id, action, metadata_json FROM admin_actions ORDER BY id DESC LIMIT 1"
+    ).fetchone()
+    assert row is not None
+    assert row["admin_telegram_id"] == 0
+    assert row["action"] == "api_read"
+    metadata = json.loads(row["metadata_json"])
+    assert metadata == {
+        "aggregate_only": True,
+        "method": "GET",
+        "owner_label": "ops",
+        "path": "/api/metrics/summary",
+        "scope": "metrics:read",
+        "status": "allowed",
+        "token_id": "api_metrics_read",
+        "token_name": "API token",
+    }
+    serialized = row["metadata_json"]
+    assert "metrics-token" not in serialized
+    assert "Authorization" not in serialized
+    assert "token_hash" not in serialized
+
+
 def test_api_auth_rejects_invalid_token_without_echoing_secret(tmp_path: Path):
     settings, _repo = _seed_api_data(tmp_path)
     client = TestClient(create_api_app(settings))
@@ -173,9 +268,15 @@ def _seed_api_data(tmp_path: Path) -> tuple[Settings, Repository]:
     return settings, repo
 
 
-def _store_token(repo: Repository, *, raw_token: str, scopes: list[str]) -> None:
+def _store_token(
+    repo: Repository,
+    *,
+    raw_token: str,
+    scopes: list[str],
+    token_id: str | None = None,
+) -> None:
     repo.create_api_token(
-        token_id=f"token-{raw_token}",
+        token_id=token_id or f"token-{raw_token}",
         name="API token",
         owner_user_id=None,
         owner_label="ops",

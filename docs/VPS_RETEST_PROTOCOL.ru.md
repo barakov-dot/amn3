@@ -6,7 +6,7 @@
 
 ```bash
 cd /opt/amn2
-git pull origin codex-vps-test-prep
+git pull origin codex/read-only-api-route-shell
 git log -1 --oneline
 source venv/bin/activate
 python -m pip install -e .
@@ -66,7 +66,8 @@ python -m app.cli api token issue \
   --owner-label ops \
   --scope server:read \
   --scope metrics:read \
-  --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')"
+  --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')" \
+  --pretty
 ```
 
 Скопировать `raw_token` из вывода только в переменную текущей shell:
@@ -87,6 +88,8 @@ python -m app.cli api serve --host 127.0.0.1 --port 3040
 curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers
 curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers/debian-vps-1/summary
 curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/metrics/summary
+curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/users/summary
+python -m app.cli api smoke-check --base-url http://127.0.0.1:3040 --token "$API_TOKEN" --server-name debian-vps-1 --pretty
 ```
 
 После проверки отозвать token:
@@ -95,7 +98,16 @@ curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/metrics
 python -m app.cli api token revoke \
   --db data/amneziya.sqlite3 \
   --token-id TOKEN_ID_FROM_ISSUE_OUTPUT \
-  --reason smoke-complete
+  --reason smoke-complete \
+  --pretty
+```
+
+Если установлен `jq`, можно извлечь `raw_token` и `token_id` без ручного копирования:
+
+```bash
+ISSUE_JSON="$(python -m app.cli api token issue --db data/amneziya.sqlite3 --name vps-smoke --owner-label ops --scope server:read --scope metrics:read --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')")"
+export API_TOKEN="$(printf '%s' "$ISSUE_JSON" | jq -r .raw_token)"
+TOKEN_ID="$(printf '%s' "$ISSUE_JSON" | jq -r .token_id)"
 ```
 
 Не присылать raw API token, token hash, Authorization header, `.conf`, QR, `vpn://`, `PrivateKey` или `PresharedKey`.

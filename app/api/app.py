@@ -30,33 +30,42 @@ def create_api_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/servers")
     async def list_servers(
         repo: Repository = Depends(_repo),
-        _auth: ApiAuthContext = Depends(_require_scope("server:read")),
+        auth: ApiAuthContext = Depends(_require_scope("server:read")),
     ):
-        return {
+        payload = {
             "servers": [
                 _server_summary_payload(row)
                 for row in repo.list_api_server_summaries()
             ],
         }
+        _record_api_read(repo, auth, path="/api/servers", scope="server:read")
+        return payload
 
     @app.get("/api/servers/{server_name}/summary")
     async def server_summary(
         server_name: str,
         repo: Repository = Depends(_repo),
-        _auth: ApiAuthContext = Depends(_require_scope("server:read")),
+        auth: ApiAuthContext = Depends(_require_scope("server:read")),
     ):
         row = repo.get_api_server_summary(server_name)
         if row is None:
             raise HTTPException(status_code=404, detail="server_not_found")
-        return {"server": _server_summary_payload(row)}
+        payload = {"server": _server_summary_payload(row)}
+        _record_api_read(
+            repo,
+            auth,
+            path="/api/servers/{server_name}/summary",
+            scope="server:read",
+        )
+        return payload
 
     @app.get("/api/metrics/summary")
     async def metrics_summary(
         repo: Repository = Depends(_repo),
-        _auth: ApiAuthContext = Depends(_require_scope("metrics:read")),
+        auth: ApiAuthContext = Depends(_require_scope("metrics:read")),
     ):
         summary = repo.get_api_metrics_summary()
-        return {
+        payload = {
             "users": {
                 "total": summary["users_total"],
                 "active": summary["users_active"],
@@ -81,6 +90,38 @@ def create_api_app(settings: Settings | None = None) -> FastAPI:
                 "source": "latest_device_snapshots",
             },
         }
+        _record_api_read(repo, auth, path="/api/metrics/summary", scope="metrics:read")
+        return payload
+
+    @app.get("/api/users/summary")
+    async def users_summary(
+        repo: Repository = Depends(_repo),
+        auth: ApiAuthContext = Depends(_require_scope("metrics:read")),
+    ):
+        summary = repo.get_api_users_summary()
+        payload = {
+            "users": {
+                "total": summary["users_total"],
+                "active": summary["users_active"],
+                "blocked": summary["users_blocked"],
+                "deleted": summary["users_deleted"],
+                "admins": summary["users_admins"],
+            },
+            "devices": {
+                "users_with_devices": summary["users_with_devices"],
+                "users_without_devices": summary["users_without_devices"],
+            },
+            "orders": {
+                "total": summary["orders_total"],
+                "manual_review": summary["orders_manual_review"],
+                "approved": summary["orders_approved"],
+                "fulfilled": summary["orders_fulfilled"],
+                "payment_pending": summary["orders_payment_pending"],
+                "rejected": summary["orders_rejected"],
+            },
+        }
+        _record_api_read(repo, auth, path="/api/users/summary", scope="metrics:read")
+        return payload
 
     return app
 
@@ -148,6 +189,29 @@ def _api_token_record_from_row(row) -> ApiTokenRecord:
         scopes=frozenset(json.loads(row["scopes_json"])),
         expires_at=_parse_datetime(row["expires_at"]),
         revoked_at=_parse_datetime(row["revoked_at"]),
+    )
+
+
+def _record_api_read(
+    repo: Repository,
+    auth: ApiAuthContext,
+    *,
+    path: str,
+    scope: str,
+) -> None:
+    repo.record_admin_action(
+        admin_telegram_id=0,
+        action="api_read",
+        metadata={
+            "aggregate_only": True,
+            "method": "GET",
+            "owner_label": auth.token.owner_label,
+            "path": path,
+            "scope": scope,
+            "status": "allowed",
+            "token_id": auth.token.token_id,
+            "token_name": auth.token.name,
+        },
     )
 
 
