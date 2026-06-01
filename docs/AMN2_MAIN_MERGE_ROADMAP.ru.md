@@ -195,7 +195,7 @@ Production evidence:
 - focused tests: `14 passed, 1 StarletteDeprecationWarning`;
 - full local suite: `535 passed, 1 StarletteDeprecationWarning`.
 
-После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening, Web Panel Safe Improvements и Scoped API Token Storage. Следующий рекомендуемый шаг - controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, потому что KYORESUAS/PRVTPRO integration candidates уже ждут реального VPS evidence.
+После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening, Web Panel Safe Improvements, Scoped API Token Storage, Manager Config Export Contract, Public/Self-service Config Delivery Policy и Backup/Import Policy Contract. Следующий рекомендуемый шаг - controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, потому что KYORESUAS/PRVTPRO integration candidates уже ждут реального VPS evidence.
 
 ## Важные задачи
 
@@ -366,7 +366,10 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 6. Local Agent read-only/audit/versioning hardening: done, local-gate-complete.
 7. Web panel safe improvements: done, local-gate-complete.
 8. Scoped API token storage/auth contract: done, local-gate-complete.
-9. Read-only metrics privacy classification: prepared in `research/amn2/read-only-metrics-privacy-classification.md`; implementation route shell still waits for VPS evidence.
+9. Manager config export contract: done in `amn2/codex/manager-config-export-contract`, local-gate-complete.
+10. Public/self-service config delivery policy: done in `amn2/codex/public-config-delivery-policy-contract`, local-gate-complete.
+11. Backup/import policy contract: done in `amn2/codex/backup-import-policy-contract`, local-gate-complete.
+12. Read-only metrics privacy classification: prepared in `research/amn2/read-only-metrics-privacy-classification.md`; implementation route shell still waits for VPS evidence.
 
 ### Live VPS verification lane
 
@@ -395,8 +398,9 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 ### Backup/import dangerous API lane
 
 1. Design is prepared in `research/amn2/backup-import-dangerous-api-design.md`.
-2. First implementation should be local-only policy registry plus restore-preview contract: metadata export, redacted backup default, encrypted full backup as explicit dangerous mode, no target write during preview.
-3. Web/API full backup, restore apply and import apply remain blocked until route policy, secret inventory, confirmation, audit and backup-before-write gates exist.
+2. First implementation is complete in `amn2/codex/backup-import-policy-contract`, commit `d2c160b`: local-only policy registry plus restore/import preview contract, metadata export, redacted backup, encrypted full backup as explicit dangerous mode, and no target write during preview.
+3. Verification: focused backup/security/config-share suite `63 passed`; full local suite `583 passed, 1 StarletteDeprecationWarning`.
+4. Web/API full backup, restore apply and import apply remain blocked until route policy, secret inventory, confirmation, audit and backup-before-write gates exist.
 
 ### Manager config export contract lane
 
@@ -434,4 +438,4 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 
 ## Recommendation
 
-Next recommended work for the local-only lane, while VPS is not ready, is backup/import policy registry and restore-preview contract. Controlled real VPS verification remains the next VPS-lane step before integrating KYORESUAS/PRVTPRO-derived operational flows.
+Backup/import policy registry and restore-preview contract is now complete. Next recommended work is controlled real VPS verification before integrating KYORESUAS/PRVTPRO-derived operational flows. If VPS is still unavailable, the only sensible local-only follow-up is a small machine-checkable secret inventory registry with no route expansion and no secret-bearing output.

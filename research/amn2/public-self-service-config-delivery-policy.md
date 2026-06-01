@@ -364,4 +364,4 @@ Keep public/self-service config delivery routes blocked until:
 4. no-secret response/audit/log tests exist for the route;
 5. ownership/resource policy is verified against real caller context.
 
-Recommended next local-only lane, if VPS is still not ready: backup/import policy registry and restore-preview contract, not public links.
+Backup/import policy registry and restore-preview contract is now complete in `amn2/codex/backup-import-policy-contract`, commit `d2c160b`. If VPS is still not ready, the next local-only lane should be smaller: machine-checkable secret inventory registry, not public links or backup/import routes.

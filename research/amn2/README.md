@@ -35,6 +35,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 - [Route/Auth machine-checkable tests plan](route-auth-machine-checkable-tests-plan.md) - next-gate plan для binding/drift tests поверх текущего `app/security/surface_policy.py`.
 - [Secret surface inventory](secret-surface-inventory.md) - первый проход по secrets, redaction, encrypted backup, email tokens, config delivery и 2FA implications.
 - [Backup/import dangerous API design](backup-import-dangerous-api-design.md) - policy boundary для metadata/redacted/full backup, restore preview и dangerous import/apply.
+- [Backup/import policy contract implementation](backup-import-policy-contract-implementation.md) - local-only `amn2` branch/commit/test evidence для no-route backup/import policy registry and restore/import preview contract.
 - [Config delivery inventory](config-delivery-inventory.md) - первый проход по выдаче VPN config через bot, email, QR, `vpn://` link, recovery token и template preview.
 - [Manager config export contract](manager-config-export-contract.md) - typed result boundary для `.conf`, QR, `vpn://` и future protocol manager export artifacts.
 - [Manager config export contract implementation](manager-config-export-contract-implementation.md) - local-only `amn2` branch/commit/test evidence для no-route typed export adapter.
@@ -66,7 +67,8 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 2. Начать VPS gate с read-only check и dry-run apply/revoke preview; single apply/revoke выполнять только после отдельного подтверждения оператора.
 3. Зафиксировать VPS evidence через `vps-gate-evidence-checklist.md`.
 4. Принять merge/PR решение по `post-vps-gate-merge-decision.md`.
-5. Пока VPS не готов, следующий local-only кандидат - backup/import policy registry and restore-preview contract; web/API full backup, restore apply и import apply не открывать.
+5. Backup/import policy registry and restore-preview contract выполнен в `amn2/codex/backup-import-policy-contract`, commit `d2c160b`; web/API full backup, restore apply и import apply остаются закрытыми.
+6. Если VPS все еще не готов, следующий маленький local-only кандидат - machine-checkable secret inventory registry, без routes, без secret-bearing output и без live VPS.
 
 ## Неактуальный риск
 

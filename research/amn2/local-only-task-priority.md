@@ -112,11 +112,12 @@
 ### Backup/import policy registry and restore-preview contract
 
 - Цель: не дать future backup/import API стать обычным download/upload endpoint для secret-bearing state.
-- Статус 2026-06-01: design подготовлен в `research/amn2/backup-import-dangerous-api-design.md`.
+- Статус 2026-06-01: implementation slice выполнен и запушен в `amn2/codex/backup-import-policy-contract`, commit `d2c160b`; evidence `research/amn2/backup-import-policy-contract-implementation.md`.
 - Что должно появиться: локальный policy registry для backup/import lanes, redacted field policy и `restore-preview` contract без записи в target state.
 - Почему P1: backup/import касается peer private keys, PSK, token hashes, users/devices/servers, audit и future Local Agent metadata.
 - Локальная проверка: no-side-effect tests для preview/validation/redaction; никаких web/API full backup, restore apply или import apply в первом срезе.
-- Готово, когда: metadata export, redacted backup и encrypted full backup имеют разные policy gates, а destructive apply/import остаются заблокированы до отдельного решения.
+- Проверено 2026-06-01: focused backup/security/config-share suite `63 passed`; full local suite `583 passed, 1 warning`.
+- Готово: metadata export, redacted backup и encrypted full backup имеют разные policy gates, а destructive apply/import остаются заблокированы до отдельного решения.
 
 ### Manager config export contract
 
@@ -213,8 +214,8 @@
 11. Выполнить public/self-service config delivery policy implementation как no-route share-token/policy contract - выполнено и запушено в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`, без public download routes и без VPS.
 12. Выполнить route/auth machine-checkable binding tests по `research/amn2/route-auth-machine-checkable-tests-plan.md` - выполнено и запушено в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`, без route expansion и без VPS.
 13. Выполнить route-connected scoped API token lifecycle gate - выполнено и запушено в stacked branch `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0`, без route expansion и без VPS.
-14. Если VPS еще не готов, следующим local-only срезом брать backup/import policy registry and restore-preview contract по `research/amn2/backup-import-dangerous-api-design.md`.
-15. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг для VPS-кандидата, отдельно подтверждаемый оператором.
+14. Backup/import policy registry and restore-preview contract выполнен в `amn2/codex/backup-import-policy-contract`, commit `d2c160b`, без web/API backup routes и без VPS.
+15. Следующий основной шаг - controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; если VPS все еще не готов, брать только маленький local-only secret inventory registry без route expansion.
 
 ## Не переносим в локальную фазу
 

@@ -170,7 +170,7 @@ Public-token surfaces не являются admin-auth bypass. Их модель
 - Web-admin и Telegram-admin остаются разными actor channels; объединять их нельзя без отдельного actor model design.
 - CLI surfaces имеют local shell trust model; для web/API переноса им нужен `RemoteOperationRunner`.
 - `CONTROL_PANEL_AUTH_METHODS` есть в settings, но runtime surface требует отдельной трассировки перед scoped-token work.
-- Backup/import web/API policies не заведены; перед ними использовать `backup-import-dangerous-api-design.md` и не добавлять full backup/restore apply без preview, confirmation, audit и backup-before-write.
+- Backup/import policy contract выполнен в `amn2/codex/backup-import-policy-contract`, commit `d2c160b`; web/API backup routes, full backup download, restore apply и import apply не добавлять без route gate, confirmation, audit и backup-before-write.
 - Manager config export contract выполнен в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`; новые config routes не добавлять до ownership/token gate, audit и no-secret metadata tests для конкретного route.
 - Public/self-service config delivery policy выполнен в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`; public download routes не добавлять до отдельного route gate, rate-limit hook and route-level no-secret response/audit tests.
 

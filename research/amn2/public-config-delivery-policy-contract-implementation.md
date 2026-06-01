@@ -101,4 +101,4 @@ result: 577 passed, 1 StarletteDeprecationWarning
 
 ## Следующее решение
 
-Если VPS еще не готов, следующий local-only кандидат: backup/import policy registry and restore-preview contract по `research/amn2/backup-import-dangerous-api-design.md`. Web/API full backup, restore apply и import apply не добавлять.
+Backup/import policy registry and restore-preview contract уже выполнен в `amn2/codex/backup-import-policy-contract`, commit `d2c160b`. Если VPS еще не готов, следующий local-only кандидат должен быть меньше: machine-checkable secret inventory registry без route expansion, secret-bearing output или live VPS.

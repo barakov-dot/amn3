@@ -68,11 +68,12 @@ Backlog не является списком задач к немедленно�
 ### Backup/import как dangerous API
 
 - Цель: `amn2`, позже hybrid.
-- Статус: `design-prepared-local-docs`.
+- Статус: `implemented-pushed-local-gate-complete`.
 - Суть: backup/import только через redacted/full режимы, dry-run preview, validation, encryption option и recovery note.
 - Причина: full backup почти всегда содержит private keys, tokens, configs и состояние клиентов.
 - Текущий результат 2026-06-01: `research/amn2/backup-import-dangerous-api-design.md` разделяет metadata export, redacted backup, encrypted full backup, restore preview и destructive apply/import.
-- Следующий шаг: при переносе в `amn2` начать с backup/import policy registry и restore-preview contract; web/API full backup и import apply не добавлять.
+- Текущий результат 2026-06-01: local-only no-route implementation выполнен в `amn2/codex/backup-import-policy-contract`, commit `d2c160b`; focused `63 passed`, full suite `583 passed`; web/API full backup, restore apply и import apply не добавлялись.
+- Следующий шаг: не добавлять backup/import routes до route policy, secret inventory, confirmation, audit и backup-before-write gates.
 
 ### Secret inventory
 
@@ -115,7 +116,7 @@ Backlog не является списком задач к немедленно�
 - Причина: UI/API/bot/self-service не должны зависеть от несовместимых `get_client_config` signatures.
 - Текущий результат 2026-06-01: `research/amn2/manager-config-export-contract.md` описывает `ConfigExportResult`, typed artifacts, capability model, safe metadata, safe error categories and first no-route adapter boundary.
 - Текущий результат 2026-06-01: local-only no-route implementation выполнен в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`; focused `40 passed`, full suite `560 passed`; public/self-service endpoint, API `config:read` и Local Agent `/configs` не добавлялись.
-- Следующий шаг: если VPS еще не готов, начать backup/import policy registry and restore-preview contract; web/API full backup, restore apply и import apply не добавлять.
+- Следующий шаг: backup/import policy registry уже выполнен; если VPS еще не готов, брать только маленький secret inventory registry без route expansion и без secret-bearing output.
 
 ### Local Amnezia API agent
 
@@ -238,5 +239,5 @@ Backlog не является списком задач к немедленно�
 3. Решить merge/PR для ветки `codex/remote-operation-vps-gate-prep` по `research/amn2/post-vps-gate-merge-decision.md`.
 4. После VPS evidence выбрать первый integration slice из KYORESUAS/PRVTPRO inputs без копирования кода: рекомендован read-only aggregate metrics/API route shell.
 5. Использовать `research/amn2/docker-manager-design-note.md` как safety input для будущего Docker manager implementation plan.
-6. Пока VPS не готов, следующий local-only кандидат - backup/import policy registry and restore-preview contract; web/API full backup, restore apply и import apply не открывать.
+6. Пока VPS не готов, backup/import policy registry уже закрыт; следующий local-only кандидат должен быть меньше и безопаснее: machine-checkable secret inventory registry без route expansion и без secret-bearing output.
 7. Только после закрытия этих gates возвращаться к domain exclusions и 2FA.

@@ -85,4 +85,4 @@ result: 560 passed, 1 StarletteDeprecationWarning
 
 ## Следующее решение
 
-Следующий local-only кандидат был выполнен: public/self-service config delivery policy implementation как no-route share-token/policy contract в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`. Если VPS еще не готов, следующий local-only кандидат - backup/import policy registry and restore-preview contract.
+Следующий local-only кандидат после этого был выполнен: public/self-service config delivery policy implementation как no-route share-token/policy contract в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`. Backup/import policy registry тоже выполнен в `amn2/codex/backup-import-policy-contract`, commit `d2c160b`. Если VPS еще не готов, следующий local-only кандидат должен быть меньше: machine-checkable secret inventory registry без route expansion.

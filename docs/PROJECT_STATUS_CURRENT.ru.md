@@ -102,10 +102,10 @@ vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 docs/NEXT_CHAT_HANDOFF.ru.md
 ```
 
-Последняя локальная проверка `amn2`:
+Последняя local-only branch проверка `amn2`:
 
 ```text
-542 passed, 1 warning
+583 passed, 1 warning
 ```
 
 Ожидаемое предупреждение: `StarletteDeprecationWarning` от `httpx` / `starlette.testclient`.
@@ -164,6 +164,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - API Token Lifecycle Gate: branch `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0 Add API token lifecycle gate`.
 - Manager Config Export Contract: branch `amn2/codex/manager-config-export-contract`, commit `4d4e7a4 Add manager config export contract`; local-only no-route typed export adapter, без public/self-service endpoint, API `config:read` и Local Agent `/configs`.
 - Public/Self-service Config Delivery Policy: branch `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7 Add config share policy contract`; local-only no-route share-token/policy contract, без public download route, self-service download route, API `config:read` и Local Agent `/configs`.
+- Backup/Import Policy Contract: branch `amn2/codex/backup-import-policy-contract`, commit `d2c160b Add backup import policy contract`; local-only no-route backup mode registry, secret field policy and restore/import preview contract, без web/API backup routes, restore apply, import apply или live VPS calls.
 
 Решение по соседним чатам:
 
@@ -209,6 +210,7 @@ research/amn2/manager-config-export-contract.md
 research/amn2/manager-config-export-contract-implementation.md
 research/amn2/public-self-service-config-delivery-policy.md
 research/amn2/public-config-delivery-policy-contract-implementation.md
+research/amn2/backup-import-policy-contract-implementation.md
 ```
 
 Pre-VPS support package:
@@ -256,11 +258,11 @@ head: 8697b60 Document Local Agent production wiring
 4. App-managed SSH host key enrollment design подготовлен в `research/amn2/ssh-host-key-enrollment-design.md`; implementation plan писать перед web/API remote-operation expansion.
 5. Docker manager safety contract уже подготовлен в `research/amn2/docker-manager-design-note.md`; implementation plan для него писать только после VPS evidence.
 6. Route/Auth machine-checkable binding tests выполнены и запушены в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`; использовать как drift guard перед любыми route/API expansions.
-7. Backup/import dangerous API design подготовлен в `research/amn2/backup-import-dangerous-api-design.md`; web/API backup/import routes не добавлять до policy registry и restore-preview gate.
+7. Backup/import policy contract выполнен и запушен в `amn2/codex/backup-import-policy-contract`, commit `d2c160b`; web/API backup/import routes, restore apply и import apply остаются отдельными gates.
 8. Manager config export contract выполнен и запушен в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`; это local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
 9. Public/self-service config delivery policy выполнен и запушен в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`; это local-only no-route share-token/policy contract, без public download route, self-service download route, API `config:read` или Local Agent `/configs`.
 10. Read-only metrics/API route shell держать после VPS evidence или отдельного route-exposure решения; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle gate выполнен в `amn2/codex/api-token-lifecycle-gate-stacked`.
-11. Если VPS еще не готов, следующий local-only кандидат - backup/import policy registry and restore-preview contract по `research/amn2/backup-import-dangerous-api-design.md`, без web/API full backup, restore apply или import apply.
+11. Если VPS еще не готов, следующий local-only кандидат - маленький machine-checkable secret inventory registry, без route expansion, без secret-bearing output и без live VPS.
 12. Domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
 
 ## Route/Auth/Operation Policy Matrix Plan
@@ -625,6 +627,46 @@ full local suite:
 ```
 
 Live VPS не трогался. Slice не добавляет public download route, self-service config download route, `/api/*`, API `config:read`, Local Agent `/configs`, generated config persistence, новые QR/import behavior или live VPS calls; VPS gate для самого slice не нужен.
+
+## Backup/Import Policy Contract Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/backup-import-policy-contract
+```
+
+Production commit:
+
+```text
+d2c160b Add backup import policy contract
+```
+
+Покрыто:
+
+- local-only backup mode registry для `metadata-export`, `redacted-backup` и `encrypted-full-backup`;
+- secret field policy для token hashes, peer private key, PSK, admin password hash, `.conf`, QR payload/PNG и `vpn://`;
+- safe policy manifest без raw secret values;
+- restore/import preview-only contract with `apply_allowed=false` and `side_effects=[]`;
+- blocked future `SurfacePolicy` entries для backup/export, restore preview/apply и import preview/apply.
+
+Проверка:
+
+```text
+RED:
+tests/backup/test_backup_policy.py tests/security/test_surface_policy.py
+result: 1 import error as expected
+
+focused backup/security/config-share suite:
+63 passed
+
+full local suite:
+583 passed, 1 StarletteDeprecationWarning
+```
+
+Live VPS не трогался. Slice не добавляет web/API backup routes, Local Agent `/backup` или `/restore`, restore apply, import apply, backup-before-write mutation или live VPS calls; VPS gate для самого slice не нужен.
 
 ## Remote Operation Dry-run/Audit Slice
 

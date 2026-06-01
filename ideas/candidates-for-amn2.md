@@ -345,4 +345,4 @@
 - Идея: backup/import endpoint проектировать только через redacted/full режимы, validation, dry-run preview, encryption option и recovery note.
 - Польза: полезно для восстановления сервера, но не должно становиться простой кнопкой утечки всех ключей.
 - Риски: full backup содержит private keys, PSK, server configs и client state; import может разрушить runtime.
-- Статус: research-only до отдельного security design.
+- Статус: first local-only no-route policy/preview slice выполнен в `amn2/codex/backup-import-policy-contract`, commit `d2c160b`; details in [Backup/import policy contract implementation](../research/amn2/backup-import-policy-contract-implementation.md). Web/API full backup, restore apply и import apply остаются отдельными gates.
