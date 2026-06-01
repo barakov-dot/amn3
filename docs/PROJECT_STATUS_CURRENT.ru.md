@@ -265,7 +265,7 @@ head: 8697b60 Document Local Agent production wiring
 9. Manager config export contract выполнен и запушен в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`; это local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
 10. Public/self-service config delivery policy выполнен и запушен в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`; это local-only no-route share-token/policy contract, без public download route, self-service download route, API `config:read` или Local Agent `/configs`.
 11. Read-only metrics/API route shell держать после VPS evidence или отдельного route-exposure решения; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle gate выполнен в `amn2/codex/api-token-lifecycle-gate-stacked`.
-12. Если VPS еще не готов, следующий local-only шаг должен быть только docs/test guard уровня route-policy/audit-rate-limit; route/API implementation лучше не начинать до VPS evidence.
+12. Generic route-policy/audit/rate-limit guards уже закрыты через Route/Auth binding tests и public config delivery policy; если VPS еще не готов, не открывать новый local-only implementation slice, а ограничиться синхронизацией roadmap/evidence.
 13. Domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
 
 ## Route/Auth/Operation Policy Matrix Plan

@@ -101,4 +101,4 @@ result: 577 passed, 1 StarletteDeprecationWarning
 
 ## Следующее решение
 
-Backup/import policy registry and restore-preview contract уже выполнен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`; secret inventory registry выполнен в `amn2/codex/secret-inventory-registry`, commit `9ce42f4`. Если VPS еще не готов, дальнейшая local-only работа должна оставаться только на docs/test guard уровне route-policy/audit-rate-limit, без route expansion, secret-bearing output или live VPS.
+Backup/import policy registry and restore-preview contract уже выполнен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`; secret inventory registry выполнен в `amn2/codex/secret-inventory-registry`, commit `9ce42f4`. Generic route-policy/audit/rate-limit guards уже закрыты, поэтому если VPS еще не готов, дальнейшая local-only работа должна быть только синхронизацией roadmap/evidence, без route expansion, secret-bearing output или live VPS.

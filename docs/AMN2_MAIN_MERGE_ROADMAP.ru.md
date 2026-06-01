@@ -439,4 +439,4 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 
 ## Recommendation
 
-Backup/import policy registry and secret inventory registry are now complete. Next recommended work is controlled real VPS verification before integrating KYORESUAS/PRVTPRO-derived operational flows. If VPS is still unavailable, keep further work to docs/test guard slices only, such as route-level audit/rate-limit policy, and avoid route/API implementation.
+Backup/import policy registry and secret inventory registry are now complete. Route/Auth binding guards and public config delivery policy already cover the generic route-policy/audit/rate-limit preconditions. Next recommended work is controlled real VPS verification before integrating KYORESUAS/PRVTPRO-derived operational flows. If VPS is still unavailable, do not open another local-only implementation slice; keep work to roadmap/evidence synchronization only.

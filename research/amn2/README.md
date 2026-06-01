@@ -70,7 +70,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 4. Принять merge/PR решение по `post-vps-gate-merge-decision.md`.
 5. Backup/import policy registry and restore-preview contract выполнен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`; web/API full backup, restore apply и import apply остаются закрытыми.
 6. Machine-checkable secret inventory registry выполнен в `amn2/codex/secret-inventory-registry`, commit `9ce42f4`; route expansion, secret-bearing output и live VPS не добавлялись.
-7. Если VPS все еще не готов, следующий local-only шаг должен быть только docs/test guard уровня route-policy/audit-rate-limit; route/API implementation лучше не начинать до VPS evidence.
+7. Generic route-policy/audit/rate-limit guards уже закрыты; если VPS все еще не готов, не открывать новый local-only implementation slice до VPS evidence.
 
 ## Неактуальный риск
 

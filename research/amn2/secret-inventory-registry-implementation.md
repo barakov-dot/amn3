@@ -71,4 +71,4 @@ result: 591 passed, 1 StarletteDeprecationWarning
 
 VPS gate для этого slice не нужен. Slice не меняет peer apply/revoke/config delivery/sync/runtime behavior и не работает с live state.
 
-Следующий главный шаг остается controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep`. Если VPS все еще недоступен, лучше брать только route-policy/audit-rate-limit design docs или совсем мелкие test-only guards, не route/API implementation.
+Следующий главный шаг остается controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep`. Если VPS все еще недоступен, новый local-only implementation slice лучше не открывать: generic route-policy/audit/rate-limit guards уже закрыты, а дальнейшая локальная работа должна быть только синхронизацией roadmap/evidence.

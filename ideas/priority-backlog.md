@@ -240,5 +240,5 @@ Backlog не является списком задач к немедленно�
 3. Решить merge/PR для ветки `codex/remote-operation-vps-gate-prep` по `research/amn2/post-vps-gate-merge-decision.md`.
 4. После VPS evidence выбрать первый integration slice из KYORESUAS/PRVTPRO inputs без копирования кода: рекомендован read-only aggregate metrics/API route shell.
 5. Использовать `research/amn2/docker-manager-design-note.md` как safety input для будущего Docker manager implementation plan.
-6. Пока VPS не готов, backup/import policy registry и secret inventory registry уже закрыты; следующий local-only кандидат должен быть только docs/test guard уровня route-level audit/rate-limit policy, без route/API implementation.
+6. Пока VPS не готов, backup/import policy registry, secret inventory registry и generic route-policy/audit/rate-limit guards уже закрыты; новый local-only implementation slice не открывать, кроме синхронизации roadmap/evidence.
 7. Только после закрытия этих gates возвращаться к domain exclusions и 2FA.
