@@ -53,7 +53,54 @@ VPS_APPLY_ENABLED=false
 
 Перед первым live SSH-подключением отдельно сверить SSH host key по `docs/SSH_HOST_KEY_VERIFICATION.ru.md`. Если fingerprint неизвестен, не совпал или появился новый unknown host prompt, остановиться и подтвердить ключ через независимый канал.
 
-## 3. Запустить нужный сценарий теста
+## 3. Проверить read-only API shell
+
+API smoke выполняется только на loopback и только read-only aggregate routes.
+
+Выдать короткоживущий route-scoped token:
+
+```bash
+python -m app.cli api token issue \
+  --db data/amneziya.sqlite3 \
+  --name vps-smoke \
+  --owner-label ops \
+  --scope server:read \
+  --scope metrics:read \
+  --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')"
+```
+
+Скопировать `raw_token` из вывода только в переменную текущей shell:
+
+```bash
+export API_TOKEN='RAW_TOKEN_FROM_ONE_TIME_OUTPUT'
+```
+
+В отдельной shell запустить API:
+
+```bash
+python -m app.cli api serve --host 127.0.0.1 --port 3040
+```
+
+Проверить read-only endpoints:
+
+```bash
+curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers
+curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers/debian-vps-1/summary
+curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/metrics/summary
+```
+
+После проверки отозвать token:
+
+```bash
+python -m app.cli api token revoke \
+  --db data/amneziya.sqlite3 \
+  --token-id TOKEN_ID_FROM_ISSUE_OUTPUT \
+  --reason smoke-complete
+```
+
+Не присылать raw API token, token hash, Authorization header, `.conf`, QR, `vpn://`, `PrivateKey` или `PresharedKey`.
+
+## 4. Запустить нужный сценарий теста
 
 Проверить web-панель:
 
@@ -77,7 +124,7 @@ sudo systemctl status amneziya-bot --no-pager
 В Telegram или web-панели записать, что нажимал перед ошибкой: раздел, кнопка, пользователь, устройство, сервер, примерное время.
 В карточке сервера web-панель показывает блок `VPS retest bundle` с теми же базовыми командами для `git pull`, `preflight`, `server check` и `sync-peers`.
 
-## 4. При ошибке собрать snapshot
+## 5. При ошибке собрать snapshot
 
 Обычный runtime:
 
@@ -99,13 +146,14 @@ AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg AMN_INTERFACE=awg0 bash deploy
 
 Перед отправкой файла проверить, что секреты скрыты. Правила маскировки и ручной набор команд описаны в `docs/VPS_LOG_COLLECTION.ru.md`.
 
-## 5. Что прислать для анализа
+## 6. Что прислать для анализа
 
 Прислать:
 
 - последний commit hash из `git log -1 --oneline`;
 - вывод `python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run`;
 - вывод `python -m app.cli server check --config servers.yml --server debian-vps-1`, если запускался;
+- статус API smoke: HTTP-коды и безопасные aggregate counts без raw token и без Authorization header;
 - вывод `bash deploy/runtime/check_vps.sh` или Docker-варианта;
 - debug snapshot из `deploy/runtime/collect_debug_snapshot.sh`;
 - последние строки `logs/app.log`, если snapshot не собрался;
@@ -122,6 +170,6 @@ AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg AMN_INTERFACE=awg0 bash deploy
 - `PrivateKey` и `PresharedKey`;
 - полный пользовательский `.conf`.
 
-## 6. Когда останавливаемся
+## 7. Когда останавливаемся
 
 Если ошибка относится к Docker `apply-peer` или `revoke-peer`, перед повтором проверить `runtime.config_path` в `servers.yml`: он должен указывать на реальный постоянный конфиг AmneziaWG внутри контейнера. Эти операции переписывают конфиг и выполняют `docker restart <container_name>`, поэтому не включать `VPS_APPLY_ENABLED=true`, пока dry-run и ручной тестовый peer не пройдены.

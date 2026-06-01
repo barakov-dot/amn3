@@ -120,6 +120,38 @@ tunnel до панели. Для короткой проверки по plain HT
 - `/agent/version` должен возвращать `runtime_contract_version`, `first_slice_routes` и `write_enabled=false`.
 - Не добавлять write/config/backup routes без отдельного policy gate.
 
+### Read-only API shell
+
+- Первый API bind: `API_HOST=127.0.0.1`.
+- Первый порт: `API_PORT=3040`.
+- Token выдавать только через route-scoped CLI и только с явным `--expires-at`.
+- Первый scope-набор для smoke: `server:read` и `metrics:read`.
+- Проверять только aggregate endpoints: `/api/servers`, `/api/servers/{server_name}/summary`, `/api/metrics/summary`.
+- После smoke обязательно отозвать token через `python -m app.cli api token revoke`.
+- Не публиковать API наружу и не добавлять `config:read`/write routes до отдельного VPS gate.
+
+Пример issue/start/check/revoke для VPS smoke:
+
+```bash
+python -m app.cli api token issue \
+  --db data/amneziya.sqlite3 \
+  --name vps-smoke \
+  --owner-label ops \
+  --scope server:read \
+  --scope metrics:read \
+  --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')"
+
+export API_TOKEN='RAW_TOKEN_FROM_ONE_TIME_OUTPUT'
+python -m app.cli api serve --host 127.0.0.1 --port 3040
+curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers
+curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/metrics/summary
+
+python -m app.cli api token revoke \
+  --db data/amneziya.sqlite3 \
+  --token-id TOKEN_ID_FROM_ISSUE_OUTPUT \
+  --reason smoke-complete
+```
+
 ## 4. Шаблоны и выдача конфига
 
 Текущие варианты получения конфига пользователем:

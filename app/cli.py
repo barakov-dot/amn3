@@ -1,7 +1,9 @@
 import argparse
 import asyncio
 import getpass
+import json
 from collections.abc import Callable
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +30,8 @@ from app.server.peer_apply import (
 from app.server.ssh import SystemSshClient
 from app.server_config.loader import load_server_config, select_server
 from app.server_config.models import ServerConfig
+from app.services.api_tokens import create_route_api_token
+from app.services.api_tokens import revoke_api_token
 from app.services.peer_inventory import AwgDumpPeerInventoryCollector, PeerInventoryService
 from app.services.traffic import AwgDumpTrafficCollector, TrafficService
 from app.web.auth import create_password_hash
@@ -138,6 +142,22 @@ def build_parser() -> argparse.ArgumentParser:
     api_serve.add_argument("--host", default=None)
     api_serve.add_argument("--port", type=int, default=None)
 
+    api_token = api_sub.add_parser("token")
+    api_token_sub = api_token.add_subparsers(dest="api_token_command", required=True)
+
+    api_token_issue = api_token_sub.add_parser("issue")
+    api_token_issue.add_argument("--db", default="data/amneziya.sqlite3")
+    api_token_issue.add_argument("--name", required=True)
+    api_token_issue.add_argument("--owner-label", required=True)
+    api_token_issue.add_argument("--owner-user-id", type=int, default=None)
+    api_token_issue.add_argument("--scope", action="append", dest="scopes", required=True)
+    api_token_issue.add_argument("--expires-at", required=True)
+
+    api_token_revoke = api_token_sub.add_parser("revoke")
+    api_token_revoke.add_argument("--db", default="data/amneziya.sqlite3")
+    api_token_revoke.add_argument("--token-id", required=True)
+    api_token_revoke.add_argument("--reason", required=True)
+
     return parser
 
 
@@ -222,6 +242,26 @@ def main() -> None:
         run_web_server(host=args.host, port=args.port)
     elif args.command == "api" and args.api_command == "serve":
         run_api_server(host=args.host, port=args.port)
+    elif args.command == "api" and args.api_command == "token":
+        if args.api_token_command == "issue":
+            print(
+                run_api_token_issue(
+                    db_path=Path(args.db),
+                    name=args.name,
+                    owner_label=args.owner_label,
+                    scopes=args.scopes,
+                    expires_at=args.expires_at,
+                    owner_user_id=args.owner_user_id,
+                )
+            )
+        elif args.api_token_command == "revoke":
+            print(
+                run_api_token_revoke(
+                    db_path=Path(args.db),
+                    token_id=args.token_id,
+                    reason=args.reason,
+                )
+            )
 
 
 def run_web_password_hash(password: str) -> str:
@@ -270,6 +310,81 @@ def run_api_server(
         host=host or actual_settings.api_host,
         port=port or actual_settings.api_port,
     )
+
+
+def run_api_token_issue(
+    *,
+    db_path: Path,
+    name: str,
+    owner_label: str,
+    scopes: list[str],
+    expires_at: str,
+    owner_user_id: int | None = None,
+    raw_token: str | None = None,
+) -> str:
+    if not name.strip():
+        raise ValueError("token name cannot be blank")
+    if not owner_label.strip():
+        raise ValueError("owner label cannot be blank")
+
+    actual_expires_at = _parse_api_datetime(expires_at)
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = connect(db_path)
+    try:
+        initialize_schema(conn)
+        repo = Repository(conn)
+        issue = create_route_api_token(
+            repo,
+            name=name.strip(),
+            owner_label=owner_label.strip(),
+            owner_user_id=owner_user_id,
+            scopes=set(scopes),
+            expires_at=actual_expires_at,
+            raw_token=raw_token,
+        )
+    finally:
+        conn.close()
+
+    payload = {
+        "action": "api_token.issued",
+        **issue.safe_metadata(),
+        "raw_token": issue.raw_token,
+    }
+    return json.dumps(payload, ensure_ascii=False, sort_keys=True)
+
+
+def run_api_token_revoke(
+    *,
+    db_path: Path,
+    token_id: str,
+    reason: str,
+    revoked_at: str | None = None,
+) -> str:
+    if not token_id.strip():
+        raise ValueError("token id cannot be blank")
+    if not reason.strip():
+        raise ValueError("revoke reason cannot be blank")
+
+    actual_revoked_at = (
+        _parse_api_datetime(revoked_at)
+        if revoked_at is not None
+        else datetime.now(timezone.utc)
+    )
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = connect(db_path)
+    try:
+        initialize_schema(conn)
+        repo = Repository(conn)
+        event = revoke_api_token(
+            repo,
+            token_id=token_id.strip(),
+            revoked_at=actual_revoked_at,
+            reason=reason.strip(),
+        )
+    finally:
+        conn.close()
+
+    return json.dumps(event.safe_metadata(), ensure_ascii=False, sort_keys=True)
 
 
 def run_agent_token_hash(raw_token: str) -> str:
@@ -325,6 +440,16 @@ def _read_web_password(password: str | None) -> str:
     if first != second:
         raise ValueError("passwords do not match")
     return first
+
+
+def _parse_api_datetime(value: str) -> datetime:
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError(f"invalid ISO datetime: {value}") from exc
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 def run_server_check(server: ServerConfig, *, dry_run: bool) -> str:
@@ -529,7 +654,17 @@ def run_server_retest_plan(
         f"python -m app.cli server sync-peers --config {config_path} --server {server.name} --db {db_path}",
         _runtime_check_command(server),
         "",
-        "4. Restart or inspect services:",
+        "4. Run read-only API smoke:",
+        f"python -m app.cli api token issue --db {db_path} --name vps-smoke --owner-label ops --scope server:read --scope metrics:read --expires-at \"$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')\"",
+        "export API_TOKEN='<raw_token from issue output>'",
+        "python -m app.cli api serve --host 127.0.0.1 --port 3040",
+        'curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers',
+        f'curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers/{server.name}/summary',
+        'curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/metrics/summary',
+        f"python -m app.cli api token revoke --db {db_path} --token-id '<token_id from issue output>' --reason smoke-complete",
+        "Do not send raw API token, token hash, Authorization header, .conf, QR, vpn://, PrivateKey, or PresharedKey.",
+        "",
+        "5. Restart or inspect services:",
         "sudo systemctl restart amneziya-web",
         "sudo systemctl restart amneziya-bot",
         "sudo systemctl status amneziya-web --no-pager",
@@ -537,7 +672,7 @@ def run_server_retest_plan(
         "curl -i http://127.0.0.1:3030/login",
         "tail -n 200 logs/app.log",
         "",
-        "5. Manual checklist:",
+        "6. Manual checklist:",
         "- open web server detail and run health check",
         "- run peer sync and review Amnezia-created peers",
         "- approve one test order",
@@ -545,7 +680,7 @@ def run_server_retest_plan(
         "- test Disable VPN, then Enable VPN for the same device",
         "- test email config/recovery only after email is verified",
         "",
-        "6. If it fails, collect safe logs:",
+        "7. If it fails, collect safe logs:",
         _debug_snapshot_command(server),
         "sudo journalctl -u amneziya-web -n 200 --no-pager",
         "sudo journalctl -u amneziya-bot -n 200 --no-pager",

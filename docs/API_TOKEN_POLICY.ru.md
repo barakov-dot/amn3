@@ -60,6 +60,15 @@ Safe audit metadata содержит только `token_id`, `name`, `owner_lab
 
 Safe lifecycle metadata не содержит raw token, Authorization header, token hash, `.conf`, QR payload, `vpn://`, private key, PSK или remote command output.
 
+Route-connected токены для VPS smoke выдаются и отзываются через CLI:
+
+```bash
+python -m app.cli api token issue --db data/amneziya.sqlite3 --name vps-smoke --owner-label ops --scope server:read --scope metrics:read --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')"
+python -m app.cli api token revoke --db data/amneziya.sqlite3 --token-id TOKEN_ID --reason smoke-complete
+```
+
+Raw token показывается только в выводе `issue`; в базе хранится только `sha256:<digest>`.
+
 ## Connected read-only route shell
 
 Первый route-connected slice разрешает только aggregate read-only endpoints:
