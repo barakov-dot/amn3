@@ -139,11 +139,11 @@
 ### Route/Auth machine-checkable binding tests
 
 - Цель: не дать новым routes/actions/commands появиться без `SurfacePolicy`.
-- Статус 2026-06-01: next-gate plan подготовлен в `research/amn2/route-auth-machine-checkable-tests-plan.md`.
+- Статус 2026-06-01: implementation slice выполнен и запушен в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`.
 - Что должно появиться: web route coverage, bot logical action manifest, Local Agent parity, CLI/remote operation bindings и test-ref integrity checks поверх текущего `app/security/surface_policy.py`.
 - Почему P1: первый registry уже есть, но следующий риск - drift между реальным runtime surface и policy matrix.
-- Локальная проверка: focused `tests/security/test_surface_policy.py tests/security/test_surface_policy_bindings.py`; никаких route expansion, middleware enforcement или live VPS calls.
-- Готово, когда: новая web/bot/agent/CLI/remote surface без policy entry ломает тесты.
+- Локальная проверка: RED `1 import error as expected`; `tests/security/test_surface_policy.py tests/security/test_surface_policy_bindings.py -v` -> `22 passed`; focused web/email/agent/server suite -> `89 passed`; full suite -> `549 passed`.
+- Готово, когда: новая web/bot/agent/CLI/remote surface без policy entry ломает тесты. Первый slice готов; VPS gate не нужен.
 
 ## P2. Малая важность или после P0/P1
 
@@ -200,7 +200,7 @@
 9. Зафиксировать backup/import dangerous API boundary по `research/amn2/backup-import-dangerous-api-design.md` - выполнено локально, без web/API routes и без VPS.
 10. Зафиксировать manager config export contract по `research/amn2/manager-config-export-contract.md` - выполнено локально, без новых config routes и без VPS.
 11. Зафиксировать public/self-service config delivery policy по `research/amn2/public-self-service-config-delivery-policy.md` - выполнено локально, без public download routes и без VPS.
-12. Зафиксировать route/auth machine-checkable binding tests plan по `research/amn2/route-auth-machine-checkable-tests-plan.md` - выполнено локально, без route expansion и без VPS.
+12. Выполнить route/auth machine-checkable binding tests по `research/amn2/route-auth-machine-checkable-tests-plan.md` - выполнено и запушено в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`, без route expansion и без VPS.
 13. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг, отдельно подтверждаемый оператором.
 
 ## Не переносим в локальную фазу

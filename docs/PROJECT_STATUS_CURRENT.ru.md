@@ -160,6 +160,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Local Agent Hardening: `c5d7eb6 Harden Local Agent audit contract`;
 - Web Panel Safe Improvements: `22dfc37 Clarify web panel operation gates`;
 - Scoped API Token Storage: `1fdcde5 Add scoped API token storage contract`.
+- Route/Auth Binding Tests: branch `amn2/codex/route-auth-binding-tests`, commit `f9d2c79 Bind route inventory to surface policies`.
 
 Решение по соседним чатам:
 
@@ -249,7 +250,7 @@ head: 8697b60 Document Local Agent production wiring
 3. Evidence фиксировать через `research/amn2/vps-gate-evidence-checklist.md`, затем принимать merge/PR решение по `research/amn2/post-vps-gate-merge-decision.md`.
 4. App-managed SSH host key enrollment design подготовлен в `research/amn2/ssh-host-key-enrollment-design.md`; implementation plan писать перед web/API remote-operation expansion.
 5. Docker manager safety contract уже подготовлен в `research/amn2/docker-manager-design-note.md`; implementation plan для него писать только после VPS evidence.
-6. Route/Auth machine-checkable tests plan подготовлен в `research/amn2/route-auth-machine-checkable-tests-plan.md`; следующий local-only slice должен быть binding/drift tests поверх текущего registry, без route expansion.
+6. Route/Auth machine-checkable binding tests выполнены и запушены в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`; использовать как drift guard перед любыми route/API expansions.
 7. Backup/import dangerous API design подготовлен в `research/amn2/backup-import-dangerous-api-design.md`; web/API backup/import routes не добавлять до policy registry и restore-preview gate.
 8. Manager config export contract подготовлен в `research/amn2/manager-config-export-contract.md`; first slice должен быть local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
 9. Public/self-service config delivery policy подготовлен в `research/amn2/public-self-service-config-delivery-policy.md`; first slice должен быть no-route policy registry/share-token contract, без public download route.

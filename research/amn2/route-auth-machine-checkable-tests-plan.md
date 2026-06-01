@@ -28,9 +28,36 @@ docs/ROUTE_AUTH_OPERATION_POLICY.ru.md
 
 ## Decision status
 
-Status: `plan-prepared-local-docs`.
+Status: `implemented-pushed-local-gate-complete`.
 
-Decision: next route/auth work should be a local-only drift-check layer, not route expansion. It should add binding/coverage tests around current surfaces while preserving `enables_new_behavior=False`.
+Decision: route/auth work remains a local-only drift-check layer, not route expansion. The first implementation adds binding/coverage tests around current surfaces while preserving `enables_new_behavior=False`.
+
+Implementation evidence:
+
+```text
+repo: barakov-dot/amn2
+branch: codex/route-auth-binding-tests
+commit: f9d2c79 Bind route inventory to surface policies
+new files:
+- app/security/surface_bindings.py
+- tests/security/test_surface_policy_bindings.py
+policy drift fixed:
+- web.email.verify_start
+- web.servers.amnezia_peers.unmark
+stale test_ref fixed:
+- tests/server/test_peer_sync.py -> tests/services/test_peer_inventory.py
+```
+
+Verification:
+
+```text
+RED: tests/security/test_surface_policy_bindings.py -> 1 import error as expected
+tests/security/test_surface_policy.py tests/security/test_surface_policy_bindings.py -v -> 22 passed
+focused web/email/agent/server/peer inventory suite -> 89 passed, 1 warning
+full local suite -> 549 passed, 1 warning
+```
+
+The known Windows `pytest-current` cleanup `PermissionError` was emitted after successful pytest sessions; commands returned exit code 0.
 
 ## Problem
 
@@ -271,7 +298,7 @@ The next-gate slice is ready when:
 
 ## Current recommendation
 
-Use this plan before any route expansion work. It should run before:
+Use the implemented binding tests before any route expansion work. They should run before:
 
 - route-connected scoped API token lifecycle;
 - public/self-service config delivery implementation;
