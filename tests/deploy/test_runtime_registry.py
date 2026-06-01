@@ -984,6 +984,54 @@ def test_amn3_post_vps_implementation_map_links_smoke_evidence_to_write_api_task
     assert "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md" in smoke_result
 
 
+def test_amn3_pre_vps_local_status_matrix_separates_documented_plans_from_implemented_code():
+    doc_path = ROOT / "docs/AMN3_PRE_VPS_LOCAL_STATUS_MATRIX.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    release_gate_path = ROOT / "docs/AMN3_LOCAL_RELEASE_GATE.ru.md"
+    post_vps_path = ROOT / "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    release_gate = release_gate_path.read_text(encoding="utf-8")
+    post_vps = post_vps_path.read_text(encoding="utf-8")
+
+    assert "# AMN3 Pre-VPS Local Status Matrix" in text
+    assert "Не дублировать соседний VPS smoke" in text
+    assert "Реализовано локально" in text
+    assert "Только задокументировано" in text
+    assert "Не реализовано в коде до VPS" in text
+    assert "Можно делать локально без VPS" in text
+    assert "Нельзя делать без VPS" in text
+    assert "Если соседний чат уже сделал VPS smoke" in text
+    assert "docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md" in text
+    assert "docs/AMN3_VPS_TEST_PACKET.ru.md" in text
+    assert "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md" in text
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-settings-implementation.ru.md" in text
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md" in text
+    assert "docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md" in text
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md" in text
+    assert "docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md" in text
+    assert "docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md" in text
+    assert "docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md" in text
+    assert "app/web/local_agent_actions.py: absent until GO-1" in text
+    assert "app/agent/peer_commands.py: absent until GO-1" in text
+    assert "write_slice_policies(): absent until GO-1" in text
+    assert "LocalAgentClient write methods: absent until GO-1" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED=false" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED=true" in text
+    assert "agent:clients:write" in text
+    assert "read-only token remains read-only" in text
+    assert "no raw token" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "full client config" in text
+    assert "docs/AMN3_PRE_VPS_LOCAL_STATUS_MATRIX.ru.md" in handoff
+    assert "docs/AMN3_PRE_VPS_LOCAL_STATUS_MATRIX.ru.md" in release_gate
+    assert "docs/AMN3_PRE_VPS_LOCAL_STATUS_MATRIX.ru.md" in post_vps
+
+
 def test_amn3_first_vps_mutation_test_plan_coordinates_apply_revoke_without_secret_leakage():
     plan_path = ROOT / "docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md"
     handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"

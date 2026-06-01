@@ -74,6 +74,8 @@ git remote -v
   текущего переноса AMN3 на VPS.
 - `docs/AMN3_VPS_TEST_PACKET.ru.md` - короткий пакет для соседнего чата `Переводим AMN на API`,
   где готовится реальный VPS smoke.
+- `docs/AMN3_PRE_VPS_LOCAL_STATUS_MATRIX.ru.md` - текущая матрица: что уже
+  реализовано локально, что только задокументировано, что нельзя делать до VPS.
 - `docs/AMN3_LOCAL_RELEASE_GATE.ru.md` - локальный gate перед VPS: write routes закрыты,
   `LOCAL_AGENT_WRITE_ENABLED=false`, read-only token без `agent:clients:write`.
 - `docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md` - карта перехода после `go` в VPS smoke:
@@ -151,25 +153,26 @@ git status --short --branch
 Можно продолжать без VPS:
 
 1. Опубликовать или доставить ветку `codex/local-agent-production-wiring` в `barakov-dot/amn3`, когда GitHub credentials будут готовы.
-2. Держать актуальными `docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md` и этот handoff.
-3. Анализировать идеи `kyoresuas/amnezia-api` для user API без копирования кода.
-4. Использовать `docs/AMN3_KYORESUAS_API_ANALYSIS.ru.md` для уточнения policy/scopes/audit/dry-run контрактов в плане первого write API slice.
-5. Держать `docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md` синхронизированным с `app/agent/write_policy_matrix.py`.
-6. Держать `docs/AMN3_WRITE_API_UX_FLOW.ru.md` синхронизированным с policy matrix и будущими surface flows.
-7. Держать `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md` синхронизированным с `app/agent/write_audit.py`.
-8. Держать `docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md` синхронизированным с audit model и post-VPS map.
-9. Держать `docs/AMN3_LOCAL_AGENT_WRITE_SETTINGS_CONTRACT.ru.md` синхронизированным с settings/config tests.
-10. Держать `docs/superpowers/plans/2026-06-01-local-agent-write-settings-implementation.ru.md` готовым к исполнению после `GO-1`.
-11. Держать `docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md` готовым к исполнению после `GO-1`.
-12. Держать `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md` готовым к исполнению после `GO-1`.
-13. Держать `docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md` готовым к исполнению после `GO-1`.
-14. Держать `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md` готовым к исполнению после `GO-1`.
-15. Держать `docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md` готовым к исполнению после `GO-1`.
-16. Держать `docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md` готовым к исполнению только на реальном VPS после Phase 1-4.
-17. Держать `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` синхронизированным с `app/agent/write_confirmation.py`.
-18. Держать `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md` синхронизированным с UX, audit и preflight contracts.
-19. Перед передачей на VPS проходить `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
-20. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
+2. Сначала сверять следующий шаг с `docs/AMN3_PRE_VPS_LOCAL_STATUS_MATRIX.ru.md`, чтобы не дублировать соседний VPS smoke.
+3. Держать актуальными `docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md` и этот handoff.
+4. Анализировать идеи `kyoresuas/amnezia-api` для user API без копирования кода.
+5. Использовать `docs/AMN3_KYORESUAS_API_ANALYSIS.ru.md` для уточнения policy/scopes/audit/dry-run контрактов в плане первого write API slice.
+6. Держать `docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md` синхронизированным с `app/agent/write_policy_matrix.py`.
+7. Держать `docs/AMN3_WRITE_API_UX_FLOW.ru.md` синхронизированным с policy matrix и будущими surface flows.
+8. Держать `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md` синхронизированным с `app/agent/write_audit.py`.
+9. Держать `docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md` синхронизированным с audit model и post-VPS map.
+10. Держать `docs/AMN3_LOCAL_AGENT_WRITE_SETTINGS_CONTRACT.ru.md` синхронизированным с settings/config tests.
+11. Держать `docs/superpowers/plans/2026-06-01-local-agent-write-settings-implementation.ru.md` готовым к исполнению после `GO-1`.
+12. Держать `docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md` готовым к исполнению после `GO-1`.
+13. Держать `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md` готовым к исполнению после `GO-1`.
+14. Держать `docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md` готовым к исполнению после `GO-1`.
+15. Держать `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md` готовым к исполнению после `GO-1`.
+16. Держать `docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md` готовым к исполнению после `GO-1`.
+17. Держать `docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md` готовым к исполнению только на реальном VPS после Phase 1-4.
+18. Держать `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` синхронизированным с `app/agent/write_confirmation.py`.
+19. Держать `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md` синхронизированным с UX, audit и preflight contracts.
+20. Перед передачей на VPS проходить `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
+21. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
 
 До VPS smoke не включать write routes, не добавлять реальные mutation endpoints и не делать Local Agent публичным.
 
