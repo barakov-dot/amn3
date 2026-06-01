@@ -110,10 +110,11 @@ Backlog не является списком задач к немедленно�
 ### Local Amnezia API agent
 
 - Цель: `amn2`.
-- Статус: `in-progress`.
+- Статус: `alignment-prepared-local-docs`.
 - Суть: локальный agent рядом с Amnezia управляет users/peers через ограниченный HTTP contract вместо постоянного внешнего SSH control plane.
 - Причина: перспективно для управления Amnezia через API, но agent получает высокий доступ к runtime/config state.
 - Текущий результат: first-slice foundation, production wiring и Local Agent hardening выполнены; commit `c5d7eb6` закрепляет audit/version contract для read-only routes.
+- Текущий результат 2026-06-01: `research/amn2/local-agent-runtime-metadata-alignment.md` отделяет controller-safe runtime summary от topology-sensitive fields вроде `container_name` и `interface`.
 - Следующий шаг: token rotation/revoke design и scoped token policy; не добавлять `/agent/clients`, `/agent/configs` или write lifecycle без отдельного gate.
 
 ### Configurable VPN subnet/IPAM

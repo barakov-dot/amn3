@@ -209,6 +209,7 @@ research/amn2/post-vps-gate-merge-decision.md
 research/amn2/docker-manager-design-note.md
 research/amn2/neighbor-chat-vps-gate-handoff.md
 research/amn2/read-only-metrics-privacy-classification.md
+research/amn2/local-agent-runtime-metadata-alignment.md
 ```
 
 Existing unification design:
@@ -233,7 +234,7 @@ status: merged into codex-vps-test-prep via PR #3
 head: 8697b60 Document Local Agent production wiring
 ```
 
-Локальная проверка показала, что эти commits уже содержались в production baseline после `91aeb3e`. Позднее Local Agent получил hardening commit `c5d7eb6`: repository-backed audit sink для allowed read routes, safe `/agent/version` metadata и тесты, что raw bearer token не попадает в audit. Следующий Local Agent slice не должен добавлять clients/configs/write routes; сначала нужны token rotation/revoke design и scoped token policy.
+Локальная проверка показала, что эти commits уже содержались в production baseline после `91aeb3e`. Позднее Local Agent получил hardening commit `c5d7eb6`: repository-backed audit sink для allowed read routes, safe `/agent/version` metadata и тесты, что raw bearer token не попадает в audit. Runtime metadata boundary для будущего controller summary зафиксирован в `research/amn2/local-agent-runtime-metadata-alignment.md`. Следующий Local Agent slice не должен добавлять clients/configs/write routes; сначала нужны token rotation/revoke design и scoped token policy.
 
 ## Рекомендуемый порядок
 

@@ -384,6 +384,12 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 2. First implementation after `verified-live` should be aggregate-only metrics/API route shell.
 3. Detailed per-peer/client metrics remain blocked until separate opt-in detailed metrics policy and tests.
 
+### Local Agent runtime metadata lane
+
+1. Runtime metadata alignment is prepared in `research/amn2/local-agent-runtime-metadata-alignment.md`.
+2. First implementation after `verified-live` should be controller-safe runtime summary.
+3. `/agent/clients`, `/agent/configs` and write lifecycle remain blocked until separate token rotation/revoke and secret-read/write gates.
+
 ## Recommendation
 
 Next recommended work is the controlled real VPS verification gate. It should happen before integrating KYORESUAS/PRVTPRO-derived operational flows into the main project, because those ideas depend on real remote-operation behavior rather than only local contracts.

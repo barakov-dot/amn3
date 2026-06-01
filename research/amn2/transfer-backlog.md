@@ -52,6 +52,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | VPS gate evidence/merge package | `prepared-local-docs` | AMN3 | `vps-gate-evidence-checklist.md`, `post-vps-gate-merge-decision.md`, `neighbor-chat-vps-gate-handoff.md` | Использовать сразу после real VPS gate для решения merge/PR и разблокировки соседних чатов |
 | Docker manager safety note | `prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/docker-manager-design-note.md` | Использовать как вход для будущего implementation plan после VPS evidence |
 | Read-only metrics privacy classification | `classification-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/read-only-metrics-privacy-classification.md` | После VPS evidence писать implementation plan для aggregate-only API route shell |
+| Local Agent runtime metadata alignment | `alignment-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/local-agent-runtime-metadata-alignment.md` | После VPS evidence писать implementation plan для controller-safe runtime summary, не clients/configs |
 | Web panel safe improvements | `implemented-pushed-local-gate-complete` | `amn2` | commit `22dfc37`; RED `4 failed as expected`; focused `75 passed`; full suite `536 passed` | Использовать как operator safety wording baseline; VPS gate не нужен |
 | Scoped API token storage | `implemented-pushed-local-gate-complete` | `amn2` | commit `1fdcde5`; RED `1 import error as expected`; focused `54 passed`; full suite `542 passed` | Использовать как hash-only token baseline; VPS gate не нужен |
 | Public/self-service config delivery | `lab-only-until-policy` | AMN3 -> `amn2` later | `research/amn2/config-delivery-inventory.md` | Не открывать public config links до scoped token/self-service design |
@@ -64,7 +65,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 
 - задача совпадает с целевым продуктом: API-first управление пользователями Amnezia;
 - текущий first slice уже защищен route policy, hash-only token auth, typed auth errors и no-write boundary;
-- ближайший production gain - получить opt-in local runtime adapter на сервере, который controller сможет опрашивать безопасно;
+- ближайший production gain - получить opt-in local runtime adapter на сервере, который controller сможет опрашивать безопасно; safety boundary для этого зафиксирован в `research/amn2/local-agent-runtime-metadata-alignment.md`;
 - verified VPS baseline теперь дает реальный behavior contract для будущих write операций.
 
 ## Transfer Gates
@@ -86,7 +87,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 2. Зафиксировать VPS evidence в AMN3 через `research/amn2/vps-gate-evidence-checklist.md` перед интеграционными решениями из `VPN Ops Lab — KYORESUAS-API` и `VPS OPS LAB - PRVTPRO-Amnezia-Web-Panel`.
 3. Merge/PR candidate branch решать по `research/amn2/post-vps-gate-merge-decision.md`.
 4. Docker manager safety contract уже зафиксирован в `research/amn2/docker-manager-design-note.md`; implementation plan писать только после VPS evidence.
-5. Read-only clients/metrics endpoints рассматривать только после VPS evidence; privacy classification подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`.
+5. Read-only clients/metrics endpoints рассматривать только после VPS evidence; privacy classification подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, Local Agent runtime metadata alignment - в `research/amn2/local-agent-runtime-metadata-alignment.md`.
 6. Public/self-service links, domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
 
 ## Neighbor Chat Decision

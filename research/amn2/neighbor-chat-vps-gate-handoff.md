@@ -37,7 +37,7 @@ head: aca6663 Add VPS gate handoff for remote ops
 
 - проектировать read-only API route shell;
 - использовать scoped token baseline `server:read` / `metrics:read`;
-- описывать Local Agent runtime metadata alignment;
+- использовать Local Agent runtime metadata alignment из `research/amn2/local-agent-runtime-metadata-alignment.md`;
 - не переносить Node/Fastify implementation;
 - не открывать `/clients` write lifecycle.
 

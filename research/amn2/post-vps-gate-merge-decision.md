@@ -46,7 +46,7 @@ Merge блокируется, если:
 После `verified-live` и merge лучше начинать не с write lifecycle API, а с одного из read-only направлений:
 
 1. Aggregate-only read-only metrics/API route shell по `research/amn2/read-only-metrics-privacy-classification.md`.
-2. Local Agent runtime metadata alignment.
+2. Controller-safe Local Agent runtime summary по `research/amn2/local-agent-runtime-metadata-alignment.md`.
 3. Web-panel status UX для уже существующих read-only states.
 
 Write lifecycle, public config links, backup/import/reboot и destructive operations остаются за отдельными gates.
