@@ -14,7 +14,17 @@
 
 Главный принцип: любое изменение, которое читает, создает, экспортирует, отправляет, восстанавливает или логирует secret-bearing данные, должно сначала пройти эту карту. Это относится не только к 2FA, но и к config delivery, public/self-service links, backup/import, scoped tokens, Local Agent, SSH/VPS operations, metrics и audit.
 
-Рабочий статус после обновления: `ready-for-plan`.
+Рабочий статус после обновления: `implemented-pushed-local-gate-complete` для первого machine-checkable registry.
+
+Implementation evidence:
+
+```text
+branch: amn2/codex/secret-inventory-registry
+commit: 9ce42f4 Add secret inventory registry
+evidence: research/amn2/secret-inventory-registry-implementation.md
+focused: 64 passed
+full: 591 passed, 1 warning
+```
 
 Ближайшее применение:
 
@@ -199,7 +209,7 @@ For `amn2`, conservative first step is single configured web-admin 2FA, but only
 
 ## Gaps
 
-- Нет machine-checkable secret inventory в `amn2`; этот lab file остается policy-картой, но код пока не может автоматически проверять новое поле против inventory.
+- Первый machine-checkable secret inventory добавлен в `amn2/codex/secret-inventory-registry`, commit `9ce42f4`; будущие поля все еще должны расширять registry и tests.
 - Backup manifest excludes are fixed; adding new artifact types should update manifest and tests.
 - Config delivery уже признан `client-config-secret`, но audit/logging/read-model policy пока не оформлена как route-level matrix.
 - `vpn://` link теперь тестируется как reversible UTF-8 artifact в первом срезе, но QR decode round-trip без новой dependency еще не закрыт.

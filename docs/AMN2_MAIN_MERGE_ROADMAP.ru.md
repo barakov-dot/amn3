@@ -195,7 +195,7 @@ Production evidence:
 - focused tests: `14 passed, 1 StarletteDeprecationWarning`;
 - full local suite: `535 passed, 1 StarletteDeprecationWarning`.
 
-После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening, Web Panel Safe Improvements, Scoped API Token Storage, Manager Config Export Contract, Public/Self-service Config Delivery Policy и Backup/Import Policy Contract. Следующий рекомендуемый шаг - controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, потому что KYORESUAS/PRVTPRO integration candidates уже ждут реального VPS evidence.
+После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening, Web Panel Safe Improvements, Scoped API Token Storage, Manager Config Export Contract, Public/Self-service Config Delivery Policy, Backup/Import Policy Contract и Secret Inventory Registry. Следующий рекомендуемый шаг - controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, потому что KYORESUAS/PRVTPRO integration candidates уже ждут реального VPS evidence.
 
 ## Важные задачи
 
@@ -369,7 +369,8 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 9. Manager config export contract: done in `amn2/codex/manager-config-export-contract`, local-gate-complete.
 10. Public/self-service config delivery policy: done in `amn2/codex/public-config-delivery-policy-contract`, local-gate-complete.
 11. Backup/import policy contract: done in `amn2/codex/backup-import-policy-contract`, local-gate-complete.
-12. Read-only metrics privacy classification: prepared in `research/amn2/read-only-metrics-privacy-classification.md`; implementation route shell still waits for VPS evidence.
+12. Secret inventory registry: done in `amn2/codex/secret-inventory-registry`, local-gate-complete.
+13. Read-only metrics privacy classification: prepared in `research/amn2/read-only-metrics-privacy-classification.md`; implementation route shell still waits for VPS evidence.
 
 ### Live VPS verification lane
 
@@ -438,4 +439,4 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 
 ## Recommendation
 
-Backup/import policy registry and restore-preview contract is now complete. Next recommended work is controlled real VPS verification before integrating KYORESUAS/PRVTPRO-derived operational flows. If VPS is still unavailable, the only sensible local-only follow-up is a small machine-checkable secret inventory registry with no route expansion and no secret-bearing output.
+Backup/import policy registry and secret inventory registry are now complete. Next recommended work is controlled real VPS verification before integrating KYORESUAS/PRVTPRO-derived operational flows. If VPS is still unavailable, keep further work to docs/test guard slices only, such as route-level audit/rate-limit policy, and avoid route/API implementation.

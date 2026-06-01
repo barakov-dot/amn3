@@ -84,7 +84,7 @@
 - Идея: перед любым backup/restore явно классифицировать секреты и по умолчанию отдавать redacted backup.
 - Польза: снижает риск случайной утечки SSH keys, panel tokens, Telegram tokens и внешних API keys.
 - Риски: пользователю нужен понятный full-backup режим, encryption key management, restore compatibility.
-- Статус: design candidate описан в [Secret Inventory + Backup Policy для `amn2`](../docs/superpowers/specs/2026-05-30-secret-inventory-backup-policy-design.md).
+- Статус: first machine-checkable no-route registry выполнен в `amn2/codex/secret-inventory-registry`, commit `9ce42f4`; details in [Secret inventory registry implementation](../research/amn2/secret-inventory-registry-implementation.md). Backup/import policy отдельно выполнен в `amn2/codex/backup-import-policy-contract`.
 
 ### Safe SSH/sudo policy
 

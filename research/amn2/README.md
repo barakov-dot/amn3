@@ -34,6 +34,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 - [Route/Auth Policy Matrix](route-policy-matrix.md) - конкретная policy matrix для web, bot, public-token и CLI/operator surfaces.
 - [Route/Auth machine-checkable tests plan](route-auth-machine-checkable-tests-plan.md) - next-gate plan для binding/drift tests поверх текущего `app/security/surface_policy.py`.
 - [Secret surface inventory](secret-surface-inventory.md) - первый проход по secrets, redaction, encrypted backup, email tokens, config delivery и 2FA implications.
+- [Secret inventory registry implementation](secret-inventory-registry-implementation.md) - local-only `amn2` branch/commit/test evidence для machine-checkable secret inventory без route expansion.
 - [Backup/import dangerous API design](backup-import-dangerous-api-design.md) - policy boundary для metadata/redacted/full backup, restore preview и dangerous import/apply.
 - [Backup/import policy contract implementation](backup-import-policy-contract-implementation.md) - local-only `amn2` branch/commit/test evidence для no-route backup/import policy registry and restore/import preview contract.
 - [Config delivery inventory](config-delivery-inventory.md) - первый проход по выдаче VPN config через bot, email, QR, `vpn://` link, recovery token и template preview.
@@ -68,7 +69,8 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 3. Зафиксировать VPS evidence через `vps-gate-evidence-checklist.md`.
 4. Принять merge/PR решение по `post-vps-gate-merge-decision.md`.
 5. Backup/import policy registry and restore-preview contract выполнен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`; web/API full backup, restore apply и import apply остаются закрытыми.
-6. Если VPS все еще не готов, следующий маленький local-only кандидат - machine-checkable secret inventory registry, без routes, без secret-bearing output и без live VPS.
+6. Machine-checkable secret inventory registry выполнен в `amn2/codex/secret-inventory-registry`, commit `9ce42f4`; route expansion, secret-bearing output и live VPS не добавлялись.
+7. Если VPS все еще не готов, следующий local-only шаг должен быть только docs/test guard уровня route-policy/audit-rate-limit; route/API implementation лучше не начинать до VPS evidence.
 
 ## Неактуальный риск
 

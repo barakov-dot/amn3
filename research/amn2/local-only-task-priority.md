@@ -215,7 +215,8 @@
 12. Выполнить route/auth machine-checkable binding tests по `research/amn2/route-auth-machine-checkable-tests-plan.md` - выполнено и запушено в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`, без route expansion и без VPS.
 13. Выполнить route-connected scoped API token lifecycle gate - выполнено и запушено в stacked branch `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0`, без route expansion и без VPS.
 14. Backup/import policy registry and restore-preview contract выполнен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`, без web/API backup routes и без VPS.
-15. Следующий основной шаг - controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; если VPS все еще не готов, брать только маленький local-only secret inventory registry без route expansion.
+15. Secret inventory registry выполнен в `amn2/codex/secret-inventory-registry`, commit `9ce42f4`, без route expansion.
+16. Следующий основной шаг - controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; если VPS все еще не готов, брать только docs/test guard уровня route-level audit/rate-limit policy, без route/API implementation.
 
 ## Не переносим в локальную фазу
 

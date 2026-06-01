@@ -74,4 +74,4 @@ VPS gate для этого slice не нужен. Slice не меняет peer a
 Следующий recommended step теперь зависит от готовности VPS:
 
 - если VPS готов - выполнить controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep`;
-- если VPS все еще не готов - брать только маленький local-only слой вроде machine-checkable secret inventory registry, без routes и без secret-bearing output.
+- если VPS все еще не готов - брать только docs/test guard слой уровня route-policy/audit-rate-limit, без route/API implementation и без secret-bearing output.

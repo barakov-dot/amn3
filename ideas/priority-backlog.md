@@ -78,12 +78,13 @@ Backlog не является списком задач к немедленно�
 ### Secret inventory
 
 - Цель: `amn2`.
-- Статус: `ready-for-plan`.
+- Статус: `implemented-pushed-local-gate-complete`.
 - Суть: единая таблица секретов: где хранятся, где могут утечь, как redacted, rotated, revoked и restored.
 - Причина: без inventory нельзя безопасно проектировать backup, config delivery, scoped tokens, agent и audit.
 - Текущий результат: `research/amn2/secret-surface-inventory.md` расширен до P0-gate для config delivery, backup/import, scoped tokens, Local Agent, SSH/VPS operations, metrics и audit.
 - Текущий результат 2026-05-31: `Redaction coverage plan` исполнен как первый implementation gate для `.conf`, QR, `vpn://`, tokens, Local Agent headers и command output.
-- Следующий шаг: использовать verified redaction gate как обязательную предпосылку для partial-failure/rollback и будущих secret-bearing surfaces.
+- Текущий результат 2026-06-01: machine-checkable registry выполнен в `amn2/codex/secret-inventory-registry`, commit `9ce42f4`; focused `64 passed`, full suite `591 passed`; routes, `.env` чтение, DB access и secret-bearing output не добавлялись.
+- Следующий шаг: использовать registry как обязательный baseline для будущих secret-bearing routes, backup/import apply, config delivery exposure и audit/rate-limit gates.
 
 ## P1. Важные рекомендации
 
@@ -239,5 +240,5 @@ Backlog не является списком задач к немедленно�
 3. Решить merge/PR для ветки `codex/remote-operation-vps-gate-prep` по `research/amn2/post-vps-gate-merge-decision.md`.
 4. После VPS evidence выбрать первый integration slice из KYORESUAS/PRVTPRO inputs без копирования кода: рекомендован read-only aggregate metrics/API route shell.
 5. Использовать `research/amn2/docker-manager-design-note.md` как safety input для будущего Docker manager implementation plan.
-6. Пока VPS не готов, backup/import policy registry уже закрыт; следующий local-only кандидат должен быть меньше и безопаснее: machine-checkable secret inventory registry без route expansion и без secret-bearing output.
+6. Пока VPS не готов, backup/import policy registry и secret inventory registry уже закрыты; следующий local-only кандидат должен быть только docs/test guard уровня route-level audit/rate-limit policy, без route/API implementation.
 7. Только после закрытия этих gates возвращаться к domain exclusions и 2FA.
