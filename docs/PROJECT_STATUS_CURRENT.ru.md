@@ -201,6 +201,15 @@ research/amn2/remote-operations-inventory.md
 research/amn2/config-delivery-inventory.md
 ```
 
+Pre-VPS support package:
+
+```text
+research/amn2/vps-gate-evidence-checklist.md
+research/amn2/post-vps-gate-merge-decision.md
+research/amn2/docker-manager-design-note.md
+research/amn2/neighbor-chat-vps-gate-handoff.md
+```
+
 Existing unification design:
 
 ```text
@@ -229,9 +238,10 @@ head: 8697b60 Document Local Agent production wiring
 
 1. Рекомендуемый следующий шаг: controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, потому что KYORESUAS/PRVTPRO интеграционные задачи уже ждут реального VPS evidence.
 2. Начинать VPS gate с read-only check и dry-run apply/revoke preview; single test peer apply/revoke выполнять только после отдельного подтверждения оператора.
-3. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
-4. Read-only clients/metrics endpoints держать после VPS evidence и privacy classification.
-5. Public/self-service config links, domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
+3. Evidence фиксировать через `research/amn2/vps-gate-evidence-checklist.md`, затем принимать merge/PR решение по `research/amn2/post-vps-gate-merge-decision.md`.
+4. Docker manager safety contract уже подготовлен в `research/amn2/docker-manager-design-note.md`; implementation plan для него писать только после VPS evidence.
+5. Read-only clients/metrics endpoints держать после VPS evidence и privacy classification.
+6. Public/self-service config links, domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
 
 ## Route/Auth/Operation Policy Matrix Plan
 

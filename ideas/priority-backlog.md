@@ -221,8 +221,8 @@ Backlog не является списком задач к немедленно�
 ## Ближайшая рекомендуемая очередь
 
 1. Провести controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` на тестовом peer/device: read-only check, dry-run apply/revoke preview, затем single apply/revoke только после отдельного подтверждения.
-2. Зафиксировать VPS evidence в lab notes и решить, нужен ли merge/PR для ветки `codex/remote-operation-vps-gate-prep`.
-3. После VPS evidence выбрать первый integration slice из KYORESUAS/PRVTPRO inputs без копирования кода: вероятнее read-only metrics/API route shell или Local Agent runtime metadata.
-4. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
-5. После scoped token policy рассмотреть read-only metrics/client privacy design.
+2. Зафиксировать VPS evidence через `research/amn2/vps-gate-evidence-checklist.md`.
+3. Решить merge/PR для ветки `codex/remote-operation-vps-gate-prep` по `research/amn2/post-vps-gate-merge-decision.md`.
+4. После VPS evidence выбрать первый integration slice из KYORESUAS/PRVTPRO inputs без копирования кода: вероятнее read-only metrics/API route shell или Local Agent runtime metadata.
+5. Использовать `research/amn2/docker-manager-design-note.md` как safety input для будущего Docker manager implementation plan.
 6. Только после закрытия этих gates возвращаться к self-service links, domain exclusions и 2FA.

@@ -38,6 +38,10 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 - [Remote operations inventory](remote-operations-inventory.md) - первый проход по SSH/server apply flows, dry-run, health checks, peer apply/revoke, traffic collection, audit, redaction и rollback gaps.
 - [Local-only task priority](local-only-task-priority.md) - приоритетный список локально выполняемых задач перед controlled real VPS verification gate.
 - [Remote operation VPS gate runbook](vps-gate-remote-operation-dry-run-audit.md) - подготовленный checklist для реального VPS-теста ветки `codex/remote-operation-vps-gate-prep`.
+- [VPS gate evidence checklist](vps-gate-evidence-checklist.md) - короткая форма фиксации pass/fail результата после реального VPS gate.
+- [Post-VPS gate merge decision](post-vps-gate-merge-decision.md) - правила merge/PR после `verified-live`, `dry-run-only-pass` или `needs-fix`.
+- [Docker manager design note](docker-manager-design-note.md) - минимальный safety contract для будущего Docker AmneziaWG manager.
+- [Neighbor chat VPS gate handoff](neighbor-chat-vps-gate-handoff.md) - что ждут KYORESUAS/PRVTPRO направления перед интеграцией.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
 ## Следующие рабочие шаги
@@ -48,9 +52,9 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 
 1. Выполнить controlled real VPS verification gate по `vps-gate-remote-operation-dry-run-audit.md` на ветке `codex/remote-operation-vps-gate-prep`.
 2. Начать VPS gate с read-only check и dry-run apply/revoke preview; single apply/revoke выполнять только после отдельного подтверждения оператора.
-3. Зафиксировать VPS evidence в lab notes и решить, нужен ли merge/PR для ветки `codex/remote-operation-vps-gate-prep`.
-4. Только после VPS evidence выбирать первый integration slice из KYORESUAS/PRVTPRO inputs.
-5. До расширения Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
+3. Зафиксировать VPS evidence через `vps-gate-evidence-checklist.md`.
+4. Принять merge/PR решение по `post-vps-gate-merge-decision.md`.
+5. Только после VPS evidence выбирать первый integration slice из KYORESUAS/PRVTPRO inputs; текущая рекомендация - read-only metrics/API route shell + privacy classification.
 
 ## Неактуальный риск
 

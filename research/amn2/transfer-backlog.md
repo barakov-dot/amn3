@@ -49,6 +49,8 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Public-token safety | `implemented-pushed-local-gate-complete` | `amn2` | commit `dfe27ee`; tests `14 passed`, full suite `535 passed` | Использовать как verify/recover token baseline; VPS gate не нужен |
 | Local Agent hardening | `implemented-pushed-local-gate-complete` | `amn2` | commit `c5d7eb6`; focused tests `64 passed`, full suite `536 passed` | Использовать как read-only audit/version contract; VPS gate не нужен |
 | Remote operation VPS gate candidate | `prepared-pushed-awaits-real-vps-gate` | `amn2` branch + AMN3 runbook | branch `codex/remote-operation-vps-gate-prep`, head `aca6663`; runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; focused `79 passed`, docs `7 passed`, full `551 passed` | Выполнить read-only/dry-run на VPS; single apply/revoke только после отдельного подтверждения |
+| VPS gate evidence/merge package | `prepared-local-docs` | AMN3 | `vps-gate-evidence-checklist.md`, `post-vps-gate-merge-decision.md`, `neighbor-chat-vps-gate-handoff.md` | Использовать сразу после real VPS gate для решения merge/PR и разблокировки соседних чатов |
+| Docker manager safety note | `prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/docker-manager-design-note.md` | Использовать как вход для будущего implementation plan после VPS evidence |
 | Web panel safe improvements | `implemented-pushed-local-gate-complete` | `amn2` | commit `22dfc37`; RED `4 failed as expected`; focused `75 passed`; full suite `536 passed` | Использовать как operator safety wording baseline; VPS gate не нужен |
 | Scoped API token storage | `implemented-pushed-local-gate-complete` | `amn2` | commit `1fdcde5`; RED `1 import error as expected`; focused `54 passed`; full suite `542 passed` | Использовать как hash-only token baseline; VPS gate не нужен |
 | Public/self-service config delivery | `lab-only-until-policy` | AMN3 -> `amn2` later | `research/amn2/config-delivery-inventory.md` | Не открывать public config links до scoped token/self-service design |
@@ -80,10 +82,11 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 ## Current Priority Order
 
 1. Выполнить controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; single test peer apply/revoke только после отдельного подтверждения.
-2. Зафиксировать VPS evidence в AMN3 перед интеграционными решениями из `VPN Ops Lab — KYORESUAS-API` и `VPS OPS LAB - PRVTPRO-Amnezia-Web-Panel`.
-3. До live Docker apply/revoke описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
-4. Read-only clients/metrics endpoints рассматривать только после VPS evidence и privacy classification.
-5. Public/self-service links, domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
+2. Зафиксировать VPS evidence в AMN3 через `research/amn2/vps-gate-evidence-checklist.md` перед интеграционными решениями из `VPN Ops Lab — KYORESUAS-API` и `VPS OPS LAB - PRVTPRO-Amnezia-Web-Panel`.
+3. Merge/PR candidate branch решать по `research/amn2/post-vps-gate-merge-decision.md`.
+4. Docker manager safety contract уже зафиксирован в `research/amn2/docker-manager-design-note.md`; implementation plan писать только после VPS evidence.
+5. Read-only clients/metrics endpoints рассматривать только после VPS evidence и privacy classification.
+6. Public/self-service links, domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
 
 ## Neighbor Chat Decision
 

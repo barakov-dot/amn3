@@ -374,8 +374,9 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 2. Use the prepared VPS test checklist `research/amn2/vps-gate-remote-operation-dry-run-audit.md` with branch/commit, commands, expected state and rollback note.
 3. For `codex/remote-operation-vps-gate-prep`, start with read-only check and dry-run apply/revoke preview; single test peer apply/revoke needs separate operator confirmation.
 4. Verify approve/apply, config import, working configs, peer sync, disable/enable/delete and Docker runtime behavior if touched.
-5. Record VPS evidence in AMN3 before marking the slice `verified-live`.
-6. Do not use live VPS testing as a substitute for local policy/secret/operation tests.
+5. Record VPS evidence in `research/amn2/vps-gate-evidence-checklist.md` before marking the slice `verified-live`.
+6. Use `research/amn2/post-vps-gate-merge-decision.md` for merge/PR decision.
+7. Do not use live VPS testing as a substitute for local policy/secret/operation tests.
 
 ## Recommendation
 

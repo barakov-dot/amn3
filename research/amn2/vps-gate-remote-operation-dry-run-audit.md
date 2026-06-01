@@ -106,6 +106,15 @@ Not allowed in this gate:
 - raw config editing;
 - live VPS changes from the lab chat without the operator intentionally entering the VPS gate.
 
+## Companion documents
+
+Use these AMN3 notes together with this runbook:
+
+- `research/amn2/vps-gate-evidence-checklist.md` - short pass/fail checklist for the actual VPS evidence.
+- `research/amn2/post-vps-gate-merge-decision.md` - merge/PR decision rules after the gate.
+- `research/amn2/docker-manager-design-note.md` - safety contract for future Docker manager implementation.
+- `research/amn2/neighbor-chat-vps-gate-handoff.md` - what KYORESUAS/PRVTPRO chats may do after evidence.
+
 ## Preconditions
 
 Before entering the real VPS gate:
