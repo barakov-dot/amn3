@@ -113,6 +113,7 @@ Use these AMN3 notes together with this runbook:
 - `research/amn2/vps-gate-evidence-checklist.md` - short pass/fail checklist for the actual VPS evidence.
 - `research/amn2/post-vps-gate-merge-decision.md` - merge/PR decision rules after the gate.
 - `research/amn2/docker-manager-design-note.md` - safety contract for future Docker manager implementation.
+- `research/amn2/ssh-host-key-enrollment-design.md` - Phase 0 host key verification boundary before SSH commands.
 - `research/amn2/neighbor-chat-vps-gate-handoff.md` - what KYORESUAS/PRVTPRO chats may do after evidence.
 
 ## Preconditions
@@ -125,6 +126,7 @@ Before entering the real VPS gate:
 - database path is known; examples below use `data/amneziya.sqlite3`;
 - runtime config path points to the persistent AmneziaWG config used by Docker;
 - `VPS_APPLY_ENABLED=false` for read-only/dry-run phases;
+- SSH host key is verified/pinned outside AMN3 notes; if the SSH client prompts about an unknown host key, stop and verify out-of-band before continuing;
 - a dedicated test peer is prepared, with public key, PSK and VPN IP kept in operator notes outside AMN3;
 - no secrets are pasted into AMN3 notes or GitHub comments.
 
@@ -223,6 +225,8 @@ candidate head:
 server alias:
 database path:
 runtime:
+host key verified/pinned outside AMN3: yes/no
+verification method:
 Phase 1 commands run:
 Phase 1 result:
 dry-run apply output redacted:

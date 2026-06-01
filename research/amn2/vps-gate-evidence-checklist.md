@@ -20,6 +20,8 @@ base: 1fdcde5 Add scoped API token storage contract
 - [ ] Подтверждено, что оператор намеренно входит в real VPS gate.
 - [ ] Проверен maintenance window и доступ восстановления.
 - [ ] Выбран server alias из `servers.yml`.
+- [ ] SSH host key verified/pinned outside AMN3 notes.
+- [ ] Если SSH client показывает unknown host key prompt, gate остановлен до out-of-band verification.
 - [ ] Выбран dedicated test peer, не production user/device.
 - [ ] PSK/private key/full config не заносятся в AMN3/GitHub/chat.
 - [ ] Перед live mutation остается стоп-точка для отдельного подтверждения.
@@ -83,6 +85,7 @@ operator:
 candidate branch:
 candidate head:
 server alias:
+host key verification:
 phase 1 result:
 phase 2 result:
 redaction result:

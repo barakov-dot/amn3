@@ -109,7 +109,7 @@ tests_required:
 | Peer preshared key | `preshared-key` | encrypted DB field, PSK stdin для remote apply | передавать через command arg или shell history | no command string leakage, stdout/stderr redaction |
 | Web-admin session secret | `session-secret` | env-only | включать в backup или settings output | required length, redaction |
 | Telegram bot token | `credential-secret` | env-only | попадание в logs, diagnostics, backup | URL token redaction, backup exclude |
-| VPS SSH password/private key | `credential-secret` / `private-key` | env/settings/runtime candidates | shell command string, process list, diagnostic bundle | no command arg leakage, redaction, host key policy |
+| VPS SSH password/private key | `credential-secret` / `private-key` | env/settings/runtime candidates | shell command string, process list, diagnostic bundle | no command arg leakage, redaction, host key policy; enrollment design prepared in `ssh-host-key-enrollment-design.md` |
 | Local Agent token/hash | `credential-secret` / `token-hash` | design/branch candidate | хранить raw token после enrollment | hash-only storage, rotation, audit without raw token |
 | Metrics labels | `secret-adjacent` | future candidate | раскрывать client names/IP/activity по умолчанию | aggregate default, scoped token, privacy class tests |
 

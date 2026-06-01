@@ -62,6 +62,15 @@
 - Full suite 2026-06-01 на fresh candidate: `551 passed, 1 warning`.
 - Готово, когда: ни один новый dry-run/audit/report path не содержит raw secrets. Первый dry-run/audit срез готов; live VPS не трогался.
 
+### SSH host key verification policy
+
+- Цель: не начинать live SSH/VPS gate с молчаливого доверия неизвестному host key.
+- Статус 2026-06-01: design подготовлен в `research/amn2/ssh-host-key-enrollment-design.md`; VPS gate checklist получил Phase 0 host key verification.
+- Что должно появиться: operator-side verification для ближайшего gate и будущий app-managed pinning перед web/API remote-operation expansion.
+- Почему P0: host key trust решается до первого SSH command, иначе read-only/live remote operations могут стартовать через непроверенный endpoint.
+- Локальная проверка: docs review и future fake tests для missing/mismatch/matching pin без реального VPS.
+- Готово, когда: Phase 0 evidence присутствует в runbook/checklist, а будущий implementation boundary не использует `accept-new` как production trust model.
+
 ## P1. Важные локальные задачи
 
 ### Dry-run preview for mutations
@@ -157,7 +166,8 @@
 5. Прогнать focused tests - выполнено: `79 passed, 1 warning`.
 6. Прогнать full local suite на fresh candidate - выполнено: `551 passed, 1 warning`.
 7. Обновить Runtime Registry и lab notes - Runtime Registry включен в commit `50be810`, lab notes обновлены этим срезом.
-8. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг, отдельно подтверждаемый оператором.
+8. Перед controlled real VPS verification gate зафиксировать Phase 0 SSH host key verification по `research/amn2/ssh-host-key-enrollment-design.md`.
+9. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг, отдельно подтверждаемый оператором.
 
 ## Не переносим в локальную фазу
 

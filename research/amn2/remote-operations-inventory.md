@@ -154,7 +154,7 @@ Live VPS еще не трогался. Следующий шаг - read-only/dry
 
 Current limitations:
 
-- no explicit host key enrollment/pinning model was found in this pass;
+- no explicit host key enrollment/pinning model exists in code yet; AMN3 design is prepared in `research/amn2/ssh-host-key-enrollment-design.md`;
 - no dedicated sudo policy layer was found;
 - command execution assumes the configured SSH user can run the needed commands directly;
 - timeout is per command, but there is no operation-level cancellation/rollback contract.
@@ -269,7 +269,7 @@ Current posture:
 ## Gaps before production changes
 
 - State-changing contract есть для plan/metadata, но live apply/revoke еще не выполняются через полноценный `RemoteOperationRunner`.
-- Нет host key enrollment/pinning flow.
+- Нет host key enrollment/pinning flow in code; design подготовлен в `ssh-host-key-enrollment-design.md`.
 - Нет sudo/privilege policy: кто и какие команды может выполнять без interactive password.
 - Для host/systemd не найден явный persistent config update и backup после `awg set`.
 - Нет полноценного before/after audit для live apply/revoke.
@@ -298,6 +298,7 @@ Read-only slice `RemoteOperationRunner`, state-changing metadata, approve/reset 
 
 ## Следующие рабочие шаги
 
-1. Подготовить и выполнить controlled real VPS verification gate на тестовом peer/device: read-only check, dry-run apply/revoke preview, затем single apply/revoke только после отдельного подтверждения.
-2. Зафиксировать результат VPS gate в lab notes и не смешивать его с обычным локальным commit.
-3. До live Docker apply/revoke отдельно описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
+1. Перед real VPS SSH commands зафиксировать Phase 0 host key verification по `ssh-host-key-enrollment-design.md`.
+2. Подготовить и выполнить controlled real VPS verification gate на тестовом peer/device: read-only check, dry-run apply/revoke preview, затем single apply/revoke только после отдельного подтверждения.
+3. Зафиксировать результат VPS gate в lab notes и не смешивать его с обычным локальным commit.
+4. До live Docker apply/revoke отдельно описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.

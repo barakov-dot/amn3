@@ -51,6 +51,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Remote operation VPS gate candidate | `prepared-pushed-awaits-real-vps-gate` | `amn2` branch + AMN3 runbook | branch `codex/remote-operation-vps-gate-prep`, head `aca6663`; runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; focused `79 passed`, docs `7 passed`, full `551 passed` | Выполнить read-only/dry-run на VPS; single apply/revoke только после отдельного подтверждения |
 | VPS gate evidence/merge package | `prepared-local-docs` | AMN3 | `vps-gate-evidence-checklist.md`, `post-vps-gate-merge-decision.md`, `neighbor-chat-vps-gate-handoff.md` | Использовать сразу после real VPS gate для решения merge/PR и разблокировки соседних чатов |
 | Docker manager safety note | `prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/docker-manager-design-note.md` | Использовать как вход для будущего implementation plan после VPS evidence |
+| SSH host key enrollment design | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/ssh-host-key-enrollment-design.md` | Использовать как gate перед VPS onboarding, web/API remote operations и app-managed host key pinning |
 | Read-only metrics privacy classification | `classification-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/read-only-metrics-privacy-classification.md` | После VPS evidence писать implementation plan для aggregate-only API route shell |
 | Local Agent runtime metadata alignment | `alignment-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/local-agent-runtime-metadata-alignment.md` | После VPS evidence писать implementation plan для controller-safe runtime summary, не clients/configs |
 | API token rotation/revoke policy | `policy-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/api-token-rotation-revoke-policy.md` | Перед route expansion закрепить expiry, revoke, rotation, owner inheritance и audit-safe lifecycle |
@@ -84,12 +85,13 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 
 ## Current Priority Order
 
-1. Выполнить controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; single test peer apply/revoke только после отдельного подтверждения.
+1. Выполнить controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, начиная с Phase 0 SSH host key verification; single test peer apply/revoke только после отдельного подтверждения.
 2. Зафиксировать VPS evidence в AMN3 через `research/amn2/vps-gate-evidence-checklist.md` перед интеграционными решениями из `VPN Ops Lab — KYORESUAS-API` и `VPS OPS LAB - PRVTPRO-Amnezia-Web-Panel`.
 3. Merge/PR candidate branch решать по `research/amn2/post-vps-gate-merge-decision.md`.
-4. Docker manager safety contract уже зафиксирован в `research/amn2/docker-manager-design-note.md`; implementation plan писать только после VPS evidence.
-5. Read-only clients/metrics endpoints рассматривать только после VPS evidence; privacy classification подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, Local Agent runtime metadata alignment - в `research/amn2/local-agent-runtime-metadata-alignment.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
-6. Public/self-service links, domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
+4. App-managed SSH host key enrollment design подготовлен в `research/amn2/ssh-host-key-enrollment-design.md`; implementation plan писать перед web/API remote-operation expansion.
+5. Docker manager safety contract уже зафиксирован в `research/amn2/docker-manager-design-note.md`; implementation plan писать только после VPS evidence.
+6. Read-only clients/metrics endpoints рассматривать только после VPS evidence; privacy classification подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, Local Agent runtime metadata alignment - в `research/amn2/local-agent-runtime-metadata-alignment.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
+7. Public/self-service links, domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
 
 ## Neighbor Chat Decision
 
