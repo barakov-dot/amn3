@@ -37,6 +37,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 - [Backup/import dangerous API design](backup-import-dangerous-api-design.md) - policy boundary для metadata/redacted/full backup, restore preview и dangerous import/apply.
 - [Config delivery inventory](config-delivery-inventory.md) - первый проход по выдаче VPN config через bot, email, QR, `vpn://` link, recovery token и template preview.
 - [Manager config export contract](manager-config-export-contract.md) - typed result boundary для `.conf`, QR, `vpn://` и future protocol manager export artifacts.
+- [Manager config export contract implementation](manager-config-export-contract-implementation.md) - local-only `amn2` branch/commit/test evidence для no-route typed export adapter.
 - [Public/self-service config delivery policy](public-self-service-config-delivery-policy.md) - policy gate для share/self-service delivery без открытия public config routes.
 - [Redaction coverage plan](redaction-coverage-plan.md) - P0-план покрытия `.conf`, QR, `vpn://`, tokens, Local Agent headers, command output и diagnostics перед расширением remote operations.
 - [Remote operations inventory](remote-operations-inventory.md) - первый проход по SSH/server apply flows, dry-run, health checks, peer apply/revoke, traffic collection, audit, redaction и rollback gaps.
@@ -64,7 +65,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 2. Начать VPS gate с read-only check и dry-run apply/revoke preview; single apply/revoke выполнять только после отдельного подтверждения оператора.
 3. Зафиксировать VPS evidence через `vps-gate-evidence-checklist.md`.
 4. Принять merge/PR решение по `post-vps-gate-merge-decision.md`.
-5. Только после VPS evidence выбирать первый integration slice из KYORESUAS/PRVTPRO inputs; route/auth machine-checkable tests plan, SSH host key enrollment design, backup/import dangerous API design, manager config export contract, public/self-service config delivery policy, privacy classification, Local Agent runtime metadata alignment и API token lifecycle policy уже подготовлены.
+5. Пока VPS не готов, следующий local-only кандидат - public/self-service config delivery policy implementation как no-route share-token/policy contract; public download, API `config:read` и Local Agent `/configs` не открывать.
 
 ## Неактуальный риск
 

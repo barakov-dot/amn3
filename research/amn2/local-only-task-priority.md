@@ -121,11 +121,12 @@
 ### Manager config export contract
 
 - Цель: дать UI/API/bot/self-service единый typed contract для `.conf`, QR, `vpn://` и future protocol-specific artifacts.
-- Статус 2026-06-01: design подготовлен в `research/amn2/manager-config-export-contract.md`.
-- Что должно появиться: `ConfigExportResult`/artifact boundary, capability model, safe metadata и safe error categories поверх текущего `DeviceConfigDelivery`/`ConfigDeliveryPackage`.
+- Статус 2026-06-01: implementation slice выполнен и запушен в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`, evidence `research/amn2/manager-config-export-contract-implementation.md`.
+- Что появилось: `ConfigExportResult`/artifact boundary, safe metadata и safe error categories поверх текущего `DeviceConfigDelivery`/`ConfigDeliveryPackage`.
 - Почему P1: config export является `secret-read`, а несовместимые manager signatures могут ломать config delivery прямо в UI/API.
 - Локальная проверка: no-route contract tests, adapter tests, unsupported artifact/target tests, redaction/audit metadata tests; без public/self-service endpoint и без API `config:read`.
-- Готово, когда: каждый будущий protocol manager возвращает typed artifacts или safe unsupported category, а caller не зависит от manager-specific function signature.
+- Проверено 2026-06-01: focused config/security/delivery suite `40 passed`; full local suite `560 passed, 1 warning`.
+- Готово, когда: каждый будущий protocol manager возвращает typed artifacts или safe unsupported category, а caller не зависит от manager-specific function signature. Первый no-route adapter slice готов; public/self-service endpoint, API `config:read` и Local Agent `/configs` остаются отдельными gates.
 
 ### Public/self-service config delivery policy
 
@@ -207,8 +208,8 @@
 7. Обновить Runtime Registry и lab notes - Runtime Registry включен в commit `50be810`, lab notes обновлены этим срезом.
 8. Перед controlled real VPS verification gate зафиксировать Phase 0 SSH host key verification по `research/amn2/ssh-host-key-enrollment-design.md`.
 9. Зафиксировать backup/import dangerous API boundary по `research/amn2/backup-import-dangerous-api-design.md` - выполнено локально, без web/API routes и без VPS.
-10. Зафиксировать manager config export contract по `research/amn2/manager-config-export-contract.md` - выполнено локально, без новых config routes и без VPS.
-11. Зафиксировать public/self-service config delivery policy по `research/amn2/public-self-service-config-delivery-policy.md` - выполнено локально, без public download routes и без VPS.
+10. Зафиксировать manager config export contract по `research/amn2/manager-config-export-contract.md` - выполнено и запушено в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`, без новых config routes и без VPS.
+11. Выполнить public/self-service config delivery policy implementation как no-route share-token/policy contract - следующий local-only шаг, без public download routes и без VPS.
 12. Выполнить route/auth machine-checkable binding tests по `research/amn2/route-auth-machine-checkable-tests-plan.md` - выполнено и запушено в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`, без route expansion и без VPS.
 13. Выполнить route-connected scoped API token lifecycle gate - выполнено и запушено в stacked branch `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0`, без route expansion и без VPS.
 14. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг для VPS-кандидата, отдельно подтверждаемый оператором.

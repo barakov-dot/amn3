@@ -401,8 +401,9 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 ### Manager config export contract lane
 
 1. Design is prepared in `research/amn2/manager-config-export-contract.md`.
-2. First implementation should be local-only typed request/result/artifact objects plus an adapter from current `DeviceConfigDelivery`/`ConfigDeliveryPackage`.
-3. Public/self-service config endpoints, API `config:read` and Local Agent `/configs` remain blocked until route policy, ownership/token lifecycle, audit and redaction tests exist.
+2. First implementation is complete in `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`: local-only typed request/result/artifact objects plus an adapter from current `DeviceConfigDelivery`/`ConfigDeliveryPackage`.
+3. Verification: focused config/security/delivery suite `40 passed`; full local suite `560 passed, 1 StarletteDeprecationWarning`.
+4. Public/self-service config endpoints, API `config:read` and Local Agent `/configs` remain blocked until route policy, ownership/token lifecycle, audit and redaction tests exist.
 
 ### Public/self-service config delivery policy lane
 
@@ -432,4 +433,4 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 
 ## Recommendation
 
-Next recommended work is the controlled real VPS verification gate. It should happen before integrating KYORESUAS/PRVTPRO-derived operational flows into the main project, because those ideas depend on real remote-operation behavior rather than only local contracts.
+Next recommended work for the local-only lane, while VPS is not ready, is public/self-service config delivery policy implementation as a no-route share-token/policy contract. Controlled real VPS verification remains the next VPS-lane step before integrating KYORESUAS/PRVTPRO-derived operational flows.

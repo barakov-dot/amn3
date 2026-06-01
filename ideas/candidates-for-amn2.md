@@ -56,7 +56,7 @@
 - Идея: для protocol manager-ов ввести единый `export_config`/`export_artifacts` contract вместо разрозненных `get_client_config` signatures.
 - Польза: снижает риск runtime-ошибок при показе config, public share и self-service выдаче, особенно при добавлении новых протоколов.
 - Риски: нужен capability-based дизайн, чтобы не заставлять все протоколы возвращать одинаковые artifacts, если формат импорта отличается.
-- Статус: design candidate подготовлен в [Manager config export contract](../research/amn2/manager-config-export-contract.md); first slice должен быть local-only no-route adapter/tests.
+- Статус: first local-only no-route adapter/tests slice выполнен в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`; details in [Manager config export contract implementation](../research/amn2/manager-config-export-contract-implementation.md).
 
 ### OpenAPI-группировка по доменам
 

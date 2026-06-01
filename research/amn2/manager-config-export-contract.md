@@ -44,9 +44,19 @@ PRVTPRO issue #49 is the warning class: caller and manager disagree on `get_clie
 
 ## Decision status
 
-Status: `design-prepared-local-docs`.
+Status: `implemented-pushed-local-gate-complete`.
 
-Decision: future manager-driven config export must return a typed result with explicit artifacts, capabilities, safe metadata and safe error categories. The first implementation slice should be local-only contract/tests and must not expose a new config route.
+Decision: manager-driven config export must return a typed result with explicit artifacts, capabilities, safe metadata and safe error categories. The first implementation slice is complete as a local-only contract/tests adapter and does not expose a new config route.
+
+Implementation evidence:
+
+```text
+branch: codex/manager-config-export-contract
+base: codex/api-token-lifecycle-gate-stacked
+commit: 4d4e7a4 Add manager config export contract
+focused local gate: 40 passed
+full local suite: 560 passed, 1 StarletteDeprecationWarning
+```
 
 ## Contract goals
 
@@ -295,13 +305,13 @@ Regression test for the PRVTPRO #49 class:
 
 ## First safe implementation boundary
 
-The first safe code slice, when we move from AMN3 docs to `amn2`, is:
+The first safe code slice, already moved from AMN3 docs to `amn2`, is:
 
 ```text
 manager config export contract and no-route adapter
 ```
 
-It may include:
+It includes:
 
 - typed request/result/artifact objects;
 - adapter from current `DeviceConfigDelivery`/`ConfigDeliveryPackage`;

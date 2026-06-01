@@ -162,6 +162,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Scoped API Token Storage: `1fdcde5 Add scoped API token storage contract`.
 - Route/Auth Binding Tests: branch `amn2/codex/route-auth-binding-tests`, commit `f9d2c79 Bind route inventory to surface policies`.
 - API Token Lifecycle Gate: branch `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0 Add API token lifecycle gate`.
+- Manager Config Export Contract: branch `amn2/codex/manager-config-export-contract`, commit `4d4e7a4 Add manager config export contract`; local-only no-route typed export adapter, без public/self-service endpoint, API `config:read` и Local Agent `/configs`.
 
 Решение по соседним чатам:
 
@@ -204,6 +205,7 @@ research/amn2/config-delivery-inventory.md
 research/amn2/route-auth-machine-checkable-tests-plan.md
 research/amn2/backup-import-dangerous-api-design.md
 research/amn2/manager-config-export-contract.md
+research/amn2/manager-config-export-contract-implementation.md
 research/amn2/public-self-service-config-delivery-policy.md
 ```
 
@@ -253,8 +255,8 @@ head: 8697b60 Document Local Agent production wiring
 5. Docker manager safety contract уже подготовлен в `research/amn2/docker-manager-design-note.md`; implementation plan для него писать только после VPS evidence.
 6. Route/Auth machine-checkable binding tests выполнены и запушены в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`; использовать как drift guard перед любыми route/API expansions.
 7. Backup/import dangerous API design подготовлен в `research/amn2/backup-import-dangerous-api-design.md`; web/API backup/import routes не добавлять до policy registry и restore-preview gate.
-8. Manager config export contract подготовлен в `research/amn2/manager-config-export-contract.md`; first slice должен быть local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
-9. Public/self-service config delivery policy подготовлен в `research/amn2/public-self-service-config-delivery-policy.md`; first slice должен быть no-route policy registry/share-token contract, без public download route.
+8. Manager config export contract выполнен и запушен в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`; это local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
+9. Public/self-service config delivery policy подготовлен в `research/amn2/public-self-service-config-delivery-policy.md`; если VPS еще не готов, следующий local-only slice должен быть no-route policy registry/share-token contract, без public download route.
 10. Read-only metrics/API route shell держать после VPS evidence или отдельного route-exposure решения; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle gate выполнен в `amn2/codex/api-token-lifecycle-gate-stacked`.
 11. Domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
 
@@ -548,6 +550,42 @@ full local suite:
 ```
 
 Live VPS не трогался. Slice добавляет local storage/auth contract и docs, но не добавляет API routes, не делает peer apply/revoke/config/sync/runtime writes и не читает live VPS; VPS gate для самого slice не нужен.
+
+## Manager Config Export Contract Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/manager-config-export-contract
+```
+
+Production commit:
+
+```text
+4d4e7a4 Add manager config export contract
+```
+
+Покрыто:
+
+- local-only `ConfigExportRequest` / `ConfigExportResult` / `ConfigExportArtifact` contract;
+- adapter from current `DeviceConfigDelivery` / `ConfigDeliveryPackage`;
+- typed artifacts for `.conf`, QR payload/PNG, `vpn://` import URI and delivery message;
+- safe metadata boundary без raw `.conf`, QR payload, QR PNG/base64, `vpn://`, private key и PSK;
+- safe categories for unsupported artifact, unsupported target client and exporter signature mismatch.
+
+Проверка:
+
+```text
+focused config/security/delivery suite:
+40 passed
+
+full local suite:
+560 passed, 1 StarletteDeprecationWarning
+```
+
+Live VPS не трогался. Slice не добавляет public/self-service config endpoint, `/api/*` route, API `config:read`, Local Agent `/configs`, новые QR/import behavior или storage raw config в БД; VPS gate для самого slice не нужен.
 
 ## Remote Operation Dry-run/Audit Slice
 
