@@ -70,7 +70,7 @@ status: clean and synchronized with origin/master
 Следующий рабочий выбор:
 
 1. Запустить controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, если цель - начать интеграцию решений из KYORESUAS/PRVTPRO в основной проект.
-2. Локальная альтернатива: read-only metrics/API route shell после privacy classification, без write/client lifecycle.
+2. Локальная альтернатива: implementation plan для aggregate-only read-only metrics/API route shell по `research/amn2/read-only-metrics-privacy-classification.md`, без write/client lifecycle.
 
 Старые блоки ниже, где `91aeb3e` указан как latest clean baseline, считать историческим контекстом verified live stage.
 

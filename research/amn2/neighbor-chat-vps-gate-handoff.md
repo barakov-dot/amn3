@@ -43,7 +43,7 @@ head: aca6663 Add VPS gate handoff for remote ops
 
 Если только `dry-run-only-pass`:
 
-- можно продолжать privacy classification и read-only route design;
+- можно продолжать read-only route design по уже подготовленной privacy classification;
 - нельзя начинать write lifecycle, config delivery API или controller-to-agent mutation.
 
 ## What PRVTPRO-Web-Panel may do after signal
@@ -78,7 +78,7 @@ head: aca6663 Add VPS gate handoff for remote ops
 Первый безопасный integration slice после `verified-live`:
 
 ```text
-Read-only metrics/API route shell + privacy classification
+Read-only aggregate metrics/API route shell
 ```
 
-Причина: он использует уже подготовленные policy/token foundations и не меняет live VPS state.
+Privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`. Первый slice должен использовать aggregate-only default и не включать per-peer/client labels.

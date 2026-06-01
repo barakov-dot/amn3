@@ -366,7 +366,7 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 6. Local Agent read-only/audit/versioning hardening: done, local-gate-complete.
 7. Web panel safe improvements: done, local-gate-complete.
 8. Scoped API token storage/auth contract: done, local-gate-complete.
-9. Consider read-only metrics endpoint and API route shell only after VPS evidence and privacy classification.
+9. Read-only metrics privacy classification: prepared in `research/amn2/read-only-metrics-privacy-classification.md`; implementation route shell still waits for VPS evidence.
 
 ### Live VPS verification lane
 
@@ -377,6 +377,12 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 5. Record VPS evidence in `research/amn2/vps-gate-evidence-checklist.md` before marking the slice `verified-live`.
 6. Use `research/amn2/post-vps-gate-merge-decision.md` for merge/PR decision.
 7. Do not use live VPS testing as a substitute for local policy/secret/operation tests.
+
+### Read-only metrics/API lane
+
+1. Privacy classification is prepared in `research/amn2/read-only-metrics-privacy-classification.md`.
+2. First implementation after `verified-live` should be aggregate-only metrics/API route shell.
+3. Detailed per-peer/client metrics remain blocked until separate opt-in detailed metrics policy and tests.
 
 ## Recommendation
 

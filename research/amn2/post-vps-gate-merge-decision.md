@@ -45,7 +45,7 @@ Merge блокируется, если:
 
 После `verified-live` и merge лучше начинать не с write lifecycle API, а с одного из read-only направлений:
 
-1. Read-only metrics/API route shell с privacy classification.
+1. Aggregate-only read-only metrics/API route shell по `research/amn2/read-only-metrics-privacy-classification.md`.
 2. Local Agent runtime metadata alignment.
 3. Web-panel status UX для уже существующих read-only states.
 

@@ -127,10 +127,11 @@ Backlog не является списком задач к немедленно�
 ### Metrics surface и privacy policy
 
 - Цель: `amn2`, позже hybrid.
-- Статус: `design-needed`.
+- Статус: `classification-prepared-local-docs`.
 - Суть: read-only metrics endpoint для peers/traffic/handshake только с privacy class и scoped metrics token.
 - Причина: monitoring полезен, но может раскрывать client names, IP, endpoint и activity metadata.
-- Следующий шаг: определить aggregate-only default и opt-in detailed labels.
+- Текущий результат 2026-06-01: `research/amn2/read-only-metrics-privacy-classification.md` определяет aggregate-only default, forbidden labels и opt-in detailed policy boundary.
+- Следующий шаг: после VPS evidence написать implementation plan для read-only API route shell с aggregate metrics only.
 
 ## P2. Малая важность или отложить
 
@@ -223,6 +224,6 @@ Backlog не является списком задач к немедленно�
 1. Провести controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` на тестовом peer/device: read-only check, dry-run apply/revoke preview, затем single apply/revoke только после отдельного подтверждения.
 2. Зафиксировать VPS evidence через `research/amn2/vps-gate-evidence-checklist.md`.
 3. Решить merge/PR для ветки `codex/remote-operation-vps-gate-prep` по `research/amn2/post-vps-gate-merge-decision.md`.
-4. После VPS evidence выбрать первый integration slice из KYORESUAS/PRVTPRO inputs без копирования кода: вероятнее read-only metrics/API route shell или Local Agent runtime metadata.
+4. После VPS evidence выбрать первый integration slice из KYORESUAS/PRVTPRO inputs без копирования кода: рекомендован read-only aggregate metrics/API route shell.
 5. Использовать `research/amn2/docker-manager-design-note.md` как safety input для будущего Docker manager implementation plan.
 6. Только после закрытия этих gates возвращаться к self-service links, domain exclusions и 2FA.

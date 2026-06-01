@@ -242,4 +242,4 @@ decision: verified-live / needs-fix / dry-run-only-pass
 
 If Phase 1 and optional Phase 2 pass, record VPS evidence in AMN3 and then decide whether to merge the candidate branch into `codex-vps-test-prep`.
 
-Only after that should KYORESUAS/PRVTPRO-derived integration work move from reference material into the main project. The next likely safe integration slice is read-only server/client status or metrics with privacy classification, not write lifecycle API.
+Only after that should KYORESUAS/PRVTPRO-derived integration work move from reference material into the main project. The next likely safe integration slice is aggregate-only read-only metrics/API route shell based on `research/amn2/read-only-metrics-privacy-classification.md`, not write lifecycle API.

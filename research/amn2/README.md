@@ -42,6 +42,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 - [Post-VPS gate merge decision](post-vps-gate-merge-decision.md) - правила merge/PR после `verified-live`, `dry-run-only-pass` или `needs-fix`.
 - [Docker manager design note](docker-manager-design-note.md) - минимальный safety contract для будущего Docker AmneziaWG manager.
 - [Neighbor chat VPS gate handoff](neighbor-chat-vps-gate-handoff.md) - что ждут KYORESUAS/PRVTPRO направления перед интеграцией.
+- [Read-only metrics privacy classification](read-only-metrics-privacy-classification.md) - privacy gate для будущего aggregate-only metrics/API route shell.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
 ## Следующие рабочие шаги
@@ -54,7 +55,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 2. Начать VPS gate с read-only check и dry-run apply/revoke preview; single apply/revoke выполнять только после отдельного подтверждения оператора.
 3. Зафиксировать VPS evidence через `vps-gate-evidence-checklist.md`.
 4. Принять merge/PR решение по `post-vps-gate-merge-decision.md`.
-5. Только после VPS evidence выбирать первый integration slice из KYORESUAS/PRVTPRO inputs; текущая рекомендация - read-only metrics/API route shell + privacy classification.
+5. Только после VPS evidence выбирать первый integration slice из KYORESUAS/PRVTPRO inputs; privacy classification уже подготовлена в `read-only-metrics-privacy-classification.md`.
 
 ## Неактуальный риск
 
