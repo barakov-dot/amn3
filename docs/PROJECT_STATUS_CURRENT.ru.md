@@ -201,6 +201,7 @@ research/amn2/remote-operations-inventory.md
 research/amn2/config-delivery-inventory.md
 research/amn2/backup-import-dangerous-api-design.md
 research/amn2/manager-config-export-contract.md
+research/amn2/public-self-service-config-delivery-policy.md
 ```
 
 Pre-VPS support package:
@@ -249,8 +250,9 @@ head: 8697b60 Document Local Agent production wiring
 5. Docker manager safety contract уже подготовлен в `research/amn2/docker-manager-design-note.md`; implementation plan для него писать только после VPS evidence.
 6. Backup/import dangerous API design подготовлен в `research/amn2/backup-import-dangerous-api-design.md`; web/API backup/import routes не добавлять до policy registry и restore-preview gate.
 7. Manager config export contract подготовлен в `research/amn2/manager-config-export-contract.md`; first slice должен быть local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
-8. Read-only metrics/API route shell держать после VPS evidence; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
-9. Public/self-service config links, domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
+8. Public/self-service config delivery policy подготовлен в `research/amn2/public-self-service-config-delivery-policy.md`; first slice должен быть no-route policy registry/share-token contract, без public download route.
+9. Read-only metrics/API route shell держать после VPS evidence; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
+10. Domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
 
 ## Route/Auth/Operation Policy Matrix Plan
 

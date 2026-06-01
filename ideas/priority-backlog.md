@@ -97,10 +97,11 @@ Backlog не является списком задач к немедленно�
 ### Public/self-service config delivery
 
 - Цель: `amn2`.
-- Статус: `design-needed`.
+- Статус: `design-prepared-local-docs`.
 - Суть: share links и self-service выдача конфигов с ownership checks, expiry, revoke, audit и rate limit.
 - Причина: полезно для пользователей, но это новый secret delivery surface.
-- Следующий шаг: строить только после P0 `Secret-safe config delivery`.
+- Текущий результат 2026-06-01: `research/amn2/public-self-service-config-delivery-policy.md` фиксирует policy gate для self-service session, admin-issued share, public share token, integration API `config:read` и Local Agent `/configs`.
+- Следующий шаг: при переносе в `amn2` начать с no-route policy registry/share-token contract; public download endpoint, self-service config download, API `config:read` и Local Agent `/configs` не добавлять.
 
 ### Manager config export contract
 

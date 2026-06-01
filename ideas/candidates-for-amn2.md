@@ -42,7 +42,7 @@
 - Идея: публичные ссылки для получения конфигурации без доступа к панели.
 - Польза: удобная выдача конфигов пользователям.
 - Риски: срок жизни ссылок, одноразовость, аудит, утечки, revoke.
-- Статус: design candidate описан в [Public/Self-service Config Delivery для `amn2`](../docs/superpowers/specs/2026-05-30-public-self-service-config-delivery-design.md); после `amn2` inventory `vpn://`, QR и `.conf` явно считаются `secret-read` артефактами.
+- Статус: design candidate описан в [Public/Self-service Config Delivery для `amn2`](../docs/superpowers/specs/2026-05-30-public-self-service-config-delivery-design.md); текущий `amn2` policy gate подготовлен в [Public/Self-service Config Delivery Policy](../research/amn2/public-self-service-config-delivery-policy.md).
 
 ### Config delivery integrity tests
 

@@ -82,14 +82,14 @@
 
 ## Решение для lab
 
-Статус: `config-delivery-inventory-first-pass`; manager export contract design prepared in `manager-config-export-contract.md`.
+Статус: `config-delivery-inventory-first-pass`; manager export contract design prepared in `manager-config-export-contract.md`; public/self-service policy prepared in `public-self-service-config-delivery-policy.md`.
 
 Пока не переносим public/self-service delivery в `amn2` как code edit. Сначала фиксируем policy-слой: какие endpoints могут выдавать config, кто actor, какой gate, какой audit, какие tests и как revoke работает после выдачи.
 
 ## Следующие рабочие шаги
 
 1. Использовать `manager-config-export-contract.md` как вход для no-route contract/adapters/tests перед любым новым protocol manager, public/self-service endpoint или API `config:read`.
-2. Подготовить route/config delivery policy design на базе этого inventory и текущего route/auth surface.
+2. Использовать `public-self-service-config-delivery-policy.md` как gate перед share/self-service routes: сначала no-route policy registry/share-token contract.
 3. Расширить test matrix для существующего `build_device_config_delivery()` на `.conf`, QR, `vpn://`, UTF-8/non-ASCII и no-secret-leak checks.
 4. Перед любым self-service config endpoint добавить обязательный test matrix для ownership, token lifecycle, audit и redaction.
 5. Перейти к remote operations inventory: approve flow и config delivery связаны с server apply, поэтому remote failure/rollback нужно рассмотреть отдельно.

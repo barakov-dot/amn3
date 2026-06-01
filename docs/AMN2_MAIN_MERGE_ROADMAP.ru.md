@@ -397,6 +397,12 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 2. First implementation should be local-only typed request/result/artifact objects plus an adapter from current `DeviceConfigDelivery`/`ConfigDeliveryPackage`.
 3. Public/self-service config endpoints, API `config:read` and Local Agent `/configs` remain blocked until route policy, ownership/token lifecycle, audit and redaction tests exist.
 
+### Public/self-service config delivery policy lane
+
+1. Policy is prepared in `research/amn2/public-self-service-config-delivery-policy.md`.
+2. First implementation should be no-route policy registry/share-token contract: hash-only raw token discipline, expiry, one-time/max-download, revoke cascade, audit-safe metadata and backup/restore policy tests.
+3. Public download routes, self-service config download, API `config:read` and Local Agent `/configs` remain blocked until this gate is implemented and verified.
+
 ### Read-only metrics/API lane
 
 1. Privacy classification is prepared in `research/amn2/read-only-metrics-privacy-classification.md`.

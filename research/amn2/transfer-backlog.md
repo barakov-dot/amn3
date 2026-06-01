@@ -54,6 +54,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | SSH host key enrollment design | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/ssh-host-key-enrollment-design.md` | Использовать как gate перед VPS onboarding, web/API remote operations и app-managed host key pinning |
 | Backup/import dangerous API design | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/backup-import-dangerous-api-design.md` | Использовать как gate перед backup/import web/API routes, restore preview и full backup dangerous mode |
 | Manager config export contract | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/manager-config-export-contract.md` | Использовать как gate перед protocol manager export, public/self-service config links, API `config:read` и Local Agent `/configs` |
+| Public/self-service config delivery policy | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/public-self-service-config-delivery-policy.md` | Использовать как gate перед share/self-service config routes; first slice только no-route policy/share-token contract |
 | Read-only metrics privacy classification | `classification-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/read-only-metrics-privacy-classification.md` | После VPS evidence писать implementation plan для aggregate-only API route shell |
 | Local Agent runtime metadata alignment | `alignment-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/local-agent-runtime-metadata-alignment.md` | После VPS evidence писать implementation plan для controller-safe runtime summary, не clients/configs |
 | API token rotation/revoke policy | `policy-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/api-token-rotation-revoke-policy.md` | Перед route expansion закрепить expiry, revoke, rotation, owner inheritance и audit-safe lifecycle |
@@ -93,9 +94,10 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 4. App-managed SSH host key enrollment design подготовлен в `research/amn2/ssh-host-key-enrollment-design.md`; implementation plan писать перед web/API remote-operation expansion.
 5. Backup/import dangerous API design подготовлен в `research/amn2/backup-import-dangerous-api-design.md`; web/API backup/import routes не добавлять до policy registry и restore-preview gate.
 6. Manager config export contract подготовлен в `research/amn2/manager-config-export-contract.md`; первым переносить только local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
-7. Docker manager safety contract уже зафиксирован в `research/amn2/docker-manager-design-note.md`; implementation plan писать только после VPS evidence.
-8. Read-only clients/metrics endpoints рассматривать только после VPS evidence; privacy classification подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, Local Agent runtime metadata alignment - в `research/amn2/local-agent-runtime-metadata-alignment.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
-9. Public/self-service links, domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
+7. Public/self-service config delivery policy подготовлен в `research/amn2/public-self-service-config-delivery-policy.md`; public routes не добавлять, первый перенос только no-route policy registry/share-token contract.
+8. Docker manager safety contract уже зафиксирован в `research/amn2/docker-manager-design-note.md`; implementation plan писать только после VPS evidence.
+9. Read-only clients/metrics endpoints рассматривать только после VPS evidence; privacy classification подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, Local Agent runtime metadata alignment - в `research/amn2/local-agent-runtime-metadata-alignment.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
+10. Domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
 
 ## Neighbor Chat Decision
 

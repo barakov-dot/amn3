@@ -21,6 +21,7 @@
 - route/auth policy matrix для `secret-read`, `state-write`, `remote-exec` и `public-token-secret-read` surfaces;
 - redaction test plan для `.conf`, QR, `vpn://`, tokens, command output и diagnostics;
 - backup/import policy, где redacted backup остается default, а full backup считается dangerous explicit mode;
+- public/self-service config delivery policy, где share tokens hash-only, TTL/one-time/revoke обязательны, а public route остается заблокирован до no-secret audit/rate-limit tests;
 - Local Agent hardening, где agent token, operation payload и runtime outputs не должны попадать в logs/audit plain text.
 
 ## Текущее решение

@@ -127,6 +127,15 @@
 - Локальная проверка: no-route contract tests, adapter tests, unsupported artifact/target tests, redaction/audit metadata tests; без public/self-service endpoint и без API `config:read`.
 - Готово, когда: каждый будущий protocol manager возвращает typed artifacts или safe unsupported category, а caller не зависит от manager-specific function signature.
 
+### Public/self-service config delivery policy
+
+- Цель: подготовить share/self-service delivery gate без открытия public config routes.
+- Статус 2026-06-01: policy подготовлен в `research/amn2/public-self-service-config-delivery-policy.md`.
+- Что должно появиться: route policy entries, share-token contract, hash-only raw token discipline, expiry, one-time/max downloads, revoke cascade, audit-safe metadata and backup/restore policy.
+- Почему P1: public/self-service выдача config превращает `.conf`, QR и `vpn://` в internet-facing `secret-read` surface.
+- Локальная проверка: no-route policy tests, token lifecycle tests, generic denial tests, no-secret audit tests; без self-service/public download route.
+- Готово, когда: public token flow можно проверить без payload delivery, а любой будущий route обязан пройти ownership/token/audit/rate-limit gates.
+
 ## P2. Малая важность или после P0/P1
 
 ### Real VPS checklist refinement
@@ -187,7 +196,8 @@
 8. Перед controlled real VPS verification gate зафиксировать Phase 0 SSH host key verification по `research/amn2/ssh-host-key-enrollment-design.md`.
 9. Зафиксировать backup/import dangerous API boundary по `research/amn2/backup-import-dangerous-api-design.md` - выполнено локально, без web/API routes и без VPS.
 10. Зафиксировать manager config export contract по `research/amn2/manager-config-export-contract.md` - выполнено локально, без новых config routes и без VPS.
-11. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг, отдельно подтверждаемый оператором.
+11. Зафиксировать public/self-service config delivery policy по `research/amn2/public-self-service-config-delivery-policy.md` - выполнено локально, без public download routes и без VPS.
+12. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг, отдельно подтверждаемый оператором.
 
 ## Не переносим в локальную фазу
 
