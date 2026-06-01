@@ -16,6 +16,14 @@ Production commit:
 c2ba646 Add API token lifecycle gate
 ```
 
+Stacked variant, если первым объединяется route/auth binding slice:
+
+```text
+branch: codex/api-token-lifecycle-gate-stacked
+base: codex/route-auth-binding-tests
+commit: 256d0c0 Add API token lifecycle gate
+```
+
 ## Что добавлено
 
 В `amn2` добавлен local-only lifecycle gate для scoped API tokens:

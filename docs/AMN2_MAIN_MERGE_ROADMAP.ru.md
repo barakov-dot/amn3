@@ -426,8 +426,9 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 
 1. Rotation/revoke policy is prepared in `research/amn2/api-token-rotation-revoke-policy.md`.
 2. Local-only lifecycle gate implemented in `amn2/codex/api-token-lifecycle-gate`, commit `c2ba646`: explicit route-connected expiry helper, idempotent revoke event, create-new-then-revoke-old rotation, owner inheritance and safe metadata.
-3. Next implementation should expose only read-only route shell after VPS evidence or a separate route-exposure decision.
-4. `config:read`, write, remote-exec, destructive, backup/import and broad admin-equivalent bearer tokens remain blocked.
+3. Stacked variant for merge order after route/auth binding is available in `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0`.
+4. Next implementation should expose only read-only route shell after VPS evidence or a separate route-exposure decision.
+5. `config:read`, write, remote-exec, destructive, backup/import and broad admin-equivalent bearer tokens remain blocked.
 
 ## Recommendation
 
