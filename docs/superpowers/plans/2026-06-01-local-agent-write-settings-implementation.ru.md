@@ -25,6 +25,8 @@ Until `GO-1` remains true:
 
 The new write settings are an authorization boundary only. They do not create `/agent/clients*` routes, do not register write policies, and do not deliver client configuration secrets.
 
+Endpoint wiring plan after these settings are implemented: `docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md`.
+
 ## File Structure
 
 - Modify `tests/config/test_settings.py`: prove defaults, validation, and token-scope separation.

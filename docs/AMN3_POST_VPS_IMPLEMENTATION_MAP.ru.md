@@ -18,6 +18,7 @@
 - `docs/superpowers/plans/2026-06-01-local-agent-write-settings-implementation.ru.md`
 - `docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md`
 - `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md`
+- `docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md`
 - `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`
 - `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`
 - `docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md`
@@ -111,6 +112,7 @@ agent:clients:write uses a dedicated token/scope set
 - для audit storage использовать TDD-план `docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md`;
 - добавить dry-run endpoint в `app/agent/api.py`;
 - добавить apply/revoke endpoints только за `LOCAL_AGENT_WRITE_ENABLED=true`;
+- для guarded endpoints использовать TDD-план `docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md`;
 - принимать request/response contracts из `app/agent/write_contracts.py`;
 - использовать `app/agent/write_confirmation.py` для fresh dry-run reference и confirmation nonce;
 - писать audit через `app/agent/write_audit.py`;

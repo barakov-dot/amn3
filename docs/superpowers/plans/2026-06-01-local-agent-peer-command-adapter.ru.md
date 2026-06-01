@@ -34,6 +34,8 @@ rollback_reference required for mutation audit
 
 This adapter is not the route layer. `app/agent/api.py` must still enforce auth scope, feature flag, dry-run freshness, confirmation nonce, and audit storage before it calls mutation methods.
 
+Endpoint wiring plan for that route layer: `docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md`.
+
 ## File Structure
 
 - Create `app/agent/peer_commands.py`: Local Agent command adapter, runtime runner protocol, redacted result assembly, and command failure mapping.

@@ -594,6 +594,80 @@ def test_amn3_local_agent_peer_command_adapter_plan_is_code_ready_and_vps_gated(
     assert "docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md" in identity
 
 
+def test_amn3_local_agent_write_endpoints_plan_wires_gates_without_opening_routes():
+    plan_path = ROOT / "docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    post_vps_path = ROOT / "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md"
+    write_api_plan_path = ROOT / "docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md"
+    settings_plan_path = ROOT / "docs/superpowers/plans/2026-06-01-local-agent-write-settings-implementation.ru.md"
+    audit_plan_path = ROOT / "docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md"
+    peer_plan_path = ROOT / "docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md"
+    preflight_path = ROOT / "docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md"
+
+    text = plan_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    post_vps = post_vps_path.read_text(encoding="utf-8")
+    write_api_plan = write_api_plan_path.read_text(encoding="utf-8")
+    settings_plan = settings_plan_path.read_text(encoding="utf-8")
+    audit_plan = audit_plan_path.read_text(encoding="utf-8")
+    peer_plan = peer_plan_path.read_text(encoding="utf-8")
+    preflight = preflight_path.read_text(encoding="utf-8")
+
+    assert "# Local Agent Write Endpoints Implementation Plan" in text
+    assert "GO-1" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED=false" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED=true" in text
+    assert "agent:clients:write" in text
+    assert "dedicated write token set" in text
+    assert "read-only token remains read-only" in text
+    assert "app/agent/api.py" in text
+    assert "tests/agent/test_api.py" in text
+    assert "app/agent/policy.py" in text
+    assert "tests/agent/test_policy.py" in text
+    assert "app/agent/config.py" in text
+    assert "tests/agent/test_config.py" in text
+    assert "app/agent/peer_commands.py" in text
+    assert "tests/agent/test_peer_commands.py" in text
+    assert "app/agent/write_contracts.py" in text
+    assert "app/agent/write_confirmation.py" in text
+    assert "app/agent/write_audit.py" in text
+    assert "local_agent_write_audit_events" in text
+    assert "POST /agent/clients/dry-run" in text
+    assert "POST /agent/clients" in text
+    assert "DELETE /agent/clients/{id}" in text
+    assert "write_slice_policies" in text
+    assert "get_policy() remains read-only" in text
+    assert "create_agent_app" in text
+    assert "write_enabled=False" in text
+    assert "write_enabled=True" in text
+    assert "LocalPeerCommandAdapter" in text
+    assert "WritePreflightReference" in text
+    assert "WriteConfirmationChallenge" in text
+    assert "ensure_mutation_allowed" in text
+    assert "WritePreflightRequiredError" in text
+    assert "preflight_required" in text
+    assert "runtime_degraded" in text
+    assert "mutation_failed" in text
+    assert "WriteAuditEvent" in text
+    assert "audit write fails, block mutation" in text
+    assert "rollback_reference" in text
+    assert "peer_public_key_fingerprint" in text
+    assert "raw token" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "full client config" in text
+    assert "pytest tests/agent/test_policy.py tests/agent/test_api.py tests/agent/test_peer_commands.py tests/agent/test_write_contracts.py tests/agent/test_write_confirmation.py tests/agent/test_write_audit.py" in text
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md" in handoff
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md" in post_vps
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md" in write_api_plan
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md" in settings_plan
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md" in audit_plan
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md" in peer_plan
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md" in preflight
+
+
 def test_amn3_preflight_confirmation_doc_tracks_nonce_expiry_and_vps_gate():
     doc_path = ROOT / "docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md"
     handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"

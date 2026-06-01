@@ -24,6 +24,8 @@ Until then:
 
 The plan implements only authoritative audit storage. It does not implement peer apply/revoke endpoints.
 
+Endpoint wiring plan that consumes this storage: `docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md`.
+
 ## File Structure
 
 - Modify `app/db/schema.py`: create `local_agent_write_audit_events` and indexes idempotently.
