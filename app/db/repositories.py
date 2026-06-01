@@ -1533,6 +1533,7 @@ class Repository:
         token_hash: str,
         scopes: list[str],
         expires_at: str | None,
+        rotated_from_token_id: str | None = None,
     ) -> None:
         if not token_id.strip():
             raise ValueError("token_id is required")
@@ -1554,9 +1555,10 @@ class Repository:
                 owner_label,
                 token_hash,
                 scopes_json,
-                expires_at
+                expires_at,
+                rotated_from_token_id
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 token_id,
@@ -1566,6 +1568,7 @@ class Repository:
                 token_hash,
                 json.dumps(scopes),
                 expires_at,
+                rotated_from_token_id,
             ),
         )
         self._commit()
@@ -1573,8 +1576,9 @@ class Repository:
     def get_valid_api_token(self, *, token_hash: str, now: str) -> sqlite3.Row | None:
         return self._conn.execute(
             """
-            SELECT *
+            SELECT api_tokens.*, users.status AS owner_status
             FROM api_tokens
+            LEFT JOIN users ON users.id = api_tokens.owner_user_id
             WHERE token_hash = ?
               AND revoked_at IS NULL
               AND (expires_at IS NULL OR expires_at > ?)
@@ -1594,15 +1598,21 @@ class Repository:
         self._commit()
         return cursor.rowcount > 0
 
-    def revoke_api_token(self, token_id: str, revoked_at: str) -> bool:
+    def revoke_api_token(
+        self,
+        token_id: str,
+        revoked_at: str,
+        reason: str | None = None,
+    ) -> bool:
         cursor = self._conn.execute(
             """
             UPDATE api_tokens
-            SET revoked_at = ?
+            SET revoked_at = ?,
+                revoke_reason = ?
             WHERE id = ?
               AND revoked_at IS NULL
             """,
-            (revoked_at, token_id),
+            (revoked_at, reason, token_id),
         )
         self._commit()
         return cursor.rowcount > 0
