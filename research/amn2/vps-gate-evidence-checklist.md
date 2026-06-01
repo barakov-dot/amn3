@@ -11,8 +11,8 @@
 ```text
 repo: https://github.com/barakov-dot/amn2.git
 branch: codex/remote-operation-vps-gate-prep
-head: aca6663 Add VPS gate handoff for remote ops
-base: 1fdcde5 Add scoped API token storage contract
+head: 262d70f Merge current VPS test prep into remote operation gate
+base: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
 ```
 
 ## Phase 0: вход в gate

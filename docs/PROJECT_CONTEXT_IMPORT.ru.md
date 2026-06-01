@@ -14,22 +14,22 @@
 repo: C:\Users\SooL\Documents\Amneziya
 branch: codex-vps-test-prep
 remote branch: amn2/codex-vps-test-prep
-latest committed head: 1fdcde5 Add scoped API token storage contract
+latest committed head: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
-status: remote-synced after scoped API token storage
+status: remote branch current after route/auth binding, API token lifecycle and SSH host key verifier merges
 ```
 
 Текущая VPS-gate candidate branch для remote-operation проверки:
 
 ```text
 branch: codex/remote-operation-vps-gate-prep
-head: aca6663 Add VPS gate handoff for remote ops
-base: 1fdcde5 Add scoped API token storage contract
+head: 262d70f Merge current VPS test prep into remote operation gate
+base: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
 status: pushed to amn2, local tests green, awaits real VPS gate
 runbook: research/amn2/vps-gate-remote-operation-dry-run-audit.md
 ```
 
-Последний production slice относится к scoped API token storage/auth layer:
+Scoped API token storage/auth layer остается важным baseline, но после него в `codex-vps-test-prep` уже вошли route/auth binding, API token lifecycle и SSH host key verifier:
 
 ```text
 app/services/api_tokens.py

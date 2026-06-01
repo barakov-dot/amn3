@@ -10,7 +10,7 @@
 
 ```text
 codex/remote-operation-vps-gate-prep
-head: aca6663 Add VPS gate handoff for remote ops
+head: 262d70f Merge current VPS test prep into remote operation gate
 ```
 
 Пока нет real VPS evidence, интеграционные write/API решения в main project не начинать.

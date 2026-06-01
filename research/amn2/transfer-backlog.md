@@ -48,7 +48,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Verified config delivery | `implemented-pushed-local-gate-complete` | `amn2` | commits `952cc49`, `4b19cd3`, `fc73929`; verified at `94ad807` | Использовать как artifact integrity baseline; VPS gate не нужен |
 | Public-token safety | `implemented-pushed-local-gate-complete` | `amn2` | commit `dfe27ee`; tests `14 passed`, full suite `535 passed` | Использовать как verify/recover token baseline; VPS gate не нужен |
 | Local Agent hardening | `implemented-pushed-local-gate-complete` | `amn2` | commit `c5d7eb6`; focused tests `64 passed`, full suite `536 passed` | Использовать как read-only audit/version contract; VPS gate не нужен |
-| Remote operation VPS gate candidate | `prepared-pushed-awaits-real-vps-gate` | `amn2` branch + AMN3 runbook | branch `codex/remote-operation-vps-gate-prep`, head `aca6663`; runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; focused `79 passed`, docs `7 passed`, full `551 passed` | Выполнить read-only/dry-run на VPS; single apply/revoke только после отдельного подтверждения |
+| Remote operation VPS gate candidate | `prepared-pushed-awaits-real-vps-gate` | `amn2` branch + AMN3 runbook | branch `codex/remote-operation-vps-gate-prep`, head `262d70f`; runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; focused/docs `107 passed`, full `572 passed` | Выполнить read-only/dry-run на VPS; single apply/revoke только после отдельного подтверждения |
 | VPS gate evidence/merge package | `prepared-local-docs` | AMN3 | `vps-gate-evidence-checklist.md`, `post-vps-gate-merge-decision.md`, `neighbor-chat-vps-gate-handoff.md` | Использовать сразу после real VPS gate для решения merge/PR и разблокировки соседних чатов |
 | Docker manager safety note | `prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/docker-manager-design-note.md` | Использовать как вход для будущего implementation plan после VPS evidence |
 | SSH host key enrollment design | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/ssh-host-key-enrollment-design.md` | Использовать как policy gate перед VPS onboarding, web/API remote operations и app-managed host key pinning |
@@ -217,7 +217,7 @@ Public-token safety commit `dfe27ee` также остается `local-gate-com
 
 Local Agent hardening commit `c5d7eb6` также остается `local-gate-complete`: `agent serve` подключает repository-backed audit sink для allowed read routes, `/agent/version` публикует runtime contract metadata, а tests подтверждают отсутствие raw bearer token в audit. Live VPS gate не нужен, потому что slice не делает real agent deployment, controller-to-agent calls, peer apply/revoke/config/sync/runtime writes.
 
-Remote operation VPS gate branch `codex/remote-operation-vps-gate-prep` подготовлена и запушена как fresh candidate поверх `1fdcde5`: dry-run metadata и Runtime Registry подтверждены локально, но real VPS verification еще не запускался.
+Remote operation VPS gate branch `codex/remote-operation-vps-gate-prep` обновлена поверх текущего `codex-vps-test-prep` head `d0939d8`: dry-run metadata, Runtime Registry и SSH host key verifier baseline подтверждены локально, но real VPS verification еще не запускался.
 
 Web panel safe-improvements commit `22dfc37` также остается `local-gate-complete`: это wording/UI-test слой без изменения apply/revoke/config/sync/runtime behavior. Live VPS gate не нужен.
 

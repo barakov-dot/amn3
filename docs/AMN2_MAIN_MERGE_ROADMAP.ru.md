@@ -299,9 +299,9 @@ Gate: local-only. Live VPS не нужен, потому что slice не до�
 - state-changing metadata contract: `codex/remote-operation-contract-metadata`, commit `57d484d`;
 - approve/reset partial-failure model: `codex/remote-operation-partial-failure`, commit `0afb22a`;
 - dry-run/audit metadata: историческая branch `codex/remote-operation-dry-run-audit`, commits `0313857`, `063b6c3`;
-- fresh candidate поверх текущего `codex-vps-test-prep`: `codex/remote-operation-vps-gate-prep`, head `aca6663`;
+- fresh candidate поверх текущего `codex-vps-test-prep`: `codex/remote-operation-vps-gate-prep`, head `262d70f`;
 - VPS gate runbook: `research/amn2/vps-gate-remote-operation-dry-run-audit.md`;
-- full local suite для fresh candidate: `551 passed, 1 StarletteDeprecationWarning`.
+- full local suite для fresh candidate: `572 passed, 2 warnings`.
 
 Остается перед broader remote-state-write API:
 

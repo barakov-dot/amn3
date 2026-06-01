@@ -156,7 +156,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Redaction Coverage: `94ad807 Document secret-bearing delivery artifacts`;
 - Config Delivery Integrity evidence: verified at `94ad807`;
 - Public Token Safety: `dfe27ee Harden public email token safety`;
-- Remote Operation state-changing contract / partial-failure / dry-run-audit: fresh VPS-gate candidate `codex/remote-operation-vps-gate-prep` prepared on top of `1fdcde5`, head `aca6663`, runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`;
+- Remote Operation state-changing contract / partial-failure / dry-run-audit: fresh VPS-gate candidate `codex/remote-operation-vps-gate-prep` prepared on top of `d0939d8`, head `262d70f`, runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`;
 - Local Agent Hardening: `c5d7eb6 Harden Local Agent audit contract`;
 - Web Panel Safe Improvements: `22dfc37 Clarify web panel operation gates`;
 - Scoped API Token Storage: `1fdcde5 Add scoped API token storage contract`.
@@ -734,6 +734,7 @@ c249bd0 Add state-changing operation metadata
 8af6b5e Add remote partial failure model
 b7a12ca Add remote operation dry-run metadata
 aca6663 Add VPS gate handoff for remote ops
+262d70f Merge current VPS test prep into remote operation gate
 ```
 
 Покрыто:
@@ -746,9 +747,9 @@ aca6663 Add VPS gate handoff for remote ops
 Проверка:
 
 ```text
-focused server/security/web tests: 79 passed, 1 StarletteDeprecationWarning
+focused server/security/policy/docs tests: 107 passed, 1 PytestCacheWarning
 runtime registry docs tests: 7 passed
-full local suite: 551 passed, 1 StarletteDeprecationWarning
+full local suite: 572 passed, 2 warnings
 ```
 
 Live VPS не трогался. Candidate branch уже запушена в `amn2`; следующий шаг - отдельный controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, начиная с read-only/dry-run подтверждения.

@@ -25,13 +25,13 @@ Base branch/head:
 
 ```text
 codex-vps-test-prep
-1fdcde5 Add scoped API token storage contract
+d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
 ```
 
 Candidate head after local preparation:
 
 ```text
-aca6663 Add VPS gate handoff for remote ops
+262d70f Merge current VPS test prep into remote operation gate
 ```
 
 Included remote-operation commits:
@@ -42,9 +42,10 @@ c249bd0 Add state-changing operation metadata
 b7a12ca Add remote operation dry-run metadata
 50be810 Document remote operation local gate
 aca6663 Add VPS gate handoff for remote ops
+262d70f Merge current VPS test prep into remote operation gate
 ```
 
-Why this candidate exists: the older `codex/remote-operation-dry-run-audit` branch diverged from `codex-vps-test-prep` at `91aeb3e`. The VPS test must use a fresh branch on top of the current verified transfer head `1fdcde5`, not the stale branch.
+Why this candidate exists: the older `codex/remote-operation-dry-run-audit` branch diverged from `codex-vps-test-prep` at `91aeb3e`. The VPS test must use the updated candidate branch on top of the current verified transfer head `d0939d8`, not the stale branch or the old `aca6663` head.
 
 ## Local verification
 
@@ -62,7 +63,7 @@ tests\server\test_peer_apply.py
 tests\security\test_redaction.py
 tests\web\test_servers.py
 tests\web\test_users.py
-result: 79 passed, 1 StarletteDeprecationWarning
+result: 107 passed, 1 PytestCacheWarning
 ```
 
 Runtime registry docs:
@@ -75,7 +76,7 @@ result: 7 passed
 Full local suite:
 
 ```text
-551 passed, 1 StarletteDeprecationWarning
+572 passed, 2 warnings
 ```
 
 Note: the first Windows worktree run failed because `tmp\...` did not exist for `--basetemp`; after creating local `tmp` and disabling pytest cache, the same candidate passed. This was an execution-environment issue, not a code regression.
@@ -144,7 +145,7 @@ git log -1 --oneline
 Expected head:
 
 ```text
-aca6663 Add VPS gate handoff for remote ops
+262d70f Merge current VPS test prep into remote operation gate
 ```
 
 If the VPS uses a virtual environment:

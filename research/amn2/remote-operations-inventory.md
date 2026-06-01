@@ -113,12 +113,12 @@ Read-only health slice `RemoteOperationRunner` уже присутствует �
 Для реального VPS gate подготовлена fresh branch поверх текущего `codex-vps-test-prep` head `1fdcde5`, потому что историческая `codex/remote-operation-dry-run-audit` расходилась с актуальным baseline.
 
 - branch: `codex/remote-operation-vps-gate-prep`;
-- head: `aca6663 Add VPS gate handoff for remote ops`;
-- base: `1fdcde5 Add scoped API token storage contract`;
+- head: `262d70f Merge current VPS test prep into remote operation gate`;
+- base: `d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier`;
 - runbook: `research/amn2/vps-gate-remote-operation-dry-run-audit.md`;
-- focused verification: `79 passed, 1 warning`;
+- focused verification: `107 passed, 1 warning`;
 - docs verification: `7 passed`;
-- full suite: `551 passed, 1 warning`.
+- full suite: `572 passed, 2 warnings`.
 
 Live VPS еще не трогался. Следующий шаг - read-only/dry-run gate на реальном VPS, затем single test peer apply/revoke только после отдельного подтверждения оператора.
 
@@ -154,7 +154,7 @@ Live VPS еще не трогался. Следующий шаг - read-only/dry
 
 Current limitations:
 
-- no explicit host key enrollment/pinning model exists in code yet; AMN3 design is prepared in `research/amn2/ssh-host-key-enrollment-design.md`;
+- local-only host key identity verifier exists in `amn2/codex/ssh-host-key-identity-verifier`; app-managed pinning integration is still a separate future gate;
 - no dedicated sudo policy layer was found;
 - command execution assumes the configured SSH user can run the needed commands directly;
 - timeout is per command, but there is no operation-level cancellation/rollback contract.

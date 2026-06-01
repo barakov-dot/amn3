@@ -19,7 +19,7 @@ branch: codex-vps-test-prep
 latest: 91aeb3e Document VPS verified tag
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 handoff: docs/NEXT_CHAT_HANDOFF.ru.md
-current transfer head: 1fdcde5 Add scoped API token storage contract
+current transfer head: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
 ```
 
 Живой VPS-цикл подтвержден: approve, working config, peer sync, disable/enable и выборочное удаление устройства работают на Docker AmneziaWG runtime.

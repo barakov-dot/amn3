@@ -54,12 +54,12 @@
 ### Secret-safe audit/redaction gate
 
 - Цель: не допустить утечек `.conf`, QR payload, `vpn://`, private key, PSK, tokens и command output в metadata, logs, audit и diagnostics.
-- Статус 2026-06-01: dry-run/audit metadata slice перенесен на fresh VPS-gate candidate `codex/remote-operation-vps-gate-prep`, head `aca6663`.
+- Статус 2026-06-01: dry-run/audit metadata slice перенесен на fresh VPS-gate candidate `codex/remote-operation-vps-gate-prep`, head `262d70f`.
 - Что должно появиться: tests, которые проверяют redacted output для новых remote mutation metadata.
 - Почему P0: remote operations почти всегда рядом с секретами и конфигами.
 - Локальная проверка: focused redaction/security tests плюс audit serialization tests.
-- Проверено 2026-06-01: `79 passed, 1 warning` для focused server/security/web набора.
-- Full suite 2026-06-01 на fresh candidate: `551 passed, 1 warning`.
+- Проверено 2026-06-01: `107 passed, 1 warning` для focused server/security/policy/docs набора.
+- Full suite 2026-06-01 на fresh candidate: `572 passed, 2 warnings`.
 - Готово, когда: ни один новый dry-run/audit/report path не содержит raw secrets. Первый dry-run/audit срез готов; live VPS не трогался.
 
 ### SSH host key verification policy
@@ -80,7 +80,7 @@
 - Что должно появиться: preview с `operation_id`, `risk_class`, side effects, rollback/recovery note и `consistency_status=dry-run`.
 - Почему P1: dry-run нужен до live VPS apply/revoke, но опирается на P0 contract.
 - Локальная проверка: tests для apply-peer/revoke-peer dry-run без live execution.
-- Проверено 2026-06-01: `tests/server/test_operation_runner.py tests/server/test_peer_apply.py tests/security/test_redaction.py tests/web/test_servers.py tests/web/test_users.py -v` -> `79 passed, 1 warning`.
+- Проверено 2026-06-01: focused server/security/policy/docs набор -> `107 passed, 1 warning`.
 - Готово, когда: preview понятен оператору и не содержит секретов. Первый срез готов: `RemoteOperationRunner.plan()` отдает `dry-run` для state-changing операций, `OperationPlan.to_safe_metadata()` не публикует command strings, `apply-peer`/`revoke-peer` dry-run выводит operation metadata без PSK.
 
 ### Bot/service partial-failure сценарии
@@ -205,8 +205,8 @@
 2. Добавить fake runner/fake peer applier harness - первый approve/reset слой выполнен в `codex/remote-operation-partial-failure`.
 3. Покрыть partial-failure model для approve/revoke/reset - первый approve/reset слой выполнен в `codex/remote-operation-partial-failure`.
 4. Добавить dry-run preview и safe audit/redaction metadata - выполнено и перенесено на fresh candidate `codex/remote-operation-vps-gate-prep`.
-5. Прогнать focused tests - выполнено: `79 passed, 1 warning`.
-6. Прогнать full local suite на fresh candidate - выполнено: `551 passed, 1 warning`.
+5. Прогнать focused tests - выполнено: `107 passed, 1 warning`.
+6. Прогнать full local suite на fresh candidate - выполнено: `572 passed, 2 warnings`.
 7. Обновить Runtime Registry и lab notes - Runtime Registry включен в commit `50be810`, lab notes обновлены этим срезом.
 8. Перед controlled real VPS verification gate зафиксировать Phase 0 SSH host key verification по `research/amn2/ssh-host-key-enrollment-design.md`.
 9. Зафиксировать backup/import dangerous API boundary по `research/amn2/backup-import-dangerous-api-design.md` - выполнено локально, без web/API routes и без VPS.
