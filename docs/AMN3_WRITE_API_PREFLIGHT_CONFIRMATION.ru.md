@@ -10,6 +10,7 @@ confirmation nonce и проверки `preflight_required`.
 - `tests/agent/test_write_confirmation.py`
 - `docs/AMN3_WRITE_API_UX_FLOW.ru.md`
 - `docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md`
+- `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`
 
 ## 1. Gate
 
@@ -31,6 +32,9 @@ LOCAL_AGENT_WRITE_ENABLED=false
 - `actor_surface`;
 - `actor_id`;
 - `server_alias`;
+- `user_id`;
+- `device_id`;
+- `device_label`;
 - `client_id`;
 - `peer_public_key_fingerprint`;
 - `request_hash`;

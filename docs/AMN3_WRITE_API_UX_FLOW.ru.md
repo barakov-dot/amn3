@@ -10,6 +10,7 @@ production defaults. Это локальный продуктовый контр
 Связанный audit contract: `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md`.
 Связанный preflight/confirmation contract: `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`.
 Локальный release gate до VPS: `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
+Связанная identity model: `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`.
 
 ## 1. Gate
 
@@ -58,6 +59,10 @@ write routes remain disabled
 
 Controller нормализует ввод в `AgentPeerApplyRequest` или `AgentPeerRevokeRequest`. Некорректные поля дают
 `validation_failed` до обращения к Local Agent.
+
+Стабильные поля `user_id`, `device_id`, `device_label`, `client_id`, `server_alias` и `peer_public_key_fingerprint`
+описаны в `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`. UI может показывать labels, но mutation подтверждается по
+стабильным идентификаторам.
 
 ### Step 2. Dry-run / preflight
 

@@ -89,6 +89,8 @@ git remote -v
   result states, redaction rules и storage note.
 - `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` - contract для dry-run reference, confirmation nonce,
   expiry и `preflight_required`.
+- `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md` - модель `user_id` / `device_id` / `client_id` /
+  `peer_public_key` для будущего write API без открытия mutation routes.
 - `docs/WEB_PANEL_AND_BOT_SETUP.ru.md` - web/bot запуск и эксплуатация.
 - `docs/VPS_RETEST_PROTOCOL.ru.md` - повторяемый VPS retest.
 - `docs/VPS_LOG_COLLECTION.ru.md` - сбор логов и диагностики.
@@ -136,8 +138,9 @@ git status --short --branch
 6. Держать `docs/AMN3_WRITE_API_UX_FLOW.ru.md` синхронизированным с policy matrix и будущими surface flows.
 7. Держать `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md` синхронизированным с `app/agent/write_audit.py`.
 8. Держать `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` синхронизированным с `app/agent/write_confirmation.py`.
-9. Перед передачей на VPS проходить `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
-10. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
+9. Держать `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md` синхронизированным с UX, audit и preflight contracts.
+10. Перед передачей на VPS проходить `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
+11. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
 
 До VPS smoke не включать write routes, не добавлять реальные mutation endpoints и не делать Local Agent публичным.
 

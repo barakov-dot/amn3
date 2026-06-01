@@ -373,6 +373,46 @@ def test_amn3_preflight_confirmation_doc_tracks_nonce_expiry_and_vps_gate():
     assert "docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md" in policy_doc
 
 
+def test_amn3_user_device_peer_identity_model_defines_stable_terms_and_links():
+    doc_path = ROOT / "docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    policy_doc_path = ROOT / "docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md"
+    ux_flow_path = ROOT / "docs/AMN3_WRITE_API_UX_FLOW.ru.md"
+    audit_doc_path = ROOT / "docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md"
+    preflight_doc_path = ROOT / "docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    policy_doc = policy_doc_path.read_text(encoding="utf-8")
+    ux_flow = ux_flow_path.read_text(encoding="utf-8")
+    audit_doc = audit_doc_path.read_text(encoding="utf-8")
+    preflight_doc = preflight_doc_path.read_text(encoding="utf-8")
+
+    assert "user_id" in text
+    assert "device_id" in text
+    assert "client_id" in text
+    assert "peer_public_key" in text
+    assert "peer_public_key_fingerprint" in text
+    assert "device_label" in text
+    assert "server_alias" in text
+    assert "amneziawg" in text
+    assert "one user -> many devices" in text
+    assert "one device -> one active peer per server" in text
+    assert "client_id is controller-owned" in text
+    assert "peer_public_key is runtime-owned" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "raw token" in text
+    assert "agent:clients:write" in text
+    assert "docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md" in handoff
+    assert "docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md" in policy_doc
+    assert "docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md" in ux_flow
+    assert "docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md" in audit_doc
+    assert "docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md" in preflight_doc
+
+
 def test_amn3_vps_test_packet_coordinates_neighbor_chat_smoke_run():
     doc_path = ROOT / "docs/AMN3_VPS_TEST_PACKET.ru.md"
     handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
