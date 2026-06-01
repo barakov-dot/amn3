@@ -39,6 +39,8 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 - [Manager config export contract](manager-config-export-contract.md) - typed result boundary для `.conf`, QR, `vpn://` и future protocol manager export artifacts.
 - [Manager config export contract implementation](manager-config-export-contract-implementation.md) - local-only `amn2` branch/commit/test evidence для no-route typed export adapter.
 - [Public/self-service config delivery policy](public-self-service-config-delivery-policy.md) - policy gate для share/self-service delivery без открытия public config routes.
+- [Public/self-service config delivery policy implementation](public-self-service-config-delivery-policy-implementation.md) - local-only `amn2` branch/commit/test evidence для no-route share-token/policy contract.
+- [Public config delivery policy contract implementation](public-config-delivery-policy-contract-implementation.md) - local-only `amn2` branch/commit/test evidence для no-route share-token/policy contract.
 - [Redaction coverage plan](redaction-coverage-plan.md) - P0-план покрытия `.conf`, QR, `vpn://`, tokens, Local Agent headers, command output и diagnostics перед расширением remote operations.
 - [Remote operations inventory](remote-operations-inventory.md) - первый проход по SSH/server apply flows, dry-run, health checks, peer apply/revoke, traffic collection, audit, redaction и rollback gaps.
 - [Local-only task priority](local-only-task-priority.md) - приоритетный список локально выполняемых задач перед controlled real VPS verification gate.
@@ -65,7 +67,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 2. Начать VPS gate с read-only check и dry-run apply/revoke preview; single apply/revoke выполнять только после отдельного подтверждения оператора.
 3. Зафиксировать VPS evidence через `vps-gate-evidence-checklist.md`.
 4. Принять merge/PR решение по `post-vps-gate-merge-decision.md`.
-5. Пока VPS не готов, следующий local-only кандидат - public/self-service config delivery policy implementation как no-route share-token/policy contract; public download, API `config:read` и Local Agent `/configs` не открывать.
+5. Пока VPS не готов, следующий local-only кандидат - backup/import policy registry and restore-preview contract; web/API full backup, restore apply и import apply не открывать.
 
 ## Неактуальный риск
 

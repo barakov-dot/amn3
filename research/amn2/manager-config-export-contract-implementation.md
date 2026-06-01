@@ -85,4 +85,4 @@ result: 560 passed, 1 StarletteDeprecationWarning
 
 ## Следующее решение
 
-Следующий local-only кандидат, пока VPS не готов: public/self-service config delivery policy implementation как no-route share-token/policy contract. Public download endpoint, self-service config download, API `config:read` и Local Agent `/configs` не добавлять.
+Следующий local-only кандидат был выполнен: public/self-service config delivery policy implementation как no-route share-token/policy contract в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`. Если VPS еще не готов, следующий local-only кандидат - backup/import policy registry and restore-preview contract.

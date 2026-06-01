@@ -131,11 +131,12 @@
 ### Public/self-service config delivery policy
 
 - Цель: подготовить share/self-service delivery gate без открытия public config routes.
-- Статус 2026-06-01: policy подготовлен в `research/amn2/public-self-service-config-delivery-policy.md`.
-- Что должно появиться: route policy entries, share-token contract, hash-only raw token discipline, expiry, one-time/max downloads, revoke cascade, audit-safe metadata and backup/restore policy.
+- Статус 2026-06-01: implementation slice выполнен и запушен в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`, evidence `research/amn2/public-config-delivery-policy-contract-implementation.md`.
+- Что появилось: blocked route policy entries, share-token contract, hash-only raw token discipline, expiry, one-time/max downloads, revoke cascade, audit-safe metadata and backup/restore policy.
 - Почему P1: public/self-service выдача config превращает `.conf`, QR и `vpn://` в internet-facing `secret-read` surface.
 - Локальная проверка: no-route policy tests, token lifecycle tests, generic denial tests, no-secret audit tests; без self-service/public download route.
-- Готово, когда: public token flow можно проверить без payload delivery, а любой будущий route обязан пройти ownership/token/audit/rate-limit gates.
+- Проверено 2026-06-01: focused config/token/security/db suite `94 passed`; full local suite `577 passed, 1 warning`.
+- Готово, когда: public token flow можно проверить без payload delivery, а любой будущий route обязан пройти ownership/token/audit/rate-limit gates. Первый no-route share-token/policy slice готов; public/self-service download route, API `config:read` и Local Agent `/configs` остаются отдельными gates.
 
 ### Route/Auth machine-checkable binding tests
 
@@ -209,10 +210,11 @@
 8. Перед controlled real VPS verification gate зафиксировать Phase 0 SSH host key verification по `research/amn2/ssh-host-key-enrollment-design.md`.
 9. Зафиксировать backup/import dangerous API boundary по `research/amn2/backup-import-dangerous-api-design.md` - выполнено локально, без web/API routes и без VPS.
 10. Зафиксировать manager config export contract по `research/amn2/manager-config-export-contract.md` - выполнено и запушено в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`, без новых config routes и без VPS.
-11. Выполнить public/self-service config delivery policy implementation как no-route share-token/policy contract - следующий local-only шаг, без public download routes и без VPS.
+11. Выполнить public/self-service config delivery policy implementation как no-route share-token/policy contract - выполнено и запушено в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`, без public download routes и без VPS.
 12. Выполнить route/auth machine-checkable binding tests по `research/amn2/route-auth-machine-checkable-tests-plan.md` - выполнено и запушено в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`, без route expansion и без VPS.
 13. Выполнить route-connected scoped API token lifecycle gate - выполнено и запушено в stacked branch `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0`, без route expansion и без VPS.
-14. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг для VPS-кандидата, отдельно подтверждаемый оператором.
+14. Если VPS еще не готов, следующим local-only срезом брать backup/import policy registry and restore-preview contract по `research/amn2/backup-import-dangerous-api-design.md`.
+15. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг для VPS-кандидата, отдельно подтверждаемый оператором.
 
 ## Не переносим в локальную фазу
 

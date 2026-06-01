@@ -1,4 +1,4 @@
-# Public/Self-service Config Delivery Policy
+# Политика public/self-service выдачи конфигов
 
 Дата: 2026-06-01.
 
@@ -30,9 +30,19 @@ Current baseline still does not mean public/self-service download routes are rea
 
 ## Decision status
 
-Status: `design-prepared-local-docs`.
+Status: `implemented-pushed-local-gate-complete`.
 
-Decision: public/self-service config delivery remains blocked until a no-route policy/contract slice exists. The first implementation must define policy records, share-token storage semantics and tests without exposing downloadable configs through a new route.
+Decision: public/self-service config delivery remains blocked for routes, but the first no-route policy/contract slice exists. It defines policy records, share-token storage semantics and tests without exposing downloadable configs through a new route.
+
+Implementation evidence:
+
+```text
+branch: codex/public-config-delivery-policy-contract
+base: codex/manager-config-export-contract
+commit: 2ef3af7 Add config share policy contract
+focused local gate: 94 passed
+full local suite: 577 passed, 1 StarletteDeprecationWarning
+```
 
 ## Risk model
 
@@ -64,7 +74,7 @@ Public/self-service delivery adds extra risk:
 | `integration-api-config-read` | scoped bearer token | future, blocked | requires explicit `config:read`, resource policy and audit |
 | `local-agent-configs` | Local Agent/controller | future, blocked | requires separate Local Agent secret-read gate |
 
-Default recommendation: first implement policy registry and share-token contract, not a public route.
+Default recommendation: public routes still remain blocked; the next step for this lane is a separate route-exposure gate, not automatic endpoint implementation.
 
 ## Route policy table
 
@@ -318,13 +328,13 @@ Abuse tests:
 
 ## First safe implementation boundary
 
-The first safe code slice, when moving from AMN3 docs to `amn2`, is:
+The first safe code slice, already moved from AMN3 docs to `amn2`, is:
 
 ```text
 public/self-service config delivery policy registry and share-token contract
 ```
 
-It may include:
+It includes:
 
 - route policy entries without routes;
 - share-token storage contract or schema proposal;
@@ -346,12 +356,12 @@ It must not include:
 
 ## Current recommendation
 
-Keep public/self-service config delivery as `design-prepared-local-docs` until:
+Keep public/self-service config delivery routes blocked until:
 
-1. manager config export no-route adapter exists;
-2. share-token contract exists with hash-only raw token discipline;
-3. route policy matrix is machine-checkable for `secret-read` and `public-token-secret-read`;
-4. audit/rate-limit/backup tests exist;
-5. product explicitly chooses which lane opens first.
+1. product explicitly chooses which lane opens first;
+2. route policy exists for that concrete route;
+3. rate-limit implementation is connected to the route;
+4. no-secret response/audit/log tests exist for the route;
+5. ownership/resource policy is verified against real caller context.
 
-Recommended first lane remains `channel-only export`/internal adapter work, not public links.
+Recommended next local-only lane, if VPS is still not ready: backup/import policy registry and restore-preview contract, not public links.

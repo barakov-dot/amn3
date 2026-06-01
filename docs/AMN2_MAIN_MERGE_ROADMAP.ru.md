@@ -408,8 +408,9 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 ### Public/self-service config delivery policy lane
 
 1. Policy is prepared in `research/amn2/public-self-service-config-delivery-policy.md`.
-2. First implementation should be no-route policy registry/share-token contract: hash-only raw token discipline, expiry, one-time/max-download, revoke cascade, audit-safe metadata and backup/restore policy tests.
-3. Public download routes, self-service config download, API `config:read` and Local Agent `/configs` remain blocked until this gate is implemented and verified.
+2. First implementation is complete in `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`: no-route policy registry/share-token contract, hash-only raw token discipline, expiry, one-time/max-download, revoke cascade, audit-safe metadata and backup/restore policy tests.
+3. Verification: focused config/token/security/db suite `94 passed`; full local suite `577 passed, 1 StarletteDeprecationWarning`.
+4. Public download routes, self-service config download, API `config:read` and Local Agent `/configs` remain blocked until a separate route-exposure gate is implemented and verified.
 
 ### Read-only metrics/API lane
 
@@ -433,4 +434,4 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 
 ## Recommendation
 
-Next recommended work for the local-only lane, while VPS is not ready, is public/self-service config delivery policy implementation as a no-route share-token/policy contract. Controlled real VPS verification remains the next VPS-lane step before integrating KYORESUAS/PRVTPRO-derived operational flows.
+Next recommended work for the local-only lane, while VPS is not ready, is backup/import policy registry and restore-preview contract. Controlled real VPS verification remains the next VPS-lane step before integrating KYORESUAS/PRVTPRO-derived operational flows.

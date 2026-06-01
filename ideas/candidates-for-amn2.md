@@ -42,7 +42,7 @@
 - Идея: публичные ссылки для получения конфигурации без доступа к панели.
 - Польза: удобная выдача конфигов пользователям.
 - Риски: срок жизни ссылок, одноразовость, аудит, утечки, revoke.
-- Статус: design candidate описан в [Public/Self-service Config Delivery для `amn2`](../docs/superpowers/specs/2026-05-30-public-self-service-config-delivery-design.md); текущий `amn2` policy gate подготовлен в [Public/Self-service Config Delivery Policy](../research/amn2/public-self-service-config-delivery-policy.md).
+- Статус: first local-only no-route share-token/policy slice выполнен в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`; details in [Public config delivery policy contract implementation](../research/amn2/public-config-delivery-policy-contract-implementation.md).
 
 ### Config delivery integrity tests
 

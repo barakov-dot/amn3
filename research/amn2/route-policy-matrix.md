@@ -172,7 +172,7 @@ Public-token surfaces не являются admin-auth bypass. Их модель
 - `CONTROL_PANEL_AUTH_METHODS` есть в settings, но runtime surface требует отдельной трассировки перед scoped-token work.
 - Backup/import web/API policies не заведены; перед ними использовать `backup-import-dangerous-api-design.md` и не добавлять full backup/restore apply без preview, confirmation, audit и backup-before-write.
 - Manager config export contract выполнен в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`; новые config routes не добавлять до ownership/token gate, audit и no-secret metadata tests для конкретного route.
-- Public/self-service config delivery policy подготовлен в `public-self-service-config-delivery-policy.md`; public download routes не добавлять до no-route share-token contract, rate-limit hook, revoke cascade and no-secret audit tests.
+- Public/self-service config delivery policy выполнен в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`; public download routes не добавлять до отдельного route gate, rate-limit hook and route-level no-secret response/audit tests.
 
 ## Следующие шаги
 

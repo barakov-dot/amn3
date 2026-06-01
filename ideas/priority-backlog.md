@@ -100,11 +100,12 @@ Backlog не является списком задач к немедленно�
 ### Public/self-service config delivery
 
 - Цель: `amn2`.
-- Статус: `design-prepared-local-docs`.
+- Статус: `implemented-pushed-local-gate-complete`.
 - Суть: share links и self-service выдача конфигов с ownership checks, expiry, revoke, audit и rate limit.
 - Причина: полезно для пользователей, но это новый secret delivery surface.
 - Текущий результат 2026-06-01: `research/amn2/public-self-service-config-delivery-policy.md` фиксирует policy gate для self-service session, admin-issued share, public share token, integration API `config:read` и Local Agent `/configs`.
-- Следующий шаг: при переносе в `amn2` начать с no-route policy registry/share-token contract; public download endpoint, self-service config download, API `config:read` и Local Agent `/configs` не добавлять.
+- Текущий результат 2026-06-01: local-only no-route implementation выполнен в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`; focused `94 passed`, full suite `577 passed`; public download endpoint, self-service config download, API `config:read` и Local Agent `/configs` не добавлялись.
+- Следующий шаг: route exposure не делать до отдельного route gate, rate-limit hook и route-level no-secret response/audit tests.
 
 ### Manager config export contract
 
@@ -114,7 +115,7 @@ Backlog не является списком задач к немедленно�
 - Причина: UI/API/bot/self-service не должны зависеть от несовместимых `get_client_config` signatures.
 - Текущий результат 2026-06-01: `research/amn2/manager-config-export-contract.md` описывает `ConfigExportResult`, typed artifacts, capability model, safe metadata, safe error categories and first no-route adapter boundary.
 - Текущий результат 2026-06-01: local-only no-route implementation выполнен в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`; focused `40 passed`, full suite `560 passed`; public/self-service endpoint, API `config:read` и Local Agent `/configs` не добавлялись.
-- Следующий шаг: если VPS еще не готов, начать public/self-service config delivery policy implementation как no-route share-token/policy contract; public download endpoint, self-service config download, API `config:read` и Local Agent `/configs` не добавлять.
+- Следующий шаг: если VPS еще не готов, начать backup/import policy registry and restore-preview contract; web/API full backup, restore apply и import apply не добавлять.
 
 ### Local Amnezia API agent
 
@@ -237,5 +238,5 @@ Backlog не является списком задач к немедленно�
 3. Решить merge/PR для ветки `codex/remote-operation-vps-gate-prep` по `research/amn2/post-vps-gate-merge-decision.md`.
 4. После VPS evidence выбрать первый integration slice из KYORESUAS/PRVTPRO inputs без копирования кода: рекомендован read-only aggregate metrics/API route shell.
 5. Использовать `research/amn2/docker-manager-design-note.md` как safety input для будущего Docker manager implementation plan.
-6. Пока VPS не готов, следующий local-only кандидат - public/self-service config delivery policy implementation как no-route share-token/policy contract; public download, API `config:read` и Local Agent `/configs` не открывать.
+6. Пока VPS не готов, следующий local-only кандидат - backup/import policy registry and restore-preview contract; web/API full backup, restore apply и import apply не открывать.
 7. Только после закрытия этих gates возвращаться к domain exclusions и 2FA.
