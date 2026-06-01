@@ -11,6 +11,7 @@ production defaults. Это локальный продуктовый контр
 Связанный preflight/confirmation contract: `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`.
 Локальный release gate до VPS: `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
 Связанная identity model: `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`.
+Связанный runtime adapter plan: `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md`.
 
 ## 1. Gate
 

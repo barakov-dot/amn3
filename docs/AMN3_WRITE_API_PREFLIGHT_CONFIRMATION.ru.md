@@ -11,6 +11,7 @@ confirmation nonce и проверки `preflight_required`.
 - `docs/AMN3_WRITE_API_UX_FLOW.ru.md`
 - `docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md`
 - `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`
+- `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md`
 
 ## 1. Gate
 

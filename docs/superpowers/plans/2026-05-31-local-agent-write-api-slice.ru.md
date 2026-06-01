@@ -63,6 +63,7 @@ Do not implement write routes before these gates are true.
 - Modify `app/agent/policy.py`: promote only selected `/agent/clients` write policies into the active slice when write mode is enabled.
 - Modify `app/agent/api.py`: add guarded endpoints for dry-run and apply/revoke peer operations.
 - Create `app/agent/peer_commands.py`: Local Agent side adapter that performs peer apply/revoke using local runtime commands, not SSH.
+- Detailed adapter plan: `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md`.
 - Modify `app/agent/config.py`: add write enablement setting if the existing agent settings do not already expose it.
 - Modify `app/agent/client.py`: add controller client methods for the selected write operations.
 - Modify `app/web/server_health.py` or a new `app/web/local_agent_actions.py`: controller-side wrapper for calling Local Agent write operations.
@@ -138,6 +139,8 @@ git commit -m "Gate Local Agent write policies"
 **Files:**
 - Create: `app/agent/peer_commands.py`
 - Test: `tests/agent/test_peer_commands.py`
+
+Detailed plan for this task: `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md`.
 
 - [ ] **Step 1: Write failing tests**
 

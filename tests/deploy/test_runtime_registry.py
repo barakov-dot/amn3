@@ -527,6 +527,73 @@ def test_amn3_local_agent_write_settings_implementation_plan_is_code_ready_and_s
     assert "docs/superpowers/plans/2026-06-01-local-agent-write-settings-implementation.ru.md" in post_vps
 
 
+def test_amn3_local_agent_peer_command_adapter_plan_is_code_ready_and_vps_gated():
+    plan_path = ROOT / "docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    post_vps_path = ROOT / "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md"
+    write_api_plan_path = ROOT / "docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md"
+    ux_flow_path = ROOT / "docs/AMN3_WRITE_API_UX_FLOW.ru.md"
+    preflight_path = ROOT / "docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md"
+    identity_path = ROOT / "docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md"
+
+    text = plan_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    post_vps = post_vps_path.read_text(encoding="utf-8")
+    write_api_plan = write_api_plan_path.read_text(encoding="utf-8")
+    ux_flow = ux_flow_path.read_text(encoding="utf-8")
+    preflight = preflight_path.read_text(encoding="utf-8")
+    identity = identity_path.read_text(encoding="utf-8")
+
+    assert "# Local Agent Peer Command Adapter Implementation Plan" in text
+    assert "GO-1" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED=false" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED=true" in text
+    assert "app/agent/peer_commands.py" in text
+    assert "tests/agent/test_peer_commands.py" in text
+    assert "app/server/peer_apply.py" in text
+    assert "app/agent/write_contracts.py" in text
+    assert "app/agent/write_confirmation.py" in text
+    assert "app/agent/write_audit.py" in text
+    assert "AgentPeerApplyRequest" in text
+    assert "AgentPeerRevokeRequest" in text
+    assert "AgentPeerMutationResult" in text
+    assert "LocalPeerCommandAdapter" in text
+    assert "LocalRuntimeAdapter" in text
+    assert "LocalRuntimeResult" in text
+    assert "PeerCommandError" in text
+    assert "build_peer_apply_dry_run" in text
+    assert "build_peer_revoke_dry_run" in text
+    assert "PeerApplyInput" in text
+    assert "apply_peer" in text
+    assert "revoke_peer" in text
+    assert "host_systemd" in text
+    assert "docker" in text
+    assert "local commands only" in text
+    assert "no SSH from inside Local Agent" in text
+    assert "dry-run before mutation" in text
+    assert "confirmation nonce" in text
+    assert "rollback_reference" in text
+    assert "peer_public_key_fingerprint" in text
+    assert "user_id" in text
+    assert "device_id" in text
+    assert "client_id" in text
+    assert "server_alias" in text
+    assert "protocol=amneziawg" in text
+    assert "raw token" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "full client config" in text
+    assert "pytest tests/agent/test_peer_commands.py tests/agent/test_write_contracts.py tests/agent/test_write_confirmation.py tests/agent/test_write_audit.py" in text
+    assert "docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md" in handoff
+    assert "docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md" in post_vps
+    assert "docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md" in write_api_plan
+    assert "docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md" in ux_flow
+    assert "docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md" in preflight
+    assert "docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md" in identity
+
+
 def test_amn3_preflight_confirmation_doc_tracks_nonce_expiry_and_vps_gate():
     doc_path = ROOT / "docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md"
     handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"

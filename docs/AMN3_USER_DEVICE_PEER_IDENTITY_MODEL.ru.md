@@ -11,6 +11,7 @@ AmneziaWG-сервере. Документ не включает write routes, �
 - `docs/AMN3_WRITE_API_UX_FLOW.ru.md`
 - `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md`
 - `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`
+- `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md`
 - `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`
 
 ## 1. Gate
