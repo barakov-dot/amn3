@@ -43,8 +43,22 @@ Raw token возвращается только в момент выдачи ч�
 - token not revoked;
 - token not expired;
 - required scope is present.
+- если token привязан к `owner_user_id`, текущий owner status должен оставаться `active`.
 
 Safe audit metadata содержит только `token_id`, `name`, `owner_label` и scopes.
+
+## Lifecycle gate
+
+Второй local-only slice добавляет lifecycle boundary до подключения токенов к маршрутам:
+
+- `create_route_api_token()` требует явный `expires_at` для route-connected токенов;
+- `revoke_api_token()` возвращает idempotent safe event: повторный revoke не раскрывает, существовал ли usable token;
+- `rotate_api_token()` использует create-new-then-revoke-old: новый token получает отдельный id и raw token показывается только один раз;
+- `rotated_from_token_id` хранит lineage без raw token и без token hash в safe metadata;
+- `revoke_reason` хранит причину отзыва без удаления audit history;
+- user-owned token наследует статус владельца: `blocked`/`deleted` owner не проходит auth.
+
+Safe lifecycle metadata не содержит raw token, Authorization header, token hash, `.conf`, QR payload, `vpn://`, private key, PSK или remote command output.
 
 ## VPS Gate
 

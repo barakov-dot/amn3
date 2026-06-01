@@ -171,9 +171,12 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             scopes_json TEXT NOT NULL,
             expires_at TEXT,
             revoked_at TEXT,
+            revoke_reason TEXT,
             last_used_at TEXT,
+            rotated_from_token_id TEXT,
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE SET NULL
+            FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE SET NULL,
+            FOREIGN KEY (rotated_from_token_id) REFERENCES api_tokens(id) ON DELETE SET NULL
         );
 
         CREATE TABLE IF NOT EXISTS ignored_remote_peers (
@@ -219,6 +222,8 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
     )
     _ensure_column(conn, "devices", "first_connected_at", "TEXT")
     _ensure_column(conn, "devices", "last_connected_at", "TEXT")
+    _ensure_column(conn, "api_tokens", "revoke_reason", "TEXT")
+    _ensure_column(conn, "api_tokens", "rotated_from_token_id", "TEXT")
     _migrate_devices_disabled_status(conn)
     conn.commit()
 
