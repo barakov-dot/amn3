@@ -728,6 +728,7 @@ def test_api_token_lifecycle_stores_hash_scopes_and_revoke_state(tmp_path):
         token_hash="sha256:api-token-hash",
         scopes=["metrics:read", "server:read"],
         expires_at="2026-06-08T10:00:00Z",
+        rotated_from_token_id=None,
     )
 
     token = repo.get_valid_api_token(
@@ -738,6 +739,7 @@ def test_api_token_lifecycle_stores_hash_scopes_and_revoke_state(tmp_path):
     assert token["id"] == "api-token-1"
     assert token["name"] == "Monitoring"
     assert token["owner_user_id"] == user_id
+    assert token["owner_status"] == "active"
     assert token["owner_label"] == "ops"
     assert token["token_hash"] == "sha256:api-token-hash"
     assert token["scopes_json"] == '["metrics:read", "server:read"]'
@@ -751,8 +753,18 @@ def test_api_token_lifecycle_stores_hash_scopes_and_revoke_state(tmp_path):
         is None
     )
     assert repo.mark_api_token_used("api-token-1", "2026-06-01T10:01:00Z")
-    assert repo.revoke_api_token("api-token-1", "2026-06-01T10:02:00Z")
-    assert not repo.revoke_api_token("api-token-1", "2026-06-01T10:03:00Z")
+    assert repo.revoke_api_token(
+        "api-token-1",
+        "2026-06-01T10:02:00Z",
+        reason="operator-requested",
+    )
+    stored = conn.execute("SELECT * FROM api_tokens WHERE id = ?", ("api-token-1",)).fetchone()
+    assert stored["revoke_reason"] == "operator-requested"
+    assert not repo.revoke_api_token(
+        "api-token-1",
+        "2026-06-01T10:03:00Z",
+        reason="operator-requested",
+    )
     assert (
         repo.get_valid_api_token(
             token_hash="sha256:api-token-hash",
@@ -760,6 +772,37 @@ def test_api_token_lifecycle_stores_hash_scopes_and_revoke_state(tmp_path):
         )
         is None
     )
+
+
+def test_api_token_rotation_lineage_is_stored_without_raw_token(tmp_path):
+    conn = connect(tmp_path / "test.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    user_id, _server_id = _create_user_and_server(repo)
+
+    repo.create_api_token(
+        token_id="old-token",
+        name="Monitoring",
+        owner_user_id=user_id,
+        owner_label="ops",
+        token_hash="sha256:old-token-hash",
+        scopes=["server:read"],
+        expires_at="2026-06-08T10:00:00Z",
+    )
+    repo.create_api_token(
+        token_id="new-token",
+        name="Monitoring",
+        owner_user_id=user_id,
+        owner_label="ops",
+        token_hash="sha256:new-token-hash",
+        scopes=["server:read"],
+        expires_at="2026-07-01T10:00:00Z",
+        rotated_from_token_id="old-token",
+    )
+
+    rotated = conn.execute("SELECT * FROM api_tokens WHERE id = ?", ("new-token",)).fetchone()
+    assert rotated["rotated_from_token_id"] == "old-token"
+    assert "new-raw-token" not in dict(rotated).values()
 
 
 def _create_user_and_server(repo: Repository) -> tuple[int, int]:

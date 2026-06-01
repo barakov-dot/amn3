@@ -8,7 +8,10 @@ from app.services.api_tokens import (
     ApiTokenRecord,
     authenticate_api_token,
     create_api_token,
+    create_route_api_token,
     hash_api_token,
+    revoke_api_token,
+    rotate_api_token,
 )
 
 
@@ -79,6 +82,23 @@ def test_create_api_token_rejects_secret_read_or_write_scopes():
         )
 
 
+def test_create_route_api_token_requires_explicit_expiry():
+    class TokenStore:
+        def create_api_token(self, **kwargs):  # pragma: no cover - must not be called
+            raise AssertionError("route-connected token without expiry must not be stored")
+
+    with pytest.raises(ValueError, match="expires_at is required"):
+        create_route_api_token(
+            TokenStore(),
+            token_id="api-token-1",
+            raw_token="raw-api-token",
+            name="Monitoring",
+            owner_label="ops",
+            scopes={"metrics:read"},
+            expires_at=None,
+        )
+
+
 def test_authenticate_api_token_accepts_matching_unexpired_scope():
     now = datetime(2026, 6, 1, 10, 0, tzinfo=timezone.utc)
     record = ApiTokenRecord(
@@ -102,6 +122,7 @@ def test_authenticate_api_token_accepts_matching_unexpired_scope():
         "token_id": "api-token-1",
         "name": "Monitoring",
         "owner_label": "ops",
+        "owner_user_id": None,
         "scopes": ["server:read"],
     }
 
@@ -158,3 +179,145 @@ def test_authenticate_api_token_rejects_expired_revoked_and_missing_scope():
             now=now,
         )
     assert scope_error.value.reason == "missing_scope"
+
+
+def test_authenticate_api_token_rejects_inactive_owner():
+    now = datetime(2026, 6, 1, 10, 0, tzinfo=timezone.utc)
+    record = ApiTokenRecord(
+        token_id="api-token-1",
+        token_hash=hash_api_token("raw-api-token"),
+        name="Monitoring",
+        owner_label="ops",
+        owner_user_id=7,
+        owner_status="blocked",
+        scopes=frozenset({"server:read"}),
+        expires_at=now + timedelta(minutes=5),
+    )
+
+    with pytest.raises(ApiTokenAuthError) as owner_error:
+        authenticate_api_token(
+            "raw-api-token",
+            tokens=(record,),
+            required_scope="server:read",
+            now=now,
+        )
+
+    assert owner_error.value.reason == "inactive_owner"
+
+
+def test_authenticate_api_token_checks_inactive_owner_before_scope():
+    now = datetime(2026, 6, 1, 10, 0, tzinfo=timezone.utc)
+    record = ApiTokenRecord(
+        token_id="api-token-1",
+        token_hash=hash_api_token("raw-api-token"),
+        name="Monitoring",
+        owner_label="ops",
+        owner_user_id=7,
+        owner_status="deleted",
+        scopes=frozenset({"metrics:read"}),
+        expires_at=now + timedelta(minutes=5),
+    )
+
+    with pytest.raises(ApiTokenAuthError) as owner_error:
+        authenticate_api_token(
+            "raw-api-token",
+            tokens=(record,),
+            required_scope="server:read",
+            now=now,
+        )
+
+    assert owner_error.value.reason == "inactive_owner"
+
+
+def test_revoke_api_token_is_idempotent_and_returns_safe_metadata():
+    calls = []
+
+    class TokenStore:
+        def revoke_api_token(self, token_id, revoked_at, reason=None):
+            calls.append((token_id, revoked_at, reason))
+            return len(calls) == 1
+
+    revoked_at = datetime(2026, 6, 1, 10, 5, tzinfo=timezone.utc)
+    first = revoke_api_token(
+        TokenStore(),
+        token_id="api-token-1",
+        revoked_at=revoked_at,
+        reason="operator-requested",
+    )
+    second = revoke_api_token(
+        TokenStore(),
+        token_id="api-token-1",
+        revoked_at=revoked_at,
+        reason="operator-requested",
+    )
+
+    assert first.safe_metadata() == {
+        "action": "api_token.revoked",
+        "token_id": "api-token-1",
+        "status": "revoked",
+        "reason": "operator-requested",
+        "revoked_at": "2026-06-01T10:05:00+00:00",
+        "rotated_from_token_id": None,
+    }
+    assert second.safe_metadata()["status"] == "already-revoked-or-missing"
+    assert "raw-api-token" not in str(first.safe_metadata())
+
+
+def test_rotate_api_token_creates_new_token_then_revokes_old_without_secret_metadata():
+    calls = []
+
+    class TokenStore:
+        def create_api_token(self, **kwargs):
+            calls.append(("create", kwargs))
+
+        def revoke_api_token(self, token_id, revoked_at, reason=None):
+            calls.append(("revoke", token_id, revoked_at, reason))
+            return True
+
+    now = datetime(2026, 6, 1, 10, 0, tzinfo=timezone.utc)
+    previous = ApiTokenRecord(
+        token_id="old-token",
+        token_hash=hash_api_token("old-raw-token"),
+        name="Monitoring",
+        owner_label="ops",
+        owner_user_id=7,
+        owner_status="active",
+        scopes=frozenset({"server:read", "metrics:read"}),
+        expires_at=now + timedelta(days=1),
+    )
+
+    rotation = rotate_api_token(
+        TokenStore(),
+        previous,
+        new_token_id="new-token",
+        raw_token="new-raw-token",
+        expires_at=now + timedelta(days=30),
+        rotated_at=now,
+    )
+
+    assert calls[0][0] == "create"
+    assert calls[0][1]["owner_user_id"] == 7
+    assert calls[0][1]["owner_label"] == "ops"
+    assert calls[0][1]["scopes"] == ["metrics:read", "server:read"]
+    assert calls[0][1]["rotated_from_token_id"] == "old-token"
+    assert calls[1] == (
+        "revoke",
+        "old-token",
+        "2026-06-01T10:00:00+00:00",
+        "rotated",
+    )
+    assert rotation.issue.raw_token == "new-raw-token"
+    assert rotation.safe_metadata() == {
+        "action": "api_token.rotated",
+        "status": "rotated",
+        "old_token_id": "old-token",
+        "new_token_id": "new-token",
+        "owner_label": "ops",
+        "owner_user_id": 7,
+        "scopes": ["metrics:read", "server:read"],
+        "expires_at": "2026-07-01T10:00:00+00:00",
+        "raw_token_display": "one-time",
+    }
+    assert "old-raw-token" not in str(rotation.safe_metadata())
+    assert "new-raw-token" not in str(rotation.safe_metadata())
+    assert hash_api_token("new-raw-token") not in str(rotation.safe_metadata())
