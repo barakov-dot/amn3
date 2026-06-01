@@ -1,6 +1,6 @@
 # `amn2`: основной порядок слияния API, web panel и operations
 
-Дата: 2026-06-01.
+Дата: 2026-06-02.
 
 Режим: coordination roadmap в `VPS-OPS-LAB`. Production-код `amn2` меняется только отдельными local-gate slices. Upstream code не копируется. Live VPS не трогаем без отдельного VPS gate.
 
@@ -114,7 +114,7 @@ Live VPS gate должен быть отдельным этапом с зафи�
 
 ### 2. Route/Auth/Operation Policy Matrix как первый production slice
 
-Статус: first implementation candidate.
+Статус: implemented-pushed-local-gate-complete.
 
 Правило: не добавлять новые API routes. Сначала сделать machine-checkable policy coverage для текущих surfaces.
 
@@ -195,7 +195,7 @@ Production evidence:
 - focused tests: `14 passed, 1 StarletteDeprecationWarning`;
 - full local suite: `535 passed, 1 StarletteDeprecationWarning`.
 
-После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening, Web Panel Safe Improvements, Scoped API Token Storage, Manager Config Export Contract, Public/Self-service Config Delivery Policy, Backup/Import Policy Contract и Secret Inventory Registry. Следующий рекомендуемый шаг - controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, потому что KYORESUAS/PRVTPRO integration candidates уже ждут реального VPS evidence.
+После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening, Web Panel Safe Improvements, Scoped API Token Storage, Manager Config Export Contract, Public/Self-service Config Delivery Policy, Backup/Import Policy Contract, Secret Inventory Registry и отдельная read-only API lane. KYORESUAS API направление уже перешло в собственную `amn2` ветку `codex/read-only-api-route-shell`, head `2010d60`; следующий шаг для нее - real VPS loopback API smoke по `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным gate для SSH/sync/config/runtime write surfaces.
 
 ## Важные задачи
 
@@ -370,11 +370,11 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 10. Public/self-service config delivery policy: done in `amn2/codex/public-config-delivery-policy-contract`, local-gate-complete.
 11. Backup/import policy contract: done in `amn2/codex/backup-import-policy-contract`, local-gate-complete.
 12. Secret inventory registry: done in `amn2/codex/secret-inventory-registry`, local-gate-complete.
-13. Read-only metrics privacy classification: prepared in `research/amn2/read-only-metrics-privacy-classification.md`; implementation route shell now waits for install/startup/preflight evidence and the API route-exposure plan.
+13. Read-only metrics privacy classification: prepared in `research/amn2/read-only-metrics-privacy-classification.md`; first aggregate-only route shell implemented in `amn2/codex/read-only-api-route-shell`, head `2010d60`, and now waits for real VPS loopback API smoke.
 
 ### Live VPS verification lane
 
-1. Enter this lane now if the goal is to unblock KYORESUAS/PRVTPRO integration decisions; the local API-token storage slice is complete.
+1. Enter this lane for SSH/sync/config/runtime-changing integration decisions. KYORESUAS read-only API shell uses its own loopback smoke gate and does not require this remote-operation apply/revoke gate while it remains aggregate-only and non-mutating.
 2. Treat SSH host key verification as Phase 0 evidence using `research/amn2/ssh-host-key-enrollment-design.md`; if an unknown host key prompt appears, stop and verify out-of-band before continuing.
 3. Use the prepared VPS test checklist `research/amn2/vps-gate-remote-operation-dry-run-audit.md` with branch/commit, commands, expected state and rollback note.
 4. For `codex/remote-operation-vps-gate-prep`, start with read-only check and dry-run apply/revoke preview; single test peer apply/revoke needs separate operator confirmation.
@@ -420,8 +420,9 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 ### Read-only metrics/API lane
 
 1. Privacy classification is prepared in `research/amn2/read-only-metrics-privacy-classification.md`.
-2. First implementation after `verified-live` should be aggregate-only metrics/API route shell.
-3. Detailed per-peer/client metrics remain blocked until separate opt-in detailed metrics policy and tests.
+2. First aggregate-only metrics/API route shell is implemented and pushed in `amn2/codex/read-only-api-route-shell`, head `2010d60`; verification recorded in the branch handoff as full suite `588 passed`.
+3. Next step is real VPS loopback API smoke with scoped token issue/use/revoke and no raw token/header/hash/config/keys/PSK in evidence.
+4. Detailed per-peer/client metrics remain blocked until separate opt-in detailed metrics policy and tests.
 
 ### Local Agent runtime metadata lane
 
@@ -434,9 +435,9 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 1. Rotation/revoke policy is prepared in `research/amn2/api-token-rotation-revoke-policy.md`.
 2. Local-only lifecycle gate implemented in `amn2/codex/api-token-lifecycle-gate`, commit `c2ba646`: explicit route-connected expiry helper, idempotent revoke event, create-new-then-revoke-old rotation, owner inheritance and safe metadata.
 3. Stacked variant for merge order after route/auth binding is available in `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0`; stacked verification: focused `56 passed`, full suite `555 passed`.
-4. Next implementation should expose only read-only route shell after install/startup/preflight evidence and a separate route-exposure decision.
+4. Read-only route shell is implemented in `amn2/codex/read-only-api-route-shell`; next lifecycle work should wait for VPS loopback API smoke evidence.
 5. `config:read`, write, remote-exec, destructive, backup/import and broad admin-equivalent bearer tokens remain blocked.
 
 ## Recommendation
 
-API integration is now the priority product lane from `VPN Ops Lab — KYORESUAS-API`, but it must enter `amn2` as a native, scoped, read-only route shell, not as copied KYORESUAS code. The first implementation target is aggregate-only `server:read`/`metrics:read` after VPS install/startup/preflight evidence and the packaging discovery fix. Controlled real VPS verification remains mandatory before any API route that calls SSH, syncs peers, emits config or changes runtime state.
+API integration is now the priority product lane from `VPN Ops Lab — KYORESUAS-API`, and it entered `amn2` as a native, scoped, read-only route shell in `codex/read-only-api-route-shell`, not as copied KYORESUAS code. The immediate next step is VPS loopback API smoke and evidence, then PR/merge decision back to stable `codex-vps-test-prep`. Controlled real VPS verification remains mandatory before any API route that calls SSH, syncs peers, emits config or changes runtime state.

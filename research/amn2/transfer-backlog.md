@@ -1,6 +1,6 @@
 # `amn2` Transfer Backlog
 
-Дата: 2026-06-01.
+Дата: 2026-06-02.
 
 Назначение: единая очередь переноса AMNEZIYA-наработок и upstream-идей из AMN3 в production repo `amn2`.
 
@@ -23,6 +23,17 @@ d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verif
 ```
 
 В эту линию уже вошли PR #4/#5 по API token lifecycle и PR #6 по SSH host key verifier. Scoped API token storage `1fdcde5` остается важным baseline, но больше не является текущим production head.
+
+Текущая active implementation branch для установки/API smoke:
+
+```text
+branch: codex/read-only-api-route-shell
+remote branch: amn2/codex/read-only-api-route-shell
+head: 2010d60 Add API VPS smoke evidence template
+base: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
+status: pushed, local tests green, awaits real VPS loopback API smoke
+working chat: Переводим AMN на API
+```
 
 Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 
@@ -52,6 +63,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Local Agent hardening | `implemented-pushed-local-gate-complete` | `amn2` | commit `c5d7eb6`; focused tests `64 passed`, full suite `536 passed` | Использовать как read-only audit/version contract; VPS gate не нужен |
 | Remote operation VPS gate candidate | `prepared-pushed-awaits-real-vps-gate` | `amn2` branch + AMN3 runbook | branch `codex/remote-operation-vps-gate-prep`, head `262d70f`; runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; focused/docs `107 passed`, full `572 passed` | Выполнить read-only/dry-run на VPS; single apply/revoke только после отдельного подтверждения |
 | VPS gate evidence/merge package | `prepared-local-docs` | AMN3 | `vps-gate-evidence-checklist.md`, `post-vps-gate-merge-decision.md`, `neighbor-chat-vps-gate-handoff.md` | Использовать сразу после real VPS gate для решения merge/PR и разблокировки соседних чатов |
+| VPS install package | `published-updated` | AMN3 package for `amn2` | `dist/amn2-vps-install-d0939d8.zip`, sha256 `DEBF2983BFE10B17EF3994A5C1F4F21F959919D0746C6593001A67705E00378F`; commit `87da41d` fixed installer user creation fallback | Использовать как стабильный package baseline; для API smoke на VPS после установки подтянуть ветку `codex/read-only-api-route-shell` |
 | Docker manager safety note | `prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/docker-manager-design-note.md` | Использовать как вход для будущего implementation plan после VPS evidence |
 | SSH host key enrollment design | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/ssh-host-key-enrollment-design.md` | Использовать как policy gate перед VPS onboarding, web/API remote operations и app-managed host key pinning |
 | SSH host key identity verifier | `implemented-pushed-local-gate-complete` | `amn2` | branch `codex/ssh-host-key-identity-verifier`, commit `dd20364`; evidence `research/amn2/ssh-host-key-verifier-implementation.md`; focused `29 passed`, full `550 passed` | Использовать как merge/cherry-pick candidate перед live VPS gate; следующий шаг - подключать к SSH-backed operations только отдельным gated slice |
@@ -61,8 +73,10 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Backup/import policy contract | `implemented-pushed-local-gate-complete` | `amn2` | branch `codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`; evidence `research/amn2/backup-import-policy-contract-implementation.md`; RED `1 import error as expected`; focused `61 passed`; full suite `584 passed` | Использовать как no-route backup/import policy baseline; web/API full backup, restore apply и import apply остаются отдельными gates |
 | Manager config export contract | `implemented-pushed-local-gate-complete` | `amn2` | branch `codex/manager-config-export-contract`, commit `4d4e7a4`; evidence `research/amn2/manager-config-export-contract-implementation.md`; focused `40 passed`, full `560 passed` | Использовать как no-route typed export adapter baseline; public/self-service endpoints, API `config:read` и Local Agent `/configs` остаются отдельными gates |
 | Public/self-service config delivery policy | `implemented-pushed-local-gate-complete` | `amn2` | branch `codex/public-config-delivery-policy-contract`, commit `2ef3af7`; evidence `research/amn2/public-config-delivery-policy-contract-implementation.md`; focused `94 passed`, full `577 passed` | Использовать как no-route share-token/policy baseline; public download, self-service download, API `config:read` и Local Agent `/configs` остаются отдельными gates |
-| KYORESUAS API integration priority | `priority-plan-prepared` | AMN3 -> `amn2` next | `research/amn2/kyoresuas-api-integration-priority-plan.md` | После packaging/startup/preflight evidence писать implementation plan для native read-only aggregate API route shell |
-| Read-only metrics privacy classification | `classification-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/read-only-metrics-privacy-classification.md` | Использовать как privacy input для первого aggregate-only API route shell |
+| Packaging discovery fix | `implemented-pushed-local-gate-complete` | `amn2` | branch `codex/read-only-api-route-shell`, commit `e99d5f3 Fix editable install package discovery` | Считать install/startup blocker закрытым для API smoke branch; проверять на VPS через editable install |
+| KYORESUAS API integration priority | `implementation-active` | AMN3 -> `amn2` | `research/amn2/kyoresuas-api-integration-priority-plan.md`; `amn2/codex/read-only-api-route-shell` | Продолжать в чате `Переводим AMN на API`; upstream code не копировать |
+| Read-only API route shell | `implemented-pushed-awaits-vps-smoke` | `amn2` | branch `codex/read-only-api-route-shell`, commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`; full suite `588 passed` | Выполнить loopback API smoke на VPS по `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`, затем решить PR/merge в `codex-vps-test-prep` |
+| Read-only metrics privacy classification | `classification-used-by-api-shell` | AMN3 -> `amn2` | `research/amn2/read-only-metrics-privacy-classification.md` | Держать как privacy baseline для aggregate-only API; detailed client metrics остаются заблокированы |
 | Local Agent runtime metadata alignment | `alignment-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/local-agent-runtime-metadata-alignment.md` | После VPS evidence писать implementation plan для controller-safe runtime summary, не clients/configs |
 | API token rotation/revoke policy | `policy-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/api-token-rotation-revoke-policy.md` | Policy остается design source для route expansion и Local Agent token separation |
 | API token lifecycle gate | `implemented-pushed-local-gate-complete` | `amn2` | branch `codex/api-token-lifecycle-gate`, commit `c2ba646`; stacked branch `codex/api-token-lifecycle-gate-stacked`, commit `256d0c0` поверх `codex/route-auth-binding-tests`; evidence `research/amn2/api-token-lifecycle-gate-implementation.md`; stacked focused `56 passed`, full `555 passed` | Использовать как service/repository lifecycle baseline; `/api/*` routes, `config:read`, write scopes и bearer-token route exposure остаются отдельными gates |
@@ -96,12 +110,12 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 
 ## Current Priority Order
 
-1. Приоритетная product lane: API integration по `VPN Ops Lab — KYORESUAS-API`, но как собственный `amn2` read-only aggregate route shell без копирования upstream code; см. `research/amn2/kyoresuas-api-integration-priority-plan.md`.
-2. До API implementation закрыть install/startup blockers: packaging discovery fix в `amn2`, web/bot manual startup, `bot check-network`, `server preflight`, `server check --dry-run`.
-3. Первый API slice: `server:read`/`metrics:read` aggregate-only endpoints по `research/amn2/read-only-metrics-privacy-classification.md`; no `/clients` write CRUD, no `config:read`, no backup/import/reboot.
-4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается обязательным перед API/web/agent routes, которые вызывают SSH, sync peers, emit config или меняют runtime state; single test peer apply/revoke только после отдельного подтверждения.
+1. Продолжать API/install work в чате `Переводим AMN на API` на ветке `amn2/codex/read-only-api-route-shell`, head `2010d60`.
+2. Выполнить real VPS loopback API smoke по `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`: issue scoped token, `api serve --host 127.0.0.1`, `api smoke-check`, revoke token; raw token/header/hash/config/keys/PSK не фиксировать в чатах.
+3. После VPS evidence решить PR/merge read-only API route shell обратно в stable `codex-vps-test-prep`.
+4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным обязательным gate перед API/web/agent routes, которые вызывают SSH, sync peers, emit config или меняют runtime state; single test peer apply/revoke только после отдельного подтверждения.
 5. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед route expansion.
-6. Docker manager safety contract уже зафиксирован в `research/amn2/docker-manager-design-note.md`; implementation plan писать только после VPS evidence.
+6. `/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot, public docs/metrics и detailed client metrics остаются заблокированы до отдельного решения.
 7. Domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
 
 ## Neighbor Chat Decision
@@ -114,8 +128,9 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 
 `VPN Ops Lab — KYORESUAS-API`:
 
-- keep active as API/Local-Agent architecture reference;
-- no server install, no implementation copy, no broad CRUD/write API before policy/secret/remote-write gates.
+- теперь является источником product direction для собственной `amn2` API lane;
+- активная реализация идет в `amn2/codex/read-only-api-route-shell`, не через копирование upstream code;
+- no broad CRUD/write API, no `config:read`, no backup/import/reboot before policy/secret/remote-write gates.
 
 ## Когда нужен новый live retest
 

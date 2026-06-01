@@ -2,6 +2,8 @@
 
 Этот файл фиксирует рабочую карту решений после анализа PRVTPRO/Amnezia-Web-Panel, wg-easy/wg-easy, kyoresuas/amnezia-api и текущего состояния `amn2`.
 
+Актуализация 2026-06-02: API integration уже перешла из plan stage в активную собственную ветку `amn2/codex/read-only-api-route-shell`, head `2010d60`. Следующий gate - real VPS loopback API smoke, а не новый параллельный implementation plan.
+
 Backlog не является списком задач к немедленной реализации. Любая идея переходит в `amn2` только после transfer gate:
 
 - лицензия и отсутствие копирования внешнего кода;
@@ -122,13 +124,14 @@ Backlog не является списком задач к немедленно�
 ### Local Amnezia API agent
 
 - Цель: `amn2`.
-- Статус: `alignment-prepared-local-docs`.
+- Статус: `implementation-active-read-only-api-shell`.
 - Суть: локальный agent рядом с Amnezia управляет users/peers через ограниченный HTTP contract вместо постоянного внешнего SSH control plane.
 - Причина: перспективно для управления Amnezia через API, но agent получает высокий доступ к runtime/config state.
 - Текущий результат: first-slice foundation, production wiring и Local Agent hardening выполнены; commit `c5d7eb6` закрепляет audit/version contract для read-only routes.
 - Текущий результат 2026-06-01: `research/amn2/local-agent-runtime-metadata-alignment.md` отделяет controller-safe runtime summary от topology-sensitive fields вроде `container_name` и `interface`.
 - Текущий результат 2026-06-01: `research/amn2/api-token-rotation-revoke-policy.md` разделяет external API tokens и Local Agent tokens, чтобы `agent:*` scopes не стали broad integration API.
-- Следующий шаг: route-connected lifecycle implementation; не добавлять `/agent/clients`, `/agent/configs` или write lifecycle без отдельного gate.
+- Текущий результат 2026-06-02: собственная `amn2` ветка `codex/read-only-api-route-shell` добавила loopback-safe read-only API route shell, token smoke CLI и evidence template; full suite `588 passed`.
+- Следующий шаг: real VPS loopback API smoke по `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`; не добавлять `/agent/clients`, `/agent/configs`, `/clients` write CRUD, API `config:read` или write lifecycle без отдельного gate.
 
 ### Configurable VPN subnet/IPAM
 
@@ -141,11 +144,12 @@ Backlog не является списком задач к немедленно�
 ### Metrics surface и privacy policy
 
 - Цель: `amn2`, позже hybrid.
-- Статус: `classification-prepared-local-docs`.
+- Статус: `classification-used-by-api-shell`.
 - Суть: read-only metrics endpoint для peers/traffic/handshake только с privacy class и scoped metrics token.
 - Причина: monitoring полезен, но может раскрывать client names, IP, endpoint и activity metadata.
 - Текущий результат 2026-06-01: `research/amn2/read-only-metrics-privacy-classification.md` определяет aggregate-only default, forbidden labels и opt-in detailed policy boundary.
-- Следующий шаг: после install/startup/preflight evidence написать implementation plan для read-only API route shell с aggregate metrics only.
+- Текущий результат 2026-06-02: aggregate-only read-only API shell реализован в `amn2/codex/read-only-api-route-shell` без detailed client labels и без secret-bearing output.
+- Следующий шаг: подтвердить на VPS loopback smoke; detailed client metrics и public metrics остаются отдельным blocked gate.
 
 ## P2. Малая важность или отложить
 
@@ -235,9 +239,9 @@ Backlog не является списком задач к немедленно�
 
 ## Ближайшая рекомендуемая очередь
 
-1. Зафиксировать API integration как приоритетную product lane из `VPN Ops Lab — KYORESUAS-API`: первый slice - read-only aggregate `server:read`/`metrics:read` route shell без копирования upstream code.
-2. До API implementation закрыть VPS install/startup blockers: packaging discovery fix, web/bot startup, `bot check-network`, `server preflight`, `server check --dry-run`.
-3. Написать implementation plan для `docs/superpowers/plans/2026-06-01-amn2-read-only-api-route-shell.md` на основе `research/amn2/kyoresuas-api-integration-priority-plan.md`.
-4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` проводить перед любыми routes, которые вызывают SSH, sync peers, emit config или меняют runtime state.
+1. Продолжать API/install work в чате `Переводим AMN на API` на ветке `amn2/codex/read-only-api-route-shell`, head `2010d60`.
+2. Выполнить real VPS loopback API smoke по `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`: issue scoped token, `api serve --host 127.0.0.1`, `api smoke-check`, revoke token; raw token/header/hash/config/keys/PSK не фиксировать.
+3. После smoke вернуть evidence в AMN3 и решить PR/merge read-only API route shell обратно в stable `codex-vps-test-prep`.
+4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` проводить отдельно перед любыми routes, которые вызывают SSH, sync peers, emit config или меняют runtime state.
 5. Использовать `research/amn2/docker-manager-design-note.md` как safety input для будущего Docker manager implementation plan.
 6. Domain exclusions и 2FA возвращать только после API/read-only lane и текущих safety gates.

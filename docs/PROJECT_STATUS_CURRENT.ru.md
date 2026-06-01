@@ -1,8 +1,8 @@
 # Текущее состояние проекта
 
-Дата: 2026-06-01.
+Дата: 2026-06-02.
 
-Этот snapshot фиксирует текущее состояние после verified live VPS cycle, серии local-only hardening slices в `amn2` и синхронизации AMN3 с GitHub.
+Этот snapshot фиксирует текущее состояние после verified live VPS cycle, серии local-only hardening slices в `amn2`, сборки VPS install package и перехода API-направления в активную ветку `codex/read-only-api-route-shell`.
 
 ## Что учтено при обновлении
 
@@ -25,6 +25,8 @@
 - Web Panel Safe Improvements task/review;
 - Scoped API Token Storage task/review;
 - Route/Auth Binding Tests, API Token Lifecycle Gate and SSH Host Key Verifier task/review;
+- VPS install package / installer fallback fix;
+- KYORESUAS API priority plan и последующую ветку read-only API route shell;
 - pre-VPS matrix comments from `codex/local-agent-production-wiring`;
 - текущий `MAIN - VPN Ops Lab` coordination chat.
 
@@ -53,10 +55,25 @@ master
 Committed head lab reviewed before this status refresh:
 
 ```text
-008ee09 Refresh VPS gate candidate evidence
+7fc3aee Set KYORESUAS API integration priority
 ```
 
 `master` синхронизирован с `origin/master`.
+
+Последние AMN3 pushes, учтенные в этом snapshot:
+
+```text
+25e02e9 Add VPS install package
+87da41d Fix VPS installer user creation fallback
+7fc3aee Set KYORESUAS API integration priority
+```
+
+Актуальный install package для стабильного `amn2` baseline `d0939d8`:
+
+```text
+dist/amn2-vps-install-d0939d8.zip
+sha256: DEBF2983BFE10B17EF3994A5C1F4F21F959919D0746C6593001A67705E00378F
+```
 
 Дополнительный соседний AMN3 push, который не слит в `master`, но учтен в этом snapshot:
 
@@ -84,7 +101,7 @@ GitHub remote:
 https://github.com/barakov-dot/amn2.git
 ```
 
-Текущая production-ветка:
+Стабильная production baseline ветка:
 
 ```text
 codex-vps-test-prep
@@ -96,7 +113,18 @@ codex-vps-test-prep
 d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
 ```
 
-Текущий local worktree `Amneziya` чистый и синхронизирован с `amn2/codex-vps-test-prep`.
+Стабильная baseline-ветка `amn2/codex-vps-test-prep` остается точкой для проверенного live VPS behavior contract.
+
+Текущая активная рабочая ветка `Amneziya` для установки/API debug:
+
+```text
+codex/read-only-api-route-shell
+head: 2010d60 Add API VPS smoke evidence template
+remote: amn2/codex/read-only-api-route-shell
+status: pushed, local worktree clean
+```
+
+Эту ветку используем в чате `Переводим AMN на API` для VPS install/update smoke и исправления ошибок. Главный coordination-chat не должен открывать параллельную API-реализацию.
 
 После scoped API token storage в `codex-vps-test-prep` уже вошли Route/Auth Binding Tests, API Token Lifecycle Gate и SSH Host Key Verifier через PR #4, PR #5 и PR #6. Эти срезы остаются local-gate-complete: без новых live VPS calls, без включения remote writes и без расширения `/api/*` routes до отдельного gate.
 
@@ -120,6 +148,7 @@ API Token Lifecycle Gate stacked: focused 56 passed; full 555 passed
 SSH Host Key Verifier: focused 29 passed; full 550 passed
 Remote Operation VPS-gate candidate: focused/docs 107 passed; full 572 passed
 Secret Inventory Registry: focused 64 passed; full 591 passed
+Read-only API route shell: full 588 passed
 ```
 
 Ожидаемое предупреждение: `StarletteDeprecationWarning` от `httpx` / `starlette.testclient`.
@@ -165,7 +194,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 
 Этот slice остался без live VPS calls, без новых config/API/write endpoints и без копирования upstream code.
 
-После него локально выполнены и запушены в `amn2/codex-vps-test-prep` следующие local-only slices:
+После него локально выполнены и запушены в `amn2` следующие local-only / candidate slices:
 
 - Redaction Coverage: `94ad807 Document secret-bearing delivery artifacts`;
 - Config Delivery Integrity evidence: verified at `94ad807`;
@@ -181,16 +210,19 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Public/Self-service Config Delivery Policy: branch `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7 Add config share policy contract`; local-only no-route share-token/policy contract, без public download route, self-service download route, API `config:read` и Local Agent `/configs`.
 - Backup/Import Policy Contract: branch `amn2/codex/backup-import-policy-contract`, head `afb2702 Tighten backup import preview type contract` with foundation commit `d2c160b`; local-only no-route backup mode registry, secret field policy and restore/import preview contract, без web/API backup routes, restore apply, import apply или live VPS calls.
 - Secret Inventory Registry: branch `amn2/codex/secret-inventory-registry`, commit `9ce42f4 Add secret inventory registry`; local-only machine-checkable secret inventory, без `.env` чтения, DB access, routes, secret-bearing output или live VPS calls.
+- Packaging discovery fix: branch `amn2/codex/read-only-api-route-shell`, commit `e99d5f3 Fix editable install package discovery`; исправляет editable install/package discovery перед VPS install package smoke.
+- Read-only API route shell: branch `amn2/codex/read-only-api-route-shell`, commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`; добавлены loopback-safe read-only `/api/*` routes, token smoke CLI, local API smoke readiness и `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`; full local suite `588 passed`, expected `StarletteDeprecationWarning`.
 
 Решение по соседним чатам:
 
 - `VPS OPS LAB - PRVTPRO-Amnezia-Web-Panel`: широкие research-задачи поставить на паузу; оставить как targeted-input для web-panel UX, config delivery integrity, route taxonomy, scoped API tokens и dangerous-action patterns.
-- `VPN Ops Lab — KYORESUAS-API`: оставить active reference для Local Agent/API architecture; не устанавливать, не копировать и не переносить CRUD/write API до policy/secret/remote-write gates.
-- Оба соседних направления можно переводить к интеграционным решениям только после controlled real VPS evidence: сначала read-only/dry-run, затем single peer apply/revoke по отдельному подтверждению.
+- `VPN Ops Lab — KYORESUAS-API`: уже переведен из reference-only в собственную `amn2` implementation lane на ветке `codex/read-only-api-route-shell`; upstream code не копируем, `/clients` write CRUD, `config:read`, backup/import/reboot не открываем.
+- `Переводим AMN на API`: использовать как рабочий чат для установки на сервер, loopback API smoke и исправления ошибок по ветке `codex/read-only-api-route-shell`.
+- Соседние направления, которые требуют SSH/sync/config/runtime writes, все еще можно переводить к интеграционным решениям только после controlled real VPS evidence: сначала read-only/dry-run, затем single peer apply/revoke по отдельному подтверждению.
 
 ## Что не делать первым
 
-Не писать production API сразу.
+Не расширять production API за пределы уже сделанного read-only aggregate route shell.
 
 Не копировать upstream code.
 
@@ -229,6 +261,8 @@ research/amn2/public-config-delivery-policy-contract-implementation.md
 research/amn2/backup-import-policy-contract-implementation.md
 research/amn2/secret-inventory-registry-implementation.md
 research/amn2/kyoresuas-api-integration-priority-plan.md
+amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md
+amn2/docs/API_TOKEN_POLICY.ru.md
 ```
 
 Pre-VPS support package:
@@ -270,16 +304,13 @@ head: 8697b60 Document Local Agent production wiring
 
 ## Рекомендуемый порядок
 
-1. Приоритетная product lane теперь API integration из `VPN Ops Lab — KYORESUAS-API`, но как собственный `amn2` read-only aggregate API route shell без копирования upstream code; план зафиксирован в `research/amn2/kyoresuas-api-integration-priority-plan.md`.
-2. Сначала закрыть install/startup blockers: `pyproject.toml` packaging discovery bug в `amn2`, затем web/bot manual startup и read-only/preflight evidence на VPS.
-3. Первый API implementation slice после этого: aggregate-only `server:read`/`metrics:read` route shell по `research/amn2/read-only-metrics-privacy-classification.md`; `/clients` write CRUD, `config:read`, backup/import/reboot и public docs/metrics остаются заблокированы.
-4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается обязательным перед любым API/web/agent route, который вызывает SSH, syncs peers, emits config или меняет runtime state.
-5. Начинать VPS gate с read-only check и dry-run apply/revoke preview; single test peer apply/revoke выполнять только после отдельного подтверждения оператора.
-6. Evidence фиксировать через `research/amn2/vps-gate-evidence-checklist.md`, затем принимать merge/PR решение по `research/amn2/post-vps-gate-merge-decision.md`.
-7. Route/Auth machine-checkable binding tests выполнены и запушены в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`; использовать как drift guard перед любыми route/API expansions.
-8. Secret inventory registry выполнен и запушен в `amn2/codex/secret-inventory-registry`, commit `9ce42f4`; использовать как machine-checkable secret baseline перед route/API secret-bearing work.
-9. Public/self-service config delivery policy выполнен и запушен в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`; API `config:read` и Local Agent `/configs` остаются отдельными gates.
-10. Domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
+1. Продолжать установку/API smoke в чате `Переводим AMN на API` на ветке `amn2/codex/read-only-api-route-shell`, head `2010d60`.
+2. На VPS использовать loopback-only API smoke из `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`: issue scoped token, `api serve --host 127.0.0.1`, `api smoke-check`, revoke token; не публиковать raw token/header/hash/config/keys/PSK.
+3. После VPS smoke вернуть evidence в AMN3 и решить, открывать ли PR/merge read-only API branch обратно в stable `codex-vps-test-prep`.
+4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным обязательным gate перед любым API/web/agent route, который вызывает SSH, syncs peers, emits config или меняет runtime state.
+5. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед дальнейшим route expansion.
+6. `/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot и public docs/metrics не открывать до отдельного route/secret/remote-write решения.
+7. Domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
 
 ## Route/Auth/Operation Policy Matrix Plan
 

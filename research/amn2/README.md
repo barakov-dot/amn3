@@ -22,6 +22,15 @@ handoff: docs/NEXT_CHAT_HANDOFF.ru.md
 current transfer head: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
 ```
 
+Активная рабочая ветка для установки/API smoke:
+
+```text
+branch: codex/read-only-api-route-shell
+head: 2010d60 Add API VPS smoke evidence template
+status: pushed; full local suite 588 passed; awaits real VPS loopback API smoke
+working chat: Переводим AMN на API
+```
+
 Живой VPS-цикл подтвержден: approve, working config, peer sync, disable/enable и выборочное удаление устройства работают на Docker AmneziaWG runtime.
 
 Это значит, что дальнейшие lab-решения должны опираться на уже проверенное поведение `amn2`, а не возвращаться к live retest как к незакрытому риску.
@@ -36,6 +45,7 @@ current transfer head: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-
 - [Secret surface inventory](secret-surface-inventory.md) - первый проход по secrets, redaction, encrypted backup, email tokens, config delivery и 2FA implications.
 - [Secret inventory registry implementation](secret-inventory-registry-implementation.md) - local-only `amn2` branch/commit/test evidence для machine-checkable secret inventory без route expansion.
 - [KYORESUAS API integration priority plan](kyoresuas-api-integration-priority-plan.md) - новый приоритет API lane: native read-only aggregate route shell без копирования upstream code.
+- `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md` - evidence template для текущей ветки `codex/read-only-api-route-shell`.
 - [Backup/import dangerous API design](backup-import-dangerous-api-design.md) - policy boundary для metadata/redacted/full backup, restore preview и dangerous import/apply.
 - [Backup/import policy contract implementation](backup-import-policy-contract-implementation.md) - local-only `amn2` branch/commit/test evidence для no-route backup/import policy registry and restore/import preview contract.
 - [Config delivery inventory](config-delivery-inventory.md) - первый проход по выдаче VPN config через bot, email, QR, `vpn://` link, recovery token и template preview.
@@ -63,15 +73,15 @@ current transfer head: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-
 
 Текущее решение: 2FA для web-admin поставлена на паузу, implementation plan для нее не пишем до отдельного решения.
 
-Текущий фокус после verified VPS cycle, read-only `RemoteOperationRunner` baseline, redaction coverage, state-changing metadata, partial-failure, dry-run/audit metadata, web-panel safety и scoped API token storage local slices:
+Текущий фокус после verified VPS cycle, read-only `RemoteOperationRunner` baseline, redaction coverage, state-changing metadata, partial-failure, dry-run/audit metadata, web-panel safety, scoped API token storage local slices и read-only API route shell:
 
-1. Выполнить controlled real VPS verification gate по `vps-gate-remote-operation-dry-run-audit.md` на ветке `codex/remote-operation-vps-gate-prep`.
-2. Начать VPS gate с read-only check и dry-run apply/revoke preview; single apply/revoke выполнять только после отдельного подтверждения оператора.
-3. Зафиксировать VPS evidence через `vps-gate-evidence-checklist.md`.
-4. Принять merge/PR решение по `post-vps-gate-merge-decision.md`.
+1. В чате `Переводим AMN на API` выполнить real VPS loopback API smoke на ветке `codex/read-only-api-route-shell`.
+2. Зафиксировать API evidence в `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md` и синхронизировать итог обратно в AMN3.
+3. Принять PR/merge решение для read-only API shell обратно в stable `codex-vps-test-prep`.
+4. Отдельно выполнить controlled real VPS verification gate по `vps-gate-remote-operation-dry-run-audit.md` на ветке `codex/remote-operation-vps-gate-prep` перед SSH/sync/config/runtime-changing routes.
 5. Backup/import policy registry and restore-preview contract выполнен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`; web/API full backup, restore apply и import apply остаются закрытыми.
 6. Machine-checkable secret inventory registry выполнен в `amn2/codex/secret-inventory-registry`, commit `9ce42f4`; route expansion, secret-bearing output и live VPS не добавлялись.
-7. Generic route-policy/audit/rate-limit guards уже закрыты; если VPS все еще не готов, не открывать новый local-only implementation slice до VPS evidence.
+7. Generic route-policy/audit/rate-limit guards уже закрыты; не открывать новый local-only implementation slice до VPS evidence по активной API-ветке.
 
 ## Неактуальный риск
 

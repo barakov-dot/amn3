@@ -1,14 +1,14 @@
 # VPN Ops Lab / Amneziya: импорт контекста из чатов
 
-Дата снимка: 2026-06-01.
+Дата снимка: 2026-06-02.
 
-Обновлено: 2026-06-01 после повторного прохода по проектным чатам, серии local-only transfer slices в `amn2` и синхронизации AMN3 с `barakov-dot/amn3`.
+Обновлено: 2026-06-02 после повторного прохода по проектным чатам, пушам AMN3/`amn2`, VPS install package и активной ветке `codex/read-only-api-route-shell`.
 
 Документ нужен для главного coordination-чата. Он собирает только рабочий контекст, который нужен для решений по `amn2`, будущему hybrid и общему Codex skill. Это не implementation plan и не разрешение на перенос функций.
 
-## Актуализация 2026-06-01
+## Актуализация 2026-06-02
 
-Текущая точка правды `amn2`:
+Стабильная точка правды `amn2`:
 
 ```text
 repo: C:\Users\SooL\Documents\Amneziya
@@ -18,6 +18,39 @@ latest committed head: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 status: remote branch current after route/auth binding, API token lifecycle and SSH host key verifier merges
 ```
+
+Активная рабочая ветка `amn2` для установки/API smoke:
+
+```text
+repo: C:\Users\SooL\Documents\Amneziya
+branch: codex/read-only-api-route-shell
+remote branch: amn2/codex/read-only-api-route-shell
+latest committed head: 2010d60 Add API VPS smoke evidence template
+base stable line: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
+status: pushed, local worktree clean, full local suite 588 passed with expected StarletteDeprecationWarning
+working chat: Переводим AMN на API
+```
+
+Изменения в активной API-ветке:
+
+```text
+e99d5f3 Fix editable install package discovery
+6534ac4 Add read-only API route shell
+9cccdc2 Add API token smoke CLI
+b37103a Harden local API smoke readiness
+2010d60 Add API VPS smoke evidence template
+```
+
+API shell открывает только read-only aggregate routes с scoped tokens:
+
+```text
+GET /api/servers -> server:read
+GET /api/servers/{server_name}/summary -> server:read
+GET /api/metrics/summary -> metrics:read
+GET /api/users/summary -> metrics:read
+```
+
+Запрещено публиковать `.conf`, QR, `vpn://`, private key, PSK, endpoint host/port, SSH host/port, raw token/header/hash или detailed client metadata.
 
 Текущая VPS-gate candidate branch для remote-operation проверки:
 
@@ -52,8 +85,23 @@ tests/db/test_repositories.py
 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 branch: master
 remote: https://github.com/barakov-dot/amn3.git
-committed head reviewed before this refresh: 008ee09 Refresh VPS gate candidate evidence
+committed head reviewed before this refresh: 7fc3aee Set KYORESUAS API integration priority
 status: clean and synchronized with origin/master
+```
+
+Последние AMN3 pushes, учтенные в координации:
+
+```text
+25e02e9 Add VPS install package
+87da41d Fix VPS installer user creation fallback
+7fc3aee Set KYORESUAS API integration priority
+```
+
+Актуальный install package:
+
+```text
+dist/amn2-vps-install-d0939d8.zip
+sha256: DEBF2983BFE10B17EF3994A5C1F4F21F959919D0746C6593001A67705E00378F
 ```
 
 Соседний AMN3 branch-only push, учтенный как комментарий к pre-VPS координации:
@@ -79,11 +127,15 @@ status: не слито в master; не повторять соседний VPS 
 - API token lifecycle gate branch `256d0c0`, merged through PR #4/#5;
 - SSH host key verifier `dd20364`, merged through PR #6; current `amn2` head `d0939d8`;
 - remote operation VPS-gate candidate `262d70f`, pushed and waiting for real VPS gate.
+- VPS install package `dist/amn2-vps-install-d0939d8.zip` with installer fallback fix;
+- KYORESUAS API integration priority plan;
+- read-only API route shell branch `codex/read-only-api-route-shell`, pushed at `2010d60`, waiting for real VPS loopback API smoke.
 
 Следующий рабочий выбор:
 
-1. Запустить controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, если цель - начать интеграцию решений из KYORESUAS/PRVTPRO в основной проект.
-2. Локальная альтернатива: implementation plan для aggregate-only read-only metrics/API route shell по `research/amn2/read-only-metrics-privacy-classification.md`, без write/client lifecycle.
+1. В чате `Переводим AMN на API` обновить/установить VPS на ветку `codex/read-only-api-route-shell` и выполнить loopback API smoke по `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`.
+2. После smoke вернуть сюда evidence и решить PR/merge ветки `codex/read-only-api-route-shell` обратно в stable `codex-vps-test-prep`.
+3. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным gate перед routes, которые вызывают SSH, sync peers, emit config или меняют runtime state.
 
 Старые блоки ниже, где `91aeb3e` указан как latest clean baseline, считать историческим контекстом verified live stage.
 
@@ -481,15 +533,13 @@ First safe slice по design spec:
 
 ## Ближайшие рабочие развилки
 
-Текущий режим coordination: AMN3 принял состояние после live VPS stage и выбрал первый безопасный next slice.
+Текущий режим coordination: AMN3 принял состояние после live VPS stage, local-only transfer slices, VPS install package и активной read-only API ветки.
 
-0. Review `research/amn2/api-readiness-audit-after-live-baseline.md`.
-1. Написать implementation plan для `Route/Auth/Operation Policy Matrix for current amn2 surfaces`.
-2. В plan не включать новые API routes, config delivery endpoints, write operations или live VPS calls.
-3. Только после принятого plan переходить в production branch/worktree.
-4. После production-среза вернуть в AMN3 branch/commit/test evidence.
-5. Для `kyoresuas/amnezia-api` можно продолжить отдельные deep-dive карточки: API surface/route policy, install/runtime hardening, auth/secrets.
-6. Для coordination-чата держать правило: любая новая идея сначала попадает в очередь с verdict, а не сразу в implementation.
+1. Продолжать серверную установку/API smoke в чате `Переводим AMN на API` на ветке `codex/read-only-api-route-shell`.
+2. Выполнить loopback API smoke по `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`: scoped token issue/use/revoke, без raw token/header/hash/config/keys/PSK в evidence.
+3. После VPS smoke вернуть итог в AMN3 и решить PR/merge read-only API shell обратно в stable `codex-vps-test-prep`.
+4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` держать отдельным gate для SSH/sync/config/runtime-changing routes.
+5. Для coordination-чата держать правило: любая новая идея сначала попадает в очередь с verdict, а не сразу в implementation.
 
 ## Источники в workspace
 
