@@ -1,7 +1,8 @@
 # AMN3 Pre-VPS Local Status Matrix
 
-Дата сверки: 2026-06-01. Ветка: `codex/local-agent-production-wiring`. Последний
-проверенный commit: `137b1f1 Add first VPS mutation test packet`.
+Дата сверки: 2026-06-01. Ветка: `codex/local-agent-production-wiring`.
+Базовая сверка перед добавлением этой матрицы:
+`137b1f1 Add first VPS mutation test packet`.
 
 Цель документа - убрать повторные рекомендации перед реальным VPS и ясно
 разделить три состояния: что уже реализовано локально, что только
