@@ -67,7 +67,7 @@
 - Для public token redemption стоит отдельно решить, нужен ли audit event успешного и неуспешного redeem без raw token и без config/link.
 - `vpn://` link легко воспринимается как безопасный, потому что он не показывает private key строкой; в policy и docs его надо считать secret-bearing.
 - После PRVTPRO issues #41/#51 нужен byte-level QR test: отрисованный QR должен декодироваться в тот же UTF-8 payload, включая non-ASCII names.
-- После PRVTPRO issue #49 нужен единый manager export contract или аналогичный слой, чтобы новые protocol manager-ы не ломали self-service/admin/public config delivery несовместимыми signatures.
+- После PRVTPRO issue #49 нужен единый manager export contract или аналогичный слой, чтобы новые protocol manager-ы не ломали self-service/admin/public config delivery несовместимыми signatures. Update 2026-06-01: design boundary подготовлен в `manager-config-export-contract.md`.
 - Новые self-service endpoints нельзя добавлять как "просто скачать конфиг": им нужен ownership/token gate, expiry, revoke story, audit и tests.
 
 ## Transfer gate для идей из lab
@@ -82,13 +82,14 @@
 
 ## Решение для lab
 
-Статус: `config-delivery-inventory-first-pass`.
+Статус: `config-delivery-inventory-first-pass`; manager export contract design prepared in `manager-config-export-contract.md`.
 
 Пока не переносим public/self-service delivery в `amn2` как code edit. Сначала фиксируем policy-слой: какие endpoints могут выдавать config, кто actor, какой gate, какой audit, какие tests и как revoke работает после выдачи.
 
 ## Следующие рабочие шаги
 
-1. Подготовить route/config delivery policy design на базе этого inventory и текущего route/auth surface.
-2. Расширить test matrix для существующего `build_device_config_delivery()` на `.conf`, QR, `vpn://`, UTF-8/non-ASCII и no-secret-leak checks.
-3. Перед любым self-service config endpoint добавить обязательный test matrix для ownership, token lifecycle, audit и redaction.
-4. Перейти к remote operations inventory: approve flow и config delivery связаны с server apply, поэтому remote failure/rollback нужно рассмотреть отдельно.
+1. Использовать `manager-config-export-contract.md` как вход для no-route contract/adapters/tests перед любым новым protocol manager, public/self-service endpoint или API `config:read`.
+2. Подготовить route/config delivery policy design на базе этого inventory и текущего route/auth surface.
+3. Расширить test matrix для существующего `build_device_config_delivery()` на `.conf`, QR, `vpn://`, UTF-8/non-ASCII и no-secret-leak checks.
+4. Перед любым self-service config endpoint добавить обязательный test matrix для ownership, token lifecycle, audit и redaction.
+5. Перейти к remote operations inventory: approve flow и config delivery связаны с server apply, поэтому remote failure/rollback нужно рассмотреть отдельно.

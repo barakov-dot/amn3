@@ -118,6 +118,15 @@
 - Локальная проверка: no-side-effect tests для preview/validation/redaction; никаких web/API full backup, restore apply или import apply в первом срезе.
 - Готово, когда: metadata export, redacted backup и encrypted full backup имеют разные policy gates, а destructive apply/import остаются заблокированы до отдельного решения.
 
+### Manager config export contract
+
+- Цель: дать UI/API/bot/self-service единый typed contract для `.conf`, QR, `vpn://` и future protocol-specific artifacts.
+- Статус 2026-06-01: design подготовлен в `research/amn2/manager-config-export-contract.md`.
+- Что должно появиться: `ConfigExportResult`/artifact boundary, capability model, safe metadata и safe error categories поверх текущего `DeviceConfigDelivery`/`ConfigDeliveryPackage`.
+- Почему P1: config export является `secret-read`, а несовместимые manager signatures могут ломать config delivery прямо в UI/API.
+- Локальная проверка: no-route contract tests, adapter tests, unsupported artifact/target tests, redaction/audit metadata tests; без public/self-service endpoint и без API `config:read`.
+- Готово, когда: каждый будущий protocol manager возвращает typed artifacts или safe unsupported category, а caller не зависит от manager-specific function signature.
+
 ## P2. Малая важность или после P0/P1
 
 ### Real VPS checklist refinement
@@ -177,7 +186,8 @@
 7. Обновить Runtime Registry и lab notes - Runtime Registry включен в commit `50be810`, lab notes обновлены этим срезом.
 8. Перед controlled real VPS verification gate зафиксировать Phase 0 SSH host key verification по `research/amn2/ssh-host-key-enrollment-design.md`.
 9. Зафиксировать backup/import dangerous API boundary по `research/amn2/backup-import-dangerous-api-design.md` - выполнено локально, без web/API routes и без VPS.
-10. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг, отдельно подтверждаемый оператором.
+10. Зафиксировать manager config export contract по `research/amn2/manager-config-export-contract.md` - выполнено локально, без новых config routes и без VPS.
+11. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг, отдельно подтверждаемый оператором.
 
 ## Не переносим в локальную фазу
 

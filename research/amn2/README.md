@@ -35,6 +35,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 - [Secret surface inventory](secret-surface-inventory.md) - первый проход по secrets, redaction, encrypted backup, email tokens, config delivery и 2FA implications.
 - [Backup/import dangerous API design](backup-import-dangerous-api-design.md) - policy boundary для metadata/redacted/full backup, restore preview и dangerous import/apply.
 - [Config delivery inventory](config-delivery-inventory.md) - первый проход по выдаче VPN config через bot, email, QR, `vpn://` link, recovery token и template preview.
+- [Manager config export contract](manager-config-export-contract.md) - typed result boundary для `.conf`, QR, `vpn://` и future protocol manager export artifacts.
 - [Redaction coverage plan](redaction-coverage-plan.md) - P0-план покрытия `.conf`, QR, `vpn://`, tokens, Local Agent headers, command output и diagnostics перед расширением remote operations.
 - [Remote operations inventory](remote-operations-inventory.md) - первый проход по SSH/server apply flows, dry-run, health checks, peer apply/revoke, traffic collection, audit, redaction и rollback gaps.
 - [Local-only task priority](local-only-task-priority.md) - приоритетный список локально выполняемых задач перед controlled real VPS verification gate.
@@ -59,7 +60,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 2. Начать VPS gate с read-only check и dry-run apply/revoke preview; single apply/revoke выполнять только после отдельного подтверждения оператора.
 3. Зафиксировать VPS evidence через `vps-gate-evidence-checklist.md`.
 4. Принять merge/PR решение по `post-vps-gate-merge-decision.md`.
-5. Только после VPS evidence выбирать первый integration slice из KYORESUAS/PRVTPRO inputs; SSH host key enrollment design, backup/import dangerous API design, privacy classification, Local Agent runtime metadata alignment и API token lifecycle policy уже подготовлены.
+5. Только после VPS evidence выбирать первый integration slice из KYORESUAS/PRVTPRO inputs; SSH host key enrollment design, backup/import dangerous API design, manager config export contract, privacy classification, Local Agent runtime metadata alignment и API token lifecycle policy уже подготовлены.
 
 ## Неактуальный риск
 

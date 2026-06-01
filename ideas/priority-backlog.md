@@ -105,10 +105,11 @@ Backlog не является списком задач к немедленно�
 ### Manager config export contract
 
 - Цель: `amn2`, позже hybrid.
-- Статус: `design-needed`.
+- Статус: `design-prepared-local-docs`.
 - Суть: единый result contract для `.conf`, QR, `vpn://` и будущих protocol-specific артефактов.
 - Причина: UI/API/bot/self-service не должны зависеть от несовместимых `get_client_config` signatures.
-- Следующий шаг: описать минимальный `ConfigExportResult` и capability-based behavior.
+- Текущий результат 2026-06-01: `research/amn2/manager-config-export-contract.md` описывает `ConfigExportResult`, typed artifacts, capability model, safe metadata, safe error categories and first no-route adapter boundary.
+- Следующий шаг: при переносе в `amn2` начать с local-only contract objects/adapters/tests; public/self-service endpoint, API `config:read` и Local Agent `/configs` не добавлять.
 
 ### Local Amnezia API agent
 

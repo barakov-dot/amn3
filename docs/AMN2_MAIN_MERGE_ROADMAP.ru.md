@@ -391,6 +391,12 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 2. First implementation should be local-only policy registry plus restore-preview contract: metadata export, redacted backup default, encrypted full backup as explicit dangerous mode, no target write during preview.
 3. Web/API full backup, restore apply and import apply remain blocked until route policy, secret inventory, confirmation, audit and backup-before-write gates exist.
 
+### Manager config export contract lane
+
+1. Design is prepared in `research/amn2/manager-config-export-contract.md`.
+2. First implementation should be local-only typed request/result/artifact objects plus an adapter from current `DeviceConfigDelivery`/`ConfigDeliveryPackage`.
+3. Public/self-service config endpoints, API `config:read` and Local Agent `/configs` remain blocked until route policy, ownership/token lifecycle, audit and redaction tests exist.
+
 ### Read-only metrics/API lane
 
 1. Privacy classification is prepared in `research/amn2/read-only-metrics-privacy-classification.md`.

@@ -171,6 +171,7 @@ Public-token surfaces не являются admin-auth bypass. Их модель
 - CLI surfaces имеют local shell trust model; для web/API переноса им нужен `RemoteOperationRunner`.
 - `CONTROL_PANEL_AUTH_METHODS` есть в settings, но runtime surface требует отдельной трассировки перед scoped-token work.
 - Backup/import web/API policies не заведены; перед ними использовать `backup-import-dangerous-api-design.md` и не добавлять full backup/restore apply без preview, confirmation, audit и backup-before-write.
+- Manager config export contract подготовлен в `manager-config-export-contract.md`; новые config routes не добавлять до typed artifact contract, ownership/token gate, audit и no-secret metadata tests.
 
 ## Следующие шаги
 
