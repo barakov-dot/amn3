@@ -72,7 +72,7 @@ Backlog не является списком задач к немедленно�
 - Суть: backup/import только через redacted/full режимы, dry-run preview, validation, encryption option и recovery note.
 - Причина: full backup почти всегда содержит private keys, tokens, configs и состояние клиентов.
 - Текущий результат 2026-06-01: `research/amn2/backup-import-dangerous-api-design.md` разделяет metadata export, redacted backup, encrypted full backup, restore preview и destructive apply/import.
-- Текущий результат 2026-06-01: local-only no-route implementation выполнен в `amn2/codex/backup-import-policy-contract`, commit `d2c160b`; focused `63 passed`, full suite `583 passed`; web/API full backup, restore apply и import apply не добавлялись.
+- Текущий результат 2026-06-01: local-only no-route implementation выполнен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`; focused `61 passed`, full suite `584 passed`; web/API full backup, restore apply и import apply не добавлялись.
 - Следующий шаг: не добавлять backup/import routes до route policy, secret inventory, confirmation, audit и backup-before-write gates.
 
 ### Secret inventory

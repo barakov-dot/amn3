@@ -101,4 +101,4 @@ result: 577 passed, 1 StarletteDeprecationWarning
 
 ## Следующее решение
 
-Backup/import policy registry and restore-preview contract уже выполнен в `amn2/codex/backup-import-policy-contract`, commit `d2c160b`. Если VPS еще не готов, следующий local-only кандидат должен быть меньше: machine-checkable secret inventory registry без route expansion, secret-bearing output или live VPS.
+Backup/import policy registry and restore-preview contract уже выполнен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`. Если VPS еще не готов, следующий local-only кандидат должен быть меньше: machine-checkable secret inventory registry без route expansion, secret-bearing output или live VPS.

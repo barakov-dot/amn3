@@ -60,10 +60,11 @@ Implementation evidence:
 
 ```text
 branch: amn2/codex/backup-import-policy-contract
-commit: d2c160b Add backup import policy contract
+head: afb2702 Tighten backup import preview type contract
+foundation: d2c160b Add backup import policy contract
 evidence: research/amn2/backup-import-policy-contract-implementation.md
-focused: 63 passed
-full: 583 passed, 1 warning
+focused: 61 passed
+full: 584 passed, 1 warning
 ```
 
 Future backup/import work must split into three explicit lanes:
@@ -320,7 +321,7 @@ Recommended first code boundary if this moves to `amn2`:
 backup/import policy registry and restore-preview contract
 ```
 
-Status: implemented as local-only no-route slice in `amn2/codex/backup-import-policy-contract`, commit `d2c160b`.
+Status: implemented as local-only no-route slice in `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`.
 
 It may include:
 

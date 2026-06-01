@@ -67,7 +67,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 2. Начать VPS gate с read-only check и dry-run apply/revoke preview; single apply/revoke выполнять только после отдельного подтверждения оператора.
 3. Зафиксировать VPS evidence через `vps-gate-evidence-checklist.md`.
 4. Принять merge/PR решение по `post-vps-gate-merge-decision.md`.
-5. Backup/import policy registry and restore-preview contract выполнен в `amn2/codex/backup-import-policy-contract`, commit `d2c160b`; web/API full backup, restore apply и import apply остаются закрытыми.
+5. Backup/import policy registry and restore-preview contract выполнен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`; web/API full backup, restore apply и import apply остаются закрытыми.
 6. Если VPS все еще не готов, следующий маленький local-only кандидат - machine-checkable secret inventory registry, без routes, без secret-bearing output и без live VPS.
 
 ## Неактуальный риск

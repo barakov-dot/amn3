@@ -398,8 +398,8 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 ### Backup/import dangerous API lane
 
 1. Design is prepared in `research/amn2/backup-import-dangerous-api-design.md`.
-2. First implementation is complete in `amn2/codex/backup-import-policy-contract`, commit `d2c160b`: local-only policy registry plus restore/import preview contract, metadata export, redacted backup, encrypted full backup as explicit dangerous mode, and no target write during preview.
-3. Verification: focused backup/security/config-share suite `63 passed`; full local suite `583 passed, 1 StarletteDeprecationWarning`.
+2. First implementation is complete in `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`: local-only policy registry plus restore/import preview contract, metadata export, redacted backup, encrypted full backup as explicit dangerous mode, and no target write during preview.
+3. Verification: focused backup/security suite `61 passed`; full local suite `584 passed, 1 StarletteDeprecationWarning`.
 4. Web/API full backup, restore apply and import apply remain blocked until route policy, secret inventory, confirmation, audit and backup-before-write gates exist.
 
 ### Manager config export contract lane

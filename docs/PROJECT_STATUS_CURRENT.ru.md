@@ -105,7 +105,7 @@ docs/NEXT_CHAT_HANDOFF.ru.md
 Последняя local-only branch проверка `amn2`:
 
 ```text
-583 passed, 1 warning
+584 passed, 1 warning
 ```
 
 Ожидаемое предупреждение: `StarletteDeprecationWarning` от `httpx` / `starlette.testclient`.
@@ -164,7 +164,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - API Token Lifecycle Gate: branch `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0 Add API token lifecycle gate`.
 - Manager Config Export Contract: branch `amn2/codex/manager-config-export-contract`, commit `4d4e7a4 Add manager config export contract`; local-only no-route typed export adapter, без public/self-service endpoint, API `config:read` и Local Agent `/configs`.
 - Public/Self-service Config Delivery Policy: branch `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7 Add config share policy contract`; local-only no-route share-token/policy contract, без public download route, self-service download route, API `config:read` и Local Agent `/configs`.
-- Backup/Import Policy Contract: branch `amn2/codex/backup-import-policy-contract`, commit `d2c160b Add backup import policy contract`; local-only no-route backup mode registry, secret field policy and restore/import preview contract, без web/API backup routes, restore apply, import apply или live VPS calls.
+- Backup/Import Policy Contract: branch `amn2/codex/backup-import-policy-contract`, head `afb2702 Tighten backup import preview type contract` with foundation commit `d2c160b`; local-only no-route backup mode registry, secret field policy and restore/import preview contract, без web/API backup routes, restore apply, import apply или live VPS calls.
 
 Решение по соседним чатам:
 
@@ -258,7 +258,7 @@ head: 8697b60 Document Local Agent production wiring
 4. App-managed SSH host key enrollment design подготовлен в `research/amn2/ssh-host-key-enrollment-design.md`; implementation plan писать перед web/API remote-operation expansion.
 5. Docker manager safety contract уже подготовлен в `research/amn2/docker-manager-design-note.md`; implementation plan для него писать только после VPS evidence.
 6. Route/Auth machine-checkable binding tests выполнены и запушены в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`; использовать как drift guard перед любыми route/API expansions.
-7. Backup/import policy contract выполнен и запушен в `amn2/codex/backup-import-policy-contract`, commit `d2c160b`; web/API backup/import routes, restore apply и import apply остаются отдельными gates.
+7. Backup/import policy contract выполнен и запушен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`; web/API backup/import routes, restore apply и import apply остаются отдельными gates.
 8. Manager config export contract выполнен и запушен в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`; это local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
 9. Public/self-service config delivery policy выполнен и запушен в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`; это local-only no-route share-token/policy contract, без public download route, self-service download route, API `config:read` или Local Agent `/configs`.
 10. Read-only metrics/API route shell держать после VPS evidence или отдельного route-exposure решения; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle gate выполнен в `amn2/codex/api-token-lifecycle-gate-stacked`.
@@ -638,10 +638,10 @@ Production branch:
 codex/backup-import-policy-contract
 ```
 
-Production commit:
+Production head:
 
 ```text
-d2c160b Add backup import policy contract
+afb2702 Tighten backup import preview type contract
 ```
 
 Покрыто:
@@ -659,11 +659,11 @@ RED:
 tests/backup/test_backup_policy.py tests/security/test_surface_policy.py
 result: 1 import error as expected
 
-focused backup/security/config-share suite:
-63 passed
+focused backup/security/agent suite:
+61 passed
 
 full local suite:
-583 passed, 1 StarletteDeprecationWarning
+584 passed, 1 StarletteDeprecationWarning
 ```
 
 Live VPS не трогался. Slice не добавляет web/API backup routes, Local Agent `/backup` или `/restore`, restore apply, import apply, backup-before-write mutation или live VPS calls; VPS gate для самого slice не нужен.

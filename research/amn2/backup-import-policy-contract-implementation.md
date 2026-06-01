@@ -10,7 +10,8 @@
 repo: C:\Users\SooL\Documents\VPS-OPS-LAB\worktrees\amn2-backup-import-policy-contract
 branch: codex/backup-import-policy-contract
 remote: amn2/codex/backup-import-policy-contract
-commit: d2c160b Add backup import policy contract
+head: afb2702 Tighten backup import preview type contract
+foundation: d2c160b Add backup import policy contract
 base: amn2/codex/public-config-delivery-policy-contract
 ```
 
@@ -51,15 +52,15 @@ tests/backup/test_backup_policy.py
 tests/backup/test_backup_service.py
 tests/security/test_surface_policy.py
 tests/security/test_surface_policy_bindings.py
-tests/services/test_config_share_tokens.py
-result: 63 passed
+tests/agent/test_policy.py
+result: 61 passed
 ```
 
 Full local suite:
 
 ```text
 pytest -q
-result: 583 passed, 1 StarletteDeprecationWarning
+result: 584 passed, 1 StarletteDeprecationWarning
 ```
 
 `git diff --check`: clean.
