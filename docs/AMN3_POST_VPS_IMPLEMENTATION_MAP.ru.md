@@ -14,6 +14,7 @@
 - `docs/AMN3_WRITE_API_UX_FLOW.ru.md`
 - `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md`
 - `docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md`
+- `docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md`
 - `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`
 - `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`
 - `docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md`
@@ -101,6 +102,7 @@ agent:clients:write uses a dedicated token/scope set
 
 - создать runtime adapter `app/agent/peer_commands.py` для local peer apply/revoke;
 - реализовать authoritative audit storage из `docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md`;
+- для audit storage использовать TDD-план `docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md`;
 - добавить dry-run endpoint в `app/agent/api.py`;
 - добавить apply/revoke endpoints только за `LOCAL_AGENT_WRITE_ENABLED=true`;
 - принимать request/response contracts из `app/agent/write_contracts.py`;

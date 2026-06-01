@@ -11,6 +11,7 @@ boundary.
 - `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`
 - `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`
 - `docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md`
+- `docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md`
 
 ## Decision
 
@@ -183,3 +184,6 @@ write audit - часть production state, а не обычный log tail.
 Это решение не создает storage layer прямо сейчас. До VPS smoke оно только фиксирует выбранный путь и связывает будущий
 implementation slice с существующей SQLite архитектурой. Реальная таблица появляется после `GO-1` из
 `docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md`.
+
+Code-ready TDD-план для будущей таблицы и repository methods:
+`docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md`.

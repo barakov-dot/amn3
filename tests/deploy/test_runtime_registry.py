@@ -381,6 +381,54 @@ def test_amn3_write_audit_storage_decision_selects_app_db_and_redaction_boundari
     assert "docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md" in post_vps
 
 
+def test_amn3_write_audit_storage_schema_plan_is_code_ready_without_enabling_routes():
+    plan_path = ROOT / "docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    storage_decision_path = ROOT / "docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md"
+    post_vps_path = ROOT / "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md"
+
+    text = plan_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    storage_decision = storage_decision_path.read_text(encoding="utf-8")
+    post_vps = post_vps_path.read_text(encoding="utf-8")
+
+    assert "# Local Agent Write Audit Storage Schema Implementation Plan" in text
+    assert "pre-VPS code-ready plan" in text
+    assert "does not implement storage before GO-1" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED=false" in text
+    assert "no write routes" in text
+    assert "local_agent_write_audit_events" in text
+    assert "app/db/schema.py" in text
+    assert "app/db/repositories.py" in text
+    assert "tests/db/test_repositories.py" in text
+    assert "tests/agent/test_write_audit.py" in text
+    assert "app/agent/write_audit.py" in text
+    assert "WriteAuditEvent" in text
+    assert "record_write_audit_event" in text
+    assert "list_write_audit_events_for_user" in text
+    assert "list_write_audit_events_for_device" in text
+    assert "list_write_audit_events_for_server" in text
+    assert "operation_id UNIQUE" in text
+    assert "audit_id UNIQUE" in text
+    assert "details_json" in text
+    assert "peer_public_key_fingerprint" in text
+    assert "no full peer_public_key" in text
+    assert "schema creates table and indexes idempotently" in text
+    assert "repository rejects duplicate operation_id" in text
+    assert "if audit write fails, block mutation" in text
+    assert "encrypted backup" in text
+    assert "raw token" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "GO-1" in text
+    assert "pytest tests/db/test_repositories.py tests/agent/test_write_audit.py" in text
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md" in handoff
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md" in storage_decision
+    assert "docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md" in post_vps
+
+
 def test_amn3_preflight_confirmation_doc_tracks_nonce_expiry_and_vps_gate():
     doc_path = ROOT / "docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md"
     handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
