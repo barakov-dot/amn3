@@ -89,6 +89,8 @@ git remote -v
   dry-run -> confirmation -> apply/revoke -> audit -> rollback.
 - `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md` - audit contract для будущих write operations: actor surfaces,
   result states, redaction rules и storage note.
+- `docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md` - ADR по хранению future write audit events:
+  authoritative SQLite table `local_agent_write_audit_events`, JSONL только fallback/export.
 - `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` - contract для dry-run reference, confirmation nonce,
   expiry и `preflight_required`.
 - `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md` - модель `user_id` / `device_id` / `client_id` /
@@ -139,10 +141,11 @@ git status --short --branch
 5. Держать `docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md` синхронизированным с `app/agent/write_policy_matrix.py`.
 6. Держать `docs/AMN3_WRITE_API_UX_FLOW.ru.md` синхронизированным с policy matrix и будущими surface flows.
 7. Держать `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md` синхронизированным с `app/agent/write_audit.py`.
-8. Держать `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` синхронизированным с `app/agent/write_confirmation.py`.
-9. Держать `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md` синхронизированным с UX, audit и preflight contracts.
-10. Перед передачей на VPS проходить `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
-11. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
+8. Держать `docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md` синхронизированным с audit model и post-VPS map.
+9. Держать `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` синхронизированным с `app/agent/write_confirmation.py`.
+10. Держать `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md` синхронизированным с UX, audit и preflight contracts.
+11. Перед передачей на VPS проходить `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
+12. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
 
 До VPS smoke не включать write routes, не добавлять реальные mutation endpoints и не делать Local Agent публичным.
 

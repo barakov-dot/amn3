@@ -342,6 +342,45 @@ def test_amn3_write_api_audit_model_doc_tracks_safe_audit_contracts():
     assert "docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md" in policy_doc
 
 
+def test_amn3_write_audit_storage_decision_selects_app_db_and_redaction_boundaries():
+    doc_path = ROOT / "docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    audit_doc_path = ROOT / "docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md"
+    post_vps_path = ROOT / "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    audit_doc = audit_doc_path.read_text(encoding="utf-8")
+    post_vps = post_vps_path.read_text(encoding="utf-8")
+
+    assert "Decision: application SQLite DB" in text
+    assert "DATABASE_PATH" in text
+    assert "local_agent_write_audit_events" in text
+    assert "admin_actions is not the write audit store" in text
+    assert "append-only JSONL mirror is fallback/export" in text
+    assert "operation_id UNIQUE" in text
+    assert "audit_id UNIQUE" in text
+    assert "details_json" in text
+    assert "peer_public_key_fingerprint" in text
+    assert "no full peer_public_key" in text
+    assert "record audit before mutation" in text
+    assert "if audit write fails, block mutation" in text
+    assert "encrypted backup" in text
+    assert "app/db/schema.py" in text
+    assert "app/db/repositories.py" in text
+    assert "tests/db/test_repositories.py" in text
+    assert "app/agent/write_audit.py" in text
+    assert "tests/agent/test_write_audit.py" in text
+    assert "raw token" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md" in handoff
+    assert "docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md" in audit_doc
+    assert "docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md" in post_vps
+
+
 def test_amn3_preflight_confirmation_doc_tracks_nonce_expiry_and_vps_gate():
     doc_path = ROOT / "docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md"
     handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"

@@ -11,6 +11,7 @@ endpoints, чтобы web admin, Telegram bot и CLI одинаково запи
 - `docs/AMN3_WRITE_API_UX_FLOW.ru.md`
 - `docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md`
 - `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`
+- `docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md`
 
 ## 1. Gate
 
@@ -106,10 +107,9 @@ CLI:
 
 ## 7. Storage note
 
-Первый локальный контракт не выбирает окончательное хранилище. Подходящие варианты после VPS smoke:
+Первый локальный контракт сам не создает storage layer. Решение по хранилищу зафиксировано отдельно:
+`docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md`.
 
-- SQLite table рядом с web admin state;
-- append-only JSONL с ротацией и правами `0600`;
-- отдельная таблица в существующем application DB, если она уже есть в production deployment.
-
-Выбор storage должен быть отдельным маленьким slice с миграцией, backup policy и тестами на redaction.
+Выбранный путь: authoritative `local_agent_write_audit_events` в application SQLite DB (`DATABASE_PATH`) после
+зеленого VPS smoke. JSONL остается только fallback/export, а `admin_actions` не смешивается с runtime mutation trail.
+Storage slice должен включать миграцию, backup policy и тесты на redaction.
