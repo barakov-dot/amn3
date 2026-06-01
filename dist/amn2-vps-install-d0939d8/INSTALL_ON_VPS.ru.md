@@ -27,6 +27,13 @@ sudo apt update
 sudo apt install -y python3.12 python3.12-venv python3-pip
 ```
 
+Если минимальный образ не содержит `useradd`/`adduser`, поставить системные
+утилиты пользователей:
+
+```bash
+sudo apt install -y passwd adduser
+```
+
 Пакет не содержит offline wheelhouse для Python-зависимостей: `pip install -e .`
 будет ставить зависимости из PyPI или из настроенного вами package mirror.
 

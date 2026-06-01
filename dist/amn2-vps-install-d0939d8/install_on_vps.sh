@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${PATH:-}"
+
 PACKAGE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ARCHIVE="${PACKAGE_DIR}/amn2-source-d0939d8.zip"
 INSTALL_DIR="${INSTALL_DIR:-/opt/amn2}"
@@ -40,8 +42,32 @@ then
   exit 1
 fi
 
+create_service_user() {
+  if command -v useradd >/dev/null 2>&1; then
+    useradd --system --create-home --shell "$(nologin_shell)" "${SERVICE_USER}"
+    return
+  fi
+  if command -v adduser >/dev/null 2>&1; then
+    adduser --system --home "/home/${SERVICE_USER}" --shell "$(nologin_shell)" --group "${SERVICE_USER}"
+    return
+  fi
+  echo "Cannot create service user: neither useradd nor adduser is available."
+  echo "On Debian/Ubuntu install it first: apt update && apt install -y passwd adduser"
+  exit 1
+}
+
+nologin_shell() {
+  if [[ -x /usr/sbin/nologin ]]; then
+    echo /usr/sbin/nologin
+  elif [[ -x /sbin/nologin ]]; then
+    echo /sbin/nologin
+  else
+    echo /bin/false
+  fi
+}
+
 if ! id "${SERVICE_USER}" >/dev/null 2>&1; then
-  useradd --system --create-home --shell /usr/sbin/nologin "${SERVICE_USER}"
+  create_service_user
 fi
 
 rm -rf "${INSTALL_DIR}.new"
