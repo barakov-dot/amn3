@@ -8,7 +8,7 @@
 
 ## Verified Production Baseline
 
-Актуальный `amn2` baseline:
+Verified live `amn2` baseline:
 
 ```text
 branch: codex-vps-test-prep
@@ -16,11 +16,13 @@ latest: 91aeb3e Document VPS verified tag
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 ```
 
-Текущий production head после локальных transfer-срезов:
+Текущий production head после merged local-gate transfer-срезов:
 
 ```text
-1fdcde5 Add scoped API token storage contract
+d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
 ```
+
+В эту линию уже вошли PR #4/#5 по API token lifecycle и PR #6 по SSH host key verifier. Scoped API token storage `1fdcde5` остается важным baseline, но больше не является текущим production head.
 
 Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 

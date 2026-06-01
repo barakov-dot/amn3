@@ -24,6 +24,8 @@
 - Local Agent hardening task/review;
 - Web Panel Safe Improvements task/review;
 - Scoped API Token Storage task/review;
+- Route/Auth Binding Tests, API Token Lifecycle Gate and SSH Host Key Verifier task/review;
+- pre-VPS matrix comments from `codex/local-agent-production-wiring`;
 - текущий `MAIN - VPN Ops Lab` coordination chat.
 
 Нерелевантные сессии из других рабочих папок, например `ISP-NEW`, не включались в состояние этого проекта.
@@ -51,10 +53,18 @@ master
 Committed head lab reviewed before this status refresh:
 
 ```text
-80deebf Clarify reviewed project state head
+008ee09 Refresh VPS gate candidate evidence
 ```
 
 `master` синхронизирован с `origin/master`.
+
+Дополнительный соседний AMN3 push, который не слит в `master`, но учтен в этом snapshot:
+
+```text
+origin/codex/local-agent-production-wiring -> d5f30c6 Clarify pre-VPS matrix baseline
+artifact: docs/AMN3_PRE_VPS_LOCAL_STATUS_MATRIX.ru.md
+status: branch-only pre-VPS matrix; использовать как комментарий/сверку, не как production gate
+```
 
 AMN3 является coordination/knowledge repo: research, design specs, implementation plans, transfer notes и gate для переноса идей в production.
 
@@ -83,12 +93,12 @@ codex-vps-test-prep
 Актуальный head:
 
 ```text
-1fdcde5 Add scoped API token storage contract
+d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
 ```
 
-Текущий local worktree `Amneziya` после scoped API token storage commit должен оставаться чистым и синхронизированным с `amn2/codex-vps-test-prep`.
+Текущий local worktree `Amneziya` чистый и синхронизирован с `amn2/codex-vps-test-prep`.
 
-Базовый scoped API token storage/auth contract добавлен без новых `/api/*` routes и без live VPS behavior changes; последующий lifecycle gate вынесен в отдельный stacked branch `amn2/codex/api-token-lifecycle-gate-stacked`.
+После scoped API token storage в `codex-vps-test-prep` уже вошли Route/Auth Binding Tests, API Token Lifecycle Gate и SSH Host Key Verifier через PR #4, PR #5 и PR #6. Эти срезы остаются local-gate-complete: без новых live VPS calls, без включения remote writes и без расширения `/api/*` routes до отдельного gate.
 
 Проверенная stable-точка live VPS cycle:
 
@@ -102,10 +112,14 @@ vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 docs/NEXT_CHAT_HANDOFF.ru.md
 ```
 
-Последняя local-only branch проверка `amn2`:
+Последние зафиксированные local-only проверки по свежим gate-срезам `amn2`:
 
 ```text
-584 passed, 1 warning
+Route/Auth Binding Tests: focused 22 passed; full 549 passed
+API Token Lifecycle Gate stacked: focused 56 passed; full 555 passed
+SSH Host Key Verifier: focused 29 passed; full 550 passed
+Remote Operation VPS-gate candidate: focused/docs 107 passed; full 572 passed
+Secret Inventory Registry: focused 64 passed; full 591 passed
 ```
 
 Ожидаемое предупреждение: `StarletteDeprecationWarning` от `httpx` / `starlette.testclient`.
@@ -162,6 +176,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Scoped API Token Storage: `1fdcde5 Add scoped API token storage contract`.
 - Route/Auth Binding Tests: branch `amn2/codex/route-auth-binding-tests`, commit `f9d2c79 Bind route inventory to surface policies`.
 - API Token Lifecycle Gate: branch `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0 Add API token lifecycle gate`.
+- SSH Host Key Identity Verifier: branch `amn2/codex/ssh-host-key-identity-verifier`, commit `dd20364 Add SSH host key verifier`, merged to `codex-vps-test-prep` via PR #6; current production head `d0939d8`.
 - Manager Config Export Contract: branch `amn2/codex/manager-config-export-contract`, commit `4d4e7a4 Add manager config export contract`; local-only no-route typed export adapter, без public/self-service endpoint, API `config:read` и Local Agent `/configs`.
 - Public/Self-service Config Delivery Policy: branch `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7 Add config share policy contract`; local-only no-route share-token/policy contract, без public download route, self-service download route, API `config:read` и Local Agent `/configs`.
 - Backup/Import Policy Contract: branch `amn2/codex/backup-import-policy-contract`, head `afb2702 Tighten backup import preview type contract` with foundation commit `d2c160b`; local-only no-route backup mode registry, secret field policy and restore/import preview contract, без web/API backup routes, restore apply, import apply или live VPS calls.

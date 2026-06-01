@@ -52,8 +52,17 @@ tests/db/test_repositories.py
 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 branch: master
 remote: https://github.com/barakov-dot/amn3.git
-committed head reviewed before this refresh: 80deebf Clarify reviewed project state head
+committed head reviewed before this refresh: 008ee09 Refresh VPS gate candidate evidence
 status: clean and synchronized with origin/master
+```
+
+Соседний AMN3 branch-only push, учтенный как комментарий к pre-VPS координации:
+
+```text
+branch: origin/codex/local-agent-production-wiring
+head: d5f30c6 Clarify pre-VPS matrix baseline
+artifact: docs/AMN3_PRE_VPS_LOCAL_STATUS_MATRIX.ru.md
+status: не слито в master; не повторять соседний VPS smoke, использовать только для сверки local-only/pre-VPS boundaries
 ```
 
 После verified live VPS baseline уже выполнены и записаны в AMN3:
@@ -65,7 +74,11 @@ status: clean and synchronized with origin/master
 - remote operation contract / partial-failure / dry-run-audit local-gate evidence;
 - `c5d7eb6 Harden Local Agent audit contract`;
 - `22dfc37 Clarify web panel operation gates`;
-- `1fdcde5 Add scoped API token storage contract`.
+- `1fdcde5 Add scoped API token storage contract`;
+- Route/Auth binding tests branch `f9d2c79`, merged through current production line;
+- API token lifecycle gate branch `256d0c0`, merged through PR #4/#5;
+- SSH host key verifier `dd20364`, merged through PR #6; current `amn2` head `d0939d8`;
+- remote operation VPS-gate candidate `262d70f`, pushed and waiting for real VPS gate.
 
 Следующий рабочий выбор:
 
