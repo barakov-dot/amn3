@@ -40,6 +40,7 @@ def test_env_examples_include_local_agent_safe_defaults():
         "LOCAL_AGENT_ENABLED=false",
         "LOCAL_AGENT_HOST=127.0.0.1",
         "LOCAL_AGENT_PORT=3031",
+        "LOCAL_AGENT_WRITE_ENABLED=false",
         "LOCAL_AGENT_TOKEN_ID=local-controller",
         "LOCAL_AGENT_TOKEN_HASH=",
         "LOCAL_AGENT_TOKEN_OWNER=local-controller",
@@ -54,3 +55,12 @@ def test_env_examples_include_local_agent_safe_defaults():
         text = path.read_text(encoding="utf-8")
         for line in expected:
             assert line in text, f"{path} is missing {line}"
+
+
+def test_env_examples_keep_local_agent_write_scope_disabled_until_vps_smoke():
+    for path in [Path(".env.example"), Path("deploy/examples/.env.production.example")]:
+        text = path.read_text(encoding="utf-8")
+
+        assert "LOCAL_AGENT_WRITE_ENABLED=false" in text
+        assert "LOCAL_AGENT_WRITE_ENABLED=true" not in text
+        assert "agent:clients:write" not in text

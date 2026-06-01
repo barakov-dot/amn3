@@ -404,6 +404,34 @@ def test_amn3_vps_test_packet_coordinates_neighbor_chat_smoke_run():
     assert "docs/AMN3_VPS_TEST_PACKET.ru.md" in smoke
 
 
+def test_amn3_local_release_gate_locks_write_api_until_vps_smoke():
+    doc_path = ROOT / "docs/AMN3_LOCAL_RELEASE_GATE.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    policy_doc_path = ROOT / "docs/AMN3_WRITE_API_POLICY_MATRIX.ru.md"
+    ux_flow_path = ROOT / "docs/AMN3_WRITE_API_UX_FLOW.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    policy_doc = policy_doc_path.read_text(encoding="utf-8")
+    ux_flow = ux_flow_path.read_text(encoding="utf-8")
+
+    assert "LOCAL_AGENT_WRITE_ENABLED=false" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED=true" in text
+    assert "/agent/clients*" in text
+    assert "agent:clients:write" in text
+    assert "read-only token" in text
+    assert "VPS smoke required" in text
+    assert "get_policy()" in text
+    assert "tests/agent/test_policy.py" in text
+    assert "tests/test_file_hygiene.py" in text
+    assert "docs/AMN3_VPS_TEST_PACKET.ru.md" in text
+    assert "docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md" in text
+    assert "Go / no-go" in text
+    assert "docs/AMN3_LOCAL_RELEASE_GATE.ru.md" in handoff
+    assert "docs/AMN3_LOCAL_RELEASE_GATE.ru.md" in policy_doc
+    assert "docs/AMN3_LOCAL_RELEASE_GATE.ru.md" in ux_flow
+
+
 def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     doc_path = ROOT / "docs/VPS_RETEST_PROTOCOL.ru.md"
     checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"

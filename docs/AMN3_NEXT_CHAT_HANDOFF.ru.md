@@ -74,6 +74,8 @@ git remote -v
   текущего переноса AMN3 на VPS.
 - `docs/AMN3_VPS_TEST_PACKET.ru.md` - короткий пакет для соседнего чата `Переводим AMN на API`,
   где готовится реальный VPS smoke.
+- `docs/AMN3_LOCAL_RELEASE_GATE.ru.md` - локальный gate перед VPS: write routes закрыты,
+  `LOCAL_AGENT_WRITE_ENABLED=false`, read-only token без `agent:clients:write`.
 - `docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md` - шаблон отчета после реального VPS smoke: commit, runtime,
   Local Agent, web admin, degraded reasons, rollback и Go / no-go.
 - `docs/LOCAL_AGENT_VPS_SMOKE_RUNBOOK.ru.md` - полный VPS smoke runbook.
@@ -134,7 +136,8 @@ git status --short --branch
 6. Держать `docs/AMN3_WRITE_API_UX_FLOW.ru.md` синхронизированным с policy matrix и будущими surface flows.
 7. Держать `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md` синхронизированным с `app/agent/write_audit.py`.
 8. Держать `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` синхронизированным с `app/agent/write_confirmation.py`.
-9. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
+9. Перед передачей на VPS проходить `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
+10. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
 
 До VPS smoke не включать write routes, не добавлять реальные mutation endpoints и не делать Local Agent публичным.
 

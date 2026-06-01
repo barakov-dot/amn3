@@ -9,6 +9,7 @@ production defaults. Это локальный продуктовый контр
 
 Связанный audit contract: `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md`.
 Связанный preflight/confirmation contract: `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`.
+Локальный release gate до VPS: `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
 
 ## 1. Gate
 
