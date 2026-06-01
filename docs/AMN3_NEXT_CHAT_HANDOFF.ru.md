@@ -76,6 +76,8 @@ git remote -v
   где готовится реальный VPS smoke.
 - `docs/AMN3_LOCAL_RELEASE_GATE.ru.md` - локальный gate перед VPS: write routes закрыты,
   `LOCAL_AGENT_WRITE_ENABLED=false`, read-only token без `agent:clients:write`.
+- `docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md` - карта перехода после `go` в VPS smoke:
+  evidence intake -> write policy -> endpoints -> controller client -> web admin -> first mutation test.
 - `docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md` - шаблон отчета после реального VPS smoke: commit, runtime,
   Local Agent, web admin, degraded reasons, rollback и Go / no-go.
 - `docs/LOCAL_AGENT_VPS_SMOKE_RUNBOOK.ru.md` - полный VPS smoke runbook.
@@ -151,9 +153,10 @@ git status --short --branch
 1. Для соседнего чата использовать `docs/AMN3_VPS_TEST_PACKET.ru.md`.
 2. На VPS пройти `docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md`.
 3. Заполнить `docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md`.
-4. Убедиться, что web admin видит Local Agent без raw token.
-5. Зафиксировать результат smoke в docs или commit message.
-6. После успешного smoke начинать первый write API slice.
+4. При `go` идти по `docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md`.
+5. Убедиться, что web admin видит Local Agent без raw token.
+6. Зафиксировать результат smoke в docs или commit message.
+7. После успешного smoke начинать первый write API slice.
 
 План первого write API slice: `docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md`.
 

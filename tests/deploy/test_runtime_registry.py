@@ -472,6 +472,54 @@ def test_amn3_local_release_gate_locks_write_api_until_vps_smoke():
     assert "docs/AMN3_LOCAL_RELEASE_GATE.ru.md" in ux_flow
 
 
+def test_amn3_post_vps_implementation_map_links_smoke_evidence_to_write_api_tasks():
+    doc_path = ROOT / "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    release_gate_path = ROOT / "docs/AMN3_LOCAL_RELEASE_GATE.ru.md"
+    smoke_result_path = ROOT / "docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md"
+
+    text = doc_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    release_gate = release_gate_path.read_text(encoding="utf-8")
+    smoke_result = smoke_result_path.read_text(encoding="utf-8")
+
+    assert "docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md" in text
+    assert "docs/AMN3_LOCAL_RELEASE_GATE.ru.md" in text
+    assert "docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md" in text
+    assert "docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md" in text
+    assert "GO-1" in text
+    assert "NO-GO" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED=false -> true" in text
+    assert "Phase 0 - VPS evidence intake" in text
+    assert "Phase 1 - write policy activation" in text
+    assert "Phase 2 - Local Agent endpoints" in text
+    assert "Phase 3 - controller client" in text
+    assert "Phase 4 - web admin preflight" in text
+    assert "Phase 5 - first VPS mutation test" in text
+    assert "app/agent/policy.py" in text
+    assert "app/agent/api.py" in text
+    assert "app/agent/client.py" in text
+    assert "app/agent/peer_commands.py" in text
+    assert "app/agent/write_contracts.py" in text
+    assert "app/agent/write_confirmation.py" in text
+    assert "app/agent/write_audit.py" in text
+    assert "app/agent/write_policy_matrix.py" in text
+    assert "tests/agent/test_policy.py" in text
+    assert "tests/agent/test_api.py" in text
+    assert "tests/agent/test_client.py" in text
+    assert "tests/agent/test_peer_commands.py" in text
+    assert "agent:clients:write" in text
+    assert "dry-run -> confirmation -> apply/revoke -> audit -> rollback" in text
+    assert "raw token" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md" in handoff
+    assert "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md" in release_gate
+    assert "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md" in smoke_result
+
+
 def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     doc_path = ROOT / "docs/VPS_RETEST_PROTOCOL.ru.md"
     checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"

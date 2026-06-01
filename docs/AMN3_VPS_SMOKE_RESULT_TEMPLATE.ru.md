@@ -181,5 +181,7 @@ Owner:
 `go` возможен только если read-only smoke зеленый, rollback проверен, `degraded` отсутствует или объяснен, публичного
 доступа к Local Agent нет, raw token не утек, а write routes все еще выключены.
 
+После `go` следующий документ для внедрения: `docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md`.
+
 `no-go` обязателен, если agent недоступен, порт `3031` слушает публично, raw token попал в `.env`/логи/UI, Docker access
 непонятен, `/agent/protocols` раскрывает секреты или причина `degraded` не установлена.

@@ -17,6 +17,7 @@
 - write API docs продолжают говорить `VPS smoke required`;
 - результат реального smoke должен идти через `docs/AMN3_VPS_TEST_PACKET.ru.md`;
 - финальный `Go / no-go` фиксируется в `docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md`.
+- после `go` следующий маршрут внедрения: `docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md`.
 
 ## 2. Локальные команды проверки
 
@@ -66,6 +67,10 @@ git status --short --branch
 
 Если все локальные проверки зеленые, можно передавать сборку в VPS smoke через
 `docs/AMN3_VPS_TEST_PACKET.ru.md`.
+
+Если после VPS smoke получен `go`, не включать write routes напрямую из этого gate. Сначала пройти
+`docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md`: evidence intake, policy activation, guarded endpoints,
+controller client, web admin preflight и первый VPS mutation test.
 
 Если любая проверка показывает active write surface до VPS smoke, результат gate - `no-go`, и такую сборку нельзя
 использовать для перехода к `agent:clients:write`.
