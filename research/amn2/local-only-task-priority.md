@@ -136,6 +136,15 @@
 - Локальная проверка: no-route policy tests, token lifecycle tests, generic denial tests, no-secret audit tests; без self-service/public download route.
 - Готово, когда: public token flow можно проверить без payload delivery, а любой будущий route обязан пройти ownership/token/audit/rate-limit gates.
 
+### Route/Auth machine-checkable binding tests
+
+- Цель: не дать новым routes/actions/commands появиться без `SurfacePolicy`.
+- Статус 2026-06-01: next-gate plan подготовлен в `research/amn2/route-auth-machine-checkable-tests-plan.md`.
+- Что должно появиться: web route coverage, bot logical action manifest, Local Agent parity, CLI/remote operation bindings и test-ref integrity checks поверх текущего `app/security/surface_policy.py`.
+- Почему P1: первый registry уже есть, но следующий риск - drift между реальным runtime surface и policy matrix.
+- Локальная проверка: focused `tests/security/test_surface_policy.py tests/security/test_surface_policy_bindings.py`; никаких route expansion, middleware enforcement или live VPS calls.
+- Готово, когда: новая web/bot/agent/CLI/remote surface без policy entry ломает тесты.
+
 ## P2. Малая важность или после P0/P1
 
 ### Real VPS checklist refinement
@@ -149,12 +158,6 @@
 - Цель: описать persistent config path, backup, reload/apply semantics и rollback note до live Docker apply/revoke.
 - Почему P2: это важно, но должно идти после общего remote operation contract.
 - Локальная проверка: design note и test plan, без live Docker mutations.
-
-### Route/Auth machine-checkable tests
-
-- Цель: превратить Route/Auth Policy Matrix в тесты.
-- Почему P2: полезно для общего hardening, но текущий блок сфокусирован на remote operation safety.
-- Локальная проверка: endpoint tests, auth/role tests, audit expectations.
 
 ### Background jobs and cancellation
 
@@ -197,7 +200,8 @@
 9. Зафиксировать backup/import dangerous API boundary по `research/amn2/backup-import-dangerous-api-design.md` - выполнено локально, без web/API routes и без VPS.
 10. Зафиксировать manager config export contract по `research/amn2/manager-config-export-contract.md` - выполнено локально, без новых config routes и без VPS.
 11. Зафиксировать public/self-service config delivery policy по `research/amn2/public-self-service-config-delivery-policy.md` - выполнено локально, без public download routes и без VPS.
-12. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг, отдельно подтверждаемый оператором.
+12. Зафиксировать route/auth machine-checkable binding tests plan по `research/amn2/route-auth-machine-checkable-tests-plan.md` - выполнено локально, без route expansion и без VPS.
+13. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг, отдельно подтверждаемый оператором.
 
 ## Не переносим в локальную фазу
 

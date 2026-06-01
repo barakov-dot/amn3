@@ -32,6 +32,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 - [Auth/security inventory snapshot](current-auth-security-inventory.md) - первый read-only снимок web-admin auth, CSRF, admin model, secret handling, backup и применимости 2FA.
 - [Route/auth surface inventory](route-auth-surface-inventory.md) - первый проход по web routes, public email token endpoints и Telegram bot admin surface.
 - [Route/Auth Policy Matrix](route-policy-matrix.md) - конкретная policy matrix для web, bot, public-token и CLI/operator surfaces.
+- [Route/Auth machine-checkable tests plan](route-auth-machine-checkable-tests-plan.md) - next-gate plan для binding/drift tests поверх текущего `app/security/surface_policy.py`.
 - [Secret surface inventory](secret-surface-inventory.md) - первый проход по secrets, redaction, encrypted backup, email tokens, config delivery и 2FA implications.
 - [Backup/import dangerous API design](backup-import-dangerous-api-design.md) - policy boundary для metadata/redacted/full backup, restore preview и dangerous import/apply.
 - [Config delivery inventory](config-delivery-inventory.md) - первый проход по выдаче VPN config через bot, email, QR, `vpn://` link, recovery token и template preview.
@@ -61,7 +62,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 2. Начать VPS gate с read-only check и dry-run apply/revoke preview; single apply/revoke выполнять только после отдельного подтверждения оператора.
 3. Зафиксировать VPS evidence через `vps-gate-evidence-checklist.md`.
 4. Принять merge/PR решение по `post-vps-gate-merge-decision.md`.
-5. Только после VPS evidence выбирать первый integration slice из KYORESUAS/PRVTPRO inputs; SSH host key enrollment design, backup/import dangerous API design, manager config export contract, public/self-service config delivery policy, privacy classification, Local Agent runtime metadata alignment и API token lifecycle policy уже подготовлены.
+5. Только после VPS evidence выбирать первый integration slice из KYORESUAS/PRVTPRO inputs; route/auth machine-checkable tests plan, SSH host key enrollment design, backup/import dangerous API design, manager config export contract, public/self-service config delivery policy, privacy classification, Local Agent runtime metadata alignment и API token lifecycle policy уже подготовлены.
 
 ## Неактуальный риск
 

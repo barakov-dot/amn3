@@ -176,7 +176,7 @@ Public-token surfaces не являются admin-auth bypass. Их модель
 
 ## Следующие шаги
 
-1. Использовать эту матрицу как вход для implementation plan по route policy coverage tests.
+1. Использовать `route-auth-machine-checkable-tests-plan.md` как вход для следующего local-only slice: binding/drift tests поверх текущего `app/security/surface_policy.py`.
 2. До self-service/public share links добавить rate-limit и audit policy для `public-token-secret-read`.
 3. До remote state-changing web/API routes продолжить `RemoteOperationRunner` read-only health slice.
 4. До 2FA решить actor model: single configured web-admin или multi-operator accounts.

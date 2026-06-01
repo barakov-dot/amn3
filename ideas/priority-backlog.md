@@ -52,7 +52,8 @@ Backlog не является списком задач к немедленно�
 - Суть: для каждого endpoint фиксировать role, auth method, risk class, side effect, audit requirement и tests.
 - Причина: это снижает риск случайного privilege escalation при расширении API, web-admin, bot и интеграций.
 - Текущий результат: создана конкретная [Route/Auth Policy Matrix](../research/amn2/route-policy-matrix.md) для web, bot, public-token и CLI/operator surfaces.
-- Следующий шаг: использовать matrix как обязательный gate для scoped API tokens, self-service links, Local Agent expansion и remote-state-write surfaces.
+- Текущий результат 2026-06-01: первый machine-checkable registry уже есть в `amn2`; AMN3 next-gate plan подготовлен в `research/amn2/route-auth-machine-checkable-tests-plan.md`.
+- Следующий шаг: реализовывать только local-only binding/drift tests поверх текущего registry; новые routes, route middleware enforcement и API expansion не добавлять.
 
 ### SSH host key enrollment
 

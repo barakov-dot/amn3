@@ -52,6 +52,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | VPS gate evidence/merge package | `prepared-local-docs` | AMN3 | `vps-gate-evidence-checklist.md`, `post-vps-gate-merge-decision.md`, `neighbor-chat-vps-gate-handoff.md` | Использовать сразу после real VPS gate для решения merge/PR и разблокировки соседних чатов |
 | Docker manager safety note | `prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/docker-manager-design-note.md` | Использовать как вход для будущего implementation plan после VPS evidence |
 | SSH host key enrollment design | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/ssh-host-key-enrollment-design.md` | Использовать как gate перед VPS onboarding, web/API remote operations и app-managed host key pinning |
+| Route/Auth machine-checkable tests plan | `plan-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/route-auth-machine-checkable-tests-plan.md` | Следующий local-only slice: binding/drift tests поверх текущего `app/security/surface_policy.py`, без route expansion |
 | Backup/import dangerous API design | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/backup-import-dangerous-api-design.md` | Использовать как gate перед backup/import web/API routes, restore preview и full backup dangerous mode |
 | Manager config export contract | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/manager-config-export-contract.md` | Использовать как gate перед protocol manager export, public/self-service config links, API `config:read` и Local Agent `/configs` |
 | Public/self-service config delivery policy | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/public-self-service-config-delivery-policy.md` | Использовать как gate перед share/self-service config routes; first slice только no-route policy/share-token contract |
@@ -92,12 +93,13 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 2. Зафиксировать VPS evidence в AMN3 через `research/amn2/vps-gate-evidence-checklist.md` перед интеграционными решениями из `VPN Ops Lab — KYORESUAS-API` и `VPS OPS LAB - PRVTPRO-Amnezia-Web-Panel`.
 3. Merge/PR candidate branch решать по `research/amn2/post-vps-gate-merge-decision.md`.
 4. App-managed SSH host key enrollment design подготовлен в `research/amn2/ssh-host-key-enrollment-design.md`; implementation plan писать перед web/API remote-operation expansion.
-5. Backup/import dangerous API design подготовлен в `research/amn2/backup-import-dangerous-api-design.md`; web/API backup/import routes не добавлять до policy registry и restore-preview gate.
-6. Manager config export contract подготовлен в `research/amn2/manager-config-export-contract.md`; первым переносить только local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
-7. Public/self-service config delivery policy подготовлен в `research/amn2/public-self-service-config-delivery-policy.md`; public routes не добавлять, первый перенос только no-route policy registry/share-token contract.
-8. Docker manager safety contract уже зафиксирован в `research/amn2/docker-manager-design-note.md`; implementation plan писать только после VPS evidence.
-9. Read-only clients/metrics endpoints рассматривать только после VPS evidence; privacy classification подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, Local Agent runtime metadata alignment - в `research/amn2/local-agent-runtime-metadata-alignment.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
-10. Domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
+5. Route/Auth machine-checkable tests plan подготовлен в `research/amn2/route-auth-machine-checkable-tests-plan.md`; следующий local-only slice должен быть binding/drift tests, без route expansion.
+6. Backup/import dangerous API design подготовлен в `research/amn2/backup-import-dangerous-api-design.md`; web/API backup/import routes не добавлять до policy registry и restore-preview gate.
+7. Manager config export contract подготовлен в `research/amn2/manager-config-export-contract.md`; первым переносить только local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
+8. Public/self-service config delivery policy подготовлен в `research/amn2/public-self-service-config-delivery-policy.md`; public routes не добавлять, первый перенос только no-route policy registry/share-token contract.
+9. Docker manager safety contract уже зафиксирован в `research/amn2/docker-manager-design-note.md`; implementation plan писать только после VPS evidence.
+10. Read-only clients/metrics endpoints рассматривать только после VPS evidence; privacy classification подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, Local Agent runtime metadata alignment - в `research/amn2/local-agent-runtime-metadata-alignment.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
+11. Domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
 
 ## Neighbor Chat Decision
 

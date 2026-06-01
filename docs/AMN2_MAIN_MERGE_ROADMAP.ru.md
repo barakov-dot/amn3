@@ -385,6 +385,12 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 2. First implementation should be a local-only SSH host key identity verifier: parse public host key lines, compute SHA256 fingerprints, verify match/mismatch with fake SSH tests and document operator verification.
 3. Production live mode must not rely on `StrictHostKeyChecking=accept-new`; missing/mismatched pins block SSH-backed operations.
 
+### Route/Auth machine-checkable tests lane
+
+1. Next-gate plan is prepared in `research/amn2/route-auth-machine-checkable-tests-plan.md`.
+2. First implementation should be local-only binding/drift tests over current `app/security/surface_policy.py`: web route coverage, bot action manifest, Local Agent parity, CLI/remote operation bindings and test-ref integrity.
+3. No route expansion, route middleware enforcement, public config download, API `config:read` or live VPS calls belong in this slice.
+
 ### Backup/import dangerous API lane
 
 1. Design is prepared in `research/amn2/backup-import-dangerous-api-design.md`.

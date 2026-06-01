@@ -199,6 +199,7 @@ research/amn2/README.md
 research/amn2/transfer-backlog.md
 research/amn2/remote-operations-inventory.md
 research/amn2/config-delivery-inventory.md
+research/amn2/route-auth-machine-checkable-tests-plan.md
 research/amn2/backup-import-dangerous-api-design.md
 research/amn2/manager-config-export-contract.md
 research/amn2/public-self-service-config-delivery-policy.md
@@ -248,11 +249,12 @@ head: 8697b60 Document Local Agent production wiring
 3. Evidence фиксировать через `research/amn2/vps-gate-evidence-checklist.md`, затем принимать merge/PR решение по `research/amn2/post-vps-gate-merge-decision.md`.
 4. App-managed SSH host key enrollment design подготовлен в `research/amn2/ssh-host-key-enrollment-design.md`; implementation plan писать перед web/API remote-operation expansion.
 5. Docker manager safety contract уже подготовлен в `research/amn2/docker-manager-design-note.md`; implementation plan для него писать только после VPS evidence.
-6. Backup/import dangerous API design подготовлен в `research/amn2/backup-import-dangerous-api-design.md`; web/API backup/import routes не добавлять до policy registry и restore-preview gate.
-7. Manager config export contract подготовлен в `research/amn2/manager-config-export-contract.md`; first slice должен быть local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
-8. Public/self-service config delivery policy подготовлен в `research/amn2/public-self-service-config-delivery-policy.md`; first slice должен быть no-route policy registry/share-token contract, без public download route.
-9. Read-only metrics/API route shell держать после VPS evidence; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
-10. Domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
+6. Route/Auth machine-checkable tests plan подготовлен в `research/amn2/route-auth-machine-checkable-tests-plan.md`; следующий local-only slice должен быть binding/drift tests поверх текущего registry, без route expansion.
+7. Backup/import dangerous API design подготовлен в `research/amn2/backup-import-dangerous-api-design.md`; web/API backup/import routes не добавлять до policy registry и restore-preview gate.
+8. Manager config export contract подготовлен в `research/amn2/manager-config-export-contract.md`; first slice должен быть local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
+9. Public/self-service config delivery policy подготовлен в `research/amn2/public-self-service-config-delivery-policy.md`; first slice должен быть no-route policy registry/share-token contract, без public download route.
+10. Read-only metrics/API route shell держать после VPS evidence; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
+11. Domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
 
 ## Route/Auth/Operation Policy Matrix Plan
 
