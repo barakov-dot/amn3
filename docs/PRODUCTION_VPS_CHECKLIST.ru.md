@@ -165,6 +165,8 @@ export API_TOKEN="$(printf '%s' "$ISSUE_JSON" | jq -r .raw_token)"
 TOKEN_ID="$(printf '%s' "$ISSUE_JSON" | jq -r .token_id)"
 ```
 
+После проверки заполнить `docs/API_VPS_SMOKE_EVIDENCE.ru.md`: фиксировать только HTTP-коды, aggregate counts, forbidden marker status, safe `api_read` metadata и итоговый VPS verdict.
+
 ## 4. Шаблоны и выдача конфига
 
 Текущие варианты получения конфига пользователем:

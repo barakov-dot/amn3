@@ -112,6 +112,8 @@ TOKEN_ID="$(printf '%s' "$ISSUE_JSON" | jq -r .token_id)"
 
 Не присылать raw API token, token hash, Authorization header, `.conf`, QR, `vpn://`, `PrivateKey` или `PresharedKey`.
 
+Результаты проверки фиксировать в `docs/API_VPS_SMOKE_EVIDENCE.ru.md`: туда заносим только HTTP-коды, aggregate counts, forbidden marker status, `api_read` audit metadata без секретов и итоговый VPS verdict.
+
 ## 4. Запустить нужный сценарий теста
 
 Проверить web-панель:

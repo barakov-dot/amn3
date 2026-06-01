@@ -56,6 +56,7 @@ vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 - docs/PRODUCTION_VPS_CHECKLIST.ru.md
 - docs/WEB_PANEL_AND_BOT_SETUP.ru.md
 - docs/VPS_RETEST_PROTOCOL.ru.md
+- docs/API_VPS_SMOKE_EVIDENCE.ru.md
 - docs/VPS_LOG_COLLECTION.ru.md
 - docs/SERVER_CONFIG_TEMPLATE.ru.md
 
@@ -102,7 +103,7 @@ $env:PYTHONPATH='.codex_deps;.'
 Последний результат:
 
 ```text
-587 passed, 1 warning
+588 passed, 1 warning
 ```
 
 Предупреждение ожидаемое:
@@ -157,6 +158,7 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
   - `python -m app.cli api token issue`;
   - `python -m app.cli api smoke-check`;
   - `python -m app.cli api token revoke`.
+- Добавлен шаблон evidence для реального VPS API smoke: `docs/API_VPS_SMOKE_EVIDENCE.ru.md`.
 - Если новый `.conf` снова выглядит как старый шаблон без `S3/S4/I1-I5` и с `AllowedIPs = 0.0.0.0/0`, первым делом проверить `devices.config_version`/`orders.requested_config_version`: это почти наверняка `amneziawg_v1_5`, а не `amneziawg_v2`.
 - Действия в карточке сервера:
   - `Пометить как созданный в Amnezia` для внешнего peer;
@@ -288,6 +290,8 @@ ISSUE_JSON="$(python -m app.cli api token issue --db data/amneziya.sqlite3 --nam
 export API_TOKEN="$(printf '%s' "$ISSUE_JSON" | jq -r .raw_token)"
 TOKEN_ID="$(printf '%s' "$ISSUE_JSON" | jq -r .token_id)"
 ```
+
+Результаты VPS smoke после проверки занести в `docs/API_VPS_SMOKE_EVIDENCE.ru.md`: HTTP-коды, aggregate counts, forbidden marker status, safe `api_read` metadata и итоговый verdict.
 
 ## 9. Что уже проверено на VPS
 
