@@ -1515,3 +1515,5 @@ git commit -m "Document web admin Local Agent preflight UX"
 ```
 
 Skip this commit only when those links were already committed in the same branch.
+
+Next first VPS mutation packet: `docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md`.

@@ -182,6 +182,7 @@ Owner:
 доступа к Local Agent нет, raw token не утек, а write routes все еще выключены.
 
 После `go` следующий документ для внедрения: `docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md`.
+После реализации Phase 1-4 первый controlled mutation packet: `docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md`.
 
 `no-go` обязателен, если agent недоступен, порт `3031` слушает публично, raw token попал в `.env`/логи/UI, Docker access
 непонятен, `/agent/protocols` раскрывает секреты или причина `degraded` не установлена.

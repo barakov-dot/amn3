@@ -14,6 +14,7 @@ production defaults. Это локальный продуктовый контр
 Связанный runtime adapter plan: `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md`.
 Связанный controller client plan: `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md`.
 Связанный web admin preflight UX plan: `docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md`.
+Связанный first VPS mutation packet: `docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md`.
 
 ## 1. Gate
 

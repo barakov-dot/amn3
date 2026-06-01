@@ -21,6 +21,7 @@
 - `docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md`
 - `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md`
 - `docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md`
+- `docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md`
 - `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`
 - `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`
 - `docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md`
@@ -183,13 +184,14 @@ agent:clients:write uses a dedicated token/scope set
 Порядок:
 
 1. Создать test-only user/device/peer binding.
-2. Выполнить dry-run.
-3. Подтвердить mutation.
-4. Выполнить apply.
-5. Проверить runtime state.
-6. Выполнить revoke или rollback.
-7. Проверить logs на raw token, private key, PSK, QR, `vpn://` и full client config.
-8. Зафиксировать result summary без секретов.
+2. Для первого VPS mutation test использовать packet `docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md`.
+3. Выполнить dry-run.
+4. Подтвердить mutation.
+5. Выполнить apply.
+6. Проверить runtime state.
+7. Выполнить revoke или rollback.
+8. Проверить logs на raw token, private key, PSK, QR, `vpn://` и full client config.
+9. Зафиксировать result summary без секретов.
 
 Файлы/тесты:
 

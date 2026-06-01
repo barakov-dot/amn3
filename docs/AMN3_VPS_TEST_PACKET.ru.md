@@ -8,6 +8,8 @@ copy/paste-safe маршрут, который синхронизирован с
 - `docs/AMN3_LOCAL_AGENT_VPS_SMOKE_CHECKLIST.ru.md` - полный порядок smoke.
 - `docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md` - форма результата и Go / no-go.
 - `docs/LOCAL_AGENT_VPS_SMOKE_RUNBOOK.ru.md` - расширенный runbook, если короткий checklist недостаточен.
+- `docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md` - отдельный packet для первого
+  test-only apply/revoke после `GO-1` и Phase 1-4.
 
 ## 1. Что тестируем
 
@@ -133,6 +135,9 @@ Required follow-ups:
 - audit storage;
 - dry-run/preflight/confirmation gate;
 - tests на запрет secret leakage и read-only token bypass.
+
+После реализации Phase 1-4 первый реальный mutation test выполнять только по
+`docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md`.
 
 Если результат `no-go`, сначала исправлять runtime/deploy проблему и повторять этот packet. Не переходить к mutation
 endpoints до зеленого read-only VPS smoke.

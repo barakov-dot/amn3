@@ -984,6 +984,64 @@ def test_amn3_post_vps_implementation_map_links_smoke_evidence_to_write_api_task
     assert "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md" in smoke_result
 
 
+def test_amn3_first_vps_mutation_test_plan_coordinates_apply_revoke_without_secret_leakage():
+    plan_path = ROOT / "docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    post_vps_path = ROOT / "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md"
+    vps_packet_path = ROOT / "docs/AMN3_VPS_TEST_PACKET.ru.md"
+    smoke_result_path = ROOT / "docs/AMN3_VPS_SMOKE_RESULT_TEMPLATE.ru.md"
+    ux_flow_path = ROOT / "docs/AMN3_WRITE_API_UX_FLOW.ru.md"
+    web_admin_plan_path = ROOT / "docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md"
+
+    text = plan_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    post_vps = post_vps_path.read_text(encoding="utf-8")
+    vps_packet = vps_packet_path.read_text(encoding="utf-8")
+    smoke_result = smoke_result_path.read_text(encoding="utf-8")
+    ux_flow = ux_flow_path.read_text(encoding="utf-8")
+    web_admin_plan = web_admin_plan_path.read_text(encoding="utf-8")
+
+    assert "# First VPS Mutation Test Implementation Plan" in text
+    assert "Phase 5 - first VPS mutation test" in text
+    assert "GO-2" in text
+    assert "GO-1" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED=false -> true -> false" in text
+    assert "LOCAL_AGENT_CONTROLLER_WRITE_TOKEN_PATH" in text
+    assert "LOCAL_AGENT_WRITE_TOKEN_SCOPES=agent:clients:write" in text
+    assert "test-only user/device/peer binding" in text
+    assert "dry-run -> confirmation -> apply/revoke -> audit -> rollback" in text
+    assert "Preview peer apply" in text
+    assert "Confirm apply" in text
+    assert "Revoke peer" in text
+    assert "POST /agent/clients/dry-run" in text
+    assert "POST /agent/clients" in text
+    assert "DELETE /agent/clients/{id}" in text
+    assert "python -m app.cli agent probe --base-url http://127.0.0.1:3031" in text
+    assert "curl -fsS -H \"Authorization: Bearer $LOCAL_AGENT_WRITE_TOKEN\" http://127.0.0.1:3031/agent/clients/dry-run" in text
+    assert "journalctl -u amneziya-agent -n 200 --no-pager" in text
+    assert "bash deploy/runtime/collect_debug_snapshot.sh" in text
+    assert "audit event" in text
+    assert "rollback_reference" in text
+    assert "peer_public_key_fingerprint" in text
+    assert "runtime state" in text
+    assert "revoke or rollback" in text
+    assert "NO-GO" in text
+    assert "Decision: go | no-go" in text
+    assert "raw token" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "full client config" in text
+    assert "do not paste secrets" in text
+    assert "docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md" in handoff
+    assert "docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md" in post_vps
+    assert "docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md" in vps_packet
+    assert "docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md" in smoke_result
+    assert "docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md" in ux_flow
+    assert "docs/superpowers/plans/2026-06-01-first-vps-mutation-test.ru.md" in web_admin_plan
+
+
 def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     doc_path = ROOT / "docs/VPS_RETEST_PROTOCOL.ru.md"
     checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"
