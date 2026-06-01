@@ -65,11 +65,11 @@
 ### SSH host key verification policy
 
 - Цель: не начинать live SSH/VPS gate с молчаливого доверия неизвестному host key.
-- Статус 2026-06-01: design подготовлен в `research/amn2/ssh-host-key-enrollment-design.md`; VPS gate checklist получил Phase 0 host key verification.
+- Статус 2026-06-01: design подготовлен в `research/amn2/ssh-host-key-enrollment-design.md`; local-only verifier выполнен и запушен в `amn2/codex/ssh-host-key-identity-verifier`, commit `dd20364`; VPS gate checklist получил Phase 0 host key verification.
 - Что должно появиться: operator-side verification для ближайшего gate и будущий app-managed pinning перед web/API remote-operation expansion.
 - Почему P0: host key trust решается до первого SSH command, иначе read-only/live remote operations могут стартовать через непроверенный endpoint.
 - Локальная проверка: docs review и future fake tests для missing/mismatch/matching pin без реального VPS.
-- Готово, когда: Phase 0 evidence присутствует в runbook/checklist, а будущий implementation boundary не использует `accept-new` как production trust model.
+- Готово, когда: Phase 0 evidence присутствует в runbook/checklist, local verifier проверяет host key fingerprint/pin без VPS, а будущий implementation boundary не использует `accept-new` как production trust model.
 
 ## P1. Важные локальные задачи
 

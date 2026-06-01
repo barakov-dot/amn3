@@ -382,8 +382,9 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 ### SSH host key enrollment lane
 
 1. Design is prepared in `research/amn2/ssh-host-key-enrollment-design.md`.
-2. First implementation should be a local-only SSH host key identity verifier: parse public host key lines, compute SHA256 fingerprints, verify match/mismatch with fake SSH tests and document operator verification.
-3. Production live mode must not rely on `StrictHostKeyChecking=accept-new`; missing/mismatched pins block SSH-backed operations.
+2. Local-only SSH host key identity verifier implemented in `amn2/codex/ssh-host-key-identity-verifier`, commit `dd20364`: parse public host key lines, compute SHA256 fingerprints, verify match/mismatch with tests and document operator verification.
+3. Next implementation should connect the verifier to SSH-backed operations as a separate gated slice.
+4. Production live mode must not rely on `StrictHostKeyChecking=accept-new`; missing/mismatched pins block SSH-backed operations.
 
 ### Route/Auth machine-checkable tests lane
 

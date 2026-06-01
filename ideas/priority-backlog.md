@@ -62,7 +62,8 @@ Backlog не является списком задач к немедленно�
 - Суть: добавление VPS должно включать явное SSH host key enrollment/pinning.
 - Причина: автоматическое доверие неизвестному host key оставляет риск MITM при production-управлении сервером.
 - Текущий результат 2026-06-01: `research/amn2/ssh-host-key-enrollment-design.md` фиксирует hybrid staged model: текущий VPS gate получает operator-side Phase 0 verification, будущий `amn2` - app-managed pinning.
-- Следующий шаг: при переносе в `amn2` сделать local-only host key identity verifier; live SSH/write behavior не расширять до pinning gate.
+- Текущий результат 2026-06-01: local-only host key identity verifier выполнен в `amn2/codex/ssh-host-key-identity-verifier`, commit `dd20364`; live SSH/write behavior не расширялось.
+- Следующий шаг: подключать verifier к SSH-backed operations только отдельным gated slice после решения по VPS gate/pinning.
 
 ### Backup/import как dangerous API
 
