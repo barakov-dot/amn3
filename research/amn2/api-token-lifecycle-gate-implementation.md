@@ -44,7 +44,7 @@ commit: 256d0c0 Add API token lifecycle gate
 
 ## Проверка
 
-Focused:
+Original branch focused:
 
 ```text
 tests/services/test_api_tokens.py
@@ -53,18 +53,25 @@ tests/db/test_repositories.py::test_api_token_rotation_lineage_is_stored_without
 result: 12 passed
 ```
 
-Broader auth/db/security:
+Original branch broader auth/db/security:
 
 ```text
 tests/services/test_api_tokens.py tests/db/test_repositories.py tests/security/test_surface_policy.py tests/agent/test_auth.py -v
 result: 58 passed
 ```
 
+Stacked branch verification after `codex/route-auth-binding-tests`:
+
+```text
+tests/services/test_api_tokens.py tests/db/test_repositories.py tests/security/test_surface_policy.py tests/security/test_surface_policy_bindings.py -v
+result: 56 passed
+```
+
 Full local suite:
 
 ```text
-tests -v
-result: 548 passed, 1 StarletteDeprecationWarning
+python -m pytest -q
+result on stacked branch: 555 passed, 1 StarletteDeprecationWarning
 ```
 
 Также `git diff --check` прошел без замечаний.
