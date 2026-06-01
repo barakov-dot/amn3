@@ -12,6 +12,7 @@
 - `LOCAL_AGENT_WRITE_ENABLED=true` нигде не используется как default;
 - read-only token содержит только `agent:health,agent:read,agent:protocols:read`;
 - `agent:clients:write` не добавлен в read-only token;
+- future write settings contract остается отдельным документом: `docs/AMN3_LOCAL_AGENT_WRITE_SETTINGS_CONTRACT.ru.md`;
 - `/agent/clients*` routes не зарегистрированы в active policy;
 - `get_policy()` продолжает отклонять `/agent/clients/dry-run`, `/agent/clients` и `/agent/clients/{id}`;
 - write API docs продолжают говорить `VPS smoke required`;

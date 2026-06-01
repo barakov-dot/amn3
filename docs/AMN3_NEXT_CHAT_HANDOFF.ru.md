@@ -91,6 +91,8 @@ git remote -v
   result states, redaction rules и storage note.
 - `docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md` - ADR по хранению future write audit events:
   authoritative SQLite table `local_agent_write_audit_events`, JSONL только fallback/export.
+- `docs/AMN3_LOCAL_AGENT_WRITE_SETTINGS_CONTRACT.ru.md` - future settings contract для
+  `LOCAL_AGENT_WRITE_ENABLED=true`, отдельного write token set и запрета `agent:clients:write` в read-only token.
 - `docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md` - code-ready TDD-план
   будущей таблицы `local_agent_write_audit_events` и repository methods после `GO-1`.
 - `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` - contract для dry-run reference, confirmation nonce,
@@ -144,11 +146,12 @@ git status --short --branch
 6. Держать `docs/AMN3_WRITE_API_UX_FLOW.ru.md` синхронизированным с policy matrix и будущими surface flows.
 7. Держать `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md` синхронизированным с `app/agent/write_audit.py`.
 8. Держать `docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md` синхронизированным с audit model и post-VPS map.
-9. Держать `docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md` готовым к исполнению после `GO-1`.
-10. Держать `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` синхронизированным с `app/agent/write_confirmation.py`.
-11. Держать `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md` синхронизированным с UX, audit и preflight contracts.
-12. Перед передачей на VPS проходить `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
-13. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
+9. Держать `docs/AMN3_LOCAL_AGENT_WRITE_SETTINGS_CONTRACT.ru.md` синхронизированным с settings/config tests.
+10. Держать `docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md` готовым к исполнению после `GO-1`.
+11. Держать `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` синхронизированным с `app/agent/write_confirmation.py`.
+12. Держать `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md` синхронизированным с UX, audit и preflight contracts.
+13. Перед передачей на VPS проходить `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
+14. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
 
 До VPS smoke не включать write routes, не добавлять реальные mutation endpoints и не делать Local Agent публичным.
 

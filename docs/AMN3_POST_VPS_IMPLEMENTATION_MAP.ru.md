@@ -14,6 +14,7 @@
 - `docs/AMN3_WRITE_API_UX_FLOW.ru.md`
 - `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md`
 - `docs/AMN3_WRITE_AUDIT_STORAGE_DECISION.ru.md`
+- `docs/AMN3_LOCAL_AGENT_WRITE_SETTINGS_CONTRACT.ru.md`
 - `docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md`
 - `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`
 - `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`
@@ -84,6 +85,7 @@ agent:clients:write uses a dedicated token/scope set
 - добавить helper для selected write slice в `app/agent/policy.py`;
 - не менять read-only behavior `get_policy()` без явного write mode;
 - связать active write policy с `LOCAL_AGENT_WRITE_ENABLED`;
+- реализовать settings/token boundary по `docs/AMN3_LOCAL_AGENT_WRITE_SETTINGS_CONTRACT.ru.md`;
 - использовать `app/agent/write_policy_matrix.py` как источник planned operations;
 - scope `agent:clients:write` держать отдельным от read-only token.
 

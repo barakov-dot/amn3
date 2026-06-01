@@ -16,6 +16,7 @@
 Связанный audit contract: `docs/AMN3_WRITE_API_AUDIT_MODEL.ru.md`.
 Связанный preflight/confirmation contract: `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`.
 Связанная identity model: `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`.
+Связанный write settings contract: `docs/AMN3_LOCAL_AGENT_WRITE_SETTINGS_CONTRACT.ru.md`.
 Локальный release gate до VPS: `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
 
 ## Gate
