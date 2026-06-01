@@ -145,6 +145,15 @@
 - Локальная проверка: RED `1 import error as expected`; `tests/security/test_surface_policy.py tests/security/test_surface_policy_bindings.py -v` -> `22 passed`; focused web/email/agent/server suite -> `89 passed`; full suite -> `549 passed`.
 - Готово, когда: новая web/bot/agent/CLI/remote surface без policy entry ломает тесты. Первый slice готов; VPS gate не нужен.
 
+### API token lifecycle gate
+
+- Цель: закрепить route-connected scoped token lifecycle до появления `/api/*` routes.
+- Статус 2026-06-01: implementation slice выполнен и доступен как stacked branch `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0`, поверх route/auth binding guard.
+- Что появилось: explicit expiry для `create_route_api_token()`, idempotent revoke event, create-new-then-revoke-old rotation, owner inheritance и safe lifecycle metadata.
+- Почему P1: bearer-token surface нельзя подключать к read-only API shell, пока token lifecycle не умеет fail-closed expiry/revoke/owner checks и не сохраняет audit-safe metadata.
+- Локальная проверка: focused token/db/security binding suite -> `56 passed`; full suite -> `555 passed`.
+- Готово, когда: lifecycle service/repository contract есть, но `/api/*`, `config:read`, write/remote-exec/destructive scopes и live VPS behavior не изменены. Первый slice готов; VPS gate не нужен.
+
 ## P2. Малая важность или после P0/P1
 
 ### Real VPS checklist refinement
@@ -201,7 +210,8 @@
 10. Зафиксировать manager config export contract по `research/amn2/manager-config-export-contract.md` - выполнено локально, без новых config routes и без VPS.
 11. Зафиксировать public/self-service config delivery policy по `research/amn2/public-self-service-config-delivery-policy.md` - выполнено локально, без public download routes и без VPS.
 12. Выполнить route/auth machine-checkable binding tests по `research/amn2/route-auth-machine-checkable-tests-plan.md` - выполнено и запушено в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`, без route expansion и без VPS.
-13. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг, отдельно подтверждаемый оператором.
+13. Выполнить route-connected scoped API token lifecycle gate - выполнено и запушено в stacked branch `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0`, без route expansion и без VPS.
+14. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг для VPS-кандидата, отдельно подтверждаемый оператором.
 
 ## Не переносим в локальную фазу
 

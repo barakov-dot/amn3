@@ -88,7 +88,7 @@ codex-vps-test-prep
 
 Текущий local worktree `Amneziya` после scoped API token storage commit должен оставаться чистым и синхронизированным с `amn2/codex-vps-test-prep`.
 
-Последний local-only slice добавил scoped API token storage/auth contract без новых `/api/*` routes и без live VPS behavior changes.
+Базовый scoped API token storage/auth contract добавлен без новых `/api/*` routes и без live VPS behavior changes; последующий lifecycle gate вынесен в отдельный stacked branch `amn2/codex/api-token-lifecycle-gate-stacked`.
 
 Проверенная stable-точка live VPS cycle:
 
@@ -161,6 +161,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Web Panel Safe Improvements: `22dfc37 Clarify web panel operation gates`;
 - Scoped API Token Storage: `1fdcde5 Add scoped API token storage contract`.
 - Route/Auth Binding Tests: branch `amn2/codex/route-auth-binding-tests`, commit `f9d2c79 Bind route inventory to surface policies`.
+- API Token Lifecycle Gate: branch `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0 Add API token lifecycle gate`.
 
 Решение по соседним чатам:
 
@@ -241,7 +242,7 @@ status: merged into codex-vps-test-prep via PR #3
 head: 8697b60 Document Local Agent production wiring
 ```
 
-Локальная проверка показала, что эти commits уже содержались в production baseline после `91aeb3e`. Позднее Local Agent получил hardening commit `c5d7eb6`: repository-backed audit sink для allowed read routes, safe `/agent/version` metadata и тесты, что raw bearer token не попадает в audit. Runtime metadata boundary для будущего controller summary зафиксирован в `research/amn2/local-agent-runtime-metadata-alignment.md`; token lifecycle boundary - в `research/amn2/api-token-rotation-revoke-policy.md`. Следующий Local Agent slice не должен добавлять clients/configs/write routes; сначала нужен route-connected lifecycle gate.
+Локальная проверка показала, что эти commits уже содержались в production baseline после `91aeb3e`. Позднее Local Agent получил hardening commit `c5d7eb6`: repository-backed audit sink для allowed read routes, safe `/agent/version` metadata и тесты, что raw bearer token не попадает в audit. Runtime metadata boundary для будущего controller summary зафиксирован в `research/amn2/local-agent-runtime-metadata-alignment.md`; token lifecycle boundary - в `research/amn2/api-token-rotation-revoke-policy.md`, а local-only lifecycle gate выполнен в `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0`. Следующий Local Agent slice не должен добавлять clients/configs/write routes.
 
 ## Рекомендуемый порядок
 
@@ -254,7 +255,7 @@ head: 8697b60 Document Local Agent production wiring
 7. Backup/import dangerous API design подготовлен в `research/amn2/backup-import-dangerous-api-design.md`; web/API backup/import routes не добавлять до policy registry и restore-preview gate.
 8. Manager config export contract подготовлен в `research/amn2/manager-config-export-contract.md`; first slice должен быть local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
 9. Public/self-service config delivery policy подготовлен в `research/amn2/public-self-service-config-delivery-policy.md`; first slice должен быть no-route policy registry/share-token contract, без public download route.
-10. Read-only metrics/API route shell держать после VPS evidence; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
+10. Read-only metrics/API route shell держать после VPS evidence или отдельного route-exposure решения; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle gate выполнен в `amn2/codex/api-token-lifecycle-gate-stacked`.
 11. Domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
 
 ## Route/Auth/Operation Policy Matrix Plan

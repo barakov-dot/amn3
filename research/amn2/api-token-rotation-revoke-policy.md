@@ -40,7 +40,17 @@ Local Agent token не должен автоматически становит�
 
 ## Decision
 
-Status: `policy-prepared-local-docs`.
+Status: `policy-prepared-local-docs`; first local-only implementation is `implemented-pushed-local-gate-complete`.
+
+Implementation evidence:
+
+```text
+branch: codex/api-token-lifecycle-gate-stacked
+base: codex/route-auth-binding-tests
+commit: 256d0c0 Add API token lifecycle gate
+focused: 56 passed
+full suite: 555 passed
+```
 
 Следующий production implementation по API tokens должен быть lifecycle/policy slice, а не endpoint expansion.
 
