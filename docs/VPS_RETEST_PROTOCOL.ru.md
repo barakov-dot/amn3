@@ -51,6 +51,8 @@ AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/check_vps.
 VPS_APPLY_ENABLED=false
 ```
 
+Перед первым live SSH-подключением отдельно сверить SSH host key по `docs/SSH_HOST_KEY_VERIFICATION.ru.md`. Если fingerprint неизвестен, не совпал или появился новый unknown host prompt, остановиться и подтвердить ключ через независимый канал.
+
 ## 3. Запустить нужный сценарий теста
 
 Проверить web-панель:
