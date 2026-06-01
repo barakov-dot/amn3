@@ -37,6 +37,7 @@ head: aca6663 Add VPS gate handoff for remote ops
 
 - проектировать read-only API route shell;
 - использовать scoped token baseline `server:read` / `metrics:read`;
+- учитывать token lifecycle policy из `research/amn2/api-token-rotation-revoke-policy.md`;
 - использовать Local Agent runtime metadata alignment из `research/amn2/local-agent-runtime-metadata-alignment.md`;
 - не переносить Node/Fastify implementation;
 - не открывать `/clients` write lifecycle.
@@ -82,3 +83,5 @@ Read-only aggregate metrics/API route shell
 ```
 
 Privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`. Первый slice должен использовать aggregate-only default и не включать per-peer/client labels.
+
+Если этот slice получает bearer-token доступ, сначала применить lifecycle boundary из `research/amn2/api-token-rotation-revoke-policy.md`: explicit expiry, revoke/rotation semantics, owner/service-owner rule и audit без raw token/hash.

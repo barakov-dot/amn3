@@ -85,11 +85,12 @@ Backlog не является списком задач к немедленно�
 ### Scoped API tokens
 
 - Цель: `amn2`.
-- Статус: `implemented-first-storage-slice`.
+- Статус: `policy-prepared-after-storage-slice`.
 - Суть: granular scopes, expiry, revoke, hash-only storage, audit.
 - Причина: внешним интеграциям нельзя выдавать admin-equivalent bearer tokens.
 - Текущий результат: commit `1fdcde5` добавил `api_tokens` table и `app.services.api_tokens` contract: hash-only storage, one-time raw token issue metadata, expiry, revoke, last-used и safe audit metadata. Первый slice разрешает только `server:read` и `metrics:read`.
-- Следующий шаг: не добавлять `/api/*`, `config:read` или write scopes до VPS evidence, route policy entry и privacy/secret-read classification.
+- Текущий результат 2026-06-01: `research/amn2/api-token-rotation-revoke-policy.md` фиксирует expiry, revoke, rotation, owner inheritance, backup/restore и audit-safe lifecycle gates.
+- Следующий шаг: не добавлять `/api/*`, `config:read` или write scopes до VPS evidence, route policy entry, privacy/secret-read classification и route-connected lifecycle implementation.
 
 ### Public/self-service config delivery
 
@@ -115,7 +116,8 @@ Backlog не является списком задач к немедленно�
 - Причина: перспективно для управления Amnezia через API, но agent получает высокий доступ к runtime/config state.
 - Текущий результат: first-slice foundation, production wiring и Local Agent hardening выполнены; commit `c5d7eb6` закрепляет audit/version contract для read-only routes.
 - Текущий результат 2026-06-01: `research/amn2/local-agent-runtime-metadata-alignment.md` отделяет controller-safe runtime summary от topology-sensitive fields вроде `container_name` и `interface`.
-- Следующий шаг: token rotation/revoke design и scoped token policy; не добавлять `/agent/clients`, `/agent/configs` или write lifecycle без отдельного gate.
+- Текущий результат 2026-06-01: `research/amn2/api-token-rotation-revoke-policy.md` разделяет external API tokens и Local Agent tokens, чтобы `agent:*` scopes не стали broad integration API.
+- Следующий шаг: route-connected lifecycle implementation; не добавлять `/agent/clients`, `/agent/configs` или write lifecycle без отдельного gate.
 
 ### Configurable VPN subnet/IPAM
 

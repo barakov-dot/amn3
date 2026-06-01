@@ -44,6 +44,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 - [Neighbor chat VPS gate handoff](neighbor-chat-vps-gate-handoff.md) - что ждут KYORESUAS/PRVTPRO направления перед интеграцией.
 - [Read-only metrics privacy classification](read-only-metrics-privacy-classification.md) - privacy gate для будущего aggregate-only metrics/API route shell.
 - [Local Agent runtime metadata alignment](local-agent-runtime-metadata-alignment.md) - safety boundary для будущего controller-safe Local Agent runtime summary.
+- [API token rotation/revoke policy](api-token-rotation-revoke-policy.md) - lifecycle gate для scoped API tokens и Local Agent tokens перед route expansion.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
 ## Следующие рабочие шаги
@@ -56,7 +57,7 @@ current transfer head: 1fdcde5 Add scoped API token storage contract
 2. Начать VPS gate с read-only check и dry-run apply/revoke preview; single apply/revoke выполнять только после отдельного подтверждения оператора.
 3. Зафиксировать VPS evidence через `vps-gate-evidence-checklist.md`.
 4. Принять merge/PR решение по `post-vps-gate-merge-decision.md`.
-5. Только после VPS evidence выбирать первый integration slice из KYORESUAS/PRVTPRO inputs; privacy classification и Local Agent runtime metadata alignment уже подготовлены.
+5. Только после VPS evidence выбирать первый integration slice из KYORESUAS/PRVTPRO inputs; privacy classification, Local Agent runtime metadata alignment и API token lifecycle policy уже подготовлены.
 
 ## Неактуальный риск
 

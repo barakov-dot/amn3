@@ -46,7 +46,7 @@
 | Control panel auth methods | `telegram_admin`, `password`, `key` в настройках | Нужно отдельно проверить runtime, чтобы 2FA не имела обхода через password/key flow. |
 | Audit | `admin_actions`, `record_admin_action()`, web action metadata | Есть место для будущих событий enrollment/reset/failed login без записи секретов. |
 | Email recovery tokens | `email_recovery_tokens.token_hash`, TTL, `used_at` | Есть хороший pattern: raw token показывается/отправляется, в БД хранится hash. |
-| Generic API tokens | После local-only slice `1fdcde5` появился scoped storage/auth contract без `/api/*` routes | Использовать как hash-only baseline: `server:read`, `metrics:read`, expiry, revoke, safe audit metadata; `config:read`/write scopes остаются blocked. |
+| Generic API tokens | После local-only slice `1fdcde5` появился scoped storage/auth contract без `/api/*` routes; lifecycle policy подготовлена в `api-token-rotation-revoke-policy.md` | Использовать как hash-only baseline: `server:read`, `metrics:read`, expiry, revoke, safe audit metadata; `config:read`/write scopes остаются blocked до route-connected lifecycle gate. |
 | Device secrets | `SecretBox`, encrypted peer private key and preshared key | Config delivery уже работает с secret-read surface. |
 | Redaction | tests закрывают web-admin secrets, SMTP, VPS password, control panel hash, custom tokens | Secret inventory можно развивать от уже существующих redaction tests. |
 | Backup/restore | encrypted archive, excludes, schema checks, decryptability checks | Для новых secret fields нужно сразу добавить backup/restore expectations. |

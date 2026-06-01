@@ -210,6 +210,7 @@ research/amn2/docker-manager-design-note.md
 research/amn2/neighbor-chat-vps-gate-handoff.md
 research/amn2/read-only-metrics-privacy-classification.md
 research/amn2/local-agent-runtime-metadata-alignment.md
+research/amn2/api-token-rotation-revoke-policy.md
 ```
 
 Existing unification design:
@@ -234,7 +235,7 @@ status: merged into codex-vps-test-prep via PR #3
 head: 8697b60 Document Local Agent production wiring
 ```
 
-Локальная проверка показала, что эти commits уже содержались в production baseline после `91aeb3e`. Позднее Local Agent получил hardening commit `c5d7eb6`: repository-backed audit sink для allowed read routes, safe `/agent/version` metadata и тесты, что raw bearer token не попадает в audit. Runtime metadata boundary для будущего controller summary зафиксирован в `research/amn2/local-agent-runtime-metadata-alignment.md`. Следующий Local Agent slice не должен добавлять clients/configs/write routes; сначала нужны token rotation/revoke design и scoped token policy.
+Локальная проверка показала, что эти commits уже содержались в production baseline после `91aeb3e`. Позднее Local Agent получил hardening commit `c5d7eb6`: repository-backed audit sink для allowed read routes, safe `/agent/version` metadata и тесты, что raw bearer token не попадает в audit. Runtime metadata boundary для будущего controller summary зафиксирован в `research/amn2/local-agent-runtime-metadata-alignment.md`; token lifecycle boundary - в `research/amn2/api-token-rotation-revoke-policy.md`. Следующий Local Agent slice не должен добавлять clients/configs/write routes; сначала нужен route-connected lifecycle gate.
 
 ## Рекомендуемый порядок
 
@@ -242,7 +243,7 @@ head: 8697b60 Document Local Agent production wiring
 2. Начинать VPS gate с read-only check и dry-run apply/revoke preview; single test peer apply/revoke выполнять только после отдельного подтверждения оператора.
 3. Evidence фиксировать через `research/amn2/vps-gate-evidence-checklist.md`, затем принимать merge/PR решение по `research/amn2/post-vps-gate-merge-decision.md`.
 4. Docker manager safety contract уже подготовлен в `research/amn2/docker-manager-design-note.md`; implementation plan для него писать только после VPS evidence.
-5. Read-only metrics/API route shell держать после VPS evidence; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`.
+5. Read-only metrics/API route shell держать после VPS evidence; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
 6. Public/self-service config links, domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
 
 ## Route/Auth/Operation Policy Matrix Plan

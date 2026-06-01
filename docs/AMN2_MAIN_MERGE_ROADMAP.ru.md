@@ -240,7 +240,7 @@ Production evidence:
 - unified production audit sink для allowed read routes - выполнено;
 - version/runtime compatibility response - выполнено;
 - public-safe runtime metadata - закреплено на текущем first-slice contract;
-- token rotation/revoke design - следующий дизайн-срез перед scoped API tokens.
+- token rotation/revoke design - подготовлен в `research/amn2/api-token-rotation-revoke-policy.md`; следующий шаг только route-connected lifecycle gate.
 
 Production evidence:
 
@@ -389,6 +389,12 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 1. Runtime metadata alignment is prepared in `research/amn2/local-agent-runtime-metadata-alignment.md`.
 2. First implementation after `verified-live` should be controller-safe runtime summary.
 3. `/agent/clients`, `/agent/configs` and write lifecycle remain blocked until separate token rotation/revoke and secret-read/write gates.
+
+### Scoped API token lifecycle lane
+
+1. Rotation/revoke policy is prepared in `research/amn2/api-token-rotation-revoke-policy.md`.
+2. First implementation before route expansion should be a route-connected lifecycle gate: explicit expiry, idempotent service/API revoke, create-new-then-revoke-old rotation, owner inheritance and safe audit metadata.
+3. `config:read`, write, remote-exec, destructive, backup/import and broad admin-equivalent bearer tokens remain blocked.
 
 ## Recommendation
 

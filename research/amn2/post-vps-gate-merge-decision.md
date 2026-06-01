@@ -47,6 +47,7 @@ Merge блокируется, если:
 
 1. Aggregate-only read-only metrics/API route shell по `research/amn2/read-only-metrics-privacy-classification.md`.
 2. Controller-safe Local Agent runtime summary по `research/amn2/local-agent-runtime-metadata-alignment.md`.
-3. Web-panel status UX для уже существующих read-only states.
+3. Route-connected scoped API token lifecycle gate по `research/amn2/api-token-rotation-revoke-policy.md`, если read-only API route shell требует bearer-token доступа.
+4. Web-panel status UX для уже существующих read-only states.
 
 Write lifecycle, public config links, backup/import/reboot и destructive operations остаются за отдельными gates.
