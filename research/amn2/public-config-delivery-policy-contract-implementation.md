@@ -1,4 +1,4 @@
-# `amn2`: public/self-service config delivery policy contract
+# `amn2`: контракт public/self-service выдачи конфигов
 
 Дата: 2026-06-01.
 
