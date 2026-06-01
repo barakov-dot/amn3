@@ -109,6 +109,15 @@
 - Проверено 2026-06-01: `tests/deploy/test_runtime_registry.py -v` -> `7 passed`.
 - Готово, когда: по docs понятно, что real VPS gate начинается только после локального green suite. Первый registry update готов.
 
+### Backup/import policy registry and restore-preview contract
+
+- Цель: не дать future backup/import API стать обычным download/upload endpoint для secret-bearing state.
+- Статус 2026-06-01: design подготовлен в `research/amn2/backup-import-dangerous-api-design.md`.
+- Что должно появиться: локальный policy registry для backup/import lanes, redacted field policy и `restore-preview` contract без записи в target state.
+- Почему P1: backup/import касается peer private keys, PSK, token hashes, users/devices/servers, audit и future Local Agent metadata.
+- Локальная проверка: no-side-effect tests для preview/validation/redaction; никаких web/API full backup, restore apply или import apply в первом срезе.
+- Готово, когда: metadata export, redacted backup и encrypted full backup имеют разные policy gates, а destructive apply/import остаются заблокированы до отдельного решения.
+
 ## P2. Малая важность или после P0/P1
 
 ### Real VPS checklist refinement
@@ -167,7 +176,8 @@
 6. Прогнать full local suite на fresh candidate - выполнено: `551 passed, 1 warning`.
 7. Обновить Runtime Registry и lab notes - Runtime Registry включен в commit `50be810`, lab notes обновлены этим срезом.
 8. Перед controlled real VPS verification gate зафиксировать Phase 0 SSH host key verification по `research/amn2/ssh-host-key-enrollment-design.md`.
-9. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг, отдельно подтверждаемый оператором.
+9. Зафиксировать backup/import dangerous API boundary по `research/amn2/backup-import-dangerous-api-design.md` - выполнено локально, без web/API routes и без VPS.
+10. Только после этого перейти к controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md` - следующий шаг, отдельно подтверждаемый оператором.
 
 ## Не переносим в локальную фазу
 

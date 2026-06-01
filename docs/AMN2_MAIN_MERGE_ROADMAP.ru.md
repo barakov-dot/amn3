@@ -385,6 +385,12 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 2. First implementation should be a local-only SSH host key identity verifier: parse public host key lines, compute SHA256 fingerprints, verify match/mismatch with fake SSH tests and document operator verification.
 3. Production live mode must not rely on `StrictHostKeyChecking=accept-new`; missing/mismatched pins block SSH-backed operations.
 
+### Backup/import dangerous API lane
+
+1. Design is prepared in `research/amn2/backup-import-dangerous-api-design.md`.
+2. First implementation should be local-only policy registry plus restore-preview contract: metadata export, redacted backup default, encrypted full backup as explicit dangerous mode, no target write during preview.
+3. Web/API full backup, restore apply and import apply remain blocked until route policy, secret inventory, confirmation, audit and backup-before-write gates exist.
+
 ### Read-only metrics/API lane
 
 1. Privacy classification is prepared in `research/amn2/read-only-metrics-privacy-classification.md`.

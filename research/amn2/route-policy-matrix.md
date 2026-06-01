@@ -170,6 +170,7 @@ Public-token surfaces не являются admin-auth bypass. Их модель
 - Web-admin и Telegram-admin остаются разными actor channels; объединять их нельзя без отдельного actor model design.
 - CLI surfaces имеют local shell trust model; для web/API переноса им нужен `RemoteOperationRunner`.
 - `CONTROL_PANEL_AUTH_METHODS` есть в settings, но runtime surface требует отдельной трассировки перед scoped-token work.
+- Backup/import web/API policies не заведены; перед ними использовать `backup-import-dangerous-api-design.md` и не добавлять full backup/restore apply без preview, confirmation, audit и backup-before-write.
 
 ## Следующие шаги
 

@@ -66,10 +66,11 @@ Backlog не является списком задач к немедленно�
 ### Backup/import как dangerous API
 
 - Цель: `amn2`, позже hybrid.
-- Статус: `design-needed`.
+- Статус: `design-prepared-local-docs`.
 - Суть: backup/import только через redacted/full режимы, dry-run preview, validation, encryption option и recovery note.
 - Причина: full backup почти всегда содержит private keys, tokens, configs и состояние клиентов.
-- Следующий шаг: использовать обновленный P0 secret inventory как вход для backup/import policy; redacted backup оставить default, full backup считать dangerous explicit mode.
+- Текущий результат 2026-06-01: `research/amn2/backup-import-dangerous-api-design.md` разделяет metadata export, redacted backup, encrypted full backup, restore preview и destructive apply/import.
+- Следующий шаг: при переносе в `amn2` начать с backup/import policy registry и restore-preview contract; web/API full backup и import apply не добавлять.
 
 ### Secret inventory
 

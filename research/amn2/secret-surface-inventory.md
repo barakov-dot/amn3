@@ -129,6 +129,8 @@ tests_required:
 
 ## Backup and restore model
 
+Update 2026-06-01: dangerous API boundary for future web/API backup/import is prepared in `backup-import-dangerous-api-design.md`. Current CLI encrypted backup remains an operator recovery baseline; it is not a permission slip for ordinary backup/import endpoints.
+
 | Area | Current behavior | 2FA impact |
 | --- | --- | --- |
 | Archive content | database + manifest | TOTP state in DB would be included in encrypted full backup. |
@@ -225,6 +227,6 @@ For `amn2`, conservative first step is single configured web-admin 2FA, but only
 
 1. Подготовить `Route/Auth policy matrix` для текущих web/API/bot surfaces, опираясь на классы `secret-read`, `public-token-secret-read`, `remote-exec` и `destructive`.
 2. Добавить отдельный design/plan для redaction coverage: `.conf`, QR payload, `vpn://`, token raw/hash, Local Agent token, command stdout/stderr и diagnostics.
-3. Использовать этот inventory как вход для backup/import policy: redacted backup default, full backup только explicit dangerous mode.
+3. Использовать `backup-import-dangerous-api-design.md` как вход для backup/import policy: metadata export/redacted backup default, encrypted full backup только explicit dangerous mode, restore/import только через preview и audit.
 4. Не писать `amn2` implementation plan для 2FA, пока статус `paused`.
 5. Если пауза снимается, сначала обсудить actor model и recovery model.

@@ -199,6 +199,7 @@ research/amn2/README.md
 research/amn2/transfer-backlog.md
 research/amn2/remote-operations-inventory.md
 research/amn2/config-delivery-inventory.md
+research/amn2/backup-import-dangerous-api-design.md
 ```
 
 Pre-VPS support package:
@@ -245,8 +246,9 @@ head: 8697b60 Document Local Agent production wiring
 3. Evidence фиксировать через `research/amn2/vps-gate-evidence-checklist.md`, затем принимать merge/PR решение по `research/amn2/post-vps-gate-merge-decision.md`.
 4. App-managed SSH host key enrollment design подготовлен в `research/amn2/ssh-host-key-enrollment-design.md`; implementation plan писать перед web/API remote-operation expansion.
 5. Docker manager safety contract уже подготовлен в `research/amn2/docker-manager-design-note.md`; implementation plan для него писать только после VPS evidence.
-6. Read-only metrics/API route shell держать после VPS evidence; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
-7. Public/self-service config links, domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
+6. Backup/import dangerous API design подготовлен в `research/amn2/backup-import-dangerous-api-design.md`; web/API backup/import routes не добавлять до policy registry и restore-preview gate.
+7. Read-only metrics/API route shell держать после VPS evidence; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle policy - в `research/amn2/api-token-rotation-revoke-policy.md`.
+8. Public/self-service config links, domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
 
 ## Route/Auth/Operation Policy Matrix Plan
 
