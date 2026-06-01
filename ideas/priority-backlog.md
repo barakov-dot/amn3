@@ -145,7 +145,7 @@ Backlog не является списком задач к немедленно�
 - Суть: read-only metrics endpoint для peers/traffic/handshake только с privacy class и scoped metrics token.
 - Причина: monitoring полезен, но может раскрывать client names, IP, endpoint и activity metadata.
 - Текущий результат 2026-06-01: `research/amn2/read-only-metrics-privacy-classification.md` определяет aggregate-only default, forbidden labels и opt-in detailed policy boundary.
-- Следующий шаг: после VPS evidence написать implementation plan для read-only API route shell с aggregate metrics only.
+- Следующий шаг: после install/startup/preflight evidence написать implementation plan для read-only API route shell с aggregate metrics only.
 
 ## P2. Малая важность или отложить
 
@@ -235,10 +235,9 @@ Backlog не является списком задач к немедленно�
 
 ## Ближайшая рекомендуемая очередь
 
-1. Провести controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` на тестовом peer/device, начиная с Phase 0 SSH host key verification по `research/amn2/ssh-host-key-enrollment-design.md`, затем read-only check, dry-run apply/revoke preview и single apply/revoke только после отдельного подтверждения.
-2. Зафиксировать VPS evidence через `research/amn2/vps-gate-evidence-checklist.md`.
-3. Решить merge/PR для ветки `codex/remote-operation-vps-gate-prep` по `research/amn2/post-vps-gate-merge-decision.md`.
-4. После VPS evidence выбрать первый integration slice из KYORESUAS/PRVTPRO inputs без копирования кода: рекомендован read-only aggregate metrics/API route shell.
+1. Зафиксировать API integration как приоритетную product lane из `VPN Ops Lab — KYORESUAS-API`: первый slice - read-only aggregate `server:read`/`metrics:read` route shell без копирования upstream code.
+2. До API implementation закрыть VPS install/startup blockers: packaging discovery fix, web/bot startup, `bot check-network`, `server preflight`, `server check --dry-run`.
+3. Написать implementation plan для `docs/superpowers/plans/2026-06-01-amn2-read-only-api-route-shell.md` на основе `research/amn2/kyoresuas-api-integration-priority-plan.md`.
+4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` проводить перед любыми routes, которые вызывают SSH, sync peers, emit config или меняют runtime state.
 5. Использовать `research/amn2/docker-manager-design-note.md` как safety input для будущего Docker manager implementation plan.
-6. Пока VPS не готов, backup/import policy registry, secret inventory registry и generic route-policy/audit/rate-limit guards уже закрыты; новый local-only implementation slice не открывать, кроме синхронизации roadmap/evidence.
-7. Только после закрытия этих gates возвращаться к domain exclusions и 2FA.
+6. Domain exclusions и 2FA возвращать только после API/read-only lane и текущих safety gates.

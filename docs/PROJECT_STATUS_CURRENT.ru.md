@@ -228,6 +228,7 @@ research/amn2/public-self-service-config-delivery-policy.md
 research/amn2/public-config-delivery-policy-contract-implementation.md
 research/amn2/backup-import-policy-contract-implementation.md
 research/amn2/secret-inventory-registry-implementation.md
+research/amn2/kyoresuas-api-integration-priority-plan.md
 ```
 
 Pre-VPS support package:
@@ -269,19 +270,16 @@ head: 8697b60 Document Local Agent production wiring
 
 ## Рекомендуемый порядок
 
-1. Рекомендуемый следующий шаг: controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` по runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, начиная с Phase 0 SSH host key verification, потому что KYORESUAS/PRVTPRO интеграционные задачи уже ждут реального VPS evidence.
-2. Начинать VPS gate с read-only check и dry-run apply/revoke preview; single test peer apply/revoke выполнять только после отдельного подтверждения оператора.
-3. Evidence фиксировать через `research/amn2/vps-gate-evidence-checklist.md`, затем принимать merge/PR решение по `research/amn2/post-vps-gate-merge-decision.md`.
-4. App-managed SSH host key enrollment design подготовлен в `research/amn2/ssh-host-key-enrollment-design.md`; implementation plan писать перед web/API remote-operation expansion.
-5. Docker manager safety contract уже подготовлен в `research/amn2/docker-manager-design-note.md`; implementation plan для него писать только после VPS evidence.
-6. Route/Auth machine-checkable binding tests выполнены и запушены в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`; использовать как drift guard перед любыми route/API expansions.
-7. Backup/import policy contract выполнен и запушен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`; web/API backup/import routes, restore apply и import apply остаются отдельными gates.
+1. Приоритетная product lane теперь API integration из `VPN Ops Lab — KYORESUAS-API`, но как собственный `amn2` read-only aggregate API route shell без копирования upstream code; план зафиксирован в `research/amn2/kyoresuas-api-integration-priority-plan.md`.
+2. Сначала закрыть install/startup blockers: `pyproject.toml` packaging discovery bug в `amn2`, затем web/bot manual startup и read-only/preflight evidence на VPS.
+3. Первый API implementation slice после этого: aggregate-only `server:read`/`metrics:read` route shell по `research/amn2/read-only-metrics-privacy-classification.md`; `/clients` write CRUD, `config:read`, backup/import/reboot и public docs/metrics остаются заблокированы.
+4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается обязательным перед любым API/web/agent route, который вызывает SSH, syncs peers, emits config или меняет runtime state.
+5. Начинать VPS gate с read-only check и dry-run apply/revoke preview; single test peer apply/revoke выполнять только после отдельного подтверждения оператора.
+6. Evidence фиксировать через `research/amn2/vps-gate-evidence-checklist.md`, затем принимать merge/PR решение по `research/amn2/post-vps-gate-merge-decision.md`.
+7. Route/Auth machine-checkable binding tests выполнены и запушены в `amn2/codex/route-auth-binding-tests`, commit `f9d2c79`; использовать как drift guard перед любыми route/API expansions.
 8. Secret inventory registry выполнен и запушен в `amn2/codex/secret-inventory-registry`, commit `9ce42f4`; использовать как machine-checkable secret baseline перед route/API secret-bearing work.
-9. Manager config export contract выполнен и запушен в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`; это local-only no-route adapter/tests, без public/self-service endpoint, API `config:read` или Local Agent `/configs`.
-10. Public/self-service config delivery policy выполнен и запушен в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`; это local-only no-route share-token/policy contract, без public download route, self-service download route, API `config:read` или Local Agent `/configs`.
-11. Read-only metrics/API route shell держать после VPS evidence или отдельного route-exposure решения; privacy classification уже подготовлена в `research/amn2/read-only-metrics-privacy-classification.md`, token lifecycle gate выполнен в `amn2/codex/api-token-lifecycle-gate-stacked`.
-12. Generic route-policy/audit/rate-limit guards уже закрыты через Route/Auth binding tests и public config delivery policy; если VPS еще не готов, не открывать новый local-only implementation slice, а ограничиться синхронизацией roadmap/evidence.
-13. Domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
+9. Public/self-service config delivery policy выполнен и запушен в `amn2/codex/public-config-delivery-policy-contract`, commit `2ef3af7`; API `config:read` и Local Agent `/configs` остаются отдельными gates.
+10. Domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
 
 ## Route/Auth/Operation Policy Matrix Plan
 

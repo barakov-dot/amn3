@@ -370,7 +370,7 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 10. Public/self-service config delivery policy: done in `amn2/codex/public-config-delivery-policy-contract`, local-gate-complete.
 11. Backup/import policy contract: done in `amn2/codex/backup-import-policy-contract`, local-gate-complete.
 12. Secret inventory registry: done in `amn2/codex/secret-inventory-registry`, local-gate-complete.
-13. Read-only metrics privacy classification: prepared in `research/amn2/read-only-metrics-privacy-classification.md`; implementation route shell still waits for VPS evidence.
+13. Read-only metrics privacy classification: prepared in `research/amn2/read-only-metrics-privacy-classification.md`; implementation route shell now waits for install/startup/preflight evidence and the API route-exposure plan.
 
 ### Live VPS verification lane
 
@@ -434,9 +434,9 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 1. Rotation/revoke policy is prepared in `research/amn2/api-token-rotation-revoke-policy.md`.
 2. Local-only lifecycle gate implemented in `amn2/codex/api-token-lifecycle-gate`, commit `c2ba646`: explicit route-connected expiry helper, idempotent revoke event, create-new-then-revoke-old rotation, owner inheritance and safe metadata.
 3. Stacked variant for merge order after route/auth binding is available in `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0`; stacked verification: focused `56 passed`, full suite `555 passed`.
-4. Next implementation should expose only read-only route shell after VPS evidence or a separate route-exposure decision.
+4. Next implementation should expose only read-only route shell after install/startup/preflight evidence and a separate route-exposure decision.
 5. `config:read`, write, remote-exec, destructive, backup/import and broad admin-equivalent bearer tokens remain blocked.
 
 ## Recommendation
 
-Backup/import policy registry and secret inventory registry are now complete. Route/Auth binding guards and public config delivery policy already cover the generic route-policy/audit/rate-limit preconditions. Next recommended work is controlled real VPS verification before integrating KYORESUAS/PRVTPRO-derived operational flows. If VPS is still unavailable, do not open another local-only implementation slice; keep work to roadmap/evidence synchronization only.
+API integration is now the priority product lane from `VPN Ops Lab — KYORESUAS-API`, but it must enter `amn2` as a native, scoped, read-only route shell, not as copied KYORESUAS code. The first implementation target is aggregate-only `server:read`/`metrics:read` after VPS install/startup/preflight evidence and the packaging discovery fix. Controlled real VPS verification remains mandatory before any API route that calls SSH, syncs peers, emits config or changes runtime state.

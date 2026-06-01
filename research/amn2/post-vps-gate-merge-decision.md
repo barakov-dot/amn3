@@ -43,9 +43,9 @@ Merge блокируется, если:
 
 ## Next safe slice after merge
 
-После `verified-live` и merge лучше начинать не с write lifecycle API, а с одного из read-only направлений:
+API integration из `VPN Ops Lab — KYORESUAS-API` является приоритетной product lane, но начинать нужно не с write lifecycle API, а с read-only направления:
 
-1. Aggregate-only read-only metrics/API route shell по `research/amn2/read-only-metrics-privacy-classification.md`.
+1. Aggregate-only read-only metrics/API route shell по `research/amn2/read-only-metrics-privacy-classification.md` and `research/amn2/kyoresuas-api-integration-priority-plan.md`.
 2. Controller-safe Local Agent runtime summary по `research/amn2/local-agent-runtime-metadata-alignment.md`.
 3. Route-connected scoped API token lifecycle gate по `research/amn2/api-token-rotation-revoke-policy.md`, если read-only API route shell требует bearer-token доступа.
 4. Web-panel status UX для уже существующих read-only states.

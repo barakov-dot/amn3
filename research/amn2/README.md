@@ -35,6 +35,7 @@ current transfer head: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-
 - [Route/Auth machine-checkable tests plan](route-auth-machine-checkable-tests-plan.md) - next-gate plan для binding/drift tests поверх текущего `app/security/surface_policy.py`.
 - [Secret surface inventory](secret-surface-inventory.md) - первый проход по secrets, redaction, encrypted backup, email tokens, config delivery и 2FA implications.
 - [Secret inventory registry implementation](secret-inventory-registry-implementation.md) - local-only `amn2` branch/commit/test evidence для machine-checkable secret inventory без route expansion.
+- [KYORESUAS API integration priority plan](kyoresuas-api-integration-priority-plan.md) - новый приоритет API lane: native read-only aggregate route shell без копирования upstream code.
 - [Backup/import dangerous API design](backup-import-dangerous-api-design.md) - policy boundary для metadata/redacted/full backup, restore preview и dangerous import/apply.
 - [Backup/import policy contract implementation](backup-import-policy-contract-implementation.md) - local-only `amn2` branch/commit/test evidence для no-route backup/import policy registry and restore/import preview contract.
 - [Config delivery inventory](config-delivery-inventory.md) - первый проход по выдаче VPN config через bot, email, QR, `vpn://` link, recovery token и template preview.
