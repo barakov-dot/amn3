@@ -668,6 +668,72 @@ def test_amn3_local_agent_write_endpoints_plan_wires_gates_without_opening_route
     assert "docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md" in preflight
 
 
+def test_amn3_local_agent_controller_client_plan_wires_write_flow_without_secret_leakage():
+    plan_path = ROOT / "docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    post_vps_path = ROOT / "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md"
+    write_api_plan_path = ROOT / "docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md"
+    endpoints_plan_path = ROOT / "docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md"
+    ux_flow_path = ROOT / "docs/AMN3_WRITE_API_UX_FLOW.ru.md"
+
+    text = plan_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    post_vps = post_vps_path.read_text(encoding="utf-8")
+    write_api_plan = write_api_plan_path.read_text(encoding="utf-8")
+    endpoints_plan = endpoints_plan_path.read_text(encoding="utf-8")
+    ux_flow = ux_flow_path.read_text(encoding="utf-8")
+
+    assert "# Local Agent Controller Client Implementation Plan" in text
+    assert "GO-1" in text
+    assert "LOCAL_AGENT_CONTROLLER_BASE_URL" in text
+    assert "LOCAL_AGENT_CONTROLLER_TOKEN_PATH" in text
+    assert "LOCAL_AGENT_CONTROLLER_WRITE_TOKEN_PATH" in text
+    assert "read-only token" in text
+    assert "write token" in text
+    assert "dedicated write token set" in text
+    assert "raw token" in text
+    assert "bearer token" in text
+    assert "LocalAgentClient" in text
+    assert "AgentTransport" in text
+    assert "AgentHttpResponse" in text
+    assert "UrlLibAgentTransport" in text
+    assert "app/agent/client.py" in text
+    assert "tests/agent/test_client.py" in text
+    assert "app/web/local_agent_actions.py" in text
+    assert "app/web/server_health.py" in text
+    assert "tests/web/test_server_health.py" in text
+    assert "app/cli.py" in text
+    assert "probe_local_agent_controller" in text
+    assert "peer_apply_dry_run" in text
+    assert "apply_peer" in text
+    assert "revoke_peer" in text
+    assert "POST /agent/clients/dry-run" in text
+    assert "POST /agent/clients" in text
+    assert "DELETE /agent/clients/{id}" in text
+    assert "AgentPeerApplyRequest" in text
+    assert "AgentPeerRevokeRequest" in text
+    assert "AgentPeerMutationResult" in text
+    assert "WritePreflightReference" in text
+    assert "WriteConfirmationChallenge" in text
+    assert "dry-run -> confirmation -> apply/revoke -> audit -> rollback" in text
+    assert "preflight_required" in text
+    assert "runtime_degraded" in text
+    assert "mutation_failed" in text
+    assert "missing_scope" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "full client config" in text
+    assert "do not log Authorization" in text
+    assert "pytest tests/agent/test_client.py tests/web/test_server_health.py tests/agent/test_write_contracts.py tests/agent/test_write_confirmation.py" in text
+    assert "docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md" in handoff
+    assert "docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md" in post_vps
+    assert "docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md" in write_api_plan
+    assert "docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md" in endpoints_plan
+    assert "docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md" in ux_flow
+
+
 def test_amn3_preflight_confirmation_doc_tracks_nonce_expiry_and_vps_gate():
     doc_path = ROOT / "docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md"
     handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"

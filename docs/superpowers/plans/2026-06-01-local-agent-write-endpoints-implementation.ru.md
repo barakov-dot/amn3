@@ -39,6 +39,8 @@ This plan does not replace these prerequisite plans:
 - `docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md`
 - `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md`
 
+Controller-side caller plan: `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md`.
+
 ## File Structure
 
 - Modify `app/agent/policy.py`: add selected write slice helpers while preserving `get_policy() remains read-only`.

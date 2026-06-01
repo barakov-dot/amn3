@@ -67,6 +67,7 @@ Do not implement write routes before these gates are true.
 - Detailed adapter plan: `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md`.
 - Modify `app/agent/config.py`: add write enablement setting if the existing agent settings do not already expose it.
 - Modify `app/agent/client.py`: add controller client methods for the selected write operations.
+- Detailed controller client plan: `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md`.
 - Modify `app/web/server_health.py` or a new `app/web/local_agent_actions.py`: controller-side wrapper for calling Local Agent write operations.
 - Modify web templates only after API/client tests pass.
 - Test `tests/agent/test_policy.py`, `tests/agent/test_api.py`, `tests/agent/test_client.py`, and focused web tests.
@@ -292,6 +293,8 @@ git commit -m "Add guarded Local Agent write endpoints"
 **Files:**
 - Modify: `app/agent/client.py`
 - Test: `tests/agent/test_client.py`
+
+Detailed plan for this task: `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md`.
 
 - [ ] **Step 1: Write failing tests**
 

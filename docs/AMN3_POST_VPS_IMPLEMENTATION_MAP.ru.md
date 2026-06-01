@@ -19,6 +19,7 @@
 - `docs/superpowers/plans/2026-06-01-local-agent-write-audit-storage-schema.ru.md`
 - `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md`
 - `docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md`
+- `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md`
 - `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`
 - `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`
 - `docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md`
@@ -138,6 +139,7 @@ agent:clients:write uses a dedicated token/scope set
 Действия:
 
 - создать или расширить `app/agent/client.py`;
+- для controller client использовать TDD-план `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md`;
 - добавить методы для `POST /agent/clients/dry-run`, `POST /agent/clients`, `DELETE /agent/clients/{id}`;
 - хранить raw agent token только в controller settings/runtime secret path;
 - передавать `user_id`, `device_id`, `device_label`, `client_id`, `server_alias`, `protocol=amneziawg` и
