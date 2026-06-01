@@ -186,7 +186,9 @@ Scoped API tokens для будущих external integrations.
 - `scopes_json` - JSON-список scopes;
 - `expires_at`;
 - `revoked_at`;
+- `revoke_reason`;
 - `last_used_at`;
+- `rotated_from_token_id` - ссылка на предыдущий token id при rotation;
 - `created_at`.
 
 В первом slice разрешены только read-only scopes `server:read` и `metrics:read`. `config:read`, write scopes и destructive scopes остаются future gates.

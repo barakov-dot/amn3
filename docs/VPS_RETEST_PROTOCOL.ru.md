@@ -65,7 +65,13 @@ AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg bash deploy/runtime/check_vps.
 VPS_APPLY_ENABLED=false
 ```
 
-## 3. Remote-operation dry-run/audit gate
+## 3. Проверить SSH host key
+
+Перед первым live SSH-подключением отдельно сверить SSH host key по `docs/SSH_HOST_KEY_VERIFICATION.ru.md`.
+
+Если fingerprint неизвестен, не совпал или появился новый unknown host prompt, остановиться и подтвердить ключ через независимый канал. Не использовать `accept-new` как production-доверие без ручной проверки.
+
+## 4. Remote-operation dry-run/audit gate
 
 До любого live `apply-peer --apply` или `revoke-peer --apply` выполнить только preview-команды на тестовом peer:
 
@@ -98,7 +104,7 @@ Rollback note:
 
 Live `apply-peer --apply` и `revoke-peer --apply` запускать только после отдельного подтверждения оператора в соседнем чате. Для Docker runtime перед этим еще раз проверить, что `runtime.config_path` указывает на реальный persistent config внутри контейнера.
 
-## 4. Запустить нужный сценарий теста
+## 5. Запустить нужный сценарий теста
 
 Проверить web-панель:
 
@@ -122,7 +128,7 @@ sudo systemctl status amneziya-bot --no-pager
 В Telegram или web-панели записать, что нажимал перед ошибкой: раздел, кнопка, пользователь, устройство, сервер, примерное время.
 В карточке сервера web-панель показывает блок `VPS retest bundle` с теми же базовыми командами для `git pull`, `preflight`, `server check` и `sync-peers`.
 
-## 5. При ошибке собрать snapshot
+## 6. При ошибке собрать snapshot
 
 Обычный runtime:
 
@@ -144,7 +150,7 @@ AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg AMN_INTERFACE=awg0 bash deploy
 
 Перед отправкой файла проверить, что секреты скрыты. Правила маскировки и ручной набор команд описаны в `docs/VPS_LOG_COLLECTION.ru.md`.
 
-## 6. Что прислать для анализа
+## 7. Что прислать для анализа
 
 Прислать:
 
@@ -169,6 +175,6 @@ AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg AMN_INTERFACE=awg0 bash deploy
 - `PrivateKey` и `PresharedKey`;
 - полный пользовательский `.conf`.
 
-## 7. Когда останавливаемся
+## 8. Когда останавливаемся
 
 Если ошибка относится к Docker `apply-peer` или `revoke-peer`, перед повтором проверить `runtime.config_path` в `servers.yml`: он должен указывать на реальный постоянный конфиг AmneziaWG внутри контейнера. Эти операции переписывают конфиг и выполняют `docker restart <container_name>`, поэтому не включать `VPS_APPLY_ENABLED=true`, пока dry-run и ручной тестовый peer не пройдены.
