@@ -70,6 +70,7 @@ Do not implement write routes before these gates are true.
 - Detailed controller client plan: `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md`.
 - Modify `app/web/server_health.py` or a new `app/web/local_agent_actions.py`: controller-side wrapper for calling Local Agent write operations.
 - Modify web templates only after API/client tests pass.
+- Detailed web admin preflight UX plan: `docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md`.
 - Test `tests/agent/test_policy.py`, `tests/agent/test_api.py`, `tests/agent/test_client.py`, and focused web tests.
 - Update `docs/LOCAL_AGENT.ru.md`, `docs/AMN3_NEXT_CHAT_HANDOFF.ru.md`, and production checklist after behavior is green.
 

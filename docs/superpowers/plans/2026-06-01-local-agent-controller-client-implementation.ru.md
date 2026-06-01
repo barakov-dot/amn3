@@ -1146,3 +1146,5 @@ git commit -m "Document Local Agent controller write client"
 ```
 
 Skip this docs commit if the same implementation branch already committed the documentation links.
+
+Next web admin UX plan: `docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md`.

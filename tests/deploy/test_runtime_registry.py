@@ -734,6 +734,78 @@ def test_amn3_local_agent_controller_client_plan_wires_write_flow_without_secret
     assert "docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md" in ux_flow
 
 
+def test_amn3_web_admin_preflight_ux_plan_wires_operator_flow_without_enabling_mutations():
+    plan_path = ROOT / "docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md"
+    handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"
+    post_vps_path = ROOT / "docs/AMN3_POST_VPS_IMPLEMENTATION_MAP.ru.md"
+    ux_flow_path = ROOT / "docs/AMN3_WRITE_API_UX_FLOW.ru.md"
+    write_api_plan_path = ROOT / "docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md"
+    controller_plan_path = ROOT / "docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md"
+
+    text = plan_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    post_vps = post_vps_path.read_text(encoding="utf-8")
+    ux_flow = ux_flow_path.read_text(encoding="utf-8")
+    write_api_plan = write_api_plan_path.read_text(encoding="utf-8")
+    controller_plan = controller_plan_path.read_text(encoding="utf-8")
+
+    assert "# Web Admin Preflight UX Implementation Plan" in text
+    assert "GO-1" in text
+    assert "Phase 4 - web admin preflight" in text
+    assert "LOCAL_AGENT_WRITE_ENABLED" in text
+    assert "LOCAL_AGENT_CONTROLLER_WRITE_TOKEN_PATH" in text
+    assert "agent:clients:write" in text
+    assert "dry-run -> confirmation -> apply/revoke -> audit -> rollback" in text
+    assert "run_local_agent_peer_apply_preflight" in text
+    assert "run_local_agent_peer_apply_confirmation" in text
+    assert "run_local_agent_peer_revoke_preflight" in text
+    assert "run_local_agent_peer_revoke_confirmation" in text
+    assert "peer_apply_dry_run" in text
+    assert "apply_peer" in text
+    assert "revoke_peer" in text
+    assert "WritePreflightReference" in text
+    assert "WriteConfirmationChallenge" in text
+    assert "AgentPeerApplyRequest" in text
+    assert "AgentPeerRevokeRequest" in text
+    assert "AgentPeerMutationResult" in text
+    assert "preflight_required" in text
+    assert "runtime_degraded" in text
+    assert "mutation_failed" in text
+    assert "expired_preflight" in text
+    assert "confirmation nonce" in text
+    assert "one click mutation" in text
+    assert "POST /servers/{server_id}/devices/{device_id}/agent/apply/preview" in text
+    assert "POST /servers/{server_id}/devices/{device_id}/agent/apply/confirm" in text
+    assert "POST /servers/{server_id}/peers/{client_id}/agent/revoke/preview" in text
+    assert "POST /servers/{server_id}/peers/{client_id}/agent/revoke/confirm" in text
+    assert "Preview peer apply" in text
+    assert "Confirm apply" in text
+    assert "Revoke peer" in text
+    assert "Apply blocked" in text
+    assert "app/web/app.py" in text
+    assert "app/web/local_agent_actions.py" in text
+    assert "app/web/server_health.py" in text
+    assert "app/web/templates/server_detail.html" in text
+    assert "app/web/templates/server_health.html" in text
+    assert "app/web/static/admin.css" in text
+    assert "tests/web/test_app.py" in text
+    assert "tests/web/test_server_health.py" in text
+    assert "tests/security/test_redaction.py" in text
+    assert "raw token" in text
+    assert "private key" in text
+    assert "PSK" in text
+    assert "QR" in text
+    assert "vpn://" in text
+    assert "full client config" in text
+    assert "do not log Authorization" in text
+    assert "pytest tests/web/test_app.py tests/web/test_server_health.py tests/security/test_redaction.py" in text
+    assert "docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md" in handoff
+    assert "docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md" in post_vps
+    assert "docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md" in ux_flow
+    assert "docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md" in write_api_plan
+    assert "docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md" in controller_plan
+
+
 def test_amn3_preflight_confirmation_doc_tracks_nonce_expiry_and_vps_gate():
     doc_path = ROOT / "docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md"
     handoff_path = ROOT / "docs/AMN3_NEXT_CHAT_HANDOFF.ru.md"

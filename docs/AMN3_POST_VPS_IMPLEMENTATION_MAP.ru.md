@@ -20,6 +20,7 @@
 - `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md`
 - `docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md`
 - `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md`
+- `docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md`
 - `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md`
 - `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`
 - `docs/superpowers/plans/2026-05-31-local-agent-write-api-slice.ru.md`
@@ -161,6 +162,7 @@ agent:clients:write uses a dedicated token/scope set
 Действия:
 
 - добавить web admin preview для dry-run;
+- для web admin preflight UX использовать TDD-план `docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md`;
 - показывать user/device/server identity, risk class, planned commands и rollback hint;
 - требовать confirmation nonce перед apply/revoke;
 - блокировать повторное подтверждение после expiry;

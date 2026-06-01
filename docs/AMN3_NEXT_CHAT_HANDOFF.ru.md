@@ -103,6 +103,8 @@ git remote -v
   guarded `/agent/clients*` endpoints после `GO-1`.
 - `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md` - code-ready TDD-план
   controller-side Local Agent write client для web admin/CLI после `GO-1`.
+- `docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md` - code-ready TDD-план
+  web admin preflight/confirmation UX после `GO-1`.
 - `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` - contract для dry-run reference, confirmation nonce,
   expiry и `preflight_required`.
 - `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md` - модель `user_id` / `device_id` / `client_id` /
@@ -160,10 +162,11 @@ git status --short --branch
 12. Держать `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md` готовым к исполнению после `GO-1`.
 13. Держать `docs/superpowers/plans/2026-06-01-local-agent-write-endpoints-implementation.ru.md` готовым к исполнению после `GO-1`.
 14. Держать `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md` готовым к исполнению после `GO-1`.
-15. Держать `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` синхронизированным с `app/agent/write_confirmation.py`.
-16. Держать `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md` синхронизированным с UX, audit и preflight contracts.
-17. Перед передачей на VPS проходить `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
-18. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
+15. Держать `docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md` готовым к исполнению после `GO-1`.
+16. Держать `docs/AMN3_WRITE_API_PREFLIGHT_CONFIRMATION.ru.md` синхронизированным с `app/agent/write_confirmation.py`.
+17. Держать `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md` синхронизированным с UX, audit и preflight contracts.
+18. Перед передачей на VPS проходить `docs/AMN3_LOCAL_RELEASE_GATE.ru.md`.
+19. Писать только неинвазивные тесты, которые подтверждают, что write routes пока недоступны по умолчанию.
 
 До VPS smoke не включать write routes, не добавлять реальные mutation endpoints и не делать Local Agent публичным.
 

@@ -13,6 +13,7 @@ production defaults. Это локальный продуктовый контр
 Связанная identity model: `docs/AMN3_USER_DEVICE_PEER_IDENTITY_MODEL.ru.md`.
 Связанный runtime adapter plan: `docs/superpowers/plans/2026-06-01-local-agent-peer-command-adapter.ru.md`.
 Связанный controller client plan: `docs/superpowers/plans/2026-06-01-local-agent-controller-client-implementation.ru.md`.
+Связанный web admin preflight UX plan: `docs/superpowers/plans/2026-06-01-web-admin-preflight-ux-implementation.ru.md`.
 
 ## 1. Gate
 
