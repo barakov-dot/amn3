@@ -1,4 +1,5 @@
 import re
+import tomllib
 from pathlib import Path
 
 
@@ -33,3 +34,17 @@ def test_env_example_uses_placeholders_only():
         text,
         re.MULTILINE,
     )
+
+
+def test_pyproject_limits_setuptools_package_discovery_to_app_package():
+    config = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+
+    package_find = config["tool"]["setuptools"]["packages"]["find"]
+
+    assert package_find["where"] == ["."]
+    assert package_find["include"] == ["app", "app.*"]
+    assert "deploy*" in package_find["exclude"]
+    assert "docs*" in package_find["exclude"]
+    assert "tests*" in package_find["exclude"]
+    assert "tmp*" in package_find["exclude"]
+    assert "errors_logs*" in package_find["exclude"]
