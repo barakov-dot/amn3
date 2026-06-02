@@ -212,7 +212,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Backup/Import Policy Contract: branch `amn2/codex/backup-import-policy-contract`, head `afb2702 Tighten backup import preview type contract` with foundation commit `d2c160b`; local-only no-route backup mode registry, secret field policy and restore/import preview contract, без web/API backup routes, restore apply, import apply или live VPS calls.
 - Secret Inventory Registry: branch `amn2/codex/secret-inventory-registry`, commit `9ce42f4 Add secret inventory registry`; local-only machine-checkable secret inventory, без `.env` чтения, DB access, routes, secret-bearing output или live VPS calls.
 - Packaging discovery fix: branch `amn2/codex/read-only-api-route-shell`, commit `e99d5f3 Fix editable install package discovery`; исправляет editable install/package discovery перед VPS install package smoke.
-- Read-only API route shell: branch `amn2/codex/read-only-api-route-shell`, commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`; добавлены loopback-safe read-only `/api/*` routes, token smoke CLI, local API smoke readiness и `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`; full local suite `588 passed`, expected `StarletteDeprecationWarning`.
+- Read-only API route shell: branch `amn2/codex/read-only-api-route-shell`, commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`; добавлены loopback-safe read-only `/api/*` routes, token smoke CLI, local API smoke readiness, `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md` и AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh`; full local suite `588 passed`, expected `StarletteDeprecationWarning`.
 
 Решение по соседним чатам:
 
@@ -306,7 +306,7 @@ head: 8697b60 Document Local Agent production wiring
 ## Рекомендуемый порядок
 
 1. Продолжать установку/API smoke в чате `Переводим AMN на API` на ветке `amn2/codex/read-only-api-route-shell`, head `2010d60`.
-2. На VPS использовать loopback-only API smoke из `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`: issue scoped token, `api serve --host 127.0.0.1`, `api smoke-check`, revoke token; не публиковать raw token/header/hash/config/keys/PSK.
+2. На VPS использовать AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh` по инструкции `docs/AMN2_VPS_OPERATOR_API_SMOKE.ru.md`; не публиковать raw token/header/hash/config/keys/PSK.
 3. После VPS smoke вернуть evidence в AMN3 и решить, открывать ли PR/merge read-only API branch обратно в stable `codex-vps-test-prep`.
 4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным обязательным gate перед любым API/web/agent route, который вызывает SSH, syncs peers, emits config или меняет runtime state.
 5. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед дальнейшим route expansion.

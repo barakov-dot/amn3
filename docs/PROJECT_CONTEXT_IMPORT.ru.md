@@ -130,11 +130,11 @@ status: не слито в master; не повторять соседний VPS 
 - remote operation VPS-gate candidate `262d70f`, pushed and waiting for real VPS gate.
 - VPS install package `dist/amn2-vps-install-d0939d8.zip` with installer fallback fix;
 - KYORESUAS API integration priority plan;
-- read-only API route shell branch `codex/read-only-api-route-shell`, pushed at `2010d60`, waiting for real VPS loopback API smoke.
+- read-only API route shell branch `codex/read-only-api-route-shell`, pushed at `2010d60`, waiting for real VPS loopback API smoke through AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh`.
 
 Следующий рабочий выбор:
 
-1. В чате `Переводим AMN на API` обновить/установить VPS на ветку `codex/read-only-api-route-shell` и выполнить loopback API smoke по `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`.
+1. В чате `Переводим AMN на API` обновить/установить VPS на ветку `codex/read-only-api-route-shell` и выполнить loopback API smoke через `scripts/vps/amn2_api_loopback_smoke.sh` по `docs/AMN2_VPS_OPERATOR_API_SMOKE.ru.md`.
 2. После smoke вернуть сюда evidence и решить PR/merge ветки `codex/read-only-api-route-shell` обратно в stable `codex-vps-test-prep`.
 3. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным gate перед routes, которые вызывают SSH, sync peers, emit config или меняют runtime state.
 
@@ -438,7 +438,7 @@ Primary verdict:
 
 Актуальная design queue после verified baseline:
 
-- `codex/read-only-api-route-shell`: active API branch, head `2010d60`, ждет real VPS loopback smoke.
+- `codex/read-only-api-route-shell`: active API branch, head `2010d60`, ждет real VPS loopback smoke через AMN3 operator script.
 - `codex/remote-operation-vps-gate-prep`: отдельный controlled VPS gate для SSH/sync/config/runtime write surfaces.
 - `Route/Auth Binding`, `Scoped API Token Lifecycle`, `Secret Inventory`, `Public Config Policy`, `Backup/Import Policy`: обязательные baselines перед дальнейшим route expansion.
 - `/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot и public docs/metrics остаются заблокированы до отдельного решения.
@@ -536,7 +536,7 @@ First safe slice по design spec:
 Текущий режим coordination: AMN3 принял состояние после live VPS stage, local-only transfer slices, VPS install package и активной read-only API ветки.
 
 1. Продолжать серверную установку/API smoke в чате `Переводим AMN на API` на ветке `codex/read-only-api-route-shell`.
-2. Выполнить loopback API smoke по `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`: scoped token issue/use/revoke, без raw token/header/hash/config/keys/PSK в evidence.
+2. Выполнить loopback API smoke через `scripts/vps/amn2_api_loopback_smoke.sh`: scoped token issue/use/revoke, без raw token/header/hash/config/keys/PSK в evidence.
 3. После VPS smoke вернуть итог в AMN3 и решить PR/merge read-only API shell обратно в stable `codex-vps-test-prep`.
 4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` держать отдельным gate для SSH/sync/config/runtime-changing routes.
 5. Для coordination-чата держать правило: любая новая идея сначала попадает в очередь с verdict, а не сразу в implementation.
