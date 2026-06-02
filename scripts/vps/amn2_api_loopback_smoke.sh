@@ -162,11 +162,12 @@ fi
 
 BASE_URL="http://${AMN2_API_HOST}:${AMN2_API_PORT}"
 if command -v ss >/dev/null 2>&1; then
-  if ss -ltn | "$PYTHON_BIN" - "$AMN2_API_PORT" <<'PY'
+  ss -ltn > "$RUN_DIR/pre-existing-listeners.txt" 2>&1 || true
+  if "$PYTHON_BIN" - "$RUN_DIR/pre-existing-listeners.txt" "$AMN2_API_PORT" <<'PY'
 import sys
 
-port = sys.argv[1]
-for line in sys.stdin:
+path, port = sys.argv[1], sys.argv[2]
+for line in open(path, encoding="utf-8", errors="replace"):
     if f":{port}" in line:
         raise SystemExit(0)
 raise SystemExit(1)
@@ -216,14 +217,28 @@ else
   printf 'not a git checkout\n' > "$RUN_DIR/git-status.txt"
   printf 'not a git checkout\n' > "$RUN_DIR/git-head.txt"
 fi
+if [ -f ".amn2_source_overlay_commit" ]; then
+  printf 'source_overlay_commit=%s\n' "$(cat .amn2_source_overlay_commit)" > "$RUN_DIR/source-overlay.txt"
+fi
 
-"$PYTHON_BIN" - <<'PY' > "$RUN_DIR/python-imports.txt"
+if ! "$PYTHON_BIN" - <<'PY' > "$RUN_DIR/python-imports.txt" 2>&1
 import importlib
 
 for module in ("fastapi", "uvicorn", "app.cli", "app.api.app"):
     importlib.import_module(module)
     print(f"{module}: ok")
 PY
+then
+  {
+    printf 'VPS verdict: blocked\n'
+    printf 'blocker: amn2 source does not contain the read-only API route shell or dependencies are not installed\n'
+    printf 'expected branch/commit: codex/read-only-api-route-shell / %s\n' "$AMN2_EXPECTED_COMMIT"
+    printf 'safe_evidence_dir: %s\n' "$RUN_DIR"
+    printf 'next: update /opt/amn2 to the API source package, run python -m pip install -e ., then rerun this smoke script\n'
+  } > "$RUN_DIR/api-smoke-safe-summary.txt"
+  cat "$RUN_DIR/api-smoke-safe-summary.txt"
+  exit 3
+fi
 
 PREFLIGHT_STATUS="skipped"
 if [ "$AMN2_RUN_PREFLIGHT" = "1" ] || { [ "$AMN2_RUN_PREFLIGHT" = "auto" ] && [ -f "$AMN2_CONFIG" ]; }; then

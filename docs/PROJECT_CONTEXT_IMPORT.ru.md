@@ -130,11 +130,11 @@ status: не слито в master; не повторять соседний VPS 
 - remote operation VPS-gate candidate `262d70f`, pushed and waiting for real VPS gate.
 - VPS install package `dist/amn2-vps-install-d0939d8.zip` with installer fallback fix;
 - KYORESUAS API integration priority plan;
-- read-only API route shell branch `codex/read-only-api-route-shell`, pushed at `2010d60`, waiting for real VPS loopback API smoke through AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh`.
+- read-only API route shell branch `codex/read-only-api-route-shell`, pushed at `2010d60`, waiting for real VPS loopback API smoke through AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh`; if VPS source is still old and lacks `app/api`, use update+smoke kit `dist/amn2-api-vps-update-and-smoke-kit-2026-06-02.zip`.
 
 Следующий рабочий выбор:
 
-1. В чате `Переводим AMN на API` обновить/установить VPS на ветку `codex/read-only-api-route-shell` и выполнить loopback API smoke через `scripts/vps/amn2_api_loopback_smoke.sh` по `docs/AMN2_VPS_OPERATOR_API_SMOKE.ru.md`.
+1. В чате `Переводим AMN на API` обновить/установить VPS на ветку `codex/read-only-api-route-shell`; при `ModuleNotFoundError: No module named 'app.api'` использовать `docs/AMN2_VPS_API_UPDATE_AND_SMOKE.ru.md`, затем выполнить loopback API smoke.
 2. После smoke вернуть сюда evidence и решить PR/merge ветки `codex/read-only-api-route-shell` обратно в stable `codex-vps-test-prep`.
 3. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным gate перед routes, которые вызывают SSH, sync peers, emit config или меняют runtime state.
 

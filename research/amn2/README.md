@@ -47,6 +47,7 @@ working chat: Переводим AMN на API
 - [KYORESUAS API integration priority plan](kyoresuas-api-integration-priority-plan.md) - новый приоритет API lane: native read-only aggregate route shell без копирования upstream code.
 - `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md` - evidence template для текущей ветки `codex/read-only-api-route-shell`.
 - [AMN2 VPS Operator API Smoke](../../docs/AMN2_VPS_OPERATOR_API_SMOKE.ru.md) - инструкция и безопасный operator script для запуска VPS loopback API smoke без передачи доступа.
+- [AMN2 VPS API Update And Smoke](../../docs/AMN2_VPS_API_UPDATE_AND_SMOKE.ru.md) - update+smoke kit для VPS, где `/opt/amn2` еще не содержит `app/api`.
 - [Backup/import dangerous API design](backup-import-dangerous-api-design.md) - policy boundary для metadata/redacted/full backup, restore preview и dangerous import/apply.
 - [Backup/import policy contract implementation](backup-import-policy-contract-implementation.md) - local-only `amn2` branch/commit/test evidence для no-route backup/import policy registry and restore/import preview contract.
 - [Config delivery inventory](config-delivery-inventory.md) - первый проход по выдаче VPN config через bot, email, QR, `vpn://` link, recovery token и template preview.
@@ -76,7 +77,7 @@ working chat: Переводим AMN на API
 
 Текущий фокус после verified VPS cycle, read-only `RemoteOperationRunner` baseline, redaction coverage, state-changing metadata, partial-failure, dry-run/audit metadata, web-panel safety, scoped API token storage local slices и read-only API route shell:
 
-1. В чате `Переводим AMN на API` выполнить real VPS loopback API smoke на ветке `codex/read-only-api-route-shell` через `scripts/vps/amn2_api_loopback_smoke.sh`.
+1. В чате `Переводим AMN на API` выполнить real VPS loopback API smoke на ветке `codex/read-only-api-route-shell` через `scripts/vps/amn2_api_loopback_smoke.sh`; если VPS source старый и нет `app/api`, сначала использовать `dist/amn2-api-vps-update-and-smoke-kit-2026-06-02.zip`.
 2. Зафиксировать API evidence в `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md` и синхронизировать итог обратно в AMN3.
 3. Принять PR/merge решение для read-only API shell обратно в stable `codex-vps-test-prep`.
 4. Отдельно выполнить controlled real VPS verification gate по `vps-gate-remote-operation-dry-run-audit.md` на ветке `codex/remote-operation-vps-gate-prep` перед SSH/sync/config/runtime-changing routes.

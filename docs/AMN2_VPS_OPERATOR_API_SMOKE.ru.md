@@ -30,6 +30,19 @@ dist/amn2-api-vps-smoke-operator-kit-2026-06-02.zip.sha256.txt
 
 Скрипт не делает peer apply/revoke, не читает `.conf`, QR, `vpn://`, private keys, PSK, не вызывает Docker restart и не открывает API наружу.
 
+Если скрипт останавливается на:
+
+```text
+ModuleNotFoundError: No module named 'app.api'
+```
+
+значит на VPS установлен старый source tree без read-only API route shell. В этом случае сначала использовать:
+
+```text
+docs/AMN2_VPS_API_UPDATE_AND_SMOKE.ru.md
+dist/amn2-api-vps-update-and-smoke-kit-2026-06-02.zip
+```
+
 ## 1. Подготовить ветку на VPS
 
 Если `/opt/amn2` является git checkout:
