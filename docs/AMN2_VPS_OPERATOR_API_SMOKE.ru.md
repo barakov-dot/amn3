@@ -194,6 +194,10 @@ VPS verdict: blocked
 
 При `blocked` не расширять API и не начинать PR/merge. Нужно передать safe bundle и кратко указать, какая строка failed: imports, preflight, smoke, auth, listener или audit.
 
+Если в старой версии скрипта перед summary были строки `curl: (7) Failed to connect`, это был шум ожидания старта API. Это не ошибка, если `api_ready_status`, `api_smoke_status`, `auth_status` и `audit_status` равны `passed`.
+
+Если единственный blocker - `listener_status: failed`, прислать только safe `api-listener-evidence.txt` или перезапустить обновленный `scripts/vps/amn2_api_loopback_smoke.sh`. Обновленная версия проверяет listener по PID временного API-процесса и не печатает startup polling noise.
+
 ## 6. Что делать после pass
 
 После `pass` в coordination chat можно принять решение:

@@ -142,7 +142,26 @@ audit_status: passed
 - SSH private key/password;
 - полный `api-server.log`, если оператор не проверил и не отредактировал его вручную.
 
-## 5. После pass
+## 5. Как читать шум запуска
+
+Если в старой версии скрипта перед summary были строки вида:
+
+```text
+curl: (7) Failed to connect to 127.0.0.1 port 3040
+```
+
+это был шум ожидания старта API. Само по себе это не ошибка, если итоговый summary показывает:
+
+```text
+api_ready_status: passed
+api_smoke_status: passed
+auth_status: passed
+audit_status: passed
+```
+
+Если при этом был только `listener_status: failed`, нужно проверить `api-listener-evidence.txt` или перезапустить обновленный `scripts/vps/amn2_api_loopback_smoke.sh`. Обновленный файл подавляет startup polling noise и точнее проверяет listener по PID временного API-процесса.
+
+## 6. После pass
 
 После `VPS verdict: pass` можно вернуться в coordination chat и принять решение по PR/merge `codex/read-only-api-route-shell` обратно в stable `codex-vps-test-prep`.
 

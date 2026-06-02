@@ -74,7 +74,7 @@ PY
 }
 
 http_code() {
-  curl -sS -o /dev/null -w '%{http_code}' --max-time "$AMN2_CURL_TIMEOUT" "$@"
+  curl -s -o /dev/null -w '%{http_code}' --max-time "$AMN2_CURL_TIMEOUT" "$@"
 }
 
 revoke_token() {
@@ -291,18 +291,65 @@ done
 
 LISTENER_STATUS="unknown"
 if command -v ss >/dev/null 2>&1; then
-  ss -ltn > "$RUN_DIR/listeners.txt" 2>&1 || true
-  "$PYTHON_BIN" - "$RUN_DIR/listeners.txt" "$AMN2_API_PORT" > "$RUN_DIR/api-listener-evidence.txt" <<'PY'
+  ss -ltnp > "$RUN_DIR/listeners.txt" 2>&1 || ss -ltn > "$RUN_DIR/listeners.txt" 2>&1 || true
+  "$PYTHON_BIN" - "$RUN_DIR/listeners.txt" "$AMN2_API_PORT" "$API_PID" "$AMN2_API_HOST" > "$RUN_DIR/api-listener-evidence.txt" <<'PY'
 import sys
 
-path, port = sys.argv[1], sys.argv[2]
+path, port, api_pid, expected_host = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 lines = open(path, encoding="utf-8", errors="replace").read().splitlines()
 matches = [line for line in lines if f":{port}" in line]
-unsafe = [line for line in matches if "0.0.0.0:" in line or ":::" in line]
-print(f"listener_rows={len(matches)}")
+
+def local_address(line: str) -> str:
+    parts = line.split(None, 5)
+    if len(parts) < 4 or parts[0] == "State":
+        return ""
+    return parts[3]
+
+def host_part(local: str) -> str:
+    if not local:
+        return ""
+    if local.startswith("[") and "]:" in local:
+        return local[1:].split("]:", 1)[0]
+    if ":" in local:
+        return local.rsplit(":", 1)[0]
+    return local
+
+def is_loopback(host: str) -> bool:
+    normalized = host.strip("[]")
+    return (
+        normalized == expected_host
+        or normalized == "localhost"
+        or normalized == "::1"
+        or normalized.startswith("127.")
+        or normalized.startswith("::ffff:127.")
+    )
+
+def is_wildcard(host: str) -> bool:
+    normalized = host.strip("[]")
+    return normalized in {"", "*", "0.0.0.0", "::", ":::"}
+
+parsed = []
+unsafe = []
 for line in matches:
-    print(line)
+    local = local_address(line)
+    host = host_part(local)
+    pid_match = f"pid={api_pid}" in line
+    parsed.append((line, host, pid_match))
+    if is_wildcard(host) and (pid_match or "users:(" not in line):
+        unsafe.append(line)
+    elif not is_loopback(host) and pid_match:
+        unsafe.append(line)
+
+print(f"listener_rows={len(matches)}")
+print(f"api_pid={api_pid}")
+print(f"expected_host={expected_host}")
+for line, host, pid_match in parsed:
+    print(f"host={host or '<unknown>'} pid_match={'yes' if pid_match else 'no'} row={line}")
 print(f"loopback_only={'no' if unsafe else 'yes'}")
+if unsafe:
+    print("unsafe_listener_rows:")
+    for line in unsafe:
+        print(line)
 PY
   if grep -q 'loopback_only=no' "$RUN_DIR/api-listener-evidence.txt"; then
     LISTENER_STATUS="failed"
