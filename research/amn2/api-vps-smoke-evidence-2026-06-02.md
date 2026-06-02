@@ -19,6 +19,12 @@ safe evidence dir: /opt/amn2/vps-smoke/api-loopback-20260602T171639Z
 
 `/opt/amn2` reported `not a git checkout` because the VPS install used the source-overlay/update kit path rather than a live git checkout.
 
+## Superseded smoke-script note
+
+This evidence remains the historical 2026-06-02 pass record for script version `2026-06-02.2`.
+After the AMN3 package hotfix `2026-06-02.3`, API-only smoke must run with `AMN2_RUN_PREFLIGHT=0` and should report `preflight_status: skipped`.
+The separate `server preflight` / SSH dry-run gate is intentional only when an operator explicitly sets `AMN2_RUN_PREFLIGHT=1`.
+
 ## Result
 
 ```text

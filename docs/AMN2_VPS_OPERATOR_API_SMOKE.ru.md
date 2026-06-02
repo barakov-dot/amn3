@@ -30,6 +30,8 @@ dist/amn2-api-vps-smoke-operator-kit-2026-06-02.zip.sha256.txt
 
 Скрипт не делает peer apply/revoke, не читает `.conf`, QR, `vpn://`, private keys, PSK, не вызывает Docker restart и не открывает API наружу.
 
+По умолчанию скрипт также не запускает `server preflight` и не входит в SSH/server gate. Для API-only проверки `preflight_status` должен быть `skipped`.
+
 Если скрипт останавливается на:
 
 ```text
@@ -118,6 +120,7 @@ install -m 700 /root/amn2-api-vps-smoke-kit-2026-06-02/amn2_api_loopback_smoke.s
 ```bash
 cd /opt/amn2
 export VPS_APPLY_ENABLED=false
+export AMN2_RUN_PREFLIGHT=0
 export AMN2_SERVER_NAME=debian-vps-1
 bash ./amn2_api_loopback_smoke.sh
 ```
@@ -132,18 +135,19 @@ export AMN2_DB=data/amneziya.sqlite3
 export AMN2_CONFIG=servers.yml
 export AMN2_SERVER_NAME=debian-vps-1
 export AMN2_API_PORT=3040
+export AMN2_RUN_PREFLIGHT=0
 bash ./amn2_api_loopback_smoke.sh
 ```
 
 Опциональные флаги:
 
 ```bash
-export AMN2_RUN_PREFLIGHT=auto
-export AMN2_REQUIRE_PREFLIGHT=0
-export AMN2_EXPECTED_COMMIT=2010d60
+export AMN2_RUN_PREFLIGHT=1
+export AMN2_REQUIRE_PREFLIGHT=1
+export AMN2_EXPECTED_COMMIT=5f12736
 ```
 
-`AMN2_RUN_PREFLIGHT=auto` запускает `server preflight` и `server check --dry-run`, если найден `servers.yml`. Это локальная/preview проверка, без live apply.
+`AMN2_RUN_PREFLIGHT=1` запускает отдельный SSH/server preflight и `server check --dry-run`. Не использовать этот режим для чистого API-only smoke.
 
 ## 4. Что прислать обратно
 

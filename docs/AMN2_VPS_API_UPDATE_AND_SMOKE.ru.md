@@ -6,6 +6,8 @@
 
 Последний безопасный итог: real VPS loopback API smoke passed 2026-06-02, `run_id=20260602T171639Z`; preflight/API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`. AMN3 evidence: `research/amn2/api-vps-smoke-evidence-2026-06-02.md`.
 
+Важно: API smoke теперь по умолчанию не запускает `server preflight` и не входит в SSH/server gate. Для чистой API-проверки `preflight_status` должен быть `skipped`. Если нужен отдельный SSH/server dry-run gate, запускать его вручную и осознанно, не смешивая с API smoke.
+
 ## Почему нужен этот пакет
 
 Если при запуске `amn2_api_loopback_smoke.sh` появляется:
@@ -99,6 +101,7 @@ next=run ./amn2_api_loopback_smoke.sh from /opt/amn2
 install -m 700 /root/amn2-vps-update-and-smoke-kit-5f12736/amn2_api_loopback_smoke.sh /opt/amn2/amn2_api_loopback_smoke.sh
 cd /opt/amn2
 export VPS_APPLY_ENABLED=false
+export AMN2_RUN_PREFLIGHT=0
 export AMN2_SERVER_NAME=debian-vps-1
 bash ./amn2_api_loopback_smoke.sh
 ```
@@ -114,6 +117,7 @@ bash ./amn2_api_loopback_smoke.sh
 ```text
 api_smoke_status: passed
 auth_status: passed
+preflight_status: skipped
 listener_status: passed
 audit_status: passed
 ```
@@ -165,6 +169,6 @@ audit_status: passed
 
 ## 6. После pass
 
-После `VPS verdict: pass` можно вернуться в coordination chat и зафиксировать, что stable `codex-vps-test-prep` на `5f12736` подтвержден на VPS.
+После `VPS verdict: pass` можно вернуться в coordination chat и зафиксировать, что stable `codex-vps-test-prep` на `5f12736` подтвержден на VPS API-only smoke.
 
 Write API, `/clients` CRUD, API `config:read`, public config delivery, backup/import/reboot и SSH/sync/config/runtime-changing routes остаются закрытыми до отдельного controlled VPS gate.
