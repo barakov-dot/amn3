@@ -4,6 +4,8 @@
 
 Назначение: обновить установленный на VPS `/opt/amn2` до ветки `codex/read-only-api-route-shell` и затем выполнить loopback API smoke без передачи SSH-доступа в чат.
 
+Последний безопасный итог: real VPS loopback API smoke passed 2026-06-02, `run_id=20260602T171639Z`; preflight/API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`. AMN3 evidence: `research/amn2/api-vps-smoke-evidence-2026-06-02.md`.
+
 ## Почему нужен этот пакет
 
 Если при запуске `amn2_api_loopback_smoke.sh` появляется:

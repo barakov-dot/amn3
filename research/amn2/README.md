@@ -27,9 +27,11 @@ current transfer head: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-
 ```text
 branch: codex/read-only-api-route-shell
 head: 2010d60 Add API VPS smoke evidence template
-status: pushed; full local suite 588 passed; awaits real VPS loopback API smoke
+status: pushed; full local suite 588 passed; real VPS loopback API smoke passed 2026-06-02, run_id=20260602T171639Z
 working chat: Переводим AMN на API
 ```
+
+AMN3 evidence: [API VPS smoke evidence 2026-06-02](api-vps-smoke-evidence-2026-06-02.md).
 
 Живой VPS-цикл подтвержден: approve, working config, peer sync, disable/enable и выборочное удаление устройства работают на Docker AmneziaWG runtime.
 
@@ -77,9 +79,9 @@ working chat: Переводим AMN на API
 
 Текущий фокус после verified VPS cycle, read-only `RemoteOperationRunner` baseline, redaction coverage, state-changing metadata, partial-failure, dry-run/audit metadata, web-panel safety, scoped API token storage local slices и read-only API route shell:
 
-1. В чате `Переводим AMN на API` выполнить real VPS loopback API smoke на ветке `codex/read-only-api-route-shell` через `scripts/vps/amn2_api_loopback_smoke.sh`; если VPS source старый и нет `app/api`, сначала использовать `dist/amn2-api-vps-update-and-smoke-kit-2026-06-02.zip`.
-2. Зафиксировать API evidence в `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md` и синхронизировать итог обратно в AMN3.
-3. Принять PR/merge решение для read-only API shell обратно в stable `codex-vps-test-prep`.
+1. Зафиксировать API evidence в `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md` и синхронизировать production PR/commit итог обратно в AMN3.
+2. Принять PR/merge решение для read-only API shell обратно в stable `codex-vps-test-prep`.
+3. Не расширять API за пределы passed read-only aggregate shell до отдельного route/secret/remote-write gate.
 4. Отдельно выполнить controlled real VPS verification gate по `vps-gate-remote-operation-dry-run-audit.md` на ветке `codex/remote-operation-vps-gate-prep` перед SSH/sync/config/runtime-changing routes.
 5. Backup/import policy registry and restore-preview contract выполнен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`; web/API full backup, restore apply и import apply остаются закрытыми.
 6. Machine-checkable secret inventory registry выполнен в `amn2/codex/secret-inventory-registry`, commit `9ce42f4`; route expansion, secret-bearing output и live VPS не добавлялись.

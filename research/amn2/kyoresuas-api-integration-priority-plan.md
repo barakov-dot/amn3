@@ -2,7 +2,7 @@
 
 Дата: 2026-06-01.
 
-Актуализация 2026-06-02: первый read-only API route shell уже реализован и запушен в `amn2/codex/read-only-api-route-shell`, head `2010d60 Add API VPS smoke evidence template`. Этот документ теперь является исходным priority decision и safety boundary; текущий следующий gate - real VPS loopback API smoke по `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`, а не повторная локальная реализация.
+Актуализация 2026-06-02: первый read-only API route shell уже реализован и запушен в `amn2/codex/read-only-api-route-shell`, head `2010d60 Add API VPS smoke evidence template`. Real VPS loopback API smoke passed: `run_id=20260602T171639Z`, preflight/API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`. Этот документ теперь является исходным priority decision и safety boundary; текущий следующий gate - PR/merge decision обратно в stable `codex-vps-test-prep`, а не повторная локальная реализация.
 
 Назначение: зафиксировать новый приоритет после успешной установки `amn2` на VPS: API integration становится главной product lane, но переносится как собственный `amn2` contract без копирования `kyoresuas/amnezia-api` implementation.
 
@@ -79,7 +79,7 @@ Forbidden in first slice:
 
 1. `done-local`: Fix `amn2` packaging discovery so VPS installs can use `pip install -e .` - commit `e99d5f3`.
 2. `done-local`: Write and implement the read-only aggregate API route shell plan - commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`.
-3. `active-vps-gate`: Finish real VPS loopback API smoke evidence with secrets redacted.
+3. `done-vps-gate`: Finish real VPS loopback API smoke evidence with secrets redacted - AMN3 evidence `research/amn2/api-vps-smoke-evidence-2026-06-02.md`.
 
 ### Important
 
@@ -90,7 +90,7 @@ Forbidden in first slice:
 ### Simple
 
 7. `done-local`: Document safe smoke flow with placeholder tokens only.
-8. `active-after-vps-smoke`: Update AMN3 transfer evidence after VPS smoke.
+8. `done-after-vps-smoke`: Update AMN3 transfer evidence after VPS smoke.
 
 ### Cosmetic
 
@@ -105,4 +105,4 @@ Implementation plan:
 docs/superpowers/plans/2026-06-01-amn2-read-only-api-route-shell.md
 ```
 
-Implemented in `amn2/codex/read-only-api-route-shell`. Do not start another API implementation branch from AMN3 while this branch is waiting for VPS smoke and PR/merge decision.
+Implemented in `amn2/codex/read-only-api-route-shell`. Do not start another API implementation branch from AMN3; this branch now has local suite evidence and real VPS loopback smoke evidence, so the next decision is PR/merge back to `codex-vps-test-prep`.
