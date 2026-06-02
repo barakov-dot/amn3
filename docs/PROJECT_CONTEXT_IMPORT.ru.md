@@ -14,7 +14,7 @@
 repo: C:\Users\SooL\Documents\Amneziya
 branch: codex-vps-test-prep
 remote branch: amn2/codex-vps-test-prep
-latest committed head: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
+latest committed head: 5f12736 Record VPS API smoke evidence
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 status: remote branch current after route/auth binding, API token lifecycle and SSH host key verifier merges
 ```
@@ -126,16 +126,16 @@ status: не слито в master; не повторять соседний VPS 
 - `1fdcde5 Add scoped API token storage contract`;
 - Route/Auth binding tests branch `f9d2c79`, merged through current production line;
 - API token lifecycle gate branch `256d0c0`, merged through PR #4/#5;
-- SSH host key verifier `dd20364`, merged through PR #6; current `amn2` head `d0939d8`;
+- SSH host key verifier `dd20364`, merged through PR #6; later read-only API route shell moved current `amn2` head to `5f12736`;
 - remote operation VPS-gate candidate `262d70f`, pushed and waiting for real VPS gate.
 - VPS install package `dist/amn2-vps-install-d0939d8.zip` with installer fallback fix;
 - KYORESUAS API integration priority plan;
-- read-only API route shell branch `codex/read-only-api-route-shell`, pushed at `2010d60`, real VPS loopback API smoke passed through AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh`; if VPS source is still old and lacks `app/api`, use update+smoke kit `dist/amn2-api-vps-update-and-smoke-kit-2026-06-02.zip`.
+- read-only API route shell branch `codex/read-only-api-route-shell`, real VPS loopback API smoke passed through AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh`, then fast-forward merged into stable `codex-vps-test-prep` at `5f12736`.
 
 Следующий рабочий выбор:
 
-1. Зафиксировать API smoke evidence в production branch docs и принять PR/merge решение для ветки `codex/read-only-api-route-shell` обратно в stable `codex-vps-test-prep`.
-2. После PR/merge вернуть сюда production PR/commit evidence.
+1. Считать read-only API shell stable baseline at `5f12736`.
+2. Future API expansion requires separate route/secret/remote-write gates.
 3. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным gate перед routes, которые вызывают SSH, sync peers, emit config или меняют runtime state.
 
 Старые блоки ниже, где `91aeb3e` указан как latest clean baseline, считать историческим контекстом verified live stage.
@@ -438,7 +438,7 @@ Primary verdict:
 
 Актуальная design queue после verified baseline:
 
-- `codex/read-only-api-route-shell`: active API branch, head `2010d60`, real VPS loopback smoke passed через AMN3 operator script.
+- `codex/read-only-api-route-shell`: merged API branch, head `5f12736`, real VPS loopback smoke passed через AMN3 operator script.
 - `codex/remote-operation-vps-gate-prep`: отдельный controlled VPS gate для SSH/sync/config/runtime write surfaces.
 - `Route/Auth Binding`, `Scoped API Token Lifecycle`, `Secret Inventory`, `Public Config Policy`, `Backup/Import Policy`: обязательные baselines перед дальнейшим route expansion.
 - `/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot и public docs/metrics остаются заблокированы до отдельного решения.
@@ -535,9 +535,9 @@ First safe slice по design spec:
 
 Текущий режим coordination: AMN3 принял состояние после live VPS stage, local-only transfer slices, VPS install package и активной read-only API ветки.
 
-1. Зафиксировать API smoke evidence в production branch docs на ветке `codex/read-only-api-route-shell`.
-2. Принять PR/merge decision read-only API shell обратно в stable `codex-vps-test-prep`.
-3. После PR/merge вернуть итог в AMN3.
+1. Держать read-only API shell как stable baseline at `5f12736`.
+2. Перед remote-operation VPS gate обновить отдельную branch `codex/remote-operation-vps-gate-prep` поверх `5f12736`.
+3. Для новых API routes начинать с отдельного route/secret/remote-write gate, не с копирования upstream code.
 4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` держать отдельным gate для SSH/sync/config/runtime-changing routes.
 5. Для coordination-чата держать правило: любая новая идея сначала попадает в очередь с verdict, а не сразу в implementation.
 

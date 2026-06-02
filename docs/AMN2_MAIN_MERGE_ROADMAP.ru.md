@@ -195,7 +195,7 @@ Production evidence:
 - focused tests: `14 passed, 1 StarletteDeprecationWarning`;
 - full local suite: `535 passed, 1 StarletteDeprecationWarning`.
 
-После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening, Web Panel Safe Improvements, Scoped API Token Storage, Manager Config Export Contract, Public/Self-service Config Delivery Policy, Backup/Import Policy Contract, Secret Inventory Registry и отдельная read-only API lane. KYORESUAS API направление уже перешло в собственную `amn2` ветку `codex/read-only-api-route-shell`, head `2010d60`; real VPS loopback API smoke passed 2026-06-02, `run_id=20260602T171639Z`, evidence `research/amn2/api-vps-smoke-evidence-2026-06-02.md`. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным gate для SSH/sync/config/runtime write surfaces.
+После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening, Web Panel Safe Improvements, Scoped API Token Storage, Manager Config Export Contract, Public/Self-service Config Delivery Policy, Backup/Import Policy Contract, Secret Inventory Registry и отдельная read-only API lane. KYORESUAS API направление перешло в собственную `amn2` ветку `codex/read-only-api-route-shell`; real VPS loopback API smoke passed 2026-06-02, `run_id=20260602T171639Z`, evidence `research/amn2/api-vps-smoke-evidence-2026-06-02.md`, and the branch fast-forward merged into stable `codex-vps-test-prep` at `5f12736`. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным gate для SSH/sync/config/runtime write surfaces.
 
 ## Важные задачи
 
@@ -435,9 +435,9 @@ Gate: local-only срезы закрыли contract/partial-failure/dry-run ос
 1. Rotation/revoke policy is prepared in `research/amn2/api-token-rotation-revoke-policy.md`.
 2. Local-only lifecycle gate implemented in `amn2/codex/api-token-lifecycle-gate`, commit `c2ba646`: explicit route-connected expiry helper, idempotent revoke event, create-new-then-revoke-old rotation, owner inheritance and safe metadata.
 3. Stacked variant for merge order after route/auth binding is available in `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0`; stacked verification: focused `56 passed`, full suite `555 passed`.
-4. Read-only route shell is implemented in `amn2/codex/read-only-api-route-shell`; next lifecycle work should wait for PR/merge decision after VPS loopback API smoke evidence.
+4. Read-only route shell is implemented in `amn2/codex/read-only-api-route-shell` and merged into stable `codex-vps-test-prep` at `5f12736`; next lifecycle work must start from the stable baseline and stay behind separate route/secret gates.
 5. `config:read`, write, remote-exec, destructive, backup/import and broad admin-equivalent bearer tokens remain blocked.
 
 ## Recommendation
 
-API integration is now the priority product lane from `VPN Ops Lab — KYORESUAS-API`, and it entered `amn2` as a native, scoped, read-only route shell in `codex/read-only-api-route-shell`, not as copied KYORESUAS code. The VPS loopback API smoke gate is passed; the immediate next step is PR/merge decision back to stable `codex-vps-test-prep`. Controlled real VPS verification remains mandatory before any API route that calls SSH, syncs peers, emits config or changes runtime state.
+API integration is now the priority product lane from `VPN Ops Lab — KYORESUAS-API`, and it entered `amn2` as a native, scoped, read-only route shell in `codex/read-only-api-route-shell`, not as copied KYORESUAS code. The VPS loopback API smoke gate is passed and the branch is merged into stable `codex-vps-test-prep` at `5f12736`. Controlled real VPS verification remains mandatory before any API route that calls SSH, syncs peers, emits config or changes runtime state.

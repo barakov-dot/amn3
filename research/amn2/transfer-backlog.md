@@ -16,10 +16,10 @@ latest: 91aeb3e Document VPS verified tag
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 ```
 
-Текущий production head после merged local-gate transfer-срезов:
+Текущий production head после merged API/VPS evidence transfer:
 
 ```text
-d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
+5f12736 Record VPS API smoke evidence
 ```
 
 В эту линию уже вошли PR #4/#5 по API token lifecycle и PR #6 по SSH host key verifier. Scoped API token storage `1fdcde5` остается важным baseline, но больше не является текущим production head.
@@ -31,7 +31,7 @@ branch: codex/read-only-api-route-shell
 remote branch: amn2/codex/read-only-api-route-shell
 head: 2010d60 Add API VPS smoke evidence template
 base: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
-status: pushed, local tests green, real VPS loopback API smoke passed
+status: merged into codex-vps-test-prep at 5f12736 after local tests and real VPS loopback API smoke
 working chat: Переводим AMN на API
 ```
 
@@ -76,8 +76,8 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Manager config export contract | `implemented-pushed-local-gate-complete` | `amn2` | branch `codex/manager-config-export-contract`, commit `4d4e7a4`; evidence `research/amn2/manager-config-export-contract-implementation.md`; focused `40 passed`, full `560 passed` | Использовать как no-route typed export adapter baseline; public/self-service endpoints, API `config:read` и Local Agent `/configs` остаются отдельными gates |
 | Public/self-service config delivery policy | `implemented-pushed-local-gate-complete` | `amn2` | branch `codex/public-config-delivery-policy-contract`, commit `2ef3af7`; evidence `research/amn2/public-config-delivery-policy-contract-implementation.md`; focused `94 passed`, full `577 passed` | Использовать как no-route share-token/policy baseline; public download, self-service download, API `config:read` и Local Agent `/configs` остаются отдельными gates |
 | Packaging discovery fix | `implemented-pushed-local-gate-complete` | `amn2` | branch `codex/read-only-api-route-shell`, commit `e99d5f3 Fix editable install package discovery` | Считать install/startup blocker закрытым для API smoke branch; проверять на VPS через editable install |
-| KYORESUAS API integration priority | `vps-smoke-passed-merge-decision` | AMN3 -> `amn2` | `research/amn2/kyoresuas-api-integration-priority-plan.md`; `amn2/codex/read-only-api-route-shell`; evidence `research/amn2/api-vps-smoke-evidence-2026-06-02.md` | Принять PR/merge decision; upstream code не копировать |
-| Read-only API route shell | `real-vps-smoke-passed-awaits-merge-decision` | `amn2` | branch `codex/read-only-api-route-shell`, commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`; full suite `588 passed`; real VPS smoke passed `run_id=20260602T171639Z`; operator script `scripts/vps/amn2_api_loopback_smoke.sh`; update+smoke kit `dist/amn2-api-vps-update-and-smoke-kit-2026-06-02.zip` | Зафиксировать evidence в `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`, затем решить PR/merge в `codex-vps-test-prep` |
+| KYORESUAS API integration priority | `merged-in-stable-read-only-api` | AMN3 -> `amn2` | `research/amn2/kyoresuas-api-integration-priority-plan.md`; `amn2/codex/read-only-api-route-shell`; evidence `research/amn2/api-vps-smoke-evidence-2026-06-02.md`; production head `5f12736` | Использовать как merged read-only API baseline; upstream code не копировать |
+| Read-only API route shell | `merged-in-stable` | `amn2` | branch `codex/read-only-api-route-shell`, commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`, `5f12736`; full suite `588 passed`; focused merge check `75 passed`; real VPS smoke passed `run_id=20260602T171639Z`; operator script `scripts/vps/amn2_api_loopback_smoke.sh`; update+smoke kit `dist/amn2-api-vps-update-and-smoke-kit-2026-06-02.zip` | Считать first read-only API baseline merged; дальнейшее route expansion только через отдельные gates |
 | Read-only metrics privacy classification | `classification-used-by-api-shell` | AMN3 -> `amn2` | `research/amn2/read-only-metrics-privacy-classification.md` | Держать как privacy baseline для aggregate-only API; detailed client metrics остаются заблокированы |
 | Local Agent runtime metadata alignment | `alignment-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/local-agent-runtime-metadata-alignment.md` | После VPS evidence писать implementation plan для controller-safe runtime summary, не clients/configs |
 | API token rotation/revoke policy | `policy-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/api-token-rotation-revoke-policy.md` | Policy остается design source для route expansion и Local Agent token separation |
@@ -112,9 +112,9 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 
 ## Current Priority Order
 
-1. Зафиксировать real VPS API smoke evidence в production ветке `amn2/codex/read-only-api-route-shell`, head `2010d60`.
-2. Принять PR/merge decision read-only API route shell обратно в stable `codex-vps-test-prep`.
-3. Не открывать повторный local-only API implementation slice: first API shell уже прошел local suite и real VPS loopback smoke. Raw token/header/hash/config/keys/PSK не фиксировать в чатах.
+1. Считать first read-only API shell merged в stable `codex-vps-test-prep` at `5f12736`.
+2. Не открывать повторный local-only API implementation slice: first API shell уже прошел local suite, real VPS loopback smoke и stable merge. Raw token/header/hash/config/keys/PSK не фиксировать в чатах.
+3. Если нужен новый VPS install/update package, собирать его от production head `5f12736`.
 4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным обязательным gate перед API/web/agent routes, которые вызывают SSH, sync peers, emit config или меняют runtime state; single test peer apply/revoke только после отдельного подтверждения.
 5. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед route expansion.
 6. `/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot, public docs/metrics и detailed client metrics остаются заблокированы до отдельного решения.
@@ -232,7 +232,7 @@ Public-token safety commit `dfe27ee` также остается `local-gate-com
 
 Local Agent hardening commit `c5d7eb6` также остается `local-gate-complete`: `agent serve` подключает repository-backed audit sink для allowed read routes, `/agent/version` публикует runtime contract metadata, а tests подтверждают отсутствие raw bearer token в audit. Live VPS gate не нужен, потому что slice не делает real agent deployment, controller-to-agent calls, peer apply/revoke/config/sync/runtime writes.
 
-Remote operation VPS gate branch `codex/remote-operation-vps-gate-prep` обновлена поверх текущего `codex-vps-test-prep` head `d0939d8`: dry-run metadata, Runtime Registry и SSH host key verifier baseline подтверждены локально, но real VPS verification еще не запускался.
+Remote operation VPS gate branch `codex/remote-operation-vps-gate-prep` была подготовлена поверх прежнего `codex-vps-test-prep` head `d0939d8`: dry-run metadata, Runtime Registry и SSH host key verifier baseline подтверждены локально, но real VPS verification еще не запускался. Перед отдельным remote-operation VPS gate ее нужно обновить/rebase поверх нового stable head `5f12736`.
 
 Web panel safe-improvements commit `22dfc37` также остается `local-gate-complete`: это wording/UI-test слой без изменения apply/revoke/config/sync/runtime behavior. Live VPS gate не нужен.
 

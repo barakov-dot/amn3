@@ -2,7 +2,7 @@
 
 Дата: 2026-06-01.
 
-Актуализация 2026-06-02: первый read-only API route shell уже реализован и запушен в `amn2/codex/read-only-api-route-shell`, head `2010d60 Add API VPS smoke evidence template`. Real VPS loopback API smoke passed: `run_id=20260602T171639Z`, preflight/API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`. Этот документ теперь является исходным priority decision и safety boundary; текущий следующий gate - PR/merge decision обратно в stable `codex-vps-test-prep`, а не повторная локальная реализация.
+Актуализация 2026-06-02: первый read-only API route shell реализован в `amn2/codex/read-only-api-route-shell`, real VPS loopback API smoke passed (`run_id=20260602T171639Z`, preflight/API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`) и fast-forward merged в stable `codex-vps-test-prep` at `5f12736 Record VPS API smoke evidence`. Этот документ теперь является исходным priority decision и safety boundary; текущий следующий gate - не повторная локальная реализация, а отдельные route/secret/remote-write gates для любого расширения API.
 
 Назначение: зафиксировать новый приоритет после успешной установки `amn2` на VPS: API integration становится главной product lane, но переносится как собственный `amn2` contract без копирования `kyoresuas/amnezia-api` implementation.
 
@@ -94,7 +94,7 @@ Forbidden in first slice:
 
 ### Cosmetic
 
-9. `defer`: OpenAPI/docs grouping after VPS smoke and merge decision.
+9. `defer`: OpenAPI/docs grouping after a separate docs exposure decision.
 10. `defer`: Naming cleanup for API terms only if route behavior changes.
 
 ## Implemented plan artifact
@@ -105,4 +105,4 @@ Implementation plan:
 docs/superpowers/plans/2026-06-01-amn2-read-only-api-route-shell.md
 ```
 
-Implemented in `amn2/codex/read-only-api-route-shell`. Do not start another API implementation branch from AMN3; this branch now has local suite evidence and real VPS loopback smoke evidence, so the next decision is PR/merge back to `codex-vps-test-prep`.
+Implemented in `amn2/codex/read-only-api-route-shell` and merged into `codex-vps-test-prep` at `5f12736`. Do not start another API implementation branch from AMN3; future API work starts from this stable read-only baseline and requires separate gates for write/config/remote-changing surfaces.
