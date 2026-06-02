@@ -82,7 +82,7 @@ Merge result: fast-forward merged into `codex-vps-test-prep` at production head 
 Текущий фокус после verified VPS cycle, read-only `RemoteOperationRunner` baseline, redaction coverage, state-changing metadata, partial-failure, dry-run/audit metadata, web-panel safety, scoped API token storage local slices и read-only API route shell:
 
 1. Не расширять API за пределы merged read-only aggregate shell до отдельного route/secret/remote-write gate.
-2. Если нужен новый VPS install/update package, собирать его от production head `5f12736`.
+2. VPS install/update package от production head `5f12736` собран: `dist/amn2-vps-install-5f12736.zip` и `dist/amn2-vps-update-and-smoke-kit-5f12736.zip`.
 3. Перед отдельным remote-operation VPS gate обновить `codex/remote-operation-vps-gate-prep` поверх нового stable head `5f12736`.
 4. Отдельно выполнить controlled real VPS verification gate по `vps-gate-remote-operation-dry-run-audit.md` на ветке `codex/remote-operation-vps-gate-prep` перед SSH/sync/config/runtime-changing routes.
 5. Backup/import policy registry and restore-preview contract выполнен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`; web/API full backup, restore apply и import apply остаются закрытыми.

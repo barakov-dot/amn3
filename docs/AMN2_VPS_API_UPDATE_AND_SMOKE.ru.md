@@ -2,7 +2,7 @@
 
 Дата: 2026-06-02.
 
-Назначение: обновить установленный на VPS `/opt/amn2` до ветки `codex/read-only-api-route-shell` и затем выполнить loopback API smoke без передачи SSH-доступа в чат.
+Назначение: обновить установленный на VPS `/opt/amn2` до stable production head `5f12736` и затем выполнить loopback API smoke без передачи SSH-доступа в чат.
 
 Последний безопасный итог: real VPS loopback API smoke passed 2026-06-02, `run_id=20260602T171639Z`; preflight/API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`. AMN3 evidence: `research/amn2/api-vps-smoke-evidence-2026-06-02.md`.
 
@@ -20,18 +20,18 @@ Smoke-скрипт сам API-код не устанавливает. Он пр�
 
 ## Пакеты
 
-Source package для API-ветки:
+Source package для stable head `5f12736`:
 
 ```text
-dist/amn2-read-only-api-route-shell-2010d60-source.zip
-dist/amn2-read-only-api-route-shell-2010d60-source.zip.sha256.txt
+dist/amn2-codex-vps-test-prep-5f12736-source.zip
+dist/amn2-codex-vps-test-prep-5f12736-source.zip.sha256.txt
 ```
 
 Operator update+smoke kit:
 
 ```text
-dist/amn2-api-vps-update-and-smoke-kit-2026-06-02.zip
-dist/amn2-api-vps-update-and-smoke-kit-2026-06-02.zip.sha256.txt
+dist/amn2-vps-update-and-smoke-kit-5f12736.zip
+dist/amn2-vps-update-and-smoke-kit-5f12736.zip.sha256.txt
 ```
 
 Скрипты внутри:
@@ -47,7 +47,7 @@ amn2_api_loopback_smoke.sh
 
 - проверяет SHA256 source zip;
 - проверяет, что source zip не содержит `.env`, `servers.yml`, `data/`, `venv/`, `.git/`, sqlite/db/key/pem files;
-- распаковывает tracked source files из ветки `2010d60`;
+- распаковывает tracked source files из production head `5f12736`;
 - накладывает их поверх `/opt/amn2`;
 - не удаляет и не копирует `.env`, `data`, `venv`, `servers.yml`;
 - запускает `python -m pip install -e .`;
@@ -61,27 +61,27 @@ amn2_api_loopback_smoke.sh
 
 ```powershell
 cd C:\Users\SooL\Documents\VPS-OPS-LAB
-scp .\dist\amn2-api-vps-update-and-smoke-kit-2026-06-02.zip root@<VPS_HOST>:/root/
-scp .\dist\amn2-api-vps-update-and-smoke-kit-2026-06-02.zip.sha256.txt root@<VPS_HOST>:/root/
+scp .\dist\amn2-vps-update-and-smoke-kit-5f12736.zip root@<VPS_HOST>:/root/
+scp .\dist\amn2-vps-update-and-smoke-kit-5f12736.zip.sha256.txt root@<VPS_HOST>:/root/
 ```
 
 На VPS:
 
 ```bash
 cd /root
-sha256sum -c amn2-api-vps-update-and-smoke-kit-2026-06-02.zip.sha256.txt
-mkdir -p amn2-api-vps-update-and-smoke-kit-2026-06-02
-python3 -m zipfile -e amn2-api-vps-update-and-smoke-kit-2026-06-02.zip amn2-api-vps-update-and-smoke-kit-2026-06-02
-cd amn2-api-vps-update-and-smoke-kit-2026-06-02
-sha256sum -c amn2-read-only-api-route-shell-2010d60-source.zip.sha256.txt
+sha256sum -c amn2-vps-update-and-smoke-kit-5f12736.zip.sha256.txt
+mkdir -p amn2-vps-update-and-smoke-kit-5f12736
+python3 -m zipfile -e amn2-vps-update-and-smoke-kit-5f12736.zip amn2-vps-update-and-smoke-kit-5f12736
+cd amn2-vps-update-and-smoke-kit-5f12736
+sha256sum -c amn2-codex-vps-test-prep-5f12736-source.zip.sha256.txt
 ```
 
 ## 2. Обновить `/opt/amn2`
 
 ```bash
-cd /root/amn2-api-vps-update-and-smoke-kit-2026-06-02
+cd /root/amn2-vps-update-and-smoke-kit-5f12736
 export AMN2_DIR=/opt/amn2
-export AMN2_SOURCE_ZIP=/root/amn2-api-vps-update-and-smoke-kit-2026-06-02/amn2-read-only-api-route-shell-2010d60-source.zip
+export AMN2_SOURCE_ZIP=/root/amn2-vps-update-and-smoke-kit-5f12736/amn2-codex-vps-test-prep-5f12736-source.zip
 bash ./amn2_apply_source_zip.sh
 ```
 
@@ -89,14 +89,14 @@ bash ./amn2_apply_source_zip.sh
 
 ```text
 source_update_status=passed
-source_commit=2010d60
+source_commit=5f12736
 next=run ./amn2_api_loopback_smoke.sh from /opt/amn2
 ```
 
 ## 3. Установить smoke script и запустить проверку
 
 ```bash
-install -m 700 /root/amn2-api-vps-update-and-smoke-kit-2026-06-02/amn2_api_loopback_smoke.sh /opt/amn2/amn2_api_loopback_smoke.sh
+install -m 700 /root/amn2-vps-update-and-smoke-kit-5f12736/amn2_api_loopback_smoke.sh /opt/amn2/amn2_api_loopback_smoke.sh
 cd /opt/amn2
 export VPS_APPLY_ENABLED=false
 export AMN2_SERVER_NAME=debian-vps-1
@@ -165,6 +165,6 @@ audit_status: passed
 
 ## 6. После pass
 
-После `VPS verdict: pass` можно вернуться в coordination chat и принять решение по PR/merge `codex/read-only-api-route-shell` обратно в stable `codex-vps-test-prep`.
+После `VPS verdict: pass` можно вернуться в coordination chat и зафиксировать, что stable `codex-vps-test-prep` на `5f12736` подтвержден на VPS.
 
 Write API, `/clients` CRUD, API `config:read`, public config delivery, backup/import/reboot и SSH/sync/config/runtime-changing routes остаются закрытыми до отдельного controlled VPS gate.

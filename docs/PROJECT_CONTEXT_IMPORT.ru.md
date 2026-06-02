@@ -98,11 +98,13 @@ status: clean and synchronized with origin/master
 8b4cc81 Refresh project coordination state
 ```
 
-Актуальный install package:
+Актуальный install/update package:
 
 ```text
-dist/amn2-vps-install-d0939d8.zip
-sha256: DEBF2983BFE10B17EF3994A5C1F4F21F959919D0746C6593001A67705E00378F
+dist/amn2-vps-install-5f12736.zip
+sha256: 5CD7EFEAC92BF9ED6A93D6DC4114536298085A829392659C28096FEFD9E2AF19
+dist/amn2-vps-update-and-smoke-kit-5f12736.zip
+sha256: 5AAD3373DF587338166F421AA269267A170B028E49F1A606937A89076C239935
 ```
 
 Соседний AMN3 branch-only push, учтенный как комментарий к pre-VPS координации:
@@ -128,7 +130,7 @@ status: не слито в master; не повторять соседний VPS 
 - API token lifecycle gate branch `256d0c0`, merged through PR #4/#5;
 - SSH host key verifier `dd20364`, merged through PR #6; later read-only API route shell moved current `amn2` head to `5f12736`;
 - remote operation VPS-gate candidate `262d70f`, pushed and waiting for real VPS gate.
-- VPS install package `dist/amn2-vps-install-d0939d8.zip` with installer fallback fix;
+- VPS install/update package `dist/amn2-vps-install-5f12736.zip` and `dist/amn2-vps-update-and-smoke-kit-5f12736.zip`;
 - KYORESUAS API integration priority plan;
 - read-only API route shell branch `codex/read-only-api-route-shell`, real VPS loopback API smoke passed through AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh`, then fast-forward merged into stable `codex-vps-test-prep` at `5f12736`.
 

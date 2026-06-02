@@ -40,7 +40,7 @@ ModuleNotFoundError: No module named 'app.api'
 
 ```text
 docs/AMN2_VPS_API_UPDATE_AND_SMOKE.ru.md
-dist/amn2-api-vps-update-and-smoke-kit-2026-06-02.zip
+dist/amn2-vps-update-and-smoke-kit-5f12736.zip
 ```
 
 ## 1. Подготовить ветку на VPS
@@ -69,7 +69,7 @@ source venv/bin/activate
 python -m pip install -e .
 ```
 
-Если `/opt/amn2` установлен из zip без `.git`, сначала нужно заменить source tree на сборку/checkout ветки `codex/read-only-api-route-shell`. Старый stable package `dist/amn2-vps-install-d0939d8.zip` не содержит read-only API route shell.
+Если `/opt/amn2` установлен из zip без `.git`, сначала нужно заменить source tree на stable package/update kit `5f12736`. Старый stable package `dist/amn2-vps-install-d0939d8.zip` не содержит read-only API route shell.
 
 ## 2. Загрузить скрипт
 

@@ -69,11 +69,13 @@ Committed head lab reviewed in this status refresh:
 8b4cc81 Refresh project coordination state
 ```
 
-Актуальный install package для стабильного `amn2` baseline `d0939d8`:
+Актуальный install/update package для стабильного `amn2` baseline `5f12736`:
 
 ```text
-dist/amn2-vps-install-d0939d8.zip
-sha256: DEBF2983BFE10B17EF3994A5C1F4F21F959919D0746C6593001A67705E00378F
+dist/amn2-vps-install-5f12736.zip
+sha256: 5CD7EFEAC92BF9ED6A93D6DC4114536298085A829392659C28096FEFD9E2AF19
+dist/amn2-vps-update-and-smoke-kit-5f12736.zip
+sha256: 5AAD3373DF587338166F421AA269267A170B028E49F1A606937A89076C239935
 ```
 
 Дополнительный соседний AMN3 push, который не слит в `master`, но учтен в этом snapshot:
@@ -212,7 +214,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Backup/Import Policy Contract: branch `amn2/codex/backup-import-policy-contract`, head `afb2702 Tighten backup import preview type contract` with foundation commit `d2c160b`; local-only no-route backup mode registry, secret field policy and restore/import preview contract, без web/API backup routes, restore apply, import apply или live VPS calls.
 - Secret Inventory Registry: branch `amn2/codex/secret-inventory-registry`, commit `9ce42f4 Add secret inventory registry`; local-only machine-checkable secret inventory, без `.env` чтения, DB access, routes, secret-bearing output или live VPS calls.
 - Packaging discovery fix: branch `amn2/codex/read-only-api-route-shell`, commit `e99d5f3 Fix editable install package discovery`; исправляет editable install/package discovery перед VPS install package smoke.
-- Read-only API route shell: branch `amn2/codex/read-only-api-route-shell`, commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`, `5f12736`; добавлены loopback-safe read-only `/api/*` routes, token smoke CLI, local API smoke readiness, `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`, AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh` и update+smoke kit `dist/amn2-api-vps-update-and-smoke-kit-2026-06-02.zip`; full local suite `588 passed`, expected `StarletteDeprecationWarning`; real VPS loopback smoke passed 2026-06-02, `run_id=20260602T171639Z`, evidence `research/amn2/api-vps-smoke-evidence-2026-06-02.md`; fast-forward merged into `codex-vps-test-prep` at production head `5f12736`.
+- Read-only API route shell: branch `amn2/codex/read-only-api-route-shell`, commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`, `5f12736`; добавлены loopback-safe read-only `/api/*` routes, token smoke CLI, local API smoke readiness, `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`, AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh` и update+smoke kit `dist/amn2-vps-update-and-smoke-kit-5f12736.zip`; full local suite `588 passed`, expected `StarletteDeprecationWarning`; real VPS loopback smoke passed 2026-06-02, `run_id=20260602T171639Z`, evidence `research/amn2/api-vps-smoke-evidence-2026-06-02.md`; fast-forward merged into `codex-vps-test-prep` at production head `5f12736`.
 
 Решение по соседним чатам:
 
@@ -306,7 +308,7 @@ head: 8697b60 Document Local Agent production wiring
 ## Рекомендуемый порядок
 
 1. Не открывать второй параллельный API implementation branch: read-only API route shell уже прошел local suite, real VPS loopback smoke и fast-forward merge в stable `codex-vps-test-prep`.
-2. Если нужен новый VPS install/update package, собрать его уже от production head `5f12736`; старый install package `d0939d8` остается историческим стабильным baseline package.
+2. Новый VPS install/update package собран от production head `5f12736`; старый install package `d0939d8` остается историческим baseline package.
 3. Перед отдельным remote-operation VPS gate обновить/rebase `codex/remote-operation-vps-gate-prep` поверх нового stable head `5f12736`.
 4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным обязательным gate перед любым API/web/agent route, который вызывает SSH, syncs peers, emits config или меняет runtime state.
 5. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед дальнейшим route expansion.
