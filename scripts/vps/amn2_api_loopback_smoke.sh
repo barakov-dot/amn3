@@ -16,6 +16,7 @@ AMN2_RUN_PREFLIGHT="${AMN2_RUN_PREFLIGHT:-auto}"
 AMN2_REQUIRE_PREFLIGHT="${AMN2_REQUIRE_PREFLIGHT:-0}"
 AMN2_EXPECTED_COMMIT="${AMN2_EXPECTED_COMMIT:-2010d60}"
 AMN2_ALLOW_EXISTING_API="${AMN2_ALLOW_EXISTING_API:-0}"
+AMN2_SMOKE_SCRIPT_VERSION="2026-06-02.2"
 
 API_PID=""
 TOKEN_ID=""
@@ -74,7 +75,7 @@ PY
 }
 
 http_code() {
-  curl -s -o /dev/null -w '%{http_code}' --max-time "$AMN2_CURL_TIMEOUT" "$@"
+  curl -s -o /dev/null -w '%{http_code}' --max-time "$AMN2_CURL_TIMEOUT" "$@" 2>/dev/null
 }
 
 revoke_token() {
@@ -191,6 +192,10 @@ PY
 log "workspace: $AMN2_DIR"
 log "server name: $AMN2_SERVER_NAME"
 log "api bind: $BASE_URL"
+log "script version: $AMN2_SMOKE_SCRIPT_VERSION"
+if command -v sha256sum >/dev/null 2>&1; then
+  log "script sha256: $(sha256sum "$0" | awk '{print $1}')"
+fi
 log "safe evidence dir: $RUN_DIR"
 
 {
@@ -199,6 +204,10 @@ log "safe evidence dir: $RUN_DIR"
   printf 'db_path=%s\n' "$AMN2_DB"
   printf 'server_name=%s\n' "$AMN2_SERVER_NAME"
   printf 'api_bind=%s\n' "$BASE_URL"
+  printf 'script_version=%s\n' "$AMN2_SMOKE_SCRIPT_VERSION"
+  if command -v sha256sum >/dev/null 2>&1; then
+    printf 'script_sha256=%s\n' "$(sha256sum "$0" | awk '{print $1}')"
+  fi
   printf 'python=%s\n' "$("$PYTHON_BIN" --version 2>&1)"
   printf 'vps_apply_enabled=false\n'
 } > "$RUN_DIR/context.txt"
