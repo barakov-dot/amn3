@@ -52,13 +52,13 @@ https://github.com/barakov-dot/amn3.git
 master
 ```
 
-Committed head lab reviewed in this status refresh:
+AMN3 package state reviewed in this status refresh:
 
 ```text
-8b4cc81 Refresh project coordination state
+master; verify exact current head with git log -1 after package publish
 ```
 
-`master` синхронизирован с `origin/master`.
+`master` должен быть синхронизирован с `origin/master` после каждого package publish.
 
 Последние AMN3 pushes, учтенные в этом snapshot:
 
@@ -67,16 +67,19 @@ Committed head lab reviewed in this status refresh:
 87da41d Fix VPS installer user creation fallback
 7fc3aee Set KYORESUAS API integration priority
 8b4cc81 Refresh project coordination state
+2b845cb Make API smoke skip server preflight by default
 ```
 
 Актуальный install/update package для стабильного `amn2` baseline `5f12736`:
 
 ```text
 dist/amn2-vps-install-5f12736.zip
-sha256: 62F6816BC4FCCDC72DBE8ACC96F70155B772706CF976B3578066BF1B6413AE04
+sha256: 41817BD8F5F6F7F4BE3DBDA53788645A02B2BAE1664A1FB5AF6B979512238A29
 dist/amn2-vps-update-and-smoke-kit-5f12736.zip
 sha256: 79BFFCA120D95FA4A68163CAD80F56C61E241035FDCD0FF6DC318BBA1E594A85
 ```
+
+Package hotfix note: install package `5f12736` now includes `amn2_api_loopback_smoke.sh`; `install_on_vps.sh` copies it to `/opt/amn2` and its `Next steps` run API-only smoke with `AMN2_RUN_PREFLIGHT=0`. `server preflight` remains only a separate SSH/server dry-run gate, not the API smoke path.
 
 Дополнительный соседний AMN3 push, который не слит в `master`, но учтен в этом snapshot:
 

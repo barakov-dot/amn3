@@ -33,7 +33,7 @@ sudo apt install -y python3.12 python3.12-venv python3-pip passwd adduser
 Пример с локальной машины:
 
 ```bash
-scp amn2-source-5f12736.zip INSTALL_ON_VPS.ru.md install_on_vps.sh root@YOUR_VPS:/root/amn2-install/
+scp amn2-source-5f12736.zip INSTALL_ON_VPS.ru.md install_on_vps.sh amn2_api_loopback_smoke.sh root@YOUR_VPS:/root/amn2-install/
 ```
 
 На VPS:
@@ -133,7 +133,8 @@ cd /opt/amn2
 source venv/bin/activate
 export VPS_APPLY_ENABLED=false
 export AMN2_RUN_PREFLIGHT=0
-python -m app.cli api serve --host 127.0.0.1 --port 3040
+export AMN2_SERVER_NAME=local
+bash ./amn2_api_loopback_smoke.sh
 ```
 
 Если нужен отдельный SSH/server dry-run gate, запускать его вручную и осознанно,

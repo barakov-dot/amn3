@@ -5,6 +5,7 @@ export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${PATH
 
 PACKAGE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ARCHIVE="${PACKAGE_DIR}/amn2-source-5f12736.zip"
+SMOKE_SCRIPT="${PACKAGE_DIR}/amn2_api_loopback_smoke.sh"
 INSTALL_DIR="${INSTALL_DIR:-/opt/amn2}"
 SERVICE_USER="${SERVICE_USER:-amneziya}"
 FORCE="false"
@@ -20,6 +21,11 @@ fi
 
 if [[ ! -f "${ARCHIVE}" ]]; then
   echo "Archive not found: ${ARCHIVE}"
+  exit 1
+fi
+
+if [[ ! -f "${SMOKE_SCRIPT}" ]]; then
+  echo "Smoke script not found: ${SMOKE_SCRIPT}"
   exit 1
 fi
 
@@ -108,6 +114,8 @@ if [[ ! -f "servers.yml" ]]; then
   cp deploy/examples/servers.docker.example.yml servers.yml
 fi
 
+install -m 700 "${SMOKE_SCRIPT}" "${INSTALL_DIR}/amn2_api_loopback_smoke.sh"
+
 chown -R "${SERVICE_USER}:${SERVICE_USER}" "${INSTALL_DIR}"
 chmod 600 "${INSTALL_DIR}/.env" || true
 
@@ -116,12 +124,13 @@ Installed to ${INSTALL_DIR}.
 
 Next steps:
 1. Edit ${INSTALL_DIR}/.env and ${INSTALL_DIR}/servers.yml.
-2. Keep VPS_APPLY_ENABLED=false for first read-only/dry-run checks.
-3. Run:
+2. Keep VPS_APPLY_ENABLED=false for first loopback API smoke.
+3. Run API-only smoke; do not run server preflight for this check:
    cd ${INSTALL_DIR}
    source venv/bin/activate
-   python -m app.cli web hash-password
-   python -m app.cli bot check-network
-   python -m app.cli server preflight --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
-   python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
+   export VPS_APPLY_ENABLED=false
+   export AMN2_RUN_PREFLIGHT=0
+   export AMN2_SERVER_NAME=local
+   bash ./amn2_api_loopback_smoke.sh
+4. Run bot/network/server SSH dry-run checks only as a separate operator gate.
 EOF

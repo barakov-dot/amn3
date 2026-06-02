@@ -85,8 +85,8 @@ tests/db/test_repositories.py
 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 branch: master
 remote: https://github.com/barakov-dot/amn3.git
-committed head reviewed in this refresh: 8b4cc81 Refresh project coordination state
-status: clean and synchronized with origin/master
+package state reviewed in this refresh: master; verify exact current head with git log -1 after package publish
+status: synchronize with origin/master after package publish
 ```
 
 Последние AMN3 pushes, учтенные в координации:
@@ -96,16 +96,19 @@ status: clean and synchronized with origin/master
 87da41d Fix VPS installer user creation fallback
 7fc3aee Set KYORESUAS API integration priority
 8b4cc81 Refresh project coordination state
+2b845cb Make API smoke skip server preflight by default
 ```
 
 Актуальный install/update package:
 
 ```text
 dist/amn2-vps-install-5f12736.zip
-sha256: 62F6816BC4FCCDC72DBE8ACC96F70155B772706CF976B3578066BF1B6413AE04
+sha256: 41817BD8F5F6F7F4BE3DBDA53788645A02B2BAE1664A1FB5AF6B979512238A29
 dist/amn2-vps-update-and-smoke-kit-5f12736.zip
 sha256: 79BFFCA120D95FA4A68163CAD80F56C61E241035FDCD0FF6DC318BBA1E594A85
 ```
+
+Package hotfix note: install package `5f12736` includes `amn2_api_loopback_smoke.sh`; installer `Next steps` run API-only smoke with `AMN2_RUN_PREFLIGHT=0`. `server preflight` is a separate SSH/server dry-run gate only.
 
 Соседний AMN3 branch-only push, учтенный как комментарий к pre-VPS координации:
 
