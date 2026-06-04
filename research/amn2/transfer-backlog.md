@@ -248,3 +248,15 @@ Public/self-service config delivery policy commit `2ef3af7` также оста�
 Backup/import policy contract head `afb2702` (foundation commit `d2c160b`) также остается `local-gate-complete`: добавлен no-route backup mode registry, secret field policy, safe manifests, restore/import preview-only contracts and blocked future `SurfacePolicy` entries. Slice не добавляет `/api/*`, web/Local Agent backup routes, restore apply, import apply или live VPS calls.
 
 Secret inventory registry commit `9ce42f4` также остается `local-gate-complete`: добавлен machine-checkable `app.security.secret_inventory`, safe manifest, lookup/filter helpers and backup policy cross-checks. Slice не читает `.env`, не подключается к БД, не добавляет routes, secret-bearing output или live VPS calls.
+
+## Post Dry-Run Read-Only Integration Plan
+
+Статус: `planned-next-local-slice`.
+
+Plan artifact:
+
+```text
+docs/superpowers/plans/2026-06-04-amn2-post-dry-run-read-only-integration.md
+```
+
+Решение: после real VPS Phase 1 `dry-run-only-pass` не переходить к Phase 2 live apply/revoke по умолчанию. Следующий рекомендуемый `amn2` slice - local-only read-only integration status surface: web-admin `/integration-status`, API `GET /api/integration/status`, общий local `integration_status` service, route policy/binding tests и AMN3 evidence. Slice не должен добавлять `/api/clients`, `config:read`, public/self-service config delivery, Local Agent mutations, SSH writes, Docker writes, peer apply/revoke, backup/import/reboot routes или detailed per-peer metrics.
