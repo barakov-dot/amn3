@@ -56,7 +56,7 @@ GET /api/users/summary -> metrics:read
 
 ```text
 branch: codex/remote-operation-vps-gate-prep
-head: 262d70f Merge current VPS test prep into remote operation gate
+head: 7281254 Merge stable API web panel baseline into remote operation gate
 base: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
 status: pushed to amn2, local tests green, awaits real VPS gate
 runbook: research/amn2/vps-gate-remote-operation-dry-run-audit.md
@@ -132,7 +132,7 @@ status: не слито в master; не повторять соседний VPS 
 - Route/Auth binding tests branch `f9d2c79`, merged through current production line;
 - API token lifecycle gate branch `256d0c0`, merged through PR #4/#5;
 - SSH host key verifier `dd20364`, merged through PR #6; later read-only API route shell moved current `amn2` head to `5f12736`, then API/web-panel finish moved current head to `294803e`;
-- remote operation VPS-gate candidate `262d70f`, pushed and waiting for real VPS gate.
+- remote operation VPS-gate candidate `7281254`, pushed and waiting for real VPS gate.
 - VPS install/update package `dist/amn2-vps-install-294803e.zip` and `dist/amn2-vps-update-and-smoke-kit-294803e.zip`;
 - KYORESUAS API integration priority plan;
 - read-only API route shell branch `codex/read-only-api-route-shell`, real VPS loopback API smoke passed through AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh`, then fast-forward merged into stable `codex-vps-test-prep` at `5f12736`;
@@ -543,7 +543,7 @@ First safe slice по design spec:
 Текущий режим coordination: AMN3 принял состояние после live VPS stage, local-only transfer slices, VPS install package и активной read-only API ветки.
 
 1. Держать read-only API shell как stable evidence baseline at `5f12736`; текущий production/API-web head - `294803e`.
-2. Перед remote-operation VPS gate обновить отдельную branch `codex/remote-operation-vps-gate-prep` поверх `294803e`.
+2. Remote-operation VPS gate branch уже обновлена поверх `294803e`: `codex/remote-operation-vps-gate-prep` at `7281254`.
 3. Для новых API routes начинать с отдельного route/secret/remote-write gate, не с копирования upstream code.
 4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` держать отдельным gate для SSH/sync/config/runtime-changing routes.
 5. Для coordination-чата держать правило: любая новая идея сначала попадает в очередь с verdict, а не сразу в implementation.

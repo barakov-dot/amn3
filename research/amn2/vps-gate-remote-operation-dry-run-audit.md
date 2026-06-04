@@ -1,6 +1,6 @@
 # `amn2` Remote Operation VPS Gate: dry-run/audit candidate
 
-Дата: 2026-06-01.
+Дата: 2026-06-04.
 
 Назначение: подготовить controlled real VPS verification gate для remote-operation dry-run/audit stack после verified amn2 live baseline.
 
@@ -25,13 +25,13 @@ Base branch/head:
 
 ```text
 codex-vps-test-prep
-d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
+294803e Add API readiness and token web pages
 ```
 
 Candidate head after local preparation:
 
 ```text
-262d70f Merge current VPS test prep into remote operation gate
+7281254 Merge stable API web panel baseline into remote operation gate
 ```
 
 Included remote-operation commits:
@@ -43,9 +43,10 @@ b7a12ca Add remote operation dry-run metadata
 50be810 Document remote operation local gate
 aca6663 Add VPS gate handoff for remote ops
 262d70f Merge current VPS test prep into remote operation gate
+7281254 Merge stable API web panel baseline into remote operation gate
 ```
 
-Why this candidate exists: the older `codex/remote-operation-dry-run-audit` branch diverged from `codex-vps-test-prep` at `91aeb3e`. The VPS test must use the updated candidate branch on top of the current verified transfer head `d0939d8`, not the stale branch or the old `aca6663` head.
+Why this candidate exists: the older `codex/remote-operation-dry-run-audit` branch diverged from `codex-vps-test-prep` at `91aeb3e`. The VPS test must use the updated candidate branch on top of the current verified API/web-panel head `294803e`, not the stale branch or the old `aca6663`/`262d70f` heads.
 
 ## Local verification
 
@@ -58,28 +59,21 @@ C:\Users\SooL\Documents\VPS-OPS-LAB\worktrees\amn2-vps-gate-prep
 Focused gate:
 
 ```text
+tests\deploy\test_runtime_registry.py
 tests\server\test_operation_runner.py
 tests\server\test_peer_apply.py
-tests\security\test_redaction.py
-tests\web\test_servers.py
-tests\web\test_users.py
-result: 107 passed, 1 PytestCacheWarning
-```
-
-Runtime registry docs:
-
-```text
-tests\deploy\test_runtime_registry.py
-result: 7 passed
+tests\services\test_access_service.py
+tests\server\test_cli_server_check.py
+result: 71 passed, 1 PytestCacheWarning
 ```
 
 Full local suite:
 
 ```text
-572 passed, 2 warnings
+603 passed, 1 StarletteDeprecationWarning
 ```
 
-Note: the first Windows worktree run failed because `tmp\...` did not exist for `--basetemp`; after creating local `tmp` and disabling pytest cache, the same candidate passed. This was an execution-environment issue, not a code regression.
+Note: the focused Windows worktree run emitted a PytestCacheWarning because `.pytest_cache` could not be written. The full suite was rerun with pytest cache disabled and passed. This was an execution-environment issue, not a code regression.
 
 ## Scope
 
@@ -123,8 +117,8 @@ Before entering the real VPS gate:
 
 - operator has a VPS maintenance window and recovery access;
 - current production app state is known and recoverable;
-- `servers.yml` server alias is known; examples below use `debian-vps-1`;
-- database path is known; examples below use `data/amneziya.sqlite3`;
+- `servers.yml` server alias is known; examples below default to `SERVER_NAME=local`;
+- database path is known; examples below default to `DB_PATH=data/amneziya.sqlite3`;
 - runtime config path points to the persistent AmneziaWG config used by Docker;
 - `VPS_APPLY_ENABLED=false` for read-only/dry-run phases;
 - SSH host key is verified/pinned outside AMN3 notes; if the SSH client prompts about an unknown host key, stop and verify out-of-band before continuing;
@@ -133,51 +127,71 @@ Before entering the real VPS gate:
 
 ## VPS setup commands
 
-Run on the real VPS only after the operator explicitly starts the VPS gate:
+The current `/opt/amn2` VPS install may be a source-overlay install and not a git checkout. Prefer the AMN3 update kit below. Run on the real VPS only after the operator explicitly starts the VPS gate:
 
-```powershell
-cd /opt/amn2
-git fetch amn2
-git switch codex/remote-operation-vps-gate-prep
-git log -1 --oneline
+```text
+dist/amn2-remote-operation-vps-gate-7281254-update-kit.zip
+sha256: 4CD05C728A74588B4EB1DC2BFB9DC550E1B32807A398C17917875648251F88D1
+```
+
+```bash
+cd /root
+curl -fL -o amn2-remote-operation-vps-gate-7281254-update-kit.zip \
+  https://github.com/barakov-dot/amn3/raw/master/dist/amn2-remote-operation-vps-gate-7281254-update-kit.zip
+curl -fL -o amn2-remote-operation-vps-gate-7281254-update-kit.zip.sha256.txt \
+  https://raw.githubusercontent.com/barakov-dot/amn3/master/dist/amn2-remote-operation-vps-gate-7281254-update-kit.zip.sha256.txt
+sha256sum -c amn2-remote-operation-vps-gate-7281254-update-kit.zip.sha256.txt
+rm -rf amn2-remote-operation-vps-gate-7281254-update-kit
+mkdir -p amn2-remote-operation-vps-gate-7281254-update-kit
+python3 -m zipfile -e amn2-remote-operation-vps-gate-7281254-update-kit.zip amn2-remote-operation-vps-gate-7281254-update-kit
+cd amn2-remote-operation-vps-gate-7281254-update-kit
+sha256sum -c amn2-remote-operation-vps-gate-7281254-source.zip.sha256.txt
+export VPS_APPLY_ENABLED=false
+export AMN2_DIR=/opt/amn2
+bash ./amn2_apply_remote_operation_gate_source_zip.sh
 ```
 
 Expected head:
 
 ```text
-262d70f Merge current VPS test prep into remote operation gate
+7281254 Merge stable API web panel baseline into remote operation gate
 ```
 
 If the VPS uses a virtual environment:
 
-```powershell
+```bash
+cd /opt/amn2
 source venv/bin/activate
-python -m pip install -e .
+cat .amn2_source_overlay_commit
 ```
 
 Generate the existing retest bundle:
 
-```powershell
-python -m app.cli server retest-plan --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
+```bash
+export SERVER_NAME="${SERVER_NAME:-local}"
+export DB_PATH="${DB_PATH:-data/amneziya.sqlite3}"
+python -m app.cli server retest-plan --config servers.yml --server "$SERVER_NAME" --db "$DB_PATH"
 ```
 
 ## Phase 1: read-only and dry-run
 
 These commands must not change the VPS state:
 
-```powershell
+```bash
+export SERVER_NAME="${SERVER_NAME:-local}"
+export DB_PATH="${DB_PATH:-data/amneziya.sqlite3}"
 python -m app.cli bot check-network
-python -m app.cli server preflight --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
-python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
-python -m app.cli server check --config servers.yml --server debian-vps-1
-python -m app.cli server collect-traffic --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3 --dry-run
+python -m app.cli server preflight --config servers.yml --server "$SERVER_NAME" --db "$DB_PATH"
+python -m app.cli server check --config servers.yml --server "$SERVER_NAME" --dry-run
+python -m app.cli server check --config servers.yml --server "$SERVER_NAME"
+python -m app.cli server collect-traffic --config servers.yml --server "$SERVER_NAME" --db "$DB_PATH" --dry-run
 ```
 
 Dry-run mutation previews:
 
-```powershell
-python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key TEST_PEER_PUBLIC_KEY --preshared-key TEST_PEER_PSK --vpn-ip TEST_VPN_IP --dry-run
-python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 --public-key TEST_PEER_PUBLIC_KEY --dry-run
+```bash
+python -m app.cli server apply-peer --config servers.yml --server "$SERVER_NAME" --public-key TEST_PEER_PUBLIC_KEY --preshared-key TEST_PEER_PSK --vpn-ip TEST_VPN_IP --dry-run
+python -m app.cli server revoke-peer --config servers.yml --server "$SERVER_NAME" --public-key TEST_PEER_PUBLIC_KEY --dry-run
 ```
 
 Expected dry-run evidence:
@@ -195,11 +209,11 @@ This phase requires separate operator confirmation after Phase 1 evidence is rev
 
 Use only a dedicated test peer/device:
 
-```powershell
-python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key TEST_PEER_PUBLIC_KEY --preshared-key TEST_PEER_PSK --vpn-ip TEST_VPN_IP --apply
-python -m app.cli server sync-peers --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
-python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 --public-key TEST_PEER_PUBLIC_KEY --apply
-python -m app.cli server sync-peers --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3
+```bash
+python -m app.cli server apply-peer --config servers.yml --server "$SERVER_NAME" --public-key TEST_PEER_PUBLIC_KEY --preshared-key TEST_PEER_PSK --vpn-ip TEST_VPN_IP --apply
+python -m app.cli server sync-peers --config servers.yml --server "$SERVER_NAME" --db "$DB_PATH"
+python -m app.cli server revoke-peer --config servers.yml --server "$SERVER_NAME" --public-key TEST_PEER_PUBLIC_KEY --apply
+python -m app.cli server sync-peers --config servers.yml --server "$SERVER_NAME" --db "$DB_PATH"
 ```
 
 Expected live evidence:

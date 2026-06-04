@@ -110,15 +110,14 @@ Read-only health slice `RemoteOperationRunner` уже присутствует �
 
 ## Обновление 2026-06-01: fresh VPS gate candidate
 
-Для реального VPS gate подготовлена fresh branch поверх текущего `codex-vps-test-prep` head `1fdcde5`, потому что историческая `codex/remote-operation-dry-run-audit` расходилась с актуальным baseline.
+Для реального VPS gate подготовлена fresh branch поверх текущего `codex-vps-test-prep` head `294803e`, потому что историческая `codex/remote-operation-dry-run-audit` расходилась с актуальным baseline.
 
 - branch: `codex/remote-operation-vps-gate-prep`;
-- head: `262d70f Merge current VPS test prep into remote operation gate`;
-- base: `d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier`;
+- head: `7281254 Merge stable API web panel baseline into remote operation gate`;
+- base: `294803e Add API readiness and token web pages`;
 - runbook: `research/amn2/vps-gate-remote-operation-dry-run-audit.md`;
-- focused verification: `107 passed, 1 warning`;
-- docs verification: `7 passed`;
-- full suite: `572 passed, 2 warnings`.
+- focused verification: `71 passed, 1 warning`;
+- full suite: `603 passed, 1 warning`.
 
 Live VPS еще не трогался. Следующий шаг - read-only/dry-run gate на реальном VPS, затем single test peer apply/revoke только после отдельного подтверждения оператора.
 

@@ -11,7 +11,7 @@
 ```text
 repo: https://github.com/barakov-dot/amn2.git
 branch: codex/remote-operation-vps-gate-prep
-head: 262d70f Merge current VPS test prep into remote operation gate
+head: 7281254 Merge stable API web panel baseline into remote operation gate
 base: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
 ```
 

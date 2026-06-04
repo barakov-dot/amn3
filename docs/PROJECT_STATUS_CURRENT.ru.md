@@ -152,7 +152,7 @@ docs/NEXT_CHAT_HANDOFF.ru.md
 Route/Auth Binding Tests: focused 22 passed; full 549 passed
 API Token Lifecycle Gate stacked: focused 56 passed; full 555 passed
 SSH Host Key Verifier: focused 29 passed; full 550 passed
-Remote Operation VPS-gate candidate: focused/docs 107 passed; full 572 passed
+Remote Operation VPS-gate candidate: focused 71 passed; full 603 passed
 Secret Inventory Registry: focused 64 passed; full 591 passed
 Read-only API route shell: full 588 passed
 ```
@@ -205,7 +205,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Redaction Coverage: `94ad807 Document secret-bearing delivery artifacts`;
 - Config Delivery Integrity evidence: verified at `94ad807`;
 - Public Token Safety: `dfe27ee Harden public email token safety`;
-- Remote Operation state-changing contract / partial-failure / dry-run-audit: fresh VPS-gate candidate `codex/remote-operation-vps-gate-prep` prepared on top of `d0939d8`, head `262d70f`, runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`;
+- Remote Operation state-changing contract / partial-failure / dry-run-audit: VPS-gate candidate `codex/remote-operation-vps-gate-prep` updated on top of `294803e`, head `7281254`, runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, package `dist/amn2-remote-operation-vps-gate-7281254-update-kit.zip`;
 - Local Agent Hardening: `c5d7eb6 Harden Local Agent audit contract`;
 - Web Panel Safe Improvements: `22dfc37 Clarify web panel operation gates`;
 - Scoped API Token Storage: `1fdcde5 Add scoped API token storage contract`.
@@ -313,7 +313,7 @@ head: 8697b60 Document Local Agent production wiring
 1. Не открывать второй параллельный API shell: read-only API route shell уже прошел local suite, real VPS loopback smoke и fast-forward merge в stable `codex-vps-test-prep`.
 2. API/web-panel implementation slice выполнен, запушен, fast-forward merged в `codex-vps-test-prep` и повторно проверен на stable checkout: commit `294803e Add API readiness and token web pages`; focused `39 passed`, full `594 passed`.
 3. VPS API/web-panel gate для production head `294803e` пройден 2026-06-04: API loopback smoke `run_id=20260604T102355Z`, `server_db_sync_status=passed`, API/auth/scope/revoke/listener/audit `passed`, web-admin `API readiness` и `API tokens` routes доступны. Evidence: `research/amn2/api-web-panel-vps-evidence-2026-06-04.md`.
-4. Перед отдельным remote-operation VPS gate обновить/rebase `codex/remote-operation-vps-gate-prep` поверх нового stable head `294803e`.
+4. Remote-operation VPS gate branch обновлена поверх stable head `294803e`: `codex/remote-operation-vps-gate-prep`, head `7281254`; focused `71 passed`, full `603 passed`; AMN3 package `dist/amn2-remote-operation-vps-gate-7281254-update-kit.zip`.
 5. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным обязательным gate перед любым API/web/agent route, который вызывает SSH, syncs peers, emits config или меняет runtime state.
 6. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед дальнейшим route expansion.
 7. `/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot, public docs/metrics, domain exclusions и 2FA не открывать до отдельного решения.
@@ -785,6 +785,7 @@ c249bd0 Add state-changing operation metadata
 b7a12ca Add remote operation dry-run metadata
 aca6663 Add VPS gate handoff for remote ops
 262d70f Merge current VPS test prep into remote operation gate
+7281254 Merge stable API web panel baseline into remote operation gate
 ```
 
 Покрыто:
@@ -797,9 +798,8 @@ aca6663 Add VPS gate handoff for remote ops
 Проверка:
 
 ```text
-focused server/security/policy/docs tests: 107 passed, 1 PytestCacheWarning
-runtime registry docs tests: 7 passed
-full local suite: 572 passed, 2 warnings
+focused remote-operation/runtime tests: 71 passed, 1 PytestCacheWarning
+full local suite: 603 passed, 1 warning
 ```
 
 Live VPS не трогался. Candidate branch уже запушена в `amn2`; следующий шаг - отдельный controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, начиная с read-only/dry-run подтверждения.

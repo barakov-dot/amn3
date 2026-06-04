@@ -2,6 +2,8 @@
 
 Дата: 2026-05-31.
 
+Актуализация 2026-06-04: локальная remote-operation подготовка перенесена на свежую ветку `amn2/codex/remote-operation-vps-gate-prep`, head `7281254`, поверх verified API/web-panel baseline `294803e`. Текущий следующий шаг - controlled real VPS remote-operation gate без live apply/revoke; старые значения `262d70f`, `107 passed` и `572 passed` ниже сохранены только как история первого локального среза.
+
 Этот список отделяет задачи, которые можно безопасно выполнить локально, от задач, которые требуют реального VPS. Основа: [AMN2 Remote Operations Local/VPS Split Implementation Plan](../../docs/superpowers/plans/2026-05-31-amn2-remote-ops-local-vps-split.md).
 
 ## Граница локальной фазы
@@ -54,12 +56,12 @@
 ### Secret-safe audit/redaction gate
 
 - Цель: не допустить утечек `.conf`, QR payload, `vpn://`, private key, PSK, tokens и command output в metadata, logs, audit и diagnostics.
-- Статус 2026-06-01: dry-run/audit metadata slice перенесен на fresh VPS-gate candidate `codex/remote-operation-vps-gate-prep`, head `262d70f`.
+- Статус 2026-06-04: dry-run/audit metadata slice перенесен на fresh VPS-gate candidate `codex/remote-operation-vps-gate-prep`, head `7281254`, поверх API/web-panel baseline `294803e`.
 - Что должно появиться: tests, которые проверяют redacted output для новых remote mutation metadata.
 - Почему P0: remote operations почти всегда рядом с секретами и конфигами.
 - Локальная проверка: focused redaction/security tests плюс audit serialization tests.
-- Проверено 2026-06-01: `107 passed, 1 warning` для focused server/security/policy/docs набора.
-- Full suite 2026-06-01 на fresh candidate: `572 passed, 2 warnings`.
+- Проверено 2026-06-04: `71 passed, 1 warning` для focused remote-operation/API safety набора.
+- Full suite 2026-06-04 на fresh candidate: `603 passed, 1 warning`.
 - Готово, когда: ни один новый dry-run/audit/report path не содержит raw secrets. Первый dry-run/audit срез готов; live VPS не трогался.
 
 ### SSH host key verification policy
@@ -80,7 +82,7 @@
 - Что должно появиться: preview с `operation_id`, `risk_class`, side effects, rollback/recovery note и `consistency_status=dry-run`.
 - Почему P1: dry-run нужен до live VPS apply/revoke, но опирается на P0 contract.
 - Локальная проверка: tests для apply-peer/revoke-peer dry-run без live execution.
-- Проверено 2026-06-01: focused server/security/policy/docs набор -> `107 passed, 1 warning`.
+- Проверено 2026-06-04: focused remote-operation/API safety набор -> `71 passed, 1 warning`.
 - Готово, когда: preview понятен оператору и не содержит секретов. Первый срез готов: `RemoteOperationRunner.plan()` отдает `dry-run` для state-changing операций, `OperationPlan.to_safe_metadata()` не публикует command strings, `apply-peer`/`revoke-peer` dry-run выводит operation metadata без PSK.
 
 ### Bot/service partial-failure сценарии
@@ -205,8 +207,8 @@
 2. Добавить fake runner/fake peer applier harness - первый approve/reset слой выполнен в `codex/remote-operation-partial-failure`.
 3. Покрыть partial-failure model для approve/revoke/reset - первый approve/reset слой выполнен в `codex/remote-operation-partial-failure`.
 4. Добавить dry-run preview и safe audit/redaction metadata - выполнено и перенесено на fresh candidate `codex/remote-operation-vps-gate-prep`.
-5. Прогнать focused tests - выполнено: `107 passed, 1 warning`.
-6. Прогнать full local suite на fresh candidate - выполнено: `572 passed, 2 warnings`.
+5. Прогнать focused tests - выполнено 2026-06-04: `71 passed, 1 warning`.
+6. Прогнать full local suite на fresh candidate - выполнено 2026-06-04: `603 passed, 1 warning`.
 7. Обновить Runtime Registry и lab notes - Runtime Registry включен в commit `50be810`, lab notes обновлены этим срезом.
 8. Перед controlled real VPS verification gate зафиксировать Phase 0 SSH host key verification по `research/amn2/ssh-host-key-enrollment-design.md`.
 9. Зафиксировать backup/import dangerous API boundary по `research/amn2/backup-import-dangerous-api-design.md` - выполнено локально, без web/API routes и без VPS.
@@ -216,7 +218,7 @@
 13. Выполнить route-connected scoped API token lifecycle gate - выполнено и запушено в stacked branch `amn2/codex/api-token-lifecycle-gate-stacked`, commit `256d0c0`, без route expansion и без VPS.
 14. Backup/import policy registry and restore-preview contract выполнен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`, без web/API backup routes и без VPS.
 15. Secret inventory registry выполнен в `amn2/codex/secret-inventory-registry`, commit `9ce42f4`, без route expansion.
-16. Следующий основной шаг - controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; если VPS все еще не готов, не открывать новый local-only implementation slice, потому что generic route-policy/audit/rate-limit guards уже закрыты.
+16. Следующий основной шаг - controlled real VPS remote-operation gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; не открывать новый generic local-only implementation slice, потому что route-policy/audit/rate-limit/API baseline guards уже закрыты.
 
 ## Не переносим в локальную фазу
 
