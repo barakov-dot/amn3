@@ -52,34 +52,34 @@ evidence: research/amn2/phase-1-closeout-2026-06-04.md
 
 ## 1. Обновить пакет на VPS
 
-Важно: пакет `294803e` ниже является текущим API/web-panel package после merge `amn2/codex/api-web-panel-finish` в `codex-vps-test-prep`. Он содержит web-admin `API readiness` и `API tokens` pages.
+Важно: команды ниже используют текущий Phase 1 closeout package `7764ae7`; пакет `294803e` остается historical API/web-panel evidence.
 
 ```bash
 cd /root
 
-curl -fL -o amn2-vps-update-and-smoke-kit-294803e.zip \
-  https://github.com/barakov-dot/amn3/raw/master/dist/amn2-vps-update-and-smoke-kit-294803e.zip
+curl -fL -o amn2-vps-update-and-smoke-kit-7764ae7.zip \
+  https://github.com/barakov-dot/amn3/raw/master/dist/amn2-vps-update-and-smoke-kit-7764ae7.zip
 
-curl -fL -o amn2-vps-update-and-smoke-kit-294803e.zip.sha256.txt \
-  https://raw.githubusercontent.com/barakov-dot/amn3/master/dist/amn2-vps-update-and-smoke-kit-294803e.zip.sha256.txt
+curl -fL -o amn2-vps-update-and-smoke-kit-7764ae7.zip.sha256.txt \
+  https://raw.githubusercontent.com/barakov-dot/amn3/master/dist/amn2-vps-update-and-smoke-kit-7764ae7.zip.sha256.txt
 
-sha256sum -c amn2-vps-update-and-smoke-kit-294803e.zip.sha256.txt
+sha256sum -c amn2-vps-update-and-smoke-kit-7764ae7.zip.sha256.txt
 ```
 
 Ожидаемый SHA256:
 
 ```text
-702BAD7EBD69F80FC75FD31648383258B6C042BD51B801BC72BE2FD125813CE2
+832E1B1F6516A02E0D6AA45672B8FF526DF15D27117D2063CE45F9966825A66A
 ```
 
 Распаковать и применить source overlay:
 
 ```bash
-rm -rf amn2-vps-update-and-smoke-kit-294803e
-mkdir -p amn2-vps-update-and-smoke-kit-294803e
-python3 -m zipfile -e amn2-vps-update-and-smoke-kit-294803e.zip amn2-vps-update-and-smoke-kit-294803e
+rm -rf amn2-vps-update-and-smoke-kit-7764ae7
+mkdir -p amn2-vps-update-and-smoke-kit-7764ae7
+python3 -m zipfile -e amn2-vps-update-and-smoke-kit-7764ae7.zip amn2-vps-update-and-smoke-kit-7764ae7
 
-cd amn2-vps-update-and-smoke-kit-294803e
+cd amn2-vps-update-and-smoke-kit-7764ae7
 export VPS_APPLY_ENABLED=false
 export AMN2_DIR=/opt/amn2
 bash ./amn2_apply_source_zip.sh

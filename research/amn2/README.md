@@ -89,9 +89,9 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 
 1. Не расширять API за пределы merged read-only aggregate shell до отдельного route/secret/remote-write gate.
 2. API/web-panel finish slice реализован, запушен и fast-forward merged: `amn2/codex/api-web-panel-finish`, commit `294803e`, evidence `api-web-panel-finish-implementation.md`.
-3. AMN3 VPS install/update package пересобран от production head `294803e`.
+3. AMN3 VPS update/smoke package rebuilt from production head `7764ae7`.
 4. Real VPS API/web-panel gate для `294803e` пройден: API loopback smoke `run_id=20260604T102355Z`, web-admin `API readiness` и `API tokens` доступны; evidence `api-web-panel-vps-evidence-2026-06-04.md`.
-5. VPS install/update package `294803e` является текущим package; historical `5f12736` остается evidence baseline для read-only API shell.
+5. VPS update/smoke package `7764ae7` is the current package; historical `294803e` and `5f12736` remain evidence baselines.
 6. Controlled real VPS verification gate Phase 1 для `codex/remote-operation-vps-gate-prep` пройден как `dry-run-only-pass`; evidence `remote-operation-vps-gate-evidence-2026-06-04.md`.
 7. Backup/import policy registry, restore-preview contract и machine-checkable secret inventory уже выполнены; web/API full backup, restore apply, import apply, route expansion, secret-bearing output и live VPS write flows остаются закрытыми до отдельных gates.
 

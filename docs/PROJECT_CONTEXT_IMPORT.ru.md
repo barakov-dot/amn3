@@ -25,7 +25,7 @@ Phase 2 live single test peer apply/revoke remains a separate new chat/gate with
 repo: C:\Users\SooL\Documents\Amneziya
 branch: codex-vps-test-prep
 remote branch: amn2/codex-vps-test-prep
-latest committed head: 294803e Add API readiness and token web pages
+latest committed head: 7764ae7 Cover integration status in API smoke
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 status: remote branch current after read-only API shell and API/web-panel finish merge
 ```
@@ -119,7 +119,7 @@ dist/amn2-vps-update-and-smoke-kit-294803e.zip
 sha256: 702BAD7EBD69F80FC75FD31648383258B6C042BD51B801BC72BE2FD125813CE2
 ```
 
-Package note: current `294803e` install/update packages include `amn2_api_loopback_smoke.sh` version `2026-06-04.2`, the merged API/web-panel pages, and DB-only server config sync from `servers.yml` before `/api/*` route smoke. `server preflight` is a separate SSH/server dry-run gate only. Historical `5f12736` packages remain available for read-only API shell evidence.
+Package note: current `7764ae7` update+smoke package includes `amn2_api_loopback_smoke.sh` version `2026-06-04.3`, DB-only server config sync, and 5 read-only API route checks including `/api/integration/status`. Historical `294803e` and `5f12736` packages remain available as evidence baselines.
 
 Соседний AMN3 branch-only push, учтенный как комментарий к pre-VPS координации:
 
@@ -144,14 +144,14 @@ status: не слито в master; не повторять соседний VPS 
 - API token lifecycle gate branch `256d0c0`, merged through PR #4/#5;
 - SSH host key verifier `dd20364`, merged through PR #6; later read-only API route shell moved current `amn2` head to `5f12736`, then API/web-panel finish moved current head to `294803e`;
 - remote operation VPS-gate candidate `7281254`, real VPS Phase 1 read-only/dry-run passed as `dry-run-only-pass`; evidence `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`; Phase 2 live single test peer apply/revoke not run.
-- VPS install/update package `dist/amn2-vps-install-294803e.zip` and `dist/amn2-vps-update-and-smoke-kit-294803e.zip`;
+- Current VPS update+smoke package `dist/amn2-vps-update-and-smoke-kit-7764ae7.zip`; historical install/update packages for `294803e` remain available as evidence baselines;
 - KYORESUAS API integration priority plan;
 - read-only API route shell branch `codex/read-only-api-route-shell`, real VPS loopback API smoke passed through AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh`, then fast-forward merged into stable `codex-vps-test-prep` at `5f12736`;
 - API/web-panel finish slice branch `codex/api-web-panel-finish`, full local suite `594 passed`, then fast-forward merged into stable `codex-vps-test-prep` at `294803e`; real VPS API/web-panel gate passed 2026-06-04, `run_id=20260604T102355Z`, evidence `research/amn2/api-web-panel-vps-evidence-2026-06-04.md`.
 
 Следующий рабочий выбор:
 
-1. Считать read-only API shell stable evidence baseline at `5f12736`, а текущий production head для API/web-panel testing - `294803e`.
+1. Current production/API-web head is `7764ae7`; `294803e` remains historical API/web-panel gate evidence.
 2. Future API expansion requires separate route/secret/remote-write gates.
 3. API/web-panel VPS test для `294803e` считать пройденным: loopback API smoke + web route check, без live apply.
 4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным gate перед routes, которые вызывают SSH, sync peers, emit config или меняют runtime state.
@@ -553,7 +553,7 @@ First safe slice по design spec:
 
 Текущий режим coordination: AMN3 принял состояние после live VPS stage, local-only transfer slices, VPS install package и активной read-only API ветки.
 
-1. Держать read-only API shell как stable evidence baseline at `5f12736`; текущий production/API-web head - `294803e`.
+1. Current production/API-web head is `7764ae7`; `294803e` remains historical API/web-panel gate evidence.
 2. Remote-operation VPS gate branch уже обновлена поверх `294803e`: `codex/remote-operation-vps-gate-prep` at `7281254`.
 3. Для новых API routes начинать с отдельного route/secret/remote-write gate, не с копирования upstream code.
 4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` держать отдельным gate для SSH/sync/config/runtime-changing routes.
