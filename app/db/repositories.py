@@ -1770,6 +1770,28 @@ class Repository:
         self._commit()
         return cursor.rowcount > 0
 
+    def list_api_tokens_for_admin(self, *, limit: int = 100) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                id,
+                name,
+                owner_user_id,
+                owner_label,
+                scopes_json,
+                expires_at,
+                revoked_at,
+                revoke_reason,
+                last_used_at,
+                rotated_from_token_id,
+                created_at
+            FROM api_tokens
+            ORDER BY created_at DESC, id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+
     def revoke_api_token(
         self,
         token_id: str,

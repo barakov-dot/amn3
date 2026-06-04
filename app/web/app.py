@@ -5,6 +5,7 @@ import sqlite3
 import re
 from collections.abc import Iterator
 from contextlib import contextmanager
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -36,6 +37,9 @@ from app.services.config_delivery import build_device_config_delivery
 from app.services.email_delivery import EmailDeliveryService
 from app.services.email_delivery import EmailSender
 from app.services.email_delivery import build_smtp_sender
+from app.services.api_tokens import API_TOKEN_FIRST_SLICE_SCOPES
+from app.services.api_tokens import create_route_api_token
+from app.services.api_tokens import revoke_api_token
 from app.services.email_tokens import create_email_token
 from app.services.email_tokens import hash_email_token
 from app.services.email_tokens import utc_now_iso
@@ -158,6 +162,8 @@ PATH_SETTING_FIELDS = {
     "server_config_path",
     "client_config_template_dir",
 }
+
+API_READINESS_ALLOWED_SCOPES = tuple(sorted(API_TOKEN_FIRST_SLICE_SCOPES))
 
 
 def create_web_app(
@@ -358,6 +364,132 @@ def create_web_app(
                 },
             ),
         )
+
+    @app.get("/api-readiness")
+    async def api_readiness_index(request: Request):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+
+        readiness = _load_api_readiness(actual_settings)
+        return templates.TemplateResponse(
+            request,
+            "api_readiness.html",
+            _template_context(
+                request,
+                title="API readiness",
+                authenticated=True,
+                **readiness,
+            ),
+        )
+
+    @app.get("/api-tokens")
+    async def api_tokens_index(request: Request):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+
+        return templates.TemplateResponse(
+            request,
+            "api_tokens.html",
+            _template_context(
+                request,
+                title="API tokens",
+                authenticated=True,
+                allowed_scopes=API_READINESS_ALLOWED_SCOPES,
+                tokens=_load_api_tokens(actual_settings),
+                issue_form=_api_token_issue_form(),
+                issued_token=None,
+                issued_raw_token=None,
+            ),
+        )
+
+    @app.post("/api-tokens/issue")
+    async def issue_api_token(
+        request: Request,
+        name: str = Form(...),
+        owner_label: str = Form(...),
+        scope: list[str] = Form(default=[]),
+        expires_days: int = Form(...),
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+
+        form = _api_token_issue_form(
+            name=name,
+            owner_label=owner_label,
+            scopes=scope,
+            expires_days=expires_days,
+        )
+        try:
+            expires_at = _api_token_expiry(expires_days)
+            with _open_repository(actual_settings) as (repo, _conn):
+                with repo.transaction():
+                    issue = create_route_api_token(
+                        repo,
+                        name=name.strip(),
+                        owner_label=owner_label.strip(),
+                        scopes=set(scope),
+                        expires_at=expires_at,
+                    )
+                    _record_web_api_token_action(
+                        repo,
+                        actual_settings,
+                        request,
+                        action="web_api_token_issue",
+                        metadata=issue.safe_metadata(),
+                    )
+            tokens = _load_api_tokens(actual_settings)
+        except (ValueError, sqlite3.IntegrityError) as exc:
+            return _plain_error_response(exc)
+
+        return templates.TemplateResponse(
+            request,
+            "api_tokens.html",
+            _template_context(
+                request,
+                title="API tokens",
+                authenticated=True,
+                allowed_scopes=API_READINESS_ALLOWED_SCOPES,
+                tokens=tokens,
+                issue_form=form,
+                issued_token=issue.safe_metadata(),
+                issued_raw_token=issue.raw_token,
+            ),
+        )
+
+    @app.post("/api-tokens/{token_id}/revoke")
+    async def revoke_api_token_from_web(
+        request: Request,
+        token_id: str,
+        csrf_token: str = Form(""),
+    ):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+        if not verify_csrf_token(request.session, csrf_token):
+            return PlainTextResponse("Invalid CSRF token", status_code=403)
+
+        try:
+            with _open_repository(actual_settings) as (repo, _conn):
+                with repo.transaction():
+                    event = revoke_api_token(
+                        repo,
+                        token_id=token_id.strip(),
+                        revoked_at=datetime.now(timezone.utc),
+                        reason="web-admin-revoke",
+                    )
+                    _record_web_api_token_action(
+                        repo,
+                        actual_settings,
+                        request,
+                        action="web_api_token_revoke",
+                        metadata=event.safe_metadata(),
+                    )
+        except ValueError as exc:
+            return _plain_error_response(exc)
+
+        return RedirectResponse("/api-tokens", status_code=303)
 
     @app.post("/config-templates/{config_version}/save")
     async def save_config_template(
@@ -1730,6 +1862,65 @@ def _load_servers(settings: Settings) -> list[dict[str, Any]]:
         return [_row_to_dict(row) for row in repo.list_servers_for_admin(limit=500)]
 
 
+def _load_api_readiness(settings: Settings) -> dict[str, Any]:
+    with _open_repository(settings) as (_repo, conn):
+        return {
+            "allowed_scopes": API_READINESS_ALLOWED_SCOPES,
+            "metrics": {
+                "servers_total": _count_rows(
+                    conn,
+                    "SELECT COUNT(*) AS count FROM servers",
+                ),
+                "users_total": _count_rows(
+                    conn,
+                    "SELECT COUNT(*) AS count FROM users",
+                ),
+                "devices_total": _count_rows(
+                    conn,
+                    "SELECT COUNT(*) AS count FROM devices",
+                ),
+            },
+            "blocked_surfaces": [
+                "/api/clients write CRUD",
+                "API config:read",
+                "public config delivery",
+                "live peer apply/revoke",
+            ],
+        }
+
+
+def _load_api_tokens(settings: Settings) -> list[dict[str, Any]]:
+    with _open_repository(settings) as (repo, _conn):
+        tokens = []
+        for row in repo.list_api_tokens_for_admin(limit=200):
+            token = _row_to_dict(row)
+            token["scopes"] = json.loads(str(token.pop("scopes_json")))
+            token["status"] = "revoked" if token.get("revoked_at") else "active"
+            tokens.append(token)
+        return tokens
+
+
+def _api_token_issue_form(
+    *,
+    name: str = "",
+    owner_label: str = "",
+    scopes: list[str] | None = None,
+    expires_days: int = 7,
+) -> dict[str, Any]:
+    return {
+        "name": name,
+        "owner_label": owner_label,
+        "scopes": scopes or list(API_READINESS_ALLOWED_SCOPES),
+        "expires_days": expires_days,
+    }
+
+
+def _api_token_expiry(expires_days: int) -> datetime:
+    if not 1 <= expires_days <= 365:
+        raise ValueError("expires_days must be in 1..365")
+    return datetime.now(timezone.utc) + timedelta(days=expires_days)
+
+
 def _load_orders(settings: Settings) -> list[dict[str, Any]]:
     with _open_repository(settings) as (repo, _conn):
         return [_row_to_dict(row) for row in repo.list_orders_for_admin(limit=200)]
@@ -2794,6 +2985,26 @@ def _record_web_server_action(
         "source": "web_admin",
         "web_admin_username": str(request.session.get("web_admin_username", "")),
         "server_id": server_id,
+    }
+    full_metadata.update(metadata)
+    repo.record_admin_action(
+        admin_telegram_id=_web_admin_actor_id(settings),
+        action=action,
+        metadata=full_metadata,
+    )
+
+
+def _record_web_api_token_action(
+    repo: Repository,
+    settings: Settings,
+    request: Request,
+    *,
+    action: str,
+    metadata: dict[str, Any],
+) -> None:
+    full_metadata = {
+        "source": "web_admin",
+        "web_admin_username": str(request.session.get("web_admin_username", "")),
     }
     full_metadata.update(metadata)
     repo.record_admin_action(

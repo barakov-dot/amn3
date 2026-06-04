@@ -4,6 +4,8 @@
 
 Назначение: зафиксировать только безопасные факты реального VPS smoke для read-only API shell на ветке `codex/read-only-api-route-shell`.
 
+Template policy: Заполнять после реального VPS smoke; historical command marker `python -m app.cli api smoke-check`; historical filled evidence ниже оставляет только safe summary.
+
 Не вставлять raw API token, Authorization header, token hash, `.conf`, QR, `vpn://`, `PrivateKey`, `PresharedKey`, SSH password/private key, `.env`, PSK, полные response bodies или `api-server.log` без ручной redaction.
 
 ## 1. Контекст
