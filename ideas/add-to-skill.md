@@ -203,3 +203,67 @@
 - есть ли route/bot/web tests, что audit metadata содержит только ids/status/purpose, но не config/link/token;
 - есть ли remote operation tests, что stdout/stderr/recovery note не раскрывают PSK, config block, private key или agent token;
 - для binary QR PNG фиксировать не text-redaction, а запрет попадания в diagnostics/plain backup и отдельный payload round-trip test.
+
+## Phase closeout checklist для VPN/control-panel work
+
+После завершения фазы фиксировать не только код, но и закрывающий пакет evidence:
+
+- production head, branch и commit hash;
+- какие routes/actions реально добавлены;
+- какие dangerous/write/secret surfaces остались заблокированы;
+- focused verification и full verification;
+- live VPS evidence, если фаза трогала runtime или deployment;
+- package name, SHA256, expected source commit и operator doc;
+- no-secret evidence review: без raw token, bearer header, token hash, config, private key, PSK, QR payload и `vpn://`;
+- следующий gate и явное указание, что он не разрешен автоматически.
+
+## Local gate vs live VPS gate rule
+
+Для VPN/control-panel проектов всегда разделять:
+
+- `local-gate-complete`: policy, registry, route bindings, redaction, tests, docs and fake runner checks;
+- `api-smoke-passed`: read-only loopback/API route smoke на VPS без SSH/runtime mutation;
+- `dry-run-only-pass`: remote-operation preview прошел, но live apply/revoke не запускались;
+- `verified-live`: конкретная live mutation прошла с rollback/evidence.
+
+Нельзя использовать `dry-run-only-pass` как разрешение на write API, peer apply/revoke, Docker restart, config delivery или backup/import apply.
+
+## Read-only-first API transfer checklist
+
+Перед переносом API-направления из upstream в production:
+
+- реализовать собственный API contract, не копировать upstream implementation;
+- начинать с loopback/local-only bind и read-only aggregate/status routes;
+- использовать scoped tokens, expiry, revoke, rotation, owner inheritance and audit;
+- не включать `/clients` write CRUD, `config:read`, backup/import/reboot и public docs/metrics в первом slice;
+- добавить API smoke CLI/script, который проверяет token issue/use/revoke, listener, allowed routes and audit;
+- держать SSH/server preflight отдельным gate, а не частью обычного API smoke;
+- фиксировать evidence без raw tokens, headers, hashes, config bodies or keys.
+
+## VPS update and smoke kit checklist
+
+Любой VPS-ready slice должен иметь повторяемый operator package:
+
+- source zip from expected commit;
+- source zip SHA256;
+- update+smoke kit SHA256;
+- operator runbook на русском языке;
+- install/update script that preserves `.env`, `data`, `venv`, `servers.yml`;
+- smoke script with explicit `VPS_APPLY_ENABLED=false` unless the gate is live-mutation-approved;
+- package hygiene check for forbidden files and secret-bearing artifacts;
+- rollback/recovery note;
+- clear decision output: `passed`, `needs-fix`, `dry-run-only-pass` or `verified-live`.
+
+## Remote write gate checklist
+
+Перед любым route/API/web/agent flow, который вызывает SSH, syncs peers, emits config или меняет runtime state, требовать:
+
+- state-changing operation metadata;
+- dry-run plan preview;
+- explicit operator confirmation;
+- before/after audit without secrets;
+- idempotency or replay policy;
+- partial-failure model;
+- rollback note and recovery path;
+- disposable test peer for first live gate;
+- separate Phase 2 approval after Phase 1 dry-run evidence.
