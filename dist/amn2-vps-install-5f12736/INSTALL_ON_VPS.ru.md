@@ -126,7 +126,9 @@ Fingerprint сверить вне SSH-сессии: через панель пр
 ## 4. Проверить API-only запуск на VPS
 
 Эта проверка не должна входить в SSH/server preflight. Для API-only smoke держать
-`AMN2_RUN_PREFLIGHT=0`; ожидаемый `preflight_status` - `skipped`.
+`AMN2_RUN_PREFLIGHT=0`; ожидаемые `preflight_status` - `skipped` и
+`server_db_sync_status` - `passed`. Smoke script делает DB-only sync выбранного
+server config из `servers.yml` в SQLite перед `/api/*` route smoke.
 
 ```bash
 cd /opt/amn2

@@ -2,7 +2,7 @@
 
 Дата: 2026-06-01.
 
-Актуализация 2026-06-02: первый read-only API route shell реализован в `amn2/codex/read-only-api-route-shell`, real VPS loopback API smoke passed (`run_id=20260602T171639Z`, preflight/API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`) и fast-forward merged в stable `codex-vps-test-prep` at `5f12736 Record VPS API smoke evidence`. Этот документ теперь является исходным priority decision и safety boundary; текущий следующий gate - не повторная локальная реализация, а отдельные route/secret/remote-write gates для любого расширения API.
+Актуализация 2026-06-03: первый read-only API route shell реализован в `amn2/codex/read-only-api-route-shell`, latest real VPS API-only smoke passed (`run_id=20260603T112418Z`, DB-only server config sync выполнен, preflight `skipped`, API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`) и fast-forward merged в stable `codex-vps-test-prep` at `5f12736 Record VPS API smoke evidence`. Этот документ теперь является исходным priority decision и safety boundary; текущий следующий gate - не повторная локальная реализация, а отдельные route/secret/remote-write gates для любого расширения API.
 
 Назначение: зафиксировать новый приоритет после успешной установки `amn2` на VPS: API integration становится главной product lane, но переносится как собственный `amn2` contract без копирования `kyoresuas/amnezia-api` implementation.
 
@@ -79,7 +79,7 @@ Forbidden in first slice:
 
 1. `done-local`: Fix `amn2` packaging discovery so VPS installs can use `pip install -e .` - commit `e99d5f3`.
 2. `done-local`: Write and implement the read-only aggregate API route shell plan - commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`.
-3. `done-vps-gate`: Finish real VPS loopback API smoke evidence with secrets redacted - AMN3 evidence `research/amn2/api-vps-smoke-evidence-2026-06-02.md`.
+3. `done-vps-gate`: Finish real VPS loopback API smoke evidence with secrets redacted - latest AMN3 evidence `research/amn2/api-vps-smoke-evidence-2026-06-03.md`.
 
 ### Important
 

@@ -14,9 +14,11 @@ AMN2_TOKEN_TTL_DAYS="${AMN2_TOKEN_TTL_DAYS:-7}"
 AMN2_CURL_TIMEOUT="${AMN2_CURL_TIMEOUT:-5}"
 AMN2_RUN_PREFLIGHT="${AMN2_RUN_PREFLIGHT:-0}"
 AMN2_REQUIRE_PREFLIGHT="${AMN2_REQUIRE_PREFLIGHT:-0}"
+AMN2_SYNC_SERVER_CONFIG="${AMN2_SYNC_SERVER_CONFIG:-1}"
+AMN2_REQUIRE_SERVER_DB_SYNC="${AMN2_REQUIRE_SERVER_DB_SYNC:-0}"
 AMN2_EXPECTED_COMMIT="${AMN2_EXPECTED_COMMIT:-5f12736}"
 AMN2_ALLOW_EXISTING_API="${AMN2_ALLOW_EXISTING_API:-0}"
-AMN2_SMOKE_SCRIPT_VERSION="2026-06-02.3"
+AMN2_SMOKE_SCRIPT_VERSION="2026-06-04.1"
 
 API_PID=""
 TOKEN_ID=""
@@ -269,6 +271,81 @@ if [ "$AMN2_RUN_PREFLIGHT" = "1" ] || { [ "$AMN2_RUN_PREFLIGHT" = "auto" ] && [ 
   fi
 fi
 
+SERVER_DB_SYNC_STATUS="skipped"
+printf 'server_db_sync=skipped\nreason=not_run\n' > "$RUN_DIR/server-db-sync.txt"
+if [ "$AMN2_SYNC_SERVER_CONFIG" = "1" ] && [ -f "$AMN2_CONFIG" ]; then
+  SERVER_DB_SYNC_STATUS="passed"
+  if ! "$PYTHON_BIN" - "$AMN2_CONFIG" "$AMN2_SERVER_NAME" "$AMN2_DB" > "$RUN_DIR/server-db-sync.txt" 2>&1 <<'PY'
+from pathlib import Path
+import sys
+
+from app.db.connection import connect
+from app.db.repositories import Repository
+from app.db.schema import initialize_schema
+from app.server_config.loader import load_server_config, select_server
+
+config_path = Path(sys.argv[1])
+server_name = sys.argv[2]
+db_path = Path(sys.argv[3])
+
+config = load_server_config(config_path)
+server = select_server(config, server_name)
+db_path.parent.mkdir(parents=True, exist_ok=True)
+conn = connect(db_path)
+try:
+    initialize_schema(conn)
+    repo = Repository(conn)
+    server_id = repo.upsert_server_config(
+        name=server.name,
+        host=server.ssh.host,
+        ssh_port=server.ssh.port,
+        endpoint_host=server.vpn.endpoint_host,
+        vpn_port=int(server.vpn.port),
+        vpn_network_cidr=server.vpn.network_cidr,
+        server_address=server.vpn.server_address,
+        server_public_key=server.vpn.server_public_key or "",
+        runtime=server.runtime.type,
+        firewall=server.firewall.provider,
+        max_devices=server.vpn.max_devices,
+    )
+    row = conn.execute(
+        "SELECT id, name, status, runtime FROM servers WHERE id = ?",
+        (server_id,),
+    ).fetchone()
+finally:
+    conn.close()
+
+print("server_db_sync=passed")
+print(f"id={row['id']}")
+print(f"name={row['name']}")
+print(f"status={row['status']}")
+print(f"runtime={row['runtime']}")
+PY
+  then
+    SERVER_DB_SYNC_STATUS="failed"
+  fi
+  if [ "$SERVER_DB_SYNC_STATUS" = "failed" ]; then
+    {
+      printf 'VPS verdict: blocked\n'
+      printf 'blocker: server config DB-only sync failed before API smoke\n'
+      printf 'server_db_sync_status: failed\n'
+      printf 'safe_evidence_dir: %s\n' "$RUN_DIR"
+      printf 'next: fix %s placeholders/server name, then rerun this smoke script\n' "$AMN2_CONFIG"
+    } > "$RUN_DIR/api-smoke-safe-summary.txt"
+    cat "$RUN_DIR/api-smoke-safe-summary.txt"
+    exit 4
+  fi
+elif [ "$AMN2_REQUIRE_SERVER_DB_SYNC" = "1" ]; then
+  {
+    printf 'VPS verdict: blocked\n'
+    printf 'blocker: server config DB-only sync was required but %s was not found\n' "$AMN2_CONFIG"
+    printf 'server_db_sync_status: skipped\n'
+    printf 'safe_evidence_dir: %s\n' "$RUN_DIR"
+  } > "$RUN_DIR/api-smoke-safe-summary.txt"
+  cat "$RUN_DIR/api-smoke-safe-summary.txt"
+  exit 4
+fi
+
 ISSUE_RAW_FILE="$(mktemp "$RUN_DIR/.api-token-issue.XXXXXX.json")"
 "$PYTHON_BIN" -m app.cli api token issue \
   --db "$AMN2_DB" \
@@ -474,6 +551,7 @@ fi
   printf 'branch/head:\n'
   sed 's/^/  /' "$RUN_DIR/git-head.txt" 2>/dev/null || true
   printf 'preflight_status: %s\n' "$PREFLIGHT_STATUS"
+  printf 'server_db_sync_status: %s\n' "$SERVER_DB_SYNC_STATUS"
   printf 'api_ready_status: %s\n' "$READY_STATUS"
   printf 'api_smoke_status: %s\n' "$SMOKE_STATUS"
   printf 'auth_status: %s\n' "$AUTH_STATUS"
@@ -502,6 +580,7 @@ tar -czf "$SAFE_BUNDLE" -C "$RUN_DIR" \
   api-auth-evidence.txt \
   api-listener-evidence.txt \
   api-audit-evidence.txt \
+  server-db-sync.txt \
   api-smoke-safe-summary.txt \
   server-preflight.txt \
   server-check-dry-run.txt 2>/dev/null || \
@@ -518,6 +597,7 @@ tar -czf "$SAFE_BUNDLE" -C "$RUN_DIR" \
   api-auth-evidence.txt \
   api-listener-evidence.txt \
   api-audit-evidence.txt \
+  server-db-sync.txt \
   api-smoke-safe-summary.txt
 
 cat "$RUN_DIR/api-smoke-safe-summary.txt"

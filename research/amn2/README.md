@@ -27,11 +27,11 @@ current transfer head: 5f12736 Record VPS API smoke evidence
 ```text
 branch: codex/read-only-api-route-shell
 head: 2010d60 Add API VPS smoke evidence template
-status: pushed; full local suite 588 passed; real VPS loopback API smoke passed 2026-06-02, run_id=20260602T171639Z
+status: pushed; full local suite 588 passed; latest real VPS API-only smoke passed 2026-06-03, run_id=20260603T112418Z
 working chat: Переводим AMN на API
 ```
 
-AMN3 evidence: [API VPS smoke evidence 2026-06-02](api-vps-smoke-evidence-2026-06-02.md).
+AMN3 evidence: [API VPS smoke evidence 2026-06-03](api-vps-smoke-evidence-2026-06-03.md). Historical first pass: [API VPS smoke evidence 2026-06-02](api-vps-smoke-evidence-2026-06-02.md).
 
 Merge result: fast-forward merged into `codex-vps-test-prep` at production head `5f12736`.
 

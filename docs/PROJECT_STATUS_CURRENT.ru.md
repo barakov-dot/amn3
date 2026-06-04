@@ -74,12 +74,12 @@ master; verify exact current head with git log -1 after package publish
 
 ```text
 dist/amn2-vps-install-5f12736.zip
-sha256: 41817BD8F5F6F7F4BE3DBDA53788645A02B2BAE1664A1FB5AF6B979512238A29
+sha256: CB2FBA547FD5DC50A94851BC7154D775FBD4977F09091E0F9BAE52F2DC9C2F25
 dist/amn2-vps-update-and-smoke-kit-5f12736.zip
-sha256: 79BFFCA120D95FA4A68163CAD80F56C61E241035FDCD0FF6DC318BBA1E594A85
+sha256: 557C3B0C589BE98E1F5780DBBF289ACB3EB350F468BF369A6672B2A10DB2BB3C
 ```
 
-Package hotfix note: install package `5f12736` now includes `amn2_api_loopback_smoke.sh`; `install_on_vps.sh` copies it to `/opt/amn2` and its `Next steps` run API-only smoke with `AMN2_RUN_PREFLIGHT=0`. `server preflight` remains only a separate SSH/server dry-run gate, not the API smoke path.
+Package hotfix note: install/update packages include `amn2_api_loopback_smoke.sh` version `2026-06-04.1`; the script performs DB-only server config sync from `servers.yml` into SQLite before route smoke and keeps `server preflight` as a separate SSH/server dry-run gate, not the API smoke path.
 
 Дополнительный соседний AMN3 push, который не слит в `master`, но учтен в этом snapshot:
 
@@ -130,7 +130,7 @@ remote: amn2/codex/read-only-api-route-shell
 status: merged into `codex-vps-test-prep` at `5f12736`, local worktree clean
 ```
 
-Эту ветку использовали в чате `Переводим AMN на API` для VPS install/update smoke и исправления ошибок. Реальный VPS loopback smoke прошел 2026-06-02 с `run_id=20260602T171639Z`: preflight/API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`, raw token/header/hash/config/keys/PSK не публиковались. Evidence: `research/amn2/api-vps-smoke-evidence-2026-06-02.md`. После evidence ветка fast-forward merged в stable `codex-vps-test-prep` и запушена как production head `5f12736`. Главный coordination-chat не должен открывать параллельную API-реализацию.
+Эту ветку использовали в чате `Переводим AMN на API` для VPS install/update smoke и исправления ошибок. Актуальный real VPS loopback API-only smoke прошел 2026-06-03 с `run_id=20260603T112418Z`: DB-only server config sync выполнен, preflight `skipped`, API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`, raw token/header/hash/config/keys/PSK не публиковались. Evidence: `research/amn2/api-vps-smoke-evidence-2026-06-03.md`. Предыдущий historical pass 2026-06-02 остается в `research/amn2/api-vps-smoke-evidence-2026-06-02.md`. После evidence ветка fast-forward merged в stable `codex-vps-test-prep` и запушена как production head `5f12736`. Главный coordination-chat не должен открывать параллельную API-реализацию.
 
 После scoped API token storage в `codex-vps-test-prep` уже вошли Route/Auth Binding Tests, API Token Lifecycle Gate и SSH Host Key Verifier через PR #4, PR #5 и PR #6. Эти срезы остаются local-gate-complete: без новых live VPS calls, без включения remote writes и без расширения `/api/*` routes до отдельного gate.
 
@@ -217,7 +217,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Backup/Import Policy Contract: branch `amn2/codex/backup-import-policy-contract`, head `afb2702 Tighten backup import preview type contract` with foundation commit `d2c160b`; local-only no-route backup mode registry, secret field policy and restore/import preview contract, без web/API backup routes, restore apply, import apply или live VPS calls.
 - Secret Inventory Registry: branch `amn2/codex/secret-inventory-registry`, commit `9ce42f4 Add secret inventory registry`; local-only machine-checkable secret inventory, без `.env` чтения, DB access, routes, secret-bearing output или live VPS calls.
 - Packaging discovery fix: branch `amn2/codex/read-only-api-route-shell`, commit `e99d5f3 Fix editable install package discovery`; исправляет editable install/package discovery перед VPS install package smoke.
-- Read-only API route shell: branch `amn2/codex/read-only-api-route-shell`, commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`, `5f12736`; добавлены loopback-safe read-only `/api/*` routes, token smoke CLI, local API smoke readiness, `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`, AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh` и update+smoke kit `dist/amn2-vps-update-and-smoke-kit-5f12736.zip`; full local suite `588 passed`, expected `StarletteDeprecationWarning`; real VPS loopback smoke passed 2026-06-02, `run_id=20260602T171639Z`, evidence `research/amn2/api-vps-smoke-evidence-2026-06-02.md`; fast-forward merged into `codex-vps-test-prep` at production head `5f12736`.
+- Read-only API route shell: branch `amn2/codex/read-only-api-route-shell`, commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`, `5f12736`; добавлены loopback-safe read-only `/api/*` routes, token smoke CLI, local API smoke readiness, `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`, AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh` и update+smoke kit `dist/amn2-vps-update-and-smoke-kit-5f12736.zip`; full local suite `588 passed`, expected `StarletteDeprecationWarning`; latest real VPS API-only smoke passed 2026-06-03, `run_id=20260603T112418Z`, evidence `research/amn2/api-vps-smoke-evidence-2026-06-03.md`; fast-forward merged into `codex-vps-test-prep` at production head `5f12736`.
 
 Решение по соседним чатам:
 

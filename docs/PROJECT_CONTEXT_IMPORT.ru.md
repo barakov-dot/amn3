@@ -27,7 +27,7 @@ branch: codex/read-only-api-route-shell
 remote branch: amn2/codex/read-only-api-route-shell
 latest committed head: 2010d60 Add API VPS smoke evidence template
 base stable line: d0939d8 Merge pull request #6 from barakov-dot/codex/ssh-host-key-identity-verifier
-status: pushed, local worktree clean, full local suite 588 passed with expected StarletteDeprecationWarning, real VPS loopback API smoke passed run_id=20260602T171639Z
+status: pushed, local worktree clean, full local suite 588 passed with expected StarletteDeprecationWarning, latest real VPS API-only smoke passed run_id=20260603T112418Z
 working chat: Переводим AMN на API
 ```
 
@@ -103,12 +103,12 @@ status: synchronize with origin/master after package publish
 
 ```text
 dist/amn2-vps-install-5f12736.zip
-sha256: 41817BD8F5F6F7F4BE3DBDA53788645A02B2BAE1664A1FB5AF6B979512238A29
+sha256: CB2FBA547FD5DC50A94851BC7154D775FBD4977F09091E0F9BAE52F2DC9C2F25
 dist/amn2-vps-update-and-smoke-kit-5f12736.zip
-sha256: 79BFFCA120D95FA4A68163CAD80F56C61E241035FDCD0FF6DC318BBA1E594A85
+sha256: 557C3B0C589BE98E1F5780DBBF289ACB3EB350F468BF369A6672B2A10DB2BB3C
 ```
 
-Package hotfix note: install package `5f12736` includes `amn2_api_loopback_smoke.sh`; installer `Next steps` run API-only smoke with `AMN2_RUN_PREFLIGHT=0`. `server preflight` is a separate SSH/server dry-run gate only.
+Package hotfix note: install/update packages include `amn2_api_loopback_smoke.sh` version `2026-06-04.1`; smoke performs DB-only server config sync from `servers.yml` before `/api/*` route smoke. `server preflight` is a separate SSH/server dry-run gate only.
 
 Соседний AMN3 branch-only push, учтенный как комментарий к pre-VPS координации:
 

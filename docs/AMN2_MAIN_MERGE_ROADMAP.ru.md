@@ -195,7 +195,7 @@ Production evidence:
 - focused tests: `14 passed, 1 StarletteDeprecationWarning`;
 - full local suite: `535 passed, 1 StarletteDeprecationWarning`.
 
-После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening, Web Panel Safe Improvements, Scoped API Token Storage, Manager Config Export Contract, Public/Self-service Config Delivery Policy, Backup/Import Policy Contract, Secret Inventory Registry и отдельная read-only API lane. KYORESUAS API направление перешло в собственную `amn2` ветку `codex/read-only-api-route-shell`; real VPS loopback API smoke passed 2026-06-02, `run_id=20260602T171639Z`, evidence `research/amn2/api-vps-smoke-evidence-2026-06-02.md`, and the branch fast-forward merged into stable `codex-vps-test-prep` at `5f12736`. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным gate для SSH/sync/config/runtime write surfaces.
+После public-token safety выполнены remote operation dry-run/audit local slice, Local Agent hardening, Web Panel Safe Improvements, Scoped API Token Storage, Manager Config Export Contract, Public/Self-service Config Delivery Policy, Backup/Import Policy Contract, Secret Inventory Registry и отдельная read-only API lane. KYORESUAS API направление перешло в собственную `amn2` ветку `codex/read-only-api-route-shell`; latest real VPS API-only smoke passed 2026-06-03, `run_id=20260603T112418Z`, evidence `research/amn2/api-vps-smoke-evidence-2026-06-03.md`, and the branch fast-forward merged into stable `codex-vps-test-prep` at `5f12736`. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным gate для SSH/sync/config/runtime write surfaces.
 
 ## Важные задачи
 

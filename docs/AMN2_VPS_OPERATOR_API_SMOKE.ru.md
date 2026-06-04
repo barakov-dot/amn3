@@ -30,7 +30,7 @@ dist/amn2-api-vps-smoke-operator-kit-2026-06-02.zip.sha256.txt
 
 Скрипт не делает peer apply/revoke, не читает `.conf`, QR, `vpn://`, private keys, PSK, не вызывает Docker restart и не открывает API наружу.
 
-По умолчанию скрипт также не запускает `server preflight` и не входит в SSH/server gate. Для API-only проверки `preflight_status` должен быть `skipped`.
+По умолчанию скрипт также не запускает `server preflight` и не входит в SSH/server gate. Для API-only проверки `preflight_status` должен быть `skipped`. Скрипт делает DB-only sync выбранного server config из `servers.yml` в SQLite; ожидаемый `server_db_sync_status` - `passed`.
 
 Если скрипт останавливается на:
 
@@ -121,7 +121,7 @@ install -m 700 /root/amn2-api-vps-smoke-kit-2026-06-02/amn2_api_loopback_smoke.s
 cd /opt/amn2
 export VPS_APPLY_ENABLED=false
 export AMN2_RUN_PREFLIGHT=0
-export AMN2_SERVER_NAME=debian-vps-1
+export AMN2_SERVER_NAME=local
 bash ./amn2_api_loopback_smoke.sh
 ```
 
@@ -133,7 +133,7 @@ export VPS_APPLY_ENABLED=false
 export AMN2_DIR=/opt/amn2
 export AMN2_DB=data/amneziya.sqlite3
 export AMN2_CONFIG=servers.yml
-export AMN2_SERVER_NAME=debian-vps-1
+export AMN2_SERVER_NAME=local
 export AMN2_API_PORT=3040
 export AMN2_RUN_PREFLIGHT=0
 bash ./amn2_api_loopback_smoke.sh
@@ -144,6 +144,8 @@ bash ./amn2_api_loopback_smoke.sh
 ```bash
 export AMN2_RUN_PREFLIGHT=1
 export AMN2_REQUIRE_PREFLIGHT=1
+export AMN2_SYNC_SERVER_CONFIG=1
+export AMN2_REQUIRE_SERVER_DB_SYNC=1
 export AMN2_EXPECTED_COMMIT=5f12736
 ```
 

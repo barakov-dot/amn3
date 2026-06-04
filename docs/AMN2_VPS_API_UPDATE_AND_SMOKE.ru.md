@@ -4,9 +4,9 @@
 
 Назначение: обновить установленный на VPS `/opt/amn2` до stable production head `5f12736` и затем выполнить loopback API smoke без передачи SSH-доступа в чат.
 
-Последний безопасный итог: real VPS loopback API smoke passed 2026-06-02, `run_id=20260602T171639Z`; preflight/API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`. AMN3 evidence: `research/amn2/api-vps-smoke-evidence-2026-06-02.md`.
+Последний безопасный итог: real VPS loopback API smoke passed 2026-06-03, `run_id=20260603T112418Z`; server config был заранее синхронизирован в SQLite как DB-only step, preflight был `skipped`, API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`. AMN3 evidence: `research/amn2/api-vps-smoke-evidence-2026-06-03.md`.
 
-Важно: API smoke теперь по умолчанию не запускает `server preflight` и не входит в SSH/server gate. Для чистой API-проверки `preflight_status` должен быть `skipped`. Если нужен отдельный SSH/server dry-run gate, запускать его вручную и осознанно, не смешивая с API smoke.
+Важно: API smoke теперь по умолчанию не запускает `server preflight` и не входит в SSH/server gate. Для чистой API-проверки `preflight_status` должен быть `skipped`. Перед route smoke скрипт делает DB-only sync выбранного server config из `servers.yml` в SQLite; ожидаемый `server_db_sync_status` - `passed`. Если нужен отдельный SSH/server dry-run gate, запускать его вручную и осознанно, не смешивая с API smoke.
 
 ## Почему нужен этот пакет
 
@@ -102,7 +102,7 @@ install -m 700 /root/amn2-vps-update-and-smoke-kit-5f12736/amn2_api_loopback_smo
 cd /opt/amn2
 export VPS_APPLY_ENABLED=false
 export AMN2_RUN_PREFLIGHT=0
-export AMN2_SERVER_NAME=debian-vps-1
+export AMN2_SERVER_NAME=local
 bash ./amn2_api_loopback_smoke.sh
 ```
 
@@ -118,6 +118,7 @@ bash ./amn2_api_loopback_smoke.sh
 api_smoke_status: passed
 auth_status: passed
 preflight_status: skipped
+server_db_sync_status: passed
 listener_status: passed
 audit_status: passed
 ```
