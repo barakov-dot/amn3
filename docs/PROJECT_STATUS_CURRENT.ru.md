@@ -70,16 +70,16 @@ master; verify exact current head with git log -1 after package publish
 2b845cb Make API smoke skip server preflight by default
 ```
 
-Актуальный install/update package для стабильного `amn2` baseline `5f12736`:
+Актуальный install/update package для стабильного `amn2` baseline `294803e`:
 
 ```text
-dist/amn2-vps-install-5f12736.zip
-sha256: CB2FBA547FD5DC50A94851BC7154D775FBD4977F09091E0F9BAE52F2DC9C2F25
-dist/amn2-vps-update-and-smoke-kit-5f12736.zip
-sha256: 557C3B0C589BE98E1F5780DBBF289ACB3EB350F468BF369A6672B2A10DB2BB3C
+dist/amn2-vps-install-294803e.zip
+sha256: 9B561FBF9C1ACDE403CFF6DA3A49544074457D3089FF8A8D0859B0CEBBBB1501
+dist/amn2-vps-update-and-smoke-kit-294803e.zip
+sha256: 702BAD7EBD69F80FC75FD31648383258B6C042BD51B801BC72BE2FD125813CE2
 ```
 
-Package hotfix note: install/update packages include `amn2_api_loopback_smoke.sh` version `2026-06-04.1`; the script performs DB-only server config sync from `servers.yml` into SQLite before route smoke and keeps `server preflight` as a separate SSH/server dry-run gate, not the API smoke path.
+Package note: install/update packages include `amn2_api_loopback_smoke.sh` version `2026-06-04.2`; the package contains the merged API/web-panel slice (`API readiness` and `API tokens` web-admin pages), performs DB-only server config sync from `servers.yml` into SQLite before route smoke, and keeps `server preflight` as a separate SSH/server dry-run gate, not the API smoke path.
 
 Дополнительный соседний AMN3 push, который не слит в `master`, но учтен в этом snapshot:
 
@@ -116,10 +116,10 @@ codex-vps-test-prep
 Актуальный head:
 
 ```text
-5f12736 Record VPS API smoke evidence
+294803e Add API readiness and token web pages
 ```
 
-Стабильная baseline-ветка `amn2/codex-vps-test-prep` теперь содержит проверенный live VPS behavior contract и merged read-only API route shell.
+Стабильная baseline-ветка `amn2/codex-vps-test-prep` теперь содержит проверенный live VPS behavior contract, merged read-only API route shell и web-admin API readiness/token lifecycle pages.
 
 Текущая активная рабочая ветка `Amneziya` для установки/API debug:
 
@@ -130,7 +130,7 @@ remote: amn2/codex/read-only-api-route-shell
 status: merged into `codex-vps-test-prep` at `5f12736`, local worktree clean
 ```
 
-Эту ветку использовали в чате `Переводим AMN на API` для VPS install/update smoke и исправления ошибок. Актуальный real VPS loopback API-only smoke прошел 2026-06-03 с `run_id=20260603T112418Z`: DB-only server config sync выполнен, preflight `skipped`, API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`, raw token/header/hash/config/keys/PSK не публиковались. Evidence: `research/amn2/api-vps-smoke-evidence-2026-06-03.md`. Предыдущий historical pass 2026-06-02 остается в `research/amn2/api-vps-smoke-evidence-2026-06-02.md`. После evidence ветка fast-forward merged в stable `codex-vps-test-prep` и запушена как production head `5f12736`. Главный coordination-chat не должен открывать параллельную API-реализацию; API/web-panel slice `API readiness/status` + `API token lifecycle` UI выполнен в `amn2/codex/api-web-panel-finish`, commit `294803e`.
+Эту ветку использовали в чате `Переводим AMN на API` для VPS install/update smoke и исправления ошибок. Актуальный real VPS loopback API-only smoke прошел 2026-06-03 с `run_id=20260603T112418Z`: DB-only server config sync выполнен, preflight `skipped`, API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`, raw token/header/hash/config/keys/PSK не публиковались. Evidence: `research/amn2/api-vps-smoke-evidence-2026-06-03.md`. Предыдущий historical pass 2026-06-02 остается в `research/amn2/api-vps-smoke-evidence-2026-06-02.md`. После evidence ветка fast-forward merged в stable `codex-vps-test-prep` и запушена как production head `5f12736`. Главный coordination-chat не должен открывать параллельную API-реализацию; следующий API/web-panel slice `API readiness/status` + `API token lifecycle` UI выполнен в `amn2/codex/api-web-panel-finish`, затем fast-forward merged в stable `codex-vps-test-prep` и запушен как production head `294803e`.
 
 После scoped API token storage в `codex-vps-test-prep` уже вошли Route/Auth Binding Tests, API Token Lifecycle Gate и SSH Host Key Verifier через PR #4, PR #5 и PR #6. Эти срезы остаются local-gate-complete: без новых live VPS calls, без включения remote writes и без расширения `/api/*` routes до отдельного gate.
 
@@ -311,9 +311,9 @@ head: 8697b60 Document Local Agent production wiring
 ## Рекомендуемый порядок
 
 1. Не открывать второй параллельный API shell: read-only API route shell уже прошел local suite, real VPS loopback smoke и fast-forward merge в stable `codex-vps-test-prep`.
-2. API/web-panel implementation slice выполнен и запушен: branch `amn2/codex/api-web-panel-finish`, commit `294803e Add API readiness and token web pages`; focused `39 passed`, full `594 passed`.
-3. Новый VPS install/update package от production head `5f12736` остается baseline package до merge/rebase API/web-panel branch. После merge пересобрать AMN3 package от нового head. Для будущего API/web-panel VPS теста использовать `docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md`.
-4. Перед отдельным remote-operation VPS gate обновить/rebase `codex/remote-operation-vps-gate-prep` поверх нового stable head `5f12736`.
+2. API/web-panel implementation slice выполнен, запушен, fast-forward merged в `codex-vps-test-prep` и повторно проверен на stable checkout: commit `294803e Add API readiness and token web pages`; focused `39 passed`, full `594 passed`.
+3. Новый VPS install/update package пересобран от production head `294803e`. Для API/web-panel VPS теста использовать `docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md`: API loopback smoke + web через SSH tunnel, без live apply.
+4. Перед отдельным remote-operation VPS gate обновить/rebase `codex/remote-operation-vps-gate-prep` поверх нового stable head `294803e`.
 5. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным обязательным gate перед любым API/web/agent route, который вызывает SSH, syncs peers, emits config или меняет runtime state.
 6. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед дальнейшим route expansion.
 7. `/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot, public docs/metrics, domain exclusions и 2FA не открывать до отдельного решения.

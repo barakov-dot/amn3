@@ -39,34 +39,34 @@
 
 ## 1. Обновить пакет на VPS
 
-Важно: пакет `5f12736` ниже является текущим verified baseline package. После реализации API/web-panel slice в `amn2` нужно пересобрать AMN3 install/update package от нового production head и заменить имя архива/SHA в этом разделе перед VPS тестом новой панели.
+Важно: пакет `294803e` ниже является текущим API/web-panel package после merge `amn2/codex/api-web-panel-finish` в `codex-vps-test-prep`. Он содержит web-admin `API readiness` и `API tokens` pages.
 
 ```bash
 cd /root
 
-curl -fL -o amn2-vps-update-and-smoke-kit-5f12736.zip \
-  https://github.com/barakov-dot/amn3/raw/master/dist/amn2-vps-update-and-smoke-kit-5f12736.zip
+curl -fL -o amn2-vps-update-and-smoke-kit-294803e.zip \
+  https://github.com/barakov-dot/amn3/raw/master/dist/amn2-vps-update-and-smoke-kit-294803e.zip
 
-curl -fL -o amn2-vps-update-and-smoke-kit-5f12736.zip.sha256.txt \
-  https://raw.githubusercontent.com/barakov-dot/amn3/master/dist/amn2-vps-update-and-smoke-kit-5f12736.zip.sha256.txt
+curl -fL -o amn2-vps-update-and-smoke-kit-294803e.zip.sha256.txt \
+  https://raw.githubusercontent.com/barakov-dot/amn3/master/dist/amn2-vps-update-and-smoke-kit-294803e.zip.sha256.txt
 
-sha256sum -c amn2-vps-update-and-smoke-kit-5f12736.zip.sha256.txt
+sha256sum -c amn2-vps-update-and-smoke-kit-294803e.zip.sha256.txt
 ```
 
 Ожидаемый SHA256:
 
 ```text
-557C3B0C589BE98E1F5780DBBF289ACB3EB350F468BF369A6672B2A10DB2BB3C
+702BAD7EBD69F80FC75FD31648383258B6C042BD51B801BC72BE2FD125813CE2
 ```
 
 Распаковать и применить source overlay:
 
 ```bash
-rm -rf amn2-vps-update-and-smoke-kit-5f12736
-mkdir -p amn2-vps-update-and-smoke-kit-5f12736
-python3 -m zipfile -e amn2-vps-update-and-smoke-kit-5f12736.zip amn2-vps-update-and-smoke-kit-5f12736
+rm -rf amn2-vps-update-and-smoke-kit-294803e
+mkdir -p amn2-vps-update-and-smoke-kit-294803e
+python3 -m zipfile -e amn2-vps-update-and-smoke-kit-294803e.zip amn2-vps-update-and-smoke-kit-294803e
 
-cd amn2-vps-update-and-smoke-kit-5f12736
+cd amn2-vps-update-and-smoke-kit-294803e
 export VPS_APPLY_ENABLED=false
 export AMN2_DIR=/opt/amn2
 bash ./amn2_apply_source_zip.sh

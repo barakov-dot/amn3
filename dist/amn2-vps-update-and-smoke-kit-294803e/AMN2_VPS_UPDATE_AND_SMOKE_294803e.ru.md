@@ -1,4 +1,4 @@
-# AMN2 VPS API Update And Smoke
+﻿# AMN2 VPS API Update And Smoke
 
 Дата: 2026-06-04.
 

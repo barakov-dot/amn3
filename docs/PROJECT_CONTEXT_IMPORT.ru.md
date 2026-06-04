@@ -14,9 +14,9 @@
 repo: C:\Users\SooL\Documents\Amneziya
 branch: codex-vps-test-prep
 remote branch: amn2/codex-vps-test-prep
-latest committed head: 5f12736 Record VPS API smoke evidence
+latest committed head: 294803e Add API readiness and token web pages
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
-status: remote branch current after route/auth binding, API token lifecycle and SSH host key verifier merges
+status: remote branch current after read-only API shell and API/web-panel finish merge
 ```
 
 Активная рабочая ветка `amn2` для установки/API smoke:
@@ -102,13 +102,13 @@ status: synchronize with origin/master after package publish
 Актуальный install/update package:
 
 ```text
-dist/amn2-vps-install-5f12736.zip
-sha256: CB2FBA547FD5DC50A94851BC7154D775FBD4977F09091E0F9BAE52F2DC9C2F25
-dist/amn2-vps-update-and-smoke-kit-5f12736.zip
-sha256: 557C3B0C589BE98E1F5780DBBF289ACB3EB350F468BF369A6672B2A10DB2BB3C
+dist/amn2-vps-install-294803e.zip
+sha256: 9B561FBF9C1ACDE403CFF6DA3A49544074457D3089FF8A8D0859B0CEBBBB1501
+dist/amn2-vps-update-and-smoke-kit-294803e.zip
+sha256: 702BAD7EBD69F80FC75FD31648383258B6C042BD51B801BC72BE2FD125813CE2
 ```
 
-Package hotfix note: install/update packages include `amn2_api_loopback_smoke.sh` version `2026-06-04.1`; smoke performs DB-only server config sync from `servers.yml` before `/api/*` route smoke. `server preflight` is a separate SSH/server dry-run gate only.
+Package note: current `294803e` install/update packages include `amn2_api_loopback_smoke.sh` version `2026-06-04.2`, the merged API/web-panel pages, and DB-only server config sync from `servers.yml` before `/api/*` route smoke. `server preflight` is a separate SSH/server dry-run gate only. Historical `5f12736` packages remain available for read-only API shell evidence.
 
 Соседний AMN3 branch-only push, учтенный как комментарий к pre-VPS координации:
 
@@ -131,17 +131,19 @@ status: не слито в master; не повторять соседний VPS 
 - `1fdcde5 Add scoped API token storage contract`;
 - Route/Auth binding tests branch `f9d2c79`, merged through current production line;
 - API token lifecycle gate branch `256d0c0`, merged through PR #4/#5;
-- SSH host key verifier `dd20364`, merged through PR #6; later read-only API route shell moved current `amn2` head to `5f12736`;
+- SSH host key verifier `dd20364`, merged through PR #6; later read-only API route shell moved current `amn2` head to `5f12736`, then API/web-panel finish moved current head to `294803e`;
 - remote operation VPS-gate candidate `262d70f`, pushed and waiting for real VPS gate.
-- VPS install/update package `dist/amn2-vps-install-5f12736.zip` and `dist/amn2-vps-update-and-smoke-kit-5f12736.zip`;
+- VPS install/update package `dist/amn2-vps-install-294803e.zip` and `dist/amn2-vps-update-and-smoke-kit-294803e.zip`;
 - KYORESUAS API integration priority plan;
-- read-only API route shell branch `codex/read-only-api-route-shell`, real VPS loopback API smoke passed through AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh`, then fast-forward merged into stable `codex-vps-test-prep` at `5f12736`.
+- read-only API route shell branch `codex/read-only-api-route-shell`, real VPS loopback API smoke passed through AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh`, then fast-forward merged into stable `codex-vps-test-prep` at `5f12736`;
+- API/web-panel finish slice branch `codex/api-web-panel-finish`, full local suite `594 passed`, then fast-forward merged into stable `codex-vps-test-prep` at `294803e`.
 
 Следующий рабочий выбор:
 
-1. Считать read-only API shell stable baseline at `5f12736`.
+1. Считать read-only API shell stable evidence baseline at `5f12736`, а текущий production head для API/web-panel testing - `294803e`.
 2. Future API expansion requires separate route/secret/remote-write gates.
-3. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным gate перед routes, которые вызывают SSH, sync peers, emit config или меняют runtime state.
+3. Сначала выполнить API/web-panel VPS test по `docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md`: loopback API smoke + web через SSH tunnel, без live apply.
+4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным gate перед routes, которые вызывают SSH, sync peers, emit config или меняют runtime state.
 
 Старые блоки ниже, где `91aeb3e` указан как latest clean baseline, считать историческим контекстом verified live stage.
 
@@ -540,8 +542,8 @@ First safe slice по design spec:
 
 Текущий режим coordination: AMN3 принял состояние после live VPS stage, local-only transfer slices, VPS install package и активной read-only API ветки.
 
-1. Держать read-only API shell как stable baseline at `5f12736`.
-2. Перед remote-operation VPS gate обновить отдельную branch `codex/remote-operation-vps-gate-prep` поверх `5f12736`.
+1. Держать read-only API shell как stable evidence baseline at `5f12736`; текущий production/API-web head - `294803e`.
+2. Перед remote-operation VPS gate обновить отдельную branch `codex/remote-operation-vps-gate-prep` поверх `294803e`.
 3. Для новых API routes начинать с отдельного route/secret/remote-write gate, не с копирования upstream code.
 4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` держать отдельным gate для SSH/sync/config/runtime-changing routes.
 5. Для coordination-чата держать правило: любая новая идея сначала попадает в очередь с verdict, а не сразу в implementation.
