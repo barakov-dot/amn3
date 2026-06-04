@@ -130,7 +130,7 @@ remote: amn2/codex/read-only-api-route-shell
 status: merged into `codex-vps-test-prep` at `5f12736`, local worktree clean
 ```
 
-Эту ветку использовали в чате `Переводим AMN на API` для VPS install/update smoke и исправления ошибок. Актуальный real VPS loopback API-only smoke прошел 2026-06-03 с `run_id=20260603T112418Z`: DB-only server config sync выполнен, preflight `skipped`, API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`, raw token/header/hash/config/keys/PSK не публиковались. Evidence: `research/amn2/api-vps-smoke-evidence-2026-06-03.md`. Предыдущий historical pass 2026-06-02 остается в `research/amn2/api-vps-smoke-evidence-2026-06-02.md`. После evidence ветка fast-forward merged в stable `codex-vps-test-prep` и запушена как production head `5f12736`. Главный coordination-chat не должен открывать параллельную API-реализацию.
+Эту ветку использовали в чате `Переводим AMN на API` для VPS install/update smoke и исправления ошибок. Актуальный real VPS loopback API-only smoke прошел 2026-06-03 с `run_id=20260603T112418Z`: DB-only server config sync выполнен, preflight `skipped`, API/auth/scope/revoke/listener/audit `passed`, `VPS_APPLY_ENABLED=false`, raw token/header/hash/config/keys/PSK не публиковались. Evidence: `research/amn2/api-vps-smoke-evidence-2026-06-03.md`. Предыдущий historical pass 2026-06-02 остается в `research/amn2/api-vps-smoke-evidence-2026-06-02.md`. После evidence ветка fast-forward merged в stable `codex-vps-test-prep` и запушена как production head `5f12736`. Главный coordination-chat не должен открывать параллельную API-реализацию; следующий допустимый API/web-panel slice - web-admin-only `API readiness/status` и `API token lifecycle` UI по `docs/superpowers/plans/2026-06-04-amn2-api-web-panel-finish.md`.
 
 После scoped API token storage в `codex-vps-test-prep` уже вошли Route/Auth Binding Tests, API Token Lifecycle Gate и SSH Host Key Verifier через PR #4, PR #5 и PR #6. Эти срезы остаются local-gate-complete: без новых live VPS calls, без включения remote writes и без расширения `/api/*` routes до отдельного gate.
 
@@ -310,13 +310,13 @@ head: 8697b60 Document Local Agent production wiring
 
 ## Рекомендуемый порядок
 
-1. Не открывать второй параллельный API implementation branch: read-only API route shell уже прошел local suite, real VPS loopback smoke и fast-forward merge в stable `codex-vps-test-prep`.
-2. Новый VPS install/update package собран от production head `5f12736`; старый install package `d0939d8` остается историческим baseline package.
-3. Перед отдельным remote-operation VPS gate обновить/rebase `codex/remote-operation-vps-gate-prep` поверх нового stable head `5f12736`.
-4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным обязательным gate перед любым API/web/agent route, который вызывает SSH, syncs peers, emits config или меняет runtime state.
-5. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед дальнейшим route expansion.
-6. `/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot и public docs/metrics не открывать до отдельного route/secret/remote-write решения.
-7. Domain exclusions и 2FA не возвращать в работу до закрытия текущих safety gates.
+1. Не открывать второй параллельный API shell: read-only API route shell уже прошел local suite, real VPS loopback smoke и fast-forward merge в stable `codex-vps-test-prep`.
+2. Следующий допустимый API/web-panel implementation slice: web-admin-only `API readiness/status` и `API token lifecycle` UI по `docs/superpowers/plans/2026-06-04-amn2-api-web-panel-finish.md`.
+3. Новый VPS install/update package собран от production head `5f12736`; старый install package `d0939d8` остается историческим baseline package. Для будущего API/web-panel VPS теста использовать `docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md`.
+4. Перед отдельным remote-operation VPS gate обновить/rebase `codex/remote-operation-vps-gate-prep` поверх нового stable head `5f12736`.
+5. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным обязательным gate перед любым API/web/agent route, который вызывает SSH, syncs peers, emits config или меняет runtime state.
+6. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед дальнейшим route expansion.
+7. `/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot, public docs/metrics, domain exclusions и 2FA не открывать до отдельного решения.
 
 ## Route/Auth/Operation Policy Matrix Plan
 
