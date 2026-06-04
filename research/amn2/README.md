@@ -78,6 +78,7 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [API/Web panel finish implementation](api-web-panel-finish-implementation.md) - pushed `amn2/codex/api-web-panel-finish`, commit `294803e`, merged into stable `codex-vps-test-prep`, local gate evidence.
 - [API/Web panel VPS evidence 2026-06-04](api-web-panel-vps-evidence-2026-06-04.md) - real VPS API loopback smoke and web-admin API readiness/API tokens route check for stable head `294803e`.
 - [Phase 1 closeout 2026-06-04](phase-1-closeout-2026-06-04.md) - `7764ae7` follow-up: `/api/integration/status` is covered by API smoke and current update+smoke kit is published.
+- [Next chat Phase 2 VPS live gate](../../docs/NEXT_CHAT_AMN2_PHASE_2_VPS_LIVE.ru.md) - one-copy handoff for the separate live single test peer apply/revoke chat.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
