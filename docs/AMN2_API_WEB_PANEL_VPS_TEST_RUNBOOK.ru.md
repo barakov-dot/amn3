@@ -1,5 +1,16 @@
 # AMN2 API/Web Panel VPS Test Runbook
 
+Актуализация 2026-06-04: текущий Phase 1 closeout package — `7764ae7 Cover integration status in API smoke`.
+
+```text
+dist/amn2-vps-update-and-smoke-kit-7764ae7.zip
+sha256: 832E1B1F6516A02E0D6AA45672B8FF526DF15D27117D2063CE45F9966825A66A
+operator doc: dist/amn2-vps-update-and-smoke-kit-7764ae7/AMN2_VPS_UPDATE_AND_SMOKE_7764ae7.ru.md
+evidence: research/amn2/phase-1-closeout-2026-06-04.md
+```
+
+Пакет `294803e` ниже остается historical API/web-panel evidence. Для следующей VPS-проверки Фазы 1 использовать `7764ae7`; он проверяет 5 read-only API routes, включая `/api/integration/status`, и не разрешает live apply/revoke.
+
 Дата: 2026-06-04.
 
 Назначение: зафиксировать, что делать на VPS при следующих API/web-panel доработках после подтвержденного API-only pass `run_id=20260603T112418Z`. Этот runbook не является разрешением на live apply/revoke/config delivery.

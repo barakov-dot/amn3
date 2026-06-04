@@ -1,3 +1,14 @@
+# Current Override 2026-06-04
+
+`amn2/codex-vps-test-prep` head is `7764ae7 Cover integration status in API smoke`.
+
+```text
+AMN3 evidence: research/amn2/phase-1-closeout-2026-06-04.md
+current update+smoke kit: dist/amn2-vps-update-and-smoke-kit-7764ae7.zip
+sha256: 832E1B1F6516A02E0D6AA45672B8FF526DF15D27117D2063CE45F9966825A66A
+```
+
+Phase 2 live single test peer apply/revoke remains a separate new chat/gate with separate operator confirmation and rollback checklist. Older `294803e` blocks below are historical API/web-panel evidence.
 # VPN Ops Lab / Amneziya: импорт контекста из чатов
 
 Дата снимка: 2026-06-02.

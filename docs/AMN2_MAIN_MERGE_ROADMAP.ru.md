@@ -1,3 +1,8 @@
+# Current Override 2026-06-04
+
+Phase 1 read-only/API/web-panel baseline is closed at `amn2/codex-vps-test-prep` head `7764ae7`. Use `research/amn2/phase-1-closeout-2026-06-04.md` and `dist/amn2-vps-update-and-smoke-kit-7764ae7.zip` for the next VPS read-only update/smoke.
+
+Phase 2 live single test peer apply/revoke is not part of this thread. It must start as a separate gate with separate operator confirmation, disposable test peer and rollback checklist.
 # `amn2`: основной порядок слияния API, web panel и operations
 
 Дата: 2026-06-02.

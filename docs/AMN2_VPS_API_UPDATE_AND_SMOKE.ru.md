@@ -1,5 +1,16 @@
 # AMN2 VPS API Update And Smoke
 
+Актуализация 2026-06-04: текущий Phase 1 closeout package для существующего `/opt/amn2` — `7764ae7 Cover integration status in API smoke`.
+
+```text
+dist/amn2-vps-update-and-smoke-kit-7764ae7.zip
+sha256: 832E1B1F6516A02E0D6AA45672B8FF526DF15D27117D2063CE45F9966825A66A
+operator doc: dist/amn2-vps-update-and-smoke-kit-7764ae7/AMN2_VPS_UPDATE_AND_SMOKE_7764ae7.ru.md
+evidence: research/amn2/phase-1-closeout-2026-06-04.md
+```
+
+Пакет `294803e` ниже остается historical API/web-panel evidence. Для следующей VPS-проверки Фазы 1 использовать `7764ae7`; он добавляет `/api/integration/status` в API smoke и не включает live apply/revoke.
+
 Дата: 2026-06-04.
 
 Назначение: обновить установленный на VPS `/opt/amn2` до stable production head `294803e` и затем выполнить loopback API smoke и web-panel tunnel check без передачи SSH-доступа в чат.

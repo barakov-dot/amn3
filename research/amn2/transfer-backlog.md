@@ -1,5 +1,15 @@
 # `amn2` Transfer Backlog
 
+Актуализация 2026-06-04: Phase 1 read-only/API/web-panel baseline закрыт на `amn2/codex-vps-test-prep` head `7764ae7 Cover integration status in API smoke`.
+
+```text
+AMN3 evidence: research/amn2/phase-1-closeout-2026-06-04.md
+current update+smoke kit: dist/amn2-vps-update-and-smoke-kit-7764ae7.zip
+sha256: 832E1B1F6516A02E0D6AA45672B8FF526DF15D27117D2063CE45F9966825A66A
+```
+
+Phase 2 live single test peer apply/revoke остается отдельным новым chat/gate. Старые строки `294803e` ниже остаются historical API/web-panel evidence.
+
 Дата: 2026-06-02.
 
 Назначение: единая очередь переноса AMNEZIYA-наработок и upstream-идей из AMN3 в production repo `amn2`.
@@ -65,8 +75,8 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Local Agent hardening | `implemented-pushed-local-gate-complete` | `amn2` | commit `c5d7eb6`; focused tests `64 passed`, full suite `536 passed` | Использовать как read-only audit/version contract; VPS gate не нужен |
 | Remote operation VPS gate candidate | `verified-real-vps-dry-run-only-pass` | `amn2` branch + AMN3 evidence | branch `codex/remote-operation-vps-gate-prep`, head `7281254`; runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; evidence `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`; package `dist/amn2-remote-operation-vps-gate-7281254-update-kit.zip`, sha256 `85FE02C2D9F402562E36CD08990CCA0A891E9173D5257EFC52E5DDF8F5C2061B`; focused `71 passed`, full `603 passed` | Phase 1 read-only/dry-run пройден; single apply/revoke остается только после отдельного подтверждения |
 | VPS gate evidence/merge package | `dry-run-evidence-recorded` | AMN3 | `remote-operation-vps-gate-evidence-2026-06-04.md`, `vps-gate-evidence-checklist.md`, `post-vps-gate-merge-decision.md`, `neighbor-chat-vps-gate-handoff.md` | Использовать для решения: `dry-run-only-pass`, не `verified-live`; write integration и merge live-state behavior остаются заблокированы |
-| Post dry-run read-only integration status | `implemented-pushed-local-gate-complete` | `amn2` branch + AMN3 evidence | branch `codex/post-dry-run-read-only-integration`, commit `55a7ed6`; evidence `research/amn2/post-dry-run-read-only-integration-implementation.md`; focused `31 passed`, full `610 passed` | Read-only API/web status surface готов; Phase 2 live apply/revoke вынести в отдельный чат/gate |
-| VPS install/update package | `published-updated-stable-294803e` | AMN3 package for `amn2` | `dist/amn2-vps-install-294803e.zip`, sha256 `9B561FBF9C1ACDE403CFF6DA3A49544074457D3089FF8A8D0859B0CEBBBB1501`; install package includes `amn2_api_loopback_smoke.sh` version `2026-06-04.2`; `dist/amn2-vps-update-and-smoke-kit-294803e.zip`, sha256 `702BAD7EBD69F80FC75FD31648383258B6C042BD51B801BC72BE2FD125813CE2`; historical `5f12736` and `d0939d8` packages remain available | Использовать `install` для чистой установки, `update+smoke` для существующего `/opt/amn2` с сохранением `.env`/`data`/`venv`/`servers.yml`; smoke сам делает DB-only server config sync; `server preflight` запускать только как отдельный SSH/server dry-run gate; web-panel тестировать через SSH tunnel |
+| Post dry-run read-only integration status | `phase-1-closeout-pushed` | `amn2` stable branch + AMN3 evidence | branch `codex/post-dry-run-read-only-integration`, commits `55a7ed6`, `7764ae7`; evidence `research/amn2/post-dry-run-read-only-integration-implementation.md`, `research/amn2/phase-1-closeout-2026-06-04.md`; focused `39 passed`, full `610 passed` | Read-only API/web status surface готов и включен в API smoke; Phase 2 live apply/revoke вынести в отдельный чат/gate |
+| VPS install/update package | `published-updated-stable-7764ae7` | AMN3 package for `amn2` | current update+smoke kit `dist/amn2-vps-update-and-smoke-kit-7764ae7.zip`, sha256 `832E1B1F6516A02E0D6AA45672B8FF526DF15D27117D2063CE45F9966825A66A`; source `dist/amn2-codex-vps-test-prep-7764ae7-source.zip`, sha256 `94D110BB9AA17C65E02C1780380BA77E49A4F0ADDDECEA7DE267FFC9F353B42B`; historical `294803e`, `5f12736` and `d0939d8` packages remain available | Использовать `update+smoke` для существующего `/opt/amn2` с сохранением `.env`/`data`/`venv`/`servers.yml`; smoke сам делает DB-only server config sync и проверяет 5 read-only API routes; `server preflight` запускать только как отдельный SSH/server dry-run gate; web-panel тестировать через SSH tunnel |
 | Docker manager safety note | `prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/docker-manager-design-note.md` | Использовать как вход для будущего implementation plan после VPS evidence |
 | SSH host key enrollment design | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/ssh-host-key-enrollment-design.md` | Использовать как policy gate перед VPS onboarding, web/API remote operations и app-managed host key pinning |
 | SSH host key identity verifier | `implemented-pushed-local-gate-complete` | `amn2` | branch `codex/ssh-host-key-identity-verifier`, commit `dd20364`; evidence `research/amn2/ssh-host-key-verifier-implementation.md`; focused `29 passed`, full `550 passed` | Использовать как merge/cherry-pick candidate перед live VPS gate; следующий шаг - подключать к SSH-backed operations только отдельным gated slice |
@@ -115,11 +125,11 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 ## Current Priority Order
 
 1. Считать first read-only API shell merged в stable `codex-vps-test-prep` at `5f12736`.
-2. API/web-panel finish slice реализован, fast-forward merged в stable `codex-vps-test-prep` at `294803e`; local full suite `594 passed`.
+2. API/web-panel finish slice реализован, fast-forward merged в stable `codex-vps-test-prep` at `294803e`; Phase 1 read-only integration status follow-up pushed at `7764ae7`; local full suite `610 passed`.
 3. Не расширять API route surface в этом slice: `/api/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot, public docs/metrics и detailed client metrics остаются заблокированы до отдельного решения.
 4. VPS API/web-panel gate для production head `294803e` пройден: API loopback smoke `run_id=20260604T102355Z`, web-admin route check passed; evidence `research/amn2/api-web-panel-vps-evidence-2026-06-04.md`.
 5. Controlled real VPS verification gate Phase 1 для `codex/remote-operation-vps-gate-prep` пройден как `dry-run-only-pass`; API/web/agent routes, которые вызывают SSH, sync peers, emit config или меняют runtime state, остаются заблокированы до Phase 2 `verified-live`; single test peer apply/revoke только после отдельного подтверждения.
-6. Post dry-run read-only integration status реализован в `amn2/codex/post-dry-run-read-only-integration` at `55a7ed6`; это только API/web visibility, без live writes. Phase 2 live apply/revoke вынести в отдельный чат/gate.
+6. Post dry-run read-only integration status реализован в `amn2/codex/post-dry-run-read-only-integration` at `55a7ed6`, затем закрыт follow-up `7764ae7`, который добавляет `/api/integration/status` в API smoke; это только API/web visibility, без live writes. Phase 2 live apply/revoke вынести в отдельный чат/gate.
 7. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед route expansion.
 8. Domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
 
@@ -266,8 +276,9 @@ Implementation:
 ```text
 branch: codex/post-dry-run-read-only-integration
 commit: 55a7ed6 Add post dry-run integration status
+follow-up: 7764ae7 Cover integration status in API smoke
 evidence: research/amn2/post-dry-run-read-only-integration-implementation.md
-focused: 31 passed
+focused: 39 passed
 full: 610 passed
 ```
 

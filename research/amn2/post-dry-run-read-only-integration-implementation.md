@@ -28,6 +28,12 @@ Commit:
 55a7ed6 Add post dry-run integration status
 ```
 
+Phase 1 closeout follow-up:
+
+```text
+7764ae7 Cover integration status in API smoke
+```
+
 ## Decision
 
 Real VPS Phase 1 is fixed as `dry-run-only-pass`. Phase 2 live single test peer apply/revoke was not run and remains blocked until a separate operator confirmation in a new chat/gate.
@@ -46,7 +52,7 @@ No live VPS write behavior was added. The slice does not add `/api/clients`, `co
 
 The status payload reports:
 
-- stable head `708c98e`;
+- Phase 1 read-only integration baseline `55a7ed6`;
 - historical API/web baseline `294803e`;
 - remote-operation candidate `7281254`;
 - Phase 1 `dry_run_only_pass`;
@@ -74,6 +80,14 @@ Full local verification:
 ```text
 python -m pytest -q -p no:cacheprovider --basetemp tmp/pytest-post-dry-run-read-only
 result: 610 passed, 1 StarletteDeprecationWarning
+```
+
+Follow-up verification for `7764ae7`:
+
+```text
+focused: 39 passed
+full: 610 passed
+package evidence: research/amn2/phase-1-closeout-2026-06-04.md
 ```
 
 Note: the first full-suite attempt used `--basetemp tmp/pytest-post-dry-run-read-only` before creating parent `tmp/`, so pytest produced setup `FileNotFoundError` noise. After creating ignored `tmp/`, the full suite passed.
