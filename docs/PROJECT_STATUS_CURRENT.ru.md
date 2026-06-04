@@ -153,6 +153,7 @@ Route/Auth Binding Tests: focused 22 passed; full 549 passed
 API Token Lifecycle Gate stacked: focused 56 passed; full 555 passed
 SSH Host Key Verifier: focused 29 passed; full 550 passed
 Remote Operation VPS-gate candidate: focused 71 passed; full 603 passed; VPS Phase 1 dry-run-only-pass
+Post dry-run read-only integration status: focused 31 passed; full 610 passed
 Secret Inventory Registry: focused 64 passed; full 591 passed
 Read-only API route shell: full 588 passed
 ```
@@ -218,6 +219,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Secret Inventory Registry: branch `amn2/codex/secret-inventory-registry`, commit `9ce42f4 Add secret inventory registry`; local-only machine-checkable secret inventory, без `.env` чтения, DB access, routes, secret-bearing output или live VPS calls.
 - Packaging discovery fix: branch `amn2/codex/read-only-api-route-shell`, commit `e99d5f3 Fix editable install package discovery`; исправляет editable install/package discovery перед VPS install package smoke.
 - Read-only API route shell: branch `amn2/codex/read-only-api-route-shell`, commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`, `5f12736`; добавлены loopback-safe read-only `/api/*` routes, token smoke CLI, local API smoke readiness, `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`, AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh` и update+smoke kit `dist/amn2-vps-update-and-smoke-kit-5f12736.zip`; full local suite `588 passed`, expected `StarletteDeprecationWarning`; latest real VPS API-only smoke passed 2026-06-03, `run_id=20260603T112418Z`, evidence `research/amn2/api-vps-smoke-evidence-2026-06-03.md`; fast-forward merged into `codex-vps-test-prep` at production head `5f12736`.
+- Post Dry-Run Read-Only Integration Status: branch `amn2/codex/post-dry-run-read-only-integration`, commit `55a7ed6 Add post dry-run integration status`; добавлены web-admin `/integration-status`, API `GET /api/integration/status` под `server:read`, общий local-only `integration_status` service, route policy/binding tests и `docs/API_TOKEN_POLICY.ru.md` update; focused `31 passed`, full `610 passed`; Phase 2 live apply/revoke не запускалась и должна идти отдельным чатом/gate.
 
 Решение по соседним чатам:
 
@@ -282,6 +284,7 @@ research/amn2/neighbor-chat-vps-gate-handoff.md
 research/amn2/read-only-metrics-privacy-classification.md
 research/amn2/local-agent-runtime-metadata-alignment.md
 research/amn2/api-token-rotation-revoke-policy.md
+research/amn2/post-dry-run-read-only-integration-implementation.md
 ```
 
 Existing unification design:

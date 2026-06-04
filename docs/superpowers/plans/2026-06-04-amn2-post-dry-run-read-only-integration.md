@@ -17,7 +17,7 @@ Use this plan from `C:\Users\SooL\Documents\Amneziya` after refreshing from the 
 ```text
 repo: C:\Users\SooL\Documents\Amneziya
 stable branch: codex-vps-test-prep
-stable head: 294803e Add API readiness and token web pages
+stable head: 708c98e Merge pull request #7 from barakov-dot/codex/remote-operation-vps-gate-prep
 remote-operation candidate: codex/remote-operation-vps-gate-prep
 remote-operation candidate head: 7281254 Merge stable API web panel baseline into remote operation gate
 AMN3 evidence: research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md
@@ -58,9 +58,9 @@ Blocked in this slice:
 - Modify `app/web/templates/base.html`: add one navigation link for integration status.
 - Modify `app/security/surface_policy.py`: add or extend route policy entries for the new API and web routes.
 - Modify `app/security/surface_bindings.py` or the current route binding inventory file: bind the new routes to the policy matrix.
-- Create `tests/services/test_integration_status.py`: service contract and forbidden-marker tests.
-- Create `tests/api/test_integration_status.py`: API auth/scope/audit/no-secret tests.
-- Create `tests/web/test_integration_status.py`: web auth/render/no-secret tests.
+- Create `tests/services/test_integration_status_service.py`: service contract and forbidden-marker tests.
+- Create `tests/api/test_api_integration_status.py`: API auth/scope/audit/no-secret tests.
+- Create `tests/web/test_web_integration_status.py`: web auth/render/no-secret tests.
 - Modify `tests/security/test_surface_policy_bindings.py`: web route binding drift guard for the new route.
 - Update AMN3 after implementation: `research/amn2/transfer-backlog.md`, `docs/PROJECT_STATUS_CURRENT.ru.md`, and a new implementation evidence note.
 
@@ -74,12 +74,14 @@ The service returns this shape. Field names are intentionally stable because bot
     "summary": "Read-only API/web integration is available; remote writes require a separate live gate.",
     "api_baseline": {
         "status": "verified_read_only",
-        "stable_head": "294803e",
+        "stable_head": "708c98e",
+        "api_web_baseline_head": "294803e",
         "allowed_scopes": ["metrics:read", "server:read"],
         "write_routes_enabled": False,
     },
     "remote_operation_gate": {
         "candidate_head": "7281254",
+        "stable_merge_head": "708c98e",
         "phase_1": "dry_run_only_pass",
         "phase_2": "not_run",
         "write_operations_enabled": False,
@@ -113,11 +115,11 @@ Do not include environment values, server hostnames, interface names, container 
 
 **Files:**
 - Create: `app/services/integration_status.py`
-- Create: `tests/services/test_integration_status.py`
+- Create: `tests/services/test_integration_status_service.py`
 
 - [ ] **Step 1: Write failing service tests**
 
-Create `tests/services/test_integration_status.py`:
+Create `tests/services/test_integration_status_service.py`:
 
 ```python
 from pathlib import Path
@@ -154,9 +156,11 @@ def test_build_integration_status_reports_dry_run_gate_without_write_enablement(
 
     assert report["status"] == "dry_run_ready"
     assert report["api_baseline"]["status"] == "verified_read_only"
-    assert report["api_baseline"]["stable_head"] == "294803e"
+    assert report["api_baseline"]["stable_head"] == "708c98e"
+    assert report["api_baseline"]["api_web_baseline_head"] == "294803e"
     assert report["api_baseline"]["write_routes_enabled"] is False
     assert report["remote_operation_gate"]["candidate_head"] == "7281254"
+    assert report["remote_operation_gate"]["stable_merge_head"] == "708c98e"
     assert report["remote_operation_gate"]["phase_1"] == "dry_run_only_pass"
     assert report["remote_operation_gate"]["phase_2"] == "not_run"
     assert report["remote_operation_gate"]["write_operations_enabled"] is False
@@ -201,7 +205,7 @@ def _seed_server(repo: Repository) -> None:
 Run:
 
 ```powershell
-python -m pytest tests/services/test_integration_status.py -q
+python -m pytest tests/services/test_integration_status_service.py -q
 ```
 
 Expected before implementation:
@@ -246,12 +250,14 @@ def build_integration_status(repo: Repository) -> dict[str, Any]:
         "summary": "Read-only API/web integration is available; remote writes require a separate live gate.",
         "api_baseline": {
             "status": "verified_read_only",
-            "stable_head": "294803e",
+            "stable_head": "708c98e",
+            "api_web_baseline_head": "294803e",
             "allowed_scopes": list(ALLOWED_API_SCOPES),
             "write_routes_enabled": False,
         },
         "remote_operation_gate": {
             "candidate_head": "7281254",
+            "stable_merge_head": "708c98e",
             "phase_1": "dry_run_only_pass",
             "phase_2": "not_run",
             "write_operations_enabled": False,
@@ -277,7 +283,7 @@ def _load_aggregate_state(repo: Repository) -> dict[str, int]:
 Run:
 
 ```powershell
-python -m pytest tests/services/test_integration_status.py -q
+python -m pytest tests/services/test_integration_status_service.py -q
 ```
 
 Expected:
@@ -291,7 +297,7 @@ Expected:
 Run:
 
 ```powershell
-git add app/services/integration_status.py tests/services/test_integration_status.py
+git add app/services/integration_status.py tests/services/test_integration_status_service.py
 git commit -m "Add integration status service"
 ```
 
@@ -299,12 +305,12 @@ git commit -m "Add integration status service"
 
 **Files:**
 - Modify: `app/api/app.py`
-- Create: `tests/api/test_integration_status.py`
+- Create: `tests/api/test_api_integration_status.py`
 - Modify: `app/security/surface_policy.py`
 
 - [ ] **Step 1: Write failing API tests**
 
-Create `tests/api/test_integration_status.py`:
+Create `tests/api/test_api_integration_status.py`:
 
 ```python
 from pathlib import Path
@@ -354,8 +360,11 @@ def test_integration_status_returns_safe_read_only_report(tmp_path: Path):
     assert response.status_code == 200
     payload = response.json()
     assert payload["status"] == "dry_run_ready"
+    assert payload["api_baseline"]["stable_head"] == "708c98e"
+    assert payload["api_baseline"]["api_web_baseline_head"] == "294803e"
     assert payload["api_baseline"]["write_routes_enabled"] is False
     assert payload["remote_operation_gate"]["write_operations_enabled"] is False
+    assert payload["remote_operation_gate"]["stable_merge_head"] == "708c98e"
     assert payload["remote_operation_gate"]["phase_2"] == "not_run"
     assert payload["aggregate_state"]["servers"] == 1
     assert "live peer apply/revoke" in payload["blocked_lanes"]
@@ -417,7 +426,7 @@ def _seed_server(db_path: Path) -> None:
 Run:
 
 ```powershell
-python -m pytest tests/api/test_integration_status.py -q
+python -m pytest tests/api/test_api_integration_status.py -q
 ```
 
 Expected before route implementation:
@@ -471,7 +480,7 @@ In `app/security/surface_policy.py`, add this `_p(...)` entry next to the existi
         "Native amn2 read-only integration status route.",
         False,
         "implemented",
-        ("tests/api/test_integration_status.py",),
+        ("tests/api/test_api_integration_status.py",),
         "Reports gate state and aggregate counts without enabling remote writes.",
         enables_new_behavior=True,
     ),
@@ -482,7 +491,7 @@ In `app/security/surface_policy.py`, add this `_p(...)` entry next to the existi
 Run:
 
 ```powershell
-python -m pytest tests/api/test_integration_status.py tests/security/test_surface_policy_bindings.py -q
+python -m pytest tests/api/test_api_integration_status.py tests/security/test_surface_policy_bindings.py -q
 ```
 
 Expected:
@@ -496,7 +505,7 @@ all selected tests pass
 Run:
 
 ```powershell
-git add app/api/app.py app/security/surface_policy.py tests/api/test_integration_status.py
+git add app/api/app.py app/security/surface_policy.py tests/api/test_api_integration_status.py
 git commit -m "Add read-only integration status API"
 ```
 
@@ -509,11 +518,11 @@ git commit -m "Add read-only integration status API"
 - Modify: `app/security/surface_policy.py`
 - Modify: `app/security/surface_bindings.py`
 - Test: `tests/security/test_surface_policy_bindings.py`
-- Create: `tests/web/test_integration_status.py`
+- Create: `tests/web/test_web_integration_status.py`
 
 - [ ] **Step 1: Write failing web tests**
 
-Create `tests/web/test_integration_status.py`:
+Create `tests/web/test_web_integration_status.py`:
 
 ```python
 import re
@@ -620,7 +629,7 @@ def _seed_server(db_path: Path) -> None:
 Run:
 
 ```powershell
-python -m pytest tests/web/test_integration_status.py -q
+python -m pytest tests/web/test_web_integration_status.py -q
 ```
 
 Expected before implementation:
@@ -765,7 +774,7 @@ In `app/security/surface_policy.py`, add this `_p(...)` entry next to `web.api_r
         "",
         False,
         "implemented",
-        ("tests/web/test_integration_status.py",),
+        ("tests/web/test_web_integration_status.py",),
         "Web-admin view of post-dry-run integration gates without enabling remote writes.",
     ),
 ```
@@ -787,7 +796,7 @@ In `app/security/surface_bindings.py`, add this binding next to `/api-readiness`
 Run:
 
 ```powershell
-python -m pytest tests/web/test_integration_status.py tests/web/test_api_readiness.py tests/web/test_api_tokens.py tests/security/test_surface_policy_bindings.py -q
+python -m pytest tests/web/test_web_integration_status.py tests/web/test_api_readiness.py tests/web/test_api_tokens.py tests/security/test_surface_policy_bindings.py -q
 ```
 
 Expected:
@@ -801,7 +810,7 @@ all selected tests pass
 Run:
 
 ```powershell
-git add app/web/app.py app/web/templates/base.html app/web/templates/integration_status.html app/security/surface_policy.py app/security/surface_bindings.py tests/web/test_integration_status.py
+git add app/web/app.py app/web/templates/base.html app/web/templates/integration_status.html app/security/surface_policy.py app/security/surface_bindings.py tests/web/test_web_integration_status.py
 git commit -m "Add integration status web page"
 ```
 
@@ -854,7 +863,7 @@ Date: 2026-06-04.
 
 Production repo: `C:\Users\SooL\Documents\Amneziya`
 Branch: `codex/post-dry-run-read-only-integration`
-Base: `codex-vps-test-prep` at `294803e`
+Base: `codex-vps-test-prep` at `708c98e`
 
 ## Decision
 
@@ -870,7 +879,7 @@ The remote-operation VPS gate remains `dry-run-only-pass`. This implementation a
 ## Verification
 
 ```text
-python -m pytest tests/services/test_integration_status.py tests/api/test_integration_status.py tests/web/test_integration_status.py tests/security/test_surface_policy_bindings.py -q
+python -m pytest tests/services/test_integration_status_service.py tests/api/test_api_integration_status.py tests/web/test_web_integration_status.py tests/security/test_surface_policy_bindings.py -q
 result: paste exact focused result
 
 python -m pytest -q -p no:cacheprovider --basetemp tmp/pytest-post-dry-run-read-only
@@ -918,7 +927,7 @@ git push origin master
 Run:
 
 ```powershell
-python -m pytest tests/services/test_integration_status.py tests/api/test_integration_status.py tests/web/test_integration_status.py tests/security/test_surface_policy_bindings.py -q
+python -m pytest tests/services/test_integration_status_service.py tests/api/test_api_integration_status.py tests/web/test_web_integration_status.py tests/security/test_surface_policy_bindings.py -q
 ```
 
 Expected:

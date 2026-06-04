@@ -65,6 +65,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Local Agent hardening | `implemented-pushed-local-gate-complete` | `amn2` | commit `c5d7eb6`; focused tests `64 passed`, full suite `536 passed` | Использовать как read-only audit/version contract; VPS gate не нужен |
 | Remote operation VPS gate candidate | `verified-real-vps-dry-run-only-pass` | `amn2` branch + AMN3 evidence | branch `codex/remote-operation-vps-gate-prep`, head `7281254`; runbook `research/amn2/vps-gate-remote-operation-dry-run-audit.md`; evidence `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`; package `dist/amn2-remote-operation-vps-gate-7281254-update-kit.zip`, sha256 `85FE02C2D9F402562E36CD08990CCA0A891E9173D5257EFC52E5DDF8F5C2061B`; focused `71 passed`, full `603 passed` | Phase 1 read-only/dry-run пройден; single apply/revoke остается только после отдельного подтверждения |
 | VPS gate evidence/merge package | `dry-run-evidence-recorded` | AMN3 | `remote-operation-vps-gate-evidence-2026-06-04.md`, `vps-gate-evidence-checklist.md`, `post-vps-gate-merge-decision.md`, `neighbor-chat-vps-gate-handoff.md` | Использовать для решения: `dry-run-only-pass`, не `verified-live`; write integration и merge live-state behavior остаются заблокированы |
+| Post dry-run read-only integration status | `implemented-pushed-local-gate-complete` | `amn2` branch + AMN3 evidence | branch `codex/post-dry-run-read-only-integration`, commit `55a7ed6`; evidence `research/amn2/post-dry-run-read-only-integration-implementation.md`; focused `31 passed`, full `610 passed` | Read-only API/web status surface готов; Phase 2 live apply/revoke вынести в отдельный чат/gate |
 | VPS install/update package | `published-updated-stable-294803e` | AMN3 package for `amn2` | `dist/amn2-vps-install-294803e.zip`, sha256 `9B561FBF9C1ACDE403CFF6DA3A49544074457D3089FF8A8D0859B0CEBBBB1501`; install package includes `amn2_api_loopback_smoke.sh` version `2026-06-04.2`; `dist/amn2-vps-update-and-smoke-kit-294803e.zip`, sha256 `702BAD7EBD69F80FC75FD31648383258B6C042BD51B801BC72BE2FD125813CE2`; historical `5f12736` and `d0939d8` packages remain available | Использовать `install` для чистой установки, `update+smoke` для существующего `/opt/amn2` с сохранением `.env`/`data`/`venv`/`servers.yml`; smoke сам делает DB-only server config sync; `server preflight` запускать только как отдельный SSH/server dry-run gate; web-panel тестировать через SSH tunnel |
 | Docker manager safety note | `prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/docker-manager-design-note.md` | Использовать как вход для будущего implementation plan после VPS evidence |
 | SSH host key enrollment design | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/ssh-host-key-enrollment-design.md` | Использовать как policy gate перед VPS onboarding, web/API remote operations и app-managed host key pinning |
@@ -118,8 +119,9 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 3. Не расширять API route surface в этом slice: `/api/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot, public docs/metrics и detailed client metrics остаются заблокированы до отдельного решения.
 4. VPS API/web-panel gate для production head `294803e` пройден: API loopback smoke `run_id=20260604T102355Z`, web-admin route check passed; evidence `research/amn2/api-web-panel-vps-evidence-2026-06-04.md`.
 5. Controlled real VPS verification gate Phase 1 для `codex/remote-operation-vps-gate-prep` пройден как `dry-run-only-pass`; API/web/agent routes, которые вызывают SSH, sync peers, emit config или меняют runtime state, остаются заблокированы до Phase 2 `verified-live`; single test peer apply/revoke только после отдельного подтверждения.
-6. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед route expansion.
-7. Domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
+6. Post dry-run read-only integration status реализован в `amn2/codex/post-dry-run-read-only-integration` at `55a7ed6`; это только API/web visibility, без live writes. Phase 2 live apply/revoke вынести в отдельный чат/gate.
+7. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед route expansion.
+8. Domain exclusions и 2FA держать отложенными до закрытия текущих safety gates.
 
 ## Neighbor Chat Decision
 
@@ -249,9 +251,9 @@ Backup/import policy contract head `afb2702` (foundation commit `d2c160b`) та�
 
 Secret inventory registry commit `9ce42f4` также остается `local-gate-complete`: добавлен machine-checkable `app.security.secret_inventory`, safe manifest, lookup/filter helpers and backup policy cross-checks. Slice не читает `.env`, не подключается к БД, не добавляет routes, secret-bearing output или live VPS calls.
 
-## Post Dry-Run Read-Only Integration Plan
+## Post Dry-Run Read-Only Integration Status
 
-Статус: `planned-next-local-slice`.
+Статус: `implemented-pushed-local-gate-complete`.
 
 Plan artifact:
 
@@ -259,4 +261,14 @@ Plan artifact:
 docs/superpowers/plans/2026-06-04-amn2-post-dry-run-read-only-integration.md
 ```
 
-Решение: после real VPS Phase 1 `dry-run-only-pass` не переходить к Phase 2 live apply/revoke по умолчанию. Следующий рекомендуемый `amn2` slice - local-only read-only integration status surface: web-admin `/integration-status`, API `GET /api/integration/status`, общий local `integration_status` service, route policy/binding tests и AMN3 evidence. Slice не должен добавлять `/api/clients`, `config:read`, public/self-service config delivery, Local Agent mutations, SSH writes, Docker writes, peer apply/revoke, backup/import/reboot routes или detailed per-peer metrics.
+Implementation:
+
+```text
+branch: codex/post-dry-run-read-only-integration
+commit: 55a7ed6 Add post dry-run integration status
+evidence: research/amn2/post-dry-run-read-only-integration-implementation.md
+focused: 31 passed
+full: 610 passed
+```
+
+Решение: после real VPS Phase 1 `dry-run-only-pass` не переходить к Phase 2 live apply/revoke по умолчанию. Реализован local-only read-only integration status surface: web-admin `/integration-status`, API `GET /api/integration/status`, общий local `integration_status` service, route policy/binding tests и AMN3 evidence. Slice не добавляет `/api/clients`, `config:read`, public/self-service config delivery, Local Agent mutations, SSH writes, Docker writes, peer apply/revoke, backup/import/reboot routes или detailed per-peer metrics.
