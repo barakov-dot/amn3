@@ -204,6 +204,6 @@ audit_status: passed
 
 ## 7. После pass
 
-После `VPS verdict: pass` можно вернуться в coordination chat и зафиксировать, что stable `codex-vps-test-prep` на `294803e` подтвержден на VPS API-only smoke.
+После `VPS verdict: pass` можно вернуться в coordination chat и зафиксировать, что stable `codex-vps-test-prep` на `294803e` подтвержден на VPS API-only smoke. Это выполнено 2026-06-04, `run_id=20260604T102355Z`; evidence `research/amn2/api-web-panel-vps-evidence-2026-06-04.md`.
 
 Write API, `/clients` CRUD, API `config:read`, public config delivery, backup/import/reboot и SSH/sync/config/runtime-changing routes остаются закрытыми до отдельного controlled VPS gate.

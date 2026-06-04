@@ -4,6 +4,8 @@
 
 Назначение: зафиксировать, что делать на VPS при следующих API/web-panel доработках после подтвержденного API-only pass `run_id=20260603T112418Z`. Этот runbook не является разрешением на live apply/revoke/config delivery.
 
+Актуализация 2026-06-04: real VPS API/web-panel gate для `294803e` пройден, `run_id=20260604T102355Z`; evidence `research/amn2/api-web-panel-vps-evidence-2026-06-04.md`. Если web-панель временно запускалась на `0.0.0.0`, это считать только операторским route-rendering check в закрытой сети; штатный повторный gate должен использовать `127.0.0.1` + SSH tunnel или отдельное firewall/TLS/reverse-proxy решение.
+
 ## Границы
 
 Разрешено на VPS в этом gate:

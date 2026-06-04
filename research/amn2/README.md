@@ -75,6 +75,7 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [API token lifecycle gate implementation](api-token-lifecycle-gate-implementation.md) - local-only `amn2` branch/commit/test evidence для expiry, revoke, rotation и owner inheritance.
 - [API/Web panel finish plan](../../docs/superpowers/plans/2026-06-04-amn2-api-web-panel-finish.md) - следующий безопасный `amn2` implementation slice: web-admin API readiness/status и API token lifecycle UI.
 - [API/Web panel finish implementation](api-web-panel-finish-implementation.md) - pushed `amn2/codex/api-web-panel-finish`, commit `294803e`, merged into stable `codex-vps-test-prep`, local gate evidence.
+- [API/Web panel VPS evidence 2026-06-04](api-web-panel-vps-evidence-2026-06-04.md) - real VPS API loopback smoke and web-admin API readiness/API tokens route check for stable head `294803e`.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
@@ -87,7 +88,7 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 1. Не расширять API за пределы merged read-only aggregate shell до отдельного route/secret/remote-write gate.
 2. API/web-panel finish slice реализован, запушен и fast-forward merged: `amn2/codex/api-web-panel-finish`, commit `294803e`, evidence `api-web-panel-finish-implementation.md`.
 3. AMN3 VPS install/update package пересобран от production head `294803e`.
-4. Для будущего VPS теста API/web-panel slice использовать `../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md`: API loopback smoke, web через SSH tunnel, `VPS_APPLY_ENABLED=false`.
+4. Real VPS API/web-panel gate для `294803e` пройден: API loopback smoke `run_id=20260604T102355Z`, web-admin `API readiness` и `API tokens` доступны; evidence `api-web-panel-vps-evidence-2026-06-04.md`.
 5. VPS install/update package `294803e` является текущим package; historical `5f12736` остается evidence baseline для read-only API shell.
 6. Отдельно выполнить controlled real VPS verification gate по `vps-gate-remote-operation-dry-run-audit.md` перед SSH/sync/config/runtime-changing routes.
 7. Backup/import policy registry, restore-preview contract и machine-checkable secret inventory уже выполнены; web/API full backup, restore apply, import apply, route expansion, secret-bearing output и live VPS остаются закрытыми до отдельных gates.
