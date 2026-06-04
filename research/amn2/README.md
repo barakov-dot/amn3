@@ -74,6 +74,7 @@ Merge result: fast-forward merged into `codex-vps-test-prep` at production head 
 - [API token rotation/revoke policy](api-token-rotation-revoke-policy.md) - lifecycle gate для scoped API tokens и Local Agent tokens перед route expansion.
 - [API token lifecycle gate implementation](api-token-lifecycle-gate-implementation.md) - local-only `amn2` branch/commit/test evidence для expiry, revoke, rotation и owner inheritance.
 - [API/Web panel finish plan](../../docs/superpowers/plans/2026-06-04-amn2-api-web-panel-finish.md) - следующий безопасный `amn2` implementation slice: web-admin API readiness/status и API token lifecycle UI.
+- [API/Web panel finish implementation](api-web-panel-finish-implementation.md) - pushed `amn2/codex/api-web-panel-finish`, commit `294803e`, local gate evidence.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
@@ -84,11 +85,11 @@ Merge result: fast-forward merged into `codex-vps-test-prep` at production head 
 Текущий фокус после verified VPS cycle, read-only `RemoteOperationRunner` baseline, redaction coverage, state-changing metadata, partial-failure, dry-run/audit metadata, web-panel safety, scoped API token storage local slices и read-only API route shell:
 
 1. Не расширять API за пределы merged read-only aggregate shell до отдельного route/secret/remote-write gate.
-2. Следующий `amn2` slice: web-admin-only `API readiness/status` и `API token lifecycle` UI по `../../docs/superpowers/plans/2026-06-04-amn2-api-web-panel-finish.md`.
-3. Для будущего VPS теста API/web-panel slice использовать `../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md`: API loopback smoke, web через SSH tunnel, `VPS_APPLY_ENABLED=false`.
-4. VPS install/update package от production head `5f12736` собран: `dist/amn2-vps-install-5f12736.zip` и `dist/amn2-vps-update-and-smoke-kit-5f12736.zip`.
-5. Перед отдельным remote-operation VPS gate обновить `codex/remote-operation-vps-gate-prep` поверх нового stable head `5f12736`.
-6. Отдельно выполнить controlled real VPS verification gate по `vps-gate-remote-operation-dry-run-audit.md` на ветке `codex/remote-operation-vps-gate-prep` перед SSH/sync/config/runtime-changing routes.
+2. API/web-panel finish slice реализован и запушен: `amn2/codex/api-web-panel-finish`, commit `294803e`, evidence `api-web-panel-finish-implementation.md`.
+3. После review/merge/rebase этого branch пересобрать AMN3 VPS package от нового production head.
+4. Для будущего VPS теста API/web-panel slice использовать `../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md`: API loopback smoke, web через SSH tunnel, `VPS_APPLY_ENABLED=false`.
+5. VPS install/update package от production head `5f12736` остается baseline package до пересборки после API/web-panel merge.
+6. Отдельно выполнить controlled real VPS verification gate по `vps-gate-remote-operation-dry-run-audit.md` перед SSH/sync/config/runtime-changing routes.
 7. Backup/import policy registry, restore-preview contract и machine-checkable secret inventory уже выполнены; web/API full backup, restore apply, import apply, route expansion, secret-bearing output и live VPS остаются закрытыми до отдельных gates.
 
 ## Неактуальный риск
