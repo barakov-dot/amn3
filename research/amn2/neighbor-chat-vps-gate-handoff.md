@@ -6,14 +6,15 @@
 
 ## Current blocker
 
-Оба соседних направления ждут evidence по ветке:
+Phase 1 evidence по ветке получена 2026-06-04 как `dry-run-only-pass`:
 
 ```text
 codex/remote-operation-vps-gate-prep
 head: 7281254 Merge stable API web panel baseline into remote operation gate
+evidence: research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md
 ```
 
-Пока нет real VPS evidence, интеграционные write/API решения в main project не начинать.
+Интеграционные write/API решения в main project не начинать до отдельного Phase 2 `verified-live`. Read-only/API status/UX design lanes можно продолжать в рамках уже закрытых policy/token/audit gates.
 
 ## Signal needed from VPS gate
 
@@ -21,8 +22,10 @@ head: 7281254 Merge stable API web panel baseline into remote operation gate
 
 - Phase 1 read-only/dry-run прошла;
 - `apply-peer --dry-run` и `revoke-peer --dry-run` показывают operation metadata;
-- dry-run output не содержит PSK/private key/full config/raw command string;
+- dry-run output не содержит PSK/private key/full config/token/header/hash; planned command preview допустим только если он не содержит secret-bearing args/output;
 - no state change confirmed.
+
+Статус 2026-06-04: минимальный сигнал получен как `dry-run-only-pass`.
 
 Сильный сигнал:
 

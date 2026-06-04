@@ -289,15 +289,15 @@ Current posture:
 
 ## Решение для lab
 
-Статус: `remote-operations-local-gate-dry-run-verified`.
+Статус: `remote-operations-vps-phase-1-dry-run-only-pass`.
 
 Не переносим новые remote-state-write функции в `amn2` как code edit, пока не описан и не утвержден policy/design для partial failure, rollback/resume и audit before/after.
 
-Read-only slice `RemoteOperationRunner`, state-changing metadata, approve/reset partial-failure и dry-run/audit metadata уже закрыты локальными срезами. Дальше работаем не над повторным вводом runner-а, а над controlled real VPS verification gate и последующими gates.
+Read-only slice `RemoteOperationRunner`, state-changing metadata, approve/reset partial-failure и dry-run/audit metadata уже закрыты локальными срезами. Controlled real VPS Phase 1 read-only/dry-run gate для `7281254` пройден 2026-06-04 как `dry-run-only-pass`; evidence: `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`.
 
 ## Следующие рабочие шаги
 
-1. Перед real VPS SSH commands зафиксировать Phase 0 host key verification по `ssh-host-key-enrollment-design.md`.
-2. Подготовить и выполнить controlled real VPS verification gate на тестовом peer/device: read-only check, dry-run apply/revoke preview, затем single apply/revoke только после отдельного подтверждения.
-3. Зафиксировать результат VPS gate в lab notes и не смешивать его с обычным локальным commit.
-4. До live Docker apply/revoke отдельно описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.
+1. Не считать `dry-run-only-pass` равным `verified-live`: live single test peer apply/revoke еще не запускался.
+2. Если нужен `verified-live`, запросить отдельное подтверждение оператора на Phase 2 single test peer apply/revoke.
+3. Если Phase 2 не запускаем, продолжать только read-only/API status/UX design lanes.
+4. До broader live Docker apply/revoke отдельно описать Docker manager: persistent config path, backup, reload/apply semantics и rollback note.

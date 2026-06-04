@@ -63,6 +63,7 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [Remote operations inventory](remote-operations-inventory.md) - первый проход по SSH/server apply flows, dry-run, health checks, peer apply/revoke, traffic collection, audit, redaction и rollback gaps.
 - [Local-only task priority](local-only-task-priority.md) - приоритетный список локально выполняемых задач перед controlled real VPS verification gate.
 - [Remote operation VPS gate runbook](vps-gate-remote-operation-dry-run-audit.md) - подготовленный checklist для реального VPS-теста ветки `codex/remote-operation-vps-gate-prep`.
+- [Remote operation VPS gate evidence 2026-06-04](remote-operation-vps-gate-evidence-2026-06-04.md) - real VPS Phase 1 read-only/dry-run evidence for `7281254`, decision `dry-run-only-pass`.
 - [VPS gate evidence checklist](vps-gate-evidence-checklist.md) - короткая форма фиксации pass/fail результата после реального VPS gate.
 - [Post-VPS gate merge decision](post-vps-gate-merge-decision.md) - правила merge/PR после `verified-live`, `dry-run-only-pass` или `needs-fix`.
 - [Docker manager design note](docker-manager-design-note.md) - минимальный safety contract для будущего Docker AmneziaWG manager.
@@ -90,8 +91,8 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 3. AMN3 VPS install/update package пересобран от production head `294803e`.
 4. Real VPS API/web-panel gate для `294803e` пройден: API loopback smoke `run_id=20260604T102355Z`, web-admin `API readiness` и `API tokens` доступны; evidence `api-web-panel-vps-evidence-2026-06-04.md`.
 5. VPS install/update package `294803e` является текущим package; historical `5f12736` остается evidence baseline для read-only API shell.
-6. Отдельно выполнить controlled real VPS verification gate по `vps-gate-remote-operation-dry-run-audit.md` перед SSH/sync/config/runtime-changing routes.
-7. Backup/import policy registry, restore-preview contract и machine-checkable secret inventory уже выполнены; web/API full backup, restore apply, import apply, route expansion, secret-bearing output и live VPS остаются закрытыми до отдельных gates.
+6. Controlled real VPS verification gate Phase 1 для `codex/remote-operation-vps-gate-prep` пройден как `dry-run-only-pass`; evidence `remote-operation-vps-gate-evidence-2026-06-04.md`.
+7. Backup/import policy registry, restore-preview contract и machine-checkable secret inventory уже выполнены; web/API full backup, restore apply, import apply, route expansion, secret-bearing output и live VPS write flows остаются закрытыми до отдельных gates.
 
 ## Неактуальный риск
 

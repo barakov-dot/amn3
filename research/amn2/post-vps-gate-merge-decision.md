@@ -14,6 +14,8 @@
 - финальный статус test peer;
 - явное решение: `verified-live`, `needs-fix` или `dry-run-only-pass`.
 
+Статус 2026-06-04: Phase 1 evidence recorded as `dry-run-only-pass` in `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`; Phase 2 live single peer apply/revoke was not run.
+
 ## Decision matrix
 
 | Gate result | Что делать с branch | Что делать с интеграцией |
@@ -38,6 +40,7 @@ Merge блокируется, если:
 - test peer cleanup не подтвержден;
 - вывод содержит raw PSK/private key/full config;
 - apply/revoke затронул production peer;
+- dry-run planned command preview содержит secret-bearing args/output;
 - dry-run и live behavior расходятся по expected side effects;
 - recovery note оказался неверным или отсутствующим.
 

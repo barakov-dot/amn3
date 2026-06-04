@@ -152,7 +152,7 @@ docs/NEXT_CHAT_HANDOFF.ru.md
 Route/Auth Binding Tests: focused 22 passed; full 549 passed
 API Token Lifecycle Gate stacked: focused 56 passed; full 555 passed
 SSH Host Key Verifier: focused 29 passed; full 550 passed
-Remote Operation VPS-gate candidate: focused 71 passed; full 603 passed
+Remote Operation VPS-gate candidate: focused 71 passed; full 603 passed; VPS Phase 1 dry-run-only-pass
 Secret Inventory Registry: focused 64 passed; full 591 passed
 Read-only API route shell: full 588 passed
 ```
@@ -314,9 +314,10 @@ head: 8697b60 Document Local Agent production wiring
 2. API/web-panel implementation slice выполнен, запушен, fast-forward merged в `codex-vps-test-prep` и повторно проверен на stable checkout: commit `294803e Add API readiness and token web pages`; focused `39 passed`, full `594 passed`.
 3. VPS API/web-panel gate для production head `294803e` пройден 2026-06-04: API loopback smoke `run_id=20260604T102355Z`, `server_db_sync_status=passed`, API/auth/scope/revoke/listener/audit `passed`, web-admin `API readiness` и `API tokens` routes доступны. Evidence: `research/amn2/api-web-panel-vps-evidence-2026-06-04.md`.
 4. Remote-operation VPS gate branch обновлена поверх stable head `294803e`: `codex/remote-operation-vps-gate-prep`, head `7281254`; focused `71 passed`, full `603 passed`; AMN3 package `dist/amn2-remote-operation-vps-gate-7281254-update-kit.zip`.
-5. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным обязательным gate перед любым API/web/agent route, который вызывает SSH, syncs peers, emits config или меняет runtime state.
-6. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед дальнейшим route expansion.
-7. `/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot, public docs/metrics, domain exclusions и 2FA не открывать до отдельного решения.
+5. Controlled real VPS verification gate Phase 1 для `codex/remote-operation-vps-gate-prep` пройден 2026-06-04 как `dry-run-only-pass`: API sanity, read-only server check, traffic dry-run, apply-peer dry-run metadata и revoke-peer dry-run metadata passed. Evidence: `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`.
+6. Любой API/web/agent route, который вызывает SSH, syncs peers, emits config или меняет runtime state, остается заблокирован до отдельного Phase 2 `verified-live`.
+7. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед дальнейшим route expansion.
+8. `/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot, public docs/metrics, domain exclusions и 2FA не открывать до отдельного решения.
 
 ## Route/Auth/Operation Policy Matrix Plan
 
@@ -802,7 +803,7 @@ focused remote-operation/runtime tests: 71 passed, 1 PytestCacheWarning
 full local suite: 603 passed, 1 warning
 ```
 
-Live VPS не трогался. Candidate branch уже запушена в `amn2`; следующий шаг - отдельный controlled real VPS verification gate по `research/amn2/vps-gate-remote-operation-dry-run-audit.md`, начиная с read-only/dry-run подтверждения.
+Real VPS Phase 1 read-only/dry-run gate пройден 2026-06-04 как `dry-run-only-pass`: source overlay `7281254` verified, API loopback sanity passed, read-only server check passed, traffic dry-run passed, apply/revoke dry-run metadata passed. Live `--apply`/`--revoke --apply` не запускались. Evidence: `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`.
 
 ## Local Gate / Live VPS Gate
 
@@ -830,4 +831,4 @@ Live VPS не трогался. Candidate branch уже запушена в `amn
 - Docker AmneziaWG write/reload/restart behavior;
 - реальный Local Agent deployment или controller-to-agent calls.
 
-Следующий рекомендуемый шаг теперь не очередной local-only feature slice, а controlled real VPS verification gate для ветки `codex/remote-operation-vps-gate-prep`: read-only check, dry-run apply/revoke preview, затем single test peer apply/revoke только после отдельного разрешения. Это нужно, чтобы параллельные KYORESUAS/PRVTPRO интеграционные задачи не пошли в main project без реального VPS evidence.
+Следующий рекомендуемый шаг: решить, запрашиваем ли отдельное разрешение оператора на Phase 2 single test peer apply/revoke для `verified-live`. Если Phase 2 не запускаем, параллельные KYORESUAS/PRVTPRO задачи могут продолжать только read-only/API status/UX design lanes; write lifecycle, config delivery API, Local Agent mutation routes и live manager flows остаются заблокированы.

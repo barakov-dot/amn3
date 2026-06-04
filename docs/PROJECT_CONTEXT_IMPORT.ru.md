@@ -132,7 +132,7 @@ status: не слито в master; не повторять соседний VPS 
 - Route/Auth binding tests branch `f9d2c79`, merged through current production line;
 - API token lifecycle gate branch `256d0c0`, merged through PR #4/#5;
 - SSH host key verifier `dd20364`, merged through PR #6; later read-only API route shell moved current `amn2` head to `5f12736`, then API/web-panel finish moved current head to `294803e`;
-- remote operation VPS-gate candidate `7281254`, pushed and waiting for real VPS gate.
+- remote operation VPS-gate candidate `7281254`, real VPS Phase 1 read-only/dry-run passed as `dry-run-only-pass`; evidence `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`; Phase 2 live single test peer apply/revoke not run.
 - VPS install/update package `dist/amn2-vps-install-294803e.zip` and `dist/amn2-vps-update-and-smoke-kit-294803e.zip`;
 - KYORESUAS API integration priority plan;
 - read-only API route shell branch `codex/read-only-api-route-shell`, real VPS loopback API smoke passed through AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh`, then fast-forward merged into stable `codex-vps-test-prep` at `5f12736`;

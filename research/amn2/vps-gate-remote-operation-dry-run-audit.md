@@ -4,6 +4,8 @@
 
 Назначение: подготовить controlled real VPS verification gate для remote-operation dry-run/audit stack после verified amn2 live baseline.
 
+Результат 2026-06-04: Phase 1 real VPS read-only/dry-run gate пройден как `dry-run-only-pass`; evidence: `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`. Phase 2 live single test peer apply/revoke не запускалась.
+
 Этот документ не является разрешением на live mutation. Он фиксирует, что уже подготовлено локально, какие команды запускать на реальном VPS, где остановиться перед `--apply`, какие результаты считать успешными и какую evidence вернуть в AMN3.
 
 ## Candidate branch
