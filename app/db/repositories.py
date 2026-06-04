@@ -1228,6 +1228,178 @@ class Repository:
             (limit,),
         ).fetchall()
 
+    def list_api_server_summaries(self, *, limit: int = 100) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                servers.name,
+                servers.status,
+                servers.runtime,
+                COUNT(devices.id) AS total_device_count,
+                COALESCE(
+                    SUM(CASE WHEN devices.status = 'active' THEN 1 ELSE 0 END),
+                    0
+                ) AS active_device_count,
+                latest_health.status AS health_status,
+                latest_health.latency_ms AS health_latency_ms,
+                latest_health.checked_at AS health_checked_at,
+                latest_health.ssh_ok AS health_ssh_ok,
+                latest_health.awg_ok AS health_awg_ok,
+                latest_health.udp_port_ok AS health_udp_port_ok
+            FROM servers
+            LEFT JOIN devices ON devices.server_id = servers.id
+            LEFT JOIN server_health_checks AS latest_health
+                ON latest_health.id = (
+                    SELECT id
+                    FROM server_health_checks
+                    WHERE server_id = servers.id
+                    ORDER BY checked_at DESC, id DESC
+                    LIMIT 1
+                )
+            GROUP BY servers.id
+            ORDER BY servers.id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+
+    def get_api_server_summary(self, name: str) -> sqlite3.Row | None:
+        return self._conn.execute(
+            """
+            SELECT
+                servers.name,
+                servers.status,
+                servers.runtime,
+                COUNT(devices.id) AS total_device_count,
+                COALESCE(
+                    SUM(CASE WHEN devices.status = 'active' THEN 1 ELSE 0 END),
+                    0
+                ) AS active_device_count,
+                latest_health.status AS health_status,
+                latest_health.latency_ms AS health_latency_ms,
+                latest_health.checked_at AS health_checked_at,
+                latest_health.ssh_ok AS health_ssh_ok,
+                latest_health.awg_ok AS health_awg_ok,
+                latest_health.udp_port_ok AS health_udp_port_ok
+            FROM servers
+            LEFT JOIN devices ON devices.server_id = servers.id
+            LEFT JOIN server_health_checks AS latest_health
+                ON latest_health.id = (
+                    SELECT id
+                    FROM server_health_checks
+                    WHERE server_id = servers.id
+                    ORDER BY checked_at DESC, id DESC
+                    LIMIT 1
+                )
+            WHERE servers.name = ?
+            GROUP BY servers.id
+            """,
+            (name,),
+        ).fetchone()
+
+    def get_api_metrics_summary(self) -> dict[str, int]:
+        counts = self._conn.execute(
+            """
+            SELECT
+                (SELECT COUNT(*) FROM users) AS users_total,
+                (SELECT COUNT(*) FROM users WHERE status = 'active') AS users_active,
+                (SELECT COUNT(*) FROM users WHERE status = 'blocked') AS users_blocked,
+                (SELECT COUNT(*) FROM users WHERE status = 'deleted') AS users_deleted,
+                (SELECT COUNT(*) FROM servers) AS servers_total,
+                (SELECT COUNT(*) FROM servers WHERE status = 'active') AS servers_active,
+                (SELECT COUNT(*) FROM servers WHERE status = 'degraded') AS servers_degraded,
+                (SELECT COUNT(*) FROM servers WHERE status = 'disabled') AS servers_disabled,
+                (SELECT COUNT(*) FROM devices) AS devices_total,
+                (SELECT COUNT(*) FROM devices WHERE status = 'active') AS devices_active,
+                (SELECT COUNT(*) FROM devices WHERE status = 'disabled') AS devices_disabled,
+                (SELECT COUNT(*) FROM devices WHERE status = 'revoked') AS devices_revoked
+            """
+        ).fetchone()
+        traffic = self._conn.execute(
+            """
+            SELECT
+                COALESCE(SUM(latest.rx_bytes), 0) AS traffic_rx_bytes,
+                COALESCE(SUM(latest.tx_bytes), 0) AS traffic_tx_bytes
+            FROM device_traffic_snapshots AS latest
+            WHERE latest.id = (
+                SELECT id
+                FROM device_traffic_snapshots AS candidate
+                WHERE candidate.device_id = latest.device_id
+                ORDER BY candidate.collected_at DESC, candidate.id DESC
+                LIMIT 1
+            )
+            """
+        ).fetchone()
+
+        return {
+            "users_total": int(counts["users_total"]),
+            "users_active": int(counts["users_active"]),
+            "users_blocked": int(counts["users_blocked"]),
+            "users_deleted": int(counts["users_deleted"]),
+            "servers_total": int(counts["servers_total"]),
+            "servers_active": int(counts["servers_active"]),
+            "servers_degraded": int(counts["servers_degraded"]),
+            "servers_disabled": int(counts["servers_disabled"]),
+            "devices_total": int(counts["devices_total"]),
+            "devices_active": int(counts["devices_active"]),
+            "devices_disabled": int(counts["devices_disabled"]),
+            "devices_revoked": int(counts["devices_revoked"]),
+            "traffic_rx_bytes": int(traffic["traffic_rx_bytes"]),
+            "traffic_tx_bytes": int(traffic["traffic_tx_bytes"]),
+        }
+
+    def get_api_users_summary(self) -> dict[str, int]:
+        counts = self._conn.execute(
+            """
+            SELECT
+                (SELECT COUNT(*) FROM users) AS users_total,
+                (SELECT COUNT(*) FROM users WHERE status = 'active') AS users_active,
+                (SELECT COUNT(*) FROM users WHERE status = 'blocked') AS users_blocked,
+                (SELECT COUNT(*) FROM users WHERE status = 'deleted') AS users_deleted,
+                (SELECT COUNT(*) FROM users WHERE is_admin = 1) AS users_admins,
+                (
+                    SELECT COUNT(*)
+                    FROM users
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM devices
+                        WHERE devices.user_id = users.id
+                    )
+                ) AS users_with_devices,
+                (
+                    SELECT COUNT(*)
+                    FROM users
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM devices
+                        WHERE devices.user_id = users.id
+                    )
+                ) AS users_without_devices,
+                (SELECT COUNT(*) FROM orders) AS orders_total,
+                (SELECT COUNT(*) FROM orders WHERE status = 'manual_review') AS orders_manual_review,
+                (SELECT COUNT(*) FROM orders WHERE status = 'approved') AS orders_approved,
+                (SELECT COUNT(*) FROM orders WHERE status = 'fulfilled') AS orders_fulfilled,
+                (SELECT COUNT(*) FROM orders WHERE status = 'payment_pending') AS orders_payment_pending,
+                (SELECT COUNT(*) FROM orders WHERE status = 'rejected') AS orders_rejected
+            """
+        ).fetchone()
+
+        return {
+            "users_total": int(counts["users_total"]),
+            "users_active": int(counts["users_active"]),
+            "users_blocked": int(counts["users_blocked"]),
+            "users_deleted": int(counts["users_deleted"]),
+            "users_admins": int(counts["users_admins"]),
+            "users_with_devices": int(counts["users_with_devices"]),
+            "users_without_devices": int(counts["users_without_devices"]),
+            "orders_total": int(counts["orders_total"]),
+            "orders_manual_review": int(counts["orders_manual_review"]),
+            "orders_approved": int(counts["orders_approved"]),
+            "orders_fulfilled": int(counts["orders_fulfilled"]),
+            "orders_payment_pending": int(counts["orders_payment_pending"]),
+            "orders_rejected": int(counts["orders_rejected"]),
+        }
+
     def get_server_for_admin(self, server_id: int) -> sqlite3.Row:
         return self._fetch_one(
             """
@@ -1597,6 +1769,28 @@ class Repository:
         )
         self._commit()
         return cursor.rowcount > 0
+
+    def list_api_tokens_for_admin(self, *, limit: int = 100) -> list[sqlite3.Row]:
+        return self._conn.execute(
+            """
+            SELECT
+                id,
+                name,
+                owner_user_id,
+                owner_label,
+                scopes_json,
+                expires_at,
+                revoked_at,
+                revoke_reason,
+                last_used_at,
+                rotated_from_token_id,
+                created_at
+            FROM api_tokens
+            ORDER BY created_at DESC, id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
 
     def revoke_api_token(
         self,

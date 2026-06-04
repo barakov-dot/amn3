@@ -101,6 +101,36 @@ def test_settings_reads_vps_apply_settings():
     assert settings.server_name == "debian-vps-1"
 
 
+def test_settings_reads_api_route_shell_defaults_and_overrides():
+    default_settings = Settings(
+        _env_file=None,
+        telegram_bot_token="CHANGE_ME",
+        app_secret_key="test-secret",
+    )
+    custom_settings = Settings(
+        _env_file=None,
+        telegram_bot_token="CHANGE_ME",
+        app_secret_key="test-secret",
+        api_host="0.0.0.0",
+        api_port=3041,
+    )
+
+    assert default_settings.api_host == "127.0.0.1"
+    assert default_settings.api_port == 3040
+    assert custom_settings.api_host == "0.0.0.0"
+    assert custom_settings.api_port == 3041
+
+
+def test_settings_rejects_invalid_api_port():
+    with pytest.raises(ValidationError, match="API_PORT"):
+        Settings(
+            _env_file=None,
+            telegram_bot_token="CHANGE_ME",
+            app_secret_key="test-secret",
+            api_port=70000,
+        )
+
+
 def test_settings_reads_client_amneziawg_parameters():
     settings = Settings(
         _env_file=None,

@@ -119,7 +119,7 @@ def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     checklist = checklist_path.read_text(encoding="utf-8")
 
     assert "git pull origin codex-vps-test-prep" in text
-    assert "codex/vps-gate-remote-ops-integration" in text
+    assert "codex/remote-operation-vps-gate-prep" in text
     assert "git log -1 --oneline" in text
     assert "python -m pip install -e ." in text
     assert "python -m app.cli bot check-network" in text
@@ -132,3 +132,31 @@ def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     assert "AMN_RUNTIME=docker AMN_CONTAINER_NAME=amnezia-awg AMN_INTERFACE=awg0 bash deploy/runtime/collect_debug_snapshot.sh" in text
     assert "что нажимал" in text
     assert "docs/VPS_RETEST_PROTOCOL.ru.md" in checklist
+
+
+def test_api_vps_smoke_evidence_template_is_safe_and_linked():
+    template_path = ROOT / "docs/API_VPS_SMOKE_EVIDENCE.ru.md"
+    retest_path = ROOT / "docs/VPS_RETEST_PROTOCOL.ru.md"
+    checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"
+    handoff_path = ROOT / "docs/NEXT_CHAT_HANDOFF.ru.md"
+
+    template = template_path.read_text(encoding="utf-8")
+    retest = retest_path.read_text(encoding="utf-8")
+    checklist = checklist_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+
+    assert "Заполнять после реального VPS smoke" in template
+    assert "codex/read-only-api-route-shell" in template
+    assert "python -m app.cli api smoke-check" in template
+    assert "GET /api/users/summary" in template
+    assert "api_read" in template
+    assert "raw API token" in template
+    assert "Authorization header" in template
+    assert "token hash" in template
+    assert "PrivateKey" in template
+    assert "PresharedKey" in template
+    assert "VPS verdict" in template
+    assert "Next local action" in template
+    assert "docs/API_VPS_SMOKE_EVIDENCE.ru.md" in retest
+    assert "docs/API_VPS_SMOKE_EVIDENCE.ru.md" in checklist
+    assert "docs/API_VPS_SMOKE_EVIDENCE.ru.md" in handoff

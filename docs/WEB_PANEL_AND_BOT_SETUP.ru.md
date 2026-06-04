@@ -1,6 +1,6 @@
 # Установка и настройка web-панели и Telegram-бота
 
-Документ описывает ручной запуск на VPS для ветки `codex-vps-test-prep`.
+Документ описывает ручной запуск на VPS для ветки `codex/read-only-api-route-shell`.
 
 Порядок безопасной настройки:
 
@@ -14,7 +14,7 @@
 Если проект еще не склонирован:
 
 ```bash
-git clone -b codex-vps-test-prep https://github.com/barakov-dot/amn2.git /opt/amn2
+git clone -b codex/read-only-api-route-shell https://github.com/barakov-dot/amn2.git /opt/amn2
 cd /opt/amn2
 ```
 
@@ -22,7 +22,7 @@ cd /opt/amn2
 
 ```bash
 cd /opt/amn2
-git pull origin codex-vps-test-prep
+git pull origin codex/read-only-api-route-shell
 ```
 
 Подготовить Python-окружение:

@@ -220,7 +220,7 @@ def test_server_detail_shows_vps_retest_bundle_commands(tmp_path: Path):
 
     assert response.status_code == 200
     assert "VPS retest bundle" in response.text
-    assert "git pull origin codex-vps-test-prep" in response.text
+    assert "git pull origin codex/read-only-api-route-shell" in response.text
     assert "python -m app.cli server retest-plan" in response.text
     assert f"--config {server_config_path}" in response.text
     assert "--server local" in response.text

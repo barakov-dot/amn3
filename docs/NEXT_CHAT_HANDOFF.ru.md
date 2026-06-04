@@ -21,13 +21,13 @@ https://github.com/barakov-dot/amn2.git
 Рабочая ветка:
 
 ```text
-codex-vps-test-prep
+codex/read-only-api-route-shell
 ```
 
-Текущий актуальный коммит:
+Текущий актуальный фокус:
 
 ```text
-Document VPS verified tag
+read-only API route shell + local API hardening before VPS smoke
 ```
 
 Стабильная проверенная точка живого VPS-цикла помечена тегом:
@@ -46,16 +46,17 @@ vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 Продолжаем проект Amneziya / amn2.
 
 Репозиторий: https://github.com/barakov-dot/amn2.git
-Ветка: codex-vps-test-prep
+Ветка: codex/read-only-api-route-shell
 Локальная папка: C:\Users\SooL\Documents\Amneziya
 Стартовый документ: docs/NEXT_CHAT_HANDOFF.ru.md
 
-Цель текущего этапа: довести первый живой VPS-тест до стабильного состояния.
+Цель текущего этапа: проверить read-only API shell на реальном VPS через loopback smoke, не открывая write/config routes.
 
 Прошу сначала прочитать docs/NEXT_CHAT_HANDOFF.ru.md, затем проверить git status, последний коммит и актуальные документы:
 - docs/PRODUCTION_VPS_CHECKLIST.ru.md
 - docs/WEB_PANEL_AND_BOT_SETUP.ru.md
 - docs/VPS_RETEST_PROTOCOL.ru.md
+- docs/API_VPS_SMOKE_EVIDENCE.ru.md
 - docs/VPS_LOG_COLLECTION.ru.md
 - docs/SERVER_CONFIG_TEMPLATE.ru.md
 
@@ -75,19 +76,19 @@ cd C:\Users\SooL\Documents\Amneziya
 Ожидаем:
 
 ```text
-## codex-vps-test-prep...origin/codex-vps-test-prep
+## codex/read-only-api-route-shell...amn2/codex/read-only-api-route-shell
 ```
 
-В `git log -5` верхний коммит должен иметь сообщение `Document VPS verified tag`.
+В `git log -5` верхние коммиты должны относиться к read-only API shell и local API hardening.
 
 Тег `vps-live-cycle-verified` должен указывать на коммит `d6eda20 Document verified VPS live cycle`: это последняя точка, где базовый live cycle был проверен на VPS.
 
 Если ветка не совпадает:
 
 ```powershell
-& 'C:\Program Files\Git\cmd\git.exe' fetch origin
-& 'C:\Program Files\Git\cmd\git.exe' switch codex-vps-test-prep
-& 'C:\Program Files\Git\cmd\git.exe' pull origin codex-vps-test-prep
+& 'C:\Program Files\Git\cmd\git.exe' fetch amn2
+& 'C:\Program Files\Git\cmd\git.exe' switch codex/read-only-api-route-shell
+& 'C:\Program Files\Git\cmd\git.exe' pull amn2 codex/read-only-api-route-shell
 ```
 
 ## 4. Проверка тестов локально
@@ -102,7 +103,7 @@ $env:PYTHONPATH='.codex_deps;.'
 Последний результат:
 
 ```text
-508 passed, 1 warning
+588 passed, 1 warning
 ```
 
 Предупреждение ожидаемое:
@@ -147,6 +148,17 @@ StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprec
 - После `Добавить в Amnezia` отчет обновляется и показывает `Added to Amnezia` вместе с добавленным peer.
 - Первый живой VPS-цикл подтвержден на сервере: approve создает рабочий peer, конфиг работает, `Run peer sync` показывает `confirmed live`, `Disable VPN`/`Enable VPN` работают, выборочное удаление устройства работает как ожидалось.
 - В Telegram выбор версии конфига теперь показывает `AmneziaWG 2.0` первой. В админском списке заявок отображается запрошенная версия, а кнопки approve ставят запрошенную версию заявки первой.
+- Добавлен read-only API route shell:
+  - `GET /api/servers` под `server:read`;
+  - `GET /api/servers/{server_name}/summary` под `server:read`;
+  - `GET /api/metrics/summary` под `metrics:read`;
+  - `GET /api/users/summary` под `metrics:read`.
+- API route shell возвращает только aggregate/safe поля, пишет `api_read` audit events и не выдает `.conf`, QR, `vpn://`, keys, PSK, SSH host/port, endpoint host, raw token или token hash.
+- Добавлены CLI-команды для API smoke:
+  - `python -m app.cli api token issue`;
+  - `python -m app.cli api smoke-check`;
+  - `python -m app.cli api token revoke`.
+- Добавлен шаблон evidence для реального VPS API smoke: `docs/API_VPS_SMOKE_EVIDENCE.ru.md`.
 - Если новый `.conf` снова выглядит как старый шаблон без `S3/S4/I1-I5` и с `AllowedIPs = 0.0.0.0/0`, первым делом проверить `devices.config_version`/`orders.requested_config_version`: это почти наверняка `amneziawg_v1_5`, а не `amneziawg_v2`.
 - Действия в карточке сервера:
   - `Пометить как созданный в Amnezia` для внешнего peer;
@@ -212,7 +224,7 @@ Peer, созданные напрямую в приложении Amnezia, не 
 
 ```bash
 cd /home/amn2
-git pull origin codex-vps-test-prep
+git pull origin codex/read-only-api-route-shell
 source venv/bin/activate
 python -m pip install -e .
 python -m app.cli server retest-plan --config servers.yml --server local --db data/amneziya.sqlite3
@@ -224,10 +236,10 @@ python -m app.cli server retest-plan --config servers.yml --server local --db da
 git log -1 --oneline
 ```
 
-Ожидаемый коммит:
+Ожидаемый фокус верхнего коммита:
 
 ```text
-Document VPS verified tag
+local API hardening / read-only API smoke
 ```
 
 Проверить server config:
@@ -260,6 +272,26 @@ python -m app.main
 curl -i http://127.0.0.1:3030/login
 tail -n 200 logs/app.log
 ```
+
+Проверить read-only API smoke:
+
+```bash
+python -m app.cli api token issue --db data/amneziya.sqlite3 --name vps-smoke --owner-label ops --scope server:read --scope metrics:read --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')" --pretty
+export API_TOKEN='RAW_TOKEN_FROM_ONE_TIME_OUTPUT'
+python -m app.cli api serve --host 127.0.0.1 --port 3040
+python -m app.cli api smoke-check --base-url http://127.0.0.1:3040 --token "$API_TOKEN" --server-name local --pretty
+python -m app.cli api token revoke --db data/amneziya.sqlite3 --token-id TOKEN_ID_FROM_ISSUE_OUTPUT --reason smoke-complete --pretty
+```
+
+Если на VPS установлен `jq`, можно не копировать id вручную:
+
+```bash
+ISSUE_JSON="$(python -m app.cli api token issue --db data/amneziya.sqlite3 --name vps-smoke --owner-label ops --scope server:read --scope metrics:read --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')")"
+export API_TOKEN="$(printf '%s' "$ISSUE_JSON" | jq -r .raw_token)"
+TOKEN_ID="$(printf '%s' "$ISSUE_JSON" | jq -r .token_id)"
+```
+
+Результаты VPS smoke после проверки занести в `docs/API_VPS_SMOKE_EVIDENCE.ru.md`: HTTP-коды, aggregate counts, forbidden marker status, safe `api_read` metadata и итоговый verdict.
 
 ## 9. Что уже проверено на VPS
 

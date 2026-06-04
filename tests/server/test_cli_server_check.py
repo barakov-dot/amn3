@@ -390,13 +390,19 @@ def test_run_server_retest_plan_prints_safe_vps_sequence(tmp_path):
     )
 
     assert "VPS retest plan: debian-vps-1" in output
-    assert "git pull origin codex-vps-test-prep" in output
+    assert "git pull origin codex/read-only-api-route-shell" in output
     assert "python -m app.cli server preflight" in output
     assert f"--config {path}" in output
     assert "--server debian-vps-1" in output
     assert f"--db {db_path}" in output
     assert "python -m app.cli server check" in output
     assert "python -m app.cli server sync-peers" in output
+    assert "python -m app.cli api token issue" in output
+    assert "python -m app.cli api serve --host 127.0.0.1 --port 3040" in output
+    assert "curl -sS -H \"Authorization: Bearer $API_TOKEN\" http://127.0.0.1:3040/api/servers" in output
+    assert "http://127.0.0.1:3040/api/users/summary" in output
+    assert "python -m app.cli api smoke-check" in output
+    assert "python -m app.cli api token revoke" in output
     assert "VPS_APPLY_ENABLED=false" in output
     assert "runtime: docker" in output
     assert "container: amnezia-awg" in output
