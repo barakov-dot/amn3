@@ -131,7 +131,7 @@ The current `/opt/amn2` VPS install may be a source-overlay install and not a gi
 
 ```text
 dist/amn2-remote-operation-vps-gate-7281254-update-kit.zip
-sha256: 4CD05C728A74588B4EB1DC2BFB9DC550E1B32807A398C17917875648251F88D1
+sha256: 85FE02C2D9F402562E36CD08990CCA0A891E9173D5257EFC52E5DDF8F5C2061B
 ```
 
 ```bash
@@ -148,6 +148,10 @@ cd amn2-remote-operation-vps-gate-7281254-update-kit
 sha256sum -c amn2-remote-operation-vps-gate-7281254-source.zip.sha256.txt
 export VPS_APPLY_ENABLED=false
 export AMN2_DIR=/opt/amn2
+unset AMN2_SOURCE_ZIP AMN2_EXPECTED_SOURCE_SHA AMN2_EXPECTED_SOURCE_COMMIT
+export AMN2_SOURCE_ZIP=/root/amn2-remote-operation-vps-gate-7281254-update-kit/amn2-remote-operation-vps-gate-7281254-source.zip
+export AMN2_EXPECTED_SOURCE_SHA=E7D36BE8D0EAD3C1F6C1F4144F93F4017BE24B39527259FB813D352350AB0B78
+export AMN2_EXPECTED_SOURCE_COMMIT=7281254
 bash ./amn2_apply_remote_operation_gate_source_zip.sh
 ```
 

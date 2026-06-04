@@ -4,7 +4,9 @@ set -Eeuo pipefail
 umask 077
 
 AMN2_DIR="${AMN2_DIR:-/opt/amn2}"
-AMN2_SOURCE_ZIP="${AMN2_SOURCE_ZIP:-/root/amn2-remote-operation-vps-gate-7281254-update-kit/amn2-remote-operation-vps-gate-7281254-source.zip}"
+AMN2_DEFAULT_SOURCE_ZIP="/root/amn2-remote-operation-vps-gate-7281254-update-kit/amn2-remote-operation-vps-gate-7281254-source.zip"
+AMN2_EXPECTED_SOURCE_BASENAME="amn2-remote-operation-vps-gate-7281254-source.zip"
+AMN2_SOURCE_ZIP="${AMN2_SOURCE_ZIP:-$AMN2_DEFAULT_SOURCE_ZIP}"
 AMN2_EXPECTED_SOURCE_SHA="${AMN2_EXPECTED_SOURCE_SHA:-E7D36BE8D0EAD3C1F6C1F4144F93F4017BE24B39527259FB813D352350AB0B78}"
 AMN2_EXPECTED_SOURCE_COMMIT="${AMN2_EXPECTED_SOURCE_COMMIT:-7281254}"
 
@@ -25,6 +27,10 @@ require_cmd tar
 
 [ -d "$AMN2_DIR" ] || die "AMN2_DIR does not exist: $AMN2_DIR"
 [ -f "$AMN2_SOURCE_ZIP" ] || die "AMN2_SOURCE_ZIP does not exist: $AMN2_SOURCE_ZIP"
+SOURCE_ZIP_BASENAME="${AMN2_SOURCE_ZIP##*/}"
+if [ "$SOURCE_ZIP_BASENAME" != "$AMN2_EXPECTED_SOURCE_BASENAME" ]; then
+  die "refusing unexpected source zip: $AMN2_SOURCE_ZIP; expected basename: $AMN2_EXPECTED_SOURCE_BASENAME"
+fi
 
 if [ -x "$AMN2_DIR/venv/bin/python" ]; then
   PYTHON_BIN="$AMN2_DIR/venv/bin/python"
@@ -115,6 +121,12 @@ if [ ! -f "$STAGING/app/api/app.py" ]; then
 fi
 if [ ! -f "$STAGING/app/services/api_smoke.py" ]; then
   die "source zip does not contain app/services/api_smoke.py"
+fi
+if ! grep -q "Risk class: remote-state-write" "$STAGING/app/server/peer_apply.py"; then
+  die "source zip does not contain remote-operation dry-run metadata marker"
+fi
+if ! grep -q "Operation ID:" "$STAGING/app/server/peer_apply.py"; then
+  die "source zip does not contain operation id dry-run metadata marker"
 fi
 
 {

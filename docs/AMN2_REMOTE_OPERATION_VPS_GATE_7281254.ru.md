@@ -43,8 +43,12 @@ sha256sum -c amn2-remote-operation-vps-gate-7281254-source.zip.sha256.txt
 
 ```bash
 cd /root/amn2-remote-operation-vps-gate-7281254-update-kit
+unset AMN2_SOURCE_ZIP AMN2_EXPECTED_SOURCE_SHA AMN2_EXPECTED_SOURCE_COMMIT
 export VPS_APPLY_ENABLED=false
 export AMN2_DIR=/opt/amn2
+export AMN2_SOURCE_ZIP=/root/amn2-remote-operation-vps-gate-7281254-update-kit/amn2-remote-operation-vps-gate-7281254-source.zip
+export AMN2_EXPECTED_SOURCE_SHA=E7D36BE8D0EAD3C1F6C1F4144F93F4017BE24B39527259FB813D352350AB0B78
+export AMN2_EXPECTED_SOURCE_COMMIT=7281254
 bash ./amn2_apply_remote_operation_gate_source_zip.sh
 install -m 700 ./amn2_api_loopback_smoke.sh /opt/amn2/amn2_api_loopback_smoke.sh
 ```
@@ -61,12 +65,24 @@ source_commit=7281254
 ```bash
 cd /opt/amn2
 cat .amn2_source_overlay_commit
+python - <<'PY'
+from pathlib import Path
+import app.server.peer_apply as peer_apply
+
+path = Path(peer_apply.__file__)
+text = path.read_text(encoding="utf-8")
+print("peer_apply_path:", path)
+print("source_has_metadata:", "Risk class: remote-state-write" in text)
+print("source_has_operation_id:", "Operation ID:" in text)
+PY
 ```
 
 Ожидаемо:
 
 ```text
 7281254
+source_has_metadata: True
+source_has_operation_id: True
 ```
 
 ## 3. Optional API loopback sanity
