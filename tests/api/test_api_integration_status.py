@@ -53,7 +53,7 @@ def test_integration_status_returns_safe_read_only_report_and_audit(tmp_path: Pa
     assert response.status_code == 200
     payload = response.json()
     assert payload["status"] == "dry_run_ready"
-    assert payload["api_baseline"]["stable_head"] == "708c98e"
+    assert payload["api_baseline"]["stable_head"] == "55a7ed6"
     assert payload["api_baseline"]["api_web_baseline_head"] == "294803e"
     assert payload["api_baseline"]["write_routes_enabled"] is False
     assert payload["remote_operation_gate"]["candidate_head"] == "7281254"

@@ -516,6 +516,7 @@ def _json_dumps(payload: object, *, pretty: bool = False) -> str:
 def _api_smoke_paths(server_name: str) -> dict[str, str]:
     return {
         "servers": "/api/servers",
+        "integration_status": "/api/integration/status",
         "server_summary": f"/api/servers/{server_name}/summary",
         "metrics_summary": "/api/metrics/summary",
         "users_summary": "/api/users/summary",

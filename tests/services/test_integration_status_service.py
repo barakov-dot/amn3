@@ -35,7 +35,7 @@ def test_build_integration_status_reports_dry_run_gate_without_write_enablement(
 
     assert report["status"] == "dry_run_ready"
     assert report["api_baseline"]["status"] == "verified_read_only"
-    assert report["api_baseline"]["stable_head"] == "708c98e"
+    assert report["api_baseline"]["stable_head"] == "55a7ed6"
     assert report["api_baseline"]["api_web_baseline_head"] == "294803e"
     assert report["api_baseline"]["write_routes_enabled"] is False
     assert report["remote_operation_gate"]["candidate_head"] == "7281254"

@@ -20,6 +20,10 @@ BLOCKED_LANES = (
     "Local Agent configs or mutations",
     "backup/import/reboot routes",
 )
+POST_DRY_RUN_READ_ONLY_HEAD = "55a7ed6"
+API_WEB_BASELINE_HEAD = "294803e"
+REMOTE_OPERATION_GATE_MERGE_HEAD = "708c98e"
+REMOTE_OPERATION_GATE_CANDIDATE_HEAD = "7281254"
 
 
 def build_integration_status(repo: Repository) -> dict[str, Any]:
@@ -28,14 +32,14 @@ def build_integration_status(repo: Repository) -> dict[str, Any]:
         "summary": "Read-only API/web integration is available; remote writes require a separate live gate.",
         "api_baseline": {
             "status": "verified_read_only",
-            "stable_head": "708c98e",
-            "api_web_baseline_head": "294803e",
+            "stable_head": POST_DRY_RUN_READ_ONLY_HEAD,
+            "api_web_baseline_head": API_WEB_BASELINE_HEAD,
             "allowed_scopes": list(ALLOWED_API_SCOPES),
             "write_routes_enabled": False,
         },
         "remote_operation_gate": {
-            "candidate_head": "7281254",
-            "stable_merge_head": "708c98e",
+            "candidate_head": REMOTE_OPERATION_GATE_CANDIDATE_HEAD,
+            "stable_merge_head": REMOTE_OPERATION_GATE_MERGE_HEAD,
             "phase_1": "dry_run_only_pass",
             "phase_2": "not_run",
             "write_operations_enabled": False,
