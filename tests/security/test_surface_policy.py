@@ -18,6 +18,7 @@ REQUIRED_POLICY_IDS = {
     "web.auth.logout",
     "web.config_templates.save",
     "web.config_templates.reset",
+    "web.integration_status.index",
     "web.users.create",
     "web.users.update",
     "web.users.block",
@@ -49,12 +50,14 @@ REQUIRED_POLICY_IDS = {
     "cli.server.revoke_peer_live",
     "api.servers.list",
     "api.servers.summary",
+    "api.integration.status",
     "api.metrics.summary",
     "api.users.summary",
 }
 API_ROUTE_SHELL_POLICY_IDS = {
     "api.servers.list",
     "api.servers.summary",
+    "api.integration.status",
     "api.metrics.summary",
     "api.users.summary",
 }
@@ -187,6 +190,7 @@ def test_api_route_shell_policies_are_read_only_scoped_and_no_live_retest():
     expected_scopes = {
         "api.servers.list": "server:read",
         "api.servers.summary": "server:read",
+        "api.integration.status": "server:read",
         "api.metrics.summary": "metrics:read",
         "api.users.summary": "metrics:read",
     }

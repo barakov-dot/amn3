@@ -43,6 +43,7 @@ from app.services.api_tokens import revoke_api_token
 from app.services.email_tokens import create_email_token
 from app.services.email_tokens import hash_email_token
 from app.services.email_tokens import utc_now_iso
+from app.services.integration_status import build_integration_status
 from app.services.peer_inventory import AwgDumpPeerInventoryCollector
 from app.services.peer_inventory import PeerInventoryService
 from app.web.auth import check_password
@@ -379,6 +380,24 @@ def create_web_app(
                 title="API readiness",
                 authenticated=True,
                 **readiness,
+            ),
+        )
+
+    @app.get("/integration-status")
+    async def integration_status_index(request: Request):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+
+        with _open_repository(actual_settings) as (repo, _conn):
+            report = build_integration_status(repo)
+        return templates.TemplateResponse(
+            request,
+            "integration_status.html",
+            _template_context(
+                request,
+                title="Integration status",
+                authenticated=True,
+                report=report,
             ),
         )
 

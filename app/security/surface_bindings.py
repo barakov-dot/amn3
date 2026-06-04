@@ -103,6 +103,13 @@ WEB_RUNTIME_ROUTE_BINDINGS: tuple[SurfaceBinding, ...] = (
     _binding(
         "web",
         "GET",
+        "/integration-status",
+        source="app.web.app:create_web_app",
+        policy_id="web.integration_status.index",
+    ),
+    _binding(
+        "web",
+        "GET",
         "/api-tokens",
         source="app.web.app:create_web_app",
         policy_id="web.api_tokens.index",

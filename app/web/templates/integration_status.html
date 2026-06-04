@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <p class="eyebrow">Read-only integration gate</p>
+    <h1>Integration status</h1>
+  </section>
+
+  <section class="settings-grid" aria-label="Integration status">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Current decision</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Status</td>
+              <td>{{ report.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Stable head</td>
+              <td><code>{{ report.api_baseline.stable_head }}</code></td>
+            </tr>
+            <tr>
+              <td>API/web baseline</td>
+              <td><code>{{ report.api_baseline.api_web_baseline_head }}</code></td>
+            </tr>
+            <tr>
+              <td>Remote operation Phase 1</td>
+              <td>{{ report.remote_operation_gate.phase_1|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Phase 2 live write gate</td>
+              <td>{{ report.remote_operation_gate.phase_2|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Write routes enabled</td>
+              <td>{{ report.api_baseline.write_routes_enabled }}</td>
+            </tr>
+            <tr>
+              <td>Remote writes enabled</td>
+              <td>{{ report.remote_operation_gate.write_operations_enabled }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Aggregate state</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Servers</td>
+              <td>{{ report.aggregate_state.servers }}</td>
+            </tr>
+            <tr>
+              <td>Users</td>
+              <td>{{ report.aggregate_state.users }}</td>
+            </tr>
+            <tr>
+              <td>Devices</td>
+              <td>{{ report.aggregate_state.devices }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Allowed read scopes</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="settings-table">
+        <tbody>
+          {% for scope in report.api_baseline.allowed_scopes %}
+            <tr>
+              <td><code>{{ scope }}</code></td>
+              <td>read-only</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="settings-grid" aria-label="Integration lanes">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Allowed lanes</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            {% for lane in report.allowed_lanes %}
+              <tr>
+                <td>{{ lane }}</td>
+                <td>available</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Blocked lanes</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            {% for lane in report.blocked_lanes %}
+              <tr>
+                <td>{{ lane }}</td>
+                <td>separate gate required</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Next gate</h2>
+    </div>
+    <p>{{ report.next_gate }}</p>
+  </section>
+{% endblock %}

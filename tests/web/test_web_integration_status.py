@@ -1,0 +1,110 @@
+from __future__ import annotations
+
+import re
+from pathlib import Path
+
+from fastapi.testclient import TestClient
+
+from app.config.settings import Settings
+from app.db.connection import connect
+from app.db.repositories import Repository
+from app.db.schema import initialize_schema
+from app.web.app import create_web_app
+from app.web.auth import create_password_hash
+
+
+def test_integration_status_page_requires_login(tmp_path: Path):
+    client = TestClient(create_web_app(_settings(tmp_path)), base_url="https://testserver")
+
+    response = client.get("/integration-status", follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
+def test_integration_status_page_renders_gate_without_secret_markers(tmp_path: Path):
+    settings = _settings(tmp_path)
+    _seed_server(Path(settings.database_path))
+    client = _authenticated_client(settings)
+
+    response = client.get("/integration-status")
+
+    assert response.status_code == 200
+    assert "Integration status" in response.text
+    assert "dry-run-only-pass" in response.text
+    assert "Phase 2 live write gate" in response.text
+    assert "not-run" in response.text
+    assert "live peer apply/revoke" in response.text
+    assert "server:read" in response.text
+    forbidden = [
+        "PrivateKey",
+        "PresharedKey",
+        "Authorization",
+        "token_hash",
+        "vpn://",
+        "client.conf",
+        "wg0.conf",
+        "docker exec",
+        "awg show",
+    ]
+    assert all(marker not in response.text for marker in forbidden)
+
+
+def _settings(tmp_path: Path) -> Settings:
+    return Settings(
+        _env_file=None,
+        telegram_bot_token="TEST_TOKEN",
+        app_secret_key="test-secret",
+        database_path=str(tmp_path / "amneziya.sqlite3"),
+        web_admin_username="root",
+        web_admin_password_hash=create_password_hash(
+            "correct-password",
+            salt="test-salt",
+        ),
+        web_admin_session_secret="s" * 32,
+        web_admin_session_cookie_secure=True,
+    )
+
+
+def _authenticated_client(settings: Settings) -> TestClient:
+    client = TestClient(create_web_app(settings), base_url="https://testserver")
+    login_page = client.get("/login")
+    response = client.post(
+        "/login",
+        data={
+            "username": "root",
+            "password": "correct-password",
+            "csrf_token": _csrf_token(login_page.text),
+        },
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    return client
+
+
+def _csrf_token(html: str) -> str:
+    match = re.search(r'name="csrf_token"[^>]*value="([^"]+)"', html)
+    assert match is not None
+    return match.group(1)
+
+
+def _seed_server(db_path: Path) -> None:
+    conn = connect(db_path)
+    try:
+        initialize_schema(conn)
+        repo = Repository(conn)
+        repo.upsert_server_config(
+            name="local",
+            host="127.0.0.1",
+            ssh_port=22,
+            endpoint_host="127.0.0.1",
+            vpn_port=51820,
+            vpn_network_cidr="10.8.1.0/24",
+            server_address="10.8.1.1/24",
+            server_public_key="public-key",
+            runtime="docker",
+            firewall="none",
+            max_devices=100,
+        )
+    finally:
+        conn.close()

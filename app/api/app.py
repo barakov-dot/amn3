@@ -15,6 +15,7 @@ from app.services.api_tokens import ApiTokenAuthError
 from app.services.api_tokens import ApiTokenRecord
 from app.services.api_tokens import authenticate_api_token
 from app.services.api_tokens import hash_api_token
+from app.services.integration_status import build_integration_status
 
 
 @dataclass(frozen=True)
@@ -39,6 +40,15 @@ def create_api_app(settings: Settings | None = None) -> FastAPI:
             ],
         }
         _record_api_read(repo, auth, path="/api/servers", scope="server:read")
+        return payload
+
+    @app.get("/api/integration/status")
+    async def integration_status(
+        repo: Repository = Depends(_repo),
+        auth: ApiAuthContext = Depends(_require_scope("server:read")),
+    ):
+        payload = build_integration_status(repo)
+        _record_api_read(repo, auth, path="/api/integration/status", scope="server:read")
         return payload
 
     @app.get("/api/servers/{server_name}/summary")
