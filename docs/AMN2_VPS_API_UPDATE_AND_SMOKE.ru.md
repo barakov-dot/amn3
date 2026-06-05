@@ -1,5 +1,16 @@
 # AMN2 VPS API Update And Smoke
 
+Current override 2026-06-05: use post-Phase 2 PSK stdin package `568c611 Merge pull request #8 from barakov-dot/codex/preshared-key-stdin` for the next VPS read-only update/smoke.
+
+```text
+dist/amn2-vps-update-and-smoke-kit-568c611.zip
+sha256: 8841BB7B9B3F21F3EAB968C1944F80CD47D40A8D178932AC6F346BCA19210662
+operator doc: dist/amn2-vps-update-and-smoke-kit-568c611/AMN2_VPS_UPDATE_AND_SMOKE_568c611.ru.md
+local verification: 78 passed on focused remote-gate/package suite
+```
+
+Older `294803e`, `5f12736` and `7764ae7` package blocks below are historical evidence. This override does not authorize live apply/revoke.
+
 Актуализация 2026-06-04: текущий Phase 1 closeout package для существующего `/opt/amn2` — `7764ae7 Cover integration status in API smoke`.
 
 ```text

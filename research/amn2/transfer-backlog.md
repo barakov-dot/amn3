@@ -1,5 +1,16 @@
 # `amn2` Transfer Backlog
 
+Update 2026-06-05 post-Phase 2: PSK stdin hardening is merged into current stable `amn2/codex-vps-test-prep` head `568c611 Merge pull request #8 from barakov-dot/codex/preshared-key-stdin`.
+
+```text
+AMN3 package: dist/amn2-vps-update-and-smoke-kit-568c611.zip
+sha256: 8841BB7B9B3F21F3EAB968C1944F80CD47D40A8D178932AC6F346BCA19210662
+source zip: dist/amn2-codex-vps-test-prep-568c611-source.zip
+source sha256: 30319240D2D887239A3D57417A6777CBD7AFE34D97093831609939822C92B243
+local verification: 78 passed on focused remote-gate/package suite
+next gate: VPS read-only update/smoke for 568c611 with VPS_APPLY_ENABLED=false
+```
+
 Актуализация 2026-06-05: Phase 2 live single disposable test peer apply/revoke gate пройден на current stable `amn2/codex-vps-test-prep` head `7764ae7 Cover integration status in API smoke`.
 
 ```text

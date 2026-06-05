@@ -1,5 +1,16 @@
 # AMN2 API/Web Panel VPS Test Runbook
 
+Current override 2026-06-05: use post-Phase 2 PSK stdin package `568c611 Merge pull request #8 from barakov-dot/codex/preshared-key-stdin` for the next VPS read-only update/smoke.
+
+```text
+dist/amn2-vps-update-and-smoke-kit-568c611.zip
+sha256: 8841BB7B9B3F21F3EAB968C1944F80CD47D40A8D178932AC6F346BCA19210662
+operator doc: dist/amn2-vps-update-and-smoke-kit-568c611/AMN2_VPS_UPDATE_AND_SMOKE_568c611.ru.md
+local verification: 78 passed on focused remote-gate/package suite
+```
+
+Older `294803e`, `5f12736` and `7764ae7` package blocks below are historical evidence. This override does not authorize live apply/revoke.
+
 Актуализация 2026-06-04: текущий Phase 1 closeout package — `7764ae7 Cover integration status in API smoke`.
 
 ```text
@@ -57,29 +68,29 @@ evidence: research/amn2/phase-1-closeout-2026-06-04.md
 ```bash
 cd /root
 
-curl -fL -o amn2-vps-update-and-smoke-kit-7764ae7.zip \
-  https://github.com/barakov-dot/amn3/raw/master/dist/amn2-vps-update-and-smoke-kit-7764ae7.zip
+curl -fL -o amn2-vps-update-and-smoke-kit-568c611.zip \
+  https://github.com/barakov-dot/amn3/raw/master/dist/amn2-vps-update-and-smoke-kit-568c611.zip
 
-curl -fL -o amn2-vps-update-and-smoke-kit-7764ae7.zip.sha256.txt \
-  https://raw.githubusercontent.com/barakov-dot/amn3/master/dist/amn2-vps-update-and-smoke-kit-7764ae7.zip.sha256.txt
+curl -fL -o amn2-vps-update-and-smoke-kit-568c611.zip.sha256.txt \
+  https://raw.githubusercontent.com/barakov-dot/amn3/master/dist/amn2-vps-update-and-smoke-kit-568c611.zip.sha256.txt
 
-sha256sum -c amn2-vps-update-and-smoke-kit-7764ae7.zip.sha256.txt
+sha256sum -c amn2-vps-update-and-smoke-kit-568c611.zip.sha256.txt
 ```
 
 Ожидаемый SHA256:
 
 ```text
-832E1B1F6516A02E0D6AA45672B8FF526DF15D27117D2063CE45F9966825A66A
+8841BB7B9B3F21F3EAB968C1944F80CD47D40A8D178932AC6F346BCA19210662
 ```
 
 Распаковать и применить source overlay:
 
 ```bash
-rm -rf amn2-vps-update-and-smoke-kit-7764ae7
-mkdir -p amn2-vps-update-and-smoke-kit-7764ae7
-python3 -m zipfile -e amn2-vps-update-and-smoke-kit-7764ae7.zip amn2-vps-update-and-smoke-kit-7764ae7
+rm -rf amn2-vps-update-and-smoke-kit-568c611
+mkdir -p amn2-vps-update-and-smoke-kit-568c611
+python3 -m zipfile -e amn2-vps-update-and-smoke-kit-568c611.zip amn2-vps-update-and-smoke-kit-568c611
 
-cd amn2-vps-update-and-smoke-kit-7764ae7
+cd amn2-vps-update-and-smoke-kit-568c611
 export VPS_APPLY_ENABLED=false
 export AMN2_DIR=/opt/amn2
 bash ./amn2_apply_source_zip.sh

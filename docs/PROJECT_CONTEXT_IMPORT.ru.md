@@ -1,14 +1,16 @@
 # Current Override 2026-06-05
 
-`amn2/codex-vps-test-prep` head is `7764ae7 Cover integration status in API smoke`.
+`amn2/codex-vps-test-prep` head is `568c611 Merge pull request #8 from barakov-dot/codex/preshared-key-stdin`.
 
 ```text
-AMN3 evidence: research/amn2/phase-1-closeout-2026-06-04.md
-current update+smoke kit: dist/amn2-vps-update-and-smoke-kit-7764ae7.zip
-sha256: 832E1B1F6516A02E0D6AA45672B8FF526DF15D27117D2063CE45F9966825A66A
+AMN3 package: dist/amn2-vps-update-and-smoke-kit-568c611.zip
+sha256: 8841BB7B9B3F21F3EAB968C1944F80CD47D40A8D178932AC6F346BCA19210662
+source zip: dist/amn2-codex-vps-test-prep-568c611-source.zip
+source sha256: 30319240D2D887239A3D57417A6777CBD7AFE34D97093831609939822C92B243
+local verification: 78 passed on focused remote-gate/package suite
 ```
 
-Phase 2 live single disposable test peer apply/revoke is verified-live on current stable `7764ae7`.
+Phase 2 live single disposable test peer apply/revoke is verified-live on stable `7764ae7`; `568c611` adds safer `--preshared-key-stdin` handling and needs read-only VPS update/smoke before any further live write.
 
 ```text
 AMN3 evidence: research/amn2/phase-2-live-vps-gate-evidence-2026-06-05.md
@@ -16,7 +18,7 @@ result: verified-live
 scope: exactly one disposable test peer apply/sync/revoke/sync
 ```
 
-This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e` blocks below are historical API/web-panel evidence.
+This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e` and `7764ae7` package blocks below are historical evidence.
 # VPN Ops Lab / Amneziya: импорт контекста из чатов
 
 Дата снимка: 2026-06-02.
