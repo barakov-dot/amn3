@@ -4,7 +4,7 @@ Current override 2026-06-05: use post-Phase 2 PSK stdin package `568c611 Merge p
 
 ```text
 dist/amn2-vps-update-and-smoke-kit-568c611.zip
-sha256: 8841BB7B9B3F21F3EAB968C1944F80CD47D40A8D178932AC6F346BCA19210662
+sha256: D52BC730BD59A894E76A203861E8FFA87F808A699656625D3C542DC771DEFA27
 operator doc: dist/amn2-vps-update-and-smoke-kit-568c611/AMN2_VPS_UPDATE_AND_SMOKE_568c611.ru.md
 local verification: 78 passed on focused remote-gate/package suite
 ```
@@ -80,7 +80,7 @@ sha256sum -c amn2-vps-update-and-smoke-kit-568c611.zip.sha256.txt
 Ожидаемый SHA256:
 
 ```text
-8841BB7B9B3F21F3EAB968C1944F80CD47D40A8D178932AC6F346BCA19210662
+D52BC730BD59A894E76A203861E8FFA87F808A699656625D3C542DC771DEFA27
 ```
 
 Распаковать и применить source overlay:

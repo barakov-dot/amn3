@@ -4,10 +4,12 @@ Post-Phase 2 PSK stdin hardening is merged on `amn2/codex-vps-test-prep` head `5
 
 ```text
 AMN3 package: dist/amn2-vps-update-and-smoke-kit-568c611.zip
-sha256: 8841BB7B9B3F21F3EAB968C1944F80CD47D40A8D178932AC6F346BCA19210662
+sha256: D52BC730BD59A894E76A203861E8FFA87F808A699656625D3C542DC771DEFA27
 source zip: dist/amn2-codex-vps-test-prep-568c611-source.zip
 source sha256: 30319240D2D887239A3D57417A6777CBD7AFE34D97093831609939822C92B243
 local verification: 78 passed on focused remote-gate/package suite
+VPS evidence: research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
+VPS result: read-only-vps-smoke-pass, run_id 20260605T162742Z
 ```
 
 Phase 2 live single disposable test peer apply/revoke is verified-live on stable `7764ae7`; `568c611` adds safer `--preshared-key-stdin` handling and still needs read-only VPS update/smoke before any further live write.

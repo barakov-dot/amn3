@@ -1,4 +1,4 @@
-﻿# AMN2 VPS Update And Smoke Kit 568c611
+# AMN2 VPS Update And Smoke Kit 568c611
 
 Дата: 2026-06-05.
 
