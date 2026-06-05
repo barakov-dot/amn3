@@ -16,6 +16,8 @@
 
 Статус 2026-06-04: Phase 1 evidence recorded as `dry-run-only-pass` in `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`; Phase 2 live single peer apply/revoke was not run.
 
+Статус 2026-06-05: Phase 2 live single disposable test peer apply/revoke passed on current stable `7764ae7`; evidence recorded in `research/amn2/phase-2-live-vps-gate-evidence-2026-06-05.md`. The historical `7281254` candidate is already merged into stable via `708c98e` and is an ancestor of `7764ae7`, so there is no separate old-branch merge to perform for the tested code path.
+
 ## Decision matrix
 
 | Gate result | Что делать с branch | Что делать с интеграцией |
@@ -26,12 +28,19 @@
 
 ## Merge checklist for `verified-live`
 
-- [ ] AMN3 evidence записана без секретов.
-- [ ] `amn2` candidate branch все еще указывает на проверенный head.
-- [ ] `codex-vps-test-prep` не ушел вперед с конфликтующими runtime changes.
-- [ ] Локально повторен focused remote-operation suite.
-- [ ] Локально повторен full suite или явно записана причина, почему повторяется только focused suite.
+- [x] AMN3 evidence записана без секретов.
+- [x] `amn2` candidate branch все еще указывает на проверенный head.
+- [x] `codex-vps-test-prep` не ушел вперед с конфликтующими runtime changes.
+- [x] Локально повторен focused remote-operation suite.
+- [x] Локально повторен full suite или явно записана причина, почему повторяется только focused suite.
 - [ ] PR/merge description содержит VPS gate result и ссылку на AMN3 evidence.
+
+Local verification after Phase 2:
+
+```text
+focused remote-operation suite: 71 passed
+full suite: not rerun, because this turn changed AMN3 evidence/status documentation only and did not modify `amn2` production code
+```
 
 ## Blockers
 

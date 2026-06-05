@@ -23,7 +23,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 branch: master
 ```
 
-Текущий закрытый этап:
+Текущие закрытые этапы:
 
 ```text
 Phase 1 read-only/API/web-panel baseline
@@ -31,14 +31,19 @@ status: closed
 amn2 head: 7764ae7
 evidence: research/amn2/phase-1-closeout-2026-06-04.md
 package: dist/amn2-vps-update-and-smoke-kit-7764ae7.zip
+
+Phase 2 live single test peer apply/revoke
+status: verified-live
+amn2 head: 7764ae7
+evidence: research/amn2/phase-2-live-vps-gate-evidence-2026-06-05.md
+scope: exactly one disposable test peer apply/sync/revoke/sync
 ```
 
-Следующий опасный этап:
+Следующие опасные поверхности:
 
 ```text
-Phase 2 live single test peer apply/revoke
-status: not started
-requirement: separate chat/gate, explicit operator confirmation, disposable test peer, rollback checklist
+status: still blocked behind separate gates
+surfaces: broad write API, public config delivery, API config:read, /api/clients CRUD, backup/import/reboot, Local Agent mutations, public web/API exposure
 ```
 
 ## Готовые фазы
@@ -149,19 +154,17 @@ full: 610 passed
 - `apply-peer --dry-run` and `revoke-peer --dry-run` safe metadata;
 - remote-operation candidate updated on stable API/web-panel baseline at `7281254`;
 - real VPS Phase 1 read-only/dry-run gate passed as `dry-run-only-pass`.
+- real VPS Phase 2 single disposable peer apply/sync/revoke/sync passed on current stable `7764ae7` as `verified-live`.
 
 Не готово:
 
-- live `apply-peer --apply`;
-- live `revoke-peer --apply`;
-- Docker restart through this new gate;
-- any API/web/agent route that invokes SSH, syncs peers, emits config or mutates runtime state.
+- any broad API/web/agent route that invokes SSH, syncs peers, emits config or mutates runtime state.
 
 Что переносить дальше:
 
-- `dry-run-only-pass` является самостоятельным безопасным статусом, но не равен `verified-live`;
-- Phase 2 требует отдельного разрешения, disposable test peer и rollback checklist;
-- write integration нельзя разблокировать на основании одного dry-run evidence.
+- `dry-run-only-pass` является самостоятельным безопасным статусом, но больше не является текущим результатом Phase 2;
+- Phase 2 `verified-live` покрывает ровно один disposable test peer и не открывает broad write/API/config/agent surfaces;
+- broad write integration нельзя разблокировать на основании одного scoped disposable-peer evidence.
 
 ### 7. Packaging and operator evidence
 
@@ -242,6 +245,6 @@ full: 610 passed
 Ближайшая безопасная работа:
 
 1. перенести правила этого документа в общий Codex skill;
-2. держать Phase 2 live single test peer apply/revoke как отдельный gate;
-3. если VPS Phase 2 не запускается, продолжать только read-only/status/docs/UX design lanes;
+2. использовать Phase 2 live single test peer apply/revoke evidence как scoped `verified-live`, не как blanket-разрешение на destructive surfaces;
+3. для следующих write/runtime slices требовать отдельный gate;
 4. для следующей production-функции сначала сделать design/plan с явным ответом: нужен ли live VPS gate.

@@ -1,4 +1,4 @@
-# Current Override 2026-06-04
+# Current Override 2026-06-05
 
 Phase 1 read-only/API/web-panel baseline is closed on `amn2/codex-vps-test-prep` head `7764ae7 Cover integration status in API smoke`.
 
@@ -8,7 +8,15 @@ current update+smoke kit: dist/amn2-vps-update-and-smoke-kit-7764ae7.zip
 sha256: 832E1B1F6516A02E0D6AA45672B8FF526DF15D27117D2063CE45F9966825A66A
 ```
 
-Phase 2 live single test peer apply/revoke remains a separate new chat/gate with separate operator confirmation and rollback checklist. Older `294803e` blocks below are historical API/web-panel evidence, not the current package for the next VPS update.
+Phase 2 live single disposable test peer apply/revoke is verified-live on current stable `7764ae7`.
+
+```text
+AMN3 evidence: research/amn2/phase-2-live-vps-gate-evidence-2026-06-05.md
+result: verified-live
+scope: exactly one disposable test peer apply/sync/revoke/sync
+```
+
+This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e` blocks below are historical API/web-panel evidence, not the current package for the next VPS update.
 # Текущее состояние проекта
 
 Дата: 2026-06-02.
@@ -163,7 +171,7 @@ docs/NEXT_CHAT_HANDOFF.ru.md
 Route/Auth Binding Tests: focused 22 passed; full 549 passed
 API Token Lifecycle Gate stacked: focused 56 passed; full 555 passed
 SSH Host Key Verifier: focused 29 passed; full 550 passed
-Remote Operation VPS-gate candidate: focused 71 passed; full 603 passed; VPS Phase 1 dry-run-only-pass
+Remote Operation VPS-gate candidate: focused 71 passed; full 603 passed; VPS Phase 2 verified-live on current stable `7764ae7`
 Post dry-run read-only integration status: focused 31 passed; full 610 passed
 Secret Inventory Registry: focused 64 passed; full 591 passed
 Read-only API route shell: full 588 passed
@@ -230,7 +238,7 @@ Route/Auth/Operation Policy Matrix for current amn2 surfaces
 - Secret Inventory Registry: branch `amn2/codex/secret-inventory-registry`, commit `9ce42f4 Add secret inventory registry`; local-only machine-checkable secret inventory, без `.env` чтения, DB access, routes, secret-bearing output или live VPS calls.
 - Packaging discovery fix: branch `amn2/codex/read-only-api-route-shell`, commit `e99d5f3 Fix editable install package discovery`; исправляет editable install/package discovery перед VPS install package smoke.
 - Read-only API route shell: branch `amn2/codex/read-only-api-route-shell`, commits `6534ac4`, `9cccdc2`, `b37103a`, `2010d60`, `5f12736`; добавлены loopback-safe read-only `/api/*` routes, token smoke CLI, local API smoke readiness, `amn2/docs/API_VPS_SMOKE_EVIDENCE.ru.md`, AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh` и update+smoke kit `dist/amn2-vps-update-and-smoke-kit-5f12736.zip`; full local suite `588 passed`, expected `StarletteDeprecationWarning`; latest real VPS API-only smoke passed 2026-06-03, `run_id=20260603T112418Z`, evidence `research/amn2/api-vps-smoke-evidence-2026-06-03.md`; fast-forward merged into `codex-vps-test-prep` at production head `5f12736`.
-- Post Dry-Run Read-Only Integration Status: branch `amn2/codex/post-dry-run-read-only-integration`, commit `55a7ed6 Add post dry-run integration status`; добавлены web-admin `/integration-status`, API `GET /api/integration/status` под `server:read`, общий local-only `integration_status` service, route policy/binding tests и `docs/API_TOKEN_POLICY.ru.md` update; focused `31 passed`, full `610 passed`; Phase 2 live apply/revoke не запускалась и должна идти отдельным чатом/gate.
+- Post Dry-Run Read-Only Integration Status: branch `amn2/codex/post-dry-run-read-only-integration`, commit `55a7ed6 Add post dry-run integration status`; добавлены web-admin `/integration-status`, API `GET /api/integration/status` под `server:read`, общий local-only `integration_status` service, route policy/binding tests и `docs/API_TOKEN_POLICY.ru.md` update; focused `31 passed`, full `610 passed`; Phase 2 live single disposable peer apply/revoke passed later on current stable `7764ae7`.
 
 Решение по соседним чатам:
 
@@ -329,7 +337,8 @@ head: 8697b60 Document Local Agent production wiring
 3. VPS API/web-panel gate для production head `294803e` пройден 2026-06-04: API loopback smoke `run_id=20260604T102355Z`, `server_db_sync_status=passed`, API/auth/scope/revoke/listener/audit `passed`, web-admin `API readiness` и `API tokens` routes доступны. Evidence: `research/amn2/api-web-panel-vps-evidence-2026-06-04.md`.
 4. Remote-operation VPS gate branch обновлена поверх stable head `294803e`: `codex/remote-operation-vps-gate-prep`, head `7281254`; focused `71 passed`, full `603 passed`; AMN3 package `dist/amn2-remote-operation-vps-gate-7281254-update-kit.zip`.
 5. Controlled real VPS verification gate Phase 1 для `codex/remote-operation-vps-gate-prep` пройден 2026-06-04 как `dry-run-only-pass`: API sanity, read-only server check, traffic dry-run, apply-peer dry-run metadata и revoke-peer dry-run metadata passed. Evidence: `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`.
-6. Любой API/web/agent route, который вызывает SSH, syncs peers, emits config или меняет runtime state, остается заблокирован до отдельного Phase 2 `verified-live`.
+6. Controlled real VPS verification gate Phase 2 пройден 2026-06-05 на current stable `7764ae7` как `verified-live` для ровно одного disposable test peer apply/sync/revoke/sync. Evidence: `research/amn2/phase-2-live-vps-gate-evidence-2026-06-05.md`.
+7. Любой API/web/agent route, который вызывает SSH, syncs peers, emits config или меняет runtime state, остается отдельным gated slice; Phase 2 не открывает broad write lifecycle.
 7. Route/Auth binding tests, scoped API token lifecycle, secret inventory, public config policy and backup/import policy остаются обязательными baselines перед дальнейшим route expansion.
 8. `/clients` write CRUD, API `config:read`, public config delivery, backup/import/reboot, public docs/metrics, domain exclusions и 2FA не открывать до отдельного решения.
 

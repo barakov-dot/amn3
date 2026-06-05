@@ -6,16 +6,20 @@
 
 Базовый runbook: `research/amn2/vps-gate-remote-operation-dry-run-audit.md`.
 
-Актуализация 2026-06-04: Phase 1 read-only/dry-run gate пройден на VPS как `dry-run-only-pass`; evidence записана в `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`. Phase 2 live single peer apply/revoke не запускалась.
+Актуализация 2026-06-04: Phase 1 read-only/dry-run gate пройден на VPS как `dry-run-only-pass`; evidence записана в `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`.
+
+Актуализация 2026-06-05: Phase 2 live single disposable test peer apply/revoke пройден на current stable `7764ae7`; evidence записана в `research/amn2/phase-2-live-vps-gate-evidence-2026-06-05.md`.
 
 ## Candidate
 
 ```text
 repo: https://github.com/barakov-dot/amn2.git
-branch: codex/remote-operation-vps-gate-prep
-head: 7281254 Merge stable API web panel baseline into remote operation gate
-base: 294803e Add API readiness and token web pages
+branch: codex-vps-test-prep
+head: 7764ae7 Cover integration status in API smoke
+base: 708c98e Merge pull request #7 from barakov-dot/codex/remote-operation-vps-gate-prep
 ```
+
+Note: historical `7281254` is already an ancestor of `7764ae7`; the Phase 2 gate did not downgrade the VPS to the old package.
 
 ## Phase 0: вход в gate
 
@@ -61,20 +65,20 @@ dry-run-only-pass
 
 Phase 2 разрешена только после отдельного подтверждения оператора.
 
-- [ ] Отдельное подтверждение получено.
-- [ ] `apply-peer --apply` выполнен только для dedicated test peer.
-- [ ] `sync-peers` после apply выполнен.
-- [ ] Добавлен ровно один test peer.
-- [ ] Existing peers не изменились.
-- [ ] `revoke-peer --apply` выполнен для того же test peer.
-- [ ] `sync-peers` после revoke выполнен.
-- [ ] Test peer больше не активен.
-- [ ] Ошибки, если были, redacted и содержат recovery note.
+- [x] Отдельное подтверждение получено.
+- [x] `apply-peer --apply` выполнен только для dedicated test peer.
+- [x] `sync-peers` после apply выполнен.
+- [x] Добавлен ровно один test peer.
+- [x] Existing peers не изменились.
+- [x] `revoke-peer --apply` выполнен для того же test peer.
+- [x] `sync-peers` после revoke выполнен.
+- [x] Test peer больше не активен.
+- [x] Ошибки, если были, redacted и содержат recovery note.
 
 Phase 2 decision:
 
 ```text
-skipped-after-dry-run
+verified-live
 ```
 
 ## Evidence record
@@ -113,6 +117,25 @@ final peer state: no live test peer apply/revoke executed
 rollback/recovery used: not needed
 decision: dry-run-only-pass
 next action: either request separate Phase 2 single test peer apply/revoke approval, or continue read-only integration design only
+```
+
+Recorded 2026-06-05:
+
+```text
+date/time: 2026-06-05
+operator: VPS operator
+candidate branch: codex-vps-test-prep
+candidate head: 7764ae7
+server alias: local
+host key verification: not recorded in AMN3; no unknown-host prompt evidence published
+phase 1 result: api-smoke-passed-on-7764ae7
+phase 2 result: verified-live
+redaction result: passed for AMN3 evidence; raw peer keys are omitted here
+final peer state: disposable test peer removed; final sync returned to the pre-test remote peer count
+rollback/recovery used: not needed
+local post-gate verification: focused remote-operation suite 71 passed on 7764ae7
+decision: verified-live
+next action: keep broad write/API/config/backup/agent mutation surfaces blocked; consider --preshared-key-stdin hardening before repeated live operations
 ```
 
 ## Gate result rules

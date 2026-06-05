@@ -1,4 +1,4 @@
-# Current Override 2026-06-04
+# Current Override 2026-06-05
 
 `amn2/codex-vps-test-prep` head is `7764ae7 Cover integration status in API smoke`.
 
@@ -8,7 +8,15 @@ current update+smoke kit: dist/amn2-vps-update-and-smoke-kit-7764ae7.zip
 sha256: 832E1B1F6516A02E0D6AA45672B8FF526DF15D27117D2063CE45F9966825A66A
 ```
 
-Phase 2 live single test peer apply/revoke remains a separate new chat/gate with separate operator confirmation and rollback checklist. Older `294803e` blocks below are historical API/web-panel evidence.
+Phase 2 live single disposable test peer apply/revoke is verified-live on current stable `7764ae7`.
+
+```text
+AMN3 evidence: research/amn2/phase-2-live-vps-gate-evidence-2026-06-05.md
+result: verified-live
+scope: exactly one disposable test peer apply/sync/revoke/sync
+```
+
+This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e` blocks below are historical API/web-panel evidence.
 # VPN Ops Lab / Amneziya: импорт контекста из чатов
 
 Дата снимка: 2026-06-02.
@@ -143,7 +151,7 @@ status: не слито в master; не повторять соседний VPS 
 - Route/Auth binding tests branch `f9d2c79`, merged through current production line;
 - API token lifecycle gate branch `256d0c0`, merged through PR #4/#5;
 - SSH host key verifier `dd20364`, merged through PR #6; later read-only API route shell moved current `amn2` head to `5f12736`, then API/web-panel finish moved current head to `294803e`;
-- remote operation VPS-gate candidate `7281254`, real VPS Phase 1 read-only/dry-run passed as `dry-run-only-pass`; evidence `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`; Phase 2 live single test peer apply/revoke not run.
+- remote operation VPS-gate candidate `7281254`, real VPS Phase 1 read-only/dry-run passed as `dry-run-only-pass`; evidence `research/amn2/remote-operation-vps-gate-evidence-2026-06-04.md`; Phase 2 live single disposable peer apply/revoke passed later on current stable `7764ae7`, evidence `research/amn2/phase-2-live-vps-gate-evidence-2026-06-05.md`.
 - Current VPS update+smoke package `dist/amn2-vps-update-and-smoke-kit-7764ae7.zip`; historical install/update packages for `294803e` remain available as evidence baselines;
 - KYORESUAS API integration priority plan;
 - read-only API route shell branch `codex/read-only-api-route-shell`, real VPS loopback API smoke passed through AMN3 operator script `scripts/vps/amn2_api_loopback_smoke.sh`, then fast-forward merged into stable `codex-vps-test-prep` at `5f12736`;
@@ -154,7 +162,7 @@ status: не слито в master; не повторять соседний VPS 
 1. Current production/API-web head is `7764ae7`; `294803e` remains historical API/web-panel gate evidence.
 2. Future API expansion requires separate route/secret/remote-write gates.
 3. API/web-panel VPS test для `294803e` считать пройденным: loopback API smoke + web route check, без live apply.
-4. Controlled real VPS verification gate для `codex/remote-operation-vps-gate-prep` остается отдельным gate перед routes, которые вызывают SSH, sync peers, emit config или меняют runtime state.
+4. Controlled real VPS verification gate Phase 2 is now `verified-live` for exactly one disposable test peer on current stable `7764ae7`; routes that call SSH, sync peers, emit config or mutate runtime state still require their own scoped gates.
 
 Старые блоки ниже, где `91aeb3e` указан как latest clean baseline, считать историческим контекстом verified live stage.
 
