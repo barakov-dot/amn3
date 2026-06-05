@@ -137,9 +137,11 @@ TOKEN_ID="$(printf '%s' "$ISSUE_JSON" | jq -r .token_id)"
 До любого live `apply-peer --apply` или `revoke-peer --apply` выполнить только preview-команды на тестовом peer:
 
 ```bash
-python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key TEST_PEER_PUBLIC_KEY --preshared-key TEST_PEER_PSK --vpn-ip TEST_VPN_IP --dry-run
+printf '%s\n' "$TEST_PEER_PSK" | python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key TEST_PEER_PUBLIC_KEY --preshared-key-stdin --vpn-ip TEST_VPN_IP --dry-run
 python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 --public-key TEST_PEER_PUBLIC_KEY --dry-run
 ```
+
+`--preshared-key-stdin` предпочтителен для VPS gate: PSK передается через stdin и не попадает в локальную command line. Старый `--preshared-key` остается только для одноразовых disposable тестов, где оператор явно принял этот риск.
 
 В выводе `apply-peer --dry-run` должны быть:
 

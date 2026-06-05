@@ -124,7 +124,8 @@ def test_vps_retest_protocol_doc_lists_repeatable_test_steps():
     assert "python -m pip install -e ." in text
     assert "python -m app.cli bot check-network" in text
     assert "python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run" in text
-    assert "python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key TEST_PEER_PUBLIC_KEY --preshared-key TEST_PEER_PSK --vpn-ip TEST_VPN_IP --dry-run" in text
+    assert "python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key TEST_PEER_PUBLIC_KEY --preshared-key-stdin --vpn-ip TEST_VPN_IP --dry-run" in text
+    assert "--preshared-key-stdin" in text
     assert "python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 --public-key TEST_PEER_PUBLIC_KEY --dry-run" in text
     assert "Operation ID: server.peer.apply" in text
     assert "Consistency status: dry-run" in text

@@ -301,10 +301,12 @@ python -m app.cli server preflight --config servers.yml --server debian-vps-1 --
 
 ```bash
 python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
-python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key PEER_PSK --vpn-ip 10.8.0.2 --dry-run
+printf '%s\n' "$PEER_PSK" | python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key-stdin --vpn-ip 10.8.0.2 --dry-run
 python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --dry-run
 python -m app.cli server collect-traffic --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3 --dry-run
 ```
+
+Для `apply-peer` предпочитать `--preshared-key-stdin`, чтобы PSK не попадал в локальную command line. `--preshared-key` оставлен для совместимости и одноразовых disposable gate-сценариев.
 
 Перед live-проверкой можно отдельно проверить runtime VPS без изменения сервера:
 
