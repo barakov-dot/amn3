@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import getpass
 import json
+import sys
 from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
@@ -76,7 +77,9 @@ def build_parser() -> argparse.ArgumentParser:
     apply_peer.add_argument("--config", default="servers.yml")
     apply_peer.add_argument("--server", required=True)
     apply_peer.add_argument("--public-key", required=True)
-    apply_peer.add_argument("--preshared-key", required=True)
+    preshared_key_input = apply_peer.add_mutually_exclusive_group(required=True)
+    preshared_key_input.add_argument("--preshared-key")
+    preshared_key_input.add_argument("--preshared-key-stdin", action="store_true")
     apply_peer.add_argument("--vpn-ip", required=True)
     apply_mode = apply_peer.add_mutually_exclusive_group(required=True)
     apply_mode.add_argument("--dry-run", action="store_true")
@@ -194,7 +197,7 @@ def main() -> None:
         server = select_server(config, args.server)
         peer = PeerApplyInput(
             public_key=args.public_key,
-            preshared_key=args.preshared_key,
+            preshared_key=read_preshared_key_arg(args),
             vpn_ip=args.vpn_ip,
         )
         if args.dry_run:
@@ -505,6 +508,15 @@ def _parse_api_datetime(value: str) -> datetime:
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
+
+
+def read_preshared_key_arg(args: argparse.Namespace) -> str:
+    if getattr(args, "preshared_key_stdin", False):
+        value = sys.stdin.readline().rstrip("\r\n")
+        if not value:
+            raise SystemExit("--preshared-key-stdin requires a non-empty preshared key on stdin")
+        return value
+    return str(args.preshared_key)
 
 
 def _json_dumps(payload: object, *, pretty: bool = False) -> str:

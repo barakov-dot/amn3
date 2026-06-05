@@ -1,5 +1,8 @@
+import io
+
 import app.cli as cli
 from app.cli import build_parser
+from app.cli import read_preshared_key_arg
 from app.cli import run_server_peer_sync
 from app.cli import run_server_preflight
 from app.cli import run_server_traffic_collection
@@ -111,6 +114,111 @@ def test_cli_accepts_server_apply_peer_apply_arguments():
     assert args.server_command == "apply-peer"
     assert args.apply is True
     assert args.dry_run is False
+
+
+def test_cli_accepts_server_apply_peer_preshared_key_stdin_argument():
+    parser = build_parser()
+
+    args = parser.parse_args(
+        [
+            "server",
+            "apply-peer",
+            "--config",
+            "servers.yml",
+            "--server",
+            "debian-vps-1",
+            "--public-key",
+            "peer-public",
+            "--preshared-key-stdin",
+            "--vpn-ip",
+            "10.8.0.2",
+            "--dry-run",
+        ]
+    )
+
+    assert args.command == "server"
+    assert args.server_command == "apply-peer"
+    assert args.preshared_key is None
+    assert args.preshared_key_stdin is True
+
+
+def test_cli_rejects_both_preshared_key_inputs_for_server_apply_peer():
+    parser = build_parser()
+
+    try:
+        parser.parse_args(
+            [
+                "server",
+                "apply-peer",
+                "--config",
+                "servers.yml",
+                "--server",
+                "debian-vps-1",
+                "--public-key",
+                "peer-public",
+                "--preshared-key",
+                "secret-psk",
+                "--preshared-key-stdin",
+                "--vpn-ip",
+                "10.8.0.2",
+                "--dry-run",
+            ]
+        )
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError("apply-peer must accept only one preshared-key input mode")
+
+
+def test_read_preshared_key_arg_reads_one_stdin_line_without_newline(monkeypatch):
+    monkeypatch.setattr(cli.sys, "stdin", io.StringIO("secret-psk\nignored\n"))
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "server",
+            "apply-peer",
+            "--config",
+            "servers.yml",
+            "--server",
+            "debian-vps-1",
+            "--public-key",
+            "peer-public",
+            "--preshared-key-stdin",
+            "--vpn-ip",
+            "10.8.0.2",
+            "--dry-run",
+        ]
+    )
+
+    assert read_preshared_key_arg(args) == "secret-psk"
+
+
+def test_read_preshared_key_arg_rejects_empty_stdin(monkeypatch):
+    monkeypatch.setattr(cli.sys, "stdin", io.StringIO("\n"))
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "server",
+            "apply-peer",
+            "--config",
+            "servers.yml",
+            "--server",
+            "debian-vps-1",
+            "--public-key",
+            "peer-public",
+            "--preshared-key-stdin",
+            "--vpn-ip",
+            "10.8.0.2",
+            "--dry-run",
+        ]
+    )
+
+    try:
+        read_preshared_key_arg(args)
+    except SystemExit as exc:
+        assert "non-empty preshared key" in str(exc)
+    else:
+        raise AssertionError("empty stdin must not be accepted as a preshared key")
 
 
 def test_cli_requires_explicit_apply_or_dry_run_for_server_apply_peer():

@@ -209,10 +209,12 @@ python -m app.cli server preflight --config servers.yml --server debian-vps-1 --
 
 ```bash
 python -m app.cli server check --config servers.yml --server debian-vps-1 --dry-run
-python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key PEER_PSK --vpn-ip 10.8.0.2 --dry-run
+printf '%s\n' "$PEER_PSK" | python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key-stdin --vpn-ip 10.8.0.2 --dry-run
 python -m app.cli server revoke-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --dry-run
 python -m app.cli server collect-traffic --config servers.yml --server debian-vps-1 --db data/amneziya.sqlite3 --dry-run
 ```
+
+Prefer `--preshared-key-stdin` for `apply-peer` so the PSK does not appear in the local command line. `--preshared-key` remains for compatibility and one-time disposable gate scenarios.
 
 Before a live check, you can verify the VPS runtime without changing the server:
 
