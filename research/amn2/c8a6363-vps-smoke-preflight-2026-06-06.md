@@ -4,6 +4,8 @@
 
 Назначение: зафиксировать попытку перейти от package-ready статуса `c8a6363` к read-only VPS update/smoke и сохранить безопасный результат проверки до реального доступа к VPS.
 
+Исторический статус: этот preflight позже был superseded реальным read-only VPS smoke pass в `research/amn2/local-agent-runtime-summary-vps-smoke-evidence-2026-06-06.md`.
+
 ## Итог
 
 ```text
@@ -13,10 +15,10 @@ preflight status: local-package-preflight-pass
 real VPS update/smoke: not run
 reason: no safe non-interactive VPS access in current environment
 server touched: no
-last VPS-smoked source remains: 32d01fd, run_id=20260606T185114Z
+last VPS-smoked source at preflight time: 32d01fd, run_id=20260606T185114Z
 ```
 
-Это не меняет статус `c8a6363`: пакет остается `package-ready-not-vps-smoked`.
+На момент preflight это не меняло статус `c8a6363`: пакет оставался `package-ready-not-vps-smoked`. Позже operator-run подтвердил `c8a6363` как `read-only-vps-smoke-pass`.
 
 ## Что проверено локально
 
@@ -168,7 +170,8 @@ Forbidden:
 ## Decision
 
 ```text
-decision: keep c8a6363 as package-ready-not-vps-smoked
-next gate: real operator read-only VPS update/smoke
+decision at preflight time: keep c8a6363 as package-ready-not-vps-smoked
+superseded by: research/amn2/local-agent-runtime-summary-vps-smoke-evidence-2026-06-06.md
+new decision after operator run: read-only-vps-smoke-pass
 controlled-prod readiness: still pending
 ```

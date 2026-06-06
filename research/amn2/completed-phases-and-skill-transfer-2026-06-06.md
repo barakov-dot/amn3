@@ -28,7 +28,7 @@ current head: 8f613c8 Publish c8a6363 VPS update package
 
 ```text
 source commit: c8a6363
-status: package-ready-not-vps-smoked
+status: read-only-vps-smoke-pass
 package: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
 package sha256: 027ECC1BAD7321FCCD61A4CCCA3AC9F06AAA9AC6A3D7115B4813253D19C2CFBF
 source zip: dist/amn2-codex-vps-test-prep-c8a6363-source.zip
@@ -38,13 +38,13 @@ source sha256: E1E198979D988B3A5AA038CF732B8DCDBE854C48A6D381FADBA05BFDEE0251C6
 Последний VPS-smoked runtime/source:
 
 ```text
-source commit: 32d01fd
+source commit: c8a6363
 status: read-only-vps-smoke-pass
-run_id: 20260606T185114Z
+run_id: 20260606T202040Z
 decision: passed
 ```
 
-Важно: `c8a6363` уже является текущим `amn2` head и имеет подготовленный пакет, но до отдельного read-only VPS update/smoke именно `32d01fd` остается последним подтвержденным на VPS runtime/source.
+Важно: `c8a6363` уже является текущим `amn2` head и последним подтвержденным на VPS runtime/source. `32d01fd` остается historical prior VPS-smoked baseline.
 
 ## Готовые фазы
 
@@ -138,6 +138,7 @@ Verification snapshots:
 7764ae7 focused: 39 passed
 7764ae7 full: 610 passed
 32d01fd read-only VPS smoke: passed, run_id 20260606T185114Z
+c8a6363 read-only VPS smoke: passed, run_id 20260606T202040Z
 ```
 
 Правило переноса:
@@ -162,7 +163,7 @@ Verification snapshots:
 
 - `verified-live` покрывает ровно один disposable test peer apply/revoke path;
 - broad write API, web write, Local Agent mutations, config delivery, backup/import and destructive operations не открыты;
-- current head `c8a6363` не меняет этот live-write scope, но сам пакет еще не VPS-smoked.
+- current head `c8a6363` не меняет этот live-write scope и прошел read-only VPS smoke.
 
 Правило переноса:
 
@@ -213,8 +214,8 @@ Verification snapshots:
 
 ```text
 status: readiness-prefill-recorded; operator-confirmations-pending
-last VPS-smoked source: 32d01fd
-current package-ready source: c8a6363
+last VPS-smoked source: c8a6363
+previous VPS-smoked source: 32d01fd
 ```
 
 Операторские подтверждения еще нужны:
@@ -242,7 +243,7 @@ current package-ready source: c8a6363
 - adjacent regression: `37 passed, 1 warning`;
 - full suite: `619 passed, 1 warning`;
 - merged into AMN2 stable line at `c8a6363`;
-- AMN3 package prepared and verified for `c8a6363`.
+- AMN3 package prepared and read-only VPS-smoked for `c8a6363`.
 
 Не открыто:
 
@@ -273,7 +274,7 @@ current package-ready source: c8a6363
 
 ```text
 commit: c8a6363
-package status: package-ready-not-vps-smoked
+package status: read-only-vps-smoke-pass
 package hygiene: passed
 source entries: 294
 forbidden source entries: none
@@ -351,9 +352,8 @@ required entries: present
 
 ## Следующая рекомендуемая работа
 
-Не начинать новый write implementation до закрытия текущей развилки `c8a6363`:
+Не начинать новый write implementation до operator-only controlled-prod decision:
 
-1. выполнить read-only VPS update/smoke для `c8a6363`;
-2. если smoke прошел, обновить статус current VPS-smoked source с `32d01fd` на `c8a6363`;
-3. после этого вернуться к controlled-prod decision;
-4. новые runtime/write/API/config функции начинать только через отдельный design gate.
+1. пройти operator-only controlled-prod readiness;
+2. зафиксировать `controlled-prod-ready`, `needs-fix` или `defer-prod`;
+3. новые runtime/write/API/config функции начинать только через отдельный design gate.

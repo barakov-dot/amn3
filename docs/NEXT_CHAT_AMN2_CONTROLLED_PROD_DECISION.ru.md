@@ -11,6 +11,7 @@
 ```text
 docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
 research/amn2/controlled-prod-readiness-2026-06-06.md
+research/amn2/local-agent-runtime-summary-vps-smoke-evidence-2026-06-06.md
 research/amn2/integration-status-controlled-prod-update-2026-06-06.md
 docs/PROJECT_STATUS_CURRENT.ru.md
 docs/PROJECT_CONTEXT_IMPORT.ru.md
@@ -36,10 +37,9 @@ current amn2 head: c8a6363 Add Local Agent runtime summary mapper
 current package: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
 current package sha256: 027ECC1BAD7321FCCD61A4CCCA3AC9F06AAA9AC6A3D7115B4813253D19C2CFBF
 current source sha256: E1E198979D988B3A5AA038CF732B8DCDBE854C48A6D381FADBA05BFDEE0251C6
-current package status: package-ready-not-vps-smoked
-last VPS-smoked package: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
+current package status: read-only-vps-smoke-pass
 last VPS read-only smoke: pass
-last VPS run_id: 20260606T185114Z
+last VPS run_id: 20260606T202040Z
 checked_routes: 5
 routes: servers, integration_status, server_summary, metrics_summary, users_summary
 auth checks: missing bearer 401, wrong scope 403, revoked token 401
@@ -52,8 +52,8 @@ Phase 2 single disposable peer apply/revoke: verified-live on stable line
 ## Текущий статус
 
 ```text
-c8a6363 package-ready-not-vps-smoked
-32d01fd read-only-vps-smoke-pass remains last VPS-smoked source
+c8a6363 read-only-vps-smoke-pass
+32d01fd is historical prior VPS-smoked source
 controlled-prod-readiness: operator confirmations pending
 ```
 
@@ -74,7 +74,7 @@ next action:
 
 ## Decision Rules
 
-For current `c8a6363`, first run read-only VPS update/smoke with `dist/amn2-vps-update-and-smoke-kit-c8a6363.zip`. `controlled-prod-ready` for current head can be recorded only if:
+For current `c8a6363`, read-only VPS update/smoke already passed with `run_id=20260606T202040Z`. `controlled-prod-ready` for current head can be recorded only if:
 
 - source overlay commit is `c8a6363`;
 - read-only VPS smoke passed for `c8a6363`;
@@ -85,7 +85,7 @@ For current `c8a6363`, first run read-only VPS update/smoke with `dist/amn2-vps-
 - no stop condition is present;
 - no secret-bearing evidence was pasted.
 
-`32d01fd` remains the last VPS-smoked source and can be discussed only as the previous baseline, not as the current git head.
+`32d01fd` can be discussed only as the previous baseline, not as the current git head.
 
 `needs-fix` обязателен при smoke/auth/listener/audit/checksum/access-path/host-key/evidence hygiene failure.
 

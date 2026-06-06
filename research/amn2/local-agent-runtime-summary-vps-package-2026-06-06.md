@@ -2,7 +2,7 @@
 
 Date: 2026-06-06.
 
-Status: package-ready, not VPS-smoked.
+Status: package-ready, then read-only VPS-smoked.
 
 ## Package
 
@@ -70,10 +70,32 @@ config delivery
 
 No `.env`, `servers.yml`, raw tokens, Authorization headers, token hashes, private keys, PSK, `.conf`, QR payloads, VPN URI payloads, or full logs were published.
 
+## VPS Verification
+
+Real VPS read-only update/smoke passed after this package was applied:
+
+```text
+source update run_id: 20260606T202012Z
+API smoke run_id: 20260606T202040Z
+VPS verdict: pass
+server_db_sync_status: passed
+api_smoke_status: passed
+auth_status: passed
+listener_status: passed
+audit_status: passed
+safe bundle: /opt/amn2/vps-smoke/api-loopback-safe-evidence-20260606T202040Z.tar.gz
+```
+
+Evidence:
+
+```text
+research/amn2/local-agent-runtime-summary-vps-smoke-evidence-2026-06-06.md
+```
+
 ## Decision
 
-Result: `package-ready-not-vps-smoked`.
+Result: `read-only-vps-smoke-pass`.
 
-Next operator action, if continuing on the current stable head, is read-only VPS update/smoke with `dist/amn2-vps-update-and-smoke-kit-c8a6363.zip` and `VPS_APPLY_ENABLED=false`.
+`c8a6363` is now the current VPS-smoked runtime/source baseline.
 
-The last VPS-smoked runtime/source remains `32d01fd`, `run_id=20260606T185114Z`, until this package is applied and passes read-only smoke.
+Next operator action is the operator-only controlled-prod readiness decision. This does not unlock public prod, broad write routes, config delivery, backup/import/reboot, Local Agent mutation routes or `VPS_APPLY_ENABLED=true`.

@@ -1,6 +1,6 @@
 # AMN2 VPS API Update And Smoke
 
-Current override 2026-06-06: stable branch head `c8a6363 Add Local Agent runtime summary mapper` has a package-ready update+smoke kit, but is not VPS-smoked yet. The last VPS-smoked runtime/source is `32d01fd Update integration status for controlled prod`, which passed real VPS read-only update/smoke, `run_id=20260606T185114Z`. `1a193b9` is now historical prior VPS-smoked runtime/source, `run_id=20260606T154636Z`.
+Current override 2026-06-06: stable branch head `c8a6363 Add Local Agent runtime summary mapper` has a package-ready update+smoke kit and passed real VPS read-only smoke, `run_id=20260606T202040Z`. `32d01fd` is now the historical prior VPS-smoked runtime/source, `run_id=20260606T185114Z`; `1a193b9` is the previous historical runtime/source before that.
 
 ```text
 dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
@@ -9,8 +9,8 @@ source zip: dist/amn2-codex-vps-test-prep-c8a6363-source.zip
 source sha256: E1E198979D988B3A5AA038CF732B8DCDBE854C48A6D381FADBA05BFDEE0251C6
 operator doc: dist/amn2-vps-update-and-smoke-kit-c8a6363/AMN2_VPS_UPDATE_AND_SMOKE_c8a6363.ru.md
 local verification: focused/adjacent 37 passed; full 619 passed; package SHA/source SHA/no-BOM/no-forbidden-source-entry/test-extract checks passed
-VPS result: not run for c8a6363; previous read-only-vps-smoke-pass is 32d01fd, run_id 20260606T185114Z
-evidence: research/amn2/local-agent-runtime-summary-vps-package-2026-06-06.md
+VPS result: read-only-vps-smoke-pass, run_id 20260606T202040Z
+evidence: research/amn2/local-agent-runtime-summary-vps-smoke-evidence-2026-06-06.md
 ```
 
 Older `32d01fd`, `294803e`, `5f12736`, `7764ae7`, `568c611` and `1a193b9` package blocks below are historical evidence. This override does not authorize live apply/revoke.
