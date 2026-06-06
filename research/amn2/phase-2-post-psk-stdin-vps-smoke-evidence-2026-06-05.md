@@ -71,6 +71,42 @@ listener_status: passed
 audit_status: passed
 ```
 
+API smoke result:
+
+```json
+{
+  "checked_routes": 5,
+  "routes": [
+    {
+      "forbidden_markers": [],
+      "name": "servers",
+      "status_code": 200
+    },
+    {
+      "forbidden_markers": [],
+      "name": "integration_status",
+      "status_code": 200
+    },
+    {
+      "forbidden_markers": [],
+      "name": "server_summary",
+      "status_code": 200
+    },
+    {
+      "forbidden_markers": [],
+      "name": "metrics_summary",
+      "status_code": 200
+    },
+    {
+      "forbidden_markers": [],
+      "name": "users_summary",
+      "status_code": 200
+    }
+  ],
+  "status": "passed"
+}
+```
+
 ## Result
 
 Status: `read-only-vps-smoke-pass` for stable `568c611`.
