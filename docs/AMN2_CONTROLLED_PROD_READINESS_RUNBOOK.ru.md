@@ -12,7 +12,7 @@ branch: codex-vps-test-prep
 latest VPS source overlay head: c8a6363 Add Local Agent runtime summary mapper
 latest VPS read-only smoke: c8a6363 pass, run_id 20260606T202040Z
 current local read-only head: 62ff184 Update controlled prod status visibility
-local head deployment status: requires fresh VPS smoke before source overlay update
+local head deployment status: git-checkout VPS smoke passed; source overlay promotion pending
 previous VPS read-only smoke: 32d01fd pass, run_id 20260606T185114Z
 previous API route smoke: 1a193b9 pass, run_id 20260606T154636Z
 current prod decision: controlled-prod-ready for source overlay c8a6363
@@ -20,7 +20,7 @@ web/admin access: HTTPS reverse proxy approved; API 3040 remains loopback-only
 Phase 2 live single disposable peer gate: verified-live on stable line
 ```
 
-Source overlay `c8a6363` прошел read-only API smoke на `/opt/amn2` с `VPS_APPLY_ENABLED=false`, loopback API `127.0.0.1:3040`, пятью read-only routes, `auth/listener/audit` checks passed и пустыми forbidden markers. Web/admin доступ подтвержден как HTTPS reverse proxy, при этом порт API `3040` наружу не выставляется. Локальный head `62ff184` содержит дополнительные read-only доработки и требует отдельного VPS smoke перед переносом в source overlay.
+Source overlay `c8a6363` прошел read-only API smoke на `/opt/amn2` с `VPS_APPLY_ENABLED=false`, loopback API `127.0.0.1:3040`, пятью read-only routes, `auth/listener/audit` checks passed и пустыми forbidden markers. Web/admin доступ подтвержден как HTTPS reverse proxy, при этом порт API `3040` наружу не выставляется. Локальный head `62ff184` содержит дополнительные read-only доработки и прошел git-checkout VPS smoke на `/opt/amn2-git`: 6 routes, all 200, forbidden markers empty, smoke token revoked. Перед заменой stable overlay нужен отдельный source overlay promotion/update gate.
 
 ## Controlled Prod Mode
 
@@ -181,7 +181,7 @@ next action:
 
 ## Decision Rules
 
-`controlled-prod-ready` разрешен только когда checklist закрыт и stop conditions отсутствуют. Для текущего VPS source overlay это состояние зафиксировано на `c8a6363`. Если новый read-only head еще не прошел VPS smoke, он не становится source overlay автоматически: использовать статус `requires_fresh_vps_smoke` для локальной доработки.
+`controlled-prod-ready` разрешен только когда checklist закрыт и stop conditions отсутствуют. Для текущего VPS source overlay это состояние зафиксировано на `c8a6363`. Если новый read-only head прошел только git-checkout smoke, он не становится source overlay автоматически: использовать статус `vps_smoke_passed_git_checkout` до отдельного source overlay promotion/update gate.
 
 `needs-fix` обязателен, если smoke, auth, listener, audit, checksum, host key, access path или evidence hygiene не проходят.
 
@@ -189,4 +189,4 @@ next action:
 
 ## Next Engineering Slice
 
-После `controlled-prod-ready` следующий инженерный slice должен оставаться read-only. Не переходить сразу к config delivery, public API writes, backup/import или Local Agent mutations. Перед обновлением VPS source overlay с текущего локального head `62ff184` выполнить fresh VPS smoke по `docs/AMN2_VPS_SMOKE_62FF184_RUNBOOK.ru.md`.
+После `controlled-prod-ready` следующий инженерный slice должен оставаться read-only. Не переходить сразу к config delivery, public API writes, backup/import или Local Agent mutations. Для `62ff184` следующий gate: source overlay promotion/update по `docs/AMN2_VPS_SMOKE_62FF184_RUNBOOK.ru.md` либо выбор следующего read-only slice.

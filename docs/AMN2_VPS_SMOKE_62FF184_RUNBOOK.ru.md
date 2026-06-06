@@ -16,10 +16,38 @@ expected package commit: use git log -1 / package manifest before VPS update
 current VPS source overlay: c8a6363 Add Local Agent runtime summary mapper
 last VPS smoke: 20260606T202040Z, pass
 current prod decision: controlled-prod-ready for source overlay c8a6363
-next decision after this run: keep c8a6363 or promote 62ff184 after fresh smoke
+next decision after this run: keep c8a6363 or promote 62ff184 after source overlay update/smoke
 ```
 
 `62ff184` меняет только read-only status visibility: `/api/integration/status`, страницу `/integration-status`, runbook/evidence/handoff. Он не включает live peer mutations, config delivery, public API, Local Agent mutations, backup/import/reboot routes или `config:read`.
+
+## Фактический Результат Git-Checkout Smoke
+
+Оператор выполнил read-only smoke на git-managed checkout `/opt/amn2-git` через `python -m app.cli api smoke-cycle`.
+
+```text
+Дата и время проверки: 2026-06-06 21:41 UTC
+workspace: /opt/amn2-git
+server: local
+api_smoke_status: passed
+checked_routes: 6
+servers: 200
+integration_status: 200
+local_agent_runtime_summary: 200
+server_summary: 200
+metrics_summary: 200
+users_summary: 200
+forbidden_markers: []
+smoke_token_status: revoked
+raw_token_display: hidden
+```
+
+Decision для этого прогона:
+
+```text
+decision: 62ff184 read-only git-checkout VPS smoke passed
+source_overlay_promotion: not claimed by this smoke; promote /opt/amn2 separately if needed
+```
 
 ## Локальная Подготовка
 
@@ -226,14 +254,20 @@ decision:
 
 ## Decision
 
-Если все проверки прошли, можно фиксировать:
+Если проверки прошли на git-managed checkout `/opt/amn2-git`, можно фиксировать:
 
 ```text
-decision: 62ff184 read-only VPS smoke passed; source overlay can be treated as promoted
+decision: 62ff184 read-only git-checkout VPS smoke passed; source overlay promotion remains separate
+```
+
+Если отдельно выполнен source overlay update flow и после него `/opt/amn2/.amn2_source_overlay_commit` показывает `62ff184`, можно фиксировать:
+
+```text
+decision: 62ff184 source overlay update/smoke passed; source overlay can be treated as promoted
 ```
 
 Если часть проверок не выполнена:
 
 ```text
-decision: keep controlled-prod-ready source overlay c8a6363; 62ff184 requires fix or rerun
+decision: keep controlled-prod-ready source overlay c8a6363; 62ff184 source overlay promotion requires fix or rerun
 ```

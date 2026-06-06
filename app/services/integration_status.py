@@ -30,6 +30,8 @@ REMOTE_OPERATION_GATE_MERGE_HEAD = "708c98e"
 REMOTE_OPERATION_GATE_CANDIDATE_HEAD = "7281254"
 CONTROLLED_PROD_SMOKE_RUN_ID = "20260606T202040Z"
 CURRENT_LOCAL_READ_ONLY_HEAD = "62ff184"
+CURRENT_LOCAL_READ_ONLY_SMOKE_STATUS = "passed"
+CURRENT_LOCAL_READ_ONLY_SMOKE_CHECKED_ROUTES = 6
 
 
 def build_integration_status(repo: Repository) -> dict[str, Any]:
@@ -37,8 +39,9 @@ def build_integration_status(repo: Repository) -> dict[str, Any]:
         "status": "controlled_prod_ready",
         "summary": (
             "Controlled prod is approved for VPS source overlay c8a6363; "
-            "current local read-only extensions require a fresh VPS smoke before "
-            "source overlay update."
+            "current local read-only extensions passed a git-checkout VPS smoke "
+            "and still need a separate source overlay promotion step before they "
+            "replace the stable overlay."
         ),
         "api_baseline": {
             "status": "controlled_prod_ready",
@@ -69,7 +72,11 @@ def build_integration_status(repo: Repository) -> dict[str, Any]:
         },
         "local_read_only_extension": {
             "head": CURRENT_LOCAL_READ_ONLY_HEAD,
-            "status": "requires_fresh_vps_smoke",
+            "status": "vps_smoke_passed_git_checkout",
+            "vps_smoke_status": CURRENT_LOCAL_READ_ONLY_SMOKE_STATUS,
+            "checked_routes": CURRENT_LOCAL_READ_ONLY_SMOKE_CHECKED_ROUTES,
+            "workspace": "git_checkout",
+            "token_lifecycle": "revoked",
             "safe_routes": [
                 "/api/local-agent/runtime/summary",
             ],
@@ -77,7 +84,7 @@ def build_integration_status(repo: Repository) -> dict[str, Any]:
         "aggregate_state": _load_aggregate_state(repo),
         "allowed_lanes": list(ALLOWED_LANES),
         "blocked_lanes": list(BLOCKED_LANES),
-        "next_gate": "VPS smoke current read-only head before source overlay update",
+        "next_gate": "Promote 62ff184 through source overlay update or choose next read-only slice",
     }
 
 

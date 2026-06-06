@@ -8,6 +8,56 @@ Template policy: Заполнять после реального VPS smoke; cur
 
 Не вставлять raw API token, Authorization header, token hash, `.conf`, QR, `vpn://`, `PrivateKey`, `PresharedKey`, SSH password/private key, `.env`, PSK, полные response bodies или `api-server.log` без ручной redaction.
 
+## Git Checkout Smoke: 2026-06-06 / 62ff184 read-only gate
+
+Назначение: зафиксировать safe summary фактического VPS smoke для текущего read-only head `62ff184 Update controlled prod status visibility` на git-managed checkout `/opt/amn2-git`.
+
+```text
+Дата и время проверки: 2026-06-06 21:41 UTC
+VPS alias: mirror / local
+Workspace: /opt/amn2-git
+Branch: codex-vps-test-prep
+Target read-only gate head: 62ff184 Update controlled prod status visibility
+API bind: http://127.0.0.1:3040
+Server name: local
+Smoke command: python -m app.cli api smoke-cycle
+```
+
+Read-only route evidence:
+
+```text
+checked_routes: 6
+status: passed
+
+servers: 200, forbidden_markers=[]
+integration_status: 200, forbidden_markers=[]
+local_agent_runtime_summary: 200, forbidden_markers=[]
+server_summary: 200, forbidden_markers=[]
+metrics_summary: 200, forbidden_markers=[]
+users_summary: 200, forbidden_markers=[]
+```
+
+Token evidence:
+
+```text
+smoke token status: revoked
+smoke token revoke reason: smoke-complete
+raw token display: hidden
+raw token/header/hash evidence: not published
+```
+
+VPS verdict:
+
+```text
+api_smoke_status: passed
+forbidden_markers: none
+listener_scope: loopback target
+write_routes_enabled: false
+write_operations_enabled: false
+decision: 62ff184 read-only git-checkout VPS smoke passed
+source_overlay_promotion: not claimed by this evidence
+```
+
 ## Controlled Prod Update: 2026-06-07 / c8a6363 source overlay
 
 Назначение: зафиксировать safe summary фактического VPS состояния после source overlay update и loopback API smoke на `/opt/amn2`.
@@ -64,7 +114,8 @@ data/: preserved
 servers.yml: preserved
 recovery kits: 32d01fd and c8a6363 present with sha files and extracted dirs
 controlled_prod_decision: controlled-prod-ready for source overlay c8a6363
-next local head before VPS overlay update: 62ff184 requires fresh VPS smoke
+next local head before VPS overlay update: 62ff184 git-checkout VPS smoke passed
+next gate: source overlay promotion/update or choose next read-only slice
 next runbook: docs/AMN2_VPS_SMOKE_62FF184_RUNBOOK.ru.md
 ```
 

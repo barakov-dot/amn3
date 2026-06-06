@@ -53,11 +53,14 @@ def test_build_integration_status_reports_controlled_prod_without_write_enableme
     assert report["controlled_prod_readiness"]["api_listener"] == "127.0.0.1:3040_loopback_only"
     assert report["controlled_prod_readiness"]["vps_apply_enabled_default"] is False
     assert report["local_read_only_extension"]["head"] == "62ff184"
-    assert report["local_read_only_extension"]["status"] == "requires_fresh_vps_smoke"
+    assert report["local_read_only_extension"]["status"] == "vps_smoke_passed_git_checkout"
+    assert report["local_read_only_extension"]["vps_smoke_status"] == "passed"
+    assert report["local_read_only_extension"]["checked_routes"] == 6
+    assert report["local_read_only_extension"]["token_lifecycle"] == "revoked"
     assert report["aggregate_state"]["servers"] == 1
     assert "new live peer apply/revoke without separate operator confirmation" in report["blocked_lanes"]
     assert "/api/clients write CRUD" in report["blocked_lanes"]
-    assert report["next_gate"] == "VPS smoke current read-only head before source overlay update"
+    assert report["next_gate"] == "Promote 62ff184 through source overlay update or choose next read-only slice"
 
 
 def test_build_integration_status_contains_no_secret_or_command_markers(tmp_path: Path):

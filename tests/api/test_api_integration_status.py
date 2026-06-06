@@ -69,8 +69,11 @@ def test_integration_status_returns_safe_read_only_report_and_audit(tmp_path: Pa
     assert payload["controlled_prod_readiness"]["api_listener"] == "127.0.0.1:3040_loopback_only"
     assert payload["controlled_prod_readiness"]["vps_apply_enabled_default"] is False
     assert payload["local_read_only_extension"]["head"] == "62ff184"
-    assert payload["local_read_only_extension"]["status"] == "requires_fresh_vps_smoke"
-    assert payload["next_gate"] == "VPS smoke current read-only head before source overlay update"
+    assert payload["local_read_only_extension"]["status"] == "vps_smoke_passed_git_checkout"
+    assert payload["local_read_only_extension"]["vps_smoke_status"] == "passed"
+    assert payload["local_read_only_extension"]["checked_routes"] == 6
+    assert payload["local_read_only_extension"]["token_lifecycle"] == "revoked"
+    assert payload["next_gate"] == "Promote 62ff184 through source overlay update or choose next read-only slice"
     assert payload["aggregate_state"]["servers"] == 1
     assert "new live peer apply/revoke without separate operator confirmation" in payload["blocked_lanes"]
     assert _forbidden_markers_absent(payload)

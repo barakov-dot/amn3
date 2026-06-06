@@ -12,7 +12,8 @@ remote: https://github.com/barakov-dot/amn2.git
 branch: codex-vps-test-prep
 latest VPS source overlay head: c8a6363 Add Local Agent runtime summary mapper
 latest VPS smoke status: pass, run_id 20260606T202040Z
-current local head: 62ff184 Update controlled prod status visibility
+current read-only head: 62ff184 Update controlled prod status visibility
+current read-only VPS smoke: pass on /opt/amn2-git, checked_routes=6
 controlled-prod decision: controlled-prod-ready for source overlay c8a6363
 lab repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 lab branch: master
@@ -108,4 +109,4 @@ lab branch: master
 
 ## Следующий Рекомендуемый Срез
 
-Ближайшая безопасная работа после этой карты: выполнить read-only VPS smoke текущего head `62ff184` по `docs/AMN2_VPS_SMOKE_62FF184_RUNBOOK.ru.md`. Ожидаемый smoke должен проверять 6 routes и автоматически отзывать временный token. Не начинать broad write API, public config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
+Ближайшая безопасная работа после этой карты: либо промотировать read-only head `62ff184` через safe source overlay update flow и повторно подтвердить `/opt/amn2`, либо продолжить следующий read-only controller slice. Git-checkout VPS smoke для `62ff184` уже прошел: 6 routes, token revoked, forbidden markers empty. Не начинать broad write API, public config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
