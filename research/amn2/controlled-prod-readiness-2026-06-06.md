@@ -7,7 +7,7 @@ This document contains no secrets, no full logs and no live write evidence.
 ## Decision
 
 ```text
-status: readiness-runbook-published; 32d01fd read-only-vps-smoke-pass
+status: readiness-prefill-recorded; operator-confirmations-pending
 target mode: operator-only controlled prod
 current amn2 branch: codex-vps-test-prep
 current amn2 head: 32d01fd Update integration status for controlled prod
@@ -50,6 +50,44 @@ The previous stage proved:
 - PSK stdin handling was added before repeated live peer work.
 
 The remaining risk before first controlled prod is operational, not feature implementation: access path, rollback awareness, evidence hygiene and stop/go criteria.
+
+## Readiness Prefill
+
+Known from safe evidence already returned:
+
+```text
+package checksum recorded in AMN3: yes
+latest read-only smoke safe summary: VPS verdict pass
+read-only smoke run_id: 20260606T185114Z
+preflight_status: skipped
+server_db_sync_status: passed
+api_ready_status: passed
+api_smoke_status: passed
+auth_status: passed
+missing_bearer_http: 401
+wrong_scope_http: 403
+revoked_token_http: 401
+listener_status: passed
+audit_status: passed
+checked_routes: 5
+route result status: passed
+forbidden_markers: none in all returned routes
+secret-bearing evidence pasted: no
+```
+
+Remaining operator-only confirmations before `controlled-prod-ready`:
+
+```text
+source overlay commit on VPS: confirm .amn2_source_overlay_commit is 32d01fd
+integration status body: confirm safe fields if required by the readiness checklist
+web/admin access path: loopback, SSH tunnel, private network, or separately approved reverse proxy
+VPS_APPLY_ENABLED default: false
+host key prompt: none, or verified out-of-band
+recovery path known: yes/no
+decision: controlled-prod-ready, needs-fix, or defer-prod
+```
+
+Do not use this prefill as authorization for public exposure or new write operations.
 
 ## Required Operator Result
 

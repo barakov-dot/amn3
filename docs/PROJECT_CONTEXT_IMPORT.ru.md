@@ -14,7 +14,7 @@ package evidence: research/amn2/integration-status-controlled-prod-update-2026-0
 VPS result for 32d01fd: read-only-vps-smoke-pass, run_id 20260606T185114Z
 VPS smoke evidence: research/amn2/integration-status-controlled-prod-update-2026-06-06.md
 previous VPS-smoked runtime/source: 1a193b9, run_id 20260606T154636Z, evidence research/amn2/remote-partial-failure-contract-vps-smoke-evidence-2026-06-06.md
-controlled prod readiness: runbook-published, evidence pending
+controlled prod readiness: readiness-prefill-recorded, operator confirmations pending
 controlled prod runbook: docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
 controlled prod evidence: research/amn2/controlled-prod-readiness-2026-06-06.md
 previous VPS-smoked source: 568c611, run_id 20260605T162742Z, evidence research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
