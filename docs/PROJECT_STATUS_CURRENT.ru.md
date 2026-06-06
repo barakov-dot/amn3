@@ -13,6 +13,9 @@ local verification: focused 70 passed after stable fast-forward; package SHA/sou
 package evidence: research/amn2/remote-partial-failure-contract-vps-package-2026-06-06.md
 VPS result for 1a193b9: read-only-vps-smoke-pass, run_id 20260606T154636Z
 VPS smoke evidence: research/amn2/remote-partial-failure-contract-vps-smoke-evidence-2026-06-06.md
+controlled prod readiness: runbook-published, evidence pending
+controlled prod runbook: docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
+controlled prod evidence: research/amn2/controlled-prod-readiness-2026-06-06.md
 previous VPS-smoked source: 568c611, run_id 20260605T162742Z, evidence research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
 docs-only cleanup: 6b5b5b7 Document stdin PSK peer apply
 local-only contract merge: 1a193b9 Add remote partial failure contract
@@ -26,7 +29,7 @@ result: verified-live
 scope: exactly one disposable test peer apply/sync/revoke/sync
 ```
 
-This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e`, `7764ae7` and `568c611` package blocks below are historical evidence; `1a193b9` is the current VPS-smoked runtime/source baseline.
+This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e`, `7764ae7` and `568c611` package blocks below are historical evidence; `1a193b9` is the current VPS-smoked runtime/source baseline. Next gate is operator-only controlled-prod readiness, not public prod.
 # Текущее состояние проекта
 
 Дата: 2026-06-02.
@@ -864,4 +867,4 @@ Real VPS Phase 1 read-only/dry-run gate пройден 2026-06-04 как `dry-ru
 - Docker AmneziaWG write/reload/restart behavior;
 - реальный Local Agent deployment или controller-to-agent calls.
 
-Следующий рекомендуемый шаг: решить, запрашиваем ли отдельное разрешение оператора на Phase 2 single test peer apply/revoke для `verified-live`. Если Phase 2 не запускаем, параллельные KYORESUAS/PRVTPRO задачи могут продолжать только read-only/API status/UX design lanes; write lifecycle, config delivery API, Local Agent mutation routes и live manager flows остаются заблокированы.
+Следующий рекомендуемый шаг: пройти operator-only controlled-prod readiness по `docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md` и зафиксировать `controlled-prod-ready`, `needs-fix` или `defer-prod`. Phase 2 single disposable peer apply/revoke уже verified-live, а `1a193b9` уже прошел real VPS read-only smoke; write lifecycle, config delivery API, Local Agent mutation routes, backup/import/reboot и public web/API exposure остаются заблокированы до отдельных gates.

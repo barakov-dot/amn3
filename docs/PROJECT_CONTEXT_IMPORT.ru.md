@@ -13,6 +13,9 @@ local verification: focused 70 passed after stable fast-forward; package SHA/sou
 package evidence: research/amn2/remote-partial-failure-contract-vps-package-2026-06-06.md
 VPS result for 1a193b9: read-only-vps-smoke-pass, run_id 20260606T154636Z
 VPS smoke evidence: research/amn2/remote-partial-failure-contract-vps-smoke-evidence-2026-06-06.md
+controlled prod readiness: runbook-published, evidence pending
+controlled prod runbook: docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
+controlled prod evidence: research/amn2/controlled-prod-readiness-2026-06-06.md
 previous VPS-smoked source: 568c611, run_id 20260605T162742Z, evidence research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
 docs-only cleanup: 6b5b5b7 Document stdin PSK peer apply
 local-only contract merge: 1a193b9 Add remote partial failure contract
@@ -26,7 +29,7 @@ result: verified-live
 scope: exactly one disposable test peer apply/sync/revoke/sync
 ```
 
-This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e`, `7764ae7` and `568c611` package blocks below are historical evidence; `1a193b9` is the current VPS-smoked runtime/source baseline.
+This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e`, `7764ae7` and `568c611` package blocks below are historical evidence; `1a193b9` is the current VPS-smoked runtime/source baseline. Next gate is operator-only controlled-prod readiness, not public prod.
 # VPN Ops Lab / Amneziya: импорт контекста из чатов
 
 Дата снимка: 2026-06-02.
