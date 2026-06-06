@@ -33,8 +33,9 @@ def test_integration_status_page_renders_gate_without_secret_markers(tmp_path: P
     assert "Integration status" in response.text
     assert "dry-run-only-pass" in response.text
     assert "Phase 2 live write gate" in response.text
-    assert "not-run" in response.text
-    assert "live peer apply/revoke" in response.text
+    assert "verified-live" in response.text
+    assert "new live peer apply/revoke without separate operator confirmation" in response.text
+    assert "operator-only controlled prod readiness checklist" in response.text
     assert "server:read" in response.text
     forbidden = [
         "PrivateKey",

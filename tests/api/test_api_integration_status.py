@@ -52,16 +52,19 @@ def test_integration_status_returns_safe_read_only_report_and_audit(tmp_path: Pa
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["status"] == "dry_run_ready"
-    assert payload["api_baseline"]["stable_head"] == "55a7ed6"
+    assert payload["status"] == "read_only_vps_smoked"
+    assert payload["api_baseline"]["stable_head"] == "1a193b9"
     assert payload["api_baseline"]["api_web_baseline_head"] == "294803e"
+    assert payload["api_baseline"]["integration_status_head"] == "7764ae7"
     assert payload["api_baseline"]["write_routes_enabled"] is False
     assert payload["remote_operation_gate"]["candidate_head"] == "7281254"
     assert payload["remote_operation_gate"]["stable_merge_head"] == "708c98e"
     assert payload["remote_operation_gate"]["write_operations_enabled"] is False
-    assert payload["remote_operation_gate"]["phase_2"] == "not_run"
+    assert payload["remote_operation_gate"]["phase_2"] == "verified_live"
+    assert payload["controlled_prod_readiness"]["decision"] == "pending_operator_evidence"
+    assert payload["next_gate"] == "operator-only controlled prod readiness checklist"
     assert payload["aggregate_state"]["servers"] == 1
-    assert "live peer apply/revoke" in payload["blocked_lanes"]
+    assert "new live peer apply/revoke without separate operator confirmation" in payload["blocked_lanes"]
     assert _forbidden_markers_absent(payload)
 
     conn = connect(Path(settings.database_path))

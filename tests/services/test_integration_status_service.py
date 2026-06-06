@@ -21,7 +21,7 @@ FORBIDDEN_MARKERS = [
 ]
 
 
-def test_build_integration_status_reports_dry_run_gate_without_write_enablement(tmp_path: Path):
+def test_build_integration_status_reports_vps_smoked_gate_without_write_enablement(tmp_path: Path):
     db_path = tmp_path / "amneziya.sqlite3"
     conn = connect(db_path)
     try:
@@ -33,19 +33,26 @@ def test_build_integration_status_reports_dry_run_gate_without_write_enablement(
     finally:
         conn.close()
 
-    assert report["status"] == "dry_run_ready"
+    assert report["status"] == "read_only_vps_smoked"
     assert report["api_baseline"]["status"] == "verified_read_only"
-    assert report["api_baseline"]["stable_head"] == "55a7ed6"
+    assert report["api_baseline"]["stable_head"] == "1a193b9"
     assert report["api_baseline"]["api_web_baseline_head"] == "294803e"
+    assert report["api_baseline"]["integration_status_head"] == "7764ae7"
     assert report["api_baseline"]["write_routes_enabled"] is False
     assert report["remote_operation_gate"]["candidate_head"] == "7281254"
     assert report["remote_operation_gate"]["stable_merge_head"] == "708c98e"
     assert report["remote_operation_gate"]["phase_1"] == "dry_run_only_pass"
-    assert report["remote_operation_gate"]["phase_2"] == "not_run"
+    assert report["remote_operation_gate"]["phase_2"] == "verified_live"
     assert report["remote_operation_gate"]["write_operations_enabled"] is False
+    assert report["controlled_prod_readiness"] == {
+        "status": "runbook_published",
+        "decision": "pending_operator_evidence",
+        "runbook": "docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md",
+    }
     assert report["aggregate_state"]["servers"] == 1
-    assert "live peer apply/revoke" in report["blocked_lanes"]
+    assert "new live peer apply/revoke without separate operator confirmation" in report["blocked_lanes"]
     assert "/api/clients write CRUD" in report["blocked_lanes"]
+    assert report["next_gate"] == "operator-only controlled prod readiness checklist"
 
 
 def test_build_integration_status_contains_no_secret_or_command_markers(tmp_path: Path):
