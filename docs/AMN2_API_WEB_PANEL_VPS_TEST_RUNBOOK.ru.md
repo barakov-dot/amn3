@@ -1,6 +1,6 @@
 # AMN2 API/Web Panel VPS Test Runbook
 
-Current override 2026-06-06: stable branch head is `32d01fd Update integration status for controlled prod`; AMN3 package `32d01fd` is published and pending read-only VPS smoke. Last proven VPS runtime/source remains `1a193b9 Add remote partial failure contract`, `run_id=20260606T154636Z`.
+Current override 2026-06-06: stable branch head `32d01fd Update integration status for controlled prod` passed real VPS read-only update/smoke, `run_id=20260606T185114Z`. `1a193b9` is now historical prior VPS-smoked runtime/source, `run_id=20260606T154636Z`.
 
 ```text
 dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
@@ -9,7 +9,7 @@ source zip: dist/amn2-codex-vps-test-prep-32d01fd-source.zip
 source sha256: 034753DA7EC42ACF869519F43909EEFDC8A392A5665B2A33C935F8A058CCB99B
 operator doc: dist/amn2-vps-update-and-smoke-kit-32d01fd/AMN2_VPS_UPDATE_AND_SMOKE_32d01fd.ru.md
 local verification: focused 7 passed; adjacent smoke/security 26 passed; package SHA/source SHA/no-BOM/no-forbidden-source-entry/test-extract checks passed
-VPS result: pending-read-only-smoke
+VPS result: read-only-vps-smoke-pass, run_id 20260606T185114Z
 evidence: research/amn2/integration-status-controlled-prod-update-2026-06-06.md
 ```
 
@@ -67,7 +67,7 @@ evidence: research/amn2/phase-1-closeout-2026-06-04.md
 
 ## 1. Обновить пакет на VPS
 
-Важно: команды ниже используют текущий package `32d01fd`; он опубликован и ожидает read-only VPS smoke. Последний уже доказанный runtime/source baseline - `1a193b9`, `run_id=20260606T154636Z`. Пакет `568c611` остается historical prior VPS-smoked runtime/source, а `294803e` остается historical API/web-panel evidence.
+Важно: команды ниже используют текущий package `32d01fd`; он уже прошел read-only VPS smoke `run_id=20260606T185114Z`. Пакеты `1a193b9` и `568c611` остаются historical prior VPS-smoked runtime/source, а `294803e` остается historical API/web-panel evidence.
 
 ```bash
 cd /root

@@ -1,21 +1,21 @@
 # Controlled Prod Readiness 2026-06-06
 
-Purpose: record the next safe stage after `1a193b9` passed real VPS read-only update/smoke.
+Purpose: record the next safe stage after `32d01fd` passed real VPS read-only update/smoke.
 
 This document contains no secrets, no full logs and no live write evidence.
 
 ## Decision
 
 ```text
-status: readiness-runbook-published; 32d01fd package pending VPS smoke
+status: readiness-runbook-published; 32d01fd read-only-vps-smoke-pass
 target mode: operator-only controlled prod
 current amn2 branch: codex-vps-test-prep
 current amn2 head: 32d01fd Update integration status for controlled prod
 current AMN3 package: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
 package sha256: BE59AF74001AC4F094C753B565A4E672194D823C4F65B6CB476F4FF01B310807
 source sha256: 034753DA7EC42ACF869519F43909EEFDC8A392A5665B2A33C935F8A058CCB99B
-latest VPS smoke: 1a193b9 read-only-vps-smoke-pass, run_id 20260606T154636Z
-32d01fd VPS smoke: pending
+latest VPS smoke: 32d01fd read-only-vps-smoke-pass, run_id 20260606T185114Z
+previous VPS smoke: 1a193b9 read-only-vps-smoke-pass, run_id 20260606T154636Z
 runbook: docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
 ```
 
@@ -43,7 +43,7 @@ It does not enable:
 The previous stage proved:
 
 - `1a193b9` package passed real VPS read-only smoke;
-- `32d01fd` updates only the read-only integration status contract and has a published update+smoke kit pending VPS smoke;
+- `32d01fd` updates only the read-only integration status contract and passed real VPS read-only smoke;
 - the API smoke covered five read-only routes;
 - auth/listener/audit checks passed;
 - Phase 2 single disposable peer apply/revoke was previously verified on the stable line;
@@ -61,10 +61,10 @@ needs-fix
 defer-prod
 ```
 
-Until `32d01fd` read-only VPS smoke and `controlled-prod-ready` are recorded, treat the current state as:
+Until `controlled-prod-ready` is recorded, treat the current state as:
 
 ```text
-1a193b9 read-only-vps-smoke-pass; 32d01fd package-published-pending-vps-smoke; controlled-prod-readiness-pending
+32d01fd read-only-vps-smoke-pass; controlled-prod-readiness-pending
 ```
 
 ## Next Implementation Candidate
