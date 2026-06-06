@@ -193,7 +193,7 @@
 - Идея: заменить secret-bearing CLI аргумент `--preshared-key` на stdin/file descriptor/one-shot prompt или другой безопасный канал.
 - Польза: PSK не попадает в shell history и process args.
 - Риски: UX CLI станет чуть сложнее; нужны тесты, что dry-run/live output не печатает PSK.
-- Статус: covered as requirement in updated [RemoteOperationRunner design](../docs/superpowers/specs/2026-05-30-remote-operation-runner-design.md).
+- Status: implemented in `amn2` PR #8 (`568c611`) as `--preshared-key-stdin`; verified locally and by VPS read-only smoke. Keep `--preshared-key` only as a compatibility path for explicitly accepted disposable one-time tests.
 
 ### Shared command policy for telemetry
 

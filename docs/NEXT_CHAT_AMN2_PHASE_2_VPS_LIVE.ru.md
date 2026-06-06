@@ -1,5 +1,7 @@
 # NEXT CHAT: AMN2 Phase 2 VPS Live Gate
 
+Current override 2026-06-06: this handoff is historical. Phase 2 live disposable peer gate passed on `7764ae7`, then PR #8 merged `--preshared-key-stdin` into stable `568c611`, and VPS read-only smoke passed for `568c611`. For any future apply/revoke gate, use `--preshared-key-stdin` for `apply-peer`; do not put PSK values in the local command line.
+
 Дата: 2026-06-05.
 
 Рабочая папка нового чата:
@@ -211,18 +213,15 @@ If the answer is not an explicit yes, stop at `dry-run-only-pass` / read-only st
 
 ### Step 3: PSK handling decision before live apply
 
-Current CLI requires:
+Current stable CLI supports the safer input path:
 
 ```text
---preshared-key
+--preshared-key-stdin
 ```
 
-The remote Docker/awg command receives PSK through stdin and redacts output, but the local CLI still receives PSK as an argument. Before live apply, the new chat must decide one of:
+The remote Docker/awg command receives PSK through stdin and redacts output. After PR #8, the local CLI can also read PSK from stdin. For future live gates, prefer `--preshared-key-stdin`; keep `--preshared-key` only as a compatibility path for one-time disposable tests where the operator explicitly accepts local command-line exposure.
 
-1. Accept this for a disposable one-time test peer and do not publish commands with real values.
-2. First implement a small safer `--preshared-key-stdin` / secret-file local slice in `amn2`, test it locally, package it, then run Phase 2.
-
-If strict no-secret-on-local-command-line is required, choose option 2 before live apply.
+Do not publish commands with real PSK values.
 
 ### Step 4: prepare disposable test peer
 
@@ -243,11 +242,11 @@ Do not use production user/device keys.
 With `VPS_APPLY_ENABLED=false`:
 
 ```bash
-python -m app.cli server apply-peer \
+printf '%s\n' "$TEST_PEER_PSK" | python -m app.cli server apply-peer \
   --config servers.yml \
   --server "$SERVER_NAME" \
   --public-key "$TEST_PEER_PUBLIC_KEY" \
-  --preshared-key "$TEST_PEER_PSK" \
+  --preshared-key-stdin \
   --vpn-ip "$TEST_PEER_IP" \
   --dry-run
 
@@ -267,11 +266,11 @@ Only after separate confirmation and only for the disposable test peer:
 ```bash
 export VPS_APPLY_ENABLED=true
 
-python -m app.cli server apply-peer \
+printf '%s\n' "$TEST_PEER_PSK" | python -m app.cli server apply-peer \
   --config servers.yml \
   --server "$SERVER_NAME" \
   --public-key "$TEST_PEER_PUBLIC_KEY" \
-  --preshared-key "$TEST_PEER_PSK" \
+  --preshared-key-stdin \
   --vpn-ip "$TEST_PEER_IP" \
   --apply
 
