@@ -52,7 +52,7 @@ def test_build_integration_status_reports_controlled_prod_without_write_enableme
     assert report["controlled_prod_readiness"]["web_admin_access"] == "https_reverse_proxy"
     assert report["controlled_prod_readiness"]["api_listener"] == "127.0.0.1:3040_loopback_only"
     assert report["controlled_prod_readiness"]["vps_apply_enabled_default"] is False
-    assert report["local_read_only_extension"]["head"] == "465444a"
+    assert report["local_read_only_extension"]["head"] == "62ff184"
     assert report["local_read_only_extension"]["status"] == "requires_fresh_vps_smoke"
     assert report["aggregate_state"]["servers"] == 1
     assert "new live peer apply/revoke without separate operator confirmation" in report["blocked_lanes"]

@@ -11,7 +11,7 @@ Remote для production code: amn2
 Рабочая ветка: codex-vps-test-prep
 Последний VPS source overlay head: c8a6363 Add Local Agent runtime summary mapper
 Последний VPS smoke status: pass, run_id 20260606T202040Z
-Текущий локальный read-only head: 465444a Add safe API smoke cycle
+Текущий локальный read-only head: 62ff184 Update controlled prod status visibility
 Controlled-prod decision: controlled-prod-ready for source overlay c8a6363
 Стабильный verified live VPS tag: vps-live-cycle-verified -> d6eda20
 Lab/coordination repo: C:\Users\SooL\Documents\VPS-OPS-LAB
@@ -35,10 +35,11 @@ Lab/coordination repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 - docs/VPS_RETEST_PROTOCOL.ru.md
 - docs/PRODUCTION_VPS_CHECKLIST.ru.md
 - docs/LOCAL_AGENT.ru.md
+- docs/AMN2_VPS_SMOKE_62FF184_RUNBOOK.ru.md
 
 Текущий статус: source overlay `c8a6363` прошел read-only API smoke на VPS `/opt/amn2` через loopback `127.0.0.1:3040`, пять read-only routes вернули 200, forbidden markers пустые, auth/listener/audit checks passed. Web/admin доступ утвержден через HTTPS reverse proxy, при этом порт API `3040` наружу не выставляется. Итоговый статус: `controlled-prod-ready` для source overlay `c8a6363`.
 
-Следующий локальный срез после этого evidence: текущий head `465444a` добавляет safe API smoke cycle и read-only `/api/local-agent/runtime/summary` под `server:read`. Он не дергает Local Agent по сети и не выдает host/port/token/container/interface/config path. Перед переносом `465444a` в VPS source overlay нужен fresh VPS smoke через `python -m app.cli api smoke-cycle`; raw token не печатается, временный token отзывается автоматически.
+Следующий локальный срез после этого evidence: текущий head `62ff184` добавляет safe API smoke cycle, read-only `/api/local-agent/runtime/summary` и обновленную controlled-prod status visibility. Перед переносом `62ff184` в VPS source overlay нужен fresh VPS smoke по `docs/AMN2_VPS_SMOKE_62FF184_RUNBOOK.ru.md`; raw token не печатается, временный token отзывается автоматически.
 
 Цель следующего этапа: не открывать broad write API, а закрыть controlled-prod readiness или выбрать следующий read-only controller-facing slice.
 ```
@@ -61,6 +62,7 @@ git remote -v
 В `git log -8` должен быть текущий documentation/evidence commit поверх app-code baseline:
 
 ```text
+62ff184 Update controlled prod status visibility
 465444a Add safe API smoke cycle
 8f0be19 Add Local Agent runtime summary API route
 c8a6363 Add Local Agent runtime summary mapper
@@ -80,7 +82,7 @@ c8a6363 Add Local Agent runtime summary mapper
 - Local Agent first slice: read-only `/agent/*`, hash-only token and audit.
 - Local Agent runtime summary mapper included in VPS-smoked source overlay `c8a6363`.
 - API controller-facing Local Agent runtime summary route: `/api/local-agent/runtime/summary`.
-- Safe API smoke cycle included in local head `465444a`; requires fresh VPS smoke before source overlay update.
+- Safe API smoke cycle and controlled-prod status visibility are included in local head `62ff184`; requires fresh VPS smoke before source overlay update.
 
 ## 5. Что Не Открыто
 
@@ -101,7 +103,7 @@ c8a6363 Add Local Agent runtime summary mapper
 
 ```text
 source overlay: c8a6363 Add Local Agent runtime summary mapper
-local head: 465444a Add safe API smoke cycle
+local head: 62ff184 Update controlled prod status visibility
 workspace: /opt/amn2
 server: local
 api bind: 127.0.0.1:3040
@@ -114,7 +116,7 @@ status: controlled-prod-ready for source overlay c8a6363
 Deployment caveat:
 
 ```text
-local head 465444a: requires fresh VPS smoke before source overlay update
+local head 62ff184: requires fresh VPS smoke before source overlay update
 public API 3040 exposure: blocked
 web/admin access: HTTPS reverse proxy approved
 VPS_APPLY_ENABLED default: false
@@ -137,4 +139,4 @@ VPS_APPLY_ENABLED default: false
 
 Если VPS сейчас не трогаем: основной чат может доработать read-only controller UX и status visibility вокруг `/api/integration/status` и `/api/local-agent/runtime/summary`, но не начинать broad write API, config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
 
-Перед переносом локального head `465444a` на VPS: собрать package/update kit, выполнить source overlay update и fresh read-only smoke, затем обновить `docs/API_VPS_SMOKE_EVIDENCE.ru.md`.
+Перед переносом локального head `62ff184` на VPS: собрать package/update kit, выполнить source overlay update и fresh read-only smoke по `docs/AMN2_VPS_SMOKE_62FF184_RUNBOOK.ru.md`, затем обновить `docs/API_VPS_SMOKE_EVIDENCE.ru.md`.

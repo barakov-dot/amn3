@@ -64,7 +64,8 @@ data/: preserved
 servers.yml: preserved
 recovery kits: 32d01fd and c8a6363 present with sha files and extracted dirs
 controlled_prod_decision: controlled-prod-ready for source overlay c8a6363
-next local head before VPS overlay update: 465444a requires fresh VPS smoke
+next local head before VPS overlay update: 62ff184 requires fresh VPS smoke
+next runbook: docs/AMN2_VPS_SMOKE_62FF184_RUNBOOK.ru.md
 ```
 
 ## 0. Актуальный Smoke: 2026-06-06 / 64a6750

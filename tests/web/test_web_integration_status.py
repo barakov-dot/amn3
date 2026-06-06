@@ -36,7 +36,7 @@ def test_integration_status_page_renders_gate_without_secret_markers(tmp_path: P
     assert "20260606T202040Z" in response.text
     assert "https-reverse-proxy" in response.text
     assert "127.0.0.1:3040-loopback-only" in response.text
-    assert "465444a" in response.text
+    assert "62ff184" in response.text
     assert "requires-fresh-vps-smoke" in response.text
     assert "dry-run-only-pass" in response.text
     assert "Phase 2 live write gate" in response.text
