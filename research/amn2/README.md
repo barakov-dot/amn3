@@ -80,7 +80,8 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [Phase 1 closeout 2026-06-04](phase-1-closeout-2026-06-04.md) - `7764ae7` follow-up: `/api/integration/status` is covered by API smoke and current update+smoke kit is published.
 - [Next chat Phase 2 VPS live gate](../../docs/NEXT_CHAT_AMN2_PHASE_2_VPS_LIVE.ru.md) - one-copy handoff for the separate live single test peer apply/revoke chat.
 - [Remote partial-failure contract evidence 2026-06-06](remote-partial-failure-contract-2026-06-06.md) - local-only AMN2 branch `codex/remote-partial-failure-contract`, commit `1a193b9`, focused `70 passed`; fast-forward merged into stable.
-- [Remote partial-failure contract VPS package 2026-06-06](remote-partial-failure-contract-vps-package-2026-06-06.md) - AMN3 update+smoke kit for stable `1a193b9`; package published, VPS read-only smoke pending.
+- [Remote partial-failure contract VPS package 2026-06-06](remote-partial-failure-contract-vps-package-2026-06-06.md) - AMN3 update+smoke kit for stable `1a193b9`; package published and read-only VPS-smoked.
+- [Remote partial-failure contract VPS smoke 2026-06-06](remote-partial-failure-contract-vps-smoke-evidence-2026-06-06.md) - real VPS read-only update/smoke pass for stable `1a193b9`, `run_id=20260606T154636Z`.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
