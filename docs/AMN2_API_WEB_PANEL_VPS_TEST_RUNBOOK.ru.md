@@ -1,19 +1,19 @@
 # AMN2 API/Web Panel VPS Test Runbook
 
-Current override 2026-06-06: stable branch head `32d01fd Update integration status for controlled prod` passed real VPS read-only update/smoke, `run_id=20260606T185114Z`. `1a193b9` is now historical prior VPS-smoked runtime/source, `run_id=20260606T154636Z`.
+Current override 2026-06-06: stable branch head `c8a6363 Add Local Agent runtime summary mapper` has a package-ready update+smoke kit, but is not VPS-smoked yet. The last VPS-smoked runtime/source is `32d01fd Update integration status for controlled prod`, which passed real VPS read-only update/smoke, `run_id=20260606T185114Z`. `1a193b9` is now historical prior VPS-smoked runtime/source, `run_id=20260606T154636Z`.
 
 ```text
-dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
-sha256: BE59AF74001AC4F094C753B565A4E672194D823C4F65B6CB476F4FF01B310807
-source zip: dist/amn2-codex-vps-test-prep-32d01fd-source.zip
-source sha256: 034753DA7EC42ACF869519F43909EEFDC8A392A5665B2A33C935F8A058CCB99B
-operator doc: dist/amn2-vps-update-and-smoke-kit-32d01fd/AMN2_VPS_UPDATE_AND_SMOKE_32d01fd.ru.md
-local verification: focused 7 passed; adjacent smoke/security 26 passed; package SHA/source SHA/no-BOM/no-forbidden-source-entry/test-extract checks passed
-VPS result: read-only-vps-smoke-pass, run_id 20260606T185114Z
-evidence: research/amn2/integration-status-controlled-prod-update-2026-06-06.md
+dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
+sha256: 027ECC1BAD7321FCCD61A4CCCA3AC9F06AAA9AC6A3D7115B4813253D19C2CFBF
+source zip: dist/amn2-codex-vps-test-prep-c8a6363-source.zip
+source sha256: E1E198979D988B3A5AA038CF732B8DCDBE854C48A6D381FADBA05BFDEE0251C6
+operator doc: dist/amn2-vps-update-and-smoke-kit-c8a6363/AMN2_VPS_UPDATE_AND_SMOKE_c8a6363.ru.md
+local verification: focused/adjacent 37 passed; full 619 passed; package SHA/source SHA/no-BOM/no-forbidden-source-entry/test-extract checks passed
+VPS result: not run for c8a6363; previous read-only-vps-smoke-pass is 32d01fd, run_id 20260606T185114Z
+evidence: research/amn2/local-agent-runtime-summary-vps-package-2026-06-06.md
 ```
 
-Older `294803e`, `5f12736`, `7764ae7`, `568c611` and `1a193b9` package blocks below are historical evidence. This override does not authorize live apply/revoke.
+Older `32d01fd`, `294803e`, `5f12736`, `7764ae7`, `568c611` and `1a193b9` package blocks below are historical evidence. This override does not authorize live apply/revoke.
 
 Актуализация 2026-06-04: текущий Phase 1 closeout package — `7764ae7 Cover integration status in API smoke`.
 
@@ -67,34 +67,34 @@ evidence: research/amn2/phase-1-closeout-2026-06-04.md
 
 ## 1. Обновить пакет на VPS
 
-Важно: команды ниже используют текущий package `32d01fd`; он уже прошел read-only VPS smoke `run_id=20260606T185114Z`. Пакеты `1a193b9` и `568c611` остаются historical prior VPS-smoked runtime/source, а `294803e` остается historical API/web-panel evidence.
+Важно: команды ниже используют текущий package `c8a6363`; он package-ready, но еще не прошел VPS read-only smoke. Последний VPS-smoked runtime/source остается `32d01fd`, `run_id=20260606T185114Z`. Пакеты `1a193b9` и `568c611` остаются historical prior VPS-smoked runtime/source, а `294803e` остается historical API/web-panel evidence.
 
 ```bash
 cd /root
 
-curl -fL -o amn2-vps-update-and-smoke-kit-32d01fd.zip \
-  https://github.com/barakov-dot/amn3/raw/master/dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
+curl -fL -o amn2-vps-update-and-smoke-kit-c8a6363.zip \
+  https://github.com/barakov-dot/amn3/raw/master/dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
 
-curl -fL -o amn2-vps-update-and-smoke-kit-32d01fd.zip.sha256.txt \
-  https://raw.githubusercontent.com/barakov-dot/amn3/master/dist/amn2-vps-update-and-smoke-kit-32d01fd.zip.sha256.txt
+curl -fL -o amn2-vps-update-and-smoke-kit-c8a6363.zip.sha256.txt \
+  https://raw.githubusercontent.com/barakov-dot/amn3/master/dist/amn2-vps-update-and-smoke-kit-c8a6363.zip.sha256.txt
 
-sha256sum -c amn2-vps-update-and-smoke-kit-32d01fd.zip.sha256.txt
+sha256sum -c amn2-vps-update-and-smoke-kit-c8a6363.zip.sha256.txt
 ```
 
 Ожидаемый SHA256:
 
 ```text
-BE59AF74001AC4F094C753B565A4E672194D823C4F65B6CB476F4FF01B310807
+027ECC1BAD7321FCCD61A4CCCA3AC9F06AAA9AC6A3D7115B4813253D19C2CFBF
 ```
 
 Распаковать и применить source overlay:
 
 ```bash
-rm -rf amn2-vps-update-and-smoke-kit-32d01fd
-mkdir -p amn2-vps-update-and-smoke-kit-32d01fd
-python3 -m zipfile -e amn2-vps-update-and-smoke-kit-32d01fd.zip amn2-vps-update-and-smoke-kit-32d01fd
+rm -rf amn2-vps-update-and-smoke-kit-c8a6363
+mkdir -p amn2-vps-update-and-smoke-kit-c8a6363
+python3 -m zipfile -e amn2-vps-update-and-smoke-kit-c8a6363.zip amn2-vps-update-and-smoke-kit-c8a6363
 
-cd amn2-vps-update-and-smoke-kit-32d01fd
+cd amn2-vps-update-and-smoke-kit-c8a6363
 export VPS_APPLY_ENABLED=false
 export AMN2_DIR=/opt/amn2
 bash ./amn2_apply_source_zip.sh

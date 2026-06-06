@@ -2,7 +2,7 @@
 
 Дата: 2026-06-06.
 
-Назначение: зафиксировать первый безопасный production-режим для текущего `amn2/codex-vps-test-prep` baseline после real VPS read-only smoke. Текущий GitHub head `32d01fd` прошел read-only VPS smoke; следующий шаг - operator-only controlled prod readiness decision.
+Назначение: зафиксировать первый безопасный production-режим для текущего `amn2/codex-vps-test-prep` baseline после real VPS read-only smoke. Текущий GitHub head `c8a6363` имеет package-ready update+smoke kit, но еще не прошел VPS read-only smoke. Последний VPS-smoked baseline остается `32d01fd`; следующий шаг для текущего head - read-only update/smoke, затем operator-only controlled prod readiness decision.
 
 Это не разрешение на public web/API exposure, `/api/clients` write CRUD, API `config:read`, public/self-service config delivery, Local Agent mutations, backup/import/reboot routes или новые live peer mutations.
 
@@ -11,10 +11,15 @@
 ```text
 repo: https://github.com/barakov-dot/amn2.git
 branch: codex-vps-test-prep
-head: 32d01fd Update integration status for controlled prod
-AMN3 package: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
-package sha256: BE59AF74001AC4F094C753B565A4E672194D823C4F65B6CB476F4FF01B310807
-source sha256: 034753DA7EC42ACF869519F43909EEFDC8A392A5665B2A33C935F8A058CCB99B
+last VPS-smoked head: 32d01fd Update integration status for controlled prod
+current head: c8a6363 Add Local Agent runtime summary mapper
+current package: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
+current package sha256: 027ECC1BAD7321FCCD61A4CCCA3AC9F06AAA9AC6A3D7115B4813253D19C2CFBF
+current source sha256: E1E198979D988B3A5AA038CF732B8DCDBE854C48A6D381FADBA05BFDEE0251C6
+current package status: package-ready-not-vps-smoked
+last VPS-smoked package: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
+last VPS-smoked package sha256: BE59AF74001AC4F094C753B565A4E672194D823C4F65B6CB476F4FF01B310807
+last VPS-smoked source sha256: 034753DA7EC42ACF869519F43909EEFDC8A392A5665B2A33C935F8A058CCB99B
 latest proven VPS read-only smoke: 32d01fd pass, run_id 20260606T185114Z
 previous VPS read-only smoke: 1a193b9 pass, run_id 20260606T154636Z
 VPS smoke evidence: research/amn2/integration-status-controlled-prod-update-2026-06-06.md
@@ -26,7 +31,7 @@ Phase 2 live single disposable peer gate: verified-live on stable line, evidence
 
 Controlled prod means:
 
-- `/opt/amn2` stays on the VPS-smoked `32d01fd` source overlay unless a new package and smoke gate supersede it.
+- `/opt/amn2` stays on the VPS-smoked `32d01fd` source overlay unless `c8a6363` or a later package passes a new read-only update/smoke gate.
 - `VPS_APPLY_ENABLED=false` is the default operator shell state.
 - Read-only API smoke and web/admin checks use loopback only.
 - Web panel access is operator-only through SSH tunnel, private network, or a separately approved reverse-proxy/firewall/TLS gate.
@@ -40,7 +45,7 @@ Controlled prod does not mean broad public SaaS mode.
 
 Allowed after this readiness check:
 
-- Keep current `/opt/amn2` runtime on `32d01fd`.
+- Keep current VPS-smoked `/opt/amn2` runtime on `32d01fd` until the `c8a6363` read-only update/smoke gate passes.
 - Run read-only API loopback smoke again.
 - Run DB-only server config sync used by the smoke script.
 - Check web-admin read-only/status pages through loopback or SSH tunnel.

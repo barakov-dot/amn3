@@ -19,9 +19,9 @@ branch: codex-vps-test-prep
 latest: 91aeb3e Document VPS verified tag
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 handoff: docs/NEXT_CHAT_HANDOFF.ru.md
-current transfer head: 32d01fd Update integration status for controlled prod
-current VPS-smoked runtime/source: 32d01fd Update integration status for controlled prod, run_id=20260606T185114Z
-current update+smoke kit: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
+current transfer head: c8a6363 Add Local Agent runtime summary mapper
+current update+smoke kit: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip, package-ready-not-vps-smoked
+last VPS-smoked runtime/source: 32d01fd Update integration status for controlled prod, run_id=20260606T185114Z
 ```
 
 Активная рабочая ветка для установки/API smoke:
@@ -35,7 +35,7 @@ working chat: Переводим AMN на API
 
 AMN3 evidence: [API VPS smoke evidence 2026-06-03](api-vps-smoke-evidence-2026-06-03.md). Historical first pass: [API VPS smoke evidence 2026-06-02](api-vps-smoke-evidence-2026-06-02.md).
 
-Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep` at production head `5f12736`; API/web-panel finish slice then fast-forward merged into `codex-vps-test-prep` at production head `294803e`; Phase 1 read-only integration closeout then moved stable to `7764ae7`; remote partial-failure contract moved stable to `1a193b9`; controlled-prod integration status update moved stable to `32d01fd` and passed read-only VPS smoke.
+Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep` at production head `5f12736`; API/web-panel finish slice then fast-forward merged into `codex-vps-test-prep` at production head `294803e`; Phase 1 read-only integration closeout then moved stable to `7764ae7`; remote partial-failure contract moved stable to `1a193b9`; controlled-prod integration status update moved stable to `32d01fd` and passed read-only VPS smoke; mapper-only Local Agent runtime summary moved stable to `c8a6363` and has a package-ready, not-yet-VPS-smoked update kit.
 
 Живой VPS-цикл подтвержден: approve, working config, peer sync, disable/enable и выборочное удаление устройства работают на Docker AmneziaWG runtime.
 
@@ -85,7 +85,8 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [Remote partial-failure contract VPS package 2026-06-06](remote-partial-failure-contract-vps-package-2026-06-06.md) - AMN3 update+smoke kit for stable `1a193b9`; package published and read-only VPS-smoked.
 - [Remote partial-failure contract VPS smoke 2026-06-06](remote-partial-failure-contract-vps-smoke-evidence-2026-06-06.md) - real VPS read-only update/smoke pass for stable `1a193b9`, `run_id=20260606T154636Z`.
 - [Integration status controlled prod update 2026-06-06](integration-status-controlled-prod-update-2026-06-06.md) - AMN2 stable `32d01fd`, local tests green, AMN3 update+smoke kit published, read-only VPS smoke passed `run_id=20260606T185114Z`.
-- [Controlled prod readiness 2026-06-06](controlled-prod-readiness-2026-06-06.md) - next operator-only prod gate after `32d01fd` read-only VPS smoke; readiness prefill recorded, operator confirmations pending.
+- [Local Agent runtime summary package 2026-06-06](local-agent-runtime-summary-vps-package-2026-06-06.md) - AMN2 stable `c8a6363`, package-ready, not VPS-smoked; use for next read-only update/smoke if continuing current git head.
+- [Controlled prod readiness 2026-06-06](controlled-prod-readiness-2026-06-06.md) - operator-only prod gate remains pending; for current git head `c8a6363`, first run read-only update/smoke.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
@@ -97,9 +98,9 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 
 1. Не расширять API за пределы merged read-only aggregate shell до отдельного route/secret/remote-write gate.
 2. API/web-panel finish slice реализован, запушен и fast-forward merged: `amn2/codex/api-web-panel-finish`, commit `294803e`, evidence `api-web-panel-finish-implementation.md`.
-3. AMN3 VPS update/smoke package rebuilt from production head `7764ae7`.
+3. AMN3 VPS update/smoke package rebuilt from current production head `c8a6363`; package is ready but not VPS-smoked.
 4. Real VPS API/web-panel gate для `294803e` пройден: API loopback smoke `run_id=20260604T102355Z`, web-admin `API readiness` и `API tokens` доступны; evidence `api-web-panel-vps-evidence-2026-06-04.md`.
-5. VPS update/smoke package `7764ae7` is the current package; historical `294803e` and `5f12736` remain evidence baselines.
+5. VPS update/smoke package `c8a6363` is the current package for the git head; `32d01fd` remains the last VPS-smoked runtime/source; historical `294803e`, `5f12736`, and `7764ae7` remain evidence baselines.
 6. Controlled real VPS verification gate Phase 1 для `codex/remote-operation-vps-gate-prep` пройден как `dry-run-only-pass`; evidence `remote-operation-vps-gate-evidence-2026-06-04.md`.
 7. Backup/import policy registry, restore-preview contract и machine-checkable secret inventory уже выполнены; web/API full backup, restore apply, import apply, route expansion, secret-bearing output и live VPS write flows остаются закрытыми до отдельных gates.
 

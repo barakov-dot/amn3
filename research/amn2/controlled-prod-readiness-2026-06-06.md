@@ -9,9 +9,9 @@ This document contains no secrets, no full logs and no live write evidence.
 ```text
 status: readiness-prefill-recorded; operator-confirmations-pending
 target mode: operator-only controlled prod
-current amn2 branch: codex-vps-test-prep
-current amn2 head: 32d01fd Update integration status for controlled prod
-current AMN3 package: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
+amn2 branch at evidence capture: codex-vps-test-prep
+amn2 head at evidence capture: 32d01fd Update integration status for controlled prod
+AMN3 package at evidence capture: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
 package sha256: BE59AF74001AC4F094C753B565A4E672194D823C4F65B6CB476F4FF01B310807
 source sha256: 034753DA7EC42ACF869519F43909EEFDC8A392A5665B2A33C935F8A058CCB99B
 latest VPS smoke: 32d01fd read-only-vps-smoke-pass, run_id 20260606T185114Z

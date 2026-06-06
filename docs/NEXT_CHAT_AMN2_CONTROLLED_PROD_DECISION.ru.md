@@ -27,17 +27,19 @@ latest AMN3 commit: verify with git log -1
 
 repo amn2: C:\Users\SooL\Documents\Amneziya
 branch amn2: codex-vps-test-prep
-current amn2 head: 32d01fd Update integration status for controlled prod
+current amn2 head: c8a6363 Add Local Agent runtime summary mapper
 ```
 
 ## Уже доказано
 
 ```text
-package: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
-package sha256: BE59AF74001AC4F094C753B565A4E672194D823C4F65B6CB476F4FF01B310807
-source sha256: 034753DA7EC42ACF869519F43909EEFDC8A392A5665B2A33C935F8A058CCB99B
-VPS read-only smoke: pass
-run_id: 20260606T185114Z
+current package: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
+current package sha256: 027ECC1BAD7321FCCD61A4CCCA3AC9F06AAA9AC6A3D7115B4813253D19C2CFBF
+current source sha256: E1E198979D988B3A5AA038CF732B8DCDBE854C48A6D381FADBA05BFDEE0251C6
+current package status: package-ready-not-vps-smoked
+last VPS-smoked package: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
+last VPS read-only smoke: pass
+last VPS run_id: 20260606T185114Z
 checked_routes: 5
 routes: servers, integration_status, server_summary, metrics_summary, users_summary
 auth checks: missing bearer 401, wrong scope 403, revoked token 401
@@ -50,7 +52,8 @@ Phase 2 single disposable peer apply/revoke: verified-live on stable line
 ## Текущий статус
 
 ```text
-32d01fd read-only-vps-smoke-pass
+c8a6363 package-ready-not-vps-smoked
+32d01fd read-only-vps-smoke-pass remains last VPS-smoked source
 controlled-prod-readiness: operator confirmations pending
 ```
 
@@ -59,7 +62,7 @@ controlled-prod-readiness: operator confirmations pending
 Вернуть только безопасный decision packet:
 
 ```text
-source overlay commit: 32d01fd | other
+source overlay commit: c8a6363 | 32d01fd | other
 integration status safe fields: ok | not checked | needs-fix
 web/admin access path: loopback | ssh-tunnel | private-network | approved-reverse-proxy | other
 VPS_APPLY_ENABLED default: false | other
@@ -71,15 +74,18 @@ next action:
 
 ## Decision Rules
 
-`controlled-prod-ready` можно записать только если:
+For current `c8a6363`, first run read-only VPS update/smoke with `dist/amn2-vps-update-and-smoke-kit-c8a6363.zip`. `controlled-prod-ready` for current head can be recorded only if:
 
-- source overlay commit is `32d01fd`;
+- source overlay commit is `c8a6363`;
+- read-only VPS smoke passed for `c8a6363`;
 - web/admin access path is operator-only;
 - `VPS_APPLY_ENABLED` default is `false`;
 - host key prompt is absent or verified out-of-band;
 - recovery path is known;
 - no stop condition is present;
 - no secret-bearing evidence was pasted.
+
+`32d01fd` remains the last VPS-smoked source and can be discussed only as the previous baseline, not as the current git head.
 
 `needs-fix` обязателен при smoke/auth/listener/audit/checksum/access-path/host-key/evidence hygiene failure.
 
