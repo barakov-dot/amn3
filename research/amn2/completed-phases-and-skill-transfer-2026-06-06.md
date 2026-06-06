@@ -8,12 +8,25 @@
 
 ## Текущая точка правды
 
+Актуализация 2026-06-07:
+
+```text
+current AMN2 git head: 42ffa65 Record git checkout smoke status
+current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
+current VPS source overlay: c8a6363 Add Local Agent runtime summary mapper
+git-checkout VPS smoke: 62ff184 pass on /opt/amn2-git, checked_routes=6
+source-overlay promotion for 62ff184/42ffa65: pending
+current AMN3 master: verify with git log -1; latest synced state records controlled-prod-ready plus git-checkout smoke evidence
+```
+
+The 2026-06-06 `c8a6363` entries below are source-overlay baseline evidence, not the latest AMN2 git head after neighboring status-visibility work.
+
 Production repo:
 
 ```text
 C:\Users\SooL\Documents\Amneziya
 branch: codex-vps-test-prep
-current head: c8a6363 Add Local Agent runtime summary mapper
+source-overlay baseline head: c8a6363 Add Local Agent runtime summary mapper
 ```
 
 Lab / coordination repo:
@@ -21,10 +34,10 @@ Lab / coordination repo:
 ```text
 C:\Users\SooL\Documents\VPS-OPS-LAB
 branch: master
-current head: 8f613c8 Publish c8a6363 VPS update package
+historical package-publish head: 8f613c8 Publish c8a6363 VPS update package
 ```
 
-Текущий пакет по git head:
+Текущий source-overlay package:
 
 ```text
 source commit: c8a6363
@@ -44,7 +57,7 @@ run_id: 20260606T202040Z
 decision: passed
 ```
 
-Важно: `c8a6363` уже является текущим `amn2` head и последним подтвержденным на VPS runtime/source. `32d01fd` остается historical prior VPS-smoked baseline.
+Важно: `c8a6363` является последним подтвержденным на VPS source-overlay runtime/source. После него AMN2 git head продвинулся до `42ffa65`, а app-code slice `62ff184` прошел git-checkout smoke; source-overlay promotion для этой линии еще отдельный gate. `32d01fd` остается historical prior VPS-smoked baseline.
 
 ## Готовые фазы
 
@@ -163,7 +176,7 @@ c8a6363 read-only VPS smoke: passed, run_id 20260606T202040Z
 
 - `verified-live` покрывает ровно один disposable test peer apply/revoke path;
 - broad write API, web write, Local Agent mutations, config delivery, backup/import and destructive operations не открыты;
-- current head `c8a6363` не меняет этот live-write scope и прошел read-only VPS smoke.
+- source-overlay head `c8a6363` не меняет этот live-write scope и прошел read-only VPS smoke.
 
 Правило переноса:
 

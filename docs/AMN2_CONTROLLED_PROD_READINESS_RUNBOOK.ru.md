@@ -6,6 +6,8 @@
 
 Актуализация 2026-06-07: operator-only decision recorded as `controlled-prod-ready`; evidence `research/amn2/controlled-prod-ready-2026-06-07.md`.
 
+Post-decision AMN2 update: current `amn2/codex-vps-test-prep` git head is `42ffa65 Record git checkout smoke status`. The app-code read-only slice `62ff184 Update controlled prod status visibility` passed VPS git-checkout smoke on `/opt/amn2-git` with six read-only routes. This does not promote `/opt/amn2` source overlay beyond `c8a6363`; a source-overlay update+read-only smoke gate is still required for promotion.
+
 Это не разрешение на public web/API exposure, `/api/clients` write CRUD, API `config:read`, public/self-service config delivery, Local Agent mutations, backup/import/reboot routes или новые live peer mutations.
 
 ## Текущая production-точка
@@ -14,6 +16,9 @@
 repo: https://github.com/barakov-dot/amn2.git
 branch: codex-vps-test-prep
 last VPS-smoked head: c8a6363 Add Local Agent runtime summary mapper
+current amn2 git head: 42ffa65 Record git checkout smoke status
+current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
+current git-checkout smoke: 62ff184 pass on /opt/amn2-git, checked_routes=6
 previous VPS-smoked head: 32d01fd Update integration status for controlled prod
 current package: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
 current package sha256: 027ECC1BAD7321FCCD61A4CCCA3AC9F06AAA9AC6A3D7115B4813253D19C2CFBF
@@ -32,6 +37,7 @@ Phase 2 live single disposable peer gate: verified-live on stable line, evidence
 Controlled prod means:
 
 - `/opt/amn2` stays on the VPS-smoked `c8a6363` source overlay unless a later package passes a new read-only update/smoke gate.
+- `62ff184`/`42ffa65` git-checkout smoke is useful evidence for the next promotion, but not a replacement for source-overlay smoke.
 - `VPS_APPLY_ENABLED=false` is the default operator shell state.
 - Read-only API smoke and web/admin checks use loopback only.
 - Web panel access is operator-only through SSH tunnel, private network, or a separately approved reverse-proxy/firewall/TLS gate.

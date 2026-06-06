@@ -30,7 +30,9 @@ latest AMN3 commit: verify with git log -1
 
 repo amn2: C:\Users\SooL\Documents\Amneziya
 branch amn2: codex-vps-test-prep
-current amn2 head: c8a6363 Add Local Agent runtime summary mapper
+current amn2 git head: 42ffa65 Record git checkout smoke status
+current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
+current VPS source overlay: c8a6363 Add Local Agent runtime summary mapper
 ```
 
 ## Уже доказано
@@ -58,12 +60,16 @@ login_http: 200
 rollback/current kits and data/.env/servers.yml: present
 recovery path known: yes
 decision: controlled-prod-ready
+post-decision git-checkout smoke: 62ff184 read-only gate passed on /opt/amn2-git
+post-decision documentation/status head: 42ffa65
 ```
 
 ## Текущий статус
 
 ```text
-c8a6363 read-only-vps-smoke-pass
+source overlay c8a6363 read-only-vps-smoke-pass
+git-checkout read-only status line 62ff184 smoke-pass with checked_routes=6
+amn2 current git head 42ffa65 records that status
 32d01fd is historical prior VPS-smoked source
 controlled-prod-readiness: controlled-prod-ready
 ```
@@ -82,7 +88,7 @@ next action: continue with read-only next slice
 
 ## Decision Rules
 
-For current `c8a6363`, read-only VPS update/smoke already passed with `run_id=20260606T202040Z`. `controlled-prod-ready` was recorded after these conditions were met:
+For current source overlay `c8a6363`, read-only VPS update/smoke already passed with `run_id=20260606T202040Z`. `controlled-prod-ready` was recorded after these conditions were met:
 
 - source overlay commit is `c8a6363`;
 - read-only VPS smoke passed for `c8a6363`;
@@ -95,6 +101,8 @@ For current `c8a6363`, read-only VPS update/smoke already passed with `run_id=20
 - no secret-bearing evidence was pasted.
 
 `32d01fd` can be discussed only as the previous baseline, not as the current git head.
+
+After the decision, AMN2 advanced locally to git head `42ffa65`; the app-code read-only slice `62ff184` passed a separate git-checkout smoke on `/opt/amn2-git` with six read-only routes. This is not yet a source-overlay promotion for `/opt/amn2`.
 
 `needs-fix` would be required if smoke/auth/listener/audit/checksum/access-path/host-key/evidence hygiene failed.
 
@@ -118,7 +126,8 @@ For current `c8a6363`, read-only VPS update/smoke already passed with `run_id=20
 Следующий safe implementation slice должен оставаться read-only:
 
 ```text
-read-only controlled-prod status/recovery visibility
+promote 62ff184/42ffa65 through source-overlay update+read-only smoke
+or continue read-only controlled-prod status/recovery visibility
 operator documentation cleanup
 another read-only status/observability slice
 ```

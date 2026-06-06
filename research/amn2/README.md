@@ -19,9 +19,13 @@ branch: codex-vps-test-prep
 latest: 91aeb3e Document VPS verified tag
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 handoff: docs/NEXT_CHAT_HANDOFF.ru.md
-current transfer head: c8a6363 Add Local Agent runtime summary mapper
-current update+smoke kit: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip, read-only-vps-smoke-pass
+current source-overlay transfer head: c8a6363 Add Local Agent runtime summary mapper
+current source-overlay update+smoke kit: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip, read-only-vps-smoke-pass
 last VPS-smoked runtime/source: c8a6363 Add Local Agent runtime summary mapper, run_id=20260606T202040Z
+current amn2 git head: 42ffa65 Record git checkout smoke status
+current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
+git-checkout VPS smoke: /opt/amn2-git, checked_routes=6, status=passed
+source-overlay promotion for the read-only status line: pending
 ```
 
 Активная рабочая ветка для установки/API smoke:
@@ -91,6 +95,7 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [Controlled prod readiness 2026-06-06](controlled-prod-readiness-2026-06-06.md) - operator-only prod gate is recorded as `controlled-prod-ready`; current VPS-smoked baseline is `c8a6363`.
 - [Controlled prod reverse proxy confirmation 2026-06-07](controlled-prod-reverse-proxy-confirmation-2026-06-07.md) - web/admin access is through approved HTTPS reverse proxy; public API port `3040` is not exposed.
 - [Controlled prod ready 2026-06-07](controlled-prod-ready-2026-06-07.md) - final operator-only decision `controlled-prod-ready`; recovery path known; continue only read-only next slice.
+- [Controlled prod status visibility git-checkout smoke 2026-06-07](controlled-prod-status-visibility-git-checkout-smoke-2026-06-07.md) - AMN2 current git head `42ffa65`, app-code slice `62ff184`, real VPS git-checkout smoke pass on `/opt/amn2-git`; source overlay promotion still pending.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 

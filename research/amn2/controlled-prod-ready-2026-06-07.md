@@ -108,6 +108,15 @@ The `controlled-prod-ready` decision does not allow:
 
 Allowed next work should stay read-only unless a separate gate is opened.
 
+Post-decision AMN2 update:
+
+```text
+current AMN2 git head: 42ffa65 Record git checkout smoke status
+current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
+git-checkout VPS smoke: passed on /opt/amn2-git, checked_routes=6
+source overlay promotion: not claimed; /opt/amn2 remains c8a6363 until separate update/smoke
+```
+
 Recommended next direction:
 
 ```text

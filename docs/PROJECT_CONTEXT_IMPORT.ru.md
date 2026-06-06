@@ -1,11 +1,17 @@
-# Current Override 2026-06-06
+# Current Override 2026-06-07
 
-`amn2/codex-vps-test-prep` current head is `c8a6363 Add Local Agent runtime summary mapper`. Current AMN3 update+smoke package for the git head is `c8a6363` and passed real VPS read-only smoke on 2026-06-06, `run_id=20260606T202040Z`. `32d01fd` is now the historical prior VPS-smoked runtime/source, `run_id=20260606T185114Z`; `1a193b9` is the previous historical runtime/source before that.
+`amn2/codex-vps-test-prep` current git head is `42ffa65 Record git checkout smoke status`. The current app-code read-only slice is `62ff184 Update controlled prod status visibility`: it passed real VPS git-checkout smoke on `/opt/amn2-git` with six read-only routes, all `200`, empty forbidden markers, and the temporary smoke token revoked. The source-overlay production runtime on `/opt/amn2` is still `c8a6363 Add Local Agent runtime summary mapper`, which passed source-overlay read-only smoke on 2026-06-06 and has `controlled-prod-ready` operator-only status.
+
+This update comes from neighboring AMN2 docs/commits after the `c8a6363` package work. It changes the coordination state, not the safety boundary: no public API `3040`, no API `config:read`, no `/api/clients` write CRUD, no public/self-service config delivery, no Local Agent mutations, no backup/import/reboot, and no new live peer operations. Next gate is source-overlay promotion/update for the read-only status line, or another read-only controller/status slice.
+
+# Historical Override 2026-06-06
+
+Historical 2026-06-06 source-overlay head was `c8a6363 Add Local Agent runtime summary mapper`. AMN3 update+smoke package for that source overlay is `c8a6363` and passed real VPS read-only smoke on 2026-06-06, `run_id=20260606T202040Z`. `32d01fd` is now the historical prior VPS-smoked runtime/source, `run_id=20260606T185114Z`; `1a193b9` is the previous historical runtime/source before that.
 
 Read-only integration status update 2026-06-06: `32d01fd` updates `/api/integration/status` to report `read_only_vps_smoked`, Phase 2 `verified_live`, and controlled-prod readiness pending without enabling write routes or write operations. AMN3 evidence is `research/amn2/integration-status-controlled-prod-update-2026-06-06.md`. The previous local-only operation-contract fast-forward remains recorded at `research/amn2/remote-partial-failure-contract-2026-06-06.md`.
 
 ```text
-AMN3 package for current git head: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
+AMN3 package for current source overlay: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
 sha256: 027ECC1BAD7321FCCD61A4CCCA3AC9F06AAA9AC6A3D7115B4813253D19C2CFBF
 source zip: dist/amn2-codex-vps-test-prep-c8a6363-source.zip
 source sha256: E1E198979D988B3A5AA038CF732B8DCDBE854C48A6D381FADBA05BFDEE0251C6
