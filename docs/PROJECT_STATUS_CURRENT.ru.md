@@ -17,6 +17,7 @@ previous VPS-smoked runtime/source: 1a193b9, run_id 20260606T154636Z, evidence r
 controlled prod readiness: readiness-prefill-recorded, operator confirmations pending
 controlled prod runbook: docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
 controlled prod evidence: research/amn2/controlled-prod-readiness-2026-06-06.md
+controlled prod next chat: docs/NEXT_CHAT_AMN2_CONTROLLED_PROD_DECISION.ru.md
 previous VPS-smoked source: 568c611, run_id 20260605T162742Z, evidence research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
 docs-only cleanup: 6b5b5b7 Document stdin PSK peer apply
 local-only contract merge: 1a193b9 Add remote partial failure contract
@@ -869,4 +870,4 @@ Real VPS Phase 1 read-only/dry-run gate пройден 2026-06-04 как `dry-ru
 - Docker AmneziaWG write/reload/restart behavior;
 - реальный Local Agent deployment или controller-to-agent calls.
 
-Следующий рекомендуемый шаг: пройти operator-only controlled-prod readiness по `docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md` и зафиксировать `controlled-prod-ready`, `needs-fix` или `defer-prod`. Phase 2 single disposable peer apply/revoke уже verified-live, а `32d01fd` уже прошел real VPS read-only smoke; write lifecycle, config delivery API, Local Agent mutation routes, backup/import/reboot и public web/API exposure остаются заблокированы до отдельных gates.
+Следующий рекомендуемый шаг: пройти operator-only controlled-prod readiness по `docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md`; для нового чата использовать `docs/NEXT_CHAT_AMN2_CONTROLLED_PROD_DECISION.ru.md` и зафиксировать `controlled-prod-ready`, `needs-fix` или `defer-prod`. Phase 2 single disposable peer apply/revoke уже verified-live, а `32d01fd` уже прошел real VPS read-only smoke; write lifecycle, config delivery API, Local Agent mutation routes, backup/import/reboot и public web/API exposure остаются заблокированы до отдельных gates.

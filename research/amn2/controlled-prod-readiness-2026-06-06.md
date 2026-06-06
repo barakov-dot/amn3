@@ -17,6 +17,7 @@ source sha256: 034753DA7EC42ACF869519F43909EEFDC8A392A5665B2A33C935F8A058CCB99B
 latest VPS smoke: 32d01fd read-only-vps-smoke-pass, run_id 20260606T185114Z
 previous VPS smoke: 1a193b9 read-only-vps-smoke-pass, run_id 20260606T154636Z
 runbook: docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
+next chat handoff: docs/NEXT_CHAT_AMN2_CONTROLLED_PROD_DECISION.ru.md
 ```
 
 ## Scope
@@ -88,6 +89,12 @@ decision: controlled-prod-ready, needs-fix, or defer-prod
 ```
 
 Do not use this prefill as authorization for public exposure or new write operations.
+
+Next-chat handoff for the final operator decision:
+
+```text
+docs/NEXT_CHAT_AMN2_CONTROLLED_PROD_DECISION.ru.md
+```
 
 ## Required Operator Result
 

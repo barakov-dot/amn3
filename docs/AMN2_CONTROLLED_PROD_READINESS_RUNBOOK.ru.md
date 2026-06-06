@@ -163,6 +163,12 @@ next action:
 
 ## Decision Rules
 
+For a fresh decision chat, use:
+
+```text
+docs/NEXT_CHAT_AMN2_CONTROLLED_PROD_DECISION.ru.md
+```
+
 `controlled-prod-ready` is allowed only when the readiness checklist is complete and no stop condition is present.
 
 `needs-fix` is required if smoke, auth, listener, audit, checksum, host key, access-path or evidence hygiene fails.
