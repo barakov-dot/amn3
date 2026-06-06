@@ -148,7 +148,7 @@ def test_api_vps_smoke_evidence_template_is_safe_and_linked():
 
     assert "Заполнять после реального VPS smoke" in template
     assert "codex/read-only-api-route-shell" in template
-    assert "python -m app.cli api smoke-check" in template
+    assert "python -m app.cli api smoke-cycle" in template
     assert "GET /api/users/summary" in template
     assert "api_read" in template
     assert "raw API token" in template

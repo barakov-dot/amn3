@@ -60,15 +60,13 @@ Safe audit metadata содержит только `token_id`, `name`, `owner_lab
 
 Safe lifecycle metadata не содержит raw token, Authorization header, token hash, `.conf`, QR payload, `vpn://`, private key, PSK или remote command output.
 
-Route-connected токены для VPS smoke выдаются и отзываются через CLI:
+Route-connected токены для VPS smoke предпочтительно проверяются через safe CLI cycle:
 
 ```bash
-python -m app.cli api token issue --db data/amneziya.sqlite3 --name vps-smoke --owner-label ops --scope server:read --scope metrics:read --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')" --pretty
-python -m app.cli api smoke-check --base-url http://127.0.0.1:3040 --token "$API_TOKEN" --server-name debian-vps-1 --pretty
-python -m app.cli api token revoke --db data/amneziya.sqlite3 --token-id TOKEN_ID --reason smoke-complete --pretty
+python -m app.cli api smoke-cycle --db data/amneziya.sqlite3 --base-url http://127.0.0.1:3040 --server-name debian-vps-1 --name vps-smoke --owner-label ops --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')" --pretty
 ```
 
-Raw token показывается только в выводе `issue`; в базе хранится только `sha256:<digest>`.
+`smoke-cycle` внутри выпускает token со scopes `server:read` и `metrics:read`, использует его только для loopback smoke-check и отзывает token после проверки. Raw token не печатается. Если оператор использует ручные `api token issue` / `api smoke-check`, raw token показывается только в выводе `issue`, в базе хранится только `sha256:<digest>`, а revoke обязателен после проверки.
 
 ## Connected read-only route shell
 

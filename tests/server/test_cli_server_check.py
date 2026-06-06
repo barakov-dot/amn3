@@ -505,12 +505,14 @@ def test_run_server_retest_plan_prints_safe_vps_sequence(tmp_path):
     assert f"--db {db_path}" in output
     assert "python -m app.cli server check" in output
     assert "python -m app.cli server sync-peers" in output
-    assert "python -m app.cli api token issue" in output
     assert "python -m app.cli api serve --host 127.0.0.1 --port 3040" in output
-    assert "curl -sS -H \"Authorization: Bearer $API_TOKEN\" http://127.0.0.1:3040/api/servers" in output
-    assert "http://127.0.0.1:3040/api/users/summary" in output
-    assert "python -m app.cli api smoke-check" in output
-    assert "python -m app.cli api token revoke" in output
+    assert "python -m app.cli api smoke-cycle" in output
+    assert "checked_routes: 6" in output
+    assert "raw token is hidden and revoked automatically" in output
+    assert "export API_TOKEN" not in output
+    assert "python -m app.cli api token issue" not in output
+    assert "python -m app.cli api smoke-check" not in output
+    assert "python -m app.cli api token revoke" not in output
     assert "VPS_APPLY_ENABLED=false" in output
     assert "runtime: docker" in output
     assert "container: amnezia-awg" in output

@@ -127,42 +127,35 @@ tunnel до панели. Для короткой проверки по plain HT
 - Token выдавать только через route-scoped CLI и только с явным `--expires-at`.
 - Первый scope-набор для smoke: `server:read` и `metrics:read`.
 - Проверять только aggregate endpoints: `/api/servers`, `/api/servers/{server_name}/summary`, `/api/metrics/summary`, `/api/users/summary`.
-- После smoke обязательно отозвать token через `python -m app.cli api token revoke`.
-- Автоматическая проверка forbidden markers: `python -m app.cli api smoke-check --base-url http://127.0.0.1:3040 --token "$API_TOKEN" --server-name debian-vps-1 --pretty`.
+- Для VPS smoke использовать `python -m app.cli api smoke-cycle`: он выпускает scoped token, проверяет forbidden markers и отзывает token автоматически.
+- Если token выдавался вручную через `api token issue`, после проверки обязательно отозвать его через `python -m app.cli api token revoke`.
 - Не публиковать API наружу и не добавлять `config:read`/write routes до отдельного VPS gate.
 
-Пример issue/start/check/revoke для VPS smoke:
+Пример safe VPS smoke в двух shell:
 
 ```bash
-python -m app.cli api token issue \
+python -m app.cli api serve --host 127.0.0.1 --port 3040
+```
+
+```bash
+python -m app.cli api smoke-cycle \
   --db data/amneziya.sqlite3 \
+  --base-url http://127.0.0.1:3040 \
+  --server-name debian-vps-1 \
   --name vps-smoke \
   --owner-label ops \
-  --scope server:read \
-  --scope metrics:read \
   --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')" \
-  --pretty
-
-export API_TOKEN='RAW_TOKEN_FROM_ONE_TIME_OUTPUT'
-python -m app.cli api serve --host 127.0.0.1 --port 3040
-curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers
-curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/metrics/summary
-curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/users/summary
-python -m app.cli api smoke-check --base-url http://127.0.0.1:3040 --token "$API_TOKEN" --server-name debian-vps-1 --pretty
-
-python -m app.cli api token revoke \
-  --db data/amneziya.sqlite3 \
-  --token-id TOKEN_ID_FROM_ISSUE_OUTPUT \
-  --reason smoke-complete \
   --pretty
 ```
 
-Если на VPS есть `jq`, можно сохранить вывод issue и извлечь значения без ручного копирования:
+Ожидаемый safe output:
 
-```bash
-ISSUE_JSON="$(python -m app.cli api token issue --db data/amneziya.sqlite3 --name vps-smoke --owner-label ops --scope server:read --scope metrics:read --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')")"
-export API_TOKEN="$(printf '%s' "$ISSUE_JSON" | jq -r .raw_token)"
-TOKEN_ID="$(printf '%s' "$ISSUE_JSON" | jq -r .token_id)"
+```text
+status: passed
+checked_routes: 6
+route status codes: 200
+forbidden_markers: []
+revoke.status: revoked
 ```
 
 После проверки заполнить `docs/API_VPS_SMOKE_EVIDENCE.ru.md`: фиксировать только HTTP-коды, aggregate counts, forbidden marker status, safe `api_read` metadata и итоговый VPS verdict.

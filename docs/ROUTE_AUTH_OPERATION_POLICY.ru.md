@@ -55,4 +55,4 @@ Policy-only changes and tests do not require live VPS retest.
 - `GET /api/metrics/summary` - `metrics:read`;
 - `GET /api/users/summary` - `metrics:read`.
 
-The next read-only API smoke for a head that includes this section should report `checked_routes: 6`. This still does not enable `config:read`, write scopes, Local Agent mutations or public exposure.
+The next read-only API smoke for a head that includes this section should use `python -m app.cli api smoke-cycle` and report `checked_routes: 6`. This still does not enable `config:read`, write scopes, Local Agent mutations or public exposure.

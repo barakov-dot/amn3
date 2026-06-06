@@ -4,7 +4,7 @@
 
 Назначение: зафиксировать только безопасные факты реального VPS smoke для read-only API shell на ветке `codex/read-only-api-route-shell`.
 
-Template policy: Заполнять после реального VPS smoke; historical command marker `python -m app.cli api smoke-check`; historical filled evidence ниже оставляет только safe summary.
+Template policy: Заполнять после реального VPS smoke; current command marker `python -m app.cli api smoke-cycle`; historical filled evidence ниже оставляет только safe summary.
 
 Не вставлять raw API token, Authorization header, token hash, `.conf`, QR, `vpn://`, `PrivateKey`, `PresharedKey`, SSH password/private key, `.env`, PSK, полные response bodies или `api-server.log` без ручной redaction.
 
@@ -82,6 +82,7 @@ route: GET /api/local-agent/runtime/summary
 scope: server:read
 status: local-ready, not included in the 2026-06-06 VPS smoke above
 next VPS smoke expectation: checked_routes=6
+next VPS smoke command: python -m app.cli api smoke-cycle
 secret boundary: no Local Agent host/port/token id/token hash/container/interface/config path
 ```
 

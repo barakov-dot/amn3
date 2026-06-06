@@ -37,7 +37,7 @@ Lab/coordination repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 
 Текущий статус: app-code baseline `64a6750` прошел read-only API smoke на VPS `/opt/amn2-git` через loopback `127.0.0.1:3040`, пять read-only routes вернули 200, forbidden markers пустые. Новый smoke token отозван. Предыдущий raw token был опубликован в чате и по решению оператора пока не отозван; поэтому итоговый статус `api-smoke-passed`, но не полный `controlled-prod-ready`.
 
-Следующий локальный срез после этого evidence: `/api/local-agent/runtime/summary` добавлен как controller-facing read-only route под `server:read`. Он не дергает Local Agent по сети и не выдает host/port/token/container/interface/config path. Следующий VPS smoke для текущего head должен ожидать `checked_routes: 6`.
+Следующий локальный срез после этого evidence: `/api/local-agent/runtime/summary` добавлен как controller-facing read-only route под `server:read`. Он не дергает Local Agent по сети и не выдает host/port/token/container/interface/config path. Следующий VPS smoke для текущего head должен идти через `python -m app.cli api smoke-cycle` и ожидать `checked_routes: 6`; raw token не печатается, временный token отзывается автоматически.
 
 Цель следующего этапа: не открывать broad write API, а закрыть controlled-prod readiness или выбрать следующий read-only controller-facing slice.
 ```
@@ -70,7 +70,7 @@ git remote -v
 - Docker runtime apply/revoke behavior and restart boundary.
 - Route/Auth/Operation policy matrix and binding tests.
 - Redaction, secret inventory, API token lifecycle and SSH host key verifier.
-- Read-only scoped `/api/*` route shell with audit and smoke-check.
+- Read-only scoped `/api/*` route shell with audit, smoke-check and safe smoke-cycle.
 - API readiness, API tokens and integration status web pages.
 - Remote-operation dry-run metadata, partial failure model and PSK stdin path.
 - Phase 2 single disposable peer live apply/sync/revoke/sync evidence.

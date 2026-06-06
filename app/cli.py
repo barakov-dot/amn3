@@ -156,6 +156,16 @@ def build_parser() -> argparse.ArgumentParser:
     api_smoke.add_argument("--timeout", type=float, default=5.0)
     api_smoke.add_argument("--pretty", action="store_true")
 
+    api_smoke_cycle = api_sub.add_parser("smoke-cycle")
+    api_smoke_cycle.add_argument("--db", default="data/amneziya.sqlite3")
+    api_smoke_cycle.add_argument("--base-url", default="http://127.0.0.1:3040")
+    api_smoke_cycle.add_argument("--server-name", required=True)
+    api_smoke_cycle.add_argument("--name", default="vps-smoke")
+    api_smoke_cycle.add_argument("--owner-label", default="ops")
+    api_smoke_cycle.add_argument("--expires-at", required=True)
+    api_smoke_cycle.add_argument("--timeout", type=float, default=5.0)
+    api_smoke_cycle.add_argument("--pretty", action="store_true")
+
     api_token = api_sub.add_parser("token")
     api_token_sub = api_token.add_subparsers(dest="api_token_command", required=True)
 
@@ -264,6 +274,19 @@ def main() -> None:
                 base_url=args.base_url,
                 token=args.token,
                 server_name=args.server_name,
+                timeout=args.timeout,
+                pretty=args.pretty,
+            )
+        )
+    elif args.command == "api" and args.api_command == "smoke-cycle":
+        print(
+            run_api_smoke_cycle(
+                db_path=Path(args.db),
+                base_url=args.base_url,
+                server_name=args.server_name,
+                name=args.name,
+                owner_label=args.owner_label,
+                expires_at=args.expires_at,
                 timeout=args.timeout,
                 pretty=args.pretty,
             )
@@ -415,6 +438,71 @@ def run_api_token_revoke(
         conn.close()
 
     return _json_dumps(event.safe_metadata(), pretty=pretty)
+
+
+def run_api_smoke_cycle(
+    *,
+    db_path: Path,
+    base_url: str,
+    server_name: str,
+    name: str,
+    owner_label: str,
+    expires_at: str,
+    timeout: float = 5.0,
+    pretty: bool = False,
+    raw_token: str | None = None,
+    http_get: Callable[[str, dict[str, str], float], tuple[int, str]] | None = None,
+) -> str:
+    if not name.strip():
+        raise ValueError("token name cannot be blank")
+    if not owner_label.strip():
+        raise ValueError("owner label cannot be blank")
+
+    actual_expires_at = _parse_api_datetime(expires_at)
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = connect(db_path)
+    try:
+        initialize_schema(conn)
+        repo = Repository(conn)
+        issue = create_route_api_token(
+            repo,
+            name=name.strip(),
+            owner_label=owner_label.strip(),
+            owner_user_id=None,
+            scopes={"server:read", "metrics:read"},
+            expires_at=actual_expires_at,
+            raw_token=raw_token,
+        )
+        try:
+            smoke = json.loads(
+                run_api_smoke_check(
+                    base_url=base_url,
+                    token=issue.raw_token,
+                    server_name=server_name,
+                    timeout=timeout,
+                    http_get=http_get,
+                )
+            )
+        finally:
+            revoked = revoke_api_token(
+                repo,
+                token_id=issue.token_id,
+                revoked_at=datetime.now(timezone.utc),
+                reason="smoke-complete",
+            )
+    finally:
+        conn.close()
+
+    token_metadata = issue.safe_metadata()
+    token_metadata["raw_token_display"] = "hidden"
+    payload = {
+        "action": "api_smoke_cycle.completed",
+        "status": smoke["status"],
+        "token": token_metadata,
+        "smoke": smoke,
+        "revoke": revoked.safe_metadata(),
+    }
+    return _json_dumps(payload, pretty=pretty)
 
 
 def run_api_smoke_check(
@@ -755,15 +843,11 @@ def run_server_retest_plan(
         _runtime_check_command(server),
         "",
         "4. Run read-only API smoke:",
-        f"python -m app.cli api token issue --db {db_path} --name vps-smoke --owner-label ops --scope server:read --scope metrics:read --expires-at \"$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')\"",
-        "export API_TOKEN='<raw_token from issue output>'",
+        "Terminal A:",
         "python -m app.cli api serve --host 127.0.0.1 --port 3040",
-        'curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers',
-        f'curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers/{server.name}/summary',
-        'curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/metrics/summary',
-        'curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/users/summary',
-        f'python -m app.cli api smoke-check --base-url http://127.0.0.1:3040 --token "$API_TOKEN" --server-name {server.name} --pretty',
-        f"python -m app.cli api token revoke --db {db_path} --token-id '<token_id from issue output>' --reason smoke-complete",
+        "Terminal B:",
+        f"python -m app.cli api smoke-cycle --db {db_path} --base-url http://127.0.0.1:3040 --server-name {server.name} --name vps-smoke --owner-label ops --expires-at \"$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')\" --pretty",
+        "Expected safe result: status=passed, checked_routes: 6, raw token is hidden and revoked automatically.",
         "Do not send raw API token, token hash, Authorization header, .conf, QR, vpn://, PrivateKey, or PresharedKey.",
         "",
         "5. Restart or inspect services:",

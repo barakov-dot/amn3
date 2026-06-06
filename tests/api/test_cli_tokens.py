@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from app.cli import build_parser
+from app.cli import run_api_smoke_cycle
 from app.cli import run_api_smoke_check
 from app.cli import run_api_token_issue
 from app.cli import run_api_token_revoke
@@ -90,6 +91,40 @@ def test_cli_accepts_api_smoke_check_arguments():
     assert args.base_url == "http://127.0.0.1:3040"
     assert args.token == "raw-api-token"
     assert args.server_name == "local"
+    assert args.pretty is True
+
+
+def test_cli_accepts_api_smoke_cycle_arguments():
+    parser = build_parser()
+
+    args = parser.parse_args(
+        [
+            "api",
+            "smoke-cycle",
+            "--db",
+            "data/amneziya.sqlite3",
+            "--base-url",
+            "http://127.0.0.1:3040",
+            "--server-name",
+            "local",
+            "--name",
+            "VPS smoke",
+            "--owner-label",
+            "ops",
+            "--expires-at",
+            "2026-06-08T10:00:00+00:00",
+            "--pretty",
+        ]
+    )
+
+    assert args.command == "api"
+    assert args.api_command == "smoke-cycle"
+    assert args.db == "data/amneziya.sqlite3"
+    assert args.base_url == "http://127.0.0.1:3040"
+    assert args.server_name == "local"
+    assert args.name == "VPS smoke"
+    assert args.owner_label == "ops"
+    assert args.expires_at == "2026-06-08T10:00:00+00:00"
     assert args.pretty is True
 
 
@@ -209,6 +244,65 @@ def test_run_api_token_revoke_marks_token_without_secret_output(tmp_path: Path):
 
     assert row["revoked_at"] == "2026-06-01T12:00:00+00:00"
     assert row["revoke_reason"] == "smoke-complete"
+
+
+def test_run_api_smoke_cycle_hides_raw_token_and_revokes_after_smoke(tmp_path: Path):
+    db_path = tmp_path / "amneziya.sqlite3"
+    calls = []
+
+    def fake_http_get(url: str, headers: dict[str, str], timeout: float):
+        calls.append((url, headers, timeout))
+        return 200, json.dumps({"body_secret_marker": "must-not-be-output"})
+
+    result = json.loads(
+        run_api_smoke_cycle(
+            db_path=db_path,
+            base_url="http://127.0.0.1:3040",
+            server_name="local",
+            name="VPS smoke",
+            owner_label="ops",
+            expires_at="2026-06-08T10:00:00+00:00",
+            raw_token="raw-cycle-token",
+            http_get=fake_http_get,
+        )
+    )
+
+    assert result["action"] == "api_smoke_cycle.completed"
+    assert result["status"] == "passed"
+    assert result["token"] == {
+        "token_id": result["token"]["token_id"],
+        "name": "VPS smoke",
+        "owner_label": "ops",
+        "scopes": ["metrics:read", "server:read"],
+        "expires_at": "2026-06-08T10:00:00+00:00",
+        "raw_token_display": "hidden",
+    }
+    assert result["smoke"]["status"] == "passed"
+    assert result["smoke"]["checked_routes"] == 6
+    assert result["revoke"]["status"] == "revoked"
+    assert result["revoke"]["reason"] == "smoke-complete"
+    assert {call[1]["Authorization"] for call in calls} == {"Bearer raw-cycle-token"}
+    serialized = json.dumps(result)
+    assert "raw-cycle-token" not in serialized
+    assert "Authorization" not in serialized
+    assert "token_hash" not in serialized
+    assert "body_secret_marker" not in serialized
+    assert "must-not-be-output" not in serialized
+
+    conn = connect(db_path)
+    try:
+        initialize_schema(conn)
+        row = conn.execute(
+            "SELECT revoked_at, revoke_reason, token_hash FROM api_tokens WHERE id = ?",
+            (result["token"]["token_id"],),
+        ).fetchone()
+    finally:
+        conn.close()
+
+    assert row is not None
+    assert row["revoked_at"]
+    assert row["revoke_reason"] == "smoke-complete"
+    assert row["token_hash"] == hash_api_token("raw-cycle-token")
 
 
 def test_run_api_smoke_check_calls_expected_routes_without_secret_output():

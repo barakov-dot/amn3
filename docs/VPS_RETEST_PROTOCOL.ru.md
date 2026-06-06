@@ -75,58 +75,38 @@ VPS_APPLY_ENABLED=false
 
 API smoke выполняется только на loopback и только read-only aggregate routes.
 
-Выдать короткоживущий route-scoped token:
-
-```bash
-python -m app.cli api token issue \
-  --db data/amneziya.sqlite3 \
-  --name vps-smoke \
-  --owner-label ops \
-  --scope server:read \
-  --scope metrics:read \
-  --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')" \
-  --pretty
-```
-
-Скопировать `raw_token` из вывода только в переменную текущей shell:
-
-```bash
-export API_TOKEN='RAW_TOKEN_FROM_ONE_TIME_OUTPUT'
-```
-
 В отдельной shell запустить API:
 
 ```bash
 python -m app.cli api serve --host 127.0.0.1 --port 3040
 ```
 
-Проверить read-only endpoints:
+В основной shell выполнить safe smoke-cycle:
 
 ```bash
-curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers
-curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/servers/debian-vps-1/summary
-curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/metrics/summary
-curl -sS -H "Authorization: Bearer $API_TOKEN" http://127.0.0.1:3040/api/users/summary
-python -m app.cli api smoke-check --base-url http://127.0.0.1:3040 --token "$API_TOKEN" --server-name debian-vps-1 --pretty
-```
-
-После проверки отозвать token:
-
-```bash
-python -m app.cli api token revoke \
+python -m app.cli api smoke-cycle \
   --db data/amneziya.sqlite3 \
-  --token-id TOKEN_ID_FROM_ISSUE_OUTPUT \
-  --reason smoke-complete \
+  --base-url http://127.0.0.1:3040 \
+  --server-name debian-vps-1 \
+  --name vps-smoke \
+  --owner-label ops \
+  --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')" \
   --pretty
 ```
 
-Если установлен `jq`, можно извлечь `raw_token` и `token_id` без ручного копирования:
+`api smoke-cycle` внутри выпускает короткоживущий token со scopes `server:read` и `metrics:read`, проверяет read-only endpoints и отзывает token в конце цикла. Raw token, Authorization header, token hash и response body не печатаются.
 
-```bash
-ISSUE_JSON="$(python -m app.cli api token issue --db data/amneziya.sqlite3 --name vps-smoke --owner-label ops --scope server:read --scope metrics:read --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')")"
-export API_TOKEN="$(printf '%s' "$ISSUE_JSON" | jq -r .raw_token)"
-TOKEN_ID="$(printf '%s' "$ISSUE_JSON" | jq -r .token_id)"
+Ожидаемый safe result:
+
+```text
+status: passed
+checked_routes: 6
+route status codes: 200
+forbidden_markers: []
+revoke.status: revoked
 ```
+
+После smoke остановить `api serve` через `Ctrl+C`, если он был запущен только для проверки.
 
 Не присылать raw API token, token hash, Authorization header, `.conf`, QR, `vpn://`, `PrivateKey` или `PresharedKey`.
 

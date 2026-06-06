@@ -24,14 +24,16 @@ codex-vps-test-prep
 Перед любыми write/config API идеями сначала проверить на VPS только read-only shell:
 
 ```bash
-python -m app.cli api token issue --db data/amneziya.sqlite3 --name vps-smoke --owner-label ops --scope server:read --scope metrics:read --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')" --pretty
-export API_TOKEN='RAW_TOKEN_FROM_ONE_TIME_OUTPUT'
 python -m app.cli api serve --host 127.0.0.1 --port 3040
-python -m app.cli api smoke-check --base-url http://127.0.0.1:3040 --token "$API_TOKEN" --server-name debian-vps-1 --pretty
-python -m app.cli api token revoke --db data/amneziya.sqlite3 --token-id TOKEN_ID_FROM_ISSUE_OUTPUT --reason smoke-complete --pretty
 ```
 
-Команда `api smoke-check` проверяет HTTP-коды и forbidden markers (`PrivateKey`, `PresharedKey`, `vpn://`, `token_hash`, `ssh_port`, `endpoint_host`) без вывода raw token, Authorization header или response body.
+В другой shell:
+
+```bash
+python -m app.cli api smoke-cycle --db data/amneziya.sqlite3 --base-url http://127.0.0.1:3040 --server-name debian-vps-1 --name vps-smoke --owner-label ops --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')" --pretty
+```
+
+Команда `api smoke-cycle` сама выпускает временный scoped token, проверяет HTTP-коды и forbidden markers (`PrivateKey`, `PresharedKey`, `vpn://`, `token_hash`, `ssh_port`, `endpoint_host`) и отзывает token после проверки. Raw token, Authorization header и response body не выводятся.
 
 Следующий этап - научить проект работать с настоящим VPS:
 

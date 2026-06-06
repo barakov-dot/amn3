@@ -90,15 +90,35 @@ export AMN2_RUN_PREFLIGHT=0
 export AMN2_SYNC_SERVER_CONFIG=1
 export AMN2_REQUIRE_SERVER_DB_SYNC=1
 export AMN2_SERVER_NAME=local
-
-bash ./amn2_api_loopback_smoke.sh
 ```
 
-Публиковать после smoke только:
+Terminal A:
 
 ```bash
-cat /opt/amn2/vps-smoke/api-loopback-*/api-smoke-safe-summary.txt
-cat /opt/amn2/vps-smoke/api-loopback-*/api-smoke-result.json
+python -m app.cli api serve --host 127.0.0.1 --port 3040
+```
+
+Terminal B:
+
+```bash
+python -m app.cli api smoke-cycle \
+  --db data/amneziya.sqlite3 \
+  --base-url http://127.0.0.1:3040 \
+  --server-name "$AMN2_SERVER_NAME" \
+  --name vps-smoke \
+  --owner-label ops \
+  --expires-at "$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%S+00:00')" \
+  --pretty
+```
+
+Публиковать после smoke только safe summary из вывода `api smoke-cycle`:
+
+```text
+status
+checked_routes
+route status codes
+forbidden_markers
+revoke.status
 ```
 
 `api-server.log` не публиковать без ручной redaction.
