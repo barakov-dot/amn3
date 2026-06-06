@@ -1,6 +1,6 @@
-# Current Override 2026-06-05
+# Current Override 2026-06-06
 
-Post-Phase 2 PSK stdin hardening is merged on `amn2/codex-vps-test-prep` head `568c611 Merge pull request #8 from barakov-dot/codex/preshared-key-stdin`.
+`amn2/codex-vps-test-prep` current head is `6b5b5b7 Document stdin PSK peer apply` after a docs-only runbook cleanup. Runtime/source package `568c611` remains the latest VPS-smoked source.
 
 ```text
 AMN3 package: dist/amn2-vps-update-and-smoke-kit-568c611.zip
@@ -10,9 +10,10 @@ source sha256: 30319240D2D887239A3D57417A6777CBD7AFE34D97093831609939822C92B243
 local verification: 78 passed on focused remote-gate/package suite
 VPS evidence: research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
 VPS result: read-only-vps-smoke-pass, run_id 20260605T162742Z
+docs-only cleanup: 6b5b5b7 Document stdin PSK peer apply
 ```
 
-Phase 2 live single disposable test peer apply/revoke is verified-live on stable `7764ae7`; `568c611` adds safer `--preshared-key-stdin` handling and still needs read-only VPS update/smoke before any further live write.
+Phase 2 live single disposable test peer apply/revoke is verified-live on stable `7764ae7`; `568c611` adds safer `--preshared-key-stdin` handling and passed read-only VPS update/smoke.
 
 ```text
 AMN3 evidence: research/amn2/phase-2-live-vps-gate-evidence-2026-06-05.md
@@ -20,7 +21,7 @@ result: verified-live
 scope: exactly one disposable test peer apply/sync/revoke/sync
 ```
 
-This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e` and `7764ae7` package blocks below are historical evidence; use `568c611` for the next VPS read-only update/smoke.
+This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e` and `7764ae7` package blocks below are historical evidence; `568c611` is the latest VPS-smoked runtime package and `6b5b5b7` is docs-only.
 # Текущее состояние проекта
 
 Дата: 2026-06-02.
