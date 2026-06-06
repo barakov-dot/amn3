@@ -1,17 +1,18 @@
 # `amn2` Transfer Backlog
 
-Update 2026-06-06: `amn2/codex-vps-test-prep` current head is `1a193b9 Add remote partial failure contract` after a local-only operation-contract fast-forward. Runtime/source package `568c611` remains the latest VPS-smoked source.
+Update 2026-06-06: `amn2/codex-vps-test-prep` current head is `1a193b9 Add remote partial failure contract` after a local-only operation-contract fast-forward. Current AMN3 update+smoke package for the next read-only VPS smoke is `1a193b9`; `568c611` remains the latest VPS-smoked runtime/source until that smoke is run.
 
 Local-only work branch update 2026-06-06: `amn2/codex/remote-partial-failure-contract` was pushed at `1a193b9 Add remote partial failure contract`, then fast-forward merged into `codex-vps-test-prep`; AMN3 evidence is `research/amn2/remote-partial-failure-contract-2026-06-06.md`. GitHub connector PR creation still returned `403 Resource not accessible by integration`, so integration used direct git push.
 
 ```text
-AMN3 package: dist/amn2-vps-update-and-smoke-kit-568c611.zip
-sha256: D52BC730BD59A894E76A203861E8FFA87F808A699656625D3C542DC771DEFA27
-source zip: dist/amn2-codex-vps-test-prep-568c611-source.zip
-source sha256: 30319240D2D887239A3D57417A6777CBD7AFE34D97093831609939822C92B243
-local verification: 78 passed on focused remote-gate/package suite
-VPS evidence: research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
-VPS result: read-only-vps-smoke-pass, run_id 20260605T162742Z
+AMN3 package: dist/amn2-vps-update-and-smoke-kit-1a193b9.zip
+sha256: 48530E59618C413BF8B298CD01801D28DD1AA6E144EAD946EF5BCF303BE56533
+source zip: dist/amn2-codex-vps-test-prep-1a193b9-source.zip
+source sha256: 8FA2E86FF056A4BA0DE5BC3F913EF33DFC2CC9EF34DDCDC03B0EA09FAD655AEC
+local verification: focused 70 passed after stable fast-forward; package SHA/source SHA/no-BOM/no-forbidden-source-entry/test-extract checks passed
+package evidence: research/amn2/remote-partial-failure-contract-vps-package-2026-06-06.md
+VPS result for 1a193b9: not_run_yet; next gate is read-only update/smoke with VPS_APPLY_ENABLED=false
+latest VPS-smoked source: 568c611, run_id 20260605T162742Z, evidence research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
 docs-only cleanup: 6b5b5b7 Document stdin PSK peer apply
 local-only contract merge: 1a193b9 Add remote partial failure contract
 ```
@@ -100,7 +101,7 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Remote operation VPS gate candidate | `verified-live-on-current-stable` | `amn2` branch + AMN3 evidence | historical branch `codex/remote-operation-vps-gate-prep`, head `7281254`, is merged into stable via `708c98e` and is ancestor of `7764ae7`; current Phase 2 evidence `research/amn2/phase-2-live-vps-gate-evidence-2026-06-05.md`; read-only baseline package `dist/amn2-vps-update-and-smoke-kit-7764ae7.zip`, sha256 `832E1B1F6516A02E0D6AA45672B8FF526DF15D27117D2063CE45F9966825A66A` | Phase 2 live single disposable peer apply/sync/revoke/sync passed; keep broad write/API/config/backup/agent mutation surfaces behind separate gates |
 | VPS gate evidence/merge package | `verified-live-evidence-recorded` | AMN3 | `phase-2-live-vps-gate-evidence-2026-06-05.md`, `remote-operation-vps-gate-evidence-2026-06-04.md`, `vps-gate-evidence-checklist.md`, `post-vps-gate-merge-decision.md`, `neighbor-chat-vps-gate-handoff.md` | Use result `verified-live` for exactly one disposable test peer; broad write integration remains blocked behind route/secret/remote-write gates |
 | Post dry-run read-only integration status | `phase-1-closeout-pushed` | `amn2` stable branch + AMN3 evidence | branch `codex/post-dry-run-read-only-integration`, commits `55a7ed6`, `7764ae7`; evidence `research/amn2/post-dry-run-read-only-integration-implementation.md`, `research/amn2/phase-1-closeout-2026-06-04.md`; focused `39 passed`, full `610 passed` | Read-only API/web status surface готов и включен в API smoke; Phase 2 live apply/revoke вынести в отдельный чат/gate |
-| VPS install/update package | `published-updated-stable-7764ae7` | AMN3 package for `amn2` | current update+smoke kit `dist/amn2-vps-update-and-smoke-kit-7764ae7.zip`, sha256 `832E1B1F6516A02E0D6AA45672B8FF526DF15D27117D2063CE45F9966825A66A`; source `dist/amn2-codex-vps-test-prep-7764ae7-source.zip`, sha256 `94D110BB9AA17C65E02C1780380BA77E49A4F0ADDDECEA7DE267FFC9F353B42B`; historical `294803e`, `5f12736` and `d0939d8` packages remain available | Использовать `update+smoke` для существующего `/opt/amn2` с сохранением `.env`/`data`/`venv`/`servers.yml`; smoke сам делает DB-only server config sync и проверяет 5 read-only API routes; `server preflight` запускать только как отдельный SSH/server dry-run gate; web-panel тестировать через SSH tunnel |
+| VPS install/update package | `published-pending-vps-smoke-1a193b9` | AMN3 package for `amn2` | current update+smoke kit `dist/amn2-vps-update-and-smoke-kit-1a193b9.zip`, sha256 `48530E59618C413BF8B298CD01801D28DD1AA6E144EAD946EF5BCF303BE56533`; source `dist/amn2-codex-vps-test-prep-1a193b9-source.zip`, sha256 `8FA2E86FF056A4BA0DE5BC3F913EF33DFC2CC9EF34DDCDC03B0EA09FAD655AEC`; latest VPS-smoked kit remains `568c611` until read-only smoke is rerun | Использовать `update+smoke` для существующего `/opt/amn2` с сохранением `.env`/`data`/`venv`/`servers.yml`; smoke сам делает DB-only server config sync и проверяет 5 read-only API routes; `server preflight` запускать только как отдельный SSH/server dry-run gate; web-panel тестировать через SSH tunnel; live write остается отдельным gate |
 | Docker manager safety note | `prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/docker-manager-design-note.md` | Использовать как вход для будущего implementation plan после VPS evidence |
 | SSH host key enrollment design | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/ssh-host-key-enrollment-design.md` | Использовать как policy gate перед VPS onboarding, web/API remote operations и app-managed host key pinning |
 | SSH host key identity verifier | `implemented-pushed-local-gate-complete` | `amn2` | branch `codex/ssh-host-key-identity-verifier`, commit `dd20364`; evidence `research/amn2/ssh-host-key-verifier-implementation.md`; focused `29 passed`, full `550 passed` | Использовать как merge/cherry-pick candidate перед live VPS gate; следующий шаг - подключать к SSH-backed operations только отдельным gated slice |

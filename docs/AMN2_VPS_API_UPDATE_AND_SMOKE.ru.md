@@ -1,15 +1,15 @@
 # AMN2 VPS API Update And Smoke
 
-Current override 2026-06-05: use post-Phase 2 PSK stdin package `568c611 Merge pull request #8 from barakov-dot/codex/preshared-key-stdin` for the next VPS read-only update/smoke.
+Current override 2026-06-06: use stable package `1a193b9 Add remote partial failure contract` for the next VPS read-only update/smoke. `568c611` remains the latest already VPS-smoked runtime/source until this package is run on the VPS.
 
 ```text
-dist/amn2-vps-update-and-smoke-kit-568c611.zip
-sha256: D52BC730BD59A894E76A203861E8FFA87F808A699656625D3C542DC771DEFA27
-operator doc: dist/amn2-vps-update-and-smoke-kit-568c611/AMN2_VPS_UPDATE_AND_SMOKE_568c611.ru.md
-local verification: 78 passed on focused remote-gate/package suite
+dist/amn2-vps-update-and-smoke-kit-1a193b9.zip
+sha256: 48530E59618C413BF8B298CD01801D28DD1AA6E144EAD946EF5BCF303BE56533
+operator doc: dist/amn2-vps-update-and-smoke-kit-1a193b9/AMN2_VPS_UPDATE_AND_SMOKE_1a193b9.ru.md
+local verification: focused 70 passed after stable fast-forward; package SHA/source SHA/no-BOM/no-forbidden-source-entry/test-extract checks passed
 ```
 
-Older `294803e`, `5f12736` and `7764ae7` package blocks below are historical evidence. This override does not authorize live apply/revoke.
+Older `294803e`, `5f12736`, `7764ae7` and `568c611` package blocks below are historical evidence. This override does not authorize live apply/revoke.
 
 Актуализация 2026-06-04: текущий Phase 1 closeout package для существующего `/opt/amn2` — `7764ae7 Cover integration status in API smoke`.
 

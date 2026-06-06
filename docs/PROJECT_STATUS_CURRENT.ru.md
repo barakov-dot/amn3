@@ -1,17 +1,18 @@
 # Current Override 2026-06-06
 
-`amn2/codex-vps-test-prep` current head is `1a193b9 Add remote partial failure contract` after a local-only operation-contract fast-forward. Runtime/source package `568c611` remains the latest VPS-smoked source.
+`amn2/codex-vps-test-prep` current head is `1a193b9 Add remote partial failure contract` after a local-only operation-contract fast-forward. Current AMN3 update+smoke package for the next read-only VPS smoke is `1a193b9`; `568c611` remains the latest VPS-smoked runtime/source until that smoke is run.
 
 Local-only work branch update 2026-06-06: `amn2/codex/remote-partial-failure-contract` was pushed at `1a193b9 Add remote partial failure contract`, then fast-forward merged into `codex-vps-test-prep`; AMN3 evidence is `research/amn2/remote-partial-failure-contract-2026-06-06.md`. GitHub connector PR creation still returned `403 Resource not accessible by integration`, so integration used direct git push.
 
 ```text
-AMN3 package: dist/amn2-vps-update-and-smoke-kit-568c611.zip
-sha256: D52BC730BD59A894E76A203861E8FFA87F808A699656625D3C542DC771DEFA27
-source zip: dist/amn2-codex-vps-test-prep-568c611-source.zip
-source sha256: 30319240D2D887239A3D57417A6777CBD7AFE34D97093831609939822C92B243
-local verification: 78 passed on focused remote-gate/package suite
-VPS evidence: research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
-VPS result: read-only-vps-smoke-pass, run_id 20260605T162742Z
+AMN3 package: dist/amn2-vps-update-and-smoke-kit-1a193b9.zip
+sha256: 48530E59618C413BF8B298CD01801D28DD1AA6E144EAD946EF5BCF303BE56533
+source zip: dist/amn2-codex-vps-test-prep-1a193b9-source.zip
+source sha256: 8FA2E86FF056A4BA0DE5BC3F913EF33DFC2CC9EF34DDCDC03B0EA09FAD655AEC
+local verification: focused 70 passed after stable fast-forward; package SHA/source SHA/no-BOM/no-forbidden-source-entry/test-extract checks passed
+package evidence: research/amn2/remote-partial-failure-contract-vps-package-2026-06-06.md
+VPS result for 1a193b9: not_run_yet; next gate is read-only update/smoke with VPS_APPLY_ENABLED=false
+latest VPS-smoked source: 568c611, run_id 20260605T162742Z, evidence research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
 docs-only cleanup: 6b5b5b7 Document stdin PSK peer apply
 local-only contract merge: 1a193b9 Add remote partial failure contract
 ```
@@ -24,7 +25,7 @@ result: verified-live
 scope: exactly one disposable test peer apply/sync/revoke/sync
 ```
 
-This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e` and `7764ae7` package blocks below are historical evidence; `568c611` is the latest VPS-smoked runtime package and `1a193b9` is a local-only contract merge on stable.
+This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e`, `7764ae7` and `568c611` package blocks below are historical evidence; `1a193b9` is the current package for the next read-only update/smoke.
 # Текущее состояние проекта
 
 Дата: 2026-06-02.
