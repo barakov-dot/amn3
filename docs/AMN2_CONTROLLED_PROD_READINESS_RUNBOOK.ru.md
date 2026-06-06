@@ -2,7 +2,7 @@
 
 Дата: 2026-06-06.
 
-Назначение: зафиксировать первый безопасный production-режим для текущего `amn2/codex-vps-test-prep` baseline после real VPS read-only smoke `1a193b9`.
+Назначение: зафиксировать первый безопасный production-режим для текущего `amn2/codex-vps-test-prep` baseline после real VPS read-only smoke. Текущий GitHub head `32d01fd` требует нового read-only VPS smoke перед решением `controlled-prod-ready`; последний уже доказанный VPS runtime/source baseline остается `1a193b9`.
 
 Это не разрешение на public web/API exposure, `/api/clients` write CRUD, API `config:read`, public/self-service config delivery, Local Agent mutations, backup/import/reboot routes или новые live peer mutations.
 
@@ -11,12 +11,14 @@
 ```text
 repo: https://github.com/barakov-dot/amn2.git
 branch: codex-vps-test-prep
-head: 1a193b9 Add remote partial failure contract
-AMN3 package: dist/amn2-vps-update-and-smoke-kit-1a193b9.zip
-package sha256: 48530E59618C413BF8B298CD01801D28DD1AA6E144EAD946EF5BCF303BE56533
-source sha256: 8FA2E86FF056A4BA0DE5BC3F913EF33DFC2CC9EF34DDCDC03B0EA09FAD655AEC
-VPS read-only smoke: pass, run_id 20260606T154636Z
+head: 32d01fd Update integration status for controlled prod
+AMN3 package: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
+package sha256: BE59AF74001AC4F094C753B565A4E672194D823C4F65B6CB476F4FF01B310807
+source sha256: 034753DA7EC42ACF869519F43909EEFDC8A392A5665B2A33C935F8A058CCB99B
+latest proven VPS read-only smoke: 1a193b9 pass, run_id 20260606T154636Z
+32d01fd VPS read-only smoke: pending
 VPS smoke evidence: research/amn2/remote-partial-failure-contract-vps-smoke-evidence-2026-06-06.md
+32d01fd package evidence: research/amn2/integration-status-controlled-prod-update-2026-06-06.md
 Phase 2 live single disposable peer gate: verified-live on stable line, evidence research/amn2/phase-2-live-vps-gate-evidence-2026-06-05.md
 ```
 
@@ -24,7 +26,7 @@ Phase 2 live single disposable peer gate: verified-live on stable line, evidence
 
 Controlled prod means:
 
-- `/opt/amn2` stays on the VPS-smoked `1a193b9` source overlay unless a new package and smoke gate supersede it.
+- `/opt/amn2` stays on the VPS-smoked `1a193b9` source overlay until the `32d01fd` package is applied and passes read-only smoke.
 - `VPS_APPLY_ENABLED=false` is the default operator shell state.
 - Read-only API smoke and web/admin checks use loopback only.
 - Web panel access is operator-only through SSH tunnel, private network, or a separately approved reverse-proxy/firewall/TLS gate.
@@ -38,7 +40,7 @@ Controlled prod does not mean broad public SaaS mode.
 
 Allowed after this readiness check:
 
-- Keep current `/opt/amn2` runtime on `1a193b9`.
+- Keep current `/opt/amn2` runtime on `1a193b9` until the `32d01fd` read-only update/smoke supersedes it.
 - Run read-only API loopback smoke again.
 - Run DB-only server config sync used by the smoke script.
 - Check web-admin read-only/status pages through loopback or SSH tunnel.
@@ -65,9 +67,10 @@ Blocked until separate explicit gates:
 Before calling the VPS controlled-prod-ready:
 
 - [ ] Current package checksum is recorded.
-- [ ] `.amn2_source_overlay_commit` on VPS is `1a193b9`.
+- [ ] `.amn2_source_overlay_commit` on VPS is `32d01fd` after applying the current kit.
 - [ ] Latest read-only smoke safe summary is `VPS verdict: pass`.
 - [ ] Smoke result has 5 checked routes with `status: passed`.
+- [ ] `/api/integration/status` reports `read_only_vps_smoked`, `phase_2=verified_live`, `controlled_prod_readiness.decision=pending_operator_evidence`, `write_routes_enabled=false` and `write_operations_enabled=false`.
 - [ ] Auth checks show missing bearer `401`, wrong scope `403`, revoked token `401`.
 - [ ] Listener and audit checks are `passed`.
 - [ ] Operator shell default has `VPS_APPLY_ENABLED=false`.
@@ -109,7 +112,7 @@ Do not publish `api-server.log` unless manually redacted.
 Stop and do not proceed to prod if:
 
 - package checksum does not match;
-- source overlay commit is not `1a193b9` or an explicitly superseding smoke-passed commit;
+- source overlay commit is not `32d01fd` after applying the current kit, or not an explicitly superseding smoke-passed commit;
 - any smoke status is not `passed`;
 - any route reports forbidden markers;
 - auth checks do not return the expected `401/403/401`;

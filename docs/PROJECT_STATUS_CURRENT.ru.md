@@ -1,17 +1,18 @@
 # Current Override 2026-06-06
 
-`amn2/codex-vps-test-prep` current head is `1a193b9 Add remote partial failure contract` after a local-only operation-contract fast-forward. Current AMN3 update+smoke package `1a193b9` passed real VPS read-only smoke on 2026-06-06, `run_id=20260606T154636Z`; `568c611` is now historical prior VPS-smoked runtime/source.
+`amn2/codex-vps-test-prep` current head is `32d01fd Update integration status for controlled prod`. Current AMN3 update+smoke package `32d01fd` is published and pending read-only VPS smoke; the last proven VPS-smoked runtime/source remains `1a193b9 Add remote partial failure contract`, real VPS read-only smoke pass on 2026-06-06, `run_id=20260606T154636Z`.
 
-Local-only work branch update 2026-06-06: `amn2/codex/remote-partial-failure-contract` was pushed at `1a193b9 Add remote partial failure contract`, then fast-forward merged into `codex-vps-test-prep`; AMN3 evidence is `research/amn2/remote-partial-failure-contract-2026-06-06.md`. GitHub connector PR creation still returned `403 Resource not accessible by integration`, so integration used direct git push.
+Read-only integration status update 2026-06-06: `32d01fd` updates `/api/integration/status` to report `read_only_vps_smoked`, Phase 2 `verified_live`, and controlled-prod readiness pending without enabling write routes or write operations. AMN3 evidence is `research/amn2/integration-status-controlled-prod-update-2026-06-06.md`. The previous local-only operation-contract fast-forward remains recorded at `research/amn2/remote-partial-failure-contract-2026-06-06.md`.
 
 ```text
-AMN3 package: dist/amn2-vps-update-and-smoke-kit-1a193b9.zip
-sha256: 48530E59618C413BF8B298CD01801D28DD1AA6E144EAD946EF5BCF303BE56533
-source zip: dist/amn2-codex-vps-test-prep-1a193b9-source.zip
-source sha256: 8FA2E86FF056A4BA0DE5BC3F913EF33DFC2CC9EF34DDCDC03B0EA09FAD655AEC
-local verification: focused 70 passed after stable fast-forward; package SHA/source SHA/no-BOM/no-forbidden-source-entry/test-extract checks passed
-package evidence: research/amn2/remote-partial-failure-contract-vps-package-2026-06-06.md
-VPS result for 1a193b9: read-only-vps-smoke-pass, run_id 20260606T154636Z
+AMN3 package: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
+sha256: BE59AF74001AC4F094C753B565A4E672194D823C4F65B6CB476F4FF01B310807
+source zip: dist/amn2-codex-vps-test-prep-32d01fd-source.zip
+source sha256: 034753DA7EC42ACF869519F43909EEFDC8A392A5665B2A33C935F8A058CCB99B
+local verification: focused 7 passed; adjacent smoke/security 26 passed; package SHA/source SHA/no-BOM/no-forbidden-source-entry/test-extract checks passed
+package evidence: research/amn2/integration-status-controlled-prod-update-2026-06-06.md
+VPS result for 32d01fd: pending-read-only-smoke
+previous VPS-smoked runtime/source: 1a193b9, run_id 20260606T154636Z
 VPS smoke evidence: research/amn2/remote-partial-failure-contract-vps-smoke-evidence-2026-06-06.md
 controlled prod readiness: runbook-published, evidence pending
 controlled prod runbook: docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
@@ -19,6 +20,7 @@ controlled prod evidence: research/amn2/controlled-prod-readiness-2026-06-06.md
 previous VPS-smoked source: 568c611, run_id 20260605T162742Z, evidence research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
 docs-only cleanup: 6b5b5b7 Document stdin PSK peer apply
 local-only contract merge: 1a193b9 Add remote partial failure contract
+read-only integration status update: 32d01fd Update integration status for controlled prod
 ```
 
 Phase 2 live single disposable test peer apply/revoke is verified-live on stable `7764ae7`; `568c611` adds safer `--preshared-key-stdin` handling and passed read-only VPS update/smoke.
@@ -29,7 +31,7 @@ result: verified-live
 scope: exactly one disposable test peer apply/sync/revoke/sync
 ```
 
-This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e`, `7764ae7` and `568c611` package blocks below are historical evidence; `1a193b9` is the current VPS-smoked runtime/source baseline. Next gate is operator-only controlled-prod readiness, not public prod.
+This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `294803e`, `7764ae7`, `568c611` and `1a193b9` package blocks below are historical evidence; `32d01fd` must pass read-only VPS smoke before it supersedes `1a193b9` as the current VPS-smoked runtime/source baseline. Next gate is operator-only controlled-prod readiness, not public prod.
 # Текущее состояние проекта
 
 Дата: 2026-06-02.

@@ -1,17 +1,18 @@
 # `amn2` Transfer Backlog
 
-Update 2026-06-06: `amn2/codex-vps-test-prep` current head is `1a193b9 Add remote partial failure contract` after a local-only operation-contract fast-forward. Current AMN3 update+smoke package `1a193b9` passed real VPS read-only smoke on 2026-06-06, `run_id=20260606T154636Z`; `568c611` is now historical prior VPS-smoked runtime/source.
+Update 2026-06-06: `amn2/codex-vps-test-prep` current head is `32d01fd Update integration status for controlled prod`. Current AMN3 update+smoke package `32d01fd` is published and pending read-only VPS smoke; the last proven VPS-smoked runtime/source remains `1a193b9 Add remote partial failure contract`, real VPS read-only smoke pass on 2026-06-06, `run_id=20260606T154636Z`.
 
-Local-only work branch update 2026-06-06: `amn2/codex/remote-partial-failure-contract` was pushed at `1a193b9 Add remote partial failure contract`, then fast-forward merged into `codex-vps-test-prep`; AMN3 evidence is `research/amn2/remote-partial-failure-contract-2026-06-06.md`. GitHub connector PR creation still returned `403 Resource not accessible by integration`, so integration used direct git push.
+Read-only integration status update 2026-06-06: `32d01fd` updates `/api/integration/status` to report `read_only_vps_smoked`, Phase 2 `verified_live`, and controlled-prod readiness pending without enabling write routes or write operations. AMN3 evidence is `research/amn2/integration-status-controlled-prod-update-2026-06-06.md`. The previous local-only operation-contract fast-forward remains recorded at `research/amn2/remote-partial-failure-contract-2026-06-06.md`.
 
 ```text
-AMN3 package: dist/amn2-vps-update-and-smoke-kit-1a193b9.zip
-sha256: 48530E59618C413BF8B298CD01801D28DD1AA6E144EAD946EF5BCF303BE56533
-source zip: dist/amn2-codex-vps-test-prep-1a193b9-source.zip
-source sha256: 8FA2E86FF056A4BA0DE5BC3F913EF33DFC2CC9EF34DDCDC03B0EA09FAD655AEC
-local verification: focused 70 passed after stable fast-forward; package SHA/source SHA/no-BOM/no-forbidden-source-entry/test-extract checks passed
-package evidence: research/amn2/remote-partial-failure-contract-vps-package-2026-06-06.md
-VPS result for 1a193b9: read-only-vps-smoke-pass, run_id 20260606T154636Z
+AMN3 package: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
+sha256: BE59AF74001AC4F094C753B565A4E672194D823C4F65B6CB476F4FF01B310807
+source zip: dist/amn2-codex-vps-test-prep-32d01fd-source.zip
+source sha256: 034753DA7EC42ACF869519F43909EEFDC8A392A5665B2A33C935F8A058CCB99B
+local verification: focused 7 passed; adjacent smoke/security 26 passed; package SHA/source SHA/no-BOM/no-forbidden-source-entry/test-extract checks passed
+package evidence: research/amn2/integration-status-controlled-prod-update-2026-06-06.md
+VPS result for 32d01fd: pending-read-only-smoke
+previous VPS-smoked runtime/source: 1a193b9, run_id 20260606T154636Z
 VPS smoke evidence: research/amn2/remote-partial-failure-contract-vps-smoke-evidence-2026-06-06.md
 controlled prod readiness: runbook-published, evidence pending
 controlled prod runbook: docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
@@ -19,6 +20,7 @@ controlled prod evidence: research/amn2/controlled-prod-readiness-2026-06-06.md
 previous VPS-smoked source: 568c611, run_id 20260605T162742Z, evidence research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
 docs-only cleanup: 6b5b5b7 Document stdin PSK peer apply
 local-only contract merge: 1a193b9 Add remote partial failure contract
+read-only integration status update: 32d01fd Update integration status for controlled prod
 ```
 
 Актуализация 2026-06-05: Phase 2 live single disposable test peer apply/revoke gate пройден на current stable `amn2/codex-vps-test-prep` head `7764ae7 Cover integration status in API smoke`.
@@ -105,8 +107,8 @@ Live VPS cycle подтвержден на Docker AmneziaWG runtime:
 | Remote operation VPS gate candidate | `verified-live-on-current-stable` | `amn2` branch + AMN3 evidence | historical branch `codex/remote-operation-vps-gate-prep`, head `7281254`, is merged into stable via `708c98e` and is ancestor of `7764ae7`; current Phase 2 evidence `research/amn2/phase-2-live-vps-gate-evidence-2026-06-05.md`; read-only baseline package `dist/amn2-vps-update-and-smoke-kit-7764ae7.zip`, sha256 `832E1B1F6516A02E0D6AA45672B8FF526DF15D27117D2063CE45F9966825A66A` | Phase 2 live single disposable peer apply/sync/revoke/sync passed; keep broad write/API/config/backup/agent mutation surfaces behind separate gates |
 | VPS gate evidence/merge package | `verified-live-evidence-recorded` | AMN3 | `phase-2-live-vps-gate-evidence-2026-06-05.md`, `remote-operation-vps-gate-evidence-2026-06-04.md`, `vps-gate-evidence-checklist.md`, `post-vps-gate-merge-decision.md`, `neighbor-chat-vps-gate-handoff.md` | Use result `verified-live` for exactly one disposable test peer; broad write integration remains blocked behind route/secret/remote-write gates |
 | Post dry-run read-only integration status | `phase-1-closeout-pushed` | `amn2` stable branch + AMN3 evidence | branch `codex/post-dry-run-read-only-integration`, commits `55a7ed6`, `7764ae7`; evidence `research/amn2/post-dry-run-read-only-integration-implementation.md`, `research/amn2/phase-1-closeout-2026-06-04.md`; focused `39 passed`, full `610 passed` | Read-only API/web status surface готов и включен в API smoke; Phase 2 live apply/revoke вынести в отдельный чат/gate |
-| VPS install/update package | `read-only-vps-smoke-pass-1a193b9` | AMN3 package for `amn2` | current update+smoke kit `dist/amn2-vps-update-and-smoke-kit-1a193b9.zip`, sha256 `48530E59618C413BF8B298CD01801D28DD1AA6E144EAD946EF5BCF303BE56533`; source `dist/amn2-codex-vps-test-prep-1a193b9-source.zip`, sha256 `8FA2E86FF056A4BA0DE5BC3F913EF33DFC2CC9EF34DDCDC03B0EA09FAD655AEC`; VPS smoke evidence `research/amn2/remote-partial-failure-contract-vps-smoke-evidence-2026-06-06.md`, `run_id=20260606T154636Z`; previous VPS-smoked kit `568c611` remains historical | Использовать `1a193b9` как текущий read-only VPS-smoked runtime/source baseline; smoke сам делает DB-only server config sync и проверяет 5 read-only API routes; `server preflight` запускать только как отдельный SSH/server dry-run gate; web-panel тестировать через SSH tunnel; live write остается отдельным gate |
-| Controlled prod readiness | `runbook-published-evidence-pending` | AMN3 operator gate | `docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md`; evidence placeholder `research/amn2/controlled-prod-readiness-2026-06-06.md`; current baseline `1a193b9`, VPS smoke `run_id=20260606T154636Z` | Оператору пройти checklist и зафиксировать `controlled-prod-ready`, `needs-fix` или `defer-prod`; это не public prod и не разрешение на broad write/API/config/backup/agent surfaces |
+| VPS install/update package | `package-published-pending-vps-smoke-32d01fd` | AMN3 package for `amn2` | current update+smoke kit `dist/amn2-vps-update-and-smoke-kit-32d01fd.zip`, sha256 `BE59AF74001AC4F094C753B565A4E672194D823C4F65B6CB476F4FF01B310807`; source `dist/amn2-codex-vps-test-prep-32d01fd-source.zip`, sha256 `034753DA7EC42ACF869519F43909EEFDC8A392A5665B2A33C935F8A058CCB99B`; package evidence `research/amn2/integration-status-controlled-prod-update-2026-06-06.md`; previous VPS-smoked runtime/source `1a193b9`, `run_id=20260606T154636Z`; `568c611` remains historical | Run `32d01fd` read-only VPS smoke next; until it passes, use `1a193b9` as the proven runtime/source baseline. Smoke does DB-only server config sync and checks 5 read-only API routes; `server preflight` is a separate SSH/server dry-run gate; web-panel testing stays behind SSH tunnel; live write remains a separate gate |
+| Controlled prod readiness | `runbook-published-32d01fd-smoke-pending` | AMN3 operator gate | `docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md`; evidence placeholder `research/amn2/controlled-prod-readiness-2026-06-06.md`; current branch head `32d01fd`, current package pending VPS smoke; last VPS-smoked baseline `1a193b9`, `run_id=20260606T154636Z` | Оператору сначала прогнать `32d01fd` read-only smoke, затем пройти checklist и зафиксировать `controlled-prod-ready`, `needs-fix` или `defer-prod`; это не public prod и не разрешение на broad write/API/config/backup/agent surfaces |
 | Docker manager safety note | `prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/docker-manager-design-note.md` | Использовать как вход для будущего implementation plan после VPS evidence |
 | SSH host key enrollment design | `design-prepared-local-docs` | AMN3 -> `amn2` later | `research/amn2/ssh-host-key-enrollment-design.md` | Использовать как policy gate перед VPS onboarding, web/API remote operations и app-managed host key pinning |
 | SSH host key identity verifier | `implemented-pushed-local-gate-complete` | `amn2` | branch `codex/ssh-host-key-identity-verifier`, commit `dd20364`; evidence `research/amn2/ssh-host-key-verifier-implementation.md`; focused `29 passed`, full `550 passed` | Использовать как merge/cherry-pick candidate перед live VPS gate; следующий шаг - подключать к SSH-backed operations только отдельным gated slice |

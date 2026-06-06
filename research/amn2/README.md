@@ -19,7 +19,9 @@ branch: codex-vps-test-prep
 latest: 91aeb3e Document VPS verified tag
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 handoff: docs/NEXT_CHAT_HANDOFF.ru.md
-current transfer head: 7764ae7 Cover integration status in API smoke
+current transfer head: 32d01fd Update integration status for controlled prod
+current VPS-smoked runtime/source: 1a193b9 Add remote partial failure contract, run_id=20260606T154636Z
+current update+smoke kit: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip, pending VPS smoke
 ```
 
 Активная рабочая ветка для установки/API smoke:
@@ -33,7 +35,7 @@ working chat: Переводим AMN на API
 
 AMN3 evidence: [API VPS smoke evidence 2026-06-03](api-vps-smoke-evidence-2026-06-03.md). Historical first pass: [API VPS smoke evidence 2026-06-02](api-vps-smoke-evidence-2026-06-02.md).
 
-Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep` at production head `5f12736`; API/web-panel finish slice then fast-forward merged into `codex-vps-test-prep` at production head `294803e`; Phase 1 read-only integration closeout then moved stable to `7764ae7`.
+Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep` at production head `5f12736`; API/web-panel finish slice then fast-forward merged into `codex-vps-test-prep` at production head `294803e`; Phase 1 read-only integration closeout then moved stable to `7764ae7`; remote partial-failure contract moved stable to `1a193b9`; controlled-prod integration status update moved stable to `32d01fd` and is pending VPS smoke.
 
 Живой VPS-цикл подтвержден: approve, working config, peer sync, disable/enable и выборочное удаление устройства работают на Docker AmneziaWG runtime.
 
@@ -82,7 +84,8 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [Remote partial-failure contract evidence 2026-06-06](remote-partial-failure-contract-2026-06-06.md) - local-only AMN2 branch `codex/remote-partial-failure-contract`, commit `1a193b9`, focused `70 passed`; fast-forward merged into stable.
 - [Remote partial-failure contract VPS package 2026-06-06](remote-partial-failure-contract-vps-package-2026-06-06.md) - AMN3 update+smoke kit for stable `1a193b9`; package published and read-only VPS-smoked.
 - [Remote partial-failure contract VPS smoke 2026-06-06](remote-partial-failure-contract-vps-smoke-evidence-2026-06-06.md) - real VPS read-only update/smoke pass for stable `1a193b9`, `run_id=20260606T154636Z`.
-- [Controlled prod readiness 2026-06-06](controlled-prod-readiness-2026-06-06.md) - next operator-only prod gate after `1a193b9` VPS smoke; runbook published, controlled-prod-ready evidence pending.
+- [Integration status controlled prod update 2026-06-06](integration-status-controlled-prod-update-2026-06-06.md) - AMN2 stable `32d01fd`, local tests green, AMN3 update+smoke kit published; read-only VPS smoke pending.
+- [Controlled prod readiness 2026-06-06](controlled-prod-readiness-2026-06-06.md) - next operator-only prod gate; `32d01fd` read-only VPS smoke must pass before controlled-prod-ready evidence.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
