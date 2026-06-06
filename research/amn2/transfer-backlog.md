@@ -2,6 +2,8 @@
 
 Update 2026-06-06: `amn2/codex-vps-test-prep` current head is `6b5b5b7 Document stdin PSK peer apply` after a docs-only runbook cleanup. Runtime/source package `568c611` remains the latest VPS-smoked source.
 
+Local-only work branch update 2026-06-06: `amn2/codex/remote-partial-failure-contract` was pushed at `1a193b9 Add remote partial failure contract`; AMN3 evidence is `research/amn2/remote-partial-failure-contract-2026-06-06.md`. This branch has not moved `codex-vps-test-prep`; GitHub connector PR creation still returns `403 Resource not accessible by integration`.
+
 ```text
 AMN3 package: dist/amn2-vps-update-and-smoke-kit-568c611.zip
 sha256: D52BC730BD59A894E76A203861E8FFA87F808A699656625D3C542DC771DEFA27
