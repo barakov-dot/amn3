@@ -18,6 +18,7 @@ latest VPS smoke: c8a6363 read-only-vps-smoke-pass, run_id 20260606T202040Z
 previous VPS smoke: 32d01fd read-only-vps-smoke-pass, run_id 20260606T185114Z
 runbook: docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
 next chat handoff: docs/NEXT_CHAT_AMN2_CONTROLLED_PROD_DECISION.ru.md
+reverse proxy confirmation: research/amn2/controlled-prod-reverse-proxy-confirmation-2026-06-07.md
 ```
 
 ## Scope
@@ -75,16 +76,21 @@ checked_routes: 5
 route result status: passed
 forbidden_markers: none in all returned routes
 secret-bearing evidence pasted: no
+source overlay commit confirmed: c8a6363
+VPS_APPLY_ENABLED shell: false
+VPS_APPLY_ENABLED .env: false
+web/admin access path: approved-reverse-proxy over HTTPS
+public API 3040 exposed: no
+web listener: 127.0.0.1:3030
+login_http: 200
+rollback/current kits and data/.env/servers.yml: present
 ```
 
 Remaining operator-only confirmations before `controlled-prod-ready`:
 
 ```text
-source overlay commit on VPS: confirm .amn2_source_overlay_commit is c8a6363
 integration status body: confirm safe fields if required by the readiness checklist
-web/admin access path: loopback, SSH tunnel, private network, or separately approved reverse proxy
-VPS_APPLY_ENABLED default: false
-host key prompt: none, or verified out-of-band
+host key prompt: not applicable for web/admin reverse-proxy access, unless SSH is used for operations
 recovery path known: yes/no
 decision: controlled-prod-ready, needs-fix, or defer-prod
 ```

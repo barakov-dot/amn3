@@ -13,6 +13,7 @@ docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
 research/amn2/controlled-prod-readiness-2026-06-06.md
 research/amn2/local-agent-runtime-summary-vps-smoke-evidence-2026-06-06.md
 research/amn2/integration-status-controlled-prod-update-2026-06-06.md
+research/amn2/controlled-prod-reverse-proxy-confirmation-2026-06-07.md
 docs/PROJECT_STATUS_CURRENT.ru.md
 docs/PROJECT_CONTEXT_IMPORT.ru.md
 research/amn2/transfer-backlog.md
@@ -47,6 +48,13 @@ listener_status: passed
 audit_status: passed
 forbidden_markers: none in returned route evidence
 Phase 2 single disposable peer apply/revoke: verified-live on stable line
+source overlay commit: c8a6363
+VPS_APPLY_ENABLED shell/env: false
+web/admin access path: approved-reverse-proxy over HTTPS
+public API 3040 exposed: no
+web listener: 127.0.0.1:3030
+login_http: 200
+rollback/current kits and data/.env/servers.yml: present
 ```
 
 ## Текущий статус
@@ -62,11 +70,8 @@ controlled-prod-readiness: operator confirmations pending
 Вернуть только безопасный decision packet:
 
 ```text
-source overlay commit: c8a6363 | 32d01fd | other
 integration status safe fields: ok | not checked | needs-fix
-web/admin access path: loopback | ssh-tunnel | private-network | approved-reverse-proxy | other
-VPS_APPLY_ENABLED default: false | other
-host key prompt: none | verified-out-of-band | unexpected
+host key prompt: not applicable | none | verified-out-of-band | unexpected
 recovery path known: yes | no
 decision: controlled-prod-ready | needs-fix | defer-prod
 next action:
@@ -78,9 +83,10 @@ For current `c8a6363`, read-only VPS update/smoke already passed with `run_id=20
 
 - source overlay commit is `c8a6363`;
 - read-only VPS smoke passed for `c8a6363`;
-- web/admin access path is operator-only;
+- web/admin access path is operator-approved HTTPS reverse proxy;
+- public API port `3040` is not exposed;
 - `VPS_APPLY_ENABLED` default is `false`;
-- host key prompt is absent or verified out-of-band;
+- host key prompt is absent/verified when SSH is used, or not applicable for web/admin reverse-proxy access;
 - recovery path is known;
 - no stop condition is present;
 - no secret-bearing evidence was pasted.

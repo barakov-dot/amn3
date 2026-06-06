@@ -17,8 +17,10 @@ VPS smoke evidence: research/amn2/local-agent-runtime-summary-vps-smoke-evidence
 previous VPS-smoked runtime/source: 32d01fd, run_id 20260606T185114Z, evidence research/amn2/integration-status-controlled-prod-update-2026-06-06.md
 previous VPS-smoked runtime/source: 1a193b9, run_id 20260606T154636Z, evidence research/amn2/remote-partial-failure-contract-vps-smoke-evidence-2026-06-06.md
 controlled prod readiness: readiness-prefill-recorded, operator confirmations pending
+controlled prod access path: approved HTTPS reverse proxy; public API 3040 not exposed; final decision pending
 controlled prod runbook: docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
 controlled prod evidence: research/amn2/controlled-prod-readiness-2026-06-06.md
+controlled prod reverse proxy confirmation: research/amn2/controlled-prod-reverse-proxy-confirmation-2026-06-07.md
 controlled prod next chat: docs/NEXT_CHAT_AMN2_CONTROLLED_PROD_DECISION.ru.md
 previous VPS-smoked source: 568c611, run_id 20260605T162742Z, evidence research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
 docs-only cleanup: 6b5b5b7 Document stdin PSK peer apply
