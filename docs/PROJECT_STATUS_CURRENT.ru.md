@@ -1,10 +1,10 @@
 # Current Override 2026-06-06
 
-`amn2/codex-vps-test-prep` current head is `32d01fd Update integration status for controlled prod`. Current AMN3 update+smoke package `32d01fd` passed real VPS read-only smoke on 2026-06-06, `run_id=20260606T185114Z`; `1a193b9` is now historical prior VPS-smoked runtime/source.
+`amn2/codex-vps-test-prep` current head is `c8a6363 Add Local Agent runtime summary mapper`. Current VPS-smoked AMN3 update+smoke package is still `32d01fd`, which passed real VPS read-only smoke on 2026-06-06, `run_id=20260606T185114Z`; `1a193b9` is now historical prior VPS-smoked runtime/source.
 
 Read-only integration status update 2026-06-06: `32d01fd` updates `/api/integration/status` to report `read_only_vps_smoked`, Phase 2 `verified_live`, and controlled-prod readiness pending without enabling write routes or write operations. AMN3 evidence is `research/amn2/integration-status-controlled-prod-update-2026-06-06.md`. The previous local-only operation-contract fast-forward remains recorded at `research/amn2/remote-partial-failure-contract-2026-06-06.md`.
 
-Local Agent runtime summary 2026-06-06: local-only AMN2 feature branch `codex/local-agent-runtime-summary` was created from `32d01fd` and pushed at `c8a6363 Add Local Agent runtime summary mapper`. It adds only a pure controller-safe mapper and focused tests; no API route, web route, CLI command, package change, VPS command or live write operation. Evidence is `research/amn2/local-agent-runtime-summary-implementation-2026-06-06.md`.
+Local Agent runtime summary 2026-06-06: local-only AMN2 feature branch `codex/local-agent-runtime-summary` was created from `32d01fd`, verified locally, fast-forward merged into `codex-vps-test-prep`, and pushed at `c8a6363 Add Local Agent runtime summary mapper`. It adds only a pure controller-safe mapper and focused tests; no API route, web route, CLI command, package change, VPS command or live write operation. Evidence is `research/amn2/local-agent-runtime-summary-implementation-2026-06-06.md`.
 
 ```text
 AMN3 package: dist/amn2-vps-update-and-smoke-kit-32d01fd.zip
@@ -24,7 +24,7 @@ previous VPS-smoked source: 568c611, run_id 20260605T162742Z, evidence research/
 docs-only cleanup: 6b5b5b7 Document stdin PSK peer apply
 local-only contract merge: 1a193b9 Add remote partial failure contract
 read-only integration status update: 32d01fd Update integration status for controlled prod
-local-only Local Agent runtime summary branch: c8a6363 Add Local Agent runtime summary mapper
+stable Local Agent runtime summary merge: c8a6363 Add Local Agent runtime summary mapper
 ```
 
 Phase 2 live single disposable test peer apply/revoke is verified-live on stable `7764ae7`; `568c611` adds safer `--preshared-key-stdin` handling and passed read-only VPS update/smoke.

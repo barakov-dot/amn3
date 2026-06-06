@@ -2,7 +2,7 @@
 
 Date: 2026-06-06.
 
-Status: local-only feature branch.
+Status: merged into AMN2 stable branch, local-only mapper slice.
 
 ## AMN2 Branch
 
@@ -11,6 +11,8 @@ branch: codex/local-agent-runtime-summary
 remote: amn2/codex/local-agent-runtime-summary
 head: c8a6363 Add Local Agent runtime summary mapper
 base: 32d01fd Update integration status for controlled prod
+stable branch: codex-vps-test-prep
+stable head after fast-forward: c8a6363 Add Local Agent runtime summary mapper
 worktree: C:\Users\SooL\Documents\VPS-OPS-LAB\worktrees\amn2-local-agent-runtime-summary
 ```
 
@@ -45,11 +47,27 @@ python -m pytest tests/agent/test_runtime_summary.py -q
 result: 3 passed in 0.03s
 ```
 
-Adjacent regression:
+Adjacent regression before stable fast-forward:
 
 ```text
 python -m pytest tests/agent/test_runtime_summary.py tests/agent/test_runtime.py tests/agent/test_api.py tests/agent/test_policy.py tests/security/test_surface_policy_bindings.py -q
 result: 37 passed, 1 warning in 1.81s
+warning: StarletteDeprecationWarning from fastapi/starlette testclient
+```
+
+Adjacent regression before stable push:
+
+```text
+python -m pytest tests/agent/test_runtime_summary.py tests/agent/test_runtime.py tests/agent/test_api.py tests/agent/test_policy.py tests/security/test_surface_policy_bindings.py -q
+result: 37 passed, 1 warning in 1.79s
+warning: StarletteDeprecationWarning from fastapi/starlette testclient
+```
+
+Full suite before stable push:
+
+```text
+python -m pytest -q
+result: 619 passed, 1 warning in 63.89s
 warning: StarletteDeprecationWarning from fastapi/starlette testclient
 ```
 
@@ -67,6 +85,7 @@ note: a pytest temp cleanup PermissionError appeared after exit 0; later runs us
 git diff --check: exit 0
 secret marker scan on changed AMN2 files: exit 1, no matches
 AMN2 feature worktree status after push: clean, tracking amn2/codex/local-agent-runtime-summary
+AMN2 stable checkout after fast-forward/push: clean, tracking amn2/codex-vps-test-prep
 ```
 
 Secret marker scan pattern:
@@ -96,6 +115,8 @@ No `.env`, `servers.yml`, raw tokens, Authorization headers, token hashes, priva
 
 ## Decision
 
-Result: `local-agent-runtime-summary-feature-branch-pushed`.
+Result: `local-agent-runtime-summary-merged-stable-local-only`.
 
-Next safe option is review/merge of `codex/local-agent-runtime-summary` into `codex-vps-test-prep` after normal local verification. A VPS smoke is not required for this mapper-only branch unless it is combined with API route, web/admin runtime status, auth policy, packaging, smoke-script, or runtime behavior changes.
+The branch was fast-forward merged into `codex-vps-test-prep` and pushed to `amn2`.
+
+VPS status is unchanged: `32d01fd` remains the current VPS-smoked runtime/source baseline until a separate operator update/read-only smoke is performed for `c8a6363` or a later package. A VPS smoke is not required for the mapper-only code by itself unless it is combined with API route, web/admin runtime status, auth policy, packaging, smoke-script, or runtime behavior changes.
