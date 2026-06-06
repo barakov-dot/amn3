@@ -267,3 +267,64 @@
 - rollback note and recovery path;
 - disposable test peer for first live gate;
 - separate Phase 2 approval after Phase 1 dry-run evidence.
+
+## Current head vs VPS-smoked source rule
+
+Для VPN/control-panel проектов нельзя смешивать три разные точки состояния:
+
+- `current git head`: последний commit в production repo;
+- `package-ready head`: commit, для которого собран update/smoke kit и прошла package hygiene;
+- `last VPS-smoked source`: commit, который реально прошел VPS smoke на целевом runtime.
+
+Если новый commit уже merged и package-ready, но еще не проходил VPS smoke, фиксировать статус `package-ready-not-vps-smoked`. Production/controlled-prod выводы разрешены только по `last VPS-smoked source` или после нового smoke для target commit.
+
+## Scoped verified-live evidence rule
+
+`verified-live` должен всегда иметь точный scope:
+
+- какой commit проверен;
+- какой run/evidence подтверждает результат;
+- какая одна операция или набор операций реально выполнены;
+- какой rollback/recovery результат получен;
+- какие surfaces остаются заблокированы.
+
+Нельзя переносить scoped `verified-live` для одного disposable peer на broad write API, public config delivery, backup/import, Local Agent mutations, Docker restart или destructive routes.
+
+## Secret-bearing CLI argument rule
+
+Перед добавлением CLI или operator script проверять, не попадут ли secrets в command line, shell history, process list, logs или evidence.
+
+Для PSK, private key, API token, backup password и похожих values по умолчанию предпочитать:
+
+- stdin;
+- protected env/config file with restricted permissions;
+- external secret store;
+- one-time operator prompt без echo.
+
+Compatibility flags with inline secrets могут оставаться только временно или для controlled disposable tests, с явным предупреждением в docs.
+
+## Controlled prod readiness checklist
+
+Перед статусом `controlled-prod-ready` требовать:
+
+- target source commit и package checksum;
+- read-only VPS smoke для target commit;
+- operator-only web/admin access path;
+- default `VPS_APPLY_ENABLED=false`;
+- SSH host key identity prompt/confirmation;
+- recovery path and rollback note;
+- no-secret evidence review;
+- явное решение: `controlled-prod-ready`, `needs-fix` или `defer-prod`.
+
+`controlled-prod-ready` не означает public SaaS, public API, self-service config delivery или broad write enablement.
+
+## Local Agent safe mapper rule
+
+Для Local Agent и похожих runtime-интеграций начинать с безопасного read model:
+
+- pure mapper/service without route;
+- focused tests for field mapping, missing data and no-secret output;
+- no API/web/CLI exposure in first slice;
+- separate gate for route, UI, runtime smoke and mutation surfaces.
+
+Local-only mapper может быть merged в production branch, но для VPS/runtime статуса отдельно фиксировать, проходил ли target commit update/smoke.
