@@ -529,6 +529,7 @@ def _api_smoke_paths(server_name: str) -> dict[str, str]:
     return {
         "servers": "/api/servers",
         "integration_status": "/api/integration/status",
+        "local_agent_runtime_summary": "/api/local-agent/runtime/summary",
         "server_summary": f"/api/servers/{server_name}/summary",
         "metrics_summary": "/api/metrics/summary",
         "users_summary": "/api/users/summary",

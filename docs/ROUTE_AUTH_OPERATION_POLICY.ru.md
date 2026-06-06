@@ -45,3 +45,14 @@
 - Docker runtime write/restart behavior.
 
 Policy-only changes and tests do not require live VPS retest.
+
+## Implemented read-only API routes
+
+- `GET /api/servers` - `server:read`;
+- `GET /api/servers/{server_name}/summary` - `server:read`;
+- `GET /api/integration/status` - `server:read`;
+- `GET /api/local-agent/runtime/summary` - `server:read`, controller-safe Local Agent runtime readiness, no Local Agent network call;
+- `GET /api/metrics/summary` - `metrics:read`;
+- `GET /api/users/summary` - `metrics:read`.
+
+The next read-only API smoke for a head that includes this section should report `checked_routes: 6`. This still does not enable `config:read`, write scopes, Local Agent mutations or public exposure.

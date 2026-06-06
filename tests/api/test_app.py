@@ -11,6 +11,12 @@ from app.db.schema import initialize_schema
 from app.services.api_tokens import hash_api_token
 
 
+AGENT_TOKEN_HASH = (
+    "sha256:"
+    "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+)
+
+
 def test_api_servers_requires_server_read_scope_and_returns_safe_summary(tmp_path: Path):
     settings, repo = _seed_api_data(tmp_path)
     _store_token(repo, raw_token="server-token", scopes=["server:read"])
@@ -204,14 +210,99 @@ def test_api_auth_rejects_invalid_token_without_echoing_secret(tmp_path: Path):
     assert "token_hash" not in response.text
 
 
-def _seed_api_data(tmp_path: Path) -> tuple[Settings, Repository]:
-    db_path = tmp_path / "api.sqlite3"
-    settings = Settings(
-        _env_file=None,
-        telegram_bot_token="CHANGE_ME",
-        app_secret_key="test-secret",
-        database_path=str(db_path),
+def test_api_local_agent_runtime_summary_is_controller_safe(tmp_path: Path):
+    settings, repo = _seed_api_data(
+        tmp_path,
+        local_agent_enabled=True,
+        local_agent_host="10.9.0.10",
+        local_agent_port=3041,
+        local_agent_token_hash=AGENT_TOKEN_HASH,
+        local_agent_token_id="agent-secret-token-id",
+        local_agent_token_owner="agent-secret-owner",
     )
+    _store_token(repo, raw_token="server-token", scopes=["server:read"])
+    _store_token(repo, raw_token="metrics-token", scopes=["metrics:read"])
+    client = TestClient(create_api_app(settings))
+
+    denied = client.get(
+        "/api/local-agent/runtime/summary",
+        headers={"Authorization": "Bearer metrics-token"},
+    )
+    allowed = client.get(
+        "/api/local-agent/runtime/summary",
+        headers={"Authorization": "Bearer server-token"},
+    )
+
+    assert denied.status_code == 403
+    assert allowed.status_code == 200
+    payload = allowed.json()
+    assert payload == {
+        "local_agent": {
+            "configured": True,
+            "connectivity": "not_checked",
+            "read_only": True,
+            "source": "controller_settings",
+            "write_routes_enabled": False,
+            "runtime_summary": {
+                "agent_status": "configured_not_checked",
+                "agent_version": None,
+                "runtime_contract_version": 1,
+                "write_enabled": False,
+                "controller_display_status": "safe",
+                "runtime_type": "unknown",
+                "runtime_status": "unknown",
+                "protocols": [],
+            },
+        }
+    }
+    assert _forbidden_markers_absent(payload)
+    serialized = json.dumps(payload)
+    for forbidden in (
+        AGENT_TOKEN_HASH,
+        "agent-secret-token-id",
+        "agent-secret-owner",
+        "10.9.0.10",
+        "3041",
+        "server-token",
+        "Authorization",
+        "token_hash",
+        "sha256",
+        "container_name",
+        "interface",
+        "config_path",
+        "docker exec",
+        "awg show",
+    ):
+        assert forbidden not in serialized
+
+    row = repo._conn.execute(
+        "SELECT action, metadata_json FROM admin_actions ORDER BY id DESC LIMIT 1"
+    ).fetchone()
+    assert row is not None
+    assert row["action"] == "api_read"
+    metadata = json.loads(row["metadata_json"])
+    assert metadata == {
+        "aggregate_only": True,
+        "method": "GET",
+        "owner_label": "ops",
+        "path": "/api/local-agent/runtime/summary",
+        "scope": "server:read",
+        "status": "allowed",
+        "token_id": "token-server-token",
+        "token_name": "API token",
+    }
+
+
+def _seed_api_data(tmp_path: Path, **settings_overrides: object) -> tuple[Settings, Repository]:
+    db_path = tmp_path / "api.sqlite3"
+    settings_values = {
+        "_env_file": None,
+        "telegram_bot_token": "CHANGE_ME",
+        "app_secret_key": "test-secret",
+        "database_path": str(db_path),
+    }
+    settings_values.update(settings_overrides)
+    settings = Settings(**settings_values)
     conn = connect(db_path)
     initialize_schema(conn)
     repo = Repository(conn)

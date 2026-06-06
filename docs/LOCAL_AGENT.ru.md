@@ -18,6 +18,9 @@
 - production audit sink в `admin_actions` при запуске через `agent serve`
 - `runtime_contract_version` и список first-slice routes в `/agent/version`
 - disabled public docs/openapi in the agent app
+- controller-facing API summary `GET /api/local-agent/runtime/summary`
+
+`GET /api/local-agent/runtime/summary` живет в основном `/api/*` контуре, требует `server:read` и не ходит в Local Agent по сети. Он возвращает только controller-safe summary из `app.agent.runtime_summary`: configured flag, connectivity `not_checked`, `write_routes_enabled=false`, runtime status `unknown` и пустой protocols list до отдельной live/transport проверки. В ответ не попадают `LOCAL_AGENT_HOST`, `LOCAL_AGENT_PORT`, token id, token hash, container name, interface, config path или command output.
 
 ## Что не включено
 

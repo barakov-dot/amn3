@@ -75,6 +75,16 @@ defer reason: previous chat-exposed token remains a token-hygiene exception unti
 
 This run confirms the read-only API route shell on the current app-code baseline. It does not grant public exposure, write API routes, `config:read`, Local Agent mutations, backup/import/reboot routes or broad live peer mutation permission.
 
+Follow-up local route after this evidence:
+
+```text
+route: GET /api/local-agent/runtime/summary
+scope: server:read
+status: local-ready, not included in the 2026-06-06 VPS smoke above
+next VPS smoke expectation: checked_routes=6
+secret boundary: no Local Agent host/port/token id/token hash/container/interface/config path
+```
+
 ## 1. Контекст
 
 ```text

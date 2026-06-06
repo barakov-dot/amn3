@@ -37,6 +37,8 @@ Lab/coordination repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 
 Текущий статус: app-code baseline `64a6750` прошел read-only API smoke на VPS `/opt/amn2-git` через loopback `127.0.0.1:3040`, пять read-only routes вернули 200, forbidden markers пустые. Новый smoke token отозван. Предыдущий raw token был опубликован в чате и по решению оператора пока не отозван; поэтому итоговый статус `api-smoke-passed`, но не полный `controlled-prod-ready`.
 
+Следующий локальный срез после этого evidence: `/api/local-agent/runtime/summary` добавлен как controller-facing read-only route под `server:read`. Он не дергает Local Agent по сети и не выдает host/port/token/container/interface/config path. Следующий VPS smoke для текущего head должен ожидать `checked_routes: 6`.
+
 Цель следующего этапа: не открывать broad write API, а закрыть controlled-prod readiness или выбрать следующий read-only controller-facing slice.
 ```
 
@@ -74,6 +76,7 @@ git remote -v
 - Phase 2 single disposable peer live apply/sync/revoke/sync evidence.
 - Local Agent first slice: read-only `/agent/*`, hash-only token and audit.
 - Local Agent runtime summary mapper included in VPS-smoked app-code baseline `64a6750`.
+- API controller-facing Local Agent runtime summary route: `/api/local-agent/runtime/summary`.
 
 ## 5. Что Не Открыто
 
@@ -128,4 +131,4 @@ controlled-prod decision: defer-prod until token is revoked or expired
 
 Если оператор готов закрыть controlled-prod readiness: зафиксировать revoke/expiry предыдущего chat-exposed token и обновить `docs/API_VPS_SMOKE_EVIDENCE.ru.md`.
 
-Если VPS сейчас не трогаем: следующий инженерный slice должен оставаться read-only, policy-bound and no-secret. Не начинать broad write API, config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
+Если VPS сейчас не трогаем: основной чат может доработать read-only controller UX вокруг `/api/local-agent/runtime/summary`, но не начинать broad write API, config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.

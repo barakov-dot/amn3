@@ -233,6 +233,7 @@ def test_run_api_smoke_check_calls_expected_routes_without_secret_output():
     assert [call[0] for call in calls] == [
         "http://127.0.0.1:3040/api/servers",
         "http://127.0.0.1:3040/api/integration/status",
+        "http://127.0.0.1:3040/api/local-agent/runtime/summary",
         "http://127.0.0.1:3040/api/servers/local/summary",
         "http://127.0.0.1:3040/api/metrics/summary",
         "http://127.0.0.1:3040/api/users/summary",
@@ -240,7 +241,7 @@ def test_run_api_smoke_check_calls_expected_routes_without_secret_output():
     assert calls[0][1] == {"Authorization": "Bearer raw-api-token"}
     assert calls[0][2] == 3.5
     assert result["status"] == "passed"
-    assert result["checked_routes"] == 5
+    assert result["checked_routes"] == 6
     assert "raw-api-token" not in json.dumps(result)
     assert "Authorization" not in json.dumps(result)
     assert "ok" not in json.dumps(result)

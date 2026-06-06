@@ -51,6 +51,7 @@ REQUIRED_POLICY_IDS = {
     "api.servers.list",
     "api.servers.summary",
     "api.integration.status",
+    "api.local_agent.runtime_summary",
     "api.metrics.summary",
     "api.users.summary",
 }
@@ -58,6 +59,7 @@ API_ROUTE_SHELL_POLICY_IDS = {
     "api.servers.list",
     "api.servers.summary",
     "api.integration.status",
+    "api.local_agent.runtime_summary",
     "api.metrics.summary",
     "api.users.summary",
 }
@@ -191,6 +193,7 @@ def test_api_route_shell_policies_are_read_only_scoped_and_no_live_retest():
         "api.servers.list": "server:read",
         "api.servers.summary": "server:read",
         "api.integration.status": "server:read",
+        "api.local_agent.runtime_summary": "server:read",
         "api.metrics.summary": "metrics:read",
         "api.users.summary": "metrics:read",
     }

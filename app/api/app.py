@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import json
 from collections.abc import AsyncIterator
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 
+from app.agent.api import AGENT_RUNTIME_CONTRACT_VERSION
+from app.agent.runtime_summary import build_runtime_summary
 from app.config import Settings
 from app.db.connection import connect
 from app.db.repositories import Repository
@@ -49,6 +51,43 @@ def create_api_app(settings: Settings | None = None) -> FastAPI:
     ):
         payload = build_integration_status(repo)
         _record_api_read(repo, auth, path="/api/integration/status", scope="server:read")
+        return payload
+
+    @app.get("/api/local-agent/runtime/summary")
+    async def local_agent_runtime_summary(
+        request: Request,
+        repo: Repository = Depends(_repo),
+        auth: ApiAuthContext = Depends(_require_scope("server:read")),
+    ):
+        settings: Settings = request.app.state.settings
+        payload = {
+            "local_agent": {
+                "configured": settings.local_agent_enabled,
+                "connectivity": "not_checked",
+                "read_only": True,
+                "source": "controller_settings",
+                "write_routes_enabled": False,
+                "runtime_summary": asdict(
+                    build_runtime_summary(
+                        agent_status=(
+                            "configured_not_checked"
+                            if settings.local_agent_enabled
+                            else "disabled"
+                        ),
+                        agent_version=None,
+                        runtime_contract_version=AGENT_RUNTIME_CONTRACT_VERSION,
+                        write_enabled=False,
+                        runtime=None,
+                    )
+                ),
+            }
+        }
+        _record_api_read(
+            repo,
+            auth,
+            path="/api/local-agent/runtime/summary",
+            scope="server:read",
+        )
         return payload
 
     @app.get("/api/servers/{server_name}/summary")

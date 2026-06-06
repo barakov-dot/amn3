@@ -77,10 +77,11 @@ Raw token показывается только в выводе `issue`; в ба
 - `GET /api/servers` - требует `server:read`;
 - `GET /api/servers/{server_name}/summary` - требует `server:read`;
 - `GET /api/integration/status` - требует `server:read`;
-- `GET /api/metrics/summary` - требует `metrics:read`.
+- `GET /api/local-agent/runtime/summary` - требует `server:read`;
+- `GET /api/metrics/summary` - требует `metrics:read`;
 - `GET /api/users/summary` - требует `metrics:read`.
 
-Маршруты возвращают только безопасные summary/count fields: server name/status/runtime, device counters, latest health readiness, user/order aggregates, integration gate state и aggregate metrics. Ответы не содержат Telegram ID, username, email, SSH host/port, endpoint host, public/private keys, PSK, token hash, `.conf`, QR или `vpn://`.
+Маршруты возвращают только безопасные summary/count fields: server name/status/runtime, device counters, latest health readiness, user/order aggregates, integration gate state, Local Agent controller-safe runtime readiness и aggregate metrics. Ответы не содержат Telegram ID, username, email, SSH host/port, endpoint host, Local Agent host/port/token id/token hash, container name, interface, public/private keys, PSK, token hash, `.conf`, QR или `vpn://`.
 
 `server:read` не дает доступ к metrics/users endpoints, а `metrics:read` не дает доступ к server endpoints. Любой bearer token без нужного scope получает отказ без раскрытия raw token или token hash.
 

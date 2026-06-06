@@ -64,7 +64,7 @@ Controlled prod не означает публичный SaaS-режим.
 - [ ] Git commit/package checksum записан.
 - [ ] VPS source overlay commit совпадает с последним smoke-passed commit или явно superseding smoke-passed commit.
 - [ ] Последний read-only smoke safe summary имеет `VPS verdict: pass`.
-- [ ] Smoke result показывает только read-only routes и `status: passed`.
+- [ ] Smoke result показывает только read-only routes и `status: passed`; для head с `/api/local-agent/runtime/summary` ожидается `checked_routes: 6`.
 - [ ] `/api/integration/status` сообщает `read_only_vps_smoked`, `phase_2=verified_live`, `write_routes_enabled=false`, `write_operations_enabled=false`.
 - [ ] Auth checks: missing bearer `401`, wrong scope `403`, revoked token `401`.
 - [ ] Listener и audit checks имеют `passed`.

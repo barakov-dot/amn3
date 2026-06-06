@@ -16,6 +16,10 @@ FORBIDDEN_API_RESPONSE_MARKERS = (
     "server_public_key",
     "ssh_port",
     "endpoint_host",
+    "container_name",
+    "config_path",
+    "docker exec",
+    "awg show",
     "Authorization",
     ".conf",
 )

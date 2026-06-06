@@ -41,7 +41,7 @@ lab branch: master
 
 ### 4. Read-only API Shell
 
-Готово: scoped token model, `/api/servers`, `/api/servers/{server_name}/summary`, `/api/metrics/summary`, `/api/users/summary`, `/api/integration/status`, API smoke CLI, audit and forbidden marker checks.
+Готово: scoped token model, `/api/servers`, `/api/servers/{server_name}/summary`, `/api/metrics/summary`, `/api/users/summary`, `/api/integration/status`, `/api/local-agent/runtime/summary`, API smoke CLI, audit and forbidden marker checks.
 
 Переносимое правило: API расширять read-only-first, aggregate-only, scoped, audited and loopback-first. `config:read`, write scopes and public exposure stay gated.
 
@@ -59,7 +59,7 @@ lab branch: master
 
 ### 7. Local Agent Runtime Summary
 
-Готово: `app/agent/runtime_summary.py` строит controller-safe summary без server name, container name, interface, config path, stdout/stderr, keys, PSK, traffic or client config details.
+Готово: `app/agent/runtime_summary.py` строит controller-safe summary без server name, container name, interface, config path, stdout/stderr, keys, PSK, traffic or client config details. Основной API route `/api/local-agent/runtime/summary` публикует только этот safe summary под `server:read`, без сетевого вызова Local Agent.
 
 Переносимое правило: controller-facing runtime summaries должны быть safe-by-construction и явно маркировать `write_enabled != False` как unsafe.
 
@@ -107,4 +107,4 @@ lab branch: master
 
 ## Следующий Рекомендуемый Срез
 
-Ближайшая безопасная работа после этой карты: синхронизировать controlled-prod docs and evidence, затем выбрать read-only controller-facing slice. Не начинать broad write API, public config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
+Ближайшая безопасная работа после этой карты: выполнить read-only VPS re-smoke текущего head с новым `/api/local-agent/runtime/summary` route. Ожидаемый smoke должен проверять 6 routes. Не начинать broad write API, public config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
