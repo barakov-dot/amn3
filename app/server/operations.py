@@ -129,6 +129,15 @@ class OperationResult:
     recovery_note: str
 
 
+@dataclass(frozen=True)
+class RemoteMutationResult:
+    operation_id: str
+    consistency_status: ConsistencyStatus
+    remote_applied: bool
+    local_applied: bool
+    recovery_note: str
+
+
 _SECRET_INPUT_MARKERS = (
     "password",
     "private_key",
@@ -146,6 +155,8 @@ _STATE_CHANGING_CONSISTENCY_STATUSES = {
     "partial-failure",
     "rolled-back",
     "manual-review-required",
+    "remote-changed-local-failed",
+    "local-changed-remote-failed",
 }
 
 
@@ -189,3 +200,17 @@ def _validate_state_changing_metadata(operation: RemoteOperation) -> None:
         raise OperationValidationError(
             "state-changing operation requires state-changing consistency status"
         )
+
+
+def remote_changed_local_failed_result(
+    *,
+    operation_id: str,
+    recovery_note: str,
+) -> RemoteMutationResult:
+    return RemoteMutationResult(
+        operation_id=operation_id,
+        consistency_status="remote-changed-local-failed",
+        remote_applied=True,
+        local_applied=False,
+        recovery_note=redact(recovery_note),
+    )

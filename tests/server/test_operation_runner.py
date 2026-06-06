@@ -5,6 +5,7 @@ from app.server.operations import (
     CommandStep,
     OperationValidationError,
     RemoteOperation,
+    remote_changed_local_failed_result,
     validate_operation,
 )
 from app.server.ssh import CommandResult
@@ -96,6 +97,32 @@ def test_validate_operation_allows_state_changing_operation_metadata():
     assert operation.local_side_effects == ("device-create", "admin-audit")
     assert operation.remote_side_effects == ("awg-peer-add", "service-reload")
     assert operation.idempotency_key == "server.peer.apply:1:7"
+
+
+def test_validate_operation_allows_specific_remote_changed_local_failed_status():
+    operation = _state_changing_operation(consistency_status="remote-changed-local-failed")
+
+    validate_operation(operation)
+
+    assert operation.consistency_status == "remote-changed-local-failed"
+
+
+def test_remote_changed_local_failed_result_redacts_recovery_note():
+    result = remote_changed_local_failed_result(
+        operation_id="access.approve_order",
+        recovery_note=(
+            "Remote peer was applied with PresharedKey = secret-psk before "
+            "local approval completed; vpn://W0ludGVyZmFjZV0K must not leak."
+        ),
+    )
+
+    assert result.operation_id == "access.approve_order"
+    assert result.consistency_status == "remote-changed-local-failed"
+    assert result.remote_applied is True
+    assert result.local_applied is False
+    assert "secret-psk" not in result.recovery_note
+    assert "vpn://" not in result.recovery_note
+    assert "PresharedKey = [REDACTED]" in result.recovery_note
 
 
 def test_validate_operation_rejects_state_changing_operation_without_recovery_metadata():

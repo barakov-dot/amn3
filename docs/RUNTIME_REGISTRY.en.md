@@ -97,6 +97,7 @@ Before any live VPS apply/revoke, state-changing operations must pass a local ga
 - `remote-state-write` and `destructive-remote` operations describe `operation_id`, `risk_class`, `consistency_status`, `local_side_effects`, `remote_side_effects`, `rollback_note`, and `idempotency_key`;
 - `RemoteOperationRunner.plan()` returns a `consistency_status=dry-run` preview for state-changing operations without executing SSH;
 - `OperationPlan.to_safe_metadata()` does not publish command strings, and redacts `audit_summary`, `rollback_note`, and idempotency metadata;
+- partial failure results use specific consistency statuses such as `remote-changed-local-failed` and redact recovery notes before they are surfaced to higher-level workflows;
 - `apply-peer` and `revoke-peer` dry-run previews show operation ID, risk class, side effects, and rollback note without exposing PSK, private keys, `.conf`, or `vpn://`;
 - the real VPS gate starts only after focused tests and the full local `pytest tests -v` suite pass.
 

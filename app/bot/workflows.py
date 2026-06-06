@@ -13,11 +13,11 @@ from app.bot.ux import render_access_request_created, render_admin_approval, ren
 from app.db.repositories import Repository
 from app.security.crypto import SecretBox
 from app.security.redaction import redact
+from app.server.operations import remote_changed_local_failed_result
 from app.server.peer_apply import PeerApplyError
 from app.services.config_delivery import build_device_config_delivery
 from app.services.access import (
     AccessService,
-    RemoteMutationResult,
     RemoteOperationPartialFailure,
 )
 from app.services.traffic import DeviceTrafficView, build_device_traffic_view
@@ -436,11 +436,8 @@ class BotWorkflow:
                 except Exception as exc:
                     if remote_removed_device_ids:
                         raise RemoteOperationPartialFailure(
-                            RemoteMutationResult(
+                            remote_changed_local_failed_result(
                                 operation_id="bot.reset_user_devices",
-                                consistency_status="partial-failure",
-                                remote_applied=True,
-                                local_applied=False,
                                 recovery_note=(
                                     "One or more remote peers were removed before "
                                     "local device reset completed. Put affected "

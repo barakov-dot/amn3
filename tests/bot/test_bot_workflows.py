@@ -719,7 +719,7 @@ def test_user_reset_reports_partial_failure_when_one_remote_remove_succeeds_and_
 
     failure = exc_info.value.result
     assert failure.operation_id == "bot.reset_user_devices"
-    assert failure.consistency_status == "partial-failure"
+    assert failure.consistency_status == "remote-changed-local-failed"
     assert failure.remote_applied is True
     assert failure.local_applied is False
     assert "manual review" in failure.recovery_note.lower()

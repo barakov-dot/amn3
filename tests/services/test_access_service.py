@@ -237,7 +237,7 @@ def test_approve_order_reports_partial_failure_when_remote_apply_succeeds_but_ad
     failure = exc_info.value.result
     order = repo.get_order(order_id)
     assert failure.operation_id == "access.approve_order"
-    assert failure.consistency_status == "partial-failure"
+    assert failure.consistency_status == "remote-changed-local-failed"
     assert failure.remote_applied is True
     assert failure.local_applied is False
     assert "manual review" in failure.recovery_note.lower()

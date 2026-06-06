@@ -7,6 +7,10 @@ from pathlib import Path
 from typing import Callable, Protocol
 
 from app.db.repositories import Repository
+from app.server.operations import (
+    RemoteMutationResult,
+    remote_changed_local_failed_result,
+)
 from app.security.crypto import SecretBox
 from app.vpn.amneziawg_v2.config import ClientConfigDefaults, ClientConfigInput
 from app.vpn.amneziawg_v2.keys import generate_key, generate_keypair
@@ -30,15 +34,6 @@ class OrderNotApprovable(ValueError):
 
 class IpAllocationConflict(RuntimeError):
     pass
-
-
-@dataclass(frozen=True)
-class RemoteMutationResult:
-    operation_id: str
-    consistency_status: str
-    remote_applied: bool
-    local_applied: bool
-    recovery_note: str
 
 
 class RemoteOperationPartialFailure(RuntimeError):
@@ -262,11 +257,8 @@ class AccessService:
                     )
                     if remote_mutation_observer is not None:
                         remote_mutation_observer(
-                            RemoteMutationResult(
+                            remote_changed_local_failed_result(
                                 operation_id="access.approve_order",
-                                consistency_status="partial-failure",
-                                remote_applied=True,
-                                local_applied=False,
                                 recovery_note=(
                                     "Remote peer was applied before local approval "
                                     f"completed. Put order {order_id} and device "
