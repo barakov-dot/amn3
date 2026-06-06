@@ -21,7 +21,7 @@ Install Python 3.12+, Git, and AmneziaWG system dependencies. Keep
 ## 2. Get the Project
 
 ```bash
-git clone -b codex/read-only-api-route-shell https://github.com/barakov-dot/amn2.git
+git clone -b codex-vps-test-prep https://github.com/barakov-dot/amn2.git
 cd amn2
 ```
 

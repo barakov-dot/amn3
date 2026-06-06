@@ -71,6 +71,22 @@ def test_build_integration_status_contains_no_secret_or_command_markers(tmp_path
         assert marker not in report_text
 
 
+def test_controlled_prod_runbook_reference_exists(tmp_path: Path):
+    db_path = tmp_path / "amneziya.sqlite3"
+    conn = connect(db_path)
+    try:
+        initialize_schema(conn)
+        repo = Repository(conn)
+        _seed_server(repo)
+
+        report = build_integration_status(repo)
+    finally:
+        conn.close()
+
+    runbook_path = Path(report["controlled_prod_readiness"]["runbook"])
+    assert runbook_path.exists()
+
+
 def _seed_server(repo: Repository) -> None:
     repo.upsert_server_config(
         name="local",

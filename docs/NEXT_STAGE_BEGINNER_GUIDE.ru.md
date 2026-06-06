@@ -18,7 +18,7 @@
 Текущая API-ветка:
 
 ```text
-codex/read-only-api-route-shell
+codex-vps-test-prep
 ```
 
 Перед любыми write/config API идеями сначала проверить на VPS только read-only shell:

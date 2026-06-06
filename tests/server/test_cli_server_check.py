@@ -498,7 +498,7 @@ def test_run_server_retest_plan_prints_safe_vps_sequence(tmp_path):
     )
 
     assert "VPS retest plan: debian-vps-1" in output
-    assert "git pull origin codex/read-only-api-route-shell" in output
+    assert "git pull origin codex-vps-test-prep" in output
     assert "python -m app.cli server preflight" in output
     assert f"--config {path}" in output
     assert "--server debian-vps-1" in output

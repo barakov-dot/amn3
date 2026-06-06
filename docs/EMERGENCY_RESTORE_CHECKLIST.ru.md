@@ -21,7 +21,7 @@
 ## 2. Получить проект
 
 ```bash
-git clone -b codex/read-only-api-route-shell https://github.com/barakov-dot/amn2.git
+git clone -b codex-vps-test-prep https://github.com/barakov-dot/amn2.git
 cd amn2
 ```
 

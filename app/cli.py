@@ -737,7 +737,7 @@ def run_server_retest_plan(
         "",
         "1. Update code:",
         "cd /home/amn2",
-        "git pull origin codex/read-only-api-route-shell",
+        "git pull origin codex-vps-test-prep",
         "git log -1 --oneline",
         "source venv/bin/activate",
         "python -m pip install -e .",
