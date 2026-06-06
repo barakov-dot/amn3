@@ -400,16 +400,16 @@ still more reliable.
 Dry-run adding a peer on the VPS:
 
 ```powershell
-python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key PEER_PSK --vpn-ip 10.8.0.2 --dry-run
+$env:PEER_PSK | python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key-stdin --vpn-ip 10.8.0.2 --dry-run
 ```
 
-The command prints the planned `awg set` operation, but does not execute it and
-does not print the PSK in clear text.
+The command reads the PSK from stdin, prints the planned `awg set` operation,
+but does not execute it and does not put the PSK in the local command line.
 
 Real peer application requires the explicit `--apply` flag:
 
 ```powershell
-python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key PEER_PSK --vpn-ip 10.8.0.2 --apply
+$env:PEER_PSK | python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key-stdin --vpn-ip 10.8.0.2 --apply
 ```
 
 Dry-run peer removal:

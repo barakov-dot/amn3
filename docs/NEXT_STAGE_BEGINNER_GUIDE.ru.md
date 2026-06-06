@@ -517,7 +517,7 @@ backend. Для первого живого check сейчас надежнее 
 Dry-run добавления peer на VPS:
 
 ```powershell
-python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key PEER_PSK --vpn-ip 10.8.0.2 --dry-run
+$env:PEER_PSK | python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key-stdin --vpn-ip 10.8.0.2 --dry-run
 ```
 
 Команда показывает план `awg set`, но не выполняет его и не выводит PSK открытым текстом.
@@ -525,7 +525,7 @@ python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 -
 Реальное применение peer включается только явным флагом `--apply`:
 
 ```powershell
-python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key PEER_PSK --vpn-ip 10.8.0.2 --apply
+$env:PEER_PSK | python -m app.cli server apply-peer --config servers.yml --server debian-vps-1 --public-key PEER_PUBLIC_KEY --preshared-key-stdin --vpn-ip 10.8.0.2 --apply
 ```
 
 Dry-run удаления peer:
