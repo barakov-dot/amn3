@@ -4,7 +4,7 @@ Purpose: record the local-only AMN2 slice that tightens remote mutation partial-
 
 ## Result
 
-Status: `pushed-local-gate-complete`, awaiting PR or manual merge decision.
+Status: `merged-in-stable-local-gate-complete`.
 
 ```text
 repo: C:\Users\SooL\Documents\Amneziya
@@ -15,9 +15,14 @@ branch: codex/remote-partial-failure-contract
 head: 1a193b9 Add remote partial failure contract
 remote: amn2/codex/remote-partial-failure-contract
 target branch: codex-vps-test-prep
+merged stable head: 1a193b9 Add remote partial failure contract
 ```
 
-GitHub connector PR creation was attempted and failed with `403 Resource not accessible by integration`. The branch was pushed successfully, and GitHub printed the manual PR creation URL for the pushed branch.
+GitHub connector PR creation was attempted and failed with `403 Resource not accessible by integration`. The branch was pushed successfully, then `codex-vps-test-prep` was fast-forwarded locally and pushed directly:
+
+```text
+6b5b5b7..1a193b9  codex-vps-test-prep -> codex-vps-test-prep
+```
 
 ## Scope
 
@@ -69,6 +74,13 @@ pytest tests/server/test_operation_runner.py tests/server/test_peer_apply.py tes
 70 passed
 ```
 
+Focused validation after fast-forward merge into the main `amn2` checkout:
+
+```text
+pytest tests/server/test_operation_runner.py tests/server/test_peer_apply.py tests/services/test_access_service.py tests/bot/test_bot_workflows.py -q -p no:cacheprovider --basetemp C:\Users\SooL\Documents\VPS-OPS-LAB\.pytest-tmp-amn2-stable
+70 passed
+```
+
 Additional checks:
 
 ```text
@@ -80,4 +92,4 @@ passed
 
 This slice is safe to review as a local operation-contract change. It does not expand the live runner beyond the existing read-only runner and does not unlock broader write/API/config/agent surfaces.
 
-The latest VPS-smoked runtime/source package remains `568c611`; the current production branch head before merging this slice remains `6b5b5b7`.
+The latest VPS-smoked runtime/source package remains `568c611`; the current production branch head after merging this local-only slice is `1a193b9`.

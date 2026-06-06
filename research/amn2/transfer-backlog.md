@@ -1,8 +1,8 @@
 # `amn2` Transfer Backlog
 
-Update 2026-06-06: `amn2/codex-vps-test-prep` current head is `6b5b5b7 Document stdin PSK peer apply` after a docs-only runbook cleanup. Runtime/source package `568c611` remains the latest VPS-smoked source.
+Update 2026-06-06: `amn2/codex-vps-test-prep` current head is `1a193b9 Add remote partial failure contract` after a local-only operation-contract fast-forward. Runtime/source package `568c611` remains the latest VPS-smoked source.
 
-Local-only work branch update 2026-06-06: `amn2/codex/remote-partial-failure-contract` was pushed at `1a193b9 Add remote partial failure contract`; AMN3 evidence is `research/amn2/remote-partial-failure-contract-2026-06-06.md`. This branch has not moved `codex-vps-test-prep`; GitHub connector PR creation still returns `403 Resource not accessible by integration`.
+Local-only work branch update 2026-06-06: `amn2/codex/remote-partial-failure-contract` was pushed at `1a193b9 Add remote partial failure contract`, then fast-forward merged into `codex-vps-test-prep`; AMN3 evidence is `research/amn2/remote-partial-failure-contract-2026-06-06.md`. GitHub connector PR creation still returned `403 Resource not accessible by integration`, so integration used direct git push.
 
 ```text
 AMN3 package: dist/amn2-vps-update-and-smoke-kit-568c611.zip
@@ -13,6 +13,7 @@ local verification: 78 passed on focused remote-gate/package suite
 VPS evidence: research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
 VPS result: read-only-vps-smoke-pass, run_id 20260605T162742Z
 docs-only cleanup: 6b5b5b7 Document stdin PSK peer apply
+local-only contract merge: 1a193b9 Add remote partial failure contract
 ```
 
 Актуализация 2026-06-05: Phase 2 live single disposable test peer apply/revoke gate пройден на current stable `amn2/codex-vps-test-prep` head `7764ae7 Cover integration status in API smoke`.
