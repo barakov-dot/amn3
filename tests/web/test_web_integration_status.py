@@ -31,11 +31,18 @@ def test_integration_status_page_renders_gate_without_secret_markers(tmp_path: P
 
     assert response.status_code == 200
     assert "Integration status" in response.text
+    assert "controlled-prod-ready" in response.text
+    assert "c8a6363" in response.text
+    assert "20260606T202040Z" in response.text
+    assert "https-reverse-proxy" in response.text
+    assert "127.0.0.1:3040-loopback-only" in response.text
+    assert "465444a" in response.text
+    assert "requires-fresh-vps-smoke" in response.text
     assert "dry-run-only-pass" in response.text
     assert "Phase 2 live write gate" in response.text
     assert "verified-live" in response.text
     assert "new live peer apply/revoke without separate operator confirmation" in response.text
-    assert "operator-only controlled prod readiness checklist" in response.text
+    assert "VPS smoke current read-only head before source overlay update" in response.text
     assert "server:read" in response.text
     forbidden = [
         "PrivateKey",

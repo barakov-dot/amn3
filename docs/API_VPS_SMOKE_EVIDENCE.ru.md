@@ -8,6 +8,65 @@ Template policy: Заполнять после реального VPS smoke; cur
 
 Не вставлять raw API token, Authorization header, token hash, `.conf`, QR, `vpn://`, `PrivateKey`, `PresharedKey`, SSH password/private key, `.env`, PSK, полные response bodies или `api-server.log` без ручной redaction.
 
+## Controlled Prod Update: 2026-06-07 / c8a6363 source overlay
+
+Назначение: зафиксировать safe summary фактического VPS состояния после source overlay update и loopback API smoke на `/opt/amn2`.
+
+```text
+source overlay commit: c8a6363
+source update run_id: 20260606T202012Z
+source_update_status: passed
+api loopback smoke run_id: 20260606T202040Z
+workspace: /opt/amn2
+VPS checkout state: not a git checkout; source-overlay/update kit path
+API bind: http://127.0.0.1:3040
+VPS_APPLY_ENABLED shell: false
+VPS_APPLY_ENABLED .env: false
+server name: local
+runtime: docker
+```
+
+Read-only route evidence:
+
+```text
+checked_routes: 5
+status: passed
+
+servers: 200, forbidden_markers=[]
+integration_status: 200, forbidden_markers=[]
+server_summary: 200, forbidden_markers=[]
+metrics_summary: 200, forbidden_markers=[]
+users_summary: 200, forbidden_markers=[]
+```
+
+Auth/listener/audit evidence:
+
+```text
+auth_status: passed
+missing_bearer_actual: 401
+wrong_scope_actual: 403
+revoked_token_actual: 401
+listener_status: passed
+api_listener: 127.0.0.1:3040 loopback-only
+audit_status: passed
+api_read_rows: 5
+audit_safe: yes
+server_db_sync: passed
+```
+
+Access and recovery boundary:
+
+```text
+web/admin access: HTTPS reverse proxy approved by operator
+public API 3040 exposure: blocked
+data/: preserved
+.env: preserved
+servers.yml: preserved
+recovery kits: 32d01fd and c8a6363 present with sha files and extracted dirs
+controlled_prod_decision: controlled-prod-ready for source overlay c8a6363
+next local head before VPS overlay update: 465444a requires fresh VPS smoke
+```
+
 ## 0. Актуальный Smoke: 2026-06-06 / 64a6750
 
 Назначение: зафиксировать безопасный факт read-only API smoke на git-managed checkout `/opt/amn2-git` после перехода с source overlay `/opt/amn2`.

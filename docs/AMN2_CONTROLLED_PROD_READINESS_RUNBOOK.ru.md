@@ -1,6 +1,6 @@
 # AMN2 Controlled Prod Readiness Runbook
 
-Дата: 2026-06-06.
+Дата: 2026-06-06. Обновлено: 2026-06-07.
 
 Назначение: зафиксировать безопасный operator-only production-режим для текущей ветки `codex-vps-test-prep` после read-only VPS smoke. Этот runbook не открывает public web/API, `/api/clients` write CRUD, API `config:read`, public/self-service config delivery, Local Agent mutations, backup/import/reboot routes или новые live peer mutations.
 
@@ -9,15 +9,18 @@
 ```text
 repo: https://github.com/barakov-dot/amn2.git
 branch: codex-vps-test-prep
-latest VPS-smoked app-code head: 64a6750 Document controlled prod readiness
-latest VPS read-only smoke: 64a6750 pass-with-token-hygiene-exception, 2026-06-06 around 20:48 UTC
+latest VPS source overlay head: c8a6363 Add Local Agent runtime summary mapper
+latest VPS read-only smoke: c8a6363 pass, run_id 20260606T202040Z
+current local read-only head: 465444a Add safe API smoke cycle
+local head deployment status: requires fresh VPS smoke before source overlay update
 previous VPS read-only smoke: 32d01fd pass, run_id 20260606T185114Z
 previous API route smoke: 1a193b9 pass, run_id 20260606T154636Z
-current prod decision: defer-prod until the previous chat-exposed token is revoked or expires
+current prod decision: controlled-prod-ready for source overlay c8a6363
+web/admin access: HTTPS reverse proxy approved; API 3040 remains loopback-only
 Phase 2 live single disposable peer gate: verified-live on stable line
 ```
 
-`64a6750` прошел read-only API smoke на git-managed checkout `/opt/amn2-git` с `VPS_APPLY_ENABLED=false`, loopback API `127.0.0.1:3040`, пятью read-only routes и пустыми forbidden markers. Новый smoke token был отозван. Предыдущий raw token был опубликован в чате и по решению оператора не отзывается сейчас; поэтому этот smoke подтверждает read-only baseline, но не закрывает token-hygiene условие для полного `controlled-prod-ready`.
+Source overlay `c8a6363` прошел read-only API smoke на `/opt/amn2` с `VPS_APPLY_ENABLED=false`, loopback API `127.0.0.1:3040`, пятью read-only routes, `auth/listener/audit` checks passed и пустыми forbidden markers. Web/admin доступ подтвержден как HTTPS reverse proxy, при этом порт API `3040` наружу не выставляется. Локальный head `465444a` содержит дополнительные read-only доработки и требует отдельного VPS smoke перед переносом в source overlay.
 
 ## Controlled Prod Mode
 
@@ -65,7 +68,7 @@ Controlled prod не означает публичный SaaS-режим.
 - [ ] VPS source overlay commit совпадает с последним smoke-passed commit или явно superseding smoke-passed commit.
 - [ ] Последний read-only smoke safe summary имеет `VPS verdict: pass`.
 - [ ] Smoke result показывает только read-only routes и `status: passed`; для head с `/api/local-agent/runtime/summary` ожидается `checked_routes: 6`.
-- [ ] `/api/integration/status` сообщает `read_only_vps_smoked`, `phase_2=verified_live`, `write_routes_enabled=false`, `write_operations_enabled=false`.
+- [ ] `/api/integration/status` сообщает `controlled_prod_ready`, `phase_2=verified_live`, `write_routes_enabled=false`, `write_operations_enabled=false`, `public_api_exposed=false`.
 - [ ] Auth checks: missing bearer `401`, wrong scope `403`, revoked token `401`.
 - [ ] Listener и audit checks имеют `passed`.
 - [ ] Operator shell по умолчанию держит `VPS_APPLY_ENABLED=false`.
@@ -178,7 +181,7 @@ next action:
 
 ## Decision Rules
 
-`controlled-prod-ready` разрешен только когда checklist закрыт и stop conditions отсутствуют. Если read-only smoke прошел, но остался активный chat-exposed API token, использовать статус `api-smoke-passed` или `defer-prod`, а не `controlled-prod-ready`.
+`controlled-prod-ready` разрешен только когда checklist закрыт и stop conditions отсутствуют. Для текущего VPS source overlay это состояние зафиксировано на `c8a6363`. Если новый read-only head еще не прошел VPS smoke, он не становится source overlay автоматически: использовать статус `requires_fresh_vps_smoke` для локальной доработки.
 
 `needs-fix` обязателен, если smoke, auth, listener, audit, checksum, host key, access path или evidence hygiene не проходят.
 
@@ -186,4 +189,4 @@ next action:
 
 ## Next Engineering Slice
 
-После `controlled-prod-ready` следующий инженерный slice должен оставаться read-only. Не переходить сразу к config delivery, public API writes, backup/import или Local Agent mutations.
+После `controlled-prod-ready` следующий инженерный slice должен оставаться read-only. Не переходить сразу к config delivery, public API writes, backup/import или Local Agent mutations. Перед обновлением VPS source overlay с текущего локального head `465444a` выполнить fresh VPS smoke через `python -m app.cli api smoke-cycle`.

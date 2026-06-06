@@ -9,9 +9,10 @@
 GitHub: https://github.com/barakov-dot/amn2.git
 Remote для production code: amn2
 Рабочая ветка: codex-vps-test-prep
-Последний VPS-smoked app-code head: 64a6750 Document controlled prod readiness
-Последний VPS smoke status: api-smoke-passed with token-hygiene exception
-Controlled-prod decision: defer-prod until previous chat-exposed token is revoked or expired
+Последний VPS source overlay head: c8a6363 Add Local Agent runtime summary mapper
+Последний VPS smoke status: pass, run_id 20260606T202040Z
+Текущий локальный read-only head: 465444a Add safe API smoke cycle
+Controlled-prod decision: controlled-prod-ready for source overlay c8a6363
 Стабильный verified live VPS tag: vps-live-cycle-verified -> d6eda20
 Lab/coordination repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 ```
@@ -35,9 +36,9 @@ Lab/coordination repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 - docs/PRODUCTION_VPS_CHECKLIST.ru.md
 - docs/LOCAL_AGENT.ru.md
 
-Текущий статус: app-code baseline `64a6750` прошел read-only API smoke на VPS `/opt/amn2-git` через loopback `127.0.0.1:3040`, пять read-only routes вернули 200, forbidden markers пустые. Новый smoke token отозван. Предыдущий raw token был опубликован в чате и по решению оператора пока не отозван; поэтому итоговый статус `api-smoke-passed`, но не полный `controlled-prod-ready`.
+Текущий статус: source overlay `c8a6363` прошел read-only API smoke на VPS `/opt/amn2` через loopback `127.0.0.1:3040`, пять read-only routes вернули 200, forbidden markers пустые, auth/listener/audit checks passed. Web/admin доступ утвержден через HTTPS reverse proxy, при этом порт API `3040` наружу не выставляется. Итоговый статус: `controlled-prod-ready` для source overlay `c8a6363`.
 
-Следующий локальный срез после этого evidence: `/api/local-agent/runtime/summary` добавлен как controller-facing read-only route под `server:read`. Он не дергает Local Agent по сети и не выдает host/port/token/container/interface/config path. Следующий VPS smoke для текущего head должен идти через `python -m app.cli api smoke-cycle` и ожидать `checked_routes: 6`; raw token не печатается, временный token отзывается автоматически.
+Следующий локальный срез после этого evidence: текущий head `465444a` добавляет safe API smoke cycle и read-only `/api/local-agent/runtime/summary` под `server:read`. Он не дергает Local Agent по сети и не выдает host/port/token/container/interface/config path. Перед переносом `465444a` в VPS source overlay нужен fresh VPS smoke через `python -m app.cli api smoke-cycle`; raw token не печатается, временный token отзывается автоматически.
 
 Цель следующего этапа: не открывать broad write API, а закрыть controlled-prod readiness или выбрать следующий read-only controller-facing slice.
 ```
@@ -60,7 +61,9 @@ git remote -v
 В `git log -8` должен быть текущий documentation/evidence commit поверх app-code baseline:
 
 ```text
-64a6750 Document controlled prod readiness
+465444a Add safe API smoke cycle
+8f0be19 Add Local Agent runtime summary API route
+c8a6363 Add Local Agent runtime summary mapper
 ```
 
 ## 4. Что Уже Готово
@@ -75,8 +78,9 @@ git remote -v
 - Remote-operation dry-run metadata, partial failure model and PSK stdin path.
 - Phase 2 single disposable peer live apply/sync/revoke/sync evidence.
 - Local Agent first slice: read-only `/agent/*`, hash-only token and audit.
-- Local Agent runtime summary mapper included in VPS-smoked app-code baseline `64a6750`.
+- Local Agent runtime summary mapper included in VPS-smoked source overlay `c8a6363`.
 - API controller-facing Local Agent runtime summary route: `/api/local-agent/runtime/summary`.
+- Safe API smoke cycle included in local head `465444a`; requires fresh VPS smoke before source overlay update.
 
 ## 5. Что Не Открыто
 
@@ -96,22 +100,24 @@ git remote -v
 Последний VPS-smoked app-code baseline:
 
 ```text
-64a6750 Document controlled prod readiness
-workspace: /opt/amn2-git
+source overlay: c8a6363 Add Local Agent runtime summary mapper
+local head: 465444a Add safe API smoke cycle
+workspace: /opt/amn2
 server: local
 api bind: 127.0.0.1:3040
 checked_routes: 5
 route status codes: 200
 forbidden_markers: []
-status: api-smoke-passed
+status: controlled-prod-ready for source overlay c8a6363
 ```
 
-Readiness caveat:
+Deployment caveat:
 
 ```text
-previous chat-exposed token: not revoked by operator decision
-reported expiry: 2026-06-13T20:37:39+00:00
-controlled-prod decision: defer-prod until token is revoked or expired
+local head 465444a: requires fresh VPS smoke before source overlay update
+public API 3040 exposure: blocked
+web/admin access: HTTPS reverse proxy approved
+VPS_APPLY_ENABLED default: false
 ```
 
 ## 7. Главные Документы
@@ -129,6 +135,6 @@ controlled-prod decision: defer-prod until token is revoked or expired
 
 ## 8. Рекомендуемый Следующий Шаг
 
-Если оператор готов закрыть controlled-prod readiness: зафиксировать revoke/expiry предыдущего chat-exposed token и обновить `docs/API_VPS_SMOKE_EVIDENCE.ru.md`.
+Если VPS сейчас не трогаем: основной чат может доработать read-only controller UX и status visibility вокруг `/api/integration/status` и `/api/local-agent/runtime/summary`, но не начинать broad write API, config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
 
-Если VPS сейчас не трогаем: основной чат может доработать read-only controller UX вокруг `/api/local-agent/runtime/summary`, но не начинать broad write API, config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
+Перед переносом локального head `465444a` на VPS: собрать package/update kit, выполнить source overlay update и fresh read-only smoke, затем обновить `docs/API_VPS_SMOKE_EVIDENCE.ru.md`.

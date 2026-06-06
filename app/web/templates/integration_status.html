@@ -19,12 +19,40 @@
               <td>{{ report.status|replace("_", "-") }}</td>
             </tr>
             <tr>
+              <td>Controlled prod decision</td>
+              <td>{{ report.controlled_prod_readiness.decision|replace("_", "-") }}</td>
+            </tr>
+            <tr>
               <td>Stable head</td>
               <td><code>{{ report.api_baseline.stable_head }}</code></td>
             </tr>
             <tr>
+              <td>Source overlay</td>
+              <td><code>{{ report.controlled_prod_readiness.source_overlay_head }}</code></td>
+            </tr>
+            <tr>
+              <td>VPS smoke run</td>
+              <td><code>{{ report.controlled_prod_readiness.vps_smoke_run_id }}</code></td>
+            </tr>
+            <tr>
               <td>API/web baseline</td>
               <td><code>{{ report.api_baseline.api_web_baseline_head }}</code></td>
+            </tr>
+            <tr>
+              <td>Web/admin access</td>
+              <td>{{ report.controlled_prod_readiness.web_admin_access|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>API listener</td>
+              <td>{{ report.controlled_prod_readiness.api_listener|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Local read-only head</td>
+              <td><code>{{ report.local_read_only_extension.head }}</code></td>
+            </tr>
+            <tr>
+              <td>Local head status</td>
+              <td>{{ report.local_read_only_extension.status|replace("_", "-") }}</td>
             </tr>
             <tr>
               <td>Remote operation Phase 1</td>
@@ -41,6 +69,14 @@
             <tr>
               <td>Remote writes enabled</td>
               <td>{{ report.remote_operation_gate.write_operations_enabled }}</td>
+            </tr>
+            <tr>
+              <td>Public API exposed</td>
+              <td>{{ report.api_baseline.public_api_exposed }}</td>
+            </tr>
+            <tr>
+              <td>VPS apply default</td>
+              <td>{{ report.controlled_prod_readiness.vps_apply_enabled_default }}</td>
             </tr>
           </tbody>
         </table>
