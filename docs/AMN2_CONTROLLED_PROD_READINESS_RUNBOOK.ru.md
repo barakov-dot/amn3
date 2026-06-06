@@ -9,15 +9,15 @@
 ```text
 repo: https://github.com/barakov-dot/amn2.git
 branch: codex-vps-test-prep
-current head: c8a6363 Add Local Agent runtime summary mapper
-last VPS-smoked head: 32d01fd Update integration status for controlled prod
-current package status: package-ready-not-vps-smoked
-latest proven VPS read-only smoke: 32d01fd pass, run_id 20260606T185114Z
-previous VPS read-only smoke: 1a193b9 pass, run_id 20260606T154636Z
+latest VPS-smoked app-code head: 64a6750 Document controlled prod readiness
+latest VPS read-only smoke: 64a6750 pass-with-token-hygiene-exception, 2026-06-06 around 20:48 UTC
+previous VPS read-only smoke: 32d01fd pass, run_id 20260606T185114Z
+previous API route smoke: 1a193b9 pass, run_id 20260606T154636Z
+current prod decision: defer-prod until the previous chat-exposed token is revoked or expires
 Phase 2 live single disposable peer gate: verified-live on stable line
 ```
 
-`c8a6363` добавляет только controller-safe Local Agent runtime summary mapper. Сам mapper не требует live VPS gate, но если оператор принимает `c8a6363` как новый VPS source/package baseline, нужен отдельный read-only update/smoke.
+`64a6750` прошел read-only API smoke на git-managed checkout `/opt/amn2-git` с `VPS_APPLY_ENABLED=false`, loopback API `127.0.0.1:3040`, пятью read-only routes и пустыми forbidden markers. Новый smoke token был отозван. Предыдущий raw token был опубликован в чате и по решению оператора не отзывается сейчас; поэтому этот smoke подтверждает read-only baseline, но не закрывает token-hygiene условие для полного `controlled-prod-ready`.
 
 ## Controlled Prod Mode
 
@@ -73,6 +73,7 @@ Controlled prod не означает публичный SaaS-режим.
 - [ ] SSH host key prompt не появился, либо host key проверен out-of-band.
 - [ ] Recovery path известен до будущего write gate.
 - [ ] Evidence не содержит secret-bearing data.
+- [ ] Нет активного chat-exposed API token, либо он явно отозван/истек и это зафиксировано безопасным audit/evidence.
 
 ## Operator Verification Commands
 
@@ -115,6 +116,7 @@ cat /opt/amn2/vps-smoke/api-loopback-*/api-smoke-result.json
 - для проверки требуется public web/API exposure;
 - recovery path неясен;
 - evidence требует публикации секретов или full logs.
+- есть активный chat-exposed API token, который не отозван и не истек.
 
 ## Recovery Boundary
 
@@ -156,7 +158,7 @@ next action:
 
 ## Decision Rules
 
-`controlled-prod-ready` разрешен только когда checklist закрыт и stop conditions отсутствуют.
+`controlled-prod-ready` разрешен только когда checklist закрыт и stop conditions отсутствуют. Если read-only smoke прошел, но остался активный chat-exposed API token, использовать статус `api-smoke-passed` или `defer-prod`, а не `controlled-prod-ready`.
 
 `needs-fix` обязателен, если smoke, auth, listener, audit, checksum, host key, access path или evidence hygiene не проходят.
 

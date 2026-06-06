@@ -9,8 +9,9 @@
 GitHub: https://github.com/barakov-dot/amn2.git
 Remote для production code: amn2
 Рабочая ветка: codex-vps-test-prep
-Текущий head: c8a6363 Add Local Agent runtime summary mapper
-Последний VPS-smoked head: 32d01fd Update integration status for controlled prod
+Последний VPS-smoked app-code head: 64a6750 Document controlled prod readiness
+Последний VPS smoke status: api-smoke-passed with token-hygiene exception
+Controlled-prod decision: defer-prod until previous chat-exposed token is revoked or expired
 Стабильный verified live VPS tag: vps-live-cycle-verified -> d6eda20
 Lab/coordination repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 ```
@@ -34,7 +35,7 @@ Lab/coordination repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 - docs/PRODUCTION_VPS_CHECKLIST.ru.md
 - docs/LOCAL_AGENT.ru.md
 
-Текущий статус: read-only API/web integration уже VPS-smoked на 32d01fd; текущий head c8a6363 добавляет local-only Local Agent runtime summary mapper и package-ready, но сам head еще не является VPS-smoked baseline.
+Текущий статус: app-code baseline `64a6750` прошел read-only API smoke на VPS `/opt/amn2-git` через loopback `127.0.0.1:3040`, пять read-only routes вернули 200, forbidden markers пустые. Новый smoke token отозван. Предыдущий raw token был опубликован в чате и по решению оператора пока не отозван; поэтому итоговый статус `api-smoke-passed`, но не полный `controlled-prod-ready`.
 
 Цель следующего этапа: не открывать broad write API, а закрыть controlled-prod readiness или выбрать следующий read-only controller-facing slice.
 ```
@@ -54,10 +55,10 @@ git remote -v
 ## codex-vps-test-prep...amn2/codex-vps-test-prep
 ```
 
-Верхний commit на момент этого handoff:
+В `git log -8` должен быть текущий documentation/evidence commit поверх app-code baseline:
 
 ```text
-c8a6363 Add Local Agent runtime summary mapper
+64a6750 Document controlled prod readiness
 ```
 
 ## 4. Что Уже Готово
@@ -72,7 +73,7 @@ c8a6363 Add Local Agent runtime summary mapper
 - Remote-operation dry-run metadata, partial failure model and PSK stdin path.
 - Phase 2 single disposable peer live apply/sync/revoke/sync evidence.
 - Local Agent first slice: read-only `/agent/*`, hash-only token and audit.
-- Local Agent runtime summary mapper at `c8a6363`.
+- Local Agent runtime summary mapper included in VPS-smoked app-code baseline `64a6750`.
 
 ## 5. Что Не Открыто
 
@@ -89,20 +90,25 @@ c8a6363 Add Local Agent runtime summary mapper
 
 ## 6. VPS Статус
 
-Последний VPS-smoked baseline:
+Последний VPS-smoked app-code baseline:
 
 ```text
-32d01fd Update integration status for controlled prod
-run_id: 20260606T185114Z
-status: read-only VPS smoke pass
+64a6750 Document controlled prod readiness
+workspace: /opt/amn2-git
+server: local
+api bind: 127.0.0.1:3040
+checked_routes: 5
+route status codes: 200
+forbidden_markers: []
+status: api-smoke-passed
 ```
 
-Текущий `c8a6363`:
+Readiness caveat:
 
 ```text
-status: package-ready-not-vps-smoked
-scope: local-only runtime summary mapper
-VPS smoke required only if accepting c8a6363 as new VPS source/package baseline
+previous chat-exposed token: not revoked by operator decision
+reported expiry: 2026-06-13T20:37:39+00:00
+controlled-prod decision: defer-prod until token is revoked or expired
 ```
 
 ## 7. Главные Документы
@@ -120,6 +126,6 @@ VPS smoke required only if accepting c8a6363 as new VPS source/package baseline
 
 ## 8. Рекомендуемый Следующий Шаг
 
-Если оператор готов к VPS-проверке: выполнить read-only update/smoke для `c8a6363` package и затем controlled-prod readiness decision по `docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md`.
+Если оператор готов закрыть controlled-prod readiness: зафиксировать revoke/expiry предыдущего chat-exposed token и обновить `docs/API_VPS_SMOKE_EVIDENCE.ru.md`.
 
 Если VPS сейчас не трогаем: следующий инженерный slice должен оставаться read-only, policy-bound and no-secret. Не начинать broad write API, config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.

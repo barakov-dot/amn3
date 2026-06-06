@@ -1,12 +1,79 @@
 # API VPS Smoke Evidence
 
-Дата: 2026-06-02.
+Дата: 2026-06-02. Обновлено: 2026-06-06.
 
 Назначение: зафиксировать только безопасные факты реального VPS smoke для read-only API shell на ветке `codex/read-only-api-route-shell`.
 
 Template policy: Заполнять после реального VPS smoke; historical command marker `python -m app.cli api smoke-check`; historical filled evidence ниже оставляет только safe summary.
 
 Не вставлять raw API token, Authorization header, token hash, `.conf`, QR, `vpn://`, `PrivateKey`, `PresharedKey`, SSH password/private key, `.env`, PSK, полные response bodies или `api-server.log` без ручной redaction.
+
+## 0. Актуальный Smoke: 2026-06-06 / 64a6750
+
+Назначение: зафиксировать безопасный факт read-only API smoke на git-managed checkout `/opt/amn2-git` после перехода с source overlay `/opt/amn2`.
+
+```text
+Дата и время проверки: 2026-06-06, около 20:48 UTC
+VPS alias: mirror / local
+Workspace: /opt/amn2-git
+Branch: codex-vps-test-prep
+Target app-code commit: 64a6750 Document controlled prod readiness
+API bind: http://127.0.0.1:3040
+VPS_APPLY_ENABLED: false
+Server name: local
+```
+
+Preflight evidence:
+
+```text
+Telegram API: ok
+Bot identity: ok
+Proxy: enabled
+server config: ok
+database sync: ok
+server check dry-run: ok
+peer apply dry-run: ok
+peer revoke dry-run: ok
+traffic dry-run: ok
+backup target: ok
+```
+
+Read-only route evidence:
+
+```text
+checked_routes: 5
+status: passed
+
+servers: 200, forbidden_markers=[]
+integration_status: 200, forbidden_markers=[]
+server_summary: 200, forbidden_markers=[]
+metrics_summary: 200, forbidden_markers=[]
+users_summary: 200, forbidden_markers=[]
+```
+
+Token evidence:
+
+```text
+new smoke token status: revoked
+new smoke token revoke reason: smoke-complete
+raw token/header/hash evidence: not published
+previous chat-exposed token: not revoked by operator decision
+previous chat-exposed token expiry reported by CLI: 2026-06-13T20:37:39+00:00
+```
+
+VPS verdict:
+
+```text
+api_smoke_status: passed
+forbidden_markers: none
+listener_scope: loopback-only
+write_routes_enabled: false
+write_operations_enabled: false
+controlled_prod_decision: defer-prod
+defer reason: previous chat-exposed token remains a token-hygiene exception until revoked or expired
+```
+
+This run confirms the read-only API route shell on the current app-code baseline. It does not grant public exposure, write API routes, `config:read`, Local Agent mutations, backup/import/reboot routes or broad live peer mutation permission.
 
 ## 1. Контекст
 

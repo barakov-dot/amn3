@@ -10,8 +10,9 @@
 production repo: C:\Users\SooL\Documents\Amneziya
 remote: https://github.com/barakov-dot/amn2.git
 branch: codex-vps-test-prep
-current head: c8a6363 Add Local Agent runtime summary mapper
-last VPS-smoked head: 32d01fd Update integration status for controlled prod
+latest VPS-smoked app-code head: 64a6750 Document controlled prod readiness
+latest VPS smoke status: api-smoke-passed with token-hygiene exception
+controlled-prod decision: defer-prod until previous chat-exposed token is revoked or expired
 lab repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 lab branch: master
 ```
@@ -74,6 +75,7 @@ lab branch: master
 | --- | --- | --- |
 | `local-gate-complete` | Локальные тесты/контракт пройдены без VPS writes | Можно менять production VPS без gate |
 | `api-smoke-passed` | Read-only loopback API проверен на VPS | Разрешены write routes или public exposure |
+| `api-smoke-passed-token-exception` | Read-only loopback API прошел, но token hygiene не закрыт | Полный `controlled-prod-ready` |
 | `dry-run-only-pass` | Remote-operation dry-run/read-only gate пройден | Live apply/revoke подтверждены |
 | `verified-live` | Конкретная live mutation прошла с evidence | Можно расширять другие destructive surfaces |
 | `controlled-prod-ready` | Operator checklist закрыт без stop conditions | Разрешен broad public SaaS mode |
@@ -99,8 +101,9 @@ lab branch: master
 2. Сначала local tests, потом package, потом read-only smoke, потом live gate if needed.
 3. Любая write operation получает dry-run, explicit confirmation, audit, rollback and recovery story.
 4. Evidence не содержит raw token/header/hash/config/private key/PSK/QR/vpn URI.
-5. Upstream projects дают идеи и requirements, но код не копируется.
-6. Для hybrid продукта сохранять operator-first, status-first and read-only-first архитектуру.
+5. Если raw token попал в чат или GitHub, readiness не считается закрытым до revoke/expiry и безопасной фиксации этого факта.
+6. Upstream projects дают идеи и requirements, но код не копируется.
+7. Для hybrid продукта сохранять operator-first, status-first and read-only-first архитектуру.
 
 ## Следующий Рекомендуемый Срез
 
