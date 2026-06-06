@@ -19,11 +19,13 @@ VPS result for c8a6363: read-only-vps-smoke-pass, run_id 20260606T202040Z
 VPS smoke evidence: research/amn2/local-agent-runtime-summary-vps-smoke-evidence-2026-06-06.md
 previous VPS-smoked runtime/source: 32d01fd, run_id 20260606T185114Z, evidence research/amn2/integration-status-controlled-prod-update-2026-06-06.md
 previous VPS-smoked runtime/source: 1a193b9, run_id 20260606T154636Z, evidence research/amn2/remote-partial-failure-contract-vps-smoke-evidence-2026-06-06.md
-controlled prod readiness: readiness-prefill-recorded, operator confirmations pending
-controlled prod access path: approved HTTPS reverse proxy; public API 3040 not exposed; final decision pending
+controlled prod readiness: controlled-prod-ready
+controlled prod access path: approved HTTPS reverse proxy; public API 3040 not exposed
+controlled prod recovery path: known
 controlled prod runbook: docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
 controlled prod evidence: research/amn2/controlled-prod-readiness-2026-06-06.md
 controlled prod reverse proxy confirmation: research/amn2/controlled-prod-reverse-proxy-confirmation-2026-06-07.md
+controlled prod final decision: research/amn2/controlled-prod-ready-2026-06-07.md
 controlled prod next chat: docs/NEXT_CHAT_AMN2_CONTROLLED_PROD_DECISION.ru.md
 previous VPS-smoked source: 568c611, run_id 20260605T162742Z, evidence research/amn2/phase-2-post-psk-stdin-vps-smoke-evidence-2026-06-05.md
 docs-only cleanup: 6b5b5b7 Document stdin PSK peer apply
@@ -878,4 +880,4 @@ Real VPS Phase 1 read-only/dry-run gate пройден 2026-06-04 как `dry-ru
 - Docker AmneziaWG write/reload/restart behavior;
 - реальный Local Agent deployment или controller-to-agent calls.
 
-Следующий рекомендуемый шаг для текущего git head `c8a6363`: пройти operator-only controlled-prod readiness по `docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md`; для нового чата использовать `docs/NEXT_CHAT_AMN2_CONTROLLED_PROD_DECISION.ru.md` и зафиксировать `controlled-prod-ready`, `needs-fix` или `defer-prod`. Phase 2 single disposable peer apply/revoke уже verified-live, а `c8a6363` уже прошел real VPS read-only smoke; write lifecycle, config delivery API, Local Agent mutation routes, backup/import/reboot и public web/API exposure остаются заблокированы до отдельных gates.
+Следующий рекомендуемый шаг для текущего git head `c8a6363`: продолжить только read-only next slice после `controlled-prod-ready`. Phase 2 single disposable peer apply/revoke уже verified-live, а `c8a6363` уже прошел real VPS read-only smoke; write lifecycle, config delivery API, Local Agent mutation routes, backup/import/reboot и public API `3040` остаются заблокированы до отдельных gates.

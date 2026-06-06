@@ -7,7 +7,7 @@ This document contains no secrets, no full logs and no live write evidence.
 ## Decision
 
 ```text
-status: readiness-prefill-recorded; operator-confirmations-pending
+status: controlled-prod-ready
 target mode: operator-only controlled prod
 amn2 branch at evidence capture: codex-vps-test-prep
 amn2 head at evidence capture: c8a6363 Add Local Agent runtime summary mapper
@@ -19,6 +19,7 @@ previous VPS smoke: 32d01fd read-only-vps-smoke-pass, run_id 20260606T185114Z
 runbook: docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
 next chat handoff: docs/NEXT_CHAT_AMN2_CONTROLLED_PROD_DECISION.ru.md
 reverse proxy confirmation: research/amn2/controlled-prod-reverse-proxy-confirmation-2026-06-07.md
+controlled prod ready evidence: research/amn2/controlled-prod-ready-2026-06-07.md
 ```
 
 ## Scope
@@ -84,15 +85,17 @@ public API 3040 exposed: no
 web listener: 127.0.0.1:3030
 login_http: 200
 rollback/current kits and data/.env/servers.yml: present
+recovery path known: yes
+decision: controlled-prod-ready
 ```
 
-Remaining operator-only confirmations before `controlled-prod-ready`:
+Closed operator-only confirmations:
 
 ```text
 integration status body: confirm safe fields if required by the readiness checklist
 host key prompt: not applicable for web/admin reverse-proxy access, unless SSH is used for operations
-recovery path known: yes/no
-decision: controlled-prod-ready, needs-fix, or defer-prod
+recovery path known: yes
+decision: controlled-prod-ready
 ```
 
 Do not use this prefill as authorization for public exposure or new write operations.
@@ -103,34 +106,22 @@ Next-chat handoff for the final operator decision:
 docs/NEXT_CHAT_AMN2_CONTROLLED_PROD_DECISION.ru.md
 ```
 
-## Required Operator Result
+## Operator Result
 
-The next operator evidence should use the runbook template and end in one of:
-
-```text
-controlled-prod-ready
-needs-fix
-defer-prod
-```
-
-Until `controlled-prod-ready` is recorded, treat the current state as:
+Recorded result:
 
 ```text
-c8a6363 read-only-vps-smoke-pass; controlled-prod-readiness-pending
+c8a6363 read-only-vps-smoke-pass; controlled-prod-ready
 ```
 
 ## Next Implementation Candidate
 
-After readiness is recorded, the next code slice should stay read-only:
+After readiness is recorded, the next code slice should stay read-only. The previous candidate, controller-safe Local Agent runtime summary, is already implemented and read-only VPS-smoked. Prefer another read-only/status/operator-safety slice before any write expansion.
 
 ```text
-controller-safe Local Agent runtime summary
-```
-
-Design source:
-
-```text
-research/amn2/local-agent-runtime-metadata-alignment.md
+read-only controlled-prod status/recovery visibility
+operator documentation cleanup
+another read-only status/observability slice
 ```
 
 Blocked until separate gates:

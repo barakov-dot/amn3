@@ -58,9 +58,9 @@ Still not enabled by this confirmation:
 ## Remaining Decision Fields
 
 ```text
-recovery path known: pending explicit operator decision
-decision: pending controlled-prod-ready | needs-fix | defer-prod
-next action: pending
+recovery path known: yes
+decision: controlled-prod-ready
+next action: continue with read-only next slice
 ```
 
-This confirmation removes the web/admin access-path blocker but does not by itself declare `controlled-prod-ready`.
+This confirmation removed the web/admin access-path blocker. Final readiness was later recorded in `research/amn2/controlled-prod-ready-2026-06-07.md`.

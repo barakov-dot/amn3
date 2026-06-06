@@ -213,9 +213,10 @@ c8a6363 read-only VPS smoke: passed, run_id 20260606T202040Z
 Текущий статус:
 
 ```text
-status: readiness-prefill-recorded; operator-confirmations-pending
+status: controlled-prod-ready
 last VPS-smoked source: c8a6363
 previous VPS-smoked source: 32d01fd
+controlled prod decision: controlled-prod-ready, evidence research/amn2/controlled-prod-ready-2026-06-07.md
 ```
 
 Операторские подтверждения еще нужны:

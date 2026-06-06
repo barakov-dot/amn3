@@ -2,7 +2,7 @@
 
 Дата: 2026-06-06.
 
-Цель следующего чата: принять operator-only решение по controlled prod readiness для текущего `amn2/codex-vps-test-prep` baseline.
+Цель документа: исторически передать operator-only решение по controlled prod readiness для текущего `amn2/codex-vps-test-prep` baseline. Решение уже принято: `controlled-prod-ready`.
 
 Это не разрешение на public prod, live peer mutations, API write routes, config delivery, Local Agent mutations, backup/import/reboot или публикацию secret-bearing evidence.
 
@@ -14,6 +14,7 @@ research/amn2/controlled-prod-readiness-2026-06-06.md
 research/amn2/local-agent-runtime-summary-vps-smoke-evidence-2026-06-06.md
 research/amn2/integration-status-controlled-prod-update-2026-06-06.md
 research/amn2/controlled-prod-reverse-proxy-confirmation-2026-06-07.md
+research/amn2/controlled-prod-ready-2026-06-07.md
 docs/PROJECT_STATUS_CURRENT.ru.md
 docs/PROJECT_CONTEXT_IMPORT.ru.md
 research/amn2/transfer-backlog.md
@@ -55,6 +56,8 @@ public API 3040 exposed: no
 web listener: 127.0.0.1:3030
 login_http: 200
 rollback/current kits and data/.env/servers.yml: present
+recovery path known: yes
+decision: controlled-prod-ready
 ```
 
 ## Текущий статус
@@ -62,24 +65,24 @@ rollback/current kits and data/.env/servers.yml: present
 ```text
 c8a6363 read-only-vps-smoke-pass
 32d01fd is historical prior VPS-smoked source
-controlled-prod-readiness: operator confirmations pending
+controlled-prod-readiness: controlled-prod-ready
 ```
 
-## Что нужно от оператора
+## Operator Decision Packet
 
-Вернуть только безопасный decision packet:
+Recorded safe decision packet:
 
 ```text
-integration status safe fields: ok | not checked | needs-fix
-host key prompt: not applicable | none | verified-out-of-band | unexpected
-recovery path known: yes | no
-decision: controlled-prod-ready | needs-fix | defer-prod
-next action:
+integration status safe fields: ok via read-only smoke
+host key prompt: not applicable for web/admin reverse-proxy access
+recovery path known: yes
+decision: controlled-prod-ready
+next action: continue with read-only next slice
 ```
 
 ## Decision Rules
 
-For current `c8a6363`, read-only VPS update/smoke already passed with `run_id=20260606T202040Z`. `controlled-prod-ready` for current head can be recorded only if:
+For current `c8a6363`, read-only VPS update/smoke already passed with `run_id=20260606T202040Z`. `controlled-prod-ready` was recorded after these conditions were met:
 
 - source overlay commit is `c8a6363`;
 - read-only VPS smoke passed for `c8a6363`;
@@ -93,9 +96,9 @@ For current `c8a6363`, read-only VPS update/smoke already passed with `run_id=20
 
 `32d01fd` can be discussed only as the previous baseline, not as the current git head.
 
-`needs-fix` обязателен при smoke/auth/listener/audit/checksum/access-path/host-key/evidence hygiene failure.
+`needs-fix` would be required if smoke/auth/listener/audit/checksum/access-path/host-key/evidence hygiene failed.
 
-`defer-prod` подходит, если система здорова, но операторские условия доступа или recovery пока не готовы.
+`defer-prod` would be appropriate if the system were healthy but operator recovery/access conditions were not ready. The recorded decision is `controlled-prod-ready`.
 
 ## Остается запрещено без отдельного подтверждения
 
@@ -115,13 +118,9 @@ For current `c8a6363`, read-only VPS update/smoke already passed with `run_id=20
 Следующий safe implementation slice должен оставаться read-only:
 
 ```text
-controller-safe Local Agent runtime summary
-```
-
-Design source:
-
-```text
-research/amn2/local-agent-runtime-metadata-alignment.md
+read-only controlled-prod status/recovery visibility
+operator documentation cleanup
+another read-only status/observability slice
 ```
 
 Не переходить сразу к config delivery, public API writes, backup/import или Local Agent mutations.

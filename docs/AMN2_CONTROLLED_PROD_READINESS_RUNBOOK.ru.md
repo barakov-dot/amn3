@@ -4,6 +4,8 @@
 
 Назначение: зафиксировать первый безопасный production-режим для текущего `amn2/codex-vps-test-prep` baseline после real VPS read-only smoke. Текущий GitHub head `c8a6363` прошел read-only VPS update/smoke; следующий шаг - operator-only controlled prod readiness decision.
 
+Актуализация 2026-06-07: operator-only decision recorded as `controlled-prod-ready`; evidence `research/amn2/controlled-prod-ready-2026-06-07.md`.
+
 Это не разрешение на public web/API exposure, `/api/clients` write CRUD, API `config:read`, public/self-service config delivery, Local Agent mutations, backup/import/reboot routes или новые live peer mutations.
 
 ## Текущая production-точка
@@ -180,6 +182,6 @@ docs/NEXT_CHAT_AMN2_CONTROLLED_PROD_DECISION.ru.md
 
 ## Next Engineering Slice
 
-After `controlled-prod-ready`, the next safe implementation slice should remain read-only. The recommended first candidate is controller-safe Local Agent runtime summary from `research/amn2/local-agent-runtime-metadata-alignment.md`.
+After `controlled-prod-ready`, the next safe implementation slice should remain read-only. The earlier controller-safe Local Agent runtime summary candidate is already implemented and read-only VPS-smoked. Prefer read-only controlled-prod status/recovery visibility, operator documentation cleanup, or another read-only status/observability slice.
 
 Do not jump directly to config delivery, public API writes, backup/import or Local Agent mutations.

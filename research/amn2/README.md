@@ -88,8 +88,9 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [Local Agent runtime summary package 2026-06-06](local-agent-runtime-summary-vps-package-2026-06-06.md) - AMN2 stable `c8a6363`, package-ready and read-only VPS-smoked.
 - [c8a6363 VPS smoke preflight 2026-06-06](c8a6363-vps-smoke-preflight-2026-06-06.md) - local package preflight passed; later superseded by real VPS smoke evidence.
 - [c8a6363 VPS smoke evidence 2026-06-06](local-agent-runtime-summary-vps-smoke-evidence-2026-06-06.md) - real VPS read-only update/smoke pass for stable `c8a6363`, `run_id=20260606T202040Z`.
-- [Controlled prod readiness 2026-06-06](controlled-prod-readiness-2026-06-06.md) - operator-only prod gate remains pending; current VPS-smoked baseline is now `c8a6363`.
-- [Controlled prod reverse proxy confirmation 2026-06-07](controlled-prod-reverse-proxy-confirmation-2026-06-07.md) - web/admin access is through approved HTTPS reverse proxy; public API port `3040` is not exposed; final controlled-prod decision remains pending.
+- [Controlled prod readiness 2026-06-06](controlled-prod-readiness-2026-06-06.md) - operator-only prod gate is recorded as `controlled-prod-ready`; current VPS-smoked baseline is `c8a6363`.
+- [Controlled prod reverse proxy confirmation 2026-06-07](controlled-prod-reverse-proxy-confirmation-2026-06-07.md) - web/admin access is through approved HTTPS reverse proxy; public API port `3040` is not exposed.
+- [Controlled prod ready 2026-06-07](controlled-prod-ready-2026-06-07.md) - final operator-only decision `controlled-prod-ready`; recovery path known; continue only read-only next slice.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
@@ -104,7 +105,8 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 3. AMN3 VPS update/smoke package rebuilt from current production head `c8a6363`; real VPS read-only smoke passed `run_id=20260606T202040Z`.
 4. Real VPS API/web-panel gate для `294803e` пройден: API loopback smoke `run_id=20260604T102355Z`, web-admin `API readiness` и `API tokens` доступны; evidence `api-web-panel-vps-evidence-2026-06-04.md`.
 5. VPS update/smoke package `c8a6363` is now the current VPS-smoked runtime/source; `32d01fd`, `294803e`, `5f12736`, and `7764ae7` remain historical evidence baselines.
-5.1. Web/admin controlled-prod access path confirmed as approved HTTPS reverse proxy; public API port `3040` is not exposed. Final operator decision is still pending.
+5.1. Web/admin controlled-prod access path confirmed as approved HTTPS reverse proxy; public API port `3040` is not exposed.
+5.2. Controlled prod decision recorded as `controlled-prod-ready`; recovery path is known. Continue with read-only next slice, not write/config/backup/agent expansion.
 6. Controlled real VPS verification gate Phase 1 для `codex/remote-operation-vps-gate-prep` пройден как `dry-run-only-pass`; evidence `remote-operation-vps-gate-evidence-2026-06-04.md`.
 7. Backup/import policy registry, restore-preview contract и machine-checkable secret inventory уже выполнены; web/API full backup, restore apply, import apply, route expansion, secret-bearing output и live VPS write flows остаются закрытыми до отдельных gates.
 
