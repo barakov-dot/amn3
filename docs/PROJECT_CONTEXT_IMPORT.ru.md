@@ -1,19 +1,24 @@
 # Current Override 2026-06-07
 
-`amn2/codex-vps-test-prep` current git head is `42ffa65 Record git checkout smoke status`. The current app-code read-only slice is `62ff184 Update controlled prod status visibility`: it passed real VPS git-checkout smoke on `/opt/amn2-git` with six read-only routes, all `200`, empty forbidden markers, and the temporary smoke token revoked. The source-overlay production runtime on `/opt/amn2` is still `c8a6363 Add Local Agent runtime summary mapper`, which passed source-overlay read-only smoke on 2026-06-06 and has `controlled-prod-ready` operator-only status.
+`amn2/codex-vps-test-prep` current git head is `42ffa65 Record git checkout smoke status`. The current app-code read-only slice is `62ff184 Update controlled prod status visibility`: it passed real VPS git-checkout smoke on `/opt/amn2-git`, then the `42ffa65` AMN3 package was applied to `/opt/amn2` through safe source-overlay update and passed read-only loopback API smoke. Current source overlay on `/opt/amn2` is now `42ffa65`; previous source overlay `c8a6363 Add Local Agent runtime summary mapper` remains historical smoke-passed baseline.
 
 This update comes from neighboring AMN2 docs/commits after the `c8a6363` package work. It changes the coordination state, not the safety boundary: no public API `3040`, no API `config:read`, no `/api/clients` write CRUD, no public/self-service config delivery, no Local Agent mutations, no backup/import/reboot, and no new live peer operations.
 
-AMN3 prepared the next source-overlay update kit:
+AMN3 source-overlay update kit result:
 
 ```text
 dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
 sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
 source sha256: 8A5B83D9AB95BE4230AAC221CE0321A37EF37E4E4B6EAB5EDECAE3C98A944829
-status: package-ready-not-vps-smoked
+status: read-only-vps-smoke-pass
+source_update_run_id: 20260607T165559Z
+api_smoke_run_id: 20260607T165625Z
+checked_routes: 6
+listener: 127.0.0.1:3040 loopback-only
+evidence: research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
 ```
 
-Next gate is source-overlay promotion/update for the read-only status line, or another read-only controller/status slice.
+Next gate is the controlled production launch checklist for source overlay `42ffa65`, or another read-only controller/status slice.
 
 # Historical Override 2026-06-06
 
@@ -22,7 +27,7 @@ Historical 2026-06-06 source-overlay head was `c8a6363 Add Local Agent runtime s
 Read-only integration status update 2026-06-06: `32d01fd` updates `/api/integration/status` to report `read_only_vps_smoked`, Phase 2 `verified_live`, and controlled-prod readiness pending without enabling write routes or write operations. AMN3 evidence is `research/amn2/integration-status-controlled-prod-update-2026-06-06.md`. The previous local-only operation-contract fast-forward remains recorded at `research/amn2/remote-partial-failure-contract-2026-06-06.md`.
 
 ```text
-AMN3 package for current source overlay: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
+AMN3 package for historical 2026-06-06 source overlay: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
 sha256: 027ECC1BAD7321FCCD61A4CCCA3AC9F06AAA9AC6A3D7115B4813253D19C2CFBF
 source zip: dist/amn2-codex-vps-test-prep-c8a6363-source.zip
 source sha256: E1E198979D988B3A5AA038CF732B8DCDBE854C48A6D381FADBA05BFDEE0251C6
@@ -55,7 +60,7 @@ result: verified-live
 scope: exactly one disposable test peer apply/sync/revoke/sync
 ```
 
-This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `32d01fd`, `294803e`, `7764ae7`, `568c611` and `1a193b9` package blocks below are historical evidence; `c8a6363` is the current VPS-smoked runtime/source baseline. Next gate is operator-only controlled-prod readiness, not public prod.
+This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `c8a6363`, `32d01fd`, `294803e`, `7764ae7`, `568c611` and `1a193b9` package blocks below are historical evidence; `42ffa65` is the current VPS-smoked runtime/source baseline.
 # VPN Ops Lab / Amneziya: импорт контекста из чатов
 
 Дата снимка: 2026-06-02.

@@ -13,22 +13,24 @@
 ```text
 current AMN2 git head: 42ffa65 Record git checkout smoke status
 current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
-current VPS source overlay: c8a6363 Add Local Agent runtime summary mapper
+current VPS source overlay: 42ffa65 Record git checkout smoke status
+previous VPS source overlay: c8a6363 Add Local Agent runtime summary mapper
 git-checkout VPS smoke: 62ff184 pass on /opt/amn2-git, checked_routes=6
-source-overlay promotion for 62ff184/42ffa65: package-ready-not-vps-smoked
-prepared source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
-prepared package sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
-current AMN3 master: verify with git log -1; latest synced state records controlled-prod-ready, git-checkout smoke evidence and 42ffa65 package evidence
+source-overlay promotion for 62ff184/42ffa65: read-only-vps-smoke-pass
+source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+package sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
+VPS smoke run_id: 20260607T165625Z
+current AMN3 master: verify with git log -1; latest synced state records controlled-prod-ready, git-checkout smoke evidence, 42ffa65 package evidence and 42ffa65 source-overlay smoke evidence
 ```
 
-The 2026-06-06 `c8a6363` entries below are source-overlay baseline evidence, not the latest AMN2 git head after neighboring status-visibility work.
+The 2026-06-06 `c8a6363` entries below are historical source-overlay baseline evidence, not the latest VPS-smoked source overlay after neighboring status-visibility work.
 
 Production repo:
 
 ```text
 C:\Users\SooL\Documents\Amneziya
 branch: codex-vps-test-prep
-source-overlay baseline head: c8a6363 Add Local Agent runtime summary mapper
+source-overlay baseline head: 42ffa65 Record git checkout smoke status
 ```
 
 Lab / coordination repo:
@@ -37,25 +39,26 @@ Lab / coordination repo:
 C:\Users\SooL\Documents\VPS-OPS-LAB
 branch: master
 historical package-publish head: 8f613c8 Publish c8a6363 VPS update package
+current package-publish head: 2a2e8b2 Publish 42ffa65 VPS update package
 ```
 
 Текущий source-overlay package:
 
 ```text
-source commit: c8a6363
+source commit: 42ffa65
 status: read-only-vps-smoke-pass
-package: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
-package sha256: 027ECC1BAD7321FCCD61A4CCCA3AC9F06AAA9AC6A3D7115B4813253D19C2CFBF
-source zip: dist/amn2-codex-vps-test-prep-c8a6363-source.zip
-source sha256: E1E198979D988B3A5AA038CF732B8DCDBE854C48A6D381FADBA05BFDEE0251C6
+package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+package sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
+source zip: dist/amn2-codex-vps-test-prep-42ffa65-source.zip
+source sha256: 8A5B83D9AB95BE4230AAC221CE0321A37EF37E4E4B6EAB5EDECAE3C98A944829
 ```
 
 Последний VPS-smoked runtime/source:
 
 ```text
-source commit: c8a6363
+source commit: 42ffa65
 status: read-only-vps-smoke-pass
-run_id: 20260606T202040Z
+run_id: 20260607T165625Z
 decision: passed
 ```
 
@@ -229,8 +232,8 @@ c8a6363 read-only VPS smoke: passed, run_id 20260606T202040Z
 
 ```text
 status: controlled-prod-ready
-last VPS-smoked source: c8a6363
-previous VPS-smoked source: 32d01fd
+last VPS-smoked source: 42ffa65
+previous VPS-smoked source: c8a6363
 controlled prod decision: controlled-prod-ready, evidence research/amn2/controlled-prod-ready-2026-06-07.md
 ```
 

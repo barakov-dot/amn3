@@ -11,16 +11,18 @@ AMN2 repo: C:\Users\SooL\Documents\Amneziya
 AMN2 branch: codex-vps-test-prep
 current AMN2 git head: 42ffa65 Record git checkout smoke status
 current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
-current VPS source overlay: c8a6363 Add Local Agent runtime summary mapper
+VPS source overlay at git-checkout smoke time: c8a6363 Add Local Agent runtime summary mapper
 controlled prod decision: controlled-prod-ready for source overlay c8a6363
 ```
 
 Interpretation:
 
-- `c8a6363` remains the current source-overlay production baseline on `/opt/amn2`.
+- At this git-checkout smoke time, `c8a6363` remained the source-overlay production baseline on `/opt/amn2`.
 - `62ff184` passed a real VPS smoke on a git-managed checkout `/opt/amn2-git`.
 - `42ffa65` records that smoke/status contract in AMN2.
-- This does not claim that `/opt/amn2` source overlay has been promoted to `62ff184` or `42ffa65`.
+- This evidence alone did not claim that `/opt/amn2` source overlay had been promoted to `62ff184` or `42ffa65`.
+
+Later update: AMN3 package `42ffa65` passed source-overlay update/read-only smoke on `/opt/amn2`, `run_id=20260607T165625Z`; see `research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md`.
 
 ## Safe VPS Evidence
 
@@ -55,7 +57,7 @@ smoke token status: revoked
 smoke token revoke reason: smoke-complete
 raw token display: hidden
 decision: 62ff184 read-only git-checkout VPS smoke passed
-source_overlay_promotion: not claimed by this evidence
+source_overlay_promotion: not claimed by this evidence; later passed in separate source-overlay smoke
 ```
 
 ## Safety Boundary
@@ -77,7 +79,7 @@ Still blocked without a separate gate:
 Recommended next step:
 
 ```text
-Either build/promote a source-overlay update package for the current read-only status line and repeat read-only smoke on /opt/amn2,
+Source-overlay promotion for 42ffa65 is now passed; continue controlled production launch checklist,
 or continue another read-only controller/status/observability slice.
 ```
 

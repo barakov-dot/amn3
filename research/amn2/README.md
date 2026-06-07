@@ -19,15 +19,16 @@ branch: codex-vps-test-prep
 latest: 91aeb3e Document VPS verified tag
 stable tag: vps-live-cycle-verified -> d6eda20 Document verified VPS live cycle
 handoff: docs/NEXT_CHAT_HANDOFF.ru.md
-current source-overlay transfer head: c8a6363 Add Local Agent runtime summary mapper
-current source-overlay update+smoke kit: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip, read-only-vps-smoke-pass
-last VPS-smoked runtime/source: c8a6363 Add Local Agent runtime summary mapper, run_id=20260606T202040Z
+current source-overlay transfer head: 42ffa65 Record git checkout smoke status
+current source-overlay update+smoke kit: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip, read-only-vps-smoke-pass
+last VPS-smoked runtime/source: 42ffa65 Record git checkout smoke status, run_id=20260607T165625Z
+previous VPS-smoked runtime/source: c8a6363 Add Local Agent runtime summary mapper, run_id=20260606T202040Z
 current amn2 git head: 42ffa65 Record git checkout smoke status
 current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
 git-checkout VPS smoke: /opt/amn2-git, checked_routes=6, status=passed
-prepared source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
-prepared package sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
-source-overlay promotion for the read-only status line: package-ready-not-vps-smoked
+current source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+current package sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
+source-overlay promotion for the read-only status line: read-only-vps-smoke-pass
 ```
 
 Активная рабочая ветка для установки/API smoke:
@@ -41,7 +42,7 @@ working chat: Переводим AMN на API
 
 AMN3 evidence: [API VPS smoke evidence 2026-06-03](api-vps-smoke-evidence-2026-06-03.md). Historical first pass: [API VPS smoke evidence 2026-06-02](api-vps-smoke-evidence-2026-06-02.md).
 
-Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep` at production head `5f12736`; API/web-panel finish slice then fast-forward merged into `codex-vps-test-prep` at production head `294803e`; Phase 1 read-only integration closeout then moved stable to `7764ae7`; remote partial-failure contract moved stable to `1a193b9`; controlled-prod integration status update moved stable to `32d01fd` and passed read-only VPS smoke; mapper-only Local Agent runtime summary moved stable to `c8a6363` and passed read-only VPS smoke.
+Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep` at production head `5f12736`; API/web-panel finish slice then fast-forward merged into `codex-vps-test-prep` at production head `294803e`; Phase 1 read-only integration closeout then moved stable to `7764ae7`; remote partial-failure contract moved stable to `1a193b9`; controlled-prod integration status update moved stable to `32d01fd` and passed read-only VPS smoke; mapper-only Local Agent runtime summary moved stable to `c8a6363` and passed read-only VPS smoke; controlled-prod status visibility moved stable to `42ffa65` and passed source-overlay VPS smoke.
 
 Живой VPS-цикл подтвержден: approve, working config, peer sync, disable/enable и выборочное удаление устройства работают на Docker AmneziaWG runtime.
 
@@ -94,11 +95,12 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [Local Agent runtime summary package 2026-06-06](local-agent-runtime-summary-vps-package-2026-06-06.md) - AMN2 stable `c8a6363`, package-ready and read-only VPS-smoked.
 - [c8a6363 VPS smoke preflight 2026-06-06](c8a6363-vps-smoke-preflight-2026-06-06.md) - local package preflight passed; later superseded by real VPS smoke evidence.
 - [c8a6363 VPS smoke evidence 2026-06-06](local-agent-runtime-summary-vps-smoke-evidence-2026-06-06.md) - real VPS read-only update/smoke pass for stable `c8a6363`, `run_id=20260606T202040Z`.
-- [Controlled prod readiness 2026-06-06](controlled-prod-readiness-2026-06-06.md) - operator-only prod gate is recorded as `controlled-prod-ready`; current VPS-smoked baseline is `c8a6363`.
+- [Controlled prod readiness 2026-06-06](controlled-prod-readiness-2026-06-06.md) - operator-only prod gate is recorded as `controlled-prod-ready`; historical decision baseline was `c8a6363`, later superseded by VPS-smoked source overlay `42ffa65`.
 - [Controlled prod reverse proxy confirmation 2026-06-07](controlled-prod-reverse-proxy-confirmation-2026-06-07.md) - web/admin access is through approved HTTPS reverse proxy; public API port `3040` is not exposed.
 - [Controlled prod ready 2026-06-07](controlled-prod-ready-2026-06-07.md) - final operator-only decision `controlled-prod-ready`; recovery path known; continue only read-only next slice.
-- [Controlled prod status visibility git-checkout smoke 2026-06-07](controlled-prod-status-visibility-git-checkout-smoke-2026-06-07.md) - AMN2 current git head `42ffa65`, app-code slice `62ff184`, real VPS git-checkout smoke pass on `/opt/amn2-git`; source overlay promotion still pending.
-- [Controlled prod status visibility VPS package 2026-06-07](controlled-prod-status-visibility-vps-package-2026-06-07.md) - AMN3 update+smoke kit for `42ffa65`; package-ready, not VPS-smoked yet.
+- [Controlled prod status visibility git-checkout smoke 2026-06-07](controlled-prod-status-visibility-git-checkout-smoke-2026-06-07.md) - AMN2 current git head `42ffa65`, app-code slice `62ff184`, real VPS git-checkout smoke pass on `/opt/amn2-git`; later promoted through source-overlay smoke.
+- [Controlled prod status visibility VPS package 2026-06-07](controlled-prod-status-visibility-vps-package-2026-06-07.md) - AMN3 update+smoke kit for `42ffa65`; package prepared for source-overlay gate.
+- [Controlled prod status visibility VPS smoke 2026-06-07](controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md) - real VPS source-overlay update/smoke pass for `42ffa65`, `run_id=20260607T165625Z`.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
@@ -110,9 +112,9 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 
 1. Не расширять API за пределы merged read-only aggregate shell до отдельного route/secret/remote-write gate.
 2. API/web-panel finish slice реализован, запушен и fast-forward merged: `amn2/codex/api-web-panel-finish`, commit `294803e`, evidence `api-web-panel-finish-implementation.md`.
-3. AMN3 VPS update/smoke package rebuilt from current production head `c8a6363`; real VPS read-only smoke passed `run_id=20260606T202040Z`.
+3. AMN3 VPS update/smoke package rebuilt from current production head `42ffa65`; real VPS read-only smoke passed `run_id=20260607T165625Z`.
 4. Real VPS API/web-panel gate для `294803e` пройден: API loopback smoke `run_id=20260604T102355Z`, web-admin `API readiness` и `API tokens` доступны; evidence `api-web-panel-vps-evidence-2026-06-04.md`.
-5. VPS update/smoke package `c8a6363` is now the current VPS-smoked runtime/source; `32d01fd`, `294803e`, `5f12736`, and `7764ae7` remain historical evidence baselines.
+5. VPS update/smoke package `42ffa65` is now the current VPS-smoked runtime/source; `c8a6363`, `32d01fd`, `294803e`, `5f12736`, and `7764ae7` remain historical evidence baselines.
 5.1. Web/admin controlled-prod access path confirmed as approved HTTPS reverse proxy; public API port `3040` is not exposed.
 5.2. Controlled prod decision recorded as `controlled-prod-ready`; recovery path is known. Continue with read-only next slice, not write/config/backup/agent expansion.
 6. Controlled real VPS verification gate Phase 1 для `codex/remote-operation-vps-gate-prep` пройден как `dry-run-only-pass`; evidence `remote-operation-vps-gate-evidence-2026-06-04.md`.

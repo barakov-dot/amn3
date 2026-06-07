@@ -9,8 +9,8 @@
 ```text
 decision: controlled-prod-ready
 target mode: operator-only controlled prod
-source overlay commit: c8a6363
-current VPS-smoked runtime/source: c8a6363 Add Local Agent runtime summary mapper
+source overlay commit at decision time: c8a6363
+VPS-smoked runtime/source at decision time: c8a6363 Add Local Agent runtime summary mapper
 read-only VPS smoke run_id: 20260606T202040Z
 web/admin access path: approved-reverse-proxy over HTTPS
 public API 3040 exposed: no
@@ -21,6 +21,23 @@ next action: continue with read-only next slice
 ```
 
 This is not public SaaS readiness and not broad write/API/config/backup/agent enablement.
+
+## Later Source Overlay Promotion
+
+After this operator-only decision was recorded for `c8a6363`, AMN2 advanced to `42ffa65 Record git checkout smoke status`. AMN3 package `42ffa65` passed safe source-overlay update and read-only API smoke on `/opt/amn2`.
+
+```text
+current source overlay after later promotion: 42ffa65
+previous source overlay: c8a6363
+source_update_run_id: 20260607T165559Z
+api_smoke_run_id: 20260607T165625Z
+checked_routes: 6
+listener: 127.0.0.1:3040 loopback-only
+VPS_APPLY_ENABLED: false
+evidence: research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
+```
+
+This later promotion preserves the same controlled-prod boundary: no public API `3040`, no write routes, no config delivery, no Local Agent mutations and no backup/import/reboot routes.
 
 ## Evidence Already Recorded
 
@@ -85,7 +102,7 @@ c8a6363_dir=present
 Interpretation:
 
 - rollback/update artifacts for previous `32d01fd` baseline are present;
-- current `c8a6363` kit and checksum are present;
+- `c8a6363` kit and checksum were present at the recovery check time;
 - runtime state directories/files that must be preserved by the overlay flow are present;
 - no rollback command was run during this check.
 
@@ -114,9 +131,9 @@ Post-decision AMN2 update:
 current AMN2 git head: 42ffa65 Record git checkout smoke status
 current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
 git-checkout VPS smoke: passed on /opt/amn2-git, checked_routes=6
-prepared source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
-prepared package status: package-ready-not-vps-smoked
-source overlay promotion: not claimed; /opt/amn2 remains c8a6363 until separate update/smoke
+source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+source-overlay package status: read-only-vps-smoke-pass
+source overlay promotion: passed; /opt/amn2 is now 42ffa65
 ```
 
 Recommended next direction:

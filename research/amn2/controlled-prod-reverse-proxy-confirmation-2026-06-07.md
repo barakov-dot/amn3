@@ -26,7 +26,7 @@ VPS_APPLY_ENABLED .env: false
 web listener: 127.0.0.1:3030 yes
 login_http: 200
 32d01fd rollback/update kit: present
-c8a6363 current update kit: present
+c8a6363 update kit at check time: present
 data_dir: present
 env_file: present
 servers_yml: present

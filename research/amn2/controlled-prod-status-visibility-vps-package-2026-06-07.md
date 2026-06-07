@@ -11,7 +11,8 @@ AMN2 branch: codex-vps-test-prep
 AMN2 package/source commit: 42ffa65 Record git checkout smoke status
 app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
 previous VPS source overlay: c8a6363 Add Local Agent runtime summary mapper
-package status: package-ready-not-vps-smoked
+package status: read-only-vps-smoke-pass
+publication status: package-ready before VPS smoke
 ```
 
 Artifacts:
@@ -55,6 +56,15 @@ warnings: StarletteDeprecationWarning and pytest cache warning only
 
 ## Safety Boundary
 
+Later VPS smoke result:
+
+```text
+source_update_run_id: 20260607T165559Z
+api_smoke_run_id: 20260607T165625Z
+VPS result: read-only-vps-smoke-pass
+evidence: research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
+```
+
 This package does not authorize:
 
 - `VPS_APPLY_ENABLED=true`;
@@ -69,7 +79,7 @@ This package does not authorize:
 
 ## Next Gate
 
-Operator-only next step:
+Operator-only rerun/recovery step:
 
 ```text
 Download/update with dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
@@ -78,4 +88,4 @@ Run read-only API loopback smoke
 Return only safe summary evidence
 ```
 
-Until that pass is returned, the current VPS-smoked source overlay remains `c8a6363`.
+After the pass returned, the current VPS-smoked source overlay is `42ffa65`. Keep `VPS_APPLY_ENABLED=false` unless a separate write gate is explicitly opened.
