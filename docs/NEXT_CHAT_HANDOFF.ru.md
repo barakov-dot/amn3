@@ -43,6 +43,8 @@ Lab/coordination repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 
 Последний operator launch evidence после этого показал, что фактически работающий `/opt/amn2` в той shell-сессии все еще возвращал `.amn2_source_overlay_commit = 42ffa65`. На нем прошли backup create/verify, bot check, preflight, dry-run, API smoke 6/6, web login `200`, listeners `127.0.0.1:3030` и `127.0.0.1:3040`. Это подтверждает working runtime для `42ffa65`, но не закрывает текущий `c92bd1a` gate. Safe summary записан в `docs/API_VPS_SMOKE_EVIDENCE.ru.md` в разделе `Production Launch Gate Attempt: 2026-06-07 / 42ffa65`.
 
+Следом source overlay был выровнен до `c92bd1a`: kit/source checksum OK, `source_update_status=passed`, `.amn2_source_overlay_commit=c92bd1a`, runtime preserved, backup create/verify прошел, preflight/dry-run прошли, API smoke 6/6 прошел. Web/admin systemd service в этом evidence еще не запускали; следующий шаг - loopback service launch/check.
+
 Цель следующего этапа: не открывать broad write API, а закрыть controlled-prod readiness или выбрать следующий read-only controller-facing slice.
 ```
 
@@ -146,6 +148,8 @@ VPS_APPLY_ENABLED default: false
 Если VPS при проверке показывает `.amn2_source_overlay_commit = 42ffa65`, сначала выровнять source overlay до `c92bd1a` или явно подтвердить, что выбран historical `42ffa65` runtime. Не объявлять `c92bd1a` production gate закрытым по evidence от `42ffa65`.
 
 Для выравнивания есть отдельная инструкция: `docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md`.
+
+Текущий ближайший шаг после alignment: запустить/restart `amneziya-web` через loopback systemd template и проверить `web_login_http=200`, затем записать final gate evidence.
 
 Если VPS сейчас не трогаем: основной чат может доработать read-only controller UX и status visibility вокруг `/api/integration/status` и `/api/local-agent/runtime/summary`, но не начинать broad write API, config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
 

@@ -110,9 +110,9 @@ VPS_APPLY_ENABLED=false
 cd /opt/amn2
 source venv/bin/activate
 
-set -a
-. ./.env
-set +a
+export APP_SECRET_KEY="$(
+  python -c 'from dotenv import dotenv_values; print(dotenv_values(".env").get("APP_SECRET_KEY", ""))'
+)"
 
 test -n "${APP_SECRET_KEY:-}" && echo "APP_SECRET_KEY=present" || echo "APP_SECRET_KEY=missing"
 

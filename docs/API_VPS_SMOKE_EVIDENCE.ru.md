@@ -8,6 +8,78 @@ Template policy: Заполнять после реального VPS smoke; cur
 
 Не вставлять raw API token, Authorization header, token hash, `.conf`, QR, `vpn://`, `PrivateKey`, `PresharedKey`, SSH password/private key, `.env`, PSK, полные response bodies или `api-server.log` без ручной redaction.
 
+## c92bd1a Source Overlay Alignment: 2026-06-07
+
+Назначение: зафиксировать safe summary выравнивания production source overlay `/opt/amn2` до `c92bd1a`. Web/admin systemd service в этом evidence еще не запускали; service launch остается следующим шагом.
+
+Source update evidence:
+
+```text
+workspace: /opt/amn2
+kit_checksum: OK
+source_checksum: OK
+source_update_status: passed
+target: /opt/amn2
+source_commit: c92bd1a
+source_overlay_commit: c92bd1a
+safe_log_dir: /opt/amn2/vps-smoke/source-update-20260607T194406Z
+runtime_preserved: data/.env/servers.yml/venv present
+VPS_APPLY_ENABLED: false
+```
+
+Backup evidence:
+
+```text
+APP_SECRET_KEY: present, value not published
+backup_create: passed
+backup_file: backups/amneziya-backup-20260607T195439Z.tar.enc
+backup_verify: passed
+backup_manifest_app: amneziya
+backup_manifest_format_version: 1
+backup_manifest_includes: database, manifest
+backup_manifest_excludes: app_secret_key, telegram_bot_token, qr_files, plain_configs
+backup_database_checksum_sha256: aacad1ee5fb60906bb9d2895ea82f6f7404a6b6752a1dd1bc7e1787c61a82f64
+dotenv_shell_source_status: failed-on-special-character
+dotenv_safe_loader_next_step: use python-dotenv for APP_SECRET_KEY only
+```
+
+Preflight evidence:
+
+```text
+bot_check_network: ok
+bot_identity: ok
+proxy: enabled
+server_config: ok
+database_sync: ok
+server_check_dry_run: ok
+peer_apply_dry_run: ok
+peer_revoke_dry_run: ok
+traffic_dry_run: ok
+backup_target: ok
+```
+
+Read-only API smoke evidence:
+
+```text
+api_bind: http://127.0.0.1:3040
+api_smoke_status: passed
+api_checked_routes: 6
+route_status_codes: 200
+forbidden_markers: []
+token_raw_display: hidden
+token_lifecycle: revoked
+```
+
+VPS verdict:
+
+```text
+decision: c92bd1a-source-overlay-aligned-and-read-only-smoke-passed
+web_systemd_launch_status: pending
+write_routes_enabled: false
+write_operations_enabled: false
+next_step: start/restart amneziya-web loopback systemd and verify web_login_http=200
+```
+
 ## Production Launch Gate Attempt: 2026-06-07 / 42ffa65
 
 Назначение: зафиксировать safe summary production launch проверки, которую оператор выполнил на фактически работающем `/opt/amn2`. Важно: вывод VPS показал `source_overlay_commit: 42ffa65`, а текущий локальный gate target после соседнего чата уже `c92bd1a`. Поэтому эта запись подтверждает работоспособность текущего observed runtime, но не объявляет `c92bd1a` полностью пройденным на этом VPS.

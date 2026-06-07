@@ -236,6 +236,10 @@ def test_c92_source_overlay_alignment_runbook_is_linked_and_safe():
     assert "cat .amn2_source_overlay_commit" in runbook
     assert "c92bd1a" in runbook
     assert "VPS_APPLY_ENABLED=false" in runbook
+    assert "dotenv_values(\".env\")" in runbook
+    assert "source .env" not in runbook
+    assert ". ./.env" not in runbook
+    assert "set -a" not in runbook
     assert "python -m app.cli backup create" in runbook
     assert "python -m app.cli backup verify" in runbook
     assert "python -m app.cli api smoke-cycle" in runbook
@@ -247,3 +251,21 @@ def test_c92_source_overlay_alignment_runbook_is_linked_and_safe():
     assert "docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md" in gate
     assert "docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md" in handoff
     assert "docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md" in checklist
+
+
+def test_api_vps_smoke_evidence_records_c92_alignment_with_web_pending():
+    evidence_path = ROOT / "docs/API_VPS_SMOKE_EVIDENCE.ru.md"
+
+    evidence = evidence_path.read_text(encoding="utf-8")
+
+    assert "## c92bd1a Source Overlay Alignment: 2026-06-07" in evidence
+    assert "source_update_status: passed" in evidence
+    assert "source_overlay_commit: c92bd1a" in evidence
+    assert "backup_file: backups/amneziya-backup-20260607T195439Z.tar.enc" in evidence
+    assert "backup_verify: passed" in evidence
+    assert "dotenv_shell_source_status: failed-on-special-character" in evidence
+    assert "dotenv_safe_loader_next_step: use python-dotenv for APP_SECRET_KEY only" in evidence
+    assert "api_smoke_status: passed" in evidence
+    assert "api_checked_routes: 6" in evidence
+    assert "decision: c92bd1a-source-overlay-aligned-and-read-only-smoke-passed" in evidence
+    assert "web_systemd_launch_status: pending" in evidence
