@@ -28,6 +28,8 @@ VPS_APPLY_ENABLED=false
 
 Operator launch evidence от 2026-06-07 19:24 UTC показал успешный backup/smoke/web-login на фактически наблюдаемом `/opt/amn2 = 42ffa65`. Это safe working-runtime evidence, но текущий gate target остается `c92bd1a`; если VPS показывает `42ffa65`, сначала выровнять source overlay или явно выбрать historical runtime, не смешивая эти статусы.
 
+Для выравнивания использовать короткий runbook: `docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md`.
+
 ## 2. Что Именно Считаем Production Сейчас
 
 Разрешенный controlled production scope:

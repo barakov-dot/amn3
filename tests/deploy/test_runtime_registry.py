@@ -215,3 +215,35 @@ def test_api_vps_smoke_evidence_records_42ffa65_launch_without_claiming_c92():
     assert "127.0.0.1:3040" in evidence
     assert "current_gate_target: c92bd1a" in evidence
     assert "c92bd1a_alignment_status: pending" in evidence
+
+
+def test_c92_source_overlay_alignment_runbook_is_linked_and_safe():
+    runbook_path = ROOT / "docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md"
+    gate_path = ROOT / "docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md"
+    handoff_path = ROOT / "docs/NEXT_CHAT_HANDOFF.ru.md"
+    checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"
+
+    runbook = runbook_path.read_text(encoding="utf-8")
+    gate = gate_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    checklist = checklist_path.read_text(encoding="utf-8")
+
+    assert "amn2-vps-update-and-smoke-kit-c92bd1a.zip" in runbook
+    assert "EC48DBA7C91F189512AB77EB5490432C85DA79F987068A98C1CC7F3082387F12" in runbook
+    assert "272CC013A416937AAA2256A1643B2C77F707874D28FDCB2EA16534E349DD4FC2" in runbook
+    assert "sha256sum -c amn2-vps-update-and-smoke-kit-c92bd1a.zip.sha256.txt" in runbook
+    assert "bash ./amn2_apply_source_zip.sh" in runbook
+    assert "cat .amn2_source_overlay_commit" in runbook
+    assert "c92bd1a" in runbook
+    assert "VPS_APPLY_ENABLED=false" in runbook
+    assert "python -m app.cli backup create" in runbook
+    assert "python -m app.cli backup verify" in runbook
+    assert "python -m app.cli api smoke-cycle" in runbook
+    assert "sudo systemctl restart amneziya-web" in runbook
+    assert "127.0.0.1:3030" in runbook
+    assert "127.0.0.1:3040" in runbook
+    assert "raw API token" in runbook
+    assert "PrivateKey" in runbook
+    assert "docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md" in gate
+    assert "docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md" in handoff
+    assert "docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md" in checklist

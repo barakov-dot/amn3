@@ -4,6 +4,8 @@
 
 Для текущего controlled production launch после source overlay `c92bd1a` использовать короткий gate: `docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md`.
 
+Если VPS показывает `.amn2_source_overlay_commit = 42ffa65`, сначала выполнить выравнивание до `c92bd1a`: `docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md`.
+
 Перед повторным заходом на VPS использовать короткий протокол: `docs/VPS_RETEST_PROTOCOL.ru.md`.
 
 ## 1. Получить код

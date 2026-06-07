@@ -31,6 +31,7 @@ Lab/coordination repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 - docs/NEXT_CHAT_HANDOFF.ru.md
 - docs/PROJECT_PHASE_MAP.ru.md
 - docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md
+- docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md
 - docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
 - docs/API_VPS_SMOKE_EVIDENCE.ru.md
 - docs/VPS_RETEST_PROTOCOL.ru.md
@@ -127,6 +128,7 @@ VPS_APPLY_ENABLED default: false
 
 - `docs/PROJECT_PHASE_MAP.ru.md`
 - `docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md`
+- `docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md`
 - `docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md`
 - `docs/API_TOKEN_POLICY.ru.md`
 - `docs/API_VPS_SMOKE_EVIDENCE.ru.md`
@@ -142,6 +144,8 @@ VPS_APPLY_ENABLED default: false
 Сначала пройти `docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md`: backup create/verify, bot/web systemd, web login, loopback API smoke и safe evidence. Это текущий путь к controlled production для source overlay `c92bd1a`.
 
 Если VPS при проверке показывает `.amn2_source_overlay_commit = 42ffa65`, сначала выровнять source overlay до `c92bd1a` или явно подтвердить, что выбран historical `42ffa65` runtime. Не объявлять `c92bd1a` production gate закрытым по evidence от `42ffa65`.
+
+Для выравнивания есть отдельная инструкция: `docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md`.
 
 Если VPS сейчас не трогаем: основной чат может доработать read-only controller UX и status visibility вокруг `/api/integration/status` и `/api/local-agent/runtime/summary`, но не начинать broad write API, config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
 
