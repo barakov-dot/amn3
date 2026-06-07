@@ -35,7 +35,8 @@ def test_build_integration_status_reports_controlled_prod_without_write_enableme
 
     assert report["status"] == "controlled_prod_ready"
     assert report["api_baseline"]["status"] == "controlled_prod_ready"
-    assert report["api_baseline"]["stable_head"] == "c8a6363"
+    assert report["api_baseline"]["stable_head"] == "42ffa65"
+    assert report["api_baseline"]["previous_stable_head"] == "c8a6363"
     assert report["api_baseline"]["api_web_baseline_head"] == "294803e"
     assert report["api_baseline"]["integration_status_head"] == "7764ae7"
     assert report["api_baseline"]["write_routes_enabled"] is False
@@ -47,20 +48,21 @@ def test_build_integration_status_reports_controlled_prod_without_write_enableme
     assert report["remote_operation_gate"]["write_operations_enabled"] is False
     assert report["controlled_prod_readiness"]["status"] == "ready"
     assert report["controlled_prod_readiness"]["decision"] == "controlled-prod-ready"
-    assert report["controlled_prod_readiness"]["source_overlay_head"] == "c8a6363"
-    assert report["controlled_prod_readiness"]["vps_smoke_run_id"] == "20260606T202040Z"
+    assert report["controlled_prod_readiness"]["source_overlay_head"] == "42ffa65"
+    assert report["controlled_prod_readiness"]["vps_smoke_run_id"] == "20260607T150923Z"
     assert report["controlled_prod_readiness"]["web_admin_access"] == "https_reverse_proxy"
     assert report["controlled_prod_readiness"]["api_listener"] == "127.0.0.1:3040_loopback_only"
     assert report["controlled_prod_readiness"]["vps_apply_enabled_default"] is False
-    assert report["local_read_only_extension"]["head"] == "62ff184"
-    assert report["local_read_only_extension"]["status"] == "vps_smoke_passed_git_checkout"
+    assert report["local_read_only_extension"]["head"] == "42ffa65"
+    assert report["local_read_only_extension"]["status"] == "source_overlay_smoke_passed"
     assert report["local_read_only_extension"]["vps_smoke_status"] == "passed"
     assert report["local_read_only_extension"]["checked_routes"] == 6
+    assert report["local_read_only_extension"]["workspace"] == "source_overlay"
     assert report["local_read_only_extension"]["token_lifecycle"] == "revoked"
     assert report["aggregate_state"]["servers"] == 1
     assert "new live peer apply/revoke without separate operator confirmation" in report["blocked_lanes"]
     assert "/api/clients write CRUD" in report["blocked_lanes"]
-    assert report["next_gate"] == "Promote 62ff184 through source overlay update or choose next read-only slice"
+    assert report["next_gate"] == "Choose next read-only controller slice"
 
 
 def test_build_integration_status_contains_no_secret_or_command_markers(tmp_path: Path):

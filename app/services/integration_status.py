@@ -23,13 +23,14 @@ BLOCKED_LANES = (
     "backup/import/reboot routes",
     "public API 3040 exposure",
 )
-CURRENT_STABLE_HEAD = "c8a6363"
+CURRENT_STABLE_HEAD = "42ffa65"
+PREVIOUS_STABLE_HEAD = "c8a6363"
 POST_DRY_RUN_READ_ONLY_HEAD = "7764ae7"
 API_WEB_BASELINE_HEAD = "294803e"
 REMOTE_OPERATION_GATE_MERGE_HEAD = "708c98e"
 REMOTE_OPERATION_GATE_CANDIDATE_HEAD = "7281254"
-CONTROLLED_PROD_SMOKE_RUN_ID = "20260606T202040Z"
-CURRENT_LOCAL_READ_ONLY_HEAD = "62ff184"
+CONTROLLED_PROD_SMOKE_RUN_ID = "20260607T150923Z"
+CURRENT_LOCAL_READ_ONLY_HEAD = "42ffa65"
 CURRENT_LOCAL_READ_ONLY_SMOKE_STATUS = "passed"
 CURRENT_LOCAL_READ_ONLY_SMOKE_CHECKED_ROUTES = 6
 
@@ -38,14 +39,13 @@ def build_integration_status(repo: Repository) -> dict[str, Any]:
     return {
         "status": "controlled_prod_ready",
         "summary": (
-            "Controlled prod is approved for VPS source overlay c8a6363; "
-            "current local read-only extensions passed a git-checkout VPS smoke "
-            "and still need a separate source overlay promotion step before they "
-            "replace the stable overlay."
+            "Controlled prod is approved for VPS source overlay 42ffa65 after "
+            "safe source overlay update and read-only loopback smoke on /opt/amn2."
         ),
         "api_baseline": {
             "status": "controlled_prod_ready",
             "stable_head": CURRENT_STABLE_HEAD,
+            "previous_stable_head": PREVIOUS_STABLE_HEAD,
             "api_web_baseline_head": API_WEB_BASELINE_HEAD,
             "integration_status_head": POST_DRY_RUN_READ_ONLY_HEAD,
             "allowed_scopes": list(ALLOWED_API_SCOPES),
@@ -72,10 +72,10 @@ def build_integration_status(repo: Repository) -> dict[str, Any]:
         },
         "local_read_only_extension": {
             "head": CURRENT_LOCAL_READ_ONLY_HEAD,
-            "status": "vps_smoke_passed_git_checkout",
+            "status": "source_overlay_smoke_passed",
             "vps_smoke_status": CURRENT_LOCAL_READ_ONLY_SMOKE_STATUS,
             "checked_routes": CURRENT_LOCAL_READ_ONLY_SMOKE_CHECKED_ROUTES,
-            "workspace": "git_checkout",
+            "workspace": "source_overlay",
             "token_lifecycle": "revoked",
             "safe_routes": [
                 "/api/local-agent/runtime/summary",
@@ -84,7 +84,7 @@ def build_integration_status(repo: Repository) -> dict[str, Any]:
         "aggregate_state": _load_aggregate_state(repo),
         "allowed_lanes": list(ALLOWED_LANES),
         "blocked_lanes": list(BLOCKED_LANES),
-        "next_gate": "Promote 62ff184 through source overlay update or choose next read-only slice",
+        "next_gate": "Choose next read-only controller slice",
     }
 
 

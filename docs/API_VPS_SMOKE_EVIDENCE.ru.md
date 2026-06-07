@@ -1,12 +1,72 @@
 # API VPS Smoke Evidence
 
-Дата: 2026-06-02. Обновлено: 2026-06-06.
+Дата: 2026-06-02. Обновлено: 2026-06-07.
 
 Назначение: зафиксировать только безопасные факты реального VPS smoke для read-only API shell на ветке `codex/read-only-api-route-shell`.
 
 Template policy: Заполнять после реального VPS smoke; current command marker `python -m app.cli api smoke-cycle`; historical filled evidence ниже оставляет только safe summary.
 
 Не вставлять raw API token, Authorization header, token hash, `.conf`, QR, `vpn://`, `PrivateKey`, `PresharedKey`, SSH password/private key, `.env`, PSK, полные response bodies или `api-server.log` без ручной redaction.
+
+## Source Overlay Promotion: 2026-06-07 / 42ffa65
+
+Назначение: зафиксировать safe summary фактического promotion `/opt/amn2` до source overlay `42ffa65 Record git checkout smoke status` и повторного read-only smoke уже на production source overlay path.
+
+Source update evidence:
+
+```text
+Дата и время update: 2026-06-07 15:08 UTC
+workspace: /opt/amn2
+source overlay before: c8a6363
+source overlay after: 42ffa65
+source_update_status: passed
+safe_log_dir: /opt/amn2/vps-smoke/source-update-20260607T150818Z
+data/: preserved
+.env: preserved
+servers.yml: preserved
+venv/: preserved
+VPS_APPLY_ENABLED: false
+```
+
+Read-only route evidence:
+
+```text
+Дата и время smoke: 2026-06-07 15:09 UTC
+workspace: /opt/amn2
+API bind: http://127.0.0.1:3040
+Server name: local
+Smoke command: python -m app.cli api smoke-cycle
+checked_routes: 6
+status: passed
+
+servers: 200, forbidden_markers=[]
+integration_status: 200, forbidden_markers=[]
+local_agent_runtime_summary: 200, forbidden_markers=[]
+server_summary: 200, forbidden_markers=[]
+metrics_summary: 200, forbidden_markers=[]
+users_summary: 200, forbidden_markers=[]
+```
+
+Token evidence:
+
+```text
+smoke token status: revoked
+smoke token revoke reason: smoke-complete
+raw token display: hidden
+raw token/header/hash evidence: not published
+```
+
+VPS verdict:
+
+```text
+api_smoke_status: passed
+forbidden_markers: none
+listener_scope: loopback target
+write_routes_enabled: false
+write_operations_enabled: false
+controlled_prod_decision: controlled-prod-ready for source overlay 42ffa65
+next gate: choose next read-only controller slice
+```
 
 ## Git Checkout Smoke: 2026-06-06 / 62ff184 read-only gate
 
@@ -114,8 +174,7 @@ data/: preserved
 servers.yml: preserved
 recovery kits: 32d01fd and c8a6363 present with sha files and extracted dirs
 controlled_prod_decision: controlled-prod-ready for source overlay c8a6363
-next local head before VPS overlay update: 62ff184 git-checkout VPS smoke passed
-next gate: source overlay promotion/update or choose next read-only slice
+superseded by source overlay: 42ffa65
 next runbook: docs/AMN2_VPS_SMOKE_62FF184_RUNBOOK.ru.md
 ```
 

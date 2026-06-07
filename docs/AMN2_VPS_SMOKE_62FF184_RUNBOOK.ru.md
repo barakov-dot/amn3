@@ -13,10 +13,10 @@ production repo: https://github.com/barakov-dot/amn2.git
 branch: codex-vps-test-prep
 app-code slice to test: 62ff184 Update controlled prod status visibility
 expected package commit: use git log -1 / package manifest before VPS update
-current VPS source overlay: c8a6363 Add Local Agent runtime summary mapper
-last VPS smoke: 20260606T202040Z, pass
-current prod decision: controlled-prod-ready for source overlay c8a6363
-next decision after this run: keep c8a6363 or promote 62ff184 after source overlay update/smoke
+current VPS source overlay: 42ffa65 Record git checkout smoke status
+last VPS smoke: 2026-06-07 15:09 UTC, pass, checked_routes=6
+current prod decision: controlled-prod-ready for source overlay 42ffa65
+next decision after this run: choose next read-only controller slice or separate design/live gate
 ```
 
 `62ff184` меняет только read-only status visibility: `/api/integration/status`, страницу `/integration-status`, runbook/evidence/handoff. Он не включает live peer mutations, config delivery, public API, Local Agent mutations, backup/import/reboot routes или `config:read`.
@@ -47,6 +47,46 @@ Decision для этого прогона:
 ```text
 decision: 62ff184 read-only git-checkout VPS smoke passed
 source_overlay_promotion: not claimed by this smoke; promote /opt/amn2 separately if needed
+```
+
+## Фактический Результат Source Overlay Promotion
+
+Оператор применил update kit `amn2-vps-update-and-smoke-kit-42ffa65` на `/opt/amn2` и повторил smoke уже на source overlay path.
+
+```text
+Дата и время update: 2026-06-07 15:08 UTC
+source overlay before: c8a6363
+source overlay after: 42ffa65
+source_update_status: passed
+safe_log_dir: /opt/amn2/vps-smoke/source-update-20260607T150818Z
+data/: preserved
+.env: preserved
+servers.yml: preserved
+venv/: preserved
+VPS_APPLY_ENABLED: false
+```
+
+```text
+Дата и время smoke: 2026-06-07 15:09 UTC
+workspace: /opt/amn2
+server: local
+api_smoke_status: passed
+checked_routes: 6
+servers: 200
+integration_status: 200
+local_agent_runtime_summary: 200
+server_summary: 200
+metrics_summary: 200
+users_summary: 200
+forbidden_markers: []
+smoke_token_status: revoked
+raw_token_display: hidden
+```
+
+Decision:
+
+```text
+decision: 42ffa65 source overlay update/smoke passed; source overlay can be treated as promoted
 ```
 
 ## Локальная Подготовка
@@ -260,10 +300,10 @@ decision:
 decision: 62ff184 read-only git-checkout VPS smoke passed; source overlay promotion remains separate
 ```
 
-Если отдельно выполнен source overlay update flow и после него `/opt/amn2/.amn2_source_overlay_commit` показывает `62ff184`, можно фиксировать:
+Если отдельно выполнен source overlay update flow и после него `/opt/amn2/.amn2_source_overlay_commit` показывает expected package commit, можно фиксировать:
 
 ```text
-decision: 62ff184 source overlay update/smoke passed; source overlay can be treated as promoted
+decision: expected package commit source overlay update/smoke passed; source overlay can be treated as promoted
 ```
 
 Если часть проверок не выполнена:
