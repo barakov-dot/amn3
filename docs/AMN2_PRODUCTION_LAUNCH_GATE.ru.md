@@ -26,6 +26,8 @@ VPS_APPLY_ENABLED=false
 - временный smoke token отозван автоматически;
 - API 3040 наружу не выставлять.
 
+Operator launch evidence от 2026-06-07 19:24 UTC показал успешный backup/smoke/web-login на фактически наблюдаемом `/opt/amn2 = 42ffa65`. Это safe working-runtime evidence, но текущий gate target остается `c92bd1a`; если VPS показывает `42ffa65`, сначала выровнять source overlay или явно выбрать historical runtime, не смешивая эти статусы.
+
 ## 2. Что Именно Считаем Production Сейчас
 
 Разрешенный controlled production scope:

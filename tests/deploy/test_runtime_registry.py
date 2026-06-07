@@ -197,3 +197,21 @@ def test_production_launch_gate_keeps_first_prod_run_operator_only():
     assert "docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md" in handoff
     assert "docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md" in phase
     assert "docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md" in checklist
+
+
+def test_api_vps_smoke_evidence_records_42ffa65_launch_without_claiming_c92():
+    evidence_path = ROOT / "docs/API_VPS_SMOKE_EVIDENCE.ru.md"
+
+    evidence = evidence_path.read_text(encoding="utf-8")
+
+    assert "## Production Launch Gate Attempt: 2026-06-07 / 42ffa65" in evidence
+    assert "source_overlay_commit: 42ffa65" in evidence
+    assert "backup_file: backups/amneziya-backup-20260607T192423Z.tar.enc" in evidence
+    assert "backup_verify: passed" in evidence
+    assert "api_smoke_status: passed" in evidence
+    assert "api_checked_routes: 6" in evidence
+    assert "web_login_http: 200" in evidence
+    assert "127.0.0.1:3030" in evidence
+    assert "127.0.0.1:3040" in evidence
+    assert "current_gate_target: c92bd1a" in evidence
+    assert "c92bd1a_alignment_status: pending" in evidence

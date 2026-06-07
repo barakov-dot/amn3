@@ -8,6 +8,84 @@ Template policy: Заполнять после реального VPS smoke; cur
 
 Не вставлять raw API token, Authorization header, token hash, `.conf`, QR, `vpn://`, `PrivateKey`, `PresharedKey`, SSH password/private key, `.env`, PSK, полные response bodies или `api-server.log` без ручной redaction.
 
+## Production Launch Gate Attempt: 2026-06-07 / 42ffa65
+
+Назначение: зафиксировать safe summary production launch проверки, которую оператор выполнил на фактически работающем `/opt/amn2`. Важно: вывод VPS показал `source_overlay_commit: 42ffa65`, а текущий локальный gate target после соседнего чата уже `c92bd1a`. Поэтому эта запись подтверждает работоспособность текущего observed runtime, но не объявляет `c92bd1a` полностью пройденным на этом VPS.
+
+Runtime evidence:
+
+```text
+workspace: /opt/amn2
+source_overlay_commit: 42ffa65
+current_gate_target: c92bd1a
+c92bd1a_alignment_status: pending
+data_dir: present
+env_file: present
+servers_yml: present
+venv: present
+VPS_APPLY_ENABLED: false
+APP_SECRET_KEY: present, value not published
+```
+
+Backup evidence:
+
+```text
+backup_create: passed
+backup_file: backups/amneziya-backup-20260607T192423Z.tar.enc
+backup_verify: passed
+backup_manifest_app: amneziya
+backup_manifest_format_version: 1
+backup_manifest_includes: database, manifest
+backup_manifest_excludes: app_secret_key, telegram_bot_token, qr_files, plain_configs
+```
+
+Preflight evidence:
+
+```text
+bot_check_network: ok
+bot_identity: ok
+proxy: enabled
+server_config: ok
+database_sync: ok
+server_check_dry_run: ok
+peer_apply_dry_run: ok
+peer_revoke_dry_run: ok
+traffic_dry_run: ok
+backup_target: ok
+```
+
+Read-only API smoke evidence:
+
+```text
+api_bind: http://127.0.0.1:3040
+api_smoke_status: passed
+api_checked_routes: 6
+route_status_codes: 200
+forbidden_markers: []
+token_raw_display: hidden
+token_lifecycle: revoked
+```
+
+Web/admin and listener evidence:
+
+```text
+web_login_http: 200
+web_listener: 127.0.0.1:3030
+api_listener: 127.0.0.1:3040
+public_api_3040: no
+direct_public_web_3030: no evidence claimed
+```
+
+VPS verdict:
+
+```text
+decision_for_observed_runtime: launch-gate-checks-pass-for-42ffa65
+decision_for_current_c92_gate: pending-source-overlay-alignment
+next_step: apply or confirm c92bd1a source overlay, then repeat short backup/smoke/listener gate
+write_routes_enabled: false
+write_operations_enabled: false
+```
+
 ## Source Overlay Promotion: 2026-06-07 / c92bd1a
 
 Назначение: зафиксировать safe summary фактического promotion `/opt/amn2` до source overlay `c92bd1a Bind web admin systemd to loopback` и повторного read-only smoke уже на production source overlay path.

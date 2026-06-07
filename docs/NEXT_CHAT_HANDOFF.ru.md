@@ -40,6 +40,8 @@ Lab/coordination repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 
 Текущий статус: source overlay `/opt/amn2` промотирован до `c92bd1a` через safe update kit, runtime сохранен (`data/`, `.env`, `servers.yml`, `venv/`), `VPS_APPLY_ENABLED=false`. Read-only API smoke на loopback `127.0.0.1:3040` прошел: `server_db_sync`, API readiness, auth, listener и audit `passed`. Web/admin systemd template подтвержден как loopback-only: `web serve --host 127.0.0.1 --port 3030`. Web/admin доступ утвержден через HTTPS reverse proxy, при этом порт API `3040` наружу не выставляется. Итоговый статус: `controlled-prod-ready` для source overlay `c92bd1a`.
 
+Последний operator launch evidence после этого показал, что фактически работающий `/opt/amn2` в той shell-сессии все еще возвращал `.amn2_source_overlay_commit = 42ffa65`. На нем прошли backup create/verify, bot check, preflight, dry-run, API smoke 6/6, web login `200`, listeners `127.0.0.1:3030` и `127.0.0.1:3040`. Это подтверждает working runtime для `42ffa65`, но не закрывает текущий `c92bd1a` gate. Safe summary записан в `docs/API_VPS_SMOKE_EVIDENCE.ru.md` в разделе `Production Launch Gate Attempt: 2026-06-07 / 42ffa65`.
+
 Цель следующего этапа: не открывать broad write API, а закрыть controlled-prod readiness или выбрать следующий read-only controller-facing slice.
 ```
 
@@ -138,6 +140,8 @@ VPS_APPLY_ENABLED default: false
 ## 8. Рекомендуемый Следующий Шаг
 
 Сначала пройти `docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md`: backup create/verify, bot/web systemd, web login, loopback API smoke и safe evidence. Это текущий путь к controlled production для source overlay `c92bd1a`.
+
+Если VPS при проверке показывает `.amn2_source_overlay_commit = 42ffa65`, сначала выровнять source overlay до `c92bd1a` или явно подтвердить, что выбран historical `42ffa65` runtime. Не объявлять `c92bd1a` production gate закрытым по evidence от `42ffa65`.
 
 Если VPS сейчас не трогаем: основной чат может доработать read-only controller UX и status visibility вокруг `/api/integration/status` и `/api/local-agent/runtime/summary`, но не начинать broad write API, config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
 
