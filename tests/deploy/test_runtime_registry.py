@@ -175,8 +175,7 @@ def test_production_launch_gate_keeps_first_prod_run_operator_only():
     checklist = checklist_path.read_text(encoding="utf-8")
 
     assert "controlled-prod-ready" in gate
-    assert "42ffa65" in gate
-    assert "26b1b9a" in gate
+    assert "c92bd1a" in gate
     assert "VPS_APPLY_ENABLED=false" in gate
     assert "python -m app.cli backup create" in gate
     assert "python -m app.cli backup verify" in gate

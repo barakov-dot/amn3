@@ -2,7 +2,7 @@
 
 Короткий путь перед первым тестом на живом VPS.
 
-Для текущего controlled production launch после source overlay `42ffa65` и evidence `26b1b9a` использовать короткий gate: `docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md`.
+Для текущего controlled production launch после source overlay `c92bd1a` использовать короткий gate: `docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md`.
 
 Перед повторным заходом на VPS использовать короткий протокол: `docs/VPS_RETEST_PROTOCOL.ru.md`.
 
@@ -74,7 +74,7 @@ python -m app.cli bot check-network
 
 ```env
 WEB_ADMIN_ENABLED=false
-WEB_ADMIN_HOST=0.0.0.0
+WEB_ADMIN_HOST=127.0.0.1
 WEB_ADMIN_PORT=3030
 WEB_ADMIN_USERNAME=admin
 WEB_ADMIN_PASSWORD_HASH=replace-with-password-hash

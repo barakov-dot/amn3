@@ -13,10 +13,11 @@ production repo: https://github.com/barakov-dot/amn2.git
 branch: codex-vps-test-prep
 app-code slice to test: 62ff184 Update controlled prod status visibility
 expected package commit: use git log -1 / package manifest before VPS update
-current VPS source overlay: 42ffa65 Record git checkout smoke status
-last VPS smoke: 2026-06-07 15:09 UTC, pass, checked_routes=6
-current prod decision: controlled-prod-ready for source overlay 42ffa65
-next decision after this run: choose next read-only controller slice or separate design/live gate
+historical source overlay promoted by this runbook: 42ffa65 Record git checkout smoke status
+latest VPS source overlay after later safety follow-up: c92bd1a Bind web admin systemd to loopback
+last smoke for this runbook scope: 2026-06-07 15:09 UTC, pass, checked_routes=6
+current prod decision: controlled-prod-ready for source overlay c92bd1a
+next decision after later c92bd1a smoke: controlled production launch checklist or separate design/live gate
 ```
 
 `62ff184` меняет только read-only status visibility: `/api/integration/status`, страницу `/integration-status`, runbook/evidence/handoff. Он не включает live peer mutations, config delivery, public API, Local Agent mutations, backup/import/reboot routes или `config:read`.
@@ -88,6 +89,8 @@ Decision:
 ```text
 decision: 42ffa65 source overlay update/smoke passed; source overlay can be treated as promoted
 ```
+
+Позднее этот source overlay был superseded by `c92bd1a Bind web admin systemd to loopback`, который также прошел source-overlay update/read-only smoke и подтвердил web/admin systemd template на `127.0.0.1:3030`.
 
 ## Локальная Подготовка
 

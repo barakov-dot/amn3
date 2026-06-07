@@ -8,6 +8,66 @@ Template policy: Заполнять после реального VPS smoke; cur
 
 Не вставлять raw API token, Authorization header, token hash, `.conf`, QR, `vpn://`, `PrivateKey`, `PresharedKey`, SSH password/private key, `.env`, PSK, полные response bodies или `api-server.log` без ручной redaction.
 
+## Source Overlay Promotion: 2026-06-07 / c92bd1a
+
+Назначение: зафиксировать safe summary фактического promotion `/opt/amn2` до source overlay `c92bd1a Bind web admin systemd to loopback` и повторного read-only smoke уже на production source overlay path.
+
+Source update evidence:
+
+```text
+Дата и время update: 2026-06-07 18:21 UTC
+workspace: /opt/amn2
+source overlay before: 42ffa65
+source overlay after: c92bd1a
+source_update_status: passed
+source_update_run_id: 20260607T182118Z
+source_sha: 272CC013A416937AAA2256A1643B2C77F707874D28FDCB2EA16534E349DD4FC2
+safe_log_dir: /opt/amn2/vps-smoke/source-update-20260607T182118Z
+runtime preserved: .env, data/, venv/, servers.yml
+VPS_APPLY_ENABLED: false
+```
+
+Read-only smoke evidence:
+
+```text
+Дата и время smoke: 2026-06-07 18:21 UTC
+workspace: /opt/amn2
+API bind: http://127.0.0.1:3040
+Server name: local
+branch/head: not a git checkout
+preflight_status: skipped
+server_db_sync_status: passed
+api_ready_status: passed
+api_smoke_status: passed
+auth_status: passed
+missing_bearer_http: 401
+wrong_scope_http: 403
+revoked_token_http: 401
+listener_status: passed
+audit_status: passed
+safe_evidence_dir: /opt/amn2/vps-smoke/api-loopback-20260607T182131Z
+safe_bundle: /opt/amn2/vps-smoke/api-loopback-safe-evidence-20260607T182131Z.tar.gz
+```
+
+Web/admin loopback evidence:
+
+```text
+systemd template ExecStart: /opt/amn2/venv/bin/python -m app.cli web serve --host 127.0.0.1 --port 3030
+web/admin access path: approved HTTPS reverse proxy
+direct public web/admin 3030: blocked unless separate gate
+public API 3040 exposure: blocked
+```
+
+VPS verdict:
+
+```text
+decision: read-only-vps-smoke-pass-c92bd1a
+current source overlay: c92bd1a
+write_routes_enabled: false
+write_operations_enabled: false
+controlled production next gate: operator-only web/admin and bot launch checklist
+```
+
 ## Source Overlay Promotion: 2026-06-07 / 42ffa65
 
 Назначение: зафиксировать safe summary фактического promotion `/opt/amn2` до source overlay `42ffa65 Record git checkout smoke status` и повторного read-only smoke уже на production source overlay path.
@@ -64,8 +124,9 @@ forbidden_markers: none
 listener_scope: loopback target
 write_routes_enabled: false
 write_operations_enabled: false
-controlled_prod_decision: controlled-prod-ready for source overlay 42ffa65
-next gate: choose next read-only controller slice
+controlled_prod_decision_at_time: controlled-prod-ready for source overlay 42ffa65
+superseded_by_source_overlay: c92bd1a
+next gate after c92bd1a smoke: controlled production launch checklist
 ```
 
 ## Git Checkout Smoke: 2026-06-06 / 62ff184 read-only gate

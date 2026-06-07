@@ -9,18 +9,18 @@
 ```text
 repo: https://github.com/barakov-dot/amn2.git
 branch: codex-vps-test-prep
-latest VPS source overlay head: 42ffa65 Record git checkout smoke status
-latest VPS read-only smoke: 42ffa65 pass, checked_routes=6, 2026-06-07 15:09 UTC
-previous VPS source overlay head: c8a6363 Add Local Agent runtime summary mapper
+latest VPS source overlay head: c92bd1a Bind web admin systemd to loopback
+latest VPS read-only smoke: c92bd1a pass, 2026-06-07 18:21 UTC
+previous VPS source overlay head: 42ffa65 Record git checkout smoke status
 local head deployment status: source overlay promoted and smoked
 previous VPS read-only smoke: 32d01fd pass, run_id 20260606T185114Z
 previous API route smoke: 1a193b9 pass, run_id 20260606T154636Z
-current prod decision: controlled-prod-ready for source overlay 42ffa65
+current prod decision: controlled-prod-ready for source overlay c92bd1a
 web/admin access: HTTPS reverse proxy approved; API 3040 remains loopback-only
 Phase 2 live single disposable peer gate: verified-live on stable line
 ```
 
-Source overlay `42ffa65` прошел safe update на `/opt/amn2` с сохранением `data/`, `.env`, `servers.yml` и `venv/`, затем read-only API smoke на loopback `127.0.0.1:3040`: 6 routes, all 200, forbidden markers empty, smoke token revoked. Web/admin доступ подтвержден как HTTPS reverse proxy, при этом порт API `3040` наружу не выставляется.
+Source overlay `c92bd1a` прошел safe update на `/opt/amn2` с сохранением `data/`, `.env`, `servers.yml` и `venv/`, затем read-only API smoke на loopback `127.0.0.1:3040`: API readiness, auth, listener and audit passed. Web/admin systemd template подтвержден как loopback-only `127.0.0.1:3030`; web/admin доступ подтвержден как HTTPS reverse proxy, при этом порт API `3040` наружу не выставляется.
 
 ## Controlled Prod Mode
 
@@ -181,7 +181,7 @@ next action:
 
 ## Decision Rules
 
-`controlled-prod-ready` разрешен только когда checklist закрыт и stop conditions отсутствуют. Для текущего VPS source overlay это состояние зафиксировано на `42ffa65`. Если следующий read-only head пройдет только git-checkout smoke, он не становится source overlay автоматически до отдельного source overlay promotion/update gate.
+`controlled-prod-ready` разрешен только когда checklist закрыт и stop conditions отсутствуют. Для текущего VPS source overlay это состояние зафиксировано на `c92bd1a`. Если следующий read-only head пройдет только git-checkout smoke, он не становится source overlay автоматически до отдельного source overlay promotion/update gate.
 
 `needs-fix` обязателен, если smoke, auth, listener, audit, checksum, host key, access path или evidence hygiene не проходят.
 

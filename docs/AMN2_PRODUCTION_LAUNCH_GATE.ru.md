@@ -2,14 +2,14 @@
 
 Дата: 2026-06-07.
 
-Назначение: безопасно перевести текущий срез AMN2 в controlled production режим на `/opt/amn2`, не открывая broad write API и не расширяя поверхность мутаций. Этот gate опирается на уже подтвержденный source overlay `42ffa65`, локальную evidence-фиксацию `26b1b9a` и VPS smoke `checked_routes=6`.
+Назначение: безопасно перевести текущий срез AMN2 в controlled production режим на `/opt/amn2`, не открывая broad write API и не расширяя поверхность мутаций. Этот gate опирается на уже подтвержденный source overlay `c92bd1a`, VPS smoke `20260607T182131Z` и loopback web/admin systemd template.
 
 ## 1. Текущая Точка Правды
 
 ```text
 workspace: /opt/amn2
-source overlay: 42ffa65 Record git checkout smoke status
-local evidence commit: 26b1b9a Record source overlay smoke promotion
+source overlay: c92bd1a Bind web admin systemd to loopback
+previous evidence commit: 26b1b9a Record source overlay smoke promotion
 status: controlled-prod-ready
 api bind for smoke: 127.0.0.1:3040
 web/admin access: HTTPS reverse proxy
@@ -20,8 +20,9 @@ VPS_APPLY_ENABLED=false
 
 - source update kit применен к `/opt/amn2`;
 - runtime сохранен: `data/`, `.env`, `servers.yml`, `venv/`;
-- `cat /opt/amn2/.amn2_source_overlay_commit` показывает `42ffa65`;
-- `python -m app.cli api smoke-cycle` прошел: 6 routes, все HTTP `200`, forbidden markers пустые;
+- `cat /opt/amn2/.amn2_source_overlay_commit` показывает `c92bd1a`;
+- `python -m app.cli api smoke-cycle` прошел: API readiness, auth, listener и audit `passed`;
+- `deploy/systemd/amneziya-web.service.example` использует `web serve --host 127.0.0.1 --port 3030`;
 - временный smoke token отозван автоматически;
 - API 3040 наружу не выставлять.
 
@@ -51,12 +52,12 @@ VPS_APPLY_ENABLED=false
 
 Остановиться и не продолжать production launch, если выполнено хоть одно условие:
 
-- `/opt/amn2/.amn2_source_overlay_commit` не равен `42ffa65`;
+- `/opt/amn2/.amn2_source_overlay_commit` не равен `c92bd1a`;
 - backup не создается или `backup verify` не проходит;
 - `.env`, `servers.yml`, `data/` или `venv/` отсутствуют;
 - `VPS_APPLY_ENABLED` неожиданно равен `true` до отдельного live-write окна;
 - API 3040 доступен не только на `127.0.0.1`;
-- `api smoke-cycle` дает не 6 routes, не HTTP `200`, либо forbidden markers не пустые;
+- `api smoke-cycle` не дает `api_smoke_status=passed`, либо auth/listener/audit checks не проходят;
 - bot `check-network` не проходит;
 - `amneziya-web` или `amneziya-bot` flapping/failing в systemd;
 - в evidence попали raw API token, Authorization header, token hash, PrivateKey, PresharedKey, QR, `vpn://`, `.env`, full config или полный лог.
@@ -85,7 +86,7 @@ printf 'VPS_APPLY_ENABLED=%s\n' "$VPS_APPLY_ENABLED"
 Ожидаем:
 
 ```text
-source overlay: 42ffa65
+source overlay: c92bd1a
 data_dir=present
 env_file=present
 servers_yml=present
@@ -227,17 +228,17 @@ api 3040: loopback smoke only, not public
 Присылать сюда только безопасный итог:
 
 ```text
-source_overlay_commit: 42ffa65
-local_evidence_commit: 26b1b9a
+source_overlay_commit: c92bd1a
+previous_evidence_commit: 26b1b9a
 backup_create: passed
 backup_verify: passed
 bot_check_network: ok
 server_preflight: ok
 server_check_dry_run: ok
 api_smoke_status: passed
-api_checked_routes: 6
-api_route_status_codes: 200
-api_forbidden_markers: []
+api_auth_status: passed
+api_listener_status: passed
+api_audit_status: passed
 api_token_lifecycle: issued-hidden-and-revoked
 web_login_http: <code>
 systemd_web: active

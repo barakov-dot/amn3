@@ -10,10 +10,10 @@
 production repo: C:\Users\SooL\Documents\Amneziya
 remote: https://github.com/barakov-dot/amn2.git
 branch: codex-vps-test-prep
-latest VPS source overlay head: 42ffa65 Record git checkout smoke status
-latest VPS smoke status: pass, checked_routes=6, 2026-06-07 15:09 UTC
-previous VPS source overlay head: c8a6363 Add Local Agent runtime summary mapper
-controlled-prod decision: controlled-prod-ready for source overlay 42ffa65
+latest VPS source overlay head: c92bd1a Bind web admin systemd to loopback
+latest VPS smoke status: pass, 2026-06-07 18:21 UTC
+previous VPS source overlay head: 42ffa65 Record git checkout smoke status
+controlled-prod decision: controlled-prod-ready for source overlay c92bd1a
 production launch gate: docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md
 lab repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 lab branch: master
@@ -109,4 +109,4 @@ lab branch: master
 
 ## Следующий Рекомендуемый Срез
 
-Ближайшая безопасная работа после этой карты: пройти `docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md` и открыть controlled production для operator-only web/admin и bot. Source overlay `42ffa65` уже промотирован и прошел VPS smoke на `/opt/amn2`: 6 routes, token revoked, forbidden markers empty. После gate можно продолжать следующий read-only controller slice. Не начинать broad write API, public config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
+Ближайшая безопасная работа после этой карты: пройти `docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md` и открыть controlled production для operator-only web/admin и bot. Source overlay `c92bd1a` уже промотирован и прошел VPS smoke на `/opt/amn2`; web/admin systemd template подтвержден как `127.0.0.1:3030`, API остается loopback-only `127.0.0.1:3040`. После gate можно продолжать следующий read-only controller slice. Не начинать broad write API, public config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
