@@ -31,17 +31,19 @@ def test_integration_status_page_renders_gate_without_secret_markers(tmp_path: P
 
     assert response.status_code == 200
     assert "Integration status" in response.text
-    assert "controlled-prod-ready" in response.text
-    assert "42ffa65" in response.text
-    assert "20260607T150923Z" in response.text
-    assert "https-reverse-proxy" in response.text
+    assert "manual-prelaunch-ready" in response.text
+    assert "manual-prelaunch-pass-systemd-deferred" in response.text
+    assert "c92bd1a" in response.text
+    assert "20260607T195044Z" in response.text
+    assert "manual-loopback-validation" in response.text
+    assert "deferred-target-server" in response.text
     assert "127.0.0.1:3040-loopback-only" in response.text
-    assert "source-overlay-smoke-passed" in response.text
+    assert "manual-prelaunch-passed" in response.text
     assert "dry-run-only-pass" in response.text
     assert "Phase 2 live write gate" in response.text
     assert "verified-live" in response.text
     assert "new live peer apply/revoke without separate operator confirmation" in response.text
-    assert "Choose next read-only controller slice" in response.text
+    assert "Repeat gate on target server before systemd/reverse proxy" in response.text
     assert "server:read" in response.text
     forbidden = [
         "PrivateKey",

@@ -52,10 +52,10 @@ def test_integration_status_returns_safe_read_only_report_and_audit(tmp_path: Pa
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["status"] == "controlled_prod_ready"
-    assert payload["api_baseline"]["stable_head"] == "42ffa65"
-    assert payload["api_baseline"]["previous_stable_head"] == "c8a6363"
-    assert payload["api_baseline"]["api_web_baseline_head"] == "294803e"
+    assert payload["status"] == "manual_prelaunch_ready"
+    assert payload["api_baseline"]["stable_head"] == "c92bd1a"
+    assert payload["api_baseline"]["previous_stable_head"] == "42ffa65"
+    assert payload["api_baseline"]["api_web_baseline_head"] == "c92bd1a"
     assert payload["api_baseline"]["integration_status_head"] == "7764ae7"
     assert payload["api_baseline"]["write_routes_enabled"] is False
     assert payload["api_baseline"]["public_api_exposed"] is False
@@ -63,19 +63,22 @@ def test_integration_status_returns_safe_read_only_report_and_audit(tmp_path: Pa
     assert payload["remote_operation_gate"]["stable_merge_head"] == "708c98e"
     assert payload["remote_operation_gate"]["write_operations_enabled"] is False
     assert payload["remote_operation_gate"]["phase_2"] == "verified_live"
-    assert payload["controlled_prod_readiness"]["decision"] == "controlled-prod-ready"
-    assert payload["controlled_prod_readiness"]["source_overlay_head"] == "42ffa65"
-    assert payload["controlled_prod_readiness"]["vps_smoke_run_id"] == "20260607T150923Z"
-    assert payload["controlled_prod_readiness"]["web_admin_access"] == "https_reverse_proxy"
+    assert payload["controlled_prod_readiness"]["decision"] == "manual-prelaunch-pass-systemd-deferred"
+    assert payload["controlled_prod_readiness"]["source_overlay_head"] == "c92bd1a"
+    assert payload["controlled_prod_readiness"]["vps_smoke_run_id"] == "20260607T195044Z"
+    assert payload["controlled_prod_readiness"]["source_update_run_id"] == "20260607T194406Z"
+    assert payload["controlled_prod_readiness"]["web_admin_access"] == "manual_loopback_validation"
+    assert payload["controlled_prod_readiness"]["manual_web_check"] == "passed"
+    assert payload["controlled_prod_readiness"]["service_deployment"] == "deferred_target_server"
     assert payload["controlled_prod_readiness"]["api_listener"] == "127.0.0.1:3040_loopback_only"
     assert payload["controlled_prod_readiness"]["vps_apply_enabled_default"] is False
-    assert payload["local_read_only_extension"]["head"] == "42ffa65"
-    assert payload["local_read_only_extension"]["status"] == "source_overlay_smoke_passed"
+    assert payload["local_read_only_extension"]["head"] == "c92bd1a"
+    assert payload["local_read_only_extension"]["status"] == "manual_prelaunch_passed"
     assert payload["local_read_only_extension"]["vps_smoke_status"] == "passed"
     assert payload["local_read_only_extension"]["checked_routes"] == 6
     assert payload["local_read_only_extension"]["workspace"] == "source_overlay"
     assert payload["local_read_only_extension"]["token_lifecycle"] == "revoked"
-    assert payload["next_gate"] == "Choose next read-only controller slice"
+    assert payload["next_gate"] == "Repeat gate on target server before systemd/reverse proxy"
     assert payload["aggregate_state"]["servers"] == 1
     assert "new live peer apply/revoke without separate operator confirmation" in payload["blocked_lanes"]
     assert _forbidden_markers_absent(payload)

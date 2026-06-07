@@ -34,6 +34,12 @@
               <td>VPS smoke run</td>
               <td><code>{{ report.controlled_prod_readiness.vps_smoke_run_id }}</code></td>
             </tr>
+            {% if report.controlled_prod_readiness.source_update_run_id %}
+              <tr>
+                <td>Source update run</td>
+                <td><code>{{ report.controlled_prod_readiness.source_update_run_id }}</code></td>
+              </tr>
+            {% endif %}
             <tr>
               <td>API/web baseline</td>
               <td><code>{{ report.api_baseline.api_web_baseline_head }}</code></td>
@@ -42,6 +48,18 @@
               <td>Web/admin access</td>
               <td>{{ report.controlled_prod_readiness.web_admin_access|replace("_", "-") }}</td>
             </tr>
+            {% if report.controlled_prod_readiness.manual_web_check %}
+              <tr>
+                <td>Manual web check</td>
+                <td>{{ report.controlled_prod_readiness.manual_web_check|replace("_", "-") }}</td>
+              </tr>
+            {% endif %}
+            {% if report.controlled_prod_readiness.service_deployment %}
+              <tr>
+                <td>Service deployment</td>
+                <td>{{ report.controlled_prod_readiness.service_deployment|replace("_", "-") }}</td>
+              </tr>
+            {% endif %}
             <tr>
               <td>API listener</td>
               <td>{{ report.controlled_prod_readiness.api_listener|replace("_", "-") }}</td>

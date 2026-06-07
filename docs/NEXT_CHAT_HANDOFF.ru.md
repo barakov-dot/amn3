@@ -45,6 +45,8 @@ Lab/coordination repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 
 Следом source overlay был выровнен до `c92bd1a`: kit/source checksum OK, `source_update_status=passed`, `.amn2_source_overlay_commit=c92bd1a`, runtime preserved, backup create/verify прошел, preflight/dry-run прошли, API smoke 6/6 прошел. Manual web loopback check тоже прошел: старый ручной listener остановлен, новый web process поднялся на `127.0.0.1:3030`, `/login` вернул `web_login_http=200`, после cleanup listener остановлен. На текущем VPS постоянный systemd service не запускаем: этот сервер используется для ручной проверки, а service deployment переносится на другой целевой сервер.
 
+Локальный read-only status slice обновляет `/api/integration/status` и web `/integration-status`: теперь они сообщают `manual_prelaunch_ready`, `c92bd1a`, `manual-prelaunch-pass-systemd-deferred`, manual web check `passed` и следующий gate на целевом сервере.
+
 Цель следующего этапа: не открывать broad write API, а закрыть controlled-prod readiness или выбрать следующий read-only controller-facing slice.
 ```
 

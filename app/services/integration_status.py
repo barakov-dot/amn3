@@ -13,6 +13,7 @@ ALLOWED_LANES = (
     "API token lifecycle administration",
     "controlled prod status visibility",
     "Local Agent runtime summary visibility",
+    "manual validation VPS evidence",
 )
 BLOCKED_LANES = (
     "new live peer apply/revoke without separate operator confirmation",
@@ -22,28 +23,30 @@ BLOCKED_LANES = (
     "Local Agent configs or mutations",
     "backup/import/reboot routes",
     "public API 3040 exposure",
+    "systemd/reverse proxy deployment on validation VPS",
 )
-CURRENT_STABLE_HEAD = "42ffa65"
-PREVIOUS_STABLE_HEAD = "c8a6363"
+CURRENT_STABLE_HEAD = "c92bd1a"
+PREVIOUS_STABLE_HEAD = "42ffa65"
 POST_DRY_RUN_READ_ONLY_HEAD = "7764ae7"
-API_WEB_BASELINE_HEAD = "294803e"
+API_WEB_BASELINE_HEAD = "c92bd1a"
 REMOTE_OPERATION_GATE_MERGE_HEAD = "708c98e"
 REMOTE_OPERATION_GATE_CANDIDATE_HEAD = "7281254"
-CONTROLLED_PROD_SMOKE_RUN_ID = "20260607T150923Z"
-CURRENT_LOCAL_READ_ONLY_HEAD = "42ffa65"
+CONTROLLED_PROD_SMOKE_RUN_ID = "20260607T195044Z"
+CONTROLLED_PROD_SOURCE_UPDATE_RUN_ID = "20260607T194406Z"
+CURRENT_LOCAL_READ_ONLY_HEAD = "c92bd1a"
 CURRENT_LOCAL_READ_ONLY_SMOKE_STATUS = "passed"
 CURRENT_LOCAL_READ_ONLY_SMOKE_CHECKED_ROUTES = 6
 
 
 def build_integration_status(repo: Repository) -> dict[str, Any]:
     return {
-        "status": "controlled_prod_ready",
+        "status": "manual_prelaunch_ready",
         "summary": (
-            "Controlled prod is approved for VPS source overlay 42ffa65 after "
-            "safe source overlay update and read-only loopback smoke on /opt/amn2."
+            "Manual prelaunch validation passed for VPS source overlay c92bd1a. "
+            "Systemd and reverse proxy deployment are deferred to the target server."
         ),
         "api_baseline": {
-            "status": "controlled_prod_ready",
+            "status": "manual_prelaunch_ready",
             "stable_head": CURRENT_STABLE_HEAD,
             "previous_stable_head": PREVIOUS_STABLE_HEAD,
             "api_web_baseline_head": API_WEB_BASELINE_HEAD,
@@ -60,19 +63,22 @@ def build_integration_status(repo: Repository) -> dict[str, Any]:
             "write_operations_enabled": False,
         },
         "controlled_prod_readiness": {
-            "status": "ready",
-            "decision": "controlled-prod-ready",
-            "runbook": "docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md",
+            "status": "manual_prelaunch_ready",
+            "decision": "manual-prelaunch-pass-systemd-deferred",
+            "runbook": "docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md",
             "source_overlay_head": CURRENT_STABLE_HEAD,
             "vps_smoke_run_id": CONTROLLED_PROD_SMOKE_RUN_ID,
-            "web_admin_access": "https_reverse_proxy",
+            "source_update_run_id": CONTROLLED_PROD_SOURCE_UPDATE_RUN_ID,
+            "web_admin_access": "manual_loopback_validation",
+            "manual_web_check": "passed",
+            "service_deployment": "deferred_target_server",
             "api_listener": "127.0.0.1:3040_loopback_only",
             "vps_apply_enabled_default": False,
             "recovery_path": "known",
         },
         "local_read_only_extension": {
             "head": CURRENT_LOCAL_READ_ONLY_HEAD,
-            "status": "source_overlay_smoke_passed",
+            "status": "manual_prelaunch_passed",
             "vps_smoke_status": CURRENT_LOCAL_READ_ONLY_SMOKE_STATUS,
             "checked_routes": CURRENT_LOCAL_READ_ONLY_SMOKE_CHECKED_ROUTES,
             "workspace": "source_overlay",
@@ -84,7 +90,7 @@ def build_integration_status(repo: Repository) -> dict[str, Any]:
         "aggregate_state": _load_aggregate_state(repo),
         "allowed_lanes": list(ALLOWED_LANES),
         "blocked_lanes": list(BLOCKED_LANES),
-        "next_gate": "Choose next read-only controller slice",
+        "next_gate": "Repeat gate on target server before systemd/reverse proxy",
     }
 
 
