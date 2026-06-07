@@ -74,7 +74,18 @@ safe_evidence_dir: /opt/amn2/vps-smoke/api-loopback-20260607T182131Z
 safe_bundle: /opt/amn2/vps-smoke/api-loopback-safe-evidence-20260607T182131Z.tar.gz
 ```
 
-The pasted VPS summary did not include `api-smoke-result.json`; route-level details can be added later from the safe evidence directory if needed. The smoke script itself reported `api_smoke_status=passed`.
+Route-level result:
+
+```text
+checked_routes=6
+servers: 200, forbidden_markers=[]
+integration_status: 200, forbidden_markers=[]
+local_agent_runtime_summary: 200, forbidden_markers=[]
+server_summary: 200, forbidden_markers=[]
+metrics_summary: 200, forbidden_markers=[]
+users_summary: 200, forbidden_markers=[]
+status=passed
+```
 
 ## Web/Admin Loopback Template Evidence
 
@@ -91,6 +102,7 @@ This matches the approved reverse-proxy boundary: web/admin backend stays on loo
 ```text
 decision: read-only-vps-smoke-pass-c92bd1a
 current VPS source overlay: c92bd1a
+checked_routes: 6
 web/admin backend template: loopback-only 127.0.0.1:3030
 API listener policy: 127.0.0.1:3040 loopback-only
 controlled production next gate: operator-only web/admin and bot launch checklist

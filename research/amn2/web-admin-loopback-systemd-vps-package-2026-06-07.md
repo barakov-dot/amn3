@@ -73,6 +73,10 @@ api_smoke_status: passed
 auth_status: passed
 listener_status: passed
 audit_status: passed
+checked_routes: 6
+routes: servers, integration_status, local_agent_runtime_summary, server_summary, metrics_summary, users_summary
+route_status_codes: all 200
+forbidden_markers: none
 source overlay after: c92bd1a
 ```
 

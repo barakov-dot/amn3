@@ -18,6 +18,7 @@ research/amn2/controlled-prod-ready-2026-06-07.md
 research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
 research/amn2/controlled-prod-status-visibility-vps-repeat-smoke-2026-06-07.md
 research/amn2/web-admin-loopback-systemd-vps-package-2026-06-07.md
+research/amn2/web-admin-loopback-systemd-vps-smoke-evidence-2026-06-07.md
 docs/PROJECT_STATUS_CURRENT.ru.md
 docs/PROJECT_CONTEXT_IMPORT.ru.md
 research/amn2/transfer-backlog.md
@@ -50,12 +51,13 @@ current package status: read-only-vps-smoke-pass
 last VPS read-only smoke: pass
 source_update_run_id: 20260607T182118Z
 api_smoke_run_id: 20260607T182131Z
-route result JSON: pending operator paste; smoke summary reported api_smoke_status=passed
+checked_routes: 6
 routes: servers, integration_status, local_agent_runtime_summary, server_summary, metrics_summary, users_summary
+route_status_codes: all 200
+forbidden_markers: none
 auth checks: missing bearer 401, wrong scope 403, revoked token 401
 listener_status: passed
 audit_status: passed
-forbidden_markers: none in returned route evidence
 Phase 2 single disposable peer apply/revoke: verified-live on stable line
 source overlay commit: c92bd1a
 previous source overlay commit: 42ffa65
@@ -118,7 +120,7 @@ For current source overlay `c92bd1a`, read-only VPS update/smoke passed with `ap
 
 After the original `c8a6363` decision, AMN2 advanced locally to git head `42ffa65`; the app-code read-only slice `62ff184` passed a separate git-checkout smoke on `/opt/amn2-git` with six read-only routes, then source-overlay promotion to `/opt/amn2` passed through the AMN3 update/smoke kit.
 
-After that source-overlay proof, AMN2 advanced to `c92bd1a Bind web admin systemd to loopback`; AMN3 package `c92bd1a` passed real VPS source-overlay smoke. Route-level JSON for that run is still useful to attach later, but the safe smoke summary reported `api_smoke_status=passed`.
+After that source-overlay proof, AMN2 advanced to `c92bd1a Bind web admin systemd to loopback`; AMN3 package `c92bd1a` passed real VPS source-overlay smoke. Route-level JSON for that run is now attached: six read-only routes returned `200` with no forbidden markers.
 
 `needs-fix` would be required if smoke/auth/listener/audit/checksum/access-path/host-key/evidence hygiene failed.
 

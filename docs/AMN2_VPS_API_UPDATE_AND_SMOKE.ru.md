@@ -10,7 +10,9 @@ source sha256: 272CC013A416937AAA2256A1643B2C77F707874D28FDCB2EA16534E349DD4FC2
 operator doc: dist/amn2-vps-update-and-smoke-kit-c92bd1a/AMN2_VPS_UPDATE_AND_SMOKE_c92bd1a.ru.md
 local validation: focused deploy tests 11 passed; package SHA/source SHA/no-BOM/no-CRLF/no-forbidden-source-entry/test-extract checks passed
 VPS result: read-only-vps-smoke-pass, source_update_run_id 20260607T182118Z, api_smoke_run_id 20260607T182131Z
-route result JSON: pending operator paste; smoke summary reported api_smoke_status=passed
+checked_routes: 6
+route_status_codes: all 200
+forbidden_markers: none
 web template: 127.0.0.1:3030 loopback-only
 evidence: research/amn2/web-admin-loopback-systemd-vps-package-2026-06-07.md
 smoke evidence: research/amn2/web-admin-loopback-systemd-vps-smoke-evidence-2026-06-07.md

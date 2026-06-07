@@ -22,6 +22,7 @@ source-overlay promotion for c92bd1a: read-only-vps-smoke-pass
 source-overlay package: dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip
 package sha256: EC48DBA7C91F189512AB77EB5490432C85DA79F987068A98C1CC7F3082387F12
 VPS smoke run_id: 20260607T182131Z
+checked_routes: 6
 current AMN3 master: verify with git log -1; latest synced state records controlled-prod-ready, git-checkout smoke evidence, 42ffa65 package evidence, 42ffa65 source-overlay smoke evidence and c92bd1a source-overlay smoke evidence
 ```
 
@@ -61,6 +62,7 @@ source sha256: 272CC013A416937AAA2256A1643B2C77F707874D28FDCB2EA16534E349DD4FC2
 source commit: c92bd1a
 status: read-only-vps-smoke-pass
 run_id: 20260607T182131Z
+checked_routes: 6
 decision: passed
 ```
 

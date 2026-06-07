@@ -15,7 +15,10 @@ source sha256: 272CC013A416937AAA2256A1643B2C77F707874D28FDCB2EA16534E349DD4FC2
 status: read-only-vps-smoke-pass
 source_update_run_id: 20260607T182118Z
 api_smoke_run_id: 20260607T182131Z
-route result JSON: pending operator paste; smoke summary reported api_smoke_status=passed
+checked_routes: 6
+routes: servers, integration_status, local_agent_runtime_summary, server_summary, metrics_summary, users_summary
+route_status_codes: all 200
+forbidden_markers: none
 evidence: research/amn2/web-admin-loopback-systemd-vps-package-2026-06-07.md
 smoke evidence: research/amn2/web-admin-loopback-systemd-vps-smoke-evidence-2026-06-07.md
 ```
