@@ -1,8 +1,20 @@
 # Current Override 2026-06-07
 
-`amn2/codex-vps-test-prep` current git head is `42ffa65 Record git checkout smoke status`. The app-code read-only slice `62ff184 Update controlled prod status visibility` first passed real VPS git-checkout smoke on `/opt/amn2-git`, then AMN3 package `42ffa65` was applied to `/opt/amn2` through the safe source-overlay update flow and passed read-only loopback API smoke on 2026-06-07.
+`amn2/codex-vps-test-prep` VPS-smoked source overlay is `42ffa65 Record git checkout smoke status`. The app-code read-only slice `62ff184 Update controlled prod status visibility` first passed real VPS git-checkout smoke on `/opt/amn2-git`, then AMN3 package `42ffa65` was applied to `/opt/amn2` through the safe source-overlay update flow and passed read-only loopback API smoke on 2026-06-07.
 
 The current VPS production source overlay is now `42ffa65 Record git checkout smoke status`. Previous source overlay `c8a6363 Add Local Agent runtime summary mapper` remains historical smoke-passed baseline from 2026-06-06. Current evidence: `research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md`; prior git-checkout evidence: `research/amn2/controlled-prod-status-visibility-git-checkout-smoke-2026-06-07.md`.
+
+Post-smoke safety follow-up: AMN2 current git head is now `c92bd1a Bind web admin systemd to loopback`. AMN3 package `dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip` is ready but not VPS-smoked yet. Purpose: keep web/admin backend on `127.0.0.1:3030` for approved HTTPS reverse proxy mode before controlled production launch. Until this package passes source-overlay smoke, the current VPS-smoked source overlay remains `42ffa65`.
+
+```text
+dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip
+package sha256: EC48DBA7C91F189512AB77EB5490432C85DA79F987068A98C1CC7F3082387F12
+source zip: dist/amn2-codex-vps-test-prep-c92bd1a-source.zip
+source sha256: 272CC013A416937AAA2256A1643B2C77F707874D28FDCB2EA16534E349DD4FC2
+status: package-ready-not-vps-smoked
+operator doc: dist/amn2-vps-update-and-smoke-kit-c92bd1a/AMN2_VPS_UPDATE_AND_SMOKE_c92bd1a.ru.md
+package evidence: research/amn2/web-admin-loopback-systemd-vps-package-2026-06-07.md
+```
 
 AMN3 source-overlay gate result:
 
@@ -23,7 +35,7 @@ package evidence: research/amn2/controlled-prod-status-visibility-vps-package-20
 VPS smoke evidence: research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
 ```
 
-Next gate: complete the controlled production launch checklist for web/admin and bot runtime around source overlay `42ffa65`, or continue with another read-only controller/status/observability slice. This still does not unlock public API `3040`, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent mutations, backup/import/reboot, or new live peer operations.
+Next gate: promote `c92bd1a` through source-overlay update/read-only smoke, then complete the controlled production launch checklist for web/admin and bot runtime. This still does not unlock public API `3040`, direct public web/admin `3030`, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent mutations, backup/import/reboot, or new live peer operations.
 
 # Historical Override 2026-06-06
 

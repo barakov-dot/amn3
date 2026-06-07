@@ -1,5 +1,20 @@
 # AMN2 API/Web Panel VPS Test Runbook
 
+Current override 2026-06-07.2: stable branch head `c92bd1a Bind web admin systemd to loopback` has a package-ready update+smoke kit. This package is not VPS-smoked yet. Last VPS-smoked source overlay remains `42ffa65 Record git checkout smoke status`, `api_smoke_run_id=20260607T165625Z`. `c92bd1a` is a controlled production launch safety follow-up: web/admin systemd backend binds to `127.0.0.1:3030` by default for approved HTTPS reverse proxy mode.
+
+```text
+dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip
+sha256: EC48DBA7C91F189512AB77EB5490432C85DA79F987068A98C1CC7F3082387F12
+source zip: dist/amn2-codex-vps-test-prep-c92bd1a-source.zip
+source sha256: 272CC013A416937AAA2256A1643B2C77F707874D28FDCB2EA16534E349DD4FC2
+operator doc: dist/amn2-vps-update-and-smoke-kit-c92bd1a/AMN2_VPS_UPDATE_AND_SMOKE_c92bd1a.ru.md
+local validation: focused deploy tests 11 passed; package SHA/source SHA/no-BOM/no-CRLF/no-forbidden-source-entry/test-extract checks passed
+VPS result: pending read-only source-overlay smoke
+evidence: research/amn2/web-admin-loopback-systemd-vps-package-2026-06-07.md
+```
+
+Previous source-overlay package:
+
 Current override 2026-06-07: stable branch head `42ffa65 Record git checkout smoke status` has passed safe source-overlay update and read-only API smoke on `/opt/amn2`. Last VPS-smoked source overlay is now `42ffa65`, `source_update_run_id=20260607T165559Z`, `api_smoke_run_id=20260607T165625Z`. `c8a6363` is the historical prior VPS-smoked runtime/source, `run_id=20260606T202040Z`; `32d01fd` and `1a193b9` are older historical baselines.
 
 ```text
@@ -15,7 +30,7 @@ listener: 127.0.0.1:3040 loopback-only
 evidence: research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
 ```
 
-Previous source-overlay package:
+Historical prior source-overlay package:
 
 ```text
 dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
@@ -28,7 +43,7 @@ VPS result: read-only-vps-smoke-pass, run_id 20260606T202040Z
 evidence: research/amn2/local-agent-runtime-summary-vps-smoke-evidence-2026-06-06.md
 ```
 
-Older `c8a6363`, `32d01fd`, `294803e`, `5f12736`, `7764ae7`, `568c611` and `1a193b9` package blocks below are historical evidence after `42ffa65` source-overlay smoke pass. This override does not authorize live apply/revoke.
+Older `42ffa65`, `c8a6363`, `32d01fd`, `294803e`, `5f12736`, `7764ae7`, `568c611` and `1a193b9` package blocks below are historical evidence after `c92bd1a` package publication. This override does not authorize live apply/revoke.
 
 Актуализация 2026-06-04: текущий Phase 1 closeout package — `7764ae7 Cover integration status in API smoke`.
 
@@ -82,7 +97,7 @@ evidence: research/amn2/phase-1-closeout-2026-06-04.md
 
 ## 1. Обновить пакет на VPS
 
-Важно: команды ниже используют package `42ffa65`, который уже прошел source-overlay VPS smoke на `/opt/amn2`. Их можно применять как rerun/recovery flow только с `VPS_APPLY_ENABLED=false`. Последний VPS-smoked source overlay: `42ffa65`, `api_smoke_run_id=20260607T165625Z`. Пакеты `c8a6363`, `32d01fd`, `1a193b9` и `568c611` остаются historical prior VPS-smoked runtime/source, а `294803e` остается historical API/web-panel evidence.
+Важно: команды ниже для historical `42ffa65` оставлены как evidence/recovery. Для текущего next gate использовать package `c92bd1a` и operator doc `dist/amn2-vps-update-and-smoke-kit-c92bd1a/AMN2_VPS_UPDATE_AND_SMOKE_c92bd1a.ru.md`. Последний VPS-smoked source overlay пока `42ffa65`, `api_smoke_run_id=20260607T165625Z`.
 
 ```bash
 cd /root
