@@ -13,7 +13,7 @@ def test_bot_systemd_template_uses_cli_module_and_project_paths():
     assert "User=amneziya" in text
 
 
-def test_web_systemd_template_uses_web_cli_and_port_3030():
+def test_web_systemd_template_uses_web_cli_loopback_bind_and_port_3030():
     text = Path("deploy/systemd/amneziya-web.service.example").read_text(
         encoding="utf-8"
     )
@@ -22,7 +22,8 @@ def test_web_systemd_template_uses_web_cli_and_port_3030():
     assert "EnvironmentFile=/opt/amn2/.env" in text
     assert (
         "ExecStart=/opt/amn2/venv/bin/python -m app.cli web serve "
-        "--host 0.0.0.0 --port 3030"
+        "--host 127.0.0.1 --port 3030"
     ) in text
+    assert "--host 0.0.0.0" not in text
     assert "Restart=on-failure" in text
     assert "User=amneziya" in text

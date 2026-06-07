@@ -97,14 +97,15 @@ password manager.
 Запуск панели:
 
 ```bash
-python -m app.cli web serve --host 0.0.0.0 --port 3030
+python -m app.cli web serve --host 127.0.0.1 --port 3030
 ```
 
 Если `--host` или `--port` не указаны, команда берет `WEB_ADMIN_HOST` и
 `WEB_ADMIN_PORT` из `.env`.
 
 `WEB_ADMIN_SESSION_COOKIE_SECURE=true` требует HTTPS, reverse proxy с TLS или SSH
-tunnel до панели. Для короткой проверки по plain HTTP на `:3030` можно временно
+tunnel до панели. Для approved reverse-proxy режима держать backend web listener
+на `127.0.0.1:3030`, а не на публичном interface. Для короткой проверки по plain HTTP на `:3030` можно временно
 поставить `WEB_ADMIN_SESSION_COOKIE_SECURE=false`, но не оставлять так открытую
 панель в интернете.
 

@@ -181,6 +181,14 @@ revoke.status: revoked
 
 Проверить unit templates перед копированием. Если локальные unit уже установлены, сначала сравнить `sudo systemctl cat`.
 
+Для web/admin в текущем approved reverse-proxy режиме template должен слушать только loopback:
+
+```bash
+grep -F 'web serve --host 127.0.0.1 --port 3030' deploy/systemd/amneziya-web.service.example
+```
+
+Если в unit или template остается `--host 0.0.0.0`, остановиться и заменить на `--host 127.0.0.1` перед `systemctl enable --now`.
+
 ```bash
 cd /opt/amn2
 
@@ -210,7 +218,7 @@ ss -ltnp | grep -E ':3030|:3040' || true
 Ожидаем:
 
 ```text
-web 3030: local/reverse-proxy path only
+web 3030: 127.0.0.1/reverse-proxy path only
 api 3040: loopback smoke only, not public
 ```
 

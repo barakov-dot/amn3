@@ -93,14 +93,15 @@ example from your password manager.
 Start the panel with:
 
 ```bash
-python -m app.cli web serve --host 0.0.0.0 --port 3030
+python -m app.cli web serve --host 127.0.0.1 --port 3030
 ```
 
 If `--host` or `--port` are omitted, the command uses `WEB_ADMIN_HOST` and
 `WEB_ADMIN_PORT` from `.env`.
 
 `WEB_ADMIN_SESSION_COOKIE_SECURE=true` requires HTTPS, a TLS reverse proxy, or an
-SSH tunnel to the panel. For a short plain-HTTP check on `:3030`, temporarily set
+SSH tunnel to the panel. For the approved reverse-proxy mode, keep the backend
+web listener on `127.0.0.1:3030`, not on a public interface. For a short plain-HTTP check on `:3030`, temporarily set
 `WEB_ADMIN_SESSION_COOKIE_SECURE=false`, but do not leave an internet-facing
 admin panel open that way.
 

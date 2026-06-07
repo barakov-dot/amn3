@@ -193,13 +193,13 @@ WEB_ADMIN_SESSION_SECRET=PASTE_GENERATED_VALUE_HERE
 ```bash
 cd /opt/amn2
 source venv/bin/activate
-python -m app.cli web serve --host 0.0.0.0 --port 3030
+python -m app.cli web serve --host 127.0.0.1 --port 3030
 ```
 
 Успешный запуск выглядит примерно так:
 
 ```text
-Uvicorn running on http://0.0.0.0:3030
+Uvicorn running on http://127.0.0.1:3030
 ```
 
 Если `--host` и `--port` не указаны, команда берет значения из `.env`:
@@ -226,30 +226,28 @@ ss -lntp | grep ':3030'
 
 ## 7. Проверить доступ с компьютера администратора
 
-В браузере:
+В approved production режиме доступ с компьютера администратора идет через HTTPS reverse proxy, а backend web-панель остается на `127.0.0.1:3030`. Проверять нужно публичный HTTPS endpoint reverse proxy:
 
 ```text
-http://VPS_IP:3030/login
+https://<admin-domain>/login
 ```
 
-В PowerShell на Windows:
-
-```powershell
-Test-NetConnection VPS_IP -Port 3030
-curl.exe -I http://VPS_IP:3030/login
-```
-
-Если на VPS `curl http://127.0.0.1:3030/login` работает, а с компьютера нет, проверить:
-
-- приложение запущено с `--host 0.0.0.0`, а не `127.0.0.1`;
-- порт `3030/tcp` открыт в `ufw`;
-- порт `3030/tcp` открыт в firewall панели VPS-провайдера;
-- на сервере нет другого firewall, который блокирует входящие соединения.
-
-Пример для `ufw`:
+На самом VPS backend остается доступен локально:
 
 ```bash
-sudo ufw allow 3030/tcp
+curl -i http://127.0.0.1:3030/login
+```
+
+Если на VPS `curl http://127.0.0.1:3030/login` работает, а через HTTPS reverse proxy нет, проверить:
+
+- reverse proxy проксирует на `127.0.0.1:3030`;
+- TLS/сертификат reverse proxy активен;
+- firewall не открывает прямой публичный `3030/tcp`;
+- `WEB_ADMIN_SESSION_COOKIE_SECURE=true` при HTTPS.
+
+Открывать `3030/tcp` наружу через `ufw` или панель VPS-провайдера не нужно для approved reverse-proxy режима. Direct public `:3030` - отдельный exposure gate, не текущий production path.
+
+```bash
 sudo ufw status
 ```
 
@@ -563,7 +561,7 @@ User=amneziya
 Group=amneziya
 WorkingDirectory=/opt/amn2
 EnvironmentFile=/opt/amn2/.env
-ExecStart=/opt/amn2/venv/bin/python -m app.cli web serve --host 0.0.0.0 --port 3030
+ExecStart=/opt/amn2/venv/bin/python -m app.cli web serve --host 127.0.0.1 --port 3030
 ```
 
 После правки:
@@ -694,7 +692,7 @@ ss -lntp | grep ':3030'
 Остановить старый процесс или выбрать другой порт:
 
 ```bash
-python -m app.cli web serve --host 0.0.0.0 --port 3031
+python -m app.cli web serve --host 127.0.0.1 --port 3031
 ```
 
 ### `ModuleNotFoundError: app`
@@ -719,7 +717,7 @@ ss -lntp | grep ':3030'
 sudo ufw status
 ```
 
-Если сервис слушает только `127.0.0.1`, запустить с `--host 0.0.0.0` или использовать SSH tunnel.
+Если сервис слушает только `127.0.0.1`, использовать SSH tunnel или HTTPS reverse proxy. Не переключать web-admin на `0.0.0.0` без отдельного firewall/TLS/exposure gate.
 
 ## 17. Частые ошибки Telegram-бота
 
@@ -787,7 +785,7 @@ python -m app.cli server check --config servers.yml --server debian-vps-1
 cd /opt/amn2
 git log -1 --oneline
 git status --short
-python -m app.cli web serve --host 0.0.0.0 --port 3030
+python -m app.cli web serve --host 127.0.0.1 --port 3030
 sudo journalctl -u amneziya-web -n 200 --no-pager
 sudo journalctl -u amneziya-bot -n 200 --no-pager
 tail -n 200 logs/app.log
