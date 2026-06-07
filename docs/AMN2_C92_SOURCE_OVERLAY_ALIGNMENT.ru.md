@@ -190,20 +190,25 @@ token.raw_token_display: hidden
 revoke.status: revoked
 ```
 
-## 8. Web/Admin Loopback Systemd
+## 8. Web/Admin Manual Loopback Check
 
-`c92bd1a` нужен, чтобы web-admin service template держал backend на loopback.
+На текущем validation VPS service пока не запускаем. Этот сервер используется для ручной проверки; постоянный systemd deployment будет на другом целевом сервере. `c92bd1a` все равно нужен, чтобы будущий web-admin service template держал backend на loopback.
+
+В первом SSH-окне:
 
 ```bash
 cd /opt/amn2
+source venv/bin/activate
 
 grep -F 'web serve --host 127.0.0.1 --port 3030' deploy/systemd/amneziya-web.service.example
 
-sudo cp deploy/systemd/amneziya-web.service.example /etc/systemd/system/amneziya-web.service
-sudo systemctl daemon-reload
-sudo systemctl restart amneziya-web
-sudo systemctl status amneziya-web --no-pager
+python -m app.cli web serve --host 127.0.0.1 --port 3030
+```
 
+Во втором SSH-окне:
+
+```bash
+cd /opt/amn2
 curl -sS -o /dev/null -w 'web_login_http=%{http_code}\n' http://127.0.0.1:3030/login
 ss -ltnp | grep -E ':3030|:3040' || true
 ```
@@ -214,7 +219,28 @@ ss -ltnp | grep -E ':3030|:3040' || true
 web_login_http=200
 web listener: 127.0.0.1:3030
 api listener: 127.0.0.1:3040 only while smoke server is running
+web_listener_after_cleanup: stopped
+systemd_launch_status: deferred-working-server
 ```
+
+Фактический diagnostic run 2026-06-07: старый ручной listener `pid=2333887` был остановлен, новый web process `pid=2990245` поднялся примерно на `tick=5`, Uvicorn сообщил `Application startup complete`, `/login` вернул `web_login_http=200`, listener был `127.0.0.1:3030`, после cleanup `web_3030_listener=stopped`.
+
+## 8b. Service Deployment На Целевом Сервере
+
+На новом production server, когда придет время разворачивать сервисы:
+
+```bash
+cd /opt/amn2
+
+grep -F 'web serve --host 127.0.0.1 --port 3030' deploy/systemd/amneziya-web.service.example
+
+sudo cp deploy/systemd/amneziya-web.service.example /etc/systemd/system/amneziya-web.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now amneziya-web
+sudo systemctl status amneziya-web --no-pager
+```
+
+Этот service deployment не требуется для закрытия manual validation gate на текущем VPS.
 
 ## 9. Safe Evidence Для Чата
 
@@ -239,6 +265,8 @@ api_forbidden_markers: []
 api_token_lifecycle: issued-hidden-and-revoked
 web_login_http: 200
 web_listener: 127.0.0.1:3030
+web_listener_after_cleanup: stopped
+systemd_launch_status: deferred-working-server
 api_listener: 127.0.0.1:3040
 ```
 
@@ -246,4 +274,4 @@ api_listener: 127.0.0.1:3040
 
 ## 10. Решение После Alignment
 
-Если все пункты прошли, `c92bd1a` можно закрывать как current production source overlay gate. Следующий шаг после этого: не broad write API, а отдельный operator-approved live-write window для одной контролируемой user/peer операции или следующий read-only controller slice.
+Если все пункты прошли, `c92bd1a` можно закрывать как current production source overlay/manual prelaunch gate на validation VPS. На будущем рабочем сервере нужно повторить backup/API/manual web checks и только там включать `systemd`/reverse proxy. Следующий инженерный шаг после этого: не broad write API, а отдельный operator-approved live-write window для одной контролируемой user/peer операции или следующий read-only controller slice.

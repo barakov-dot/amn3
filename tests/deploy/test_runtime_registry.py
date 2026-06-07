@@ -243,7 +243,11 @@ def test_c92_source_overlay_alignment_runbook_is_linked_and_safe():
     assert "python -m app.cli backup create" in runbook
     assert "python -m app.cli backup verify" in runbook
     assert "python -m app.cli api smoke-cycle" in runbook
-    assert "sudo systemctl restart amneziya-web" in runbook
+    assert "python -m app.cli web serve --host 127.0.0.1 --port 3030" in runbook
+    assert "sudo systemctl enable --now amneziya-web" in runbook
+    assert "## 8b. Service Deployment" in runbook
+    assert "Этот service deployment не требуется" in runbook
+    assert "systemd_launch_status: deferred-working-server" in runbook
     assert "127.0.0.1:3030" in runbook
     assert "127.0.0.1:3040" in runbook
     assert "raw API token" in runbook
@@ -253,7 +257,7 @@ def test_c92_source_overlay_alignment_runbook_is_linked_and_safe():
     assert "docs/AMN2_C92_SOURCE_OVERLAY_ALIGNMENT.ru.md" in checklist
 
 
-def test_api_vps_smoke_evidence_records_c92_alignment_with_web_pending():
+def test_api_vps_smoke_evidence_records_c92_manual_prelaunch_with_service_deferred():
     evidence_path = ROOT / "docs/API_VPS_SMOKE_EVIDENCE.ru.md"
 
     evidence = evidence_path.read_text(encoding="utf-8")
@@ -267,5 +271,9 @@ def test_api_vps_smoke_evidence_records_c92_alignment_with_web_pending():
     assert "dotenv_safe_loader_next_step: use python-dotenv for APP_SECRET_KEY only" in evidence
     assert "api_smoke_status: passed" in evidence
     assert "api_checked_routes: 6" in evidence
-    assert "decision: c92bd1a-source-overlay-aligned-and-read-only-smoke-passed" in evidence
-    assert "web_systemd_launch_status: pending" in evidence
+    assert "decision: c92bd1a-manual-prelaunch-pass-systemd-deferred" in evidence
+    assert "web_systemd_launch_status: deferred-working-server" in evidence
+    assert "manual_web_runtime_status: passed" in evidence
+    assert "web_login_http: 200" in evidence
+    assert "web_listener: 127.0.0.1:3030" in evidence
+    assert "web_listener_after_cleanup: stopped" in evidence

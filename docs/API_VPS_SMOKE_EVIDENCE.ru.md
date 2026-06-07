@@ -10,7 +10,7 @@ Template policy: Заполнять после реального VPS smoke; cur
 
 ## c92bd1a Source Overlay Alignment: 2026-06-07
 
-Назначение: зафиксировать safe summary выравнивания production source overlay `/opt/amn2` до `c92bd1a`. Web/admin systemd service в этом evidence еще не запускали; service launch остается следующим шагом.
+Назначение: зафиксировать safe summary выравнивания production source overlay `/opt/amn2` до `c92bd1a`. На текущем VPS постоянный systemd service намеренно не запускается: этот сервер используется для ручной проверки, а service deployment переносится на другой целевой сервер.
 
 Source update evidence:
 
@@ -70,14 +70,30 @@ token_raw_display: hidden
 token_lifecycle: revoked
 ```
 
+Manual web evidence:
+
+```text
+WEB_ADMIN_HOST: 127.0.0.1
+WEB_ADMIN_SESSION_COOKIE_SECURE: true
+old_manual_web_pid: 2333887, stopped
+diagnostic_web_pid: 2990245
+startup_tick: 5
+startup_log: Application startup complete
+web_login_http: 200
+web_listener: 127.0.0.1:3030
+web_listener_after_cleanup: stopped
+systemd_launch_status: deferred-working-server
+```
+
 VPS verdict:
 
 ```text
-decision: c92bd1a-source-overlay-aligned-and-read-only-smoke-passed
-web_systemd_launch_status: pending
+decision: c92bd1a-manual-prelaunch-pass-systemd-deferred
+web_systemd_launch_status: deferred-working-server
+manual_web_runtime_status: passed
 write_routes_enabled: false
 write_operations_enabled: false
-next_step: start/restart amneziya-web loopback systemd and verify web_login_http=200
+next_step: repeat gate on future working server, then enable systemd/reverse proxy there
 ```
 
 ## Production Launch Gate Attempt: 2026-06-07 / 42ffa65
