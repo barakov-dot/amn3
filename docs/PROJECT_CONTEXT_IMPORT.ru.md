@@ -25,6 +25,8 @@ smoke evidence: research/amn2/web-admin-loopback-systemd-vps-smoke-evidence-2026
 
 Purpose: make the web/admin systemd backend listen on `127.0.0.1:3030` for approved HTTPS reverse proxy mode before controlled production launch. Current VPS-smoked source overlay is now `c92bd1a`.
 
+Manual prelaunch follow-up on validation VPS `mirror`: backup create/verify passed, repeat API loopback smoke passed with `run_id=20260607T194229Z`, manual web `/login` check returned `200` on `127.0.0.1:3030`, bot network check passed, and the manual web listener was stopped after cleanup. `systemd`/reverse proxy deployment is deferred because the working server will be different. Evidence: `research/amn2/c92bd1a-manual-prelaunch-evidence-2026-06-07.md`.
+
 Previous AMN3 source-overlay update kit result:
 
 ```text
