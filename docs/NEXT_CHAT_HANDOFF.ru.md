@@ -30,6 +30,7 @@ Lab/coordination repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 Стартовые документы:
 - docs/NEXT_CHAT_HANDOFF.ru.md
 - docs/PROJECT_PHASE_MAP.ru.md
+- docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md
 - docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md
 - docs/API_VPS_SMOKE_EVIDENCE.ru.md
 - docs/VPS_RETEST_PROTOCOL.ru.md
@@ -123,6 +124,7 @@ VPS_APPLY_ENABLED default: false
 ## 7. Главные Документы
 
 - `docs/PROJECT_PHASE_MAP.ru.md`
+- `docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md`
 - `docs/AMN2_CONTROLLED_PROD_READINESS_RUNBOOK.ru.md`
 - `docs/API_TOKEN_POLICY.ru.md`
 - `docs/API_VPS_SMOKE_EVIDENCE.ru.md`
@@ -134,6 +136,8 @@ VPS_APPLY_ENABLED default: false
 - `docs/WEB_PANEL_AND_BOT_SETUP.ru.md`
 
 ## 8. Рекомендуемый Следующий Шаг
+
+Сначала пройти `docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md`: backup create/verify, bot/web systemd, web login, loopback API smoke и safe evidence. Это текущий путь к controlled production для source overlay `42ffa65`.
 
 Если VPS сейчас не трогаем: основной чат может доработать read-only controller UX и status visibility вокруг `/api/integration/status` и `/api/local-agent/runtime/summary`, но не начинать broad write API, config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
 

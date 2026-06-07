@@ -14,6 +14,7 @@ latest VPS source overlay head: 42ffa65 Record git checkout smoke status
 latest VPS smoke status: pass, checked_routes=6, 2026-06-07 15:09 UTC
 previous VPS source overlay head: c8a6363 Add Local Agent runtime summary mapper
 controlled-prod decision: controlled-prod-ready for source overlay 42ffa65
+production launch gate: docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md
 lab repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 lab branch: master
 ```
@@ -108,4 +109,4 @@ lab branch: master
 
 ## Следующий Рекомендуемый Срез
 
-Ближайшая безопасная работа после этой карты: продолжить следующий read-only controller slice или подготовить отдельный design/live gate. Source overlay `42ffa65` уже промотирован и прошел VPS smoke на `/opt/amn2`: 6 routes, token revoked, forbidden markers empty. Не начинать broad write API, public config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.
+Ближайшая безопасная работа после этой карты: пройти `docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md` и открыть controlled production для operator-only web/admin и bot. Source overlay `42ffa65` уже промотирован и прошел VPS smoke на `/opt/amn2`: 6 routes, token revoked, forbidden markers empty. После gate можно продолжать следующий read-only controller slice. Не начинать broad write API, public config delivery, backup/import или Local Agent mutations без отдельного design/plan/live-gate решения.

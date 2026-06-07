@@ -2,6 +2,8 @@
 
 Короткий путь перед первым тестом на живом VPS.
 
+Для текущего controlled production launch после source overlay `42ffa65` и evidence `26b1b9a` использовать короткий gate: `docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md`.
+
 Перед повторным заходом на VPS использовать короткий протокол: `docs/VPS_RETEST_PROTOCOL.ru.md`.
 
 ## 1. Получить код

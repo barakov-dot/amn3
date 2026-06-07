@@ -161,3 +161,40 @@ def test_api_vps_smoke_evidence_template_is_safe_and_linked():
     assert "docs/API_VPS_SMOKE_EVIDENCE.ru.md" in retest
     assert "docs/API_VPS_SMOKE_EVIDENCE.ru.md" in checklist
     assert "docs/API_VPS_SMOKE_EVIDENCE.ru.md" in handoff
+
+
+def test_production_launch_gate_keeps_first_prod_run_operator_only():
+    gate_path = ROOT / "docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md"
+    handoff_path = ROOT / "docs/NEXT_CHAT_HANDOFF.ru.md"
+    phase_path = ROOT / "docs/PROJECT_PHASE_MAP.ru.md"
+    checklist_path = ROOT / "docs/PRODUCTION_VPS_CHECKLIST.ru.md"
+
+    gate = gate_path.read_text(encoding="utf-8")
+    handoff = handoff_path.read_text(encoding="utf-8")
+    phase = phase_path.read_text(encoding="utf-8")
+    checklist = checklist_path.read_text(encoding="utf-8")
+
+    assert "controlled-prod-ready" in gate
+    assert "42ffa65" in gate
+    assert "26b1b9a" in gate
+    assert "VPS_APPLY_ENABLED=false" in gate
+    assert "python -m app.cli backup create" in gate
+    assert "python -m app.cli backup verify" in gate
+    assert "python -m app.cli bot check-network" in gate
+    assert "python -m app.cli server preflight" in gate
+    assert "python -m app.cli api smoke-cycle" in gate
+    assert "sudo systemctl enable --now amneziya-web" in gate
+    assert "sudo systemctl enable --now amneziya-bot" in gate
+    assert "127.0.0.1:3040" in gate
+    assert "API 3040 наружу не выставлять" in gate
+    assert "/api/clients write CRUD" in gate
+    assert "API `config:read`" in gate
+    assert "Local Agent" in gate
+    assert "backup/import/reboot" in gate
+    assert "raw API token" in gate
+    assert "Authorization header" in gate
+    assert "PrivateKey" in gate
+    assert "PresharedKey" in gate
+    assert "docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md" in handoff
+    assert "docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md" in phase
+    assert "docs/AMN2_PRODUCTION_LAUNCH_GATE.ru.md" in checklist
