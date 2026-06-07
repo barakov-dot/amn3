@@ -114,6 +114,8 @@ Post-decision AMN2 update:
 current AMN2 git head: 42ffa65 Record git checkout smoke status
 current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
 git-checkout VPS smoke: passed on /opt/amn2-git, checked_routes=6
+prepared source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+prepared package status: package-ready-not-vps-smoked
 source overlay promotion: not claimed; /opt/amn2 remains c8a6363 until separate update/smoke
 ```
 

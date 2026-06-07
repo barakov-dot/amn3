@@ -15,8 +15,10 @@ current AMN2 git head: 42ffa65 Record git checkout smoke status
 current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
 current VPS source overlay: c8a6363 Add Local Agent runtime summary mapper
 git-checkout VPS smoke: 62ff184 pass on /opt/amn2-git, checked_routes=6
-source-overlay promotion for 62ff184/42ffa65: pending
-current AMN3 master: verify with git log -1; latest synced state records controlled-prod-ready plus git-checkout smoke evidence
+source-overlay promotion for 62ff184/42ffa65: package-ready-not-vps-smoked
+prepared source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+prepared package sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
+current AMN3 master: verify with git log -1; latest synced state records controlled-prod-ready, git-checkout smoke evidence and 42ffa65 package evidence
 ```
 
 The 2026-06-06 `c8a6363` entries below are source-overlay baseline evidence, not the latest AMN2 git head after neighboring status-visibility work.

@@ -2,7 +2,18 @@
 
 `amn2/codex-vps-test-prep` current git head is `42ffa65 Record git checkout smoke status`. The current app-code read-only slice is `62ff184 Update controlled prod status visibility`: it passed real VPS git-checkout smoke on `/opt/amn2-git` with six read-only routes, all `200`, empty forbidden markers, and the temporary smoke token revoked. The source-overlay production runtime on `/opt/amn2` is still `c8a6363 Add Local Agent runtime summary mapper`, which passed source-overlay read-only smoke on 2026-06-06 and has `controlled-prod-ready` operator-only status.
 
-This update comes from neighboring AMN2 docs/commits after the `c8a6363` package work. It changes the coordination state, not the safety boundary: no public API `3040`, no API `config:read`, no `/api/clients` write CRUD, no public/self-service config delivery, no Local Agent mutations, no backup/import/reboot, and no new live peer operations. Next gate is source-overlay promotion/update for the read-only status line, or another read-only controller/status slice.
+This update comes from neighboring AMN2 docs/commits after the `c8a6363` package work. It changes the coordination state, not the safety boundary: no public API `3040`, no API `config:read`, no `/api/clients` write CRUD, no public/self-service config delivery, no Local Agent mutations, no backup/import/reboot, and no new live peer operations.
+
+AMN3 prepared the next source-overlay update kit:
+
+```text
+dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
+source sha256: 8A5B83D9AB95BE4230AAC221CE0321A37EF37E4E4B6EAB5EDECAE3C98A944829
+status: package-ready-not-vps-smoked
+```
+
+Next gate is source-overlay promotion/update for the read-only status line, or another read-only controller/status slice.
 
 # Historical Override 2026-06-06
 

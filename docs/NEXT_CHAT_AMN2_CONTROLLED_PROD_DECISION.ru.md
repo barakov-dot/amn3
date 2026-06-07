@@ -38,7 +38,7 @@ current VPS source overlay: c8a6363 Add Local Agent runtime summary mapper
 ## Уже доказано
 
 ```text
-current package: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
+current VPS-smoked source-overlay package: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
 current package sha256: 027ECC1BAD7321FCCD61A4CCCA3AC9F06AAA9AC6A3D7115B4813253D19C2CFBF
 current source sha256: E1E198979D988B3A5AA038CF732B8DCDBE854C48A6D381FADBA05BFDEE0251C6
 current package status: read-only-vps-smoke-pass
@@ -62,6 +62,10 @@ recovery path known: yes
 decision: controlled-prod-ready
 post-decision git-checkout smoke: 62ff184 read-only gate passed on /opt/amn2-git
 post-decision documentation/status head: 42ffa65
+prepared source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+prepared source-overlay package sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
+prepared source sha256: 8A5B83D9AB95BE4230AAC221CE0321A37EF37E4E4B6EAB5EDECAE3C98A944829
+prepared package status: package-ready-not-vps-smoked
 ```
 
 ## Текущий статус

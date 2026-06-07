@@ -8,6 +8,8 @@
 
 Post-decision AMN2 update: current `amn2/codex-vps-test-prep` git head is `42ffa65 Record git checkout smoke status`. The app-code read-only slice `62ff184 Update controlled prod status visibility` passed VPS git-checkout smoke on `/opt/amn2-git` with six read-only routes. This does not promote `/opt/amn2` source overlay beyond `c8a6363`; a source-overlay update+read-only smoke gate is still required for promotion.
 
+AMN3 package for that source-overlay promotion gate is ready but not VPS-smoked yet: `dist/amn2-vps-update-and-smoke-kit-42ffa65.zip`, sha256 `5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39`; source sha256 `8A5B83D9AB95BE4230AAC221CE0321A37EF37E4E4B6EAB5EDECAE3C98A944829`.
+
 Это не разрешение на public web/API exposure, `/api/clients` write CRUD, API `config:read`, public/self-service config delivery, Local Agent mutations, backup/import/reboot routes или новые live peer mutations.
 
 ## Текущая production-точка
@@ -19,8 +21,10 @@ last VPS-smoked head: c8a6363 Add Local Agent runtime summary mapper
 current amn2 git head: 42ffa65 Record git checkout smoke status
 current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
 current git-checkout smoke: 62ff184 pass on /opt/amn2-git, checked_routes=6
+prepared source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+prepared source-overlay package status: package-ready-not-vps-smoked
 previous VPS-smoked head: 32d01fd Update integration status for controlled prod
-current package: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
+current VPS-smoked source-overlay package: dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
 current package sha256: 027ECC1BAD7321FCCD61A4CCCA3AC9F06AAA9AC6A3D7115B4813253D19C2CFBF
 current source sha256: E1E198979D988B3A5AA038CF732B8DCDBE854C48A6D381FADBA05BFDEE0251C6
 current package status: read-only-vps-smoke-pass

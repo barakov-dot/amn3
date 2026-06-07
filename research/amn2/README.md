@@ -25,7 +25,9 @@ last VPS-smoked runtime/source: c8a6363 Add Local Agent runtime summary mapper, 
 current amn2 git head: 42ffa65 Record git checkout smoke status
 current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
 git-checkout VPS smoke: /opt/amn2-git, checked_routes=6, status=passed
-source-overlay promotion for the read-only status line: pending
+prepared source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+prepared package sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
+source-overlay promotion for the read-only status line: package-ready-not-vps-smoked
 ```
 
 Активная рабочая ветка для установки/API smoke:
@@ -96,6 +98,7 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [Controlled prod reverse proxy confirmation 2026-06-07](controlled-prod-reverse-proxy-confirmation-2026-06-07.md) - web/admin access is through approved HTTPS reverse proxy; public API port `3040` is not exposed.
 - [Controlled prod ready 2026-06-07](controlled-prod-ready-2026-06-07.md) - final operator-only decision `controlled-prod-ready`; recovery path known; continue only read-only next slice.
 - [Controlled prod status visibility git-checkout smoke 2026-06-07](controlled-prod-status-visibility-git-checkout-smoke-2026-06-07.md) - AMN2 current git head `42ffa65`, app-code slice `62ff184`, real VPS git-checkout smoke pass on `/opt/amn2-git`; source overlay promotion still pending.
+- [Controlled prod status visibility VPS package 2026-06-07](controlled-prod-status-visibility-vps-package-2026-06-07.md) - AMN3 update+smoke kit for `42ffa65`; package-ready, not VPS-smoked yet.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 

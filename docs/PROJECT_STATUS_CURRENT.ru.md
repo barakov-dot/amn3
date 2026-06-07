@@ -4,7 +4,19 @@
 
 The current VPS production source overlay remains `c8a6363 Add Local Agent runtime summary mapper`, which passed real read-only source-overlay update/smoke on `/opt/amn2` on 2026-06-06, `run_id=20260606T202040Z`, and is recorded as `controlled-prod-ready` for operator-only controlled prod. Evidence for the new git-checkout status line is `research/amn2/controlled-prod-status-visibility-git-checkout-smoke-2026-06-07.md`; AMN2 source docs are `docs/NEXT_CHAT_HANDOFF.ru.md`, `docs/API_VPS_SMOKE_EVIDENCE.ru.md`, and `docs/AMN2_VPS_SMOKE_62FF184_RUNBOOK.ru.md`.
 
-Next gate: either build/promote a source-overlay update package for the current read-only status line and repeat read-only smoke on `/opt/amn2`, or continue with another read-only controller/status/observability slice. This still does not unlock public API `3040`, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent mutations, backup/import/reboot, or new live peer operations.
+AMN3 package prepared for the next source-overlay gate:
+
+```text
+dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+package sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
+source zip: dist/amn2-codex-vps-test-prep-42ffa65-source.zip
+source sha256: 8A5B83D9AB95BE4230AAC221CE0321A37EF37E4E4B6EAB5EDECAE3C98A944829
+status: package-ready-not-vps-smoked
+operator doc: dist/amn2-vps-update-and-smoke-kit-42ffa65/AMN2_VPS_UPDATE_AND_SMOKE_42ffa65.ru.md
+package evidence: research/amn2/controlled-prod-status-visibility-vps-package-2026-06-07.md
+```
+
+Next gate: promote this package through source-overlay update and repeat read-only smoke on `/opt/amn2`, or continue with another read-only controller/status/observability slice. This still does not unlock public API `3040`, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent mutations, backup/import/reboot, or new live peer operations.
 
 # Historical Override 2026-06-06
 

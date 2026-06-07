@@ -1,6 +1,19 @@
 # AMN2 VPS API Update And Smoke
 
-Current override 2026-06-06: stable branch head `c8a6363 Add Local Agent runtime summary mapper` has a package-ready update+smoke kit and passed real VPS read-only smoke, `run_id=20260606T202040Z`. `32d01fd` is now the historical prior VPS-smoked runtime/source, `run_id=20260606T185114Z`; `1a193b9` is the previous historical runtime/source before that.
+Current override 2026-06-07: stable branch head `42ffa65 Record git checkout smoke status` has a package-ready update+smoke kit. This package is not VPS-smoked yet. Last VPS-smoked source overlay is still `c8a6363 Add Local Agent runtime summary mapper`, `run_id=20260606T202040Z`. `32d01fd` is historical prior VPS-smoked runtime/source, `run_id=20260606T185114Z`; `1a193b9` is the previous historical runtime/source before that.
+
+```text
+dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
+source zip: dist/amn2-codex-vps-test-prep-42ffa65-source.zip
+source sha256: 8A5B83D9AB95BE4230AAC221CE0321A37EF37E4E4B6EAB5EDECAE3C98A944829
+operator doc: dist/amn2-vps-update-and-smoke-kit-42ffa65/AMN2_VPS_UPDATE_AND_SMOKE_42ffa65.ru.md
+local validation: focused status tests 8 passed; package SHA/source SHA/no-BOM/no-CRLF/no-forbidden-source-entry/test-extract checks passed
+VPS result: pending read-only source-overlay smoke
+evidence: research/amn2/controlled-prod-status-visibility-vps-package-2026-06-07.md
+```
+
+Previous source-overlay package:
 
 ```text
 dist/amn2-vps-update-and-smoke-kit-c8a6363.zip
@@ -13,12 +26,12 @@ VPS result: read-only-vps-smoke-pass, run_id 20260606T202040Z
 evidence: research/amn2/local-agent-runtime-summary-vps-smoke-evidence-2026-06-06.md
 ```
 
-Older `32d01fd`, `294803e`, `5f12736`, `7764ae7`, `568c611` and `1a193b9` package blocks below are historical evidence. This override does not authorize live apply/revoke.
+Older `c8a6363`, `32d01fd`, `294803e`, `5f12736`, `7764ae7`, `568c611` and `1a193b9` package blocks below are historical evidence after `42ffa65` package publication. This override does not authorize live apply/revoke.
 
 For the current VPS update/smoke commands, use:
 
 ```text
-dist/amn2-vps-update-and-smoke-kit-c8a6363/AMN2_VPS_UPDATE_AND_SMOKE_c8a6363.ru.md
+dist/amn2-vps-update-and-smoke-kit-42ffa65/AMN2_VPS_UPDATE_AND_SMOKE_42ffa65.ru.md
 ```
 
 Актуализация 2026-06-04: текущий Phase 1 closeout package для существующего `/opt/amn2` — `7764ae7 Cover integration status in API smoke`.
