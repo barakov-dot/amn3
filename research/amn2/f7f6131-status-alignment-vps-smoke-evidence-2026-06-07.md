@@ -12,6 +12,7 @@ source_overlay_commit: f7f6131
 previous_proven_source_overlay: c92bd1a
 source_update_run_id: 20260607T203721Z
 api_smoke_run_id: 20260607T203730Z
+latest_repeat_api_smoke_run_id: 20260607T204300Z
 runtime_mode: manual
 systemd_web: not-used
 systemd_bot: not-used
@@ -53,6 +54,26 @@ listener_status: passed
 audit_status: passed
 safe_evidence_dir: /opt/amn2/vps-smoke/api-loopback-20260607T203730Z
 safe_bundle: /opt/amn2/vps-smoke/api-loopback-safe-evidence-20260607T203730Z.tar.gz
+```
+
+## Latest Repeat API Loopback Smoke
+
+```text
+run_id: 20260607T204300Z
+branch/head: not a git checkout
+preflight_status: skipped
+server_db_sync_status: passed
+api_ready_status: passed
+api_smoke_status: passed
+auth_status: passed
+missing_bearer_http: 401
+wrong_scope_http: 403
+revoked_token_http: 401
+listener_status: passed
+audit_status: passed
+safe_evidence_dir: /opt/amn2/vps-smoke/api-loopback-20260607T204300Z
+safe_bundle: /opt/amn2/vps-smoke/api-loopback-safe-evidence-20260607T204300Z.tar.gz
+note: api-server.log was not published and must not be sent unless manually redacted.
 ```
 
 ## Route Evidence

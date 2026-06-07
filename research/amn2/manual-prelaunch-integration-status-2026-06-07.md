@@ -50,6 +50,7 @@ latest AMN2 repository head: f7f6131
 f7f6131 package status: read-only-vps-smoke-pass
 f7f6131 source update run_id: 20260607T203721Z
 f7f6131 API smoke run_id: 20260607T203730Z
+f7f6131 latest repeat API smoke run_id: 20260607T204300Z
 f7f6131 VPS source-overlay smoke: passed
 next safe step: keep manual-runtime boundary; open service-mode gate only by separate decision
 ```

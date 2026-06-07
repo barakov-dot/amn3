@@ -59,6 +59,7 @@ current package status: read-only-vps-smoke-pass
 last VPS read-only smoke: pass
 source_update_run_id: 20260607T203721Z
 api_smoke_run_id: 20260607T203730Z
+latest_repeat_api_smoke_run_id: 20260607T204300Z
 checked_routes: 6
 routes: servers, integration_status, local_agent_runtime_summary, server_summary, metrics_summary, users_summary
 route_status_codes: all 200
@@ -91,6 +92,7 @@ status-alignment package status: read-only-vps-smoke-pass
 status-alignment VPS smoke: passed
 status-alignment source update run_id: 20260607T203721Z
 status-alignment api smoke run_id: 20260607T203730Z
+status-alignment latest repeat api smoke run_id: 20260607T204300Z
 manual runtime mode: manual
 systemd web/bot: not-used
 manual web process: present
@@ -130,7 +132,7 @@ next action: continue with read-only next slice
 
 ## Decision Rules
 
-For current source overlay `f7f6131`, read-only VPS update/smoke passed with `api_smoke_run_id=20260607T203730Z`. The previous `c92bd1a` follow-up manual runtime gate passed with operator-started web/admin and bot processes, and `f7f6131` only aligns read-only status visibility to that accepted state. `controlled-prod-ready` continues to apply inside the same operator-only boundary after these conditions were met:
+For current source overlay `f7f6131`, read-only VPS update/smoke passed with `api_smoke_run_id=20260607T203730Z` and a latest repeat API smoke pass `20260607T204300Z`. The previous `c92bd1a` follow-up manual runtime gate passed with operator-started web/admin and bot processes, and `f7f6131` only aligns read-only status visibility to that accepted state. `controlled-prod-ready` continues to apply inside the same operator-only boundary after these conditions were met:
 
 - source overlay commit is `f7f6131`;
 - read-only VPS smoke passed for `f7f6131`;

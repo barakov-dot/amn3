@@ -21,6 +21,7 @@ status-alignment package status: read-only-vps-smoke-pass
 status-alignment VPS smoke: passed
 status-alignment source update run_id: 20260607T203721Z
 status-alignment api smoke run_id: 20260607T203730Z
+status-alignment latest repeat api smoke run_id: 20260607T204300Z
 status: read-only-vps-smoke-pass
 source_update_run_id: 20260607T182118Z
 api_smoke_run_id: 20260607T182131Z

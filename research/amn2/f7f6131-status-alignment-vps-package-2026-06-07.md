@@ -63,6 +63,7 @@ source_update_run_id: 20260607T203721Z
 source_update_status: passed
 source overlay after: f7f6131
 api_smoke_run_id: 20260607T203730Z
+latest_repeat_api_smoke_run_id: 20260607T204300Z
 branch/head: not a git checkout
 preflight_status: skipped
 server_db_sync_status: passed

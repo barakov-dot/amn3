@@ -45,6 +45,7 @@ status-alignment package status: read-only-vps-smoke-pass
 status-alignment VPS smoke: passed
 status-alignment source update run_id: 20260607T203721Z
 status-alignment api smoke run_id: 20260607T203730Z
+status-alignment latest repeat api smoke run_id: 20260607T204300Z
 status-alignment smoke evidence: research/amn2/f7f6131-status-alignment-vps-smoke-evidence-2026-06-07.md
 status-alignment operator doc: dist/amn2-vps-update-and-smoke-kit-f7f6131/AMN2_VPS_UPDATE_AND_SMOKE_f7f6131.ru.md
 status-alignment evidence: research/amn2/f7f6131-status-alignment-vps-package-2026-06-07.md
