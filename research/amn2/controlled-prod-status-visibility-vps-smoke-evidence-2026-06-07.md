@@ -106,11 +106,15 @@ live write expansion: blocked until separate gate
 
 This promotes the read-only status visibility line from git-checkout smoke evidence to production source-overlay smoke evidence. It does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, Local Agent mutations, backup/import/reboot routes or new live peer operations.
 
+## Repeat Smoke
+
+A later safe repeat read-only smoke for the same `42ffa65` source overlay passed with `run_id=20260607T165807Z`, `checked_routes=6`, all route status codes `200`, auth checks `401/403/401`, listener passed, and audit passed. Evidence: `research/amn2/controlled-prod-status-visibility-vps-repeat-smoke-2026-06-07.md`.
+
 ## Next Safe Gate
 
 Use this evidence as the current AMN3 truth for `amn2` controlled production coordination. The next safe local step is either:
 
-- complete the controlled production launch checklist for web/admin and bot runtime around source overlay `42ffa65`;
+- use the later `c92bd1a` smoke evidence as the current source-overlay truth and complete the controlled production launch checklist for web/admin and bot runtime;
 - or continue with another read-only controller/status/observability slice.
 
 Any live write, config delivery, backup/import or Local Agent mutation surface still needs its own design, tests, runbook and real VPS gate.

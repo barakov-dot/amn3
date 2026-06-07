@@ -11,26 +11,28 @@
 Актуализация 2026-06-07:
 
 ```text
-current AMN2 git head: 42ffa65 Record git checkout smoke status
+current AMN2 git head: c92bd1a Bind web admin systemd to loopback
 current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
-current VPS source overlay: 42ffa65 Record git checkout smoke status
-previous VPS source overlay: c8a6363 Add Local Agent runtime summary mapper
+current VPS source overlay: c92bd1a Bind web admin systemd to loopback
+previous VPS source overlay: 42ffa65 Record git checkout smoke status
+historical prior VPS source overlay: c8a6363 Add Local Agent runtime summary mapper
 git-checkout VPS smoke: 62ff184 pass on /opt/amn2-git, checked_routes=6
 source-overlay promotion for 62ff184/42ffa65: read-only-vps-smoke-pass
-source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
-package sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
-VPS smoke run_id: 20260607T165625Z
-current AMN3 master: verify with git log -1; latest synced state records controlled-prod-ready, git-checkout smoke evidence, 42ffa65 package evidence and 42ffa65 source-overlay smoke evidence
+source-overlay promotion for c92bd1a: read-only-vps-smoke-pass
+source-overlay package: dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip
+package sha256: EC48DBA7C91F189512AB77EB5490432C85DA79F987068A98C1CC7F3082387F12
+VPS smoke run_id: 20260607T182131Z
+current AMN3 master: verify with git log -1; latest synced state records controlled-prod-ready, git-checkout smoke evidence, 42ffa65 package evidence, 42ffa65 source-overlay smoke evidence and c92bd1a source-overlay smoke evidence
 ```
 
-The 2026-06-06 `c8a6363` entries below are historical source-overlay baseline evidence, not the latest VPS-smoked source overlay after neighboring status-visibility work.
+The 2026-06-06 `c8a6363` entries below and the 2026-06-07 `42ffa65` status-visibility entries are historical source-overlay baseline evidence, not the latest VPS-smoked source overlay after the web-admin loopback systemd work.
 
 Production repo:
 
 ```text
 C:\Users\SooL\Documents\Amneziya
 branch: codex-vps-test-prep
-source-overlay baseline head: 42ffa65 Record git checkout smoke status
+source-overlay baseline head: c92bd1a Bind web admin systemd to loopback
 ```
 
 Lab / coordination repo:
@@ -39,30 +41,30 @@ Lab / coordination repo:
 C:\Users\SooL\Documents\VPS-OPS-LAB
 branch: master
 historical package-publish head: 8f613c8 Publish c8a6363 VPS update package
-current package-publish head: 2a2e8b2 Publish 42ffa65 VPS update package
+current package-publish head: verify with git log -1; latest synced state includes c92bd1a VPS smoke evidence
 ```
 
 Текущий source-overlay package:
 
 ```text
-source commit: 42ffa65
+source commit: c92bd1a
 status: read-only-vps-smoke-pass
-package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
-package sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
-source zip: dist/amn2-codex-vps-test-prep-42ffa65-source.zip
-source sha256: 8A5B83D9AB95BE4230AAC221CE0321A37EF37E4E4B6EAB5EDECAE3C98A944829
+package: dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip
+package sha256: EC48DBA7C91F189512AB77EB5490432C85DA79F987068A98C1CC7F3082387F12
+source zip: dist/amn2-codex-vps-test-prep-c92bd1a-source.zip
+source sha256: 272CC013A416937AAA2256A1643B2C77F707874D28FDCB2EA16534E349DD4FC2
 ```
 
 Последний VPS-smoked runtime/source:
 
 ```text
-source commit: 42ffa65
+source commit: c92bd1a
 status: read-only-vps-smoke-pass
-run_id: 20260607T165625Z
+run_id: 20260607T182131Z
 decision: passed
 ```
 
-Важно: `c8a6363` является последним подтвержденным на VPS source-overlay runtime/source. После него AMN2 git head продвинулся до `42ffa65`, а app-code slice `62ff184` прошел git-checkout smoke; source-overlay promotion для этой линии еще отдельный gate. `32d01fd` остается historical prior VPS-smoked baseline.
+Важно: `c92bd1a` является текущим подтвержденным на VPS source-overlay runtime/source. `42ffa65` остается предыдущим status-visibility baseline после git-checkout smoke and source-overlay smoke; `c8a6363` и `32d01fd` являются historical prior VPS-smoked baselines.
 
 ## Готовые фазы
 
@@ -232,12 +234,13 @@ c8a6363 read-only VPS smoke: passed, run_id 20260606T202040Z
 
 ```text
 status: controlled-prod-ready
-last VPS-smoked source: 42ffa65
-previous VPS-smoked source: c8a6363
+last VPS-smoked source: c92bd1a
+previous VPS-smoked source: 42ffa65
+historical prior VPS-smoked source: c8a6363
 controlled prod decision: controlled-prod-ready, evidence research/amn2/controlled-prod-ready-2026-06-07.md
 ```
 
-Операторские подтверждения еще нужны:
+Для будущего target commit операторские подтверждения снова нужны:
 
 - source overlay на VPS соответствует целевому commit;
 - read-only smoke для target commit passed;

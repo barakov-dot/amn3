@@ -24,11 +24,16 @@ This is not public SaaS readiness and not broad write/API/config/backup/agent en
 
 ## Later Source Overlay Promotion
 
-After this operator-only decision was recorded for `c8a6363`, AMN2 advanced to `42ffa65 Record git checkout smoke status`. AMN3 package `42ffa65` passed safe source-overlay update and read-only API smoke on `/opt/amn2`.
+After this operator-only decision was recorded for `c8a6363`, AMN2 advanced to `42ffa65 Record git checkout smoke status`. AMN3 package `42ffa65` passed safe source-overlay update and read-only API smoke on `/opt/amn2`. A later controlled production safety follow-up `c92bd1a Bind web admin systemd to loopback` also passed source-overlay update and read-only API smoke on `/opt/amn2`.
 
 ```text
-current source overlay after later promotion: 42ffa65
-previous source overlay: c8a6363
+current source overlay after later promotion: c92bd1a
+previous source overlay: 42ffa65
+historical prior source overlay: c8a6363
+current_source_update_run_id: 20260607T182118Z
+current_api_smoke_run_id: 20260607T182131Z
+current evidence: research/amn2/web-admin-loopback-systemd-vps-smoke-evidence-2026-06-07.md
+prior source overlay: 42ffa65
 source_update_run_id: 20260607T165559Z
 api_smoke_run_id: 20260607T165625Z
 checked_routes: 6
@@ -37,7 +42,7 @@ VPS_APPLY_ENABLED: false
 evidence: research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
 ```
 
-This later promotion preserves the same controlled-prod boundary: no public API `3040`, no write routes, no config delivery, no Local Agent mutations and no backup/import/reboot routes.
+These later promotions preserve the same controlled-prod boundary: no public API `3040`, no direct public web/admin `3030`, no write routes, no config delivery, no Local Agent mutations and no backup/import/reboot routes.
 
 ## Evidence Already Recorded
 
@@ -128,18 +133,20 @@ Allowed next work should stay read-only unless a separate gate is opened.
 Post-decision AMN2 update:
 
 ```text
-current AMN2 git head: 42ffa65 Record git checkout smoke status
+current AMN2 git head: c92bd1a Bind web admin systemd to loopback
 current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
 git-checkout VPS smoke: passed on /opt/amn2-git, checked_routes=6
-source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+source-overlay package: dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip
 source-overlay package status: read-only-vps-smoke-pass
-source overlay promotion: passed; /opt/amn2 is now 42ffa65
+source overlay promotion: passed; /opt/amn2 is now c92bd1a
+previous source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+previous source overlay promotion: passed; /opt/amn2 was promoted to 42ffa65 before c92bd1a
 ```
 
 Recommended next direction:
 
 ```text
-read-only controlled-prod status/recovery visibility,
+complete controlled production launch checklist for operator-only web/admin and bot runtime,
 operator documentation cleanup,
 or another read-only status/observability slice
 ```

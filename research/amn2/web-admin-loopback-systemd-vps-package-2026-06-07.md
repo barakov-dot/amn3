@@ -10,7 +10,7 @@
 AMN2 branch: codex-vps-test-prep
 AMN2 commit: c92bd1a Bind web admin systemd to loopback
 previous VPS-smoked source overlay: 42ffa65 Record git checkout smoke status
-package status: package-ready-not-vps-smoked
+package status: read-only-vps-smoke-pass
 ```
 
 Scope:
@@ -56,6 +56,34 @@ text_hygiene=passed
 test_extract=passed
 ```
 
+## VPS Smoke Result
+
+The package was downloaded on the VPS, both checksums passed, then the source overlay was applied to `/opt/amn2` with `VPS_APPLY_ENABLED=false`.
+
+```text
+source_update_status: passed
+source_update_run_id: 20260607T182118Z
+source_commit: c92bd1a
+api_smoke_run_id: 20260607T182131Z
+VPS verdict: pass
+preflight_status: skipped
+server_db_sync_status: passed
+api_ready_status: passed
+api_smoke_status: passed
+auth_status: passed
+listener_status: passed
+audit_status: passed
+source overlay after: c92bd1a
+```
+
+Web systemd template evidence:
+
+```text
+ExecStart=/opt/amn2/venv/bin/python -m app.cli web serve --host 127.0.0.1 --port 3030
+```
+
+Smoke evidence: [Web-admin loopback systemd VPS smoke evidence 2026-06-07](web-admin-loopback-systemd-vps-smoke-evidence-2026-06-07.md).
+
 ## Safety Boundary
 
 This package does not authorize:
@@ -76,11 +104,10 @@ This package does not authorize:
 Operator-only next step:
 
 ```text
-Download/update with dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip
-Run source overlay update on /opt/amn2 with VPS_APPLY_ENABLED=false
-Run read-only API loopback smoke
-Verify web systemd template/installed unit uses 127.0.0.1:3030
-Return only safe summary evidence
+Complete the controlled production launch checklist for operator-only web/admin and bot runtime.
+Keep web backend on 127.0.0.1:3030 behind approved HTTPS reverse proxy.
+Keep API 3040 loopback-only.
+Return only safe summary evidence.
 ```
 
-Until that pass is returned, the current VPS-smoked source overlay remains `42ffa65`.
+After this pass, the current VPS-smoked source overlay is `c92bd1a`.

@@ -2,13 +2,13 @@
 
 Дата: 2026-06-06.
 
-Назначение: зафиксировать безопасный production-режим для текущего `amn2/codex-vps-test-prep` baseline после real VPS read-only smoke. Первичный source overlay `c8a6363` прошел read-only VPS update/smoke, а 2026-06-07 текущий head `42ffa65` прошел safe source-overlay update/smoke на `/opt/amn2`.
+Назначение: зафиксировать безопасный production-режим для текущего `amn2/codex-vps-test-prep` baseline после real VPS read-only smoke. Первичный source overlay `c8a6363` прошел read-only VPS update/smoke, 2026-06-07 head `42ffa65` прошел safe source-overlay update/smoke на `/opt/amn2`, затем controlled production safety follow-up `c92bd1a` также прошел source-overlay update/read-only smoke.
 
 Актуализация 2026-06-07: operator-only decision recorded as `controlled-prod-ready`; evidence `research/amn2/controlled-prod-ready-2026-06-07.md`.
 
-Post-decision AMN2 update: current `amn2/codex-vps-test-prep` git head is `42ffa65 Record git checkout smoke status`. The app-code read-only slice `62ff184 Update controlled prod status visibility` passed VPS git-checkout smoke on `/opt/amn2-git` with six read-only routes. AMN3 package `42ffa65` then passed source-overlay update+read-only smoke on `/opt/amn2`.
+Post-decision AMN2 update: current `amn2/codex-vps-test-prep` git head is `c92bd1a Bind web admin systemd to loopback`. The app-code read-only slice `62ff184 Update controlled prod status visibility` passed VPS git-checkout smoke on `/opt/amn2-git` with six read-only routes. AMN3 package `42ffa65` then passed source-overlay update+read-only smoke on `/opt/amn2`; AMN3 package `c92bd1a` then passed source-overlay update+read-only smoke on `/opt/amn2`.
 
-AMN3 package for that source-overlay promotion gate is smoke-passed: `dist/amn2-vps-update-and-smoke-kit-42ffa65.zip`, sha256 `5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39`; source sha256 `8A5B83D9AB95BE4230AAC221CE0321A37EF37E4E4B6EAB5EDECAE3C98A944829`; evidence `research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md`.
+AMN3 package for the current source-overlay promotion gate is smoke-passed: `dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip`, sha256 `EC48DBA7C91F189512AB77EB5490432C85DA79F987068A98C1CC7F3082387F12`; source sha256 `272CC013A416937AAA2256A1643B2C77F707874D28FDCB2EA16534E349DD4FC2`; evidence `research/amn2/web-admin-loopback-systemd-vps-smoke-evidence-2026-06-07.md`. Prior `42ffa65` evidence remains `research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md`.
 
 Это не разрешение на public web/API exposure, `/api/clients` write CRUD, API `config:read`, public/self-service config delivery, Local Agent mutations, backup/import/reboot routes или новые live peer mutations.
 
@@ -17,21 +17,23 @@ AMN3 package for that source-overlay promotion gate is smoke-passed: `dist/amn2-
 ```text
 repo: https://github.com/barakov-dot/amn2.git
 branch: codex-vps-test-prep
-last VPS-smoked head: 42ffa65 Record git checkout smoke status
-current amn2 git head: 42ffa65 Record git checkout smoke status
+last VPS-smoked head: c92bd1a Bind web admin systemd to loopback
+current amn2 git head: c92bd1a Bind web admin systemd to loopback
 current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
 current git-checkout smoke: 62ff184 pass on /opt/amn2-git, checked_routes=6
-current source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
+current source-overlay package: dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip
 current source-overlay package status: read-only-vps-smoke-pass
-previous VPS-smoked head: c8a6363 Add Local Agent runtime summary mapper
-current VPS-smoked source-overlay package: dist/amn2-vps-update-and-smoke-kit-42ffa65.zip
-current package sha256: 5B43B467E014E87FEC1E49E8D9A8B7A2FBF841541BE88FDC6768097806240E39
-current source sha256: 8A5B83D9AB95BE4230AAC221CE0321A37EF37E4E4B6EAB5EDECAE3C98A944829
+previous VPS-smoked head: 42ffa65 Record git checkout smoke status
+current VPS-smoked source-overlay package: dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip
+current package sha256: EC48DBA7C91F189512AB77EB5490432C85DA79F987068A98C1CC7F3082387F12
+current source sha256: 272CC013A416937AAA2256A1643B2C77F707874D28FDCB2EA16534E349DD4FC2
 current package status: read-only-vps-smoke-pass
-latest proven VPS read-only smoke: 42ffa65 pass, run_id 20260607T165625Z
-previous VPS read-only smoke: c8a6363 pass, run_id 20260606T202040Z
+latest proven VPS read-only smoke: c92bd1a pass, source_update_run_id 20260607T182118Z, api_smoke_run_id 20260607T182131Z
+previous VPS read-only smoke: 42ffa65 pass, promotion run_id 20260607T165625Z, repeat run_id 20260607T165807Z
 historical VPS read-only smoke: 1a193b9 pass, run_id 20260606T154636Z
-VPS smoke evidence: research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
+VPS smoke evidence: research/amn2/web-admin-loopback-systemd-vps-smoke-evidence-2026-06-07.md
+prior VPS smoke evidence: research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
+repeat VPS smoke evidence: research/amn2/controlled-prod-status-visibility-vps-repeat-smoke-2026-06-07.md
 c8a6363 historical evidence: research/amn2/local-agent-runtime-summary-vps-smoke-evidence-2026-06-06.md
 Phase 2 live single disposable peer gate: verified-live on stable line, evidence research/amn2/phase-2-live-vps-gate-evidence-2026-06-05.md
 ```
@@ -40,7 +42,7 @@ Phase 2 live single disposable peer gate: verified-live on stable line, evidence
 
 Controlled prod means:
 
-- `/opt/amn2` stays on the VPS-smoked `42ffa65` source overlay unless a later package passes a new read-only update/smoke gate.
+- `/opt/amn2` stays on the VPS-smoked `c92bd1a` source overlay unless a later package passes a new read-only update/smoke gate.
 - `62ff184`/`42ffa65` git-checkout smoke is now paired with source-overlay smoke evidence for `/opt/amn2`.
 - `VPS_APPLY_ENABLED=false` is the default operator shell state.
 - Read-only API smoke and web/admin checks use loopback only.
@@ -55,7 +57,7 @@ Controlled prod does not mean broad public SaaS mode.
 
 Allowed after this readiness check:
 
-- Keep current VPS-smoked `/opt/amn2` runtime on `42ffa65`.
+- Keep current VPS-smoked `/opt/amn2` runtime on `c92bd1a`.
 - Run read-only API loopback smoke again.
 - Run DB-only server config sync used by the smoke script.
 - Check web-admin read-only/status pages through loopback or SSH tunnel.
@@ -82,7 +84,7 @@ Blocked until separate explicit gates:
 Before calling the VPS controlled-prod-ready:
 
 - [ ] Current package checksum is recorded.
-- [ ] `.amn2_source_overlay_commit` on VPS is `42ffa65` after applying the current kit.
+- [ ] `.amn2_source_overlay_commit` on VPS is `c92bd1a` after applying the current kit.
 - [ ] Latest read-only smoke safe summary is `VPS verdict: pass`.
 - [ ] Smoke result has 6 checked routes with `status: passed`.
 - [ ] `/api/integration/status` is included in the smoke result and returns `200` with empty forbidden markers.
@@ -127,7 +129,7 @@ Do not publish `api-server.log` unless manually redacted.
 Stop and do not proceed to prod if:
 
 - package checksum does not match;
-- source overlay commit is not `42ffa65` after applying the current kit, or not an explicitly superseding smoke-passed commit;
+- source overlay commit is not `c92bd1a` after applying the current kit, or not an explicitly superseding smoke-passed commit;
 - any smoke status is not `passed`;
 - any route reports forbidden markers;
 - auth checks do not return the expected `401/403/401`;

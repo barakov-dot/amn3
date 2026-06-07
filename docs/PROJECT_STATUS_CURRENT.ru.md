@@ -1,19 +1,29 @@
 # Current Override 2026-06-07
 
-`amn2/codex-vps-test-prep` VPS-smoked source overlay is `42ffa65 Record git checkout smoke status`. The app-code read-only slice `62ff184 Update controlled prod status visibility` first passed real VPS git-checkout smoke on `/opt/amn2-git`, then AMN3 package `42ffa65` was applied to `/opt/amn2` through the safe source-overlay update flow and passed read-only loopback API smoke on 2026-06-07.
+`amn2/codex-vps-test-prep` VPS-smoked source overlay is now `c92bd1a Bind web admin systemd to loopback`. The app-code read-only slice `62ff184 Update controlled prod status visibility` first passed real VPS git-checkout smoke on `/opt/amn2-git`, then AMN3 package `42ffa65` was applied to `/opt/amn2` through the safe source-overlay update flow and passed read-only loopback API smoke on 2026-06-07. The safety follow-up package `c92bd1a` has now also passed source-overlay update/read-only loopback smoke on `/opt/amn2`.
 
-The current VPS production source overlay is now `42ffa65 Record git checkout smoke status`. Previous source overlay `c8a6363 Add Local Agent runtime summary mapper` remains historical smoke-passed baseline from 2026-06-06. Current evidence: `research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md`; prior git-checkout evidence: `research/amn2/controlled-prod-status-visibility-git-checkout-smoke-2026-06-07.md`.
+The current VPS production source overlay is now `c92bd1a Bind web admin systemd to loopback`. Previous source overlay `42ffa65 Record git checkout smoke status` remains historical status-visibility smoke baseline from 2026-06-07. `c8a6363 Add Local Agent runtime summary mapper` remains historical smoke-passed baseline from 2026-06-06. Current evidence: `research/amn2/web-admin-loopback-systemd-vps-smoke-evidence-2026-06-07.md`; prior source-overlay evidence: `research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md`; prior git-checkout evidence: `research/amn2/controlled-prod-status-visibility-git-checkout-smoke-2026-06-07.md`.
 
-Post-smoke safety follow-up: AMN2 current git head is now `c92bd1a Bind web admin systemd to loopback`. AMN3 package `dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip` is ready but not VPS-smoked yet. Purpose: keep web/admin backend on `127.0.0.1:3030` for approved HTTPS reverse proxy mode before controlled production launch. Until this package passes source-overlay smoke, the current VPS-smoked source overlay remains `42ffa65`.
+Repeat confirmation: the same `42ffa65` source overlay passed another read-only loopback API smoke with `run_id=20260607T165807Z`, `checked_routes=6`, auth `401/403/401`, listener passed and audit passed. Evidence: `research/amn2/controlled-prod-status-visibility-vps-repeat-smoke-2026-06-07.md`.
+
+Post-smoke safety follow-up is now complete for the read-only gate. Purpose: keep web/admin backend on `127.0.0.1:3030` for approved HTTPS reverse proxy mode before controlled production launch. This does not open public API `3040`, direct public web/admin `3030`, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent mutations, backup/import/reboot, or new live peer operations.
 
 ```text
 dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip
 package sha256: EC48DBA7C91F189512AB77EB5490432C85DA79F987068A98C1CC7F3082387F12
 source zip: dist/amn2-codex-vps-test-prep-c92bd1a-source.zip
 source sha256: 272CC013A416937AAA2256A1643B2C77F707874D28FDCB2EA16534E349DD4FC2
-status: package-ready-not-vps-smoked
+status: read-only-vps-smoke-pass
+source_update_run_id: 20260607T182118Z
+api_smoke_run_id: 20260607T182131Z
+route result JSON: pending operator paste; smoke summary reported api_smoke_status=passed
+listener: 127.0.0.1:3040 loopback-only
+auth: missing bearer 401, wrong scope 403, revoked token 401
+audit: safe
+web systemd template: ExecStart uses web serve --host 127.0.0.1 --port 3030
 operator doc: dist/amn2-vps-update-and-smoke-kit-c92bd1a/AMN2_VPS_UPDATE_AND_SMOKE_c92bd1a.ru.md
 package evidence: research/amn2/web-admin-loopback-systemd-vps-package-2026-06-07.md
+VPS smoke evidence: research/amn2/web-admin-loopback-systemd-vps-smoke-evidence-2026-06-07.md
 ```
 
 AMN3 source-overlay gate result:
@@ -26,6 +36,7 @@ source sha256: 8A5B83D9AB95BE4230AAC221CE0321A37EF37E4E4B6EAB5EDECAE3C98A944829
 status: read-only-vps-smoke-pass
 source_update_run_id: 20260607T165559Z
 api_smoke_run_id: 20260607T165625Z
+latest_repeat_api_smoke_run_id: 20260607T165807Z
 checked_routes: 6
 listener: 127.0.0.1:3040 loopback-only
 auth: missing bearer 401, wrong scope 403, revoked token 401
@@ -35,7 +46,7 @@ package evidence: research/amn2/controlled-prod-status-visibility-vps-package-20
 VPS smoke evidence: research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
 ```
 
-Next gate: promote `c92bd1a` through source-overlay update/read-only smoke, then complete the controlled production launch checklist for web/admin and bot runtime. This still does not unlock public API `3040`, direct public web/admin `3030`, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent mutations, backup/import/reboot, or new live peer operations.
+Next gate: complete the controlled production launch checklist for operator-only web/admin and bot runtime on the now smoke-passed source overlay `c92bd1a`. This still does not unlock public API `3040`, direct public web/admin `3030`, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent mutations, backup/import/reboot, or new live peer operations.
 
 # Historical Override 2026-06-06
 
@@ -81,7 +92,7 @@ result: verified-live
 scope: exactly one disposable test peer apply/sync/revoke/sync
 ```
 
-This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `c8a6363`, `32d01fd`, `294803e`, `7764ae7`, `568c611` and `1a193b9` package blocks below are historical evidence; `42ffa65` is the current VPS-smoked runtime/source baseline.
+This does not unlock broad write API, public/self-service config delivery, API `config:read`, `/api/clients` CRUD, backup/import/reboot routes, Local Agent mutations or public web/API exposure. Older `42ffa65`, `c8a6363`, `32d01fd`, `294803e`, `7764ae7`, `568c611` and `1a193b9` package blocks below are historical evidence; `c92bd1a` is the current VPS-smoked runtime/source baseline.
 # Текущее состояние проекта
 
 Дата: 2026-06-02.
