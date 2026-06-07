@@ -41,14 +41,17 @@ tests/web/test_web_integration_status.py
 
 ## Boundary
 
-This update does not supersede the current VPS-smoked source overlay:
+This read-only status update is now the current VPS-smoked source overlay:
 
 ```text
-current proven VPS source overlay: c92bd1a
+previous proven VPS source overlay: c92bd1a
+current proven VPS source overlay: f7f6131
 latest AMN2 repository head: f7f6131
-f7f6131 package status: package-prepared
-f7f6131 VPS source-overlay smoke: not run in this evidence
-next safe step: apply f7f6131 read-only update+smoke kit with VPS_APPLY_ENABLED=false
+f7f6131 package status: read-only-vps-smoke-pass
+f7f6131 source update run_id: 20260607T203721Z
+f7f6131 API smoke run_id: 20260607T203730Z
+f7f6131 VPS source-overlay smoke: passed
+next safe step: keep manual-runtime boundary; open service-mode gate only by separate decision
 ```
 
 Still blocked without a separate gate:

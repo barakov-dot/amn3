@@ -17,8 +17,9 @@ package sha256: 19BF96A7E1057C042B89630BF80ADC7A9F5A09A62436E33A8555D7E2991AF282
 source zip: dist/amn2-codex-vps-test-prep-f7f6131-source.zip
 source sha256: 720B6C9FE3CADDBC65C19BDEC5B0C811D00C94EB0D095D6311DCD90DD77BE4E1
 operator doc: dist/amn2-vps-update-and-smoke-kit-f7f6131/AMN2_VPS_UPDATE_AND_SMOKE_f7f6131.ru.md
-status: package-prepared
-VPS source-overlay smoke: pending
+status: read-only-vps-smoke-pass
+VPS source-overlay smoke: passed
+VPS smoke evidence: research/amn2/f7f6131-status-alignment-vps-smoke-evidence-2026-06-07.md
 ```
 
 ## Local Package Checks
@@ -53,7 +54,35 @@ Still blocked:
 - route expansion to config/write/backup/import/reboot/Local Agent mutations;
 - secret-bearing evidence.
 
-## Expected VPS Evidence
+## VPS Smoke Evidence
+
+The prepared package was applied to `/opt/amn2` with `VPS_APPLY_ENABLED=false`, then the loopback API smoke was repeated.
+
+```text
+source_update_run_id: 20260607T203721Z
+source_update_status: passed
+source overlay after: f7f6131
+api_smoke_run_id: 20260607T203730Z
+branch/head: not a git checkout
+preflight_status: skipped
+server_db_sync_status: passed
+api_ready_status: passed
+api_smoke_status: passed
+auth_status: passed
+missing_bearer_http: 401
+wrong_scope_http: 403
+revoked_token_http: 401
+listener_status: passed
+audit_status: passed
+checked_routes: 6
+route_status_codes: 200
+forbidden_markers: []
+safe_evidence_dir: /opt/amn2/vps-smoke/api-loopback-20260607T203730Z
+safe_bundle: /opt/amn2/vps-smoke/api-loopback-safe-evidence-20260607T203730Z.tar.gz
+VPS_APPLY_ENABLED: false
+```
+
+## Expected Safe Fields
 
 Return only safe summary fields:
 
