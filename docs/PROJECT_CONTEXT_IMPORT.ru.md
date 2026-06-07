@@ -6,12 +6,19 @@ Repeat confirmation 2026-06-07: the same `42ffa65` source overlay passed another
 
 This update comes from neighboring AMN2 docs/commits after the `c8a6363` package work. It changes the coordination state, not the safety boundary: no public API `3040`, no API `config:read`, no `/api/clients` write CRUD, no public/self-service config delivery, no Local Agent mutations, no backup/import/reboot, and no new live peer operations.
 
-Latest local AMN2 head after this smoke is `c92bd1a Bind web admin systemd to loopback`. AMN3 package and source-overlay smoke evidence:
+Latest local AMN2 head after neighboring documentation/status work is `f7f6131 Update integration status for c92 manual prelaunch`. The latest proven VPS-smoked source overlay remains `c92bd1a Bind web admin systemd to loopback`; `f7f6131` is a read-only status-visibility update with an AMN3 update+smoke kit prepared and VPS smoke pending. Evidence: `research/amn2/manual-prelaunch-integration-status-2026-06-07.md`; package evidence: `research/amn2/f7f6131-status-alignment-vps-package-2026-06-07.md`. AMN3 package and source-overlay smoke evidence:
 
 ```text
 dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip
 sha256: EC48DBA7C91F189512AB77EB5490432C85DA79F987068A98C1CC7F3082387F12
 source sha256: 272CC013A416937AAA2256A1643B2C77F707874D28FDCB2EA16534E349DD4FC2
+latest AMN2 repository head: f7f6131 Update integration status for c92 manual prelaunch
+latest AMN2 head status: read-only status visibility, package-prepared, not yet VPS source-overlay-smoked
+status-alignment package: dist/amn2-vps-update-and-smoke-kit-f7f6131.zip
+status-alignment package sha256: 19BF96A7E1057C042B89630BF80ADC7A9F5A09A62436E33A8555D7E2991AF282
+status-alignment source sha256: 720B6C9FE3CADDBC65C19BDEC5B0C811D00C94EB0D095D6311DCD90DD77BE4E1
+status-alignment package status: package-prepared
+status-alignment VPS smoke: pending
 status: read-only-vps-smoke-pass
 source_update_run_id: 20260607T182118Z
 api_smoke_run_id: 20260607T182131Z
@@ -25,7 +32,7 @@ smoke evidence: research/amn2/web-admin-loopback-systemd-vps-smoke-evidence-2026
 
 Purpose: make the web/admin systemd backend listen on `127.0.0.1:3030` for approved HTTPS reverse proxy mode before controlled production launch. Current VPS-smoked source overlay is now `c92bd1a`.
 
-Manual prelaunch follow-up on validation VPS `mirror`: backup create/verify passed, repeat API loopback smoke passed with `run_id=20260607T194229Z`, manual web `/login` check returned `200` on `127.0.0.1:3030`, bot network check passed, and the manual web listener was stopped after cleanup. `systemd`/reverse proxy deployment is deferred because the working server will be different. Evidence: `research/amn2/c92bd1a-manual-prelaunch-evidence-2026-06-07.md`.
+Manual runtime follow-up on validation VPS `mirror`: backup create/verify passed, safe preflight passed, API smoke-cycle summary passed with six read-only routes, manual web and bot processes are present, manual web `/login` returned `200` on `127.0.0.1:3030`, direct public web `3030` is not exposed, public API `3040` is not exposed, `systemd` is not used, and `VPS_APPLY_ENABLED=false`. Evidence: `research/amn2/c92bd1a-manual-prelaunch-evidence-2026-06-07.md`.
 
 Previous AMN3 source-overlay update kit result:
 
@@ -42,7 +49,7 @@ listener: 127.0.0.1:3040 loopback-only
 evidence: research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
 ```
 
-Next gate is the controlled production launch checklist for operator-only web/admin and bot runtime.
+Next gate is to apply the prepared `f7f6131` status-alignment package with `VPS_APPLY_ENABLED=false` and repeat read-only loopback smoke, or keep the operator-only manual web/admin and bot runtime boundary until the target server is ready. Open a separate service-mode gate only if `systemd`/reverse proxy deployment becomes required.
 
 # Historical Override 2026-06-06
 

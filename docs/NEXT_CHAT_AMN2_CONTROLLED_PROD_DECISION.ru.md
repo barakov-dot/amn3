@@ -19,6 +19,9 @@ research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
 research/amn2/controlled-prod-status-visibility-vps-repeat-smoke-2026-06-07.md
 research/amn2/web-admin-loopback-systemd-vps-package-2026-06-07.md
 research/amn2/web-admin-loopback-systemd-vps-smoke-evidence-2026-06-07.md
+research/amn2/c92bd1a-manual-prelaunch-evidence-2026-06-07.md
+research/amn2/manual-prelaunch-integration-status-2026-06-07.md
+research/amn2/f7f6131-status-alignment-vps-package-2026-06-07.md
 docs/PROJECT_STATUS_CURRENT.ru.md
 docs/PROJECT_CONTEXT_IMPORT.ru.md
 research/amn2/transfer-backlog.md
@@ -34,7 +37,10 @@ latest AMN3 commit: verify with git log -1
 
 repo amn2: C:\Users\SooL\Documents\Amneziya
 branch amn2: codex-vps-test-prep
-current amn2 git head: c92bd1a Bind web admin systemd to loopback
+current amn2 git head: f7f6131 Update integration status for c92 manual prelaunch
+current amn2 git head status: read-only status visibility, package-prepared, not yet VPS source-overlay-smoked
+current amn2 git head evidence: research/amn2/manual-prelaunch-integration-status-2026-06-07.md
+current amn2 package-prepared evidence: research/amn2/f7f6131-status-alignment-vps-package-2026-06-07.md
 current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
 current VPS source overlay: c92bd1a Bind web admin systemd to loopback
 previous VPS source overlay: 42ffa65 Record git checkout smoke status
@@ -76,6 +82,20 @@ prior source-overlay package status: read-only-vps-smoke-pass
 current source-overlay package: dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip
 current source-overlay package status: read-only-vps-smoke-pass
 web/admin backend template: 127.0.0.1:3030 loopback-only
+status-alignment package: dist/amn2-vps-update-and-smoke-kit-f7f6131.zip
+status-alignment package sha256: 19BF96A7E1057C042B89630BF80ADC7A9F5A09A62436E33A8555D7E2991AF282
+status-alignment source sha256: 720B6C9FE3CADDBC65C19BDEC5B0C811D00C94EB0D095D6311DCD90DD77BE4E1
+status-alignment package status: package-prepared
+status-alignment VPS smoke: pending
+manual runtime mode: manual
+systemd web/bot: not-used
+manual web process: present
+manual bot process: present
+manual web login: 200
+direct public web 3030: no
+public API 3040: no
+manual runtime backup: backups/amneziya-backup-20260607T195851Z.tar.enc verified
+manual runtime API smoke cycle: passed, checked_routes=6, forbidden_markers_count=0
 ```
 
 ## Текущий статус
@@ -85,9 +105,11 @@ source overlay c92bd1a read-only-vps-smoke-pass
 previous source overlay 42ffa65 read-only-vps-smoke-pass
 historical prior source overlay c8a6363 read-only-vps-smoke-pass
 git-checkout read-only status line 62ff184 smoke-pass with checked_routes=6
-amn2 current git head c92bd1a is VPS-smoked
+amn2 current git head f7f6131 is package-prepared, not yet VPS-smoked
+current VPS source overlay c92bd1a is VPS-smoked
 32d01fd is historical prior VPS-smoked source
 controlled-prod-readiness: controlled-prod-ready
+manual-runtime-validation: passed
 ```
 
 ## Operator Decision Packet
@@ -104,7 +126,7 @@ next action: continue with read-only next slice
 
 ## Decision Rules
 
-For current source overlay `c92bd1a`, read-only VPS update/smoke passed with `api_smoke_run_id=20260607T182131Z`. `controlled-prod-ready` continues to apply inside the same operator-only boundary after these conditions were met:
+For current source overlay `c92bd1a`, read-only VPS update/smoke passed with `api_smoke_run_id=20260607T182131Z`, and the follow-up manual runtime gate passed with operator-started web/admin and bot processes. `controlled-prod-ready` continues to apply inside the same operator-only boundary after these conditions were met:
 
 - source overlay commit is `c92bd1a`;
 - read-only VPS smoke passed for `c92bd1a`;
@@ -113,6 +135,9 @@ For current source overlay `c92bd1a`, read-only VPS update/smoke passed with `ap
 - `VPS_APPLY_ENABLED` default is `false`;
 - host key prompt is absent/verified when SSH is used, or not applicable for web/admin reverse-proxy access;
 - recovery path is known;
+- current runtime mode is manual and `systemd` is not used;
+- manual web/admin and bot processes are present;
+- direct public `3030` and public API `3040` exposure are not present;
 - no stop condition is present;
 - no secret-bearing evidence was pasted.
 
@@ -120,7 +145,7 @@ For current source overlay `c92bd1a`, read-only VPS update/smoke passed with `ap
 
 After the original `c8a6363` decision, AMN2 advanced locally to git head `42ffa65`; the app-code read-only slice `62ff184` passed a separate git-checkout smoke on `/opt/amn2-git` with six read-only routes, then source-overlay promotion to `/opt/amn2` passed through the AMN3 update/smoke kit.
 
-After that source-overlay proof, AMN2 advanced to `c92bd1a Bind web admin systemd to loopback`; AMN3 package `c92bd1a` passed real VPS source-overlay smoke. Route-level JSON for that run is now attached: six read-only routes returned `200` with no forbidden markers.
+After that source-overlay proof, AMN2 advanced to `c92bd1a Bind web admin systemd to loopback`; AMN3 package `c92bd1a` passed real VPS source-overlay smoke. Route-level JSON for that run is now attached: six read-only routes returned `200` with no forbidden markers. Neighboring AMN2 status work then advanced the repository branch to `f7f6131 Update integration status for c92 manual prelaunch`; AMN3 now has a prepared `f7f6131` update+smoke kit, but that commit is not yet the VPS source overlay.
 
 `needs-fix` would be required if smoke/auth/listener/audit/checksum/access-path/host-key/evidence hygiene failed.
 
@@ -145,7 +170,10 @@ After that source-overlay proof, AMN2 advanced to `c92bd1a Bind web admin system
 
 ```text
 complete controlled production launch checklist for source overlay c92bd1a
+keep current operator-only manual runtime boundary
+apply f7f6131 status-alignment package with VPS_APPLY_ENABLED=false and repeat read-only smoke
 or continue read-only controlled-prod status/recovery visibility
+open a separate service-mode gate only if systemd/reverse proxy deployment becomes required
 operator documentation cleanup
 another read-only status/observability slice
 ```

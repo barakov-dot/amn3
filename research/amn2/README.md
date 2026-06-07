@@ -23,13 +23,16 @@ current source-overlay transfer head: c92bd1a Bind web admin systemd to loopback
 current source-overlay update+smoke kit: dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip, read-only-vps-smoke-pass
 last VPS-smoked runtime/source: c92bd1a Bind web admin systemd to loopback, run_id=20260607T182131Z, checked_routes=6
 previous VPS-smoked runtime/source: 42ffa65 Record git checkout smoke status, promotion run_id=20260607T165625Z, latest repeat run_id=20260607T165807Z
-current amn2 git head: c92bd1a Bind web admin systemd to loopback
+current amn2 git head: f7f6131 Update integration status for c92 manual prelaunch
+current amn2 git head status: read-only status visibility, package-prepared, not yet VPS source-overlay-smoked
 current app-code read-only smoke slice: 62ff184 Update controlled prod status visibility
 git-checkout VPS smoke: /opt/amn2-git, checked_routes=6, status=passed
 current source-overlay package: dist/amn2-vps-update-and-smoke-kit-c92bd1a.zip
 current package sha256: EC48DBA7C91F189512AB77EB5490432C85DA79F987068A98C1CC7F3082387F12
+status-alignment package: dist/amn2-vps-update-and-smoke-kit-f7f6131.zip, package-prepared
+status-alignment package sha256: 19BF96A7E1057C042B89630BF80ADC7A9F5A09A62436E33A8555D7E2991AF282
 source-overlay promotion for web-admin loopback systemd: read-only-vps-smoke-pass
-manual prelaunch validation: passed on mirror; systemd/reverse proxy deferred to future working server
+manual runtime validation: passed on mirror; web/bot run manually, systemd not used, direct public 3030/3040 exposure no
 ```
 
 Активная рабочая ветка для установки/API smoke:
@@ -105,7 +108,9 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [Controlled prod status visibility repeat VPS smoke 2026-06-07](controlled-prod-status-visibility-vps-repeat-smoke-2026-06-07.md) - repeat read-only API smoke pass for the same `42ffa65` source overlay, `run_id=20260607T165807Z`.
 - [Web-admin loopback systemd VPS package 2026-06-07](web-admin-loopback-systemd-vps-package-2026-06-07.md) - AMN2 `c92bd1a`, package prepared and read-only VPS-smoked for promoting loopback web-admin systemd template before controlled production launch.
 - [Web-admin loopback systemd VPS smoke 2026-06-07](web-admin-loopback-systemd-vps-smoke-evidence-2026-06-07.md) - real VPS source-overlay update/smoke pass for `c92bd1a`, `run_id=20260607T182131Z`, `checked_routes=6`.
-- [c92bd1a manual prelaunch evidence 2026-06-07](c92bd1a-manual-prelaunch-evidence-2026-06-07.md) - validation VPS manual prelaunch pass: backup, API smoke, manual web `/login=200`, bot network ok; `systemd`/reverse proxy deferred to future working server.
+- [c92bd1a manual prelaunch evidence 2026-06-07](c92bd1a-manual-prelaunch-evidence-2026-06-07.md) - validation VPS manual runtime pass: backup, safe preflight, API smoke cycle, manual web `/login=200`, bot process present, loopback-only web/admin, public `3030`/`3040` exposure no; `systemd` not used.
+- [Manual prelaunch integration status 2026-06-07](manual-prelaunch-integration-status-2026-06-07.md) - AMN2 `f7f6131` read-only status update for `/api/integration/status` and web `/integration-status`; not yet VPS source-overlay-smoked.
+- [f7f6131 status alignment VPS package 2026-06-07](f7f6131-status-alignment-vps-package-2026-06-07.md) - AMN3 update+smoke kit prepared for `f7f6131`; VPS source-overlay smoke pending.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
@@ -120,8 +125,9 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 3. AMN3 VPS update/smoke package rebuilt from current production head `c92bd1a`; read-only VPS smoke passed, `run_id=20260607T182131Z`, `checked_routes=6`.
 4. Real VPS API/web-panel gate для `294803e` пройден: API loopback smoke `run_id=20260604T102355Z`, web-admin `API readiness` и `API tokens` доступны; evidence `api-web-panel-vps-evidence-2026-06-04.md`.
 5. VPS update/smoke package `c92bd1a` is now the current VPS-smoked runtime/source; `42ffa65`, `c8a6363`, `32d01fd`, `294803e`, `5f12736`, and `7764ae7` remain historical evidence baselines.
-5.1. Validation VPS manual prelaunch passed for `c92bd1a`; web/admin service deployment and HTTPS reverse proxy are deferred to the future working server; public API port `3040` is not exposed.
+5.1. Validation VPS manual runtime passed for `c92bd1a`; web/admin and bot run manually, `systemd` is not used, direct public `3030`/`3040` exposure is not present, and public API port `3040` remains closed.
 5.2. Controlled prod decision recorded as `controlled-prod-ready`; recovery path is known. Continue with read-only next slice, not write/config/backup/agent expansion.
+5.3. AMN3 package `f7f6131` is prepared for read-only status-alignment source-overlay update; VPS smoke is pending.
 6. Controlled real VPS verification gate Phase 1 для `codex/remote-operation-vps-gate-prep` пройден как `dry-run-only-pass`; evidence `remote-operation-vps-gate-evidence-2026-06-04.md`.
 7. Backup/import policy registry, restore-preview contract и machine-checkable secret inventory уже выполнены; web/API full backup, restore apply, import apply, route expansion, secret-bearing output и live VPS write flows остаются закрытыми до отдельных gates.
 
