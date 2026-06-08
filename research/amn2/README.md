@@ -117,6 +117,8 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [Target server prep gate 2026-06-08](target-server-prep-gate-2026-06-08.md) - evidence note for the new docs-only/read-only target-server prep slice.
 - [Target server prep evidence template 2026-06-08](target-server-prep-evidence-template-2026-06-08.md) - safe summary template for the new target VPS.
 - [Target server bootstrap evidence 2026-06-08](target-server-bootstrap-evidence-2026-06-08.md) - new target VPS partial bootstrap pass: OS packages, Docker, `f7f6131` source overlay, venv/deps, DB schema, partial loopback API probe and backup verify; full six-route smoke remains blocked until real `servers.yml`.
+- [AMN Unified Prod Gate Handoff](../../docs/AMN_UNIFIED_PROD_GATE_HANDOFF.ru.md) - coordination packet for merging AMN2/API, Phase 2 live gate, target VPS and PRVTPRO/Web Panel work without mixing live commands.
+- [Unified prod gate handoff 2026-06-08](unified-prod-gate-handoff-2026-06-08.md) - evidence note for the docs-only unified-chat coordination slice.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
