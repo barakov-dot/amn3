@@ -116,29 +116,21 @@ command -v ufw >/dev/null 2>&1 && ufw status || echo "ufw=not-installed-or-not-u
 
 Когда сервер готов к первому read-only AMN2 gate, использовать текущий пакет:
 
-Так как `barakov-dot/amn3` приватный, скачивать пакет с GitHub нужно через authenticated API или переносить файлы вручную через `scp`.
+Для текущего опубликованного AMN3 kit использовать raw URL без GitHub token и без Authorization header:
 
 ```bash
 cd /root
 
-read -rsp "GitHub token: " GITHUB_TOKEN
-echo
+curl -fL -o amn2-vps-update-and-smoke-kit-f7f6131.zip \
+  https://github.com/barakov-dot/amn3/raw/master/dist/amn2-vps-update-and-smoke-kit-f7f6131.zip
 
-curl -fL \
-  -H "Authorization: Bearer $GITHUB_TOKEN" \
-  -H "Accept: application/vnd.github.raw" \
-  -o amn2-vps-update-and-smoke-kit-f7f6131.zip \
-  "https://api.github.com/repos/barakov-dot/amn3/contents/dist/amn2-vps-update-and-smoke-kit-f7f6131.zip?ref=master"
+curl -fL -o amn2-vps-update-and-smoke-kit-f7f6131.zip.sha256.txt \
+  https://raw.githubusercontent.com/barakov-dot/amn3/master/dist/amn2-vps-update-and-smoke-kit-f7f6131.zip.sha256.txt
 
-curl -fL \
-  -H "Authorization: Bearer $GITHUB_TOKEN" \
-  -H "Accept: application/vnd.github.raw" \
-  -o amn2-vps-update-and-smoke-kit-f7f6131.zip.sha256.txt \
-  "https://api.github.com/repos/barakov-dot/amn3/contents/dist/amn2-vps-update-and-smoke-kit-f7f6131.zip.sha256.txt?ref=master"
-
-unset GITHUB_TOKEN
 sha256sum -c amn2-vps-update-and-smoke-kit-f7f6131.zip.sha256.txt
 ```
+
+Если скачивание недоступно, остановиться и вернуться в чат с safe summary. Не вводить GitHub token в команды из чата и не публиковать Authorization header.
 
 Дальше применять только после отдельного сообщения в чат, чтобы мы проверили precheck и не смешали target server gate с validation VPS.
 
