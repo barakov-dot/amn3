@@ -23,6 +23,10 @@ research/amn2/c92bd1a-manual-prelaunch-evidence-2026-06-07.md
 research/amn2/manual-prelaunch-integration-status-2026-06-07.md
 research/amn2/f7f6131-status-alignment-vps-package-2026-06-07.md
 research/amn2/f7f6131-status-alignment-vps-smoke-evidence-2026-06-07.md
+docs/AMN2_TARGET_SERVER_PREP_GATE.ru.md
+docs/AMN2_TARGET_SERVER_PREP_RUNBOOK.ru.md
+research/amn2/target-server-prep-gate-2026-06-08.md
+research/amn2/target-server-prep-evidence-template-2026-06-08.md
 docs/PROJECT_STATUS_CURRENT.ru.md
 docs/PROJECT_CONTEXT_IMPORT.ru.md
 research/amn2/transfer-backlog.md
@@ -177,6 +181,7 @@ After that source-overlay proof, AMN2 advanced to `c92bd1a Bind web admin system
 ```text
 complete controlled production launch checklist for source overlay f7f6131
 keep current operator-only manual runtime boundary
+prepare new target server through target-server prep gate, then use runbook only after safe precheck review
 or continue read-only controlled-prod status/recovery visibility
 open a separate service-mode gate only if systemd/reverse proxy deployment becomes required
 operator documentation cleanup

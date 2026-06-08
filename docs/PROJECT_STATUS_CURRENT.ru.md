@@ -82,7 +82,7 @@ package evidence: research/amn2/controlled-prod-status-visibility-vps-package-20
 VPS smoke evidence: research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
 ```
 
-Next gate: keep the current operator-controlled manual runtime boundary and continue only read-only/status/docs slices, or open a separate service-mode gate if `systemd`/reverse proxy deployment is desired. This still does not unlock public API `3040`, direct public web/admin `3030`, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent mutations, backup/import/reboot, or new live peer operations.
+Next gate: keep the current operator-controlled manual runtime boundary and continue only read-only/status/docs slices, or open a separate service-mode gate if `systemd`/reverse proxy deployment is desired. The next physical server is a separate target-server prep gate, not a continuation of validation VPS source-overlay work. Start with `docs/AMN2_TARGET_SERVER_PREP_GATE.ru.md`; use `docs/AMN2_TARGET_SERVER_PREP_RUNBOOK.ru.md` only after the safe precheck is reviewed, and record evidence through `research/amn2/target-server-prep-gate-2026-06-08.md` and `research/amn2/target-server-prep-evidence-template-2026-06-08.md`. This still does not unlock public API `3040`, direct public web/admin `3030`, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent mutations, backup/import/reboot, or new live peer operations.
 
 # Historical Override 2026-06-06
 

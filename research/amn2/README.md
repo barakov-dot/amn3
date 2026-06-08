@@ -112,6 +112,10 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [Manual prelaunch integration status 2026-06-07](manual-prelaunch-integration-status-2026-06-07.md) - AMN2 `f7f6131` read-only status update for `/api/integration/status` and web `/integration-status`; VPS source-overlay smoke passed.
 - [f7f6131 status alignment VPS package 2026-06-07](f7f6131-status-alignment-vps-package-2026-06-07.md) - AMN3 update+smoke kit for `f7f6131`; VPS source-overlay smoke passed.
 - [f7f6131 status alignment VPS smoke 2026-06-07](f7f6131-status-alignment-vps-smoke-evidence-2026-06-07.md) - real VPS source-overlay update/smoke pass for `f7f6131`, `run_id=20260607T203730Z`, latest repeat API smoke `20260607T204300Z`, `checked_routes=6`.
+- [AMN2 target server prep gate](../../docs/AMN2_TARGET_SERVER_PREP_GATE.ru.md) - high-level gate for renting/prechecking the new target VPS without enabling service mode.
+- [AMN2 target server prep runbook](../../docs/AMN2_TARGET_SERVER_PREP_RUNBOOK.ru.md) - safe bootstrap/read-only/manual-runtime gate for the new target VPS before any service-mode decision.
+- [Target server prep gate 2026-06-08](target-server-prep-gate-2026-06-08.md) - evidence note for the new docs-only/read-only target-server prep slice.
+- [Target server prep evidence template 2026-06-08](target-server-prep-evidence-template-2026-06-08.md) - safe summary template for the new target VPS.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
