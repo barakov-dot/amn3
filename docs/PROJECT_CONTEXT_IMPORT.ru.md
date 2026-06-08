@@ -52,6 +52,8 @@ listener: 127.0.0.1:3040 loopback-only
 evidence: research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
 ```
 
+New target VPS bootstrap 2026-06-08 is `partial-pass`: base OS packages, Docker runtime with no containers, `/opt/amn2` venv, `f7f6131` source overlay, Python dependencies, DB schema init, partial loopback API `/api/servers` probe with token revoke, and encrypted backup create/verify passed. Evidence: `research/amn2/target-server-bootstrap-evidence-2026-06-08.md`. Full six-route read-only API smoke is still blocked until a real target `servers.yml` is created on the VPS through a secret-safe channel.
+
 Next gate is to keep the operator-only manual web/admin and bot runtime boundary and continue read-only/status/docs work, or prepare the new target VPS through `docs/AMN2_TARGET_SERVER_PREP_GATE.ru.md` first. Use `docs/AMN2_TARGET_SERVER_PREP_RUNBOOK.ru.md` only after the safe precheck is reviewed, with safe evidence in `research/amn2/target-server-prep-evidence-template-2026-06-08.md`. Open a separate service-mode gate only if `systemd`/reverse proxy deployment becomes required.
 
 # Historical Override 2026-06-06
