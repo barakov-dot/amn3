@@ -92,6 +92,7 @@ secret_surface: route metadata only; no secret output
 remote_write_surface: none
 test_plan: add/maintain local tests that fail when a runtime route/action lacks policy, auth, risk and audit binding
 required_gate: local-only
+planning_status: route/secret gate plan created 2026-06-09; see research/amn2/phase-4-route-secret-gate-plan-2026-06-09.md
 recommendation: accept
 ```
 
@@ -108,6 +109,7 @@ secret_surface: secret metadata only, no raw payloads
 remote_write_surface: none
 test_plan: maintain local redaction/manifest tests; any new config output must prove no secret leakage in safe metadata
 required_gate: local-only
+planning_status: route/secret gate plan created 2026-06-09; see research/amn2/phase-4-route-secret-gate-plan-2026-06-09.md
 recommendation: accept
 ```
 
@@ -537,7 +539,7 @@ recommendation: defer
 
 ## Completed AMN2 Local-only Slices
 
-Completed: `P4-C009`, then `P4-I002`.
+Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning.
 
 Completed slice name:
 
@@ -561,8 +563,9 @@ Implemented safe scope:
 - Implemented only local read-only navigation/empty-state clarification.
 - No DB/live backfill, sync, apply/revoke, config delivery or token work was performed.
 - `P4-I002` implemented the service-mode/read-only status wording on `/integration-status`.
+- Route/secret gate planning consolidated existing route/auth, secret inventory, token lifecycle, config delivery policy, manager export and backup/import policy baselines into `research/amn2/phase-4-route-secret-gate-plan-2026-06-09.md`.
 
-Next decision: run `P4-I001` as a second detailed read-only UX/data pass only if more page-level evidence is needed; otherwise continue route/secret gate planning for future API expansion.
+Next decision: choose a specific future route-expansion candidate and write its design against the route/secret gate plan, or run `P4-I001` if more private-panel UX evidence is needed first.
 
 ## Source Notes
 

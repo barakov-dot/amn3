@@ -65,7 +65,7 @@ tcp_443_absent=yes
 vps_apply_enabled_false=yes
 ```
 
-## Active Remaining Plan After P4-C009 And P4-I002
+## Active Remaining Plan After P4-C009, P4-I002 And Route/Secret Gate Planning
 
 Closed and removed from the active plan:
 
@@ -74,11 +74,12 @@ Closed and removed from the active plan:
 - `P4-C009` web-panel user/config visibility investigation;
 - AMN2 branch/worktree preparation for `P4-C009`;
 - VPS access decision for `P4-C009` (`not needed`; no live commands were run);
-- `P4-I002` service-mode/read-only status wording on `/integration-status`.
+- `P4-I002` service-mode/read-only status wording on `/integration-status`;
+- route/secret gate planning for future API expansion.
 
 ### Critical
 
-No active default-mode critical implementation item remains after `P4-C009` and `P4-I002`.
+No active default-mode critical implementation item remains after `P4-C009`, `P4-I002` and route/secret gate planning.
 Critical live/public/write/config candidates stay blocked or gated by the registry.
 
 ### Important
@@ -96,13 +97,13 @@ Critical live/public/write/config candidates stay blocked or gated by the regist
   - SSH-tunnel private-panel GET/navigation review only.
   - No POST/write/config delivery/API token issue-revoke/sync/health/backup/import/reboot.
 
-- [ ] **Task I2: Route/secret gate planning for future API expansion**
+- [ ] **Task I2: Choose the next route-expansion candidate design**
 
   Scope:
 
-  - route/auth policy only;
-  - secret-bearing output classification only;
-  - no new API routes, public exposure, config delivery or write CRUD.
+  - use `research/amn2/phase-4-route-secret-gate-plan-2026-06-09.md` as the required checklist;
+  - choose exactly one candidate such as read-only API schema maturity, endpoint taxonomy, scoped token route exposure, `/api/clients` design, `config:read` design, or public/self-service delivery design;
+  - design first; do not implement new routes, public exposure, config delivery or write CRUD until the candidate-specific gate is named.
 
 ### Medium
 
@@ -319,4 +320,4 @@ The original startup breakdown below is retained as audit context. Use the activ
 
 ## Start Recommendation
 
-Start with active decision `Task I1`: run `P4-I001` only if another private-panel read-only UX pass is needed. Otherwise continue `Task I2` route/secret gate planning for future API expansion. The VPS access check can run separately only after the operator supplies the SSH target alias/host and confirms the `P4-VPS-ACCESS-READONLY-2026-06-09` gate.
+Start with active decision `Task I1`: run `P4-I001` only if another private-panel read-only UX pass is needed. Otherwise continue `Task I2` by choosing one route-expansion candidate design against `research/amn2/phase-4-route-secret-gate-plan-2026-06-09.md`. The VPS access check can run separately only after the operator supplies the SSH target alias/host and confirms the `P4-VPS-ACCESS-READONLY-2026-06-09` gate.
