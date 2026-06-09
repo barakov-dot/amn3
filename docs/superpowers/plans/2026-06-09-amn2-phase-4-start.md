@@ -65,9 +65,9 @@ tcp_443_absent=yes
 vps_apply_enabled_false=yes
 ```
 
-## Active Remaining Plan After P4-C009, P4-I002, Route/Secret Gate Planning, P4-I003 Design, P4-I003 Implementation Plan, P4-I003 Implementation And P4-I004 Endpoint Taxonomy
+## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy и P4-N003 metrics privacy
 
-Closed and removed from the active plan:
+Закрыто и удалено из активного плана:
 
 - access/GitHub preflight;
 - first AMN2 slice selection;
@@ -80,15 +80,16 @@ Closed and removed from the active plan:
 - `P4-I003` AMN2 local implementation plan.
 - `P4-I003` AMN2 local implementation.
 - `P4-I004` endpoint taxonomy / route-policy docs alignment.
+- `P4-N003` aggregate metrics privacy boundary visibility.
 
-### Critical
+### Критичные
 
-No active default-mode critical implementation item remains after `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003` design, `P4-I003` implementation plan and `P4-I003` implementation.
-Critical live/public/write/config candidates stay blocked or gated by the registry.
+Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004` и `P4-N003`.
+Critical live/public/write/config candidates остаются blocked или gated by the registry.
 
-### Important
+### Важные
 
-- [ ] **Task I1: Decide whether to run `P4-I001` fallback UX evidence pass**
+- [ ] **Задача I1: решить, нужен ли fallback UX evidence pass `P4-I001`**
 
   Trigger:
 
@@ -101,19 +102,27 @@ Critical live/public/write/config candidates stay blocked or gated by the regist
   - SSH-tunnel private-panel GET/navigation review only.
   - No POST/write/config delivery/API token issue-revoke/sync/health/backup/import/reboot.
 
-### Medium
+- [ ] **Задача I3: продолжить scoped API token lifecycle boundary**
 
-- [ ] **Task M2: Keep aggregate metrics privacy boundary visible**
+  Scope:
 
-### Minimal
+  - refine local token lifecycle docs/tests before any future route expansion;
+  - keep raw token one-time only, token hash private, revoke/rotate audit safe and owner status inherited;
+  - do not issue/revoke production tokens, open public API or add write/config scopes.
 
-- [ ] **Task MIN1: Update AMN3 transfer note after the next AMN2 slice**
-- [ ] **Task MIN2: Keep the candidate registry current when priority/gate/recommendation changes**
+### Средние
 
-### Cosmetic
+Активных medium local-only implementation items не осталось после `P4-N003`.
 
-- [ ] **Task X1: Polish naming only after behavior is stable**
-- [ ] **Task X2: Polish operator docs links without authorizing live VPS work**
+### Минимальные
+
+- [ ] **Задача MIN1: обновлять AMN3 transfer note после следующего AMN2 slice**
+- [ ] **Задача MIN2: поддерживать candidate registry при изменении priority/gate/recommendation**
+
+### Косметические
+
+- [ ] **Задача X1: полировать naming только после стабилизации behavior**
+- [ ] **Задача X2: полировать operator docs links без авторизации live VPS work**
 
 ## Original Startup Breakdown
 
@@ -313,6 +322,6 @@ The original startup breakdown below is retained as audit context. Use the activ
   - link cleanup and stale baseline scan.
   - no new operational instruction that authorizes live VPS work.
 
-## Start Recommendation
+## Стартовая рекомендация
 
-Start with active decision `Task M2`: keep aggregate metrics privacy boundary visible from the latest private/local endpoint taxonomy baseline. Run `P4-I001` only if another private-panel read-only UX pass is needed first. The VPS access check can run separately only after the operator supplies the SSH target alias/host and confirms the `P4-VPS-ACCESS-READONLY-2026-06-09` gate.
+Начинать с active decision `Task I3`: continue scoped API token lifecycle boundary from the latest read-only API and metrics privacy baseline. `P4-I001` запускать только если сначала нужен еще один private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.

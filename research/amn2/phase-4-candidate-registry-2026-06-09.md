@@ -408,7 +408,8 @@ secret_surface: avoid peer names, IPs, endpoints and per-user activity labels
 remote_write_surface: none
 test_plan: local tests for aggregate-only response shape and scope separation
 required_gate: local-only
-recommendation: accept
+implementation_status: local-only implemented 2026-06-09 in AMN2 branch codex/phase-4-aggregate-metrics-privacy-boundary, commit 8b6aef8; see research/amn2/phase-4-aggregate-metrics-privacy-boundary-implementation-2026-06-09.md
+recommendation: completed; use as aggregate metrics privacy boundary baseline
 ```
 
 ```text
@@ -543,7 +544,7 @@ recommendation: defer
 
 ## Completed AMN2 Local-only Slices
 
-Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design, then `P4-I003` AMN2 local implementation plan, then `P4-I003` AMN2 local implementation, then `P4-I004` endpoint taxonomy / route-policy docs alignment.
+Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design, then `P4-I003` AMN2 local implementation plan, then `P4-I003` AMN2 local implementation, then `P4-I004` endpoint taxonomy / route-policy docs alignment, then `P4-N003` aggregate metrics privacy boundary visibility.
 
 Completed slice name:
 
@@ -572,8 +573,9 @@ Implemented safe scope:
 - `P4-I003` AMN2 local implementation plan was prepared in `docs/superpowers/plans/2026-06-09-amn2-p4-i003-read-only-api-status-schema.md`; it limits execution to API route binding tests, schema/status contract tests and docs updates.
 - `P4-I003` AMN2 local implementation was completed in branch `codex/phase-4-read-only-api-status-schema`, commit `b71b8f4`; it adds API runtime route bindings, route drift tests, read-only API/status contract tests and policy docs without new routes.
 - `P4-I004` endpoint taxonomy / route-policy docs alignment was completed in branch `codex/phase-4-endpoint-taxonomy-route-policy-docs`, commit `acf39f8`; it adds private/local taxonomy docs for the same six read-only routes and links policy docs without public OpenAPI/docs exposure or runtime changes.
+- `P4-N003` aggregate metrics privacy boundary visibility was completed in branch `codex/phase-4-aggregate-metrics-privacy-boundary`, commit `8b6aef8`; it adds an additive safe `privacy` marker to `/api/metrics/summary` and locks the response boundary in local API tests/docs without changing route count or exposure.
 
-Next decision: continue `P4-N003` aggregate metrics privacy boundary visibility, or run `P4-I001` only if more private-panel UX evidence is needed first.
+Next decision: continue `P4-I005` scoped API token lifecycle boundary, or run `P4-I001` only if more private-panel UX evidence is needed first.
 
 ## Source Notes
 

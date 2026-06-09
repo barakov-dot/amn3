@@ -82,10 +82,11 @@ Completed first local-only slice:
 5. `P4-I003` AMN2 local implementation plan; plan: `docs/superpowers/plans/2026-06-09-amn2-p4-i003-read-only-api-status-schema.md`.
 6. `P4-I003` AMN2 local implementation; evidence: `research/amn2/phase-4-read-only-api-status-schema-implementation-2026-06-09.md`.
 7. `P4-I004` endpoint taxonomy / route-policy docs alignment; evidence: `research/amn2/phase-4-endpoint-taxonomy-route-policy-docs-implementation-2026-06-09.md`.
+8. `P4-N003` aggregate metrics privacy boundary; evidence: `research/amn2/phase-4-aggregate-metrics-privacy-boundary-implementation-2026-06-09.md`.
 
 Continue Phase 4 with:
 
-1. `P4-N003` aggregate metrics privacy boundary visibility;
+1. `P4-I005` scoped API token lifecycle boundary;
 2. `P4-I001` detailed read-only web-panel UX pass only if more page-level evidence is needed.
 
 If the selected slice requires live VPS state changes, stop and create a separate named gate first.
