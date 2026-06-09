@@ -52,9 +52,11 @@ listener: 127.0.0.1:3040 loopback-only
 evidence: research/amn2/controlled-prod-status-visibility-vps-smoke-evidence-2026-06-07.md
 ```
 
-New target VPS bootstrap 2026-06-08 is `partial-pass`: base OS packages, Docker runtime with no containers, `/opt/amn2` venv, `f7f6131` source overlay, Python dependencies, DB schema init, partial loopback API `/api/servers` probe with token revoke, and encrypted backup create/verify passed. Evidence: `research/amn2/target-server-bootstrap-evidence-2026-06-08.md`. Full six-route read-only API smoke is still blocked until a real target `servers.yml` is created on the VPS through a secret-safe channel.
+New target VPS bootstrap 2026-06-08 first passed as `partial-pass`: base OS packages, Docker runtime with no containers, `/opt/amn2` venv, `f7f6131` source overlay, Python dependencies, DB schema init, partial loopback API `/api/servers` probe with token revoke, and encrypted backup create/verify passed. Evidence: `research/amn2/target-server-bootstrap-evidence-2026-06-08.md`.
 
-Next gate is to keep the operator-only manual web/admin and bot runtime boundary and continue read-only/status/docs work, or prepare the new target VPS through `docs/AMN2_TARGET_SERVER_PREP_GATE.ru.md` first. Use `docs/AMN2_TARGET_SERVER_PREP_RUNBOOK.ru.md` only after the safe precheck is reviewed, with safe evidence in `research/amn2/target-server-prep-evidence-template-2026-06-08.md`. For consolidating AMN2/API, Phase 2 live gate and PRVTPRO/Web Panel work, use `docs/AMN_UNIFIED_PROD_GATE_HANDOFF.ru.md` and `research/amn2/unified-prod-gate-handoff-2026-06-08.md`; live commands remain owned by the Phase 2 chat until it returns a safe summary. Open a separate service-mode gate only if `systemd`/reverse proxy deployment becomes required.
+Target VPS AWG2 runtime gate 2026-06-09 is now `read-only-smoke-pass`: `amnezia-awg2` Docker runtime was built and started, real target `servers.yml` was created on the VPS through a secret-safe channel, AMN2 loader accepted it, and official read-only API loopback smoke passed with `run_id=20260609T043158Z`, `checked_routes=6`, auth `401/403/401`, listener passed and audit passed. Evidence: `research/amn2/target-server-awg2-runtime-smoke-evidence-2026-06-09.md`.
+
+Next gate is a separate explicit confirmation for exactly one disposable test peer live apply/sync/revoke/sync on the new endpoint, or a separate service-mode gate only if `systemd`/reverse proxy deployment becomes required. For consolidating AMN2/API, Phase 2 live gate and PRVTPRO/Web Panel work, use `docs/AMN_UNIFIED_PROD_GATE_HANDOFF.ru.md` and `research/amn2/unified-prod-gate-handoff-2026-06-08.md`; live peer commands remain owned by a dedicated gate and must return a safe summary.
 
 # Historical Override 2026-06-06
 
