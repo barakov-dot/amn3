@@ -140,6 +140,8 @@ blocked_by_write_gate:
 next_recommended_slice:
 ```
 
+Для полного отчета использовать шаблон: `docs/AMN2_WEB_PANEL_READ_ONLY_UX_REVIEW_EVIDENCE_TEMPLATE.ru.md`.
+
 ## Decision Rules
 
 `read-only-ux` findings можно переносить в AMN2 planning только если они не требуют POST/write/config/token/sync actions.

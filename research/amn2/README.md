@@ -125,7 +125,9 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [Unified prod gate handoff 2026-06-08](unified-prod-gate-handoff-2026-06-08.md) - evidence note updated with the Phase 3 service-mode loopback/SSH-tunnel current state.
 - [API/Web panel VPS test runbook](../../docs/AMN2_API_WEB_PANEL_VPS_TEST_RUNBOOK.ru.md) - что делать на VPS при будущей проверке API/web-panel slice через loopback и SSH tunnel.
 - [AMN2 web panel read-only UX review checklist](../../docs/AMN2_WEB_PANEL_READ_ONLY_UX_REVIEW_CHECKLIST.ru.md) - safe checklist for reviewing the private loopback web/admin panel through SSH tunnel without POST/write/config/token/sync actions.
+- [AMN2 web panel read-only UX review evidence template](../../docs/AMN2_WEB_PANEL_READ_ONLY_UX_REVIEW_EVIDENCE_TEMPLATE.ru.md) - safe textual return template for the private-panel UX review.
 - [Service-mode web panel read-only UX review 2026-06-09](service-mode-web-panel-read-only-ux-review-2026-06-09.md) - docs-only preparation note for the next safe UX/product review slice after Phase 3 service-mode evidence.
+- [Service-mode web panel read-only UX review evidence template 2026-06-09](service-mode-web-panel-read-only-ux-review-evidence-template-2026-06-09.md) - AMN3 note linking the checklist and evidence template to the current Phase 3 boundary.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
 ## Следующие рабочие шаги

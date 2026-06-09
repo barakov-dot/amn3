@@ -24,6 +24,7 @@ destructive/admin writes tested: no
 
 ```text
 checklist: docs/AMN2_WEB_PANEL_READ_ONLY_UX_REVIEW_CHECKLIST.ru.md
+evidence_template: docs/AMN2_WEB_PANEL_READ_ONLY_UX_REVIEW_EVIDENCE_TEMPLATE.ru.md
 scope: read-only UX/product review only
 production code changes: none
 AMN2 code changes: none
