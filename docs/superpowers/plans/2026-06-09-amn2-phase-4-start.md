@@ -65,7 +65,7 @@ tcp_443_absent=yes
 vps_apply_enabled_false=yes
 ```
 
-## Active Remaining Plan After P4-C009, P4-I002, Route/Secret Gate Planning, P4-I003 Design, P4-I003 Implementation Plan And P4-I003 Implementation
+## Active Remaining Plan After P4-C009, P4-I002, Route/Secret Gate Planning, P4-I003 Design, P4-I003 Implementation Plan, P4-I003 Implementation And P4-I004 Endpoint Taxonomy
 
 Closed and removed from the active plan:
 
@@ -79,6 +79,7 @@ Closed and removed from the active plan:
 - `P4-I003` candidate-specific read-only API/status schema maturity design.
 - `P4-I003` AMN2 local implementation plan.
 - `P4-I003` AMN2 local implementation.
+- `P4-I004` endpoint taxonomy / route-policy docs alignment.
 
 ### Critical
 
@@ -100,17 +101,8 @@ Critical live/public/write/config candidates stay blocked or gated by the regist
   - SSH-tunnel private-panel GET/navigation review only.
   - No POST/write/config delivery/API token issue-revoke/sync/health/backup/import/reboot.
 
-- [ ] **Task I2: Continue local-only endpoint taxonomy and route-policy docs alignment**
-
-  Scope:
-
-  - use `research/amn2/phase-4-read-only-api-status-schema-implementation-2026-06-09.md` as the latest read-only API/status baseline;
-  - keep the next slice docs/test alignment only unless a new implementation plan is written;
-  - do not implement new routes, public exposure, config delivery, token lifecycle actions or write CRUD.
-
 ### Medium
 
-- [ ] **Task M1: Keep endpoint taxonomy and route-policy docs aligned**
 - [ ] **Task M2: Keep aggregate metrics privacy boundary visible**
 
 ### Minimal
@@ -323,4 +315,4 @@ The original startup breakdown below is retained as audit context. Use the activ
 
 ## Start Recommendation
 
-Start with active decision `Task I2`: continue local-only endpoint taxonomy and route-policy docs alignment from `research/amn2/phase-4-read-only-api-status-schema-implementation-2026-06-09.md`. Run `P4-I001` only if another private-panel read-only UX pass is needed first. The VPS access check can run separately only after the operator supplies the SSH target alias/host and confirms the `P4-VPS-ACCESS-READONLY-2026-06-09` gate.
+Start with active decision `Task M2`: keep aggregate metrics privacy boundary visible from the latest private/local endpoint taxonomy baseline. Run `P4-I001` only if another private-panel read-only UX pass is needed first. The VPS access check can run separately only after the operator supplies the SSH target alias/host and confirms the `P4-VPS-ACCESS-READONLY-2026-06-09` gate.

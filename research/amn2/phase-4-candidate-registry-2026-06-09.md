@@ -55,8 +55,8 @@ Gate classes:
 | Priority | Local-only | Requires VPS gate | Blocked until separate write/config/public gate |
 | --- | --- | --- | --- |
 | `critical` | `P4-C001`, `P4-C002`, `P4-C003`, `P4-C009` | `P4-C004` | `P4-C005`, `P4-C006`, `P4-C007`, `P4-C008` |
-| `important` | `P4-I001`, `P4-I002`, `P4-I003`, `P4-I004`, `P4-I005` | `P4-I006`, `P4-I007` | `P4-I008`, `P4-I009` |
-| `normal` | `P4-N001`, `P4-N002`, `P4-N003`, `P4-N004` | `P4-N005`, `P4-N006` | `P4-N007` |
+| `important` | `P4-I001`, `P4-I002`, `P4-I003`, `P4-I005` | `P4-I006`, `P4-I007` | `P4-I008`, `P4-I009` |
+| `normal` | `P4-I004`, `P4-N001`, `P4-N002`, `P4-N003`, `P4-N004` | `P4-N005`, `P4-N006` | `P4-N007` |
 | `cosmetic` | `P4-X001`, `P4-X002`, `P4-X003` | - | `P4-X004` |
 
 ## Candidate Rows
@@ -265,22 +265,6 @@ recommendation: completed; use as read-only API/status schema contract baseline
 ```
 
 ```text
-candidate_id: P4-I004
-priority: important
-source: PRVTPRO API taxonomy; KYORESUAS `/clients` and `/server`; AMN2 route policy matrix
-feature_area: endpoint taxonomy and OpenAPI/domain grouping
-user_value: keeps product/API docs understandable before more endpoints exist
-AMN2_fit: good as docs/test alignment, not public docs exposure
-license_boundary: idea only; no upstream OpenAPI copied
-risk_class: docs-only + read-only API
-secret_surface: none
-remote_write_surface: none
-test_plan: local docs/tests that route groups match current implemented routes and policy entries
-required_gate: local-only
-recommendation: accept
-```
-
-```text
 candidate_id: P4-I005
 priority: important
 source: AMN2 current auth/security inventory; PRVTPRO/KYORESUAS token signals
@@ -361,6 +345,23 @@ recommendation: research
 ```
 
 ### Normal
+
+```text
+candidate_id: P4-I004
+priority: normal
+source: PRVTPRO API taxonomy; KYORESUAS `/clients` and `/server`; AMN2 route policy matrix
+feature_area: endpoint taxonomy and OpenAPI/domain grouping
+user_value: keeps product/API docs understandable before more endpoints exist
+AMN2_fit: good as docs/test alignment, not public docs exposure
+license_boundary: idea only; no upstream OpenAPI copied
+risk_class: docs-only + read-only API
+secret_surface: none
+remote_write_surface: none
+test_plan: local docs/tests that route groups match current implemented routes and policy entries
+required_gate: local-only
+implementation_status: local-only implemented 2026-06-09 in AMN2 branch codex/phase-4-endpoint-taxonomy-route-policy-docs, commit acf39f8; see research/amn2/phase-4-endpoint-taxonomy-route-policy-docs-implementation-2026-06-09.md
+recommendation: completed; use as private/local endpoint taxonomy baseline, not public OpenAPI/docs exposure
+```
 
 ```text
 candidate_id: P4-N001
@@ -542,7 +543,7 @@ recommendation: defer
 
 ## Completed AMN2 Local-only Slices
 
-Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design, then `P4-I003` AMN2 local implementation plan, then `P4-I003` AMN2 local implementation.
+Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design, then `P4-I003` AMN2 local implementation plan, then `P4-I003` AMN2 local implementation, then `P4-I004` endpoint taxonomy / route-policy docs alignment.
 
 Completed slice name:
 
@@ -570,8 +571,9 @@ Implemented safe scope:
 - `P4-I003` prepared a candidate-specific read-only API/status schema maturity design in `research/amn2/phase-4-read-only-api-status-design-2026-06-09.md`; no AMN2 code or runtime route changed.
 - `P4-I003` AMN2 local implementation plan was prepared in `docs/superpowers/plans/2026-06-09-amn2-p4-i003-read-only-api-status-schema.md`; it limits execution to API route binding tests, schema/status contract tests and docs updates.
 - `P4-I003` AMN2 local implementation was completed in branch `codex/phase-4-read-only-api-status-schema`, commit `b71b8f4`; it adds API runtime route bindings, route drift tests, read-only API/status contract tests and policy docs without new routes.
+- `P4-I004` endpoint taxonomy / route-policy docs alignment was completed in branch `codex/phase-4-endpoint-taxonomy-route-policy-docs`, commit `acf39f8`; it adds private/local taxonomy docs for the same six read-only routes and links policy docs without public OpenAPI/docs exposure or runtime changes.
 
-Next decision: continue local-only endpoint taxonomy / route-policy docs alignment, or run `P4-I001` if more private-panel UX evidence is needed first.
+Next decision: continue `P4-N003` aggregate metrics privacy boundary visibility, or run `P4-I001` only if more private-panel UX evidence is needed first.
 
 ## Source Notes
 
