@@ -1,4 +1,26 @@
-# Current Override 2026-06-07
+# Current Override 2026-06-09
+
+Phase 4 main-chat handoff is now prepared:
+
+```text
+entrypoint: docs/NEXT_CHAT_AMN2_PHASE_4_UNIFIED_PRODUCT_GATE.ru.md
+research note: research/amn2/phase-4-unified-product-gate-handoff-2026-06-09.md
+AMN3 checkpoint before Phase 4 packet: a205daa Record web panel UX review evidence
+AMN2 source-overlay/package head: f7f6131 Update integration status for c92 manual prelaunch
+target VPS mode: service-mode web/bot active, loopback-only
+operator access: SSH local port forward to 127.0.0.1:3030, external browser only
+public/direct 3030: closed by loopback bind
+public API 3040: absent/closed
+TCP 80/443: absent
+domain/Caddy/HTTPS public cutover: deferred
+VPS_APPLY_ENABLED: false
+remaining approved test peers: Neobyatnaya-AMNZ-1, Neobyatnaya-AMNZ-2
+revoked test peers: Neobyatnaya-AMNZ-3, Neobyatnaya-AMNZ-4
+```
+
+Use Phase 4 as the unified product/API planning gate. Do not reopen Phase 3 service-mode loopback as pending. Do not run live VPS commands from the main chat by default. PRVTPRO/Web Panel and KYORESUAS/API outputs enter as candidate rows first; any public API, direct public web/admin, HTTPS reverse proxy, config delivery, write CRUD, Local Agent mutation, backup/import/reboot or production peer mutation requires a separate named gate.
+
+# Historical Override 2026-06-07
 
 `amn2/codex-vps-test-prep` VPS-smoked source overlay is `f7f6131 Update integration status for c92 manual prelaunch`. The app-code read-only slice `62ff184 Update controlled prod status visibility` passed real VPS git-checkout smoke on `/opt/amn2-git`, then the `42ffa65` AMN3 package was applied to `/opt/amn2` through safe source-overlay update and passed read-only loopback API smoke. The controlled production safety follow-up `c92bd1a` passed safe source-overlay update and read-only API smoke on `/opt/amn2`; the status-alignment follow-up `f7f6131` has now also passed read-only loopback API smoke. Previous source overlay `c92bd1a Bind web admin systemd to loopback` remains the web-admin loopback/manual-runtime baseline; `42ffa65 Record git checkout smoke status` remains historical status-visibility baseline; `c8a6363 Add Local Agent runtime summary mapper` remains historical smoke-passed baseline.
 

@@ -14,7 +14,9 @@
 
 ## Current Override 2026-06-09
 
-Phase 2 live gate, target VPS prep and Phase 3 service-mode loopback gates are no longer pending. The new target VPS is now in service-mode for web/bot only, with web/admin bound to `127.0.0.1:3030` and operator access through SSH tunnel only. Use `docs/NEXT_CHAT_AMN2_PHASE_3_SERVICE_MODE.ru.md` as the active Phase 3 handoff.
+Phase 2 live gate, target VPS prep and Phase 3 service-mode loopback gates are no longer pending. The new target VPS is now in service-mode for web/bot only, with web/admin bound to `127.0.0.1:3030` and operator access through SSH tunnel only. Use `docs/NEXT_CHAT_AMN2_PHASE_4_UNIFIED_PRODUCT_GATE.ru.md` as the active main-chat handoff for Phase 4. Keep `docs/NEXT_CHAT_AMN2_PHASE_3_SERVICE_MODE.ru.md` as historical service-mode evidence context.
+
+Phase 4 starts as a local/read-only unified product gate: consolidate AMN2/API, target VPS, PRVTPRO/Web Panel and KYORESUAS/API work into candidate rows and safe next slices. It does not authorize new live commands or public exposure.
 
 Still closed: HTTPS reverse proxy/public cutover, any domain/Caddy path, public API `3040`, direct public web/admin `3030`, production peer mutation beyond the two approved test peers, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent write/config mutations and backup/import/reboot routes.
 
@@ -178,13 +180,13 @@ Immediate candidates may be accepted only if they are:
 
 ## Unified Chat Opening Packet
 
-Current active opening packet for Phase 3 lives in:
+Current active opening packet for Phase 4 lives in:
 
 ```text
-docs/NEXT_CHAT_AMN2_PHASE_3_SERVICE_MODE.ru.md
+docs/NEXT_CHAT_AMN2_PHASE_4_UNIFIED_PRODUCT_GATE.ru.md
 ```
 
-Historical packet below remains as broader context.
+Historical Phase 3 packet remains broader service-mode context.
 
 When opening the future unified chat, paste this packet:
 
@@ -229,9 +231,9 @@ Decision rules:
 ## Next Action
 
 ```text
-1. Treat `bc00b77` Phase 3 evidence/runbooks as the current AMN3 checkpoint.
+1. Treat `a205daa` and the new Phase 4 packet as the latest AMN3 main-chat checkpoint; `bc00b77` remains the Phase 3 service-mode evidence checkpoint.
 2. Keep the target VPS in loopback-only service mode with SSH tunnel operator access.
-3. Convert PRVTPRO/Web Panel ideas into candidate rows before any AMN2 changes.
+3. Convert PRVTPRO/Web Panel and KYORESUAS/API ideas into candidate rows before any AMN2 changes.
 4. Prepare the next AMN2/API slice as local/read-only by default.
 5. Open a separate gate before public API, config delivery, write CRUD, Local Agent mutation, backup/import/reboot, Caddy/HTTPS or production peer writes.
 ```
