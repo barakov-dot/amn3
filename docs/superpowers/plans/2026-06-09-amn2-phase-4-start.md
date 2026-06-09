@@ -65,7 +65,7 @@ tcp_443_absent=yes
 vps_apply_enabled_false=yes
 ```
 
-## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy и P4-N003 metrics privacy
+## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy и P4-I005 token lifecycle boundary
 
 Закрыто и удалено из активного плана:
 
@@ -81,10 +81,11 @@ vps_apply_enabled_false=yes
 - `P4-I003` AMN2 local implementation.
 - `P4-I004` endpoint taxonomy / route-policy docs alignment.
 - `P4-N003` aggregate metrics privacy boundary visibility.
+- `P4-I005` API token lifecycle boundary visibility.
 
 ### Критичные
 
-Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004` и `P4-N003`.
+Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003` и `P4-I005`.
 Critical live/public/write/config candidates остаются blocked или gated by the registry.
 
 ### Важные
@@ -102,17 +103,15 @@ Critical live/public/write/config candidates остаются blocked или gat
   - SSH-tunnel private-panel GET/navigation review only.
   - No POST/write/config delivery/API token issue-revoke/sync/health/backup/import/reboot.
 
-- [ ] **Задача I3: продолжить scoped API token lifecycle boundary**
+### Средние
+
+- [ ] **Задача N4: продолжить `P4-N004` bot/admin read-only navigation labels and empty states**
 
   Scope:
 
-  - refine local token lifecycle docs/tests before any future route expansion;
-  - keep raw token one-time only, token hash private, revoke/rotate audit safe and owner status inherited;
-  - do not issue/revoke production tokens, open public API or add write/config scopes.
-
-### Средние
-
-Активных medium local-only implementation items не осталось после `P4-N003`.
+  - clarify read-only navigation labels, empty states and gated action wording in bot/admin surfaces;
+  - use local rendering/tests only unless a separate evidence pass is selected first;
+  - do not change POST behavior, issue/revoke tokens, deliver configs, sync/apply/revoke peers, open public listeners or mutate production state.
 
 ### Минимальные
 
@@ -324,4 +323,4 @@ The original startup breakdown below is retained as audit context. Use the activ
 
 ## Стартовая рекомендация
 
-Начинать с active decision `Task I3`: continue scoped API token lifecycle boundary from the latest read-only API and metrics privacy baseline. `P4-I001` запускать только если сначала нужен еще один private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.
+Начинать с active decision `Task N4`: continue `P4-N004` bot/admin read-only navigation labels and empty states from the latest read-only API, metrics privacy and token lifecycle boundary baselines. `P4-I001` запускать только если сначала нужен еще один private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.
