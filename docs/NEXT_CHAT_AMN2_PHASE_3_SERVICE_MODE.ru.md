@@ -8,13 +8,13 @@
 C:\Users\SooL\Documents\VPS-OPS-LAB
 ```
 
-Назначение нового чата: продолжить Phase 3 для нового target VPS после уже закрытых bootstrap, AWG2 runtime, live disposable peer apply/revoke и manual web/bot readiness gates. Новый чат должен владеть следующим controlled production/service-mode решением: оставаться в manual mode или запускать отдельный gate для `systemd` + HTTPS reverse proxy.
+Назначение нового чата: продолжить Phase 3 для нового target VPS после уже закрытых bootstrap, AWG2 runtime, live disposable peer apply/revoke, manual web/bot readiness и loopback-only service-mode gates. Текущий рабочий режим: web/bot systemd включены и активны, web/admin слушает только `127.0.0.1:3030`, операторский доступ только через SSH tunnel.
 
-Этот handoff не разрешает public API, public config delivery, production peer writes или service-mode без отдельного решения оператора.
+Этот handoff не разрешает public API, public config delivery, production peer writes beyond approved test peers, public/direct `3030`, Caddy/HTTPS cutover, Local Agent mutations, backup/import/reboot или API route expansion без отдельного решения оператора.
 
 ## Current Update 2026-06-09
 
-Phase 3A.1 phone live test peer gate, Phase 3A.2 test peers batch gate, Phase 3B.0 service-mode read-only precheck, Phase 3A critical manual-mode cleanup, Phase 3A protocol identity check and Phase 3A manual-runtime field test partial-pass were completed after this handoff was created. Four operator-approved test peers are intentionally left enabled for phone/desktop/test-zone validation.
+Phase 3A.1 phone live test peer gate, Phase 3A.2 test peers batch gate, Phase 3B.0/B0.1/B1 loopback service-mode gates, no-domain SSH tunnel access and web-panel read-only smokes were completed after this handoff was created. Current live state has two approved test peers left enabled for validation; `Neobyatnaya-AMNZ-3` and `Neobyatnaya-AMNZ-4` were revoked by explicit gates.
 
 ```text
 phone_live_test_peer_gate: passed
@@ -78,10 +78,11 @@ systemd_bot_active: active
 web_bind: 127.0.0.1:3030
 web_login_http: 200
 reverse_proxy_B2_1_blockers:
-  dns_a_count: 0
-  dns_aaaa_count: 0
-  dns_matches_vps_route_v4: unknown
-  VPS_APPLY_ENABLED_file_false: no
+  domain_planned: no
+  dns_a_count: not-applicable
+  dns_aaaa_count: not-applicable
+  dns_matches_vps_route_v4: not-applicable
+  VPS_APPLY_ENABLED_file_false: resolved-current-explicit-false
 no_domain_access:
   public_https_cutover: deferred
   access_path: ssh-local-port-forward
@@ -94,7 +95,7 @@ no_domain_access:
   authenticated_web_panel_smoke: passed-read-only
   authenticated_overview_pages_200: yes
 final_safety_snapshot:
-  live_peer_count: 3
+  live_peer_count: 2
   tcp_80: absent
   tcp_443: absent
   tcp_3030: present-loopback
@@ -146,7 +147,7 @@ runbook:
   docs/AMN2_SERVICE_MODE_SSH_TUNNEL_ACCESS_RUNBOOK.ru.md
 ```
 
-This update does not authorize service-mode `systemd`, HTTPS reverse proxy/public cutover, public API `3040`, direct public web/admin `3030`, production peer/user mutation beyond the four approved test peers, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent write/config mutations, backup/import/reboot routes, or secret-bearing evidence publication.
+This update authorizes only the already-proven loopback web/bot service mode and SSH-tunnel operator access. It does not authorize HTTPS reverse proxy/public cutover, Caddy/domain exposure, public API `3040`, direct public web/admin `3030`, production peer/user mutation beyond the two remaining approved test peers, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent write/config mutations, backup/import/reboot routes, or secret-bearing evidence publication.
 
 ## Текущая Точка Правды
 
@@ -216,7 +217,7 @@ web-panel tunnel smoke: passed read-only; login 200, protected GET routes redire
 second Telegram admin ID add: passed; configured admin count is 2, raw IDs not recorded, web readiness recovered to /login 200 after restart
 second admin bot read-only check: skipped by operator to save time; not recorded as independently passed
 authenticated web-panel smoke: passed read-only; overview GET pages returned 200 after login, no POST/write/config delivery
-final safety snapshot: passed; peer count 3, #3 absent, #1/#2 traffic-seen, #4 not-yet, web/bot active, 3030 loopback, 80/443/3040 absent, VPS_APPLY_ENABLED=false
+final safety snapshot: passed historically before #4 revoke; follow-up current state is peer count 2, #3/#4 absent, web/bot active, 3030 loopback, 80/443/3040 absent, VPS_APPLY_ENABLED=false
 revoke-by-number #4: passed; unused peer removed, peer count 2, #3/#4 absent from latest numbered snapshot, web/bot active, 3030 loopback, 80/443/3040 absent, VPS_APPLY_ENABLED=false
 VPS_APPLY_ENABLED: false/not-set outside narrow live gates
 ```
@@ -480,19 +481,23 @@ No outcome in Phase 3 should unlock broad write API, config delivery, production
 Что уже закрыто на новом target VPS:
 - bootstrap: partial-pass
 - AWG2 runtime: read-only-smoke-pass
-- live peer gate: verified-live for exactly one disposable test peer
+- live peer gate: verified-live for disposable peer primitive
 - manual web/bot gate: passed
-- final peer count: 0
-- direct public web 3030: closed
-- public API 3040: closed
-- service-mode systemd/reverse proxy: not-enabled
+- service-mode web/bot: enabled and active, loopback-only
+- operator access: SSH tunnel only
+- final peer count: 2 approved test peers
+- revoked peers: Neobyatnaya-AMNZ-3 and Neobyatnaya-AMNZ-4
+- direct public web 3030: closed by loopback bind
+- public API 3040: absent/closed
+- TCP 80/443: absent
+- domain/Caddy/HTTPS public cutover: deferred indefinitely
 
 Задача:
-1. Начать Phase 3 controlled service-mode/prod-readiness gate.
-2. Сначала подтвердить read-only baseline: f7f6131, AWG2 running, peer_count=0, 3030/3040 closed, bot/web secrets present without printing values, VPS_APPLY_ENABLED=false/not-set.
-3. Затем отдельно спросить решение: остаемся в manual mode или идем в service-mode gate для web/bot systemd + HTTPS reverse proxy.
-4. Если service-mode gate подтвержден, делать только loopback web/admin + controlled HTTPS reverse proxy path, с rollback и safe evidence.
-5. Не открывать public API 3040, direct public 3030, config delivery, /api/clients write CRUD, Local Agent mutations, backup/import/reboot или production peer writes без отдельного gate.
+1. Продолжать от Phase 3 service-mode loopback pass, не возвращаясь к manual/service-mode выбору как незакрытому вопросу.
+2. Держать web/admin только на `127.0.0.1:3030`, операторский доступ только через SSH tunnel.
+3. Использовать web-panel unauth/auth read-only smoke как evidence, но не как разрешение на POST/write/config delivery/token/sync.
+4. Любой public API 3040, direct public 3030, Caddy/HTTPS, config delivery, `/api/clients` write CRUD, Local Agent mutations, backup/import/reboot или production peer writes запускать только отдельным gate.
+5. Для следующего локального AMN2 slice начинать с read-only/status/UX контракта и отдельного transfer record.
 
 Не публиковать:
 - .env, servers.yml, raw tokens, Authorization headers, token hash, web password hash, session secret, private keys, PSK, peer public keys, .conf, QR, vpn://, backup contents или full logs.

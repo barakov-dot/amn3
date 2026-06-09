@@ -14,9 +14,9 @@
 
 ## Current Override 2026-06-09
 
-Phase 2 live gate and target VPS prep are no longer pending. The new target VPS has passed bootstrap, AWG2 runtime smoke, live single disposable peer apply/revoke and manual web/bot readiness gates. The next chat should use `docs/NEXT_CHAT_AMN2_PHASE_3_SERVICE_MODE.ru.md` as the active handoff for Phase 3.
+Phase 2 live gate, target VPS prep and Phase 3 service-mode loopback gates are no longer pending. The new target VPS is now in service-mode for web/bot only, with web/admin bound to `127.0.0.1:3030` and operator access through SSH tunnel only. Use `docs/NEXT_CHAT_AMN2_PHASE_3_SERVICE_MODE.ru.md` as the active Phase 3 handoff.
 
-Still closed: service-mode `systemd`, HTTPS reverse proxy/public cutover, public API `3040`, direct public web/admin `3030`, production peer mutation, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent write/config mutations and backup/import/reboot routes.
+Still closed: HTTPS reverse proxy/public cutover, any domain/Caddy path, public API `3040`, direct public web/admin `3030`, production peer mutation beyond the two approved test peers, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent write/config mutations and backup/import/reboot routes.
 
 ## Текущая Точка Правды
 
@@ -33,25 +33,31 @@ source_update_run_id: 20260607T203721Z
 api_smoke_run_id: 20260607T203730Z
 latest_repeat_api_smoke_run_id: 20260607T204300Z
 
-validation VPS mode: manual runtime
+validation VPS mode: manual runtime historical baseline
 validation VPS source overlay: do-not-touch-after-f7f6131
-target VPS mode: manual readiness passed
-target VPS live peer gate: verified-live for exactly one disposable test peer
-service mode: separate Phase 3 gate required
+target VPS mode: service-mode web/bot active, loopback-only
+target VPS operator access: SSH tunnel only
+target VPS live peer count: 2 approved test peers
+target VPS revoked peers: Neobyatnaya-AMNZ-3, Neobyatnaya-AMNZ-4
+target VPS public/direct 3030: closed by loopback bind
+target VPS public API 3040: absent/closed
+target VPS TCP 80/443: absent
+target VPS domain/Caddy/HTTPS public cutover: deferred indefinitely
+VPS_APPLY_ENABLED in target .env: false
 ```
 
 ## Chat Roles
 
 ```text
-Phase 2 live gate chat:
-  role: owner of real VPS live commands and live evidence
-  allowed: run the active approved VPS gate
-  returns: safe summary only
+Phase 2/3 live gate chats:
+  role: owners of already completed real VPS gates and safe evidence
+  allowed: keep historical context and one-copy live evidence
+  returns: safe summary only, no secrets
 
 This AMN2/API coordination chat:
-  role: integration dispatcher, status map, target-server prep, API boundary
+  role: integration dispatcher, status map, API boundary and next-slice planner
   allowed: docs/evidence/handoff, package coordination, read-only planning
-  blocked: issuing conflicting live VPS commands while Phase 2 chat is active
+  blocked: treating service-mode loopback evidence as approval for route expansion or write APIs
 
 PRVTPRO-Amnezia-Web-Panel chat:
   role: UI/web-panel candidate source
@@ -59,21 +65,21 @@ PRVTPRO-Amnezia-Web-Panel chat:
   blocked: direct promotion to production without AMN2 gate and tests
 
 Future unified chat:
-  role: single production decision room after first Phase 2 safe evidence summary
-  input: this handoff + Phase 2 safe evidence + PRVTPRO candidate summary
+  role: single production decision room after Phase 3 service-mode evidence
+  input: this handoff + Phase 3 safe evidence + PRVTPRO candidate summary
 ```
 
 ## Why Not Merge The Chats Immediately
 
-Active VPS connection is already being handled in the Phase 2 chat. Moving live commands into multiple chats can cause:
+Phase 2/3 live execution has produced the safe summaries, but live authority should still stay single-owner per gate. Moving new live commands into multiple chats can cause:
 
 - duplicate commands against one server;
 - conflicting `VPS_APPLY_ENABLED` assumptions;
 - mixed validation VPS vs target VPS evidence;
-- accidental service-mode enablement;
+- accidental route/API/write expansion from a read-only/service-mode evidence record;
 - secret-bearing output copied into the wrong context.
 
-Therefore, live execution remains in the Phase 2 chat until it returns a safe summary. The new unified chat should start after that summary is available.
+Therefore, future live execution should open as a named gate with one owner. This document is now the coordination map; it is not a standing authorization to run new live mutations.
 
 ## Required Phase 2 Safe Summary
 
@@ -125,14 +131,22 @@ evidence template: research/amn2/target-server-prep-evidence-template-2026-06-08
 evidence note: research/amn2/target-server-prep-gate-2026-06-08.md
 ```
 
-Target VPS starts as:
+Target VPS current safe mode:
 
 ```text
-runtime_mode: manual bootstrap + read-only smoke
+runtime_mode: service-mode web/bot, loopback-only
+web_admin_bind: 127.0.0.1:3030
+operator_access: SSH tunnel only
 public API 3040: no
 direct public web 3030: no
-systemd: not enabled
-reverse proxy: not production-enabled
+systemd: enabled/active for web and bot
+reverse proxy: not enabled
+domain/Caddy/HTTPS public cutover: deferred indefinitely
+live_peer_count: 2
+approved_test_peers: Neobyatnaya-AMNZ-1, Neobyatnaya-AMNZ-2
+revoked_test_peers: Neobyatnaya-AMNZ-3, Neobyatnaya-AMNZ-4
+web_panel_smoke: unauth redirect passed, authenticated read-only GET passed
+write_actions: none
 VPS_APPLY_ENABLED: false
 ```
 
@@ -192,8 +206,8 @@ Sources:
 Decision rules:
 - one chat owns live commands at a time;
 - validation VPS source overlay remains untouched after f7f6131 pass;
-- target VPS prep is a separate gate;
-- service mode requires separate approval;
+- target VPS service-mode web/bot is loopback-only and tunnel-only;
+- public/reverse-proxy/API/write work requires a separate gate;
 - PRVTPRO ideas enter as candidates, not direct production changes;
 - no secrets in chat or GitHub.
 ```
@@ -209,15 +223,15 @@ Decision rules:
 - public/self-service config delivery;
 - Local Agent clients/configs/write mutations;
 - backup/import/reboot routes;
-- service-mode `systemd`/reverse proxy on target VPS without a separate gate;
+- service-mode expansion beyond loopback web/bot and any reverse proxy/public cutover without a separate gate;
 - publishing secret-bearing evidence.
 
 ## Next Action
 
 ```text
-1. Let Phase 2 live gate chat finish or return first safe summary.
-2. Keep this chat as integration dispatcher.
-3. Prepare target VPS using target-server prep gate.
-4. Convert PRVTPRO/Web Panel ideas into candidate rows.
-5. Open unified chat only after Phase 2 summary exists.
+1. Treat `bc00b77` Phase 3 evidence/runbooks as the current AMN3 checkpoint.
+2. Keep the target VPS in loopback-only service mode with SSH tunnel operator access.
+3. Convert PRVTPRO/Web Panel ideas into candidate rows before any AMN2 changes.
+4. Prepare the next AMN2/API slice as local/read-only by default.
+5. Open a separate gate before public API, config delivery, write CRUD, Local Agent mutation, backup/import/reboot, Caddy/HTTPS or production peer writes.
 ```
