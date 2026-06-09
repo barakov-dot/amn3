@@ -495,7 +495,8 @@ secret_surface: none
 remote_write_surface: none
 test_plan: docs/link check; confirm no public docs exposure decision is implied
 required_gate: local-only
-recommendation: accept
+implementation_status: completed 2026-06-09 as AMN3 docs-only read-only API docs grouping polish; see research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md
+recommendation: completed; use as private/local read-only API navigation grouping, not as public OpenAPI/docs exposure
 ```
 
 ```text
@@ -550,7 +551,7 @@ recommendation: defer
 
 ## Completed AMN2 Local-only Slices
 
-Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design, then `P4-I003` AMN2 local implementation plan, then `P4-I003` AMN2 local implementation, then `P4-I004` endpoint taxonomy / route-policy docs alignment, then `P4-N003` aggregate metrics privacy boundary visibility, then `P4-I005` API token lifecycle boundary visibility, then `P4-N004` bot/admin read-only navigation labels and empty states, then `P4-N001` docs/status drift synchronization, then `P4-N002` protocol manager interface checklist, then `P4-X003` Russian-first operator docs polish, then `P4-X002` API/status/gate naming cleanup.
+Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design, then `P4-I003` AMN2 local implementation plan, then `P4-I003` AMN2 local implementation, then `P4-I004` endpoint taxonomy / route-policy docs alignment, then `P4-N003` aggregate metrics privacy boundary visibility, then `P4-I005` API token lifecycle boundary visibility, then `P4-N004` bot/admin read-only navigation labels and empty states, then `P4-N001` docs/status drift synchronization, then `P4-N002` protocol manager interface checklist, then `P4-X003` Russian-first operator docs polish, then `P4-X002` API/status/gate naming cleanup, then `P4-X001` read-only API docs grouping polish.
 
 Completed slice name:
 
@@ -586,8 +587,9 @@ Implemented safe scope:
 - `P4-N002` protocol manager interface checklist was completed as AMN3 docs-only evidence in `research/amn2/phase-4-protocol-manager-interface-checklist-2026-06-09.md`; it converts PRVTPRO manager ideas and AMN2 remote-operation/export contracts into capability/gate/test checklist language without authorizing implementation.
 - `P4-X003` Russian-first operator docs polish was completed as AMN3 docs-only evidence in `research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md`; it makes active operator handoff/status/plan headings and copy-paste next-chat wording Russian-first without changing gates or behavior.
 - `P4-X002` API/status/gate naming cleanup was completed as AMN3 docs-only evidence in `research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md`; it defines active meanings for service-mode, local-only, read-only, gate classes, public exposure and config delivery without changing routes, gates or behavior.
+- `P4-X001` read-only API docs grouping polish was completed as AMN3 docs-only evidence in `research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md`; it groups the existing six private/local read-only routes into server inventory/status, integration/service boundary, Local Agent runtime summary and aggregate metrics without public OpenAPI/docs exposure, route expansion or behavior changes.
 
-Next decision: continue `P4-X001` OpenAPI/docs grouping polish for existing read-only routes, or run `P4-I001` only if more private-panel UX evidence is needed first.
+Next decision: run `P4-I001` only if more private-panel page-level UX evidence is needed; otherwise pause default local-only implementation and require a separate named gate/decision before VPS/live/public/write/config work.
 
 ## Source Notes
 

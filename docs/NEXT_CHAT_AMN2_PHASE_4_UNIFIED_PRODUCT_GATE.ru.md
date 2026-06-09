@@ -63,6 +63,19 @@ Phase 4 is the unified product/planning gate after the service-mode loopback pas
 - keep live mutations and public exposure behind separate named gates;
 - keep the main chat from issuing ad hoc commands against the VPS.
 
+## Текущая private/local read-only API grouping
+
+P4-X001 closed the docs grouping polish for the existing six private/local read-only routes. This is documentation/navigation only, not public OpenAPI/docs exposure and not route expansion.
+
+| Group | Route | Scope | Boundary |
+| --- | --- | --- | --- |
+| Server inventory/status | `GET /api/servers` | `server:read` | server list/status metadata only |
+| Server inventory/status | `GET /api/servers/{server_name}/summary` | `server:read` | aggregate server/user/device summary only |
+| Integration/service boundary | `GET /api/integration/status` | `server:read` | service-mode/read-only/API/token-boundary status only |
+| Local Agent runtime summary | `GET /api/local-agent/runtime/summary` | `server:read` | controller-safe Local Agent runtime summary only |
+| Aggregate metrics | `GET /api/metrics/summary` | `metrics:read` | aggregate metrics only, no peer/user detail leakage |
+| Aggregate metrics | `GET /api/users/summary` | `metrics:read` | aggregate user/device counts only |
+
 ## Что Phase 4 не разрешает
 
 Phase 4 does not authorize:
@@ -223,8 +236,9 @@ go_no_go_decision:
 14. Treat `P4-N002` protocol manager interface checklist as completed; evidence: `research/amn2/phase-4-protocol-manager-interface-checklist-2026-06-09.md`.
 15. Treat `P4-X003` Russian-first operator docs polish as completed; evidence: `research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md`.
 16. Treat `P4-X002` API/status/gate naming cleanup as completed; evidence: `research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md`.
-17. Decide whether to continue `P4-X001` OpenAPI/docs grouping polish, or run another read-only UX pass first.
-18. If a live action is proposed, stop and create a separate gate first.
+17. Treat `P4-X001` read-only API docs grouping polish as completed; evidence: `research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md`.
+18. Decide whether `P4-I001` second read-only UX pass is still needed for page-level evidence; otherwise pause default local-only implementation.
+19. If a live/public/write/config action is proposed, stop and create a separate named gate first.
 
 ## Сообщение для копирования в основной чат
 
@@ -308,7 +322,18 @@ go_no_go_decision:
 Закрытый P4-X002 API/status/gate naming cleanup:
 - research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md
 
+Закрытый P4-X001 read-only API docs grouping polish:
+- research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md
+
+Текущая private/local read-only API grouping:
+- Server inventory/status: GET /api/servers, GET /api/servers/{server_name}/summary.
+- Integration/service boundary: GET /api/integration/status.
+- Local Agent runtime summary: GET /api/local-agent/runtime/summary.
+- Aggregate metrics: GET /api/metrics/summary, GET /api/users/summary.
+- Scope split: server:read for server/integration/local-agent summary, metrics:read for aggregate metrics/users summary.
+- This does not authorize public OpenAPI/docs exposure, route expansion, config delivery or write routes.
+
 Следующее решение:
 - P4-I001 second read-only UX pass только если нужны дополнительные page-level evidence;
-- otherwise continue P4-X001 OpenAPI/docs grouping polish for existing read-only routes.
+- otherwise pause default local-only implementation and require a separate named gate/decision before VPS/live/public/write/config work.
 ```

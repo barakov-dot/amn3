@@ -6,8 +6,8 @@ Phase 4 main-chat handoff is now prepared:
 entrypoint: docs/NEXT_CHAT_AMN2_PHASE_4_UNIFIED_PRODUCT_GATE.ru.md
 research note: research/amn2/phase-4-unified-product-gate-handoff-2026-06-09.md
 AMN3 Phase 4 coordination checkpoint before P4-N001 sync: 113c5ed Record Phase 4 bot admin read-only labels
-Phase 4 completed local/default sequence: P4-C009, P4-I002, route/secret gate planning, P4-I003 design/plan/implementation, P4-I004, P4-N003, P4-I005, P4-N004, P4-N001 docs/status sync, P4-N002 protocol manager interface checklist, P4-X003 Russian-first operator docs polish, P4-X002 API/status/gate naming cleanup
-Phase 4 next recommended local-only slice: P4-X001 OpenAPI/docs grouping polish for existing read-only routes
+Phase 4 completed local/default sequence: P4-C009, P4-I002, route/secret gate planning, P4-I003 design/plan/implementation, P4-I004, P4-N003, P4-I005, P4-N004, P4-N001 docs/status sync, P4-N002 protocol manager interface checklist, P4-X003 Russian-first operator docs polish, P4-X002 API/status/gate naming cleanup, P4-X001 read-only API docs grouping polish
+Phase 4 next default decision: P4-I001 only if more private-panel page-level UX evidence is needed; otherwise pause default local-only implementation and require a separate named gate/decision before VPS/live/public/write/config work
 AMN2 source-overlay/package head: f7f6131 Update integration status for c92 manual prelaunch
 target VPS mode: service-mode web/bot active, loopback-only
 operator access: SSH local port forward to 127.0.0.1:3030, external browser only
@@ -21,6 +21,8 @@ revoked test peers: Neobyatnaya-AMNZ-3, Neobyatnaya-AMNZ-4
 ```
 
 Use Phase 4 as the unified product/API planning gate. Do not reopen Phase 3 service-mode loopback as pending. Do not run live VPS commands from the main chat by default. PRVTPRO/Web Panel and KYORESUAS/API outputs enter as candidate rows first; any public API, direct public web/admin, HTTPS reverse proxy, config delivery, write CRUD, Local Agent mutation, backup/import/reboot or production peer mutation requires a separate named gate. `P4-I001` remains available only if another private-panel read-only UX evidence pass is needed before the next design/docs slice.
+
+Current private/local read-only API grouping after `P4-X001`: server inventory/status (`GET /api/servers`, `GET /api/servers/{server_name}/summary`), integration/service boundary (`GET /api/integration/status`), Local Agent runtime summary (`GET /api/local-agent/runtime/summary`) and aggregate metrics (`GET /api/metrics/summary`, `GET /api/users/summary`). This is docs/navigation grouping only; it does not authorize public OpenAPI/docs exposure, route expansion, config delivery or write routes.
 
 # Historical Override 2026-06-07
 

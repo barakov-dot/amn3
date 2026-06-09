@@ -50,6 +50,19 @@ web_panel_ux_review: passed-minimal-safe-summary
 - `public exposure`: public API `3040`, direct public web/admin `3030`, domain/Caddy/HTTPS cutover, public docs/metrics exposure.
 - `config delivery`: `.conf`, QR, `vpn://`, generated config archives, share/download links and any secret-bearing config output.
 
+## Текущая private/local read-only API grouping
+
+`P4-X001` closed the operator docs grouping for the existing six private/local read-only routes. This is only a docs/navigation grouping; it does not authorize public OpenAPI/docs exposure, public API `3040`, direct public web/admin `3030`, route expansion, config delivery, write routes or Local Agent mutations.
+
+| Group | Route | Scope | Boundary |
+| --- | --- | --- | --- |
+| Server inventory/status | `GET /api/servers` | `server:read` | server list/status metadata only |
+| Server inventory/status | `GET /api/servers/{server_name}/summary` | `server:read` | aggregate server/user/device summary only |
+| Integration/service boundary | `GET /api/integration/status` | `server:read` | service-mode/read-only/API/token-boundary status only |
+| Local Agent runtime summary | `GET /api/local-agent/runtime/summary` | `server:read` | controller-safe Local Agent runtime summary only |
+| Aggregate metrics | `GET /api/metrics/summary` | `metrics:read` | aggregate metrics only, no peer/user detail leakage |
+| Aggregate metrics | `GET /api/users/summary` | `metrics:read` | aggregate user/device counts only |
+
 ## Назначение Phase 4
 
 Phase 4 gathers the parallel workstreams into one decision map:
@@ -102,11 +115,12 @@ It is a planning and transfer gate, not a permission to run new live commands.
 12. `P4-N002` protocol manager interface checklist; evidence: `research/amn2/phase-4-protocol-manager-interface-checklist-2026-06-09.md`.
 13. `P4-X003` Russian-first operator docs polish; evidence: `research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md`.
 14. `P4-X002` API/status/gate naming cleanup; evidence: `research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md`.
+15. `P4-X001` read-only API docs grouping polish; evidence: `research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md`.
 
-Продолжать Phase 4 с:
+Оставшееся default-mode решение:
 
-1. `P4-X001` OpenAPI/docs grouping polish for existing read-only routes;
-2. `P4-I001` detailed read-only web-panel UX pass only if more page-level evidence is needed.
+1. `P4-I001` detailed read-only web-panel UX pass only if more page-level evidence is needed;
+2. otherwise pause default local-only implementation and require a separate named gate/decision before VPS/live/public/write/config work.
 
 If the selected slice requires live VPS state changes, stop and create a separate named gate first.
 
@@ -130,6 +144,7 @@ research/amn2/phase-4-api-token-lifecycle-boundary-implementation-2026-06-09.md
 research/amn2/phase-4-bot-admin-read-only-labels-implementation-2026-06-09.md
 research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md
 research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md
+research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md
 research/amn2/target-server-service-mode-authenticated-web-panel-smoke-evidence-2026-06-09.md
 research/amn2/target-server-revoke-by-number-4-evidence-2026-06-09.md
 research/amn2/target-server-service-mode-ssh-tunnel-access-evidence-2026-06-09.md

@@ -65,7 +65,7 @@ tcp_443_absent=yes
 vps_apply_enabled_false=yes
 ```
 
-## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy, P4-I005 token lifecycle boundary, P4-N004 bot/admin read-only labels, P4-N001 docs/status drift synchronization, P4-N002 protocol manager interface checklist, P4-X003 Russian-first operator docs polish и P4-X002 API/status/gate naming cleanup
+## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy, P4-I005 token lifecycle boundary, P4-N004 bot/admin read-only labels, P4-N001 docs/status drift synchronization, P4-N002 protocol manager interface checklist, P4-X003 Russian-first operator docs polish, P4-X002 API/status/gate naming cleanup и P4-X001 read-only API docs grouping polish
 
 Закрыто и удалено из активного плана:
 
@@ -87,10 +87,11 @@ vps_apply_enabled_false=yes
 - `P4-N002` protocol manager interface checklist.
 - `P4-X003` Russian-first operator docs polish.
 - `P4-X002` API/status/gate naming cleanup.
+- `P4-X001` read-only API docs grouping polish.
 
 ### Критичные
 
-Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003`, `P4-I005`, `P4-N004`, `P4-N001`, `P4-N002`, `P4-X003` и `P4-X002`.
+Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003`, `P4-I005`, `P4-N004`, `P4-N001`, `P4-N002`, `P4-X003`, `P4-X002` и `P4-X001`.
 Critical live/public/write/config candidates остаются blocked или gated by the registry.
 
 ### Важные
@@ -126,8 +127,9 @@ Critical live/public/write/config candidates остаются blocked или gat
 
 ### Косметические
 
-- [ ] **Задача X1: продолжить `P4-X001` OpenAPI/docs grouping polish for existing read-only routes**
-- [ ] **Задача X2: полировать operator docs links без авторизации live VPS work**
+Активных cosmetic implementation items не осталось после `P4-X001`, `P4-X002` и `P4-X003`.
+`P4-X004` i18n/RTL remains blocked/deferred by the registry.
+Operator docs link cleanup stays allowed only as minimal maintenance and must not authorize live VPS work.
 
 ## Исходная стартовая разбивка
 
@@ -329,4 +331,4 @@ Critical live/public/write/config candidates остаются blocked или gat
 
 ## Стартовая рекомендация
 
-Начинать с `P4-X001` OpenAPI/docs grouping polish for existing read-only routes after the API/status/gate naming cleanup, unless the operator first wants `P4-I001` for another private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.
+После закрытия `P4-X001` запускать `P4-I001` только если оператору нужны дополнительные private-panel page-level UX evidence. Если такой evidence pass не нужен, default local-only implementation queue фактически исчерпана; следующий шаг должен быть отдельным named gate/decision перед VPS/live/public/write/config work. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.
