@@ -78,11 +78,12 @@ Completed first local-only slice:
 1. `P4-C009` web-panel user/config visibility; evidence: `research/amn2/phase-4-web-panel-user-config-visibility-implementation-2026-06-09.md`.
 2. `P4-I002` service-mode/read-only status wording; evidence: `research/amn2/phase-4-service-mode-status-wording-implementation-2026-06-09.md`.
 3. route/secret gate planning; evidence: `research/amn2/phase-4-route-secret-gate-plan-2026-06-09.md`.
+4. `P4-I003` read-only API/status schema maturity design; evidence: `research/amn2/phase-4-read-only-api-status-design-2026-06-09.md`.
 
 Continue Phase 4 with:
 
-1. `P4-I001` detailed read-only web-panel UX pass only if more page-level evidence is needed;
-2. one candidate-specific API expansion design against the route/secret gate plan.
+1. AMN2 local implementation plan for `P4-I003` schema/docs/tests only;
+2. `P4-I001` detailed read-only web-panel UX pass only if more page-level evidence is needed.
 
 If the selected slice requires live VPS state changes, stop and create a separate named gate first.
 
@@ -97,6 +98,7 @@ research/amn2/service-mode-web-panel-read-only-ux-review-evidence-2026-06-09.md
 research/amn2/phase-4-web-panel-user-config-visibility-implementation-2026-06-09.md
 research/amn2/phase-4-service-mode-status-wording-implementation-2026-06-09.md
 research/amn2/phase-4-route-secret-gate-plan-2026-06-09.md
+research/amn2/phase-4-read-only-api-status-design-2026-06-09.md
 research/amn2/target-server-service-mode-authenticated-web-panel-smoke-evidence-2026-06-09.md
 research/amn2/target-server-revoke-by-number-4-evidence-2026-06-09.md
 research/amn2/target-server-service-mode-ssh-tunnel-access-evidence-2026-06-09.md

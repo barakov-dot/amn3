@@ -258,7 +258,8 @@ secret_surface: aggregate metadata only
 remote_write_surface: none
 test_plan: local API tests for `server:read`/`metrics:read`, safe audit and no secret-bearing fields
 required_gate: local-only
-recommendation: accept
+design_status: candidate-specific design prepared 2026-06-09; see research/amn2/phase-4-read-only-api-status-design-2026-06-09.md
+recommendation: design-prepared; next AMN2 slice should be local docs/tests only, with no new routes
 ```
 
 ```text
@@ -539,7 +540,7 @@ recommendation: defer
 
 ## Completed AMN2 Local-only Slices
 
-Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning.
+Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design.
 
 Completed slice name:
 
@@ -564,8 +565,9 @@ Implemented safe scope:
 - No DB/live backfill, sync, apply/revoke, config delivery or token work was performed.
 - `P4-I002` implemented the service-mode/read-only status wording on `/integration-status`.
 - Route/secret gate planning consolidated existing route/auth, secret inventory, token lifecycle, config delivery policy, manager export and backup/import policy baselines into `research/amn2/phase-4-route-secret-gate-plan-2026-06-09.md`.
+- `P4-I003` prepared a candidate-specific read-only API/status schema maturity design in `research/amn2/phase-4-read-only-api-status-design-2026-06-09.md`; no AMN2 code or runtime route changed.
 
-Next decision: choose a specific future route-expansion candidate and write its design against the route/secret gate plan, or run `P4-I001` if more private-panel UX evidence is needed first.
+Next decision: prepare the AMN2 local implementation plan for `P4-I003` schema/docs/tests, or run `P4-I001` if more private-panel UX evidence is needed first.
 
 ## Source Notes
 
