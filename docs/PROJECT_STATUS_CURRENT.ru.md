@@ -88,7 +88,9 @@ Target VPS AWG2 runtime gate 2026-06-09 is now `read-only-smoke-pass`: `amnezia-
 
 Target VPS live peer gate 2026-06-09 is now `verified-live`: exactly one disposable test peer passed dry-run apply/revoke, live apply/sync/revoke/sync, ended with peer count `0`, and post-gate read-only API loopback smoke passed with `run_id=20260609T045546Z`, `checked_routes=6`. Evidence: `research/amn2/target-server-live-peer-gate-evidence-2026-06-09.md`.
 
-Next gate: keep the new target VPS as verified for the remote peer apply/revoke primitive and choose the next layer deliberately: manual web/admin + bot runtime check, or a separate service-mode gate if `systemd`/reverse proxy deployment is desired. This still does not unlock public API `3040`, direct public web/admin `3030`, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent mutations, backup/import/reboot, or production peer operations.
+Target VPS manual web/bot gate 2026-06-09 is now `passed`: Telegram bot token is present on the VPS and `bot check-network` passed for `@NeobyatnayaAMNZ_bot`; web admin password hash and session secret are present; a temporary manual web/admin process returned `/login` HTTP `200` on `127.0.0.1:3030`, then was stopped. Final snapshot: AWG2 container running, peer count `0`, TCP `3030` absent, TCP `3040` absent. Evidence: `research/amn2/target-server-manual-web-bot-evidence-2026-06-09.md`.
+
+Next gate: keep the new target VPS as verified for the remote peer apply/revoke primitive and manual web/bot readiness, then choose the next layer deliberately: stay in manual runtime mode for product/API work, or run a separate service-mode gate if `systemd`/HTTPS reverse proxy deployment is desired. This still does not unlock public API `3040`, direct public web/admin `3030`, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent mutations, backup/import/reboot, or production peer operations.
 
 # Historical Override 2026-06-06
 

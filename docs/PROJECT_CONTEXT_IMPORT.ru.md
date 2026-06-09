@@ -58,7 +58,9 @@ Target VPS AWG2 runtime gate 2026-06-09 is now `read-only-smoke-pass`: `amnezia-
 
 Target VPS live peer gate 2026-06-09 is now `verified-live`: exactly one disposable test peer passed dry-run apply/revoke, live apply/sync/revoke/sync, ended with peer count `0`, and post-gate read-only API loopback smoke passed with `run_id=20260609T045546Z`, `checked_routes=6`. Evidence: `research/amn2/target-server-live-peer-gate-evidence-2026-06-09.md`.
 
-Next gate is manual web/admin + bot runtime check on the new target VPS, or a separate service-mode gate only if `systemd`/reverse proxy deployment becomes required. For consolidating AMN2/API, Phase 2 live gate and PRVTPRO/Web Panel work, use `docs/AMN_UNIFIED_PROD_GATE_HANDOFF.ru.md` and `research/amn2/unified-prod-gate-handoff-2026-06-08.md`; production peer commands and broader write surfaces still require dedicated gates and safe summaries.
+Target VPS manual web/bot gate 2026-06-09 is now `passed`: bot network readiness passed for `@NeobyatnayaAMNZ_bot`, web admin password/session secret are present, temporary manual web/admin `/login` returned HTTP `200` on loopback `127.0.0.1:3030`, and cleanup left TCP `3030`/`3040` absent with AWG2 running and peer count `0`. Evidence: `research/amn2/target-server-manual-web-bot-evidence-2026-06-09.md`.
+
+Next gate is either staying in manual runtime mode for product/API work, or a separate service-mode gate only if `systemd`/HTTPS reverse proxy deployment becomes required. For consolidating AMN2/API, Phase 2 live gate and PRVTPRO/Web Panel work, use `docs/AMN_UNIFIED_PROD_GATE_HANDOFF.ru.md` and `research/amn2/unified-prod-gate-handoff-2026-06-08.md`; production peer commands and broader write surfaces still require dedicated gates and safe summaries.
 
 # Historical Override 2026-06-06
 
