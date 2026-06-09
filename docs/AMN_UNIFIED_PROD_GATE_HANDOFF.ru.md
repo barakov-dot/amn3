@@ -12,6 +12,12 @@
 
 Этот документ не переносит live-команды в новый чат. Он задает порядок объединения, чтобы не было трех источников команд для одного VPS.
 
+## Current Override 2026-06-09
+
+Phase 2 live gate and target VPS prep are no longer pending. The new target VPS has passed bootstrap, AWG2 runtime smoke, live single disposable peer apply/revoke and manual web/bot readiness gates. The next chat should use `docs/NEXT_CHAT_AMN2_PHASE_3_SERVICE_MODE.ru.md` as the active handoff for Phase 3.
+
+Still closed: service-mode `systemd`, HTTPS reverse proxy/public cutover, public API `3040`, direct public web/admin `3030`, production peer mutation, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent write/config mutations and backup/import/reboot routes.
+
 ## Текущая Точка Правды
 
 ```text
@@ -29,8 +35,9 @@ latest_repeat_api_smoke_run_id: 20260607T204300Z
 
 validation VPS mode: manual runtime
 validation VPS source overlay: do-not-touch-after-f7f6131
-target VPS mode before approval: target-server-prep-gate only
-service mode: separate gate required
+target VPS mode: manual readiness passed
+target VPS live peer gate: verified-live for exactly one disposable test peer
+service mode: separate Phase 3 gate required
 ```
 
 ## Chat Roles
@@ -156,6 +163,14 @@ Immediate candidates may be accepted only if they are:
 - covered by local tests and later VPS smoke if route/runtime changes.
 
 ## Unified Chat Opening Packet
+
+Current active opening packet for Phase 3 lives in:
+
+```text
+docs/NEXT_CHAT_AMN2_PHASE_3_SERVICE_MODE.ru.md
+```
+
+Historical packet below remains as broader context.
 
 When opening the future unified chat, paste this packet:
 
