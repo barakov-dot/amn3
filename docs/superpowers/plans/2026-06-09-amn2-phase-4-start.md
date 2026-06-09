@@ -65,7 +65,7 @@ tcp_443_absent=yes
 vps_apply_enabled_false=yes
 ```
 
-## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy, P4-I005 token lifecycle boundary, P4-N004 bot/admin read-only labels, P4-N001 docs/status drift synchronization и P4-N002 protocol manager interface checklist
+## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy, P4-I005 token lifecycle boundary, P4-N004 bot/admin read-only labels, P4-N001 docs/status drift synchronization, P4-N002 protocol manager interface checklist и P4-X003 Russian-first operator docs polish
 
 Закрыто и удалено из активного плана:
 
@@ -85,10 +85,11 @@ vps_apply_enabled_false=yes
 - `P4-N004` bot/admin read-only navigation labels and empty states.
 - `P4-N001` docs/status drift synchronization.
 - `P4-N002` protocol manager interface checklist.
+- `P4-X003` Russian-first operator docs polish.
 
 ### Критичные
 
-Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003`, `P4-I005`, `P4-N004`, `P4-N001` и `P4-N002`.
+Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003`, `P4-I005`, `P4-N004`, `P4-N001`, `P4-N002` и `P4-X003`.
 Critical live/public/write/config candidates остаются blocked или gated by the registry.
 
 ### Важные
@@ -125,7 +126,8 @@ Critical live/public/write/config candidates остаются blocked или gat
 ### Косметические
 
 - [ ] **Задача X1: полировать naming только после стабилизации behavior**
-- [ ] **Задача X2: полировать operator docs links без авторизации live VPS work**
+- [ ] **Задача X2: продолжить `P4-X002` naming cleanup for API/status/gate terms**
+- [ ] **Задача X3: полировать operator docs links без авторизации live VPS work**
 
 ## Исходная стартовая разбивка
 
@@ -327,4 +329,4 @@ Critical live/public/write/config candidates остаются blocked или gat
 
 ## Стартовая рекомендация
 
-Начинать с `P4-X003` Russian-first operator docs polish after the protocol manager interface checklist, unless the operator first wants `P4-I001` for another private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.
+Начинать с `P4-X002` naming cleanup for API/status/gate terms after the Russian-first operator docs polish, unless the operator first wants `P4-I001` for another private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.

@@ -1,10 +1,10 @@
-# Phase 4 Unified Product Gate Handoff 2026-06-09
+# Phase 4 Unified Product Gate: handoff 2026-06-09
 
 Дата: 2026-06-09.
 
 Назначение: зафиксировать переход основного AMN coordination-чата из Phase 3 service-mode loopback work в Phase 4 unified product/API planning.
 
-## Decision
+## Решение
 
 ```text
 decision: phase4-ready
@@ -16,7 +16,7 @@ production_write_authorized: no
 public_exposure_authorized: no
 ```
 
-## Baseline Accepted By Phase 4
+## Baseline, принятый Phase 4
 
 ```text
 AMN2 source-overlay/package head: f7f6131
@@ -37,7 +37,7 @@ revoked_test_peers: Neobyatnaya-AMNZ-3, Neobyatnaya-AMNZ-4
 web_panel_ux_review: passed-minimal-safe-summary
 ```
 
-## Phase 4 Purpose
+## Назначение Phase 4
 
 Phase 4 gathers the parallel workstreams into one decision map:
 
@@ -49,7 +49,7 @@ Phase 4 gathers the parallel workstreams into one decision map:
 
 It is a planning and transfer gate, not a permission to run new live commands.
 
-## Allowed Next Work
+## Разрешенная следующая работа
 
 - AMN3 docs/status/backlog consolidation.
 - Read-only web-panel UX/product notes through the existing SSH tunnel.
@@ -57,7 +57,7 @@ It is a planning and transfer gate, not a permission to run new live commands.
 - Local/read-only `amn2` plans and tests.
 - Separate gate design for future live/public/write changes.
 
-## Still Closed
+## Всё еще закрыто
 
 - `VPS_APPLY_ENABLED=true`;
 - public API `3040`;
@@ -71,9 +71,9 @@ It is a planning and transfer gate, not a permission to run new live commands.
 - backup/import/reboot routes;
 - secret-bearing evidence publication.
 
-## Next Recommended Slice
+## Закрытые и следующие slices
 
-Completed first local-only slice:
+Закрытые slices:
 
 1. `P4-C009` web-panel user/config visibility; evidence: `research/amn2/phase-4-web-panel-user-config-visibility-implementation-2026-06-09.md`.
 2. `P4-I002` service-mode/read-only status wording; evidence: `research/amn2/phase-4-service-mode-status-wording-implementation-2026-06-09.md`.
@@ -87,15 +87,16 @@ Completed first local-only slice:
 10. `P4-N004` bot/admin read-only labels; evidence: `research/amn2/phase-4-bot-admin-read-only-labels-implementation-2026-06-09.md`.
 11. `P4-N001` docs/status drift synchronization; evidence: `research/amn2/phase-4-docs-status-drift-sync-2026-06-09.md`.
 12. `P4-N002` protocol manager interface checklist; evidence: `research/amn2/phase-4-protocol-manager-interface-checklist-2026-06-09.md`.
+13. `P4-X003` Russian-first operator docs polish; evidence: `research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md`.
 
-Continue Phase 4 with:
+Продолжать Phase 4 с:
 
-1. `P4-X003` Russian-first operator docs polish;
+1. `P4-X002` naming cleanup for API/status/gate terms;
 2. `P4-I001` detailed read-only web-panel UX pass only if more page-level evidence is needed.
 
 If the selected slice requires live VPS state changes, stop and create a separate named gate first.
 
-## Evidence Links
+## Evidence links
 
 ```text
 docs/NEXT_CHAT_AMN2_PHASE_4_UNIFIED_PRODUCT_GATE.ru.md
@@ -113,11 +114,12 @@ research/amn2/phase-4-endpoint-taxonomy-route-policy-docs-implementation-2026-06
 research/amn2/phase-4-aggregate-metrics-privacy-boundary-implementation-2026-06-09.md
 research/amn2/phase-4-api-token-lifecycle-boundary-implementation-2026-06-09.md
 research/amn2/phase-4-bot-admin-read-only-labels-implementation-2026-06-09.md
+research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md
 research/amn2/target-server-service-mode-authenticated-web-panel-smoke-evidence-2026-06-09.md
 research/amn2/target-server-revoke-by-number-4-evidence-2026-06-09.md
 research/amn2/target-server-service-mode-ssh-tunnel-access-evidence-2026-06-09.md
 ```
 
-## Secret Handling
+## Обращение с секретами
 
 No `.env`, raw `servers.yml`, raw tokens, Authorization headers, token hashes, web password hash, session secret, private keys, PSK, peer public keys, client configs, QR payloads, `vpn://`, backup contents, public endpoint values, session cookies or full logs are included in this handoff.

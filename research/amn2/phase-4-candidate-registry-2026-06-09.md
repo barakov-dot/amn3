@@ -527,7 +527,8 @@ secret_surface: none
 remote_write_surface: none
 test_plan: link/path review and stale baseline scan
 required_gate: local-only
-recommendation: accept
+implementation_status: completed 2026-06-09 as AMN3 docs-only Russian-first operator handoff/status polish; see research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md
+recommendation: completed; use as Russian-first operator handoff baseline
 ```
 
 ```text
@@ -548,7 +549,7 @@ recommendation: defer
 
 ## Completed AMN2 Local-only Slices
 
-Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design, then `P4-I003` AMN2 local implementation plan, then `P4-I003` AMN2 local implementation, then `P4-I004` endpoint taxonomy / route-policy docs alignment, then `P4-N003` aggregate metrics privacy boundary visibility, then `P4-I005` API token lifecycle boundary visibility, then `P4-N004` bot/admin read-only navigation labels and empty states, then `P4-N001` docs/status drift synchronization, then `P4-N002` protocol manager interface checklist.
+Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design, then `P4-I003` AMN2 local implementation plan, then `P4-I003` AMN2 local implementation, then `P4-I004` endpoint taxonomy / route-policy docs alignment, then `P4-N003` aggregate metrics privacy boundary visibility, then `P4-I005` API token lifecycle boundary visibility, then `P4-N004` bot/admin read-only navigation labels and empty states, then `P4-N001` docs/status drift synchronization, then `P4-N002` protocol manager interface checklist, then `P4-X003` Russian-first operator docs polish.
 
 Completed slice name:
 
@@ -582,8 +583,9 @@ Implemented safe scope:
 - `P4-N004` bot/admin read-only navigation labels and empty states was completed in branch `codex/phase-4-bot-admin-read-only-labels`, commit `c9829b7`; it adds service-mode/gated boundary labels to web admin navigation, local/live inventory empty-state wording and bot admin aggregate/local list labels without changing callbacks, routes or POST behavior.
 - `P4-N001` docs/status drift synchronization was completed as AMN3 docs-only evidence in `research/amn2/phase-4-docs-status-drift-sync-2026-06-09.md`; it aligned active registry/status/handoff/next-chat/plan docs after `P4-N004` and classified older next-step recommendations as historical evidence.
 - `P4-N002` protocol manager interface checklist was completed as AMN3 docs-only evidence in `research/amn2/phase-4-protocol-manager-interface-checklist-2026-06-09.md`; it converts PRVTPRO manager ideas and AMN2 remote-operation/export contracts into capability/gate/test checklist language without authorizing implementation.
+- `P4-X003` Russian-first operator docs polish was completed as AMN3 docs-only evidence in `research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md`; it makes active operator handoff/status/plan headings and copy-paste next-chat wording Russian-first without changing gates or behavior.
 
-Next decision: continue `P4-X003` Russian-first operator docs polish, or run `P4-I001` only if more private-panel UX evidence is needed first.
+Next decision: continue `P4-X002` naming cleanup for API/status/gate terms, or run `P4-I001` only if more private-panel UX evidence is needed first.
 
 ## Source Notes
 
