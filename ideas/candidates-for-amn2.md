@@ -16,6 +16,8 @@
 
 Статус лицензии: GPL-3.0, только самостоятельная реализация идей.
 
+Актуализация 2026-06-09: после AMN2 target VPS Phase 3 service-mode evidence `bc00b77` текущая web/admin модель - приватная панель через SSH local port forward к `127.0.0.1:3030`, без публичного домена, без HTTPS reverse proxy/public cutover, без public API `3040` и при `VPS_APPLY_ENABLED=false`. Поэтому PRVTPRO-кандидаты ниже рассматривать сначала как read-only UX/product improvements для operator panel. Идеи, требующие public exposure, raw config delivery, backup/import/reboot, direct server management или destructive write actions, остаются заблокированными до отдельного explicit gate.
+
 ### API tokens для интеграций
 
 - Идея: токены для внешних интеграций, где raw token показывается один раз, а в хранилище лежит только hash.

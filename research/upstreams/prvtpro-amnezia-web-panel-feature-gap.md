@@ -8,6 +8,28 @@
 - License verdict: GPL-3.0, режим `research-only`.
 - Важное ограничение: текущий код `amn2` в этом репозитории отсутствует, поэтому финальные verdict-ы требуют отдельного review в репозитории `amn2`.
 
+## Актуализация AMN2 Phase 3 Service Mode
+
+Дата: 2026-06-09.
+
+AMN3 evidence commit: `bc00b77 Record Phase 3 service mode evidence`.
+
+Текущая проверенная модель AMN2 target VPS:
+
+- публичный домен не планируется;
+- HTTPS reverse proxy/public cutover не выполняется;
+- admin web доступ приватный через SSH local port forward к `127.0.0.1:3030`;
+- Codex/browser preview не является access path, использовать внешний браузер через tunnel;
+- `amneziya-web` и `amneziya-bot` active/enabled;
+- `/login` по loopback возвращает `200`;
+- TCP `3030` present-loopback only;
+- TCP `3040`, `80`, `443` absent;
+- `VPS_APPLY_ENABLED=false`;
+- authenticated read-only navigation по overview pages прошла;
+- destructive/admin write actions не тестировались.
+
+Вывод для PRVTPRO/Web Panel идей: сейчас брать только UX/product review и safe read-only improvements для приватной operator panel. Не переносить предположения о public panel exposure, HTTPS domain access, direct server management, backup/import/reboot, raw config delivery или destructive operations без нового explicit gate.
+
 ## Как читать таблицу
 
 Статусы:

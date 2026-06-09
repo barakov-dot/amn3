@@ -4,6 +4,8 @@
 
 Актуализация 2026-06-02: API integration уже перешла из plan stage в активную собственную ветку `amn2/codex/read-only-api-route-shell`, head `2010d60`. Следующий gate - real VPS loopback API smoke, а не новый параллельный implementation plan.
 
+Актуализация 2026-06-09: AMN2 target VPS Phase 3 service-mode зафиксирован в AMN3 commit `bc00b77`. Текущий web/admin access path - приватный SSH local port forward к loopback `127.0.0.1:3030`; публичный домен, HTTPS reverse proxy/public cutover, TCP `80/443`, public API `3040` и direct public web `3030` не используются. Для PRVTPRO/Web Panel направления ближайший фокус - read-only UX/product review и безопасные обзорные улучшения, без destructive/admin write assumptions.
+
 Backlog не является списком задач к немедленной реализации. Любая идея переходит в `amn2` только после transfer gate:
 
 - лицензия и отсутствие копирования внешнего кода;

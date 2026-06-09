@@ -42,6 +42,8 @@ Docker-сценарий простой: официальный образ `prvtp
 
 ## Полезные идеи для `amn2`
 
+Актуализация 2026-06-09 после AMN2 target VPS Phase 3 service-mode: текущая рабочая модель `amn2` - не публичная web-панель. `amneziya-web` и `amneziya-bot` работают как `systemd` services, web/admin слушает `127.0.0.1:3030`, API `3040` отсутствует, `80/443` отсутствуют, `VPS_APPLY_ENABLED=false`, а доступ к панели выполняется приватно через SSH local port forward в обычном внешнем браузере. Поэтому PRVTPRO/Web Panel идеи для `amn2` сейчас нужно читать как UX/product reference для private operator panel и safe read-only navigation, а не как аргумент за public panel exposure, HTTPS domain cutover, direct server management, backup/import/reboot или raw config delivery.
+
 - Feature gate перед production-переносом: отдельно проверять лицензию, пользу, риски, архитектурную совместимость и тест-план.
 - API tokens для интеграций: raw token показывается один раз, в хранилище лежит только SHA-256 hash.
 - Command execution contract для remote operations: отделять план, выполнение, audit, redaction и recovery note.
@@ -92,6 +94,8 @@ Docker-сценарий простой: официальный образ `prvtp
 ## Решение
 
 Проект стоит держать в `research/upstreams` как сильный UX/architecture reference, но не как источник кода.
+
+После AMN2 Phase 3 service-mode evidence `bc00b77` текущий переносимый фокус сузился: в первую очередь искать read-only UX/product improvements для приватной operator panel over SSH tunnel. Любые идеи, предполагающие публичную панель, public HTTPS domain, direct public `3030/3040`, destructive operations, backup/import/reboot, raw config delivery или live remote writes, остаются за отдельным explicit gate.
 
 Первичный статус:
 
