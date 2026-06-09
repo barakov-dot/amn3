@@ -65,7 +65,7 @@ tcp_443_absent=yes
 vps_apply_enabled_false=yes
 ```
 
-## Active Remaining Plan After P4-C009
+## Active Remaining Plan After P4-C009 And P4-I002
 
 Closed and removed from the active plan:
 
@@ -73,25 +73,17 @@ Closed and removed from the active plan:
 - first AMN2 slice selection;
 - `P4-C009` web-panel user/config visibility investigation;
 - AMN2 branch/worktree preparation for `P4-C009`;
-- VPS access decision for `P4-C009` (`not needed`; no live commands were run).
+- VPS access decision for `P4-C009` (`not needed`; no live commands were run);
+- `P4-I002` service-mode/read-only status wording on `/integration-status`.
 
 ### Critical
 
-No active default-mode critical implementation item remains after `P4-C009`.
+No active default-mode critical implementation item remains after `P4-C009` and `P4-I002`.
 Critical live/public/write/config candidates stay blocked or gated by the registry.
 
 ### Important
 
-- [ ] **Task I1: Implement `P4-I002` service-mode/read-only status wording**
-
-  Scope:
-
-  - make tunnel-only, loopback-only and `VPS_APPLY_ENABLED=false` state visible on safe web/status surfaces;
-  - clarify that public API `3040`, direct public web/admin `3030`, Caddy/HTTPS/domain cutover, config delivery and write/config actions remain gated;
-  - add local template/API tests first;
-  - do not change POST route behavior, token lifecycle, peer sync/apply/revoke, config generation, backup/import/reboot or runtime state.
-
-- [ ] **Task I2: Keep `P4-I001` as fallback UX evidence pass**
+- [ ] **Task I1: Decide whether to run `P4-I001` fallback UX evidence pass**
 
   Trigger:
 
@@ -103,6 +95,14 @@ Critical live/public/write/config candidates stay blocked or gated by the regist
 
   - SSH-tunnel private-panel GET/navigation review only.
   - No POST/write/config delivery/API token issue-revoke/sync/health/backup/import/reboot.
+
+- [ ] **Task I2: Route/secret gate planning for future API expansion**
+
+  Scope:
+
+  - route/auth policy only;
+  - secret-bearing output classification only;
+  - no new API routes, public exposure, config delivery or write CRUD.
 
 ### Medium
 
@@ -116,7 +116,7 @@ Critical live/public/write/config candidates stay blocked or gated by the regist
 
 ### Cosmetic
 
-- [ ] **Task X1: Polish service-mode/read-only naming only after behavior is stable**
+- [ ] **Task X1: Polish naming only after behavior is stable**
 - [ ] **Task X2: Polish operator docs links without authorizing live VPS work**
 
 ## Original Startup Breakdown
@@ -319,4 +319,4 @@ The original startup breakdown below is retained as audit context. Use the activ
 
 ## Start Recommendation
 
-Start with active `Task I1`: implement `P4-I002` service-mode/read-only status wording. The VPS access check can run separately only after the operator supplies the SSH target alias/host and confirms the `P4-VPS-ACCESS-READONLY-2026-06-09` gate.
+Start with active decision `Task I1`: run `P4-I001` only if another private-panel read-only UX pass is needed. Otherwise continue `Task I2` route/secret gate planning for future API expansion. The VPS access check can run separately only after the operator supplies the SSH target alias/host and confirms the `P4-VPS-ACCESS-READONLY-2026-06-09` gate.

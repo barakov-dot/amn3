@@ -76,12 +76,12 @@ It is a planning and transfer gate, not a permission to run new live commands.
 Completed first local-only slice:
 
 1. `P4-C009` web-panel user/config visibility; evidence: `research/amn2/phase-4-web-panel-user-config-visibility-implementation-2026-06-09.md`.
+2. `P4-I002` service-mode/read-only status wording; evidence: `research/amn2/phase-4-service-mode-status-wording-implementation-2026-06-09.md`.
 
 Continue Phase 4 with:
 
-1. `P4-I002` AMN2 service-mode/read-only status wording;
-2. `P4-I001` detailed read-only web-panel UX pass only if wording cannot be inferred safely;
-3. route/secret gate planning for future API expansion.
+1. `P4-I001` detailed read-only web-panel UX pass only if more page-level evidence is needed;
+2. route/secret gate planning for future API expansion.
 
 If the selected slice requires live VPS state changes, stop and create a separate named gate first.
 
@@ -94,6 +94,7 @@ docs/AMN_UNIFIED_PROD_GATE_HANDOFF.ru.md
 docs/PROJECT_STATUS_CURRENT.ru.md
 research/amn2/service-mode-web-panel-read-only-ux-review-evidence-2026-06-09.md
 research/amn2/phase-4-web-panel-user-config-visibility-implementation-2026-06-09.md
+research/amn2/phase-4-service-mode-status-wording-implementation-2026-06-09.md
 research/amn2/target-server-service-mode-authenticated-web-panel-smoke-evidence-2026-06-09.md
 research/amn2/target-server-revoke-by-number-4-evidence-2026-06-09.md
 research/amn2/target-server-service-mode-ssh-tunnel-access-evidence-2026-06-09.md

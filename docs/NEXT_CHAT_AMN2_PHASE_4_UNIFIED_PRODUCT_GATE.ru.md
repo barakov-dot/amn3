@@ -197,8 +197,9 @@ Examples that require a separate gate:
 1. Confirm this Phase 4 handoff is the main chat entry point.
 2. Keep target VPS unchanged: web/bot active, web/admin loopback-only, SSH tunnel access only.
 3. Treat `P4-C009` web-panel user/config visibility as the completed first local-only slice; evidence: `research/amn2/phase-4-web-panel-user-config-visibility-implementation-2026-06-09.md`.
-4. Continue with `P4-I002`: AMN2 service-mode/read-only status wording.
-5. If a live action is proposed, stop and create a separate gate first.
+4. Treat `P4-I002` service-mode/read-only status wording as the completed second local-only slice; evidence: `research/amn2/phase-4-service-mode-status-wording-implementation-2026-06-09.md`.
+5. Decide whether another read-only UX pass is needed before route/secret gate planning.
+6. If a live action is proposed, stop and create a separate gate first.
 
 ## One-Copy Message For Main Chat
 
@@ -243,6 +244,10 @@ Examples that require a separate gate:
 Закрытый первый slice:
 - P4-C009 web-panel user/config visibility, local-only.
 
-Следующий рекомендуемый slice:
-- P4-I002 service-mode/read-only status wording.
+Закрытый второй slice:
+- P4-I002 service-mode/read-only status wording, local-only.
+
+Следующее решение:
+- P4-I001 second read-only UX pass only if more page-level evidence is needed;
+- otherwise route/secret gate planning for future API expansion.
 ```

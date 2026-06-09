@@ -239,7 +239,8 @@ secret_surface: safe status labels only
 remote_write_surface: none
 test_plan: focused web tests for integration/status/settings/templates pages; no POST route behavior changes
 required_gate: local-only
-recommendation: accept
+implementation_status: local-only implemented 2026-06-09 in AMN2 branch codex/phase-4-service-mode-status-wording, commit 83f6d28; see research/amn2/phase-4-service-mode-status-wording-implementation-2026-06-09.md
+recommendation: completed; use as service-mode status baseline
 ```
 
 ```text
@@ -534,9 +535,9 @@ required_gate: blocked until separate write/config/public gate
 recommendation: defer
 ```
 
-## Completed First AMN2 Local-only Slice
+## Completed AMN2 Local-only Slices
 
-Completed: `P4-C009`. Next recommendation: `P4-I002`.
+Completed: `P4-C009`, then `P4-I002`.
 
 Completed slice name:
 
@@ -559,9 +560,9 @@ Implemented safe scope:
 - Added local tests for the chosen read-only display/empty-state behavior.
 - Implemented only local read-only navigation/empty-state clarification.
 - No DB/live backfill, sync, apply/revoke, config delivery or token work was performed.
-- Next run `P4-I002`: service-mode/read-only status wording.
+- `P4-I002` implemented the service-mode/read-only status wording on `/integration-status`.
 
-Fallback if more UX detail is needed before `P4-I002`: run `P4-I001` as a second detailed read-only UX/data pass and use the returned page-by-page safe findings to define the next AMN2 implementation plan.
+Next decision: run `P4-I001` as a second detailed read-only UX/data pass only if more page-level evidence is needed; otherwise continue route/secret gate planning for future API expansion.
 
 ## Source Notes
 
