@@ -2,9 +2,9 @@
 
 > **Для agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Цель:** Start Phase 4 from the accepted service-mode loopback baseline, choose only local/read-only AMN2 slices by default, and keep GitHub/VPS access checks explicit and safe.
+**Цель:** стартовать Phase 4 от принятого service-mode loopback baseline, выбирать по умолчанию только local-only/read-only AMN2 slices и держать GitHub/VPS access checks явными и безопасными.
 
-**Архитектура:** AMN3 remains the coordination/evidence registry, while AMN2 receives only selected implementation slices. Live VPS access is a separate named read-only gate for access verification only; public/write/config/destructive work stays blocked until a later named gate.
+**Архитектура:** AMN3 остается coordination/evidence registry, а AMN2 получает только выбранные implementation slices. Live VPS access идет только через separate named gate; public/write/config/destructive work остается blocked до отдельного named gate.
 
 **Стек:** AMN3 markdown evidence/backlog, AMN2 Python/FastAPI/web templates/tests, GitHub connector/local git, OpenSSH read-only VPS preflight.
 
@@ -65,7 +65,7 @@ tcp_443_absent=yes
 vps_apply_enabled_false=yes
 ```
 
-## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy, P4-I005 token lifecycle boundary, P4-N004 bot/admin read-only labels, P4-N001 docs/status drift synchronization, P4-N002 protocol manager interface checklist и P4-X003 Russian-first operator docs polish
+## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy, P4-I005 token lifecycle boundary, P4-N004 bot/admin read-only labels, P4-N001 docs/status drift synchronization, P4-N002 protocol manager interface checklist, P4-X003 Russian-first operator docs polish и P4-X002 API/status/gate naming cleanup
 
 Закрыто и удалено из активного плана:
 
@@ -86,10 +86,11 @@ vps_apply_enabled_false=yes
 - `P4-N001` docs/status drift synchronization.
 - `P4-N002` protocol manager interface checklist.
 - `P4-X003` Russian-first operator docs polish.
+- `P4-X002` API/status/gate naming cleanup.
 
 ### Критичные
 
-Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003`, `P4-I005`, `P4-N004`, `P4-N001`, `P4-N002` и `P4-X003`.
+Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003`, `P4-I005`, `P4-N004`, `P4-N001`, `P4-N002`, `P4-X003` и `P4-X002`.
 Critical live/public/write/config candidates остаются blocked или gated by the registry.
 
 ### Важные
@@ -125,9 +126,8 @@ Critical live/public/write/config candidates остаются blocked или gat
 
 ### Косметические
 
-- [ ] **Задача X1: полировать naming только после стабилизации behavior**
-- [ ] **Задача X2: продолжить `P4-X002` naming cleanup for API/status/gate terms**
-- [ ] **Задача X3: полировать operator docs links без авторизации live VPS work**
+- [ ] **Задача X1: продолжить `P4-X001` OpenAPI/docs grouping polish for existing read-only routes**
+- [ ] **Задача X2: полировать operator docs links без авторизации live VPS work**
 
 ## Исходная стартовая разбивка
 
@@ -329,4 +329,4 @@ Critical live/public/write/config candidates остаются blocked или gat
 
 ## Стартовая рекомендация
 
-Начинать с `P4-X002` naming cleanup for API/status/gate terms after the Russian-first operator docs polish, unless the operator first wants `P4-I001` for another private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.
+Начинать с `P4-X001` OpenAPI/docs grouping polish for existing read-only routes after the API/status/gate naming cleanup, unless the operator first wants `P4-I001` for another private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.

@@ -37,6 +37,19 @@ revoked_test_peers: Neobyatnaya-AMNZ-3, Neobyatnaya-AMNZ-4
 web_panel_ux_review: passed-minimal-safe-summary
 ```
 
+## Термины Phase 4
+
+- `service-mode`: web/bot работают как сервисы, но это не означает public exposure.
+- `loopback-only`: listener доступен только на `127.0.0.1`.
+- `SSH tunnel`: единственный operator access path к private web/admin.
+- `local-only`: разрешены только локальные docs/tests/templates/code changes без live VPS commands и без runtime mutation.
+- `read-only`: разрешено только чтение/навигация/aggregate/status evidence; POST/write/config/sync/apply/revoke не входят.
+- `requires VPS gate`: нужен отдельный named gate даже для read-only live sampling.
+- `blocked until separate write/config/public gate`: нельзя выполнять в Phase 4 default mode.
+- `deferred`: не выбран сейчас; может быть пересмотрен позже, но не дает permission.
+- `public exposure`: public API `3040`, direct public web/admin `3030`, domain/Caddy/HTTPS cutover, public docs/metrics exposure.
+- `config delivery`: `.conf`, QR, `vpn://`, generated config archives, share/download links and any secret-bearing config output.
+
 ## Назначение Phase 4
 
 Phase 4 gathers the parallel workstreams into one decision map:
@@ -88,10 +101,11 @@ It is a planning and transfer gate, not a permission to run new live commands.
 11. `P4-N001` docs/status drift synchronization; evidence: `research/amn2/phase-4-docs-status-drift-sync-2026-06-09.md`.
 12. `P4-N002` protocol manager interface checklist; evidence: `research/amn2/phase-4-protocol-manager-interface-checklist-2026-06-09.md`.
 13. `P4-X003` Russian-first operator docs polish; evidence: `research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md`.
+14. `P4-X002` API/status/gate naming cleanup; evidence: `research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md`.
 
 Продолжать Phase 4 с:
 
-1. `P4-X002` naming cleanup for API/status/gate terms;
+1. `P4-X001` OpenAPI/docs grouping polish for existing read-only routes;
 2. `P4-I001` detailed read-only web-panel UX pass only if more page-level evidence is needed.
 
 If the selected slice requires live VPS state changes, stop and create a separate named gate first.
@@ -115,6 +129,7 @@ research/amn2/phase-4-aggregate-metrics-privacy-boundary-implementation-2026-06-
 research/amn2/phase-4-api-token-lifecycle-boundary-implementation-2026-06-09.md
 research/amn2/phase-4-bot-admin-read-only-labels-implementation-2026-06-09.md
 research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md
+research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md
 research/amn2/target-server-service-mode-authenticated-web-panel-smoke-evidence-2026-06-09.md
 research/amn2/target-server-revoke-by-number-4-evidence-2026-06-09.md
 research/amn2/target-server-service-mode-ssh-tunnel-access-evidence-2026-06-09.md

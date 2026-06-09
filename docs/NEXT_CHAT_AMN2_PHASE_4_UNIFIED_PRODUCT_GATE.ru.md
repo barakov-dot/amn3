@@ -40,6 +40,19 @@ revoked peers: Neobyatnaya-AMNZ-3, Neobyatnaya-AMNZ-4
 
 Phase 3 service-mode loopback is considered closed as a baseline. Do not reopen manual-vs-service-mode as an unresolved question unless new evidence contradicts this state.
 
+## Термины Phase 4
+
+- `service-mode`: web/bot работают как сервисы, но это не означает public exposure.
+- `loopback-only`: listener доступен только на `127.0.0.1`.
+- `SSH tunnel`: единственный operator access path к private web/admin.
+- `local-only`: разрешены только локальные docs/tests/templates/code changes без live VPS commands и без runtime mutation.
+- `read-only`: разрешено только чтение/навигация/aggregate/status evidence; POST/write/config/sync/apply/revoke не входят.
+- `requires VPS gate`: нужен отдельный named gate даже для read-only live sampling.
+- `blocked until separate write/config/public gate`: нельзя выполнять в Phase 4 default mode.
+- `deferred`: не выбран сейчас; может быть пересмотрен позже, но не дает permission.
+- `public exposure`: public API `3040`, direct public web/admin `3030`, domain/Caddy/HTTPS cutover, public docs/metrics exposure.
+- `config delivery`: `.conf`, QR, `vpn://`, generated config archives, share/download links and any secret-bearing config output.
+
 ## Что такое Phase 4
 
 Phase 4 is the unified product/planning gate after the service-mode loopback pass:
@@ -209,8 +222,9 @@ go_no_go_decision:
 13. Treat `P4-N001` docs/status drift synchronization as completed; evidence: `research/amn2/phase-4-docs-status-drift-sync-2026-06-09.md`.
 14. Treat `P4-N002` protocol manager interface checklist as completed; evidence: `research/amn2/phase-4-protocol-manager-interface-checklist-2026-06-09.md`.
 15. Treat `P4-X003` Russian-first operator docs polish as completed; evidence: `research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md`.
-16. Decide whether to continue `P4-X002` naming cleanup for API/status/gate terms, or run another read-only UX pass first.
-17. If a live action is proposed, stop and create a separate gate first.
+16. Treat `P4-X002` API/status/gate naming cleanup as completed; evidence: `research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md`.
+17. Decide whether to continue `P4-X001` OpenAPI/docs grouping polish, or run another read-only UX pass first.
+18. If a live action is proposed, stop and create a separate gate first.
 
 ## Сообщение для копирования в основной чат
 
@@ -291,7 +305,10 @@ go_no_go_decision:
 Закрытый P4-X003 Russian-first operator docs polish:
 - research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md
 
+Закрытый P4-X002 API/status/gate naming cleanup:
+- research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md
+
 Следующее решение:
 - P4-I001 second read-only UX pass только если нужны дополнительные page-level evidence;
-- otherwise continue P4-X002 naming cleanup for API/status/gate terms.
+- otherwise continue P4-X001 OpenAPI/docs grouping polish for existing read-only routes.
 ```
