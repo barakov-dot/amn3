@@ -86,7 +86,9 @@ New target VPS bootstrap 2026-06-08 first passed as `partial-pass`: base OS pack
 
 Target VPS AWG2 runtime gate 2026-06-09 is now `read-only-smoke-pass`: `amnezia-awg2` Docker runtime was built and started, real target `servers.yml` was created on the VPS through a secret-safe channel, AMN2 loader accepted it, and official read-only API loopback smoke passed with `run_id=20260609T043158Z`, `checked_routes=6`, auth `401/403/401`, listener passed and audit passed. Evidence: `research/amn2/target-server-awg2-runtime-smoke-evidence-2026-06-09.md`.
 
-Next gate: request a separate explicit confirmation for exactly one disposable test peer live apply/sync/revoke/sync on the new endpoint, or open a separate service-mode gate if `systemd`/reverse proxy deployment is desired. This still does not unlock public API `3040`, direct public web/admin `3030`, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent mutations, backup/import/reboot, or production peer operations.
+Target VPS live peer gate 2026-06-09 is now `verified-live`: exactly one disposable test peer passed dry-run apply/revoke, live apply/sync/revoke/sync, ended with peer count `0`, and post-gate read-only API loopback smoke passed with `run_id=20260609T045546Z`, `checked_routes=6`. Evidence: `research/amn2/target-server-live-peer-gate-evidence-2026-06-09.md`.
+
+Next gate: keep the new target VPS as verified for the remote peer apply/revoke primitive and choose the next layer deliberately: manual web/admin + bot runtime check, or a separate service-mode gate if `systemd`/reverse proxy deployment is desired. This still does not unlock public API `3040`, direct public web/admin `3030`, API `config:read`, `/api/clients` write CRUD, public/self-service config delivery, Local Agent mutations, backup/import/reboot, or production peer operations.
 
 # Historical Override 2026-06-06
 

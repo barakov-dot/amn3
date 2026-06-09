@@ -142,4 +142,4 @@ vpn_port: 30001
 
 ## Next Gate
 
-Recommended next gate: ask for a separate explicit confirmation for exactly one disposable test peer live apply/sync/revoke/sync on the new endpoint. Use safer `--preshared-key-stdin` handling and keep `VPS_APPLY_ENABLED=false` except for the narrowly scoped apply/revoke commands.
+Completed next gate: exactly one disposable test peer live apply/sync/revoke/sync passed on the new endpoint with `--preshared-key-stdin`. Evidence: `research/amn2/target-server-live-peer-gate-evidence-2026-06-09.md`.
