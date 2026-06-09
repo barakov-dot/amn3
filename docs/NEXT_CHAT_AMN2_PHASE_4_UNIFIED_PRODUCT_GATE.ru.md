@@ -206,7 +206,8 @@ Examples that require a separate gate:
 10. Treat `P4-N003` aggregate metrics privacy boundary as completed; evidence: `research/amn2/phase-4-aggregate-metrics-privacy-boundary-implementation-2026-06-09.md`.
 11. Treat `P4-I005` API token lifecycle boundary as completed; evidence: `research/amn2/phase-4-api-token-lifecycle-boundary-implementation-2026-06-09.md`.
 12. Treat `P4-N004` bot/admin read-only labels as completed; evidence: `research/amn2/phase-4-bot-admin-read-only-labels-implementation-2026-06-09.md`.
-13. Decide whether to continue `P4-N001` docs/status drift synchronization, or run another read-only UX pass first.
+13. Treat `P4-N001` docs/status drift synchronization as completed; evidence: `research/amn2/phase-4-docs-status-drift-sync-2026-06-09.md`.
+14. Decide whether to continue `P4-N002` protocol manager interface checklist, or run another read-only UX pass first.
 14. If a live action is proposed, stop and create a separate gate first.
 
 ## One-Copy Message For Main Chat
@@ -279,7 +280,10 @@ Examples that require a separate gate:
 Закрытый P4-N004 bot/admin read-only labels:
 - research/amn2/phase-4-bot-admin-read-only-labels-implementation-2026-06-09.md
 
+Закрытый P4-N001 docs/status drift synchronization:
+- research/amn2/phase-4-docs-status-drift-sync-2026-06-09.md
+
 Следующее решение:
 - P4-I001 second read-only UX pass only if more page-level evidence is needed;
-- otherwise continue P4-N001 docs/status drift synchronization.
+- otherwise continue P4-N002 protocol manager interface checklist.
 ```

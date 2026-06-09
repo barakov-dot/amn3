@@ -1,16 +1,16 @@
-# AMN2 Phase 4 Start Implementation Plan
+# AMN2 Phase 4: стартовый план
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Для agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Start Phase 4 from the accepted service-mode loopback baseline, choose only local/read-only AMN2 slices by default, and keep GitHub/VPS access checks explicit and safe.
+**Цель:** Start Phase 4 from the accepted service-mode loopback baseline, choose only local/read-only AMN2 slices by default, and keep GitHub/VPS access checks explicit and safe.
 
-**Architecture:** AMN3 remains the coordination/evidence registry, while AMN2 receives only selected implementation slices. Live VPS access is a separate named read-only gate for access verification only; public/write/config/destructive work stays blocked until a later named gate.
+**Архитектура:** AMN3 remains the coordination/evidence registry, while AMN2 receives only selected implementation slices. Live VPS access is a separate named read-only gate for access verification only; public/write/config/destructive work stays blocked until a later named gate.
 
-**Tech Stack:** AMN3 markdown evidence/backlog, AMN2 Python/FastAPI/web templates/tests, GitHub connector/local git, OpenSSH read-only VPS preflight.
+**Стек:** AMN3 markdown evidence/backlog, AMN2 Python/FastAPI/web templates/tests, GitHub connector/local git, OpenSSH read-only VPS preflight.
 
 ---
 
-## Access Preflight Result 2026-06-09
+## Результат проверки доступа 2026-06-09
 
 - AMN3 local checkout: `C:\Users\SooL\Documents\VPS-OPS-LAB`, branch `master`, remote `https://github.com/barakov-dot/amn3.git`.
 - AMN3 GitHub connector: repository visible as `barakov-dot/amn3`; connector permissions show `pull=true`, `push=false`.
@@ -22,7 +22,7 @@
 - Local SSH client: OpenSSH for Windows is installed.
 - VPS host/alias: not present in the repo by design; a live access check needs the operator-provided SSH alias or host and an explicit read-only gate.
 
-## Named VPS Gate For Access Check
+## Именованный VPS gate для проверки доступа
 
 Gate name:
 
@@ -65,7 +65,7 @@ tcp_443_absent=yes
 vps_apply_enabled_false=yes
 ```
 
-## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy, P4-I005 token lifecycle boundary и P4-N004 bot/admin read-only labels
+## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy, P4-I005 token lifecycle boundary, P4-N004 bot/admin read-only labels и P4-N001 docs/status drift synchronization
 
 Закрыто и удалено из активного плана:
 
@@ -83,10 +83,11 @@ vps_apply_enabled_false=yes
 - `P4-N003` aggregate metrics privacy boundary visibility.
 - `P4-I005` API token lifecycle boundary visibility.
 - `P4-N004` bot/admin read-only navigation labels and empty states.
+- `P4-N001` docs/status drift synchronization.
 
 ### Критичные
 
-Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003`, `P4-I005` и `P4-N004`.
+Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003`, `P4-I005`, `P4-N004` и `P4-N001`.
 Critical live/public/write/config candidates остаются blocked или gated by the registry.
 
 ### Важные
@@ -106,13 +107,13 @@ Critical live/public/write/config candidates остаются blocked или gat
 
 ### Средние
 
-- [ ] **Задача N1: продолжить `P4-N001` docs/status drift synchronization**
+- [ ] **Задача N1: продолжить `P4-N002` protocol manager interface checklist**
 
   Scope:
 
-  - scan AMN3 and selected AMN2 docs for stale Phase 4 next-step claims;
-  - keep candidate registry, transfer backlog, current status, next-chat packet and phase map aligned;
-  - do not authorize live VPS commands, public exposure, config delivery, write routes or runtime mutation.
+  - reconcile PRVTPRO manager architecture ideas with current AMN2 manager/export/remote-operation contracts;
+  - produce a design-only checklist for future capability-based manager/plugin work;
+  - do not copy GPL/upstream code and do not add manager implementation, live VPS commands, public exposure, config delivery, write routes or runtime mutation.
 
 ### Минимальные
 
@@ -124,11 +125,11 @@ Critical live/public/write/config candidates остаются blocked или gat
 - [ ] **Задача X1: полировать naming только после стабилизации behavior**
 - [ ] **Задача X2: полировать operator docs links без авторизации live VPS work**
 
-## Original Startup Breakdown
+## Исходная стартовая разбивка
 
-The original startup breakdown below is retained as audit context. Use the active remaining plan above for the next execution step.
+Исходная стартовая разбивка ниже сохранена как audit context. Для следующего исполнения использовать активный оставшийся план выше.
 
-## Critical Tasks
+## Критичные задачи
 
 - [ ] **Task C1: Freeze Phase 4 boundaries before implementation**
 
@@ -198,7 +199,7 @@ The original startup breakdown below is retained as audit context. Use the activ
   fetch dry-run: exit code 0
   ```
 
-## Important Tasks
+## Важные задачи
 
 - [ ] **Task I1: Write a focused AMN2 implementation plan for P4-C009**
 
@@ -240,7 +241,7 @@ The original startup breakdown below is retained as audit context. Use the activ
 
   Run `P4-VPS-ACCESS-READONLY-2026-06-09` only if the operator wants a fresh access proof before UX review or later live gates.
 
-## Medium Tasks
+## Средние задачи
 
 - [ ] **Task M1: Run second detailed read-only UX pass if wording details are unclear**
 
@@ -276,7 +277,7 @@ The original startup breakdown below is retained as audit context. Use the activ
   - Aggregate-only labels by default.
   - No peer names, endpoint values, per-user activity labels or public metrics exposure.
 
-## Minimal Tasks
+## Минимальные задачи
 
 - [ ] **Task MIN1: Update AMN3 transfer note after the next AMN2 slice**
 
@@ -303,7 +304,7 @@ The original startup breakdown below is retained as audit context. Use the activ
 
   Update only when a candidate changes gate class, priority or recommendation.
 
-## Cosmetic Tasks
+## Косметические задачи
 
 - [ ] **Task X1: Polish naming only after behavior is stable**
 
@@ -324,4 +325,4 @@ The original startup breakdown below is retained as audit context. Use the activ
 
 ## Стартовая рекомендация
 
-Начинать с active decision `Task N1`: continue `P4-N001` docs/status drift synchronization after the latest read-only API, metrics privacy, token lifecycle and bot/admin label baselines. `P4-I001` запускать только если сначала нужен еще один private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.
+Начинать с active decision `Task N1`: continue `P4-N002` protocol manager interface checklist after the latest docs/status drift sync. `P4-I001` запускать только если сначала нужен еще один private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.
