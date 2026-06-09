@@ -65,7 +65,7 @@ tcp_443_absent=yes
 vps_apply_enabled_false=yes
 ```
 
-## Active Remaining Plan After P4-C009, P4-I002, Route/Secret Gate Planning, P4-I003 Design And P4-I003 Implementation Plan
+## Active Remaining Plan After P4-C009, P4-I002, Route/Secret Gate Planning, P4-I003 Design, P4-I003 Implementation Plan And P4-I003 Implementation
 
 Closed and removed from the active plan:
 
@@ -78,10 +78,11 @@ Closed and removed from the active plan:
 - route/secret gate planning for future API expansion.
 - `P4-I003` candidate-specific read-only API/status schema maturity design.
 - `P4-I003` AMN2 local implementation plan.
+- `P4-I003` AMN2 local implementation.
 
 ### Critical
 
-No active default-mode critical implementation item remains after `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003` design and `P4-I003` implementation plan.
+No active default-mode critical implementation item remains after `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003` design, `P4-I003` implementation plan and `P4-I003` implementation.
 Critical live/public/write/config candidates stay blocked or gated by the registry.
 
 ### Important
@@ -99,12 +100,12 @@ Critical live/public/write/config candidates stay blocked or gated by the regist
   - SSH-tunnel private-panel GET/navigation review only.
   - No POST/write/config delivery/API token issue-revoke/sync/health/backup/import/reboot.
 
-- [ ] **Task I2: Execute AMN2 local implementation for `P4-I003`**
+- [ ] **Task I2: Continue local-only endpoint taxonomy and route-policy docs alignment**
 
   Scope:
 
-  - use `docs/superpowers/plans/2026-06-09-amn2-p4-i003-read-only-api-status-schema.md` as the approved implementation plan;
-  - keep the AMN2 slice to schema/docs/tests for existing read-only API/status routes;
+  - use `research/amn2/phase-4-read-only-api-status-schema-implementation-2026-06-09.md` as the latest read-only API/status baseline;
+  - keep the next slice docs/test alignment only unless a new implementation plan is written;
   - do not implement new routes, public exposure, config delivery, token lifecycle actions or write CRUD.
 
 ### Medium
@@ -322,4 +323,4 @@ The original startup breakdown below is retained as audit context. Use the activ
 
 ## Start Recommendation
 
-Start with active decision `Task I2`: execute the AMN2 local `P4-I003` plan using `docs/superpowers/plans/2026-06-09-amn2-p4-i003-read-only-api-status-schema.md`. Run `P4-I001` only if another private-panel read-only UX pass is needed first. The VPS access check can run separately only after the operator supplies the SSH target alias/host and confirms the `P4-VPS-ACCESS-READONLY-2026-06-09` gate.
+Start with active decision `Task I2`: continue local-only endpoint taxonomy and route-policy docs alignment from `research/amn2/phase-4-read-only-api-status-schema-implementation-2026-06-09.md`. Run `P4-I001` only if another private-panel read-only UX pass is needed first. The VPS access check can run separately only after the operator supplies the SSH target alias/host and confirms the `P4-VPS-ACCESS-READONLY-2026-06-09` gate.

@@ -201,8 +201,9 @@ Examples that require a separate gate:
 5. Treat route/secret gate planning as completed docs-only; evidence: `research/amn2/phase-4-route-secret-gate-plan-2026-06-09.md`.
 6. Treat `P4-I003` read-only API/status schema maturity design as completed docs-only; evidence: `research/amn2/phase-4-read-only-api-status-design-2026-06-09.md`.
 7. Treat the AMN2 local implementation plan for `P4-I003` as completed docs-only; plan: `docs/superpowers/plans/2026-06-09-amn2-p4-i003-read-only-api-status-schema.md`.
-8. Decide whether to execute the AMN2 local `P4-I003` plan, or run another read-only UX pass first.
-9. If a live action is proposed, stop and create a separate gate first.
+8. Treat `P4-I003` AMN2 local implementation as completed; evidence: `research/amn2/phase-4-read-only-api-status-schema-implementation-2026-06-09.md`.
+9. Decide whether to continue local-only endpoint taxonomy / route-policy docs alignment, or run another read-only UX pass first.
+10. If a live action is proposed, stop and create a separate gate first.
 
 ## One-Copy Message For Main Chat
 
@@ -259,7 +260,10 @@ Examples that require a separate gate:
 Закрытый P4-I003 implementation plan:
 - docs/superpowers/plans/2026-06-09-amn2-p4-i003-read-only-api-status-schema.md
 
+Закрытый P4-I003 implementation:
+- research/amn2/phase-4-read-only-api-status-schema-implementation-2026-06-09.md
+
 Следующее решение:
 - P4-I001 second read-only UX pass only if more page-level evidence is needed;
-- otherwise execute the AMN2 local P4-I003 schema/docs/tests plan.
+- otherwise continue local-only endpoint taxonomy / route-policy docs alignment.
 ```
