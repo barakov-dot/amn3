@@ -426,7 +426,8 @@ secret_surface: none
 remote_write_surface: none
 test_plan: local web/bot rendering tests; no POST/action behavior changes
 required_gate: local-only
-recommendation: accept
+implementation_status: local-only implemented 2026-06-09 in AMN2 branch codex/phase-4-bot-admin-read-only-labels, commit c9829b7; see research/amn2/phase-4-bot-admin-read-only-labels-implementation-2026-06-09.md
+recommendation: completed; use as bot/admin read-only navigation and empty-state wording baseline
 ```
 
 ```text
@@ -545,7 +546,7 @@ recommendation: defer
 
 ## Completed AMN2 Local-only Slices
 
-Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design, then `P4-I003` AMN2 local implementation plan, then `P4-I003` AMN2 local implementation, then `P4-I004` endpoint taxonomy / route-policy docs alignment, then `P4-N003` aggregate metrics privacy boundary visibility, then `P4-I005` API token lifecycle boundary visibility.
+Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design, then `P4-I003` AMN2 local implementation plan, then `P4-I003` AMN2 local implementation, then `P4-I004` endpoint taxonomy / route-policy docs alignment, then `P4-N003` aggregate metrics privacy boundary visibility, then `P4-I005` API token lifecycle boundary visibility, then `P4-N004` bot/admin read-only navigation labels and empty states.
 
 Completed slice name:
 
@@ -576,8 +577,9 @@ Implemented safe scope:
 - `P4-I004` endpoint taxonomy / route-policy docs alignment was completed in branch `codex/phase-4-endpoint-taxonomy-route-policy-docs`, commit `acf39f8`; it adds private/local taxonomy docs for the same six read-only routes and links policy docs without public OpenAPI/docs exposure or runtime changes.
 - `P4-N003` aggregate metrics privacy boundary visibility was completed in branch `codex/phase-4-aggregate-metrics-privacy-boundary`, commit `8b6aef8`; it adds an additive safe `privacy` marker to `/api/metrics/summary` and locks the response boundary in local API tests/docs without changing route count or exposure.
 - `P4-I005` API token lifecycle boundary visibility was completed in branch `codex/phase-4-api-token-lifecycle-boundary`, commit `22061ea`; it adds an additive safe `api_token_lifecycle_boundary` marker to `/api/integration/status` and locks expiry/one-time-secret/digest-only/scope/blocklist/owner/revoke/rotation/no-production-mutation labels in local API tests/docs without adding token operation routes.
+- `P4-N004` bot/admin read-only navigation labels and empty states was completed in branch `codex/phase-4-bot-admin-read-only-labels`, commit `c9829b7`; it adds service-mode/gated boundary labels to web admin navigation, local/live inventory empty-state wording and bot admin aggregate/local list labels without changing callbacks, routes or POST behavior.
 
-Next decision: continue `P4-N004` bot/admin read-only navigation labels and empty states, or run `P4-I001` only if more private-panel UX evidence is needed first.
+Next decision: continue `P4-N001` docs/status drift synchronization, or run `P4-I001` only if more private-panel UX evidence is needed first.
 
 ## Source Notes
 

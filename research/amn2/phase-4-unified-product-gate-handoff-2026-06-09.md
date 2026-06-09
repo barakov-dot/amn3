@@ -84,10 +84,11 @@ Completed first local-only slice:
 7. `P4-I004` endpoint taxonomy / route-policy docs alignment; evidence: `research/amn2/phase-4-endpoint-taxonomy-route-policy-docs-implementation-2026-06-09.md`.
 8. `P4-N003` aggregate metrics privacy boundary; evidence: `research/amn2/phase-4-aggregate-metrics-privacy-boundary-implementation-2026-06-09.md`.
 9. `P4-I005` API token lifecycle boundary; evidence: `research/amn2/phase-4-api-token-lifecycle-boundary-implementation-2026-06-09.md`.
+10. `P4-N004` bot/admin read-only labels; evidence: `research/amn2/phase-4-bot-admin-read-only-labels-implementation-2026-06-09.md`.
 
 Continue Phase 4 with:
 
-1. `P4-N004` bot/admin read-only navigation labels and empty states;
+1. `P4-N001` docs/status drift synchronization;
 2. `P4-I001` detailed read-only web-panel UX pass only if more page-level evidence is needed.
 
 If the selected slice requires live VPS state changes, stop and create a separate named gate first.
@@ -109,6 +110,7 @@ research/amn2/phase-4-read-only-api-status-schema-implementation-2026-06-09.md
 research/amn2/phase-4-endpoint-taxonomy-route-policy-docs-implementation-2026-06-09.md
 research/amn2/phase-4-aggregate-metrics-privacy-boundary-implementation-2026-06-09.md
 research/amn2/phase-4-api-token-lifecycle-boundary-implementation-2026-06-09.md
+research/amn2/phase-4-bot-admin-read-only-labels-implementation-2026-06-09.md
 research/amn2/target-server-service-mode-authenticated-web-panel-smoke-evidence-2026-06-09.md
 research/amn2/target-server-revoke-by-number-4-evidence-2026-06-09.md
 research/amn2/target-server-service-mode-ssh-tunnel-access-evidence-2026-06-09.md

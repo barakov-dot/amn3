@@ -65,7 +65,7 @@ tcp_443_absent=yes
 vps_apply_enabled_false=yes
 ```
 
-## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy и P4-I005 token lifecycle boundary
+## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy, P4-I005 token lifecycle boundary и P4-N004 bot/admin read-only labels
 
 Закрыто и удалено из активного плана:
 
@@ -82,10 +82,11 @@ vps_apply_enabled_false=yes
 - `P4-I004` endpoint taxonomy / route-policy docs alignment.
 - `P4-N003` aggregate metrics privacy boundary visibility.
 - `P4-I005` API token lifecycle boundary visibility.
+- `P4-N004` bot/admin read-only navigation labels and empty states.
 
 ### Критичные
 
-Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003` и `P4-I005`.
+Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003`, `P4-I005` и `P4-N004`.
 Critical live/public/write/config candidates остаются blocked или gated by the registry.
 
 ### Важные
@@ -105,13 +106,13 @@ Critical live/public/write/config candidates остаются blocked или gat
 
 ### Средние
 
-- [ ] **Задача N4: продолжить `P4-N004` bot/admin read-only navigation labels and empty states**
+- [ ] **Задача N1: продолжить `P4-N001` docs/status drift synchronization**
 
   Scope:
 
-  - clarify read-only navigation labels, empty states and gated action wording in bot/admin surfaces;
-  - use local rendering/tests only unless a separate evidence pass is selected first;
-  - do not change POST behavior, issue/revoke tokens, deliver configs, sync/apply/revoke peers, open public listeners or mutate production state.
+  - scan AMN3 and selected AMN2 docs for stale Phase 4 next-step claims;
+  - keep candidate registry, transfer backlog, current status, next-chat packet and phase map aligned;
+  - do not authorize live VPS commands, public exposure, config delivery, write routes or runtime mutation.
 
 ### Минимальные
 
@@ -323,4 +324,4 @@ The original startup breakdown below is retained as audit context. Use the activ
 
 ## Стартовая рекомендация
 
-Начинать с active decision `Task N4`: continue `P4-N004` bot/admin read-only navigation labels and empty states from the latest read-only API, metrics privacy and token lifecycle boundary baselines. `P4-I001` запускать только если сначала нужен еще один private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.
+Начинать с active decision `Task N1`: continue `P4-N001` docs/status drift synchronization after the latest read-only API, metrics privacy, token lifecycle and bot/admin label baselines. `P4-I001` запускать только если сначала нужен еще один private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.
