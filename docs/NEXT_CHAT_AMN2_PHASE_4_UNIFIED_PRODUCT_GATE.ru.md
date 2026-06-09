@@ -200,8 +200,9 @@ Examples that require a separate gate:
 4. Treat `P4-I002` service-mode/read-only status wording as the completed second local-only slice; evidence: `research/amn2/phase-4-service-mode-status-wording-implementation-2026-06-09.md`.
 5. Treat route/secret gate planning as completed docs-only; evidence: `research/amn2/phase-4-route-secret-gate-plan-2026-06-09.md`.
 6. Treat `P4-I003` read-only API/status schema maturity design as completed docs-only; evidence: `research/amn2/phase-4-read-only-api-status-design-2026-06-09.md`.
-7. Decide whether to prepare the AMN2 local implementation plan for `P4-I003` schema/docs/tests, or run another read-only UX pass first.
-8. If a live action is proposed, stop and create a separate gate first.
+7. Treat the AMN2 local implementation plan for `P4-I003` as completed docs-only; plan: `docs/superpowers/plans/2026-06-09-amn2-p4-i003-read-only-api-status-schema.md`.
+8. Decide whether to execute the AMN2 local `P4-I003` plan, or run another read-only UX pass first.
+9. If a live action is proposed, stop and create a separate gate first.
 
 ## One-Copy Message For Main Chat
 
@@ -255,7 +256,10 @@ Examples that require a separate gate:
 Закрытый P4-I003 design:
 - research/amn2/phase-4-read-only-api-status-design-2026-06-09.md
 
+Закрытый P4-I003 implementation plan:
+- docs/superpowers/plans/2026-06-09-amn2-p4-i003-read-only-api-status-schema.md
+
 Следующее решение:
 - P4-I001 second read-only UX pass only if more page-level evidence is needed;
-- otherwise prepare the AMN2 local implementation plan for P4-I003 schema/docs/tests only.
+- otherwise execute the AMN2 local P4-I003 schema/docs/tests plan.
 ```

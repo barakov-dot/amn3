@@ -259,7 +259,8 @@ remote_write_surface: none
 test_plan: local API tests for `server:read`/`metrics:read`, safe audit and no secret-bearing fields
 required_gate: local-only
 design_status: candidate-specific design prepared 2026-06-09; see research/amn2/phase-4-read-only-api-status-design-2026-06-09.md
-recommendation: design-prepared; next AMN2 slice should be local docs/tests only, with no new routes
+implementation_plan_status: prepared 2026-06-09; see docs/superpowers/plans/2026-06-09-amn2-p4-i003-read-only-api-status-schema.md
+recommendation: plan-prepared; next AMN2 slice should execute local docs/tests only, with no new routes
 ```
 
 ```text
@@ -540,7 +541,7 @@ recommendation: defer
 
 ## Completed AMN2 Local-only Slices
 
-Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design.
+Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design, then `P4-I003` AMN2 local implementation plan.
 
 Completed slice name:
 
@@ -566,8 +567,9 @@ Implemented safe scope:
 - `P4-I002` implemented the service-mode/read-only status wording on `/integration-status`.
 - Route/secret gate planning consolidated existing route/auth, secret inventory, token lifecycle, config delivery policy, manager export and backup/import policy baselines into `research/amn2/phase-4-route-secret-gate-plan-2026-06-09.md`.
 - `P4-I003` prepared a candidate-specific read-only API/status schema maturity design in `research/amn2/phase-4-read-only-api-status-design-2026-06-09.md`; no AMN2 code or runtime route changed.
+- `P4-I003` AMN2 local implementation plan was prepared in `docs/superpowers/plans/2026-06-09-amn2-p4-i003-read-only-api-status-schema.md`; it limits execution to API route binding tests, schema/status contract tests and docs updates.
 
-Next decision: prepare the AMN2 local implementation plan for `P4-I003` schema/docs/tests, or run `P4-I001` if more private-panel UX evidence is needed first.
+Next decision: execute the AMN2 local `P4-I003` plan, or run `P4-I001` if more private-panel UX evidence is needed first.
 
 ## Source Notes
 
