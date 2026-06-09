@@ -6,8 +6,8 @@ Phase 4 main-chat handoff is now prepared:
 entrypoint: docs/NEXT_CHAT_AMN2_PHASE_4_UNIFIED_PRODUCT_GATE.ru.md
 research note: research/amn2/phase-4-unified-product-gate-handoff-2026-06-09.md
 AMN3 Phase 4 coordination checkpoint before P4-N001 sync: 113c5ed Record Phase 4 bot admin read-only labels
-Phase 4 completed local/default sequence: P4-C009, P4-I002, route/secret gate planning, P4-I003 design/plan/implementation, P4-I004, P4-N003, P4-I005, P4-N004, P4-N001 docs/status sync
-Phase 4 next recommended local-only slice: P4-N002 protocol manager interface checklist
+Phase 4 completed local/default sequence: P4-C009, P4-I002, route/secret gate planning, P4-I003 design/plan/implementation, P4-I004, P4-N003, P4-I005, P4-N004, P4-N001 docs/status sync, P4-N002 protocol manager interface checklist
+Phase 4 next recommended local-only slice: P4-X003 Russian-first operator docs polish
 AMN2 source-overlay/package head: f7f6131 Update integration status for c92 manual prelaunch
 target VPS mode: service-mode web/bot active, loopback-only
 operator access: SSH local port forward to 127.0.0.1:3030, external browser only

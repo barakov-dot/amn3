@@ -65,7 +65,7 @@ tcp_443_absent=yes
 vps_apply_enabled_false=yes
 ```
 
-## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy, P4-I005 token lifecycle boundary, P4-N004 bot/admin read-only labels и P4-N001 docs/status drift synchronization
+## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy, P4-I005 token lifecycle boundary, P4-N004 bot/admin read-only labels, P4-N001 docs/status drift synchronization и P4-N002 protocol manager interface checklist
 
 Закрыто и удалено из активного плана:
 
@@ -84,10 +84,11 @@ vps_apply_enabled_false=yes
 - `P4-I005` API token lifecycle boundary visibility.
 - `P4-N004` bot/admin read-only navigation labels and empty states.
 - `P4-N001` docs/status drift synchronization.
+- `P4-N002` protocol manager interface checklist.
 
 ### Критичные
 
-Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003`, `P4-I005`, `P4-N004` и `P4-N001`.
+Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003`, `P4-I005`, `P4-N004`, `P4-N001` и `P4-N002`.
 Critical live/public/write/config candidates остаются blocked или gated by the registry.
 
 ### Важные
@@ -107,13 +108,14 @@ Critical live/public/write/config candidates остаются blocked или gat
 
 ### Средние
 
-- [ ] **Задача N1: продолжить `P4-N002` protocol manager interface checklist**
+- [ ] **Задача N1: держать remaining normal candidates gated/deferred**
 
   Scope:
 
-  - reconcile PRVTPRO manager architecture ideas with current AMN2 manager/export/remote-operation contracts;
-  - produce a design-only checklist for future capability-based manager/plugin work;
-  - do not copy GPL/upstream code and do not add manager implementation, live VPS commands, public exposure, config delivery, write routes or runtime mutation.
+  - `P4-N005` attach-existing-server reconciliation requires a named VPS read-only gate for real detection;
+  - `P4-N006` background jobs/operation queue requires a VPS gate and is deferred until write operations are selected;
+  - `P4-N007` external sync/delete flows remains blocked/deferred;
+  - do not start live detection, job runner work, external sync, public exposure, config delivery, write routes or runtime mutation by default.
 
 ### Минимальные
 
@@ -325,4 +327,4 @@ Critical live/public/write/config candidates остаются blocked или gat
 
 ## Стартовая рекомендация
 
-Начинать с active decision `Task N1`: continue `P4-N002` protocol manager interface checklist after the latest docs/status drift sync. `P4-I001` запускать только если сначала нужен еще один private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.
+Начинать с `P4-X003` Russian-first operator docs polish after the protocol manager interface checklist, unless the operator first wants `P4-I001` for another private-panel read-only UX pass. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.

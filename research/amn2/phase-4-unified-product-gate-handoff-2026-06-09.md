@@ -86,10 +86,11 @@ Completed first local-only slice:
 9. `P4-I005` API token lifecycle boundary; evidence: `research/amn2/phase-4-api-token-lifecycle-boundary-implementation-2026-06-09.md`.
 10. `P4-N004` bot/admin read-only labels; evidence: `research/amn2/phase-4-bot-admin-read-only-labels-implementation-2026-06-09.md`.
 11. `P4-N001` docs/status drift synchronization; evidence: `research/amn2/phase-4-docs-status-drift-sync-2026-06-09.md`.
+12. `P4-N002` protocol manager interface checklist; evidence: `research/amn2/phase-4-protocol-manager-interface-checklist-2026-06-09.md`.
 
 Continue Phase 4 with:
 
-1. `P4-N002` protocol manager interface checklist;
+1. `P4-X003` Russian-first operator docs polish;
 2. `P4-I001` detailed read-only web-panel UX pass only if more page-level evidence is needed.
 
 If the selected slice requires live VPS state changes, stop and create a separate named gate first.
