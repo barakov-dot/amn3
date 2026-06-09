@@ -128,6 +128,7 @@ Merge result: read-only API shell fast-forward merged into `codex-vps-test-prep`
 - [AMN2 web panel read-only UX review evidence template](../../docs/AMN2_WEB_PANEL_READ_ONLY_UX_REVIEW_EVIDENCE_TEMPLATE.ru.md) - safe textual return template for the private-panel UX review.
 - [Service-mode web panel read-only UX review 2026-06-09](service-mode-web-panel-read-only-ux-review-2026-06-09.md) - docs-only preparation note for the next safe UX/product review slice after Phase 3 service-mode evidence.
 - [Service-mode web panel read-only UX review evidence template 2026-06-09](service-mode-web-panel-read-only-ux-review-evidence-template-2026-06-09.md) - AMN3 note linking the checklist and evidence template to the current Phase 3 boundary.
+- [Service-mode web panel read-only UX review evidence 2026-06-09](service-mode-web-panel-read-only-ux-review-evidence-2026-06-09.md) - operator returned a minimal safe summary: baseline OK, authenticated overview OK, no write/config/token/sync/backup actions and no secrets published.
 - [Transfer backlog](transfer-backlog.md) - очередь переноса lab-решений в `amn2`.
 
 ## Следующие рабочие шаги
