@@ -123,15 +123,16 @@ It is a planning and transfer gate, not a permission to run new live commands.
 20. `WAPI-V001` write API threat model; evidence: `research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md`.
 21. PRVTPRO refresh 2026-06-10 candidate intake; evidence: `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`.
 22. `P4-PRVTPRO-REFRESH-002` expiration-field contract tests; evidence: `research/amn2/phase-4-prvtpro-expiration-contract-tests-implementation-2026-06-10.md`.
+23. `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status; evidence: `research/amn2/phase-4-prvtpro-build-status-implementation-2026-06-10.md`.
 
 Текущий next stage:
 
 1. `P4-NG` is active as docs-only named gate / write API readiness planning.
-2. `NG-C001`, `NG-C002`, `NG-C003`, `NG-C004`, `NG-S003`, `NG-C005`, `WAPI-V001` and `P4-PRVTPRO-REFRESH-002` are closed.
+2. `NG-C001`, `NG-C002`, `NG-C003`, `NG-C004`, `NG-S003`, `NG-C005`, `WAPI-V001`, `P4-PRVTPRO-REFRESH-002` and `P4-PRVTPRO-REFRESH-001` are closed.
 3. Next recommended docs-only task is `WAPI-V002` write API route taxonomy with `live_write_authorized: no`.
 4. `NG-V001` read-only VPS baseline gate requires explicit operator approval and target SSH alias/host outside repo secrets.
 5. Write API live work remains blocked until a separate `P4-WRITE-API-LIVE-GATE`.
-6. `P4-PRVTPRO-REFRESH-002` expiration-field contract tests are closed; if selecting the next PRVTPRO-derived local-only AMN2 product slice, start with `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status; keep GPL-3.0 code/templates/UI/managers/workflows out of AMN2.
+6. `P4-PRVTPRO-REFRESH-002` expiration-field contract tests and `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status are closed; if selecting remaining PRVTPRO-derived work, start with `P4-PRVTPRO-REFRESH-004` docs/policy support before any `P4-PRVTPRO-REFRESH-003` design boundary; keep GPL-3.0 code/templates/UI/managers/workflows out of AMN2.
 
 If the selected slice requires live VPS state changes, stop and create a separate named gate first.
 

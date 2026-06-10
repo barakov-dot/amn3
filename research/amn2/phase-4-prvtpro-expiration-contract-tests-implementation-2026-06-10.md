@@ -74,4 +74,4 @@ The expiration field is shown only inside the already-authenticated local web-ad
 
 ## Closure
 
-`P4-PRVTPRO-REFRESH-002` is closed. The remaining PRVTPRO-derived local-only queue now starts with `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status, followed by `P4-PRVTPRO-REFRESH-003` after design boundary and `P4-PRVTPRO-REFRESH-004` as docs/policy support.
+`P4-PRVTPRO-REFRESH-002` is closed. Subsequent status sync: `P4-PRVTPRO-REFRESH-001` was also closed in `research/amn2/phase-4-prvtpro-build-status-implementation-2026-06-10.md`. Remaining PRVTPRO-derived work is `P4-PRVTPRO-REFRESH-004` as docs/policy support and `P4-PRVTPRO-REFRESH-003` only after design boundary.
