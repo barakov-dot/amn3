@@ -90,12 +90,13 @@ Closed and removed from active plan:
 - `WAPI-I005` web-panel gated action labels;
 - `NG-N003` operation queue design after write API contract;
 - `NG-N002` health/status polling design;
-- `NG-N001` attach-existing-server read-only reconciliation gate design.
+- `NG-N001` attach-existing-server read-only reconciliation gate design;
+- `NG-N004` candidate registry update after every gate decision.
 
 Active next recommendation:
 
 ```text
-NG-N004 update candidate registry after every gate decision
+NG-S001 keep AMN3 status/transfer current
 ```
 
 Reason: it is docs-only and is constrained by `live_write_authorized: no`.

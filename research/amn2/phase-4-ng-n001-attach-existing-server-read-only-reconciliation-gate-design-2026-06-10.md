@@ -47,6 +47,7 @@ required_gate_for_config_delivery: P4-CONFIG-DELIVERY-GATE
 selected_next_slice: NG-N004 update candidate registry after every gate decision
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed in research/amn2/phase-4-ng-n004-candidate-registry-update-2026-06-10.md
 ```
 
 ## Sources Reused
@@ -347,7 +348,7 @@ defer_scope: local reconciliation implementation gate, real target read-only VPS
 
 ## Handoff
 
-`NG-N001` is closed. The recommended next docs-only slice is `NG-N004` update candidate registry after every gate decision, because the candidate registry now has multiple closed P4-NG/WAPI decisions and should be checked as its own explicit registry-maintenance slice before any live or implementation direction.
+`NG-N001` is closed. `NG-N004` was selected next and later closed in `research/amn2/phase-4-ng-n004-candidate-registry-update-2026-06-10.md`, because the candidate registry had multiple closed P4-NG/WAPI decisions and needed an explicit registry-maintenance slice before any live or implementation direction. Current next recommendation after `NG-N004` closure is `NG-S001` keep AMN3 status/transfer current with `live_write_authorized: no`.
 
 ## Safety Statement
 

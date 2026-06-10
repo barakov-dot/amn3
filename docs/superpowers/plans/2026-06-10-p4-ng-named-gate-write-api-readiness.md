@@ -117,6 +117,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-ng-n001-attach-existing-server-read-only-reconciliation-gate-design-2026-06-10.md`.
   - Defines safe read-only reconciliation phases, allowed report fields, attach/backfill boundaries, conflict handling, health/status binding and RED test requirements without implementing reconciliation, attach, import, backfill, real target detection or route changes.
 
+- [x] **NG-N004: update candidate registry after every gate decision**
+  - Closed by `research/amn2/phase-4-ng-n004-candidate-registry-update-2026-06-10.md`.
+  - Synchronizes candidate registry entries for health/status polling, attach-existing-server reconciliation and operation queue boundaries without authorizing implementation, live VPS work, route changes, config delivery or production mutation.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -162,11 +166,7 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ### Нормальные
 
-- [ ] **NG-N004: update candidate registry after every gate decision**
-
-  Scope:
-
-  - Change `priority`, `required_gate`, `recommendation` or `implementation_status` only with evidence.
+Нет активных задач.
 
 ### Простые
 
@@ -211,6 +211,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `NG-N004` next. It is docs-only candidate registry maintenance and must preserve the P4-NG boundaries: update only `priority`, `required_gate`, `recommendation` or `implementation_status` with evidence; no live VPS commands, no implementation, no route behavior changes, no config delivery and no production mutation are authorized.
+Start with `NG-S001` next. It is docs-only status/transfer synchronization and must preserve the P4-NG boundaries: update AMN3 status and transfer references only, with no live VPS commands, no implementation, no route behavior changes, no config delivery and no production mutation.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.

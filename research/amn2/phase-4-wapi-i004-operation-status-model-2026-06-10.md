@@ -244,7 +244,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It defines minimal write/config/operation scopes and explicitly rejects broad admin-equivalent tokens before `/api/clients` design or route implementation planning. `WAPI-I002` was then closed as docs-only config delivery decoupling; `WAPI-I001` was then closed as docs-only `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels; `NG-N003` was then closed as docs-only operation queue design after write API contract; `NG-N002` was then closed as docs-only health/status polling design; `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. Current next recommendation after `NG-N001` closure is `NG-N004` candidate registry update after every gate decision with `live_write_authorized: no`.
+It defines minimal write/config/operation scopes and explicitly rejects broad admin-equivalent tokens before `/api/clients` design or route implementation planning. `WAPI-I002` was then closed as docs-only config delivery decoupling; `WAPI-I001` was then closed as docs-only `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels; `NG-N003` was then closed as docs-only operation queue design after write API contract; `NG-N002` was then closed as docs-only health/status polling design; `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. `NG-N004` was then closed as docs-only candidate registry update after every gate decision. Current next recommendation after `NG-N004` closure is `NG-S001` keep AMN3 status/transfer current with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

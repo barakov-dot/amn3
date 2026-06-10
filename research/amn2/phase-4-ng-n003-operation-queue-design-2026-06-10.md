@@ -339,7 +339,7 @@ defer_scope: AMN2 local queue implementation gate, live peer mutation, config/re
 
 ## Handoff
 
-`NG-N003` is closed. `NG-N002` was selected next and later closed in `research/amn2/phase-4-ng-n002-health-status-polling-design-2026-06-10.md`, because queue/status UX needed a safe polling contract that remains aggregate-only, avoids peer/user leakage and does not call live VPS or write/config surfaces. `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. Current next recommendation after `NG-N001` closure is `NG-N004` candidate registry update after every gate decision with `live_write_authorized: no`.
+`NG-N003` is closed. `NG-N002` was selected next and later closed in `research/amn2/phase-4-ng-n002-health-status-polling-design-2026-06-10.md`, because queue/status UX needed a safe polling contract that remains aggregate-only, avoids peer/user leakage and does not call live VPS or write/config surfaces. `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. `NG-N004` was then closed as docs-only candidate registry update after every gate decision. Current next recommendation after `NG-N004` closure is `NG-S001` keep AMN3 status/transfer current with `live_write_authorized: no`.
 
 ## Safety Statement
 
