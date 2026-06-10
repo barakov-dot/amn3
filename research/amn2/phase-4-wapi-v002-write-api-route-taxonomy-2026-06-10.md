@@ -153,7 +153,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It defines fake-runner inputs/outputs for create, disable, revoke, sync and retry operation plans without SSH, live VPS commands or remote mutation. `WAPI-V004` was selected next and later closed as docs-only idempotency, locking and partial-failure model; `WAPI-V005` was then closed as write API audit/redaction requirements; `WAPI-I004` was then closed as operation status model; `WAPI-I003` was then closed as scoped write-token model; `WAPI-I002` was then closed as config delivery decoupling; `WAPI-I001` was then closed as `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels. Current next recommendation after `WAPI-I005` closure is `NG-N003` operation queue design after write API contract with `live_write_authorized: no`.
+It defines fake-runner inputs/outputs for create, disable, revoke, sync and retry operation plans without SSH, live VPS commands or remote mutation. `WAPI-V004` was selected next and later closed as docs-only idempotency, locking and partial-failure model; `WAPI-V005` was then closed as write API audit/redaction requirements; `WAPI-I004` was then closed as operation status model; `WAPI-I003` was then closed as scoped write-token model; `WAPI-I002` was then closed as config delivery decoupling; `WAPI-I001` was then closed as `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels; `NG-N003` was then closed as docs-only operation queue design after write API contract. Current next recommendation after `NG-N003` closure is `NG-N002` health/status polling design with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

@@ -280,7 +280,7 @@ live_vps_commands: no
 config_delivery: no
 ```
 
-It uses this `/api/clients` contract to define how future web/admin labels distinguish read-only metadata, local operation planning, deferred live write, blocked config delivery and separately gated destructive/public actions. Current next recommendation after `WAPI-I005` closure is `NG-N003` operation queue design after write API contract with `live_write_authorized: no`.
+It uses this `/api/clients` contract to define how future web/admin labels distinguish read-only metadata, local operation planning, deferred live write, blocked config delivery and separately gated destructive/public actions. `NG-N003` was then closed as docs-only operation queue design after write API contract. Current next recommendation after `NG-N003` closure is `NG-N002` health/status polling design with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

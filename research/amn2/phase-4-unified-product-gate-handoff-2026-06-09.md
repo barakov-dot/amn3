@@ -135,12 +135,13 @@ It is a planning and transfer gate, not a permission to run new live commands.
 32. `WAPI-I002` config delivery decoupling; evidence: `research/amn2/phase-4-wapi-i002-config-delivery-decoupling-2026-06-10.md`.
 33. `WAPI-I001` `/api/clients` design without live CRUD; evidence: `research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md`.
 34. `WAPI-I005` web-panel gated action labels; evidence: `research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md`.
+35. `NG-N003` operation queue design after write API contract; evidence: `research/amn2/phase-4-ng-n003-operation-queue-design-2026-06-10.md`.
 
 Текущий next stage:
 
 1. `P4-NG` is active as docs-only named gate / write API readiness planning.
-2. `NG-C001`, `NG-C002`, `NG-C003`, `NG-C004`, `NG-S003`, `NG-C005`, `WAPI-V001`, `WAPI-V002`, `WAPI-V003`, `WAPI-V004`, `WAPI-V005`, `WAPI-I004`, `WAPI-I003`, `WAPI-I002`, `WAPI-I001`, `WAPI-I005`, `P4-PRVTPRO-REFRESH-002`, `P4-PRVTPRO-REFRESH-001` and `P4-PRVTPRO-REFRESH-004` are closed.
-3. Next recommended docs-only task is `NG-N003` operation queue design after write API contract with `live_write_authorized: no`.
+2. `NG-C001`, `NG-C002`, `NG-C003`, `NG-C004`, `NG-S003`, `NG-C005`, `WAPI-V001`, `WAPI-V002`, `WAPI-V003`, `WAPI-V004`, `WAPI-V005`, `WAPI-I004`, `WAPI-I003`, `WAPI-I002`, `WAPI-I001`, `WAPI-I005`, `NG-N003`, `P4-PRVTPRO-REFRESH-002`, `P4-PRVTPRO-REFRESH-001` and `P4-PRVTPRO-REFRESH-004` are closed.
+3. Next recommended docs-only task is `NG-N002` health/status polling design with `live_write_authorized: no`.
 4. `NG-V001` read-only VPS baseline gate requires explicit operator approval and target SSH alias/host outside repo secrets.
 5. Write API live work remains blocked until a separate `P4-WRITE-API-LIVE-GATE`.
 6. `P4-PRVTPRO-REFRESH-002` expiration-field contract tests, `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status and `P4-PRVTPRO-REFRESH-004` docs/policy support are closed; if selecting remaining PRVTPRO-derived work, create a design boundary for `P4-PRVTPRO-REFRESH-003` before any implementation; keep GPL-3.0 code/templates/UI/managers/workflows out of AMN2.
@@ -183,6 +184,7 @@ research/amn2/phase-4-wapi-i003-scoped-write-token-model-2026-06-10.md
 research/amn2/phase-4-wapi-i002-config-delivery-decoupling-2026-06-10.md
 research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md
 research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md
+research/amn2/phase-4-ng-n003-operation-queue-design-2026-06-10.md
 research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md
 research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md
 docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md

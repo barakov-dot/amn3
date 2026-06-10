@@ -105,6 +105,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md`.
   - Defines future web-panel label vocabulary, disabled/gated action rules, status mappings and RED test requirements without changing templates, routes, behavior, config delivery, live writes or AMN2 code.
 
+- [x] **NG-N003: operation queue design after write API contract**
+  - Closed by `research/amn2/phase-4-ng-n003-operation-queue-design-2026-06-10.md`.
+  - Defines future queue/cancel/retry/status semantics, lifecycle boundaries, idempotency/lock rules, visibility constraints and RED test requirements without implementing a queue, worker, runtime route, live write or config delivery.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -164,12 +168,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Aggregate/safe telemetry only.
   - No peer/user leakage.
 
-- [ ] **NG-N003: operation queue design after write API contract**
-
-  Scope:
-
-  - Queue/cancel/retry UX only after operation model is stable.
-
 - [ ] **NG-N004: update candidate registry after every gate decision**
 
   Scope:
@@ -219,6 +217,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `NG-N003` next. It is docs-only operation queue design after the write API contract and must preserve the WAPI boundaries: no queue implementation, route behavior changes, runtime routes, token issue/revoke routes, fake-runner code, live VPS commands, config delivery, `.conf`, QR, `vpn://` output or production mutation are authorized.
+Start with `NG-N002` next. It is docs-only health/status polling design and must preserve the WAPI and NG-N003 boundaries: aggregate/safe telemetry only, no peer/user leakage, no runtime polling implementation, no queue implementation, no route behavior changes, no live VPS commands, no write/config actions and no production mutation are authorized.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.

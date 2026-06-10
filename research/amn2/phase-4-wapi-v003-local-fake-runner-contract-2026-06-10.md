@@ -186,7 +186,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It defines idempotency keys, per-target lock boundaries, retry behavior, conflict statuses and partial-failure vocabulary before any fake-runner code or write API route implementation. `WAPI-V005` was selected later and closed as write API audit/redaction requirements; `WAPI-I004` was then closed as operation status model; `WAPI-I003` was then closed as scoped write-token model; `WAPI-I002` was then closed as config delivery decoupling; `WAPI-I001` was then closed as `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels. Current next recommendation after `WAPI-I005` closure is `NG-N003` operation queue design after write API contract with `live_write_authorized: no`.
+It defines idempotency keys, per-target lock boundaries, retry behavior, conflict statuses and partial-failure vocabulary before any fake-runner code or write API route implementation. `WAPI-V005` was selected later and closed as write API audit/redaction requirements; `WAPI-I004` was then closed as operation status model; `WAPI-I003` was then closed as scoped write-token model; `WAPI-I002` was then closed as config delivery decoupling; `WAPI-I001` was then closed as `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels; `NG-N003` was then closed as docs-only operation queue design after write API contract. Current next recommendation after `NG-N003` closure is `NG-N002` health/status polling design with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

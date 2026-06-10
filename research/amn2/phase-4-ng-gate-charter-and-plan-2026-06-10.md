@@ -87,12 +87,13 @@ Closed and removed from active plan:
 - `WAPI-I003` scoped write-token model;
 - `WAPI-I002` config delivery decoupling;
 - `WAPI-I001` `/api/clients` design without live CRUD;
-- `WAPI-I005` web-panel gated action labels.
+- `WAPI-I005` web-panel gated action labels;
+- `NG-N003` operation queue design after write API contract.
 
 Active next recommendation:
 
 ```text
-NG-N003 operation queue design after write API contract
+NG-N002 health/status polling design
 ```
 
 Reason: it is docs-only and is constrained by `live_write_authorized: no`.

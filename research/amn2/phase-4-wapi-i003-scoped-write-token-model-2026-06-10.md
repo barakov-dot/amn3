@@ -204,7 +204,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It makes the config-delivery boundary explicit before `/api/clients` design: client/peer creation may create a safe operation plan, but `.conf`, QR, `vpn://`, archives, share links and downloads require a separate secret-read/config gate. `WAPI-I001` was then closed as docs-only `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels. Current next recommendation after `WAPI-I005` closure is `NG-N003` operation queue design after write API contract with `live_write_authorized: no`.
+It makes the config-delivery boundary explicit before `/api/clients` design: client/peer creation may create a safe operation plan, but `.conf`, QR, `vpn://`, archives, share links and downloads require a separate secret-read/config gate. `WAPI-I001` was then closed as docs-only `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels; `NG-N003` was then closed as docs-only operation queue design after write API contract. Current next recommendation after `NG-N003` closure is `NG-N002` health/status polling design with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

@@ -38,6 +38,7 @@ required_gate_for_public_exposure: P4-PUBLIC-EXPOSURE-GATE
 selected_next_slice: NG-N003 operation queue design after write API contract
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed in research/amn2/phase-4-ng-n003-operation-queue-design-2026-06-10.md
 ```
 
 ## Sources Reused
@@ -175,7 +176,7 @@ Any future AMN2 implementation plan for web-panel gated action labels must start
 
 ## NG-N003 Handoff
 
-`NG-N003` is the recommended next docs-only slice:
+`NG-N003` was the recommended next docs-only slice and was later closed in `research/amn2/phase-4-ng-n003-operation-queue-design-2026-06-10.md`:
 
 ```text
 slice_id: NG-N003
@@ -188,7 +189,7 @@ live_vps_commands: no
 config_delivery: no
 ```
 
-Reason: the WAPI contract chain now defines route taxonomy, fake-runner expectations, idempotency/locks, audit/redaction, operation statuses, scoped tokens, config decoupling, `/api/clients` boundaries and panel labels. The next safe design layer is queue/cancel/retry semantics as docs-only planning, not implementation.
+Reason: the WAPI contract chain now defines route taxonomy, fake-runner expectations, idempotency/locks, audit/redaction, operation statuses, scoped tokens, config decoupling, `/api/clients` boundaries and panel labels. `NG-N003` captured queue/cancel/retry semantics as docs-only planning, not implementation. Current next recommendation after `NG-N003` closure is `NG-N002` health/status polling design with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 
