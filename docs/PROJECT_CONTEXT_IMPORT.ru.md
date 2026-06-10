@@ -7,7 +7,10 @@ entrypoint: docs/NEXT_CHAT_AMN2_PHASE_4_UNIFIED_PRODUCT_GATE.ru.md
 research note: research/amn2/phase-4-unified-product-gate-handoff-2026-06-09.md
 AMN3 Phase 4 coordination checkpoint before P4-N001 sync: 113c5ed Record Phase 4 bot admin read-only labels
 Phase 4 completed local/default sequence: P4-C009, P4-I002, route/secret gate planning, P4-I003 design/plan/implementation, P4-I004, P4-N003, P4-I005, P4-N004, P4-N001 docs/status sync, P4-N002 protocol manager interface checklist, P4-X003 Russian-first operator docs polish, P4-X002 API/status/gate naming cleanup, P4-X001 read-only API docs grouping polish, P4-I001 second read-only UX pass closure
-Phase 4 next default decision: default local-only implementation queue is closed except minimal maintenance; any VPS/live/public/write/config direction requires a separate named gate/decision first
+Phase 4 next stage: P4-NG Named Gate / Write API Readiness is active as docs-only planning; plan docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md; charter research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md
+P4-NG closed: NG-C001 named gate charter, NG-C002 safety boundary restatement
+P4-NG next recommended docs-only tasks: NG-C003 secrets policy for gate outputs, NG-C004 go/no-go format for all gates
+P4-NG live/write status: NG-V001 read-only VPS baseline gate requires explicit operator approval and target SSH alias/host outside repo secrets; write API live work remains blocked until separate P4-WRITE-API-LIVE-GATE
 AMN2 source-overlay/package head: f7f6131 Update integration status for c92 manual prelaunch
 target VPS mode: service-mode web/bot active, loopback-only
 operator access: SSH local port forward to 127.0.0.1:3030, external browser only
@@ -21,6 +24,8 @@ revoked test peers: Neobyatnaya-AMNZ-3, Neobyatnaya-AMNZ-4
 ```
 
 Use Phase 4 as the unified product/API planning gate. Do not reopen Phase 3 service-mode loopback as pending. Do not run live VPS commands from the main chat by default. PRVTPRO/Web Panel and KYORESUAS/API outputs enter as candidate rows first; any public API, direct public web/admin, HTTPS reverse proxy, config delivery, write CRUD, Local Agent mutation, backup/import/reboot or production peer mutation requires a separate named gate. `P4-I001` is closed as not needed now; do not reopen a second private-panel UX pass by default.
+
+Use P4-NG as the active gate-first stage. It starts with docs-only gate policy and does not authorize SSH, VPS sampling, public exposure, write API, config delivery or production mutation by itself.
 
 Current private/local read-only API grouping after `P4-X001`: server inventory/status (`GET /api/servers`, `GET /api/servers/{server_name}/summary`), integration/service boundary (`GET /api/integration/status`), Local Agent runtime summary (`GET /api/local-agent/runtime/summary`) and aggregate metrics (`GET /api/metrics/summary`, `GET /api/users/summary`). This is docs/navigation grouping only; it does not authorize public OpenAPI/docs exposure, route expansion, config delivery or write routes.
 

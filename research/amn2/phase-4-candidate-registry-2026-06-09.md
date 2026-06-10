@@ -590,8 +590,9 @@ Implemented safe scope:
 - `P4-X002` API/status/gate naming cleanup was completed as AMN3 docs-only evidence in `research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md`; it defines active meanings for service-mode, local-only, read-only, gate classes, public exposure and config delivery without changing routes, gates or behavior.
 - `P4-X001` read-only API docs grouping polish was completed as AMN3 docs-only evidence in `research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md`; it groups the existing six private/local read-only routes into server inventory/status, integration/service boundary, Local Agent runtime summary and aggregate metrics without public OpenAPI/docs exposure, route expansion or behavior changes.
 - `P4-I001` second read-only UX pass was closed as not needed now in `research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md`; no second pass was run and no new page-level findings were collected.
+- `P4-NG` named gate / write API readiness was started as AMN3 docs-only planning in `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md` with plan `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`; `NG-C001` and `NG-C002` are closed, while live/write work remains blocked without separate approval.
 
-Next decision: default local-only Phase 4 implementation queue is closed except minimal maintenance; any VPS/live/public/write/config direction requires a separate named gate/decision first.
+Next decision: continue P4-NG with docs-only `NG-C003` secrets policy and `NG-C004` go/no-go format before proposing any read-only VPS command.
 
 ## Source Notes
 
@@ -602,6 +603,8 @@ Primary AMN3 sources:
 - `research/amn2/transfer-backlog.md`
 - `research/amn2/service-mode-web-panel-read-only-ux-review-evidence-2026-06-09.md`
 - `research/amn2/phase-4-unified-product-gate-handoff-2026-06-09.md`
+- `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md`
+- `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`
 
 Upstream/reference sources:
 

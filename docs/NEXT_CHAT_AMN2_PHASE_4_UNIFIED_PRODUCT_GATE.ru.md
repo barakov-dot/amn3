@@ -94,6 +94,27 @@ Phase 4 does not authorize:
 
 Any item above requires a separate explicit gate, safe summary and rollback/recovery note.
 
+## Новый этап P4-NG
+
+`P4-NG` starts after the default local-only Phase 4 queue was closed. It is the Named Gate / Write API Readiness stage.
+
+Docs:
+
+- plan: `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`;
+- charter/evidence: `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md`.
+
+Closed in this stage:
+
+- `NG-C001` named gate charter;
+- `NG-C002` safety boundary restatement.
+
+Active next recommendation:
+
+- `NG-C003` secrets policy for gate outputs;
+- `NG-C004` go/no-go format for all gates.
+
+Do not run `NG-V001` read-only VPS baseline gate until the operator explicitly approves that gate and provides the target SSH alias/host outside repository secrets. Write API live work remains blocked until a separate `P4-WRITE-API-LIVE-GATE`.
+
 ## Обязательное чтение
 
 Start with:
@@ -182,13 +203,15 @@ recommendation: accept | defer | reject | research
 
 ### Линия D. Подготовка AMN2 local/read-only slices
 
-Безопасные следующие local candidates:
+Default local-only implementation queue is closed after `P4-I001` closure. Safe work in this line is now limited to explicit `P4-NG` planning or a newly approved local-only design slice.
 
-- detailed web-panel UX backlog from a second read-only pass;
-- status/readiness wording cleanup;
-- candidate registry for PRVTPRO/KYORESUAS ideas;
-- route/auth/secret policy checks before future route expansion;
-- tests for read-only UI/status surfaces.
+Безопасные next actions:
+
+- `NG-C003` secrets policy for gate outputs;
+- `NG-C004` go/no-go format for all gates;
+- docs-only write API threat model/design after explicit selection;
+- candidate registry maintenance for PRVTPRO/KYORESUAS ideas;
+- route/auth/secret policy checks before future route expansion.
 
 Не запускать live operations из этой линии. Если выбран `amn2` code change, создать отдельную ветку/план в repo `amn2` и держать первый slice local/read-only, если отдельно не утверждено другое.
 
@@ -239,7 +262,8 @@ go_no_go_decision:
 17. Treat `P4-X001` read-only API docs grouping polish as completed; evidence: `research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md`.
 18. Treat `P4-I001` second read-only UX pass as closed/not needed now; evidence: `research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md`.
 19. Treat the default local-only Phase 4 implementation queue as closed except minimal maintenance.
-20. If a live/public/write/config action is proposed, stop and create a separate named gate first.
+20. Treat `P4-NG` named gate / write API readiness charter as started docs-only; evidence: `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md`.
+21. If a live/public/write/config action is proposed, stop and create a separate named gate first.
 
 ## Сообщение для копирования в основной чат
 
@@ -339,6 +363,8 @@ go_no_go_decision:
 - This does not authorize public OpenAPI/docs exposure, route expansion, config delivery or write routes.
 
 Следующее решение:
-- default local-only Phase 4 implementation queue is closed;
+- P4-NG is active as docs-only named gate / write API readiness planning;
+- NG-C001 and NG-C002 are closed;
+- next recommended docs-only tasks are NG-C003 secrets policy and NG-C004 go/no-go format;
 - any VPS/live/public/write/config direction requires a separate named gate/decision first.
 ```

@@ -117,11 +117,15 @@ It is a planning and transfer gate, not a permission to run new live commands.
 14. `P4-X002` API/status/gate naming cleanup; evidence: `research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md`.
 15. `P4-X001` read-only API docs grouping polish; evidence: `research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md`.
 16. `P4-I001` second read-only UX pass closure; evidence: `research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md`.
+17. `P4-NG` named gate / write API readiness charter; evidence: `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md`; plan: `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`.
 
-Оставшееся default-mode решение:
+Текущий next stage:
 
-1. default local-only Phase 4 implementation queue is closed except minimal maintenance;
-2. any VPS/live/public/write/config direction requires a separate named gate/decision first.
+1. `P4-NG` is active as docs-only named gate / write API readiness planning.
+2. `NG-C001` named gate charter and `NG-C002` safety boundary restatement are closed.
+3. Next recommended docs-only tasks are `NG-C003` secrets policy and `NG-C004` go/no-go format.
+4. `NG-V001` read-only VPS baseline gate requires explicit operator approval and target SSH alias/host outside repo secrets.
+5. Write API live work remains blocked until a separate `P4-WRITE-API-LIVE-GATE`.
 
 If the selected slice requires live VPS state changes, stop and create a separate named gate first.
 
@@ -147,6 +151,8 @@ research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md
 research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md
 research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md
 research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md
+research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md
+docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md
 research/amn2/target-server-service-mode-authenticated-web-panel-smoke-evidence-2026-06-09.md
 research/amn2/target-server-revoke-by-number-4-evidence-2026-06-09.md
 research/amn2/target-server-service-mode-ssh-tunnel-access-evidence-2026-06-09.md
