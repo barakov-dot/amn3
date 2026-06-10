@@ -23,6 +23,7 @@ Accepted baseline:
 - `P4-C009` local investigation clarified that `/users` shows local AMN2 DB users/devices only; live VPS peers created outside AMN2 belong to server peer-sync/read-only inventory unless a separate write/backfill gate is opened.
 - KYORESUAS upstream was refreshed on 2026-06-10 at `ffdc78c`; see `research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-10.md`. The refresh reinforces write serialization, atomic config write, lifecycle vocabulary, QR/import testing, rate-limit/public-route hardening and setup resilience, but does not open any route or copy upstream code.
 - PRVTPRO upstream was refreshed on 2026-06-10 at `7f062abc2c76bbe19eb7daafdf1191d6c26ff19a`; see `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`. The refresh reinforces expiration/lifecycle contract tests, read-only about/version/build status, read-only status/latency design, API taxonomy grouping and hybrid-only protocol/service ideas, but GPL-3.0 code, templates, UI, manager implementations and workflows are not copied.
+- `NG-SC001` added a `Codex Security` threat-model checkpoint before `NG-V001` or any future destructive VPS rebuild gate; see `research/amn2/phase-4-ng-sc001-codex-security-vps-risk-checkpoint-2026-06-10.md`.
 
 Still blocked without a separate named gate:
 
@@ -126,7 +127,7 @@ license_boundary: not applicable
 risk_class: read-only live environment check
 secret_surface: safe summary only; no `.env` values, tokens, peer keys, configs or full logs
 remote_write_surface: read-only VPS commands
-test_plan: named gate preflight with explicit allowed commands, safe fields and no secret publication
+test_plan: named gate preflight with explicit allowed commands, safe fields, no secret publication and Codex Security `security_risk_decision: go`
 required_gate: requires VPS gate
 recommendation: defer
 ```
@@ -684,10 +685,11 @@ Implemented safe scope:
 - `NG-S002` next-chat handoff synchronization and `NG-S004` visible active plan maintenance were closed in `research/amn2/phase-4-ng-s002-next-chat-handoff-sync-2026-06-10.md` and `research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md`; they aligned next-chat/startup context and removed closed simple tasks from the active plan without authorizing implementation or live work.
 - `NG-X003` stale wording cleanup and `NG-X001` gate naming consistency were closed in `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md` and `research/amn2/phase-4-ng-x001-gate-naming-consistency-2026-06-10.md`; they removed stale active-next wording and aligned stage-level gate labels to `P4-NG-*` without authorizing implementation, live work, config delivery or public exposure.
 - `NG-X002` Russian-first operator wording polish was closed in `research/amn2/phase-4-ng-x002-russian-first-operator-wording-polish-2026-06-10.md`; it made active P4-NG operator-facing headings and next-step wording Russian-first without changing technical ids, routes, gate names, file paths or candidate ids.
+- `NG-SC001` Codex Security VPS risk checkpoint was closed in `research/amn2/phase-4-ng-sc001-codex-security-vps-risk-checkpoint-2026-06-10.md`; it adds `security_risk_decision: go | no-go | defer` before `NG-V001` or any future destructive VPS rebuild gate without authorizing SSH, live commands, reinstall/rebuild, public exposure, write/config actions or production mutation.
 - PRVTPRO refresh 2026-06-10 was recorded in `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`; `P4-PRVTPRO-REFRESH-002` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-expiration-contract-tests-implementation-2026-06-10.md`, `P4-PRVTPRO-REFRESH-001` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-build-status-implementation-2026-06-10.md`, and `P4-PRVTPRO-REFRESH-004` was completed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`. Remaining AMN2 PRVTPRO-derived candidate is `P4-PRVTPRO-REFRESH-003` only after design boundary. Hybrid-only candidates are `HYB-PRVTPRO-REFRESH-001..004`. No GPL code, templates, UI, managers or workflows are copied.
 - The PRVTPRO local-only branches for `P4-PRVTPRO-REFRESH-002` and `P4-PRVTPRO-REFRESH-001` were merged into `amn2/codex-vps-test-prep` at `1508e3c4a100b76815b29f91757290f1266f813d`; evidence: `research/amn2/phase-4-prvtpro-local-slices-merge-2026-06-10.md`.
 
-Следующее решение: очередь default docs-only cosmetic закрыта. Либо explicit approval для `NG-V001` read-only VPS baseline gate с target SSH alias/host вне repository secrets, либо design boundary для `P4-PRVTPRO-REFRESH-003` до любого UI/server-status slice. Не предлагать VPS command без named gate и не копировать GPL code.
+Следующее решение: очередь default docs-only cosmetic закрыта. Либо explicit approval для `NG-V001` read-only VPS baseline gate с target SSH alias/host вне repository secrets и `security_risk_decision: go`, либо design boundary для `P4-PRVTPRO-REFRESH-003` до любого UI/server-status slice. Fresh VPS rebuild требует отдельный destructive gate `VPS-REBUILD-001`. Не предлагать VPS command без named gate и не копировать GPL code.
 
 ## Source Notes
 
@@ -703,6 +705,7 @@ Primary AMN3 sources:
 - `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`
 - `research/amn2/phase-4-ng-x001-gate-naming-consistency-2026-06-10.md`
 - `research/amn2/phase-4-ng-x002-russian-first-operator-wording-polish-2026-06-10.md`
+- `research/amn2/phase-4-ng-sc001-codex-security-vps-risk-checkpoint-2026-06-10.md`
 - `research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md`
 - `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`
 - `research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md`

@@ -116,6 +116,7 @@ Docs:
 - stale wording cleanup evidence: `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`.
 - gate naming consistency evidence: `research/amn2/phase-4-ng-x001-gate-naming-consistency-2026-06-10.md`.
 - Russian-first operator wording evidence: `research/amn2/phase-4-ng-x002-russian-first-operator-wording-polish-2026-06-10.md`.
+- Codex Security VPS risk checkpoint evidence: `research/amn2/phase-4-ng-sc001-codex-security-vps-risk-checkpoint-2026-06-10.md`.
 
 Closed in or alongside this stage:
 
@@ -145,14 +146,15 @@ Closed in or alongside this stage:
 - `NG-X003` stale wording cleanup;
 - `NG-X001` gate naming consistency;
 - `NG-X002` Russian-first operator wording polish;
+- `NG-SC001` Codex Security VPS risk checkpoint;
 - `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping policy support.
 
 Следующее решение:
 
 - очередь default docs-only cosmetic закрыта;
-- `NG-V001` read-only VPS baseline gate требует explicit named approval до любого SSH/VPS action.
+- `NG-V001` read-only VPS baseline gate требует explicit named approval, target SSH alias/host вне repo secrets и `security_risk_decision: go` до любого SSH/VPS action.
 
-Do not run `NG-V001` read-only VPS baseline gate until the operator explicitly approves that gate and provides the target SSH alias/host outside repository secrets. Write API live work remains blocked until a separate `P4-NG-WRITE-API-LIVE-GATE`; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
+Do not run `NG-V001` read-only VPS baseline gate until the operator explicitly approves that gate, provides the target SSH alias/host outside repository secrets, and the embedded Codex Security checkpoint returns `security_risk_decision: go`. Write API live work remains blocked until a separate `P4-NG-WRITE-API-LIVE-GATE`; destructive VPS rebuild remains blocked until a separate `VPS-REBUILD-001` gate; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
 
 ## Обязательное чтение
 
@@ -329,7 +331,8 @@ go_no_go_decision:
 41. Treat `NG-X003` stale wording cleanup as closed; evidence: `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`.
 42. Treat `NG-X001` gate naming consistency as closed; evidence: `research/amn2/phase-4-ng-x001-gate-naming-consistency-2026-06-10.md`.
 43. Treat `NG-X002` Russian-first operator wording polish as closed; evidence: `research/amn2/phase-4-ng-x002-russian-first-operator-wording-polish-2026-06-10.md`.
-44. If a live/public/write/config action is proposed, stop and create a separate named gate first.
+44. Treat `NG-SC001` Codex Security VPS risk checkpoint as closed; evidence: `research/amn2/phase-4-ng-sc001-codex-security-vps-risk-checkpoint-2026-06-10.md`.
+45. If a live/public/write/config/destructive action is proposed, stop and create a separate named gate first.
 
 ## Сообщение для копирования в основной чат
 
@@ -469,6 +472,10 @@ go_no_go_decision:
 - research/amn2/phase-4-ng-x002-russian-first-operator-wording-polish-2026-06-10.md
 - active P4-NG operator-facing headings and next-step wording are Russian-first; technical ids/routes/gate names were not changed.
 
+Закрытый NG-SC001 Codex Security VPS risk checkpoint:
+- research/amn2/phase-4-ng-sc001-codex-security-vps-risk-checkpoint-2026-06-10.md
+- Codex Security threat-model checkpoint is now required before NG-V001 or any future destructive VPS rebuild gate; it does not authorize SSH, live commands, reinstall/rebuild, public exposure, write/config actions or production mutation.
+
 Текущая private/local read-only API grouping:
 - Server inventory/status: GET /api/servers, GET /api/servers/{server_name}/summary.
 - Integration/service boundary: GET /api/integration/status.
@@ -479,7 +486,7 @@ go_no_go_decision:
 
 Следующее решение:
 - P4-NG is active as docs-only named gate / write API readiness planning;
-- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, WAPI-I005, NG-N003, NG-N002, NG-N001, NG-N004, NG-S001, NG-S002, NG-S004, NG-X003, NG-X001, NG-X002, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001 and P4-PRVTPRO-REFRESH-004 are closed;
-- очередь default docs-only cosmetic закрыта; следующее explicit decision: NG-V001 read-only VPS baseline gate только после named approval;
-- любое VPS/live/public/write/config направление сначала требует отдельный named gate/decision.
+- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, WAPI-I005, NG-N003, NG-N002, NG-N001, NG-N004, NG-S001, NG-S002, NG-S004, NG-X003, NG-X001, NG-X002, NG-SC001, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001 and P4-PRVTPRO-REFRESH-004 are closed;
+- очередь default docs-only cosmetic закрыта; следующее explicit decision: NG-V001 read-only VPS baseline gate только после named approval и security_risk_decision: go;
+- любое VPS/live/public/write/config/destructive направление сначала требует отдельный named gate/decision.
 ```

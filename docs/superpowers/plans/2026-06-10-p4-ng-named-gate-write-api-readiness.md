@@ -145,6 +145,10 @@ write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-ng-x002-russian-first-operator-wording-polish-2026-06-10.md`.
   - Makes active P4-NG operator-facing headings and next-step instructions Russian-first while keeping technical ids/routes/gate names unchanged.
 
+- [x] **NG-SC001: Codex Security VPS risk checkpoint**
+  - Closed by `research/amn2/phase-4-ng-sc001-codex-security-vps-risk-checkpoint-2026-06-10.md`.
+  - Adds a required `Codex Security` threat-model checkpoint before `NG-V001` and any future destructive VPS rebuild gate, without authorizing SSH, live commands, reinstall/rebuild, public exposure, write/config actions or production mutation.
+
 ## Активный Оставшийся План
 
 ### Критичные
@@ -163,6 +167,7 @@ write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
 
   Разрешенные действия после явного operator approval:
 
+  - `Codex Security` risk checkpoint with `security_risk_decision: go | no-go | defer`.
   - Проверка SSH transport только до operator-provided target.
   - Read-only service status для `amneziya-web` и `amneziya-bot`.
   - Read-only loopback `/login` check на `127.0.0.1:3030`.
@@ -202,4 +207,4 @@ write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
 
 ## Рекомендация
 
-Очередь default docs-only cosmetic закрыта. Следующее решение: `NG-V001` read-only VPS baseline gate можно брать только после явного operator approval и target SSH alias/host вне repository secrets. Если live/read-only gate сейчас не выбирается, оставляем P4-NG в paused/docs-maintenance state или открываем отдельный local-only design boundary, например для `P4-PRVTPRO-REFRESH-003`.
+Очередь default docs-only cosmetic закрыта. `Codex Security` checkpoint добавлен и закрыт как docs-only guardrail. Следующее решение: `NG-V001` read-only VPS baseline gate можно брать только после явного operator approval, target SSH alias/host вне repository secrets и `security_risk_decision: go`. Если вместо baseline выбирается fresh VPS rebuild, сначала нужен отдельный destructive gate `VPS-REBUILD-001`; `NG-SC001` сам по себе его не разрешает.
