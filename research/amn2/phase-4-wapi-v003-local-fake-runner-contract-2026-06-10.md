@@ -26,6 +26,7 @@ required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
 selected_next_slice: WAPI-V004 idempotency, locking and partial-failure model
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed in research/amn2/phase-4-wapi-v004-idempotency-locking-partial-failure-model-2026-06-10.md
 ```
 
 ## Sources Reused
@@ -173,7 +174,7 @@ Any future AMN2 fake-runner implementation plan must start with RED tests for:
 
 ## WAPI-V004 Handoff
 
-`WAPI-V004` may be selected next only as docs-only idempotency, locking and partial-failure model:
+`WAPI-V004` was selected next and later closed as docs-only idempotency, locking and partial-failure model:
 
 ```text
 slice_id: WAPI-V004
@@ -185,7 +186,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It should define idempotency keys, per-target lock boundaries, retry behavior, conflict statuses and partial-failure vocabulary before any fake-runner code or write API route implementation.
+It defines idempotency keys, per-target lock boundaries, retry behavior, conflict statuses and partial-failure vocabulary before any fake-runner code or write API route implementation. Current next recommendation after `WAPI-V004` closure is `WAPI-V005` write API audit/redaction requirements with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

@@ -153,7 +153,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It defines fake-runner inputs/outputs for create, disable, revoke, sync and retry operation plans without SSH, live VPS commands or remote mutation. Current next recommendation after `WAPI-V003` closure is `WAPI-V004` idempotency, locking and partial-failure model with `live_write_authorized: no`.
+It defines fake-runner inputs/outputs for create, disable, revoke, sync and retry operation plans without SSH, live VPS commands or remote mutation. `WAPI-V004` was selected next and later closed as docs-only idempotency, locking and partial-failure model. Current next recommendation after `WAPI-V004` closure is `WAPI-V005` write API audit/redaction requirements with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

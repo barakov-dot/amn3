@@ -77,6 +77,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-wapi-v003-local-fake-runner-contract-2026-06-10.md`.
   - Defines future fake-runner inputs, outputs, operation intents, deterministic failure modes, audit-safe metadata and RED test requirements without adding runner code.
 
+- [x] **WAPI-V004: idempotency, locking and partial-failure model**
+  - Closed by `research/amn2/phase-4-wapi-v004-idempotency-locking-partial-failure-model-2026-06-10.md`.
+  - Defines request idempotency keys, per-target locks, retry behavior, conflict statuses and partial-failure vocabulary without adding runtime routes, runner code or live VPS/write authorization.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -115,16 +119,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   Done when:
 
   - Evidence records safe summary only and no secret-bearing data.
-
-- [ ] **WAPI-V004: idempotency, locking and partial-failure model**
-
-  Scope:
-
-  - Define request idempotency keys, operation locks, retry behavior, partial apply/revoke failure states and rollback evidence.
-
-  Done when:
-
-  - Design can explain what happens if local DB write succeeds but remote mutation fails, or vice versa.
 
 - [ ] **WAPI-V005: write API audit/redaction requirements**
 
@@ -245,6 +239,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `WAPI-V004` next. It is docs-only idempotency, locking and partial-failure model design with `live_write_authorized: no`; no runtime routes, live VPS commands, config delivery or production mutation are authorized.
+Start with `WAPI-V005` next. It is docs-only write API audit/redaction requirements design with `live_write_authorized: no`; no runtime routes, fake-runner code, live VPS commands, config delivery or production mutation are authorized.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.
