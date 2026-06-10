@@ -40,6 +40,7 @@ from app.services.email_delivery import build_smtp_sender
 from app.services.api_tokens import API_TOKEN_FIRST_SLICE_SCOPES
 from app.services.api_tokens import create_route_api_token
 from app.services.api_tokens import revoke_api_token
+from app.services.build_status import build_about_status
 from app.services.email_tokens import create_email_token
 from app.services.email_tokens import hash_email_token
 from app.services.email_tokens import utc_now_iso
@@ -398,6 +399,22 @@ def create_web_app(
                 title="Integration status",
                 authenticated=True,
                 report=report,
+            ),
+        )
+
+    @app.get("/about")
+    async def about_index(request: Request):
+        if not _is_authenticated(request):
+            return RedirectResponse("/login", status_code=303)
+
+        return templates.TemplateResponse(
+            request,
+            "about.html",
+            _template_context(
+                request,
+                title="About",
+                authenticated=True,
+                about=build_about_status(),
             ),
         )
 
