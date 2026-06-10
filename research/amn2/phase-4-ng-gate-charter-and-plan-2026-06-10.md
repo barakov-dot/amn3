@@ -94,15 +94,16 @@ Closed and removed from active plan:
 - `NG-N004` candidate registry update after every gate decision;
 - `NG-S001` status/transfer synchronization;
 - `NG-S002` next-chat handoff synchronization;
-- `NG-S004` visible active plan maintenance.
+- `NG-S004` visible active plan maintenance;
+- `NG-X003` stale wording cleanup.
 
 Active next recommendation:
 
 ```text
-NG-X003 stale wording cleanup
+NG-X001 gate naming consistency
 ```
 
-Reason: it is docs-only and is constrained by `live_write_authorized: no`.
+Reason: it is docs-only cosmetic cleanup and keeps gate-stage names consistent before any future read-only VPS gate discussion.
 
 Reusable gate evidence template:
 

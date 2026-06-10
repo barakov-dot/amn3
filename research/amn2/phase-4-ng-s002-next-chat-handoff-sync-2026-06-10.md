@@ -69,7 +69,7 @@ defer_scope: naming/wording cleanup, read-only VPS gate, implementation gates, l
 
 ## Handoff
 
-`NG-S002` is closed together with `NG-S004`. The recommended next docs-only slice is `NG-X003` stale wording cleanup, because the next-chat packet and visible plan are current and the remaining safe work is cosmetic cleanup of wording that could imply live/write/public/config authorization.
+`NG-S002` is closed together with `NG-S004`. `NG-X003` was selected next and later closed in `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`. Current next recommendation after `NG-X003` closure is `NG-X001` gate naming consistency with `live_write_authorized: no`.
 
 ## Safety Statement
 

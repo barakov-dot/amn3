@@ -21,9 +21,10 @@ config_delivery: no
 production_mutation: no
 live_vps_commands: no
 ssh_commands: no
-selected_next_slice: NG-X003 stale wording cleanup
-selected_next_slice_mode: docs-only
-selected_next_slice_live_write_authorized: no
+closed_follow_up_slice: NG-X003 stale wording cleanup
+closed_follow_up_slice_status: completed in research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md
+closed_follow_up_slice_mode: docs-only
+closed_follow_up_slice_live_write_authorized: no
 ```
 
 ## Plan Maintenance Result
@@ -43,7 +44,7 @@ very_important: NG-V001 read-only VPS baseline gate, blocked until explicit name
 important: none
 normal: none
 simple: none
-cosmetic: NG-X001, NG-X002, NG-X003
+cosmetic: NG-X001, NG-X002
 ```
 
 ## Go/No-Go Result
@@ -57,7 +58,7 @@ defer_scope: stale wording cleanup, gate naming consistency, Russian-first wordi
 
 ## Handoff
 
-`NG-S004` is closed. The recommended next docs-only slice is `NG-X003` stale wording cleanup, because all simple tasks are now closed and stale wording cleanup most directly reduces accidental live/write/public/config ambiguity before any future gate discussion.
+`NG-S004` is closed. `NG-X003` was selected next and later closed in `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`. Current next recommendation after `NG-X003` closure is `NG-X001` gate naming consistency with `live_write_authorized: no`.
 
 ## Safety Statement
 

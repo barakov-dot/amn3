@@ -21,7 +21,7 @@ P4-NG scoped write-token model evidence: research/amn2/phase-4-wapi-i003-scoped-
 P4-NG config delivery decoupling evidence: research/amn2/phase-4-wapi-i002-config-delivery-decoupling-2026-06-10.md
 P4-NG /api/clients design evidence: research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md
 P4-NG web-panel gated action labels evidence: research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md
-P4-NG next recommended docs-only task: NG-X003 stale wording cleanup with live_write_authorized: no
+P4-NG next recommended docs-only task: NG-X001 gate naming consistency with live_write_authorized: no
 P4-NG live/write status: NG-V001 read-only VPS baseline gate requires explicit operator approval and target SSH alias/host outside repo secrets; write API live work remains blocked until separate P4-WRITE-API-LIVE-GATE; selected WAPI work remains docs-only/local-only with live_write_authorized: no
 PRVTPRO refresh 2026-06-10: research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md
 PRVTPRO AMN2 local-only order: P4-PRVTPRO-REFRESH-002 expiration-field contract tests completed in AMN2 commit b2eceeb111a0a27e41daf7b9ae7c79b5a0195e51; P4-PRVTPRO-REFRESH-001 read-only About/Version/Build status completed in AMN2 commit dc7966628e490da018f55fafe0fc559b44cc1dfa; both merged into AMN2 codex-vps-test-prep at 1508e3c4a100b76815b29f91757290f1266f813d; P4-PRVTPRO-REFRESH-004 API taxonomy/OpenAPI grouping completed as AMN3 docs-only policy support in research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md; remaining PRVTPRO-derived safe item is P4-PRVTPRO-REFRESH-003 read-only server status/latency UX only after design boundary

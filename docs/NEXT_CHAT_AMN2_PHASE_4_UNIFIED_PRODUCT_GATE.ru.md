@@ -113,6 +113,7 @@ Docs:
 - config delivery decoupling evidence: `research/amn2/phase-4-wapi-i002-config-delivery-decoupling-2026-06-10.md`.
 - `/api/clients` design evidence: `research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md`.
 - web-panel gated action labels evidence: `research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md`.
+- stale wording cleanup evidence: `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`.
 
 Closed in or alongside this stage:
 
@@ -139,11 +140,12 @@ Closed in or alongside this stage:
 - `NG-S001` status/transfer synchronization;
 - `NG-S002` next-chat handoff synchronization;
 - `NG-S004` visible active plan maintenance;
+- `NG-X003` stale wording cleanup;
 - `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping policy support.
 
 Active next recommendation:
 
-- `NG-X003` stale wording cleanup with `live_write_authorized: no`.
+- `NG-X001` gate naming consistency with `live_write_authorized: no`.
 
 Do not run `NG-V001` read-only VPS baseline gate until the operator explicitly approves that gate and provides the target SSH alias/host outside repository secrets. Write API live work remains blocked until a separate `P4-WRITE-API-LIVE-GATE`; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
 
@@ -243,7 +245,7 @@ Default local-only implementation queue is closed after `P4-I001` closure. Safe 
 
 Безопасные next actions:
 
-- `NG-X003` stale wording cleanup with `live_write_authorized: no`;
+- `NG-X001` gate naming consistency with `live_write_authorized: no`;
 - `P4-PRVTPRO-REFRESH-003` design boundary only, before any server status/latency UX implementation;
 - docs-only write API design after explicit selection and threat model alignment;
 - candidate registry maintenance for PRVTPRO/KYORESUAS ideas;
@@ -319,7 +321,8 @@ go_no_go_decision:
 38. Treat `NG-S001` status/transfer synchronization as closed; evidence: `research/amn2/phase-4-ng-s001-status-transfer-sync-2026-06-10.md`.
 39. Treat `NG-S002` next-chat handoff synchronization as closed; evidence: `research/amn2/phase-4-ng-s002-next-chat-handoff-sync-2026-06-10.md`.
 40. Treat `NG-S004` visible active plan maintenance as closed; evidence: `research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md`.
-41. If a live/public/write/config action is proposed, stop and create a separate named gate first.
+41. Treat `NG-X003` stale wording cleanup as closed; evidence: `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`.
+42. If a live/public/write/config action is proposed, stop and create a separate named gate first.
 
 ## Сообщение для копирования в основной чат
 
@@ -447,6 +450,10 @@ go_no_go_decision:
 - research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md
 - next-chat packet and visible active plan are current; no simple docs-only tasks remain active.
 
+Закрытый NG-X003 stale wording cleanup:
+- research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md
+- stale active-next wording cleaned up; NG-X003 is no longer an active recommendation.
+
 Текущая private/local read-only API grouping:
 - Server inventory/status: GET /api/servers, GET /api/servers/{server_name}/summary.
 - Integration/service boundary: GET /api/integration/status.
@@ -457,7 +464,7 @@ go_no_go_decision:
 
 Следующее решение:
 - P4-NG is active as docs-only named gate / write API readiness planning;
-- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, WAPI-I005, NG-N003, NG-N002, NG-N001, NG-N004, NG-S001, NG-S002, NG-S004, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001 and P4-PRVTPRO-REFRESH-004 are closed;
-- next recommended docs-only task is NG-X003 stale wording cleanup with live_write_authorized: no;
+- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, WAPI-I005, NG-N003, NG-N002, NG-N001, NG-N004, NG-S001, NG-S002, NG-S004, NG-X003, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001 and P4-PRVTPRO-REFRESH-004 are closed;
+- next recommended docs-only task is NG-X001 gate naming consistency with live_write_authorized: no;
 - any VPS/live/public/write/config direction requires a separate named gate/decision first.
 ```

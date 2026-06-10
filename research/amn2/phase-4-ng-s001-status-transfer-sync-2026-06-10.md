@@ -87,7 +87,7 @@ defer_scope: next-chat handoff synchronization, visible active-plan maintenance,
 
 ## Handoff
 
-`NG-S001` is closed. `NG-S002` and `NG-S004` were selected next and closed together in `research/amn2/phase-4-ng-s002-next-chat-handoff-sync-2026-06-10.md` and `research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md`. Current next recommendation after `NG-S002`/`NG-S004` closure is `NG-X003` stale wording cleanup with `live_write_authorized: no`.
+`NG-S001` is closed. `NG-S002` and `NG-S004` were selected next and closed together in `research/amn2/phase-4-ng-s002-next-chat-handoff-sync-2026-06-10.md` and `research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md`. `NG-X003` was then closed as docs-only stale wording cleanup. Current next recommendation after `NG-X003` closure is `NG-X001` gate naming consistency with `live_write_authorized: no`.
 
 ## Safety Statement
 

@@ -133,6 +133,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md`.
   - Removes closed simple tasks from the visible active plan and leaves only explicit VPS-gate and cosmetic docs tasks active.
 
+- [x] **NG-X003: stale wording cleanup**
+  - Closed by `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`.
+  - Removes stale active-next wording that could imply implicit live/write/public/config authorization.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -198,14 +202,8 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
   - Russian headings and operator instructions; keep technical ids/routes unchanged.
 
-- [ ] **NG-X003: stale wording cleanup**
-
-  Scope:
-
-  - Remove wording that sounds like implicit authorization for live/write/public/config work.
-
 ## First Recommendation
 
-Start with `NG-X003` next. It is docs-only stale wording cleanup and must preserve the P4-NG boundaries: remove wording that sounds like implicit authorization for live/write/public/config work, with no live VPS commands, no implementation, no route behavior changes, no config delivery and no production mutation.
+Start with `NG-X001` next. It is docs-only gate naming consistency and must preserve the P4-NG boundaries: align naming around `P4-NG-*` gate-stage docs/evidence, with no live VPS commands, no implementation, no route behavior changes, no config delivery and no production mutation.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.

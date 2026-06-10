@@ -685,7 +685,7 @@ Implemented safe scope:
 - PRVTPRO refresh 2026-06-10 was recorded in `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`; `P4-PRVTPRO-REFRESH-002` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-expiration-contract-tests-implementation-2026-06-10.md`, `P4-PRVTPRO-REFRESH-001` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-build-status-implementation-2026-06-10.md`, and `P4-PRVTPRO-REFRESH-004` was completed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`. Remaining AMN2 PRVTPRO-derived candidate is `P4-PRVTPRO-REFRESH-003` only after design boundary. Hybrid-only candidates are `HYB-PRVTPRO-REFRESH-001..004`. No GPL code, templates, UI, managers or workflows are copied.
 - The PRVTPRO local-only branches for `P4-PRVTPRO-REFRESH-002` and `P4-PRVTPRO-REFRESH-001` were merged into `amn2/codex-vps-test-prep` at `1508e3c4a100b76815b29f91757290f1266f813d`; evidence: `research/amn2/phase-4-prvtpro-local-slices-merge-2026-06-10.md`.
 
-Next decision: continue P4-NG with docs-only `NG-X003` stale wording cleanup with `live_write_authorized: no`, or if selecting remaining PRVTPRO-derived work, create the design boundary for `P4-PRVTPRO-REFRESH-003` before any UI/server-status slice. Do not propose any VPS command or copy GPL code.
+Next decision: continue P4-NG with docs-only `NG-X001` gate naming consistency with `live_write_authorized: no`, or if selecting remaining PRVTPRO-derived work, create the design boundary for `P4-PRVTPRO-REFRESH-003` before any UI/server-status slice. Do not propose any VPS command or copy GPL code.
 
 ## Source Notes
 
