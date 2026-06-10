@@ -32,6 +32,19 @@ focused_local_tests: 30 passed, 1 warning
 package_precheck_status: blocked_until_1508e3c_package_build
 ```
 
+Latest package build/hygiene evidence:
+
+```text
+research/amn2/vps-rebuild-001-package-build-hygiene-2026-06-10.md
+package_status: package-ready-not-vps-smoked
+package: dist/amn2-vps-update-and-smoke-kit-1508e3c.zip
+package_sha256: 03C51891AF83B9BD2B435AF5F77EEBBAE0DC7289CD107803DE7FB9877C4BFDA3
+source_zip: dist/amn2-codex-vps-test-prep-1508e3c-source.zip
+source_zip_sha256: 0F4BBD72651FC99197C857093C24AAC9F3927EC9F5B7B7C364B1A312032EF15E
+package_hygiene: passed
+test_extract: passed
+```
+
 ## Phase 1: Open Docs-Only Gate
 
 - [x] Create `research/amn2/vps-rebuild-001-fresh-vps-rebuild-gate-2026-06-10.md`.
@@ -61,7 +74,7 @@ package_precheck_status: blocked_until_1508e3c_package_build
   - `encrypted_backup_required`;
   - `safe_summary_only`.
 - [x] Choose exact AMN2 source commit after local source precheck.
-- [ ] Build and verify install/update package for `1508e3c`.
+- [x] Build and verify install/update package for `1508e3c`.
 - [x] Choose secret transfer policy:
   - `operator_local_channel_only`;
   - `regenerate_on_target`;
@@ -80,7 +93,8 @@ data_retention_decision: preserve_snapshot_required
 snapshot_or_backup_decision: provider_snapshot_required
 secret_transfer_policy: regenerate_on_target_where_possible + operator_local_channel_only_for_external_secrets
 install_source_commit_selected: 1508e3c4a100b76815b29f91757290f1266f813d
-install_package: pending-build-and-hygiene
+install_package: dist/amn2-vps-update-and-smoke-kit-1508e3c.zip
+install_package_sha256: 03C51891AF83B9BD2B435AF5F77EEBBAE0DC7289CD107803DE7FB9877C4BFDA3
 final_destructive_phrase: not_sent
 ```
 
@@ -115,7 +129,7 @@ Do not execute this phase until every Phase 3 decision is filled and the exact f
 
 ### Критичные
 
-- `VPS-REBUILD-001`: fresh VPS rebuild gate, `opened-defer-awaiting-final-destructive-approval`; next required: build and verify `1508e3c` package locally, then provider snapshot confirmation.
+- `VPS-REBUILD-001`: fresh VPS rebuild gate, `opened-defer-awaiting-final-destructive-approval`; next required: provider snapshot confirmation and stop-criteria review.
 
 ### Очень Важные
 
@@ -139,4 +153,4 @@ Do not execute this phase until every Phase 3 decision is filled and the exact f
 
 ## Recommendation
 
-Next step is not a live VPS command. Build and verify the `1508e3c` package locally, including checksum, hygiene and test extraction. Only after package evidence and provider snapshot confirmation are reviewed should the operator decide whether to send the exact final destructive phrase.
+Next step is not a live VPS command. Confirm the provider snapshot and review stop criteria. Only after those are reviewed should the operator decide whether to send the exact final destructive phrase.

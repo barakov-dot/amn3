@@ -57,7 +57,10 @@ allowed_values: not_required_by_operator | provider_snapshot_required | encrypte
 install_source_commit: 1508e3c4a100b76815b29f91757290f1266f813d
 allowed_values: explicit AMN2 commit or package hash only
 
-install_package: pending-build-and-hygiene
+install_package: dist/amn2-vps-update-and-smoke-kit-1508e3c.zip
+install_package_sha256: 03C51891AF83B9BD2B435AF5F77EEBBAE0DC7289CD107803DE7FB9877C4BFDA3
+source_zip: dist/amn2-codex-vps-test-prep-1508e3c-source.zip
+source_zip_sha256: 0F4BBD72651FC99197C857093C24AAC9F3927EC9F5B7B7C364B1A312032EF15E
 
 secret_transfer_policy: regenerate_on_target_where_possible + operator_local_channel_only_for_external_secrets
 allowed_values: operator_local_channel_only | regenerate_on_target | restore_from_approved_secret_store
@@ -66,7 +69,7 @@ final_destructive_phrase: not_sent
 required_exact_phrase: GO VPS-REBUILD-001 WIPE TARGET
 ```
 
-Snapshot-first mode is selected because the current `NG-V001` baseline is known-good and should remain recoverable for a novice-safe rebuild path. Local source precheck selected AMN2 commit `1508e3c4a100b76815b29f91757290f1266f813d`, but the package for that commit is not built yet. Until package build/hygiene, provider snapshot confirmation and the exact final destructive phrase are complete, this gate stays `defer`.
+Snapshot-first mode is selected because the current `NG-V001` baseline is known-good and should remain recoverable for a novice-safe rebuild path. Local source precheck selected AMN2 commit `1508e3c4a100b76815b29f91757290f1266f813d`; local package build/hygiene produced `dist/amn2-vps-update-and-smoke-kit-1508e3c.zip` as `package-ready-not-vps-smoked`. Until provider snapshot confirmation, stop-criteria review and the exact final destructive phrase are complete, this gate stays `defer`.
 
 ## Source Precheck Result
 
@@ -78,6 +81,22 @@ AMN2_source_commit: 1508e3c4a100b76815b29f91757290f1266f813d
 focused_local_tests: 30 passed, 1 warning
 package_precheck_status: blocked_until_1508e3c_package_build
 neighboring_branch_policy: mine ideas explicitly, do not auto-merge into first rebuild package
+```
+
+## Package Build/Hygiene Result
+
+Evidence: `research/amn2/vps-rebuild-001-package-build-hygiene-2026-06-10.md`.
+
+```text
+package_status: package-ready-not-vps-smoked
+package: dist/amn2-vps-update-and-smoke-kit-1508e3c.zip
+package_sha256: 03C51891AF83B9BD2B435AF5F77EEBBAE0DC7289CD107803DE7FB9877C4BFDA3
+source_zip: dist/amn2-codex-vps-test-prep-1508e3c-source.zip
+source_zip_sha256: 0F4BBD72651FC99197C857093C24AAC9F3927EC9F5B7B7C364B1A312032EF15E
+package_entries: 5
+source_entries: 302
+forbidden_source_entries: 0
+test_extract: passed
 ```
 
 ## Allowed Now
@@ -141,6 +160,7 @@ data_retention_decision: preserve_snapshot_required
 snapshot_or_backup_decision: provider_snapshot_required
 secret_transfer_policy: regenerate_on_target_where_possible + operator_local_channel_only_for_external_secrets
 install_source_commit: 1508e3c4a100b76815b29f91757290f1266f813d
-install_package: pending-build-and-hygiene
-next_required_operator_decision: build and verify 1508e3c package locally, provider snapshot confirmation, then exact final destructive phrase only if the operator still chooses wipe
+install_package: dist/amn2-vps-update-and-smoke-kit-1508e3c.zip
+install_package_sha256: 03C51891AF83B9BD2B435AF5F77EEBBAE0DC7289CD107803DE7FB9877C4BFDA3
+next_required_operator_decision: provider snapshot confirmation and stop-criteria review, then exact final destructive phrase only if the operator still chooses wipe
 ```

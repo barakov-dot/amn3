@@ -148,9 +148,9 @@ Recommendation: do not broaden the first fresh-rebuild source beyond `1508e3c` a
 
 ```text
 source_precheck_status: passed
-package_precheck_status: blocked_until_1508e3c_package_build
+package_precheck_status: superseded_by_package_build_hygiene
 install_source_commit: 1508e3c4a100b76815b29f91757290f1266f813d
-install_package: pending-build-and-hygiene
+install_package: superseded_by_dist/amn2-vps-update-and-smoke-kit-1508e3c.zip
 provider_snapshot_confirmation: pending
 final_destructive_phrase: not_sent
 go_no_go_decision: defer
