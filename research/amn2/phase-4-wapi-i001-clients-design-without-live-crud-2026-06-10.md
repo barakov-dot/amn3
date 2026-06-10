@@ -280,7 +280,7 @@ live_vps_commands: no
 config_delivery: no
 ```
 
-It uses this `/api/clients` contract to define how future web/admin labels distinguish read-only metadata, local operation planning, deferred live write, blocked config delivery and separately gated destructive/public actions. `NG-N003` was then closed as docs-only operation queue design after write API contract. `NG-N002` was then closed as docs-only health/status polling design. Current next recommendation after `NG-N002` closure is `NG-N001` attach-existing-server read-only reconciliation gate design with `live_write_authorized: no`.
+It uses this `/api/clients` contract to define how future web/admin labels distinguish read-only metadata, local operation planning, deferred live write, blocked config delivery and separately gated destructive/public actions. `NG-N003` was then closed as docs-only operation queue design after write API contract. `NG-N002` was then closed as docs-only health/status polling design. `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. Current next recommendation after `NG-N001` closure is `NG-N004` candidate registry update after every gate decision with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

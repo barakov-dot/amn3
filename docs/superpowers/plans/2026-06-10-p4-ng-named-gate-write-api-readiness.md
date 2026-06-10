@@ -113,6 +113,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-ng-n002-health-status-polling-design-2026-06-10.md`.
   - Defines future health/status polling tiers, safe aggregate fields, forbidden leakage fields, status vocabulary, staleness behavior, queue/status binding and RED test requirements without implementing polling, scheduling, collectors, live target checks or route changes.
 
+- [x] **NG-N001: attach-existing-server read-only reconciliation gate design**
+  - Closed by `research/amn2/phase-4-ng-n001-attach-existing-server-read-only-reconciliation-gate-design-2026-06-10.md`.
+  - Defines safe read-only reconciliation phases, allowed report fields, attach/backfill boundaries, conflict handling, health/status binding and RED test requirements without implementing reconciliation, attach, import, backfill, real target detection or route changes.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -157,13 +161,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 Нет активных задач.
 
 ### Нормальные
-
-- [ ] **NG-N001: attach-existing-server read-only reconciliation gate design**
-
-  Scope:
-
-  - Read-only detection only.
-  - No attach/write/backfill until separate gate.
 
 - [ ] **NG-N004: update candidate registry after every gate decision**
 
@@ -214,6 +211,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `NG-N001` next. It is docs-only attach-existing-server read-only reconciliation gate design and must preserve the P4-NG boundaries: read-only detection only, no attach/write/backfill, no live VPS commands without named approval, no route behavior changes, no config delivery and no production mutation are authorized.
+Start with `NG-N004` next. It is docs-only candidate registry maintenance and must preserve the P4-NG boundaries: update only `priority`, `required_gate`, `recommendation` or `implementation_status` with evidence; no live VPS commands, no implementation, no route behavior changes, no config delivery and no production mutation are authorized.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.

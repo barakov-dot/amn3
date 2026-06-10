@@ -40,6 +40,7 @@ required_gate_for_config_delivery: P4-CONFIG-DELIVERY-GATE
 selected_next_slice: NG-N001 attach-existing-server read-only reconciliation gate design
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed in research/amn2/phase-4-ng-n001-attach-existing-server-read-only-reconciliation-gate-design-2026-06-10.md
 ```
 
 ## Sources Reused
@@ -333,7 +334,7 @@ defer_scope: local polling implementation gate, real target read-only VPS pollin
 
 ## Handoff
 
-`NG-N002` is closed. The recommended next docs-only slice is `NG-N001` attach-existing-server read-only reconciliation gate design, because safe health/status vocabulary now exists and the next planning gap is how to reconcile an already-existing target server without attach/write/backfill behavior.
+`NG-N002` is closed. `NG-N001` was selected next and later closed in `research/amn2/phase-4-ng-n001-attach-existing-server-read-only-reconciliation-gate-design-2026-06-10.md`, because safe health/status vocabulary existed and the next planning gap was how to reconcile an already-existing target server without attach/write/backfill behavior. Current next recommendation after `NG-N001` closure is `NG-N004` candidate registry update after every gate decision with `live_write_authorized: no`.
 
 ## Safety Statement
 

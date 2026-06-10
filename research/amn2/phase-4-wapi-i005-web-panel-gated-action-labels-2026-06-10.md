@@ -189,7 +189,7 @@ live_vps_commands: no
 config_delivery: no
 ```
 
-Reason: the WAPI contract chain now defines route taxonomy, fake-runner expectations, idempotency/locks, audit/redaction, operation statuses, scoped tokens, config decoupling, `/api/clients` boundaries and panel labels. `NG-N003` captured queue/cancel/retry semantics as docs-only planning, not implementation. `NG-N002` was then closed as docs-only health/status polling design. Current next recommendation after `NG-N002` closure is `NG-N001` attach-existing-server read-only reconciliation gate design with `live_write_authorized: no`.
+Reason: the WAPI contract chain now defines route taxonomy, fake-runner expectations, idempotency/locks, audit/redaction, operation statuses, scoped tokens, config decoupling, `/api/clients` boundaries and panel labels. `NG-N003` captured queue/cancel/retry semantics as docs-only planning, not implementation. `NG-N002` was then closed as docs-only health/status polling design. `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. Current next recommendation after `NG-N001` closure is `NG-N004` candidate registry update after every gate decision with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

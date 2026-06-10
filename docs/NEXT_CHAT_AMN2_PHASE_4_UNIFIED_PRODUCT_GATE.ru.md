@@ -134,11 +134,12 @@ Closed in or alongside this stage:
 - `WAPI-I005` web-panel gated action labels;
 - `NG-N003` operation queue design after write API contract;
 - `NG-N002` health/status polling design;
+- `NG-N001` attach-existing-server read-only reconciliation gate design;
 - `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping policy support.
 
 Active next recommendation:
 
-- `NG-N001` attach-existing-server read-only reconciliation gate design with `live_write_authorized: no`.
+- `NG-N004` update candidate registry after every gate decision with `live_write_authorized: no`.
 
 Do not run `NG-V001` read-only VPS baseline gate until the operator explicitly approves that gate and provides the target SSH alias/host outside repository secrets. Write API live work remains blocked until a separate `P4-WRITE-API-LIVE-GATE`; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
 
@@ -238,7 +239,7 @@ Default local-only implementation queue is closed after `P4-I001` closure. Safe 
 
 Безопасные next actions:
 
-- `NG-N001` attach-existing-server read-only reconciliation gate design with `live_write_authorized: no`;
+- `NG-N004` update candidate registry after every gate decision with `live_write_authorized: no`;
 - `P4-PRVTPRO-REFRESH-003` design boundary only, before any server status/latency UX implementation;
 - docs-only write API design after explicit selection and threat model alignment;
 - candidate registry maintenance for PRVTPRO/KYORESUAS ideas;
@@ -309,7 +310,8 @@ go_no_go_decision:
 33. Treat `WAPI-I005` web-panel gated action labels as closed; evidence: `research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md`.
 34. Treat `NG-N003` operation queue design after write API contract as closed; evidence: `research/amn2/phase-4-ng-n003-operation-queue-design-2026-06-10.md`.
 35. Treat `NG-N002` health/status polling design as closed; evidence: `research/amn2/phase-4-ng-n002-health-status-polling-design-2026-06-10.md`.
-36. If a live/public/write/config action is proposed, stop and create a separate named gate first.
+36. Treat `NG-N001` attach-existing-server read-only reconciliation gate design as closed; evidence: `research/amn2/phase-4-ng-n001-attach-existing-server-read-only-reconciliation-gate-design-2026-06-10.md`.
+37. If a live/public/write/config action is proposed, stop and create a separate named gate first.
 
 ## Сообщение для копирования в основной чат
 
@@ -420,6 +422,10 @@ go_no_go_decision:
 - research/amn2/phase-4-ng-n002-health-status-polling-design-2026-06-10.md
 - future polling remains aggregate-only and stale-aware; no scheduler, collector, runtime route, live target polling, peer/user leakage or write/config action is authorized.
 
+Закрытый NG-N001 attach-existing-server reconciliation design:
+- research/amn2/phase-4-ng-n001-attach-existing-server-read-only-reconciliation-gate-design-2026-06-10.md
+- future reconciliation remains report-only; no attach, import, backfill, real target detection, route change, live write or config delivery is authorized.
+
 Текущая private/local read-only API grouping:
 - Server inventory/status: GET /api/servers, GET /api/servers/{server_name}/summary.
 - Integration/service boundary: GET /api/integration/status.
@@ -430,7 +436,7 @@ go_no_go_decision:
 
 Следующее решение:
 - P4-NG is active as docs-only named gate / write API readiness planning;
-- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, WAPI-I005, NG-N003, NG-N002, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001 and P4-PRVTPRO-REFRESH-004 are closed;
-- next recommended docs-only task is NG-N001 attach-existing-server read-only reconciliation gate design with live_write_authorized: no;
+- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, WAPI-I005, NG-N003, NG-N002, NG-N001, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001 and P4-PRVTPRO-REFRESH-004 are closed;
+- next recommended docs-only task is NG-N004 update candidate registry after every gate decision with live_write_authorized: no;
 - any VPS/live/public/write/config direction requires a separate named gate/decision first.
 ```
