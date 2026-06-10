@@ -103,9 +103,10 @@ Remaining PRVTPRO-derived AMN2 work:
 
 - `P4-PRVTPRO-REFRESH-003` read-only server status/latency UX only after a separate design boundary.
 
-Recommended next safe task:
+Subsequent status:
 
-- `WAPI-V002` write API route taxonomy, docs-only, with `live_write_authorized: no`.
+- `WAPI-V002` write API route taxonomy was later closed in `research/amn2/phase-4-wapi-v002-write-api-route-taxonomy-2026-06-10.md`;
+- current next safe WAPI task is `WAPI-V003` local fake-runner contract, docs-only, with `live_write_authorized: no`.
 
 ## Safety Statement
 

@@ -69,6 +69,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md`.
   - Defines threat classes and required tests before any write API route implementation.
 
+- [x] **WAPI-V002: write API route taxonomy**
+  - Closed by `research/amn2/phase-4-wapi-v002-write-api-route-taxonomy-2026-06-10.md`.
+  - Classifies future route groups, candidate route names, scopes, side effects, gates and required tests without adding runtime routes.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -107,18 +111,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   Done when:
 
   - Evidence records safe summary only and no secret-bearing data.
-
-- [ ] **WAPI-V002: write API route taxonomy**
-
-  Scope:
-
-  - Split future routes into `clients`, `peers`, `configs`, `operations`, `audit/status`.
-  - Mark every route as read-only, state-write, secret-read, destructive or public-exposure.
-  - `live_write_authorized: no`.
-
-  Done when:
-
-  - Future route names are proposed without adding runtime routes.
 
 - [ ] **WAPI-V003: local fake-runner contract**
 
@@ -260,6 +252,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `WAPI-V002` next. It is docs-only route taxonomy with `live_write_authorized: no`; no runtime routes, live VPS commands, config delivery or production mutation are authorized.
+Start with `WAPI-V003` next. It is docs-only local fake-runner contract design with `live_write_authorized: no`; no runtime routes, live VPS commands, config delivery or production mutation are authorized.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.

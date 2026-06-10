@@ -22,6 +22,7 @@ required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
 selected_next_slice: WAPI-V002 write API route taxonomy
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed 2026-06-10; see research/amn2/phase-4-wapi-v002-write-api-route-taxonomy-2026-06-10.md
 ```
 
 ## Sources Reused
@@ -117,12 +118,13 @@ Before any AMN2 implementation plan for write API routes, require local tests fo
 
 ## WAPI-V002 Handoff
 
-`WAPI-V002` may be selected next only as docs-only route taxonomy:
+`WAPI-V002` was selected next and later closed as docs-only route taxonomy:
 
 ```text
 slice_id: WAPI-V002
 slice_name: write API route taxonomy
 slice_mode: docs-only
+result: closed
 live_write_authorized: no
 runtime_routes_changed: no
 AMN2_code_changed: no
@@ -145,7 +147,7 @@ Each proposed route must be marked as one or more of:
 - `destructive`;
 - `public-exposure`.
 
-Route taxonomy must not add runtime routes, OpenAPI exposure, config delivery or live mutation.
+Route taxonomy did not add runtime routes, OpenAPI exposure, config delivery or live mutation. Current next recommendation after `WAPI-V002` closure is `WAPI-V003` local fake-runner contract with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 
