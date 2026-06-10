@@ -30,6 +30,7 @@ required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
 selected_next_slice: WAPI-I001 /api/clients design without live CRUD
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed in research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md
 ```
 
 ## Sources Reused
@@ -174,7 +175,7 @@ Any future AMN2 implementation plan for `/api/clients`, config routes, scoped to
 
 ## WAPI-I001 Handoff
 
-`WAPI-I001` is the recommended next docs-only slice:
+`WAPI-I001` was selected next and later closed as docs-only `/api/clients` design without live CRUD:
 
 ```text
 slice_id: WAPI-I001
@@ -187,7 +188,7 @@ live_vps_commands: no
 config_delivery: no
 ```
 
-It should use this `WAPI-I002` boundary as an invariant: future `/api/clients` may describe safe request/response shapes and operation planning states, but must not implement runtime routes, write CRUD, live runner calls or config delivery unless a separate selected implementation gate exists.
+It uses this `WAPI-I002` boundary as an invariant: future `/api/clients` may describe safe request/response shapes and operation planning states, but must not implement runtime routes, write CRUD, live runner calls or config delivery unless a separate selected implementation gate exists. Current next recommendation after `WAPI-I001` closure is `WAPI-I005` web-panel gated action labels with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

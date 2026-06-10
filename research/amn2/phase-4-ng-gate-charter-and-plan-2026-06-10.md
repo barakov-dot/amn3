@@ -78,12 +78,20 @@ Closed and removed from active plan:
 - `NG-C004` go/no-go format for all gates;
 - `NG-S003` reusable named-gate evidence template;
 - `NG-C005` write API live-block assertion;
-- `WAPI-V001` write API threat model.
+- `WAPI-V001` write API threat model;
+- `WAPI-V002` write API route taxonomy;
+- `WAPI-V003` local fake-runner contract;
+- `WAPI-V004` idempotency, locking and partial-failure model;
+- `WAPI-V005` write API audit/redaction requirements;
+- `WAPI-I004` operation status model;
+- `WAPI-I003` scoped write-token model;
+- `WAPI-I002` config delivery decoupling;
+- `WAPI-I001` `/api/clients` design without live CRUD.
 
 Active next recommendation:
 
 ```text
-WAPI-V002 write API route taxonomy
+WAPI-I005 web-panel gated action labels
 ```
 
 Reason: it is docs-only and is constrained by `live_write_authorized: no`.

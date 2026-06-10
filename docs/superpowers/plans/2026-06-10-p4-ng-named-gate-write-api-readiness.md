@@ -97,6 +97,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-wapi-i002-config-delivery-decoupling-2026-06-10.md`.
   - Defines client/peer creation as safe operation metadata only and keeps `.conf`, QR, `vpn://`, archives, share/download links and public/self-service config delivery blocked behind separate config/public gates.
 
+- [x] **WAPI-I001: `/api/clients` design without live CRUD**
+  - Closed by `research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md`.
+  - Defines candidate `/api/clients` request/response boundaries, safe client metadata, scopes, idempotency, locks, audit/status binding and RED test requirements without adding runtime routes, write CRUD, fake-runner code or live VPS/write authorization.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -137,13 +141,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Evidence records safe summary only and no secret-bearing data.
 
 ### Важные
-
-- [ ] **WAPI-I001: `/api/clients` design without live CRUD**
-
-  Scope:
-
-  - Design request/response schema for future client create/list/revoke/status.
-  - No runtime route expansion until a separate AMN2 local implementation plan is approved.
 
 - [ ] **WAPI-I005: web-panel gated action labels**
 
@@ -223,6 +220,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `WAPI-I001` next. It is docs-only `/api/clients` design without live CRUD and must preserve the `WAPI-I002` boundary: no runtime routes, token issue/revoke routes, fake-runner code, live VPS commands, config delivery, `.conf`, QR, `vpn://` output or production mutation are authorized.
+Start with `WAPI-I005` next. It is docs-only web-panel gated action label design and must preserve the `WAPI-I001` and `WAPI-I002` boundaries: no template/route behavior changes, runtime routes, token issue/revoke routes, fake-runner code, live VPS commands, config delivery, `.conf`, QR, `vpn://` output or production mutation are authorized.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.
