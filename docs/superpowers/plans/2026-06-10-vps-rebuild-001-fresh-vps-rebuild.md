@@ -16,6 +16,7 @@
 gate_id: VPS-REBUILD-001
 gate_status: opened-defer-awaiting-final-destructive-approval
 source_baseline: NG-V001 closed-go
+preflight_mode: novice-safe snapshot-first
 destructive_action_authorized: no
 reinstall_authorized: no
 live_commands_run: no
@@ -40,17 +41,17 @@ live_commands_run: no
 
 ## Phase 3: Required Decisions Before Any Live Action
 
-- [ ] Choose `data_retention_decision`:
+- [x] Choose `data_retention_decision`:
   - `wipe_all_allowed`;
   - `preserve_snapshot_required`;
   - `export_safe_summary_only`.
-- [ ] Choose `snapshot_or_backup_decision`:
+- [x] Choose `snapshot_or_backup_decision`:
   - `not_required_by_operator`;
   - `provider_snapshot_required`;
   - `encrypted_backup_required`;
   - `safe_summary_only`.
-- [ ] Choose exact AMN2 source commit or install package hash.
-- [ ] Choose secret transfer policy:
+- [ ] Choose exact AMN2 source commit or install package hash after local source/package precheck.
+- [x] Choose secret transfer policy:
   - `operator_local_channel_only`;
   - `regenerate_on_target`;
   - `restore_from_approved_secret_store`.
@@ -59,6 +60,16 @@ live_commands_run: no
 
 ```text
 GO VPS-REBUILD-001 WIPE TARGET
+```
+
+Selected novice-safe values:
+
+```text
+data_retention_decision: preserve_snapshot_required
+snapshot_or_backup_decision: provider_snapshot_required
+secret_transfer_policy: regenerate_on_target_where_possible + operator_local_channel_only_for_external_secrets
+install_source_commit: pending-source-package-precheck
+final_destructive_phrase: not_sent
 ```
 
 ## Phase 4: Blocked Until Final Destructive Approval
@@ -116,4 +127,4 @@ Do not execute this phase until every Phase 3 decision is filled and the exact f
 
 ## Recommendation
 
-Next step is not a live VPS command. First choose data retention, snapshot/backup, install source and secret transfer policy. Only after that should the operator decide whether to send the exact final destructive phrase.
+Next step is not a live VPS command. Prepare the local source/package precheck and provider snapshot confirmation first. Only after those are reviewed should the operator decide whether to send the exact final destructive phrase.

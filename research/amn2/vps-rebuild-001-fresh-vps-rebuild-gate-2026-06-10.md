@@ -13,6 +13,7 @@ target_label: operator_provided_redacted
 operator_intent: try fresh rebuild under a destructive named gate
 operation_class: destructive + remote-exec + secret-read + state-write
 gate_status: opened-defer-awaiting-final-destructive-approval
+preflight_mode: novice-safe snapshot-first
 security_checkpoint: Codex Security threat-model required
 security_risk_decision: defer
 go_no_go_decision: defer
@@ -47,29 +48,30 @@ Fresh VPS reinstall/rebuild is intentionally outside `NG-V001`. It can destroy c
 ## Required Decisions Before Go
 
 ```text
-data_retention_decision: pending
+data_retention_decision: preserve_snapshot_required
 allowed_values: wipe_all_allowed | preserve_snapshot_required | export_safe_summary_only
 
-snapshot_or_backup_decision: pending
+snapshot_or_backup_decision: provider_snapshot_required
 allowed_values: not_required_by_operator | provider_snapshot_required | encrypted_backup_required | safe_summary_only
 
-install_source_commit: pending
+install_source_commit: pending-source-package-precheck
 allowed_values: explicit AMN2 commit or package hash only
 
-secret_transfer_policy: pending
+secret_transfer_policy: regenerate_on_target_where_possible + operator_local_channel_only_for_external_secrets
 allowed_values: operator_local_channel_only | regenerate_on_target | restore_from_approved_secret_store
 
-final_destructive_phrase: pending
+final_destructive_phrase: not_sent
 required_exact_phrase: GO VPS-REBUILD-001 WIPE TARGET
 ```
 
-Until all decisions above are filled and the exact final destructive phrase is sent by the operator, this gate stays `defer`.
+Snapshot-first mode is selected because the current `NG-V001` baseline is known-good and should remain recoverable for a novice-safe rebuild path. Until the source/package precheck is complete and the exact final destructive phrase is sent by the operator, this gate stays `defer`.
 
 ## Allowed Now
 
 - Update AMN3 docs/evidence for `VPS-REBUILD-001`.
 - Prepare local-only command checklist and post-install acceptance checklist.
 - Select candidate AMN2 source commit/package locally.
+- Prepare local source/package precheck before any live action.
 - Define safe summary fields for future evidence.
 - Define stop criteria and rollback/recovery note.
 - Optionally prepare a read-only pre-rebuild status checklist, but do not run it without separate explicit approval.
@@ -120,5 +122,9 @@ The rebuild can be considered acceptable only after a future approved live run p
 gate_status: opened-defer-awaiting-final-destructive-approval
 security_risk_decision: defer
 go_no_go_decision: defer
-next_required_operator_decision: data retention mode, snapshot/backup mode, install source commit/package, secret transfer policy, then exact final destructive phrase
+preflight_mode: novice-safe snapshot-first
+data_retention_decision: preserve_snapshot_required
+snapshot_or_backup_decision: provider_snapshot_required
+secret_transfer_policy: regenerate_on_target_where_possible + operator_local_channel_only_for_external_secrets
+next_required_operator_decision: local source/package precheck, provider snapshot confirmation, then exact final destructive phrase only if the operator still chooses wipe
 ```
