@@ -8,10 +8,11 @@ research note: research/amn2/phase-4-unified-product-gate-handoff-2026-06-09.md
 AMN3 Phase 4 coordination checkpoint before P4-N001 sync: 113c5ed Record Phase 4 bot admin read-only labels
 Phase 4 completed local/default sequence: P4-C009, P4-I002, route/secret gate planning, P4-I003 design/plan/implementation, P4-I004, P4-N003, P4-I005, P4-N004, P4-N001 docs/status sync, P4-N002 protocol manager interface checklist, P4-X003 Russian-first operator docs polish, P4-X002 API/status/gate naming cleanup, P4-X001 read-only API docs grouping polish, P4-I001 second read-only UX pass closure
 Phase 4 next stage: P4-NG Named Gate / Write API Readiness is active as docs-only planning; plan docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md; charter research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md
-P4-NG closed: NG-C001 named gate charter, NG-C002 safety boundary restatement, NG-C003 secrets policy, NG-C004 go/no-go format, NG-S003 reusable named-gate evidence template, NG-C005 write API live-block assertion
+P4-NG closed: NG-C001 named gate charter, NG-C002 safety boundary restatement, NG-C003 secrets policy, NG-C004 go/no-go format, NG-S003 reusable named-gate evidence template, NG-C005 write API live-block assertion, WAPI-V001 write API threat model
 P4-NG template: research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md
 P4-NG write live-block evidence: research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md
-P4-NG next recommended docs-only task: WAPI-V001 write API threat model with live_write_authorized: no
+P4-NG write API threat model evidence: research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md
+P4-NG next recommended docs-only task: WAPI-V002 write API route taxonomy with live_write_authorized: no
 P4-NG live/write status: NG-V001 read-only VPS baseline gate requires explicit operator approval and target SSH alias/host outside repo secrets; write API live work remains blocked until separate P4-WRITE-API-LIVE-GATE; selected WAPI work remains docs-only/local-only with live_write_authorized: no
 AMN2 source-overlay/package head: f7f6131 Update integration status for c92 manual prelaunch
 target VPS mode: service-mode web/bot active, loopback-only

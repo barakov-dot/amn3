@@ -595,8 +595,9 @@ Implemented safe scope:
 - `NG-C003` secrets policy, `NG-C004` go/no-go format and `NG-S003` reusable named-gate evidence template were closed in `research/amn2/phase-4-ng-secrets-policy-go-no-go-format-2026-06-10.md`; template: `research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md`.
 - `NG-C005` write API live-block assertion was closed in `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
 - KYORESUAS GitHub refresh 2026-06-10 was recorded in `research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-10.md`; it strengthens `WAPI-V001` inputs: one operation lock per server/protocol/write surface, backup-before-write, temp/atomic config replace, post-check, rollback/audit metadata, `active|disabled` + `expiresAt` lifecycle wording, QR/`vpn://` as secret-read import artifacts, and rate-limit as a future public-route gate requirement. No upstream code, AMN2 route, VPS command, public listener or write/config operation was added.
+- `WAPI-V001` write API threat model was closed in `research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md`; it defines threat classes and required tests before any write API implementation.
 
-Next decision: continue P4-NG with docs-only `WAPI-V001` write API threat model with `live_write_authorized: no`, before selecting any local implementation or proposing any VPS command.
+Next decision: continue P4-NG with docs-only `WAPI-V002` write API route taxonomy with `live_write_authorized: no`, before selecting any local implementation or proposing any VPS command.
 
 ## Source Notes
 
@@ -611,6 +612,7 @@ Primary AMN3 sources:
 - `research/amn2/phase-4-ng-secrets-policy-go-no-go-format-2026-06-10.md`
 - `research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md`
 - `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`
+- `research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md`
 - `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`
 
 Upstream/reference sources:

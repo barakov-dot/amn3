@@ -77,12 +77,13 @@ Closed and removed from active plan:
 - `NG-C003` secrets policy for gate outputs;
 - `NG-C004` go/no-go format for all gates;
 - `NG-S003` reusable named-gate evidence template;
-- `NG-C005` write API live-block assertion.
+- `NG-C005` write API live-block assertion;
+- `WAPI-V001` write API threat model.
 
 Active next recommendation:
 
 ```text
-WAPI-V001 write API threat model
+WAPI-V002 write API route taxonomy
 ```
 
 Reason: it is docs-only and is constrained by `live_write_authorized: no`.
@@ -97,6 +98,12 @@ Write API live-block assertion:
 
 ```text
 research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md
+```
+
+Write API threat model:
+
+```text
+research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md
 ```
 
 ## Safety Statement
