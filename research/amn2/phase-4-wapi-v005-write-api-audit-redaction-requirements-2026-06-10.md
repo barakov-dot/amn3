@@ -224,7 +224,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It consolidates WAPI-V004 status vocabulary and WAPI-V005 audit/redaction requirements into the safe operation status read model before `/api/clients` design or route implementation planning. Current next recommendation after `WAPI-I004` closure is `WAPI-I003` scoped write-token model with `live_write_authorized: no`.
+It consolidates WAPI-V004 status vocabulary and WAPI-V005 audit/redaction requirements into the safe operation status read model before `/api/clients` design or route implementation planning. `WAPI-I003` was then closed as scoped write-token model. Current next recommendation after `WAPI-I003` closure is `WAPI-I002` decouple config delivery from client creation with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

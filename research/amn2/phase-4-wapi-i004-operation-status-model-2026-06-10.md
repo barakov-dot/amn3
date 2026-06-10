@@ -28,6 +28,7 @@ required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
 selected_next_slice: WAPI-I003 scoped write-token model
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed in research/amn2/phase-4-wapi-i003-scoped-write-token-model-2026-06-10.md
 ```
 
 ## Sources Reused
@@ -231,7 +232,7 @@ Any future AMN2 implementation plan for operation records, operation status rout
 
 ## WAPI-I003 Handoff
 
-`WAPI-I003` is the recommended next docs-only slice:
+`WAPI-I003` was selected next and later closed as docs-only scoped write-token model:
 
 ```text
 slice_id: WAPI-I003
@@ -243,7 +244,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It should define minimal write/config/operation scopes and explicitly reject broad admin-equivalent tokens before `/api/clients` design or route implementation planning.
+It defines minimal write/config/operation scopes and explicitly rejects broad admin-equivalent tokens before `/api/clients` design or route implementation planning. Current next recommendation after `WAPI-I003` closure is `WAPI-I002` decouple config delivery from client creation with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

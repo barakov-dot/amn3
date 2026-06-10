@@ -89,6 +89,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-wapi-i004-operation-status-model-2026-06-10.md`.
   - Defines safe operation status fields, canonical statuses, reason codes, transition rules, visibility tiers and RED test requirements without adding runtime routes, status schema code, operation queue or live VPS/write authorization.
 
+- [x] **WAPI-I003: scoped write-token model**
+  - Closed by `research/amn2/phase-4-wapi-i003-scoped-write-token-model-2026-06-10.md`.
+  - Defines future minimal scope classes, proposed scoped write/config/operation permissions, forbidden broad scope patterns, token lifecycle boundaries and RED test requirements without adding runtime routes, token issue/revoke routes or live VPS/write authorization.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -143,13 +147,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
   - Peer/client creation must not automatically publish `.conf`, QR or `vpn://`.
   - Config delivery requires a separate secret-read gate.
-
-- [ ] **WAPI-I003: scoped write-token model**
-
-  Scope:
-
-  - Define minimal scopes such as `client:write`, `client:revoke`, `operation:read`.
-  - Explicitly reject broad admin-equivalent tokens.
 
 - [ ] **WAPI-I005: web-panel gated action labels**
 
@@ -229,6 +226,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `WAPI-I003` next. It is docs-only scoped write-token model design with `live_write_authorized: no`; no runtime routes, token issue/revoke routes, fake-runner code, live VPS commands, config delivery or production mutation are authorized.
+Start with `WAPI-I002` next. It is docs-only config-delivery decoupling design with `live_write_authorized: no`; no runtime routes, token issue/revoke routes, fake-runner code, live VPS commands, config delivery or production mutation are authorized.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.
