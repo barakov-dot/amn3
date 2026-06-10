@@ -2,7 +2,7 @@
 
 Дата: 2026-06-10.
 
-Назначение: открыть `NG-V001` как named gate для будущей read-only проверки текущего target VPS baseline. Этот документ фиксирует preflight и safe evidence boundary. Он не разрешает package apply, service restart/enable/disable, firewall/reverse proxy edits, public exposure, config delivery, `/api/clients` write CRUD, Local Agent mutations, backup/import/reboot, production peer/user mutation или fresh VPS rebuild.
+Назначение: закрыть `NG-V001` как named gate для read-only проверки текущего target VPS baseline. Этот документ фиксирует только safe summary evidence. Он не разрешает package apply, service restart/enable/disable, firewall/reverse proxy edits, public exposure, config delivery, `/api/clients` write CRUD, Local Agent mutations, backup/import/reboot, production peer/user mutation или fresh VPS rebuild.
 
 ## Gate Identity
 
@@ -11,10 +11,10 @@ gate_name: P4-NG-VPS-READONLY-BASELINE-2026-06-10
 gate_date: 2026-06-10
 operator_approval: explicit-start-approved
 operator_phrase: "приступаем"
-target_label: pending_operator_provided_ssh_alias_or_host
+target_label: operator_provided_redacted
 operation_class: read-only VPS baseline
 planned_evidence_file: research/amn2/phase-4-ng-v001-read-only-vps-baseline-gate-2026-06-10.md
-gate_status: opened-defer-awaiting-target
+gate_status: closed-go
 ```
 
 ## Codex Security Checkpoint
@@ -22,17 +22,17 @@ gate_status: opened-defer-awaiting-target
 ```text
 security_checkpoint: Codex Security risk review
 security_source: research/amn2/phase-4-ng-sc001-codex-security-vps-risk-checkpoint-2026-06-10.md
-security_risk_decision: defer
-security_decision_reason: target SSH alias/host is not yet operator-provided in this gate turn, so live read-only SSH cannot start safely
+security_risk_decision: go
+security_decision_reason: operator provided target outside repository files; final safe output contains only allowed read-only status summaries, no secret-bearing evidence and no state-changing result
 destructive_action_authorized: no
 fresh_vps_rebuild_authorized: no
 ```
 
-`NG-SC001` requires `security_risk_decision: go | no-go | defer` before any live/read-only or destructive gate work. For this opening pass, the decision is `defer` because the target is not confirmed yet. No SSH/VPS command was run.
+`NG-SC001` requires `security_risk_decision: go | no-go | defer` before any live/read-only or destructive gate work. For this gate, the decision is `go` because the final evidence stayed inside the approved read-only scope and did not publish secrets.
 
-## Allowed Actions After Target Confirmation
+## Allowed Actions
 
-These actions are allowed only after the operator provides the target SSH alias/host outside repository secrets and the security checkpoint is updated to `security_risk_decision: go`.
+These were the only approved action classes for this gate.
 
 ```text
 allowed_actions:
@@ -101,8 +101,8 @@ forbidden_evidence_fields:
 ```text
 preflight:
 approval_confirmed: yes
-target_confirmed: no
-host_key_verification_handled_outside_repo: pending
+target_confirmed: yes
+host_key_verification_handled_outside_repo: not_recorded_in_evidence
 allowed_actions_reviewed: yes
 blocked_actions_reviewed: yes
 secrets_policy_reviewed: yes
@@ -115,40 +115,40 @@ Rollback/recovery note: current pass is read-only only, so it must not create re
 
 ```text
 safe_summary_fields:
-gate_status: opened-defer-awaiting-target
-ssh_transport: not_checked
-service_status_summary: not_checked
-listener_summary: not_checked
-loopback_http_summary: not_checked
-vps_apply_enabled_false: not_checked
-public_exposure_summary: not_checked
-write_surface_summary: not_checked
-config_delivery_summary: not_checked
+gate_status: closed-go
+ssh_transport: ok
+service_status_summary: amneziya-web active/enabled; amneziya-bot active/enabled
+listener_summary: 3030 present loopback-only; 3040 absent; 80 absent; 443 absent
+loopback_http_summary: 127.0.0.1:3030/login returned HTTP 200
+vps_apply_enabled_false: yes
+public_exposure_summary: direct public API 3040 absent; TCP 80 absent; TCP 443 absent; web/admin 3030 loopback-only
+write_surface_summary: no write/sync/apply/revoke action performed; VPS_APPLY_ENABLED=false
+config_delivery_summary: no config delivery performed
 secret_publication_summary: no_secret_evidence_published
-preflight_errors_summary: target SSH alias/host not yet provided
+preflight_errors_summary: earlier listener command outputs were superseded by final clean listener evidence
 recovery_or_rollback_summary: read-only gate; no remote state changes allowed
 ```
 
 ## Gate Result
 
 ```text
-go_no_go_decision: defer
-decision_reason: explicit start approval is present, but target SSH alias/host is not yet confirmed outside repo secrets; security_risk_decision remains defer
-safe_result: no live command was run; no secret-bearing evidence was published; no state changed
-next_action: operator provides target SSH alias/host outside repository secrets, then rerun NG-V001 live read-only checks with security_risk_decision: go
+go_no_go_decision: go
+decision_reason: read-only baseline checks passed using safe summary fields; no blocked action was needed; no secret-bearing evidence was published
+safe_result: target baseline matches expected service-mode loopback-only boundary
+next_action: remove NG-V001 from active P4-NG plan; any fresh VPS rebuild still requires separate VPS-REBUILD-001
 ```
 
 ## Active Plan Effect
 
-`NG-V001` is open but not closed. It remains the only active P4-NG task:
+`NG-V001` is closed and removed from the active P4-NG plan:
 
 ```text
 critical: none
-very_important: NG-V001 read-only VPS baseline gate, opened-defer-awaiting-target
+very_important: none
 important: none
 normal: none
 simple: none
 cosmetic: none
 ```
 
-Do not remove `NG-V001` from the active plan until the read-only VPS baseline evidence is completed with `go`, `no-go` or an operator decision to stop the gate.
+Fresh VPS reinstall/rebuild remains outside this gate and requires a separate destructive gate `VPS-REBUILD-001`.

@@ -129,8 +129,8 @@ secret_surface: safe summary only; no `.env` values, tokens, peer keys, configs 
 remote_write_surface: read-only VPS commands
 test_plan: named gate preflight with explicit allowed commands, safe fields, no secret publication and Codex Security `security_risk_decision: go`
 required_gate: requires VPS gate
-gate_opening_status: opened-defer-awaiting-target on 2026-06-10; see research/amn2/phase-4-ng-v001-read-only-vps-baseline-gate-2026-06-10.md
-recommendation: defer
+gate_result: closed-go on 2026-06-10; see research/amn2/phase-4-ng-v001-read-only-vps-baseline-gate-2026-06-10.md
+recommendation: completed; use as current read-only VPS baseline before any separate destructive/public/write/config gate
 ```
 
 ```text
@@ -690,7 +690,7 @@ Implemented safe scope:
 - PRVTPRO refresh 2026-06-10 was recorded in `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`; `P4-PRVTPRO-REFRESH-002` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-expiration-contract-tests-implementation-2026-06-10.md`, `P4-PRVTPRO-REFRESH-001` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-build-status-implementation-2026-06-10.md`, and `P4-PRVTPRO-REFRESH-004` was completed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`. Remaining AMN2 PRVTPRO-derived candidate is `P4-PRVTPRO-REFRESH-003` only after design boundary. Hybrid-only candidates are `HYB-PRVTPRO-REFRESH-001..004`. No GPL code, templates, UI, managers or workflows are copied.
 - The PRVTPRO local-only branches for `P4-PRVTPRO-REFRESH-002` and `P4-PRVTPRO-REFRESH-001` were merged into `amn2/codex-vps-test-prep` at `1508e3c4a100b76815b29f91757290f1266f813d`; evidence: `research/amn2/phase-4-prvtpro-local-slices-merge-2026-06-10.md`.
 
-Следующее решение: очередь default docs-only cosmetic закрыта. Либо explicit approval для `NG-V001` read-only VPS baseline gate с target SSH alias/host вне repository secrets и `security_risk_decision: go`, либо design boundary для `P4-PRVTPRO-REFRESH-003` до любого UI/server-status slice. Fresh VPS rebuild требует отдельный destructive gate `VPS-REBUILD-001`. Не предлагать VPS command без named gate и не копировать GPL code.
+Следующее решение: очередь default docs-only cosmetic закрыта, `NG-V001` read-only VPS baseline gate закрыт как `go`. Активных P4-NG задач больше нет. Если выбирается fresh VPS rebuild, сначала нужен отдельный destructive gate `VPS-REBUILD-001`; если rebuild сейчас не выбирается, держать P4-NG в paused/docs-maintenance state или открыть отдельный local-only design boundary для `P4-PRVTPRO-REFRESH-003`. Не предлагать VPS command без named gate и не копировать GPL code.
 
 ## Source Notes
 

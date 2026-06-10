@@ -149,6 +149,10 @@ write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-ng-sc001-codex-security-vps-risk-checkpoint-2026-06-10.md`.
   - Adds a required `Codex Security` threat-model checkpoint before `NG-V001` and any future destructive VPS rebuild gate, without authorizing SSH, live commands, reinstall/rebuild, public exposure, write/config actions or production mutation.
 
+- [x] **NG-V001: run read-only VPS baseline gate**
+  - Closed by `research/amn2/phase-4-ng-v001-read-only-vps-baseline-gate-2026-06-10.md`.
+  - Confirms SSH transport, web/bot service-mode status, loopback `/login`, listener boundary, `VPS_APPLY_ENABLED=false`, no secret-bearing evidence and no state-changing action.
+
 ## Активный Оставшийся План
 
 ### Критичные
@@ -157,44 +161,7 @@ write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
 
 ### Очень Важные
 
-- [ ] **NG-V001: run read-only VPS baseline gate**
-
-  Имя gate:
-
-  ```text
-  P4-NG-VPS-READONLY-BASELINE-2026-06-10
-  ```
-
-  Gate opening evidence:
-
-  ```text
-  research/amn2/phase-4-ng-v001-read-only-vps-baseline-gate-2026-06-10.md
-  current_status: opened-defer-awaiting-target
-  ```
-
-  Разрешенные действия после явного operator approval:
-
-  - `Codex Security` risk checkpoint with `security_risk_decision: go | no-go | defer`.
-  - Проверка SSH transport только до operator-provided target.
-  - Read-only service status для `amneziya-web` и `amneziya-bot`.
-  - Read-only loopback `/login` check на `127.0.0.1:3030`.
-  - Read-only listener checks для `3030`, `3040`, `80`, `443`.
-  - Boolean-only проверка, что `VPS_APPLY_ENABLED=false` существует; не печатать `.env`.
-
-  Закрытые действия:
-
-  - package apply;
-  - service restart/enable/disable;
-  - firewall/reverse proxy edits;
-  - peer apply/revoke/sync;
-  - config delivery;
-  - token issue/revoke;
-  - backup/import/reboot;
-  - изменения public exposure.
-
-  Готово, когда:
-
-  - Evidence содержит только safe summary и не содержит secret-bearing data.
+Нет активных задач.
 
 ### Важные
 
@@ -214,4 +181,4 @@ write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
 
 ## Рекомендация
 
-Очередь default docs-only cosmetic закрыта. `Codex Security` checkpoint добавлен и закрыт как docs-only guardrail. Следующее решение: `NG-V001` read-only VPS baseline gate можно брать только после явного operator approval, target SSH alias/host вне repository secrets и `security_risk_decision: go`. Если вместо baseline выбирается fresh VPS rebuild, сначала нужен отдельный destructive gate `VPS-REBUILD-001`; `NG-SC001` сам по себе его не разрешает.
+Очередь default docs-only cosmetic закрыта. `NG-V001` read-only VPS baseline gate закрыт как `go`. Активных P4-NG задач больше нет. Следующее решение: если идем к fresh VPS reinstall/rebuild, сначала открыть отдельный destructive gate `VPS-REBUILD-001`; если rebuild сейчас не выбирается, оставить P4-NG в paused/docs-maintenance state.

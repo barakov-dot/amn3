@@ -11,7 +11,7 @@ stage_id: P4-NG
 stage_name: Named Gate / Write API Readiness
 operator_decision: proceed with gate-first planning
 default_mode: docs-only gate planning
-first_recommended_live_gate: NG-V001 read-only VPS baseline gate, only after explicit approval and security_risk_decision: go
+first_recommended_live_gate: NG-V001 read-only VPS baseline gate, closed-go
 write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
 AMN2_code_changed: no
 live_vps_commands: no
@@ -98,15 +98,16 @@ Closed and removed from active plan:
 - `NG-X003` stale wording cleanup;
 - `NG-X001` gate naming consistency;
 - `NG-X002` Russian-first operator wording polish;
-- `NG-SC001` Codex Security VPS risk checkpoint.
+- `NG-SC001` Codex Security VPS risk checkpoint;
+- `NG-V001` read-only VPS baseline gate.
 
 Следующее решение:
 
 ```text
-default docs-only cosmetic queue closed; Codex Security checkpoint closed; NG-V001 requires explicit named approval and security_risk_decision: go
+default docs-only cosmetic queue closed; Codex Security checkpoint closed; NG-V001 closed-go; no active P4-NG tasks remain
 ```
 
-Reason: все P4-NG docs-only cosmetic tasks закрыты; `Codex Security` threat-model checkpoint добавлен как обязательный preflight; в активном плане остается только explicitly gated `NG-V001` read-only VPS baseline.
+Reason: все P4-NG docs-only cosmetic tasks закрыты; `Codex Security` threat-model checkpoint добавлен как обязательный preflight; `NG-V001` read-only VPS baseline закрыт safe summary result. Активных P4-NG задач больше нет.
 
 Reusable gate evidence template:
 
@@ -130,6 +131,12 @@ Codex Security VPS risk checkpoint:
 
 ```text
 research/amn2/phase-4-ng-sc001-codex-security-vps-risk-checkpoint-2026-06-10.md
+```
+
+Read-only VPS baseline gate:
+
+```text
+research/amn2/phase-4-ng-v001-read-only-vps-baseline-gate-2026-06-10.md
 ```
 
 ## Safety Statement
