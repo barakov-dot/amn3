@@ -129,6 +129,7 @@ secret_surface: safe summary only; no `.env` values, tokens, peer keys, configs 
 remote_write_surface: read-only VPS commands
 test_plan: named gate preflight with explicit allowed commands, safe fields, no secret publication and Codex Security `security_risk_decision: go`
 required_gate: requires VPS gate
+gate_opening_status: opened-defer-awaiting-target on 2026-06-10; see research/amn2/phase-4-ng-v001-read-only-vps-baseline-gate-2026-06-10.md
 recommendation: defer
 ```
 

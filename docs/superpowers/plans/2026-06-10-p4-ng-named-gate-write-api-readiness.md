@@ -165,6 +165,13 @@ write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
   P4-NG-VPS-READONLY-BASELINE-2026-06-10
   ```
 
+  Gate opening evidence:
+
+  ```text
+  research/amn2/phase-4-ng-v001-read-only-vps-baseline-gate-2026-06-10.md
+  current_status: opened-defer-awaiting-target
+  ```
+
   Разрешенные действия после явного operator approval:
 
   - `Codex Security` risk checkpoint with `security_risk_decision: go | no-go | defer`.
