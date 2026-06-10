@@ -60,6 +60,18 @@ provider_portal_action_by_codex: no
 live_commands_run: no
 ```
 
+Latest clean-server readiness clarification:
+
+```text
+research/amn2/vps-fresh-deploy-001-readiness-checklist-2026-06-10.md
+fresh_deploy_possible_from_repo_package: yes-with-operator-provided-secrets
+bare_os_deploy_smoked: no
+current_vps_disposable_decision: not-set
+data_loss_acceptance_required_before_wipe: yes
+delete_actions_planned: no
+destructive_action_authorized: no
+```
+
 ## Phase 1: Open Docs-Only Gate
 
 - [x] Create `research/amn2/vps-rebuild-001-fresh-vps-rebuild-gate-2026-06-10.md`.
@@ -90,6 +102,7 @@ live_commands_run: no
   - `safe_summary_only`.
 - [x] Choose exact AMN2 source commit after local source precheck.
 - [x] Build and verify install/update package for `1508e3c`.
+- [x] Document clean-server readiness and the boundary between rebuildable source/package state and non-rebuildable runtime/secrets.
 - [x] Choose secret transfer policy:
   - `operator_local_channel_only`;
   - `regenerate_on_target`;
@@ -145,8 +158,9 @@ Do not execute this phase until every Phase 3 decision is filled and the exact f
 
 ### Критичные
 
-- `VPS-REBUILD-001`: provider snapshot/backup confirmation, `defer`; backup plan enabled, created/restorable backup not yet confirmed, delete actions not planned.
+- `VPS-REBUILD-001`: choose retention path before any destructive GO: wait for provider backup, explicitly accept disposable target, or keep gate deferred.
 - `VPS-REBUILD-001`: stop-criteria review before any destructive GO.
+- `VPS-REBUILD-001`: exact final destructive phrase is required only if the operator still chooses wipe/reinstall.
 
 ### Очень Важные
 
@@ -170,4 +184,4 @@ Do not execute this phase until every Phase 3 decision is filled and the exact f
 
 ## Recommendation
 
-Next step is not a live VPS command. Ask the provider where to see created backups or whether an immediate backup can be created. After a created/restorable backup is confirmed, review stop criteria before any final destructive phrase.
+Next step is not a live VPS command. Continue non-destructive readiness work without waiting for the provider backup. Before any wipe/reinstall, choose one retention path, review stop criteria and require the exact final destructive phrase.

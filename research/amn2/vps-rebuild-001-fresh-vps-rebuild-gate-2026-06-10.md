@@ -69,7 +69,7 @@ final_destructive_phrase: not_sent
 required_exact_phrase: GO VPS-REBUILD-001 WIPE TARGET
 ```
 
-Snapshot-first mode is selected because the current `NG-V001` baseline is known-good and should remain recoverable for a novice-safe rebuild path. Local source precheck selected AMN2 commit `1508e3c4a100b76815b29f91757290f1266f813d`; local package build/hygiene produced `dist/amn2-vps-update-and-smoke-kit-1508e3c.zip` as `package-ready-not-vps-smoked`. Until provider snapshot confirmation, stop-criteria review and the exact final destructive phrase are complete, this gate stays `defer`.
+Snapshot-first mode is selected because the current `NG-V001` baseline is known-good and should remain recoverable for a novice-safe rebuild path. Local source precheck selected AMN2 commit `1508e3c4a100b76815b29f91757290f1266f813d`; local package build/hygiene produced `dist/amn2-vps-update-and-smoke-kit-1508e3c.zip` as `package-ready-not-vps-smoked`. Until the operator chooses a retention path, stop-criteria review and the exact final destructive phrase are complete, this gate stays `defer`.
 
 ## Source Precheck Result
 
@@ -120,6 +120,23 @@ live_commands_run: no
 ssh_commands_run: no
 secret_publication: none
 ```
+
+## Fresh Deploy Readiness Clarification
+
+Evidence: `research/amn2/vps-fresh-deploy-001-readiness-checklist-2026-06-10.md`.
+
+```text
+fresh_deploy_readiness: documented
+fresh_deploy_possible_from_repo_package: yes-with-operator-provided-secrets
+bare_os_deploy_smoked: no
+current_vps_disposable_decision: not-set
+data_loss_acceptance_required_before_wipe: yes
+provider_backup_required_for_readiness_docs: no
+delete_actions_planned: no
+destructive_action_authorized: no
+```
+
+This clarification answers the operator question about rebuilding from zero: source/package readiness can continue without waiting for the provider backup. It does not change the current destructive gate result. Before any wipe/reinstall, the operator must still choose a retention path: wait for provider backup, explicitly accept the current VPS as disposable, or keep this gate deferred.
 
 ## Allowed Now
 
@@ -188,5 +205,8 @@ provider_snapshot_confirmation: defer
 provider_backup_plan_enabled: yes
 backup_created_now: unknown
 delete_actions_planned: no
-next_required_operator_decision: provider answer or visible created backup, stop-criteria review, then exact final destructive phrase only if the operator still chooses wipe
+fresh_deploy_readiness: documented
+fresh_deploy_possible_from_repo_package: yes-with-operator-provided-secrets
+current_vps_disposable_decision: not-set
+next_required_operator_decision: choose retention path before any wipe: wait for provider backup, explicitly accept disposable target, or keep gate deferred; then stop-criteria review and exact final destructive phrase only if the operator still chooses wipe
 ```

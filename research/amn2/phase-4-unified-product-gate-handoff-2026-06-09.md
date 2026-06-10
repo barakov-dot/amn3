@@ -145,6 +145,7 @@ It is a planning and transfer gate, not a permission to run new live commands.
 42. `NG-SC001` Codex Security VPS risk checkpoint; evidence: `research/amn2/phase-4-ng-sc001-codex-security-vps-risk-checkpoint-2026-06-10.md`.
 43. `NG-V001` read-only VPS baseline gate; evidence: `research/amn2/phase-4-ng-v001-read-only-vps-baseline-gate-2026-06-10.md`; status: `closed-go`.
 44. `VPS-REBUILD-001` fresh VPS rebuild gate; evidence: `research/amn2/vps-rebuild-001-fresh-vps-rebuild-gate-2026-06-10.md`; plan: `docs/superpowers/plans/2026-06-10-vps-rebuild-001-fresh-vps-rebuild.md`; status: `opened-defer-awaiting-final-destructive-approval`.
+45. `VPS-FRESH-DEPLOY-001` clean server readiness checklist; evidence: `research/amn2/vps-fresh-deploy-001-readiness-checklist-2026-06-10.md`; plan: `docs/superpowers/plans/2026-06-10-vps-fresh-deploy-001-readiness.md`; status: `readiness-documented`, docs-only.
 
 Текущий next stage:
 
@@ -153,7 +154,7 @@ It is a planning and transfer gate, not a permission to run new live commands.
 3. Default docs-only cosmetic queue is closed after `NG-X002`; `Codex Security` VPS risk checkpoint is closed after `NG-SC001`.
 4. `NG-V001` read-only VPS baseline gate is closed as `go`; active P4-NG plan has no remaining tasks.
 5. Write API live work remains blocked until a separate `P4-NG-WRITE-API-LIVE-GATE`.
-6. Destructive fresh VPS rebuild has separate gate `VPS-REBUILD-001`, currently opened as `defer`; novice-safe mode selects provider snapshot first and regenerate/operator-local secret handling. Source precheck selected AMN2 `1508e3c4a100b76815b29f91757290f1266f813d`; package build/hygiene produced `dist/amn2-vps-update-and-smoke-kit-1508e3c.zip` as `package-ready-not-vps-smoked`; backup plan is enabled, but created/restorable backup is not confirmed, and delete actions are not planned. No destructive action is authorized until provider answer or visible created backup, stop-criteria review and exact final phrase are present.
+6. Destructive fresh VPS rebuild has separate gate `VPS-REBUILD-001`, currently opened as `defer`; novice-safe mode selects provider snapshot first unless the operator later records a different retention path. Source precheck selected AMN2 `1508e3c4a100b76815b29f91757290f1266f813d`; package build/hygiene produced `dist/amn2-vps-update-and-smoke-kit-1508e3c.zip` as `package-ready-not-vps-smoked`; `VPS-FRESH-DEPLOY-001` documented that clean deploy is possible from repo/package plus operator-provided secrets, but bare OS deploy is not smoked and current VPS disposable decision is not set. Backup plan is enabled, created/restorable backup is not confirmed, and delete actions are not planned. No destructive action is authorized until retention path, stop-criteria review and exact final phrase are present.
 7. `P4-PRVTPRO-REFRESH-002` expiration-field contract tests, `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status and `P4-PRVTPRO-REFRESH-004` docs/policy support are closed; if selecting remaining PRVTPRO-derived work, create a design boundary for `P4-PRVTPRO-REFRESH-003` before any implementation; keep GPL-3.0 code/templates/UI/managers/workflows out of AMN2.
 
 If the selected slice requires live VPS state changes, public exposure, write/config work or destructive rebuild, stop and create a separate named gate first.
@@ -203,6 +204,7 @@ research/amn2/phase-4-ng-s002-next-chat-handoff-sync-2026-06-10.md
 research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md
 research/amn2/phase-4-ng-sc001-codex-security-vps-risk-checkpoint-2026-06-10.md
 research/amn2/phase-4-ng-v001-read-only-vps-baseline-gate-2026-06-10.md
+research/amn2/vps-fresh-deploy-001-readiness-checklist-2026-06-10.md
 research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md
 research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md
 docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md
