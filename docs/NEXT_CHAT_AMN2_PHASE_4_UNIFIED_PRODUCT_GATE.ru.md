@@ -156,7 +156,7 @@ Closed in or alongside this stage:
 - `NG-V001` read-only VPS baseline gate закрыт как `go`;
 - активных P4-NG задач больше нет.
 
-`NG-V001` does not authorize adjacent live/write/config/public/destructive work. Write API live work remains blocked until a separate `P4-NG-WRITE-API-LIVE-GATE`; destructive VPS rebuild remains blocked until a separate `VPS-REBUILD-001` gate; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
+`NG-V001` does not authorize adjacent live/write/config/public/destructive work. Write API live work remains blocked until a separate `P4-NG-WRITE-API-LIVE-GATE`; destructive VPS rebuild is now tracked by separate `VPS-REBUILD-001` and remains blocked until final destructive approval; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
 
 ## Обязательное чтение
 
@@ -483,6 +483,12 @@ go_no_go_decision:
 - research/amn2/phase-4-ng-v001-read-only-vps-baseline-gate-2026-06-10.md
 - status: closed-go; SSH transport ok, web/bot active/enabled, loopback login 200, 3030 loopback-only, 3040/80/443 absent, VPS_APPLY_ENABLED=false, no secret-bearing evidence.
 
+Открытый VPS-REBUILD-001 fresh VPS rebuild gate:
+- research/amn2/vps-rebuild-001-fresh-vps-rebuild-gate-2026-06-10.md
+- plan: docs/superpowers/plans/2026-06-10-vps-rebuild-001-fresh-vps-rebuild.md
+- status: opened-defer-awaiting-final-destructive-approval; security_risk_decision=defer; go_no_go_decision=defer.
+- destructive_action_authorized=no; reinstall_authorized=no; no live/SSH command, wipe, package apply, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production mutation or secret publication.
+
 Текущая private/local read-only API grouping:
 - Server inventory/status: GET /api/servers, GET /api/servers/{server_name}/summary.
 - Integration/service boundary: GET /api/integration/status.
@@ -495,5 +501,6 @@ go_no_go_decision:
 - P4-NG is active as docs-only named gate / write API readiness planning;
 - NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, WAPI-I005, NG-N003, NG-N002, NG-N001, NG-N004, NG-S001, NG-S002, NG-S004, NG-X003, NG-X001, NG-X002, NG-SC001, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001 and P4-PRVTPRO-REFRESH-004 are closed;
 - очередь default docs-only cosmetic закрыта; NG-V001 закрыт как go; активных P4-NG задач больше нет;
-- любое VPS/live/public/write/config/destructive направление сначала требует отдельный named gate/decision.
+- активная критичная задача отдельного destructive stage: VPS-REBUILD-001, defer-awaiting-final-destructive-approval;
+- любое другое VPS/live/public/write/config/destructive направление сначала требует отдельный named gate/decision.
 ```

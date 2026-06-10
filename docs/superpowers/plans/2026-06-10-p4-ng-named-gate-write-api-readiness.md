@@ -181,4 +181,4 @@ write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
 
 ## Рекомендация
 
-Очередь default docs-only cosmetic закрыта. `NG-V001` read-only VPS baseline gate закрыт как `go`. Активных P4-NG задач больше нет. Следующее решение: если идем к fresh VPS reinstall/rebuild, сначала открыть отдельный destructive gate `VPS-REBUILD-001`; если rebuild сейчас не выбирается, оставить P4-NG в paused/docs-maintenance state.
+Очередь default docs-only cosmetic закрыта. `NG-V001` read-only VPS baseline gate закрыт как `go`. Активных P4-NG задач больше нет. Отдельный destructive stage `VPS-REBUILD-001` открыт как `opened-defer-awaiting-final-destructive-approval`; если rebuild сейчас не выбирается, оставить P4-NG в paused/docs-maintenance state.

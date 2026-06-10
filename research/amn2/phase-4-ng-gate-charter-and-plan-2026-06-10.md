@@ -104,10 +104,10 @@ Closed and removed from active plan:
 Следующее решение:
 
 ```text
-default docs-only cosmetic queue closed; Codex Security checkpoint closed; NG-V001 closed-go; no active P4-NG tasks remain
+default docs-only cosmetic queue closed; Codex Security checkpoint closed; NG-V001 closed-go; no active P4-NG tasks remain; separate VPS-REBUILD-001 destructive stage opened-defer-awaiting-final-destructive-approval
 ```
 
-Reason: все P4-NG docs-only cosmetic tasks закрыты; `Codex Security` threat-model checkpoint добавлен как обязательный preflight; `NG-V001` read-only VPS baseline закрыт safe summary result. Активных P4-NG задач больше нет.
+Reason: все P4-NG docs-only cosmetic tasks закрыты; `Codex Security` threat-model checkpoint добавлен как обязательный preflight; `NG-V001` read-only VPS baseline закрыт safe summary result. Активных P4-NG задач больше нет. Если проект продолжает fresh VPS rebuild, это уже отдельный destructive stage `VPS-REBUILD-001`, не скрытое продолжение P4-NG.
 
 Reusable gate evidence template:
 
@@ -137,6 +137,13 @@ Read-only VPS baseline gate:
 
 ```text
 research/amn2/phase-4-ng-v001-read-only-vps-baseline-gate-2026-06-10.md
+```
+
+Fresh VPS rebuild destructive gate:
+
+```text
+research/amn2/vps-rebuild-001-fresh-vps-rebuild-gate-2026-06-10.md
+docs/superpowers/plans/2026-06-10-vps-rebuild-001-fresh-vps-rebuild.md
 ```
 
 ## Safety Statement
