@@ -69,7 +69,7 @@ defer_scope: naming/wording cleanup, read-only VPS gate, implementation gates, l
 
 ## Handoff
 
-`NG-S002` is closed together with `NG-S004`. `NG-X003` was selected next and later closed in `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`. Current next recommendation after `NG-X003` closure is `NG-X001` gate naming consistency with `live_write_authorized: no`.
+`NG-S002` is closed together with `NG-S004`. `NG-X003` was selected next and later closed in `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`. `NG-X001` was then closed as docs-only gate naming consistency. Current next recommendation after `NG-X001` closure is `NG-X002` Russian-first operator wording polish with `live_write_authorized: no`.
 
 ## Safety Statement
 

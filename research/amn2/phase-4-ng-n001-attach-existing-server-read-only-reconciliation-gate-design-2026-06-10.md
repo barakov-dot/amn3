@@ -39,11 +39,11 @@ config_delivery: no
 production_mutation: no
 live_vps_commands: no
 ssh_commands: no
-required_gate_for_local_reconciliation_implementation: P4-ATTACH-EXISTING-SERVER-RECONCILIATION-LOCAL-IMPLEMENTATION-GATE
+required_gate_for_local_reconciliation_implementation: P4-NG-ATTACH-EXISTING-SERVER-RECONCILIATION-LOCAL-IMPLEMENTATION-GATE
 required_gate_for_real_target_detection: P4-NG-VPS-READONLY-BASELINE-2026-06-10
-required_gate_for_attach_or_backfill: P4-ATTACH-EXISTING-SERVER-WRITE-BACKFILL-GATE
-required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
-required_gate_for_config_delivery: P4-CONFIG-DELIVERY-GATE
+required_gate_for_attach_or_backfill: P4-NG-ATTACH-EXISTING-SERVER-WRITE-BACKFILL-GATE
+required_gate_for_live_write: P4-NG-WRITE-API-LIVE-GATE
+required_gate_for_config_delivery: P4-NG-CONFIG-DELIVERY-GATE
 selected_next_slice: NG-N004 update candidate registry after every gate decision
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
@@ -348,7 +348,7 @@ defer_scope: local reconciliation implementation gate, real target read-only VPS
 
 ## Handoff
 
-`NG-N001` is closed. `NG-N004` was selected next and later closed in `research/amn2/phase-4-ng-n004-candidate-registry-update-2026-06-10.md`, because the candidate registry had multiple closed P4-NG/WAPI decisions and needed an explicit registry-maintenance slice before any live or implementation direction. `NG-S001` was then closed as docs-only status/transfer synchronization. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. Current next recommendation after `NG-X003` closure is `NG-X001` gate naming consistency with `live_write_authorized: no`.
+`NG-N001` is closed. `NG-N004` was selected next and later closed in `research/amn2/phase-4-ng-n004-candidate-registry-update-2026-06-10.md`, because the candidate registry had multiple closed P4-NG/WAPI decisions and needed an explicit registry-maintenance slice before any live or implementation direction. `NG-S001` was then closed as docs-only status/transfer synchronization. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. `NG-X001` was then closed as docs-only gate naming consistency. Current next recommendation after `NG-X001` closure is `NG-X002` Russian-first operator wording polish with `live_write_authorized: no`.
 
 ## Safety Statement
 

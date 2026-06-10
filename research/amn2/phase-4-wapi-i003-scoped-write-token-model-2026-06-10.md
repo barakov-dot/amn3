@@ -24,7 +24,7 @@ config_delivery: no
 production_mutation: no
 live_vps_commands: no
 ssh_commands: no
-required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
+required_gate_for_live_write: P4-NG-WRITE-API-LIVE-GATE
 selected_next_slice: WAPI-I002 decouple config delivery from client creation
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
@@ -73,7 +73,7 @@ Future scopes are classified into five groups:
 | --- | --- | --- |
 | `read` | current safe aggregate/status read access | existing/current baseline for `server:read`, `metrics:read` |
 | `write-plan` | create local operation plans without live mutation | future docs/local implementation only |
-| `write-live` | perform remote/live mutation | blocked until `P4-WRITE-API-LIVE-GATE` |
+| `write-live` | perform remote/live mutation | blocked until `P4-NG-WRITE-API-LIVE-GATE` |
 | `secret-read` | return `.conf`, QR, `vpn://` or config artifacts | blocked until separate secret-read/config gate |
 | `destructive` | backup/import/reboot/service/proxy/firewall mutation | blocked until separate destructive gate |
 
@@ -204,7 +204,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It makes the config-delivery boundary explicit before `/api/clients` design: client/peer creation may create a safe operation plan, but `.conf`, QR, `vpn://`, archives, share links and downloads require a separate secret-read/config gate. `WAPI-I001` was then closed as docs-only `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels; `NG-N003` was then closed as docs-only operation queue design after write API contract; `NG-N002` was then closed as docs-only health/status polling design; `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. `NG-N004` was then closed as docs-only candidate registry update after every gate decision. `NG-S001` was then closed as docs-only status/transfer synchronization. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. Current next recommendation after `NG-X003` closure is `NG-X001` gate naming consistency with `live_write_authorized: no`.
+It makes the config-delivery boundary explicit before `/api/clients` design: client/peer creation may create a safe operation plan, but `.conf`, QR, `vpn://`, archives, share links and downloads require a separate secret-read/config gate. `WAPI-I001` was then closed as docs-only `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels; `NG-N003` was then closed as docs-only operation queue design after write API contract; `NG-N002` was then closed as docs-only health/status polling design; `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. `NG-N004` was then closed as docs-only candidate registry update after every gate decision. `NG-S001` was then closed as docs-only status/transfer synchronization. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. `NG-X001` was then closed as docs-only gate naming consistency. Current next recommendation after `NG-X001` closure is `NG-X002` Russian-first operator wording polish with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

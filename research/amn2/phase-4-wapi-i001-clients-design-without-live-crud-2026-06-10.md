@@ -29,9 +29,9 @@ config_delivery: no
 production_mutation: no
 live_vps_commands: no
 ssh_commands: no
-required_gate_for_route_implementation: P4-WAPI-CLIENTS-LOCAL-IMPLEMENTATION-GATE
-required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
-required_gate_for_config_delivery: P4-CONFIG-DELIVERY-GATE
+required_gate_for_route_implementation: P4-NG-WAPI-CLIENTS-LOCAL-IMPLEMENTATION-GATE
+required_gate_for_live_write: P4-NG-WRITE-API-LIVE-GATE
+required_gate_for_config_delivery: P4-NG-CONFIG-DELIVERY-GATE
 selected_next_slice: WAPI-I005 web-panel gated action labels
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
@@ -75,8 +75,8 @@ Default meaning:
 - `client` means an opaque local AMN2-managed client/device/user-facing configuration record or operation target;
 - `peer` means the VPN/server-side runtime object, which may exist independently from AMN2 local metadata;
 - live peers created outside AMN2 must not be silently backfilled into managed `/api/clients` write state;
-- config artifacts are separate `config` resources and remain blocked behind `P4-CONFIG-DELIVERY-GATE`;
-- remote peer mutation remains blocked behind `P4-WRITE-API-LIVE-GATE`.
+- config artifacts are separate `config` resources and remain blocked behind `P4-NG-CONFIG-DELIVERY-GATE`;
+- remote peer mutation remains blocked behind `P4-NG-WRITE-API-LIVE-GATE`.
 
 This keeps the earlier web-panel visibility finding intact: live VPS peers visible through read-only inventory are not automatically the same thing as local AMN2 users/devices/configurations.
 
@@ -113,7 +113,7 @@ Future client read responses may include only safe metadata:
 | `operation_ref` | latest safe operation id, if present |
 | `operation_status` | safe status from WAPI-I004 |
 | `config_delivery_status` | `not_requested`, `blocked`, `deferred` or later gated value |
-| `config_delivery_required_gate` | `P4-CONFIG-DELIVERY-GATE` when applicable |
+| `config_delivery_required_gate` | `P4-NG-CONFIG-DELIVERY-GATE` when applicable |
 | `live_write_authorized` | `no` in default/local/docs mode |
 
 Future responses must not include:
@@ -176,7 +176,7 @@ live_write_authorized: no
 local_mutation_performed: false or future local metadata-only marker
 remote_mutation_performed: false
 config_delivery_status: blocked | deferred | not_requested
-config_delivery_required_gate: P4-CONFIG-DELIVERY-GATE
+config_delivery_required_gate: P4-NG-CONFIG-DELIVERY-GATE
 operation_status_url: optional private/local candidate link only after route implementation gate
 ```
 
@@ -280,7 +280,7 @@ live_vps_commands: no
 config_delivery: no
 ```
 
-It uses this `/api/clients` contract to define how future web/admin labels distinguish read-only metadata, local operation planning, deferred live write, blocked config delivery and separately gated destructive/public actions. `NG-N003` was then closed as docs-only operation queue design after write API contract. `NG-N002` was then closed as docs-only health/status polling design. `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. `NG-N004` was then closed as docs-only candidate registry update after every gate decision. `NG-S001` was then closed as docs-only status/transfer synchronization. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. Current next recommendation after `NG-X003` closure is `NG-X001` gate naming consistency with `live_write_authorized: no`.
+It uses this `/api/clients` contract to define how future web/admin labels distinguish read-only metadata, local operation planning, deferred live write, blocked config delivery and separately gated destructive/public actions. `NG-N003` was then closed as docs-only operation queue design after write API contract. `NG-N002` was then closed as docs-only health/status polling design. `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. `NG-N004` was then closed as docs-only candidate registry update after every gate decision. `NG-S001` was then closed as docs-only status/transfer synchronization. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. `NG-X001` was then closed as docs-only gate naming consistency. Current next recommendation after `NG-X001` closure is `NG-X002` Russian-first operator wording polish with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

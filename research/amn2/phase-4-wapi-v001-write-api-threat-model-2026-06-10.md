@@ -18,7 +18,7 @@ config_delivery: no
 production_mutation: no
 live_vps_commands: no
 ssh_commands: no
-required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
+required_gate_for_live_write: P4-NG-WRITE-API-LIVE-GATE
 selected_next_slice: WAPI-V002 write API route taxonomy
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
@@ -155,7 +155,7 @@ Route taxonomy did not add runtime routes, OpenAPI exposure, config delivery or 
 go_no_go_decision: go
 go_scope: WAPI-V002 docs-only route taxonomy with live_write_authorized: no
 no_go_scope: runtime route expansion, live write, public exposure, config delivery, SSH/VPS commands, production mutation
-defer_scope: any request that requires P4-WRITE-API-LIVE-GATE, NG-V001, public/config gate or destructive-operation gate
+defer_scope: any request that requires P4-NG-WRITE-API-LIVE-GATE, NG-V001, public/config gate or destructive-operation gate
 ```
 
 ## Safety Statement

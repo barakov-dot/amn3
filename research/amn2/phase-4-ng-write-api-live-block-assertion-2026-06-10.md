@@ -55,7 +55,7 @@ live_write_authorized: no
 runtime_routes_changed:
 config_delivery:
 production_mutation:
-required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
+required_gate_for_live_write: P4-NG-WRITE-API-LIVE-GATE
 ```
 
 If a future slice needs live write behavior, the current slice must stop and a separate named gate must be created first.
@@ -97,7 +97,7 @@ Blocked `WAPI-V001` output:
 go_no_go_decision: go
 go_scope: WAPI-V001 docs-only threat model with live_write_authorized: no
 no_go_scope: live write, runtime route expansion, public exposure, config delivery, SSH/VPS commands, production mutation
-defer_scope: any request that requires P4-WRITE-API-LIVE-GATE or NG-V001 approval
+defer_scope: any request that requires P4-NG-WRITE-API-LIVE-GATE or NG-V001 approval
 ```
 
 ## Safety Statement

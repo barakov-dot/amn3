@@ -44,7 +44,7 @@ very_important: NG-V001 read-only VPS baseline gate, blocked until explicit name
 important: none
 normal: none
 simple: none
-cosmetic: NG-X001, NG-X002
+cosmetic: NG-X002
 ```
 
 ## Go/No-Go Result
@@ -58,7 +58,7 @@ defer_scope: stale wording cleanup, gate naming consistency, Russian-first wordi
 
 ## Handoff
 
-`NG-S004` is closed. `NG-X003` was selected next and later closed in `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`. Current next recommendation after `NG-X003` closure is `NG-X001` gate naming consistency with `live_write_authorized: no`.
+`NG-S004` is closed. `NG-X003` was selected next and later closed in `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`. `NG-X001` was then closed as docs-only gate naming consistency. Current next recommendation after `NG-X001` closure is `NG-X002` Russian-first operator wording polish with `live_write_authorized: no`.
 
 ## Safety Statement
 

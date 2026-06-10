@@ -100,7 +100,7 @@ defer_scope: local implementation gates, real target read-only VPS detection gat
 
 ## Handoff
 
-`NG-N004` is closed. `NG-S001` was selected next and later closed in `research/amn2/phase-4-ng-s001-status-transfer-sync-2026-06-10.md`, because registry maintenance was recorded and the remaining safe work was status/transfer synchronization before any live gate discussion. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. Current next recommendation after `NG-X003` closure is `NG-X001` gate naming consistency with `live_write_authorized: no`.
+`NG-N004` is closed. `NG-S001` was selected next and later closed in `research/amn2/phase-4-ng-s001-status-transfer-sync-2026-06-10.md`, because registry maintenance was recorded and the remaining safe work was status/transfer synchronization before any live gate discussion. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. `NG-X001` was then closed as docs-only gate naming consistency. Current next recommendation after `NG-X001` closure is `NG-X002` Russian-first operator wording polish with `live_write_authorized: no`.
 
 ## Safety Statement
 

@@ -36,7 +36,7 @@ stage_id: P4-NG
 stage_name: Named Gate / Write API Readiness
 default_mode: docs-only gate planning
 first_live_gate_candidate: NG-V001 read-only VPS baseline check
-write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
+write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
 ```
 
 ## Closed And Removed From Active Plan
@@ -137,6 +137,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`.
   - Removes stale active-next wording that could imply implicit live/write/public/config authorization.
 
+- [x] **NG-X001: gate naming consistency**
+  - Closed by `research/amn2/phase-4-ng-x001-gate-naming-consistency-2026-06-10.md`.
+  - Aligns stage-level gate labels to `P4-NG-*` in P4-NG docs/evidence.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -190,12 +194,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ### Косметические
 
-- [ ] **NG-X001: gate naming consistency**
-
-  Scope:
-
-  - Use `P4-NG-*` for gate-stage docs and evidence.
-
 - [ ] **NG-X002: Russian-first operator wording polish**
 
   Scope:
@@ -204,6 +202,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `NG-X001` next. It is docs-only gate naming consistency and must preserve the P4-NG boundaries: align naming around `P4-NG-*` gate-stage docs/evidence, with no live VPS commands, no implementation, no route behavior changes, no config delivery and no production mutation.
+Start with `NG-X002` next. It is docs-only Russian-first operator wording polish and must preserve the P4-NG boundaries: keep technical ids/routes/gate names unchanged, with no live VPS commands, no implementation, no route behavior changes, no config delivery and no production mutation.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.

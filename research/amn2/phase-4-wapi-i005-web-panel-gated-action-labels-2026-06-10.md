@@ -31,10 +31,10 @@ config_delivery: no
 production_mutation: no
 live_vps_commands: no
 ssh_commands: no
-required_gate_for_template_implementation: P4-WAPI-PANEL-LABELS-LOCAL-IMPLEMENTATION-GATE
-required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
-required_gate_for_config_delivery: P4-CONFIG-DELIVERY-GATE
-required_gate_for_public_exposure: P4-PUBLIC-EXPOSURE-GATE
+required_gate_for_template_implementation: P4-NG-WAPI-PANEL-LABELS-LOCAL-IMPLEMENTATION-GATE
+required_gate_for_live_write: P4-NG-WRITE-API-LIVE-GATE
+required_gate_for_config_delivery: P4-NG-CONFIG-DELIVERY-GATE
+required_gate_for_public_exposure: P4-NG-PUBLIC-EXPOSURE-GATE
 selected_next_slice: NG-N003 operation queue design after write API contract
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
@@ -189,7 +189,7 @@ live_vps_commands: no
 config_delivery: no
 ```
 
-Reason: the WAPI contract chain now defines route taxonomy, fake-runner expectations, idempotency/locks, audit/redaction, operation statuses, scoped tokens, config decoupling, `/api/clients` boundaries and panel labels. `NG-N003` captured queue/cancel/retry semantics as docs-only planning, not implementation. `NG-N002` was then closed as docs-only health/status polling design. `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. `NG-N004` was then closed as docs-only candidate registry update after every gate decision. `NG-S001` was then closed as docs-only status/transfer synchronization. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. Current next recommendation after `NG-X003` closure is `NG-X001` gate naming consistency with `live_write_authorized: no`.
+Reason: the WAPI contract chain now defines route taxonomy, fake-runner expectations, idempotency/locks, audit/redaction, operation statuses, scoped tokens, config decoupling, `/api/clients` boundaries and panel labels. `NG-N003` captured queue/cancel/retry semantics as docs-only planning, not implementation. `NG-N002` was then closed as docs-only health/status polling design. `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. `NG-N004` was then closed as docs-only candidate registry update after every gate decision. `NG-S001` was then closed as docs-only status/transfer synchronization. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. `NG-X001` was then closed as docs-only gate naming consistency. Current next recommendation after `NG-X001` closure is `NG-X002` Russian-first operator wording polish with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

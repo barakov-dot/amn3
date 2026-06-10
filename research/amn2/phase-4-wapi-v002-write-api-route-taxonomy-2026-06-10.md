@@ -20,7 +20,7 @@ config_delivery: no
 production_mutation: no
 live_vps_commands: no
 ssh_commands: no
-required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
+required_gate_for_live_write: P4-NG-WRITE-API-LIVE-GATE
 selected_next_slice: WAPI-V003 local fake-runner contract
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
@@ -79,8 +79,8 @@ These names are planning placeholders, not implementation approval.
 | `POST /api/clients/{client_id}:disable` | `clients` | `state-write` | `client:disable` | future local disable state; remote peer mutation blocked | WAPI-V003 and WAPI-V004 before any implementation |
 | `POST /api/clients/{client_id}:revoke` | `clients` | `state-write` | `client:revoke` | future revoke operation plan; live peer revoke blocked | WAPI-V003, WAPI-V004 and live write gate before remote execution |
 | `POST /api/peers/{peer_id}:plan-apply` | `peers` | `state-write` | `peer:plan` | operation plan record only | WAPI-V003 fake-runner contract |
-| `POST /api/peers/{peer_id}:apply` | `peers` | `state-write` | `peer:apply` | remote peer mutation | `P4-WRITE-API-LIVE-GATE` after fake-runner and idempotency/lock design |
-| `POST /api/peers/{peer_id}:revoke` | `peers` | `state-write` | `peer:revoke` | remote peer mutation | `P4-WRITE-API-LIVE-GATE` after fake-runner and idempotency/lock design |
+| `POST /api/peers/{peer_id}:apply` | `peers` | `state-write` | `peer:apply` | remote peer mutation | `P4-NG-WRITE-API-LIVE-GATE` after fake-runner and idempotency/lock design |
+| `POST /api/peers/{peer_id}:revoke` | `peers` | `state-write` | `peer:revoke` | remote peer mutation | `P4-NG-WRITE-API-LIVE-GATE` after fake-runner and idempotency/lock design |
 | `POST /api/peers:sync` | `peers` | `state-write` | `peer:sync` | remote read plus possible local reconciliation | separate sync/reconciliation gate |
 | `GET /api/configs/{client_id}/metadata` | `configs` | `read-only` | `config:metadata` | none | AMN2 local read-only route plan; no secret payload |
 | `POST /api/configs/{client_id}:prepare` | `configs` | `secret-read` | `config:prepare` | secret-bearing config generation | separate config/read-delivery gate |
@@ -99,7 +99,7 @@ The following families remain blocked outside WAPI default docs-only mode:
 
 | Family | Class | Required named gate |
 | --- | --- | --- |
-| live peer apply/revoke/sync execution | `state-write` | `P4-WRITE-API-LIVE-GATE` |
+| live peer apply/revoke/sync execution | `state-write` | `P4-NG-WRITE-API-LIVE-GATE` |
 | config download, QR, `vpn://`, share links and archives | `secret-read` | separate config/read-delivery gate |
 | public/self-service config links | `public-exposure` + `secret-read` | separate public/config gate |
 | backup/import/reboot/service restart/firewall/proxy edits | `destructive` | destructive-operation gate |
@@ -153,7 +153,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It defines fake-runner inputs/outputs for create, disable, revoke, sync and retry operation plans without SSH, live VPS commands or remote mutation. `WAPI-V004` was selected next and later closed as docs-only idempotency, locking and partial-failure model; `WAPI-V005` was then closed as write API audit/redaction requirements; `WAPI-I004` was then closed as operation status model; `WAPI-I003` was then closed as scoped write-token model; `WAPI-I002` was then closed as config delivery decoupling; `WAPI-I001` was then closed as `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels; `NG-N003` was then closed as docs-only operation queue design after write API contract; `NG-N002` was then closed as docs-only health/status polling design; `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. `NG-N004` was then closed as docs-only candidate registry update after every gate decision. `NG-S001` was then closed as docs-only status/transfer synchronization. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. Current next recommendation after `NG-X003` closure is `NG-X001` gate naming consistency with `live_write_authorized: no`.
+It defines fake-runner inputs/outputs for create, disable, revoke, sync and retry operation plans without SSH, live VPS commands or remote mutation. `WAPI-V004` was selected next and later closed as docs-only idempotency, locking and partial-failure model; `WAPI-V005` was then closed as write API audit/redaction requirements; `WAPI-I004` was then closed as operation status model; `WAPI-I003` was then closed as scoped write-token model; `WAPI-I002` was then closed as config delivery decoupling; `WAPI-I001` was then closed as `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels; `NG-N003` was then closed as docs-only operation queue design after write API contract; `NG-N002` was then closed as docs-only health/status polling design; `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. `NG-N004` was then closed as docs-only candidate registry update after every gate decision. `NG-S001` was then closed as docs-only status/transfer synchronization. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. `NG-X001` was then closed as docs-only gate naming consistency. Current next recommendation after `NG-X001` closure is `NG-X002` Russian-first operator wording polish with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

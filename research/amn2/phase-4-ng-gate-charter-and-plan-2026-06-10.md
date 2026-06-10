@@ -12,7 +12,7 @@ stage_name: Named Gate / Write API Readiness
 operator_decision: proceed with gate-first planning
 default_mode: docs-only gate planning
 first_recommended_live_gate: NG-V001 read-only VPS baseline gate, only after explicit approval
-write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
+write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
 AMN2_code_changed: no
 live_vps_commands: no
 public_exposure: no
@@ -95,15 +95,16 @@ Closed and removed from active plan:
 - `NG-S001` status/transfer synchronization;
 - `NG-S002` next-chat handoff synchronization;
 - `NG-S004` visible active plan maintenance;
-- `NG-X003` stale wording cleanup.
+- `NG-X003` stale wording cleanup;
+- `NG-X001` gate naming consistency.
 
 Active next recommendation:
 
 ```text
-NG-X001 gate naming consistency
+NG-X002 Russian-first operator wording polish
 ```
 
-Reason: it is docs-only cosmetic cleanup and keeps gate-stage names consistent before any future read-only VPS gate discussion.
+Reason: it is docs-only cosmetic cleanup after gate labels were aligned to `P4-NG-*`.
 
 Reusable gate evidence template:
 
