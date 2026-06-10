@@ -490,6 +490,7 @@ go_no_go_decision:
 - novice-safe preflight: preserve provider snapshot first, precheck AMN2 source/package locally, regenerate target secrets where possible, pass external secrets only through operator local channel.
 - source/package precheck: research/amn2/vps-rebuild-001-source-package-precheck-2026-06-10.md; source candidate `1508e3c4a100b76815b29f91757290f1266f813d`; focused local tests `30 passed, 1 warning`.
 - package build/hygiene: research/amn2/vps-rebuild-001-package-build-hygiene-2026-06-10.md; package `dist/amn2-vps-update-and-smoke-kit-1508e3c.zip`, sha256 `03C51891AF83B9BD2B435AF5F77EEBBAE0DC7289CD107803DE7FB9877C4BFDA3`; source zip sha256 `0F4BBD72651FC99197C857093C24AAC9F3927EC9F5B7B7C364B1A312032EF15E`; status `package-ready-not-vps-smoked`.
+- provider snapshot confirmation: research/amn2/vps-rebuild-001-provider-snapshot-confirmation-2026-06-10.md; status `pending-operator-confirmation`; Codex did not access provider panel or run live/SSH commands.
 - destructive_action_authorized=no; reinstall_authorized=no; no live/SSH command, wipe, package apply, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production mutation or secret publication.
 
 Текущая private/local read-only API grouping:
@@ -504,6 +505,6 @@ go_no_go_decision:
 - P4-NG is active as docs-only named gate / write API readiness planning;
 - NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, WAPI-I005, NG-N003, NG-N002, NG-N001, NG-N004, NG-S001, NG-S002, NG-S004, NG-X003, NG-X001, NG-X002, NG-SC001, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001 and P4-PRVTPRO-REFRESH-004 are closed;
 - очередь default docs-only cosmetic закрыта; NG-V001 закрыт как go; активных P4-NG задач больше нет;
-- активная критичная задача отдельного destructive stage: VPS-REBUILD-001, defer-awaiting-final-destructive-approval; source/package precheck and package build/hygiene completed; next required: provider snapshot confirmation and stop-criteria review;
+- активная критичная задача отдельного destructive stage: VPS-REBUILD-001, defer-awaiting-final-destructive-approval; source/package precheck and package build/hygiene completed; provider snapshot confirmation opened and pending operator safe summary; next required after snapshot: stop-criteria review;
 - любое другое VPS/live/public/write/config/destructive направление сначала требует отдельный named gate/decision.
 ```

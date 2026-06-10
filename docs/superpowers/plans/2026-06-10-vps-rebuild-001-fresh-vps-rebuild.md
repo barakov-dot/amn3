@@ -45,6 +45,16 @@ package_hygiene: passed
 test_extract: passed
 ```
 
+Latest provider snapshot confirmation evidence:
+
+```text
+research/amn2/vps-rebuild-001-provider-snapshot-confirmation-2026-06-10.md
+provider_snapshot_confirmation: pending-operator-confirmation
+snapshot_required: yes
+provider_portal_action_by_codex: no
+live_commands_run: no
+```
+
 ## Phase 1: Open Docs-Only Gate
 
 - [x] Create `research/amn2/vps-rebuild-001-fresh-vps-rebuild-gate-2026-06-10.md`.
@@ -80,6 +90,7 @@ test_extract: passed
   - `regenerate_on_target`;
   - `restore_from_approved_secret_store`.
 - [ ] Confirm stop criteria and post-install acceptance checklist.
+- [ ] Confirm provider snapshot using safe summary fields only.
 - [ ] Send the exact final destructive phrase:
 
 ```text
@@ -129,7 +140,8 @@ Do not execute this phase until every Phase 3 decision is filled and the exact f
 
 ### Критичные
 
-- `VPS-REBUILD-001`: fresh VPS rebuild gate, `opened-defer-awaiting-final-destructive-approval`; next required: provider snapshot confirmation and stop-criteria review.
+- `VPS-REBUILD-001`: provider snapshot confirmation, `pending-operator-confirmation`.
+- `VPS-REBUILD-001`: stop-criteria review before any destructive GO.
 
 ### Очень Важные
 
@@ -153,4 +165,4 @@ Do not execute this phase until every Phase 3 decision is filled and the exact f
 
 ## Recommendation
 
-Next step is not a live VPS command. Confirm the provider snapshot and review stop criteria. Only after those are reviewed should the operator decide whether to send the exact final destructive phrase.
+Next step is not a live VPS command. The operator should create or verify the provider snapshot in the provider panel, then return only the safe summary fields from `research/amn2/vps-rebuild-001-provider-snapshot-confirmation-2026-06-10.md`. After snapshot confirmation, review stop criteria before any final destructive phrase.

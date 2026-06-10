@@ -99,6 +99,20 @@ forbidden_source_entries: 0
 test_extract: passed
 ```
 
+## Provider Snapshot Confirmation
+
+Evidence: `research/amn2/vps-rebuild-001-provider-snapshot-confirmation-2026-06-10.md`.
+
+```text
+provider_snapshot_confirmation: pending-operator-confirmation
+snapshot_required: yes
+operator_provider_panel_action_required: yes
+provider_portal_action_by_codex: no
+live_commands_run: no
+ssh_commands_run: no
+secret_publication: none
+```
+
 ## Allowed Now
 
 - Update AMN3 docs/evidence for `VPS-REBUILD-001`.
@@ -162,5 +176,6 @@ secret_transfer_policy: regenerate_on_target_where_possible + operator_local_cha
 install_source_commit: 1508e3c4a100b76815b29f91757290f1266f813d
 install_package: dist/amn2-vps-update-and-smoke-kit-1508e3c.zip
 install_package_sha256: 03C51891AF83B9BD2B435AF5F77EEBBAE0DC7289CD107803DE7FB9877C4BFDA3
-next_required_operator_decision: provider snapshot confirmation and stop-criteria review, then exact final destructive phrase only if the operator still chooses wipe
+provider_snapshot_confirmation: pending-operator-confirmation
+next_required_operator_decision: provider snapshot safe summary, stop-criteria review, then exact final destructive phrase only if the operator still chooses wipe
 ```
