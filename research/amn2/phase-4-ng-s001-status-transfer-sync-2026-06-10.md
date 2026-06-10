@@ -87,7 +87,7 @@ defer_scope: next-chat handoff synchronization, visible active-plan maintenance,
 
 ## Handoff
 
-`NG-S001` is closed. `NG-S002` and `NG-S004` were selected next and closed together in `research/amn2/phase-4-ng-s002-next-chat-handoff-sync-2026-06-10.md` and `research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md`. `NG-X003` was then closed as docs-only stale wording cleanup. `NG-X001` was then closed as docs-only gate naming consistency. Current next recommendation after `NG-X001` closure is `NG-X002` Russian-first operator wording polish with `live_write_authorized: no`.
+`NG-S001` is closed. `NG-S002` and `NG-S004` were selected next and closed together in `research/amn2/phase-4-ng-s002-next-chat-handoff-sync-2026-06-10.md` and `research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md`. `NG-X003` was then closed as docs-only stale wording cleanup. `NG-X001` was then closed as docs-only gate naming consistency. `NG-X002` was then closed as docs-only Russian-first operator wording polish. Очередь default docs-only cosmetic теперь закрыта.
 
 ## Safety Statement
 

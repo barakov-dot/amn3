@@ -96,15 +96,16 @@ Closed and removed from active plan:
 - `NG-S002` next-chat handoff synchronization;
 - `NG-S004` visible active plan maintenance;
 - `NG-X003` stale wording cleanup;
-- `NG-X001` gate naming consistency.
+- `NG-X001` gate naming consistency;
+- `NG-X002` Russian-first operator wording polish.
 
-Active next recommendation:
+Следующее решение:
 
 ```text
-NG-X002 Russian-first operator wording polish
+default docs-only cosmetic queue closed; NG-V001 requires explicit named approval
 ```
 
-Reason: it is docs-only cosmetic cleanup after gate labels were aligned to `P4-NG-*`.
+Reason: все P4-NG docs-only cosmetic tasks закрыты; в активном плане остается только explicitly gated `NG-V001` read-only VPS baseline.
 
 Reusable gate evidence template:
 

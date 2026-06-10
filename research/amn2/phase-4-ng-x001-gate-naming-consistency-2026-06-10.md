@@ -19,7 +19,9 @@ public_exposure: no
 config_delivery: no
 write_api_implementation: no
 production_peer_or_user_mutation: no
-selected_next_slice: NG-X002 Russian-first operator wording polish
+closed_follow_up_slice: NG-X002 Russian-first operator wording polish
+closed_follow_up_slice_status: completed in research/amn2/phase-4-ng-x002-russian-first-operator-wording-polish-2026-06-10.md
+current_next_slice: none
 ```
 
 ## Naming Contract
@@ -45,7 +47,8 @@ P4-NG-ATTACH-EXISTING-SERVER-WRITE-BACKFILL-GATE
 
 - P4-NG plan, charter, next-chat handoff, project context import, project status, transfer backlog and unified-product handoff now refer to `P4-NG-WRITE-API-LIVE-GATE`.
 - WAPI/NG evidence files now use `P4-NG-*` for local implementation, config delivery, public exposure, write live, attach/backfill and polling gate labels.
-- Active recommendation moved from `NG-X001` to `NG-X002`.
+- `NG-X002` was selected next and later closed in `research/amn2/phase-4-ng-x002-russian-first-operator-wording-polish-2026-06-10.md`.
+- Очередь default docs-only cosmetic теперь закрыта.
 
 ## Негативные проверки
 
@@ -78,12 +81,10 @@ P4-NG-ATTACH-EXISTING-SERVER-WRITE-BACKFILL-GATE
 
 Простые: нет активных задач.
 
-Косметические:
-
-- `NG-X002` Russian-first operator wording polish.
+Косметические: нет активных задач.
 
 ## Handoff
 
-`NG-X001` is closed. The recommended next docs-only slice is `NG-X002` Russian-first operator wording polish, because gate labels are now aligned to `P4-NG-*` and the remaining safe cosmetic work is Russian-first operator wording without changing technical ids/routes/gate names.
+`NG-X001` is closed. `NG-X002` was selected next and later closed in `research/amn2/phase-4-ng-x002-russian-first-operator-wording-polish-2026-06-10.md`. Очередь default docs-only cosmetic теперь закрыта.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.

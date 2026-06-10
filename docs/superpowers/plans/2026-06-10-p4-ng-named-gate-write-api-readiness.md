@@ -1,18 +1,18 @@
-# P4-NG Named Gate / Write API Readiness Implementation Plan
+# P4-NG: план Named Gate / Write API Readiness
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Для agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** перейти от закрытой default local-only Phase 4 очереди к управляемому named-gate этапу для VPS/read-only baseline и будущего write API design без неявного live/write допуска.
+**Цель:** перейти от закрытой default local-only Phase 4 очереди к управляемому named-gate этапу для VPS/read-only baseline и будущего write API design без неявного live/write допуска.
 
-**Architecture:** AMN3 остается source of truth для gate charter, status, evidence и backlog. AMN2 получает только отдельные implementation/design slices после явного выбора; live VPS, public exposure, config delivery and write API остаются закрыты до named gate.
+**Архитектура:** AMN3 остается source of truth для gate charter, status, evidence и backlog. AMN2 получает только отдельные implementation/design slices после явного выбора; live VPS, public exposure, config delivery and write API остаются закрыты до named gate.
 
-**Tech Stack:** AMN3 Markdown docs/evidence, AMN2 Python/FastAPI/docs/tests for future local-only design slices, PowerShell/OpenSSH only after explicit read-only VPS gate approval.
+**Стек:** AMN3 Markdown docs/evidence, AMN2 Python/FastAPI/docs/tests for future local-only design slices, PowerShell/OpenSSH only after explicit read-only VPS gate approval.
 
 ---
 
-## Current Boundary
+## Текущая Граница
 
-Default local-only Phase 4 implementation queue is closed after:
+Default local-only Phase 4 implementation queue закрыта после:
 
 - `P4-C009`;
 - `P4-I002`;
@@ -29,7 +29,7 @@ Default local-only Phase 4 implementation queue is closed after:
 - `P4-X001`;
 - `P4-I001` closure.
 
-This plan starts the next stage:
+Этот план открывает следующий этап:
 
 ```text
 stage_id: P4-NG
@@ -39,7 +39,7 @@ first_live_gate_candidate: NG-V001 read-only VPS baseline check
 write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
 ```
 
-## Closed And Removed From Active Plan
+## Закрыто И Удалено Из Активного Плана
 
 - [x] **NG-C001: create named gate charter**
   - Closed by `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md`.
@@ -141,7 +141,11 @@ write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-ng-x001-gate-naming-consistency-2026-06-10.md`.
   - Aligns stage-level gate labels to `P4-NG-*` in P4-NG docs/evidence.
 
-## Active Remaining Plan
+- [x] **NG-X002: Russian-first operator wording polish**
+  - Closed by `research/amn2/phase-4-ng-x002-russian-first-operator-wording-polish-2026-06-10.md`.
+  - Makes active P4-NG operator-facing headings and next-step instructions Russian-first while keeping technical ids/routes/gate names unchanged.
+
+## Активный Оставшийся План
 
 ### Критичные
 
@@ -151,21 +155,21 @@ write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
 
 - [ ] **NG-V001: run read-only VPS baseline gate**
 
-  Gate name:
+  Имя gate:
 
   ```text
   P4-NG-VPS-READONLY-BASELINE-2026-06-10
   ```
 
-  Allowed actions after explicit operator approval:
+  Разрешенные действия после явного operator approval:
 
-  - SSH transport check to operator-provided target only.
-  - Read-only service status for `amneziya-web` and `amneziya-bot`.
-  - Read-only loopback `/login` check on `127.0.0.1:3030`.
-  - Read-only listener checks for `3030`, `3040`, `80`, `443`.
-  - Boolean-only check that `VPS_APPLY_ENABLED=false` exists; do not print `.env`.
+  - Проверка SSH transport только до operator-provided target.
+  - Read-only service status для `amneziya-web` и `amneziya-bot`.
+  - Read-only loopback `/login` check на `127.0.0.1:3030`.
+  - Read-only listener checks для `3030`, `3040`, `80`, `443`.
+  - Boolean-only проверка, что `VPS_APPLY_ENABLED=false` существует; не печатать `.env`.
 
-  Blocked actions:
+  Закрытые действия:
 
   - package apply;
   - service restart/enable/disable;
@@ -174,11 +178,11 @@ write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
   - config delivery;
   - token issue/revoke;
   - backup/import/reboot;
-  - public exposure changes.
+  - изменения public exposure.
 
-  Done when:
+  Готово, когда:
 
-  - Evidence records safe summary only and no secret-bearing data.
+  - Evidence содержит только safe summary и не содержит secret-bearing data.
 
 ### Важные
 
@@ -194,14 +198,8 @@ write_api_live_status: blocked until separate P4-NG-WRITE-API-LIVE-GATE
 
 ### Косметические
 
-- [ ] **NG-X002: Russian-first operator wording polish**
+Нет активных задач.
 
-  Scope:
+## Рекомендация
 
-  - Russian headings and operator instructions; keep technical ids/routes unchanged.
-
-## First Recommendation
-
-Start with `NG-X002` next. It is docs-only Russian-first operator wording polish and must preserve the P4-NG boundaries: keep technical ids/routes/gate names unchanged, with no live VPS commands, no implementation, no route behavior changes, no config delivery and no production mutation.
-
-Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.
+Очередь default docs-only cosmetic закрыта. Следующее решение: `NG-V001` read-only VPS baseline gate можно брать только после явного operator approval и target SSH alias/host вне repository secrets. Если live/read-only gate сейчас не выбирается, оставляем P4-NG в paused/docs-maintenance state или открываем отдельный local-only design boundary, например для `P4-PRVTPRO-REFRESH-003`.

@@ -683,10 +683,11 @@ Implemented safe scope:
 - `NG-S001` status/transfer synchronization was closed in `research/amn2/phase-4-ng-s001-status-transfer-sync-2026-06-10.md`; it aligned status and transfer references after the closed normal P4-NG queue without changing candidate implementation status beyond the `NG-N004` registry maintenance slice.
 - `NG-S002` next-chat handoff synchronization and `NG-S004` visible active plan maintenance were closed in `research/amn2/phase-4-ng-s002-next-chat-handoff-sync-2026-06-10.md` and `research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md`; they aligned next-chat/startup context and removed closed simple tasks from the active plan without authorizing implementation or live work.
 - `NG-X003` stale wording cleanup and `NG-X001` gate naming consistency were closed in `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md` and `research/amn2/phase-4-ng-x001-gate-naming-consistency-2026-06-10.md`; they removed stale active-next wording and aligned stage-level gate labels to `P4-NG-*` without authorizing implementation, live work, config delivery or public exposure.
+- `NG-X002` Russian-first operator wording polish was closed in `research/amn2/phase-4-ng-x002-russian-first-operator-wording-polish-2026-06-10.md`; it made active P4-NG operator-facing headings and next-step wording Russian-first without changing technical ids, routes, gate names, file paths or candidate ids.
 - PRVTPRO refresh 2026-06-10 was recorded in `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`; `P4-PRVTPRO-REFRESH-002` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-expiration-contract-tests-implementation-2026-06-10.md`, `P4-PRVTPRO-REFRESH-001` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-build-status-implementation-2026-06-10.md`, and `P4-PRVTPRO-REFRESH-004` was completed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`. Remaining AMN2 PRVTPRO-derived candidate is `P4-PRVTPRO-REFRESH-003` only after design boundary. Hybrid-only candidates are `HYB-PRVTPRO-REFRESH-001..004`. No GPL code, templates, UI, managers or workflows are copied.
 - The PRVTPRO local-only branches for `P4-PRVTPRO-REFRESH-002` and `P4-PRVTPRO-REFRESH-001` were merged into `amn2/codex-vps-test-prep` at `1508e3c4a100b76815b29f91757290f1266f813d`; evidence: `research/amn2/phase-4-prvtpro-local-slices-merge-2026-06-10.md`.
 
-Next decision: continue P4-NG with docs-only `NG-X002` Russian-first operator wording polish with `live_write_authorized: no`, or if selecting remaining PRVTPRO-derived work, create the design boundary for `P4-PRVTPRO-REFRESH-003` before any UI/server-status slice. Do not propose any VPS command or copy GPL code.
+Следующее решение: очередь default docs-only cosmetic закрыта. Либо explicit approval для `NG-V001` read-only VPS baseline gate с target SSH alias/host вне repository secrets, либо design boundary для `P4-PRVTPRO-REFRESH-003` до любого UI/server-status slice. Не предлагать VPS command без named gate и не копировать GPL code.
 
 ## Source Notes
 
@@ -701,6 +702,7 @@ Primary AMN3 sources:
 - `research/amn2/phase-4-ng-secrets-policy-go-no-go-format-2026-06-10.md`
 - `research/amn2/phase-4-ng-x003-stale-wording-cleanup-2026-06-10.md`
 - `research/amn2/phase-4-ng-x001-gate-naming-consistency-2026-06-10.md`
+- `research/amn2/phase-4-ng-x002-russian-first-operator-wording-polish-2026-06-10.md`
 - `research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md`
 - `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`
 - `research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md`

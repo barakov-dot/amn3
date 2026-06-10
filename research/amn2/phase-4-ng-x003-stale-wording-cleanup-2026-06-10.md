@@ -69,6 +69,6 @@ current_next_slice: NG-X002 Russian-first operator wording polish
 
 ## Handoff
 
-`NG-X003` is closed. `NG-X001` was selected next and later closed in `research/amn2/phase-4-ng-x001-gate-naming-consistency-2026-06-10.md`. Current next recommendation after `NG-X001` closure is `NG-X002` Russian-first operator wording polish with `live_write_authorized: no`.
+`NG-X003` is closed. `NG-X001` was selected next and later closed in `research/amn2/phase-4-ng-x001-gate-naming-consistency-2026-06-10.md`. `NG-X002` was then closed as docs-only Russian-first operator wording polish. Очередь default docs-only cosmetic теперь закрыта.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.

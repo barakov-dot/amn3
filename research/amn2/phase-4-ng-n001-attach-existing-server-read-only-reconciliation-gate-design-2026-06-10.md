@@ -348,7 +348,7 @@ defer_scope: local reconciliation implementation gate, real target read-only VPS
 
 ## Handoff
 
-`NG-N001` is closed. `NG-N004` was selected next and later closed in `research/amn2/phase-4-ng-n004-candidate-registry-update-2026-06-10.md`, because the candidate registry had multiple closed P4-NG/WAPI decisions and needed an explicit registry-maintenance slice before any live or implementation direction. `NG-S001` was then closed as docs-only status/transfer synchronization. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. `NG-X001` was then closed as docs-only gate naming consistency. Current next recommendation after `NG-X001` closure is `NG-X002` Russian-first operator wording polish with `live_write_authorized: no`.
+`NG-N001` is closed. `NG-N004` was selected next and later closed in `research/amn2/phase-4-ng-n004-candidate-registry-update-2026-06-10.md`, because the candidate registry had multiple closed P4-NG/WAPI decisions and needed an explicit registry-maintenance slice before any live or implementation direction. `NG-S001` was then closed as docs-only status/transfer synchronization. `NG-S002` and `NG-S004` were then closed together as docs-only handoff and visible-plan maintenance. `NG-X003` was then closed as docs-only stale wording cleanup. `NG-X001` was then closed as docs-only gate naming consistency. `NG-X002` was then closed as docs-only Russian-first operator wording polish. Очередь default docs-only cosmetic теперь закрыта.
 
 ## Safety Statement
 
