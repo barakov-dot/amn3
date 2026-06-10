@@ -65,7 +65,7 @@ tcp_443_absent=yes
 vps_apply_enabled_false=yes
 ```
 
-## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy, P4-I005 token lifecycle boundary, P4-N004 bot/admin read-only labels, P4-N001 docs/status drift synchronization, P4-N002 protocol manager interface checklist, P4-X003 Russian-first operator docs polish, P4-X002 API/status/gate naming cleanup и P4-X001 read-only API docs grouping polish
+## Активный оставшийся план после P4-C009, P4-I002, route/secret gate planning, P4-I003 design/implementation, P4-I004 endpoint taxonomy, P4-N003 metrics privacy, P4-I005 token lifecycle boundary, P4-N004 bot/admin read-only labels, P4-N001 docs/status drift synchronization, P4-N002 protocol manager interface checklist, P4-X003 Russian-first operator docs polish, P4-X002 API/status/gate naming cleanup, P4-X001 read-only API docs grouping polish и P4-I001 second read-only UX pass closure
 
 Закрыто и удалено из активного плана:
 
@@ -88,26 +88,17 @@ vps_apply_enabled_false=yes
 - `P4-X003` Russian-first operator docs polish.
 - `P4-X002` API/status/gate naming cleanup.
 - `P4-X001` read-only API docs grouping polish.
+- `P4-I001` second read-only UX pass closure (`not needed now`; no second pass was run).
 
 ### Критичные
 
-Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003`, `P4-I005`, `P4-N004`, `P4-N001`, `P4-N002`, `P4-X003`, `P4-X002` и `P4-X001`.
+Активных default-mode critical implementation items не осталось после `P4-C009`, `P4-I002`, route/secret gate planning, `P4-I003`, `P4-I004`, `P4-N003`, `P4-I005`, `P4-N004`, `P4-N001`, `P4-N002`, `P4-X003`, `P4-X002`, `P4-X001` и `P4-I001`.
 Critical live/public/write/config candidates остаются blocked или gated by the registry.
 
 ### Важные
 
-- [ ] **Задача I1: решить, нужен ли fallback UX evidence pass `P4-I001`**
-
-  Trigger:
-
-  ```text
-  wording cannot be inferred safely from existing AMN2 templates/tests and Phase 3 evidence
-  ```
-
-  Boundary:
-
-  - SSH-tunnel private-panel GET/navigation review only.
-  - No POST/write/config delivery/API token issue-revoke/sync/health/backup/import/reboot.
+Активных default-mode important implementation items не осталось после закрытия `P4-I001`.
+Повторный private-panel UX pass больше не держать как return item; если будущий операторский вопрос потребует page-level evidence, оформить новое явное решение/gate.
 
 ### Средние
 
@@ -249,9 +240,15 @@ Operator docs link cleanup stays allowed only as minimal maintenance and must no
 
 ## Средние задачи
 
-- [ ] **Task M1: Run second detailed read-only UX pass if wording details are unclear**
+- [ ] **Task M1: Historical/superseded second detailed read-only UX pass**
 
-  Trigger:
+  Superseded by:
+
+  ```text
+  P4-I001 closure: research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md
+  ```
+
+  Historical trigger:
 
   ```text
   concrete page-level wording cannot be inferred safely from current evidence
@@ -267,6 +264,7 @@ Operator docs link cleanup stays allowed only as minimal maintenance and must no
 
   - GET/navigation/labels/empty states/warnings only.
   - No POST, config delivery, token issue/revoke, sync/health actions, backup/import/reboot.
+  - Do not run this by default; create a fresh explicit decision/gate if future page-level evidence is needed.
 
 - [ ] **Task M2: Keep endpoint taxonomy and route-policy docs aligned**
 
@@ -331,4 +329,4 @@ Operator docs link cleanup stays allowed only as minimal maintenance and must no
 
 ## Стартовая рекомендация
 
-После закрытия `P4-X001` запускать `P4-I001` только если оператору нужны дополнительные private-panel page-level UX evidence. Если такой evidence pass не нужен, default local-only implementation queue фактически исчерпана; следующий шаг должен быть отдельным named gate/decision перед VPS/live/public/write/config work. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.
+После закрытия `P4-I001` default local-only implementation queue закрыта, кроме минимального обслуживания AMN3 docs/status/registry. Следующий шаг должен быть отдельным named gate/decision перед VPS/live/public/write/config work. VPS access check можно запускать отдельно только после того, как оператор даст SSH target alias/host и подтвердит gate `P4-VPS-ACCESS-READONLY-2026-06-09`.

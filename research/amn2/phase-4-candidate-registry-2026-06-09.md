@@ -225,7 +225,8 @@ secret_surface: no secrets; safe notes only
 remote_write_surface: none
 test_plan: second SSH-tunnel read-only pass using the evidence template; return only safe page-by-page findings
 required_gate: local-only
-recommendation: accept
+closure_status: closed as not needed now on 2026-06-10; second UX pass was not run; see research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md
+recommendation: completed/closed; do not keep as a default-mode return item
 ```
 
 ```text
@@ -378,7 +379,7 @@ remote_write_surface: none
 test_plan: markdown/link review and `rg` checks for stale baseline claims
 required_gate: local-only
 implementation_status: completed 2026-06-09 as AMN3 docs/status drift sync; see research/amn2/phase-4-docs-status-drift-sync-2026-06-09.md
-recommendation: completed; use P4-N002 as next normal local-only planning slice, or P4-I001 only if more page-level UX evidence is needed first
+recommendation: completed; historical next-step note superseded by later P4-N002 completion and P4-I001 closure
 ```
 
 ```text
@@ -551,7 +552,7 @@ recommendation: defer
 
 ## Completed AMN2 Local-only Slices
 
-Completed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design, then `P4-I003` AMN2 local implementation plan, then `P4-I003` AMN2 local implementation, then `P4-I004` endpoint taxonomy / route-policy docs alignment, then `P4-N003` aggregate metrics privacy boundary visibility, then `P4-I005` API token lifecycle boundary visibility, then `P4-N004` bot/admin read-only navigation labels and empty states, then `P4-N001` docs/status drift synchronization, then `P4-N002` protocol manager interface checklist, then `P4-X003` Russian-first operator docs polish, then `P4-X002` API/status/gate naming cleanup, then `P4-X001` read-only API docs grouping polish.
+Completed/closed: `P4-C009`, then `P4-I002`, then route/secret gate planning, then `P4-I003` candidate-specific read-only API/status design, then `P4-I003` AMN2 local implementation plan, then `P4-I003` AMN2 local implementation, then `P4-I004` endpoint taxonomy / route-policy docs alignment, then `P4-N003` aggregate metrics privacy boundary visibility, then `P4-I005` API token lifecycle boundary visibility, then `P4-N004` bot/admin read-only navigation labels and empty states, then `P4-N001` docs/status drift synchronization, then `P4-N002` protocol manager interface checklist, then `P4-X003` Russian-first operator docs polish, then `P4-X002` API/status/gate naming cleanup, then `P4-X001` read-only API docs grouping polish, then `P4-I001` second read-only UX pass closure.
 
 Completed slice name:
 
@@ -588,8 +589,9 @@ Implemented safe scope:
 - `P4-X003` Russian-first operator docs polish was completed as AMN3 docs-only evidence in `research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md`; it makes active operator handoff/status/plan headings and copy-paste next-chat wording Russian-first without changing gates or behavior.
 - `P4-X002` API/status/gate naming cleanup was completed as AMN3 docs-only evidence in `research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md`; it defines active meanings for service-mode, local-only, read-only, gate classes, public exposure and config delivery without changing routes, gates or behavior.
 - `P4-X001` read-only API docs grouping polish was completed as AMN3 docs-only evidence in `research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md`; it groups the existing six private/local read-only routes into server inventory/status, integration/service boundary, Local Agent runtime summary and aggregate metrics without public OpenAPI/docs exposure, route expansion or behavior changes.
+- `P4-I001` second read-only UX pass was closed as not needed now in `research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md`; no second pass was run and no new page-level findings were collected.
 
-Next decision: run `P4-I001` only if more private-panel page-level UX evidence is needed; otherwise pause default local-only implementation and require a separate named gate/decision before VPS/live/public/write/config work.
+Next decision: default local-only Phase 4 implementation queue is closed except minimal maintenance; any VPS/live/public/write/config direction requires a separate named gate/decision first.
 
 ## Source Notes
 

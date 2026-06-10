@@ -153,7 +153,7 @@ secrets_published: no
 result: passed-minimal-safe-summary
 ```
 
-Важное ограничение: детальные page-by-page UX findings не были возвращены. Если нужны конкретные UX tasks, запускать только второй read-only UX pass через `docs/AMN2_WEB_PANEL_READ_ONLY_UX_REVIEW_EVIDENCE_TEMPLATE.ru.md`.
+Важное ограничение: детальные page-by-page UX findings не были возвращены. `P4-I001` was later closed as not needed now; do not reopen a second UX pass by default. If future page-level evidence becomes necessary, create a fresh explicit decision/gate first and use `docs/AMN2_WEB_PANEL_READ_ONLY_UX_REVIEW_EVIDENCE_TEMPLATE.ru.md`.
 
 ### Линия C. PRVTPRO и KYORESUAS candidate intake
 
@@ -237,8 +237,9 @@ go_no_go_decision:
 15. Treat `P4-X003` Russian-first operator docs polish as completed; evidence: `research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md`.
 16. Treat `P4-X002` API/status/gate naming cleanup as completed; evidence: `research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md`.
 17. Treat `P4-X001` read-only API docs grouping polish as completed; evidence: `research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md`.
-18. Decide whether `P4-I001` second read-only UX pass is still needed for page-level evidence; otherwise pause default local-only implementation.
-19. If a live/public/write/config action is proposed, stop and create a separate named gate first.
+18. Treat `P4-I001` second read-only UX pass as closed/not needed now; evidence: `research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md`.
+19. Treat the default local-only Phase 4 implementation queue as closed except minimal maintenance.
+20. If a live/public/write/config action is proposed, stop and create a separate named gate first.
 
 ## Сообщение для копирования в основной чат
 
@@ -325,6 +326,10 @@ go_no_go_decision:
 Закрытый P4-X001 read-only API docs grouping polish:
 - research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md
 
+Закрытый P4-I001 second read-only UX pass decision:
+- research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md
+- second UX pass was not run; operator decision is to close it as not needed now.
+
 Текущая private/local read-only API grouping:
 - Server inventory/status: GET /api/servers, GET /api/servers/{server_name}/summary.
 - Integration/service boundary: GET /api/integration/status.
@@ -334,6 +339,6 @@ go_no_go_decision:
 - This does not authorize public OpenAPI/docs exposure, route expansion, config delivery or write routes.
 
 Следующее решение:
-- P4-I001 second read-only UX pass только если нужны дополнительные page-level evidence;
-- otherwise pause default local-only implementation and require a separate named gate/decision before VPS/live/public/write/config work.
+- default local-only Phase 4 implementation queue is closed;
+- any VPS/live/public/write/config direction requires a separate named gate/decision first.
 ```

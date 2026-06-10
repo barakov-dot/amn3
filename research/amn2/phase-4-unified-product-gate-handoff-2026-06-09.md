@@ -116,11 +116,12 @@ It is a planning and transfer gate, not a permission to run new live commands.
 13. `P4-X003` Russian-first operator docs polish; evidence: `research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md`.
 14. `P4-X002` API/status/gate naming cleanup; evidence: `research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md`.
 15. `P4-X001` read-only API docs grouping polish; evidence: `research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md`.
+16. `P4-I001` second read-only UX pass closure; evidence: `research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md`.
 
 Оставшееся default-mode решение:
 
-1. `P4-I001` detailed read-only web-panel UX pass only if more page-level evidence is needed;
-2. otherwise pause default local-only implementation and require a separate named gate/decision before VPS/live/public/write/config work.
+1. default local-only Phase 4 implementation queue is closed except minimal maintenance;
+2. any VPS/live/public/write/config direction requires a separate named gate/decision first.
 
 If the selected slice requires live VPS state changes, stop and create a separate named gate first.
 
@@ -145,6 +146,7 @@ research/amn2/phase-4-bot-admin-read-only-labels-implementation-2026-06-09.md
 research/amn2/phase-4-russian-first-operator-docs-polish-2026-06-09.md
 research/amn2/phase-4-api-status-gate-naming-cleanup-2026-06-09.md
 research/amn2/phase-4-read-only-api-docs-grouping-polish-2026-06-09.md
+research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md
 research/amn2/target-server-service-mode-authenticated-web-panel-smoke-evidence-2026-06-09.md
 research/amn2/target-server-revoke-by-number-4-evidence-2026-06-09.md
 research/amn2/target-server-service-mode-ssh-tunnel-access-evidence-2026-06-09.md
