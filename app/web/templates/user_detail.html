@@ -109,6 +109,7 @@
                 <th>Name</th>
                 <th>Server</th>
                 <th>Status</th>
+                <th>Expires</th>
                 <th>IP</th>
                 <th>Secrets</th>
                 <th>Actions</th>
@@ -121,6 +122,7 @@
                   <td>{{ device.name }}</td>
                   <td>{{ device.server_name }}</td>
                   <td><span class="status status-{{ device.status }}">{{ device.status }}</span></td>
+                  <td>{{ device.expires_at or "-" }}</td>
                   <td>{{ device.vpn_ip }}</td>
                   <td>
                     {% if revealed_device_id is defined and revealed_device_id == device.id %}

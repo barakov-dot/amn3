@@ -985,6 +985,7 @@ class Repository:
                 devices.id,
                 devices.name,
                 devices.status,
+                devices.expires_at,
                 devices.vpn_ip,
                 servers.name AS server_name
             FROM devices
