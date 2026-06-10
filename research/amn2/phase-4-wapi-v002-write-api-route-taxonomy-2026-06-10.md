@@ -24,6 +24,7 @@ required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
 selected_next_slice: WAPI-V003 local fake-runner contract
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed 2026-06-10; see research/amn2/phase-4-wapi-v003-local-fake-runner-contract-2026-06-10.md
 ```
 
 ## Sources Reused
@@ -139,19 +140,20 @@ Before any candidate route becomes AMN2 code:
 
 ## WAPI-V003 Handoff
 
-`WAPI-V003` may be selected next only as docs-only fake-runner contract:
+`WAPI-V003` was selected next and later closed as docs-only fake-runner contract:
 
 ```text
 slice_id: WAPI-V003
 slice_name: local fake-runner contract
 slice_mode: docs-only
+result: closed
 live_write_authorized: no
 runtime_routes_changed: no
 AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It should define fake-runner inputs/outputs for create, disable, revoke, sync and retry operation plans without SSH, live VPS commands or remote mutation.
+It defines fake-runner inputs/outputs for create, disable, revoke, sync and retry operation plans without SSH, live VPS commands or remote mutation. Current next recommendation after `WAPI-V003` closure is `WAPI-V004` idempotency, locking and partial-failure model with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

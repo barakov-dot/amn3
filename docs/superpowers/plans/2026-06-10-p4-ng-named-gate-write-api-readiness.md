@@ -73,6 +73,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-wapi-v002-write-api-route-taxonomy-2026-06-10.md`.
   - Classifies future route groups, candidate route names, scopes, side effects, gates and required tests without adding runtime routes.
 
+- [x] **WAPI-V003: local fake-runner contract**
+  - Closed by `research/amn2/phase-4-wapi-v003-local-fake-runner-contract-2026-06-10.md`.
+  - Defines future fake-runner inputs, outputs, operation intents, deterministic failure modes, audit-safe metadata and RED test requirements without adding runner code.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -111,17 +115,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   Done when:
 
   - Evidence records safe summary only and no secret-bearing data.
-
-- [ ] **WAPI-V003: local fake-runner contract**
-
-  Scope:
-
-  - Design fake-runner contracts for create/revoke/sync before any live runner.
-  - All tests must run locally without SSH.
-
-  Done when:
-
-  - AMN2 implementation plan can start with RED tests and fake runner only.
 
 - [ ] **WAPI-V004: idempotency, locking and partial-failure model**
 
@@ -252,6 +245,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `WAPI-V003` next. It is docs-only local fake-runner contract design with `live_write_authorized: no`; no runtime routes, live VPS commands, config delivery or production mutation are authorized.
+Start with `WAPI-V004` next. It is docs-only idempotency, locking and partial-failure model design with `live_write_authorized: no`; no runtime routes, live VPS commands, config delivery or production mutation are authorized.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.
