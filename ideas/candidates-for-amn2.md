@@ -158,6 +158,21 @@
 - Риски: изменение subnet может ломать existing peers; нужны CIDR validation, conflict detection, migration story, dry-run preview и audit.
 - Статус: research candidate после [GitHub watch PRVTPRO](../research/upstreams/prvtpro-amnezia-web-panel-github-watch.md); открывать design spec только после review текущей IPAM/server model в `amn2`.
 
+### PRVTPRO upstream refresh 2026-06-10
+
+Источник: [PRVTPRO/Amnezia-Web-Panel upstream refresh 2026-06-10](../research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md).
+
+Лицензия: GPL-3.0, только самостоятельная реализация идей.
+
+Рекомендованная очередь для AMN2 Phase 4:
+
+- `P4-PRVTPRO-REFRESH-002`: expiration-field contract tests для user/device lifecycle fields. Статус: рекомендовано первым local-only slice.
+- `P4-PRVTPRO-REFRESH-001`: read-only About/Version/Build status в operator UI. Статус: важное, без auto-update и без public exposure.
+- `P4-PRVTPRO-REFRESH-003`: read-only server status/latency UX. Статус: только после design boundary, без SSH write и без sync/health action.
+- `P4-PRVTPRO-REFRESH-004`: API taxonomy/OpenAPI grouping. Статус: docs/policy support.
+
+Negative control: не переносить upstream Bearer token model как admin-equivalent access ко всем admin endpoints; сохраняем scoped tokens, route policy, audit и named gates.
+
 ## Из текущего `amn2` baseline
 
 Источники: [`amn2`: config delivery inventory](../research/amn2/config-delivery-inventory.md), [`amn2`: remote operations inventory](../research/amn2/remote-operations-inventory.md)

@@ -16,6 +16,25 @@
 - API surface deep-dive: [prvtpro-amnezia-web-panel-api-surface.md](prvtpro-amnezia-web-panel-api-surface.md).
 - Manager architecture deep-dive: [prvtpro-amnezia-web-panel-manager-architecture.md](prvtpro-amnezia-web-panel-manager-architecture.md).
 - Feature gap: [prvtpro-amnezia-web-panel-feature-gap.md](prvtpro-amnezia-web-panel-feature-gap.md).
+- Upstream refresh 2026-06-10: [prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md](prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md).
+
+## Upstream refresh 2026-06-10
+
+Повторная проверка upstream зафиксировала latest checked commit `7f062abc2c76bbe19eb7daafdf1191d6c26ff19a` и product-сигналы v1.4.3: SOCKS5, AdGuard Home, node status/latency, API grouping, API tokens, Xray upgrade и расширение Telegram bot. Решение для `amn2`: брать только идеи в режиме `research-only`, без копирования GPL-3.0 кода, и начинать с local/read-only/status/docs/contract-test кандидатов.
+
+Ближайшие AMN2-кандидаты:
+
+- `P4-PRVTPRO-REFRESH-002`: expiration-field contract tests;
+- `P4-PRVTPRO-REFRESH-001`: read-only About/Version/Build status;
+- `P4-PRVTPRO-REFRESH-003`: read-only server status/latency UX после design boundary;
+- `P4-PRVTPRO-REFRESH-004`: API taxonomy/OpenAPI grouping как docs/policy support.
+
+Hybrid-only backlog:
+
+- `HYB-PRVTPRO-REFRESH-001`: AdGuard Home integration;
+- `HYB-PRVTPRO-REFRESH-002`: SOCKS5 service manager;
+- `HYB-PRVTPRO-REFRESH-003`: Xray migration/attach existing install;
+- `HYB-PRVTPRO-REFRESH-004`: multi-protocol capability registry.
 
 ## Repository map
 

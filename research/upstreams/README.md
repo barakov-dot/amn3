@@ -17,6 +17,10 @@
 
 - [VoltAgent/awesome-design-md](awesome-design-md.md) - коллекция DESIGN.md по известным сайтам; используем как источник паттернов для собственного `VPS-OPS-LAB DESIGN.md`, без копирования брендовой визуальной идентичности.
 
+## Активные VPN upstream refresh
+
+- [PRVTPRO/Amnezia-Web-Panel upstream refresh 2026-06-10](prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md) - свежая проверка v1.4.3/main, GPL-3.0 ограничения, AMN2 Phase 4 кандидаты и hybrid-only backlog.
+
 ## Минимальный шаблон карточки
 
 ```md

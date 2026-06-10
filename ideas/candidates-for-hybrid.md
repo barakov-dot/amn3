@@ -136,6 +136,17 @@
 - Риски: широкий scope, сложная support matrix, много secret delivery surfaces и remote operation risks.
 - Статус: feature gap относит это к `hybrid-only` или `needs-amn2-context`, не к прямому переносу в `amn2`.
 
+### PRVTPRO upstream refresh 2026-06-10
+
+Источник: [PRVTPRO/Amnezia-Web-Panel upstream refresh 2026-06-10](../research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md).
+
+- `HYB-PRVTPRO-REFRESH-001`: AdGuard Home integration как adjunct DNS/ad-blocking service. Нужны service mode model, conflict detection, dry-run и recovery plan.
+- `HYB-PRVTPRO-REFRESH-002`: SOCKS5 service manager. Нужны capability registry, threat model, observability и route policy.
+- `HYB-PRVTPRO-REFRESH-003`: Xray migration/attach existing install. Нужны redacted preview, conflict report, no-write dry-run и rollback note.
+- `HYB-PRVTPRO-REFRESH-004`: multi-protocol capability registry. Нужны unified adapter contract, test doubles и secret-output classification.
+
+Статус: hybrid-only backlog. В `amn2` эти темы не переносить без отдельного named gate.
+
 ## Из wg-easy/wg-easy
 
 Источник: [research/upstreams/wg-easy-wg-easy.md](../research/upstreams/wg-easy-wg-easy.md)
