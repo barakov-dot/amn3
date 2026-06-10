@@ -218,6 +218,32 @@ def test_user_detail_shows_profile_summaries_and_actions(tmp_path: Path):
     assert "seed_action" in response.text
 
 
+def test_user_detail_shows_device_expiration_contract(tmp_path: Path):
+    settings = _settings(tmp_path)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=4014,
+        username="lifecycle-user",
+        first_name="Life",
+        last_name="Contract",
+    )
+    _seed_devices(Path(settings.database_path), user_id=user_id)
+    with _repo(Path(settings.database_path)) as repo:
+        repo._conn.execute(
+            "UPDATE devices SET expires_at = ? WHERE user_id = ? AND name = ?",
+            ("2026-06-27 12:00:00", user_id, "active-device"),
+        )
+        repo._conn.commit()
+    client = _authenticated_client(settings)
+
+    response = client.get(f"/users/{user_id}")
+
+    assert response.status_code == 200
+    assert "<th>Expires</th>" in response.text
+    assert "2026-06-27 12:00:00" in response.text
+    assert "active-device" in response.text
+
+
 def test_user_detail_admin_actions_show_metadata(tmp_path: Path):
     settings = _settings(tmp_path, admin_telegram_ids="9001")
     user_id = _seed_user(
