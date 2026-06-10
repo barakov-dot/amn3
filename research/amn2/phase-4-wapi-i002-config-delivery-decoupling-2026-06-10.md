@@ -188,7 +188,7 @@ live_vps_commands: no
 config_delivery: no
 ```
 
-It uses this `WAPI-I002` boundary as an invariant: future `/api/clients` may describe safe request/response shapes and operation planning states, but must not implement runtime routes, write CRUD, live runner calls or config delivery unless a separate selected implementation gate exists. Current next recommendation after `WAPI-I001` closure is `WAPI-I005` web-panel gated action labels with `live_write_authorized: no`.
+It uses this `WAPI-I002` boundary as an invariant: future `/api/clients` may describe safe request/response shapes and operation planning states, but must not implement runtime routes, write CRUD, live runner calls or config delivery unless a separate selected implementation gate exists. `WAPI-I005` was then closed as web-panel gated action labels. Current next recommendation after `WAPI-I005` closure is `NG-N003` operation queue design after write API contract with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

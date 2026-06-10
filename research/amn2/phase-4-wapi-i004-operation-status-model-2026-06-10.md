@@ -244,7 +244,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It defines minimal write/config/operation scopes and explicitly rejects broad admin-equivalent tokens before `/api/clients` design or route implementation planning. `WAPI-I002` was then closed as docs-only config delivery decoupling; `WAPI-I001` was then closed as docs-only `/api/clients` design without live CRUD. Current next recommendation after `WAPI-I001` closure is `WAPI-I005` web-panel gated action labels with `live_write_authorized: no`.
+It defines minimal write/config/operation scopes and explicitly rejects broad admin-equivalent tokens before `/api/clients` design or route implementation planning. `WAPI-I002` was then closed as docs-only config delivery decoupling; `WAPI-I001` was then closed as docs-only `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels. Current next recommendation after `WAPI-I005` closure is `NG-N003` operation queue design after write API contract with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

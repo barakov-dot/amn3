@@ -112,6 +112,7 @@ Docs:
 - scoped write-token model evidence: `research/amn2/phase-4-wapi-i003-scoped-write-token-model-2026-06-10.md`.
 - config delivery decoupling evidence: `research/amn2/phase-4-wapi-i002-config-delivery-decoupling-2026-06-10.md`.
 - `/api/clients` design evidence: `research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md`.
+- web-panel gated action labels evidence: `research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md`.
 
 Closed in or alongside this stage:
 
@@ -130,11 +131,12 @@ Closed in or alongside this stage:
 - `WAPI-I003` scoped write-token model;
 - `WAPI-I002` config delivery decoupling;
 - `WAPI-I001` `/api/clients` design without live CRUD;
+- `WAPI-I005` web-panel gated action labels;
 - `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping policy support.
 
 Active next recommendation:
 
-- `WAPI-I005` web-panel gated action labels with `live_write_authorized: no`.
+- `NG-N003` operation queue design after write API contract with `live_write_authorized: no`.
 
 Do not run `NG-V001` read-only VPS baseline gate until the operator explicitly approves that gate and provides the target SSH alias/host outside repository secrets. Write API live work remains blocked until a separate `P4-WRITE-API-LIVE-GATE`; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
 
@@ -234,7 +236,7 @@ Default local-only implementation queue is closed after `P4-I001` closure. Safe 
 
 Безопасные next actions:
 
-- `WAPI-I005` web-panel gated action labels with `live_write_authorized: no`;
+- `NG-N003` operation queue design after write API contract with `live_write_authorized: no`;
 - `P4-PRVTPRO-REFRESH-003` design boundary only, before any server status/latency UX implementation;
 - docs-only write API design after explicit selection and threat model alignment;
 - candidate registry maintenance for PRVTPRO/KYORESUAS ideas;
@@ -302,7 +304,8 @@ go_no_go_decision:
 30. Treat `WAPI-I003` scoped write-token model as closed; evidence: `research/amn2/phase-4-wapi-i003-scoped-write-token-model-2026-06-10.md`.
 31. Treat `WAPI-I002` config delivery decoupling as closed; evidence: `research/amn2/phase-4-wapi-i002-config-delivery-decoupling-2026-06-10.md`.
 32. Treat `WAPI-I001` `/api/clients` design without live CRUD as closed; evidence: `research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md`.
-33. If a live/public/write/config action is proposed, stop and create a separate named gate first.
+33. Treat `WAPI-I005` web-panel gated action labels as closed; evidence: `research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md`.
+34. If a live/public/write/config action is proposed, stop and create a separate named gate first.
 
 ## Сообщение для копирования в основной чат
 
@@ -401,6 +404,10 @@ go_no_go_decision:
 - research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md
 - candidate `/api/clients` routes remain planning placeholders only; no runtime CRUD, config delivery or live peer mutation is authorized.
 
+Закрытый WAPI-I005 web-panel gated action labels:
+- research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md
+- future panel labels must distinguish read-only metadata, local planning, dry-run, blocked named gates, config delivery blocks and live-write blocks without changing behavior.
+
 Текущая private/local read-only API grouping:
 - Server inventory/status: GET /api/servers, GET /api/servers/{server_name}/summary.
 - Integration/service boundary: GET /api/integration/status.
@@ -411,7 +418,7 @@ go_no_go_decision:
 
 Следующее решение:
 - P4-NG is active as docs-only named gate / write API readiness planning;
-- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001 and P4-PRVTPRO-REFRESH-004 are closed;
-- next recommended docs-only task is WAPI-I005 web-panel gated action labels with live_write_authorized: no;
+- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, WAPI-I005, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001 and P4-PRVTPRO-REFRESH-004 are closed;
+- next recommended docs-only task is NG-N003 operation queue design after write API contract with live_write_authorized: no;
 - any VPS/live/public/write/config direction requires a separate named gate/decision first.
 ```

@@ -101,6 +101,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md`.
   - Defines candidate `/api/clients` request/response boundaries, safe client metadata, scopes, idempotency, locks, audit/status binding and RED test requirements without adding runtime routes, write CRUD, fake-runner code or live VPS/write authorization.
 
+- [x] **WAPI-I005: web-panel gated action labels**
+  - Closed by `research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md`.
+  - Defines future web-panel label vocabulary, disabled/gated action rules, status mappings and RED test requirements without changing templates, routes, behavior, config delivery, live writes or AMN2 code.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -142,12 +146,7 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ### Важные
 
-- [ ] **WAPI-I005: web-panel gated action labels**
-
-  Scope:
-
-  - Future write actions must be visibly gated and require confirmation.
-  - No template/route behavior changes until a selected AMN2 slice.
+Нет активных задач.
 
 ### Нормальные
 
@@ -220,6 +219,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `WAPI-I005` next. It is docs-only web-panel gated action label design and must preserve the `WAPI-I001` and `WAPI-I002` boundaries: no template/route behavior changes, runtime routes, token issue/revoke routes, fake-runner code, live VPS commands, config delivery, `.conf`, QR, `vpn://` output or production mutation are authorized.
+Start with `NG-N003` next. It is docs-only operation queue design after the write API contract and must preserve the WAPI boundaries: no queue implementation, route behavior changes, runtime routes, token issue/revoke routes, fake-runner code, live VPS commands, config delivery, `.conf`, QR, `vpn://` output or production mutation are authorized.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.

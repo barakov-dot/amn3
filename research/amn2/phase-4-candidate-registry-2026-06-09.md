@@ -672,10 +672,11 @@ Implemented safe scope:
 - `WAPI-I003` scoped write-token model was closed in `research/amn2/phase-4-wapi-i003-scoped-write-token-model-2026-06-10.md`; it defines future minimal scope classes, proposed scoped write/config/operation permissions, forbidden broad scope patterns, token lifecycle boundaries and RED test requirements without adding routes, token issue/revoke routes or live/write authorization.
 - `WAPI-I002` config delivery decoupling was closed in `research/amn2/phase-4-wapi-i002-config-delivery-decoupling-2026-06-10.md`; it defines future client/peer creation as safe operation/client metadata only and keeps `.conf`, QR, `vpn://`, archives, share/download links and public/self-service config delivery behind separate config/public gates.
 - `WAPI-I001` `/api/clients` design without live CRUD was closed in `research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md`; it defines future client route contracts, safe metadata fields, scope/idempotency/audit/status/test boundaries and keeps runtime CRUD, config delivery and live peer mutation absent/blocked.
+- `WAPI-I005` web-panel gated action labels was closed in `research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md`; it defines future panel labels and disabled/gated action rules for read-only metadata, local planning, dry-run, blocked config/live/public/destructive actions and safe status mapping without changing templates, routes or behavior.
 - PRVTPRO refresh 2026-06-10 was recorded in `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`; `P4-PRVTPRO-REFRESH-002` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-expiration-contract-tests-implementation-2026-06-10.md`, `P4-PRVTPRO-REFRESH-001` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-build-status-implementation-2026-06-10.md`, and `P4-PRVTPRO-REFRESH-004` was completed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`. Remaining AMN2 PRVTPRO-derived candidate is `P4-PRVTPRO-REFRESH-003` only after design boundary. Hybrid-only candidates are `HYB-PRVTPRO-REFRESH-001..004`. No GPL code, templates, UI, managers or workflows are copied.
 - The PRVTPRO local-only branches for `P4-PRVTPRO-REFRESH-002` and `P4-PRVTPRO-REFRESH-001` were merged into `amn2/codex-vps-test-prep` at `1508e3c4a100b76815b29f91757290f1266f813d`; evidence: `research/amn2/phase-4-prvtpro-local-slices-merge-2026-06-10.md`.
 
-Next decision: continue P4-NG with docs-only `WAPI-I005` web-panel gated action labels with `live_write_authorized: no`, or if selecting remaining PRVTPRO-derived work, create the design boundary for `P4-PRVTPRO-REFRESH-003` before any UI/server-status slice. Do not propose any VPS command or copy GPL code.
+Next decision: continue P4-NG with docs-only `NG-N003` operation queue design after write API contract with `live_write_authorized: no`, or if selecting remaining PRVTPRO-derived work, create the design boundary for `P4-PRVTPRO-REFRESH-003` before any UI/server-status slice. Do not propose any VPS command or copy GPL code.
 
 ## Source Notes
 
@@ -699,6 +700,7 @@ Primary AMN3 sources:
 - `research/amn2/phase-4-wapi-i003-scoped-write-token-model-2026-06-10.md`
 - `research/amn2/phase-4-wapi-i002-config-delivery-decoupling-2026-06-10.md`
 - `research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md`
+- `research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md`
 - `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`
 
 Upstream/reference sources:

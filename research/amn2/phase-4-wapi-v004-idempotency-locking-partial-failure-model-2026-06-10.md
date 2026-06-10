@@ -190,7 +190,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It defines safe audit fields, correlation IDs, actor/scope/result metadata, forbidden secret markers and required tests before any write API route or fake-runner implementation. `WAPI-I004` was then closed as operation status model; `WAPI-I003` was then closed as scoped write-token model; `WAPI-I002` was then closed as config delivery decoupling; `WAPI-I001` was then closed as `/api/clients` design without live CRUD. Current next recommendation after `WAPI-I001` closure is `WAPI-I005` web-panel gated action labels with `live_write_authorized: no`.
+It defines safe audit fields, correlation IDs, actor/scope/result metadata, forbidden secret markers and required tests before any write API route or fake-runner implementation. `WAPI-I004` was then closed as operation status model; `WAPI-I003` was then closed as scoped write-token model; `WAPI-I002` was then closed as config delivery decoupling; `WAPI-I001` was then closed as `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels. Current next recommendation after `WAPI-I005` closure is `NG-N003` operation queue design after write API contract with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

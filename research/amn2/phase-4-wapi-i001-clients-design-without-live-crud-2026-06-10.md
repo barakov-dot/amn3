@@ -35,6 +35,7 @@ required_gate_for_config_delivery: P4-CONFIG-DELIVERY-GATE
 selected_next_slice: WAPI-I005 web-panel gated action labels
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed in research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md
 ```
 
 ## Sources Reused
@@ -266,7 +267,7 @@ Any future AMN2 implementation plan for `/api/clients` must start with RED tests
 
 ## WAPI-I005 Handoff
 
-`WAPI-I005` is the recommended next docs-only slice:
+`WAPI-I005` was selected next and later closed as docs-only web-panel gated action labels:
 
 ```text
 slice_id: WAPI-I005
@@ -279,7 +280,7 @@ live_vps_commands: no
 config_delivery: no
 ```
 
-It should use this `/api/clients` contract to define how future web/admin labels distinguish read-only metadata, local operation planning, deferred live write, blocked config delivery and separately gated destructive/public actions.
+It uses this `/api/clients` contract to define how future web/admin labels distinguish read-only metadata, local operation planning, deferred live write, blocked config delivery and separately gated destructive/public actions. Current next recommendation after `WAPI-I005` closure is `NG-N003` operation queue design after write API contract with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 
