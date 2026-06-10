@@ -22,6 +22,7 @@ Accepted baseline:
 - Web-panel unauth/authenticated read-only navigation passed, but detailed page-by-page UX findings were not returned.
 - `P4-C009` local investigation clarified that `/users` shows local AMN2 DB users/devices only; live VPS peers created outside AMN2 belong to server peer-sync/read-only inventory unless a separate write/backfill gate is opened.
 - KYORESUAS upstream was refreshed on 2026-06-10 at `ffdc78c`; see `research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-10.md`. The refresh reinforces write serialization, atomic config write, lifecycle vocabulary, QR/import testing, rate-limit/public-route hardening and setup resilience, but does not open any route or copy upstream code.
+- PRVTPRO upstream was refreshed on 2026-06-10 at `7f062abc2c76bbe19eb7daafdf1191d6c26ff19a`; see `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`. The refresh reinforces expiration/lifecycle contract tests, read-only about/version/build status, read-only status/latency design, API taxonomy grouping and hybrid-only protocol/service ideas, but GPL-3.0 code, templates, UI, manager implementations and workflows are not copied.
 
 Still blocked without a separate named gate:
 
@@ -56,8 +57,8 @@ Gate classes:
 | Priority | Local-only | Requires VPS gate | Blocked until separate write/config/public gate |
 | --- | --- | --- | --- |
 | `critical` | `P4-C001`, `P4-C002`, `P4-C003`, `P4-C009` | `P4-C004` | `P4-C005`, `P4-C006`, `P4-C007`, `P4-C008` |
-| `important` | `P4-I001`, `P4-I002`, `P4-I003`, `P4-I005` | `P4-I006`, `P4-I007` | `P4-I008`, `P4-I009` |
-| `normal` | `P4-I004`, `P4-N001`, `P4-N002`, `P4-N003`, `P4-N004` | `P4-N005`, `P4-N006` | `P4-N007` |
+| `important` | `P4-I001`, `P4-I002`, `P4-I003`, `P4-I005`, `P4-PRVTPRO-REFRESH-002`, `P4-PRVTPRO-REFRESH-001`, `P4-PRVTPRO-REFRESH-004` | `P4-I006`, `P4-I007` | `P4-I008`, `P4-I009` |
+| `normal` | `P4-I004`, `P4-N001`, `P4-N002`, `P4-N003`, `P4-N004`, `P4-PRVTPRO-REFRESH-003` | `P4-N005`, `P4-N006` | `P4-N007` |
 | `cosmetic` | `P4-X001`, `P4-X002`, `P4-X003` | - | `P4-X004` |
 
 ## Candidate Rows
@@ -214,6 +215,54 @@ recommendation: completed; use as local visibility baseline
 ### Important
 
 ```text
+candidate_id: P4-PRVTPRO-REFRESH-002
+priority: important
+source: PRVTPRO upstream refresh 2026-06-10; expiration_date regression signal; AMN2 user/device lifecycle expectations
+feature_area: expiration/lifecycle field contract tests
+user_value: prevents user/device expiration or lifecycle fields from disappearing across API responses, UI forms and edit payloads
+AMN2_fit: strong local-only test slice; no live VPS write required
+license_boundary: PRVTPRO is GPL-3.0 research-only; use only regression signal, no upstream code/templates/UI/managers/workflows copied
+risk_class: lifecycle correctness / access-duration safety
+secret_surface: none if tests use synthetic local fixtures
+remote_write_surface: none
+test_plan: local unit/API/UI contract tests for list/detail/edit payloads preserving expiration/lifecycle fields
+required_gate: local-only
+recommendation: accept first among PRVTPRO refresh AMN2 slices
+```
+
+```text
+candidate_id: P4-PRVTPRO-REFRESH-001
+priority: important
+source: PRVTPRO upstream refresh 2026-06-10; release/build/version UX signal
+feature_area: read-only About/Version/Build status
+user_value: operator can verify the build/source/runtime label before choosing gates or reporting evidence
+AMN2_fit: good local-only UI/status/docs slice after expiration contract tests
+license_boundary: independent AMN2 UI/text/tests only; no upstream UI/templates/workflows copied
+risk_class: read-only operator status
+secret_surface: source/build labels only, no `.env`, tokens, endpoint values, config payloads or logs
+remote_write_surface: none
+test_plan: local template/status tests plus forbidden-marker scan for secret-bearing fields and auto-update/write wording
+required_gate: local-only
+recommendation: accept second among PRVTPRO refresh AMN2 slices
+```
+
+```text
+candidate_id: P4-PRVTPRO-REFRESH-004
+priority: important
+source: PRVTPRO upstream refresh 2026-06-10; grouped API/system routes signal
+feature_area: API taxonomy/OpenAPI grouping docs and policy support
+user_value: route grouping makes admin/user boundary, config surfaces and integration scopes easier to audit
+AMN2_fit: docs/policy support for existing route policy matrix and future WAPI taxonomy
+license_boundary: taxonomy idea only; no upstream OpenAPI text, route layout, code or workflows copied
+risk_class: docs/policy guardrail
+secret_surface: route metadata only
+remote_write_surface: none
+test_plan: compare proposed groups to AMN2 route policy matrix; no runtime route or public OpenAPI/docs exposure
+required_gate: local-only
+recommendation: accept as support for WAPI-V002 or later policy alignment
+```
+
+```text
 candidate_id: P4-I001
 priority: important
 source: service-mode web-panel UX evidence; Phase 4 handoff; PRVTPRO web-panel UX signal
@@ -348,6 +397,22 @@ recommendation: research
 ```
 
 ### Normal
+
+```text
+candidate_id: P4-PRVTPRO-REFRESH-003
+priority: normal
+source: PRVTPRO upstream refresh 2026-06-10; node status/latency signal
+feature_area: read-only server status/latency UX
+user_value: operator sees safe availability/latency hints without triggering sync, health mutation or server actions
+AMN2_fit: useful after a design boundary defines safe fields and data source
+license_boundary: independent AMN2 implementation only; no upstream UI/templates/managers copied
+risk_class: read-only telemetry UX with potential secret/live-source drift
+secret_surface: must exclude raw logs, endpoint values, SSH details, peer public keys, configs, tokens and detailed client metadata
+remote_write_surface: none for design/static local implementation; fresh runtime probe requires separate read-only VPS gate
+test_plan: docs-only design first; later local UI/status tests, safe-field tests and read-only audit classification
+required_gate: local-only for design; requires VPS gate only for fresh live runtime sampling
+recommendation: defer until design boundary
+```
 
 ```text
 candidate_id: P4-I004
@@ -596,8 +661,9 @@ Implemented safe scope:
 - `NG-C005` write API live-block assertion was closed in `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
 - KYORESUAS GitHub refresh 2026-06-10 was recorded in `research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-10.md`; it strengthens `WAPI-V001` inputs: one operation lock per server/protocol/write surface, backup-before-write, temp/atomic config replace, post-check, rollback/audit metadata, `active|disabled` + `expiresAt` lifecycle wording, QR/`vpn://` as secret-read import artifacts, and rate-limit as a future public-route gate requirement. No upstream code, AMN2 route, VPS command, public listener or write/config operation was added.
 - `WAPI-V001` write API threat model was closed in `research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md`; it defines threat classes and required tests before any write API implementation.
+- PRVTPRO refresh 2026-06-10 was recorded in `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`; AMN2 candidates are `P4-PRVTPRO-REFRESH-002` first, `P4-PRVTPRO-REFRESH-001` second, `P4-PRVTPRO-REFRESH-003` only after design boundary and `P4-PRVTPRO-REFRESH-004` as docs/policy support. Hybrid-only candidates are `HYB-PRVTPRO-REFRESH-001..004`. No GPL code, templates, UI, managers or workflows are copied.
 
-Next decision: continue P4-NG with docs-only `WAPI-V002` write API route taxonomy with `live_write_authorized: no`, before selecting any local implementation or proposing any VPS command.
+Next decision: continue P4-NG with docs-only `WAPI-V002` write API route taxonomy with `live_write_authorized: no`, or if selecting a PRVTPRO-derived local-only AMN2 product slice, start with `P4-PRVTPRO-REFRESH-002` expiration-field contract tests. Do not propose any VPS command or copy GPL code.
 
 ## Source Notes
 
@@ -622,6 +688,7 @@ Upstream/reference sources:
 - `research/upstreams/prvtpro-amnezia-web-panel-auth-secrets.md`
 - `research/upstreams/prvtpro-amnezia-web-panel-config-delivery-integrity.md`
 - `research/upstreams/prvtpro-amnezia-web-panel-manager-architecture.md`
+- `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`
 - `research/upstreams/kyoresuas-amnezia-api.md`
 - `research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-10.md`
 - `research/amn2/kyoresuas-api-integration-priority-plan.md`

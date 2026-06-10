@@ -121,6 +121,7 @@ It is a planning and transfer gate, not a permission to run new live commands.
 18. `NG-C003` secrets policy, `NG-C004` go/no-go format and `NG-S003` reusable named-gate evidence template; evidence: `research/amn2/phase-4-ng-secrets-policy-go-no-go-format-2026-06-10.md`; template: `research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md`.
 19. `NG-C005` write API live-block assertion; evidence: `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`.
 20. `WAPI-V001` write API threat model; evidence: `research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md`.
+21. PRVTPRO refresh 2026-06-10 candidate intake; evidence: `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`.
 
 Текущий next stage:
 
@@ -129,6 +130,7 @@ It is a planning and transfer gate, not a permission to run new live commands.
 3. Next recommended docs-only task is `WAPI-V002` write API route taxonomy with `live_write_authorized: no`.
 4. `NG-V001` read-only VPS baseline gate requires explicit operator approval and target SSH alias/host outside repo secrets.
 5. Write API live work remains blocked until a separate `P4-WRITE-API-LIVE-GATE`.
+6. If selecting a PRVTPRO-derived local-only AMN2 product slice, start with `P4-PRVTPRO-REFRESH-002` expiration-field contract tests; keep GPL-3.0 code/templates/UI/managers/workflows out of AMN2.
 
 If the selected slice requires live VPS state changes, stop and create a separate named gate first.
 
@@ -159,6 +161,7 @@ research/amn2/phase-4-ng-secrets-policy-go-no-go-format-2026-06-10.md
 research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md
 research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md
 research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md
+research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md
 docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md
 research/amn2/target-server-service-mode-authenticated-web-panel-smoke-evidence-2026-06-09.md
 research/amn2/target-server-revoke-by-number-4-evidence-2026-06-09.md

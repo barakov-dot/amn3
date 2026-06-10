@@ -134,6 +134,7 @@ docs/NEXT_CHAT_AMN2_PHASE_3_SERVICE_MODE.ru.md
 research/amn2/phase-4-unified-product-gate-handoff-2026-06-09.md
 research/amn2/transfer-backlog.md
 research/amn2/service-mode-web-panel-read-only-ux-review-evidence-2026-06-09.md
+research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md
 ```
 
 Historical Phase 3 evidence is linked from `docs/NEXT_CHAT_AMN2_PHASE_3_SERVICE_MODE.ru.md`; do not paste full logs or secret-bearing runtime files into the new chat.
@@ -204,6 +205,9 @@ recommendation: accept | defer | reject | research
 Базовые границы:
 
 - PRVTPRO/Amnezia-Web-Panel is GPL-3.0: research-only, no code/UI/templates/scripts/managers copied.
+- PRVTPRO refresh 2026-06-10 AMN2 order: `P4-PRVTPRO-REFRESH-002` expiration-field contract tests first, `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status second, `P4-PRVTPRO-REFRESH-003` read-only server status/latency UX only after design boundary, `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping as docs/policy support.
+- PRVTPRO hybrid-only backlog: `HYB-PRVTPRO-REFRESH-001` AdGuard Home integration, `HYB-PRVTPRO-REFRESH-002` SOCKS5 service manager, `HYB-PRVTPRO-REFRESH-003` Xray migration/attach existing install, `HYB-PRVTPRO-REFRESH-004` multi-protocol capability registry.
+- PRVTPRO negative controls: do not transfer upstream Bearer-token model as admin-equivalent access to all admin endpoints; do not open public panel, config delivery, reboot, backup, import or server cleanup without a separate named gate.
 - KYORESUAS/API is used as product/architecture signal: own AMN2 implementation, no direct production install.
 - Any secret-bearing config delivery, write API or remote mutation candidate stays blocked until a named gate exists.
 
@@ -214,6 +218,7 @@ Default local-only implementation queue is closed after `P4-I001` closure. Safe 
 Безопасные next actions:
 
 - `WAPI-V002` write API route taxonomy with `live_write_authorized: no`;
+- `P4-PRVTPRO-REFRESH-002` expiration-field contract test plan as a newly approved AMN2 local-only slice;
 - docs-only write API design after explicit selection and threat model alignment;
 - candidate registry maintenance for PRVTPRO/KYORESUAS ideas;
 - route/auth/secret policy checks before future route expansion.
