@@ -321,6 +321,8 @@
 
 Статус лицензии: MIT, но перенос в `amn2` только как самостоятельный дизайн без копирования кода.
 
+Актуализация 2026-06-10: свежий GitHub refresh зафиксирован в [kyoresuas/amnezia-api GitHub refresh 2026-06-10](../research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-10.md). Новые полезные сигналы: operation lock/serialization, safer atomic config write pattern, `active|disabled` + `expiresAt` lifecycle vocabulary, QR/`vpn://` import compatibility tests, Fastify rate-limit/Helmet hardening and setup/deploy resilience. Это усиливает будущий `WAPI-V001` threat model, но не открывает `/api/clients`, `config:read`, public API `3040`, backup/import/reboot или установку upstream service.
+
 ### Local Amnezia API agent
 
 - Идея: поставить рядом с Amnezia локальный API-agent, который управляет users/peers через ограниченный HTTP contract, а не через постоянный внешний SSH control plane.

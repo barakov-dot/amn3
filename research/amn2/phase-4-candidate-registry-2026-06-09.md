@@ -21,6 +21,7 @@ Accepted baseline:
 - Revoked test peers: `Neobyatnaya-AMNZ-3`, `Neobyatnaya-AMNZ-4`.
 - Web-panel unauth/authenticated read-only navigation passed, but detailed page-by-page UX findings were not returned.
 - `P4-C009` local investigation clarified that `/users` shows local AMN2 DB users/devices only; live VPS peers created outside AMN2 belong to server peer-sync/read-only inventory unless a separate write/backfill gate is opened.
+- KYORESUAS upstream was refreshed on 2026-06-10 at `ffdc78c`; see `research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-10.md`. The refresh reinforces write serialization, atomic config write, lifecycle vocabulary, QR/import testing, rate-limit/public-route hardening and setup resilience, but does not open any route or copy upstream code.
 
 Still blocked without a separate named gate:
 
@@ -593,6 +594,7 @@ Implemented safe scope:
 - `P4-NG` named gate / write API readiness was started as AMN3 docs-only planning in `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md` with plan `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`; `NG-C001` and `NG-C002` are closed, while live/write work remains blocked without separate approval.
 - `NG-C003` secrets policy, `NG-C004` go/no-go format and `NG-S003` reusable named-gate evidence template were closed in `research/amn2/phase-4-ng-secrets-policy-go-no-go-format-2026-06-10.md`; template: `research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md`.
 - `NG-C005` write API live-block assertion was closed in `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
+- KYORESUAS GitHub refresh 2026-06-10 was recorded in `research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-10.md`; it strengthens `WAPI-V001` inputs: one operation lock per server/protocol/write surface, backup-before-write, temp/atomic config replace, post-check, rollback/audit metadata, `active|disabled` + `expiresAt` lifecycle wording, QR/`vpn://` as secret-read import artifacts, and rate-limit as a future public-route gate requirement. No upstream code, AMN2 route, VPS command, public listener or write/config operation was added.
 
 Next decision: continue P4-NG with docs-only `WAPI-V001` write API threat model with `live_write_authorized: no`, before selecting any local implementation or proposing any VPS command.
 
@@ -619,6 +621,7 @@ Upstream/reference sources:
 - `research/upstreams/prvtpro-amnezia-web-panel-config-delivery-integrity.md`
 - `research/upstreams/prvtpro-amnezia-web-panel-manager-architecture.md`
 - `research/upstreams/kyoresuas-amnezia-api.md`
+- `research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-10.md`
 - `research/amn2/kyoresuas-api-integration-priority-plan.md`
 - `ideas/candidates-for-amn2.md`
 - `ideas/priority-backlog.md`

@@ -11,6 +11,20 @@
 - Статус для `amn2`: сильный research candidate для API/user-management дизайна, но без копирования кода.
 - Статус для будущего гибридного проекта: high-signal reference для node-agent/API поверх нескольких VPN runtime.
 
+## Актуализация 2026-06-10
+
+Свежая проверка GitHub `main` зафиксирована отдельно: [kyoresuas/amnezia-api GitHub refresh 2026-06-10](kyoresuas-amnezia-api-github-watch-2026-06-10.md).
+
+```text
+latest_commit: ffdc78c refactor: устойчивость записи конфигов, валидация и чистка кода
+latest_commit_date_utc: 2026-06-02T21:02:25Z
+latest_tree_sha: ffdc78cf4e6f653322c6df251df10a7d7274a887
+```
+
+Новые полезные сигналы для AMN2: in-process write serialization, safer config write pattern, `active|disabled` + `expiresAt` lifecycle vocabulary, QR/`vpn://` compatibility work, rate-limit/Helmet hardening signals and setup/deploy resilience. Это усиливает текущий `P4-NG` / `WAPI-V001` threat model, но не меняет запрет на копирование кода, установку upstream service, public API `3040`, config delivery, `/api/clients` write CRUD, backup/import/reboot или production peer writes.
+
+Одна старая оценка ниже требует уточнения: в первичном проходе rate-limit не был найден как отдельный production gate, но свежий upstream уже содержит Fastify rate-limit hardening. Для AMN2 это становится обязательным пунктом будущего public/self-service/config/token gate, а не разрешением открывать маршруты.
+
 ## Краткое описание
 
 `amnezia-api` превращает локальное управление установленной Amnezia в HTTP API. Проект ставится на тот же сервер, где уже работают Amnezia Docker-контейнеры, и через API дает операции для клиентов, конфигов, статуса сервера, метрик, backup/import и reboot.
