@@ -107,6 +107,7 @@ Docs:
 - write API route taxonomy evidence: `research/amn2/phase-4-wapi-v002-write-api-route-taxonomy-2026-06-10.md`;
 - local fake-runner contract evidence: `research/amn2/phase-4-wapi-v003-local-fake-runner-contract-2026-06-10.md`.
 - idempotency/locking/partial-failure model evidence: `research/amn2/phase-4-wapi-v004-idempotency-locking-partial-failure-model-2026-06-10.md`.
+- write API audit/redaction requirements evidence: `research/amn2/phase-4-wapi-v005-write-api-audit-redaction-requirements-2026-06-10.md`.
 
 Closed in or alongside this stage:
 
@@ -120,11 +121,12 @@ Closed in or alongside this stage:
 - `WAPI-V002` write API route taxonomy;
 - `WAPI-V003` local fake-runner contract;
 - `WAPI-V004` idempotency, locking and partial-failure model;
+- `WAPI-V005` write API audit/redaction requirements;
 - `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping policy support.
 
 Active next recommendation:
 
-- `WAPI-V005` write API audit/redaction requirements with `live_write_authorized: no`.
+- `WAPI-I004` operation status model with `live_write_authorized: no`.
 
 Do not run `NG-V001` read-only VPS baseline gate until the operator explicitly approves that gate and provides the target SSH alias/host outside repository secrets. Write API live work remains blocked until a separate `P4-WRITE-API-LIVE-GATE`; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
 
@@ -224,7 +226,7 @@ Default local-only implementation queue is closed after `P4-I001` closure. Safe 
 
 Безопасные next actions:
 
-- `WAPI-V005` write API audit/redaction requirements with `live_write_authorized: no`;
+- `WAPI-I004` operation status model with `live_write_authorized: no`;
 - `P4-PRVTPRO-REFRESH-003` design boundary only, before any server status/latency UX implementation;
 - docs-only write API design after explicit selection and threat model alignment;
 - candidate registry maintenance for PRVTPRO/KYORESUAS ideas;
@@ -287,7 +289,8 @@ go_no_go_decision:
 25. Treat `WAPI-V002` write API route taxonomy as closed; evidence: `research/amn2/phase-4-wapi-v002-write-api-route-taxonomy-2026-06-10.md`.
 26. Treat `WAPI-V003` local fake-runner contract as closed; evidence: `research/amn2/phase-4-wapi-v003-local-fake-runner-contract-2026-06-10.md`.
 27. Treat `WAPI-V004` idempotency, locking and partial-failure model as closed; evidence: `research/amn2/phase-4-wapi-v004-idempotency-locking-partial-failure-model-2026-06-10.md`.
-28. If a live/public/write/config action is proposed, stop and create a separate named gate first.
+28. Treat `WAPI-V005` write API audit/redaction requirements as closed; evidence: `research/amn2/phase-4-wapi-v005-write-api-audit-redaction-requirements-2026-06-10.md`.
+29. If a live/public/write/config action is proposed, stop and create a separate named gate first.
 
 ## Сообщение для копирования в основной чат
 
@@ -388,7 +391,7 @@ go_no_go_decision:
 
 Следующее решение:
 - P4-NG is active as docs-only named gate / write API readiness planning;
-- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001 and P4-PRVTPRO-REFRESH-004 are closed;
-- next recommended docs-only task is WAPI-V005 write API audit/redaction requirements with live_write_authorized: no;
+- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001 and P4-PRVTPRO-REFRESH-004 are closed;
+- next recommended docs-only task is WAPI-I004 operation status model with live_write_authorized: no;
 - any VPS/live/public/write/config direction requires a separate named gate/decision first.
 ```

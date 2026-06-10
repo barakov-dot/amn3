@@ -26,6 +26,7 @@ required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
 selected_next_slice: WAPI-V005 write API audit/redaction requirements
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed in research/amn2/phase-4-wapi-v005-write-api-audit-redaction-requirements-2026-06-10.md
 ```
 
 ## Sources Reused
@@ -177,7 +178,7 @@ Any future AMN2 implementation plan for write API operation records, fake runner
 
 ## WAPI-V005 Handoff
 
-`WAPI-V005` is the recommended next docs-only slice:
+`WAPI-V005` was selected next and later closed as docs-only write API audit/redaction requirements:
 
 ```text
 slice_id: WAPI-V005
@@ -189,7 +190,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It should define safe audit fields, correlation IDs, actor/scope/result metadata, forbidden secret markers and required tests before any write API route or fake-runner implementation.
+It defines safe audit fields, correlation IDs, actor/scope/result metadata, forbidden secret markers and required tests before any write API route or fake-runner implementation. Current next recommendation after `WAPI-V005` closure is `WAPI-I004` operation status model with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

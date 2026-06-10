@@ -81,6 +81,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-wapi-v004-idempotency-locking-partial-failure-model-2026-06-10.md`.
   - Defines request idempotency keys, per-target locks, retry behavior, conflict statuses and partial-failure vocabulary without adding runtime routes, runner code or live VPS/write authorization.
 
+- [x] **WAPI-V005: write API audit/redaction requirements**
+  - Closed by `research/amn2/phase-4-wapi-v005-write-api-audit-redaction-requirements-2026-06-10.md`.
+  - Defines required safe audit fields, forbidden secret-bearing fields, redaction rules, event types and RED test requirements without adding runtime routes, audit schema code or live VPS/write authorization.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -119,17 +123,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   Done when:
 
   - Evidence records safe summary only and no secret-bearing data.
-
-- [ ] **WAPI-V005: write API audit/redaction requirements**
-
-  Scope:
-
-  - Audit must include operation metadata, actor, scope, result and correlation id.
-  - Audit must never include raw tokens, configs, keys, PSK, QR, `vpn://` or endpoint secrets.
-
-  Done when:
-
-  - Tests are specified before route implementation.
 
 ### Важные
 
@@ -239,6 +232,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `WAPI-V005` next. It is docs-only write API audit/redaction requirements design with `live_write_authorized: no`; no runtime routes, fake-runner code, live VPS commands, config delivery or production mutation are authorized.
+Start with `WAPI-I004` next. It is docs-only operation status model design with `live_write_authorized: no`; no runtime routes, fake-runner code, live VPS commands, config delivery or production mutation are authorized.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.
