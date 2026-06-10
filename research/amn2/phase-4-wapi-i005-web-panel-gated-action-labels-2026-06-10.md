@@ -189,7 +189,7 @@ live_vps_commands: no
 config_delivery: no
 ```
 
-Reason: the WAPI contract chain now defines route taxonomy, fake-runner expectations, idempotency/locks, audit/redaction, operation statuses, scoped tokens, config decoupling, `/api/clients` boundaries and panel labels. `NG-N003` captured queue/cancel/retry semantics as docs-only planning, not implementation. `NG-N002` was then closed as docs-only health/status polling design. `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. `NG-N004` was then closed as docs-only candidate registry update after every gate decision. Current next recommendation after `NG-N004` closure is `NG-S001` keep AMN3 status/transfer current with `live_write_authorized: no`.
+Reason: the WAPI contract chain now defines route taxonomy, fake-runner expectations, idempotency/locks, audit/redaction, operation statuses, scoped tokens, config decoupling, `/api/clients` boundaries and panel labels. `NG-N003` captured queue/cancel/retry semantics as docs-only planning, not implementation. `NG-N002` was then closed as docs-only health/status polling design. `NG-N001` was then closed as docs-only attach-existing-server read-only reconciliation gate design. `NG-N004` was then closed as docs-only candidate registry update after every gate decision. `NG-S001` was then closed as docs-only status/transfer synchronization. Current next recommendation after `NG-S001` closure is `NG-S002` keep next-chat handoff current with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

@@ -348,7 +348,7 @@ defer_scope: local reconciliation implementation gate, real target read-only VPS
 
 ## Handoff
 
-`NG-N001` is closed. `NG-N004` was selected next and later closed in `research/amn2/phase-4-ng-n004-candidate-registry-update-2026-06-10.md`, because the candidate registry had multiple closed P4-NG/WAPI decisions and needed an explicit registry-maintenance slice before any live or implementation direction. Current next recommendation after `NG-N004` closure is `NG-S001` keep AMN3 status/transfer current with `live_write_authorized: no`.
+`NG-N001` is closed. `NG-N004` was selected next and later closed in `research/amn2/phase-4-ng-n004-candidate-registry-update-2026-06-10.md`, because the candidate registry had multiple closed P4-NG/WAPI decisions and needed an explicit registry-maintenance slice before any live or implementation direction. `NG-S001` was then closed as docs-only status/transfer synchronization. Current next recommendation after `NG-S001` closure is `NG-S002` keep next-chat handoff current with `live_write_authorized: no`.
 
 ## Safety Statement
 

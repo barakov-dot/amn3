@@ -38,6 +38,7 @@ ssh_commands: no
 selected_next_slice: NG-S001 keep AMN3 status/transfer current
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed in research/amn2/phase-4-ng-s001-status-transfer-sync-2026-06-10.md
 ```
 
 ## Registry Maintenance Scope
@@ -99,7 +100,7 @@ defer_scope: local implementation gates, real target read-only VPS detection gat
 
 ## Handoff
 
-`NG-N004` is closed. The recommended next docs-only slice is `NG-S001` keep AMN3 status/transfer current, because registry maintenance is now recorded and the remaining safe work is status/transfer synchronization before any live gate discussion.
+`NG-N004` is closed. `NG-S001` was selected next and later closed in `research/amn2/phase-4-ng-s001-status-transfer-sync-2026-06-10.md`, because registry maintenance was recorded and the remaining safe work was status/transfer synchronization before any live gate discussion. Current next recommendation after `NG-S001` closure is `NG-S002` keep next-chat handoff current with `live_write_authorized: no`.
 
 ## Safety Statement
 

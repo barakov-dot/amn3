@@ -91,12 +91,13 @@ Closed and removed from active plan:
 - `NG-N003` operation queue design after write API contract;
 - `NG-N002` health/status polling design;
 - `NG-N001` attach-existing-server read-only reconciliation gate design;
-- `NG-N004` candidate registry update after every gate decision.
+- `NG-N004` candidate registry update after every gate decision;
+- `NG-S001` status/transfer synchronization.
 
 Active next recommendation:
 
 ```text
-NG-S001 keep AMN3 status/transfer current
+NG-S002 keep next-chat handoff current
 ```
 
 Reason: it is docs-only and is constrained by `live_write_authorized: no`.

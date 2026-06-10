@@ -121,6 +121,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-ng-n004-candidate-registry-update-2026-06-10.md`.
   - Synchronizes candidate registry entries for health/status polling, attach-existing-server reconciliation and operation queue boundaries without authorizing implementation, live VPS work, route changes, config delivery or production mutation.
 
+- [x] **NG-S001: keep AMN3 status/transfer current**
+  - Closed by `research/amn2/phase-4-ng-s001-status-transfer-sync-2026-06-10.md`.
+  - Synchronizes AMN3 status and transfer references after the closed normal P4-NG queue without authorizing implementation, live VPS work, route changes, config delivery or production mutation.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -170,13 +174,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ### Простые
 
-- [ ] **NG-S001: keep AMN3 status/transfer current after each gate**
-
-  Files:
-
-  - `docs/PROJECT_STATUS_CURRENT.ru.md`
-  - `research/amn2/transfer-backlog.md`
-
 - [ ] **NG-S002: keep next-chat handoff current**
 
   File:
@@ -211,6 +208,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `NG-S001` next. It is docs-only status/transfer synchronization and must preserve the P4-NG boundaries: update AMN3 status and transfer references only, with no live VPS commands, no implementation, no route behavior changes, no config delivery and no production mutation.
+Start with `NG-S002` next. It is docs-only next-chat handoff synchronization and must preserve the P4-NG boundaries: update the next-chat packet only, with no live VPS commands, no implementation, no route behavior changes, no config delivery and no production mutation.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.
