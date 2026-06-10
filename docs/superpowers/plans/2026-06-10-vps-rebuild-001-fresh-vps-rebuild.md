@@ -49,7 +49,12 @@ Latest provider snapshot confirmation evidence:
 
 ```text
 research/amn2/vps-rebuild-001-provider-snapshot-confirmation-2026-06-10.md
-provider_snapshot_confirmation: pending-operator-confirmation
+provider_snapshot_confirmation: defer
+provider_backup_plan_enabled: yes
+backup_frequency: monthly
+backup_created_now: unknown
+backup_restorable: yes_after_backup_created
+delete_actions_planned: no
 snapshot_required: yes
 provider_portal_action_by_codex: no
 live_commands_run: no
@@ -140,7 +145,7 @@ Do not execute this phase until every Phase 3 decision is filled and the exact f
 
 ### Критичные
 
-- `VPS-REBUILD-001`: provider snapshot confirmation, `pending-operator-confirmation`.
+- `VPS-REBUILD-001`: provider snapshot/backup confirmation, `defer`; backup plan enabled, created/restorable backup not yet confirmed, delete actions not planned.
 - `VPS-REBUILD-001`: stop-criteria review before any destructive GO.
 
 ### Очень Важные
@@ -165,4 +170,4 @@ Do not execute this phase until every Phase 3 decision is filled and the exact f
 
 ## Recommendation
 
-Next step is not a live VPS command. The operator should create or verify the provider snapshot in the provider panel, then return only the safe summary fields from `research/amn2/vps-rebuild-001-provider-snapshot-confirmation-2026-06-10.md`. After snapshot confirmation, review stop criteria before any final destructive phrase.
+Next step is not a live VPS command. Ask the provider where to see created backups or whether an immediate backup can be created. After a created/restorable backup is confirmed, review stop criteria before any final destructive phrase.

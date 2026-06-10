@@ -104,8 +104,16 @@ test_extract: passed
 Evidence: `research/amn2/vps-rebuild-001-provider-snapshot-confirmation-2026-06-10.md`.
 
 ```text
-provider_snapshot_confirmation: pending-operator-confirmation
+provider_snapshot_confirmation: defer
 snapshot_required: yes
+provider_snapshot_exists: no
+provider_backup_plan_enabled: yes
+backup_frequency: monthly
+backup_created_now: unknown
+backup_restorable: yes_after_backup_created
+snapshot_delete_planned: no
+backup_delete_planned: no
+delete_actions_planned: no
 operator_provider_panel_action_required: yes
 provider_portal_action_by_codex: no
 live_commands_run: no
@@ -176,6 +184,9 @@ secret_transfer_policy: regenerate_on_target_where_possible + operator_local_cha
 install_source_commit: 1508e3c4a100b76815b29f91757290f1266f813d
 install_package: dist/amn2-vps-update-and-smoke-kit-1508e3c.zip
 install_package_sha256: 03C51891AF83B9BD2B435AF5F77EEBBAE0DC7289CD107803DE7FB9877C4BFDA3
-provider_snapshot_confirmation: pending-operator-confirmation
-next_required_operator_decision: provider snapshot safe summary, stop-criteria review, then exact final destructive phrase only if the operator still chooses wipe
+provider_snapshot_confirmation: defer
+provider_backup_plan_enabled: yes
+backup_created_now: unknown
+delete_actions_planned: no
+next_required_operator_decision: provider answer or visible created backup, stop-criteria review, then exact final destructive phrase only if the operator still chooses wipe
 ```
