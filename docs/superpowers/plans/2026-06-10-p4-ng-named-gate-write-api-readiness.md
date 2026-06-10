@@ -49,31 +49,21 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md`.
   - Keeps public `3040`, direct public `3030`, Caddy/HTTPS, config delivery, `/api/clients` write CRUD, Local Agent mutations, backup/import/reboot and production peer/user mutation closed.
 
+- [x] **NG-C003: approve secrets policy for gate outputs**
+  - Closed by `research/amn2/phase-4-ng-secrets-policy-go-no-go-format-2026-06-10.md`.
+  - Reusable policy is present in `research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md`.
+
+- [x] **NG-C004: define go/no-go format for all gates**
+  - Closed by `research/amn2/phase-4-ng-secrets-policy-go-no-go-format-2026-06-10.md`.
+  - `go_no_go_decision: go | no-go | defer` is present in the reusable gate evidence template.
+
+- [x] **NG-S003: create reusable named-gate evidence template**
+  - Closed by `research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md`.
+  - Closed as supporting work required by `NG-C003` and `NG-C004`.
+
 ## Active Remaining Plan
 
 ### Критичные
-
-- [ ] **NG-C003: approve secrets policy for gate outputs**
-
-  Scope:
-
-  - Evidence may contain only boolean/status summaries.
-  - Evidence must not include `.env`, raw `servers.yml`, raw tokens, Authorization headers, token hashes, web password hash, session secret, private keys, PSK, peer public keys, `.conf`, QR payload, `vpn://`, backup contents, endpoint values, session cookies or full logs.
-
-  Done when:
-
-  - A reusable secrets policy block is present in the selected gate evidence template.
-
-- [ ] **NG-C004: define go/no-go format for all gates**
-
-  Scope:
-
-  - Every gate must end with `go`, `no-go`, or `defer`.
-  - Any failed preflight must default to `no-go` or `defer`, not partial execution.
-
-  Done when:
-
-  - `go_no_go_decision` format is present in the active gate template.
 
 - [ ] **NG-C005: keep write API live work blocked**
 
@@ -253,12 +243,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
   - `docs/NEXT_CHAT_AMN2_PHASE_4_UNIFIED_PRODUCT_GATE.ru.md`
 
-- [ ] **NG-S003: create reusable named-gate evidence template**
-
-  Scope:
-
-  - Template only; no live command.
-
 - [ ] **NG-S004: maintain visible active plan**
 
   Rule:
@@ -287,6 +271,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `NG-C003` and `NG-C004` next. They are docs-only and make `NG-V001` safer by locking secrets policy and go/no-go format before any read-only VPS command is proposed.
+Start with `NG-C005` next. It is docs-only and keeps write API live work explicitly blocked before any write API design slice starts.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.

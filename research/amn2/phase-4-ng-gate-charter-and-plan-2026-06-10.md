@@ -74,15 +74,23 @@ Closed and removed from active plan:
 
 - `NG-C001` named gate charter;
 - `NG-C002` safety boundary restatement.
+- `NG-C003` secrets policy for gate outputs;
+- `NG-C004` go/no-go format for all gates;
+- `NG-S003` reusable named-gate evidence template.
 
 Active next recommendation:
 
 ```text
-NG-C003 secrets policy for gate outputs
-NG-C004 go/no-go format for all gates
+NG-C005 keep write API live work blocked
 ```
 
-Reason: both are docs-only and should be closed before proposing any read-only VPS command.
+Reason: it is docs-only and should be closed before any write API design slice can be selected.
+
+Reusable gate evidence template:
+
+```text
+research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md
+```
 
 ## Safety Statement
 

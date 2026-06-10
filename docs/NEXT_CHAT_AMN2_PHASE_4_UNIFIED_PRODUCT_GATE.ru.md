@@ -107,11 +107,13 @@ Closed in this stage:
 
 - `NG-C001` named gate charter;
 - `NG-C002` safety boundary restatement.
+- `NG-C003` secrets policy for gate outputs;
+- `NG-C004` go/no-go format for all gates;
+- `NG-S003` reusable named-gate evidence template.
 
 Active next recommendation:
 
-- `NG-C003` secrets policy for gate outputs;
-- `NG-C004` go/no-go format for all gates.
+- `NG-C005` keep write API live work blocked.
 
 Do not run `NG-V001` read-only VPS baseline gate until the operator explicitly approves that gate and provides the target SSH alias/host outside repository secrets. Write API live work remains blocked until a separate `P4-WRITE-API-LIVE-GATE`.
 
@@ -207,8 +209,7 @@ Default local-only implementation queue is closed after `P4-I001` closure. Safe 
 
 Безопасные next actions:
 
-- `NG-C003` secrets policy for gate outputs;
-- `NG-C004` go/no-go format for all gates;
+- `NG-C005` keep write API live work blocked;
 - docs-only write API threat model/design after explicit selection;
 - candidate registry maintenance for PRVTPRO/KYORESUAS ideas;
 - route/auth/secret policy checks before future route expansion.
@@ -364,7 +365,7 @@ go_no_go_decision:
 
 Следующее решение:
 - P4-NG is active as docs-only named gate / write API readiness planning;
-- NG-C001 and NG-C002 are closed;
-- next recommended docs-only tasks are NG-C003 secrets policy and NG-C004 go/no-go format;
+- NG-C001, NG-C002, NG-C003, NG-C004 and NG-S003 are closed;
+- next recommended docs-only task is NG-C005 write API live-block assertion;
 - any VPS/live/public/write/config direction requires a separate named gate/decision first.
 ```
