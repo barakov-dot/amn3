@@ -186,7 +186,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It defines idempotency keys, per-target lock boundaries, retry behavior, conflict statuses and partial-failure vocabulary before any fake-runner code or write API route implementation. `WAPI-V005` was selected later and closed as write API audit/redaction requirements. Current next recommendation after `WAPI-V005` closure is `WAPI-I004` operation status model with `live_write_authorized: no`.
+It defines idempotency keys, per-target lock boundaries, retry behavior, conflict statuses and partial-failure vocabulary before any fake-runner code or write API route implementation. `WAPI-V005` was selected later and closed as write API audit/redaction requirements; `WAPI-I004` was then closed as operation status model. Current next recommendation after `WAPI-I004` closure is `WAPI-I003` scoped write-token model with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

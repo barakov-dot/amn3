@@ -85,6 +85,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-wapi-v005-write-api-audit-redaction-requirements-2026-06-10.md`.
   - Defines required safe audit fields, forbidden secret-bearing fields, redaction rules, event types and RED test requirements without adding runtime routes, audit schema code or live VPS/write authorization.
 
+- [x] **WAPI-I004: operation status model**
+  - Closed by `research/amn2/phase-4-wapi-i004-operation-status-model-2026-06-10.md`.
+  - Defines safe operation status fields, canonical statuses, reason codes, transition rules, visibility tiers and RED test requirements without adding runtime routes, status schema code, operation queue or live VPS/write authorization.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -146,13 +150,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
   - Define minimal scopes such as `client:write`, `client:revoke`, `operation:read`.
   - Explicitly reject broad admin-equivalent tokens.
-
-- [ ] **WAPI-I004: operation status model**
-
-  Scope:
-
-  - Define `planned`, `dry_run_passed`, `running`, `succeeded`, `failed`, `rolled_back`, `deferred`.
-  - Include safe fields only.
 
 - [ ] **WAPI-I005: web-panel gated action labels**
 
@@ -232,6 +229,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `WAPI-I004` next. It is docs-only operation status model design with `live_write_authorized: no`; no runtime routes, fake-runner code, live VPS commands, config delivery or production mutation are authorized.
+Start with `WAPI-I003` next. It is docs-only scoped write-token model design with `live_write_authorized: no`; no runtime routes, token issue/revoke routes, fake-runner code, live VPS commands, config delivery or production mutation are authorized.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.

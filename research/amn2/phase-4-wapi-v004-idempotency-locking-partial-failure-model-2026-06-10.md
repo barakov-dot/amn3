@@ -190,7 +190,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It defines safe audit fields, correlation IDs, actor/scope/result metadata, forbidden secret markers and required tests before any write API route or fake-runner implementation. Current next recommendation after `WAPI-V005` closure is `WAPI-I004` operation status model with `live_write_authorized: no`.
+It defines safe audit fields, correlation IDs, actor/scope/result metadata, forbidden secret markers and required tests before any write API route or fake-runner implementation. `WAPI-I004` was then closed as operation status model. Current next recommendation after `WAPI-I004` closure is `WAPI-I003` scoped write-token model with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

@@ -26,6 +26,7 @@ required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
 selected_next_slice: WAPI-I004 operation status model
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed in research/amn2/phase-4-wapi-i004-operation-status-model-2026-06-10.md
 ```
 
 ## Sources Reused
@@ -211,7 +212,7 @@ Any future AMN2 implementation plan for write API routes, fake runner, operation
 
 ## WAPI-I004 Handoff
 
-`WAPI-I004` is the recommended next docs-only slice:
+`WAPI-I004` was selected next and later closed as docs-only operation status model:
 
 ```text
 slice_id: WAPI-I004
@@ -223,7 +224,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It should consolidate WAPI-V004 status vocabulary and WAPI-V005 audit/redaction requirements into the safe operation status read model before `/api/clients` design or route implementation planning.
+It consolidates WAPI-V004 status vocabulary and WAPI-V005 audit/redaction requirements into the safe operation status read model before `/api/clients` design or route implementation planning. Current next recommendation after `WAPI-I004` closure is `WAPI-I003` scoped write-token model with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 
