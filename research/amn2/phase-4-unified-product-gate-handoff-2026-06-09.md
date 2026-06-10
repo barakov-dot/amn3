@@ -124,6 +124,7 @@ It is a planning and transfer gate, not a permission to run new live commands.
 21. PRVTPRO refresh 2026-06-10 candidate intake; evidence: `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`.
 22. `P4-PRVTPRO-REFRESH-002` expiration-field contract tests; evidence: `research/amn2/phase-4-prvtpro-expiration-contract-tests-implementation-2026-06-10.md`.
 23. `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status; evidence: `research/amn2/phase-4-prvtpro-build-status-implementation-2026-06-10.md`.
+24. PRVTPRO local-only slices merge into AMN2 `codex-vps-test-prep`; evidence: `research/amn2/phase-4-prvtpro-local-slices-merge-2026-06-10.md`; AMN2 base head: `1508e3c4a100b76815b29f91757290f1266f813d`.
 
 Текущий next stage:
 
