@@ -30,7 +30,23 @@ selected_next_slice_live_write_authorized: no
 - `research/amn2/phase-4-protocol-manager-interface-checklist-2026-06-09.md`
 - `research/amn2/phase-4-api-token-lifecycle-boundary-implementation-2026-06-09.md`
 - `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`
+- `research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-10.md`
+- `research/upstreams/kyoresuas-amnezia-api.md`
 - `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`
+
+## KYORESUAS Production Signals Used
+
+The 2026-06-10 KYORESUAS refresh is used only as product/architecture signal. No upstream code, route layout, scripts, command strings, service files or generated artifacts are copied.
+
+Signals carried into this threat model:
+
+- one operation lock/serialization boundary per server, protocol and write surface;
+- temp/atomic config write before any future live save/apply path;
+- backup-before-write, post-check and rollback/audit metadata as future write controls;
+- `active | disabled` plus `expiresAt` lifecycle vocabulary for future client status design;
+- QR and `vpn://` treated as secret-read/import artifacts requiring dedicated tests;
+- rate-limit and Helmet-style hardening treated as future public-route gate requirements, not default private-route behavior;
+- setup resilience treated as install/operator hardening signal, not permission to add package apply or service mutation.
 
 ## Protected Assets
 
@@ -73,6 +89,8 @@ No boundary may be collapsed by a convenience route. In particular, peer/client 
 | `WAPI-T11` | Destructive operation smuggled into client lifecycle | critical | Destructive routes classified separately: backup/import/reboot, service restart, firewall/proxy edits, raw config apply. |
 | `WAPI-T12` | Operation status leaks peer/user identity or config metadata | important | Operation status returns safe aggregate/opaque IDs only unless a stricter private gate explicitly allows more. |
 | `WAPI-T13` | Upstream/reference implementation crosses license boundary | important | PRVTPRO/KYORESUAS remain ideas/reference; no code, templates, scripts, command strings or generated artifacts copied. |
+| `WAPI-T14` | Non-atomic config write leaves remote state partially saved | critical | Future write design must require temp/atomic write semantics, post-check and rollback/recovery metadata before live apply. |
+| `WAPI-T15` | Public-route hardening is assumed for private/local routes | important | Rate-limit/Helmet-style controls belong to public-route taxonomy and a separate public gate before exposure. |
 
 ## Required Test Classes
 
@@ -85,10 +103,15 @@ Before any AMN2 implementation plan for write API routes, require local tests fo
 - `live_write_authorized: no` marker enforced in docs/status/evidence for local slices;
 - idempotency key reuse and duplicate request behavior;
 - per-target lock conflict behavior;
+- one-operation-at-a-time serialization per server/protocol/write surface;
 - partial-failure statuses for `local_changed_remote_failed`, `remote_changed_local_failed`, `deferred` and `rolled_back`;
+- future atomic-write contract tests for temp write, validation, replace, post-check and rollback metadata before any live config mutation;
+- client lifecycle vocabulary tests for `active`, `disabled` and optional `expiresAt` without implying live peer mutation;
 - audit redaction for tokens, configs, keys, PSK, QR, `vpn://`, endpoint values, Authorization headers and raw command output;
 - config delivery decoupling: client/peer creation must not return `.conf`, QR, `vpn://`, archive, share link or download URL;
+- QR and `vpn://` import compatibility tests only inside a secret-read/config gate;
 - operation status safe-field contract;
+- rate-limit/public hardening tests only if a route is classified as `public-exposure`;
 - public exposure marker scan for API `3040`, direct public web/admin `3030`, TCP `80/443` and Caddy/HTTPS/domain cutover;
 - license-boundary scan that blocks copied upstream code/templates/scripts/command strings.
 
