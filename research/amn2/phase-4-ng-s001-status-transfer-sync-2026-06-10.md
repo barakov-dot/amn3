@@ -40,6 +40,7 @@ ssh_commands: no
 selected_next_slice: NG-S002 keep next-chat handoff current
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed with NG-S004 in research/amn2/phase-4-ng-s002-next-chat-handoff-sync-2026-06-10.md and research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md
 ```
 
 ## Files Synchronized
@@ -86,7 +87,7 @@ defer_scope: next-chat handoff synchronization, visible active-plan maintenance,
 
 ## Handoff
 
-`NG-S001` is closed. The recommended next docs-only slice is `NG-S002` keep next-chat handoff current, because the status/transfer references are now current and the next safest action is to make the next-chat packet independently current.
+`NG-S001` is closed. `NG-S002` and `NG-S004` were selected next and closed together in `research/amn2/phase-4-ng-s002-next-chat-handoff-sync-2026-06-10.md` and `research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md`. Current next recommendation after `NG-S002`/`NG-S004` closure is `NG-X003` stale wording cleanup with `live_write_authorized: no`.
 
 ## Safety Statement
 

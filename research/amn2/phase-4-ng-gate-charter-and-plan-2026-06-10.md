@@ -92,12 +92,14 @@ Closed and removed from active plan:
 - `NG-N002` health/status polling design;
 - `NG-N001` attach-existing-server read-only reconciliation gate design;
 - `NG-N004` candidate registry update after every gate decision;
-- `NG-S001` status/transfer synchronization.
+- `NG-S001` status/transfer synchronization;
+- `NG-S002` next-chat handoff synchronization;
+- `NG-S004` visible active plan maintenance.
 
 Active next recommendation:
 
 ```text
-NG-S002 keep next-chat handoff current
+NG-X003 stale wording cleanup
 ```
 
 Reason: it is docs-only and is constrained by `live_write_authorized: no`.

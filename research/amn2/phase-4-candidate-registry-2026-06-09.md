@@ -681,10 +681,11 @@ Implemented safe scope:
 - `NG-N001` attach-existing-server read-only reconciliation gate design was closed in `research/amn2/phase-4-ng-n001-attach-existing-server-read-only-reconciliation-gate-design-2026-06-10.md`; it defines future report-only reconciliation phases, safe fields, forbidden leakage fields, attach/backfill boundaries, conflict handling and RED test requirements without implementing reconciliation, attach/import/backfill, real target checks or route changes.
 - `NG-N004` candidate registry update after every gate decision was closed in `research/amn2/phase-4-ng-n004-candidate-registry-update-2026-06-10.md`; it synchronized `P4-N006` with `NG-N003` and verified `P4-I007`/`P4-N005` remain gated by `NG-N002`/`NG-N001` boundaries without authorizing implementation or live work.
 - `NG-S001` status/transfer synchronization was closed in `research/amn2/phase-4-ng-s001-status-transfer-sync-2026-06-10.md`; it aligned status and transfer references after the closed normal P4-NG queue without changing candidate implementation status beyond the `NG-N004` registry maintenance slice.
+- `NG-S002` next-chat handoff synchronization and `NG-S004` visible active plan maintenance were closed in `research/amn2/phase-4-ng-s002-next-chat-handoff-sync-2026-06-10.md` and `research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md`; they aligned next-chat/startup context and removed closed simple tasks from the active plan without authorizing implementation or live work.
 - PRVTPRO refresh 2026-06-10 was recorded in `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`; `P4-PRVTPRO-REFRESH-002` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-expiration-contract-tests-implementation-2026-06-10.md`, `P4-PRVTPRO-REFRESH-001` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-build-status-implementation-2026-06-10.md`, and `P4-PRVTPRO-REFRESH-004` was completed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`. Remaining AMN2 PRVTPRO-derived candidate is `P4-PRVTPRO-REFRESH-003` only after design boundary. Hybrid-only candidates are `HYB-PRVTPRO-REFRESH-001..004`. No GPL code, templates, UI, managers or workflows are copied.
 - The PRVTPRO local-only branches for `P4-PRVTPRO-REFRESH-002` and `P4-PRVTPRO-REFRESH-001` were merged into `amn2/codex-vps-test-prep` at `1508e3c4a100b76815b29f91757290f1266f813d`; evidence: `research/amn2/phase-4-prvtpro-local-slices-merge-2026-06-10.md`.
 
-Next decision: continue P4-NG with docs-only `NG-S002` keep next-chat handoff current with `live_write_authorized: no`, or if selecting remaining PRVTPRO-derived work, create the design boundary for `P4-PRVTPRO-REFRESH-003` before any UI/server-status slice. Do not propose any VPS command or copy GPL code.
+Next decision: continue P4-NG with docs-only `NG-X003` stale wording cleanup with `live_write_authorized: no`, or if selecting remaining PRVTPRO-derived work, create the design boundary for `P4-PRVTPRO-REFRESH-003` before any UI/server-status slice. Do not propose any VPS command or copy GPL code.
 
 ## Source Notes
 
@@ -714,6 +715,8 @@ Primary AMN3 sources:
 - `research/amn2/phase-4-ng-n001-attach-existing-server-read-only-reconciliation-gate-design-2026-06-10.md`
 - `research/amn2/phase-4-ng-n004-candidate-registry-update-2026-06-10.md`
 - `research/amn2/phase-4-ng-s001-status-transfer-sync-2026-06-10.md`
+- `research/amn2/phase-4-ng-s002-next-chat-handoff-sync-2026-06-10.md`
+- `research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md`
 - `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`
 
 Upstream/reference sources:

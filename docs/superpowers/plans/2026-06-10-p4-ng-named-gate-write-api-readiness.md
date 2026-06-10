@@ -125,6 +125,14 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-ng-s001-status-transfer-sync-2026-06-10.md`.
   - Synchronizes AMN3 status and transfer references after the closed normal P4-NG queue without authorizing implementation, live VPS work, route changes, config delivery or production mutation.
 
+- [x] **NG-S002: keep next-chat handoff current**
+  - Closed by `research/amn2/phase-4-ng-s002-next-chat-handoff-sync-2026-06-10.md`.
+  - Synchronizes the next-chat packet with the closed P4-NG normal and simple queue without authorizing implementation, live VPS work, route changes, config delivery or production mutation.
+
+- [x] **NG-S004: maintain visible active plan**
+  - Closed by `research/amn2/phase-4-ng-s004-visible-active-plan-maintenance-2026-06-10.md`.
+  - Removes closed simple tasks from the visible active plan and leaves only explicit VPS-gate and cosmetic docs tasks active.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -174,17 +182,7 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ### Простые
 
-- [ ] **NG-S002: keep next-chat handoff current**
-
-  File:
-
-  - `docs/NEXT_CHAT_AMN2_PHASE_4_UNIFIED_PRODUCT_GATE.ru.md`
-
-- [ ] **NG-S004: maintain visible active plan**
-
-  Rule:
-
-  - When a task closes, remove it from the active plan, show the full remaining plan and give a recommendation.
+Нет активных задач.
 
 ### Косметические
 
@@ -208,6 +206,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `NG-S002` next. It is docs-only next-chat handoff synchronization and must preserve the P4-NG boundaries: update the next-chat packet only, with no live VPS commands, no implementation, no route behavior changes, no config delivery and no production mutation.
+Start with `NG-X003` next. It is docs-only stale wording cleanup and must preserve the P4-NG boundaries: remove wording that sounds like implicit authorization for live/write/public/config work, with no live VPS commands, no implementation, no route behavior changes, no config delivery and no production mutation.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.
