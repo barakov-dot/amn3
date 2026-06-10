@@ -28,6 +28,7 @@ required_gate_for_live_write: P4-WRITE-API-LIVE-GATE
 selected_next_slice: WAPI-I002 decouple config delivery from client creation
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed in research/amn2/phase-4-wapi-i002-config-delivery-decoupling-2026-06-10.md
 ```
 
 ## Sources Reused
@@ -191,7 +192,7 @@ Any future AMN2 implementation plan for write API auth, token checks, routes or 
 
 ## WAPI-I002 Handoff
 
-`WAPI-I002` is the recommended next docs-only slice:
+`WAPI-I002` was selected next and later closed as docs-only config delivery decoupling:
 
 ```text
 slice_id: WAPI-I002
@@ -203,7 +204,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It should make the config-delivery boundary explicit before `/api/clients` design: client/peer creation may create a safe operation plan, but `.conf`, QR, `vpn://`, archives, share links and downloads require a separate secret-read/config gate.
+It makes the config-delivery boundary explicit before `/api/clients` design: client/peer creation may create a safe operation plan, but `.conf`, QR, `vpn://`, archives, share links and downloads require a separate secret-read/config gate. Current next recommendation after `WAPI-I002` closure is `WAPI-I001` `/api/clients` design without live CRUD with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

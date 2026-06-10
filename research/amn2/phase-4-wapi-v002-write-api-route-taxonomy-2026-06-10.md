@@ -153,7 +153,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It defines fake-runner inputs/outputs for create, disable, revoke, sync and retry operation plans without SSH, live VPS commands or remote mutation. `WAPI-V004` was selected next and later closed as docs-only idempotency, locking and partial-failure model; `WAPI-V005` was then closed as write API audit/redaction requirements; `WAPI-I004` was then closed as operation status model; `WAPI-I003` was then closed as scoped write-token model. Current next recommendation after `WAPI-I003` closure is `WAPI-I002` decouple config delivery from client creation with `live_write_authorized: no`.
+It defines fake-runner inputs/outputs for create, disable, revoke, sync and retry operation plans without SSH, live VPS commands or remote mutation. `WAPI-V004` was selected next and later closed as docs-only idempotency, locking and partial-failure model; `WAPI-V005` was then closed as write API audit/redaction requirements; `WAPI-I004` was then closed as operation status model; `WAPI-I003` was then closed as scoped write-token model; `WAPI-I002` was then closed as config delivery decoupling. Current next recommendation after `WAPI-I002` closure is `WAPI-I001` `/api/clients` design without live CRUD with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

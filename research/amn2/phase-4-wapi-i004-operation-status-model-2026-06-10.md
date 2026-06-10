@@ -244,7 +244,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It defines minimal write/config/operation scopes and explicitly rejects broad admin-equivalent tokens before `/api/clients` design or route implementation planning. Current next recommendation after `WAPI-I003` closure is `WAPI-I002` decouple config delivery from client creation with `live_write_authorized: no`.
+It defines minimal write/config/operation scopes and explicitly rejects broad admin-equivalent tokens before `/api/clients` design or route implementation planning. `WAPI-I002` was then closed as docs-only config delivery decoupling. Current next recommendation after `WAPI-I002` closure is `WAPI-I001` `/api/clients` design without live CRUD with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 
