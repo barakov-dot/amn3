@@ -22,6 +22,16 @@ reinstall_authorized: no
 live_commands_run: no
 ```
 
+Latest source/package precheck evidence:
+
+```text
+research/amn2/vps-rebuild-001-source-package-precheck-2026-06-10.md
+source_precheck_status: passed
+AMN2_source_commit: 1508e3c4a100b76815b29f91757290f1266f813d
+focused_local_tests: 30 passed, 1 warning
+package_precheck_status: blocked_until_1508e3c_package_build
+```
+
 ## Phase 1: Open Docs-Only Gate
 
 - [x] Create `research/amn2/vps-rebuild-001-fresh-vps-rebuild-gate-2026-06-10.md`.
@@ -50,7 +60,8 @@ live_commands_run: no
   - `provider_snapshot_required`;
   - `encrypted_backup_required`;
   - `safe_summary_only`.
-- [ ] Choose exact AMN2 source commit or install package hash after local source/package precheck.
+- [x] Choose exact AMN2 source commit after local source precheck.
+- [ ] Build and verify install/update package for `1508e3c`.
 - [x] Choose secret transfer policy:
   - `operator_local_channel_only`;
   - `regenerate_on_target`;
@@ -68,7 +79,8 @@ Selected novice-safe values:
 data_retention_decision: preserve_snapshot_required
 snapshot_or_backup_decision: provider_snapshot_required
 secret_transfer_policy: regenerate_on_target_where_possible + operator_local_channel_only_for_external_secrets
-install_source_commit: pending-source-package-precheck
+install_source_commit_selected: 1508e3c4a100b76815b29f91757290f1266f813d
+install_package: pending-build-and-hygiene
 final_destructive_phrase: not_sent
 ```
 
@@ -103,7 +115,7 @@ Do not execute this phase until every Phase 3 decision is filled and the exact f
 
 ### Критичные
 
-- `VPS-REBUILD-001`: fresh VPS rebuild gate, `opened-defer-awaiting-final-destructive-approval`.
+- `VPS-REBUILD-001`: fresh VPS rebuild gate, `opened-defer-awaiting-final-destructive-approval`; next required: build and verify `1508e3c` package locally, then provider snapshot confirmation.
 
 ### Очень Важные
 
@@ -127,4 +139,4 @@ Do not execute this phase until every Phase 3 decision is filled and the exact f
 
 ## Recommendation
 
-Next step is not a live VPS command. Prepare the local source/package precheck and provider snapshot confirmation first. Only after those are reviewed should the operator decide whether to send the exact final destructive phrase.
+Next step is not a live VPS command. Build and verify the `1508e3c` package locally, including checksum, hygiene and test extraction. Only after package evidence and provider snapshot confirmation are reviewed should the operator decide whether to send the exact final destructive phrase.

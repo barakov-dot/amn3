@@ -54,8 +54,10 @@ allowed_values: wipe_all_allowed | preserve_snapshot_required | export_safe_summ
 snapshot_or_backup_decision: provider_snapshot_required
 allowed_values: not_required_by_operator | provider_snapshot_required | encrypted_backup_required | safe_summary_only
 
-install_source_commit: pending-source-package-precheck
+install_source_commit: 1508e3c4a100b76815b29f91757290f1266f813d
 allowed_values: explicit AMN2 commit or package hash only
+
+install_package: pending-build-and-hygiene
 
 secret_transfer_policy: regenerate_on_target_where_possible + operator_local_channel_only_for_external_secrets
 allowed_values: operator_local_channel_only | regenerate_on_target | restore_from_approved_secret_store
@@ -64,7 +66,19 @@ final_destructive_phrase: not_sent
 required_exact_phrase: GO VPS-REBUILD-001 WIPE TARGET
 ```
 
-Snapshot-first mode is selected because the current `NG-V001` baseline is known-good and should remain recoverable for a novice-safe rebuild path. Until the source/package precheck is complete and the exact final destructive phrase is sent by the operator, this gate stays `defer`.
+Snapshot-first mode is selected because the current `NG-V001` baseline is known-good and should remain recoverable for a novice-safe rebuild path. Local source precheck selected AMN2 commit `1508e3c4a100b76815b29f91757290f1266f813d`, but the package for that commit is not built yet. Until package build/hygiene, provider snapshot confirmation and the exact final destructive phrase are complete, this gate stays `defer`.
+
+## Source Precheck Result
+
+Evidence: `research/amn2/vps-rebuild-001-source-package-precheck-2026-06-10.md`.
+
+```text
+source_precheck_status: passed
+AMN2_source_commit: 1508e3c4a100b76815b29f91757290f1266f813d
+focused_local_tests: 30 passed, 1 warning
+package_precheck_status: blocked_until_1508e3c_package_build
+neighboring_branch_policy: mine ideas explicitly, do not auto-merge into first rebuild package
+```
 
 ## Allowed Now
 
@@ -126,5 +140,7 @@ preflight_mode: novice-safe snapshot-first
 data_retention_decision: preserve_snapshot_required
 snapshot_or_backup_decision: provider_snapshot_required
 secret_transfer_policy: regenerate_on_target_where_possible + operator_local_channel_only_for_external_secrets
-next_required_operator_decision: local source/package precheck, provider snapshot confirmation, then exact final destructive phrase only if the operator still chooses wipe
+install_source_commit: 1508e3c4a100b76815b29f91757290f1266f813d
+install_package: pending-build-and-hygiene
+next_required_operator_decision: build and verify 1508e3c package locally, provider snapshot confirmation, then exact final destructive phrase only if the operator still chooses wipe
 ```
