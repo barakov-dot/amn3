@@ -101,7 +101,8 @@ Any item above requires a separate explicit gate, safe summary and rollback/reco
 Docs:
 
 - plan: `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`;
-- charter/evidence: `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md`.
+- charter/evidence: `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md`;
+- write API live-block evidence: `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`.
 
 Closed in this stage:
 
@@ -109,13 +110,14 @@ Closed in this stage:
 - `NG-C002` safety boundary restatement.
 - `NG-C003` secrets policy for gate outputs;
 - `NG-C004` go/no-go format for all gates;
-- `NG-S003` reusable named-gate evidence template.
+- `NG-S003` reusable named-gate evidence template;
+- `NG-C005` write API live-block assertion.
 
 Active next recommendation:
 
-- `NG-C005` keep write API live work blocked.
+- `WAPI-V001` write API threat model with `live_write_authorized: no`.
 
-Do not run `NG-V001` read-only VPS baseline gate until the operator explicitly approves that gate and provides the target SSH alias/host outside repository secrets. Write API live work remains blocked until a separate `P4-WRITE-API-LIVE-GATE`.
+Do not run `NG-V001` read-only VPS baseline gate until the operator explicitly approves that gate and provides the target SSH alias/host outside repository secrets. Write API live work remains blocked until a separate `P4-WRITE-API-LIVE-GATE`; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
 
 ## Обязательное чтение
 
@@ -209,8 +211,8 @@ Default local-only implementation queue is closed after `P4-I001` closure. Safe 
 
 Безопасные next actions:
 
-- `NG-C005` keep write API live work blocked;
-- docs-only write API threat model/design after explicit selection;
+- `WAPI-V001` write API threat model with `live_write_authorized: no`;
+- docs-only write API design after explicit selection;
 - candidate registry maintenance for PRVTPRO/KYORESUAS ideas;
 - route/auth/secret policy checks before future route expansion.
 
@@ -365,7 +367,7 @@ go_no_go_decision:
 
 Следующее решение:
 - P4-NG is active as docs-only named gate / write API readiness planning;
-- NG-C001, NG-C002, NG-C003, NG-C004 and NG-S003 are closed;
-- next recommended docs-only task is NG-C005 write API live-block assertion;
+- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003 and NG-C005 are closed;
+- next recommended docs-only task is WAPI-V001 write API threat model with live_write_authorized: no;
 - any VPS/live/public/write/config direction requires a separate named gate/decision first.
 ```

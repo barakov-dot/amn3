@@ -592,8 +592,9 @@ Implemented safe scope:
 - `P4-I001` second read-only UX pass was closed as not needed now in `research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md`; no second pass was run and no new page-level findings were collected.
 - `P4-NG` named gate / write API readiness was started as AMN3 docs-only planning in `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md` with plan `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`; `NG-C001` and `NG-C002` are closed, while live/write work remains blocked without separate approval.
 - `NG-C003` secrets policy, `NG-C004` go/no-go format and `NG-S003` reusable named-gate evidence template were closed in `research/amn2/phase-4-ng-secrets-policy-go-no-go-format-2026-06-10.md`; template: `research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md`.
+- `NG-C005` write API live-block assertion was closed in `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
 
-Next decision: continue P4-NG with docs-only `NG-C005` keep write API live work blocked before selecting write API design or proposing any VPS command.
+Next decision: continue P4-NG with docs-only `WAPI-V001` write API threat model with `live_write_authorized: no`, before selecting any local implementation or proposing any VPS command.
 
 ## Source Notes
 
@@ -607,6 +608,7 @@ Primary AMN3 sources:
 - `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md`
 - `research/amn2/phase-4-ng-secrets-policy-go-no-go-format-2026-06-10.md`
 - `research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md`
+- `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`
 - `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`
 
 Upstream/reference sources:

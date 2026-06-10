@@ -119,12 +119,13 @@ It is a planning and transfer gate, not a permission to run new live commands.
 16. `P4-I001` second read-only UX pass closure; evidence: `research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md`.
 17. `P4-NG` named gate / write API readiness charter; evidence: `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md`; plan: `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`.
 18. `NG-C003` secrets policy, `NG-C004` go/no-go format and `NG-S003` reusable named-gate evidence template; evidence: `research/amn2/phase-4-ng-secrets-policy-go-no-go-format-2026-06-10.md`; template: `research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md`.
+19. `NG-C005` write API live-block assertion; evidence: `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`.
 
 Текущий next stage:
 
 1. `P4-NG` is active as docs-only named gate / write API readiness planning.
-2. `NG-C001`, `NG-C002`, `NG-C003`, `NG-C004` and `NG-S003` are closed.
-3. Next recommended docs-only task is `NG-C005` keep write API live work blocked.
+2. `NG-C001`, `NG-C002`, `NG-C003`, `NG-C004`, `NG-S003` and `NG-C005` are closed.
+3. Next recommended docs-only task is `WAPI-V001` write API threat model with `live_write_authorized: no`.
 4. `NG-V001` read-only VPS baseline gate requires explicit operator approval and target SSH alias/host outside repo secrets.
 5. Write API live work remains blocked until a separate `P4-WRITE-API-LIVE-GATE`.
 
@@ -155,6 +156,7 @@ research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md
 research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md
 research/amn2/phase-4-ng-secrets-policy-go-no-go-format-2026-06-10.md
 research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md
+research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md
 docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md
 research/amn2/target-server-service-mode-authenticated-web-panel-smoke-evidence-2026-06-09.md
 research/amn2/target-server-revoke-by-number-4-evidence-2026-06-09.md

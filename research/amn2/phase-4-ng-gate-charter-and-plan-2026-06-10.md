@@ -76,20 +76,27 @@ Closed and removed from active plan:
 - `NG-C002` safety boundary restatement.
 - `NG-C003` secrets policy for gate outputs;
 - `NG-C004` go/no-go format for all gates;
-- `NG-S003` reusable named-gate evidence template.
+- `NG-S003` reusable named-gate evidence template;
+- `NG-C005` write API live-block assertion.
 
 Active next recommendation:
 
 ```text
-NG-C005 keep write API live work blocked
+WAPI-V001 write API threat model
 ```
 
-Reason: it is docs-only and should be closed before any write API design slice can be selected.
+Reason: it is docs-only and is constrained by `live_write_authorized: no`.
 
 Reusable gate evidence template:
 
 ```text
 research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md
+```
+
+Write API live-block assertion:
+
+```text
+research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md
 ```
 
 ## Safety Statement
