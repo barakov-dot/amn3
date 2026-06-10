@@ -205,7 +205,7 @@ recommendation: accept | defer | reject | research
 Базовые границы:
 
 - PRVTPRO/Amnezia-Web-Panel is GPL-3.0: research-only, no code/UI/templates/scripts/managers copied.
-- PRVTPRO refresh 2026-06-10 AMN2 order: `P4-PRVTPRO-REFRESH-002` expiration-field contract tests first, `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status second, `P4-PRVTPRO-REFRESH-003` read-only server status/latency UX only after design boundary, `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping as docs/policy support.
+- PRVTPRO refresh 2026-06-10 AMN2 order: `P4-PRVTPRO-REFRESH-002` expiration-field contract tests are closed; remaining order starts with `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status, then `P4-PRVTPRO-REFRESH-003` read-only server status/latency UX only after design boundary, and `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping as docs/policy support.
 - PRVTPRO hybrid-only backlog: `HYB-PRVTPRO-REFRESH-001` AdGuard Home integration, `HYB-PRVTPRO-REFRESH-002` SOCKS5 service manager, `HYB-PRVTPRO-REFRESH-003` Xray migration/attach existing install, `HYB-PRVTPRO-REFRESH-004` multi-protocol capability registry.
 - PRVTPRO negative controls: do not transfer upstream Bearer-token model as admin-equivalent access to all admin endpoints; do not open public panel, config delivery, reboot, backup, import or server cleanup without a separate named gate.
 - KYORESUAS/API is used as product/architecture signal: own AMN2 implementation, no direct production install.
@@ -218,7 +218,7 @@ Default local-only implementation queue is closed after `P4-I001` closure. Safe 
 Безопасные next actions:
 
 - `WAPI-V002` write API route taxonomy with `live_write_authorized: no`;
-- `P4-PRVTPRO-REFRESH-002` expiration-field contract test plan as a newly approved AMN2 local-only slice;
+- `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status as the next PRVTPRO-derived AMN2 local-only slice;
 - docs-only write API design after explicit selection and threat model alignment;
 - candidate registry maintenance for PRVTPRO/KYORESUAS ideas;
 - route/auth/secret policy checks before future route expansion.
@@ -273,7 +273,8 @@ go_no_go_decision:
 18. Treat `P4-I001` second read-only UX pass as closed/not needed now; evidence: `research/amn2/phase-4-p4-i001-read-only-ux-pass-closure-2026-06-10.md`.
 19. Treat the default local-only Phase 4 implementation queue as closed except minimal maintenance.
 20. Treat `P4-NG` named gate / write API readiness charter as started docs-only; evidence: `research/amn2/phase-4-ng-gate-charter-and-plan-2026-06-10.md`.
-21. If a live/public/write/config action is proposed, stop and create a separate named gate first.
+21. Treat `P4-PRVTPRO-REFRESH-002` expiration-field contract tests as closed; evidence: `research/amn2/phase-4-prvtpro-expiration-contract-tests-implementation-2026-06-10.md`.
+22. If a live/public/write/config action is proposed, stop and create a separate named gate first.
 
 ## Сообщение для копирования в основной чат
 
@@ -374,7 +375,7 @@ go_no_go_decision:
 
 Следующее решение:
 - P4-NG is active as docs-only named gate / write API readiness planning;
-- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005 and WAPI-V001 are closed;
+- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001 and P4-PRVTPRO-REFRESH-002 are closed;
 - next recommended docs-only task is WAPI-V002 write API route taxonomy with live_write_authorized: no;
 - any VPS/live/public/write/config direction requires a separate named gate/decision first.
 ```
