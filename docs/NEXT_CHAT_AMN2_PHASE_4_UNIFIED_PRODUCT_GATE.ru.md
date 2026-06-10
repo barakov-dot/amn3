@@ -105,7 +105,7 @@ Docs:
 - write API live-block evidence: `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`;
 - write API threat model evidence: `research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md`.
 
-Closed in this stage:
+Closed in or alongside this stage:
 
 - `NG-C001` named gate charter;
 - `NG-C002` safety boundary restatement.
@@ -113,7 +113,8 @@ Closed in this stage:
 - `NG-C004` go/no-go format for all gates;
 - `NG-S003` reusable named-gate evidence template;
 - `NG-C005` write API live-block assertion;
-- `WAPI-V001` write API threat model.
+- `WAPI-V001` write API threat model;
+- `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping policy support.
 
 Active next recommendation:
 
@@ -205,7 +206,7 @@ recommendation: accept | defer | reject | research
 Базовые границы:
 
 - PRVTPRO/Amnezia-Web-Panel is GPL-3.0: research-only, no code/UI/templates/scripts/managers copied.
-- PRVTPRO refresh 2026-06-10 AMN2 order: `P4-PRVTPRO-REFRESH-002` expiration-field contract tests and `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status are closed and merged into AMN2 `codex-vps-test-prep` at `1508e3c4a100b76815b29f91757290f1266f813d`; remaining order is `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping as docs/policy support, and `P4-PRVTPRO-REFRESH-003` read-only server status/latency UX only after design boundary.
+- PRVTPRO refresh 2026-06-10 AMN2 order: `P4-PRVTPRO-REFRESH-002` expiration-field contract tests and `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status are closed and merged into AMN2 `codex-vps-test-prep` at `1508e3c4a100b76815b29f91757290f1266f813d`; `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping is closed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`; remaining PRVTPRO-derived order is `P4-PRVTPRO-REFRESH-003` read-only server status/latency UX only after design boundary.
 - PRVTPRO hybrid-only backlog: `HYB-PRVTPRO-REFRESH-001` AdGuard Home integration, `HYB-PRVTPRO-REFRESH-002` SOCKS5 service manager, `HYB-PRVTPRO-REFRESH-003` Xray migration/attach existing install, `HYB-PRVTPRO-REFRESH-004` multi-protocol capability registry.
 - PRVTPRO negative controls: do not transfer upstream Bearer-token model as admin-equivalent access to all admin endpoints; do not open public panel, config delivery, reboot, backup, import or server cleanup without a separate named gate.
 - KYORESUAS/API is used as product/architecture signal: own AMN2 implementation, no direct production install.
@@ -218,7 +219,7 @@ Default local-only implementation queue is closed after `P4-I001` closure. Safe 
 Безопасные next actions:
 
 - `WAPI-V002` write API route taxonomy with `live_write_authorized: no`;
-- `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping as the next PRVTPRO-derived docs/policy slice;
+- `P4-PRVTPRO-REFRESH-003` design boundary only, before any server status/latency UX implementation;
 - docs-only write API design after explicit selection and threat model alignment;
 - candidate registry maintenance for PRVTPRO/KYORESUAS ideas;
 - route/auth/secret policy checks before future route expansion.

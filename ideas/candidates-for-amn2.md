@@ -169,7 +169,7 @@
 - `P4-PRVTPRO-REFRESH-002`: expiration-field contract tests для user/device lifecycle fields. Статус: завершено как AMN2 local-only, evidence `research/amn2/phase-4-prvtpro-expiration-contract-tests-implementation-2026-06-10.md`.
 - `P4-PRVTPRO-REFRESH-001`: read-only About/Version/Build status в operator UI. Статус: завершено как AMN2 local-only, evidence `research/amn2/phase-4-prvtpro-build-status-implementation-2026-06-10.md`.
 - `P4-PRVTPRO-REFRESH-003`: read-only server status/latency UX. Статус: только после design boundary, без SSH write и без sync/health action.
-- `P4-PRVTPRO-REFRESH-004`: API taxonomy/OpenAPI grouping. Статус: docs/policy support.
+- `P4-PRVTPRO-REFRESH-004`: API taxonomy/OpenAPI grouping. Статус: завершено как AMN3 docs-only policy support, evidence `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`.
 
 Negative control: не переносить upstream Bearer token model как admin-equivalent access ко всем admin endpoints; сохраняем scoped tokens, route policy, audit и named gates.
 

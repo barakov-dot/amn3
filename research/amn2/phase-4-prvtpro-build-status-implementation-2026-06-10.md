@@ -80,7 +80,7 @@ The About page is available only inside authenticated web-admin navigation. It e
 
 `P4-PRVTPRO-REFRESH-001` is closed. The remaining PRVTPRO-derived queue no longer includes a ready implementation slice by default:
 
-- `P4-PRVTPRO-REFRESH-003` read-only server status/latency UX requires a design boundary first.
-- `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping remains docs/policy support.
+- `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping was later closed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`.
+- `P4-PRVTPRO-REFRESH-003` read-only server status/latency UX remains only after a design boundary.
 
-Recommended next safe direction: choose `P4-PRVTPRO-REFRESH-004` if staying in PRVTPRO-derived docs/policy work, or choose `WAPI-V002` if continuing the named-gate write API taxonomy track.
+Recommended next safe direction after the later `P4-PRVTPRO-REFRESH-004` closure: choose `WAPI-V002` if continuing the named-gate write API taxonomy track, or create the `P4-PRVTPRO-REFRESH-003` design boundary before any PRVTPRO-derived server status/latency UX work.

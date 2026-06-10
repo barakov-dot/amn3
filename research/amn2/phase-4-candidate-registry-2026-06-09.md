@@ -261,7 +261,8 @@ secret_surface: route metadata only
 remote_write_surface: none
 test_plan: compare proposed groups to AMN2 route policy matrix; no runtime route or public OpenAPI/docs exposure
 required_gate: local-only
-recommendation: accept as support for WAPI-V002 or later policy alignment
+implementation_status: docs-only completed 2026-06-10 in AMN3; see research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md
+recommendation: completed; use as policy baseline for WAPI-V002 or later taxonomy alignment
 ```
 
 ```text
@@ -663,10 +664,10 @@ Implemented safe scope:
 - `NG-C005` write API live-block assertion was closed in `research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md`; selected WAPI work remains docs-only/local-only with `live_write_authorized: no`.
 - KYORESUAS GitHub refresh 2026-06-10 was recorded in `research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-10.md`; it strengthens `WAPI-V001` inputs: one operation lock per server/protocol/write surface, backup-before-write, temp/atomic config replace, post-check, rollback/audit metadata, `active|disabled` + `expiresAt` lifecycle wording, QR/`vpn://` as secret-read import artifacts, and rate-limit as a future public-route gate requirement. No upstream code, AMN2 route, VPS command, public listener or write/config operation was added.
 - `WAPI-V001` write API threat model was closed in `research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md`; it defines threat classes and required tests before any write API implementation.
-- PRVTPRO refresh 2026-06-10 was recorded in `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`; `P4-PRVTPRO-REFRESH-002` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-expiration-contract-tests-implementation-2026-06-10.md`, and `P4-PRVTPRO-REFRESH-001` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-build-status-implementation-2026-06-10.md`. Remaining AMN2 candidates are `P4-PRVTPRO-REFRESH-003` only after design boundary and `P4-PRVTPRO-REFRESH-004` as docs/policy support. Hybrid-only candidates are `HYB-PRVTPRO-REFRESH-001..004`. No GPL code, templates, UI, managers or workflows are copied.
+- PRVTPRO refresh 2026-06-10 was recorded in `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`; `P4-PRVTPRO-REFRESH-002` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-expiration-contract-tests-implementation-2026-06-10.md`, `P4-PRVTPRO-REFRESH-001` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-build-status-implementation-2026-06-10.md`, and `P4-PRVTPRO-REFRESH-004` was completed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`. Remaining AMN2 PRVTPRO-derived candidate is `P4-PRVTPRO-REFRESH-003` only after design boundary. Hybrid-only candidates are `HYB-PRVTPRO-REFRESH-001..004`. No GPL code, templates, UI, managers or workflows are copied.
 - The PRVTPRO local-only branches for `P4-PRVTPRO-REFRESH-002` and `P4-PRVTPRO-REFRESH-001` were merged into `amn2/codex-vps-test-prep` at `1508e3c4a100b76815b29f91757290f1266f813d`; evidence: `research/amn2/phase-4-prvtpro-local-slices-merge-2026-06-10.md`.
 
-Next decision: continue P4-NG with docs-only `WAPI-V002` write API route taxonomy with `live_write_authorized: no`, or if selecting remaining PRVTPRO-derived work, take `P4-PRVTPRO-REFRESH-004` as docs/policy support before any `P4-PRVTPRO-REFRESH-003` design boundary. Do not propose any VPS command or copy GPL code.
+Next decision: continue P4-NG with docs-only `WAPI-V002` write API route taxonomy with `live_write_authorized: no`, or if selecting remaining PRVTPRO-derived work, create the design boundary for `P4-PRVTPRO-REFRESH-003` before any UI/server-status slice. Do not propose any VPS command or copy GPL code.
 
 ## Source Notes
 
