@@ -88,12 +88,13 @@ Closed and removed from active plan:
 - `WAPI-I002` config delivery decoupling;
 - `WAPI-I001` `/api/clients` design without live CRUD;
 - `WAPI-I005` web-panel gated action labels;
-- `NG-N003` operation queue design after write API contract.
+- `NG-N003` operation queue design after write API contract;
+- `NG-N002` health/status polling design.
 
 Active next recommendation:
 
 ```text
-NG-N002 health/status polling design
+NG-N001 attach-existing-server read-only reconciliation gate design
 ```
 
 Reason: it is docs-only and is constrained by `live_write_authorized: no`.

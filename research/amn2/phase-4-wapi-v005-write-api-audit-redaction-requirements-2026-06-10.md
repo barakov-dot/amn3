@@ -224,7 +224,7 @@ AMN2_code_changed: no
 live_vps_commands: no
 ```
 
-It consolidates WAPI-V004 status vocabulary and WAPI-V005 audit/redaction requirements into the safe operation status read model before `/api/clients` design or route implementation planning. `WAPI-I003` was then closed as scoped write-token model; `WAPI-I002` was then closed as config delivery decoupling; `WAPI-I001` was then closed as `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels; `NG-N003` was then closed as docs-only operation queue design after write API contract. Current next recommendation after `NG-N003` closure is `NG-N002` health/status polling design with `live_write_authorized: no`.
+It consolidates WAPI-V004 status vocabulary and WAPI-V005 audit/redaction requirements into the safe operation status read model before `/api/clients` design or route implementation planning. `WAPI-I003` was then closed as scoped write-token model; `WAPI-I002` was then closed as config delivery decoupling; `WAPI-I001` was then closed as `/api/clients` design without live CRUD; `WAPI-I005` was then closed as web-panel gated action labels; `NG-N003` was then closed as docs-only operation queue design after write API contract; `NG-N002` was then closed as docs-only health/status polling design. Current next recommendation after `NG-N002` closure is `NG-N001` attach-existing-server read-only reconciliation gate design with `live_write_authorized: no`.
 
 ## Go/No-Go Result
 

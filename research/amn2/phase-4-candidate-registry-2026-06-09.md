@@ -364,7 +364,8 @@ secret_surface: peer names, IPs, endpoints and activity metadata can leak if too
 remote_write_surface: none if read-only, but can load SSH/API services
 test_plan: local fake telemetry tests; VPS gate only for real service polling/sampling
 required_gate: requires VPS gate
-recommendation: research
+implementation_status: docs-only design boundary closed 2026-06-10 in NG-N002; no polling implementation, scheduler, collector, live target sampling or route change
+recommendation: use NG-N002 as aggregate-only/stale-aware polling boundary; keep real target polling behind read-only VPS named gate
 ```
 
 ```text
@@ -674,10 +675,11 @@ Implemented safe scope:
 - `WAPI-I001` `/api/clients` design without live CRUD was closed in `research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md`; it defines future client route contracts, safe metadata fields, scope/idempotency/audit/status/test boundaries and keeps runtime CRUD, config delivery and live peer mutation absent/blocked.
 - `WAPI-I005` web-panel gated action labels was closed in `research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md`; it defines future panel labels and disabled/gated action rules for read-only metadata, local planning, dry-run, blocked config/live/public/destructive actions and safe status mapping without changing templates, routes or behavior.
 - `NG-N003` operation queue design after write API contract was closed in `research/amn2/phase-4-ng-n003-operation-queue-design-2026-06-10.md`; it defines future queue/cancel/retry/status semantics, lifecycle boundaries, idempotency/lock rules, visibility limits and RED test requirements without implementing a queue, worker, runtime route, live write or config delivery.
+- `NG-N002` health/status polling design was closed in `research/amn2/phase-4-ng-n002-health-status-polling-design-2026-06-10.md`; it defines future polling tiers, safe aggregate fields, forbidden leakage fields, status/staleness vocabulary, route boundaries and RED test requirements without implementing polling, scheduling, collectors, live target checks or route changes.
 - PRVTPRO refresh 2026-06-10 was recorded in `research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-10.md`; `P4-PRVTPRO-REFRESH-002` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-expiration-contract-tests-implementation-2026-06-10.md`, `P4-PRVTPRO-REFRESH-001` was completed as AMN2 local-only in `research/amn2/phase-4-prvtpro-build-status-implementation-2026-06-10.md`, and `P4-PRVTPRO-REFRESH-004` was completed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`. Remaining AMN2 PRVTPRO-derived candidate is `P4-PRVTPRO-REFRESH-003` only after design boundary. Hybrid-only candidates are `HYB-PRVTPRO-REFRESH-001..004`. No GPL code, templates, UI, managers or workflows are copied.
 - The PRVTPRO local-only branches for `P4-PRVTPRO-REFRESH-002` and `P4-PRVTPRO-REFRESH-001` were merged into `amn2/codex-vps-test-prep` at `1508e3c4a100b76815b29f91757290f1266f813d`; evidence: `research/amn2/phase-4-prvtpro-local-slices-merge-2026-06-10.md`.
 
-Next decision: continue P4-NG with docs-only `NG-N002` health/status polling design with `live_write_authorized: no`, or if selecting remaining PRVTPRO-derived work, create the design boundary for `P4-PRVTPRO-REFRESH-003` before any UI/server-status slice. Do not propose any VPS command or copy GPL code.
+Next decision: continue P4-NG with docs-only `NG-N001` attach-existing-server read-only reconciliation gate design with `live_write_authorized: no`, or if selecting remaining PRVTPRO-derived work, create the design boundary for `P4-PRVTPRO-REFRESH-003` before any UI/server-status slice. Do not propose any VPS command or copy GPL code.
 
 ## Source Notes
 
@@ -703,6 +705,7 @@ Primary AMN3 sources:
 - `research/amn2/phase-4-wapi-i001-clients-design-without-live-crud-2026-06-10.md`
 - `research/amn2/phase-4-wapi-i005-web-panel-gated-action-labels-2026-06-10.md`
 - `research/amn2/phase-4-ng-n003-operation-queue-design-2026-06-10.md`
+- `research/amn2/phase-4-ng-n002-health-status-polling-design-2026-06-10.md`
 - `docs/superpowers/plans/2026-06-10-p4-ng-named-gate-write-api-readiness.md`
 
 Upstream/reference sources:

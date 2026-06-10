@@ -109,6 +109,10 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Closed by `research/amn2/phase-4-ng-n003-operation-queue-design-2026-06-10.md`.
   - Defines future queue/cancel/retry/status semantics, lifecycle boundaries, idempotency/lock rules, visibility constraints and RED test requirements without implementing a queue, worker, runtime route, live write or config delivery.
 
+- [x] **NG-N002: health/status polling design**
+  - Closed by `research/amn2/phase-4-ng-n002-health-status-polling-design-2026-06-10.md`.
+  - Defines future health/status polling tiers, safe aggregate fields, forbidden leakage fields, status vocabulary, staleness behavior, queue/status binding and RED test requirements without implementing polling, scheduling, collectors, live target checks or route changes.
+
 ## Active Remaining Plan
 
 ### Критичные
@@ -161,13 +165,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
   - Read-only detection only.
   - No attach/write/backfill until separate gate.
 
-- [ ] **NG-N002: health/status polling design**
-
-  Scope:
-
-  - Aggregate/safe telemetry only.
-  - No peer/user leakage.
-
 - [ ] **NG-N004: update candidate registry after every gate decision**
 
   Scope:
@@ -217,6 +214,6 @@ write_api_live_status: blocked until separate P4-WRITE-API-LIVE-GATE
 
 ## First Recommendation
 
-Start with `NG-N002` next. It is docs-only health/status polling design and must preserve the WAPI and NG-N003 boundaries: aggregate/safe telemetry only, no peer/user leakage, no runtime polling implementation, no queue implementation, no route behavior changes, no live VPS commands, no write/config actions and no production mutation are authorized.
+Start with `NG-N001` next. It is docs-only attach-existing-server read-only reconciliation gate design and must preserve the P4-NG boundaries: read-only detection only, no attach/write/backfill, no live VPS commands without named approval, no route behavior changes, no config delivery and no production mutation are authorized.
 
 Do not run `NG-V001` until the operator explicitly approves the gate and provides the target SSH alias/host outside repository secrets.

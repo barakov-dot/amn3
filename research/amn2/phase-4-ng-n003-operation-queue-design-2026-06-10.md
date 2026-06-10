@@ -35,6 +35,7 @@ required_gate_for_config_delivery: P4-CONFIG-DELIVERY-GATE
 selected_next_slice: NG-N002 health/status polling design
 selected_next_slice_mode: docs-only
 selected_next_slice_live_write_authorized: no
+selected_next_slice_status: completed in research/amn2/phase-4-ng-n002-health-status-polling-design-2026-06-10.md
 ```
 
 ## Sources Reused
@@ -338,7 +339,7 @@ defer_scope: AMN2 local queue implementation gate, live peer mutation, config/re
 
 ## Handoff
 
-`NG-N003` is closed. The recommended next docs-only slice is `NG-N002` health/status polling design, because queue/status UX needs a safe polling contract that remains aggregate-only, avoids peer/user leakage and does not call live VPS or write/config surfaces.
+`NG-N003` is closed. `NG-N002` was selected next and later closed in `research/amn2/phase-4-ng-n002-health-status-polling-design-2026-06-10.md`, because queue/status UX needed a safe polling contract that remains aggregate-only, avoids peer/user leakage and does not call live VPS or write/config surfaces. Current next recommendation after `NG-N002` closure is `NG-N001` attach-existing-server read-only reconciliation gate design with `live_write_authorized: no`.
 
 ## Safety Statement
 
