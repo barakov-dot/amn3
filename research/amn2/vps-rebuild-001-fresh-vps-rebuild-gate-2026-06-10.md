@@ -138,6 +138,22 @@ destructive_action_authorized: no
 
 This clarification answers the operator question about rebuilding from zero: source/package readiness can continue without waiting for the provider backup. It does not change the current destructive gate result. Before any wipe/reinstall, the operator must still choose a retention path: wait for provider backup, explicitly accept the current VPS as disposable, or keep this gate deferred.
 
+## Fresh Deploy Runbook
+
+Runbook: `docs/AMN2_FRESH_DEPLOY_FROM_ZERO_RUNBOOK.ru.md`.
+Evidence: `research/amn2/vps-fresh-deploy-002-clean-ubuntu-runbook-2026-06-11.md`.
+
+```text
+fresh_deploy_runbook: prepared
+runbook_live_execution_authorized: no
+target_mode: no-domain service-mode
+web_admin_bind: 127.0.0.1:3030
+operator_access: SSH tunnel only
+separates_rebuildable_from_operator_required_state: yes
+```
+
+The runbook is an operator review artifact. It does not authorize live execution; it keeps retention path, stop-criteria review and exact final destructive phrase as the remaining gate controls.
+
 ## Allowed Now
 
 - Update AMN3 docs/evidence for `VPS-REBUILD-001`.
@@ -208,5 +224,6 @@ delete_actions_planned: no
 fresh_deploy_readiness: documented
 fresh_deploy_possible_from_repo_package: yes-with-operator-provided-secrets
 current_vps_disposable_decision: not-set
+fresh_deploy_runbook: prepared
 next_required_operator_decision: choose retention path before any wipe: wait for provider backup, explicitly accept disposable target, or keep gate deferred; then stop-criteria review and exact final destructive phrase only if the operator still chooses wipe
 ```

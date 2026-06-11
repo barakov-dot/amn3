@@ -116,4 +116,4 @@ final_destructive_phrase: not_sent
 go_no_go_decision: defer
 ```
 
-Recommendation: do not run this package live yet. First confirm provider snapshot exists and record stop criteria, then decide whether the operator still wants to send the exact final destructive phrase.
+Recommendation: do not run this package live yet. First record the retention path and stop criteria, then decide whether the operator still wants to send the exact final destructive phrase.
