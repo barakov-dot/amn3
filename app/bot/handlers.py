@@ -491,13 +491,23 @@ async def _send_delivery(bot, result) -> None:
         chat_id=result.user_telegram_id,
         text=result.delivery.message_text,
     )
+    if getattr(result.delivery, "vpn_import_link_text", ""):
+        await bot.send_message(
+            chat_id=result.user_telegram_id,
+            text=result.delivery.vpn_import_link_text,
+        )
+    if getattr(result.delivery, "app_links_text", ""):
+        await bot.send_message(
+            chat_id=result.user_telegram_id,
+            text=result.delivery.app_links_text,
+        )
     await bot.send_document(
         chat_id=result.user_telegram_id,
         document=BufferedInputFile(
             result.delivery.config_bytes,
             filename=result.delivery.config_filename,
         ),
-        caption="VPN config file",
+        caption=result.delivery.config_caption,
     )
     await bot.send_photo(
         chat_id=result.user_telegram_id,
@@ -505,7 +515,7 @@ async def _send_delivery(bot, result) -> None:
             result.delivery.qr_png_bytes,
             filename=result.delivery.qr_filename,
         ),
-        caption="VPN config QR code",
+        caption=result.delivery.qr_caption,
     )
 
 

@@ -71,6 +71,9 @@ def test_device_config_delivery_uses_client_config_defaults(tmp_path):
     assert "H2 = 202" in result.config_text
     assert "H3 = 303" in result.config_text
     assert "H4 = 404" in result.config_text
+    assert result.delivery.config_filename == "phone.conf"
+    assert result.delivery.qr_filename == "phone.qr.png"
+    assert result.delivery.qr_payload_text == result.delivery.vpn_import_link
 
 
 def test_device_config_delivery_preserves_utf8_artifacts_from_template(tmp_path):
@@ -133,7 +136,8 @@ def test_device_config_delivery_preserves_utf8_artifacts_from_template(tmp_path)
 
     assert "# Profile = телефон-Ф" in result.config_text
     assert result.delivery.config_bytes == result.config_text.encode("utf-8")
-    assert result.delivery.qr_payload_text == result.config_text
+    assert result.delivery.config_filename == f"device-{device_id}.conf"
+    assert result.delivery.qr_payload_text == result.delivery.vpn_import_link
     assert _decode_vpn_link(result.delivery.vpn_import_link) == result.config_text
     assert result.delivery.config_secret_class == "client-config-secret"
     redacted_delivery_text = redact(

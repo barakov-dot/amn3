@@ -308,8 +308,10 @@ class BotWorkflow:
             CONFIG_READY_TEMPLATE_KEY,
             default_text=DEFAULT_CONFIG_READY_TEMPLATE,
         )
+        device = self._repo.get_device(result.device_id)
         delivery = build_config_delivery(
             device_id=result.device_id,
+            device_name=str(device["name"]),
             config_version=config_version,
             config_text=result.config_text,
             template_text=template_text,
@@ -473,7 +475,7 @@ class BotWorkflow:
 
 
 def _default_device_name(order_id: int) -> str:
-    return f"device-{order_id}"
+    return f"Neobyatnaya-AMNZ-{order_id}"
 
 
 def _utc_now() -> str:

@@ -324,8 +324,8 @@ def test_render_admin_approval_mentions_order_device_and_user():
         config_version="amneziawg_v2",
     )
 
-    assert "Access request #11 approved" in text
-    assert "device #7" in text
+    assert "Заявка #11 одобрена" in text
+    assert "устройство #7" in text
     assert "telegram_id=1001" in text
     assert "AmneziaWG 2.0" in text
 

@@ -374,14 +374,14 @@ def render_admin_approval(
     config_version: str,
 ) -> str:
     return (
-        f"Access request #{order_id} approved.\n"
-        f"Created device #{device_id} for telegram_id={user_telegram_id}.\n"
-        f"Config: {_version_label(config_version)}."
+        f"Заявка #{order_id} одобрена.\n"
+        f"Создано устройство #{device_id} для telegram_id={user_telegram_id}.\n"
+        f"Конфиг: {_version_label(config_version)}."
     )
 
 
 def render_user_config_ready(*, config_version: str) -> str:
-    return f"Your {_version_label(config_version)} VPN config is ready."
+    return f"Ваш VPN-конфиг {_version_label(config_version)} готов."
 
 
 def render_user_traffic(views: Iterable[DeviceTrafficView]) -> str:

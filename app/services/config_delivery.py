@@ -78,6 +78,7 @@ def build_device_config_delivery(
     )
     delivery = build_config_delivery(
         device_id=int(device["id"]),
+        device_name=str(device["name"]),
         config_version=config_version,
         config_text=config_text,
         template_text=template_text,

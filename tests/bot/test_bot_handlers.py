@@ -481,13 +481,17 @@ def test_handle_admin_approve_calls_workflow_and_returns_config_preview():
     asyncio.run(handle_admin_approve(callback, workflow=workflow))
 
     assert workflow.approvals == [(11, "amneziawg_v1_5")]
-    assert "approved" in callback.message.answers[0]["text"]
+    assert "одобрена" in callback.message.answers[0]["text"]
     assert callback.bot.sent_messages[0]["chat_id"] == 1001
-    assert "VPN config is ready" in callback.bot.sent_messages[0]["text"]
+    assert "VPN-конфиг" in callback.bot.sent_messages[0]["text"]
+    assert callback.bot.sent_messages[1]["text"].startswith("Ссылка для импорта:")
+    assert "DefaultVPN" in callback.bot.sent_messages[2]["text"]
     assert callback.bot.sent_documents[0]["chat_id"] == 1001
     assert callback.bot.sent_documents[0]["document"].filename.endswith(".conf")
+    assert callback.bot.sent_documents[0]["caption"] == "VPN-конфиг (.conf)"
     assert callback.bot.sent_photos[0]["chat_id"] == 1001
     assert callback.bot.sent_photos[0]["photo"].filename.endswith(".qr.png")
+    assert callback.bot.sent_photos[0]["caption"] == "QR-код import-ссылки vpn://"
     assert callback.answered is True
 
 
@@ -773,11 +777,15 @@ class FakeWorkflow:
             user_telegram_id=telegram_id,
             config_text="[Interface]\nPrivateKey = test",
             delivery=SimpleNamespace(
-                message_text="Your VPN config is ready.",
-                config_filename=f"amneziya-device-{device_id}.conf",
+                message_text="Ваш VPN-конфиг готов.",
+                vpn_import_link_text="Ссылка для импорта:\nvpn://import/test",
+                app_links_text="DefaultVPN:\nhttps://github.com/amnezia-vpn/DefaultVPN",
+                config_filename=f"Neobyatnaya-AMNZ-{device_id}.conf",
                 config_bytes=b"[Interface]\nPrivateKey = test",
-                qr_filename=f"amneziya-device-{device_id}.qr.png",
+                config_caption="VPN-конфиг (.conf)",
+                qr_filename=f"Neobyatnaya-AMNZ-{device_id}.qr.png",
                 qr_png_bytes=b"\x89PNG\r\n\x1a\n",
+                qr_caption="QR-код import-ссылки vpn://",
             ),
         )
 
@@ -878,15 +886,19 @@ class FakeWorkflow:
         return SimpleNamespace(
             device_id=7,
             user_telegram_id=1001,
-            admin_text="Access request #11 approved.",
-            user_text="Your VPN config is ready.",
+            admin_text="Заявка #11 одобрена.",
+            user_text="Ваш VPN-конфиг готов.",
             config_text="[Interface]\nPrivateKey = test",
             delivery=SimpleNamespace(
-                message_text="Your VPN config is ready.",
-                config_filename="amneziya-device-7.conf",
+                message_text="Ваш VPN-конфиг готов.",
+                vpn_import_link_text="Ссылка для импорта:\nvpn://import/test",
+                app_links_text="DefaultVPN:\nhttps://github.com/amnezia-vpn/DefaultVPN",
+                config_filename="Neobyatnaya-AMNZ-7.conf",
                 config_bytes=b"[Interface]\nPrivateKey = test",
-                qr_filename="amneziya-device-7.qr.png",
+                config_caption="VPN-конфиг (.conf)",
+                qr_filename="Neobyatnaya-AMNZ-7.qr.png",
                 qr_png_bytes=b"\x89PNG\r\n\x1a\n",
+                qr_caption="QR-код import-ссылки vpn://",
             ),
         )
 
@@ -910,11 +922,15 @@ class FakeWorkflow:
             user_telegram_id=1001,
             config_text="[Interface]\nPrivateKey = test",
             delivery=SimpleNamespace(
-                message_text="Your VPN config is ready.",
-                config_filename=f"amneziya-device-{device_id}.conf",
+                message_text="Ваш VPN-конфиг готов.",
+                vpn_import_link_text="Ссылка для импорта:\nvpn://import/test",
+                app_links_text="DefaultVPN:\nhttps://github.com/amnezia-vpn/DefaultVPN",
+                config_filename=f"Neobyatnaya-AMNZ-{device_id}.conf",
                 config_bytes=b"[Interface]\nPrivateKey = test",
-                qr_filename=f"amneziya-device-{device_id}.qr.png",
+                config_caption="VPN-конфиг (.conf)",
+                qr_filename=f"Neobyatnaya-AMNZ-{device_id}.qr.png",
                 qr_png_bytes=b"\x89PNG\r\n\x1a\n",
+                qr_caption="QR-код import-ссылки vpn://",
             ),
         )
 

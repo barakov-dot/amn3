@@ -235,11 +235,13 @@ def test_approve_order_creates_device_with_selected_config_version(tmp_path):
     device = repo.get_device(result.device_id)
     assert device["config_version"] == "amneziawg_v1_5"
     assert result.user_telegram_id == 1001
-    assert "Access request #1 approved" in result.admin_text
+    assert "Заявка #1 одобрена" in result.admin_text
     assert "[Interface]" in result.config_text
-    assert result.delivery.config_filename == f"amneziya-device-{result.device_id}.conf"
+    assert result.delivery.config_filename == "Neobyatnaya-AMNZ-1.conf"
     assert result.delivery.qr_png_bytes.startswith(b"\x89PNG")
     assert "DefaultVPN" in result.delivery.message_text
+    assert "Ваш VPN-конфиг готов" in result.delivery.message_text
+    assert result.delivery.qr_payload_text == result.delivery.vpn_import_link
 
 
 def test_approve_order_records_redacted_vps_failure_audit(tmp_path):
@@ -343,7 +345,8 @@ def test_admin_can_read_update_and_reset_config_ready_template(tmp_path):
     workflow.reset_config_ready_template(admin_telegram_id=9001)
     reset = workflow.get_config_ready_template(admin_telegram_id=9001)
 
-    assert "Android AmneziaVPN" in original
+    assert "Ваш VPN-конфиг готов" in original
+    assert "Ссылки на приложения" in original
     assert updated == "Custom template {device_id}"
     assert reset == original
 
@@ -387,7 +390,7 @@ def test_resend_device_config_rebuilds_delivery_from_encrypted_device_secrets(tm
     )
 
     assert resend.user_telegram_id == 1001
-    assert resend.delivery.config_filename == f"amneziya-device-{approval.device_id}.conf"
+    assert resend.delivery.config_filename == "Neobyatnaya-AMNZ-1.conf"
     assert resend.delivery.qr_png_bytes.startswith(b"\x89PNG")
     assert "[Interface]" in resend.config_text
 
@@ -473,7 +476,7 @@ def test_user_can_resend_only_owned_device_config(tmp_path):
     )
 
     assert resend.user_telegram_id == 1001
-    assert resend.delivery.config_filename == f"amneziya-device-{device_id}.conf"
+    assert resend.delivery.config_filename == "phone.conf"
     assert forbidden is None
 
 

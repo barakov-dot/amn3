@@ -68,6 +68,13 @@ WEB_RUNTIME_ROUTE_BINDINGS: tuple[SurfaceBinding, ...] = (
     _binding(
         "web",
         "GET",
+        "/about",
+        source="app.web.app:create_web_app",
+        exemption_reason=READ_ONLY_WEB_VIEW,
+    ),
+    _binding(
+        "web",
+        "GET",
         "/orders",
         source="app.web.app:create_web_app",
         exemption_reason=READ_ONLY_WEB_VIEW,

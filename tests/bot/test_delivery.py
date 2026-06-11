@@ -19,6 +19,7 @@ def _decode_vpn_link(link: str) -> str:
 def test_build_config_delivery_creates_conf_and_qr_png_bytes():
     package = build_config_delivery(
         device_id=7,
+        device_name="Neobyatnaya-AMNZ-7",
         config_version="amneziawg_v2",
         config_text="[Interface]\nPrivateKey = test\n[Peer]",
         template_text=(
@@ -33,12 +34,17 @@ def test_build_config_delivery_creates_conf_and_qr_png_bytes():
     assert "PrivateKey" not in package.vpn_import_link
     assert "PrivateKey" not in package.message_text
     assert package.vpn_import_link in package.message_text
-    assert package.config_filename == "amneziya-device-7.conf"
+    assert package.config_filename == "Neobyatnaya-AMNZ-7.conf"
     assert package.config_bytes.startswith(b"[Interface]")
-    assert package.qr_filename == "amneziya-device-7.qr.png"
+    assert package.qr_filename == "Neobyatnaya-AMNZ-7.qr.png"
     assert package.qr_png_bytes.startswith(b"\x89PNG\r\n\x1a\n")
     assert "AmneziaWG 2.0" in package.message_text
     assert APP_LINKS["ios_russia_defaultvpn"] in package.message_text
+    assert package.vpn_import_link_text == f"Ссылка для импорта:\n{package.vpn_import_link}"
+    assert APP_LINKS["ios_russia_defaultvpn"] in package.app_links_text
+    assert package.config_caption == "VPN-конфиг (.conf)"
+    assert package.qr_caption == "QR-код import-ссылки vpn://"
+    assert package.qr_payload_text == package.vpn_import_link
 
 
 def test_render_template_leaves_unknown_placeholders_visible_for_admins_to_fix():
@@ -50,7 +56,9 @@ def test_render_template_leaves_unknown_placeholders_visible_for_admins_to_fix()
 def test_default_config_ready_template_mentions_all_delivery_options():
     assert ".conf" in DEFAULT_CONFIG_READY_TEMPLATE
     assert "QR" in DEFAULT_CONFIG_READY_TEMPLATE
-    assert "{vpn_link}" in DEFAULT_CONFIG_READY_TEMPLATE
+    assert "Ваш VPN-конфиг готов" in DEFAULT_CONFIG_READY_TEMPLATE
+    assert "DefaultVPN" in DEFAULT_CONFIG_READY_TEMPLATE
+    assert "Ссылки на приложения" in DEFAULT_CONFIG_READY_TEMPLATE
 
 
 def test_build_config_delivery_preserves_utf8_secret_artifacts():
@@ -71,7 +79,7 @@ def test_build_config_delivery_preserves_utf8_secret_artifacts():
     )
 
     assert package.config_bytes == config_text.encode("utf-8")
-    assert package.qr_payload_text == config_text
+    assert package.qr_payload_text == package.vpn_import_link
     assert package.config_secret_class == "client-config-secret"
     assert package.config_content_encoding == "utf-8"
     assert package.vpn_import_link_encoding == "base64-url-no-padding"
@@ -100,6 +108,8 @@ def test_config_delivery_artifacts_redact_when_rendered_as_text():
         [
             package.message_text,
             package.vpn_import_link,
+            package.vpn_import_link_text,
+            package.app_links_text,
             package.qr_payload_text,
             package.config_bytes.decode("utf-8"),
         ]

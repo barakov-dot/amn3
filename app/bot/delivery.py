@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import re
 from dataclasses import dataclass
 from string import Formatter
 
@@ -20,23 +21,20 @@ APP_LINKS = {
     "defaultvpn_github": "https://github.com/amnezia-vpn/DefaultVPN",
 }
 
-DEFAULT_CONFIG_READY_TEMPLATE = """Your VPN config is ready.
+CONFIG_FILE_CAPTION = "VPN-конфиг (.conf)"
+QR_CODE_CAPTION = "QR-код import-ссылки vpn://"
 
-Device: #{device_id}
-Config format: {config_version_label}
+DEFAULT_CONFIG_READY_TEMPLATE = """Ваш VPN-конфиг готов.
 
-Delivery options:
-1. Import the attached .conf file.
-2. Scan the attached QR code from the VPN app.
-3. Open this vpn:// import link from a VPN app:
-{vpn_link}
+Устройство: {device_name}
+Формат конфига: {config_version_label}
 
-Apps:
-Android AmneziaVPN: {android_amnezia}
-Android AmneziaWG: {android_amneziawg}
-iOS in Russia DefaultVPN: {ios_russia_defaultvpn}
-Windows AmneziaWG: {windows_amneziawg}
-DefaultVPN GitHub: {defaultvpn_github}
+Варианты установки:
+1. Для DefaultVPN импортируйте прикрепленный .conf файл.
+2. Откройте отдельную vpn:// ссылку, которую бот пришлет следующим сообщением.
+3. QR-код тоже содержит vpn:// ссылку. Если встроенный QR-сканер приложения ее не принимает, используйте файл или отдельную ссылку.
+
+Ссылки на приложения бот пришлет отдельным сообщением.
 """
 
 
@@ -49,6 +47,10 @@ class ConfigDeliveryPackage:
     qr_filename: str
     qr_png_bytes: bytes
     vpn_import_link: str
+    vpn_import_link_text: str = ""
+    app_links_text: str = ""
+    config_caption: str = CONFIG_FILE_CAPTION
+    qr_caption: str = QR_CODE_CAPTION
     qr_payload_text: str = ""
     config_secret_class: str = "client-config-secret"
     config_content_encoding: str = "utf-8"
@@ -58,13 +60,16 @@ class ConfigDeliveryPackage:
 def build_config_delivery(
     *,
     device_id: int,
+    device_name: str | None = None,
     config_version: str,
     config_text: str,
     template_text: str,
 ) -> ConfigDeliveryPackage:
     vpn_import_link = build_vpn_import_link(config_text)
+    basename = _artifact_basename(device_name=device_name, device_id=device_id)
     context = {
         "device_id": str(device_id),
+        "device_name": device_name or f"device-{device_id}",
         "config_version": config_version,
         "config_version_label": VERSION_LABELS.get(config_version, config_version),
         "vpn_link": vpn_import_link,
@@ -73,12 +78,14 @@ def build_config_delivery(
     return ConfigDeliveryPackage(
         template_key=CONFIG_READY_TEMPLATE_KEY,
         message_text=render_template(template_text, context),
-        config_filename=f"amneziya-device-{device_id}.conf",
+        config_filename=f"{basename}.conf",
         config_bytes=config_text.encode("utf-8"),
-        qr_filename=f"amneziya-device-{device_id}.qr.png",
-        qr_png_bytes=_build_qr_png(config_text),
+        qr_filename=f"{basename}.qr.png",
+        qr_png_bytes=_build_qr_png(vpn_import_link),
         vpn_import_link=vpn_import_link,
-        qr_payload_text=config_text,
+        vpn_import_link_text=f"Ссылка для импорта:\n{vpn_import_link}",
+        app_links_text=_render_app_links(),
+        qr_payload_text=vpn_import_link,
     )
 
 
@@ -104,3 +111,21 @@ def _build_qr_png(config_text: str) -> bytes:
     output = io.BytesIO()
     image.save(output, format="PNG")
     return output.getvalue()
+
+
+def _artifact_basename(*, device_name: str | None, device_id: int) -> str:
+    source = (device_name or "").strip() or f"device-{device_id}"
+    basename = re.sub(r"[^A-Za-z0-9._-]+", "-", source).strip(".-_")
+    return basename or f"device-{device_id}"
+
+
+def _render_app_links() -> str:
+    return "\n\n".join(
+        [
+            f"Android AmneziaVPN:\n{APP_LINKS['android_amnezia']}",
+            f"Android AmneziaWG:\n{APP_LINKS['android_amneziawg']}",
+            f"iOS DefaultVPN:\n{APP_LINKS['ios_russia_defaultvpn']}",
+            f"Windows AmneziaWG:\n{APP_LINKS['windows_amneziawg']}",
+            f"DefaultVPN GitHub:\n{APP_LINKS['defaultvpn_github']}",
+        ]
+    )
