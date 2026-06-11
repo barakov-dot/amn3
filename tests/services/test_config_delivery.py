@@ -5,7 +5,12 @@ from app.db.repositories import Repository
 from app.db.schema import initialize_schema
 from app.security.crypto import SecretBox
 from app.security.redaction import redact
-from app.services.config_delivery import build_device_config_delivery
+import pytest
+
+from app.services.config_delivery import (
+    ConfigMaterialUnavailable,
+    build_device_config_delivery,
+)
 import app.vpn.amneziawg_v2.config as awg_config
 
 
@@ -153,3 +158,34 @@ def test_device_config_delivery_preserves_utf8_artifacts_from_template(tmp_path)
     assert "client-private" not in redacted_delivery_text
     assert "client-psk" not in redacted_delivery_text
     assert "[Interface]" not in redacted_delivery_text
+
+
+def test_device_config_delivery_rejects_external_only_device(tmp_path):
+    conn = connect(tmp_path / "delivery.sqlite3")
+    initialize_schema(conn)
+    repo = Repository(conn)
+    secret_box = SecretBox.from_app_secret("test-secret-for-config-delivery-123456")
+    user_id = repo.upsert_user(
+        telegram_id=1003,
+        username="external",
+        first_name="External",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    device_id = repo.create_external_device(
+        user_id=user_id,
+        server_id=server_id,
+        name="Neobyatnaya-AMNZ-4",
+        duration_days=30,
+        vpn_ip="10.8.0.44",
+        peer_public_key="external-peer-4",
+        config_version="amneziawg_v2",
+        status="active",
+    )
+
+    with pytest.raises(ConfigMaterialUnavailable):
+        build_device_config_delivery(
+            repo=repo,
+            secret_box=secret_box,
+            device=repo.get_device(device_id),
+        )

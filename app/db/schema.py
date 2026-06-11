@@ -81,6 +81,8 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
             peer_private_key_encrypted TEXT NOT NULL,
             preshared_key_encrypted TEXT NOT NULL,
             config_version TEXT NOT NULL,
+            config_material_status TEXT NOT NULL DEFAULT 'available'
+                CHECK (config_material_status IN ('available', 'external_only')),
             last_config_sent_at TEXT,
             first_connected_at TEXT,
             last_connected_at TEXT,
@@ -225,6 +227,12 @@ def initialize_schema(conn: sqlite3.Connection) -> None:
     _ensure_column(conn, "api_tokens", "revoke_reason", "TEXT")
     _ensure_column(conn, "api_tokens", "rotated_from_token_id", "TEXT")
     _migrate_devices_disabled_status(conn)
+    _ensure_column(
+        conn,
+        "devices",
+        "config_material_status",
+        "TEXT NOT NULL DEFAULT 'available' CHECK (config_material_status IN ('available', 'external_only'))",
+    )
     conn.commit()
 
 

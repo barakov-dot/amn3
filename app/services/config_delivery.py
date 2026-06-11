@@ -11,6 +11,7 @@ from app.bot.delivery import (
 )
 from app.db.repositories import Repository
 from app.security.crypto import SecretBox
+from app.services.config_material import ConfigMaterialUnavailable
 from app.vpn.amneziawg_v2.config import ClientConfigDefaults, ClientConfigInput
 from app.vpn.config_versions import render_client_config_for_version
 
@@ -33,6 +34,10 @@ def build_device_config_delivery(
     client_allowed_ips: str = "0.0.0.0/0, ::/0",
     client_config_defaults: ClientConfigDefaults | None = None,
 ) -> DeviceConfigDelivery:
+    if _config_material_status(device) != "available":
+        raise ConfigMaterialUnavailable(
+            f"Config material is unavailable for device #{device['id']}"
+        )
     user = repo.get_user(int(device["user_id"]))
     server = repo.get_server(int(device["server_id"]))
     private_key = secret_box.decrypt_text(device["peer_private_key_encrypted"])
@@ -89,3 +94,10 @@ def build_device_config_delivery(
         config_text=config_text,
         delivery=delivery,
     )
+
+
+def _config_material_status(device: Any) -> str:
+    try:
+        return str(device["config_material_status"])
+    except (IndexError, KeyError):
+        return "available"

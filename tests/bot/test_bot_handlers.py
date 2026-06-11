@@ -37,6 +37,7 @@ from app.bot.ux import (
     USER_REVOKE_PREFIX,
 )
 from app.server.peer_apply import PeerApplyError
+from app.services.config_delivery import ConfigMaterialUnavailable
 
 
 def test_handle_start_renders_main_menu_for_admin():
@@ -158,6 +159,38 @@ def test_handle_my_devices_renders_device_actions_and_reset():
     assert callback.answered is True
 
 
+def test_handle_my_devices_hides_resend_for_external_only_device():
+    callback = FakeCallback(
+        data=MY_DEVICES_CALLBACK,
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(
+        admin_ids={9001},
+        devices=[
+            {
+                "id": 4,
+                "name": "Neobyatnaya-AMNZ-4",
+                "duration_days": 30,
+                "expires_at": "2026-06-26T12:00:00Z",
+                "status": "revoked",
+                "config_version": "amneziawg_v2",
+                "config_material_status": "external_only",
+                "first_connected_at": None,
+                "last_connected_at": None,
+            }
+        ],
+    )
+
+    asyncio.run(handle_my_devices(callback, workflow=workflow))
+
+    assert "ранее импортировано" in callback.message.answers[0]["text"]
+    assert _button_texts(callback.message.answers[1]["reply_markup"]) == [
+        ["Удалить устройство"]
+    ]
+
+
 def test_handle_user_resend_config_sends_owned_config_to_user():
     callback = FakeCallback(
         data=f"{USER_RESEND_PREFIX}:7",
@@ -174,6 +207,28 @@ def test_handle_user_resend_config_sends_owned_config_to_user():
     assert callback.bot.sent_documents[0]["document"].filename.endswith(".conf")
     assert callback.bot.sent_photos[0]["photo"].filename.endswith(".qr.png")
     assert "отправлен повторно" in callback.message.answers[0]["text"]
+    assert callback.answered is True
+
+
+def test_handle_user_resend_config_reports_external_only_device():
+    callback = FakeCallback(
+        data=f"{USER_RESEND_PREFIX}:4",
+        user_id=1001,
+        username="alice",
+        first_name="Alice",
+    )
+    workflow = FakeWorkflow(
+        admin_ids={9001},
+        user_resend_error=ConfigMaterialUnavailable("external-only"),
+    )
+
+    asyncio.run(handle_user_resend_config(callback, workflow=workflow))
+
+    assert workflow.user_resends == [4]
+    assert "недоступен для повторной отправки" in callback.message.answers[0]["text"]
+    assert callback.bot.sent_messages == []
+    assert callback.bot.sent_documents == []
+    assert callback.bot.sent_photos == []
     assert callback.answered is True
 
 
@@ -701,11 +756,15 @@ class FakeWorkflow:
         traffic_text_marker=None,
         approval_error=None,
         revoke_error=None,
+        user_resend_error=None,
+        devices=None,
     ):
         self._admin_ids = admin_ids
         self._traffic_text_marker = traffic_text_marker
         self._approval_error = approval_error
         self._revoke_error = revoke_error
+        self._user_resend_error = user_resend_error
+        self._devices = devices
         self.requests = []
         self.approvals = []
         self.resends = []
@@ -757,6 +816,8 @@ class FakeWorkflow:
         ]
 
     def list_user_devices(self, *, telegram_id):
+        if self._devices is not None:
+            return self._devices
         return [
             {
                 "id": 7,
@@ -772,6 +833,8 @@ class FakeWorkflow:
 
     def build_user_resend_delivery(self, *, telegram_id, device_id):
         self.user_resends.append(device_id)
+        if self._user_resend_error is not None:
+            raise self._user_resend_error
         return SimpleNamespace(
             device_id=device_id,
             user_telegram_id=telegram_id,

@@ -66,6 +66,8 @@ class BotWorkflow:
         peer_remover: PeerRemover | None = None,
         client_config_template_dir: str | None = None,
         client_config_defaults: ClientConfigDefaults | None = None,
+        device_name_prefix: str = "Neobyatnaya-AMNZ",
+        device_name_sequence_seed: int = 4,
     ) -> None:
         self._repo = repo
         self._admin_telegram_ids = admin_telegram_ids
@@ -75,6 +77,10 @@ class BotWorkflow:
         self._peer_remover = peer_remover
         self._client_config_template_dir = client_config_template_dir
         self._client_config_defaults = client_config_defaults or ClientConfigDefaults()
+        self._device_name_prefix = device_name_prefix.strip()
+        self._device_name_sequence_seed = max(0, int(device_name_sequence_seed))
+        if not self._device_name_prefix:
+            raise ValueError("device_name_prefix must be non-blank")
 
     def is_admin(self, telegram_id: int) -> bool:
         if telegram_id in self._admin_telegram_ids:
@@ -238,7 +244,10 @@ class BotWorkflow:
         user = self._repo.get_user_by_telegram_id(telegram_id)
         if user is None:
             return []
-        return self._repo.list_user_devices(int(user["id"]))
+        return self._repo.list_user_devices(
+            int(user["id"]),
+            statuses=("active", "disabled", "revoked"),
+        )
 
     def build_admin_traffic_views(
         self,
@@ -285,7 +294,7 @@ class BotWorkflow:
             result = self._access_service.approve_order(
                 order_id,
                 self._default_server_id,
-                _default_device_name(order_id),
+                self._next_device_name(),
                 admin_telegram_id=admin_telegram_id,
                 config_version=config_version,
             )
@@ -473,9 +482,12 @@ class BotWorkflow:
             delivery=result.delivery,
         )
 
-
-def _default_device_name(order_id: int) -> str:
-    return f"Neobyatnaya-AMNZ-{order_id}"
+    def _next_device_name(self) -> str:
+        sequence = self._repo.next_device_sequence(
+            self._device_name_prefix,
+            minimum_sequence=self._device_name_sequence_seed,
+        )
+        return f"{self._device_name_prefix}-{sequence}"
 
 
 def _utc_now() -> str:

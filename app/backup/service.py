@@ -249,6 +249,7 @@ class BackupService:
             SELECT id, peer_private_key_encrypted, preshared_key_encrypted
             FROM devices
             WHERE status IN ('active', 'pending')
+              AND config_material_status = 'available'
             """
         ).fetchall()
         for row in rows:

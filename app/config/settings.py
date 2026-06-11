@@ -17,6 +17,14 @@ class Settings(BaseSettings):
     free_test_requires_approval: bool = Field(default=True, alias="FREE_TEST_REQUIRES_APPROVAL")
     default_plan_days: int = Field(default=7, alias="DEFAULT_PLAN_DAYS")
     max_devices_per_user: int = Field(default=5, alias="MAX_DEVICES_PER_USER")
+    bot_device_name_prefix: str = Field(
+        default="Neobyatnaya-AMNZ",
+        alias="BOT_DEVICE_NAME_PREFIX",
+    )
+    bot_device_name_sequence_seed: int = Field(
+        default=4,
+        alias="BOT_DEVICE_NAME_SEQUENCE_SEED",
+    )
     client_dns: str = Field(default="8.8.8.8, 8.8.4.4", alias="CLIENT_DNS")
     client_allowed_ips: str = Field(default="0.0.0.0/0, ::/0", alias="CLIENT_ALLOWED_IPS")
     client_persistent_keepalive: int = Field(
@@ -147,8 +155,12 @@ class Settings(BaseSettings):
                 "CLIENT_AWG_S2": self.client_awg_s2,
                 "CLIENT_AWG_S3": self.client_awg_s3,
                 "CLIENT_AWG_S4": self.client_awg_s4,
+                "BOT_DEVICE_NAME_SEQUENCE_SEED": self.bot_device_name_sequence_seed,
             }
         )
+        self.bot_device_name_prefix = self.bot_device_name_prefix.strip()
+        if not self.bot_device_name_prefix:
+            raise ValueError("BOT_DEVICE_NAME_PREFIX must be non-blank")
         _validate_awg_h_values(
             {
                 "CLIENT_AWG_H1": self.client_awg_h1,

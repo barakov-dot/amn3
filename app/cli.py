@@ -21,6 +21,7 @@ from app.backup.service import BackupService
 from app.config import Settings
 from app.db.connection import connect
 from app.db.repositories import Repository
+from app.db.repositories import DEVICE_STATUSES
 from app.db.schema import initialize_schema
 from app.main import check_bot_network
 from app.server.checks import planned_check_commands, run_server_checks
@@ -40,6 +41,7 @@ from app.services.api_smoke import validate_api_smoke_responses
 from app.services.peer_inventory import AwgDumpPeerInventoryCollector, PeerInventoryService
 from app.services.traffic import AwgDumpTrafficCollector, TrafficService
 from app.web.auth import create_password_hash
+from app.vpn.config_versions import validate_config_version
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -64,6 +66,28 @@ def build_parser() -> argparse.ArgumentParser:
     restore.add_argument("--file", required=True)
     restore.add_argument("--target-db", required=True)
     restore.add_argument("--force", action="store_true")
+
+    device = sub.add_parser("device")
+    device_sub = device.add_subparsers(dest="device_command", required=True)
+
+    import_external = device_sub.add_parser("import-external")
+    import_external.add_argument("--db", default="data/amneziya.sqlite3")
+    import_external.add_argument("--telegram-id", type=int, required=True)
+    import_external.add_argument("--username", default=None)
+    import_external.add_argument("--first-name", default=None)
+    import_external.add_argument("--last-name", default=None)
+    import_external.add_argument("--server-name", default="local")
+    import_external.add_argument("--server-network-cidr", default="10.8.0.0/24")
+    import_external.add_argument("--name", required=True)
+    import_external.add_argument("--duration-days", type=int, default=30)
+    import_external.add_argument("--vpn-ip", required=True)
+    import_external.add_argument("--peer-public-key", required=True)
+    import_external.add_argument("--config-version", default="amneziawg_v2")
+    import_external.add_argument("--status", choices=sorted(DEVICE_STATUSES), default="active")
+    import_external.add_argument("--expires-at", default=None)
+    import_external.add_argument("--revoked-at", default=None)
+    import_external.add_argument("--revoke-reason", default=None)
+    import_external.add_argument("--pretty", action="store_true")
 
     server = sub.add_parser("server")
     server_sub = server.add_subparsers(dest="server_command", required=True)
@@ -198,6 +222,28 @@ def main() -> None:
         print(service.verify(Path(args.file)))
     elif args.command == "backup" and args.backup_command == "restore":
         print(service.restore(Path(args.file), Path(args.target_db), force=args.force))
+    elif args.command == "device" and args.device_command == "import-external":
+        print(
+            run_device_import_external(
+                db_path=Path(args.db),
+                telegram_id=args.telegram_id,
+                username=args.username,
+                first_name=args.first_name,
+                last_name=args.last_name,
+                server_name=args.server_name,
+                server_network_cidr=args.server_network_cidr,
+                name=args.name,
+                duration_days=args.duration_days,
+                vpn_ip=args.vpn_ip,
+                peer_public_key=args.peer_public_key,
+                config_version=args.config_version,
+                status=args.status,
+                expires_at=args.expires_at,
+                revoked_at=args.revoked_at,
+                revoke_reason=args.revoke_reason,
+                pretty=args.pretty,
+            )
+        )
     elif args.command == "server" and args.server_command == "check":
         config = load_server_config(Path(args.config))
         server = select_server(config, args.server)
@@ -313,6 +359,82 @@ def main() -> None:
                     pretty=args.pretty,
                 )
             )
+
+
+def run_device_import_external(
+    *,
+    db_path: Path,
+    telegram_id: int,
+    username: str | None,
+    first_name: str | None,
+    last_name: str | None,
+    server_name: str,
+    server_network_cidr: str,
+    name: str,
+    duration_days: int,
+    vpn_ip: str,
+    peer_public_key: str,
+    config_version: str,
+    status: str,
+    expires_at: str | None,
+    revoked_at: str | None,
+    revoke_reason: str | None,
+    pretty: bool = False,
+) -> str:
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = connect(db_path)
+    try:
+        initialize_schema(conn)
+        repo = Repository(conn)
+        user_id = repo.upsert_user(
+            telegram_id=telegram_id,
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+        )
+        server_id = repo.ensure_default_server(
+            name=server_name,
+            network_cidr=server_network_cidr,
+        )
+        device_id = repo.create_external_device(
+            user_id=user_id,
+            server_id=server_id,
+            name=name,
+            duration_days=duration_days,
+            vpn_ip=vpn_ip,
+            peer_public_key=peer_public_key,
+            config_version=validate_config_version(config_version),
+            status=status,
+            expires_at=expires_at,
+            revoked_at=revoked_at,
+            revoke_reason=revoke_reason,
+        )
+        device = repo.get_device(device_id)
+        user = repo.get_user(user_id)
+        payload = {
+            "user": {
+                "id": int(user["id"]),
+                "telegram_id": int(user["telegram_id"]),
+                "username": user["username"],
+            },
+            "device": {
+                "id": int(device["id"]),
+                "name": device["name"],
+                "status": device["status"],
+                "vpn_ip": device["vpn_ip"],
+                "config_version": device["config_version"],
+                "config_material_status": device["config_material_status"],
+                "server_id": int(device["server_id"]),
+                "server_name": server_name,
+            },
+            "delivery": {
+                "config_resend_available": False,
+                "reason": "external_only_config_material_unavailable",
+            },
+        }
+        return _json_dumps(payload, pretty=pretty)
+    finally:
+        conn.close()
 
 
 def run_web_password_hash(password: str) -> str:

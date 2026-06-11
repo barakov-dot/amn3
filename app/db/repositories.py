@@ -1,5 +1,6 @@
 import ipaddress
 import json
+import re
 import sqlite3
 from contextlib import contextmanager
 from collections.abc import Iterator
@@ -8,6 +9,7 @@ from typing import Any
 DEFAULT_PLAN_DAYS = (3, 7, 10, 14, 30, 60, 90, 180)
 USER_STATUSES = {"active", "blocked", "deleted"}
 SERVER_STATUSES = {"active", "degraded", "disabled"}
+DEVICE_STATUSES = {"pending", "active", "disabled", "expired", "revoked", "failed"}
 
 
 class Repository:
@@ -587,6 +589,7 @@ class Repository:
         peer_private_key_encrypted: str,
         preshared_key_encrypted: str,
         config_version: str,
+        config_material_status: str = "available",
     ) -> int:
         cursor = self._conn.execute(
             """
@@ -601,7 +604,8 @@ class Repository:
                 peer_public_key,
                 peer_private_key_encrypted,
                 preshared_key_encrypted,
-                config_version
+                config_version,
+                config_material_status
             )
             VALUES (
                 ?,
@@ -609,6 +613,7 @@ class Repository:
                 ?,
                 CURRENT_TIMESTAMP,
                 datetime(CURRENT_TIMESTAMP, ?),
+                ?,
                 ?,
                 ?,
                 ?,
@@ -628,10 +633,105 @@ class Repository:
                 peer_private_key_encrypted,
                 preshared_key_encrypted,
                 config_version,
+                config_material_status,
             ),
         )
         self._commit()
         return int(cursor.lastrowid)
+
+    def create_external_device(
+        self,
+        *,
+        user_id: int,
+        server_id: int,
+        name: str,
+        duration_days: int,
+        vpn_ip: str,
+        peer_public_key: str,
+        config_version: str,
+        status: str = "active",
+        expires_at: str | None = None,
+        revoked_at: str | None = None,
+        revoke_reason: str | None = None,
+    ) -> int:
+        if status not in DEVICE_STATUSES:
+            raise ValueError(f"Unsupported device status: {status}")
+        if duration_days <= 0:
+            raise ValueError("duration_days must be positive")
+        cursor = self._conn.execute(
+            """
+            INSERT INTO devices (
+                user_id,
+                server_id,
+                name,
+                activated_at,
+                expires_at,
+                duration_days,
+                status,
+                vpn_ip,
+                peer_public_key,
+                peer_private_key_encrypted,
+                preshared_key_encrypted,
+                config_version,
+                config_material_status,
+                revoked_at,
+                revoke_reason
+            )
+            VALUES (
+                ?,
+                ?,
+                ?,
+                CURRENT_TIMESTAMP,
+                COALESCE(?, datetime(CURRENT_TIMESTAMP, ?)),
+                ?,
+                ?,
+                ?,
+                ?,
+                'external-only-client-private-key-unavailable',
+                'external-only-preshared-key-unavailable',
+                ?,
+                'external_only',
+                ?,
+                ?
+            )
+            """,
+            (
+                user_id,
+                server_id,
+                name,
+                expires_at,
+                f"+{duration_days} days",
+                duration_days,
+                status,
+                vpn_ip,
+                peer_public_key,
+                config_version,
+                revoked_at,
+                revoke_reason,
+            ),
+        )
+        self._commit()
+        return int(cursor.lastrowid)
+
+    def next_device_sequence(self, prefix: str, *, minimum_sequence: int = 0) -> int:
+        clean_prefix = prefix.strip()
+        if not clean_prefix:
+            raise ValueError("prefix must be non-blank")
+        max_sequence = max(0, int(minimum_sequence))
+        pattern = re.compile(rf"^{re.escape(clean_prefix)}-(\d+)$")
+        rows = self._conn.execute(
+            """
+            SELECT name
+            FROM devices
+            WHERE name LIKE ?
+            """,
+            (f"{clean_prefix}-%",),
+        ).fetchall()
+        for row in rows:
+            match = pattern.fullmatch(str(row["name"]))
+            if match is not None:
+                max_sequence = max(max_sequence, int(match.group(1)))
+        return max_sequence + 1
 
     def get_device(self, device_id: int) -> sqlite3.Row:
         return self._fetch_one("SELECT * FROM devices WHERE id = ?", (device_id,))
@@ -987,6 +1087,7 @@ class Repository:
                 devices.status,
                 devices.expires_at,
                 devices.vpn_ip,
+                devices.config_material_status,
                 servers.name AS server_name
             FROM devices
             JOIN servers ON servers.id = devices.server_id
@@ -1034,6 +1135,7 @@ class Repository:
             JOIN servers ON servers.id = devices.server_id
             WHERE devices.user_id = ?
               AND devices.status = 'disabled'
+              AND devices.config_material_status = 'available'
             ORDER BY devices.id ASC
             """,
             (user_id,),

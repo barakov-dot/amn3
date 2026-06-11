@@ -394,6 +394,29 @@ def test_render_my_devices_accepts_sqlite_rows_from_repository():
     assert "AmneziaWG 2.0" in text
 
 
+def test_render_my_devices_marks_external_only_imports():
+    text = render_my_devices(
+        [
+            {
+                "id": 4,
+                "name": "Neobyatnaya-AMNZ-4",
+                "duration_days": 30,
+                "expires_at": "2026-06-26T12:00:00Z",
+                "status": "revoked",
+                "config_version": "amneziawg_v2",
+                "config_material_status": "external_only",
+                "first_connected_at": None,
+                "last_connected_at": None,
+            }
+        ],
+        now="2026-05-27T12:00:00Z",
+    )
+
+    assert "#4 Neobyatnaya-AMNZ-4" in text
+    assert "ранее импортировано" in text
+    assert "Конфиг недоступен для повторной отправки" in text
+
+
 def test_user_device_keyboard_offers_resend_and_revoke_actions():
     keyboard = build_user_device_keyboard(device_id=7)
 
@@ -402,6 +425,13 @@ def test_user_device_keyboard_offers_resend_and_revoke_actions():
         [f"{USER_RESEND_PREFIX}:7"],
         [f"{USER_REVOKE_PREFIX}:7"],
     ]
+
+
+def test_user_device_keyboard_can_hide_resend_for_external_only_device():
+    keyboard = build_user_device_keyboard(device_id=4, can_resend=False)
+
+    assert _button_texts(keyboard) == [["Удалить устройство"]]
+    assert _callback_data(keyboard) == [[f"{USER_REVOKE_PREFIX}:4"]]
 
 
 def test_user_revoke_confirm_keyboard_targets_confirmed_device_delete():

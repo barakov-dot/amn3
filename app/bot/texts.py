@@ -34,6 +34,10 @@ TEXTS = {
         "my_tariff.empty": "Активного тарифа пока нет.",
         "my_devices.title": "Мои устройства",
         "my_devices.empty": "Активных устройств пока нет.",
+        "my_devices.external_only": (
+            "Устройство ранее импортировано. Конфиг недоступен для повторной отправки: "
+            "в AMN2 нет исходного client private key."
+        ),
         "traffic.user_title": "Мой трафик",
         "traffic.admin_title": "Трафик пользователей",
         "traffic.no_data": "Данных о трафике пока нет.",
@@ -65,6 +69,11 @@ TEXTS = {
         "handler.unknown_delete_confirm": "Неизвестное подтверждение удаления.",
         "handler.device_not_found": "Устройство не найдено.",
         "handler.config_resent": "Конфиг для устройства #{device_id} отправлен повторно.",
+        "handler.config_unavailable": (
+            "Конфиг для этого ранее импортированного устройства недоступен для повторной "
+            "отправки: в AMN2 нет исходного client private key. Устройство видно в боте "
+            "и панели, но для переотправки нужен исходный файл или перевыпуск."
+        ),
         "handler.confirm_device_delete": "Подтвердите удаление устройства #{device_id}.",
         "handler.confirm_reset": "Подтвердите сброс всех устройств.",
         "handler.device_removed": "Устройство #{device_id} удалено.",
@@ -102,6 +111,10 @@ TEXTS = {
         "my_tariff.empty": "No active tariff yet.",
         "my_devices.title": "My devices",
         "my_devices.empty": "No active devices yet.",
+        "my_devices.external_only": (
+            "This device was imported earlier. Config resend is unavailable because "
+            "AMN2 does not have the original client private key."
+        ),
         "traffic.user_title": "Your traffic",
         "traffic.admin_title": "Admin traffic",
         "traffic.no_data": "No traffic data yet.",
@@ -133,6 +146,11 @@ TEXTS = {
         "handler.unknown_delete_confirm": "Unknown delete confirmation.",
         "handler.device_not_found": "Device was not found.",
         "handler.config_resent": "Config for device #{device_id} was resent.",
+        "handler.config_unavailable": (
+            "Config resend is unavailable for this imported device because AMN2 does "
+            "not have the original client private key. The device remains visible in "
+            "the bot and panel; resending requires the original file or reissue."
+        ),
         "handler.confirm_device_delete": "Confirm device deletion for device #{device_id}.",
         "handler.confirm_reset": "Confirm reset of all devices.",
         "handler.device_removed": "Device #{device_id} was removed.",

@@ -9,6 +9,7 @@ from app.db.schema import initialize_schema
 from app.security.crypto import SecretBox
 from app.server.peer_apply import PeerApplyError
 from app.services.access import AccessService, RemoteOperationPartialFailure
+from app.services.config_delivery import ConfigMaterialUnavailable
 from app.services.traffic import PeerTraffic, TrafficService
 
 SECRET = "bot-workflow-secret-value-with-more-than-32-chars"
@@ -237,11 +238,55 @@ def test_approve_order_creates_device_with_selected_config_version(tmp_path):
     assert result.user_telegram_id == 1001
     assert "Заявка #1 одобрена" in result.admin_text
     assert "[Interface]" in result.config_text
-    assert result.delivery.config_filename == "Neobyatnaya-AMNZ-1.conf"
+    assert result.delivery.config_filename == "Neobyatnaya-AMNZ-5.conf"
     assert result.delivery.qr_png_bytes.startswith(b"\x89PNG")
     assert "DefaultVPN" in result.delivery.message_text
     assert "Ваш VPN-конфиг готов" in result.delivery.message_text
     assert result.delivery.qr_payload_text == result.delivery.vpn_import_link
+
+
+def test_approve_order_continues_neobyatnaya_sequence_across_existing_devices(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    _create_encrypted_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="Neobyatnaya-AMNZ-9",
+    )
+    order_id = repo.create_order(
+        user_id=user_id,
+        plan_id=None,
+        payment_mode="free_test",
+        requested_config_version="amneziawg_v2",
+    )
+    workflow = BotWorkflow(
+        repo=repo,
+        admin_telegram_ids={9001},
+        access_service=AccessService(
+            repo=repo,
+            secret_box=SecretBox.from_app_secret(SECRET),
+            max_devices_per_user=5,
+            duration_days=7,
+        ),
+        default_server_id=server_id,
+    )
+
+    result = workflow.approve_order(
+        admin_telegram_id=9001,
+        order_id=order_id,
+        config_version="amneziawg_v2",
+    )
+
+    device = repo.get_device(result.device_id)
+    assert device["name"] == "Neobyatnaya-AMNZ-10"
+    assert result.delivery.config_filename == "Neobyatnaya-AMNZ-10.conf"
 
 
 def test_approve_order_records_redacted_vps_failure_audit(tmp_path):
@@ -390,9 +435,48 @@ def test_resend_device_config_rebuilds_delivery_from_encrypted_device_secrets(tm
     )
 
     assert resend.user_telegram_id == 1001
-    assert resend.delivery.config_filename == "Neobyatnaya-AMNZ-1.conf"
+    assert resend.delivery.config_filename == "Neobyatnaya-AMNZ-5.conf"
     assert resend.delivery.qr_png_bytes.startswith(b"\x89PNG")
     assert "[Interface]" in resend.config_text
+
+
+def test_external_imported_device_is_visible_but_not_resendable(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    external_id = repo.create_external_device(
+        user_id=user_id,
+        server_id=server_id,
+        name="Neobyatnaya-AMNZ-4",
+        duration_days=30,
+        vpn_ip="10.8.0.44",
+        peer_public_key="external-peer-4",
+        config_version="amneziawg_v2",
+        status="revoked",
+        revoked_at="2026-06-09T10:00:00Z",
+        revoke_reason="phase3_test_revoked",
+    )
+    workflow = BotWorkflow(
+        repo=repo,
+        admin_telegram_ids={9001},
+        secret_box=SecretBox.from_app_secret(SECRET),
+    )
+
+    devices = workflow.list_user_devices(telegram_id=1001)
+
+    assert [device["id"] for device in devices] == [external_id]
+    assert devices[0]["name"] == "Neobyatnaya-AMNZ-4"
+    assert devices[0]["config_material_status"] == "external_only"
+    with pytest.raises(ConfigMaterialUnavailable):
+        workflow.build_user_resend_delivery(
+            telegram_id=1001,
+            device_id=external_id,
+        )
 
 
 def test_resend_device_config_uses_current_external_template_for_stored_version(tmp_path):

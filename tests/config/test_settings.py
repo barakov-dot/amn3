@@ -101,6 +101,26 @@ def test_settings_reads_vps_apply_settings():
     assert settings.server_name == "debian-vps-1"
 
 
+def test_settings_reads_bot_device_name_sequence_defaults_and_overrides():
+    default_settings = Settings(
+        _env_file=None,
+        telegram_bot_token="CHANGE_ME",
+        app_secret_key="test-secret",
+    )
+    custom_settings = Settings(
+        _env_file=None,
+        telegram_bot_token="CHANGE_ME",
+        app_secret_key="test-secret",
+        bot_device_name_prefix="Custom-AMNZ",
+        bot_device_name_sequence_seed=12,
+    )
+
+    assert default_settings.bot_device_name_prefix == "Neobyatnaya-AMNZ"
+    assert default_settings.bot_device_name_sequence_seed == 4
+    assert custom_settings.bot_device_name_prefix == "Custom-AMNZ"
+    assert custom_settings.bot_device_name_sequence_seed == 12
+
+
 def test_settings_reads_api_route_shell_defaults_and_overrides():
     default_settings = Settings(
         _env_file=None,

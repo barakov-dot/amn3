@@ -42,6 +42,7 @@ from app.bot.ux import (
 )
 from app.security.redaction import redact
 from app.server.peer_apply import PeerApplyError
+from app.services.config_material import ConfigMaterialUnavailable
 
 
 async def handle_start(message, *, workflow) -> None:
@@ -120,7 +121,10 @@ async def handle_my_devices(callback, *, workflow) -> None:
     for device in devices:
         await callback.message.answer(
             f"Device #{device['id']}",
-            reply_markup=build_user_device_keyboard(device_id=int(device["id"])),
+            reply_markup=build_user_device_keyboard(
+                device_id=int(device["id"]),
+                can_resend=_device_config_material_status(device) == "available",
+            ),
         )
     if devices:
         await callback.message.answer(
@@ -137,10 +141,15 @@ async def handle_user_resend_config(callback, *, workflow) -> None:
         await callback.answer()
         return
 
-    result = workflow.build_user_resend_delivery(
-        telegram_id=int(callback.from_user.id),
-        device_id=device_id,
-    )
+    try:
+        result = workflow.build_user_resend_delivery(
+            telegram_id=int(callback.from_user.id),
+            device_id=device_id,
+        )
+    except ConfigMaterialUnavailable:
+        await callback.message.answer(text("handler.config_unavailable"))
+        await callback.answer()
+        return
     if result is None:
         await callback.message.answer(text("handler.device_not_found"))
         await callback.answer()
@@ -341,10 +350,15 @@ async def handle_admin_resend_config(callback, *, workflow) -> None:
         await callback.answer()
         return
 
-    result = workflow.build_resend_delivery(
-        admin_telegram_id=admin_telegram_id,
-        device_id=device_id,
-    )
+    try:
+        result = workflow.build_resend_delivery(
+            admin_telegram_id=admin_telegram_id,
+            device_id=device_id,
+        )
+    except ConfigMaterialUnavailable:
+        await callback.message.answer(text("handler.config_unavailable"))
+        await callback.answer()
+        return
     if result is None:
         await callback.message.answer(text("handler.admin_required"))
         await callback.answer()
@@ -537,6 +551,13 @@ def _parse_int_suffix(data: str, prefix: str) -> int | None:
         return int(data.removeprefix(marker))
     except ValueError:
         return None
+
+
+def _device_config_material_status(device) -> str:
+    try:
+        return str(device["config_material_status"])
+    except (KeyError, IndexError):
+        return "available"
 
 
 def _peer_apply_failure_message(

@@ -244,6 +244,42 @@ def test_user_detail_shows_device_expiration_contract(tmp_path: Path):
     assert "active-device" in response.text
 
 
+def test_user_detail_marks_external_only_device_without_config_actions(tmp_path: Path):
+    settings = _settings(tmp_path)
+    user_id = _seed_user(
+        Path(settings.database_path),
+        telegram_id=4024,
+        username="external-user",
+        first_name="External",
+        last_name="Import",
+        email="external@example.com",
+    )
+    with _repo(Path(settings.database_path)) as repo:
+        server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+        repo.create_external_device(
+            user_id=user_id,
+            server_id=server_id,
+            name="Neobyatnaya-AMNZ-4",
+            duration_days=30,
+            vpn_ip="10.8.0.44",
+            peer_public_key="external-peer-4",
+            config_version="amneziawg_v2",
+            status="revoked",
+            revoked_at="2026-06-09T10:00:00Z",
+            revoke_reason="phase3_test_revoked",
+        )
+    client = _authenticated_client(settings)
+
+    response = client.get(f"/users/{user_id}")
+
+    assert response.status_code == 200
+    assert "Neobyatnaya-AMNZ-4" in response.text
+    assert "external-only" in response.text
+    assert "Config material is unavailable" in response.text
+    assert "Show secrets" not in response.text
+    assert "Email config" not in response.text
+
+
 def test_user_detail_admin_actions_show_metadata(tmp_path: Path):
     settings = _settings(tmp_path, admin_telegram_ids="9001")
     user_id = _seed_user(

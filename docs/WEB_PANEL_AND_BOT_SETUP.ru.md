@@ -108,6 +108,9 @@ APP_LOG_PATH=logs/app.log
 
 EMAIL_DELIVERY_ENABLED=false
 
+BOT_DEVICE_NAME_PREFIX=Neobyatnaya-AMNZ
+BOT_DEVICE_NAME_SEQUENCE_SEED=4
+
 CLIENT_DNS=8.8.8.8, 8.8.4.4
 CLIENT_ALLOWED_IPS=0.0.0.0/0, ::/0
 CLIENT_PERSISTENT_KEEPALIVE=25
@@ -315,6 +318,43 @@ http://127.0.0.1:3030/login
 
 Если ранее созданные пользователи не видны, проверить, что web-панель и бот используют один и тот же `DATABASE_PATH`.
 
+Если до перехода на AMN2 уже были выданы тестовые peer/config вне бота, их можно завести в локальную базу как `external_only`, чтобы они отображались в web-панели и в боте. Это только локальный backfill: команда не подключается к VPS, не меняет AmneziaWG и не восстанавливает client private key. Для таких устройств повторная отправка конфига будет недоступна, пока не найден исходный `.conf` или устройство не перевыпущено.
+
+Пример для ранее выданного активного тестового устройства:
+
+```bash
+python -m app.cli device import-external \
+  --db data/amneziya.sqlite3 \
+  --telegram-id TELEGRAM_ID \
+  --username USERNAME \
+  --server-name debian-vps-1 \
+  --name Neobyatnaya-AMNZ-1 \
+  --vpn-ip 10.8.0.X \
+  --peer-public-key PEER_PUBLIC_KEY \
+  --config-version amneziawg_v2 \
+  --status active \
+  --pretty
+```
+
+Пример для ранее отозванного тестового устройства:
+
+```bash
+python -m app.cli device import-external \
+  --db data/amneziya.sqlite3 \
+  --telegram-id TELEGRAM_ID \
+  --server-name debian-vps-1 \
+  --name Neobyatnaya-AMNZ-4 \
+  --vpn-ip 10.8.0.X \
+  --peer-public-key PEER_PUBLIC_KEY \
+  --config-version amneziawg_v2 \
+  --status revoked \
+  --revoked-at 2026-06-09T10:00:00Z \
+  --revoke-reason phase3_test_revoked \
+  --pretty
+```
+
+Для текущего тестового ряда дефолтная нумерация новых устройств начинается после уже выданных `Neobyatnaya-AMNZ-1`...`Neobyatnaya-AMNZ-4`: `BOT_DEVICE_NAME_SEQUENCE_SEED=4`. Новое одобрение через бота получит следующий свободный номер, например `Neobyatnaya-AMNZ-5`, а если в базе уже есть больший номер, будет продолжение от него.
+
 В разделе `Config templates` можно редактировать клиентские `.conf.tpl` шаблоны для `amneziawg_v1_5` и `amneziawg_v2`. Сохранение пишет override-файл в `CLIENT_CONFIG_TEMPLATE_DIR`, не меняя встроенные шаблоны приложения. Перед сохранением шаблон валидируется: неизвестные placeholders отклоняются, а старый файл остается без изменений. Кнопка `Сбросить к встроенному шаблону` удаляет override-файл и возвращает дефолтный шаблон из пакета. После правки preview и `vpn://` на этой же странице должны отражать новые параметры.
 
 Постоянные параметры клиентского AmneziaWG-конфига берутся из `.env`: `CLIENT_DNS`, `CLIENT_ALLOWED_IPS`, `CLIENT_PERSISTENT_KEEPALIVE`, `CLIENT_AWG_JC`, `CLIENT_AWG_JMIN`, `CLIENT_AWG_JMAX`, `CLIENT_AWG_S1`...`CLIENT_AWG_S4`, `CLIENT_AWG_H1`...`CLIENT_AWG_H4`, `CLIENT_AWG_I1`...`CLIENT_AWG_I5`. `H1-H4` можно переносить из `awg show` как диапазоны `число-число`. Уникальные значения `PrivateKey`, `PresharedKey`, `Address`, имя устройства и имя файла формируются при создании устройства. `PublicKey` сервера и `Endpoint` берутся из `servers.yml`.
@@ -337,6 +377,8 @@ http://127.0.0.1:3030/login
 - `Delete permanently` — сначала удаляет активные/pending peer из AmneziaWG, затем удаляет пользователя, его устройства, заявки, email-токены, traffic snapshots и связанные audit-записи из базы.
 
 В таблице устройств секреты показываются замаскированными. Кнопка `Show secrets` расшифровывает private key и preshared key только для выбранного устройства и пишет audit-событие. Кнопка `Удалить устройство` выборочно удаляет один аккаунт устройства у пользователя: для active/pending устройства сначала удаляет peer из AmneziaWG, затем чистит устройство и связанные ссылки в базе; для disabled/revoked устройства удаляет только локальные данные. Без постоянного `APP_SECRET_KEY` восстановить сохраненные секреты нельзя.
+
+Устройства с `config_material_status=external_only` отображаются в таблице, но не показывают `Show secrets`, `Email config` и повторную отправку конфига в боте. Это означает, что AMN2 знает peer public key/IP/status, но не хранит исходный client private key и поэтому не может честно пересобрать рабочий клиентский конфиг.
 
 Для `Disable VPN`, `Enable VPN` и `Delete permanently` при наличии активных или отключенных устройств требуется `VPS_APPLY_ENABLED=true` и корректный `SERVER_CONFIG_PATH`. Если изменение peer на ноде не прошло, база не меняется. Опасные web-действия (`Disable VPN`, `Enable VPN`, `Soft delete`, `Delete permanently`, `Удалить устройство`, отключение сервера и `Добавить в Amnezia`) требуют browser confirm, чтобы случайный клик не отправил боевую операцию.
 

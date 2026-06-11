@@ -28,6 +28,22 @@ def test_create_workflow_wires_access_service_for_admin_approval(tmp_path):
     ]
 
 
+def test_create_workflow_wires_device_name_sequence_settings(tmp_path):
+    workflow = create_workflow(
+        database_path=tmp_path / "app.sqlite3",
+        app_secret_key="app-bootstrap-secret-value-with-more-than-32-chars",
+        admin_telegram_ids={9001},
+        default_vpn_network_cidr="10.8.0.0/24",
+        max_devices_per_user=5,
+        default_plan_days=7,
+        bot_device_name_prefix="Custom-AMNZ",
+        bot_device_name_sequence_seed=12,
+    )
+
+    assert workflow._device_name_prefix == "Custom-AMNZ"
+    assert workflow._device_name_sequence_seed == 12
+
+
 def test_create_workflow_can_enable_vps_peer_apply_from_server_config(tmp_path):
     server_config_path = tmp_path / "servers.yml"
     server_config_path.write_text(

@@ -37,6 +37,8 @@ async def run() -> None:
         vps_ssh_password=settings.vps_ssh_password,
         client_config_template_dir=settings.client_config_template_dir,
         client_config_defaults=settings.client_config_defaults,
+        bot_device_name_prefix=settings.bot_device_name_prefix,
+        bot_device_name_sequence_seed=settings.bot_device_name_sequence_seed,
     )
     bot = create_bot(
         telegram_bot_token=settings.telegram_bot_token,
@@ -138,6 +140,8 @@ def create_workflow(
     vps_ssh_password: str = "",
     client_config_template_dir: str | Path | None = None,
     client_config_defaults: ClientConfigDefaults | None = None,
+    bot_device_name_prefix: str = "Neobyatnaya-AMNZ",
+    bot_device_name_sequence_seed: int = 4,
 ) -> BotWorkflow:
     conn = connect(database_path)
     initialize_schema(conn)
@@ -178,6 +182,8 @@ def create_workflow(
         if client_config_template_dir is not None
         else None,
         client_config_defaults=client_config_defaults,
+        device_name_prefix=bot_device_name_prefix,
+        device_name_sequence_seed=bot_device_name_sequence_seed,
     )
     return workflow
 

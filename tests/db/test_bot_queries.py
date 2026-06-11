@@ -35,6 +35,71 @@ def test_list_user_devices_returns_latest_active_devices(tmp_path):
     assert [row["id"] for row in devices] == [second_id, first_id]
 
 
+def test_next_device_sequence_uses_existing_names_and_minimum_seed(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+    _create_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="Neobyatnaya-AMNZ-2",
+        vpn_ip="10.8.0.20",
+    )
+    _create_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="Neobyatnaya-AMNZ-9",
+        vpn_ip="10.8.0.21",
+    )
+    _create_device(
+        repo,
+        user_id=user_id,
+        server_id=server_id,
+        name="Other-100",
+        vpn_ip="10.8.0.22",
+    )
+
+    assert repo.next_device_sequence("Neobyatnaya-AMNZ", minimum_sequence=4) == 10
+    assert repo.next_device_sequence("Fresh", minimum_sequence=4) == 5
+
+
+def test_create_external_device_marks_config_material_unavailable(tmp_path):
+    repo = _repo(tmp_path)
+    user_id = repo.upsert_user(
+        telegram_id=1001,
+        username="alice",
+        first_name="Alice",
+        last_name=None,
+    )
+    server_id = repo.ensure_default_server(name="local", network_cidr="10.8.0.0/24")
+
+    device_id = repo.create_external_device(
+        user_id=user_id,
+        server_id=server_id,
+        name="Neobyatnaya-AMNZ-4",
+        duration_days=30,
+        vpn_ip="10.8.0.44",
+        peer_public_key="external-peer-4",
+        config_version="amneziawg_v2",
+        status="revoked",
+        revoked_at="2026-06-09T10:00:00Z",
+        revoke_reason="phase3_test_revoked",
+    )
+
+    device = repo.get_device(device_id)
+    assert device["config_material_status"] == "external_only"
+    assert device["status"] == "revoked"
+    assert device["revoked_at"] == "2026-06-09T10:00:00Z"
+    assert device["revoke_reason"] == "phase3_test_revoked"
+
+
 def test_list_pending_orders_includes_user_identity(tmp_path):
     repo = _repo(tmp_path)
     user_id = repo.upsert_user(
@@ -268,13 +333,13 @@ def _repo(tmp_path):
     return Repository(conn)
 
 
-def _create_device(repo, *, user_id, server_id, name):
+def _create_device(repo, *, user_id, server_id, name, vpn_ip=None):
     return repo.create_device(
         user_id=user_id,
         server_id=server_id,
         name=name,
         duration_days=30,
-        vpn_ip=f"10.8.0.{user_id + len(name)}",
+        vpn_ip=vpn_ip or f"10.8.0.{user_id + len(name)}",
         peer_public_key=f"peer-{name}",
         peer_private_key_encrypted=f"encrypted-private-{name}",
         preshared_key_encrypted=f"encrypted-psk-{name}",

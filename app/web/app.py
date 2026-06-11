@@ -33,6 +33,7 @@ from app.server.ssh import SystemSshClient
 from app.server_config.loader import ConfigError
 from app.server_config.loader import load_server_config
 from app.server_config.loader import select_server
+from app.services.config_material import ConfigMaterialUnavailable
 from app.services.config_delivery import build_device_config_delivery
 from app.services.email_delivery import EmailDeliveryService
 from app.services.email_delivery import EmailSender
@@ -727,6 +728,8 @@ def create_web_app(
                     )
         except LookupError:
             return PlainTextResponse("User not found", status_code=404)
+        except ConfigMaterialUnavailable:
+            return PlainTextResponse("Config material is unavailable", status_code=400)
         except ValueError as exc:
             return _plain_error_response(exc)
 
@@ -989,6 +992,8 @@ def create_web_app(
                 device_id=send_device_id,
                 delivery=send_delivery,
             )
+        except ConfigMaterialUnavailable:
+            return PlainTextResponse("Config material is unavailable", status_code=400)
         except (LookupError, ValueError):
             return PlainTextResponse("Recovery code is invalid or expired", status_code=400)
 
@@ -1207,6 +1212,8 @@ def create_web_app(
             detail = _load_user_detail(actual_settings, user_id)
         except LookupError:
             return PlainTextResponse("Device not found", status_code=404)
+        except ConfigMaterialUnavailable:
+            return PlainTextResponse("Config material is unavailable", status_code=400)
         except ValueError as exc:
             return _plain_error_response(exc)
 
@@ -2946,6 +2953,10 @@ def _reveal_device_secrets(
             device = repo.get_user_device(user_id=user_id, device_id=device_id)
             if device is None:
                 raise LookupError("Device not found")
+            if _device_config_material_status(device) != "available":
+                raise ConfigMaterialUnavailable(
+                    f"Config material is unavailable for device #{device_id}"
+                )
             secret_box = SecretBox.from_app_secret(settings.app_secret_key)
             secrets = {
                 "private_key": secret_box.decrypt_text(
@@ -2965,6 +2976,13 @@ def _reveal_device_secrets(
                 metadata={"device_id": device_id},
             )
             return secrets
+
+
+def _device_config_material_status(device: Any) -> str:
+    try:
+        return str(device["config_material_status"])
+    except (KeyError, IndexError):
+        return "available"
 
 
 def _email_service(request: Request) -> EmailDeliveryService:

@@ -146,24 +146,30 @@ def build_admin_resend_keyboard(
 def build_user_device_keyboard(
     *,
     device_id: int,
+    can_resend: bool = True,
+    can_delete: bool = True,
     locale: str = DEFAULT_LOCALE,
 ) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
+    rows: list[list[InlineKeyboardButton]] = []
+    if can_resend:
+        rows.append(
             [
                 InlineKeyboardButton(
                     text=text("button.resend_config", locale=locale),
                     callback_data=f"{USER_RESEND_PREFIX}:{device_id}",
                 )
-            ],
+            ]
+        )
+    if can_delete:
+        rows.append(
             [
                 InlineKeyboardButton(
                     text=text("button.delete_device", locale=locale),
                     callback_data=f"{USER_REVOKE_PREFIX}:{device_id}",
                 )
             ],
-        ]
-    )
+        )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def build_user_devices_reset_keyboard(
@@ -326,6 +332,8 @@ def render_my_devices(devices: Iterable[Mapping[str, object]], *, now: str) -> s
                 f"{text('common.connected')}: {text('common.yes') if connected else text('common.no')}",
             ]
         )
+        if _row_get(device, "config_material_status") == "external_only":
+            lines.append(text("my_devices.external_only"))
     if not has_devices:
         lines.append(text("my_devices.empty"))
     return "\n".join(lines)
