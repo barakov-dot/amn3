@@ -109,6 +109,11 @@ verification.
 
 ## Follow-up Recommendation
 
-Next safe local-only recommendation: `P5-I002` external-only backfill rehearsal
-on a local DB copy. It continues the already-completed device sequence/external
-import work without touching live VPS state or secret-bearing config material.
+The original next safe local-only recommendation, `P5-I002` external-only
+backfill rehearsal on a local DB copy, was completed later in
+`research/amn2/phase-5-external-only-backfill-rehearsal-2026-06-11.md`.
+`P5-I004` operator-only smoke checklist was also completed later in
+`research/amn2/phase-5-operator-only-smoke-checklist-2026-06-11.md`.
+
+Current next safe local-only recommendation: `P5-M003` AMN3 evidence
+discipline.

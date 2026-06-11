@@ -16,7 +16,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: 9ec2ea0 Record external-only backfill rehearsal slice
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-I004 operator-only smoke checklist
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
@@ -88,6 +88,7 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P4-BOT-ONBOARDING-001`: bot onboarding language/header.
 - `P5-I003`: runtime/toolchain standardization, CPython 3.12.x local runtime.
 - `P5-I002`: external-only backfill rehearsal on local DB copy.
+- `P5-I004`: operator-only smoke checklist, `docs/AMN2_OPERATOR_ONLY_SMOKE_CHECKLIST.ru.md`.
 
 Latest AMN2 verification:
 
@@ -102,7 +103,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Очень важные
 
-- `P5-I004` Operator-only smoke checklist: build the checklist for web/admin loopback, bot dry/local behavior, read-only API routes, no public exposure.
+- `P5-I004` Operator-only smoke checklist: carried from Phase 4 and closed as Phase 5 docs-only checklist; evidence `research/amn2/phase-5-operator-only-smoke-checklist-2026-06-11.md`.
 
 ### Нормальные
 
@@ -136,7 +137,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Очень важные
 
-- `P5-I004` Operator-only smoke checklist.
+- Сейчас нет активных задач в этой группе после закрытия `P5-I004`.
 
 ### Важные
 
@@ -164,7 +165,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ## Automations
 
-Existing heartbeat automations were updated for Phase 5 without creating new automations:
+Existing heartbeat automations were updated for Phase 5 prompts without creating new automations:
 
 - `amnezia-weekly-upstream-refresh`;
 - `prvtpro-weekly-upstream-refresh`;
@@ -172,7 +173,7 @@ Existing heartbeat automations were updated for Phase 5 without creating new aut
 
 Schedule remains Sunday 10:00. Prompts now reference Phase 5 docs and keep the same negative controls.
 
-Important: because these are heartbeat/thread automations, in the new Phase 5 chat check whether the app posts them into the intended thread. If they still wake the Phase 4 chat, update the same existing automation IDs to `destination=thread` from the new chat. Do not create duplicates.
+Important: because these are heartbeat/thread automations, the Phase 5 chat retargeted `amnezia-weekly-upstream-refresh` to the current thread. The app rejected attaching a second active heartbeat to the same thread, so `prvtpro-weekly-upstream-refresh` and `weekly-kyoresuas-upstream-refresh` keep their existing thread bindings unless the operator chooses a separate consolidation policy. Do not create duplicates or cron workarounds by default.
 
 ## Сообщение Для Нового Чата
 
@@ -188,7 +189,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: 23f18ef Add external-only backfill rehearsal
-- AMN3 current checkpoint: 9ec2ea0 Record external-only backfill rehearsal slice
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-I004 operator-only smoke checklist
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -213,8 +214,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Рекомендация для первого шага:
-P5-I004 Operator-only smoke checklist.
+Следующая рекомендация после закрытия `P5-I004`:
+P5-M003 AMN3 evidence discipline.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;
