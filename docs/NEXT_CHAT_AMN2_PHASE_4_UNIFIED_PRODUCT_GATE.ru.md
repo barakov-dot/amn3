@@ -21,7 +21,7 @@ AMN3 checkpoint before this Phase 4 packet: a205daa Record web panel UX review e
 AMN2 repo: C:\Users\SooL\Documents\Amneziya
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: 59bc266 Add device sequence and external import visibility
+AMN2 current branch head: d2e234f Add Amnezia client compatibility matrix
 AMN2 latest VPS-smoked source-overlay/package head remains historical: f7f6131 Update integration status for c92 manual prelaunch
 
 target VPS mode: service-mode web/bot active, loopback-only
@@ -122,6 +122,7 @@ Docs:
 - Amnezia VPN / DefaultVPN upstream refresh: `research/upstreams/amnezia-vpn-client-defaultvpn-refresh-2026-06-11.md`.
 - Bot config delivery localization evidence: `research/amn2/phase-4-bot-config-delivery-localization-2026-06-11.md`.
 - Device sequence/external import visibility evidence: `research/amn2/phase-4-device-sequence-external-import-2026-06-11.md`.
+- Amnezia client compatibility matrix evidence: `research/amn2/phase-4-amnezia-client-compatibility-matrix-2026-06-11.md`.
 
 Closed in or alongside this stage:
 
@@ -154,6 +155,7 @@ Closed in or alongside this stage:
 - `NG-SC001` Codex Security VPS risk checkpoint;
 - `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping policy support.
 - `P4-DEVICE-SEQUENCE-EXTERNAL-IMPORT` bot/admin device sequence and local external-only backfill.
+- `P4-AMNEZIA-REFRESH-002` client import compatibility matrix.
 
 Следующее решение:
 
@@ -505,7 +507,8 @@ go_no_go_decision:
 - research/amn2/phase-4-bot-config-delivery-localization-2026-06-11.md
 - AMN2 commit `908cafc Localize bot config delivery` pushed to `codex/bot-russian-config-delivery` and fast-forwarded into `codex-vps-test-prep`.
 - AMN2 commit `59bc266 Add device sequence and external import visibility` pushed to `codex/device-sequence-existing-peers` and fast-forwarded into `codex-vps-test-prep`.
-- Full AMN2 local suite: `630 passed, 1 warning`.
+- AMN2 commit `d2e234f Add Amnezia client compatibility matrix` pushed to `codex/amnezia-client-compatibility-matrix` and fast-forwarded into `codex-vps-test-prep`.
+- Latest full AMN2 local suite: `650 passed, 1 warning`.
 - No live bot deploy/restart, live config delivery, VPS command, public exposure or production mutation was performed.
 
 Текущая private/local read-only API grouping:
@@ -518,9 +521,10 @@ go_no_go_decision:
 
 Следующее решение:
 - P4-NG is active as docs-only named gate / write API readiness planning;
-- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, WAPI-I005, NG-N003, NG-N002, NG-N001, NG-N004, NG-S001, NG-S002, NG-S004, NG-X003, NG-X001, NG-X002, NG-SC001, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001, P4-PRVTPRO-REFRESH-004 and P4-DEVICE-SEQUENCE-EXTERNAL-IMPORT are closed;
+- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, WAPI-I005, NG-N003, NG-N002, NG-N001, NG-N004, NG-S001, NG-S002, NG-S004, NG-X003, NG-X001, NG-X002, NG-SC001, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001, P4-PRVTPRO-REFRESH-004, P4-DEVICE-SEQUENCE-EXTERNAL-IMPORT and P4-AMNEZIA-REFRESH-002 are closed;
 - очередь default docs-only cosmetic закрыта; NG-V001 закрыт как go; активных P4-NG задач больше нет;
 - активная критичная задача отдельного destructive stage: VPS-REBUILD-001, defer-awaiting-final-destructive-approval; source/package precheck, package build/hygiene, clean-server readiness and clean Ubuntu runbook completed for older AMN2 head `1508e3c`; backup plan enabled but created/restorable backup not confirmed; no delete actions planned; next required: choose retention path before any wipe, then stop-criteria review and exact final destructive phrase only if operator still chooses wipe/reinstall;
-- любое VPS/package apply/rebuild направление сначала требует пересобрать package from selected current AMN2 head (`59bc266` if selected), rerun source/package precheck, then pass the separate named gate/decision.
-- рекомендуемый безопасный local-only follow-up: `P4-AMNEZIA-REFRESH-002` client import compatibility matrix for `.conf`, `vpn://`, QR, future native `.vpn`/Amnezia JSON behavior and current client/platform availability constraints.
+- любое VPS/package apply/rebuild направление сначала требует пересобрать package from selected current AMN2 head (`d2e234f` if selected), rerun source/package precheck, then pass the separate named gate/decision.
+- рекомендуемый безопасный local-only follow-up: bot onboarding language/header assets slice, because AMN2 currently has Russian default + English fallback but no bot-specific header image and no `/start` language selector matching the operator screenshot.
+- перспективный planning artifact: `docs/PHASE_5_6_FORWARD_PLAN.ru.md`.
 ```
