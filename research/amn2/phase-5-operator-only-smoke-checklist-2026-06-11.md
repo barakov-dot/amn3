@@ -49,6 +49,8 @@ VPS-REBUILD-001 destructive gate remains defer
 
 ## Следующая рекомендация
 
-Next safe local-only recommendation: `P5-M003` AMN3 evidence discipline.
+The original next safe local-only recommendation, `P5-M003` AMN3 evidence discipline, was completed later in `research/amn2/phase-5-amn3-evidence-discipline-2026-06-11.md`.
+
+Current next safe local-only recommendation: `P5-M001` Support/news bot asset inventory.
 
 Rationale: after the operator-only smoke checklist exists, the next useful low-risk step is to make evidence/status/backlog/active-plan cleanup explicit before any future pilot run, named gate or operator evidence intake.

@@ -78,6 +78,8 @@ This slice does not recover or reconstruct old client config material. It only m
 
 The original next safe local-only recommendation, `P5-I004` Operator-only smoke checklist, was completed later in `research/amn2/phase-5-operator-only-smoke-checklist-2026-06-11.md`.
 
-Current next safe local-only recommendation: `P5-M003` AMN3 evidence discipline.
+`P5-M003` AMN3 evidence discipline was also completed later in `research/amn2/phase-5-amn3-evidence-discipline-2026-06-11.md`.
+
+Current next safe local-only recommendation: `P5-M001` Support/news bot asset inventory.
 
 Rationale: after old external devices can be rehearsed safely on a DB copy, the next useful local-only step is a checklist that tells the operator exactly what to smoke in web/admin, bot dry/local behavior and read-only API routes before any package apply/rebuild/live gate.

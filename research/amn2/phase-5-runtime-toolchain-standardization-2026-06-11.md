@@ -115,5 +115,8 @@ backfill rehearsal on a local DB copy, was completed later in
 `P5-I004` operator-only smoke checklist was also completed later in
 `research/amn2/phase-5-operator-only-smoke-checklist-2026-06-11.md`.
 
-Current next safe local-only recommendation: `P5-M003` AMN3 evidence
-discipline.
+`P5-M003` AMN3 evidence discipline was also completed later in
+`research/amn2/phase-5-amn3-evidence-discipline-2026-06-11.md`.
+
+Current next safe local-only recommendation: `P5-M001` Support/news bot asset
+inventory.
