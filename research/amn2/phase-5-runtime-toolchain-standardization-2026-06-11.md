@@ -118,5 +118,8 @@ backfill rehearsal on a local DB copy, was completed later in
 `P5-M003` AMN3 evidence discipline was also completed later in
 `research/amn2/phase-5-amn3-evidence-discipline-2026-06-11.md`.
 
-Current next safe local-only recommendation: `P5-M001` Support/news bot asset
-inventory.
+`P5-M001` Support/news bot asset inventory was also completed later in
+`research/amn2/phase-5-support-news-bot-asset-inventory-2026-06-11.md`.
+
+Current next safe local-only recommendation: `P5-M005` Bot media asset
+upload/apply boundary.

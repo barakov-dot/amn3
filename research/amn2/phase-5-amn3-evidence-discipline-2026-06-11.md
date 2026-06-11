@@ -50,6 +50,9 @@ VPS-REBUILD-001 destructive gate remains defer
 
 ## Следующая рекомендация
 
-Next safe local-only recommendation: `P5-M001` Support/news bot asset inventory.
+The original follow-up, `P5-M001` Support/news bot asset inventory, was
+completed later in
+`research/amn2/phase-5-support-news-bot-asset-inventory-2026-06-11.md`.
 
-Rationale: after evidence discipline is explicit, the next useful low-risk step is to inventory the supplied support/news bot assets, commands, copy boundaries and ownership split without enabling additional bot runtimes or touching live tokens.
+Current next safe local-only recommendation: `P5-M005` Bot media asset
+upload/apply boundary.

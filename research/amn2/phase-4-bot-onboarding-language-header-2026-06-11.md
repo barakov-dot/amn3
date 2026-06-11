@@ -93,4 +93,4 @@ Previous VPS rebuild package evidence remains based on older AMN2 `1508e3c`; any
 
 ## Следующая рекомендация
 
-Do not return to `P4-BOT-ONBOARDING-001`; it is closed. The original next recommendation, `P5-I003` Runtime/toolchain standardization, was completed later in `research/amn2/phase-5-runtime-toolchain-standardization-2026-06-11.md`. `P5-I002` external-only backfill rehearsal, `P5-I004` operator-only smoke checklist and `P5-M003` AMN3 evidence discipline were also completed later. Current next safe local-only recommendation: `P5-M001` Support/news bot asset inventory.
+Do not return to `P4-BOT-ONBOARDING-001`; it is closed. The original next recommendation, `P5-I003` Runtime/toolchain standardization, was completed later in `research/amn2/phase-5-runtime-toolchain-standardization-2026-06-11.md`. `P5-I002` external-only backfill rehearsal, `P5-I004` operator-only smoke checklist, `P5-M003` AMN3 evidence discipline and `P5-M001` support/news bot asset inventory were also completed later. Current next safe local-only recommendation: `P5-M005` Bot media asset upload/apply boundary.

@@ -80,6 +80,6 @@ The original next safe local-only recommendation, `P5-I004` Operator-only smoke 
 
 `P5-M003` AMN3 evidence discipline was also completed later in `research/amn2/phase-5-amn3-evidence-discipline-2026-06-11.md`.
 
-Current next safe local-only recommendation: `P5-M001` Support/news bot asset inventory.
+`P5-M001` Support/news bot asset inventory was also completed later in `research/amn2/phase-5-support-news-bot-asset-inventory-2026-06-11.md`.
 
-Rationale: after old external devices can be rehearsed safely on a DB copy, the next useful local-only step is a checklist that tells the operator exactly what to smoke in web/admin, bot dry/local behavior and read-only API routes before any package apply/rebuild/live gate.
+Current next safe local-only recommendation: `P5-M005` Bot media asset upload/apply boundary.

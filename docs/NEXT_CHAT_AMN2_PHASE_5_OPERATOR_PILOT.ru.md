@@ -16,7 +16,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-M003 AMN3 evidence discipline
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-M001 Support/news bot asset inventory
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
@@ -90,6 +90,7 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-I002`: external-only backfill rehearsal on local DB copy.
 - `P5-I004`: operator-only smoke checklist, `docs/AMN2_OPERATOR_ONLY_SMOKE_CHECKLIST.ru.md`.
 - `P5-M003`: AMN3 evidence discipline, `docs/AMN3_PHASE5_EVIDENCE_DISCIPLINE.ru.md`.
+- `P5-M001`: support/news bot asset inventory, `docs/AMN2_SUPPORT_NEWS_BOT_ASSET_INVENTORY.ru.md`.
 
 Latest AMN2 verification:
 
@@ -142,9 +143,9 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Важные
 
-- `P5-M001` Support/news bot asset inventory.
 - `P5-M002` Client guidance QA.
 - `P5-M004` Admin panel header asset boundary.
+- `P5-M005` Bot media asset upload/apply boundary.
 
 ### Нормальные
 
@@ -188,7 +189,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: 23f18ef Add external-only backfill rehearsal
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-M003 AMN3 evidence discipline
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-M001 Support/news bot asset inventory
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -213,8 +214,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P5-M003`:
-P5-M001 Support/news bot asset inventory.
+Следующая рекомендация после закрытия `P5-M001`:
+P5-M005 Bot media asset upload/apply boundary.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;

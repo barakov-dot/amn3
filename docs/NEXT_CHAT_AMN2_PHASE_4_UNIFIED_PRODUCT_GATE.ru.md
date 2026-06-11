@@ -537,6 +537,6 @@ go_no_go_decision:
 - очередь default docs-only cosmetic закрыта; NG-V001 закрыт как go; активных P4-NG задач больше нет;
 - активная критичная задача отдельного destructive stage: VPS-REBUILD-001, defer-awaiting-final-destructive-approval; source/package precheck, package build/hygiene, clean-server readiness and clean Ubuntu runbook completed for older AMN2 head `1508e3c`; backup plan enabled but created/restorable backup not confirmed; no delete actions planned; next required: choose retention path before any wipe, then stop-criteria review and exact final destructive phrase only if operator still chooses wipe/reinstall;
 - любое VPS/package apply/rebuild направление сначала требует пересобрать package from selected current AMN2 head (`23f18ef` if selected), rerun source/package precheck, then pass the separate named gate/decision.
-- historical recommended local-only follow-up `P5-I004` operator-only smoke checklist was completed in Phase 5; `P5-M003` AMN3 evidence discipline was also completed. Current next safe local-only recommendation is `P5-M001` Support/news bot asset inventory.
+- historical recommended local-only follow-up `P5-I004` operator-only smoke checklist was completed in Phase 5; `P5-M003` AMN3 evidence discipline and `P5-M001` support/news bot asset inventory were also completed. Current next safe local-only recommendation is `P5-M005` Bot media asset upload/apply boundary.
 - перспективный planning artifact: `docs/PHASE_5_6_FORWARD_PLAN.ru.md`.
 ```
