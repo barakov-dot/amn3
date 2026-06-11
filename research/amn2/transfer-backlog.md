@@ -504,6 +504,8 @@ Backup/import policy contract head `afb2702` (foundation commit `d2c160b`) та�
 
 Secret inventory registry commit `9ce42f4` также остается `local-gate-complete`: добавлен machine-checkable `app.security.secret_inventory`, safe manifest, lookup/filter helpers and backup policy cross-checks. Slice не читает `.env`, не подключается к БД, не добавляет routes, secret-bearing output или live VPS calls.
 
+Bot config delivery localization commit `908cafc` также остается `local-gate-complete`: Telegram config delivery стал Russian-first, `vpn://` и app links отправляются отдельными сообщениями, filenames строятся от device name, новые bot-approved devices получают default name `Neobyatnaya-AMNZ-{order_id}`, QR caption больше не обещает universal DefaultVPN in-app QR compatibility. Full local AMN2 suite: `630 passed, 1 warning`. Slice не выполнял live bot deploy/restart, real config delivery by Codex, live VPS commands, production peer/user mutation, public exposure or upstream code copy. Перед любым VPS package apply/rebuild нужно пересобрать package from selected current AMN2 head and rerun source/package precheck because previous rebuild package was built from `1508e3c`.
+
 ## Post Dry-Run Read-Only Integration Status
 
 Статус: `implemented-pushed-local-gate-complete`.
