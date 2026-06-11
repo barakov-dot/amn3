@@ -98,4 +98,4 @@ remote: amn2/codex-vps-test-prep at ad6aa1b
 
 The implemented path is safe and bounded: it provides one-tap copy only when the exact full import link fits Telegram's copy-text payload. It deliberately leaves over-limit raw `vpn://` links without a copy button instead of truncating or promising unsupported behavior.
 
-Next safe local-only recommendation: `P5-N002` Полировка текста веб-панели для service-mode и external-only устройств.
+Follow-up status: `P5-N002` Полировка текста веб-панели для service-mode и external-only устройств was completed later on 2026-06-11 as AMN2 commit `17454e9`. Evidence: `research/amn2/phase-5-web-panel-service-mode-copy-2026-06-11.md`.
