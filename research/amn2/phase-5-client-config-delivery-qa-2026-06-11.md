@@ -82,7 +82,7 @@ Verification for this AMN3 docs-only slice:
 ```text
 git diff --check: passed
 stale active P5-M002/P5-M004 scan: no active-plan/current-next stale matches
-P5-M006 active recommendation scan: present in forward plan, next-chat handoff, current status, transfer backlog and candidate queue
+historical P5-M006 recommendation scan at P5-M002 closeout: present in forward plan, next-chat handoff, current status, transfer backlog and candidate queue
 git diff --cached --check: passed
 ```
 
@@ -92,4 +92,4 @@ AMN2 local test suite was not run because this slice does not change AMN2 code. 
 
 `P5-M002` is closed as docs-only/local-only QA preparation. It does not treat plain text selection as an acceptable final UX for the operator's copy requirement.
 
-Next safe local-only recommendation: `P5-M006` Одно нажатие для копирования import-ссылки в Telegram.
+Follow-up status: `P5-M006` Одно нажатие для копирования import-ссылки в Telegram was completed later on 2026-06-11 as AMN2 commit `ad6aa1b`. Evidence: `research/amn2/phase-5-telegram-import-link-copy-2026-06-11.md`.

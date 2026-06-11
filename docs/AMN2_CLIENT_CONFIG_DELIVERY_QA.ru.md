@@ -8,7 +8,9 @@
 
 ## Текущий AMN2 Контекст
 
-Источник текущего AMN2 поведения: `barakov-dot/amn2`, branch `codex-vps-test-prep`, head `23f18ef`.
+Источник поведения на момент создания QA: `barakov-dot/amn2`, branch `codex-vps-test-prep`, head `23f18ef`.
+
+Статус follow-up на 2026-06-11: `P5-M006` advanced `codex-vps-test-prep` to `ad6aa1b` and added a bounded local Telegram copy affordance for import links that fit Bot API copy-text limits.
 
 Текущая модель доставки:
 
@@ -209,4 +211,4 @@ next_recommended_slice:
 
 `P5-M002` closes as a docs-only/local-only QA checklist. It records that current AMN2 instructions are structurally safe for `.conf`, QR and `vpn://` review, but the operator's one-tap copy-to-clipboard requirement is not satisfied by the current bot behavior. Sending the import link as a separate message is acceptable; requiring manual text selection is only a temporary fallback, not the target UX.
 
-Next recommended local-only slice: `P5-M006` Одно нажатие для копирования import-ссылки в Telegram. It should decide whether AMN2 can add a safe local-tested copy button for the import link, measure the generated `vpn://` length against Bot API limits, and avoid promising copy behavior until tests prove the exact full link is copied without truncation.
+Follow-up выполнен: `P5-M006` Одно нажатие для копирования import-ссылки в Telegram. AMN2 now adds a safe local-tested `Скопировать ссылку` button only when the exact full `vpn://` link fits Telegram copy-text limits. Over-limit raw links remain visible/selectable with `.conf`/QR fallback and must not be described as one-tap copy-ready without a separate config-delivery gate.
