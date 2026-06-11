@@ -24,6 +24,13 @@ Phase 5 стоит запускать после закрытия текущих
 - `P4-BOT-ONBOARDING-001` Bot onboarding language/header local slice: текущий access bot получил `NEOBYATNAYA-AMNZ-BOT.png`, `/start` language selector, Russian default and English fallback in AMN2 commit `137d471`.
 - `P5-I003` Runtime/toolchain standardization: AMN2 commit `578d91e` pins supported local runtime to CPython 3.12.x, adds `python -m app.toolchain check`, documents one `.venv` per worktree and verifies the full local suite with `658 passed, 1 warning`.
 - `P5-I002` External-only backfill rehearsal on local DB copy: AMN2 commit `23f18ef` adds `device backfill-external` dry-run/apply-to-copy flow, rejects secret-bearing input fields, keeps imported devices `external_only`, and verifies the full local suite with `662 passed, 1 warning`.
+- `P5-S001` Keep next-chat handoff current: Phase 5 handoff prepared at `docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md`; existing weekly upstream automations were updated to Phase 5 prompts without creating duplicates.
+
+### Перенесено из Phase 4 как условные направления Phase 5
+
+- `P4-PRVTPRO-REFRESH-003` Read-only server status/latency UX: `normal`, only after design boundary.
+- Write API / config delivery / public exposure: `critical gated`, blocked until separate named gates.
+- `VPS-REBUILD-001`: `critical destructive gate`, remains `defer`; not Phase 5 default work.
 
 ### Критичные
 
@@ -51,7 +58,6 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Простые
 
-- `P5-S001` Keep next-chat handoff current.
 - `P5-S002` Remove stale recommendations after every closed slice.
 
 ### Косметические

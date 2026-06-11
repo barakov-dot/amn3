@@ -3,6 +3,8 @@
 Phase 4 main-chat handoff is now prepared:
 
 ```text
+Phase 5 active handoff: docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
+Phase 5 explanation: operator-only pilot; default work is local-only/docs/tests/checklists; live/write/config/public/destructive actions require named gates.
 entrypoint: docs/NEXT_CHAT_AMN2_PHASE_4_UNIFIED_PRODUCT_GATE.ru.md
 research note: research/amn2/phase-4-unified-product-gate-handoff-2026-06-09.md
 AMN3 Phase 4 coordination checkpoint before P4-N001 sync: 113c5ed Record Phase 4 bot admin read-only labels
@@ -11,6 +13,7 @@ Phase 4 next stage: P4-NG Named Gate / Write API Readiness is active as docs-onl
 Phase 4 closed since P4-NG start: NG-C001 named gate charter, NG-C002 safety boundary restatement, NG-C003 secrets policy, NG-C004 go/no-go format, NG-S003 reusable named-gate evidence template, NG-C005 write API live-block assertion, WAPI-V001 write API threat model, WAPI-V002 write API route taxonomy, WAPI-V003 local fake-runner contract, WAPI-V004 idempotency/locking/partial-failure model, WAPI-V005 write API audit/redaction requirements, WAPI-I004 operation status model, WAPI-I003 scoped write-token model, WAPI-I002 config delivery decoupling, WAPI-I001 /api/clients design without live CRUD, WAPI-I005 web-panel gated action labels, NG-N003 operation queue design after write API contract, NG-N002 health/status polling design, NG-N001 attach-existing-server read-only reconciliation gate design, NG-N004 candidate registry update after every gate decision, NG-S001 status/transfer synchronization, NG-S002 next-chat handoff synchronization, NG-S004 visible active plan maintenance, NG-X003 stale wording cleanup, NG-X001 gate naming consistency, NG-X002 Russian-first operator wording polish, NG-SC001 Codex Security VPS risk checkpoint, P4-PRVTPRO-REFRESH-004 API taxonomy/OpenAPI grouping policy support, P4-DEVICE-SEQUENCE-EXTERNAL-IMPORT bot/admin device sequence and external-only backfill, P4-AMNEZIA-REFRESH-002 client import compatibility matrix, P4-BOT-ONBOARDING-001 bot onboarding language/header, P5-I003 runtime/toolchain standardization, P5-I002 external-only backfill rehearsal
 P4-NG template: research/amn2/phase-4-ng-named-gate-evidence-template-2026-06-10.md
 Phase 5/6 forward plan: docs/PHASE_5_6_FORWARD_PLAN.ru.md
+Phase 5 next-chat handoff: docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
 P4-NG write live-block evidence: research/amn2/phase-4-ng-write-api-live-block-assertion-2026-06-10.md
 P4-NG write API threat model evidence: research/amn2/phase-4-wapi-v001-write-api-threat-model-2026-06-10.md
 P4-NG write API route taxonomy evidence: research/amn2/phase-4-wapi-v002-write-api-route-taxonomy-2026-06-10.md
@@ -41,6 +44,7 @@ AMN2 client compatibility matrix: research/amn2/phase-4-amnezia-client-compatibi
 AMN2 bot onboarding language/header: research/amn2/phase-4-bot-onboarding-language-header-2026-06-11.md; `/start` sends supplied `NEOBYATNAYA-AMNZ-BOT.png`, shows Russian/English language choice, persists `users.locale` with Russian default, and does not deploy/restart the live bot
 AMN2 runtime/toolchain standardization: research/amn2/phase-5-runtime-toolchain-standardization-2026-06-11.md; CPython 3.12.x is pinned as supported local runtime, `python -m app.toolchain check` is available, one `.venv` per worktree is required, and Python 3.14 remains a separate future upgrade gate
 AMN2 external-only backfill rehearsal: research/amn2/phase-5-external-only-backfill-rehearsal-2026-06-11.md; old externally issued test devices can be rehearsed from JSON with `device backfill-external`, dry-run does not mutate the DB copy, apply writes only to an operator-selected local DB copy, and all imported rows remain `external_only`
+Phase 5 handoff/automation sync: docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md; existing heartbeat automations `amnezia-weekly-upstream-refresh`, `prvtpro-weekly-upstream-refresh` and `weekly-kyoresuas-upstream-refresh` were updated to Phase 5 prompts without creating duplicates; new Phase 5 chat should retarget the same automation IDs only if they still post into the old thread
 target VPS mode: service-mode web/bot active, loopback-only
 operator access: SSH local port forward to 127.0.0.1:3030, external browser only
 public/direct 3030: closed by loopback bind

@@ -2,6 +2,8 @@
 
 Дата: 2026-06-09.
 
+Статус 2026-06-11: Phase 4 handoff остается historical/coordination reference. Новый active handoff для следующего чата: `docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md`.
+
 Рабочая папка нового основного чата:
 
 ```text
