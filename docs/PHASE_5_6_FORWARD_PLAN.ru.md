@@ -32,6 +32,8 @@ Phase 5 стоит запускать после закрытия текущих
 - `P5-M002` QA клиентских инструкций доставки конфигурации: created `docs/AMN2_CLIENT_CONFIG_DELIVERY_QA.ru.md` with safe Telegram `.conf`/QR/`vpn://` Android/iOS/Desktop QA, redacted evidence policy, and the one-tap copy-to-clipboard requirement for the import link; evidence `research/amn2/phase-5-client-config-delivery-qa-2026-06-11.md`.
 - `P5-M006` Одно нажатие для копирования import-ссылки в Telegram: AMN2 commit `ad6aa1b` adds a bounded Telegram `Скопировать ссылку` copy button for exact full `vpn://` links that fit Bot API copy-text limits, keeps over-limit raw links on visible-text plus `.conf`/QR fallback, and verifies full local suite with `664 passed, 1 warning`; evidence `research/amn2/phase-5-telegram-import-link-copy-2026-06-11.md`.
 - `P5-N002` Полировка текста веб-панели для service-mode и external-only устройств: AMN2 commit `17454e9` clarifies operator-only/service-mode boundary and external-only device wording in web templates, with full local suite `664 passed, 1 warning`; evidence `research/amn2/phase-5-web-panel-service-mode-copy-2026-06-11.md`.
+- `P5-X002` Единообразие bot button labels and captions: AMN2 commit `fed832c` clarifies `.conf`, QR and `vpn://` delivery captions/messages without changing delivery behavior; evidence `research/amn2/phase-5-bot-labels-captions-2026-06-11.md`.
+- `P5-X001` Полировка Russian-first микротекстов: AMN2 commit `de25576` makes visible bot/admin and web-panel boundary microtexts Russian-first, with full local suite `664 passed, 1 warning`; evidence `research/amn2/phase-5-russian-first-microtexts-2026-06-11.md`.
 - `P5-S001` Keep next-chat handoff current: Phase 5 handoff prepared at `docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md`; existing weekly upstream automations were updated to Phase 5 prompts without creating duplicates.
 
 ### Перенесено из Phase 4 как условные направления Phase 5
@@ -66,8 +68,7 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Косметические
 
-- `P5-X001` Полировка Russian-first микротекстов.
-- `P5-X002` Единообразие bot button labels and captions.
+Сейчас нет активных задач в этой группе после закрытия `P5-X001` и `P5-X002`.
 
 ## Когда запускать Phase 6
 

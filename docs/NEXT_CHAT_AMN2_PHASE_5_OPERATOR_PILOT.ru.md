@@ -16,11 +16,11 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-N002 Полировка текста веб-панели для service-mode и external-only устройств
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-X001 Полировка Russian-first микротекстов
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: 17454e9 Clarify web panel service-mode copy
+AMN2 current branch head: de25576 Polish Russian-first microcopy
 AMN2 latest VPS-smoked source-overlay/package head remains historical: f7f6131 Update integration status for c92 manual prelaunch
 ```
 
@@ -96,6 +96,8 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-M002`: QA клиентских инструкций доставки конфигурации, `docs/AMN2_CLIENT_CONFIG_DELIVERY_QA.ru.md`.
 - `P5-M006`: Telegram import link copy affordance, AMN2 commit `ad6aa1b`, evidence `research/amn2/phase-5-telegram-import-link-copy-2026-06-11.md`.
 - `P5-N002`: web-panel service-mode/external-only copy polish, AMN2 commit `17454e9`, evidence `research/amn2/phase-5-web-panel-service-mode-copy-2026-06-11.md`.
+- `P5-X002`: bot labels and captions polish, AMN2 commit `fed832c`, evidence `research/amn2/phase-5-bot-labels-captions-2026-06-11.md`.
+- `P5-X001`: Russian-first microtexts polish, AMN2 commit `de25576`, evidence `research/amn2/phase-5-russian-first-microtexts-2026-06-11.md`.
 
 Latest AMN2 verification:
 
@@ -119,7 +121,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 ### Критичные, gated
 
 - `VPS-REBUILD-001`: destructive VPS rebuild gate remains `defer`. Do not run VPS commands, wipe, reinstall or package apply until retention path, stop criteria and exact final destructive phrase are accepted.
-- `P5-C001` Current-head package rebuild gate: if live/package direction is selected, rebuild from selected current AMN2 head `17454e9`, rerun source/package precheck, then enter a named gate.
+- `P5-C001` Current-head package rebuild gate: if live/package direction is selected, rebuild from selected current AMN2 head `de25576`, rerun source/package precheck, then enter a named gate.
 - `P5-C002` VPS retention decision: provider snapshot/backup/retention path must be explicit before destructive action.
 - `P5-C003` Live rollout named gate: deploy/restart/smoke only after go/no-go.
 - `P5-C004` Secret handoff protocol: operator local channel only for tokens/secrets/server config.
@@ -162,8 +164,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Косметические
 
-- `P5-X001` Полировка Russian-first микротекстов.
-- `P5-X002` Единообразие bot button labels and captions.
+Сейчас нет активных задач в этой группе после закрытия `P5-X001` и `P5-X002`.
 
 ## Automations
 
@@ -190,8 +191,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 Источник правды:
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
-- AMN2 current head: 17454e9 Clarify web panel service-mode copy
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-N002 Полировка текста веб-панели для service-mode и external-only устройств
+- AMN2 current head: de25576 Polish Russian-first microcopy
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-X001 Полировка Russian-first микротекстов
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -216,8 +217,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P5-N002`:
-P5-X002 Единообразие bot button labels and captions.
+Следующая рекомендация после закрытия `P5-X001`:
+P5-S002 Удалять устаревшие рекомендации после каждого закрытого slice.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;

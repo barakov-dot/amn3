@@ -84,4 +84,4 @@ remote: amn2/codex-vps-test-prep at 17454e9
 
 `P5-N002` is closed as a local-only web-panel copy polish slice.
 
-Next safe local-only recommendation: `P5-X002` Единообразие bot button labels and captions.
+Follow-up status: `P5-X002` Единообразие bot button labels and captions was completed later on 2026-06-11 as AMN2 commit `fed832c`. Evidence: `research/amn2/phase-5-bot-labels-captions-2026-06-11.md`.
