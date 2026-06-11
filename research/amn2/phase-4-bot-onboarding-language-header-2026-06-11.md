@@ -93,4 +93,4 @@ Previous VPS rebuild package evidence remains based on older AMN2 `1508e3c`; any
 
 ## Следующая рекомендация
 
-Do not return to `P4-BOT-ONBOARDING-001`; it is closed. The next safe local-only recommendation is `P5-I003` Runtime/toolchain standardization, because the current Windows environment runs tests through an older Python 3.12 venv while the system Python is newer and incompatible with cached binary dependencies.
+Do not return to `P4-BOT-ONBOARDING-001`; it is closed. The original next recommendation, `P5-I003` Runtime/toolchain standardization, was completed later in `research/amn2/phase-5-runtime-toolchain-standardization-2026-06-11.md`. Current next safe local-only recommendation: `P5-I002` external-only backfill rehearsal on a local DB copy.

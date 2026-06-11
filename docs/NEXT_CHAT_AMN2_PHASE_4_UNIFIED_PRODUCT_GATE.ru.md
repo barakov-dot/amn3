@@ -21,7 +21,7 @@ AMN3 checkpoint before this Phase 4 packet: a205daa Record web panel UX review e
 AMN2 repo: C:\Users\SooL\Documents\Amneziya
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: 137d471 Add bot onboarding language header
+AMN2 current branch head: 578d91e Add runtime toolchain standardization
 AMN2 latest VPS-smoked source-overlay/package head remains historical: f7f6131 Update integration status for c92 manual prelaunch
 
 target VPS mode: service-mode web/bot active, loopback-only
@@ -124,6 +124,7 @@ Docs:
 - Device sequence/external import visibility evidence: `research/amn2/phase-4-device-sequence-external-import-2026-06-11.md`.
 - Amnezia client compatibility matrix evidence: `research/amn2/phase-4-amnezia-client-compatibility-matrix-2026-06-11.md`.
 - Bot onboarding language/header evidence: `research/amn2/phase-4-bot-onboarding-language-header-2026-06-11.md`.
+- Runtime/toolchain standardization evidence: `research/amn2/phase-5-runtime-toolchain-standardization-2026-06-11.md`.
 
 Closed in or alongside this stage:
 
@@ -158,6 +159,7 @@ Closed in or alongside this stage:
 - `P4-DEVICE-SEQUENCE-EXTERNAL-IMPORT` bot/admin device sequence and local external-only backfill.
 - `P4-AMNEZIA-REFRESH-002` client import compatibility matrix.
 - `P4-BOT-ONBOARDING-001` bot onboarding language/header.
+- `P5-I003` runtime/toolchain standardization.
 
 Следующее решение:
 
@@ -345,6 +347,7 @@ go_no_go_decision:
 44. Treat `NG-SC001` Codex Security VPS risk checkpoint as closed; evidence: `research/amn2/phase-4-ng-sc001-codex-security-vps-risk-checkpoint-2026-06-10.md`.
 45. Treat `NG-V001` read-only VPS baseline gate as closed/go; evidence: `research/amn2/phase-4-ng-v001-read-only-vps-baseline-gate-2026-06-10.md`.
 46. If a live/public/write/config/destructive action is proposed outside the allowed NG-V001 read-only scope, stop and create a separate named gate first.
+47. Treat `P5-I003` runtime/toolchain standardization as closed; evidence: `research/amn2/phase-5-runtime-toolchain-standardization-2026-06-11.md`.
 
 ## Сообщение для копирования в основной чат
 
@@ -511,7 +514,8 @@ go_no_go_decision:
 - AMN2 commit `59bc266 Add device sequence and external import visibility` pushed to `codex/device-sequence-existing-peers` and fast-forwarded into `codex-vps-test-prep`.
 - AMN2 commit `d2e234f Add Amnezia client compatibility matrix` pushed to `codex/amnezia-client-compatibility-matrix` and fast-forwarded into `codex-vps-test-prep`.
 - AMN2 commit `137d471 Add bot onboarding language header` pushed to `codex/bot-onboarding-language-header` and fast-forwarded into `codex-vps-test-prep`.
-- Latest full AMN2 local suite: `654 passed, 1 warning`.
+- AMN2 commit `578d91e Add runtime toolchain standardization` pushed to `codex/runtime-toolchain-standardization` and fast-forwarded into `codex-vps-test-prep`.
+- Latest full AMN2 local suite: `658 passed, 1 warning`.
 - No live bot deploy/restart, live config delivery, VPS command, public exposure or production mutation was performed.
 
 Текущая private/local read-only API grouping:
@@ -524,10 +528,10 @@ go_no_go_decision:
 
 Следующее решение:
 - P4-NG is active as docs-only named gate / write API readiness planning;
-- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, WAPI-I005, NG-N003, NG-N002, NG-N001, NG-N004, NG-S001, NG-S002, NG-S004, NG-X003, NG-X001, NG-X002, NG-SC001, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001, P4-PRVTPRO-REFRESH-004, P4-DEVICE-SEQUENCE-EXTERNAL-IMPORT, P4-AMNEZIA-REFRESH-002 and P4-BOT-ONBOARDING-001 are closed;
+- NG-C001, NG-C002, NG-C003, NG-C004, NG-S003, NG-C005, WAPI-V001, WAPI-V002, WAPI-V003, WAPI-V004, WAPI-V005, WAPI-I004, WAPI-I003, WAPI-I002, WAPI-I001, WAPI-I005, NG-N003, NG-N002, NG-N001, NG-N004, NG-S001, NG-S002, NG-S004, NG-X003, NG-X001, NG-X002, NG-SC001, P4-PRVTPRO-REFRESH-002, P4-PRVTPRO-REFRESH-001, P4-PRVTPRO-REFRESH-004, P4-DEVICE-SEQUENCE-EXTERNAL-IMPORT, P4-AMNEZIA-REFRESH-002, P4-BOT-ONBOARDING-001 and P5-I003 are closed;
 - очередь default docs-only cosmetic закрыта; NG-V001 закрыт как go; активных P4-NG задач больше нет;
 - активная критичная задача отдельного destructive stage: VPS-REBUILD-001, defer-awaiting-final-destructive-approval; source/package precheck, package build/hygiene, clean-server readiness and clean Ubuntu runbook completed for older AMN2 head `1508e3c`; backup plan enabled but created/restorable backup not confirmed; no delete actions planned; next required: choose retention path before any wipe, then stop-criteria review and exact final destructive phrase only if operator still chooses wipe/reinstall;
-- любое VPS/package apply/rebuild направление сначала требует пересобрать package from selected current AMN2 head (`137d471` if selected), rerun source/package precheck, then pass the separate named gate/decision.
-- рекомендуемый безопасный local-only follow-up: `P5-I003` runtime/toolchain standardization, because local verification currently relies on an older Python 3.12 venv while the system Python is newer and cached binary dependencies are not compatible with it.
+- любое VPS/package apply/rebuild направление сначала требует пересобрать package from selected current AMN2 head (`578d91e` if selected), rerun source/package precheck, then pass the separate named gate/decision.
+- рекомендуемый безопасный local-only follow-up: `P5-I002` external-only backfill rehearsal on local DB copy.
 - перспективный planning artifact: `docs/PHASE_5_6_FORWARD_PLAN.ru.md`.
 ```
