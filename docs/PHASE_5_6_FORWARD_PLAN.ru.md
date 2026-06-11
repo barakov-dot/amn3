@@ -19,6 +19,10 @@ Phase 5 стоит запускать после закрытия текущих
 
 ## Phase 5 задачи
 
+### Закрыто до Phase 5
+
+- `P4-BOT-ONBOARDING-001` Bot onboarding language/header local slice: текущий access bot получил `NEOBYATNAYA-AMNZ-BOT.png`, `/start` language selector, Russian default and English fallback in AMN2 commit `137d471`.
+
 ### Критичные
 
 - `P5-C001` Current-head package rebuild gate: пересобрать package от выбранного AMN2 head, rerun source/package precheck, записать sha256 и stop criteria.
@@ -28,16 +32,16 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Очень важные
 
-- `P5-I001` Bot onboarding language/header local slice: header image, language selector, Russian default, English fallback, no live bot deploy by default.
 - `P5-I002` External-only backfill rehearsal on local DB copy: проверить импорт старых test configs without config material resurrection.
 - `P5-I003` Runtime/toolchain standardization: зафиксировать supported Python runtime, venv bootstrap, dependency rebuild and full-suite command.
 - `P5-I004` Operator-only smoke checklist: web/admin loopback, bot dry/local behavior, read-only API routes, no public exposure.
 
 ### Важные
 
-- `P5-M001` Support/news bot asset inventory: собрать изображения, тексты, команды и ownership boundary для будущих отдельных ботов.
+- `P5-M001` Support/news bot asset inventory: собрать тексты, команды and ownership boundary для будущих отдельных ботов; supplied planning assets are `NEOBYATNAYA-AMNZ-SUPPORT-BOT.png` and `NEOBYATNAYA-AMNZ-NEWS-BOT.png`.
 - `P5-M002` Client guidance QA: проверить Telegram delivery text on Android/iOS/Desktop screenshots without publishing real secrets.
 - `P5-M003` AMN3 evidence discipline: каждый live/local step получает evidence file, status/backlog update and active-plan cleanup.
+- `P5-M004` Admin panel header asset boundary: рассмотреть `NEOBYATNAYA-AMNZ-ADMIN-PANEL.png` только как отдельный web/admin design slice, не как asset текущего access bot.
 
 ### Нормальные
 
@@ -84,7 +88,7 @@ Phase 6 нужна только если после operator-only pilot мы р�
 - `P6-I001` Scoped API tokens production implementation.
 - `P6-I002` User self-service surface separated from admin surface.
 - `P6-I003` Payments/manual approval boundary if commercial access is enabled.
-- `P6-I004` Support bot and news bot production split with separate tokens/scopes.
+- `P6-I004` Support bot and news bot production split with separate tokens/scopes; current planning assets: `NEOBYATNAYA-AMNZ-SUPPORT-BOT.png`, `NEOBYATNAYA-AMNZ-NEWS-BOT.png`.
 
 ### Важные
 
