@@ -224,7 +224,6 @@ gate changes them:
 
 ## Next Step
 
-`P5-M001` is closed. The next safe local-only recommendation is `P5-M005`
-Bot media asset upload/apply boundary, because per-bot header images and
-Telegram profile icons now need a separate operator-only upload/registry design
-before any implementation or live Telegram identity mutation.
+`P5-M001` is closed. Its next recommendation was completed by `P5-M005` Bot
+media asset upload/apply boundary. Current next safe local-only recommendation:
+`P5-M004` Admin panel header asset boundary.

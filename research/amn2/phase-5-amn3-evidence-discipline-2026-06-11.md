@@ -54,5 +54,8 @@ The original follow-up, `P5-M001` Support/news bot asset inventory, was
 completed later in
 `research/amn2/phase-5-support-news-bot-asset-inventory-2026-06-11.md`.
 
-Current next safe local-only recommendation: `P5-M005` Bot media asset
-upload/apply boundary.
+`P5-M005` Bot media asset upload/apply boundary was also completed later in
+`research/amn2/phase-5-bot-media-asset-upload-boundary-2026-06-11.md`.
+
+Current next safe local-only recommendation: `P5-M004` Admin panel header asset
+boundary.

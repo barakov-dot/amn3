@@ -111,10 +111,9 @@ VPS-REBUILD-001 destructive gate remains defer
 
 ## Следующая рекомендация
 
-Next safe local-only recommendation: `P5-M005` Bot media asset upload/apply
-boundary.
+The original follow-up, `P5-M005` Bot media asset upload/apply boundary, was
+completed later in
+`research/amn2/phase-5-bot-media-asset-upload-boundary-2026-06-11.md`.
 
-Rationale: after support/news bot ownership is separated, per-bot header images
-and Telegram profile icons need a dedicated operator-only upload/registry and
-apply-gate design. This keeps local header asset preparation separate from live
-Telegram identity mutation and avoids adding a public/user upload surface.
+Current next safe local-only recommendation: `P5-M004` Admin panel header asset
+boundary.

@@ -27,6 +27,7 @@ Phase 5 стоит запускать после закрытия текущих
 - `P5-I004` Operator-only smoke checklist: created `docs/AMN2_OPERATOR_ONLY_SMOKE_CHECKLIST.ru.md` with web/admin loopback, bot dry/local, read-only API and no-public-exposure checks; evidence `research/amn2/phase-5-operator-only-smoke-checklist-2026-06-11.md`.
 - `P5-M003` AMN3 evidence discipline: created `docs/AMN3_PHASE5_EVIDENCE_DISCIPLINE.ru.md` with required evidence/status/backlog/active-plan closeout packet; evidence `research/amn2/phase-5-amn3-evidence-discipline-2026-06-11.md`.
 - `P5-M001` Support/news bot asset inventory: created `docs/AMN2_SUPPORT_NEWS_BOT_ASSET_INVENTORY.ru.md` with future support/news bot command, copy, token/runtime, media surface and ownership boundaries; evidence `research/amn2/phase-5-support-news-bot-asset-inventory-2026-06-11.md`.
+- `P5-M005` Bot media asset upload/apply boundary: created `docs/AMN2_BOT_MEDIA_ASSET_UPLOAD_BOUNDARY.ru.md` with local upload/registry, profile-icon apply gate, validation, registry and audit boundaries; evidence `research/amn2/phase-5-bot-media-asset-upload-boundary-2026-06-11.md`.
 - `P5-S001` Keep next-chat handoff current: Phase 5 handoff prepared at `docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md`; existing weekly upstream automations were updated to Phase 5 prompts without creating duplicates.
 
 ### Перенесено из Phase 4 как условные направления Phase 5
@@ -50,7 +51,6 @@ Phase 5 стоит запускать после закрытия текущих
 
 - `P5-M002` Client guidance QA: проверить Telegram delivery text on Android/iOS/Desktop screenshots without publishing real secrets.
 - `P5-M004` Admin panel header asset boundary: рассмотреть `NEOBYATNAYA-AMNZ-ADMIN-PANEL.png` только как отдельный web/admin design slice, не как asset текущего access bot.
-- `P5-M005` Bot media asset upload/apply boundary: спроектировать operator-only local upload/registry для per-bot header images and Telegram profile icons; profile icon apply is live Telegram identity mutation and needs a named gate.
 
 ### Нормальные
 
