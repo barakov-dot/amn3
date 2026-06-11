@@ -68,8 +68,12 @@ VPS-REBUILD-001 destructive gate remains defer
 
 ## Следующая рекомендация
 
-Next safe local-only recommendation: `P5-M002` QA клиентских инструкций
-доставки конфигурации.
+The original follow-up, `P5-M002` QA клиентских инструкций доставки
+конфигурации, was completed later in
+`research/amn2/phase-5-client-config-delivery-qa-2026-06-11.md`.
+
+Current next safe local-only recommendation: `P5-M006` Одно нажатие для
+копирования import-ссылки в Telegram.
 
 Rationale: after bot/admin media planning assets are scoped, the remaining
 important local-only task is to review Android/iOS/Desktop client guidance text

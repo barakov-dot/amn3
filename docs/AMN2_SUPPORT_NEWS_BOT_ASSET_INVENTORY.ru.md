@@ -226,5 +226,7 @@ gate changes them:
 
 `P5-M001` is closed. Its next recommendation was completed by `P5-M005` Bot
 media asset upload/apply boundary. `P5-M004` Граница ассета шапки веб-панели
-was also completed later. Current next safe local-only recommendation:
-`P5-M002` QA клиентских инструкций доставки конфигурации.
+was also completed later. `P5-M002` QA клиентских инструкций доставки
+конфигурации was also completed later. Current next safe local-only
+recommendation: `P5-M006` Одно нажатие для копирования import-ссылки в
+Telegram.

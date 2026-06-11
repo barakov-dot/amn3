@@ -169,9 +169,9 @@ P5-M004 Граница ассета шапки веб-панели
 Next safe local-only recommendation:
 
 ```text
-P5-M002 QA клиентских инструкций доставки конфигурации
+P5-M006 Одно нажатие для копирования import-ссылки в Telegram
 ```
 
-Rationale: after all supplied media planning assets are scoped, the remaining
-important safe local-only work is to review client-facing delivery guidance
-without publishing real secrets.
+Rationale: after media planning and client delivery QA are scoped, the remaining
+important safe local-only work is to make the Telegram import-link copy behavior
+explicit and testable without publishing real secrets.

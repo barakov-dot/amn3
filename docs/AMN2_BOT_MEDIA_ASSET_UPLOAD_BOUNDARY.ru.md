@@ -275,5 +275,5 @@ P5-M004 Admin panel header asset boundary
 Current next safe local-only recommendation:
 
 ```text
-P5-M002 QA клиентских инструкций доставки конфигурации
+P5-M006 Одно нажатие для копирования import-ссылки в Telegram
 ```

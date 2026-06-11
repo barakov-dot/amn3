@@ -75,5 +75,5 @@ The original follow-up, `P5-M004` Граница ассета шапки веб-
 completed later in
 `research/amn2/phase-5-web-admin-header-asset-boundary-2026-06-11.md`.
 
-Current next safe local-only recommendation: `P5-M002` QA клиентских инструкций
-доставки конфигурации.
+Current next safe local-only recommendation: `P5-M006` Одно нажатие для
+копирования import-ссылки в Telegram.
