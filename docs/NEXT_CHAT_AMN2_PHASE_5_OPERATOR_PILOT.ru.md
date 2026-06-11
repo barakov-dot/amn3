@@ -16,7 +16,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-M005 Bot media asset upload/apply boundary
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-M004 Граница ассета шапки веб-панели
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
@@ -92,6 +92,7 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-M003`: AMN3 evidence discipline, `docs/AMN3_PHASE5_EVIDENCE_DISCIPLINE.ru.md`.
 - `P5-M001`: support/news bot asset inventory, `docs/AMN2_SUPPORT_NEWS_BOT_ASSET_INVENTORY.ru.md`.
 - `P5-M005`: bot media asset upload/apply boundary, `docs/AMN2_BOT_MEDIA_ASSET_UPLOAD_BOUNDARY.ru.md`.
+- `P5-M004`: граница ассета шапки веб-панели, `docs/AMN2_WEB_ADMIN_HEADER_ASSET_BOUNDARY.ru.md`.
 
 Latest AMN2 verification:
 
@@ -133,10 +134,10 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Критичные
 
-- `P5-C001` Current-head package rebuild gate.
-- `P5-C002` VPS retention decision.
-- `P5-C003` Live rollout named gate.
-- `P5-C004` Secret handoff protocol.
+- `P5-C001` Гейт пересборки пакета от текущего AMN2 head.
+- `P5-C002` Решение по VPS retention.
+- `P5-C003` Named gate live rollout.
+- `P5-C004` Протокол передачи секретов.
 
 ### Очень важные
 
@@ -144,24 +145,23 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Важные
 
-- `P5-M002` Client guidance QA.
-- `P5-M004` Admin panel header asset boundary.
+- `P5-M002` QA клиентских инструкций доставки конфигурации.
 
 ### Нормальные
 
-- `P5-N001` Operator docs cleanup after pilot.
-- `P5-N002` Web panel copy polish for service-mode and external-only devices.
-- `P5-N003` Client/platform compatibility refresh after next Amnezia upstream watcher run.
-- `P4-PRVTPRO-REFRESH-003` Read-only server status/latency UX design boundary.
+- `P5-N001` Чистка операторских документов после pilot.
+- `P5-N002` Полировка текста веб-панели для service-mode и external-only устройств.
+- `P5-N003` Обновление совместимости клиентов/платформ после следующего Amnezia upstream watcher run.
+- `P4-PRVTPRO-REFRESH-003` Граница read-only UX server status/latency.
 
 ### Простые
 
-- `P5-S002` Remove stale recommendations after every closed slice.
+- `P5-S002` Удалять устаревшие рекомендации после каждого закрытого slice.
 
 ### Косметические
 
-- `P5-X001` Russian-first microcopy polish.
-- `P5-X002` Bot button labels and captions consistency.
+- `P5-X001` Полировка Russian-first микротекстов.
+- `P5-X002` Единообразие bot button labels and captions.
 
 ## Automations
 
@@ -189,7 +189,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: 23f18ef Add external-only backfill rehearsal
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-M005 Bot media asset upload/apply boundary
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-M004 Граница ассета шапки веб-панели
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -214,8 +214,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P5-M005`:
-P5-M004 Admin panel header asset boundary.
+Следующая рекомендация после закрытия `P5-M004`:
+P5-M002 QA клиентских инструкций доставки конфигурации.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;

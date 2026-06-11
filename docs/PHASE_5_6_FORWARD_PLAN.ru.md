@@ -28,6 +28,7 @@ Phase 5 стоит запускать после закрытия текущих
 - `P5-M003` AMN3 evidence discipline: created `docs/AMN3_PHASE5_EVIDENCE_DISCIPLINE.ru.md` with required evidence/status/backlog/active-plan closeout packet; evidence `research/amn2/phase-5-amn3-evidence-discipline-2026-06-11.md`.
 - `P5-M001` Support/news bot asset inventory: created `docs/AMN2_SUPPORT_NEWS_BOT_ASSET_INVENTORY.ru.md` with future support/news bot command, copy, token/runtime, media surface and ownership boundaries; evidence `research/amn2/phase-5-support-news-bot-asset-inventory-2026-06-11.md`.
 - `P5-M005` Bot media asset upload/apply boundary: created `docs/AMN2_BOT_MEDIA_ASSET_UPLOAD_BOUNDARY.ru.md` with local upload/registry, profile-icon apply gate, validation, registry and audit boundaries; evidence `research/amn2/phase-5-bot-media-asset-upload-boundary-2026-06-11.md`.
+- `P5-M004` Граница ассета шапки веб-панели: created `docs/AMN2_WEB_ADMIN_HEADER_ASSET_BOUNDARY.ru.md` with web/admin-only placement, public-safe login/header, asset source/license and no-public-exposure boundaries; evidence `research/amn2/phase-5-web-admin-header-asset-boundary-2026-06-11.md`.
 - `P5-S001` Keep next-chat handoff current: Phase 5 handoff prepared at `docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md`; existing weekly upstream automations were updated to Phase 5 prompts without creating duplicates.
 
 ### Перенесено из Phase 4 как условные направления Phase 5
@@ -38,10 +39,10 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Критичные
 
-- `P5-C001` Current-head package rebuild gate: пересобрать package от выбранного AMN2 head, rerun source/package precheck, записать sha256 и stop criteria.
-- `P5-C002` VPS retention decision: snapshot/backup/reinstall path должен быть выбран до любого wipe/package apply.
-- `P5-C003` Live rollout named gate: отдельный go/no-go для deploy/restart/smoke, без public API/panel.
-- `P5-C004` Secret handoff protocol: операторский локальный канал для Telegram token, web secret, server config and bootstrap values.
+- `P5-C001` Гейт пересборки пакета от текущего AMN2 head: пересобрать package от выбранного AMN2 head, rerun source/package precheck, записать sha256 и stop criteria.
+- `P5-C002` Решение по VPS retention: snapshot/backup/reinstall path должен быть выбран до любого wipe/package apply.
+- `P5-C003` Named gate live rollout: отдельный go/no-go для deploy/restart/smoke, без public API/panel.
+- `P5-C004` Протокол передачи секретов: операторский локальный канал для Telegram token, web secret, server config and bootstrap values.
 
 ### Очень важные
 
@@ -49,23 +50,22 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Важные
 
-- `P5-M002` Client guidance QA: проверить Telegram delivery text on Android/iOS/Desktop screenshots without publishing real secrets.
-- `P5-M004` Admin panel header asset boundary: рассмотреть `NEOBYATNAYA-AMNZ-ADMIN-PANEL.png` только как отдельный web/admin design slice, не как asset текущего access bot.
+- `P5-M002` QA клиентских инструкций доставки конфигурации: проверить Telegram delivery text on Android/iOS/Desktop screenshots without publishing real secrets.
 
 ### Нормальные
 
-- `P5-N001` Operator docs cleanup after pilot.
-- `P5-N002` Web panel copy polish for service-mode and external-only devices.
-- `P5-N003` Client/platform compatibility refresh after next Amnezia upstream watcher run.
+- `P5-N001` Чистка операторских документов после pilot.
+- `P5-N002` Полировка текста веб-панели для service-mode и external-only устройств.
+- `P5-N003` Обновление совместимости клиентов/платформ после следующего Amnezia upstream watcher run.
 
 ### Простые
 
-- `P5-S002` Remove stale recommendations after every closed slice.
+- `P5-S002` Удалять устаревшие рекомендации после каждого закрытого slice.
 
 ### Косметические
 
-- `P5-X001` Russian-first microcopy polish.
-- `P5-X002` Bot button labels and captions consistency.
+- `P5-X001` Полировка Russian-first микротекстов.
+- `P5-X002` Единообразие bot button labels and captions.
 
 ## Когда запускать Phase 6
 

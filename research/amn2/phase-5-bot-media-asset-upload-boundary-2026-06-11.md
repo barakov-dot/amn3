@@ -71,9 +71,9 @@ VPS-REBUILD-001 destructive gate remains defer
 
 ## Следующая рекомендация
 
-Next safe local-only recommendation: `P5-M004` Admin panel header asset
-boundary.
+The original follow-up, `P5-M004` Граница ассета шапки веб-панели, was
+completed later in
+`research/amn2/phase-5-web-admin-header-asset-boundary-2026-06-11.md`.
 
-Rationale: after bot media upload/apply is bounded, the remaining supplied
-planning asset `NEOBYATNAYA-AMNZ-ADMIN-PANEL.png` should be scoped as a separate
-web/admin design boundary before any UI/runtime work.
+Current next safe local-only recommendation: `P5-M002` QA клиентских инструкций
+доставки конфигурации.

@@ -266,12 +266,14 @@ Remove from active Phase 5 plan:
 P5-M005 Bot media asset upload/apply boundary
 ```
 
-Next safe local-only recommendation:
+The original next safe local-only recommendation was completed later:
 
 ```text
 P5-M004 Admin panel header asset boundary
 ```
 
-Rationale: the bot media upload/apply boundary is now explicit, so the remaining
-media-adjacent planning asset `NEOBYATNAYA-AMNZ-ADMIN-PANEL.png` should be
-scoped as a separate web/admin design boundary.
+Current next safe local-only recommendation:
+
+```text
+P5-M002 QA клиентских инструкций доставки конфигурации
+```

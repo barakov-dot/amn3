@@ -55,4 +55,6 @@ The original next safe local-only recommendation, `P5-M003` AMN3 evidence discip
 
 `P5-M005` Bot media asset upload/apply boundary was also completed later in `research/amn2/phase-5-bot-media-asset-upload-boundary-2026-06-11.md`.
 
-Current next safe local-only recommendation: `P5-M004` Admin panel header asset boundary.
+`P5-M004` Граница ассета шапки веб-панели was also completed later in `research/amn2/phase-5-web-admin-header-asset-boundary-2026-06-11.md`.
+
+Current next safe local-only recommendation: `P5-M002` QA клиентских инструкций доставки конфигурации.
