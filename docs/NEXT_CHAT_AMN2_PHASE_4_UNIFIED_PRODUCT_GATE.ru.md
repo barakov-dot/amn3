@@ -522,5 +522,5 @@ go_no_go_decision:
 - очередь default docs-only cosmetic закрыта; NG-V001 закрыт как go; активных P4-NG задач больше нет;
 - активная критичная задача отдельного destructive stage: VPS-REBUILD-001, defer-awaiting-final-destructive-approval; source/package precheck, package build/hygiene, clean-server readiness and clean Ubuntu runbook completed for older AMN2 head `1508e3c`; backup plan enabled but created/restorable backup not confirmed; no delete actions planned; next required: choose retention path before any wipe, then stop-criteria review and exact final destructive phrase only if operator still chooses wipe/reinstall;
 - любое VPS/package apply/rebuild направление сначала требует пересобрать package from selected current AMN2 head (`59bc266` if selected), rerun source/package precheck, then pass the separate named gate/decision.
-- рекомендуемый безопасный local-only follow-up: `P4-AMNEZIA-REFRESH-002` client import compatibility matrix for `.conf`, `vpn://`, QR and future native `.vpn`/Amnezia JSON behavior.
+- рекомендуемый безопасный local-only follow-up: `P4-AMNEZIA-REFRESH-002` client import compatibility matrix for `.conf`, `vpn://`, QR, future native `.vpn`/Amnezia JSON behavior and current client/platform availability constraints.
 ```

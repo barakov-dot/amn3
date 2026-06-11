@@ -27,6 +27,13 @@
 - `amnezia-vpn/amneziawg-windows`: default branch `master`, `pushed_at=2026-06-09T00:14:59Z`;
 - `amnezia-vpn/amneziawg-apple`: default branch `master`, `pushed_at=2026-06-09T00:10:33Z`.
 
+Дополнительная release-проверка 2026-06-11:
+
+- `amnezia-vpn/amnezia-client` latest GitHub release is `4.8.18.0`, released 2026-06-11 from commit `e9ed5b5`;
+- release notes describe the changelog as general stability improvement;
+- release packaging notes matter for AMN2 user guidance: Android 9+ has a dedicated APK naming requirement, Android 7/8 is temporarily unavailable, macOS 13+ uses the current package path, macOS 10.15-12 is temporarily unavailable, and Debian 12 / Ubuntu 22.04.x build availability is temporarily unavailable;
+- Linux notes include GUI dependency requirements, so future user-facing app/help text should avoid promising one universal current client path for every OS/version.
+
 ## Import/QR signals
 
 Проверенные reference-файлы:
@@ -70,16 +77,16 @@ status: completed in AMN2 commit 908cafc Localize bot config delivery
 ```text
 candidate_id: P4-AMNEZIA-REFRESH-002
 priority: important
-source: amnezia-vpn/amnezia-client, DefaultVPN, AmneziaWG Android/Apple import paths
+source: amnezia-vpn/amnezia-client, DefaultVPN, AmneziaWG Android/Apple import paths, amnezia-client 4.8.18.0 release notes
 feature_area: client import compatibility matrix
-user_value: prevents promising QR/vpn/file behavior that a target client does not actually support
+user_value: prevents promising QR/vpn/file/platform behavior that a target client or OS version does not actually support
 AMN2_fit: strong as docs/tests around existing delivery artifacts
 license_boundary: independent tests/docs only
 risk_class: secret-adjacent local tests
 secret_surface: no raw real configs in evidence; fixtures only
 remote_write_surface: none
 required_gate: local-only
-recommendation: next safe local-only slice before changing QR/native `.vpn` behavior again
+recommendation: next safe local-only slice before changing QR/native `.vpn` behavior or adding stronger app/platform guidance again
 ```
 
 ```text
@@ -106,3 +113,4 @@ recommendation: defer until compatibility matrix is written and accepted
 - No production user/peer mutation.
 - No secret-bearing evidence stored in AMN3.
 - No assumption that QR compatibility is universal across AmneziaVPN, DefaultVPN and standalone AmneziaWG clients.
+- No assumption that latest app availability is universal across Android, iOS, macOS, Windows and Linux OS versions.
