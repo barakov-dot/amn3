@@ -155,7 +155,6 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Простые
 
-- `P5-S001` Keep next-chat handoff current.
 - `P5-S002` Remove stale recommendations after every closed slice.
 
 ### Косметические
