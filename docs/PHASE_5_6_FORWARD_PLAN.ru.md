@@ -23,6 +23,7 @@ Phase 5 стоит запускать после закрытия текущих
 
 - `P4-BOT-ONBOARDING-001` Bot onboarding language/header local slice: текущий access bot получил `NEOBYATNAYA-AMNZ-BOT.png`, `/start` language selector, Russian default and English fallback in AMN2 commit `137d471`.
 - `P5-I003` Runtime/toolchain standardization: AMN2 commit `578d91e` pins supported local runtime to CPython 3.12.x, adds `python -m app.toolchain check`, documents one `.venv` per worktree and verifies the full local suite with `658 passed, 1 warning`.
+- `P5-I002` External-only backfill rehearsal on local DB copy: AMN2 commit `23f18ef` adds `device backfill-external` dry-run/apply-to-copy flow, rejects secret-bearing input fields, keeps imported devices `external_only`, and verifies the full local suite with `662 passed, 1 warning`.
 
 ### Критичные
 
@@ -33,7 +34,6 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Очень важные
 
-- `P5-I002` External-only backfill rehearsal on local DB copy: проверить импорт старых test configs without config material resurrection.
 - `P5-I004` Operator-only smoke checklist: web/admin loopback, bot dry/local behavior, read-only API routes, no public exposure.
 
 ### Важные
