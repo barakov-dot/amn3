@@ -16,7 +16,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-C005 source-overlay permission preservation fix
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-C004 secret handoff protocol
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
@@ -103,6 +103,7 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-C002`: VPS retention decision, current server recorded as disposable test VPS, evidence `research/amn2/phase-5-vps-retention-disposable-test-server-2026-06-12.md`.
 - `P5-C001`: current-head package rebuild from AMN2 `de25576`, package-ready-not-vps-smoked, evidence `research/amn2/phase-5-current-head-package-rebuild-2026-06-12.md`.
 - `P5-C003`: live rollout for AMN2 `de25576` on disposable test VPS, source overlay and read-only API smoke passed, web/bot active after permission repair, evidence `research/amn2/phase-5-live-rollout-de25576-2026-06-12.md`.
+- `P5-C004`: secret handoff protocol, created `docs/AMN2_SECRET_HANDOFF_PROTOCOL.ru.md` with operator-local channel policy, safe summaries and stop lines, evidence `research/amn2/phase-5-secret-handoff-protocol-2026-06-12.md`.
 - `P5-C005`: source-overlay permission preservation fix, corrected `scripts/vps/amn2_apply_source_zip.sh`, added local regression tests and documented future package rebuild requirement, evidence `research/amn2/phase-5-source-overlay-permission-preservation-2026-06-12.md`.
 
 Latest AMN2 verification:
@@ -126,6 +127,14 @@ result: 2 passed
 scope: local fake target through Git Bash, no VPS contact
 ```
 
+Latest AMN3 `P5-C004` verification:
+
+```text
+secret_doc_created: yes
+raw_secret_values_recorded: no
+git diff --check: passed
+```
+
 ## Phase 4 Items Carried Into Phase 5
 
 These are not active Phase 4 tasks anymore. They are carried into Phase 5 with explicit priority and gate labels.
@@ -144,7 +153,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 - `P5-C001` Current-head package rebuild gate: closed for AMN2 `de25576` as `package-ready-not-vps-smoked`; live apply still requires `P5-C003`.
 - `P5-C002` VPS retention decision: closed for current disposable test VPS; no important project data must be preserved, but live/destructive actions still require separate named gate.
 - `P5-C003` Live rollout named gate: closed for AMN2 `de25576` on disposable test VPS; read-only API smoke passed, web/bot active, no public exposure.
-- `P5-C004` Secret handoff protocol: operator local channel only for tokens/secrets/server config.
+- `P5-C004` Secret handoff protocol: closed as docs-only protocol; operator local channel only for tokens/secrets/server config.
 - `P5-C005` Source-overlay permission preservation fix: closed as local package tooling/test follow-up; future package apply must use a rebuilt kit with the corrected script.
 
 ### Blocked Until Separate Gate
@@ -160,7 +169,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Критичные
 
-- `P5-C004` Протокол передачи секретов.
+Сейчас нет активных default critical задач после закрытия `P5-C004` и `P5-C005`. Остаются только carried/gated directions: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates.
 
 ### Очень важные
 
@@ -210,7 +219,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: de25576 Polish Russian-first microcopy
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-C005 source-overlay permission preservation fix
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-C004 secret handoff protocol
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -235,8 +244,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P5-C005`:
-P5-C004 Secret handoff protocol for operator-local Telegram token, web secret, server config and bootstrap values.
+Следующая рекомендация после закрытия `P5-C004`:
+P5-N001 cleanup operator docs after pilot.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;

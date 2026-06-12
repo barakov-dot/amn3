@@ -208,6 +208,8 @@ editable_install: passed
 
 Future live run only. Create `.env` and `servers.yml` through the operator local/private channel. Do not paste either file into chat or GitHub.
 
+Use `docs/AMN2_SECRET_HANDOFF_PROTOCOL.ru.md` as the controlling handoff policy. It requires `regenerate_on_target_where_possible + operator_local_channel_only_for_external_secrets`, safe summaries only, and no raw `.env`, `servers.yml`, Telegram token, web/session secret, target host/IP, client config, QR or `vpn://` in AMN3/GitHub/chat evidence.
+
 Required `.env` boundary:
 
 ```text
