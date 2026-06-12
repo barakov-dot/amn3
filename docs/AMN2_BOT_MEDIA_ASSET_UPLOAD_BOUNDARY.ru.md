@@ -284,8 +284,15 @@ Historical next safe local-only recommendation at the time of this boundary:
 P5-M006 Одно нажатие для копирования import-ссылки в Telegram
 ```
 
-Current follow-up after `P5-L002` and `P5-L001`:
+Historical follow-up after `P5-L002` and `P5-L001`, completed later by
+`P5-C008`:
 
 ```text
 P5-C008 Current-head package rebuild for AMN2 9bff807
+```
+
+Current follow-up after `P5-C008`:
+
+```text
+P5-C007 Named live update/smoke gate for AMN2 9bff807
 ```

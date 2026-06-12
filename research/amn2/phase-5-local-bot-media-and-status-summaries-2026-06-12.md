@@ -175,10 +175,10 @@ P4-PRVTPRO-REFRESH-003 status/latency: carried from Phase 4, normal, design boun
 
 ## Next Recommendation
 
-Recommended next step:
+Historical recommended next step, completed later by `P5-C008`:
 
 ```text
 P5-C008 Current-head package rebuild for AMN2 9bff807
 ```
 
-Do `P5-C008` before reopening the live update/smoke path. After that, `P5-C007` can be the named live update/smoke gate for the disposable test VPS if the operator chooses it.
+After `P5-C008`, `P5-C007` can be the named live update/smoke gate for the disposable test VPS if the operator chooses it.
