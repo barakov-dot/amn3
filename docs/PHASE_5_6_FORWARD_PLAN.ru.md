@@ -43,7 +43,9 @@ Phase 5 стоит запускать после закрытия текущих
 - `P5-N001` Чистка операторских документов после pilot: removed stale active references to already closed Phase 5 gate slices, refreshed status/context/backlog/next-chat handoff and recorded the remaining plan; evidence `research/amn2/phase-5-operator-docs-cleanup-2026-06-12.md`.
 - `P5-N003` Обновление совместимости клиентов/платформ: AMN2 commit `dd0dd44` refreshes AmneziaVPN Linux platform guidance after the 2026-06-12 upstream watcher check; evidence `research/amn2/phase-5-client-platform-compatibility-refresh-2026-06-12.md`.
 - `P4-PRVTPRO-REFRESH-003` Read-only server status/latency UX boundary: carried from Phase 4 and closed as AMN3 docs-only design boundary; evidence `research/amn2/phase-5-prvtpro-server-status-latency-boundary-2026-06-12.md`.
-- `P5-C006` Current-head package rebuild for AMN2 `dd0dd44`: rebuilt local package/source kit from current AMN2 head, tightened operator-kit commit/no-live-apply bindings, verified full AMN2 suite `664 passed, 1 warning`, and recorded package status `package-ready-not-vps-smoked`; evidence `research/amn2/phase-5-current-head-package-rebuild-dd0dd44-2026-06-12.md`.
+- `P5-C006` Current-head package rebuild for AMN2 `dd0dd44`: rebuilt local package/source kit from then-current AMN2 head, tightened operator-kit commit/no-live-apply bindings, verified full AMN2 suite `664 passed, 1 warning`, and recorded package status `package-ready-not-vps-smoked`; evidence `research/amn2/phase-5-current-head-package-rebuild-dd0dd44-2026-06-12.md`. This package is now superseded as current-head package evidence because AMN2 advanced to `9bff807`.
+- `P5-L002` Bot media local registry/upload for start/header assets: AMN2 commit `9bff807` adds local-only CLI validation/stage/select/manifest support for access/support/news bot media, with `start_header` runtime selection and `profile_icon` staged-for-operator metadata only; no Telegram API call, token storage, public upload route, live send or profile mutation; evidence `research/amn2/phase-5-local-bot-media-and-status-summaries-2026-06-12.md`.
+- `P5-L001` Read-only status/latency display: AMN2 commit `9bff807` adds a private web/admin `Read-only server summary` from cached DB health data only, with secret/user/device/config fields excluded and live checks kept behind a named gate; evidence `research/amn2/phase-5-local-bot-media-and-status-summaries-2026-06-12.md`.
 - `P5-S001` Keep next-chat handoff current: Phase 5 handoff prepared at `docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md`; existing weekly upstream automations were updated to Phase 5 prompts without creating duplicates.
 
 ### Перенесено из Phase 4 как условные направления Phase 5
@@ -54,7 +56,7 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Критичные
 
-Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005` и `P5-C006`. Остаются только carried/gated направления выше: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates.
+Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002` и `P5-L001`. Остаются только carried/gated направления выше: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates. Если выбран VPS path, следующий named/local package step: `P5-C008` rebuild current-head package for AMN2 `9bff807` before any `P5-C007` live update/smoke.
 
 ### Очень важные
 
@@ -66,7 +68,7 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Нормальные
 
-Сейчас нет активных default normal задач после закрытия `P5-N003` и carried-from-Phase-4 `P4-PRVTPRO-REFRESH-003`.
+Сейчас нет активных default normal задач после закрытия `P5-N003`, `P5-L002`, `P5-L001` и carried-from-Phase-4 `P4-PRVTPRO-REFRESH-003`.
 
 ### Простые
 

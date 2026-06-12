@@ -4,6 +4,12 @@
 
 Статус: `P5-M005` closed as AMN3 docs-only/local-only design boundary.
 
+Follow-up 2026-06-12: optional local-only implementation was completed in AMN2
+commit `9bff807` as `P5-L002`. The implemented scope is the operator CLI/local
+registry path: validate, stage, select and manifest for access/support/news bot
+media. It still does not call Telegram API, store bot tokens, expose public
+upload routes, send live bot messages or mutate Telegram profile photos.
+
 Этот документ фиксирует безопасную модель для будущего инструмента загрузки и
 выбора медиа для access/support/news ботов. Он не реализует upload runtime, не
 копирует ассеты в AMN2, не вызывает Telegram API и не меняет live bot identity.
@@ -272,8 +278,14 @@ The original next safe local-only recommendation was completed later:
 P5-M004 Admin panel header asset boundary
 ```
 
-Current next safe local-only recommendation:
+Historical next safe local-only recommendation at the time of this boundary:
 
 ```text
 P5-M006 Одно нажатие для копирования import-ссылки в Telegram
+```
+
+Current follow-up after `P5-L002` and `P5-L001`:
+
+```text
+P5-C008 Current-head package rebuild for AMN2 9bff807
 ```

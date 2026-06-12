@@ -2,6 +2,12 @@
 
 Дата: 2026-06-12.
 
+Follow-up 2026-06-12: optional local-only implementation was completed in AMN2
+commit `9bff807` as `P5-L001`. The implemented scope is a private web/admin
+`Read-only server summary` built from cached `server_health_checks` DB data
+only. It does not run live probes, SSH commands, health/sync actions, Local
+Agent calls, public exposure, config delivery or peer/user mutations.
+
 Назначение: закрыть design boundary для `P4-PRVTPRO-REFRESH-003` и отделить безопасную идею "operator can see server status/latency" от PRVTPRO GPL implementation, public panel assumptions, live probes and write actions.
 
 Этот документ не является implementation plan и не меняет AMN2 runtime. Он определяет, какие status/latency поля можно проектировать для будущего local-only AMN2 slice, какие поля запрещены, какие gates нужны перед runtime probe, and when to stop.
@@ -132,4 +138,7 @@ Future AMN2 implementation plan should include:
 
 `P4-PRVTPRO-REFRESH-003` is closed as a design-boundary slice.
 
-The allowed future implementation is a separate optional local-only AMN2 slice: read-only server status/latency display from safe cached/local/fake sources. It is not authorized to run live probes, add public exposure, perform health/sync actions, deliver configs, mutate peers/users, or copy PRVTPRO GPL code/UI/templates.
+The allowed local-only implementation was later completed by `P5-L001` in AMN2
+commit `9bff807` using cached DB health data. It is still not authorized to run
+live probes, add public exposure, perform health/sync actions, deliver configs,
+mutate peers/users, or copy PRVTPRO GPL code/UI/templates.

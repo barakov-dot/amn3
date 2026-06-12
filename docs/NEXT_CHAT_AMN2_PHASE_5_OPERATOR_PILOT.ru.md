@@ -16,13 +16,13 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-C006 current-head package rebuild for AMN2 dd0dd44
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-L002/P5-L001 local bot media registry and read-only status summaries
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: dd0dd44 Refresh client platform guidance
+AMN2 current branch head: 9bff807 Add local bot media and status summaries
 AMN2 latest VPS-smoked source-overlay/package head: de25576 Polish Russian-first microcopy
-AMN2 latest current-head package status: package-ready-not-vps-smoked for `dd0dd44`; latest VPS-smoked source-overlay remains `de25576`
+AMN2 latest current-head package status: no package yet for `9bff807`; previous `dd0dd44` package is superseded as current-head evidence; latest VPS-smoked source-overlay remains `de25576`
 ```
 
 GitHub access note:
@@ -108,18 +108,19 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-N001`: operator docs cleanup, removed stale active references to already closed gate slices and refreshed the Phase 5 handoff/status/context/backlog plan; evidence `research/amn2/phase-5-operator-docs-cleanup-2026-06-12.md`.
 - `P5-N003`: client/platform compatibility refresh, AMN2 commit `dd0dd44` updates AmneziaVPN Linux platform guidance after the 2026-06-12 upstream watcher check; evidence `research/amn2/phase-5-client-platform-compatibility-refresh-2026-06-12.md`.
 - `P4-PRVTPRO-REFRESH-003`: read-only server status/latency UX boundary, carried from Phase 4 and closed as AMN3 docs-only design boundary; evidence `research/amn2/phase-5-prvtpro-server-status-latency-boundary-2026-06-12.md`.
-- `P5-C006`: current-head package rebuild for AMN2 `dd0dd44`, package-ready-not-vps-smoked after full local AMN2 suite and package hygiene/test-extract; evidence `research/amn2/phase-5-current-head-package-rebuild-dd0dd44-2026-06-12.md`.
+- `P5-C006`: current-head package rebuild for AMN2 `dd0dd44`, package-ready-not-vps-smoked after full local AMN2 suite and package hygiene/test-extract; evidence `research/amn2/phase-5-current-head-package-rebuild-dd0dd44-2026-06-12.md`. Superseded as current-head package evidence by AMN2 `9bff807`; rebuild again before any live update.
+- `P5-L002`: bot media local registry/upload for start/header assets, AMN2 commit `9bff807`, local-only CLI validation/stage/select/manifest for access/support/news bot media; no Telegram API/token/profile mutation/live send/public upload; evidence `research/amn2/phase-5-local-bot-media-and-status-summaries-2026-06-12.md`.
+- `P5-L001`: read-only status/latency display, AMN2 commit `9bff807`, private web/admin `Read-only server summary` from cached DB health data only; no live probe, SSH, health/sync action, config/user/device/peer secret output or public exposure; evidence `research/amn2/phase-5-local-bot-media-and-status-summaries-2026-06-12.md`.
 
 Latest AMN2 verification:
 
 ```text
-tests -q
-result: 664 passed, 1 warning
-package: dist/amn2-vps-update-and-smoke-kit-dd0dd44.zip
-package sha256: BB510BEABEB5ACCB7394C09F43EA7288BB08FC1352CCD35DA5AFF781E1B48E6D
-source zip: dist/amn2-codex-vps-test-prep-dd0dd44-source.zip
-source sha256: E29DFD7B64727BC75C677EDE2B897C6C972AB25243FD7713B767ABE1E29E2BD1
-package status: package-ready-not-vps-smoked
+focused P5-L002/P5-L001 suite: 71 passed, 1 warning
+full AMN2 suite at 9bff807: 671 passed, 1 warning
+git diff --check: passed
+git diff --cached --check: passed
+package: none yet for 9bff807
+previous package: dist/amn2-vps-update-and-smoke-kit-dd0dd44.zip, now superseded as current-head evidence
 latest VPS-smoked source: de25576, live-rollout-pass-with-permission-repair
 ```
 
@@ -171,6 +172,16 @@ git diff --cached --check: passed
 AMN2 remote head: dd0dd442f0f25c1113accdc625dd16a96059eba4
 ```
 
+Latest AMN2 `P5-L002`/`P5-L001` verification:
+
+```text
+RED P5-L002: missing app.services.bot_media / CLI entrypoints failed as expected
+RED P5-L001: server detail lacked Read-only server summary as expected
+focused final: 71 passed, 1 warning
+full final: 671 passed, 1 warning
+AMN2 remote head: 9bff807 Add local bot media and status summaries
+```
+
 Latest AMN3 `P4-PRVTPRO-REFRESH-003` verification:
 
 ```text
@@ -190,7 +201,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Нормальные
 
-- `P4-PRVTPRO-REFRESH-003` read-only server status/latency UX: only after a separate design boundary; no implementation yet.
+- `P4-PRVTPRO-REFRESH-003` read-only server status/latency UX: carried from Phase 4; design boundary closed, and local-only cached status display was implemented by `P5-L001` in AMN2 `9bff807`. Live probes/actions remain gated.
 
 ### Критичные, gated
 
@@ -200,7 +211,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 - `P5-C003` Live rollout named gate: closed for AMN2 `de25576` on disposable test VPS; read-only API smoke passed, web/bot active, no public exposure.
 - `P5-C004` Secret handoff protocol: closed as docs-only protocol; operator local channel only for tokens/secrets/server config.
 - `P5-C005` Source-overlay permission preservation fix: closed as local package tooling/test follow-up; future package apply must use a rebuilt kit with the corrected script.
-- `P5-C006` Current-head package rebuild: closed for AMN2 `dd0dd44` as `package-ready-not-vps-smoked`; live apply/smoke still requires a separate named gate, recommended as `P5-C007`.
+- `P5-C006` Current-head package rebuild: closed for AMN2 `dd0dd44` as `package-ready-not-vps-smoked`, but superseded as current-head package evidence by AMN2 `9bff807`; before any live apply/smoke, run `P5-C008` current-head package rebuild for `9bff807`.
 
 ### Blocked Until Separate Gate
 
@@ -215,7 +226,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Критичные
 
-Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005` и `P5-C006`. Остаются только carried/gated directions: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates.
+Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002` и `P5-L001`. Остаются только carried/gated directions: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates. Если выбран VPS path, следующий шаг: `P5-C008` current-head package rebuild for AMN2 `9bff807` before any `P5-C007` live update/smoke.
 
 ### Очень важные
 
@@ -227,7 +238,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Нормальные
 
-Сейчас нет активных default normal задач после закрытия carried-from-Phase-4 `P4-PRVTPRO-REFRESH-003`.
+Сейчас нет активных default normal задач после закрытия `P5-L002`, `P5-L001` и carried-from-Phase-4 `P4-PRVTPRO-REFRESH-003`.
 
 ### Простые
 
@@ -262,8 +273,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 Источник правды:
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
-- AMN2 current head: dd0dd44 Refresh client platform guidance
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-C006 current-head package rebuild for AMN2 dd0dd44
+- AMN2 current head: 9bff807 Add local bot media and status summaries
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-L002/P5-L001 local bot media registry and read-only status summaries
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -288,8 +299,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P5-C006`:
-`P5-C007` Named live update/smoke gate for AMN2 `dd0dd44` on the disposable test VPS, or choose an explicit local-only alternative first: `P5-L001` read-only status/latency display, `P5-L002` bot media local registry/upload for start/header assets, or `P5-L003` web/admin header asset local implementation.
+Следующая рекомендация после закрытия `P5-L002` и `P5-L001`:
+`P5-C008` Current-head package rebuild for AMN2 `9bff807`. Only after that, if the operator chooses VPS path, open a separate `P5-C007` named live update/smoke gate for the disposable test VPS.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;
