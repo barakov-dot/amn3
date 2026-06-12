@@ -272,5 +272,6 @@ After any checklist run:
 - update `docs/PROJECT_STATUS_CURRENT.ru.md`;
 - update `research/amn2/transfer-backlog.md`;
 - remove completed items from the active Phase 5 plan;
-- keep `P5-C001`, `P5-C002`, `P5-C003`, `P5-C004` and `VPS-REBUILD-001` gated unless the operator opens a separate named gate;
+- keep closed gate slices in history/evidence, not in the active plan;
+- keep `VPS-REBUILD-001`, write API, config delivery, public exposure and other future live/write/destructive directions gated unless the operator opens a separate named gate;
 - give the next recommendation explicitly.

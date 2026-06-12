@@ -158,7 +158,8 @@ After every closed task:
 - keep carried-from-Phase-4 labels for inherited gated items;
 - do not remove a gated item merely because a checklist or design exists;
 - keep `VPS-REBUILD-001` as `defer` until retention path, stop criteria and exact final destructive phrase are accepted;
-- keep `P5-C001`/`P5-C002`/`P5-C003`/`P5-C004` active until their named gate or decision is actually closed;
+- keep named gates active only until their named gate or decision is actually closed;
+- after closure, move the task to closed/history and keep only future gated directions in the active plan;
 - update the next recommendation to an open, safe item.
 
 ## Verification Rules
