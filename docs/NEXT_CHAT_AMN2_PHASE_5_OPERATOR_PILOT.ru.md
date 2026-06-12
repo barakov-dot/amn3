@@ -16,12 +16,13 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-C002 VPS retention decision
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-C001 current-head package rebuild
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
 AMN2 current branch head: de25576 Polish Russian-first microcopy
 AMN2 latest VPS-smoked source-overlay/package head remains historical: f7f6131 Update integration status for c92 manual prelaunch
+AMN2 latest local package candidate: de25576 package-ready-not-vps-smoked
 ```
 
 GitHub access note:
@@ -100,12 +101,16 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-X001`: Russian-first microtexts polish, AMN2 commit `de25576`, evidence `research/amn2/phase-5-russian-first-microtexts-2026-06-11.md`.
 - `P5-S002`: active-plan stale recommendation cleanup, evidence `research/amn2/phase-5-active-plan-stale-recommendation-cleanup-2026-06-12.md`.
 - `P5-C002`: VPS retention decision, current server recorded as disposable test VPS, evidence `research/amn2/phase-5-vps-retention-disposable-test-server-2026-06-12.md`.
+- `P5-C001`: current-head package rebuild from AMN2 `de25576`, package-ready-not-vps-smoked, evidence `research/amn2/phase-5-current-head-package-rebuild-2026-06-12.md`.
 
 Latest AMN2 verification:
 
 ```text
 tests -q
 result: 664 passed, 1 warning
+package: dist/amn2-vps-update-and-smoke-kit-de25576.zip
+package sha256: B35D176F871ADB3B4CFDD3EC8D55B9BC5DF972E537038345B2E66899CFD21F87
+source sha256: CFF46C44CFB8F321DEB88CE64A0F5D2154CFC02CD3931CF9955DDC466615B8CC
 ```
 
 ## Phase 4 Items Carried Into Phase 5
@@ -123,7 +128,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 ### Критичные, gated
 
 - `VPS-REBUILD-001`: destructive VPS rebuild gate remains `defer`. Do not run VPS commands, wipe, reinstall or package apply until retention path, stop criteria and exact final destructive phrase are accepted.
-- `P5-C001` Current-head package rebuild gate: if live/package direction is selected, rebuild from selected current AMN2 head `de25576`, rerun source/package precheck, then enter a named gate.
+- `P5-C001` Current-head package rebuild gate: closed for AMN2 `de25576` as `package-ready-not-vps-smoked`; live apply still requires `P5-C003`.
 - `P5-C002` VPS retention decision: closed for current disposable test VPS; no important project data must be preserved, but live/destructive actions still require separate named gate.
 - `P5-C003` Live rollout named gate: deploy/restart/smoke only after go/no-go.
 - `P5-C004` Secret handoff protocol: operator local channel only for tokens/secrets/server config.
@@ -141,7 +146,6 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Критичные
 
-- `P5-C001` Гейт пересборки пакета от текущего AMN2 head.
 - `P5-C003` Named gate live rollout.
 - `P5-C004` Протокол передачи секретов.
 
@@ -193,7 +197,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: de25576 Polish Russian-first microcopy
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-C002 VPS retention decision
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-C001 current-head package rebuild
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -218,8 +222,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P5-C002`:
-P5-C001 named local package-rebuild gate от AMN2 head `de25576`.
+Следующая рекомендация после закрытия `P5-C001`:
+P5-C003 named live rollout gate for the disposable test VPS, using the `de25576` package; use `P5-C004` first only if fresh operator secrets/server config must be handed off.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;
