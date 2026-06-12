@@ -51,17 +51,31 @@ Phase 5 стоит запускать после закрытия текущих
 - `P5-C007` Named live update/smoke gate for AMN2 `9bff807`: updated the disposable test VPS source overlay from `de25576` to `9bff807`, read-only API smoke passed with run_id `20260612T184701Z`, web/bot services are active after restart and remote listeners remain loopback/closed as expected; evidence `research/amn2/phase-5-live-update-smoke-9bff807-2026-06-12.md`.
 - `P5-O001` Operator-only post-update UI smoke for AMN2 `9bff807`: authenticated GET navigation through the operator SSH local port forward loaded all checked web/admin routes, but decision is `needs-fix` because create/write/config/token controls remain visible during operator-only smoke; evidence `research/amn2/phase-5-operator-post-update-ui-smoke-9bff807-2026-06-12.md`.
 - `P5-O002` Web-admin gated-action and Russian-first UX cleanup: AMN2 commit `2215761` makes the operator web/admin brand `AmneziyaDA`, aligns sampled pages Russian-first, centers dashboard count/entity cards and disables create/token/template write affordances with named-gate notes; evidence `research/amn2/phase-5-web-admin-gated-action-russian-ux-2026-06-12.md`.
+- `P5-C009` Current-head package rebuild for AMN2 `2215761`: rebuilt local package/source kit from current AMN2 head, verified toolchain on CPython 3.12.13, full AMN2 suite `675 passed, 1 warning`, package hygiene/test-extract and recorded package status `package-ready-not-vps-smoked`; evidence `research/amn2/phase-5-current-head-package-rebuild-2215761-2026-06-13.md`.
 - `P5-S001` Keep next-chat handoff current: Phase 5 handoff prepared at `docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md`; existing weekly upstream automations were updated to Phase 5 prompts without creating duplicates.
 
-### Перенесено из Phase 4 как условные направления Phase 5
+### Неисполненные deferred/gated направления
 
-- `P4-PRVTPRO-REFRESH-003` Read-only server status/latency UX: `normal`, carried from Phase 4, closed in Phase 5. Design boundary closed in AMN3, local cached display implemented by `P5-L001`; live probes/actions remain behind a separate named gate.
-- Write API / config delivery / public exposure: `critical gated`, blocked until separate named gates.
-- `VPS-REBUILD-001`: `critical destructive gate`, remains `defer`; not Phase 5 default work.
+Эти пункты не выполнены и не считаются частью default work. Их можно исполнять только как отдельные named gates.
+
+- `P5-C010` Live update/smoke for AMN2 `2215761`: `critical gated`, next recommended gate after `P5-C009`. Dependencies: package `dist/amn2-vps-update-and-smoke-kit-2215761.zip`, operator approval for SSH/upload/source overlay/restart/read-only smoke, `VPS_APPLY_ENABLED=false`, no config delivery/write/public exposure.
+- `VPS-REBUILD-001`: `critical destructive`, not executed, defer. Dependencies: explicit destructive phrase, target retention/snapshot decision, stop-criteria review, fresh package choice, secret handoff via operator-local channel, rollback/restore acceptance.
+- Write API / `/api/clients` CRUD: `critical gated`, not executed. Dependencies: threat model, scoped write-token policy, fake-runner/local contract, operation queue/idempotency/locking/partial failure model, audit/redaction, rollback semantics, tests, then separate live gate.
+- Config delivery: `critical gated`, not executed. Dependencies: secret-bearing artifact policy, tokenized/TTL/revoke model, safe Telegram/self-service UX, redacted evidence, client compatibility QA, explicit delivery gate.
+- Public exposure: `critical gated`, not executed. Dependencies: domain/HTTPS/Caddy or reverse-proxy design, auth/session hardening, rate limit, monitoring/log redaction, firewall/listener plan, security review, rollback.
+- `P4-PRVTPRO-REFRESH-003` live probes/actions: `normal gated`, carried from Phase 4, not executed. Safe part is closed: AMN3 design boundary and `P5-L001` local cached display. Dependencies for live probes/actions: read-only probe contract, timeout/rate limits, no raw logs/secrets, no sync/apply mutation, separate live probe gate.
 
 ### Критичные
 
-Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008`, `P5-S003`, `P5-C007`, `P5-O001` и `P5-O002`. Остаются только carried/gated направления выше: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates.
+Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008`, `P5-S003`, `P5-C007`, `P5-O001`, `P5-O002` и `P5-C009`.
+
+Критичные gated/deferred, не выполнены:
+
+- `P5-C010` live update/smoke for AMN2 `2215761`: следующий рекомендуемый named gate.
+- `VPS-REBUILD-001`: destructive rebuild, deferred.
+- Write API / `/api/clients` CRUD: deferred.
+- Config delivery: deferred.
+- Public exposure: deferred.
 
 ### Очень важные
 
@@ -73,7 +87,11 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Нормальные
 
-Сейчас нет активных default normal задач после закрытия `P5-N003`, `P5-L002`, `P5-L001` и carried-from-Phase-4 `P4-PRVTPRO-REFRESH-003`.
+Сейчас нет активных default normal задач после закрытия `P5-N003`, `P5-L002`, `P5-L001` и safe part of carried-from-Phase-4 `P4-PRVTPRO-REFRESH-003`.
+
+Нормальные gated/deferred, не выполнены:
+
+- `P4-PRVTPRO-REFRESH-003-LIVE` live status/latency probes/actions: separate live probe gate only.
 
 ### Простые
 
@@ -98,27 +116,31 @@ Phase 6 нужна только если после operator-only pilot мы р�
 - security review/gate completed;
 - rollback and incident plan documented.
 
-## Phase 6 задачи
+## Phase 6 рекомендации
+
+Phase 6 следует открывать только после решения, что AMN2 выходит за пределы private/operator-only режима. Рекомендуемый вход в Phase 6: `P5-C010` live update/smoke for AMN2 `2215761` закрыт, operator-only pilot accepted, и есть явное решение идти в public/self-service/productization.
 
 ### Критичные
 
-- `P6-C001` Public exposure gate: domain/Caddy/HTTPS/public panel/API решение с threat model.
-- `P6-C002` Config delivery gate: public/self-service delivery, tokenized links, TTL, revoke, audit, redaction.
-- `P6-C003` Write API production gate: `/api/clients` CRUD, operation queue, idempotency, locking, partial failure and rollback.
-- `P6-C004` Production backup/restore/import gate: encrypted backups, restore preview/apply, disaster recovery drill.
+- `P6-C001` Public exposure gate: domain/Caddy/HTTPS/public panel/API decision with threat model. Complexity: high. Depends on security review, auth/session hardening, listener/firewall plan, rollback.
+- `P6-C002` Config delivery gate: public/self-service delivery, tokenized links, TTL, revoke, audit, redaction. Complexity: high. Depends on secret-bearing artifact policy and client compatibility QA.
+- `P6-C003` Write API production gate: `/api/clients` CRUD, operation queue, idempotency, locking, partial failure and rollback. Complexity: very high. Depends on WAPI design tasks and local fake-runner validation.
+- `P6-C004` Production backup/restore/import gate: encrypted backups, restore preview/apply, disaster recovery drill. Complexity: high/destructive. Depends on retention policy and restore tests.
+- `P6-C005` Production security review gate: abuse cases, exposed surfaces, credentials, logs, Telegram bot identity and incident response. Complexity: high. Blocks public/self-service launch.
 
 ### Очень важные
 
-- `P6-I001` Scoped API tokens production implementation.
-- `P6-I002` User self-service surface separated from admin surface.
-- `P6-I003` Payments/manual approval boundary if commercial access is enabled.
-- `P6-I004` Support bot and news bot production split with separate tokens/scopes; current planning assets: `NEOBYATNAYA-AMNZ-SUPPORT-BOT.png`, `NEOBYATNAYA-AMNZ-NEWS-BOT.png`.
+- `P6-I001` Scoped API tokens production implementation. Complexity: medium/high. Depends on token lifecycle, rotation, revoke and audit.
+- `P6-I002` User self-service surface separated from admin surface. Complexity: high. Depends on public exposure and config delivery decisions.
+- `P6-I003` Payments/manual approval boundary if commercial access is enabled. Complexity: medium/high. Depends on order lifecycle, fraud/manual review and support process.
+- `P6-I004` Support bot and news bot production split with separate tokens/scopes; current planning assets: `NEOBYATNAYA-AMNZ-SUPPORT-BOT.png`, `NEOBYATNAYA-AMNZ-NEWS-BOT.png`. Complexity: medium/high. Depends on bot identity/profile-icon gate and token/runtime separation.
+- `P6-I005` Telegram bot profile/icon apply gates for access/support/news bots. Complexity: medium. Depends on operator-local asset registry and Telegram identity mutation approval.
 
 ### Важные
 
-- `P6-M001` Multi-server/multi-protocol capability registry.
-- `P6-M002` Health/status polling scheduler with aggregate-only privacy boundary.
-- `P6-M003` Attach-existing-server reconciliation beyond read-only report mode.
+- `P6-M001` Multi-server/multi-protocol capability registry. Complexity: medium/high. Depends on protocol boundaries and no upstream/GPL code copy.
+- `P6-M002` Health/status polling scheduler with aggregate-only privacy boundary. Complexity: medium. Depends on PRVTPRO live probe gate and no-secret telemetry rules.
+- `P6-M003` Attach-existing-server reconciliation beyond read-only report mode. Complexity: high. Depends on write API/operation queue gates.
 
 ### Нормальные
 

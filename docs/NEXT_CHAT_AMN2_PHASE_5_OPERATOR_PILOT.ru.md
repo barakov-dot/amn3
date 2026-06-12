@@ -16,13 +16,13 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-O002 web-admin gated-action and Russian-first UX cleanup for AMN2 2215761
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-C009 current-head package rebuild for AMN2 2215761
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
 AMN2 current branch head: 2215761 Polish operator web admin UX
 AMN2 latest VPS-smoked source-overlay/package head: 9bff807 Add local bot media and status summaries
-AMN2 latest current-head package status: stale after AMN2 advanced to `2215761`; latest package/live-smoked head remains `9bff807`
+AMN2 latest current-head package status: package-ready-not-vps-smoked for `2215761`; latest package/live-smoked head remains `9bff807`
 ```
 
 GitHub access note:
@@ -116,19 +116,36 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-C007`: live update/smoke for AMN2 `9bff807`, source overlay on the disposable test VPS passed, read-only API smoke passed with run_id `20260612T184701Z`, web/bot are active after restart, and remote listeners remained loopback/closed as expected; evidence `research/amn2/phase-5-live-update-smoke-9bff807-2026-06-12.md`.
 - `P5-O001`: operator-only post-update UI smoke for AMN2 `9bff807`, authenticated GET navigation through the operator SSH local port forward loaded the checked web/admin routes, but decision is `needs-fix` because create/write/config/token controls remain visible during operator-only smoke; evidence `research/amn2/phase-5-operator-post-update-ui-smoke-9bff807-2026-06-12.md`.
 - `P5-O002`: web-admin gated-action and Russian-first UX cleanup, AMN2 commit `2215761`, local-only implementation/test slice that makes the sampled web/admin UI use `AmneziyaDA`, Russian-first headings/navigation, centered two-line dashboard counts and disabled named-gate create/token/template write affordances; evidence `research/amn2/phase-5-web-admin-gated-action-russian-ux-2026-06-12.md`.
+- `P5-C009`: current-head package rebuild for AMN2 `2215761`, package-ready-not-vps-smoked after CPython 3.12.13 toolchain check, full AMN2 suite and package hygiene/test-extract; evidence `research/amn2/phase-5-current-head-package-rebuild-2215761-2026-06-13.md`.
 
 Latest AMN2 verification:
 
 ```text
 focused P5-O002 suite: 4 passed, 1 warning
 expanded web regression at 2215761: 90 passed, 1 warning
+full AMN2 suite at 2215761: 675 passed, 1 warning
 git diff --check: passed
-package: dist/amn2-vps-update-and-smoke-kit-9bff807.zip
-package sha256: 882619B665B93CF4D6EFAB7977F7AE968F032C08C74CCFDA19A6B06BD629FAF9
-source zip: dist/amn2-codex-vps-test-prep-9bff807-source.zip
-source sha256: 5109C0FD7FBF40BB2F48C7476015E8BD4CCCF3AF54CAD702160488B0CE898AFD
-package status: stale-current-head after AMN2 advanced to 2215761; live-update-smoke-pass for 9bff807 only
+package: dist/amn2-vps-update-and-smoke-kit-2215761.zip
+package sha256: 6C360E8005E117EC59DD2829E9C4E9D2F36B5070275CD989D9D51A0675CF8B44
+source zip: dist/amn2-codex-vps-test-prep-2215761-source.zip
+source sha256: 825D1EF34F8DF11C0DB12B7A3DCDAE8FE79F04A8C56113CBA9CAEA3ECDBCC38B
+package status: package-ready-not-vps-smoked
 latest VPS-smoked source: 9bff807, live-update-smoke-pass
+```
+
+Latest AMN3 `P5-C009` verification:
+
+```text
+initial system python toolchain check: failed on Python 3.14.3 as expected
+AMN2 CPython 3.12.13 toolchain check: passed
+AMN2 full pytest: 675 passed, 1 warning
+AMN2 git diff --check: passed
+package hygiene/test-extract: passed
+package entries: 5
+source files: 275
+forbidden source entries: absent
+shell scripts LF/no BOM: passed
+commit bindings: present
 ```
 
 Latest AMN3 `P5-C008` verification:
@@ -250,7 +267,15 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Критичные
 
-Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008`, `P5-S003`, `P5-C007`, `P5-O001` и `P5-O002`. Остаются только carried/gated directions: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates.
+Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008`, `P5-S003`, `P5-C007`, `P5-O001`, `P5-O002` и `P5-C009`.
+
+Критичные deferred/gated, не исполнены:
+
+- `P5-C010` live update/smoke for AMN2 `2215761`: следующий рекомендуемый named gate; требует отдельное разрешение на SSH/upload/source overlay/restart/read-only smoke.
+- `VPS-REBUILD-001`: destructive rebuild, not executed, defer.
+- Write API / `/api/clients` CRUD: not executed, deferred.
+- Config delivery: not executed, deferred.
+- Public exposure: not executed, deferred.
 
 ### Очень важные
 
@@ -262,7 +287,11 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Нормальные
 
-Сейчас нет активных default normal задач после закрытия `P5-L002`, `P5-L001` и carried-from-Phase-4 `P4-PRVTPRO-REFRESH-003`.
+Сейчас нет активных default normal задач после закрытия `P5-L002`, `P5-L001` и safe part of carried-from-Phase-4 `P4-PRVTPRO-REFRESH-003`.
+
+Нормальные deferred/gated, не исполнены:
+
+- `P4-PRVTPRO-REFRESH-003-LIVE`: live probes/actions not executed; safe design boundary and local cached display are closed.
 
 ### Простые
 
@@ -299,7 +328,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: 2215761 Polish operator web admin UX
 - AMN2 latest VPS-smoked/package head: 9bff807 Add local bot media and status summaries
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-O002 web-admin gated-action and Russian-first UX cleanup for AMN2 2215761
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-C009 current-head package rebuild for AMN2 2215761
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -324,8 +353,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P5-O002`:
-`P5-C009` Current-head package rebuild for AMN2 `2215761`.
+Следующая рекомендация после закрытия `P5-C009`:
+`P5-C010` Named live update/smoke gate for AMN2 `2215761` on the disposable test VPS.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;
