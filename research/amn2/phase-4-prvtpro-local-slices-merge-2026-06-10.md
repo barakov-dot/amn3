@@ -63,6 +63,8 @@ This was a source-only Git merge/push step. It did not run live VPS commands, SS
 
 ## Closure
 
-The review/merge step for `P4-PRVTPRO-REFRESH-002` and `P4-PRVTPRO-REFRESH-001` is closed. Subsequent status sync: `P4-PRVTPRO-REFRESH-004` was later closed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`. The remaining PRVTPRO-derived work is:
+The review/merge step for `P4-PRVTPRO-REFRESH-002` and `P4-PRVTPRO-REFRESH-001` is closed. Subsequent status sync: `P4-PRVTPRO-REFRESH-004` was later closed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`.
 
-- `P4-PRVTPRO-REFRESH-003` read-only server status/latency UX only after design boundary.
+Later Phase 5 status:
+
+- `P4-PRVTPRO-REFRESH-003` was closed as a carried Phase 4 item: AMN3 design boundary first, then AMN2 `P5-L001` local cached display; live probes/actions remain separately gated.

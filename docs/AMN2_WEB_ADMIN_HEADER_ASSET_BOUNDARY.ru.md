@@ -166,12 +166,14 @@ Remove from active Phase 5 plan:
 P5-M004 Граница ассета шапки веб-панели
 ```
 
-Next safe local-only recommendation:
+Historical next safe local-only recommendation at the time:
 
 ```text
 P5-M006 Одно нажатие для копирования import-ссылки в Telegram
 ```
 
-Rationale: after media planning and client delivery QA are scoped, the remaining
-important safe local-only work is to make the Telegram import-link copy behavior
-explicit and testable without publishing real secrets.
+Status: completed later in Phase 5.
+
+Current Phase 5 handoff after `P5-S003` keeps no default local-only active work.
+The next recommendation is `P5-C007` named live update/smoke gate for AMN2
+`9bff807` on the disposable test VPS, if the operator chooses the VPS path.

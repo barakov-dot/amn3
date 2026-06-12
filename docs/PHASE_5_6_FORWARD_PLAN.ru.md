@@ -47,17 +47,18 @@ Phase 5 стоит запускать после закрытия текущих
 - `P5-L002` Bot media local registry/upload for start/header assets: AMN2 commit `9bff807` adds local-only CLI validation/stage/select/manifest support for access/support/news bot media, with `start_header` runtime selection and `profile_icon` staged-for-operator metadata only; no Telegram API call, token storage, public upload route, live send or profile mutation; evidence `research/amn2/phase-5-local-bot-media-and-status-summaries-2026-06-12.md`.
 - `P5-L001` Read-only status/latency display: AMN2 commit `9bff807` adds a private web/admin `Read-only server summary` from cached DB health data only, with secret/user/device/config fields excluded and live checks kept behind a named gate; evidence `research/amn2/phase-5-local-bot-media-and-status-summaries-2026-06-12.md`.
 - `P5-C008` Current-head package rebuild for AMN2 `9bff807`: rebuilt local package/source kit from current AMN2 head, verified toolchain on CPython 3.12.13, full AMN2 suite `671 passed, 1 warning`, package hygiene/test-extract and recorded package status `package-ready-not-vps-smoked`; evidence `research/amn2/phase-5-current-head-package-rebuild-9bff807-2026-06-12.md`.
+- `P5-S003` Закрытые carried-items без путаницы с активным планом: refreshed AMN3 wording so carried Phase 4 items remain visible as `closed / carried from Phase N / gate remains`, without looking like active pending work; evidence `research/amn2/phase-5-carried-items-active-plan-cleanup-2026-06-12.md`.
 - `P5-S001` Keep next-chat handoff current: Phase 5 handoff prepared at `docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md`; existing weekly upstream automations were updated to Phase 5 prompts without creating duplicates.
 
 ### Перенесено из Phase 4 как условные направления Phase 5
 
-- `P4-PRVTPRO-REFRESH-003` Read-only server status/latency UX: `normal`, carried from Phase 4, design boundary closed; future implementation is optional local-only and must not run live probes without a separate named gate.
+- `P4-PRVTPRO-REFRESH-003` Read-only server status/latency UX: `normal`, carried from Phase 4, closed in Phase 5. Design boundary closed in AMN3, local cached display implemented by `P5-L001`; live probes/actions remain behind a separate named gate.
 - Write API / config delivery / public exposure: `critical gated`, blocked until separate named gates.
 - `VPS-REBUILD-001`: `critical destructive gate`, remains `defer`; not Phase 5 default work.
 
 ### Критичные
 
-Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001` и `P5-C008`. Остаются только carried/gated направления выше: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates. Если выбран VPS path, следующий шаг - отдельный named gate `P5-C007` live update/smoke for AMN2 `9bff807` on the disposable test VPS.
+Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008` и `P5-S003`. Остаются только carried/gated направления выше: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates. Если выбран VPS path, следующий шаг - отдельный named gate `P5-C007` live update/smoke for AMN2 `9bff807` on the disposable test VPS.
 
 ### Очень важные
 
@@ -73,7 +74,7 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Простые
 
-Сейчас нет активных задач в этой группе после закрытия `P5-S002`.
+Сейчас нет активных задач в этой группе после закрытия `P5-S002` и `P5-S003`.
 
 ### Косметические
 

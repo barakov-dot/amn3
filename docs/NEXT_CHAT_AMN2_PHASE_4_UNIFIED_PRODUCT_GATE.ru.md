@@ -256,7 +256,7 @@ recommendation: accept | defer | reject | research
 Базовые границы:
 
 - PRVTPRO/Amnezia-Web-Panel is GPL-3.0: research-only, no code/UI/templates/scripts/managers copied.
-- PRVTPRO refresh 2026-06-10 AMN2 order: `P4-PRVTPRO-REFRESH-002` expiration-field contract tests and `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status are closed and merged into AMN2 `codex-vps-test-prep` at `1508e3c4a100b76815b29f91757290f1266f813d`; `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping is closed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`; remaining PRVTPRO-derived order is `P4-PRVTPRO-REFRESH-003` read-only server status/latency UX only after design boundary.
+- PRVTPRO refresh 2026-06-10 AMN2 order: `P4-PRVTPRO-REFRESH-002` expiration-field contract tests and `P4-PRVTPRO-REFRESH-001` read-only About/Version/Build status are closed and merged into AMN2 `codex-vps-test-prep` at `1508e3c4a100b76815b29f91757290f1266f813d`; `P4-PRVTPRO-REFRESH-004` API taxonomy/OpenAPI grouping is closed as AMN3 docs-only policy support in `research/amn2/phase-4-prvtpro-api-taxonomy-openapi-grouping-2026-06-10.md`; historical remaining order `P4-PRVTPRO-REFRESH-003` was later closed in Phase 5 as a carried item: AMN3 design boundary plus AMN2 `P5-L001` local cached display; live probes/actions remain gated.
 - PRVTPRO hybrid-only backlog: `HYB-PRVTPRO-REFRESH-001` AdGuard Home integration, `HYB-PRVTPRO-REFRESH-002` SOCKS5 service manager, `HYB-PRVTPRO-REFRESH-003` Xray migration/attach existing install, `HYB-PRVTPRO-REFRESH-004` multi-protocol capability registry.
 - PRVTPRO negative controls: do not transfer upstream Bearer-token model as admin-equivalent access to all admin endpoints; do not open public panel, config delivery, reboot, backup, import or server cleanup without a separate named gate.
 - KYORESUAS/API is used as product/architecture signal: own AMN2 implementation, no direct production install.
@@ -269,7 +269,7 @@ Default local-only implementation queue is closed after `P4-I001` closure. Safe 
 Безопасные next actions:
 
 - очередь default docs-only cosmetic закрыта;
-- `P4-PRVTPRO-REFRESH-003` design boundary only, before any server status/latency UX implementation;
+- historical `P4-PRVTPRO-REFRESH-003` was later closed in Phase 5: design boundary first, then `P5-L001` local cached display; live probes/actions remain gated;
 - docs-only write API design after explicit selection and threat model alignment;
 - candidate registry maintenance for PRVTPRO/KYORESUAS ideas;
 - route/auth/secret policy checks before future route expansion.
@@ -537,6 +537,6 @@ go_no_go_decision:
 - очередь default docs-only cosmetic закрыта; NG-V001 закрыт как go; активных P4-NG задач больше нет;
 - активная критичная задача отдельного destructive stage: VPS-REBUILD-001, defer-awaiting-final-destructive-approval; source/package precheck, package build/hygiene, clean-server readiness and clean Ubuntu runbook completed for older AMN2 head `1508e3c`; backup plan enabled but created/restorable backup not confirmed; no delete actions planned; next required: choose retention path before any wipe, then stop-criteria review and exact final destructive phrase only if operator still chooses wipe/reinstall;
 - любое VPS/package apply/rebuild направление сначала требует пересобрать package from selected current AMN2 head (`23f18ef` if selected), rerun source/package precheck, then pass the separate named gate/decision.
-- historical recommended local-only follow-up `P5-I004` operator-only smoke checklist was completed in Phase 5; `P5-M003` AMN3 evidence discipline, `P5-M001` support/news bot asset inventory, `P5-M005` bot media asset upload/apply boundary, `P5-M004` web/admin header asset boundary and `P5-M002` QA клиентских инструкций доставки конфигурации were also completed. Current next safe local-only recommendation is `P5-M006` Одно нажатие для копирования import-ссылки в Telegram.
+- historical recommended local-only follow-up `P5-I004` operator-only smoke checklist was completed in Phase 5; `P5-M003` AMN3 evidence discipline, `P5-M001` support/news bot asset inventory, `P5-M005` bot media asset upload/apply boundary, `P5-M004` web/admin header asset boundary, `P5-M002` QA клиентских инструкций доставки конфигурации and `P5-M006` Одно нажатие для копирования import-ссылки в Telegram were also completed. Active Phase 5 handoff is `docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md`; latest docs/status cleanup is `P5-S003`; next recommendation is `P5-C007` named live update/smoke gate for AMN2 `9bff807` on the disposable test VPS, if the operator chooses the VPS path.
 - перспективный planning artifact: `docs/PHASE_5_6_FORWARD_PLAN.ru.md`.
 ```

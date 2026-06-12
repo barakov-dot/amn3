@@ -16,7 +16,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-C008 current-head package rebuild for AMN2 9bff807
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-S003 carried-items active-plan cleanup
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
@@ -107,11 +107,12 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-C005`: source-overlay permission preservation fix, corrected `scripts/vps/amn2_apply_source_zip.sh`, added local regression tests and documented future package rebuild requirement, evidence `research/amn2/phase-5-source-overlay-permission-preservation-2026-06-12.md`.
 - `P5-N001`: operator docs cleanup, removed stale active references to already closed gate slices and refreshed the Phase 5 handoff/status/context/backlog plan; evidence `research/amn2/phase-5-operator-docs-cleanup-2026-06-12.md`.
 - `P5-N003`: client/platform compatibility refresh, AMN2 commit `dd0dd44` updates AmneziaVPN Linux platform guidance after the 2026-06-12 upstream watcher check; evidence `research/amn2/phase-5-client-platform-compatibility-refresh-2026-06-12.md`.
-- `P4-PRVTPRO-REFRESH-003`: read-only server status/latency UX boundary, carried from Phase 4 and closed as AMN3 docs-only design boundary; evidence `research/amn2/phase-5-prvtpro-server-status-latency-boundary-2026-06-12.md`.
+- `P4-PRVTPRO-REFRESH-003`: read-only server status/latency UX, carried from Phase 4 and closed in Phase 5. AMN3 design boundary evidence `research/amn2/phase-5-prvtpro-server-status-latency-boundary-2026-06-12.md`; safe local cached display implemented by `P5-L001`; live probes/actions remain gated.
 - `P5-C006`: current-head package rebuild for AMN2 `dd0dd44`, package-ready-not-vps-smoked after full local AMN2 suite and package hygiene/test-extract; evidence `research/amn2/phase-5-current-head-package-rebuild-dd0dd44-2026-06-12.md`. Superseded as current-head package evidence by AMN2 `9bff807`; rebuild again before any live update.
 - `P5-L002`: bot media local registry/upload for start/header assets, AMN2 commit `9bff807`, local-only CLI validation/stage/select/manifest for access/support/news bot media; no Telegram API/token/profile mutation/live send/public upload; evidence `research/amn2/phase-5-local-bot-media-and-status-summaries-2026-06-12.md`.
 - `P5-L001`: read-only status/latency display, AMN2 commit `9bff807`, private web/admin `Read-only server summary` from cached DB health data only; no live probe, SSH, health/sync action, config/user/device/peer secret output or public exposure; evidence `research/amn2/phase-5-local-bot-media-and-status-summaries-2026-06-12.md`.
 - `P5-C008`: current-head package rebuild for AMN2 `9bff807`, package-ready-not-vps-smoked after CPython 3.12.13 toolchain check, full AMN2 suite and package hygiene/test-extract; evidence `research/amn2/phase-5-current-head-package-rebuild-9bff807-2026-06-12.md`.
+- `P5-S003`: carried-items active-plan cleanup, refreshed AMN3 docs so closed carried items remain visible with phase/gate labels but are not listed as active pending work; evidence `research/amn2/phase-5-carried-items-active-plan-cleanup-2026-06-12.md`.
 
 Latest AMN2 verification:
 
@@ -245,7 +246,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Критичные
 
-Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001` и `P5-C008`. Остаются только carried/gated directions: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates. Если выбран VPS path, следующий шаг: отдельный `P5-C007` named live update/smoke gate for AMN2 `9bff807`.
+Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008` и `P5-S003`. Остаются только carried/gated directions: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates. Если выбран VPS path, следующий шаг: отдельный `P5-C007` named live update/smoke gate for AMN2 `9bff807`.
 
 ### Очень важные
 
@@ -261,7 +262,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Простые
 
-Сейчас нет активных задач в этой группе после закрытия `P5-S002`.
+Сейчас нет активных задач в этой группе после закрытия `P5-S002` и `P5-S003`.
 
 ### Косметические
 
@@ -293,7 +294,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: 9bff807 Add local bot media and status summaries
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-C008 current-head package rebuild for AMN2 9bff807
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-S003 carried-items active-plan cleanup
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -318,7 +319,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P5-C008`:
+Следующая рекомендация после закрытия `P5-S003`:
 `P5-C007` Named live update/smoke gate for AMN2 `9bff807` on the disposable test VPS.
 
 После закрытия каждой задачи:
