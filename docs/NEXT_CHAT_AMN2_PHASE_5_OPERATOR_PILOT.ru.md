@@ -16,7 +16,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-S002 active-plan stale recommendation cleanup
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-C002 VPS retention decision
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
@@ -99,6 +99,7 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-X002`: bot labels and captions polish, AMN2 commit `fed832c`, evidence `research/amn2/phase-5-bot-labels-captions-2026-06-11.md`.
 - `P5-X001`: Russian-first microtexts polish, AMN2 commit `de25576`, evidence `research/amn2/phase-5-russian-first-microtexts-2026-06-11.md`.
 - `P5-S002`: active-plan stale recommendation cleanup, evidence `research/amn2/phase-5-active-plan-stale-recommendation-cleanup-2026-06-12.md`.
+- `P5-C002`: VPS retention decision, current server recorded as disposable test VPS, evidence `research/amn2/phase-5-vps-retention-disposable-test-server-2026-06-12.md`.
 
 Latest AMN2 verification:
 
@@ -123,7 +124,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 - `VPS-REBUILD-001`: destructive VPS rebuild gate remains `defer`. Do not run VPS commands, wipe, reinstall or package apply until retention path, stop criteria and exact final destructive phrase are accepted.
 - `P5-C001` Current-head package rebuild gate: if live/package direction is selected, rebuild from selected current AMN2 head `de25576`, rerun source/package precheck, then enter a named gate.
-- `P5-C002` VPS retention decision: provider snapshot/backup/retention path must be explicit before destructive action.
+- `P5-C002` VPS retention decision: closed for current disposable test VPS; no important project data must be preserved, but live/destructive actions still require separate named gate.
 - `P5-C003` Live rollout named gate: deploy/restart/smoke only after go/no-go.
 - `P5-C004` Secret handoff protocol: operator local channel only for tokens/secrets/server config.
 
@@ -141,7 +142,6 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 ### Критичные
 
 - `P5-C001` Гейт пересборки пакета от текущего AMN2 head.
-- `P5-C002` Решение по VPS retention.
 - `P5-C003` Named gate live rollout.
 - `P5-C004` Протокол передачи секретов.
 
@@ -193,7 +193,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: de25576 Polish Russian-first microcopy
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-S002 active-plan stale recommendation cleanup
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-C002 VPS retention decision
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -218,12 +218,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P5-S002`:
-по умолчанию не запускать новую local-only задачу автоматически; выбрать один из условных путей явно:
-- `P5-C001` только как named package-rebuild gate от AMN2 head `de25576`;
-- `P5-N001` после фактического operator-only pilot;
-- `P5-N003` после следующего upstream watcher output;
-- `P4-PRVTPRO-REFRESH-003` только после отдельной design boundary.
+Следующая рекомендация после закрытия `P5-C002`:
+P5-C001 named local package-rebuild gate от AMN2 head `de25576`.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;
