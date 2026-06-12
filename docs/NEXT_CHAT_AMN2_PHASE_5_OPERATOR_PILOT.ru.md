@@ -16,7 +16,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-X001 Полировка Russian-first микротекстов
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-S002 active-plan stale recommendation cleanup
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
@@ -98,6 +98,7 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-N002`: web-panel service-mode/external-only copy polish, AMN2 commit `17454e9`, evidence `research/amn2/phase-5-web-panel-service-mode-copy-2026-06-11.md`.
 - `P5-X002`: bot labels and captions polish, AMN2 commit `fed832c`, evidence `research/amn2/phase-5-bot-labels-captions-2026-06-11.md`.
 - `P5-X001`: Russian-first microtexts polish, AMN2 commit `de25576`, evidence `research/amn2/phase-5-russian-first-microtexts-2026-06-11.md`.
+- `P5-S002`: active-plan stale recommendation cleanup, evidence `research/amn2/phase-5-active-plan-stale-recommendation-cleanup-2026-06-12.md`.
 
 Latest AMN2 verification:
 
@@ -160,7 +161,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Простые
 
-- `P5-S002` Удалять устаревшие рекомендации после каждого закрытого slice.
+Сейчас нет активных задач в этой группе после закрытия `P5-S002`.
 
 ### Косметические
 
@@ -192,7 +193,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: de25576 Polish Russian-first microcopy
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-X001 Полировка Russian-first микротекстов
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-S002 active-plan stale recommendation cleanup
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -217,8 +218,12 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P5-X001`:
-P5-S002 Удалять устаревшие рекомендации после каждого закрытого slice.
+Следующая рекомендация после закрытия `P5-S002`:
+по умолчанию не запускать новую local-only задачу автоматически; выбрать один из условных путей явно:
+- `P5-C001` только как named package-rebuild gate от AMN2 head `de25576`;
+- `P5-N001` после фактического operator-only pilot;
+- `P5-N003` после следующего upstream watcher output;
+- `P4-PRVTPRO-REFRESH-003` только после отдельной design boundary.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;

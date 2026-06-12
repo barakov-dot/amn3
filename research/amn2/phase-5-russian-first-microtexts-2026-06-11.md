@@ -90,4 +90,4 @@ remote: amn2/codex-vps-test-prep at de25576
 
 `P5-X001` is closed as an AMN2 local-only Russian-first microcopy polish slice.
 
-Next safe local-only recommendation: `P5-S002` Удалять устаревшие рекомендации после каждого закрытого slice.
+Follow-up status: `P5-S002` Удалять устаревшие рекомендации после каждого закрытого slice was completed later on 2026-06-12 as AMN3 docs-only cleanup. Evidence: `research/amn2/phase-5-active-plan-stale-recommendation-cleanup-2026-06-12.md`.
