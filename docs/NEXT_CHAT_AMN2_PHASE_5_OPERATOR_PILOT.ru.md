@@ -16,13 +16,13 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-N001 operator docs cleanup
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-N003 client/platform compatibility refresh
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: de25576 Polish Russian-first microcopy
+AMN2 current branch head: dd0dd44 Refresh client platform guidance
 AMN2 latest VPS-smoked source-overlay/package head: de25576 Polish Russian-first microcopy
-AMN2 latest package status: live-rollout-pass-with-permission-repair on disposable test VPS; historical `de25576` package should be rebuilt with the corrected apply script before any future source apply
+AMN2 latest package status: live-rollout-pass-with-permission-repair on disposable test VPS; AMN2 branch has advanced to `dd0dd44` after that package, so rebuild a new kit with the corrected apply script before any future source apply
 ```
 
 GitHub access note:
@@ -106,6 +106,7 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-C004`: secret handoff protocol, created `docs/AMN2_SECRET_HANDOFF_PROTOCOL.ru.md` with operator-local channel policy, safe summaries and stop lines, evidence `research/amn2/phase-5-secret-handoff-protocol-2026-06-12.md`.
 - `P5-C005`: source-overlay permission preservation fix, corrected `scripts/vps/amn2_apply_source_zip.sh`, added local regression tests and documented future package rebuild requirement, evidence `research/amn2/phase-5-source-overlay-permission-preservation-2026-06-12.md`.
 - `P5-N001`: operator docs cleanup, removed stale active references to already closed gate slices and refreshed the Phase 5 handoff/status/context/backlog plan; evidence `research/amn2/phase-5-operator-docs-cleanup-2026-06-12.md`.
+- `P5-N003`: client/platform compatibility refresh, AMN2 commit `dd0dd44` updates AmneziaVPN Linux platform guidance after the 2026-06-12 upstream watcher check; evidence `research/amn2/phase-5-client-platform-compatibility-refresh-2026-06-12.md`.
 
 Latest AMN2 verification:
 
@@ -142,6 +143,16 @@ Latest AMN3 `P5-N001` verification:
 stale active P5-N001 recommendation scan: passed
 closed-gate active wording scan: passed
 git diff --check: passed
+```
+
+Latest AMN2 `P5-N003` verification:
+
+```text
+RED tests/vpn/test_client_compatibility.py: 2 failed, 3 passed
+focused tests/vpn/test_client_compatibility.py tests/bot/test_delivery.py: 13 passed
+git diff --check: passed
+git diff --cached --check: passed
+AMN2 remote head: dd0dd442f0f25c1113accdc625dd16a96059eba4
 ```
 
 ## Phase 4 Items Carried Into Phase 5
@@ -190,7 +201,6 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Нормальные
 
-- `P5-N003` Обновление совместимости клиентов/платформ после следующего Amnezia upstream watcher run.
 - `P4-PRVTPRO-REFRESH-003` Граница read-only UX server status/latency.
 
 ### Простые
@@ -226,8 +236,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 Источник правды:
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
-- AMN2 current head: de25576 Polish Russian-first microcopy
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-N001 operator docs cleanup
+- AMN2 current head: dd0dd44 Refresh client platform guidance
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-N003 client/platform compatibility refresh
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -252,8 +262,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P5-N001`:
-P5-N003 client/platform compatibility refresh after the next Amnezia upstream watcher run.
+Следующая рекомендация после закрытия `P5-N003`:
+P4-PRVTPRO-REFRESH-003 read-only server status/latency UX boundary as docs/design-only first.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;

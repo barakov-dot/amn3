@@ -41,6 +41,7 @@ Phase 5 стоит запускать после закрытия текущих
 - `P5-C004` Secret handoff protocol: created `docs/AMN2_SECRET_HANDOFF_PROTOCOL.ru.md` with operator-local secret transfer policy, safe summary fields, stop lines and related named gates; evidence `research/amn2/phase-5-secret-handoff-protocol-2026-06-12.md`.
 - `P5-C005` Source-overlay permission preservation fix: corrected `scripts/vps/amn2_apply_source_zip.sh` so future rebuilt kits preserve target-root metadata and service-readable source permissions; added local regression tests; evidence `research/amn2/phase-5-source-overlay-permission-preservation-2026-06-12.md`.
 - `P5-N001` Чистка операторских документов после pilot: removed stale active references to already closed Phase 5 gate slices, refreshed status/context/backlog/next-chat handoff and recorded the remaining plan; evidence `research/amn2/phase-5-operator-docs-cleanup-2026-06-12.md`.
+- `P5-N003` Обновление совместимости клиентов/платформ: AMN2 commit `dd0dd44` refreshes AmneziaVPN Linux platform guidance after the 2026-06-12 upstream watcher check; evidence `research/amn2/phase-5-client-platform-compatibility-refresh-2026-06-12.md`.
 - `P5-S001` Keep next-chat handoff current: Phase 5 handoff prepared at `docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md`; existing weekly upstream automations were updated to Phase 5 prompts without creating duplicates.
 
 ### Перенесено из Phase 4 как условные направления Phase 5
@@ -63,7 +64,7 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Нормальные
 
-- `P5-N003` Обновление совместимости клиентов/платформ после следующего Amnezia upstream watcher run.
+Сейчас нет активных чистых Phase 5 normal задач после закрытия `P5-N003`; остается carried-from-Phase-4 item ниже.
 
 ### Простые
 
