@@ -114,6 +114,7 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-C008`: current-head package rebuild for AMN2 `9bff807`, package-ready-not-vps-smoked after CPython 3.12.13 toolchain check, full AMN2 suite and package hygiene/test-extract; evidence `research/amn2/phase-5-current-head-package-rebuild-9bff807-2026-06-12.md`.
 - `P5-S003`: carried-items active-plan cleanup, refreshed AMN3 docs so closed carried items remain visible with phase/gate labels but are not listed as active pending work; evidence `research/amn2/phase-5-carried-items-active-plan-cleanup-2026-06-12.md`.
 - `P5-C007`: live update/smoke for AMN2 `9bff807`, source overlay on the disposable test VPS passed, read-only API smoke passed with run_id `20260612T184701Z`, web/bot are active after restart, and remote listeners remained loopback/closed as expected; evidence `research/amn2/phase-5-live-update-smoke-9bff807-2026-06-12.md`.
+- `P5-O001`: operator-only post-update UI smoke for AMN2 `9bff807`, authenticated GET navigation through the operator SSH local port forward loaded the checked web/admin routes, but decision is `needs-fix` because create/write/config/token controls remain visible during operator-only smoke; evidence `research/amn2/phase-5-operator-post-update-ui-smoke-9bff807-2026-06-12.md`.
 
 Latest AMN2 verification:
 
@@ -248,7 +249,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Критичные
 
-Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008`, `P5-S003` и `P5-C007`. Остаются только carried/gated directions: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates. Если выбран live validation path, следующий шаг: `P5-O001` operator-only post-update UI smoke for AMN2 `9bff807`.
+Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008`, `P5-S003`, `P5-C007` и `P5-O001`. Остаются только carried/gated directions: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates.
 
 ### Очень важные
 
@@ -256,7 +257,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Важные
 
-- Сейчас нет активных задач в этой группе после закрытия `P5-M006`.
+- `P5-O002` Web-admin gated-action and Russian-first UX cleanup: local-only AMN2 implementation/test slice to make create/write/config/token controls visibly gated, disabled or named-gate-only in operator-only mode, translate visible menu/section/table copy Russian-first, and adjust resource/user display so `AmneziyaDA` is the resource name with the user shown below it. Gate: local-only/docs/tests by default; no live VPS command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot or production peer/user mutation.
 
 ### Нормальные
 
@@ -296,7 +297,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: 9bff807 Add local bot media and status summaries
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-C007 live update/smoke for AMN2 9bff807
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-O001 operator-only post-update UI smoke for AMN2 9bff807
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -321,8 +322,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P5-C007`:
-`P5-O001` Operator-only post-update UI smoke for AMN2 `9bff807`.
+Следующая рекомендация после закрытия `P5-O001`:
+`P5-O002` Web-admin gated-action and Russian-first UX cleanup.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;
