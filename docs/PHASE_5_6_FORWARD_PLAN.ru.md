@@ -48,6 +48,7 @@ Phase 5 стоит запускать после закрытия текущих
 - `P5-L001` Read-only status/latency display: AMN2 commit `9bff807` adds a private web/admin `Read-only server summary` from cached DB health data only, with secret/user/device/config fields excluded and live checks kept behind a named gate; evidence `research/amn2/phase-5-local-bot-media-and-status-summaries-2026-06-12.md`.
 - `P5-C008` Current-head package rebuild for AMN2 `9bff807`: rebuilt local package/source kit from current AMN2 head, verified toolchain on CPython 3.12.13, full AMN2 suite `671 passed, 1 warning`, package hygiene/test-extract and recorded package status `package-ready-not-vps-smoked`; evidence `research/amn2/phase-5-current-head-package-rebuild-9bff807-2026-06-12.md`.
 - `P5-S003` Закрытые carried-items без путаницы с активным планом: refreshed AMN3 wording so carried Phase 4 items remain visible as `closed / carried from Phase N / gate remains`, without looking like active pending work; evidence `research/amn2/phase-5-carried-items-active-plan-cleanup-2026-06-12.md`.
+- `P5-C007` Named live update/smoke gate for AMN2 `9bff807`: updated the disposable test VPS source overlay from `de25576` to `9bff807`, read-only API smoke passed with run_id `20260612T184701Z`, web/bot services are active after restart and remote listeners remain loopback/closed as expected; evidence `research/amn2/phase-5-live-update-smoke-9bff807-2026-06-12.md`.
 - `P5-S001` Keep next-chat handoff current: Phase 5 handoff prepared at `docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md`; existing weekly upstream automations were updated to Phase 5 prompts without creating duplicates.
 
 ### Перенесено из Phase 4 как условные направления Phase 5
@@ -58,7 +59,7 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Критичные
 
-Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008` и `P5-S003`. Остаются только carried/gated направления выше: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates. Если выбран VPS path, следующий шаг - отдельный named gate `P5-C007` live update/smoke for AMN2 `9bff807` on the disposable test VPS.
+Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008`, `P5-S003` и `P5-C007`. Остаются только carried/gated направления выше: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates. Если выбран live validation path, следующий шаг - `P5-O001` operator-only post-update UI smoke for AMN2 `9bff807`.
 
 ### Очень важные
 
