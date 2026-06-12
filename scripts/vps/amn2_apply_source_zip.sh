@@ -17,12 +17,6 @@ die() {
   exit 1
 }
 
-require_cmd() {
-  command -v "$1" >/dev/null 2>&1 || die "missing required command: $1"
-}
-
-require_cmd tar
-
 [ -d "$AMN2_DIR" ] || die "AMN2_DIR does not exist: $AMN2_DIR"
 [ -f "$AMN2_SOURCE_ZIP" ] || die "AMN2_SOURCE_ZIP does not exist: $AMN2_SOURCE_ZIP"
 
@@ -143,8 +137,76 @@ if [ -f "$AMN2_DIR/servers.yml" ]; then
   printf 'servers.yml: preserved\n' >> "$RUN_ROOT/source-update-summary.txt"
 fi
 
-log "overlaying tracked source files; .env/data/venv/servers.yml are not present in source zip"
-tar -C "$STAGING" -cf - . | tar -C "$AMN2_DIR" -xf -
+log "overlaying tracked source files; preserving target root metadata and service-readable source permissions"
+"$PYTHON_BIN" - "$STAGING" "$AMN2_DIR" >> "$RUN_ROOT/source-update-summary.txt" <<'PY'
+import os
+import shutil
+import stat
+import sys
+from pathlib import Path
+
+
+staging = Path(sys.argv[1])
+target = Path(sys.argv[2])
+target_gid = target.stat().st_gid
+copied_roots = []
+
+
+def remove_existing(path: Path) -> None:
+    if path.is_dir() and not path.is_symlink():
+        shutil.rmtree(path)
+    else:
+        path.unlink()
+
+
+def copy_item(src: Path, dst: Path) -> None:
+    if src.is_dir() and not src.is_symlink():
+        if dst.exists() and not dst.is_dir():
+            remove_existing(dst)
+        shutil.copytree(src, dst, dirs_exist_ok=True, symlinks=True)
+    else:
+        if dst.exists() and dst.is_dir() and not dst.is_symlink():
+            remove_existing(dst)
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst, follow_symlinks=False)
+
+
+def normalize_permissions(path: Path) -> None:
+    if path.is_symlink():
+        return
+    mode = path.stat().st_mode
+    try:
+        os.chown(path, -1, target_gid)
+    except (AttributeError, PermissionError, OSError):
+        pass
+
+    if stat.S_ISDIR(mode):
+        os.chmod(path, 0o750)
+    elif stat.S_ISREG(mode):
+        executable = bool(mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
+        os.chmod(path, 0o750 if executable else 0o640)
+
+
+for child in staging.iterdir():
+    destination = target / child.name
+    copy_item(child, destination)
+    copied_roots.append(destination)
+
+for root in copied_roots:
+    if root.is_dir() and not root.is_symlink():
+        for current_root, dirs, files in os.walk(root):
+            current_path = Path(current_root)
+            normalize_permissions(current_path)
+            for directory in dirs:
+                normalize_permissions(current_path / directory)
+            for file_name in files:
+                normalize_permissions(current_path / file_name)
+    else:
+        normalize_permissions(root)
+
+print("permission_strategy=target-root-metadata-preserved")
+print(f"copied_root_entries={len(copied_roots)}")
+PY
 printf '%s\n' "$AMN2_EXPECTED_SOURCE_COMMIT" > "$AMN2_DIR/.amn2_source_overlay_commit"
 
 cd "$AMN2_DIR"

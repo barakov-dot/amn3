@@ -38,6 +38,7 @@ Phase 5 стоит запускать после закрытия текущих
 - `P5-C002` Решение по VPS retention: current server recorded as disposable test VPS with no important project data to preserve; evidence `research/amn2/phase-5-vps-retention-disposable-test-server-2026-06-12.md`.
 - `P5-C001` Гейт пересборки пакета от текущего AMN2 head: rebuilt local package/source kit from AMN2 `de25576`, recorded sha256 and hygiene/test-extract as `package-ready-not-vps-smoked`; evidence `research/amn2/phase-5-current-head-package-rebuild-2026-06-12.md`.
 - `P5-C003` Named gate live rollout: applied AMN2 `de25576` package to the disposable test VPS, read-only loopback API smoke passed, web/bot services restarted and active after permission repair; evidence `research/amn2/phase-5-live-rollout-de25576-2026-06-12.md`.
+- `P5-C005` Source-overlay permission preservation fix: corrected `scripts/vps/amn2_apply_source_zip.sh` so future rebuilt kits preserve target-root metadata and service-readable source permissions; added local regression tests; evidence `research/amn2/phase-5-source-overlay-permission-preservation-2026-06-12.md`.
 - `P5-S001` Keep next-chat handoff current: Phase 5 handoff prepared at `docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md`; existing weekly upstream automations were updated to Phase 5 prompts without creating duplicates.
 
 ### Перенесено из Phase 4 как условные направления Phase 5
@@ -49,7 +50,6 @@ Phase 5 стоит запускать после закрытия текущих
 ### Критичные
 
 - `P5-C004` Протокол передачи секретов: операторский локальный канал для Telegram token, web secret, server config and bootstrap values.
-- `P5-C005` Source-overlay permission preservation fix: local package tooling/runbook fix before any future package rebuild/apply.
 
 ### Очень важные
 

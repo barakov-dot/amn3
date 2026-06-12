@@ -11,7 +11,7 @@ api smoke run_id: 20260612T054913Z
 evidence: research/amn2/phase-5-live-rollout-de25576-2026-06-12.md
 ```
 
-For this target, set `AMN2_SERVER_NAME=local` when running the API smoke. Before any future package apply, close `P5-C005` so the source-overlay apply script preserves `/opt/amn2` service-mode permissions without a manual repair step.
+For this target, set `AMN2_SERVER_NAME=local` when running the API smoke. `P5-C005` fixed the source-overlay apply-script template after this rollout so future rebuilt kits preserve `/opt/amn2` target-root metadata and normalize copied source files to service-readable permissions. The historical `de25576` zip above remains the P5-C003 evidence artifact and should not be reused for a future source apply; rebuild a new kit from the corrected `scripts/vps/amn2_apply_source_zip.sh` first.
 
 Current override 2026-06-07.3: stable branch head `c92bd1a Bind web admin systemd to loopback` has passed safe source-overlay update and read-only API smoke on `/opt/amn2`. Current VPS-smoked source overlay is now `c92bd1a`; previous source overlay `42ffa65 Record git checkout smoke status` remains the historical status-visibility baseline, original promotion `api_smoke_run_id=20260607T165625Z`, latest repeat `api_smoke_run_id=20260607T165807Z`. `c92bd1a` is a controlled production launch safety follow-up: web/admin systemd backend binds to `127.0.0.1:3030` by default for approved HTTPS reverse proxy mode.
 
@@ -132,6 +132,7 @@ amn2_api_loopback_smoke.sh
 - проверяет, что source zip не содержит `.env`, `servers.yml`, `data/`, `venv/`, `.git/`, sqlite/db/key/pem files;
 - распаковывает tracked source files из production head `294803e`;
 - накладывает их поверх `/opt/amn2`;
+- сохраняет metadata корня `/opt/amn2` и приводит скопированные source dirs/files к group-readable service-mode правам;
 - не удаляет и не копирует `.env`, `data`, `venv`, `servers.yml`;
 - запускает `python -m pip install -e .`;
 - проверяет imports: `fastapi`, `uvicorn`, `app.cli`, `app.api.app`, `app.services.api_smoke`.
