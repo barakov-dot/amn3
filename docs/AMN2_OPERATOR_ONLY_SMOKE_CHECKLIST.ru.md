@@ -11,8 +11,8 @@
 ```text
 phase: Phase 5 Operator-Only Pilot
 default_mode: local-only/docs/tests/checklists
-AMN2 current head: 23f18ef Add external-only backfill rehearsal
-latest VPS-smoked source-overlay/package head: f7f6131 Update integration status for c92 manual prelaunch
+AMN2 current head: de25576 Polish Russian-first microcopy
+latest VPS-smoked source-overlay/package head: de25576 Polish Russian-first microcopy
 web/admin target bind: 127.0.0.1:3030
 operator access: SSH local port forward only, external browser only
 public/direct 3030: closed by loopback bind

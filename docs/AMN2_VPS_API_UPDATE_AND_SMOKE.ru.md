@@ -1,5 +1,18 @@
 # AMN2 VPS API Update And Smoke
 
+Current override 2026-06-12: Phase 5 `P5-C003` applied AMN2 `de25576` to the disposable test VPS and passed read-only loopback API smoke. Current package:
+
+```text
+dist/amn2-vps-update-and-smoke-kit-de25576.zip
+sha256: B35D176F871ADB3B4CFDD3EC8D55B9BC5DF972E537038345B2E66899CFD21F87
+source sha256: CFF46C44CFB8F321DEB88CE64A0F5D2154CFC02CD3931CF9955DDC466615B8CC
+source update run_id: 20260612T054750Z
+api smoke run_id: 20260612T054913Z
+evidence: research/amn2/phase-5-live-rollout-de25576-2026-06-12.md
+```
+
+For this target, set `AMN2_SERVER_NAME=local` when running the API smoke. Before any future package apply, close `P5-C005` so the source-overlay apply script preserves `/opt/amn2` service-mode permissions without a manual repair step.
+
 Current override 2026-06-07.3: stable branch head `c92bd1a Bind web admin systemd to loopback` has passed safe source-overlay update and read-only API smoke on `/opt/amn2`. Current VPS-smoked source overlay is now `c92bd1a`; previous source overlay `42ffa65 Record git checkout smoke status` remains the historical status-visibility baseline, original promotion `api_smoke_run_id=20260607T165625Z`, latest repeat `api_smoke_run_id=20260607T165807Z`. `c92bd1a` is a controlled production launch safety follow-up: web/admin systemd backend binds to `127.0.0.1:3030` by default for approved HTTPS reverse proxy mode.
 
 ```text
