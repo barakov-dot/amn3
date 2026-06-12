@@ -125,6 +125,8 @@ Finding 4: the authenticated web/admin UI is still visibly mixed-language. Durin
 
 Finding 5: the displayed product/resource identity should be adjusted. The operator preference is to name the resource `AmneziyaDA` and show the user/person identity below it, rather than making the user name look like the primary resource label. This should be handled as local web/admin UX copy/layout work, not as a live server mutation.
 
+Finding 6: dashboard summary cards need layout polish. The operator preference is to center card contents both horizontally and vertically, with the first line as the numeric count and the second line as the entity label, for example `1` then `пользователь`, `1` then `сервер`, `0` then `заявок`, `1` then `устройство`. This is local template/CSS/copy work for `P5-O002`.
+
 ## Decision
 
 ```text
@@ -141,10 +143,10 @@ package_apply_or_rebuild: no
 service_restart_or_deploy: no
 public_exposure_changed: no
 secrets_published: no
-blocked_or_unclear_items: authenticated UI still exposes write/create controls and mixed-language/resource-label UX that need a local-only gated-action/copy cleanup
+blocked_or_unclear_items: authenticated UI still exposes write/create controls and mixed-language/resource-label/dashboard-card UX that need a local-only gated-action/copy cleanup
 decision: needs-fix
 ```
 
 ## Next Recommendation
 
-`P5-O002 Web-admin gated-action and Russian-first UX cleanup`: local-only AMN2 implementation/test slice to make create/write/config/token controls visibly gated, disabled or explicitly named-gate-only in operator-only mode, translate visible menu/section/table copy Russian-first, and adjust resource/user display so `AmneziyaDA` is the resource name with the user shown below it. This should not run live VPS commands, package apply, service restart, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot or production peer/user mutation. After it lands locally, rebuild and smoke are separate gates.
+`P5-O002 Web-admin gated-action and Russian-first UX cleanup`: local-only AMN2 implementation/test slice to make create/write/config/token controls visibly gated, disabled or explicitly named-gate-only in operator-only mode, translate visible menu/section/table copy Russian-first, adjust resource/user display so `AmneziyaDA` is the resource name with the user shown below it, and polish dashboard summary cards so their number and label are centered in a two-line layout. This should not run live VPS commands, package apply, service restart, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot or production peer/user mutation. After it lands locally, rebuild and smoke are separate gates.

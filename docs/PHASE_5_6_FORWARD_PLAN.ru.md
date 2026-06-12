@@ -68,7 +68,7 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Важные
 
-- `P5-O002` Web-admin gated-action and Russian-first UX cleanup: local-only AMN2 implementation/test slice to make create/write/config/token controls visibly gated, disabled or named-gate-only in operator-only mode, translate visible menu/section/table copy Russian-first, and adjust resource/user display so `AmneziyaDA` is the resource name with the user shown below it. This does not authorize live VPS commands, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot or production peer/user mutation.
+- `P5-O002` Web-admin gated-action and Russian-first UX cleanup: local-only AMN2 implementation/test slice to make create/write/config/token controls visibly gated, disabled or named-gate-only in operator-only mode, translate visible menu/section/table copy Russian-first, adjust resource/user display so `AmneziyaDA` is the resource name with the user shown below it, and polish dashboard summary cards so their number and label are centered in a two-line layout. This does not authorize live VPS commands, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot or production peer/user mutation.
 
 ### Нормальные
 

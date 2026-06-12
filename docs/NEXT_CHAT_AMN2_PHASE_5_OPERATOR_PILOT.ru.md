@@ -257,7 +257,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Важные
 
-- `P5-O002` Web-admin gated-action and Russian-first UX cleanup: local-only AMN2 implementation/test slice to make create/write/config/token controls visibly gated, disabled or named-gate-only in operator-only mode, translate visible menu/section/table copy Russian-first, and adjust resource/user display so `AmneziyaDA` is the resource name with the user shown below it. Gate: local-only/docs/tests by default; no live VPS command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot or production peer/user mutation.
+- `P5-O002` Web-admin gated-action and Russian-first UX cleanup: local-only AMN2 implementation/test slice to make create/write/config/token controls visibly gated, disabled or named-gate-only in operator-only mode, translate visible menu/section/table copy Russian-first, adjust resource/user display so `AmneziyaDA` is the resource name with the user shown below it, and polish dashboard summary cards so their number and label are centered in a two-line layout. Gate: local-only/docs/tests by default; no live VPS command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot or production peer/user mutation.
 
 ### Нормальные
 
