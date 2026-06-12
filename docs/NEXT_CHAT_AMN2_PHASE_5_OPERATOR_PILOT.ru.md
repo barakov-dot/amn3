@@ -16,13 +16,13 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P4-PRVTPRO-REFRESH-003 server status/latency UX boundary
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-C006 current-head package rebuild for AMN2 dd0dd44
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
 AMN2 current branch head: dd0dd44 Refresh client platform guidance
 AMN2 latest VPS-smoked source-overlay/package head: de25576 Polish Russian-first microcopy
-AMN2 latest package status: live-rollout-pass-with-permission-repair on disposable test VPS; AMN2 branch has advanced to `dd0dd44` after that package, so rebuild a new kit with the corrected apply script before any future source apply
+AMN2 latest current-head package status: package-ready-not-vps-smoked for `dd0dd44`; latest VPS-smoked source-overlay remains `de25576`
 ```
 
 GitHub access note:
@@ -108,18 +108,33 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-N001`: operator docs cleanup, removed stale active references to already closed gate slices and refreshed the Phase 5 handoff/status/context/backlog plan; evidence `research/amn2/phase-5-operator-docs-cleanup-2026-06-12.md`.
 - `P5-N003`: client/platform compatibility refresh, AMN2 commit `dd0dd44` updates AmneziaVPN Linux platform guidance after the 2026-06-12 upstream watcher check; evidence `research/amn2/phase-5-client-platform-compatibility-refresh-2026-06-12.md`.
 - `P4-PRVTPRO-REFRESH-003`: read-only server status/latency UX boundary, carried from Phase 4 and closed as AMN3 docs-only design boundary; evidence `research/amn2/phase-5-prvtpro-server-status-latency-boundary-2026-06-12.md`.
+- `P5-C006`: current-head package rebuild for AMN2 `dd0dd44`, package-ready-not-vps-smoked after full local AMN2 suite and package hygiene/test-extract; evidence `research/amn2/phase-5-current-head-package-rebuild-dd0dd44-2026-06-12.md`.
 
 Latest AMN2 verification:
 
 ```text
 tests -q
 result: 664 passed, 1 warning
-package: dist/amn2-vps-update-and-smoke-kit-de25576.zip
-package sha256: B35D176F871ADB3B4CFDD3EC8D55B9BC5DF972E537038345B2E66899CFD21F87
-source sha256: CFF46C44CFB8F321DEB88CE64A0F5D2154CFC02CD3931CF9955DDC466615B8CC
-VPS source update run_id: 20260612T054750Z
-VPS API smoke run_id: 20260612T054913Z
-VPS result: pass, with permission repair after source overlay
+package: dist/amn2-vps-update-and-smoke-kit-dd0dd44.zip
+package sha256: BB510BEABEB5ACCB7394C09F43EA7288BB08FC1352CCD35DA5AFF781E1B48E6D
+source zip: dist/amn2-codex-vps-test-prep-dd0dd44-source.zip
+source sha256: E29DFD7B64727BC75C677EDE2B897C6C972AB25243FD7713B767ABE1E29E2BD1
+package status: package-ready-not-vps-smoked
+latest VPS-smoked source: de25576, live-rollout-pass-with-permission-repair
+```
+
+Latest AMN3 `P5-C006` verification:
+
+```text
+AMN2 toolchain check: passed
+AMN2 full pytest: 664 passed, 1 warning
+AMN2 git diff --check: passed
+package hygiene/test-extract: passed
+package entries: 5
+source files: 271
+forbidden source entries: absent
+shell scripts LF/no BOM: passed
+commit bindings: present
 ```
 
 Latest AMN3 `P5-C005` verification:
@@ -185,6 +200,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 - `P5-C003` Live rollout named gate: closed for AMN2 `de25576` on disposable test VPS; read-only API smoke passed, web/bot active, no public exposure.
 - `P5-C004` Secret handoff protocol: closed as docs-only protocol; operator local channel only for tokens/secrets/server config.
 - `P5-C005` Source-overlay permission preservation fix: closed as local package tooling/test follow-up; future package apply must use a rebuilt kit with the corrected script.
+- `P5-C006` Current-head package rebuild: closed for AMN2 `dd0dd44` as `package-ready-not-vps-smoked`; live apply/smoke still requires a separate named gate, recommended as `P5-C007`.
 
 ### Blocked Until Separate Gate
 
@@ -199,7 +215,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Критичные
 
-Сейчас нет активных default critical задач после закрытия `P5-C004` и `P5-C005`. Остаются только carried/gated directions: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates.
+Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005` и `P5-C006`. Остаются только carried/gated directions: `VPS-REBUILD-001`, write API/config delivery/public exposure and other separate named gates.
 
 ### Очень важные
 
@@ -247,7 +263,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: dd0dd44 Refresh client platform guidance
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P4-PRVTPRO-REFRESH-003 server status/latency UX boundary
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-C006 current-head package rebuild for AMN2 dd0dd44
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -272,8 +288,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P4-PRVTPRO-REFRESH-003`:
-No active default Phase 5 task remains. Choose an explicit named gate, wait for weekly upstream refresh, or open a new local-only implementation slice.
+Следующая рекомендация после закрытия `P5-C006`:
+`P5-C007` Named live update/smoke gate for AMN2 `dd0dd44` on the disposable test VPS, or choose an explicit local-only alternative first: `P5-L001` read-only status/latency display, `P5-L002` bot media local registry/upload for start/header assets, or `P5-L003` web/admin header asset local implementation.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;
