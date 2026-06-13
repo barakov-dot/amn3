@@ -16,14 +16,14 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-I003 + P6-I004 commercial/bot productization boundary
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-I005 Telegram profile icon gate policy
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: 0c6aa7c Add commercial bot productization boundary
+AMN2 current branch head: 19f3422 Add Telegram profile icon gate policy
 AMN2 latest VPS-smoked source-overlay/package head: 2215761 Polish operator web admin UX
 AMN2 latest VPS-smoked/package status: live-update-smoke-pass for `2215761`
-AMN2 package/smoke status for `0c6aa7c`: not package-rebuilt, not VPS-smoked
+AMN2 package/smoke status for `19f3422`: not package-rebuilt, not VPS-smoked
 ```
 
 ## Обязательное чтение в начале нового чата
@@ -41,6 +41,7 @@ research/amn2/phase-6-scoped-api-tokens-production-implementation-2026-06-13.md
 research/amn2/phase-6-user-self-service-surface-boundary-2026-06-13.md
 research/amn2/phase-6-capability-registry-integration-status-alignment-2026-06-13.md
 research/amn2/phase-6-commercial-bot-productization-boundary-2026-06-13.md
+research/amn2/phase-6-telegram-profile-icon-gate-policy-2026-06-13.md
 ```
 
 Historical Phase 5 handoff remains available at:
@@ -59,8 +60,8 @@ current_mode: private/operator-only
 Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
-last_closed: P6-I003 + P6-I004 Commercial and bot productization boundary
-next_recommendation: P6-I005 Telegram bot profile/icon apply gates
+last_closed: P6-I005 Telegram profile icon gate policy
+next_recommendation: P6-M002 + P6-N002 privacy-safe health/status and admin analytics bundle
 ```
 
 ## Safety Boundary
@@ -112,7 +113,7 @@ Critical gated/deferred, not executed:
 
 ### Очень важные
 
-- `P6-I005` Telegram bot profile/icon apply gates for access/support/news bots.
+No active accepted very-important tasks after `P6-I005`.
 
 Proposed, not active until accepted:
 
@@ -152,10 +153,10 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 Источник правды:
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
-- AMN2 current head: 0c6aa7c Add commercial bot productization boundary
+- AMN2 current head: 19f3422 Add Telegram profile icon gate policy
 - AMN2 latest VPS-smoked/package head: 2215761 Polish operator web admin UX
-- AMN2 package/smoke status for 0c6aa7c: not package-rebuilt, not VPS-smoked
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-I003 + P6-I004 commercial/bot productization boundary
+- AMN2 package/smoke status for 19f3422: not package-rebuilt, not VPS-smoked
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-I005 Telegram profile icon gate policy
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_6_PRODUCTIZATION.ru.md
@@ -170,6 +171,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - research/amn2/phase-6-user-self-service-surface-boundary-2026-06-13.md
 - research/amn2/phase-6-capability-registry-integration-status-alignment-2026-06-13.md
 - research/amn2/phase-6-commercial-bot-productization-boundary-2026-06-13.md
+- research/amn2/phase-6-telegram-profile-icon-gate-policy-2026-06-13.md
 
 Границы Phase 6:
 - это planning/security/productization lane, не автоматический public launch;
@@ -179,7 +181,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - код GPL/upstream не копируем.
 
 Следующая рекомендация:
-P6-I005 Telegram bot profile/icon apply gates for access/support/news bots.
+P6-M002 + P6-N002 privacy-safe health/status and admin analytics bundle.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;
