@@ -124,6 +124,7 @@ Phase 6 можно открывать только как planning/security/prod
 
 - `P6-C005` Production security review gate: completed as AMN3 local/docs/security review with focused AMN2 local security regression suite `98 passed, 1 warning`; evidence `research/amn2/phase-6-production-security-review-gate-2026-06-13.md`. Result: planning can continue, but public/self-service launch remains `no-go` until separate named gates. Follow-up added: `P6-N003` Integration status current-head alignment.
 - `P6-I001` Scoped API tokens production implementation: completed as AMN2 local-only code/tests/docs in commit `0b3ac1f Add API token production policy`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-scoped-api-tokens-production-implementation-2026-06-13.md`. Adds a machine-checkable production token policy manifest, keeps allowed scopes to `server:read`/`metrics:read`, records blocked future/config/write/backup/Local Agent scopes, enforces 30-day max TTL for route-connected tokens, aligns the disabled web/admin token form with the same TTL, and updates token policy docs. Verification: focused `18 passed, 1 warning`, expanded `59 passed, 1 warning`, `git diff --check` passed. Latest VPS-smoked/package head remains `2215761`; `0b3ac1f` is not package-rebuilt or VPS-smoked.
+- `P6-I002` User self-service surface separated from admin surface: completed as AMN2 local-only code/tests/docs in commit `b676e1b Add self-service surface boundary`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-user-self-service-surface-boundary-2026-06-13.md`. Adds `self-service` as a separate blocked-future surface, records future dashboard/config-delivery/device-revoke policy entries under `/self-service*`, requires separate self-service auth and own-account/device boundaries, and verifies no `/self-service*` route is mounted in the current web/admin app. Verification: RED `4 failed, 23 passed`, focused `27 passed`, expanded `43 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `b676e1b` is not package-rebuilt or VPS-smoked.
 
 ### Критичные
 
@@ -136,7 +137,6 @@ Active default critical tasks: none after `P6-C005`. Critical gated/deferred wor
 
 ### Очень важные
 
-- `P6-I002` User self-service surface separated from admin surface. Complexity: high. Depends on public exposure and config delivery decisions.
 - `P6-I003` Payments/manual approval boundary if commercial access is enabled. Complexity: medium/high. Depends on order lifecycle, fraud/manual review and support process.
 - `P6-I004` Support bot and news bot production split with separate tokens/scopes; current planning assets: `NEOBYATNAYA-AMNZ-SUPPORT-BOT.png`, `NEOBYATNAYA-AMNZ-NEWS-BOT.png`. Complexity: medium/high. Depends on bot identity/profile-icon gate and token/runtime separation.
 - `P6-I005` Telegram bot profile/icon apply gates for access/support/news bots. Complexity: medium. Depends on operator-local asset registry and Telegram identity mutation approval.
@@ -151,7 +151,7 @@ Active default critical tasks: none after `P6-C005`. Critical gated/deferred wor
 
 - `P6-N001` Public docs/API taxonomy if public docs are approved.
 - `P6-N002` Admin analytics without per-peer/user leakage.
-- `P6-N003` Integration status current-head alignment. Complexity: low/medium. Carried from `P6-C005` review as a local-only code/tests/docs follow-up to align stale AMN2 integration-status constants with the current branch/package distinction (`0b3ac1f` branch head, `2215761` latest VPS-smoked package head).
+- `P6-N003` Integration status current-head alignment. Complexity: low/medium. Carried from `P6-C005` review as a local-only code/tests/docs follow-up to align stale AMN2 integration-status constants with the current branch/package distinction (`b676e1b` branch head, `2215761` latest VPS-smoked package head).
 
 ### Простые
 
