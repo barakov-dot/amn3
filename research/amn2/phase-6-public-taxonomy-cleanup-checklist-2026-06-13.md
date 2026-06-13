@@ -123,9 +123,9 @@ cleanup/reinstall/destructive execution still requires a separate named gate.
 
 The default local-only Phase 6 queue is now empty. Practical next choices are:
 
-- single: `P6-C006` local package refresh/preflight for AMN2 `c46f664`, without
+- single: `P6-C008` current-head package refresh/preflight for AMN2 `c46f664`, without
   live apply;
-- pair: `P6-C006` local package refresh/preflight + current-head smoke plan,
+- pair: `P6-C008` current-head package refresh/preflight + current-head smoke plan,
   without VPS commands;
 - gated live path: open a named live gate only if the operator wants to update
   the disposable VPS from `b3102db` to the current AMN2 head.

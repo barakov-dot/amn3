@@ -73,7 +73,7 @@ Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
 last_closed: P6-N001 public docs/API taxonomy + P6-C007 checklist-only
-next_recommendation: default local-only queue is empty; next practical step is P6-C006 local package refresh/preflight for c46f664 or a separately named live/public/destructive gate
+next_recommendation: default local-only queue is empty; next practical step is P6-C008 current-head package refresh/preflight for c46f664 or a separately named live/public/destructive gate
 new_active_idea: P6-I007 interactive fresh-install wizard/bootstrap automation; P6-C007 destructive VPS cleanup/reinstall gate deferred until the operator explicitly decides to assemble/test the clean installer
 ```
 
@@ -215,10 +215,10 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - код GPL/upstream не копируем.
 
 Следующая рекомендация:
-P6-C006 local package refresh/preflight for c46f664 как local-only package/checklist step, без live apply, SSH, restart/deploy, public/config/write/destructive gates.
+P6-C008 current-head package refresh/preflight for c46f664 как local-only package/checklist step, без live apply, SSH, restart/deploy, public/config/write/destructive gates.
 
 Альтернатива парой:
-P6-C006 local package refresh/preflight + current-head smoke plan, если хочется подготовить обновление VPS/бота к отдельному named live gate, но пока не выполнять его.
+P6-C008 current-head package refresh/preflight + current-head smoke plan, если хочется подготовить обновление VPS/бота к отдельному named live gate, но пока не выполнять его.
 
 Постоянное правило:
 если в ходе выполнения задач появляется новая полезная мысль, добавлять ее в план по текущей шкале приоритетов и сразу сообщать, в какой раздел она добавлена.
