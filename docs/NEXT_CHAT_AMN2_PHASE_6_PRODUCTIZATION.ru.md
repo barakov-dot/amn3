@@ -21,9 +21,9 @@ AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
 AMN2 current branch head: b3102db Add client compatibility delivery boundary
-AMN2 latest VPS-smoked source-overlay/package head: 2215761 Polish operator web admin UX
-AMN2 latest VPS-smoked/package status: live-update-smoke-pass for `2215761`
-AMN2 package/smoke status for `b3102db`: package-ready-not-vps-smoked; local package evidence `research/amn2/phase-6-final-vps-refresh-package-b3102db-2026-06-13.md`
+AMN2 latest VPS-smoked source-overlay/package head: b3102db Add client compatibility delivery boundary
+AMN2 latest VPS-smoked/package status: live-update-smoke-pass for `b3102db`
+AMN2 package/smoke evidence for `b3102db`: `research/amn2/phase-6-final-vps-refresh-package-b3102db-2026-06-13.md` and `research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md`
 ```
 
 ## Обязательное чтение в начале нового чата
@@ -49,6 +49,7 @@ research/amn2/phase-6-telemetry-retention-upstream-refresh-2026-06-13.md
 research/amn2/phase-6-ios-amneziawg-field-diagnostic-2026-06-13.md
 research/amn2/phase-6-client-compatibility-copy-boundary-2026-06-13.md
 research/amn2/phase-6-final-vps-refresh-package-b3102db-2026-06-13.md
+research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md
 ```
 
 Historical Phase 5 handoff remains available at:
@@ -67,8 +68,8 @@ current_mode: private/operator-only
 Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
-last_closed: P6-C006 local package preflight for b3102db; live VPS apply/smoke still gated
-next_recommendation: P6-C006 live apply/smoke gate for b3102db, only if the operator explicitly opens the named live gate
+last_closed: P6-C006 live update/smoke for b3102db
+next_recommendation: P6-C002 + P6-I006 as local-only design/implementation for short one-tap tokenized config-link boundary plus commercial entitlement/audit boundary
 ```
 
 Standing planning rule: if a new useful Phase 6 idea appears during task
@@ -122,11 +123,6 @@ Critical gated/deferred, not executed:
   configs.
 - `P6-C003` Write API production gate.
 - `P6-C004` Production backup/restore/import gate.
-- `P6-C006` Final VPS package refresh/apply gate: carried from Phase 6 field
-  operations planning. Local package/preflight for AMN2 `b3102db` is complete
-  as `package-ready-not-vps-smoked`; live VPS upload/apply, service restart,
-  live bot verification and VPS smoke remain gated/deferred and require a
-  separate named live gate.
 - `VPS-REBUILD-001` destructive rebuild.
 - Local Agent write/config routes.
 - Production peer/user mutation.
@@ -170,8 +166,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: b3102db Add client compatibility delivery boundary
-- AMN2 latest VPS-smoked/package head: 2215761 Polish operator web admin UX
-- AMN2 package/smoke status for b3102db: package-ready-not-vps-smoked; local package evidence research/amn2/phase-6-final-vps-refresh-package-b3102db-2026-06-13.md
+- AMN2 latest VPS-smoked/package head: b3102db Add client compatibility delivery boundary
+- AMN2 package/smoke status for b3102db: live-update-smoke-pass; evidence research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md
 - AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-M004 + P6-X001 + P6-X002 client compatibility/copy boundary
 
 Сначала прочитай:
@@ -195,6 +191,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - research/amn2/phase-6-ios-amneziawg-field-diagnostic-2026-06-13.md
 - research/amn2/phase-6-client-compatibility-copy-boundary-2026-06-13.md
 - research/amn2/phase-6-final-vps-refresh-package-b3102db-2026-06-13.md
+- research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md
 
 Границы Phase 6:
 - это planning/security/productization lane, не автоматический public launch;
@@ -204,7 +201,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - код GPL/upstream не копируем.
 
 Следующая рекомендация:
-P6-C006 live apply/smoke gate for b3102db, только если оператор явно открывает named live gate.
+P6-C002 + P6-I006 как local-only design/implementation: short one-tap tokenized config-link boundary plus commercial entitlement/audit boundary, без открытия config delivery/public/write/payment/live gates.
 
 Постоянное правило:
 если в ходе выполнения задач появляется новая полезная мысль, добавлять ее в план по текущей шкале приоритетов и сразу сообщать, в какой раздел она добавлена.
