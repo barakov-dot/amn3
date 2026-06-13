@@ -16,7 +16,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-M003 + P6-S001 reconciliation/release boundary
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-S003 project operating system extraction template
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
@@ -44,6 +44,7 @@ research/amn2/phase-6-commercial-bot-productization-boundary-2026-06-13.md
 research/amn2/phase-6-telegram-profile-icon-gate-policy-2026-06-13.md
 research/amn2/phase-6-privacy-status-analytics-boundary-2026-06-13.md
 research/amn2/phase-6-reconciliation-release-boundary-2026-06-13.md
+research/amn2/phase-6-project-operating-system-template-2026-06-13.md
 ```
 
 Historical Phase 5 handoff remains available at:
@@ -62,8 +63,8 @@ current_mode: private/operator-only
 Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
-last_closed: P6-M003 + P6-S001 reconciliation/release boundary
-next_recommendation: P6-N004 aggregate telemetry retention/redaction policy
+last_closed: P6-S003 project operating system extraction template
+next_recommendation: P6-N004 + P6-S002 aggregate telemetry retention/redaction and recurring upstream refresh incorporation
 ```
 
 Standing planning rule: if a new useful Phase 6 idea appears during task
@@ -161,7 +162,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN2 current head: 3e1f4cc Add reconciliation release boundary
 - AMN2 latest VPS-smoked/package head: 2215761 Polish operator web admin UX
 - AMN2 package/smoke status for 3e1f4cc: not package-rebuilt, not VPS-smoked
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-M003 + P6-S001 reconciliation/release boundary
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-S003 project operating system extraction template
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_6_PRODUCTIZATION.ru.md
@@ -179,6 +180,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - research/amn2/phase-6-telegram-profile-icon-gate-policy-2026-06-13.md
 - research/amn2/phase-6-privacy-status-analytics-boundary-2026-06-13.md
 - research/amn2/phase-6-reconciliation-release-boundary-2026-06-13.md
+- research/amn2/phase-6-project-operating-system-template-2026-06-13.md
 
 Границы Phase 6:
 - это planning/security/productization lane, не автоматический public launch;
@@ -188,7 +190,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - код GPL/upstream не копируем.
 
 Следующая рекомендация:
-P6-N004 aggregate telemetry retention/redaction policy как local-only/docs/tests work.
+P6-N004 + P6-S002 вместе как local-only/docs/tests: закрепить retention/redaction для агрегатов и вписать это в регулярный upstream-refresh контур.
 
 Постоянное правило:
 если в ходе выполнения задач появляется новая полезная мысль, добавлять ее в план по текущей шкале приоритетов и сразу сообщать, в какой раздел она добавлена.
