@@ -16,15 +16,15 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-I007 fresh-install wizard boundary
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-N001 public taxonomy + P6-C007 checklist-only
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: 60d2570 Add fresh install wizard boundary
+AMN2 current branch head: c46f664 Add public taxonomy cleanup checklist
 AMN2 latest VPS-smoked source-overlay/package head: b3102db Add client compatibility delivery boundary
 AMN2 latest VPS-smoked/package status: live-update-smoke-pass for `b3102db`
 AMN2 package/smoke evidence for `b3102db`: `research/amn2/phase-6-final-vps-refresh-package-b3102db-2026-06-13.md` and `research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md`
-AMN2 current head `60d2570` is local-only and not package-rebuilt/VPS-smoked.
+AMN2 current head `c46f664` is local-only and not package-rebuilt/VPS-smoked.
 ```
 
 ## Обязательное чтение в начале нового чата
@@ -53,6 +53,7 @@ research/amn2/phase-6-final-vps-refresh-package-b3102db-2026-06-13.md
 research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md
 research/amn2/phase-6-config-link-entitlement-boundary-2026-06-13.md
 research/amn2/phase-6-fresh-install-wizard-boundary-2026-06-13.md
+research/amn2/phase-6-public-taxonomy-cleanup-checklist-2026-06-13.md
 ```
 
 Historical Phase 5 handoff remains available at:
@@ -71,8 +72,8 @@ current_mode: private/operator-only
 Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
-last_closed: P6-I007 interactive fresh-install wizard/bootstrap automation
-next_recommendation: P6-N001 public docs/API taxonomy if public docs are approved as local-only docs/tests
+last_closed: P6-N001 public docs/API taxonomy + P6-C007 checklist-only
+next_recommendation: default local-only queue is empty; next practical step is P6-C006 local package refresh/preflight for c46f664 or a separately named live/public/destructive gate
 new_active_idea: P6-I007 interactive fresh-install wizard/bootstrap automation; P6-C007 destructive VPS cleanup/reinstall gate deferred until the operator explicitly decides to assemble/test the clean installer
 ```
 
@@ -151,7 +152,6 @@ No active important tasks after `P6-M004`.
 
 ### Нормальные
 
-- `P6-N001` Public docs/API taxonomy if public docs are approved.
 - `P4-PRVTPRO-REFRESH-003-LIVE` live probes/actions: carried from Phase 4, still gated, not executed.
 
 ### Простые
@@ -175,11 +175,11 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 Источник правды:
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
-- AMN2 current head: 60d2570 Add fresh install wizard boundary
+- AMN2 current head: c46f664 Add public taxonomy cleanup checklist
 - AMN2 latest VPS-smoked/package head: b3102db Add client compatibility delivery boundary
 - AMN2 package/smoke status for b3102db: live-update-smoke-pass; evidence research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md
-- AMN2 current head 60d2570 is local-only and not package-rebuilt/VPS-smoked.
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-I007 fresh-install wizard boundary
+- AMN2 current head c46f664 is local-only and not package-rebuilt/VPS-smoked.
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-N001 public taxonomy + P6-C007 checklist-only
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_6_PRODUCTIZATION.ru.md
@@ -205,6 +205,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md
 - research/amn2/phase-6-config-link-entitlement-boundary-2026-06-13.md
 - research/amn2/phase-6-fresh-install-wizard-boundary-2026-06-13.md
+- research/amn2/phase-6-public-taxonomy-cleanup-checklist-2026-06-13.md
 
 Границы Phase 6:
 - это planning/security/productization lane, не автоматический public launch;
@@ -214,10 +215,10 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - код GPL/upstream не копируем.
 
 Следующая рекомендация:
-P6-N001 public docs/API taxonomy if public docs are approved как local-only docs/tests, без открытия public/config/write/payment/live gates.
+P6-C006 local package refresh/preflight for c46f664 как local-only package/checklist step, без live apply, SSH, restart/deploy, public/config/write/destructive gates.
 
 Альтернатива парой:
-P6-N001 + P6-C007 checklist-only, если хочется вместе оформить public taxonomy и критерии будущего destructive cleanup/reinstall gate, но без зачистки VPS.
+P6-C006 local package refresh/preflight + current-head smoke plan, если хочется подготовить обновление VPS/бота к отдельному named live gate, но пока не выполнять его.
 
 Постоянное правило:
 если в ходе выполнения задач появляется новая полезная мысль, добавлять ее в план по текущей шкале приоритетов и сразу сообщать, в какой раздел она добавлена.
