@@ -53,6 +53,7 @@ Phase 5 стоит запускать после закрытия текущих
 - `P5-O002` Web-admin gated-action and Russian-first UX cleanup: AMN2 commit `2215761` makes the operator web/admin brand `AmneziyaDA`, aligns sampled pages Russian-first, centers dashboard count/entity cards and disables create/token/template write affordances with named-gate notes; evidence `research/amn2/phase-5-web-admin-gated-action-russian-ux-2026-06-12.md`.
 - `P5-C009` Current-head package rebuild for AMN2 `2215761`: rebuilt local package/source kit from current AMN2 head, verified toolchain on CPython 3.12.13, full AMN2 suite `675 passed, 1 warning`, package hygiene/test-extract and recorded package status `package-ready-not-vps-smoked`; evidence `research/amn2/phase-5-current-head-package-rebuild-2215761-2026-06-13.md`.
 - `P5-C010` Named live update/smoke gate for AMN2 `2215761`: updated the disposable test VPS source overlay from `9bff807` to `2215761`, read-only API smoke passed with run_id `20260613T045107Z`, web/bot services are active after restart and remote listeners remain loopback/closed as expected; evidence `research/amn2/phase-5-live-update-smoke-2215761-2026-06-13.md`.
+- `P5-D001` Operator-only pilot acceptance and Phase 6 entry decision: accepted the current private/operator-only baseline after `P5-C010`, kept Phase 6 as `planning-ready only`, and recorded `P6-C005` Production security review gate as the next recommended local/docs/security step; evidence `research/amn2/phase-5-operator-pilot-acceptance-phase-6-entry-2026-06-13.md`.
 - `P5-S001` Keep next-chat handoff current: Phase 5 handoff prepared at `docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md`; existing weekly upstream automations were updated to Phase 5 prompts without creating duplicates.
 
 ### Неисполненные deferred/gated направления
@@ -67,7 +68,7 @@ Phase 5 стоит запускать после закрытия текущих
 
 ### Критичные
 
-Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008`, `P5-S003`, `P5-C007`, `P5-O001`, `P5-O002`, `P5-C009` и `P5-C010`.
+Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008`, `P5-S003`, `P5-C007`, `P5-O001`, `P5-O002`, `P5-C009`, `P5-C010` и `P5-D001`.
 
 Критичные gated/deferred, не выполнены:
 
@@ -117,7 +118,7 @@ Phase 6 нужна только если после operator-only pilot мы р�
 
 ## Phase 6 рекомендации
 
-Phase 6 следует открывать только после решения, что AMN2 выходит за пределы private/operator-only режима. Рекомендуемый вход в Phase 6 теперь: `P5-D001` operator-only pilot acceptance закрыт после успешного `P5-C010`, и есть явное решение идти в public/self-service/productization.
+Phase 6 можно открывать только как planning/security/productization lane после закрытого `P5-D001`. Это не открывает public/self-service live work само по себе. Рекомендуемый первый шаг Phase 6: `P6-C005` Production security review gate. Public exposure, config delivery, write API, backup/import/reboot, Local Agent write/config routes and destructive rebuild remain separate named gates.
 
 ### Критичные
 

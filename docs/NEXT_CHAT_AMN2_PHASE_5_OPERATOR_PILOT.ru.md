@@ -16,7 +16,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-C010 live update/smoke for AMN2 2215761
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-D001 operator-only pilot acceptance and Phase 6 entry decision
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
@@ -118,6 +118,7 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 - `P5-O002`: web-admin gated-action and Russian-first UX cleanup, AMN2 commit `2215761`, local-only implementation/test slice that makes the sampled web/admin UI use `AmneziyaDA`, Russian-first headings/navigation, centered two-line dashboard counts and disabled named-gate create/token/template write affordances; evidence `research/amn2/phase-5-web-admin-gated-action-russian-ux-2026-06-12.md`.
 - `P5-C009`: current-head package rebuild for AMN2 `2215761`, package-ready-not-vps-smoked after CPython 3.12.13 toolchain check, full AMN2 suite and package hygiene/test-extract; evidence `research/amn2/phase-5-current-head-package-rebuild-2215761-2026-06-13.md`.
 - `P5-C010`: live update/smoke for AMN2 `2215761`, source overlay on the disposable test VPS passed, read-only API smoke passed with run_id `20260613T045107Z`, web/bot are active after restart, and remote listeners remained loopback/closed as expected; evidence `research/amn2/phase-5-live-update-smoke-2215761-2026-06-13.md`.
+- `P5-D001`: operator-only pilot acceptance and Phase 6 entry decision, accepted the current private/operator-only baseline, kept Phase 6 as `planning-ready only`, and set `P6-C005` Production security review gate as the next recommended local/docs/security step; evidence `research/amn2/phase-5-operator-pilot-acceptance-phase-6-entry-2026-06-13.md`.
 
 Latest AMN2 verification:
 
@@ -159,6 +160,18 @@ web/bot services after restart: active
 loopback /login: 200
 remote listener snapshot: 127.0.0.1:3030 only; 3040/80/443 absent
 VPS_APPLY_ENABLED: false
+```
+
+Latest AMN3 `P5-D001` decision:
+
+```text
+decision: operator-only-pilot-accepted
+current_mode: private/operator-only
+latest_VPS_smoked_head: 2215761
+Phase_5_default_queue: empty
+Phase_6_entry: planning-ready only
+Phase_6_live_public_self_service: not opened
+next_recommendation: P6-C005 Production security review gate
 ```
 
 Latest AMN3 `P5-C008` verification:
@@ -281,7 +294,7 @@ These are not active Phase 4 tasks anymore. They are carried into Phase 5 with e
 
 ### Критичные
 
-Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008`, `P5-S003`, `P5-C007`, `P5-O001`, `P5-O002`, `P5-C009` и `P5-C010`.
+Сейчас нет активных default critical задач после закрытия `P5-C004`, `P5-C005`, `P5-C006`, `P5-L002`, `P5-L001`, `P5-C008`, `P5-S003`, `P5-C007`, `P5-O001`, `P5-O002`, `P5-C009`, `P5-C010` и `P5-D001`.
 
 Критичные deferred/gated, не исполнены:
 
@@ -341,7 +354,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: 2215761 Polish operator web admin UX
 - AMN2 latest VPS-smoked/package head: 2215761 Polish operator web admin UX
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-C010 live update/smoke for AMN2 2215761
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-D001 operator-only pilot acceptance and Phase 6 entry decision
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_5_OPERATOR_PILOT.ru.md
@@ -366,8 +379,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 3. Выведи действующий план с градацией: критичные, очень важные, важные, нормальные, простые, косметические.
 4. То, что пришло из Phase 4, пометь как carried from Phase 4 и укажи важность/gate.
 
-Следующая рекомендация после закрытия `P5-C010`:
-`P5-D001` Operator-only pilot acceptance and Phase 6 entry decision.
+Следующая рекомендация после закрытия `P5-D001`:
+`P6-C005` Production security review gate. Начинать как local/docs/security review; не открывать public exposure, config delivery, write API, backup/import/reboot, Local Agent mutations или destructive VPS actions самим фактом Phase 6.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;
