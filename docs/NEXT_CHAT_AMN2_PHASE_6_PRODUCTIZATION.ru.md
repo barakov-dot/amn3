@@ -16,14 +16,14 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-N004 + P6-S002 telemetry retention/upstream refresh incorporation
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-M004 + P6-X001 + P6-X002 client compatibility/copy boundary
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: a9f53d7 Add telemetry retention refresh policy
+AMN2 current branch head: b3102db Add client compatibility delivery boundary
 AMN2 latest VPS-smoked source-overlay/package head: 2215761 Polish operator web admin UX
 AMN2 latest VPS-smoked/package status: live-update-smoke-pass for `2215761`
-AMN2 package/smoke status for `a9f53d7`: not package-rebuilt, not VPS-smoked
+AMN2 package/smoke status for `b3102db`: not package-rebuilt, not VPS-smoked
 ```
 
 ## Обязательное чтение в начале нового чата
@@ -47,6 +47,7 @@ research/amn2/phase-6-reconciliation-release-boundary-2026-06-13.md
 research/amn2/phase-6-project-operating-system-template-2026-06-13.md
 research/amn2/phase-6-telemetry-retention-upstream-refresh-2026-06-13.md
 research/amn2/phase-6-ios-amneziawg-field-diagnostic-2026-06-13.md
+research/amn2/phase-6-client-compatibility-copy-boundary-2026-06-13.md
 ```
 
 Historical Phase 5 handoff remains available at:
@@ -65,8 +66,8 @@ current_mode: private/operator-only
 Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
-last_closed: P6-N004 + P6-S002 telemetry retention/upstream refresh incorporation
-next_recommendation: P6-M004 iOS AmneziaWG import/connectivity diagnostic boundary
+last_closed: P6-M004 + P6-X001 + P6-X002 client compatibility/copy boundary
+next_recommendation: P6-C006 Final VPS package refresh/apply gate, only if the operator explicitly opens the named live gate
 ```
 
 Standing planning rule: if a new useful Phase 6 idea appears during task
@@ -115,7 +116,9 @@ No active default critical tasks after `P6-C005`.
 Critical gated/deferred, not executed:
 
 - `P6-C001` Public exposure gate.
-- `P6-C002` Config delivery gate.
+- `P6-C002` Config delivery gate. This also includes short one-tap tokenized
+  config links if product wants Telegram copy UX that always works for long
+  configs.
 - `P6-C003` Write API production gate.
 - `P6-C004` Production backup/restore/import gate.
 - `P6-C006` Final VPS package refresh/apply gate: carried from Phase 6 field
@@ -136,15 +139,7 @@ Proposed, not active until accepted:
 
 ### Важные
 
-- `P6-M004` iOS AmneziaWG import/connectivity diagnostic boundary: carried from
-  Phase 6 field evidence on 2026-06-13, important priority. Default scope is
-  local-only log/config compatibility review and docs/tests. The compatibility
-  matrix must distinguish iOS DefaultVPN as the primary RF-available path, iOS
-  AmneziaWG as an installed/legacy-client path, and Android AmneziaWG as a
-  separate supported-client path. Live VPS reachability probes, SSH, service
-  restart, package apply/rebuild, config delivery, production peer/user
-  mutation, firewall/provider changes and raw QR/`vpn://`/`.conf` publication
-  remain gated.
+No active important tasks after `P6-M004`.
 
 ### Нормальные
 
@@ -157,8 +152,7 @@ No active simple tasks after `P6-S003` and `P6-S002`.
 
 ### Косметические
 
-- `P6-X001` Public product copy polish.
-- `P6-X002` Brand/media consistency across bots, panel and docs.
+No active cosmetic tasks after `P6-X001` and `P6-X002`.
 
 ## Сообщение Для Нового Чата
 
@@ -173,10 +167,10 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 Источник правды:
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
-- AMN2 current head: a9f53d7 Add telemetry retention refresh policy
+- AMN2 current head: b3102db Add client compatibility delivery boundary
 - AMN2 latest VPS-smoked/package head: 2215761 Polish operator web admin UX
-- AMN2 package/smoke status for a9f53d7: not package-rebuilt, not VPS-smoked
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-N004 + P6-S002 telemetry retention/upstream refresh incorporation
+- AMN2 package/smoke status for b3102db: not package-rebuilt, not VPS-smoked
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-M004 + P6-X001 + P6-X002 client compatibility/copy boundary
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_6_PRODUCTIZATION.ru.md
@@ -196,6 +190,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - research/amn2/phase-6-reconciliation-release-boundary-2026-06-13.md
 - research/amn2/phase-6-project-operating-system-template-2026-06-13.md
 - research/amn2/phase-6-telemetry-retention-upstream-refresh-2026-06-13.md
+- research/amn2/phase-6-ios-amneziawg-field-diagnostic-2026-06-13.md
+- research/amn2/phase-6-client-compatibility-copy-boundary-2026-06-13.md
 
 Границы Phase 6:
 - это planning/security/productization lane, не автоматический public launch;
@@ -205,7 +201,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - код GPL/upstream не копируем.
 
 Следующая рекомендация:
-P6-X001 + P6-X002 вместе как local-only/docs/tests: public product copy polish и brand/media consistency без открытия public/config/write/live gates.
+P6-C006 Final VPS package refresh/apply gate, только если оператор явно открывает named live gate.
 
 Постоянное правило:
 если в ходе выполнения задач появляется новая полезная мысль, добавлять ее в план по текущей шкале приоритетов и сразу сообщать, в какой раздел она добавлена.

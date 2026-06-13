@@ -132,11 +132,12 @@ Phase 6 можно открывать только как planning/security/prod
 - `P6-M003` Attach-existing-server reconciliation beyond read-only report mode + `P6-S001` Release checklist and changelog: completed together as AMN2 local-only code/tests/docs in commit `3e1f4cc Add reconciliation release boundary`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-reconciliation-release-boundary-2026-06-13.md`. Adds a machine-checkable report-only reconciliation/release boundary, keeps live reconciliation, local device creation, peer removal, server config overwrite, package apply/rebuild on VPS, public exposure, config delivery, write API, Local Agent mutation and production peer/user mutation blocked, and exposes safe status through web `/integration-status`. Verification: RED `1 error, 1 warning`, focused `11 passed, 1 warning`, expanded `81 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `3e1f4cc` is not package-rebuilt or VPS-smoked.
 - `P6-S003` Project operating system extraction template: completed as AMN3 docs-only work; evidence `research/amn2/phase-6-project-operating-system-template-2026-06-13.md`. Adds clean reusable templates `docs/templates/PROJECT_OPERATING_SYSTEM_TEMPLATE.ru.md` and `docs/templates/NEXT_PROJECT_BOOTSTRAP.ru.md` so the AMN2/AMN3 project-memory process can be reused for a future project without AMN2-specific details. No AMN2 runtime code changed.
 - `P6-N004` Aggregate telemetry retention/redaction policy + `P6-S002` Recurring upstream refresh incorporation: completed together as AMN2 local-only code/tests/docs in commit `a9f53d7 Add telemetry retention refresh policy`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-telemetry-retention-upstream-refresh-2026-06-13.md`. Adds a machine-checkable telemetry retention/redaction and upstream refresh incorporation manifest, keeps raw telemetry export and upstream refresh live actions blocked, records watcher outputs as candidate rows/evidence only, and exposes safe status through web `/integration-status`. Verification: RED `1 error, 1 warning`, focused `11 passed, 1 warning`, expanded `68 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `a9f53d7` is not package-rebuilt or VPS-smoked.
+- `P6-M004` iOS AmneziaWG import/connectivity diagnostic boundary + `P6-X001` Public product copy polish + `P6-X002` Brand/media consistency: completed together as AMN2 local-only code/tests/docs in commit `b3102db Add client compatibility delivery boundary`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-client-compatibility-copy-boundary-2026-06-13.md`. Adds explicit client roles for iOS DefaultVPN as the primary RF path, iOS AmneziaWG as installed/legacy, and Android AmneziaWG as a separate supported path; aligns Telegram delivery copy, web config-template copy, API/web `/integration-status`, README and setup docs. Verification: RED client/status tests, focused `26 passed, 1 warning`, expanded `290 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `b3102db` is not package-rebuilt or VPS-smoked. Follow-up: short one-tap tokenized config delivery links remain inside `P6-C002`.
 
 ### Критичные
 
 - `P6-C001` Public exposure gate: domain/Caddy/HTTPS/public panel/API decision with threat model. Complexity: high. Depends on security review, auth/session hardening, listener/firewall plan, rollback.
-- `P6-C002` Config delivery gate: public/self-service delivery, tokenized links, TTL, revoke, audit, redaction. Complexity: high. Depends on secret-bearing artifact policy and client compatibility QA.
+- `P6-C002` Config delivery gate: public/self-service delivery, short one-tap tokenized config links, TTL, revoke, audit, redaction. Complexity: high. Depends on secret-bearing artifact policy and client compatibility QA.
 - `P6-C003` Write API production gate: `/api/clients` CRUD, operation queue, idempotency, locking, partial failure and rollback. Complexity: very high. Depends on WAPI design tasks and local fake-runner validation.
 - `P6-C004` Production backup/restore/import gate: encrypted backups, restore preview/apply, disaster recovery drill. Complexity: high/destructive. Depends on retention policy and restore tests.
 - `P6-C006` Final VPS package refresh/apply gate: package rebuild/apply, service restart, live bot verification and VPS smoke after local productization tasks are reviewed. Complexity: high/live. Depends on explicit named gate, rollback plan, secret-safe evidence and current package/source-head comparison.
@@ -153,15 +154,7 @@ Proposed, not active until accepted:
 
 ### Важные
 
-- `P6-M004` iOS AmneziaWG import/connectivity diagnostic boundary: carried from
-  Phase 6 field evidence on 2026-06-13, important priority. Default scope is
-  local-only iPhone log/config compatibility review and docs/tests. The
-  compatibility matrix must distinguish iOS DefaultVPN as the primary
-  RF-available path, iOS AmneziaWG as an installed/legacy-client path, and
-  Android AmneziaWG as a separate supported-client path. Live VPS reachability
-  probes, SSH, service restart, package apply/rebuild, config delivery,
-  production peer/user mutation, firewall/provider changes and raw
-  QR/`vpn://`/`.conf` publication remain gated.
+No active important tasks after `P6-M004`.
 
 ### Нормальные
 
@@ -173,5 +166,4 @@ No active simple tasks after `P6-S003` and `P6-S002`.
 
 ### Косметические
 
-- `P6-X001` Public product copy polish.
-- `P6-X002` Brand/media consistency across bots, panel and docs.
+No active cosmetic tasks after `P6-X001` and `P6-X002`.
