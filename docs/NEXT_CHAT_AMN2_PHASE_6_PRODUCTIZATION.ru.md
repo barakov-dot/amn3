@@ -16,15 +16,14 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-C008 current-head package refresh/preflight
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-C009 live update/smoke for c46f664
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
 AMN2 current branch head: c46f664 Add public taxonomy cleanup checklist
-AMN2 latest VPS-smoked source-overlay/package head: b3102db Add client compatibility delivery boundary
-AMN2 latest VPS-smoked/package status: live-update-smoke-pass for `b3102db`
-AMN2 package/smoke evidence for `b3102db`: `research/amn2/phase-6-final-vps-refresh-package-b3102db-2026-06-13.md` and `research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md`
-AMN2 current head `c46f664` is package-ready locally and not VPS-smoked; evidence `research/amn2/phase-6-current-head-package-preflight-c46f664-2026-06-13.md`.
+AMN2 latest VPS-smoked source-overlay/package head: c46f664 Add public taxonomy cleanup checklist
+AMN2 latest VPS-smoked/package status: live-update-smoke-pass for `c46f664`
+AMN2 package/smoke evidence for `c46f664`: `research/amn2/phase-6-current-head-package-preflight-c46f664-2026-06-13.md` and `research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md`
 ```
 
 ## Обязательное чтение в начале нового чата
@@ -55,6 +54,7 @@ research/amn2/phase-6-config-link-entitlement-boundary-2026-06-13.md
 research/amn2/phase-6-fresh-install-wizard-boundary-2026-06-13.md
 research/amn2/phase-6-public-taxonomy-cleanup-checklist-2026-06-13.md
 research/amn2/phase-6-current-head-package-preflight-c46f664-2026-06-13.md
+research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
 ```
 
 Historical Phase 5 handoff remains available at:
@@ -73,8 +73,8 @@ current_mode: private/operator-only
 Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
-last_closed: P6-C008 current-head package refresh/preflight for c46f664
-next_recommendation: default local-only queue is empty; next practical step is optional P6-C009 named live apply/smoke gate for c46f664 if the operator wants the disposable VPS/bot updated
+last_closed: P6-C009 live update/smoke for c46f664
+next_recommendation: P6-X003 package runbook escaping hygiene as AMN3 docs/tooling hygiene only, without rebuilding or altering already-smoked c46f664 package artifacts
 new_active_idea: P6-I007 interactive fresh-install wizard/bootstrap automation; P6-C007 destructive VPS cleanup/reinstall gate deferred until the operator explicitly decides to assemble/test the clean installer
 ```
 
@@ -82,8 +82,8 @@ Standing planning rule: if a new useful Phase 6 idea appears during task
 execution, add it to the active plan under the existing priority scale and state
 which priority bucket it was added to. This rule added `P6-N004` to normal
 priority, `P6-M004` to important priority, `P6-C006` to critical
-gated/deferred priority, `P6-I007` to very important priority and `P6-C007` to
-critical gated/deferred priority.
+gated/deferred priority, `P6-I007` to very important priority, `P6-C007` to
+critical gated/deferred priority and `P6-X003` to cosmetic priority.
 
 ## Safety Boundary
 
@@ -137,13 +137,6 @@ Critical gated/deferred, not executed:
   after a separate named destructive gate, explicit retention decision, stop
   criteria and operator acceptance of data loss. Target server currently in
   use: operator-provided `89.185.80.166`.
-- `P6-C009` Named live apply/smoke gate for AMN2 `c46f664` on the current
-  disposable VPS `89.185.80.166`: carried from Phase 6 P6-C008 package
-  preflight, optional and not opened. Requires exact operator phrase, package
-  checksum verification, source overlay apply, read-only loopback API smoke,
-  web/bot runtime verification and safe evidence. Must not open public
-  exposure/config delivery/write API/Local Agent mutation/backup-import/
-  destructive cleanup/Telegram identity mutation.
 - `VPS-REBUILD-001` destructive rebuild.
 - Local Agent write/config routes.
 - Production peer/user mutation.
@@ -168,7 +161,9 @@ No active simple tasks after `P6-S003` and `P6-S002`.
 
 ### Косметические
 
-No active cosmetic tasks after `P6-X001` and `P6-X002`.
+- `P6-X003` Package runbook escaping hygiene: carried from Phase 6 `P6-C009`
+  smoke evidence. AMN3 docs/tooling hygiene only; do not rebuild or alter the
+  already-smoked `c46f664` package artifact.
 
 ## Сообщение Для Нового Чата
 
@@ -184,10 +179,9 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
 - AMN2 current head: c46f664 Add public taxonomy cleanup checklist
-- AMN2 latest VPS-smoked/package head: b3102db Add client compatibility delivery boundary
-- AMN2 package/smoke status for b3102db: live-update-smoke-pass; evidence research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md
-- AMN2 current head c46f664 is package-ready locally and not VPS-smoked; evidence research/amn2/phase-6-current-head-package-preflight-c46f664-2026-06-13.md
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-C008 current-head package refresh/preflight
+- AMN2 latest VPS-smoked/package head: c46f664 Add public taxonomy cleanup checklist
+- AMN2 package/smoke status for c46f664: live-update-smoke-pass; evidence research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-C009 live update/smoke for c46f664
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_6_PRODUCTIZATION.ru.md
@@ -215,6 +209,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - research/amn2/phase-6-fresh-install-wizard-boundary-2026-06-13.md
 - research/amn2/phase-6-public-taxonomy-cleanup-checklist-2026-06-13.md
 - research/amn2/phase-6-current-head-package-preflight-c46f664-2026-06-13.md
+- research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
 
 Границы Phase 6:
 - это planning/security/productization lane, не автоматический public launch;
@@ -224,8 +219,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - код GPL/upstream не копируем.
 
 Следующая рекомендация:
-P6-C009 named live apply/smoke gate for c46f664, только если нужно обновить текущий disposable VPS/бот. Для старта нужна отдельная точная фраза:
-`Открываю P6-C009 live apply/smoke gate для c46f664 на текущем disposable VPS 89.185.80.166.`
+P6-X003 package runbook escaping hygiene как AMN3 docs/tooling hygiene only, без rebuild/изменения уже VPS-smoked package artifacts.
 
 Альтернатива парой:
 P6-C001 + P6-C002 decision checklist refresh как docs-only, без открытия public exposure или config delivery.
