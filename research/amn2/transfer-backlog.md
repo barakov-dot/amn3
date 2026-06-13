@@ -1,5 +1,24 @@
 # `amn2` Transfer Backlog
 
+After Phase 6 FI-M001 + FI-M002 + FI-M003 fresh installer readiness planning
+2026-06-13: completed as AMN2 local-only code/tests/docs in commit `7416fb0
+Add fresh installer readiness planning`, pushed to `amn2/codex-vps-test-prep`.
+Evidence `research/amn2/after-phase-6-fresh-installer-readiness-planning-2026-06-13.md`.
+The slice adds `fresh-install-readiness.v1`, target preflight matrix, runtime
+mode decision and package hygiene checklist to the existing fresh installer
+plan. Verification: RED `2 failed, 6 passed`, focused `10 passed`, full AMN2
+suite `716 passed, 1 StarletteDeprecationWarning`, `git diff --check` and staged
+check passed. Slice не выполнял live VPS command, SSH command, target diagnostic
+execution, package apply/rebuild on VPS, service restart/deploy, public
+exposure, real config delivery, write API, Local Agent mutation,
+backup/import/reboot, production peer/user mutation, destructive VPS action,
+Telegram token use, live bot send, Telegram identity/profile mutation,
+secret-bearing evidence publication or upstream/GPL code copy. `FI-M001`,
+`FI-M002` and `FI-M003` removed from the active recommendation. Latest
+VPS-smoked/package head remains `c46f664`; AMN2 `7416fb0` is local-only and not
+package-rebuilt/VPS-smoked. Next recommendation: `FI-N001 + FI-N002 + FI-S001`
+as local-only docs/test evidence readiness.
+
 After Phase 6 FI-I001 + FI-I002 + FI-I003 fresh installer plan renderer
 2026-06-13: completed as AMN2 local-only code/tests/docs in commit `de635a0
 Add fresh installer plan renderer`, pushed to `amn2/codex-vps-test-prep`.

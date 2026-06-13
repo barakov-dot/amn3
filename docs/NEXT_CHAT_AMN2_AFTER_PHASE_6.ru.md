@@ -13,14 +13,14 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 ```text
 AMN3 repo: barakov-dot/amn3
 AMN3 branch: master
-AMN3 checkpoint: verify with git log -1; latest completed slice is P6-S004 Phase 6 closeout / next-chat handoff / fresh installer backlog grooming
+AMN3 checkpoint: verify with git log -1; latest completed slice is FI-M001 + FI-M002 + FI-M003 fresh installer readiness planning
 
 AMN2 repo: barakov-dot/amn2
 AMN2 branch: codex-vps-test-prep
-AMN2 current head: de635a0 Add fresh installer plan renderer
+AMN2 current head: 7416fb0 Add fresh installer readiness planning
 AMN2 latest VPS-smoked/package head: c46f664 Add public taxonomy cleanup checklist
 AMN2 package/smoke status: live-update-smoke-pass for c46f664
-AMN2 local-only after-smoke head: de635a0, not package-rebuilt/VPS-smoked
+AMN2 local-only after-smoke head: 7416fb0, not package-rebuilt/VPS-smoked
 ```
 
 ## Read First
@@ -35,6 +35,7 @@ research/amn2/transfer-backlog.md
 docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md
 research/amn2/phase-6-closeout-next-chat-fresh-installer-backlog-2026-06-13.md
 research/amn2/after-phase-6-fresh-installer-plan-renderer-2026-06-13.md
+research/amn2/after-phase-6-fresh-installer-readiness-planning-2026-06-13.md
 research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
 research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md
 ```
@@ -47,7 +48,7 @@ current_mode: private/operator-only
 public_self_service_launch: not opened
 latest_vps_smoked_head: c46f664
 default_local_queue: empty
-next_recommendation: FI-M001 + FI-M002 + FI-M003 as local-only installer preflight/runtime/package planning, or P6-C001 + P6-C002 as docs-only gate decision refresh
+next_recommendation: FI-N001 + FI-N002 + FI-S001 as local-only docs/test evidence readiness, or P6-C001 + P6-C002 as docs-only gate decision refresh
 ```
 
 Phase 6 produced planning/security/productization boundaries and confirmed the
@@ -61,6 +62,12 @@ After Phase 6, `FI-I001 + FI-I002 + FI-I003` were completed in AMN2 commit
 added versioned installer question/answer schemas, a rendered plan, secret
 handoff protocol binding and the canonical `scripts/test.ps1` Windows/Codex
 test wrapper. This head is not package-rebuilt or VPS-smoked.
+
+After that, `FI-M001 + FI-M002 + FI-M003` were completed in AMN2 commit
+`7416fb0 Add fresh installer readiness planning` as local-only code/tests/docs.
+This added `fresh-install-readiness.v1`, target preflight matrix, runtime mode
+decision and package hygiene checklist. This head is not package-rebuilt or
+VPS-smoked.
 
 ## Safety Boundary
 
@@ -118,14 +125,17 @@ default. Completed after Phase 6:
 FI-I001 Installer question model hardening
 FI-I002 Install plan renderer
 FI-I003 Secret handoff checklist binding
+FI-M001 Target OS/runtime preflight matrix
+FI-M002 Runtime mode decision
+FI-M003 Package hygiene integration
 ```
 
 The recommended local-only next bundle is:
 
 ```text
-FI-M001 Target OS/runtime preflight matrix
-FI-M002 Runtime mode decision
-FI-M003 Package hygiene integration
+FI-N001 Smoke/evidence template
+FI-N002 Existing-server reconciliation input
+FI-S001 Installer docs index
 ```
 
 ## Suggested Next Steps
@@ -133,7 +143,7 @@ FI-M003 Package hygiene integration
 Recommended triple:
 
 ```text
-FI-M001 + FI-M002 + FI-M003 as local-only preflight/runtime/package planning for the clean installer path.
+FI-N001 + FI-N002 + FI-S001 as local-only docs/test evidence readiness for the clean installer path.
 ```
 
 Pair alternative:
@@ -145,7 +155,7 @@ P6-C001 + P6-C002 decision checklist refresh as docs-only, without opening publi
 Single alternative:
 
 ```text
-FI-M001 target OS/runtime preflight matrix as local-only docs/tests/code.
+FI-N001 smoke/evidence template as local-only docs/tests/code.
 ```
 
 Do not run live/destructive work unless the operator gives a separate exact

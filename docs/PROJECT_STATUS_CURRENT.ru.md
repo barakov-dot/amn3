@@ -1,5 +1,24 @@
 # Текущий override 2026-06-09
 
+After Phase 6 `FI-M001 + FI-M002 + FI-M003` fresh installer readiness planning
+was completed on 2026-06-13 as AMN2 local-only code/tests/docs. Evidence:
+`research/amn2/after-phase-6-fresh-installer-readiness-planning-2026-06-13.md`.
+AMN2 branch `codex-vps-test-prep` advanced to `7416fb0 Add fresh installer
+readiness planning` and was pushed to `amn2/codex-vps-test-prep`. The slice
+adds `fresh-install-readiness.v1`, target OS/runtime preflight matrix, runtime
+mode decision and package hygiene checklist to the fresh installer plan.
+Verification returned RED `2 failed, 6 passed`, focused `10 passed`, full AMN2
+suite `716 passed, 1 StarletteDeprecationWarning`, and `git diff --check` /
+`git diff --cached --check` passed. No live VPS command, SSH command, target
+diagnostic execution, package apply/rebuild on VPS, service restart/deploy,
+public exposure, config delivery, write API, Local Agent mutation,
+backup/import/reboot, production peer/user mutation, destructive action,
+Telegram action, secret publication or upstream/GPL code copy was performed.
+`FI-M001`, `FI-M002` and `FI-M003` are removed from the active recommendation.
+Latest VPS-smoked/package head remains `c46f664`; AMN2 `7416fb0` is local-only
+and not package-rebuilt/VPS-smoked. Next recommendation:
+`FI-N001 + FI-N002 + FI-S001` as local-only docs/test evidence readiness.
+
 After Phase 6 `FI-I001 + FI-I002 + FI-I003` fresh installer question model,
 plan renderer and secret handoff binding were completed on 2026-06-13 as AMN2
 local-only code/tests/docs. Evidence:

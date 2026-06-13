@@ -20,10 +20,10 @@ AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: de635a0 Add fresh installer plan renderer
+AMN2 current branch head: 7416fb0 Add fresh installer readiness planning
 AMN2 latest VPS-smoked source-overlay/package head: c46f664 Add public taxonomy cleanup checklist
 AMN2 latest VPS-smoked/package status: live-update-smoke-pass for `c46f664`
-AMN2 local-only after-smoke head: de635a0, not package-rebuilt/VPS-smoked
+AMN2 local-only after-smoke head: 7416fb0, not package-rebuilt/VPS-smoked
 AMN2 package/smoke evidence for `c46f664`: `research/amn2/phase-6-current-head-package-preflight-c46f664-2026-06-13.md` and `research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md`
 ```
 
@@ -59,6 +59,7 @@ research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
 research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md
 research/amn2/phase-6-closeout-next-chat-fresh-installer-backlog-2026-06-13.md
 research/amn2/after-phase-6-fresh-installer-plan-renderer-2026-06-13.md
+research/amn2/after-phase-6-fresh-installer-readiness-planning-2026-06-13.md
 docs/NEXT_CHAT_AMN2_AFTER_PHASE_6.ru.md
 docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md
 ```
@@ -79,8 +80,8 @@ current_mode: private/operator-only
 Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
-last_closed: FI-I001 + FI-I002 + FI-I003 fresh installer plan renderer / secret handoff binding
-next_recommendation: FI-M001 + FI-M002 + FI-M003 as local-only clean installer preflight/runtime/package planning, or P6-C001 + P6-C002 as docs-only gate decision refresh
+last_closed: FI-M001 + FI-M002 + FI-M003 fresh installer readiness planning
+next_recommendation: FI-N001 + FI-N002 + FI-S001 as local-only docs/test evidence readiness, or P6-C001 + P6-C002 as docs-only gate decision refresh
 new_active_idea: P6-I007 interactive fresh-install wizard/bootstrap automation; P6-C007 destructive VPS cleanup/reinstall gate deferred until the operator explicitly decides to assemble/test the clean installer
 after_phase_6_handoff: docs/NEXT_CHAT_AMN2_AFTER_PHASE_6.ru.md
 ```
@@ -95,7 +96,9 @@ to simple priority. `P6-S004` is now closed.
 
 After Phase 6, `FI-I001 + FI-I002 + FI-I003` are also closed in AMN2 commit
 `de635a0 Add fresh installer plan renderer`. The next local-only clean
-installer recommendation is `FI-M001 + FI-M002 + FI-M003`.
+installer readiness slice `FI-M001 + FI-M002 + FI-M003` is closed in AMN2
+commit `7416fb0 Add fresh installer readiness planning`. The next local-only
+recommendation is `FI-N001 + FI-N002 + FI-S001`.
 
 ## Safety Boundary
 
@@ -188,11 +191,11 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 Источник правды:
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
-- AMN2 current head: de635a0 Add fresh installer plan renderer
+- AMN2 current head: 7416fb0 Add fresh installer readiness planning
 - AMN2 latest VPS-smoked/package head: c46f664 Add public taxonomy cleanup checklist
 - AMN2 package/smoke status for c46f664: live-update-smoke-pass; evidence research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
-- AMN2 local-only after-smoke head: de635a0, not package-rebuilt/VPS-smoked
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is FI-I001 + FI-I002 + FI-I003 fresh installer plan renderer
+- AMN2 local-only after-smoke head: 7416fb0, not package-rebuilt/VPS-smoked
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is FI-M001 + FI-M002 + FI-M003 fresh installer readiness planning
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_6_PRODUCTIZATION.ru.md
@@ -224,6 +227,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md
 - research/amn2/phase-6-closeout-next-chat-fresh-installer-backlog-2026-06-13.md
 - research/amn2/after-phase-6-fresh-installer-plan-renderer-2026-06-13.md
+- research/amn2/after-phase-6-fresh-installer-readiness-planning-2026-06-13.md
 - docs/NEXT_CHAT_AMN2_AFTER_PHASE_6.ru.md
 - docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md
 
@@ -235,13 +239,13 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - код GPL/upstream не копируем.
 
 Следующая рекомендация:
-FI-M001 + FI-M002 + FI-M003 как local-only installer preflight/runtime/package hygiene planning, без live/destructive/public/config/write work.
+FI-N001 + FI-N002 + FI-S001 как local-only docs/test evidence readiness, без live/destructive/public/config/write work.
 
 Альтернатива парой:
 P6-C001 + P6-C002 decision checklist refresh как docs-only, без открытия public exposure или config delivery.
 
 Альтернатива тройкой:
-FI-N001 + FI-N002 + FI-S001 как docs/test evidence readiness, без live/destructive work.
+FI-X001 одиночно как Russian-first prompt copy polish, без live/destructive work.
 
 Постоянное правило:
 если в ходе выполнения задач появляется новая полезная мысль, добавлять ее в план по текущей шкале приоритетов и сразу сообщать, в какой раздел она добавлена.

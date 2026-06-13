@@ -1,5 +1,21 @@
 # Текущий override 2026-06-09
 
+After Phase 6 `FI-M001 + FI-M002 + FI-M003` fresh installer readiness planning
+is closed as AMN2 local-only code/tests/docs. Evidence:
+`research/amn2/after-phase-6-fresh-installer-readiness-planning-2026-06-13.md`.
+AMN2 current branch head is `7416fb0 Add fresh installer readiness planning`,
+pushed to `amn2/codex-vps-test-prep`; latest VPS-smoked/package head remains
+`c46f664 Add public taxonomy cleanup checklist`. The slice adds
+`fresh-install-readiness.v1`, target preflight matrix, runtime mode decision
+and package hygiene checklist to the existing fresh installer plan. Verification:
+RED `2 failed, 6 passed`, focused `10 passed`, full `716 passed, 1
+StarletteDeprecationWarning`, `git diff --check` and staged check passed. No
+live VPS, SSH, target diagnostic execution, package apply/rebuild, service
+restart/deploy, public exposure, config delivery, write API, Local Agent
+mutation, backup/import/reboot, production peer/user mutation, destructive
+action, Telegram action, secret publication or upstream/GPL code copy was
+performed. Next recommendation: `FI-N001 + FI-N002 + FI-S001` local-only.
+
 After Phase 6 `FI-I001 + FI-I002 + FI-I003` fresh installer question model,
 plan renderer and secret handoff binding are closed as AMN2 local-only
 code/tests/docs. Evidence:
@@ -98,7 +114,7 @@ PRVTPRO AMN2 local-only order: P4-PRVTPRO-REFRESH-002 expiration-field contract 
 PRVTPRO hybrid-only: HYB-PRVTPRO-REFRESH-001 AdGuard Home, HYB-PRVTPRO-REFRESH-002 SOCKS5 manager, HYB-PRVTPRO-REFRESH-003 Xray migration/attach existing install, HYB-PRVTPRO-REFRESH-004 multi-protocol capability registry
 PRVTPRO negative controls: GPL-3.0 research-only; no code/templates/UI/manager implementations/workflows copied; no admin-equivalent Bearer token model; no public panel/config delivery/reboot/backup/import/server cleanup without separate named gate
 AMN2 source-overlay/package head: c46f664 Add public taxonomy cleanup checklist (VPS-smoked in P6-C009)
-AMN2 current branch head: de635a0 Add fresh installer plan renderer (local-only, not package-rebuilt/VPS-smoked)
+AMN2 current branch head: 7416fb0 Add fresh installer readiness planning (local-only, not package-rebuilt/VPS-smoked)
 AMN2 latest VPS-smoked package: dist/amn2-vps-update-and-smoke-kit-c46f664.zip, sha256 5C952103B3435E1D30AF7CF0A70C40BC027885F1E860C31089DD4ACA3E8347EE, live-update-smoke-pass
 AMN2 package/smoke status for c46f664: live-update-smoke-pass; source zip dist/amn2-codex-vps-test-prep-c46f664-source.zip sha256 5A92EA9BD5B60626F120B5367A02EDDCB742ECF5E6C4FCB8444151BFEB18B248; evidence research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
 AMN2 bot config delivery localization: research/upstreams/amnezia-vpn-client-defaultvpn-refresh-2026-06-11.md and research/amn2/phase-4-bot-config-delivery-localization-2026-06-11.md; no live bot restart/deploy or real config delivery performed by Codex

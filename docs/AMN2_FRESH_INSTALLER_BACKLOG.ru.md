@@ -11,9 +11,9 @@ apply, public exposure, config delivery, write API или production mutations.
 
 ```text
 AMN2 branch: codex-vps-test-prep
-AMN2 current head: de635a0 Add fresh installer plan renderer
+AMN2 current head: 7416fb0 Add fresh installer readiness planning
 AMN2 latest VPS-smoked/package head: c46f664 Add public taxonomy cleanup checklist
-AMN2 local-only after-smoke head: de635a0, not package-rebuilt/VPS-smoked
+AMN2 local-only after-smoke head: 7416fb0, not package-rebuilt/VPS-smoked
 AMN3 latest evidence slice: P6-S004 Phase 6 closeout / next-chat / installer backlog grooming
 current working VPS: 89.185.80.166, disposable test VPS, no destructive action authorized here
 ```
@@ -28,6 +28,8 @@ Relevant completed inputs:
 - `P5-C005` source-overlay permission preservation.
 - `FI-I001 + FI-I002 + FI-I003` fresh installer question schema, rendered plan
   and secret handoff binding in AMN2 `de635a0`.
+- `FI-M001 + FI-M002 + FI-M003` fresh installer target preflight matrix,
+  runtime decision and package hygiene planning in AMN2 `7416fb0`.
 
 ## Backlog Status
 
@@ -77,19 +79,22 @@ Completed:
 
 ### Important local-only
 
+Completed:
+
 - `FI-M001` Target OS/runtime preflight matrix.
   Define read-only checks for Ubuntu version, Python runtime, Docker, ports,
   disk, time sync and package prerequisites. Live execution requires a named
-  read-only diagnostic gate.
+  read-only diagnostic gate. Completed in AMN2 `7416fb0`.
 
 - `FI-M002` Runtime mode decision.
   Keep manual runtime vs systemd vs reverse proxy as an explicit answer. No
-  service enable/restart by default.
+  service enable/restart by default. Completed in AMN2 `7416fb0`.
 
 - `FI-M003` Package hygiene integration.
   Include `scripts/check_markdown_hygiene.py`, source zip checksum, forbidden
   source entries, shell LF/no-BOM and operator runbook checks in future package
-  builds. Do not rewrite already-smoked evidence packages.
+  builds. Do not rewrite already-smoked evidence packages. Completed in AMN2
+  `7416fb0`.
 
 ### Normal local-only
 
@@ -112,9 +117,8 @@ Completed:
 
 ## Recommended Order
 
-1. `FI-M001 + FI-M002 + FI-M003` as local-only preflight/package planning.
-2. `FI-N001 + FI-N002 + FI-S001` as docs/test evidence readiness.
-3. Only then consider `FI-C001` or other live/destructive named gates.
+1. `FI-N001 + FI-N002 + FI-S001` as docs/test evidence readiness.
+2. Only then consider `FI-C001` or other live/destructive named gates.
 
 ## Hard Stop Lines
 
