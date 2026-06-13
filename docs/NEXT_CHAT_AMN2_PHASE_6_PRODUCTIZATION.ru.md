@@ -46,6 +46,7 @@ research/amn2/phase-6-privacy-status-analytics-boundary-2026-06-13.md
 research/amn2/phase-6-reconciliation-release-boundary-2026-06-13.md
 research/amn2/phase-6-project-operating-system-template-2026-06-13.md
 research/amn2/phase-6-telemetry-retention-upstream-refresh-2026-06-13.md
+research/amn2/phase-6-ios-amneziawg-field-diagnostic-2026-06-13.md
 ```
 
 Historical Phase 5 handoff remains available at:
@@ -65,13 +66,13 @@ Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
 last_closed: P6-N004 + P6-S002 telemetry retention/upstream refresh incorporation
-next_recommendation: P6-X001 + P6-X002 public product copy polish and brand/media consistency
+next_recommendation: P6-M004 iOS AmneziaWG import/connectivity diagnostic boundary
 ```
 
 Standing planning rule: if a new useful Phase 6 idea appears during task
 execution, add it to the active plan under the existing priority scale and state
 which priority bucket it was added to. This rule added `P6-N004` to normal
-priority.
+priority and `P6-M004` to important priority.
 
 ## Safety Boundary
 
@@ -130,7 +131,15 @@ Proposed, not active until accepted:
 
 ### Важные
 
-No active important tasks after `P6-M003`.
+- `P6-M004` iOS AmneziaWG import/connectivity diagnostic boundary: carried from
+  Phase 6 field evidence on 2026-06-13, important priority. Default scope is
+  local-only log/config compatibility review and docs/tests. The compatibility
+  matrix must distinguish iOS DefaultVPN as the primary RF-available path, iOS
+  AmneziaWG as an installed/legacy-client path, and Android AmneziaWG as a
+  separate supported-client path. Live VPS reachability probes, SSH, service
+  restart, package apply/rebuild, config delivery, production peer/user
+  mutation, firewall/provider changes and raw QR/`vpn://`/`.conf` publication
+  remain gated.
 
 ### Нормальные
 

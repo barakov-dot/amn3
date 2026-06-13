@@ -152,7 +152,15 @@ Proposed, not active until accepted:
 
 ### Важные
 
-No active important tasks after `P6-M003`.
+- `P6-M004` iOS AmneziaWG import/connectivity diagnostic boundary: carried from
+  Phase 6 field evidence on 2026-06-13, important priority. Default scope is
+  local-only iPhone log/config compatibility review and docs/tests. The
+  compatibility matrix must distinguish iOS DefaultVPN as the primary
+  RF-available path, iOS AmneziaWG as an installed/legacy-client path, and
+  Android AmneziaWG as a separate supported-client path. Live VPS reachability
+  probes, SSH, service restart, package apply/rebuild, config delivery,
+  production peer/user mutation, firewall/provider changes and raw
+  QR/`vpn://`/`.conf` publication remain gated.
 
 ### Нормальные
 
