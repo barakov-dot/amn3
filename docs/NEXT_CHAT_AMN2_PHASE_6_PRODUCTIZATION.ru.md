@@ -16,15 +16,15 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-C002-design + P6-I006 config-link/entitlement boundary
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-I007 fresh-install wizard boundary
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: d96112c Add config link entitlement boundary
+AMN2 current branch head: 60d2570 Add fresh install wizard boundary
 AMN2 latest VPS-smoked source-overlay/package head: b3102db Add client compatibility delivery boundary
 AMN2 latest VPS-smoked/package status: live-update-smoke-pass for `b3102db`
 AMN2 package/smoke evidence for `b3102db`: `research/amn2/phase-6-final-vps-refresh-package-b3102db-2026-06-13.md` and `research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md`
-AMN2 current head `d96112c` is local-only and not package-rebuilt/VPS-smoked.
+AMN2 current head `60d2570` is local-only and not package-rebuilt/VPS-smoked.
 ```
 
 ## Обязательное чтение в начале нового чата
@@ -52,6 +52,7 @@ research/amn2/phase-6-client-compatibility-copy-boundary-2026-06-13.md
 research/amn2/phase-6-final-vps-refresh-package-b3102db-2026-06-13.md
 research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md
 research/amn2/phase-6-config-link-entitlement-boundary-2026-06-13.md
+research/amn2/phase-6-fresh-install-wizard-boundary-2026-06-13.md
 ```
 
 Historical Phase 5 handoff remains available at:
@@ -70,8 +71,8 @@ current_mode: private/operator-only
 Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
-last_closed: P6-C002-design + P6-I006 local-only config-link/entitlement boundary
-next_recommendation: P6-I007 interactive fresh-install wizard/bootstrap automation as local-only docs/tests/code
+last_closed: P6-I007 interactive fresh-install wizard/bootstrap automation
+next_recommendation: P6-N001 public docs/API taxonomy if public docs are approved as local-only docs/tests
 new_active_idea: P6-I007 interactive fresh-install wizard/bootstrap automation; P6-C007 destructive VPS cleanup/reinstall gate deferred until the operator explicitly decides to assemble/test the clean installer
 ```
 
@@ -140,14 +141,9 @@ Critical gated/deferred, not executed:
 
 ### Очень важные
 
-- `P6-I007` Interactive fresh-install wizard/bootstrap automation: local-only
-  code/docs/tests to design a question-and-answer installer for a clean future
-  deployment. It must support operator-provided secrets, safe defaults,
-  preflight validation, dry-run output and no destructive/live execution by
-  default.
+No active very-important tasks after `P6-I007`.
 
-No active very-important commercial/payment boundary remains after `P6-I006`;
-payment provider integration and automatic access remain gated/deferred.
+Payment provider integration and automatic access remain gated/deferred.
 
 ### Важные
 
@@ -179,11 +175,11 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 Источник правды:
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
-- AMN2 current head: d96112c Add config link entitlement boundary
+- AMN2 current head: 60d2570 Add fresh install wizard boundary
 - AMN2 latest VPS-smoked/package head: b3102db Add client compatibility delivery boundary
 - AMN2 package/smoke status for b3102db: live-update-smoke-pass; evidence research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md
-- AMN2 current head d96112c is local-only and not package-rebuilt/VPS-smoked.
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-C002-design + P6-I006 config-link/entitlement boundary
+- AMN2 current head 60d2570 is local-only and not package-rebuilt/VPS-smoked.
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-I007 fresh-install wizard boundary
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_6_PRODUCTIZATION.ru.md
@@ -208,6 +204,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - research/amn2/phase-6-final-vps-refresh-package-b3102db-2026-06-13.md
 - research/amn2/phase-6-live-update-smoke-b3102db-2026-06-13.md
 - research/amn2/phase-6-config-link-entitlement-boundary-2026-06-13.md
+- research/amn2/phase-6-fresh-install-wizard-boundary-2026-06-13.md
 
 Границы Phase 6:
 - это planning/security/productization lane, не автоматический public launch;
@@ -217,10 +214,10 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - код GPL/upstream не копируем.
 
 Следующая рекомендация:
-P6-I007 interactive fresh-install wizard/bootstrap automation как local-only docs/tests/code: future question-and-answer clean installer, safe defaults, preflight validation, dry-run output, operator-provided secrets, no live/destructive execution by default.
+P6-N001 public docs/API taxonomy if public docs are approved как local-only docs/tests, без открытия public/config/write/payment/live gates.
 
 Альтернатива парой:
-P6-I007 + P6-N001, если хочется вместе оформить installer bootstrap и public docs/API taxonomy, но без открытия public/config/write/payment/live gates.
+P6-N001 + P6-C007 checklist-only, если хочется вместе оформить public taxonomy и критерии будущего destructive cleanup/reinstall gate, но без зачистки VPS.
 
 Постоянное правило:
 если в ходе выполнения задач появляется новая полезная мысль, добавлять ее в план по текущей шкале приоритетов и сразу сообщать, в какой раздел она добавлена.
