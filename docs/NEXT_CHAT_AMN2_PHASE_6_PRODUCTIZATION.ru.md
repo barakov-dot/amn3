@@ -16,14 +16,14 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-I002 user self-service surface boundary
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-M001 + P6-N003 capability/status alignment
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: b676e1b Add self-service surface boundary
+AMN2 current branch head: 3118b43 Make integration status source head dynamic
 AMN2 latest VPS-smoked source-overlay/package head: 2215761 Polish operator web admin UX
 AMN2 latest VPS-smoked/package status: live-update-smoke-pass for `2215761`
-AMN2 package/smoke status for `b676e1b`: not package-rebuilt, not VPS-smoked
+AMN2 package/smoke status for `3118b43`: not package-rebuilt, not VPS-smoked
 ```
 
 ## Обязательное чтение в начале нового чата
@@ -39,6 +39,7 @@ research/amn2/phase-5-operator-pilot-acceptance-phase-6-entry-2026-06-13.md
 research/amn2/phase-6-production-security-review-gate-2026-06-13.md
 research/amn2/phase-6-scoped-api-tokens-production-implementation-2026-06-13.md
 research/amn2/phase-6-user-self-service-surface-boundary-2026-06-13.md
+research/amn2/phase-6-capability-registry-integration-status-alignment-2026-06-13.md
 ```
 
 Historical Phase 5 handoff remains available at:
@@ -57,7 +58,7 @@ current_mode: private/operator-only
 Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
-last_closed: P6-I002 User self-service surface separated from admin surface
+last_closed: P6-M001 + P6-N003 Capability registry and integration status alignment
 next_recommendation: P6-I003 Payments/manual approval boundary if commercial access is enabled
 ```
 
@@ -116,7 +117,6 @@ Critical gated/deferred, not executed:
 
 ### Важные
 
-- `P6-M001` Multi-server/multi-protocol capability registry.
 - `P6-M002` Health/status polling scheduler with aggregate-only privacy boundary.
 - `P6-M003` Attach-existing-server reconciliation beyond read-only report mode.
 
@@ -124,7 +124,6 @@ Critical gated/deferred, not executed:
 
 - `P6-N001` Public docs/API taxonomy if public docs are approved.
 - `P6-N002` Admin analytics without per-peer/user leakage.
-- `P6-N003` Integration status current-head alignment: carried from P6-C005 review as a normal local-only code/tests/docs follow-up; align stale AMN2 integration-status constants with the current AMN2 branch/package distinction (`b676e1b` branch head, `2215761` latest VPS-smoked package head).
 - `P4-PRVTPRO-REFRESH-003-LIVE` live probes/actions: carried from Phase 4, still gated, not executed.
 
 ### Простые
@@ -150,10 +149,10 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 Источник правды:
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
-- AMN2 current head: b676e1b Add self-service surface boundary
+- AMN2 current head: 3118b43 Make integration status source head dynamic
 - AMN2 latest VPS-smoked/package head: 2215761 Polish operator web admin UX
-- AMN2 package/smoke status for b676e1b: not package-rebuilt, not VPS-smoked
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-I002 user self-service surface boundary
+- AMN2 package/smoke status for 3118b43: not package-rebuilt, not VPS-smoked
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-M001 + P6-N003 capability/status alignment
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_6_PRODUCTIZATION.ru.md
@@ -166,6 +165,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - research/amn2/phase-6-production-security-review-gate-2026-06-13.md
 - research/amn2/phase-6-scoped-api-tokens-production-implementation-2026-06-13.md
 - research/amn2/phase-6-user-self-service-surface-boundary-2026-06-13.md
+- research/amn2/phase-6-capability-registry-integration-status-alignment-2026-06-13.md
 
 Границы Phase 6:
 - это planning/security/productization lane, не автоматический public launch;

@@ -125,6 +125,7 @@ Phase 6 можно открывать только как planning/security/prod
 - `P6-C005` Production security review gate: completed as AMN3 local/docs/security review with focused AMN2 local security regression suite `98 passed, 1 warning`; evidence `research/amn2/phase-6-production-security-review-gate-2026-06-13.md`. Result: planning can continue, but public/self-service launch remains `no-go` until separate named gates. Follow-up added: `P6-N003` Integration status current-head alignment.
 - `P6-I001` Scoped API tokens production implementation: completed as AMN2 local-only code/tests/docs in commit `0b3ac1f Add API token production policy`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-scoped-api-tokens-production-implementation-2026-06-13.md`. Adds a machine-checkable production token policy manifest, keeps allowed scopes to `server:read`/`metrics:read`, records blocked future/config/write/backup/Local Agent scopes, enforces 30-day max TTL for route-connected tokens, aligns the disabled web/admin token form with the same TTL, and updates token policy docs. Verification: focused `18 passed, 1 warning`, expanded `59 passed, 1 warning`, `git diff --check` passed. Latest VPS-smoked/package head remains `2215761`; `0b3ac1f` is not package-rebuilt or VPS-smoked.
 - `P6-I002` User self-service surface separated from admin surface: completed as AMN2 local-only code/tests/docs in commit `b676e1b Add self-service surface boundary`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-user-self-service-surface-boundary-2026-06-13.md`. Adds `self-service` as a separate blocked-future surface, records future dashboard/config-delivery/device-revoke policy entries under `/self-service*`, requires separate self-service auth and own-account/device boundaries, and verifies no `/self-service*` route is mounted in the current web/admin app. Verification: RED `4 failed, 23 passed`, focused `27 passed`, expanded `43 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `b676e1b` is not package-rebuilt or VPS-smoked.
+- `P6-M001` Multi-server/multi-protocol capability registry + `P6-N003` Integration status current-head alignment: completed together as AMN2 local-only code/tests/docs in commits `4bb7364 Align integration status capability registry` and `3118b43 Make integration status source head dynamic`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-capability-registry-integration-status-alignment-2026-06-13.md`. Adds a safe capability registry to `/api/integration/status` and web `/integration-status`, records the current implemented capability as single-server operator control for `amneziawg` on Docker, keeps `wireguard` and `xray` protocol managers blocked-future with no upstream/GPL code copy, and separates current branch head from the latest VPS-smoked/package head. Verification: RED `3 failed, 5 passed, 1 warning`, focused `8 passed, 1 warning`, expanded `46 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `3118b43` is not package-rebuilt or VPS-smoked.
 
 ### Критичные
 
@@ -143,7 +144,6 @@ Active default critical tasks: none after `P6-C005`. Critical gated/deferred wor
 
 ### Важные
 
-- `P6-M001` Multi-server/multi-protocol capability registry. Complexity: medium/high. Depends on protocol boundaries and no upstream/GPL code copy.
 - `P6-M002` Health/status polling scheduler with aggregate-only privacy boundary. Complexity: medium. Depends on PRVTPRO live probe gate and no-secret telemetry rules.
 - `P6-M003` Attach-existing-server reconciliation beyond read-only report mode. Complexity: high. Depends on write API/operation queue gates.
 
@@ -151,7 +151,6 @@ Active default critical tasks: none after `P6-C005`. Critical gated/deferred wor
 
 - `P6-N001` Public docs/API taxonomy if public docs are approved.
 - `P6-N002` Admin analytics without per-peer/user leakage.
-- `P6-N003` Integration status current-head alignment. Complexity: low/medium. Carried from `P6-C005` review as a local-only code/tests/docs follow-up to align stale AMN2 integration-status constants with the current branch/package distinction (`b676e1b` branch head, `2215761` latest VPS-smoked package head).
 
 ### Простые
 
