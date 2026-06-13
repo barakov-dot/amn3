@@ -131,6 +131,7 @@ Phase 6 можно открывать только как planning/security/prod
 - `P6-M002` Health/status polling scheduler with aggregate-only privacy boundary + `P6-N002` Admin analytics without per-peer/user leakage: completed together as AMN2 local-only code/tests/docs in commit `8f4ac6a Add privacy status analytics boundary`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-privacy-status-analytics-boundary-2026-06-13.md`. Adds a machine-checkable aggregate-only health/status and admin analytics boundary, keeps live probes/raw command output/per-peer/per-user details blocked, sanitizes `/api/integration/status` sensitive marker-name lists to counts, adds blocked-future surface policy entries and exposes safe status through web `/integration-status`. Verification: RED `1 error, 1 warning`, focused `33 passed, 1 warning`, expanded `65 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `8f4ac6a` is not package-rebuilt or VPS-smoked.
 - `P6-M003` Attach-existing-server reconciliation beyond read-only report mode + `P6-S001` Release checklist and changelog: completed together as AMN2 local-only code/tests/docs in commit `3e1f4cc Add reconciliation release boundary`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-reconciliation-release-boundary-2026-06-13.md`. Adds a machine-checkable report-only reconciliation/release boundary, keeps live reconciliation, local device creation, peer removal, server config overwrite, package apply/rebuild on VPS, public exposure, config delivery, write API, Local Agent mutation and production peer/user mutation blocked, and exposes safe status through web `/integration-status`. Verification: RED `1 error, 1 warning`, focused `11 passed, 1 warning`, expanded `81 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `3e1f4cc` is not package-rebuilt or VPS-smoked.
 - `P6-S003` Project operating system extraction template: completed as AMN3 docs-only work; evidence `research/amn2/phase-6-project-operating-system-template-2026-06-13.md`. Adds clean reusable templates `docs/templates/PROJECT_OPERATING_SYSTEM_TEMPLATE.ru.md` and `docs/templates/NEXT_PROJECT_BOOTSTRAP.ru.md` so the AMN2/AMN3 project-memory process can be reused for a future project without AMN2-specific details. No AMN2 runtime code changed.
+- `P6-N004` Aggregate telemetry retention/redaction policy + `P6-S002` Recurring upstream refresh incorporation: completed together as AMN2 local-only code/tests/docs in commit `a9f53d7 Add telemetry retention refresh policy`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-telemetry-retention-upstream-refresh-2026-06-13.md`. Adds a machine-checkable telemetry retention/redaction and upstream refresh incorporation manifest, keeps raw telemetry export and upstream refresh live actions blocked, records watcher outputs as candidate rows/evidence only, and exposes safe status through web `/integration-status`. Verification: RED `1 error, 1 warning`, focused `11 passed, 1 warning`, expanded `68 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `a9f53d7` is not package-rebuilt or VPS-smoked.
 
 ### Критичные
 
@@ -156,11 +157,10 @@ No active important tasks after `P6-M003`.
 ### Нормальные
 
 - `P6-N001` Public docs/API taxonomy if public docs are approved.
-- `P6-N004` Aggregate telemetry retention/redaction policy.
 
 ### Простые
 
-- `P6-S002` Recurring upstream refresh incorporation.
+No active simple tasks after `P6-S003` and `P6-S002`.
 
 ### Косметические
 

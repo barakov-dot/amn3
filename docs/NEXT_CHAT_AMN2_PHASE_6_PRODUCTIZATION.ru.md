@@ -16,14 +16,14 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-S003 project operating system extraction template
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-N004 + P6-S002 telemetry retention/upstream refresh incorporation
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: 3e1f4cc Add reconciliation release boundary
+AMN2 current branch head: a9f53d7 Add telemetry retention refresh policy
 AMN2 latest VPS-smoked source-overlay/package head: 2215761 Polish operator web admin UX
 AMN2 latest VPS-smoked/package status: live-update-smoke-pass for `2215761`
-AMN2 package/smoke status for `3e1f4cc`: not package-rebuilt, not VPS-smoked
+AMN2 package/smoke status for `a9f53d7`: not package-rebuilt, not VPS-smoked
 ```
 
 ## Обязательное чтение в начале нового чата
@@ -45,6 +45,7 @@ research/amn2/phase-6-telegram-profile-icon-gate-policy-2026-06-13.md
 research/amn2/phase-6-privacy-status-analytics-boundary-2026-06-13.md
 research/amn2/phase-6-reconciliation-release-boundary-2026-06-13.md
 research/amn2/phase-6-project-operating-system-template-2026-06-13.md
+research/amn2/phase-6-telemetry-retention-upstream-refresh-2026-06-13.md
 ```
 
 Historical Phase 5 handoff remains available at:
@@ -63,8 +64,8 @@ current_mode: private/operator-only
 Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
-last_closed: P6-S003 project operating system extraction template
-next_recommendation: P6-N004 + P6-S002 aggregate telemetry retention/redaction and recurring upstream refresh incorporation
+last_closed: P6-N004 + P6-S002 telemetry retention/upstream refresh incorporation
+next_recommendation: P6-X001 + P6-X002 public product copy polish and brand/media consistency
 ```
 
 Standing planning rule: if a new useful Phase 6 idea appears during task
@@ -134,12 +135,11 @@ No active important tasks after `P6-M003`.
 ### Нормальные
 
 - `P6-N001` Public docs/API taxonomy if public docs are approved.
-- `P6-N004` Aggregate telemetry retention/redaction policy.
 - `P4-PRVTPRO-REFRESH-003-LIVE` live probes/actions: carried from Phase 4, still gated, not executed.
 
 ### Простые
 
-- `P6-S002` Recurring upstream refresh incorporation.
+No active simple tasks after `P6-S003` and `P6-S002`.
 
 ### Косметические
 
@@ -159,10 +159,10 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 Источник правды:
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
-- AMN2 current head: 3e1f4cc Add reconciliation release boundary
+- AMN2 current head: a9f53d7 Add telemetry retention refresh policy
 - AMN2 latest VPS-smoked/package head: 2215761 Polish operator web admin UX
-- AMN2 package/smoke status for 3e1f4cc: not package-rebuilt, not VPS-smoked
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-S003 project operating system extraction template
+- AMN2 package/smoke status for a9f53d7: not package-rebuilt, not VPS-smoked
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-N004 + P6-S002 telemetry retention/upstream refresh incorporation
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_6_PRODUCTIZATION.ru.md
@@ -181,6 +181,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - research/amn2/phase-6-privacy-status-analytics-boundary-2026-06-13.md
 - research/amn2/phase-6-reconciliation-release-boundary-2026-06-13.md
 - research/amn2/phase-6-project-operating-system-template-2026-06-13.md
+- research/amn2/phase-6-telemetry-retention-upstream-refresh-2026-06-13.md
 
 Границы Phase 6:
 - это planning/security/productization lane, не автоматический public launch;
@@ -190,7 +191,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - код GPL/upstream не копируем.
 
 Следующая рекомендация:
-P6-N004 + P6-S002 вместе как local-only/docs/tests: закрепить retention/redaction для агрегатов и вписать это в регулярный upstream-refresh контур.
+P6-X001 + P6-X002 вместе как local-only/docs/tests: public product copy polish и brand/media consistency без открытия public/config/write/live gates.
 
 Постоянное правило:
 если в ходе выполнения задач появляется новая полезная мысль, добавлять ее в план по текущей шкале приоритетов и сразу сообщать, в какой раздел она добавлена.
