@@ -16,14 +16,14 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-I005 Telegram profile icon gate policy
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-M002 + P6-N002 privacy-safe health/status and admin analytics boundary
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: 19f3422 Add Telegram profile icon gate policy
+AMN2 current branch head: 8f4ac6a Add privacy status analytics boundary
 AMN2 latest VPS-smoked source-overlay/package head: 2215761 Polish operator web admin UX
 AMN2 latest VPS-smoked/package status: live-update-smoke-pass for `2215761`
-AMN2 package/smoke status for `19f3422`: not package-rebuilt, not VPS-smoked
+AMN2 package/smoke status for `8f4ac6a`: not package-rebuilt, not VPS-smoked
 ```
 
 ## Обязательное чтение в начале нового чата
@@ -42,6 +42,7 @@ research/amn2/phase-6-user-self-service-surface-boundary-2026-06-13.md
 research/amn2/phase-6-capability-registry-integration-status-alignment-2026-06-13.md
 research/amn2/phase-6-commercial-bot-productization-boundary-2026-06-13.md
 research/amn2/phase-6-telegram-profile-icon-gate-policy-2026-06-13.md
+research/amn2/phase-6-privacy-status-analytics-boundary-2026-06-13.md
 ```
 
 Historical Phase 5 handoff remains available at:
@@ -60,8 +61,8 @@ current_mode: private/operator-only
 Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
-last_closed: P6-I005 Telegram profile icon gate policy
-next_recommendation: P6-M002 + P6-N002 privacy-safe health/status and admin analytics bundle
+last_closed: P6-M002 + P6-N002 privacy-safe health/status and admin analytics boundary
+next_recommendation: P6-M003 attach-existing-server reconciliation boundary
 ```
 
 ## Safety Boundary
@@ -121,13 +122,11 @@ Proposed, not active until accepted:
 
 ### Важные
 
-- `P6-M002` Health/status polling scheduler with aggregate-only privacy boundary.
 - `P6-M003` Attach-existing-server reconciliation beyond read-only report mode.
 
 ### Нормальные
 
 - `P6-N001` Public docs/API taxonomy if public docs are approved.
-- `P6-N002` Admin analytics without per-peer/user leakage.
 - `P4-PRVTPRO-REFRESH-003-LIVE` live probes/actions: carried from Phase 4, still gated, not executed.
 
 ### Простые
@@ -153,10 +152,10 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 Источник правды:
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
-- AMN2 current head: 19f3422 Add Telegram profile icon gate policy
+- AMN2 current head: 8f4ac6a Add privacy status analytics boundary
 - AMN2 latest VPS-smoked/package head: 2215761 Polish operator web admin UX
-- AMN2 package/smoke status for 19f3422: not package-rebuilt, not VPS-smoked
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-I005 Telegram profile icon gate policy
+- AMN2 package/smoke status for 8f4ac6a: not package-rebuilt, not VPS-smoked
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-M002 + P6-N002 privacy-safe health/status and admin analytics boundary
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_6_PRODUCTIZATION.ru.md
@@ -172,6 +171,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - research/amn2/phase-6-capability-registry-integration-status-alignment-2026-06-13.md
 - research/amn2/phase-6-commercial-bot-productization-boundary-2026-06-13.md
 - research/amn2/phase-6-telegram-profile-icon-gate-policy-2026-06-13.md
+- research/amn2/phase-6-privacy-status-analytics-boundary-2026-06-13.md
 
 Границы Phase 6:
 - это planning/security/productization lane, не автоматический public launch;
@@ -181,7 +181,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - код GPL/upstream не копируем.
 
 Следующая рекомендация:
-P6-M002 + P6-N002 privacy-safe health/status and admin analytics bundle.
+P6-M003 attach-existing-server reconciliation boundary как local-only/docs/tests work без write API, live reconciliation, Local Agent mutation или production peer/user mutation.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;

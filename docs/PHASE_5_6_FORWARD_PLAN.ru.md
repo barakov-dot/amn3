@@ -128,6 +128,7 @@ Phase 6 можно открывать только как planning/security/prod
 - `P6-M001` Multi-server/multi-protocol capability registry + `P6-N003` Integration status current-head alignment: completed together as AMN2 local-only code/tests/docs in commits `4bb7364 Align integration status capability registry` and `3118b43 Make integration status source head dynamic`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-capability-registry-integration-status-alignment-2026-06-13.md`. Adds a safe capability registry to `/api/integration/status` and web `/integration-status`, records the current implemented capability as single-server operator control for `amneziawg` on Docker, keeps `wireguard` and `xray` protocol managers blocked-future with no upstream/GPL code copy, and separates current branch head from the latest VPS-smoked/package head. Verification: RED `3 failed, 5 passed, 1 warning`, focused `8 passed, 1 warning`, expanded `46 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `3118b43` is not package-rebuilt or VPS-smoked.
 - `P6-I003` Payments/manual approval boundary + `P6-I004` Support bot and news bot production split: completed together as AMN2 local-only code/tests/docs in commit `0c6aa7c Add commercial bot productization boundary`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-commercial-bot-productization-boundary-2026-06-13.md`. Adds a safe productization manifest, keeps payment processor/webhook/automatic entitlement/config delivery on payment blocked, records manual approval as required, records support/news bots as blocked-future with separate token/runtime requirements, adds blocked-future surface policy entries, and exposes the safe boundary through integration status. Verification: RED `1 error, 1 warning`, focused `29 passed, 1 warning`, expanded `81 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `0c6aa7c` is not package-rebuilt or VPS-smoked.
 - `P6-I005` Telegram bot profile/icon apply gates: completed as AMN2 local-only code/tests/docs in commit `19f3422 Add Telegram profile icon gate policy`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-telegram-profile-icon-gate-policy-2026-06-13.md`. Adds a safe profile-icon apply gate manifest for access/support/news bots, keeps Telegram API/profile mutation/live send/token use blocked, adds blocked-future surface policy entries, and exposes the safe gate through integration status. Verification: RED `6 failed, 27 passed, 1 warning`, focused `33 passed, 1 warning`, expanded `83 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `19f3422` is not package-rebuilt or VPS-smoked.
+- `P6-M002` Health/status polling scheduler with aggregate-only privacy boundary + `P6-N002` Admin analytics without per-peer/user leakage: completed together as AMN2 local-only code/tests/docs in commit `8f4ac6a Add privacy status analytics boundary`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-privacy-status-analytics-boundary-2026-06-13.md`. Adds a machine-checkable aggregate-only health/status and admin analytics boundary, keeps live probes/raw command output/per-peer/per-user details blocked, sanitizes `/api/integration/status` sensitive marker-name lists to counts, adds blocked-future surface policy entries and exposes safe status through web `/integration-status`. Verification: RED `1 error, 1 warning`, focused `33 passed, 1 warning`, expanded `65 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `8f4ac6a` is not package-rebuilt or VPS-smoked.
 
 ### Критичные
 
@@ -148,13 +149,11 @@ Proposed, not active until accepted:
 
 ### Важные
 
-- `P6-M002` Health/status polling scheduler with aggregate-only privacy boundary. Complexity: medium. Depends on PRVTPRO live probe gate and no-secret telemetry rules.
 - `P6-M003` Attach-existing-server reconciliation beyond read-only report mode. Complexity: high. Depends on write API/operation queue gates.
 
 ### Нормальные
 
 - `P6-N001` Public docs/API taxonomy if public docs are approved.
-- `P6-N002` Admin analytics without per-peer/user leakage.
 
 ### Простые
 
