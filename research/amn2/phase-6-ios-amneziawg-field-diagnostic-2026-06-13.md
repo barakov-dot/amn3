@@ -16,6 +16,8 @@ secret-bearing evidence publication or upstream/GPL code copy was performed.
 - iPhone screenshots showing an existing `usa` profile, handshake wait and a
   `timed out after 12 seconds` connection error.
 - Telegram-delivered QR screenshot captioned as a `vpn://` import-link QR.
+- Operator-provided correlation target: admin request number 2. The Telegram
+  handle is treated as personal/operational metadata and is not published here.
 
 ## Safe Findings
 
@@ -82,3 +84,17 @@ Still gated: live VPS reachability probes, SSH, service restart, package
 apply/rebuild, public exposure, config delivery, production peer/user mutation,
 firewall/provider changes, Telegram live sends and raw QR/`vpn://`/`.conf`
 publication.
+
+## Final VPS Update Gate Candidate
+
+Added to critical gated/deferred Phase 6 plan:
+
+- `P6-C006` Final VPS package refresh/apply gate.
+
+Purpose: after local productization tasks are reviewed, explicitly update the
+VPS package/source and live bot to the accepted AMN2 head, then run secret-safe
+VPS and bot smoke evidence.
+
+Still gated until named approval: package rebuild/apply, service restart,
+deploy, live bot verification, live VPS commands, config delivery, production
+peer/user mutation and public exposure.

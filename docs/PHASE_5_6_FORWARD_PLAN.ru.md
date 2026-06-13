@@ -139,8 +139,9 @@ Phase 6 можно открывать только как planning/security/prod
 - `P6-C002` Config delivery gate: public/self-service delivery, tokenized links, TTL, revoke, audit, redaction. Complexity: high. Depends on secret-bearing artifact policy and client compatibility QA.
 - `P6-C003` Write API production gate: `/api/clients` CRUD, operation queue, idempotency, locking, partial failure and rollback. Complexity: very high. Depends on WAPI design tasks and local fake-runner validation.
 - `P6-C004` Production backup/restore/import gate: encrypted backups, restore preview/apply, disaster recovery drill. Complexity: high/destructive. Depends on retention policy and restore tests.
+- `P6-C006` Final VPS package refresh/apply gate: package rebuild/apply, service restart, live bot verification and VPS smoke after local productization tasks are reviewed. Complexity: high/live. Depends on explicit named gate, rollback plan, secret-safe evidence and current package/source-head comparison.
 
-Active default critical tasks: none after `P6-C005`. Critical gated/deferred work remains `P6-C001`, `P6-C002`, `P6-C003`, `P6-C004`, `VPS-REBUILD-001`, Local Agent write/config routes and production peer/user mutation.
+Active default critical tasks: none after `P6-C005`. Critical gated/deferred work remains `P6-C001`, `P6-C002`, `P6-C003`, `P6-C004`, `P6-C006`, `VPS-REBUILD-001`, Local Agent write/config routes and production peer/user mutation.
 
 ### Очень важные
 

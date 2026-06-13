@@ -72,7 +72,8 @@ next_recommendation: P6-M004 iOS AmneziaWG import/connectivity diagnostic bounda
 Standing planning rule: if a new useful Phase 6 idea appears during task
 execution, add it to the active plan under the existing priority scale and state
 which priority bucket it was added to. This rule added `P6-N004` to normal
-priority and `P6-M004` to important priority.
+priority, `P6-M004` to important priority and `P6-C006` to critical
+gated/deferred priority.
 
 ## Safety Boundary
 
@@ -117,6 +118,10 @@ Critical gated/deferred, not executed:
 - `P6-C002` Config delivery gate.
 - `P6-C003` Write API production gate.
 - `P6-C004` Production backup/restore/import gate.
+- `P6-C006` Final VPS package refresh/apply gate: carried from Phase 6 field
+  operations planning, gated/deferred, not executed. Run only after local
+  productization tasks are reviewed and a separate named gate explicitly allows
+  package rebuild/apply, service restart, live bot verification and VPS smoke.
 - `VPS-REBUILD-001` destructive rebuild.
 - Local Agent write/config routes.
 - Production peer/user mutation.
