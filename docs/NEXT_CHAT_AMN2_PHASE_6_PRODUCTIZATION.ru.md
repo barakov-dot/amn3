@@ -70,13 +70,15 @@ Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
 last_closed: P6-C006 live update/smoke for b3102db
 next_recommendation: P6-C002 + P6-I006 as local-only design/implementation for short one-tap tokenized config-link boundary plus commercial entitlement/audit boundary
+new_active_idea: P6-I007 interactive fresh-install wizard/bootstrap automation; P6-C007 destructive VPS cleanup/reinstall gate deferred until the operator explicitly decides to assemble/test the clean installer
 ```
 
 Standing planning rule: if a new useful Phase 6 idea appears during task
 execution, add it to the active plan under the existing priority scale and state
 which priority bucket it was added to. This rule added `P6-N004` to normal
-priority, `P6-M004` to important priority and `P6-C006` to critical
-gated/deferred priority.
+priority, `P6-M004` to important priority, `P6-C006` to critical
+gated/deferred priority, `P6-I007` to very important priority and `P6-C007` to
+critical gated/deferred priority.
 
 ## Safety Boundary
 
@@ -123,13 +125,23 @@ Critical gated/deferred, not executed:
   configs.
 - `P6-C003` Write API production gate.
 - `P6-C004` Production backup/restore/import gate.
+- `P6-C007` Destructive cleanup/reinstall gate for the current working VPS:
+  carried from Phase 6 operator proposal, deferred until the operator
+  explicitly decides to assemble/test the clean installer. It may only run
+  after a separate named destructive gate, explicit retention decision, stop
+  criteria and operator acceptance of data loss. Target server currently in
+  use: operator-provided `89.185.80.166`.
 - `VPS-REBUILD-001` destructive rebuild.
 - Local Agent write/config routes.
 - Production peer/user mutation.
 
 ### Очень важные
 
-No active accepted very-important tasks after `P6-I005`.
+- `P6-I007` Interactive fresh-install wizard/bootstrap automation: local-only
+  code/docs/tests to design a question-and-answer installer for a clean future
+  deployment. It must support operator-provided secrets, safe defaults,
+  preflight validation, dry-run output and no destructive/live execution by
+  default.
 
 Proposed, not active until accepted:
 
