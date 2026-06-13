@@ -129,6 +129,7 @@ Phase 6 можно открывать только как planning/security/prod
 - `P6-I003` Payments/manual approval boundary + `P6-I004` Support bot and news bot production split: completed together as AMN2 local-only code/tests/docs in commit `0c6aa7c Add commercial bot productization boundary`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-commercial-bot-productization-boundary-2026-06-13.md`. Adds a safe productization manifest, keeps payment processor/webhook/automatic entitlement/config delivery on payment blocked, records manual approval as required, records support/news bots as blocked-future with separate token/runtime requirements, adds blocked-future surface policy entries, and exposes the safe boundary through integration status. Verification: RED `1 error, 1 warning`, focused `29 passed, 1 warning`, expanded `81 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `0c6aa7c` is not package-rebuilt or VPS-smoked.
 - `P6-I005` Telegram bot profile/icon apply gates: completed as AMN2 local-only code/tests/docs in commit `19f3422 Add Telegram profile icon gate policy`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-telegram-profile-icon-gate-policy-2026-06-13.md`. Adds a safe profile-icon apply gate manifest for access/support/news bots, keeps Telegram API/profile mutation/live send/token use blocked, adds blocked-future surface policy entries, and exposes the safe gate through integration status. Verification: RED `6 failed, 27 passed, 1 warning`, focused `33 passed, 1 warning`, expanded `83 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `19f3422` is not package-rebuilt or VPS-smoked.
 - `P6-M002` Health/status polling scheduler with aggregate-only privacy boundary + `P6-N002` Admin analytics without per-peer/user leakage: completed together as AMN2 local-only code/tests/docs in commit `8f4ac6a Add privacy status analytics boundary`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-privacy-status-analytics-boundary-2026-06-13.md`. Adds a machine-checkable aggregate-only health/status and admin analytics boundary, keeps live probes/raw command output/per-peer/per-user details blocked, sanitizes `/api/integration/status` sensitive marker-name lists to counts, adds blocked-future surface policy entries and exposes safe status through web `/integration-status`. Verification: RED `1 error, 1 warning`, focused `33 passed, 1 warning`, expanded `65 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `8f4ac6a` is not package-rebuilt or VPS-smoked.
+- `P6-M003` Attach-existing-server reconciliation beyond read-only report mode + `P6-S001` Release checklist and changelog: completed together as AMN2 local-only code/tests/docs in commit `3e1f4cc Add reconciliation release boundary`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-reconciliation-release-boundary-2026-06-13.md`. Adds a machine-checkable report-only reconciliation/release boundary, keeps live reconciliation, local device creation, peer removal, server config overwrite, package apply/rebuild on VPS, public exposure, config delivery, write API, Local Agent mutation and production peer/user mutation blocked, and exposes safe status through web `/integration-status`. Verification: RED `1 error, 1 warning`, focused `11 passed, 1 warning`, expanded `81 passed, 1 warning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `2215761`; `3e1f4cc` is not package-rebuilt or VPS-smoked.
 
 ### Критичные
 
@@ -149,15 +150,15 @@ Proposed, not active until accepted:
 
 ### Важные
 
-- `P6-M003` Attach-existing-server reconciliation beyond read-only report mode. Complexity: high. Depends on write API/operation queue gates.
+No active important tasks after `P6-M003`.
 
 ### Нормальные
 
 - `P6-N001` Public docs/API taxonomy if public docs are approved.
+- `P6-N004` Aggregate telemetry retention/redaction policy.
 
 ### Простые
 
-- `P6-S001` Release checklist and changelog.
 - `P6-S002` Recurring upstream refresh incorporation.
 
 ### Косметические
