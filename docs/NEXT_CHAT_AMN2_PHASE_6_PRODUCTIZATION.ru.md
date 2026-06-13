@@ -16,7 +16,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-C009 live update/smoke for c46f664
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-X003 package runbook escaping hygiene
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
@@ -55,6 +55,7 @@ research/amn2/phase-6-fresh-install-wizard-boundary-2026-06-13.md
 research/amn2/phase-6-public-taxonomy-cleanup-checklist-2026-06-13.md
 research/amn2/phase-6-current-head-package-preflight-c46f664-2026-06-13.md
 research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
+research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md
 ```
 
 Historical Phase 5 handoff remains available at:
@@ -73,8 +74,8 @@ current_mode: private/operator-only
 Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
-last_closed: P6-C009 live update/smoke for c46f664
-next_recommendation: P6-X003 package runbook escaping hygiene as AMN3 docs/tooling hygiene only, without rebuilding or altering already-smoked c46f664 package artifacts
+last_closed: P6-X003 package runbook escaping hygiene
+next_recommendation: Phase 6 closeout packet + next-chat handoff + fresh installer backlog grooming as docs-only, without live/destructive/public/config/write work
 new_active_idea: P6-I007 interactive fresh-install wizard/bootstrap automation; P6-C007 destructive VPS cleanup/reinstall gate deferred until the operator explicitly decides to assemble/test the clean installer
 ```
 
@@ -83,7 +84,8 @@ execution, add it to the active plan under the existing priority scale and state
 which priority bucket it was added to. This rule added `P6-N004` to normal
 priority, `P6-M004` to important priority, `P6-C006` to critical
 gated/deferred priority, `P6-I007` to very important priority, `P6-C007` to
-critical gated/deferred priority and `P6-X003` to cosmetic priority.
+critical gated/deferred priority and `P6-X003` to cosmetic priority. `P6-X003`
+is now closed.
 
 ## Safety Boundary
 
@@ -161,9 +163,7 @@ No active simple tasks after `P6-S003` and `P6-S002`.
 
 ### Косметические
 
-- `P6-X003` Package runbook escaping hygiene: carried from Phase 6 `P6-C009`
-  smoke evidence. AMN3 docs/tooling hygiene only; do not rebuild or alter the
-  already-smoked `c46f664` package artifact.
+No active cosmetic tasks after `P6-X003`.
 
 ## Сообщение Для Нового Чата
 
@@ -181,7 +181,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN2 current head: c46f664 Add public taxonomy cleanup checklist
 - AMN2 latest VPS-smoked/package head: c46f664 Add public taxonomy cleanup checklist
 - AMN2 package/smoke status for c46f664: live-update-smoke-pass; evidence research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-C009 live update/smoke for c46f664
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-X003 package runbook escaping hygiene
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_6_PRODUCTIZATION.ru.md
@@ -210,6 +210,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - research/amn2/phase-6-public-taxonomy-cleanup-checklist-2026-06-13.md
 - research/amn2/phase-6-current-head-package-preflight-c46f664-2026-06-13.md
 - research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
+- research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md
 
 Границы Phase 6:
 - это planning/security/productization lane, не автоматический public launch;
@@ -219,13 +220,13 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - код GPL/upstream не копируем.
 
 Следующая рекомендация:
-P6-X003 package runbook escaping hygiene как AMN3 docs/tooling hygiene only, без rebuild/изменения уже VPS-smoked package artifacts.
+Phase 6 closeout packet + next-chat handoff + fresh installer backlog grooming как docs-only, без live/destructive/public/config/write work.
 
 Альтернатива парой:
 P6-C001 + P6-C002 decision checklist refresh как docs-only, без открытия public exposure или config delivery.
 
 Альтернатива тройкой:
-Phase 6 closeout packet + next-chat handoff + fresh installer backlog grooming как docs-only, без live/destructive work.
+Phase 6 closeout packet + next-chat handoff + fresh installer backlog grooming + public/config gate index refresh как docs-only, без live/destructive work.
 
 Постоянное правило:
 если в ходе выполнения задач появляется новая полезная мысль, добавлять ее в план по текущей шкале приоритетов и сразу сообщать, в какой раздел она добавлена.

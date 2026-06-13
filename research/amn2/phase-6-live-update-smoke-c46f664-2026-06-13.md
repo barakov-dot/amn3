@@ -221,6 +221,9 @@ The apply/smoke scripts, checksums and smoke result are not affected. Do not
 rewrite the smoked package artifact after this gate, because that would change
 checksum evidence.
 
+Status update: this follow-up is closed by
+`research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md`.
+
 ## Active Plan Update
 
 Remove from active Phase 6 plan:
@@ -250,8 +253,7 @@ critical_gated_deferred:
   - Production peer/user mutation
 normal:
   - P4-PRVTPRO-REFRESH-003-LIVE live probes/actions, carried from Phase 4, gated
-cosmetic:
-  - P6-X003 Package runbook escaping hygiene
+cosmetic: none after P6-X003
 ```
 
 ## Next Recommendation
@@ -259,8 +261,8 @@ cosmetic:
 Recommended next choice:
 
 ```text
-P6-X003 Package runbook escaping hygiene
+Phase 6 closeout packet + next-chat handoff + fresh installer backlog grooming
 ```
 
-This is AMN3 docs/tooling hygiene only. It should not rebuild or alter the
-already-smoked `c46f664` package artifact.
+This is docs-only by default. It must not open live/destructive/public/config or
+write gates.
