@@ -16,13 +16,14 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 repo: C:\Users\SooL\Documents\VPS-OPS-LAB
 AMN3 remote: https://github.com/barakov-dot/amn3.git
 AMN3 branch: master
-AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P5-D001 operator-only pilot acceptance and Phase 6 entry decision
+AMN3 current checkpoint: verify with `git log -1`; latest completed slice is P6-I001 scoped API tokens production implementation
 
 AMN2 remote: https://github.com/barakov-dot/amn2.git
 AMN2 branch: codex-vps-test-prep
-AMN2 current branch head: 2215761 Polish operator web admin UX
+AMN2 current branch head: 0b3ac1f Add API token production policy
 AMN2 latest VPS-smoked source-overlay/package head: 2215761 Polish operator web admin UX
-AMN2 latest current-head package status: live-update-smoke-pass for `2215761`
+AMN2 latest VPS-smoked/package status: live-update-smoke-pass for `2215761`
+AMN2 package/smoke status for `0b3ac1f`: not package-rebuilt, not VPS-smoked
 ```
 
 ## Обязательное чтение в начале нового чата
@@ -35,6 +36,8 @@ docs/PROJECT_CONTEXT_IMPORT.ru.md
 research/amn2/transfer-backlog.md
 research/amn2/phase-5-live-update-smoke-2215761-2026-06-13.md
 research/amn2/phase-5-operator-pilot-acceptance-phase-6-entry-2026-06-13.md
+research/amn2/phase-6-production-security-review-gate-2026-06-13.md
+research/amn2/phase-6-scoped-api-tokens-production-implementation-2026-06-13.md
 ```
 
 Historical Phase 5 handoff remains available at:
@@ -53,7 +56,9 @@ current_mode: private/operator-only
 Phase_5_default_queue: empty
 Phase_6_entry: planning-ready only
 Phase_6_live_public_self_service: not opened
-next_recommendation: P6-C005 Production security review gate
+last_closed: P6-C005 Production security review gate
+last_closed: P6-I001 Scoped API tokens production implementation
+next_recommendation: P6-I002 User self-service surface separated from admin surface
 ```
 
 ## Safety Boundary
@@ -91,7 +96,7 @@ Keep `VPS_APPLY_ENABLED=false` until a named gate explicitly changes it.
 
 ### Критичные
 
-- `P6-C005` Production security review gate: start local/docs/security review for exposed surfaces, credentials, logs, Telegram bot identity, incident response, public exposure, config delivery, write API and backup/import risks. Does not open live public/config/write actions.
+No active default critical tasks after `P6-C005`.
 
 Critical gated/deferred, not executed:
 
@@ -100,10 +105,11 @@ Critical gated/deferred, not executed:
 - `P6-C003` Write API production gate.
 - `P6-C004` Production backup/restore/import gate.
 - `VPS-REBUILD-001` destructive rebuild.
+- Local Agent write/config routes.
+- Production peer/user mutation.
 
 ### Очень важные
 
-- `P6-I001` Scoped API tokens production implementation.
 - `P6-I002` User self-service surface separated from admin surface.
 - `P6-I003` Payments/manual approval boundary if commercial access is enabled.
 - `P6-I004` Support bot and news bot production split with separate tokens/scopes.
@@ -119,6 +125,7 @@ Critical gated/deferred, not executed:
 
 - `P6-N001` Public docs/API taxonomy if public docs are approved.
 - `P6-N002` Admin analytics without per-peer/user leakage.
+- `P6-N003` Integration status current-head alignment: carried from P6-C005 review as a normal local-only code/tests/docs follow-up; align stale AMN2 integration-status constants with the current AMN2 branch/package distinction (`0b3ac1f` branch head, `2215761` latest VPS-smoked package head).
 - `P4-PRVTPRO-REFRESH-003-LIVE` live probes/actions: carried from Phase 4, still gated, not executed.
 
 ### Простые
@@ -144,9 +151,10 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 Источник правды:
 - AMN3 repo: barakov-dot/amn3, branch master
 - AMN2 repo: barakov-dot/amn2, branch codex-vps-test-prep
-- AMN2 current head: 2215761 Polish operator web admin UX
+- AMN2 current head: 0b3ac1f Add API token production policy
 - AMN2 latest VPS-smoked/package head: 2215761 Polish operator web admin UX
-- AMN3 current checkpoint: verify with git log -1; latest completed slice is P5-D001 operator-only pilot acceptance and Phase 6 entry decision
+- AMN2 package/smoke status for 0b3ac1f: not package-rebuilt, not VPS-smoked
+- AMN3 current checkpoint: verify with git log -1; latest completed slice is P6-I001 scoped API tokens production implementation
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_6_PRODUCTIZATION.ru.md
@@ -156,6 +164,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - research/amn2/transfer-backlog.md
 - research/amn2/phase-5-live-update-smoke-2215761-2026-06-13.md
 - research/amn2/phase-5-operator-pilot-acceptance-phase-6-entry-2026-06-13.md
+- research/amn2/phase-6-production-security-review-gate-2026-06-13.md
+- research/amn2/phase-6-scoped-api-tokens-production-implementation-2026-06-13.md
 
 Границы Phase 6:
 - это planning/security/productization lane, не автоматический public launch;
@@ -164,8 +174,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - VPS_APPLY_ENABLED=false;
 - код GPL/upstream не копируем.
 
-Рекомендация для первого шага:
-P6-C005 Production security review gate.
+Следующая рекомендация:
+P6-I002 User self-service surface separated from admin surface.
 
 После закрытия каждой задачи:
 - удалять ее из активного плана;

@@ -118,7 +118,12 @@ Phase 6 нужна только если после operator-only pilot мы р�
 
 ## Phase 6 рекомендации
 
-Phase 6 можно открывать только как planning/security/productization lane после закрытого `P5-D001`. Это не открывает public/self-service live work само по себе. Рекомендуемый первый шаг Phase 6: `P6-C005` Production security review gate. Public exposure, config delivery, write API, backup/import/reboot, Local Agent write/config routes and destructive rebuild remain separate named gates.
+Phase 6 можно открывать только как planning/security/productization lane после закрытого `P5-D001`. Это не открывает public/self-service live work само по себе. Первый шаг Phase 6, `P6-C005` Production security review gate, закрыт как local/docs/security review. Public exposure, config delivery, write API, backup/import/reboot, Local Agent write/config routes and destructive rebuild remain separate named gates.
+
+### Закрыто в Phase 6
+
+- `P6-C005` Production security review gate: completed as AMN3 local/docs/security review with focused AMN2 local security regression suite `98 passed, 1 warning`; evidence `research/amn2/phase-6-production-security-review-gate-2026-06-13.md`. Result: planning can continue, but public/self-service launch remains `no-go` until separate named gates. Follow-up added: `P6-N003` Integration status current-head alignment.
+- `P6-I001` Scoped API tokens production implementation: completed as AMN2 local-only code/tests/docs in commit `0b3ac1f Add API token production policy`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/phase-6-scoped-api-tokens-production-implementation-2026-06-13.md`. Adds a machine-checkable production token policy manifest, keeps allowed scopes to `server:read`/`metrics:read`, records blocked future/config/write/backup/Local Agent scopes, enforces 30-day max TTL for route-connected tokens, aligns the disabled web/admin token form with the same TTL, and updates token policy docs. Verification: focused `18 passed, 1 warning`, expanded `59 passed, 1 warning`, `git diff --check` passed. Latest VPS-smoked/package head remains `2215761`; `0b3ac1f` is not package-rebuilt or VPS-smoked.
 
 ### Критичные
 
@@ -126,11 +131,11 @@ Phase 6 можно открывать только как planning/security/prod
 - `P6-C002` Config delivery gate: public/self-service delivery, tokenized links, TTL, revoke, audit, redaction. Complexity: high. Depends on secret-bearing artifact policy and client compatibility QA.
 - `P6-C003` Write API production gate: `/api/clients` CRUD, operation queue, idempotency, locking, partial failure and rollback. Complexity: very high. Depends on WAPI design tasks and local fake-runner validation.
 - `P6-C004` Production backup/restore/import gate: encrypted backups, restore preview/apply, disaster recovery drill. Complexity: high/destructive. Depends on retention policy and restore tests.
-- `P6-C005` Production security review gate: abuse cases, exposed surfaces, credentials, logs, Telegram bot identity and incident response. Complexity: high. Blocks public/self-service launch.
+
+Active default critical tasks: none after `P6-C005`. Critical gated/deferred work remains `P6-C001`, `P6-C002`, `P6-C003`, `P6-C004`, `VPS-REBUILD-001`, Local Agent write/config routes and production peer/user mutation.
 
 ### Очень важные
 
-- `P6-I001` Scoped API tokens production implementation. Complexity: medium/high. Depends on token lifecycle, rotation, revoke and audit.
 - `P6-I002` User self-service surface separated from admin surface. Complexity: high. Depends on public exposure and config delivery decisions.
 - `P6-I003` Payments/manual approval boundary if commercial access is enabled. Complexity: medium/high. Depends on order lifecycle, fraud/manual review and support process.
 - `P6-I004` Support bot and news bot production split with separate tokens/scopes; current planning assets: `NEOBYATNAYA-AMNZ-SUPPORT-BOT.png`, `NEOBYATNAYA-AMNZ-NEWS-BOT.png`. Complexity: medium/high. Depends on bot identity/profile-icon gate and token/runtime separation.
@@ -146,6 +151,7 @@ Phase 6 можно открывать только как planning/security/prod
 
 - `P6-N001` Public docs/API taxonomy if public docs are approved.
 - `P6-N002` Admin analytics without per-peer/user leakage.
+- `P6-N003` Integration status current-head alignment. Complexity: low/medium. Carried from `P6-C005` review as a local-only code/tests/docs follow-up to align stale AMN2 integration-status constants with the current branch/package distinction (`0b3ac1f` branch head, `2215761` latest VPS-smoked package head).
 
 ### Простые
 
