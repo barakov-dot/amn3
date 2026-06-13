@@ -1,6 +1,24 @@
 # Текущий override 2026-06-09
 
-Phase 6 `P6-S004` closeout packet + next-chat handoff + fresh installer backlog grooming is closed as AMN3 docs-only work. Evidence: `research/amn2/phase-6-closeout-next-chat-fresh-installer-backlog-2026-06-13.md`. Added `docs/NEXT_CHAT_AMN2_AFTER_PHASE_6.ru.md` as the next active handoff after Phase 6 and `docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md` as a gated candidate backlog for the future clean installer. Phase 6 default lane is closed; public/self-service launch remains not opened. Remaining work is gated/deferred: `P6-C001`, `P6-C002`, `P6-C003`, `P6-C004`, `P6-C007`, `VPS-REBUILD-001`, Local Agent write/config routes, production peer/user mutation and carried `P4-PRVTPRO-REFRESH-003-LIVE`. Recommended next local-only bundle is `FI-I001 + FI-I002 + FI-I003`. No live VPS command, SSH command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive action, Telegram action, secret publication or upstream/GPL code copy was performed.
+After Phase 6 `FI-I001 + FI-I002 + FI-I003` fresh installer question model,
+plan renderer and secret handoff binding are closed as AMN2 local-only
+code/tests/docs. Evidence:
+`research/amn2/after-phase-6-fresh-installer-plan-renderer-2026-06-13.md`.
+AMN2 current branch head is `de635a0 Add fresh installer plan renderer`, pushed
+to `amn2/codex-vps-test-prep`; latest VPS-smoked/package head remains
+`c46f664 Add public taxonomy cleanup checklist`. The slice adds
+`build_fresh_install_manifest()`, `fresh-install-plan.v1`, rendered plan phases,
+named-gate mapping, `docs/AMN2_SECRET_HANDOFF_PROTOCOL.ru.md`, and
+`scripts/test.ps1` as the canonical Windows/Codex Desktop CPython 3.12 test
+wrapper. Verification: RED missing manifest/doc tests, focused `8 passed`,
+full AMN2 suite `714 passed, 1 StarletteDeprecationWarning`, `git diff
+--cached --check` passed. No live VPS, SSH, package apply/rebuild, service
+restart/deploy, public exposure, config delivery, write API, Local Agent
+mutation, backup/import/reboot, production peer/user mutation, destructive
+action, Telegram action, secret publication or upstream/GPL code copy was
+performed. Next recommendation: `FI-M001 + FI-M002 + FI-M003` local-only.
+
+Phase 6 `P6-S004` closeout packet + next-chat handoff + fresh installer backlog grooming is closed as AMN3 docs-only work. Evidence: `research/amn2/phase-6-closeout-next-chat-fresh-installer-backlog-2026-06-13.md`. Added `docs/NEXT_CHAT_AMN2_AFTER_PHASE_6.ru.md` as the next active handoff after Phase 6 and `docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md` as a gated candidate backlog for the future clean installer. Phase 6 default lane is closed; public/self-service launch remains not opened. Remaining work is gated/deferred: `P6-C001`, `P6-C002`, `P6-C003`, `P6-C004`, `P6-C007`, `VPS-REBUILD-001`, Local Agent write/config routes, production peer/user mutation and carried `P4-PRVTPRO-REFRESH-003-LIVE`. Its recommended local-only bundle `FI-I001 + FI-I002 + FI-I003` was completed after Phase 6 in AMN2 `de635a0`; the current recommendation is `FI-M001 + FI-M002 + FI-M003`. No live VPS command, SSH command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive action, Telegram action, secret publication or upstream/GPL code copy was performed.
 
 Phase 6 `P6-X003` package runbook escaping hygiene is closed as AMN3 local-only docs/tooling hygiene. Evidence: `research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md`. Added `scripts/check_markdown_hygiene.py` and `tests/test_markdown_hygiene.py` to catch accidental ASCII control characters in generated Markdown/operator docs, especially PowerShell backtick escape accidents such as `U+0008`, `U+0007` and `U+000B`. Verification: RED `python -m unittest tests.test_markdown_hygiene` failed while the tool was missing; GREEN returned `2 tests OK`; diagnostic run against the already-smoked unpacked `c46f664` operator doc failed with five expected findings. The already-smoked `dist/amn2-vps-update-and-smoke-kit-c46f664.zip` artifact was not rebuilt, repacked or altered. No live VPS command, SSH command, package apply, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive action, Telegram action, secret publication or upstream/GPL code copy was performed. `P6-X003` is removed from active Phase 6 plan.
 
@@ -80,7 +98,7 @@ PRVTPRO AMN2 local-only order: P4-PRVTPRO-REFRESH-002 expiration-field contract 
 PRVTPRO hybrid-only: HYB-PRVTPRO-REFRESH-001 AdGuard Home, HYB-PRVTPRO-REFRESH-002 SOCKS5 manager, HYB-PRVTPRO-REFRESH-003 Xray migration/attach existing install, HYB-PRVTPRO-REFRESH-004 multi-protocol capability registry
 PRVTPRO negative controls: GPL-3.0 research-only; no code/templates/UI/manager implementations/workflows copied; no admin-equivalent Bearer token model; no public panel/config delivery/reboot/backup/import/server cleanup without separate named gate
 AMN2 source-overlay/package head: c46f664 Add public taxonomy cleanup checklist (VPS-smoked in P6-C009)
-AMN2 current branch head: c46f664 Add public taxonomy cleanup checklist
+AMN2 current branch head: de635a0 Add fresh installer plan renderer (local-only, not package-rebuilt/VPS-smoked)
 AMN2 latest VPS-smoked package: dist/amn2-vps-update-and-smoke-kit-c46f664.zip, sha256 5C952103B3435E1D30AF7CF0A70C40BC027885F1E860C31089DD4ACA3E8347EE, live-update-smoke-pass
 AMN2 package/smoke status for c46f664: live-update-smoke-pass; source zip dist/amn2-codex-vps-test-prep-c46f664-source.zip sha256 5A92EA9BD5B60626F120B5367A02EDDCB742ECF5E6C4FCB8444151BFEB18B248; evidence research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
 AMN2 bot config delivery localization: research/upstreams/amnezia-vpn-client-defaultvpn-refresh-2026-06-11.md and research/amn2/phase-4-bot-config-delivery-localization-2026-06-11.md; no live bot restart/deploy or real config delivery performed by Codex

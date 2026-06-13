@@ -1,6 +1,26 @@
 # `amn2` Transfer Backlog
 
-Phase 6 P6-S004 closeout packet + next-chat handoff + fresh installer backlog grooming 2026-06-13: completed as AMN3 docs-only work. Evidence `research/amn2/phase-6-closeout-next-chat-fresh-installer-backlog-2026-06-13.md`. Added `docs/NEXT_CHAT_AMN2_AFTER_PHASE_6.ru.md` and `docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md`, synchronized Phase 6 handoff/status/context/backlog, closed the Phase 6 default lane and organized future clean-installer work under candidate `FI-*` IDs. Public/self-service launch remains not opened; remaining work is gated/deferred: `P6-C001`, `P6-C002`, `P6-C003`, `P6-C004`, `P6-C007`, `VPS-REBUILD-001`, Local Agent write/config routes, production peer/user mutation and carried `P4-PRVTPRO-REFRESH-003-LIVE`. Recommended next local-only bundle is `FI-I001 + FI-I002 + FI-I003`. Slice не выполнял live VPS command, SSH command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive VPS action, Telegram token use, live bot send, Telegram identity mutation, secret-bearing evidence publication or upstream/GPL code copy.
+After Phase 6 FI-I001 + FI-I002 + FI-I003 fresh installer plan renderer
+2026-06-13: completed as AMN2 local-only code/tests/docs in commit `de635a0
+Add fresh installer plan renderer`, pushed to `amn2/codex-vps-test-prep`.
+Evidence `research/amn2/after-phase-6-fresh-installer-plan-renderer-2026-06-13.md`.
+The slice adds `build_fresh_install_manifest()`, versioned question/answer
+schemas, `fresh-install-plan.v1`, rendered plan phases, required named-gate
+mapping for `P6-C001`/`P6-C002`/`P6-C003`/`P6-C007`, secret handoff protocol
+binding and the Windows/Codex Desktop `scripts/test.ps1` runner. Verification:
+RED missing manifest/doc tests, focused `8 passed`, full AMN2 suite `714 passed,
+1 StarletteDeprecationWarning`, `git diff --cached --check` passed. Slice не
+выполнял live VPS command, SSH command, package apply/rebuild on VPS, service
+restart/deploy, public exposure, real config delivery, write API, Local Agent
+mutation, backup/import/reboot, production peer/user mutation, destructive VPS
+action, Telegram token use, live bot send, Telegram identity/profile mutation,
+secret-bearing evidence publication or upstream/GPL code copy. `FI-I001`,
+`FI-I002` and `FI-I003` removed from the active recommendation. Latest
+VPS-smoked/package head remains `c46f664`; AMN2 `de635a0` is local-only and not
+package-rebuilt/VPS-smoked. Next recommendation: `FI-M001 + FI-M002 + FI-M003`
+as local-only preflight/runtime/package planning.
+
+Phase 6 P6-S004 closeout packet + next-chat handoff + fresh installer backlog grooming 2026-06-13: completed as AMN3 docs-only work. Evidence `research/amn2/phase-6-closeout-next-chat-fresh-installer-backlog-2026-06-13.md`. Added `docs/NEXT_CHAT_AMN2_AFTER_PHASE_6.ru.md` and `docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md`, synchronized Phase 6 handoff/status/context/backlog, closed the Phase 6 default lane and organized future clean-installer work under candidate `FI-*` IDs. Public/self-service launch remains not opened; remaining work is gated/deferred: `P6-C001`, `P6-C002`, `P6-C003`, `P6-C004`, `P6-C007`, `VPS-REBUILD-001`, Local Agent write/config routes, production peer/user mutation and carried `P4-PRVTPRO-REFRESH-003-LIVE`. Its recommended local-only bundle `FI-I001 + FI-I002 + FI-I003` was completed after Phase 6 in AMN2 `de635a0`; the current recommendation is `FI-M001 + FI-M002 + FI-M003`. Slice не выполнял live VPS command, SSH command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive VPS action, Telegram token use, live bot send, Telegram identity mutation, secret-bearing evidence publication or upstream/GPL code copy.
 
 Phase 6 P6-X003 package runbook escaping hygiene 2026-06-13: completed as AMN3 local-only docs/tooling hygiene. Evidence `research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md`. Added `scripts/check_markdown_hygiene.py` and `tests/test_markdown_hygiene.py` to catch accidental ASCII control characters in generated Markdown/operator docs, including PowerShell backtick escape accidents. Verification: RED `python -m unittest tests.test_markdown_hygiene` failed while the tool was missing; GREEN returned `2 tests OK`; diagnostic run against the already-smoked unpacked `c46f664` operator doc failed with five expected findings. The already-smoked `c46f664` zip/package artifact was not rebuilt, repacked or altered. Slice не выполнял live VPS command, SSH command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive VPS action, Telegram token use, live bot send, Telegram identity mutation, secret-bearing evidence publication or upstream/GPL code copy. `P6-X003` removed from active Phase 6 plan.
 

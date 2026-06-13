@@ -1,6 +1,28 @@
 # Текущий override 2026-06-09
 
-Phase 6 `P6-S004` closeout packet + next-chat handoff + fresh installer backlog grooming was completed on 2026-06-13 as AMN3 docs-only work. Evidence: `research/amn2/phase-6-closeout-next-chat-fresh-installer-backlog-2026-06-13.md`. Added `docs/NEXT_CHAT_AMN2_AFTER_PHASE_6.ru.md` and `docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md`, synchronized the Phase 6 handoff/status/context/backlog, closed the Phase 6 default lane and organized future clean-installer candidates under `FI-*` IDs. Public/self-service launch remains not opened; remaining work is gated/deferred. Recommended next local-only bundle is `FI-I001 + FI-I002 + FI-I003`. No live VPS command, SSH command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive action, Telegram action, secret publication or upstream/GPL code copy was performed.
+After Phase 6 `FI-I001 + FI-I002 + FI-I003` fresh installer question model,
+plan renderer and secret handoff binding were completed on 2026-06-13 as AMN2
+local-only code/tests/docs. Evidence:
+`research/amn2/after-phase-6-fresh-installer-plan-renderer-2026-06-13.md`.
+AMN2 branch `codex-vps-test-prep` advanced to `de635a0 Add fresh installer
+plan renderer` and was pushed to `amn2/codex-vps-test-prep`. The slice adds
+versioned fresh-install question/answer schemas, a redacted rendered plan,
+named-gate mapping for `P6-C001`, `P6-C002`, `P6-C003` and `P6-C007`, secret
+handoff protocol binding, docs `docs/AMN2_SECRET_HANDOFF_PROTOCOL.ru.md`, and
+`scripts/test.ps1` as the canonical Windows/Codex Desktop test wrapper for
+CPython 3.12 + `.codex_deps`. Verification returned RED manifest/doc tests,
+focused `8 passed`, full AMN2 suite `714 passed, 1 StarletteDeprecationWarning`,
+and `git diff --cached --check` passed. No live VPS command, SSH command,
+package apply/rebuild on VPS, service restart/deploy, public exposure, config
+delivery, write API, Local Agent mutation, backup/import/reboot, production
+peer/user mutation, destructive action, Telegram action, secret publication or
+upstream/GPL code copy was performed. `FI-I001`, `FI-I002` and `FI-I003` are
+removed from the active recommendation. Latest VPS-smoked/package head remains
+`c46f664`; AMN2 `de635a0` is local-only and not package-rebuilt/VPS-smoked.
+Next recommendation: `FI-M001 + FI-M002 + FI-M003` as local-only installer
+preflight/runtime/package planning.
+
+Phase 6 `P6-S004` closeout packet + next-chat handoff + fresh installer backlog grooming was completed on 2026-06-13 as AMN3 docs-only work. Evidence: `research/amn2/phase-6-closeout-next-chat-fresh-installer-backlog-2026-06-13.md`. Added `docs/NEXT_CHAT_AMN2_AFTER_PHASE_6.ru.md` and `docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md`, synchronized the Phase 6 handoff/status/context/backlog, closed the Phase 6 default lane and organized future clean-installer candidates under `FI-*` IDs. Public/self-service launch remains not opened; remaining work is gated/deferred. Its recommended local-only bundle `FI-I001 + FI-I002 + FI-I003` was completed after Phase 6 in AMN2 `de635a0`; the current recommendation is `FI-M001 + FI-M002 + FI-M003`. No live VPS command, SSH command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive action, Telegram action, secret publication or upstream/GPL code copy was performed.
 
 Phase 6 `P6-X003` package runbook escaping hygiene was completed on 2026-06-13 as AMN3 local-only docs/tooling hygiene. Evidence: `research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md`. Added `scripts/check_markdown_hygiene.py` and `tests/test_markdown_hygiene.py` to catch accidental ASCII control characters in generated Markdown/operator docs. Verification returned RED failure while the tool was missing, GREEN `2 tests OK`, and a diagnostic run against the already-smoked unpacked `c46f664` operator doc failed with five expected findings. The already-smoked `c46f664` zip/package artifact was not rebuilt, repacked or altered. No live VPS command, SSH command, package apply, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive action, Telegram action, secret publication or upstream/GPL code copy was performed. `P6-X003` is removed from active Phase 6 plan.
 

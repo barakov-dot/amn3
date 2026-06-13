@@ -11,8 +11,9 @@ apply, public exposure, config delivery, write API или production mutations.
 
 ```text
 AMN2 branch: codex-vps-test-prep
-AMN2 current head: c46f664 Add public taxonomy cleanup checklist
+AMN2 current head: de635a0 Add fresh installer plan renderer
 AMN2 latest VPS-smoked/package head: c46f664 Add public taxonomy cleanup checklist
+AMN2 local-only after-smoke head: de635a0, not package-rebuilt/VPS-smoked
 AMN3 latest evidence slice: P6-S004 Phase 6 closeout / next-chat / installer backlog grooming
 current working VPS: 89.185.80.166, disposable test VPS, no destructive action authorized here
 ```
@@ -25,6 +26,8 @@ Relevant completed inputs:
 - `P6-X003` package runbook escaping hygiene guardrail.
 - `P5-C004` secret handoff protocol.
 - `P5-C005` source-overlay permission preservation.
+- `FI-I001 + FI-I002 + FI-I003` fresh installer question schema, rendered plan
+  and secret handoff binding in AMN2 `de635a0`.
 
 ## Backlog Status
 
@@ -56,19 +59,21 @@ All items below are candidates. None are active by default.
 
 ### Very important local-only
 
+Completed:
+
 - `FI-I001` Installer question model hardening.
   Extend the existing `P6-I007` wizard with explicit answer schema versions,
-  validation groups and stop-line explanations. Local-only code/tests/docs.
+  validation groups and stop-line explanations. Completed in AMN2 `de635a0`.
 
 - `FI-I002` Install plan renderer.
   Generate a redacted, operator-readable install plan from answers, including
   package choice, secrets needed through operator-local channel, expected
-  listeners and smoke steps. Local-only code/tests/docs.
+  listeners and smoke steps. Completed in AMN2 `de635a0`.
 
 - `FI-I003` Secret handoff checklist binding.
   Bind the installer plan to `docs/AMN2_SECRET_HANDOFF_PROTOCOL.ru.md` so raw
   tokens, `.env`, `servers.yml`, client configs, QR and `vpn://` never enter
-  AMN3 evidence. Local-only docs/tests.
+  AMN3 evidence. Completed in AMN2 `de635a0`.
 
 ### Important local-only
 
@@ -107,10 +112,9 @@ All items below are candidates. None are active by default.
 
 ## Recommended Order
 
-1. `FI-I001 + FI-I002 + FI-I003` as local-only code/tests/docs.
-2. `FI-M001 + FI-M002 + FI-M003` as local-only preflight/package planning.
-3. `FI-N001 + FI-N002 + FI-S001` as docs/test evidence readiness.
-4. Only then consider `FI-C001` or other live/destructive named gates.
+1. `FI-M001 + FI-M002 + FI-M003` as local-only preflight/package planning.
+2. `FI-N001 + FI-N002 + FI-S001` as docs/test evidence readiness.
+3. Only then consider `FI-C001` or other live/destructive named gates.
 
 ## Hard Stop Lines
 

@@ -17,9 +17,10 @@ AMN3 checkpoint: verify with git log -1; latest completed slice is P6-S004 Phase
 
 AMN2 repo: barakov-dot/amn2
 AMN2 branch: codex-vps-test-prep
-AMN2 current head: c46f664 Add public taxonomy cleanup checklist
+AMN2 current head: de635a0 Add fresh installer plan renderer
 AMN2 latest VPS-smoked/package head: c46f664 Add public taxonomy cleanup checklist
 AMN2 package/smoke status: live-update-smoke-pass for c46f664
+AMN2 local-only after-smoke head: de635a0, not package-rebuilt/VPS-smoked
 ```
 
 ## Read First
@@ -33,6 +34,7 @@ docs/PROJECT_CONTEXT_IMPORT.ru.md
 research/amn2/transfer-backlog.md
 docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md
 research/amn2/phase-6-closeout-next-chat-fresh-installer-backlog-2026-06-13.md
+research/amn2/after-phase-6-fresh-installer-plan-renderer-2026-06-13.md
 research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
 research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md
 ```
@@ -45,7 +47,7 @@ current_mode: private/operator-only
 public_self_service_launch: not opened
 latest_vps_smoked_head: c46f664
 default_local_queue: empty
-next_recommendation: FI-I001 + FI-I002 + FI-I003 as local-only installer planning/code/docs, or P6-C001 + P6-C002 as docs-only gate decision refresh
+next_recommendation: FI-M001 + FI-M002 + FI-M003 as local-only installer preflight/runtime/package planning, or P6-C001 + P6-C002 as docs-only gate decision refresh
 ```
 
 Phase 6 produced planning/security/productization boundaries and confirmed the
@@ -53,6 +55,12 @@ current disposable VPS source overlay at `c46f664` through read-only loopback
 smoke. It did not open public launch, config delivery, write API, destructive
 rebuild, backup/import/reboot, Local Agent mutations, production peer/user
 mutation or Telegram identity mutation.
+
+After Phase 6, `FI-I001 + FI-I002 + FI-I003` were completed in AMN2 commit
+`de635a0 Add fresh installer plan renderer` as local-only code/tests/docs. This
+added versioned installer question/answer schemas, a rendered plan, secret
+handoff protocol binding and the canonical `scripts/test.ps1` Windows/Codex
+test wrapper. This head is not package-rebuilt or VPS-smoked.
 
 ## Safety Boundary
 
@@ -104,7 +112,7 @@ Keep `VPS_APPLY_ENABLED=false` unless a future named gate explicitly changes it.
 ### Fresh installer candidates
 
 Use `docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md`. Candidates are not active by
-default. The recommended local-only starter bundle is:
+default. Completed after Phase 6:
 
 ```text
 FI-I001 Installer question model hardening
@@ -112,12 +120,20 @@ FI-I002 Install plan renderer
 FI-I003 Secret handoff checklist binding
 ```
 
+The recommended local-only next bundle is:
+
+```text
+FI-M001 Target OS/runtime preflight matrix
+FI-M002 Runtime mode decision
+FI-M003 Package hygiene integration
+```
+
 ## Suggested Next Steps
 
 Recommended triple:
 
 ```text
-FI-I001 + FI-I002 + FI-I003 as local-only code/tests/docs for the clean installer path.
+FI-M001 + FI-M002 + FI-M003 as local-only preflight/runtime/package planning for the clean installer path.
 ```
 
 Pair alternative:
@@ -129,7 +145,7 @@ P6-C001 + P6-C002 decision checklist refresh as docs-only, without opening publi
 Single alternative:
 
 ```text
-FI-I001 installer question model hardening as local-only code/tests/docs.
+FI-M001 target OS/runtime preflight matrix as local-only docs/tests/code.
 ```
 
 Do not run live/destructive work unless the operator gives a separate exact
