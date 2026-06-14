@@ -12,9 +12,10 @@ apply, public exposure, config delivery, write API или production mutations.
 ```text
 AMN2 branch: codex-vps-test-prep
 AMN2 current head: 0de7a77 Polish fresh installer preflight planning
-AMN2 latest VPS-smoked/package head: c46f664 Add public taxonomy cleanup checklist
-AMN2 local-only after-smoke head: 0de7a77, not package-rebuilt/VPS-smoked
-AMN3 latest evidence slice: P6-S004 Phase 6 closeout / next-chat / installer backlog grooming
+AMN2 latest VPS-smoked head: c46f664 Add public taxonomy cleanup checklist
+AMN2 latest package-ready head: 0de7a77 Polish fresh installer preflight planning
+AMN2 package status: package-ready-not-vps-smoked for 0de7a77
+AMN3 latest evidence slice: local package build/preflight for 0de7a77
 current working VPS: 89.185.80.166, disposable test VPS, no destructive action authorized here
 ```
 
@@ -36,6 +37,7 @@ Relevant completed inputs:
   `ff77d4c`.
 - `FI-X001 + current-head package preflight planning` Russian-first installer
   prompts and `fresh-install-package-preflight.v1` planning in AMN2 `0de7a77`.
+- Local package build/preflight for AMN2 `0de7a77`, package-ready-not-vps-smoked.
 
 ## Backlog Status
 
@@ -128,8 +130,8 @@ Completed:
 
 ## Recommended Order
 
-1. Local package build/preflight for `0de7a77` if the operator wants a package
-   candidate, without live apply/smoke.
+1. Next-chat handoff refresh + live gate checklist grooming for `0de7a77`,
+   without live apply/smoke.
 2. A separate named live apply/smoke gate only if the operator wants to update
    the disposable VPS.
 3. Only then consider `FI-C001` or other live/destructive named gates.

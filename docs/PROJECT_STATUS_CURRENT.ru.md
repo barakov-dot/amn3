@@ -1,5 +1,25 @@
 # Текущий override 2026-06-09
 
+After Phase 6 local package build/preflight for `0de7a77` was completed on
+2026-06-14 as AMN3 local package work. Evidence:
+`research/amn2/after-phase-6-package-preflight-0de7a77-2026-06-14.md`. Built
+`dist/amn2-vps-update-and-smoke-kit-0de7a77.zip`, sha256
+`7B6DA000DAA39DD15A4DB7C3691D0B0C24EAA20ACB1C428150C6961B01E6F85B`, from
+source zip `dist/amn2-codex-vps-test-prep-0de7a77-source.zip`, sha256
+`B8D0E7E2A40051AB38EDF09947977DFE5F7197CEEEE87D1523734D3C1C505295`. Package
+hygiene passed with `kit_entries=5`, `source_entries=342`,
+`forbidden_source_entries=0`, shell scripts LF/no-BOM, operator doc markdown
+hygiene, package checksum and test-extract. Verification returned full AMN2
+suite `721 passed, 1 StarletteDeprecationWarning`, AMN3 package/apply-script and
+markdown hygiene tests `4 tests OK`, and `git diff --check` passed. No live VPS
+command, SSH command, package upload/apply on VPS, service restart/deploy,
+public exposure, config delivery, write API, Local Agent mutation,
+backup/import/reboot, production peer/user mutation, destructive action,
+Telegram action, secret publication or upstream/GPL code copy was performed.
+AMN2 `0de7a77` is package-ready-not-vps-smoked; latest VPS-smoked head remains
+`c46f664`. Next recommendation: next-chat handoff refresh, or a separate named
+live apply/smoke gate for `0de7a77` if the operator chooses.
+
 After Phase 6 `FI-X001 + current-head package preflight planning` was completed
 on 2026-06-14 as AMN2 local-only code/tests/docs. Evidence:
 `research/amn2/after-phase-6-fresh-installer-copy-package-preflight-2026-06-14.md`.
