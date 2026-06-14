@@ -13,7 +13,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 ```text
 AMN3 repo: barakov-dot/amn3
 AMN3 branch: master
-AMN3 checkpoint: verify with git log -1; latest completed slice is P6-M005 local-only
+AMN3 checkpoint: verify with git log -1; latest completed slice is Phase 6 final closeout
 
 AMN2 repo: barakov-dot/amn2
 AMN2 branch: codex-vps-test-prep
@@ -46,6 +46,7 @@ research/amn2/phase-6-live-update-smoke-0de7a77-2026-06-14.md
 research/amn2/after-phase-6-automation-intake-aggregation-closeout-readiness-2026-06-14.md
 research/amn2/after-phase-6-installer-preflight-taxonomy-guards-2026-06-14.md
 research/amn2/after-phase-6-multi-instance-ipam-conflict-model-2026-06-14.md
+research/amn2/phase-6-final-closeout-known-good-snapshot-2026-06-14.md
 research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-14.md
 research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-14.md
 research/upstreams/amnezia-vpn-client-defaultvpn-refresh-2026-06-14.md
@@ -65,6 +66,12 @@ current_amn2_head: b121865 local-only not package-rebuilt or VPS-smoked
 default_local_queue: empty
 next_recommendation: Phase 6 final closeout + clean-installer next-phase entry + current VPS known-good snapshot/runbook
 ```
+
+Phase 6 final closeout is completed. The default local queue is empty. The next
+chat should either pause on known-good `0de7a77` or ask the operator for a
+separate named gate before any live/public/config/write/destructive work.
+Evidence:
+`research/amn2/phase-6-final-closeout-known-good-snapshot-2026-06-14.md`.
 
 Phase 6 produced planning/security/productization boundaries and confirmed the
 current disposable VPS source overlay at `0de7a77` through read-only loopback

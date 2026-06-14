@@ -11,11 +11,11 @@ apply, public exposure, config delivery, write API или production mutations.
 
 ```text
 AMN2 branch: codex-vps-test-prep
-AMN2 current head: 0de7a77 Polish fresh installer preflight planning
+AMN2 current head: b121865 Add multi instance conflict model
 AMN2 latest VPS-smoked head: 0de7a77 Polish fresh installer preflight planning
 AMN2 latest package-ready head: 0de7a77 Polish fresh installer preflight planning
 AMN2 package status: VPS-smoked/pass for 0de7a77
-AMN3 latest evidence slice: P6-C010 live update/smoke for 0de7a77
+AMN3 latest evidence slice: Phase 6 final closeout / known-good snapshot
 current working VPS: 89.185.80.166, disposable test VPS, no destructive action authorized here
 ```
 
@@ -38,8 +38,13 @@ Relevant completed inputs:
   `ff77d4c`.
 - `FI-X001 + current-head package preflight planning` Russian-first installer
   prompts and `fresh-install-package-preflight.v1` planning in AMN2 `0de7a77`.
+- `FI-M004 + P6-N005` package asset path preflight and API taxonomy route-order
+  guard in AMN2 `4cde273`.
+- `P6-M005` multi-instance/port/IPAM conflict model in AMN2 `b121865`.
 - Local package build/preflight and P6-C010 live update/smoke for AMN2
   `0de7a77`, VPS-smoked/pass.
+- Phase 6 final closeout and known-good snapshot evidence in
+  `research/amn2/phase-6-final-closeout-known-good-snapshot-2026-06-14.md`.
 
 ## Backlog Status
 
@@ -132,11 +137,12 @@ Completed:
 
 ## Recommended Order
 
-1. Next-chat handoff refresh + live gate checklist grooming for `0de7a77`,
-   without live apply/smoke.
-2. A separate named live apply/smoke gate only if the operator wants to update
-   the disposable VPS.
-3. Only then consider `FI-C001` or other live/destructive named gates.
+1. Pause on known-good `0de7a77` unless the operator intentionally opens a
+   named gate.
+2. If updating the disposable VPS to AMN2 `b121865`, first build a fresh package
+   from `b121865`, run package/source preflight and require a separate named
+   live apply/smoke gate.
+3. Only after that consider `FI-C001` or other live/destructive named gates.
 
 ## Hard Stop Lines
 

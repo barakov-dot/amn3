@@ -1,5 +1,17 @@
 # Текущий override 2026-06-09
 
+Phase 6 final closeout is closed as AMN3 docs-only/local-only work. Evidence:
+`research/amn2/phase-6-final-closeout-known-good-snapshot-2026-06-14.md`.
+Decision: Phase 6 default lane is closed, default local queue is empty and the
+project remains private/operator-only. AMN2 current head is `b121865 Add multi
+instance conflict model`, pushed to `amn2/codex-vps-test-prep`; latest
+VPS-smoked/package head remains `0de7a77 Polish fresh installer preflight
+planning`. Current disposable VPS `89.185.80.166` known-good evidence remains
+`research/amn2/phase-6-live-update-smoke-0de7a77-2026-06-14.md`. Any future
+live update from `0de7a77` to `b121865` requires a separate named live
+package/apply/smoke gate. Remaining public/config/write/backup/destructive/Local
+Agent/Telegram identity gates remain deferred and not active.
+
 After Phase 6 `P6-M005` is closed as AMN2 local-only code/tests/docs.
 Evidence:
 `research/amn2/after-phase-6-multi-instance-ipam-conflict-model-2026-06-14.md`.
