@@ -1,5 +1,41 @@
 # Текущий override 2026-06-09
 
+After Phase 6 `P6-C001 + P6-C002` docs-only checklist refresh is closed as
+AMN2 local-only code/tests/docs. Evidence:
+`research/amn2/after-phase-6-public-config-gate-checklist-refresh-2026-06-13.md`.
+AMN2 current branch head is `ff77d4c Add public config gate checklist`, pushed
+to `amn2/codex-vps-test-prep`; latest VPS-smoked/package head remains
+`c46f664 Add public taxonomy cleanup checklist`. The slice adds
+`docs/PUBLIC_CONFIG_GATE_CHECKLIST.ru.md` and a machine-checkable checklist
+artifact that keeps `public_exposure_enabled=false` and
+`config_delivery_enabled=false` unless separate named gates are opened.
+Verification: focused `4 passed`, full `720 passed, 1
+StarletteDeprecationWarning`, `git diff --check` passed. No live VPS, SSH,
+package apply/rebuild, service restart/deploy, public exposure, config
+delivery, write API, Local Agent mutation, backup/import/reboot, production
+peer/user mutation, destructive action, Telegram action, secret publication or
+upstream/GPL code copy was performed. `P6-C001` and `P6-C002` remain critical
+gated/deferred for actual public exposure and actual config delivery. Next
+recommendation: `FI-X001 + current-head package preflight planning for ff77d4c`
+as local-only docs/tests/package hygiene, without live apply.
+
+After Phase 6 `FI-N001 + FI-N002 + FI-S001` fresh installer evidence readiness
+is closed as AMN2 local-only code/tests/docs. Evidence:
+`research/amn2/after-phase-6-fresh-installer-evidence-readiness-2026-06-13.md`.
+AMN2 current branch head is `525a9cd Add fresh installer evidence readiness`,
+pushed to `amn2/codex-vps-test-prep`; latest VPS-smoked/package head remains
+`c46f664 Add public taxonomy cleanup checklist`. The slice adds
+`fresh-install-evidence.v1`, smoke/evidence template, report-only
+existing-server reconciliation input and `docs/FRESH_INSTALLER_OPERATOR_INDEX.ru.md`.
+Verification: RED `3 failed, 8 passed`, focused `13 passed`, full `719 passed,
+1 StarletteDeprecationWarning`, `git diff --check` and staged check passed. No
+live VPS, SSH, live smoke execution, package apply/rebuild, service
+restart/deploy, public exposure, config delivery, write API, Local Agent
+mutation, backup/import/reboot, production peer/user mutation, destructive
+action, Telegram action, secret publication or upstream/GPL code copy was
+performed. Next operator-requested item: `P6-C001 + P6-C002` docs-only checklist
+refresh without opening public/config gates.
+
 After Phase 6 `FI-M001 + FI-M002 + FI-M003` fresh installer readiness planning
 is closed as AMN2 local-only code/tests/docs. Evidence:
 `research/amn2/after-phase-6-fresh-installer-readiness-planning-2026-06-13.md`.
@@ -114,7 +150,7 @@ PRVTPRO AMN2 local-only order: P4-PRVTPRO-REFRESH-002 expiration-field contract 
 PRVTPRO hybrid-only: HYB-PRVTPRO-REFRESH-001 AdGuard Home, HYB-PRVTPRO-REFRESH-002 SOCKS5 manager, HYB-PRVTPRO-REFRESH-003 Xray migration/attach existing install, HYB-PRVTPRO-REFRESH-004 multi-protocol capability registry
 PRVTPRO negative controls: GPL-3.0 research-only; no code/templates/UI/manager implementations/workflows copied; no admin-equivalent Bearer token model; no public panel/config delivery/reboot/backup/import/server cleanup without separate named gate
 AMN2 source-overlay/package head: c46f664 Add public taxonomy cleanup checklist (VPS-smoked in P6-C009)
-AMN2 current branch head: 7416fb0 Add fresh installer readiness planning (local-only, not package-rebuilt/VPS-smoked)
+AMN2 current branch head: 525a9cd Add fresh installer evidence readiness (local-only, not package-rebuilt/VPS-smoked)
 AMN2 latest VPS-smoked package: dist/amn2-vps-update-and-smoke-kit-c46f664.zip, sha256 5C952103B3435E1D30AF7CF0A70C40BC027885F1E860C31089DD4ACA3E8347EE, live-update-smoke-pass
 AMN2 package/smoke status for c46f664: live-update-smoke-pass; source zip dist/amn2-codex-vps-test-prep-c46f664-source.zip sha256 5A92EA9BD5B60626F120B5367A02EDDCB742ECF5E6C4FCB8444151BFEB18B248; evidence research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
 AMN2 bot config delivery localization: research/upstreams/amnezia-vpn-client-defaultvpn-refresh-2026-06-11.md and research/amn2/phase-4-bot-config-delivery-localization-2026-06-11.md; no live bot restart/deploy or real config delivery performed by Codex

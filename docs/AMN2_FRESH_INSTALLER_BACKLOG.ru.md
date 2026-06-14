@@ -11,9 +11,9 @@ apply, public exposure, config delivery, write API или production mutations.
 
 ```text
 AMN2 branch: codex-vps-test-prep
-AMN2 current head: 7416fb0 Add fresh installer readiness planning
+AMN2 current head: ff77d4c Add public config gate checklist
 AMN2 latest VPS-smoked/package head: c46f664 Add public taxonomy cleanup checklist
-AMN2 local-only after-smoke head: 7416fb0, not package-rebuilt/VPS-smoked
+AMN2 local-only after-smoke head: ff77d4c, not package-rebuilt/VPS-smoked
 AMN3 latest evidence slice: P6-S004 Phase 6 closeout / next-chat / installer backlog grooming
 current working VPS: 89.185.80.166, disposable test VPS, no destructive action authorized here
 ```
@@ -30,6 +30,10 @@ Relevant completed inputs:
   and secret handoff binding in AMN2 `de635a0`.
 - `FI-M001 + FI-M002 + FI-M003` fresh installer target preflight matrix,
   runtime decision and package hygiene planning in AMN2 `7416fb0`.
+- `FI-N001 + FI-N002 + FI-S001` fresh installer smoke/evidence template,
+  existing-server reconciliation input and operator docs index in AMN2 `525a9cd`.
+- `P6-C001 + P6-C002` docs-only public/config gate checklist refresh in AMN2
+  `ff77d4c`.
 
 ## Backlog Status
 
@@ -98,27 +102,35 @@ Completed:
 
 ### Normal local-only
 
+Completed:
+
 - `FI-N001` Smoke/evidence template.
   Reuse read-only loopback smoke, auth/listener/audit summary, external closed
-  probes and no-secret evidence review.
+  probes and no-secret evidence review. Completed in AMN2 `525a9cd`.
 
 - `FI-N002` Existing-server reconciliation input.
   Reuse report-only reconciliation before any clean install. No auto-fix,
-  import, peer creation/removal or config overwrite.
+  import, peer creation/removal or config overwrite. Completed in AMN2 `525a9cd`.
 
 ### Simple/cosmetic
 
+Completed:
+
 - `FI-S001` Installer docs index.
   Create a short operator index linking wizard, destructive checklist, secret
-  handoff, package hygiene and smoke evidence rules.
+  handoff, package hygiene and smoke evidence rules. Completed in AMN2 `525a9cd`.
+
+Remaining:
 
 - `FI-X001` Russian-first prompt copy polish.
   Keep prompts short, direct and safe, while preserving stable technical IDs.
 
 ## Recommended Order
 
-1. `FI-N001 + FI-N002 + FI-S001` as docs/test evidence readiness.
-2. Only then consider `FI-C001` or other live/destructive named gates.
+1. `FI-X001` as local-only Russian-first prompt copy polish.
+2. Current-head package preflight planning for `ff77d4c` as local-only package
+   hygiene, without live apply/smoke.
+3. Only then consider `FI-C001` or other live/destructive named gates.
 
 ## Hard Stop Lines
 

@@ -1,5 +1,48 @@
 # Текущий override 2026-06-09
 
+After Phase 6 `P6-C001 + P6-C002` docs-only checklist refresh was completed on
+2026-06-13 as AMN2 local-only code/tests/docs. Evidence:
+`research/amn2/after-phase-6-public-config-gate-checklist-refresh-2026-06-13.md`.
+AMN2 branch `codex-vps-test-prep` advanced to `ff77d4c Add public config gate
+checklist` and was pushed to `amn2/codex-vps-test-prep`. The slice adds
+`docs/PUBLIC_CONFIG_GATE_CHECKLIST.ru.md` plus
+`build_public_config_gate_checklist()`, records `public_exposure_enabled=false`
+and `config_delivery_enabled=false`, and blocks public listener exposure,
+public OpenAPI publication, short config-link issue/redeem, QR, VPN import
+link, `.conf`, Telegram live config send and Local Agent config mutation without
+the correct named gate. Verification returned focused `4 passed`, full AMN2
+suite `720 passed, 1 StarletteDeprecationWarning`, and `git diff --check`
+passed. No live VPS command, SSH command, package apply/rebuild on VPS, service
+restart/deploy, public exposure, config delivery, write API, Local Agent
+mutation, backup/import/reboot, production peer/user mutation, destructive
+action, Telegram action, secret publication or upstream/GPL code copy was
+performed. `P6-C001` and `P6-C002` remain critical gated/deferred for actual
+public exposure and actual config delivery. Latest VPS-smoked/package head
+remains `c46f664`; AMN2 `ff77d4c` is local-only and not
+package-rebuilt/VPS-smoked. Next recommendation: `FI-X001 + current-head package
+preflight planning for ff77d4c` as local-only docs/tests/package hygiene,
+without live apply.
+
+After Phase 6 `FI-N001 + FI-N002 + FI-S001` fresh installer evidence readiness
+was completed on 2026-06-13 as AMN2 local-only code/tests/docs. Evidence:
+`research/amn2/after-phase-6-fresh-installer-evidence-readiness-2026-06-13.md`.
+AMN2 branch `codex-vps-test-prep` advanced to `525a9cd Add fresh installer
+evidence readiness` and was pushed to `amn2/codex-vps-test-prep`. The slice
+adds `fresh-install-evidence.v1`, smoke/evidence template, report-only
+existing-server reconciliation input and `docs/FRESH_INSTALLER_OPERATOR_INDEX.ru.md`.
+Verification returned RED `3 failed, 8 passed`, focused `13 passed`, full AMN2
+suite `719 passed, 1 StarletteDeprecationWarning`, and `git diff --check` /
+`git diff --cached --check` passed. No live VPS command, SSH command, live
+smoke execution, package apply/rebuild on VPS, service restart/deploy, public
+exposure, config delivery, write API, Local Agent mutation, backup/import/reboot,
+production peer/user mutation, destructive action, Telegram action, secret
+publication or upstream/GPL code copy was performed. `FI-N001`, `FI-N002` and
+`FI-S001` are removed from the active recommendation. Latest VPS-smoked/package
+head remains `c46f664`; AMN2 `525a9cd` is local-only and not
+package-rebuilt/VPS-smoked. Next operator-requested item:
+`P6-C001 + P6-C002` docs-only checklist refresh, without opening public/config
+gates.
+
 After Phase 6 `FI-M001 + FI-M002 + FI-M003` fresh installer readiness planning
 was completed on 2026-06-13 as AMN2 local-only code/tests/docs. Evidence:
 `research/amn2/after-phase-6-fresh-installer-readiness-planning-2026-06-13.md`.

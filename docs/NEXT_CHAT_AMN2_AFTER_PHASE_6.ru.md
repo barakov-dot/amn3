@@ -13,14 +13,14 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 ```text
 AMN3 repo: barakov-dot/amn3
 AMN3 branch: master
-AMN3 checkpoint: verify with git log -1; latest completed slice is FI-M001 + FI-M002 + FI-M003 fresh installer readiness planning
+AMN3 checkpoint: verify with git log -1; latest completed slice is P6-C001 + P6-C002 docs-only checklist refresh
 
 AMN2 repo: barakov-dot/amn2
 AMN2 branch: codex-vps-test-prep
-AMN2 current head: 7416fb0 Add fresh installer readiness planning
+AMN2 current head: ff77d4c Add public config gate checklist
 AMN2 latest VPS-smoked/package head: c46f664 Add public taxonomy cleanup checklist
 AMN2 package/smoke status: live-update-smoke-pass for c46f664
-AMN2 local-only after-smoke head: 7416fb0, not package-rebuilt/VPS-smoked
+AMN2 local-only after-smoke head: ff77d4c, not package-rebuilt/VPS-smoked
 ```
 
 ## Read First
@@ -36,6 +36,8 @@ docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md
 research/amn2/phase-6-closeout-next-chat-fresh-installer-backlog-2026-06-13.md
 research/amn2/after-phase-6-fresh-installer-plan-renderer-2026-06-13.md
 research/amn2/after-phase-6-fresh-installer-readiness-planning-2026-06-13.md
+research/amn2/after-phase-6-fresh-installer-evidence-readiness-2026-06-13.md
+research/amn2/after-phase-6-public-config-gate-checklist-refresh-2026-06-13.md
 research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
 research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md
 ```
@@ -48,7 +50,7 @@ current_mode: private/operator-only
 public_self_service_launch: not opened
 latest_vps_smoked_head: c46f664
 default_local_queue: empty
-next_recommendation: FI-N001 + FI-N002 + FI-S001 as local-only docs/test evidence readiness, or P6-C001 + P6-C002 as docs-only gate decision refresh
+next_recommendation: FI-X001 + current-head package preflight planning for ff77d4c as local-only docs/tests/package hygiene, without live apply
 ```
 
 Phase 6 produced planning/security/productization boundaries and confirmed the
@@ -68,6 +70,19 @@ After that, `FI-M001 + FI-M002 + FI-M003` were completed in AMN2 commit
 This added `fresh-install-readiness.v1`, target preflight matrix, runtime mode
 decision and package hygiene checklist. This head is not package-rebuilt or
 VPS-smoked.
+
+After that, `FI-N001 + FI-N002 + FI-S001` were completed in AMN2 commit
+`525a9cd Add fresh installer evidence readiness` as local-only code/tests/docs.
+This added smoke/evidence template, report-only existing-server reconciliation
+input and `docs/FRESH_INSTALLER_OPERATOR_INDEX.ru.md`. This head is not
+package-rebuilt or VPS-smoked.
+
+After that, `P6-C001 + P6-C002` docs-only checklist refresh was completed in
+AMN2 commit `ff77d4c Add public config gate checklist` as local-only
+code/tests/docs. This added `docs/PUBLIC_CONFIG_GATE_CHECKLIST.ru.md` and a
+machine-checkable checklist artifact that keeps public exposure and config
+delivery disabled unless separate named gates are opened. This head is not
+package-rebuilt or VPS-smoked.
 
 ## Safety Boundary
 
@@ -128,34 +143,36 @@ FI-I003 Secret handoff checklist binding
 FI-M001 Target OS/runtime preflight matrix
 FI-M002 Runtime mode decision
 FI-M003 Package hygiene integration
-```
-
-The recommended local-only next bundle is:
-
-```text
 FI-N001 Smoke/evidence template
 FI-N002 Existing-server reconciliation input
 FI-S001 Installer docs index
+P6-C001 + P6-C002 docs-only checklist refresh
+```
+
+The remaining local-only clean installer candidate is:
+
+```text
+FI-X001 Russian-first prompt copy polish
 ```
 
 ## Suggested Next Steps
 
-Recommended triple:
+Recommended pair:
 
 ```text
-FI-N001 + FI-N002 + FI-S001 as local-only docs/test evidence readiness for the clean installer path.
-```
-
-Pair alternative:
-
-```text
-P6-C001 + P6-C002 decision checklist refresh as docs-only, without opening public exposure or config delivery.
+FI-X001 + current-head package preflight planning for ff77d4c as local-only docs/tests/package hygiene, without live apply/smoke.
 ```
 
 Single alternative:
 
 ```text
-FI-N001 smoke/evidence template as local-only docs/tests/code.
+FI-X001 Russian-first prompt copy polish as local-only docs/tests/copy.
+```
+
+Gated alternative:
+
+```text
+Live apply/smoke for ff77d4c only after a separate exact named gate phrase.
 ```
 
 Do not run live/destructive work unless the operator gives a separate exact
