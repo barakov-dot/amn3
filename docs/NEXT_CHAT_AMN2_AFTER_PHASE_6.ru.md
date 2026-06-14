@@ -2,6 +2,22 @@
 
 Дата: 2026-06-14.
 
+Статус: superseded by Phase 7 transition packet.
+
+Для нового рабочего чата использовать:
+
+```text
+docs/NEXT_CHAT_AMN2_PHASE_7_RELEASE_CANDIDATE.ru.md
+docs/PHASE_7_RELEASE_CANDIDATE_PLAN.ru.md
+research/amn2/phase-7-transition-packet-2026-06-14.md
+```
+
+Phase 7 name/status: `Release Candidate Readiness / Clean Installer RC`,
+`pre-release / release-candidate readiness`. Default lane remains
+local-only/docs/tests/security/package-preflight. Public launch, config
+delivery, write API, live VPS/package apply, destructive installer execution
+and Telegram identity mutations remain gated/deferred.
+
 Рабочая папка:
 
 ```text

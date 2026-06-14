@@ -15,7 +15,7 @@ AMN2 current head: b121865 Add multi instance conflict model
 AMN2 latest VPS-smoked head: 0de7a77 Polish fresh installer preflight planning
 AMN2 latest package-ready head: 0de7a77 Polish fresh installer preflight planning
 AMN2 package status: VPS-smoked/pass for 0de7a77
-AMN3 latest evidence slice: Phase 6 final closeout / known-good snapshot
+AMN3 latest evidence slice: Phase 7 transition packet / clean installer RC entry
 current working VPS: 89.185.80.166, disposable test VPS, no destructive action authorized here
 ```
 
@@ -45,6 +45,10 @@ Relevant completed inputs:
   `0de7a77`, VPS-smoked/pass.
 - Phase 6 final closeout and known-good snapshot evidence in
   `research/amn2/phase-6-final-closeout-known-good-snapshot-2026-06-14.md`.
+- Phase 7 transition packet in
+  `research/amn2/phase-7-transition-packet-2026-06-14.md`, with Phase name
+  `Release Candidate Readiness / Clean Installer RC` and status `pre-release /
+  release-candidate readiness`.
 
 ## Backlog Status
 

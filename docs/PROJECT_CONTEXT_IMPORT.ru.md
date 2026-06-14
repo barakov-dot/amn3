@@ -1,5 +1,17 @@
 # Текущий override 2026-06-09
 
+Phase 7 transition packet is prepared as AMN3 docs-only/local-only work.
+Evidence: `research/amn2/phase-7-transition-packet-2026-06-14.md`. Phase 7
+name/status: `Release Candidate Readiness / Clean Installer RC`, `pre-release /
+release-candidate readiness`. Start new Phase 7 chats from
+`docs/NEXT_CHAT_AMN2_PHASE_7_RELEASE_CANDIDATE.ru.md` and
+`docs/PHASE_7_RELEASE_CANDIDATE_PLAN.ru.md`. AMN2 current head remains
+`b121865 Add multi instance conflict model`; latest VPS-smoked/package head
+remains `0de7a77 Polish fresh installer preflight planning`. Default Phase 7
+lane is local-only/docs/tests/security/package-preflight; no VPS/SSH access is
+needed by default. Existing weekly upstream-refresh automations were updated to
+Phase 7 context.
+
 Phase 6 final closeout is closed as AMN3 docs-only/local-only work. Evidence:
 `research/amn2/phase-6-final-closeout-known-good-snapshot-2026-06-14.md`.
 Decision: Phase 6 default lane is closed, default local queue is empty and the
