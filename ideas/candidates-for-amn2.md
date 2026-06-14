@@ -399,8 +399,8 @@ public GitHub metadata refresh.
 - Польза: будущий clean installer and hybrid path смогут заранее показать
   conflicts instead of discovering them during live apply.
 - Gate: `local-only/docs/tests`.
-- Статус: important candidate, no live action, reinforced by PRVTPRO
-  multi-AmneziaWG/endpoint/DNS/subnet/IPv6 signals.
+- Статус: completed as AMN2 local-only code/tests/docs in `b121865`; evidence
+  [P6-M005 multi-instance/IPAM conflict model](../research/amn2/after-phase-6-multi-instance-ipam-conflict-model-2026-06-14.md).
 
 ### `P6-N005` OpenAPI/taxonomy route-order drift guard
 
