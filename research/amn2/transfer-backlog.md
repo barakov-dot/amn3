@@ -1,5 +1,19 @@
 # `amn2` Transfer Backlog
 
+After Phase 6 automation intake audit + upstream refresh aggregation plan
+2026-06-14: completed as AMN3 local-only/docs-only work. Evidence
+`research/amn2/after-phase-6-automation-intake-audit-plan-2026-06-14.md`.
+Created `docs/AMN2_AUTOMATION_INTAKE_AGGREGATION_PLAN.ru.md` to normalize
+weekly upstream-refresh outputs before Phase 6 final closeout. The plan keeps
+PRVTPRO, KYORESUAS and Amnezia as separate heartbeat automations, records the
+current AMN2 thread as the decision lane, defines the required intake card,
+priority/gate labels and `missing-input` handling, and says not to close Phase 6
+final closeout until automation intake evidence exists. Slice не выполнял live
+VPS command, SSH command, package rebuild/apply on VPS, service restart/deploy,
+public exposure, config delivery, write API, Local Agent mutation,
+backup/import/reboot, production peer/user mutation, destructive action,
+Telegram action, secret-bearing evidence publication or upstream/GPL code copy.
+
 Phase 6 P6-C010 live update/smoke for AMN2 0de7a77 2026-06-14: completed on
 the disposable test VPS `89.185.80.166` as `live-update-smoke-pass`. Evidence
 `research/amn2/phase-6-live-update-smoke-0de7a77-2026-06-14.md`. Package
