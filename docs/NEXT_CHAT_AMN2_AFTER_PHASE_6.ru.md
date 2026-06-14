@@ -13,15 +13,15 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 ```text
 AMN3 repo: barakov-dot/amn3
 AMN3 branch: master
-AMN3 checkpoint: verify with git log -1; latest completed slice is next-chat handoff refresh + live gate checklist grooming for 0de7a77
+AMN3 checkpoint: verify with git log -1; latest completed slice is P6-C010 live update/smoke for 0de7a77
 
 AMN2 repo: barakov-dot/amn2
 AMN2 branch: codex-vps-test-prep
 AMN2 current head: 0de7a77 Polish fresh installer preflight planning
-AMN2 latest VPS-smoked head: c46f664 Add public taxonomy cleanup checklist
+AMN2 latest VPS-smoked head: 0de7a77 Polish fresh installer preflight planning
 AMN2 latest package-ready head: 0de7a77 Polish fresh installer preflight planning
-AMN2 package status: package-ready-not-vps-smoked for 0de7a77
-AMN2 smoke status: live-update-smoke-pass for c46f664
+AMN2 package status: VPS-smoked/pass for 0de7a77
+AMN2 smoke status: live-update-smoke-pass for 0de7a77
 ```
 
 ## Read First
@@ -42,6 +42,7 @@ research/amn2/after-phase-6-public-config-gate-checklist-refresh-2026-06-13.md
 research/amn2/after-phase-6-fresh-installer-copy-package-preflight-2026-06-14.md
 research/amn2/after-phase-6-package-preflight-0de7a77-2026-06-14.md
 research/amn2/after-phase-6-next-chat-live-gate-checklist-0de7a77-2026-06-14.md
+research/amn2/phase-6-live-update-smoke-0de7a77-2026-06-14.md
 research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
 research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md
 ```
@@ -52,17 +53,26 @@ research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md
 decision: Phase 6 default lane closed
 current_mode: private/operator-only
 public_self_service_launch: not opened
-latest_vps_smoked_head: c46f664
+latest_vps_smoked_head: 0de7a77
 latest_package_ready_head: 0de7a77
 default_local_queue: empty
-next_recommendation: named live apply/smoke gate for 0de7a77 if operator chooses
+next_recommendation: pause, or choose a separately named gate for a new live/public/config/destructive action
 ```
 
 Phase 6 produced planning/security/productization boundaries and confirmed the
-current disposable VPS source overlay at `c46f664` through read-only loopback
+current disposable VPS source overlay at `0de7a77` through read-only loopback
 smoke. It did not open public launch, config delivery, write API, destructive
 rebuild, backup/import/reboot, Local Agent mutations, production peer/user
 mutation or Telegram identity mutation.
+
+After that, `P6-C010` live update/smoke for `0de7a77` was completed on the
+disposable VPS `89.185.80.166`. The prepared package was uploaded,
+checksum-verified and extracted; source overlay updated `/opt/amn2` to
+`0de7a77f3eb09d23dc2785d402bc51c2b5eb7835`; the manual web/bot runtime was
+minimally restarted; read-only API smoke on temporary loopback `127.0.0.1:3040`
+passed with run_id `20260614T063327Z`; final external probes returned `000`.
+Evidence:
+`research/amn2/phase-6-live-update-smoke-0de7a77-2026-06-14.md`.
 
 After Phase 6, `FI-I001 + FI-I002 + FI-I003` were completed in AMN2 commit
 `de635a0 Add fresh installer plan renderer` as local-only code/tests/docs. This
@@ -182,17 +192,18 @@ requires a separate package or live gate decision.
 
 ## Suggested Next Steps
 
-Recommended gated option:
+Recommended default:
 
 ```text
-Live apply/smoke for 0de7a77 only after this exact named gate phrase:
-Открываю P6-C010 live apply/smoke gate для 0de7a77 на текущем disposable VPS 89.185.80.166.
+Pause here. 0de7a77 is already VPS-smoked/pass on the disposable VPS.
 ```
 
-Local-only alternative:
+Future work requires a new named gate if it touches live/public/config/write or
+destructive surfaces.
 
 ```text
-Pause here, keep c46f664 as latest VPS-smoked head and keep 0de7a77 package-ready-not-vps-smoked.
+Possible future lanes: public/config checklist gate, destructive clean-install
+gate, or a new local-only installer hardening slice.
 ```
 
 ## P6-C010 Live Gate Checklist
@@ -200,7 +211,7 @@ Pause here, keep c46f664 as latest VPS-smoked head and keep 0de7a77 package-read
 Gate status:
 
 ```text
-P6-C010 live apply/smoke gate: closed
+P6-C010 live apply/smoke gate: closed as live-update-smoke-pass
 target: 89.185.80.166 disposable VPS
 candidate package: dist/amn2-vps-update-and-smoke-kit-0de7a77.zip
 candidate package sha256: 7B6DA000DAA39DD15A4DB7C3691D0B0C24EAA20ACB1C428150C6961B01E6F85B

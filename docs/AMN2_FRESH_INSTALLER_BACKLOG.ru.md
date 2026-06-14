@@ -12,10 +12,10 @@ apply, public exposure, config delivery, write API или production mutations.
 ```text
 AMN2 branch: codex-vps-test-prep
 AMN2 current head: 0de7a77 Polish fresh installer preflight planning
-AMN2 latest VPS-smoked head: c46f664 Add public taxonomy cleanup checklist
+AMN2 latest VPS-smoked head: 0de7a77 Polish fresh installer preflight planning
 AMN2 latest package-ready head: 0de7a77 Polish fresh installer preflight planning
-AMN2 package status: package-ready-not-vps-smoked for 0de7a77
-AMN3 latest evidence slice: local package build/preflight for 0de7a77
+AMN2 package status: VPS-smoked/pass for 0de7a77
+AMN3 latest evidence slice: P6-C010 live update/smoke for 0de7a77
 current working VPS: 89.185.80.166, disposable test VPS, no destructive action authorized here
 ```
 
@@ -24,6 +24,7 @@ Relevant completed inputs:
 - `P6-I007` local-only fresh-install wizard/bootstrap automation.
 - `P6-C007` destructive cleanup/reinstall checklist-only boundary.
 - `P6-C009` live update/smoke for `c46f664`, read-only smoke passed.
+- `P6-C010` live update/smoke for `0de7a77`, read-only smoke passed.
 - `P6-X003` package runbook escaping hygiene guardrail.
 - `P5-C004` secret handoff protocol.
 - `P5-C005` source-overlay permission preservation.
@@ -37,7 +38,8 @@ Relevant completed inputs:
   `ff77d4c`.
 - `FI-X001 + current-head package preflight planning` Russian-first installer
   prompts and `fresh-install-package-preflight.v1` planning in AMN2 `0de7a77`.
-- Local package build/preflight for AMN2 `0de7a77`, package-ready-not-vps-smoked.
+- Local package build/preflight and P6-C010 live update/smoke for AMN2
+  `0de7a77`, VPS-smoked/pass.
 
 ## Backlog Status
 

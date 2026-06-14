@@ -1,5 +1,25 @@
 # `amn2` Transfer Backlog
 
+Phase 6 P6-C010 live update/smoke for AMN2 0de7a77 2026-06-14: completed on
+the disposable test VPS `89.185.80.166` as `live-update-smoke-pass`. Evidence
+`research/amn2/phase-6-live-update-smoke-0de7a77-2026-06-14.md`. Package
+`dist/amn2-vps-update-and-smoke-kit-0de7a77.zip`, sha256
+`7B6DA000DAA39DD15A4DB7C3691D0B0C24EAA20ACB1C428150C6961B01E6F85B`, was
+uploaded, checksum-verified and extracted. Source overlay updated `/opt/amn2`
+to `0de7a77f3eb09d23dc2785d402bc51c2b5eb7835`; source update run_id
+`20260614T062734Z` passed. The manual web/bot runtime was minimally restarted
+and web remained bound to `127.0.0.1:3030`. Read-only API smoke on temporary
+loopback `127.0.0.1:3040` passed with run_id `20260614T063327Z`,
+auth/listener/audit `passed`, and negative auth checks `401/403/401`. Final
+listener snapshot showed only `127.0.0.1:3030`, with `3040/80/443` absent;
+external probes returned `000`; `VPS_APPLY_ENABLED=false` remained explicit.
+Gate не выполнял public exposure change, config delivery, write API production
+opening, Local Agent mutation, backup/import/reboot, production peer/user
+mutation, destructive cleanup/reinstall, provider-side destructive action,
+Telegram identity/profile mutation, live bot send by Codex, secret-bearing
+evidence publication or upstream/GPL code copy. `P6-C010` removed from active
+Phase 6 plan. Latest VPS-smoked/package head is now `0de7a77`.
+
 After Phase 6 next-chat handoff refresh + live gate checklist grooming for
 0de7a77 2026-06-14: completed as AMN3 docs-only/local-only work. Evidence
 `research/amn2/after-phase-6-next-chat-live-gate-checklist-0de7a77-2026-06-14.md`.
