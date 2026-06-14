@@ -1,5 +1,25 @@
 # `amn2` Transfer Backlog
 
+After Phase 6 FI-X001 + current-head package preflight planning 2026-06-14:
+completed as AMN2 local-only code/tests/docs in commit `0de7a77 Polish fresh
+installer preflight planning`, pushed to `amn2/codex-vps-test-prep`. Evidence
+`research/amn2/after-phase-6-fresh-installer-copy-package-preflight-2026-06-14.md`.
+The slice changes fresh installer prompts to Russian-first copy while preserving
+stable technical IDs, adds `fresh-install-package-preflight.v1`, records target
+preflight head `ff77d4c`, latest VPS-smoked head `c46f664`, and keeps package
+build, live apply and live smoke disabled by default. Verification: RED `3
+failed, 9 passed`, focused `12 passed`, full AMN2 suite `721 passed, 1
+StarletteDeprecationWarning`, `git diff --check` and staged checks passed. Slice
+не выполнял live VPS command, SSH command, package apply/rebuild on VPS, service
+restart/deploy, public exposure, real config delivery, write API, Local Agent
+mutation, backup/import/reboot, production peer/user mutation, destructive VPS
+action, Telegram token use, live bot send, Telegram identity/profile mutation,
+secret-bearing evidence publication or upstream/GPL code copy. Latest
+VPS-smoked/package head remains `c46f664`; AMN2 `0de7a77` is local-only and not
+package-rebuilt/VPS-smoked. Next recommendation: local package build/preflight
+for `0de7a77` without live apply/smoke, or a separate named live gate if the
+operator chooses.
+
 After Phase 6 P6-C001 + P6-C002 docs-only checklist refresh 2026-06-13:
 completed as AMN2 local-only code/tests/docs in commit `ff77d4c Add public
 config gate checklist`, pushed to `amn2/codex-vps-test-prep`. Evidence

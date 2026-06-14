@@ -1,5 +1,25 @@
 # Текущий override 2026-06-09
 
+After Phase 6 `FI-X001 + current-head package preflight planning` was completed
+on 2026-06-14 as AMN2 local-only code/tests/docs. Evidence:
+`research/amn2/after-phase-6-fresh-installer-copy-package-preflight-2026-06-14.md`.
+AMN2 branch `codex-vps-test-prep` advanced to `0de7a77 Polish fresh installer
+preflight planning` and was pushed to `amn2/codex-vps-test-prep`. The slice
+changes fresh installer prompts to Russian-first copy while preserving stable
+technical IDs, adds `fresh-install-package-preflight.v1`, records target
+preflight head `ff77d4c`, latest VPS-smoked head `c46f664`, and keeps package
+build, live apply and live smoke disabled by default. Verification returned RED
+`3 failed, 9 passed`, focused `12 passed`, full AMN2 suite `721 passed, 1
+StarletteDeprecationWarning`, and `git diff --check` / staged checks passed. No
+live VPS command, SSH command, package apply/rebuild on VPS, service
+restart/deploy, public exposure, config delivery, write API, Local Agent
+mutation, backup/import/reboot, production peer/user mutation, destructive
+action, Telegram action, secret publication or upstream/GPL code copy was
+performed. Latest VPS-smoked/package head remains `c46f664`; AMN2 `0de7a77` is
+local-only and not package-rebuilt/VPS-smoked. Next recommendation: local
+package build/preflight for `0de7a77` without live apply/smoke, or a separate
+named live gate if the operator chooses.
+
 After Phase 6 `P6-C001 + P6-C002` docs-only checklist refresh was completed on
 2026-06-13 as AMN2 local-only code/tests/docs. Evidence:
 `research/amn2/after-phase-6-public-config-gate-checklist-refresh-2026-06-13.md`.

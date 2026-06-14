@@ -1,5 +1,23 @@
 # Текущий override 2026-06-09
 
+After Phase 6 `FI-X001 + current-head package preflight planning` is closed as
+AMN2 local-only code/tests/docs. Evidence:
+`research/amn2/after-phase-6-fresh-installer-copy-package-preflight-2026-06-14.md`.
+AMN2 current branch head is `0de7a77 Polish fresh installer preflight planning`,
+pushed to `amn2/codex-vps-test-prep`; latest VPS-smoked/package head remains
+`c46f664 Add public taxonomy cleanup checklist`. The slice switches fresh
+installer prompt copy to Russian-first while preserving stable technical IDs and
+adds `fresh-install-package-preflight.v1` planning for `ff77d4c` with package
+build, live apply and live smoke disabled by default. Verification: RED `3
+failed, 9 passed`, focused `12 passed`, full `721 passed, 1
+StarletteDeprecationWarning`, `git diff --check` and staged checks passed. No
+live VPS, SSH, package apply/rebuild, service restart/deploy, public exposure,
+config delivery, write API, Local Agent mutation, backup/import/reboot,
+production peer/user mutation, destructive action, Telegram action, secret
+publication or upstream/GPL code copy was performed. Next recommendation: local
+package build/preflight for `0de7a77` without live apply/smoke, or a separate
+named live gate if the operator chooses.
+
 After Phase 6 `P6-C001 + P6-C002` docs-only checklist refresh is closed as
 AMN2 local-only code/tests/docs. Evidence:
 `research/amn2/after-phase-6-public-config-gate-checklist-refresh-2026-06-13.md`.

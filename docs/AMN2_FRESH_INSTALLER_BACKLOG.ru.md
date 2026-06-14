@@ -11,9 +11,9 @@ apply, public exposure, config delivery, write API или production mutations.
 
 ```text
 AMN2 branch: codex-vps-test-prep
-AMN2 current head: ff77d4c Add public config gate checklist
+AMN2 current head: 0de7a77 Polish fresh installer preflight planning
 AMN2 latest VPS-smoked/package head: c46f664 Add public taxonomy cleanup checklist
-AMN2 local-only after-smoke head: ff77d4c, not package-rebuilt/VPS-smoked
+AMN2 local-only after-smoke head: 0de7a77, not package-rebuilt/VPS-smoked
 AMN3 latest evidence slice: P6-S004 Phase 6 closeout / next-chat / installer backlog grooming
 current working VPS: 89.185.80.166, disposable test VPS, no destructive action authorized here
 ```
@@ -34,6 +34,8 @@ Relevant completed inputs:
   existing-server reconciliation input and operator docs index in AMN2 `525a9cd`.
 - `P6-C001 + P6-C002` docs-only public/config gate checklist refresh in AMN2
   `ff77d4c`.
+- `FI-X001 + current-head package preflight planning` Russian-first installer
+  prompts and `fresh-install-package-preflight.v1` planning in AMN2 `0de7a77`.
 
 ## Backlog Status
 
@@ -120,16 +122,16 @@ Completed:
   Create a short operator index linking wizard, destructive checklist, secret
   handoff, package hygiene and smoke evidence rules. Completed in AMN2 `525a9cd`.
 
-Remaining:
-
 - `FI-X001` Russian-first prompt copy polish.
   Keep prompts short, direct and safe, while preserving stable technical IDs.
+  Completed in AMN2 `0de7a77`.
 
 ## Recommended Order
 
-1. `FI-X001` as local-only Russian-first prompt copy polish.
-2. Current-head package preflight planning for `ff77d4c` as local-only package
-   hygiene, without live apply/smoke.
+1. Local package build/preflight for `0de7a77` if the operator wants a package
+   candidate, without live apply/smoke.
+2. A separate named live apply/smoke gate only if the operator wants to update
+   the disposable VPS.
 3. Only then consider `FI-C001` or other live/destructive named gates.
 
 ## Hard Stop Lines

@@ -13,14 +13,14 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 ```text
 AMN3 repo: barakov-dot/amn3
 AMN3 branch: master
-AMN3 checkpoint: verify with git log -1; latest completed slice is P6-C001 + P6-C002 docs-only checklist refresh
+AMN3 checkpoint: verify with git log -1; latest completed slice is FI-X001 + current-head package preflight planning
 
 AMN2 repo: barakov-dot/amn2
 AMN2 branch: codex-vps-test-prep
-AMN2 current head: ff77d4c Add public config gate checklist
+AMN2 current head: 0de7a77 Polish fresh installer preflight planning
 AMN2 latest VPS-smoked/package head: c46f664 Add public taxonomy cleanup checklist
 AMN2 package/smoke status: live-update-smoke-pass for c46f664
-AMN2 local-only after-smoke head: ff77d4c, not package-rebuilt/VPS-smoked
+AMN2 local-only after-smoke head: 0de7a77, not package-rebuilt/VPS-smoked
 ```
 
 ## Read First
@@ -38,6 +38,7 @@ research/amn2/after-phase-6-fresh-installer-plan-renderer-2026-06-13.md
 research/amn2/after-phase-6-fresh-installer-readiness-planning-2026-06-13.md
 research/amn2/after-phase-6-fresh-installer-evidence-readiness-2026-06-13.md
 research/amn2/after-phase-6-public-config-gate-checklist-refresh-2026-06-13.md
+research/amn2/after-phase-6-fresh-installer-copy-package-preflight-2026-06-14.md
 research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
 research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md
 ```
@@ -50,7 +51,7 @@ current_mode: private/operator-only
 public_self_service_launch: not opened
 latest_vps_smoked_head: c46f664
 default_local_queue: empty
-next_recommendation: FI-X001 + current-head package preflight planning for ff77d4c as local-only docs/tests/package hygiene, without live apply
+next_recommendation: local package build/preflight for 0de7a77, without live apply/smoke, or named live gate if operator chooses
 ```
 
 Phase 6 produced planning/security/productization boundaries and confirmed the
@@ -83,6 +84,13 @@ code/tests/docs. This added `docs/PUBLIC_CONFIG_GATE_CHECKLIST.ru.md` and a
 machine-checkable checklist artifact that keeps public exposure and config
 delivery disabled unless separate named gates are opened. This head is not
 package-rebuilt or VPS-smoked.
+
+After that, `FI-X001 + current-head package preflight planning` was completed
+in AMN2 commit `0de7a77 Polish fresh installer preflight planning` as local-only
+code/tests/docs. This switched the fresh installer prompts to Russian-first copy
+while preserving stable technical IDs, and added
+`fresh-install-package-preflight.v1` planning for `ff77d4c` without package
+build, live apply or live smoke. This head is not package-rebuilt or VPS-smoked.
 
 ## Safety Boundary
 
@@ -147,32 +155,31 @@ FI-N001 Smoke/evidence template
 FI-N002 Existing-server reconciliation input
 FI-S001 Installer docs index
 P6-C001 + P6-C002 docs-only checklist refresh
-```
-
-The remaining local-only clean installer candidate is:
-
-```text
 FI-X001 Russian-first prompt copy polish
+current-head package preflight planning for ff77d4c
 ```
+
+The remaining clean-installer lane is empty by default. Future package/live work
+requires a separate package or live gate decision.
 
 ## Suggested Next Steps
 
 Recommended pair:
 
 ```text
-FI-X001 + current-head package preflight planning for ff77d4c as local-only docs/tests/package hygiene, without live apply/smoke.
+Local package build/preflight for 0de7a77 + next-chat handoff refresh, without live apply/smoke.
 ```
 
 Single alternative:
 
 ```text
-FI-X001 Russian-first prompt copy polish as local-only docs/tests/copy.
+Local package build/preflight for 0de7a77, without live apply/smoke.
 ```
 
 Gated alternative:
 
 ```text
-Live apply/smoke for ff77d4c only after a separate exact named gate phrase.
+Live apply/smoke for 0de7a77 only after a separate exact named gate phrase.
 ```
 
 Do not run live/destructive work unless the operator gives a separate exact
