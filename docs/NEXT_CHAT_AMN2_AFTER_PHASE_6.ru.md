@@ -43,6 +43,10 @@ research/amn2/after-phase-6-fresh-installer-copy-package-preflight-2026-06-14.md
 research/amn2/after-phase-6-package-preflight-0de7a77-2026-06-14.md
 research/amn2/after-phase-6-next-chat-live-gate-checklist-0de7a77-2026-06-14.md
 research/amn2/phase-6-live-update-smoke-0de7a77-2026-06-14.md
+research/amn2/after-phase-6-automation-intake-aggregation-closeout-readiness-2026-06-14.md
+research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-14.md
+research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-14.md
+research/upstreams/amnezia-vpn-client-defaultvpn-refresh-2026-06-14.md
 research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
 research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md
 ```
@@ -55,8 +59,8 @@ current_mode: private/operator-only
 public_self_service_launch: not opened
 latest_vps_smoked_head: 0de7a77
 latest_package_ready_head: 0de7a77
-default_local_queue: empty
-next_recommendation: pause, or choose a separately named gate for a new live/public/config/destructive action
+default_local_queue: optional FI-M004 + P6-N005 before final closeout
+next_recommendation: Phase 6 final closeout + clean-installer next-phase entry + current VPS known-good snapshot/runbook; optional pre-closeout FI-M004 + P6-N005
 ```
 
 Phase 6 produced planning/security/productization boundaries and confirmed the
@@ -73,6 +77,17 @@ minimally restarted; read-only API smoke on temporary loopback `127.0.0.1:3040`
 passed with run_id `20260614T063327Z`; final external probes returned `000`.
 Evidence:
 `research/amn2/phase-6-live-update-smoke-0de7a77-2026-06-14.md`.
+
+After the weekly automation windows, automation intake aggregation was
+completed as AMN3 local-only/docs-only work. PRVTPRO heartbeat output was
+available and normalized. KYORESUAS and Amnezia final automation reports were
+not visible in the current AMN2 thread or local AMN3 evidence, so they are
+marked `missing-input` and supplemented only with direct public GitHub metadata
+refresh. New non-live candidates are `FI-M004` package asset path preflight,
+`P6-M005` multi-instance/port/IPAM conflict model and `P6-N005`
+OpenAPI/taxonomy route-order drift guard. AmneziaWG Android `2.0.1` is
+watch-only. Evidence:
+`research/amn2/after-phase-6-automation-intake-aggregation-closeout-readiness-2026-06-14.md`.
 
 After Phase 6, `FI-I001 + FI-I002 + FI-I003` were completed in AMN2 commit
 `de635a0 Add fresh installer plan renderer` as local-only code/tests/docs. This

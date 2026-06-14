@@ -141,6 +141,7 @@ Phase 6 можно открывать только как planning/security/prod
 - `P6-C009` Live update/smoke gate for AMN2 `c46f664`: completed as `live-update-smoke-pass`; evidence `research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md` and package preflight evidence `research/amn2/phase-6-current-head-package-preflight-c46f664-2026-06-13.md`. Updated source overlay `/opt/amn2` from `b3102db250da7ca9aef78ca095602187d0efc462` to `c46f664762d7774756b88db8d4e1ebc038b20bb5`, source update run_id `20260613T173232Z`, read-only API smoke run_id `20260613T173738Z`, web bound to `127.0.0.1:3030`, external probes closed and `VPS_APPLY_ENABLED=false` remained explicit. No config delivery/write/public/destructive/Telegram mutation work was performed. Follow-up added: `P6-X003` package runbook escaping hygiene.
 - `P6-X003` Package runbook escaping hygiene: completed as AMN3 local-only docs/tooling hygiene; evidence `research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md`. Added `scripts/check_markdown_hygiene.py` and `tests/test_markdown_hygiene.py` to catch accidental ASCII control characters from PowerShell backtick escaping in generated operator Markdown. Verification: RED `python -m unittest tests.test_markdown_hygiene` failed while the tool was missing; GREEN returned `2 tests OK`. Diagnostic run against the already-smoked unpacked `c46f664` operator doc failed with five expected findings, proving the guard catches the historical issue. The already-smoked `c46f664` zip/package artifact was not rebuilt, repacked or altered.
 - `P6-S004` Phase 6 closeout packet + next-chat handoff + fresh installer backlog grooming: completed as AMN3 docs-only work; evidence `research/amn2/phase-6-closeout-next-chat-fresh-installer-backlog-2026-06-13.md`. Added `docs/NEXT_CHAT_AMN2_AFTER_PHASE_6.ru.md` and `docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md`, synchronized Phase 6 handoff/status/context/backlog, closed the Phase 6 default lane and organized future clean-installer work under candidate `FI-*` IDs. No live VPS command, SSH command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive action, Telegram action, secret publication or upstream/GPL code copy was performed.
+- `P6-AI001` Automation intake aggregation + Phase 6 closeout readiness review: completed as AMN3 local-only/docs-only work; evidence `research/amn2/after-phase-6-automation-intake-aggregation-closeout-readiness-2026-06-14.md`. PRVTPRO heartbeat output was available and normalized; KYORESUAS and Amnezia automation reports are marked `missing-input/direct-refresh-used` because final outputs were not found in the current AMN2 thread or local AMN3 evidence. Added upstream notes for PRVTPRO, KYORESUAS and Amnezia ecosystem. Closeout readiness decision: Phase 6 can proceed to final closeout; optional pre-closeout bundle is `FI-M004 + P6-N005`. No live VPS command, SSH command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive action, Telegram action, secret publication or upstream/GPL code copy was performed.
 
 ### Критичные
 
@@ -160,9 +161,18 @@ No active very-important tasks after `P6-I007`.
 
 No active important tasks after `P6-M004`.
 
+Optional important candidate before final closeout:
+
+- `FI-M004` Package asset path preflight: carried from automation intake aggregation 2026-06-14, important, `package/preflight only`. Verify installer/package referenced paths/assets before any future apply.
+- `P6-M005` Multi-instance/port/IPAM conflict model: carried from automation intake aggregation 2026-06-14, important, `local-only/docs/tests`. No live multi-instance action.
+
 ### Нормальные
 
 No active default normal tasks after `P6-N001`.
+
+Optional normal candidate before final closeout:
+
+- `P6-N005` OpenAPI/taxonomy route-order drift guard: carried from automation intake aggregation 2026-06-14, normal, `local-only/docs/tests`. Public docs publication remains behind `P6-C001`.
 
 ### Простые
 

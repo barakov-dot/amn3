@@ -1,17 +1,30 @@
 # Текущий override 2026-06-09
 
-After Phase 6 automation intake audit + upstream refresh aggregation plan is
+After Phase 6 automation intake aggregation + closeout readiness review is
 closed as AMN3 local-only/docs-only work. Evidence:
-`research/amn2/after-phase-6-automation-intake-audit-plan-2026-06-14.md`.
-Created `docs/AMN2_AUTOMATION_INTAKE_AGGREGATION_PLAN.ru.md`, defining a
-required intake card, allowed priority labels, gate labels, deduplication
-statuses and audit steps before Phase 6 final closeout. The plan records the
-three active weekly upstream-refresh automations as separate scout/aggregator
-heartbeats: PRVTPRO at Sunday 10:00, KYORESUAS at 11:00 and Amnezia aggregator
-at 12:00. The current AMN2 thread is the decision lane; automation output may
-need to be collected from separate heartbeat threads. Do not close Phase 6
-final closeout until an automation intake note exists, or until missing outputs
-are explicitly marked `missing-input`.
+`research/amn2/after-phase-6-automation-intake-aggregation-closeout-readiness-2026-06-14.md`.
+PRVTPRO heartbeat output was available and normalized into
+`research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-14.md`.
+KYORESUAS and Amnezia final automation reports were not found in the current
+AMN2 thread or local AMN3 evidence, so they are explicitly marked
+`missing-input`; direct public GitHub metadata refresh produced
+`research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-14.md` and
+`research/upstreams/amnezia-vpn-client-defaultvpn-refresh-2026-06-14.md`.
+New non-live candidates: `FI-M004` package asset path preflight
+(`package/preflight only`), `P6-M005` multi-instance/port/IPAM conflict model
+(`local-only/docs/tests`) and `P6-N005` OpenAPI/taxonomy route-order drift guard
+(`local-only/docs/tests`). AmneziaWG Android `2.0.1` is watch-only. Phase 6 can
+proceed to final closeout; optional pre-closeout bundle is `FI-M004 + P6-N005`.
+No live VPS command, SSH command, package rebuild/apply on VPS, service
+restart/deploy, public exposure, config delivery, write API, Local Agent
+mutation, backup/import/reboot, production peer/user mutation, destructive
+action, Telegram action, secret publication or upstream/GPL code copy was
+performed.
+
+The underlying automation intake plan remains in
+`docs/AMN2_AUTOMATION_INTAKE_AGGREGATION_PLAN.ru.md`. It records the three
+weekly upstream-refresh automations as separate scout/aggregator heartbeats:
+PRVTPRO at Sunday 10:00, KYORESUAS at 11:00 and Amnezia aggregator at 12:00.
 
 Phase 6 `P6-C010` live update/smoke for AMN2 `0de7a77` is closed as
 `live-update-smoke-pass` on disposable VPS `89.185.80.166`. Evidence:

@@ -219,3 +219,17 @@
 - Польза: гибридный продукт может добавлять новые runtimes без переписывания панели.
 - Риски: слишком общий contract может скрыть protocol-specific side effects; нужны capabilities и risk classes.
 - Статус: research candidate.
+
+## Automation intake aggregation 2026-06-14
+
+Источник: [Automation intake aggregation and closeout readiness](../research/amn2/after-phase-6-automation-intake-aggregation-closeout-readiness-2026-06-14.md).
+
+- `HYB-AI-001`: multi-instance AmneziaWG / multi-protocol IPAM and port
+  planner. Статус: hybrid roadmap candidate; live actions require separate
+  gate, conflict model and rollback design.
+- `HYB-AI-002`: per-user stats and speed limits. Статус: hybrid-only until
+  privacy, billing/entitlement, write API and config delivery boundaries are
+  accepted.
+- `HYB-AI-003`: endpoint/DNS/subnet/IPv6 config model. Статус: hybrid roadmap
+  candidate as dry-run compatibility design only; no real config delivery by
+  default.

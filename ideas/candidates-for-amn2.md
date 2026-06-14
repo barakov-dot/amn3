@@ -372,3 +372,53 @@ Negative control: не переносить upstream Bearer token model как a
 - Польза: полезно для восстановления сервера, но не должно становиться простой кнопкой утечки всех ключей.
 - Риски: full backup содержит private keys, PSK, server configs и client state; import может разрушить runtime.
 - Статус: first local-only no-route policy/preview slice выполнен в `amn2/codex/backup-import-policy-contract`, head `afb2702` with foundation commit `d2c160b`; details in [Backup/import policy contract implementation](../research/amn2/backup-import-policy-contract-implementation.md). Web/API full backup, restore apply и import apply остаются отдельными gates.
+
+## Automation intake aggregation 2026-06-14
+
+Источник: [Automation intake aggregation and closeout readiness](../research/amn2/after-phase-6-automation-intake-aggregation-closeout-readiness-2026-06-14.md).
+
+PRVTPRO heartbeat output was available and normalized. KYORESUAS/Amnezia final
+automation reports were not visible in the current AMN2 thread or local AMN3
+evidence, so they are marked `missing-input` and supplemented only with direct
+public GitHub metadata refresh.
+
+### `FI-M004` Package asset path preflight
+
+- Идея: перед будущим installer/package apply проверять, что все referenced
+  operator-kit assets, upload paths and generated runbook paths exist and are
+  packaged.
+- Польза: снижает риск сломанного обновления из-за missing/stale asset path.
+- Gate: `package/preflight only`.
+- Статус: important fresh-installer/package hygiene candidate after
+  [PRVTPRO upstream refresh 2026-06-14](../research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-14.md).
+
+### `P6-M005` Multi-instance, port and IPAM conflict model
+
+- Идея: описать multi-instance/protocol runtime capabilities with port,
+  subnet, endpoint and address constraints before any live multi-server action.
+- Польза: будущий clean installer and hybrid path смогут заранее показать
+  conflicts instead of discovering them during live apply.
+- Gate: `local-only/docs/tests`.
+- Статус: important candidate, no live action, reinforced by PRVTPRO
+  multi-AmneziaWG/endpoint/DNS/subnet/IPv6 signals.
+
+### `P6-N005` OpenAPI/taxonomy route-order drift guard
+
+- Идея: если AMN2 генерирует public/operator API docs, держать deterministic
+  route grouping/order aligned with surface policy.
+- Польза: уменьшает drift между route policy, docs taxonomy and generated API
+  surface.
+- Gate: `local-only/docs/tests`; public publication still requires `P6-C001`.
+- Статус: normal optional candidate after
+  [kyoresuas/amnezia-api GitHub watch 2026-06-14](../research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-14.md).
+
+### Amnezia client compatibility watch
+
+- Идея: keep DefaultVPN/iOS, installed AmneziaWG iOS/Android and desktop client
+  compatibility as watch-only unless a concrete import/connectivity regression
+  appears.
+- Польза: сохраняет актуальность пользовательских инструкций без преждевременного
+  открытия config delivery.
+- Gate: `watch-only`.
+- Статус: no active AMN2 item required after
+  [Amnezia ecosystem refresh 2026-06-14](../research/upstreams/amnezia-vpn-client-defaultvpn-refresh-2026-06-14.md); current copy/client matrix remains the `b3102db` baseline and latest smoked head is `0de7a77`.
