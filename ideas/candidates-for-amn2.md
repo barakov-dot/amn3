@@ -389,8 +389,8 @@ public GitHub metadata refresh.
   packaged.
 - Польза: снижает риск сломанного обновления из-за missing/stale asset path.
 - Gate: `package/preflight only`.
-- Статус: important fresh-installer/package hygiene candidate after
-  [PRVTPRO upstream refresh 2026-06-14](../research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-14.md).
+- Статус: completed as AMN2 local-only code/tests/docs in `4cde273`; evidence
+  [FI-M004 + P6-N005 installer preflight and taxonomy guards](../research/amn2/after-phase-6-installer-preflight-taxonomy-guards-2026-06-14.md).
 
 ### `P6-M005` Multi-instance, port and IPAM conflict model
 
@@ -409,8 +409,8 @@ public GitHub metadata refresh.
 - Польза: уменьшает drift между route policy, docs taxonomy and generated API
   surface.
 - Gate: `local-only/docs/tests`; public publication still requires `P6-C001`.
-- Статус: normal optional candidate after
-  [kyoresuas/amnezia-api GitHub watch 2026-06-14](../research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-14.md).
+- Статус: completed as AMN2 local-only code/tests/docs in `4cde273`; evidence
+  [FI-M004 + P6-N005 installer preflight and taxonomy guards](../research/amn2/after-phase-6-installer-preflight-taxonomy-guards-2026-06-14.md).
 
 ### Amnezia client compatibility watch
 

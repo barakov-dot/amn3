@@ -13,11 +13,11 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 ```text
 AMN3 repo: barakov-dot/amn3
 AMN3 branch: master
-AMN3 checkpoint: verify with git log -1; latest completed slice is P6-C010 live update/smoke for 0de7a77
+AMN3 checkpoint: verify with git log -1; latest completed slice is FI-M004 + P6-N005 local-only
 
 AMN2 repo: barakov-dot/amn2
 AMN2 branch: codex-vps-test-prep
-AMN2 current head: 0de7a77 Polish fresh installer preflight planning
+AMN2 current head: 4cde273 Add installer preflight taxonomy guards
 AMN2 latest VPS-smoked head: 0de7a77 Polish fresh installer preflight planning
 AMN2 latest package-ready head: 0de7a77 Polish fresh installer preflight planning
 AMN2 package status: VPS-smoked/pass for 0de7a77
@@ -44,6 +44,7 @@ research/amn2/after-phase-6-package-preflight-0de7a77-2026-06-14.md
 research/amn2/after-phase-6-next-chat-live-gate-checklist-0de7a77-2026-06-14.md
 research/amn2/phase-6-live-update-smoke-0de7a77-2026-06-14.md
 research/amn2/after-phase-6-automation-intake-aggregation-closeout-readiness-2026-06-14.md
+research/amn2/after-phase-6-installer-preflight-taxonomy-guards-2026-06-14.md
 research/upstreams/prvtpro-amnezia-web-panel-upstream-refresh-2026-06-14.md
 research/upstreams/kyoresuas-amnezia-api-github-watch-2026-06-14.md
 research/upstreams/amnezia-vpn-client-defaultvpn-refresh-2026-06-14.md
@@ -59,8 +60,9 @@ current_mode: private/operator-only
 public_self_service_launch: not opened
 latest_vps_smoked_head: 0de7a77
 latest_package_ready_head: 0de7a77
-default_local_queue: optional FI-M004 + P6-N005 before final closeout
-next_recommendation: Phase 6 final closeout + clean-installer next-phase entry + current VPS known-good snapshot/runbook; optional pre-closeout FI-M004 + P6-N005
+current_amn2_head: 4cde273 local-only not package-rebuilt or VPS-smoked
+default_local_queue: optional P6-M005 before final closeout
+next_recommendation: Phase 6 final closeout + clean-installer next-phase entry + current VPS known-good snapshot/runbook; optional P6-M005 local-only first
 ```
 
 Phase 6 produced planning/security/productization boundaries and confirmed the
@@ -88,6 +90,15 @@ refresh. New non-live candidates are `FI-M004` package asset path preflight,
 OpenAPI/taxonomy route-order drift guard. AmneziaWG Android `2.0.1` is
 watch-only. Evidence:
 `research/amn2/after-phase-6-automation-intake-aggregation-closeout-readiness-2026-06-14.md`.
+
+After that, `FI-M004 + P6-N005` were completed in AMN2 commit `4cde273 Add
+installer preflight taxonomy guards` as local-only code/tests/docs. This added
+fresh-installer package asset path preflight, rendered
+`package-asset-path-preflight` phase and a public docs/API route-order drift
+guard. Full AMN2 suite returned `723 passed, 1 StarletteDeprecationWarning`.
+This head is not package-rebuilt or VPS-smoked; latest VPS-smoked/package head
+remains `0de7a77`. Evidence:
+`research/amn2/after-phase-6-installer-preflight-taxonomy-guards-2026-06-14.md`.
 
 After Phase 6, `FI-I001 + FI-I002 + FI-I003` were completed in AMN2 commit
 `de635a0 Add fresh installer plan renderer` as local-only code/tests/docs. This

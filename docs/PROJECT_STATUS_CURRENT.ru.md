@@ -1,5 +1,25 @@
 # Текущий override 2026-06-09
 
+After Phase 6 `FI-M004 + P6-N005` was completed on 2026-06-14 as AMN2
+local-only code/tests/docs. Evidence:
+`research/amn2/after-phase-6-installer-preflight-taxonomy-guards-2026-06-14.md`.
+AMN2 branch `codex-vps-test-prep` advanced to `4cde273 Add installer preflight
+taxonomy guards` and was pushed to `amn2/codex-vps-test-prep`. The slice adds
+fresh-installer package asset path preflight, rendered
+`package-asset-path-preflight` phase and public docs/API route-order drift guard.
+Verification: RED `3 failed, 15 passed`, focused `18 passed`, expanded
+`26 passed, 1 StarletteDeprecationWarning`, full AMN2 suite `723 passed, 1
+StarletteDeprecationWarning`, `git diff --check` and staged check passed. No
+live VPS command, SSH command, package rebuild/apply on VPS, service
+restart/deploy, public exposure, public OpenAPI publication, config delivery,
+write API, Local Agent mutation, backup/import/reboot, production peer/user
+mutation, destructive action, Telegram action, secret publication or
+upstream/GPL code copy was performed. Latest VPS-smoked/package head remains
+`0de7a77`; AMN2 `4cde273` is local-only and not package-rebuilt/VPS-smoked.
+Next recommendation: Phase 6 final closeout + clean-installer next-phase entry
++ current VPS known-good snapshot/runbook. Optional alternative: `P6-M005`
+local-only multi-instance/port/IPAM conflict model.
+
 After Phase 6 automation intake aggregation + closeout readiness review was
 completed on 2026-06-14 as AMN3 local-only/docs-only work. Evidence:
 `research/amn2/after-phase-6-automation-intake-aggregation-closeout-readiness-2026-06-14.md`.

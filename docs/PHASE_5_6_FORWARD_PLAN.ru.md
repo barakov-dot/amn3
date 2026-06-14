@@ -142,6 +142,7 @@ Phase 6 можно открывать только как planning/security/prod
 - `P6-X003` Package runbook escaping hygiene: completed as AMN3 local-only docs/tooling hygiene; evidence `research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md`. Added `scripts/check_markdown_hygiene.py` and `tests/test_markdown_hygiene.py` to catch accidental ASCII control characters from PowerShell backtick escaping in generated operator Markdown. Verification: RED `python -m unittest tests.test_markdown_hygiene` failed while the tool was missing; GREEN returned `2 tests OK`. Diagnostic run against the already-smoked unpacked `c46f664` operator doc failed with five expected findings, proving the guard catches the historical issue. The already-smoked `c46f664` zip/package artifact was not rebuilt, repacked or altered.
 - `P6-S004` Phase 6 closeout packet + next-chat handoff + fresh installer backlog grooming: completed as AMN3 docs-only work; evidence `research/amn2/phase-6-closeout-next-chat-fresh-installer-backlog-2026-06-13.md`. Added `docs/NEXT_CHAT_AMN2_AFTER_PHASE_6.ru.md` and `docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md`, synchronized Phase 6 handoff/status/context/backlog, closed the Phase 6 default lane and organized future clean-installer work under candidate `FI-*` IDs. No live VPS command, SSH command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive action, Telegram action, secret publication or upstream/GPL code copy was performed.
 - `P6-AI001` Automation intake aggregation + Phase 6 closeout readiness review: completed as AMN3 local-only/docs-only work; evidence `research/amn2/after-phase-6-automation-intake-aggregation-closeout-readiness-2026-06-14.md`. PRVTPRO heartbeat output was available and normalized; KYORESUAS and Amnezia automation reports are marked `missing-input/direct-refresh-used` because final outputs were not found in the current AMN2 thread or local AMN3 evidence. Added upstream notes for PRVTPRO, KYORESUAS and Amnezia ecosystem. Closeout readiness decision: Phase 6 can proceed to final closeout; optional pre-closeout bundle is `FI-M004 + P6-N005`. No live VPS command, SSH command, package apply/rebuild on VPS, service restart/deploy, public exposure, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive action, Telegram action, secret publication or upstream/GPL code copy was performed.
+- `FI-M004` Package asset path preflight + `P6-N005` OpenAPI/taxonomy route-order drift guard: completed together as AMN2 local-only code/tests/docs in commit `4cde273 Add installer preflight taxonomy guards`, pushed to `amn2/codex-vps-test-prep`; evidence `research/amn2/after-phase-6-installer-preflight-taxonomy-guards-2026-06-14.md`. Adds fresh-installer package asset path preflight, rendered `package-asset-path-preflight` phase and public docs/API route-order drift guard. Verification: RED `3 failed, 15 passed`, focused `18 passed`, expanded `26 passed, 1 StarletteDeprecationWarning`, full AMN2 suite `723 passed, 1 StarletteDeprecationWarning`, `git diff --check` and staged check passed. Latest VPS-smoked/package head remains `0de7a77`; `4cde273` is not package-rebuilt or VPS-smoked. No live VPS command, SSH command, package apply/rebuild on VPS, service restart/deploy, public exposure, public OpenAPI publication, config delivery, write API, Local Agent mutation, backup/import/reboot, production peer/user mutation, destructive action, Telegram action, secret publication or upstream/GPL code copy was performed.
 
 ### Критичные
 
@@ -163,16 +164,11 @@ No active important tasks after `P6-M004`.
 
 Optional important candidate before final closeout:
 
-- `FI-M004` Package asset path preflight: carried from automation intake aggregation 2026-06-14, important, `package/preflight only`. Verify installer/package referenced paths/assets before any future apply.
 - `P6-M005` Multi-instance/port/IPAM conflict model: carried from automation intake aggregation 2026-06-14, important, `local-only/docs/tests`. No live multi-instance action.
 
 ### Нормальные
 
-No active default normal tasks after `P6-N001`.
-
-Optional normal candidate before final closeout:
-
-- `P6-N005` OpenAPI/taxonomy route-order drift guard: carried from automation intake aggregation 2026-06-14, normal, `local-only/docs/tests`. Public docs publication remains behind `P6-C001`.
+No active default normal tasks after `P6-N005`.
 
 ### Простые
 
