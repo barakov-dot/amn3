@@ -1,5 +1,19 @@
 # Текущий override 2026-06-09
 
+After Phase 6 next-chat handoff refresh + live gate checklist grooming for
+`0de7a77` is closed as AMN3 docs-only/local-only work. Evidence:
+`research/amn2/after-phase-6-next-chat-live-gate-checklist-0de7a77-2026-06-14.md`.
+The handoff now records `0de7a77` as package-ready-not-vps-smoked, `c46f664` as
+latest VPS-smoked head, the exact future gate phrase
+`Открываю P6-C010 live apply/smoke gate для 0de7a77 на текущем disposable VPS 89.185.80.166.`,
+the package/source checksums, stop criteria and forbidden surfaces. No live VPS,
+SSH, package upload/apply, service restart/deploy, public exposure, config
+delivery, write API, Local Agent mutation, backup/import/reboot, production
+peer/user mutation, destructive action, Telegram action, secret publication or
+upstream/GPL code copy was performed. Next recommendation: open `P6-C010` only
+with the exact named gate phrase if the operator chooses; otherwise pause with
+`0de7a77` package-ready-not-vps-smoked.
+
 After Phase 6 local package build/preflight for `0de7a77` is closed as AMN3
 local package work. Evidence:
 `research/amn2/after-phase-6-package-preflight-0de7a77-2026-06-14.md`. Built

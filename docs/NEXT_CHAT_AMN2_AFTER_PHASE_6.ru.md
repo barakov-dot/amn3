@@ -1,6 +1,6 @@
 # Следующий чат: AMN2 after Phase 6
 
-Дата: 2026-06-13.
+Дата: 2026-06-14.
 
 Рабочая папка:
 
@@ -13,7 +13,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 ```text
 AMN3 repo: barakov-dot/amn3
 AMN3 branch: master
-AMN3 checkpoint: verify with git log -1; latest completed slice is local package build/preflight for 0de7a77
+AMN3 checkpoint: verify with git log -1; latest completed slice is next-chat handoff refresh + live gate checklist grooming for 0de7a77
 
 AMN2 repo: barakov-dot/amn2
 AMN2 branch: codex-vps-test-prep
@@ -41,6 +41,7 @@ research/amn2/after-phase-6-fresh-installer-evidence-readiness-2026-06-13.md
 research/amn2/after-phase-6-public-config-gate-checklist-refresh-2026-06-13.md
 research/amn2/after-phase-6-fresh-installer-copy-package-preflight-2026-06-14.md
 research/amn2/after-phase-6-package-preflight-0de7a77-2026-06-14.md
+research/amn2/after-phase-6-next-chat-live-gate-checklist-0de7a77-2026-06-14.md
 research/amn2/phase-6-live-update-smoke-c46f664-2026-06-13.md
 research/amn2/phase-6-package-runbook-escaping-hygiene-2026-06-13.md
 ```
@@ -54,7 +55,7 @@ public_self_service_launch: not opened
 latest_vps_smoked_head: c46f664
 latest_package_ready_head: 0de7a77
 default_local_queue: empty
-next_recommendation: next-chat handoff refresh, or named live apply/smoke gate for 0de7a77 if operator chooses
+next_recommendation: named live apply/smoke gate for 0de7a77 if operator chooses
 ```
 
 Phase 6 produced planning/security/productization boundaries and confirmed the
@@ -100,6 +101,12 @@ local package work. It produced `dist/amn2-vps-update-and-smoke-kit-0de7a77.zip`
 and `dist/amn2-codex-vps-test-prep-0de7a77-source.zip`, with package hygiene
 and test-extract passing. This did not run live apply/smoke. Latest VPS-smoked
 head remains `c46f664`.
+
+After that, next-chat handoff refresh + live gate checklist grooming for
+`0de7a77` was completed as AMN3 docs-only/local-only work. It records the exact
+future live gate phrase, package/source checksums, stop criteria and forbidden
+surfaces for a possible `P6-C010` live apply/smoke gate. It does not open the
+gate and does not run live apply/smoke.
 
 ## Safety Boundary
 
@@ -167,6 +174,7 @@ P6-C001 + P6-C002 docs-only checklist refresh
 FI-X001 Russian-first prompt copy polish
 current-head package preflight planning for ff77d4c
 local package build/preflight for 0de7a77
+next-chat handoff refresh + live gate checklist grooming for 0de7a77
 ```
 
 The remaining clean-installer lane is empty by default. Future package/live work
@@ -174,23 +182,52 @@ requires a separate package or live gate decision.
 
 ## Suggested Next Steps
 
-Recommended pair:
+Recommended gated option:
 
 ```text
-Next-chat handoff refresh + live gate checklist grooming for 0de7a77, without live apply/smoke.
+Live apply/smoke for 0de7a77 only after this exact named gate phrase:
+Открываю P6-C010 live apply/smoke gate для 0de7a77 на текущем disposable VPS 89.185.80.166.
 ```
 
-Single alternative:
+Local-only alternative:
 
 ```text
-Next-chat handoff refresh.
+Pause here, keep c46f664 as latest VPS-smoked head and keep 0de7a77 package-ready-not-vps-smoked.
 ```
 
-Gated alternative:
+## P6-C010 Live Gate Checklist
+
+Gate status:
 
 ```text
-Live apply/smoke for 0de7a77 only after a separate exact named gate phrase.
+P6-C010 live apply/smoke gate: closed
+target: 89.185.80.166 disposable VPS
+candidate package: dist/amn2-vps-update-and-smoke-kit-0de7a77.zip
+candidate package sha256: 7B6DA000DAA39DD15A4DB7C3691D0B0C24EAA20ACB1C428150C6961B01E6F85B
+candidate source zip sha256: B8D0E7E2A40051AB38EDF09947977DFE5F7197CEEEE87D1523734D3C1C505295
+current latest VPS-smoked head: c46f664
 ```
+
+Before any live action, confirm:
+
+- exact operator phrase names `P6-C010`, commit `0de7a77`, and target
+  `89.185.80.166`;
+- AMN3 head and AMN2 head are checked locally;
+- package checksum and source checksum match the values above;
+- target is still disposable and intended for this update;
+- smoke remains loopback-only with `VPS_APPLY_ENABLED=false`;
+- no public exposure/config delivery/write API/Local Agent mutation/backup or
+  destructive work is being opened.
+
+Stop if any of these occur:
+
+- package checksum mismatch;
+- package extract missing one of the five expected files;
+- source overlay apply failure;
+- web/bot runtime cannot be verified inside the named gate;
+- listener drift exposes `3030`, `3040`, `80` or `443` unexpectedly;
+- loopback API smoke fails auth/listener/audit checks;
+- any secret-bearing material appears in evidence.
 
 Do not run live/destructive work unless the operator gives a separate exact
 named gate phrase.
