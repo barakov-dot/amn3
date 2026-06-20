@@ -17,8 +17,8 @@ Default lane: local-only/docs/tests/security/package-preflight.
 C:\Users\SooL\Documents\VPS-OPS-LAB
 
 Источник правды:
-- Current workspace/evidence repo: barakov-dot/amn3, branch master, head
-  ec811cf Prepare Phase 7 transition.
+- Current workspace/evidence repo: barakov-dot/amn3, branch master, latest
+  pushed head; verify with `git log -1`.
 - AMN2 package/source repo: barakov-dot/amn2, branch codex-vps-test-prep.
 - AMN2 current/VPS-smoked/known-good/package-ready head:
   5501295 Add P7 install write contour.
@@ -95,6 +95,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
   research/amn2/phase-7-final-rc-freeze-status-5501295-2026-06-20.md.
 - Latest direct clean installer pass:
   research/amn2/phase-7-direct-clean-installer-5501295-2026-06-20.md.
+- Latest post-direct-clean login + backup evidence:
+  research/amn2/phase-7-post-direct-clean-login-backup-5501295-2026-06-20.md.
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_7_RELEASE_CANDIDATE.ru.md
@@ -149,7 +151,7 @@ production_mutation=not opened
 
 ```text
 AMN2 head: 5501295 Add P7 install write contour
-workspace/evidence repo: barakov-dot/amn3 master ec811cf
+workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 5501295
 package status: VPS-smoked/pass for 5501295
 smoke status: scoped-write-contour-smoked-pass for 5501295
@@ -166,6 +168,7 @@ P7-C006 backup-only status: completed-backup-only-create-verify-no-restore-impor
 P7-C004a destructive pre-cutover status: ready-for-final-destructive-stop-line-no-apply
 P7-C004b destructive clean installer status: completed-clean-install-loopback-smoke
 P7-C004c direct clean installer status: completed-direct-clean-install-5501295-loopback-smoke
+P7-C004d + P7-C006b post-direct-clean login/backup status: completed-login-verified-backup-create-verify
 post-clean write/backup/Telegram rebaseline status: completed-post-clean-read-only-rebaseline-no-mutation
 P7-C005 write/install contour status: completed-scoped-write-contour-smoked
 P7-C006a provider restore-point status: completed-inconclusive-no-restore-point-confirmed

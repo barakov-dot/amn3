@@ -13,7 +13,7 @@ Telegram identity/profile/media mutation.
 ```text
 AMN2 head: 5501295 Add P7 install write contour
 latest VPS-smoked/package head: 5501295 Add P7 install write contour
-workspace/evidence repo: barakov-dot/amn3 master ec811cf
+workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 5501295
 public/config/write status: blocked-by-preconditions
 public exposure status: operator-only-ip-loopback-ssh-tunnel
@@ -34,6 +34,7 @@ p7_c006_current_state_backup_status: completed-current-state-backup-only-create-
 p7_c007_telegram_status: deferred-not-required-for-private-rc-no-telegram-action
 final_rc_freeze_status: completed-rc-ready-paused-state-no-live-action
 p7_c004c_direct_clean_installer_status: completed-direct-clean-install-5501295-loopback-smoke
+p7_c004d_c006b_post_direct_clean_login_backup_status: completed-login-verified-backup-create-verify
 p7_c004a_destructive_pre_cutover_status: ready-for-final-destructive-stop-line-no-apply
 P7-C004b clean install status: completed-clean-install-loopback-smoke
 latest_watch_only_after_critical_preflights: completed-watch-only-intake-after-critical-preflights-no-live-action
@@ -56,6 +57,12 @@ local-only expansion status: frozen before named gate
   destructive clean installer pass for AMN2 `5501295` on disposable VPS
   `89.185.80.166`; clean install, DB init, loopback web and API smoke passed;
   public probes stayed closed.
+- `phase-7-post-direct-clean-login-backup-5501295-2026-06-20.md` -
+  `P7-C004d + P7-C006b` post-direct-clean loopback admin login verification
+  plus backup-only create/verify for AMN2 `5501295`; login passed, encrypted
+  backup artifact stayed on the VPS, public probes stayed closed, and no
+  restore/import/reboot/download/public/config/write/Local Agent/Telegram/
+  provider mutation was performed.
 - `phase-7-transition-packet-2026-06-14.md` - Phase 7 entry packet.
 - `phase-7-current-head-package-preflight-b121865-2026-06-14.md` - local
   package/preflight for `b121865`.

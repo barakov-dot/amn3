@@ -1,5 +1,21 @@
 # `amn2` Transfer Backlog
 
+Phase 7 P7-C004d + P7-C006b post-direct-clean login and backup 2026-06-20:
+completed as `completed-login-verified-backup-create-verify` for AMN2
+`5501295` on disposable VPS `89.185.80.166`. Evidence
+`research/amn2/phase-7-post-direct-clean-login-backup-5501295-2026-06-20.md`.
+Loopback admin login passed after direct clean install; backup create and verify
+passed for the current clean state; artifact stayed on the VPS under
+`/opt/amn2/backups/p7-c006b-post-direct-clean-5501295-20260620T061005Z`,
+basename `amneziya-backup-20260620T061102Z.tar.enc`, bytes `204900`, sha256
+`f8e0591db75e8ec9ce58f4fa9d71972d577e1ec103194d1943a626aa9b156b97`, mode
+`644`. External probes stayed closed. No restore/import/reboot, provider
+mutation, remote backup download, service restart, public exposure, config
+delivery, write execution, Local Agent mutation, production peer/user mutation,
+Telegram action or secret-bearing output was performed. Residual `P7-C006`
+restore/import/download/reboot/DR/provider-restore scopes remain exact named
+gates only.
+
 Phase 7 P7-C004c direct clean installer execution 2026-06-20: completed as
 `completed-direct-clean-install-5501295-loopback-smoke` for AMN2 `5501295` on
 disposable VPS `89.185.80.166`. Evidence
@@ -332,7 +348,7 @@ Phase 7 P7-S005 + P7-I012 docs quality audit and IP-only env reconciliation
 planning 2026-06-18: completed as docs-only/status work. Evidence
 `research/amn2/phase-7-docs-quality-audit-ip-env-reconcile-2026-06-18.md`.
 The current workspace is AMN3 evidence repo `barakov-dot/amn3` on `master` at
-`ec811cf`; AMN2 package/source truth remains `barakov-dot/amn2`
+latest pushed `master`; AMN2 package/source truth remains `barakov-dot/amn2`
 `codex-vps-test-prep` at `b121865`. Public URL fields left in live `.env` by
 `P7-C002a` are now explicitly treated as inert prerequisite residue after the
 later IP-only policy decision. New inactive proposal: `P7-C002e Public URL env

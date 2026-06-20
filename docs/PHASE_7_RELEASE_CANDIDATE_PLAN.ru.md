@@ -20,11 +20,13 @@ write API, destructive install, live package apply или Telegram identity chan
 AMN2 current local head: 5501295 Add P7 install write contour
 AMN2 known-good VPS-smoked/package head: 5501295 Add P7 install write contour
 AMN2 current local RC package-ready head: 5501295 Add P7 install write contour
-Workspace/evidence repo: barakov-dot/amn3, branch master, head ec811cf
+Workspace/evidence repo: barakov-dot/amn3, branch master, latest pushed head;
+verify with `git log -1`
 AMN2 package/source repo: barakov-dot/amn2, branch codex-vps-test-prep, head 5501295
 Current disposable VPS: 89.185.80.166
 Known-good evidence: research/amn2/phase-7-write-install-mutation-contour-5501295-2026-06-20.md
 Latest current-state backup evidence: research/amn2/phase-7-current-state-backup-only-5501295-2026-06-20.md
+Latest post-direct-clean login/backup evidence: research/amn2/phase-7-post-direct-clean-login-backup-5501295-2026-06-20.md
 Latest Telegram private RC decision: research/amn2/phase-7-telegram-defer-private-rc-2026-06-20.md
 Latest final RC freeze/status evidence: research/amn2/phase-7-final-rc-freeze-status-5501295-2026-06-20.md
 Latest direct clean installer evidence: research/amn2/phase-7-direct-clean-installer-5501295-2026-06-20.md
@@ -44,6 +46,22 @@ Latest direct clean installer evidence: research/amn2/phase-7-direct-clean-insta
   smoke returned `VPS verdict: pass`, and public probes stayed closed. This
   supersedes the earlier `b121865` clean install + `5501295` overlay as the
   clean-installer RC evidence for the current head.
+
+- `P7-C004d + P7-C006b` Post-direct-clean loopback admin login verification
+  and backup-only create+verify for AMN2 `5501295`.
+  Importance: critical + critical backup evidence. Gate: explicitly opened by
+  the operator for disposable VPS `89.185.80.166`; no restore/import/reboot,
+  remote backup download, provider mutation, public exposure, config delivery,
+  write execution, Local Agent mutation or Telegram action. Evidence:
+  `research/amn2/phase-7-post-direct-clean-login-backup-5501295-2026-06-20.md`.
+  Result: closed as `completed-login-verified-backup-create-verify`. Loopback
+  admin login passed after the direct clean installer RC. Backup create and
+  verify passed for the clean `5501295` state; the encrypted artifact stayed on
+  the VPS under
+  `/opt/amn2/backups/p7-c006b-post-direct-clean-5501295-20260620T061005Z`,
+  sha256
+  `f8e0591db75e8ec9ce58f4fa9d71972d577e1ec103194d1943a626aa9b156b97`.
+  External probes stayed closed.
 
 - Final RC freeze/status pass for AMN2 `5501295`.
   Importance: critical status hygiene. Gate: docs-only/local-only; no live

@@ -1,5 +1,23 @@
 # Текущий override 2026-06-09
 
+Phase 7 `P7-C004d + P7-C006b` post-direct-clean login and backup gate was
+completed on 2026-06-20 as
+`completed-login-verified-backup-create-verify` for AMN2 `5501295` on
+disposable VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-7-post-direct-clean-login-backup-5501295-2026-06-20.md`.
+Loopback admin login passed after the direct clean installer RC: `GET /login`
+returned `200`, `POST /login` returned `303`, dashboard after login returned
+`200` and the login form was absent. Backup create and verify passed for the
+current clean state; artifact stayed on the VPS at
+`/opt/amn2/backups/p7-c006b-post-direct-clean-5501295-20260620T061005Z`,
+basename `amneziya-backup-20260620T061102Z.tar.enc`, bytes `204900`, sha256
+`f8e0591db75e8ec9ce58f4fa9d71972d577e1ec103194d1943a626aa9b156b97`, mode
+`644`. External probes to public `3030`, `3040`, `80` and `443` stayed `000`.
+No restore/import/reboot, provider mutation, remote backup download, service
+restart, public exposure, config delivery, write execution, Local Agent
+mutation, production peer/user mutation, Telegram action or secret-bearing
+output was performed.
+
 Phase 7 `P7-C004c` direct clean installer execution gate was completed on
 2026-06-20 as `completed-direct-clean-install-5501295-loopback-smoke` for AMN2
 `5501295` on disposable VPS `89.185.80.166`. Evidence:
@@ -370,7 +388,7 @@ Phase 7 `P7-S005 + P7-I012` docs quality audit and IP-only env reconciliation
 planning was completed on 2026-06-18 as docs-only/status work. Evidence:
 `research/amn2/phase-7-docs-quality-audit-ip-env-reconcile-2026-06-18.md`.
 The audit corrected two navigation risks from recent Phase 7 edits: the current
-workspace is AMN3 evidence repo `barakov-dot/amn3` on `master` at `ec811cf`,
+workspace is AMN3 evidence repo `barakov-dot/amn3` on latest pushed `master`,
 while AMN2 package/source truth remains `barakov-dot/amn2`
 `codex-vps-test-prep` at `b121865`; and public URL fields left in live `.env`
 by `P7-C002a` are now explicitly treated as inert prerequisite residue after

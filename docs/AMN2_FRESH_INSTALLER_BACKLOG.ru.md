@@ -30,6 +30,7 @@ AMN2 final RC handoff/status compression status: completed
 AMN2 Phase 7 evidence index / dry checklist / RC notes status: completed
 AMN2 final RC freeze/status: completed-rc-ready-paused-state-no-live-action
 AMN2 direct clean installer status: completed-direct-clean-install-5501295-loopback-smoke
+AMN2 post-direct-clean login/backup status: completed-login-verified-backup-create-verify
 AMN2 Phase 7 final freeze / named-gate menu status: completed
 AMN2 P7-C002b runtime/login verification status: completed-not-exposed
 AMN2 P7-C002 public cutover guard status: blocked-by-domain-tls-not-exposed
@@ -62,7 +63,7 @@ AMN2 P7-C007 Telegram identity/profile/media status: deferred-not-required-for-p
 AMN2 P7-C004a destructive pre-cutover guard status: ready-final-stop-line-no-apply
 AMN2 P7-C004b destructive clean installer status: completed-clean-install-loopback-smoke
 AMN3 latest evidence slice: Phase 7 transition packet / clean installer RC entry
-current working VPS: 89.185.80.166, disposable test VPS, clean-installed b121865 loopback-only after P7-C004b and source-overlaid/smoked 5501295 after P7-C005
+current working VPS: 89.185.80.166, disposable test VPS, direct clean-installed 5501295 loopback-only after P7-C004c, loopback admin login verified and post-direct-clean backup create+verify completed after P7-C004d/P7-C006b
 ```
 
 Relevant completed inputs:
@@ -164,6 +165,16 @@ Relevant completed inputs:
   Backup create and verify passed; artifact stayed on the VPS, bytes `218552`,
   sha256 `1412e6791ba03e0f955d46e988357274a413d0afc96a2e72c1b6077624554bb2`.
   No restore/import/reboot, provider mutation, remote backup download, service
+  restart, public exposure, config delivery, write execution, Local Agent
+  mutation, Telegram action or secret-bearing output was performed.
+- Phase 7 `P7-C004d + P7-C006b` post-direct-clean loopback admin login and
+  backup-only evidence for AMN2 `5501295` in
+  `research/amn2/phase-7-post-direct-clean-login-backup-5501295-2026-06-20.md`.
+  Loopback admin login passed after the direct clean installer RC; backup
+  create and verify passed for the clean `5501295` state; the encrypted
+  artifact stayed on the VPS, bytes `204900`, sha256
+  `f8e0591db75e8ec9ce58f4fa9d71972d577e1ec103194d1943a626aa9b156b97`. No
+  restore/import/reboot, provider mutation, remote backup download, service
   restart, public exposure, config delivery, write execution, Local Agent
   mutation, Telegram action or secret-bearing output was performed.
 - Phase 7 `P7-C007` Telegram identity/profile/media private RC decision in
