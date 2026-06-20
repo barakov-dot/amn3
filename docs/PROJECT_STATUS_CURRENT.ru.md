@@ -1,5 +1,827 @@
 # Текущий override 2026-06-09
 
+Phase 7 final RC freeze/status pass was completed on 2026-06-20 as
+`completed-rc-ready-paused-state-no-live-action` for AMN2 `5501295`. Evidence:
+`research/amn2/phase-7-final-rc-freeze-status-5501295-2026-06-20.md`.
+The frozen state is `rc_ready_paused_private_operator_lane`: latest
+VPS-smoked/package head is `5501295 Add P7 install write contour`, current VPS
+source overlay is `5501295`, web/admin remains loopback-only on
+`127.0.0.1:3030`, public exposure is not opened, `VPS_APPLY_ENABLED=false`,
+the scoped `install:write` contour is audit-only/blocked by apply-disabled,
+current-state backup create+verify is complete, known-device operator-local
+private config handoff is complete for devices 1 and 2, and `P7-C007` Telegram
+identity/profile/media is deferred as not required for private RC. No live
+VPS/SSH command, package apply, restart, public exposure, config delivery,
+write execution, restore/import/reboot, provider mutation, Local Agent
+mutation, Telegram action or secret-bearing output was performed in the freeze
+pass. Remaining approved work is residual `P7-C006`
+restore/import/download/reboot/DR/provider-restore scope only, plus watch-only
+intake.
+
+Phase 7 `P7-C007` Telegram identity/profile/media decision was completed on
+2026-06-20 as
+`completed-deferred-not-required-for-private-rc-no-telegram-action`. Evidence:
+`research/amn2/phase-7-telegram-defer-private-rc-2026-06-20.md`. Telegram
+identity/profile/media mutation is deferred and is not a blocker for the
+private/operator RC lane. No Telegram token use, Telegram API call, live bot
+send, profile/media mutation, media upload, credential handoff, live VPS/SSH
+command or secret-bearing output was performed. Future Telegram identity,
+profile or media work would require a new exact named gate. Remaining approved
+Phase 7 work is residual `P7-C006`
+restore/import/download/reboot/DR/provider-restore scope only, plus watch-only
+intake.
+
+Phase 7 `P7-C006` current-state backup-only evidence gate was completed on
+2026-06-20 as
+`completed-current-state-backup-only-create-verify-no-restore-import-reboot`
+for AMN2 `5501295` on disposable VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-7-current-state-backup-only-5501295-2026-06-20.md`.
+Source overlay matched `5501295`; DB aggregate counts were users `0`, devices
+`0`, servers `1`, API tokens `8`, admin actions `14`; backup create and verify
+passed; artifact stayed on the VPS at
+`/opt/amn2/backups/p7-c006-current-state-5501295-20260620T050111Z`, basename
+`amneziya-backup-20260620T050141Z.tar.enc`, bytes `218552`, sha256
+`1412e6791ba03e0f955d46e988357274a413d0afc96a2e72c1b6077624554bb2`, mode
+`600`. External probes to `3030`, `3040`, `80` and `443` stayed `000`. No
+restore/import/reboot, provider mutation, remote backup download, service
+restart, public exposure, config delivery, write execution, Local Agent
+mutation, Telegram action or secret-bearing output was performed. Remaining
+Phase 7 exact gates are residual `P7-C006` restore/import/download/reboot/DR/
+provider-restore scopes only, plus watch-only intake.
+
+Phase 7 `P7-C006a + watch-only status hygiene` was completed on 2026-06-20 as
+`completed-provider-console-evidence-inconclusive-watch-hygiene-no-mutation`.
+Evidence:
+`research/amn2/phase-7-provider-backup-restore-point-watch-hygiene-2026-06-20.md`.
+The operator-provided provider-console screenshot for VPS `89.185.80.166`
+showed successful backup creation, failed move to internal storage and
+successful backup deletion on 2026-06-15, so provider restore-point availability
+is not confirmed and must not be used as a restore prerequisite. No provider
+mutation, restore/import/reboot, remote backup download, live VPS/SSH command or
+secret-bearing output was performed. Watch-only release check still observes
+`amnezia-client 4.8.19.0` and `amneziawg-android 2.0.1`; these remain
+signals-only and do not authorize live/config/write/restore/Telegram actions.
+
+Phase 7 `P7-C005` write API / install mutation gate was completed on
+2026-06-20 as `completed-scoped-write-contour-smoked` for AMN2
+`55012958ff6b8338254f3f68dfe6779f4bc56f5d` on disposable VPS
+`89.185.80.166`. Evidence:
+`research/amn2/phase-7-write-install-mutation-contour-5501295-2026-06-20.md`.
+AMN2 branch `codex-vps-test-prep` was advanced from `b121865` to `5501295`
+(`Add P7 install write contour`) and pushed. Local full suite returned
+`726 passed, 1 StarletteDeprecationWarning`. Package
+`dist/amn2-vps-update-and-smoke-kit-5501295.zip` sha256
+`C03D26673AD79D9487A3ED34E9657E0DCA10EBC9BB601E429385091F1DFEF407` and source
+zip sha256 `DA7DA58E0FD8D778BD4A22471BBCD9038CC455ACD3C0538A38874215C81646D3`
+were verified. Live apply updated `/opt/amn2` source overlay to `5501295`,
+loopback web restart passed, baseline API loopback smoke returned `VPS verdict:
+pass`, and the scoped write route smoke passed: `server:read` token got `403`,
+`install:write` token got `202`, route status was
+`recorded_blocked_by_vps_apply_disabled`, audit action was `api_write`, audit
+metadata was secret-safe, and external probes to `3030`, `3040`, `80` and
+`443` stayed `000`. The route is audit-only while `VPS_APPLY_ENABLED=false`;
+no actual installer executor, public exposure, config delivery,
+restore/import/reboot, Local Agent mutation, Telegram action or secret-bearing
+output was performed. This was later followed by current-state `P7-C006`
+backup-only evidence and the `P7-C007` private-RC deferral decision. Remaining
+approved Phase 7 live/mutation work is residual `P7-C006` scope only;
+`P7-C006a` provider restore-point confirmation was later closed as inconclusive
+docs-only evidence.
+
+Phase 7 `P7-C005 + P7-C006 + P7-C007` post-clean read-only rebaseline was
+completed on 2026-06-19 as
+`completed-post-clean-read-only-rebaseline-no-mutation` for AMN2 `b121865` on
+disposable VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-7-post-clean-write-backup-telegram-read-only-rebaseline-b121865-2026-06-19.md`.
+The clean `P7-C004b` install remained active with source overlay
+`b121865f488821f6fc471c9529fb26e5d7992515`, web loopback on
+`127.0.0.1:3030`, no public API listener on `3040`, no public `80/443`
+listeners and external probes to `3030`, `3040`, `80` and `443` returning
+`000`. Public API route inventory is read-only with `write_api_route_count=0`;
+DB aggregate counts after clean install are users `0`, devices `0`, servers
+`1`, API tokens `2` and admin actions `6`. Backup help probing was safe, no
+backup was created, and Telegram token presence was checked without token use
+or Telegram API call. No write API enablement, install mutation,
+backup/restore/import/reboot, remote backup download, service restart, public
+exposure, config delivery, Local Agent mutation, production peer/user mutation,
+Telegram action or secret-bearing output was performed. This was later
+superseded for `P7-C005` by the 2026-06-20 scoped write contour and for
+`P7-C007` by the private-RC deferral decision; residual `P7-C006` scopes require
+exact named gates only. Provider restore-point confirmation `P7-C006a` was
+later completed as inconclusive docs-only evidence.
+
+Phase 7 `P7-C004b` destructive clean installer execution was completed on
+2026-06-19 as `completed-clean-install-loopback-smoke` for AMN2 `b121865` on
+disposable VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-7-destructive-clean-installer-execution-b121865-2026-06-19.md`.
+The operator opened the exact destructive gate and entered the final
+destructive phrase. The old `/opt/amn2` was moved to
+`/opt/amn2.pre-p7-c004b-20260619T173819Z`, clean `/opt/amn2` was installed from
+the verified `b121865` package/source, `.env` and `servers.yml` were
+regenerated without secret output, DB initialization passed, loopback web
+returned `/login=200`, API loopback smoke returned `VPS verdict: pass`, and
+external probes to `3030`, `3040`, `80` and `443` stayed `000`. No provider
+rebuild, reboot, restore/import, remote backup download, public exposure,
+config delivery, write API, Local Agent mutation, production peer/user
+mutation, Telegram action or secret-bearing output was performed. This was
+later followed by `P7-C005` scoped write contour completion, current-state
+`P7-C006` backup evidence and the `P7-C007` private-RC deferral decision;
+residual `P7-C006` scopes remain exact named gates only.
+
+Phase 7 `P7-C004a` destructive clean installer pre-cutover guard was completed
+on 2026-06-19 as `ready-for-final-destructive-stop-line-no-apply` for AMN2
+`b121865` on disposable VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-7-destructive-clean-installer-precutover-guard-b121865-2026-06-19.md`.
+Local package/source checksums matched, remote source overlay matched `b121865`,
+the `P7-C006` backup artifact was present with matching sha256 and
+`pre_cutover_blocker_count=0`. No wipe, reinstall, package apply, service
+restart, provider action, restore/import/reboot, public exposure, write API,
+Local Agent mutation, production peer/user mutation, Telegram action or
+secret-bearing output was performed.
+
+Phase 7 `P7-C006` backup-only evidence gate was completed on 2026-06-19 as
+`completed-backup-only-create-verify-no-restore-import-reboot` for AMN2
+`b121865` on disposable VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-7-backup-only-evidence-b121865-2026-06-19.md`. Backup
+create and verify passed after diagnosing env propagation for `APP_SECRET_KEY`;
+the backup artifact stayed on the VPS and was not downloaded. No restore apply,
+archive import, reboot, destructive migration, public exposure, write API,
+Local Agent mutation, production peer/user mutation, Telegram action or
+secret-bearing output was performed.
+
+Phase 7 watch-only intake cycle closeout was completed on 2026-06-19 as
+`completed-watch-only-intake-cycle-complete-no-live-action`. Evidence:
+`research/amn2/phase-7-watch-only-intake-cycle-complete-2026-06-19.md`.
+Current observed client signals remain `amnezia-client 4.8.19.0` and
+`amneziawg-android 2.0.1`; no live action, mutation, upstream/GPL code copy or
+new implementation task was created.
+
+Phase 7 watch-only intake after critical preflights was completed on 2026-06-19
+as `completed-watch-only-intake-after-critical-preflights-no-live-action`.
+Evidence:
+`research/amn2/phase-7-watch-only-intake-after-critical-preflights-2026-06-19.md`.
+No live action, mutation, secret-bearing output or new implementation task was
+created.
+
+Phase 7 `P7-C005 + P7-C006 + P7-C007` write/backup/Telegram read-only preflight
+was completed on 2026-06-19 as `completed-read-only-preflight-no-mutation`.
+Evidence:
+`research/amn2/phase-7-write-backup-telegram-read-only-preflight-2026-06-19.md`.
+This pass reviewed existing local readiness evidence only; no live VPS command,
+SSH command or external API call was run. At that time `P7-C005` was still
+blocked by RC policy, public write routes disabled, `VPS_APPLY_ENABLED=false`
+and `LOCAL_AGENT_ENABLED=false`; this was later superseded by the 2026-06-20
+scoped write contour on `5501295`. `P7-C006` remains blocked for live backup,
+restore apply, archive import, remote backup download and reboot. At that time
+`P7-C007` was blocked for Telegram token use, live bot send, profile/media
+mutation and media upload; it was later deferred as not required for private RC.
+No backup archive create, restore/import apply, Telegram action, secret
+publication or upstream/GPL code copy was performed.
+
+Phase 7 `P7-C003` target-specific operator-local private handoff for
+`TARGET_USER_ID=1` / `TARGET_DEVICE_ID=2` was completed on 2026-06-19 as
+`completed-private-file-copied-secret-not-printed` on disposable VPS
+`89.185.80.166`. Evidence:
+`research/amn2/phase-7-config-delivery-private-handoff-device2-b121865-2026-06-19.md`.
+The config was rendered on the VPS to a root-only temp file, copied by SCP to the
+operator-selected local private destination outside the workspace and removed
+from the VPS. Remote/local metadata matched: `artifact_bytes=438`, sha256
+`87b5a41c665b593b72740b00422416ef73dc0d7a58ca928ea52c6722c0e5cbb3`. No config
+payload, `.conf` contents, QR, `vpn://` payload, client private key, PSK, raw
+token, cookie, authorization header, `.env`, `servers.yml` or rollback file was
+printed or attached to evidence. No SMTP/Telegram send, public config link
+issue/redeem, write API enablement, install mutation, Local Agent mutation,
+`.env` mutation, service restart, public exposure, secret publication or
+upstream/GPL code copy was performed. Together with the earlier
+`TARGET_DEVICE_ID=1` handoff, both known active target devices from the
+2026-06-19 inventory have completed private-file handoff. Resend/revocation,
+SMTP/Telegram delivery, public/self-service links and new target devices remain
+separate exact gates.
+
+Phase 7 `P7-C003` target-specific operator-local private handoff for
+`TARGET_USER_ID=1` / `TARGET_DEVICE_ID=1` was completed on 2026-06-19 as
+`completed-private-file-copied-secret-not-printed` on disposable VPS
+`89.185.80.166`. Evidence:
+`research/amn2/phase-7-config-delivery-private-handoff-device1-b121865-2026-06-19.md`.
+The config was rendered on the VPS to a root-only temp file, copied by SCP to the
+operator-selected local private destination outside the workspace and removed
+from the VPS. Remote/local metadata matched: `artifact_bytes=438`, sha256
+`7ca64dd57a7467c4817e846a11d56d861013921c1db3f6ac020f7ca355dfdb83`. No config
+payload, `.conf` contents, QR, `vpn://` payload, client private key, PSK, raw
+token, cookie, authorization header, `.env`, `servers.yml` or rollback file was
+printed or attached to evidence. No SMTP/Telegram send, public config link
+issue/redeem, write API enablement, install mutation, Local Agent mutation,
+`.env` mutation, service restart, public exposure, secret publication or
+upstream/GPL code copy was performed. `TARGET_DEVICE_ID=2`, resend/revocation,
+SMTP/Telegram delivery and public/self-service links remain separate exact
+gates.
+
+Phase 7 `P7-C003` target inventory for operator-local handoff was completed on
+2026-06-19 as `completed-read-only-target-inventory-no-delivery` on disposable
+VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-7-config-delivery-target-inventory-b121865-2026-06-19.md`.
+Source overlay marker confirmed `b121865f488821f6fc471c9529fb26e5d7992515`.
+Runtime stayed loopback-only; `/login=200`, `/=303`, and external probes to
+`3030`, `3040`, `80` and `443` returned `000`. Safe inventory found one active
+user and two active devices: valid next target pairs are
+`TARGET_USER_ID=1 TARGET_DEVICE_ID=1` and
+`TARGET_USER_ID=1 TARGET_DEVICE_ID=2`; both devices have
+`config_material_status=available` and `config_version=amneziawg_v2`. No config
+delivery, `.conf`/QR/`vpn://` output, client secret output, SMTP/Telegram send,
+public config link issue/redeem, write API enablement, install mutation, Local
+Agent mutation, `.env` mutation, service restart, public exposure, secret
+publication or upstream/GPL code copy was performed.
+
+Phase 7 `P7-C003` operator-local config delivery guard was opened by the
+operator and completed on 2026-06-19 as
+`blocked-pending-target-and-private-handoff-no-delivery` on disposable VPS
+`89.185.80.166`. Evidence:
+`research/amn2/phase-7-config-delivery-operator-local-guard-b121865-2026-06-19.md`.
+Source overlay marker confirmed `b121865f488821f6fc471c9529fb26e5d7992515`.
+Channel is now selected as `operator-local`. Loopback web checks returned
+`/login=200` and `/=303`; external probes to `3030`, `3040`, `80` and `443`
+returned `000`. Safe route inventory found five config-related web/admin routes;
+DB aggregate counts showed `users_count=1`, `devices_count=2`, `servers_count=1`.
+Delivery remains blocked until exact target user/device, private artifact
+destination and one-time delivery/revocation policy are selected. No config
+delivery, `.conf`/QR/`vpn://` output, client secret output, SMTP/Telegram send,
+public config link issue/redeem, write API enablement, install mutation, Local
+Agent mutation, `.env` mutation, service restart, public exposure, secret
+publication or upstream/GPL code copy was performed.
+
+Phase 7 `P7-C003 + P7-C005` config/write read-only preflight was completed on
+2026-06-19 as `completed-read-only-preflight-blocked-no-delivery-no-write`.
+Evidence:
+`research/amn2/phase-7-config-write-read-only-preflight-2026-06-19.md`.
+This pass used local docs/evidence/package notes only; no live VPS/SSH command
+was run. At that time `P7-C003` was blocked because the delivery channel
+decision was missing, SMTP config / attachment policy were not ready and no
+secret-safe operator-local delivery policy was selected. The later `P7-C003`
+operator-local guard selected `operator-local` as the current channel but left
+real delivery blocked pending target/private handoff. At that time `P7-C005`
+was still blocked by read-only RC policy, prior `write_api_route_count=0`,
+`VPS_APPLY_ENABLED=false` and `LOCAL_AGENT_ENABLED=false`; this was later
+superseded by the 2026-06-20 scoped write contour on `5501295`. No config delivery,
+`.conf`/QR/`vpn://` output, SMTP/Telegram config send, tokenized redeem, write
+API enablement, install mutation, Local Agent mutation, peer/user mutation,
+secret publication or upstream/GPL code copy was performed.
+
+Phase 7 `P7-C002d` IP-only public exposure risk guard was opened by the operator
+and completed on 2026-06-19 as
+`blocked-pending-design-or-explicit-risk-acceptance-not-exposed` on disposable
+VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-7-ip-only-public-exposure-risk-guard-b121865-2026-06-19.md`.
+Source overlay marker confirmed `b121865f488821f6fc471c9529fb26e5d7992515`.
+Runtime stayed loopback-only on `127.0.0.1:3030`; public `3040/80/443`
+listeners were absent. Safe env flags: admin/session secrets present, public URL
+fields missing, `VPS_APPLY_ENABLED=false`, `LOCAL_AGENT_ENABLED=false`.
+Blockers: `ufw_inactive_for_public_exposure`,
+`no_reverse_proxy_binary_for_admin_exposure`,
+`ip_only_public_admin_has_no_trusted_dns_tls` and
+`public_admin_over_ip_requires_explicit_risk_acceptance`.
+`ip_only_public_apply_allowed=false`. No service restart, `.env` mutation,
+package install, reverse proxy/TLS/firewall apply, public listener change,
+public exposure, config delivery, write API, Local Agent mutation,
+backup/import/reboot, destructive action, Telegram action, secret publication or
+upstream/GPL code copy was performed.
+
+Phase 7 watch-only intake current signals was refreshed on 2026-06-19 as
+docs-only/watch-only work. Evidence:
+`research/amn2/phase-7-watch-only-intake-current-signals-2026-06-19.md`.
+Current official watch remains `amnezia-vpn/amnezia-client` `4.8.19.0` and
+`amneziawg-android` `2.0.1`. PRVTPRO remains upstream idea source only with no
+GPL code copy; KYORESUAS remains API taxonomy signal only. Local automation
+configs for `prvtpro-weekly-upstream-refresh`, `weekly-kyoresuas-upstream-refresh`
+and `amnezia-weekly-upstream-refresh` remain present and unchanged since
+2026-06-14; no new local automation output was found. No new AMN2
+implementation task was created. No live VPS command, SSH command, `.env`
+mutation, package install, service restart, reverse proxy/TLS/firewall apply,
+public listener change, public exposure, config delivery, write API, Local Agent
+mutation, backup/import/reboot, destructive action, Telegram action, secret
+publication or upstream/GPL code copy was performed.
+
+Phase 7 `P7-C002e + watch-only` Public URL env reconciliation gate was opened
+by the operator and completed on 2026-06-19 as `completed-live-env-reconcile-not-exposed`
+on disposable VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-7-public-url-env-reconciliation-b121865-2026-06-19.md`.
+Remote source overlay remains `b121865f488821f6fc471c9529fb26e5d7992515`.
+`PUBLIC_BASE_URL`, `PUBLIC_DOMAIN` and `WEB_PUBLIC_BASE_URL` were removed from
+live `.env`; safe summary shows each removed once. A rollback copy was created
+on the VPS and must not be posted because it contains secrets. Post-state safe
+flags: `APP_SECRET_KEY=present`, `WEB_ADMIN_USERNAME=present`,
+`WEB_ADMIN_PASSWORD_HASH=present`, `WEB_ADMIN_SESSION_SECRET=present`,
+`PUBLIC_BASE_URL=missing`, `PUBLIC_DOMAIN=missing`,
+`WEB_PUBLIC_BASE_URL=missing`, `VPS_APPLY_ENABLED=false`,
+`LOCAL_AGENT_ENABLED=false`. Runtime stayed loopback-only: loopback `/login=200`,
+root `/=303`, listener `127.0.0.1:3030`, no listener on `3040`; external probes
+to `3030`, `3040`, `80` and `443` returned `000`. No service restart, reverse
+proxy, TLS, firewall, public listener, public web/API exposure, config delivery,
+write API, Local Agent mutation, backup/import/reboot, destructive action,
+Telegram action, secret publication or upstream/GPL code copy was performed.
+The settings probe `app.settings` failure is classified as a verifier-path issue:
+remote package has no `app.settings`; runtime probes passed.
+
+Phase 7 watch-only intake current signals was completed on 2026-06-18 as
+docs-only/watch-only work. Evidence:
+`research/amn2/phase-7-watch-only-intake-current-signals-2026-06-18.md`.
+Current official watch remains `amnezia-vpn/amnezia-client` `4.8.19.0` and
+`amneziawg-android` `2.0.1`. PRVTPRO remains upstream idea source only with no
+GPL code copy; KYORESUAS remains API taxonomy signal only. Local automation
+configs for `prvtpro-weekly-upstream-refresh`, `weekly-kyoresuas-upstream-refresh`
+and `amnezia-weekly-upstream-refresh` remain present and unchanged since
+2026-06-14; no new local automation output was found. No new AMN2
+implementation task was created. No live VPS command, SSH command, `.env`
+mutation, package install, service restart, reverse proxy/TLS/firewall apply,
+public listener change, public exposure, config delivery, write API, Local Agent
+mutation, backup/import/reboot, destructive action, Telegram action, secret
+publication or upstream/GPL code copy was performed.
+
+Phase 7 watch-only intake correction was completed on 2026-06-18 as
+docs-only/watch-only work. Evidence:
+`research/amn2/phase-7-watch-only-intake-correction-2026-06-18.md`. This pass
+corrects the watch-only/status hygiene wording that previously recorded obsolete
+`amneziawg-android 2.0.0`. Current official GitHub watch keeps
+`amnezia-vpn/amnezia-client` `4.8.19.0` and
+`amneziawg-android` `2.0.1` as watch-only client compatibility signals. No live
+VPS command, SSH command, `.env` mutation, package install, service restart,
+reverse proxy/TLS/firewall apply, public listener change, public exposure,
+config delivery, write API, Local Agent mutation, backup/import/reboot,
+destructive action, Telegram action, secret publication or upstream/GPL code
+copy was performed.
+
+Phase 7 `P7-S005 + P7-I012` docs quality audit and IP-only env reconciliation
+planning was completed on 2026-06-18 as docs-only/status work. Evidence:
+`research/amn2/phase-7-docs-quality-audit-ip-env-reconcile-2026-06-18.md`.
+The audit corrected two navigation risks from recent Phase 7 edits: the current
+workspace is AMN3 evidence repo `barakov-dot/amn3` on `master` at `ec811cf`,
+while AMN2 package/source truth remains `barakov-dot/amn2`
+`codex-vps-test-prep` at `b121865`; and public URL fields left in live `.env`
+by `P7-C002a` are now explicitly treated as inert prerequisite residue after
+the later IP-only policy decision. New inactive proposal:
+`P7-C002e Public URL env reconciliation gate`, important gated, live `.env`
+hygiene only, no public listener/reverse proxy/TLS/firewall/config delivery.
+No live VPS command, SSH command, `.env` mutation, package install, service
+restart, reverse proxy/TLS/firewall apply, public listener change, public
+exposure, config delivery, write API, Local Agent mutation, backup/import/
+reboot, destructive action, Telegram action, secret publication or upstream/GPL
+code copy was performed.
+
+Phase 7 watch-only intake + status hygiene was completed on 2026-06-18 as
+docs-only/watch-only work. Evidence:
+`research/amn2/phase-7-watch-only-intake-status-hygiene-2026-06-18.md`. Current
+official GitHub watch keeps `amnezia-vpn/amnezia-client` `4.8.19.0` as a client
+compatibility signal. Its temporary `amneziawg-android 2.0.0` wording is
+superseded by the later correction evidence, and current status/navigation keeps
+`amneziawg-android 2.0.1` as latest. PRVTPRO remains upstream idea source
+only with no GPL code copy; KYORESUAS remains API taxonomy signal only. Local
+automation configs remain present and watch-only; no new automation-generated
+output newer than the 2026-06-14 Phase 7 intake evidence was found in the local
+workspace. `P7-I011` remains canonical: AMN2 uses VPS IP + SSH tunnel to
+loopback web/admin by default, without DNS-domain trusted TLS cutover. No live
+VPS command, SSH command, `.env` mutation, package install, service restart,
+reverse proxy/TLS/firewall apply, public listener change, public exposure,
+config delivery, write API, Local Agent mutation, backup/import/reboot,
+destructive action, Telegram action, secret publication or upstream/GPL code
+copy was performed.
+
+Phase 7 `P7-I011` IP-only exposure policy decision was completed on 2026-06-18
+as local-only/docs/status work. Evidence:
+`research/amn2/phase-7-ip-only-exposure-policy-decision-2026-06-18.md`. The
+operator explicitly decided not to use a DNS domain for AMN2 and to use only the
+VPS IP. Therefore `P7-C002c` DNS/domain/trusted TLS prerequisite is closed as
+`operator_declined_dns_domain`. The selected default access policy is VPS IP for
+SSH/operator targeting plus loopback web/admin `127.0.0.1:3030` through SSH
+tunnel. Public web/admin exposure, trusted TLS cutover, reverse proxy, firewall,
+public listener, public API, config delivery and write API remain not opened.
+Any future IP-only public web/admin exposure requires a separate exact named
+risk-acceptance gate. No live VPS command, SSH command, `.env` mutation, package
+install, service restart, reverse proxy/TLS/firewall apply, public listener
+change, config delivery, write API, Local Agent mutation, backup/import/reboot,
+destructive action, Telegram action, secret publication or upstream/GPL code
+copy was performed.
+
+Phase 7 `P7-N005` client compatibility watch refresh for Amnezia client
+`4.8.19.0` was activated from the requested `P7-C002c + P7-N005` pair and
+completed on 2026-06-18 as local-only/docs/tests/watch-only work. Evidence:
+`research/amn2/phase-7-client-compatibility-watch-refresh-4-8-19-2026-06-18.md`.
+`P7-C002c` was not executed live because an exact named live prerequisite gate
+and operator-provided DNS FQDN were not supplied; this state was later
+superseded by `P7-I011` operator no-domain policy. Current official GitHub
+watch keeps `amnezia-vpn/amnezia-client` release `4.8.19.0` as the latest
+client-compatibility signal; a later watch-only/status hygiene pass corrected
+current `amneziawg-android` wording, and the latest correction keeps `2.0.1`. No
+config artifact, QR, `vpn://`, SMTP delivery, public redeem
+route, client-secret output or Telegram config send was enabled. No live VPS
+command, SSH command, `.env` mutation, reverse proxy/TLS/firewall apply, public
+exposure, config delivery, write API, Local Agent mutation, backup/import/
+reboot, destructive action, Telegram action, secret publication or upstream/GPL
+code copy was performed.
+
+Phase 7 `P7-C002c + watch-only intake` DNS/domain/TLS prerequisite staging and
+watch-only upstream/client intake was completed on 2026-06-18 as
+`watch-only-intake-complete-p7-c002c-input-required`. Evidence:
+`research/amn2/phase-7-dns-domain-tls-prereq-watch-intake-2026-06-18.md`.
+`P7-C002c` was not executed live because an exact named live prerequisite gate
+and operator-provided DNS FQDN were not supplied. Local automation configs for
+`prvtpro-weekly-upstream-refresh`, `weekly-kyoresuas-upstream-refresh` and
+`amnezia-weekly-upstream-refresh` remain active; no new local automation output
+newer than the 2026-06-14 Phase 7 intake evidence was found. Current official
+GitHub watch saw `amnezia-vpn/amnezia-client` release `4.8.19.0` from
+2026-06-15 as a client-compatibility signal only. A later watch-only/status
+hygiene pass corrected current `amneziawg-android` latest-release endpoint
+observation back to `2.0.1`. No live VPS command, SSH command, `.env` mutation, reverse
+proxy/TLS/firewall apply, public exposure, config delivery, write API, Local
+Agent mutation, backup/import/reboot, destructive action, Telegram action,
+secret publication or upstream/GPL code copy was performed. New inactive
+proposal from this pass, `P7-N005` client compatibility watch refresh for
+Amnezia client `4.8.19.0`, was later activated and completed in
+`research/amn2/phase-7-client-compatibility-watch-refresh-4-8-19-2026-06-18.md`.
+The DNS-domain input-required state was later superseded by `P7-I011` operator
+no-domain policy.
+
+Phase 7 `P7-C002` public cutover gate for AMN2 `b121865` was opened by the
+operator and stopped by read-only guard on 2026-06-18 as
+`blocked-by-domain-tls-plan-not-exposed` on disposable VPS `89.185.80.166`.
+Evidence:
+`research/amn2/phase-7-public-cutover-guard-b121865-2026-06-18.md`. Remote
+source overlay remains `b121865f488821f6fc471c9529fb26e5d7992515`; web stayed
+loopback-only on `127.0.0.1:3030`; loopback `/login` returned `200`; loopback
+root returned `303`; external probes to `3030`, `3040`, `80` and `443`
+returned `000`. Admin credentials and public URL fields were present, but
+`PUBLIC_BASE_URL`/`PUBLIC_DOMAIN` were IP-based; guard blocker:
+`trusted_tls_requires_dns_domain_not_ip`. Reverse proxy and certbot tooling were
+missing. No package install, service restart, `.env` mutation, reverse proxy
+apply, TLS issue, firewall change, public listener change, public web/API
+exposure, config delivery, write API enablement, Local Agent mutation,
+backup/import/reboot, production peer/user mutation, destructive action,
+Telegram action, secret publication or upstream/GPL code copy was performed.
+`P7-I011` later closed the DNS/domain path by operator policy; `P7-C002d` was
+later opened and blocked IP-only exposure. Next default action is
+operator-only/watch-only unless a new post-`P7-C002d` risk-design gate is
+explicitly opened.
+
+Phase 7 `P7-C002b` public exposure runtime reload and loopback login
+verification for AMN2 `b121865` was opened by the operator and completed on
+2026-06-18 as `runtime-login-verified-not-exposed` on disposable VPS
+`89.185.80.166`. Evidence:
+`research/amn2/phase-7-public-exposure-runtime-login-verify-b121865-2026-06-18.md`.
+Remote source overlay remains `b121865f488821f6fc471c9529fb26e5d7992515`.
+Manual loopback runtime was restarted after `P7-C002a`; the first immediate
+HTTP probe hit a short pre-bind readiness window, then recovery showed web
+listening on `127.0.0.1:3030`. Final live login flow returned
+`GET /login=200`, `POST /login=303`, `Location=/` and dashboard `200`;
+password contract check matched the submitted username/password to the live
+`.env` hash without printing secrets. External probes to `3030`, `3040`, `80`
+and `443` returned `000`. No reverse proxy apply, TLS issue, firewall change,
+public listener change, public web/API exposure, config delivery, write API
+enablement, Local Agent mutation, backup/import/reboot, production peer/user
+mutation, destructive action, Telegram action, secret publication or
+upstream/GPL code copy was performed. `P7-C002` remains a critical named gate
+for a separate exact public cutover gate only.
+
+Phase 7 `P7-C002a` public exposure admin/domain prerequisite for AMN2 `b121865`
+was opened by the operator and completed on 2026-06-14 as live `.env`
+admin/domain prerequisite mutation on disposable VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-7-public-exposure-admin-domain-prereq-b121865-2026-06-14.md`.
+Remote source overlay was `b121865f488821f6fc471c9529fb26e5d7992515`.
+Pre-mutation flags showed `WEB_ADMIN_USERNAME=missing`, public base/domain URL
+missing and `WEB_ADMIN_PASSWORD_HASH=present`. The gate updated only `.env`
+admin/domain fields; post-mutation flags showed `WEB_ADMIN_USERNAME=present`,
+`WEB_ADMIN_PASSWORD_HASH=present`, `PUBLIC_BASE_URL=present`,
+`PUBLIC_DOMAIN=present`, `WEB_PUBLIC_BASE_URL=present`, `VPS_APPLY_ENABLED=false`
+and `LOCAL_AGENT_ENABLED=false`. Verdict:
+`public_exposure_precondition_status=ready_for_operator_cutover_plan`, with
+`public_exposure_apply_allowed=false`. No service restart, reverse proxy apply,
+TLS certificate issue, firewall change, public listener change, public web/API
+exposure, config delivery, write API enablement, backup/import/reboot,
+destructive action, Telegram action, secret publication or upstream/GPL code
+copy was performed.
+
+Phase 7 `P7-C002` public exposure gate for AMN2 `b121865` was opened by the
+operator and completed on 2026-06-14 as read-only pre-cutover on disposable VPS
+`89.185.80.166`, with outcome `blocked-by-preconditions`. Evidence:
+`research/amn2/phase-7-public-exposure-gate-precutover-b121865-2026-06-14.md`.
+Remote source overlay was `b121865f488821f6fc471c9529fb26e5d7992515`; web
+remained loopback-only on `127.0.0.1:3030`; external probes to `3030`, `3040`,
+`80` and `443` returned `000`; reverse proxy binaries/services were absent or
+inactive; `ufw` was inactive; `WEB_ADMIN_USERNAME=missing`; public domain/base
+URL was missing; `VPS_APPLY_ENABLED=false`; `LOCAL_AGENT_ENABLED=false`. No
+reverse proxy install/apply, TLS certificate issue, firewall change, public
+listener change, public web/admin exposure, public API exposure, config
+delivery, write API enablement, Local Agent mutation, backup/import/reboot,
+production peer/user mutation, destructive action, Telegram action, secret
+publication or upstream/GPL code copy was performed. Later `P7-C002a` supplied
+admin/domain prerequisites and `P7-C002b` verified runtime/login on loopback;
+actual public cutover remains a separate critical named gate.
+
+Phase 7 `P7-S004 + watch-only intake check + operator named-gate menu review`
+was completed on 2026-06-14 as docs-only/watch-only work. Evidence:
+`research/amn2/phase-7-final-freeze-watch-menu-2026-06-14.md`. Phase 7
+local-only expansion is now frozen before any named gate. The evidence index
+and next-chat handoff show the watch-only intake check and an operator
+named-gate menu for `P7-C002`...`P7-C007`. No live VPS command, SSH command,
+package upload/apply/rebuild on VPS, service restart/deploy, public exposure,
+config delivery, write API enablement, Local Agent mutation, backup/import/
+reboot, production peer/user mutation, destructive action, Telegram token use,
+live bot send, Telegram profile/media mutation, secret publication or
+upstream/GPL code copy was performed.
+
+Phase 7 `P7-N004 + watch-only automation/client refresh intake + named-gate dry
+checklist review + final RC notes polish` was completed on 2026-06-14 as
+local-only/docs/watch-only work. Evidence:
+`research/amn2/phase-7-evidence-watch-drycheck-rcnotes-2026-06-14.md`. Added
+`docs/AMN2_PHASE_7_EVIDENCE_INDEX.ru.md`, recorded that upstream automations
+remain watch-only intake, added named-gate dry checklist review and polished
+AMN2 `docs/RELEASE_NOTES_RC_SKELETON.ru.md` so `b121865` is the latest
+known-good VPS-smoked/package baseline while public/config/write/backup/
+destructive/Telegram gates remain unopened. No live VPS command, SSH command,
+package upload/apply/rebuild on VPS, service restart/deploy, public exposure,
+config delivery, write API enablement, Local Agent mutation, backup/import/
+reboot, production peer/user mutation, destructive action, Telegram token use,
+live bot send, Telegram profile/media mutation, secret publication or
+upstream/GPL code copy was performed.
+
+Phase 7 `P7-S003` final RC handoff/status compression was completed on
+2026-06-14 as AMN3 docs-only work. Evidence:
+`research/amn2/phase-7-final-rc-handoff-compression-2026-06-14.md`.
+`docs/NEXT_CHAT_AMN2_PHASE_7_RELEASE_CANDIDATE.ru.md` is now a compact handoff
+with short start block, current state, approved remaining plan, RC Gate Matrix
+summary, exact named gate policy and recommendation rhythm. No live VPS
+command, SSH command, package upload/apply/rebuild on VPS, service
+restart/deploy, public exposure, config delivery, write API enablement, Local
+Agent mutation, backup/import/reboot, production peer/user mutation,
+destructive action, Telegram token use, live bot send, Telegram profile/media
+mutation, secret publication or upstream/GPL code copy was performed.
+`P7-S003` is removed from the active Phase 7 plan.
+
+Phase 7 `P7-I010` release candidate gate matrix consolidation was completed on
+2026-06-14 as AMN3 local-only docs/tests work. Evidence:
+`research/amn2/phase-7-rc-gate-matrix-consolidation-2026-06-14.md`.
+`docs/PHASE_7_RELEASE_CANDIDATE_PLAN.ru.md` now contains `RC Gate Matrix`,
+which separates completed local-only structural tasks, active critical named
+gates, watch-only intake and inactive structural proposals. The matrix maps
+`P7-C002`...`P7-C007` to readiness source, current blocker/status and allowed
+next action. No live VPS command, SSH command, package upload/apply/rebuild on
+VPS, service restart/deploy, public exposure, config delivery, write API
+enablement, Local Agent mutation, backup/import/reboot, production peer/user
+mutation, destructive action, Telegram token use, live bot send, Telegram
+profile/media mutation, secret publication or upstream/GPL code copy was
+performed. `P7-I010` is removed from the active Phase 7 plan.
+
+Phase 7 `P7-I009` Telegram identity/profile/media prerequisite checklist was
+completed on 2026-06-14 as AMN2 local-only code/tests/docs and AMN3
+evidence/status work. Evidence:
+`research/amn2/phase-7-telegram-identity-readiness-2026-06-14.md`. AMN2 fresh
+installer manifest and `/api/integration/status` now expose
+`telegram_identity_readiness` with schema
+`telegram-identity-profile-media-prerequisite-checklist.v1`, status
+`readiness_checklist_ready`, target gate `P7-C007`, Telegram API disabled,
+token use disabled, profile mutation disabled, media mutation disabled and live
+bot send disabled. Required checklists cover identity scope decision,
+credential handoff/storage policy, profile/media asset planning, operator
+preview/rollback and post-mutation relock audit. Verification: RED focused `3
+failed, 29 passed, 1 StarletteDeprecationWarning`; focused GREEN `32 passed, 1
+StarletteDeprecationWarning`; expanded `38 passed, 1
+StarletteDeprecationWarning`; full AMN2 suite `741 passed, 1
+StarletteDeprecationWarning`. No live VPS command, SSH command, package
+upload/apply/rebuild on VPS, service restart/deploy, public exposure, config
+delivery, write API enablement, Local Agent mutation, backup/import/reboot,
+production peer/user mutation, destructive action, Telegram token use, live bot
+send, Telegram profile/media mutation, secret publication or upstream/GPL code
+copy was performed. `P7-I009` is removed from the active Phase 7 plan.
+
+Phase 7 `P7-I008` backup/restore/import prerequisite checklist was completed
+on 2026-06-14 as AMN2 local-only code/tests/docs and AMN3 evidence/status work.
+Evidence:
+`research/amn2/phase-7-backup-restore-import-readiness-2026-06-14.md`. AMN2
+fresh installer manifest and `/api/integration/status` now expose
+`backup_restore_import_readiness` with schema
+`backup-restore-import-prerequisite-checklist.v1`, status
+`readiness_checklist_ready`, target gate `P7-C006`, live backup disabled,
+restore apply disabled, archive import disabled and reboot disabled. Required
+checklists cover backup scope, encryption/retention policy, restore preview
+safety, import source validation and disaster-recovery drill planning.
+Verification: RED focused `3 failed, 27 passed, 1 StarletteDeprecationWarning`;
+focused GREEN `30 passed, 1 StarletteDeprecationWarning`; expanded `36 passed,
+1 StarletteDeprecationWarning`; full AMN2 suite `739 passed, 1
+StarletteDeprecationWarning`. No live VPS command, SSH command, package
+upload/apply/rebuild on VPS, service restart/deploy,
+public exposure, config delivery, write API enablement, Local Agent mutation,
+backup archive create, restore apply, archive import apply, reboot, production
+peer/user mutation, destructive action, Telegram action, secret publication or
+upstream/GPL code copy was performed. `P7-I008` is removed from the active
+Phase 7 plan.
+
+Phase 7 `P7-I007` write API scope/implementation decision was completed on
+2026-06-14 as AMN2 local-only code/tests/docs and AMN3 evidence/status work.
+Evidence:
+`research/amn2/phase-7-write-api-scope-decision-2026-06-14.md`. AMN2 fresh
+installer manifest and `/api/integration/status` now expose
+`write_api_scope_decision` with schema `write-api-scope-decision.v1`, status
+`decision_ready`, target gate `P7-C005` and selected RC policy
+`keep_public_api_read_only_for_rc`. Write API, public write routes, Local Agent
+mutation and production peer/user mutation remain disabled; deferred options
+require `P7-C005`. Verification: RED focused `3 failed, 25 passed, 1
+StarletteDeprecationWarning`; focused GREEN `28 passed, 1
+StarletteDeprecationWarning`; expanded `34 passed, 1 StarletteDeprecationWarning`;
+full AMN2 suite `737 passed, 1 StarletteDeprecationWarning`. No live VPS
+command, SSH command, package
+upload/apply/rebuild on VPS, service restart/deploy, public exposure, config
+delivery, write API enablement, Local Agent mutation, backup/import/reboot,
+production peer/user mutation, destructive action, Telegram action, secret
+publication or upstream/GPL code copy was performed. `P7-I007` is removed from
+the active Phase 7 plan.
+
+Phase 7 `P7-I006` config delivery channel readiness was completed on
+2026-06-14 as AMN2 local-only code/tests/docs and AMN3 evidence/status work.
+Evidence:
+`research/amn2/phase-7-config-delivery-channel-readiness-2026-06-14.md`. AMN2
+fresh installer manifest and `/api/integration/status` now expose
+`config_delivery_channel_readiness` with schema
+`config-delivery-channel-readiness.v1`, status `readiness_design_ready`, target
+gate `P7-C003`, live delivery disabled and checklists for SMTP/operator-local
+channel decision, secret-safe evidence protocol, client import matrix, one-time
+delivery policy and delivery revocation story. API/rendered-plan views redact
+exact forbidden evidence marker names to count/policy while the local manifest
+keeps the full validation contract. Verification: RED focused `3 failed, 23
+passed, 1 StarletteDeprecationWarning`; focused GREEN `26 passed, 1
+StarletteDeprecationWarning`; expanded `32 passed, 1 StarletteDeprecationWarning`;
+full AMN2 suite `735 passed, 1 StarletteDeprecationWarning`. No live VPS
+command, SSH command, package upload/apply/rebuild on VPS, service
+restart/deploy, public exposure, config delivery, write API enablement, Local
+Agent mutation, backup/import/reboot, production peer/user mutation,
+destructive action, Telegram action, secret publication or upstream/GPL code
+copy was performed. `P7-I006` is removed from the active Phase 7 plan.
+
+Phase 7 `P7-I005` public exposure readiness/design was completed on 2026-06-14
+as AMN2 local-only code/tests/docs and AMN3 evidence/status work. Evidence:
+`research/amn2/phase-7-public-exposure-readiness-design-2026-06-14.md`. AMN2
+fresh installer manifest and `/api/integration/status` now expose
+`public_exposure_readiness_design` with schema
+`public-exposure-readiness-design.v1`, status `readiness_design_ready`, target
+gate `P7-C002`, live exposure disabled and checklists for admin credential
+contract, domain/TLS/reverse-proxy plan, firewall/listener plan, external probe
+matrix and rollback-to-loopback. Blocked actions remain public listener change,
+firewall apply, reverse proxy apply, TLS certificate issue, public OpenAPI
+publication and direct public API `3040`. Verification: RED focused `3 failed,
+21 passed, 1 StarletteDeprecationWarning`; focused GREEN `24 passed, 1
+StarletteDeprecationWarning`; expanded `30 passed, 1 StarletteDeprecationWarning`.
+No live VPS command, SSH command, package upload/apply/rebuild on VPS, service
+restart/deploy, public exposure, config delivery, write API enablement, Local
+Agent mutation, backup/import/reboot, production peer/user mutation,
+destructive action, Telegram action, secret publication or upstream/GPL code
+copy was performed. `P7-I005` is removed from the active Phase 7 plan.
+
+Phase 7 `P7-I004` public/config/write prerequisite split was completed on
+2026-06-14 as AMN2 local-only code/tests/docs and AMN3 evidence/status work.
+Evidence:
+`research/amn2/phase-7-public-config-write-prerequisite-split-2026-06-14.md`.
+AMN2 fresh installer manifest and `/api/integration/status` now expose
+`public_config_write_prerequisite_split` with schema
+`public-config-write-prerequisite-split.v1`, status
+`blocked_by_preconditions`, source evidence
+`research/amn2/phase-7-public-config-write-preflight-b121865-2026-06-14.md`,
+and three readiness tracks: `P7-C002` public exposure readiness, `P7-C003`
+config delivery channel readiness and `P7-C005` write API scope decision.
+Blocked actions remain public listener changes, domain/TLS/reverse proxy apply,
+config artifact output, write route enablement, `VPS_APPLY_ENABLED=true`, Local
+Agent mutation and live peer/user mutation. Verification: RED focused `3
+failed, 19 passed, 1 StarletteDeprecationWarning`; focused GREEN `22 passed, 1
+StarletteDeprecationWarning`; expanded `28 passed, 1 StarletteDeprecationWarning`.
+No live VPS command, SSH command, package upload/apply/rebuild on VPS, service
+restart/deploy, public exposure, config delivery, write API enablement, Local
+Agent mutation, backup/import/reboot, production peer/user mutation,
+destructive action, Telegram action, secret publication or upstream/GPL code
+copy was performed. `P7-I004` is removed from the active Phase 7 plan.
+
+Phase 7 `P7-C002 + P7-C003 + P7-C005` public/config/write gate for AMN2
+`b121865` was opened and completed on 2026-06-14 as read-only preflight on
+disposable VPS `89.185.80.166`, with outcome `blocked-by-preconditions`.
+Evidence:
+`research/amn2/phase-7-public-config-write-preflight-b121865-2026-06-14.md`.
+Remote source overlay was `b121865f488821f6fc471c9529fb26e5d7992515`; web
+runtime remained `127.0.0.1:3030`; loopback `/login` returned `200`; external
+probes to `3030`, `3040`, `80` and `443` returned `000`. Safe env summary:
+`APP_SECRET_KEY=present`, `WEB_ADMIN_USERNAME=missing`,
+`WEB_ADMIN_PASSWORD_HASH=present`, `VPS_APPLY_ENABLED=false`,
+`EMAIL_CONFIG_ATTACHMENTS_ENABLED=unset`, SMTP config missing and
+`LOCAL_AGENT_ENABLED=false`. Public API route inventory was read-only and
+`write_api_route_count=0`. Web admin has local operator write/config routes, but
+they remain loopback-only and were not invoked by Codex. No public exposure,
+domain/TLS/reverse proxy/firewall change, public OpenAPI publication, config
+delivery, `.conf`, QR, `vpn://`, write API route enablement, `/api/clients`
+CRUD, Local Agent mutation, `VPS_APPLY_ENABLED=true`, live peer/user mutation,
+backup/import/reboot, destructive action, secret-bearing evidence publication
+or upstream/GPL code copy was performed. `P7-C002`, `P7-C003` and `P7-C005`
+remain critical gates, now with explicit blockers.
+
+Phase 7 `P7-C001` live package/apply/smoke for AMN2 `b121865` was completed on
+2026-06-14 on disposable VPS `89.185.80.166` as `live-update-smoke-pass`.
+Evidence: `research/amn2/phase-7-live-update-smoke-b121865-2026-06-14.md`.
+Package `dist/amn2-vps-update-and-smoke-kit-b121865.zip`, sha256
+`364025BD1AE5A23979889A6DED3D78078E1C939F883AF277106F9851CE660849`, was
+uploaded, remote checksum-verified and applied as a source overlay. Remote
+source commit is `b121865f488821f6fc471c9529fb26e5d7992515`;
+`source_update_status=passed`; API loopback smoke returned `VPS verdict: pass`;
+auth/listener/audit passed; negative auth checks returned `401/403/401`; API
+listener was loopback-only on `127.0.0.1:3040`; web login returned `200` on
+loopback `127.0.0.1:3030`; external probes to `3030`, `3040`, `80` and `443`
+returned `000`. This was later superseded by `P7-C005` on `5501295`; current
+latest VPS-smoked/package head is now `5501295 Add P7 install write contour`.
+`b121865` remains the completed clean-installer baseline, and `0de7a77` remains
+earlier history/rollback evidence. `P7-C001` is removed from the active Phase 7 plan.
+No public exposure, config delivery, write API production opening, Local Agent
+mutation, backup/import/reboot, production peer/user mutation, destructive
+action, Telegram identity/profile/media mutation, secret publication or
+upstream/GPL code copy was performed.
+
+Phase 7 `P7-S001` next-chat/status hygiene was completed on 2026-06-14 as
+AMN3 docs-only work. Evidence:
+`research/amn2/phase-7-next-chat-status-hygiene-2026-06-14.md`. Phase 7
+handoff/status/backlog/context/transfer docs showed that the default local-only
+RC readiness queue was closed. After `P7-C001`, active Phase 7 work is limited
+to critical named gates `P7-C002` through `P7-C007` and watch-only monitoring.
+No live VPS command, SSH command, package upload/apply on VPS, service
+restart/deploy, public exposure, public OpenAPI publication, config delivery,
+write API, Local Agent mutation, backup/import/reboot, production peer/user
+mutation, destructive action, Telegram action, secret publication or
+upstream/GPL code copy was performed.
+
+Phase 7 `P7-N001 + P7-N003 + P7-X001` automation intake, client compatibility
+watch refresh and clean installer operator copy polish was completed on
+2026-06-14 as AMN2 local-only code/tests/docs and AMN3 evidence/status work.
+Evidence:
+`research/amn2/phase-7-automation-client-watch-copy-polish-2026-06-14.md`.
+Weekly upstream-refresh automations remain intake-only signals; AMN2 now exposes
+`CLIENT_COMPATIBILITY_WATCH` through integration status without opening config
+delivery; clean installer prompts are Russian-first while stable answer values
+remain unchanged. Focused RED returned one expected import error; focused GREEN
+returned `10 passed, 1 StarletteDeprecationWarning`; expanded suite returned
+`68 passed, 1 StarletteDeprecationWarning`; final full AMN2 suite returned
+`729 passed, 1 StarletteDeprecationWarning`. `P7-N001`, `P7-N003` and
+`P7-X001` are removed from the active Phase 7 plan. No live VPS command, SSH
+command, package upload/apply on VPS, service restart/deploy, public exposure,
+public OpenAPI publication, config delivery, write API, Local Agent mutation,
+backup/import/reboot, production peer/user mutation, destructive action,
+Telegram action, secret publication or upstream/GPL code copy was performed.
+
+Phase 7 `P7-M003 + P7-N002 + P7-S002` multi-instance/IPAM incorporation,
+API/docs taxonomy RC drift check and release notes skeleton was completed on
+2026-06-14 as AMN2 local-only code/tests/docs and AMN3 evidence/status work.
+Evidence:
+`research/amn2/phase-7-multi-instance-taxonomy-release-notes-2026-06-14.md`.
+AMN2 fresh installer now exposes `multi_instance_ipam_rc_decision`, rendered
+plans include `multi-instance-ipam-rc-decision`, integration status exposes
+`api_docs_taxonomy_rc_drift_check`, and AMN2 docs include
+`docs/RELEASE_NOTES_RC_SKELETON.ru.md` without declaring a public release.
+Focused RED returned `3 failed, 15 passed, 1 StarletteDeprecationWarning`;
+focused GREEN returned `18 passed, 1 StarletteDeprecationWarning`; expanded
+suite returned `56 passed, 1 StarletteDeprecationWarning`; final full AMN2
+suite returned `728 passed, 1 StarletteDeprecationWarning`. `P7-M003`,
+`P7-N002` and `P7-S002` are removed from the active Phase 7 plan. No live VPS
+command, SSH command, package upload/apply on VPS, service restart/deploy,
+public exposure, public OpenAPI publication, config delivery, write API, Local
+Agent mutation, backup/import/reboot, production peer/user mutation,
+destructive action, Telegram action, secret publication or upstream/GPL code
+copy was performed.
+
+Phase 7 `P7-I002 + P7-M002 + P7-I003` clean installer RC checklist/security
+contract was completed on 2026-06-14 as AMN2 local-only code/tests/docs and
+AMN3 evidence/status work. Evidence:
+`research/amn2/phase-7-clean-installer-rc-checklist-security-contract-2026-06-14.md`.
+AMN2 fresh installer now exposes `clean_installer_rc_acceptance`, package
+asset/runbook path verification for the `b121865` package, package-local helper
+default bindings and `secret_input_contract` with field-only secret-bearing
+answer rejection. TDD evidence: RED focused `6 failed, 10 passed`, GREEN
+focused `16 passed`, expanded `52 passed`, regression verification `17 passed,
+1 StarletteDeprecationWarning`, final full AMN2 suite `727 passed, 1
+StarletteDeprecationWarning`. `P7-I002`, `P7-M002` and `P7-I003` are removed
+from the active Phase 7 plan. No live VPS command, SSH command, package
+upload/apply on VPS, service restart/deploy, public exposure, public OpenAPI
+publication, config delivery, write API, Local Agent mutation,
+backup/import/reboot, production peer/user mutation, destructive action,
+Telegram action, secret publication or upstream/GPL code copy was performed.
+
+Phase 7 `P7-I001 + P7-M001` current-head package/preflight for AMN2 `b121865`
+was completed on 2026-06-14 as AMN3 local-only package/preflight work.
+Evidence:
+`research/amn2/phase-7-current-head-package-preflight-b121865-2026-06-14.md`.
+Built `dist/amn2-vps-update-and-smoke-kit-b121865.zip`, sha256
+`364025BD1AE5A23979889A6DED3D78078E1C939F883AF277106F9851CE660849`, from source
+zip `dist/amn2-codex-vps-test-prep-b121865-source.zip`, sha256
+`D0FB561D5A12C3B2C095521C3B44923B001F49C8E94CA5C13DB1E811ABB17647`. AMN2
+focused RC suite returned `56 passed, 1 StarletteDeprecationWarning`; full AMN2
+suite returned `724 passed, 1 StarletteDeprecationWarning`; AMN3 package tests
+returned `4 tests OK`. At that step `b121865` was
+package-ready-not-vps-smoked and known-good VPS-smoked/package baseline remained
+`0de7a77 Polish fresh installer preflight planning`; this was later superseded
+by `P7-C001`. `P7-I001` and `P7-M001` are removed from the active Phase 7 plan.
+No live VPS command, SSH command, package upload/apply on VPS, service
+restart/deploy, public exposure, public OpenAPI publication, config delivery,
+write API, Local Agent mutation, backup/import/reboot, production peer/user
+mutation, destructive action, Telegram action, secret publication or
+upstream/GPL code copy was performed.
+
 Phase 7 transition packet was prepared on 2026-06-14 as AMN3 docs-only/local-only
 work. Evidence: `research/amn2/phase-7-transition-packet-2026-06-14.md`.
 Phase 7 name/status: `Release Candidate Readiness / Clean Installer RC`,
