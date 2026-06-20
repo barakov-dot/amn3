@@ -39,7 +39,7 @@ p7_c006_current_state_backup_status: completed-current-state-backup-only-create-
 p7_c007_telegram_status: deferred-not-required-for-private-rc-no-telegram-action
 p7_c008_telegram_user_flow_smoke_status: completed-after-token-reconciliation
 p7_c008a_telegram_token_reconciliation_status: completed-getme-dispatcher-surface-no-send
-final_rc_freeze_status: completed-rc-ready-paused-state-no-live-action
+final_rc_freeze_status: completed-rc-ready-paused-state-c958733-no-live-action
 p7_c004c_direct_clean_installer_status: completed-direct-clean-install-5501295-loopback-smoke
 p7_c004d_c006b_post_direct_clean_login_backup_status: completed-login-verified-backup-create-verify
 codex_security_postfix_status: completed-post-fix-security-validation-no-open-findings
@@ -76,6 +76,11 @@ local-only expansion status: frozen before named gate
   execution, restore/import/reboot/download, provider mutation, Local Agent
   mutation, Telegram polling/live send/profile/media mutation or secret-bearing
   output was performed.
+- `phase-7-final-rc-freeze-status-c958733-2026-06-20.md` - final Phase 7 RC
+  freeze/status pass for AMN2 `c958733`; status
+  `completed-rc-ready-paused-state-c958733-no-live-action`, frozen state
+  `rc_ready_paused_private_operator_lane`; no live action or secret-bearing
+  output.
 - `phase-7-final-rc-freeze-status-5501295-2026-06-20.md` - final Phase 7 RC
   freeze/status pass for AMN2 `5501295`; status
   `completed-rc-ready-paused-state-no-live-action`, frozen state

@@ -1,5 +1,19 @@
 # Текущий override 2026-06-09
 
+Phase 7 final RC freeze/status pass for AMN2 `c958733` was completed on
+2026-06-20 as
+`completed-rc-ready-paused-state-c958733-no-live-action`. Evidence:
+`research/amn2/phase-7-final-rc-freeze-status-c958733-2026-06-20.md`. Frozen
+state is `rc_ready_paused_private_operator_lane`: latest VPS-smoked/package
+head is `c958733`, current VPS source overlay is
+`c9587332d425583ed627899d7fa950756b64c4dc`, web/admin remains loopback-only,
+public exposure and public API exposure are not opened, `VPS_APPLY_ENABLED=false`,
+users are Telegram-first, and operator web/admin remains private by VPS IP plus
+loopback/SSH tunnel. No live VPS/SSH command, package upload/apply, service
+restart, public exposure, config delivery, write execution, restore/import/
+reboot, provider mutation, Local Agent mutation, Telegram action or
+secret-bearing output was performed in the freeze pass.
+
 Phase 7 `P7-C009` c958733 package apply + loopback/Telegram/backup smoke was
 completed on 2026-06-20 for AMN2
 `c9587332d425583ed627899d7fa950756b64c4dc` on disposable VPS

@@ -32,7 +32,7 @@ AMN2 Telegram identity/profile/media readiness status: completed
 AMN2 RC gate matrix consolidation status: completed
 AMN2 final RC handoff/status compression status: completed
 AMN2 Phase 7 evidence index / dry checklist / RC notes status: completed
-AMN2 final RC freeze/status: completed-rc-ready-paused-state-no-live-action
+AMN2 final RC freeze/status: completed-rc-ready-paused-state-c958733-no-live-action
 AMN2 direct clean installer status: completed-direct-clean-install-5501295-loopback-smoke
 AMN2 post-direct-clean login/backup status: completed-login-verified-backup-create-verify
 AMN2 Phase 7 final freeze / named-gate menu status: completed
@@ -87,6 +87,10 @@ Relevant completed inputs:
   Telegram `getMe` and non-polling dispatcher/user-flow smoke passed, backup
   create+verify passed with artifact mode `600`, and public probes stayed
   closed.
+- Phase 7 final RC freeze/status pass for AMN2 `c958733` in
+  `research/amn2/phase-7-final-rc-freeze-status-c958733-2026-06-20.md`.
+  Current frozen state is `rc_ready_paused_private_operator_lane` on `c958733`;
+  no live action or secret-bearing output was performed in the freeze pass.
 - `P6-I007` local-only fresh-install wizard/bootstrap automation.
 - `P6-C007` destructive cleanup/reinstall checklist-only boundary.
 - `P6-C009` live update/smoke for `c46f664`, read-only smoke passed.

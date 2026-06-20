@@ -95,7 +95,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - Latest P7-C007 Telegram private RC decision:
   research/amn2/phase-7-telegram-defer-private-rc-2026-06-20.md.
 - Latest final RC freeze/status pass:
-  research/amn2/phase-7-final-rc-freeze-status-5501295-2026-06-20.md.
+  research/amn2/phase-7-final-rc-freeze-status-c958733-2026-06-20.md.
 - Latest direct clean installer pass:
   research/amn2/phase-7-direct-clean-installer-5501295-2026-06-20.md.
 - Latest post-direct-clean login + backup evidence:
@@ -136,10 +136,9 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - watch-only intake;
 - evidence/status hygiene.
 
-`c958733` package/apply smoke on the disposable VPS is complete. The next
-strong step is a final RC freeze/status pass for `c958733`, then optional
-provider restore-point confirmation or any remaining live gates only by exact
-name.
+`c958733` package/apply smoke and final RC freeze/status pass are complete.
+The next strong step is optional provider restore-point confirmation or a
+separate DR restore/import drill, only by exact named gate.
 
 Запрещено без отдельного exact named gate:
 
@@ -192,7 +191,7 @@ P7-C005 write/install contour status: completed-scoped-write-contour-smoked
 P7-C006a provider restore-point status: completed-inconclusive-no-restore-point-confirmed
 P7-C006 current-state backup-only status: completed-current-state-backup-only-create-verify-no-restore-import-reboot
 P7-C007 Telegram status: deferred-not-required-for-private-rc-no-telegram-action
-final RC freeze status: completed-rc-ready-paused-state-no-live-action
+final RC freeze status: completed-rc-ready-paused-state-c958733-no-live-action
 latest docs audit status: completed-docs-only-audit-with-inactive-reconcile-gate
 local-only queue: closed
 local-only expansion status: frozen before named gate
@@ -236,6 +235,7 @@ Latest important evidence:
 - `research/amn2/phase-7-current-state-backup-only-5501295-2026-06-20.md`
 - `research/amn2/phase-7-telegram-defer-private-rc-2026-06-20.md`
 - `research/amn2/phase-7-final-rc-freeze-status-5501295-2026-06-20.md`
+- `research/amn2/phase-7-final-rc-freeze-status-c958733-2026-06-20.md`
 - `research/amn2/phase-7-watch-only-intake-after-critical-preflights-2026-06-19.md`
 - `research/amn2/phase-7-watch-only-intake-cycle-complete-2026-06-19.md`
 - `research/amn2/phase-7-public-config-write-prerequisite-split-2026-06-14.md`
