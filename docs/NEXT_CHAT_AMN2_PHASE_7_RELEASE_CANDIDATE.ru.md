@@ -20,7 +20,9 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - Current workspace/evidence repo: barakov-dot/amn3, branch master, latest
   pushed head; verify with `git log -1`.
 - AMN2 package/source repo: barakov-dot/amn2, branch codex-vps-test-prep.
-- AMN2 current/VPS-smoked/known-good/package-ready head:
+- AMN2 source/security-fix head:
+  c958733 Harden security-sensitive operations.
+- AMN2 current VPS-smoked/known-good/package-ready head:
   5501295 Add P7 install write contour.
 - Current disposable VPS: 89.185.80.166.
 - Latest live smoke evidence:
@@ -101,6 +103,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
   research/amn2/phase-7-telegram-first-operator-web-policy-2026-06-20.md.
 - Latest Telegram user-flow smoke evidence:
   research/amn2/phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md.
+- Latest Codex Security post-fix validation:
+  research/amn2/phase-7-codex-security-postfix-c958733-2026-06-20.md.
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_7_RELEASE_CANDIDATE.ru.md
@@ -128,6 +132,10 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - local-only docs/tests/security/package-preflight;
 - watch-only intake;
 - evidence/status hygiene.
+
+Следующий сильный шаг после handoff: собрать и прогнать `c958733` package/apply
+на disposable VPS отдельным exact named gate, потому что GitHub AMN2 уже
+обновлён, а live VPS runtime/evidence пока остаётся на `5501295`.
 
 Запрещено без отдельного exact named gate:
 

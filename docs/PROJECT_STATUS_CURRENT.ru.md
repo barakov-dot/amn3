@@ -1,5 +1,25 @@
 # Текущий override 2026-06-09
 
+Phase 7 Codex Security post-fix validation was completed on 2026-06-20 for
+AMN2 `c958733 Harden security-sensitive operations`. Evidence:
+`research/amn2/phase-7-codex-security-postfix-c958733-2026-06-20.md`.
+AMN2 branch `codex-vps-test-prep` was pushed from `5501295` to
+`c9587332d425583ed627899d7fa950756b64c4dc`. Fixed security-sensitive
+operations: CLI live peer apply/revoke now requires `VPS_APPLY_ENABLED=true`;
+Telegram admin delivery-failure fallback no longer sends secret-bearing config
+payloads/import links to admin chat; SMTP `STARTTLS` uses an explicit verifying
+SSL context; backup artifacts are chmodded to `0600`; debug snapshot port greps
+validate numeric ports and avoid `bash -lc` string execution. Verification:
+focused pytest `95 passed`; full pytest `729 passed` with one unrelated
+FastAPI/TestClient deprecation warning; Codex Security post-fix scan
+`b9106c1d-1f68-493a-91a6-2698303da56e` completed with `0` reportable findings.
+No live VPS/SSH, package apply, restart, public exposure, config delivery,
+write execution, restore/import/reboot, provider mutation, Local Agent
+mutation, Telegram send/profile/media mutation or secret-bearing output was
+performed. Remaining follow-up: build/apply a `c958733` package to the
+disposable VPS under an exact named gate; current VPS runtime evidence remains
+on previously smoked `5501295`.
+
 Phase 7 `P7-C008a` Telegram token reconciliation and user-flow smoke completed
 on 2026-06-20 for AMN2 `5501295` on disposable VPS `89.185.80.166`. Evidence:
 `research/amn2/phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md`.

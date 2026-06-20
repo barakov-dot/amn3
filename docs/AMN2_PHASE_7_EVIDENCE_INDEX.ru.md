@@ -12,9 +12,12 @@ Telegram identity/profile/media mutation.
 
 ```text
 AMN2 head: 5501295 Add P7 install write contour
+AMN2 security-fix head: c958733 Harden security-sensitive operations
 latest VPS-smoked/package head: 5501295 Add P7 install write contour
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
-AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 5501295
+AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep c958733
+latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings
+next VPS package/apply target: c958733 exact named gate
 public/config/write status: blocked-by-preconditions
 public exposure status: deferred-not-required-for-private-rc-not-exposed
 user_channel_policy: telegram-first
@@ -39,6 +42,7 @@ p7_c008a_telegram_token_reconciliation_status: completed-getme-dispatcher-surfac
 final_rc_freeze_status: completed-rc-ready-paused-state-no-live-action
 p7_c004c_direct_clean_installer_status: completed-direct-clean-install-5501295-loopback-smoke
 p7_c004d_c006b_post_direct_clean_login_backup_status: completed-login-verified-backup-create-verify
+codex_security_postfix_status: completed-post-fix-security-validation-no-open-findings
 p7_c004a_destructive_pre_cutover_status: ready-for-final-destructive-stop-line-no-apply
 P7-C004b clean install status: completed-clean-install-loopback-smoke
 latest_watch_only_after_critical_preflights: completed-watch-only-intake-after-critical-preflights-no-live-action
@@ -53,6 +57,13 @@ local-only expansion status: frozen before named gate
 
 ## Core Evidence
 
+- `phase-7-codex-security-postfix-c958733-2026-06-20.md` - Codex Security
+  post-fix validation for AMN2 `c958733`; fixed CLI `VPS_APPLY_ENABLED` bypass,
+  Telegram delivery fallback config leak, SMTP STARTTLS context, backup
+  artifact mode and debug snapshot shell boundary; focused pytest `95 passed`,
+  full pytest `729 passed`, and post-fix Codex Security scan completed with `0`
+  reportable findings. No live VPS action was performed; next VPS target is a
+  separate `c958733` package/apply smoke gate.
 - `phase-7-final-rc-freeze-status-5501295-2026-06-20.md` - final Phase 7 RC
   freeze/status pass for AMN2 `5501295`; status
   `completed-rc-ready-paused-state-no-live-action`, frozen state

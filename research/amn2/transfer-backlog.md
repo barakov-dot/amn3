@@ -1,5 +1,22 @@
 # `amn2` Transfer Backlog
 
+Phase 7 Codex Security post-fix validation 2026-06-20: completed as
+`completed-post-fix-security-validation-no-open-findings` for AMN2 `c958733`.
+Evidence
+`research/amn2/phase-7-codex-security-postfix-c958733-2026-06-20.md`.
+AMN2 `codex-vps-test-prep` was pushed from `5501295` to
+`c9587332d425583ed627899d7fa950756b64c4dc` after hardening security-sensitive
+operations: CLI live peer mutations now require `VPS_APPLY_ENABLED=true`;
+Telegram admin delivery failure fallback no longer sends secret-bearing config
+payloads/import links; SMTP STARTTLS uses an explicit verifying context; backup
+artifacts are chmodded to `0600`; debug snapshot port greps validate numeric
+ports and avoid `bash -lc` string execution. Focused pytest passed with
+`95 passed`; full pytest passed with `729 passed`; Codex Security post-fix scan
+`b9106c1d-1f68-493a-91a6-2698303da56e` completed with `0` reportable findings.
+No live VPS action was performed. Next exact gate should build/apply/smoke a
+`c958733` package on disposable VPS `89.185.80.166`, because live runtime
+evidence remains on `5501295`.
+
 Phase 7 P7-C008a Telegram token reconciliation and user-flow smoke 2026-06-20:
 completed as `completed-getme-dispatcher-surface-no-send` for AMN2 `5501295`
 on disposable VPS `89.185.80.166`. Evidence

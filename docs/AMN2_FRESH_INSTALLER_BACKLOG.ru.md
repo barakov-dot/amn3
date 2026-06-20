@@ -11,11 +11,13 @@ apply, public exposure, config delivery, write API или production mutations.
 
 ```text
 AMN2 branch: codex-vps-test-prep
-AMN2 current head: 5501295 Add P7 install write contour
+AMN2 current source/security-fix head: c958733 Harden security-sensitive operations
 AMN2 latest VPS-smoked head: 5501295 Add P7 install write contour
 AMN2 latest local RC package-ready head: 5501295 Add P7 install write contour
 AMN2 known-good package head: 5501295 Add P7 install write contour
 AMN2 package status: VPS-smoked/pass for 5501295
+AMN2 next package/apply target: c958733 exact named gate
+AMN2 Codex Security post-fix status: completed-no-open-findings-for-c958733
 AMN2 current-head RC package status: package-ready-and-vps-smoked for 5501295
 AMN2 public/config/write status: blocked-by-preconditions
 AMN2 public exposure status: deferred-not-required-for-private-rc-not-exposed
@@ -72,6 +74,11 @@ current working VPS: 89.185.80.166, disposable test VPS, direct clean-installed 
 
 Relevant completed inputs:
 
+- Codex Security post-fix validation for AMN2 `c958733` in
+  `research/amn2/phase-7-codex-security-postfix-c958733-2026-06-20.md`;
+  focused pytest `95 passed`, full pytest `729 passed`, post-fix scan
+  `0` reportable findings. This is source/GitHub-ready only until a new
+  `c958733` package is built and smoked on the disposable VPS.
 - `P6-I007` local-only fresh-install wizard/bootstrap automation.
 - `P6-C007` destructive cleanup/reinstall checklist-only boundary.
 - `P6-C009` live update/smoke for `c46f664`, read-only smoke passed.

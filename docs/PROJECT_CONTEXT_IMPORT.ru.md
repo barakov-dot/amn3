@@ -1,5 +1,18 @@
 # Текущий override 2026-06-09
 
+Phase 7 Codex Security post-fix validation is complete for AMN2 `c958733`.
+Evidence:
+`research/amn2/phase-7-codex-security-postfix-c958733-2026-06-20.md`.
+AMN2 `codex-vps-test-prep` was pushed to
+`c9587332d425583ed627899d7fa950756b64c4dc` after fixing the CLI
+`VPS_APPLY_ENABLED` bypass, Telegram delivery fallback config leak, SMTP
+STARTTLS context, backup artifact mode and debug snapshot shell boundary.
+Focused pytest passed with `95 passed`; full pytest passed with `729 passed`;
+Codex Security post-fix scan `b9106c1d-1f68-493a-91a6-2698303da56e`
+completed with `0` reportable findings. No live VPS action was performed in
+this security/fix slice. Current VPS runtime evidence remains on `5501295`
+until a separate exact named `c958733` package/apply smoke gate.
+
 Phase 7 `P7-C008a` Telegram token reconciliation and user-flow smoke completed
 as `completed-getme-dispatcher-surface-no-send`. Evidence:
 `research/amn2/phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md`.
