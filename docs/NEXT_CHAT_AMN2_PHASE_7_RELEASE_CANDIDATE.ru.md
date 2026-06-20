@@ -93,6 +93,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
   research/amn2/phase-7-telegram-defer-private-rc-2026-06-20.md.
 - Latest final RC freeze/status pass:
   research/amn2/phase-7-final-rc-freeze-status-5501295-2026-06-20.md.
+- Latest direct clean installer pass:
+  research/amn2/phase-7-direct-clean-installer-5501295-2026-06-20.md.
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_7_RELEASE_CANDIDATE.ru.md
@@ -163,6 +165,7 @@ latest watch-only intake: completed-watch-only-intake-cycle-complete-no-live-act
 P7-C006 backup-only status: completed-backup-only-create-verify-no-restore-import-reboot
 P7-C004a destructive pre-cutover status: ready-for-final-destructive-stop-line-no-apply
 P7-C004b destructive clean installer status: completed-clean-install-loopback-smoke
+P7-C004c direct clean installer status: completed-direct-clean-install-5501295-loopback-smoke
 post-clean write/backup/Telegram rebaseline status: completed-post-clean-read-only-rebaseline-no-mutation
 P7-C005 write/install contour status: completed-scoped-write-contour-smoked
 P7-C006a provider restore-point status: completed-inconclusive-no-restore-point-confirmed

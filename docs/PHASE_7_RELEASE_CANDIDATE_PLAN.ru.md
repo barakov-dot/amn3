@@ -27,9 +27,23 @@ Known-good evidence: research/amn2/phase-7-write-install-mutation-contour-550129
 Latest current-state backup evidence: research/amn2/phase-7-current-state-backup-only-5501295-2026-06-20.md
 Latest Telegram private RC decision: research/amn2/phase-7-telegram-defer-private-rc-2026-06-20.md
 Latest final RC freeze/status evidence: research/amn2/phase-7-final-rc-freeze-status-5501295-2026-06-20.md
+Latest direct clean installer evidence: research/amn2/phase-7-direct-clean-installer-5501295-2026-06-20.md
 ```
 
 ## Выполнено В Phase 7
+
+- `P7-C004c` Direct clean installer execution for AMN2 `5501295`.
+  Importance: critical destructive gate. Gate: explicitly opened by the
+  operator for disposable VPS `89.185.80.166`; destructive clean install from
+  verified `5501295` package, no provider rebuild/reboot/restore/import/public
+  exposure/config delivery/Local Agent/Telegram action. Evidence:
+  `research/amn2/phase-7-direct-clean-installer-5501295-2026-06-20.md`.
+  Result: closed as `completed-direct-clean-install-5501295-loopback-smoke`.
+  Current `/opt/amn2` was quarantined, clean `/opt/amn2` was installed from
+  `5501295`, DB init passed, loopback web returned `/login=200`, API loopback
+  smoke returned `VPS verdict: pass`, and public probes stayed closed. This
+  supersedes the earlier `b121865` clean install + `5501295` overlay as the
+  clean-installer RC evidence for the current head.
 
 - Final RC freeze/status pass for AMN2 `5501295`.
   Importance: critical status hygiene. Gate: docs-only/local-only; no live

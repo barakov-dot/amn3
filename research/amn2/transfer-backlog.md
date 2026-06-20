@@ -1,5 +1,19 @@
 # `amn2` Transfer Backlog
 
+Phase 7 P7-C004c direct clean installer execution 2026-06-20: completed as
+`completed-direct-clean-install-5501295-loopback-smoke` for AMN2 `5501295` on
+disposable VPS `89.185.80.166`. Evidence
+`research/amn2/phase-7-direct-clean-installer-5501295-2026-06-20.md`. Verified
+`5501295` package/source was uploaded and checked, current `/opt/amn2` was
+quarantined at `/opt/amn2.pre-p7-c004c-20260620T054656Z`, clean `/opt/amn2`
+was installed, DB init passed, loopback web returned `/login=200`, API
+loopback smoke returned `VPS verdict: pass` with run_id `20260620T054813Z`,
+and public probes to `3030`, `3040`, `80` and `443` stayed `000`. No provider
+rebuild, reboot, restore/import, remote backup download, public exposure,
+config delivery, write API enablement, Local Agent mutation, production
+peer/user mutation, Telegram action or secret-bearing output was performed.
+This closes the direct clean-installer RC gap for current head `5501295`.
+
 Phase 7 final RC freeze/status pass 2026-06-20: completed as
 `completed-rc-ready-paused-state-no-live-action` for AMN2 `5501295`. Evidence
 `research/amn2/phase-7-final-rc-freeze-status-5501295-2026-06-20.md`. Frozen

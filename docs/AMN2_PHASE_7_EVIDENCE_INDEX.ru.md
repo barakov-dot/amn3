@@ -33,6 +33,7 @@ p7_c006a_provider_restore_point_status: completed-inconclusive-no-restore-point-
 p7_c006_current_state_backup_status: completed-current-state-backup-only-create-verify-no-restore-import-reboot
 p7_c007_telegram_status: deferred-not-required-for-private-rc-no-telegram-action
 final_rc_freeze_status: completed-rc-ready-paused-state-no-live-action
+p7_c004c_direct_clean_installer_status: completed-direct-clean-install-5501295-loopback-smoke
 p7_c004a_destructive_pre_cutover_status: ready-for-final-destructive-stop-line-no-apply
 P7-C004b clean install status: completed-clean-install-loopback-smoke
 latest_watch_only_after_critical_preflights: completed-watch-only-intake-after-critical-preflights-no-live-action
@@ -51,6 +52,10 @@ local-only expansion status: frozen before named gate
   `completed-rc-ready-paused-state-no-live-action`, frozen state
   `rc_ready_paused_private_operator_lane`; no live action or secret-bearing
   output.
+- `phase-7-direct-clean-installer-5501295-2026-06-20.md` - `P7-C004c` direct
+  destructive clean installer pass for AMN2 `5501295` on disposable VPS
+  `89.185.80.166`; clean install, DB init, loopback web and API smoke passed;
+  public probes stayed closed.
 - `phase-7-transition-packet-2026-06-14.md` - Phase 7 entry packet.
 - `phase-7-current-head-package-preflight-b121865-2026-06-14.md` - local
   package/preflight for `b121865`.

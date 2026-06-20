@@ -1,5 +1,17 @@
 # Текущий override 2026-06-09
 
+Phase 7 `P7-C004c` direct clean installer execution gate is complete as
+`completed-direct-clean-install-5501295-loopback-smoke` for AMN2 `5501295` on
+disposable VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-7-direct-clean-installer-5501295-2026-06-20.md`. The
+verified `5501295` package/source was uploaded and checked, current `/opt/amn2`
+was quarantined, clean `/opt/amn2` was installed from `5501295`, DB
+initialization passed, loopback web returned `/login=200`, API loopback smoke
+returned `VPS verdict: pass`, and public probes stayed closed. No provider
+rebuild, reboot, restore/import, public exposure, config delivery, write API
+enablement, Local Agent mutation, Telegram action or secret-bearing output was
+performed.
+
 Phase 7 final RC freeze/status pass is complete as
 `completed-rc-ready-paused-state-no-live-action` for AMN2 `5501295`. Evidence:
 `research/amn2/phase-7-final-rc-freeze-status-5501295-2026-06-20.md`. Frozen

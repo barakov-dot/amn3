@@ -29,6 +29,7 @@ AMN2 RC gate matrix consolidation status: completed
 AMN2 final RC handoff/status compression status: completed
 AMN2 Phase 7 evidence index / dry checklist / RC notes status: completed
 AMN2 final RC freeze/status: completed-rc-ready-paused-state-no-live-action
+AMN2 direct clean installer status: completed-direct-clean-install-5501295-loopback-smoke
 AMN2 Phase 7 final freeze / named-gate menu status: completed
 AMN2 P7-C002b runtime/login verification status: completed-not-exposed
 AMN2 P7-C002 public cutover guard status: blocked-by-domain-tls-not-exposed
