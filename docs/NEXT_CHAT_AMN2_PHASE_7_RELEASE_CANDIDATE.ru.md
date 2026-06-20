@@ -110,6 +110,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
   research/amn2/phase-7-codex-security-postfix-c958733-2026-06-20.md.
 - Latest c958733 VPS package/apply smoke:
   research/amn2/phase-7-c958733-package-apply-smoke-2026-06-20.md.
+- Latest mobile Telegram UX acceptance plan:
+  research/amn2/phase-7-mobile-telegram-ux-acceptance-plan-c958733-2026-06-20.md.
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_7_RELEASE_CANDIDATE.ru.md
@@ -141,7 +143,9 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 
 `c958733` package/apply smoke and final RC freeze/status pass are complete.
 S-final next-chat handoff is complete. The next strong step is optional
-provider restore-point confirmation or a
+provider restore-point confirmation or `P7-C010b` real-device Telegram UX
+acceptance before Phase 8. Do not start Phase 8 until mobile Telegram UX is
+passed or an explicit non-QR fallback policy is documented.
 separate DR restore/import drill, only by exact named gate.
 
 Запрещено без отдельного exact named gate:

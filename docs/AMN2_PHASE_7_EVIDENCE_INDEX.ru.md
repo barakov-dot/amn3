@@ -39,6 +39,8 @@ p7_c006_current_state_backup_status: completed-current-state-backup-only-create-
 p7_c007_telegram_status: deferred-not-required-for-private-rc-no-telegram-action
 p7_c008_telegram_user_flow_smoke_status: completed-after-token-reconciliation
 p7_c008a_telegram_token_reconciliation_status: completed-getme-dispatcher-surface-no-send
+p7_c010_mobile_telegram_ux_acceptance_status: planned-pending-live-real-device-acceptance
+p7_c010a_mobile_telegram_ux_plan_status: completed-mobile-telegram-ux-acceptance-plan-no-live-action
 final_rc_freeze_status: completed-rc-ready-paused-state-c958733-no-live-action
 s_final_next_chat_handoff_status: completed-s-final-next-chat-handoff-c958733-no-live-action
 p7_c004c_direct_clean_installer_status: completed-direct-clean-install-5501295-loopback-smoke
@@ -59,6 +61,11 @@ local-only expansion status: frozen before named gate
 
 ## Core Evidence
 
+- `phase-7-mobile-telegram-ux-acceptance-plan-c958733-2026-06-20.md` -
+  `P7-C010a` local-only mobile Telegram UX acceptance plan for AMN2 `c958733`;
+  records the release-blocking real-device checks for one-click copy, QR
+  readability on iPhone/Android and fallback `.conf` import before Phase 8. No
+  live action or secret-bearing output was performed.
 - `phase-7-s-final-next-chat-handoff-c958733-2026-06-20.md` - S-final
   next-chat handoff for AMN2 `c958733`; captures current truth, next-chat
   opening text, exact-gate menu and stop-lines for the

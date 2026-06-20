@@ -1,5 +1,15 @@
 # Текущий override 2026-06-09
 
+Phase 7 `P7-C010a` Mobile Telegram UX acceptance plan for AMN2 `c958733` is
+complete as `completed-mobile-telegram-ux-acceptance-plan-no-live-action`.
+Evidence:
+`research/amn2/phase-7-mobile-telegram-ux-acceptance-plan-c958733-2026-06-20.md`.
+Phase 8 should wait for real-device Telegram UX acceptance or an explicit
+documented non-QR fallback policy. Pending checks: one-click copy, QR
+readability on iPhone/Android and fallback `.conf` import. No live VPS,
+Telegram API/live send, config/QR/import-link output or secret-bearing evidence
+was performed in `P7-C010a`.
+
 Phase 7 S-final next-chat handoff for AMN2 `c958733` is complete as
 `completed-s-final-next-chat-handoff-c958733-no-live-action`. Evidence:
 `research/amn2/phase-7-s-final-next-chat-handoff-c958733-2026-06-20.md`.
