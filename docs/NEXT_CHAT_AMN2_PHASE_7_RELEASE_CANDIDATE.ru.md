@@ -28,6 +28,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - Current disposable VPS: 89.185.80.166.
 - Latest live smoke evidence:
   research/amn2/phase-7-c958733-package-apply-smoke-2026-06-20.md.
+- Latest S-final next-chat handoff:
+  research/amn2/phase-7-s-final-next-chat-handoff-c958733-2026-06-20.md.
 - Latest RC gate matrix:
   research/amn2/phase-7-rc-gate-matrix-consolidation-2026-06-14.md.
 - Latest handoff compression:
@@ -111,6 +113,7 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_7_RELEASE_CANDIDATE.ru.md
+- research/amn2/phase-7-s-final-next-chat-handoff-c958733-2026-06-20.md
 - docs/PHASE_7_RELEASE_CANDIDATE_PLAN.ru.md
 - docs/AMN2_FRESH_INSTALLER_BACKLOG.ru.md
 - docs/AMN2_PHASE_7_EVIDENCE_INDEX.ru.md
@@ -137,7 +140,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - evidence/status hygiene.
 
 `c958733` package/apply smoke and final RC freeze/status pass are complete.
-The next strong step is optional provider restore-point confirmation or a
+S-final next-chat handoff is complete. The next strong step is optional
+provider restore-point confirmation or a
 separate DR restore/import drill, only by exact named gate.
 
 Запрещено без отдельного exact named gate:

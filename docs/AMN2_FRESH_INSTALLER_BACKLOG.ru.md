@@ -36,6 +36,7 @@ AMN2 final RC freeze/status: completed-rc-ready-paused-state-c958733-no-live-act
 AMN2 direct clean installer status: completed-direct-clean-install-5501295-loopback-smoke
 AMN2 post-direct-clean login/backup status: completed-login-verified-backup-create-verify
 AMN2 Phase 7 final freeze / named-gate menu status: completed
+AMN2 S-final next-chat handoff status: completed-s-final-next-chat-handoff-c958733-no-live-action
 AMN2 P7-C002b runtime/login verification status: completed-not-exposed
 AMN2 P7-C002 public cutover guard status: blocked-by-domain-tls-not-exposed
 AMN2 P7-C002c DNS/domain/TLS prerequisite staging status: superseded-operator-declined-dns-domain

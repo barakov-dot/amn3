@@ -9,6 +9,9 @@
 Текущий freeze status:
 `completed-rc-ready-paused-state-c958733-no-live-action` для AMN2 `c958733`.
 
+Текущий S-final handoff:
+`completed-s-final-next-chat-handoff-c958733-no-live-action`.
+
 Режим по умолчанию:
 `local-only/docs/tests/security/package-preflight/watch-only` unless an exact
 named live gate is opened.
@@ -39,6 +42,7 @@ Latest current-state backup evidence: research/amn2/phase-7-current-state-backup
 Latest post-direct-clean login/backup evidence: research/amn2/phase-7-post-direct-clean-login-backup-5501295-2026-06-20.md
 Latest Telegram private RC decision: research/amn2/phase-7-telegram-defer-private-rc-2026-06-20.md
 Latest final RC freeze/status evidence: research/amn2/phase-7-final-rc-freeze-status-c958733-2026-06-20.md
+Latest S-final next-chat handoff: research/amn2/phase-7-s-final-next-chat-handoff-c958733-2026-06-20.md
 Latest direct clean installer evidence: research/amn2/phase-7-direct-clean-installer-5501295-2026-06-20.md
 Latest Telegram-first/operator-web policy: research/amn2/phase-7-telegram-first-operator-web-policy-2026-06-20.md
 Latest Telegram user-flow smoke evidence: research/amn2/phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md

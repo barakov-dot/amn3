@@ -1,5 +1,16 @@
 # Текущий override 2026-06-09
 
+Phase 7 S-final next-chat handoff for AMN2 `c958733` was completed on
+2026-06-20 as
+`completed-s-final-next-chat-handoff-c958733-no-live-action`. Evidence:
+`research/amn2/phase-7-s-final-next-chat-handoff-c958733-2026-06-20.md`.
+It is the compact starting point for the next chat: current state is
+`rc_ready_paused_private_operator_lane`; users are Telegram-first; operator
+web/admin remains private by VPS IP plus loopback/SSH tunnel; public exposure,
+public API exposure, write execution, restore/import/reboot, provider mutation,
+config delivery payload output and Telegram live send/profile/media mutation
+remain stop-lines requiring fresh exact named gates.
+
 Phase 7 final RC freeze/status pass for AMN2 `c958733` was completed on
 2026-06-20 as
 `completed-rc-ready-paused-state-c958733-no-live-action`. Evidence:
