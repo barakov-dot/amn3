@@ -18,7 +18,9 @@ AMN2 known-good package head: 5501295 Add P7 install write contour
 AMN2 package status: VPS-smoked/pass for 5501295
 AMN2 current-head RC package status: package-ready-and-vps-smoked for 5501295
 AMN2 public/config/write status: blocked-by-preconditions
-AMN2 public exposure status: operator-only-ip-loopback-ssh-tunnel
+AMN2 public exposure status: deferred-not-required-for-private-rc-not-exposed
+AMN2 user channel policy: telegram-first
+AMN2 operator web policy: vps-ip-loopback-ssh-tunnel-no-public-web-required
 AMN2 public/config/write prerequisite split status: completed
 AMN2 public exposure readiness/design status: completed
 AMN2 config delivery channel readiness status: completed
@@ -60,10 +62,11 @@ AMN2 P7-C006 backup-only evidence status: completed-create-verify-no-restore-imp
 AMN2 P7-C006a provider restore-point status: completed-inconclusive-no-restore-point-confirmed
 AMN2 P7-C006 current-state backup-only status: completed-create-verify-no-restore-import-reboot-for-5501295
 AMN2 P7-C007 Telegram identity/profile/media status: deferred-not-required-for-private-rc-no-telegram-action
+AMN2 candidate P7-C008 Telegram user-flow smoke status: candidate-exact-live-gate-not-active
 AMN2 P7-C004a destructive pre-cutover guard status: ready-final-stop-line-no-apply
 AMN2 P7-C004b destructive clean installer status: completed-clean-install-loopback-smoke
 AMN3 latest evidence slice: Phase 7 transition packet / clean installer RC entry
-current working VPS: 89.185.80.166, disposable test VPS, direct clean-installed 5501295 loopback-only after P7-C004c, loopback admin login verified and post-direct-clean backup create+verify completed after P7-C004d/P7-C006b
+current working VPS: 89.185.80.166, disposable test VPS, direct clean-installed 5501295 loopback-only after P7-C004c, loopback admin login verified and post-direct-clean backup create+verify completed after P7-C004d/P7-C006b; users are Telegram-first, operator web/admin remains IP/loopback/private access
 ```
 
 Relevant completed inputs:
@@ -183,6 +186,13 @@ Relevant completed inputs:
   private/operator RC readiness. No Telegram token use, Telegram API call, live
   bot send, profile/media mutation, media upload, credential handoff or
   secret-bearing output was performed.
+- Phase 7 Telegram-first/operator-web policy in
+  `research/amn2/phase-7-telegram-first-operator-web-policy-2026-06-20.md`.
+  Users are served through Telegram; web/admin remains operator-only by VPS IP
+  plus loopback/SSH tunnel or equivalent private access. Public web-admin
+  exposure, DNS domain, trusted public TLS and reverse proxy are not required
+  for private/operator RC. Future Telegram user-flow smoke is a separate exact
+  named live Telegram gate and is not active by this docs-only policy.
 - Phase 7 `P7-C002 + P7-C003 + P7-C005` public/config/write preflight for
   AMN2 `b121865` in
   `research/amn2/phase-7-public-config-write-preflight-b121865-2026-06-14.md`.

@@ -1,5 +1,18 @@
 # `amn2` Transfer Backlog
 
+Phase 7 Telegram-first/operator-web policy 2026-06-20: completed as
+`completed-docs-only-telegram-first-operator-web-policy`. Evidence
+`research/amn2/phase-7-telegram-first-operator-web-policy-2026-06-20.md`.
+Decision: AMN2 private/operator RC uses Telegram as the user-facing channel and
+keeps web/admin operator-only by VPS IP plus loopback/SSH tunnel or equivalent
+private access. Public web-admin exposure, DNS domain, trusted public TLS and
+reverse proxy are not required for private/operator RC. `P7-C002` is
+deferred/not required for private RC; `P7-C007` Telegram identity/profile/media
+remains deferred. Future Telegram user-flow smoke is a separate exact named
+live Telegram gate. No live VPS/SSH command, public exposure, Telegram token
+use/API call/live send/profile/media mutation or secret-bearing output was
+performed.
+
 Phase 7 P7-C004d + P7-C006b post-direct-clean login and backup 2026-06-20:
 completed as `completed-login-verified-backup-create-verify` for AMN2
 `5501295` on disposable VPS `89.185.80.166`. Evidence

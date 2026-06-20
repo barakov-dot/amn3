@@ -16,7 +16,9 @@ latest VPS-smoked/package head: 5501295 Add P7 install write contour
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 5501295
 public/config/write status: blocked-by-preconditions
-public exposure status: operator-only-ip-loopback-ssh-tunnel
+public exposure status: deferred-not-required-for-private-rc-not-exposed
+user_channel_policy: telegram-first
+operator_web_policy: vps-ip-loopback-ssh-tunnel-no-public-web-required
 public_url_env_residue_status: reconciled-removed-in-P7-C002e
 ip_only_public_exposure_status: blocked-in-P7-C002d-not-exposed
 config_write_read_only_preflight_status: completed-blocked-no-delivery-no-write
@@ -40,7 +42,8 @@ P7-C004b clean install status: completed-clean-install-loopback-smoke
 latest_watch_only_after_critical_preflights: completed-watch-only-intake-after-critical-preflights-no-live-action
 latest_watch_only_cycle: completed-watch-only-intake-cycle-complete-no-live-action
 approved active work: residual P7-C006 scopes and watch-only intake
-P7-C002 default status: blocked/not-exposed after P7-C002d
+P7-C002 default status: deferred-not-required-for-private-rc-not-exposed
+candidate future Telegram user-flow smoke: P7-C008 exact named live Telegram gate, not active
 latest_watch_only_status: completed-watch-only-status-hygiene-no-live-action
 latest_watch_only_intake: completed-watch-only-intake-cycle-complete-no-live-action
 local-only expansion status: frozen before named gate
@@ -63,6 +66,11 @@ local-only expansion status: frozen before named gate
   backup artifact stayed on the VPS, public probes stayed closed, and no
   restore/import/reboot/download/public/config/write/Local Agent/Telegram/
   provider mutation was performed.
+- `phase-7-telegram-first-operator-web-policy-2026-06-20.md` -
+  docs-only policy decision: users are served through the Telegram-first
+  channel, web/admin remains operator-only by VPS IP plus loopback/SSH tunnel,
+  and public web-admin/domain/TLS/reverse-proxy exposure is not required for
+  private/operator RC.
 - `phase-7-transition-packet-2026-06-14.md` - Phase 7 entry packet.
 - `phase-7-current-head-package-preflight-b121865-2026-06-14.md` - local
   package/preflight for `b121865`.
@@ -288,11 +296,14 @@ backup/destructive/Telegram action:
   verified loopback runtime/login. Public cutover guard blocked apply because
   current public URL/domain are IP-based and trusted TLS requires a DNS domain.
   Operator later declined DNS domain use for AMN2 in `P7-I011`; the selected
-  default mode is VPS IP + SSH tunnel to loopback web/admin. `P7-C002e` removed
-  the IP-based public URL residue from live `.env`. `P7-C002d` then blocked
-  IP-only public exposure by four risk blockers and performed no reverse proxy,
-  TLS, firewall or public listener apply. Any future IP-only public web/admin
-  exposure requires a new separate exact risk-acceptance/design gate.
+  default mode is VPS IP + SSH tunnel to loopback web/admin. The 2026-06-20
+  Telegram-first/operator-web policy makes public web-admin exposure not
+  required for private/operator RC because users are served through Telegram.
+  `P7-C002e` removed the IP-based public URL residue from live `.env`.
+  `P7-C002d` then blocked IP-only public exposure by four risk blockers and
+  performed no reverse proxy, TLS, firewall or public listener apply. Any
+  future IP-only public web/admin exposure requires a new separate exact
+  risk-acceptance/design gate.
 - `P7-C003` Config delivery gate.
   Opens only the explicitly named config delivery channel scope. Latest
   operator-local guard selected `operator-local` as the practical channel but

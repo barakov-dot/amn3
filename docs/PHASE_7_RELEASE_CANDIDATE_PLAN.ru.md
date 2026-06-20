@@ -14,6 +14,14 @@
 Эта фаза не открывает public launch, production mutation, config delivery,
 write API, destructive install, live package apply или Telegram identity changes.
 
+RC channel policy:
+
+- user-facing channel: Telegram-first;
+- operator web/admin channel: VPS IP plus loopback/SSH tunnel or equivalent
+  private operator access;
+- public web-admin exposure, DNS domain, trusted public TLS and reverse proxy
+  are not required for private/operator RC.
+
 ## Источник Правды
 
 ```text
@@ -30,9 +38,21 @@ Latest post-direct-clean login/backup evidence: research/amn2/phase-7-post-direc
 Latest Telegram private RC decision: research/amn2/phase-7-telegram-defer-private-rc-2026-06-20.md
 Latest final RC freeze/status evidence: research/amn2/phase-7-final-rc-freeze-status-5501295-2026-06-20.md
 Latest direct clean installer evidence: research/amn2/phase-7-direct-clean-installer-5501295-2026-06-20.md
+Latest Telegram-first/operator-web policy: research/amn2/phase-7-telegram-first-operator-web-policy-2026-06-20.md
 ```
 
 ## Выполнено В Phase 7
+
+- Telegram-first/operator-web policy for private/operator RC.
+  Importance: very important policy. Gate: docs-only/local-only. Evidence:
+  `research/amn2/phase-7-telegram-first-operator-web-policy-2026-06-20.md`.
+  Result: closed as
+  `completed-docs-only-telegram-first-operator-web-policy`. Users are served
+  through Telegram; web/admin remains operator-only by VPS IP plus loopback/SSH
+  tunnel or equivalent private access. Public web-admin exposure, DNS domain,
+  trusted public TLS and reverse proxy are not required for private/operator
+  RC. Candidate future `P7-C008` Telegram user-flow smoke remains inactive
+  until an exact named live Telegram gate is opened.
 
 - `P7-C004c` Direct clean installer execution for AMN2 `5501295`.
   Importance: critical destructive gate. Gate: explicitly opened by the
@@ -731,7 +751,7 @@ Latest direct clean installer evidence: research/amn2/phase-7-direct-clean-insta
 
 | Gate | Readiness Source | Current Status | Allowed Next Action |
 | --- | --- | --- | --- |
-| `P7-C002` Public exposure | `P7-I005` readiness; pre-cutover evidence; `P7-C002a` admin/domain prerequisite evidence; `P7-C002b` runtime/login verification evidence; public cutover guard evidence; `P7-I011` IP-only policy; `P7-I012` env reconciliation plan; `P7-C002e` env reconciliation evidence; `P7-C002d` IP-only risk guard evidence | domain/trusted TLS branch closed by operator decision; runtime/login verified, still not exposed, current selected mode is VPS IP + loopback web/admin over SSH tunnel; public URL fields from `P7-C002a` were removed in `P7-C002e`; `P7-C002d` blocked IP-only exposure by four risk blockers | keep operator-only/watch-only; any future IP-only exposure requires a new exact risk-acceptance/design gate |
+| `P7-C002` Public exposure | `P7-I005` readiness; pre-cutover evidence; `P7-C002a` admin/domain prerequisite evidence; `P7-C002b` runtime/login verification evidence; public cutover guard evidence; `P7-I011` IP-only policy; `P7-I012` env reconciliation plan; `P7-C002e` env reconciliation evidence; `P7-C002d` IP-only risk guard evidence; Telegram-first/operator-web policy | deferred/not required for private/operator RC; users are served through Telegram, operator web/admin remains VPS IP + loopback/SSH tunnel; public URL fields from `P7-C002a` were removed in `P7-C002e`; `P7-C002d` blocked IP-only exposure by four risk blockers | keep operator-only/watch-only; any future public web exposure requires a new exact risk-acceptance/design gate |
 | `P7-C003` Config delivery | `P7-I006` config delivery channel readiness; 2026-06-19 config/write read-only preflight; 2026-06-19 operator-local guard evidence; 2026-06-19 target inventory; 2026-06-19 device 1 and device 2 private handoffs | complete for known active devices: `user_id=1/device_id=1` and `user_id=1/device_id=2` private handoffs completed without payload output; resend/revocation, SMTP/Telegram delivery, public/self-service delivery and new targets remain separate exact gates | no default next action; exact named gate only for resend/revocation/channel/new-target work |
 | `P7-C004` Destructive clean installer execution | Phase 6 destructive checklist boundary; 2026-06-19 `P7-C004a` pre-cutover guard; 2026-06-19 `P7-C004b` execution evidence | completed for `b121865`: clean `/opt/amn2` install applied on disposable VPS, loopback web healthy, API loopback smoke passed, external probes closed; old runtime is root-only quarantined | no default next action; future provider rebuild, another clean install, restore/import or quarantine cleanup requires a new exact named gate |
 | `P7-C005` Write API / install mutation | `P7-I007` write API scope decision; 2026-06-19 config/write read-only preflight; 2026-06-19 write/backup/Telegram read-only preflight; 2026-06-19 post-clean rebaseline; 2026-06-20 scoped write contour evidence | completed for scoped install-mutation request contour on `5501295`: `POST /api/install/mutation-requests` requires `install:write`, records safe `api_write`, returns `recorded_blocked_by_vps_apply_disabled` while `VPS_APPLY_ENABLED=false`, and does not invoke installer/apply/restart/public/config/Telegram actions | no default next action; future actual installer runner or broader write routes require a new exact named gate |
@@ -745,16 +765,18 @@ Latest direct clean installer evidence: research/amn2/phase-7-direct-clean-insta
   exposure. Covers domain, HTTPS, reverse proxy, public web/admin, public API,
   firewall/listener changes and public docs/OpenAPI publication. Current
   status after the 2026-06-18 public cutover guard, `P7-C002c` staging,
-  `P7-I011` policy decision and 2026-06-19 `P7-C002d` risk guard:
+  `P7-I011` policy decision, 2026-06-19 `P7-C002d` risk guard and the
+  2026-06-20 Telegram-first/operator-web policy:
   runtime/login is verified on loopback, web is still loopback-only, public
   `3040/80/443` listeners are absent and no reverse proxy/TLS/firewall/listener
   apply has happened. The trusted DNS-domain/TLS branch is closed because the
-  operator chose IP-only AMN2 operation. `P7-C002d` then blocked IP-only public
-  exposure because UFW is inactive, no reverse proxy binary is present, IP-only
-  public admin has no trusted DNS/TLS path and explicit risk acceptance would be
-  required. Public URL fields added by `P7-C002a` were removed in `P7-C002e`;
-  readiness checklist exists in `P7-I005`. Default: keep operator-only/
-  watch-only.
+  operator chose IP-only AMN2 operation, and public web/admin is not required
+  for private/operator RC because users are served through Telegram.
+  `P7-C002d` then blocked IP-only public exposure because UFW is inactive, no
+  reverse proxy binary is present, IP-only public admin has no trusted DNS/TLS
+  path and explicit risk acceptance would be required. Public URL fields added
+  by `P7-C002a` were removed in `P7-C002e`; readiness checklist exists in
+  `P7-I005`. Default: keep operator-only/watch-only.
 
 - `P7-C003` Config delivery gate.
   Importance: critical gated. Carried from Phase 6 `P6-C002`. Gate: config
@@ -828,11 +850,16 @@ P7-C005 закрыты в рамках их текущих Phase 7 scopes. Curre
 VPS-smoked/package head: 5501295 Add P7 install write contour. Current
 disposable VPS: 89.185.80.166, source overlay 5501295, web loopback-only,
 external probes closed.
+User-facing RC policy is Telegram-first. Operator web/admin policy is VPS IP
+plus loopback/SSH tunnel; public web-admin/domain/TLS/reverse proxy is not
+required for private/operator RC.
 
 Утвержденный оставшийся план:
 - residual P7-C006 Backup/restore/import scopes: exact named gate only
   для restore apply, archive import, remote backup download, reboot,
   disaster-recovery drill, destructive migration или provider restore use;
+- optional P7-C008 Telegram user-flow smoke: exact named live Telegram gate
+  only, if we decide to validate the user-facing channel live;
 - watch-only intake, если не открываем live/mutation gate.
 
 Новые local-only задачи можно выводить только как структурные предложения, не
@@ -870,7 +897,13 @@ Latest watch-only intake cycle is closed as
 Одиночное предложение:
 
 ```text
-No single local-only proposal currently needed.
+P7-C008 Telegram user-flow smoke gate.
+Importance: critical/user-facing.
+Gate: exact named live Telegram gate.
+Status: candidate only, not active.
+Scope: verify bot runtime and safe user-facing flow without Telegram
+identity/profile/media mutation, public web exposure, write execution,
+restore/import/reboot, provider mutation or secret-bearing evidence.
 ```
 
 `P7-C002d` был активирован оператором и закрыт как

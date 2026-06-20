@@ -1,5 +1,19 @@
 # Текущий override 2026-06-09
 
+Phase 7 Telegram-first/operator-web policy was completed on 2026-06-20 as
+`completed-docs-only-telegram-first-operator-web-policy`. Evidence:
+`research/amn2/phase-7-telegram-first-operator-web-policy-2026-06-20.md`.
+Decision: AMN2 private/operator RC does not require public web-admin exposure,
+DNS domain, trusted public TLS or reverse-proxy publication. The user-facing RC
+channel is Telegram-first; the operator web/admin channel remains operator-only
+by VPS IP plus loopback/SSH tunnel or equivalent private access. `P7-C002`
+public web exposure is deferred/not required for private/operator RC. `P7-C007`
+Telegram identity/profile/media remains deferred. A future Telegram user-flow
+smoke should be a separate exact named live Telegram gate, not an implicit
+permission from this docs-only policy. No live VPS/SSH command, public
+exposure, Telegram token use/API call/live send/profile/media mutation or
+secret-bearing output was performed.
+
 Phase 7 `P7-C004d + P7-C006b` post-direct-clean login and backup gate was
 completed on 2026-06-20 as
 `completed-login-verified-backup-create-verify` for AMN2 `5501295` on
