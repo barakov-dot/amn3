@@ -11,13 +11,13 @@ Telegram identity/profile/media mutation.
 ## Current Truth
 
 ```text
-AMN2 head: 5501295 Add P7 install write contour
+AMN2 head: c958733 Harden security-sensitive operations
 AMN2 security-fix head: c958733 Harden security-sensitive operations
-latest VPS-smoked/package head: 5501295 Add P7 install write contour
+latest VPS-smoked/package head: c958733 Harden security-sensitive operations
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep c958733
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings
-next VPS package/apply target: c958733 exact named gate
+next VPS package/apply target: completed by P7-C009
 public/config/write status: blocked-by-preconditions
 public exposure status: deferred-not-required-for-private-rc-not-exposed
 user_channel_policy: telegram-first
@@ -43,6 +43,7 @@ final_rc_freeze_status: completed-rc-ready-paused-state-no-live-action
 p7_c004c_direct_clean_installer_status: completed-direct-clean-install-5501295-loopback-smoke
 p7_c004d_c006b_post_direct_clean_login_backup_status: completed-login-verified-backup-create-verify
 codex_security_postfix_status: completed-post-fix-security-validation-no-open-findings
+p7_c009_c958733_package_apply_smoke_status: completed-c958733-package-apply-loopback-telegram-backup-smoke
 p7_c004a_destructive_pre_cutover_status: ready-for-final-destructive-stop-line-no-apply
 P7-C004b clean install status: completed-clean-install-loopback-smoke
 latest_watch_only_after_critical_preflights: completed-watch-only-intake-after-critical-preflights-no-live-action
@@ -62,8 +63,19 @@ local-only expansion status: frozen before named gate
   Telegram delivery fallback config leak, SMTP STARTTLS context, backup
   artifact mode and debug snapshot shell boundary; focused pytest `95 passed`,
   full pytest `729 passed`, and post-fix Codex Security scan completed with `0`
-  reportable findings. No live VPS action was performed; next VPS target is a
-  separate `c958733` package/apply smoke gate.
+  reportable findings. No live VPS action was performed in that step; the
+  follow-up VPS package/apply smoke was later completed by `P7-C009`.
+- `phase-7-c958733-package-apply-smoke-2026-06-20.md` - `P7-C009`
+  package/apply and smoke gate for AMN2 `c958733` on disposable VPS
+  `89.185.80.166`; package/source checksums matched, source overlay applied to
+  `c9587332d425583ed627899d7fa950756b64c4dc`, loopback web restart passed,
+  loopback API smoke returned `VPS verdict: pass`, Telegram `getMe` and
+  non-polling dispatcher/user-flow smoke passed, backup create+verify passed
+  with artifact mode `600`, and public probes to `3030`, `3040`, `80` and
+  `443` stayed `000`. No public exposure, config delivery payload output, write
+  execution, restore/import/reboot/download, provider mutation, Local Agent
+  mutation, Telegram polling/live send/profile/media mutation or secret-bearing
+  output was performed.
 - `phase-7-final-rc-freeze-status-5501295-2026-06-20.md` - final Phase 7 RC
   freeze/status pass for AMN2 `5501295`; status
   `completed-rc-ready-paused-state-no-live-action`, frozen state

@@ -7,9 +7,12 @@
 Статус: `pre-release / release-candidate readiness`.
 
 Текущий freeze status:
-`completed-rc-ready-paused-state-no-live-action` для AMN2 `5501295`.
+`completed-rc-ready-paused-state-no-live-action` для AMN2 `5501295`, later
+superseded for current VPS-smoked/package readiness by `P7-C009` on `c958733`.
 
-Режим по умолчанию: `local-only/docs/tests/security/package-preflight`.
+Режим по умолчанию:
+`local-only/docs/tests/security/package-preflight/watch-only` unless an exact
+named live gate is opened.
 
 Эта фаза не открывает public launch, production mutation, config delivery,
 write API, destructive install, live package apply или Telegram identity changes.
@@ -25,14 +28,14 @@ RC channel policy:
 ## Источник Правды
 
 ```text
-AMN2 current local head: 5501295 Add P7 install write contour
-AMN2 known-good VPS-smoked/package head: 5501295 Add P7 install write contour
-AMN2 current local RC package-ready head: 5501295 Add P7 install write contour
+AMN2 current local head: c958733 Harden security-sensitive operations
+AMN2 known-good VPS-smoked/package head: c958733 Harden security-sensitive operations
+AMN2 current local RC package-ready head: c958733 Harden security-sensitive operations
 Workspace/evidence repo: barakov-dot/amn3, branch master, latest pushed head;
 verify with `git log -1`
-AMN2 package/source repo: barakov-dot/amn2, branch codex-vps-test-prep, head 5501295
+AMN2 package/source repo: barakov-dot/amn2, branch codex-vps-test-prep, head c958733
 Current disposable VPS: 89.185.80.166
-Known-good evidence: research/amn2/phase-7-write-install-mutation-contour-5501295-2026-06-20.md
+Known-good evidence: research/amn2/phase-7-c958733-package-apply-smoke-2026-06-20.md
 Latest current-state backup evidence: research/amn2/phase-7-current-state-backup-only-5501295-2026-06-20.md
 Latest post-direct-clean login/backup evidence: research/amn2/phase-7-post-direct-clean-login-backup-5501295-2026-06-20.md
 Latest Telegram private RC decision: research/amn2/phase-7-telegram-defer-private-rc-2026-06-20.md
@@ -40,9 +43,21 @@ Latest final RC freeze/status evidence: research/amn2/phase-7-final-rc-freeze-st
 Latest direct clean installer evidence: research/amn2/phase-7-direct-clean-installer-5501295-2026-06-20.md
 Latest Telegram-first/operator-web policy: research/amn2/phase-7-telegram-first-operator-web-policy-2026-06-20.md
 Latest Telegram user-flow smoke evidence: research/amn2/phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md
+Latest c958733 package/apply smoke evidence: research/amn2/phase-7-c958733-package-apply-smoke-2026-06-20.md
 ```
 
 ## Выполнено В Phase 7
+
+- `P7-C009` c958733 package apply + loopback/Telegram/backup smoke.
+  Importance: critical current-head VPS validation. Gate: exact named live VPS
+  package/apply smoke on disposable VPS `89.185.80.166`. Evidence:
+  `research/amn2/phase-7-c958733-package-apply-smoke-2026-06-20.md`. Result:
+  closed as `completed-c958733-package-apply-loopback-telegram-backup-smoke`.
+  Package/source checksums matched, source overlay became
+  `c9587332d425583ed627899d7fa950756b64c4dc`, loopback web/API smoke passed,
+  Telegram `getMe` and non-polling dispatcher/user-flow smoke passed, backup
+  create+verify passed with artifact mode `600`, and public probes stayed
+  closed.
 
 - Telegram-first/operator-web policy for private/operator RC.
   Importance: very important policy. Gate: docs-only/local-only. Evidence:

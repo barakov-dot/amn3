@@ -59,8 +59,10 @@ live VPS SSH, package upload/apply, service restart, public exposure, config
 delivery, write execution, restore/import/reboot, provider mutation, Local Agent
 mutation, Telegram send/profile/media mutation or secret-bearing evidence.
 
-## Remaining Follow-Up
+## Follow-Up Closure
 
-The disposable VPS runtime remains on the previously smoked `5501295` package
-until a separate exact named gate builds/applies a `c958733` package and reruns
-loopback/API/Telegram/backup smoke evidence.
+The separate exact named VPS gate was completed after this security validation:
+`research/amn2/phase-7-c958733-package-apply-smoke-2026-06-20.md`.
+`c958733` is now package-applied and VPS-smoked with loopback API smoke,
+Telegram `getMe`/dispatcher smoke, backup create+verify mode evidence and
+closed public probes.

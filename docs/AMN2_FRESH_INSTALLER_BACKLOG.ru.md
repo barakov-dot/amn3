@@ -12,13 +12,13 @@ apply, public exposure, config delivery, write API или production mutations.
 ```text
 AMN2 branch: codex-vps-test-prep
 AMN2 current source/security-fix head: c958733 Harden security-sensitive operations
-AMN2 latest VPS-smoked head: 5501295 Add P7 install write contour
-AMN2 latest local RC package-ready head: 5501295 Add P7 install write contour
-AMN2 known-good package head: 5501295 Add P7 install write contour
-AMN2 package status: VPS-smoked/pass for 5501295
-AMN2 next package/apply target: c958733 exact named gate
+AMN2 latest VPS-smoked head: c958733 Harden security-sensitive operations
+AMN2 latest local RC package-ready head: c958733 Harden security-sensitive operations
+AMN2 known-good package head: c958733 Harden security-sensitive operations
+AMN2 package status: VPS-smoked/pass for c958733
+AMN2 next package/apply target: completed by P7-C009
 AMN2 Codex Security post-fix status: completed-no-open-findings-for-c958733
-AMN2 current-head RC package status: package-ready-and-vps-smoked for 5501295
+AMN2 current-head RC package status: package-ready-and-vps-smoked for c958733
 AMN2 public/config/write status: blocked-by-preconditions
 AMN2 public exposure status: deferred-not-required-for-private-rc-not-exposed
 AMN2 user channel policy: telegram-first
@@ -66,10 +66,11 @@ AMN2 P7-C006 current-state backup-only status: completed-create-verify-no-restor
 AMN2 P7-C007 Telegram identity/profile/media status: deferred-not-required-for-private-rc-no-telegram-action
 AMN2 P7-C008 Telegram user-flow smoke status: completed-after-token-reconciliation
 AMN2 P7-C008a Telegram token reconciliation status: completed-getme-dispatcher-surface-no-send
+AMN2 P7-C009 c958733 package/apply smoke status: completed-c958733-package-apply-loopback-telegram-backup-smoke
 AMN2 P7-C004a destructive pre-cutover guard status: ready-final-stop-line-no-apply
 AMN2 P7-C004b destructive clean installer status: completed-clean-install-loopback-smoke
 AMN3 latest evidence slice: Phase 7 transition packet / clean installer RC entry
-current working VPS: 89.185.80.166, disposable test VPS, direct clean-installed 5501295 loopback-only after P7-C004c, loopback admin login verified and post-direct-clean backup create+verify completed after P7-C004d/P7-C006b; users are Telegram-first, operator web/admin remains IP/loopback/private access
+current working VPS: 89.185.80.166, disposable test VPS, c958733 package-applied and smoked loopback-only after P7-C009; users are Telegram-first, operator web/admin remains IP/loopback/private access
 ```
 
 Relevant completed inputs:
@@ -77,8 +78,15 @@ Relevant completed inputs:
 - Codex Security post-fix validation for AMN2 `c958733` in
   `research/amn2/phase-7-codex-security-postfix-c958733-2026-06-20.md`;
   focused pytest `95 passed`, full pytest `729 passed`, post-fix scan
-  `0` reportable findings. This is source/GitHub-ready only until a new
-  `c958733` package is built and smoked on the disposable VPS.
+  `0` reportable findings. The follow-up `c958733` package/apply smoke was
+  completed by `P7-C009`.
+- Phase 7 `P7-C009` c958733 package apply + loopback/Telegram/backup smoke in
+  `research/amn2/phase-7-c958733-package-apply-smoke-2026-06-20.md`.
+  Package/source checksums matched, source overlay became
+  `c9587332d425583ed627899d7fa950756b64c4dc`, loopback API smoke passed,
+  Telegram `getMe` and non-polling dispatcher/user-flow smoke passed, backup
+  create+verify passed with artifact mode `600`, and public probes stayed
+  closed.
 - `P6-I007` local-only fresh-install wizard/bootstrap automation.
 - `P6-C007` destructive cleanup/reinstall checklist-only boundary.
 - `P6-C009` live update/smoke for `c46f664`, read-only smoke passed.

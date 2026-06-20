@@ -9,7 +9,8 @@
 
 Phase 7: Release Candidate Readiness / Clean Installer RC.
 Status: pre-release / release-candidate readiness.
-Default lane: local-only/docs/tests/security/package-preflight.
+Default lane: local-only/docs/tests/security/package-preflight/watch-only unless
+an exact named live gate is opened.
 
 Это не public launch и не production mutation lane.
 
@@ -23,10 +24,10 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - AMN2 source/security-fix head:
   c958733 Harden security-sensitive operations.
 - AMN2 current VPS-smoked/known-good/package-ready head:
-  5501295 Add P7 install write contour.
+  c958733 Harden security-sensitive operations.
 - Current disposable VPS: 89.185.80.166.
 - Latest live smoke evidence:
-  research/amn2/phase-7-write-install-mutation-contour-5501295-2026-06-20.md.
+  research/amn2/phase-7-c958733-package-apply-smoke-2026-06-20.md.
 - Latest RC gate matrix:
   research/amn2/phase-7-rc-gate-matrix-consolidation-2026-06-14.md.
 - Latest handoff compression:
@@ -105,6 +106,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
   research/amn2/phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md.
 - Latest Codex Security post-fix validation:
   research/amn2/phase-7-codex-security-postfix-c958733-2026-06-20.md.
+- Latest c958733 VPS package/apply smoke:
+  research/amn2/phase-7-c958733-package-apply-smoke-2026-06-20.md.
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_7_RELEASE_CANDIDATE.ru.md
@@ -133,9 +136,10 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
 - watch-only intake;
 - evidence/status hygiene.
 
-Следующий сильный шаг после handoff: собрать и прогнать `c958733` package/apply
-на disposable VPS отдельным exact named gate, потому что GitHub AMN2 уже
-обновлён, а live VPS runtime/evidence пока остаётся на `5501295`.
+`c958733` package/apply smoke on the disposable VPS is complete. The next
+strong step is a final RC freeze/status pass for `c958733`, then optional
+provider restore-point confirmation or any remaining live gates only by exact
+name.
 
 Запрещено без отдельного exact named gate:
 
@@ -162,11 +166,11 @@ production_mutation=not opened
 ## Current State
 
 ```text
-AMN2 head: 5501295 Add P7 install write contour
+AMN2 head: c958733 Harden security-sensitive operations
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
-AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 5501295
-package status: VPS-smoked/pass for 5501295
-smoke status: scoped-write-contour-smoked-pass for 5501295
+AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep c958733
+package status: VPS-smoked/pass for c958733
+smoke status: package/apply + loopback API + Telegram getMe/dispatcher + backup mode smoke pass for c958733
 public/config/write status: blocked-by-preconditions
 public exposure status: deferred-not-required-for-private-rc-not-exposed
 user channel policy: telegram-first
@@ -196,6 +200,7 @@ active work: residual P7-C006 scopes + watch-only intake only
 P7-C002 default status: deferred-not-required-for-private-rc-not-exposed
 P7-C008 Telegram user-flow smoke status: completed-after-token-reconciliation
 P7-C008a Telegram token reconciliation status: completed-getme-dispatcher-surface-no-send
+P7-C009 c958733 package/apply smoke status: completed-c958733-package-apply-loopback-telegram-backup-smoke
 ```
 
 Latest important evidence:
@@ -226,6 +231,7 @@ Latest important evidence:
 - `research/amn2/phase-7-destructive-clean-installer-execution-b121865-2026-06-19.md`
 - `research/amn2/phase-7-post-clean-write-backup-telegram-read-only-rebaseline-b121865-2026-06-19.md`
 - `research/amn2/phase-7-write-install-mutation-contour-5501295-2026-06-20.md`
+- `research/amn2/phase-7-c958733-package-apply-smoke-2026-06-20.md`
 - `research/amn2/phase-7-provider-backup-restore-point-watch-hygiene-2026-06-20.md`
 - `research/amn2/phase-7-current-state-backup-only-5501295-2026-06-20.md`
 - `research/amn2/phase-7-telegram-defer-private-rc-2026-06-20.md`

@@ -1,5 +1,21 @@
 # Текущий override 2026-06-09
 
+Phase 7 `P7-C009` c958733 package apply + loopback/Telegram/backup smoke is
+complete for AMN2 `c9587332d425583ed627899d7fa950756b64c4dc` on disposable VPS
+`89.185.80.166`. Evidence:
+`research/amn2/phase-7-c958733-package-apply-smoke-2026-06-20.md`. Package
+`dist/amn2-vps-update-and-smoke-kit-c958733.zip` sha256
+`B9C299DE16041570068EAFE77B0ED95F86A56FDB07E85A2D3AA061A5C971DB6A` and source
+zip sha256 `E0F2F823CF4E29B52404E634BA11961B3C2B85604C04498CC3D752DD5DAB6E0B`
+were verified. `/opt/amn2` source overlay is now `c958733`; loopback web/API
+smoke passed; Telegram `getMe` and non-polling dispatcher/user-flow smoke
+passed; backup create+verify passed with artifact mode `600`; external probes
+to public `3030`, `3040`, `80` and `443` stayed `000`. No public exposure,
+config delivery payload output, write execution, actual installer executor,
+restore/import/reboot/download, provider mutation, Local Agent mutation,
+Telegram polling/live send/profile/media mutation or secret-bearing output was
+performed. Current latest VPS-smoked/package head is now `c958733`.
+
 Phase 7 Codex Security post-fix validation is complete for AMN2 `c958733`.
 Evidence:
 `research/amn2/phase-7-codex-security-postfix-c958733-2026-06-20.md`.
@@ -10,8 +26,8 @@ STARTTLS context, backup artifact mode and debug snapshot shell boundary.
 Focused pytest passed with `95 passed`; full pytest passed with `729 passed`;
 Codex Security post-fix scan `b9106c1d-1f68-493a-91a6-2698303da56e`
 completed with `0` reportable findings. No live VPS action was performed in
-this security/fix slice. Current VPS runtime evidence remains on `5501295`
-until a separate exact named `c958733` package/apply smoke gate.
+this security/fix slice. The follow-up exact named `c958733` package/apply
+smoke gate was later completed by `P7-C009`.
 
 Phase 7 `P7-C008a` Telegram token reconciliation and user-flow smoke completed
 as `completed-getme-dispatcher-surface-no-send`. Evidence:

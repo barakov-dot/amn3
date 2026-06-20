@@ -1,5 +1,24 @@
 # Текущий override 2026-06-09
 
+Phase 7 `P7-C009` c958733 package apply + loopback/Telegram/backup smoke was
+completed on 2026-06-20 for AMN2
+`c9587332d425583ed627899d7fa950756b64c4dc` on disposable VPS
+`89.185.80.166`. Evidence:
+`research/amn2/phase-7-c958733-package-apply-smoke-2026-06-20.md`. Package
+`dist/amn2-vps-update-and-smoke-kit-c958733.zip` sha256
+`B9C299DE16041570068EAFE77B0ED95F86A56FDB07E85A2D3AA061A5C971DB6A` and source
+zip sha256 `E0F2F823CF4E29B52404E634BA11961B3C2B85604C04498CC3D752DD5DAB6E0B`
+were verified. Live source overlay updated `/opt/amn2` to `c958733`, loopback
+web restart passed, API loopback smoke returned `VPS verdict: pass`, Telegram
+`getMe` and non-polling dispatcher/user-flow smoke passed for
+`@NeobyatnayaAMNZ_bot`, backup create and verify passed with artifact mode
+`600`, and external probes to public `3030`, `3040`, `80` and `443` stayed
+`000`. No public exposure, config delivery payload output, write execution,
+actual installer executor, restore/import/reboot/download, provider mutation,
+Local Agent mutation, Telegram polling/live send/profile/media mutation or
+secret-bearing output was performed. Current latest VPS-smoked/package head is
+now `c958733`.
+
 Phase 7 Codex Security post-fix validation was completed on 2026-06-20 for
 AMN2 `c958733 Harden security-sensitive operations`. Evidence:
 `research/amn2/phase-7-codex-security-postfix-c958733-2026-06-20.md`.
@@ -16,9 +35,8 @@ FastAPI/TestClient deprecation warning; Codex Security post-fix scan
 No live VPS/SSH, package apply, restart, public exposure, config delivery,
 write execution, restore/import/reboot, provider mutation, Local Agent
 mutation, Telegram send/profile/media mutation or secret-bearing output was
-performed. Remaining follow-up: build/apply a `c958733` package to the
-disposable VPS under an exact named gate; current VPS runtime evidence remains
-on previously smoked `5501295`.
+performed in that security-validation step. The follow-up `c958733` VPS
+package/apply smoke was later completed by `P7-C009`.
 
 Phase 7 `P7-C008a` Telegram token reconciliation and user-flow smoke completed
 on 2026-06-20 for AMN2 `5501295` on disposable VPS `89.185.80.166`. Evidence:
