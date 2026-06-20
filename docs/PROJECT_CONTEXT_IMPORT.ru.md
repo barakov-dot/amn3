@@ -1,5 +1,17 @@
 # Текущий override 2026-06-09
 
+Phase 7 `P7-C008a` Telegram token reconciliation and user-flow smoke completed
+as `completed-getme-dispatcher-surface-no-send`. Evidence:
+`research/amn2/phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md`.
+The earlier `P7-C008` attempt was blocked by an invalid Telegram token and is
+now resolved by `P7-C008a`. The token was updated through operator-secret
+handoff with rollback copy and without printing it, Telegram `getMe` passed,
+and the non-polling bot/user-flow surface was constructed. Source overlay
+matched `5501295`, web/admin remained loopback-only and public probes stayed
+closed. No Telegram polling, live send, profile/media mutation, config payload
+output, write execution, public exposure, restore/import/reboot, provider
+mutation or secret-bearing output was performed.
+
 Phase 7 Telegram-first/operator-web policy is complete as
 `completed-docs-only-telegram-first-operator-web-policy`. Evidence:
 `research/amn2/phase-7-telegram-first-operator-web-policy-2026-06-20.md`.

@@ -62,7 +62,8 @@ AMN2 P7-C006 backup-only evidence status: completed-create-verify-no-restore-imp
 AMN2 P7-C006a provider restore-point status: completed-inconclusive-no-restore-point-confirmed
 AMN2 P7-C006 current-state backup-only status: completed-create-verify-no-restore-import-reboot-for-5501295
 AMN2 P7-C007 Telegram identity/profile/media status: deferred-not-required-for-private-rc-no-telegram-action
-AMN2 candidate P7-C008 Telegram user-flow smoke status: candidate-exact-live-gate-not-active
+AMN2 P7-C008 Telegram user-flow smoke status: completed-after-token-reconciliation
+AMN2 P7-C008a Telegram token reconciliation status: completed-getme-dispatcher-surface-no-send
 AMN2 P7-C004a destructive pre-cutover guard status: ready-final-stop-line-no-apply
 AMN2 P7-C004b destructive clean installer status: completed-clean-install-loopback-smoke
 AMN3 latest evidence slice: Phase 7 transition packet / clean installer RC entry
@@ -193,6 +194,15 @@ Relevant completed inputs:
   exposure, DNS domain, trusted public TLS and reverse proxy are not required
   for private/operator RC. Future Telegram user-flow smoke is a separate exact
   named live Telegram gate and is not active by this docs-only policy.
+- Phase 7 `P7-C008a` Telegram token reconciliation and user-flow smoke in
+  `research/amn2/phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md`.
+  The earlier invalid-token `P7-C008` blocker is retained as historical
+  evidence and resolved by `P7-C008a`. Token reconciliation used
+  operator-secret handoff with rollback copy and no token output; Telegram
+  `getMe` passed; non-polling bot/user-flow surface construction passed. No
+  polling, live send, profile/media mutation, config payload output, write
+  execution, public exposure, restore/import/reboot, provider mutation or
+  secret-bearing output was performed.
 - Phase 7 `P7-C002 + P7-C003 + P7-C005` public/config/write preflight for
   AMN2 `b121865` in
   `research/amn2/phase-7-public-config-write-preflight-b121865-2026-06-14.md`.

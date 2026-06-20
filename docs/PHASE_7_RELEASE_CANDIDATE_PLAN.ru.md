@@ -39,6 +39,7 @@ Latest Telegram private RC decision: research/amn2/phase-7-telegram-defer-privat
 Latest final RC freeze/status evidence: research/amn2/phase-7-final-rc-freeze-status-5501295-2026-06-20.md
 Latest direct clean installer evidence: research/amn2/phase-7-direct-clean-installer-5501295-2026-06-20.md
 Latest Telegram-first/operator-web policy: research/amn2/phase-7-telegram-first-operator-web-policy-2026-06-20.md
+Latest Telegram user-flow smoke evidence: research/amn2/phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md
 ```
 
 ## Выполнено В Phase 7
@@ -53,6 +54,19 @@ Latest Telegram-first/operator-web policy: research/amn2/phase-7-telegram-first-
   trusted public TLS and reverse proxy are not required for private/operator
   RC. Candidate future `P7-C008` Telegram user-flow smoke remains inactive
   until an exact named live Telegram gate is opened.
+
+- `P7-C008a` Telegram token reconciliation and user-flow smoke for AMN2
+  `5501295`. Importance: critical/user-facing. Gate: exact named secret/env
+  live gate. Evidence:
+  `research/amn2/phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md`.
+  Result: completed as `completed-getme-dispatcher-surface-no-send`. The
+  earlier `P7-C008` invalid-token attempt is retained as historical evidence
+  and resolved by this gate. The token was updated through operator-secret
+  handoff with rollback copy and no token output, Telegram `getMe` passed, and
+  non-polling bot/user-flow surface construction passed. No polling, live send,
+  profile/media mutation, config payload output, write execution, public
+  exposure, restore/import/reboot, provider mutation or secret-bearing output
+  was performed.
 
 - `P7-C004c` Direct clean installer execution for AMN2 `5501295`.
   Importance: critical destructive gate. Gate: explicitly opened by the
@@ -858,8 +872,10 @@ required for private/operator RC.
 - residual P7-C006 Backup/restore/import scopes: exact named gate only
   для restore apply, archive import, remote backup download, reboot,
   disaster-recovery drill, destructive migration или provider restore use;
-- optional P7-C008 Telegram user-flow smoke: exact named live Telegram gate
-  only, if we decide to validate the user-facing channel live;
+- P7-C008/P7-C008a Telegram user-flow smoke: completed after token
+  reconciliation; further Telegram actions require a new exact named gate,
+  especially live send, polling, config payload delivery or identity/profile
+  mutation;
 - watch-only intake, если не открываем live/mutation gate.
 
 Новые local-only задачи можно выводить только как структурные предложения, не
@@ -900,10 +916,20 @@ Latest watch-only intake cycle is closed as
 P7-C008 Telegram user-flow smoke gate.
 Importance: critical/user-facing.
 Gate: exact named live Telegram gate.
-Status: candidate only, not active.
-Scope: verify bot runtime and safe user-facing flow without Telegram
-identity/profile/media mutation, public web exposure, write execution,
-restore/import/reboot, provider mutation or secret-bearing evidence.
+Status: completed after P7-C008a token reconciliation.
+Scope completed: Telegram `getMe` and non-polling bot/user-flow surface
+construction without Telegram identity/profile/media mutation, live send,
+public web exposure, write execution, restore/import/reboot, provider mutation
+or secret-bearing evidence.
+
+P7-C008a Telegram token reconciliation gate.
+Importance: critical/user-facing prerequisite.
+Gate: exact named secret/env live gate.
+Status: completed.
+Scope completed: operator-secret handoff for Telegram bot token, safe VPS
+`.env` update with rollback copy, Telegram `getMe`, and non-polling P7-C008
+smoke. No profile/media mutation, live send, config payload output, public
+exposure, write execution, restore/import/reboot or provider mutation.
 ```
 
 `P7-C002d` был активирован оператором и закрыт как

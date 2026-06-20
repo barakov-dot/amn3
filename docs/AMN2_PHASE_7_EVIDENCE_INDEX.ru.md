@@ -34,6 +34,8 @@ p7_c006_backup_only_status: completed-backup-only-create-verify-no-restore-impor
 p7_c006a_provider_restore_point_status: completed-inconclusive-no-restore-point-confirmed
 p7_c006_current_state_backup_status: completed-current-state-backup-only-create-verify-no-restore-import-reboot
 p7_c007_telegram_status: deferred-not-required-for-private-rc-no-telegram-action
+p7_c008_telegram_user_flow_smoke_status: completed-after-token-reconciliation
+p7_c008a_telegram_token_reconciliation_status: completed-getme-dispatcher-surface-no-send
 final_rc_freeze_status: completed-rc-ready-paused-state-no-live-action
 p7_c004c_direct_clean_installer_status: completed-direct-clean-install-5501295-loopback-smoke
 p7_c004d_c006b_post_direct_clean_login_backup_status: completed-login-verified-backup-create-verify
@@ -43,7 +45,7 @@ latest_watch_only_after_critical_preflights: completed-watch-only-intake-after-c
 latest_watch_only_cycle: completed-watch-only-intake-cycle-complete-no-live-action
 approved active work: residual P7-C006 scopes and watch-only intake
 P7-C002 default status: deferred-not-required-for-private-rc-not-exposed
-candidate future Telegram user-flow smoke: P7-C008 exact named live Telegram gate, not active
+latest Telegram user-flow smoke: completed after P7-C008a token reconciliation
 latest_watch_only_status: completed-watch-only-status-hygiene-no-live-action
 latest_watch_only_intake: completed-watch-only-intake-cycle-complete-no-live-action
 local-only expansion status: frozen before named gate
@@ -71,6 +73,16 @@ local-only expansion status: frozen before named gate
   channel, web/admin remains operator-only by VPS IP plus loopback/SSH tunnel,
   and public web-admin/domain/TLS/reverse-proxy exposure is not required for
   private/operator RC.
+- `phase-7-telegram-user-flow-smoke-token-invalid-5501295-2026-06-20.md` -
+  `P7-C008` Telegram user-flow smoke attempt; source/runtime checks passed but
+  Telegram `getMe` failed with `TokenValidationError` because the VPS token is
+  invalid. Resolved by `P7-C008a`.
+- `phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md` -
+  `P7-C008a` token reconciliation and user-flow smoke; token updated through
+  operator-secret handoff with rollback copy, Telegram `getMe` passed, and
+  non-polling bot/user-flow surface construction passed. No polling, live send,
+  profile/media mutation, config payload output, write execution, public
+  exposure, restore/import/reboot, provider mutation or secret-bearing output.
 - `phase-7-transition-packet-2026-06-14.md` - Phase 7 entry packet.
 - `phase-7-current-head-package-preflight-b121865-2026-06-14.md` - local
   package/preflight for `b121865`.

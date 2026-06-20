@@ -1,5 +1,18 @@
 # `amn2` Transfer Backlog
 
+Phase 7 P7-C008a Telegram token reconciliation and user-flow smoke 2026-06-20:
+completed as `completed-getme-dispatcher-surface-no-send` for AMN2 `5501295`
+on disposable VPS `89.185.80.166`. Evidence
+`research/amn2/phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md`.
+The earlier invalid-token `P7-C008` blocker is retained as historical evidence
+in `research/amn2/phase-7-telegram-user-flow-smoke-token-invalid-5501295-2026-06-20.md`
+and is resolved by `P7-C008a`. Token reconciliation used operator-secret handoff
+with rollback copy and no token output; Telegram `getMe` passed; the
+non-polling bot/user-flow surface was constructed. No polling, live Telegram
+send, identity/profile/media mutation, config delivery payload output, write
+execution, public exposure, restore/import/reboot, provider mutation or
+secret-bearing output was performed. External probes stayed closed.
+
 Phase 7 Telegram-first/operator-web policy 2026-06-20: completed as
 `completed-docs-only-telegram-first-operator-web-policy`. Evidence
 `research/amn2/phase-7-telegram-first-operator-web-policy-2026-06-20.md`.

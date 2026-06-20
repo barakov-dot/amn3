@@ -99,6 +99,8 @@ C:\Users\SooL\Documents\VPS-OPS-LAB
   research/amn2/phase-7-post-direct-clean-login-backup-5501295-2026-06-20.md.
 - Latest Telegram-first/operator-web policy:
   research/amn2/phase-7-telegram-first-operator-web-policy-2026-06-20.md.
+- Latest Telegram user-flow smoke evidence:
+  research/amn2/phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md.
 
 Сначала прочитай:
 - docs/NEXT_CHAT_AMN2_PHASE_7_RELEASE_CANDIDATE.ru.md
@@ -184,7 +186,8 @@ local-only queue: closed
 local-only expansion status: frozen before named gate
 active work: residual P7-C006 scopes + watch-only intake only
 P7-C002 default status: deferred-not-required-for-private-rc-not-exposed
-candidate P7-C008 Telegram user-flow smoke: exact named live Telegram gate, not active
+P7-C008 Telegram user-flow smoke status: completed-after-token-reconciliation
+P7-C008a Telegram token reconciliation status: completed-getme-dispatcher-surface-no-send
 ```
 
 Latest important evidence:
@@ -387,8 +390,9 @@ Operator named-gate menu:
 - `P7-C006` Backup/restore/import gate.
 - Future Telegram identity/profile/media mutation gate only if explicitly
   reopened.
-- Future Telegram user-flow smoke can be opened as `P7-C008` only by exact
-  named live Telegram gate.
+- Future Telegram actions beyond the completed P7-C008a smoke require a new
+  exact named gate, especially live send, polling, config payload delivery or
+  Telegram identity/profile/media mutation.
 
 If no exact gate is chosen, wait or repeat watch-only intake later as a fresh
 cycle. The current watch-only item is closed.
@@ -399,10 +403,19 @@ cycle. The current watch-only item is closed.
 P7-C008 Telegram user-flow smoke gate.
 Importance: critical/user-facing.
 Gate: exact named live Telegram gate.
-Status: candidate only, not active.
-Scope: verify bot runtime and safe user-facing flow without Telegram
-identity/profile/media mutation, public web exposure, write execution,
-restore/import/reboot, provider mutation or secret-bearing evidence.
+Status: completed after P7-C008a token reconciliation.
+Scope completed: Telegram getMe and non-polling bot/user-flow surface without
+Telegram identity/profile/media mutation, live send, public web exposure, write
+execution, restore/import/reboot, provider mutation or secret-bearing evidence.
+
+P7-C008a Telegram token reconciliation gate.
+Importance: critical/user-facing prerequisite.
+Gate: exact named secret/env live gate.
+Status: completed.
+Scope completed: operator-secret handoff for Telegram bot token, safe VPS .env
+update with rollback copy, getMe verification, and non-polling P7-C008 smoke.
+No profile/media mutation, live send, config payload output, public exposure,
+write execution, restore/import/reboot or provider mutation.
 ```
 
 Для future live VPS work требовать фразу вида:

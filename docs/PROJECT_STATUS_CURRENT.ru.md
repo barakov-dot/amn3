@@ -1,5 +1,19 @@
 # Текущий override 2026-06-09
 
+Phase 7 `P7-C008a` Telegram token reconciliation and user-flow smoke completed
+on 2026-06-20 for AMN2 `5501295` on disposable VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-7-telegram-token-reconciliation-user-flow-smoke-5501295-2026-06-20.md`.
+The earlier `P7-C008` attempt was blocked by an invalid Telegram token, then
+`P7-C008a` safely updated the VPS `.env` through operator-secret handoff with a
+rollback copy, did not print the token, verified Telegram `getMe`, and
+constructed the non-polling bot/user-flow surface. Source overlay matched
+`55012958ff6b8338254f3f68dfe6779f4bc56f5d`; web/admin remained loopback-only;
+`VPS_APPLY_ENABLED=false` and `LOCAL_AGENT_ENABLED=false`. No polling, live
+Telegram send, identity/profile/media mutation, config delivery payload output,
+write execution, public exposure, restore/import/reboot, provider mutation or
+secret-bearing output was performed. External probes to public `3030`, `3040`,
+`80` and `443` returned `000`.
+
 Phase 7 Telegram-first/operator-web policy was completed on 2026-06-20 as
 `completed-docs-only-telegram-first-operator-web-policy`. Evidence:
 `research/amn2/phase-7-telegram-first-operator-web-policy-2026-06-20.md`.
