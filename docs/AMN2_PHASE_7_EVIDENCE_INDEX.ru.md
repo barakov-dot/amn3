@@ -11,11 +11,11 @@ Telegram identity/profile/media mutation.
 ## Current Truth
 
 ```text
-AMN2 head: 6d5cf3e Make Telegram config delivery conf-first
+AMN2 head: 471bca8 Downgrade DefaultVPN iOS compatibility
 AMN2 security-fix head: c958733 Harden security-sensitive operations
 latest VPS-smoked/package head: 6d5cf3e Make Telegram config delivery conf-first
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
-AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 6d5cf3e
+AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 471bca8
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings
 next VPS package/apply target: completed by P7-C009
 public/config/write status: blocked-by-preconditions
@@ -45,6 +45,7 @@ p7_c010b_mobile_telegram_ux_live_acceptance_status: failed-real-device-ux-copy-q
 p7_c010b_conf_first_fix_status: package-smoked-mobile-retest-failed-qr-and-ios-defaultvpn
 p7_c010c_6d5cf3e_package_apply_smoke_status: completed-package-apply-loopback-telegram-backup-smoke
 p7_c010c_mobile_retest_status: failed-qr-and-ios-defaultvpn-functional-connectivity
+p7_c010d_client_compatibility_status: completed-defaultvpn-ios-downgraded-no-live-apply
 final_rc_freeze_status: completed-rc-ready-paused-state-c958733-no-live-action
 s_final_next_chat_handoff_status: completed-s-final-next-chat-handoff-c958733-no-live-action
 p7_c004c_direct_clean_installer_status: completed-direct-clean-install-5501295-loopback-smoke
@@ -65,6 +66,10 @@ local-only expansion status: frozen before named gate
 
 ## Core Evidence
 
+- `phase-7-ios-android-client-compatibility-diagnostic-471bca8-2026-06-20.md` -
+  `P7-C010d` compatibility diagnostic after mobile UX retest; AMN2
+  `471bca8` downgrades DefaultVPN iOS to experimental/unreliable and updates
+  install guidance. No live package apply was performed in this step.
 - `phase-7-mobile-telegram-ux-failure-conf-first-fix-6d5cf3e-2026-06-20.md` -
   `P7-C010b` real-device Telegram UX failure analysis and AMN2 code fix
   `6d5cf3e`; records that full `vpn://` one-click copy and QR deep-link import

@@ -1,5 +1,13 @@
 # Текущий override 2026-06-09
 
+Phase 7 `P7-C010d` iOS/Android client compatibility diagnostic is complete as
+`completed-compatibility-policy-update-no-live-apply`. Evidence:
+`research/amn2/phase-7-ios-android-client-compatibility-diagnostic-471bca8-2026-06-20.md`.
+AMN2 head is now `471bca8 Downgrade DefaultVPN iOS compatibility`; DefaultVPN
+iOS is experimental/unreliable, not a primary release path. Latest
+VPS-smoked/package head remains `6d5cf3e` until another package/apply gate.
+Next useful gate: Android AmneziaWG real-device acceptance.
+
 Phase 7 `P7-C010b/P7-C010c` mobile Telegram UX acceptance found real-device
 blockers: full `vpn://` one-click copy is not reliable for real configs, QR did
 not open/import through the tested phone flows, and iPhone DefaultVPN failed
