@@ -2,13 +2,13 @@
 
 Date: 2026-06-20.
 
-Status: `completed-code-fix-pending-package-apply-real-device-retest`.
+Status: `package-smoked-mobile-retest-failed-qr-and-ios-defaultvpn`.
 
 AMN2 fix commit: `6d5cf3e Make Telegram config delivery conf-first`.
 
 Scope: record real-device Telegram UX acceptance failure signals from
-`P7-C010b`, root cause, and the AMN2 code fix. No new VPS/package apply was
-performed in this evidence step.
+`P7-C010b`, root cause, AMN2 code fix, `P7-C010c` package/apply smoke, and
+mobile retest result.
 
 ## Observed Failure
 
@@ -80,38 +80,69 @@ status: passed
 
 Full local pytest was not run in this environment because the available Windows
 Python lacks project test dependencies (`pytest`, `aiogram`) and Python 3.12
-launcher/runtime was not installed. The next meaningful verification is a new
-package/apply/live Telegram UX retest gate for AMN2 `6d5cf3e`.
+launcher/runtime was not installed.
+
+`P7-C010c` package/apply smoke was completed on disposable VPS `89.185.80.166`:
+
+```text
+package: dist/amn2-vps-update-and-smoke-kit-6d5cf3e.zip
+package_sha256: 4C5AA58E44362D7BBBC7815C8F0102B5C52BAB781B7415033B19F83E3AC3C4B2
+source_sha256: 19D4F480F740972B124FAC64E9A335C9753D5DCDB9FBC9C84D9BB3923B96EDA4
+source_overlay_commit: 6d5cf3ea929f26b6b352ad341bff1dd4bd5a8da5
+loopback_api_smoke: passed
+telegram_getme_non_polling_smoke: passed
+backup_create_verify: passed
+backup_artifact_mode: 600
+external_public_probes: 3030=000, 3040=000, 80=000, 443=000
+```
+
+`P7-C010c` operator-only Telegram live payload send also completed:
+
+```text
+telegram_send_message_intro_status=passed
+telegram_send_message_import_link_status=passed
+telegram_send_message_app_links_status=passed
+telegram_send_document_conf_status=passed
+telegram_send_photo_qr_status=passed
+copy_button_enabled=no
+vpn_import_link_bytes=701
+qr_png_bytes=4361
+secret_values_printed=false
+```
+
+Manual real-device retest result reported by the operator:
+
+```text
+iPhone network: Wi-Fi
+iPhone DefaultVPN .conf import/connect: degraded/fail
+iPhone first-connect: connected only after a long wait
+iPhone reconnect behavior: after toggling off/on, reconnect loops were observed
+iPhone functional tunnel check: failed; VPN did not provide expected connectivity, Telegram stayed unavailable
+Android .conf import/connect: pending device availability
+Windows same .conf connect: not checked
+QR import/open: failed
+copy button: not available, expected because vpn:// payload is too long for Telegram copy button
+```
 
 ## Next Gate
 
 Recommended next exact named gate:
 
 ```text
-P7-C010c AMN2 6d5cf3e package/apply + Mobile Telegram UX retest
+P7-C010d iOS/Android client compatibility diagnostic
 ```
 
 Scope should include:
 
-- build/upload/apply verified package for `6d5cf3e`;
-- restart only loopback web/runtime as needed;
-- run loopback API smoke;
-- run Telegram getMe/non-polling surface smoke;
-- send operator-only test payload to the operator test chat;
-- manually verify iPhone/Android:
-  - `.conf` import;
-  - QR through in-app VPN client scanner;
-  - `vpn://` fallback behavior;
-- user-facing message clarity.
-- iOS DefaultVPN connectivity:
-  - whether `.conf` imports successfully;
-  - first-connect attempt count before success/failure;
-  - exact safe error class shown by the client, without secrets, if visible;
-  - whether the phone is on mobile data or Wi-Fi;
-  - whether Android/Windows can connect through the same endpoint at the same
-    time;
-  - whether a DefaultVPN-specific `.conf` template or client selection policy
-    is needed.
+- read-only/safe diagnostic of generated config shape;
+- compare `amneziawg_v2` fields against DefaultVPN/iOS expectations;
+- decide whether iOS DefaultVPN should be removed as the primary iOS path,
+  moved to experimental, or given a DefaultVPN-specific template;
+- test Android AmneziaWG `.conf` import/connect separately;
+- keep `.conf` as the primary delivery artifact only if at least one target
+  mobile client passes reliably;
+- record only safe error classes, attempt counts, network type and pass/fail
+  statuses, never secret payloads.
 
 Still forbidden unless separately opened:
 
@@ -125,7 +156,14 @@ Still forbidden unless separately opened:
 
 ## Release Posture
 
-Phase 7 remains `rc_ready_paused_private_operator_lane`, but Phase 8 should not
-start until the AMN2 `6d5cf3e` delivery UX is package-smoked and accepted on
-real mobile devices, or a documented non-QR `.conf`-first policy is explicitly
-accepted.
+Phase 7 should remain paused before Phase 8 on mobile UX grounds. AMN2
+`6d5cf3e` is package-smoked and deployed on the disposable VPS. iPhone
+DefaultVPN is not an accepted release path: first-connect was slow, reconnect
+loops were observed after toggling, the VPN tunnel did not provide expected
+connectivity, and QR still failed. Android remains pending. Before Phase 8,
+choose one:
+
+- complete `P7-C010d` client compatibility diagnostic and fix/select a passing
+  mobile client path; or
+- explicitly ship a non-mobile/desktop-only or Android-only private RC policy,
+  if that is acceptable for the product.

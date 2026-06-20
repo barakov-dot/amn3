@@ -13,7 +13,7 @@ Telegram identity/profile/media mutation.
 ```text
 AMN2 head: 6d5cf3e Make Telegram config delivery conf-first
 AMN2 security-fix head: c958733 Harden security-sensitive operations
-latest VPS-smoked/package head: c958733 Harden security-sensitive operations
+latest VPS-smoked/package head: 6d5cf3e Make Telegram config delivery conf-first
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 6d5cf3e
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings
@@ -42,7 +42,9 @@ p7_c008a_telegram_token_reconciliation_status: completed-getme-dispatcher-surfac
 p7_c010_mobile_telegram_ux_acceptance_status: planned-pending-live-real-device-acceptance
 p7_c010a_mobile_telegram_ux_plan_status: completed-mobile-telegram-ux-acceptance-plan-no-live-action
 p7_c010b_mobile_telegram_ux_live_acceptance_status: failed-real-device-ux-copy-qr-and-ios-first-connect
-p7_c010b_conf_first_fix_status: completed-code-fix-pending-package-apply-real-device-retest
+p7_c010b_conf_first_fix_status: package-smoked-mobile-retest-failed-qr-and-ios-defaultvpn
+p7_c010c_6d5cf3e_package_apply_smoke_status: completed-package-apply-loopback-telegram-backup-smoke
+p7_c010c_mobile_retest_status: failed-qr-and-ios-defaultvpn-functional-connectivity
 final_rc_freeze_status: completed-rc-ready-paused-state-c958733-no-live-action
 s_final_next_chat_handoff_status: completed-s-final-next-chat-handoff-c958733-no-live-action
 p7_c004c_direct_clean_installer_status: completed-direct-clean-install-5501295-loopback-smoke

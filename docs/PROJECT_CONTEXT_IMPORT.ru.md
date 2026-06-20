@@ -1,12 +1,14 @@
 # Текущий override 2026-06-09
 
-Phase 7 `P7-C010b` mobile Telegram UX acceptance found real-device blockers:
-full `vpn://` one-click copy is not reliable for real configs, QR over
-`vpn://` did not open/import through the tested phone flows, and iPhone
-DefaultVPN connected only on the fourth attempt while Windows worked. AMN2 was
-advanced to `6d5cf3e Make Telegram config delivery conf-first`; latest
-VPS-smoked/package head remains `c958733` until a new `6d5cf3e` package/apply +
-mobile UX/iOS first-connect retest passes. Evidence:
+Phase 7 `P7-C010b/P7-C010c` mobile Telegram UX acceptance found real-device
+blockers: full `vpn://` one-click copy is not reliable for real configs, QR did
+not open/import through the tested phone flows, and iPhone DefaultVPN failed
+functional acceptance in the latest retest: first-connect was slow, reconnect
+loops appeared after toggling VPN off/on, and the tunnel did not provide
+expected connectivity. AMN2 was advanced to `6d5cf3e Make Telegram config
+delivery conf-first`; `P7-C010c` package/apply smoke passed on the disposable
+VPS, but mobile acceptance still failed. Phase 8 should wait for `P7-C010d`
+client compatibility diagnostic or an explicit narrower launch policy. Evidence:
 `research/amn2/phase-7-mobile-telegram-ux-failure-conf-first-fix-6d5cf3e-2026-06-20.md`.
 
 Phase 7 `P7-C010a` Mobile Telegram UX acceptance plan for AMN2 `c958733` is
