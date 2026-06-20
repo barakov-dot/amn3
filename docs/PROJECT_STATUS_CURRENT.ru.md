@@ -1,5 +1,21 @@
 # Текущий override 2026-06-09
 
+Phase 7 `P7-C010b` mobile Telegram UX live acceptance found a real-device UX
+blocker on 2026-06-20: one-click copy for the full config import link was not
+available/practical, QR did not open/import through Amnezia/DefaultVPN on the
+tested phones, iPhone DefaultVPN connected only on the fourth attempt while
+Windows worked, and the user-facing Telegram text needed to be more polished.
+Evidence:
+`research/amn2/phase-7-mobile-telegram-ux-failure-conf-first-fix-6d5cf3e-2026-06-20.md`.
+Root cause: real AMN2 `vpn://` import links are normally too long for Telegram
+copy-text buttons, and QR over the custom `vpn://` deep link is not a reliable
+camera/client import path. AMN2 was advanced to `6d5cf3e Make Telegram config
+delivery conf-first`: `.conf` is now the primary install path, QR is generated
+from raw `.conf` payload for in-app VPN scanners, and copy/QR limitations are
+explained to the user. Latest VPS-smoked/package head remains `c958733` until a
+new `6d5cf3e` package/apply + mobile Telegram UX and iOS DefaultVPN
+first-connect reliability retest gate passes.
+
 Phase 7 `P7-C010a` Mobile Telegram UX acceptance plan for AMN2 `c958733` was
 completed on 2026-06-20 as
 `completed-mobile-telegram-ux-acceptance-plan-no-live-action`. Evidence:

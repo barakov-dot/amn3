@@ -11,11 +11,11 @@ Telegram identity/profile/media mutation.
 ## Current Truth
 
 ```text
-AMN2 head: c958733 Harden security-sensitive operations
+AMN2 head: 6d5cf3e Make Telegram config delivery conf-first
 AMN2 security-fix head: c958733 Harden security-sensitive operations
 latest VPS-smoked/package head: c958733 Harden security-sensitive operations
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
-AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep c958733
+AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 6d5cf3e
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings
 next VPS package/apply target: completed by P7-C009
 public/config/write status: blocked-by-preconditions
@@ -41,6 +41,8 @@ p7_c008_telegram_user_flow_smoke_status: completed-after-token-reconciliation
 p7_c008a_telegram_token_reconciliation_status: completed-getme-dispatcher-surface-no-send
 p7_c010_mobile_telegram_ux_acceptance_status: planned-pending-live-real-device-acceptance
 p7_c010a_mobile_telegram_ux_plan_status: completed-mobile-telegram-ux-acceptance-plan-no-live-action
+p7_c010b_mobile_telegram_ux_live_acceptance_status: failed-real-device-ux-copy-qr-and-ios-first-connect
+p7_c010b_conf_first_fix_status: completed-code-fix-pending-package-apply-real-device-retest
 final_rc_freeze_status: completed-rc-ready-paused-state-c958733-no-live-action
 s_final_next_chat_handoff_status: completed-s-final-next-chat-handoff-c958733-no-live-action
 p7_c004c_direct_clean_installer_status: completed-direct-clean-install-5501295-loopback-smoke
@@ -61,6 +63,12 @@ local-only expansion status: frozen before named gate
 
 ## Core Evidence
 
+- `phase-7-mobile-telegram-ux-failure-conf-first-fix-6d5cf3e-2026-06-20.md` -
+  `P7-C010b` real-device Telegram UX failure analysis and AMN2 code fix
+  `6d5cf3e`; records that full `vpn://` one-click copy and QR deep-link import
+  are not reliable release paths, changes delivery to `.conf`-first and marks
+  the next step as package/apply plus real-device retest. No new live package
+  apply was performed in this evidence step.
 - `phase-7-mobile-telegram-ux-acceptance-plan-c958733-2026-06-20.md` -
   `P7-C010a` local-only mobile Telegram UX acceptance plan for AMN2 `c958733`;
   records the release-blocking real-device checks for one-click copy, QR
