@@ -1,5 +1,18 @@
 # `amn2` Transfer Backlog
 
+Phase 7 P7-C010f Windows desktop path acceptance record 2026-06-20: completed
+as `completed-windows-desktop-path-accepted-operator-observation-no-live-action`.
+Evidence
+`research/amn2/phase-7-windows-desktop-path-acceptance-2026-06-20.md`.
+Operator observation: the previously issued Windows configuration works clearly
+on Windows desktop. This accepts the desktop path as evidence that the AMN2
+server/base profile is not globally broken, but it does not close mobile
+acceptance: iPhone DefaultVPN remains experimental/unreliable, QR remains
+non-primary, full `vpn://` one-click copy remains impractical for real payload
+length, and Android AmneziaWG is still pending. No live VPS/SSH, Telegram
+action, config/QR/import-link output, restore/import/reboot, provider mutation,
+write execution or secret-bearing evidence was performed.
+
 Phase 7 Codex Security post-fix validation 2026-06-20: completed as
 `completed-post-fix-security-validation-no-open-findings` for AMN2 `c958733`.
 Evidence

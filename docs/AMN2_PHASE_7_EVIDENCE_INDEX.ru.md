@@ -46,6 +46,7 @@ p7_c010b_conf_first_fix_status: package-smoked-mobile-retest-failed-qr-and-ios-d
 p7_c010c_6d5cf3e_package_apply_smoke_status: completed-package-apply-loopback-telegram-backup-smoke
 p7_c010c_mobile_retest_status: failed-qr-and-ios-defaultvpn-functional-connectivity
 p7_c010d_client_compatibility_status: completed-defaultvpn-ios-downgraded-no-live-apply
+p7_c010f_windows_desktop_path_status: completed-windows-desktop-path-accepted-operator-observation-no-live-action
 final_rc_freeze_status: completed-rc-ready-paused-state-c958733-no-live-action
 s_final_next_chat_handoff_status: completed-s-final-next-chat-handoff-c958733-no-live-action
 p7_c004c_direct_clean_installer_status: completed-direct-clean-install-5501295-loopback-smoke
@@ -66,6 +67,13 @@ local-only expansion status: frozen before named gate
 
 ## Core Evidence
 
+- `phase-7-windows-desktop-path-acceptance-2026-06-20.md` - `P7-C010f`
+  docs-only Windows desktop path acceptance record; operator reports that the
+  previously issued Windows config works clearly. This accepts the desktop path
+  as operator observation evidence, but does not close mobile acceptance:
+  iPhone DefaultVPN remains experimental/unreliable, QR remains non-primary and
+  Android AmneziaWG is still pending. No live action or secret-bearing output
+  was performed.
 - `phase-7-ios-android-client-compatibility-diagnostic-471bca8-2026-06-20.md` -
   `P7-C010d` compatibility diagnostic after mobile UX retest; AMN2
   `471bca8` downgrades DefaultVPN iOS to experimental/unreliable and updates

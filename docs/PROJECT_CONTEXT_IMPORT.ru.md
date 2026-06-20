@@ -1,5 +1,18 @@
 # Текущий override 2026-06-09
 
+Phase 7 `P7-C010f` Windows desktop path acceptance record is complete as
+`completed-windows-desktop-path-accepted-operator-observation-no-live-action`.
+Evidence:
+`research/amn2/phase-7-windows-desktop-path-acceptance-2026-06-20.md`.
+Operator observation: the previously issued Windows config works clearly on
+Windows desktop. This accepts the desktop path as evidence that the server/base
+profile is not globally broken, but it does not close mobile acceptance.
+iPhone DefaultVPN remains experimental/unreliable, QR remains non-primary, full
+`vpn://` one-click copy remains impractical for real payload length, and Android
+AmneziaWG is still pending. No live VPS/SSH, Telegram action, config/QR/import
+link output, restore/import/reboot, provider mutation, write execution or
+secret-bearing evidence was performed.
+
 Phase 7 `P7-C010d` iOS/Android client compatibility diagnostic is complete as
 `completed-compatibility-policy-update-no-live-apply`. Evidence:
 `research/amn2/phase-7-ios-android-client-compatibility-diagnostic-471bca8-2026-06-20.md`.
