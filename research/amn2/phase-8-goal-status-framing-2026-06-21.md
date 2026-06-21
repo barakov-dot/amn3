@@ -17,8 +17,8 @@ AMN3/evidence workspace:
 ```text
 path=C:\Users\SooL\Documents\VPS-OPS-LAB
 branch=master
-head=82d9fd1 Record Phase 7 mobile dataplane closeout
-status=clean
+head_before_p8_s002=0d93807 Record Phase 8 launch readiness gates
+status_before_p8_s002=clean
 ```
 
 AMN2 clean current-fixes worktree:
@@ -78,9 +78,10 @@ Already strong:
 - previous package/apply, loopback web/API, Telegram getMe/non-polling smoke
   and backup create+verify evidence exists.
 
-Still blocking launch after P8-C002:
+Still blocking launch after P8-S002:
 
 - fresh-from-zero VPS rehearsal for the final Phase 8 line is not complete;
+- `P8-C003` proposal is prepared, but the destructive gate is not opened;
 - final launch readiness freeze has not yet been recorded.
 
 ## Phase 8 Gate Map
@@ -134,6 +135,32 @@ passed on 2026-06-21 for AMN2 `187949b`; launch estimate moved to roughly
 Stop-line если failed:
 do not continue to destructive rehearsal until package/apply or smoke blocker
 is fixed under a new exact gate.
+
+### P8-S002 fresh-from-zero preflight ledger
+
+ЦЕЛЬ:
+record the criticality/size task matrix, package inputs, readiness checklist,
+pass criteria and stop-lines before opening the destructive rehearsal gate.
+
+Что доказывает:
+the project has a clear non-live contract for what `P8-C003` is allowed to do
+and how it will pass or fail.
+
+Что не доказывает:
+fresh-from-zero installation, live runtime behavior, Android acceptance on a
+fresh VPS or launch readiness.
+
+Влияние на близость запуска:
+passed on 2026-06-21 as docs-only preparation; launch estimate remains roughly
+`92_percent` because the destructive rehearsal has not run.
+
+Следующий gate если passed:
+operator review or explicit opening of `P8-C003 fresh-from-zero VPS rehearsal
+gate`.
+
+Stop-line если failed:
+do not open `P8-C003`; fix the missing preflight item or unclear stop-line
+first.
 
 ### P8-C003 fresh-from-zero VPS rehearsal gate
 
@@ -196,8 +223,9 @@ Without a fresh exact named Phase 8 gate, do not perform:
 ## Result
 
 `P8-S001` is closed as local-only framing. `P8-C001` fresh per-device Android
-acceptance and `P8-C002` package/current-head smoke have also passed on
-2026-06-21. The recommended next exact gate is now:
+acceptance, `P8-C002` package/current-head smoke and `P8-S002` fresh-from-zero
+preflight ledger have also passed on 2026-06-21. `P8-C003` is proposed but not
+opened. The recommended next exact gate is still:
 
 ```text
 P8-C003 fresh-from-zero VPS rehearsal gate

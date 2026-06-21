@@ -18,6 +18,26 @@ Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
 
+## Update 2026-06-21: P8-S002 + P8-C003 proposal prepared
+
+`P8-S002` fresh-from-zero preflight ledger is complete as docs-only evidence.
+`P8-C003` destructive gate proposal is prepared but not opened. Evidence:
+
+- `research/amn2/phase-8-p8-s002-fresh-from-zero-preflight-ledger-2026-06-21.md`
+- `research/amn2/phase-8-p8-c003-destructive-gate-proposal-2026-06-21.md`
+
+Current status remains:
+
+```text
+phase8_launch_gate_status=blocked-until-fresh-from-zero-vps-rehearsal
+operator_explicit_destructive_gate_opened=false
+next_action=operator_review_or_open_exact_P8_C003_gate
+```
+
+If the operator chooses to open `P8-C003`, use the copy/paste gate text from
+the proposal. Do not treat this handoff or proposal as permission to wipe or
+install.
+
 ## Update 2026-06-21: P8-C002 passed for AMN2 187949b
 
 `P8-C002` package/current-head smoke and compatible AWG defaults persistence
@@ -128,6 +148,13 @@ delivery path later persisted those compatible defaults in `P8-C002`.
 P8-C003 fresh-from-zero VPS rehearsal gate
 ```
 
+Prepared docs:
+
+- `P8-S002` preflight ledger with criticality/size grouping, package inputs,
+  readiness checklist, pass criteria and stop-lines;
+- `P8-C003` destructive gate proposal with copy/paste operator text and
+  confirmation strings.
+
 Suggested scope:
 
 - destructive clean/fresh install on the disposable VPS;
@@ -169,6 +196,10 @@ Do not open without exact named gate:
 
 Read:
 
+- `research/amn2/phase-8-p8-s002-fresh-from-zero-preflight-ledger-2026-06-21.md`
+- `research/amn2/phase-8-p8-c003-destructive-gate-proposal-2026-06-21.md`
+- `research/amn2/phase-8-p8-c002-187949b-package-apply-smoke-2026-06-21.md`
+- `research/amn2/phase-8-p8-c001-fresh-android-config-acceptance-2026-06-21.md`
 - `research/amn2/phase-7-mobile-dataplane-closeout-c011f2-2026-06-21.md`
 - `research/amn2/phase-7-android-acceptance-contract-471bca8-2026-06-21.md`
 - `research/amn2/phase-7-state-drift-clean-worktree-2026-06-21.md`

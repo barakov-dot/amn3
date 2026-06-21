@@ -1,5 +1,16 @@
 # Текущий override 2026-06-09
 
+Phase 8 next-step preparation: `P8-S002` fresh-from-zero preflight ledger is
+complete and `P8-C003` destructive gate proposal is prepared but not opened.
+Evidence:
+`research/amn2/phase-8-p8-s002-fresh-from-zero-preflight-ledger-2026-06-21.md`
+and
+`research/amn2/phase-8-p8-c003-destructive-gate-proposal-2026-06-21.md`.
+The proposal includes copy/paste operator text and confirmation strings for a
+future exact destructive gate. No live/destructive action was performed. Launch
+remains `blocked-until-fresh-from-zero-vps-rehearsal` until the operator
+explicitly opens `P8-C003`.
+
 Phase 8 current status after `P8-C001` and `P8-C002`: fresh per-device Android
 AmneziaWG acceptance passed on 2026-06-21, and package/current-head smoke for
 AMN2 `187949bffb927a0a6d6c1f260fc0bb9ebb972447 Persist Android-compatible AWG

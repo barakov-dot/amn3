@@ -1,5 +1,21 @@
 # Текущий override 2026-06-09
 
+Phase 8 `P8-S002` fresh-from-zero preflight ledger completed on 2026-06-21 as
+docs-only preparation, and `P8-C003` destructive gate proposal was prepared but
+not opened. Evidence:
+`research/amn2/phase-8-p8-s002-fresh-from-zero-preflight-ledger-2026-06-21.md`
+and
+`research/amn2/phase-8-p8-c003-destructive-gate-proposal-2026-06-21.md`.
+The ledger records the criticality/size task matrix, package inputs for
+AMN2 `187949b`, readiness checklist, pass criteria and stop-lines. The proposal
+contains copy/paste operator gate text and future helper confirmation strings
+for `P8-C003`. No live VPS/SSH command, destructive clean/install action,
+package upload/apply, public exposure, Telegram API/live send, config delivery,
+restore/import/reboot, provider mutation, production peer/user mutation or
+secret-bearing output was performed. Launch remains
+`blocked-until-fresh-from-zero-vps-rehearsal` until the operator explicitly
+opens `P8-C003`.
+
 Phase 8 `P8-C002` package/current-head smoke and compatible AWG defaults
 persistence gate completed on 2026-06-21 for disposable VPS `89.185.80.166`.
 Evidence:
