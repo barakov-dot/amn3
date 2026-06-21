@@ -1,5 +1,21 @@
 # Текущий override 2026-06-09
 
+Phase 8 current status after `P8-C001` and `P8-C002`: fresh per-device Android
+AmneziaWG acceptance passed on 2026-06-21, and package/current-head smoke for
+AMN2 `187949bffb927a0a6d6c1f260fc0bb9ebb972447 Persist Android-compatible AWG
+defaults` passed on disposable VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-8-p8-c001-fresh-android-config-acceptance-2026-06-21.md`
+and
+`research/amn2/phase-8-p8-c002-187949b-package-apply-smoke-2026-06-21.md`.
+Latest VPS-applied/package-smoked AMN2 head is now `187949b`; compatible
+`CLIENT_AWG_*` defaults are persisted in the normal AMN2 runtime/package path;
+loopback web/API smoke, Telegram `getMe` plus non-polling dispatcher/user-flow
+smoke, backup create+verify and closed public probes passed. No `.conf`, QR,
+`vpn://`, private key, PSK, token or secret-bearing payload was printed. Phase
+8 launch gate is now `blocked-until-fresh-from-zero-vps-rehearsal`; next exact
+gate is `P8-C003 fresh-from-zero VPS rehearsal gate`, which is destructive and
+must not be run without a fresh exact named gate.
+
 Phase 7 mobile/dataplane closeout: `P7-C011f2` read-only AWG observation
 confirmed live `awg0` on UDP `30001`, server public key fingerprint
 `0bdc326c396a`, old matched peer `a6a551084fad` with fresh handshake/growing

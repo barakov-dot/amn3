@@ -9,7 +9,7 @@
 
 Phase 7 status: phase8-prep-ready.
 Phase 8 launch gate status:
-blocked-until-fresh-per-device-android-config-acceptance.
+blocked-until-fresh-from-zero-vps-rehearsal.
 
 Default lane: local-only/docs/tests/package-preflight unless an exact named
 Phase 8 live/destructive/config gate is opened.
@@ -17,6 +17,71 @@ Phase 8 live/destructive/config gate is opened.
 Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
+
+## Update 2026-06-21: P8-C002 passed for AMN2 187949b
+
+`P8-C002` package/current-head smoke and compatible AWG defaults persistence
+passed on 2026-06-21. Evidence:
+`research/amn2/phase-8-p8-c002-187949b-package-apply-smoke-2026-06-21.md`.
+
+Key safe result:
+
+```text
+amn2_head=187949bffb927a0a6d6c1f260fc0bb9ebb972447
+package_sha256=7FA073E4C66C0981673061D167D525BB9BCD6DFDDAA075E15701F0C2608E2E82
+source_overlay_match=yes
+settings_client_awg_compatible=yes
+loopback_web_runtime_status=passed
+api_smoke_status=passed
+telegram_get_me_status=passed
+telegram_live_send_performed=false
+backup_create_status=passed
+backup_verify_status=passed
+backup_artifact_mode=600
+public_3030_probe=000
+public_3040_probe=000
+public_80_probe=000
+public_443_probe=000
+secret_values_printed=false
+```
+
+Latest VPS-applied/package-smoked AMN2 head is now `187949b`. The remaining
+launch blocker is fresh-from-zero reproducibility, not Android acceptance or
+current-head package smoke.
+
+## Update 2026-06-21: P8-C001 passed with reconnect sanity
+
+`P8-C001` fresh per-device Android config acceptance passed functionally on
+2026-06-21. Evidence:
+`research/amn2/phase-8-p8-c001-fresh-android-config-acceptance-2026-06-21.md`.
+
+Key safe result:
+
+```text
+fresh_peer_public_key_fp=594ba96e4f90
+android_import_status=passed
+android_connect_status=passed
+android_traffic_status=passed
+endpoint_observed=yes
+latest_handshake_age_s=45
+transfer_rx_bytes_before=191124
+transfer_tx_bytes_before=1487651
+transfer_rx_bytes_after=520504
+transfer_tx_bytes_after=4609467
+reconnect_sanity_status=passed
+reconnect_latest_handshake_age_s=18
+reconnect_transfer_rx_bytes_before=5136612
+reconnect_transfer_tx_bytes_before=229495265
+reconnect_transfer_rx_bytes_after=5318584
+reconnect_transfer_tx_bytes_after=230151167
+payload_output_status=not_performed
+public_exposure_status=not_performed
+telegram_live_send_status=not_performed
+```
+
+Important limitation: the successful file used live-compatible AWG client
+parameters rendered for existing fresh device `2`; the normal package/runtime
+delivery path later persisted those compatible defaults in `P8-C002`.
 
 ## Источник правды
 
@@ -27,10 +92,9 @@ They are diagnostic proof only.
   `C:\Users\SooL\Documents\VPS-OPS-LAB\worktrees\amn2-phase7-current`,
   branch `codex/phase7-current-fixes`.
 - AMN2 source head for current local policy:
-  `4d22ff2 Gate Phase 8 on Android acceptance`.
+  `187949b Persist Android-compatible AWG defaults`.
 - AMN2 latest VPS-applied/package-smoked head:
-  `6d5cf3e Make Telegram config delivery conf-first`, until a new exact
-  package/apply gate is opened.
+  `187949b Persist Android-compatible AWG defaults`.
 - Current disposable VPS:
   `89.185.80.166`.
 
@@ -48,9 +112,9 @@ They are diagnostic proof only.
   - `Neobyatnaya-AMNZ-2.conf` matched peer `2ed2b69a2f79`.
 - Do not paste or publish `.conf`, QR, `vpn://`, private keys, PSK, tokens or
   screenshots containing payloads.
-- Android AmneziaWG is the intended mobile candidate, but AMN2 now marks it
-  `pending_real_device_acceptance` and `release_primary_allowed=false` until a
-  fresh per-device config passes.
+- Android AmneziaWG is the intended mobile candidate. `P8-C001` now provides
+  functional fresh per-device Android acceptance, and `P8-C002` persisted the
+  compatible AWG defaults in the normal package/runtime delivery path.
 - QR and full `vpn://` are not release-primary mobile delivery paths.
 - iOS DefaultVPN is experimental/unreliable.
 - Windows desktop is accepted by operator observation, but this does not close
@@ -58,37 +122,35 @@ They are diagnostic proof only.
 
 ## Главный Phase 8 выбор
 
-Выбрать один exact gate:
+Следующий exact gate:
 
 ```text
-P8-C001 fresh per-device Android config acceptance gate
-```
-
-Suggested scope:
-
-- create or add one fresh Android peer/config through AMN2/dataplane path;
-- private operator handoff only;
-- Android AmneziaWG import/connect/traffic acceptance;
-- no public web/API exposure;
-- no Telegram profile/media mutation;
-- no payload output in evidence.
-
-Alternative exact gate:
-
-```text
-P8-C000 fresh-from-zero VPS launch rehearsal gate
+P8-C003 fresh-from-zero VPS rehearsal gate
 ```
 
 Suggested scope:
 
 - destructive clean/fresh install on the disposable VPS;
-- package/apply current AMN2 head;
+- initialize fresh safe env/DB;
+- apply/package current selected AMN2 head only under this exact gate;
 - loopback web/API smoke;
-- Telegram getMe/non-polling smoke if needed;
-- create one fresh per-device Android config;
-- Android acceptance;
+- Telegram getMe/non-polling smoke;
 - backup create+verify;
-- external public probes closed unless public exposure is separately opened.
+- external public probes remain closed;
+- one fresh Android per-device config acceptance;
+- no public web/API exposure;
+- no Telegram profile/media mutation;
+- no payload output in evidence.
+
+After that, if passed:
+
+```text
+P8-SFINAL launch readiness freeze
+```
+
+`P8-SFINAL` should decide one final status: `private/operator RC launch-ready`,
+`launch-ready-with-explicit-limitations`, or
+`blocked-with-exact-remaining-blockers`.
 
 ## Stop lines
 

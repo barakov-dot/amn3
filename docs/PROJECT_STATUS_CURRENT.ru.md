@@ -1,5 +1,45 @@
 # Текущий override 2026-06-09
 
+Phase 8 `P8-C002` package/current-head smoke and compatible AWG defaults
+persistence gate completed on 2026-06-21 for disposable VPS `89.185.80.166`.
+Evidence:
+`research/amn2/phase-8-p8-c002-187949b-package-apply-smoke-2026-06-21.md`.
+AMN2 `codex/phase7-current-fixes` was packaged/applied at
+`187949bffb927a0a6d6c1f260fc0bb9ebb972447 Persist Android-compatible AWG defaults`.
+The package/source SHA checks passed, `/opt/amn2` source overlay matched
+`187949b`, Android-compatible `CLIENT_AWG_*` defaults were persisted in the
+normal runtime/package path, loopback web/API smoke passed, Telegram `getMe`
+plus non-polling dispatcher/user-flow smoke passed, backup create+verify passed
+with artifact mode `600`, and public probes to `3030`, `3040`, `80` and `443`
+remained closed. No `.conf`, private key, PSK, QR, `vpn://`, token,
+secret-bearing screenshot or payload was printed into evidence; no public
+exposure, Telegram live send, restore/import/reboot or provider mutation was
+performed. Latest VPS-applied/package-smoked AMN2 head is now `187949b`.
+Phase 8 launch gate status is now
+`blocked-until-fresh-from-zero-vps-rehearsal`; private/operator RC distance is
+roughly `92_percent`. Next exact gate: `P8-C003 fresh-from-zero VPS rehearsal
+gate`.
+
+Phase 8 `P8-C001` fresh per-device Android config acceptance passed
+functionally with reconnect sanity on 2026-06-21 for disposable VPS
+`89.185.80.166`. Evidence:
+`research/amn2/phase-8-p8-c001-fresh-android-config-acceptance-2026-06-21.md`.
+Fresh AMN2 peer/device `2` with public-key fingerprint `594ba96e4f90` was
+created/applied through the AMN2 access/dataplane path, privately handed off as
+a `.conf` outside the workspace, then accepted on Android AmneziaWG after a
+phone OS update and compatible AWG client config render. Final read-only
+server observation showed `endpoint_observed=yes`, fresh handshake age `45s`,
+and counter growth from `rx=191124/tx=1487651` to
+`rx=520504/tx=4609467`. A reconnect sanity observation then showed
+`endpoint_observed=yes`, fresh handshake age `18s`, and counter growth from
+`rx=5136612/tx=229495265` to `rx=5318584/tx=230151167`. No `.conf`, private
+key, PSK, QR, `vpn://`, token, secret-bearing screenshot or payload was printed
+into evidence; no public exposure, Telegram live send, destructive install,
+restore/import/reboot or provider mutation was performed. Phase 8 launch gate
+was then `android-acceptance-unblocked-package-and-persistence-gates-remain`;
+that interim blocker was superseded by the successful `P8-C002` package/current
+head smoke recorded above.
+
 Phase 7 mobile/dataplane closeout completed on 2026-06-21 as
 `completed-mobile-dataplane-observed-old-matched-config-diagnostic-only`.
 Evidence:
