@@ -1,5 +1,17 @@
 # Текущий override 2026-06-09
 
+Phase 7 mobile/dataplane closeout completed on 2026-06-21 as
+`completed-mobile-dataplane-observed-old-matched-config-diagnostic-only`.
+Evidence:
+`research/amn2/phase-7-mobile-dataplane-closeout-c011f2-2026-06-21.md`.
+`P7-C011f2` used a corrected read-only AWG parser and showed live `awg0` on UDP
+`30001`, server public key fingerprint `0bdc326c396a`, live peer
+`a6a551084fad` with fresh handshake and growing transfer counters, and operator
+observation that Android connected instantly. The old matched configs from
+`C:\temp` are diagnostic proof only and must not become release delivery
+artifacts. Phase 8 status is now `phase8-prep-ready`, but launch remains
+`blocked-until-fresh-per-device-android-config-acceptance`.
+
 Phase 7 Android acceptance contract was updated locally on 2026-06-21 from the
 clean AMN2 worktree
 `C:\Users\SooL\Documents\VPS-OPS-LAB\worktrees\amn2-phase7-current` at

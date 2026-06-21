@@ -382,6 +382,16 @@ permission_to_open_live_gate=false
   verification passed. No live VPS/SSH, package apply, config delivery,
   Telegram action, restore/import/reboot, provider mutation, write execution or
   secret-bearing output was performed.
+- `phase-7-mobile-dataplane-closeout-c011f2-2026-06-21.md` - `P7-C011f2`
+  read-only live AWG handshake observation and operator Android observation;
+  confirms the live dataplane on UDP `30001` is working and that old matched
+  config `Neobyatnaya-AMNZ.conf`/peer `a6a551084fad` is active with fresh
+  handshake and growing transfer counters. The old matched configs are
+  diagnostic proof only, not release delivery artifacts. Phase 8 entry is
+  `phase8-prep-ready`, but launch remains blocked until fresh per-device
+  Android config acceptance. No config payload, key, PSK, QR, `vpn://`, token,
+  container/config mutation, Telegram send, restore/import/reboot, provider
+  mutation, write execution or public exposure was performed.
 
 ## Operator Named-Gate Menu
 

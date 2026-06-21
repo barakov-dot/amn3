@@ -1,5 +1,18 @@
 # Текущий override 2026-06-09
 
+Phase 7 mobile/dataplane closeout: `P7-C011f2` read-only AWG observation
+confirmed live `awg0` on UDP `30001`, server public key fingerprint
+`0bdc326c396a`, old matched peer `a6a551084fad` with fresh handshake/growing
+transfer counters, and operator observation that Android connected instantly.
+Evidence:
+`research/amn2/phase-7-mobile-dataplane-closeout-c011f2-2026-06-21.md`.
+Old matched configs from `C:\temp` are diagnostic proof only. Phase 8 is
+`phase8-prep-ready`, but launch is blocked until fresh per-device Android
+config acceptance.
+
+Phase 8 prep handoff:
+`docs/NEXT_CHAT_AMN2_PHASE_8_PREP.ru.md`.
+
 Phase 7 current-fixes clean-worktree guard: AMN2 fixes now continue from
 `C:\Users\SooL\Documents\VPS-OPS-LAB\worktrees\amn2-phase7-current` on
 `codex/phase7-current-fixes` at `471bca8`, not from the dirty historical

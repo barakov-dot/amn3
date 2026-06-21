@@ -26,6 +26,12 @@ Current-fixes update 2026-06-21:
 - Fresh-from-zero VPS launch remains allowed only through an exact destructive
   named gate with an explicit final stop-line phrase, even if the current VPS is
   disposable.
+- `P7-C011f2` closed the live dataplane question: `awg0` listens on UDP `30001`,
+  the old matched peer `a6a551084fad` showed fresh handshake/growing transfer
+  counters, and the operator observed Android connecting instantly. This proves
+  dataplane viability, but old matched configs remain diagnostic-only. Phase 8
+  is `phase8-prep-ready`; launch remains blocked until fresh per-device Android
+  config acceptance.
 
 Режим по умолчанию:
 `local-only/docs/tests/security/package-preflight/watch-only` unless an exact
