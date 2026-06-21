@@ -1,5 +1,18 @@
 # Текущий override 2026-06-09
 
+Phase 8 `P8-C003` readiness is now `go-with-limitation`, but the destructive
+gate is still not opened. Evidence:
+`research/amn2/phase-8-p8-c003-readiness-confirmation-2026-06-21.md`.
+Confirmed without printing secrets: Telegram token is available privately,
+web/admin credentials strategy is `new_private_credentials`, safe env strategy
+is `generate_fresh_plus_private_inputs`, and private handoff path is
+`C:\Users\SooL\Documents\AMN2-PRIVATE-HANDOFF`. Android phone is unavailable;
+Android projector is available, lacks Telegram, but browser/app traffic is
+available and accepted for the fresh Android traffic observation. The final
+freeze must record this limitation if `P8-C003` uses the projector. No live VPS,
+destructive action, package apply, Telegram API/live send, config delivery or
+secret-bearing output was performed.
+
 Phase 8 next-step preparation: `P8-S002` fresh-from-zero preflight ledger is
 complete and `P8-C003` destructive gate proposal is prepared but not opened.
 Evidence:

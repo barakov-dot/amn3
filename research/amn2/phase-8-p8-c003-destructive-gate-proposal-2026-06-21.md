@@ -37,6 +37,33 @@ prove fresh-from-zero private/operator RC reproducibility using current AMN2
 per-device config acceptance, backup evidence and closed public exposure.
 ```
 
+## Readiness Confirmation
+
+Readiness confirmation was completed after this proposal was drafted. Evidence:
+`research/amn2/phase-8-p8-c003-readiness-confirmation-2026-06-21.md`.
+
+```text
+telegram_token_available_privately=yes
+web_admin_credentials_strategy=new_private_credentials
+safe_env_strategy=generate_fresh_plus_private_inputs
+private_handoff_destination_outside_workspace=yes
+private_handoff_path=C:\Users\SooL\Documents\AMN2-PRIVATE-HANDOFF
+android_phone_available=no
+android_projector_available=yes
+android_projector_telegram_available=no
+android_projector_telegram_required=false
+android_projector_can_generate_browser_or_app_traffic=yes
+android_test_device_available=yes-with-limitation
+android_test_device_type=android_projector
+limitation_accepted=yes
+p8_c003_readiness_status=go-with-limitation
+```
+
+If the Android projector is used during `P8-C003`, the final evidence and
+`P8-SFINAL` freeze must state that fresh-from-zero Android acceptance used an
+Android projector with browser/app traffic, while prior Android phone
+acceptance remains the separate `P8-C001` evidence.
+
 ## Copy/Paste Operator Gate Text
 
 The operator can open the gate in a future chat or prompt with this exact
@@ -58,6 +85,19 @@ dist/amn2-vps-update-and-smoke-kit-187949b.zip
 Expected package SHA256:
 7FA073E4C66C0981673061D167D525BB9BCD6DFDDAA075E15701F0C2608E2E82
 
+Private inputs readiness:
+- Telegram token available privately.
+- Web admin credentials strategy: new private credentials.
+- Safe env strategy: generate fresh plus private inputs.
+- Private handoff path: C:\Users\SooL\Documents\AMN2-PRIVATE-HANDOFF.
+
+Android acceptance limitation:
+- Android phone is not available for this gate.
+- Android projector is available.
+- Android projector has no Telegram, and Telegram on-device is not required.
+- Browser/app traffic on Android projector is available and accepted for the
+  fresh Android traffic observation.
+
 No public exposure, no Telegram live send/profile/media mutation, no restore/
 import, no config payload output, no QR/vpn:// output, no private key/PSK/token
 output.
@@ -73,6 +113,7 @@ TARGET_89_185_80_166_DISPOSABLE_WIPE_ALLOWED
 APPLY_AMN2_187949B_PACKAGE_AND_SMOKE
 NO_PUBLIC_EXPOSURE_NO_PAYLOAD_OUTPUT_CONFIRMED
 STOP_AT_FIRST_FAILED_GATE_CONFIRMED
+ANDROID_PROJECTOR_LIMITATION_ACCEPTED
 ```
 
 If a private destination is needed for a fresh Android `.conf`, use a local
@@ -103,6 +144,9 @@ Only after the exact gate is opened, the following actions are allowed:
   the workspace;
 - read-only server-side AWG observation of the fresh peer fingerprint,
   handshake and transfer counters;
+- use the Android projector for acceptance if an Android phone remains
+  unavailable, with browser/app traffic as the traffic generator and the
+  limitation recorded in evidence;
 - backup create and verify;
 - public external probes confirming `3030`, `3040`, `80` and `443` remain
   closed;
@@ -208,6 +252,7 @@ fresh_android_private_handoff_failed
 fresh_android_import_failed
 fresh_android_connect_failed
 fresh_android_traffic_or_counter_failed
+fresh_android_projector_limitation_not_recorded
 backup_create_failed
 backup_verify_failed
 backup_mode_failed
@@ -224,6 +269,10 @@ If `P8-C003` passes, evidence should end with:
 p8_c003_status=passed-fresh-from-zero-vps-rehearsal
 phase8_launch_gate_status=fresh-from-zero-rehearsal-passed-awaiting-final-freeze
 private_operator_rc_distance_to_launch=97_percent
+fresh_android_acceptance_device=android_projector
+fresh_android_phone_available=false
+fresh_android_traffic_source=browser_or_app
+fresh_android_projector_limitation_recorded=true
 recommended_next_gate=P8-SFINAL launch readiness freeze
 ```
 

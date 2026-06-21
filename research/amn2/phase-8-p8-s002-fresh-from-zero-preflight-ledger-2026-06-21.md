@@ -18,7 +18,7 @@ AMN3/evidence workspace:
 ```text
 path=C:\Users\SooL\Documents\VPS-OPS-LAB
 branch=master
-head=0d93807 Record Phase 8 launch readiness gates
+head_before_p8_c003_readiness=ee0edbc Prepare Phase 8 fresh-from-zero gate
 status=clean
 ```
 
@@ -202,11 +202,17 @@ package_sha256_known=true
 source_sha256_known=true
 amn2_head_pushed=true
 amn3_evidence_head_pushed=true
-safe_env_values_available_privately=operator_must_confirm
-telegram_token_available_privately=operator_must_confirm
-web_admin_credentials_available_privately=operator_must_confirm
-android_test_device_available=operator_must_confirm
-private_handoff_destination_outside_workspace=operator_must_confirm
+safe_env_strategy=generate_fresh_plus_private_inputs
+telegram_token_available_privately=yes
+web_admin_credentials_strategy=new_private_credentials
+android_test_device_available=yes-with-limitation
+android_test_device_type=android_projector
+android_phone_available=no
+android_projector_available=yes
+android_projector_telegram_available=no
+android_projector_telegram_required=false
+android_projector_can_generate_browser_or_app_traffic=yes
+private_handoff_destination_outside_workspace=yes
 public_exposure_required=false
 restore_import_required=false
 old_configs_allowed_as_release_artifacts=false
@@ -215,6 +221,11 @@ payload_output_allowed=false
 
 The `false` value for `operator_explicit_destructive_gate_opened` is
 intentional: this ledger does not open `P8-C003`.
+
+The Android test-device value is a limitation, not a phone acceptance claim:
+`P8-C003` may use the Android projector with browser/app traffic if the
+limitation is recorded in evidence and the final freeze. The separate Android
+phone acceptance remains `P8-C001`.
 
 ## P8-C003 Pass Criteria
 

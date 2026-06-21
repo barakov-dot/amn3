@@ -78,10 +78,13 @@ Already strong:
 - previous package/apply, loopback web/API, Telegram getMe/non-polling smoke
   and backup create+verify evidence exists.
 
-Still blocking launch after P8-S002:
+Still blocking launch after P8-C003 readiness confirmation:
 
 - fresh-from-zero VPS rehearsal for the final Phase 8 line is not complete;
-- `P8-C003` proposal is prepared, but the destructive gate is not opened;
+- `P8-C003` proposal is prepared and readiness is `go-with-limitation`, but the
+  destructive gate is not opened;
+- the Android device for `P8-C003` is an Android projector with browser/app
+  traffic, not an Android phone, and this limitation must be recorded if used;
 - final launch readiness freeze has not yet been recorded.
 
 ## Phase 8 Gate Map
@@ -162,6 +165,33 @@ Stop-line если failed:
 do not open `P8-C003`; fix the missing preflight item or unclear stop-line
 first.
 
+### P8-C003 readiness confirmation
+
+ЦЕЛЬ:
+confirm private input strategy and Android test-device availability before the
+destructive rehearsal approval.
+
+Что доказывает:
+the operator has a private Telegram token source, will use new private web/admin
+credentials, will generate fresh env secrets plus private inputs, has a private
+handoff path outside the workspace, and has an Android projector capable of
+browser/app traffic.
+
+Что не доказывает:
+fresh-from-zero installation, live runtime behavior, Android phone acceptance
+inside `P8-C003` or final launch readiness.
+
+Влияние на близость запуска:
+completed on 2026-06-21 as `go-with-limitation`; launch estimate remains
+roughly `92_percent` until `P8-C003` actually runs.
+
+Следующий gate если passed:
+explicit `P8-C003 destructive gate approval`.
+
+Stop-line если failed:
+do not approve destructive execution; resolve private input or Android
+availability blocker first.
+
 ### P8-C003 fresh-from-zero VPS rehearsal gate
 
 ЦЕЛЬ:
@@ -223,9 +253,11 @@ Without a fresh exact named Phase 8 gate, do not perform:
 ## Result
 
 `P8-S001` is closed as local-only framing. `P8-C001` fresh per-device Android
-acceptance, `P8-C002` package/current-head smoke and `P8-S002` fresh-from-zero
-preflight ledger have also passed on 2026-06-21. `P8-C003` is proposed but not
-opened. The recommended next exact gate is still:
+acceptance, `P8-C002` package/current-head smoke, `P8-S002` fresh-from-zero
+preflight ledger and `P8-C003` readiness confirmation have also passed on
+2026-06-21. `P8-C003` is proposed but not opened. Readiness is
+`go-with-limitation` because the available Android test device is an Android
+projector rather than a phone. The recommended next exact gate is still:
 
 ```text
 P8-C003 fresh-from-zero VPS rehearsal gate

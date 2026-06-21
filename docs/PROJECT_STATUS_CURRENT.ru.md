@@ -1,5 +1,23 @@
 # Текущий override 2026-06-09
 
+Phase 8 `P8-C003` readiness confirmation completed on 2026-06-21 as
+`completed-readiness-confirmation-go-with-limitation-no-live-action`. Evidence:
+`research/amn2/phase-8-p8-c003-readiness-confirmation-2026-06-21.md`.
+Telegram token availability was confirmed privately; web/admin credentials
+strategy is `new_private_credentials`; safe env strategy is
+`generate_fresh_plus_private_inputs`; private handoff path is
+`C:\Users\SooL\Documents\AMN2-PRIVATE-HANDOFF`. Android phone is not available
+for `P8-C003`; Android projector is available, has browser/app traffic, has no
+Telegram, and on-device Telegram is not required because Telegram is separately
+smoked server-side through `getMe` plus non-polling dispatcher/user-flow
+surface. This is `p8_c003_readiness_status=go-with-limitation`, not launch
+readiness and not a destructive approval. No live VPS/SSH command, destructive
+clean/install action, package upload/apply, public exposure, Telegram API/live
+send, config delivery, restore/import/reboot, provider mutation, production
+peer/user mutation or secret-bearing output was performed. Launch remains
+`blocked-until-fresh-from-zero-vps-rehearsal` until the operator explicitly
+opens `P8-C003`.
+
 Phase 8 `P8-S002` fresh-from-zero preflight ledger completed on 2026-06-21 as
 docs-only preparation, and `P8-C003` destructive gate proposal was prepared but
 not opened. Evidence:

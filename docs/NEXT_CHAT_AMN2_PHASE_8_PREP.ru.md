@@ -21,22 +21,31 @@ They are diagnostic proof only.
 ## Update 2026-06-21: P8-S002 + P8-C003 proposal prepared
 
 `P8-S002` fresh-from-zero preflight ledger is complete as docs-only evidence.
-`P8-C003` destructive gate proposal is prepared but not opened. Evidence:
+`P8-C003` destructive gate proposal is prepared but not opened. `P8-C003`
+readiness confirmation is now `go-with-limitation`. Evidence:
 
 - `research/amn2/phase-8-p8-s002-fresh-from-zero-preflight-ledger-2026-06-21.md`
 - `research/amn2/phase-8-p8-c003-destructive-gate-proposal-2026-06-21.md`
+- `research/amn2/phase-8-p8-c003-readiness-confirmation-2026-06-21.md`
 
 Current status remains:
 
 ```text
 phase8_launch_gate_status=blocked-until-fresh-from-zero-vps-rehearsal
 operator_explicit_destructive_gate_opened=false
+p8_c003_readiness_status=go-with-limitation
+telegram_token_available_privately=yes
+web_admin_credentials_strategy=new_private_credentials
+safe_env_strategy=generate_fresh_plus_private_inputs
+android_test_device_type=android_projector
+android_phone_available=no
+android_projector_can_generate_browser_or_app_traffic=yes
 next_action=operator_review_or_open_exact_P8_C003_gate
 ```
 
 If the operator chooses to open `P8-C003`, use the copy/paste gate text from
-the proposal. Do not treat this handoff or proposal as permission to wipe or
-install.
+the proposal. Do not treat this handoff, readiness confirmation or proposal as
+permission to wipe or install.
 
 ## Update 2026-06-21: P8-C002 passed for AMN2 187949b
 
@@ -153,7 +162,8 @@ Prepared docs:
 - `P8-S002` preflight ledger with criticality/size grouping, package inputs,
   readiness checklist, pass criteria and stop-lines;
 - `P8-C003` destructive gate proposal with copy/paste operator text and
-  confirmation strings.
+  confirmation strings;
+- `P8-C003` readiness confirmation with Android projector limitation accepted.
 
 Suggested scope:
 
@@ -196,6 +206,7 @@ Do not open without exact named gate:
 
 Read:
 
+- `research/amn2/phase-8-p8-c003-readiness-confirmation-2026-06-21.md`
 - `research/amn2/phase-8-p8-s002-fresh-from-zero-preflight-ledger-2026-06-21.md`
 - `research/amn2/phase-8-p8-c003-destructive-gate-proposal-2026-06-21.md`
 - `research/amn2/phase-8-p8-c002-187949b-package-apply-smoke-2026-06-21.md`
