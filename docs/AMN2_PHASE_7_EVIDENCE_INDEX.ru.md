@@ -362,6 +362,27 @@ current_state_backup_status=completed-for-5501295
 permission_to_open_live_gate=false
 ```
 
+## Current-Fixes State Drift
+
+- `phase-7-state-drift-clean-worktree-2026-06-21.md` - local-only guard after
+  manual upstream-refresh and mobile VPN debugging; confirms Phase 7 fixes must
+  continue from clean AMN2 worktree
+  `C:\Users\SooL\Documents\VPS-OPS-LAB\worktrees\amn2-phase7-current` on
+  `471bca8 Downgrade DefaultVPN iOS compatibility`, while the older
+  `C:\Users\SooL\Documents\Amneziya` checkout is behind by four commits and
+  dirty. No live VPS/SSH, package apply, config delivery, Telegram action,
+  restore/import/reboot, provider mutation, write execution or secret-bearing
+  output was performed.
+- `phase-7-android-acceptance-contract-471bca8-2026-06-21.md` - local-only
+  AMN2 code/tests slice from clean worktree `471bca8`; Android AmneziaWG remains
+  a supported candidate but is now machine-marked
+  `pending_real_device_acceptance` and `release_primary_allowed=false`, QR and
+  full `vpn://` are not release-primary, and Windows desktop remains accepted
+  only by operator observation. Focused verification: `9 passed`; syntax
+  verification passed. No live VPS/SSH, package apply, config delivery,
+  Telegram action, restore/import/reboot, provider mutation, write execution or
+  secret-bearing output was performed.
+
 ## Operator Named-Gate Menu
 
 Choose exactly one exact named gate before any live/public/config/write/

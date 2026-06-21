@@ -1,5 +1,18 @@
 # Текущий override 2026-06-09
 
+Phase 7 Android acceptance contract was updated locally on 2026-06-21 from the
+clean AMN2 worktree
+`C:\Users\SooL\Documents\VPS-OPS-LAB\worktrees\amn2-phase7-current` at
+`471bca8 Downgrade DefaultVPN iOS compatibility`. Evidence:
+`research/amn2/phase-7-android-acceptance-contract-471bca8-2026-06-21.md`.
+AMN2 now machine-reports Android AmneziaWG as a supported candidate with
+`acceptance_status=pending_real_device_acceptance` and
+`release_primary_allowed=false`; QR and full `vpn://` are not release-primary;
+Windows desktop remains accepted by operator observation only. Focused
+verification passed with `9 passed`; syntax verification passed. No live
+VPS/SSH, package apply, config delivery, Telegram action, restore/import/reboot,
+provider mutation, write execution or secret-bearing output was performed.
+
 Phase 7 `P7-C010f` Windows desktop path acceptance record completed on
 2026-06-20 as
 `completed-windows-desktop-path-accepted-operator-observation-no-live-action`.

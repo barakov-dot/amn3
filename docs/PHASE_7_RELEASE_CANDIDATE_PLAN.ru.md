@@ -12,6 +12,21 @@
 Текущий S-final handoff:
 `completed-s-final-next-chat-handoff-c958733-no-live-action`.
 
+Current-fixes update 2026-06-21:
+
+- AMN2 local fixes now use the clean worktree
+  `C:\Users\SooL\Documents\VPS-OPS-LAB\worktrees\amn2-phase7-current` at
+  `471bca8 Downgrade DefaultVPN iOS compatibility`.
+- The older `C:\Users\SooL\Documents\Amneziya` checkout is dirty and behind the
+  current Phase 7 branch by four commits; do not use it for active fixes until
+  a separate port/compare task is opened.
+- Android AmneziaWG is a supported candidate, but not release-primary until
+  real-device `.conf` import/connect/traffic acceptance passes.
+- QR and full `vpn://` are not release-primary mobile delivery paths.
+- Fresh-from-zero VPS launch remains allowed only through an exact destructive
+  named gate with an explicit final stop-line phrase, even if the current VPS is
+  disposable.
+
 Режим по умолчанию:
 `local-only/docs/tests/security/package-preflight/watch-only` unless an exact
 named live gate is opened.

@@ -1,5 +1,20 @@
 # Текущий override 2026-06-09
 
+Phase 7 current-fixes clean-worktree guard: AMN2 fixes now continue from
+`C:\Users\SooL\Documents\VPS-OPS-LAB\worktrees\amn2-phase7-current` on
+`codex/phase7-current-fixes` at `471bca8`, not from the dirty historical
+`C:\Users\SooL\Documents\Amneziya` checkout. Evidence:
+`research/amn2/phase-7-state-drift-clean-worktree-2026-06-21.md`.
+
+Phase 7 Android acceptance contract: local AMN2 code/tests now mark Android
+AmneziaWG as `pending_real_device_acceptance` with
+`release_primary_allowed=false`; QR and full `vpn://` are not release-primary;
+Windows desktop remains `operator_observed_passed`. Evidence:
+`research/amn2/phase-7-android-acceptance-contract-471bca8-2026-06-21.md`.
+Focused verification: `9 passed`; syntax verification passed. Phase 8 remains
+blocked for mobile launch until Android AmneziaWG real-device acceptance passes
+or the operator explicitly narrows the launch policy.
+
 Phase 7 `P7-C010f` Windows desktop path acceptance record is complete as
 `completed-windows-desktop-path-accepted-operator-observation-no-live-action`.
 Evidence:
