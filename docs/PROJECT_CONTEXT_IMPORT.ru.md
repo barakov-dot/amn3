@@ -1,5 +1,14 @@
 # Текущий override 2026-06-09
 
+Phase 8 fresh Android phone post-RC recheck review/runbook prepared docs-only.
+Review: `docs/AMN2_FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW.ru.md`.
+Runbook: `docs/AMN2_FRESH_ANDROID_PHONE_POST_RC_RECHECK_RUNBOOK.ru.md`.
+Evidence:
+`research/amn2/phase-8-fresh-android-phone-post-rc-recheck-review-runbook-2026-06-22.md`.
+Future exact gate: `FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE`. Gate opening is
+conditional-no-go until Android phone is physically available. No live action
+was performed.
+
 Phase 8 helper style hardening завершен local-only. Документ:
 `docs/AMN2_HELPER_STYLE_HARDENING.ru.md`. Безопасный шаблон helper-а:
 `docs/templates/amn2_safe_gate_helper_template.ps1`. Evidence:

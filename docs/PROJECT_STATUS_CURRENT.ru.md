@@ -1,5 +1,24 @@
 # Текущий override 2026-06-09
 
+Phase 8 fresh Android phone post-RC recheck review/runbook prepared on
+2026-06-22 as docs-only. Review:
+`docs/AMN2_FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW.ru.md`. Runbook:
+`docs/AMN2_FRESH_ANDROID_PHONE_POST_RC_RECHECK_RUNBOOK.ru.md`. Evidence:
+`research/amn2/phase-8-fresh-android-phone-post-rc-recheck-review-runbook-2026-06-22.md`.
+The future exact gate is `FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE`. Review
+result: `review_go=true`,
+`gate_open_go=conditional-no-go-until-android-phone-available`,
+`operator_can_open_gate_now=false`. The plan records target VPS
+`89.185.80.166`, expected AMN2 head
+`187949bffb927a0a6d6c1f260fc0bb9ebb972447`, private handoff boundary
+`C:\Users\SooL\Documents\AMN2-PRIVATE-HANDOFF`, Android phone readiness inputs,
+import/connect/traffic pass criteria, server-side observation criteria,
+stop-lines and copy/paste gate text for the moment when the phone is physically
+available. No live VPS/SSH command, config generation/delivery, Telegram live
+send, public exposure, package apply, service restart, restore/import/reboot,
+provider rebuild, production peer/user mutation or secret-bearing output was
+performed.
+
 Phase 8 helper style hardening завершен 2026-06-22 как local-only. Документ:
 `docs/AMN2_HELPER_STYLE_HARDENING.ru.md`. Безопасный шаблон helper-а:
 `docs/templates/amn2_safe_gate_helper_template.ps1`. Evidence:

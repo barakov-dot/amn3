@@ -39,6 +39,26 @@ parse_check_required=true
 probe_url_dry_inspection_required=true
 ```
 
+## 0a. Android phone post-RC recheck prep
+
+Prepared docs-only:
+
+```text
+fresh_android_phone_post_rc_recheck_review_status=completed-docs-only
+fresh_android_phone_post_rc_recheck_runbook_status=prepared-docs-only
+review_doc=docs/AMN2_FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW.ru.md
+runbook_doc=docs/AMN2_FRESH_ANDROID_PHONE_POST_RC_RECHECK_RUNBOOK.ru.md
+evidence=research/amn2/phase-8-fresh-android-phone-post-rc-recheck-review-runbook-2026-06-22.md
+gate_name=FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE
+gate_open_go=conditional-no-go-until-android-phone-available
+```
+
+Use this only when Android phone is physically available. Until then:
+
+```text
+recommended_next_step=ANDROID_PHONE_BLOCKER_HOLD
+```
+
 ## 1. Latest pushed heads
 
 ```text

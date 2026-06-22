@@ -10,6 +10,15 @@ Telegram identity/profile/media mutation.
 
 ## Phase 8 Addendum
 
+- `phase-8-fresh-android-phone-post-rc-recheck-review-runbook-2026-06-22.md` -
+  docs-only review/runbook для будущего
+  `FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE`. Review:
+  `docs/AMN2_FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW.ru.md`. Runbook:
+  `docs/AMN2_FRESH_ANDROID_PHONE_POST_RC_RECHECK_RUNBOOK.ru.md`. Result:
+  `review_go=true`,
+  `gate_open_go=conditional-no-go-until-android-phone-available`. No
+  live/destructive/config/Telegram/public action or secret-bearing output was
+  performed.
 - `phase-8-helper-style-hardening-2026-06-22.md` - local-only helper style
   hardening после `PRIVATE_RC_OPERATOR_RUN_GATE` session 0. Документ:
   `docs/AMN2_HELPER_STYLE_HARDENING.ru.md`. Безопасный шаблон helper-а:
@@ -155,6 +164,8 @@ Phase 8 operator run gate status: passed-read-only
 Phase 8 private RC session 0 closeout status: completed-docs-only
 Phase 8 private RC next-chat sync status: completed-docs-only
 Phase 8 helper style hardening status: completed-local-only
+Phase 8 fresh Android phone post-RC recheck review status: completed-docs-only
+Phase 8 fresh Android phone post-RC recheck gate status: conditional-no-go-until-android-phone-available
 Phase 8 recommended next state: ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 Phase 8 recommended practical next state: FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
