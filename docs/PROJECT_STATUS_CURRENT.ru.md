@@ -1,5 +1,16 @@
 # Текущий override 2026-06-09
 
+Phase 8 private RC session 0 closeout completed on 2026-06-22 as docs-only.
+Closeout: `docs/AMN2_PRIVATE_RC_SESSION_0_CLOSEOUT.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-session-0-closeout-2026-06-22.md`. It closes
+the first private/operator RC session 0 as `passed-read-only`, records what was
+proven by `PRIVATE_RC_OPERATOR_RUN_GATE`, what remains unproven, helper issues
+for future scripts and the next exact gates menu. No live VPS/SSH command,
+package apply, service restart, public exposure, config delivery, Telegram
+live send, bot polling, restore/import/reboot, provider rebuild, production
+peer/user mutation or secret-bearing output was performed in the closeout step.
+Recommended next step: `PRIVATE_RC_NEXT_CHAT_SYNC`.
+
 Phase 8 `PRIVATE_RC_OPERATOR_RUN_GATE` passed on 2026-06-22 as the first
 private/operator RC session 0 read-only run. Result:
 `docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_RESULT.ru.md`. Evidence:

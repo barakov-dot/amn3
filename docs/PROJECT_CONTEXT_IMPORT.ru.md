@@ -1,5 +1,12 @@
 # Текущий override 2026-06-09
 
+Phase 8 private RC session 0 closeout is complete docs-only. Closeout:
+`docs/AMN2_PRIVATE_RC_SESSION_0_CLOSEOUT.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-session-0-closeout-2026-06-22.md`. It closes
+`PRIVATE_RC_OPERATOR_RUN_GATE` as `passed-read-only`, records proven/unproven
+scope, helper issues and next exact gates menu. No live action was performed in
+the closeout. Recommended next step is `PRIVATE_RC_NEXT_CHAT_SYNC`.
+
 Phase 8 `PRIVATE_RC_OPERATOR_RUN_GATE` passed as the first private/operator RC
 session 0 read-only run. Result:
 `docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_RESULT.ru.md`. Evidence:

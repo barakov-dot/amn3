@@ -18,6 +18,31 @@ Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
 
+## Update 2026-06-22: private RC session 0 closeout
+
+Completed docs-only:
+
+```text
+docs/AMN2_PRIVATE_RC_SESSION_0_CLOSEOUT.ru.md
+research/amn2/phase-8-private-rc-session-0-closeout-2026-06-22.md
+```
+
+Key result:
+
+```text
+private_rc_session_0_closeout_status=completed-docs-only
+private_rc_operator_run_gate_status=passed
+phase8_private_operator_rc_session_0_status=passed-read-only
+phase8_final_status=launch-ready-with-explicit-limitations
+private_operator_rc_launch_ready=true
+public_launch_status=not-approved
+recommended_next_step=PRIVATE_RC_NEXT_CHAT_SYNC
+```
+
+Use this closeout as the first read after the operator run result. It records
+what session 0 proved, what remains unproven, helper issues and the next exact
+gates menu.
+
 ## Update 2026-06-22: PRIVATE_RC_OPERATOR_RUN_GATE passed
 
 `PRIVATE_RC_OPERATOR_RUN_GATE` passed as the first private/operator RC session
