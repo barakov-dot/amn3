@@ -1,5 +1,19 @@
 # Текущий override 2026-06-09
 
+Phase 8 private RC operator run gate review completed on 2026-06-22 as
+docs-only. Review:
+`docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_REVIEW.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-operator-run-gate-review-2026-06-22.md`.
+The review checks the `PRIVATE_RC_OPERATOR_RUN_GATE` proposal for target VPS,
+expected AMN2 head, allowed actions, stop-lines, private inputs readiness and
+pass/fail criteria. Result: `review_go=true`, `gate_open_go=conditional-go`,
+`operator_run_gate_opened=false`. Opening the gate still requires explicit
+operator request plus private input confirmation at run time. No live VPS/SSH
+command, destructive action, package apply, service restart, public exposure,
+config delivery, Telegram live send, bot polling, restore/import/reboot,
+provider mutation, production peer/user mutation or secret-bearing output was
+performed.
+
 Phase 8 private RC session 0 plan plus operator run gate proposal prepared on
 2026-06-22 as docs-only. Plan:
 `docs/AMN2_PRIVATE_RC_SESSION_0_PLAN.ru.md`. Proposal:

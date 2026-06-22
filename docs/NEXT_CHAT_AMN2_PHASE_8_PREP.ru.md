@@ -18,6 +18,34 @@ Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
 
+## Update 2026-06-22: private RC operator run gate review
+
+Completed docs-only review:
+
+```text
+docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_REVIEW.ru.md
+research/amn2/phase-8-private-rc-operator-run-gate-review-2026-06-22.md
+```
+
+Key result:
+
+```text
+operator_run_gate_review_status=completed-docs-only
+gate_name=PRIVATE_RC_OPERATOR_RUN_GATE
+target_vps_review=passed
+expected_amn2_head_review=passed
+allowed_actions_review=passed
+stop_lines_review=passed
+private_inputs_readiness_review=conditional-passed
+pass_fail_criteria_review=passed
+review_go=true
+gate_open_go=conditional-go
+operator_run_gate_opened=false
+```
+
+Next operator choice: explicitly open `PRIVATE_RC_OPERATOR_RUN_GATE` or stay in
+wait-for-operator-request state.
+
 ## Update 2026-06-22: private RC session 0 plan + operator gate proposal
 
 Prepared docs-only:

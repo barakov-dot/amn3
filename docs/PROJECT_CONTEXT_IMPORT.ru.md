@@ -1,5 +1,15 @@
 # Текущий override 2026-06-09
 
+Phase 8 private RC operator run gate review is complete docs-only. Review:
+`docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_REVIEW.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-operator-run-gate-review-2026-06-22.md`.
+Result: `review_go=true`, `gate_open_go=conditional-go`,
+`operator_run_gate_opened=false`. The review confirms target VPS
+`89.185.80.166`, expected AMN2 head `187949b`, narrow allowed actions,
+stop-lines and pass/fail criteria. Private inputs readiness is conditional:
+operator must confirm SSH access, Telegram token for `getMe` and web/admin
+credentials privately at gate open. No live action was performed.
+
 Phase 8 private RC session 0 plan and operator run gate proposal are prepared
 docs-only. Plan: `docs/AMN2_PRIVATE_RC_SESSION_0_PLAN.ru.md`. Proposal:
 `docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_PROPOSAL.ru.md`. Evidence:
