@@ -10,6 +10,12 @@ Telegram identity/profile/media mutation.
 
 ## Phase 8 Addendum
 
+- `phase-8-rc-final-package-2026-06-22.md` - docs-only final private/operator
+  RC package evidence. Package index:
+  `docs/AMN2_PRIVATE_OPERATOR_RC_FINAL_PACKAGE.ru.md`. It points to the handoff
+  document, run checklist, evidence chain, limitations and future exact gates.
+  No live/destructive/config/Telegram/public action or secret-bearing output
+  was performed.
 - `phase-8-rc-operator-run-checklist-2026-06-22.md` - docs-only
   private/operator RC run checklist evidence. Checklist:
   `docs/AMN2_PRIVATE_OPERATOR_RC_RUN_CHECKLIST.ru.md`. It records what to check
@@ -63,7 +69,8 @@ Phase 8 final status: launch-ready-with-explicit-limitations
 Phase 8 launch gate status: closed-for-private-operator-rc-with-limitations
 Phase 8 operator handoff status: completed-private-operator-rc-handoff-docs-only
 Phase 8 operator run checklist status: completed-private-operator-rc-run-checklist-docs-only
-Phase 8 recommended next step: P8-RC-FINAL-PACKAGE
+Phase 8 final package status: completed-private-operator-rc-final-package-docs-only
+Phase 8 recommended next step: P8-RC-CLOSEOUT
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 471bca8
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings
