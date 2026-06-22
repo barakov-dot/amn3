@@ -18,6 +18,28 @@ Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
 
+## Update 2026-06-22: private/operator RC closeout completed
+
+Final private/operator RC closeout is complete. Document:
+`docs/AMN2_PRIVATE_OPERATOR_RC_CLOSEOUT.ru.md`. Evidence:
+`research/amn2/phase-8-rc-closeout-2026-06-22.md`.
+
+Key safe result:
+
+```text
+closeout_status=completed-docs-only
+phase8_final_status=launch-ready-with-explicit-limitations
+private_operator_rc_launch_ready=true
+public_launch_status=not-approved
+blocked_with_exact_remaining_blockers=false
+remaining_blockers_inside_listed_limitations=none
+next_recommended_state=P8-RC-READY-HOLD
+```
+
+Use this closeout as the first read in a new chat. Do not open live,
+destructive, config delivery, Telegram send or public exposure gates without a
+fresh exact named gate.
+
 ## Update 2026-06-22: private/operator RC final package prepared
 
 Final private/operator RC package index is complete. Document:

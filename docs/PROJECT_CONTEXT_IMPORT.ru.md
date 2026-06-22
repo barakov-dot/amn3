@@ -1,5 +1,17 @@
 # Текущий override 2026-06-09
 
+Phase 8 private/operator RC closeout is complete. Closeout:
+`docs/AMN2_PRIVATE_OPERATOR_RC_CLOSEOUT.ru.md`. Evidence:
+`research/amn2/phase-8-rc-closeout-2026-06-22.md`. It is docs-only and uses
+existing Phase 8 evidence only. Final status remains
+`launch-ready-with-explicit-limitations`; private/operator RC is launch-ready,
+public launch is not approved, and there are no remaining blockers inside the
+listed private/operator RC limitations. No live VPS/SSH command, destructive
+action, package apply, public exposure, config delivery, Telegram live send,
+bot polling, restore/import/reboot, provider mutation, production peer/user
+mutation or secret-bearing output was performed. Next recommended state:
+`P8-RC-READY-HOLD`.
+
 Phase 8 private/operator RC final package is complete. Final package index:
 `docs/AMN2_PRIVATE_OPERATOR_RC_FINAL_PACKAGE.ru.md`. Evidence:
 `research/amn2/phase-8-rc-final-package-2026-06-22.md`. It is docs-only and
