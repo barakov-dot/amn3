@@ -10,6 +10,13 @@ Telegram identity/profile/media mutation.
 
 ## Phase 8 Addendum
 
+- `phase-8-private-rc-session-0-plan-and-gate-proposal-2026-06-22.md` -
+  docs-only private RC session 0 plan plus operator run gate proposal evidence.
+  Plan: `docs/AMN2_PRIVATE_RC_SESSION_0_PLAN.ru.md`. Proposal:
+  `docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_PROPOSAL.ru.md`. It prepares
+  `PRIVATE_RC_OPERATOR_RUN_GATE` with pass criteria, stop-lines and copy/paste
+  text, but does not open the gate. No live/destructive/config/Telegram/public
+  action or secret-bearing output was performed.
 - `phase-8-rc-wait-operator-request-2026-06-22.md` - docs-only
   wait-for-operator-request evidence. Wait document:
   `docs/AMN2_PRIVATE_OPERATOR_RC_WAIT_OPERATOR_REQUEST.ru.md`. It records the
@@ -103,7 +110,9 @@ Phase 8 closeout status: completed-private-operator-rc-closeout-docs-only
 Phase 8 ready hold status: active-private-operator-rc-ready-hold-docs-only
 Phase 8 wait exact gate status: active-wait-exact-named-gate-docs-only
 Phase 8 wait operator request status: active-wait-operator-request-docs-only
-Phase 8 recommended next state: ждать-запроса-оператора
+Phase 8 private RC session 0 plan status: prepared-docs-only
+Phase 8 operator run gate proposal status: prepared-not-opened
+Phase 8 recommended next state: review-or-open-PRIVATE_RC_OPERATOR_RUN_GATE
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 471bca8
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings

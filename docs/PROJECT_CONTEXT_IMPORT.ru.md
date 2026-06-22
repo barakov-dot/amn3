@@ -1,5 +1,16 @@
 # Текущий override 2026-06-09
 
+Phase 8 private RC session 0 plan and operator run gate proposal are prepared
+docs-only. Plan: `docs/AMN2_PRIVATE_RC_SESSION_0_PLAN.ru.md`. Proposal:
+`docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_PROPOSAL.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-session-0-plan-and-gate-proposal-2026-06-22.md`.
+The future gate is `PRIVATE_RC_OPERATOR_RUN_GATE`; it allows only read-only VPS
+observation, loopback web/API health, Telegram `getMe` without live send or
+polling, external closed probes and safe evidence. It does not allow public
+exposure, config delivery, package apply, service restart, restore/import,
+provider rebuild, production peer/user mutation or secret payload output. The
+gate was not opened.
+
 Phase 8 wait-for-operator-request state is active:
 `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА`. Wait document:
 `docs/AMN2_PRIVATE_OPERATOR_RC_WAIT_OPERATOR_REQUEST.ru.md`. Evidence:

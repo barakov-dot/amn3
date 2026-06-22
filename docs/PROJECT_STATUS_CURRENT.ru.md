@@ -1,5 +1,19 @@
 # Текущий override 2026-06-09
 
+Phase 8 private RC session 0 plan plus operator run gate proposal prepared on
+2026-06-22 as docs-only. Plan:
+`docs/AMN2_PRIVATE_RC_SESSION_0_PLAN.ru.md`. Proposal:
+`docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_PROPOSAL.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-session-0-plan-and-gate-proposal-2026-06-22.md`.
+This prepares the first private/operator RC session and a future exact
+`PRIVATE_RC_OPERATOR_RUN_GATE` with pass criteria, stop-lines and copy/paste
+gate text. The gate was not opened. No live VPS/SSH command, destructive
+action, package apply, service restart, public exposure, config delivery,
+Telegram live send, bot polling, restore/import/reboot, provider mutation,
+production peer/user mutation or secret-bearing output was performed. Next
+recommended operator choice: review the proposal or explicitly open
+`PRIVATE_RC_OPERATOR_RUN_GATE`.
+
 Phase 8 wait-for-operator-request state activated on 2026-06-22 as
 `active-wait-operator-request-docs-only`. Wait document:
 `docs/AMN2_PRIVATE_OPERATOR_RC_WAIT_OPERATOR_REQUEST.ru.md`. Evidence:

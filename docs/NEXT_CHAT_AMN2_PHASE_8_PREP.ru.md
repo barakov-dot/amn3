@@ -18,6 +18,29 @@ Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
 
+## Update 2026-06-22: private RC session 0 plan + operator gate proposal
+
+Prepared docs-only:
+
+```text
+docs/AMN2_PRIVATE_RC_SESSION_0_PLAN.ru.md
+docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_PROPOSAL.ru.md
+research/amn2/phase-8-private-rc-session-0-plan-and-gate-proposal-2026-06-22.md
+```
+
+Key result:
+
+```text
+private_rc_session_0_plan_status=prepared-docs-only
+operator_run_gate_proposal_status=prepared-not-opened
+gate_name=PRIVATE_RC_OPERATOR_RUN_GATE
+operator_run_gate_opened=false
+next_recommended_operator_choice=review_or_open_PRIVATE_RC_OPERATOR_RUN_GATE
+```
+
+No live/VPS/config/Telegram/public action was performed. The proposal contains
+copy/paste gate text, pass criteria and stop-lines.
+
 ## Update 2026-06-22: ждать запроса оператора
 
 Активно состояние `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА`. Документ:
