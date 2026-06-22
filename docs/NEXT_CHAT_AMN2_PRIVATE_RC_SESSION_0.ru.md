@@ -19,6 +19,26 @@ Default lane:
 Не открывать live/VPS/config/Telegram/public gates без нового exact named gate.
 ```
 
+## 0. Post-session helper hardening
+
+Completed local-only after session 0:
+
+```text
+helper_style_hardening_status=completed-local-only
+hardening_doc=docs/AMN2_HELPER_STYLE_HARDENING.ru.md
+safe_helper_template=docs/templates/amn2_safe_gate_helper_template.ps1
+evidence=research/amn2/phase-8-helper-style-hardening-2026-06-22.md
+```
+
+Rule for future helper scripts:
+
+```text
+helper_encoding_rule=ascii_prompts_or_utf8_with_bom
+url_interpolation_rule=${TargetIp}:PORT_or_$($TargetIp):PORT
+parse_check_required=true
+probe_url_dry_inspection_required=true
+```
+
 ## 1. Latest pushed heads
 
 ```text

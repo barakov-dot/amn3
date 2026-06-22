@@ -10,6 +10,14 @@ Telegram identity/profile/media mutation.
 
 ## Phase 8 Addendum
 
+- `phase-8-helper-style-hardening-2026-06-22.md` - local-only helper style
+  hardening после `PRIVATE_RC_OPERATOR_RUN_GATE` session 0. Документ:
+  `docs/AMN2_HELPER_STYLE_HARDENING.ru.md`. Безопасный шаблон helper-а:
+  `docs/templates/amn2_safe_gate_helper_template.ps1`. Evidence фиксирует
+  обязательные правила для будущих PowerShell helpers: ASCII prompts или
+  UTF-8 with BOM, `${TargetIp}:PORT` URL interpolation, parse check и probe URL
+  dry inspection перед operator handoff. Live/destructive/config/Telegram/
+  public action и secret-bearing output не выполнялись.
 - `phase-8-private-rc-next-chat-sync-2026-06-22.md` - docs-only short
   next-chat handoff after `PRIVATE_RC_OPERATOR_RUN_GATE` and session 0
   closeout. Handoff document:
@@ -146,6 +154,7 @@ Phase 8 operator run gate review status: completed-docs-only
 Phase 8 operator run gate status: passed-read-only
 Phase 8 private RC session 0 closeout status: completed-docs-only
 Phase 8 private RC next-chat sync status: completed-docs-only
+Phase 8 helper style hardening status: completed-local-only
 Phase 8 recommended next state: ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 Phase 8 recommended practical next state: FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1

@@ -1,5 +1,14 @@
 # Текущий override 2026-06-09
 
+Phase 8 helper style hardening завершен local-only. Документ:
+`docs/AMN2_HELPER_STYLE_HARDENING.ru.md`. Безопасный шаблон helper-а:
+`docs/templates/amn2_safe_gate_helper_template.ps1`. Evidence:
+`research/amn2/phase-8-helper-style-hardening-2026-06-22.md`. Будущие
+PowerShell helpers должны использовать ASCII prompts или UTF-8 with BOM,
+`${TargetIp}:PORT` или `$($TargetIp):PORT` для URL interpolation, проходить
+parse check и probe URL dry inspection перед operator handoff. Live action не
+выполнялся.
+
 Phase 8 private RC next-chat sync is complete docs-only. Handoff:
 `docs/NEXT_CHAT_AMN2_PRIVATE_RC_SESSION_0.ru.md`. Evidence:
 `research/amn2/phase-8-private-rc-next-chat-sync-2026-06-22.md`. Use it as the

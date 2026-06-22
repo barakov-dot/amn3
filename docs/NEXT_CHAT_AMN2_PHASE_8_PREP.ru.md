@@ -18,6 +18,35 @@ Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
 
+## Update 2026-06-22: helper style hardening
+
+Completed local-only:
+
+```text
+docs/AMN2_HELPER_STYLE_HARDENING.ru.md
+docs/templates/amn2_safe_gate_helper_template.ps1
+research/amn2/phase-8-helper-style-hardening-2026-06-22.md
+```
+
+Key result:
+
+```text
+helper_style_hardening_status=completed-local-only
+helper_encoding_rule=ascii_prompts_or_utf8_with_bom
+url_interpolation_rule=${TargetIp}:PORT_or_$($TargetIp):PORT
+parse_check_required=true
+probe_url_dry_inspection_required=true
+live_vps_ssh_performed=false
+public_exposure_performed=false
+config_delivery_performed=false
+telegram_live_send_performed=false
+secret_values_printed=false
+```
+
+Future PowerShell helpers must avoid Russian prompts in UTF-8-without-BOM
+scripts, use braced target interpolation for probe URLs, and pass parse plus
+dry URL inspection before operator handoff.
+
 ## Update 2026-06-22: private RC next-chat sync
 
 Prepared short next-chat handoff:
