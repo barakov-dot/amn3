@@ -10,6 +10,13 @@ Telegram identity/profile/media mutation.
 
 ## Phase 8 Addendum
 
+- `phase-8-private-rc-next-chat-sync-2026-06-22.md` - docs-only short
+  next-chat handoff after `PRIVATE_RC_OPERATOR_RUN_GATE` and session 0
+  closeout. Handoff document:
+  `docs/NEXT_CHAT_AMN2_PRIVATE_RC_SESSION_0.ru.md`. It records latest heads,
+  final `passed-read-only` status, proven/unproven scope, stop-lines and next
+  exact gates menu. No live/destructive/config/Telegram/public action or
+  secret-bearing output was performed.
 - `phase-8-private-rc-session-0-closeout-2026-06-22.md` - docs-only closeout
   of first private/operator RC session 0. Closeout document:
   `docs/AMN2_PRIVATE_RC_SESSION_0_CLOSEOUT.ru.md`. It records final
@@ -138,7 +145,9 @@ Phase 8 operator run gate proposal status: prepared-not-opened
 Phase 8 operator run gate review status: completed-docs-only
 Phase 8 operator run gate status: passed-read-only
 Phase 8 private RC session 0 closeout status: completed-docs-only
-Phase 8 recommended next state: PRIVATE_RC_NEXT_CHAT_SYNC
+Phase 8 private RC next-chat sync status: completed-docs-only
+Phase 8 recommended next state: ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+Phase 8 recommended practical next state: FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 471bca8
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings

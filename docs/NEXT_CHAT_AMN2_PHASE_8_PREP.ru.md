@@ -18,6 +18,30 @@ Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
 
+## Update 2026-06-22: private RC next-chat sync
+
+Prepared short next-chat handoff:
+
+```text
+docs/NEXT_CHAT_AMN2_PRIVATE_RC_SESSION_0.ru.md
+research/amn2/phase-8-private-rc-next-chat-sync-2026-06-22.md
+```
+
+Key result:
+
+```text
+private_rc_next_chat_sync_status=completed-docs-only
+private_rc_operator_run_gate_status=passed
+phase8_private_operator_rc_session_0_status=passed-read-only
+phase8_final_status=launch-ready-with-explicit-limitations
+private_operator_rc_launch_ready=true
+public_launch_status=not-approved
+recommended_next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+recommended_practical_next_step=FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW
+```
+
+In a new chat, read `docs/NEXT_CHAT_AMN2_PRIVATE_RC_SESSION_0.ru.md` first.
+
 ## Update 2026-06-22: private RC session 0 closeout
 
 Completed docs-only:

@@ -1,5 +1,14 @@
 # Текущий override 2026-06-09
 
+Phase 8 private RC next-chat sync is complete docs-only. Handoff:
+`docs/NEXT_CHAT_AMN2_PRIVATE_RC_SESSION_0.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-next-chat-sync-2026-06-22.md`. Use it as the
+first read in a new chat after `PRIVATE_RC_OPERATOR_RUN_GATE`. It records final
+`passed-read-only` status, latest heads, proven/unproven scope, stop-lines and
+next exact gates menu. No live action was performed. Default next step:
+`ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА`; practical next step if Android phone is available:
+`FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW`.
+
 Phase 8 private RC session 0 closeout is complete docs-only. Closeout:
 `docs/AMN2_PRIVATE_RC_SESSION_0_CLOSEOUT.ru.md`. Evidence:
 `research/amn2/phase-8-private-rc-session-0-closeout-2026-06-22.md`. It closes
