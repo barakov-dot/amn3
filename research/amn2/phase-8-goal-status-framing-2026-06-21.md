@@ -48,7 +48,8 @@ Phase 7 entry into Phase 8 is valid:
 
 ```text
 phase8_entry_status=phase8-prep-ready
-phase8_launch_gate_status=fresh-from-zero-rehearsal-passed-awaiting-final-freeze
+phase8_launch_gate_status=closed-for-private-operator-rc-with-limitations
+phase8_final_status=launch-ready-with-explicit-limitations
 ```
 
 The live dataplane question is closed by `P7-C011f2`: `awg0` listens on UDP
@@ -62,10 +63,10 @@ used as Phase 8 acceptance.
 
 ## Distance To Launch
 
-Current distance-to-launch estimate after P8-C003:
+Current distance-to-launch estimate after P8-SFINAL:
 
 ```text
-private_operator_rc_distance_to_launch=98_percent
+private_operator_rc_distance_to_launch=100_percent_with_explicit_limitations
 ```
 
 Already strong:
@@ -78,12 +79,16 @@ Already strong:
 - previous package/apply, loopback web/API, Telegram getMe/non-polling smoke
   and backup create+verify evidence exists.
 
-Still blocking launch after P8-C003:
+Still blocking broader/public launch after P8-SFINAL:
 
-- final launch readiness freeze has not yet been recorded.
-- `P8-SFINAL` must explicitly decide whether the projector limitation still
-  permits `private/operator RC launch-ready` or requires
-  `launch-ready-with-explicit-limitations`.
+- public launch is not approved;
+- Telegram live send/profile/media mutation and bot polling were not performed;
+- restore/import DR is not proven;
+- iOS DefaultVPN remains experimental/unreliable;
+- `P8-C003` used an Android projector, while Android phone acceptance remains
+  separate `P8-C001` evidence.
+
+No blockers remain for private/operator RC inside the explicit limitations.
 
 ## Phase 8 Gate Map
 
@@ -227,10 +232,13 @@ the evidence is internally consistent enough to make the launch decision.
 any missing live gate that did not pass.
 
 Влияние на близость запуска:
-turns Phase 8 evidence into the final private/operator RC verdict.
+completed on 2026-06-22 as
+`launch-ready-with-explicit-limitations`; closes Phase 8 for private/operator
+RC inside the listed limitations.
 
 Следующий gate если passed:
-private/operator RC launch handoff.
+private/operator RC handoff, docs/operator-only unless an exact live gate is
+opened.
 
 Stop-line если failed:
 publish only the short exact blocker list and required gates.
@@ -256,14 +264,12 @@ acceptance, `P8-C002` package/current-head smoke, `P8-S002` fresh-from-zero
 preflight ledger and `P8-C003` readiness confirmation have also passed on
 2026-06-21. `P8-C003` fresh-from-zero VPS rehearsal passed on 2026-06-22 using
 AMN2 `187949b` and Android projector browser/app traffic. Readiness is now
-`fresh-from-zero-rehearsal-passed-awaiting-final-freeze`; the projector
-limitation must be recorded in the final verdict. The recommended next exact
-gate is:
+closed by `P8-SFINAL` as `launch-ready-with-explicit-limitations`. The
+recommended next step is:
 
 ```text
-P8-SFINAL launch readiness freeze
+private/operator RC handoff with explicit limitations
 ```
 
-`P8-SFINAL` must not perform new live/destructive/config delivery action unless
-a separate exact gate is opened; it should freeze the final private/operator RC
-status from existing evidence.
+No new live/destructive/config delivery action is permitted unless a separate
+exact gate is opened.

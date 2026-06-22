@@ -10,6 +10,18 @@ Telegram identity/profile/media mutation.
 
 ## Phase 8 Addendum
 
+- `phase-8-sfinal-launch-readiness-freeze-2026-06-22.md` - `P8-SFINAL`
+  launch readiness freeze using existing evidence only; final Phase 8 status is
+  `launch-ready-with-explicit-limitations` for private/operator RC,
+  `public_launch_status=not-approved`, and
+  `blocked_with_exact_remaining_blockers=false`. The freeze records the exact
+  limitations: `P8-C003` used an Android projector while Android phone
+  acceptance remains separate `P8-C001` evidence; public exposure stays closed;
+  Telegram live send/profile/media mutation and bot polling were not performed;
+  `.conf` is release-primary while QR/full `vpn://` are not; iOS DefaultVPN
+  remains experimental/unreliable; backup create+verify passed but
+  restore/import is not proven. No live/destructive/config/Telegram/public
+  action or secret-bearing output was performed in the freeze.
 - `phase-8-p8-c003-fresh-zero-rehearsal-2026-06-22.md` - `P8-C003`
   fresh-from-zero VPS rehearsal for AMN2 `187949b` on disposable VPS
   `89.185.80.166`; destructive clean install of `/opt/amn2`, source overlay
@@ -32,8 +44,9 @@ AMN2 security-fix head: c958733 Harden security-sensitive operations
 latest VPS-smoked/package head: 6d5cf3e Make Telegram config delivery conf-first
 Phase 8 AMN2 current-fixes head: 187949b Persist Android-compatible AWG defaults
 Phase 8 latest VPS-applied/package-smoked head: 187949b Persist Android-compatible AWG defaults
-Phase 8 launch gate status: fresh-from-zero-rehearsal-passed-awaiting-final-freeze
-Phase 8 recommended next gate: P8-SFINAL launch readiness freeze
+Phase 8 final status: launch-ready-with-explicit-limitations
+Phase 8 launch gate status: closed-for-private-operator-rc-with-limitations
+Phase 8 recommended next step: private/operator RC handoff with explicit limitations
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 471bca8
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings

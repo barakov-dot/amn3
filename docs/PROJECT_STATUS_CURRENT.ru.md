@@ -1,5 +1,29 @@
 # Текущий override 2026-06-09
 
+Phase 8 `P8-SFINAL` launch readiness freeze completed on 2026-06-22 as
+`launch-ready-with-explicit-limitations`. Evidence:
+`research/amn2/phase-8-sfinal-launch-readiness-freeze-2026-06-22.md`.
+Final verdict:
+`private_operator_rc_launch_ready=true`,
+`phase8_final_status=launch-ready-with-explicit-limitations`,
+`phase8_launch_gate_status=closed-for-private-operator-rc-with-limitations`,
+`public_launch_status=not-approved`, and
+`blocked_with_exact_remaining_blockers=false`. This is a private/operator RC
+readiness freeze, not a public launch approval. The decision is based on
+`P8-C001` fresh Android phone acceptance, `P8-C002` current-head package smoke
+for AMN2 `187949b`, and `P8-C003` fresh-from-zero VPS rehearsal on disposable
+VPS `89.185.80.166`. Exact limitations remain: `P8-C003` Android acceptance
+used an Android projector with browser/app traffic, while Android phone
+acceptance remains separate `P8-C001` evidence; public exposure is closed by
+default; Telegram `getMe` plus non-polling smoke passed, but Telegram live
+send/profile/media mutation and bot polling were not performed; `.conf` is the
+release-primary handoff artifact, while QR and full `vpn://` are not
+release-primary; iOS DefaultVPN remains experimental/unreliable; backup
+create+verify passed but restore/import DR is not proven. No live VPS/SSH
+command, destructive action, package apply, public exposure, config delivery,
+Telegram live send, restore/import/reboot, provider mutation, production
+peer/user mutation or secret-bearing output was performed in `P8-SFINAL`.
+
 Phase 8 `P8-C003` fresh-from-zero VPS rehearsal passed on 2026-06-22 for
 disposable VPS `89.185.80.166`. Evidence:
 `research/amn2/phase-8-p8-c003-fresh-zero-rehearsal-2026-06-22.md`.

@@ -8,8 +8,8 @@
 Продолжаем AMN2 после Phase 7 closeout.
 
 Phase 7 status: phase8-prep-ready.
-Phase 8 launch gate status:
-fresh-from-zero-rehearsal-passed-awaiting-final-freeze.
+Phase 8 final status:
+launch-ready-with-explicit-limitations.
 
 Default lane: local-only/docs/tests/package-preflight unless an exact named
 Phase 8 live/destructive/config gate is opened.
@@ -17,6 +17,32 @@ Phase 8 live/destructive/config gate is opened.
 Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
+
+## Update 2026-06-22: P8-SFINAL launch readiness freeze
+
+`P8-SFINAL` launch readiness freeze completed on 2026-06-22. Evidence:
+`research/amn2/phase-8-sfinal-launch-readiness-freeze-2026-06-22.md`.
+
+Final safe result:
+
+```text
+phase8_final_status=launch-ready-with-explicit-limitations
+private_operator_rc_launch_ready=true
+phase8_launch_gate_status=closed-for-private-operator-rc-with-limitations
+public_launch_status=not-approved
+blocked_with_exact_remaining_blockers=false
+fresh_android_phone_acceptance_source=P8-C001
+fresh_zero_android_acceptance_device=P8-C003_android_projector
+telegram_first_runtime_status=server-side-getme-and-non-polling-smoke-passed
+telegram_live_send_status=not-performed
+public_exposure_status=closed-by-default
+backup_evidence_status=create-and-verify-passed
+restore_import_status=not-proven
+secret_payload_output_status=not-performed
+```
+
+The project is ready for a private/operator RC handoff with explicit
+limitations. It is not approved for public launch.
 
 ## Update 2026-06-22: P8-C003 fresh-from-zero rehearsal passed
 
@@ -196,10 +222,11 @@ delivery path later persisted those compatible defaults in `P8-C002`.
 
 ## Главный Phase 8 выбор
 
-Следующий exact gate:
+Phase 8 freeze is complete. The next recommended step is docs/operator handoff,
+not another live gate:
 
 ```text
-P8-SFINAL launch readiness freeze
+private/operator RC handoff with explicit limitations
 ```
 
 Already prepared/completed docs:
@@ -212,11 +239,14 @@ Already prepared/completed docs:
 - `P8-C003` fresh-from-zero rehearsal evidence with projector acceptance and
   closed public probes.
 
-`P8-SFINAL` should decide one final status:
+`P8-SFINAL` decided:
 
-- `private/operator RC launch-ready`;
-- `launch-ready-with-explicit-limitations`;
-- `blocked-with-exact-remaining-blockers`.
+```text
+phase8_final_status=launch-ready-with-explicit-limitations
+```
+
+If the operator wants actual production sends, public exposure, restore/import,
+or broader rollout, open a new exact named gate for that action.
 
 ## Stop lines
 

@@ -1,5 +1,26 @@
 # Текущий override 2026-06-09
 
+Phase 8 final status: `launch-ready-with-explicit-limitations`.
+`P8-SFINAL` launch readiness freeze completed on 2026-06-22 using existing
+evidence only. Evidence:
+`research/amn2/phase-8-sfinal-launch-readiness-freeze-2026-06-22.md`.
+This closes Phase 8 for private/operator RC with limitations:
+`private_operator_rc_launch_ready=true`, `public_launch_status=not-approved`,
+and `blocked_with_exact_remaining_blockers=false`. No live VPS/SSH command,
+destructive action, package apply, public exposure, config delivery, Telegram
+live send, bot polling, restore/import/reboot, provider mutation, production
+peer/user mutation or secret-bearing output was performed in the freeze.
+
+The final verdict rests on `P8-C001` fresh Android phone acceptance, `P8-C002`
+AMN2 `187949b` package/current-head smoke, and `P8-C003` fresh-from-zero VPS
+rehearsal. Exact limitations: `P8-C003` used an Android projector with
+browser/app traffic and no on-device Telegram; Android phone acceptance remains
+separate `P8-C001` evidence. Public exposure stays closed by default; Telegram
+live send/profile/media mutation and bot polling were not performed; `.conf`
+is the release-primary handoff artifact, while QR and full `vpn://` are not
+release-primary; iOS DefaultVPN remains experimental/unreliable; backup
+create+verify passed but restore/import is not proven.
+
 Phase 8 `P8-C003` fresh-from-zero VPS rehearsal passed on 2026-06-22.
 Evidence:
 `research/amn2/phase-8-p8-c003-fresh-zero-rehearsal-2026-06-22.md`.
