@@ -1,5 +1,18 @@
 # Текущий override 2026-06-09
 
+Phase 8 explicit wait state activated on 2026-06-22 as
+`active-wait-exact-named-gate-docs-only`. Wait document:
+`docs/AMN2_PRIVATE_OPERATOR_RC_WAIT_EXACT_GATE.ru.md`. Evidence:
+`research/amn2/phase-8-rc-wait-exact-named-gate-2026-06-22.md`. This records
+the Russian operator command `ОЖИДАНИЕ_ТОЧНОГО_ИМЕНОВАННОГО_GATE`: use existing
+Phase 8 evidence only, do not open live/destructive/config/Telegram
+send/public exposure gates, and keep AMN2 at private/operator RC
+`launch-ready-with-explicit-limitations` until the operator explicitly requests
+a concrete named gate. No live VPS/SSH command, destructive action, package
+apply, service restart, public exposure, config delivery, Telegram live send,
+bot polling, restore/import/reboot, provider mutation, production peer/user
+mutation or secret-bearing output was performed.
+
 Phase 8 private/operator RC ready hold activated on 2026-06-22 as
 `active-private-operator-rc-ready-hold-docs-only`. Hold document:
 `docs/AMN2_PRIVATE_OPERATOR_RC_READY_HOLD.ru.md`. Evidence:

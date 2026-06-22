@@ -18,6 +18,26 @@ Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
 
+## Update 2026-06-22: ожидание точного именованного gate
+
+Активно состояние `ОЖИДАНИЕ_ТОЧНОГО_ИМЕНОВАННОГО_GATE`. Документ:
+`docs/AMN2_PRIVATE_OPERATOR_RC_WAIT_EXACT_GATE.ru.md`. Evidence:
+`research/amn2/phase-8-rc-wait-exact-named-gate-2026-06-22.md`.
+
+Ключевой результат:
+
+```text
+wait_exact_named_gate_status=active-docs-only
+phase8_final_status=launch-ready-with-explicit-limitations
+private_operator_rc_launch_ready=true
+public_launch_status=not-approved
+remaining_blockers_inside_listed_limitations=none
+next_action=ничего_не_открывать_без_запроса_оператора
+```
+
+В следующем чате рекомендации и команды оператору должны быть на русском.
+Технические identifiers можно оставлять как есть.
+
 ## Update 2026-06-22: private/operator RC ready hold active
 
 `P8-RC-READY-HOLD` is active. Document:

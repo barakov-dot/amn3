@@ -10,6 +10,14 @@ Telegram identity/profile/media mutation.
 
 ## Phase 8 Addendum
 
+- `phase-8-rc-wait-exact-named-gate-2026-06-22.md` - docs-only explicit wait
+  state evidence. Wait document:
+  `docs/AMN2_PRIVATE_OPERATOR_RC_WAIT_EXACT_GATE.ru.md`. It records the
+  Russian operator command `ОЖИДАНИЕ_ТОЧНОГО_ИМЕНОВАННОГО_GATE`, keeps AMN2 at
+  private/operator RC `launch-ready-with-explicit-limitations`, and requires a
+  fresh explicit named gate for any live/config/Telegram/public/destructive
+  action. No live/destructive/config/Telegram/public action or secret-bearing
+  output was performed.
 - `phase-8-rc-ready-hold-2026-06-22.md` - docs-only ready hold evidence.
   Hold document: `docs/AMN2_PRIVATE_OPERATOR_RC_READY_HOLD.ru.md`. It holds
   AMN2 at private/operator RC `launch-ready-with-explicit-limitations`, with
@@ -85,7 +93,8 @@ Phase 8 operator run checklist status: completed-private-operator-rc-run-checkli
 Phase 8 final package status: completed-private-operator-rc-final-package-docs-only
 Phase 8 closeout status: completed-private-operator-rc-closeout-docs-only
 Phase 8 ready hold status: active-private-operator-rc-ready-hold-docs-only
-Phase 8 recommended next state: wait-for-explicit-exact-named-gate
+Phase 8 wait exact gate status: active-wait-exact-named-gate-docs-only
+Phase 8 recommended next state: ожидать-явный-именованный-gate
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 471bca8
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings
