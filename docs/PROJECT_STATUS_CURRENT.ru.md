@@ -1,5 +1,18 @@
 # Текущий override 2026-06-09
 
+Phase 8 private/operator RC run checklist completed on 2026-06-22 as
+`completed-private-operator-rc-run-checklist-docs-only`. Checklist:
+`docs/AMN2_PRIVATE_OPERATOR_RC_RUN_CHECKLIST.ru.md`. Evidence:
+`research/amn2/phase-8-rc-operator-run-checklist-2026-06-22.md`. It uses only
+existing Phase 8 evidence and records what to check before operating, how to
+keep public exposure closed, where private handoff artifacts live, Telegram and
+config delivery boundaries, backup/restore boundaries and exact future gates
+for broader action. No live VPS/SSH command, destructive action, package apply,
+public exposure, config delivery, Telegram live send, bot polling,
+restore/import/reboot, provider mutation, production peer/user mutation or
+secret-bearing output was performed in the checklist step. Next recommended
+docs-only step is `P8-RC-FINAL-PACKAGE`.
+
 Phase 8 private/operator RC handoff completed on 2026-06-22 as
 `completed-private-operator-rc-handoff-docs-only`. Operator-facing handoff:
 `docs/AMN2_PRIVATE_OPERATOR_RC_HANDOFF.ru.md`. Evidence:
