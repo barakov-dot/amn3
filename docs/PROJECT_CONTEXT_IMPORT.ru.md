@@ -1,5 +1,15 @@
 # Текущий override 2026-06-09
 
+Phase 8 private/operator RC handoff is complete. Operator-facing document:
+`docs/AMN2_PRIVATE_OPERATOR_RC_HANDOFF.ru.md`. Evidence:
+`research/amn2/phase-8-rc-handoff-2026-06-22.md`. It is docs-only and uses
+existing Phase 8 evidence only. It records the allowed private/operator RC
+scope, exact limitations, stop-lines and future exact gates for broader live
+actions. No live VPS/SSH command, destructive action, package apply, public
+exposure, config delivery, Telegram live send, bot polling, restore/import/
+reboot, provider mutation, production peer/user mutation or secret-bearing
+output was performed in the handoff.
+
 Phase 8 final status: `launch-ready-with-explicit-limitations`.
 `P8-SFINAL` launch readiness freeze completed on 2026-06-22 using existing
 evidence only. Evidence:

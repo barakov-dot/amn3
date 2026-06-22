@@ -10,6 +10,14 @@ Telegram identity/profile/media mutation.
 
 ## Phase 8 Addendum
 
+- `phase-8-rc-handoff-2026-06-22.md` - docs-only private/operator RC handoff
+  evidence. Operator-facing handoff:
+  `docs/AMN2_PRIVATE_OPERATOR_RC_HANDOFF.ru.md`. It carries forward
+  `launch-ready-with-explicit-limitations`, records allowed private/operator RC
+  scope, exact limitations, stop-lines and future exact gates for public
+  exposure, Telegram live delivery, config delivery, restore/import DR and
+  production rollout. No live/destructive/config/Telegram/public action or
+  secret-bearing output was performed.
 - `phase-8-sfinal-launch-readiness-freeze-2026-06-22.md` - `P8-SFINAL`
   launch readiness freeze using existing evidence only; final Phase 8 status is
   `launch-ready-with-explicit-limitations` for private/operator RC,
@@ -46,7 +54,8 @@ Phase 8 AMN2 current-fixes head: 187949b Persist Android-compatible AWG defaults
 Phase 8 latest VPS-applied/package-smoked head: 187949b Persist Android-compatible AWG defaults
 Phase 8 final status: launch-ready-with-explicit-limitations
 Phase 8 launch gate status: closed-for-private-operator-rc-with-limitations
-Phase 8 recommended next step: private/operator RC handoff with explicit limitations
+Phase 8 operator handoff status: completed-private-operator-rc-handoff-docs-only
+Phase 8 recommended next step: P8-RC-OPERATOR-RUN-CHECKLIST
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 471bca8
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings

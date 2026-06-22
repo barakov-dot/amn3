@@ -18,6 +18,27 @@ Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
 
+## Update 2026-06-22: private/operator RC handoff prepared
+
+Operator-facing private/operator RC handoff is complete. Document:
+`docs/AMN2_PRIVATE_OPERATOR_RC_HANDOFF.ru.md`. Evidence:
+`research/amn2/phase-8-rc-handoff-2026-06-22.md`.
+
+Key safe result:
+
+```text
+phase8_final_status=launch-ready-with-explicit-limitations
+private_operator_rc_launch_ready=true
+public_launch_status=not-approved
+blocked_with_exact_remaining_blockers=false
+handoff_status=completed-private-operator-rc-handoff-docs-only
+allowed_scope=private_operator_rc_only
+next_recommended_step=P8-RC-OPERATOR-RUN-CHECKLIST
+```
+
+The handoff records the allowed private/operator RC scope, exact limitations,
+stop-lines and future exact gates for broader launch.
+
 ## Update 2026-06-22: P8-SFINAL launch readiness freeze
 
 `P8-SFINAL` launch readiness freeze completed on 2026-06-22. Evidence:
@@ -222,11 +243,11 @@ delivery path later persisted those compatible defaults in `P8-C002`.
 
 ## Главный Phase 8 выбор
 
-Phase 8 freeze is complete. The next recommended step is docs/operator handoff,
-not another live gate:
+Phase 8 freeze and private/operator RC handoff are complete. The next
+recommended step is a docs-only operator run checklist, not a live gate:
 
 ```text
-private/operator RC handoff with explicit limitations
+P8-RC-OPERATOR-RUN-CHECKLIST
 ```
 
 Already prepared/completed docs:
