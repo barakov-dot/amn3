@@ -8,12 +8,32 @@
 API, Local Agent mutation, backup/import/reboot, destructive execution или
 Telegram identity/profile/media mutation.
 
+## Phase 8 Addendum
+
+- `phase-8-p8-c003-fresh-zero-rehearsal-2026-06-22.md` - `P8-C003`
+  fresh-from-zero VPS rehearsal for AMN2 `187949b` on disposable VPS
+  `89.185.80.166`; destructive clean install of `/opt/amn2`, source overlay
+  match, fresh env/DB init, two-admin bot config verification, loopback web/API
+  smoke, Telegram `getMe` plus non-polling bot surface smoke, one fresh Android
+  projector private `.conf` handoff, backup create+verify and closed public
+  probes all passed. Fresh projector peer `d0ab128d6801` showed endpoint
+  `yes`, fresh handshake and positive traffic deltas
+  `rx_delta=622084/tx_delta=9004751`. No public exposure, Telegram live send,
+  bot polling, restore/import/reboot, provider mutation, QR/`vpn://`, key/PSK,
+  token/password or config payload output was performed. Phase 8 launch gate is
+  now `fresh-from-zero-rehearsal-passed-awaiting-final-freeze`; next exact gate
+  is `P8-SFINAL launch readiness freeze`.
+
 ## Current Truth
 
 ```text
 AMN2 head: 471bca8 Downgrade DefaultVPN iOS compatibility
 AMN2 security-fix head: c958733 Harden security-sensitive operations
 latest VPS-smoked/package head: 6d5cf3e Make Telegram config delivery conf-first
+Phase 8 AMN2 current-fixes head: 187949b Persist Android-compatible AWG defaults
+Phase 8 latest VPS-applied/package-smoked head: 187949b Persist Android-compatible AWG defaults
+Phase 8 launch gate status: fresh-from-zero-rehearsal-passed-awaiting-final-freeze
+Phase 8 recommended next gate: P8-SFINAL launch readiness freeze
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 471bca8
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings

@@ -9,7 +9,7 @@
 
 Phase 7 status: phase8-prep-ready.
 Phase 8 launch gate status:
-blocked-until-fresh-from-zero-vps-rehearsal.
+fresh-from-zero-rehearsal-passed-awaiting-final-freeze.
 
 Default lane: local-only/docs/tests/package-preflight unless an exact named
 Phase 8 live/destructive/config gate is opened.
@@ -17,6 +17,51 @@ Phase 8 live/destructive/config gate is opened.
 Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
+
+## Update 2026-06-22: P8-C003 fresh-from-zero rehearsal passed
+
+`P8-C003` fresh-from-zero VPS rehearsal passed on 2026-06-22. Evidence:
+`research/amn2/phase-8-p8-c003-fresh-zero-rehearsal-2026-06-22.md`.
+
+Key safe result:
+
+```text
+target_vps=89.185.80.166
+amn2_head=187949bffb927a0a6d6c1f260fc0bb9ebb972447
+package_sha256=7FA073E4C66C0981673061D167D525BB9BCD6DFDDAA075E15701F0C2608E2E82
+fresh_install_status=passed
+source_overlay_match=yes
+fresh_env_db_init_status=passed
+admin_telegram_ids_count_actual=2
+operator_admin_pair_present=yes
+loopback_web_status=passed
+loopback_api_smoke_status=passed
+telegram_get_me_status=passed
+telegram_polling_started=false
+telegram_live_send_performed=false
+backup_create_status=passed
+backup_verify_status=passed
+backup_artifact_mode_600_verified=true
+fresh_peer_public_key_fp=d0ab128d6801
+fresh_android_acceptance_device=android_projector
+fresh_android_phone_available=false
+fresh_android_traffic_source=browser_or_app
+endpoint_observed_after=yes
+transfer_rx_delta_bytes=622084
+transfer_tx_delta_bytes=9004751
+public_3030_probe=000
+public_3040_probe=000
+public_80_probe=000
+public_443_probe=000
+secret_values_printed=false
+phase8_launch_gate_status=fresh-from-zero-rehearsal-passed-awaiting-final-freeze
+recommended_next_gate=P8-SFINAL launch readiness freeze
+```
+
+Important limitation: `P8-C003` Android acceptance used an Android projector
+with browser/app traffic and no on-device Telegram. Android phone acceptance
+remains the separate `P8-C001` evidence. The final freeze must state this
+limitation explicitly.
 
 ## Update 2026-06-21: P8-S002 + P8-C003 proposal prepared
 
@@ -154,40 +199,24 @@ delivery path later persisted those compatible defaults in `P8-C002`.
 Следующий exact gate:
 
 ```text
-P8-C003 fresh-from-zero VPS rehearsal gate
+P8-SFINAL launch readiness freeze
 ```
 
-Prepared docs:
+Already prepared/completed docs:
 
 - `P8-S002` preflight ledger with criticality/size grouping, package inputs,
   readiness checklist, pass criteria and stop-lines;
 - `P8-C003` destructive gate proposal with copy/paste operator text and
   confirmation strings;
 - `P8-C003` readiness confirmation with Android projector limitation accepted.
+- `P8-C003` fresh-from-zero rehearsal evidence with projector acceptance and
+  closed public probes.
 
-Suggested scope:
+`P8-SFINAL` should decide one final status:
 
-- destructive clean/fresh install on the disposable VPS;
-- initialize fresh safe env/DB;
-- apply/package current selected AMN2 head only under this exact gate;
-- loopback web/API smoke;
-- Telegram getMe/non-polling smoke;
-- backup create+verify;
-- external public probes remain closed;
-- one fresh Android per-device config acceptance;
-- no public web/API exposure;
-- no Telegram profile/media mutation;
-- no payload output in evidence.
-
-After that, if passed:
-
-```text
-P8-SFINAL launch readiness freeze
-```
-
-`P8-SFINAL` should decide one final status: `private/operator RC launch-ready`,
-`launch-ready-with-explicit-limitations`, or
-`blocked-with-exact-remaining-blockers`.
+- `private/operator RC launch-ready`;
+- `launch-ready-with-explicit-limitations`;
+- `blocked-with-exact-remaining-blockers`.
 
 ## Stop lines
 

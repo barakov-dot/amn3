@@ -48,7 +48,7 @@ Phase 7 entry into Phase 8 is valid:
 
 ```text
 phase8_entry_status=phase8-prep-ready
-phase8_launch_gate_status=blocked-until-fresh-from-zero-vps-rehearsal
+phase8_launch_gate_status=fresh-from-zero-rehearsal-passed-awaiting-final-freeze
 ```
 
 The live dataplane question is closed by `P7-C011f2`: `awg0` listens on UDP
@@ -62,10 +62,10 @@ used as Phase 8 acceptance.
 
 ## Distance To Launch
 
-Current distance-to-launch estimate after P8-C002:
+Current distance-to-launch estimate after P8-C003:
 
 ```text
-private_operator_rc_distance_to_launch=92_percent
+private_operator_rc_distance_to_launch=98_percent
 ```
 
 Already strong:
@@ -78,14 +78,12 @@ Already strong:
 - previous package/apply, loopback web/API, Telegram getMe/non-polling smoke
   and backup create+verify evidence exists.
 
-Still blocking launch after P8-C003 readiness confirmation:
+Still blocking launch after P8-C003:
 
-- fresh-from-zero VPS rehearsal for the final Phase 8 line is not complete;
-- `P8-C003` proposal is prepared and readiness is `go-with-limitation`, but the
-  destructive gate is not opened;
-- the Android device for `P8-C003` is an Android projector with browser/app
-  traffic, not an Android phone, and this limitation must be recorded if used;
 - final launch readiness freeze has not yet been recorded.
+- `P8-SFINAL` must explicitly decide whether the projector limitation still
+  permits `private/operator RC launch-ready` or requires
+  `launch-ready-with-explicit-limitations`.
 
 ## Phase 8 Gate Map
 
@@ -206,7 +204,8 @@ reproducible fresh launch path for private/operator RC.
 public launch, public web/admin, iOS primary support or restore/import DR.
 
 Влияние на близость запуска:
-if passed, allows final launch-readiness freeze.
+passed on 2026-06-22; launch estimate moved to roughly `98_percent` and the
+next remaining gate is the final launch-readiness freeze.
 
 Следующий gate если passed:
 `P8-SFINAL launch readiness freeze`.
@@ -255,12 +254,16 @@ Without a fresh exact named Phase 8 gate, do not perform:
 `P8-S001` is closed as local-only framing. `P8-C001` fresh per-device Android
 acceptance, `P8-C002` package/current-head smoke, `P8-S002` fresh-from-zero
 preflight ledger and `P8-C003` readiness confirmation have also passed on
-2026-06-21. `P8-C003` is proposed but not opened. Readiness is
-`go-with-limitation` because the available Android test device is an Android
-projector rather than a phone. The recommended next exact gate is still:
+2026-06-21. `P8-C003` fresh-from-zero VPS rehearsal passed on 2026-06-22 using
+AMN2 `187949b` and Android projector browser/app traffic. Readiness is now
+`fresh-from-zero-rehearsal-passed-awaiting-final-freeze`; the projector
+limitation must be recorded in the final verdict. The recommended next exact
+gate is:
 
 ```text
-P8-C003 fresh-from-zero VPS rehearsal gate
+P8-SFINAL launch readiness freeze
 ```
 
-`P8-C003` is destructive and must not run without a fresh exact named gate.
+`P8-SFINAL` must not perform new live/destructive/config delivery action unless
+a separate exact gate is opened; it should freeze the final private/operator RC
+status from existing evidence.

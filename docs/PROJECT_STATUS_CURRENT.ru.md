@@ -1,5 +1,32 @@
 # Текущий override 2026-06-09
 
+Phase 8 `P8-C003` fresh-from-zero VPS rehearsal passed on 2026-06-22 for
+disposable VPS `89.185.80.166`. Evidence:
+`research/amn2/phase-8-p8-c003-fresh-zero-rehearsal-2026-06-22.md`.
+The operator opened the exact destructive gate for AMN2
+`187949bffb927a0a6d6c1f260fc0bb9ebb972447`; package SHA256
+`7FA073E4C66C0981673061D167D525BB9BCD6DFDDAA075E15701F0C2608E2E82` matched.
+The rehearsal performed destructive clean install of `/opt/amn2`, quarantined
+the previous runtime path, applied the `187949b` source overlay, generated fresh
+safe env/DB values plus private operator inputs, verified two Telegram bot
+admins without printing IDs in evidence, ran loopback web/API smoke, Telegram
+`getMe` plus non-polling dispatcher/user-flow smoke, created one fresh Android
+projector peer/config through the AMN2 path, privately handed off one `.conf`
+outside the workspace, created and verified a backup artifact with mode `600`,
+and kept public probes to `3030`, `3040`, `80` and `443` closed as `000`.
+Fresh Android projector server observation for peer fingerprint
+`d0ab128d6801` showed endpoint `yes`, fresh handshake and counter growth:
+`rx_delta=622084`, `tx_delta=9004751`. No `.conf`, QR, `vpn://`, private key,
+PSK, token, password or secret-bearing payload was printed; no public exposure,
+Telegram live send/profile/media mutation, bot polling, restore/import,
+reboot or provider mutation was performed. `P8-C003` used an Android projector
+with browser/app traffic, not an Android phone; Android phone acceptance remains
+the separate `P8-C001` evidence. Phase 8 launch gate is now
+`fresh-from-zero-rehearsal-passed-awaiting-final-freeze`; recommended next gate
+is `P8-SFINAL launch readiness freeze`. Private/operator RC distance is roughly
+`98_percent` until the final freeze records the exact launch verdict and
+limitations.
+
 Phase 8 `P8-C003` readiness confirmation completed on 2026-06-21 as
 `completed-readiness-confirmation-go-with-limitation-no-live-action`. Evidence:
 `research/amn2/phase-8-p8-c003-readiness-confirmation-2026-06-21.md`.

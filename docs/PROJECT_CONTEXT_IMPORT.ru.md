@@ -1,5 +1,28 @@
 # Текущий override 2026-06-09
 
+Phase 8 `P8-C003` fresh-from-zero VPS rehearsal passed on 2026-06-22.
+Evidence:
+`research/amn2/phase-8-p8-c003-fresh-zero-rehearsal-2026-06-22.md`.
+AMN2 `187949bffb927a0a6d6c1f260fc0bb9ebb972447` was rehearsed on disposable
+VPS `89.185.80.166` from a fresh `/opt/amn2` runtime path using package
+`dist/amn2-vps-update-and-smoke-kit-187949b.zip` with SHA256
+`7FA073E4C66C0981673061D167D525BB9BCD6DFDDAA075E15701F0C2608E2E82`.
+The run passed source overlay match, fresh env/DB init, two-admin bot config
+verification, loopback web/API smoke, Telegram `getMe` plus non-polling bot
+surface smoke, backup create+verify, private `.conf` handoff outside the
+workspace and closed public probes. Fresh Android projector peer
+`d0ab128d6801` showed endpoint `yes`, fresh handshake and traffic counter
+growth with `rx_delta=622084` and `tx_delta=9004751`. No public exposure,
+Telegram live send/profile/media mutation, bot polling, restore/import/reboot,
+provider mutation or secret-bearing payload output was performed.
+
+Current Phase 8 launch gate is now
+`fresh-from-zero-rehearsal-passed-awaiting-final-freeze`. Next exact gate:
+`P8-SFINAL launch readiness freeze`. The final freeze must explicitly record
+the limitation that `P8-C003` Android acceptance used an Android projector with
+browser/app traffic and no on-device Telegram; Android phone acceptance remains
+separate `P8-C001` evidence.
+
 Phase 8 `P8-C003` readiness is now `go-with-limitation`, but the destructive
 gate is still not opened. Evidence:
 `research/amn2/phase-8-p8-c003-readiness-confirmation-2026-06-21.md`.
