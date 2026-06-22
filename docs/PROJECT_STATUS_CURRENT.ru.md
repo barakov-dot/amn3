@@ -1,5 +1,21 @@
 # Текущий override 2026-06-09
 
+Phase 8 `PRIVATE_RC_OPERATOR_RUN_GATE` passed on 2026-06-22 as the first
+private/operator RC session 0 read-only run. Result:
+`docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_RESULT.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-operator-run-gate-result-2026-06-22.md`.
+Target VPS `89.185.80.166` matched, source overlay matched AMN2
+`187949bffb927a0a6d6c1f260fc0bb9ebb972447`, loopback web health returned
+`200`, API listener was not running and was not started, public listener guard
+passed, Telegram `getMe` passed for `@NeobyatnayaAMNZ_bot`, and corrected
+external probes to `3030`, `3040`, `80`, and `443` returned `000`.
+No package apply, service restart, public exposure, config generation/delivery,
+Telegram live send, bot polling, restore/import/reboot, provider rebuild,
+production peer/user mutation or secret-bearing output was performed. Helper
+issues were recorded for future scripts: Windows PowerShell UTF-8-without-BOM
+mojibake and `$TargetIp:PORT` interpolation causing malformed probe URLs until
+rerun with `${TargetIp}`.
+
 Phase 8 private RC operator run gate review completed on 2026-06-22 as
 docs-only. Review:
 `docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_REVIEW.ru.md`. Evidence:

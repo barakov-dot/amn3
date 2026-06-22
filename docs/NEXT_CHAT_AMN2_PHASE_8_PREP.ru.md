@@ -18,6 +18,38 @@ Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
 
+## Update 2026-06-22: PRIVATE_RC_OPERATOR_RUN_GATE passed
+
+`PRIVATE_RC_OPERATOR_RUN_GATE` passed as the first private/operator RC session
+0 read-only run. Result:
+`docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_RESULT.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-operator-run-gate-result-2026-06-22.md`.
+
+Key result:
+
+```text
+private_rc_operator_run_gate_status=passed
+phase8_private_operator_rc_session_0_status=passed-read-only
+target_vps_match=yes
+source_overlay_match=yes
+web_login_loopback_http=200
+api_loopback_health_status=not-running-no-start-performed
+public_listener_guard_status=passed
+telegram_get_me_status=passed
+external_probe_3030=000
+external_probe_3040=000
+external_probe_80=000
+external_probe_443=000
+public_exposure_performed=false
+config_delivery_performed=false
+telegram_live_send_performed=false
+bot_polling_started=false
+secret_values_printed=false
+```
+
+Helper notes for future: avoid Russian prompts in UTF-8-without-BOM PowerShell
+scripts or save with BOM; use `${TargetIp}:PORT` in interpolated URLs.
+
 ## Update 2026-06-22: private RC operator run gate review
 
 Completed docs-only review:

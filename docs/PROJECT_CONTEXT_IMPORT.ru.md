@@ -1,5 +1,19 @@
 # Текущий override 2026-06-09
 
+Phase 8 `PRIVATE_RC_OPERATOR_RUN_GATE` passed as the first private/operator RC
+session 0 read-only run. Result:
+`docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_RESULT.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-operator-run-gate-result-2026-06-22.md`.
+Target/runtime matched AMN2 `187949b`, loopback web returned `200`, API was not
+running and was not started, public listener guard passed, Telegram `getMe`
+passed, external probes to `3030`, `3040`, `80`, and `443` were corrected and
+returned `000`. No package apply, restart, public exposure, config delivery,
+Telegram live send, bot polling, restore/import/reboot, provider rebuild,
+production peer/user mutation or secret-bearing output was performed. Helper
+issues are recorded: Windows PowerShell mojibake for UTF-8 without BOM and
+PowerShell `$TargetIp:PORT` interpolation bug; future helpers should use ASCII
+prompts or UTF-8 BOM and `${TargetIp}:PORT`.
+
 Phase 8 private RC operator run gate review is complete docs-only. Review:
 `docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_REVIEW.ru.md`. Evidence:
 `research/amn2/phase-8-private-rc-operator-run-gate-review-2026-06-22.md`.

@@ -10,6 +10,16 @@ Telegram identity/profile/media mutation.
 
 ## Phase 8 Addendum
 
+- `phase-8-private-rc-operator-run-gate-result-2026-06-22.md` - first
+  private/operator RC session 0 read-only result for
+  `PRIVATE_RC_OPERATOR_RUN_GATE`. Result document:
+  `docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_RESULT.ru.md`. Target/runtime matched
+  AMN2 `187949b`, loopback web returned `200`, API was not running and was not
+  started, public listener guard passed, Telegram `getMe` passed, corrected
+  external probes to `3030`, `3040`, `80`, and `443` returned `000`. No
+  package apply, restart, public exposure, config delivery, Telegram live send,
+  bot polling, restore/import/reboot, provider rebuild, production peer/user
+  mutation or secret-bearing output was performed.
 - `phase-8-private-rc-operator-run-gate-review-2026-06-22.md` - docs-only
   review of `PRIVATE_RC_OPERATOR_RUN_GATE` proposal. Review document:
   `docs/AMN2_PRIVATE_RC_OPERATOR_RUN_GATE_REVIEW.ru.md`. Result:
@@ -120,7 +130,8 @@ Phase 8 wait operator request status: active-wait-operator-request-docs-only
 Phase 8 private RC session 0 plan status: prepared-docs-only
 Phase 8 operator run gate proposal status: prepared-not-opened
 Phase 8 operator run gate review status: completed-docs-only
-Phase 8 recommended next state: open-PRIVATE_RC_OPERATOR_RUN_GATE-or-wait
+Phase 8 operator run gate status: passed-read-only
+Phase 8 recommended next state: stay-private-operator-rc-or-open-next-exact-gate
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 471bca8
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings
