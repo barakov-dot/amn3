@@ -10,6 +10,14 @@ Telegram identity/profile/media mutation.
 
 ## Phase 8 Addendum
 
+- `phase-8-rc-wait-operator-request-2026-06-22.md` - docs-only
+  wait-for-operator-request evidence. Wait document:
+  `docs/AMN2_PRIVATE_OPERATOR_RC_WAIT_OPERATOR_REQUEST.ru.md`. It records the
+  Russian operator command `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА`: use existing Phase 8
+  evidence only, open nothing live/destructive/config/Telegram/public, and do
+  the next action only after an explicit named gate from the operator. No
+  live/destructive/config/Telegram/public action or secret-bearing output was
+  performed.
 - `phase-8-rc-wait-exact-named-gate-2026-06-22.md` - docs-only explicit wait
   state evidence. Wait document:
   `docs/AMN2_PRIVATE_OPERATOR_RC_WAIT_EXACT_GATE.ru.md`. It records the
@@ -94,7 +102,8 @@ Phase 8 final package status: completed-private-operator-rc-final-package-docs-o
 Phase 8 closeout status: completed-private-operator-rc-closeout-docs-only
 Phase 8 ready hold status: active-private-operator-rc-ready-hold-docs-only
 Phase 8 wait exact gate status: active-wait-exact-named-gate-docs-only
-Phase 8 recommended next state: ожидать-явный-именованный-gate
+Phase 8 wait operator request status: active-wait-operator-request-docs-only
+Phase 8 recommended next state: ждать-запроса-оператора
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 471bca8
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings

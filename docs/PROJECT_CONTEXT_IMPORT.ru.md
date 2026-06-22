@@ -1,5 +1,16 @@
 # Текущий override 2026-06-09
 
+Phase 8 wait-for-operator-request state is active:
+`ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА`. Wait document:
+`docs/AMN2_PRIVATE_OPERATOR_RC_WAIT_OPERATOR_REQUEST.ru.md`. Evidence:
+`research/amn2/phase-8-rc-wait-operator-request-2026-06-22.md`. Use existing
+Phase 8 evidence only; open nothing live/destructive/config/Telegram/public;
+do the next action only after an explicit named gate from the operator. No live
+VPS/SSH command, destructive action, package apply, service restart, public
+exposure, config delivery, Telegram live send, bot polling, restore/import/
+reboot, provider mutation, production peer/user mutation or secret-bearing
+output was performed.
+
 Phase 8 explicit wait state is active:
 `ОЖИДАНИЕ_ТОЧНОГО_ИМЕНОВАННОГО_GATE`. Wait document:
 `docs/AMN2_PRIVATE_OPERATOR_RC_WAIT_EXACT_GATE.ru.md`. Evidence:

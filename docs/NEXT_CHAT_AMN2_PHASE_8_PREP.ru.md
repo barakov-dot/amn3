@@ -18,6 +18,27 @@ Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
 
+## Update 2026-06-22: ждать запроса оператора
+
+Активно состояние `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА`. Документ:
+`docs/AMN2_PRIVATE_OPERATOR_RC_WAIT_OPERATOR_REQUEST.ru.md`. Evidence:
+`research/amn2/phase-8-rc-wait-operator-request-2026-06-22.md`.
+
+Ключевой результат:
+
+```text
+wait_operator_request_status=active-docs-only
+phase8_final_status=launch-ready-with-explicit-limitations
+private_operator_rc_launch_ready=true
+public_launch_status=not-approved
+remaining_blockers_inside_listed_limitations=none
+next_action=не_открывать_ничего_без_явного_именованного_gate
+```
+
+Следующее действие выполнять только после явного именованного gate от
+оператора. Рекомендации и команды оператору писать на русском; technical
+identifiers оставлять только там, где это нужно для точности.
+
 ## Update 2026-06-22: ожидание точного именованного gate
 
 Активно состояние `ОЖИДАНИЕ_ТОЧНОГО_ИМЕНОВАННОГО_GATE`. Документ:
