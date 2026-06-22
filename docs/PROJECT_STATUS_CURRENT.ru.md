@@ -1,5 +1,17 @@
 # Текущий override 2026-06-09
 
+Phase 8 private/operator RC ready hold activated on 2026-06-22 as
+`active-private-operator-rc-ready-hold-docs-only`. Hold document:
+`docs/AMN2_PRIVATE_OPERATOR_RC_READY_HOLD.ru.md`. Evidence:
+`research/amn2/phase-8-rc-ready-hold-2026-06-22.md`. AMN2 is held at
+`phase8_final_status=launch-ready-with-explicit-limitations` with
+`private_operator_rc_launch_ready=true`, `public_launch_status=not-approved`
+and `remaining_blockers_inside_listed_limitations=none`. No live VPS/SSH
+command, destructive action, package apply, service restart, public exposure,
+config delivery, Telegram live send, bot polling, restore/import/reboot,
+provider mutation, production peer/user mutation or secret-bearing output was
+performed. Exit from hold requires a fresh exact named gate.
+
 Phase 8 private/operator RC closeout completed on 2026-06-22 as
 `completed-private-operator-rc-closeout-docs-only`. Closeout:
 `docs/AMN2_PRIVATE_OPERATOR_RC_CLOSEOUT.ru.md`. Evidence:

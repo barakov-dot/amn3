@@ -10,6 +10,12 @@ Telegram identity/profile/media mutation.
 
 ## Phase 8 Addendum
 
+- `phase-8-rc-ready-hold-2026-06-22.md` - docs-only ready hold evidence.
+  Hold document: `docs/AMN2_PRIVATE_OPERATOR_RC_READY_HOLD.ru.md`. It holds
+  AMN2 at private/operator RC `launch-ready-with-explicit-limitations`, with
+  public launch not approved and no remaining blockers inside listed
+  limitations. No live/destructive/config/Telegram/public action or
+  secret-bearing output was performed.
 - `phase-8-rc-closeout-2026-06-22.md` - docs-only private/operator RC
   closeout evidence. Closeout:
   `docs/AMN2_PRIVATE_OPERATOR_RC_CLOSEOUT.ru.md`. It records final
@@ -78,7 +84,8 @@ Phase 8 operator handoff status: completed-private-operator-rc-handoff-docs-only
 Phase 8 operator run checklist status: completed-private-operator-rc-run-checklist-docs-only
 Phase 8 final package status: completed-private-operator-rc-final-package-docs-only
 Phase 8 closeout status: completed-private-operator-rc-closeout-docs-only
-Phase 8 recommended next state: P8-RC-READY-HOLD
+Phase 8 ready hold status: active-private-operator-rc-ready-hold-docs-only
+Phase 8 recommended next state: wait-for-explicit-exact-named-gate
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1
 AMN2 package/source repo: barakov-dot/amn2 codex-vps-test-prep 471bca8
 latest Codex Security post-fix scan: completed on c958733 with 0 reportable findings

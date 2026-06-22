@@ -18,6 +18,26 @@ Do not use historical shared .conf files as release delivery artifacts.
 They are diagnostic proof only.
 ```
 
+## Update 2026-06-22: private/operator RC ready hold active
+
+`P8-RC-READY-HOLD` is active. Document:
+`docs/AMN2_PRIVATE_OPERATOR_RC_READY_HOLD.ru.md`. Evidence:
+`research/amn2/phase-8-rc-ready-hold-2026-06-22.md`.
+
+Key safe result:
+
+```text
+ready_hold_status=active-docs-only
+phase8_final_status=launch-ready-with-explicit-limitations
+private_operator_rc_launch_ready=true
+public_launch_status=not-approved
+remaining_blockers_inside_listed_limitations=none
+next_action=wait_for_explicit_exact_named_gate
+```
+
+Hold means: do nothing live by default. Exit only through a fresh exact named
+gate.
+
 ## Update 2026-06-22: private/operator RC closeout completed
 
 Final private/operator RC closeout is complete. Document:
