@@ -1,5 +1,23 @@
 # Текущий override 2026-06-09
 
+Phase 8 private RC Telegram bot live preview review/runbook prepared on
+2026-06-24 as docs-only. Review:
+`docs/AMN2_PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE_REVIEW.ru.md`. Runbook:
+`docs/AMN2_PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_RUNBOOK.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-telegram-bot-live-preview-review-runbook-2026-06-24.md`.
+Future exact gate: `PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE`. Review result:
+`review_go=true`, `gate_open_go=conditional-go-with-explicit-operator-approval`,
+`operator_can_open_gate_now=true`. The plan records target VPS
+`89.185.80.166`, expected AMN2 head
+`187949bffb927a0a6d6c1f260fc0bb9ebb972447`, allowed Telegram actions, two-admin
+operator boundary, DB mutation boundary for admin test chats only, config
+delivery stop-lines, controlled polling start/stop criteria, public exposure
+closed criteria, pass/fail criteria and copy/paste gate text. No live VPS/SSH
+command, Telegram polling, Telegram live send, config generation/delivery,
+public exposure, package apply, service restart, restore/import/reboot,
+provider rebuild, production peer/user mutation or secret-bearing output was
+performed.
+
 Phase 8 fresh Android phone post-RC recheck review/runbook prepared on
 2026-06-22 as docs-only. Review:
 `docs/AMN2_FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW.ru.md`. Runbook:

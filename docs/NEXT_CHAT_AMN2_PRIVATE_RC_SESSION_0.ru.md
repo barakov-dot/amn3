@@ -59,6 +59,23 @@ Use this only when Android phone is physically available. Until then:
 recommended_next_step=ANDROID_PHONE_BLOCKER_HOLD
 ```
 
+## 0b. Telegram bot live preview prep
+
+Prepared docs-only:
+
+```text
+private_rc_telegram_bot_live_preview_review_status=completed-docs-only
+private_rc_telegram_bot_live_preview_runbook_status=prepared-docs-only
+review_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE_REVIEW.ru.md
+runbook_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_RUNBOOK.ru.md
+evidence=research/amn2/phase-8-private-rc-telegram-bot-live-preview-review-runbook-2026-06-24.md
+gate_name=PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE
+gate_open_go=conditional-go-with-explicit-operator-approval
+```
+
+This gate can be opened without Android phone, but it is live Telegram polling
+and requires explicit operator approval.
+
 ## 1. Latest pushed heads
 
 ```text

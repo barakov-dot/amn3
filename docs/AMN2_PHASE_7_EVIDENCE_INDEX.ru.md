@@ -10,6 +10,15 @@ Telegram identity/profile/media mutation.
 
 ## Phase 8 Addendum
 
+- `phase-8-private-rc-telegram-bot-live-preview-review-runbook-2026-06-24.md`
+  - docs-only review/runbook для будущего
+  `PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE`. Review:
+  `docs/AMN2_PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE_REVIEW.ru.md`.
+  Runbook: `docs/AMN2_PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_RUNBOOK.ru.md`.
+  Result: `review_go=true`,
+  `gate_open_go=conditional-go-with-explicit-operator-approval`. No
+  live/destructive/config/Telegram/public action or secret-bearing output was
+  performed.
 - `phase-8-fresh-android-phone-post-rc-recheck-review-runbook-2026-06-22.md` -
   docs-only review/runbook для будущего
   `FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE`. Review:
@@ -166,6 +175,8 @@ Phase 8 private RC next-chat sync status: completed-docs-only
 Phase 8 helper style hardening status: completed-local-only
 Phase 8 fresh Android phone post-RC recheck review status: completed-docs-only
 Phase 8 fresh Android phone post-RC recheck gate status: conditional-no-go-until-android-phone-available
+Phase 8 Telegram bot live preview review status: completed-docs-only
+Phase 8 Telegram bot live preview gate status: conditional-go-with-explicit-operator-approval
 Phase 8 recommended next state: ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 Phase 8 recommended practical next state: FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW
 workspace/evidence repo: barakov-dot/amn3 master latest pushed head; verify with git log -1

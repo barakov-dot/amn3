@@ -1,5 +1,14 @@
 # Текущий override 2026-06-09
 
+Phase 8 private RC Telegram bot live preview review/runbook prepared docs-only.
+Review: `docs/AMN2_PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE_REVIEW.ru.md`.
+Runbook: `docs/AMN2_PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_RUNBOOK.ru.md`.
+Evidence:
+`research/amn2/phase-8-private-rc-telegram-bot-live-preview-review-runbook-2026-06-24.md`.
+Future exact gate: `PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE`. Gate opening is
+conditional-go only after explicit operator approval because it starts live
+Telegram polling. No live action was performed in the review/runbook step.
+
 Phase 8 fresh Android phone post-RC recheck review/runbook prepared docs-only.
 Review: `docs/AMN2_FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW.ru.md`.
 Runbook: `docs/AMN2_FRESH_ANDROID_PHONE_POST_RC_RECHECK_RUNBOOK.ru.md`.
