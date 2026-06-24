@@ -1,5 +1,21 @@
 # Текущий override 2026-06-09
 
+Phase 8 `PRIVATE_RC_DB_RUNTIME_OBSERVATION_GATE` was opened on 2026-06-24 and
+ended as `blocked-by-ssh-transport-before-observation`. Result:
+`docs/AMN2_PRIVATE_RC_DB_RUNTIME_OBSERVATION_RESULT.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-db-runtime-observation-result-2026-06-24.md`.
+Both the main helper and resume helper completed local dry probe URL inspection
+and confirmed public probes to `3030`, `3040`, `80` and `443` as `000`, but SSH
+closed before the first remote precheck output:
+`Connection closed by 89.185.80.166 port 22`. Therefore DB/runtime state was
+not observed and the earlier discrepancy remains unresolved:
+`PRIVATE_RC_OPERATOR_RUN_GATE` saw `db_present=true`, while
+`PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE` saw `db_present=false`. No package
+apply, service start/restart/stop, public exposure, config generation/delivery,
+peer creation, DB row dump/download/copy, Telegram polling/live send,
+restore/import/reboot, provider rebuild or secret-bearing output was performed.
+Recommended next exact gate: `PRIVATE_RC_SSH_TRANSPORT_DIAGNOSTIC_REVIEW`.
+
 Phase 8 private RC DB/runtime observation review completed on 2026-06-24 as
 docs-only. Review:
 `docs/AMN2_PRIVATE_RC_DB_RUNTIME_OBSERVATION_REVIEW.ru.md`. Evidence:

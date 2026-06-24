@@ -137,6 +137,32 @@ This future gate is read-only VPS observation only. It must not perform package
 apply, service start/restart/stop, public exposure, config generation/delivery,
 Telegram polling/live send, restore/import/reboot or secret-bearing output.
 
+## 0e. DB/runtime observation result
+
+Executed after explicit operator gate:
+
+```text
+private_rc_db_runtime_observation_gate_status=blocked-by-ssh-transport-before-observation
+result_doc=docs/AMN2_PRIVATE_RC_DB_RUNTIME_OBSERVATION_RESULT.ru.md
+evidence=research/amn2/phase-8-private-rc-db-runtime-observation-result-2026-06-24.md
+main_run_id=20260624T190511Z
+resume_run_id=20260624T190840Z
+remote_observation_started=false
+db_runtime_observation_completed=false
+db_root_cause_classification=not_observed
+```
+
+Exact blocker:
+
+```text
+exact_blocker=ssh_transport_closed_before_remote_precheck
+db_discrepancy_status=unresolved_due_to_ssh_transport_blocker
+recommended_next=PRIVATE_RC_SSH_TRANSPORT_DIAGNOSTIC_REVIEW
+```
+
+The DB discrepancy is still not classified. Do not retry DB/runtime observation
+again without an explicit retry gate or SSH transport diagnostic review.
+
 ## 1. Latest pushed heads
 
 ```text
