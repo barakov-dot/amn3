@@ -1,5 +1,20 @@
 # Текущий override 2026-06-09
 
+Phase 8 `PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE` passed on 2026-06-24 as
+`passed-with-manual-operator-observation`. Result:
+`docs/AMN2_PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_RESULT.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-telegram-bot-live-preview-result-2026-06-24.md`.
+Target VPS `89.185.80.166` matched expected AMN2 runtime/source head
+`187949bffb927a0a6d6c1f260fc0bb9ebb972447`; Telegram `getMe` passed; exactly
+one controlled bot polling process started; operator `/start` flow passed;
+polling was stopped; public probes to `3030`, `3040`, `80` and `443` stayed
+closed as `000` before and after. No package apply, broad service restart,
+public exposure, config generation/delivery, peer creation, Telegram
+profile/media mutation, restore/import/reboot, provider rebuild or
+secret-bearing output occurred. Limitations: partner/admin `/start` was not
+reported, `db_present=false` was observed in this helper run, and public launch
+plus config delivery remain not approved without separate exact gates.
+
 Phase 8 private RC Telegram bot live preview review/runbook prepared on
 2026-06-24 as docs-only. Review:
 `docs/AMN2_PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE_REVIEW.ru.md`. Runbook:

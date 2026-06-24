@@ -76,6 +76,43 @@ gate_open_go=conditional-go-with-explicit-operator-approval
 This gate can be opened without Android phone, but it is live Telegram polling
 and requires explicit operator approval.
 
+## 0c. Telegram bot live preview result
+
+Completed after explicit operator gate:
+
+```text
+private_rc_telegram_bot_live_preview_gate_status=passed-with-manual-operator-observation
+run_id=20260624T184735Z
+target_vps=89.185.80.166
+expected_amn2_head=187949bffb927a0a6d6c1f260fc0bb9ebb972447
+result_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_RESULT.ru.md
+evidence=research/amn2/phase-8-private-rc-telegram-bot-live-preview-result-2026-06-24.md
+```
+
+Safe result:
+
+```text
+source_overlay_match=yes
+telegram_get_me_status=passed
+bot_polling_started=true
+operator_start_flow_observed=passed
+bot_polling_process_after=stopped
+public_closed_probes_before_status=passed
+public_closed_probes_after_status=passed
+public_exposure_performed=false
+config_delivery_performed=false
+secret_values_printed=false
+```
+
+Limitations:
+
+```text
+partner_start_flow_observed=not_reported
+db_present=false
+public_launch_status=not-approved
+config_delivery_status=not-approved
+```
+
 ## 1. Latest pushed heads
 
 ```text
