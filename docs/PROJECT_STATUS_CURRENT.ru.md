@@ -1,5 +1,18 @@
 # Текущий override 2026-06-09
 
+Phase 8 private RC DB/runtime observation review completed on 2026-06-24 as
+docs-only. Review:
+`docs/AMN2_PRIVATE_RC_DB_RUNTIME_OBSERVATION_REVIEW.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-db-runtime-observation-review-2026-06-24.md`.
+The review prepares future exact gate `PRIVATE_RC_DB_RUNTIME_OBSERVATION_GATE`
+to investigate why `PRIVATE_RC_OPERATOR_RUN_GATE` saw `db_present=true` while
+`PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE` saw `db_present=false`. Result:
+`review_go=true`, `gate_open_go=conditional-go-with-explicit-operator-approval`.
+No live VPS/SSH command, package apply, service restart, public exposure,
+config generation/delivery, Telegram polling/live send, restore/import/reboot,
+provider rebuild, production peer/user mutation or secret-bearing output was
+performed.
+
 Phase 8 `PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE` passed on 2026-06-24 as
 `passed-with-manual-operator-observation`. Result:
 `docs/AMN2_PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_RESULT.ru.md`. Evidence:

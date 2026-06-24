@@ -113,6 +113,30 @@ public_launch_status=not-approved
 config_delivery_status=not-approved
 ```
 
+## 0d. DB/runtime observation review
+
+Prepared docs-only:
+
+```text
+private_rc_db_runtime_observation_review_status=completed-docs-only
+review_doc=docs/AMN2_PRIVATE_RC_DB_RUNTIME_OBSERVATION_REVIEW.ru.md
+evidence=research/amn2/phase-8-private-rc-db-runtime-observation-review-2026-06-24.md
+gate_name=PRIVATE_RC_DB_RUNTIME_OBSERVATION_GATE
+review_go=true
+gate_open_go=conditional-go-with-explicit-operator-approval
+```
+
+Reason:
+
+```text
+private_rc_operator_run_gate_db_present=true
+private_rc_telegram_bot_live_preview_db_present=false
+```
+
+This future gate is read-only VPS observation only. It must not perform package
+apply, service start/restart/stop, public exposure, config generation/delivery,
+Telegram polling/live send, restore/import/reboot or secret-bearing output.
+
 ## 1. Latest pushed heads
 
 ```text
