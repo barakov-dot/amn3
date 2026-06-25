@@ -185,6 +185,30 @@ Recommended order:
 3=PRIVATE_RC_TELEGRAM_PARTNER_ADMIN_PREVIEW_GATE only when partner admin is available
 ```
 
+## 0g. SSH transport diagnostic result
+
+Executed after explicit operator gate:
+
+```text
+private_rc_ssh_transport_diagnostic_gate_status=passed
+result_doc=docs/AMN2_PRIVATE_RC_SSH_TRANSPORT_DIAGNOSTIC_RESULT.ru.md
+evidence=research/amn2/phase-8-private-rc-ssh-transport-diagnostic-result-2026-06-25.md
+run_id=20260625T130118Z
+target_vps=89.185.80.166
+ssh_transport_status=passed
+source_overlay_match=yes
+public_closed_probes_before_status=passed
+public_closed_probes_after_status=passed
+```
+
+Interpretation:
+
+```text
+previous_db_observation_blocker_reclassified=large_stdin_or_helper_execution_method_issue
+db_discrepancy_status=still_unresolved_but_retry_unblocked
+recommended_next=PRIVATE_RC_DB_RUNTIME_OBSERVATION_GATE_RETRY
+```
+
 ## 1. Latest pushed heads
 
 ```text

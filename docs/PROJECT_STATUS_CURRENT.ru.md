@@ -1,5 +1,23 @@
 # Текущий override 2026-06-09
 
+Phase 8 `PRIVATE_RC_SSH_TRANSPORT_DIAGNOSTIC_GATE` passed on 2026-06-25.
+Result: `docs/AMN2_PRIVATE_RC_SSH_TRANSPORT_DIAGNOSTIC_RESULT.ru.md`.
+Evidence:
+`research/amn2/phase-8-private-rc-ssh-transport-diagnostic-result-2026-06-25.md`.
+Target VPS `89.185.80.166` accepted small read-only SSH commands: `true`,
+`echo`, safe remote summary and `/opt/amn2` source marker read all passed.
+Source overlay matched AMN2
+`187949bffb927a0a6d6c1f260fc0bb9ebb972447`; public probes to `3030`, `3040`,
+`80` and `443` stayed closed as `000` before and after. This reclassifies the
+previous DB/runtime observation blocker from general SSH transport failure to a
+likely large-stdin/helper-execution-method issue. DB discrepancy remains
+unresolved but retry is now unblocked via small read-only SSH commands. No
+package apply, service start/restart/stop, sshd/firewall/auth change, public
+exposure, config generation/delivery, peer creation, DB row dump/download/copy,
+Telegram polling/live send, restore/import/reboot, provider rebuild or
+secret-bearing output was performed. Recommended next exact gate:
+`PRIVATE_RC_DB_RUNTIME_OBSERVATION_GATE_RETRY`.
+
 Phase 8 private RC SSH/DB/partner review package completed on 2026-06-25 as
 docs-only. New docs:
 `docs/AMN2_PRIVATE_RC_SSH_TRANSPORT_DIAGNOSTIC_REVIEW.ru.md`,
