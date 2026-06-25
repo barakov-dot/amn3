@@ -1,5 +1,21 @@
 # Текущий override 2026-06-09
 
+Phase 8 private RC SSH/DB/partner review package completed on 2026-06-25 as
+docs-only. New docs:
+`docs/AMN2_PRIVATE_RC_SSH_TRANSPORT_DIAGNOSTIC_REVIEW.ru.md`,
+`docs/AMN2_PRIVATE_RC_DB_RUNTIME_OBSERVATION_RETRY_PLAN.ru.md`, and
+`docs/AMN2_PRIVATE_RC_TELEGRAM_PARTNER_ADMIN_PREVIEW_REVIEW.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-ssh-db-partner-review-package-2026-06-25.md`.
+The package responds to the latest DB/runtime observation blocker
+`ssh_transport_closed_before_remote_precheck` and the Telegram live preview
+limitation `partner_start_flow_observed=not_reported`. It prepares future exact
+gates for SSH transport diagnostic, DB/runtime observation retry after SSH
+diagnostic, and partner/admin Telegram preview. No live VPS/SSH command,
+package apply, service start/restart/stop, public exposure, config
+generation/delivery, Telegram polling/live send, restore/import/reboot,
+provider rebuild, production peer/user mutation or secret-bearing output was
+performed.
+
 Phase 8 `PRIVATE_RC_DB_RUNTIME_OBSERVATION_GATE` was opened on 2026-06-24 and
 ended as `blocked-by-ssh-transport-before-observation`. Result:
 `docs/AMN2_PRIVATE_RC_DB_RUNTIME_OBSERVATION_RESULT.ru.md`. Evidence:

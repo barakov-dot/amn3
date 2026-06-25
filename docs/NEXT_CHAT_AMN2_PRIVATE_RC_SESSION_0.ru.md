@@ -163,6 +163,28 @@ recommended_next=PRIVATE_RC_SSH_TRANSPORT_DIAGNOSTIC_REVIEW
 The DB discrepancy is still not classified. Do not retry DB/runtime observation
 again without an explicit retry gate or SSH transport diagnostic review.
 
+## 0f. SSH/DB/partner review package
+
+Prepared docs-only on 2026-06-25:
+
+```text
+private_rc_ssh_transport_diagnostic_review_status=completed-docs-only
+private_rc_db_runtime_observation_retry_plan_status=completed-docs-only
+private_rc_telegram_partner_admin_preview_review_status=completed-docs-only
+ssh_transport_review_doc=docs/AMN2_PRIVATE_RC_SSH_TRANSPORT_DIAGNOSTIC_REVIEW.ru.md
+db_runtime_retry_plan_doc=docs/AMN2_PRIVATE_RC_DB_RUNTIME_OBSERVATION_RETRY_PLAN.ru.md
+telegram_partner_review_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_PARTNER_ADMIN_PREVIEW_REVIEW.ru.md
+evidence=research/amn2/phase-8-private-rc-ssh-db-partner-review-package-2026-06-25.md
+```
+
+Recommended order:
+
+```text
+1=PRIVATE_RC_SSH_TRANSPORT_DIAGNOSTIC_GATE
+2=PRIVATE_RC_DB_RUNTIME_OBSERVATION_GATE_RETRY only after SSH diagnostic pass
+3=PRIVATE_RC_TELEGRAM_PARTNER_ADMIN_PREVIEW_GATE only when partner admin is available
+```
+
 ## 1. Latest pushed heads
 
 ```text
