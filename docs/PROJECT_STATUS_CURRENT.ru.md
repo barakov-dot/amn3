@@ -1,5 +1,19 @@
 # Текущий override 2026-06-09
 
+Phase 8 third-party Android config handoff review completed on 2026-06-25 as
+docs-only. Review:
+`docs/AMN2_THIRD_PARTY_ANDROID_CONFIG_HANDOFF_GATE_REVIEW.ru.md`. Evidence:
+`research/amn2/phase-8-third-party-android-config-handoff-review-2026-06-25.md`.
+Result: `review_go=true`,
+`gate_open_go=conditional-go-when-third-party-android-phone-is-available`.
+Recommended handoff model is operator-mediated private `.conf` handoff to
+`C:\Users\SooL\Documents\AMN2-PRIVATE-HANDOFF`. Third-party Telegram ID is not
+required for file handoff; it is required only if the execution helper must bind
+the AMN2 order to a Telegram identity. Unrelated old Telegram IDs must not be
+reused. Future execution gate is `THIRD_PARTY_ANDROID_CONFIG_HANDOFF_GATE`.
+No live VPS/SSH/config/Telegram/public gate was opened; no peer/config was
+created; no secret-bearing payload was output.
+
 Phase 8 `PRIVATE_RC_DB_RUNTIME_OBSERVATION_GATE_RETRY` completed on 2026-06-25
 as `passed-db-path-classified-with-aggregate-limitation`. Result:
 `docs/AMN2_PRIVATE_RC_DB_RUNTIME_OBSERVATION_RETRY_RESULT.ru.md`. Evidence:

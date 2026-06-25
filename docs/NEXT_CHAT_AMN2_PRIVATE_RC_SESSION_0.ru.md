@@ -59,6 +59,36 @@ Use this only when Android phone is physically available. Until then:
 recommended_next_step=ANDROID_PHONE_BLOCKER_HOLD
 ```
 
+## 0a-1. Third-party Android config handoff prep
+
+Prepared docs-only:
+
+```text
+third_party_android_config_handoff_review_status=completed-docs-only
+review_doc=docs/AMN2_THIRD_PARTY_ANDROID_CONFIG_HANDOFF_GATE_REVIEW.ru.md
+evidence=research/amn2/phase-8-third-party-android-config-handoff-review-2026-06-25.md
+gate_name=THIRD_PARTY_ANDROID_CONFIG_HANDOFF_GATE
+review_go=true
+gate_open_go=conditional-go-when-third-party-android-phone-is-available
+handoff_model=recommended_operator_mediated_private_conf_handoff
+fresh_peer_limit=1
+```
+
+Important boundary:
+
+```text
+third_party_android_user_is_admin=false
+third_party_telegram_id_required=no_for_handoff_yes_only_if_order_identity_is_required_by_execution_helper
+private_handoff_dir=C:\Users\SooL\Documents\AMN2-PRIVATE-HANDOFF
+artifact_type=.conf
+artifact_count=1
+payload_output_allowed=false
+```
+
+Use this only when the third-party Android phone is physically available for
+AmneziaWG import, connect and browser/app traffic test. Do not reuse unrelated
+old Telegram IDs.
+
 ## 0b. Telegram bot live preview prep
 
 Prepared docs-only:
