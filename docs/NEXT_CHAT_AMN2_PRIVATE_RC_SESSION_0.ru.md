@@ -104,6 +104,24 @@ Use this only when the third-party Android phone is physically available for
 AmneziaWG import, connect and browser/app traffic test. Do not reuse unrelated
 old Telegram IDs.
 
+Execution completed after explicit operator gate on 2026-06-25:
+
+```text
+third_party_android_config_handoff_gate_status=completed-private-file-copied-secret-not-printed
+run_id=20260625T193843Z
+result_doc=docs/AMN2_THIRD_PARTY_ANDROID_CONFIG_HANDOFF_GATE_RESULT.ru.md
+evidence=research/amn2/phase-8-third-party-android-config-handoff-result-2026-06-25.md
+fresh_peer_public_key_fp=49e456e4edcb
+fresh_vpn_ip=10.8.0.7
+local_conf_file=third-party-android-device-2.conf
+local_conf_file_sha256=ce431c29b5b7dae010bb91c429d4f401f048893c356498ba6f2d65e99b224db4
+next_gate=THIRD_PARTY_ANDROID_TRAFFIC_OBSERVATION_GATE
+```
+
+Do not recreate another third-party Android config unless the operator opens a
+new exact gate and accepts one more peer. Next step is private manual send plus
+server-side observation after the third-party user attempts traffic.
+
 ## 0b. Telegram bot live preview prep
 
 Prepared docs-only:

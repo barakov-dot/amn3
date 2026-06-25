@@ -1,5 +1,22 @@
 # Текущий override 2026-06-09
 
+Phase 8 `THIRD_PARTY_ANDROID_CONFIG_HANDOFF_GATE` completed on 2026-06-25 as
+`completed-private-file-copied-secret-not-printed`. Result:
+`docs/AMN2_THIRD_PARTY_ANDROID_CONFIG_HANDOFF_GATE_RESULT.ru.md`. Evidence:
+`research/amn2/phase-8-third-party-android-config-handoff-result-2026-06-25.md`.
+Run id `20260625T193843Z`; target VPS `89.185.80.166`; source overlay matched
+`187949bffb927a0a6d6c1f260fc0bb9ebb972447`; third-party Telegram ID was not
+required for private file handoff. Exactly one fresh peer/config was created
+through AMN2 path: `fresh_peer_public_key_fp=49e456e4edcb`,
+`fresh_vpn_ip=10.8.0.7`, peer count `5 -> 6`. Local private `.conf` artifact:
+`third-party-android-device-2.conf`, bytes `478`, sha256
+`ce431c29b5b7dae010bb91c429d4f401f048893c356498ba6f2d65e99b224db4`. No config
+payload, QR, `vpn://`, private key, PSK, token or password was printed; no
+Telegram live send/polling, public exposure, destructive install,
+restore/import/reboot, provider action or extra peer creation was performed.
+Next exact gate after third-party manual import/connect/traffic attempt:
+`THIRD_PARTY_ANDROID_TRAFFIC_OBSERVATION_GATE`.
+
 Phase 8 `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА` hold recorded on 2026-06-25 as
 `active-hold`. Hold doc: `docs/AMN2_WAIT_FOR_OPERATOR_REQUEST_HOLD.ru.md`.
 Evidence:
