@@ -209,6 +209,34 @@ db_discrepancy_status=still_unresolved_but_retry_unblocked
 recommended_next=PRIVATE_RC_DB_RUNTIME_OBSERVATION_GATE_RETRY
 ```
 
+## 0h. DB/runtime observation retry result
+
+Executed after explicit operator gate:
+
+```text
+private_rc_db_runtime_observation_retry_gate_status=passed-db-path-classified-with-aggregate-limitation
+result_doc=docs/AMN2_PRIVATE_RC_DB_RUNTIME_OBSERVATION_RETRY_RESULT.ru.md
+evidence=research/amn2/phase-8-private-rc-db-runtime-observation-retry-result-2026-06-25.md
+source_overlay_match=yes
+settings_database_path=data/amneziya.sqlite3
+settings_database_resolved_path=/opt/amn2/data/amneziya.sqlite3
+settings_database_exists=true
+settings_database_bytes=147456
+settings_database_mode=600
+db_candidate_count=1
+db_candidate_1_path=data/amneziya.sqlite3
+db_root_cause_classification=settings_db_present
+```
+
+Interpretation:
+
+```text
+previous_telegram_live_preview_db_present_false_reclassified=helper_observation_issue
+db_discrepancy_status=resolved_for_path_existence
+aggregate_counts_status=not_observed_due_to_helper_quoting
+private_operator_rc_status_impact=no_new_blocker_inside_current_limitations
+```
+
 ## 1. Latest pushed heads
 
 ```text

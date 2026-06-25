@@ -1,5 +1,23 @@
 # Текущий override 2026-06-09
 
+Phase 8 `PRIVATE_RC_DB_RUNTIME_OBSERVATION_GATE_RETRY` completed on 2026-06-25
+as `passed-db-path-classified-with-aggregate-limitation`. Result:
+`docs/AMN2_PRIVATE_RC_DB_RUNTIME_OBSERVATION_RETRY_RESULT.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-db-runtime-observation-retry-result-2026-06-25.md`.
+Small read-only SSH commands confirmed source overlay
+`187949bffb927a0a6d6c1f260fc0bb9ebb972447`, `.env` key presence,
+`DATABASE_PATH=data/amneziya.sqlite3`, resolved DB path
+`/opt/amn2/data/amneziya.sqlite3`, DB existence `true`, size `147456`, mode
+`600`, and exactly one DB candidate at `data/amneziya.sqlite3`. This
+reclassifies the earlier Telegram live preview `db_present=false` as helper
+observation issue, not runtime DB absence. Aggregate counts were not completed
+because two helper attempts hit Windows SSH shell/SQL quoting issues; no DB
+rows were printed and no DB copy/download occurred. No package apply, service
+start/restart/stop, public exposure, config generation/delivery, peer creation,
+Telegram polling/live send, restore/import/reboot, provider rebuild or
+secret-bearing output was performed. No new blocker inside current
+private/operator RC limitations.
+
 Phase 8 `PRIVATE_RC_SSH_TRANSPORT_DIAGNOSTIC_GATE` passed on 2026-06-25.
 Result: `docs/AMN2_PRIVATE_RC_SSH_TRANSPORT_DIAGNOSTIC_RESULT.ru.md`.
 Evidence:
