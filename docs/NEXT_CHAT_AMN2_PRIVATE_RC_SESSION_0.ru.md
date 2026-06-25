@@ -19,6 +19,21 @@ Default lane:
 Не открывать live/VPS/config/Telegram/public gates без нового exact named gate.
 ```
 
+## 0. Active hold
+
+Recorded on 2026-06-25:
+
+```text
+hold_gate=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+hold_status=active
+hold_doc=docs/AMN2_WAIT_FOR_OPERATOR_REQUEST_HOLD.ru.md
+evidence=research/amn2/phase-8-wait-for-operator-request-hold-2026-06-25.md
+next_action_requires_exact_named_gate=true
+```
+
+Ничего live/VPS/config/Telegram/public не открывать до явного именованного gate
+от оператора.
+
 ## 0. Post-session helper hardening
 
 Completed local-only after session 0:

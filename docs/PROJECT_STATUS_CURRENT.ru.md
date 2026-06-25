@@ -1,5 +1,14 @@
 # Текущий override 2026-06-09
 
+Phase 8 `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА` hold recorded on 2026-06-25 as
+`active-hold`. Hold doc: `docs/AMN2_WAIT_FOR_OPERATOR_REQUEST_HOLD.ru.md`.
+Evidence:
+`research/amn2/phase-8-wait-for-operator-request-hold-2026-06-25.md`.
+AMN2 remains `launch-ready-with-explicit-limitations`; public launch, config
+delivery, Telegram live send and live VPS actions remain not approved. Next
+action requires an explicit exact named gate from the operator. No live VPS/SSH,
+config, Telegram or public gate was opened.
+
 Phase 8 third-party Android config handoff review completed on 2026-06-25 as
 docs-only. Review:
 `docs/AMN2_THIRD_PARTY_ANDROID_CONFIG_HANDOFF_GATE_REVIEW.ru.md`. Evidence:
