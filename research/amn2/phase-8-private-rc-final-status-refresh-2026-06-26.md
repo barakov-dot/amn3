@@ -15,6 +15,8 @@ provider_console_ssh_diagnostic_review=completed-docs-only
 ssh_key_based_access_prep_gate_review=completed-docs-only
 provider_console_ssh_diagnostic_gate_package=prepared-operator-side-runbook
 ssh_key_based_access_prep_gate_package=prepared-pending-provider-console-result-and-private-inputs
+provider_console_ssh_diagnostic_gate_execution=passed-minimal-manual-console-observation
+ssh_key_based_access_prep_gate_execution=pending_operator_helper_run
 ```
 
 ## Final status
@@ -36,7 +38,7 @@ production_rollout_status=not-approved
 ```text
 recommended_next_gate=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE
 recommended_followup_gate=PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE
-provider_console_ssh_diagnostic_gate_execution=pending_operator_console_action
-ssh_key_based_access_prep_gate_execution=pending_provider_console_result_and_operator_public_key
+provider_console_ssh_diagnostic_gate_execution=passed-minimal-manual-console-observation
+ssh_key_based_access_prep_gate_execution=pending_operator_helper_run
 ssh_auth_hardening_go=false
 ```
