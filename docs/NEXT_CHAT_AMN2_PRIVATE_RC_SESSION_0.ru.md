@@ -49,6 +49,22 @@ recommended_next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 recommended_live_next_review=PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW
 ```
 
+## 0a-1. Telegram operation gate review
+
+Recorded docs-only on 2026-06-26:
+
+```text
+private_rc_telegram_operation_gate_review_status=completed-docs-only
+review_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW.ru.md
+evidence=research/amn2/phase-8-private-rc-telegram-operation-gate-review-2026-06-26.md
+review_go=true
+execution_gate_go=conditional-go-with-explicit-operator-approval
+recommended_execution_gate=PRIVATE_RC_TELEGRAM_OPERATION_GATE
+```
+
+No live bot polling was started by the review. Future execution gate must stop
+polling at the end and keep config delivery/public exposure closed.
+
 ## 0b. Release limitations refresh
 
 Recorded docs-only on 2026-06-26:

@@ -1,5 +1,21 @@
 # Текущий override 2026-06-09
 
+Phase 8 `PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW` completed on 2026-06-26 as
+`completed-docs-only`. Review:
+`docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-telegram-operation-gate-review-2026-06-26.md`.
+Verdict: `review_go=true`,
+`execution_gate_go=conditional-go-with-explicit-operator-approval`.
+Prepared future exact gate `PRIVATE_RC_TELEGRAM_OPERATION_GATE` for controlled
+private/operator Telegram bot operation: read-only prechecks, public closed
+probes, Telegram `getMe`, exactly one controlled polling process, live replies
+only to approved admin/operator chats, manual UX check, stop polling at end, and
+final no-polling/no-public-exposure guard. Config generation/delivery, peer
+creation, public exposure, package apply, broad service restart, Telegram
+profile/media mutation, broadcast/mass send, DB row dump/download/copy and
+secret-bearing output remain forbidden. No live VPS/SSH/config/Telegram/public
+gate was opened for this review.
+
 Phase 8 `PRIVATE_RC_FINAL_STATUS_SNAPSHOT` completed on 2026-06-26 as
 `completed-docs-only`. Snapshot:
 `docs/AMN2_PRIVATE_RC_FINAL_STATUS_SNAPSHOT.ru.md`. Evidence:

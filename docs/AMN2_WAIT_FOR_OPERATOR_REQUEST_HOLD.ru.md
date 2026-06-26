@@ -17,6 +17,9 @@ release_limitations_refresh_status=completed-docs-only
 last_status_snapshot_gate=PRIVATE_RC_FINAL_STATUS_SNAPSHOT
 last_status_snapshot_date=2026-06-26
 final_status_snapshot_status=completed-docs-only
+last_review_gate=PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW
+last_review_date=2026-06-26
+telegram_operation_gate_review_status=completed-docs-only
 next_action_requires_exact_named_gate=true
 ```
 
