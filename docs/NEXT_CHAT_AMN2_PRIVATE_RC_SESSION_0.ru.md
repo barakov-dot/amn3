@@ -122,6 +122,18 @@ Do not recreate another third-party Android config unless the operator opens a
 new exact gate and accepts one more peer. Next step is private manual send plus
 server-side observation after the third-party user attempts traffic.
 
+Manual acceptance recorded on 2026-06-26:
+
+```text
+third_party_android_manual_acceptance_status=passed-by-third-party-operator-report
+result_doc=docs/AMN2_THIRD_PARTY_ANDROID_MANUAL_ACCEPTANCE_RESULT.ru.md
+evidence=research/amn2/phase-8-third-party-android-manual-acceptance-result-2026-06-26.md
+fresh_peer_public_key_fp=49e456e4edcb
+owner_report_summary=config_imported_connects_works_fast
+server_side_observation_status=not_checked_in_this_manual_record
+next_gate_if_needed=THIRD_PARTY_ANDROID_TRAFFIC_OBSERVATION_GATE
+```
+
 ## 0b. Telegram bot live preview prep
 
 Prepared docs-only:

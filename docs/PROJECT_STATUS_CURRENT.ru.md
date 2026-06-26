@@ -1,5 +1,19 @@
 # Текущий override 2026-06-09
 
+Phase 8 third-party Android manual acceptance was recorded on 2026-06-26 as
+`passed-by-third-party-operator-report`. Result:
+`docs/AMN2_THIRD_PARTY_ANDROID_MANUAL_ACCEPTANCE_RESULT.ru.md`. Evidence:
+`research/amn2/phase-8-third-party-android-manual-acceptance-result-2026-06-26.md`.
+Linked handoff: `THIRD_PARTY_ANDROID_CONFIG_HANDOFF_GATE`, run id
+`20260625T193843Z`, fresh peer fp `49e456e4edcb`, file
+`third-party-android-device-2.conf`. Operator relayed the Android owner's safe
+report: config imported, connection works, traffic works fast. No config
+payload, QR, `vpn://`, private key, PSK, token/password or screenshot payload
+was shared. No live VPS/SSH/config/Telegram/public gate was opened for this
+manual record. Server-side handshake/rx-tx observation remains available via
+future exact gate `THIRD_PARTY_ANDROID_TRAFFIC_OBSERVATION_GATE` if stronger
+evidence is required.
+
 Phase 8 `THIRD_PARTY_ANDROID_CONFIG_HANDOFF_GATE` completed on 2026-06-25 as
 `completed-private-file-copied-secret-not-printed`. Result:
 `docs/AMN2_THIRD_PARTY_ANDROID_CONFIG_HANDOFF_GATE_RESULT.ru.md`. Evidence:
