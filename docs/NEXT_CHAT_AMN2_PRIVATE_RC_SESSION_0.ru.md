@@ -181,6 +181,15 @@ provider_mutation_go=false
 telegram_operation_retry_go=false
 ```
 
+Provider-console SSH diagnostic gate runbook prepared on 2026-06-26:
+
+```text
+provider_console_ssh_diagnostic_gate_package=prepared-operator-side-runbook
+runbook=docs/AMN2_PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE_RUNBOOK.ru.md
+evidence=research/amn2/phase-8-private-rc-provider-console-ssh-diagnostic-gate-package-2026-06-26.md
+execution_status=pending_operator_console_action
+```
+
 SSH key-based access prep review prepared on 2026-06-26:
 
 ```text
@@ -195,6 +204,15 @@ firewall_allowlist_go=false
 telegram_operation_retry_go=false
 ```
 
+SSH key-based access prep gate runbook prepared on 2026-06-26:
+
+```text
+ssh_key_based_access_prep_gate_package=prepared-pending-provider-console-result-and-private-inputs
+runbook=docs/AMN2_PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_RUNBOOK.ru.md
+evidence=research/amn2/phase-8-private-rc-ssh-key-based-access-prep-gate-package-2026-06-26.md
+execution_status=pending_provider_console_result_and_operator_public_key
+```
+
 Final status refresh recorded on 2026-06-26:
 
 ```text
@@ -205,6 +223,8 @@ phase8_final_status=launch-ready-with-explicit-limitations
 telegram_real_operation_status=blocked-by-ssh-transport-before-remote-execution
 recommended_next_gate=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE
 recommended_followup_gate=PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE
+provider_console_execution_status=pending_operator_console_action
+ssh_key_based_access_prep_execution_status=pending_provider_console_result_and_operator_public_key
 ```
 
 Operator display rule, set by operator on 2026-06-26:

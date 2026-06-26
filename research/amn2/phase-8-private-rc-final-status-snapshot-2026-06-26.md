@@ -38,6 +38,8 @@ ssh_auth_noise_mitigation_review=completed-docs-only
 provider_console_ssh_diagnostic_review=completed-docs-only
 ssh_key_based_access_prep_gate_review=completed-docs-only
 private_rc_final_status_refresh=completed-docs-only
+provider_console_ssh_diagnostic_gate_package=prepared-operator-side-runbook
+ssh_key_based_access_prep_gate_package=prepared-pending-provider-console-result-and-private-inputs
 android_private_operator_rc_proof=complete-with-explicit-limitations
 backup_create_verify=passed
 public_closed_probes=passed_in_latest_relevant_gates
@@ -88,5 +90,7 @@ e1730c3 Record SSH single-session diagnostic result
 ```text
 recommended_next_step=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE
 recommended_followup=PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE
+provider_console_execution_status=pending_operator_console_action
+ssh_key_based_access_prep_execution_status=pending_provider_console_result_and_operator_public_key
 recommended_live_next_review=blocked-until-provider-console-diagnostic-and-key-based-access-path
 ```

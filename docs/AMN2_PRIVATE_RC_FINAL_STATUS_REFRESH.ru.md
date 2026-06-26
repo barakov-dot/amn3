@@ -12,6 +12,8 @@
 - `PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_REVIEW`.
 
 Live/VPS/SSH/config/Telegram/public gates этим refresh не открывались.
+Provider-console/key-based execution packages подготовлены, но operator-side
+execution еще не выполнен.
 
 ## Final status
 
@@ -33,6 +35,10 @@ production_rollout_status=not-approved
 ```text
 provider_console_ssh_diagnostic_review_status=completed-docs-only
 ssh_key_based_access_prep_gate_review_status=completed-docs-only
+provider_console_ssh_diagnostic_gate_package=prepared-operator-side-runbook
+ssh_key_based_access_prep_gate_package=prepared-pending-provider-console-result-and-private-inputs
+provider_console_ssh_diagnostic_gate_execution=pending_operator_console_action
+ssh_key_based_access_prep_gate_execution=pending_provider_console_result_and_operator_public_key
 recommended_next_gate=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE
 recommended_followup_gate=PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE
 ssh_auth_hardening_go=false
@@ -84,3 +90,10 @@ PRIVATE_RC_FINAL_STATUS_REFRESH
 - создавать peer;
 - выполнять reboot/restore/import/provider rebuild;
 - выводить secrets/payloads.
+
+## Prepared runbooks
+
+```text
+provider_console_gate_runbook=docs/AMN2_PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE_RUNBOOK.ru.md
+ssh_key_based_access_prep_runbook=docs/AMN2_PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_RUNBOOK.ru.md
+```
