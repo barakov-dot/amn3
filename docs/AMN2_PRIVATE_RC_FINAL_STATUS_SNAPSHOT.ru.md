@@ -44,6 +44,7 @@ db_path_classification=passed-db-path-classified-with-aggregate-limitation
 ssh_transport_small_commands=passed
 ssh_server_log_diagnostic=partial-useful-evidence-blocked-on-later-ssh-session
 ssh_transport_stabilization_review=completed-docs-only
+ssh_single_session_diagnostic=passed-with-helper-crlf-exit-issue
 android_private_operator_rc_proof=complete-with-explicit-limitations
 backup_create_verify=passed
 public_closed_probes=passed_in_latest_relevant_gates
@@ -99,6 +100,7 @@ public_launch_status=not-approved
 public_web_admin_api_status=not-approved
 telegram_live_config_delivery_status=not-approved
 telegram_private_operation_retry_status=blocked-until-ssh-transport-stabilization-review
+telegram_private_operation_retry_precondition=ssh_single_session_diagnostic_passed
 public_self_service_config_delivery_status=not-approved
 qr_release_primary=false
 full_vpn_uri_release_primary=false
@@ -163,6 +165,12 @@ Single-session SSH diagnostic recommended by stabilization review:
 PRIVATE_RC_SSH_SINGLE_SESSION_DIAGNOSTIC_GATE
 ```
 
+Refresh Telegram operation review before retry:
+
+```text
+PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW_REFRESH
+```
+
 Новая приватная выдача `.conf`:
 
 ```text
@@ -192,7 +200,7 @@ PROVIDER_REBUILD_GATE_REVIEW
 Текущий рекомендуемый режим после Telegram operation blocker:
 
 ```text
-recommended_next_step=PRIVATE_RC_SSH_SINGLE_SESSION_DIAGNOSTIC_GATE
+recommended_next_step=PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW_REFRESH
 ```
 
 Повторять Telegram operation execution нельзя до SSH stabilization review:

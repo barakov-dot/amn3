@@ -53,6 +53,10 @@ helper_external_probe_url_issue=powershell_interpreted_$TargetIp:3030_as_scoped_
 - перед выдачей helper-а оператору обязательна сухая инспекция probe URLs;
 - external probes должны печатать полный target URL до выполнения;
 - helper должен выводить safe markers, а не secret-bearing payload.
+- если PowerShell helper передает bash через `ssh ... bash -s`, текст remote
+  script должен быть нормализован в LF до передачи;
+- CRLF в stdin bash может сломать даже успешный remote run на финальном
+  `exit 0` с ошибкой `numeric argument required`.
 
 Canonical URL pattern:
 
@@ -129,10 +133,18 @@ docs/templates/amn2_safe_gate_helper_template.ps1
 ```text
 helper_encoding_rule=ascii_prompts_or_utf8_with_bom
 url_interpolation_rule=${TargetIp}:PORT
+remote_stdin_bash_lf_normalization_required=true
 parse_check_required=true
 probe_url_dry_inspection_required=true
 secret_payload_guard_required=true
 stop_at_first_failed_gate_required=true
+```
+
+LF normalization pattern для bash через stdin:
+
+```powershell
+$RemoteScriptLf = $RemoteScript.Replace("`r`n", "`n").Replace("`r", "`n")
+$remoteOutput = $RemoteScriptLf | & ssh @sshArgs 2>&1
 ```
 
 Команды проверки:

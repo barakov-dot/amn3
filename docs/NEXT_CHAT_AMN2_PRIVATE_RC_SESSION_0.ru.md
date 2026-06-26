@@ -99,6 +99,33 @@ telegram_operation_retry_go=false
 Use one SSH session for the next diagnostic. Do not use SCP/helper upload and
 do not perform service/auth/firewall mutation in that gate.
 
+Single-session diagnostic recorded on 2026-06-26:
+
+```text
+private_rc_ssh_single_session_diagnostic_status=passed-with-helper-crlf-exit-issue
+single_session_result_doc=docs/AMN2_PRIVATE_RC_SSH_SINGLE_SESSION_DIAGNOSTIC_RESULT.ru.md
+single_session_evidence=research/amn2/phase-8-private-rc-ssh-single-session-diagnostic-result-2026-06-26.md
+remote_single_session_status=passed
+source_overlay_match=yes
+no_telegram_polling_process=true
+public_closed_probes_before_status=passed
+public_closed_probes_after_manual_status=passed
+helper_issue=crlf_in_stdin_bash_script_exit_0
+recommended_next_review=PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW_REFRESH
+```
+
+Do not retry the old Telegram operation helper. Refresh the review first and
+require a single-session/no-SCP design plus LF-normalized remote bash text.
+
+Operator display rule, set by operator on 2026-06-26:
+
+```text
+after_every_task_output_updated_task_list=true
+applies_to_new_phases=true
+include_priority_groups=critical_very_important_important_simple_cosmetic
+include_next_options=single_pair_triple_or_more_when_useful
+```
+
 ## 0b. Release limitations refresh
 
 Recorded docs-only on 2026-06-26:
