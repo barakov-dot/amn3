@@ -59,7 +59,8 @@ private_rc_final_status_refresh=completed-docs-only
 provider_console_ssh_diagnostic_gate_package=prepared-operator-side-runbook
 ssh_key_based_access_prep_gate_package=prepared-pending-provider-console-result-and-private-inputs
 provider_console_ssh_diagnostic_gate_execution=passed-minimal-manual-console-observation
-ssh_key_based_access_prep_gate_execution=pending_operator_helper_run
+ssh_key_based_access_prep_gate_execution=passed
+key_based_access_path_status=passed
 android_private_operator_rc_proof=complete-with-explicit-limitations
 backup_create_verify=passed
 public_closed_probes=passed_in_latest_relevant_gates
@@ -164,6 +165,7 @@ docs/AMN2_PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE_RUNBOOK.ru.md
 docs/AMN2_PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_RESULT.ru.md
 docs/AMN2_PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_REVIEW.ru.md
 docs/AMN2_PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_RUNBOOK.ru.md
+docs/AMN2_PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_RESULT.ru.md
 docs/AMN2_PRIVATE_RC_FINAL_STATUS_REFRESH.ru.md
 docs/AMN2_PRIVATE_OPERATOR_RC_FINAL_PACKAGE.ru.md
 docs/AMN2_PRIVATE_OPERATOR_RC_HANDOFF.ru.md
@@ -263,15 +265,14 @@ PROVIDER_REBUILD_GATE_REVIEW
 Текущий рекомендуемый режим после Telegram operation blocker:
 
 ```text
-recommended_next_step=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE
-recommended_followup=PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE
+recommended_next_review=PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_RETRY_REVIEW
 provider_console_execution_status=passed-minimal-manual-console-observation
-ssh_key_based_access_prep_execution_status=pending_operator_helper_run
+ssh_key_based_access_prep_execution_status=passed
 ```
 
 Повторять Telegram operation execution нельзя до выбора SSH/auth-noise
 mitigation path:
 
 ```text
-recommended_live_next_review=blocked-until-provider-console-diagnostic-and-key-based-access-path
+recommended_live_next_review=PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_RETRY_REVIEW
 ```

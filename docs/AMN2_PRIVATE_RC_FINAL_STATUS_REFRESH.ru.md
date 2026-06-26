@@ -12,8 +12,8 @@
 - `PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_REVIEW`.
 
 Live/VPS/SSH/config/Telegram/public gates этим refresh не открывались.
-Provider-console/key-based execution packages подготовлены, но operator-side
-execution еще не выполнен.
+Provider-console diagnostic и key-based access prep выполнены оператором в
+явных gates; этот refresh сам live-gates не открывал.
 
 ## Final status
 
@@ -38,11 +38,11 @@ ssh_key_based_access_prep_gate_review_status=completed-docs-only
 provider_console_ssh_diagnostic_gate_package=prepared-operator-side-runbook
 ssh_key_based_access_prep_gate_package=prepared-pending-provider-console-result-and-private-inputs
 provider_console_ssh_diagnostic_gate_execution=passed-minimal-manual-console-observation
-ssh_key_based_access_prep_gate_execution=pending_operator_helper_run
-recommended_next_gate=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE
-recommended_followup_gate=PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE
+ssh_key_based_access_prep_gate_execution=passed
+key_based_access_path_status=passed
+recommended_next_review=PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_RETRY_REVIEW
 ssh_auth_hardening_go=false
-telegram_operation_retry_go=false
+telegram_operation_retry_go=false_until_review
 ```
 
 Реальный Telegram operation не повторять до стабилизации access path. Это не
@@ -97,4 +97,5 @@ PRIVATE_RC_FINAL_STATUS_REFRESH
 provider_console_gate_runbook=docs/AMN2_PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE_RUNBOOK.ru.md
 ssh_key_based_access_prep_runbook=docs/AMN2_PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_RUNBOOK.ru.md
 provider_console_result=docs/AMN2_PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_RESULT.ru.md
+ssh_key_based_access_prep_result=docs/AMN2_PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_RESULT.ru.md
 ```
