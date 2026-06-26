@@ -14,6 +14,9 @@ Live/VPS/config/Telegram/public gates не открывались.
 last_hold_refresh_gate=PRIVATE_RC_RELEASE_LIMITATIONS_REFRESH
 last_hold_refresh_date=2026-06-26
 release_limitations_refresh_status=completed-docs-only
+last_status_snapshot_gate=PRIVATE_RC_FINAL_STATUS_SNAPSHOT
+last_status_snapshot_date=2026-06-26
+final_status_snapshot_status=completed-docs-only
 next_action_requires_exact_named_gate=true
 ```
 

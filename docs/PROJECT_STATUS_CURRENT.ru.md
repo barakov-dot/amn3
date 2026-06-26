@@ -1,5 +1,19 @@
 # Текущий override 2026-06-09
 
+Phase 8 `PRIVATE_RC_FINAL_STATUS_SNAPSHOT` completed on 2026-06-26 as
+`completed-docs-only`. Snapshot:
+`docs/AMN2_PRIVATE_RC_FINAL_STATUS_SNAPSHOT.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-final-status-snapshot-2026-06-26.md`.
+Final status remains `launch-ready-with-explicit-limitations` with active
+operator hold. Android private/operator RC proof is complete with explicit
+limitations; public launch, public exposure, Telegram live config delivery,
+public/self-service config delivery, new peer/config creation without exact
+gate, restore/import, provider rebuild and production-scale rollout remain not
+approved. Recommended next step is `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА`; if live operation
+is desired, start with `PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW`, not
+execution. No live VPS/SSH/config/Telegram/public gate was opened for this
+snapshot.
+
 Phase 8 `PRIVATE_RC_RELEASE_LIMITATIONS_REFRESH` completed on 2026-06-26 as
 `completed-docs-only`, followed by active `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА` hold.
 Refresh doc: `docs/AMN2_PRIVATE_RC_RELEASE_LIMITATIONS_REFRESH.ru.md`.
