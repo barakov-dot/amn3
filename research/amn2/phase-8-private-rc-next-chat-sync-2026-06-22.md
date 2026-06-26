@@ -20,7 +20,7 @@ docs/NEXT_CHAT_AMN2_PRIVATE_RC_SESSION_0.ru.md
 ## Current truth
 
 ```text
-amn3_evidence_head_at_sync_start=f3536f2 Refresh Telegram operation review for single session
+amn3_evidence_head_at_sync_start=9066cbd Record Telegram operation SSH blocker
 amn2_current_fixes_head=187949bffb927a0a6d6c1f260fc0bb9ebb972447 Persist Android-compatible AWG defaults
 private_rc_operator_run_gate_status=passed
 phase8_private_operator_rc_session_0_status=passed-read-only
@@ -29,6 +29,9 @@ private_operator_rc_launch_ready=true
 public_launch_status=not-approved
 telegram_private_operation_status=blocked-by-ssh-transport-before-remote-execution
 ssh_auth_noise_mitigation_review_status=completed-docs-only
+provider_console_ssh_diagnostic_review_status=completed-docs-only
+ssh_key_based_access_prep_gate_review_status=completed-docs-only
+private_rc_final_status_refresh=completed-docs-only
 ```
 
 ## Proven
@@ -75,9 +78,9 @@ production_scale_rollout=false
 ## Next recommendations
 
 ```text
-single=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_REVIEW
-pair=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_REVIEW+PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_REVIEW
-triple=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_REVIEW+PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_REVIEW+PRIVATE_RC_FINAL_STATUS_REFRESH
-recommended_next_step=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_REVIEW
+single=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE
+pair=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE+PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_REVIEW
+triple=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE+PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE+PRIVATE_RC_FINAL_STATUS_REFRESH
+recommended_next_step=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE
 recommended_practical_next_step=provider_console_readonly_then_key_based_access_prep
 ```

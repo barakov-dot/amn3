@@ -19,7 +19,7 @@ telegram_private_operation_status=blocked-by-ssh-transport-before-remote-executi
 production_rollout_status=not-approved
 hold_status=active
 next_action_requires_exact_named_gate=true
-latest_head_at_refresh_start=f3536f2
+latest_head_at_refresh_start=9066cbd
 ```
 
 ## Proven
@@ -35,6 +35,9 @@ telegram_operation_single_session_gate=blocked-before-remote-marker
 db_path_classification=passed-db-path-classified-with-aggregate-limitation
 ssh_transport_small_commands=passed
 ssh_auth_noise_mitigation_review=completed-docs-only
+provider_console_ssh_diagnostic_review=completed-docs-only
+ssh_key_based_access_prep_gate_review=completed-docs-only
+private_rc_final_status_refresh=completed-docs-only
 android_private_operator_rc_proof=complete-with-explicit-limitations
 backup_create_verify=passed
 public_closed_probes=passed_in_latest_relevant_gates
@@ -52,6 +55,7 @@ new_peer_creation_without_exact_gate=not-approved
 restore_import_status=not-proven
 provider_rebuild_status=not-proven
 production_scale_rollout_status=not-approved
+ssh_auth_hardening_status=not-approved
 ```
 
 ## Telegram operation single-session result
@@ -72,16 +76,17 @@ telegram_application_failure=false
 ## Latest heads
 
 ```text
+9066cbd Record Telegram operation SSH blocker
 f3536f2 Refresh Telegram operation review for single session
 e1730c3 Record SSH single-session diagnostic result
 9be156b Add SSH transport stabilization review
 930fcc5 Record SSH transport blocker for Telegram operation
-c01f0a1 Prepare private RC Telegram operation gate
 ```
 
 ## Recommendation
 
 ```text
-recommended_next_step=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_REVIEW
-recommended_live_next_review=blocked-until-provider-console-or-auth-access-strategy
+recommended_next_step=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE
+recommended_followup=PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE
+recommended_live_next_review=blocked-until-provider-console-diagnostic-and-key-based-access-path
 ```

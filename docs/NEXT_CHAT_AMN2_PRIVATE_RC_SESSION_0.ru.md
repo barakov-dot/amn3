@@ -170,6 +170,43 @@ recommended_followup_review=PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_REVIEW
 auth_hardening_requires_separate_exact_gate=true
 ```
 
+Provider-console SSH diagnostic review prepared on 2026-06-26:
+
+```text
+private_rc_provider_console_ssh_diagnostic_review_status=completed-docs-only
+review_doc=docs/AMN2_PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_REVIEW.ru.md
+evidence=research/amn2/phase-8-private-rc-provider-console-ssh-diagnostic-review-2026-06-26.md
+recommended_gate=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE
+provider_mutation_go=false
+telegram_operation_retry_go=false
+```
+
+SSH key-based access prep review prepared on 2026-06-26:
+
+```text
+private_rc_ssh_key_based_access_prep_gate_review_status=completed-docs-only
+review_doc=docs/AMN2_PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_REVIEW.ru.md
+evidence=research/amn2/phase-8-private-rc-ssh-key-based-access-prep-gate-review-2026-06-26.md
+recommended_gate=PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE
+disable_password_auth_go=false
+disable_root_login_go=false
+move_ssh_port_go=false
+firewall_allowlist_go=false
+telegram_operation_retry_go=false
+```
+
+Final status refresh recorded on 2026-06-26:
+
+```text
+private_rc_final_status_refresh=completed-docs-only
+refresh_doc=docs/AMN2_PRIVATE_RC_FINAL_STATUS_REFRESH.ru.md
+evidence=research/amn2/phase-8-private-rc-final-status-refresh-2026-06-26.md
+phase8_final_status=launch-ready-with-explicit-limitations
+telegram_real_operation_status=blocked-by-ssh-transport-before-remote-execution
+recommended_next_gate=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_GATE
+recommended_followup_gate=PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE
+```
+
 Operator display rule, set by operator on 2026-06-26:
 
 ```text
@@ -520,7 +557,7 @@ private_operator_rc_status_impact=no_new_blocker_inside_current_limitations
 ## 1. Latest pushed heads
 
 ```text
-amn3_evidence_head_at_sync_start=f3536f2 Refresh Telegram operation review for single session
+amn3_evidence_head_at_sync_start=9066cbd Record Telegram operation SSH blocker
 amn2_current_fixes_head=187949bffb927a0a6d6c1f260fc0bb9ebb972447 Persist Android-compatible AWG defaults
 latest_vps_applied_package_smoked_head=187949bffb927a0a6d6c1f260fc0bb9ebb972447
 target_vps=89.185.80.166
