@@ -16,6 +16,7 @@ android_private_operator_rc_proof=complete-with-explicit-limitations
 public_launch_status=not-approved
 public_exposure_status=closed-by-default
 telegram_live_config_delivery_status=not-approved
+telegram_private_operation_status=blocked-by-intermittent-ssh-transport
 production_rollout_status=not-approved
 hold_status=active
 next_action_requires_exact_named_gate=true
@@ -38,8 +39,10 @@ fresh_zero_rehearsal=P8-C003_passed
 private_operator_session_0=passed-read-only
 telegram_getme=passed
 telegram_private_live_preview=passed-with-manual-operator-observation
+telegram_private_operation=blocked-by-intermittent-ssh-transport
 db_path_classification=passed-db-path-classified-with-aggregate-limitation
 ssh_transport_small_commands=passed
+ssh_server_log_diagnostic=partial-useful-evidence-blocked-on-later-ssh-session
 android_private_operator_rc_proof=complete-with-explicit-limitations
 backup_create_verify=passed
 public_closed_probes=passed_in_latest_relevant_gates
@@ -94,6 +97,7 @@ production_rollout=not-approved
 public_launch_status=not-approved
 public_web_admin_api_status=not-approved
 telegram_live_config_delivery_status=not-approved
+telegram_private_operation_retry_status=blocked-until-ssh-transport-stabilization-review
 public_self_service_config_delivery_status=not-approved
 qr_release_primary=false
 full_vpn_uri_release_primary=false
@@ -146,6 +150,12 @@ PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW
 PRIVATE_RC_TELEGRAM_OPERATION_GATE
 ```
 
+SSH transport stabilization review before retrying Telegram operation:
+
+```text
+PRIVATE_RC_SSH_TRANSPORT_STABILIZATION_REVIEW
+```
+
 Новая приватная выдача `.conf`:
 
 ```text
@@ -172,15 +182,14 @@ PROVIDER_REBUILD_GATE_REVIEW
 
 ## Рекомендация
 
-Текущий рекомендуемый режим:
+Текущий рекомендуемый режим после Telegram operation blocker:
 
 ```text
-recommended_next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+recommended_next_step=PRIVATE_RC_SSH_TRANSPORT_STABILIZATION_REVIEW
 ```
 
-Если оператор хочет перейти к реальной эксплуатации, сначала открыть review,
-не execution:
+Повторять Telegram operation execution нельзя до SSH stabilization review:
 
 ```text
-recommended_live_next_review=PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW
+recommended_live_next_review=blocked-until-ssh-transport-stabilization-review
 ```

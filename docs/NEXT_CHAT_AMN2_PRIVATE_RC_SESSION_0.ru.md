@@ -65,6 +65,27 @@ recommended_execution_gate=PRIVATE_RC_TELEGRAM_OPERATION_GATE
 No live bot polling was started by the review. Future execution gate must stop
 polling at the end and keep config delivery/public exposure closed.
 
+## 0a-2. Telegram operation blocker after execution attempt
+
+Recorded on 2026-06-26:
+
+```text
+private_rc_telegram_operation_gate_status=blocked-by-intermittent-ssh-transport
+blocker_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_BLOCKER_RECORD.ru.md
+blocker_evidence=research/amn2/phase-8-private-rc-telegram-operation-blocker-record-2026-06-26.md
+ssh_server_log_doc=docs/AMN2_PRIVATE_RC_SSH_SERVER_LOG_DIAGNOSTIC_RESULT.ru.md
+ssh_server_log_evidence=research/amn2/phase-8-private-rc-ssh-server-log-diagnostic-result-2026-06-26.md
+public_exposure_status=closed
+config_delivery_performed=false
+telegram_polling_retry_go=false
+required_next_review=PRIVATE_RC_SSH_TRANSPORT_STABILIZATION_REVIEW
+```
+
+Do not retry `PRIVATE_RC_TELEGRAM_OPERATION_GATE` until SSH transport is
+classified/stabilized by a separate exact gate. Current evidence points to
+intermittent SSH/SCP transport close during repeated sessions on a VPS with
+heavy external SSH auth noise. This is not classified as an AMN2 bot failure.
+
 ## 0b. Release limitations refresh
 
 Recorded docs-only on 2026-06-26:
