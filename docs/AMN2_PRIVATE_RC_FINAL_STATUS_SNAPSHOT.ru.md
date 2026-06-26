@@ -45,6 +45,7 @@ ssh_transport_small_commands=passed
 ssh_server_log_diagnostic=partial-useful-evidence-blocked-on-later-ssh-session
 ssh_transport_stabilization_review=completed-docs-only
 ssh_single_session_diagnostic=passed-with-helper-crlf-exit-issue
+telegram_operation_review_refresh=completed-docs-only
 android_private_operator_rc_proof=complete-with-explicit-limitations
 backup_create_verify=passed
 public_closed_probes=passed_in_latest_relevant_gates
@@ -171,6 +172,12 @@ Refresh Telegram operation review before retry:
 PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW_REFRESH
 ```
 
+New single-session Telegram operation gate:
+
+```text
+PRIVATE_RC_TELEGRAM_OPERATION_SINGLE_SESSION_GATE
+```
+
 Новая приватная выдача `.conf`:
 
 ```text
@@ -200,7 +207,7 @@ PROVIDER_REBUILD_GATE_REVIEW
 Текущий рекомендуемый режим после Telegram operation blocker:
 
 ```text
-recommended_next_step=PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW_REFRESH
+recommended_next_step=PRIVATE_RC_TELEGRAM_OPERATION_SINGLE_SESSION_GATE
 ```
 
 Повторять Telegram operation execution нельзя до SSH stabilization review:

@@ -117,6 +117,26 @@ recommended_next_review=PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW_REFRESH
 Do not retry the old Telegram operation helper. Refresh the review first and
 require a single-session/no-SCP design plus LF-normalized remote bash text.
 
+Telegram operation review refresh recorded on 2026-06-26:
+
+```text
+private_rc_telegram_operation_review_refresh_status=completed-docs-only
+review_refresh_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW_REFRESH.ru.md
+review_refresh_evidence=research/amn2/phase-8-private-rc-telegram-operation-review-refresh-2026-06-26.md
+recommended_next_gate=PRIVATE_RC_TELEGRAM_OPERATION_SINGLE_SESSION_GATE
+old_execution_helper_retry_go=false
+required_transport_model=single-session-no-scp-lf-normalized
+```
+
+Helper hardening updated on 2026-06-26:
+
+```text
+helper_ssh_transport_hardening_updated=true
+single_session_remote_checks_preferred=true
+scp_helper_upload_for_live_gate=avoid
+remote_stdin_bash_lf_normalization_required=true
+```
+
 Operator display rule, set by operator on 2026-06-26:
 
 ```text

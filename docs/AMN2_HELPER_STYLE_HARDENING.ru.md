@@ -52,7 +52,7 @@ helper_external_probe_url_issue=powershell_interpreted_$TargetIp:3030_as_scoped_
 - перед выдачей helper-а оператору обязателен parse check;
 - перед выдачей helper-а оператору обязательна сухая инспекция probe URLs;
 - external probes должны печатать полный target URL до выполнения;
-- helper должен выводить safe markers, а не secret-bearing payload.
+- helper должен выводить safe markers, а не secret-bearing payload;
 - если PowerShell helper передает bash через `ssh ... bash -s`, текст remote
   script должен быть нормализован в LF до передачи;
 - CRLF в stdin bash может сломать даже успешный remote run на финальном
@@ -146,6 +146,36 @@ LF normalization pattern для bash через stdin:
 $RemoteScriptLf = $RemoteScript.Replace("`r`n", "`n").Replace("`r", "`n")
 $remoteOutput = $RemoteScriptLf | & ssh @sshArgs 2>&1
 ```
+
+## 6a. SSH transport hardening после private RC Telegram operation blocker
+
+Дополнительные правила после `PRIVATE_RC_SSH_SINGLE_SESSION_DIAGNOSTIC_GATE`:
+
+```text
+ssh_transport_hardening_status=updated-after-single-session-diagnostic
+multi_session_ssh_for_live_gate=avoid
+scp_helper_upload_for_live_gate=avoid
+remote_temp_helper_file_for_live_gate=avoid
+single_session_remote_checks_preferred=true
+remote_stdin_bash_lf_normalization_required=true
+raw_auth_log_output_allowed=false
+raw_process_list_output_allowed=false
+helper_side_crlf_exit_issue_must_not_mask_remote_passed_markers=true
+```
+
+Для live gates с ручным окном, например controlled Telegram operation:
+
+- делать local public closed probes до SSH-сеанса;
+- открывать один SSH-сеанс;
+- внутри этого одного SSH-сеанса выполнять precheck, start, manual wait, stop и
+  final guard;
+- после SSH-сеанса делать local public closed probes;
+- не использовать `scp`;
+- не писать temporary helper на VPS;
+- не печатать raw process list или raw logs;
+- если remote output уже содержит `*_status=passed`, но wrapper падает на
+  `exit 0` из-за CRLF, классифицировать как helper serialization issue и не
+  повторять remote action автоматически.
 
 Команды проверки:
 
