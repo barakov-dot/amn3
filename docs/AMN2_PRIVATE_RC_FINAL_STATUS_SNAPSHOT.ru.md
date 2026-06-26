@@ -43,6 +43,7 @@ telegram_private_operation=blocked-by-intermittent-ssh-transport
 db_path_classification=passed-db-path-classified-with-aggregate-limitation
 ssh_transport_small_commands=passed
 ssh_server_log_diagnostic=partial-useful-evidence-blocked-on-later-ssh-session
+ssh_transport_stabilization_review=completed-docs-only
 android_private_operator_rc_proof=complete-with-explicit-limitations
 backup_create_verify=passed
 public_closed_probes=passed_in_latest_relevant_gates
@@ -156,6 +157,12 @@ SSH transport stabilization review before retrying Telegram operation:
 PRIVATE_RC_SSH_TRANSPORT_STABILIZATION_REVIEW
 ```
 
+Single-session SSH diagnostic recommended by stabilization review:
+
+```text
+PRIVATE_RC_SSH_SINGLE_SESSION_DIAGNOSTIC_GATE
+```
+
 Новая приватная выдача `.conf`:
 
 ```text
@@ -185,7 +192,7 @@ PROVIDER_REBUILD_GATE_REVIEW
 Текущий рекомендуемый режим после Telegram operation blocker:
 
 ```text
-recommended_next_step=PRIVATE_RC_SSH_TRANSPORT_STABILIZATION_REVIEW
+recommended_next_step=PRIVATE_RC_SSH_SINGLE_SESSION_DIAGNOSTIC_GATE
 ```
 
 Повторять Telegram operation execution нельзя до SSH stabilization review:

@@ -86,6 +86,19 @@ classified/stabilized by a separate exact gate. Current evidence points to
 intermittent SSH/SCP transport close during repeated sessions on a VPS with
 heavy external SSH auth noise. This is not classified as an AMN2 bot failure.
 
+SSH stabilization review recorded on 2026-06-26:
+
+```text
+private_rc_ssh_transport_stabilization_review_status=completed-docs-only
+review_doc=docs/AMN2_PRIVATE_RC_SSH_TRANSPORT_STABILIZATION_REVIEW.ru.md
+evidence=research/amn2/phase-8-private-rc-ssh-transport-stabilization-review-2026-06-26.md
+recommended_next_gate=PRIVATE_RC_SSH_SINGLE_SESSION_DIAGNOSTIC_GATE
+telegram_operation_retry_go=false
+```
+
+Use one SSH session for the next diagnostic. Do not use SCP/helper upload and
+do not perform service/auth/firewall mutation in that gate.
+
 ## 0b. Release limitations refresh
 
 Recorded docs-only on 2026-06-26:
