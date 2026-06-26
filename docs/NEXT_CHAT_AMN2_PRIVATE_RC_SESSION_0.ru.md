@@ -134,6 +134,28 @@ server_side_observation_status=not_checked_in_this_manual_record
 next_gate_if_needed=THIRD_PARTY_ANDROID_TRAFFIC_OBSERVATION_GATE
 ```
 
+Server-side observation passed on 2026-06-26:
+
+```text
+third_party_android_traffic_observation_status=passed-server-side-observation
+gate_name=THIRD_PARTY_ANDROID_TRAFFIC_OBSERVATION_HELPER_UPLOAD_RETRY_GATE
+run_id=20260626T042616Z
+result_doc=docs/AMN2_THIRD_PARTY_ANDROID_TRAFFIC_OBSERVATION_RESULT.ru.md
+evidence=research/amn2/phase-8-third-party-android-traffic-observation-result-2026-06-26.md
+fresh_peer_public_key_fp=49e456e4edcb
+latest_handshake_age_s=23
+endpoint_observed=yes
+transfer_rx_bytes=55600508
+transfer_tx_bytes=132476207
+third_party_android_server_observation_status=passed
+public_closed_probes_before_status=passed
+public_closed_probes_after_status=passed
+temporary_helper_cleanup_status=passed
+```
+
+Third-party Android proof is now complete inside private/operator RC boundary:
+manual owner report passed and server-side handshake/endpoint/rx-tx passed.
+
 ## 0b. Telegram bot live preview prep
 
 Prepared docs-only:

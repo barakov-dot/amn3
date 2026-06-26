@@ -1,5 +1,22 @@
 # Текущий override 2026-06-09
 
+Phase 8 `THIRD_PARTY_ANDROID_TRAFFIC_OBSERVATION_HELPER_UPLOAD_RETRY_GATE`
+passed on 2026-06-26 as `passed-server-side-observation`. Result:
+`docs/AMN2_THIRD_PARTY_ANDROID_TRAFFIC_OBSERVATION_RESULT.ru.md`. Evidence:
+`research/amn2/phase-8-third-party-android-traffic-observation-result-2026-06-26.md`.
+Linked peer fp `49e456e4edcb`; server-side observation found the fresh peer,
+`latest_handshake_age_s=23`, `endpoint_observed=yes`,
+`transfer_rx_bytes=55600508`, `transfer_tx_bytes=132476207`,
+`fresh_handshake_after=true`, and
+`third_party_android_server_observation_status=passed`. Public probes to
+`3030`, `3040`, `80` and `443` remained `000` before and after; temporary
+helper cleanup passed. No config generation/delivery, peer creation, service
+start/restart/stop, package upload/apply, public exposure, firewall/listener/
+TLS/proxy change, Telegram live send/polling, raw `wg dump`, `.conf`, QR,
+`vpn://`, private key, PSK, token/password output, restore/import/reboot or
+provider action was performed. Third-party Android proof now has both manual
+owner report and server-side handshake/rx-tx evidence.
+
 Phase 8 third-party Android manual acceptance was recorded on 2026-06-26 as
 `passed-by-third-party-operator-report`. Result:
 `docs/AMN2_THIRD_PARTY_ANDROID_MANUAL_ACCEPTANCE_RESULT.ru.md`. Evidence:
