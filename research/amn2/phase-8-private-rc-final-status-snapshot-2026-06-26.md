@@ -15,10 +15,11 @@ android_private_operator_rc_proof=complete-with-explicit-limitations
 public_launch_status=not-approved
 public_exposure_status=closed-by-default
 telegram_live_config_delivery_status=not-approved
+telegram_private_operation_status=blocked-by-ssh-transport-before-remote-execution
 production_rollout_status=not-approved
 hold_status=active
 next_action_requires_exact_named_gate=true
-latest_head=2dbd746
+latest_head_at_refresh_start=f3536f2
 ```
 
 ## Proven
@@ -30,8 +31,10 @@ fresh_zero_rehearsal=P8-C003_passed
 private_operator_session_0=passed-read-only
 telegram_getme=passed
 telegram_private_live_preview=passed-with-manual-operator-observation
+telegram_operation_single_session_gate=blocked-before-remote-marker
 db_path_classification=passed-db-path-classified-with-aggregate-limitation
 ssh_transport_small_commands=passed
+ssh_auth_noise_mitigation_review=completed-docs-only
 android_private_operator_rc_proof=complete-with-explicit-limitations
 backup_create_verify=passed
 public_closed_probes=passed_in_latest_relevant_gates
@@ -51,19 +54,34 @@ provider_rebuild_status=not-proven
 production_scale_rollout_status=not-approved
 ```
 
+## Telegram operation single-session result
+
+```text
+private_rc_telegram_operation_single_session_status=blocked-by-ssh-transport-before-remote-execution
+run_id=20260626T183902Z
+ssh_single_session_telegram_operation_exit_code=255
+remote_boundary_marker_observed=false
+telegram_polling_started=false
+manual_telegram_window_started=false
+config_delivery_performed=false
+peer_creation_performed=false
+public_closed_probes_before_status=passed
+telegram_application_failure=false
+```
+
 ## Latest heads
 
 ```text
-2dbd746 Refresh private RC release limitations
-cd36207 Add private RC final Android summary
-a43a2ca Record third-party Android traffic observation
-52efc55 Record third-party Android manual acceptance
-6f2081f Record third-party Android handoff result
+f3536f2 Refresh Telegram operation review for single session
+e1730c3 Record SSH single-session diagnostic result
+9be156b Add SSH transport stabilization review
+930fcc5 Record SSH transport blocker for Telegram operation
+c01f0a1 Prepare private RC Telegram operation gate
 ```
 
 ## Recommendation
 
 ```text
-recommended_next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
-recommended_live_next_review=PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW
+recommended_next_step=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_REVIEW
+recommended_live_next_review=blocked-until-provider-console-or-auth-access-strategy
 ```

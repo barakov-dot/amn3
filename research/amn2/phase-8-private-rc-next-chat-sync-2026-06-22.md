@@ -20,13 +20,15 @@ docs/NEXT_CHAT_AMN2_PRIVATE_RC_SESSION_0.ru.md
 ## Current truth
 
 ```text
-amn3_evidence_head_at_sync_start=e63266f Close out private RC session zero
+amn3_evidence_head_at_sync_start=f3536f2 Refresh Telegram operation review for single session
 amn2_current_fixes_head=187949bffb927a0a6d6c1f260fc0bb9ebb972447 Persist Android-compatible AWG defaults
 private_rc_operator_run_gate_status=passed
 phase8_private_operator_rc_session_0_status=passed-read-only
 phase8_final_status=launch-ready-with-explicit-limitations
 private_operator_rc_launch_ready=true
 public_launch_status=not-approved
+telegram_private_operation_status=blocked-by-ssh-transport-before-remote-execution
+ssh_auth_noise_mitigation_review_status=completed-docs-only
 ```
 
 ## Proven
@@ -38,6 +40,10 @@ web_login_loopback_http=200
 api_loopback_health_status=not-running-no-start-performed
 public_listener_guard_status=passed
 telegram_get_me_status=passed
+telegram_private_live_preview_status=passed-with-manual-operator-observation
+telegram_operation_single_session_status=blocked-before-remote-execution
+telegram_operation_single_session_exit_code=255
+telegram_operation_single_session_remote_marker_observed=false
 external_probe_3030=000
 external_probe_3040=000
 external_probe_80=000
@@ -47,7 +53,7 @@ service_restart_performed=false
 public_exposure_performed=false
 config_delivery_performed=false
 telegram_live_send_performed=false
-bot_polling_started=false
+bot_polling_started=false_in_session_0_and_not_started_in_single_session_operation_attempt
 secret_values_printed=false
 ```
 
@@ -56,8 +62,9 @@ secret_values_printed=false
 ```text
 public_launch_readiness=false
 public_web_admin_api_exposure=false
-telegram_live_delivery=false
-bot_polling=false
+telegram_live_delivery=false_beyond_private_live_preview
+telegram_private_operation=false_blocked_by_ssh_transport
+bot_polling=false_for_real_operation_attempt
 config_delivery_automation=false
 fresh_android_phone_post_rc_acceptance=false
 restore_import_dr=false
@@ -68,9 +75,9 @@ production_scale_rollout=false
 ## Next recommendations
 
 ```text
-single=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
-pair=FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW+FRESH_ANDROID_PHONE_POST_RC_RECHECK_PLAN
-triple=RESTORE_IMPORT_DR_GATE_REVIEW+CONFIG_DELIVERY_GATE_REVIEW+PUBLIC_EXPOSURE_GATE_REVIEW
-recommended_next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
-recommended_practical_next_step=FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW
+single=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_REVIEW
+pair=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_REVIEW+PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_REVIEW
+triple=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_REVIEW+PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_REVIEW+PRIVATE_RC_FINAL_STATUS_REFRESH
+recommended_next_step=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_REVIEW
+recommended_practical_next_step=provider_console_readonly_then_key_based_access_prep
 ```

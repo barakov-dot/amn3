@@ -137,6 +137,39 @@ scp_helper_upload_for_live_gate=avoid
 remote_stdin_bash_lf_normalization_required=true
 ```
 
+Single-session Telegram operation attempt recorded on 2026-06-26:
+
+```text
+private_rc_telegram_operation_single_session_status=blocked-by-ssh-transport-before-remote-execution
+result_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_SINGLE_SESSION_RESULT.ru.md
+evidence=research/amn2/phase-8-private-rc-telegram-operation-single-session-result-2026-06-26.md
+run_id=20260626T183902Z
+ssh_single_session_telegram_operation_exit_code=255
+remote_boundary_marker_observed=false
+telegram_polling_started=false
+manual_telegram_window_started=false
+config_delivery_performed=false
+peer_creation_performed=false
+public_closed_probes_before_status=passed
+telegram_application_failure=false
+```
+
+Do not retry Telegram operation execution again until a transport/auth strategy
+is selected. This was not a bot runtime failure; SSH closed before remote script
+execution.
+
+SSH auth-noise mitigation review recorded on 2026-06-26:
+
+```text
+private_rc_ssh_auth_noise_mitigation_review_status=completed-docs-only
+review_doc=docs/AMN2_PRIVATE_RC_SSH_AUTH_NOISE_MITIGATION_REVIEW.ru.md
+evidence=research/amn2/phase-8-private-rc-ssh-auth-noise-mitigation-review-2026-06-26.md
+telegram_operation_retry_go=false
+recommended_next_review=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_REVIEW
+recommended_followup_review=PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_GATE_REVIEW
+auth_hardening_requires_separate_exact_gate=true
+```
+
 Operator display rule, set by operator on 2026-06-26:
 
 ```text
@@ -487,7 +520,7 @@ private_operator_rc_status_impact=no_new_blocker_inside_current_limitations
 ## 1. Latest pushed heads
 
 ```text
-amn3_evidence_head_at_sync_start=e63266f Close out private RC session zero
+amn3_evidence_head_at_sync_start=f3536f2 Refresh Telegram operation review for single session
 amn2_current_fixes_head=187949bffb927a0a6d6c1f260fc0bb9ebb972447 Persist Android-compatible AWG defaults
 latest_vps_applied_package_smoked_head=187949bffb927a0a6d6c1f260fc0bb9ebb972447
 target_vps=89.185.80.166

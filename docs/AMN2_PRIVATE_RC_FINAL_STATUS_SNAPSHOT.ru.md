@@ -16,11 +16,11 @@ android_private_operator_rc_proof=complete-with-explicit-limitations
 public_launch_status=not-approved
 public_exposure_status=closed-by-default
 telegram_live_config_delivery_status=not-approved
-telegram_private_operation_status=blocked-by-intermittent-ssh-transport
+telegram_private_operation_status=blocked-by-ssh-transport-before-remote-execution
 production_rollout_status=not-approved
 hold_status=active
 next_action_requires_exact_named_gate=true
-latest_head=2dbd746
+latest_head_at_refresh_start=f3536f2
 ```
 
 Человеческая формулировка:
@@ -39,13 +39,15 @@ fresh_zero_rehearsal=P8-C003_passed
 private_operator_session_0=passed-read-only
 telegram_getme=passed
 telegram_private_live_preview=passed-with-manual-operator-observation
-telegram_private_operation=blocked-by-intermittent-ssh-transport
+telegram_private_operation=blocked-by-ssh-transport-before-remote-execution
+telegram_operation_single_session_gate=blocked-before-remote-marker
 db_path_classification=passed-db-path-classified-with-aggregate-limitation
 ssh_transport_small_commands=passed
 ssh_server_log_diagnostic=partial-useful-evidence-blocked-on-later-ssh-session
 ssh_transport_stabilization_review=completed-docs-only
 ssh_single_session_diagnostic=passed-with-helper-crlf-exit-issue
 telegram_operation_review_refresh=completed-docs-only
+ssh_auth_noise_mitigation_review=completed-docs-only
 android_private_operator_rc_proof=complete-with-explicit-limitations
 backup_create_verify=passed
 public_closed_probes=passed_in_latest_relevant_gates
@@ -63,6 +65,21 @@ third_party_android_latest_handshake_age_s=23
 third_party_android_endpoint_observed=yes
 third_party_android_transfer_rx_bytes=55600508
 third_party_android_transfer_tx_bytes=132476207
+```
+
+Telegram operation single-session result:
+
+```text
+private_rc_telegram_operation_single_session_status=blocked-by-ssh-transport-before-remote-execution
+run_id=20260626T183902Z
+ssh_single_session_telegram_operation_exit_code=255
+remote_boundary_marker_observed=false
+telegram_polling_started=false
+manual_telegram_window_started=false
+config_delivery_performed=false
+peer_creation_performed=false
+public_closed_probes_before_status=passed
+telegram_application_failure=false
 ```
 
 ## Что разрешено
@@ -100,8 +117,8 @@ production_rollout=not-approved
 public_launch_status=not-approved
 public_web_admin_api_status=not-approved
 telegram_live_config_delivery_status=not-approved
-telegram_private_operation_retry_status=blocked-until-ssh-transport-stabilization-review
-telegram_private_operation_retry_precondition=ssh_single_session_diagnostic_passed
+telegram_private_operation_retry_status=blocked-until-ssh-auth-noise-mitigation-path-selected
+telegram_private_operation_retry_precondition=provider_console_or_auth_access_strategy_selected
 public_self_service_config_delivery_status=not-approved
 qr_release_primary=false
 full_vpn_uri_release_primary=false
@@ -115,10 +132,11 @@ production_scale_rollout_status=not-approved
 
 ```text
 2dbd746 Refresh private RC release limitations
-cd36207 Add private RC final Android summary
-a43a2ca Record third-party Android traffic observation
-52efc55 Record third-party Android manual acceptance
-6f2081f Record third-party Android handoff result
+f3536f2 Refresh Telegram operation review for single session
+e1730c3 Record SSH single-session diagnostic result
+9be156b Add SSH transport stabilization review
+930fcc5 Record SSH transport blocker for Telegram operation
+c01f0a1 Prepare private RC Telegram operation gate
 ```
 
 ## Главные документы
@@ -127,6 +145,8 @@ a43a2ca Record third-party Android traffic observation
 docs/AMN2_PRIVATE_RC_FINAL_STATUS_SNAPSHOT.ru.md
 docs/AMN2_PRIVATE_RC_RELEASE_LIMITATIONS_REFRESH.ru.md
 docs/AMN2_PRIVATE_RC_FINAL_ANDROID_SUMMARY.ru.md
+docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_SINGLE_SESSION_RESULT.ru.md
+docs/AMN2_PRIVATE_RC_SSH_AUTH_NOISE_MITIGATION_REVIEW.ru.md
 docs/AMN2_PRIVATE_OPERATOR_RC_FINAL_PACKAGE.ru.md
 docs/AMN2_PRIVATE_OPERATOR_RC_HANDOFF.ru.md
 docs/AMN2_PRIVATE_OPERATOR_RC_RUN_CHECKLIST.ru.md
@@ -172,10 +192,16 @@ Refresh Telegram operation review before retry:
 PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW_REFRESH
 ```
 
-New single-session Telegram operation gate:
+Single-session Telegram operation result:
 
 ```text
-PRIVATE_RC_TELEGRAM_OPERATION_SINGLE_SESSION_GATE
+PRIVATE_RC_TELEGRAM_OPERATION_SINGLE_SESSION_RESULT
+```
+
+SSH auth-noise mitigation review:
+
+```text
+PRIVATE_RC_SSH_AUTH_NOISE_MITIGATION_REVIEW
 ```
 
 Новая приватная выдача `.conf`:
@@ -207,11 +233,12 @@ PROVIDER_REBUILD_GATE_REVIEW
 Текущий рекомендуемый режим после Telegram operation blocker:
 
 ```text
-recommended_next_step=PRIVATE_RC_TELEGRAM_OPERATION_SINGLE_SESSION_GATE
+recommended_next_step=PRIVATE_RC_PROVIDER_CONSOLE_SSH_DIAGNOSTIC_REVIEW
 ```
 
-Повторять Telegram operation execution нельзя до SSH stabilization review:
+Повторять Telegram operation execution нельзя до выбора SSH/auth-noise
+mitigation path:
 
 ```text
-recommended_live_next_review=blocked-until-ssh-transport-stabilization-review
+recommended_live_next_review=blocked-until-provider-console-or-auth-access-strategy
 ```
