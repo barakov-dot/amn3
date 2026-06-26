@@ -1,5 +1,21 @@
 # Текущий override 2026-06-09
 
+Phase 8 `PRIVATE_RC_RELEASE_LIMITATIONS_REFRESH` completed on 2026-06-26 as
+`completed-docs-only`, followed by active `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА` hold.
+Refresh doc: `docs/AMN2_PRIVATE_RC_RELEASE_LIMITATIONS_REFRESH.ru.md`.
+Evidence:
+`research/amn2/phase-8-private-rc-release-limitations-refresh-2026-06-26.md`.
+Updated `docs/AMN2_PRIVATE_OPERATOR_RC_HANDOFF.ru.md` and
+`docs/AMN2_PRIVATE_OPERATOR_RC_FINAL_PACKAGE.ru.md` to reflect the new Android
+proof: P8-C001 Android phone passed, P8-C003 remains Android projector
+fresh-zero proof with explicit limitation, and third-party Android phone passed
+manual + server-side proof. Public launch, public exposure, Telegram live
+config delivery, public/self-service config delivery, new peer/config creation
+without exact gate, iOS release acceptance, restore/import DR, provider rebuild
+and production-scale rollout remain not approved. No live VPS/SSH/config/
+Telegram/public gate was opened for this refresh. Next action requires an exact
+named gate from the operator.
+
 Phase 8 `PRIVATE_RC_FINAL_ANDROID_SUMMARY` completed on 2026-06-26 as
 `completed-docs-only`. Summary:
 `docs/AMN2_PRIVATE_RC_FINAL_ANDROID_SUMMARY.ru.md`. Evidence:

@@ -34,7 +34,26 @@ next_action_requires_exact_named_gate=true
 Ничего live/VPS/config/Telegram/public не открывать до явного именованного gate
 от оператора.
 
-## 0a. Final Android summary
+## 0a. Release limitations refresh
+
+Recorded docs-only on 2026-06-26:
+
+```text
+private_rc_release_limitations_refresh_status=completed-docs-only
+refresh_doc=docs/AMN2_PRIVATE_RC_RELEASE_LIMITATIONS_REFRESH.ru.md
+evidence=research/amn2/phase-8-private-rc-release-limitations-refresh-2026-06-26.md
+android_private_operator_rc_proof=complete-with-explicit-limitations
+public_launch_status=not-approved
+telegram_live_config_delivery_status=not-approved
+hold_status=active
+next_action_requires_exact_named_gate=true
+```
+
+Updated `docs/AMN2_PRIVATE_OPERATOR_RC_HANDOFF.ru.md` and
+`docs/AMN2_PRIVATE_OPERATOR_RC_FINAL_PACKAGE.ru.md` with the refreshed Android
+proof and unchanged public/config/Telegram limitations.
+
+## 0b. Final Android summary
 
 Recorded docs-only on 2026-06-26:
 

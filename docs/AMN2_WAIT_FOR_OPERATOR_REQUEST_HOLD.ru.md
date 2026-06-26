@@ -8,6 +8,15 @@
 
 Live/VPS/config/Telegram/public gates не открывались.
 
+Последнее подтверждение hold после refresh:
+
+```text
+last_hold_refresh_gate=PRIVATE_RC_RELEASE_LIMITATIONS_REFRESH
+last_hold_refresh_date=2026-06-26
+release_limitations_refresh_status=completed-docs-only
+next_action_requires_exact_named_gate=true
+```
+
 ## Итог
 
 AMN2 остается в режиме private/operator RC

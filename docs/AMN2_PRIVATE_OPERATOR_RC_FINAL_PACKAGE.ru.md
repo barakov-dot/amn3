@@ -6,6 +6,7 @@
 
 ```text
 final_package_status=prepared-docs-only
+release_limitations_refresh_status=completed-2026-06-26
 phase8_final_status=launch-ready-with-explicit-limitations
 private_operator_rc_launch_ready=true
 public_launch_status=not-approved
@@ -157,6 +158,25 @@ research/amn2/phase-8-rc-operator-run-checklist-2026-06-22.md
 - private handoff location recorded safely;
 - public exposure, Telegram, config delivery and backup boundaries recorded.
 
+### Android proof refresh
+
+```text
+research/amn2/phase-8-private-rc-final-android-summary-2026-06-26.md
+research/amn2/phase-8-third-party-android-traffic-observation-result-2026-06-26.md
+research/amn2/phase-8-private-rc-release-limitations-refresh-2026-06-26.md
+```
+
+Доказательство:
+
+- Android private/operator RC proof refreshed after third-party Android phone;
+- `P8-C001` remains Android phone evidence;
+- `P8-C003` remains Android projector fresh-zero evidence with explicit
+  projector limitation;
+- third-party Android phone passed manual owner report and server-side
+  handshake/endpoint/rx-tx observation;
+- public exposure stayed closed;
+- no secret-bearing payload was printed.
+
 ## 4. Разрешенный RC scope
 
 Разрешено:
@@ -191,6 +211,8 @@ telegram_live_send_status=not-performed
 telegram_bot_polling_status=not-performed
 fresh_android_phone_acceptance_source=P8-C001
 fresh_zero_android_acceptance_device=P8-C003_android_projector
+third_party_android_phone_proof=passed-manual-and-server-side
+android_private_operator_rc_proof=complete-with-explicit-limitations
 config_delivery_primary_artifact=.conf
 qr_release_primary=false
 full_vpn_uri_release_primary=false
@@ -204,6 +226,10 @@ secret_payload_output_status=not-performed
 - P8-C001 доказал Android phone acceptance.
 - P8-C003 fresh-zero acceptance использовал Android projector.
 - Нельзя выдавать P8-C003 за fresh-zero Android phone test.
+- Third-party Android phone дополнительно доказал `.conf` import/connect/
+  traffic через manual owner report и server-side handshake/rx-tx observation.
+- Новое Android proof не открывает public launch и не разрешает live config
+  delivery без отдельного exact gate.
 
 ## 6. Private handoff artifacts
 
