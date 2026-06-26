@@ -34,6 +34,25 @@ next_action_requires_exact_named_gate=true
 Ничего live/VPS/config/Telegram/public не открывать до явного именованного gate
 от оператора.
 
+## 0a. Final Android summary
+
+Recorded docs-only on 2026-06-26:
+
+```text
+private_rc_final_android_summary_status=completed-docs-only
+summary_doc=docs/AMN2_PRIVATE_RC_FINAL_ANDROID_SUMMARY.ru.md
+evidence=research/amn2/phase-8-private-rc-final-android-summary-2026-06-26.md
+private_rc_android_status=passed-with-explicit-limitations
+android_phone_acceptance_status=passed
+android_projector_acceptance_status=passed-as-projector-limited-fresh-zero-proof
+third_party_android_phone_status=passed-manual-and-server-side
+recommended_status=android-private-operator-rc-proof-complete
+```
+
+This does not approve public launch, public exposure, Telegram live config
+delivery, public/self-service config delivery, iOS release acceptance,
+restore/import DR, provider rebuild or production-scale rollout.
+
 ## 0. Post-session helper hardening
 
 Completed local-only after session 0:

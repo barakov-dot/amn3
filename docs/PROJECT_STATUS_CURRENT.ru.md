@@ -1,5 +1,22 @@
 # Текущий override 2026-06-09
 
+Phase 8 `PRIVATE_RC_FINAL_ANDROID_SUMMARY` completed on 2026-06-26 as
+`completed-docs-only`. Summary:
+`docs/AMN2_PRIVATE_RC_FINAL_ANDROID_SUMMARY.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-final-android-summary-2026-06-26.md`.
+Final Android private/operator RC status is
+`passed-with-explicit-limitations`: P8-C001 Android phone acceptance passed
+with reconnect sanity; P8-C003 Android projector fresh-zero proof passed with
+explicit projector limitation; third-party Android phone proof passed with both
+manual owner report and server-side handshake/endpoint/rx-tx observation
+(`fresh_peer_public_key_fp=49e456e4edcb`, `latest_handshake_age_s=23`,
+`endpoint_observed=yes`, `rx=55600508`, `tx=132476207`). This strengthens
+private/operator RC Android confidence but does not approve public launch,
+public exposure, Telegram live config delivery, public/self-service config
+delivery, iOS release acceptance, restore/import DR, provider rebuild or
+production-scale rollout. No live VPS/SSH/config/Telegram/public gate was
+opened for this summary.
+
 Phase 8 `THIRD_PARTY_ANDROID_TRAFFIC_OBSERVATION_HELPER_UPLOAD_RETRY_GATE`
 passed on 2026-06-26 as `passed-server-side-observation`. Result:
 `docs/AMN2_THIRD_PARTY_ANDROID_TRAFFIC_OBSERVATION_RESULT.ru.md`. Evidence:
