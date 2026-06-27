@@ -61,7 +61,7 @@ phase8_final_status=launch-ready-with-explicit-limitations
 phase9_material_status=prepared-existing-material
 branch=codex-spark-phase9-docs-sync
 latest_known_pre_sync_commit=5bcbbc4
-private_self_config_readiness_with_naming_review=passed
+private_self_config_readiness_with_naming_review=completed-docs-only
 android_display_name_gate_decision=DOCUMENTED_LIMITATION
 android_display_name_gate_execution_go=false
 android_display_name_next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
@@ -127,6 +127,27 @@ production rollout не разрешены.
   оставляем `manual rename` fallback.
   Safe observation: `Observed display name = Сервер 1`.
   Implementation readiness handoff prepared: `docs/AMN2_PHASE_9_PLATFORM_DISPLAY_NAME_IMPLEMENTATION_READINESS.ru.md`.
+
+## Что считать истинно текущим сейчас (не как исторический passed)
+
+- `android_display_name_gate_decision_status=DOCUMENTED_LIMITATION`
+- `android_display_name_gate_pass_required=Neobyatnaya-AMNZ-N`
+- `android_display_name_gate_pass_not_reached=true`
+- `android_display_name_gate_observed=Сервер 1`
+- `android_display_name_gate_observed_classification=localized_SERVER1_client_display_name_compatibility_gap`
+- `android_display_name_gate_fallback=manual_rename`
+- `android_display_name_gate_production_naming=Neobyatnaya-AMNZ-N`
+- `android_display_name_gate_windows_policy=filename/basename_Neobyatnaya-AMNZ-N.conf`
+- `android_display_name_gate_ios_policy=not_proven_manual_rename_fallback`
+- `android_display_name_gate_execution_go_after_result=false`
+
+```text
+next_phase_execution_gate_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
+execution_go_after_result=false
+config_generation_delivery=not-approved
+peer_creation=not-approved
+public_launch=not-approved
+```
 
 ## Обязательная naming-граница для config/self-use
 
