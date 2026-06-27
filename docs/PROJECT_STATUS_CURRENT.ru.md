@@ -10,6 +10,7 @@ selected_lane=HARDENING_PRODUCTIZATION
 phase9_entry_decision_status=passed
 helper_hardening_status=completed-docs-only
 no_long_ssh_pattern=status=standardized
+phase9_current_sync_commit=259b742
 ios_defaultvpn_default_status=failed-not-accepted
 ssh_auth_no_hardening_execution=not-approved
 db_aggregate_counts_status=optional-confidence-not-hardening-blocker
@@ -72,7 +73,7 @@ Critical limitations remain unchanged:
 `public_self_service_config_delivery_status=not-approved`,
 `restore_import_status=not-proven`,
 `provider_rebuild_status=not-proven`.
-Current active next-chat handoff: `docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_4.ru.md`.
+Current active next-chat handoff: `docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_5.ru.md`.
 
 Phase 9 `AMN2_PHASE_9_IMPORTANT_BLOCK_REALIZATION` completed on 2026-06-27 as
 `completed-docs-only`. Realization doc:

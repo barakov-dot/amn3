@@ -10,7 +10,8 @@
 phase9_entry_decision=passed
 selected_lane=HARDENING_PRODUCTIZATION
 final_status_refresh=passed
-final_status_commit=aeeb539
+final_status_commit=259b742
+latest_docs_sync_commit=259b742
 hardening_entry_gap_tasks_prep=passed
 hardening_entry_review=passed
 public_launch_entry_review=completed_no_go_stay_in_hardening
@@ -52,7 +53,7 @@ default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` (закрыт) | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено |
 | Критично | `AMN2_PHASE_9_PUBLIC_LAUNCH_ENTRY_REVIEW` (lane confirmed) | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнен: `public_launch_go=false`, продолжение на hardening lane |
-| Критично | `AMN2_PHASE_9_FINAL_STATUS_REFRESH` | Codex-Spark | true | false | false | Завершён и подтверждён (`aeeb539`) |
+| Критично | `AMN2_PHASE_9_FINAL_STATUS_REFRESH` | Codex-Spark | true | false | false | Завершён и подтверждён (`259b742`) |
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW_GAP_TASKS_PREP` | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено: закрывает gap-prep и anti-loop rule |
 | Критично | `AMN2_PHASE_9_CONFIG_DELIVERY_ENTRY_REVIEW` (если меняется lane в другой трек) | GPT-5.5 | false | true (`requires_model_switch`) | true (`CONFIG_DELIVERY_GATE_REVIEW` exact) | Подготовить review bundle и запуск exact gate |
 | Критично | `AMN2_PHASE_9_DR_ENTRY_REVIEW` (если меняется lane в другой трек) | GPT-5.5 | false | true (`requires_model_switch`) | true (`RESTORE_IMPORT_DR_GATE_REVIEW` exact) | Подготовить DR-review и exact gate |
