@@ -87,4 +87,3 @@ android_private_operator_rc_status=passed-manual-and-server-side
 - public launch и config delivery остаются `not-approved` до полного отдельного gate path;
 - нельзя смешивать public launch с hardening controls в одном live step;
 - без explicit `exact gate` и operator подтверждения никаких mutations на VPS/SSH/Telegram/public.
-
