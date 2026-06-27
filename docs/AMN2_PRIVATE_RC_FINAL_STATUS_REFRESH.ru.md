@@ -2,7 +2,7 @@
 
 Дата: 2026-06-27.
 
-Статус: `completed-docs-only-updated-after-key-path-retry-blocker`.
+Статус: `completed-docs-only-updated-after-no-long-ssh-retry-pass`.
 
 Использованы существующие Phase 8 evidence и explicit gate results:
 
@@ -17,6 +17,8 @@
 - `PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW`.
 - `PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_RESULT`.
 - `HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_HARDENING`.
+- `HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_IMPLEMENTATION_REVIEW`.
+- `PRIVATE_RC_TELEGRAM_OPERATION_NO_LONG_SSH_RETRY_RESULT`.
 
 Этот refresh сам live/VPS/SSH/config/Telegram/public gates не открывал.
 
@@ -30,13 +32,12 @@ telegram_private_live_preview_status=passed
 telegram_key_path_retry_status=blocked-during-manual-window-after-polling-started-cleanup-required
 telegram_cleanup_guard_status=passed
 telegram_no_polling_status=restored-and-proven
-telegram_real_operation_status=not-passed-deferred-or-retry-needs-new-design
+telegram_no_long_ssh_retry_status=passed
+telegram_real_operation_status=passed-private-operator-no-config-delivery
 telegram_cleanup_guard_required=false
 telegram_short_window_retry_review_status=completed-docs-only
 telegram_short_window_retry_status=blocked-by-ssh-transport-before-remote-execution
-telegram_operation_retry_go=false_until_no_long_ssh_implementation_review
 recommended_next=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
-optional_next_review=HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_IMPLEMENTATION_REVIEW
 public_launch_status=not-approved
 public_exposure_status=closed-by-default
 config_delivery_status=not-approved
@@ -73,18 +74,34 @@ short_window_remote_boundary_marker_observed=false
 short_window_bot_polling_started=false
 repeat_old_1800_second_helper=false
 helper_telegram_operation_no_long_ssh_hardening_status=completed-docs-only
+helper_telegram_operation_no_long_ssh_implementation_review_status=completed-docs-only
+no_long_ssh_retry_run_id=20260627T051432Z
+no_long_ssh_retry_status=passed
+no_long_ssh_manual_window_seconds=120
+no_long_ssh_remote_polling_ttl_seconds=150
+no_long_ssh_ssh_session_open_during_manual_window=false
+no_long_ssh_source_overlay_match=yes
+no_long_ssh_telegram_get_me_status=passed
+no_long_ssh_bot_polling_started=true
+no_long_ssh_remote_watchdog_started=true
+operator_start_flow_observed=passed
+partner_start_flow_observed=passed
+config_delivery_attempted=false
+no_long_ssh_stop_only_amn2_app_main_polling_process_status=stopped
+no_long_ssh_remaining_amn2_app_main_polling_process_count=0
+no_long_ssh_final_no_polling_guard_status=passed
 secret_values_printed=false
 ```
 
 ## Что не доказано
 
 ```text
-telegram_operation_passed=false
-normal_stop_final_guard_inside_retry=not_observed_due_ssh_close
-manual_operator_summary=not_recorded
-short_window_retry_execution=blocked-before-remote-execution
-public_launch_status=not-approved
 config_delivery_status=not-approved
+peer_creation_status=not-approved
+public_exposure_status=not-approved
+non_admin_rollout_status=not-approved
+telegram_profile_media_mutation_status=not-approved
+public_launch_status=not-approved
 production_rollout_status=not-approved
 ```
 
@@ -105,8 +122,17 @@ Short-window retry review завершен docs-only. Он разрешает т
 
 Short-window retry execution then failed before the first remote marker with
 SSH exit `255`. This did not start polling according to available evidence.
-Do not repeat the same helper blindly. Next retry work should move to no-long
-SSH helper design, or hold.
+
+No-long-SSH helper implementation review was completed and then executed under
+`PRIVATE_RC_TELEGRAM_OPERATION_NO_LONG_SSH_RETRY_GATE`. The retry passed:
+short precheck passed, controlled polling started, manual Telegram window ran
+locally with no open SSH session, operator and partner `/start` flows were
+reported passed, config delivery was not attempted, and final guard stopped the
+AMN2 bot polling process with `remaining_amn2_app_main_polling_process_count=0`.
+
+This proves private/operator Telegram operation without config delivery. It
+does not approve public launch, config generation/delivery, peer creation,
+non-admin rollout, Telegram profile/media mutation or production rollout.
 
 ## Next exact gates
 
@@ -119,19 +145,19 @@ SSH helper design, or hold.
 Парный:
 
 ```text
-HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_IMPLEMENTATION_REVIEW
-+
 PRIVATE_RC_FINAL_STATUS_REFRESH
++
+NEXT_CHAT_SYNC_AND_PUSH
 ```
 
 Тройной:
 
 ```text
-HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_IMPLEMENTATION_REVIEW
-+
-PRIVATE_RC_TELEGRAM_OPERATION_NO_LONG_SSH_RETRY_GATE
+PRIVATE_RC_RELEASE_LIMITATIONS_REFRESH
 +
 PRIVATE_RC_FINAL_STATUS_REFRESH
++
+NEXT_CHAT_SYNC_AND_PUSH
 ```
 
 ## Stop-lines
@@ -140,7 +166,7 @@ PRIVATE_RC_FINAL_STATUS_REFRESH
 
 - повторять тот же short-window Telegram operation helper без no-long-SSH implementation review;
 - использовать manual window дольше 180 секунд;
-- считать Telegram operation passed;
+- считать public/config/production rollout approved;
 - выполнять config generation/delivery;
 - создавать peer/config;
 - открывать public exposure;
@@ -164,5 +190,7 @@ telegram_key_path_cleanup_guard_result=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_K
 telegram_short_window_retry_review=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW.ru.md
 telegram_short_window_retry_result=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_RESULT.ru.md
 helper_telegram_no_long_ssh_hardening=docs/AMN2_HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_HARDENING.ru.md
+helper_telegram_no_long_ssh_implementation_review=docs/AMN2_HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_IMPLEMENTATION_REVIEW.ru.md
+telegram_no_long_ssh_retry_result=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_NO_LONG_SSH_RETRY_RESULT.ru.md
 cleanup_guard_helper=tmp/private_rc_telegram_operation_key_path_cleanup_guard.ps1
 ```

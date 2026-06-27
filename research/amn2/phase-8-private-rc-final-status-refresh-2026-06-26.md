@@ -2,7 +2,7 @@
 
 Date: 2026-06-27.
 
-Status: `updated-after-key-path-retry-blocker`.
+Status: `updated-after-no-long-ssh-retry-pass`.
 
 No live/VPS/SSH/config/Telegram/public gates were opened by this refresh.
 
@@ -19,6 +19,8 @@ telegram_key_path_cleanup_guard_result=passed
 telegram_short_window_retry_review=completed-docs-only
 telegram_short_window_retry_result=blocked-by-ssh-transport-before-remote-execution
 helper_telegram_operation_no_long_ssh_hardening=completed-docs-only
+helper_telegram_operation_no_long_ssh_implementation_review=completed-docs-only
+telegram_no_long_ssh_retry_result=passed-private-operator-no-config-delivery
 ```
 
 ## Final status
@@ -31,11 +33,10 @@ telegram_private_live_preview_status=passed
 telegram_key_path_retry_status=blocked-during-manual-window-after-polling-started-cleanup-required
 telegram_cleanup_guard_status=passed
 telegram_no_polling_status=restored-and-proven
-telegram_real_operation_status=not-passed-deferred-or-retry-needs-new-design
+telegram_no_long_ssh_retry_status=passed
+telegram_real_operation_status=passed-private-operator-no-config-delivery
 telegram_cleanup_guard_required=false
-telegram_operation_retry_go=false_until_no_long_ssh_implementation_review
 recommended_next=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
-optional_next_review=HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_IMPLEMENTATION_REVIEW
 public_launch_status=not-approved
 config_delivery_status=not-approved
 production_rollout_status=not-approved
@@ -51,4 +52,11 @@ short_window_retry_remote_exit_code=255
 short_window_remote_boundary_marker_observed=false
 repeat_old_1800_second_helper=false
 ssh_auth_hardening_go=false_until_separate_exact_gate
+no_long_ssh_retry_run_id=20260627T051432Z
+no_long_ssh_retry_status=passed
+ssh_session_open_during_manual_window=false
+operator_start_flow_observed=passed
+partner_start_flow_observed=passed
+config_delivery_attempted=false
+final_no_polling_guard_status=passed
 ```

@@ -600,6 +600,7 @@ private_operator_rc_status_impact=no_new_blocker_inside_current_limitations
 
 ```text
 amn3_evidence_head_at_sync_start=289372f Record provider console SSH diagnostic result
+amn3_evidence_head_after_no_long_ssh_retry_sync=see_git_log_1_after_push
 amn2_current_fixes_head=187949bffb927a0a6d6c1f260fc0bb9ebb972447 Persist Android-compatible AWG defaults
 latest_vps_applied_package_smoked_head=187949bffb927a0a6d6c1f260fc0bb9ebb972447
 target_vps=89.185.80.166
@@ -899,4 +900,50 @@ Current recommendation after failed short-window execution:
 recommended_next=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 optional_next_review=HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_IMPLEMENTATION_REVIEW
 telegram_operation_retry_go=false_until_no_long_ssh_implementation_review
+```
+
+No-long-SSH implementation review recorded on 2026-06-27:
+
+```text
+helper_no_long_ssh_implementation_review_status=completed-docs-only
+implementation_review_doc=docs/AMN2_HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_IMPLEMENTATION_REVIEW.ru.md
+implementation_review_evidence=research/amn2/phase-8-helper-telegram-operation-no-long-ssh-implementation-review-2026-06-27.md
+recommended_execution_gate=PRIVATE_RC_TELEGRAM_OPERATION_NO_LONG_SSH_RETRY_GATE
+transport_model=key-based-short-ssh-commands-no-open-ssh-during-manual-window
+```
+
+No-long-SSH retry execution passed on 2026-06-27:
+
+```text
+no_long_ssh_retry_status=passed-private-operator-no-config-delivery
+no_long_ssh_retry_result_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_NO_LONG_SSH_RETRY_RESULT.ru.md
+no_long_ssh_retry_result_evidence=research/amn2/phase-8-private-rc-telegram-operation-no-long-ssh-retry-result-2026-06-27.md
+run_id=20260627T051432Z
+manual_window_seconds=120
+remote_polling_ttl_seconds=150
+source_overlay_match=yes
+telegram_get_me_status=passed
+bot_identity_safe=@NeobyatnayaAMNZ_bot
+bot_polling_started=true
+remote_watchdog_started=true
+ssh_session_open_during_manual_window=false
+operator_start_flow_observed=passed
+partner_start_flow_observed=passed
+config_delivery_attempted=false
+remaining_amn2_app_main_polling_process_count=0
+final_no_polling_guard_status=passed
+public_closed_probes_before_status=passed
+public_closed_probes_after_status=passed
+```
+
+Current recommendation after no-long-SSH retry:
+
+```text
+telegram_private_live_preview_status=passed
+telegram_real_operation_status=passed-private-operator-no-config-delivery
+telegram_no_polling_status=restored-and-proven
+public_launch_status=not-approved
+config_delivery_status=not-approved
+production_rollout_status=not-approved
+recommended_next=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 ```
