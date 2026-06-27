@@ -10,7 +10,7 @@
 - `default_hold`: `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА`
 - `status`: `docs-only-ready-for-operator-confirmation`
 - `branch`: `codex-spark-phase9-docs-sync`
-- `remote_sync`: `в sync с origin после push `7e06695`
+- `remote_sync`: `в sync с origin после push `aeeb539`
 
 ## Что уже зафиксировано
 
