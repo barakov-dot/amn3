@@ -36,8 +36,11 @@ android_display_name_gate_documented_limitation=SERVER1_as_client_display_name_c
 android_display_name_gate_fail=generic_generated_name_or_filename|SERVER1_as_production_naming|payload_secrets_output|peer_config_public_self_service_action
 android_display_name_gate_execution_go=false
 android_display_name_gate_next=platform_policy_docs_sync
-android_display_name_observed=Сервер_1
-android_display_name_observed_classification=localized_SERVER1_documented_limitation
+android_display_name_observed=Сервер 1
+android_display_name_gate_result=DOCUMENTED_LIMITATION
+android_display_name_observed_classification=localized_SERVER1_client_display_name_compatibility_gap
+android_display_name_pass_required=Neobyatnaya-AMNZ-N
+android_display_name_fallback=manual_rename
 windows_amneziawg_display_name_strategy=filename_basename
 windows_amneziawg_required_filename=Neobyatnaya-AMNZ-N.conf
 phase9_platform_display_name_implementation_readiness_doc=docs/AMN2_PHASE_9_PLATFORM_DISPLAY_NAME_IMPLEMENTATION_READINESS.ru.md
@@ -70,7 +73,7 @@ next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_ANDROID_AMNEZIAWG_PROF
 - Не обещать iOS support (DefaultVPN не прошел import path).
 - Не запускать любые новые `peer creation`, `config delivery`, `production rollout`.
 - Перед каждым commit/push выполнить SECRET_POLLUTION_SCAN и local markdown/diff clean checks.
-- Real Android AmneziaWG display-name validation подтвержден как:
+ - Real Android AmneziaWG display-name validation подтвержден как:
   - pass: `Observed display name = Neobyatnaya-AMNZ-N`;
   - documented limitation: `SERVER1` / `Сервер 1` допустим только как client
     display-name gap с `manual rename` fallback;

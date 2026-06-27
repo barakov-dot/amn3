@@ -67,6 +67,10 @@ default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 current_model=ChatGPT 5.3-Spark
 phase9_platform_display_name_implementation_readiness_doc=docs/AMN2_PHASE_9_PLATFORM_DISPLAY_NAME_IMPLEMENTATION_READINESS.ru.md
 phase9_platform_display_name_implementation_next=generator_code_docs_ready
+android_display_name_gate_result=DOCUMENTED_LIMITATION
+android_display_name_gate_observed=Сервер 1
+android_display_name_gate_next=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
+execution_go_after_gate_result=false
 ```
 
 Phase 8 закрыта для private/operator RC. Android private/operator proof,
