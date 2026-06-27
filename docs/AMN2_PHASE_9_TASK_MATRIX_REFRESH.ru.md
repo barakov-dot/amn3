@@ -11,6 +11,7 @@ phase9_entry_decision=passed
 selected_lane=HARDENING_PRODUCTIZATION
 final_status_refresh=passed
 final_status_commit=fed6191
+hardening_entry_gap_tasks_prep=passed
 hardening_entry_review=passed
 public_launch_entry_review=completed_no_go_stay_in_hardening
 public_launch_go=blocked
@@ -22,6 +23,7 @@ ssh_auth_hardening_execution_approved=false
 db_aggregate_counts_review=passed
 db_aggregate_counts_status=optional-confidence-not-hardening-blocker
 important_block_realization=completed-docs-only
+telegram_operation_runbook_polish=passed
 private_rc_final_status_refresh_reflected=true
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 ```
@@ -48,7 +50,7 @@ default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` (закрыт) | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено |
 | Критично | `AMN2_PHASE_9_PUBLIC_LAUNCH_ENTRY_REVIEW` (lane confirmed) | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнен: `public_launch_go=false`, продолжение на hardening lane |
 | Критично | `AMN2_PHASE_9_FINAL_STATUS_REFRESH` | Codex-Spark | true | false | false | Завершён и подтверждён (`fed6191`) |
-| Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW_GAP_TASKS_PREP` (если требуется доп. hardening docs prep) | GPT-5.5 | false | true (`requires_model_switch`) | false | Запускается по решению после operator-confirmed запроса |
+| Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW_GAP_TASKS_PREP` | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено: закрывает gap-prep и anti-loop rule |
 | Критично | `AMN2_PHASE_9_CONFIG_DELIVERY_ENTRY_REVIEW` (если меняется lane в другой трек) | GPT-5.5 | false | true (`requires_model_switch`) | true (`CONFIG_DELIVERY_GATE_REVIEW` exact) | Подготовить review bundle и запуск exact gate |
 | Критично | `AMN2_PHASE_9_DR_ENTRY_REVIEW` (если меняется lane в другой трек) | GPT-5.5 | false | true (`requires_model_switch`) | true (`RESTORE_IMPORT_DR_GATE_REVIEW` exact) | Подготовить DR-review и exact gate |
 | Очень важно | `AMN2_PHASE_9_ENTRY_BRIEF_REVIEW` | GPT-5.5 | false | true (`requires_model_switch`) | false | Проверить актуальность условий lane и stop-lines |
@@ -57,7 +59,7 @@ default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 | Очень важно | `AMN2_PHASE_9_DR_GATE_PREP_REFRESH` (`RESTORE_IMPORT_DR_GATE_REVIEW` при lane 4) | GPT-5.5 | false | true (`requires_model_switch`) | true (`RESTORE_IMPORT_DR` exact) | Подготовить review bundle и запуск exact gate |
 | Очень важно | `AMN2_PRIVATE_RC_RELEASE_LIMITATIONS_REFRESH` | Codex-Spark | true | false | false | Держать ограничения по статусу и hold-правила |
 | Очень важно | `AMN2_PRIVATE_RC_FINAL_STATUS_REFRESH` | Codex-Spark | true | false | false | Синхронизировать итоговый status после выбранного lane + review outcomes |
-| Важно | `AMN2_PHASE_9_TELEGRAM_OPERATION_RUNBOOK_POLISH` | GPT-5.5 | false | true (`requires_model_switch`) | false | Привести runbook в соответствие с no-long-SSH approach |
+| Важно | `AMN2_PHASE_9_TELEGRAM_OPERATION_RUNBOOK_POLISH` | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено: validated после passed no-long-SSH result |
 | Важно | `AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW` | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено: не blocker для hardening lane; execution только future exact gate |
 | Важно | `AMN2_DB_AGGREGATE_COUNTS_REVIEW` | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено: optional-confidence-not-hardening-blocker; live counts только через future exact gate |
 | Важно | `AMN2_IOS_ACCEPTANCE_DECISION_REVIEW` | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено: `DefaultVPN failed-no-tested-import-path`; future exact gate для любых iOS claims |

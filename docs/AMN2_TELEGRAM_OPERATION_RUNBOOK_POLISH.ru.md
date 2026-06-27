@@ -1,11 +1,13 @@
 # AMN2 Telegram operation runbook polish (Phase 9 hardening lane)
 
 Дата: 2026-06-27.
-Модель: `Codex-Spark`.
-Статус: `completed-docs-only`.
+Модель: `GPT-5.5 review`, initial draft: `Codex-Spark`.
+Статус: `completed-docs-only-validated-after-no-long-ssh-pass`.
 
 Использованы существующие Phase 8 evidence и `PHASE 9 hardening` решения.
 Live/VPS/SSH/Telegram/public gates этим документом не открывались.
+Дополнительно сверено с результатом
+`docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_NO_LONG_SSH_RETRY_RESULT.ru.md`.
 
 ## Цель
 
@@ -39,6 +41,27 @@ public_closed_probes_after_status=passed
 secret_values_printed=false
 raw_output_for_sensitive_sources=false
 ```
+
+## Фактическая валидация после retry
+
+```text
+source_result=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_NO_LONG_SSH_RETRY_RESULT.ru.md
+telegram_operation_no_long_ssh_retry_status=passed
+operator_start_flow_observed=passed
+partner_start_flow_observed=passed
+ssh_session_open_during_manual_window=false
+remote_polling_ttl_seconds=150
+final_no_polling_guard_status=passed
+remaining_amn2_app_main_polling_process_count=0
+config_delivery_attempted=false
+public_closed_probes_before_status=passed
+public_closed_probes_after_status=passed
+secret_values_printed=false
+```
+
+Итог: этот runbook больше не является pending gap. Он считается закрытым как
+доказанный no-long-SSH operational standard для private/operator Telegram
+проверок без config delivery.
 
 ## Точно требуемые проверки перед запуском
 
@@ -123,3 +146,11 @@ remaining_amn2_app_main_polling_process_count=0
 ```
 
 Это не снимает hard limitations на launch/config/peer/public rollout.
+
+## Anti-loop note
+
+Повторно открывать этот polish не нужно, пока не появится новый факт:
+- изменился Telegram operation helper;
+- появился новый Telegram gate с другой архитектурой;
+- изменился допустимый manual window / remote TTL;
+- оператор отдельно запросил production/public rollout path.
