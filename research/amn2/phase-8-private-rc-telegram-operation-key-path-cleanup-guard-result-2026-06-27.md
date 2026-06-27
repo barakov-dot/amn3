@@ -1,0 +1,49 @@
+# Phase 8 - PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_RESULT
+
+Date: 2026-06-27.
+
+Status: `passed`.
+
+## Input
+
+Operator-provided safe transcript from
+`PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_GATE`, run id
+`20260627T042926Z`.
+
+## Safe result
+
+```text
+target_vps=89.185.80.166
+key_path_preflight_status=passed
+ssh_key_login_only=true
+password_fallback_used=false
+scp_helper_upload_performed=false
+package_upload_apply_performed=false
+service_restart_performed=false
+public_exposure_performed=false
+config_generation_performed=false
+config_delivery_performed=false
+peer_creation_performed=false
+raw_process_list_output_performed=false
+secret_values_printed=false
+public_closed_probes_before_status=passed
+public_listener_guard_before_cleanup=passed
+amn2_app_main_polling_process_before_count=1
+stop_only_amn2_app_main_polling_process_status=stopped
+amn2_app_main_polling_process_stop_attempt_count=1
+remaining_amn2_app_main_polling_process_count=0
+final_no_polling_guard_status=passed
+public_listener_guard_after_cleanup=passed
+ssh_key_cleanup_guard_remote_exit_code=0
+public_closed_probes_after_status=passed
+private_rc_telegram_operation_key_path_cleanup_guard_status=passed
+```
+
+## Decision
+
+```text
+telegram_no_polling_status=restored-and-proven
+telegram_cleanup_guard_status=passed
+telegram_operation_retry_passed=false
+recommended_next=PRIVATE_RC_FINAL_STATUS_REFRESH
+```

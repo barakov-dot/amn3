@@ -819,3 +819,26 @@ Next exact gate:
 ```text
 PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_GATE
 ```
+
+Cleanup guard result recorded on 2026-06-27:
+
+```text
+cleanup_guard_status=passed
+cleanup_guard_result_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_RESULT.ru.md
+cleanup_guard_result_evidence=research/amn2/phase-8-private-rc-telegram-operation-key-path-cleanup-guard-result-2026-06-27.md
+run_id=20260627T042926Z
+amn2_app_main_polling_process_before_count=1
+stop_only_amn2_app_main_polling_process_status=stopped
+remaining_amn2_app_main_polling_process_count=0
+final_no_polling_guard_status=passed
+public_closed_probes_after_status=passed
+telegram_no_polling_status=restored-and-proven
+```
+
+Current recommendation after cleanup:
+
+```text
+recommended_next=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+optional_next_review=PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW
+telegram_operation_retry_go=false_until_new_short_window_review
+```

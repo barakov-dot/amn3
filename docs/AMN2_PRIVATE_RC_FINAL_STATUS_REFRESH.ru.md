@@ -13,6 +13,7 @@
 - `PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_RETRY_REVIEW`;
 - `PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_RETRY_RESULT`;
 - `PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_REVIEW`.
+- `PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_RESULT`.
 
 Этот refresh сам live/VPS/SSH/config/Telegram/public gates не открывал.
 
@@ -24,9 +25,11 @@ private_operator_rc_launch_ready=true
 android_private_operator_rc_proof=complete-with-explicit-limitations
 telegram_private_live_preview_status=passed
 telegram_key_path_retry_status=blocked-during-manual-window-after-polling-started-cleanup-required
-telegram_real_operation_status=not-passed-cleanup-required
-telegram_cleanup_guard_required=true
-telegram_operation_retry_go=false_until_cleanup_guard_passes
+telegram_cleanup_guard_status=passed
+telegram_no_polling_status=restored-and-proven
+telegram_real_operation_status=not-passed-deferred-or-retry-needs-new-design
+telegram_cleanup_guard_required=false
+telegram_operation_retry_go=false_until_new_short_window_review
 public_launch_status=not-approved
 public_exposure_status=closed-by-default
 config_delivery_status=not-approved
@@ -51,6 +54,10 @@ public_closed_probes_before_status=passed
 public_closed_probes_after_status=passed
 config_delivery_performed=false
 peer_creation_performed=false
+amn2_app_main_polling_process_before_cleanup_count=1
+stop_only_amn2_app_main_polling_process_status=stopped
+remaining_amn2_app_main_polling_process_count=0
+final_no_polling_guard_status=passed
 secret_values_printed=false
 ```
 
@@ -58,8 +65,7 @@ secret_values_printed=false
 
 ```text
 telegram_operation_passed=false
-final_no_polling_guard_after_key_path_retry=not_observed
-bot_polling_process_after_key_path_retry=unknown_until_cleanup_guard
+normal_stop_final_guard_inside_retry=not_observed_due_ssh_close
 manual_operator_summary=not_recorded
 public_launch_status=not-approved
 config_delivery_status=not-approved
@@ -72,21 +78,23 @@ Key-path retry дошел до remote execution, подтвердил source hea
 Telegram `getMe` и старт controlled polling. Но SSH-сеанс закрылся remote host
 во время manual window до штатного stop/final guard.
 
-Поэтому Telegram operation нельзя считать passed. Следующий безопасный шаг -
-не повтор retry, а доказать или восстановить `no Telegram polling`.
+Cleanup guard затем нашел один оставшийся AMN2 bot polling process, остановил
+только его и доказал `remaining_amn2_app_main_polling_process_count=0`.
+Telegram operation нельзя считать passed, но immediate no-polling safety
+blocker закрыт.
 
 ## Next exact gates
 
 Одиночный:
 
 ```text
-PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_GATE
+ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 ```
 
 Парный:
 
 ```text
-PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_GATE
+PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW
 +
 PRIVATE_RC_FINAL_STATUS_REFRESH
 ```
@@ -94,18 +102,18 @@ PRIVATE_RC_FINAL_STATUS_REFRESH
 Тройной:
 
 ```text
-PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_GATE
+PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW
++
+PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE
 +
 PRIVATE_RC_FINAL_STATUS_REFRESH
-+
-NEXT_CHAT_SYNC_AND_PUSH
 ```
 
 ## Stop-lines
 
 Без нового exact gate нельзя:
 
-- повторять Telegram operation retry;
+- повторять Telegram operation retry без нового short-window/no-long-SSH review;
 - считать Telegram operation passed;
 - выполнять config generation/delivery;
 - создавать peer/config;
@@ -126,5 +134,6 @@ ssh_key_based_access_prep_result=docs/AMN2_PRIVATE_RC_SSH_KEY_BASED_ACCESS_PREP_
 telegram_key_path_retry_review=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_RETRY_REVIEW.ru.md
 telegram_key_path_retry_result=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_RETRY_RESULT.ru.md
 telegram_key_path_cleanup_guard_review=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_REVIEW.ru.md
+telegram_key_path_cleanup_guard_result=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_RESULT.ru.md
 cleanup_guard_helper=tmp/private_rc_telegram_operation_key_path_cleanup_guard.ps1
 ```
