@@ -10,7 +10,7 @@
 - `default_hold`: `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА`
 - `status`: `docs-only-progress-continued`
 - `branch`: `codex-spark-phase9-docs-sync`
-- `remote_sync`: `commit выполнен, push не выполнен из‑за TLS/SSL handshake (schannel), требуется ручной повтор`
+- `remote_sync`: `commit выполнен и push успешно выполнен в origin/codex-spark-phase9-docs-sync`
 
 ## Что уже зафиксировано
 
@@ -68,7 +68,7 @@
 
 ## Рекомендованный следующий шаг
 
-1. `NEXT_CHAT_AND_PUSH` (если требуется) после подтверждения текущего шага и проверки, что рабочий tree clean.
+1. `NEXT_CHAT_AND_PUSH` уже выполнен для этого session-комплекта (последний commit `e09c564`).
 2. Ждать operator confirmation для exact hardening gate.
 3. После подтверждения — начать тот single/paired exact gate, который ты выберешь первым:
    - `AMN2_SSH_AUTH_HARDENING_GATE_REVIEW` (если идем в SSH hardening lane)

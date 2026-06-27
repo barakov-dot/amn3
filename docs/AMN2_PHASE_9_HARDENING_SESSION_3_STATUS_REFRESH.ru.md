@@ -46,15 +46,15 @@ requires_operator_exact_gate_before_live=true
 - Не открывались live/VPS/SSH/Telegram/public gates.
 - Не выполнялись пакетные изменения runtime/state в проде.
 - Не менялись секреты, ключи, токены, `.conf` payload, QR, `vpn://` payload, PSK.
-- Commit выполнен: `441292a` (`Add Phase 9 hardening session 3 status handoff docs`).
-- `push` не выполнен: `git push` на `https://github.com/barakov-dot/amn3.git/` упал на `schannel: failed to receive handshake`.
+- Commit выполнен: `e09c564` (`Add Phase 9 hardening session 3 status handoff docs`).
+- `push` выполнен: `e09c564` успешно отправлен в `origin/codex-spark-phase9-docs-sync`.
 
 ## Готовность к следующему шагу (из этого refresh)
 
-1. Фиксация в git уже выполнена:
-   - commit docs-only уже есть; 
+1. Фиксация в git выполнена и синхронизирована:
+   - docs-only commit уже есть: `e09c564`;
    - выполнены `SECRET_POLLUTION_SCAN` и `git diff --check`;
-   - требуется только повторный ручной/разрешённый `push`.
+   - remote sync подтвержден: branch `codex-spark-phase9-docs-sync` в sync после push.
 2. После подтверждения:
    - запуск exact named gate по выбранному hardening направлению;
    - затем новый `FINAL_STATUS` bridge и обновление session handoff.

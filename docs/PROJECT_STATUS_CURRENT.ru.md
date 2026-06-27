@@ -72,7 +72,7 @@ Critical limitations remain unchanged:
 `public_self_service_config_delivery_status=not-approved`,
 `restore_import_status=not-proven`,
 `provider_rebuild_status=not-proven`.
-Current active next-chat handoff: `docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_3.ru.md`.
+Current active next-chat handoff: `docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_4.ru.md`.
 
 Phase 9 `AMN2_PHASE_9_IMPORTANT_BLOCK_REALIZATION` completed on 2026-06-27 as
 `completed-docs-only`. Realization doc:
