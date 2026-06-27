@@ -13,6 +13,7 @@ no_long_ssh_pattern=status=standardized
 ios_defaultvpn_default_status=failed-not-accepted
 ssh_auth_no_hardening_execution=not-approved
 db_aggregate_counts_status=optional-confidence-not-hardening-blocker
+important_block_realization_status=completed-docs-only
 public_launch_status=not-approved
 config_delivery_status=not-approved
 peer_creation_status=not-approved
@@ -72,6 +73,20 @@ Critical limitations remain unchanged:
 `restore_import_status=not-proven`,
 `provider_rebuild_status=not-proven`.
 Current active next-chat handoff: `docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_1.ru.md`.
+
+Phase 9 `AMN2_PHASE_9_IMPORTANT_BLOCK_REALIZATION` completed on 2026-06-27 as
+`completed-docs-only`. Realization doc:
+`docs/AMN2_PHASE_9_IMPORTANT_BLOCK_REALIZATION.ru.md`. Evidence:
+`research/amn2/phase-9-important-block-realization-2026-06-27.md`. The block
+turns three important reviews into operational rails for the current
+`HARDENING_PRODUCTIZATION` lane: SSH auth-noise hardening execution remains
+not approved and requires future `AMN2_SSH_AUTH_HARDENING_GATE_REVIEW`; DB
+aggregate counts remain `optional-confidence-not-hardening-blocker` and live
+counts require future `AMN2_DB_AGGREGATE_COUNTS_OBSERVATION_GATE_REVIEW`; iOS
+DefaultVPN remains `failed-not-accepted` / `failed-no-tested-import-path` and
+any iOS acceptance or config delivery claim requires future
+`AMN2_IOS_ACCEPTANCE_GATE_REVIEW`. No live/VPS/SSH/DB/config/Telegram/public
+gate was opened by this realization.
 
 Phase 9 `AMN2_IOS_ACCEPTANCE_DECISION_REVIEW` completed on 2026-06-27 as
 `completed-docs-only-review`. Review:

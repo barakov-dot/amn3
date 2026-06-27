@@ -19,6 +19,7 @@ ssh_auth_noise_mitigation_review=passed
 ssh_auth_hardening_execution_approved=false
 db_aggregate_counts_review=passed
 db_aggregate_counts_status=optional-confidence-not-hardening-blocker
+important_block_realization=completed-docs-only
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 ```
 
@@ -43,6 +44,7 @@ default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 - `AMN2_PHASE_9_HARDENING_DOCS_PACKAGE` и `AMN2_PHASE_9_DOCS_SYNC_SECRET_SCAN_AND_COMMIT_PREP` — `completed-docs-only`, исполнитель `Codex-Spark`, без смены модели.
 - `AMN2_PHASE_9_ENTRY_DECISION` / `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` — зафиксированы как `done`, исполнитель `GPT-5.5`, требуется подтвердить модель для повторного открытия/изменения.
 - `AMN2_PHASE_9_PUBLIC_LAUNCH_ENTRY_REVIEW` — выполнен как `completed-docs-only-no-go`, executor `GPT-5.5`; lane не меняется, продолжение на `HARDENING_PRODUCTIZATION`.
+- `AMN2_PHASE_9_IMPORTANT_BLOCK_REALIZATION` — выполнен как `completed-docs-only`, executor `GPT-5`; SSH auth-noise/DB counts/iOS DefaultVPN сведены в один исполнимый статусный блок.
 - Для дальнейших шагов в этой фазе продолжаем в этой сессии правило: по умолчанию выполняются только tasks с `Codex-Spark` + review/status sync (см. блок ниже `requires_model_switch`).
 
 Короткое правило по моделям (после каждого блока):
@@ -70,6 +72,7 @@ GPT-5.5 задачи: новые entry-decisions, смена lane, policy/approa
 | Важно | `AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW` | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено: не blocker для current lane; execution только future exact gate |
 | Важно | `AMN2_DB_AGGREGATE_COUNTS_REVIEW` | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено: optional-confidence-not-hardening-blocker; live counts only via future exact gate |
 | Важно | `AMN2_IOS_ACCEPTANCE_DECISION_REVIEW` | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено: iOS DefaultVPN failed-not-accepted; no tested config import path; future exact gate required for any iOS claims |
+| Важно | `AMN2_PHASE_9_IMPORTANT_BLOCK_REALIZATION` | GPT-5 | true | false | false | Выполнено docs-only: три важных пункта сведены в порядок future gates/stop-lines |
 | Просто | `NEXT_CHAT_AMN2_PHASE_9_SESSION` | Codex-Spark | true | false | false | Сгенерировать next-chat sync с выбранным lane |
 | Просто | `AMN2_PHASE_9_TASK_MATRIX_REFRESH` | Codex-Spark | true | false | false | Обновить в случае изменения риска/приоритетов и при следующем чекпоинте |
 | Просто | `PROJECT_STATUS_CURRENT.ru.md refresh` | Codex-Spark | true | false | false | Синхронизировать текущий статус, оставив hold при отсутствии exact gate |
