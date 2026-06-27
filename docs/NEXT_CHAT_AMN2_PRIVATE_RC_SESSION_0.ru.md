@@ -842,3 +842,25 @@ recommended_next=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 optional_next_review=PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW
 telegram_operation_retry_go=false_until_new_short_window_review
 ```
+
+Short-window retry review recorded on 2026-06-27:
+
+```text
+telegram_short_window_retry_review_status=completed-docs-only
+short_window_review_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW.ru.md
+short_window_review_evidence=research/amn2/phase-8-private-rc-telegram-operation-short-window-retry-review-2026-06-27.md
+recommended_execution_gate=PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE
+manual_window_seconds_default=120
+manual_window_seconds_max=180
+repeat_old_1800_second_helper=false
+public_launch_status=not-approved
+config_delivery_status=not-approved
+production_rollout_status=not-approved
+```
+
+Current recommendation after short-window review:
+
+```text
+recommended_next_gate=PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE
+telegram_operation_retry_go=conditional-with-exact-short-window-gate
+```

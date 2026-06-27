@@ -16,6 +16,7 @@ telegram_key_path_retry_review=completed-docs-only
 telegram_key_path_retry_result=blocked-during-manual-window-after-polling-started-cleanup-required
 telegram_key_path_cleanup_guard_review=completed-docs-only
 telegram_key_path_cleanup_guard_result=passed
+telegram_short_window_retry_review=completed-docs-only
 ```
 
 ## Final status
@@ -30,7 +31,8 @@ telegram_cleanup_guard_status=passed
 telegram_no_polling_status=restored-and-proven
 telegram_real_operation_status=not-passed-deferred-or-retry-needs-new-design
 telegram_cleanup_guard_required=false
-telegram_operation_retry_go=false_until_new_short_window_review
+telegram_operation_retry_go=conditional-with-exact-short-window-gate
+recommended_next_gate=PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE
 public_launch_status=not-approved
 config_delivery_status=not-approved
 production_rollout_status=not-approved
@@ -39,8 +41,9 @@ production_rollout_status=not-approved
 ## Recommendation
 
 ```text
-recommended_next=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
-optional_next_review=PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW
-repeat_telegram_operation_retry_go=false_until_new_short_window_review
+recommended_next_gate=PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE
+manual_window_seconds_default=120
+manual_window_seconds_max=180
+repeat_old_1800_second_helper=false
 ssh_auth_hardening_go=false_until_separate_exact_gate
 ```

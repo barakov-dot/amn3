@@ -14,6 +14,7 @@
 - `PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_RETRY_RESULT`;
 - `PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_REVIEW`.
 - `PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_RESULT`.
+- `PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW`.
 
 Этот refresh сам live/VPS/SSH/config/Telegram/public gates не открывал.
 
@@ -29,7 +30,9 @@ telegram_cleanup_guard_status=passed
 telegram_no_polling_status=restored-and-proven
 telegram_real_operation_status=not-passed-deferred-or-retry-needs-new-design
 telegram_cleanup_guard_required=false
-telegram_operation_retry_go=false_until_new_short_window_review
+telegram_short_window_retry_review_status=completed-docs-only
+telegram_operation_retry_go=conditional-with-exact-short-window-gate
+recommended_next_gate=PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE
 public_launch_status=not-approved
 public_exposure_status=closed-by-default
 config_delivery_status=not-approved
@@ -58,6 +61,10 @@ amn2_app_main_polling_process_before_cleanup_count=1
 stop_only_amn2_app_main_polling_process_status=stopped
 remaining_amn2_app_main_polling_process_count=0
 final_no_polling_guard_status=passed
+telegram_short_window_retry_review_status=completed-docs-only
+short_window_manual_seconds_default=120
+short_window_manual_seconds_max=180
+repeat_old_1800_second_helper=false
 secret_values_printed=false
 ```
 
@@ -67,6 +74,7 @@ secret_values_printed=false
 telegram_operation_passed=false
 normal_stop_final_guard_inside_retry=not_observed_due_ssh_close
 manual_operator_summary=not_recorded
+short_window_retry_execution=not_performed
 public_launch_status=not-approved
 config_delivery_status=not-approved
 production_rollout_status=not-approved
@@ -83,12 +91,16 @@ Cleanup guard затем нашел один оставшийся AMN2 bot polli
 Telegram operation нельзя считать passed, но immediate no-polling safety
 blocker закрыт.
 
+Short-window retry review завершен docs-only. Он разрешает только будущий
+отдельный exact gate с коротким manual window `120-180` секунд; старую
+30-минутную схему повторять нельзя.
+
 ## Next exact gates
 
 Одиночный:
 
 ```text
-ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE
 ```
 
 Парный:
@@ -96,7 +108,7 @@ blocker закрыт.
 ```text
 PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW
 +
-PRIVATE_RC_FINAL_STATUS_REFRESH
+PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE
 ```
 
 Тройной:
@@ -113,7 +125,8 @@ PRIVATE_RC_FINAL_STATUS_REFRESH
 
 Без нового exact gate нельзя:
 
-- повторять Telegram operation retry без нового short-window/no-long-SSH review;
+- повторять Telegram operation retry без exact `PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE`;
+- использовать manual window дольше 180 секунд;
 - считать Telegram operation passed;
 - выполнять config generation/delivery;
 - создавать peer/config;
@@ -135,5 +148,6 @@ telegram_key_path_retry_review=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_
 telegram_key_path_retry_result=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_RETRY_RESULT.ru.md
 telegram_key_path_cleanup_guard_review=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_REVIEW.ru.md
 telegram_key_path_cleanup_guard_result=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_RESULT.ru.md
+telegram_short_window_retry_review=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW.ru.md
 cleanup_guard_helper=tmp/private_rc_telegram_operation_key_path_cleanup_guard.ps1
 ```
