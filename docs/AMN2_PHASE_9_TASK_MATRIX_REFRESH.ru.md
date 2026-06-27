@@ -10,6 +10,8 @@
 phase9_entry_decision=passed
 selected_lane=HARDENING_PRODUCTIZATION
 hardening_entry_review=passed
+public_launch_entry_review=completed_no_go_stay_in_hardening
+public_launch_go=blocked
 ios_acceptance_decision_review=passed
 ios_defaultvpn_status=failed-not-accepted
 ios_defaultvpn_config_import_status=failed-no-tested-import-path
@@ -40,6 +42,7 @@ default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 
 - `AMN2_PHASE_9_HARDENING_DOCS_PACKAGE` и `AMN2_PHASE_9_DOCS_SYNC_SECRET_SCAN_AND_COMMIT_PREP` — `completed-docs-only`, исполнитель `Codex-Spark`, без смены модели.
 - `AMN2_PHASE_9_ENTRY_DECISION` / `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` — зафиксированы как `done`, исполнитель `GPT-5.5`, требуется подтвердить модель для повторного открытия/изменения.
+- `AMN2_PHASE_9_PUBLIC_LAUNCH_ENTRY_REVIEW` — выполнен как `completed-docs-only-no-go`, executor `GPT-5.5`; lane не меняется, продолжение на `HARDENING_PRODUCTIZATION`.
 - Для дальнейших шагов в этой фазе продолжаем в этой сессии правило: по умолчанию выполняются только tasks с `Codex-Spark` + review/status sync (см. блок ниже `requires_model_switch`).
 
 Короткое правило по моделям (после каждого блока):
@@ -54,7 +57,7 @@ GPT-5.5 задачи: новые entry-decisions, смена lane, policy/approa
 | --- | --- | --- | --- | --- | --- | --- |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` (закрыт) | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено |
-| Критично | `AMN2_PHASE_9_PUBLIC_LAUNCH_ENTRY_REVIEW` (если меняется lane в другой трек) | GPT-5.5 | false | true (`requires_model_switch`) | false | Подготовить `PUBLIC_EXPOSURE_GATE_REVIEW`, затем exact gate по launch lane |
+| Критично | `AMN2_PHASE_9_PUBLIC_LAUNCH_ENTRY_REVIEW` | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнен: `public_launch_go=false`, продолжение на hardening lane |
 | Критично | `AMN2_PHASE_9_CONFIG_DELIVERY_ENTRY_REVIEW` (если меняется lane в другой трек) | GPT-5.5 | false | true (`requires_model_switch`) | false | Подготовить `CONFIG_DELIVERY_GATE_REVIEW`, затем exact gate для controlled delivery |
 | Критично | `AMN2_PHASE_9_DR_ENTRY_REVIEW` (если меняется lane в другой трек) | GPT-5.5 | false | true (`requires_model_switch`) | false | Подготовить DR-review и exact `RESTORE_IMPORT_DR_GATE_REVIEW` |
 | Очень важно | `AMN2_PHASE_9_ENTRY_BRIEF_REVIEW` | GPT-5.5 | false | true (`requires_model_switch`) | false | Проверить актуальность условий lane и stop-lines |

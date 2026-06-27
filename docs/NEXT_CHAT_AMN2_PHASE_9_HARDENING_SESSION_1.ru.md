@@ -17,15 +17,21 @@
 scope=AMN2_PHASE_9_HARDENING_DOCS_SYNC
 status=docs-only-pass
 gate_model=Codex-Spark
-completed_items=AMN2_PHASE_9_HARDENING_DOCS_PACKAGE, AMN2_PHASE_9_ENTRY_DECISION, AMN2_PHASE_9_HARDENING_ENTRY_REVIEW, AMN2_IOS_ACCEPTANCE_DECISION_REVIEW, AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW, AMN2_DB_AGGREGATE_COUNTS_REVIEW, AMN2_PHASE_9_TASK_MATRIX_REFRESH
+completed_items=AMN2_PHASE_9_HARDENING_DOCS_PACKAGE, AMN2_PHASE_9_ENTRY_DECISION, AMN2_PHASE_9_HARDENING_ENTRY_REVIEW, AMN2_PHASE_9_PUBLIC_LAUNCH_ENTRY_REVIEW, AMN2_PRIVATE_RC_FINAL_STATUS_REFRESH, AMN2_PHASE_9_IOS_ACCEPTANCE_DECISION_REVIEW, AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW, AMN2_DB_AGGREGATE_COUNTS_REVIEW, AMN2_PHASE_9_TASK_MATRIX_REFRESH
 critical_statuses=public_launch_status=not-approved; config_delivery_status=not-approved; peer_creation_status=not-approved; production_rollout_status=not-approved; ios_defaultvpn_status=failed-not-accepted; ssh_auth_hardening_execution_approved=false; db_aggregate_counts_status=optional-confidence-not-hardening-blocker
 model_contract=tasks marked "requires_model_switch=true" still need explicit GPT-5.5 confirmation
 ```
 
 ## Что подтверждено
 
+- `docs/AMN2_PHASE_9_PUBLIC_LAUNCH_ENTRY_REVIEW.ru.md` и
+  `research/amn2/phase-9-public-launch-entry-review-2026-06-27.md`:
+  public launch lane оставлен `not-go` на текущей фазе, lane продолжает
+  `HARDENING_PRODUCTIZATION`.
 - `docs/AMN2_PHASE_9_HARDENING_DOCS_PACKAGE.ru.md` обновлен и завершен.
 - `docs/AMN2_PHASE_9_TASK_MATRIX_REFRESH.ru.md` обновлен под реальный статус и привязку задач к моделям.
+- `docs/AMN2_PRIVATE_RC_FINAL_STATUS_REFRESH.ru.md` обновлен с итогом no-long-SSH
+  retry и текущими ограничениям/доказательствами.
 - `docs/PROJECT_STATUS_CURRENT.ru.md` обновлен на текущий срез hardening.
 - `docs/NEXT_CHAT_AMN2_PHASE_9_IOS_DECISION.ru.md` и `docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_0.ru.md` остаются актуальными.
 - Проход `SECRET_POLLUTION_SCAN` и `git diff --check` ранее выполнены в рамках `AMN2_PHASE_9_DOCS_SYNC_SECRET_SCAN_AND_COMMIT_PREP`.

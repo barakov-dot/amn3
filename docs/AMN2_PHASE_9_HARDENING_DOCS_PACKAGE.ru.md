@@ -14,6 +14,7 @@
 - `docs/AMN2_HELPER_SSH_TRANSPORT_HARDENING.ru.md`
 - `docs/AMN2_HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_HARDENING.ru.md`
 - `docs/AMN2_PHASE_9_HARDENING_ENTRY_REVIEW.ru.md`
+- `docs/AMN2_PHASE_9_PUBLIC_LAUNCH_ENTRY_REVIEW.ru.md`
 - `docs/AMN2_TELEGRAM_OPERATION_RUNBOOK_POLISH.ru.md`
 - `docs/AMN2_IOS_ACCEPTANCE_DECISION_REVIEW.ru.md`
 - `docs/AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW.ru.md`
@@ -23,6 +24,7 @@
 - `docs/AMN2_PRIVATE_RC_FINAL_STATUS_REFRESH.ru.md`
 - `docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_0.ru.md`
 - `research/amn2/phase-9-hardenings-docs-package-2026-06-27.md`
+- `research/amn2/phase-9-public-launch-entry-review-2026-06-27.md`
 
 Базовые ограничения на входе в Phase 9 оставлены:
 
@@ -61,6 +63,7 @@ secret_payload_output_allowed=false
 
 ```text
 phase9_hardening_lane=HARDENING_PRODUCTIZATION
+public_launch_entry_review=blocked
 phase9_entry_decision_doc=docs/AMN2_PHASE_9_ENTRY_DECISION.ru.md
 helper_stability_review_status=passed
 telegram_no_long_ssh_pattern=standardized
@@ -71,6 +74,8 @@ ssh_auth_noise_mitigation_review_status=passed
 db_aggregate_counts_review_status=passed
 release_limitations_status=refreshed
 final_status_refresh_status=updated
+final_status_refresh_includes=no-long-ssh-retry-passed-private-operator-no-config-delivery
+public_launch_entry_review_status=completed-docs-only-no-go
 docs_only=true
 ```
 

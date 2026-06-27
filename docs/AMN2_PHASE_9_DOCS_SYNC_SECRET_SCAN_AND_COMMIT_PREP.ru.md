@@ -17,7 +17,7 @@
 ### 1) Git sync status
 
 - `git status --short --branch`:
-  - ветка: `master...origin/master`
+  - ветка: `codex-spark-phase9-docs-sync...origin/codex-spark-phase9-docs-sync`
   - изменено: `M docs/PROJECT_STATUS_CURRENT.ru.md`
   - непроиндексированные:
     - `docs/AMN2_DB_AGGREGATE_COUNTS_REVIEW.ru.md`
@@ -26,15 +26,19 @@
     - `docs/AMN2_PHASE_9_ENTRY_DECISION.ru.md`
     - `docs/AMN2_PHASE_9_HARDENING_DOCS_PACKAGE.ru.md`
     - `docs/AMN2_PHASE_9_HARDENING_ENTRY_REVIEW.ru.md`
+    - `docs/AMN2_PHASE_9_PUBLIC_LAUNCH_ENTRY_REVIEW.ru.md`
     - `docs/AMN2_PHASE_9_TASK_MATRIX_REFRESH.ru.md`
     - `docs/AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW.ru.md`
     - `docs/AMN2_TELEGRAM_OPERATION_RUNBOOK_POLISH.ru.md`
     - `docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_0.ru.md`
+    - `docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_1.ru.md`
+    - `docs/AMN2_PRIVATE_RC_FINAL_STATUS_REFRESH.ru.md`
     - `docs/NEXT_CHAT_AMN2_PHASE_9_IOS_DECISION.ru.md`
     - `research/amn2/phase-9-db-aggregate-counts-review-2026-06-27.md`
     - `research/amn2/phase-9-entry-decision-2026-06-27.md`
     - `research/amn2/phase-9-hardening-entry-review-2026-06-27.md`
     - `research/amn2/phase-9-hardenings-docs-package-2026-06-27.md`
+    - `research/amn2/phase-9-public-launch-entry-review-2026-06-27.md`
     - `research/amn2/phase-9-helper-ssh-transport-hardening-2026-06-27.md`
     - `research/amn2/phase-9-ios-acceptance-decision-review-2026-06-27.md`
     - `research/amn2/phase-9-ssh-auth-noise-mitigation-review-2026-06-27.md`
