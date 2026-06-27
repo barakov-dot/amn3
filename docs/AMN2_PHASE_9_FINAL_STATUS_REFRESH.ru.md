@@ -10,8 +10,8 @@ lane=HARDENING_PRODUCTIZATION
 phase9_mode=docs-only-final-refresh
 branch=codex-spark-phase9-docs-sync
 branch_sync_with_origin=true
-last_commit=e9939ae
-last_commit_scope=Add AMN2 Phase 9 hardening session 4 docs
+last_commit=7e06695
+last_commit_scope=AMN2_PHASE_9_POST_SSH_AUTH_REVIEW_SYNC
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 status_refresh_complete=true
 next_handoff=docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_4.ru.md
@@ -22,6 +22,8 @@ next_step=wait_for_operator_exact_named_gate
 
 - `AMN2_PHASE_9_DOCS_SYNC_SECRET_SCAN_AND_COMMIT_PREP`, `AMN2_PHASE_9_HARDENING_DOCS_PACKAGE` и
   `AMN2_PHASE_9_IMPORTANT_BLOCK_REALIZATION` подтверждены как `completed-docs-only`.
+- `AMN2_PHASE_9_POST_SSH_AUTH_REVIEW_SYNC` добавлен как завершённый step синхронизации после
+  `AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW`.
 - Сессия 4 handoff-доки создана/актуализирована:
   - `docs/AMN2_PHASE_9_HARDENING_SESSION_4_STATUS_REFRESH.ru.md`
   - `docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_4.ru.md`
@@ -44,6 +46,8 @@ next_step=wait_for_operator_exact_named_gate
 - `restore_import_status=not-proven`.
 - `provider_rebuild_status=not-proven`.
 - `ssh_auth_hardening_execution=not-approved` (требует будущий exact gate).
+- `ssh_auth_hardening_gate_review=prepared` (результат: no-go для immediate execution).
+- `ssh_auth_hardening_future_exact_gate_required=true`.
 - `db_aggregate_counts_status=optional-confidence-not-hardening-blocker`.
 - `ios_defaultvpn_status=failed-not-accepted`.
 

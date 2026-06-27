@@ -19,6 +19,9 @@ ios_acceptance_decision_review=passed
 ios_defaultvpn_status=failed-not-accepted
 ios_defaultvpn_config_import_status=failed-no-tested-import-path
 ssh_auth_noise_mitigation_review=passed
+ssh_auth_hardening_gate_review=prepared
+ssh_auth_hardening_gate_review_reviewed_by=GPT-5.5
+ssh_auth_hardening_future_exact_gate_required=true
 ssh_auth_hardening_execution_approved=false
 db_aggregate_counts_review=passed
 db_aggregate_counts_status=optional-confidence-not-hardening-blocker
@@ -53,6 +56,7 @@ default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW_GAP_TASKS_PREP` | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено: закрывает gap-prep и anti-loop rule |
 | Критично | `AMN2_PHASE_9_CONFIG_DELIVERY_ENTRY_REVIEW` (если меняется lane в другой трек) | GPT-5.5 | false | true (`requires_model_switch`) | true (`CONFIG_DELIVERY_GATE_REVIEW` exact) | Подготовить review bundle и запуск exact gate |
 | Критично | `AMN2_PHASE_9_DR_ENTRY_REVIEW` (если меняется lane в другой трек) | GPT-5.5 | false | true (`requires_model_switch`) | true (`RESTORE_IMPORT_DR_GATE_REVIEW` exact) | Подготовить DR-review и exact gate |
+| Критично | `AMN2_PHASE_9_POST_SSH_AUTH_REVIEW_SYNC` | Codex-Spark | true | false | false | Выполнить post-sync синхронизацию статусов после завершения SSH auth hardening review |
 | Очень важно | `AMN2_PHASE_9_ENTRY_BRIEF_REVIEW` | GPT-5.5 | false | true (`requires_model_switch`) | false | Проверить актуальность условий lane и stop-lines |
 | Очень важно | `AMN2_PHASE_9_PUBLIC_GATE_PREP_REFRESH` (`PUBLIC_EXPOSURE_GATE_REVIEW` при выборе lane 1) | GPT-5.5 | false | true (`requires_model_switch`) | true (`PUBLIC_EXPOSURE_GATE` exact) | Подготовить review bundle и запуск exact gate |
 | Очень важно | `AMN2_PHASE_9_CONFIG_DELIVERY_GATE_PREP_REFRESH` (`CONFIG_DELIVERY_GATE_REVIEW` при lane 2) | GPT-5.5 | false | true (`requires_model_switch`) | true (`CONFIG_DELIVERY_GATE` exact) | Подготовить review bundle и запуск exact gate |
@@ -75,6 +79,7 @@ default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 critical_openers=AMN2_PHASE_9_HARDENING_ENTRY_REVIEW, AMN2_PHASE_9_ENTRY_DECISION
 docs_only_openers=AMN2_PHASE_9_HARDENING_DOCS_PACKAGE, AMN2_PHASE_9_TELEGRAM_OPERATION_RUNBOOK_POLISH, AMN2_HELPER_SSH_TRANSPORT_HARDENING, AMN2_HELPER_STYLE_HARDENING, AMN2_PHASE_9_FINAL_STATUS_REFRESH, AMN2_PHASE_9_TASK_MATRIX_REFRESH
 live_openers=requires_operator_approval + exact_named_gate
+post_review_sync_completed=AMN2_PHASE_9_POST_SSH_AUTH_REVIEW_SYNC
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 ```
 

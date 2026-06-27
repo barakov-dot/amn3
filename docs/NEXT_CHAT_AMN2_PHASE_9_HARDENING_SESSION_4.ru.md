@@ -10,12 +10,13 @@
 - `default_hold`: `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА`
 - `status`: `docs-only-ready-for-operator-confirmation`
 - `branch`: `codex-spark-phase9-docs-sync`
-- `remote_sync`: `в sync с origin после push `e09c564`
+- `remote_sync`: `в sync с origin после push `7e06695`
 
 ## Что уже зафиксировано
 
 - Session 3 docs-only handoff/refresh обновлён под факт успешного push в origin.
 - `AMN2_PHASE_9_HARDENING_SESSION_4_STATUS_REFRESH` подготовлен.
+- `AMN2_PHASE_9_POST_SSH_AUTH_REVIEW_SYNC` выполнен: status matrix и final status синхронизированы после `AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW`.
 - Обновлён `docs/PROJECT_STATUS_CURRENT.ru.md` с новым active next-chat (`SESSION_4`).
 - `AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW`, `AMN2_DB_AGGREGATE_COUNTS_REVIEW`,
   `AMN2_IOS_ACCEPTANCE_DECISION_REVIEW` уже закрыты как docs-only-reviews и остаются в статусе
@@ -66,6 +67,7 @@
      - `AMN2_SSH_AUTH_HARDENING_GATE_REVIEW`,
      - или `AMN2_DB_AGGREGATE_COUNTS_OBSERVATION_GATE`,
      - или `AMN2_IOS_ACCEPTANCE_GATE_REVIEW` (если решим закрывать iOS-кейс отдельно).
+   - После нового exact gate выполнить соответствующий `*_POST_*_SYNC` и только потом следующий next-chat.
 
 ## Stop-lines на этом промежутке
 
