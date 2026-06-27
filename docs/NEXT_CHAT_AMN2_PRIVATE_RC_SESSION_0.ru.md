@@ -947,3 +947,35 @@ config_delivery_status=not-approved
 production_rollout_status=not-approved
 recommended_next=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 ```
+
+Final Phase 8 closeout recorded on 2026-06-27:
+
+```text
+phase8_private_operator_rc_final_closeout_status=completed-docs-only-final-closeout
+closeout_doc=docs/AMN2_PHASE_8_PRIVATE_RC_FINAL_CLOSEOUT.ru.md
+closeout_evidence=research/amn2/phase-8-private-rc-final-closeout-2026-06-27.md
+phase8_final_status=launch-ready-with-explicit-limitations
+private_operator_rc_launch_ready=true
+android_private_operator_rc_proof=complete-with-explicit-limitations
+telegram_private_operator_rc_proof=passed-private-operator-no-config-delivery
+db_runtime_path_classification=resolved-for-path-existence
+ssh_key_based_access_status=passed
+public_launch_status=not-approved
+config_delivery_status=not-approved
+peer_creation_status=not-approved
+production_rollout_status=not-approved
+```
+
+Phase 9 entry brief prepared on 2026-06-27:
+
+```text
+phase9_entry_brief_status=prepared-docs-only
+phase9_entry_brief_doc=docs/AMN2_PHASE_9_ENTRY_BRIEF.ru.md
+phase9_entry_brief_evidence=research/amn2/phase-9-entry-brief-2026-06-27.md
+candidate_lane_1=PUBLIC_LAUNCH_READINESS
+candidate_lane_2=CONTROLLED_CONFIG_DELIVERY
+candidate_lane_3=HARDENING_PRODUCTIZATION
+candidate_lane_4=DR_RELIABILITY
+recommended_decision_gate=AMN2_PHASE_9_ENTRY_DECISION
+default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+```

@@ -6,7 +6,8 @@
 
 ```text
 final_package_status=prepared-docs-only
-release_limitations_refresh_status=completed-2026-06-26
+release_limitations_refresh_status=completed-2026-06-27
+phase8_private_operator_rc_final_closeout_status=completed-2026-06-27
 phase8_final_status=launch-ready-with-explicit-limitations
 private_operator_rc_launch_ready=true
 public_launch_status=not-approved
@@ -35,6 +36,7 @@ AMN2 можно запускать в закрытом private/operator RC ре�
 operator web/admin остается приватным, public exposure закрыта,
 основной handoff-артефакт - приватный .conf,
 Android AmneziaWG принят как основной мобильный кандидат,
+private/operator Telegram `/start` operation доказан без config delivery,
 а любые расширения требуют отдельного exact named gate.
 ```
 
@@ -177,6 +179,37 @@ research/amn2/phase-8-private-rc-release-limitations-refresh-2026-06-26.md
 - public exposure stayed closed;
 - no secret-bearing payload was printed.
 
+### Telegram private/operator proof refresh
+
+```text
+research/amn2/phase-8-private-rc-telegram-operation-no-long-ssh-retry-result-2026-06-27.md
+```
+
+Доказательство:
+
+- no-long-SSH Telegram operation retry passed;
+- key-based short SSH precheck/start/final guard passed;
+- manual window прошел без открытой SSH-сессии;
+- operator `/start` flow passed;
+- partner `/start` flow passed;
+- config delivery was not attempted;
+- final no-polling guard passed;
+- public probes stayed closed.
+
+### Final Phase 8 closeout
+
+```text
+research/amn2/phase-8-private-rc-final-closeout-2026-06-27.md
+```
+
+Доказательство:
+
+- Android proof, Telegram proof, DB/runtime path classification and SSH/key
+  access evidence rolled up into final closeout;
+- public launch/config delivery/peer creation/production rollout remain not
+  approved;
+- Phase 9 entry brief prepared as docs-only.
+
 ## 4. Разрешенный RC scope
 
 Разрешено:
@@ -186,6 +219,7 @@ research/amn2/phase-8-private-rc-release-limitations-refresh-2026-06-26.md
 - private operator web/admin access only;
 - `.conf`-first private handoff;
 - Android AmneziaWG как основной мобильный кандидат;
+- private/operator Telegram `/start` flow без config delivery;
 - AMN2 `187949b` как текущая RC runtime/package line;
 - backup create+verify как доказанный backup режим;
 - docs/operator coordination без live gates.
@@ -195,7 +229,7 @@ research/amn2/phase-8-private-rc-release-limitations-refresh-2026-06-26.md
 - public launch;
 - public web/admin/API;
 - live Telegram send;
-- bot polling;
+- bot polling как постоянный режим;
 - Telegram profile/media mutation;
 - production config delivery;
 - restore/import;
@@ -208,7 +242,10 @@ research/amn2/phase-8-private-rc-release-limitations-refresh-2026-06-26.md
 public_launch_status=not-approved
 public_exposure_status=closed-by-default
 telegram_live_send_status=not-performed
-telegram_bot_polling_status=not-performed
+telegram_bot_polling_status=passed-controlled-operation-not-persistent-mode
+telegram_private_operator_rc_proof=passed-private-operator-no-config-delivery
+config_delivery_status=not-approved
+peer_creation_status=not-approved
 fresh_android_phone_acceptance_source=P8-C001
 fresh_zero_android_acceptance_device=P8-C003_android_projector
 third_party_android_phone_proof=passed-manual-and-server-side
@@ -307,6 +344,8 @@ Read first:
 docs/AMN2_PRIVATE_OPERATOR_RC_FINAL_PACKAGE.ru.md
 docs/AMN2_PRIVATE_OPERATOR_RC_HANDOFF.ru.md
 docs/AMN2_PRIVATE_OPERATOR_RC_RUN_CHECKLIST.ru.md
+docs/AMN2_PHASE_8_PRIVATE_RC_FINAL_CLOSEOUT.ru.md
+docs/AMN2_PHASE_9_ENTRY_BRIEF.ru.md
 research/amn2/phase-8-sfinal-launch-readiness-freeze-2026-06-22.md
 
 Default mode:

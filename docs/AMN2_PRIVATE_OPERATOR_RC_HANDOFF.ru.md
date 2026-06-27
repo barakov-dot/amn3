@@ -6,7 +6,8 @@
 
 ```text
 phase8_final_status=launch-ready-with-explicit-limitations
-release_limitations_refresh_status=completed-2026-06-26
+release_limitations_refresh_status=completed-2026-06-27
+phase8_private_operator_rc_final_closeout_status=completed-2026-06-27
 private_operator_rc_launch_ready=true
 public_launch_status=not-approved
 blocked_with_exact_remaining_blockers=false
@@ -28,6 +29,8 @@ AMN2 можно считать готовым к private/operator RC с явны
 - Android AmneziaWG принят как рабочий мобильный кандидат внутри private/
   operator RC: P8-C001 Android phone, P8-C003 Android projector limitation и
   third-party Android phone manual + server-side proof;
+- private/operator Telegram `/start` operation прошел без config delivery и
+  без public exposure через no-long-SSH retry;
 - свежий запуск AMN2 на disposable VPS воспроизведен;
 - backup create+verify доказан;
 - public probes остались закрыты.
@@ -113,6 +116,18 @@ Android phone, P8-C003 Android projector с явным projector limitation и
 third-party Android phone, у которого manual owner report и server-side
 handshake/endpoint/rx-tx observation прошли.
 
+### Telegram proof refresh 2026-06-27
+
+Evidence:
+
+```text
+research/amn2/phase-8-private-rc-telegram-operation-no-long-ssh-retry-result-2026-06-27.md
+```
+
+Ключевой смысл: controlled private/operator Telegram `/start` flow прошел для
+operator и partner внутри approved admin/operator boundary. Config delivery не
+пытались, public exposure не открывалась, polling был остановлен final guard.
+
 ## Разрешенный private/operator RC scope
 
 Разрешено считать готовым:
@@ -121,6 +136,7 @@ handshake/endpoint/rx-tx observation прошли.
 - Telegram-first продуктовый контур как основной пользовательский канал;
 - операторский web/admin только приватно, без публичной экспозиции;
 - `.conf`-first приватная передача конфигураций;
+- private/operator Telegram `/start` flow без config delivery;
 - Android AmneziaWG как основной мобильный кандидат;
 - текущий AMN2 head `187949b` как RC runtime/package line;
 - backup create+verify как доказанный режим сохранения текущего состояния.
@@ -136,8 +152,9 @@ handshake/endpoint/rx-tx observation прошли.
 
 1. Public launch не approved.
 2. Public web/admin/API exposure не approved.
-3. Telegram live send, bot polling, profile/media mutation не выполнялись и не
-   approved.
+3. Telegram private/operator `/start` flow доказан; Telegram live config
+   delivery, persistent polling, broadcast/mass send и profile/media mutation
+   не approved.
 4. P8-C003 Android acceptance был на Android projector. Android phone
    acceptance остается отдельным P8-C001 evidence. Third-party Android phone
    proof дополнительно прошел manual + server-side observation, но не заменяет
@@ -251,6 +268,7 @@ public exposure closed by default, Telegram live send not performed, `.conf`
 is release-primary private handoff, Android phone acceptance is P8-C001,
 fresh-zero rehearsal used Android projector in P8-C003, third-party Android
 phone manual + server-side proof passed, restore/import is not proven.
+Telegram private/operator `/start` flow passed without config delivery.
 ```
 
 ## Следующее рекомендуемое действие

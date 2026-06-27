@@ -1,11 +1,12 @@
 # PRIVATE_RC_RELEASE_LIMITATIONS_REFRESH
 
-Дата: 2026-06-26.
+Дата: 2026-06-27.
 
 Статус: `completed-docs-only`.
 
-Использованы существующие Phase 8 evidence, `PRIVATE_RC_FINAL_ANDROID_SUMMARY`
-и результаты third-party Android handoff/manual/server-side observation.
+Использованы существующие Phase 8 evidence, `PRIVATE_RC_FINAL_ANDROID_SUMMARY`,
+результаты third-party Android handoff/manual/server-side observation и
+`PRIVATE_RC_TELEGRAM_OPERATION_NO_LONG_SSH_RETRY_RESULT`.
 
 Live/VPS/config/Telegram/public gates не открывались.
 
@@ -16,9 +17,12 @@ release_limitations_refresh_status=completed-docs-only
 phase8_final_status=launch-ready-with-explicit-limitations
 private_operator_rc_launch_ready=true
 android_private_operator_rc_proof=complete-with-explicit-limitations
+telegram_private_operator_rc_proof=passed-private-operator-no-config-delivery
 public_launch_status=not-approved
 public_exposure_status=closed-by-default
 telegram_live_config_delivery_status=not-approved
+config_delivery_status=not-approved
+peer_creation_status=not-approved
 production_rollout_status=not-approved
 next_action_requires_exact_named_gate=true
 hold_status=active
@@ -33,11 +37,14 @@ P8-C003 Android projector fresh-zero limitation, и third-party Android phone
 manual + server-side proof.
 Public launch, public exposure, Telegram live config delivery,
 public/self-service config delivery и broader rollout не approved.
+Telegram private/operator `/start` operation доказан отдельно через
+no-long-SSH retry без config delivery и без публичной экспозиции.
 ```
 
 ## Что изменилось относительно RC package от 2026-06-22
 
-Обновлена только формулировка Android confidence и ограничений.
+Обновлена формулировка Android confidence, Telegram private/operator operation
+proof и ограничений.
 
 Было:
 
@@ -53,6 +60,7 @@ fresh_android_phone_acceptance_source=P8-C001
 fresh_zero_android_acceptance_device=P8-C003_android_projector
 third_party_android_phone_proof=passed-manual-and-server-side
 android_private_operator_rc_proof=complete-with-explicit-limitations
+telegram_private_operator_rc_proof=passed-private-operator-no-config-delivery
 ```
 
 `P8-C003` по-прежнему нельзя выдавать за Android phone evidence. Это projector
@@ -74,6 +82,22 @@ third_party_android_transfer_rx_bytes=55600508
 third_party_android_transfer_tx_bytes=132476207
 ```
 
+## Telegram proof после refresh
+
+```text
+telegram_no_long_ssh_retry_status=passed
+telegram_get_me_status=passed
+bot_identity_safe=@NeobyatnayaAMNZ_bot
+bot_polling_started=true
+ssh_session_open_during_manual_window=false
+operator_start_flow_observed=passed
+partner_start_flow_observed=passed
+config_delivery_attempted=false
+remaining_amn2_app_main_polling_process_count=0
+final_no_polling_guard_status=passed
+telegram_real_operation_status=passed-private-operator-no-config-delivery
+```
+
 ## Ограничения, которые НЕ сняты
 
 ```text
@@ -81,7 +105,7 @@ public_launch_status=not-approved
 public_web_admin_api_status=not-approved
 public_exposure_status=closed-by-default
 telegram_live_send_status=not-approved
-telegram_bot_polling_status=not-approved-by-refresh
+telegram_bot_polling_status=not-approved-as-persistent-mode
 telegram_live_config_delivery_status=not-approved
 public_self_service_config_delivery_status=not-approved
 config_generation_without_exact_gate=not-approved
@@ -102,6 +126,7 @@ production_scale_rollout_status=not-approved
 - private/operator web/admin без public exposure;
 - `.conf`-first private handoff внутри явно открытых gates;
 - Android AmneziaWG как основной мобильный кандидат внутри RC;
+- private/operator Telegram `/start` flow без config delivery;
 - AMN2 `187949b` как текущая RC runtime/package line;
 - Telegram `getMe` и controlled private preview evidence как уже доказанные
   ограниченные проверки;
@@ -145,6 +170,9 @@ production_scale_rollout_status=not-approved
 docs/AMN2_PRIVATE_OPERATOR_RC_HANDOFF.ru.md
 docs/AMN2_PRIVATE_OPERATOR_RC_FINAL_PACKAGE.ru.md
 docs/AMN2_PRIVATE_RC_FINAL_ANDROID_SUMMARY.ru.md
+docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_NO_LONG_SSH_RETRY_RESULT.ru.md
+docs/AMN2_PHASE_8_PRIVATE_RC_FINAL_CLOSEOUT.ru.md
+docs/AMN2_PHASE_9_ENTRY_BRIEF.ru.md
 docs/NEXT_CHAT_AMN2_PRIVATE_RC_SESSION_0.ru.md
 docs/PROJECT_STATUS_CURRENT.ru.md
 ```

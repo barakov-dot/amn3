@@ -1,5 +1,24 @@
 # Текущий override 2026-06-09
 
+Phase 8 final private/operator RC closeout completed on 2026-06-27 as
+`completed-docs-only-final-closeout`. Closeout:
+`docs/AMN2_PHASE_8_PRIVATE_RC_FINAL_CLOSEOUT.ru.md`. Evidence:
+`research/amn2/phase-8-private-rc-final-closeout-2026-06-27.md`.
+Final status: `phase8_final_status=launch-ready-with-explicit-limitations`,
+`private_operator_rc_launch_ready=true`,
+`android_private_operator_rc_proof=complete-with-explicit-limitations`,
+`telegram_private_operator_rc_proof=passed-private-operator-no-config-delivery`,
+`db_runtime_path_classification=resolved-for-path-existence`, and
+`ssh_key_based_access_status=passed`. Public launch, public exposure, config
+delivery, peer creation, public self-service config delivery, restore/import,
+provider rebuild and production-scale rollout remain not approved. Phase 9
+entry brief prepared docs-only:
+`docs/AMN2_PHASE_9_ENTRY_BRIEF.ru.md` with candidate lanes
+`PUBLIC_LAUNCH_READINESS`, `CONTROLLED_CONFIG_DELIVERY`,
+`HARDENING_PRODUCTIZATION`, and `DR_RELIABILITY`. Default remains
+`ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА`; any live/config/public/VPS action still requires a
+fresh exact named gate.
+
 Phase 8 `PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW` completed on 2026-06-26 as
 `completed-docs-only`. Review:
 `docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW.ru.md`. Evidence:

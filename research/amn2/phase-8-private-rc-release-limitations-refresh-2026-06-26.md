@@ -1,6 +1,6 @@
 # Phase 8 private RC release limitations refresh
 
-Date: 2026-06-26.
+Date: 2026-06-27.
 
 Status: `completed-docs-only`.
 
@@ -13,9 +13,12 @@ release_limitations_refresh_status=completed-docs-only
 phase8_final_status=launch-ready-with-explicit-limitations
 private_operator_rc_launch_ready=true
 android_private_operator_rc_proof=complete-with-explicit-limitations
+telegram_private_operator_rc_proof=passed-private-operator-no-config-delivery
 public_launch_status=not-approved
 public_exposure_status=closed-by-default
 telegram_live_config_delivery_status=not-approved
+config_delivery_status=not-approved
+peer_creation_status=not-approved
 production_rollout_status=not-approved
 hold_status=active
 next_action_requires_exact_named_gate=true
@@ -36,13 +39,28 @@ third_party_android_transfer_rx_bytes=55600508
 third_party_android_transfer_tx_bytes=132476207
 ```
 
+## Telegram proof refresh
+
+```text
+telegram_no_long_ssh_retry_status=passed
+telegram_get_me_status=passed
+bot_polling_started=true
+ssh_session_open_during_manual_window=false
+operator_start_flow_observed=passed
+partner_start_flow_observed=passed
+config_delivery_attempted=false
+remaining_amn2_app_main_polling_process_count=0
+final_no_polling_guard_status=passed
+telegram_real_operation_status=passed-private-operator-no-config-delivery
+```
+
 ## Still not approved
 
 ```text
 public_launch_status=not-approved
 public_web_admin_api_status=not-approved
 telegram_live_send_status=not-approved
-telegram_bot_polling_status=not-approved-by-refresh
+telegram_bot_polling_status=not-approved-as-persistent-mode
 telegram_live_config_delivery_status=not-approved
 public_self_service_config_delivery_status=not-approved
 new_peer_creation_without_exact_gate=not-approved
