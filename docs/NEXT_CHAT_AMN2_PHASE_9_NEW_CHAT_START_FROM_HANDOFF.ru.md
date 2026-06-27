@@ -231,7 +231,7 @@ recommended_first_decision=post_decision_sync_completed
 recommended_model_for_risk_decision=ChatGPT 5.5
 recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
 next_safe_docs_step=done-by-spark-sync
-android_display_name_gate_decision=passed
+android_display_name_gate_decision=DOCUMENTED_LIMITATION
 android_display_name_gate_pass=Neobyatnaya-AMNZ-N
 android_display_name_gate_documented_limitation=SERVER1_or_Сервер 1_client_display_name_gap_with_manual_rename_fallback
 android_display_name_gate_fail=generic_name_or_filename_or_payload_or_peer_public_action
@@ -241,4 +241,36 @@ android_ios_next=keep_manual_rename_fallback
 execution_go=false_until_operator_exact_gate
 next_execution_candidate_if_operator_requests=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+```
+
+## Коротко для перехода в следующий чат (готовый текст)
+
+**Важно:** решение `ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE` принято как
+`DOCUMENTED_LIMITATION` (не pass), потому что на одном контролируемом Android
+отображение после import = `Сервер 1`.
+
+**Ключевые факты для принятия:**
+- `pass_required=Neobyatnaya-AMNZ-N`
+- `pass_not_reached=true`
+- `classification=localized_SERVER1_client_display_name_compatibility_gap`
+- `android_fallback=manual_rename`
+- `production_naming=Neobyatnaya-AMNZ-N`
+- `execution_go_after_result=false`
+
+**Где можно продолжать реализацию:**
+- Windows: filename/basename `Neobyatnaya-AMNZ-N.conf`
+- Android/iOS: keep manual rename fallback, automatic display-name пока не подтвержден.
+
+**Для вставки в 5.5 (copy/paste):**
+```text
+AMN2_PHASE_9_ANDROID_DISPLAY_NAME_ACCEPTANCE_POST_DECISION_SYNC
+Модель: ChatGPT 5.3-Spark / Codex docs-only.
+decision_status=DOCUMENTED_LIMITATION
+Observed display name=Сервер 1
+pass_not_reached=true
+pass_required=Neobyatnaya-AMNZ-N
+classification=localized_SERVER1_client_display_name_compatibility_gap
+execution_go_after_result=false
+android_fallback=manual_rename
+android_display_name_production_naming=Neobyatnaya-AMNZ-N
 ```
