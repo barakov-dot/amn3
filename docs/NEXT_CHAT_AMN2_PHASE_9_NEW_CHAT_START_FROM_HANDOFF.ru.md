@@ -65,6 +65,8 @@ android_ios_display_name_strategy=manual_rename_fallback_until_supported_or_prov
 ssh_auth_hardening_gate_review=passed-docs-only
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 current_model=ChatGPT 5.3-Spark
+phase9_platform_display_name_implementation_readiness_doc=docs/AMN2_PHASE_9_PLATFORM_DISPLAY_NAME_IMPLEMENTATION_READINESS.ru.md
+phase9_platform_display_name_implementation_next=generator_code_docs_ready
 ```
 
 Phase 8 закрыта для private/operator RC. Android private/operator proof,
@@ -102,6 +104,7 @@ production rollout не разрешены.
   Android/iOS Amnezia app: automatic display-name из `.conf` не доказан,
   оставляем `manual rename` fallback.
   Safe observation: `Observed display name = Сервер 1`.
+  Implementation readiness handoff prepared: `docs/AMN2_PHASE_9_PLATFORM_DISPLAY_NAME_IMPLEMENTATION_READINESS.ru.md`.
 
 ## Обязательная naming-граница для config/self-use
 
