@@ -10,8 +10,8 @@
 phase9_entry_decision=passed
 selected_lane=HARDENING_PRODUCTIZATION
 final_status_refresh=passed
-final_status_commit=259b742
-latest_docs_sync_commit=259b742
+final_status_commit=d70ed23
+latest_docs_sync_commit=d70ed23
 hardening_entry_gap_tasks_prep=passed
 hardening_entry_review=passed
 public_launch_entry_review=completed_no_go_stay_in_hardening

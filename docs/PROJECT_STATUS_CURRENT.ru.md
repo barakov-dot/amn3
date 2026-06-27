@@ -10,7 +10,7 @@ selected_lane=HARDENING_PRODUCTIZATION
 phase9_entry_decision_status=passed
 helper_hardening_status=completed-docs-only
 no_long_ssh_pattern=status=standardized
-phase9_current_sync_commit=259b742
+phase9_current_sync_commit=d70ed23
 ios_defaultvpn_default_status=failed-not-accepted
 ssh_auth_no_hardening_execution=not-approved
 db_aggregate_counts_status=optional-confidence-not-hardening-blocker
