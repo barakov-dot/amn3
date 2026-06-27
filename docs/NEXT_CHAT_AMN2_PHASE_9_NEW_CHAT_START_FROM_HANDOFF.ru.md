@@ -7,9 +7,8 @@
 ```text
 AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF
 
-Модель: ChatGPT 5.5 для первого решения/выбора Phase 9 направления.
-После стартового решения ChatGPT 5.3-Spark можно использовать для docs-only
-sync, status/matrix refresh, handoff и commit/push.
+Модель: ChatGPT 5.3-Spark для текущего docs-only синхрона после решения.
+ChatGPT 5.5 используется только для отдельного exact gate (`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`) по запросу оператора.
 
 Использовать:
 - docs/AMN2_PHASE_8_FINAL_HANDOFF_TO_PHASE_9_NEW_CHAT_SYNC.ru.md
@@ -29,15 +28,19 @@ named gate.
 Цель:
 - принять Phase 8 как закрытую;
 - принять уже подготовленные Phase 9 docs/commits как existing material;
-- выбрать первый конкретный Phase 9 шаг или подтвердить hold;
+- принять решение 5.5 по `ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE` и
+  закрепить его в `status/matrix/next-chat`.
 - оценить близость Phase 9 к закрытому self/operator config release, не к
   public release;
 - добавить обязательную naming-доработку:
-  config/device name follows `Neobyatnaya-AMNZ-N`;
-- отдельно разобрать app display-name issue:
-  imported profile/server currently appears as `SERVER1`, and Phase 9 must
-  determine whether Android AmneziaWG takes display name from filename,
-  device name, profile metadata, or app default;
+  имя config/device должно быть `Neobyatnaya-AMNZ-N`;
+- отдельно разобрать проблему названия профиля в приложении:
+  после import профиль/сервер сейчас отображается как `SERVER1`; надо определить,
+  берёт ли Android AmneziaWG имя из filename, имени device, metadata или
+  из дефолтного поведения app;
+- зафиксировать решение 5.5: pass=`Neobyatnaya-AMNZ-N`, `SERVER1` — это только
+  client display-name compatibility gap с fallback `manual rename`, всё остальное
+  generic/name/fail.
 - не повторять generic refresh без нового статуса;
 - при необходимости отдельно решить судьбу локального draft:
   docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md
@@ -52,8 +55,12 @@ phase9_material_status=prepared-existing-material
 branch=codex-spark-phase9-docs-sync
 latest_known_pre_sync_commit=5bcbbc4
 private_self_config_readiness_with_naming_review=passed
+android_display_name_gate_decision=passed_with_documented_limitation
+android_display_name_gate_execution_go=false
+android_display_name_next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
 ssh_auth_hardening_gate_review=passed-docs-only
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+current_model=ChatGPT 5.3-Spark
 ```
 
 Phase 8 закрыта для private/operator RC. Android private/operator proof,
@@ -71,8 +78,8 @@ production rollout не разрешены.
 - iOS DefaultVPN acceptance как failed-no-tested-import-path, без release claim.
 - Private self-config readiness with naming review:
   `docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW.ru.md`.
-  Первый трек подтвержден как `PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING`,
-  но execution/config generation/import остаются закрыты до exact gate.
+  Первый трек подтвержден как `PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING`.
+  `execution_go=false` до operator-confirmed exact gate.
 - SSH auth hardening review:
   `docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md`. Review passed docs-only;
   execution approved now: false.
@@ -80,7 +87,10 @@ production rollout не разрешены.
   - `docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE_REVIEW.ru.md`
   - `docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RUNBOOK.ru.md`
   - `docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT_TEMPLATE.ru.md`
-  Все три docs-only артефакта подготовлены.
+  Все три docs-only артефакта подготовлены. Решение 5.5:
+  pass=`Neobyatnaya-AMNZ-N`,
+  limitation=`SERVER1` documented с fallback `manual rename`,
+  fail=`generic/production naming или payload/secrets action`.
 
 ## Обязательная naming-граница для config/self-use
 
@@ -96,6 +106,10 @@ app_display_name_issue=SERVER1_observed_after_import
 display_name_acceptance_required=true
 server1_classification=client-display-name-product-compatibility-gap
 android_display_name_future_gate=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
+android_display_name_pass=Neobyatnaya-AMNZ-N
+android_display_name_documented_limitation=SERVER1_as_client_display_name_gap_with_manual_rename_fallback
+android_display_name_fail=generic_name_or_filename|payload_secrets_output|peer_config_public_self_service_action
+android_display_name_execution_go=false
 ```
 
 Важно разделить два слоя:
@@ -103,9 +117,8 @@ android_display_name_future_gate=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
 - имя config/device/file должно формироваться как `Neobyatnaya-AMNZ-N`;
 - имя, которое видит пользователь в Android AmneziaWG после import, должно быть
   проверено отдельно. Если клиент игнорирует filename и показывает `SERVER1`,
-  Phase 9 должна зафиксировать это как client display-name gap и выбрать
-  следующий вариант: filename/import-path fix, metadata-compatible fix или
-  manual rename instruction as fallback.
+  Phase 9 зафиксировала это как client display-name gap и фиксирует fallback
+  `manual rename`.
 
 Первый Phase 9 практический трек должен быть ближе к private self-config
 readiness, а не к public launch:
@@ -166,15 +179,18 @@ execution и не разрешает mutation. Любая реальная SSH h
 - restore/import/reboot/provider action;
 - `.conf`, QR, `vpn://`, private key, PSK, token/password или raw log output.
 
-## Current recommended decision
+## Текущее рекомендованное решение
 
 ```text
-recommended_first_decision=completed-docs-only
+recommended_first_decision=post_decision_sync_completed
 recommended_model_for_risk_decision=ChatGPT 5.5
 recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
 next_safe_docs_step=done-by-spark-sync
-android_display_name_gate_docs_prep=completed
-execution_go=false_until_exact_gate
+android_display_name_gate_decision=passed
+android_display_name_gate_pass=Neobyatnaya-AMNZ-N
+android_display_name_gate_documented_limitation=SERVER1_client_display_name_gap_with_manual_rename_fallback
+android_display_name_gate_fail=generic_name_or_filename_or_payload_or_peer_public_action
+execution_go=false_until_operator_exact_gate
 next_execution_candidate_if_operator_requests=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 ```

@@ -29,6 +29,11 @@ android_display_name_gate_review_doc=docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_AC
 android_display_name_gate_review_runbook=docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RUNBOOK.ru.md
 android_display_name_gate_review_result_template=docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT_TEMPLATE.ru.md
 android_display_name_gate_docs_status=completed-docs-only
+android_display_name_gate_docs_decision_status=decision-approved-by-5_5
+android_display_name_gate_pass=Neobyatnaya-AMNZ-N
+android_display_name_gate_documented_limitation=SERVER1_as_client_display_name_compatibility_gap_with_manual_rename_fallback
+android_display_name_gate_fail=generic_generated_name_or_filename|SERVER1_as_production_naming|payload_secrets_output|peer_config_public_self_service_action
+android_display_name_gate_execution_go=false
 android_display_name_gate_next=awaiting_operator_exact_gate
 server1_display_name_issue=client-display-name-product-compatibility-gap
 ssh_auth_hardening_gate_review=passed-docs-only
@@ -46,7 +51,6 @@ restore_import_status=not-proven
 provider_rebuild_status=not-proven
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
-next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_EXACT_NAMED_GATE
 ```
 
 Ключевые ограничения в этом срезе:
@@ -55,8 +59,14 @@ next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_EXACT_NAMED_GATE
 - Не обещать iOS support (DefaultVPN не прошел import path).
 - Не запускать любые новые `peer creation`, `config delivery`, `production rollout`.
 - Перед каждым commit/push выполнить SECRET_POLLUTION_SCAN и local markdown/diff clean checks.
-- Real Android AmneziaWG display-name validation только через future exact gate
-  `ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`.
+- Real Android AmneziaWG display-name validation подтвержден как:
+  - pass: `Observed display name = Neobyatnaya-AMNZ-N`;
+  - documented limitation: `SERVER1` допустим только как client display-name gap с
+    `manual rename` fallback;
+  - fail: generic generated name/filename, принятие `SERVER1` как production
+    naming, payload/secrets output, peer/config/public/self-service action.
+  Выполнение — только через future exact gate
+  `ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE` при запросе оператора.
 
 Phase 9 `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW`
 completed on 2026-06-27 as `completed-docs-only-review`. Document:
