@@ -10,6 +10,12 @@ AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF
 Модель: ChatGPT 5.3-Spark для текущего docs-only синхрона после решения.
 ChatGPT 5.5 используется только для отдельного exact gate (`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`) по запросу оператора.
 
+Порядок выполнения для docs-only Spark-потока (по состоянию на этот handoff):
+`NEXT_CHAT` -> `safe-scan` -> `git diff --check` -> `commit/push`,
+только если в процессе синка появился новый артефакт для синхронизации в
+`PROJECT_STATUS_CURRENT` / `AMN2_PHASE_9_TASK_MATRIX_REFRESH` /
+`NEXT_CHAT_AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF`.
+
 Использовать:
 - docs/AMN2_PHASE_8_FINAL_HANDOFF_TO_PHASE_9_NEW_CHAT_SYNC.ru.md
 - docs/AMN2_PHASE_8_PRIVATE_RC_FINAL_CLOSEOUT.ru.md
@@ -65,6 +71,8 @@ android_ios_display_name_strategy=manual_rename_fallback_until_supported_or_prov
 ssh_auth_hardening_gate_review=passed-docs-only
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 current_model=ChatGPT 5.3-Spark
+spark_docs_only_sync_mode=NEXT_CHAT_safe_scan_diffcheck_commit_push
+spark_docs_only_sync_scope=PROJECT_STATUS_CURRENT_and_TASK_MATRIX_REFRESH_and_NEXT_CHAT
 phase9_platform_display_name_implementation_readiness_doc=docs/AMN2_PHASE_9_PLATFORM_DISPLAY_NAME_IMPLEMENTATION_READINESS.ru.md
 phase9_platform_display_name_implementation_next=generator_code_docs_ready
 android_display_name_gate_result=DOCUMENTED_LIMITATION
