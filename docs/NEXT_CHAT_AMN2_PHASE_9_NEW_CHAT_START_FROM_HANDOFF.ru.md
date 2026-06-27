@@ -18,6 +18,7 @@ ChatGPT 5.5 используется только для отдельного ex
 - docs/AMN2_PHASE_9_TASK_MATRIX_REFRESH.ru.md
 - docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW.ru.md
 - docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md
+- docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT.ru.md
 - docs/NEXT_CHAT_AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF.ru.md
 
 Не открывать live/VPS/SSH/config/Telegram/public gates без отдельного exact
@@ -58,6 +59,9 @@ private_self_config_readiness_with_naming_review=passed
 android_display_name_gate_decision=passed_with_documented_limitation
 android_display_name_gate_execution_go=false
 android_display_name_next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
+android_observed_display_name=Сервер_1
+windows_amneziawg_display_name_strategy=filename_basename
+android_ios_display_name_strategy=manual_rename_fallback_until_supported_or_proven
 ssh_auth_hardening_gate_review=passed-docs-only
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 current_model=ChatGPT 5.3-Spark
@@ -87,10 +91,17 @@ production rollout не разрешены.
   - `docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE_REVIEW.ru.md`
   - `docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RUNBOOK.ru.md`
   - `docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT_TEMPLATE.ru.md`
-  Все три docs-only артефакта подготовлены. Решение 5.5:
+  - `docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT.ru.md`
+  Docs-only артефакты и safe result подготовлены. Решение 5.5:
   pass=`Neobyatnaya-AMNZ-N`,
-  limitation=`SERVER1` documented с fallback `manual rename`,
+  limitation=`SERVER1`/`Сервер 1` documented с fallback `manual rename`,
   fail=`generic/production naming или payload/secrets action`.
+- Platform display-name policy:
+  Windows AmneziaWG standalone: реализуем через filename/basename
+  `Neobyatnaya-AMNZ-N.conf`.
+  Android/iOS Amnezia app: automatic display-name из `.conf` не доказан,
+  оставляем `manual rename` fallback.
+  Safe observation: `Observed display name = Сервер 1`.
 
 ## Обязательная naming-граница для config/self-use
 
@@ -107,18 +118,27 @@ display_name_acceptance_required=true
 server1_classification=client-display-name-product-compatibility-gap
 android_display_name_future_gate=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
 android_display_name_pass=Neobyatnaya-AMNZ-N
-android_display_name_documented_limitation=SERVER1_as_client_display_name_gap_with_manual_rename_fallback
+android_display_name_documented_limitation=SERVER1_or_Сервер_1_as_client_display_name_gap_with_manual_rename_fallback
 android_display_name_fail=generic_name_or_filename|payload_secrets_output|peer_config_public_self_service_action
 android_display_name_execution_go=false
+windows_amneziawg_display_name_strategy=filename_basename
+windows_amneziawg_required_filename=Neobyatnaya-AMNZ-N.conf
+android_display_name_strategy=manual_rename_fallback
+ios_display_name_strategy=not_proven_manual_rename_fallback
 ```
 
 Важно разделить два слоя:
 
 - имя config/device/file должно формироваться как `Neobyatnaya-AMNZ-N`;
 - имя, которое видит пользователь в Android AmneziaWG после import, должно быть
-  проверено отдельно. Если клиент игнорирует filename и показывает `SERVER1`,
+  проверено отдельно. Если клиент игнорирует filename и показывает `SERVER1` или
+  `Сервер 1`,
   Phase 9 зафиксировала это как client display-name gap и фиксирует fallback
   `manual rename`.
+- где можно задать имя без изменения payload, закладываем реализацию: для
+  Windows AmneziaWG standalone это filename/basename `Neobyatnaya-AMNZ-N.conf`.
+- для Android/iOS Amnezia app автоматическое display-name из `.conf` не
+  подтверждено; оставляем documented limitation.
 
 Первый Phase 9 практический трек должен быть ближе к private self-config
 readiness, а не к public launch:
@@ -188,8 +208,11 @@ recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
 next_safe_docs_step=done-by-spark-sync
 android_display_name_gate_decision=passed
 android_display_name_gate_pass=Neobyatnaya-AMNZ-N
-android_display_name_gate_documented_limitation=SERVER1_client_display_name_gap_with_manual_rename_fallback
+android_display_name_gate_documented_limitation=SERVER1_or_Сервер_1_client_display_name_gap_with_manual_rename_fallback
 android_display_name_gate_fail=generic_name_or_filename_or_payload_or_peer_public_action
+android_display_name_gate_result=Сервер_1_documented_limitation
+windows_amneziawg_next=implement_filename_basename_policy
+android_ios_next=keep_manual_rename_fallback
 execution_go=false_until_operator_exact_gate
 next_execution_candidate_if_operator_requests=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА

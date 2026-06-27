@@ -14,10 +14,12 @@ execution_model=operator-controlled-device
 input_artifact_source=canonical_generated_name
 expected_name=Neobyatnaya-AMNZ-N
 expected_filename=Neobyatnaya-AMNZ-N.conf
-observed_display_name=SERVER1|Neobyatnaya-AMNZ-N|other
+observed_display_name=Сервер 1|SERVER1|Neobyatnaya-AMNZ-N|other
 observed_display_name_matches_expected=true|false
 manual_rename_performed=true|false
 manual_rename_required=true|false
+classification=pass|documented_limitation|fail|deferred
+platform_rule=windows_filename_based|android_manual_rename|ios_not_proven|none
 import_attempt_count=1
 import_result=passed|failed|deferred
 
@@ -36,8 +38,8 @@ raw_logs_printed=false
 ```
 
 ```text
-decision=pass|fail|defer
-next_action=accept_to_naming_contract|open_compatibility_gap_ticket|defer_to_next_model
+decision=pass|documented_limitation|fail|defer
+next_action=accept_to_naming_contract|manual_rename_fallback|windows_filename_implementation|open_compatibility_gap_ticket|defer_to_next_model
 ```
 
 ```text

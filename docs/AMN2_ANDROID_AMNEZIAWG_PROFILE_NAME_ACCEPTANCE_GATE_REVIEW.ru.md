@@ -28,6 +28,12 @@ canonical_name_policy=Neobyatnaya-AMNZ-N
 filename_policy=Neobyatnaya-AMNZ-N.conf
 server1_is_not_accepted_as_final_name=true
 server1_classification=app_display_name_product_compatibility_gap
+observed_android_display_name=Сервер 1
+observed_android_display_name_classification=localized_SERVER1_documented_limitation
+windows_amneziawg_display_name_strategy=filename_basename
+windows_required_filename=Neobyatnaya-AMNZ-N.conf
+android_display_name_strategy=manual_rename_fallback
+ios_display_name_strategy=not_proven_manual_rename_fallback
 ```
 
 Решение этого review-only шага:
@@ -39,6 +45,33 @@ server1_classification=app_display_name_product_compatibility_gap
 - не расширять public/public self-service routes до подтверждения этого gate;
 - передать 5.5-ready product-compatibility decision в future execution scope без
   изменения naming contract.
+
+## Platform naming implementation decision
+
+Решение после ручного Android observation:
+
+```text
+android_observed_display_name=Сервер 1
+android_result=documented_limitation
+android_config_embedded_display_name_supported=false_or_not_proven
+windows_amneziawg_filename_based_display_name_supported=true
+ios_config_embedded_display_name_supported=not_proven
+```
+
+Практическое правило Phase 9:
+
+- где клиент позволяет задать имя безопасно, закрепляем реализацию через
+  canonical filename / basename `Neobyatnaya-AMNZ-N`;
+- для Windows AmneziaWG standalone expected behavior: файл должен называться
+  `Neobyatnaya-AMNZ-N.conf`, а tunnel name ожидается из basename файла;
+- для Android Amnezia app результат `Сервер 1` считаем localized `SERVER1` и
+  оставляем documented limitation + fallback `manual rename`;
+- для iOS Amnezia app автоматическое имя из `.conf` не доказано; до отдельного
+  iOS exact gate оставляем documented limitation + fallback `manual rename`.
+
+Это не открывает config generation/delivery и не меняет payload shape. Если в
+будущем появится локальная implementation-задача для генератора, обязательное
+правило для filename layer: `Neobyatnaya-AMNZ-N.conf`.
 
 ## Что считаем проходом
 
@@ -67,3 +100,6 @@ secret_value_printed=false
   `ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE` в отдельном exact gate.
 - После exact gate результаты записывать в
   `AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT_TEMPLATE.ru.md`.
+- Для Windows AmneziaWG планировать filename-based naming implementation.
+- Для Android/iOS не обещать automatic display-name from config; использовать
+  documented limitation/manual rename fallback.

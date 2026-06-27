@@ -61,6 +61,9 @@ canonical_config_device_name=Neobyatnaya-AMNZ-N
 config_filename_policy=Neobyatnaya-AMNZ-N.conf
 forbidden_generic_names=SERVER1,server1,third-party-android-device-N,android-device-N
 generic_name_as_normal_result_allowed=false
+windows_amneziawg_filename_based_display_name=true
+android_display_name_manual_rename_fallback=true
+ios_display_name_manual_rename_fallback_until_proven=true
 ```
 
 Будущий private/self flow должен проверять три разных слоя:
@@ -82,17 +85,19 @@ issue_class=client-display-name-product-compatibility-gap
 not_yet_classified_as_generation_bug=true
 ```
 
-`SERVER1` нельзя считать приемлемым финальным UX по умолчанию, но текущие docs
-не доказывают, что причина находится именно в AMN2 generator. Возможные
-гипотезы остаются открытыми до exact acceptance gate:
+`SERVER1` / `Сервер 1` нельзя считать приемлемым финальным UX по умолчанию.
+Ручное Android observation показало `Сервер 1`, то есть localized generic
+client display-name. Это не доказывает ошибку AMN2 generator и не отменяет
+canonical filename policy.
 
-- Android AmneziaWG игнорирует filename при import;
-- Android AmneziaWG берет display name из profile metadata, которого нет или
-  который не совместим с текущим artifact shape;
-- Android AmneziaWG использует app default для импортированного raw profile;
-- import path или file picker передает filename не так, как ожидается;
-- generated artifact name корректен, но client-side display требует manual
-  rename fallback.
+Текущая platform decision:
+
+- Windows AmneziaWG standalone: где возможно, закладываем реализацию через
+  filename/basename. Required artifact filename: `Neobyatnaya-AMNZ-N.conf`.
+- Android Amnezia app: automatic display-name из `.conf` не подтвержден; оставляем
+  documented limitation + fallback `manual rename`.
+- iOS Amnezia app: automatic display-name из `.conf` не доказан; до отдельного
+  iOS exact gate оставляем documented limitation + fallback `manual rename`.
 
 Решение сейчас: не подменять проблему публичной выдачей или новым delivery
 flow. Сначала нужен controlled Android AmneziaWG profile-name acceptance gate.
@@ -181,7 +186,8 @@ Future execution/import gate can pass only if it records safe evidence that:
 
 - generated name is `Neobyatnaya-AMNZ-N`;
 - filename is `Neobyatnaya-AMNZ-N.conf`;
-- imported Android AmneziaWG display name is either `Neobyatnaya-AMNZ-N` or a
+- Windows AmneziaWG receives filename-based naming where applicable;
+- imported Android/iOS Amnezia display name is either `Neobyatnaya-AMNZ-N` or a
   documented limitation with explicit manual rename fallback;
 - connectivity/import acceptance, if tested, does not require publishing
   secret-bearing artifacts;

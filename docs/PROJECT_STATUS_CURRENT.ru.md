@@ -28,13 +28,20 @@ android_display_name_future_gate=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
 android_display_name_gate_review_doc=docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE_REVIEW.ru.md
 android_display_name_gate_review_runbook=docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RUNBOOK.ru.md
 android_display_name_gate_review_result_template=docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT_TEMPLATE.ru.md
+android_display_name_gate_result_doc=docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT.ru.md
 android_display_name_gate_docs_status=completed-docs-only
 android_display_name_gate_docs_decision_status=decision-approved-by-5_5
 android_display_name_gate_pass=Neobyatnaya-AMNZ-N
 android_display_name_gate_documented_limitation=SERVER1_as_client_display_name_compatibility_gap_with_manual_rename_fallback
 android_display_name_gate_fail=generic_generated_name_or_filename|SERVER1_as_production_naming|payload_secrets_output|peer_config_public_self_service_action
 android_display_name_gate_execution_go=false
-android_display_name_gate_next=awaiting_operator_exact_gate
+android_display_name_gate_next=platform_policy_docs_sync
+android_display_name_observed=Сервер_1
+android_display_name_observed_classification=localized_SERVER1_documented_limitation
+windows_amneziawg_display_name_strategy=filename_basename
+windows_amneziawg_required_filename=Neobyatnaya-AMNZ-N.conf
+android_display_name_strategy=manual_rename_fallback
+ios_display_name_strategy=not_proven_manual_rename_fallback
 server1_display_name_issue=client-display-name-product-compatibility-gap
 ssh_auth_hardening_gate_review=passed-docs-only
 ssh_auth_hardening_gate_review_doc=docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md
@@ -61,12 +68,16 @@ next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_ANDROID_AMNEZIAWG_PROF
 - Перед каждым commit/push выполнить SECRET_POLLUTION_SCAN и local markdown/diff clean checks.
 - Real Android AmneziaWG display-name validation подтвержден как:
   - pass: `Observed display name = Neobyatnaya-AMNZ-N`;
-  - documented limitation: `SERVER1` допустим только как client display-name gap с
-    `manual rename` fallback;
+  - documented limitation: `SERVER1` / `Сервер 1` допустим только как client
+    display-name gap с `manual rename` fallback;
   - fail: generic generated name/filename, принятие `SERVER1` как production
     naming, payload/secrets output, peer/config/public/self-service action.
   Выполнение — только через future exact gate
   `ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE` при запросе оператора.
+- Platform naming implementation: Windows AmneziaWG standalone использует
+  filename/basename strategy, поэтому future artifact filename должен быть
+  `Neobyatnaya-AMNZ-N.conf`; Android/iOS Amnezia app остаются documented
+  limitation/manual rename fallback до отдельного доказанного механизма.
 
 Phase 9 `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW`
 completed on 2026-06-27 as `completed-docs-only-review`. Document:
@@ -79,6 +90,19 @@ config generation/import behind future exact gate
 `ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`. No live/VPS/SSH/config/
 Telegram/public execution, peer/config creation, public/self-service delivery,
 VPS/auth/firewall/users/keys/ports mutation or secret-bearing output was
+performed.
+
+Phase 9 Android display-name safe observation recorded on 2026-06-27 as
+`completed-safe-result`. Result:
+`docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT.ru.md`.
+Observed display name: `Сервер 1`. Classification:
+`documented_limitation`, localized `SERVER1` / client display-name compatibility
+gap. Canonical naming remains `Neobyatnaya-AMNZ-N`. Windows AmneziaWG standalone
+should use filename/basename strategy with required filename
+`Neobyatnaya-AMNZ-N.conf`; Android/iOS Amnezia app keep manual rename fallback
+unless a future exact gate proves automatic display-name support. No config
+payload, QR, import URI, keys, PSK, token/password, raw logs, peer/config
+creation, public/self-service action or VPS/SSH/Telegram/public execution was
 performed.
 
 Phase 9 `AMN2_SSH_AUTH_HARDENING_GATE_REVIEW` accepted on 2026-06-27 as

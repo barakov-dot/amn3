@@ -7,7 +7,7 @@
 
 Подготовить безопасный future exact gate для подтверждения имени профиля после import
 в Android AmneziaWG и отличить `Neobyatnaya-AMNZ-N` (ожидаемый canonical name)
-от `SERVER1`/generic fallback.
+от `SERVER1`/`Сервер 1`/generic fallback.
 
 ## Exact gate for execution
 
@@ -16,6 +16,21 @@ ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
 ```
 
 Этот runbook не выполняется до подтверждения gate.
+
+## Platform implementation rule
+
+```text
+windows_amneziawg_display_name_strategy=filename_basename
+windows_required_filename=Neobyatnaya-AMNZ-N.conf
+android_display_name_strategy=manual_rename_fallback
+ios_display_name_strategy=not_proven_manual_rename_fallback
+```
+
+Где можно задать имя без изменения secret payload, закладываем реализацию через
+filename/basename. Для Windows AmneziaWG standalone это означает обязательный
+artifact filename `Neobyatnaya-AMNZ-N.conf`. Для Android/iOS Amnezia app
+automatic display-name из `.conf` не подтверждён; там остаётся documented
+limitation и ручное переименование профиля в `Neobyatnaya-AMNZ-N`.
 
 ## Разрешено для runbook-подготовки (current chat)
 
@@ -57,11 +72,12 @@ gate_opened=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
 android_device=operator-controlled
 source_name=Neobyatnaya-AMNZ-N
 source_filename=Neobyatnaya-AMNZ-N.conf
-observed_display_name=SERVER1|Neobyatnaya-AMNZ-N|other
+observed_display_name=Сервер 1|SERVER1|Neobyatnaya-AMNZ-N|other
 observed_match_expected=true|false|not-tested
 manual_rename_used=true|false
 manual_rename_required_for_ok=false|true
 final_gate_status=passed|failed|deferred
+platform_followup=windows_filename_based|android_manual_rename|ios_not_proven|none
 peer_creation_performed=false
 config_delivery_performed=false
 secret_values_printed=false

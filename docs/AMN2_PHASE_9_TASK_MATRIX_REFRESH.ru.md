@@ -13,6 +13,7 @@ final_status_refresh=passed
 final_status_commit=d70ed23
 latest_known_docs_sync_commit=5bcbbc4
 phase9_android_display_name_decision_commit=691790a
+phase9_platform_display_name_policy=windows_filename_based_android_ios_manual_rename_fallback
 hardening_entry_gap_tasks_prep=passed
 hardening_entry_review=passed
 public_launch_entry_review=completed_no_go_stay_in_hardening
@@ -72,8 +73,15 @@ android_display_name_gate_decision_status=passed_with_documented_limitation
 android_display_name_gate_execution_go=false
 android_display_name_gate_runbook=docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RUNBOOK.ru.md
 android_display_name_gate_result_template=docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT_TEMPLATE.ru.md
+android_display_name_gate_result=docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT.ru.md
 android_display_name_gate_docs_status=completed-docs-only
 android_display_name_future_exact_gate_required=true
+android_observed_display_name=Сервер_1
+android_observed_display_name_classification=localized_SERVER1_documented_limitation
+windows_amneziawg_display_name_strategy=filename_basename
+windows_amneziawg_required_filename=Neobyatnaya-AMNZ-N.conf
+android_display_name_strategy=manual_rename_fallback
+ios_display_name_strategy=not_proven_manual_rename_fallback
 ```
 
 Задача делится на два слоя:
@@ -88,9 +96,18 @@ android_display_name_future_exact_gate_required=true
 
 ```text
 android_display_name_pass=Neobyatnaya-AMNZ-N
-android_display_name_documented_limitation=SERVER1 как compatibility issue + manual rename fallback only
+android_display_name_documented_limitation=SERVER1/Сервер 1 как compatibility issue + manual rename fallback only
 android_display_name_fail=generic_generated_name_or_filename_or_payload_secrets_output_or_peer_config_public_self_service_action
 android_display_name_gate_next=awaiting_operator_exact_gate
+```
+
+Implementation policy:
+
+```text
+where_possible_implement_display_name=true
+windows_amneziawg_implementation=filename_basename_Neobyatnaya-AMNZ-N
+android_amnezia_implementation=not_supported_or_not_proven_keep_manual_rename
+ios_amnezia_implementation=not_proven_keep_manual_rename
 ```
 
 ## Матрица задач
@@ -103,6 +120,8 @@ android_display_name_gate_next=awaiting_operator_exact_gate
 | Критично | `AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE_REVIEW` | ChatGPT 5.5 (decision only) | false | true (`requires_model_switch`) | true (`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`) | Схема pass/fail и limitation/fallback зафиксирована |
 | Критично | `AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RUNBOOK` | ChatGPT 5.3-Spark | true | false | true (`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`) | Подготовлен runbook проверки display-name после import |
 | Критично | `AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT_TEMPLATE` | ChatGPT 5.3-Spark | true | false | true (`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`) | Подготовлен шаблон безопасной фиксации результата exact gate |
+| Критично | `AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT` | ChatGPT 5.3-Spark | true | false | false | Safe result recorded: `Сервер 1` -> documented limitation/manual rename |
+| Критично | `AMN2_PHASE_9_PLATFORM_DISPLAY_NAME_IMPLEMENTATION_POLICY` | ChatGPT 5.3-Spark | true | false | false | Где возможно: Windows filename-based naming; где нельзя/не доказано: Android/iOS manual rename fallback |
 | Критично | `AMN2_PHASE_9_NAMING_DOCS_SYNC` | ChatGPT 5.3-Spark | true | false | false | Выполнено docs-only после 5.5 review; перед commit/push нужен safe scan |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` (закрыт) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено |
