@@ -76,6 +76,11 @@ production rollout не разрешены.
 - SSH auth hardening review:
   `docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md`. Review passed docs-only;
   execution approved now: false.
+- Android display-name gate package docs:
+  - `docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE_REVIEW.ru.md`
+  - `docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RUNBOOK.ru.md`
+  - `docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT_TEMPLATE.ru.md`
+  Все три docs-only артефакта подготовлены.
 
 ## Обязательная naming-граница для config/self-use
 
@@ -168,6 +173,7 @@ recommended_first_decision=completed-docs-only
 recommended_model_for_risk_decision=ChatGPT 5.5
 recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
 next_safe_docs_step=done-by-spark-sync
+android_display_name_gate_docs_prep=completed
 execution_go=false_until_exact_gate
 next_execution_candidate_if_operator_requests=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА

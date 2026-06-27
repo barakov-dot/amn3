@@ -8,7 +8,7 @@ Phase 9 docs/commits остаются existing material, первый Phase 9 т
 live/config/public execution.
 
 ```text
-current_chat_state=Phase 9 new-chat docs-only naming sync
+current_chat_state=Phase 9 docs-only Android display-name gate prep
 phase8_final_status=launch-ready-with-explicit-limitations
 phase9_material_status=prepared-existing-material
 phase9_continuation_chat_required=false_current_chat_started
@@ -25,6 +25,11 @@ private_self_config_readiness_with_naming_doc=docs/AMN2_PHASE_9_PRIVATE_SELF_CON
 recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
 private_self_config_execution_go=false
 android_display_name_future_gate=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
+android_display_name_gate_review_doc=docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE_REVIEW.ru.md
+android_display_name_gate_review_runbook=docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RUNBOOK.ru.md
+android_display_name_gate_review_result_template=docs/AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT_TEMPLATE.ru.md
+android_display_name_gate_docs_status=completed-docs-only
+android_display_name_gate_next=awaiting_operator_exact_gate
 server1_display_name_issue=client-display-name-product-compatibility-gap
 ssh_auth_hardening_gate_review=passed-docs-only
 ssh_auth_hardening_gate_review_doc=docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md
@@ -40,6 +45,7 @@ telegram_profile_media_mutation_status=not-approved
 restore_import_status=not-proven
 provider_rebuild_status=not-proven
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
 next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_EXACT_NAMED_GATE
 ```
 
