@@ -864,3 +864,39 @@ Current recommendation after short-window review:
 recommended_next_gate=PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE
 telegram_operation_retry_go=conditional-with-exact-short-window-gate
 ```
+
+Short-window retry execution recorded on 2026-06-27:
+
+```text
+short_window_retry_status=blocked-by-ssh-transport-before-remote-execution
+short_window_retry_result_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_RESULT.ru.md
+short_window_retry_result_evidence=research/amn2/phase-8-private-rc-telegram-operation-short-window-retry-result-2026-06-27.md
+run_id=20260627T045613Z
+manual_window_seconds=120
+key_path_preflight_status=passed
+public_closed_probes_before_status=passed
+ssh_short_window_retry_remote_exit_code=255
+remote_boundary_marker_observed=false
+telegram_getme_in_this_gate=not_reached
+bot_polling_started=false
+manual_telegram_window_started=false
+public_closed_probes_after_status=passed
+telegram_application_failure=false
+```
+
+No-long-SSH helper hardening recorded on 2026-06-27:
+
+```text
+helper_no_long_ssh_hardening_status=completed-docs-only
+hardening_doc=docs/AMN2_HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_HARDENING.ru.md
+hardening_evidence=research/amn2/phase-8-helper-telegram-operation-no-long-ssh-hardening-2026-06-27.md
+recommended_next_review=HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_IMPLEMENTATION_REVIEW
+```
+
+Current recommendation after failed short-window execution:
+
+```text
+recommended_next=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+optional_next_review=HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_IMPLEMENTATION_REVIEW
+telegram_operation_retry_go=false_until_no_long_ssh_implementation_review
+```

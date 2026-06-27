@@ -15,6 +15,8 @@
 - `PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_REVIEW`.
 - `PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_RESULT`.
 - `PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW`.
+- `PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_RESULT`.
+- `HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_HARDENING`.
 
 Этот refresh сам live/VPS/SSH/config/Telegram/public gates не открывал.
 
@@ -31,8 +33,10 @@ telegram_no_polling_status=restored-and-proven
 telegram_real_operation_status=not-passed-deferred-or-retry-needs-new-design
 telegram_cleanup_guard_required=false
 telegram_short_window_retry_review_status=completed-docs-only
-telegram_operation_retry_go=conditional-with-exact-short-window-gate
-recommended_next_gate=PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE
+telegram_short_window_retry_status=blocked-by-ssh-transport-before-remote-execution
+telegram_operation_retry_go=false_until_no_long_ssh_implementation_review
+recommended_next=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+optional_next_review=HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_IMPLEMENTATION_REVIEW
 public_launch_status=not-approved
 public_exposure_status=closed-by-default
 config_delivery_status=not-approved
@@ -64,7 +68,11 @@ final_no_polling_guard_status=passed
 telegram_short_window_retry_review_status=completed-docs-only
 short_window_manual_seconds_default=120
 short_window_manual_seconds_max=180
+short_window_retry_remote_exit_code=255
+short_window_remote_boundary_marker_observed=false
+short_window_bot_polling_started=false
 repeat_old_1800_second_helper=false
+helper_telegram_operation_no_long_ssh_hardening_status=completed-docs-only
 secret_values_printed=false
 ```
 
@@ -74,7 +82,7 @@ secret_values_printed=false
 telegram_operation_passed=false
 normal_stop_final_guard_inside_retry=not_observed_due_ssh_close
 manual_operator_summary=not_recorded
-short_window_retry_execution=not_performed
+short_window_retry_execution=blocked-before-remote-execution
 public_launch_status=not-approved
 config_delivery_status=not-approved
 production_rollout_status=not-approved
@@ -95,28 +103,33 @@ Short-window retry review завершен docs-only. Он разрешает т
 отдельный exact gate с коротким manual window `120-180` секунд; старую
 30-минутную схему повторять нельзя.
 
+Short-window retry execution then failed before the first remote marker with
+SSH exit `255`. This did not start polling according to available evidence.
+Do not repeat the same helper blindly. Next retry work should move to no-long
+SSH helper design, or hold.
+
 ## Next exact gates
 
 Одиночный:
 
 ```text
-PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE
+ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 ```
 
 Парный:
 
 ```text
-PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW
+HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_IMPLEMENTATION_REVIEW
 +
-PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE
+PRIVATE_RC_FINAL_STATUS_REFRESH
 ```
 
 Тройной:
 
 ```text
-PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW
+HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_IMPLEMENTATION_REVIEW
 +
-PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE
+PRIVATE_RC_TELEGRAM_OPERATION_NO_LONG_SSH_RETRY_GATE
 +
 PRIVATE_RC_FINAL_STATUS_REFRESH
 ```
@@ -125,7 +138,7 @@ PRIVATE_RC_FINAL_STATUS_REFRESH
 
 Без нового exact gate нельзя:
 
-- повторять Telegram operation retry без exact `PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_GATE`;
+- повторять тот же short-window Telegram operation helper без no-long-SSH implementation review;
 - использовать manual window дольше 180 секунд;
 - считать Telegram operation passed;
 - выполнять config generation/delivery;
@@ -149,5 +162,7 @@ telegram_key_path_retry_result=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_
 telegram_key_path_cleanup_guard_review=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_REVIEW.ru.md
 telegram_key_path_cleanup_guard_result=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_RESULT.ru.md
 telegram_short_window_retry_review=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_REVIEW.ru.md
+telegram_short_window_retry_result=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_SHORT_WINDOW_RETRY_RESULT.ru.md
+helper_telegram_no_long_ssh_hardening=docs/AMN2_HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_HARDENING.ru.md
 cleanup_guard_helper=tmp/private_rc_telegram_operation_key_path_cleanup_guard.ps1
 ```
