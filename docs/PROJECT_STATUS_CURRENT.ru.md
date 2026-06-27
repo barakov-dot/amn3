@@ -1,5 +1,36 @@
 # Текущий override 2026-06-09
 
+## Текущий контрольный срез (актуализировано 2026-06-27)
+
+Phase 9 hardening lane сейчас в состоянии docs-only + подготовка до первого hardening exact gate:
+
+```text
+active_phase=Phase 9 hardening prep
+selected_lane=HARDENING_PRODUCTIZATION
+phase9_entry_decision_status=passed
+helper_hardening_status=completed-docs-only
+no_long_ssh_pattern=status=standardized
+ios_defaultvpn_default_status=failed-not-accepted
+ssh_auth_no_hardening_execution=not-approved
+db_aggregate_counts_status=optional-confidence-not-hardening-blocker
+public_launch_status=not-approved
+config_delivery_status=not-approved
+peer_creation_status=not-approved
+production_rollout_status=not-approved
+telegram_profile_media_mutation_status=not-approved
+restore_import_status=not-proven
+provider_rebuild_status=not-proven
+default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+next_step=prepare exact hardening live gate via operator confirmation
+```
+
+Ключевые ограничения в этом срезе:
+
+- Не открывать live/VPS/SSH/config/Telegram/public action без fresh exact named gate.
+- Не обещать iOS support (DefaultVPN не прошел import path).
+- Не запускать любые новые `peer creation`, `config delivery`, `production rollout`.
+- Перед каждым commit/push выполнить SECRET_POLLUTION_SCAN и local markdown/diff clean checks.
+
 Phase 8 final private/operator RC closeout completed on 2026-06-27 as
 `completed-docs-only-final-closeout`. Closeout:
 `docs/AMN2_PHASE_8_PRIVATE_RC_FINAL_CLOSEOUT.ru.md`. Evidence:
@@ -40,6 +71,7 @@ Critical limitations remain unchanged:
 `public_self_service_config_delivery_status=not-approved`,
 `restore_import_status=not-proven`,
 `provider_rebuild_status=not-proven`.
+Current active next-chat handoff: `docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_1.ru.md`.
 
 Phase 9 `AMN2_IOS_ACCEPTANCE_DECISION_REVIEW` completed on 2026-06-27 as
 `completed-docs-only-review`. Review:

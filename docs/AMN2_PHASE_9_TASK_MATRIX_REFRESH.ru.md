@@ -36,6 +36,20 @@ default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 
 ## Матрица задач
 
+### Обновление после текущего блока (2026-06-27, Spark)
+
+- `AMN2_PHASE_9_HARDENING_DOCS_PACKAGE` и `AMN2_PHASE_9_DOCS_SYNC_SECRET_SCAN_AND_COMMIT_PREP` — `completed-docs-only`, исполнитель `Codex-Spark`, без смены модели.
+- `AMN2_PHASE_9_ENTRY_DECISION` / `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` — зафиксированы как `done`, исполнитель `GPT-5.5`, требуется подтвердить модель для повторного открытия/изменения.
+- Для дальнейших шагов в этой фазе продолжаем в этой сессии правило: по умолчанию выполняются только tasks с `Codex-Spark` + review/status sync (см. блок ниже `requires_model_switch`).
+
+Короткое правило по моделям (после каждого блока):
+
+```text
+Spark-first задачи: docs/research/status обновления, helper-standards, helper hardening packages, обновление task matrix и next-chat.
+GPT-5.5 задачи: новые entry-decisions, смена lane, policy/approach сдвиги, аргументация live gate selection.
+Если в задаче `requires_model_switch=true` — просить подтверждение модели явно.
+```
+
 | Критичность | Задача | Рекомендуемый исполнитель | Codex может делать сам | Что требует согласия/переключения модели | Что требует exact named gate | recommended next step |
 | --- | --- | --- | --- | --- | --- | --- |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | GPT-5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
@@ -57,6 +71,15 @@ default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 | Просто | `AMN2_PHASE_9_TASK_MATRIX_REFRESH` | Codex-Spark | true | false | false | Обновить в случае изменения риска/приоритетов и при следующем чекпоинте |
 | Просто | `PROJECT_STATUS_CURRENT.ru.md refresh` | Codex-Spark | true | false | false | Синхронизировать текущий статус, оставив hold при отсутствии exact gate |
 | Просто | `SECRET_POLLUTION_SCAN` (скан на `.conf`, `token`, `private key`, `PSK`, `qr`, `vpn://`) | Codex-Spark | true | false | false | Выполнить перед каждым commit / push |
+
+### Критичный gate-резюме до next chat
+
+```text
+critical_openers=AMN2_PHASE_9_HARDENING_ENTRY_REVIEW, AMN2_PHASE_9_ENTRY_DECISION
+docs_only_openers=AMN2_PHASE_9_HARDENING_DOCS_PACKAGE, AMN2_PHASE_9_TELEGRAM_OPERATION_RUNBOOK_POLISH, AMN2_HELPER_SSH_TRANSPORT_HARDENING, AMN2_HELPER_STYLE_HARDENING
+live_openers=requires_operator_approval + exact_named_gate
+default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+```
 
 ## Следующий шаг сейчас
 
