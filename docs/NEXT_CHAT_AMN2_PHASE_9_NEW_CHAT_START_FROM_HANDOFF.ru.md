@@ -68,7 +68,7 @@ android_display_name_next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_A
 android_observed_display_name=Сервер 1
 windows_amneziawg_display_name_strategy=filename_basename
 android_ios_display_name_strategy=manual_rename_fallback_until_supported_or_proven
-ssh_auth_hardening_gate_review=passed-docs-only
+ssh_auth_hardening_gate_review=completed-docs-only
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 current_model=ChatGPT 5.3-Spark
 spark_docs_only_sync_mode=NEXT_CHAT_safe_scan_diffcheck_commit_push
@@ -191,7 +191,7 @@ readiness, а не к public launch:
 
 ```text
 recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
-first_track_review_status=passed-docs-only
+first_track_review_status=completed-docs-only
 public_launch_go=false
 public_self_service_go=false
 config_for_everyone_go=false
