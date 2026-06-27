@@ -2,15 +2,25 @@
 
 ## Текущий контрольный срез (актуализировано 2026-06-27)
 
-Phase 9 hardening lane сейчас в состоянии docs-only + подготовка до первого hardening exact gate:
+Текущий чат закрывается как Phase 8 final handoff. Уже подготовленные Phase 9
+docs/commits остаются как existing material, но дальнейшая Phase 9 работа
+переносится в новый чат:
 
 ```text
-active_phase=Phase 9 hardening prep
+current_chat_closure=Phase 8 final closeout/handoff
+phase8_final_status=launch-ready-with-explicit-limitations
+phase9_material_status=prepared-existing-material
+phase9_continuation_chat_required=true
+active_phase=Phase 8 handoff closure
 selected_lane=HARDENING_PRODUCTIZATION
 phase9_entry_decision_status=passed
 helper_hardening_status=completed-docs-only
 no_long_ssh_pattern=status=standardized
-phase9_current_sync_commit=d70ed23
+phase9_current_sync_commit=157685f
+phase8_to_phase9_handoff_doc=docs/AMN2_PHASE_8_FINAL_HANDOFF_TO_PHASE_9_NEW_CHAT_SYNC.ru.md
+next_chat_handoff=docs/NEXT_CHAT_AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF.ru.md
+untracked_phase9_draft=docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md
+untracked_phase9_draft_status=not-committed-prepared-draft
 ios_defaultvpn_default_status=failed-not-accepted
 ssh_auth_no_hardening_execution=not-approved
 db_aggregate_counts_status=optional-confidence-not-hardening-blocker
@@ -23,7 +33,7 @@ telegram_profile_media_mutation_status=not-approved
 restore_import_status=not-proven
 provider_rebuild_status=not-proven
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
-next_step=prepare exact hardening live gate via operator confirmation
+next_step=AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF in new chat
 ```
 
 Ключевые ограничения в этом срезе:
@@ -32,6 +42,8 @@ next_step=prepare exact hardening live gate via operator confirmation
 - Не обещать iOS support (DefaultVPN не прошел import path).
 - Не запускать любые новые `peer creation`, `config delivery`, `production rollout`.
 - Перед каждым commit/push выполнить SECRET_POLLUTION_SCAN и local markdown/diff clean checks.
+- Не развивать Phase 9 дальше в этом чате; продолжение Phase 9 только в новом
+  чате через `AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF`.
 
 Phase 8 final private/operator RC closeout completed on 2026-06-27 as
 `completed-docs-only-final-closeout`. Closeout:
