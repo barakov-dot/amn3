@@ -775,3 +775,47 @@ recommended_next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 ```text
 recommended_practical_next_step=FRESH_ANDROID_PHONE_POST_RC_RECHECK_GATE_REVIEW
 ```
+
+## 10. Telegram key-path retry blocker and cleanup guard
+
+Recorded on 2026-06-27:
+
+```text
+telegram_key_path_retry_review_status=completed-docs-only
+review_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_RETRY_REVIEW.ru.md
+review_evidence=research/amn2/phase-8-private-rc-telegram-operation-key-path-retry-review-2026-06-26.md
+telegram_key_path_retry_result_status=blocked-during-manual-window-after-polling-started-cleanup-required
+result_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_RETRY_RESULT.ru.md
+result_evidence=research/amn2/phase-8-private-rc-telegram-operation-key-path-retry-result-2026-06-27.md
+run_id=20260626T194933Z
+key_path_preflight_status=passed
+ssh_key_login_only=true
+password_fallback_used=false
+source_overlay_match=yes
+telegram_get_me_status=passed
+bot_polling_started=true
+manual_window_status=started
+ssh_key_path_retry_remote_exit_code=-1
+public_closed_probes_before_status=passed
+public_closed_probes_after_status=passed
+telegram_application_failure=false
+config_delivery_performed=false
+peer_creation_performed=false
+required_next_gate=PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_GATE
+```
+
+Cleanup/no-polling guard review prepared on 2026-06-27:
+
+```text
+cleanup_guard_review_status=completed-docs-only
+cleanup_guard_review_doc=docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_REVIEW.ru.md
+cleanup_guard_review_evidence=research/amn2/phase-8-private-rc-telegram-operation-key-path-cleanup-guard-review-2026-06-27.md
+prepared_helper=tmp/private_rc_telegram_operation_key_path_cleanup_guard.ps1
+repeat_telegram_operation_retry_go=false_until_cleanup_guard_passes
+```
+
+Next exact gate:
+
+```text
+PRIVATE_RC_TELEGRAM_OPERATION_KEY_PATH_CLEANUP_GUARD_GATE
+```
