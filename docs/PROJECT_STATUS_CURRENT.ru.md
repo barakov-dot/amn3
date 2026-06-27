@@ -136,7 +136,7 @@ Phase 8 final private/operator RC closeout completed on 2026-06-27 as
 Final status: `phase8_final_status=launch-ready-with-explicit-limitations`,
 `private_operator_rc_launch_ready=true`,
 `android_private_operator_rc_proof=complete-with-explicit-limitations`,
-`telegram_private_operator_rc_proof=passed-private-operator-no-config-delivery`,
+`telegram_private_operator_rc_proof=completed-no-config-delivery`,
 `db_runtime_path_classification=resolved-for-path-existence`, and
 `ssh_key_based_access_status=passed`. Public launch, public exposure, config
 delivery, peer creation, public self-service config delivery, restore/import,
