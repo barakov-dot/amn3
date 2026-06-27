@@ -19,6 +19,58 @@ entry brief prepared docs-only:
 `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА`; any live/config/public/VPS action still requires a
 fresh exact named gate.
 
+Phase 9 hardening docs package prep completed on 2026-06-27 as
+`completed-docs-only`. Bundle:
+`docs/AMN2_PHASE_9_HARDENING_DOCS_PACKAGE.ru.md`. Evidence:
+`research/amn2/phase-9-hardenings-docs-package-2026-06-27.md`.
+Lane is fixed to `HARDENING_PRODUCTIZATION` via
+`docs/AMN2_PHASE_9_ENTRY_DECISION.ru.md`; hardening preps ready:
+`docs/AMN2_PHASE_9_HARDENING_ENTRY_REVIEW.ru.md`,
+`docs/AMN2_HELPER_STYLE_HARDENING.ru.md`,
+`docs/AMN2_HELPER_SSH_TRANSPORT_HARDENING.ru.md`,
+`docs/AMN2_HELPER_TELEGRAM_OPERATION_NO_LONG_SSH_HARDENING.ru.md`,
+`docs/AMN2_TELEGRAM_OPERATION_RUNBOOK_POLISH.ru.md`,
+`docs/AMN2_PHASE_9_TASK_MATRIX_REFRESH.ru.md`,
+`docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_0.ru.md`.
+Critical limitations remain unchanged:
+`public_launch_status=not-approved`,
+`config_delivery_status=not-approved`,
+`peer_creation_status=not-approved`,
+`production_rollout_status=not-approved`,
+`public_self_service_config_delivery_status=not-approved`,
+`restore_import_status=not-proven`,
+`provider_rebuild_status=not-proven`.
+
+Phase 9 `AMN2_IOS_ACCEPTANCE_DECISION_REVIEW` completed on 2026-06-27 as
+`completed-docs-only-review`. Review:
+`docs/AMN2_IOS_ACCEPTANCE_DECISION_REVIEW.ru.md`. Evidence:
+`research/amn2/phase-9-ios-acceptance-decision-review-2026-06-27.md`.
+Operator clarification: iOS DefaultVPN is `failed-not-accepted`; AMN2 configs
+are not added by QR or by any tested non-QR path. This is not a blocker for
+the current `HARDENING_PRODUCTIZATION` lane, but iOS release/support/config
+delivery claims remain forbidden until a future exact iOS acceptance gate.
+No live/VPS/SSH/config/Telegram/public gate was opened for this decision.
+
+Phase 9 `AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW` completed on 2026-06-27 as
+`completed-docs-only-review`. Review:
+`docs/AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW.ru.md`. Evidence:
+`research/amn2/phase-9-ssh-auth-noise-mitigation-review-2026-06-27.md`.
+Heavy SSH auth-noise remains observed, but execution is not approved for the
+current hardening lane: no `sshd_config`, firewall, users, keys, password auth,
+root login, SSH port, rate limiting, service or provider mutation without a
+future exact gate and rollback/provider-console boundary. Current safe policy:
+key-based short SSH operations and no long SSH manual windows.
+
+Phase 9 `AMN2_DB_AGGREGATE_COUNTS_REVIEW` completed on 2026-06-27 as
+`completed-docs-only-review`. Review:
+`docs/AMN2_DB_AGGREGATE_COUNTS_REVIEW.ru.md`. Evidence:
+`research/amn2/phase-9-db-aggregate-counts-review-2026-06-27.md`.
+Phase 8 already resolved DB runtime path existence at
+`/opt/amn2/data/amneziya.sqlite3`; aggregate counts remain
+`optional-confidence-not-hardening-blocker`. No live DB/VPS/SSH observation,
+DB row dump, DB copy/download, config generation/delivery or public exposure
+was opened by this review. Future live counts require a separate exact gate.
+
 Phase 8 `PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW` completed on 2026-06-26 as
 `completed-docs-only`. Review:
 `docs/AMN2_PRIVATE_RC_TELEGRAM_OPERATION_GATE_REVIEW.ru.md`. Evidence:
