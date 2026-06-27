@@ -17,7 +17,9 @@ sync, status/matrix refresh, handoff и commit/push.
 - docs/PROJECT_STATUS_CURRENT.ru.md
 - docs/AMN2_PHASE_9_ENTRY_BRIEF.ru.md
 - docs/AMN2_PHASE_9_TASK_MATRIX_REFRESH.ru.md
-- docs/NEXT_CHAT_AMN2_PHASE_9_HARDENING_SESSION_5.ru.md
+- docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW.ru.md
+- docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md
+- docs/NEXT_CHAT_AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF.ru.md
 
 Не открывать live/VPS/SSH/config/Telegram/public gates без отдельного exact
 named gate.
@@ -48,7 +50,9 @@ previous_chat_closure=Phase 8 final closeout/handoff
 phase8_final_status=launch-ready-with-explicit-limitations
 phase9_material_status=prepared-existing-material
 branch=codex-spark-phase9-docs-sync
-latest_known_pushed_commit=157685f
+latest_known_pre_sync_commit=5bcbbc4
+private_self_config_readiness_with_naming_review=passed
+ssh_auth_hardening_gate_review=passed-docs-only
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 ```
 
@@ -65,6 +69,13 @@ production rollout не разрешены.
 - SSH auth-noise review как future exact gate boundary.
 - DB aggregate counts как optional-confidence future gate.
 - iOS DefaultVPN acceptance как failed-no-tested-import-path, без release claim.
+- Private self-config readiness with naming review:
+  `docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW.ru.md`.
+  Первый трек подтвержден как `PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING`,
+  но execution/config generation/import остаются закрыты до exact gate.
+- SSH auth hardening review:
+  `docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md`. Review passed docs-only;
+  execution approved now: false.
 
 ## Обязательная naming-граница для config/self-use
 
@@ -78,6 +89,8 @@ do_not_use_generic_names=true
 forbidden_generic_names=SERVER1,server1,third-party-android-device-N,android-device-N
 app_display_name_issue=SERVER1_observed_after_import
 display_name_acceptance_required=true
+server1_classification=client-display-name-product-compatibility-gap
+android_display_name_future_gate=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
 ```
 
 Важно разделить два слоя:
@@ -94,10 +107,12 @@ readiness, а не к public launch:
 
 ```text
 recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
+first_track_review_status=passed-docs-only
 public_launch_go=false
 public_self_service_go=false
 config_for_everyone_go=false
 self_operator_config_review_required=true
+private_self_config_execution_go=false
 ```
 
 ## Разделение задач по моделям
@@ -121,15 +136,15 @@ self_operator_config_review_required=true
 
 ## Локальный draft
 
-В предыдущем workspace мог остаться untracked draft:
+В предыдущем workspace оставался untracked draft:
 
 ```text
 docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md
 ```
 
-В новом чате сначала проверить `git status --short --branch`. Если draft
-существует, не коммитить автоматически: принять его только после Phase 9
-контекстной проверки или пересоздать.
+В этом sync он принят как docs-only review material. Он не открывает SSH/auth
+execution и не разрешает mutation. Любая реальная SSH hardening execution
+требует отдельный exact gate `AMN2_SSH_AUTH_HARDENING_EXECUTION_GATE`.
 
 ## Ограничения
 
@@ -146,11 +161,14 @@ docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md
 - restore/import/reboot/provider action;
 - `.conf`, QR, `vpn://`, private key, PSK, token/password или raw log output.
 
-## Recommended first decision
+## Current recommended decision
 
 ```text
-recommended_first_decision=confirm_or_reselect_phase9_lane
-recommended_model=ChatGPT 5.5
+recommended_first_decision=completed-docs-only
+recommended_model_for_risk_decision=ChatGPT 5.5
 recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
+next_safe_docs_step=done-by-spark-sync
 execution_go=false_until_exact_gate
+next_execution_candidate_if_operator_requests=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
+default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 ```

@@ -11,16 +11,20 @@ phase9_entry_decision=passed
 selected_lane=HARDENING_PRODUCTIZATION
 final_status_refresh=passed
 final_status_commit=d70ed23
-latest_docs_sync_commit=d70ed23
+latest_known_docs_sync_commit=5bcbbc4
 hardening_entry_gap_tasks_prep=passed
 hardening_entry_review=passed
 public_launch_entry_review=completed_no_go_stay_in_hardening
 public_launch_go=blocked
+private_self_config_readiness_with_naming_review=passed
+private_self_config_readiness_with_naming_doc=docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW.ru.md
+private_self_config_execution_approved=false
 ios_acceptance_decision_review=passed
 ios_defaultvpn_status=failed-not-accepted
 ios_defaultvpn_config_import_status=failed-no-tested-import-path
 ssh_auth_noise_mitigation_review=passed
-ssh_auth_hardening_gate_review=prepared
+ssh_auth_hardening_gate_review=passed-docs-only
+ssh_auth_hardening_gate_review_doc=docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md
 ssh_auth_hardening_gate_review_reviewed_by=ChatGPT 5.5
 ssh_auth_hardening_future_exact_gate_required=true
 ssh_auth_hardening_execution_approved=false
@@ -28,6 +32,7 @@ db_aggregate_counts_review=passed
 db_aggregate_counts_status=optional-confidence-not-hardening-blocker
 important_block_realization=completed-docs-only
 telegram_operation_runbook_polish=passed
+phase9_naming_docs_sync=completed-docs-only
 private_rc_final_status_refresh_reflected=true
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 ```
@@ -58,6 +63,8 @@ config_filename_policy=Neobyatnaya-AMNZ-N.conf
 forbidden_generic_names=SERVER1,server1,third-party-android-device-N,android-device-N
 app_display_name_issue=SERVER1_observed_after_import
 recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
+private_self_config_readiness_with_naming_review=passed
+android_display_name_future_gate=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
 ```
 
 Задача делится на два слоя:
@@ -65,15 +72,17 @@ recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
 - генерируемое имя config/device/file должно быть `Neobyatnaya-AMNZ-N`;
 - отображаемое имя профиля/сервера в Android AmneziaWG после import не должно
   оставаться `SERVER1` без явного documented limitation/fallback.
+- `SERVER1` считается client display-name compatibility gap до отдельного
+  exact-gated acceptance, а не разрешенным generic name.
 
 ## Матрица задач
 
 | Критичность | Задача | Рекомендуемый исполнитель | Codex может делать сам | Что требует согласия/переключения модели | Что требует exact named gate | recommended next step |
 | --- | --- | --- | --- | --- | --- | --- |
-| Критично | `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_REVIEW` | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Первым делом решить closed self/operator config path, не public release |
-| Критично | `AMN2_PHASE_9_CONFIG_PROFILE_NAMING_REVIEW` | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Зафиксировать `Neobyatnaya-AMNZ-N` как обязательное имя config/device/file и разобрать `SERVER1` display-name gap |
-| Критично | `AMN2_PHASE_9_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE_REVIEW` | ChatGPT 5.5 | false | true (`requires_model_switch`) | true (`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`) | Подготовить exact gate review для проверки реального display name после import |
-| Критично | `AMN2_PHASE_9_NAMING_DOCS_SYNC` | ChatGPT 5.3-Spark | true | false | false | После review обновить docs/runbook/task matrix/NEXT_CHAT |
+| Критично | `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW` | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено docs-only: closed self/operator path выбран, public/self-service/config-for-everyone go=false |
+| Критично | `AMN2_PHASE_9_CONFIG_PROFILE_NAMING_REVIEW` | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Закрыто внутри combined review: `Neobyatnaya-AMNZ-N` обязателен, `SERVER1` classified as display-name gap |
+| Критично | `AMN2_PHASE_9_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE_REVIEW` | ChatGPT 5.5 | false | true (`requires_model_switch`) | true (`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`) | Future exact gate only: проверить реальный display name после import без public/config leak |
+| Критично | `AMN2_PHASE_9_NAMING_DOCS_SYNC` | ChatGPT 5.3-Spark | true | false | false | Выполнено docs-only после 5.5 review; перед commit/push нужен safe scan |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` (закрыт) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено |
 | Критично | `AMN2_PHASE_9_PUBLIC_LAUNCH_ENTRY_REVIEW` (lane confirmed) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнен: `public_launch_go=false`, продолжение на hardening lane |
@@ -89,7 +98,7 @@ recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
 | Очень важно | `AMN2_PRIVATE_RC_RELEASE_LIMITATIONS_REFRESH` | ChatGPT 5.3-Spark | true | false | false | Держать ограничения по статусу и hold-правила |
 | Очень важно | `AMN2_PRIVATE_RC_FINAL_STATUS_REFRESH` | ChatGPT 5.3-Spark | true | false | false | Синхронизировать итоговый status после выбранного lane + review outcomes |
 | Важно | `AMN2_PHASE_9_TELEGRAM_OPERATION_RUNBOOK_POLISH` | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено: validated после passed no-long-SSH result |
-| Важно | `AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW` | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено: не blocker для hardening lane; execution только future exact gate |
+| Важно | `AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW` | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено: не blocker для hardening lane; SSH auth hardening review принят docs-only, execution только future exact gate |
 | Важно | `AMN2_DB_AGGREGATE_COUNTS_REVIEW` | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено: optional-confidence-not-hardening-blocker; live counts только через future exact gate |
 | Важно | `AMN2_IOS_ACCEPTANCE_DECISION_REVIEW` | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено: `DefaultVPN failed-no-tested-import-path`; future exact gate для любых iOS claims |
 | Важно | `AMN2_PHASE_9_IMPORTANT_BLOCK_REALIZATION` | ChatGPT 5.5 | true | false | false | Выполнено docs-only, блоки сведены в единый hardening decision set |
@@ -102,7 +111,7 @@ recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
 
 ```text
 critical_openers=AMN2_PHASE_9_HARDENING_ENTRY_REVIEW, AMN2_PHASE_9_ENTRY_DECISION
-docs_only_openers=AMN2_PHASE_9_HARDENING_DOCS_PACKAGE, AMN2_PHASE_9_TELEGRAM_OPERATION_RUNBOOK_POLISH, AMN2_HELPER_SSH_TRANSPORT_HARDENING, AMN2_HELPER_STYLE_HARDENING, AMN2_PHASE_9_FINAL_STATUS_REFRESH, AMN2_PHASE_9_TASK_MATRIX_REFRESH
+docs_only_openers=AMN2_PHASE_9_HARDENING_DOCS_PACKAGE, AMN2_PHASE_9_TELEGRAM_OPERATION_RUNBOOK_POLISH, AMN2_HELPER_SSH_TRANSPORT_HARDENING, AMN2_HELPER_STYLE_HARDENING, AMN2_PHASE_9_FINAL_STATUS_REFRESH, AMN2_PHASE_9_TASK_MATRIX_REFRESH, AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW
 live_openers=requires_operator_approval + exact_named_gate
 post_review_sync_completed=AMN2_PHASE_9_POST_SSH_AUTH_REVIEW_SYNC
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
@@ -113,14 +122,16 @@ default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 - До operator-confirmed нового exact gate — `ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА`.
 - На этом этапе ChatGPT 5.5 выполняет только docs/review-only (без live/VPS/SSH/Telegram/public):
   - `AMN2_PHASE_9_ENTRY_BRIEF_REVIEW` при изменении входных условий;
-  - `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_REVIEW` для закрытого self/operator config path;
-  - `AMN2_PHASE_9_CONFIG_PROFILE_NAMING_REVIEW` для `Neobyatnaya-AMNZ-N` и `SERVER1`;
+  - `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW` выполнен для закрытого self/operator config path, `Neobyatnaya-AMNZ-N` и `SERVER1`;
   - повторный `AMN2_PHASE_9_TASK_MATRIX_REFRESH` при изменении статусов;
   - `AMN2_PHASE_9_FINAL_STATUS_REFRESH` при появлении новых фактов.
 - Закрытые статусы по review:
+  - `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW`: `selected_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING`, `public_launch_go=false`, `public_self_service_go=false`, `private_self_config_execution_go=false`.
+  - `AMN2_PHASE_9_CONFIG_PROFILE_NAMING_REVIEW`: covered by combined review; `SERVER1` is a display-name compatibility gap pending future exact gate.
   - `AMN2_SSH_AUTH_NOISE_MITIGATION_REVIEW`: `ssh_auth_hardening_execution=not-approved`, `future_exact_gate_required=true`.
   - `AMN2_DB_AGGREGATE_COUNTS_REVIEW`: `future_exact_gate_required_for_live_counts=true`.
   - `AMN2_IOS_ACCEPTANCE_DECISION_REVIEW`: `ios_defaultvpn_status=failed-no-tested-import-path`, `public release claim deferred`.
+  - `AMN2_PHASE_9_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE_REVIEW`: future exact gate only; no real import/config generation now.
 
 ## Правило по модели (соглашение с тобой)
 

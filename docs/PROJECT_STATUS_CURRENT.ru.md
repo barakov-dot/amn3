@@ -2,25 +2,32 @@
 
 ## Текущий контрольный срез (актуализировано 2026-06-27)
 
-Текущий чат закрывается как Phase 8 final handoff. Уже подготовленные Phase 9
-docs/commits остаются как existing material, но дальнейшая Phase 9 работа
-переносится в новый чат:
+Phase 9 старт из Phase 8 handoff принят. Phase 8 закрыта, уже подготовленные
+Phase 9 docs/commits остаются existing material, первый Phase 9 трек
+подтвержден как private/self config readiness with naming, без открытия
+live/config/public execution.
 
 ```text
-current_chat_closure=Phase 8 final closeout/handoff
+current_chat_state=Phase 9 new-chat docs-only naming sync
 phase8_final_status=launch-ready-with-explicit-limitations
 phase9_material_status=prepared-existing-material
-phase9_continuation_chat_required=true
-active_phase=Phase 8 handoff closure
+phase9_continuation_chat_required=false_current_chat_started
+active_phase=Phase 9 docs-only private self-config naming review
 selected_lane=HARDENING_PRODUCTIZATION
 phase9_entry_decision_status=passed
 helper_hardening_status=completed-docs-only
 no_long_ssh_pattern=status=standardized
-phase9_current_sync_commit=157685f
+phase9_latest_known_pre_sync_commit=5bcbbc4
 phase8_to_phase9_handoff_doc=docs/AMN2_PHASE_8_FINAL_HANDOFF_TO_PHASE_9_NEW_CHAT_SYNC.ru.md
 next_chat_handoff=docs/NEXT_CHAT_AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF.ru.md
-untracked_phase9_draft=docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md
-untracked_phase9_draft_status=not-committed-prepared-draft
+private_self_config_readiness_with_naming_review=passed
+private_self_config_readiness_with_naming_doc=docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW.ru.md
+recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
+private_self_config_execution_go=false
+android_display_name_future_gate=ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
+server1_display_name_issue=client-display-name-product-compatibility-gap
+ssh_auth_hardening_gate_review=passed-docs-only
+ssh_auth_hardening_gate_review_doc=docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md
 ios_defaultvpn_default_status=failed-not-accepted
 ssh_auth_no_hardening_execution=not-approved
 db_aggregate_counts_status=optional-confidence-not-hardening-blocker
@@ -33,7 +40,7 @@ telegram_profile_media_mutation_status=not-approved
 restore_import_status=not-proven
 provider_rebuild_status=not-proven
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
-next_step=AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF in new chat
+next_step=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_EXACT_NAMED_GATE
 ```
 
 Ключевые ограничения в этом срезе:
@@ -42,8 +49,28 @@ next_step=AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF in new chat
 - Не обещать iOS support (DefaultVPN не прошел import path).
 - Не запускать любые новые `peer creation`, `config delivery`, `production rollout`.
 - Перед каждым commit/push выполнить SECRET_POLLUTION_SCAN и local markdown/diff clean checks.
-- Не развивать Phase 9 дальше в этом чате; продолжение Phase 9 только в новом
-  чате через `AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF`.
+- Real Android AmneziaWG display-name validation только через future exact gate
+  `ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`.
+
+Phase 9 `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW`
+completed on 2026-06-27 as `completed-docs-only-review`. Document:
+`docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW.ru.md`.
+It accepts Phase 8 as closed, accepts prepared Phase 9 material, confirms the
+first track as `PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING`, fixes
+`Neobyatnaya-AMNZ-N` as canonical config/device/file naming policy, classifies
+`SERVER1` as Android AmneziaWG display-name compatibility gap, and keeps real
+config generation/import behind future exact gate
+`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`. No live/VPS/SSH/config/
+Telegram/public execution, peer/config creation, public/self-service delivery,
+VPS/auth/firewall/users/keys/ports mutation or secret-bearing output was
+performed.
+
+Phase 9 `AMN2_SSH_AUTH_HARDENING_GATE_REVIEW` accepted on 2026-06-27 as
+`completed-docs-only-review`. Document:
+`docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md`. It keeps SSH auth hardening
+as future optional hardening only; current execution remains not approved and
+requires `AMN2_SSH_AUTH_HARDENING_EXECUTION_GATE` before any SSH/auth/firewall/
+users/keys/ports mutation.
 
 Phase 8 final private/operator RC closeout completed on 2026-06-27 as
 `completed-docs-only-final-closeout`. Closeout:
