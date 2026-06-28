@@ -12,8 +12,8 @@ selected_lane=HARDENING_PRODUCTIZATION
 final_status_refresh=completed-docs-only
 final_status_commit=d70ed23
 latest_known_docs_sync_commit=5bcbbc4
-phase9_next_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
-phase9_selected_next_track=generator-code implementation / Windows filename-basename policy
+phase9_next_gate=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_FINAL_REVIEW_GATE
+phase9_selected_next_track=generator-code / private self-config readiness final review
 windows_filename_readiness_review=APPROVED_FOR_DOCS_AND_READ_ONLY_READINESS
 windows_filename_readiness_review_doc=docs/AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE_REVIEW.ru.md
 windows_filename_readiness_runbook=docs/AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_RUNBOOK.ru.md
@@ -170,6 +170,7 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 | Критично | `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_RUNBOOK` | ChatGPT 5.3-Spark | true | false | false | Подготовлен read-only inventory checklist для поиска generator-code точки filename-forming |
 | Критично | `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_RESULT_TEMPLATE` | ChatGPT 5.3-Spark | true | false | false | Подготовлен шаблон фиксации read-only readiness результата |
 | Критично | `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE` | ChatGPT 5.3-Spark | true | false | false | Локальная имплементация выполнена: `Neobyatnaya-AMNZ-N.conf` в `worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py`; 5.5 decision: `APPROVED_WITH_TEST_ENV_LIMITATION`; scoped tests не запускались (`pytest` отсутствует) |
+| Критично | `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_FINAL_REVIEW_GATE` | ChatGPT 5.5 (decision) + ChatGPT 5.3-Spark (sync) | false | true (`requires_model_switch`) | false | `decision_status=APPROVED_NEXT_GATE_DOCS_ONLY`; 5.3-Spark делает docs-only sync в статус/матрицу/NEXT_CHAT, pass/fail/stop-lines фиксируются |
 | Критично | `AMN2_PHASE_9_ANDROID_DISPLAY_NAME_GATE_RESULT_SYNC` | ChatGPT 5.3-Spark | true | false | false | `completed` (pair-sync): `PROJECT_STATUS_CURRENT` + `TASK_MATRIX_REFRESH`; результат `Сервер 1` зафиксирован как `DOCUMENTED_LIMITATION`, `production naming` остается `Neobyatnaya-AMNZ-N`, Android fallback `manual rename`, iOS not proven/manual rename fallback |
 | Критично | `AMN2_PHASE_9_NAMING_DOCS_SYNC` | ChatGPT 5.3-Spark | true | false | false | Выполнено docs-only после 5.5 review; перед commit/push нужен safe scan |
 | Очень важно | `P9_VALIDATION_AND_CONFIG_PATH_CHECKLIST_SYNC` | ChatGPT 5.3-Spark | true | false | false | Создан docs-only чеклист: XRay validation + runtime config path/manager export compatibility как candidate для hardening review |
@@ -202,13 +203,18 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 ### Критичный gate-резюме до next chat
 
 ```text
-critical_openers=AMN2_PHASE_9_HARDENING_ENTRY_REVIEW, AMN2_PHASE_9_ENTRY_DECISION, AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
+critical_openers=AMN2_PHASE_9_HARDENING_ENTRY_REVIEW, AMN2_PHASE_9_ENTRY_DECISION, AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_FINAL_REVIEW_GATE
 docs_only_openers=AMN2_PHASE_9_HARDENING_DOCS_PACKAGE, AMN2_PHASE_9_TELEGRAM_OPERATION_RUNBOOK_POLISH, AMN2_HELPER_SSH_TRANSPORT_HARDENING, AMN2_HELPER_STYLE_HARDENING, AMN2_PHASE_9_FINAL_STATUS_REFRESH, AMN2_PHASE_9_TASK_MATRIX_REFRESH, AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW
 validation_openers=P9_VALIDATION_AND_CONFIG_PATH_CHECKLIST_SYNC
 android_display_name_gate_openers=AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE_REVIEW, AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RUNBOOK, AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT_TEMPLATE
 live_openers=requires_operator_approval + exact_named_gate
 post_review_sync_completed=AMN2_PHASE_9_POST_SSH_AUTH_REVIEW_SYNC
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
+phase9_private_self_config_final_review_gate=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_FINAL_REVIEW_GATE
+phase9_private_self_config_final_review_status=APPROVED_NEXT_GATE_DOCS_ONLY
+phase9_private_self_config_final_review_pass=Neobyatnaya-AMNZ-N
+phase9_private_self_config_final_review_android_limitation=Сервер 1 as client display-name compatibility gap
+phase9_private_self_config_final_review_fail=generic naming as production naming|secrets/output|peer/config/public actions
 ```
 
 ## Следующий шаг сейчас

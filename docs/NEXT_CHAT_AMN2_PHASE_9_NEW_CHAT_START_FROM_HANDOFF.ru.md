@@ -359,3 +359,26 @@ android_display_name_production_naming=Neobyatnaya-AMNZ-N
 - зафиксировать `phase9_validation_checklist_status=completed-docs-only` в статусных артефактах;
 - выполнить `safe scan` и `git diff --check`;
 - выполнить commit/push с `execution_go=false`, `config_generation=false`, `config_delivery=false`, `peer_creation=false`, `live_vps_ssh_telegram_public=false`.
+
+## AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_FINAL_REVIEW_GATE
+
+Модель: ChatGPT 5.3-Spark / Codex docs-only.
+
+```text
+task=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_FINAL_REVIEW_GATE
+decision_status=APPROVED_NEXT_GATE_DOCS_ONLY
+next_gate=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_FINAL_REVIEW_GATE
+risk_model=display-name_gap_only_client_side; generation/display policy is canonical; no live/config/peer mutations
+pass=canonical_naming_Must_Be_Neobyatnaya-AMNZ-N
+android_limitation=Сервер 1 as documented client display-name compatibility gap + manual_rename fallback
+windows_policy=Neobyatnaya-AMNZ-N.conf -> Neobyatnaya-AMNZ-N
+ios_policy=not_proven_manual_rename_fallback
+fail=generic naming as production naming|payload/secrets output|peer/config/public actions
+stop_lines=execution_go=false|config_generation=false|config_delivery=false|peer_creation=false|live_vps_ssh_telegram_public=false
+next_sync=PROJECT_STATUS_CURRENT / AMN2_PHASE_9_TASK_MATRIX_REFRESH / NEXT_CHAT_AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF
+```
+
+После sync:
+- `safe scan` по обновленным docs;
+- `git diff --check`;
+- `commit/push`.
