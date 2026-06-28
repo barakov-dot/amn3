@@ -1,0 +1,52 @@
+# Шаблон: AMN2 private self-config execution package prep result
+
+Назначение: зафиксировать результат подготовки `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_GATE`.
+
+```text
+run_id=YYYYMMDDTHHMMSSZ
+result_owner=ChatGPT 5.3-Spark
+scope=docs-only-package-prep
+exact_gate=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_GATE
+previous_gate=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_READINESS_GATE
+decision_status=APPROVED_FOR_EXECUTION_PACKAGE_PREP_ONLY
+decision_confirmation=CONFIRMED_BY_5_5
+next_gate=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_GATE
+
+execution_go=false
+config_generation=false
+config_delivery=false
+peer_creation=false
+live_vps_ssh_telegram_public=false
+
+canonical_naming=Neobyatnaya-AMNZ-N
+windows_policy=Neobyatnaya-AMNZ-N.conf -> Neobyatnaya-AMNZ-N
+android_status=DOCUMENTED_LIMITATION
+android_observed=Сервер 1
+android_fallback=manual_rename
+ios_status=not_proven/manual_rename_fallback
+
+package_artifacts_prepared=true
+review_doc=docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_READINESS_GATE_REVIEW.ru.md
+runbook_doc=docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_RUNBOOK.ru.md
+result_template=docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_RESULT_TEMPLATE.ru.md
+
+pass=Neobyatnaya-AMNZ-N_only
+fail=generic naming as production naming|payload/secrets output|peer/config/public/self-service actions
+stop_lines=execution_go=false|config_generation=false|config_delivery=false|peer_creation=false|live_vps_ssh_telegram_public=false
+risk_model=docs-only package prep; exact execution remains blocked by stop-lines
+
+sync_targets=PROJECT_STATUS_CURRENT|TASK_MATRIX_REFRESH|NEXT_CHAT_AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF
+safe_scan_status=required_before_commit
+diffcheck_status=required_before_commit
+
+peer_creation_performed=false
+secret_values_printed=false
+conf_payload_printed=false
+qr_payload_printed=false
+vpn_uri_printed=false
+private_key_printed=false
+psk_printed=false
+token_printed=false
+password_printed=false
+raw_logs_printed=false
+```

@@ -93,8 +93,10 @@ android_display_name_gate_fallback=manual_rename
 android_display_name_gate_windows_policy=filename/basename_Neobyatnaya-AMNZ-N.conf
 android_display_name_gate_ios_policy=not_proven_manual_rename_fallback
 android_display_name_gate_execution_go_after_result=false
-next_gate=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
-selected_next_track=generator-code implementation / Windows filename-basename policy
+next_gate=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_GATE
+selected_next_track=generator-code / private self-config execution package prep
+phase9_private_self_config_execution_readiness_gate=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_READINESS_GATE
+phase9_private_self_config_execution_readiness_next=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_GATE
 windows_filename_basename_readiness_status=APPROVED_FOR_DOCS_AND_READ_ONLY_READINESS
 windows_filename_basename_readiness_review=docs/AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE_REVIEW.ru.md
 windows_filename_basename_readiness_runbook=docs/AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_RUNBOOK.ru.md
@@ -116,6 +118,18 @@ config_generation=false
 config_delivery=false
 peer_creation=false
 live_vps_ssh_telegram_public=false
+phase9_private_self_config_execution_readiness_decision=APPROVED_FOR_EXECUTION_PACKAGE_PREP_ONLY
+phase9_private_self_config_execution_readiness_status=APPROVED_FOR_EXECUTION_PACKAGE_PREP_ONLY
+phase9_private_self_config_execution_readiness_review_doc=docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_READINESS_GATE_REVIEW.ru.md
+phase9_private_self_config_execution_readiness_runbook=docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_RUNBOOK.ru.md
+phase9_private_self_config_execution_readiness_result_template=docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_RESULT_TEMPLATE.ru.md
+phase9_private_self_config_execution_package_prep_status=prepared-docs-only
+phase9_private_self_config_execution_package_prep_gate=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_GATE
+phase9_private_self_config_execution_package_prep_result_doc=docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_RESULT.ru.md
+phase9_private_self_config_execution_package_prep_artifacts_present=true
+phase9_private_self_config_execution_package_prep_artifacts_missing=none
+phase9_private_self_config_execution_package_prep_safe_scan_status=required_before_commit
+phase9_private_self_config_execution_package_prep_diffcheck_status=required_before_commit
 canonical_naming=Neobyatnaya-AMNZ-N
 windows_policy=Neobyatnaya-AMNZ-N.conf -> Neobyatnaya-AMNZ-N
 android_status=DOCUMENTED_LIMITATION
@@ -167,6 +181,10 @@ production rollout не разрешены.
   Read-only inventory обнаружил точку формирования `config_filename` в
   `worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py`, и
   код уже локально переведен на canonical filename.
+- Пакет для execution-readiness:
+  - `docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_READINESS_GATE_REVIEW.ru.md`
+  - `docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_RUNBOOK.ru.md`
+  - `docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_RESULT_TEMPLATE.ru.md`
 
 ## Что считать истинно текущим сейчас (не как исторический passed)
 
@@ -192,7 +210,7 @@ production rollout не разрешены.
 - `phase9_prvtpro_watch=v1.4.4_a62f958_carry-forward_no_new_launch_go`
 
 ```text
-next_phase_execution_gate_hold=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
+next_phase_execution_gate_hold=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_GATE
 execution_go_after_result=false
 config_generation_delivery=not-approved
 peer_creation=not-approved
@@ -377,6 +395,43 @@ ios_policy=not_proven_manual_rename_fallback
 fail=generic naming as production naming|payload/secrets output|peer/config/public actions
 stop_lines=execution_go=false|config_generation=false|config_delivery=false|peer_creation=false|live_vps_ssh_telegram_public=false
 next_sync=PROJECT_STATUS_CURRENT / AMN2_PHASE_9_TASK_MATRIX_REFRESH / NEXT_CHAT_AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF
+```
+
+После sync:
+- `safe scan` по обновленным docs;
+- `git diff --check`;
+- `commit/push`.
+
+## AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_READINESS_GATE
+
+Модель: ChatGPT 5.5.
+
+```text
+task=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_READINESS_GATE
+decision_status=APPROVED_FOR_EXECUTION_PACKAGE_PREP_ONLY
+decision_confirmation=CONFIRMED_BY_5_5
+next_gate=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_GATE
+risk_model=docs-only package prep only; no live/VPS/SSH/Telegram/public/config/peer scope until exact gate
+pass=Neobyatnaya-AMNZ-N
+android_limitation=Сервер 1 as documented client display-name compatibility gap + manual_rename fallback
+windows_policy=Neobyatnaya-AMNZ-N.conf -> Neobyatnaya-AMNZ-N
+ios_policy=not_proven_manual_rename_fallback
+fail=generic naming as production naming|payload/secrets output|peer/config/public/self-service actions
+stop_lines=execution_go=false|config_generation=false|config_delivery=false|peer_creation=false|live_vps_ssh_telegram_public=false
+next_sync=PROJECT_STATUS_CURRENT / AMN2_PHASE_9_TASK_MATRIX_REFRESH / NEXT_CHAT_AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF
+```
+
+Для вставки в 5.5 (если нужно повторить):
+
+```text
+AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_READINESS_GATE
+Модель: ChatGPT 5.5
+decision_status=APPROVED_FOR_EXECUTION_PACKAGE_PREP_ONLY
+next_gate=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_GATE
+risk_model=docs-only package prep only
+pass=Neobyatnaya-AMNZ-N
+fail=generic naming as production naming|payload/secrets output|peer/config/public actions
+stop_lines=execution_go=false|config_generation=false|config_delivery=false|peer_creation=false|live_vps_ssh_telegram_public=false
 ```
 
 После sync:
