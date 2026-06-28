@@ -26,12 +26,20 @@ peer creation, VPS/SSH/Telegram/public actions, or secret-bearing output.
 Scoped verification: `tests/agent/test_runtime.py` +
 `tests/server_config/test_loader.py -q` returned `14 passed`.
 
+Status update 2026-06-28: numeric range validation local code slice completed
+in AMN2 branch `codex/public-config-delivery-policy-contract`, commit
+`5b1d34a`. The server config loader now rejects invalid `ssh.port`,
+`vpn.port`, and `vpn.max_devices` values before save/persist boundaries.
+Scoped verification: `tests/server_config/test_loader.py` +
+`tests/agent/test_runtime.py -q` returned `19 passed`.
+
 ### Условия pass
 
 - Host validation поддержана до save/persist для конфигураций.
 - SNI validation поддержана до save/persist для конфигураций.
 - Path validation поддержана до save/persist для конфигураций.
-- Numeric range validation (порт/MTU/keepalive/тайминги) поддержана до save/persist.
+- Numeric range validation для текущих server config полей поддержана до
+  save/persist: `ssh.port`, `vpn.port`, `vpn.max_devices`.
 - Везде в docs-only pipeline сохраняется единая ошибка валидации без raw secrets.
 - Runtime snapshot для `xray_docker` ограничен read-only проверкой наличия
   контейнера и публикует только status/capabilities без runtime config payload.
@@ -81,8 +89,9 @@ Scoped verification: `tests/services/test_config_export.py -q` returned
 
 ## Итог для текущего этапа
 
-- Решение: runtime config-path guard и XRay runtime snapshot выполнены как
-  local-code slices; form-level XRay host/SNI/path/range validation остается
+- Решение: runtime config-path guard, XRay runtime snapshot и server config
+  numeric range validation выполнены как local-code slices; form-level XRay
+  host/SNI/path validation остается
   future exact-gate hardening item.
 - `decision_status`: `documented-limitations-accepted-with-hold`.
 - Следующий step: keep execution hold until exact gate request.
