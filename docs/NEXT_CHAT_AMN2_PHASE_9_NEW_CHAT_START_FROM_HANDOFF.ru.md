@@ -348,3 +348,14 @@ execution_go_after_result=false
 android_fallback=manual_rename
 android_display_name_production_naming=Neobyatnaya-AMNZ-N
 ```
+## P9_VALIDATION_AND_CONFIG_PATH_CHECKLIST_SYNC
+
+Модель: ChatGPT 5.3-Spark / Codex docs-only.
+Статус: docs-only checklist prepared и подготовлен к следующему sync.
+
+Документ: `docs/AMN2_PHASE_9_VALIDATION_AND_CONFIG_PATH_CHECKLIST.ru.md`.
+
+Следующий безопасный шаг по `NEXT_CHAT`:
+- зафиксировать `phase9_validation_checklist_status=completed-docs-only` в статусных артефактах;
+- выполнить `safe scan` и `git diff --check`;
+- выполнить commit/push с `execution_go=false`, `config_generation=false`, `config_delivery=false`, `peer_creation=false`, `live_vps_ssh_telegram_public=false`.
