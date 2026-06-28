@@ -1,0 +1,48 @@
+# Шаблон: Windows filename/basename implementation readiness result
+
+Используется для фиксации результата read-only inventory и готовности к
+generator-code implementation-readiness.
+
+```text
+run_id=YYYYMMDDTHHMMSSZ
+result_owner=ChatGPT 5.3-Spark
+scope=read-only workspace inventory
+allowed_actions=true
+readiness_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE
+decision_status=APPROVED_FOR_DOCS_AND_READ_ONLY_READINESS
+next_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE
+execution_go=false
+config_generation=false
+config_delivery=false
+peer_creation=false
+live_vps_ssh_telegram_public=false
+
+canonical_naming=Neobyatnaya-AMNZ-N
+windows_policy=Neobyatnaya-AMNZ-N.conf -> Neobyatnaya-AMNZ-N
+android_status=DOCUMENTED_LIMITATION
+android_observed=Сервер 1
+android_fallback=manual_rename
+ios_status=not_proven/manual_rename_fallback
+
+generator_code_repo_detected=false
+generator_code_candidate_repo=worktrees/amn2-public-config-delivery-policy-contract
+generator_code_candidate_branch=codex/public-config-delivery-policy-contract
+generator_code_candidate_path=app/bot/delivery.py
+current_windows_config_filename=amneziya-device-{device_id}.conf
+config_filename_candidate=Neobyatnaya-AMNZ-N.conf
+result_note=read-only inventory completed, ready for implementation planning
+
+result_sync_targets=PROJECT_STATUS_CURRENT,TASK_MATRIX_REFRESH,NEXT_CHAT
+result_sync_completed=true
+
+peer_creation_performed=false
+secret_values_printed=false
+conf_payload_printed=false
+qr_payload_printed=false
+vpn_uri_printed=false
+private_key_printed=false
+psk_printed=false
+token_printed=false
+password_printed=false
+raw_logs_printed=false
+```
