@@ -64,6 +64,13 @@ The server config loader now rejects duplicate `server.name` values before
 `tests/server_config/test_loader.py` + `tests/agent/test_runtime.py -q`
 returned `34 passed`.
 
+Status update 2026-06-28: enum validation local code slice completed in AMN2
+branch `codex/public-config-delivery-policy-contract`, commit `c7e5dbb`. The
+server config loader now validates `ssh.auth.type`, `firewall.provider`, and
+the existing `runtime.type` guard before runtime use. Scoped verification:
+`tests/server_config/test_loader.py` + `tests/agent/test_runtime.py -q`
+returned `37 passed`.
+
 ### Условия pass
 
 - Host validation поддержана до save/persist для конфигураций.
@@ -79,6 +86,8 @@ returned `34 passed`.
   `runtime.service_name`, `runtime.container_name`.
 - Unique server name validation поддержана до runtime target selection:
   duplicate `server.name` values fail before `select_server`.
+- Enum validation поддержана до runtime use: `ssh.auth.type`,
+  `firewall.provider`, `runtime.type`.
 - Везде в docs-only pipeline сохраняется единая ошибка валидации без raw secrets.
 - Runtime snapshot для `xray_docker` ограничен read-only проверкой наличия
   контейнера и публикует только status/capabilities без runtime config payload.
@@ -132,7 +141,8 @@ Scoped verification: `tests/services/test_config_export.py -q` returned
 - Решение: runtime config-path guard, XRay runtime snapshot, server config
   numeric range validation, host/path validation и network/CIDR validation
   и identifier validation выполнены как local-code slices; duplicate server
-  names теперь blocked-before-runtime-selection. Form-level XRay SNI validation
-  остается future exact-gate hardening item.
+  names теперь blocked-before-runtime-selection; enum validation выполнена как
+  local-code slice. Form-level XRay SNI validation остается future exact-gate
+  hardening item.
 - `decision_status`: `documented-limitations-accepted-with-hold`.
 - Следующий step: keep execution hold until exact gate request.
