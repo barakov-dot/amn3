@@ -37,7 +37,14 @@
 - Technical owner подтверждает, что перечисленные валидации покрыты локальными тестами на уровне form handlers.
 - Если покрытие временно неполное, фиксировать как `documented limitation` + `stop-line` для будущего exact gate.
 
-## Runtime config-path / manager export compatibility checklist (candidate, docs-only)
+## Runtime config-path / manager export compatibility checklist (completed local slice)
+
+Status update 2026-06-28: local code slice completed in AMN2 branch
+`codex/public-config-delivery-policy-contract`, commit `990a376`. The config
+export contract now supports safe `runtime_config_path_missing` without exposing
+the raw runtime path; safe metadata publishes only `runtime_config_path_status`.
+Scoped verification: `tests/services/test_config_export.py -q` returned
+`7 passed`.
 
 ### Принцип
 
