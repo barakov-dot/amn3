@@ -93,6 +93,13 @@ config_delivery_template_unknown_placeholder_guard_push_status=done
 config_delivery_template_unknown_placeholder_guard_test_status=scoped_pytest_28_passed
 config_delivery_template_unknown_placeholder_guard_contract=unknown_delivery_placeholder_rejected_before_package_build
 config_delivery_template_unknown_placeholder_guard_live_actions=false
+config_delivery_template_empty_message_guard_status=completed-local-code
+config_delivery_template_empty_message_guard_commit=a674db2
+config_delivery_template_empty_message_guard_branch=codex/public-config-delivery-policy-contract
+config_delivery_template_empty_message_guard_push_status=done
+config_delivery_template_empty_message_guard_test_status=scoped_pytest_29_passed
+config_delivery_template_empty_message_guard_contract=empty_delivery_message_rejected_before_package_build
+config_delivery_template_empty_message_guard_live_actions=false
 windows_filename_readiness_target_filename_rule=Neobyatnaya-AMNZ-N.conf
 phase9_execution_go=false
 phase9_config_generation=false
@@ -203,6 +210,7 @@ phase9_server_config_identifier_validation=completed-local-code
 phase9_server_config_unique_server_name=completed-local-code
 phase9_server_config_enum_validation=completed-local-code
 phase9_config_delivery_template_unknown_placeholder_guard=completed-local-code
+phase9_config_delivery_template_empty_message_guard=completed-local-code
 phase9_runtime_config_path_checklist_candidate=AMN2_PHASE_9_VALIDATION_AND_CONFIG_PATH_CHECKLIST.ru.md
 phase9_runtime_config_path_manager_export_guard=completed-local-code
 phase9_amnezia_client_watch=4.8.19.0_release_current_4.9.0.3_unreleased_watch
@@ -303,7 +311,7 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 | Критично | `AMN2_PHASE_9_ANDROID_DISPLAY_NAME_GATE_RESULT_SYNC` | ChatGPT 5.3-Spark | true | false | false | `completed` (pair-sync): `PROJECT_STATUS_CURRENT` + `TASK_MATRIX_REFRESH`; результат `Сервер 1` зафиксирован как `DOCUMENTED_LIMITATION`, `production naming` остается `Neobyatnaya-AMNZ-N`, Android fallback `manual rename`, iOS not proven/manual rename fallback |
 | Критично | `AMN2_PHASE_9_NAMING_DOCS_SYNC` | ChatGPT 5.3-Spark | true | false | false | Выполнено docs-only после 5.5 review; перед commit/push нужен safe scan |
 | Очень важно | `P9_VALIDATION_AND_CONFIG_PATH_CHECKLIST_SYNC` | ChatGPT 5.3-Spark | true | false | false | Runtime config path / manager export guard `990a376`; XRay runtime validation snapshot `fdc431d`; numeric range validation `5b1d34a`; host/path validation `876ce32`; network/CIDR validation `6e0bbe2`; identifier validation `0129fc9`; unique server name guard `d1c2bc3`; enum validation `c7e5dbb`, scoped `tests/server_config/test_loader.py` + `tests/agent/test_runtime.py` = 37 passed |
-| Очень важно | `P9_CONFIG_DELIVERY_TEMPLATE_GUARD` | ChatGPT 5.3-Spark | true | false | false | Local-code guard выполнен: `eeef841`; unknown delivery placeholders fail before package build; scoped `tests/bot/test_delivery.py` + `tests/bot/test_bot_workflows.py` = 28 passed; config delivery remains not-approved |
+| Очень важно | `P9_CONFIG_DELIVERY_TEMPLATE_GUARD` | ChatGPT 5.3-Spark | true | false | false | Local-code guards выполнены: `eeef841` unknown delivery placeholders fail before package build; `a674db2` empty delivery messages fail before package build; scoped `tests/bot/test_delivery.py` + `tests/bot/test_bot_workflows.py` = 29 passed; config delivery remains not-approved |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` (закрыт) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено |
 | Критично | `AMN2_PHASE_9_PUBLIC_LAUNCH_ENTRY_REVIEW` (lane confirmed) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнен: `public_launch_go=false`, продолжение на hardening lane |
