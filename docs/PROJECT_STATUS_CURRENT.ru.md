@@ -33,6 +33,9 @@ windows_filename_basename_candidate_branch=codex/public-config-delivery-policy-c
 windows_filename_basename_candidate_path=worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py
 windows_filename_basename_candidate_current_filename=Neobyatnaya-AMNZ-N.conf
 windows_filename_basename_local_implementation_status=completed-local-code
+windows_filename_basename_implementation_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
+windows_filename_basename_implementation_gate_decision=APPROVED_WITH_TEST_ENV_LIMITATION
+windows_filename_basename_local_implementation_test_status=scoped_tests_not_run_pytest_missing
 private_self_config_readiness_with_naming_review=completed-docs-only
 private_self_config_readiness_with_naming_doc=docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW.ru.md
 execution_go=false
@@ -115,10 +118,12 @@ next_step=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
     naming, payload/secrets output, peer/config/public/self-service action.
   Выполнение — только через future exact gate
   `ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE` при запросе оператора.
-- Platform naming implementation: Windows AmneziaWG standalone использует
-  filename/basename strategy, поэтому future artifact filename должен быть
-  `Neobyatnaya-AMNZ-N.conf`; Android/iOS Amnezia app остаются documented
-  limitation/manual rename fallback до отдельного доказанного механизма.
+- Platform naming implementation: `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE`
+  закрыт как `APPROVED_WITH_TEST_ENV_LIMITATION`: Windows AmneziaWG standalone
+  использует filename/basename strategy `Neobyatnaya-AMNZ-N.conf`.
+  Android/iOS Amnezia app остаются documented limitation/manual rename fallback
+  до отдельного доказанного механизма. Для локального подтверждения
+  `pytest` в окружении не установлен, тесты не запускались.
 
 Phase 9 `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW`
 completed on 2026-06-27 as `completed-docs-only-review`. Document:

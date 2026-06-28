@@ -8,7 +8,8 @@
 AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF
 
 Модель: ChatGPT 5.3-Spark для текущего docs-only синхрона после решения.
-ChatGPT 5.5 используется только для отдельного exact gate (`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`) по запросу оператора.
+ChatGPT 5.5 используется для отдельных exact gate решений (`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`,
+`AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE`) по запросу оператора.
 
 Порядок выполнения для docs-only Spark-потока (по состоянию на этот handoff):
 `NEXT_CHAT` -> `safe-scan` -> `git diff --check` -> `commit/push`,
@@ -104,6 +105,9 @@ windows_filename_basename_candidate_current=Neobyatnaya-AMNZ-N.conf
 windows_filename_basename_candidate_target=Neobyatnaya-AMNZ-N.conf
 windows_readiness_generator_code_repo_detected=true
 windows_filename_basename_implementation_local_status=completed-local-code
+windows_filename_basename_implementation_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
+windows_filename_basename_implementation_gate_decision=APPROVED_WITH_TEST_ENV_LIMITATION
+windows_filename_basename_implementation_test_status=scoped_tests_not_run_pytest_missing
 execution_go=false
 config_generation=false
 config_delivery=false
@@ -178,6 +182,8 @@ production rollout не разрешены.
 - `windows_filename_readiness_candidate=worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py`
 - `windows_filename_readiness_generator_code_repo_detected=true`
 - `windows_filename_basename_implementation_local_status=completed-local-code`
+- `windows_filename_basename_implementation_gate_decision=APPROVED_WITH_TEST_ENV_LIMITATION`
+- `windows_filename_basename_implementation_test_status=scoped_tests_not_run_pytest_missing`
 
 ```text
 next_phase_execution_gate_hold=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
@@ -290,6 +296,9 @@ recommended_first_decision=post_decision_sync_completed
 recommended_model_for_risk_decision=ChatGPT 5.5
 recommended_first_track=PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING
 next_safe_docs_step=done-by-spark-sync
+windows_filename_basename_implementation_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
+windows_filename_basename_implementation_gate_decision=APPROVED_WITH_TEST_ENV_LIMITATION
+windows_filename_basename_implementation_test_status=scoped_tests_not_run_pytest_missing
 android_display_name_gate_decision=DOCUMENTED_LIMITATION
 android_display_name_gate_pass=Neobyatnaya-AMNZ-N
 android_display_name_gate_documented_limitation=SERVER1_or_Сервер 1_client_display_name_gap_with_manual_rename_fallback

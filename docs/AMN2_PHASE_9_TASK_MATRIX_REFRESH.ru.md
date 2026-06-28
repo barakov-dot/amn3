@@ -25,6 +25,9 @@ windows_filename_readiness_inventory_scope=read-only
 windows_filename_readiness_readonly_generator_code_repo_detected=true
 windows_filename_readiness_current_filename_rule=Neobyatnaya-AMNZ-N.conf
 windows_filename_implementation_local_status=completed-local-code
+windows_filename_implementation_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
+windows_filename_implementation_gate_decision=APPROVED_WITH_TEST_ENV_LIMITATION
+windows_filename_implementation_tests_status=scoped_tests_not_run_pytest_missing
 windows_filename_readiness_target_filename_rule=Neobyatnaya-AMNZ-N.conf
 phase9_execution_go=false
 phase9_config_generation=false
@@ -159,7 +162,7 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 | Критично | `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE_REVIEW` | ChatGPT 5.3-Spark | true | false | false | Выполнена подтверждающая readiness-проверка: docs-only + read-only inventory (`worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py`) |
 | Критично | `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_RUNBOOK` | ChatGPT 5.3-Spark | true | false | false | Подготовлен read-only inventory checklist для поиска generator-code точки filename-forming |
 | Критично | `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_RESULT_TEMPLATE` | ChatGPT 5.3-Spark | true | false | false | Подготовлен шаблон фиксации read-only readiness результата |
-| Критично | `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE` | ChatGPT 5.3-Spark | true | false | false | Локальная имплементация выполнена: filename-policy в `worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py` изменен на `Neobyatnaya-AMNZ-N.conf`; тесты и docs-sync синхронизированы |
+| Критично | `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE` | ChatGPT 5.3-Spark | true | false | false | Локальная имплементация выполнена: `Neobyatnaya-AMNZ-N.conf` в `worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py`; 5.5 decision: `APPROVED_WITH_TEST_ENV_LIMITATION`; scoped tests не запускались (`pytest` отсутствует) |
 | Критично | `AMN2_PHASE_9_ANDROID_DISPLAY_NAME_GATE_RESULT_SYNC` | ChatGPT 5.3-Spark | true | false | false | `completed` (pair-sync): `PROJECT_STATUS_CURRENT` + `TASK_MATRIX_REFRESH`; результат `Сервер 1` зафиксирован как `DOCUMENTED_LIMITATION`, `production naming` остается `Neobyatnaya-AMNZ-N`, Android fallback `manual rename`, iOS not proven/manual rename fallback |
 | Критично | `AMN2_PHASE_9_NAMING_DOCS_SYNC` | ChatGPT 5.3-Spark | true | false | false | Выполнено docs-only после 5.5 review; перед commit/push нужен safe scan |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
