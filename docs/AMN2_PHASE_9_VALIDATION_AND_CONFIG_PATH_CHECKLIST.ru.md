@@ -57,6 +57,13 @@ non-empty identifiers before save/persist boundaries. Scoped verification:
 `tests/server_config/test_loader.py` + `tests/agent/test_runtime.py -q`
 returned `33 passed`.
 
+Status update 2026-06-28: unique server name local code slice completed in
+AMN2 branch `codex/public-config-delivery-policy-contract`, commit `d1c2bc3`.
+The server config loader now rejects duplicate `server.name` values before
+`select_server` can resolve an ambiguous runtime target. Scoped verification:
+`tests/server_config/test_loader.py` + `tests/agent/test_runtime.py -q`
+returned `34 passed`.
+
 ### Условия pass
 
 - Host validation поддержана до save/persist для конфигураций.
@@ -70,6 +77,8 @@ returned `33 passed`.
 - Identifier validation для текущих server config полей поддержана до
   save/persist: `server.name`, `server.location`, `vpn.interface`,
   `runtime.service_name`, `runtime.container_name`.
+- Unique server name validation поддержана до runtime target selection:
+  duplicate `server.name` values fail before `select_server`.
 - Везде в docs-only pipeline сохраняется единая ошибка валидации без raw secrets.
 - Runtime snapshot для `xray_docker` ограничен read-only проверкой наличия
   контейнера и публикует только status/capabilities без runtime config payload.
@@ -122,7 +131,8 @@ Scoped verification: `tests/services/test_config_export.py -q` returned
 
 - Решение: runtime config-path guard, XRay runtime snapshot, server config
   numeric range validation, host/path validation и network/CIDR validation
-  и identifier validation выполнены как local-code slices; form-level XRay
-  SNI validation остается future exact-gate hardening item.
+  и identifier validation выполнены как local-code slices; duplicate server
+  names теперь blocked-before-runtime-selection. Form-level XRay SNI validation
+  остается future exact-gate hardening item.
 - `decision_status`: `documented-limitations-accepted-with-hold`.
 - Следующий step: keep execution hold until exact gate request.
