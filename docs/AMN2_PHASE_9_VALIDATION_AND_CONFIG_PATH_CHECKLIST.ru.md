@@ -49,6 +49,14 @@ The server config loader now validates `vpn.network_cidr`,
 Scoped verification: `tests/server_config/test_loader.py` +
 `tests/agent/test_runtime.py -q` returned `28 passed`.
 
+Status update 2026-06-28: identifier validation local code slice completed in
+AMN2 branch `codex/public-config-delivery-policy-contract`, commit `0129fc9`.
+The server config loader now validates `server.name`, `server.location`,
+`vpn.interface`, `runtime.service_name`, and `runtime.container_name` as
+non-empty identifiers before save/persist boundaries. Scoped verification:
+`tests/server_config/test_loader.py` + `tests/agent/test_runtime.py -q`
+returned `33 passed`.
+
 ### Условия pass
 
 - Host validation поддержана до save/persist для конфигураций.
@@ -59,6 +67,9 @@ Scoped verification: `tests/server_config/test_loader.py` +
 - Network/CIDR validation для текущих server config полей поддержана до
   save/persist: `vpn.network_cidr`, `vpn.server_address`, `vpn.dns`,
   `vpn.allowed_ips`.
+- Identifier validation для текущих server config полей поддержана до
+  save/persist: `server.name`, `server.location`, `vpn.interface`,
+  `runtime.service_name`, `runtime.container_name`.
 - Везде в docs-only pipeline сохраняется единая ошибка валидации без raw secrets.
 - Runtime snapshot для `xray_docker` ограничен read-only проверкой наличия
   контейнера и публикует только status/capabilities без runtime config payload.
@@ -111,7 +122,7 @@ Scoped verification: `tests/services/test_config_export.py -q` returned
 
 - Решение: runtime config-path guard, XRay runtime snapshot, server config
   numeric range validation, host/path validation и network/CIDR validation
-  выполнены как local-code slices; form-level XRay SNI validation остается
-  future exact-gate hardening item.
+  и identifier validation выполнены как local-code slices; form-level XRay
+  SNI validation остается future exact-gate hardening item.
 - `decision_status`: `documented-limitations-accepted-with-hold`.
 - Следующий step: keep execution hold until exact gate request.
