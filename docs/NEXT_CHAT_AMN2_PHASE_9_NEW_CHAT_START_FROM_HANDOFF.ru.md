@@ -367,6 +367,7 @@ android_display_name_production_naming=Neobyatnaya-AMNZ-N
 ```text
 task=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_FINAL_REVIEW_GATE
 decision_status=APPROVED_NEXT_GATE_DOCS_ONLY
+decision_confirmation=CONFIRMED_BY_5_5
 next_gate=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_FINAL_REVIEW_GATE
 risk_model=display-name_gap_only_client_side; generation/display policy is canonical; no live/config/peer mutations
 pass=canonical_naming_Must_Be_Neobyatnaya-AMNZ-N
