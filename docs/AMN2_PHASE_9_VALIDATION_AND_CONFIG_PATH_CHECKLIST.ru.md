@@ -33,6 +33,14 @@ in AMN2 branch `codex/public-config-delivery-policy-contract`, commit
 Scoped verification: `tests/server_config/test_loader.py` +
 `tests/agent/test_runtime.py -q` returned `19 passed`.
 
+Status update 2026-06-28: host/path validation local code slice completed in
+AMN2 branch `codex/public-config-delivery-policy-contract`, commit `876ce32`.
+The server config loader now rejects empty or URL-like `ssh.host` and
+`vpn.endpoint_host` values and rejects relative `runtime.config_path` values
+before save/persist boundaries. Scoped verification:
+`tests/server_config/test_loader.py` + `tests/agent/test_runtime.py -q`
+returned `24 passed`.
+
 ### Условия pass
 
 - Host validation поддержана до save/persist для конфигураций.
@@ -43,6 +51,7 @@ Scoped verification: `tests/server_config/test_loader.py` +
 - Везде в docs-only pipeline сохраняется единая ошибка валидации без raw secrets.
 - Runtime snapshot для `xray_docker` ограничен read-only проверкой наличия
   контейнера и публикует только status/capabilities без runtime config payload.
+- Runtime config path validation требует absolute POSIX path, если путь задан.
 
 ### Условия fail / doc gap
 
@@ -89,9 +98,9 @@ Scoped verification: `tests/services/test_config_export.py -q` returned
 
 ## Итог для текущего этапа
 
-- Решение: runtime config-path guard, XRay runtime snapshot и server config
-  numeric range validation выполнены как local-code slices; form-level XRay
-  host/SNI/path validation остается
+- Решение: runtime config-path guard, XRay runtime snapshot, server config
+  numeric range validation и host/path validation выполнены как local-code
+  slices; form-level XRay SNI validation остается
   future exact-gate hardening item.
 - `decision_status`: `documented-limitations-accepted-with-hold`.
 - Следующий step: keep execution hold until exact gate request.
