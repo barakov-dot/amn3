@@ -71,6 +71,13 @@ the existing `runtime.type` guard before runtime use. Scoped verification:
 `tests/server_config/test_loader.py` + `tests/agent/test_runtime.py -q`
 returned `37 passed`.
 
+Status update 2026-06-28: config delivery template placeholder guard completed
+in AMN2 branch `codex/public-config-delivery-policy-contract`, commit
+`eeef841`. `build_config_delivery` now rejects unknown delivery placeholders
+before package build while preserving admin/debug rendering behavior in
+`render_template`. Scoped verification: `tests/bot/test_delivery.py` +
+`tests/bot/test_bot_workflows.py -q` returned `28 passed`.
+
 ### Условия pass
 
 - Host validation поддержана до save/persist для конфигураций.
@@ -88,6 +95,8 @@ returned `37 passed`.
   duplicate `server.name` values fail before `select_server`.
 - Enum validation поддержана до runtime use: `ssh.auth.type`,
   `firewall.provider`, `runtime.type`.
+- Delivery template placeholder guard поддержан до package build: unknown
+  delivery placeholders fail before user-facing delivery package assembly.
 - Везде в docs-only pipeline сохраняется единая ошибка валидации без raw secrets.
 - Runtime snapshot для `xray_docker` ограничен read-only проверкой наличия
   контейнера и публикует только status/capabilities без runtime config payload.
@@ -142,7 +151,8 @@ Scoped verification: `tests/services/test_config_export.py -q` returned
   numeric range validation, host/path validation и network/CIDR validation
   и identifier validation выполнены как local-code slices; duplicate server
   names теперь blocked-before-runtime-selection; enum validation выполнена как
-  local-code slice. Form-level XRay SNI validation остается future exact-gate
-  hardening item.
+  local-code slice; delivery template placeholder guard выполнен как local-code
+  slice. Form-level XRay SNI validation остается future exact-gate hardening
+  item, а config delivery остается not-approved.
 - `decision_status`: `documented-limitations-accepted-with-hold`.
 - Следующий step: keep execution hold until exact gate request.
