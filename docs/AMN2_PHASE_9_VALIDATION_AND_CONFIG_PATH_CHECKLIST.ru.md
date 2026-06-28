@@ -16,7 +16,15 @@
 - Не разрешать config generation/delivery и peer creation.
 - Не раскрывать в результате `.conf`, `QR`, `vpn://`, private key, PSK, token, password или raw logs.
 
-## XRay validation checklist (candidate, docs-only)
+## XRay validation checklist (completed local snapshot slice)
+
+Status update 2026-06-28: local code slice completed in AMN2 branch
+`codex/public-config-delivery-policy-contract`, commit `fdc431d`. The runtime
+adapter now accepts `runtime_type=xray_docker` and records a read-only Docker
+container presence snapshot for XRay without config generation, config delivery,
+peer creation, VPS/SSH/Telegram/public actions, or secret-bearing output.
+Scoped verification: `tests/agent/test_runtime.py` +
+`tests/server_config/test_loader.py -q` returned `14 passed`.
 
 ### Условия pass
 
@@ -25,6 +33,8 @@
 - Path validation поддержана до save/persist для конфигураций.
 - Numeric range validation (порт/MTU/keepalive/тайминги) поддержана до save/persist.
 - Везде в docs-only pipeline сохраняется единая ошибка валидации без raw secrets.
+- Runtime snapshot для `xray_docker` ограничен read-only проверкой наличия
+  контейнера и публикует только status/capabilities без runtime config payload.
 
 ### Условия fail / doc gap
 
@@ -71,6 +81,8 @@ Scoped verification: `tests/services/test_config_export.py -q` returned
 
 ## Итог для текущего этапа
 
-- Решение: оба чеклиста фиксируются как docs-only readiness candidates.
+- Решение: runtime config-path guard и XRay runtime snapshot выполнены как
+  local-code slices; form-level XRay host/SNI/path/range validation остается
+  future exact-gate hardening item.
 - `decision_status`: `documented-limitations-accepted-with-hold`.
 - Следующий step: keep execution hold until exact gate request.

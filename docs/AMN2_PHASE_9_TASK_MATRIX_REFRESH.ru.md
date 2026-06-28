@@ -36,6 +36,14 @@ runtime_config_path_manager_export_guard_push_status=done
 runtime_config_path_manager_export_guard_test_status=scoped_pytest_7_passed
 runtime_config_path_manager_export_guard_contract=runtime_config_path_missing_without_raw_path
 runtime_config_path_manager_export_guard_safe_metadata=runtime_config_path_status_only
+xray_runtime_validation_snapshot_status=completed-local-code
+xray_runtime_validation_snapshot_commit=fdc431d
+xray_runtime_validation_snapshot_branch=codex/public-config-delivery-policy-contract
+xray_runtime_validation_snapshot_push_status=done
+xray_runtime_validation_snapshot_test_status=scoped_pytest_14_passed
+xray_runtime_validation_snapshot_runtime_type=xray_docker
+xray_runtime_validation_snapshot_capabilities=detect,status,validation
+xray_runtime_validation_snapshot_live_actions=false
 windows_filename_readiness_target_filename_rule=Neobyatnaya-AMNZ-N.conf
 phase9_execution_go=false
 phase9_config_generation=false
@@ -138,6 +146,7 @@ phase9_automation_intake_2026_06_28=P9-N007_docs-only_review-only
 phase9_validation_config_path_checklist=completed-docs-only
 phase9_validation_config_path_checklist_doc=docs/AMN2_PHASE_9_VALIDATION_AND_CONFIG_PATH_CHECKLIST.ru.md
 phase9_xray_validation_candidate_source=amnezia-client_d8b8590
+phase9_xray_runtime_validation_snapshot=completed-local-code
 phase9_runtime_config_path_checklist_candidate=AMN2_PHASE_9_VALIDATION_AND_CONFIG_PATH_CHECKLIST.ru.md
 phase9_runtime_config_path_manager_export_guard=completed-local-code
 phase9_amnezia_client_watch=4.8.19.0_release_current_4.9.0.3_unreleased_watch
@@ -237,7 +246,7 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 | Критично | `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_READINESS_GATE` | ChatGPT 5.5 (decision) + ChatGPT 5.3-Spark (sync) | false | true (`requires_model_switch`) | false | `decision_status=APPROVED_FOR_EXECUTION_PACKAGE_PREP_ONLY`; 5.3-Spark готовит execution package (review/runbook/result template) |
 | Критично | `AMN2_PHASE_9_ANDROID_DISPLAY_NAME_GATE_RESULT_SYNC` | ChatGPT 5.3-Spark | true | false | false | `completed` (pair-sync): `PROJECT_STATUS_CURRENT` + `TASK_MATRIX_REFRESH`; результат `Сервер 1` зафиксирован как `DOCUMENTED_LIMITATION`, `production naming` остается `Neobyatnaya-AMNZ-N`, Android fallback `manual rename`, iOS not proven/manual rename fallback |
 | Критично | `AMN2_PHASE_9_NAMING_DOCS_SYNC` | ChatGPT 5.3-Spark | true | false | false | Выполнено docs-only после 5.5 review; перед commit/push нужен safe scan |
-| Очень важно | `P9_VALIDATION_AND_CONFIG_PATH_CHECKLIST_SYNC` | ChatGPT 5.3-Spark | true | false | false | Runtime config path / manager export guard выполнен local-code: `990a376`, scoped `tests/services/test_config_export.py` = 7 passed; XRay validation остается checklist/watch candidate |
+| Очень важно | `P9_VALIDATION_AND_CONFIG_PATH_CHECKLIST_SYNC` | ChatGPT 5.3-Spark | true | false | false | Runtime config path / manager export guard выполнен local-code: `990a376`, scoped `tests/services/test_config_export.py` = 7 passed; XRay runtime validation snapshot выполнен local-code: `fdc431d`, scoped `tests/agent/test_runtime.py` + `tests/server_config/test_loader.py` = 14 passed |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` (закрыт) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено |
 | Критично | `AMN2_PHASE_9_PUBLIC_LAUNCH_ENTRY_REVIEW` (lane confirmed) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнен: `public_launch_go=false`, продолжение на hardening lane |
