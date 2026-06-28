@@ -50,6 +50,7 @@ AMN2 latest watch-only intake current signals: completed-no-live-action-2026-06-
 AMN2 latest watch-only intake after critical preflights: completed-no-live-action-2026-06-19
 AMN2 latest watch-only intake cycle closeout: completed-no-live-action-2026-06-19
 AMN2 latest client watch signal: amnezia-client 4.8.19.0; amneziawg-android 2.0.1; no config delivery
+AMN2 Phase 9 automation intake 2026-06-28: P9-N007 docs-only/review-only; amnezia-client 4.9.0.3 unreleased watch-only; PRVTPRO v1.4.4 carry-forward; no launch/config/write go
 AMN2 public URL env residue status: reconciled-removed-in-P7-C002e
 AMN2 P7-C002e public URL env reconciliation status: completed-live-env-reconcile-not-exposed
 AMN2 P7-C003 + P7-C005 read-only preflight status: completed-blocked-no-delivery-no-write
@@ -92,6 +93,12 @@ Relevant completed inputs:
   `research/amn2/phase-7-final-rc-freeze-status-c958733-2026-06-20.md`.
   Current frozen state is `rc_ready_paused_private_operator_lane` on `c958733`;
   no live action or secret-bearing output was performed in the freeze pass.
+- Phase 9 automation intake `P9-N007` on 2026-06-28 adds docs-only
+  package/preflight reminders: do not assume static runtime config paths such
+  as `wg0.conf`/`awg0.conf`; validate or discover actual runtime path before
+  manager/config export work. Platform/client release drift remains watch-only:
+  `amnezia-client 4.9.0.3` is unreleased, current release remains `4.8.19.0`,
+  Android AmneziaWG remains `2.0.1`, and no config delivery is approved.
 - `P6-I007` local-only fresh-install wizard/bootstrap automation.
 - `P6-C007` destructive cleanup/reinstall checklist-only boundary.
 - `P6-C009` live update/smoke for `c46f664`, read-only smoke passed.

@@ -67,6 +67,29 @@
 - Риски: нужен capability-based дизайн, чтобы не заставлять все протоколы возвращать одинаковые artifacts, если формат импорта отличается.
 - Статус: first local-only no-route adapter/tests slice выполнен в `amn2/codex/manager-config-export-contract`, commit `4d4e7a4`; details in [Manager config export contract implementation](../research/amn2/manager-config-export-contract-implementation.md).
 
+### Runtime config path / manager export contract checks
+
+- Идея: при config retrieval/export не предполагать статический путь вроде
+  `wg0.conf`/`awg0.conf`, а валидировать или обнаруживать actual runtime config
+  path через единый manager/export adapter contract.
+- Польза: снижает риск показать/выдать не тот config artifact после миграции,
+  legacy layout или multi-instance setup.
+- Риски: config export является secret-read boundary; нужны redaction,
+  client-compat tests и exact gate перед live/config delivery.
+- Статус: `P9-N007` docs-only candidate после PRVTPRO Phase 9 refresh
+  2026-06-28; без переноса GPL code/templates/managers/workflows.
+
+### XRay validation checklist
+
+- Идея: для будущих config/manager surfaces валидировать host/SNI/path/ranges
+  до save/apply.
+- Польза: уменьшает риск сохранить runtime-invalid config и затем сломать
+  live apply/restart path.
+- Риски: это не перенос upstream code; нужны локальные тесты и отдельный gate,
+  если появится live config/manager behavior.
+- Статус: `P9-N007` docs-only/local-test checklist candidate после Amnezia
+  Phase 9 refresh 2026-06-28.
+
 ### OpenAPI-группировка по доменам
 
 - Идея: группировать API-документацию по понятным доменам.

@@ -59,12 +59,30 @@
 - Риски: каждый канал становится secret delivery path; нужны expiry, audit, revoke, rate limit, clear warnings и import-level тесты для `.conf`, QR и `vpn://`.
 - Статус: полезно для гибридного продукта, не для быстрого переноса в `amn2`; усилено после [PRVTPRO config delivery integrity](../research/upstreams/prvtpro-amnezia-web-panel-config-delivery-integrity.md).
 
+### Public tunnel operator UX
+
+- Идея: Cloudflare Quick Tunnel / ngrok style public tunnel lifecycle как
+  операторский UX для будущего hybrid продукта.
+- Польза: быстрый временный доступ к панели без постоянного домена.
+- Риски: public exposure, persisted public URL state, tunnel lifecycle,
+  audit/rollback и user expectation risk.
+- Статус: PRVTPRO `v1.4.4` carry-forward signal after 2026-06-28 refresh;
+  hybrid-only/future exact public gate, not AMN2 Phase 9 launch approval.
+
 ### Operator backup/restore
 
 - Идея: иметь UI/API для backup/restore состояния панели.
 - Польза: проще переносить и восстанавливать небольшие инсталляции.
 - Риски: backup почти всегда содержит секреты; нужен redacted/full режим, encryption, restore validation и audit.
 - Статус: research.
+
+### Revoke/restore async edge model
+
+- Идея: перед будущими restore/revoke/admin update surfaces описать async
+  failure edges, rollback notes и operator-visible consistency status.
+- Польза: снижает риск частично применённых write/restore действий.
+- Риски: требует exact write/restore/config gate; не является Phase 9 live work.
+- Статус: Amnezia Phase 9 refresh 2026-06-28 watch signal; hybrid/gated.
 
 ### Operator API taxonomy
 

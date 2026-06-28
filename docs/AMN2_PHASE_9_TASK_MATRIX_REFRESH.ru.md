@@ -72,6 +72,9 @@ db_aggregate_counts_status=optional-confidence-not-hardening-blocker
 important_block_realization=completed-docs-only
 telegram_operation_runbook_polish=completed
 phase9_naming_docs_sync=completed-docs-only
+phase9_automation_intake_2026_06_28=P9-N007_docs-only_review-only
+phase9_amnezia_client_watch=4.8.19.0_release_current_4.9.0.3_unreleased_watch
+phase9_prvtpro_watch=v1.4.4_a62f958_carry-forward_no_new_launch_go
 private_rc_final_status_refresh_reflected=true
 default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
 ```
@@ -184,6 +187,8 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 | Важно | `AMN2_DB_AGGREGATE_COUNTS_REVIEW` | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено: optional-confidence-not-hardening-blocker; live counts только через future exact gate |
 | Важно | `AMN2_IOS_ACCEPTANCE_DECISION_REVIEW` | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено: `DefaultVPN failed-no-tested-import-path`; future exact gate для любых iOS claims |
 | Важно | `AMN2_PHASE_9_IMPORTANT_BLOCK_REALIZATION` | ChatGPT 5.5 | true | false | false | Выполнено docs-only, блоки сведены в единый hardening decision set |
+| Нормально | `P9-N007_AMNEZIA_PHASE_9_UPSTREAM_DELTA_NOTE` | ChatGPT 5.3-Spark | true | false | false | Docs-only/review-only: Amnezia 2026-06-28 delta учтен; `4.9.0.3` unreleased watch-only, `SERVER1`/`Сервер 1` reinforced as client display-name limitation, XRay validation audit -> checklist candidate |
+| Нормально | `P9-N007_PRVTPRO_PHASE_9_CARRY_FORWARD_NOTE` | ChatGPT 5.3-Spark | true | false | false | Docs-only/read-only: PRVTPRO v1.4.4/a62f958 остается carry-forward input; public tunnels hybrid-only/gated; actual runtime config path detection -> checklist candidate |
 | Просто | `NEXT_CHAT_AMN2_PHASE_9_SESSION` | ChatGPT 5.3-Spark | true | false | false | Сгенерировать/актуализировать next-chat sync с выбранным lane |
 | Просто | `AMN2_PHASE_9_TASK_MATRIX_REFRESH` | ChatGPT 5.3-Spark | true | false | false | Завершён и обновлён после `AMN2_PHASE_9_FINAL_STATUS_REFRESH` |
 | Просто | `PROJECT_STATUS_CURRENT.ru.md refresh` | ChatGPT 5.3-Spark | true | false | false | Синхронизировать текущий статус, оставляя hold до exact gate |

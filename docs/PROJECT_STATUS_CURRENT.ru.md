@@ -36,6 +36,10 @@ windows_filename_basename_local_implementation_status=completed-local-code
 windows_filename_basename_implementation_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
 windows_filename_basename_implementation_gate_decision=APPROVED_WITH_TEST_ENV_LIMITATION
 windows_filename_basename_local_implementation_test_status=scoped_tests_not_run_pytest_missing
+phase9_automation_intake_2026_06_28=P9-N007_docs-only_review-only
+phase9_amnezia_client_watch=4.8.19.0_release_current_4.9.0.3_unreleased_watch
+phase9_android_server1_upstream_signal=client_display_name_behavior_reinforced
+phase9_prvtpro_watch=v1.4.4_a62f958_carry-forward_no_new_launch_go
 private_self_config_readiness_with_naming_review=completed-docs-only
 private_self_config_readiness_with_naming_doc=docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW.ru.md
 execution_go=false
@@ -124,6 +128,12 @@ next_step=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
   Android/iOS Amnezia app остаются documented limitation/manual rename fallback
   до отдельного доказанного механизма. Для локального подтверждения
   `pytest` в окружении не установлен, тесты не запускались.
+- Automation intake 2026-06-28 accounted as `P9-N007` docs-only/review-only:
+  Amnezia `4.9.0.3` is unreleased watch-only, current release remains
+  `4.8.19.0`, Android AmneziaWG remains `2.0.1`; `SERVER1` / `Сервер 1`
+  reinforced as client display-name behavior, not production naming.
+  PRVTPRO `v1.4.4` / `a62f958` remains carry-forward input; public tunnels
+  stay hybrid-only/gated and do not approve public exposure.
 
 Phase 9 `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW`
 completed on 2026-06-27 as `completed-docs-only-review`. Document:

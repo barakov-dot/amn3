@@ -108,6 +108,9 @@ windows_filename_basename_implementation_local_status=completed-local-code
 windows_filename_basename_implementation_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
 windows_filename_basename_implementation_gate_decision=APPROVED_WITH_TEST_ENV_LIMITATION
 windows_filename_basename_implementation_test_status=scoped_tests_not_run_pytest_missing
+phase9_automation_intake_2026_06_28=P9-N007_docs-only_review-only
+phase9_amnezia_client_watch=4.8.19.0_release_current_4.9.0.3_unreleased_watch
+phase9_prvtpro_watch=v1.4.4_a62f958_carry-forward_no_new_launch_go
 execution_go=false
 config_generation=false
 config_delivery=false
@@ -184,6 +187,9 @@ production rollout не разрешены.
 - `windows_filename_basename_implementation_local_status=completed-local-code`
 - `windows_filename_basename_implementation_gate_decision=APPROVED_WITH_TEST_ENV_LIMITATION`
 - `windows_filename_basename_implementation_test_status=scoped_tests_not_run_pytest_missing`
+- `phase9_automation_intake_2026_06_28=P9-N007_docs-only_review-only`
+- `phase9_amnezia_client_watch=4.8.19.0_release_current_4.9.0.3_unreleased_watch`
+- `phase9_prvtpro_watch=v1.4.4_a62f958_carry-forward_no_new_launch_go`
 
 ```text
 next_phase_execution_gate_hold=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
