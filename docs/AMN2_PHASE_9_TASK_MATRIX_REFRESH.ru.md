@@ -12,8 +12,8 @@ selected_lane=HARDENING_PRODUCTIZATION
 final_status_refresh=completed-docs-only
 final_status_commit=d70ed23
 latest_known_docs_sync_commit=5bcbbc4
-phase9_next_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE
-phase9_selected_next_track=generator-code readiness / Windows filename-basename policy
+phase9_next_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
+phase9_selected_next_track=generator-code implementation / Windows filename-basename policy
 windows_filename_readiness_review=APPROVED_FOR_DOCS_AND_READ_ONLY_READINESS
 windows_filename_readiness_review_doc=docs/AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE_REVIEW.ru.md
 windows_filename_readiness_runbook=docs/AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_RUNBOOK.ru.md
@@ -22,8 +22,9 @@ windows_filename_readiness_candidate_repo=worktrees/amn2-public-config-delivery-
 windows_filename_readiness_candidate_branch=codex/public-config-delivery-policy-contract
 windows_filename_readiness_candidate_path=worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py
 windows_filename_readiness_inventory_scope=read-only
-windows_filename_readiness_readonly_generator_code_repo_detected=false
-windows_filename_readiness_current_filename_rule=amneziya-device-{device_id}.conf
+windows_filename_readiness_readonly_generator_code_repo_detected=true
+windows_filename_readiness_current_filename_rule=Neobyatnaya-AMNZ-N.conf
+windows_filename_implementation_local_status=completed-local-code
 windows_filename_readiness_target_filename_rule=Neobyatnaya-AMNZ-N.conf
 phase9_execution_go=false
 phase9_config_generation=false
@@ -154,10 +155,11 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 | Критично | `AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RUNBOOK` | ChatGPT 5.3-Spark | true | false | true (`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`) | Подготовлен runbook проверки display-name после import |
 | Критично | `AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT_TEMPLATE` | ChatGPT 5.3-Spark | true | false | true (`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`) | Подготовлен шаблон безопасной фиксации результата exact gate |
 | Критично | `AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT` | ChatGPT 5.3-Spark | true | false | false | Safe result recorded: `Сервер 1` -> documented limitation/manual rename |
-| Критично | `AMN2_PHASE_9_PLATFORM_DISPLAY_NAME_IMPLEMENTATION_READINESS` | ChatGPT 5.3-Spark | true | false | false | Docs-only handoff выполнен; следующий трек уже задан: `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE` |
+| Критично | `AMN2_PHASE_9_PLATFORM_DISPLAY_NAME_IMPLEMENTATION_READINESS` | ChatGPT 5.3-Spark | true | false | false | Docs-only handoff выполнен; следующий трек задан: `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE` |
 | Критично | `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE_REVIEW` | ChatGPT 5.3-Spark | true | false | false | Выполнена подтверждающая readiness-проверка: docs-only + read-only inventory (`worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py`) |
 | Критично | `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_RUNBOOK` | ChatGPT 5.3-Spark | true | false | false | Подготовлен read-only inventory checklist для поиска generator-code точки filename-forming |
 | Критично | `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_RESULT_TEMPLATE` | ChatGPT 5.3-Spark | true | false | false | Подготовлен шаблон фиксации read-only readiness результата |
+| Критично | `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE` | ChatGPT 5.3-Spark | true | false | false | Локальная имплементация выполнена: filename-policy в `worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py` изменен на `Neobyatnaya-AMNZ-N.conf`; тесты и docs-sync синхронизированы |
 | Критично | `AMN2_PHASE_9_ANDROID_DISPLAY_NAME_GATE_RESULT_SYNC` | ChatGPT 5.3-Spark | true | false | false | `completed` (pair-sync): `PROJECT_STATUS_CURRENT` + `TASK_MATRIX_REFRESH`; результат `Сервер 1` зафиксирован как `DOCUMENTED_LIMITATION`, `production naming` остается `Neobyatnaya-AMNZ-N`, Android fallback `manual rename`, iOS not proven/manual rename fallback |
 | Критично | `AMN2_PHASE_9_NAMING_DOCS_SYNC` | ChatGPT 5.3-Spark | true | false | false | Выполнено docs-only после 5.5 review; перед commit/push нужен safe scan |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
@@ -187,7 +189,7 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 ### Критичный gate-резюме до next chat
 
 ```text
-critical_openers=AMN2_PHASE_9_HARDENING_ENTRY_REVIEW, AMN2_PHASE_9_ENTRY_DECISION, AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE_REVIEW
+critical_openers=AMN2_PHASE_9_HARDENING_ENTRY_REVIEW, AMN2_PHASE_9_ENTRY_DECISION, AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
 docs_only_openers=AMN2_PHASE_9_HARDENING_DOCS_PACKAGE, AMN2_PHASE_9_TELEGRAM_OPERATION_RUNBOOK_POLISH, AMN2_HELPER_SSH_TRANSPORT_HARDENING, AMN2_HELPER_STYLE_HARDENING, AMN2_PHASE_9_FINAL_STATUS_REFRESH, AMN2_PHASE_9_TASK_MATRIX_REFRESH, AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW
 android_display_name_gate_openers=AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE_REVIEW, AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RUNBOOK, AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT_TEMPLATE
 live_openers=requires_operator_approval + exact_named_gate
@@ -203,10 +205,10 @@ default_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА
   - `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_READINESS_WITH_NAMING_REVIEW` выполнен для закрытого self/operator config path, `Neobyatnaya-AMNZ-N` и `SERVER1`;
   - повторный `AMN2_PHASE_9_TASK_MATRIX_REFRESH` при изменении статусов;
   - `AMN2_PHASE_9_FINAL_STATUS_REFRESH` при появлении новых фактов.
-- Read-only readiness-инвентаризация для Windows filename/basename уже завершена:
-  - отдельный `generator-code` репозиторий/ветка не обнаружены;
-  - код для доработки filename найден в `worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py`.
-- Продолжить `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE` только с `execution_go=false` до отдельного решения/запроса для следующего exact gate, если потребуется.
+- Read-only readiness-инвентаризация для Windows filename/basename завершена:
+  - целевой `generator-code` repository/ветка в `worktrees/amn2-public-config-delivery-policy-contract` подтверждена и уже изменена локально;
+  - код для доработки filename применен в `worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py`.
+- Продолжить `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE` с `execution_go=false`, передав результаты `result_sync` 5.3-Spark в `docs-only` и далее на 5.5 для решения риск-модели и exact gate, если потребуется.
 - `ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE` сейчас статус: `execution_go=false`.
   При запросе оператора выполнить exact gate, и только по результату этого
   обновлять `private_self_config_execution_go`.

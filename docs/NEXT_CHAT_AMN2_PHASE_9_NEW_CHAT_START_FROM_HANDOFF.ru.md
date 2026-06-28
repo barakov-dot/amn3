@@ -92,17 +92,18 @@ android_display_name_gate_fallback=manual_rename
 android_display_name_gate_windows_policy=filename/basename_Neobyatnaya-AMNZ-N.conf
 android_display_name_gate_ios_policy=not_proven_manual_rename_fallback
 android_display_name_gate_execution_go_after_result=false
-next_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE
-selected_next_track=generator-code readiness / Windows filename-basename policy
+next_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
+selected_next_track=generator-code implementation / Windows filename-basename policy
 windows_filename_basename_readiness_status=APPROVED_FOR_DOCS_AND_READ_ONLY_READINESS
 windows_filename_basename_readiness_review=docs/AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE_REVIEW.ru.md
 windows_filename_basename_readiness_runbook=docs/AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_RUNBOOK.ru.md
 windows_filename_basename_readiness_result_template=docs/AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_RESULT_TEMPLATE.ru.md
 windows_filename_basename_candidate_repo=worktrees/amn2-public-config-delivery-policy-contract
 windows_filename_basename_candidate_path=worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py
-windows_filename_basename_candidate_current=amneziya-device-{device_id}.conf
+windows_filename_basename_candidate_current=Neobyatnaya-AMNZ-N.conf
 windows_filename_basename_candidate_target=Neobyatnaya-AMNZ-N.conf
-windows_readiness_generator_code_repo_detected=false
+windows_readiness_generator_code_repo_detected=true
+windows_filename_basename_implementation_local_status=completed-local-code
 execution_go=false
 config_generation=false
 config_delivery=false
@@ -157,8 +158,8 @@ production rollout не разрешены.
   - `docs/AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_RUNBOOK.ru.md`
   - `docs/AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_RESULT_TEMPLATE.ru.md`
   Read-only inventory обнаружил точку формирования `config_filename` в
-  `worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py` и
-  не обнаружил отдельный именованный `generator-code` репозиторий/ветку.
+  `worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py`, и
+  код уже локально переведен на canonical filename.
 
 ## Что считать истинно текущим сейчас (не как исторический passed)
 
@@ -175,10 +176,11 @@ production rollout не разрешены.
 - `windows_filename_readiness_status=APPROVED_FOR_DOCS_AND_READ_ONLY_READINESS`
 - `windows_filename_readiness_inventory=read-only_completed`
 - `windows_filename_readiness_candidate=worktrees/amn2-public-config-delivery-policy-contract/app/bot/delivery.py`
-- `windows_filename_readiness_generator_code_repo_detected=false`
+- `windows_filename_readiness_generator_code_repo_detected=true`
+- `windows_filename_basename_implementation_local_status=completed-local-code`
 
 ```text
-next_phase_execution_gate_hold=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE
+next_phase_execution_gate_hold=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE
 execution_go_after_result=false
 config_generation_delivery=not-approved
 peer_creation=not-approved
