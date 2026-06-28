@@ -12,6 +12,19 @@ selected_lane=HARDENING_PRODUCTIZATION
 final_status_refresh=completed-docs-only
 final_status_commit=d70ed23
 latest_known_docs_sync_commit=5bcbbc4
+phase9_next_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE
+phase9_selected_next_track=generator-code readiness / Windows filename-basename policy
+phase9_execution_go=false
+phase9_config_generation=false
+phase9_config_delivery=false
+phase9_peer_creation=false
+phase9_live_vps_ssh_telegram_public=false
+phase9_canonical_naming=Neobyatnaya-AMNZ-N
+phase9_windows_policy=Neobyatnaya-AMNZ-N.conf -> Neobyatnaya-AMNZ-N
+phase9_android_status=DOCUMENTED_LIMITATION
+phase9_android_observed=Сервер 1
+phase9_android_fallback=manual_rename
+phase9_ios_status=not_proven/manual_rename_fallback
 phase9_android_display_name_decision_commit=691790a
 phase9_android_display_name_decision_status=DOCUMENTED_LIMITATION
 phase9_android_display_name_observed=Сервер 1
@@ -130,7 +143,7 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 | Критично | `AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RUNBOOK` | ChatGPT 5.3-Spark | true | false | true (`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`) | Подготовлен runbook проверки display-name после import |
 | Критично | `AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT_TEMPLATE` | ChatGPT 5.3-Spark | true | false | true (`ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE`) | Подготовлен шаблон безопасной фиксации результата exact gate |
 | Критично | `AMN2_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_RESULT` | ChatGPT 5.3-Spark | true | false | false | Safe result recorded: `Сервер 1` -> documented limitation/manual rename |
-| Критично | `AMN2_PHASE_9_PLATFORM_DISPLAY_NAME_IMPLEMENTATION_READINESS` | ChatGPT 5.3-Spark | true | false | false | Docs-only handoff готов: Windows filename-basename реализации, Android/iOS оставлен manual rename fallback; подготовка для future generator-code и сохранение `execution_go=false` |
+| Критично | `AMN2_PHASE_9_PLATFORM_DISPLAY_NAME_IMPLEMENTATION_READINESS` | ChatGPT 5.3-Spark | true | false | false | Docs-only handoff выполнен; следующий трек уже задан: `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE` |
 | Критично | `AMN2_PHASE_9_ANDROID_DISPLAY_NAME_GATE_RESULT_SYNC` | ChatGPT 5.3-Spark | true | false | false | `completed` (pair-sync): `PROJECT_STATUS_CURRENT` + `TASK_MATRIX_REFRESH`; результат `Сервер 1` зафиксирован как `DOCUMENTED_LIMITATION`, `production naming` остается `Neobyatnaya-AMNZ-N`, Android fallback `manual rename`, iOS not proven/manual rename fallback |
 | Критично | `AMN2_PHASE_9_NAMING_DOCS_SYNC` | ChatGPT 5.3-Spark | true | false | false | Выполнено docs-only после 5.5 review; перед commit/push нужен safe scan |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |

@@ -89,6 +89,19 @@ android_display_name_gate_fallback=manual_rename
 android_display_name_gate_windows_policy=filename/basename_Neobyatnaya-AMNZ-N.conf
 android_display_name_gate_ios_policy=not_proven_manual_rename_fallback
 android_display_name_gate_execution_go_after_result=false
+next_gate=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE
+selected_next_track=generator-code readiness / Windows filename-basename policy
+execution_go=false
+config_generation=false
+config_delivery=false
+peer_creation=false
+live_vps_ssh_telegram_public=false
+canonical_naming=Neobyatnaya-AMNZ-N
+windows_policy=Neobyatnaya-AMNZ-N.conf -> Neobyatnaya-AMNZ-N
+android_status=DOCUMENTED_LIMITATION
+android_observed=Сервер 1
+android_fallback=manual_rename
+ios_status=not_proven/manual_rename_fallback
 ```
 
 Phase 8 закрыта для private/operator RC. Android private/operator proof,
@@ -142,7 +155,7 @@ production rollout не разрешены.
 - `android_display_name_gate_execution_go_after_result=false`
 
 ```text
-next_phase_execution_gate_hold=ЖДАТЬ_ЗАПРОСА_ОПЕРАТОРА_OR_ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE
+next_phase_execution_gate_hold=AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_READINESS_GATE
 execution_go_after_result=false
 config_generation_delivery=not-approved
 peer_creation=not-approved
