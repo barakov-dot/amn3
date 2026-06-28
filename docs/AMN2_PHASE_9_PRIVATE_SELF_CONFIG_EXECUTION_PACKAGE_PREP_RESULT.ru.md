@@ -21,9 +21,13 @@ runbook_doc=docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_RUNBOOK
 result_template=docs/AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_RESULT_TEMPLATE.ru.md
 
 fields_to_sync=PROJECT_STATUS_CURRENT|TASK_MATRIX_REFRESH|NEXT_CHAT
-safe_scan_status=required_before_commit
-diffcheck_status=required_before_commit
-commit_push_status=not_requested
+safe_scan_status=passed_before_commit_9fb6196
+diffcheck_status=passed_before_commit_9fb6196
+commit_push_status=completed_9fb6196
+commit=9fb6196
+push_status=done
+origin_sync=true
+post_push_refresh_status=prepared-docs-only
 
 execution_go=false
 config_generation=false
@@ -41,14 +45,14 @@ Fields that must stay synchronized: gate id, previous gate, decision status,
 confirmation, package artifact paths, safe-scan status, diffcheck status, and
 the five stop-lines.
 
-Safe scan patterns to run before any commit/push:
+Safe scan patterns to run before any future commit/push:
 
 ```text
 execution_go=true|config_generation=true|config_delivery=true|peer_creation=true|live_vps_ssh_telegram_public=true|approved_now=true
 .conf|QR|[v][p][n]://|private key|PSK|token|password|raw logs
 ```
 
-`git diff --check` is required before any commit/push.
+`git diff --check` is required before any future commit/push.
 
 ## Final Stop-Lines
 
