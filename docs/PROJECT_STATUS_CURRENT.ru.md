@@ -136,6 +136,13 @@ config_share_redeem_db_row_status_join_push_status=done
 config_share_redeem_db_row_status_join_test_status=scoped_pytest_69_passed
 config_share_redeem_db_row_status_join_contract=requested_device_auth_lookup_includes_db_device_server_status_before_atomic_redeem
 config_share_redeem_db_row_status_join_live_actions=false
+config_share_redeem_audit_event_no_payload_logging_status=completed-local-code
+config_share_redeem_audit_event_no_payload_logging_commit=83d8331
+config_share_redeem_audit_event_no_payload_logging_branch=codex/public-config-delivery-policy-contract
+config_share_redeem_audit_event_no_payload_logging_push_status=done
+config_share_redeem_audit_event_no_payload_logging_test_status=scoped_pytest_72_passed
+config_share_redeem_audit_event_no_payload_logging_contract=allowed_denied_redeem_audit_events_use_safe_metadata_without_token_hash_or_config_payload
+config_share_redeem_audit_event_no_payload_logging_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -3517,6 +3524,50 @@ result: failed as expected because auth row did not expose device_status/server_
 
 focused config-share/db/security suite:
 69 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
+
+## Config Share Redeem Audit Event No-Payload Logging Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+83d8331 Add config share redeem audit events
+```
+
+Покрыто:
+
+- `redeem_config_share_download` принимает optional `audit_store`;
+- allowed и denied decisions пишутся как `config.share.download_allowed` /
+  `config.share.download_denied`;
+- audit target привязан к owner user и requested device;
+- audit metadata строится только через `safe_audit_metadata`;
+- raw token, token hash, `.conf`, QR/import URI, `vpn://`, private keys, PSK
+  и config payload не попадают в audit metadata;
+- SQLite integration test подтверждает запись safe event в `admin_actions`.
+
+Проверка:
+
+```text
+RED:
+tests/services/test_config_share_tokens.py::test_redeem_config_share_download_records_allowed_audit_without_payloads
+tests/services/test_config_share_tokens.py::test_redeem_config_share_download_records_denied_audit_without_payloads_or_consume
+result: failed as expected because audit_store was not accepted yet
+
+focused config-share/db/security suite:
+72 passed
 ```
 
 Live VPS не трогался. Slice не добавляет public download route,
