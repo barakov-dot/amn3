@@ -129,6 +129,13 @@ config_share_redeem_decision_adapter_push_status=done
 config_share_redeem_decision_adapter_test_status=scoped_pytest_43_passed
 config_share_redeem_decision_adapter_contract=hash_only_lookup_policy_decision_then_atomic_redeem_without_consuming_invalid_requests
 config_share_redeem_decision_adapter_live_actions=false
+config_share_redeem_db_row_status_join_status=completed-local-code
+config_share_redeem_db_row_status_join_commit=548618a
+config_share_redeem_db_row_status_join_branch=codex/public-config-delivery-policy-contract
+config_share_redeem_db_row_status_join_push_status=done
+config_share_redeem_db_row_status_join_test_status=scoped_pytest_69_passed
+config_share_redeem_db_row_status_join_contract=requested_device_auth_lookup_includes_db_device_server_status_before_atomic_redeem
+config_share_redeem_db_row_status_join_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -3468,6 +3475,48 @@ result: import error as expected because redeem_config_share_download did not ex
 
 focused config-share/db/security suite:
 43 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
+
+## Config Share Redeem DB Row Status Join Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+548618a Add config share redeem row status join
+```
+
+Покрыто:
+
+- `get_config_share_token_for_auth` принимает `requested_device_id`;
+- auth lookup возвращает реальные `device_status` и `server_status` из DB row/JOIN;
+- multi-bound token lookup использует статус именно requested device;
+- inactive device/server denial происходит before atomic consume;
+- unbound device request остается `resource_not_bound` и не маскируется inactive-status deny;
+- raw token/config payload не сохраняются и не выводятся.
+
+Проверка:
+
+```text
+RED:
+tests/db/test_repositories.py::test_config_share_token_auth_lookup_includes_bound_device_and_server_status
+tests/db/test_repositories.py::test_config_share_token_auth_lookup_prefers_requested_device_status
+result: failed as expected because auth row did not expose device_status/server_status and did not accept requested_device_id
+
+focused config-share/db/security suite:
+69 passed
 ```
 
 Live VPS не трогался. Slice не добавляет public download route,
