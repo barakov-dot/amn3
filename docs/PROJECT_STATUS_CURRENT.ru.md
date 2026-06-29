@@ -115,6 +115,13 @@ config_template_override_empty_config_guard_push_status=done
 config_template_override_empty_config_guard_test_status=scoped_pytest_19_passed
 config_template_override_empty_config_guard_contract=empty_client_config_rejected_before_delivery_package_build
 config_template_override_empty_config_guard_live_actions=false
+config_share_token_atomic_redeem_status=completed-local-code
+config_share_token_atomic_redeem_commit=62d01d9
+config_share_token_atomic_redeem_branch=codex/public-config-delivery-policy-contract
+config_share_token_atomic_redeem_push_status=done
+config_share_token_atomic_redeem_test_status=scoped_pytest_40_passed
+config_share_token_atomic_redeem_contract=hash_only_expiry_checked_one_time_atomic_download_count_increment
+config_share_token_atomic_redeem_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -3379,6 +3386,46 @@ full local suite:
 ```
 
 Live VPS не трогался. Slice не добавляет public download route, self-service config download route, `/api/*`, API `config:read`, Local Agent `/configs`, generated config persistence, новые QR/import behavior или live VPS calls; VPS gate для самого slice не нужен.
+
+## Config Share Token Atomic Redeem Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+62d01d9 Add config share token atomic redeem
+```
+
+Покрыто:
+
+- `redeem_config_share_token_for_auth` выполняет hash-only lookup и consume в одном DB operation;
+- expired/revoked/download-limit tokens не redeem;
+- successful redeem immediately increments `download_count` and stores safe usage metadata;
+- повторный one-time redeem возвращает `None`;
+- raw token не хранится и не выводится.
+
+Проверка:
+
+```text
+RED:
+tests/db/test_repositories.py::test_redeem_config_share_token_for_auth_is_one_time_and_atomic
+result: failed as expected because Repository had no redeem method
+
+focused config-share/db/security suite:
+40 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
 
 ## Backup/Import Policy Contract Slice
 

@@ -107,6 +107,13 @@ config_template_override_empty_config_guard_push_status=done
 config_template_override_empty_config_guard_test_status=scoped_pytest_19_passed
 config_template_override_empty_config_guard_contract=empty_client_config_rejected_before_delivery_package_build
 config_template_override_empty_config_guard_live_actions=false
+config_share_token_atomic_redeem_status=completed-local-code
+config_share_token_atomic_redeem_commit=62d01d9
+config_share_token_atomic_redeem_branch=codex/public-config-delivery-policy-contract
+config_share_token_atomic_redeem_push_status=done
+config_share_token_atomic_redeem_test_status=scoped_pytest_40_passed
+config_share_token_atomic_redeem_contract=hash_only_expiry_checked_one_time_atomic_download_count_increment
+config_share_token_atomic_redeem_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -342,6 +349,7 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 | Очень важно | `P9_VALIDATION_AND_CONFIG_PATH_CHECKLIST_SYNC` | ChatGPT 5.3-Spark | true | false | false | Runtime config path / manager export guard `990a376`; XRay runtime validation snapshot `fdc431d`; numeric range validation `5b1d34a`; host/path validation `876ce32`; network/CIDR validation `6e0bbe2`; identifier validation `0129fc9`; unique server name guard `d1c2bc3`; enum validation `c7e5dbb`, scoped `tests/server_config/test_loader.py` + `tests/agent/test_runtime.py` = 37 passed |
 | Очень важно | `P9_CONFIG_DELIVERY_TEMPLATE_GUARD` | ChatGPT 5.3-Spark | true | false | false | Local-code guards выполнены: `eeef841` unknown delivery placeholders fail before package build; `a674db2` empty delivery messages fail before package build; scoped `tests/bot/test_delivery.py` + `tests/bot/test_bot_workflows.py` = 29 passed; config delivery remains not-approved |
 | Очень важно | `P9_CONFIG_TEMPLATE_OVERRIDE_EMPTY_CONFIG_GUARD` | ChatGPT 5.3-Spark | true | false | false | Local-code guard выполнен: `ac298c2`; client config template override не может rendered empty config перед delivery package build; scoped `tests/vpn/test_config_templates.py` + `tests/services/test_config_delivery.py` + `tests/bot/test_delivery.py` = 19 passed; config delivery remains not-approved |
+| Очень важно | `P9_CONFIG_SHARE_TOKEN_ATOMIC_REDEEM` | ChatGPT 5.3-Spark | true | false | false | Local-code guard выполнен: `62d01d9`; share-token redeem теперь hash-only + expiry checked + atomic download_count increment; повторный one-time redeem возвращает `None`; scoped config-share/db/security suite = 40 passed; public/self-service config delivery remains not-approved |
 | Критично | `ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5` | ChatGPT 5.5 decision + ChatGPT 5.3-Spark execution/status sync | false | true (`requires_model_switch`) | true (`ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5`) | Выполнено private/operator-only: run_id `20260628T231440`; 5 `.conf` generated locally under ignored `private-artifacts`; peer apply performed; QR/vpn import links не генерировались; config delivery/public/self-service blocked |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` (закрыт) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено |
