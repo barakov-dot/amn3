@@ -122,6 +122,13 @@ config_share_token_atomic_redeem_push_status=done
 config_share_token_atomic_redeem_test_status=scoped_pytest_40_passed
 config_share_token_atomic_redeem_contract=hash_only_expiry_checked_one_time_atomic_download_count_increment
 config_share_token_atomic_redeem_live_actions=false
+config_share_redeem_decision_adapter_status=completed-local-code
+config_share_redeem_decision_adapter_commit=9555f4c
+config_share_redeem_decision_adapter_branch=codex/public-config-delivery-policy-contract
+config_share_redeem_decision_adapter_push_status=done
+config_share_redeem_decision_adapter_test_status=scoped_pytest_43_passed
+config_share_redeem_decision_adapter_contract=hash_only_lookup_policy_decision_then_atomic_redeem_without_consuming_invalid_requests
+config_share_redeem_decision_adapter_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -3420,6 +3427,47 @@ result: failed as expected because Repository had no redeem method
 
 focused config-share/db/security suite:
 40 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
+
+## Config Share Redeem Decision Adapter Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+9555f4c Add config share redeem decision adapter
+```
+
+Покрыто:
+
+- `redeem_config_share_download` converts raw token to hash immediately;
+- adapter performs hash-only auth lookup and policy decision before consuming;
+- invalid device/artifact request does not consume a one-time token;
+- allowed decision performs atomic redeem;
+- redeem race returns denied `download_limit_reached`;
+- safe audit metadata excludes raw token, token hash and config payload.
+
+Проверка:
+
+```text
+RED:
+tests/services/test_config_share_tokens.py
+result: import error as expected because redeem_config_share_download did not exist
+
+focused config-share/db/security suite:
+43 passed
 ```
 
 Live VPS не трогался. Slice не добавляет public download route,

@@ -114,6 +114,13 @@ config_share_token_atomic_redeem_push_status=done
 config_share_token_atomic_redeem_test_status=scoped_pytest_40_passed
 config_share_token_atomic_redeem_contract=hash_only_expiry_checked_one_time_atomic_download_count_increment
 config_share_token_atomic_redeem_live_actions=false
+config_share_redeem_decision_adapter_status=completed-local-code
+config_share_redeem_decision_adapter_commit=9555f4c
+config_share_redeem_decision_adapter_branch=codex/public-config-delivery-policy-contract
+config_share_redeem_decision_adapter_push_status=done
+config_share_redeem_decision_adapter_test_status=scoped_pytest_43_passed
+config_share_redeem_decision_adapter_contract=hash_only_lookup_policy_decision_then_atomic_redeem_without_consuming_invalid_requests
+config_share_redeem_decision_adapter_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -350,6 +357,7 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 | Очень важно | `P9_CONFIG_DELIVERY_TEMPLATE_GUARD` | ChatGPT 5.3-Spark | true | false | false | Local-code guards выполнены: `eeef841` unknown delivery placeholders fail before package build; `a674db2` empty delivery messages fail before package build; scoped `tests/bot/test_delivery.py` + `tests/bot/test_bot_workflows.py` = 29 passed; config delivery remains not-approved |
 | Очень важно | `P9_CONFIG_TEMPLATE_OVERRIDE_EMPTY_CONFIG_GUARD` | ChatGPT 5.3-Spark | true | false | false | Local-code guard выполнен: `ac298c2`; client config template override не может rendered empty config перед delivery package build; scoped `tests/vpn/test_config_templates.py` + `tests/services/test_config_delivery.py` + `tests/bot/test_delivery.py` = 19 passed; config delivery remains not-approved |
 | Очень важно | `P9_CONFIG_SHARE_TOKEN_ATOMIC_REDEEM` | ChatGPT 5.3-Spark | true | false | false | Local-code guard выполнен: `62d01d9`; share-token redeem теперь hash-only + expiry checked + atomic download_count increment; повторный one-time redeem возвращает `None`; scoped config-share/db/security suite = 40 passed; public/self-service config delivery remains not-approved |
+| Очень важно | `P9_CONFIG_SHARE_REDEEM_DECISION_ADAPTER` | ChatGPT 5.3-Spark | true | false | false | Local-code adapter выполнен: `9555f4c`; hash-only lookup -> policy decision -> final atomic redeem; invalid request не consumes one-time token; scoped config-share/db/security suite = 43 passed; public/self-service config delivery remains not-approved |
 | Критично | `ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5` | ChatGPT 5.5 decision + ChatGPT 5.3-Spark execution/status sync | false | true (`requires_model_switch`) | true (`ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5`) | Выполнено private/operator-only: run_id `20260628T231440`; 5 `.conf` generated locally under ignored `private-artifacts`; peer apply performed; QR/vpn import links не генерировались; config delivery/public/self-service blocked |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` (закрыт) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено |
