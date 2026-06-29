@@ -171,6 +171,13 @@ config_share_token_backup_redaction_contract_push_status=done
 config_share_token_backup_redaction_contract_test_status=scoped_pytest_101_passed
 config_share_token_backup_redaction_contract_contract=backup_manifest_excludes_usable_share_hashes_create_restore_block_usable_hashes_without_dangerous_mode
 config_share_token_backup_redaction_contract_live_actions=false
+config_share_restore_dangerous_mode_gate_contract_status=completed-local-code
+config_share_restore_dangerous_mode_gate_contract_commit=ca4aa7c
+config_share_restore_dangerous_mode_gate_contract_branch=codex/public-config-delivery-policy-contract
+config_share_restore_dangerous_mode_gate_contract_push_status=done
+config_share_restore_dangerous_mode_gate_contract_test_status=scoped_pytest_104_passed
+config_share_restore_dangerous_mode_gate_contract_contract=restore_usable_share_hashes_dangerous_mode_gate_closed_not_implemented_cli_flag_absent
+config_share_restore_dangerous_mode_gate_contract_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -3768,6 +3775,49 @@ result: failed as expected because manifest exclusion and create/restore guards 
 
 focused backup/config-share/db/security suite:
 101 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
+
+## Config Share Restore Dangerous Mode Gate Contract Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+ca4aa7c Add config share restore dangerous mode gate
+```
+
+Покрыто:
+
+- добавлен закрытый gate metadata
+  `CONFIG_SHARE_RESTORE_USABLE_TOKEN_HASHES_DANGEROUS_MODE`;
+- `BackupService.restore(..., restore_usable_config_share_tokens=True)` явно
+  отклоняется, потому что dangerous mode gate ещё не implemented;
+- target DB не создаётся при попытке включить dangerous mode;
+- CLI restore не exposes dangerous-mode флаг;
+- public/self-service config delivery remains not-approved.
+
+Проверка:
+
+```text
+RED:
+tests/backup/test_backup_service.py::test_restore_usable_config_share_tokens_dangerous_mode_gate_is_closed
+tests/backup/test_backup_service.py::test_restore_rejects_explicit_share_token_dangerous_mode_before_writing_target
+result: failed as expected because the gate metadata and explicit restore parameter were missing
+
+focused backup/config-share/db/security suite:
+104 passed
 ```
 
 Live VPS не трогался. Slice не добавляет public download route,
