@@ -157,6 +157,13 @@ config_share_redeem_rate_limit_repository_persistence_push_status=done
 config_share_redeem_rate_limit_repository_persistence_test_status=scoped_pytest_78_passed
 config_share_redeem_rate_limit_repository_persistence_contract=sqlite_scope_attempts_denied_window_blocks_without_token_hash_or_config_payload
 config_share_redeem_rate_limit_repository_persistence_live_actions=false
+config_share_redeem_public_route_block_contract_status=completed-local-code
+config_share_redeem_public_route_block_contract_commit=3ad001f
+config_share_redeem_public_route_block_contract_branch=codex/public-config-delivery-policy-contract
+config_share_redeem_public_route_block_contract_push_status=done
+config_share_redeem_public_route_block_contract_test_status=scoped_pytest_92_passed
+config_share_redeem_public_route_block_contract_contract=public_token_config_share_download_policy_remains_blocked_future_and_unmounted
+config_share_redeem_public_route_block_contract_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -3670,6 +3677,46 @@ result: failed as expected because repository persistence methods were missing
 
 focused config-share/db/security suite:
 78 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
+
+## Config Share Public Route Block Contract Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+3ad001f Add config share public route block contract
+```
+
+Покрыто:
+
+- `public_token.config_share_download.blocked` остаётся `blocked-future`;
+- policy не включает новое поведение;
+- FastAPI web route inventory не содержит public config-share download route;
+- policy теперь ссылается на route-binding contract test;
+- public/self-service config delivery remains not-approved.
+
+Проверка:
+
+```text
+RED:
+tests/security/test_surface_policy_bindings.py::test_public_config_share_download_route_stays_unmounted
+result: failed as expected because the blocked-future policy had no route-binding contract test_ref
+
+focused config-share/db/security/web suite:
+92 passed
 ```
 
 Live VPS не трогался. Slice не добавляет public download route,
