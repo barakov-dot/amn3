@@ -135,6 +135,13 @@ config_share_redeem_audit_event_no_payload_logging_push_status=done
 config_share_redeem_audit_event_no_payload_logging_test_status=scoped_pytest_72_passed
 config_share_redeem_audit_event_no_payload_logging_contract=allowed_denied_redeem_audit_events_use_safe_metadata_without_token_hash_or_config_payload
 config_share_redeem_audit_event_no_payload_logging_live_actions=false
+config_share_redeem_rate_limit_policy_boundary_status=completed-local-code
+config_share_redeem_rate_limit_policy_boundary_commit=56e49ff
+config_share_redeem_rate_limit_policy_boundary_branch=codex/public-config-delivery-policy-contract
+config_share_redeem_rate_limit_policy_boundary_push_status=done
+config_share_redeem_rate_limit_policy_boundary_test_status=scoped_pytest_75_passed
+config_share_redeem_rate_limit_policy_boundary_contract=pre_token_lookup_rate_limit_boundary_records_safe_attempts_without_token_hash_or_config_payload
+config_share_redeem_rate_limit_policy_boundary_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -374,6 +381,7 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 | Очень важно | `P9_CONFIG_SHARE_REDEEM_DECISION_ADAPTER` | ChatGPT 5.3-Spark | true | false | false | Local-code adapter выполнен: `9555f4c`; hash-only lookup -> policy decision -> final atomic redeem; invalid request не consumes one-time token; scoped config-share/db/security suite = 43 passed; public/self-service config delivery remains not-approved |
 | Очень важно | `P9_CONFIG_SHARE_REDEEM_DB_ROW_STATUS_JOIN` | ChatGPT 5.3-Spark | true | false | false | Local-code join выполнен: `548618a`; auth lookup принимает requested device и возвращает реальные device/server statuses из DB row/JOIN before atomic consume; inactive device/server deny before consume; scoped config-share/db/security suite = 69 passed; public/self-service config delivery remains not-approved |
 | Очень важно | `P9_CONFIG_SHARE_REDEEM_AUDIT_EVENT_NO_PAYLOAD_LOGGING` | ChatGPT 5.3-Spark | true | false | false | Local-code audit slice выполнен: `83d8331`; allowed/denied redeem decisions пишутся safe audit events через `safe_audit_metadata`; raw token/hash/config payload/QR/import URI не логируются; scoped config-share/db/security suite = 72 passed; public/self-service config delivery remains not-approved |
+| Очень важно | `P9_CONFIG_SHARE_REDEEM_RATE_LIMIT_POLICY_BOUNDARY` | ChatGPT 5.3-Spark | true | false | false | Local-code boundary выполнен: `56e49ff`; optional rate-limit store blocks before token lookup/consume and records safe attempts without raw token/hash/config payload; scoped config-share/db/security suite = 75 passed; public/self-service config delivery remains not-approved |
 | Критично | `ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5` | ChatGPT 5.5 decision + ChatGPT 5.3-Spark execution/status sync | false | true (`requires_model_switch`) | true (`ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5`) | Выполнено private/operator-only: run_id `20260628T231440`; 5 `.conf` generated locally under ignored `private-artifacts`; peer apply performed; QR/vpn import links не генерировались; config delivery/public/self-service blocked |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` (закрыт) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено |

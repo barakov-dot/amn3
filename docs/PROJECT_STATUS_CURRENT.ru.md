@@ -143,6 +143,13 @@ config_share_redeem_audit_event_no_payload_logging_push_status=done
 config_share_redeem_audit_event_no_payload_logging_test_status=scoped_pytest_72_passed
 config_share_redeem_audit_event_no_payload_logging_contract=allowed_denied_redeem_audit_events_use_safe_metadata_without_token_hash_or_config_payload
 config_share_redeem_audit_event_no_payload_logging_live_actions=false
+config_share_redeem_rate_limit_policy_boundary_status=completed-local-code
+config_share_redeem_rate_limit_policy_boundary_commit=56e49ff
+config_share_redeem_rate_limit_policy_boundary_branch=codex/public-config-delivery-policy-contract
+config_share_redeem_rate_limit_policy_boundary_push_status=done
+config_share_redeem_rate_limit_policy_boundary_test_status=scoped_pytest_75_passed
+config_share_redeem_rate_limit_policy_boundary_contract=pre_token_lookup_rate_limit_boundary_records_safe_attempts_without_token_hash_or_config_payload
+config_share_redeem_rate_limit_policy_boundary_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -3568,6 +3575,49 @@ result: failed as expected because audit_store was not accepted yet
 
 focused config-share/db/security suite:
 72 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
+
+## Config Share Redeem Rate Limit Policy Boundary Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+56e49ff Add config share redeem rate limit boundary
+```
+
+Покрыто:
+
+- `redeem_config_share_download` принимает optional `rate_limit_store`;
+- rate-limit check выполняется before token lookup;
+- blocked attempt не делает token lookup и не consumes token;
+- blocked attempt возвращает generic public denial без раскрытия token validity;
+- allowed/denied attempts записываются в rate-limit store safe metadata only;
+- raw token, token hash, QR/import URI, `vpn://`, private keys, PSK и config
+  payload не попадают в rate-limit/audit metadata.
+
+Проверка:
+
+```text
+RED:
+tests/services/test_config_share_tokens.py::test_redeem_config_share_download_rate_limit_blocks_before_token_lookup
+tests/services/test_config_share_tokens.py::test_redeem_config_share_download_records_safe_rate_limit_attempt_on_denied_request
+result: failed as expected because rate_limit_store was not accepted yet
+
+focused config-share/db/security suite:
+75 passed
 ```
 
 Live VPS не трогался. Slice не добавляет public download route,
