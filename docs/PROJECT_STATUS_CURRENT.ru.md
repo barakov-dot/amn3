@@ -164,6 +164,13 @@ config_share_redeem_public_route_block_contract_push_status=done
 config_share_redeem_public_route_block_contract_test_status=scoped_pytest_92_passed
 config_share_redeem_public_route_block_contract_contract=public_token_config_share_download_policy_remains_blocked_future_and_unmounted
 config_share_redeem_public_route_block_contract_live_actions=false
+config_share_token_backup_redaction_contract_status=completed-local-code
+config_share_token_backup_redaction_contract_commit=5aecfed
+config_share_token_backup_redaction_contract_branch=codex/public-config-delivery-policy-contract
+config_share_token_backup_redaction_contract_push_status=done
+config_share_token_backup_redaction_contract_test_status=scoped_pytest_101_passed
+config_share_token_backup_redaction_contract_contract=backup_manifest_excludes_usable_share_hashes_create_restore_block_usable_hashes_without_dangerous_mode
+config_share_token_backup_redaction_contract_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -3717,6 +3724,50 @@ result: failed as expected because the blocked-future policy had no route-bindin
 
 focused config-share/db/security/web suite:
 92 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
+
+## Config Share Token Backup Redaction Contract Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+5aecfed Add config share backup redaction guard
+```
+
+Покрыто:
+
+- backup manifest декларирует exclusion для usable config-share token hashes;
+- `BackupService.create()` блокирует database с usable config-share token hashes;
+- `BackupService.restore()` блокирует archive с usable config-share token hashes
+  до появления explicit dangerous mode;
+- legacy backup manifests без нового exclusion остаются verify-compatible;
+- public/self-service config delivery remains not-approved.
+
+Проверка:
+
+```text
+RED:
+tests/backup/test_backup_service.py::test_backup_create_verify_and_restore_requires_secret
+tests/backup/test_backup_service.py::test_backup_create_rejects_usable_config_share_token_hashes
+tests/backup/test_backup_service.py::test_restore_rejects_usable_config_share_token_hashes_before_writing_target
+tests/backup/test_backup_service.py::test_verify_accepts_legacy_manifest_excludes_without_share_token_hashes
+result: failed as expected because manifest exclusion and create/restore guards were missing, and legacy manifest compatibility needed explicit handling
+
+focused backup/config-share/db/security suite:
+101 passed
 ```
 
 Live VPS не трогался. Slice не добавляет public download route,
