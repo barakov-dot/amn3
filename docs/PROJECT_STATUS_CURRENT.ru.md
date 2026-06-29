@@ -150,6 +150,13 @@ config_share_redeem_rate_limit_policy_boundary_push_status=done
 config_share_redeem_rate_limit_policy_boundary_test_status=scoped_pytest_75_passed
 config_share_redeem_rate_limit_policy_boundary_contract=pre_token_lookup_rate_limit_boundary_records_safe_attempts_without_token_hash_or_config_payload
 config_share_redeem_rate_limit_policy_boundary_live_actions=false
+config_share_redeem_rate_limit_repository_persistence_status=completed-local-code
+config_share_redeem_rate_limit_repository_persistence_commit=b8fb466
+config_share_redeem_rate_limit_repository_persistence_branch=codex/public-config-delivery-policy-contract
+config_share_redeem_rate_limit_repository_persistence_push_status=done
+config_share_redeem_rate_limit_repository_persistence_test_status=scoped_pytest_78_passed
+config_share_redeem_rate_limit_repository_persistence_contract=sqlite_scope_attempts_denied_window_blocks_without_token_hash_or_config_payload
+config_share_redeem_rate_limit_repository_persistence_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -3618,6 +3625,51 @@ result: failed as expected because rate_limit_store was not accepted yet
 
 focused config-share/db/security suite:
 75 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
+
+## Config Share Redeem Rate Limit Repository Persistence Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+b8fb466 Add config share redeem rate limit persistence
+```
+
+Покрыто:
+
+- добавлена SQLite table `config_share_redeem_attempts`;
+- добавлен индекс по `scope_key` и `attempted_at`;
+- `Repository.record_config_share_redeem_attempt` сохраняет safe attempt metadata;
+- `Repository.is_config_share_redeem_rate_limited` блокирует после 5 denied
+  attempts за 10 минут;
+- allowed и старые attempts не блокируют scope;
+- repository-backed rate-limit blocks before consume and keeps generic denial;
+- raw token, token hash, QR/import URI, `vpn://`, private keys, PSK и config
+  payload не сохраняются.
+
+Проверка:
+
+```text
+RED:
+tests/db/test_repositories.py::test_config_share_redeem_rate_limit_persists_safe_attempts_and_blocks_scope
+tests/db/test_repositories.py::test_config_share_redeem_rate_limit_ignores_allowed_and_old_attempts
+result: failed as expected because repository persistence methods were missing
+
+focused config-share/db/security suite:
+78 passed
 ```
 
 Live VPS не трогался. Slice не добавляет public download route,
