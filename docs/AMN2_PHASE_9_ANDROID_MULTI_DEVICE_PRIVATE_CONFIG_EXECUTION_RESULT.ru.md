@@ -79,6 +79,9 @@ android_auto_display_name_applied=false
 windows_auto_display_name_applied=false
 manual_rename_required=true
 tv_projector_import_status=pending_operator_review
+operator_import_review_device_03=server_display_name_Сервер 1
+operator_import_review_device_04=server_display_name_Сервер 1
+operator_import_review_device_05=server_display_name_manual_renamed_to_NeobyatnayaNET
 ```
 
 ```text
