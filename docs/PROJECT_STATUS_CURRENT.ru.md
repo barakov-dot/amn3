@@ -234,6 +234,13 @@ config_share_restore_schema_check_constraint_declaration_contract_push_status=do
 config_share_restore_schema_check_constraint_declaration_contract_test_status=scoped_pytest_136_passed
 config_share_restore_schema_check_constraint_declaration_contract_contract=backup_create_restore_reject_missing_config_share_check_constraint_declarations_before_backup_or_target_write
 config_share_restore_schema_check_constraint_declaration_contract_live_actions=false
+config_share_restore_schema_unique_constraint_declaration_contract_status=completed-local-code
+config_share_restore_schema_unique_constraint_declaration_contract_commit=4cf1e85
+config_share_restore_schema_unique_constraint_declaration_contract_branch=codex/public-config-delivery-policy-contract
+config_share_restore_schema_unique_constraint_declaration_contract_push_status=done
+config_share_restore_schema_unique_constraint_declaration_contract_test_status=scoped_pytest_138_passed
+config_share_restore_schema_unique_constraint_declaration_contract_contract=backup_create_restore_reject_missing_config_share_primary_key_or_token_hash_unique_declarations_before_backup_or_target_write
+config_share_restore_schema_unique_constraint_declaration_contract_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -4213,6 +4220,52 @@ result: failed as expected because missing CHECK declarations were not rejected 
 
 focused backup/config-share/db/security suite:
 136 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
+
+## Config Share Restore Schema Unique Constraint Declaration Contract Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+4cf1e85 Add config share restore unique schema guard
+```
+
+Покрыто:
+
+- backup create проверяет, что `config_share_tokens.id` остаётся primary key
+  до сборки backup;
+- backup create проверяет, что `config_share_tokens.token_hash` остаётся
+  unique constraint/index;
+- backup restore проверяет тот же token-identity schema contract до записи
+  target DB;
+- backup DB с валидными строками, но ослабленной `config_share_tokens` identity
+  schema, не принимается как полноценная history-only база;
+- usable share-token hashes остаются blocked без dangerous mode;
+- public/self-service config delivery remains not-approved.
+
+Проверка:
+
+```text
+RED:
+tests/backup/test_backup_service.py::test_backup_create_rejects_missing_config_share_unique_constraint_declarations
+tests/backup/test_backup_service.py::test_restore_rejects_missing_config_share_unique_constraint_declarations_before_writing_target
+result: failed as expected because missing PK/UNIQUE declarations were not rejected before backup/target DB write
+
+focused backup/config-share/db/security suite:
+138 passed
 ```
 
 Live VPS не трогался. Slice не добавляет public download route,
