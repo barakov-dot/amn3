@@ -240,6 +240,13 @@ config_share_restore_schema_required_columns_declaration_contract_push_status=do
 config_share_restore_schema_required_columns_declaration_contract_test_status=scoped_pytest_140_passed
 config_share_restore_schema_required_columns_declaration_contract_contract=backup_create_restore_reject_missing_config_share_tokens_required_columns_before_backup_or_target_write
 config_share_restore_schema_required_columns_declaration_contract_live_actions=false
+config_share_restore_schema_column_declaration_shape_contract_status=completed-local-code
+config_share_restore_schema_column_declaration_shape_contract_commit=101da38
+config_share_restore_schema_column_declaration_shape_contract_branch=codex/public-config-delivery-policy-contract
+config_share_restore_schema_column_declaration_shape_contract_push_status=done
+config_share_restore_schema_column_declaration_shape_contract_test_status=scoped_pytest_142_passed
+config_share_restore_schema_column_declaration_shape_contract_contract=backup_create_restore_reject_weakened_config_share_tokens_column_declaration_shape_before_backup_or_target_write
+config_share_restore_schema_column_declaration_shape_contract_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -494,6 +501,7 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 | Очень важно | `P9_CONFIG_SHARE_RESTORE_SCHEMA_CHECK_CONSTRAINT_DECLARATION_CONTRACT` | ChatGPT 5.3-Spark | true | false | false | Local-code CHECK schema declaration guard выполнен: `52f673e`; backup create/restore отклоняют missing `config_share_tokens` CHECK declarations before backup/target DB write; scoped backup/config-share/db/security suite = 136 passed; public/self-service config delivery remains not-approved |
 | Очень важно | `P9_CONFIG_SHARE_RESTORE_SCHEMA_UNIQUE_CONSTRAINT_DECLARATION_CONTRACT` | ChatGPT 5.3-Spark | true | false | false | Local-code UNIQUE/PK schema declaration guard выполнен: `4cf1e85`; backup create/restore отклоняют missing `config_share_tokens.id` primary key или `token_hash` unique constraint before backup/target DB write; scoped backup/config-share/db/security suite = 138 passed; public/self-service config delivery remains not-approved |
 | Очень важно | `P9_CONFIG_SHARE_RESTORE_SCHEMA_REQUIRED_COLUMNS_DECLARATION_CONTRACT` | ChatGPT 5.3-Spark | true | false | false | Local-code required-columns schema declaration guard выполнен: `1f0343d`; backup create/restore отклоняют missing required `config_share_tokens` columns before backup/target DB write; scoped backup/config-share/db/security suite = 140 passed; public/self-service config delivery remains not-approved |
+| Очень важно | `P9_CONFIG_SHARE_RESTORE_SCHEMA_COLUMN_DECLARATION_SHAPE_CONTRACT` | ChatGPT 5.3-Spark | true | false | false | Local-code column declaration shape guard выполнен: `101da38`; backup create/restore отклоняют weakened `config_share_tokens` column type/default/NOT NULL declarations before backup/target DB write; scoped backup/config-share/db/security suite = 142 passed; public/self-service config delivery remains not-approved |
 | Критично | `ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5` | ChatGPT 5.5 decision + ChatGPT 5.3-Spark execution/status sync | false | true (`requires_model_switch`) | true (`ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5`) | Выполнено private/operator-only: run_id `20260628T231440`; 5 `.conf` generated locally under ignored `private-artifacts`; peer apply performed; QR/vpn import links не генерировались; config delivery/public/self-service blocked |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` (закрыт) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено |
