@@ -74,7 +74,7 @@ ios_status=not_proven/manual_rename_fallback
 ```
 
 ```text
-operator_import_review_status=partial
+operator_import_review_status=done
 android_auto_display_name_applied=false
 windows_auto_display_name_applied=false
 manual_rename_required=true
