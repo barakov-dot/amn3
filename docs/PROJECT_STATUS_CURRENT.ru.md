@@ -185,6 +185,13 @@ config_share_restore_history_contract_push_status=done
 config_share_restore_history_contract_test_status=scoped_pytest_108_passed
 config_share_restore_history_contract_contract=restore_allows_expired_revoked_exhausted_share_records_as_history_only_while_usable_hashes_remain_blocked
 config_share_restore_history_contract_live_actions=false
+config_share_restore_policy_shape_validation_contract_status=completed-local-code
+config_share_restore_policy_shape_validation_contract_commit=6387e9e
+config_share_restore_policy_shape_validation_contract_branch=codex/public-config-delivery-policy-contract
+config_share_restore_policy_shape_validation_contract_push_status=done
+config_share_restore_policy_shape_validation_contract_test_status=scoped_pytest_110_passed
+config_share_restore_policy_shape_validation_contract_contract=backup_restore_rejects_malformed_config_share_token_policy_shape_before_backup_or_target_write
+config_share_restore_policy_shape_validation_contract_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -3866,6 +3873,48 @@ result: failed as expected because the restore history policy method was missing
 
 focused backup/config-share/db/security suite:
 108 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
+
+## Config Share Restore Policy Shape Validation Contract Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+6387e9e Add config share restore policy shape guard
+```
+
+Покрыто:
+
+- backup create валидирует shape config-share token policy перед сборкой backup;
+- backup restore валидирует shape config-share token policy до записи target DB;
+- malformed one-time policy shape отклоняется как invalid policy shape, а не
+  классифицируется как historical metadata;
+- usable share-token hashes остаются blocked без dangerous mode;
+- public/self-service config delivery remains not-approved.
+
+Проверка:
+
+```text
+RED:
+tests/backup/test_backup_service.py::test_backup_create_rejects_malformed_config_share_token_policy_shape
+tests/backup/test_backup_service.py::test_restore_rejects_malformed_config_share_token_policy_shape_before_writing_target
+result: failed as expected because malformed policy shape was not rejected
+
+focused backup/config-share/db/security suite:
+110 passed
 ```
 
 Live VPS не трогался. Slice не добавляет public download route,
