@@ -220,6 +220,13 @@ config_share_restore_foreign_key_integrity_contract_push_status=done
 config_share_restore_foreign_key_integrity_contract_test_status=scoped_pytest_132_passed
 config_share_restore_foreign_key_integrity_contract_contract=backup_create_restore_reject_foreign_key_integrity_violations_before_backup_or_target_write
 config_share_restore_foreign_key_integrity_contract_live_actions=false
+config_share_restore_schema_foreign_key_declaration_contract_status=completed-local-code
+config_share_restore_schema_foreign_key_declaration_contract_commit=6a1ca94
+config_share_restore_schema_foreign_key_declaration_contract_branch=codex/public-config-delivery-policy-contract
+config_share_restore_schema_foreign_key_declaration_contract_push_status=done
+config_share_restore_schema_foreign_key_declaration_contract_test_status=scoped_pytest_134_passed
+config_share_restore_schema_foreign_key_declaration_contract_contract=backup_create_restore_reject_missing_config_share_owner_foreign_key_declaration_before_backup_or_target_write
+config_share_restore_schema_foreign_key_declaration_contract_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -4112,6 +4119,49 @@ result: failed as expected because foreign key violations were not rejected befo
 
 focused backup/config-share/db/security suite:
 132 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
+
+## Config Share Restore Schema Foreign Key Declaration Contract Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+6a1ca94 Add config share restore foreign key schema guard
+```
+
+Покрыто:
+
+- backup create проверяет наличие FK declaration
+  `config_share_tokens.owner_user_id -> users.id` до сборки backup;
+- backup restore проверяет тот же schema contract до записи target DB;
+- backup DB с пересозданной `config_share_tokens` без owner FK не принимается
+  как валидная history-only база;
+- usable share-token hashes остаются blocked без dangerous mode;
+- public/self-service config delivery remains not-approved.
+
+Проверка:
+
+```text
+RED:
+tests/backup/test_backup_service.py::test_backup_create_rejects_missing_config_share_owner_foreign_key_declaration
+tests/backup/test_backup_service.py::test_restore_rejects_missing_config_share_owner_foreign_key_declaration_before_writing_target
+result: failed as expected because missing FK declaration was not rejected before backup/target DB write
+
+focused backup/config-share/db/security suite:
+134 passed
 ```
 
 Live VPS не трогался. Slice не добавляет public download route,
