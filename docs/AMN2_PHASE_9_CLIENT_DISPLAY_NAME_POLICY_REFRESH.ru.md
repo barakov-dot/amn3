@@ -46,7 +46,7 @@ android_manual_rename_required=true
 windows_import_observed=true
 windows_auto_display_name_applied=false
 windows_manual_rename_performed=true
-tv_projector_import_status=pending_operator_review
+tv_projector_import_status=done
 ```
 
 Файлы package могут сохранять уникальные suffixes для локального различения
