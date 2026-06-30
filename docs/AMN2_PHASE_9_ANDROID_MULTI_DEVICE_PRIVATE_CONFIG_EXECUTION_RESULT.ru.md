@@ -82,6 +82,7 @@ tv_projector_import_status=pending_operator_review
 operator_import_review_device_03=server_display_name_Сервер 1
 operator_import_review_device_04=server_display_name_Сервер 1
 operator_import_review_device_05=server_display_name_manual_renamed_to_NeobyatnayaNET
+manual_operator_android_import_review_or_prepare_safe_status_sync_executed=true
 ```
 
 ```text
