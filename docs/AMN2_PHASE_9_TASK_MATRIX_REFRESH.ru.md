@@ -205,6 +205,13 @@ config_share_restore_token_identity_metadata_validation_contract_push_status=don
 config_share_restore_token_identity_metadata_validation_contract_test_status=scoped_pytest_130_passed
 config_share_restore_token_identity_metadata_validation_contract_contract=backup_restore_rejects_malformed_config_share_token_identity_metadata_before_history_classification_or_target_write
 config_share_restore_token_identity_metadata_validation_contract_live_actions=false
+config_share_restore_foreign_key_integrity_contract_status=completed-local-code
+config_share_restore_foreign_key_integrity_contract_commit=af7dde9
+config_share_restore_foreign_key_integrity_contract_branch=codex/public-config-delivery-policy-contract
+config_share_restore_foreign_key_integrity_contract_push_status=done
+config_share_restore_foreign_key_integrity_contract_test_status=scoped_pytest_132_passed
+config_share_restore_foreign_key_integrity_contract_contract=backup_create_restore_reject_foreign_key_integrity_violations_before_backup_or_target_write
+config_share_restore_foreign_key_integrity_contract_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -454,6 +461,7 @@ ios_amnezia_implementation=not_proven_keep_manual_rename
 | Очень важно | `P9_CONFIG_SHARE_RESTORE_TIMESTAMP_SHAPE_VALIDATION_CONTRACT` | ChatGPT 5.3-Spark | true | false | false | Local-code timestamp-shape guard выполнен: `52c5340`; backup create/restore валидируют config-share timestamp metadata before history classification/target DB write; scoped backup/config-share/db/security suite = 112 passed; public/self-service config delivery remains not-approved |
 | Очень важно | `P9_CONFIG_SHARE_RESTORE_SCOPE_METADATA_SHAPE_VALIDATION_CONTRACT` | ChatGPT 5.3-Spark | true | false | false | Local-code scope-metadata guard выполнен: `f815ed2`; backup create/restore валидируют config-share scope metadata before history classification/target DB write; scoped backup/config-share/db/security suite = 120 passed; public/self-service config delivery remains not-approved |
 | Очень важно | `P9_CONFIG_SHARE_RESTORE_TOKEN_IDENTITY_METADATA_VALIDATION_CONTRACT` | ChatGPT 5.3-Spark | true | false | false | Local-code token-identity guard выполнен: `bb9ce25`; backup create/restore валидируют config-share identity metadata before history classification/target DB write; scoped backup/config-share/db/security suite = 130 passed; public/self-service config delivery remains not-approved |
+| Очень важно | `P9_CONFIG_SHARE_RESTORE_FOREIGN_KEY_INTEGRITY_CONTRACT` | ChatGPT 5.3-Spark | true | false | false | Local-code foreign-key guard выполнен: `af7dde9`; backup create/restore отклоняют SQLite foreign key violations before backup/target DB write; scoped backup/config-share/db/security suite = 132 passed; public/self-service config delivery remains not-approved |
 | Критично | `ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5` | ChatGPT 5.5 decision + ChatGPT 5.3-Spark execution/status sync | false | true (`requires_model_switch`) | true (`ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5`) | Выполнено private/operator-only: run_id `20260628T231440`; 5 `.conf` generated locally under ignored `private-artifacts`; peer apply performed; QR/vpn import links не генерировались; config delivery/public/self-service blocked |
 | Критично | `AMN2_PHASE_9_ENTRY_DECISION` (lane уже выбран: `HARDENING_PRODUCTIZATION`) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено, lane зафиксирован |
 | Критично | `AMN2_PHASE_9_HARDENING_ENTRY_REVIEW` (закрыт) | ChatGPT 5.5 | false | true (`requires_model_switch`) | false | Выполнено |
