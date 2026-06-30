@@ -178,6 +178,13 @@ config_share_restore_dangerous_mode_gate_contract_push_status=done
 config_share_restore_dangerous_mode_gate_contract_test_status=scoped_pytest_104_passed
 config_share_restore_dangerous_mode_gate_contract_contract=restore_usable_share_hashes_dangerous_mode_gate_closed_not_implemented_cli_flag_absent
 config_share_restore_dangerous_mode_gate_contract_live_actions=false
+config_share_restore_history_contract_status=completed-local-code
+config_share_restore_history_contract_commit=380f3a3
+config_share_restore_history_contract_branch=codex/public-config-delivery-policy-contract
+config_share_restore_history_contract_push_status=done
+config_share_restore_history_contract_test_status=scoped_pytest_108_passed
+config_share_restore_history_contract_contract=restore_allows_expired_revoked_exhausted_share_records_as_history_only_while_usable_hashes_remain_blocked
+config_share_restore_history_contract_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -3818,6 +3825,47 @@ result: failed as expected because the gate metadata and explicit restore parame
 
 focused backup/config-share/db/security suite:
 104 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
+
+## Config Share Restore History Contract Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+380f3a3 Add config share restore history contract
+```
+
+Покрыто:
+
+- добавлен явный restore history policy contract для config-share records;
+- usable share-token hashes остаются blocked без dangerous mode;
+- expired/revoked/exhausted config-share records разрешены для restore только как
+  non-usable historical metadata;
+- restore сохраняет historical rows без открытия dangerous mode;
+- public/self-service config delivery remains not-approved.
+
+Проверка:
+
+```text
+RED:
+tests/backup/test_backup_service.py::test_config_share_restore_history_policy_documents_allowed_non_usable_states
+result: failed as expected because the restore history policy method was missing
+
+focused backup/config-share/db/security suite:
+108 passed
 ```
 
 Live VPS не трогался. Slice не добавляет public download route,
