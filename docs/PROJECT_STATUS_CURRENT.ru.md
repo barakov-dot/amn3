@@ -206,6 +206,13 @@ config_share_restore_scope_metadata_shape_validation_contract_push_status=done
 config_share_restore_scope_metadata_shape_validation_contract_test_status=scoped_pytest_120_passed
 config_share_restore_scope_metadata_shape_validation_contract_contract=backup_restore_rejects_malformed_config_share_token_scope_metadata_before_history_classification_or_target_write
 config_share_restore_scope_metadata_shape_validation_contract_live_actions=false
+config_share_restore_token_identity_metadata_validation_contract_status=completed-local-code
+config_share_restore_token_identity_metadata_validation_contract_commit=bb9ce25
+config_share_restore_token_identity_metadata_validation_contract_branch=codex/public-config-delivery-policy-contract
+config_share_restore_token_identity_metadata_validation_contract_push_status=done
+config_share_restore_token_identity_metadata_validation_contract_test_status=scoped_pytest_130_passed
+config_share_restore_token_identity_metadata_validation_contract_contract=backup_restore_rejects_malformed_config_share_token_identity_metadata_before_history_classification_or_target_write
+config_share_restore_token_identity_metadata_validation_contract_live_actions=false
 android_multi_device_private_config_execution_gate_status=prepared-docs-only
 android_multi_device_private_config_execution_gate=ANDROID_MULTI_DEVICE_PRIVATE_CONFIG_EXECUTION_GATE_3_TO_5
 android_multi_device_private_config_execution_device_count_range=3-5
@@ -4014,6 +4021,48 @@ result: failed as expected because malformed scope metadata was not rejected bef
 
 focused backup/config-share/db/security suite:
 120 passed
+```
+
+Live VPS не трогался. Slice не добавляет public download route,
+self-service config download route, `/api/*`, API `config:read`, Local Agent
+`/configs`, generated config persistence, новые QR/import behavior или live VPS
+calls; VPS gate для самого slice не нужен.
+
+## Config Share Restore Token Identity Metadata Validation Contract Slice
+
+Статус: `implemented-pushed-local-gate-complete`.
+
+Production branch:
+
+```text
+codex/public-config-delivery-policy-contract
+```
+
+Production commit:
+
+```text
+bb9ce25 Add config share restore identity metadata guard
+```
+
+Покрыто:
+
+- backup create валидирует config-share token identity metadata до сборки backup;
+- backup restore валидирует config-share token identity metadata до записи target DB;
+- malformed `id`, `token_hash`, `token_prefix`, `created_by_actor`,
+  `owner_user_id` не маскируются как history-only metadata;
+- usable share-token hashes остаются blocked без dangerous mode;
+- public/self-service config delivery remains not-approved.
+
+Проверка:
+
+```text
+RED:
+tests/backup/test_backup_service.py::test_backup_create_rejects_malformed_config_share_token_identity_metadata
+tests/backup/test_backup_service.py::test_restore_rejects_malformed_config_share_token_identity_metadata_before_writing_target
+result: failed as expected because malformed identity metadata was not rejected before dangerous-mode guard
+
+focused backup/config-share/db/security suite:
+130 passed
 ```
 
 Live VPS не трогался. Slice не добавляет public download route,
