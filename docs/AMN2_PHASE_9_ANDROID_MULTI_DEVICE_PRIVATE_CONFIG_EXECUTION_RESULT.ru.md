@@ -63,10 +63,22 @@ raw_logs_printed=blocked
 
 ```text
 canonical_naming=Neobyatnaya-AMNZ-N
+canonical_client_display_name=NeobyatnayaNET
+canonical_client_display_name_alias=НеобъятнаяNET
+display_name_suffix_policy=none
 windows_policy=Neobyatnaya-AMNZ-N.conf -> Neobyatnaya-AMNZ-N
 android_status=DOCUMENTED_LIMITATION
+android_observed=Сервер 1|Сервер 3
 android_fallback=manual_rename
 ios_status=not_proven/manual_rename_fallback
+```
+
+```text
+operator_import_review_status=partial
+android_auto_display_name_applied=false
+windows_auto_display_name_applied=false
+manual_rename_required=true
+tv_projector_import_status=pending_operator_review
 ```
 
 ```text
