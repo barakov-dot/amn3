@@ -138,7 +138,7 @@ Phase 10 начинает не с hold, а с проверки этого хво
 Первая точная команда:
 
 ```text
-ТЕКУЩАЯ МОДЕЛЬ -> START_PHASE10_CLIENT_DISPLAY_NAME_ROOT_CAUSE_ANALYSIS_SLICE -> RUN_SCOPED_LOCAL_ANALYSIS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
+ТЕКУЩАЯ МОДЕЛЬ -> START_PHASE10_CONFIG_FILENAME_CANONICALIZATION_FOR_STANDALONE_AWG_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
 ```
 
 Ожидаемый результат:
@@ -146,7 +146,10 @@ Phase 10 начинает не с hold, а с проверки этого хво
 - schema index declaration contract закрыт product fix commit `60b77fd`;
 - scoped backup tests: `66 passed`;
 - extended scoped suite: `151 passed`;
-- следующий Phase 10 product slice: `START_PHASE10_CLIENT_DISPLAY_NAME_ROOT_CAUSE_ANALYSIS_SLICE`;
+- client display-name root-cause закрыт product policy commit `d01cb7b`;
+- display-name scoped tests: `14 passed`;
+- следующий Phase 10 product slice:
+  `START_PHASE10_CONFIG_FILENAME_CANONICALIZATION_FOR_STANDALONE_AWG_SLICE`;
 - docs sync делать только после product/test evidence.
 
 ## Следующие цели фазы

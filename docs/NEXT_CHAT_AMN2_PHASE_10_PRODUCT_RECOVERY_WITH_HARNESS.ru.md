@@ -62,7 +62,7 @@ ios_status=not_proven/manual_rename_fallback
 ## Первый шаг
 
 ```text
-ТЕКУЩАЯ МОДЕЛЬ -> START_PHASE10_CLIENT_DISPLAY_NAME_ROOT_CAUSE_ANALYSIS_SLICE -> RUN_SCOPED_LOCAL_ANALYSIS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
+ТЕКУЩАЯ МОДЕЛЬ -> START_PHASE10_CONFIG_FILENAME_CANONICALIZATION_FOR_STANDALONE_AWG_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
 ```
 
 Почему именно он:
@@ -72,10 +72,15 @@ config_share_restore_schema_index_declaration_contract_status=completed-product-
 config_share_restore_schema_index_declaration_contract_commit=60b77fd
 config_share_restore_schema_index_declaration_contract_test_status=scoped_pytest_66_passed
 config_share_restore_schema_index_declaration_contract_extended_test_status=scoped_pytest_151_passed
+phase10_client_display_name_root_cause_status=completed-product-policy-pushed
+phase10_client_display_name_root_cause_commit=d01cb7b
+phase10_client_display_name_root_cause_test_status=scoped_pytest_14_passed
+phase10_client_display_name_root_cause_result=amneziavpn_client_generated_server_n_standalone_awg_filename_stem
 ```
 
 Schema index verification slice закрыт. Следующий шаг - выбрать следующий
-Phase 10 product slice: `START_PHASE10_CLIENT_DISPLAY_NAME_ROOT_CAUSE_ANALYSIS_SLICE`.
+Phase 10 product slice:
+`START_PHASE10_CONFIG_FILENAME_CANONICALIZATION_FOR_STANDALONE_AWG_SLICE`.
 Docs sync оставлять только хвостом после code/test evidence.
 
 ## Формат рекомендаций
