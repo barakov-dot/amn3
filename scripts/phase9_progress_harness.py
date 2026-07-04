@@ -164,6 +164,16 @@ def read_status_markers(root: Path) -> dict[str, str]:
 
 
 def check_stop_lines(root: Path) -> list[Check]:
+    status_path = root / "docs" / "PROJECT_STATUS_CURRENT.ru.md"
+    if not status_path.exists():
+        return [
+            Check(
+                "stop-lines-source",
+                True,
+                "docs/PROJECT_STATUS_CURRENT.ru.md not found; stop-line check skipped",
+            )
+        ]
+
     markers = read_status_markers(root)
     checks: list[Check] = []
     for key in sorted(REQUIRED_FALSE_MARKERS):

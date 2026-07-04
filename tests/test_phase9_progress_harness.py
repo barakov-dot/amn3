@@ -1,5 +1,6 @@
 import importlib.util
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -93,6 +94,16 @@ class Phase9ProgressHarnessTests(unittest.TestCase):
                 "tests/test_phase9_progress_harness.py",
             ],
         )
+
+    def test_skips_stop_lines_when_status_doc_is_absent(self) -> None:
+        harness = _load_harness_module()
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            checks = harness.check_stop_lines(Path(tmp_dir))
+
+        self.assertEqual(len(checks), 1)
+        self.assertTrue(checks[0].ok)
+        self.assertEqual(checks[0].name, "stop-lines-source")
 
 
 if __name__ == "__main__":
