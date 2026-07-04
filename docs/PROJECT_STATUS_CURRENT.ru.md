@@ -8,12 +8,22 @@ Phase 9 docs/commits остаются existing material, первый Phase 9 т
 live/config/public execution.
 
 ```text
-current_chat_state=Phase 9 Windows filename-basename local implementation
+current_chat_state=Phase 10 product recovery with progress harness prepared
 phase8_final_status=launch-ready-with-explicit-limitations
 phase9_material_status=prepared-existing-material
 phase9_continuation_chat_required=false_current_chat_started
-active_phase=Phase 9 docs-only private self-config naming review
+active_phase=Phase 10 product recovery with progress harness
 selected_lane=HARDENING_PRODUCTIZATION
+phase10_transition_status=prepared-local-code-and-docs
+phase10_transition_doc=docs/AMN2_PHASE_10_PRODUCT_RECOVERY_WITH_HARNESS_ENTRY.ru.md
+phase10_next_chat_handoff=docs/NEXT_CHAT_AMN2_PHASE_10_PRODUCT_RECOVERY_WITH_HARNESS.ru.md
+phase10_progress_harness_script=scripts/phase9_progress_harness.py
+phase10_progress_harness_tests=tests/test_phase9_progress_harness.py
+phase10_progress_harness_policy=require-product-step-before-next-product-command
+phase10_docs_sync_policy=after-product-code-test-evidence-only
+phase10_first_product_step=START_PHASE10_CONFIG_SHARE_RESTORE_SCHEMA_INDEX_TEST_VERIFICATION_SLICE
+phase10_first_product_reason=config_share_restore_schema_index_declaration_contract_test_status_scoped_pytest_144_not_run
+phase10_forbidden_loop_next_step=CONFIRM_HOLD_STATE|READY_FOR_OPERATOR_NEXT_DOCS_REQUEST|AWAIT_OPERATOR_EXACT_CMD
 phase9_entry_decision_status=completed
 helper_hardening_status=completed-docs-only
 no_long_ssh_pattern=status=standardized

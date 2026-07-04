@@ -7,6 +7,15 @@
 Текущее состояние на 2026-06-27:
 
 ```text
+phase10_transition_status=prepared-local-code-and-docs
+phase10_transition_doc=docs/AMN2_PHASE_10_PRODUCT_RECOVERY_WITH_HARNESS_ENTRY.ru.md
+phase10_next_chat_handoff=docs/NEXT_CHAT_AMN2_PHASE_10_PRODUCT_RECOVERY_WITH_HARNESS.ru.md
+phase10_progress_harness_script=scripts/phase9_progress_harness.py
+phase10_progress_harness_tests=tests/test_phase9_progress_harness.py
+phase10_progress_harness_policy=require-product-step-before-next-product-command
+phase10_docs_sync_policy=after-product-code-test-evidence-only
+phase10_first_product_step=START_PHASE10_CONFIG_SHARE_RESTORE_SCHEMA_INDEX_TEST_VERIFICATION_SLICE
+phase10_first_product_reason=config_share_restore_schema_index_declaration_contract_test_status_scoped_pytest_144_not_run
 phase9_entry_decision=completed
 selected_lane=HARDENING_PRODUCTIZATION
 final_status_refresh=completed-docs-only
@@ -574,6 +583,16 @@ phase9_private_self_config_execution_readiness_next=AMN2_PHASE_9_PRIVATE_SELF_CO
 
 ## Следующий шаг сейчас
 
+- Phase 10 transition prepared: дальше не выбирать `CONFIRM_HOLD_STATE` /
+  `READY_FOR_OPERATOR_NEXT_DOCS_REQUEST` / `AWAIT_OPERATOR_EXACT_CMD` как
+  product-next-step.
+- Первый product-step новой фазы:
+  `START_PHASE10_CONFIG_SHARE_RESTORE_SCHEMA_INDEX_TEST_VERIFICATION_SLICE`.
+- Перед этой командой:
+  `python scripts/phase9_progress_harness.py --next-command "<COMMAND>" --require-product-step`.
+- Цель первого шага: закрыть
+  `config_share_restore_schema_index_declaration_contract_test_status=scoped_pytest_144_not_run`
+  реальным scoped test result или product fix.
 - После решения `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_READINESS_GATE` продолжить
   подготовку execution-package-prep:
   `AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_PACKAGE_PREP_GATE`.

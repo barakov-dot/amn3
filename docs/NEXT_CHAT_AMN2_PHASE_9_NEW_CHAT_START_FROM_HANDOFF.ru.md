@@ -2,6 +2,16 @@
 
 Дата: 2026-06-27.
 
+## Superseded by Phase 10 recovery harness
+
+С 2026-07-04 следующий старт для продолжения работы:
+`docs/NEXT_CHAT_AMN2_PHASE_10_PRODUCT_RECOVERY_WITH_HARNESS.ru.md`.
+
+Причина: Phase 9 handoff слишком легко возвращает поток в `CONFIRM_HOLD_STATE` /
+`AWAIT_OPERATOR_EXACT_CMD`. Phase 10 вводит обязательный
+`scripts/phase9_progress_harness.py` и первый product-step:
+`START_PHASE10_CONFIG_SHARE_RESTORE_SCHEMA_INDEX_TEST_VERIFICATION_SLICE`.
+
 ## Команда для нового чата
 
 ```text

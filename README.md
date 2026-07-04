@@ -89,6 +89,28 @@ prototypes/
 
 `prototypes/` - собственные эксперименты и проверки гипотез без копирования внешнего кода.
 
+## Phase 9 progress harness
+
+Перед очередной операторской командой Phase 9 можно прогонять локальный guard, чтобы не возвращаться в цикл `CONFIRM_HOLD_STATE` / `AWAIT_OPERATOR_EXACT_CMD` вместо реального product-work:
+
+```powershell
+python scripts/phase9_progress_harness.py --next-command "КОДЕКС SPARK → START_CONFIG_SHARE_RESTORE_SCHEMA_INDEX_DECLARATION_CONTRACT_SLICE → RUN_SCOPED_TESTS_FOR_SELECTED_SLICE" --require-product-step
+```
+
+Если команда состоит только из hold/await шагов, harness должен вернуть `FAIL`.
+
+Перед закрытием product slice можно требовать, чтобы diff содержал product-area изменения (`app/`, `scripts/`, `tests/`), а не только docs-sync:
+
+```powershell
+python scripts/phase9_progress_harness.py --require-product-diff
+```
+
+Если product slice выполняется в отдельном AMN2 worktree:
+
+```powershell
+python scripts/phase9_progress_harness.py --repo-root worktrees/amn2-public-config-delivery-policy-contract --require-product-diff
+```
+
 ## Design specs и transfer gate
 
 Foundational design specs для будущей оценки переноса в `amn2` собраны в [Design Specs Index + `amn2` Transfer Checklist](docs/superpowers/specs/2026-05-30-design-specs-index-amn2-transfer-checklist.md).

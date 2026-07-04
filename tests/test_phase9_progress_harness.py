@@ -1,0 +1,99 @@
+import importlib.util
+import sys
+import unittest
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+HARNESS_SCRIPT = REPO_ROOT / "scripts" / "phase9_progress_harness.py"
+
+
+def _load_harness_module():
+    spec = importlib.util.spec_from_file_location("phase9_progress_harness", HARNESS_SCRIPT)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+class Phase9ProgressHarnessTests(unittest.TestCase):
+    def test_extracts_operator_steps_after_model_label(self) -> None:
+        harness = _load_harness_module()
+
+        steps = harness.extract_steps(
+            "CURRENT_MODEL -> START_CONFIG_SHARE_TOKEN_REDEEM_SLICE "
+            "→ RUN_SCOPED_TESTS_FOR_SELECTED_SLICE"
+        )
+
+        self.assertEqual(
+            steps,
+            [
+                "START_CONFIG_SHARE_TOKEN_REDEEM_SLICE",
+                "RUN_SCOPED_TESTS_FOR_SELECTED_SLICE",
+            ],
+        )
+
+    def test_rejects_loop_only_command_when_product_step_required(self) -> None:
+        harness = _load_harness_module()
+
+        checks = harness.evaluate_next_command(
+            "КОДЕКС SPARK → READY_FOR_OPERATOR_NEXT_DOCS_REQUEST → AWAIT_OPERATOR_EXACT_CMD",
+            require_product_step=True,
+        )
+
+        self.assertFalse(all(check.ok for check in checks))
+        self.assertIn("next-command-loop-guard", [check.name for check in checks if not check.ok])
+        self.assertIn(
+            "next-command-product-signal",
+            [check.name for check in checks if not check.ok],
+        )
+
+    def test_accepts_real_product_slice_command(self) -> None:
+        harness = _load_harness_module()
+
+        checks = harness.evaluate_next_command(
+            "КОДЕКС SPARK → START_CONFIG_SHARE_RESTORE_SCHEMA_INDEX_DECLARATION_CONTRACT_SLICE "
+            "→ RUN_SCOPED_TESTS_FOR_SELECTED_SLICE",
+            require_product_step=True,
+        )
+
+        self.assertTrue(all(check.ok for check in checks))
+
+    def test_classifies_diff_scopes(self) -> None:
+        harness = _load_harness_module()
+
+        self.assertEqual(harness.classify_paths([]), "clean")
+        self.assertEqual(harness.classify_paths(["docs/status.md"]), "docs-only")
+        self.assertEqual(harness.classify_paths(["app/service.py", "tests/test_service.py"]), "product-only")
+        self.assertEqual(
+            harness.classify_paths(["app/service.py", "docs/status.md"]),
+            "product-and-docs",
+        )
+
+    def test_parses_untracked_paths_from_git_status(self) -> None:
+        harness = _load_harness_module()
+
+        paths = harness.parse_status_paths(
+            "\n".join(
+                [
+                    " M README.md",
+                    "?? scripts/phase9_progress_harness.py",
+                    "R  old.txt -> tests/test_phase9_progress_harness.py",
+                ]
+            )
+        )
+
+        self.assertEqual(
+            paths,
+            [
+                "README.md",
+                "scripts/phase9_progress_harness.py",
+                "tests/test_phase9_progress_harness.py",
+            ],
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()
