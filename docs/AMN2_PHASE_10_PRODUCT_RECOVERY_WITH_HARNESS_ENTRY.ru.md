@@ -4,9 +4,10 @@
 
 ## Назначение
 
-Phase 10 открывается как recovery-фаза после Phase 9 command-loop. Цель этой
-фазы - вернуть работу к product-slice, тестам и проверяемым результатам, а
-docs/status sync выполнять только после code/test результата.
+Phase 10 открывается в отдельном следующем чате как recovery-фаза после Phase
+9/9.2 closeout и Phase 9 command-loop. Цель этой фазы - вернуть работу к
+product-slice, тестам и проверяемым результатам, а docs/status sync выполнять
+только после code/test результата.
 
 Это не открывает live/VPS/SSH/Telegram/public/config/peer действия.
 
@@ -138,7 +139,7 @@ Phase 10 начинает не с hold, а с проверки этого хво
 Первая точная команда:
 
 ```text
-ТЕКУЩАЯ МОДЕЛЬ -> SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_CLIENT_COMPATIBILITY_MERGE -> START_SELECTED_PHASE10_PRODUCT_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE
+ТЕКУЩАЯ МОДЕЛЬ -> SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_FRESH_INSTALLER_RECOVERY_MERGE -> START_SELECTED_PHASE10_PRODUCT_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE
 ```
 
 Ожидаемый результат:
@@ -156,8 +157,11 @@ Phase 10 начинает не с hold, а с проверки этого хво
 - broad scoped suite: `130 passed`;
 - compatibility branch fast-forward merged в `amn2/codex-vps-test-prep` и pushed;
 - post-merge broad scoped suite: `130 passed`;
+- fresh-installer recovery branch rebased, fast-forward merged в
+  `amn2/codex-vps-test-prep` и pushed as `4326cae`;
+- fresh-installer recovery post-merge broad scoped suite: `164 passed`;
 - следующий Phase 10 product slice:
-  `SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_CLIENT_COMPATIBILITY_MERGE`;
+  `SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_FRESH_INSTALLER_RECOVERY_MERGE`;
 - docs sync делать только после product/test evidence.
 
 ## Следующие цели фазы

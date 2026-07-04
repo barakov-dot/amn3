@@ -44,7 +44,9 @@ passwords, raw logs.
 
 ```text
 previous_phase=AMN2 Phase 9
+previous_phase_closeout=AMN2 Phase 9/9.2
 new_phase=AMN2 Phase 10 Product Recovery With Harness
+phase10_execution_chat_required=true
 phase10_entry_doc=docs/AMN2_PHASE_10_PRODUCT_RECOVERY_WITH_HARNESS_ENTRY.ru.md
 phase10_next_chat_doc=docs/NEXT_CHAT_AMN2_PHASE_10_PRODUCT_RECOVERY_WITH_HARNESS.ru.md
 phase10_harness_script=scripts/phase9_progress_harness.py
@@ -62,7 +64,7 @@ ios_status=not_proven/manual_rename_fallback
 ## Первый шаг
 
 ```text
-ТЕКУЩАЯ МОДЕЛЬ -> SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_CLIENT_COMPATIBILITY_MERGE -> START_SELECTED_PHASE10_PRODUCT_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE
+ТЕКУЩАЯ МОДЕЛЬ -> SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_FRESH_INSTALLER_RECOVERY_MERGE -> START_SELECTED_PHASE10_PRODUCT_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE
 ```
 
 Почему именно он:
@@ -91,11 +93,17 @@ phase10_client_compatibility_direct_merge_status=completed-fast-forward-merged-a
 phase10_client_compatibility_direct_merge_target=amn2/codex-vps-test-prep
 phase10_client_compatibility_direct_merge_head=d61c6be
 phase10_client_compatibility_direct_merge_test_status=post_merge_scoped_pytest_130_passed
+phase10_fresh_installer_recovery_status=completed-fast-forward-merged-and-pushed
+phase10_fresh_installer_recovery_branch=codex/dirty-main-amn2-fresh-installer-recovery
+phase10_fresh_installer_recovery_head=4326cae
+phase10_fresh_installer_recovery_target=amn2/codex-vps-test-prep
+phase10_fresh_installer_recovery_test_status=post_merge_scoped_pytest_164_passed
 ```
 
-Schema index verification и client compatibility branch integration закрыты.
-Следующий шаг - выбрать следующий Phase 10 product slice:
-`SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_CLIENT_COMPATIBILITY_MERGE`.
+Schema index verification, client compatibility branch integration и
+fresh-installer recovery integration закрыты. Следующий шаг - выбрать следующий
+Phase 10 product slice:
+`SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_FRESH_INSTALLER_RECOVERY_MERGE`.
 Docs sync оставлять только хвостом после code/test evidence.
 
 ## Формат рекомендаций
