@@ -54,6 +54,8 @@ phase10_harness_script=scripts/phase9_progress_harness.py
 phase10_harness_tests=tests/test_phase9_progress_harness.py
 phase10_rule=no hold/await loop as next product step
 phase10_docs_sync_policy=after product code/test evidence only
+phase_change_automation_retarget_check=required
+weekly_upstream_automations_phase=AMN2 Phase 10 Product Recovery With Harness
 canonical_client_display_name=NeobyatnayaNET
 canonical_client_display_name_alias=НеобъятнаяNET
 android_status=DOCUMENTED_LIMITATION
@@ -106,6 +108,13 @@ fresh-installer recovery integration закрыты. Следующий шаг -
 Phase 10 product slice:
 `SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_FRESH_INSTALLER_RECOVERY_MERGE`.
 Docs sync оставлять только хвостом после code/test evidence.
+
+## Automation Retarget Check
+
+Перед первым Phase 10 product slice проверить active automations. Weekly
+upstream refresh chain должна быть переведена с Phase 9 на Phase 10. Если
+automation проснулась в старом Phase 9/9.2 thread, она должна выдать только
+retarget notice и не продолжать старую фазу.
 
 ## Формат рекомендаций
 

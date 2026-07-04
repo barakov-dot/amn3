@@ -74,6 +74,20 @@ AMN2_PHASE_10_PRODUCT_RECOVERY_WITH_HARNESS_START
 - `scripts/phase9_progress_harness.py`;
 - `tests/test_phase9_progress_harness.py`.
 
+## Automation handoff rule
+
+При каждой смене фазы обязательно проверять active automations и их prompts:
+
+- weekly upstream refresh chain;
+- heartbeat/thread automations;
+- любые reminders/watchers, которые могут проснуться в старом phase thread.
+
+Если automation всё ещё ссылается на старую фазу или старый чат, перед
+продолжением новой фазы нужно обновить prompt/target или добавить явный retarget
+notice. Для Phase 10 текущие weekly upstream automations уже обновлены на
+`AMN2 Phase 10 Product Recovery With Harness`; если они проснутся в старом
+Phase 9/9.2 thread, они должны выдать только retarget notice и остановиться.
+
 Первый product-step нового Phase 10 чата:
 
 ```text
