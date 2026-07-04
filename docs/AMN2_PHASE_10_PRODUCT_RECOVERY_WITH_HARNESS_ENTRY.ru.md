@@ -138,7 +138,7 @@ Phase 10 начинает не с hold, а с проверки этого хво
 Первая точная команда:
 
 ```text
-ТЕКУЩАЯ МОДЕЛЬ -> START_PHASE10_CLIENT_COMPATIBILITY_BRANCH_BROAD_SCOPED_REGRESSION_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
+ТЕКУЩАЯ МОДЕЛЬ -> SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_CLIENT_COMPATIBILITY_MERGE -> START_SELECTED_PHASE10_PRODUCT_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE
 ```
 
 Ожидаемый результат:
@@ -152,8 +152,12 @@ Phase 10 начинает не с hold, а с проверки этого хво
 - filename canonicalization scoped tests: `18 passed`;
 - compatibility branch rebased на `amn2/codex-vps-test-prep@471bca8`;
 - post-rebase scoped tests: `22 passed`;
+- broad regression contract fix закрыт product commit `d61c6be`;
+- broad scoped suite: `130 passed`;
+- compatibility branch fast-forward merged в `amn2/codex-vps-test-prep` и pushed;
+- post-merge broad scoped suite: `130 passed`;
 - следующий Phase 10 product slice:
-  `START_PHASE10_CLIENT_COMPATIBILITY_BRANCH_BROAD_SCOPED_REGRESSION_SLICE`;
+  `SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_CLIENT_COMPATIBILITY_MERGE`;
 - docs sync делать только после product/test evidence.
 
 ## Следующие цели фазы

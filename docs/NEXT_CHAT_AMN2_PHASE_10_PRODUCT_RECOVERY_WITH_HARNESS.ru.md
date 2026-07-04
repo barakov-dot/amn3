@@ -62,7 +62,7 @@ ios_status=not_proven/manual_rename_fallback
 ## Первый шаг
 
 ```text
-ТЕКУЩАЯ МОДЕЛЬ -> START_PHASE10_CLIENT_COMPATIBILITY_BRANCH_BROAD_SCOPED_REGRESSION_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
+ТЕКУЩАЯ МОДЕЛЬ -> SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_CLIENT_COMPATIBILITY_MERGE -> START_SELECTED_PHASE10_PRODUCT_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE
 ```
 
 Почему именно он:
@@ -84,11 +84,18 @@ phase10_rebase_client_compatibility_branch_status=completed-rebased-and-pushed
 phase10_rebase_client_compatibility_branch_base=amn2/codex-vps-test-prep@471bca8
 phase10_rebase_client_compatibility_branch_commits=d2d3099,26bb22e
 phase10_rebase_client_compatibility_branch_test_status=scoped_pytest_22_passed
+phase10_client_compatibility_broad_regression_status=completed-product-contract-fix-pushed
+phase10_client_compatibility_broad_regression_commit=d61c6be
+phase10_client_compatibility_broad_regression_test_status=scoped_pytest_130_passed
+phase10_client_compatibility_direct_merge_status=completed-fast-forward-merged-and-pushed
+phase10_client_compatibility_direct_merge_target=amn2/codex-vps-test-prep
+phase10_client_compatibility_direct_merge_head=d61c6be
+phase10_client_compatibility_direct_merge_test_status=post_merge_scoped_pytest_130_passed
 ```
 
-Schema index verification slice закрыт. Следующий шаг - выбрать следующий
-Phase 10 product slice:
-`START_PHASE10_CLIENT_COMPATIBILITY_BRANCH_BROAD_SCOPED_REGRESSION_SLICE`.
+Schema index verification и client compatibility branch integration закрыты.
+Следующий шаг - выбрать следующий Phase 10 product slice:
+`SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_CLIENT_COMPATIBILITY_MERGE`.
 Docs sync оставлять только хвостом после code/test evidence.
 
 ## Формат рекомендаций
