@@ -138,7 +138,7 @@ Phase 10 начинает не с hold, а с проверки этого хво
 Первая точная команда:
 
 ```text
-ТЕКУЩАЯ МОДЕЛЬ -> START_PHASE10_REBASE_CLIENT_COMPATIBILITY_BRANCH_ON_CURRENT_AMN2_BASE_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
+ТЕКУЩАЯ МОДЕЛЬ -> START_PHASE10_CLIENT_COMPATIBILITY_BRANCH_BROAD_SCOPED_REGRESSION_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
 ```
 
 Ожидаемый результат:
@@ -146,12 +146,14 @@ Phase 10 начинает не с hold, а с проверки этого хво
 - schema index declaration contract закрыт product fix commit `60b77fd`;
 - scoped backup tests: `66 passed`;
 - extended scoped suite: `151 passed`;
-- client display-name root-cause закрыт product policy commit `d01cb7b`;
+- client display-name root-cause закрыт product policy commit `d2d3099`;
 - display-name scoped tests: `14 passed`;
-- filename canonicalization закрыт product commit `5c193b1`;
+- filename canonicalization закрыт product commit `26bb22e`;
 - filename canonicalization scoped tests: `18 passed`;
+- compatibility branch rebased на `amn2/codex-vps-test-prep@471bca8`;
+- post-rebase scoped tests: `22 passed`;
 - следующий Phase 10 product slice:
-  `START_PHASE10_REBASE_CLIENT_COMPATIBILITY_BRANCH_ON_CURRENT_AMN2_BASE_SLICE`;
+  `START_PHASE10_CLIENT_COMPATIBILITY_BRANCH_BROAD_SCOPED_REGRESSION_SLICE`;
 - docs sync делать только после product/test evidence.
 
 ## Следующие цели фазы
