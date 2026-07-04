@@ -138,7 +138,7 @@ Phase 10 начинает не с hold, а с проверки этого хво
 Первая точная команда:
 
 ```text
-ТЕКУЩАЯ МОДЕЛЬ -> START_PHASE10_CONFIG_FILENAME_CANONICALIZATION_FOR_STANDALONE_AWG_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
+ТЕКУЩАЯ МОДЕЛЬ -> START_PHASE10_REBASE_CLIENT_COMPATIBILITY_BRANCH_ON_CURRENT_AMN2_BASE_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
 ```
 
 Ожидаемый результат:
@@ -148,8 +148,10 @@ Phase 10 начинает не с hold, а с проверки этого хво
 - extended scoped suite: `151 passed`;
 - client display-name root-cause закрыт product policy commit `d01cb7b`;
 - display-name scoped tests: `14 passed`;
+- filename canonicalization закрыт product commit `5c193b1`;
+- filename canonicalization scoped tests: `18 passed`;
 - следующий Phase 10 product slice:
-  `START_PHASE10_CONFIG_FILENAME_CANONICALIZATION_FOR_STANDALONE_AWG_SLICE`;
+  `START_PHASE10_REBASE_CLIENT_COMPATIBILITY_BRANCH_ON_CURRENT_AMN2_BASE_SLICE`;
 - docs sync делать только после product/test evidence.
 
 ## Следующие цели фазы
