@@ -62,19 +62,21 @@ ios_status=not_proven/manual_rename_fallback
 ## Первый шаг
 
 ```text
-КОДЕКС SPARK -> START_PHASE10_CONFIG_SHARE_RESTORE_SCHEMA_INDEX_TEST_VERIFICATION_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
+ТЕКУЩАЯ МОДЕЛЬ -> START_PHASE10_CLIENT_DISPLAY_NAME_ROOT_CAUSE_ANALYSIS_SLICE -> RUN_SCOPED_LOCAL_ANALYSIS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
 ```
 
 Почему именно он:
 
 ```text
-config_share_restore_schema_index_declaration_contract_status=completed-local-code
-config_share_restore_schema_index_declaration_contract_commit=dcaed34
-config_share_restore_schema_index_declaration_contract_test_status=scoped_pytest_144_not_run
+config_share_restore_schema_index_declaration_contract_status=completed-product-fix-pushed
+config_share_restore_schema_index_declaration_contract_commit=60b77fd
+config_share_restore_schema_index_declaration_contract_test_status=scoped_pytest_66_passed
+config_share_restore_schema_index_declaration_contract_extended_test_status=scoped_pytest_151_passed
 ```
 
-Нужно подтвердить тестами или исправить product code/tests. Docs sync только
-после этого.
+Schema index verification slice закрыт. Следующий шаг - выбрать следующий
+Phase 10 product slice: `START_PHASE10_CLIENT_DISPLAY_NAME_ROOT_CAUSE_ANALYSIS_SLICE`.
+Docs sync оставлять только хвостом после code/test evidence.
 
 ## Формат рекомендаций
 

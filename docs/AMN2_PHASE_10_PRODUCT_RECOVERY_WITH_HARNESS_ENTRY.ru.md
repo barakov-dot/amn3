@@ -127,9 +127,10 @@ android_multi_device_private_config_execution_run_id=20260628T231440
 видимый незакрытый инженерный риск:
 
 ```text
-config_share_restore_schema_index_declaration_contract_status=completed-local-code
-config_share_restore_schema_index_declaration_contract_commit=dcaed34
-config_share_restore_schema_index_declaration_contract_test_status=scoped_pytest_144_not_run
+config_share_restore_schema_index_declaration_contract_status=completed-product-fix-pushed
+config_share_restore_schema_index_declaration_contract_commit=60b77fd
+config_share_restore_schema_index_declaration_contract_test_status=scoped_pytest_66_passed
+config_share_restore_schema_index_declaration_contract_extended_test_status=scoped_pytest_151_passed
 ```
 
 Phase 10 начинает не с hold, а с проверки этого хвоста.
@@ -137,23 +138,22 @@ Phase 10 начинает не с hold, а с проверки этого хво
 Первая точная команда:
 
 ```text
-КОДЕКС SPARK -> START_PHASE10_CONFIG_SHARE_RESTORE_SCHEMA_INDEX_TEST_VERIFICATION_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
+ТЕКУЩАЯ МОДЕЛЬ -> START_PHASE10_CLIENT_DISPLAY_NAME_ROOT_CAUSE_ANALYSIS_SLICE -> RUN_SCOPED_LOCAL_ANALYSIS_FOR_SELECTED_SLICE -> REVIEW_SELECTED_LOCAL_PRODUCT_SLICE_DIFF
 ```
 
 Ожидаемый результат:
 
-- найти AMN2 worktree/branch с `dcaed34`;
-- прогнать scoped tests для schema index declaration contract;
-- если тесты падают, исправить product code/tests;
-- если тесты проходят, обновить статус с `scoped_pytest_144_not_run` на реальный
-  результат;
+- schema index declaration contract закрыт product fix commit `60b77fd`;
+- scoped backup tests: `66 passed`;
+- extended scoped suite: `151 passed`;
+- следующий Phase 10 product slice: `START_PHASE10_CLIENT_DISPLAY_NAME_ROOT_CAUSE_ANALYSIS_SLICE`;
 - docs sync делать только после product/test evidence.
 
 ## Следующие цели фазы
 
 Критично:
 
-- закрыть `scoped_pytest_144_not_run` по schema index declaration contract;
+- продолжать Phase 10 только через real product slices и scoped tests;
 - остановить повтор `CONFIRM_HOLD_STATE` как next-step;
 - держать harness обязательным перед product closure.
 
