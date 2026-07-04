@@ -13,6 +13,7 @@ next_phase=Phase 10 product recovery with progress harness
 phase10_execution_chat_required=true
 phase10_transition_doc=docs/AMN2_PHASE_10_PRODUCT_RECOVERY_WITH_HARNESS_ENTRY.ru.md
 phase10_next_chat_handoff=docs/NEXT_CHAT_AMN2_PHASE_10_PRODUCT_RECOVERY_WITH_HARNESS.ru.md
+phase9_9_2_final_closeout_packet=docs/AMN2_PHASE_9_9_2_FINAL_CLOSEOUT_PACKET.ru.md
 phase10_progress_harness_script=scripts/phase9_progress_harness.py
 phase10_progress_harness_tests=tests/test_phase9_progress_harness.py
 phase10_progress_harness_policy=require-product-step-before-next-product-command

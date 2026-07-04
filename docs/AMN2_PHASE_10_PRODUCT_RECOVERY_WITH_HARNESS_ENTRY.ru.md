@@ -16,6 +16,7 @@ product-slice, тестам и проверяемым результатам, а
 - текущий git workspace;
 - `docs/PROJECT_STATUS_CURRENT.ru.md`;
 - `docs/AMN2_PHASE_9_TASK_MATRIX_REFRESH.ru.md`;
+- `docs/AMN2_PHASE_9_9_2_FINAL_CLOSEOUT_PACKET.ru.md`;
 - `docs/NEXT_CHAT_AMN2_PHASE_9_NEW_CHAT_START_FROM_HANDOFF.ru.md`;
 - новый harness:
   - `scripts/phase9_progress_harness.py`;
