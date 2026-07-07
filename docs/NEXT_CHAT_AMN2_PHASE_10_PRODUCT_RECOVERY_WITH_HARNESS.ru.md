@@ -67,7 +67,7 @@ ios_status=not_proven/manual_rename_fallback
 ## Первый шаг
 
 ```text
-ТЕКУЩАЯ МОДЕЛЬ -> SELECT_NEXT_REAL_PHASE10_PRODUCT_SLICE_AFTER_PROGRESS_HARNESS_KNOWN_SLICE_REGISTRY -> START_PHASE10_<KNOWN_REAL_TOPIC>_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE
+ТЕКУЩАЯ МОДЕЛЬ -> DECIDE_READ_ONLY_VPS_SOURCE_OVERLAY_UPLOAD_GATE_FOR_AMN2_4326CAE_OR_SELECT_NEXT_LOCAL_RUNTIME_SLICE
 ```
 
 Почему именно он:
@@ -107,13 +107,24 @@ phase10_progress_harness_known_slice_registry_push_status=done
 phase10_progress_harness_known_slice_registry_result=require_known_registry_for_START_PHASE10_slice_commands
 phase10_progress_harness_known_slice_registry_harness=next_command_pass|product_diff_pass
 phase10_progress_harness_known_slice_registry_test_status=progress_harness_pytest_12_passed
+phase10_amn2_4326cae_vps_package_prep_status=completed-local-package-ready-not-vps-smoked
+phase10_amn2_4326cae_vps_package_prep_commit=69323ba
+phase10_amn2_4326cae_vps_package_prep_amntwo_head=4326cae
+phase10_amn2_4326cae_vps_package_prep_package=dist/amn2-vps-update-and-smoke-kit-4326cae.zip
+phase10_amn2_4326cae_vps_package_prep_package_sha256=FEFD9D4AE91764AB9649284E26F0F303A2F43BAECD8A511B0E492E8D9315D2F1
+phase10_amn2_4326cae_vps_package_prep_source_sha256=7F91506F2C652520940C79C951A3B329964956DD1E247152E34A0FB43BAAAB06
+phase10_amn2_4326cae_vps_package_prep_verification=amn2_toolchain_ok|amn2_scoped_pytest_8_passed_1_warning|package_hygiene_passed|package_extract_passed|amn3_package_tests_4_passed|diff_check_passed
+phase10_amn2_4326cae_vps_package_prep_live_upload_status=not-approved
 ```
 
 Schema index verification, client compatibility branch integration и
 fresh-installer recovery integration закрыты; progress harness больше не должен
 принимать выдуманные `START_PHASE10_*_SLICE` команды как реальные срезы.
-Следующий шаг - выбрать следующий известный real Phase 10 product slice:
-`SELECT_NEXT_REAL_PHASE10_PRODUCT_SLICE_AFTER_PROGRESS_HARNESS_KNOWN_SLICE_REGISTRY`.
+AMN2 `4326cae` package-prep закрыт как local-only package-ready-not-vps-smoked.
+Следующий шаг - либо exact decision на read-only VPS source-overlay upload/smoke
+для `dist/amn2-vps-update-and-smoke-kit-4326cae.zip`, либо выбрать следующий
+локальный AMN2 runtime slice. Live upload/apply остается запрещен до отдельного
+exact gate.
 Docs sync оставлять только хвостом после code/test evidence.
 
 ## Automation Retarget Check
