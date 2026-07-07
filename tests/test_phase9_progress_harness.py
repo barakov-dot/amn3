@@ -62,6 +62,18 @@ class Phase9ProgressHarnessTests(unittest.TestCase):
 
         self.assertTrue(all(check.ok for check in checks))
 
+    def test_rejects_real_product_slice_without_scoped_tests(self) -> None:
+        harness = _load_harness_module()
+
+        checks = harness.evaluate_next_command(
+            "КОДЕКС SPARK → START_CONFIG_SHARE_RESTORE_SCHEMA_INDEX_DECLARATION_CONTRACT_SLICE",
+            require_product_step=True,
+            require_scoped_tests=True,
+        )
+
+        failed_checks = {check.name: check.ok for check in checks if not check.ok}
+        self.assertIn("next-command-scoped-tests", failed_checks)
+
     def test_rejects_selected_slice_placeholder_without_concrete_slice(self) -> None:
         harness = _load_harness_module()
 

@@ -24,6 +24,7 @@ MODEL_LABEL_TOKENS = {
     "CURRENT_MODEL",
     "GPT_5",
     "GPT_5_5",
+    "GPT_5_3",
 }
 
 DOCS_ONLY_STEP_MARKERS = (
@@ -54,6 +55,8 @@ PLACEHOLDER_PRODUCT_STEPS = {
     "START_SELECTED_PHASE10_PRODUCT_SLICE",
     "RUN_SCOPED_TESTS_FOR_SELECTED_SLICE",
 }
+
+SCOPED_TESTS_REQUIRED_FOR_SLICE = {"RUN_SCOPED_TESTS_FOR_SELECTED_SLICE"}
 
 REQUIRED_FALSE_MARKERS = {
     "execution_go",
@@ -121,6 +124,7 @@ def evaluate_next_command(
     *,
     allow_hold: bool = False,
     require_product_step: bool = False,
+    require_scoped_tests: bool = False,
 ) -> list[Check]:
     steps = extract_steps(command)
     checks: list[Check] = []
@@ -167,6 +171,15 @@ def evaluate_next_command(
             else f"concrete_steps={','.join(concrete_steps) if concrete_steps else 'none'}",
         )
     )
+
+    if require_scoped_tests:
+        checks.append(
+            Check(
+                "next-command-scoped-tests",
+                any(step in SCOPED_TESTS_REQUIRED_FOR_SLICE for step in steps),
+                "scoped tests required for real product slice commands; add RUN_SCOPED_TESTS_FOR_SELECTED_SLICE",
+            )
+        )
     return checks
 
 
@@ -326,6 +339,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.next_command,
                 allow_hold=args.allow_hold,
                 require_product_step=args.require_product_step,
+                require_scoped_tests=args.require_product_step,
             )
         )
 
