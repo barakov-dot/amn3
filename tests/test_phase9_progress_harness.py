@@ -105,6 +105,17 @@ class Phase9ProgressHarnessTests(unittest.TestCase):
         self.assertTrue(checks[0].ok)
         self.assertEqual(checks[0].name, "stop-lines-source")
 
+    def test_require_product_diff_explains_clean_tree_is_not_closure(self) -> None:
+        harness = _load_harness_module()
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            checks = harness.check_diff_scope(Path(tmp_dir), require_product_diff=True)
+
+        self.assertFalse(all(check.ok for check in checks))
+        self.assertEqual(checks[0].name, "working-tree-scope")
+        self.assertIn("no product diff", checks[0].detail)
+        self.assertIn("not product-slice closure evidence", checks[0].detail)
+
 
 if __name__ == "__main__":
     unittest.main()

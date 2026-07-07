@@ -260,11 +260,14 @@ def classify_paths(paths: Iterable[str]) -> str:
 def check_diff_scope(root: Path, *, require_product_diff: bool = False) -> list[Check]:
     paths = changed_paths(root)
     scope = classify_paths(paths)
+    detail = f"scope={scope}; paths={','.join(paths) if paths else 'none'}"
+    if require_product_diff and scope == "clean":
+        detail += "; no product diff: valid next-command is not product-slice closure evidence"
     return [
         Check(
             "working-tree-scope",
             (not require_product_diff) or scope in {"product-only", "product-and-docs"},
-            f"scope={scope}; paths={','.join(paths) if paths else 'none'}",
+            detail,
         )
     ]
 
