@@ -67,7 +67,7 @@ ios_status=not_proven/manual_rename_fallback
 ## Первый шаг
 
 ```text
-ТЕКУЩАЯ МОДЕЛЬ -> SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_FRESH_INSTALLER_RECOVERY_MERGE -> START_SELECTED_PHASE10_PRODUCT_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE
+ТЕКУЩАЯ МОДЕЛЬ -> SELECT_NEXT_REAL_PHASE10_PRODUCT_SLICE_AFTER_PROGRESS_HARNESS_KNOWN_SLICE_REGISTRY -> START_PHASE10_<KNOWN_REAL_TOPIC>_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE
 ```
 
 Почему именно он:
@@ -101,12 +101,19 @@ phase10_fresh_installer_recovery_branch=codex/dirty-main-amn2-fresh-installer-re
 phase10_fresh_installer_recovery_head=4326cae
 phase10_fresh_installer_recovery_target=amn2/codex-vps-test-prep
 phase10_fresh_installer_recovery_test_status=post_merge_scoped_pytest_164_passed
+phase10_progress_harness_known_slice_registry_status=completed-local-code
+phase10_progress_harness_known_slice_registry_commit=1e0d73d
+phase10_progress_harness_known_slice_registry_push_status=done
+phase10_progress_harness_known_slice_registry_result=require_known_registry_for_START_PHASE10_slice_commands
+phase10_progress_harness_known_slice_registry_harness=next_command_pass|product_diff_pass
+phase10_progress_harness_known_slice_registry_test_status=progress_harness_pytest_12_passed
 ```
 
 Schema index verification, client compatibility branch integration и
-fresh-installer recovery integration закрыты. Следующий шаг - выбрать следующий
-Phase 10 product slice:
-`SELECT_NEXT_PHASE10_PRODUCT_SLICE_AFTER_FRESH_INSTALLER_RECOVERY_MERGE`.
+fresh-installer recovery integration закрыты; progress harness больше не должен
+принимать выдуманные `START_PHASE10_*_SLICE` команды как реальные срезы.
+Следующий шаг - выбрать следующий известный real Phase 10 product slice:
+`SELECT_NEXT_REAL_PHASE10_PRODUCT_SLICE_AFTER_PROGRESS_HARNESS_KNOWN_SLICE_REGISTRY`.
 Docs sync оставлять только хвостом после code/test evidence.
 
 ## Automation Retarget Check
