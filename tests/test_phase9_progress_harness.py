@@ -62,6 +62,33 @@ class Phase9ProgressHarnessTests(unittest.TestCase):
 
         self.assertTrue(all(check.ok for check in checks))
 
+    def test_accepts_documented_phase10_product_slice_command(self) -> None:
+        harness = _load_harness_module()
+
+        checks = harness.evaluate_next_command(
+            "GPT-5.3 -> START_PHASE10_CLIENT_COMPATIBILITY_BRANCH_BROAD_SCOPED_REGRESSION_SLICE "
+            "-> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE",
+            require_product_step=True,
+        )
+
+        self.assertTrue(all(check.ok for check in checks))
+
+    def test_rejects_unknown_phase10_product_slice_command(self) -> None:
+        harness = _load_harness_module()
+
+        checks = harness.evaluate_next_command(
+            "GPT-5.3 -> START_PHASE10_CLIENT_PARTY_COMPATIBILITY_BRANCH_BROAD_SCOPED_REGRESSION_SLICE "
+            "-> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE",
+            require_product_step=True,
+        )
+
+        failed_checks = {check.name: check.detail for check in checks if not check.ok}
+        self.assertIn("next-command-known-phase10-slice", failed_checks)
+        self.assertIn(
+            "START_PHASE10_CLIENT_COMPATIBILITY_BRANCH_BROAD_SCOPED_REGRESSION_SLICE",
+            failed_checks["next-command-known-phase10-slice"],
+        )
+
     def test_rejects_real_product_slice_without_scoped_tests(self) -> None:
         harness = _load_harness_module()
 

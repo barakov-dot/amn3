@@ -56,6 +56,12 @@ PLACEHOLDER_PRODUCT_STEPS = {
     "RUN_SCOPED_TESTS_FOR_SELECTED_SLICE",
 }
 
+KNOWN_PHASE10_SLICE_STEPS = {
+    "START_PHASE10_CLIENT_COMPATIBILITY_BRANCH_BROAD_SCOPED_REGRESSION_SLICE",
+    "START_PHASE10_CONFIG_SHARE_RESTORE_SCHEMA_INDEX_TEST_VERIFICATION_SLICE",
+    "START_PHASE10_PROGRESS_HARNESS_KNOWN_SLICE_REGISTRY_SLICE",
+}
+
 SCOPED_TESTS_REQUIRED_FOR_SLICE = {"RUN_SCOPED_TESTS_FOR_SELECTED_SLICE"}
 
 REQUIRED_FALSE_MARKERS = {
@@ -119,6 +125,12 @@ def is_concrete_product_slice_step(step: str) -> bool:
     return is_product_step(step)
 
 
+def is_known_phase10_slice_step(step: str) -> bool:
+    if not step.startswith("START_PHASE10_"):
+        return True
+    return step in KNOWN_PHASE10_SLICE_STEPS
+
+
 def evaluate_next_command(
     command: str,
     *,
@@ -169,6 +181,19 @@ def evaluate_next_command(
             "use START_PHASE10_<REAL_TOPIC>_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE"
             if require_product_step and not concrete_steps
             else f"concrete_steps={','.join(concrete_steps) if concrete_steps else 'none'}",
+        )
+    )
+    unknown_phase10_steps = [
+        step for step in concrete_steps if not is_known_phase10_slice_step(step)
+    ]
+    checks.append(
+        Check(
+            "next-command-known-phase10-slice",
+            (not require_product_step) or not unknown_phase10_steps,
+            "unknown Phase 10 slice command rejected; known="
+            f"{','.join(sorted(KNOWN_PHASE10_SLICE_STEPS))}"
+            if unknown_phase10_steps
+            else "all Phase 10 slice commands are known",
         )
     )
 
