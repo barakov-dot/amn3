@@ -62,6 +62,21 @@ class Phase9ProgressHarnessTests(unittest.TestCase):
 
         self.assertTrue(all(check.ok for check in checks))
 
+    def test_rejects_selected_slice_placeholder_without_concrete_slice(self) -> None:
+        harness = _load_harness_module()
+
+        checks = harness.evaluate_next_command(
+            "SELECT_NEXT_REAL_PHASE10_PRODUCT_SLICE_AFTER_P6_I007_INTERACTIVE_CLI_OUTPUT_SLICE "
+            "-> START_SELECTED_PHASE10_PRODUCT_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE",
+            require_product_step=True,
+        )
+
+        self.assertFalse(all(check.ok for check in checks))
+        self.assertIn(
+            "next-command-concrete-slice",
+            [check.name for check in checks if not check.ok],
+        )
+
     def test_classifies_diff_scopes(self) -> None:
         harness = _load_harness_module()
 

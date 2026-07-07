@@ -50,6 +50,11 @@ PRODUCT_PREFIXES = (
     "PUSH_",
 )
 
+PLACEHOLDER_PRODUCT_STEPS = {
+    "START_SELECTED_PHASE10_PRODUCT_SLICE",
+    "RUN_SCOPED_TESTS_FOR_SELECTED_SLICE",
+}
+
 REQUIRED_FALSE_MARKERS = {
     "execution_go",
     "config_generation",
@@ -103,6 +108,14 @@ def is_product_step(step: str) -> bool:
     return step.startswith(PRODUCT_PREFIXES) and "SLICE" in step
 
 
+def is_concrete_product_slice_step(step: str) -> bool:
+    if step in PLACEHOLDER_PRODUCT_STEPS:
+        return False
+    if step.startswith("SELECT_NEXT_"):
+        return False
+    return is_product_step(step)
+
+
 def evaluate_next_command(
     command: str,
     *,
@@ -141,6 +154,16 @@ def evaluate_next_command(
             "product step required but not found"
             if require_product_step and not product_steps
             else f"product_steps={','.join(product_steps) if product_steps else 'none'}",
+        )
+    )
+    concrete_steps = [step for step in product_steps if is_concrete_product_slice_step(step)]
+    checks.append(
+        Check(
+            "next-command-concrete-slice",
+            (not require_product_step) or bool(concrete_steps),
+            "concrete product slice required; SELECT/START_SELECTED/RUN_SCOPED_TESTS placeholders are not enough"
+            if require_product_step and not concrete_steps
+            else f"concrete_steps={','.join(concrete_steps) if concrete_steps else 'none'}",
         )
     )
     return checks
