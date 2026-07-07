@@ -161,7 +161,8 @@ def evaluate_next_command(
         Check(
             "next-command-concrete-slice",
             (not require_product_step) or bool(concrete_steps),
-            "concrete product slice required; SELECT/START_SELECTED/RUN_SCOPED_TESTS placeholders are not enough"
+            "concrete product slice required; SELECT/START_SELECTED/RUN_SCOPED_TESTS placeholders are not enough; "
+            "use START_PHASE10_<REAL_TOPIC>_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE"
             if require_product_step and not concrete_steps
             else f"concrete_steps={','.join(concrete_steps) if concrete_steps else 'none'}",
         )
