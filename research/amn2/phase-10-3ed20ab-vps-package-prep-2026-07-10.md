@@ -69,10 +69,12 @@ import/connect remains `pending_physical_device`; device `8` was not modified.
 ## Next Gate
 
 ```text
-DECIDE_PHASE10_3ED20AB_VPS_SOURCE_OVERLAY_AND_WEB_ACTIVATION_GATE
+vps_source_overlay_web_activation=completed-pass
+evidence=research/amn2/phase-10-3ed20ab-vps-source-overlay-web-activation-2026-07-10.md
+next=START_PHASE10_INTEGRATION_API_KEY_REGISTRY_SLICE
 ```
 
-Source overlay and loopback smoke may share one exact gate. Web service
-restart/activation must be separately observed, with both product-write flags
-remaining false. After deployment, continue with the integration/API-key
-registry product slice and then the Telegram operator workflow.
+Source overlay, loopback smoke and separately observed private web activation
+passed with both product-write flags remaining false. Continue with the
+integration/API-key registry product slice and then the Telegram operator
+workflow.

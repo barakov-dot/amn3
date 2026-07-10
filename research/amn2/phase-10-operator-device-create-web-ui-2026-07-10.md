@@ -71,18 +71,20 @@ No VPS command, SSH command, package build/upload/apply, source overlay, service
 restart, peer/user mutation, config generation/delivery, public exposure,
 Telegram action or secret publication was performed by this product slice.
 
-The current VPS overlay remains `e7f6246`. Release head `3ed20ab` is pushed and
-locally packaged but not deployed. Android TV import/connect and device `8`
-acceptance remain `pending_physical_device`.
+At local package closure the VPS overlay remained `e7f6246`. The follow-up gate
+then promoted `3ed20ab`, passed loopback smoke and activated the private web
+service. Android TV import/connect and device `8` acceptance remain
+`pending_physical_device`.
 
 ## Next Step
 
 ```text
 package_prep=completed
 package_evidence=research/amn2/phase-10-3ed20ab-vps-package-prep-2026-07-10.md
-next=DECIDE_PHASE10_3ED20AB_VPS_SOURCE_OVERLAY_AND_WEB_ACTIVATION_GATE
+vps_source_overlay_web_activation=completed-pass
+activation_evidence=research/amn2/phase-10-3ed20ab-vps-source-overlay-web-activation-2026-07-10.md
+next=START_PHASE10_INTEGRATION_API_KEY_REGISTRY_SLICE
 ```
 
-Source overlay and web service activation remain separately observable live
-actions. The following product lane is the scoped integration/API-key registry,
-then the Telegram operator workflow.
+The following product lane is the scoped integration/API-key registry, then the
+Telegram operator workflow.

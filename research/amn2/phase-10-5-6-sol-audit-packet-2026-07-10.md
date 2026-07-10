@@ -174,5 +174,7 @@ AMN2 `466e0bc Add operator device web workflow` adds a private web-admin adapter
 over the hardened operator create contract. Dry-run is side-effect free. Apply
 requires both `VPS_APPLY_ENABLED=true` and the new default-false
 `OPERATOR_DEVICE_CREATE_ENABLED=true`, plus CSRF, configured admin actor and an
-explicit one-device confirmation. The current VPS overlay remains `e7f6246`;
-`466e0bc` is pushed but not yet packaged or deployed.
+explicit one-device confirmation. At web-code closure the VPS overlay remained
+`e7f6246`; the later activation gate promoted release head `3ed20ab` and
+activated the private loopback web service with both product-write flags
+false/unset.
