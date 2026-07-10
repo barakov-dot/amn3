@@ -90,14 +90,16 @@ restart, public exposure, peer/user mutation, config generation/delivery,
 Telegram action or secret publication was performed.
 
 Android TV import/connect remains `pending_physical_device`. Existing device `8`
-was not modified. The live VPS source overlay remains `4326cae`.
+was not modified. At package-prep closure the live VPS source overlay still
+remained `4326cae`; the follow-up below later promoted `e7f6246`.
 
 ## Next Step
 
 ```text
-DECIDE_PHASE10_E7F6246_READ_ONLY_VPS_UPLOAD_SMOKE_GATE
+read_only_vps_upload_smoke=completed-pass
+evidence=research/amn2/phase-10-e7f6246-read-only-vps-source-overlay-smoke-2026-07-10.md
+next=START_PHASE10_OPERATOR_DEVICE_CREATE_WEB_UI_SLICE
 ```
 
-That decision may authorize only package upload, tracked source overlay with
-`VPS_APPLY_ENABLED=false`, and read-only loopback smoke. Product write actions
-remain separate gates.
+The package has now passed its exact VPS source-overlay and loopback smoke gate.
+Product write actions remain separate gates.

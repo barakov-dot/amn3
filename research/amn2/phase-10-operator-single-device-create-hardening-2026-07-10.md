@@ -72,8 +72,9 @@ Existing Android TV device `8` is unchanged. Its ownership remains provisional,
 and handshake/traffic acceptance remains pending until the physical device is
 available.
 
-The live VPS source overlay remains `4326cae`; `e7f6246` is merged and pushed but
-not packaged or VPS-smoked.
+At the initial hardening closure, the live VPS source overlay still remained
+`4326cae`; `e7f6246` was merged and pushed but not yet packaged or VPS-smoked.
+The package/smoke follow-up below later promoted `e7f6246`.
 
 ## Package Follow-Up
 
@@ -81,8 +82,11 @@ not packaged or VPS-smoked.
 package_prep=completed-local-package-ready-not-vps-smoked
 package=dist/amn2-vps-update-and-smoke-kit-e7f6246.zip
 package_evidence=research/amn2/phase-10-e7f6246-vps-package-prep-2026-07-10.md
-next=DECIDE_PHASE10_E7F6246_READ_ONLY_VPS_UPLOAD_SMOKE_GATE
+read_only_vps_upload_smoke=completed-pass
+vps_smoke_evidence=research/amn2/phase-10-e7f6246-read-only-vps-source-overlay-smoke-2026-07-10.md
+next=START_PHASE10_OPERATOR_DEVICE_CREATE_WEB_UI_SLICE
 ```
 
-The package is locally verified. Any VPS upload, source overlay or smoke remains
-a separate exact live gate.
+The package is locally verified and its exact VPS source-overlay/loopback smoke
+gate passed with `VPS_APPLY_ENABLED=false`. Product write actions remain
+separate gates.

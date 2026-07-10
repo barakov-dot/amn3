@@ -161,7 +161,7 @@ safe_reconciliation_audit_attempt=implemented
 config_payload_stdout=false
 device_8_mutated=false
 android_import_connect=pending
-VPS_overlay=e7f6246_not_uploaded_current_4326cae
+VPS_overlay=e7f6246_read_only_smoke_pass_previous_4326cae
 ```
 
 The existing device `8` owner remains provisional by operator decision. Working
