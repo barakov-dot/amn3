@@ -11,6 +11,7 @@ base=e7f6246
 branch=codex-vps-test-prep
 commit=466e0bc
 subject=Add operator device web workflow
+policy_test_followup_commit=3ed20ab
 push=completed
 ```
 
@@ -70,16 +71,18 @@ No VPS command, SSH command, package build/upload/apply, source overlay, service
 restart, peer/user mutation, config generation/delivery, public exposure,
 Telegram action or secret publication was performed by this product slice.
 
-The current VPS overlay remains `e7f6246`. Commit `466e0bc` is pushed but not
-packaged or deployed. Android TV import/connect and device `8` acceptance remain
-`pending_physical_device`.
+The current VPS overlay remains `e7f6246`. Release head `3ed20ab` is pushed and
+locally packaged but not deployed. Android TV import/connect and device `8`
+acceptance remain `pending_physical_device`.
 
 ## Next Step
 
 ```text
-START_PHASE10_466E0BC_VPS_PACKAGE_PREP_SLICE
+package_prep=completed
+package_evidence=research/amn2/phase-10-3ed20ab-vps-package-prep-2026-07-10.md
+next=DECIDE_PHASE10_3ED20AB_VPS_SOURCE_OVERLAY_AND_WEB_ACTIVATION_GATE
 ```
 
-After package verification, upload/source-overlay and any web service activation
-must remain separately reviewed live gates. The following product lane is the
-scoped integration/API-key registry, then the Telegram operator workflow.
+Source overlay and web service activation remain separately observable live
+actions. The following product lane is the scoped integration/API-key registry,
+then the Telegram operator workflow.
