@@ -140,3 +140,30 @@ Required correction:
 5=correct owner only if proven wrong and record working-config-pass after evidence
 6=perform separately reviewed private-artifact retention cleanup
 ```
+
+## Implementation Update 2026-07-10
+
+The hardening slice was implemented, tested, fast-forwarded into AMN2 stable and
+pushed as `e7f6246 Harden operator single device creation`.
+
+```text
+explicit_owner_contract=implemented
+active_owner_validation=implemented
+device_limit_enforcement=implemented
+configured_or_db_admin_authorization=implemented
+public_access_service_path=implemented
+operator_cli_dry_run_apply_modes=implemented
+local_vps_without_self_ssh=implemented
+remote_ssh_mode=implemented
+posix_atomic_0600_artifact=implemented
+non_posix_apply_preflight_block=implemented
+safe_reconciliation_audit_attempt=implemented
+config_payload_stdout=false
+device_8_mutated=false
+android_import_connect=pending
+VPS_overlay=e7f6246_not_uploaded_current_4326cae
+```
+
+The existing device `8` owner remains provisional by operator decision. Working
+config acceptance still requires physical Android TV import/connect followed by
+fresh handshake and traffic evidence.
