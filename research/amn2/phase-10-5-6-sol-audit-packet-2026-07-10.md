@@ -167,3 +167,12 @@ VPS_overlay=e7f6246_read_only_smoke_pass_previous_4326cae
 The existing device `8` owner remains provisional by operator decision. Working
 config acceptance still requires physical Android TV import/connect followed by
 fresh handshake and traffic evidence.
+
+## Web Workflow Update 2026-07-10
+
+AMN2 `466e0bc Add operator device web workflow` adds a private web-admin adapter
+over the hardened operator create contract. Dry-run is side-effect free. Apply
+requires both `VPS_APPLY_ENABLED=true` and the new default-false
+`OPERATOR_DEVICE_CREATE_ENABLED=true`, plus CSRF, configured admin actor and an
+explicit one-device confirmation. The current VPS overlay remains `e7f6246`;
+`466e0bc` is pushed but not yet packaged or deployed.
