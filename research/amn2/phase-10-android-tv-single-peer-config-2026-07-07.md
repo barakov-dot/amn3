@@ -2,7 +2,7 @@
 
 Date: 2026-07-07.
 
-Status: `completed-private-operator-only`.
+Status: `server-side-prepared-awaiting-device-acceptance`.
 
 Gate:
 `CREATE_ONE_ANDROID_TV_PEER_AND_GENERATE_LOCAL_CONFIG_FOR_EXISTING_AMN2_VPS`.
@@ -31,6 +31,10 @@ db_record_status=passed
 config_generation_status=passed
 peer_present_after=true
 active_device_count_after=8
+working_config_proven=false
+handshake_seen=false
+rx_bytes=0
+tx_bytes=0
 ```
 
 ## Private Artifacts
@@ -43,6 +47,9 @@ local_safe_summary_path=private-artifacts/phase10/android-tv-single/20260707T200
 local_private_artifact_root_gitignored=true
 remote_private_artifact_root=/root/amn2-private-artifacts/phase10/android-tv-single/20260707T200605Z/
 remote_backup_created=true
+local_config_acl=owner_system_administrators_only
+remote_private_file_modes=0600
+remote_gate_script_mode=0700
 ```
 
 ## Config Shape Check
@@ -63,6 +70,37 @@ config_bytes=439
 
 The config is an AmneziaWG v2 shaped `.conf` with AWG-specific parameters. It is
 not treated as a plain WireGuard-only export by AMN2 metadata.
+
+This proves config shape and server-side peer presence. It does not yet prove a
+working client connection: the 2026-07-10 read-only audit found no handshake and
+zero RX/TX for device `8`.
+
+## Post-Gate Audit 2026-07-10
+
+```text
+live_peer_present=true
+handshake_seen=false
+rx_bytes=0
+tx_bytes=0
+owner_selection=existing_active_user
+owner_status=active
+owner_is_admin=false
+linked_order_count=0
+target_device_admin_action_count=0
+supported_access_service_path_used=false
+global_VPS_APPLY_ENABLED_after_gate=false
+```
+
+The gate script selected the first active user because no owner was supplied.
+That owner relationship is not proven to match the intended operator/device
+owner. It must not be changed automatically: a correct target user must be
+selected explicitly before any ownership correction.
+
+The one-off script also used private implementation helpers and direct
+repository connection access. It bypassed the normal `AccessService` order,
+device-limit and audit path. A productized replacement must require an explicit
+owner, use a public service API, render the config before remote mutation, and
+cover rollback for every local failure after the remote peer write.
 
 ## Android Display Name Note
 
@@ -95,6 +133,7 @@ Not performed:
 
 ## Next Operator Step
 
-Import the private file from the local artifact path into Android TV / AmneziaWG.
-If the app shows `Сервер 1`, manually rename the profile after import. The server
-side is already configured for this peer.
+First correct or explicitly accept the device ownership record, then import the
+private file into Android TV / AmneziaWG. If the app shows `Сервер 1`, manually
+rename the profile after import. After connection, confirm handshake and traffic
+server-side before changing the status to `working-config-pass`.
