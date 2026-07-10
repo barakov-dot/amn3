@@ -32,7 +32,8 @@ Required correction:
 - require explicit `owner_user_id` or `owner_telegram_id`;
 - verify that the owner exists and is active;
 - never fall back to the first active user or create a synthetic owner;
-- correct device `8` ownership only after the operator identifies the target.
+- keep device `8` ownership provisional without mutation until Android TV
+  import/connect acceptance identifies whether correction is needed.
 
 ### P1: working config was overclaimed
 
@@ -132,10 +133,10 @@ Required correction:
 ## Recommended Order
 
 ```text
-1=resolve explicit owner for existing device 8
+1=leave existing device 8 ownership provisional without mutation
 2=implement supported operator single-device create path with tests
-3=run Android TV import/connect acceptance
-4=verify handshake and traffic
-5=record working-config-pass only after evidence
+3=run Android TV import/connect acceptance when device is available
+4=verify handshake, traffic and intended owner
+5=correct owner only if proven wrong and record working-config-pass after evidence
 6=perform separately reviewed private-artifact retention cleanup
 ```

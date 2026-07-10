@@ -96,6 +96,11 @@ That owner relationship is not proven to match the intended operator/device
 owner. It must not be changed automatically: a correct target user must be
 selected explicitly before any ownership correction.
 
+Operator follow-up decision 2026-07-10: leave device `8` with the current active
+user provisionally and perform no ownership mutation before the Android TV is
+available for import/connect acceptance. Recheck ownership during that
+acceptance; correct it only if the current owner is proven wrong.
+
 The one-off script also used private implementation helpers and direct
 repository connection access. It bypassed the normal `AccessService` order,
 device-limit and audit path. A productized replacement must require an explicit
@@ -133,7 +138,7 @@ Not performed:
 
 ## Next Operator Step
 
-First correct or explicitly accept the device ownership record, then import the
-private file into Android TV / AmneziaWG. If the app shows `Сервер 1`, manually
-rename the profile after import. After connection, confirm handshake and traffic
-server-side before changing the status to `working-config-pass`.
+When the Android TV is available, import the private file into AmneziaWG. If the
+app shows `Сервер 1`, manually rename the profile after import. After connection,
+confirm handshake and traffic server-side, review the provisional ownership, and
+only then change the status to `working-config-pass`.
