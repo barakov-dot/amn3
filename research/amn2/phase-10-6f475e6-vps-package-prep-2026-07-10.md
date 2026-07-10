@@ -69,5 +69,7 @@ TV import/connect remains `pending_physical_device`; device `8` is not modified.
 ## Next Gate
 
 ```text
-APPLY_PHASE10_6F475E6_PRIVATE_SOURCE_OVERLAY_READ_ONLY_SMOKE_AND_WEB_ACTIVATION
+vps_source_overlay_web_activation=completed-pass
+evidence=research/amn2/phase-10-6f475e6-vps-source-overlay-web-activation-2026-07-10.md
+next=START_PHASE10_TELEGRAM_OPERATOR_READ_ONLY_STATUS_SLICE
 ```

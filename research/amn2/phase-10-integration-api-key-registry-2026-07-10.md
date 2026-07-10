@@ -75,10 +75,11 @@ warning is the existing FastAPI/Starlette TestClient deprecation warning.
 
 ## Boundary
 
-This slice performed no VPS/SSH command, package upload, source overlay, service
-restart, peer/config action, Android TV action, public exposure or live
-Telegram action. The VPS remains on private loopback overlay `3ed20ab`;
-`6f475e6` is pushed but not packaged or deployed.
+At product-code closure this slice performed no VPS/SSH command, package upload,
+source overlay, service restart, peer/config action, Android TV action, public
+exposure or live Telegram action. The later approved activation gate packaged,
+smoked and promoted private loopback overlay `6f475e6`; evidence is
+`research/amn2/phase-10-6f475e6-vps-source-overlay-web-activation-2026-07-10.md`.
 
 Android TV device `8` remains
 `server-side-prepared-awaiting-device-acceptance`; import/connect, handshake
