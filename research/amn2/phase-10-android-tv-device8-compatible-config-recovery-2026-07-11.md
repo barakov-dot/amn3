@@ -30,6 +30,26 @@ runtime_tx_bytes=0
 other_existing_profiles_reported_working=true
 ```
 
+Immediately after the operator's control connection, a read-only runtime
+observation identified device 1 as the active previous profile:
+
+```text
+control_device_id=1
+control_device_endpoint_present=true
+control_device_handshake_age_s=90
+control_device_rx_positive=true
+control_device_tx_positive=true
+device8_endpoint_present=false
+device8_handshake=never
+device8_rx_positive=false
+device8_tx_positive=false
+control_comparison=confirmed_client_network_server_dataplane_healthy
+```
+
+This A/B observation confirms that the failure is specific to the first device
+8 client config rather than the official application, Android TV network path,
+VPS endpoint or AWG runtime.
+
 Secret-safe comparison confirmed:
 
 ```text
