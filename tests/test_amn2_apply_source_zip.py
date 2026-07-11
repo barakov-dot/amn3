@@ -143,6 +143,65 @@ class Amn2ApplySourceZipTests(unittest.TestCase):
             self.assertTrue((target / "data").is_dir())
             self.assertEqual((target / ".amn2_source_overlay_commit").read_text(encoding="utf-8"), "test-commit\n")
 
+    @unittest.skipUnless(GIT_BASH.exists(), "Git Bash is required for the live apply-script regression")
+    def test_expected_offline_build_failure_uses_verified_source_path(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="amn2-apply-offline-fallback-") as temp_name:
+            temp_dir = Path(temp_name)
+            target = temp_dir / "target"
+            run_root = temp_dir / "run-root"
+            source_zip = temp_dir / "source.zip"
+            target.mkdir()
+            run_root.mkdir()
+
+            venv_bin = target / "venv" / "bin"
+            venv_bin.mkdir(parents=True)
+            python_wrapper = venv_bin / "python"
+            python_wrapper.write_text(
+                "\n".join(
+                    [
+                        "#!/usr/bin/env bash",
+                        'if [ "${1:-}" = "-m" ] && [ "${2:-}" = "pip" ]; then',
+                        '  echo "Could not find a version that satisfies the requirement setuptools>=69" >&2',
+                        '  echo "No matching distribution found for setuptools>=69" >&2',
+                        "  exit 1",
+                        "fi",
+                        'exec python "$@"',
+                        "",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            python_wrapper.chmod(
+                python_wrapper.stat().st_mode
+                | stat.S_IXUSR
+                | stat.S_IXGRP
+                | stat.S_IXOTH
+            )
+
+            source_sha = _write_minimal_source_zip(source_zip)
+            result = _bash(
+                f"bash {shlex.quote(_to_bash_path(APPLY_SCRIPT))}",
+                env={
+                    "AMN2_DIR": _to_bash_path(target),
+                    "AMN2_SOURCE_ZIP": _to_bash_path(source_zip),
+                    "AMN2_EXPECTED_SOURCE_SHA": source_sha,
+                    "AMN2_EXPECTED_SOURCE_COMMIT": "offline-test-commit",
+                    "AMN2_UPDATE_LOG_DIR": _to_bash_path(run_root),
+                },
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            self.assertIn(
+                "pip_install_status=skipped_existing_source_path_after_expected_offline_build_stop",
+                result.stdout,
+            )
+            source_import_check = run_root / "source-import-check.txt"
+            self.assertTrue(source_import_check.exists())
+            self.assertIn(
+                str((target / "app" / "__init__.py").resolve()),
+                source_import_check.read_text(encoding="utf-8"),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

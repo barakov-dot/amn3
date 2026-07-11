@@ -63,3 +63,8 @@ START_PHASE10_ECF8563_VPS_PACKAGE_PREP_SLICE
 Package preparation must reproduce focused and full tests from the extracted
 source. Upload, service restart, and live quota configuration remain separate
 controlled actions.
+
+Follow-up on 2026-07-11: package preparation completed as
+`dist/amn2-vps-update-and-smoke-kit-ecf8563.zip`. Extracted source returned
+`38 passed` focused and `829 passed, 1 skipped` full. The package has not been
+uploaded; the next step is `REVIEW_ECF8563_PRIVATE_VPS_SOURCE_OVERLAY_UPLOAD_GATE`.
