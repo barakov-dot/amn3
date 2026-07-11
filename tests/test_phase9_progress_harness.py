@@ -73,6 +73,31 @@ class Phase9ProgressHarnessTests(unittest.TestCase):
 
         self.assertTrue(all(check.ok for check in checks))
 
+    def test_accepts_telegram_single_admin_smoke_hardening_slice(self) -> None:
+        harness = _load_harness_module()
+
+        checks = harness.evaluate_next_command(
+            "GPT-5.6 SOL -> "
+            "START_PHASE10_TELEGRAM_SINGLE_ADMIN_TRANSIENT_SMOKE_RUNNER_HARDENING_SLICE "
+            "-> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE",
+            require_product_step=True,
+            require_scoped_tests=True,
+        )
+
+        self.assertTrue(all(check.ok for check in checks))
+
+    def test_accepts_4e44c5d_vps_package_prep_slice(self) -> None:
+        harness = _load_harness_module()
+
+        checks = harness.evaluate_next_command(
+            "GPT-5.6 SOL -> START_PHASE10_4E44C5D_VPS_PACKAGE_PREP_SLICE "
+            "-> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE",
+            require_product_step=True,
+            require_scoped_tests=True,
+        )
+
+        self.assertTrue(all(check.ok for check in checks))
+
     def test_rejects_unknown_phase10_product_slice_command(self) -> None:
         harness = _load_harness_module()
 
