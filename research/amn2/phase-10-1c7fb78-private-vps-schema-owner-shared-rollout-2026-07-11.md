@@ -149,3 +149,8 @@ START_PHASE10_PLAN_DEVICE_QUOTA_ADMIN_UI_SLICE
 That slice should expose safe plan quota management. A client plan for six
 devices must create or permit six dedicated peers/configs; it must not reuse
 the owner-shared profile.
+
+Follow-up on 2026-07-11: the slice completed in AMN2 commit `ecf8563` with an
+authenticated `/plans` view, audited set/clear quota writes, explicit security
+policy bindings, and a final full result of `829 passed, 1 skipped`. The VPS
+remains on `1c7fb78`; `ecf8563` has not been packaged or uploaded yet.
