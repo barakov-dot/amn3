@@ -126,7 +126,8 @@ contract-test, но не разрешает автоматическую сме�
 Классификация: `candidate-now-engineering-check`.
 
 Результат: реализован отдельный local-only slice от `ecf8563` в ветке
-`codex/phase10-upstream-contract-hardening`.
+`codex/phase10-upstream-contract-hardening`, commit `dc0ed92`, и отправлен в
+`amn2` без merge в production baseline.
 
 Покрыто:
 
