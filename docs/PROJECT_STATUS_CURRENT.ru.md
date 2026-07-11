@@ -1,6 +1,6 @@
 # Текущий override 2026-06-09
 
-## Текущий контрольный срез (актуализировано 2026-06-27)
+## Текущий контрольный срез (актуализировано 2026-07-11)
 
 Phase 9 старт из Phase 8 handoff принят. Phase 8 закрыта, уже подготовленные
 Phase 9 docs/commits остаются existing material, первый Phase 9 трек
@@ -8,15 +8,15 @@ Phase 9 docs/commits остаются existing material, первый Phase 9 т
 live/config/public execution.
 
 ```text
-current_chat_state=Phase 9/9.2 closeout with Phase 10 separate-chat handoff prepared
+current_chat_state=Phase 10 product recovery active
 phase8_final_status=launch-ready-with-explicit-limitations
 phase9_material_status=prepared-existing-material
 phase9_continuation_chat_required=false_current_chat_started
-active_phase=Phase 9/9.2 closeout
-next_phase=Phase 10 product recovery with progress harness
-phase10_execution_chat_required=true
+active_phase=Phase 10 product recovery with progress harness
+next_phase=Phase 10 controlled package rollout and dedicated-device lifecycle
+phase10_execution_chat_required=false_current_chat_active
 selected_lane=HARDENING_PRODUCTIZATION
-phase10_transition_status=prepared-local-code-and-docs
+phase10_transition_status=active-product-tested-status-synced
 phase10_transition_doc=docs/AMN2_PHASE_10_PRODUCT_RECOVERY_WITH_HARNESS_ENTRY.ru.md
 phase10_next_chat_handoff=docs/NEXT_CHAT_AMN2_PHASE_10_PRODUCT_RECOVERY_WITH_HARNESS.ru.md
 phase9_9_2_final_closeout_packet=docs/AMN2_PHASE_9_9_2_FINAL_CLOSEOUT_PACKET.ru.md
@@ -26,9 +26,15 @@ phase10_progress_harness_policy=require-product-step-before-next-product-command
 phase10_docs_sync_policy=after-product-code-test-evidence-only
 phase10_first_product_step=completed
 phase10_first_product_reason=config_share_restore_schema_index_declaration_contract_test_status_scoped_pytest_66_passed_product_fix_pushed
-phase10_latest_product_step=ANDROID_TV_COMPATIBLE_AWG_DEFAULTS_RECOVERY
-phase10_latest_product_commit=60d8cc9
+phase10_latest_product_step=CONFIG_ASSIGNMENT_POLICY_AND_CROSS_CLIENT_ACCEPTANCE
+phase10_latest_product_commit=1c7fb78
 phase10_latest_product_push_status=done
+phase10_config_assignment_policy=dedicated_device_default|owner_shared_admin_only
+phase10_client_device_quota=min_MAX_DEVICES_PER_USER_and_plans.max_devices
+phase10_client_multi_device_rule=one_peer_and_one_conf_per_physical_device
+phase10_owner_shared_rule=one_peer_unbounded_physical_count_not_server_enforceable
+phase10_config_assignment_tests=scoped_128_passed_1_skipped_1_warning|full_823_passed_1_skipped_1_warning|web_7_passed_1_warning|diff_review_passed
+phase10_config_assignment_vps_overlay=34b3b43_1c7fb78_not_packaged_not_uploaded
 phase10_telegram_admin_integration_status=completed-code-tested-pushed-local-only
 phase10_telegram_admin_integration_status_base=4cf93f8
 phase10_telegram_admin_integration_status_result=callback_registered|admin_authorized|typed_hash_free_allowlist|lifecycle_read_only|no_mutations|count_only_safe_audit|secret_adjacent_surface_policy
@@ -110,8 +116,8 @@ phase10_4e44c5d_private_vps_upload_gate_review_harness=tests_14_passed|docs_only
 phase10_4e44c5d_private_vps_upload_gate_review_live_actions=read_only_vps_preflight_only|upload_false|apply_false|restart_false|telegram_api_false
 phase10_4e44c5d_private_vps_upload_gate_review_evidence=research/amn2/phase-10-4e44c5d-private-vps-source-overlay-upload-gate-review-2026-07-11.md
 phase10_4e44c5d_private_vps_upload_gate_exact_phrase=APPROVE_PHASE10_4E44C5D_PRIVATE_VPS_SOURCE_OVERLAY_UPLOAD_AND_CLONE_DB_API_WEB_SMOKE_WITH_ROLLBACK
-phase10_android_tv_device8_preacceptance_status=initial_import_passed_connect_failed_compatible_config_generated_physical_retest_pending
-phase10_android_tv_device8_preacceptance_runtime=docker_amnezia_awg2_running|peer_present|endpoint_false|handshake_false|rx_0|tx_0
+phase10_android_tv_device8_preacceptance_status=closed-superseded-by-cross-client-pass
+phase10_android_tv_device8_preacceptance_runtime=docker_amnezia_awg2_running|initial_peer_present|initial_endpoint_false|initial_handshake_false|initial_rx_0|initial_tx_0
 phase10_android_tv_device8_initial_failure=official_amneziavpn_connecting_without_connected_state
 phase10_android_tv_control_profile=device1_endpoint_true|handshake_age_90s|rx_positive|tx_positive
 phase10_android_tv_control_comparison=official_client_android_tv_network_vps_dataplane_confirmed_healthy
@@ -123,8 +129,16 @@ phase10_android_tv_device8_original_private_config=private-artifacts/phase10/and
 phase10_android_tv_device8_private_config=private-artifacts/phase10/android-tv-corrected/20260711T125600Z/Neobyatnaya-AMNZ-N-android-tv-01-compatible.conf
 phase10_android_tv_device8_corrected_sha256=916B08317819CE4C147B39C91C513F6DCF8DB59A1850EEA0774BFDB91CA193BD
 phase10_android_tv_device8_recovery_evidence=research/amn2/phase-10-android-tv-device8-compatible-config-recovery-2026-07-11.md
-phase10_android_tv_device8_next_step=ANDROID_TV_IMPORT_CONNECT_CORRECTED_DEVICE8_CONFIG
-phase10_private_telegram_next_gate=AWAIT_OPERATOR_EXACT_4E44C5D_PRIVATE_VPS_UPLOAD_APPROVAL
+phase10_android_tv_device8_acceptance=passed_official_amneziavpn_standard_conf|endpoint_present|handshake_age_93s|rx_3382412|tx_134118669
+phase10_ios_defaultvpn_acceptance=passed_standard_conf|handshake_age_9s|rx_4169240|tx_149555536
+phase10_windows_11_amneziavpn_acceptance=passed_standard_conf|handshake_age_46s|rx_4478716|tx_153445786
+phase10_cross_client_config=private-artifacts/phase10/cross-client-acceptance/20260711T134917Z/Neobyatnaya.NET.conf
+phase10_cross_client_display_name=filename_stem_passed_android_tv_and_windows_11
+phase10_native_vpn_json_status=import_pass_connect_failed_spinning_without_error_not_recommended
+phase10_shared_owner_observation=android_tv_and_ios_overlap_worked|not_concurrency_scale_guarantee
+phase10_android_tv_device8_next_step=COMPLETE_NO_REPEAT_CONNECTION_LOOP
+phase10_device8_assignment_reconciliation=pending_separate_live_db_gate_after_1c7fb78_rollout
+phase10_private_telegram_next_gate=SUPERSEDED_BY_START_PHASE10_1C7FB78_VPS_PACKAGE_PREP_SLICE
 phase10_telegram_admin_server_status_route_status=completed-code-tested-pushed-local-only
 phase10_telegram_admin_server_status_route_base=1c7b5b2
 phase10_telegram_admin_server_status_route_result=callback_registered|admin_authorized|typed_api_safe_allowlist|stored_health_only|operator_locale|count_only_safe_audit|surface_policy_bound
@@ -757,18 +771,18 @@ android_display_name_pair_sync_next_chat_status=awaiting_or_completed_in_docs_mo
 android_display_name_production_naming=Neobyatnaya-AMNZ-N
 android_display_name_fallback=manual_rename
 android_display_name_pass_required=Neobyatnaya-AMNZ-N
-android_display_name_windows_policy=filename/basename_Neobyatnaya-AMNZ-N.conf
-android_display_name_ios_policy=not_proven_manual_rename_fallback
+android_tv_amneziavpn_display_name_policy=standard_conf_filename_stem_proven
+ios_defaultvpn_display_name_policy=not_observed_connection_and_traffic_only
 android_display_name_execution_go_after_result=false
-windows_amneziawg_display_name_strategy=filename_basename
-windows_amneziawg_required_filename=Neobyatnaya-AMNZ-N.conf
+windows_amneziavpn_display_name_strategy=standard_conf_filename_stem_proven
+windows_amneziavpn_canonical_filename=Neobyatnaya.NET-device_id.conf
 phase9_platform_display_name_implementation_readiness_doc=docs/AMN2_PHASE_9_PLATFORM_DISPLAY_NAME_IMPLEMENTATION_READINESS.ru.md
 phase9_platform_display_name_implementation_handoff=prepared_docs_only_for_generator_code
 platform_display_name_generator_code_handoff_mode=docs_only_with_task_list_and_constraints
-platform_display_name_implementation_scope=windows_filename_basename_android_ios_manual_rename_fallback
-android_display_name_strategy=manual_rename_fallback
-ios_display_name_strategy=not_proven_manual_rename_fallback
-server1_display_name_issue=client-display-name-product-compatibility-gap
+platform_display_name_implementation_scope=android_tv_and_windows_standard_conf_filename_stem|ios_name_not_observed
+android_display_name_strategy=standard_conf_filename_stem
+ios_display_name_strategy=not_observed_no_claim
+server1_display_name_issue=resolved_for_verified_standard_conf_path
 phase9_validation_config_path_checklist=completed-docs-only
 phase9_validation_config_path_checklist_doc=docs/AMN2_PHASE_9_VALIDATION_AND_CONFIG_PATH_CHECKLIST.ru.md
 phase9_validation_checklist_status=documented-limitations-accepted-with-hold
@@ -786,7 +800,7 @@ phase9_config_template_override_empty_config_guard=completed-local-code
 phase9_runtime_config_path_checklist_watch=runtime_path_discovery_guard_completed_local
 ssh_auth_hardening_gate_review=completed-docs-only
 ssh_auth_hardening_gate_review_doc=docs/AMN2_SSH_AUTH_HARDENING_GATE_REVIEW.ru.md
-ios_defaultvpn_default_status=failed-not-accepted
+ios_defaultvpn_default_status=passed-first-connect-and-traffic-reconnect-soak-pending
 ssh_auth_no_hardening_execution=not-approved
 db_aggregate_counts_status=optional-confidence-not-hardening-blocker
 important_block_realization_status=completed-docs-only
@@ -804,23 +818,21 @@ next_step=AMN2_PHASE_9_PRIVATE_SELF_CONFIG_EXECUTION_READINESS_GATE
 Ключевые ограничения в этом срезе:
 
 - Не открывать live/VPS/SSH/config/Telegram/public action без fresh exact named gate.
-- Не обещать iOS support (DefaultVPN не прошел import path).
+- iOS DefaultVPN standard `.conf` first-connect и трафик подтверждены; reconnect
+  и long-session soak остаются отдельной проверкой.
 - Не запускать любые новые `peer creation`, `config delivery`, `production rollout`.
 - Перед каждым commit/push выполнить SECRET_POLLUTION_SCAN и local markdown/diff clean checks.
- - Real Android AmneziaWG display-name validation подтвержден как:
-  - pass: `Observed display name = Neobyatnaya-AMNZ-N`;
-  - documented limitation: `SERVER1` / `Сервер 1` допустим только как client
-    display-name gap с `manual rename` fallback;
-  - fail: generic generated name/filename, принятие `SERVER1` как production
-    naming, payload/secrets output, peer/config/public/self-service action.
-  Выполнение — только через future exact gate
-  `ANDROID_AMNEZIAWG_PROFILE_NAME_ACCEPTANCE_GATE` при запросе оператора.
+- Real-device Android TV и Windows 11 AmneziaVPN подтвердили display name из
+  filename stem обычного `.conf`; рабочее наблюдаемое имя:
+  `Neobyatnaya-AMNZ-N-android-tv-01`. Native `.vpn` JSON импортировался, но не
+  подключился, поэтому не является production naming/config path.
 - Platform naming implementation: `AMN2_PHASE_9_WINDOWS_FILENAME_BASENAME_IMPLEMENTATION_GATE`
   закрыт как `APPROVED_WITH_TEST_ENV_LIMITATION`: Windows AmneziaWG standalone
   использует filename/basename strategy `Neobyatnaya-AMNZ-N.conf`.
-  Android/iOS Amnezia app остаются documented limitation/manual rename fallback
-  до отдельного доказанного механизма. Для локального подтверждения
-  `pytest` в окружении не установлен, тесты не запускались.
+  Android TV и Windows official AmneziaVPN теперь также подтверждены через
+  standard `.conf` filename stem. iOS display name отдельно не наблюдался;
+  соединение и трафик DefaultVPN подтверждены. Текущий AMN2 full suite:
+  `823 passed, 1 skipped, 1 warning`.
 - Automation intake 2026-06-28 accounted as `P9-N007` docs-only/review-only:
   Amnezia `4.9.0.3` is unreleased watch-only, current release remains
   `4.8.19.0`, Android AmneziaWG remains `2.0.1`; `SERVER1` / `Сервер 1`
