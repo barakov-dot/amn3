@@ -165,6 +165,19 @@ class Phase9ProgressHarnessTests(unittest.TestCase):
             harness.classify_paths(["app/service.py", "docs/status.md"]),
             "product-and-docs",
         )
+        self.assertEqual(
+            harness.classify_paths(
+                [
+                    "dist/amn2-vps-update-and-smoke-kit-4e44c5d.zip",
+                    "docs/status.md",
+                ]
+            ),
+            "product-and-docs",
+        )
+        self.assertEqual(
+            harness.classify_paths(["dist/unrelated-export.zip"]),
+            "mixed-or-other",
+        )
 
     def test_parses_untracked_paths_from_git_status(self) -> None:
         harness = _load_harness_module()

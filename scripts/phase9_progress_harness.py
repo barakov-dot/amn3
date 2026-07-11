@@ -74,7 +74,12 @@ REQUIRED_FALSE_MARKERS = {
     "live_vps_ssh_telegram_public",
 }
 
-PRODUCT_PATH_PREFIXES = ("app/", "scripts/", "tests/")
+PRODUCT_PATH_PREFIXES = (
+    "app/",
+    "dist/amn2-vps-update-and-smoke-kit-",
+    "scripts/",
+    "tests/",
+)
 DOCS_PATH_PREFIXES = ("docs/", "ideas/", "research/", "watch-notes/", "prototypes/")
 DOCS_FILES = {"README.md"}
 
