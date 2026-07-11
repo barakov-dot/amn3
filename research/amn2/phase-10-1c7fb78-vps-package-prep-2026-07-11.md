@@ -98,3 +98,10 @@ START_PHASE10_1C7FB78_PRIVATE_VPS_SCHEMA_OWNER_SHARED_ROLLOUT_GATE
 The live gate must separately authorize source snapshot, SQLite backup, clone
 DB migration/reconciliation/API smoke, production migration and device 8
 assignment update, web-only restart, verification and automatic rollback.
+
+## Rollout Result
+
+The separate exact gate was later approved and completed on successful run
+`20260711T154907Z`. VPS overlay is now `1c7fb78`, device 8 is
+`owner_shared`, and the private web service passed final smoke. Evidence:
+`research/amn2/phase-10-1c7fb78-private-vps-schema-owner-shared-rollout-2026-07-11.md`.

@@ -2,7 +2,7 @@
 
 Date: 2026-07-11.
 
-Decision: `APPROVE-CONDITIONAL-AWAITING-EXACT-LIVE-PHRASE`.
+Decision: `APPROVED-CONSUMED-COMPLETED-PASS`.
 
 This review performed local package/tooling verification and read-only VPS
 preflight only. It did not upload a file, stop a service, migrate SQLite,
@@ -156,5 +156,6 @@ action remain excluded.
 APPROVE PHASE10_1C7FB78_PRIVATE_VPS_UPLOAD_SCHEMA_MIGRATION_DEVICE8_OWNER_SHARED_AND_CLONE_DB_API_WEB_SMOKE_WITH_ROLLBACK
 ```
 
-Without that exact phrase the decision remains review-only and no live upload,
-service stop, source apply, schema migration or reconciliation is authorized.
+The exact phrase was received and consumed. Rollout completed on run
+`20260711T154907Z`; evidence:
+`research/amn2/phase-10-1c7fb78-private-vps-schema-owner-shared-rollout-2026-07-11.md`.
