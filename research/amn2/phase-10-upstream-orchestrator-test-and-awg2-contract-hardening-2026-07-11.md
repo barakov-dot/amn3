@@ -2,7 +2,7 @@
 
 Дата: 2026-07-11.
 
-Статус: `completed-local-only`.
+Статус: `completed-integrated-into-phase10`.
 
 ## Границы
 
@@ -125,9 +125,10 @@ contract-test, но не разрешает автоматическую сме�
 
 Классификация: `candidate-now-engineering-check`.
 
-Результат: реализован отдельный local-only slice от `ecf8563` в ветке
-`codex/phase10-upstream-contract-hardening`, commit `dc0ed92`, и отправлен в
-`amn2` без merge в production baseline.
+Результат: отдельный local-only slice от `ecf8563` был реализован в ветке
+`codex/phase10-upstream-contract-hardening`, commit `dc0ed92`. После проверки
+ancestry он интегрирован fast-forward в текущую Phase 10 ветку без слепого
+переключения рабочей ветки.
 
 Покрыто:
 
@@ -147,6 +148,43 @@ full=840 passed, 1 skipped, 1 warning
 python_3_12_13_compile_and_runtime_smoke=passed
 live_actions=false
 ```
+
+### Integration result
+
+```text
+phase10_branch=codex-vps-test-prep
+integration_base=ecf85632216724ff22da48314321d01339f416e9
+upstream_commit=dc0ed92f3280903570fcc3cfbb4329e0bf880800
+integration_method=fast-forward-only
+review_fix=44287d4_require_ascii_awg_magic_headers
+integrated_head=44287d4
+candidate_status=integrated-do-not-reoffer-dc0ed92
+```
+
+Перед интеграцией подтверждено, что `ecf8563` является прямым предком
+`dc0ed92`; текущая Phase 10 ветка вперед не ушла. Первичный diff ограничен
+Settings, AWG2 config contract и их тестами. Повторно воспроизведены исходные
+результаты `56/123/840`.
+
+Diff review выявил один дополнительный wire-contract edge case: `\d` в
+Python принимает Unicode decimal digits, хотя H1-H4 должны иметь ASCII
+uint32/range syntax. В `44287d4` lexical contract сужен до `[0-9]`, добавлен
+регрессионный тест на Unicode digits.
+
+Финальная проверка интегрированного head:
+
+```text
+focused=57 passed
+expanded=124 passed, 1 warning
+full=841 passed, 1 skipped, 1 warning
+python_3_12_13_compile_and_runtime_smoke=passed
+diff_review=passed
+live_actions=false
+```
+
+Ранее подготовленный пакет `ecf8563` не загружался и теперь заблокирован как
+устаревший относительно интегрированного source head `44287d4`. Package/live
+gate этим engineering check не открывался.
 
 ### Candidate later: subnet source of truth
 
