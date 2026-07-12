@@ -1,5 +1,28 @@
 # Следующий чат: AMN2 Phase 10 Product Recovery With Harness
 
+## Актуальный override 2026-07-12 после cascade revoke
+
+```text
+amn2_branch=codex-vps-test-prep
+amn2_head=3c91601
+lifecycle_commit=bdbf740
+read_only_web_diagnostics_commit=956e76b
+cascade_revoke_commit=3c91601
+full_test_status=870_passed_1_skipped_1_warning
+launch_plan_change=false
+public_enrollment=false
+live_drift_remediation=false
+next_local_step=START_PHASE10_3C91601_VPS_PACKAGE_PREP_SLICE
+evidence=research/amn2/phase-10-upstream-lifecycle-web-diagnostics-cascade-revoke-2026-07-12.md
+```
+
+VPS 2026-07-12 недоступен одновременно клиентам, по SSH/22 и ICMP. Ни
+остановка, ни запуск runtime в этой работе не выполнялись. Последнее
+подтвержденное состояние 2026-07-11: `amnezia-awg2` running, web active,
+bot inactive/disabled. До восстановления host/provider connectivity нельзя
+заявлять, что VPN runtime включен или проверен; bot не использовать для
+восстановления VPN.
+
 Дата: 2026-07-04.
 
 ## Актуальный override 2026-07-12

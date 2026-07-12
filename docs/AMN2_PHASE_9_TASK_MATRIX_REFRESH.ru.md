@@ -1,5 +1,21 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 10 override 2026-07-12
+
+```text
+phase10_current_source_head=3c91601
+phase10_enrollment_lifecycle=bdbf740|issued_claimed_config_ready_delivered_acceptance_verified|tested
+phase10_read_only_admin_web_diagnostics=956e76b|desired_observed_drift_freshness_evidence_reason_recommended_action|no_apply
+phase10_physical_device_cascade_revoke=3c91601|operation_plan_remote_first|tickets_delivery_links_assignments_remote_peer|stale_reconnect_blocked
+phase10_security_fix=refuse_local_only_revoke_when_remote_apply_closed
+phase10_full_tests=870_passed_1_skipped_1_warning
+phase10_diff_review=passed
+phase10_upstream_2026_07_12=no_relevant_delta_vs_2026_07_11|launch_plan_unchanged
+phase10_vps_runtime=confirmed_client_outage|ssh22_timeout|ping_timeout|provider_or_host_recovery_required|no_runtime_mutation
+phase10_next_local_step=START_PHASE10_3C91601_VPS_PACKAGE_PREP_SLICE
+phase10_evidence=research/amn2/phase-10-upstream-lifecycle-web-diagnostics-cascade-revoke-2026-07-12.md
+```
+
 Дата: 2026-07-12
 Статус: `phase10-active-product-evidence-synced`
 Основа: `docs/AMN2_PHASE_8_PRIVATE_RC_FINAL_CLOSEOUT.ru.md`, `docs/AMN2_PHASE_9_ENTRY_BRIEF.ru.md`.
