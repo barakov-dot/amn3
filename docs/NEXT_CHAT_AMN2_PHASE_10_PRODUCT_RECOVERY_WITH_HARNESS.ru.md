@@ -2,6 +2,62 @@
 
 Дата: 2026-07-04.
 
+## Актуальный override 2026-07-12
+
+Исторический контекст ниже не переписывать. Текущий переносимый Phase 10
+source head:
+
+```text
+amn2_branch=codex-vps-test-prep
+amn2_head=e709746
+status_branch=codex-spark-phase9-docs-sync
+latest_product_slice=READ_ONLY_DESIRED_OBSERVED_DRIFT_DIAGNOSTICS
+drift_commit=fc48a7e
+device_passport_commit=a2cbcfa
+enrollment_ticket_commit=e709746
+full_test_status=864_passed_1_skipped_1_warning
+evidence=research/amn2/phase-10-drift-device-passport-enrollment-ticket-2026-07-12.md
+```
+
+Реализовано локально:
+
+- детерминированный read-only `ReconciliationSnapshot` с состояниями
+  `aligned`, `missing_remote`, `unexpected_remote`, `stale_observation`,
+  `observation_failed`, `unknown`;
+- Device Passport со стабильным generated ID и без hardware fingerprint,
+  posture или MDM заявлений;
+- hash-only, TTL, single-use Device Enrollment Ticket с atomic claim и exact
+  idempotent retry;
+- raw enrollment token отсутствует в DB/log/audit/read metadata;
+- drift auto-remediation, public enrollment route, VPS peer/config mutation и
+  Telegram delivery не открыты.
+
+Launch decision:
+
+```text
+read_only_drift=nearest-product-slice-after-authenticated-operator-surface-policy-binding
+device_passport=local-persistence-ready-operator-view-pending
+enrollment_ticket=local-service-only-public-route-disabled
+enrollment_ticket_launch_blocking=false_when_self_service_not_required
+drift_auto_remediation=false
+next_local_step=START_PHASE10_E709746_VPS_PACKAGE_PREP_SLICE
+```
+
+VPS runtime note:
+
+```text
+last_verified_2026_07_11=overlay_1c7fb78|web_active_enabled|amnezia_awg2_running|bot_inactive_disabled
+check_2026_07_12=ssh22_timeout|ping_timeout|no_runtime_change_performed
+classification=management-transport-unreachable-runtime-not-reverified
+runtime_restore_rule=after_any_test_stop_restore_original_runtime_verify_and_notify_operator
+```
+
+`amneziya-bot` не включать как способ восстановления VPN: он намеренно
+inactive/disabled до отдельного polling gate. Уже выданные конфиги обслуживает
+`amnezia-awg2`. При доступном SSH сначала read-only проверить container/web;
+только реально остановленный production runtime возвращать в исходное
+состояние и обязательно сообщать оператору результат.
+
 ## Команда для старта
 
 ```text
