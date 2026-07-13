@@ -1,5 +1,24 @@
 # Следующий чат: AMN2 Phase 10 Product Recovery With Harness
 
+## External full recovery backup override 2026-07-13
+
+После provider incident создана первая полная внешняя recovery-копия. Она
+включает консистентную SQLite DB, AMN2 runtime env/config, AWG persistent config
+и server keys, container start file и systemd units. Bundle зашифрован до
+скачивания, локально расшифрован только в памяти и проверен по manifest SHA-256,
+SQLite integrity и recovery contracts. Recovery key хранится отдельно от
+bundle, ограничен ACL текущего пользователя и не попадает в Git.
+
+```text
+artifact=backups/amn2-recovery/amn2-recovery-20260713T153359Z.tar.gz.enc
+sha256=3e2339fdbe7e78bcdd1ab90510e204acdffba0b09df5c4ae05dae64293136cb8
+vpn_runtime_mutation=false
+remote_temp_artifacts_removed=true
+second_independent_copy=pending
+restore_rehearsal=pending_separate_gate
+evidence=research/amn2/phase-10-external-full-recovery-backup-2026-07-13.md
+```
+
 ## VPS recovery override 2026-07-13
 
 Provider-side incident закрыт фактическим runtime evidence. SSH и ICMP

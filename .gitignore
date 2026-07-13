@@ -1,5 +1,6 @@
 worktrees/
 tmp/
 private-artifacts/
+backups/
 __pycache__/
 *.py[cod]

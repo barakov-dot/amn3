@@ -1,5 +1,17 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 10 external recovery backup override 2026-07-13
+
+```text
+phase10_external_full_recovery_backup=completed|encrypted|downloaded|verified
+phase10_external_full_recovery_scope=sqlite_env_servers_awg_config_server_keys_systemd
+phase10_external_full_recovery_verify=13_files|12_sha256_checks|sqlite_integrity_ok|runtime_contracts_passed
+phase10_external_full_recovery_runtime=not_stopped|restart_count_0|traffic_positive
+phase10_external_full_recovery_key=separate_acl_restricted_not_git
+phase10_external_full_recovery_residual=independent_second_copy_and_restore_rehearsal_pending
+phase10_external_full_recovery_evidence=research/amn2/phase-10-external-full-recovery-backup-2026-07-13.md
+```
+
 ## Phase 10 VPS recovery override 2026-07-13
 
 ```text
