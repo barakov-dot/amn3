@@ -1,5 +1,31 @@
 # Следующий чат: AMN2 Phase 10 Product Recovery With Harness
 
+## Isolated restore rehearsal override 2026-07-13
+
+Encrypted production bundle проверен локально без записи plaintext. На
+изолированный staging передан только exact-allowlisted schema-only sanitized
+fixture: DB содержит 12 tables и 0 rows, AWG material redacted, services
+заблокированы. Verifier, systemd syntax и start guard прошли; remote tree
+удалён, runtime не устанавливался, production VPS не использовался.
+
+```text
+run_id=20260713T215439Z
+verifier_commit=f1ec6ca
+local_verification=passed_with_warning
+sanitized_staging_verification=passed
+sanitized_sha256=ff10c841946c8fa5725ef974360bb987dad942e8353ac5fae09ab80e0dd1ae59
+tests=focused_11_passed|root_34_passed|compile_passed|diff_review_passed
+production_key_uploaded=false
+production_plaintext_uploaded=false
+production_vps_touched=false
+staging_runtime_installed=false
+staging_cleanup=passed|ssh_only_external_listener
+metadata_writer_defect=missing_newline_source_overlay_container_name
+next_dr_step=fix_metadata_writer_then_generate_and_verify_replacement_bundle
+launch_plan_change=false
+evidence=research/amn2/phase-10-isolated-restore-rehearsal-2026-07-13.md
+```
+
 ## External full recovery backup override 2026-07-13
 
 После provider incident создана первая полная внешняя recovery-копия. Она
@@ -17,7 +43,7 @@ sha256=3e2339fdbe7e78bcdd1ab90510e204acdffba0b09df5c4ae05dae64293136cb8
 vpn_runtime_mutation=false
 remote_temp_artifacts_removed=true
 second_independent_copy=completed|F:\AMN2-Recovery\20260713T153359Z|sha256_verified|key_not_copied
-restore_rehearsal=pending_separate_gate
+restore_rehearsal=completed_safe_split_local_production_and_sanitized_staging
 evidence=research/amn2/phase-10-external-full-recovery-backup-2026-07-13.md
 ```
 
