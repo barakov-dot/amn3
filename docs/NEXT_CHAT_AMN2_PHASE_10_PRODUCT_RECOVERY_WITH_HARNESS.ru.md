@@ -1,5 +1,21 @@
 # Следующий чат: AMN2 Phase 10 Product Recovery With Harness
 
+## VPS recovery override 2026-07-13
+
+Provider-side incident закрыт фактическим runtime evidence. SSH и ICMP
+доступны; `amnezia-awg2` running с `restart_count=0`, `awg0` читается, web
+active/enabled, bot корректно inactive/disabled. Оператор подключился последним
+тестовым конфигом в официальном Amnezia Client. Десятисекундный агрегированный
+замер показал положительную RX/TX дельту и свежий handshake. Codex не выполнял
+VPS mutation при восстановлении.
+
+```text
+source_head=3c91601
+vps_overlay=1c7fb78
+vps_upload_pending=true_separate_gate
+evidence=research/amn2/phase-10-vps-provider-recovery-and-live-traffic-2026-07-13.md
+```
+
 ## Актуальный override 2026-07-12 после cascade revoke
 
 ```text

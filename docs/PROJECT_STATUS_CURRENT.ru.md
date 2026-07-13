@@ -1,3 +1,19 @@
+# Текущий override 2026-07-13: VPS provider recovery confirmed
+
+```text
+phase10_vps_incident_status=recovered-provider-side
+phase10_vps_recovery_date=2026-07-13
+phase10_vps_recovery_transport=ssh22_reachable|icmp_reachable
+phase10_vps_recovery_runtime=overlay_1c7fb78|amnezia_awg2_running_restart_count_0|awg0_readable|web_active_enabled|bot_inactive_disabled
+phase10_vps_recovery_peer_summary=12_peers|1_handshake_ever|fresh_handshake_confirmed
+phase10_vps_recovery_traffic_sample_10s=rx_delta_144512|tx_delta_1266159
+phase10_vps_recovery_operator_acceptance=latest_test_config_connected_in_official_amnezia_client
+phase10_vps_recovery_mutations_by_codex=false
+phase10_current_source_head=3c91601
+phase10_vps_overlay_update_status=not_uploaded_still_1c7fb78
+phase10_vps_recovery_evidence=research/amn2/phase-10-vps-provider-recovery-and-live-traffic-2026-07-13.md
+```
+
 # Текущий override 2026-07-12: lifecycle, web diagnostics, cascade revoke
 
 ```text

@@ -1,5 +1,16 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 10 VPS recovery override 2026-07-13
+
+```text
+phase10_vps_incident=recovered-provider-side
+phase10_vps_runtime=overlay_1c7fb78|amnezia_awg2_running|awg0_readable|web_active_enabled|bot_inactive_disabled
+phase10_vps_live_evidence=fresh_handshake|10s_rx_delta_144512|10s_tx_delta_1266159|operator_latest_test_config_connected
+phase10_vps_mutation_by_codex=false
+phase10_source_vs_vps=source_3c91601|vps_1c7fb78|upload_pending_separate_gate
+phase10_vps_recovery_evidence=research/amn2/phase-10-vps-provider-recovery-and-live-traffic-2026-07-13.md
+```
+
 ## Phase 10 override 2026-07-12
 
 ```text
