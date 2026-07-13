@@ -52,6 +52,24 @@ Recovery key перемещён из workspace в отдельный катал�
 имеет ACL только текущего пользователя и не отслеживается Git. Encrypted bundle
 находится в `backups/`, который добавлен в root `.gitignore`.
 
+## Независимая копия
+
+Вторая encrypted copy записана на отдельный removable media `F:`. Сам носитель
+не использует BitLocker, поэтому защита данных опирается на authenticated
+encryption самого bundle. Recovery key на этот носитель намеренно не копировался.
+
+```text
+copy_path=F:\AMN2-Recovery\20260713T153359Z
+media=removable|fat32|healthy
+artifact_bytes=19000
+source_sha256=3e2339fdbe7e78bcdd1ab90510e204acdffba0b09df5c4ae05dae64293136cb8
+destination_sha256=3e2339fdbe7e78bcdd1ab90510e204acdffba0b09df5c4ae05dae64293136cb8
+copy_verification=passed
+checksum_file=SHA256SUMS.txt
+recovery_info_file=RECOVERY_INFO.txt
+key_files_under_media_root=0
+```
+
 ## Cleanup и runtime
 
 Remote plaintext stage, transient key и скачанная encrypted remote copy удалены.
@@ -70,7 +88,7 @@ telegram_action=false
 
 ## Остаток
 
-Это первая внешняя копия вне VPS, но пока на одном operator workstation.
-Следующий DR hardening: вторая encrypted copy на независимом носителе и
-restore rehearsal в изолированной временной среде. Ни одно из этих действий не
-расширяет launch gate и не разрешает production restore apply.
+Две encrypted copies теперь находятся вне VPS: на operator workstation и на
+отдельном removable media. Следующий DR hardening: restore rehearsal в
+изолированной временной среде. Он не расширяет launch gate и не разрешает
+production restore apply.
