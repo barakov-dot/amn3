@@ -1,5 +1,21 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 10 final closeout / Phase 11 entry override 2026-07-14
+
+```text
+phase10_status=closed
+phase10_result=product_recovered|3c91601_deployed|client_accepted|recovery_verified
+phase10_open_remainders=0
+phase10_final_tests=amn2_870_passed_1_skipped_1_warning|root_20_and_43_passed|harness_passed
+phase11_status=handoff_ready
+phase11_name=Controlled Launch and Operations
+phase11_first_gate=REVIEW_PHASE11_3C91601_PRIVATE_TELEGRAM_SINGLE_ADMIN_TRANSIENT_SMOKE_GATE
+phase11_stop_lines=all_false_reset
+phase11_entry=docs/AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS_ENTRY.ru.md
+phase11_handoff=docs/NEXT_CHAT_AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS.ru.md
+phase10_closeout=docs/AMN2_PHASE_10_FINAL_CLOSEOUT_PACKET.ru.md
+```
+
 ## Phase 10 3c91601 existing-client acceptance override 2026-07-14
 
 ```text

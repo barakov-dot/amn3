@@ -1,5 +1,16 @@
 # AMN2 Phase 10 Product Recovery With Harness Entry
 
+## Closeout 2026-07-14
+
+Phase 10 закрыта как `completed-product-recovered-deployed-accepted`.
+Продолжение находится в:
+
+- `docs/AMN2_PHASE_10_FINAL_CLOSEOUT_PACKET.ru.md`;
+- `docs/AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS_ENTRY.ru.md`;
+- `docs/NEXT_CHAT_AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS.ru.md`.
+
+Не использовать старую Phase 10 first-command как активный план.
+
 Дата: 2026-07-04.
 
 ## Назначение

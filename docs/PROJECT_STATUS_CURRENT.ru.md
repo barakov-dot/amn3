@@ -1,3 +1,23 @@
+# Текущий override 2026-07-14: Phase 10 closed, Phase 11 handoff ready
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+phase10_status=closed-completed-product-recovered-deployed-accepted
+phase10_final_source=codex-vps-test-prep|3c91601|origin_sync|clean
+phase10_final_vps=overlay_3c91601|web_active_200|awg_running_restart_0|12_peers
+phase10_final_client_acceptance=passed|handshake_2026-07-14T11:29:53Z|rx_205184|tx_7176839
+phase10_final_remainders=none_product_package_schema_acceptance
+phase10_final_tests=amn2_870_passed_1_skipped_1_warning|root_20_and_43_passed|harness_passed
+phase10_closeout_packet=docs/AMN2_PHASE_10_FINAL_CLOSEOUT_PACKET.ru.md
+phase11_entry=docs/AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS_ENTRY.ru.md
+phase11_handoff=docs/NEXT_CHAT_AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS.ru.md
+phase11_start_phrase=AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS_START
+phase11_first_command=GPT-5.6_SOL -> REVIEW_PHASE11_3C91601_PRIVATE_TELEGRAM_SINGLE_ADMIN_TRANSIENT_SMOKE_GATE
+phase11_stop_lines=execution_go_false|config_generation_false|config_delivery_false|peer_creation_false|live_vps_ssh_telegram_public_false
+phase11_upstream_automation=amn2-upstream-orchestrator_active_dynamic|legacy_chain_paused
+phase10_closeout_evidence=research/amn2/phase-10-final-closeout-phase11-handoff-2026-07-14.md
+```
+
 # Текущий override 2026-07-14: 3c91601 existing-client acceptance passed
 
 ```text

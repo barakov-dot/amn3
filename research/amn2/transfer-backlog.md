@@ -1,5 +1,18 @@
 # `amn2` Transfer Backlog
 
+## Current override 2026-07-14
+
+Phase 10 закрыта на AMN2/VPS head `3c91601`; historical queue ниже не является
+активным списком и должна дедуплицироваться против текущего кода/evidence.
+Authoritative Phase 11 backlog, IDs и зависимости:
+
+- `docs/AMN2_PHASE_10_FINAL_CLOSEOUT_PACKET.ru.md`;
+- `docs/AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS_ENTRY.ru.md`;
+- `docs/NEXT_CHAT_AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS.ru.md`;
+- первый control block `docs/PROJECT_STATUS_CURRENT.ru.md`.
+
+Не предлагать старые completed package/API/client gates повторно.
+
 Phase 7 P7-C010f Windows desktop path acceptance record 2026-06-20: completed
 as `completed-windows-desktop-path-accepted-operator-observation-no-live-action`.
 Evidence

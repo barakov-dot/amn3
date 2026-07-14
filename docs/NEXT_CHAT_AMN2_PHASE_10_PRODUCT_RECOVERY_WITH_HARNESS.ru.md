@@ -1,5 +1,17 @@
 # Следующий чат: AMN2 Phase 10 Product Recovery With Harness
 
+## Superseded by Phase 11 handoff 2026-07-14
+
+Phase 10 закрыта после rollout `3c91601` и свежей existing-client acceptance.
+Не продолжать Phase 10 plan из этого файла. Новый источник:
+
+```text
+closeout=docs/AMN2_PHASE_10_FINAL_CLOSEOUT_PACKET.ru.md
+phase11_entry=docs/AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS_ENTRY.ru.md
+phase11_handoff=docs/NEXT_CHAT_AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS.ru.md
+phase11_start=AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS_START
+```
+
 ## 3c91601 existing-client acceptance passed 2026-07-14
 
 Свежая post-rollout acceptance прошла: handshake обновился, за минуту появился
