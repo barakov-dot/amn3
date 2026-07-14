@@ -19,11 +19,22 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Mapping, Sequence
 
+try:
+    from scripts.phase10_recovery_crypto import (
+        RecoveryCryptoError,
+        encrypt_hybrid,
+    )
+except ModuleNotFoundError as exc:
+    if exc.name != "scripts":
+        raise
+    from phase10_recovery_crypto import RecoveryCryptoError, encrypt_hybrid
+
 
 FORMAT = "amn2-full-recovery-v1"
 MANIFEST_NAME = "manifest.sha256"
 MAX_SOURCE_FILE_BYTES = 32 * 1024 * 1024
 MAX_PLAINTEXT_BUNDLE_BYTES = 64 * 1024 * 1024
+MAX_PUBLIC_KEY_BYTES = 64 * 1024
 DOCKER_TIMEOUT_SECONDS = 30
 
 PAYLOAD_NAMES = {
@@ -149,16 +160,13 @@ def tar_bytes(files: Mapping[str, bytes]) -> bytes:
     return result
 
 
-def encrypt_recovery_files(files: Mapping[str, bytes], key: bytes) -> bytes:
+def encrypt_recovery_files(
+    files: Mapping[str, bytes], recipient_public_key_pem: bytes
+) -> bytes:
     try:
-        from cryptography.fernet import Fernet
-    except ImportError as exc:
-        raise RecoveryWriterError("cryptography dependency is unavailable") from exc
-    try:
-        cipher = Fernet(key)
-    except (TypeError, ValueError) as exc:
-        raise RecoveryWriterError("recovery encryption key is invalid") from exc
-    return cipher.encrypt(tar_bytes(files))
+        return encrypt_hybrid(tar_bytes(files), recipient_public_key_pem)
+    except RecoveryCryptoError as exc:
+        raise RecoveryWriterError(str(exc)) from exc
 
 
 def write_exclusive(path: Path, value: bytes) -> None:
@@ -264,14 +272,17 @@ def read_container_file(container_name: str, path: str, label: str) -> bytes:
     return value
 
 
-def read_key_from_stdin() -> bytes:
-    value = sys.stdin.buffer.read(4097)
-    if len(value) > 4096:
-        raise RecoveryWriterError("recovery key input is too large")
-    lines = value.splitlines()
-    if len(lines) != 1 or not lines[0]:
-        raise RecoveryWriterError("recovery key input must contain exactly one line")
-    return lines[0]
+def read_recipient_public_key(path: Path) -> bytes:
+    try:
+        resolved = path.resolve(strict=True)
+    except OSError as exc:
+        raise RecoveryWriterError("recipient public key is unavailable") from exc
+    if not resolved.is_file() or resolved.stat().st_size > MAX_PUBLIC_KEY_BYTES:
+        raise RecoveryWriterError("recipient public key is not a supported file")
+    value = resolved.read_bytes()
+    if not value:
+        raise RecoveryWriterError("recipient public key is empty")
+    return value
 
 
 def collect_source_files(args: argparse.Namespace, source_overlay: str) -> dict[str, bytes]:
@@ -322,6 +333,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--awg-server-private-key-path", required=True)
     parser.add_argument("--awg-server-public-key-path", required=True)
     parser.add_argument("--container-start-path", required=True)
+    parser.add_argument("--recipient-public-key", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     return parser
 
@@ -347,7 +359,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             container_name=args.container_name,
             container_image_id=before.image_id,
         )
-        encrypted = encrypt_recovery_files(files, read_key_from_stdin())
+        encrypted = encrypt_recovery_files(
+            files, read_recipient_public_key(args.recipient_public_key)
+        )
         write_exclusive(args.output, encrypted)
         try:
             after = inspect_container(args.container_name)
@@ -361,9 +375,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             "artifact_bytes": len(encrypted),
             "artifact_sha256": sha256_bytes(encrypted),
             "container_running": after.running,
+            "encryption": "rsa-oaep-sha256+fernet",
             "manifest_entries": len(files) - 1,
             "member_files": len(files),
             "production_plaintext_written": False,
+            "recipient_private_key_transferred": False,
             "service_restart_performed": False,
             "verdict": "passed",
         }

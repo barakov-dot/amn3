@@ -9,7 +9,10 @@ from pathlib import Path
 
 import pytest
 from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 
+from scripts.phase10_recovery_crypto import encrypt_hybrid
 from scripts.phase10_restore_rehearsal_verify import (
     MANIFEST_NAME,
     VerificationError,
@@ -17,6 +20,7 @@ from scripts.phase10_restore_rehearsal_verify import (
     load_tar_files,
     validate_sanitized_files,
     verify_encrypted_bundle,
+    verify_hybrid_bundle,
 )
 
 
@@ -125,6 +129,40 @@ def test_verify_encrypted_builds_secret_free_schema_only_fixture(tmp_path: Path)
     sanitized_files = load_tar_files(sanitized.read_bytes())
     validate_sanitized_files(sanitized_files)
     combined = b"\n".join(sanitized_files.values())
+    assert b"environment-secret" not in combined
+    assert b"yaml-secret" not in combined
+    assert b"database-secret" not in combined
+    assert private_key_not_present(combined)
+
+
+def test_verify_hybrid_builds_secret_free_schema_only_fixture(tmp_path: Path) -> None:
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=3072)
+    private_pem = private_key.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption(),
+    )
+    public_pem = private_key.public_key().public_bytes(
+        serialization.Encoding.PEM,
+        serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    bundle = tmp_path / "recovery.hybrid.enc"
+    private_key_file = tmp_path / "recovery-private.pem"
+    bundle.write_bytes(encrypt_hybrid(tar_bytes(recovery_files()), public_pem))
+    private_key_file.write_bytes(private_pem)
+    sanitized = tmp_path / "sanitized.tar.gz"
+
+    report = verify_hybrid_bundle(
+        bundle,
+        private_key_file,
+        hashlib.sha256(bundle.read_bytes()).hexdigest(),
+        sanitized,
+    )
+
+    assert report["verdict"] == "passed"
+    assert report["encryption"] == "rsa-oaep-sha256+fernet"
+    assert report["production_plaintext_written"] is False
+    combined = b"\n".join(load_tar_files(sanitized.read_bytes()).values())
     assert b"environment-secret" not in combined
     assert b"yaml-secret" not in combined
     assert b"database-secret" not in combined

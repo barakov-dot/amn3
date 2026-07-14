@@ -16,10 +16,21 @@ import tarfile
 from pathlib import Path, PurePosixPath
 from typing import Mapping, Sequence
 
+try:
+    from scripts.phase10_recovery_crypto import (
+        RecoveryCryptoError,
+        decrypt_hybrid,
+    )
+except ModuleNotFoundError as exc:
+    if exc.name != "scripts":
+        raise
+    from phase10_recovery_crypto import RecoveryCryptoError, decrypt_hybrid
+
 
 MAX_ARCHIVE_FILES = 256
 MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
 MAX_ENCRYPTED_BYTES = 128 * 1024 * 1024
+MAX_PRIVATE_KEY_BYTES = 64 * 1024
 MANIFEST_NAME = "manifest.sha256"
 SANITIZED_SENTINEL = "SANITIZED_REHEARSAL_ONLY"
 SANITIZED_ENV_HEADER = (
@@ -465,6 +476,40 @@ def write_tar(files: Mapping[str, bytes], destination: Path) -> None:
                 archive.addfile(info, io.BytesIO(value))
 
 
+def verify_decrypted_recovery_bundle(
+    decrypted: bytes,
+    actual_hash: str,
+    sanitized_output: Path,
+    *,
+    mode: str,
+) -> dict[str, object]:
+    files = load_tar_files(decrypted)
+    source_report = validate_recovery_files(files)
+    sanitized_files = build_sanitized_files(files, source_report)
+    sanitized_report = validate_sanitized_files(sanitized_files)
+    write_tar(sanitized_files, sanitized_output)
+    written_report = validate_sanitized_files(
+        load_tar_files(sanitized_output.read_bytes())
+    )
+    if written_report != sanitized_report:
+        raise VerificationError("written sanitized fixture report is inconsistent")
+    return {
+        "mode": mode,
+        "bundle_sha256": actual_hash,
+        "decrypt": "passed",
+        "production_plaintext_written": False,
+        "source": source_report,
+        "sanitized_fixture": {
+            **sanitized_report,
+            "sha256": sha256_path(sanitized_output),
+            "bytes": sanitized_output.stat().st_size,
+        },
+        "verdict": "passed_with_warning"
+        if source_report["metadata_warnings"]
+        else "passed",
+    }
+
+
 def verify_encrypted_bundle(
     bundle_path: Path,
     key_path: Path,
@@ -485,31 +530,40 @@ def verify_encrypted_bundle(
         decrypted = Fernet(key_path.read_bytes().strip()).decrypt(bundle_bytes)
     except (ValueError, InvalidToken) as exc:
         raise VerificationError("encrypted bundle authentication failed") from exc
-    files = load_tar_files(decrypted)
-    source_report = validate_recovery_files(files)
-    sanitized_files = build_sanitized_files(files, source_report)
-    sanitized_report = validate_sanitized_files(sanitized_files)
-    write_tar(sanitized_files, sanitized_output)
-    written_report = validate_sanitized_files(
-        load_tar_files(sanitized_output.read_bytes())
+    return verify_decrypted_recovery_bundle(
+        decrypted,
+        actual_hash,
+        sanitized_output,
+        mode="encrypted-production-local-memory-only",
     )
-    if written_report != sanitized_report:
-        raise VerificationError("written sanitized fixture report is inconsistent")
-    return {
-        "mode": "encrypted-production-local-memory-only",
-        "bundle_sha256": actual_hash,
-        "decrypt": "passed",
-        "production_plaintext_written": False,
-        "source": source_report,
-        "sanitized_fixture": {
-            **sanitized_report,
-            "sha256": sha256_path(sanitized_output),
-            "bytes": sanitized_output.stat().st_size,
-        },
-        "verdict": "passed_with_warning"
-        if source_report["metadata_warnings"]
-        else "passed",
-    }
+
+
+def verify_hybrid_bundle(
+    bundle_path: Path,
+    private_key_path: Path,
+    expected_sha256: str,
+    sanitized_output: Path,
+) -> dict[str, object]:
+    bundle_bytes = bundle_path.read_bytes()
+    if len(bundle_bytes) > MAX_ENCRYPTED_BYTES:
+        raise VerificationError("encrypted bundle size limit exceeded")
+    actual_hash = sha256_bytes(bundle_bytes)
+    if actual_hash != expected_sha256.lower():
+        raise VerificationError("encrypted bundle SHA-256 mismatch")
+    if private_key_path.stat().st_size > MAX_PRIVATE_KEY_BYTES:
+        raise VerificationError("recovery private key exceeds the size limit")
+    try:
+        decrypted = decrypt_hybrid(bundle_bytes, private_key_path.read_bytes())
+    except RecoveryCryptoError as exc:
+        raise VerificationError(str(exc)) from exc
+    report = verify_decrypted_recovery_bundle(
+        decrypted,
+        actual_hash,
+        sanitized_output,
+        mode="hybrid-encrypted-production-local-memory-only",
+    )
+    report["encryption"] = "rsa-oaep-sha256+fernet"
+    return report
 
 
 def validate_sanitized_files(files: Mapping[str, bytes]) -> dict[str, object]:
@@ -649,6 +703,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     encrypted.add_argument("--sanitized-output", type=Path, required=True)
     encrypted.add_argument("--report-output", type=Path, required=True)
 
+    hybrid = subparsers.add_parser("verify-hybrid")
+    hybrid.add_argument("--bundle", type=Path, required=True)
+    hybrid.add_argument("--private-key-file", type=Path, required=True)
+    hybrid.add_argument("--expected-sha256", required=True)
+    hybrid.add_argument("--sanitized-output", type=Path, required=True)
+    hybrid.add_argument("--report-output", type=Path, required=True)
+
     sanitized = subparsers.add_parser("verify-sanitized")
     sanitized.add_argument("--bundle", type=Path, required=True)
     sanitized.add_argument("--expected-sha256", required=True)
@@ -661,6 +722,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             report = verify_encrypted_bundle(
                 args.bundle,
                 args.key_file,
+                args.expected_sha256,
+                args.sanitized_output,
+            )
+        elif args.command == "verify-hybrid":
+            report = verify_hybrid_bundle(
+                args.bundle,
+                args.private_key_file,
                 args.expected_sha256,
                 args.sanitized_output,
             )

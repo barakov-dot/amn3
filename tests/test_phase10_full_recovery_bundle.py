@@ -4,7 +4,8 @@ import base64
 import sqlite3
 from pathlib import Path
 
-from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 
 from scripts.phase10_full_recovery_bundle import (
     FORMAT,
@@ -15,6 +16,7 @@ from scripts.phase10_full_recovery_bundle import (
     sqlite_backup_bytes,
     write_exclusive,
 )
+from scripts.phase10_recovery_crypto import decrypt_hybrid
 from scripts.phase10_restore_rehearsal_verify import (
     load_tar_files,
     validate_recovery_files,
@@ -92,9 +94,18 @@ def test_encrypted_writer_output_passes_recovery_verifier(tmp_path: Path) -> Non
         container_name="amneziya-awg2",
         container_image_id="sha256:test",
     )
-    key = Fernet.generate_key()
-    encrypted = encrypt_recovery_files(files, key)
-    decrypted = Fernet(key).decrypt(encrypted)
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=3072)
+    public_key_pem = private_key.public_key().public_bytes(
+        serialization.Encoding.PEM,
+        serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    private_key_pem = private_key.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption(),
+    )
+    encrypted = encrypt_recovery_files(files, public_key_pem)
+    decrypted = decrypt_hybrid(encrypted, private_key_pem)
     archive_files = load_tar_files(decrypted)
 
     report = validate_recovery_files(archive_files)
