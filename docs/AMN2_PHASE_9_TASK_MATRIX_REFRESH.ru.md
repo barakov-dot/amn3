@@ -1,5 +1,20 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 11 801f8c3 private Telegram overlay package override 2026-07-14
+
+```text
+phase11_telegram_001_package=completed_local_ready_not_uploaded
+phase11_telegram_001_source=801f8c3|origin_sync|clean
+phase11_telegram_001_production=overlay_3c91601|unchanged
+phase11_telegram_001_package_sha256=693DF74192E55A2231F45C0ADF153B745C7D2AF8EDEDA67830D02CB620A4C3FF
+phase11_telegram_001_source_sha256=B332CB1DCFB85768ACE0DF78E038B955F7C853989CF1C67CDE0233FA51EBD6C3
+phase11_telegram_001_delta=2_paths|schema_none|db_migration_none
+phase11_telegram_001_tests=packaged_21_and_184|tooling_root_23|compileall|harness_passed
+phase11_telegram_001_live_gate=not_approved
+phase11_telegram_001_next=REVIEW_PHASE11_801F8C3_PRIVATE_OVERLAY_ROLLOUT_GATE_AND_PREPARE_EXACT_APPROVAL
+phase11_telegram_001_package_evidence=research/amn2/phase-11-801f8c3-private-telegram-overlay-package-prep-2026-07-14.md
+```
+
 ## Phase 11 Telegram smoke pre-ack hardening override 2026-07-14
 
 ```text
