@@ -1,5 +1,20 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 10 3c91601 exact rollout scope override 2026-07-14
+
+```text
+phase10_3c91601_rollout_scope=recorded_reviewed_awaiting_exact_live_phrase
+phase10_3c91601_gate=upload_snapshot_clone_db_migration_clone_api_smoke_production_schema_web_activation_exact_root_restore_rollback
+phase10_3c91601_schema_acceptance=3_new_tables|5_new_indexes|new_rows_0|existing_rows_unchanged|integrity_ok|fk_0
+phase10_3c91601_runtime=awg_never_stopped_or_restarted|web_only_brief_stop|bot_inactive_disabled
+phase10_3c91601_production_api_smoke=false|clone_only_token_audit_server_sync_writes
+phase10_3c91601_scope_tests=harness_passed|scoped_20_passed|root_43_passed|diff_check_passed
+phase10_3c91601_live_actions=false
+phase10_3c91601_exact_phrase=APPROVE PHASE10_3C91601_PRIVATE_VPS_SOURCE_OVERLAY_UPLOAD_SNAPSHOT_CLONE_DB_MIGRATION_AND_WEB_ACTIVATION_WITH_ROLLBACK
+phase10_3c91601_next=AWAIT_EXACT_PHRASE_OR_STOP
+phase10_3c91601_rollout_evidence=research/amn2/phase-10-3c91601-private-vps-rollout-gate-review-2026-07-14.md
+```
+
 ## Phase 10 3c91601 VPS package override 2026-07-14
 
 ```text
@@ -10,7 +25,7 @@ phase10_3c91601_tests=focused_237|full_870_passed_1_skipped_1_warning|tooling_23
 phase10_3c91601_review=checksums_bindings_secret_boundaries_diff_passed
 phase10_3c91601_harness=passed|all_stop_lines_false
 phase10_3c91601_live_actions=false
-phase10_3c91601_next=RECORD_EXACT_3C91601_UPLOAD_SNAPSHOT_CLONE_DB_MIGRATION_ROLLBACK_SCOPE
+phase10_3c91601_package_followup=EXACT_ROLLOUT_SCOPE_RECORDED_AWAITING_EXACT_LIVE_PHRASE
 phase10_3c91601_evidence=research/amn2/phase-10-3c91601-vps-package-prep-2026-07-14.md
 ```
 

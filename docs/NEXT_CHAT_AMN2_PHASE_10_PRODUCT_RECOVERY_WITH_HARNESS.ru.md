@@ -1,5 +1,23 @@
 # Следующий чат: AMN2 Phase 10 Product Recovery With Harness
 
+## 3c91601 exact rollout scope override 2026-07-14
+
+Exact gate review завершён без обращения к VPS. Разрешённый после отдельной
+точной фразы порядок: checksum-bound upload, tracked-source и SQLite snapshot,
+миграция и API smoke только на clone DB, отдельный production schema checkpoint,
+затем активация web с автоматическим rollback. Production API smoke запрещён.
+
+```text
+scope_status=reviewed_recorded_awaiting_exact_live_phrase
+schema_delta=3_new_tables|5_new_indexes|new_rows_zero|existing_rows_unchanged
+runtime_invariant=amnezia_awg2_never_stop_or_restart|web_only_brief_stop|bot_inactive_disabled
+clone_only_writes=server_sync|temporary_api_tokens|read_audit
+scope_tests=harness_passed|scoped_20_passed|root_43_passed|diff_check_passed
+live_effect=false|vps_not_contacted|services_unchanged
+exact_phrase=APPROVE PHASE10_3C91601_PRIVATE_VPS_SOURCE_OVERLAY_UPLOAD_SNAPSHOT_CLONE_DB_MIGRATION_AND_WEB_ACTIVATION_WITH_ROLLBACK
+evidence=research/amn2/phase-10-3c91601-private-vps-rollout-gate-review-2026-07-14.md
+```
+
 ## 3c91601 private VPS package override 2026-07-14
 
 Authoritative AMN2 source `3c91601` совпадает с origin и опережает production
@@ -16,7 +34,8 @@ review=passed|required_missing_0|forbidden_0|deleted_paths_0|secret_literal_file
 harness=passed|all_stop_lines_false
 live_upload=false
 live_apply=false
-next_command=GPT-5.6_SOL -> RECORD_EXACT_3C91601_UPLOAD_SNAPSHOT_CLONE_DB_MIGRATION_ROLLBACK_SCOPE
+scope_record=completed_reviewed_awaiting_exact_live_phrase
+next_command=AWAIT_EXACT_APPROVAL_OR_STOP
 evidence=research/amn2/phase-10-3c91601-vps-package-prep-2026-07-14.md
 ```
 
