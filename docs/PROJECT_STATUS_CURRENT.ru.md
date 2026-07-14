@@ -1,3 +1,23 @@
+# Текущий override 2026-07-14: Phase 11 Telegram smoke pre-ack hardening
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+phase11_telegram_001_review_3c91601=stop-pre_ack_filtered_update_ack_race
+phase11_telegram_001_hardening=completed-tested-committed-pushed
+phase11_telegram_001_source=codex-vps-test-prep|801f8c3|origin_sync
+phase11_telegram_001_production=overlay_3c91601|live_polling_not_started|live_gate_not_ready
+phase11_telegram_001_fix=pre_ack_webhook_clear|pending_exactly_1|ack_selected_start|post_ack_pending_0
+phase11_telegram_001_boundary=one_configured_admin|exact_start|message_only|clone_writes_only|ttl_max_120
+phase11_telegram_001_watchdog=runtime_max_180|restart_no|timeout_stop_15|kill_mode_control_group|future_exact_gate
+phase11_telegram_001_tests=focused_21_passed|bot_settings_184_passed|compile_passed|diff_check_passed
+phase11_telegram_001_runtime=regular_bot_inactive_disabled_baseline|persistent_activation_false
+phase11_telegram_001_live_effect=none|telegram_api_not_called|vps_ssh_not_called|awg_untouched
+phase11_upstream_automation=amn2-upstream-orchestrator_active_retargeted_current_phase11_task|legacy_chain_paused
+phase11_stop_lines=execution_go_false|config_generation_false|config_delivery_false|peer_creation_false|live_vps_ssh_telegram_public_false
+phase11_next=PREPARE_PHASE11_801F8C3_PRIVATE_TELEGRAM_SMOKE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE
+phase11_telegram_001_evidence=research/amn2/phase-11-3c91601-private-telegram-single-admin-transient-smoke-gate-review-2026-07-14.md
+```
+
 # Текущий override 2026-07-14: Phase 10 closed, Phase 11 handoff ready
 
 ```text

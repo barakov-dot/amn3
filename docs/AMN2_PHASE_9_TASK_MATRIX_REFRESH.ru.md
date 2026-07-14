@@ -1,5 +1,20 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 11 Telegram smoke pre-ack hardening override 2026-07-14
+
+```text
+phase11_telegram_001_3c91601_review=stop_pre_ack_filtered_update_ack_race
+phase11_telegram_001_source_hardening=801f8c3|tested|origin_sync
+phase11_telegram_001_production_overlay=3c91601|not_hardened|polling_not_started
+phase11_telegram_001_safety=selected_configured_admin|exact_start|message_only|clone_only|ttl_120
+phase11_telegram_001_backlog=pre_ack_pending_exactly_1|post_ack_pending_0
+phase11_telegram_001_tests=focused_21|bot_settings_184|compile_passed|diff_check_passed
+phase11_telegram_001_live_gate=hold_until_801f8c3_overlay
+phase11_telegram_001_persistent_bot=false
+phase11_telegram_001_next=PREPARE_PHASE11_801F8C3_PRIVATE_TELEGRAM_SMOKE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE
+phase11_telegram_001_evidence=research/amn2/phase-11-3c91601-private-telegram-single-admin-transient-smoke-gate-review-2026-07-14.md
+```
+
 ## Phase 10 final closeout / Phase 11 entry override 2026-07-14
 
 ```text
