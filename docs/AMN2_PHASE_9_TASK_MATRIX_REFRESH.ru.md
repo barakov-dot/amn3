@@ -1,5 +1,20 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 11 801f8c3 private overlay rollout result override 2026-07-14
+
+```text
+phase11_telegram_001_overlay_rollout=completed_pass|run_20260714T165948Z
+phase11_telegram_001_overlay=3c91601_to_801f8c3|exact_2_path_delta
+phase11_telegram_001_approval=consumed
+phase11_telegram_001_database=unchanged|integrity_ok|fk_0|hashes_and_counts_unchanged
+phase11_telegram_001_runtime=web_active_loopback_only|bot_inactive_disabled|write_gates_false
+phase11_telegram_001_awg=never_stopped_restarted_recreated|restart_0|peers_12|set_unchanged
+phase11_telegram_001_rollback=run_20260714T165601Z_verified_pass|success_bundle_retained
+phase11_telegram_001_live_smoke=not_started|separate_exact_gate_required
+phase11_telegram_001_next=REVIEW_PHASE11_801F8C3_PRIVATE_TELEGRAM_SINGLE_ADMIN_TRANSIENT_SMOKE_GATE
+phase11_telegram_001_rollout_evidence=research/amn2/phase-11-801f8c3-private-overlay-rollout-2026-07-14.md
+```
+
 ## Phase 11 801f8c3 private overlay gate override 2026-07-14
 
 ```text
