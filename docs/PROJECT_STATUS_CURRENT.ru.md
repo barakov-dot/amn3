@@ -1,3 +1,20 @@
+# Текущий override 2026-07-14: OPS-001 runtime/recovery health passed
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+phase11_ops_001=completed_healthy|observation_2026-07-14T18:02:04Z
+phase11_ops_001_runtime=overlay_801f8c3|web_active_enabled_restart_0|bot_inactive_disabled|failed_units_0|ntp_yes
+phase11_ops_001_network=3030_loopback_only|3040_80_443_absent
+phase11_ops_001_capacity=disk_used_71_percent_available_2888376_kb|memory_available_505188_of_984560_kb|load1_0.07
+phase11_ops_001_journal=32_err_alert_24h|amn2_0|docker_0|ssh_30|resource_exhaustion_0|raw_rows_not_emitted
+phase11_ops_001_database=hashes_unchanged|integrity_ok|fk_0|tables_15|rows_88
+phase11_ops_001_rollback=801f8c3_success_bundle_present_0700|required_7_present|snapshot_integrity_ok_fk_0
+phase11_ops_001_canonical_recovery=external_copy_3_exact_files|ciphertext_hash_match|private_key_like_0
+phase11_ops_001_awg=never_stopped_restarted_recreated|restart_0|peers_12|set_unchanged
+phase11_ops_001_next=DECIDE_PHASE11_RECOVERY_001_OLD_BUNDLE_KEY_RETENTION
+phase11_ops_001_evidence=research/amn2/phase-11-ops-001-compact-runtime-recovery-health-2026-07-14.md
+```
+
 # Текущий override 2026-07-14: persistent private Telegram bot stays disabled
 
 ```text

@@ -1,5 +1,20 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 11 OPS-001 compact runtime/recovery health override 2026-07-14
+
+```text
+phase11_ops_001=completed_healthy
+phase11_ops_001_runtime=801f8c3|web_active_enabled_restart_0|bot_inactive_disabled|failed_units_0
+phase11_ops_001_network=3030_loopback_only|3040_80_443_absent
+phase11_ops_001_capacity=disk_71_percent|memory_available_505188_kb|load1_0.07
+phase11_ops_001_journal=amn2_0|docker_0|ssh_noise_observed|resource_exhaustion_0
+phase11_ops_001_database=unchanged|integrity_ok|fk_0|tables_15|rows_88
+phase11_ops_001_recovery=production_rollback_valid|canonical_external_ciphertext_hash_match|private_key_not_on_copy
+phase11_ops_001_awg=running_untouched_restart_0_peers_12_set_unchanged
+phase11_ops_001_next=DECIDE_PHASE11_RECOVERY_001_OLD_BUNDLE_KEY_RETENTION
+phase11_ops_001_evidence=research/amn2/phase-11-ops-001-compact-runtime-recovery-health-2026-07-14.md
+```
+
 ## Phase 11 persistent private Telegram bot decision override 2026-07-14
 
 ```text
