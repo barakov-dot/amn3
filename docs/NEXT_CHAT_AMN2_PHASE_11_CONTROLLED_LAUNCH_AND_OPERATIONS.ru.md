@@ -6,11 +6,15 @@
 AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS_START
 ```
 
+Copy-ready полный текст первого сообщения:
+`docs/AMN2_PHASE_11_FIRST_MESSAGE.ru.md`.
+
 ## Сначала прочитать
 
 - `docs/PROJECT_STATUS_CURRENT.ru.md` — первый control block;
 - `docs/AMN2_PHASE_10_FINAL_CLOSEOUT_PACKET.ru.md`;
 - `docs/AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS_ENTRY.ru.md`;
+- `docs/AMN2_PHASE_11_FIRST_MESSAGE.ru.md`;
 - этот handoff;
 - `docs/AMN2_PHASE_9_TASK_MATRIX_REFRESH.ru.md` — только верхние overrides;
 - `research/amn2/phase-10-3c91601-existing-client-post-deploy-acceptance-2026-07-14.md`;

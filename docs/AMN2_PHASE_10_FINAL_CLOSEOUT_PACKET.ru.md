@@ -19,6 +19,7 @@ Phase 11 Controlled Launch and Operations
 start_phrase=AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS_START
 entry=docs/AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS_ENTRY.ru.md
 handoff=docs/NEXT_CHAT_AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS.ru.md
+first_message=docs/AMN2_PHASE_11_FIRST_MESSAGE.ru.md
 ```
 
 ## Финальная база
@@ -241,6 +242,9 @@ scope. PRVTPRO и KYORESUAS остаются источниками product less
 ```text
 AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS_START
 ```
+
+Полный copy-ready first message:
+`docs/AMN2_PHASE_11_FIRST_MESSAGE.ru.md`.
 
 Первый concrete engineering gate:
 

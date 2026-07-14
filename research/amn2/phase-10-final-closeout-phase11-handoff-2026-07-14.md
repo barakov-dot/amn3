@@ -22,7 +22,13 @@ The next phase is `Phase 11 Controlled Launch and Operations`.
 - `docs/AMN2_PHASE_10_FINAL_CLOSEOUT_PACKET.ru.md`;
 - `docs/AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS_ENTRY.ru.md`;
 - `docs/NEXT_CHAT_AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS.ru.md`;
+- `docs/AMN2_PHASE_11_FIRST_MESSAGE.ru.md`;
 - synchronized first control blocks and handoff pointers.
+
+The first-message artifact consolidates workspace/head baselines, operator
+no-pause and push requirements, production service continuity, stop-lines,
+secret boundaries, the ordered P0-P3 backlog, upstream independence,
+automation retargeting and the first concrete Phase 11 gate.
 
 ## Boundary
 
@@ -58,3 +64,19 @@ content_diff_review=passed
 
 Cached name-only and whitespace review remain the final mechanical checks at
 staging time.
+
+## Separate-task relocation packet
+
+`docs/AMN2_PHASE_11_FIRST_MESSAGE.ru.md` was added as the copy-ready first
+message for a separate Phase 11 task. It names `dc2d5ca` as the Phase 10
+closeout commit while requiring the new task to start from the then-current
+origin branch head containing this relocation packet.
+
+```text
+relocation_harness=passed
+relocation_scoped_harness_markdown=20_passed
+relocation_root_full=43_passed
+relocation_diff_check=passed
+relocation_unsafe_true_marker_scan=0_findings
+relocation_secret_value_scan=0_findings
+```

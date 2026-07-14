@@ -35,12 +35,14 @@ recovery=hybrid_encrypted_copy_and_sanitized_rehearsal_passed
    текущим решением.
 2. `docs/AMN2_PHASE_10_FINAL_CLOSEOUT_PACKET.ru.md`.
 3. `docs/NEXT_CHAT_AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS.ru.md`.
-4. `docs/AMN2_PHASE_9_TASK_MATRIX_REFRESH.ru.md` — новые верхние overrides;
+4. `docs/AMN2_PHASE_11_FIRST_MESSAGE.ru.md` — operator requirements и
+   copy-ready migration contract.
+5. `docs/AMN2_PHASE_9_TASK_MATRIX_REFRESH.ru.md` — новые верхние overrides;
    старые записи являются историей.
-5. `research/amn2/phase-10-3c91601-existing-client-post-deploy-acceptance-2026-07-14.md`.
-6. `research/amn2/phase-10-upstream-lifecycle-web-diagnostics-cascade-revoke-2026-07-12.md`.
-7. `research/amn2/phase-10-canonical-hybrid-recovery-replacement-2026-07-14.md`.
-8. `ideas/priority-backlog.md`, `ideas/candidates-for-amn2.md`,
+6. `research/amn2/phase-10-3c91601-existing-client-post-deploy-acceptance-2026-07-14.md`.
+7. `research/amn2/phase-10-upstream-lifecycle-web-diagnostics-cascade-revoke-2026-07-12.md`.
+8. `research/amn2/phase-10-canonical-hybrid-recovery-replacement-2026-07-14.md`.
+9. `ideas/priority-backlog.md`, `ideas/candidates-for-amn2.md`,
    `ideas/candidates-for-hybrid.md`, `ideas/rejected.md` — reference-only;
    deduplicate against current code/evidence before selecting work.
 
