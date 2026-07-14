@@ -1,5 +1,20 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 11 persistent private Telegram bot decision override 2026-07-14
+
+```text
+phase11_telegram_002=completed_hold_disabled_go_local_hardening
+phase11_telegram_002_source_production=801f8c3|overlay_match
+phase11_telegram_002_runtime=inactive_disabled_process_0|telegram_api_not_called
+phase11_telegram_002_blockers=direct_full_polling|admission_missing|production_db_rw|watchdog_none|sandbox_incomplete
+phase11_telegram_002_tests=bot_settings_systemd_186_passed|production_read_only_review_passed
+phase11_telegram_002_activation=false|exact_gate_not_prepared
+phase11_telegram_002_awg=running_untouched_restart_0_peers_12_set_unchanged
+phase11_telegram_002_followup=TELEGRAM_002A_LOCAL_PERSISTENT_ADMISSION_AND_UNIT_HARDENING
+phase11_telegram_002_next=COLLECT_PHASE11_OPS_001_COMPACT_RUNTIME_RECOVERY_HEALTH_EVIDENCE
+phase11_telegram_002_evidence=research/amn2/phase-11-801f8c3-persistent-private-telegram-bot-service-decision-2026-07-14.md
+```
+
 ## Phase 11 801f8c3 transient Telegram smoke result override 2026-07-14
 
 ```text
