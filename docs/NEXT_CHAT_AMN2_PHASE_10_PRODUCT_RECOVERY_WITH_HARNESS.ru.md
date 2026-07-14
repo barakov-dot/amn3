@@ -1,5 +1,30 @@
 # Следующий чат: AMN2 Phase 10 Product Recovery With Harness
 
+## 3c91601 private VPS package override 2026-07-14
+
+Authoritative AMN2 source `3c91601` совпадает с origin и опережает production
+overlay `1c7fb78` на девять commits. Private package собран через `git archive`,
+проверен по exact entries/checksums/bindings/secret boundaries и протестирован
+из extracted payload. Package не загружался и production не менялся.
+
+```text
+package=dist/amn2-vps-update-and-smoke-kit-3c91601.zip
+package_sha256=12E90EB54FCC374C84B6AA987C65E5644C4BD1B974089E81E16D00780389FB6E
+source_sha256=5AD92A3A9D944825FEFDFEB4D56BDDBBB05390036E19E5AD197288C73812B0CB
+tests=focused_237_passed_1_warning|full_870_passed_1_skipped_1_warning|tooling_23_passed|root_43_passed
+review=passed|required_missing_0|forbidden_0|deleted_paths_0|secret_literal_files_0
+harness=passed|all_stop_lines_false
+live_upload=false
+live_apply=false
+next_command=GPT-5.6_SOL -> RECORD_EXACT_3C91601_UPLOAD_SNAPSHOT_CLONE_DB_MIGRATION_ROLLBACK_SCOPE
+evidence=research/amn2/phase-10-3c91601-vps-package-prep-2026-07-14.md
+```
+
+Следующий gate сначала работает с source/SQLite snapshots и clone DB. API
+loopback smoke пишет временные token/audit rows, поэтому production DB smoke,
+web restart, cascade revoke и любые peer/config действия не разрешены текущим
+package prep.
+
 ## Canonical hybrid recovery replacement override 2026-07-14
 
 Остаточный DR-срез закрыт. Canonical writer исправляет newline metadata defect,

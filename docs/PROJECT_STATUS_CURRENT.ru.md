@@ -1,3 +1,23 @@
+# Текущий override 2026-07-14: 3c91601 private VPS package ready
+
+```text
+phase10_3c91601_package_status=completed-local-package-ready-not-uploaded
+phase10_3c91601_source=codex-vps-test-prep|3c916015c10add37886370d04af70f0343f7f691|origin_0_0|clean
+phase10_3c91601_vps_base=1c7fb78|ancestor_true|9_commits_behind|runtime_unchanged
+phase10_3c91601_package=dist/amn2-vps-update-and-smoke-kit-3c91601.zip
+phase10_3c91601_package_bytes=8800099
+phase10_3c91601_package_sha256=12E90EB54FCC374C84B6AA987C65E5644C4BD1B974089E81E16D00780389FB6E
+phase10_3c91601_source_sha256=5AD92A3A9D944825FEFDFEB4D56BDDBBB05390036E19E5AD197288C73812B0CB
+phase10_3c91601_contents=package_5|source_371_entries_328_files_43_dirs|required_missing_0|forbidden_0|mismatches_0
+phase10_3c91601_delta=32_paths|12_added|20_modified|0_deleted|4240_insertions|62_deletions
+phase10_3c91601_tests=focused_237_passed_1_warning|full_870_passed_1_skipped_1_warning|tooling_23_passed|root_43_passed|compile_passed
+phase10_3c91601_review=checksums_bindings_lf_bash_markdown_secret_scan_diff_passed
+phase10_3c91601_harness=next_command_passed|product_diff_passed|all_stop_lines_false
+phase10_3c91601_live_effect=none|not_uploaded|not_applied|production_runtime_unchanged
+phase10_3c91601_next=record_exact_upload_source_sqlite_snapshot_clone_db_migration_smoke_rollback_scope
+phase10_3c91601_evidence=research/amn2/phase-10-3c91601-vps-package-prep-2026-07-14.md
+```
+
 # Текущий override 2026-07-14: canonical hybrid recovery replacement
 
 ```text

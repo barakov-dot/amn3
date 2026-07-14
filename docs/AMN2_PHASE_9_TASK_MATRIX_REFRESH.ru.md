@@ -1,5 +1,19 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 10 3c91601 VPS package override 2026-07-14
+
+```text
+phase10_3c91601_package=ready_local_not_uploaded|sha256_12E90EB54FCC374C84B6AA987C65E5644C4BD1B974089E81E16D00780389FB6E
+phase10_3c91601_source=verified_local_origin_3c91601|vps_1c7fb78|9_commits_delta
+phase10_3c91601_content=5_package_entries|371_source_entries|forbidden_0|deleted_paths_0
+phase10_3c91601_tests=focused_237|full_870_passed_1_skipped_1_warning|tooling_23|root_43|compile_passed
+phase10_3c91601_review=checksums_bindings_secret_boundaries_diff_passed
+phase10_3c91601_harness=passed|all_stop_lines_false
+phase10_3c91601_live_actions=false
+phase10_3c91601_next=RECORD_EXACT_3C91601_UPLOAD_SNAPSHOT_CLONE_DB_MIGRATION_ROLLBACK_SCOPE
+phase10_3c91601_evidence=research/amn2/phase-10-3c91601-vps-package-prep-2026-07-14.md
+```
+
 ## Phase 10 canonical hybrid recovery replacement override 2026-07-14
 
 ```text
