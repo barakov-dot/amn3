@@ -1,5 +1,20 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 11 second VPS retention audit override 2026-07-14
+
+```text
+phase11_second_vps=audited_clean_keep_temporarily_for_restore_001a
+phase11_second_vps_runtime=ssh_key_only|ufw_deny_incoming|external_ssh_only|failed_units_0
+phase11_second_vps_clean=amn2_0|units_0|containers_0|recovery_artifacts_0
+phase11_second_vps_needed_for_p0=false
+phase11_second_vps_needed_for_restore_001a=true_temporarily
+phase11_second_vps_independent_dr=false|same_provider
+phase11_second_vps_retire=after_restore_and_cleanup_or_before_unapproved_renewal
+phase11_second_vps_provider_effect=none
+phase11_second_vps_next=REVIEW_PHASE11_RESTORE_001A_CANONICAL_FULL_SECRET_DISPOSABLE_REHEARSAL_GATE
+phase11_second_vps_evidence=research/amn2/phase-11-second-vps-retention-audit-after-p0-2026-07-14.md
+```
+
 ## Phase 11 RECOVERY-001 old bundle/key decision override 2026-07-14
 
 ```text

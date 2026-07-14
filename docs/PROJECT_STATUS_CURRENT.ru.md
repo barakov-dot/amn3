@@ -1,3 +1,20 @@
+# Текущий override 2026-07-14: second VPS retained temporarily for RESTORE-001A
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+phase11_second_vps_audit=completed_pass|keep_temporarily_for_restore_001a
+phase11_second_vps_current=ubuntu_24_04|ssh_key_only|ufw_deny_incoming|external_ssh_only|failed_units_0
+phase11_second_vps_clean=amn2_tree_0|amn2_units_0|containers_0|recovery_or_amn2_artifacts_0
+phase11_second_vps_role=trusted_disposable_functional_restore_only|production_dependency_false
+phase11_second_vps_dr_independence=false|same_provider_as_production
+phase11_second_vps_retention=until_restore_001a_and_cleanup_or_next_billing_cutoff_review
+phase11_second_vps_long_term_fleet=false_until_ipam_and_fleet_decision
+phase11_second_vps_provider_mutation=false|billing_mutation=false|secret_transfer=false
+phase11_second_vps_retirement=after_restore_pass_or_decline|repeat_clean_audit|exact_provider_delete_gate|then_local_staging_key_cleanup
+phase11_next=REVIEW_PHASE11_RESTORE_001A_CANONICAL_FULL_SECRET_DISPOSABLE_REHEARSAL_GATE
+phase11_second_vps_evidence=research/amn2/phase-11-second-vps-retention-audit-after-p0-2026-07-14.md
+```
+
 # Текущий override 2026-07-14: RECOVERY-001 old fallback retained conditionally
 
 ```text
