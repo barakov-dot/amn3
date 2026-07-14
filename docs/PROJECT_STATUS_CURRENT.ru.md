@@ -1,3 +1,20 @@
+# Текущий override 2026-07-14: 3c91601 post-deploy closeout readiness review
+
+```text
+phase10_3c91601_closeout_review=completed-technical-ready-client-acceptance-pending
+phase10_3c91601_source=3c91601|origin_match|clean
+phase10_3c91601_runtime=overlay_3c91601|web_active_200|awg_running_restart_0|peers_12_set_unchanged
+phase10_3c91601_database=integrity_ok|fk_0|schema_3_tables_5_indexes|existing_counts_unchanged
+phase10_3c91601_rollback=present|hashes_verified
+phase10_3c91601_observation=2026-07-14T11:18:03Z_to_11:19:04Z|61s|rx_0|tx_0
+phase10_3c91601_latest_handshake=2026-07-13T21:44:30Z|not_post_rollout_fresh
+phase10_3c91601_product_remainder=none_identified
+phase10_3c91601_exact_remainder=one_existing_client_connect_then_read_only_handshake_traffic_verify
+phase10_3c91601_new_config_required=false
+phase10_3c91601_next=VERIFY_ONE_EXISTING_CLIENT_POST_3C91601_HANDSHAKE_AND_TRAFFIC_READ_ONLY
+phase10_3c91601_closeout_evidence=research/amn2/phase-10-3c91601-post-deploy-acceptance-closeout-readiness-2026-07-14.md
+```
+
 # Текущий override 2026-07-14: 3c91601 private VPS rollout completed
 
 ```text

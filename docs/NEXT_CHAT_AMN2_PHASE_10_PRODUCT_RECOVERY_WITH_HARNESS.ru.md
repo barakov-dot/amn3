@@ -1,5 +1,23 @@
 # Следующий чат: AMN2 Phase 10 Product Recovery With Harness
 
+## 3c91601 post-deploy closeout readiness reviewed 2026-07-14
+
+Технический closeout готов: source/VPS overlay `3c91601`, web, AWG, peer-set,
+БД и rollback прошли повторную read-only проверку. За отдельное 61-секундное
+наблюдение клиентский handshake не обновился и трафика не было, поэтому Phase
+10 ещё не объявлена закрытой. Product/package/schema remainder не найден.
+
+```text
+review_status=completed_technical_ready_client_acceptance_pending
+runtime=web_active_200|awg_running_restart_0|12_peers_unchanged
+observation=2026-07-14T11:18:03Z_to_11:19:04Z|rx_0|tx_0
+latest_handshake=2026-07-13T21:44:30Z|not_fresh_post_rollout
+exact_remainder=one_existing_client_connect_then_read_only_verify
+new_config_required=false
+next_command=GPT-5.6_SOL -> VERIFY_ONE_EXISTING_CLIENT_POST_3C91601_HANDSHAKE_AND_TRAFFIC_READ_ONLY
+evidence=research/amn2/phase-10-3c91601-post-deploy-acceptance-closeout-readiness-2026-07-14.md
+```
+
 ## 3c91601 private VPS rollout completed 2026-07-14
 
 Private package применён: production overlay теперь `3c91601`. Первый attempt

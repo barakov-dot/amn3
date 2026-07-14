@@ -160,7 +160,9 @@ new_evidence_secret_value_scan=0_findings
 
 ## Next
 
-The source/schema rollout gate is closed. The next Phase 10 decision is a
-post-deploy acceptance and closeout-readiness review. Physical Android TV or
-another existing-client connection may supply fresh handshake/traffic evidence
-without changing the already published config.
+The source/schema rollout gate is closed. Post-deploy closeout-readiness review
+passed all technical invariants, but a bounded client observation produced no
+fresh handshake or traffic. Phase 10 therefore remains open for exactly one
+existing-client connection followed by read-only handshake/traffic
+verification; no new config or peer mutation is required. Review evidence:
+`research/amn2/phase-10-3c91601-post-deploy-acceptance-closeout-readiness-2026-07-14.md`.
