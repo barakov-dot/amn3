@@ -1,5 +1,19 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 11 RECOVERY-001 old bundle/key decision override 2026-07-14
+
+```text
+phase11_recovery_001=completed_retain_sealed_until_canonical_full_secret_rehearsal
+phase11_recovery_001_old=two_ciphertext_copies_hash_match|separate_private_key_acl_pass
+phase11_recovery_001_canonical=ciphertext_hash_match|separate_private_key_acl_pass|critical_contracts_pass
+phase11_recovery_001_delete=false|files_removed_0
+phase11_recovery_001_retirement_after=PHASE11_RESTORE_001A_PASS
+phase11_recovery_001_future_gate=exact_delete_old_two_ciphertexts_receipts_and_old_key_only
+phase11_recovery_001_production=unchanged|awg_untouched|restore_not_run
+phase11_recovery_001_next=AUDIT_SECOND_VPS_RETENTION_AFTER_P0
+phase11_recovery_001_evidence=research/amn2/phase-11-recovery-001-old-bundle-key-retention-decision-2026-07-14.md
+```
+
 ## Phase 11 OPS-001 compact runtime/recovery health override 2026-07-14
 
 ```text

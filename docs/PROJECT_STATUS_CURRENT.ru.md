@@ -1,3 +1,19 @@
+# Текущий override 2026-07-14: RECOVERY-001 old fallback retained conditionally
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+phase11_recovery_001=decision_complete|retain_sealed_conditionally|deletion_false
+phase11_recovery_001_old=workspace_and_external_ciphertext_hash_match|key_present_separate_acl_private
+phase11_recovery_001_canonical=external_ciphertext_hash_match|private_key_separate_acl_private|metadata_and_critical_contracts_passed
+phase11_recovery_001_reason=canonical_full_secret_restore_apply_not_yet_rehearsed|old_legacy_fallback_still_useful
+phase11_recovery_001_retirement_prerequisite=PHASE11_RESTORE_001A_CANONICAL_FULL_SECRET_TRUSTED_DISPOSABLE_REHEARSAL_PASS
+phase11_recovery_001_future_delete=separate_exact_destructive_gate|old_workspace_ciphertext|old_external_ciphertext_receipts|old_symmetric_key
+phase11_recovery_001_canonical_delete=false|move=false|rotate=false
+phase11_recovery_001_production_effect=none|awg_untouched|services_unchanged|restore_not_run
+phase11_recovery_001_next=AUDIT_SECOND_VPS_RETENTION_AFTER_P0
+phase11_recovery_001_evidence=research/amn2/phase-11-recovery-001-old-bundle-key-retention-decision-2026-07-14.md
+```
+
 # Текущий override 2026-07-14: OPS-001 runtime/recovery health passed
 
 ```text
