@@ -1,5 +1,21 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 11 801f8c3 transient Telegram smoke gate override 2026-07-14
+
+```text
+phase11_telegram_001_gate=reviewed_ready_awaiting_exact_approval
+phase11_telegram_001_source_production=801f8c3|hash_bound|postflight_pass
+phase11_telegram_001_actor=first_configured_admin_private|configured_count_2
+phase11_telegram_001_boundary=message_only|exact_start|one_response|clone_only|backlog_0_1_0
+phase11_telegram_001_watchdog=internal_120|outer_180|restart_no|kill_control_group
+phase11_telegram_001_regular_bot=inactive_disabled|persistent_false
+phase11_telegram_001_awg=running_untouched_invariant
+phase11_telegram_001_tests=21_and_184_passed|vps_read_only_preflight_passed
+phase11_telegram_001_live_effect=none|telegram_api_not_called
+phase11_telegram_001_next=OPERATOR_EXACT_APPROVAL_FOR_PHASE11_801F8C3_TRANSIENT_TELEGRAM_SMOKE
+phase11_telegram_001_gate_evidence=research/amn2/phase-11-801f8c3-private-telegram-single-admin-transient-smoke-live-gate-review-2026-07-14.md
+```
+
 ## Phase 11 801f8c3 private overlay rollout result override 2026-07-14
 
 ```text
