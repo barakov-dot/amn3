@@ -1,5 +1,23 @@
 # Следующий чат: AMN2 Phase 10 Product Recovery With Harness
 
+## 3c91601 existing-client acceptance passed 2026-07-14
+
+Свежая post-rollout acceptance прошла: handshake обновился, за минуту появился
+двусторонний трафик, 12 peer и весь runtime остались неизменными. Единственный
+внешний remainder закрыт. Phase 10 технически готова к финальному closeout, но
+формально остаётся активной до выпуска final packet и Phase 11 handoff.
+
+```text
+acceptance=passed_fresh_handshake_and_traffic
+handshake=2026-07-14T11:29:53Z|later_confirmed_11:39:06Z
+traffic=rx_205184|tx_7176839
+runtime=overlay_3c91601|web_active_200|awg_running_restart_0|12_peers_unchanged
+external_remainder=closed
+closeout_readiness=ready_for_final_packet
+next_command=GPT-5.6_SOL -> PREPARE_PHASE10_FINAL_CLOSEOUT_PACKET_AND_PHASE11_HANDOFF
+evidence=research/amn2/phase-10-3c91601-existing-client-post-deploy-acceptance-2026-07-14.md
+```
+
 ## 3c91601 post-deploy closeout readiness reviewed 2026-07-14
 
 Технический closeout готов: source/VPS overlay `3c91601`, web, AWG, peer-set,

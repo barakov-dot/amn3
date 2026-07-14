@@ -1,3 +1,21 @@
+# Текущий override 2026-07-14: 3c91601 existing-client acceptance passed
+
+```text
+phase10_3c91601_existing_client_acceptance=passed-fresh-handshake-and-traffic
+phase10_3c91601_acceptance_window=2026-07-14T11:30:40Z_to_11:31:40Z
+phase10_3c91601_acceptance_handshake=2026-07-14T11:29:53Z|later_confirmed_2026-07-14T11:39:06Z
+phase10_3c91601_acceptance_traffic=rx_205184|tx_7176839
+phase10_3c91601_acceptance_peers=12_stable|set_unchanged
+phase10_3c91601_runtime=overlay_3c91601|web_active_200|awg_running_restart_0
+phase10_3c91601_database=integrity_ok|fk_0|hashes_unchanged|counts_unchanged
+phase10_3c91601_external_remainder=closed
+phase10_3c91601_product_package_schema_remainder=none_identified
+phase10_3c91601_closeout_readiness=ready-for-final-packet
+phase10_3c91601_formally_closed=false-until-closeout-packet
+phase10_3c91601_next=PREPARE_PHASE10_FINAL_CLOSEOUT_PACKET_AND_PHASE11_HANDOFF
+phase10_3c91601_acceptance_evidence=research/amn2/phase-10-3c91601-existing-client-post-deploy-acceptance-2026-07-14.md
+```
+
 # Текущий override 2026-07-14: 3c91601 post-deploy closeout readiness review
 
 ```text

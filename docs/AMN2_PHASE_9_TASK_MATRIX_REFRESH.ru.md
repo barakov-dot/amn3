@@ -1,5 +1,19 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 10 3c91601 existing-client acceptance override 2026-07-14
+
+```text
+phase10_3c91601_existing_client_acceptance=passed
+phase10_3c91601_handshake=2026-07-14T11:29:53Z|later_11:39:06Z
+phase10_3c91601_traffic=rx_205184|tx_7176839
+phase10_3c91601_runtime=web_active_200|awg_running_restart_0|12_peers_unchanged
+phase10_3c91601_external_remainder=closed
+phase10_3c91601_closeout_readiness=ready_for_final_packet
+phase10_3c91601_formally_closed=false_until_closeout_packet
+phase10_3c91601_next=PREPARE_PHASE10_FINAL_CLOSEOUT_PACKET_AND_PHASE11_HANDOFF
+phase10_3c91601_evidence=research/amn2/phase-10-3c91601-existing-client-post-deploy-acceptance-2026-07-14.md
+```
+
 ## Phase 10 3c91601 closeout readiness review override 2026-07-14
 
 ```text

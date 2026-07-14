@@ -160,9 +160,9 @@ new_evidence_secret_value_scan=0_findings
 
 ## Next
 
-The source/schema rollout gate is closed. Post-deploy closeout-readiness review
-passed all technical invariants, but a bounded client observation produced no
-fresh handshake or traffic. Phase 10 therefore remains open for exactly one
-existing-client connection followed by read-only handshake/traffic
-verification; no new config or peer mutation is required. Review evidence:
-`research/amn2/phase-10-3c91601-post-deploy-acceptance-closeout-readiness-2026-07-14.md`.
+The source/schema rollout gate is closed. Post-deploy technical review passed,
+and a later existing-client acceptance produced fresh handshakes plus positive
+bidirectional traffic without changing the 12-peer set. No new config or peer
+mutation was required. Phase 10 is ready for its final closeout packet and
+Phase 11 handoff. Acceptance evidence:
+`research/amn2/phase-10-3c91601-existing-client-post-deploy-acceptance-2026-07-14.md`.

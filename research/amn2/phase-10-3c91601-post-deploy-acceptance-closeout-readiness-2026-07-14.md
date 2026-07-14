@@ -125,3 +125,17 @@ canonical_root_tests=43_passed
 git_diff_check=passed
 new_evidence_secret_value_scan=0_findings
 ```
+
+## Remainder resolution
+
+The exact existing-client acceptance remainder passed later on 2026-07-14.
+The accepted minute observed a fresh `2026-07-14T11:29:53Z` handshake,
+`205184` received bytes and `7176839` transmitted bytes with all 12 peers
+stable. A final verifier observed another fresh handshake at
+`2026-07-14T11:39:06Z` and all runtime/database invariants still passing.
+
+Result evidence:
+`research/amn2/phase-10-3c91601-existing-client-post-deploy-acceptance-2026-07-14.md`.
+
+The external remainder is closed. Phase 10 is ready for its final closeout
+packet and Phase 11 handoff, but is not declared closed by this review alone.
