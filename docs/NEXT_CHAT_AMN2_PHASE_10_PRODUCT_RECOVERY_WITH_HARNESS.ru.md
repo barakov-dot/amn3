@@ -1,5 +1,30 @@
 # Следующий чат: AMN2 Phase 10 Product Recovery With Harness
 
+## Canonical hybrid recovery replacement override 2026-07-14
+
+Остаточный DR-срез закрыт. Canonical writer исправляет newline metadata defect,
+а live backup CLI больше не принимает symmetric key через stdin. Replacement
+bundle зашифрован public-key hybrid envelope, локально проверен без записи
+production plaintext, скопирован на `F:` без private key и прошёл sanitized
+staging rehearsal. Production VPN и web во время работы не останавливались.
+
+```text
+run_id=20260714T045754Z
+code_commits=dd87ea7|117b72c
+artifact_sha256=2c618fa52aed038eb494a892480970795c554bddd6649156e1fe5a9c00e52280
+encryption=rsa_oaep_sha256_wrapped_fernet
+metadata_verification=passed|warnings_none
+local_verification=passed|production_plaintext_written_false
+second_copy=F:\AMN2-Recovery\20260714T045754Z|sha256_verified|private_key_not_copied
+sanitized_staging=passed|sha256_d7845bdbd8623476bcfb81d6a602cfe8604aebd571a0ae38cc1c49bb36eab1d9|start_guard_64|ssh_only_after_cleanup
+production_runtime=amnezia_awg2_running_restart_count_0|web_active_enabled|no_service_stop_or_restart
+tests=focused_20_passed|root_43_passed|compile_passed|diff_review_passed
+previous_copy=retained_as_fallback_pending_operator_retirement
+next_dr_gate=full_secret_restore_apply_in_trusted_disposable_environment_only
+launch_plan_change=false
+evidence=research/amn2/phase-10-canonical-hybrid-recovery-replacement-2026-07-14.md
+```
+
 ## Isolated restore rehearsal override 2026-07-13
 
 Encrypted production bundle проверен локально без записи plaintext. На

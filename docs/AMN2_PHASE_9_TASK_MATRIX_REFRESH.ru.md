@@ -1,5 +1,23 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 10 canonical hybrid recovery replacement override 2026-07-14
+
+```text
+phase10_recovery_replacement=completed|run_20260714T045754Z|code_dd87ea7_117b72c
+phase10_recovery_encryption=rsa_oaep_sha256_wrapped_fernet|private_key_local_only|symmetric_stdin_removed
+phase10_recovery_artifact=19220_bytes|sha256_2c618fa52aed038eb494a892480970795c554bddd6649156e1fe5a9c00e52280
+phase10_recovery_metadata=passed|warnings_none|newline_defect_closed
+phase10_recovery_local=decrypt_passed|sqlite_ok|awg_12_peers_12_psks|systemd_contract_passed
+phase10_recovery_runtime=production_not_stopped|amnezia_awg2_running_restart_count_0|web_active_enabled
+phase10_recovery_second_copy=F:\AMN2-Recovery\20260714T045754Z|sha256_verified|private_key_not_copied
+phase10_recovery_staging=sanitized_only|sqlite_12_tables_0_rows|systemd_analyze_passed|start_guard_64|ssh_only_after_cleanup
+phase10_recovery_tests=focused_20_passed|root_43_passed|compile_passed|diff_review_passed
+phase10_recovery_previous_copy=retained_as_fallback_pending_operator_retirement
+phase10_recovery_next=full_secret_restore_apply_remains_separate_exact_gate
+phase10_recovery_launch_change=false
+phase10_recovery_evidence=research/amn2/phase-10-canonical-hybrid-recovery-replacement-2026-07-14.md
+```
+
 ## Phase 10 isolated restore rehearsal override 2026-07-13
 
 ```text
