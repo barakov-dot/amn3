@@ -6,12 +6,15 @@
 active_phase=Phase 11 Controlled Launch and Operations
 amn2_source=codex-vps-test-prep|801f8c3|origin_sync
 production_overlay=801f8c3
+restore_001a_gate=reviewed_ready_awaiting_exact_approval
+restore_001a_format=runtime_complete_v2|required_external_source_digest
+restore_001a_security=complete_coverage|findings_0
 telegram_001=completed_pass
 telegram_002=hold_disabled_go_local_hardening
 ops_001=completed_healthy
 recovery_001=retain_old_fallback_until_restore_001a
 second_vps=clean_ssh_only|keep_temporarily_for_restore_001a|independent_dr_false
-next=REVIEW_PHASE11_RESTORE_001A_CANONICAL_FULL_SECRET_DISPOSABLE_REHEARSAL_GATE
+next=OPERATOR_EXACT_APPROVAL_FOR_PHASE11_RESTORE_001A
 ```
 
 Актуальный план по критичности:

@@ -145,6 +145,35 @@ class Phase9ProgressHarnessTests(unittest.TestCase):
 
         self.assertTrue(all(check.ok for check in checks))
 
+    def test_accepts_restore_001a_phase11_live_gate_slice(self) -> None:
+        harness = _load_harness_module()
+
+        checks = harness.evaluate_next_command(
+            "GPT-5.6 SOL -> "
+            "START_PHASE11_RESTORE_001A_RUNTIME_COMPLETE_V2_LIVE_GATE_SLICE "
+            "-> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE",
+            require_product_step=True,
+            require_scoped_tests=True,
+        )
+
+        self.assertTrue(all(check.ok for check in checks))
+
+    def test_rejects_unknown_phase11_product_slice_command(self) -> None:
+        harness = _load_harness_module()
+
+        checks = harness.evaluate_next_command(
+            "GPT-5.6 SOL -> START_PHASE11_UNKNOWN_LIVE_GATE_SLICE "
+            "-> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE",
+            require_product_step=True,
+        )
+
+        failed_checks = {check.name: check.detail for check in checks if not check.ok}
+        self.assertIn("next-command-known-phase11-slice", failed_checks)
+        self.assertIn(
+            "START_PHASE11_RESTORE_001A_RUNTIME_COMPLETE_V2_LIVE_GATE_SLICE",
+            failed_checks["next-command-known-phase11-slice"],
+        )
+
     def test_rejects_unknown_phase10_product_slice_command(self) -> None:
         harness = _load_harness_module()
 

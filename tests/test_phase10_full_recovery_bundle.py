@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import base64
+import hashlib
+import json
 import sqlite3
 from pathlib import Path
 
@@ -11,6 +13,8 @@ from scripts.phase10_full_recovery_bundle import (
     FORMAT,
     MANIFEST_NAME,
     assemble_recovery_files,
+    assemble_runtime_recovery_files,
+    collect_runtime_files,
     encrypt_recovery_files,
     render_metadata,
     sqlite_backup_bytes,
@@ -20,6 +24,12 @@ from scripts.phase10_recovery_crypto import decrypt_hybrid
 from scripts.phase10_restore_rehearsal_verify import (
     load_tar_files,
     validate_recovery_files,
+)
+from scripts.phase11_recovery_runtime import normalize_runtime_contract
+from tests.test_phase11_recovery_runtime import (
+    docker_image_archive,
+    docker_inspect,
+    source_archive,
 )
 
 
@@ -115,6 +125,62 @@ def test_encrypted_writer_output_passes_recovery_verifier(tmp_path: Path) -> Non
     assert report["source_overlay"] == "deadbee"
     assert report["critical_contracts"] == "passed"
     assert MANIFEST_NAME in archive_files
+
+
+def test_runtime_complete_writer_output_passes_v2_verifier(tmp_path: Path) -> None:
+    image_archive, image_id = docker_image_archive()
+    inspect_bytes, _fixture_image_id = docker_inspect()
+    inspect_rows = json.loads(inspect_bytes)
+    inspect_rows[0]["Image"] = image_id
+    runtime_contract = normalize_runtime_contract(
+        json.dumps(inspect_rows).encode(), image_id
+    )
+    source_bundle = source_archive()
+
+    files = assemble_runtime_recovery_files(
+        source_files(tmp_path),
+        runtime_contract=runtime_contract,
+        image_archive=image_archive,
+        source_archive=source_bundle,
+        expected_source_archive_sha256=hashlib.sha256(source_bundle).hexdigest(),
+        created_utc="2026-07-14T00:00:00Z",
+        source_overlay="deadbee",
+        container_name="amneziya-awg2",
+        container_image_id=image_id,
+    )
+
+    report = validate_recovery_files(files)
+    assert report["format"] == "amn2-full-recovery-v2"
+    assert report["runtime_contract"] == "passed"
+    assert report["image_archive"]["config_digest"] == image_id
+
+
+def test_collect_runtime_files_uses_read_only_inspect_and_image_save(monkeypatch) -> None:
+    image_archive, image_id = docker_image_archive()
+    inspect_bytes, _fixture_image_id = docker_inspect()
+    inspect_rows = json.loads(inspect_bytes)
+    inspect_rows[0]["Image"] = image_id
+    calls: list[tuple[list[str], str]] = []
+
+    def fake_run_docker(arguments, label, *, timeout_seconds=None):
+        calls.append((list(arguments), label))
+        if arguments == ["inspect", "amneziya-awg2"]:
+            return json.dumps(inspect_rows).encode()
+        if arguments == ["image", "save", "amnezia-awg2:local"]:
+            return image_archive
+        raise AssertionError(f"unexpected Docker command: {arguments}")
+
+    monkeypatch.setattr(
+        "scripts.phase10_full_recovery_bundle.run_docker", fake_run_docker
+    )
+
+    runtime_files = collect_runtime_files("amneziya-awg2", image_id)
+
+    assert set(runtime_files) == {"container/runtime.json", "container/image.tar"}
+    assert calls == [
+        (["inspect", "amneziya-awg2"], "runtime contract inspection"),
+        (["image", "save", "amnezia-awg2:local"], "image archive export"),
+    ]
 
 
 def test_sqlite_backup_is_consistent_and_preserves_rows(tmp_path: Path) -> None:

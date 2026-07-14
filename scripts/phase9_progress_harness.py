@@ -68,6 +68,10 @@ KNOWN_PHASE10_SLICE_STEPS = {
     "START_PHASE10_TELEGRAM_SINGLE_ADMIN_TRANSIENT_SMOKE_RUNNER_HARDENING_SLICE",
 }
 
+KNOWN_PHASE11_SLICE_STEPS = {
+    "START_PHASE11_RESTORE_001A_RUNTIME_COMPLETE_V2_LIVE_GATE_SLICE",
+}
+
 SCOPED_TESTS_REQUIRED_FOR_SLICE = {"RUN_SCOPED_TESTS_FOR_SELECTED_SLICE"}
 
 REQUIRED_FALSE_MARKERS = {
@@ -142,6 +146,12 @@ def is_known_phase10_slice_step(step: str) -> bool:
     return step in KNOWN_PHASE10_SLICE_STEPS
 
 
+def is_known_phase11_slice_step(step: str) -> bool:
+    if not step.startswith("START_PHASE11_"):
+        return True
+    return step in KNOWN_PHASE11_SLICE_STEPS
+
+
 def evaluate_next_command(
     command: str,
     *,
@@ -189,7 +199,8 @@ def evaluate_next_command(
             "next-command-concrete-slice",
             (not require_product_step) or bool(concrete_steps),
             "concrete product slice required; SELECT/START_SELECTED/RUN_SCOPED_TESTS placeholders are not enough; "
-            "use START_PHASE10_<REAL_TOPIC>_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE"
+            "use START_PHASE10_<REAL_TOPIC>_SLICE or START_PHASE11_<REAL_TOPIC>_SLICE "
+            "-> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE"
             if require_product_step and not concrete_steps
             else f"concrete_steps={','.join(concrete_steps) if concrete_steps else 'none'}",
         )
@@ -205,6 +216,19 @@ def evaluate_next_command(
             f"{','.join(sorted(KNOWN_PHASE10_SLICE_STEPS))}"
             if unknown_phase10_steps
             else "all Phase 10 slice commands are known",
+        )
+    )
+    unknown_phase11_steps = [
+        step for step in concrete_steps if not is_known_phase11_slice_step(step)
+    ]
+    checks.append(
+        Check(
+            "next-command-known-phase11-slice",
+            (not require_product_step) or not unknown_phase11_steps,
+            "unknown Phase 11 slice command rejected; known="
+            f"{','.join(sorted(KNOWN_PHASE11_SLICE_STEPS))}"
+            if unknown_phase11_steps
+            else "all Phase 11 slice commands are known",
         )
     )
 

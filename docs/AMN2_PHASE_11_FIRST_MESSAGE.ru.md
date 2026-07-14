@@ -2,6 +2,22 @@
 
 ## Continuation override 2026-07-14
 
+`PHASE11-RESTORE-001A` gate review завершён: runtime-complete v2 tooling,
+tests, security review и mandatory cleanup contract готовы. Live execution,
+secret transfer и staging mutation не начинались. Точное approval находится в
+первом блоке `docs/PROJECT_STATUS_CURRENT.ru.md`; до него production AWG и
+второй VPS не менять.
+
+Текущая рекомендуемая команда:
+
+```text
+GPT-5.6 SOL -> START_PHASE11_RESTORE_001A_RUNTIME_COMPLETE_V2_LIVE_GATE_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE
+```
+
+---
+
+## Prior continuation override 2026-07-14
+
 Для продолжения уже начатой Phase 11 сначала прочитать
 `docs/AMN2_PHASE_11_CURRENT_PRIORITY_PLAN.ru.md` и первый блок
 `docs/PROJECT_STATUS_CURRENT.ru.md`. Текущий AMN2 source/production overlay —

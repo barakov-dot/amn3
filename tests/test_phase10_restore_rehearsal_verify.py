@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import io
+import json
 import sqlite3
 import tarfile
 from pathlib import Path
@@ -19,9 +20,16 @@ from scripts.phase10_restore_rehearsal_verify import (
     build_manifest,
     load_tar_files,
     validate_sanitized_files,
+    validate_recovery_files,
     verify_encrypted_bundle,
     verify_hybrid_bundle,
 )
+from tests.test_phase11_recovery_runtime import (
+    docker_image_archive,
+    docker_inspect,
+    source_archive,
+)
+from scripts.phase11_recovery_runtime import normalize_runtime_contract
 
 
 def sqlite_fixture() -> bytes:
@@ -81,6 +89,32 @@ def recovery_files(*, malformed_metadata: bool = False) -> dict[str, bytes]:
         "systemd/amneziya-web.service": unit,
     }
     files[MANIFEST_NAME] = build_manifest(files)
+    return files
+
+
+def runtime_complete_recovery_files() -> dict[str, bytes]:
+    files = recovery_files()
+    archive, image_id = docker_image_archive()
+    inspect_bytes, _fixture_image_id = docker_inspect()
+    inspect_rows = json.loads(inspect_bytes)
+    inspect_rows[0]["Image"] = image_id
+    source_bundle = source_archive()
+    source_digest = hashlib.sha256(source_bundle).hexdigest()
+    files["metadata.txt"] = files["metadata.txt"].replace(
+        b"format=amn2-full-recovery-v1",
+        b"format=amn2-full-recovery-v2",
+    ).replace(
+        b"container_image_id=sha256:test",
+        f"container_image_id={image_id}".encode(),
+    ) + f"source_archive_sha256={source_digest}\n".encode()
+    files["container/runtime.json"] = normalize_runtime_contract(
+        json.dumps(inspect_rows).encode(), image_id
+    )
+    files["container/image.tar"] = archive
+    files["host/source.tar.gz"] = source_bundle
+    files[MANIFEST_NAME] = build_manifest(
+        {name: value for name, value in files.items() if name != MANIFEST_NAME}
+    )
     return files
 
 
@@ -167,6 +201,119 @@ def test_verify_hybrid_builds_secret_free_schema_only_fixture(tmp_path: Path) ->
     assert b"yaml-secret" not in combined
     assert b"database-secret" not in combined
     assert private_key_not_present(combined)
+
+
+def test_verify_hybrid_accepts_runtime_complete_v2_without_exporting_image(
+    tmp_path: Path,
+) -> None:
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=3072)
+    private_pem = private_key.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption(),
+    )
+    public_pem = private_key.public_key().public_bytes(
+        serialization.Encoding.PEM,
+        serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    bundle = tmp_path / "recovery-v2.hybrid.enc"
+    private_key_file = tmp_path / "recovery-private.pem"
+    bundle.write_bytes(
+        encrypt_hybrid(tar_bytes(runtime_complete_recovery_files()), public_pem)
+    )
+    private_key_file.write_bytes(private_pem)
+    sanitized = tmp_path / "sanitized-v2.tar.gz"
+
+    report = verify_hybrid_bundle(
+        bundle,
+        private_key_file,
+        hashlib.sha256(bundle.read_bytes()).hexdigest(),
+        sanitized,
+    )
+
+    assert report["verdict"] == "passed"
+    assert report["source"]["format"] == "amn2-full-recovery-v2"
+    assert report["source"]["runtime_contract"] == "passed"
+    assert report["source"]["image_archive"]["layer_count"] == 1
+    sanitized_files = load_tar_files(sanitized.read_bytes())
+    assert "container/runtime.json" not in sanitized_files
+    assert "container/image.tar" not in sanitized_files
+
+
+def test_runtime_complete_v2_requires_image_archive(tmp_path: Path) -> None:
+    files = runtime_complete_recovery_files()
+    files.pop("container/image.tar")
+    files[MANIFEST_NAME] = build_manifest(
+        {name: value for name, value in files.items() if name != MANIFEST_NAME}
+    )
+    bundle, key_file = encrypted_fixture(tmp_path, files)
+
+    with pytest.raises(VerificationError, match="required recovery files are missing"):
+        verify_encrypted_bundle(
+            bundle,
+            key_file,
+            hashlib.sha256(bundle.read_bytes()).hexdigest(),
+            tmp_path / "sanitized.tar.gz",
+        )
+
+
+def test_restore_gate_can_require_runtime_complete_v2_and_source_digest() -> None:
+    files = runtime_complete_recovery_files()
+    source_digest = hashlib.sha256(files["host/source.tar.gz"]).hexdigest()
+
+    report = validate_recovery_files(
+        files,
+        required_format="amn2-full-recovery-v2",
+        expected_source_archive_sha256=source_digest,
+    )
+
+    assert report["format"] == "amn2-full-recovery-v2"
+    assert report["source_archive"]["sha256"] == source_digest
+
+
+def test_restore_gate_required_v2_rejects_legacy_v1() -> None:
+    with pytest.raises(VerificationError, match="required recovery format"):
+        validate_recovery_files(
+            recovery_files(), required_format="amn2-full-recovery-v2"
+        )
+
+
+def test_restore_gate_attests_required_v2_and_external_source_digest() -> None:
+    files = runtime_complete_recovery_files()
+    source_digest = hashlib.sha256(files["host/source.tar.gz"]).hexdigest()
+
+    report = validate_recovery_files(
+        files,
+        required_format="amn2-full-recovery-v2",
+        expected_source_archive_sha256=source_digest,
+    )
+
+    assert report["verification_policy"] == {
+        "external_source_archive_sha256_verified": True,
+        "gate_mode": "restore_001a_runtime_complete_v2",
+        "required_format": "amn2-full-recovery-v2",
+    }
+
+
+def test_external_source_digest_without_required_v2_is_rejected() -> None:
+    files = runtime_complete_recovery_files()
+    source_digest = hashlib.sha256(files["host/source.tar.gz"]).hexdigest()
+
+    with pytest.raises(VerificationError, match="requires required v2 format"):
+        validate_recovery_files(
+            files,
+            expected_source_archive_sha256=source_digest,
+        )
+
+
+def test_generic_v2_report_is_explicitly_not_restore_gate_evidence() -> None:
+    report = validate_recovery_files(runtime_complete_recovery_files())
+
+    assert report["verification_policy"] == {
+        "external_source_archive_sha256_verified": False,
+        "gate_mode": "generic_bundle_consistency",
+        "required_format": None,
+    }
 
 
 def test_metadata_line_join_is_reported_as_warning(tmp_path: Path) -> None:

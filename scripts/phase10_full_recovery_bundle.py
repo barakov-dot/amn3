@@ -29,13 +29,36 @@ except ModuleNotFoundError as exc:
         raise
     from phase10_recovery_crypto import RecoveryCryptoError, encrypt_hybrid
 
+try:
+    from scripts.phase11_recovery_runtime import (
+        IMAGE_REFERENCE,
+        RuntimeContractError,
+        normalize_runtime_contract,
+        validate_image_archive,
+        validate_runtime_contract,
+        validate_source_archive,
+    )
+except ModuleNotFoundError as exc:
+    if exc.name != "scripts":
+        raise
+    from phase11_recovery_runtime import (
+        IMAGE_REFERENCE,
+        RuntimeContractError,
+        normalize_runtime_contract,
+        validate_image_archive,
+        validate_runtime_contract,
+        validate_source_archive,
+    )
+
 
 FORMAT = "amn2-full-recovery-v1"
+FORMAT_V2 = "amn2-full-recovery-v2"
 MANIFEST_NAME = "manifest.sha256"
 MAX_SOURCE_FILE_BYTES = 32 * 1024 * 1024
 MAX_PLAINTEXT_BUNDLE_BYTES = 64 * 1024 * 1024
 MAX_PUBLIC_KEY_BYTES = 64 * 1024
 DOCKER_TIMEOUT_SECONDS = 30
+DOCKER_IMAGE_EXPORT_TIMEOUT_SECONDS = 120
 
 PAYLOAD_NAMES = {
     "container/awg/awg0.conf",
@@ -79,6 +102,8 @@ def render_metadata(
     source_overlay: str,
     container_name: str,
     container_image_id: str,
+    format_name: str = FORMAT,
+    source_archive_sha256: str | None = None,
 ) -> bytes:
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", created_utc):
         raise RecoveryWriterError("created UTC timestamp is invalid")
@@ -92,12 +117,25 @@ def render_metadata(
         or any(character in container_image_id for character in "\r\n")
     ):
         raise RecoveryWriterError("container image ID is invalid")
+    if format_name not in {FORMAT, FORMAT_V2}:
+        raise RecoveryWriterError("recovery format is invalid")
+    if format_name == FORMAT_V2:
+        if not source_archive_sha256 or not re.fullmatch(
+            r"[0-9a-f]{64}", source_archive_sha256
+        ):
+            raise RecoveryWriterError("source archive SHA-256 is invalid")
+        source_archive_line = f"source_archive_sha256={source_archive_sha256}\n"
+    else:
+        if source_archive_sha256 is not None:
+            raise RecoveryWriterError("legacy metadata cannot carry source archive SHA-256")
+        source_archive_line = ""
     return (
-        f"format={FORMAT}\n"
+        f"format={format_name}\n"
         f"created_utc={created_utc}\n"
         f"source_overlay={source_overlay}\n"
         f"container_name={container_name}\n"
         f"container_image_id={container_image_id}\n"
+        f"{source_archive_line}"
         "restore_apply_performed=false\n"
         "service_restart_performed=false\n"
     ).encode("utf-8")
@@ -134,6 +172,60 @@ def assemble_recovery_files(
         source_overlay=source_overlay,
         container_name=container_name,
         container_image_id=container_image_id,
+    )
+    files[MANIFEST_NAME] = build_manifest(files)
+    return files
+
+
+def assemble_runtime_recovery_files(
+    source_files: Mapping[str, bytes],
+    *,
+    runtime_contract: bytes,
+    image_archive: bytes,
+    source_archive: bytes,
+    expected_source_archive_sha256: str,
+    created_utc: str,
+    source_overlay: str,
+    container_name: str,
+    container_image_id: str,
+) -> dict[str, bytes]:
+    if set(source_files) != PAYLOAD_NAMES:
+        raise RecoveryWriterError("source file contract does not match recovery format")
+    expected_overlay = (source_overlay + "\n").encode("ascii")
+    if source_files["host/source_overlay_commit"] != expected_overlay:
+        raise RecoveryWriterError("source overlay file is not canonical")
+    try:
+        runtime = validate_runtime_contract(runtime_contract)
+        if runtime["image_id"] != container_image_id:
+            raise RecoveryWriterError("runtime image ID does not match container state")
+        validate_image_archive(
+            image_archive,
+            container_image_id,
+            str(runtime["image_reference"]),
+        )
+        validate_source_archive(
+            source_archive, source_overlay, expected_source_archive_sha256
+        )
+    except RuntimeContractError as exc:
+        raise RecoveryWriterError(str(exc)) from exc
+    files = dict(source_files)
+    files["container/runtime.json"] = runtime_contract
+    files["container/image.tar"] = image_archive
+    files["host/source.tar.gz"] = source_archive
+    for name, value in files.items():
+        if not isinstance(value, bytes):
+            raise RecoveryWriterError("source file content is not bytes")
+        if name != "container/image.tar" and len(value) > MAX_SOURCE_FILE_BYTES:
+            raise RecoveryWriterError("source file size limit exceeded")
+        if not value:
+            raise RecoveryWriterError("required source file is empty")
+    files["metadata.txt"] = render_metadata(
+        created_utc=created_utc,
+        source_overlay=source_overlay,
+        container_name=container_name,
+        container_image_id=container_image_id,
+        format_name=FORMAT_V2,
+        source_archive_sha256=expected_source_archive_sha256,
     )
     files[MANIFEST_NAME] = build_manifest(files)
     return files
@@ -221,14 +313,19 @@ def sqlite_backup_bytes(path: Path) -> bytes:
         destination.close()
 
 
-def run_docker(arguments: Sequence[str], label: str) -> bytes:
+def run_docker(
+    arguments: Sequence[str],
+    label: str,
+    *,
+    timeout_seconds: int | None = None,
+) -> bytes:
     try:
         result = subprocess.run(
             ["docker", *arguments],
             check=False,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
-            timeout=DOCKER_TIMEOUT_SECONDS,
+            timeout=timeout_seconds or DOCKER_TIMEOUT_SECONDS,
         )
     except subprocess.TimeoutExpired as exc:
         raise RecoveryWriterError(f"Docker {label} timed out") from exc
@@ -270,6 +367,27 @@ def read_container_file(container_name: str, path: str, label: str) -> bytes:
     if len(value) > MAX_SOURCE_FILE_BYTES:
         raise RecoveryWriterError(f"{label} exceeds the size limit")
     return value
+
+
+def collect_runtime_files(container_name: str, image_id: str) -> dict[str, bytes]:
+    inspect_bytes = run_docker(
+        ["inspect", container_name], "runtime contract inspection"
+    )
+    try:
+        runtime_contract = normalize_runtime_contract(inspect_bytes, image_id)
+        runtime = validate_runtime_contract(runtime_contract)
+        image_archive = run_docker(
+            ["image", "save", str(runtime["image_reference"])],
+            "image archive export",
+            timeout_seconds=DOCKER_IMAGE_EXPORT_TIMEOUT_SECONDS,
+        )
+        validate_image_archive(image_archive, image_id, IMAGE_REFERENCE)
+    except RuntimeContractError as exc:
+        raise RecoveryWriterError(str(exc)) from exc
+    return {
+        "container/runtime.json": runtime_contract,
+        "container/image.tar": image_archive,
+    }
 
 
 def read_recipient_public_key(path: Path) -> bytes:
@@ -325,6 +443,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--app-env", type=Path, required=True)
     parser.add_argument("--servers-yml", type=Path, required=True)
     parser.add_argument("--source-overlay", type=Path, required=True)
+    parser.add_argument("--source-archive", type=Path, required=True)
+    parser.add_argument("--source-archive-sha256", required=True)
     parser.add_argument("--web-unit", type=Path, required=True)
     parser.add_argument("--bot-unit", type=Path, required=True)
     parser.add_argument("--container-name", required=True)
@@ -352,8 +472,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         if not before.running:
             raise RecoveryWriterError("AWG container is not running")
         source_files = collect_source_files(args, source_overlay)
-        files = assemble_recovery_files(
+        runtime_files = collect_runtime_files(args.container_name, before.image_id)
+        files = assemble_runtime_recovery_files(
             source_files,
+            runtime_contract=runtime_files["container/runtime.json"],
+            image_archive=runtime_files["container/image.tar"],
+            source_archive=read_limited_file(args.source_archive, "source archive"),
+            expected_source_archive_sha256=args.source_archive_sha256.lower(),
             created_utc=utc_timestamp(),
             source_overlay=source_overlay,
             container_name=args.container_name,
@@ -368,7 +493,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         except Exception:
             args.output.unlink(missing_ok=True)
             raise
-        if not after.running or after.restart_count != before.restart_count:
+        if (
+            not after.running
+            or after.restart_count != before.restart_count
+            or after.image_id != before.image_id
+        ):
             args.output.unlink(missing_ok=True)
             raise RecoveryWriterError("AWG runtime changed during backup")
         report = {
@@ -376,6 +505,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "artifact_sha256": sha256_bytes(encrypted),
             "container_running": after.running,
             "encryption": "rsa-oaep-sha256+fernet",
+            "format": FORMAT_V2,
+            "offline_image_archive": True,
             "manifest_entries": len(files) - 1,
             "member_files": len(files),
             "production_plaintext_written": False,

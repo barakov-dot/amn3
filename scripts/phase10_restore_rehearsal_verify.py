@@ -26,12 +26,31 @@ except ModuleNotFoundError as exc:
         raise
     from phase10_recovery_crypto import RecoveryCryptoError, decrypt_hybrid
 
+try:
+    from scripts.phase11_recovery_runtime import (
+        RuntimeContractError,
+        validate_image_archive,
+        validate_runtime_contract,
+        validate_source_archive,
+    )
+except ModuleNotFoundError as exc:
+    if exc.name != "scripts":
+        raise
+    from phase11_recovery_runtime import (
+        RuntimeContractError,
+        validate_image_archive,
+        validate_runtime_contract,
+        validate_source_archive,
+    )
+
 
 MAX_ARCHIVE_FILES = 256
 MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
 MAX_ENCRYPTED_BYTES = 128 * 1024 * 1024
 MAX_PRIVATE_KEY_BYTES = 64 * 1024
 MANIFEST_NAME = "manifest.sha256"
+FORMAT_V1 = "amn2-full-recovery-v1"
+FORMAT_V2 = "amn2-full-recovery-v2"
 SANITIZED_SENTINEL = "SANITIZED_REHEARSAL_ONLY"
 SANITIZED_ENV_HEADER = (
     "# Sanitized AMN2 restore rehearsal fixture. No values are retained."
@@ -66,6 +85,11 @@ REQUIRED_RECOVERY_FILES = {
     "systemd/amneziya-bot.service",
     "systemd/amneziya-web.service",
     MANIFEST_NAME,
+}
+REQUIRED_RECOVERY_FILES_V2 = REQUIRED_RECOVERY_FILES | {
+    "container/runtime.json",
+    "container/image.tar",
+    "host/source.tar.gz",
 }
 REQUIRED_SANITIZED_FILES = REQUIRED_RECOVERY_FILES | {SANITIZED_SENTINEL}
 
@@ -297,14 +321,43 @@ def awg_directive_values(section: str, directive: str) -> list[str]:
     )
 
 
-def validate_recovery_files(files: Mapping[str, bytes]) -> dict[str, object]:
-    missing = sorted(REQUIRED_RECOVERY_FILES - set(files))
+def validate_recovery_files(
+    files: Mapping[str, bytes],
+    *,
+    required_format: str | None = None,
+    expected_source_archive_sha256: str | None = None,
+) -> dict[str, object]:
+    minimal = {"metadata.txt", MANIFEST_NAME}
+    missing = sorted(minimal - set(files))
     if missing:
         raise VerificationError("required recovery files are missing")
     manifest_entries = verify_manifest(files)
     metadata = parse_metadata(files["metadata.txt"])
-    if metadata.get("format") != "amn2-full-recovery-v1":
+    source_format = metadata.get("format")
+    if source_format == FORMAT_V1:
+        expected_files = REQUIRED_RECOVERY_FILES
+    elif source_format == FORMAT_V2:
+        expected_files = REQUIRED_RECOVERY_FILES_V2
+    else:
         raise VerificationError("recovery format is unsupported")
+    if required_format is not None:
+        if required_format not in {FORMAT_V1, FORMAT_V2}:
+            raise VerificationError("required recovery format is unsupported")
+        if source_format != required_format:
+            raise VerificationError("required recovery format does not match bundle")
+    if expected_source_archive_sha256 is not None:
+        if required_format != FORMAT_V2:
+            raise VerificationError(
+                "expected source archive SHA-256 requires required v2 format"
+            )
+        if not re.fullmatch(r"[0-9a-fA-F]{64}", expected_source_archive_sha256):
+            raise VerificationError("expected source archive SHA-256 is invalid")
+    missing = sorted(expected_files - set(files))
+    if missing:
+        raise VerificationError("required recovery files are missing")
+    unexpected = sorted(set(files) - expected_files)
+    if unexpected:
+        raise VerificationError("recovery bundle contains unexpected files")
     if metadata.get("restore_apply_performed") != "false":
         raise VerificationError("bundle metadata does not prove no restore apply")
     if metadata.get("service_restart_performed") != "false":
@@ -323,6 +376,45 @@ def validate_recovery_files(files: Mapping[str, bytes]) -> dict[str, object]:
             warnings.append(f"metadata_missing_{key}")
     if metadata.get("source_overlay") != source_overlay:
         warnings.append("metadata_source_overlay_mismatch")
+
+    runtime_contract = "absent_legacy_v1"
+    external_source_archive_sha256_verified = False
+    image_archive_report: dict[str, object] | None = None
+    source_archive_report: dict[str, object] | None = None
+    if source_format == FORMAT_V2:
+        try:
+            metadata_source_sha256 = metadata.get("source_archive_sha256", "")
+            if not re.fullmatch(r"[0-9a-f]{64}", metadata_source_sha256):
+                raise VerificationError("source archive SHA-256 metadata is invalid")
+            if (
+                expected_source_archive_sha256 is not None
+                and metadata_source_sha256 != expected_source_archive_sha256.lower()
+            ):
+                raise VerificationError("expected source archive SHA-256 mismatch")
+            if required_format == FORMAT_V2 and expected_source_archive_sha256 is None:
+                raise VerificationError(
+                    "required v2 verification needs expected source archive SHA-256"
+                )
+            runtime = validate_runtime_contract(files["container/runtime.json"])
+            if metadata.get("container_image_id") != runtime["image_id"]:
+                raise VerificationError("runtime image ID does not match metadata")
+            image_archive_report = validate_image_archive(
+                files["container/image.tar"],
+                str(runtime["image_id"]),
+                str(runtime["image_reference"]),
+            )
+            source_archive_report = validate_source_archive(
+                files["host/source.tar.gz"],
+                source_overlay,
+                metadata_source_sha256,
+            )
+            external_source_archive_sha256_verified = (
+                required_format == FORMAT_V2
+                and expected_source_archive_sha256 is not None
+            )
+        except RuntimeContractError as exc:
+            raise VerificationError(str(exc)) from exc
+        runtime_contract = "passed"
 
     awg = files["container/awg/awg0.conf"]
     require_text_sections(awg, ("[Interface]", "[Peer]"), "AWG config")
@@ -374,6 +466,7 @@ def validate_recovery_files(files: Mapping[str, bytes]) -> dict[str, object]:
         )
     sqlite_report = validate_sqlite(files["host/amneziya.sqlite3"])
     return {
+        "format": source_format,
         "archive_file_count": len(files),
         "manifest_entries": manifest_entries,
         "metadata_contract": "warning" if warnings else "passed",
@@ -384,6 +477,18 @@ def validate_recovery_files(files: Mapping[str, bytes]) -> dict[str, object]:
         "awg_psk_contract": "standalone_material_and_per_peer_keys_valid",
         "sqlite": sqlite_report,
         "systemd_contract": "passed",
+        "runtime_contract": runtime_contract,
+        "image_archive": image_archive_report,
+        "source_archive": source_archive_report,
+        "verification_policy": {
+            "external_source_archive_sha256_verified": (
+                external_source_archive_sha256_verified
+            ),
+            "gate_mode": "restore_001a_runtime_complete_v2"
+            if external_source_archive_sha256_verified
+            else "generic_bundle_consistency",
+            "required_format": required_format,
+        },
         "critical_contracts": "passed",
     }
 
@@ -425,7 +530,7 @@ def build_sanitized_files(
 ) -> dict[str, bytes]:
     metadata = (
         "format=amn2-full-recovery-v1-sanitized\n"
-        "source_format=amn2-full-recovery-v1\n"
+        f"source_format={source_report['format']}\n"
         f"source_overlay={source_report['source_overlay']}\n"
         "sanitized_fixture=true\n"
         "production_secrets=false\n"
@@ -482,9 +587,15 @@ def verify_decrypted_recovery_bundle(
     sanitized_output: Path,
     *,
     mode: str,
+    required_format: str | None = None,
+    expected_source_archive_sha256: str | None = None,
 ) -> dict[str, object]:
     files = load_tar_files(decrypted)
-    source_report = validate_recovery_files(files)
+    source_report = validate_recovery_files(
+        files,
+        required_format=required_format,
+        expected_source_archive_sha256=expected_source_archive_sha256,
+    )
     sanitized_files = build_sanitized_files(files, source_report)
     sanitized_report = validate_sanitized_files(sanitized_files)
     write_tar(sanitized_files, sanitized_output)
@@ -515,6 +626,9 @@ def verify_encrypted_bundle(
     key_path: Path,
     expected_sha256: str,
     sanitized_output: Path,
+    *,
+    required_format: str | None = None,
+    expected_source_archive_sha256: str | None = None,
 ) -> dict[str, object]:
     bundle_bytes = bundle_path.read_bytes()
     if len(bundle_bytes) > MAX_ENCRYPTED_BYTES:
@@ -535,6 +649,8 @@ def verify_encrypted_bundle(
         actual_hash,
         sanitized_output,
         mode="encrypted-production-local-memory-only",
+        required_format=required_format,
+        expected_source_archive_sha256=expected_source_archive_sha256,
     )
 
 
@@ -543,6 +659,9 @@ def verify_hybrid_bundle(
     private_key_path: Path,
     expected_sha256: str,
     sanitized_output: Path,
+    *,
+    required_format: str | None = None,
+    expected_source_archive_sha256: str | None = None,
 ) -> dict[str, object]:
     bundle_bytes = bundle_path.read_bytes()
     if len(bundle_bytes) > MAX_ENCRYPTED_BYTES:
@@ -561,6 +680,8 @@ def verify_hybrid_bundle(
         actual_hash,
         sanitized_output,
         mode="hybrid-encrypted-production-local-memory-only",
+        required_format=required_format,
+        expected_source_archive_sha256=expected_source_archive_sha256,
     )
     report["encryption"] = "rsa-oaep-sha256+fernet"
     return report
@@ -578,17 +699,18 @@ def validate_sanitized_files(files: Mapping[str, bytes]) -> dict[str, object]:
     metadata = parse_metadata(files.get("metadata.txt", b""))
     required_metadata = {
         "format": "amn2-full-recovery-v1-sanitized",
-        "source_format": "amn2-full-recovery-v1",
         "sanitized_fixture": "true",
         "production_secrets": "false",
         "service_start_allowed": "false",
         "network_listener_allowed": "false",
     }
-    expected_metadata_keys = set(required_metadata) | {"source_overlay"}
+    expected_metadata_keys = set(required_metadata) | {"source_format", "source_overlay"}
     if set(metadata) != expected_metadata_keys or any(
         metadata.get(key) != value for key, value in required_metadata.items()
     ):
         raise VerificationError("sanitized fixture metadata guard failed")
+    if metadata.get("source_format") not in {FORMAT_V1, FORMAT_V2}:
+        raise VerificationError("sanitized fixture source format is unsupported")
     source_overlay = metadata["source_overlay"]
     if not re.fullmatch(r"[0-9a-f]{7,40}", source_overlay):
         raise VerificationError("sanitized source overlay marker is invalid")
@@ -702,6 +824,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     encrypted.add_argument("--expected-sha256", required=True)
     encrypted.add_argument("--sanitized-output", type=Path, required=True)
     encrypted.add_argument("--report-output", type=Path, required=True)
+    encrypted.add_argument("--require-format", choices=(FORMAT_V1, FORMAT_V2))
+    encrypted.add_argument("--expected-source-archive-sha256")
 
     hybrid = subparsers.add_parser("verify-hybrid")
     hybrid.add_argument("--bundle", type=Path, required=True)
@@ -709,6 +833,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     hybrid.add_argument("--expected-sha256", required=True)
     hybrid.add_argument("--sanitized-output", type=Path, required=True)
     hybrid.add_argument("--report-output", type=Path, required=True)
+    hybrid.add_argument("--require-format", choices=(FORMAT_V1, FORMAT_V2))
+    hybrid.add_argument("--expected-source-archive-sha256")
 
     sanitized = subparsers.add_parser("verify-sanitized")
     sanitized.add_argument("--bundle", type=Path, required=True)
@@ -724,6 +850,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.key_file,
                 args.expected_sha256,
                 args.sanitized_output,
+                required_format=args.require_format,
+                expected_source_archive_sha256=args.expected_source_archive_sha256,
             )
         elif args.command == "verify-hybrid":
             report = verify_hybrid_bundle(
@@ -731,6 +859,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.private_key_file,
                 args.expected_sha256,
                 args.sanitized_output,
+                required_format=args.require_format,
+                expected_source_archive_sha256=args.expected_source_archive_sha256,
             )
         else:
             report = verify_sanitized_bundle(
