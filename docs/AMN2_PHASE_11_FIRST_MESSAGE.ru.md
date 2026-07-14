@@ -1,5 +1,23 @@
 # AMN2 Phase 11 First Message
 
+## Continuation override 2026-07-14
+
+Для продолжения уже начатой Phase 11 сначала прочитать
+`docs/AMN2_PHASE_11_CURRENT_PRIORITY_PLAN.ru.md` и первый блок
+`docs/PROJECT_STATUS_CURRENT.ru.md`. Текущий AMN2 source/production overlay —
+`801f8c3`, а не исходный entry baseline `3c91601`.
+
+`TELEGRAM-001`, решение `TELEGRAM-002`, `OPS-001`, `RECOVERY-001` и аудит
+второго VPS закрыты. Persistent bot остаётся inactive/disabled. Старый
+recovery fallback сохранён sealed. Чистый второй VPS удерживается временно для
+`RESTORE-001A`, не считается независимым DR и не нужен текущему production P0.
+
+Текущее первое действие без polling, restore apply и provider mutation:
+
+```text
+GPT-5.6 SOL -> REVIEW_PHASE11_RESTORE_001A_CANONICAL_FULL_SECRET_DISPOSABLE_REHEARSAL_GATE
+```
+
 Этот текст отправляется целиком первым сообщением в новом task того же проекта.
 
 ---

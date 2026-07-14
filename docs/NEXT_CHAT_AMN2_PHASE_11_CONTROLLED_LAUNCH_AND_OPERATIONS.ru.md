@@ -1,5 +1,23 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Current continuation override 2026-07-14
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+amn2_source=codex-vps-test-prep|801f8c3|origin_sync
+production_overlay=801f8c3
+telegram_001=completed_pass
+telegram_002=hold_disabled_go_local_hardening
+ops_001=completed_healthy
+recovery_001=retain_old_fallback_until_restore_001a
+second_vps=clean_ssh_only|keep_temporarily_for_restore_001a|independent_dr_false
+next=REVIEW_PHASE11_RESTORE_001A_CANONICAL_FULL_SECRET_DISPOSABLE_REHEARSAL_GATE
+```
+
+Актуальный план по критичности:
+`docs/AMN2_PHASE_11_CURRENT_PRIORITY_PLAN.ru.md`. Нижележащий original handoff
+с `3c91601` сохранён как entry history и не должен переопределять этот блок.
+
 Начать сообщением:
 
 ```text

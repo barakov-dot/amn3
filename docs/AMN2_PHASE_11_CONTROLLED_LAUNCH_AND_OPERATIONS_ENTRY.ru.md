@@ -1,5 +1,14 @@
 # AMN2 Phase 11 Controlled Launch and Operations Entry
 
+## Current execution override 2026-07-14
+
+Текущий исполняемый порядок после закрытия первой P0 цепочки находится в
+`docs/AMN2_PHASE_11_CURRENT_PRIORITY_PLAN.ru.md`. Production overlay и AMN2
+source сейчас `801f8c3`. Следующий review-only critical action —
+`PHASE11-RESTORE-001A` canonical full-secret disposable rehearsal gate;
+persistent bot остаётся disabled до отдельного `TELEGRAM-002A` hardening и
+последующего exact activation gate.
+
 Дата: 2026-07-14.
 
 ## Назначение

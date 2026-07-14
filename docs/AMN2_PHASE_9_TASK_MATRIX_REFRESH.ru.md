@@ -12,6 +12,7 @@ phase11_second_vps_independent_dr=false|same_provider
 phase11_second_vps_retire=after_restore_and_cleanup_or_before_unapproved_renewal
 phase11_second_vps_provider_effect=none
 phase11_second_vps_next=REVIEW_PHASE11_RESTORE_001A_CANONICAL_FULL_SECRET_DISPOSABLE_REHEARSAL_GATE
+phase11_current_priority_plan=docs/AMN2_PHASE_11_CURRENT_PRIORITY_PLAN.ru.md
 phase11_second_vps_evidence=research/amn2/phase-11-second-vps-retention-audit-after-p0-2026-07-14.md
 ```
 
