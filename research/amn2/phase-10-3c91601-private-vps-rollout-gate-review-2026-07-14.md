@@ -2,7 +2,7 @@
 
 Date: 2026-07-14.
 
-Decision: `APPROVE-CONDITIONAL-AWAITING-EXACT-LIVE-PHRASE`.
+Decision: `APPROVED-CONSUMED-COMPLETED-PASS`.
 
 This review records the exact upload, source snapshot, clone-DB migration,
 loopback smoke and rollback boundary. It did not contact the VPS, upload or
@@ -175,5 +175,6 @@ firewall/TLS/reverse-proxy changes, reboot and provider actions remain closed.
 APPROVE PHASE10_3C91601_PRIVATE_VPS_SOURCE_OVERLAY_UPLOAD_SNAPSHOT_CLONE_DB_MIGRATION_AND_WEB_ACTIVATION_WITH_ROLLBACK
 ```
 
-Without that exact phrase this decision remains review-only. No live upload,
-apply, migration or service action is authorized by this document.
+The exact phrase was received and consumed. Rollout completed on successful
+run `20260714T101632Z` after one verified automatic rollback. Result evidence:
+`research/amn2/phase-10-3c91601-private-vps-rollout-2026-07-14.md`.

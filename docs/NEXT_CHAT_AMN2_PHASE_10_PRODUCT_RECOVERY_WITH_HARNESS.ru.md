@@ -1,6 +1,28 @@
 # Следующий чат: AMN2 Phase 10 Product Recovery With Harness
 
-## 3c91601 exact rollout scope override 2026-07-14
+## 3c91601 private VPS rollout completed 2026-07-14
+
+Private package применён: production overlay теперь `3c91601`. Первый attempt
+безопасно откатился до production migration из-за слишком широкого локального
+evidence scan; второй run прошёл snapshot, clone migration/API smoke, exact
+production migration и web activation. AWG не останавливался и не
+перезапускался.
+
+```text
+rollout_status=completed_pass_with_verified_automatic_rollback
+successful_run=20260714T101632Z
+schema=3_new_tables|5_new_indexes|new_rows_zero|existing_rows_unchanged
+production_api_smoke=false
+web=active_enabled_http_200|downtime_55s
+awg=running_restart_0|12_peers|peer_set_unchanged
+bot=inactive_disabled
+rollback=verified|/root/amn2-rollbacks/3c91601-20260714T101632Z
+traffic=5s_zero_delta|latest_handshake_2026-07-13T21:44:30Z
+next_command=GPT-5.6_SOL -> REVIEW_PHASE10_3C91601_POST_DEPLOY_ACCEPTANCE_AND_CLOSEOUT_READINESS
+evidence=research/amn2/phase-10-3c91601-private-vps-rollout-2026-07-14.md
+```
+
+## 3c91601 exact rollout scope consumed 2026-07-14
 
 Exact gate review завершён без обращения к VPS. Разрешённый после отдельной
 точной фразы порядок: checksum-bound upload, tracked-source и SQLite snapshot,
@@ -8,22 +30,21 @@ Exact gate review завершён без обращения к VPS. Разре�
 затем активация web с автоматическим rollback. Production API smoke запрещён.
 
 ```text
-scope_status=reviewed_recorded_awaiting_exact_live_phrase
+scope_status=approved_consumed_completed_pass
 schema_delta=3_new_tables|5_new_indexes|new_rows_zero|existing_rows_unchanged
 runtime_invariant=amnezia_awg2_never_stop_or_restart|web_only_brief_stop|bot_inactive_disabled
 clone_only_writes=server_sync|temporary_api_tokens|read_audit
 scope_tests=harness_passed|scoped_20_passed|root_43_passed|diff_check_passed
-live_effect=false|vps_not_contacted|services_unchanged
+live_effect=source_applied|schema_migrated|web_active|awg_unchanged
 exact_phrase=APPROVE PHASE10_3C91601_PRIVATE_VPS_SOURCE_OVERLAY_UPLOAD_SNAPSHOT_CLONE_DB_MIGRATION_AND_WEB_ACTIVATION_WITH_ROLLBACK
 evidence=research/amn2/phase-10-3c91601-private-vps-rollout-gate-review-2026-07-14.md
 ```
 
 ## 3c91601 private VPS package override 2026-07-14
 
-Authoritative AMN2 source `3c91601` совпадает с origin и опережает production
-overlay `1c7fb78` на девять commits. Private package собран через `git archive`,
-проверен по exact entries/checksums/bindings/secret boundaries и протестирован
-из extracted payload. Package не загружался и production не менялся.
+Authoritative AMN2 source `3c91601` совпадает с origin. Private package собран
+через `git archive`, проверен по exact entries/checksums/bindings/secret
+boundaries, протестирован из extracted payload и теперь применён на VPS.
 
 ```text
 package=dist/amn2-vps-update-and-smoke-kit-3c91601.zip
@@ -32,17 +53,16 @@ source_sha256=5AD92A3A9D944825FEFDFEB4D56BDDBBB05390036E19E5AD197288C73812B0CB
 tests=focused_237_passed_1_warning|full_870_passed_1_skipped_1_warning|tooling_23_passed|root_43_passed
 review=passed|required_missing_0|forbidden_0|deleted_paths_0|secret_literal_files_0
 harness=passed|all_stop_lines_false
-live_upload=false
-live_apply=false
-scope_record=completed_reviewed_awaiting_exact_live_phrase
-next_command=AWAIT_EXACT_APPROVAL_OR_STOP
+live_upload=completed
+live_apply=completed_verified
+scope_record=completed_consumed
+next_command=REVIEW_PHASE10_3C91601_POST_DEPLOY_ACCEPTANCE_AND_CLOSEOUT_READINESS
 evidence=research/amn2/phase-10-3c91601-vps-package-prep-2026-07-14.md
 ```
 
-Следующий gate сначала работает с source/SQLite snapshots и clone DB. API
-loopback smoke пишет временные token/audit rows, поэтому production DB smoke,
-web restart, cascade revoke и любые peer/config действия не разрешены текущим
-package prep.
+Gate завершён через source/SQLite snapshots и clone DB. API loopback smoke
+писал временные token/audit rows только в clone; production DB smoke, cascade
+revoke и любые peer/config действия не выполнялись.
 
 ## Canonical hybrid recovery replacement override 2026-07-14
 
