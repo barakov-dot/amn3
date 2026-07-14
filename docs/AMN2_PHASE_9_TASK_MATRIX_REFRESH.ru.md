@@ -1,5 +1,19 @@
 # AMN2 Phase 9 task matrix refresh
 
+## Phase 11 801f8c3 transient Telegram smoke result override 2026-07-14
+
+```text
+phase11_telegram_001_smoke=completed_pass|run_20260714T174239Z
+phase11_telegram_001_approval=consumed
+phase11_telegram_001_result=first_configured_admin_exact_start|one_response|backlog_0_1_0
+phase11_telegram_001_data=production_unchanged|clone_only|integrity_ok|fk_0
+phase11_telegram_001_runtime=transient_stopped_collected|clone_removed|regular_bot_inactive_disabled
+phase11_telegram_001_awg=never_stopped_restarted_recreated|restart_0|peers_12|set_unchanged
+phase11_telegram_001_persistent_bot=false|separate_decision_required
+phase11_telegram_001_next=REVIEW_PHASE11_TELEGRAM_002_PERSISTENT_PRIVATE_BOT_SERVICE_DECISION
+phase11_telegram_001_smoke_evidence=research/amn2/phase-11-801f8c3-private-telegram-transient-smoke-2026-07-14.md
+```
+
 ## Phase 11 801f8c3 transient Telegram smoke gate override 2026-07-14
 
 ```text
