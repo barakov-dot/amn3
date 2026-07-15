@@ -1,15 +1,16 @@
 # AMN2 Phase 11 Controlled Launch and Operations Entry
 
-## Current execution override 2026-07-14
+## Current execution override 2026-07-15
 
-Текущий исполняемый порядок после закрытия первой P0 цепочки находится в
+Текущий исполняемый порядок после успешного `PHASE11-RESTORE-001A` находится в
 `docs/AMN2_PHASE_11_CURRENT_PRIORITY_PLAN.ru.md`. Production overlay и AMN2
-source сейчас `801f8c3`. Следующий review-only critical action —
-`PHASE11-RESTORE-001A` canonical full-secret disposable rehearsal gate;
-persistent bot остаётся disabled до отдельного `TELEGRAM-002A` hardening и
-последующего exact activation gate.
+production source остаются `801f8c3`. Canonical full-secret disposable rehearsal
+прошёл; mandatory cleanup вернул второй VPS в clean SSH-only state, production
+AWG остался running/restart 0/12 peers. Следующие critical решения — отдельные
+retirement gates для старого fallback и второго VPS. Persistent bot остаётся
+disabled до `TELEGRAM-002A` hardening и последующего exact activation gate.
 
-Дата: 2026-07-14.
+Дата: 2026-07-15.
 
 ## Назначение
 

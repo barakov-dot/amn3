@@ -1,8 +1,7 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-15 после fail-closed attempt 4, sanitized OCI gzip layer
-diagnosis и double-binding TDD fix. Attempts 1-4 не создали ciphertext;
-approval остаётся not consumed.
+Актуально: 2026-07-15 после успешного `PHASE11-RESTORE-001A` full-secret
+trusted disposable rehearsal, mandatory cleanup и production re-audits.
 
 Этот файл задаёт текущий исполняемый порядок Phase 11. Полная продуктовая
 карта и exclusions остаются в
@@ -17,12 +16,13 @@ active_phase=Phase 11 Controlled Launch and Operations
 amn2_source=codex-vps-test-prep|6abc620|origin_sync
 production_overlay=801f8c3
 restore_001a_source_pin=801f8c3|approval_scope_unchanged
+restore_001a=completed_pass|approval_consumed
 web=active_enabled_loopback_only
 regular_bot=inactive_disabled
 write_gates=false_false
 awg=running_restart_0_peers_12_set_unchanged
-old_recovery_fallback=retained_sealed_conditionally
-second_vps=clean_ssh_only|temporary_restore_001a_role
+old_recovery_fallback=retained_sealed|retirement_decision_unblocked
+second_vps=clean_ssh_only|restore_role_complete|safe_retirement_gate_recommended
 ```
 
 ## Закрыто в P0
@@ -32,16 +32,22 @@ second_vps=clean_ssh_only|temporary_restore_001a_role
 | Критично | `PHASE11-TELEGRAM-001` | transient first-admin exact `/start` smoke passed; one response; production DB unchanged; cleanup passed |
 | Критично | `PHASE11-TELEGRAM-002` | persistent bot activation held; regular service remains disabled; local hardening follow-up defined |
 | Критично | `PHASE11-OPS-001` | bounded runtime/recovery snapshot healthy; no failed units or AMN2/Docker error rows; AWG invariant passed |
-| Критично | `PHASE11-RECOVERY-001` | old bundle/key retained sealed until canonical full-secret restore rehearsal; no deletion |
-| Очень важно | second VPS retention audit | clean SSH-only host retained temporarily for `RESTORE-001A`; not production DR or long-term fleet |
+| Критично | `PHASE11-RESTORE-001A` | canonical v2 full-secret disposable restore passed; isolated AWG12 and loopback web/DB verified; cleanup and production re-audits passed |
+| Критично | `PHASE11-RECOVERY-001` | old bundle/key retirement decision unblocked; destructive deletion remains a separate exact gate |
+| Очень важно | second VPS retention audit | restore role complete; host clean SSH-only; safe provider retirement gate recommended |
 
-## P0 — критично, выполнять следующим
+## P0/P1 — критично, выполнять следующим
 
 ### C1. `PHASE11-RESTORE-001A` canonical full-secret disposable rehearsal
 
 Состояние:
-`attempt-4-failed-closed|oci-gzip-double-binding-fix-verified|security-docs-commit-push-then-retry`.
-Exact approval получен, но не consumed. Найденный Medium blocker
+`completed-pass|mandatory-cleanup-pass|production-unchanged`.
+Exact approval consumed. Canonical v2 static verification, in-memory plaintext
+stream, isolated AWG12, loopback/outbound-denied web, unchanged database и
+disabled bot contracts прошли. Второй VPS после cleanup снова clean SSH-only;
+production overlay `801f8c3`, web/DB и AWG invariants прошли re-audit.
+
+История fixes, сохранившая fail-closed binding: найденный Medium blocker
 `P11-LEGACY-IMAGE-CONFIG-UNBOUND-001` исправлен: runtime-complete v2
 связывает canonical executable Config SHA-256, `amd64/linux`, RootFS DiffIDs
 и фактические layer bytes. Проверка: runtime 15 passed, recovery scoped 41
@@ -90,8 +96,10 @@ path tamper и expansion fail closed. До review-fix: RED 3 failed, focused 8,
 recovery 56, root 85. Initial security review нашёл uncaught `zlib.error`
 и недостаточный cumulative test; оба исправлены через отдельный RED и настоящий
 two-layer case. Итог: focused 9, recovery 57, root 86; rereview `0/0/0`, ready
-yes. Cleanup/re-audits прошли, AWG untouched. Следующий порядок — docs/status
-commit/push и approved retry.
+yes. Cleanup/re-audits прошли, AWG untouched. Последующие live diagnostics
+добавили строгие compatibility contracts для canonical tar root, transient
+containerd loopback, legacy runtime image ID, IPv6 link-local AWG address и
+canonical systemd CIDR properties. Финальный full-secret run прошёл.
 
 - использует чистый второй VPS как trusted disposable environment;
 - доказывает полный canonical offline restore path;
@@ -117,14 +125,14 @@ Local product/engineering slice:
 
 Local source завершён и pushed в `6abc620`: bot `/start`, web login/dashboard
 используют один canonical PNG; security scan clean. Production всё ещё
-`801f8c3`, поэтому новый logo не deployed. Не менять production overlay до
-завершения или явного пересмотра pin `RESTORE-001A`. После него подготовить
-отдельный package/rollout gate без bot start/enable. Telegram profile photo —
-отдельная live identity mutation и требует другого exact gate.
+`801f8c3`, поэтому новый logo не deployed. `RESTORE-001A` завершён; следующим
+отдельно подготовить package/rollout gate без bot start/enable. Telegram profile
+photo — отдельная live identity mutation и требует другого exact gate.
 
 ### C3. Recovery and second-VPS retirement gates
 
-Только после `RESTORE-001A=pass`:
+`RESTORE-001A=pass`, поэтому следующие решения разблокированы, но ещё не
+исполнены:
 
 1. Exact destructive gate на удаление двух старых ciphertext copies, receipts
    и старого symmetric key.
@@ -138,8 +146,8 @@ Canonical ciphertext/key и production SSH binding не трогать.
 ### C4. Billing cutoff visibility
 
 До provider renewal получить точную дату/стоимость read-only из кабинета или
-от оператора. Если `RESTORE-001A` не согласован до cutoff, не продлевать второй
-VPS молча: подготовить retirement либо явное one-cycle extension decision.
+от оператора. Основная restore-причина держать второй VPS снята; не продлевать
+его молча — подготовить exact retirement либо явное one-cycle extension decision.
 
 ## P1 — очень важно после критического recovery/bot пути
 
@@ -191,27 +199,29 @@ gate. Не использовать approvals из Phase 10 или уже consum
 Одиночная:
 
 ```text
-GPT-5.6 SOL -> COMMIT_PUSH_PHASE11_RESTORE_001A_OCI_CONFIG_PATH_COMPATIBILITY_FIX
+GPT-5.6 SOL -> SEAL_PHASE11_RESTORE_001A_PASS_EVIDENCE_STATUS_COMMIT_AND_PUSH
 ```
 
 Двойная:
 
 ```text
-GPT-5.6 SOL -> COMMIT_PUSH_PHASE11_RESTORE_001A_OCI_CONFIG_PATH_COMPATIBILITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A
+GPT-5.6 SOL -> SEAL_PHASE11_RESTORE_001A_PASS_EVIDENCE_STATUS_COMMIT_AND_PUSH -> DECIDE_OLD_FALLBACK_RETIREMENT_GATE
 ```
 
 Тройная:
 
 ```text
-GPT-5.6 SOL -> COMMIT_PUSH_PHASE11_RESTORE_001A_OCI_CONFIG_PATH_COMPATIBILITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_AND_MANDATORY_CLEANUP
+GPT-5.6 SOL -> SEAL_PHASE11_RESTORE_001A_PASS_EVIDENCE_STATUS_COMMIT_AND_PUSH -> DECIDE_OLD_FALLBACK_RETIREMENT_GATE -> PREPARE_SECOND_VPS_SAFE_RETIREMENT_GATE
 ```
 
 Четверная:
 
-    GPT-5.6 SOL -> COMMIT_PUSH_PHASE11_RESTORE_001A_OCI_CONFIG_PATH_COMPATIBILITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_AND_MANDATORY_CLEANUP -> PRODUCTION_AWG_REAUDIT
+```text
+GPT-5.6 SOL -> SEAL_PHASE11_RESTORE_001A_PASS_EVIDENCE_STATUS_COMMIT_AND_PUSH -> DECIDE_OLD_FALLBACK_RETIREMENT_GATE -> PREPARE_SECOND_VPS_SAFE_RETIREMENT_GATE -> PREPARE_6ABC620_CANONICAL_LOGO_PRIVATE_OVERLAY_ROLLOUT_GATE
+```
 
 Более — рекомендовано:
 
 ```text
-GPT-5.6 SOL -> COMMIT_PUSH_PHASE11_RESTORE_001A_OCI_CONFIG_PATH_COMPATIBILITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_AND_MANDATORY_CLEANUP -> PRODUCTION_AWG_REAUDIT -> DECIDE_OLD_FALLBACK_AND_SECOND_VPS_SAFE_RETIREMENT_GATES -> PREPARE_6ABC620_CANONICAL_LOGO_PRIVATE_OVERLAY_ROLLOUT_GATE -> IMPLEMENT_TELEGRAM_002A_LOCAL_PERSISTENT_ADMISSION_AND_UNIT_HARDENING
+GPT-5.6 SOL -> SEAL_PHASE11_RESTORE_001A_PASS_EVIDENCE_STATUS_COMMIT_AND_PUSH -> DECIDE_OLD_FALLBACK_RETIREMENT_GATE -> PREPARE_SECOND_VPS_SAFE_RETIREMENT_GATE -> PREPARE_6ABC620_CANONICAL_LOGO_PRIVATE_OVERLAY_ROLLOUT_GATE -> IMPLEMENT_TELEGRAM_002A_LOCAL_PERSISTENT_ADMISSION_AND_UNIT_HARDENING -> RUN_SCOPED_TESTS_DIFF_AND_SECURITY_REVIEW -> SYNC_STATUS_COMMIT_AND_PUSH
 ```
