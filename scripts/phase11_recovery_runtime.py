@@ -345,6 +345,16 @@ def _normalize_archive_name(value: str) -> str:
     return path.as_posix()
 
 
+def _image_config_digest_from_archive_name(value: str) -> str:
+    legacy = re.fullmatch(r"([0-9a-f]{64})\.json", value)
+    if legacy is not None:
+        return legacy.group(1)
+    oci = re.fullmatch(r"blobs/sha256/([0-9a-f]{64})", value)
+    if oci is not None:
+        return oci.group(1)
+    raise RuntimeContractError("image archive config digest is invalid")
+
+
 def validate_image_archive(
     archive_bytes: bytes,
     expected_image_id: str,
@@ -396,9 +406,9 @@ def validate_image_archive(
         raise RuntimeContractError("image archive manifest is invalid")
     row = manifest[0]
     config_name = _normalize_archive_name(str(row.get("Config") or ""))
-    if not re.fullmatch(r"[0-9a-f]{64}\.json", config_name) or config_name not in files:
+    expected_config_digest = _image_config_digest_from_archive_name(config_name)
+    if config_name not in files:
         raise RuntimeContractError("image archive config digest is invalid")
-    expected_config_digest = config_name.removesuffix(".json")
     actual_digest = hashlib.sha256(files[config_name]).hexdigest()
     if actual_digest != expected_config_digest:
         raise RuntimeContractError("image archive config digest mismatch")

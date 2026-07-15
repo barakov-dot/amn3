@@ -95,9 +95,11 @@ def recovery_files(*, malformed_metadata: bool = False) -> dict[str, bytes]:
     return files
 
 
-def runtime_complete_recovery_files() -> dict[str, bytes]:
+def runtime_complete_recovery_files(
+    *, archive_layout: str = "legacy"
+) -> dict[str, bytes]:
     files = recovery_files()
-    archive, image_id = docker_image_archive()
+    archive, image_id = docker_image_archive(archive_layout=archive_layout)
     diff_ids = docker_image_diff_ids(archive)
     inspect_bytes, _fixture_image_id = docker_inspect()
     inspect_rows = json.loads(inspect_bytes)
@@ -275,6 +277,20 @@ def test_restore_gate_can_require_runtime_complete_v2_and_source_digest() -> Non
 
     assert report["format"] == "amn2-full-recovery-v2"
     assert report["source_archive"]["sha256"] == source_digest
+
+
+def test_restore_gate_accepts_oci_blob_image_archive() -> None:
+    files = runtime_complete_recovery_files(archive_layout="oci")
+    source_digest = hashlib.sha256(files["host/source.tar.gz"]).hexdigest()
+
+    report = validate_recovery_files(
+        files,
+        required_format="amn2-full-recovery-v2",
+        expected_source_archive_sha256=source_digest,
+    )
+
+    assert report["runtime_contract"] == "passed"
+    assert report["image_archive"]["layer_count"] == 1
 
 
 def test_restore_gate_rejects_changed_executable_config_with_same_rootfs() -> None:

@@ -160,6 +160,34 @@ def test_runtime_complete_writer_output_passes_v2_verifier(tmp_path: Path) -> No
     assert report["image_archive"]["runtime_image_id"] == image_id
 
 
+def test_runtime_complete_writer_accepts_oci_blob_image_archive(tmp_path: Path) -> None:
+    image_archive, image_id = docker_image_archive(archive_layout="oci")
+    diff_ids = docker_image_diff_ids(image_archive)
+    inspect_bytes, _fixture_image_id = docker_inspect()
+    inspect_rows = json.loads(inspect_bytes)
+    inspect_rows[0]["Image"] = image_id
+    runtime_contract = normalize_runtime_contract(
+        json.dumps(inspect_rows).encode(),
+        image_id,
+        docker_image_inspect(image_id, diff_ids),
+    )
+    source_bundle = source_archive()
+
+    files = assemble_runtime_recovery_files(
+        source_files(tmp_path),
+        runtime_contract=runtime_contract,
+        image_archive=image_archive,
+        source_archive=source_bundle,
+        expected_source_archive_sha256=hashlib.sha256(source_bundle).hexdigest(),
+        created_utc="2026-07-14T00:00:00Z",
+        source_overlay="deadbee",
+        container_name="amneziya-awg2",
+        container_image_id=image_id,
+    )
+
+    assert validate_recovery_files(files)["runtime_contract"] == "passed"
+
+
 def test_collect_runtime_files_uses_read_only_inspect_and_image_save(monkeypatch) -> None:
     image_archive, _config_image_id = docker_image_archive(repo_tags=[])
     image_id = "sha256:" + "d" * 64

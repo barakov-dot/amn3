@@ -1,4 +1,21 @@
-# Текущий override 2026-07-15: canonical logo source integrated; RESTORE-001A attempt 1 failed closed
+# Текущий override 2026-07-15: RESTORE-001A OCI Config-path fix verified and clean-scanned
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+phase11_restore_001a_source_pin=801f8c3|approval_scope_unchanged
+phase11_restore_001a_diagnosis=production_docker_save_oci_blob_layout|config_and_6_layers|safe_self_bound|cleanup_passed
+phase11_restore_001a_root_cause=validator_legacy_config_filename_only|correct_oci_blob_rejected_before_identity_checks
+phase11_restore_001a_fix=exact_legacy_or_oci_config_path_allowlist|no_fallback|all_existing_hash_platform_rootfs_layer_checks_preserved
+phase11_restore_001a_tdd=red_3_failed_expected|green_3_passed|recovery_44_passed|root_73_passed|compile_passed
+phase11_restore_001a_security=complete_coverage|full_file_receipts_1_of_1|surfaces_4|sealed_artifacts_9|findings_0|deferred_0
+phase11_restore_001a_security_snapshot=b051261c4bf7061c72ffcd31b1f04d9da3b77bc3de4e54dfbbd325055dc69cc2
+phase11_restore_001a_approval=received|not_consumed
+phase11_restore_001a_live_effect=diagnostic_read_only|bundle_false|secret_transfer_false|staging_mutation_false|services_unchanged|awg_untouched
+phase11_restore_001a_next=COMMIT_PUSH_THEN_RETRY_ALREADY_APPROVED_801F8C3_GATE
+phase11_restore_001a_oci_fix_evidence=research/amn2/phase-11-restore-001a-oci-config-path-compatibility-fix-2026-07-15.md
+```
+
+# Предыдущий override 2026-07-15: canonical logo source integrated; RESTORE-001A attempt 1 failed closed
 
 ```text
 active_phase=Phase 11 Controlled Launch and Operations

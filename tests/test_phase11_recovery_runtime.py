@@ -102,6 +102,7 @@ def docker_image_archive(
     runtime_config: dict[str, object] | None = None,
     architecture: str = "amd64",
     image_os: str = "linux",
+    archive_layout: str = "legacy",
 ) -> tuple[bytes, str]:
     layer = b"synthetic-layer"
     layer_digest = hashlib.sha256(layer).hexdigest()
@@ -120,12 +121,20 @@ def docker_image_archive(
     ).encode()
     digest = hashlib.sha256(config).hexdigest()
     image_id = "sha256:" + digest
+    if archive_layout == "legacy":
+        config_name = f"{digest}.json"
+        layer_name = "layer/layer.tar"
+    elif archive_layout == "oci":
+        config_name = f"blobs/sha256/{digest}"
+        layer_name = f"blobs/sha256/{layer_digest}"
+    else:
+        raise ValueError("unsupported synthetic image archive layout")
     manifest = json.dumps(
         [
             {
-                "Config": f"{digest}.json",
+                "Config": config_name,
                 "RepoTags": [] if repo_tags is None else repo_tags,
-                "Layers": ["layer/layer.tar"],
+                "Layers": [layer_name],
             }
         ],
         separators=(",", ":"),
@@ -134,8 +143,8 @@ def docker_image_archive(
     with tarfile.open(fileobj=output, mode="w") as archive:
         for name, value in (
             ("manifest.json", manifest),
-            (f"{digest}.json", config),
-            ("layer/layer.tar", layer),
+            (config_name, config),
+            (layer_name, layer),
         ):
             info = tarfile.TarInfo(name)
             info.size = len(value)
@@ -272,6 +281,23 @@ def test_validate_image_archive_binds_config_digest_and_rootfs() -> None:
     assert report["image_reference"] == "amnezia-awg2:local"
     assert report["repo_tags"] == []
     assert report["image_config_contract"] == "passed"
+    assert report["layer_count"] == 1
+
+
+def test_validate_image_archive_accepts_oci_blob_config_and_layer_paths() -> None:
+    archive, image_id = docker_image_archive(archive_layout="oci")
+
+    report = validate_image_archive(
+        archive,
+        image_id,
+        "amnezia-awg2:local",
+        docker_image_diff_ids(archive),
+        docker_image_config_sha256(),
+        "amd64",
+        "linux",
+    )
+
+    assert report["config_digest"] == image_id
     assert report["layer_count"] == 1
 
 

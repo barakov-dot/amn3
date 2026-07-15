@@ -202,3 +202,27 @@ documented, committed and pushed.
 AMN2 source later advanced to `6abc620` only for local canonical logo assets.
 Production and this approved restore transaction remain pinned to `801f8c3`;
 the logo commit does not expand or consume the restore approval.
+
+## 2026-07-15 OCI compatibility fix addendum
+
+The sanitized diagnostic confirmed one safe OCI Config blob and six safe OCI
+layer blobs. There were no duplicate/unsafe archive members; Config self-hash,
+canonical executable Config, architecture and OS all matched production, and
+the diagnostic temp directory was removed.
+
+The validator now accepts only the exact legacy `<64hex>.json` or exact OCI
+`blobs/sha256/<64hex>` Config form. It still requires the selected regular file
+to self-hash to the encoded digest and preserves executable Config,
+architecture/OS, RootFS DiffID and every layer-byte binding.
+
+```text
+tdd_red=3_failed_expected
+tdd_green=3_passed
+recovery_scope=44_passed
+canonical_root_inventory=73_passed
+security_scan=complete|findings_0
+approval=received|not_consumed
+```
+
+After docs/status, commit and push, the same exact `801f8c3` transaction may be
+retried. No new or expanded approval is implied.

@@ -1,9 +1,8 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-15 после source-only интеграции canonical logo в `6abc620`
-и fail-closed attempt 1 `PHASE11-RESTORE-001A` на несовпадении допустимого
-формата пути image Config. Ciphertext/secret transfer не начинались, cleanup и
-production re-audits passed.
+Актуально: 2026-07-15 после подтверждения OCI archive-layout root cause,
+минимального TDD fix, полного canonical root regression и clean security scan.
+Attempt 1 не создал ciphertext; approval остаётся not consumed.
 
 Этот файл задаёт текущий исполняемый порядок Phase 11. Полная продуктовая
 карта и exclusions остаются в
@@ -40,8 +39,8 @@ second_vps=clean_ssh_only|temporary_restore_001a_role
 
 ### C1. `PHASE11-RESTORE-001A` canonical full-secret disposable rehearsal
 
-Состояние: `attempt-1-failed-closed|diagnosis-pending`. Exact approval получен,
-но не consumed. Найденный Medium blocker
+Состояние: `attempt-1-failed-closed|oci-fix-verified|commit-push-then-retry`.
+Exact approval получен, но не consumed. Найденный Medium blocker
 `P11-LEGACY-IMAGE-CONFIG-UNBOUND-001` исправлен: runtime-complete v2
 связывает canonical executable Config SHA-256, `amd64/linux`, RootFS DiffIDs
 и фактические layer bytes. Проверка: runtime 15 passed, recovery scoped 41
@@ -50,13 +49,14 @@ security scan: complete coverage, 6/6 full-file receipts, 0 findings. Fix
 закоммичен/pushed в root/docs commit `280da45`.
 
 Attempt 1 writer остановился до создания ciphertext на
-`image archive config digest is invalid`. Failure-path cleanup прошёл; secret
-transfer, staging mutation и disposable restore не начинались. Fresh runtime
-contract и OPS health re-audits прошли, включая production AWG/service
-invariants. Следующий порядок: sanitized Config-path-shape diagnosis без raw
-path/config, RED test, минимальный fail-closed format fix, scoped/full tests,
-fresh diff/security review, docs/status, commit/push, затем retry в неизменном
-approved scope `801f8c3`.
+`image archive config digest is invalid`. Failure-path cleanup и production
+re-audits прошли. Sanitized diagnosis доказал safe OCI blob layout для Config
+и шести layers. Общий validator теперь принимает только exact legacy
+`<digest>.json` или OCI `blobs/sha256/<digest>`; Config self-hash, executable
+Config, platform, RootFS и layer bytes остаются bound. RED 3 failed, GREEN 3
+passed, recovery 44 passed, canonical root 73 passed. Clean scan: 1/1 full-file
+receipt, 4 surfaces, 9 sealed artifacts, 0 findings. Следующий порядок — этот
+docs/status commit, push, затем retry в неизменном approved scope `801f8c3`.
 
 - использует чистый второй VPS как trusted disposable environment;
 - доказывает полный canonical offline restore path;
@@ -156,27 +156,27 @@ gate. Не использовать approvals из Phase 10 или уже consum
 Одиночная:
 
 ```text
-GPT-5.6 SOL -> DIAGNOSE_PHASE11_RESTORE_001A_IMAGE_CONFIG_PATH_SHAPE_READ_ONLY_AND_SANITIZED
+GPT-5.6 SOL -> COMMIT_PUSH_PHASE11_RESTORE_001A_OCI_CONFIG_PATH_COMPATIBILITY_FIX
 ```
 
 Двойная:
 
 ```text
-GPT-5.6 SOL -> DIAGNOSE_PHASE11_RESTORE_001A_IMAGE_CONFIG_PATH_SHAPE_READ_ONLY_AND_SANITIZED -> ADD_RED_TEST_AND_IMPLEMENT_MINIMAL_FAIL_CLOSED_DOCKER_ARCHIVE_CONFIG_PATH_COMPATIBILITY
+GPT-5.6 SOL -> COMMIT_PUSH_PHASE11_RESTORE_001A_OCI_CONFIG_PATH_COMPATIBILITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A
 ```
 
 Тройная:
 
 ```text
-GPT-5.6 SOL -> DIAGNOSE_PHASE11_RESTORE_001A_IMAGE_CONFIG_PATH_SHAPE_READ_ONLY_AND_SANITIZED -> ADD_RED_TEST_AND_IMPLEMENT_MINIMAL_FAIL_CLOSED_DOCKER_ARCHIVE_CONFIG_PATH_COMPATIBILITY -> RUN_SCOPED_FULL_TESTS_DIFF_AND_CLEAN_SECURITY_RESCAN
+GPT-5.6 SOL -> COMMIT_PUSH_PHASE11_RESTORE_001A_OCI_CONFIG_PATH_COMPATIBILITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_AND_MANDATORY_CLEANUP
 ```
 
 Четверная:
 
-    GPT-5.6 SOL -> DIAGNOSE_PHASE11_RESTORE_001A_IMAGE_CONFIG_PATH_SHAPE_READ_ONLY_AND_SANITIZED -> ADD_RED_TEST_AND_IMPLEMENT_MINIMAL_FAIL_CLOSED_DOCKER_ARCHIVE_CONFIG_PATH_COMPATIBILITY -> RUN_SCOPED_FULL_TESTS_DIFF_AND_CLEAN_SECURITY_RESCAN -> SYNC_DOCS_STATUS_COMMIT_PUSH_AND_RETRY_APPROVED_RESTORE_001A
+    GPT-5.6 SOL -> COMMIT_PUSH_PHASE11_RESTORE_001A_OCI_CONFIG_PATH_COMPATIBILITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_AND_MANDATORY_CLEANUP -> PRODUCTION_AWG_REAUDIT
 
 Более — рекомендовано:
 
 ```text
-GPT-5.6 SOL -> DIAGNOSE_PHASE11_RESTORE_001A_IMAGE_CONFIG_PATH_SHAPE_READ_ONLY_AND_SANITIZED -> ADD_RED_TEST_AND_IMPLEMENT_MINIMAL_FAIL_CLOSED_DOCKER_ARCHIVE_CONFIG_PATH_COMPATIBILITY -> RUN_SCOPED_FULL_TESTS_DIFF_AND_CLEAN_SECURITY_RESCAN -> SYNC_DOCS_STATUS_COMMIT_PUSH_AND_RETRY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_MANDATORY_CLEANUP_AND_PRODUCTION_AWG_REAUDIT -> DECIDE_OLD_FALLBACK_AND_SECOND_VPS_SAFE_RETIREMENT_GATES -> PREPARE_6ABC620_CANONICAL_LOGO_PRIVATE_OVERLAY_ROLLOUT_GATE -> IMPLEMENT_TELEGRAM_002A_LOCAL_PERSISTENT_ADMISSION_AND_UNIT_HARDENING
+GPT-5.6 SOL -> COMMIT_PUSH_PHASE11_RESTORE_001A_OCI_CONFIG_PATH_COMPATIBILITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_AND_MANDATORY_CLEANUP -> PRODUCTION_AWG_REAUDIT -> DECIDE_OLD_FALLBACK_AND_SECOND_VPS_SAFE_RETIREMENT_GATES -> PREPARE_6ABC620_CANONICAL_LOGO_PRIVATE_OVERLAY_ROLLOUT_GATE -> IMPLEMENT_TELEGRAM_002A_LOCAL_PERSISTENT_ADMISSION_AND_UNIT_HARDENING
 ```

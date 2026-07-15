@@ -1,5 +1,23 @@
 # Текущий override 2026-07-15
 
+RESTORE-001A attempt 1 root cause is confirmed and fixed locally. A sanitized
+read-only production diagnostic proved that `docker image save` uses the safe
+OCI `blobs/sha256/<digest>` layout for Config and all six layers; duplicates,
+unsafe paths and Config/platform mismatches were absent, and production temp
+cleanup passed. The common validator had accepted only legacy `<digest>.json`.
+It now accepts exactly the legacy or OCI Config form while preserving path,
+self-hash, executable Config, amd64/linux, ordered RootFS DiffID and layer-byte
+checks. TDD: expected RED `3 failed`, GREEN `3 passed`; recovery scope `44
+passed`; canonical root inventory `73 passed`; compile/diff check passed. The
+sealed security diff scan has complete coverage, four surfaces, nine artifacts
+and zero findings. Evidence:
+`research/amn2/phase-11-restore-001a-oci-config-path-compatibility-fix-2026-07-15.md`.
+No bundle/secret transfer/staging mutation/service change occurred; AWG was
+untouched. Approval remains `received|not_consumed`, pinned to `801f8c3`.
+After this docs/status commit and push, retry the same exact approved gate.
+
+# Предыдущий override 2026-07-15
+
 The operator-supplied canonical bot/project logo is integrated local-source in
 AMN2 commit `6abc620 Replace canonical bot branding`, pushed to
 `origin/codex-vps-test-prep`. Bot `/start`, web login and dashboard now use the
