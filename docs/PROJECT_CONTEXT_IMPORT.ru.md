@@ -1,5 +1,29 @@
 # Текущий override 2026-07-15
 
+RESTORE-001A attempt 2 entered only the production bundle writer and stopped
+fail-closed before ciphertext creation because production `docker image save`
+preserves the one canonical local `RepoTags` value even when exporting by
+immutable image ID. Production private-run cleanup passed. Fresh runtime and
+OPS re-audits passed: overlay `801f8c3`, web healthy, bot inactive/disabled,
+database integrity OK, AWG running with restart count zero and the same
+12-peer set; Telegram API was not called. No secret transfer or staging
+mutation occurred, and approval remains `received|not_consumed`.
+
+The minimal compatibility fix accepts only `RepoTags=[]` or the exact singleton
+canonical expected reference. Foreign, additional and duplicate tags remain
+fail-closed. All Config-path/self-hash, executable Config, `amd64/linux`,
+ordered RootFS DiffID and layer-byte bindings remain unchanged. TDD: expected
+RED `3 failed`, GREEN acceptance/negative `6 passed`; recovery scope `48
+passed`; canonical root inventory `77 passed`; compile/diff checks passed.
+Independent security-focused review found zero Critical, Important or Minor
+issues and returned `Ready to merge: Yes`.
+Evidence:
+`research/amn2/phase-11-restore-001a-canonical-repotag-compatibility-fix-2026-07-15.md`.
+Next: docs/status commit/push, then retry the same exact approved gate pinned
+to `801f8c3`.
+
+# Предыдущий override 2026-07-15
+
 RESTORE-001A attempt 1 root cause is confirmed and fixed locally. A sanitized
 read-only production diagnostic proved that `docker image save` uses the safe
 OCI `blobs/sha256/<digest>` layout for Config and all six layers; duplicates,

@@ -23,6 +23,28 @@ This review did not contact production or staging, transfer a secret, create a
 recovery ciphertext, install a package, start a container/service, or perform
 restore apply. Production AWG was not stopped, restarted, recreated or changed.
 
+## 2026-07-15 attempt 2 fail-closed addendum
+
+After the OCI Config-path compatibility fix was committed and pushed as
+`bc67919`, attempt 2 entered only the production writer. It stopped fail-closed
+before ciphertext creation because the exported Docker manifest contained the
+single canonical `amnezia-awg2:local` RepoTag. `docker image save` preserves
+that tag even when invoked with the immutable image ID.
+
+Production private-run cleanup passed. Mandatory runtime and compact OPS
+re-audits passed: overlay `801f8c3`, web healthy, regular bot
+inactive/disabled, database integrity OK, AWG running with restart count zero
+and the unchanged 12-peer set; Telegram API was not called. No secret transfer
+or staging mutation occurred. Approval remains `received|not_consumed`.
+
+The minimal local fix accepts only an empty RepoTags list or the exact singleton
+expected canonical reference. It rejects foreign, additional and duplicated
+tags. Config path/self-hash, canonical executable Config, platform, ordered
+RootFS DiffIDs and every layer-byte digest remain bound. Regression evidence:
+RED 3 expected failures, GREEN 6 passed, recovery scope 48 passed and canonical
+root scope 77 passed. Current evidence:
+`research/amn2/phase-11-restore-001a-canonical-repotag-compatibility-fix-2026-07-15.md`.
+
 ## Why the existing canonical v1 is not sufficient
 
 The accepted `amn2-full-recovery-v1` authenticates and verifies the production

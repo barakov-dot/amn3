@@ -1,8 +1,8 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-15 после подтверждения OCI archive-layout root cause,
-минимального TDD fix, полного canonical root regression и clean security scan.
-Attempt 1 не создал ciphertext; approval остаётся not consumed.
+Актуально: 2026-07-15 после fail-closed attempt 2 и минимального canonical
+RepoTags compatibility fix. Attempts 1-2 не создали ciphertext; approval
+остаётся not consumed.
 
 Этот файл задаёт текущий исполняемый порядок Phase 11. Полная продуктовая
 карта и exclusions остаются в
@@ -39,7 +39,8 @@ second_vps=clean_ssh_only|temporary_restore_001a_role
 
 ### C1. `PHASE11-RESTORE-001A` canonical full-secret disposable rehearsal
 
-Состояние: `attempt-1-failed-closed|oci-fix-verified|commit-push-then-retry`.
+Состояние:
+`attempt-2-failed-closed|canonical-repotag-fix-verified|security-docs-commit-push-then-retry`.
 Exact approval получен, но не consumed. Найденный Medium blocker
 `P11-LEGACY-IMAGE-CONFIG-UNBOUND-001` исправлен: runtime-complete v2
 связывает canonical executable Config SHA-256, `amd64/linux`, RootFS DiffIDs
@@ -55,8 +56,20 @@ re-audits прошли. Sanitized diagnosis доказал safe OCI blob layout 
 `<digest>.json` или OCI `blobs/sha256/<digest>`; Config self-hash, executable
 Config, platform, RootFS и layer bytes остаются bound. RED 3 failed, GREEN 3
 passed, recovery 44 passed, canonical root 73 passed. Clean scan: 1/1 full-file
-receipt, 4 surfaces, 9 sealed artifacts, 0 findings. Следующий порядок — этот
-docs/status commit, push, затем retry в неизменном approved scope `801f8c3`.
+receipt, 4 surfaces, 9 sealed artifacts, 0 findings. OCI fix committed/pushed
+как `bc67919`.
+
+Attempt 2 затем дошёл только до writer и остановился до ciphertext на
+`immutable image archive unexpectedly contains repo tags`. Production
+`docker image save` сохраняет единственный canonical local tag даже при export
+по immutable image ID. Cleanup и обязательные runtime/OPS re-audits прошли;
+AWG running/restart 0/12 peers/same set. Минимальный fix принимает только
+`RepoTags=[]` или exact singleton ожидаемого canonical reference. Чужие,
+дополнительные и дублированные tags остаются fail-closed; все Config/platform/
+RootFS/layer bindings сохранены. RED 3 failed, GREEN 6 passed, recovery 48
+passed, canonical root 77 passed. Independent security-focused review:
+Critical/Important/Minor `0/0/0`, ready yes. Следующий порядок — docs/status
+commit, push, затем retry в неизменном approved scope `801f8c3`.
 
 - использует чистый второй VPS как trusted disposable environment;
 - доказывает полный canonical offline restore path;

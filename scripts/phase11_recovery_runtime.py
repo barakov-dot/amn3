@@ -435,8 +435,8 @@ def validate_image_archive(
     if image_config.get("os") != expected_os:
         raise RuntimeContractError("image archive OS does not match runtime image")
     repo_tags = row.get("RepoTags")
-    if repo_tags != []:
-        raise RuntimeContractError("immutable image archive unexpectedly contains repo tags")
+    if repo_tags not in ([], [expected_reference]):
+        raise RuntimeContractError("image archive repo tag contract is invalid")
     layers = row.get("Layers")
     if not isinstance(layers, list) or not layers:
         raise RuntimeContractError("image archive layers are missing")

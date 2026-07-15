@@ -301,6 +301,49 @@ def test_validate_image_archive_accepts_oci_blob_config_and_layer_paths() -> Non
     assert report["layer_count"] == 1
 
 
+def test_validate_image_archive_accepts_only_canonical_repo_tag() -> None:
+    archive, image_id = docker_image_archive(
+        archive_layout="oci", repo_tags=["amnezia-awg2:local"]
+    )
+
+    report = validate_image_archive(
+        archive,
+        image_id,
+        "amnezia-awg2:local",
+        docker_image_diff_ids(archive),
+        docker_image_config_sha256(),
+        "amd64",
+        "linux",
+    )
+
+    assert report["repo_tags"] == ["amnezia-awg2:local"]
+
+
+@pytest.mark.parametrize(
+    "repo_tags",
+    [
+        ["untrusted.invalid/amnezia-awg2:local"],
+        ["amnezia-awg2:local", "untrusted.invalid/amnezia-awg2:local"],
+        ["amnezia-awg2:local", "amnezia-awg2:local"],
+    ],
+)
+def test_validate_image_archive_rejects_noncanonical_repo_tags(
+    repo_tags: list[str],
+) -> None:
+    archive, image_id = docker_image_archive(repo_tags=repo_tags)
+
+    with pytest.raises(RuntimeContractError, match="repo tag"):
+        validate_image_archive(
+            archive,
+            image_id,
+            "amnezia-awg2:local",
+            docker_image_diff_ids(archive),
+            docker_image_config_sha256(),
+            "amd64",
+            "linux",
+        )
+
+
 def test_validate_image_archive_accepts_legacy_runtime_id_via_rootfs_binding() -> None:
     archive, config_image_id = docker_image_archive(repo_tags=[])
     legacy_runtime_image_id = "sha256:" + "d" * 64
