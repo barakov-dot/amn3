@@ -171,3 +171,34 @@ staging_package_or_runtime_mutation=false
 old_fallback_delete=false
 second_vps_provider_mutation=false
 ```
+
+## 2026-07-15 attempt 1 fail-closed addendum
+
+The exact approval was later received. After the executable-Config binding
+security fix was tested, clean-scanned, committed and pushed, attempt 1 entered
+only the production bundle-creation step and stopped fail-closed with sanitized
+reason `image archive config digest is invalid`.
+
+```text
+attempt_1=ciphertext_not_created
+production_private_run_cleanup=passed
+secret_transfer=false
+staging_mutation=false
+approval=received|not_consumed
+```
+
+Mandatory failure-path checks then passed: the production runtime contract was
+still intact, the web/bot/write-gate baseline remained unchanged, and the
+compact operations audit reconfirmed database and AWG invariants. Raw image
+Config, Config path, secret environment values and private target identity were
+not emitted.
+
+The next allowed work is a read-only sanitized path-shape diagnostic that
+classifies the archive Config entry without printing it. No bundle retry is
+allowed until the exact root cause is reproduced by a RED test, fixed
+fail-closed, covered by scoped/full tests and a fresh diff/security review,
+documented, committed and pushed.
+
+AMN2 source later advanced to `6abc620` only for local canonical logo assets.
+Production and this approved restore transaction remain pinned to `801f8c3`;
+the logo commit does not expand or consume the restore approval.

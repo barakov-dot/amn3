@@ -1,7 +1,9 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-15 после исправления executable-Config binding, полного
-root regression и clean security rescan для `PHASE11-RESTORE-001A`.
+Актуально: 2026-07-15 после source-only интеграции canonical logo в `6abc620`
+и fail-closed attempt 1 `PHASE11-RESTORE-001A` на несовпадении допустимого
+формата пути image Config. Ciphertext/secret transfer не начинались, cleanup и
+production re-audits passed.
 
 Этот файл задаёт текущий исполняемый порядок Phase 11. Полная продуктовая
 карта и exclusions остаются в
@@ -13,8 +15,9 @@ root regression и clean security rescan для `PHASE11-RESTORE-001A`.
 
 ```text
 active_phase=Phase 11 Controlled Launch and Operations
-amn2_source=codex-vps-test-prep|801f8c3|origin_sync
+amn2_source=codex-vps-test-prep|6abc620|origin_sync
 production_overlay=801f8c3
+restore_001a_source_pin=801f8c3|approval_scope_unchanged
 web=active_enabled_loopback_only
 regular_bot=inactive_disabled
 write_gates=false_false
@@ -37,15 +40,23 @@ second_vps=clean_ssh_only|temporary_restore_001a_role
 
 ### C1. `PHASE11-RESTORE-001A` canonical full-secret disposable rehearsal
 
-Состояние: `approved-pending-docs-commit-push-and-live-retry`. Exact approval
-получен, но не consumed. Найденный Medium blocker
+Состояние: `attempt-1-failed-closed|diagnosis-pending`. Exact approval получен,
+но не consumed. Найденный Medium blocker
 `P11-LEGACY-IMAGE-CONFIG-UNBOUND-001` исправлен: runtime-complete v2
 связывает canonical executable Config SHA-256, `amd64/linux`, RootFS DiffIDs
 и фактические layer bytes. Проверка: runtime 15 passed, recovery scoped 41
 passed, полный root scope 70 passed, independent verifier 35 passed. Clean
-security scan: complete coverage, 6/6 full-file receipts, 0 findings. Live
-rehearsal ещё не запускался; следующий порядок — docs/status, commit, push,
-затем выполнение уже одобренного gate.
+security scan: complete coverage, 6/6 full-file receipts, 0 findings. Fix
+закоммичен/pushed в root/docs commit `280da45`.
+
+Attempt 1 writer остановился до создания ciphertext на
+`image archive config digest is invalid`. Failure-path cleanup прошёл; secret
+transfer, staging mutation и disposable restore не начинались. Fresh runtime
+contract и OPS health re-audits прошли, включая production AWG/service
+invariants. Следующий порядок: sanitized Config-path-shape diagnosis без raw
+path/config, RED test, минимальный fail-closed format fix, scoped/full tests,
+fresh diff/security review, docs/status, commit/push, затем retry в неизменном
+approved scope `801f8c3`.
 
 - использует чистый второй VPS как trusted disposable environment;
 - доказывает полный canonical offline restore path;
@@ -66,6 +77,15 @@ Local product/engineering slice:
 
 Этот slice не включает production bot enable/start. Activation останется
 отдельным exact gate после code/tests/package/security review.
+
+### C2a. `PHASE11-BRAND-001` canonical logo production rollout
+
+Local source завершён и pushed в `6abc620`: bot `/start`, web login/dashboard
+используют один canonical PNG; security scan clean. Production всё ещё
+`801f8c3`, поэтому новый logo не deployed. Не менять production overlay до
+завершения или явного пересмотра pin `RESTORE-001A`. После него подготовить
+отдельный package/rollout gate без bot start/enable. Telegram profile photo —
+отдельная live identity mutation и требует другого exact gate.
 
 ### C3. Recovery and second-VPS retirement gates
 
@@ -136,27 +156,27 @@ gate. Не использовать approvals из Phase 10 или уже consum
 Одиночная:
 
 ```text
-GPT-5.6 SOL -> COMMIT_AND_PUSH_PHASE11_LEGACY_IMAGE_CONFIG_BINDING_SECURITY_FIX
+GPT-5.6 SOL -> DIAGNOSE_PHASE11_RESTORE_001A_IMAGE_CONFIG_PATH_SHAPE_READ_ONLY_AND_SANITIZED
 ```
 
 Двойная:
 
 ```text
-GPT-5.6 SOL -> COMMIT_AND_PUSH_PHASE11_LEGACY_IMAGE_CONFIG_BINDING_SECURITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A
+GPT-5.6 SOL -> DIAGNOSE_PHASE11_RESTORE_001A_IMAGE_CONFIG_PATH_SHAPE_READ_ONLY_AND_SANITIZED -> ADD_RED_TEST_AND_IMPLEMENT_MINIMAL_FAIL_CLOSED_DOCKER_ARCHIVE_CONFIG_PATH_COMPATIBILITY
 ```
 
 Тройная:
 
 ```text
-GPT-5.6 SOL -> COMMIT_AND_PUSH_PHASE11_LEGACY_IMAGE_CONFIG_BINDING_SECURITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_AND_MANDATORY_CLEANUP
+GPT-5.6 SOL -> DIAGNOSE_PHASE11_RESTORE_001A_IMAGE_CONFIG_PATH_SHAPE_READ_ONLY_AND_SANITIZED -> ADD_RED_TEST_AND_IMPLEMENT_MINIMAL_FAIL_CLOSED_DOCKER_ARCHIVE_CONFIG_PATH_COMPATIBILITY -> RUN_SCOPED_FULL_TESTS_DIFF_AND_CLEAN_SECURITY_RESCAN
 ```
 
 Четверная:
 
-    GPT-5.6 SOL -> COMMIT_AND_PUSH_PHASE11_LEGACY_IMAGE_CONFIG_BINDING_SECURITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_AND_MANDATORY_CLEANUP -> PRODUCTION_AWG_REAUDIT
+    GPT-5.6 SOL -> DIAGNOSE_PHASE11_RESTORE_001A_IMAGE_CONFIG_PATH_SHAPE_READ_ONLY_AND_SANITIZED -> ADD_RED_TEST_AND_IMPLEMENT_MINIMAL_FAIL_CLOSED_DOCKER_ARCHIVE_CONFIG_PATH_COMPATIBILITY -> RUN_SCOPED_FULL_TESTS_DIFF_AND_CLEAN_SECURITY_RESCAN -> SYNC_DOCS_STATUS_COMMIT_PUSH_AND_RETRY_APPROVED_RESTORE_001A
 
 Более — рекомендовано:
 
 ```text
-GPT-5.6 SOL -> COMMIT_AND_PUSH_PHASE11_LEGACY_IMAGE_CONFIG_BINDING_SECURITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_AND_MANDATORY_CLEANUP -> PRODUCTION_AWG_REAUDIT -> DECIDE_OLD_FALLBACK_AND_SECOND_VPS_SAFE_RETIREMENT_GATES -> IMPLEMENT_TELEGRAM_002A_LOCAL_PERSISTENT_ADMISSION_AND_UNIT_HARDENING
+GPT-5.6 SOL -> DIAGNOSE_PHASE11_RESTORE_001A_IMAGE_CONFIG_PATH_SHAPE_READ_ONLY_AND_SANITIZED -> ADD_RED_TEST_AND_IMPLEMENT_MINIMAL_FAIL_CLOSED_DOCKER_ARCHIVE_CONFIG_PATH_COMPATIBILITY -> RUN_SCOPED_FULL_TESTS_DIFF_AND_CLEAN_SECURITY_RESCAN -> SYNC_DOCS_STATUS_COMMIT_PUSH_AND_RETRY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_MANDATORY_CLEANUP_AND_PRODUCTION_AWG_REAUDIT -> DECIDE_OLD_FALLBACK_AND_SECOND_VPS_SAFE_RETIREMENT_GATES -> PREPARE_6ABC620_CANONICAL_LOGO_PRIVATE_OVERLAY_ROLLOUT_GATE -> IMPLEMENT_TELEGRAM_002A_LOCAL_PERSISTENT_ADMISSION_AND_UNIT_HARDENING
 ```

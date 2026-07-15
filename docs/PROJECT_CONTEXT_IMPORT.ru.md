@@ -1,5 +1,30 @@
 # Текущий override 2026-07-15
 
+The operator-supplied canonical bot/project logo is integrated local-source in
+AMN2 commit `6abc620 Replace canonical bot branding`, pushed to
+`origin/codex-vps-test-prep`. Bot `/start`, web login and dashboard now use the
+same exact PNG bytes; the old web JPG is removed. TDD evidence: expected RED
+`3 failed`, focused GREEN `58 passed`, full suite `872 passed, 1 skipped`.
+The clean sealed diff scan has complete coverage, three reviewed surfaces,
+nine sealed artifacts and zero findings. Evidence:
+`research/amn2/phase-11-canonical-bot-logo-local-integration-2026-07-15.md`.
+This is not deployed: production overlay remains `801f8c3`, regular bot stays
+inactive/disabled, Telegram profile photo is unchanged, Telegram API was not
+called and AWG was untouched. The approved RESTORE-001A source remains pinned
+to `801f8c3`.
+
+RESTORE-001A attempt 1 after the executable-Config binding fix stopped
+fail-closed before ciphertext creation because the production image archive
+Config path did not satisfy the accepted digest-path format. Production temp
+cleanup passed; no secret transfer or staging mutation occurred. Fresh runtime
+contract and compact operations re-audits passed, including unchanged AWG and
+service invariants. Approval remains `received|not_consumed`. Next is a
+sanitized archive-path-shape diagnostic, then TDD fix, scoped/full tests, fresh
+diff/security review, docs/status, commit/push and only then a retry under the
+same unchanged `801f8c3` approval scope.
+
+# Предыдущий override 2026-07-15
+
 Phase 11 RESTORE-001A security blocker P11-LEGACY-IMAGE-CONFIG-UNBOUND-001 is
 fixed local-only and the clean working-tree diff scan is sealed with complete
 coverage, six of six full-file receipts and zero findings. Evidence:
