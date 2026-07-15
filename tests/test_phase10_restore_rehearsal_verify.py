@@ -100,12 +100,14 @@ def runtime_complete_recovery_files(
     archive_layout: str = "legacy",
     repo_tags: list[str] | None = None,
     repo_tags_null: bool = False,
+    gzip_oci_layer: bool = False,
 ) -> dict[str, bytes]:
     files = recovery_files()
     archive, image_id = docker_image_archive(
         archive_layout=archive_layout,
         repo_tags=repo_tags,
         repo_tags_null=repo_tags_null,
+        gzip_oci_layer=gzip_oci_layer,
     )
     diff_ids = docker_image_diff_ids(archive)
     inspect_bytes, _fixture_image_id = docker_inspect()
@@ -288,7 +290,7 @@ def test_restore_gate_can_require_runtime_complete_v2_and_source_digest() -> Non
 
 def test_restore_gate_accepts_oci_blob_image_archive() -> None:
     files = runtime_complete_recovery_files(
-        archive_layout="oci", repo_tags_null=True
+        archive_layout="oci", repo_tags_null=True, gzip_oci_layer=True
     )
     source_digest = hashlib.sha256(files["host/source.tar.gz"]).hexdigest()
 

@@ -10,6 +10,7 @@ import ipaddress
 import json
 import re
 import tarfile
+import zlib
 from pathlib import PurePosixPath
 from typing import Mapping
 
@@ -18,6 +19,8 @@ RUNTIME_SCHEMA = "amn2-awg-runtime-v2"
 IMAGE_REFERENCE = "amnezia-awg2:local"
 MAX_IMAGE_ARCHIVE_BYTES = 64 * 1024 * 1024
 MAX_IMAGE_ARCHIVE_FILES = 512
+MAX_IMAGE_LAYER_DECOMPRESSED_BYTES = 64 * 1024 * 1024
+MAX_IMAGE_LAYERS_DECOMPRESSED_BYTES = 128 * 1024 * 1024
 MAX_SOURCE_ARCHIVE_BYTES = 32 * 1024 * 1024
 MAX_SOURCE_ARCHIVE_DECOMPRESSED_BYTES = 24 * 1024 * 1024
 MAX_SOURCE_ARCHIVE_FILES = 4096
@@ -355,6 +358,31 @@ def _image_config_digest_from_archive_name(value: str) -> str:
     raise RuntimeContractError("image archive config digest is invalid")
 
 
+def _gzip_layer_diff_id(value: bytes, remaining_bytes: int) -> tuple[str, int]:
+    limit = min(MAX_IMAGE_LAYER_DECOMPRESSED_BYTES, remaining_bytes)
+    if limit < 0:
+        raise RuntimeContractError("image archive layer expansion limit exceeded")
+    digest = hashlib.sha256()
+    total = 0
+    try:
+        with gzip.GzipFile(fileobj=io.BytesIO(value), mode="rb") as source:
+            while True:
+                chunk = source.read(min(1024 * 1024, limit - total + 1))
+                if not chunk:
+                    break
+                total += len(chunk)
+                if total > limit:
+                    raise RuntimeContractError(
+                        "image archive layer expansion limit exceeded"
+                    )
+                digest.update(chunk)
+    except RuntimeContractError:
+        raise
+    except (gzip.BadGzipFile, EOFError, OSError, zlib.error) as exc:
+        raise RuntimeContractError("image archive gzip layer is invalid") from exc
+    return "sha256:" + digest.hexdigest(), total
+
+
 def validate_image_archive(
     archive_bytes: bytes,
     expected_image_id: str,
@@ -455,13 +483,35 @@ def validate_image_archive(
         raise RuntimeContractError("image archive layer digest contract is invalid")
     if diff_ids != expected_rootfs_diff_ids:
         raise RuntimeContractError("image archive rootfs does not match runtime image")
+    compressed_layer_count = 0
+    decompressed_layer_bytes = 0
     for layer_name, diff_id in zip(normalized_layers, diff_ids, strict=True):
         if not isinstance(diff_id, str) or not re.fullmatch(
             r"sha256:[0-9a-f]{64}", diff_id
         ):
             raise RuntimeContractError("image archive layer digest is invalid")
-        actual_layer_digest = "sha256:" + hashlib.sha256(files[layer_name]).hexdigest()
-        if actual_layer_digest != diff_id:
+        layer_bytes = files[layer_name]
+        raw_layer_digest = "sha256:" + hashlib.sha256(layer_bytes).hexdigest()
+        oci_blob = re.fullmatch(r"blobs/sha256/([0-9a-f]{64})", layer_name)
+        if oci_blob is not None:
+            if raw_layer_digest != "sha256:" + oci_blob.group(1):
+                raise RuntimeContractError("image archive layer blob digest mismatch")
+            if raw_layer_digest == diff_id:
+                actual_diff_id = raw_layer_digest
+            else:
+                if not layer_bytes.startswith(b"\x1f\x8b"):
+                    raise RuntimeContractError(
+                        "image archive compressed layer format is unsupported"
+                    )
+                actual_diff_id, expanded_bytes = _gzip_layer_diff_id(
+                    layer_bytes,
+                    MAX_IMAGE_LAYERS_DECOMPRESSED_BYTES - decompressed_layer_bytes,
+                )
+                decompressed_layer_bytes += expanded_bytes
+                compressed_layer_count += 1
+        else:
+            actual_diff_id = raw_layer_digest
+        if actual_diff_id != diff_id:
             raise RuntimeContractError("image archive layer digest mismatch")
     return {
         "config_digest": "sha256:" + actual_digest,
@@ -470,6 +520,8 @@ def validate_image_archive(
         "repo_tags": repo_tags,
         "image_config_contract": "passed",
         "layer_count": len(normalized_layers),
+        "compressed_layer_count": compressed_layer_count,
+        "decompressed_layer_bytes": decompressed_layer_bytes,
         "archive_bytes": len(archive_bytes),
     }
 

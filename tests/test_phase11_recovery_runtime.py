@@ -105,9 +105,12 @@ def docker_image_archive(
     architecture: str = "amd64",
     image_os: str = "linux",
     archive_layout: str = "legacy",
+    gzip_oci_layer: bool = False,
+    layer: bytes = b"synthetic-layer",
+    additional_layers: list[bytes] | None = None,
 ) -> tuple[bytes, str]:
-    layer = b"synthetic-layer"
-    layer_digest = hashlib.sha256(layer).hexdigest()
+    layer_values = [layer, *(additional_layers or [])]
+    layer_digests = [hashlib.sha256(value).hexdigest() for value in layer_values]
     config = json.dumps(
         {
             "architecture": architecture,
@@ -117,25 +120,38 @@ def docker_image_archive(
                 else runtime_config
             ),
             "os": image_os,
-            "rootfs": {"type": "layers", "diff_ids": [f"sha256:{layer_digest}"]},
+            "rootfs": {
+                "type": "layers",
+                "diff_ids": [f"sha256:{value}" for value in layer_digests],
+            },
         },
         separators=(",", ":"),
     ).encode()
     digest = hashlib.sha256(config).hexdigest()
     image_id = "sha256:" + digest
     if archive_layout == "legacy":
+        if len(layer_values) != 1:
+            raise ValueError("synthetic legacy archive supports one layer")
         config_name = f"{digest}.json"
-        layer_name = "layer/layer.tar"
+        layer_names = ["layer/layer.tar"]
+        stored_layers = layer_values
     elif archive_layout == "oci":
         config_name = f"blobs/sha256/{digest}"
-        layer_name = f"blobs/sha256/{layer_digest}"
+        stored_layers = [
+            gzip.compress(value, mtime=0) if gzip_oci_layer else value
+            for value in layer_values
+        ]
+        layer_names = [
+            f"blobs/sha256/{hashlib.sha256(value).hexdigest()}"
+            for value in stored_layers
+        ]
     else:
         raise ValueError("unsupported synthetic image archive layout")
     if repo_tags_null and (repo_tags is not None or repo_tags_missing):
         raise ValueError("synthetic RepoTags options are mutually exclusive")
     manifest_row: dict[str, object] = {
         "Config": config_name,
-        "Layers": [layer_name],
+        "Layers": layer_names,
     }
     if not repo_tags_missing:
         manifest_row["RepoTags"] = (
@@ -144,11 +160,12 @@ def docker_image_archive(
     manifest = json.dumps([manifest_row], separators=(",", ":")).encode()
     output = io.BytesIO()
     with tarfile.open(fileobj=output, mode="w") as archive:
-        for name, value in (
+        archive_files = [
             ("manifest.json", manifest),
             (config_name, config),
-            (layer_name, layer),
-        ):
+            *zip(layer_names, stored_layers, strict=True),
+        ]
+        for name, value in archive_files:
             info = tarfile.TarInfo(name)
             info.size = len(value)
             archive.addfile(info, io.BytesIO(value))
@@ -164,6 +181,28 @@ def docker_image_diff_ids(archive_bytes: bytes) -> list[str]:
         }
     row = json.loads(files["manifest.json"])[0]
     return json.loads(files[row["Config"]])["rootfs"]["diff_ids"]
+
+
+def replace_first_oci_layer(archive_bytes: bytes, replacement: bytes) -> bytes:
+    files: dict[str, bytes] = {}
+    with tarfile.open(fileobj=io.BytesIO(archive_bytes), mode="r:") as source:
+        for member in source.getmembers():
+            if member.isfile():
+                files[member.name] = source.extractfile(member).read()
+    manifest = json.loads(files["manifest.json"])
+    old_layer_name = manifest[0]["Layers"][0]
+    files.pop(old_layer_name)
+    new_layer_name = f"blobs/sha256/{hashlib.sha256(replacement).hexdigest()}"
+    manifest[0]["Layers"][0] = new_layer_name
+    files[new_layer_name] = replacement
+    files["manifest.json"] = json.dumps(manifest, separators=(",", ":")).encode()
+    output = io.BytesIO()
+    with tarfile.open(fileobj=output, mode="w") as destination:
+        for name, value in files.items():
+            info = tarfile.TarInfo(name)
+            info.size = len(value)
+            destination.addfile(info, io.BytesIO(value))
+    return output.getvalue()
 
 
 def source_archive(*, unsafe_name: str | None = None) -> bytes:
@@ -302,6 +341,176 @@ def test_validate_image_archive_accepts_oci_blob_config_and_layer_paths() -> Non
 
     assert report["config_digest"] == image_id
     assert report["layer_count"] == 1
+
+
+def test_validate_image_archive_binds_gzip_oci_blob_and_uncompressed_diff_id() -> None:
+    archive, image_id = docker_image_archive(
+        archive_layout="oci", gzip_oci_layer=True, repo_tags_null=True
+    )
+
+    report = validate_image_archive(
+        archive,
+        image_id,
+        "amnezia-awg2:local",
+        docker_image_diff_ids(archive),
+        docker_image_config_sha256(),
+        "amd64",
+        "linux",
+    )
+
+    assert report["compressed_layer_count"] == 1
+    assert report["layer_count"] == 1
+
+
+def test_validate_image_archive_rejects_oci_blob_path_digest_mismatch() -> None:
+    archive, image_id = docker_image_archive(
+        archive_layout="oci", gzip_oci_layer=True
+    )
+    files: dict[str, bytes] = {}
+    with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as source:
+        for member in source.getmembers():
+            if member.isfile():
+                files[member.name] = source.extractfile(member).read()
+    manifest = json.loads(files["manifest.json"])
+    layer_name = manifest[0]["Layers"][0]
+    files[layer_name] += b"tampered"
+    output = io.BytesIO()
+    with tarfile.open(fileobj=output, mode="w") as destination:
+        for name, value in files.items():
+            info = tarfile.TarInfo(name)
+            info.size = len(value)
+            destination.addfile(info, io.BytesIO(value))
+
+    with pytest.raises(RuntimeContractError, match="blob digest"):
+        validate_image_archive(
+            output.getvalue(),
+            image_id,
+            "amnezia-awg2:local",
+            docker_image_diff_ids(archive),
+            docker_image_config_sha256(),
+            "amd64",
+            "linux",
+        )
+
+
+@pytest.mark.parametrize(
+    "limit_name", ["MAX_IMAGE_LAYER_DECOMPRESSED_BYTES"]
+)
+def test_validate_image_archive_rejects_gzip_layer_expansion_limits(
+    monkeypatch, limit_name: str
+) -> None:
+    archive, image_id = docker_image_archive(
+        archive_layout="oci",
+        gzip_oci_layer=True,
+        layer=b"expanded-layer-content",
+    )
+    monkeypatch.setattr(
+        f"scripts.phase11_recovery_runtime.{limit_name}", 8
+    )
+
+    with pytest.raises(RuntimeContractError, match="expansion limit"):
+        validate_image_archive(
+            archive,
+            image_id,
+            "amnezia-awg2:local",
+            docker_image_diff_ids(archive),
+            docker_image_config_sha256(),
+            "amd64",
+            "linux",
+        )
+
+
+def test_validate_image_archive_rejects_cumulative_gzip_layer_expansion_limit(
+    monkeypatch,
+) -> None:
+    archive, image_id = docker_image_archive(
+        archive_layout="oci",
+        gzip_oci_layer=True,
+        layer=b"first-layer",
+        additional_layers=[b"second-layer"],
+    )
+    monkeypatch.setattr(
+        "scripts.phase11_recovery_runtime.MAX_IMAGE_LAYER_DECOMPRESSED_BYTES", 64
+    )
+    monkeypatch.setattr(
+        "scripts.phase11_recovery_runtime.MAX_IMAGE_LAYERS_DECOMPRESSED_BYTES",
+        20,
+    )
+
+    with pytest.raises(RuntimeContractError, match="expansion limit"):
+        validate_image_archive(
+            archive,
+            image_id,
+            "amnezia-awg2:local",
+            docker_image_diff_ids(archive),
+            docker_image_config_sha256(),
+            "amd64",
+            "linux",
+        )
+
+
+@pytest.mark.parametrize(
+    ("replacement", "error"),
+    [
+        (b"\x1f\x8bnot-a-valid-gzip-stream", "gzip layer"),
+        (gzip.compress(b"different-uncompressed-layer", mtime=0), "layer digest"),
+    ],
+)
+def test_validate_image_archive_rejects_invalid_or_wrong_gzip_layer(
+    replacement: bytes, error: str
+) -> None:
+    archive, image_id = docker_image_archive(
+        archive_layout="oci", gzip_oci_layer=True
+    )
+    files: dict[str, bytes] = {}
+    with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as source:
+        for member in source.getmembers():
+            if member.isfile():
+                files[member.name] = source.extractfile(member).read()
+    manifest = json.loads(files["manifest.json"])
+    old_layer_name = manifest[0]["Layers"][0]
+    files.pop(old_layer_name)
+    new_layer_name = f"blobs/sha256/{hashlib.sha256(replacement).hexdigest()}"
+    manifest[0]["Layers"] = [new_layer_name]
+    files[new_layer_name] = replacement
+    files["manifest.json"] = json.dumps(manifest, separators=(",", ":")).encode()
+    output = io.BytesIO()
+    with tarfile.open(fileobj=output, mode="w") as destination:
+        for name, value in files.items():
+            info = tarfile.TarInfo(name)
+            info.size = len(value)
+            destination.addfile(info, io.BytesIO(value))
+
+    with pytest.raises(RuntimeContractError, match=error):
+        validate_image_archive(
+            output.getvalue(),
+            image_id,
+            "amnezia-awg2:local",
+            docker_image_diff_ids(archive),
+            docker_image_config_sha256(),
+            "amd64",
+            "linux",
+        )
+
+
+def test_validate_image_archive_normalizes_corrupt_deflate_error() -> None:
+    archive, image_id = docker_image_archive(
+        archive_layout="oci", gzip_oci_layer=True
+    )
+    corrupt = bytearray(gzip.compress(b"A" * 10_000, mtime=0))
+    corrupt[10] ^= 0xFF
+    changed_archive = replace_first_oci_layer(archive, bytes(corrupt))
+
+    with pytest.raises(RuntimeContractError, match="gzip layer"):
+        validate_image_archive(
+            changed_archive,
+            image_id,
+            "amnezia-awg2:local",
+            docker_image_diff_ids(archive),
+            docker_image_config_sha256(),
+            "amd64",
+            "linux",
+        )
 
 
 def test_validate_image_archive_accepts_only_canonical_repo_tag() -> None:

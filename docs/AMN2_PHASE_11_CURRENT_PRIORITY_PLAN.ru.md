@@ -1,7 +1,7 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-15 после fail-closed attempt 3, sanitized JSON-null
-RepoTags diagnosis и минимального TDD fix. Attempts 1-3 не создали ciphertext;
+Актуально: 2026-07-15 после fail-closed attempt 4, sanitized OCI gzip layer
+diagnosis и double-binding TDD fix. Attempts 1-4 не создали ciphertext;
 approval остаётся not consumed.
 
 Этот файл задаёт текущий исполняемый порядок Phase 11. Полная продуктовая
@@ -40,7 +40,7 @@ second_vps=clean_ssh_only|temporary_restore_001a_role
 ### C1. `PHASE11-RESTORE-001A` canonical full-secret disposable rehearsal
 
 Состояние:
-`attempt-3-failed-closed|json-null-repotags-fix-verified|security-docs-commit-push-then-retry`.
+`attempt-4-failed-closed|oci-gzip-double-binding-fix-verified|security-docs-commit-push-then-retry`.
 Exact approval получен, но не consumed. Найденный Medium blocker
 `P11-LEGACY-IMAGE-CONFIG-UNBOUND-001` исправлен: runtime-complete v2
 связывает canonical executable Config SHA-256, `amd64/linux`, RootFS DiffIDs
@@ -80,6 +80,18 @@ fail-closed. RED 3 failed, GREEN 8 passed, recovery 50 passed, canonical root
 79 passed. Cleanup и re-audits снова прошли; AWG untouched. Следующий порядок
 — independent security review `0/0/0`, ready yes; docs/status commit, push и
 тот же approved retry.
+
+Attempt 4 дошёл до layer bytes и остановился до ciphertext на raw-vs-DiffID
+mismatch. Sanitized diagnostic доказал: 6/6 raw gzip blobs bound к OCI path
+digest; 6/6 streamed decompressed layers bound к ordered RootFS DiffIDs;
+expanded total 26048512, max layer 7688192. Fix сохраняет обе привязки и вводит
+64 MiB per-layer/128 MiB cumulative limits; invalid gzip, wrong content, blob
+path tamper и expansion fail closed. До review-fix: RED 3 failed, focused 8,
+recovery 56, root 85. Initial security review нашёл uncaught `zlib.error`
+и недостаточный cumulative test; оба исправлены через отдельный RED и настоящий
+two-layer case. Итог: focused 9, recovery 57, root 86; rereview `0/0/0`, ready
+yes. Cleanup/re-audits прошли, AWG untouched. Следующий порядок — docs/status
+commit/push и approved retry.
 
 - использует чистый второй VPS как trusted disposable environment;
 - доказывает полный canonical offline restore path;

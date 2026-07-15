@@ -66,6 +66,32 @@ RED 3 expected failures, GREEN 8 passed, recovery 50 passed, canonical root 79
 passed. Current evidence:
 `research/amn2/phase-11-restore-001a-json-null-repotags-compatibility-fix-2026-07-15.md`.
 
+## 2026-07-15 attempt 4 fail-closed addendum
+
+After JSON-null RepoTags compatibility commit `9a9f31f`, attempt 4 entered only
+the production writer and stopped before ciphertext creation on `image archive
+layer digest mismatch`. Cleanup and mandatory runtime/OPS re-audits passed;
+production remained `801f8c3`, AWG running/restart zero/12 peers unchanged,
+and Telegram API was not called.
+
+A sanitized read-only diagnostic proved all six manifest layers are exact OCI
+gzip blobs. Every raw compressed SHA-256 matches its `blobs/sha256` path, every
+streamed decompressed SHA-256 matches the ordered RootFS DiffID, and no raw
+compressed hash is incorrectly equal to a DiffID. Expanded total is 26048512
+bytes and the largest layer is 7688192 bytes. Diagnostic cleanup passed.
+
+The local fix preserves both identities: raw compressed blob to OCI path
+digest, and uncompressed tar stream to RootFS DiffID. Streaming limits are
+64 MiB per layer and 128 MiB total. Legacy raw layer checking remains intact.
+Negative tests cover blob-path tamper, invalid gzip, wrong uncompressed
+content and both expansion limits. Before review-fix: RED 3 expected failures,
+focused 8, recovery 56 and canonical root 85 passed. Initial security review found
+an uncaught corrupt-DEFLATE `zlib.error` and missing true two-layer cumulative
+coverage. Both were fixed; final focused 9, recovery 57 and canonical root 86
+passed. Rereview found zero Critical/Important/Minor issues and returned ready
+yes. Current evidence:
+`research/amn2/phase-11-restore-001a-oci-gzip-layer-double-binding-fix-2026-07-15.md`.
+
 ## Why the existing canonical v1 is not sufficient
 
 The accepted `amn2-full-recovery-v1` authenticates and verifies the production

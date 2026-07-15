@@ -1,5 +1,30 @@
 # Текущий override 2026-07-15
 
+RESTORE-001A attempt 4 entered only the production writer and stopped
+fail-closed before ciphertext creation on `image archive layer digest
+mismatch`. Cleanup and mandatory runtime/OPS re-audits passed; production
+remains `801f8c3`, web healthy, bot inactive/disabled, database integrity OK,
+and AWG running/restart zero/unchanged 12-peer set. No Telegram call, secret
+transfer or staging mutation occurred.
+
+Sanitized read-only diagnosis proved the OCI layer identity model: all six raw
+gzip blobs match their `blobs/sha256` path digests, none of the raw compressed
+hashes equals RootFS DiffID, and all six streamed decompressed hashes equal the
+ordered DiffIDs. Total expanded bytes are 26048512, largest layer 7688192. The
+minimal fix now double-binds raw compressed bytes to OCI path digest and
+uncompressed bytes to RootFS DiffID, with 64 MiB per-layer and 128 MiB total
+streaming limits. Legacy raw-layer validation remains unchanged. TDD: expected
+RED `3 failed`, corrupt-DEFLATE RED `1 failed`, focused acceptance/negative `9
+passed`, recovery `57 passed`, canonical root `86 passed`, compile/diff clean.
+Initial review findings for `zlib.error` normalization and a true cumulative
+two-layer test were fixed; rereview is Critical/Important/Minor `0/0/0`, ready
+yes. Evidence:
+`research/amn2/phase-11-restore-001a-oci-gzip-layer-double-binding-fix-2026-07-15.md`.
+Approval remains `received|not_consumed`; next is docs/status commit/push and
+the same approved retry.
+
+# Предыдущий override 2026-07-15
+
 RESTORE-001A attempt 3 entered only the production writer and again stopped
 fail-closed before ciphertext creation on the RepoTags contract. Production
 cleanup and mandatory runtime/OPS re-audits passed; overlay remains `801f8c3`,
