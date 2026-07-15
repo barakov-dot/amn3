@@ -1,4 +1,20 @@
-# Текущий override 2026-07-14: RESTORE-001A runtime-complete v2 gate ready
+# Текущий override 2026-07-15: RESTORE-001A security blocker fixed and clean rescan passed
+
+    active_phase=Phase 11 Controlled Launch and Operations
+    phase11_restore_001a_gate=approved_pending_docs_commit_push_and_live_retry
+    phase11_restore_001a_approval=received|not_consumed
+    phase11_restore_001a_security_blocker=P11_LEGACY_IMAGE_CONFIG_UNBOUND_001|fixed
+    phase11_restore_001a_binding=canonical_executable_config_sha256|amd64|linux|rootfs_diff_ids|layer_bytes
+    phase11_restore_001a_tests=tdd_red_confirmed|runtime_15_passed|recovery_scoped_41_passed|root_70_passed|independent_verifier_35_passed
+    phase11_restore_001a_clean_scan=complete_coverage|full_file_receipts_6_of_6|findings_0|sealed_artifacts_5
+    phase11_restore_001a_clean_snapshot=d56c7864892bdf6f024b1e701b93577a286f1f7d467d50fde2882437757ae12c
+    phase11_restore_001a_production_compat=canonical_config_arch_os_match|values_not_emitted|temp_cleanup_passed
+    phase11_restore_001a_live_effect=none|production_and_staging_restore_not_run|awg_untouched|regular_bot_inactive_disabled
+    phase11_restore_001a_next=DOCS_STATUS_SYNC_COMMIT_PUSH_THEN_RETRY_ALREADY_APPROVED_LIVE_GATE
+    phase11_restore_001a_retirement=old_fallback_and_second_vps_delete_remain_separate_exact_gates
+    phase11_restore_001a_evidence=research/amn2/phase-11-legacy-image-config-binding-security-fix-2026-07-15.md
+
+# Предыдущий override 2026-07-14: RESTORE-001A runtime-complete v2 gate ready
 
 ```text
 active_phase=Phase 11 Controlled Launch and Operations

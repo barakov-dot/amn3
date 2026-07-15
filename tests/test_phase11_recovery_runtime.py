@@ -60,13 +60,60 @@ def docker_inspect(*, extra_env: str | None = None) -> tuple[bytes, str]:
     return json.dumps([row]).encode(), image_id
 
 
-def docker_image_archive() -> tuple[bytes, str]:
+def docker_image_inspect(image_id: str, diff_ids: list[str]) -> bytes:
+    return json.dumps(
+        [
+            {
+                "Id": image_id,
+                "RepoTags": ["amnezia-awg2:local"],
+                "Config": docker_image_runtime_config(),
+                "Architecture": "amd64",
+                "Os": "linux",
+                "RootFS": {"Type": "layers", "Layers": diff_ids},
+            }
+        ]
+    ).encode()
+
+
+def docker_image_runtime_config() -> dict[str, object]:
+    return {
+        "Cmd": [""],
+        "Entrypoint": ["dumb-init", "/opt/amnezia/start.sh"],
+        "Env": ["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"],
+        "Labels": {"org.opencontainers.image.title": "synthetic-amn2-awg"},
+        "WorkingDir": "",
+    }
+
+
+def docker_image_config_sha256(
+    config: dict[str, object] | None = None,
+) -> str:
+    value = docker_image_runtime_config() if config is None else config
+    encoded = (
+        json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+        + "\n"
+    ).encode("ascii")
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
+def docker_image_archive(
+    *,
+    repo_tags: list[str] | None = None,
+    runtime_config: dict[str, object] | None = None,
+    architecture: str = "amd64",
+    image_os: str = "linux",
+) -> tuple[bytes, str]:
     layer = b"synthetic-layer"
     layer_digest = hashlib.sha256(layer).hexdigest()
     config = json.dumps(
         {
-            "architecture": "amd64",
-            "os": "linux",
+            "architecture": architecture,
+            "config": (
+                docker_image_runtime_config()
+                if runtime_config is None
+                else runtime_config
+            ),
+            "os": image_os,
             "rootfs": {"type": "layers", "diff_ids": [f"sha256:{layer_digest}"]},
         },
         separators=(",", ":"),
@@ -77,7 +124,7 @@ def docker_image_archive() -> tuple[bytes, str]:
         [
             {
                 "Config": f"{digest}.json",
-                "RepoTags": ["amnezia-awg2:local"],
+                "RepoTags": [] if repo_tags is None else repo_tags,
                 "Layers": ["layer/layer.tar"],
             }
         ],
@@ -94,6 +141,17 @@ def docker_image_archive() -> tuple[bytes, str]:
             info.size = len(value)
             archive.addfile(info, io.BytesIO(value))
     return output.getvalue(), image_id
+
+
+def docker_image_diff_ids(archive_bytes: bytes) -> list[str]:
+    with tarfile.open(fileobj=io.BytesIO(archive_bytes), mode="r:") as archive:
+        files = {
+            member.name: archive.extractfile(member).read()
+            for member in archive.getmembers()
+            if member.isfile()
+        }
+    row = json.loads(files["manifest.json"])[0]
+    return json.loads(files[row["Config"]])["rootfs"]["diff_ids"]
 
 
 def source_archive(*, unsafe_name: str | None = None) -> bytes:
@@ -128,8 +186,11 @@ def source_archive(*, unsafe_name: str | None = None) -> bytes:
 
 def test_normalize_runtime_contract_emits_exact_safe_profile() -> None:
     inspect_bytes, image_id = docker_inspect()
+    diff_ids = ["sha256:" + "b" * 64]
 
-    encoded = normalize_runtime_contract(inspect_bytes, image_id)
+    encoded = normalize_runtime_contract(
+        inspect_bytes, image_id, docker_image_inspect(image_id, diff_ids)
+    )
     contract = json.loads(encoded)
 
     assert contract == {
@@ -142,6 +203,10 @@ def test_normalize_runtime_contract_emits_exact_safe_profile() -> None:
         },
         "image_id": image_id,
         "image_reference": "amnezia-awg2:local",
+        "image_architecture": "amd64",
+        "image_config_sha256": docker_image_config_sha256(),
+        "image_os": "linux",
+        "image_rootfs_diff_ids": diff_ids,
         "mounts": [
             {
                 "read_only": True,
@@ -157,7 +222,7 @@ def test_normalize_runtime_contract_emits_exact_safe_profile() -> None:
         "privileged": True,
         "readonly_rootfs": False,
         "restart_policy": {"maximum_retry_count": 0, "name": "unless-stopped"},
-        "schema": "amn2-awg-runtime-v1",
+        "schema": "amn2-awg-runtime-v2",
         "security_opt": ["label=disable"],
         "sysctls": {"net.ipv4.conf.all.src_valid_mark": "1"},
     }
@@ -165,29 +230,119 @@ def test_normalize_runtime_contract_emits_exact_safe_profile() -> None:
     assert b"PATH=" not in encoded
 
 
+def test_normalize_runtime_contract_binds_daemon_rootfs_layers() -> None:
+    inspect_bytes, image_id = docker_inspect()
+    diff_ids = ["sha256:" + "b" * 64, "sha256:" + "c" * 64]
+
+    encoded = normalize_runtime_contract(
+        inspect_bytes,
+        image_id,
+        docker_image_inspect(image_id, diff_ids),
+    )
+
+    assert json.loads(encoded)["image_rootfs_diff_ids"] == diff_ids
+
+
 def test_normalize_runtime_contract_rejects_unapproved_environment() -> None:
     inspect_bytes, image_id = docker_inspect(extra_env="TOKEN=must-not-be-captured")
 
     with pytest.raises(RuntimeContractError, match="environment"):
-        normalize_runtime_contract(inspect_bytes, image_id)
+        normalize_runtime_contract(
+            inspect_bytes,
+            image_id,
+            docker_image_inspect(image_id, ["sha256:" + "b" * 64]),
+        )
 
 
-def test_validate_image_archive_binds_config_digest_and_repo_tag() -> None:
+def test_validate_image_archive_binds_config_digest_and_rootfs() -> None:
     archive, image_id = docker_image_archive()
+    diff_ids = docker_image_diff_ids(archive)
 
-    report = validate_image_archive(archive, image_id, "amnezia-awg2:local")
+    report = validate_image_archive(
+        archive,
+        image_id,
+        "amnezia-awg2:local",
+        diff_ids,
+        docker_image_config_sha256(),
+        "amd64",
+        "linux",
+    )
 
     assert report["config_digest"] == image_id
-    assert report["repo_tag"] == "amnezia-awg2:local"
+    assert report["image_reference"] == "amnezia-awg2:local"
+    assert report["repo_tags"] == []
+    assert report["image_config_contract"] == "passed"
     assert report["layer_count"] == 1
 
 
-def test_validate_image_archive_rejects_mismatched_image_id() -> None:
-    archive, _image_id = docker_image_archive()
+def test_validate_image_archive_accepts_legacy_runtime_id_via_rootfs_binding() -> None:
+    archive, config_image_id = docker_image_archive(repo_tags=[])
+    legacy_runtime_image_id = "sha256:" + "d" * 64
 
-    with pytest.raises(RuntimeContractError, match="config digest"):
+    report = validate_image_archive(
+        archive,
+        legacy_runtime_image_id,
+        "amnezia-awg2:local",
+        docker_image_diff_ids(archive),
+        docker_image_config_sha256(),
+        "amd64",
+        "linux",
+    )
+
+    assert report["runtime_image_id"] == legacy_runtime_image_id
+    assert report["config_digest"] == config_image_id
+    assert report["repo_tags"] == []
+
+
+def test_validate_image_archive_rejects_changed_config_with_same_rootfs() -> None:
+    archive, image_id = docker_image_archive()
+    files: dict[str, bytes] = {}
+    with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as source:
+        for member in source.getmembers():
+            if member.isfile():
+                files[member.name] = source.extractfile(member).read()
+    manifest = json.loads(files["manifest.json"])
+    old_config_name = manifest[0]["Config"]
+    image_config = json.loads(files.pop(old_config_name))
+    image_config["config"] = {
+        "Healthcheck": {"Test": ["CMD-SHELL", "/bin/true"]}
+    }
+    config_bytes = json.dumps(image_config, separators=(",", ":")).encode()
+    config_name = hashlib.sha256(config_bytes).hexdigest() + ".json"
+    files[config_name] = config_bytes
+    manifest[0]["Config"] = config_name
+    files["manifest.json"] = json.dumps(manifest, separators=(",", ":")).encode()
+    output = io.BytesIO()
+    with tarfile.open(fileobj=output, mode="w") as destination:
+        for name, value in files.items():
+            info = tarfile.TarInfo(name)
+            info.size = len(value)
+            destination.addfile(info, io.BytesIO(value))
+
+    with pytest.raises(RuntimeContractError, match="config"):
         validate_image_archive(
-            archive, "sha256:" + "f" * 64, "amnezia-awg2:local"
+            output.getvalue(),
+            image_id,
+            "amnezia-awg2:local",
+            docker_image_diff_ids(archive),
+            docker_image_config_sha256(),
+            "amd64",
+            "linux",
+        )
+
+
+def test_validate_image_archive_rejects_runtime_rootfs_mismatch() -> None:
+    archive, image_id = docker_image_archive()
+
+    with pytest.raises(RuntimeContractError, match="rootfs"):
+        validate_image_archive(
+            archive,
+            image_id,
+            "amnezia-awg2:local",
+            ["sha256:" + "f" * 64],
+            docker_image_config_sha256(),
+            "amd64",
+            "linux",
         )
 
 
@@ -207,7 +362,45 @@ def test_validate_image_archive_rejects_layer_diff_id_mismatch() -> None:
             destination.addfile(info, io.BytesIO(value))
 
     with pytest.raises(RuntimeContractError, match="layer digest"):
-        validate_image_archive(output.getvalue(), image_id, "amnezia-awg2:local")
+        validate_image_archive(
+            output.getvalue(),
+            image_id,
+            "amnezia-awg2:local",
+            docker_image_diff_ids(archive),
+            docker_image_config_sha256(),
+            "amd64",
+            "linux",
+        )
+
+
+def test_validate_image_archive_rejects_architecture_mismatch() -> None:
+    archive, image_id = docker_image_archive(architecture="arm64")
+
+    with pytest.raises(RuntimeContractError, match="architecture"):
+        validate_image_archive(
+            archive,
+            image_id,
+            "amnezia-awg2:local",
+            docker_image_diff_ids(archive),
+            docker_image_config_sha256(),
+            "amd64",
+            "linux",
+        )
+
+
+def test_validate_image_archive_rejects_os_mismatch() -> None:
+    archive, image_id = docker_image_archive(image_os="windows")
+
+    with pytest.raises(RuntimeContractError, match="OS"):
+        validate_image_archive(
+            archive,
+            image_id,
+            "amnezia-awg2:local",
+            docker_image_diff_ids(archive),
+            docker_image_config_sha256(),
+            "amd64",
+            "linux",
+        )
 
 
 def test_validate_source_archive_requires_safe_complete_source_tree() -> None:

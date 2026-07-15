@@ -1,7 +1,7 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-14 после подготовки runtime-complete v2 gate для
-`PHASE11-RESTORE-001A`.
+Актуально: 2026-07-15 после исправления executable-Config binding, полного
+root regression и clean security rescan для `PHASE11-RESTORE-001A`.
 
 Этот файл задаёт текущий исполняемый порядок Phase 11. Полная продуктовая
 карта и exclusions остаются в
@@ -37,11 +37,15 @@ second_vps=clean_ssh_only|temporary_restore_001a_role
 
 ### C1. `PHASE11-RESTORE-001A` canonical full-secret disposable rehearsal
 
-Состояние: `reviewed-ready-awaiting-exact-approval`. Runtime-complete v2 writer,
-verifier и bounded archive/runtime validators прошли 35 focused tests, весь
-root scope — 64 tests, progress harness — 20 tests; post-fix security scan дал
-complete coverage и 0 findings. Сам live rehearsal не запускался и требует
-точного approval из текущего status block.
+Состояние: `approved-pending-docs-commit-push-and-live-retry`. Exact approval
+получен, но не consumed. Найденный Medium blocker
+`P11-LEGACY-IMAGE-CONFIG-UNBOUND-001` исправлен: runtime-complete v2
+связывает canonical executable Config SHA-256, `amd64/linux`, RootFS DiffIDs
+и фактические layer bytes. Проверка: runtime 15 passed, recovery scoped 41
+passed, полный root scope 70 passed, independent verifier 35 passed. Clean
+security scan: complete coverage, 6/6 full-file receipts, 0 findings. Live
+rehearsal ещё не запускался; следующий порядок — docs/status, commit, push,
+затем выполнение уже одобренного gate.
 
 - использует чистый второй VPS как trusted disposable environment;
 - доказывает полный canonical offline restore path;
@@ -132,23 +136,27 @@ gate. Не использовать approvals из Phase 10 или уже consum
 Одиночная:
 
 ```text
-GPT-5.6 SOL -> START_PHASE11_RESTORE_001A_RUNTIME_COMPLETE_V2_LIVE_GATE_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE
+GPT-5.6 SOL -> COMMIT_AND_PUSH_PHASE11_LEGACY_IMAGE_CONFIG_BINDING_SECURITY_FIX
 ```
 
 Двойная:
 
 ```text
-GPT-5.6 SOL -> START_PHASE11_RESTORE_001A_RUNTIME_COMPLETE_V2_LIVE_GATE_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE -> AFTER_APPROVAL_RUN_VERIFY_CLEANUP_AND_REAUDIT_WITH_PRODUCTION_AWG_UNTOUCHED
+GPT-5.6 SOL -> COMMIT_AND_PUSH_PHASE11_LEGACY_IMAGE_CONFIG_BINDING_SECURITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A
 ```
 
 Тройная:
 
 ```text
-GPT-5.6 SOL -> START_PHASE11_RESTORE_001A_RUNTIME_COMPLETE_V2_LIVE_GATE_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE -> AFTER_APPROVAL_RUN_VERIFY_CLEANUP_AND_REAUDIT_WITH_PRODUCTION_AWG_UNTOUCHED -> DECIDE_OLD_FALLBACK_AND_SECOND_VPS_SAFE_RETIREMENT_GATES
+GPT-5.6 SOL -> COMMIT_AND_PUSH_PHASE11_LEGACY_IMAGE_CONFIG_BINDING_SECURITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_AND_MANDATORY_CLEANUP
 ```
+
+Четверная:
+
+    GPT-5.6 SOL -> COMMIT_AND_PUSH_PHASE11_LEGACY_IMAGE_CONFIG_BINDING_SECURITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_AND_MANDATORY_CLEANUP -> PRODUCTION_AWG_REAUDIT
 
 Более — рекомендовано:
 
 ```text
-GPT-5.6 SOL -> START_PHASE11_RESTORE_001A_RUNTIME_COMPLETE_V2_LIVE_GATE_SLICE -> RUN_SCOPED_TESTS_FOR_SELECTED_SLICE -> AFTER_APPROVAL_RUN_VERIFY_CLEANUP_AND_REAUDIT_WITH_PRODUCTION_AWG_UNTOUCHED -> DECIDE_OLD_FALLBACK_AND_SECOND_VPS_SAFE_RETIREMENT_GATES -> IMPLEMENT_TELEGRAM_002A_LOCAL_PERSISTENT_ADMISSION_AND_UNIT_HARDENING
+GPT-5.6 SOL -> COMMIT_AND_PUSH_PHASE11_LEGACY_IMAGE_CONFIG_BINDING_SECURITY_FIX -> RETRY_ALREADY_APPROVED_RESTORE_001A -> STAGING_ISOLATED_FULL_SECRET_VERIFY_AND_MANDATORY_CLEANUP -> PRODUCTION_AWG_REAUDIT -> DECIDE_OLD_FALLBACK_AND_SECOND_VPS_SAFE_RETIREMENT_GATES -> IMPLEMENT_TELEGRAM_002A_LOCAL_PERSISTENT_ADMISSION_AND_UNIT_HARDENING
 ```

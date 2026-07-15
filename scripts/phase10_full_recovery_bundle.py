@@ -202,6 +202,10 @@ def assemble_runtime_recovery_files(
             image_archive,
             container_image_id,
             str(runtime["image_reference"]),
+            list(runtime["image_rootfs_diff_ids"]),
+            str(runtime["image_config_sha256"]),
+            str(runtime["image_architecture"]),
+            str(runtime["image_os"]),
         )
         validate_source_archive(
             source_archive, source_overlay, expected_source_archive_sha256
@@ -373,15 +377,28 @@ def collect_runtime_files(container_name: str, image_id: str) -> dict[str, bytes
     inspect_bytes = run_docker(
         ["inspect", container_name], "runtime contract inspection"
     )
+    image_inspect_bytes = run_docker(
+        ["image", "inspect", image_id], "runtime image inspection"
+    )
     try:
-        runtime_contract = normalize_runtime_contract(inspect_bytes, image_id)
+        runtime_contract = normalize_runtime_contract(
+            inspect_bytes, image_id, image_inspect_bytes
+        )
         runtime = validate_runtime_contract(runtime_contract)
         image_archive = run_docker(
-            ["image", "save", str(runtime["image_reference"])],
+            ["image", "save", image_id],
             "image archive export",
             timeout_seconds=DOCKER_IMAGE_EXPORT_TIMEOUT_SECONDS,
         )
-        validate_image_archive(image_archive, image_id, IMAGE_REFERENCE)
+        validate_image_archive(
+            image_archive,
+            image_id,
+            IMAGE_REFERENCE,
+            list(runtime["image_rootfs_diff_ids"]),
+            str(runtime["image_config_sha256"]),
+            str(runtime["image_architecture"]),
+            str(runtime["image_os"]),
+        )
     except RuntimeContractError as exc:
         raise RecoveryWriterError(str(exc)) from exc
     return {

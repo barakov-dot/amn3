@@ -1,20 +1,23 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
-## Current continuation override 2026-07-14
+## Current continuation override 2026-07-15
 
 ```text
 active_phase=Phase 11 Controlled Launch and Operations
 amn2_source=codex-vps-test-prep|801f8c3|origin_sync
 production_overlay=801f8c3
-restore_001a_gate=reviewed_ready_awaiting_exact_approval
+restore_001a_gate=approved_pending_docs_commit_push_and_live_retry
+restore_001a_approval=received|not_consumed
 restore_001a_format=runtime_complete_v2|required_external_source_digest
-restore_001a_security=complete_coverage|findings_0
+restore_001a_security_blocker=P11_LEGACY_IMAGE_CONFIG_UNBOUND_001|fixed
+restore_001a_security=complete_coverage|full_file_receipts_6_of_6|findings_0|snapshot_d56c7864892bdf6f024b1e701b93577a286f1f7d467d50fde2882437757ae12c
+restore_001a_tests=runtime_15_passed|recovery_scoped_41_passed|root_70_passed|independent_verifier_35_passed
 telegram_001=completed_pass
 telegram_002=hold_disabled_go_local_hardening
 ops_001=completed_healthy
 recovery_001=retain_old_fallback_until_restore_001a
 second_vps=clean_ssh_only|keep_temporarily_for_restore_001a|independent_dr_false
-next=OPERATOR_EXACT_APPROVAL_FOR_PHASE11_RESTORE_001A
+next=COMMIT_PUSH_THEN_RETRY_ALREADY_APPROVED_PHASE11_RESTORE_001A
 ```
 
 Актуальный план по критичности:

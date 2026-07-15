@@ -1,4 +1,20 @@
-# Текущий override 2026-06-09
+# Текущий override 2026-07-15
+
+Phase 11 RESTORE-001A security blocker P11-LEGACY-IMAGE-CONFIG-UNBOUND-001 is
+fixed local-only and the clean working-tree diff scan is sealed with complete
+coverage, six of six full-file receipts and zero findings. Evidence:
+research/amn2/phase-11-legacy-image-config-binding-security-fix-2026-07-15.md.
+The runtime-complete v2 contract now binds the canonical daemon executable
+Config SHA-256, amd64/linux identity, ordered RootFS DiffIDs and archive layer
+bytes without storing or printing raw Config values. Verification: runtime 15
+passed, combined recovery 41 passed, full root 70 passed, independent verifier
+35 passed. The existing exact RESTORE-001A approval is received but not
+consumed; the next path is docs/status sync, commit, push, then live retry with
+mandatory staging cleanup and production AWG re-audit. No VPS/SSH restore
+action, secret transfer, service restart, Telegram call, AWG mutation, old
+fallback deletion or provider deletion occurred.
+
+# Предыдущий override 2026-06-09
 
 Phase 8 private RC Telegram bot live preview review/runbook prepared docs-only.
 Review: `docs/AMN2_PRIVATE_RC_TELEGRAM_BOT_LIVE_PREVIEW_GATE_REVIEW.ru.md`.

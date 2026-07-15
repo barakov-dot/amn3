@@ -26,6 +26,9 @@ from scripts.phase10_restore_rehearsal_verify import (
 )
 from tests.test_phase11_recovery_runtime import (
     docker_image_archive,
+    docker_image_diff_ids,
+    docker_image_inspect,
+    docker_image_runtime_config,
     docker_inspect,
     source_archive,
 )
@@ -95,6 +98,7 @@ def recovery_files(*, malformed_metadata: bool = False) -> dict[str, bytes]:
 def runtime_complete_recovery_files() -> dict[str, bytes]:
     files = recovery_files()
     archive, image_id = docker_image_archive()
+    diff_ids = docker_image_diff_ids(archive)
     inspect_bytes, _fixture_image_id = docker_inspect()
     inspect_rows = json.loads(inspect_bytes)
     inspect_rows[0]["Image"] = image_id
@@ -108,7 +112,9 @@ def runtime_complete_recovery_files() -> dict[str, bytes]:
         f"container_image_id={image_id}".encode(),
     ) + f"source_archive_sha256={source_digest}\n".encode()
     files["container/runtime.json"] = normalize_runtime_contract(
-        json.dumps(inspect_rows).encode(), image_id
+        json.dumps(inspect_rows).encode(),
+        image_id,
+        docker_image_inspect(image_id, diff_ids),
     )
     files["container/image.tar"] = archive
     files["host/source.tar.gz"] = source_bundle
@@ -269,6 +275,28 @@ def test_restore_gate_can_require_runtime_complete_v2_and_source_digest() -> Non
 
     assert report["format"] == "amn2-full-recovery-v2"
     assert report["source_archive"]["sha256"] == source_digest
+
+
+def test_restore_gate_rejects_changed_executable_config_with_same_rootfs() -> None:
+    files = runtime_complete_recovery_files()
+    changed_config = docker_image_runtime_config()
+    changed_config["Healthcheck"] = {"Test": ["CMD-SHELL", "/bin/true"]}
+    changed_archive, _changed_image_id = docker_image_archive(
+        runtime_config=changed_config
+    )
+    files["container/image.tar"] = changed_archive
+    files[MANIFEST_NAME] = build_manifest(
+        {name: value for name, value in files.items() if name != MANIFEST_NAME}
+    )
+
+    with pytest.raises(VerificationError, match="executable config"):
+        validate_recovery_files(
+            files,
+            required_format="amn2-full-recovery-v2",
+            expected_source_archive_sha256=hashlib.sha256(
+                files["host/source.tar.gz"]
+            ).hexdigest(),
+        )
 
 
 def test_restore_gate_required_v2_rejects_legacy_v1() -> None:

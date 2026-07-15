@@ -14,7 +14,7 @@ from pathlib import PurePosixPath
 from typing import Mapping
 
 
-RUNTIME_SCHEMA = "amn2-awg-runtime-v1"
+RUNTIME_SCHEMA = "amn2-awg-runtime-v2"
 IMAGE_REFERENCE = "amnezia-awg2:local"
 MAX_IMAGE_ARCHIVE_BYTES = 64 * 1024 * 1024
 MAX_IMAGE_ARCHIVE_FILES = 512
@@ -22,6 +22,8 @@ MAX_SOURCE_ARCHIVE_BYTES = 32 * 1024 * 1024
 MAX_SOURCE_ARCHIVE_DECOMPRESSED_BYTES = 24 * 1024 * 1024
 MAX_SOURCE_ARCHIVE_FILES = 4096
 EXPECTED_CAPABILITIES = ["CAP_NET_ADMIN", "CAP_SYS_MODULE"]
+EXPECTED_IMAGE_ARCHITECTURE = "amd64"
+EXPECTED_IMAGE_OS = "linux"
 EXPECTED_ENVIRONMENT_KEYS = {
     "AWG_SUBNET_IP",
     "PATH",
@@ -83,10 +85,64 @@ def _validate_safe_environment(environment: object) -> dict[str, str]:
     return {"AWG_SUBNET_IP": subnet_ip, "WIREGUARD_SUBNET_CIDR": cidr}
 
 
-def normalize_runtime_contract(inspect_bytes: bytes, expected_image_id: str) -> bytes:
+def _parse_image_identity(
+    image_inspect_bytes: bytes, image_id: str
+) -> tuple[list[str], str, str, str]:
+    try:
+        rows = json.loads(image_inspect_bytes)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise RuntimeContractError("Docker image inspect response is invalid") from exc
+    if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], dict):
+        raise RuntimeContractError("Docker image inspect response is invalid")
+    row = rows[0]
+    if _require_image_id(row.get("Id")) != image_id:
+        raise RuntimeContractError("Docker image inspect ID changed")
+    if IMAGE_REFERENCE not in (row.get("RepoTags") or []):
+        raise RuntimeContractError("Docker image reference is not bound to runtime image")
+    image_config = row.get("Config")
+    if not isinstance(image_config, dict):
+        raise RuntimeContractError("Docker image config contract is invalid")
+    architecture = row.get("Architecture")
+    image_os = row.get("Os")
+    if architecture != EXPECTED_IMAGE_ARCHITECTURE:
+        raise RuntimeContractError("Docker image architecture is unsupported")
+    if image_os != EXPECTED_IMAGE_OS:
+        raise RuntimeContractError("Docker image OS is unsupported")
+    rootfs = row.get("RootFS")
+    if not isinstance(rootfs, dict) or rootfs.get("Type") != "layers":
+        raise RuntimeContractError("Docker image rootfs contract is invalid")
+    diff_ids = rootfs.get("Layers")
+    if (
+        not isinstance(diff_ids, list)
+        or not diff_ids
+        or len(diff_ids) > 128
+        or any(
+            not isinstance(value, str)
+            or not re.fullmatch(r"sha256:[0-9a-f]{64}", value)
+            for value in diff_ids
+        )
+    ):
+        raise RuntimeContractError("Docker image rootfs layer contract is invalid")
+    config_sha256 = "sha256:" + hashlib.sha256(
+        _canonical_json(image_config)
+    ).hexdigest()
+    return list(diff_ids), config_sha256, architecture, image_os
+
+
+def normalize_runtime_contract(
+    inspect_bytes: bytes,
+    expected_image_id: str,
+    image_inspect_bytes: bytes,
+) -> bytes:
     """Convert Docker inspect JSON into the only approved AMN2 AWG profile."""
 
     image_id = _require_image_id(expected_image_id)
+    (
+        image_rootfs_diff_ids,
+        image_config_sha256,
+        image_architecture,
+        image_os,
+    ) = _parse_image_identity(image_inspect_bytes, image_id)
     try:
         rows = json.loads(inspect_bytes)
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -160,6 +216,10 @@ def normalize_runtime_contract(inspect_bytes: bytes, expected_image_id: str) -> 
         "schema": RUNTIME_SCHEMA,
         "image_id": image_id,
         "image_reference": IMAGE_REFERENCE,
+        "image_config_sha256": image_config_sha256,
+        "image_architecture": image_architecture,
+        "image_os": image_os,
+        "image_rootfs_diff_ids": image_rootfs_diff_ids,
         "network_mode": "bridge",
         "restart_policy": {"name": "unless-stopped", "maximum_retry_count": 0},
         "privileged": True,
@@ -200,6 +260,10 @@ def validate_runtime_contract(value: bytes) -> dict[str, object]:
         "schema",
         "image_id",
         "image_reference",
+        "image_config_sha256",
+        "image_architecture",
+        "image_os",
+        "image_rootfs_diff_ids",
         "network_mode",
         "restart_policy",
         "privileged",
@@ -216,9 +280,28 @@ def validate_runtime_contract(value: bytes) -> dict[str, object]:
     if set(contract) != expected_keys:
         raise RuntimeContractError("runtime contract keys are invalid")
     image_id = _require_image_id(contract.get("image_id"))
+    image_config_sha256 = contract.get("image_config_sha256")
+    if not isinstance(image_config_sha256, str) or not re.fullmatch(
+        r"sha256:[0-9a-f]{64}", image_config_sha256
+    ):
+        raise RuntimeContractError("runtime image config digest is invalid")
+    image_rootfs_diff_ids = contract.get("image_rootfs_diff_ids")
+    if (
+        not isinstance(image_rootfs_diff_ids, list)
+        or not image_rootfs_diff_ids
+        or len(image_rootfs_diff_ids) > 128
+        or any(
+            not isinstance(value, str)
+            or not re.fullmatch(r"sha256:[0-9a-f]{64}", value)
+            for value in image_rootfs_diff_ids
+        )
+    ):
+        raise RuntimeContractError("runtime image rootfs layer contract is invalid")
     fixed = {
         "schema": RUNTIME_SCHEMA,
         "image_reference": IMAGE_REFERENCE,
+        "image_architecture": EXPECTED_IMAGE_ARCHITECTURE,
+        "image_os": EXPECTED_IMAGE_OS,
         "network_mode": "bridge",
         "restart_policy": {"maximum_retry_count": 0, "name": "unless-stopped"},
         "privileged": True,
@@ -263,11 +346,23 @@ def _normalize_archive_name(value: str) -> str:
 
 
 def validate_image_archive(
-    archive_bytes: bytes, expected_image_id: str, expected_reference: str
+    archive_bytes: bytes,
+    expected_image_id: str,
+    expected_reference: str,
+    expected_rootfs_diff_ids: list[str],
+    expected_config_sha256: str,
+    expected_architecture: str,
+    expected_os: str,
 ) -> dict[str, object]:
     image_id = _require_image_id(expected_image_id)
     if expected_reference != IMAGE_REFERENCE:
         raise RuntimeContractError("image archive reference is unsupported")
+    if not re.fullmatch(r"sha256:[0-9a-f]{64}", expected_config_sha256):
+        raise RuntimeContractError("image archive expected config digest is invalid")
+    if expected_architecture != EXPECTED_IMAGE_ARCHITECTURE:
+        raise RuntimeContractError("image archive expected architecture is unsupported")
+    if expected_os != EXPECTED_IMAGE_OS:
+        raise RuntimeContractError("image archive expected OS is unsupported")
     if len(archive_bytes) > MAX_IMAGE_ARCHIVE_BYTES:
         raise RuntimeContractError("image archive size limit exceeded")
     try:
@@ -301,21 +396,37 @@ def validate_image_archive(
         raise RuntimeContractError("image archive manifest is invalid")
     row = manifest[0]
     config_name = _normalize_archive_name(str(row.get("Config") or ""))
-    expected_digest = image_id.removeprefix("sha256:")
-    if config_name != f"{expected_digest}.json" or config_name not in files:
-        raise RuntimeContractError("image archive config digest does not match image ID")
+    if not re.fullmatch(r"[0-9a-f]{64}\.json", config_name) or config_name not in files:
+        raise RuntimeContractError("image archive config digest is invalid")
+    expected_config_digest = config_name.removesuffix(".json")
     actual_digest = hashlib.sha256(files[config_name]).hexdigest()
-    if actual_digest != expected_digest:
-        raise RuntimeContractError("image archive config digest does not match image ID")
+    if actual_digest != expected_config_digest:
+        raise RuntimeContractError("image archive config digest mismatch")
     try:
         image_config = json.loads(files[config_name])
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise RuntimeContractError("image archive config JSON is invalid") from exc
     if not isinstance(image_config, dict):
         raise RuntimeContractError("image archive config JSON is invalid")
+    exported_config = image_config.get("config")
+    if not isinstance(exported_config, dict):
+        raise RuntimeContractError("image archive executable config is invalid")
+    exported_config_sha256 = "sha256:" + hashlib.sha256(
+        _canonical_json(exported_config)
+    ).hexdigest()
+    if exported_config_sha256 != expected_config_sha256:
+        raise RuntimeContractError(
+            "image archive executable config does not match runtime image"
+        )
+    if image_config.get("architecture") != expected_architecture:
+        raise RuntimeContractError(
+            "image archive architecture does not match runtime image"
+        )
+    if image_config.get("os") != expected_os:
+        raise RuntimeContractError("image archive OS does not match runtime image")
     repo_tags = row.get("RepoTags")
-    if not isinstance(repo_tags, list) or expected_reference not in repo_tags:
-        raise RuntimeContractError("image archive repo tag is missing")
+    if repo_tags != []:
+        raise RuntimeContractError("immutable image archive unexpectedly contains repo tags")
     layers = row.get("Layers")
     if not isinstance(layers, list) or not layers:
         raise RuntimeContractError("image archive layers are missing")
@@ -330,6 +441,8 @@ def validate_image_archive(
     diff_ids = rootfs.get("diff_ids")
     if not isinstance(diff_ids, list) or len(diff_ids) != len(normalized_layers):
         raise RuntimeContractError("image archive layer digest contract is invalid")
+    if diff_ids != expected_rootfs_diff_ids:
+        raise RuntimeContractError("image archive rootfs does not match runtime image")
     for layer_name, diff_id in zip(normalized_layers, diff_ids, strict=True):
         if not isinstance(diff_id, str) or not re.fullmatch(
             r"sha256:[0-9a-f]{64}", diff_id
@@ -339,8 +452,11 @@ def validate_image_archive(
         if actual_layer_digest != diff_id:
             raise RuntimeContractError("image archive layer digest mismatch")
     return {
-        "config_digest": image_id,
-        "repo_tag": expected_reference,
+        "config_digest": "sha256:" + actual_digest,
+        "runtime_image_id": image_id,
+        "image_reference": expected_reference,
+        "repo_tags": repo_tags,
+        "image_config_contract": "passed",
         "layer_count": len(normalized_layers),
         "archive_bytes": len(archive_bytes),
     }

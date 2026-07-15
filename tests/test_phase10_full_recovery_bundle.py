@@ -28,6 +28,8 @@ from scripts.phase10_restore_rehearsal_verify import (
 from scripts.phase11_recovery_runtime import normalize_runtime_contract
 from tests.test_phase11_recovery_runtime import (
     docker_image_archive,
+    docker_image_diff_ids,
+    docker_image_inspect,
     docker_inspect,
     source_archive,
 )
@@ -129,11 +131,14 @@ def test_encrypted_writer_output_passes_recovery_verifier(tmp_path: Path) -> Non
 
 def test_runtime_complete_writer_output_passes_v2_verifier(tmp_path: Path) -> None:
     image_archive, image_id = docker_image_archive()
+    diff_ids = docker_image_diff_ids(image_archive)
     inspect_bytes, _fixture_image_id = docker_inspect()
     inspect_rows = json.loads(inspect_bytes)
     inspect_rows[0]["Image"] = image_id
     runtime_contract = normalize_runtime_contract(
-        json.dumps(inspect_rows).encode(), image_id
+        json.dumps(inspect_rows).encode(),
+        image_id,
+        docker_image_inspect(image_id, diff_ids),
     )
     source_bundle = source_archive()
 
@@ -152,11 +157,13 @@ def test_runtime_complete_writer_output_passes_v2_verifier(tmp_path: Path) -> No
     report = validate_recovery_files(files)
     assert report["format"] == "amn2-full-recovery-v2"
     assert report["runtime_contract"] == "passed"
-    assert report["image_archive"]["config_digest"] == image_id
+    assert report["image_archive"]["runtime_image_id"] == image_id
 
 
 def test_collect_runtime_files_uses_read_only_inspect_and_image_save(monkeypatch) -> None:
-    image_archive, image_id = docker_image_archive()
+    image_archive, _config_image_id = docker_image_archive(repo_tags=[])
+    image_id = "sha256:" + "d" * 64
+    image_inspect = docker_image_inspect(image_id, docker_image_diff_ids(image_archive))
     inspect_bytes, _fixture_image_id = docker_inspect()
     inspect_rows = json.loads(inspect_bytes)
     inspect_rows[0]["Image"] = image_id
@@ -166,7 +173,9 @@ def test_collect_runtime_files_uses_read_only_inspect_and_image_save(monkeypatch
         calls.append((list(arguments), label))
         if arguments == ["inspect", "amneziya-awg2"]:
             return json.dumps(inspect_rows).encode()
-        if arguments == ["image", "save", "amnezia-awg2:local"]:
+        if arguments == ["image", "inspect", image_id]:
+            return image_inspect
+        if arguments == ["image", "save", image_id]:
             return image_archive
         raise AssertionError(f"unexpected Docker command: {arguments}")
 
@@ -179,7 +188,8 @@ def test_collect_runtime_files_uses_read_only_inspect_and_image_save(monkeypatch
     assert set(runtime_files) == {"container/runtime.json", "container/image.tar"}
     assert calls == [
         (["inspect", "amneziya-awg2"], "runtime contract inspection"),
-        (["image", "save", "amnezia-awg2:local"], "image archive export"),
+        (["image", "inspect", image_id], "runtime image inspection"),
+        (["image", "save", image_id], "image archive export"),
     ]
 
 

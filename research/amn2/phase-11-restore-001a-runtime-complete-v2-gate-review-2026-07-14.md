@@ -2,6 +2,21 @@
 
 Date: 2026-07-14.
 
+Amendment 2026-07-15: the exact approval was received and remains not
+consumed because live execution has not started. A later sealed scan found the
+Medium executable-Config binding gap P11-LEGACY-IMAGE-CONFIG-UNBOUND-001.
+The gap is fixed: runtime-complete v2 now binds canonical executable Config
+SHA-256, exact amd64/linux identity, ordered RootFS DiffIDs and archive layer
+bytes without storing or printing raw Config values. Current verification is
+runtime 15 passed, recovery scoped 41 passed, full root 70 passed and
+independent verifier 35 passed. Clean rescan snapshot
+codex-security-snapshot/v1:sha256:d56c7864892bdf6f024b1e701b93577a286f1f7d467d50fde2882437757ae12c
+has complete coverage, six of six full-file receipts and zero findings.
+Current evidence:
+research/amn2/phase-11-legacy-image-config-binding-security-fix-2026-07-15.md.
+The ordered next step is docs/status sync, commit and push, then the already
+approved live sequence below. No live action was performed by the amendment.
+
 Decision: `READY FOR ONE EXACT APPROVAL; LIVE EXECUTION NOT STARTED`.
 
 This review did not contact production or staging, transfer a secret, create a

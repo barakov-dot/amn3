@@ -402,6 +402,10 @@ def validate_recovery_files(
                 files["container/image.tar"],
                 str(runtime["image_id"]),
                 str(runtime["image_reference"]),
+                list(runtime["image_rootfs_diff_ids"]),
+                str(runtime["image_config_sha256"]),
+                str(runtime["image_architecture"]),
+                str(runtime["image_os"]),
             )
             source_archive_report = validate_source_archive(
                 files["host/source.tar.gz"],
