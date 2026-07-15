@@ -162,7 +162,7 @@ def test_runtime_complete_writer_output_passes_v2_verifier(tmp_path: Path) -> No
 
 def test_runtime_complete_writer_accepts_oci_blob_image_archive(tmp_path: Path) -> None:
     image_archive, image_id = docker_image_archive(
-        archive_layout="oci", repo_tags=["amnezia-awg2:local"]
+        archive_layout="oci", repo_tags_null=True
     )
     diff_ids = docker_image_diff_ids(image_archive)
     inspect_bytes, _fixture_image_id = docker_inspect()

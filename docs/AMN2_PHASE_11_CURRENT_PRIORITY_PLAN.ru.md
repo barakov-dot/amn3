@@ -1,8 +1,8 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-15 после fail-closed attempt 2 и минимального canonical
-RepoTags compatibility fix. Attempts 1-2 не создали ciphertext; approval
-остаётся not consumed.
+Актуально: 2026-07-15 после fail-closed attempt 3, sanitized JSON-null
+RepoTags diagnosis и минимального TDD fix. Attempts 1-3 не создали ciphertext;
+approval остаётся not consumed.
 
 Этот файл задаёт текущий исполняемый порядок Phase 11. Полная продуктовая
 карта и exclusions остаются в
@@ -40,7 +40,7 @@ second_vps=clean_ssh_only|temporary_restore_001a_role
 ### C1. `PHASE11-RESTORE-001A` canonical full-secret disposable rehearsal
 
 Состояние:
-`attempt-2-failed-closed|canonical-repotag-fix-verified|security-docs-commit-push-then-retry`.
+`attempt-3-failed-closed|json-null-repotags-fix-verified|security-docs-commit-push-then-retry`.
 Exact approval получен, но не consumed. Найденный Medium blocker
 `P11-LEGACY-IMAGE-CONFIG-UNBOUND-001` исправлен: runtime-complete v2
 связывает canonical executable Config SHA-256, `amd64/linux`, RootFS DiffIDs
@@ -70,6 +70,16 @@ RootFS/layer bindings сохранены. RED 3 failed, GREEN 6 passed, recovery
 passed, canonical root 77 passed. Independent security-focused review:
 Critical/Important/Minor `0/0/0`, ready yes. Следующий порядок — docs/status
 commit, push, затем retry в неизменном approved scope `801f8c3`.
+
+Attempt 3 подтвердил, что archive `RepoTags` не является canonical singleton:
+sanitized diagnostic доказал присутствующий key со значением JSON `null`.
+Config и шесть OCI layers canonical/self-bound. Новый минимальный fix требует
+наличие `RepoTags` key и принимает только `null`, `[]` или exact singleton
+canonical reference; missing/malformed/foreign/additional/duplicate остаются
+fail-closed. RED 3 failed, GREEN 8 passed, recovery 50 passed, canonical root
+79 passed. Cleanup и re-audits снова прошли; AWG untouched. Следующий порядок
+— independent security review `0/0/0`, ready yes; docs/status commit, push и
+тот же approved retry.
 
 - использует чистый второй VPS как trusted disposable environment;
 - доказывает полный canonical offline restore path;

@@ -99,6 +99,8 @@ def docker_image_config_sha256(
 def docker_image_archive(
     *,
     repo_tags: list[str] | None = None,
+    repo_tags_null: bool = False,
+    repo_tags_missing: bool = False,
     runtime_config: dict[str, object] | None = None,
     architecture: str = "amd64",
     image_os: str = "linux",
@@ -129,16 +131,17 @@ def docker_image_archive(
         layer_name = f"blobs/sha256/{layer_digest}"
     else:
         raise ValueError("unsupported synthetic image archive layout")
-    manifest = json.dumps(
-        [
-            {
-                "Config": config_name,
-                "RepoTags": [] if repo_tags is None else repo_tags,
-                "Layers": [layer_name],
-            }
-        ],
-        separators=(",", ":"),
-    ).encode()
+    if repo_tags_null and (repo_tags is not None or repo_tags_missing):
+        raise ValueError("synthetic RepoTags options are mutually exclusive")
+    manifest_row: dict[str, object] = {
+        "Config": config_name,
+        "Layers": [layer_name],
+    }
+    if not repo_tags_missing:
+        manifest_row["RepoTags"] = (
+            None if repo_tags_null else ([] if repo_tags is None else repo_tags)
+        )
+    manifest = json.dumps([manifest_row], separators=(",", ":")).encode()
     output = io.BytesIO()
     with tarfile.open(fileobj=output, mode="w") as archive:
         for name, value in (
@@ -317,6 +320,39 @@ def test_validate_image_archive_accepts_only_canonical_repo_tag() -> None:
     )
 
     assert report["repo_tags"] == ["amnezia-awg2:local"]
+
+
+def test_validate_image_archive_accepts_explicit_null_repo_tags() -> None:
+    archive, image_id = docker_image_archive(
+        archive_layout="oci", repo_tags_null=True
+    )
+
+    report = validate_image_archive(
+        archive,
+        image_id,
+        "amnezia-awg2:local",
+        docker_image_diff_ids(archive),
+        docker_image_config_sha256(),
+        "amd64",
+        "linux",
+    )
+
+    assert report["repo_tags"] is None
+
+
+def test_validate_image_archive_rejects_missing_repo_tags() -> None:
+    archive, image_id = docker_image_archive(repo_tags_missing=True)
+
+    with pytest.raises(RuntimeContractError, match="repo tag"):
+        validate_image_archive(
+            archive,
+            image_id,
+            "amnezia-awg2:local",
+            docker_image_diff_ids(archive),
+            docker_image_config_sha256(),
+            "amd64",
+            "linux",
+        )
 
 
 @pytest.mark.parametrize(

@@ -1,5 +1,27 @@
 # Текущий override 2026-07-15
 
+RESTORE-001A attempt 3 entered only the production writer and again stopped
+fail-closed before ciphertext creation on the RepoTags contract. Production
+cleanup and mandatory runtime/OPS re-audits passed; overlay remains `801f8c3`,
+web is healthy, bot inactive/disabled, database integrity OK, and AWG remains
+running with restart count zero and the unchanged 12-peer set. Telegram API was
+not called; no secret transfer or staging mutation occurred.
+
+A sanitized read-only diagnostic then proved the precise production shape:
+the `RepoTags` key is present with JSON `null`, while Config and all six OCI
+layers remain canonical and self-bound. The minimal validator fix now requires
+the key to be present and accepts only JSON `null`, an empty list, or the exact
+singleton canonical expected reference. Missing, malformed, foreign,
+additional and duplicate values remain fail-closed. TDD: expected RED `3
+failed`, GREEN `8 passed`; recovery `50 passed`; canonical root `79 passed`;
+compile/diff clean. Independent security-focused review found zero Critical,
+Important or Minor issues and returned ready yes. Evidence:
+`research/amn2/phase-11-restore-001a-json-null-repotags-compatibility-fix-2026-07-15.md`.
+Approval remains `received|not_consumed` and pinned to `801f8c3`. Next:
+docs/status commit/push and the same approved retry.
+
+# Предыдущий override 2026-07-15
+
 RESTORE-001A attempt 2 entered only the production bundle writer and stopped
 fail-closed before ciphertext creation because production `docker image save`
 preserves the one canonical local `RepoTags` value even when exporting by

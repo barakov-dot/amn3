@@ -99,10 +99,13 @@ def runtime_complete_recovery_files(
     *,
     archive_layout: str = "legacy",
     repo_tags: list[str] | None = None,
+    repo_tags_null: bool = False,
 ) -> dict[str, bytes]:
     files = recovery_files()
     archive, image_id = docker_image_archive(
-        archive_layout=archive_layout, repo_tags=repo_tags
+        archive_layout=archive_layout,
+        repo_tags=repo_tags,
+        repo_tags_null=repo_tags_null,
     )
     diff_ids = docker_image_diff_ids(archive)
     inspect_bytes, _fixture_image_id = docker_inspect()
@@ -285,7 +288,7 @@ def test_restore_gate_can_require_runtime_complete_v2_and_source_digest() -> Non
 
 def test_restore_gate_accepts_oci_blob_image_archive() -> None:
     files = runtime_complete_recovery_files(
-        archive_layout="oci", repo_tags=["amnezia-awg2:local"]
+        archive_layout="oci", repo_tags_null=True
     )
     source_digest = hashlib.sha256(files["host/source.tar.gz"]).hexdigest()
 

@@ -45,6 +45,27 @@ RED 3 expected failures, GREEN 6 passed, recovery scope 48 passed and canonical
 root scope 77 passed. Current evidence:
 `research/amn2/phase-11-restore-001a-canonical-repotag-compatibility-fix-2026-07-15.md`.
 
+## 2026-07-15 attempt 3 fail-closed addendum
+
+After canonical singleton RepoTag compatibility commit `1479dc8`, attempt 3
+entered only the production writer and stopped before ciphertext creation on
+the bounded RepoTags contract. Cleanup and mandatory runtime/OPS re-audits
+passed; production remained on `801f8c3`, AWG running/restart zero/12 peers
+unchanged, and Telegram API was not called.
+
+A sanitized read-only archive diagnostic emitted classifications and booleans
+only. It proved that the manifest `RepoTags` key is present with JSON `null`,
+not a list, while Config and all six OCI layers remain canonical, safe and
+self-bound. Diagnostic temp cleanup passed.
+
+The minimal local fix requires key presence and accepts only JSON `null`, an
+empty list, or the exact singleton canonical expected reference. Missing,
+malformed, foreign, additional and duplicate values remain fail-closed. Config,
+platform, ordered RootFS and every layer-byte binding are unchanged. TDD:
+RED 3 expected failures, GREEN 8 passed, recovery 50 passed, canonical root 79
+passed. Current evidence:
+`research/amn2/phase-11-restore-001a-json-null-repotags-compatibility-fix-2026-07-15.md`.
+
 ## Why the existing canonical v1 is not sufficient
 
 The accepted `amn2-full-recovery-v1` authenticates and verifies the production
