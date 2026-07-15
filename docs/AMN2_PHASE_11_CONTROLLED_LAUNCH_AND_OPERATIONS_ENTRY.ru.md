@@ -1,6 +1,23 @@
 # AMN2 Phase 11 Controlled Launch and Operations Entry
 
-## Current execution override 2026-07-15
+## Current execution override 2026-07-15 after recovery/VPS/logo package decisions
+
+Old recovery fallback остаётся sealed без удаления до повторного review не
+позднее 2026-08-01. Второй VPS AMN2 больше не нужен: он clean SSH-only,
+пользователь держит его до выходных и затем передаёт под другой функционал;
+provider deletion/cancel/renewal mutation не является AMN2-задачей. Перед
+handover остаётся финальный read-only audit и, по отдельному exact approval,
+удаление только dedicated staging SSH key и local known-host binding.
+
+Canonical-logo private overlay package для source `6abc620` подготовлен и
+clean-scanned, но не uploaded/applied; production остаётся `801f8c3`, regular
+bot inactive/disabled, Telegram profile unchanged, AWG untouched. Текущий
+engineering priority — design gate, затем TDD implementation
+`PHASE11-TELEGRAM-002A`.
+
+Дата: 2026-07-15.
+
+## Previous execution override 2026-07-15
 
 Текущий исполняемый порядок после успешного `PHASE11-RESTORE-001A` находится в
 `docs/AMN2_PHASE_11_CURRENT_PRIORITY_PLAN.ru.md`. Production overlay и AMN2

@@ -1,6 +1,23 @@
 # AMN2 Phase 11 First Message
 
-## Continuation override 2026-07-14
+## Continuation override 2026-07-15
+
+`PHASE11-RESTORE-001A` passed. Old recovery fallback retained sealed without
+deletion. Второй VPS AMN2 больше не нужен: clean SSH-only, пользователь держит
+его до выходных и затем передаёт под другой функционал; provider mutation не
+выполнять. Canonical logo source `6abc620` packaged and clean-scanned, но
+production остаётся `801f8c3`; bot inactive/disabled, Telegram profile
+unchanged, AWG untouched.
+
+Текущая рекомендуемая команда:
+
+```text
+GPT-5.6 SOL -> REVIEW_PHASE11_TELEGRAM_002A_FAIL_CLOSED_PERSISTENT_ADMISSION_DESIGN
+```
+
+---
+
+## Prior continuation override 2026-07-14
 
 `PHASE11-RESTORE-001A` gate review завершён: runtime-complete v2 tooling,
 tests, security review и mandatory cleanup contract готовы. Live execution,

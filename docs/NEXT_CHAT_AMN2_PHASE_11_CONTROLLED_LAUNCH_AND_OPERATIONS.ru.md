@@ -1,6 +1,23 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
-## Current continuation override 2026-07-15 after RESTORE-001A pass
+## Current continuation override 2026-07-15 after fallback/VPS/logo package decision
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+amn2_source=codex-vps-test-prep|6abc620|origin_sync
+production_overlay=801f8c3|unchanged
+recovery_001=retain_old_fallback_sealed_without_deletion|review_by_2026-08-01
+second_vps=clean_ssh_only|amn2_no_longer_needed|user_hold_through_weekend_then_repurpose
+second_vps_billing=paid_until_2026-08-12_23_18_25|590_rub_month|auto_renew_enabled_observed|no_mutation
+second_vps_handover=final_read_only_audit_then_exact_local_staging_key_and_known_host_cleanup_only
+brand_001=package_ready_6abc620|sha256_2683420dd7a705c96490dc1878d14d208986209bf8eb1b6e1b066d31b17932f5|not_deployed
+brand_001_security=coverage_7_of_7|findings_0|snapshot_36d08ba1945558ee590e3c8d1057eeb37ad634141ae432cb070355ab242f38fb
+brand_001_live=regular_bot_inactive_disabled|telegram_profile_unchanged|awg_untouched
+telegram_002a=local_design_gate_next|implementation_not_started
+next=REVIEW_AND_APPROVE_TELEGRAM_002A_FAIL_CLOSED_DESIGN_THEN_TDD_IMPLEMENTATION
+```
+
+## Previous continuation override 2026-07-15 after RESTORE-001A pass
 
 ```text
 active_phase=Phase 11 Controlled Launch and Operations

@@ -1,7 +1,7 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-15 после успешного `PHASE11-RESTORE-001A` full-secret
-trusted disposable rehearsal, mandatory cleanup и production re-audits.
+Актуально: 2026-07-15 после решения сохранить old fallback sealed, завершения
+AMN2-роли второго VPS и подготовки clean-scanned canonical-logo package.
 
 Этот файл задаёт текущий исполняемый порядок Phase 11. Полная продуктовая
 карта и exclusions остаются в
@@ -21,8 +21,11 @@ web=active_enabled_loopback_only
 regular_bot=inactive_disabled
 write_gates=false_false
 awg=running_restart_0_peers_12_set_unchanged
-old_recovery_fallback=retained_sealed|retirement_decision_unblocked
-second_vps=clean_ssh_only|restore_role_complete|safe_retirement_gate_recommended
+old_recovery_fallback=retained_sealed_without_deletion|review_by_2026-08-01
+second_vps=clean_ssh_only|amn2_no_longer_needed|user_hold_through_weekend_then_repurpose
+second_vps_provider=paid_until_2026-08-12_23_18_25|590_rub_month|auto_renew_enabled_observed|no_mutation
+brand_001=package_ready_6abc620|security_findings_0|production_still_801f8c3
+telegram_002a=local_design_gate_next|production_bot_inactive_disabled
 ```
 
 ## Закрыто в P0
@@ -33,8 +36,9 @@ second_vps=clean_ssh_only|restore_role_complete|safe_retirement_gate_recommended
 | Критично | `PHASE11-TELEGRAM-002` | persistent bot activation held; regular service remains disabled; local hardening follow-up defined |
 | Критично | `PHASE11-OPS-001` | bounded runtime/recovery snapshot healthy; no failed units or AMN2/Docker error rows; AWG invariant passed |
 | Критично | `PHASE11-RESTORE-001A` | canonical v2 full-secret disposable restore passed; isolated AWG12 and loopback web/DB verified; cleanup and production re-audits passed |
-| Критично | `PHASE11-RECOVERY-001` | old bundle/key retirement decision unblocked; destructive deletion remains a separate exact gate |
-| Очень важно | second VPS retention audit | restore role complete; host clean SSH-only; safe provider retirement gate recommended |
+| Критично | `PHASE11-RECOVERY-001` | old fallback retained sealed without deletion; do not open/copy/move/delete; review by 2026-08-01 |
+| Очень важно | second VPS AMN2 role | AMN2 no longer needs it; host clean SSH-only; user keeps it through the weekend and then repurposes it |
+| Очень важно | `PHASE11-BRAND-001` package | exact `6abc620` private overlay package built and verified; security coverage 7/7, findings 0; not deployed |
 
 ## P0/P1 — критично, выполнять следующим
 
@@ -124,30 +128,42 @@ Local product/engineering slice:
 ### C2a. `PHASE11-BRAND-001` canonical logo production rollout
 
 Local source завершён и pushed в `6abc620`: bot `/start`, web login/dashboard
-используют один canonical PNG; security scan clean. Production всё ещё
-`801f8c3`, поэтому новый logo не deployed. `RESTORE-001A` завершён; следующим
-отдельно подготовить package/rollout gate без bot start/enable. Telegram profile
-photo — отдельная live identity mutation и требует другого exact gate.
+используют один canonical PNG. Exact private overlay package подготовлен:
+`dist/amn2-canonical-logo-overlay-6abc620.zip`, SHA-256
+`2683420dd7a705c96490dc1878d14d208986209bf8eb1b6e1b066d31b17932f5`.
+Focused tests: 26 passed; independent exact source-delta scope: 14 passed;
+package/bash/ZIP/diff/toolchain checks passed. Canonical security scan: 7/7
+receipts, findings 0, snapshot
+`36d08ba1945558ee590e3c8d1057eeb37ad634141ae432cb070355ab242f38fb`.
 
-### C3. Recovery and second-VPS retirement gates
+Production остаётся `801f8c3`: package не uploaded и не applied. Live rollout
+остаётся за exact phrase из
+`docs/AMN2_PHASE_11_6ABC620_CANONICAL_LOGO_OVERLAY_GATE.ru.md`; regular bot
+остаётся inactive/disabled, Telegram profile photo не меняется, AWG untouched.
 
-`RESTORE-001A=pass`, поэтому следующие решения разблокированы, но ещё не
-исполнены:
+### C3. Recovery fallback retention и second-VPS AMN2 handover
 
-1. Exact destructive gate на удаление двух старых ciphertext copies, receipts
-   и старого symmetric key.
-2. Повторный clean audit второго VPS.
-3. Exact provider retirement gate.
-4. После provider deletion — локальное удаление только staging SSH key и его
-   known-host binding.
+Old recovery fallback сохранить sealed без удаления минимум до повторного
+review не позднее 2026-08-01. В текущем slice его не открывать, не копировать,
+не перемещать и не удалять. Любое destructive действие остаётся отдельным
+exact gate; canonical ciphertext/key и production SSH binding не трогать.
 
-Canonical ciphertext/key и production SSH binding не трогать.
+Второй VPS AMN2 больше не нужен. После `RESTORE-001A` он повторно проверен как
+clean SSH-only: AMN2 tree/units/artifacts отсутствуют, Docker отсутствует,
+failed units 0. Пользователь держит сервер до выходных как краткий резерв и
+затем передаёт под другой функционал. Это handover, а не provider retirement:
+не удалять VPS, не отменять тариф и не менять автопродление.
 
-### C4. Billing cutoff visibility
+Перед передачей выполнить ещё один read-only clean audit. После отдельной
+точной фразы допускается убрать только dedicated AMN2 staging SSH key и его
+local known-host binding; remote server, production и AWG не менять.
 
-До provider renewal получить точную дату/стоимость read-only из кабинета или
-от оператора. Основная restore-причина держать второй VPS снята; не продлевать
-его молча — подготовить exact retirement либо явное one-cycle extension decision.
+### C4. Billing visibility — read-only завершено
+
+Provider portal read-only показал: оплачено до `12.08.2026 23:18:25` в
+provider display, текущий месячный период `590,00 RUB`, auto-renew включён.
+Никаких provider/billing mutations не выполнено. Дальнейшая судьба тарифа
+относится к новому пользовательскому назначению VPS, не к AMN2 handover.
 
 ## P1 — очень важно после критического recovery/bot пути
 
@@ -199,29 +215,29 @@ gate. Не использовать approvals из Phase 10 или уже consum
 Одиночная:
 
 ```text
-GPT-5.6 SOL -> SEAL_PHASE11_RESTORE_001A_PASS_EVIDENCE_STATUS_COMMIT_AND_PUSH
+GPT-5.6 SOL -> REVIEW_PHASE11_TELEGRAM_002A_FAIL_CLOSED_PERSISTENT_ADMISSION_DESIGN
 ```
 
 Двойная:
 
 ```text
-GPT-5.6 SOL -> SEAL_PHASE11_RESTORE_001A_PASS_EVIDENCE_STATUS_COMMIT_AND_PUSH -> DECIDE_OLD_FALLBACK_RETIREMENT_GATE
+GPT-5.6 SOL -> REVIEW_PHASE11_TELEGRAM_002A_FAIL_CLOSED_PERSISTENT_ADMISSION_DESIGN -> APPROVE_PHASE11_TELEGRAM_002A_DESIGN
 ```
 
 Тройная:
 
 ```text
-GPT-5.6 SOL -> SEAL_PHASE11_RESTORE_001A_PASS_EVIDENCE_STATUS_COMMIT_AND_PUSH -> DECIDE_OLD_FALLBACK_RETIREMENT_GATE -> PREPARE_SECOND_VPS_SAFE_RETIREMENT_GATE
+GPT-5.6 SOL -> REVIEW_PHASE11_TELEGRAM_002A_FAIL_CLOSED_PERSISTENT_ADMISSION_DESIGN -> APPROVE_PHASE11_TELEGRAM_002A_DESIGN -> WRITE_AND_COMMIT_TELEGRAM_002A_DESIGN_SPEC
 ```
 
 Четверная:
 
 ```text
-GPT-5.6 SOL -> SEAL_PHASE11_RESTORE_001A_PASS_EVIDENCE_STATUS_COMMIT_AND_PUSH -> DECIDE_OLD_FALLBACK_RETIREMENT_GATE -> PREPARE_SECOND_VPS_SAFE_RETIREMENT_GATE -> PREPARE_6ABC620_CANONICAL_LOGO_PRIVATE_OVERLAY_ROLLOUT_GATE
+GPT-5.6 SOL -> REVIEW_PHASE11_TELEGRAM_002A_FAIL_CLOSED_PERSISTENT_ADMISSION_DESIGN -> APPROVE_PHASE11_TELEGRAM_002A_DESIGN -> WRITE_AND_COMMIT_TELEGRAM_002A_DESIGN_SPEC -> WRITE_TELEGRAM_002A_TDD_IMPLEMENTATION_PLAN
 ```
 
 Более — рекомендовано:
 
 ```text
-GPT-5.6 SOL -> SEAL_PHASE11_RESTORE_001A_PASS_EVIDENCE_STATUS_COMMIT_AND_PUSH -> DECIDE_OLD_FALLBACK_RETIREMENT_GATE -> PREPARE_SECOND_VPS_SAFE_RETIREMENT_GATE -> PREPARE_6ABC620_CANONICAL_LOGO_PRIVATE_OVERLAY_ROLLOUT_GATE -> IMPLEMENT_TELEGRAM_002A_LOCAL_PERSISTENT_ADMISSION_AND_UNIT_HARDENING -> RUN_SCOPED_TESTS_DIFF_AND_SECURITY_REVIEW -> SYNC_STATUS_COMMIT_AND_PUSH
+GPT-5.6 SOL -> REVIEW_PHASE11_TELEGRAM_002A_FAIL_CLOSED_PERSISTENT_ADMISSION_DESIGN -> APPROVE_PHASE11_TELEGRAM_002A_DESIGN -> WRITE_AND_COMMIT_TELEGRAM_002A_DESIGN_SPEC -> WRITE_TELEGRAM_002A_TDD_IMPLEMENTATION_PLAN -> IMPLEMENT_TELEGRAM_002A_LOCAL_PERSISTENT_ADMISSION_AND_UNIT_HARDENING -> RUN_SCOPED_TESTS_DIFF_AND_SECURITY_REVIEW -> SYNC_STATUS_COMMIT_AND_PUSH -> PREPARE_6ABC620_CANONICAL_LOGO_LIVE_ROLLOUT_APPROVAL
 ```
