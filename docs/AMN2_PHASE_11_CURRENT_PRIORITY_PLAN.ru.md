@@ -1,7 +1,7 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-16 после завершения и push local
-`PHASE11-TELEGRAM-002A` hardening на source `08c56f2`.
+Актуально: 2026-07-16 после завершения и push
+`PHASE11-BRAND-002` wide language-selection header на source `0b858c5`.
 
 Этот файл задаёт текущий исполняемый порядок Phase 11. Полная продуктовая
 карта и exclusions остаются в
@@ -13,7 +13,7 @@
 
 ```text
 active_phase=Phase 11 Controlled Launch and Operations
-amn2_source=codex-vps-test-prep|08c56f2beff65145380fdb3736d94c0709a2b33a|origin_sync|clean
+amn2_source=codex-vps-test-prep|0b858c5cdbc5b565cc265966a2edfe2d339d65e0|origin_sync|clean
 production_overlay=801f8c3
 restore_001a_source_pin=801f8c3|approval_scope_unchanged
 restore_001a=completed_pass|approval_consumed
@@ -24,9 +24,10 @@ awg=running_restart_0_peers_12_set_unchanged
 old_recovery_fallback=retained_sealed_without_deletion|review_by_2026-08-01
 second_vps=clean_ssh_only|amn2_no_longer_needed|user_hold_through_weekend_then_repurpose
 second_vps_provider=paid_until_2026-08-12_23_18_25|590_rub_month|auto_renew_enabled_observed|no_mutation
-brand_001=integrated_in_descendant_08c56f2|old_logo_only_package_superseded_as_combined_candidate|production_still_801f8c3
-telegram_002a=local_implementation_complete|scoped_113|full_915_passed_1_skipped|clean_security_15_of_15_findings_0|production_bot_inactive_disabled
-next=prepare_08c56f2_combined_private_overlay_package_and_exact_rollout_gate
+brand_001=integrated_in_descendant_0b858c5|square_assets_preserved|old_logo_only_package_superseded_as_combined_candidate|production_still_801f8c3
+brand_002=wide_language_selection_header_complete|source_0b858c5|png_1672x941|sha256_bbddfa72d1d1fc37e412d2f4a9b4124001ff91fbd641635e31a47e008fc4611f|clean_security_findings_0|production_not_deployed
+telegram_002a=local_implementation_complete|contained_in_source_0b858c5|scoped_113|full_915_passed_1_skipped|clean_security_15_of_15_findings_0|production_bot_inactive_disabled
+next=prepare_0b858c5_combined_private_overlay_package_and_exact_rollout_gate
 ```
 
 ## Закрыто в P0
@@ -34,13 +35,14 @@ next=prepare_08c56f2_combined_private_overlay_package_and_exact_rollout_gate
 | Критичность | ID | Результат |
 |---|---|---|
 | Критично | `PHASE11-TELEGRAM-001` | transient first-admin exact `/start` smoke passed; one response; production DB unchanged; cleanup passed |
-| Критично | `PHASE11-TELEGRAM-002` | persistent bot activation held; regular service remains disabled; local hardening follow-up completed in `08c56f2` |
-| Критично | `PHASE11-TELEGRAM-002A` | local fail-closed admission/unit hardening complete and pushed; scoped 113, full 915/1 skipped; clean scan 15/15, findings 0; no live activation |
+| Критично | `PHASE11-TELEGRAM-002` | persistent bot activation held; regular service remains disabled; local hardening follow-up completed in `08c56f2` and is contained in source `0b858c5` |
+| Критично | `PHASE11-TELEGRAM-002A` | local fail-closed admission/unit hardening complete and pushed; contained in `0b858c5`; scoped 113, full 915/1 skipped; clean scan 15/15, findings 0; no live activation |
 | Критично | `PHASE11-OPS-001` | bounded runtime/recovery snapshot healthy; no failed units or AMN2/Docker error rows; AWG invariant passed |
 | Критично | `PHASE11-RESTORE-001A` | canonical v2 full-secret disposable restore passed; isolated AWG12 and loopback web/DB verified; cleanup and production re-audits passed |
 | Критично | `PHASE11-RECOVERY-001` | old fallback retained sealed without deletion; do not open/copy/move/delete; review by 2026-08-01 |
 | Очень важно | second VPS AMN2 role | AMN2 no longer needs it; host clean SSH-only; user keeps it through the weekend and then repurposes it |
-| Очень важно | `PHASE11-BRAND-001` source | canonical logo is contained in descendant `08c56f2`; old `6abc620` package remains not deployed and is no longer the current combined candidate |
+| Очень важно | `PHASE11-BRAND-001` source | canonical square logo is contained in descendant `0b858c5`; old `6abc620` package remains not deployed and is no longer the current combined candidate |
+| Очень важно | `PHASE11-BRAND-002` source | exact 1672x941 language-selection header integrated and pushed in `0b858c5`; `/start` role-specific usage and text-only fallback verified; square assets unchanged; no live activation |
 
 ## P0/P1 — критично, выполнять следующим
 
@@ -133,13 +135,14 @@ package/rollout. Перед будущим VPS-write mode обязателен t
 service-readable non-home SSH key/known-hosts path при сохранении
 `ProtectHome=true`.
 
-### C2a. Combined `08c56f2` production package and rollout
+### C2a. Combined `0b858c5` production package and rollout
 
-Canonical logo commit `6abc620` теперь является предком source `08c56f2`, в
-котором также находится Telegram hardening. Старый logo-only ZIP остаётся
-валидным historical artifact, но не является текущим production candidate.
-Нужно собрать новый exact combined package на `08c56f2`, связать source
-digest/apply/runbook/rollback, повторить package tests и clean security review.
+Canonical square-logo commit `6abc620` и Telegram hardening commit `08c56f2`
+теперь являются предками source `0b858c5`, который добавляет отдельный wide
+language-selection header. Старый logo-only ZIP остаётся валидным historical
+artifact, но не является текущим production candidate. Нужно собрать новый
+exact combined package на `0b858c5`, связать source digest/apply/runbook/
+rollback, повторить package tests и clean security review.
 
 Production остаётся `801f8c3`: новый package ещё не создан, не uploaded и не
 applied. Первый live transaction должен обновить source/web assets с regular
@@ -175,10 +178,12 @@ provider display, текущий месячный период `590,00 RUB`, aut
 
 ### Критичные
 
-1. `PHASE11-PACKAGE-08C56F2`: собрать новый combined private overlay из exact
-   `08c56f2`, проверить checksum, состав, source binding, apply и rollback.
+1. `PHASE11-PACKAGE-0B858C5`: собрать новый combined private overlay из exact
+   `0b858c5`, включающий canonical square logo, wide language-selection header
+   и Telegram hardening; проверить checksum, состав, source binding, apply и
+   rollback.
    Результат — copy-ready пакет; production пока не меняется.
-2. `PHASE11-ROLLOUT-08C56F2`: отдельным exact gate применить combined source
+2. `PHASE11-ROLLOUT-0B858C5`: отдельным exact gate применить combined source
    overlay, перезапустив только private web при snapshot/rollback. Regular bot
    остаётся inactive/disabled; AWG не останавливать и не перезапускать.
 3. `PHASE11-TELEGRAM-002B`: только после postflight rollout отдельным exact
@@ -242,7 +247,8 @@ provider display, текущий месячный период `590,00 RUB`, aut
 1. Telegram profile photo применить вручную через отдельный identity gate;
    это не часть source rollout или bot activation.
 2. Решить, нужен ли облегчённый PNG/thumbnail и отдельная C2PA/metadata policy
-   для canonical logo; визуальный источник уже интегрирован.
+   для brand assets. Exact wide source сохраняет provenance metadata; текущая
+   security-проверка чистая, а удаление metadata не входит в functional slice.
 3. Выравнять оставшиеся UI labels, русские формулировки и brand spacing после
    functional acceptance, не смешивая это с security/live gates.
 
@@ -266,29 +272,29 @@ gate. Не использовать approvals из Phase 10 или уже consum
 Одиночная:
 
 ```text
-GPT-5.6 SOL -> PREPARE_PHASE11_08C56F2_COMBINED_LOGO_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE
+GPT-5.6 SOL -> PREPARE_PHASE11_0B858C5_COMBINED_SQUARE_LOGO_WIDE_LANGUAGE_HEADER_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE
 ```
 
 Двойная:
 
 ```text
-GPT-5.6 SOL -> PREPARE_PHASE11_08C56F2_COMBINED_LOGO_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE -> VERIFY_PHASE11_08C56F2_PACKAGE_CHECKSUM_CONTENTS_SOURCE_BINDING_AND_ROLLBACK_CONTRACT
+GPT-5.6 SOL -> PREPARE_PHASE11_0B858C5_COMBINED_SQUARE_LOGO_WIDE_LANGUAGE_HEADER_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE -> VERIFY_PHASE11_0B858C5_PACKAGE_CHECKSUM_CONTENTS_SOURCE_BINDING_AND_ROLLBACK_CONTRACT
 ```
 
 Тройная:
 
 ```text
-GPT-5.6 SOL -> PREPARE_PHASE11_08C56F2_COMBINED_LOGO_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE -> VERIFY_PHASE11_08C56F2_PACKAGE_CHECKSUM_CONTENTS_SOURCE_BINDING_AND_ROLLBACK_CONTRACT -> RUN_PHASE11_08C56F2_SCOPED_PACKAGE_TESTS_DIFF_AND_CLEAN_SECURITY_REVIEW
+GPT-5.6 SOL -> PREPARE_PHASE11_0B858C5_COMBINED_SQUARE_LOGO_WIDE_LANGUAGE_HEADER_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE -> VERIFY_PHASE11_0B858C5_PACKAGE_CHECKSUM_CONTENTS_SOURCE_BINDING_AND_ROLLBACK_CONTRACT -> RUN_PHASE11_0B858C5_SCOPED_PACKAGE_TESTS_DIFF_AND_CLEAN_SECURITY_REVIEW
 ```
 
 Четверная:
 
 ```text
-GPT-5.6 SOL -> PREPARE_PHASE11_08C56F2_COMBINED_LOGO_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE -> VERIFY_PHASE11_08C56F2_PACKAGE_CHECKSUM_CONTENTS_SOURCE_BINDING_AND_ROLLBACK_CONTRACT -> RUN_PHASE11_08C56F2_SCOPED_PACKAGE_TESTS_DIFF_AND_CLEAN_SECURITY_REVIEW -> SYNC_PHASE11_08C56F2_PACKAGE_GATE_STATUS_COMMIT_AND_PUSH
+GPT-5.6 SOL -> PREPARE_PHASE11_0B858C5_COMBINED_SQUARE_LOGO_WIDE_LANGUAGE_HEADER_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE -> VERIFY_PHASE11_0B858C5_PACKAGE_CHECKSUM_CONTENTS_SOURCE_BINDING_AND_ROLLBACK_CONTRACT -> RUN_PHASE11_0B858C5_SCOPED_PACKAGE_TESTS_DIFF_AND_CLEAN_SECURITY_REVIEW -> SYNC_PHASE11_0B858C5_PACKAGE_GATE_STATUS_COMMIT_AND_PUSH
 ```
 
 Более — рекомендовано:
 
 ```text
-GPT-5.6 SOL -> PREPARE_PHASE11_08C56F2_COMBINED_LOGO_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE -> VERIFY_PHASE11_08C56F2_PACKAGE_CHECKSUM_CONTENTS_SOURCE_BINDING_AND_ROLLBACK_CONTRACT -> RUN_PHASE11_08C56F2_SCOPED_PACKAGE_TESTS_DIFF_AND_CLEAN_SECURITY_REVIEW -> SYNC_PHASE11_08C56F2_PACKAGE_GATE_STATUS_COMMIT_AND_PUSH -> PREPARE_EXACT_PHASE11_08C56F2_PRIVATE_OVERLAY_APPROVAL_PHRASE_WITH_REGULAR_BOT_DISABLED_AND_AWG_UNTOUCHED
+GPT-5.6 SOL -> PREPARE_PHASE11_0B858C5_COMBINED_SQUARE_LOGO_WIDE_LANGUAGE_HEADER_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE -> VERIFY_PHASE11_0B858C5_PACKAGE_CHECKSUM_CONTENTS_SOURCE_BINDING_AND_ROLLBACK_CONTRACT -> RUN_PHASE11_0B858C5_SCOPED_PACKAGE_TESTS_DIFF_AND_CLEAN_SECURITY_REVIEW -> SYNC_PHASE11_0B858C5_PACKAGE_GATE_STATUS_COMMIT_AND_PUSH -> PREPARE_EXACT_PHASE11_0B858C5_PRIVATE_OVERLAY_APPROVAL_PHRASE_WITH_REGULAR_BOT_DISABLED_AND_AWG_UNTOUCHED
 ```
