@@ -1,6 +1,26 @@
 # AMN2 Phase 11 First Message
 
-## Continuation override 2026-07-15
+## Continuation override 2026-07-16
+
+`PHASE11-TELEGRAM-002A` local persistent admission/unit hardening завершён,
+clean-scanned и pushed: AMN2 source `08c56f2`, origin sync, clean. Production
+остаётся `801f8c3`; regular bot inactive/disabled, Telegram API/profile,
+production web/DB, VPS/provider и AWG не менялись.
+
+Следующий package должен быть combined descendant `08c56f2`, уже содержащим
+canonical logo и Telegram hardening. Старый logo-only package `6abc620` не
+выкатывать отдельно как текущий candidate. Второй VPS AMN2 больше не нужен;
+пользователь держит его до выходных и затем передаёт под другой функционал.
+
+Текущая рекомендуемая команда:
+
+```text
+GPT-5.6 SOL -> PREPARE_PHASE11_08C56F2_COMBINED_LOGO_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE
+```
+
+---
+
+## Prior continuation override 2026-07-15
 
 `PHASE11-RESTORE-001A` passed. Old recovery fallback retained sealed without
 deletion. Второй VPS AMN2 больше не нужен: clean SSH-only, пользователь держит
@@ -141,8 +161,9 @@ Operator requirements:
   requested.
 - Use `scripts/phase9_progress_harness.py` and
   `tests/test_phase9_progress_harness.py` as the mandatory progress harness.
-- After each result show the next plan as `Одиночная`, `Двойная`, `Тройная`
-  or `Более`, with the model and exact commands.
+- After each result show the next plan as `Одиночная`, `Двойная`, `Тройная`,
+  `Четверная` and `Более — рекомендовано`; every exact command starts with
+  `GPT-5.6 SOL`.
 - Prefer doing all discoverable/local work yourself. Ask for manual action only
   when a physical client/device or external operator console is unavoidable.
 

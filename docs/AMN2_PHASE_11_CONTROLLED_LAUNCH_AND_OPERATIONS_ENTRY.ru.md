@@ -1,6 +1,30 @@
 # AMN2 Phase 11 Controlled Launch and Operations Entry
 
-## Current execution override 2026-07-15 after recovery/VPS/logo package decisions
+## Current execution override 2026-07-16 after TELEGRAM-002A local hardening
+
+`PHASE11-TELEGRAM-002A` реализован, clean-scanned и pushed как AMN2 source
+`08c56f2beff65145380fdb3736d94c0709a2b33a`. Identity/webhook/backlog/poll
+ownership checks, повторный pre-poll state check, process-lifetime lock,
+allowed updates, concurrency limit `8`, один overall startup budget, systemd
+readiness/watchdog/restart limits и sandbox подтверждены TDD. Scoped tests:
+113 passed; полный source suite: 915 passed, 1 skipped; clean security scan:
+15/15 receipts, findings 0.
+
+Это local-only result. Production остаётся `801f8c3`, regular bot
+inactive/disabled, Telegram API/profile, production web/DB, оба VPS и AWG не
+изменялись. Следующий critical шаг — подготовить новый combined private
+overlay package на exact `08c56f2` (он уже содержит canonical logo), проверить
+contents/checksum/rollback и только затем вынести отдельный exact rollout gate.
+Старый logo-only package `6abc620` не считать текущим combined candidate.
+
+Перед будущим bot VPS-write activation сохранить `ProtectHome=true` и отдельно
+доказать service-readable non-home SSH key/known-hosts path. Второй VPS AMN2
+уже не нужен; до пользовательского handover остаётся read-only audit и только
+отдельно approved cleanup dedicated staging key/known-host binding.
+
+Дата: 2026-07-16.
+
+## Previous execution override 2026-07-15 after recovery/VPS/logo package decisions
 
 Old recovery fallback остаётся sealed без удаления до повторного review не
 позднее 2026-08-01. Второй VPS AMN2 больше не нужен: он clean SSH-only,

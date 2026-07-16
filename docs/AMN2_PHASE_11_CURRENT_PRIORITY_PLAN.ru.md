@@ -1,7 +1,7 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-15 после решения сохранить old fallback sealed, завершения
-AMN2-роли второго VPS и подготовки clean-scanned canonical-logo package.
+Актуально: 2026-07-16 после завершения и push local
+`PHASE11-TELEGRAM-002A` hardening на source `08c56f2`.
 
 Этот файл задаёт текущий исполняемый порядок Phase 11. Полная продуктовая
 карта и exclusions остаются в
@@ -13,7 +13,7 @@ AMN2-роли второго VPS и подготовки clean-scanned canonical
 
 ```text
 active_phase=Phase 11 Controlled Launch and Operations
-amn2_source=codex-vps-test-prep|6abc620|origin_sync
+amn2_source=codex-vps-test-prep|08c56f2beff65145380fdb3736d94c0709a2b33a|origin_sync|clean
 production_overlay=801f8c3
 restore_001a_source_pin=801f8c3|approval_scope_unchanged
 restore_001a=completed_pass|approval_consumed
@@ -24,8 +24,9 @@ awg=running_restart_0_peers_12_set_unchanged
 old_recovery_fallback=retained_sealed_without_deletion|review_by_2026-08-01
 second_vps=clean_ssh_only|amn2_no_longer_needed|user_hold_through_weekend_then_repurpose
 second_vps_provider=paid_until_2026-08-12_23_18_25|590_rub_month|auto_renew_enabled_observed|no_mutation
-brand_001=package_ready_6abc620|security_findings_0|production_still_801f8c3
-telegram_002a=local_design_gate_next|production_bot_inactive_disabled
+brand_001=integrated_in_descendant_08c56f2|old_logo_only_package_superseded_as_combined_candidate|production_still_801f8c3
+telegram_002a=local_implementation_complete|scoped_113|full_915_passed_1_skipped|clean_security_15_of_15_findings_0|production_bot_inactive_disabled
+next=prepare_08c56f2_combined_private_overlay_package_and_exact_rollout_gate
 ```
 
 ## Закрыто в P0
@@ -33,12 +34,13 @@ telegram_002a=local_design_gate_next|production_bot_inactive_disabled
 | Критичность | ID | Результат |
 |---|---|---|
 | Критично | `PHASE11-TELEGRAM-001` | transient first-admin exact `/start` smoke passed; one response; production DB unchanged; cleanup passed |
-| Критично | `PHASE11-TELEGRAM-002` | persistent bot activation held; regular service remains disabled; local hardening follow-up defined |
+| Критично | `PHASE11-TELEGRAM-002` | persistent bot activation held; regular service remains disabled; local hardening follow-up completed in `08c56f2` |
+| Критично | `PHASE11-TELEGRAM-002A` | local fail-closed admission/unit hardening complete and pushed; scoped 113, full 915/1 skipped; clean scan 15/15, findings 0; no live activation |
 | Критично | `PHASE11-OPS-001` | bounded runtime/recovery snapshot healthy; no failed units or AMN2/Docker error rows; AWG invariant passed |
 | Критично | `PHASE11-RESTORE-001A` | canonical v2 full-secret disposable restore passed; isolated AWG12 and loopback web/DB verified; cleanup and production re-audits passed |
 | Критично | `PHASE11-RECOVERY-001` | old fallback retained sealed without deletion; do not open/copy/move/delete; review by 2026-08-01 |
 | Очень важно | second VPS AMN2 role | AMN2 no longer needs it; host clean SSH-only; user keeps it through the weekend and then repurposes it |
-| Очень важно | `PHASE11-BRAND-001` package | exact `6abc620` private overlay package built and verified; security coverage 7/7, findings 0; not deployed |
+| Очень важно | `PHASE11-BRAND-001` source | canonical logo is contained in descendant `08c56f2`; old `6abc620` package remains not deployed and is no longer the current combined candidate |
 
 ## P0/P1 — критично, выполнять следующим
 
@@ -113,33 +115,37 @@ canonical systemd CIDR properties. Финальный full-secret run прошё
 
 ### C2. `PHASE11-TELEGRAM-002A` persistent admission and unit hardening
 
-Local product/engineering slice:
+Состояние: `completed-local|08c56f2|origin-sync|production-not-activated`.
 
-- identity/webhook/backlog admission до full dispatcher polling;
-- explicit allowed updates, single-instance and bounded startup receipt;
-- watchdog/liveness and non-looping restart policy;
-- narrowed systemd filesystem/device/home sandbox;
-- negative tests for backlog, webhook, identity, timeout and duplicate runtime;
-- package/rollout leaves bot inactive and disabled.
+- fail-closed identity/webhook/backlog/poll-ownership admission и repeated
+  pre-poll state check;
+- explicit `message,callback_query`, process-lifetime lock и update-task
+  concurrency limit `8`;
+- один overall pre-poll timeout до 120 seconds, systemd
+  `TimeoutStartSec=135s`, readiness/watchdog и bounded restart policy;
+- narrowed filesystem/device/home sandbox, stable sanitized failures;
+- RED 3 expected failures, GREEN 14; scoped 113, full 915 passed/1 skipped;
+- clean security scan 15/15 receipts, findings 0.
 
-Этот slice не включает production bot enable/start. Activation останется
-отдельным exact gate после code/tests/package/security review.
+Production bot enable/start, Telegram API/profile, VPS, web/DB и AWG не
+затронуты. Activation остаётся отдельным exact gate после нового combined
+package/rollout. Перед будущим VPS-write mode обязателен tested
+service-readable non-home SSH key/known-hosts path при сохранении
+`ProtectHome=true`.
 
-### C2a. `PHASE11-BRAND-001` canonical logo production rollout
+### C2a. Combined `08c56f2` production package and rollout
 
-Local source завершён и pushed в `6abc620`: bot `/start`, web login/dashboard
-используют один canonical PNG. Exact private overlay package подготовлен:
-`dist/amn2-canonical-logo-overlay-6abc620.zip`, SHA-256
-`2683420dd7a705c96490dc1878d14d208986209bf8eb1b6e1b066d31b17932f5`.
-Focused tests: 26 passed; independent exact source-delta scope: 14 passed;
-package/bash/ZIP/diff/toolchain checks passed. Canonical security scan: 7/7
-receipts, findings 0, snapshot
-`36d08ba1945558ee590e3c8d1057eeb37ad634141ae432cb070355ab242f38fb`.
+Canonical logo commit `6abc620` теперь является предком source `08c56f2`, в
+котором также находится Telegram hardening. Старый logo-only ZIP остаётся
+валидным historical artifact, но не является текущим production candidate.
+Нужно собрать новый exact combined package на `08c56f2`, связать source
+digest/apply/runbook/rollback, повторить package tests и clean security review.
 
-Production остаётся `801f8c3`: package не uploaded и не applied. Live rollout
-остаётся за exact phrase из
-`docs/AMN2_PHASE_11_6ABC620_CANONICAL_LOGO_OVERLAY_GATE.ru.md`; regular bot
-остаётся inactive/disabled, Telegram profile photo не меняется, AWG untouched.
+Production остаётся `801f8c3`: новый package ещё не создан, не uploaded и не
+applied. Первый live transaction должен обновить source/web assets с regular
+bot всё ещё inactive/disabled. Отдельный следующий gate уже после postflight
+может устанавливать/admit/start persistent bot. Telegram profile photo и AWG
+не входят ни в один из этих gates.
 
 ### C3. Recovery fallback retention и second-VPS AMN2 handover
 
@@ -165,35 +171,80 @@ provider display, текущий месячный период `590,00 RUB`, aut
 Никаких provider/billing mutations не выполнено. Дальнейшая судьба тарифа
 относится к новому пользовательскому назначению VPS, не к AMN2 handover.
 
-## P1 — очень важно после критического recovery/bot пути
+## Остаток Phase 11 по критичности
 
-| Порядок | ID | Scope |
-|---:|---|---|
-| 1 | `PHASE11-DEVICE-001` | authenticated read-only Device Passport/lifecycle list/detail UX |
-| 2 | `PHASE11-API-001` | private scoped API-key lane: scope, TTL, revoke, audit, loopback-only smoke |
-| 3 | `PHASE11-DEVICE-002` | one-config-per-device default, quota and owner-shared exception consistency |
-| 4 | `PHASE11-ENROLL-001` | deferred until explicit self-service requirement; abuse/rate-limit design first |
+### Критичные
 
-## P2 — важно, после P1 и named gates
+1. `PHASE11-PACKAGE-08C56F2`: собрать новый combined private overlay из exact
+   `08c56f2`, проверить checksum, состав, source binding, apply и rollback.
+   Результат — copy-ready пакет; production пока не меняется.
+2. `PHASE11-ROLLOUT-08C56F2`: отдельным exact gate применить combined source
+   overlay, перезапустив только private web при snapshot/rollback. Regular bot
+   остаётся inactive/disabled; AWG не останавливать и не перезапускать.
+3. `PHASE11-TELEGRAM-002B`: только после postflight rollout отдельным exact
+   gate установить unit/env contract, выполнить live admission и запустить
+   один persistent bot. Проверить identity, webhook empty, backlog 0,
+   single-instance, readiness/watchdog и rollback; AWG untouched.
+4. `PHASE11-SECOND-VPS-HANDOVER`: перед пользовательской передачей выполнить
+   финальный read-only clean audit. Dedicated AMN2 staging key и local
+   known-host binding удалять только по отдельной точной фразе; provider/VPS не
+   удалять. AMN2 уже не нуждается в этом VPS.
+5. `PHASE11-RECOVERY-001`: old fallback оставить sealed; до review не позднее
+   2026-08-01 не открывать, не копировать, не перемещать и не удалять.
 
-1. `PHASE11-DRIFT-001` history/retention/explainable UX.
-2. `PHASE11-DRIFT-002` OperationPlan preview/approve/apply/verify/rollback;
-   never automatic by default.
-3. `PHASE11-IPAM-001` dynamic subnet source-of-truth and conflict validation.
-4. `PHASE11-FLEET-001` capacity/placement/migration only after IPAM; the
-   current same-provider test VPS is not retained merely for this future item.
-5. `PHASE11-RESTORE-001` product single-flight/idempotency/backup-before-write
-   restore path after the `001A` operational rehearsal.
-6. `PHASE11-CLIENT-001` reacceptance only on published release/security/config
-   format triggers.
+### Очень важно
 
-## P3 — нормально / design-later
+1. `PHASE11-TELEGRAM-SSH-PREREQ`: до bot VPS-write mode вынести SSH key и
+   known-hosts в service-readable non-home path, проверить права и сохранить
+   `ProtectHome=true`.
+2. `PHASE11-DEVICE-001`: authenticated read-only Device Passport/lifecycle
+   list/detail UX — оператор видит состояние устройства без live mutation.
+3. `PHASE11-API-001`: private scoped API-key lane со scope, TTL, revoke, audit
+   и loopback-only smoke.
+4. `PHASE11-DEVICE-002`: согласовать one-config-per-device default, quota и
+   owner-shared exception во всех bot/web/API путях.
+5. `PHASE11-ENROLL-001`: открывать self-service Enrollment только при явной
+   продуктовой потребности; сначала abuse/rate-limit design.
 
-- `PHASE11-AUTH-001` web-admin 2FA recovery/lockout/rate-limit design;
-- `PHASE11-ROUTING-001` domain-zone exclusion policy, default-off;
-- `PHASE11-BOTS-001` separate support/news identities and runtimes;
-- `PHASE11-DOCS-001` OpenAPI grouping, DESIGN, naming and Russian-first polish;
-- `PHASE11-METRICS-001` privacy-safe metrics retention/expansion.
+### Важно
+
+1. `PHASE11-DRIFT-001`: история, retention и объяснимый operator UX.
+2. `PHASE11-DRIFT-002`: `OperationPlan` preview/approve/apply/verify/rollback;
+   автоматический apply по умолчанию запрещён.
+3. `PHASE11-RESTORE-001`: product restore с single-flight, idempotency,
+   backup-before-write, verify и rollback на базе успешного `001A` rehearsal.
+4. `PHASE11-CLIENT-001`: reacceptance только при опубликованном release,
+   security или config-format trigger; baseline-файл не менять без такого
+   события.
+
+### Средней критичности
+
+1. `PHASE11-IPAM-001`: dynamic subnet source-of-truth, reserved-address и
+   conflict validation.
+2. `PHASE11-FLEET-001`: capacity/placement/migration только после IPAM.
+   Текущий второй VPS для этого не удерживается и будет перепрофилирован.
+3. `PHASE11-AUTH-001`: web-admin 2FA, recovery, lockout и rate-limit design.
+4. `PHASE11-ROUTING-001`: domain-zone exclusion policy, default-off.
+
+### Простые доработки
+
+1. `PHASE11-BOTS-001`: описать отдельные identities/runtimes для support/news
+   bots без смешивания с production admin bot.
+2. `PHASE11-DOCS-001`: OpenAPI grouping, `DESIGN.md`, naming и Russian-first
+   operator docs.
+3. `PHASE11-METRICS-001`: privacy-safe metrics retention/expansion без raw
+   long-term telemetry.
+4. Дополнить activation/recovery runbooks короткими operator checklist после
+   фактического combined rollout.
+
+### Косметические доработки
+
+1. Telegram profile photo применить вручную через отдельный identity gate;
+   это не часть source rollout или bot activation.
+2. Решить, нужен ли облегчённый PNG/thumbnail и отдельная C2PA/metadata policy
+   для canonical logo; визуальный источник уже интегрирован.
+3. Выравнять оставшиеся UI labels, русские формулировки и brand spacing после
+   functional acceptance, не смешивая это с security/live gates.
 
 ## Обязательный порядок каждого engineering/live блока
 
@@ -215,29 +266,29 @@ gate. Не использовать approvals из Phase 10 или уже consum
 Одиночная:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_TELEGRAM_002A_FAIL_CLOSED_PERSISTENT_ADMISSION_DESIGN
+GPT-5.6 SOL -> PREPARE_PHASE11_08C56F2_COMBINED_LOGO_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE
 ```
 
 Двойная:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_TELEGRAM_002A_FAIL_CLOSED_PERSISTENT_ADMISSION_DESIGN -> APPROVE_PHASE11_TELEGRAM_002A_DESIGN
+GPT-5.6 SOL -> PREPARE_PHASE11_08C56F2_COMBINED_LOGO_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE -> VERIFY_PHASE11_08C56F2_PACKAGE_CHECKSUM_CONTENTS_SOURCE_BINDING_AND_ROLLBACK_CONTRACT
 ```
 
 Тройная:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_TELEGRAM_002A_FAIL_CLOSED_PERSISTENT_ADMISSION_DESIGN -> APPROVE_PHASE11_TELEGRAM_002A_DESIGN -> WRITE_AND_COMMIT_TELEGRAM_002A_DESIGN_SPEC
+GPT-5.6 SOL -> PREPARE_PHASE11_08C56F2_COMBINED_LOGO_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE -> VERIFY_PHASE11_08C56F2_PACKAGE_CHECKSUM_CONTENTS_SOURCE_BINDING_AND_ROLLBACK_CONTRACT -> RUN_PHASE11_08C56F2_SCOPED_PACKAGE_TESTS_DIFF_AND_CLEAN_SECURITY_REVIEW
 ```
 
 Четверная:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_TELEGRAM_002A_FAIL_CLOSED_PERSISTENT_ADMISSION_DESIGN -> APPROVE_PHASE11_TELEGRAM_002A_DESIGN -> WRITE_AND_COMMIT_TELEGRAM_002A_DESIGN_SPEC -> WRITE_TELEGRAM_002A_TDD_IMPLEMENTATION_PLAN
+GPT-5.6 SOL -> PREPARE_PHASE11_08C56F2_COMBINED_LOGO_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE -> VERIFY_PHASE11_08C56F2_PACKAGE_CHECKSUM_CONTENTS_SOURCE_BINDING_AND_ROLLBACK_CONTRACT -> RUN_PHASE11_08C56F2_SCOPED_PACKAGE_TESTS_DIFF_AND_CLEAN_SECURITY_REVIEW -> SYNC_PHASE11_08C56F2_PACKAGE_GATE_STATUS_COMMIT_AND_PUSH
 ```
 
 Более — рекомендовано:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_TELEGRAM_002A_FAIL_CLOSED_PERSISTENT_ADMISSION_DESIGN -> APPROVE_PHASE11_TELEGRAM_002A_DESIGN -> WRITE_AND_COMMIT_TELEGRAM_002A_DESIGN_SPEC -> WRITE_TELEGRAM_002A_TDD_IMPLEMENTATION_PLAN -> IMPLEMENT_TELEGRAM_002A_LOCAL_PERSISTENT_ADMISSION_AND_UNIT_HARDENING -> RUN_SCOPED_TESTS_DIFF_AND_SECURITY_REVIEW -> SYNC_STATUS_COMMIT_AND_PUSH -> PREPARE_6ABC620_CANONICAL_LOGO_LIVE_ROLLOUT_APPROVAL
+GPT-5.6 SOL -> PREPARE_PHASE11_08C56F2_COMBINED_LOGO_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_AND_ROLLOUT_GATE -> VERIFY_PHASE11_08C56F2_PACKAGE_CHECKSUM_CONTENTS_SOURCE_BINDING_AND_ROLLBACK_CONTRACT -> RUN_PHASE11_08C56F2_SCOPED_PACKAGE_TESTS_DIFF_AND_CLEAN_SECURITY_REVIEW -> SYNC_PHASE11_08C56F2_PACKAGE_GATE_STATUS_COMMIT_AND_PUSH -> PREPARE_EXACT_PHASE11_08C56F2_PRIVATE_OVERLAY_APPROVAL_PHRASE_WITH_REGULAR_BOT_DISABLED_AND_AWG_UNTOUCHED
 ```

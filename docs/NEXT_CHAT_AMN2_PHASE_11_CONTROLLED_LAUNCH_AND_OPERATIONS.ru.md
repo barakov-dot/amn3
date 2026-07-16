@@ -1,6 +1,24 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
-## Current continuation override 2026-07-15 after fallback/VPS/logo package decision
+## Current continuation override 2026-07-16 after TELEGRAM-002A local hardening
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+amn2_source=codex-vps-test-prep|08c56f2beff65145380fdb3736d94c0709a2b33a|origin_sync|clean
+production_overlay=801f8c3|unchanged
+telegram_002a=local_implementation_complete|production_not_activated
+telegram_002a_controls=fail_closed_admission_and_recheck|single_instance|allowed_updates|tasks_limit_8|overall_startup_max_120|systemd_start_135_watchdog_60
+telegram_002a_tests=scoped_113_passed|full_915_passed_1_skipped|toolchain_compile_diff_passed
+telegram_002a_security=clean_complete|receipts_15_of_15|findings_0|snapshot_da0f5ec50e574c749029210fe783b5dbc3a0ee97749b13ad44a8a83ddcc15105
+telegram_002a_live=regular_bot_inactive_disabled|telegram_api_false|vps_false|web_db_false|awg_untouched
+brand_001=contained_in_descendant_08c56f2|old_6abc620_package_not_current_combined_candidate|not_deployed
+recovery_001=retain_old_fallback_sealed_without_deletion|review_by_2026-08-01
+second_vps=clean_ssh_only|amn2_no_longer_needed|user_hold_through_weekend_then_repurpose
+second_vps_handover=final_read_only_audit_then_separately_approved_dedicated_staging_key_known_host_cleanup_only
+next=PREPARE_08C56F2_COMBINED_LOGO_AND_TELEGRAM_HARDENING_PRIVATE_OVERLAY_PACKAGE_VERIFY_ROLLBACK_GATE
+```
+
+## Previous continuation override 2026-07-15 after fallback/VPS/logo package decision
 
 ```text
 active_phase=Phase 11 Controlled Launch and Operations
@@ -235,4 +253,5 @@ Phase 10 plan.
 
 Engineering/product evidence first, tests second, diff review third, status
 sync fourth, commit/push last. Report commands as `Одиночная`, `Двойная`,
-`Тройная` or `Более` with `GPT-5.6 SOL` named explicitly.
+`Тройная`, `Четверная` and `Более — рекомендовано`, always beginning with
+`GPT-5.6 SOL`.
