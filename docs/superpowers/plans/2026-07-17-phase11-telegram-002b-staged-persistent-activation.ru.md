@@ -178,6 +178,10 @@ Security diff review.
   stable column/row order, support exclusion of exactly the first configured
   administrator's `users` row and emit hashes/counts without printing the ID.
 
+  The venv interpreter may be a symlink; resolve it with `readlink -f` and
+  require the final target to be a regular executable. Source/unit/env inputs
+  remain strict non-symlink regular files.
+
 - [x] **Step 3: Implement non-acknowledging Telegram preflight**
 
   Execute a bounded Python helper as service user with production environment.

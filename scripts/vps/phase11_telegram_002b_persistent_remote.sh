@@ -98,6 +98,15 @@ require_regular_file() {
   [ -f "$path" ] && [ ! -L "$path" ] || die "required regular file missing"
 }
 
+require_executable_file() {
+  local path="$1" resolved
+  [ -e "$path" ] || die "required executable missing"
+  resolved="$(readlink -f -- "$path" 2>/dev/null)" \
+    || die "required executable target unresolved"
+  [ -f "$resolved" ] && [ -x "$resolved" ] \
+    || die "required executable target invalid"
+}
+
 source_contract_check() {
   require_regular_file "$OVERLAY_MARKER"
   [ "$(tr -d '\r\n' < "$OVERLAY_MARKER")" = "$EXPECTED_OVERLAY" ] \
@@ -771,7 +780,8 @@ preflight() {
   require_cmd docker
   require_cmd curl
   require_cmd ss
-  require_regular_file "$PYTHON_BIN"
+  require_cmd readlink
+  require_executable_file "$PYTHON_BIN"
   id "$BOT_USER" >/dev/null 2>&1 || die "bot service user missing"
   getent group "$BOT_GROUP" >/dev/null 2>&1 || die "bot service group missing"
   source_contract_check

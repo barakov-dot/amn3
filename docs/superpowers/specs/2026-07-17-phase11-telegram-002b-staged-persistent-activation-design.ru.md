@@ -199,6 +199,10 @@ changed or printed. Exact source unit is installed root-owned mode `0644`, then
 10. service remains active with zero restarts and no conflict/traceback/error
     marker after the response.
 
+The preflight interpreter binding accepts a standard virtual-environment
+symlink only after `readlink -f` resolves it to a regular executable target;
+all source/unit/env files remain non-symlink regular-file bindings.
+
 Только runner mode `accept`, получивший exact confirmation и matching run id,
 может отменить rollback watchdog, выполнить `systemctl enable` и report
 `activation=pass`. Если `accept` не завершён за 240 секунд, root-only rollback

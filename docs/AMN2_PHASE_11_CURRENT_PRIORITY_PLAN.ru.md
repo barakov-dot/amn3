@@ -320,3 +320,19 @@ APPROVE_PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_14747241F1A0E0545CF8B96329
 ```
 
 Evidence: `research/amn2/phase-11-telegram-002b-staged-persistent-activation-gate-2026-07-17.md`.
+
+## TELEGRAM-002B preflight correction override
+
+Первый exact preflight дошёл до VPS, но fail-closed остановился на ожидаемом
+venv symlink `/opt/amn2/venv/bin/python`: source/unit/env bindings присутствуют,
+stage/accept не выполнялись. Локальный executor теперь разрешает только
+`readlink -f`-resolved regular executable target для Python; остальные inputs
+остаются strict non-symlink. Новый remote SHA:
+`3E6D42D6D7184BD7A05402585A85652C2319D1E0E9E8076217057AE5EE948881`.
+
+До новой literal approval-фразы live gate остановлен; AWG и regular bot
+остаются без изменений.
+
+```text
+APPROVE PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_3E6D42D6D7184BD7A05402585A85652C2319D1E0E9E8076217057AE5EE948881_0B858C5_EXACT_UNIT_ENV_TELEGRAM_PREFLIGHT_DISABLED_FIRST_STAGE_FIRST_CONFIGURED_ADMIN_SINGLE_START_WIDE_HEADER_EXACT_CONFIRM_ACCEPT_ENABLE_POSTFLIGHT_AUTOROLLBACK240_NO_BLIND_DB_RESTORE_WEB_UNTOUCHED_AND_AWG_UNTOUCHED
+```

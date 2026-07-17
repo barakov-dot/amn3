@@ -82,3 +82,30 @@ APPROVE PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_14747241F1A0E0545CF8B96329
 Until that phrase is separately issued, `regular_bot=inactive_disabled`,
 `telegram_profile=unchanged`, `database_live_write=false`,
 `provider_mutation=false`, and `awg=untouched` remain the enforced boundary.
+
+## Preflight correction 2026-07-17
+
+The first approved preflight reached the VPS but stopped fail-closed because
+`/opt/amn2/venv/bin/python` is a normal virtual-environment symlink. The source,
+unit, settings, `.env` and overlay marker bindings were present; no mutation,
+stage, bot start or AWG action occurred. The executor was corrected to resolve
+the interpreter with `readlink -f` and require a regular executable final
+target, while retaining strict non-symlink checks for source/unit/env inputs.
+
+```text
+preflight_attempt=fail_closed|missing_venv_symlink_target_check_only
+stage=false|accept=false|postflight=false
+awg=untouched
+new_remote_executor_sha256=3E6D42D6D7184BD7A05402585A85652C2319D1E0E9E8076217057AE5EE948881
+focused_tests=19_passed
+full_canonical_tests=114_passed
+syntax=bash_n_pass|powershell_parse_pass
+security_diff=0_new_reportable_findings
+new_approval=required|old_sha_phrase_not_valid_for_changed_bytes
+```
+
+New exact phrase, not yet issued or consumed:
+
+```text
+APPROVE PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_3E6D42D6D7184BD7A05402585A85652C2319D1E0E9E8076217057AE5EE948881_0B858C5_EXACT_UNIT_ENV_TELEGRAM_PREFLIGHT_DISABLED_FIRST_STAGE_FIRST_CONFIGURED_ADMIN_SINGLE_START_WIDE_HEADER_EXACT_CONFIRM_ACCEPT_ENABLE_POSTFLIGHT_AUTOROLLBACK240_NO_BLIND_DB_RESTORE_WEB_UNTOUCHED_AND_AWG_UNTOUCHED
+```

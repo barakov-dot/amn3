@@ -35,6 +35,13 @@ class Phase11Telegram002bActivationExecutorTests(unittest.TestCase):
         for marker in sorted(required):
             self.assertIn(marker, script)
 
+    def test_remote_allows_only_resolved_executable_venv_interpreter_target(self) -> None:
+        script = read_required(self, REMOTE, "remote activation executor")
+        self.assertIn("require_executable_file()", script)
+        self.assertIn('readlink -f -- "$path"', script)
+        self.assertIn('require_executable_file "$PYTHON_BIN"', script)
+        self.assertNotIn('require_regular_file "$PYTHON_BIN"', script)
+
     def test_remote_exposes_only_the_reviewed_modes(self) -> None:
         script = read_required(self, REMOTE, "remote activation executor")
         dispatch = script.split('case "$MODE" in', 1)[1]

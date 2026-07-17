@@ -5810,3 +5810,23 @@ Prepared phrase (not consumed):
 ```text
 APPROVE_PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_14747241F1A0E0545CF8B96329E90708F7CC80AF639872968DA03A1783200C64_0B858C5_EXACT_UNIT_ENV_TELEGRAM_PREFLIGHT_DISABLED_FIRST_STAGE_FIRST_CONFIGURED_ADMIN_SINGLE_START_WIDE_HEADER_EXACT_CONFIRM_ACCEPT_ENABLE_POSTFLIGHT_AUTOROLLBACK240_NO_BLIND_DB_RESTORE_WEB_UNTOUCHED_AND_AWG_UNTOUCHED
 ```
+
+## AMN2 Phase 11 — TELEGRAM-002B preflight correction override 2026-07-17
+
+Первый literal-approved preflight дошёл до production executor и остановился
+fail-closed только потому, что `/opt/amn2/venv/bin/python` является обычным
+venv symlink. Source/unit/env/overlay marker присутствуют; stage, accept,
+regular bot start и AWG mutation не выполнялись. Executor исправлен локально:
+`readlink -f` должен привести Python к regular executable target.
+
+```text
+phase11_telegram_002b_preflight=fail_closed|venv_symlink_target_binding_only
+phase11_telegram_002b_stage=false|accept=false|postflight=false
+phase11_telegram_002b_awg=untouched
+phase11_telegram_002b_new_remote_sha256=3E6D42D6D7184BD7A05402585A85652C2319D1E0E9E8076217057AE5EE948881
+phase11_telegram_002b_new_approval=required|old_sha_phrase_invalidated
+phase11_telegram_002b_evidence=research/amn2/phase-11-telegram-002b-staged-persistent-activation-gate-2026-07-17.md
+```
+
+Новая approval-фраза публикуется только после локального тест/security/commit/
+push closeout этого correction slice.
