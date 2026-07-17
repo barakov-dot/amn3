@@ -2,11 +2,12 @@
 
 Date: 2026-07-17.
 
-Decision: `READY-AWAITING-EXACT-APPROVAL`.
+Decision: `CONSUMED-ROLLOUT-PASS`.
 
-The trusted transport hardening is committed locally and the new approval
-phrase is prepared but not consumed. This document authorizes no VPS, SSH,
-upload, apply, rollback, Telegram, bot, database, provider or AWG action.
+The trusted transport hardening was committed and the exact one-time approval
+phrase was prepared for this bounded gate. It was later consumed once as
+recorded below; it never authorized Telegram-002B activation, provider actions,
+recovery deletion or any AWG mutation.
 
 ## Bound local inputs
 
@@ -36,6 +37,8 @@ peer or configuration change.
 
 ## Stop line
 
-Remain at `READY-AWAITING-EXACT-APPROVAL` until a separate operator message is
-received. Do not run the runner merely to test the phrase; no live target is
-contacted by this gate preparation.
+The exact operator message was received and consumed once on 2026-07-17.
+Bounded rollout run `20260717T081340Z` passed and the independent postflight
+confirmed overlay `0b858c5`, private healthy web, inactive/disabled bot,
+unchanged database and unchanged AWG restart/peer-set invariants. The phrase
+is now historical and must not be reused.

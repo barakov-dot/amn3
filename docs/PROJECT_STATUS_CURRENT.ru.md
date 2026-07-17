@@ -5751,3 +5751,33 @@ phase11_0b858c5_gate_evidence=research/amn2/phase-11-0b858c5-trusted-transport-a
 
 До отдельного сообщения оператора, дословно равного phrase выше, runner не
 запускается; VPS, SSH, Telegram, bot, database, provider и AWG не трогаются.
+
+## AMN2 Phase 11 — `0b858c5` combined overlay rollout pass 2026-07-17
+
+Exact trusted-transport approval получена и потреблена один раз. Bounded
+transaction `20260717T081340Z` обновила только tracked source overlay и
+private web runtime. Automatic rollback не понадобился; проверенный rollback
+bundle сохранён.
+
+```text
+phase11_0b858c5_rollout=PASS|run_20260717T081340Z|approval_consumed
+phase11_0b858c5_before=801f8c3
+phase11_0b858c5_after=0b858c5
+phase11_0b858c5_package=sha256_7866bdd9febe1d6eea701b37a6e4206a8267766a56993f3c02a0c7b30c394b54|exact_two_files|mode_0600|remote_receipt_pass
+phase11_0b858c5_source=commit_0b858c5cdbc5b565cc265966a2edfe2d339d65e0|delta_31_exact
+phase11_0b858c5_assets=canonical_square_verified|wide_language_header_verified|telegram_profile_unchanged
+phase11_0b858c5_web=active_enabled_http_ok_loopback_only
+phase11_0b858c5_bot=inactive_disabled_process_0|unit_env_unchanged|activation_false
+phase11_0b858c5_db=integrity_ok|fk_0|tables_15|rows_88|file_logical_counts_hashes_unchanged
+phase11_0b858c5_awg=running|restart_0|peers_12|container_and_peer_set_hashes_unchanged|mutation_false
+phase11_0b858c5_rollback=retained_verified|not_needed
+phase11_0b858c5_postflight=independent_new_session_pass
+phase11_0b858c5_second_vps=not_used
+phase11_0b858c5_provider_mutation=false
+phase11_0b858c5_next=REVIEW_PHASE11_TELEGRAM_002B_PERSISTENT_BOT_ACTIVATION_GATE_WITHOUT_ACTIVATION
+phase11_0b858c5_rollout_evidence=research/amn2/phase-11-0b858c5-combined-overlay-rollout-2026-07-17.md
+```
+
+Telegram API/profile mutation, persistent bot install/enable/start, database
+write/migration, provider action, peer/config change и любые AWG actions не
+входили в consumed approval и не выполнялись.

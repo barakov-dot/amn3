@@ -1,5 +1,25 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Current continuation override 2026-07-17 after `0b858c5` rollout pass
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+amn2_source=codex-vps-test-prep|0b858c5cdbc5b565cc265966a2edfe2d339d65e0|origin_sync|production_applied
+production_overlay=0b858c5|verified
+rollout_0b858c5=pass|run_20260717T081340Z|approval_consumed
+rollout_0b858c5_package=sha256_7866bdd9febe1d6eea701b37a6e4206a8267766a56993f3c02a0c7b30c394b54|upload_exact_two_files|mode_0600
+rollout_0b858c5_assets=canonical_square_verified|wide_language_header_verified|telegram_profile_unchanged
+rollout_0b858c5_web=active_enabled_http_ok_loopback_only
+rollout_0b858c5_bot=inactive_disabled_process_0|unit_env_unchanged|activation_false
+rollout_0b858c5_db=integrity_ok|fk_0|tables_15|rows_88|file_logical_counts_hashes_unchanged
+rollout_0b858c5_awg=running|restart_0|peers_12|container_and_peer_set_unchanged|mutation_false
+rollout_0b858c5_rollback=retained_verified|not_needed
+rollout_0b858c5_postflight=independent_pass
+rollout_0b858c5_evidence=research/amn2/phase-11-0b858c5-combined-overlay-rollout-2026-07-17.md
+second_vps=not_used|user_hold_through_weekend_then_repurpose
+next=REVIEW_PHASE11_TELEGRAM_002B_PERSISTENT_BOT_ACTIVATION_GATE_WITHOUT_ACTIVATION
+```
+
 ## Current continuation override 2026-07-17 after trusted transport hardening
 
 ```text

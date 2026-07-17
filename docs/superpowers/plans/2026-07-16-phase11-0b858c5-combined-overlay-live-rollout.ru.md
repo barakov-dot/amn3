@@ -138,24 +138,24 @@ ZIP/SHA-256, systemd, Docker/AWG read-only inspection, pytest, Markdown.
 - Produces: either `rollout=pass` on `0b858c5` or verified automatic rollback
   to `801f8c3`.
 
-- [ ] **Step 1: Run secret-safe read-only preflight**
+- [x] **Step 1: Run secret-safe read-only preflight**
 
   Require exact baseline, web private health, write gates false/false, bot
   inactive/disabled/process zero, database integrity/FK zero, sufficient disk
   and unchanged running AWG snapshot. Stop before upload on any mismatch.
 
-- [ ] **Step 2: Upload exact package and checksum**
+- [x] **Step 2: Upload exact package and checksum**
 
   Upload only the two bound files to `/root`, set mode `0600`, then re-run the
   remote hash and path checks.
 
-- [ ] **Step 3: Apply the exact offline source transaction**
+- [x] **Step 3: Apply the exact offline source transaction**
 
   Freeze only web, create/verify rollback material, apply source offline,
   remove only stale tracked `app/web/static/brand-full.jpg`, start only web and
   verify served square logo plus exact wide-header source asset.
 
-- [ ] **Step 4: Run independent postflight**
+- [x] **Step 4: Run independent postflight**
 
   Require overlay `0b858c5`, web active/enabled/private, bot unchanged,
   database file/logical/count invariants unchanged and AWG container/restart/
@@ -165,7 +165,7 @@ ZIP/SHA-256, systemd, Docker/AWG read-only inspection, pytest, Markdown.
 
 **Files:**
 
-- Create: `research/amn2/phase-11-0b858c5-combined-overlay-rollout-2026-07-16.md`
+- Create: `research/amn2/phase-11-0b858c5-combined-overlay-rollout-2026-07-17.md`
 - Modify: `docs/PROJECT_STATUS_CURRENT.ru.md`
 - Modify: `docs/AMN2_PHASE_11_CURRENT_PRIORITY_PLAN.ru.md`
 - Modify: `docs/NEXT_CHAT_AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS.ru.md`
@@ -175,18 +175,18 @@ ZIP/SHA-256, systemd, Docker/AWG read-only inspection, pytest, Markdown.
 - Consumes: sanitized preflight/apply/postflight output.
 - Produces: origin-synced rollout state and next Telegram-002B review gate.
 
-- [ ] **Step 1: Write sanitized evidence and status override**
+- [x] **Step 1: Write sanitized evidence and status override**
 
   Record pass or rollback result, run id, package/source bindings, safe
   database/AWG summaries and exclusions. Never publish target, keys, tokens,
   secrets or raw logs.
 
-- [ ] **Step 2: Run scoped docs/diff/security review**
+- [x] **Step 2: Run scoped docs/diff/security review**
 
   Run markdown hygiene, `git diff --check`, exact staged allowlist and security
   diff review. Keep the client baseline untracked and unstaged.
 
-- [ ] **Step 3: Commit, push and verify AMN3 origin**
+- [x] **Step 3: Commit, push and verify AMN3 origin**
 
   Commit only plan/evidence/status files, push
   `codex-spark-phase9-docs-sync`, then require local HEAD equal origin HEAD.

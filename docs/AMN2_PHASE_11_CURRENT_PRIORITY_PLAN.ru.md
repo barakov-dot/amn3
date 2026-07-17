@@ -1,7 +1,7 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-16 после подготовки, проверки и push
-`PHASE11-PACKAGE-0B858C5` combined private overlay.
+Актуально: 2026-07-17 после live pass
+`PHASE11-ROLLOUT-0B858C5` combined private overlay.
 
 Этот файл задаёт текущий исполняемый порядок Phase 11. Полная продуктовая
 карта и exclusions остаются в
@@ -14,7 +14,7 @@
 ```text
 active_phase=Phase 11 Controlled Launch and Operations
 amn2_source=codex-vps-test-prep|0b858c5cdbc5b565cc265966a2edfe2d339d65e0|origin_sync|clean
-production_overlay=801f8c3
+production_overlay=0b858c5|verified
 restore_001a_source_pin=801f8c3|approval_scope_unchanged
 restore_001a=completed_pass|approval_consumed
 web=active_enabled_loopback_only
@@ -24,12 +24,13 @@ awg=running_restart_0_peers_12_set_unchanged
 old_recovery_fallback=retained_sealed_without_deletion|review_by_2026-08-01
 second_vps=clean_ssh_only|amn2_no_longer_needed|user_hold_through_weekend_then_repurpose
 second_vps_provider=paid_until_2026-08-12_23_18_25|590_rub_month|auto_renew_enabled_observed|no_mutation
-brand_001=integrated_in_descendant_0b858c5|square_assets_preserved|old_logo_only_package_superseded_as_combined_candidate|production_still_801f8c3
-brand_002=wide_language_selection_header_complete|source_0b858c5|png_1672x941|sha256_bbddfa72d1d1fc37e412d2f4a9b4124001ff91fbd641635e31a47e008fc4611f|clean_security_findings_0|production_not_deployed
-telegram_002a=local_implementation_complete|contained_in_source_0b858c5|scoped_113|full_915_passed_1_skipped|clean_security_15_of_15_findings_0|production_bot_inactive_disabled
-package_0b858c5=prepared_verified_pushed|outer_sha256_7866bdd9febe1d6eea701b37a6e4206a8267766a56993f3c02a0c7b30c394b54|source_sha256_e03f13fd6a7bb5cbc5fcee7179f395ea8c2864ebceab01bc351c5904f3cff975|not_uploaded_not_applied
+brand_001=production_verified_0b858c5|canonical_square_logo_served|old_logo_only_package_superseded
+brand_002=production_source_verified_0b858c5|png_1672x941|sha256_bbddfa72d1d1fc37e412d2f4a9b4124001ff91fbd641635e31a47e008fc4611f|telegram_profile_unchanged
+telegram_002a=production_source_present_0b858c5|local_hardening_verified|regular_bot_inactive_disabled|activation_separate_002b_gate
+package_0b858c5=uploaded_applied_verified|outer_sha256_7866bdd9febe1d6eea701b37a6e4206a8267766a56993f3c02a0c7b30c394b54|source_sha256_e03f13fd6a7bb5cbc5fcee7179f395ea8c2864ebceab01bc351c5904f3cff975|run_20260717T081340Z
 package_0b858c5_verification=outer_4|source_383|delta_31|forbidden_0|unsafe_0|symlinks_0|scoped_5|full_918_passed_1_skipped|clean_security_7_of_7_surfaces_5_findings_0
-next=review_0b858c5_combined_private_overlay_exact_live_gate
+rollout_0b858c5=pass|web_private_healthy|db_unchanged|bot_inactive_disabled|awg_restart_0_peers_12_set_unchanged|rollback_retained_verified
+next=review_telegram_002b_persistent_bot_activation_gate_without_activation
 ```
 
 ## Закрыто в P0
@@ -42,7 +43,8 @@ next=review_0b858c5_combined_private_overlay_exact_live_gate
 | Критично | `PHASE11-OPS-001` | bounded runtime/recovery snapshot healthy; no failed units or AMN2/Docker error rows; AWG invariant passed |
 | Критично | `PHASE11-RESTORE-001A` | canonical v2 full-secret disposable restore passed; isolated AWG12 and loopback web/DB verified; cleanup and production re-audits passed |
 | Критично | `PHASE11-RECOVERY-001` | old fallback retained sealed without deletion; do not open/copy/move/delete; review by 2026-08-01 |
-| Критично | `PHASE11-PACKAGE-0B858C5` | exact combined overlay prepared, verified and pushed; outer/source checksums bound; 4/383 entries, 31-path delta, scoped 5 and full 918/1 skipped; clean scan 7/7, findings 0; not uploaded/applied |
+| Критично | `PHASE11-PACKAGE-0B858C5` | exact combined overlay prepared, verified, pushed, uploaded and applied in run `20260717T081340Z`; independent postflight passed |
+| Критично | `PHASE11-ROLLOUT-0B858C5` | production overlay `0b858c5`; private web healthy; square/wide assets verified; database unchanged; bot inactive/disabled; AWG running/restart 0/12 peers/same set; rollback retained verified |
 | Очень важно | second VPS AMN2 role | AMN2 no longer needs it; host clean SSH-only; user keeps it through the weekend and then repurposes it |
 | Очень важно | `PHASE11-BRAND-001` source | canonical square logo is contained in descendant `0b858c5`; old `6abc620` package remains not deployed and is no longer the current combined candidate |
 | Очень важно | `PHASE11-BRAND-002` source | exact 1672x941 language-selection header integrated and pushed in `0b858c5`; `/start` role-specific usage and text-only fallback verified; square assets unchanged; no live activation |
@@ -149,12 +151,13 @@ Outer `4`, source `383`, delta `31`; forbidden/unsafe/symlink `0/0/0`.
 Scoped tests `5 passed`, полный AMN2 `918 passed, 1 skipped`; sealed security
 scan `7/7` receipts, `5` surfaces, findings `0`.
 
-Production остаётся `801f8c3`: package не uploaded и не applied. Следующий
-шаг — review exact live gate и отдельная approval phrase. Первый live
-transaction обновляет только source/private web с regular bot всё ещё
-inactive/disabled. Установка/admission/start persistent bot остаётся отдельным
-последующим `PHASE11-TELEGRAM-002B` gate. Telegram profile photo и AWG не
-входят ни в один из этих gates.
+Production переведён с `801f8c3` на `0b858c5` в bounded run
+`20260717T081340Z`. Exact package receipt, source delta и assets прошли;
+independent postflight подтвердил private healthy web, неизменную database,
+regular bot inactive/disabled и AWG running/restart 0/12 peers/same set.
+Rollback bundle retained/verified и не понадобился. Установка/admission/start
+persistent bot остаётся отдельным `PHASE11-TELEGRAM-002B` gate. Telegram
+profile photo и AWG не входят в этот gate.
 
 ### C3. Recovery fallback retention и second-VPS AMN2 handover
 
@@ -184,18 +187,15 @@ provider display, текущий месячный период `590,00 RUB`, aut
 
 ### Критичные
 
-1. `PHASE11-ROLLOUT-0B858C5`: отдельным exact gate применить combined source
-   overlay, перезапустив только private web при snapshot/rollback. Regular bot
-   остаётся inactive/disabled; AWG не останавливать и не перезапускать.
-2. `PHASE11-TELEGRAM-002B`: только после postflight rollout отдельным exact
+1. `PHASE11-TELEGRAM-002B`: после подтверждённого postflight rollout отдельным exact
    gate установить unit/env contract, выполнить live admission и запустить
    один persistent bot. Проверить identity, webhook empty, backlog 0,
    single-instance, readiness/watchdog и rollback; AWG untouched.
-3. `PHASE11-SECOND-VPS-HANDOVER`: перед пользовательской передачей выполнить
+2. `PHASE11-SECOND-VPS-HANDOVER`: перед пользовательской передачей выполнить
    финальный read-only clean audit. Dedicated AMN2 staging key и local
    known-host binding удалять только по отдельной точной фразе; provider/VPS не
    удалять. AMN2 уже не нуждается в этом VPS.
-4. `PHASE11-RECOVERY-001`: old fallback оставить sealed; до review не позднее
+3. `PHASE11-RECOVERY-001`: old fallback оставить sealed; до review не позднее
    2026-08-01 не открывать, не копировать, не перемещать и не удалять.
 
 ### Очень важно
