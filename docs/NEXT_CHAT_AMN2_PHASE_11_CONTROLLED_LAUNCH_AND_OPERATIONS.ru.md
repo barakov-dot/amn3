@@ -446,3 +446,34 @@ approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 Next: commit/push/readback, issue a new exact E407-bound literal approval,
 then fresh preflight and one disabled-first stage. `/start` только после
 `awaiting_admin_start=true`.
+
+## Correction override — exact default-plan timestamp startup delta
+
+E407 fresh preflight passed and the unbuffered admission receipt gate passed.
+Stage then stopped fail-closed before `/start` because workflow bootstrap
+updated an existing application row. Post-failure preflight proved bot
+inactive/disabled, counts unchanged, Telegram backlog 0 and AWG unchanged.
+
+Static evidence from exact `0b858c5` binds the delta to
+`seed_default_plans -> upsert_plan -> updated_at=CURRENT_TIMESTAMP`. No blind
+DB restore was run. The corrected gate hashes all rows after removing only
+`plans.updated_at`, separately requires exact counts and unchanged first-admin
+row, and freezes a post-start baseline before operator interaction.
+
+```text
+phase11_telegram_002b_status=CORRECTED_PLAN_TIMESTAMP_GATE_AWAITING_COMMIT_PUSH_ORIGIN_READBACK
+phase11_telegram_002b_e407_receipt=pass|unbuffered_fix_effective
+phase11_telegram_002b_e407_stage=fail_closed_before_operator_start|plan_timestamp_metadata_only
+phase11_telegram_002b_e407_authority=consumed_and_invalidated
+phase11_telegram_002b_new_remote_sha256=DF9E0BAD6359AD7F3100A7FBED5ED1223721C656086D0CADA72CA492BD10B396
+phase11_telegram_002b_new_runner_sha256=16E6F846DEB3DC52838224E277D65AA2D0059D6288C827248607A7F6E5943CED
+phase11_telegram_002b_tests=focused_23_passed|canonical_118_passed|bash_n_pass|powershell_parse_pass|diff_check_pass
+phase11_telegram_002b_security=complete_3_of_3|reportable_findings_0|secret_patterns_0
+phase11_telegram_002b_operator_start=false|accept=false|enable=false|postflight=false
+phase11_telegram_002b_regular_bot=inactive_disabled|process_0
+phase11_telegram_002b_awg=running|restart_0|peers_12|hashes_unchanged
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
+```
+
+Next: commit/push/readback, issue exact DF9E approval, fresh preflight/stage,
+then request `/start` only after the stage explicitly passes.

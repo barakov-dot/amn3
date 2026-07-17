@@ -322,6 +322,7 @@ try:
     ]
     all_rows: dict[str, list[dict[str, object]]] = {}
     excluding_rows: dict[str, list[dict[str, object]]] = {}
+    startup_normalized_rows: dict[str, list[dict[str, object]]] = {}
     counts: dict[str, int] = {}
     first_admin_row = None
     for table in tables:
@@ -329,6 +330,18 @@ try:
         rows = [dict(row) for row in conn.execute(f'SELECT * FROM "{table}"')]
         rows.sort(key=lambda row: json.dumps(row, sort_keys=True, default=str))
         all_rows[table] = rows
+        normalized_rows = [
+            {
+                key: value
+                for key, value in row.items()
+                if not (table == "plans" and key == "updated_at")
+            }
+            for row in rows
+        ]
+        normalized_rows.sort(
+            key=lambda row: json.dumps(row, sort_keys=True, default=str)
+        )
+        startup_normalized_rows[table] = normalized_rows
         counts[table] = len(rows)
         if table == "users" and "telegram_id" in columns:
             selected = [row for row in rows if int(row["telegram_id"]) == first_admin]
@@ -353,6 +366,9 @@ payload = {
     "application_rows_excluding_first_admin_sha256": hashlib.sha256(
         canonical(excluding_rows)
     ).hexdigest().upper(),
+    "application_rows_excluding_plan_updated_at_sha256": hashlib.sha256(
+        canonical(startup_normalized_rows)
+    ).hexdigest().upper(),
     "first_admin_user_row": first_admin_row,
     "first_admin_user_row_sha256": hashlib.sha256(
         canonical(first_admin_row)
@@ -368,9 +384,10 @@ PY
   chmod 600 "$destination"
 }
 
-verify_no_application_delta() {
-  local state_root="$1" current
+verify_expected_startup_delta() {
+  local state_root="$1" current staged
   current="$state_root/db-current.application.json"
+  staged="$state_root/db-staged.application.json"
   write_db_application_snapshot "$current"
   "$PYTHON_BIN" - "$state_root/db-before.application.json" "$current" <<'PY'
 import json
@@ -379,17 +396,28 @@ from pathlib import Path
 
 before = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 current = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
-if before["all_rows_sha256"] != current["all_rows_sha256"] or before["counts"] != current["counts"]:
-    raise SystemExit("application database changed before acceptance")
-print("application_database_pre_acceptance=unchanged")
+if before["counts"] != current["counts"]:
+    raise SystemExit("application table counts changed during startup")
+if (
+    before["application_rows_excluding_plan_updated_at_sha256"]
+    != current["application_rows_excluding_plan_updated_at_sha256"]
+):
+    raise SystemExit("application database changed outside plan timestamps")
+if (
+    before["first_admin_user_row_sha256"]
+    != current["first_admin_user_row_sha256"]
+):
+    raise SystemExit("first administrator row changed before acceptance")
+print("application_database_pre_acceptance=plan_timestamps_only_or_unchanged")
 PY
+  install -o root -g root -m 0600 "$current" "$staged"
 }
 
 verify_first_admin_delta() {
   local state_root="$1" current
   current="$state_root/db-after.application.json"
   write_db_application_snapshot "$current"
-  "$PYTHON_BIN" - "$state_root/db-before.application.json" "$current" <<'PY'
+  "$PYTHON_BIN" - "$state_root/db-staged.application.json" "$current" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -861,7 +889,7 @@ stage_activation() {
   wait_for_bot_ready || die "bot readiness/watchdog timeout"
   bot_health_check disabled >/dev/null
   journal_contract_check "$STATE_ROOT" >/dev/null
-  verify_no_application_delta "$STATE_ROOT" >/dev/null
+  verify_expected_startup_delta "$STATE_ROOT" >/dev/null
   [ "$(awg_snapshot)" = "$(cat "$STATE_ROOT/awg-before.snapshot")" ] \
     || die "AWG changed during stage"
   web_check >/dev/null
@@ -877,7 +905,7 @@ stage_activation() {
   printf 'awaiting_admin_start=true\n'
   printf 'acceptance_deadline_seconds=%s\n' "$ROLLBACK_TTL_SECONDS"
   printf 'web=active_enabled_http_ok_loopback_only\n'
-  printf 'database_pre_acceptance=unchanged_integrity_ok_fk_0\n'
+  printf 'database_pre_acceptance=plan_timestamps_only_or_unchanged_integrity_ok_fk_0\n'
   printf 'awg=unchanged\n'
 }
 

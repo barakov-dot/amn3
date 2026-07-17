@@ -254,3 +254,47 @@ sha56be_stage_authority=consumed_and_invalidated_by_changed_bytes
 new_approval=required
 approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 ```
+
+## Exact default-plan timestamp gate after E407 live attempt
+
+The E407-bound approval was received. Fresh production preflight passed and
+the corrected unbuffered admission receipt reached journald and passed its
+exact single-line gate. The stage then stopped fail-closed before operator
+interaction because the application row digest changed. `/start`, accept,
+enable and postflight did not occur. Independent post-failure preflight proved
+the bot inactive/disabled, unchanged counts, zero Telegram backlog and the
+unchanged AWG baseline.
+
+Exact `0b858c5` source tracing identified the deterministic write:
+`create_workflow()` calls `seed_default_plans()`, whose conflict path executes
+`upsert_plan()` and sets `plans.updated_at=CURRENT_TIMESTAMP` even when every
+business field already matches. This metadata-only timestamp update has
+already occurred; the no-blind-DB-restore contract was preserved.
+
+The narrow TDD correction computes a canonical hash of every application row
+after removing only `plans.updated_at`. Startup must preserve that hash, exact
+table counts and the complete first-admin row. The resulting post-start state
+is then sealed as a separate baseline, so acceptance still permits only the
+reviewed mutable fields of the first configured administrator.
+
+```text
+e407_preflight=pass
+e407_admission_receipt=pass|unbuffered_fix_effective
+e407_stage=fail_closed_before_operator_start|default_plan_updated_at
+operator_start=false|accept=false|enable=false|postflight=false
+postfailure_preflight=pass
+regular_bot=inactive_disabled|process_0
+database=integrity_ok|fk_0|tables_15|rows_88|plan_timestamp_metadata_only
+telegram=identity_match|webhook_empty|backlog_0
+awg=running|restart_0|peers_12|container_and_peer_set_hashes_unchanged
+startup_delta_gate=plans_updated_at_only_or_unchanged|counts_exact|first_admin_exact|staged_baseline_sealed
+new_remote_executor_sha256=DF9E0BAD6359AD7F3100A7FBED5ED1223721C656086D0CADA72CA492BD10B396
+new_ssh_runner_sha256=16E6F846DEB3DC52838224E277D65AA2D0059D6288C827248607A7F6E5943CED
+tdd=red_1_failed_22_passed|green_23_passed
+tests=focused_23_passed|canonical_118_passed
+syntax=bash_n_pass|powershell_parse_pass|diff_check_pass
+security_diff=complete_3_of_3|reportable_findings_0|secret_patterns_0
+e407_stage_authority=consumed_and_invalidated_by_changed_bytes
+new_approval=required
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
+```

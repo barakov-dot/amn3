@@ -436,3 +436,39 @@ approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 Критичный release blocker: commit/push/readback correction slice, затем новая
 literal SHA-bound approval и полный bounded gate. До успешного stage `/start`
 не отправлять; AWG не останавливать и не изменять.
+
+## TELEGRAM-002B default-plan timestamp startup correction override
+
+Literal E407 approval была получена. Fresh preflight прошёл, unbuffered
+admission receipt был принят, после чего disabled-first stage остановился
+fail-closed до `/start` на `application database changed before acceptance`.
+Independent post-failure preflight подтвердил bot inactive/disabled/process 0,
+DB integrity/FK/counts `15/88`, Telegram backlog 0 и неизменный AWG baseline.
+
+Exact `0b858c5` startup path всегда вызывает `seed_default_plans()`;
+`upsert_plan()` при conflict безусловно меняет только `plans.updated_at`, даже
+когда бизнес-поля совпадают. Metadata timestamp уже обновился; слепое DB
+restore не выполнялось. Новый gate разрешает только `plans.updated_at` или
+полное отсутствие startup delta, требует прежние counts и неизменную admin-row,
+а затем запечатывает отдельный post-start baseline для `/start` acceptance.
+
+```text
+phase11_telegram_002b_e407_preflight=pass
+phase11_telegram_002b_e407_receipt=pass|unbuffered_fix_effective
+phase11_telegram_002b_e407_stage=fail_closed_before_operator_start|default_plan_updated_at
+phase11_telegram_002b_operator_start=false|accept=false|enable=false|postflight=false
+phase11_telegram_002b_postfailure_preflight=pass
+phase11_telegram_002b_db=integrity_ok|fk_0|tables_15|rows_88|plan_timestamp_metadata_only_no_blind_restore
+phase11_telegram_002b_awg=running|restart_0|peers_12|hashes_unchanged
+phase11_telegram_002b_startup_delta_gate=plans_updated_at_only_or_unchanged|counts_exact|first_admin_unchanged|staged_baseline_sealed
+phase11_telegram_002b_new_remote_sha256=DF9E0BAD6359AD7F3100A7FBED5ED1223721C656086D0CADA72CA492BD10B396
+phase11_telegram_002b_new_runner_sha256=16E6F846DEB3DC52838224E277D65AA2D0059D6288C827248607A7F6E5943CED
+phase11_telegram_002b_tests=red_1_failed_22_passed|focused_23_passed|canonical_118_passed|syntax_pass|diff_check_pass
+phase11_telegram_002b_security=complete_3_of_3|reportable_findings_0|secret_patterns_0
+phase11_telegram_002b_e407_authority=consumed_and_invalidated
+phase11_telegram_002b_new_approval=required
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
+```
+
+Next: commit/push/origin readback, новая DF9E literal approval и fresh bounded
+gate. `/start` только после `awaiting_admin_start=true`; AWG untouched.

@@ -131,6 +131,38 @@ class Phase11Telegram002bActivationExecutorTests(unittest.TestCase):
         self.assertIn("first_admin_immutable_fields", script)
         self.assertIn("database_delta=first_admin_user_row_only", script)
 
+    def test_remote_allows_only_plan_timestamp_bootstrap_then_freezes_staged_baseline(self) -> None:
+        script = read_required(self, REMOTE, "remote activation executor")
+        snapshot = script.split("write_db_application_snapshot() {", 1)[1].split(
+            "verify_expected_startup_delta() {", 1
+        )[0]
+        startup = script.split("verify_expected_startup_delta() {", 1)[1].split(
+            "verify_first_admin_delta() {", 1
+        )[0]
+        accept_delta = script.split("verify_first_admin_delta() {", 1)[1].split(
+            "create_db_backup() {", 1
+        )[0]
+        stage = script.split("stage_activation() {", 1)[1].split(
+            "accept_activation() {", 1
+        )[0]
+
+        normalized_hash = "application_rows_excluding_plan_updated_at_sha256"
+        self.assertIn(normalized_hash, snapshot)
+        self.assertIn('table == "plans" and key == "updated_at"', snapshot)
+        self.assertIn(f'before["{normalized_hash}"]', startup)
+        self.assertIn(f'current["{normalized_hash}"]', startup)
+        self.assertIn('before["counts"] != current["counts"]', startup)
+        self.assertIn('before["first_admin_user_row_sha256"]', startup)
+        self.assertIn('current["first_admin_user_row_sha256"]', startup)
+        self.assertIn('db-staged.application.json', startup)
+        self.assertIn('db-staged.application.json', accept_delta)
+        self.assertNotIn('db-before.application.json', accept_delta)
+        self.assertIn('verify_expected_startup_delta "$STATE_ROOT"', stage)
+        self.assertLess(
+            stage.index('verify_expected_startup_delta "$STATE_ROOT"'),
+            stage.index('printf \'staged\\n\''),
+        )
+
     def test_remote_closes_timer_races_and_revalidates_runtime_before_enable(self) -> None:
         script = read_required(self, REMOTE, "remote activation executor")
         snapshot = script.split("snapshot_runtime_inputs() {", 1)[1].split(

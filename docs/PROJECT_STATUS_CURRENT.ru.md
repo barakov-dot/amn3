@@ -5930,3 +5930,43 @@ phase11_telegram_002b_next=DOCS_COMMIT_PUSH_ORIGIN_READBACK_THEN_ISSUE_NEW_EXACT
 
 AWG не останавливался и не изменялся; provider, Telegram profile, web source и
 production peer/config mutations не выполнялись.
+
+## AMN2 Phase 11 — TELEGRAM-002B exact plan-timestamp startup gate 2026-07-17
+
+E407 literal authority была получена. Fresh preflight прошёл; исправленный
+unbuffered admission receipt появился и был принят. Stage затем остановился
+fail-closed до `/start`, поскольку startup изменил application-row. Accept,
+enable и postflight не выполнялись. Independent post-failure preflight
+подтвердил bot inactive/disabled/process 0, integrity/FK/counts baseline,
+Telegram backlog 0 и неизменный AWG.
+
+Exact source trace: `create_workflow()` вызывает `seed_default_plans()`, а
+`upsert_plan()` обновляет `plans.updated_at=CURRENT_TIMESTAMP` при каждом
+conflict. Это ожидаемое metadata-only изменение уже сохранено; слепое DB
+restore запрещено и не выполнялось. Correction позволяет только этот столбец,
+требует неизменности всех остальных данных и запечатывает post-start baseline
+до первого admin `/start`.
+
+```text
+phase11_telegram_002b_e407_preflight=PASS
+phase11_telegram_002b_e407_receipt=PASS|UNBUFFERED_FIX_EFFECTIVE
+phase11_telegram_002b_e407_stage=FAIL_CLOSED_BEFORE_OPERATOR_START|DEFAULT_PLAN_UPDATED_AT
+phase11_telegram_002b_operator_start=false|accept=false|enable=false|postflight=false
+phase11_telegram_002b_postfailure_preflight=PASS
+phase11_telegram_002b_regular_bot=inactive_disabled|process_0
+phase11_telegram_002b_db=integrity_ok|fk_0|tables_15|rows_88|plan_timestamp_metadata_only
+phase11_telegram_002b_telegram=identity_match|webhook_empty|backlog_0
+phase11_telegram_002b_awg=running|restart_0|peers_12|container_and_peer_set_hashes_unchanged
+phase11_telegram_002b_startup_delta_contract=plans_updated_at_only_or_unchanged|counts_exact|first_admin_exact|post_start_baseline_sealed
+phase11_telegram_002b_new_remote_sha256=DF9E0BAD6359AD7F3100A7FBED5ED1223721C656086D0CADA72CA492BD10B396
+phase11_telegram_002b_new_runner_sha256=16E6F846DEB3DC52838224E277D65AA2D0059D6288C827248607A7F6E5943CED
+phase11_telegram_002b_tests=focused_23_passed|canonical_118_passed|syntax_pass|diff_check_pass
+phase11_telegram_002b_security=complete_3_of_3|reportable_findings_0|secret_patterns_0
+phase11_telegram_002b_e407_authority=consumed_and_invalidated_by_changed_remote_bytes
+phase11_telegram_002b_new_approval=required
+phase11_telegram_002b_approval_phrase=WITHHELD_UNTIL_ORIGIN_SYNC
+phase11_telegram_002b_next=DOCS_COMMIT_PUSH_ORIGIN_READBACK_THEN_ISSUE_DF9E_EXACT_APPROVAL
+```
+
+AWG, provider, Telegram profile, web source и peer configuration не
+изменялись.
