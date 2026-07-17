@@ -93,12 +93,13 @@ class Phase11Telegram002bStaleStartCleanupExecutorTests(unittest.TestCase):
             "if sender_id != first_admin",
             "if chat_id != first_admin",
             'text != "/start"',
-            'message, "content_type"',
+            'getattr(message, "content_type", None) != "text"',
             '"callback_query"',
             '"edited_message"',
             '"business_message"',
         ):
             self.assertIn(marker, probe)
+        self.assertNotIn('str(getattr(message, "content_type"', probe)
         main = script.split("async def main", 1)[1]
         self.assertEqual(main.count("await inspect_one(bot, first_admin)"), 2)
         self.assertIn("if first_update_id != second_update_id", main)

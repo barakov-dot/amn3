@@ -1,6 +1,39 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-17 после live pass
+Актуально: 2026-07-17 после fail-closed `pending_updates_nonzero` и локальной
+подготовки exact-one stale `/start` cleanup gate.
+
+## Текущий P0 override: TELEGRAM-002B stale-start cleanup готов локально
+
+Exact `2FDB...` preflight подтвердил production baseline, но остановился до
+stage с фиксированной причиной `pending_updates_nonzero`. Stage receipt не
+создан; bot не запускался; existing `2FDB...` stage authority остаётся
+неизрасходованной. До отдельной команды новый `/start` не отправлять.
+
+Отдельный cleanup executor разрешает только один уже ожидающий private exact
+`/start` от первого configured administrator. Он дважды проверяет тот же update
+без offset, затем имеет ровно один advancing offset. Ответ, workflow, DB write,
+web/systemd mutation, Telegram profile reset и AWG mutation отсутствуют.
+
+```text
+phase11_telegram_002b_blocker=pending_updates_nonzero|stage_not_run
+phase11_telegram_002b_2fdb_remote_sha256=2FDBAD445F4EBDA4A94BE84CB4FF43D05AE458D68A78686490775B8F242A00E2
+phase11_telegram_002b_2fdb_runner_sha256=75B210410CFE45377857A02FAA43618EE26533259B15AB348693B5292091ED53
+phase11_telegram_002b_2fdb_stage_authority=unconsumed
+phase11_telegram_002b_cleanup_design=d474ff6|approved
+phase11_telegram_002b_cleanup_plan=940d07c|inline_tdd
+phase11_telegram_002b_cleanup_remote_sha256=41F69F945F74647B441173B682277E0568DA81CC7F0B12EADD9BD534DB225242
+phase11_telegram_002b_cleanup_runner_sha256=D3BD76119B35155AAB922E54C2E59F50B7D9D0B23C9B5AC2268887D8ADB70A1F
+phase11_telegram_002b_cleanup_tdd=initial_red_9_failed_1_passed|aiogram_compat_red_1_failed_9_passed|green_10_passed
+phase11_telegram_002b_cleanup_tests=focused_10_passed|canonical_128_passed|bash_n_pass|powershell_parse_pass|diff_check_pass
+phase11_telegram_002b_cleanup_scans=forbidden_operations_0|high_confidence_secret_matches_0
+phase11_telegram_002b_cleanup_security=scan_59e7862ce73ab46179a01591f4533c8496f3b38d_20260717T183406Z|worklist_5_of_5|coverage_complete|findings_0
+phase11_telegram_002b_cleanup_live=not_run|new_exact_sha_bound_approval_required
+phase11_telegram_002b_cleanup_approval=prepared_in_runner|must_not_issue_or_use_before_origin_sync
+phase11_telegram_002b_next=COMMIT_PUSH_ORIGIN_READBACK_THEN_ISSUE_EXACT_CLEANUP_APPROVAL
+```
+
+Предыдущая опорная точка: 2026-07-17 после live pass
 `PHASE11-ROLLOUT-0B858C5` combined private overlay.
 
 Этот файл задаёт текущий исполняемый порядок Phase 11. Полная продуктовая

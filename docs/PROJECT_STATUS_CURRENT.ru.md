@@ -1,4 +1,48 @@
-# Текущий override 2026-07-16: combined overlay `0b858c5` prepared, verified and pushed
+# Текущий override 2026-07-17: TELEGRAM-002B exact-one stale-start cleanup готов локально
+
+User-issued `2FDB...` approval был использован только для fresh classified
+preflight. Production checks прошли до Telegram admission, затем gate
+остановился fail-closed с `pending_updates_nonzero`. `stage` не вызывался и
+single-use stage receipt отсутствует. Bot остался inactive/disabled; DB/web/AWG
+baseline не изменён.
+
+Design и written spec отдельно одобрены. TDD добавил самостоятельный remote
+cleanup executor и checksum-bound runner, не изменяя байты существующего
+activation executor. В ходе runtime-compatibility review обнаружено и по TDD
+исправлено сравнение aiogram `ContentType.TEXT`: enum напрямую равен `"text"`,
+но `str(enum)` не равен. После fix runner пересвязан к финальному SHA.
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+amn2_source=codex-vps-test-prep|0b858c5cdbc5b565cc265966a2edfe2d339d65e0|production_unchanged
+production_overlay=0b858c5|verified
+phase11_telegram_002b_blocker=pending_updates_nonzero|preflight_fail_closed
+phase11_telegram_002b_stage=false|accept=false|enable=false|postflight=false
+phase11_telegram_002b_regular_bot=inactive_disabled_process_0
+phase11_telegram_002b_database=integrity_ok|fk_0|tables_15|rows_88
+phase11_telegram_002b_awg=running|restart_0|peers_12|hashes_unchanged
+phase11_telegram_002b_existing_remote_sha256=2FDBAD445F4EBDA4A94BE84CB4FF43D05AE458D68A78686490775B8F242A00E2
+phase11_telegram_002b_existing_runner_sha256=75B210410CFE45377857A02FAA43618EE26533259B15AB348693B5292091ED53
+phase11_telegram_002b_existing_stage_authority=unconsumed
+phase11_telegram_002b_cleanup_design=docs/superpowers/specs/2026-07-17-phase11-telegram-002b-stale-start-single-update-cleanup-design.ru.md|commit_d474ff6|approved
+phase11_telegram_002b_cleanup_plan=docs/superpowers/plans/2026-07-17-phase11-telegram-002b-stale-start-single-update-cleanup.ru.md|commit_940d07c
+phase11_telegram_002b_cleanup_remote_sha256=41F69F945F74647B441173B682277E0568DA81CC7F0B12EADD9BD534DB225242
+phase11_telegram_002b_cleanup_runner_sha256=D3BD76119B35155AAB922E54C2E59F50B7D9D0B23C9B5AC2268887D8ADB70A1F
+phase11_telegram_002b_cleanup_contract=exact_one_private_first_admin_start|double_nonadvancing_inspection|single_advancing_offset|concurrent_update_preserved|no_response
+phase11_telegram_002b_cleanup_tdd=red_9_failed_1_passed|remote_green_8_passed_2_deselected|aiogram_red_1_failed_9_passed|final_green_10_passed
+phase11_telegram_002b_cleanup_tests=focused_10_passed|canonical_128_passed|bash_n_pass|powershell_parse_pass|diff_check_pass
+phase11_telegram_002b_cleanup_static_scans=forbidden_operations_0|high_confidence_secret_matches_0
+phase11_telegram_002b_cleanup_security=scan_59e7862ce73ab46179a01591f4533c8496f3b38d_20260717T183406Z|snapshot_48bc1e5a1e775a2b97c75c30c83938d4fc79f07da281b328df0640c532db7564|worklist_5_of_5|coverage_complete|findings_0
+phase11_telegram_002b_cleanup_live=not_run|telegram_ack_false|vps_mutation_false
+phase11_telegram_002b_cleanup_approval=prepared_in_runner|must_not_issue_or_use_before_origin_sync
+phase11_next=COMMIT_PUSH_ORIGIN_READBACK_THEN_ISSUE_EXACT_CLEANUP_LIVE_APPROVAL
+```
+
+До отдельного exact live cleanup approval Telegram queue не подтверждается и
+не очищается. Новый `/start` отправлять только после будущего successful
+`2FDB...` stage с `awaiting_admin_start=true`.
+
+# Предыдущий override 2026-07-16: combined overlay `0b858c5` prepared, verified and pushed
 
 ```text
 active_phase=Phase 11 Controlled Launch and Operations

@@ -281,7 +281,7 @@ async def inspect_one(bot, first_admin: int) -> int:
     )
     if any(getattr(update, field, None) is not None for field in disallowed_update_fields):
         raise CleanupRejected("update_shape_invalid")
-    if str(getattr(message, "content_type", "") or "") != "text":
+    if getattr(message, "content_type", None) != "text":
         raise CleanupRejected("update_shape_invalid")
     if getattr(message, "chat", None) is None or message.chat.type != "private":
         raise CleanupRejected("chat_not_private")

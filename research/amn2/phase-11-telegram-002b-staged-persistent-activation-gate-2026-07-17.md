@@ -161,6 +161,47 @@ succeed:
 approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 ```
 
+## Stale first-admin `/start` exact-one cleanup gate
+
+The final `2FDB...` classified preflight passed source, write-gate, web,
+bot-disabled, database and AWG checks, then stopped fail-closed with
+`pending_updates_nonzero`. Stage was not called, so its exclusive local receipt
+was not created and the existing activation authority remains unconsumed.
+
+A separate design and written-spec gate authorized only local engineering of a
+one-update cleanup. The executor performs two identical non-advancing reads,
+requires exactly one private text `/start` from the first configured admin,
+advances the offset exactly once and preserves any concurrent higher update.
+It sends no response and imports no workflow/handler/dispatcher path.
+
+An exact local aiogram probe proved that `Message.content_type` is
+`ContentType.TEXT`, compares equal to `"text"`, but stringifies as
+`"ContentType.TEXT"`. TDD caught and corrected the initial stringification
+check before live use, then rebound the runner to the changed remote bytes.
+
+```text
+classified_preflight=failed_closed|pending_updates_nonzero
+activation_stage=false|receipt_absent|2fdb_authority_unconsumed
+cleanup_design=d474ff6|approved
+cleanup_plan=940d07c
+cleanup_remote_executor_sha256=41F69F945F74647B441173B682277E0568DA81CC7F0B12EADD9BD534DB225242
+cleanup_ssh_runner_sha256=D3BD76119B35155AAB922E54C2E59F50B7D9D0B23C9B5AC2268887D8ADB70A1F
+cleanup_tdd=initial_red_9_failed_1_passed|remote_green_8_passed_2_deselected|aiogram_red_1_failed_9_passed|final_green_10_passed
+cleanup_tests=focused_10_passed|canonical_128_passed
+cleanup_syntax=bash_n_pass|powershell_parse_pass|diff_check_pass
+cleanup_static_scans=forbidden_operations_0|high_confidence_secret_matches_0
+cleanup_security_scan=59e7862ce73ab46179a01591f4533c8496f3b38d_20260717T183406Z
+cleanup_security_snapshot=48bc1e5a1e775a2b97c75c30c83938d4fc79f07da281b328df0640c532db7564
+cleanup_security=worklist_5_of_5|coverage_complete|reportable_findings_0
+cleanup_live=not_run|new_exact_approval_required
+cleanup_approval=prepared_in_runner|withheld_until_commit_push_origin_readback
+```
+
+Next: review final diff, commit/push/read back trusted origin, then issue the
+literal SHA-bound cleanup approval from the runner. Do not send a new `/start`
+until cleanup/postflight pass and a fresh activation stage explicitly returns
+`awaiting_admin_start=true`. Production AWG remains untouched.
+
 ## Exact single-line receipt correction after FA3F live attempt
 
 The literal FA3F approval was issued. Fresh production preflight passed:

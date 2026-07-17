@@ -1,5 +1,31 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Current continuation override 2026-07-17 after exact-one cleanup engineering
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+amn2_source=codex-vps-test-prep|0b858c5cdbc5b565cc265966a2edfe2d339d65e0|production_unchanged
+production_overlay=0b858c5|verified
+telegram_002b_preflight=failed_closed|reason_pending_updates_nonzero
+telegram_002b_stage=false|accept=false|enable=false|postflight=false
+telegram_002b_regular_bot=inactive_disabled_process_0
+telegram_002b_2fdb_authority=stage_receipt_absent|unconsumed
+telegram_002b_cleanup_scope=one_exact_private_first_admin_start|inspect_twice|one_offset|no_response
+telegram_002b_cleanup_design=d474ff6|approved
+telegram_002b_cleanup_remote_sha256=41F69F945F74647B441173B682277E0568DA81CC7F0B12EADD9BD534DB225242
+telegram_002b_cleanup_runner_sha256=D3BD76119B35155AAB922E54C2E59F50B7D9D0B23C9B5AC2268887D8ADB70A1F
+telegram_002b_cleanup_tests=focused_10_passed|canonical_128_passed|bash_n_pass|powershell_parse_pass|diff_check_pass
+telegram_002b_cleanup_security=sealed_scan_59e7862ce73ab46179a01591f4533c8496f3b38d_20260717T183406Z|receipts_5_of_5|coverage_complete|findings_0|secret_matches_0
+telegram_002b_cleanup_live=not_run|approval_not_consumed
+web_database_awg=unchanged_from_failed_preflight_baseline
+operator_instruction=DO_NOT_SEND_START_UNTIL_FRESH_STAGE_AWAITING_ADMIN_START
+next=COMMIT_PUSH_ORIGIN_READBACK_THEN_ISSUE_EXACT_CLEANUP_LIVE_APPROVAL
+```
+
+После exact cleanup approval: `preflight -> cleanup -> independent backlog/
+web/DB/AWG postflight -> existing 2FDB preflight/stage`. Только новый successful
+stage может открыть свежий 240-second window и запросить `/start`.
+
 ## Current continuation override 2026-07-17 after `0b858c5` rollout pass
 
 ```text
