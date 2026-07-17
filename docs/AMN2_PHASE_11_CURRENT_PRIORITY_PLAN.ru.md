@@ -1,9 +1,33 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-17 после fail-closed `pending_updates_nonzero` и локальной
-подготовки exact-one stale `/start` cleanup gate.
+Актуально: 2026-07-17 после успешной persistent activation TELEGRAM-002B;
+идёт обязательное 60-minute stability observation.
 
-## Текущий P0 override: TELEGRAM-002B stale-start cleanup готов локально
+## Текущий P0 override: TELEGRAM-002B live activation прошла
+
+Exact-one cleanup подтвердил только заранее проверенный stale private `/start`
+первого configured administrator и оставил backlog `0`. После независимого
+preflight fresh disabled-first stage `20260717T192602Z` принял один новый
+`/start`, оператор подтвердил точный wide language header, а accept включил
+persistent service. Отдельный postflight прошёл. Повторный `/start` не нужен.
+
+```text
+phase11_telegram_002b_cleanup=pass|exact_one_stale_first_admin_start_ack_only|no_response|backlog_0
+phase11_telegram_002b_fresh_preflight=pass|identity_match|webhook_empty|backlog_0|ownership_probe_empty
+phase11_telegram_002b_stage=pass|run_20260717T192602Z|disabled_first|autorollback_240|awaiting_admin_start_true
+phase11_telegram_002b_accept=pass|first_admin_start_accepted|wide_header_confirmation_exact
+phase11_telegram_002b_bot=active_enabled_single_instance|restart_0|watchdog_healthy
+phase11_telegram_002b_database=first_admin_user_row_only|integrity_ok|fk_0
+phase11_telegram_002b_postflight=pass|identity_match|webhook_empty|backlog_0
+phase11_telegram_002b_web=active_enabled_http_ok_loopback_only
+phase11_telegram_002b_awg=unchanged|running|restart_0|peer_set_unchanged
+phase11_telegram_002b_stability=active|four_read_only_checkpoints_15m|no_blind_remediation
+phase11_telegram_002b_next=COMPLETE_60_MINUTE_STABILITY_THEN_FINAL_STATUS_COMMIT_PUSH_AND_RELEASE_REMAINDER
+```
+
+## Предыдущий P0 override: stale-start cleanup engineering
+
+### TELEGRAM-002B stale-start cleanup был готов локально
 
 Exact `2FDB...` preflight подтвердил production baseline, но остановился до
 stage с фиксированной причиной `pending_updates_nonzero`. Stage receipt не

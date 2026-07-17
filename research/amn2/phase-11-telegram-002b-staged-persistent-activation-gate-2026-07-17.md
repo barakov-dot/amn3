@@ -2,7 +2,42 @@
 
 Дата: 2026-07-17.
 
-Статус: LOCAL-FIX-VERIFIED-AWAITING-COMMIT-PUSH-ORIGIN-SYNC.
+Статус: LIVE-ACTIVATION-PASS-STABILITY-OBSERVATION-ACTIVE.
+
+## Latest live outcome
+
+The exact-one stale-start cleanup preflight and cleanup passed. It acknowledged
+only the inspected private `/start` from the first configured administrator,
+sent no response, left the production database unchanged and reduced Telegram
+backlog to zero. Fresh activation preflight then passed.
+
+Disabled-first stage `20260717T192602Z` armed the 240-second autorollback. The
+first configured administrator sent one fresh `/start`, observed the exact wide
+language-selection header and returned the exact confirmation. Accept enabled
+one persistent service instance and cancelled rollback. Independent postflight
+passed.
+
+```text
+cleanup=pass|exact_one_stale_start_ack_only|backlog_0
+fresh_preflight=pass|identity_match|webhook_empty|ownership_probe_empty
+stage=pass|run_id_20260717T192602Z|active_disabled|autorollback_240
+accept=pass|first_admin_start_accepted|wide_header_confirmation_exact
+bot=active_enabled_single_instance|restart_0|watchdog_healthy
+database=first_admin_user_row_only|integrity_ok|fk_0
+telegram=identity_match|webhook_empty|backlog_0
+web=active_enabled_http_ok_loopback_only
+awg=unchanged
+postflight=pass
+stability_observation=active|four_read_only_15_minute_checkpoints
+operator_action=none|do_not_repeat_start
+```
+
+The existing upstream heartbeat is temporarily retargeted to the current task
+because the app permits only one heartbeat per task. Its original weekly TOML
+is backed up with SHA-256
+`BD8BB6253C31D6CF26E1FFA6F5B89B640FD48DF706DFEC26BB167180BA510EA6`
+and must be restored after the fourth successful checkpoint. Legacy upstream
+chain remains paused.
 
 ## Scope and authority
 

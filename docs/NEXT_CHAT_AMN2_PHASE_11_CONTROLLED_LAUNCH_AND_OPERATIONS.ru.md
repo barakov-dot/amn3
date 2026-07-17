@@ -1,6 +1,29 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
-## Current continuation override 2026-07-17 after exact-one cleanup engineering
+## Current continuation override 2026-07-17 after TELEGRAM-002B live activation
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+production_overlay=0b858c5|verified
+telegram_002b_cleanup=pass|one_stale_first_admin_start_ack_only|backlog_0
+telegram_002b_run_id=20260717T192602Z
+telegram_002b_activation=pass|fresh_start_accepted|wide_header_confirmation_exact
+telegram_002b_bot=active_enabled_single_instance_restart_0_watchdog_healthy
+telegram_002b_telegram=identity_match|webhook_empty|backlog_0
+telegram_002b_database=first_admin_user_row_only|integrity_ok|fk_0
+telegram_002b_web=active_enabled_http_ok_loopback_only
+telegram_002b_awg=unchanged
+telegram_002b_postflight=pass
+telegram_002b_operator_action=none|do_not_repeat_start
+telegram_002b_stability=active|four_15_minute_read_only_postflights
+automation=amn2-upstream-orchestrator|temporarily_retargeted_to_current_task|original_weekly_contract_backed_up_sha256_BD8BB6253C31D6CF26E1FFA6F5B89B640FD48DF706DFEC26BB167180BA510EA6
+next=COMPLETE_STABILITY_OBSERVATION_SYNC_COMMIT_PUSH_RESTORE_UPSTREAM_HEARTBEAT_THEN_REPORT_PHASE11_RELEASE_REMAINDER
+```
+
+No repeat `/start`, stage, accept or cleanup is authorized. Stability checks
+are read-only; any failed invariant stops without blind remediation.
+
+## Previous continuation override 2026-07-17 after exact-one cleanup engineering
 
 ```text
 active_phase=Phase 11 Controlled Launch and Operations

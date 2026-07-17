@@ -1,4 +1,36 @@
-# Текущий override 2026-07-17: TELEGRAM-002B exact-one stale-start cleanup готов локально
+# Текущий override 2026-07-17: TELEGRAM-002B persistent activation прошла
+
+После exact-one cleanup Telegram backlog стал `0`, при этом response/workflow и
+production DB/web/AWG mutations отсутствовали. Fresh `2FDB...` preflight и
+disabled-first stage открыли run `20260717T192602Z`. Первый configured admin
+отправил один новый `/start` и подтвердил exact wide language header. Accept
+включил persistent bot, отменил rollback timer и прошёл независимый postflight.
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+amn2_source=codex-vps-test-prep|0b858c5cdbc5b565cc265966a2edfe2d339d65e0|production_unchanged
+production_overlay=0b858c5|verified
+phase11_telegram_002b_cleanup_preflight=pass
+phase11_telegram_002b_cleanup=pass|ack_exact_one_stale_private_first_admin_start_only|no_response
+phase11_telegram_002b_cleanup_post=backlog_0|database_unchanged|web_healthy|bot_inactive_disabled|awg_unchanged
+phase11_telegram_002b_fresh_preflight=pass|identity_match|webhook_empty|backlog_0|ownership_probe_empty
+phase11_telegram_002b_stage=pass|run_id_20260717T192602Z|active_disabled|autorollback_240
+phase11_telegram_002b_accept=pass|first_admin_start_accepted|wide_header_confirmation_exact
+phase11_telegram_002b_service=active_enabled_single_instance|restart_0|watchdog_healthy
+phase11_telegram_002b_database=first_admin_user_row_only|integrity_ok|fk_0
+phase11_telegram_002b_web=active_enabled_http_ok_loopback_only
+phase11_telegram_002b_awg=unchanged
+phase11_telegram_002b_postflight=pass|identity_match|webhook_empty|backlog_0
+phase11_telegram_002b_stability=active|four_read_only_postflights_at_15_minute_intervals
+phase11_telegram_002b_operator_action=none|do_not_repeat_start
+phase11_automation=amn2-upstream-orchestrator_temporarily_retargeted|original_contract_backup_sha256_BD8BB6253C31D6CF26E1FFA6F5B89B640FD48DF706DFEC26BB167180BA510EA6|restore_after_stability
+phase11_next=COMPLETE_60_MINUTE_STABILITY_SYNC_COMMIT_PUSH_THEN_RELEASE_REMAINDER_REVIEW
+```
+
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope. Legacy
+three-step upstream chain остаётся PAUSED. Повторный `/start` не требуется.
+
+# Предыдущий override 2026-07-17: TELEGRAM-002B exact-one stale-start cleanup готов локально
 
 User-issued `2FDB...` approval был использован только для fresh classified
 preflight. Production checks прошли до Telegram admission, затем gate
