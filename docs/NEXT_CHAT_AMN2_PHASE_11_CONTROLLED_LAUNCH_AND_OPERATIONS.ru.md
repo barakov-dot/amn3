@@ -332,3 +332,21 @@ Engineering/product evidence first, tests second, diff review third, status
 sync fourth, commit/push last. Report commands as `Одиночная`, `Двойная`,
 `Тройная`, `Четверная` and `Более — рекомендовано`, always beginning with
 `GPT-5.6 SOL`.
+
+## Handoff override — TELEGRAM-002B local gate complete 2026-07-17
+
+```text
+phase11_telegram_002b_status=READY_AWAITING_SEPARATE_EXACT_LIVE_APPROVAL
+phase11_telegram_002b_remote_sha256=14747241F1A0E0545CF8B96329E90708F7CC80AF639872968DA03A1783200C64
+phase11_telegram_002b_tests=focused_18_passed|canonical_113_passed|bash_n_pass|powershell_parse_pass
+phase11_telegram_002b_security=complete_coverage|reportable_findings_0
+phase11_telegram_002b_live_action=false|regular_bot_inactive_disabled|telegram_profile_unchanged|awg_untouched
+phase11_telegram_002b_evidence=research/amn2/phase-11-telegram-002b-staged-persistent-activation-gate-2026-07-17.md
+phase11_telegram_002b_next=WAIT_FOR_SEPARATE_EXACT_LIVE_APPROVAL_THEN_REVIEW_BOUNDED_GATE
+```
+
+Prepared phrase (do not consume in this local task):
+
+```text
+APPROVE_PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_14747241F1A0E0545CF8B96329E90708F7CC80AF639872968DA03A1783200C64_0B858C5_EXACT_UNIT_ENV_TELEGRAM_PREFLIGHT_DISABLED_FIRST_STAGE_FIRST_CONFIGURED_ADMIN_SINGLE_START_WIDE_HEADER_EXACT_CONFIRM_ACCEPT_ENABLE_POSTFLIGHT_AUTOROLLBACK240_NO_BLIND_DB_RESTORE_WEB_UNTOUCHED_AND_AWG_UNTOUCHED
+```

@@ -5781,3 +5781,32 @@ phase11_0b858c5_rollout_evidence=research/amn2/phase-11-0b858c5-combined-overlay
 Telegram API/profile mutation, persistent bot install/enable/start, database
 write/migration, provider action, peer/config change и любые AWG actions не
 входили в consumed approval и не выполнялись.
+
+## AMN2 Phase 11 — TELEGRAM-002B staged persistent activation local closeout 2026-07-17
+
+Локальная design/TDD/implementation часть выполнена и подготовлена к отдельному
+live gate. Реальный SSH/VPS/Telegram/systemd запуск, production DB write,
+regular bot activation, provider mutation и AWG action не выполнялись.
+
+```text
+phase11_telegram_002b_status=READY_AWAITING_SEPARATE_EXACT_LIVE_APPROVAL
+phase11_telegram_002b_source_overlay=0b858c5
+phase11_telegram_002b_remote_sha256=14747241F1A0E0545CF8B96329E90708F7CC80AF639872968DA03A1783200C64
+phase11_telegram_002b_runner_sha256=4038FD648F6834AF03A1D44BCD1E0CA63B78FC41CCB48A24D9245B1166FA53B7
+phase11_telegram_002b_tests=focused_18_passed|canonical_113_passed|bash_n_pass|powershell_parse_pass
+phase11_telegram_002b_security=complete_coverage|reportable_findings_0
+phase11_telegram_002b_live_action=false
+phase11_telegram_002b_regular_bot=inactive_disabled
+phase11_telegram_002b_telegram_profile=unchanged
+phase11_telegram_002b_db_live_write=false
+phase11_telegram_002b_provider_mutation=false
+phase11_telegram_002b_awg=untouched
+phase11_telegram_002b_evidence=research/amn2/phase-11-telegram-002b-staged-persistent-activation-gate-2026-07-17.md
+phase11_telegram_002b_next=WAIT_FOR_SEPARATE_EXACT_LIVE_APPROVAL_THEN_REVIEW_BOUNDED_GATE
+```
+
+Prepared phrase (not consumed):
+
+```text
+APPROVE_PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_14747241F1A0E0545CF8B96329E90708F7CC80AF639872968DA03A1783200C64_0B858C5_EXACT_UNIT_ENV_TELEGRAM_PREFLIGHT_DISABLED_FIRST_STAGE_FIRST_CONFIGURED_ADMIN_SINGLE_START_WIDE_HEADER_EXACT_CONFIRM_ACCEPT_ENABLE_POSTFLIGHT_AUTOROLLBACK240_NO_BLIND_DB_RESTORE_WEB_UNTOUCHED_AND_AWG_UNTOUCHED
+```

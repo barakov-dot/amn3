@@ -299,3 +299,24 @@ GPT-5.6 SOL -> REVIEW_PHASE11_0B858C5_COMBINED_PRIVATE_OVERLAY_LIVE_GATE -> PREP
 ```text
 GPT-5.6 SOL -> REVIEW_PHASE11_0B858C5_COMBINED_PRIVATE_OVERLAY_LIVE_GATE -> PREPARE_EXACT_PHASE11_0B858C5_COMBINED_PRIVATE_OVERLAY_APPROVAL_PHRASE -> AFTER_APPROVAL_UPLOAD_WEB_FREEZE_SNAPSHOT_OFFLINE_APPLY_VERIFY_AND_ROLLBACK_WITH_REGULAR_BOT_DISABLED_AND_AWG_UNTOUCHED -> SYNC_PHASE11_0B858C5_ROLLOUT_STATUS_COMMIT_AND_PUSH -> AFTER_POSTFLIGHT_REVIEW_PHASE11_TELEGRAM_002B_PERSISTENT_BOT_ACTIVATION_GATE
 ```
+
+## TELEGRAM-002B staged persistent activation — local implementation closeout
+
+`TELEGRAM-002B` design/TDD/local executor завершены и origin-ready; live
+activation не выполнена. Remote SHA:
+`14747241F1A0E0545CF8B96329E90708F7CC80AF639872968DA03A1783200C64`.
+Focused `18 passed`, canonical `113 passed`, Bash/PowerShell parse pass,
+fresh complete Security diff review `0 reportable findings`.
+
+Критичный следующий gate — отдельная exact live approval для bounded
+`preflight -> stage -> first-admin /start -> accept -> postflight`. До него
+regular bot остаётся inactive/disabled, Telegram profile и production DB не
+трогаются, AWG не останавливается и не изменяется.
+
+Copy-ready, ещё не потреблённая phrase:
+
+```text
+APPROVE_PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_14747241F1A0E0545CF8B96329E90708F7CC80AF639872968DA03A1783200C64_0B858C5_EXACT_UNIT_ENV_TELEGRAM_PREFLIGHT_DISABLED_FIRST_STAGE_FIRST_CONFIGURED_ADMIN_SINGLE_START_WIDE_HEADER_EXACT_CONFIRM_ACCEPT_ENABLE_POSTFLIGHT_AUTOROLLBACK240_NO_BLIND_DB_RESTORE_WEB_UNTOUCHED_AND_AWG_UNTOUCHED
+```
+
+Evidence: `research/amn2/phase-11-telegram-002b-staged-persistent-activation-gate-2026-07-17.md`.
