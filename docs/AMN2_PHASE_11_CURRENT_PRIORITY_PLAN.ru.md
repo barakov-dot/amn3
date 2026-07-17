@@ -1,9 +1,9 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-17 после успешной persistent activation TELEGRAM-002B;
-идёт обязательное 60-minute stability observation.
+Актуально: 2026-07-17 после успешной persistent activation TELEGRAM-002B и
+реального 66-minute stability pass.
 
-## Текущий P0 override: TELEGRAM-002B live activation прошла
+## Текущий P0 override: TELEGRAM-002B live activation и stability закрыты
 
 Exact-one cleanup подтвердил только заранее проверенный stale private `/start`
 первого configured administrator и оставил backlog `0`. После независимого
@@ -21,8 +21,9 @@ phase11_telegram_002b_database=first_admin_user_row_only|integrity_ok|fk_0
 phase11_telegram_002b_postflight=pass|identity_match|webhook_empty|backlog_0
 phase11_telegram_002b_web=active_enabled_http_ok_loopback_only
 phase11_telegram_002b_awg=unchanged|running|restart_0|peer_set_unchanged
-phase11_telegram_002b_stability=active|four_read_only_checkpoints_15m|no_blind_remediation
-phase11_telegram_002b_next=COMPLETE_60_MINUTE_STABILITY_THEN_FINAL_STATUS_COMMIT_PUSH_AND_RELEASE_REMAINDER
+phase11_telegram_002b_stability=pass|elapsed_66m13s|final_postflight_20260717T203215Z
+phase11_telegram_002b_repeated_actions=not_required|do_not_repeat_start_stage_accept_or_cleanup
+phase11_telegram_002b_next=PHASE11_RELEASE_001_FINAL_CLOSEOUT_AND_PRIVATE_RELEASE_READINESS_DECISION
 ```
 
 ## Предыдущий P0 override: stale-start cleanup engineering
@@ -75,7 +76,7 @@ production_overlay=0b858c5|verified
 restore_001a_source_pin=801f8c3|approval_scope_unchanged
 restore_001a=completed_pass|approval_consumed
 web=active_enabled_loopback_only
-regular_bot=inactive_disabled
+regular_bot=active_enabled_single_instance_restart_0_watchdog_healthy
 write_gates=false_false
 awg=running_restart_0_peers_12_set_unchanged
 old_recovery_fallback=retained_sealed_without_deletion|review_by_2026-08-01
@@ -83,11 +84,12 @@ second_vps=clean_ssh_only|amn2_no_longer_needed|user_hold_through_weekend_then_r
 second_vps_provider=paid_until_2026-08-12_23_18_25|590_rub_month|auto_renew_enabled_observed|no_mutation
 brand_001=production_verified_0b858c5|canonical_square_logo_served|old_logo_only_package_superseded
 brand_002=production_source_verified_0b858c5|png_1672x941|sha256_bbddfa72d1d1fc37e412d2f4a9b4124001ff91fbd641635e31a47e008fc4611f|telegram_profile_unchanged
-telegram_002a=production_source_present_0b858c5|local_hardening_verified|regular_bot_inactive_disabled|activation_separate_002b_gate
+telegram_002a=production_source_present_0b858c5|local_hardening_verified|regular_bot_active_via_002b
 package_0b858c5=uploaded_applied_verified|outer_sha256_7866bdd9febe1d6eea701b37a6e4206a8267766a56993f3c02a0c7b30c394b54|source_sha256_e03f13fd6a7bb5cbc5fcee7179f395ea8c2864ebceab01bc351c5904f3cff975|run_20260717T081340Z
 package_0b858c5_verification=outer_4|source_383|delta_31|forbidden_0|unsafe_0|symlinks_0|scoped_5|full_918_passed_1_skipped|clean_security_7_of_7_surfaces_5_findings_0
 rollout_0b858c5=pass|web_private_healthy|db_unchanged|bot_inactive_disabled|awg_restart_0_peers_12_set_unchanged|rollback_retained_verified
-next=review_telegram_002b_persistent_bot_activation_gate_without_activation
+telegram_002b=activation_pass|run_20260717T192602Z|stability_66m13s_pass|backlog_0|awg_unchanged
+next=PHASE11_RELEASE_001_FINAL_CLOSEOUT_AND_PRIVATE_RELEASE_READINESS_DECISION
 ```
 
 ## Закрыто в P0
@@ -95,8 +97,9 @@ next=review_telegram_002b_persistent_bot_activation_gate_without_activation
 | Критичность | ID | Результат |
 |---|---|---|
 | Критично | `PHASE11-TELEGRAM-001` | transient first-admin exact `/start` smoke passed; one response; production DB unchanged; cleanup passed |
-| Критично | `PHASE11-TELEGRAM-002` | persistent bot activation held; regular service remains disabled; local hardening follow-up completed in `08c56f2` and is contained in source `0b858c5` |
-| Критично | `PHASE11-TELEGRAM-002A` | local fail-closed admission/unit hardening complete and pushed; contained in `0b858c5`; scoped 113, full 915/1 skipped; clean scan 15/15, findings 0; no live activation |
+| Критично | `PHASE11-TELEGRAM-002` | persistent service decision completed: fail-closed staged activation selected and subsequently accepted through `002A/002B` |
+| Критично | `PHASE11-TELEGRAM-002A` | fail-closed admission/unit hardening complete, pushed and deployed in `0b858c5`; scoped 113, full 915/1 skipped; clean scan 15/15, findings 0; activated through `002B` |
+| Критично | `PHASE11-TELEGRAM-002B` | live activation `20260717T192602Z` passed; exact first-admin wide header confirmed; persistent bot active/enabled/single/restart 0/watchdog healthy; final 66-minute postflight passed; Telegram backlog 0; DB/web healthy; AWG unchanged |
 | Критично | `PHASE11-OPS-001` | bounded runtime/recovery snapshot healthy; no failed units or AMN2/Docker error rows; AWG invariant passed |
 | Критично | `PHASE11-RESTORE-001A` | canonical v2 full-secret disposable restore passed; isolated AWG12 and loopback web/DB verified; cleanup and production re-audits passed |
 | Критично | `PHASE11-RECOVERY-001` | old fallback retained sealed without deletion; do not open/copy/move/delete; review by 2026-08-01 |
@@ -104,9 +107,9 @@ next=review_telegram_002b_persistent_bot_activation_gate_without_activation
 | Критично | `PHASE11-ROLLOUT-0B858C5` | production overlay `0b858c5`; private web healthy; square/wide assets verified; database unchanged; bot inactive/disabled; AWG running/restart 0/12 peers/same set; rollback retained verified |
 | Очень важно | second VPS AMN2 role | AMN2 no longer needs it; host clean SSH-only; user keeps it through the weekend and then repurposes it |
 | Очень важно | `PHASE11-BRAND-001` source | canonical square logo is contained in descendant `0b858c5`; old `6abc620` package remains not deployed and is no longer the current combined candidate |
-| Очень важно | `PHASE11-BRAND-002` source | exact 1672x941 language-selection header integrated and pushed in `0b858c5`; `/start` role-specific usage and text-only fallback verified; square assets unchanged; no live activation |
+| Очень важно | `PHASE11-BRAND-002` source | exact 1672x941 language-selection header integrated and pushed in `0b858c5`; `/start` role-specific usage, live first-admin display and text-only fallback verified; square assets unchanged |
 
-## P0/P1 — критично, выполнять следующим
+## Закрытые P0/P1 evidence blocks
 
 ### C1. `PHASE11-RESTORE-001A` canonical full-secret disposable rehearsal
 
@@ -179,7 +182,7 @@ canonical systemd CIDR properties. Финальный full-secret run прошё
 
 ### C2. `PHASE11-TELEGRAM-002A` persistent admission and unit hardening
 
-Состояние: `completed-local|08c56f2|origin-sync|production-not-activated`.
+Состояние: `completed-local|08c56f2|origin-sync|production-activated-via-TELEGRAM-002B`.
 
 - fail-closed identity/webhook/backlog/poll-ownership admission и repeated
   pre-poll state check;
@@ -191,9 +194,9 @@ canonical systemd CIDR properties. Финальный full-secret run прошё
 - RED 3 expected failures, GREEN 14; scoped 113, full 915 passed/1 skipped;
 - clean security scan 15/15 receipts, findings 0.
 
-Production bot enable/start, Telegram API/profile, VPS, web/DB и AWG не
-затронуты. Activation остаётся отдельным exact gate после нового combined
-package/rollout. Перед будущим VPS-write mode обязателен tested
+Исторически этот `002A` slice не включал production bot. Последующий exact
+`002B` gate активировал unit и прошёл 66-minute stability; Telegram profile и
+AWG остались неизменны. Перед будущим VPS-write mode обязателен tested
 service-readable non-home SSH key/known-hosts path при сохранении
 `ProtectHome=true`.
 
@@ -212,9 +215,9 @@ Production переведён с `801f8c3` на `0b858c5` в bounded run
 `20260717T081340Z`. Exact package receipt, source delta и assets прошли;
 independent postflight подтвердил private healthy web, неизменную database,
 regular bot inactive/disabled и AWG running/restart 0/12 peers/same set.
-Rollback bundle retained/verified и не понадобился. Установка/admission/start
-persistent bot остаётся отдельным `PHASE11-TELEGRAM-002B` gate. Telegram
-profile photo и AWG не входят в этот gate.
+Rollback bundle retained/verified и не понадобился. Последующий отдельный
+`PHASE11-TELEGRAM-002B` gate завершил installation/admission/start и 66-minute
+stability pass. Telegram profile photo и AWG не входили в этот gate.
 
 ### C3. Recovery fallback retention и second-VPS AMN2 handover
 
@@ -244,22 +247,24 @@ provider display, текущий месячный период `590,00 RUB`, aut
 
 ### Критичные
 
-1. `PHASE11-TELEGRAM-002B`: после подтверждённого postflight rollout отдельным exact
-   gate установить unit/env contract, выполнить live admission и запустить
-   один persistent bot. Проверить identity, webhook empty, backlog 0,
-   single-instance, readiness/watchdog и rollback; AWG untouched.
-2. `PHASE11-SECOND-VPS-HANDOVER`: перед пользовательской передачей выполнить
-   финальный read-only clean audit. Dedicated AMN2 staging key и local
-   known-host binding удалять только по отдельной точной фразе; provider/VPS не
-   удалять. AMN2 уже не нуждается в этом VPS.
-3. `PHASE11-RECOVERY-001`: old fallback оставить sealed; до review не позднее
-   2026-08-01 не открывать, не копировать, не перемещать и не удалять.
+1. `PHASE11-RELEASE-001`: собрать финальный Phase 11 closeout packet, проверить
+   отсутствие открытых launch-blockers и принять private release-readiness
+   decision. Это единственный текущий release-critical gate.
+2. `PHASE11-SECOND-VPS-HANDOVER` — условно критично только в момент передачи:
+   перед пользовательским перепрофилированием выполнить финальный read-only
+   clean audit. Dedicated AMN2 staging key и local known-host binding удалять
+   только по отдельной точной фразе; provider/VPS не удалять. AMN2 уже не
+   нуждается в этом VPS; пункт не блокирует релиз до фактического handover.
+3. `PHASE11-RECOVERY-001` — датированный safety hold: old fallback оставить
+   sealed; до review не позднее 2026-08-01 не открывать, не копировать, не
+   перемещать и не удалять. Пока retention соблюдается, релиз не блокируется.
 
 ### Очень важно
 
-1. `PHASE11-TELEGRAM-SSH-PREREQ`: до bot VPS-write mode вынести SSH key и
+1. `PHASE11-TELEGRAM-SSH-PREREQ`: только до будущего bot VPS-write mode вынести SSH key и
    known-hosts в service-readable non-home path, проверить права и сохранить
-   `ProtectHome=true`.
+   `ProtectHome=true`. Текущий read-only persistent bot принят; этот future
+   write prerequisite не блокирует private release.
 2. `PHASE11-DEVICE-001`: authenticated read-only Device Passport/lifecycle
    list/detail UX — оператор видит состояние устройства без live mutation.
 3. `PHASE11-API-001`: private scoped API-key lane со scope, TTL, revoke, audit
@@ -330,47 +335,52 @@ gate. Не использовать approvals из Phase 10 или уже consum
 Одиночная:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_0B858C5_COMBINED_PRIVATE_OVERLAY_LIVE_GATE
+GPT-5.6 SOL -> REVIEW_PHASE11_RELEASE_001_FINAL_CLOSEOUT_AND_PRIVATE_RELEASE_READINESS_GATE
 ```
 
 Двойная:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_0B858C5_COMBINED_PRIVATE_OVERLAY_LIVE_GATE -> PREPARE_EXACT_PHASE11_0B858C5_COMBINED_PRIVATE_OVERLAY_APPROVAL_PHRASE
+GPT-5.6 SOL -> REVIEW_PHASE11_RELEASE_001_FINAL_CLOSEOUT_AND_PRIVATE_RELEASE_READINESS_GATE -> PREPARE_PHASE11_FINAL_CLOSEOUT_PACKET
 ```
 
 Тройная:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_0B858C5_COMBINED_PRIVATE_OVERLAY_LIVE_GATE -> PREPARE_EXACT_PHASE11_0B858C5_COMBINED_PRIVATE_OVERLAY_APPROVAL_PHRASE -> AFTER_APPROVAL_UPLOAD_WEB_FREEZE_SNAPSHOT_OFFLINE_APPLY_VERIFY_AND_ROLLBACK_WITH_REGULAR_BOT_DISABLED_AND_AWG_UNTOUCHED
+GPT-5.6 SOL -> REVIEW_PHASE11_RELEASE_001_FINAL_CLOSEOUT_AND_PRIVATE_RELEASE_READINESS_GATE -> PREPARE_PHASE11_FINAL_CLOSEOUT_PACKET -> RUN_PHASE11_FINAL_DOCS_DIFF_AND_SECURITY_REVIEW
 ```
 
 Четверная:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_0B858C5_COMBINED_PRIVATE_OVERLAY_LIVE_GATE -> PREPARE_EXACT_PHASE11_0B858C5_COMBINED_PRIVATE_OVERLAY_APPROVAL_PHRASE -> AFTER_APPROVAL_UPLOAD_WEB_FREEZE_SNAPSHOT_OFFLINE_APPLY_VERIFY_AND_ROLLBACK_WITH_REGULAR_BOT_DISABLED_AND_AWG_UNTOUCHED -> SYNC_PHASE11_0B858C5_ROLLOUT_STATUS_COMMIT_AND_PUSH
+GPT-5.6 SOL -> REVIEW_PHASE11_RELEASE_001_FINAL_CLOSEOUT_AND_PRIVATE_RELEASE_READINESS_GATE -> PREPARE_PHASE11_FINAL_CLOSEOUT_PACKET -> RUN_PHASE11_FINAL_DOCS_DIFF_AND_SECURITY_REVIEW -> COMMIT_PUSH_AND_VERIFY_CLOSEOUT_ORIGIN
 ```
 
 Более — рекомендовано:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_0B858C5_COMBINED_PRIVATE_OVERLAY_LIVE_GATE -> PREPARE_EXACT_PHASE11_0B858C5_COMBINED_PRIVATE_OVERLAY_APPROVAL_PHRASE -> AFTER_APPROVAL_UPLOAD_WEB_FREEZE_SNAPSHOT_OFFLINE_APPLY_VERIFY_AND_ROLLBACK_WITH_REGULAR_BOT_DISABLED_AND_AWG_UNTOUCHED -> SYNC_PHASE11_0B858C5_ROLLOUT_STATUS_COMMIT_AND_PUSH -> AFTER_POSTFLIGHT_REVIEW_PHASE11_TELEGRAM_002B_PERSISTENT_BOT_ACTIVATION_GATE
+GPT-5.6 SOL -> REVIEW_PHASE11_RELEASE_001_FINAL_CLOSEOUT_AND_PRIVATE_RELEASE_READINESS_GATE -> PREPARE_PHASE11_FINAL_CLOSEOUT_PACKET -> RUN_PHASE11_FINAL_DOCS_DIFF_AND_SECURITY_REVIEW -> COMMIT_PUSH_AND_VERIFY_CLOSEOUT_ORIGIN -> IF_GATE_PASSES_DECLARE_CONTROLLED_PRIVATE_RELEASE -> SCHEDULE_SECOND_VPS_HANDOVER_AUDIT_ONLY_WHEN_USER_REPURPOSES
 ```
 
-## TELEGRAM-002B staged persistent activation — local implementation closeout
+## Historical TELEGRAM-002B engineering and correction ledger — closed
 
-`TELEGRAM-002B` design/TDD/local executor завершены и origin-ready; live
-activation не выполнена. Remote SHA:
+Все блоки ниже до конца файла являются историческими evidence. Их approval
+phrases consumed, superseded или withheld и не дают текущей authority. Не
+повторять rollout, upload, `/start`, cleanup, stage или accept.
+
+### Historical staged persistent activation — local implementation closeout
+
+На этом историческом checkpoint `TELEGRAM-002B` design/TDD/local executor были
+origin-ready, а live activation ещё не выполнялась. Remote SHA того checkpoint:
 `14747241F1A0E0545CF8B96329E90708F7CC80AF639872968DA03A1783200C64`.
 Focused `18 passed`, canonical `113 passed`, Bash/PowerShell parse pass,
 fresh complete Security diff review `0 reportable findings`.
 
-Критичный следующий gate — отдельная exact live approval для bounded
-`preflight -> stage -> first-admin /start -> accept -> postflight`. До него
-regular bot остаётся inactive/disabled, Telegram profile и production DB не
-трогаются, AWG не останавливается и не изменяется.
+Историческим следующим gate была отдельная exact live approval для bounded
+`preflight -> stage -> first-admin /start -> accept -> postflight`; она позже
+заменена checksum-bound corrections и завершена в run `20260717T192602Z`.
 
-Copy-ready, ещё не потреблённая phrase:
+Historical phrase, superseded by later checksum-bound runners; do not use:
 
 ```text
 APPROVE_PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_14747241F1A0E0545CF8B96329E90708F7CC80AF639872968DA03A1783200C64_0B858C5_EXACT_UNIT_ENV_TELEGRAM_PREFLIGHT_DISABLED_FIRST_STAGE_FIRST_CONFIGURED_ADMIN_SINGLE_START_WIDE_HEADER_EXACT_CONFIRM_ACCEPT_ENABLE_POSTFLIGHT_AUTOROLLBACK240_NO_BLIND_DB_RESTORE_WEB_UNTOUCHED_AND_AWG_UNTOUCHED
@@ -378,7 +388,7 @@ APPROVE_PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_14747241F1A0E0545CF8B96329
 
 Evidence: `research/amn2/phase-11-telegram-002b-staged-persistent-activation-gate-2026-07-17.md`.
 
-## TELEGRAM-002B preflight correction override
+### Historical preflight correction override
 
 Первый exact preflight дошёл до VPS, но fail-closed остановился на ожидаемом
 venv symlink `/opt/amn2/venv/bin/python`: source/unit/env bindings присутствуют,
@@ -394,7 +404,7 @@ stage/accept не выполнялись. Локальный executor тепер
 APPROVE PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_3E6D42D6D7184BD7A05402585A85652C2319D1E0E9E8076217057AE5EE948881_0B858C5_EXACT_UNIT_ENV_TELEGRAM_PREFLIGHT_DISABLED_FIRST_STAGE_FIRST_CONFIGURED_ADMIN_SINGLE_START_WIDE_HEADER_EXACT_CONFIRM_ACCEPT_ENABLE_POSTFLIGHT_AUTOROLLBACK240_NO_BLIND_DB_RESTORE_WEB_UNTOUCHED_AND_AWG_UNTOUCHED
 ```
 
-## TELEGRAM-002B journal-ingest correction override
+### Historical journal-ingest correction override
 
 Preflight с SHA `3E6D42...` прошёл. Disabled-first stage
 `20260717T115918Z` остановился fail-closed до `/start`: единичная проверка
@@ -421,7 +431,7 @@ withheld until commit, push and origin readback.
 approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 ```
 
-## TELEGRAM-002B exact single-line receipt correction override
+### Historical exact single-line receipt correction override
 
 FA3F fresh preflight прошёл на production. Single-use disabled-first stage
 остановился fail-closed до `/start` с
@@ -457,7 +467,7 @@ literal SHA-bound approval, повторить `preflight -> stage -> /start -> 
 wide-header confirmation -> accept -> postflight`, затем провести
 60-минутное наблюдение. AWG не останавливать и не изменять.
 
-## TELEGRAM-002B unbuffered admission receipt correction override
+### Historical unbuffered admission receipt correction override
 
 Literal approval для SHA `56BE8154...` была получена. Fresh preflight прошёл,
 но single-use disabled-first stage снова остановился fail-closed до `/start` с
@@ -494,7 +504,7 @@ approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 literal SHA-bound approval и полный bounded gate. До успешного stage `/start`
 не отправлять; AWG не останавливать и не изменять.
 
-## TELEGRAM-002B default-plan timestamp startup correction override
+### Historical default-plan timestamp startup correction override
 
 Literal E407 approval была получена. Fresh preflight прошёл, unbuffered
 admission receipt был принят, после чего disabled-first stage остановился
@@ -530,7 +540,7 @@ approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 Next: commit/push/origin readback, новая DF9E literal approval и fresh bounded
 gate. `/start` только после `awaiting_admin_start=true`; AWG untouched.
 
-## TELEGRAM-002B expired-window safe classification override
+### Historical expired-window safe classification override
 
 DF9E preflight и stage прошли; run `20260717T150504Z` вернул
 `awaiting_admin_start=true`, но `/start` не был отправлен в 240-секундном

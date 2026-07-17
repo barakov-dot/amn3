@@ -1,6 +1,30 @@
 # AMN2 Phase 11 Controlled Launch and Operations Entry
 
-## Current execution override 2026-07-16 after TELEGRAM-002A local hardening
+## Current execution override 2026-07-17 after TELEGRAM-002B stability pass
+
+`PHASE11-TELEGRAM-002B` live activation and real 60-minute stability window
+passed on production overlay `0b858c5`. Run `20260717T192602Z` accepted one
+fresh first-admin `/start` with exact wide-header confirmation. Final read-only
+postflight at `2026-07-17T20:32Z`, more than 66 minutes after activation,
+confirmed one active/enabled bot instance, restart `0`, healthy watchdog,
+matching Telegram identity, empty webhook/backlog, healthy loopback-only web,
+database integrity/FK pass and unchanged AWG.
+
+No repeat `/start`, stage, accept or cleanup is required. The only current
+release-critical work is `PHASE11-RELEASE-001`: seal the Phase 11 closeout and
+make the private release-readiness decision. Second-VPS clean handover audit is
+required only immediately before the user's repurpose action and does not block
+release. Old fallback remains sealed without deletion until review no later
+than 2026-08-01 and also does not block release while retained.
+
+Future bot VPS-write functionality still requires a separate exact gate and a
+service-readable non-home SSH key/known-hosts proof with `ProtectHome=true`;
+the currently accepted read-only persistent runtime does not open that mode.
+AWG remains untouched.
+
+Дата: 2026-07-17.
+
+## Previous execution override 2026-07-16 after TELEGRAM-002A local hardening
 
 `PHASE11-TELEGRAM-002A` реализован, clean-scanned и pushed как AMN2 source
 `08c56f2beff65145380fdb3736d94c0709a2b33a`. Identity/webhook/backlog/poll

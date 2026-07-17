@@ -2,7 +2,7 @@
 
 Дата: 2026-07-17.
 
-Статус: LIVE-ACTIVATION-PASS-STABILITY-OBSERVATION-ACTIVE.
+Статус: LIVE-ACTIVATION-AND-66-MINUTE-STABILITY-PASS.
 
 ## Latest live outcome
 
@@ -28,7 +28,12 @@ telegram=identity_match|webhook_empty|backlog_0
 web=active_enabled_http_ok_loopback_only
 awg=unchanged
 postflight=pass
-stability_observation=active|four_read_only_15_minute_checkpoints
+stability_observation=pass|elapsed_66m13s|final_postflight_20260717T203215Z
+final_bot=active_enabled_single_instance|restart_0|watchdog_healthy
+final_telegram=identity_match|webhook_empty|backlog_0
+final_web=active_enabled_http_ok_loopback_only
+final_database=integrity_ok|fk_0
+final_awg=unchanged
 operator_action=none|do_not_repeat_start
 ```
 
@@ -36,8 +41,8 @@ The existing upstream heartbeat is temporarily retargeted to the current task
 because the app permits only one heartbeat per task. Its original weekly TOML
 is backed up with SHA-256
 `BD8BB6253C31D6CF26E1FFA6F5B89B640FD48DF706DFEC26BB167180BA510EA6`
-and must be restored after the fourth successful checkpoint. Legacy upstream
-chain remains paused.
+and must be restored after final evidence reaches trusted origin. Legacy
+upstream chain remains paused.
 
 ## Scope and authority
 
