@@ -697,6 +697,24 @@ arm_automatic_rollback() {
   printf 'rollback_timer_unit=%s.timer\n' "$timer_base"
 }
 
+rollback_current_runtime() {
+  local timer_base
+  [ -n "${STATE_ROOT:-}" ] && [ -x "$STATE_ROOT/rollback.sh" ] \
+    || return 1
+  /bin/bash "$STATE_ROOT/rollback.sh" || return 1
+  timer_base="$(rollback_timer_base)"
+  systemctl stop "${timer_base}.timer" >/dev/null 2>&1 || true
+  systemctl reset-failed "${timer_base}.timer" "${timer_base}.service" \
+    >/dev/null 2>&1 || true
+}
+
+rollback_and_exit() {
+  local exit_code="$1"
+  rollback_current_runtime || true
+  trap - ERR HUP INT TERM
+  exit "$exit_code"
+}
+
 cancel_automatic_rollback() {
   local state_root="$1" timer_unit service_unit receipt service_state
   receipt="$state_root/rollback.receipt"
@@ -756,12 +774,23 @@ install_runtime_contract() {
 }
 
 journal_contract_check() {
-  local state_root="$1" since_epoch safe_log
+  local state_root="$1" since_epoch safe_log attempt receipt_ready
   since_epoch="$(cat "$state_root/stage-epoch.txt")"
   safe_log="$state_root/journal-safe.snapshot"
-  journalctl -u "$BOT_UNIT" --since "@${since_epoch}" -o cat --no-pager \
-    | grep -E 'telegram_persistent_admission=pass|pending_update_count=0|allowed_updates=message,callback_query' \
-    > "$safe_log" || die "sanitized admission receipt missing"
+  receipt_ready=0
+  for attempt in $(seq 1 15); do
+    journalctl -u "$BOT_UNIT" --since "@${since_epoch}" -o cat --no-pager \
+      | grep -E 'telegram_persistent_admission=pass|pending_update_count=0|allowed_updates=message,callback_query' \
+      > "$safe_log" || true
+    if [ "$(grep -c '^telegram_persistent_admission=pass' "$safe_log" || true)" = "1" ] \
+      && [ "$(grep -c '^pending_update_count=0' "$safe_log" || true)" -ge 1 ] \
+      && [ "$(grep -c '^allowed_updates=message,callback_query' "$safe_log" || true)" -ge 1 ]; then
+      receipt_ready=1
+      break
+    fi
+    sleep 1
+  done
+  [ "$receipt_ready" = "1" ] || die "sanitized admission receipt missing"
   [ "$(grep -c '^telegram_persistent_admission=pass' "$safe_log")" = "1" ] \
     || die "admission receipt count mismatch"
   if journalctl -u "$BOT_UNIT" --since "@${since_epoch}" -o cat --no-pager \
@@ -818,7 +847,10 @@ stage_activation() {
   printf 'staging\n' > "$STATE_ROOT/state.status"
   chmod 600 "$STATE_ROOT/stage-epoch.txt" "$STATE_ROOT/state.status"
 
-  trap 'if [ -n "${STATE_ROOT:-}" ] && [ -x "$STATE_ROOT/rollback.sh" ]; then /bin/bash "$STATE_ROOT/rollback.sh" || true; fi' ERR HUP INT TERM
+  trap 'rollback_and_exit 1' ERR
+  trap 'rollback_and_exit 129' HUP
+  trap 'rollback_and_exit 130' INT
+  trap 'rollback_and_exit 143' TERM
   arm_automatic_rollback "$STATE_ROOT" >/dev/null
   install_runtime_contract
   [ "$(systemctl is-enabled "$BOT_UNIT" 2>/dev/null || true)" = "disabled" ] \
@@ -867,7 +899,10 @@ accept_activation() {
   [ "$(awg_snapshot)" = "$(cat "$STATE_ROOT/awg-before.snapshot")" ] \
     || die "AWG changed before acceptance"
   web_check >/dev/null
-  trap 'if [ -n "${STATE_ROOT:-}" ] && [ -x "$STATE_ROOT/rollback.sh" ]; then /bin/bash "$STATE_ROOT/rollback.sh" || true; fi' ERR HUP INT TERM
+  trap 'rollback_and_exit 1' ERR
+  trap 'rollback_and_exit 129' HUP
+  trap 'rollback_and_exit 130' INT
+  trap 'rollback_and_exit 143' TERM
   cancel_automatic_rollback "$STATE_ROOT" >/dev/null
   unit_contract_check >/dev/null
   env_contract_check >/dev/null

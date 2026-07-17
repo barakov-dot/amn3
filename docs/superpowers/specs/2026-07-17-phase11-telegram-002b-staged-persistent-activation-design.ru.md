@@ -231,6 +231,15 @@ Rollback always requires:
 
 Rollback never stops/restarts/recreates/reconfigures AWG.
 
+Journal admission evidence is collected with a bounded 15-second retry to
+cover journald ingest latency. If stage still fails, successful immediate
+rollback also stops and resets the exact transient rollback timer so no stale
+second cleanup remains scheduled.
+
+ERR, HUP, INT and TERM compensation must terminate the privileged executor
+with a nonzero signal-specific status after rollback and timer cleanup. A
+handled signal must never resume stage or accept mutations.
+
 ## Postflight
 
 Independent mode requires overlay/source hashes unchanged, exact installed

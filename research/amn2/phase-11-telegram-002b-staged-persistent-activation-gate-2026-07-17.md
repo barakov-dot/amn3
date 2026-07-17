@@ -2,7 +2,7 @@
 
 Дата: 2026-07-17.
 
-Статус: `READY-AWAITING-SEPARATE-EXACT-LIVE-APPROVAL`.
+Статус: LOCAL-FIX-VERIFIED-AWAITING-COMMIT-PUSH-ORIGIN-SYNC.
 
 ## Scope and authority
 
@@ -108,4 +108,55 @@ New exact phrase, not yet issued or consumed:
 
 ```text
 APPROVE PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_3E6D42D6D7184BD7A05402585A85652C2319D1E0E9E8076217057AE5EE948881_0B858C5_EXACT_UNIT_ENV_TELEGRAM_PREFLIGHT_DISABLED_FIRST_STAGE_FIRST_CONFIGURED_ADMIN_SINGLE_START_WIDE_HEADER_EXACT_CONFIRM_ACCEPT_ENABLE_POSTFLIGHT_AUTOROLLBACK240_NO_BLIND_DB_RESTORE_WEB_UNTOUCHED_AND_AWG_UNTOUCHED
+```
+
+## Disabled-first stage journal-ingest correction 2026-07-17
+
+The corrected preflight passed on production. The separately approved
+disabled-first stage then stopped fail-closed before operator interaction
+because its single immediate journal read did not yet contain the sanitized
+admission receipt. The operator did not send `/start`; accept, enable and
+postflight were not entered.
+
+A narrow read-only diagnostic proved that the required markers arrived after
+the check: admission `1`, pending `1`, allowed-updates `1`, error `0`. The
+rollback receipt for run `20260717T115918Z` was present, the independent
+post-failure preflight passed, and the exact stale rollback timer was stopped
+after verifying bot inactive/disabled and rollback service inactive. Web, DB,
+Telegram backlog and AWG evidence remained unchanged.
+
+The executor now polls only the sanitized admission receipt for at most 15
+seconds and stops/resets only the current run-id-derived transient timer after
+an immediate successful rollback. It does not expose raw logs and does not add
+web, database, Telegram-profile or AWG mutation authority.
+
+```text
+corrected_preflight=pass
+stage_run=20260717T115918Z|fail_closed_before_operator_start
+operator_start=false|accept=false|enable=false|postflight=false
+journal_markers=admission_1|pending_1|allowed_updates_1|errors_0
+rollback_receipt=present
+postfailure_preflight=pass
+stale_timer=stopped_after_inactive_disabled_verification
+regular_bot=inactive_disabled|process_0
+awg=running|restart_0|peers_12|unchanged
+new_remote_executor_sha256=FA3F979E3D2DEEB0EF2F53E97A79ECECCADCA6F853C8587A9973D192C49CEB3F
+new_ssh_runner_sha256=F478A883ADE570D7A594F04B91062E1A1275467AFFE3D71877BE441D87FDA137
+signal_fix=rollback_then_nonzero_exit|no_stage_or_accept_resume
+signal_poc=term_exit_143|no_privileged_mutation_or_stage_pass
+focused_tests=21_passed
+full_canonical_tests=116_passed
+syntax=bash_n_pass|powershell_parse_pass
+security_diff=complete_9_of_9|former_candidates_closed|reportable_findings_0
+security_scan_dir=C:\Users\SooL\AppData\Local\Temp\codex-security-scans\VPS-OPS-LAB\135955aa9fdf078708d02bf5848c030fac350db4_20260717T131800Z
+new_approval=required|all_earlier_sha_phrases_invalidated
+approval_phrase=WITHHELD_UNTIL_ORIGIN_SYNC
+```
+
+The exact live phrase is intentionally withheld until post-fix tests,
+zero-reportable security rescan, commit, push and trusted-origin readback
+succeed:
+
+```text
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 ```

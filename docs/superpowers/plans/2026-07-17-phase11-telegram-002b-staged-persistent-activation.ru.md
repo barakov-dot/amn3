@@ -230,6 +230,16 @@ Security diff review.
   `run_id`, `bot=active_disabled`, and
   `awaiting_admin_start=true`.
 
+  Collect the sanitized admission receipt with a bounded 15-second retry so
+  normal journald ingest latency cannot create a false negative. Every retry
+  overwrites the local sanitized receipt and accepts only the exact admission,
+  pending-update and allowed-update markers. If an immediate stage/accept
+  rollback is required, run the exact rollback helper first and then stop and
+  reset only the transient rollback timer/service derived from that run id.
+  Compensation traps must then clear themselves and exit nonzero with status
+  1, 129, 130 or 143; neither stage nor accept may resume after ERR, HUP, INT
+  or TERM.
+
 - [x] **Step 6: Implement exact-confirmed accept**
 
   `accept_activation` must validate run id/state/confirmation, require timer
@@ -429,3 +439,12 @@ Security diff review.
   Output the exact literal embedded in the runner and mark it prepared,
   non-reusable and unconsumed. Do not invoke `preflight`, `stage`, `accept` or
   `postflight` in this local task.
+
+### Journal-race correction security override
+
+The first correction review found that a successful signal rollback could
+stop the watchdog and then resume privileged execution. RED coverage requires
+signal-specific rollback-and-exit traps. The same review requires the current
+exact live approval literal to remain absent from authority documents until
+tests, zero-reportable security rescan, commit, push and origin readback all
+pass.

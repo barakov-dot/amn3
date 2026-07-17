@@ -158,8 +158,17 @@ class Phase11Telegram002bActivationExecutorTests(unittest.TestCase):
         stage = script.split("stage_activation() {", 1)[1].split(
             "accept_activation() {", 1
         )[0]
+        signal_handler = script.split("rollback_and_exit() {", 1)[1].split(
+            "cancel_automatic_rollback() {", 1
+        )[0]
 
-        self.assertIn("HUP INT TERM", stage)
+        self.assertIn('trap \'rollback_and_exit 1\' ERR', stage)
+        self.assertIn('trap \'rollback_and_exit 129\' HUP', stage)
+        self.assertIn('trap \'rollback_and_exit 130\' INT', stage)
+        self.assertIn('trap \'rollback_and_exit 143\' TERM', stage)
+        self.assertIn("rollback_current_runtime || true", signal_handler)
+        self.assertIn("trap - ERR HUP INT TERM", signal_handler)
+        self.assertIn('exit "$exit_code"', signal_handler)
         self.assertLess(
             stage.index('arm_automatic_rollback "$STATE_ROOT"'),
             stage.index("install_runtime_contract"),
@@ -169,6 +178,38 @@ class Phase11Telegram002bActivationExecutorTests(unittest.TestCase):
             stage.index('systemctl start "$BOT_UNIT"'),
         )
         self.assertIn("trap - ERR HUP INT TERM", stage)
+
+    def test_current_live_approval_is_withheld_from_docs_until_origin_sync(self) -> None:
+        runner = read_required(self, RUNNER, "PowerShell activation runner")
+        approval_match = re.search(
+            r'\$expectedApproval = "([^"]+)"',
+            runner,
+        )
+        self.assertIsNotNone(approval_match)
+        approval = approval_match.group(1)
+        authority_docs = (
+            REPO_ROOT
+            / "research"
+            / "amn2"
+            / "phase-11-telegram-002b-staged-persistent-activation-gate-2026-07-17.md",
+            REPO_ROOT / "docs" / "AMN2_PHASE_11_CURRENT_PRIORITY_PLAN.ru.md",
+            REPO_ROOT
+            / "docs"
+            / "NEXT_CHAT_AMN2_PHASE_11_CONTROLLED_LAUNCH_AND_OPERATIONS.ru.md",
+            REPO_ROOT / "docs" / "PROJECT_STATUS_CURRENT.ru.md",
+        )
+
+        for path in authority_docs:
+            contents = read_required(self, path, "authority document")
+            self.assertNotIn(approval, contents)
+        self.assertIn(
+            "phase11_telegram_002b_approval_phrase=WITHHELD_UNTIL_ORIGIN_SYNC",
+            read_required(
+                self,
+                REPO_ROOT / "docs" / "PROJECT_STATUS_CURRENT.ru.md",
+                "project status",
+            ),
+        )
 
     def test_remote_rejects_queued_or_running_rollback_service_states(self) -> None:
         script = read_required(self, REMOTE, "remote activation executor")
@@ -187,8 +228,14 @@ class Phase11Telegram002bActivationExecutorTests(unittest.TestCase):
         )[0]
         cancel_index = accept.index('cancel_automatic_rollback "$STATE_ROOT"')
         enable_index = accept.index('systemctl enable "$BOT_UNIT"')
-        self.assertIn("HUP INT TERM", accept[:cancel_index])
-        self.assertIn("rollback.sh", accept[:cancel_index])
+        self.assertIn("rollback_and_exit 129", accept[:cancel_index])
+        self.assertIn("rollback_and_exit 130", accept[:cancel_index])
+        self.assertIn("rollback_and_exit 143", accept[:cancel_index])
+        self.assertIn("rollback_and_exit", accept[:cancel_index])
+        rollback = script.split("rollback_current_runtime() {", 1)[1].split(
+            "cancel_automatic_rollback() {", 1
+        )[0]
+        self.assertIn("rollback.sh", rollback)
         self.assertIn("trap - ERR HUP INT TERM", accept)
         self.assertLess(cancel_index, enable_index)
 
@@ -212,6 +259,21 @@ class Phase11Telegram002bActivationExecutorTests(unittest.TestCase):
             self.assertIn("bot = None", probe)
             self.assertLess(probe.index("try:"), probe.index("settings = Settings"))
             self.assertIn("if bot is not None:", probe)
+
+    def test_remote_retries_journal_receipt_and_cleans_immediate_rollback_timer(self) -> None:
+        script = read_required(self, REMOTE, "remote activation executor")
+        journal = script.split("journal_contract_check() {", 1)[1].split(
+            "preflight() {", 1
+        )[0]
+        stage = script.split("stage_activation() {", 1)[1].split(
+            "accept_activation() {", 1
+        )[0]
+
+        self.assertIn("for attempt in $(seq 1 15)", journal)
+        self.assertIn("sleep 1", journal)
+        self.assertIn("rollback_current_runtime()", script)
+        self.assertIn('systemctl stop "${timer_base}.timer"', script)
+        self.assertIn("rollback_and_exit", stage)
 
     def test_runner_requires_literal_approval_before_private_bindings(self) -> None:
         script = read_required(self, RUNNER, "PowerShell activation runner")

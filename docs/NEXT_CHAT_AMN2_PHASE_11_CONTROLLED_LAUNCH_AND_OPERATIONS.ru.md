@@ -360,3 +360,25 @@ APPROVE_PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_14747241F1A0E0545CF8B96329
 ```text
 APPROVE PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_3E6D42D6D7184BD7A05402585A85652C2319D1E0E9E8076217057AE5EE948881_0B858C5_EXACT_UNIT_ENV_TELEGRAM_PREFLIGHT_DISABLED_FIRST_STAGE_FIRST_CONFIGURED_ADMIN_SINGLE_START_WIDE_HEADER_EXACT_CONFIRM_ACCEPT_ENABLE_POSTFLIGHT_AUTOROLLBACK240_NO_BLIND_DB_RESTORE_WEB_UNTOUCHED_AND_AWG_UNTOUCHED
 ```
+
+## Correction override — delayed sanitized journal receipt
+
+SHA `3E6D42...` preflight прошёл, но disabled-first stage
+`20260717T115918Z` остановился fail-closed до `/start`, потому что единичный
+journal read опередил receipt ingest. Поздняя read-only проверка нашла exact
+markers `1/1/1`, errors `0`; rollback и повторный preflight подтверждены.
+Бот inactive/disabled, stale timer остановлен, AWG unchanged.
+
+Локальный executor исправлен: bounded sanitized receipt retry максимум 15
+секунд, exact run-id timer cleanup и обязательный nonzero exit после signal
+rollback. Новый remote SHA:
+`FA3F979E3D2DEEB0EF2F53E97A79ECECCADCA6F853C8587A9973D192C49CEB3F`.
+Post-fix focused `21 passed`, canonical `116 passed`, syntax pass; TERM
+PoC exits `143` without resumed privileged mutation. Security rescan
+completed `9/9` rows, closed both former candidates and produced
+`0 reportable findings`.
+Точная SHA-bound phrase до origin sync намеренно не публикуется:
+
+```text
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
+```

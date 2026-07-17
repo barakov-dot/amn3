@@ -336,3 +336,30 @@ stage/accept не выполнялись. Локальный executor тепер
 ```text
 APPROVE PHASE11_TELEGRAM_002B_REMOTE_ORCHESTRATOR_SHA_3E6D42D6D7184BD7A05402585A85652C2319D1E0E9E8076217057AE5EE948881_0B858C5_EXACT_UNIT_ENV_TELEGRAM_PREFLIGHT_DISABLED_FIRST_STAGE_FIRST_CONFIGURED_ADMIN_SINGLE_START_WIDE_HEADER_EXACT_CONFIRM_ACCEPT_ENABLE_POSTFLIGHT_AUTOROLLBACK240_NO_BLIND_DB_RESTORE_WEB_UNTOUCHED_AND_AWG_UNTOUCHED
 ```
+
+## TELEGRAM-002B journal-ingest correction override
+
+Preflight с SHA `3E6D42...` прошёл. Disabled-first stage
+`20260717T115918Z` остановился fail-closed до `/start`: единичная проверка
+journald опередила появление очищенного admission receipt. Последующая
+read-only диагностика нашла exact marker counts `1/1/1`, errors `0`;
+rollback receipt и повторный безопасный preflight подтверждены. Бот остался
+inactive/disabled, stale timer остановлен после проверки, AWG не изменялся.
+
+Исправление добавляет максимум 15 секунд bounded polling только очищенного
+receipt и снимает exact run-id timer после немедленного успешного rollback.
+Security review дополнительно закрыл signal-continuation: после rollback
+executor обязан завершиться nonzero и не продолжать stage/accept. Новый
+remote SHA:
+`FA3F979E3D2DEEB0EF2F53E97A79ECECCADCA6F853C8587A9973D192C49CEB3F`.
+Все прежние SHA-bound approval-фразы недействительны.
+
+Post-fix receipts: focused `21 passed`, canonical `116 passed`, Bash and
+PowerShell syntax pass, TERM compensation exits `143` before privileged
+stage continuation. Fresh Security rescan closed all `9/9` rows and both
+former candidates with `0 reportable findings`. Exact phrase remains
+withheld until commit, push and origin readback.
+
+```text
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
+```

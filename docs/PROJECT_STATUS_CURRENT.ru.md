@@ -5830,3 +5830,32 @@ phase11_telegram_002b_evidence=research/amn2/phase-11-telegram-002b-staged-persi
 
 Новая approval-фраза публикуется только после локального тест/security/commit/
 push closeout этого correction slice.
+
+## AMN2 Phase 11 — TELEGRAM-002B journal-ingest correction override 2026-07-17
+
+Corrected preflight прошёл. Disabled-first stage run `20260717T115918Z`
+остановился fail-closed до сообщения оператора: очищенный admission receipt
+появился в journald после одноразовой проверки. Диагностика затем подтвердила
+marker counts admission/pending/allowed-updates `1/1/1`, errors `0`, rollback
+receipt и повторный безопасный preflight. `/start` не отправлялся.
+
+```text
+phase11_telegram_002b_stage=fail_closed_before_operator_start|run_20260717T115918Z
+phase11_telegram_002b_operator_start=false|accept=false|enable=false|postflight=false
+phase11_telegram_002b_rollback=receipt_present|stale_timer_stopped_after_safe_state_check
+phase11_telegram_002b_regular_bot=inactive_disabled|process_0
+phase11_telegram_002b_awg=running|restart_0|peers_12|unchanged
+phase11_telegram_002b_journal_correction=bounded_sanitized_receipt_retry_15s|exact_run_timer_cleanup
+phase11_telegram_002b_new_remote_sha256=FA3F979E3D2DEEB0EF2F53E97A79ECECCADCA6F853C8587A9973D192C49CEB3F
+phase11_telegram_002b_new_runner_sha256=F478A883ADE570D7A594F04B91062E1A1275467AFFE3D71877BE441D87FDA137
+phase11_telegram_002b_signal_fix=rollback_then_nonzero_exit|no_stage_or_accept_resume
+phase11_telegram_002b_signal_poc=term_exit_143|no_privileged_mutation_or_stage_pass
+phase11_telegram_002b_tests=focused_21_passed|canonical_116_passed|bash_n_pass|powershell_parse_pass
+phase11_telegram_002b_security=complete_9_of_9|former_candidates_closed|reportable_findings_0
+phase11_telegram_002b_security_report=C:\Users\SooL\AppData\Local\Temp\codex-security-scans\VPS-OPS-LAB\135955aa9fdf078708d02bf5848c030fac350db4_20260717T131800Z\report.md
+phase11_telegram_002b_new_approval=required|all_earlier_sha_phrases_invalidated
+phase11_telegram_002b_approval_phrase=WITHHELD_UNTIL_ORIGIN_SYNC
+```
+
+Новая exact phrase публикуется только после test/security/commit/push
+closeout этого correction slice.
