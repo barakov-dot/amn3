@@ -487,6 +487,7 @@ import sys
 
 from app.bot.persistent_runtime import (
     PersistentBotAdmissionConfig,
+    PersistentBotAdmissionError,
     admit_persistent_bot,
 )
 from app.config import Settings
@@ -516,6 +517,19 @@ async def main() -> None:
         )
         if result.pending_update_count != 0:
             raise RuntimeError("unexpected pending update count")
+    except PersistentBotAdmissionError as exc:
+        safe_reasons = {
+            "Telegram bot identity mismatch": "identity_mismatch",
+            "Telegram webhook is configured": "webhook_configured",
+            "Telegram pending update count is nonzero": "pending_updates_nonzero",
+            "Telegram pending update count is invalid": "pending_update_count_invalid",
+            "Telegram poll ownership probe returned an update": "ownership_probe_nonempty",
+            "Telegram long-poll ownership conflict": "long_poll_conflict",
+            "Telegram persistent admission network failure": "network_failure",
+            "Telegram persistent admission timed out": "admission_timeout",
+        }
+        reason = safe_reasons.get(str(exc), "admission_rejected")
+        raise SystemExit(f"telegram_preflight=failed reason={reason}") from None
     except Exception:
         raise SystemExit("telegram_preflight=failed") from None
     finally:

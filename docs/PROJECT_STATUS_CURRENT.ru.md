@@ -5893,6 +5893,31 @@ phase11_telegram_002b_next=TEST_DOCS_COMMIT_PUSH_ORIGIN_READBACK_THEN_ISSUE_NEW_
 Production AWG не останавливался и не изменялся. Provider, Telegram profile и
 production peer/config mutations не выполнялись.
 
+## AMN2 Phase 11 — TELEGRAM-002B expired operator window classification 2026-07-17
+
+DF9E preflight/stage прошли, но run `20260717T150504Z` истёк без `/start`.
+Automatic rollback вернул bot inactive/disabled/process 0; DB counts, web и
+AWG baseline сохранены. Два последующих preflight завершились только внутри
+обезличенного Telegram admission probe.
+
+```text
+phase11_telegram_002b_df9e_stage=PASS|AWAITING_START_THEN_EXPIRED
+phase11_telegram_002b_operator_start=false|accept=false|enable=false|postflight=false
+phase11_telegram_002b_rollback=PASS|bot_inactive_disabled_process_0
+phase11_telegram_002b_repeat_preflight=TELEGRAM_FAILED_TWICE|OLD_BYTES_HIDE_CATEGORY
+phase11_telegram_002b_db=integrity_ok|fk_0|tables_15|rows_88
+phase11_telegram_002b_awg=running|restart_0|peers_12|hashes_unchanged
+phase11_telegram_002b_classifier=fixed_reason_allowlist|no_secret_or_update_content|no_acknowledgement
+phase11_telegram_002b_new_remote_sha256=2FDBAD445F4EBDA4A94BE84CB4FF43D05AE458D68A78686490775B8F242A00E2
+phase11_telegram_002b_new_runner_sha256=75B210410CFE45377857A02FAA43618EE26533259B15AB348693B5292091ED53
+phase11_telegram_002b_tests=focused_23_passed|canonical_118_passed|syntax_pass|diff_check_pass
+phase11_telegram_002b_security=complete_3_of_3|reportable_findings_0
+phase11_telegram_002b_next=COMMIT_PUSH_READBACK_THEN_2FDB_CLASSIFIED_PREFLIGHT
+phase11_telegram_002b_approval_phrase=WITHHELD_UNTIL_ORIGIN_SYNC
+```
+
+До classified preflight `/start` не отправлять. AWG не останавливать.
+
 ## AMN2 Phase 11 — TELEGRAM-002B unbuffered receipt correction override 2026-07-17
 
 Полученная literal SHA `56BE8154...` authority была использована. Fresh

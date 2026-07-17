@@ -477,3 +477,26 @@ approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 
 Next: commit/push/readback, issue exact DF9E approval, fresh preflight/stage,
 then request `/start` only after the stage explicitly passes.
+
+## Correction override — expired stage window and safe admission category
+
+DF9E run `20260717T150504Z` reached `awaiting_admin_start=true`; operator
+interaction did not occur before the 240-second expiry. Automatic rollback
+restored bot inactive/disabled. Two later preflights failed only inside the
+sanitized Telegram probe while DB/AWG remained safe.
+
+```text
+phase11_telegram_002b_status=AWAITING_CLASSIFIED_PREFLIGHT_AFTER_EXPIRED_OPERATOR_WINDOW
+phase11_telegram_002b_df9e_stage=pass|window_expired|rollback_pass
+phase11_telegram_002b_operator_start=false|accept=false|enable=false|postflight=false
+phase11_telegram_002b_repeat_preflight=failed_twice|category_hidden_by_old_runner
+phase11_telegram_002b_classifier=fixed_allowlist|no_secret_or_update_content|no_acknowledgement
+phase11_telegram_002b_new_remote_sha256=2FDBAD445F4EBDA4A94BE84CB4FF43D05AE458D68A78686490775B8F242A00E2
+phase11_telegram_002b_new_runner_sha256=75B210410CFE45377857A02FAA43618EE26533259B15AB348693B5292091ED53
+phase11_telegram_002b_tests=focused_23_passed|canonical_118_passed|syntax_pass|diff_check_pass
+phase11_telegram_002b_security=complete_3_of_3|reportable_findings_0
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
+```
+
+Next: commit/push/readback, exact 2FDB approval and classified preflight. A
+pending-update result requires a separate bounded cleanup approval.

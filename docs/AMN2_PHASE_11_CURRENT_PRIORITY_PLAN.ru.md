@@ -472,3 +472,31 @@ approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 
 Next: commit/push/origin readback, новая DF9E literal approval и fresh bounded
 gate. `/start` только после `awaiting_admin_start=true`; AWG untouched.
+
+## TELEGRAM-002B expired-window safe classification override
+
+DF9E preflight и stage прошли; run `20260717T150504Z` вернул
+`awaiting_admin_start=true`, но `/start` не был отправлен в 240-секундном
+окне. Автооткат подтверждён: bot inactive/disabled/process 0, DB counts и AWG
+baseline unchanged. Два последующих read-only preflight устойчиво завершились
+в обезличенном Telegram admission probe.
+
+Новый classifier выводит только фиксированную allowlisted категорию; token,
+update text/id и user id не выводятся, pending updates не подтверждаются и не
+удаляются.
+
+```text
+phase11_telegram_002b_df9e_stage=pass|run_20260717T150504Z|operator_window_expired
+phase11_telegram_002b_operator_start=false|accept=false|enable=false|postflight=false
+phase11_telegram_002b_rollback=pass|bot_inactive_disabled_process_0
+phase11_telegram_002b_repeat_preflight=failed_twice|reason_hidden_by_old_bytes
+phase11_telegram_002b_new_remote_sha256=2FDBAD445F4EBDA4A94BE84CB4FF43D05AE458D68A78686490775B8F242A00E2
+phase11_telegram_002b_new_runner_sha256=75B210410CFE45377857A02FAA43618EE26533259B15AB348693B5292091ED53
+phase11_telegram_002b_tests=focused_23_passed|canonical_118_passed|syntax_pass|diff_check_pass
+phase11_telegram_002b_security=complete_3_of_3|reportable_findings_0|secret_patterns_0
+phase11_telegram_002b_df9e_authority=consumed_and_invalidated
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
+```
+
+Next: origin sync, новая 2FDB approval и classified preflight. До его PASS
+`/start` не отправлять.

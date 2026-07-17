@@ -292,6 +292,19 @@ class Phase11Telegram002bActivationExecutorTests(unittest.TestCase):
             self.assertLess(probe.index("try:"), probe.index("settings = Settings"))
             self.assertIn("if bot is not None:", probe)
 
+        safe_categories = {
+            '"Telegram bot identity mismatch": "identity_mismatch"',
+            '"Telegram webhook is configured": "webhook_configured"',
+            '"Telegram pending update count is nonzero": "pending_updates_nonzero"',
+            '"Telegram poll ownership probe returned an update": "ownership_probe_nonempty"',
+            '"Telegram long-poll ownership conflict": "long_poll_conflict"',
+            '"Telegram persistent admission network failure": "network_failure"',
+        }
+        self.assertIn("PersistentBotAdmissionError", preflight)
+        for category in sorted(safe_categories):
+            self.assertIn(category, preflight)
+        self.assertIn('telegram_preflight=failed reason={reason}', preflight)
+
     def test_remote_accepts_exact_single_line_journal_receipt_and_cleans_immediate_rollback_timer(self) -> None:
         script = read_required(self, REMOTE, "remote activation executor")
         journal = script.split("journal_contract_check() {", 1)[1].split(
