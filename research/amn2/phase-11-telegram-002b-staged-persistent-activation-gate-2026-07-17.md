@@ -160,3 +160,53 @@ succeed:
 ```text
 approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 ```
+
+## Exact single-line receipt correction after FA3F live attempt
+
+The literal FA3F approval was issued. Fresh production preflight passed:
+overlay/source, false/false write gates, private web, SQLite integrity/FK,
+Telegram identity/webhook/backlog and read-only AWG snapshot all matched the
+known safe baseline. The single-use disabled-first stage then stopped
+fail-closed before operator interaction with
+`sanitized admission receipt missing`. The operator did not send `/start`;
+accept, enable and postflight were not entered.
+
+An independent post-failure preflight proved compensation rollback:
+regular bot inactive/disabled/process 0; web active/enabled/loopback healthy;
+database integrity ok, FK 0, tables 15, rows 88 and the same counts hash;
+Telegram backlog 0; AWG running, restart 0, peers 12 and the same
+container/peer-set hashes.
+
+Root-cause tracing against the exact `0b858c5` source proved this was not
+journald latency. `PersistentBotAdmissionResult.render()` emits one canonical
+line containing admission, identity, webhook, backlog and allowed-update
+fields. The verifier filtered that line but then required backlog and
+allowed-update fields at the beginning of separate lines, so all 15 retries
+were structurally unable to succeed.
+
+The TDD correction now accepts exactly one complete fixed-string receipt line
+with the expected public bot identity and exact state. Zero, duplicate,
+partial, prefixed or suffixed lines fail; rollback/enable ordering and all
+prohibited mutation boundaries remain unchanged.
+
+```text
+fa3f_preflight=pass
+fa3f_stage=fail_closed_before_operator_start|sanitized_receipt_shape_mismatch
+operator_start=false|accept=false|enable=false|postflight=false
+postfailure_preflight=pass
+regular_bot=inactive_disabled|process_0
+web=active_enabled_http_ok_loopback_only
+database=integrity_ok|fk_0|tables_15|rows_88|counts_hash_unchanged
+telegram=identity_match|webhook_empty|backlog_0
+awg=running|restart_0|peers_12|container_and_peer_set_hashes_unchanged
+root_cause=producer_single_line|verifier_split_line_anchors
+new_remote_executor_sha256=56BE81549B86B5DBF09AA23A8513E652F6AF344E88C131FC8EAA2D5D5403F2CE
+new_ssh_runner_sha256=04DF10C9305CFA46843981A851A07B98B658A92859135A8180BCE15363F39951
+tests=focused_21_passed|canonical_116_passed
+syntax=bash_n_pass|powershell_parse_pass|diff_check_pass
+security_diff=complete_3_of_3|reportable_findings_0
+security_report=C:\Users\SooL\AppData\Local\Temp\codex-security-scans\VPS-OPS-LAB\73207d114977189974b5aacea532c5c8466f64ce_20260717T141444Z\report.md
+fa3f_stage_authority=consumed_and_invalidated_by_changed_bytes
+new_approval=required
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
+```

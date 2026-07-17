@@ -774,24 +774,23 @@ install_runtime_contract() {
 }
 
 journal_contract_check() {
-  local state_root="$1" since_epoch safe_log attempt receipt_ready
+  local state_root="$1" since_epoch safe_log attempt receipt_ready expected_receipt
   since_epoch="$(cat "$state_root/stage-epoch.txt")"
   safe_log="$state_root/journal-safe.snapshot"
+  expected_receipt="telegram_persistent_admission=pass bot_identity=@${EXPECTED_BOT_USERNAME} webhook_configured=false pending_update_count=0 allowed_updates=message,callback_query"
   receipt_ready=0
   for attempt in $(seq 1 15); do
     journalctl -u "$BOT_UNIT" --since "@${since_epoch}" -o cat --no-pager \
-      | grep -E 'telegram_persistent_admission=pass|pending_update_count=0|allowed_updates=message,callback_query' \
+      | grep -Fx -- "$expected_receipt" \
       > "$safe_log" || true
-    if [ "$(grep -c '^telegram_persistent_admission=pass' "$safe_log" || true)" = "1" ] \
-      && [ "$(grep -c '^pending_update_count=0' "$safe_log" || true)" -ge 1 ] \
-      && [ "$(grep -c '^allowed_updates=message,callback_query' "$safe_log" || true)" -ge 1 ]; then
+    if [ "$(grep -Fxc -- "$expected_receipt" "$safe_log" || true)" = "1" ]; then
       receipt_ready=1
       break
     fi
     sleep 1
   done
   [ "$receipt_ready" = "1" ] || die "sanitized admission receipt missing"
-  [ "$(grep -c '^telegram_persistent_admission=pass' "$safe_log")" = "1" ] \
+  [ "$(grep -Fxc -- "$expected_receipt" "$safe_log")" = "1" ] \
     || die "admission receipt count mismatch"
   if journalctl -u "$BOT_UNIT" --since "@${since_epoch}" -o cat --no-pager \
     | grep -Eiq 'traceback|telegram.*conflict|unhandled error|api\.telegram\.org/bot[0-9]'; then

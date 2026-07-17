@@ -260,7 +260,7 @@ class Phase11Telegram002bActivationExecutorTests(unittest.TestCase):
             self.assertLess(probe.index("try:"), probe.index("settings = Settings"))
             self.assertIn("if bot is not None:", probe)
 
-    def test_remote_retries_journal_receipt_and_cleans_immediate_rollback_timer(self) -> None:
+    def test_remote_accepts_exact_single_line_journal_receipt_and_cleans_immediate_rollback_timer(self) -> None:
         script = read_required(self, REMOTE, "remote activation executor")
         journal = script.split("journal_contract_check() {", 1)[1].split(
             "preflight() {", 1
@@ -271,6 +271,15 @@ class Phase11Telegram002bActivationExecutorTests(unittest.TestCase):
 
         self.assertIn("for attempt in $(seq 1 15)", journal)
         self.assertIn("sleep 1", journal)
+        self.assertIn(
+            'expected_receipt="telegram_persistent_admission=pass '
+            'bot_identity=@${EXPECTED_BOT_USERNAME} webhook_configured=false '
+            'pending_update_count=0 allowed_updates=message,callback_query"',
+            journal,
+        )
+        self.assertIn('grep -Fxc -- "$expected_receipt" "$safe_log"', journal)
+        self.assertNotIn("grep -c '^pending_update_count=0'", journal)
+        self.assertNotIn("grep -c '^allowed_updates=message,callback_query'", journal)
         self.assertIn("rollback_current_runtime()", script)
         self.assertIn('systemctl stop "${timer_base}.timer"', script)
         self.assertIn("rollback_and_exit", stage)

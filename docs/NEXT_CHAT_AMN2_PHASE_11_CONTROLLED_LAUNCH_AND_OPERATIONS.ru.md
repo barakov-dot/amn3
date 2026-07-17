@@ -382,3 +382,37 @@ completed `9/9` rows, closed both former candidates and produced
 ```text
 approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 ```
+
+## Correction override — exact single-line admission receipt
+
+FA3F fresh preflight прошёл. Disabled-first stage fail-closed остановился до
+`/start`: producer `0b858c5` выводит admission/identity/webhook/backlog/
+allowed-updates одной строкой, тогда как verifier после фильтрации требовал
+backlog и allowed-updates в начале отдельных строк. Все 15 retry были
+структурно неспособны пройти.
+
+Independent postfailure preflight подтвердил rollback: bot
+inactive/disabled/process 0, web healthy, DB `15/88` и прежний counts hash,
+Telegram backlog 0, AWG running/restart 0/peers 12 и прежние hashes.
+
+TDD fix принимает ровно одну полную каноническую fixed-string строку. Новый
+remote SHA
+`56BE81549B86B5DBF09AA23A8513E652F6AF344E88C131FC8EAA2D5D5403F2CE`,
+runner SHA
+`04DF10C9305CFA46843981A851A07B98B658A92859135A8180BCE15363F39951`.
+Focused `21`, canonical `116`, syntax/diff checks PASS; Security diff
+coverage `3/3`, findings `0`.
+
+```text
+phase11_telegram_002b_status=CORRECTED_AWAITING_COMMIT_PUSH_ORIGIN_READBACK
+phase11_telegram_002b_fa3f_authority=consumed_and_invalidated
+phase11_telegram_002b_new_approval=required
+phase11_telegram_002b_operator_start=false|accept=false|enable=false|postflight=false
+phase11_telegram_002b_regular_bot=inactive_disabled|process_0
+phase11_telegram_002b_awg=running|restart_0|peers_12|hashes_unchanged
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
+```
+
+Следующий обязательный шаг: commit/push/readback correction slice, затем
+выдать новую literal SHA-bound phrase и повторить полный bounded gate. Старые
+1474/3E6D/FA3F phrases недействительны.

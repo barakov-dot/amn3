@@ -363,3 +363,39 @@ withheld until commit, push and origin readback.
 ```text
 approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 ```
+
+## TELEGRAM-002B exact single-line receipt correction override
+
+FA3F fresh preflight прошёл на production. Single-use disabled-first stage
+остановился fail-closed до `/start` с
+`sanitized admission receipt missing`; accept/enable/postflight не
+выполнялись. Независимый повторный preflight подтвердил rollback: regular bot
+inactive/disabled/process 0, web healthy, DB `15/88` с прежним counts hash,
+Telegram backlog 0, AWG running/restart 0/peers 12 с прежними container и
+peer-set hashes.
+
+Root cause: `0b858c5` runtime выводит все admission-поля одной канонической
+строкой, а verifier ошибочно искал backlog/allowed-updates в начале отдельных
+строк. Новый verifier принимает ровно одну полную fixed-string строку и
+fail-closed отклоняет 0, 2+, partial, prefixed и suffixed receipts.
+
+```text
+phase11_telegram_002b_fa3f_preflight=pass
+phase11_telegram_002b_fa3f_stage=fail_closed_before_operator_start|receipt_shape_mismatch
+phase11_telegram_002b_operator_start=false|accept=false|enable=false|postflight=false
+phase11_telegram_002b_postfailure_preflight=pass
+phase11_telegram_002b_regular_bot=inactive_disabled|process_0
+phase11_telegram_002b_awg=running|restart_0|peers_12|hashes_unchanged
+phase11_telegram_002b_new_remote_sha256=56BE81549B86B5DBF09AA23A8513E652F6AF344E88C131FC8EAA2D5D5403F2CE
+phase11_telegram_002b_new_runner_sha256=04DF10C9305CFA46843981A851A07B98B658A92859135A8180BCE15363F39951
+phase11_telegram_002b_tests=focused_21_passed|canonical_116_passed|syntax_pass|diff_check_pass
+phase11_telegram_002b_security=complete_3_of_3|reportable_findings_0
+phase11_telegram_002b_fa3f_authority=consumed_and_invalidated
+phase11_telegram_002b_new_approval=required
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
+```
+
+Критичный release blocker остаётся тем же: после origin sync получить новую
+literal SHA-bound approval, повторить `preflight -> stage -> /start -> exact
+wide-header confirmation -> accept -> postflight`, затем провести
+60-минутное наблюдение. AWG не останавливать и не изменять.
