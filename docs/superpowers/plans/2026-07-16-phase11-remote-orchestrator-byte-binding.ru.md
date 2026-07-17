@@ -199,9 +199,12 @@ Expected: the original P2 source/control/sink path is suppressed with exact coun
 
 Update runner SHA, unchanged remote SHA, nine-test receipt, syntax/diff results, security disposition and explicit `live rollout not run` status. Do not edit the client release monitor baseline.
 
-- [ ] **Step 2: Prepare a fresh approval gate**
+- [x] **Step 2: Prepare a fresh approval gate**
 
-Create a new exact phrase that includes the fixed runner identity and states bot disabled, Telegram profile unchanged and AWG untouched. Mark the previous approval as non-consumable; do not run upload/apply.
+Prepared a new exact phrase bound to the reviewed remote SHA and trusted
+absolute OpenSSH transport. It states bot disabled, Telegram profile
+unchanged and AWG untouched. The previous approval is non-consumable; no
+upload/apply was run.
 
 - [ ] **Step 3: Final review, commit and push**
 
