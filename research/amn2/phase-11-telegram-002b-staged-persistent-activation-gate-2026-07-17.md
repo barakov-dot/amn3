@@ -210,3 +210,47 @@ fa3f_stage_authority=consumed_and_invalidated_by_changed_bytes
 new_approval=required
 approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 ```
+
+## Unbuffered persistent receipt correction after 56BE live attempt
+
+The exact 56BE-bound approval was received. Fresh production preflight
+passed. The single-use disabled-first stage again stopped fail-closed before
+operator interaction with `sanitized admission receipt missing`; `/start`,
+accept, enable and postflight did not occur. An independent post-failure
+preflight proved compensation rollback and the unchanged web, database,
+Telegram and AWG baseline.
+
+Evidence from the exact `0b858c5` source archive identified a second distinct
+cause. `app.main` calls the default `print` receipt writer, while the systemd
+unit starts Python without `-u` or `PYTHONUNBUFFERED`. Because polling remains
+long-lived, the correct canonical receipt stays in the process stdout buffer
+instead of reaching journald within the gate deadline.
+
+The narrow TDD correction adds `PYTHONUNBUFFERED=1` to both the atomic env
+updater and exact env validator. The existing stage snapshots the entire env
+file and its metadata before mutation, and every fail-closed path restores
+that snapshot. No source-overlay, Telegram-profile, web, database, provider or
+AWG authority was added.
+
+```text
+sha56be_preflight=pass
+sha56be_stage=fail_closed_before_operator_start|stdout_buffered
+operator_start=false|accept=false|enable=false|postflight=false
+postfailure_preflight=pass
+regular_bot=inactive_disabled|process_0
+web=active_enabled_http_ok_loopback_only
+database=integrity_ok|fk_0|tables_15|rows_88|counts_hash_unchanged
+telegram=identity_match|webhook_empty|backlog_0
+awg=running|restart_0|peers_12|container_and_peer_set_hashes_unchanged
+root_cause=default_print|no_python_unbuffered_mode|persistent_stdout_buffer
+correction=PYTHONUNBUFFERED_1|atomic_env_update|exact_env_validation|rollback_protected
+new_remote_executor_sha256=E407421F358703C4D6FE1825EE46EFBC4E72C3840FEBAC89F131800F30DB412F
+new_ssh_runner_sha256=20944C777A5EAB534964577C8BD3F9B71C9ADAE8310E3C93F56EB70BE0EE86B5
+tdd=red_1_failed_21_passed|green_22_passed
+tests=focused_22_passed|canonical_117_passed
+syntax=bash_n_pass|powershell_parse_pass|diff_check_pass
+security_diff=complete_3_of_3|reportable_findings_0|secret_patterns_0
+sha56be_stage_authority=consumed_and_invalidated_by_changed_bytes
+new_approval=required
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
+```

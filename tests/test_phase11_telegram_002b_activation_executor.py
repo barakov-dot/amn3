@@ -284,6 +284,30 @@ class Phase11Telegram002bActivationExecutorTests(unittest.TestCase):
         self.assertIn('systemctl stop "${timer_base}.timer"', script)
         self.assertIn("rollback_and_exit", stage)
 
+    def test_remote_forces_unbuffered_python_before_journal_receipt_gate(self) -> None:
+        script = read_required(self, REMOTE, "remote activation executor")
+        env_check = script.split("env_contract_check() {", 1)[1].split(
+            "update_env_contract() {", 1
+        )[0]
+        env_update = script.split("update_env_contract() {", 1)[1].split(
+            "unit_contract_check() {", 1
+        )[0]
+        install = script.split("install_runtime_contract() {", 1)[1].split(
+            "journal_contract_check() {", 1
+        )[0]
+        stage = script.split("stage_activation() {", 1)[1].split(
+            "accept_activation() {", 1
+        )[0]
+
+        self.assertIn('ENV_PYTHONUNBUFFERED="PYTHONUNBUFFERED=1"', script)
+        self.assertIn('"PYTHONUNBUFFERED": "1"', env_check)
+        self.assertIn('"PYTHONUNBUFFERED": "1"', env_update)
+        self.assertIn("update_env_contract", install)
+        self.assertLess(
+            stage.index("install_runtime_contract"),
+            stage.index('systemctl start "$BOT_UNIT"'),
+        )
+
     def test_runner_requires_literal_approval_before_private_bindings(self) -> None:
         script = read_required(self, RUNNER, "PowerShell activation runner")
 

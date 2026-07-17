@@ -416,3 +416,33 @@ approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 Следующий обязательный шаг: commit/push/readback correction slice, затем
 выдать новую literal SHA-bound phrase и повторить полный bounded gate. Старые
 1474/3E6D/FA3F phrases недействительны.
+
+## Correction override — unbuffered persistent receipt
+
+SHA `56BE8154...` literal approval была получена. Fresh preflight прошёл;
+disabled-first stage снова fail-closed завершился до `/start`, accept/enable/
+postflight не выполнялись. Независимый post-failure preflight подтвердил:
+bot inactive/disabled/process 0, web/DB/Telegram baseline unchanged, AWG
+running/restart 0/peers 12 и прежние hashes.
+
+Exact `0b858c5` producer печатает receipt через default `print`, а production
+unit не задаёт Python unbuffered mode. Correct line оставалась в stdout buffer
+на время persistent polling. Исправление добавляет `PYTHONUNBUFFERED=1` в
+атомарный snapshot/rollback-protected `.env` contract.
+
+```text
+phase11_telegram_002b_status=CORRECTED_UNBUFFERED_AWAITING_COMMIT_PUSH_ORIGIN_READBACK
+phase11_telegram_002b_56be_authority=consumed_and_invalidated
+phase11_telegram_002b_new_remote_sha256=E407421F358703C4D6FE1825EE46EFBC4E72C3840FEBAC89F131800F30DB412F
+phase11_telegram_002b_new_runner_sha256=20944C777A5EAB534964577C8BD3F9B71C9ADAE8310E3C93F56EB70BE0EE86B5
+phase11_telegram_002b_tests=focused_22_passed|canonical_117_passed|bash_n_pass|powershell_parse_pass|diff_check_pass
+phase11_telegram_002b_security=complete_3_of_3|reportable_findings_0|secret_patterns_0
+phase11_telegram_002b_operator_start=false|accept=false|enable=false|postflight=false
+phase11_telegram_002b_regular_bot=inactive_disabled|process_0
+phase11_telegram_002b_awg=running|restart_0|peers_12|hashes_unchanged
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
+```
+
+Next: commit/push/readback, issue a new exact E407-bound literal approval,
+then fresh preflight and one disabled-first stage. `/start` только после
+`awaiting_admin_start=true`.

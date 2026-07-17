@@ -5892,3 +5892,41 @@ phase11_telegram_002b_next=TEST_DOCS_COMMIT_PUSH_ORIGIN_READBACK_THEN_ISSUE_NEW_
 
 Production AWG не останавливался и не изменялся. Provider, Telegram profile и
 production peer/config mutations не выполнялись.
+
+## AMN2 Phase 11 — TELEGRAM-002B unbuffered receipt correction override 2026-07-17
+
+Полученная literal SHA `56BE8154...` authority была использована. Fresh
+production preflight прошёл; disabled-first stage остановился fail-closed до
+операторского `/start` на отсутствующем sanitized receipt. Accept, enable и
+postflight не выполнялись. Independent post-failure preflight подтвердил
+автоматический rollback и прежний production baseline.
+
+Root cause по точному source archive `0b858c5`: `app.main` использует default
+`print` для receipt, unit запускает Python без unbuffered mode, а persistent
+polling не завершает процесс и не сбрасывает stdout buffer. Correction
+добавляет `PYTHONUNBUFFERED=1` в существующий atomic `.env` contract, который
+уже включён в snapshot и metadata-preserving rollback.
+
+```text
+phase11_telegram_002b_56be_preflight=PASS
+phase11_telegram_002b_56be_stage=FAIL_CLOSED_BEFORE_OPERATOR_START|STDOUT_BUFFERED
+phase11_telegram_002b_operator_start=false|accept=false|enable=false|postflight=false
+phase11_telegram_002b_postfailure_preflight=PASS
+phase11_telegram_002b_regular_bot=inactive_disabled|process_0
+phase11_telegram_002b_web=active_enabled_http_ok_loopback_only
+phase11_telegram_002b_db=integrity_ok|fk_0|tables_15|rows_88|counts_hash_unchanged
+phase11_telegram_002b_telegram=identity_match|webhook_empty|backlog_0
+phase11_telegram_002b_awg=running|restart_0|peers_12|container_and_peer_set_hashes_unchanged
+phase11_telegram_002b_root_cause=default_print|systemd_no_unbuffered_mode|persistent_stdout_buffer
+phase11_telegram_002b_new_remote_sha256=E407421F358703C4D6FE1825EE46EFBC4E72C3840FEBAC89F131800F30DB412F
+phase11_telegram_002b_new_runner_sha256=20944C777A5EAB534964577C8BD3F9B71C9ADAE8310E3C93F56EB70BE0EE86B5
+phase11_telegram_002b_tests=focused_22_passed|canonical_117_passed|syntax_pass|diff_check_pass
+phase11_telegram_002b_security=complete_3_of_3|reportable_findings_0|secret_patterns_0
+phase11_telegram_002b_56be_authority=consumed_and_invalidated_by_changed_remote_bytes
+phase11_telegram_002b_new_approval=required
+phase11_telegram_002b_approval_phrase=WITHHELD_UNTIL_ORIGIN_SYNC
+phase11_telegram_002b_next=DOCS_COMMIT_PUSH_ORIGIN_READBACK_THEN_ISSUE_NEW_EXACT_APPROVAL
+```
+
+AWG не останавливался и не изменялся; provider, Telegram profile, web source и
+production peer/config mutations не выполнялись.

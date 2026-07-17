@@ -399,3 +399,40 @@ approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
 literal SHA-bound approval, повторить `preflight -> stage -> /start -> exact
 wide-header confirmation -> accept -> postflight`, затем провести
 60-минутное наблюдение. AWG не останавливать и не изменять.
+
+## TELEGRAM-002B unbuffered admission receipt correction override
+
+Literal approval для SHA `56BE8154...` была получена. Fresh preflight прошёл,
+но single-use disabled-first stage снова остановился fail-closed до `/start` с
+`sanitized admission receipt missing`. Independent post-failure preflight
+подтвердил полный rollback и прежний baseline: regular bot
+inactive/disabled/process 0, web healthy, DB `15/88` и прежний counts hash,
+Telegram backlog 0, AWG running/restart 0/peers 12 и прежние hashes.
+
+Точный `0b858c5` source доказал вторую причину: persistent process вызывает
+обычный `print(result.render())`, а systemd unit запускает Python без `-u` и
+без `PYTHONUNBUFFERED`. Длительный polling поэтому удерживает правильную
+receipt-строку в stdout-буфере. TDD correction добавляет
+`PYTHONUNBUFFERED=1` в существующий атомарный `.env`-контракт; snapshot,
+metadata-preserving rollback и все границы полномочий остаются прежними.
+
+```text
+phase11_telegram_002b_56be_preflight=pass
+phase11_telegram_002b_56be_stage=fail_closed_before_operator_start|stdout_buffered
+phase11_telegram_002b_operator_start=false|accept=false|enable=false|postflight=false
+phase11_telegram_002b_postfailure_preflight=pass
+phase11_telegram_002b_regular_bot=inactive_disabled|process_0
+phase11_telegram_002b_awg=running|restart_0|peers_12|hashes_unchanged
+phase11_telegram_002b_unbuffered_contract=PYTHONUNBUFFERED_1|atomic_env_update|protected_by_existing_full_env_snapshot_and_rollback
+phase11_telegram_002b_new_remote_sha256=E407421F358703C4D6FE1825EE46EFBC4E72C3840FEBAC89F131800F30DB412F
+phase11_telegram_002b_new_runner_sha256=20944C777A5EAB534964577C8BD3F9B71C9ADAE8310E3C93F56EB70BE0EE86B5
+phase11_telegram_002b_tests=red_1_failed_21_passed|focused_22_passed|canonical_117_passed|syntax_pass|diff_check_pass
+phase11_telegram_002b_security=complete_3_of_3|reportable_findings_0|secret_patterns_0
+phase11_telegram_002b_56be_authority=consumed_and_invalidated
+phase11_telegram_002b_new_approval=required
+approval_phrase=WITHHELD_UNTIL_TEST_SECURITY_COMMIT_PUSH_AND_ORIGIN_SYNC
+```
+
+Критичный release blocker: commit/push/readback correction slice, затем новая
+literal SHA-bound approval и полный bounded gate. До успешного stage `/start`
+не отправлять; AWG не останавливать и не изменять.
