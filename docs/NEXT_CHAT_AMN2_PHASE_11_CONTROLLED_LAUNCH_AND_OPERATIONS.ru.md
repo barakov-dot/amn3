@@ -1,5 +1,21 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Current continuation override 2026-07-17 after trusted transport hardening
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+amn2_source=codex-vps-test-prep|0b858c5cdbc5b565cc265966a2edfe2d339d65e0|local_fix_pending_origin_sync
+production_overlay=801f8c3|unchanged
+remote_executor_sha256=A41C000C8C15E0A4D4E2DE0CC35CB84A27EF73CCA00B69EB04FD4971FC64EF72|unchanged
+ssh_runner_sha256=A699DC14971FAD59FC1A4020B08248C63F8A7C798816365485F7EBCF9663D362
+trusted_transport=%WINDIR%/System32/OpenSSH|ssh_and_scp_absolute|helper_fail_closed
+postfix_security=bare_calls_0|trusted_calls_3|coverage_pass
+postfix_tests=focused_9_passed|canonical_95_passed|powershell_parse_pass|bash_n_pass|diff_check_pass
+combined_package_live=upload_false|apply_false|regular_bot_inactive_disabled|telegram_profile_unchanged|web_db_unchanged|awg_untouched
+previous_approval=SUPERSEDED_BY_RUNNER_FIX|DO_NOT_USE
+next=FINAL_SCOPED_REVIEW_COMMIT_PUSH_ORIGIN_VERIFY_THEN_PREPARE_FRESH_NONREUSABLE_APPROVAL
+```
+
 ## Current continuation override 2026-07-16 after combined package verification
 
 ```text

@@ -5709,3 +5709,27 @@ phase9_private_self_config_execution_readiness_android_classification=localized_
 phase9_private_self_config_execution_readiness_windows=Neobyatnaya-AMNZ-N.conf -> Neobyatnaya-AMNZ-N
 phase9_private_self_config_execution_readiness_ios=not_proven/manual_rename_fallback
 ```
+
+## AMN2 Phase 11 — trusted transport hardening 2026-07-17
+
+Текущий локальный slice закрывает security boundary в Phase 11 runner после
+diff-review: `ssh.exe` и `scp.exe` больше не разрешаются через ambient PATH.
+Оба бинарника привязаны к абсолютной системной директории OpenSSH
+`%WINDIR%\System32\OpenSSH`; отсутствие файла, относительный путь или путь
+вне trusted OpenSSH identity завершают runner fail-closed до запуска процесса.
+
+```text
+phase11_0b858c5_remote_executor_sha256=A41C000C8C15E0A4D4E2DE0CC35CB84A27EF73CCA00B69EB04FD4971FC64EF72
+phase11_0b858c5_ssh_runner_sha256=A699DC14971FAD59FC1A4020B08248C63F8A7C798816365485F7EBCF9663D362
+phase11_0b858c5_transport=ssh_absolute|scp_absolute|helper_path_guard|bare_calls_0
+phase11_0b858c5_security_rescan=postfix_pass|trusted_calls_3|new_reportable_findings_0
+phase11_0b858c5_tests=focused_9_passed|canonical_95_passed|powershell_parse_pass|bash_n_pass|diff_check_pass
+phase11_0b858c5_live=upload_false|apply_false|rollback_false|telegram_api_false|regular_bot_disabled|web_db_unchanged|awg_untouched
+phase11_0b858c5_approval=previous_phrase_superseded|fresh_phrase_after_commit_origin_verify_only
+phase11_0b858c5_evidence=research/amn2/phase-11-remote-orchestrator-byte-binding-fix-2026-07-17.md
+phase11_0b858c5_next=FINAL_SCOPED_REVIEW_COMMIT_PUSH_ORIGIN_VERIFY_THEN_PREPARE_FRESH_NONREUSABLE_APPROVAL
+```
+
+Посторонний `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` не изменялся и не
+включался. VPS, SSH, AWG, Telegram, bot, database и provider mutation не
+выполнялись.
