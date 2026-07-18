@@ -1,4 +1,36 @@
-# Текущий override 2026-07-18: Phase 11 controlled private release closeout
+# Текущий override 2026-07-18: post-release DEVICE-001 local readiness
+
+Phase 11 остаётся закрытой как `completed-controlled-private-release`.
+Post-release slice `DEVICE-001` локально реализован и проверен в AMN2 на
+`e564b95e799fefa71599438a731e3f172a50c224`; в production он не развёрнут.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+post_release_device_001=local_implementation_and_verification_pass
+post_release_device_001_source=codex-vps-test-prep|e564b95e799fefa71599438a731e3f172a50c224
+post_release_device_001_routes=/device-passports|/device-passports/{device_id}
+post_release_device_001_access=session_authenticated|read_only|bounded_100
+post_release_device_001_policy=web.device_passports.index|web.device_passports.detail
+post_release_device_001_focused_tests=74_passed|1_warning
+post_release_device_001_full_tests=928_passed|1_skipped|1_warning
+post_release_device_001_security=complete_9_of_9|findings_0|deferred_0
+post_release_device_001_deployment=false
+public_write_config_peer_self_service=closed
+production_bot_web_database=not_contacted|unchanged
+production_awg=untouched
+telegram_group_icon_001=live_unchanged|separate_local_executor_and_exact_approval_required
+post_release_evidence=research/amn2/phase-12-device-001-read-only-operator-ux-2026-07-18.md
+post_release_next=WRITE_TELEGRAM_GROUP_ICON_001_TDD_PLAN_THEN_IMPLEMENT_LOCAL_FAIL_CLOSED_EXECUTOR
+```
+
+Новые страницы показывают только безопасную проекцию существующих Device
+Passports. Они не открывают POST/write, enrollment, raw config, private key,
+PSK, enrollment token или config/peer delivery. Живая иконка Telegram-группы
+ещё не менялась. Для неё нельзя переиспользовать Phase 11 approvals.
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и нетронутым.
+
+# Предыдущий override 2026-07-18: Phase 11 controlled private release closeout
 
 `PHASE11-RELEASE-001` завершает Phase 11 как
 `completed-controlled-private-release`. Declaration вступает в силу только
