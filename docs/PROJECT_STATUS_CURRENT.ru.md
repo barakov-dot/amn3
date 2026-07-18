@@ -22,7 +22,10 @@ production_bot_web_database=not_contacted|unchanged
 production_awg=untouched
 public_write_config_peer_self_service=closed
 telegram_group_icon_001_evidence=research/amn2/post-release-telegram-group-icon-001-local-gate-2026-07-18.md
-post_release_next=COMMIT_PUSH_VERIFY_BOTH_ORIGINS_THEN_READ_ONLY_TARGET_FINGERPRINT_GATE
+telegram_group_icon_001_origin_sync=amn3_450795b2b2b5fdf14763f7e310eac9a0eeaa0e73|amn2_227cbdcf85e2c84998282f7ceaa769aad71ba94a|verified
+telegram_group_icon_001_fingerprint=failed_closed|gate_rejected|telegram_api_false|mutation_false
+telegram_group_icon_001_target_input=missing_or_invalid|blind_remediation_forbidden
+post_release_next=PREPARE_PRIVATE_TARGET_JSON_OUTSIDE_GIT_THEN_AUTHORIZE_ROOT_ONLY_PROVISIONING_AND_REPEAT_READ_ONLY_FINGERPRINT
 ```
 
 Исполнитель связан с exact source SHA, private target fingerprint и будущим
@@ -30,8 +33,10 @@ post_release_next=COMMIT_PUSH_VERIFY_BOTH_ORIGINS_THEN_READ_ONLY_TARGET_FINGERPR
 rollback240 до единственного `setChatPhoto`, повторно проверяет bot/DB/web/AWG
 invariants и удаляет private state только после успешного postflight. Raw
 target и token не входят в Git или evidence. `preflight` и `apply` ещё не
-запускались. `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и
-нетронутым.
+запускались. После origin sync единственный read-only `fingerprint` остановился
+fail-closed на private target contract до Telegram action path. Живых API
+вызовов и mutations не было. `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md`
+остаётся вне scope и нетронутым.
 
 # Предыдущий override 2026-07-18: post-release DEVICE-001 local readiness
 

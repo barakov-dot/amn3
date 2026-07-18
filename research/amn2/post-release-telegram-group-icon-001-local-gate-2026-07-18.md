@@ -105,3 +105,28 @@ report=C:/Users/SooL/AppData/Local/Temp/codex-security-scans/VPS-OPS-LAB/d6236ce
 создан. `preflight` и `apply` запрещены до нового exact live approval с
 привязкой к target fingerprint и SHA
 `F533CF7EFCB49EE494CE1E75B80F4CCC6EA6C06D2DB46D72669AC6FC23BA623F`.
+
+## Read-only fingerprint result after origin sync
+
+После подтверждённого origin readback AMN3 `450795b2b2b5fdf14763f7e310eac9a0eeaa0e73`
+и AMN2 `227cbdcf85e2c84998282f7ceaa769aad71ba94a` был выполнен только режим
+`fingerprint`. Он завершился штатно fail-closed:
+
+```text
+fingerprint=failed_closed|gate_rejected
+telegram_api_called=false
+set_chat_photo_calls=0
+messages_sent=0
+preflight=false
+apply=false
+production_mutation=false
+production_awg=untouched
+```
+
+В этом режиме remote script вызывает только local target contract check и не
+входит в Telegram action path. Безопасная причина не раскрывается наружу;
+следовательно, private target input отсутствует либо не соответствует exact
+regular-file/root:root/0600/schema contract. Blind remediation запрещена.
+Следующий gate — оператор локально создаёт private target JSON вне Git, после
+чего отдельное согласование разрешает его root-only provisioning и повторный
+read-only fingerprint.
