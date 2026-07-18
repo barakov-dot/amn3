@@ -1,4 +1,38 @@
-# Текущий override 2026-07-18: TELEGRAM-GROUP-ICON-001 local gate ready
+# Текущий override 2026-07-18: POST-RELEASE-API-001 local gate ready
+
+Phase 11 остаётся закрытой как `completed-controlled-private-release`.
+`POST-RELEASE-API-001` реализован и полностью проверен локально; SSH и live
+gate не запускались, production не контактировался.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+post_release_api_001=local_executor_ready|live_not_run
+post_release_api_001_source_overlay=0b858c5cdbc5b565cc265966a2edfe2d339d65e0
+post_release_api_001_written_spec=3a3af86b70c21c0e5c4883839bb95d523cc242fb|approval_8b28903
+post_release_api_001_plan=78bfd9881a4c6201449aee11be61c0e52730fb01
+post_release_api_001_remote_sha256=6D4F801D7A0235C62E8F558B9D9F82DF676F672C0F7972A30F4362BCA12C9526
+post_release_api_001_contract=clone_db|loopback_3040|scoped_token|ttl_revoke|six_route_audit|mandatory_cleanup
+post_release_api_001_tdd=red_observed|focused_15_passed|root_full_163_passed
+post_release_api_001_security=scan_efb532b_20260718T140745Z|coverage_4_of_4_complete|deferred_0|findings_0
+post_release_api_001_live=false
+production_api_3040_listener=unchanged_absent
+production_database=not_contacted|unchanged
+production_bot_web=not_contacted|unchanged
+production_awg=untouched
+public_write_config_peer_self_service=closed
+post_release_api_001_evidence=research/amn2/post-release-api-001-local-gate-2026-07-18.md
+post_release_next=COMMIT_PUSH_VERIFY_BOTH_ORIGINS_THEN_REQUIRE_SEPARATE_EXACT_LIVE_APPROVAL
+```
+
+Runner связан с точными Bash-байтами, trusted absolute OpenSSH, единственным
+known-host target, ordinal approval и single-use receipt. Remote executor
+работает с read-only source и private clone, слушает только
+`127.0.0.1:3040`, проверяет scoped access/audit/revoke и обязан удалить весь
+transient state до независимого postflight. `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md`
+остаётся вне scope и нетронутым.
+
+# Предыдущий override 2026-07-18: TELEGRAM-GROUP-ICON-001 local gate ready
 
 Phase 11 остаётся закрытой как `completed-controlled-private-release`.
 Post-release `TELEGRAM-GROUP-ICON-001` реализован и статически проверен только
