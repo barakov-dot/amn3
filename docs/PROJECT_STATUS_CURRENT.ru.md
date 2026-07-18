@@ -1,4 +1,39 @@
-# Текущий override 2026-07-18: post-release DEVICE-001 local readiness
+# Текущий override 2026-07-18: TELEGRAM-GROUP-ICON-001 local gate ready
+
+Phase 11 остаётся закрытой как `completed-controlled-private-release`.
+Post-release `TELEGRAM-GROUP-ICON-001` реализован и статически проверен только
+локально. Живая фотография production Telegram-группы не менялась.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+post_release_device_001=local_implementation_and_verification_pass|production_not_deployed
+telegram_group_icon_001=local_fail_closed_executor_ready|live_unchanged
+telegram_group_icon_001_source_overlay=0b858c5cdbc5b565cc265966a2edfe2d339d65e0
+telegram_group_icon_001_remote_sha256=F533CF7EFCB49EE494CE1E75B80F4CCC6EA6C06D2DB46D72669AC6FC23BA623F
+telegram_group_icon_001_asset_sha256=40ACD9465DC9FDA06644D2D829DA996E1D9BF6C856E95298B624B31154FEC791
+telegram_group_icon_001_modes=fingerprint_read_only|preflight_exact_approval|apply_single_use_exact_approval
+telegram_group_icon_001_tdd=red_13_failed|focused_20_passed|root_full_148_passed
+telegram_group_icon_001_security=scan_d6236ce_20260718T102337Z|coverage_3_of_3_complete|deferred_0|findings_0
+telegram_group_icon_001_live=false
+telegram_api_called=false
+messages_sent=0
+production_bot_web_database=not_contacted|unchanged
+production_awg=untouched
+public_write_config_peer_self_service=closed
+telegram_group_icon_001_evidence=research/amn2/post-release-telegram-group-icon-001-local-gate-2026-07-18.md
+post_release_next=COMMIT_PUSH_VERIFY_BOTH_ORIGINS_THEN_READ_ONLY_TARGET_FINGERPRINT_GATE
+```
+
+Исполнитель связан с exact source SHA, private target fingerprint и будущим
+отдельным literal live approval. Он сохраняет прежнюю фотографию, вооружает
+rollback240 до единственного `setChatPhoto`, повторно проверяет bot/DB/web/AWG
+invariants и удаляет private state только после успешного postflight. Raw
+target и token не входят в Git или evidence. `preflight` и `apply` ещё не
+запускались. `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и
+нетронутым.
+
+# Предыдущий override 2026-07-18: post-release DEVICE-001 local readiness
 
 Phase 11 остаётся закрытой как `completed-controlled-private-release`.
 Post-release slice `DEVICE-001` локально реализован и проверен в AMN2 на
