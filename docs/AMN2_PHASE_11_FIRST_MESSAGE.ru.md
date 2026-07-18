@@ -1,5 +1,37 @@
 # AMN2 Phase 11 First Message
 
+## Final closeout override 2026-07-18
+
+`PHASE11-RELEASE-001` прошёл полный closeout gate. Phase 11 закрывается как
+`completed-controlled-private-release` commit-условием
+`closeout_commit=this_commit`: declaration действует только после tests,
+complete security-diff review с findings `0`, equality sealed scan snapshot с
+index и commit tree, push и exact trusted-origin readback.
+
+Authoritative AMN2 source и production overlay:
+`0b858c5cdbc5b565cc265966a2edfe2d339d65e0`. Persistent private bot принят
+после run `20260717T192602Z` и `66m13s` stability pass; bot/Telegram/web/DB
+healthy, database `integrity_ok|fk_0|only_expected_first_admin_row_delta`, AWG
+`unchanged|running|restart_0|peer_set_unchanged`. Не повторять `/start`,
+cleanup, stage, accept, rollout, restore или Phase 10 acceptance.
+
+Release остаётся private/operator-only. Public web/API/config delivery,
+write gates, config/peer generation и self-service enrollment закрыты. Old
+fallback остаётся sealed до review не позднее 2026-08-01; second-VPS read-only
+handover audit выполняется только непосредственно перед пользовательским
+repurpose. Оба пункта не блокируют release при соблюдении contracts.
+
+Canonical packet:
+`docs/AMN2_PHASE_11_FINAL_CLOSEOUT_PACKET.ru.md`.
+
+Следующая рекомендуемая команда после подтверждённого origin readback:
+
+```text
+GPT-5.6 SOL -> REVIEW_POST_RELEASE_DEVICE_001_READ_ONLY_OPERATOR_UX_SCOPE
+```
+
+---
+
 ## Continuation override 2026-07-16
 
 `PHASE11-TELEGRAM-002A` local persistent admission/unit hardening завершён,

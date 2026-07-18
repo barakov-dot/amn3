@@ -1,4 +1,39 @@
-# Текущий override 2026-07-17: TELEGRAM-002B 66-minute stability прошла
+# Текущий override 2026-07-18: Phase 11 controlled private release closeout
+
+`PHASE11-RELEASE-001` завершает Phase 11 как
+`completed-controlled-private-release`. Declaration вступает в силу только
+после fresh tests, complete security-diff review с findings `0`, equality
+sealed scan snapshot с index и commit tree, commit, push и exact trusted-origin
+readback commit, содержащего canonical closeout packet.
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+phase_status=completed-controlled-private-release
+phase11_release_001=pass_after_this_commit_origin_readback
+phase11_closeout_packet=docs/AMN2_PHASE_11_FINAL_CLOSEOUT_PACKET.ru.md
+phase11_closeout_evidence=research/amn2/phase-11-final-closeout-controlled-private-release-2026-07-18.md
+amn2_source=codex-vps-test-prep|0b858c5cdbc5b565cc265966a2edfe2d339d65e0|clean|origin_sync
+production_overlay=0b858c5cdbc5b565cc265966a2edfe2d339d65e0|verified
+phase11_telegram_002b=activation_and_stability_pass|run_20260717T192602Z|elapsed_66m13s
+production_bot=active_enabled_single_instance_restart_0_watchdog_healthy
+production_telegram=identity_match_webhook_empty_backlog_0
+production_web=active_enabled_http_ok_loopback_only
+production_database=integrity_ok|fk_0|only_expected_first_admin_row_delta
+production_awg=unchanged|running|restart_0|peer_set_unchanged
+release_boundary=private_operator_only|public_write_config_peer_self_service_closed
+repeat_start_cleanup_stage_accept_rollout_restore=false
+phase11_recovery_001=retain_sealed|review_by_2026_08_01|not_release_blocker_while_sealed
+phase11_second_vps=read_only_handover_audit_only_before_user_repurpose|not_release_blocker_now
+phase11_automation=amn2_upstream_orchestrator_active_current_task_original_weekly_contract
+legacy_upstream_chain=paused_paused_paused
+phase11_next=REVIEW_POST_RELEASE_DEVICE_001_READ_ONLY_OPERATOR_UX_SCOPE
+```
+
+Canonical packet сохраняет post-release P1–P3 roadmap, но не повышает его до
+launch blocker. `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне
+scope и нетронутым. No Phase 11 live approval is reusable.
+
+# Предыдущий override 2026-07-17: TELEGRAM-002B 66-minute stability прошла
 
 После exact-one cleanup Telegram backlog стал `0`, при этом response/workflow и
 production DB/web/AWG mutations отсутствовали. Fresh `2FDB...` preflight и

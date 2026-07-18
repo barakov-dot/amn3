@@ -1,7 +1,33 @@
 # AMN2 Phase 11 current priority plan
 
-Актуально: 2026-07-17 после успешной persistent activation TELEGRAM-002B и
-реального 66-minute stability pass.
+Актуально: 2026-07-18 после `PHASE11-RELEASE-001` final closeout.
+
+## Final release override: controlled private release
+
+Phase 11 закрывается как `completed-controlled-private-release` commit-условием
+`closeout_commit=this_commit`. Declaration действует только после fresh
+tests, complete security-diff review с findings `0`, equality sealed scan
+snapshot с index и commit tree, push и exact trusted-origin readback.
+
+```text
+phase11_release_001=pass_after_this_commit_origin_readback
+closeout_packet=docs/AMN2_PHASE_11_FINAL_CLOSEOUT_PACKET.ru.md
+amn2_source=0b858c5cdbc5b565cc265966a2edfe2d339d65e0|clean|origin_sync
+production_overlay=0b858c5cdbc5b565cc265966a2edfe2d339d65e0|verified
+telegram_002b=activation_and_66m13s_stability_pass|run_20260717T192602Z
+database=integrity_ok|fk_0|only_expected_first_admin_row_delta
+awg=unchanged|running|restart_0|peer_set_unchanged
+private_operator_only=true
+public_write_config_peer_self_service=false
+repeat_phase11_live_actions=prohibited_not_required
+old_fallback=sealed_review_by_2026_08_01|conditional_non_blocker
+second_vps=audit_only_before_user_repurpose|conditional_non_blocker
+next=REVIEW_POST_RELEASE_DEVICE_001_READ_ONLY_OPERATOR_UX_SCOPE
+```
+
+Все списки P1–P3 ниже являются post-release roadmap. Они не блокируют
+controlled private release, пока отдельное решение не повышает их
+критичность. No Phase 11 approval is reusable.
 
 ## Текущий P0 override: TELEGRAM-002B live activation и stability закрыты
 
@@ -247,9 +273,10 @@ provider display, текущий месячный период `590,00 RUB`, aut
 
 ### Критичные
 
-1. `PHASE11-RELEASE-001`: собрать финальный Phase 11 closeout packet, проверить
-   отсутствие открытых launch-blockers и принять private release-readiness
-   decision. Это единственный текущий release-critical gate.
+1. `PHASE11-RELEASE-001`: `completed-pass`, effective только после final
+   tests, complete security-diff с findings `0`, sealed-snapshot/index/commit
+   equality, push и exact trusted-origin readback. Открытых текущих
+   release-critical gates больше нет.
 2. `PHASE11-SECOND-VPS-HANDOVER` — условно критично только в момент передачи:
    перед пользовательским перепрофилированием выполнить финальный read-only
    clean audit. Dedicated AMN2 staging key и local known-host binding удалять
@@ -335,31 +362,31 @@ gate. Не использовать approvals из Phase 10 или уже consum
 Одиночная:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_RELEASE_001_FINAL_CLOSEOUT_AND_PRIVATE_RELEASE_READINESS_GATE
+GPT-5.6 SOL -> REVIEW_POST_RELEASE_DEVICE_001_READ_ONLY_OPERATOR_UX_SCOPE
 ```
 
 Двойная:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_RELEASE_001_FINAL_CLOSEOUT_AND_PRIVATE_RELEASE_READINESS_GATE -> PREPARE_PHASE11_FINAL_CLOSEOUT_PACKET
+GPT-5.6 SOL -> REVIEW_POST_RELEASE_DEVICE_001_READ_ONLY_OPERATOR_UX_SCOPE -> WRITE_BILINGUAL_DEVICE_001_DESIGN_SPEC
 ```
 
 Тройная:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_RELEASE_001_FINAL_CLOSEOUT_AND_PRIVATE_RELEASE_READINESS_GATE -> PREPARE_PHASE11_FINAL_CLOSEOUT_PACKET -> RUN_PHASE11_FINAL_DOCS_DIFF_AND_SECURITY_REVIEW
+GPT-5.6 SOL -> REVIEW_POST_RELEASE_DEVICE_001_READ_ONLY_OPERATOR_UX_SCOPE -> WRITE_BILINGUAL_DEVICE_001_DESIGN_SPEC -> WRITE_DEVICE_001_TDD_IMPLEMENTATION_PLAN
 ```
 
 Четверная:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_RELEASE_001_FINAL_CLOSEOUT_AND_PRIVATE_RELEASE_READINESS_GATE -> PREPARE_PHASE11_FINAL_CLOSEOUT_PACKET -> RUN_PHASE11_FINAL_DOCS_DIFF_AND_SECURITY_REVIEW -> COMMIT_PUSH_AND_VERIFY_CLOSEOUT_ORIGIN
+GPT-5.6 SOL -> REVIEW_POST_RELEASE_DEVICE_001_READ_ONLY_OPERATOR_UX_SCOPE -> WRITE_BILINGUAL_DEVICE_001_DESIGN_SPEC -> WRITE_DEVICE_001_TDD_IMPLEMENTATION_PLAN -> IMPLEMENT_DEVICE_001_LOCAL_READ_ONLY_OPERATOR_UX
 ```
 
 Более — рекомендовано:
 
 ```text
-GPT-5.6 SOL -> REVIEW_PHASE11_RELEASE_001_FINAL_CLOSEOUT_AND_PRIVATE_RELEASE_READINESS_GATE -> PREPARE_PHASE11_FINAL_CLOSEOUT_PACKET -> RUN_PHASE11_FINAL_DOCS_DIFF_AND_SECURITY_REVIEW -> COMMIT_PUSH_AND_VERIFY_CLOSEOUT_ORIGIN -> IF_GATE_PASSES_DECLARE_CONTROLLED_PRIVATE_RELEASE -> SCHEDULE_SECOND_VPS_HANDOVER_AUDIT_ONLY_WHEN_USER_REPURPOSES
+GPT-5.6 SOL -> REVIEW_POST_RELEASE_DEVICE_001_READ_ONLY_OPERATOR_UX_SCOPE -> WRITE_BILINGUAL_DEVICE_001_DESIGN_SPEC -> WRITE_DEVICE_001_TDD_IMPLEMENTATION_PLAN -> IMPLEMENT_DEVICE_001_LOCAL_READ_ONLY_OPERATOR_UX -> RUN_SCOPED_AND_FULL_TESTS_DIFF_AND_SECURITY_REVIEW -> SYNC_STATUS_COMMIT_AND_PUSH
 ```
 
 ## Historical TELEGRAM-002B engineering and correction ledger — closed

@@ -1,5 +1,33 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Final closeout override 2026-07-18
+
+```text
+active_phase=Phase 11 Controlled Launch and Operations
+phase_status=completed-controlled-private-release
+release_gate=PHASE11_RELEASE_001|pass_after_this_commit_origin_readback
+closeout_packet=docs/AMN2_PHASE_11_FINAL_CLOSEOUT_PACKET.ru.md
+amn2_source=0b858c5cdbc5b565cc265966a2edfe2d339d65e0|clean|origin_sync
+production_overlay=0b858c5cdbc5b565cc265966a2edfe2d339d65e0|verified
+telegram_002b=activation_and_66m13s_stability_pass|run_20260717T192602Z
+bot=active_enabled_single_instance_restart_0_watchdog_healthy
+telegram=identity_match_webhook_empty_backlog_0
+web=active_enabled_http_ok_loopback_only
+database=integrity_ok|fk_0|only_expected_first_admin_row_delta
+awg=unchanged|running|restart_0|peer_set_unchanged
+private_operator_only=true
+public_write_config_peer_self_service=false
+old_fallback=sealed_review_by_2026_08_01|not_release_blocker_while_sealed
+second_vps=read_only_audit_only_before_user_repurpose|not_release_blocker_now
+repeat_live_actions=prohibited_not_required
+next=REVIEW_POST_RELEASE_DEVICE_001_READ_ONLY_OPERATOR_UX_SCOPE
+```
+
+Canonical release declaration is valid only after final tests, complete
+security-diff review with findings `0`, sealed-snapshot equality with index
+and commit tree, push and exact origin readback. No Phase 11 approval is
+reusable. Future work requires a newly selected post-release product slice.
+
 ## Current continuation override 2026-07-17 after TELEGRAM-002B 66-minute stability pass
 
 ```text

@@ -1,5 +1,33 @@
 # AMN2 Phase 11 Controlled Launch and Operations Entry
 
+## Final closeout override 2026-07-18
+
+`PHASE11-RELEASE-001` completed. Phase 11 status is
+`completed-controlled-private-release`, effective only after the commit that
+contains `docs/AMN2_PHASE_11_FINAL_CLOSEOUT_PACKET.ru.md` passes fresh tests,
+complete security-diff review with findings `0`, sealed-snapshot equality with
+the index and commit tree, push and exact trusted-origin readback.
+
+AMN2 source/worktree and production overlay are pinned to
+`0b858c5cdbc5b565cc265966a2edfe2d339d65e0`. TELEGRAM-002B run
+`20260717T192602Z` and the final `66m13s` stability receipt remain accepted:
+one active/enabled bot instance, restart `0`, healthy watchdog, matching
+Telegram identity, empty webhook/backlog, healthy loopback-only web, database
+`integrity_ok|fk_0|only_expected_first_admin_row_delta` and AWG
+`unchanged|running|restart_0|peer_set_unchanged`.
+
+No Phase 11 live approval remains current. Do not repeat `/start`, cleanup,
+stage, accept, rollout, restore or Phase 10 acceptance. Release remains
+private/operator-only; all public/write/config/peer/self-service surfaces stay
+closed.
+
+Old fallback sealed review by 2026-08-01 and second-VPS audit immediately
+before user repurpose are conditional safety work, not current release
+blockers. Future product work begins as a separately selected post-release
+slice.
+
+Дата: 2026-07-18.
+
 ## Current execution override 2026-07-17 after TELEGRAM-002B stability pass
 
 `PHASE11-TELEGRAM-002B` live activation and real 60-minute stability window
