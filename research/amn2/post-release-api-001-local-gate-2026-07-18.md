@@ -76,6 +76,8 @@ or repeat Phase 10/11 work.
 
 ## Stop line
 
-The only next live action is a fresh user message containing the exact literal
-bound in the committed runner. Until both origins are pushed and read back,
-that phrase must not be used and `preflight|run` must remain unexecuted.
+Trusted-origin readback passed for AMN2
+`8b28903f72510f21181eacfe9689fa6a405a6516` and the AMN3 implementation
+commit `cfb589bb9404383cd4fb646fc19a002866fd644f`. The only next live authority
+is a fresh user message containing the exact literal bound in that committed
+runner. `preflight|run` remain unexecuted until that separate approval.
