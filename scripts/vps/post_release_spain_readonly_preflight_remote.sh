@@ -16,6 +16,20 @@ bool_command() {
     if [[ -n "$(command -v "$1")" ]]; then printf true; else printf false; fi
 }
 
+is_target_container() {
+    case "$1" in
+        amnezia-awg2) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+is_target_unit() {
+    case "$1" in
+        amneziya-web.service|amneziya-bot.service) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
 ports_for_cgroup() {
     local control_group="$1"
     local cgroup_file="/sys/fs/cgroup${control_group}/cgroup.procs"
@@ -29,7 +43,7 @@ ports_for_cgroup() {
         pid_socket_inodes=""
         shopt -s nullglob
         for fd in "/proc/$pid/fd"/*; do
-            target="$(readlink "$fd")" || continue
+            target="$(readlink "$fd")" || return 1
             if [[ "$target" =~ ^socket:\[([0-9]+)\]$ ]]; then
                 inode="${BASH_REMATCH[1]}"
                 pid_socket_inodes+="$inode"$'\n'
@@ -94,6 +108,8 @@ elif [[ -n "$(command -v iptables-save)" ]]; then
     firewall_view="$(iptables-save)"
     firewall_digest="$(sha256_text "$firewall_view")"
     firewall_rule_count="$(printf '%s\n' "$firewall_view" | awk '/^-A / {n++} END {print n+0}')"
+else
+    exit 68
 fi
 
 ssh_policy=""
@@ -103,7 +119,10 @@ if [[ -n "$(command -v sshd)" ]]; then
         $1 == "maxauthtries" || $1 == "allowtcpforwarding" ||
         $1 == "x11forwarding" {print $1 "|" $2}
     ' | sort -u)"
+else
+    exit 69
 fi
+[[ -n "$ssh_policy" ]] || exit 70
 
 docker_rows=""
 if [[ -n "$(command -v docker)" ]]; then
@@ -203,6 +222,7 @@ printf ',"unrelated_service_fingerprint":['
 first=1
 while IFS='|' read -r container_name image_name active_state port_text restart_count; do
     [[ -n "$container_name" ]] || continue
+    is_target_container "$container_name" && continue
     port_set="$(printf '%s' "$port_text" | awk -F',' '{for(i=1;i<=NF;i++){v=$i; sub(/^.*:/,"",v); sub(/->.*$/,"",v); sub(/\/.*/,"",v); if(v~/^[0-9]+$/) print v}}' | sort -nu | paste -sd, -)"
     [[ $first -eq 1 ]] || printf ','
     first=0
@@ -210,6 +230,7 @@ while IFS='|' read -r container_name image_name active_state port_text restart_c
 done <<< "$docker_rows"
 while IFS='|' read -r unit_name active_state sub_state restart_count unit_content_sha unit_ports unit_content_status bound_port_status; do
     [[ -n "$unit_name" ]] || continue
+    is_target_unit "$unit_name" && continue
     [[ $first -eq 1 ]] || printf ','
     first=0
     printf '{"kind":"unit","name_sha256":"%s","image_or_unit_sha256":"%s","active_state":"%s","restart_count":%s,"bound_port_set":[%s],"unit_content_status":"%s","bound_port_status":"%s"}' "$(sha256_text "$unit_name")" "$unit_content_sha" "$(safe_atom "$active_state:$sub_state")" "$restart_count" "$unit_ports" "$unit_content_status" "$bound_port_status"

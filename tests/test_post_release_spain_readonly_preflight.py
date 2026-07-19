@@ -1,6 +1,7 @@
 import hashlib
 import re
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -10,6 +11,21 @@ REMOTE = ROOT / "scripts" / "vps" / "post_release_spain_readonly_preflight_remot
 RUNNER = ROOT / "scripts" / "vps" / "post_release_spain_readonly_preflight_ssh_runner.ps1"
 DOC = ROOT / "docs" / "POST_RELEASE_SPAIN_READONLY_PREFLIGHT_GATE.ru.md"
 POWERSHELL = Path(r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
+BASH = Path(r"C:\Program Files\Git\bin\bash.exe")
+
+
+def extract_bash_function(source: str, name: str) -> str:
+    match = re.search(rf"(?ms)^{re.escape(name)}\(\) \{{\n.*?^\}}\n", source)
+    if match is None:
+        raise AssertionError(f"missing Bash function: {name}")
+    return match.group(0)
+
+
+def extract_powershell_function(source: str, name: str) -> str:
+    match = re.search(rf"(?ms)^function {re.escape(name)}\([^\n]*\) \{{\n.*?^\}}\n", source)
+    if match is None:
+        raise AssertionError(f"missing PowerShell function: {name}")
+    return match.group(0)
 
 
 class SpainReadonlyPreflightStaticTests(unittest.TestCase):
@@ -76,6 +92,44 @@ class SpainReadonlyPreflightStaticTests(unittest.TestCase):
         self.assertNotIn("2>&1", source)
         self.assertNotIn("|| true", source)
 
+    def test_mandatory_collectors_and_cgroup_reads_fail_closed(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        self.assertIn('else\n    exit 68\nfi', source)
+        self.assertIn('else\n    exit 69\nfi', source)
+        self.assertIn('target="$(readlink "$fd")" || return 1', source)
+        self.assertIn('[[ -r "$cgroup_file" ]] || return 1', source)
+        self.assertIn('[[ -r "$socket_table" ]] || return 1', source)
+        self.assertNotIn('readlink "$fd")" || continue', source)
+
+    @unittest.skipUnless(BASH.exists(), "Git Bash is required")
+    def test_exact_target_allowlists_exclude_only_deployment_owned_resources(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        functions = extract_bash_function(source, "is_target_container") + extract_bash_function(source, "is_target_unit")
+        harness = functions + r'''
+for name in amnezia-awg2 amnezia-awg2-shadow resident-proxy; do
+    if is_target_container "$name"; then printf 'container:%s:target\n' "$name"; else printf 'container:%s:retain\n' "$name"; fi
+done
+for name in amneziya-web.service amneziya-bot.service amneziya-web.service.backup resident.service; do
+    if is_target_unit "$name"; then printf 'unit:%s:target\n' "$name"; else printf 'unit:%s:retain\n' "$name"; fi
+done
+'''
+        result = subprocess.run([str(BASH), "-c", harness], capture_output=True, text=True, timeout=10, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            result.stdout.splitlines(),
+            [
+                "container:amnezia-awg2:target",
+                "container:amnezia-awg2-shadow:retain",
+                "container:resident-proxy:retain",
+                "unit:amneziya-web.service:target",
+                "unit:amneziya-bot.service:target",
+                "unit:amneziya-web.service.backup:retain",
+                "unit:resident.service:retain",
+            ],
+        )
+        self.assertGreaterEqual(source.count('is_target_container "$container_name" && continue'), 1)
+        self.assertGreaterEqual(source.count('is_target_unit "$unit_name" && continue'), 1)
+
     def test_runner_reuses_task7_trust_state_and_checks_it_before_ssh(self) -> None:
         self.assertTrue(RUNNER.exists(), "Spain preflight SSH runner is missing")
         source = RUNNER.read_text(encoding="utf-8")
@@ -123,11 +177,49 @@ class SpainReadonlyPreflightStaticTests(unittest.TestCase):
         self.assertIn("& $SshExe @SshArguments 2>$null", source)
         self.assertNotIn("& $SshExe @SshArguments 2>&1", source)
         self.assertGreaterEqual(source.count("$SshOutput = $null"), 2)
-        no_overwrite = "if (Test-Path -LiteralPath $EvidencePath)"
-        self.assertIn(no_overwrite, source)
-        self.assertLess(source.index(no_overwrite), source.index("& $SshExe"))
-        self.assertLess(source.index("[IO.File]::WriteAllText($EvidencePath"), source.index("Protect-PrivatePath $EvidencePath"))
+        self.assertNotIn("if (Test-Path -LiteralPath $EvidencePath)", source)
+        self.assertNotIn("[IO.File]::WriteAllText($EvidencePath", source)
+        self.assertIn("[IO.FileMode]::CreateNew", source)
+        self.assertIn("[IO.FileShare]::None", source)
+        self.assertLess(source.index("Write-EvidenceCreateNew $EvidencePath"), source.index("Protect-PrivatePath $EvidencePath"))
         self.assertLess(source.index("Protect-PrivatePath $EvidencePath"), source.index("Assert-PrivatePath $EvidencePath"))
+
+    def test_atomic_evidence_writer_never_replaces_existing_bytes(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        writer = extract_powershell_function(source, "Write-EvidenceCreateNew")
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            tmp = Path(raw_tmp)
+            harness_path = tmp / "atomic-writer-test.ps1"
+            evidence_path = tmp / "evidence.json"
+            harness_path.write_text(
+                writer
+                + '\nWrite-EvidenceCreateNew $args[0] \'{"first":true}\'\n'
+                + '$secondFailed = $false\n'
+                + 'try { Write-EvidenceCreateNew $args[0] \'{"second":true}\' } catch { $secondFailed = $true }\n'
+                + 'if (-not $secondFailed) { throw "second create unexpectedly succeeded" }\n'
+                + 'Write-Output ([IO.File]::ReadAllText($args[0]))\n',
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                [
+                    str(POWERSHELL),
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(harness_path),
+                    str(evidence_path),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.strip(), '{"first":true}')
+            self.assertEqual(evidence_path.read_text(encoding="utf-8"), '{"first":true}\n')
 
     def test_embedded_remote_checksum_matches_exact_bytes(self) -> None:
         self.assertTrue(REMOTE.exists())

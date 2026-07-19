@@ -32,7 +32,11 @@ private-artifacts/post-release/spain-migration/<run_id>/known_hosts_spain
 - UTC clock и наличие фиксированного набора пакетов;
 - `unrelated_service_fingerprint` из kind, name hash, image/unit hash, active state, restart count и bound-port set.
 
-Evidence не содержит environment, config bodies, command line, IP/host, ключи, учётные данные или Telegram-значения. После проверки JSON runner сохраняет только redacted evidence как `preflight-evidence.json` в том же private run directory.
+Evidence не содержит environment, config bodies, command line, IP/host, ключи, учётные данные или Telegram-значения. После проверки JSON runner атомарно создаёт `preflight-evidence.json` через create-new/no-replace в том же private run directory, затем отдельно защищает и повторно проверяет ACL. Конкурентный или повторный writer не может заменить уже записанные evidence bytes.
+
+Firewall inventory и effective SSH policy являются обязательными: отсутствие поддерживаемого reader, пустой результат или ошибка чтения закрывают gate. Для systemd fingerprint полное чтение unit content и cgroup socket state также обязательно; недоступный PID, FD, `readlink` или socket table не превращается в ложный пустой port set.
+
+Из `unrelated_service_fingerprint` исключаются только точные deployment-owned имена `amneziya-web.service`, `amneziya-bot.service` и `amnezia-awg2`. Похожие или расширенные имена не исключаются и остаются в fingerprint. Это публичные contract names, а не private resident-service identifiers.
 
 ## Граница безопасности
 

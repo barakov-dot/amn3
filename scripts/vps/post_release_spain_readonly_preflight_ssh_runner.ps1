@@ -14,8 +14,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Security") -ErrorAction Stop
 
-$expectedRemoteScriptSha = "31758CBD04703EE91350317EE4C6D949406887795FC030E7E506A393ED7A40FE"
-$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_REMOTE_SHA_31758CBD04703EE91350317EE4C6D949406887795FC030E7E506A393ED7A40FE_SOURCE_857B00E3EE25B8E319124A3CD26282F429DE7A3D_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
+$expectedRemoteScriptSha = "5485260DF91713B742E45793C079F6A18BC1B83D54AF72556EB8E6A3CC0AB345"
+$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_REMOTE_SHA_5485260DF91713B742E45793C079F6A18BC1B83D54AF72556EB8E6A3CC0AB345_SOURCE_857B00E3EE25B8E319124A3CD26282F429DE7A3D_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
 if (-not [string]::Equals($Approval, $expectedApproval, [StringComparison]::Ordinal)) {
     throw "Exact read-only preflight approval mismatch."
 }
@@ -111,6 +111,24 @@ function Protect-PrivatePath([string]$Path) {
     Assert-PrivatePath $Path
 }
 
+function Write-EvidenceCreateNew([string]$Path, [string]$Json) {
+    $Utf8WithoutBom = New-Object Text.UTF8Encoding($false)
+    $EvidenceBytes = $Utf8WithoutBom.GetBytes("$Json`n")
+    $EvidenceStream = [IO.File]::Open(
+        $Path,
+        [IO.FileMode]::CreateNew,
+        [IO.FileAccess]::Write,
+        [IO.FileShare]::None
+    )
+    try {
+        $EvidenceStream.Write($EvidenceBytes, 0, $EvidenceBytes.Length)
+        $EvidenceStream.Flush($true)
+    } finally {
+        $EvidenceStream.Dispose()
+        [Array]::Clear($EvidenceBytes, 0, $EvidenceBytes.Length)
+    }
+}
+
 function Assert-TargetHost([string]$Value) {
     if ($Value -notmatch '^[A-Za-z0-9](?:[A-Za-z0-9.:-]{0,252}[A-Za-z0-9])?$' -or $Value.Contains("..")) {
         throw "Target host has an invalid format."
@@ -194,9 +212,6 @@ Assert-LocalExecutable $SshKeygenExe "OpenSSH key generator"
 $Binding = Read-Binding
 Assert-DedicatedKeyPair
 Assert-VerifiedHostPin $Binding
-if (Test-Path -LiteralPath $EvidencePath) {
-    throw "Read-only preflight evidence already exists for this run."
-}
 
 $SshArguments = @(
     "-F", "none",
@@ -236,8 +251,13 @@ $EvidenceJson = $Evidence | ConvertTo-Json -Depth 8 -Compress
 if ($EvidenceJson -match '(?i)(authorization|bearer|BEGIN [A-Z ]+ KEY|api[_-]?key|credential)') {
     throw "Read-only Spain preflight evidence failed redaction validation."
 }
-$Utf8WithoutBom = New-Object Text.UTF8Encoding($false)
-[IO.File]::WriteAllText($EvidencePath, "$EvidenceJson`n", $Utf8WithoutBom)
+try {
+    Write-EvidenceCreateNew $EvidencePath $EvidenceJson
+} catch {
+    $RawEvidence = $null
+    $EvidenceJson = $null
+    throw "Atomic read-only preflight evidence creation failed."
+}
 $RawEvidence = $null
 $EvidenceJson = $null
 Protect-PrivatePath $EvidencePath
