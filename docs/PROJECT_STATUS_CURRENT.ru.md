@@ -1,4 +1,35 @@
-# Текущий override 2026-07-18: POST-RELEASE-API-001 local gate ready
+# Текущий override 2026-07-19: POST-RELEASE-API-001 live acceptance passed
+
+Phase 11 остаётся закрытой как `completed-controlled-private-release`.
+Отдельно авторизованный single-use `POST-RELEASE-API-001` gate прошёл на
+production source `0b858c5`; все smoke-записи были только в disposable clone.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+post_release_api_001=live_acceptance_pass
+post_release_api_001_remote_sha256=6D4F801D7A0235C62E8F558B9D9F82DF676F672C0F7972A30F4362BCA12C9526
+post_release_api_001_source_overlay=0b858c5cdbc5b565cc265966a2edfe2d339d65e0
+post_release_api_001_authority=exact_literal_match|single_use_consumed
+post_release_api_001_preflight=pass|write_gates_false_false|production_3040_absent
+post_release_api_001_auth=missing_401|invalid_401|cross_scope_403_403
+post_release_api_001_smoke=six_routes|api_read_6|api_write_0|ttl_used|revoked
+post_release_api_001_cleanup=listener_0|process_0|clone_0|state_0
+post_release_api_001_independent_postflight=pass|production_3040_absent
+production_database=unchanged
+production_bot_web=unchanged
+production_awg=untouched|observed_unchanged
+public_write_config_peer_self_service=closed
+post_release_api_001_evidence=research/amn2/post-release-api-001-live-gate-2026-07-19.md
+post_release_next=SYNC_TEST_SECURITY_COMMIT_PUSH_VERIFY_ORIGIN_THEN_REVIEW_NEXT_POST_RELEASE_GATE
+```
+
+Persistent API service и public listener не создавались. Повторный `run`
+запрещён single-use receipt. Не выполнялись blind remediation, DB restore,
+service restart, Telegram action, AWG mutation или повтор Phase 10/11 rollout.
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и нетронутым.
+
+# Предыдущий override 2026-07-18: POST-RELEASE-API-001 local gate ready
 
 Phase 11 остаётся закрытой как `completed-controlled-private-release`.
 `POST-RELEASE-API-001` реализован и полностью проверен локально; SSH и live
