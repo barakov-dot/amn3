@@ -229,14 +229,48 @@ done
         self.assertIsNotNone(match)
         actual = hashlib.sha256(REMOTE.read_bytes()).hexdigest().upper()
         self.assertEqual(match.group(1), actual)
-        approval = re.search(r'\$expectedApproval\s*=\s*"([^"]+)"', source)
-        self.assertIsNotNone(approval)
-        self.assertIn(actual, approval.group(1))
+        self.assertIn("Get-FileHash -LiteralPath $PSCommandPath", source)
+        self.assertIn("RUNNER_SHA_$actualRunnerSha", source)
+        self.assertIn("REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha", source)
         self.assertIn(
             "SOURCE_F43737BDDBA353F3BFF1BA9D5AB6CB5FE1AA463E",
-            approval.group(1),
+            source,
         )
-        self.assertNotRegex(approval.group(1), r"\$\{|<|>|PLACEHOLDER|TBD")
+
+    def test_empty_approval_prints_checksum_bound_literal_without_private_state(self) -> None:
+        runner_sha = hashlib.sha256(RUNNER.read_bytes()).hexdigest().upper()
+        remote_sha = hashlib.sha256(REMOTE.read_bytes()).hexdigest().upper()
+        expected = (
+            "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
+            f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
+            "SOURCE_F43737BDDBA353F3BFF1BA9D5AB6CB5FE1AA463E_"
+            "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
+            "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
+            "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"
+            "CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
+        )
+        result = subprocess.run(
+            [
+                str(POWERSHELL),
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(RUNNER),
+                "-Mode",
+                "preflight",
+                "-RunId",
+                "approval-preview",
+                "-Approval",
+                "",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=20,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.stdout.strip(), expected)
 
     def test_runbook_keeps_preflight_separate_and_withholds_execution(self) -> None:
         self.assertTrue(DOC.exists(), "Spain preflight gate runbook is missing")
