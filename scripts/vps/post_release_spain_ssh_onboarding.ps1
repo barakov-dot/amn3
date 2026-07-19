@@ -210,22 +210,25 @@ switch ($Mode) {
         Write-Output "Dedicated Spain key prepared locally."
     }
     "write-binding" {
-        $TargetHost = Read-PrivateValue "AMN2_SPAIN_TARGET_HOST" "Spain target host"
-        $TargetUser = Read-PrivateValue "AMN2_SPAIN_TARGET_USER" "Spain target user"
-        $ExpectedFingerprint = Read-PrivateValue "AMN2_SPAIN_EXPECTED_HOST_KEY_SHA256" "Expected host-key SHA-256 fingerprint"
-        Assert-TargetHost $TargetHost
-        Assert-TargetUser $TargetUser
-        Assert-Fingerprint $ExpectedFingerprint
-        Initialize-RunDirectory
+        if (-not (Test-Path -LiteralPath $RunDirectory -PathType Container)) {
+            throw "Dedicated Spain run directory must be prepared before binding."
+        }
         if (-not (Test-Path -LiteralPath $KeyPath -PathType Leaf) -or -not (Test-Path -LiteralPath $PublicKeyPath -PathType Leaf)) {
             throw "Dedicated Spain key pair must be prepared before binding."
         }
         if ((Test-Path -LiteralPath $BindingPath) -or (Test-Path -LiteralPath $KnownHostsPath)) {
             throw "Existing binding or verified pin must not be overwritten."
         }
-        Protect-PrivatePath $KeyPath
-        Protect-PrivatePath $PublicKeyPath
+        Assert-PrivatePath $RunDirectory
+        Assert-PrivatePath $KeyPath
+        Assert-PrivatePath $PublicKeyPath
         Assert-DedicatedKeyPair
+        $TargetHost = Read-PrivateValue "AMN2_SPAIN_TARGET_HOST" "Spain target host"
+        $TargetUser = Read-PrivateValue "AMN2_SPAIN_TARGET_USER" "Spain target user"
+        $ExpectedFingerprint = Read-PrivateValue "AMN2_SPAIN_EXPECTED_HOST_KEY_SHA256" "Expected host-key SHA-256 fingerprint"
+        Assert-TargetHost $TargetHost
+        Assert-TargetUser $TargetUser
+        Assert-Fingerprint $ExpectedFingerprint
         $Lines = @(
             "TARGET_HOST=$TargetHost",
             "TARGET_USER=$TargetUser",

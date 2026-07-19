@@ -81,15 +81,21 @@ def onboarding_env(mock_keygen: Path, pin: str = EXPECTED_PIN) -> dict[str, str]
 
 
 def prepare_and_bind(tmp: Path, run_id: str, pin: str = EXPECTED_PIN) -> tuple[Path, dict[str, str]]:
+    run_dir, env = prepare_only(tmp, run_id, pin)
+    root = tmp / "artifacts"
+    bound = run_script("-Mode", "write-binding", "-RunId", run_id, "-ArtifactRoot", str(root), env=env)
+    if bound.returncode != 0:
+        raise AssertionError(bound.stderr)
+    return run_dir, env
+
+
+def prepare_only(tmp: Path, run_id: str, pin: str = EXPECTED_PIN) -> tuple[Path, dict[str, str]]:
     root = tmp / "artifacts"
     key_path = root / run_id / "id_ed25519_spain"
     env = onboarding_env(write_mock_keygen(tmp, key_path, pin), pin)
     prepared = run_script("-Mode", "prepare-key", "-RunId", run_id, "-ArtifactRoot", str(root), env=env)
     if prepared.returncode != 0:
         raise AssertionError(prepared.stderr)
-    bound = run_script("-Mode", "write-binding", "-RunId", run_id, "-ArtifactRoot", str(root), env=env)
-    if bound.returncode != 0:
-        raise AssertionError(bound.stderr)
     return root / run_id, env
 
 
@@ -146,22 +152,16 @@ class SpainSshOnboardingTests(unittest.TestCase):
         self.assertNotIn('@("/T", "/C")', source)
         verify = source.split('"verify-pin" {', 1)[1].split('"print-public-key" {', 1)[0]
         self.assertLess(verify.index("Assert-PrivatePath $BindingPath"), verify.index("$Binding = Read-Binding"))
+        binding = source.split('"write-binding" {', 1)[1].split('"verify-pin" {', 1)[0]
+        self.assertNotIn("Initialize-RunDirectory", binding)
+        self.assertNotIn("Protect-PrivatePath $KeyPath", binding)
+        self.assertNotIn("Protect-PrivatePath $PublicKeyPath", binding)
+        self.assertLess(binding.index("Assert-PrivatePath $KeyPath"), binding.index("Assert-DedicatedKeyPair"))
 
     def test_write_binding_writes_exactly_four_private_lines_without_echoing_values(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             tmp = Path(raw_tmp)
-            mock_icacls, acl_log = write_mock_icacls(tmp)
-            env = {
-                "AMN2_SPAIN_TARGET_HOST": "spain.example.invalid",
-                "AMN2_SPAIN_TARGET_USER": "amn2operator",
-                "AMN2_SPAIN_EXPECTED_HOST_KEY_SHA256": EXPECTED_PIN,
-                "AMN2_SPAIN_TEST_ALLOW_LOCAL_OVERRIDES": "1",
-            }
-            run_dir = tmp / "artifacts" / "test-run-001"
-            run_dir.mkdir(parents=True)
-            (run_dir / "id_ed25519_spain").write_text("private", encoding="ascii")
-            (run_dir / "id_ed25519_spain.pub").write_text("ssh-ed25519 QUJDRA== test", encoding="ascii")
-            env["AMN2_SPAIN_TEST_SSH_KEYGEN_EXE"] = str(write_mock_keygen(tmp, run_dir / "id_ed25519_spain"))
+            run_dir, env = prepare_only(tmp, "test-run-001")
             result = run_script(
                 "-Mode",
                 "write-binding",
@@ -188,6 +188,30 @@ class SpainSshOnboardingTests(unittest.TestCase):
             self.assertNotIn("spain.example.invalid", combined_output)
             self.assertNotIn("amn2operator", combined_output)
             self.assertNotIn(EXPECTED_PIN, combined_output)
+
+    def test_write_binding_rejects_broadened_prepared_acl_without_repair(self) -> None:
+        for suffix, relative_target in (
+            ("directory", None),
+            ("private-key", "id_ed25519_spain"),
+        ):
+            with self.subTest(target=suffix), tempfile.TemporaryDirectory() as raw_tmp:
+                tmp = Path(raw_tmp)
+                run_id = f"test-run-acl-{suffix}"
+                run_dir, env = prepare_only(tmp, run_id)
+                target = run_dir if relative_target is None else run_dir / relative_target
+                acl = subprocess.run(
+                    [r"C:\Windows\System32\icacls.exe", str(target), "/grant", "*S-1-5-32-545:R"],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(acl.returncode, 0, acl.stderr)
+                result = run_script(
+                    "-Mode", "write-binding", "-RunId", run_id,
+                    "-ArtifactRoot", str(tmp / "artifacts"), env=env,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse((run_dir / "target.env").exists())
 
     def test_write_binding_rejects_shell_metacharacters_before_writing(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
@@ -280,12 +304,8 @@ class SpainSshOnboardingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw_tmp:
             tmp = Path(raw_tmp)
             root = tmp / "artifacts"
-            run_dir = root / "test-run-006"
-            run_dir.mkdir(parents=True)
-            key_path = run_dir / "id_ed25519_spain"
-            key_path.write_text("private", encoding="ascii")
+            run_dir, env = prepare_only(tmp, "test-run-006")
             (run_dir / "id_ed25519_spain.pub").write_text("ssh-ed25519 RUZHSA== wrong\n", encoding="ascii")
-            env = onboarding_env(write_mock_keygen(tmp, key_path))
             result = run_script("-Mode", "write-binding", "-RunId", "test-run-006", "-ArtifactRoot", str(root), env=env)
             self.assertNotEqual(result.returncode, 0)
             self.assertFalse((run_dir / "target.env").exists())
@@ -294,14 +314,12 @@ class SpainSshOnboardingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw_tmp:
             tmp = Path(raw_tmp)
             root = tmp / "artifacts"
-            run_dir = root / "test-run-009"
-            run_dir.mkdir(parents=True)
+            run_dir, env = prepare_only(tmp, "test-run-009")
             key_path = run_dir / "id_ed25519_spain"
             key_path.write_text("not-a-private-key", encoding="ascii")
-            (run_dir / "id_ed25519_spain.pub").write_text("ssh-ed25519 QUJDRA== test\n", encoding="ascii")
             mock = tmp / "ssh-keygen-invalid.cmd"
             mock.write_text('@echo off\r\nif "%1"=="-y" exit /b 1\r\nexit /b 0\r\n', encoding="ascii")
-            env = onboarding_env(mock)
+            env["AMN2_SPAIN_TEST_SSH_KEYGEN_EXE"] = str(mock)
             result = run_script("-Mode", "write-binding", "-RunId", "test-run-009", "-ArtifactRoot", str(root), env=env)
             self.assertNotEqual(result.returncode, 0)
             self.assertFalse((run_dir / "target.env").exists())
