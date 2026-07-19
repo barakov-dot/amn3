@@ -1,5 +1,32 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release Spain fresh-start override 2026-07-19
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+amn2_source=51fdba29ee1b33442bd109a0d0611c4d1348f4da
+spain_fresh_start=local_code_and_gates_ready|no_live_action
+operator_config_identity=NEOBYATNAYA.NET|recipient_label|device_label|device_passport
+delivery=admin_only|secret_safe_handoff|stable_request_replay
+manifest=idempotent|normalized_duplicates_fail_before_mutation
+ssh_trust=dedicated_ed25519|private_binding|independent_host_pin|required_before_preflight
+readonly_gate=runner_sha_4000D3B21549EBF96C773DF476492A1C9D741D27DBAF73D5DB7008DD1F6513CF|remote_sha_5485260DF91713B742E45793C079F6A18BC1B83D54AF72556EB8E6A3CC0AB345|not_run
+tests=amn2_scoped_210|amn2_full_1003_passed_1_skipped|amn3_scoped_21|amn3_full_184
+security=amn2_20_of_20_findings_0|amn3_2_of_2_findings_0
+spain_unrelated_service=must_preserve|fingerprint_before_after
+usa_server=retained_untouched
+production_awg=untouched
+next=LOCAL_DEDICATED_SPAIN_SSH_ONBOARDING_THEN_SEPARATE_EXACT_READ_ONLY_PREFLIGHT
+```
+
+Не принимать Spain host key автоматически и не передавать пароль в чат,
+командную строку, Git или evidence. До готовности private trust state запрещены
+SSH preflight, установка, service mutation и перенос. Read-only preflight после
+отдельного exact approval только инвентаризирует ОС, capacity, порты, Docker,
+systemd, firewall, SSH policy и fingerprint постороннего сервиса. AWG не
+останавливать и не изменять. Старые Phase 10/11 approvals не переиспользовать.
+
 ## Final closeout override 2026-07-18
 
 ```text

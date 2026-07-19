@@ -1,3 +1,42 @@
+# Текущий override 2026-07-19: Spain fresh-start issuance и read-only gate готовы локально
+
+Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа
+идёт в post-release controlled operations. Для будущего чистого развёртывания
+на Spain подготовлены локальная операторская выдача новых конфигов и отдельный
+fail-closed контур доверия к VPS. Живой Spain preflight и установка не запускались.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_fresh_start=local_implementation_ready|live_not_run
+amn2_source=codex-vps-test-prep|51fdba29ee1b33442bd109a0d0611c4d1348f4da
+spain_operator_issuance=recipient_and_device_label|canonical_neobyatnaya_net_identity|device_passport|admin_only_delivery
+spain_manifest=idempotent|normalized_duplicate_rejected_before_mutation|stable_request_replay
+spain_ssh_onboarding=dedicated_ed25519|private_target_binding|independent_host_key_pin|local_only
+spain_readonly_preflight=checksum_bound_runner_and_remote_probe|exact_amn2_source|approval_required|not_run
+spain_runner_sha256=4000D3B21549EBF96C773DF476492A1C9D741D27DBAF73D5DB7008DD1F6513CF
+spain_remote_probe_sha256=5485260DF91713B742E45793C079F6A18BC1B83D54AF72556EB8E6A3CC0AB345
+amn2_tests=scoped_210_passed|full_1003_passed_1_skipped_1_preexisting_warning
+amn3_tests=spain_scoped_21_passed|full_184_passed
+amn2_security=final_scan_20260719T_final_8b28903_51fdba2|coverage_20_of_20|findings_0|snapshot_6728b518df4b1596417791e1846b81a0c5117e93d45d9ca3be18241dac30d7c9
+amn3_security=final_scan_20260719T_final_a3c63a4_20ee9a6|coverage_2_of_2|findings_0|snapshot_a3d734713e4ba006977a49afd36053f5d556fa3591438519435ab8592dd100c4
+spain_network_contact=false
+spain_install_restart_stop_config=false
+spain_private_credentials_in_git=false
+spain_unrelated_service=preserve_and_fingerprint_before_after|identity_private
+usa_source_server=retained_untouched
+production_bot_web_database=unchanged
+production_awg=untouched
+protected_monitor_baseline=untouched
+next=PREPARE_DEDICATED_SPAIN_TRUST_STATE_THEN_REQUIRE_EXACT_READ_ONLY_PREFLIGHT_APPROVAL
+```
+
+Следующий операционный шаг не является установкой AMN2. Сначала локально
+создаётся отдельный Spain SSH key, оператор через provider console добавляет
+только его public key, а host key сверяется по независимому каналу. Лишь после
+этого может быть отдельно разрешён checksum-bound read-only preflight.
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и нетронутым.
+
 # Текущий override 2026-07-19: POST-RELEASE-API-001 live acceptance passed
 
 Phase 11 остаётся закрытой как `completed-controlled-private-release`.
