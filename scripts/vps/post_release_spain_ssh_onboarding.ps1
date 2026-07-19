@@ -71,9 +71,6 @@ function Protect-PrivatePath([string]$Path) {
     Assert-LocalExecutable $IcaclsExe "ACL"
     $Identity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
     $Arguments = @($Path, "/inheritance:r", "/grant:r", "${Identity}:F")
-    if (Test-Path -LiteralPath $Path -PathType Container) {
-        $Arguments += @("/T", "/C")
-    }
     & $IcaclsExe @Arguments | Out-Null
     if ($LASTEXITCODE -ne 0) {
         throw "ACL hardening failed."
@@ -98,6 +95,14 @@ function Protect-PrivatePath([string]$Path) {
     )
     $Acl.SetAccessRule($Rule)
     Set-Acl -LiteralPath $Path -AclObject $Acl
+    Assert-PrivatePath $Path
+}
+
+function Assert-PrivatePath([string]$Path) {
+    if (-not (Test-Path -LiteralPath $Path)) {
+        throw "Required private artifact is missing."
+    }
+    $CurrentSid = [Security.Principal.WindowsIdentity]::GetCurrent().User
     $VerifiedAcl = Get-Acl -LiteralPath $Path
     $VerifiedRules = @($VerifiedAcl.Access)
     if (-not $VerifiedAcl.AreAccessRulesProtected -or $VerifiedRules.Count -ne 1 -or
@@ -105,6 +110,20 @@ function Protect-PrivatePath([string]$Path) {
         $VerifiedRules[0].AccessControlType -ne [Security.AccessControl.AccessControlType]::Allow -or
         (($VerifiedRules[0].FileSystemRights -band [Security.AccessControl.FileSystemRights]::FullControl) -ne [Security.AccessControl.FileSystemRights]::FullControl)) {
         throw "ACL verification did not prove current-user-only access."
+    }
+}
+
+function Assert-DedicatedKeyPair {
+    Assert-LocalExecutable $SshKeygenExe "OpenSSH key generator"
+    $DerivedLines = @(& $SshKeygenExe -y -f $KeyPath 2>$null)
+    if ($LASTEXITCODE -ne 0 -or $DerivedLines.Count -ne 1) {
+        throw "Dedicated Spain private key is invalid."
+    }
+    $DerivedMatch = [regex]::Match($DerivedLines[0].Trim(), '^ssh-ed25519 ([A-Za-z0-9+/]+={0,2})$')
+    $PublicText = Get-Content -LiteralPath $PublicKeyPath -Raw
+    $PublicMatch = [regex]::Match($PublicText.Trim(), '^ssh-ed25519 ([A-Za-z0-9+/]+={0,2})(?: [^\r\n]+)?$')
+    if (-not $DerivedMatch.Success -or -not $PublicMatch.Success -or $DerivedMatch.Groups[1].Value -cne $PublicMatch.Groups[1].Value) {
+        throw "Dedicated Spain key files are not a matching Ed25519 pair."
     }
 }
 
@@ -182,7 +201,12 @@ switch ($Mode) {
         if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $KeyPath -PathType Leaf) -or -not (Test-Path -LiteralPath $PublicKeyPath -PathType Leaf)) {
             throw "Dedicated Spain key generation failed."
         }
-        Protect-PrivatePath $RunDirectory
+        Protect-PrivatePath $KeyPath
+        Protect-PrivatePath $PublicKeyPath
+        Assert-DedicatedKeyPair
+        Assert-PrivatePath $RunDirectory
+        Assert-PrivatePath $KeyPath
+        Assert-PrivatePath $PublicKeyPath
         Write-Output "Dedicated Spain key prepared locally."
     }
     "write-binding" {
@@ -199,6 +223,9 @@ switch ($Mode) {
         if ((Test-Path -LiteralPath $BindingPath) -or (Test-Path -LiteralPath $KnownHostsPath)) {
             throw "Existing binding or verified pin must not be overwritten."
         }
+        Protect-PrivatePath $KeyPath
+        Protect-PrivatePath $PublicKeyPath
+        Assert-DedicatedKeyPair
         $Lines = @(
             "TARGET_HOST=$TargetHost",
             "TARGET_USER=$TargetUser",
@@ -207,19 +234,30 @@ switch ($Mode) {
         )
         $Utf8WithoutBom = New-Object Text.UTF8Encoding($false)
         [IO.File]::WriteAllLines($BindingPath, $Lines, $Utf8WithoutBom)
-        Protect-PrivatePath $RunDirectory
+        Protect-PrivatePath $BindingPath
+        Assert-PrivatePath $RunDirectory
+        Assert-PrivatePath $KeyPath
+        Assert-PrivatePath $PublicKeyPath
+        Assert-PrivatePath $BindingPath
         Write-Output "Private target binding written locally."
     }
     "verify-pin" {
-        $Binding = Read-Binding
+        if (Test-Path -LiteralPath $KnownHostsPath) {
+            throw "Verified Spain host pin already exists."
+        }
         if (-not (Test-Path -LiteralPath $KeyPath -PathType Leaf) -or -not (Test-Path -LiteralPath $PublicKeyPath -PathType Leaf)) {
             throw "Dedicated Spain key pair is incomplete."
         }
+        Assert-PrivatePath $RunDirectory
+        Assert-PrivatePath $BindingPath
+        Assert-PrivatePath $KeyPath
+        Assert-PrivatePath $PublicKeyPath
+        Assert-DedicatedKeyPair
+        $Binding = Read-Binding
         $HostKeyLine = Read-PrivateValue "AMN2_SPAIN_HOST_KEY_LINE" "Out-of-band host public key line"
         if ($HostKeyLine -match '[\r\n]' -or $HostKeyLine -notmatch '^(ssh-ed25519|ecdsa-sha2-nistp256|rsa-sha2-(?:256|512)) ([A-Za-z0-9+/]+={0,2})$') {
             throw "Host public key line has an invalid format."
         }
-        Initialize-RunDirectory
         $CandidatePath = Join-Path $RunDirectory "known_hosts_spain.candidate"
         try {
             Set-Content -LiteralPath $CandidatePath -Value "$($Binding['TARGET_HOST']) $HostKeyLine" -Encoding ASCII
@@ -233,8 +271,13 @@ switch ($Mode) {
             if (-not $Observed -or $Observed -cne $Binding["EXPECTED_HOST_KEY_SHA256"]) {
                 throw "Host-key fingerprint does not match the independently recorded pin."
             }
-            Move-Item -LiteralPath $CandidatePath -Destination $KnownHostsPath -Force
-            Protect-PrivatePath $RunDirectory
+            [IO.File]::Move($CandidatePath, $KnownHostsPath)
+            Protect-PrivatePath $KnownHostsPath
+            Assert-PrivatePath $RunDirectory
+            Assert-PrivatePath $BindingPath
+            Assert-PrivatePath $KeyPath
+            Assert-PrivatePath $PublicKeyPath
+            Assert-PrivatePath $KnownHostsPath
             Write-Output "Independent host-key pin verified locally."
         } finally {
             if (Test-Path -LiteralPath $CandidatePath) {
@@ -246,7 +289,10 @@ switch ($Mode) {
         if (-not (Test-Path -LiteralPath $PublicKeyPath -PathType Leaf)) {
             throw "Dedicated Spain public key is missing."
         }
-        Protect-PrivatePath $RunDirectory
+        Assert-PrivatePath $RunDirectory
+        Assert-PrivatePath $KeyPath
+        Assert-PrivatePath $PublicKeyPath
+        Assert-DedicatedKeyPair
         Get-Content -LiteralPath $PublicKeyPath -Raw
     }
 }
