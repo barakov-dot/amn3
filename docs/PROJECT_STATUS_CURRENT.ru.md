@@ -16,12 +16,13 @@ post_release_api_001_auth=missing_401|invalid_401|cross_scope_403_403
 post_release_api_001_smoke=six_routes|api_read_6|api_write_0|ttl_used|revoked
 post_release_api_001_cleanup=listener_0|process_0|clone_0|state_0
 post_release_api_001_independent_postflight=pass|production_3040_absent
+post_release_api_001_live_origin_sync=amn3_218a6a82c53a04ad5a394bdf048d3b43bbac32b9|verified
 production_database=unchanged
 production_bot_web=unchanged
 production_awg=untouched|observed_unchanged
 public_write_config_peer_self_service=closed
 post_release_api_001_evidence=research/amn2/post-release-api-001-live-gate-2026-07-19.md
-post_release_next=SYNC_TEST_SECURITY_COMMIT_PUSH_VERIFY_ORIGIN_THEN_REVIEW_NEXT_POST_RELEASE_GATE
+post_release_next=REVIEW_NEXT_POST_RELEASE_GATE_BY_CRITICALITY
 ```
 
 Persistent API service и public listener не создавались. Повторный `run`

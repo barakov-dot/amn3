@@ -90,3 +90,12 @@ API-001 validates the existing private scoped read-only API contract. It does
 not authorize public exposure, write/config/peer/self-service routes, permanent
 port `3040`, or a persistent API service. Phase 11 remains closed as
 `completed-controlled-private-release`.
+
+## Trusted-origin seal
+
+The live evidence/status commit was pushed and read back exactly:
+
+```text
+amn3_commit=218a6a82c53a04ad5a394bdf048d3b43bbac32b9
+origin_sync=verified
+```
