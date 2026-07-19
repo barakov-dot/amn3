@@ -98,6 +98,51 @@ USA VPN и web остаются доступным rollback-контуром д�
 4. Spain bot запускается и проходит single-instance/identity/backlog smoke.
 5. При неудаче Spain bot останавливается, а USA bot возвращается в прежнее состояние.
 
+### 5.4 SSH onboarding и private target binding
+
+Для Spain повторно используется уже проверенный в проекте key-based SSH pattern,
+но trust state другого VPS не наследуется. Одинаковый провайдер, тариф или образ
+ОС не доказывает identity нового host.
+
+Private target binding хранится только под игнорируемым каталогом:
+
+```text
+private-artifacts/post-release/spain-migration/<run_id>/target.env
+```
+
+Файл содержит только:
+
+```text
+TARGET_HOST=<private target value>
+TARGET_USER=<operator-approved login>
+SSH_KEY_PATH=<dedicated Spain private key path>
+EXPECTED_HOST_KEY_SHA256=<out-of-band verified fingerprint>
+```
+
+Поле для SSH password запрещено. IP/login не публикуются в docs или evidence.
+
+Если первоначально доступен только login/password, оператор один раз вводит
+password непосредственно в скрытый интерактивный prompt системного OpenSSH или
+использует provider web/VNC console. Через эту сессию устанавливается только
+dedicated Spain public key. Password не читается runner-ом, не передаётся Codex,
+не сохраняется в shell history, project `.env`, private target binding или Git.
+
+До первого automated SSH command оператор получает host-key fingerprint через
+доверенный provider console/out-of-band канал и сверяет его с локально
+наблюдаемым fingerprint. `accept-new`, слепой `ssh-keyscan` и known-host entry
+другого VPS не являются production trust proof.
+
+После onboarding все runners обязаны использовать:
+
+- абсолютный `%WINDIR%\System32\OpenSSH\ssh.exe`/`scp.exe`;
+- `-F none` для изоляции ambient SSH configuration;
+- отдельный Spain known-hosts file;
+- `BatchMode=yes`;
+- `IdentitiesOnly=yes`;
+- dedicated Spain private key;
+- exact target/login binding;
+- fail-closed отказ при host-key mismatch или password prompt.
+
 ## 6. Чистая база и данные
 
 Spain DB начинается только с обязательных системных данных:
@@ -288,5 +333,7 @@ AMN2 will be deployed as a fresh production installation on the separate Spain/M
 All new configurations use the canonical `NEOBYATNAYA.NET — user — device` label and are delivered only to the single configured Telegram administrator. The administrator distributes files to recipients outside AMN2. Each device has its own peer and remains linked to its user, device passport, server, version, lifecycle state, and audit history so that a user or individual device can later be disabled or revoked.
 
 The unrelated service already running on Spain is immutable for this project. Installation and rollback may touch only allowlisted AMN2 resources. USA is retained as a rollback contour and is not deleted by Codex; only a separately approved reversible bot stop is allowed when the existing Telegram token is cut over to Spain.
+
+Spain reuses the project's proven key-based SSH pattern but never inherits trust from another VPS. The operator may enter an initial password only in a hidden interactive OpenSSH or provider-console session to install a dedicated public key. Automation then uses a separately pinned Spain host fingerprint, isolated known-hosts, the trusted absolute Windows OpenSSH binaries, batch mode, and an exact private target binding that contains no password.
 
 Real issuance is allowed only after a read-only Spain preflight, clean install verification, disabled-first bot cutover, and one disposable end-to-end create/deliver/connect/revoke acceptance cycle.
