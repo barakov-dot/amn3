@@ -232,6 +232,10 @@ done
         approval = re.search(r'\$expectedApproval\s*=\s*"([^"]+)"', source)
         self.assertIsNotNone(approval)
         self.assertIn(actual, approval.group(1))
+        self.assertIn(
+            "SOURCE_F43737BDDBA353F3BFF1BA9D5AB6CB5FE1AA463E",
+            approval.group(1),
+        )
         self.assertNotRegex(approval.group(1), r"\$\{|<|>|PLACEHOLDER|TBD")
 
     def test_runbook_keeps_preflight_separate_and_withholds_execution(self) -> None:
