@@ -1,5 +1,33 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release Spain run 004 failure override 2026-07-20
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+run_004=fail_closed|approval_consumed|never_repeat
+classification=remote_probe
+stage=systemd_cgroup_ports
+subreason=pid
+exit=76
+claim=present
+failure_evidence=present|sanitized
+success_evidence=absent
+runner_remote_source_binding=match
+local_root_cause=empty_cgroup_procs_here_string_creates_one_empty_pid_iteration
+fresh_install_gate=blocked
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+next=EMPTY_CGROUP_PROCS_ZERO_LIVE_PID_TDD_CORRECTION_DESIGN
+```
+
+Не повторять runs `001`–`004`, не выполнять ad-hoc SSH или blind remediation.
+Fresh Spain install и batch issuance gate не открывать до успешного нового
+read-only preflight. Следующий локальный slice должен явно различать ноль
+process rows как полный пустой port set и malformed nonempty PID как failure.
+
 ## Post-release Spain cgroup-port subreason gate override 2026-07-20
 
 ```text

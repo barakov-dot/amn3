@@ -2,31 +2,45 @@
 
 ## Статус
 
+Run `spain-fresh-20260720-004` выполнен ровно один раз и завершился fail-closed
+на safe pair `systemd_cgroup_ports/pid/exit=76`. Claim и sanitized failure
+evidence присутствуют, success evidence отсутствует; все checksum/source
+bindings совпали. Approval consumed, retry запрещён. Fresh-install gate остаётся
+закрытым.
+
+Локальная reproduction установила, что пустой результат `cgroup.procs`
+передаётся в `while read` через here-string и создаёт одну синтетическую пустую
+итерацию, которую collector принимает за malformed PID. Новый TDD correction
+должен считать ноль process rows валидным завершённым empty port set, сохранив
+fail-closed проверку каждой непустой PID-строки. Это изменение и новый live run
+требуют отдельных approvals.
+
 Этот gate реализует только checksum-bound read-only инвентаризацию Spain VPS.
 Run `spain-fresh-20260720-003` завершился fail-closed после SSH на sanitized
 `remote_probe/systemd_cgroup_ports/exit=1`. Claim и failure evidence созданы,
 success evidence отсутствует; approval consumed и не подлежит повтору.
-Локальный subreason diagnostic contract реализован и проверен. Следующий live
-run `spain-fresh-20260720-004` запрещён до commit/push/origin readback и новой
-literal approval.
+Этот исторический prerequisite был выполнен перед run `004`; сам run `004`
+теперь consumed и не подлежит повтору. Любой будущий preflight требует нового
+исправленного code, новых runner/probe SHA, нового outcome id и новой literal
+approval после commit/push/origin readback.
 
 Две отдельно одобренные попытки 2026-07-20 завершились fail-closed до создания
 evidence. Первая выявила преобразование диагностического stderr `nft` в
 PowerShell `NativeCommandError`; вторая после узкого nft correction вернула
 ненулевой SSH status без безопасной классификации. Оба approval исчерпаны.
 
-Текущая локальная версия добавляет stage-coded failure envelope без raw stderr,
+Версия, с которой выполнялся run `004`, добавляет stage-coded failure envelope без raw stderr,
 corrected systemd `ControlGroup -> MainPID -> procfs` resolver и закрытый
-cgroup-port subreason allowlist. Новый live-запуск не выполнялся. Новый запуск
-требует отдельного approval,
-привязанного к новым runner/probe SHA-256, source, immutable trust bundle
-`spain-fresh-20260720-001` и отдельному outcome run
-`spain-fresh-20260720-004` после origin readback. Telegram API не вызывался,
+cgroup-port subreason allowlist. Run `004` выполнен и завершился fail-closed;
+его code/SHA/outcome/approval больше не дают live authority. Новый запуск
+возможен только после отдельной TDD-коррекции и approval, привязанного к новым
+runner/probe SHA-256, source, immutable trust bundle
+`spain-fresh-20260720-001` и новому outcome run после origin readback. Telegram API не вызывался,
 установка и любые live-изменения не производились.
 
-Runner допускает единственный режим `preflight` и до обращения к private
-artifacts требует полного точного approval и exact trust run id
-`spain-fresh-20260720-004`. Approval привязан одновременно к фактическому
+Consumed runner допускает единственный режим `preflight` и был привязан к exact
+run id `spain-fresh-20260720-004`. Повторно вызывать его запрещено. Его approval
+был привязан одновременно к фактическому
 SHA-256 самого runner, SHA-256 удалённого probe, исходному AMN2 head и этому run
 id. При пустом `-Approval` runner печатает одну полностью материализованную
 строку и завершается с ошибкой до чтения private target или SSH; это безопасный
@@ -101,4 +115,5 @@ Probe не устанавливает и не обновляет пакеты, �
 Наличие этого кода не является live-authority. Будущий оператор сначала
 проверяет repository head, SHA runner/probe и Task 7 trust artifacts, затем
 получает отдельное точное approval и только после этого запускает gate один раз.
-Approvals runs `001`–`003` не дают права на retry; subreason gate ещё не запускался.
+Approvals runs `001`–`004` consumed и не дают права на retry. Будущий corrected
+gate обязан использовать новый outcome id и новую checksum-bound literal approval.

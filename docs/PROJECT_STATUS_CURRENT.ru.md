@@ -1,4 +1,46 @@
-# Текущий override 2026-07-20: Spain cgroup-port subreason gate готов для run 004
+# Текущий override 2026-07-20: Spain run 004 fail-closed на пустом cgroup process list
+
+Literal approval для `spain-fresh-20260720-004` использована ровно один раз.
+Checksum-bound read-only probe дошёл до systemd port collector и завершился
+sanitized failure: `classification=remote_probe`,
+`stage=systemd_cgroup_ports`, `subreason=pid`, `exit=76`. Claim и failure
+evidence присутствуют, success evidence отсутствует; runner/probe/source
+bindings совпали. Retry запрещён.
+
+Локальная Bash reproduction доказала root cause без нового SSH: here-string с
+пустым результатом `cgroup.procs` выполняет одну `while read`-итерацию с пустым
+значением. Collector ошибочно классифицирует штатный cgroup без живых процессов
+как invalid PID. Требуется отдельный TDD correction contract: zero process rows
+должны давать полный пустой port set, а любая непустая строка по-прежнему должна
+быть строго числовым PID и fail-closed при нарушении.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_run_004=fail_closed|approval_consumed|no_retry
+spain_run_004_classification=remote_probe
+spain_run_004_stage=systemd_cgroup_ports
+spain_run_004_subreason=pid
+spain_run_004_exit=76
+spain_run_004_claim=present
+spain_run_004_failure_evidence=present|sanitized
+spain_run_004_success_evidence=absent
+spain_bindings=runner_match|remote_match|source_match
+root_cause=empty_cgroup_procs_here_string_synthetic_empty_pid_iteration
+fresh_install_gate=blocked_until_corrected_preflight_pass
+spain_install_restart_stop_config=false
+spain_unrelated_service=read_only_observation_only|no_mutation
+telegram=untouched
+production_awg=untouched
+protected_monitor_baseline=untouched
+next=DESIGN_EMPTY_CGROUP_PROCS_ZERO_LIVE_PID_SUCCESS_CONTRACT_THEN_NEW_EXACT_GATE
+```
+
+Private target/login, unit/PID/FD/path/socket values, raw SSH output, keys,
+host-pin bytes и configs не добавлены в Git/evidence.
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и нетронутым.
+
+# Предыдущий override 2026-07-20: Spain cgroup-port subreason gate готов для run 004
 
 Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа
 идёт в post-release controlled operations. Причина fail-closed run `003`
