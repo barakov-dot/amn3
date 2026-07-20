@@ -3,6 +3,12 @@
 ## Статус
 
 Этот gate реализует только checksum-bound read-only инвентаризацию Spain VPS.
+Run `spain-fresh-20260720-003` завершился fail-closed после SSH на sanitized
+`remote_probe/systemd_cgroup_ports/exit=1`. Claim и failure evidence созданы,
+success evidence отсутствует; approval consumed и не подлежит повтору.
+Следующий live run запрещён до отдельного subreason diagnostic contract,
+commit/push/origin readback и новой literal approval.
+
 Две отдельно одобренные попытки 2026-07-20 завершились fail-closed до создания
 evidence. Первая выявила преобразование диагностического stderr `nft` в
 PowerShell `NativeCommandError`; вторая после узкого nft correction вернула

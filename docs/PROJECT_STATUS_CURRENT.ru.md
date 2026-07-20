@@ -1,4 +1,41 @@
-# Текущий override 2026-07-20: Spain LocalAppData binding correction готова для run 003
+# Текущий override 2026-07-20: Spain run 003 fail-closed на systemd cgroup ports
+
+Literal approval для `spain-fresh-20260720-003` использована ровно один раз.
+Local binding, keypair и host pin прошли, SSH выполнил checksum-bound read-only
+probe. Probe остановился fail-closed и создал только sanitized failure evidence:
+`classification=remote_probe`, `stage=systemd_cgroup_ports`, `exit=1`.
+Runner/probe/source bindings совпали; success evidence отсутствует.
+
+Текущий envelope безопасно локализует collector group, но не различает внутри
+него cgroup.procs, disappearing PID/FD, readlink и socket-table failures.
+Поэтому retry и blind remediation запрещены; требуется новый локальный
+subreason diagnostic contract и отдельная будущая approval.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_run_003=fail_closed|approval_consumed
+spain_run_003_classification=remote_probe
+spain_run_003_stage=systemd_cgroup_ports
+spain_run_003_exit=1
+spain_run_003_claim=present
+spain_run_003_failure_evidence=present|sanitized
+spain_run_003_success_evidence=absent
+spain_bindings=runner_match|remote_match|source_match
+spain_retry=false|new_contract_and_exact_approval_required
+spain_install_restart_stop_config=false
+spain_unrelated_service=read_only_observation_only|no_mutation
+telegram=untouched
+production_awg=untouched
+protected_monitor_baseline=untouched
+next=DESIGN_SYSTEMD_CGROUP_PORTS_SUBREASON_DIAGNOSTIC_WITHOUT_LIVE_ACTION
+```
+
+Private target, login, unit names, PID/FD data, raw SSH output, key/host-pin
+bytes и конфиги не добавлены в Git/evidence.
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и нетронутым.
+
+# Предыдущий override 2026-07-20: Spain LocalAppData binding correction готова для run 003
 
 Literal approval для `spain-fresh-20260720-002` была использована ровно один
 раз. Runner остановился fail-closed до outcome claim и до SSH: защищённая

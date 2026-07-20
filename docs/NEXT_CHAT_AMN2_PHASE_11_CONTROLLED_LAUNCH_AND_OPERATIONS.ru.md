@@ -1,5 +1,29 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release Spain run 003 failure override 2026-07-20
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+run_003=fail_closed|approval_consumed
+classification=remote_probe
+stage=systemd_cgroup_ports
+exit=1
+claim=present
+failure_evidence=present|sanitized
+success_evidence=absent
+runner_remote_source_binding=match
+retry=false
+spain_mutation=false
+production_awg=untouched
+next=LOCAL_SYSTEMD_CGROUP_PORTS_SUBREASON_DIAGNOSTIC_DESIGN_THEN_NEW_GATE
+```
+
+Не повторять run `003`. Не выполнять ad-hoc SSH или blind remediation. Следующий
+локальный slice должен различить allowlisted subreasons внутри
+`systemd_cgroup_ports` без unit/PID/path/raw-output disclosure; новый live run
+потребует нового runner SHA, нового outcome id и отдельной literal approval.
+
 ## Post-release Spain LocalAppData binding correction override 2026-07-20
 
 ```text

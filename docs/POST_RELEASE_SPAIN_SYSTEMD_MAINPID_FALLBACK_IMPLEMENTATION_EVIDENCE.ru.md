@@ -110,3 +110,26 @@ ssh=false
 telegram=false
 awg=untouched
 ```
+
+## Read-only run 003 result
+
+Run `spain-fresh-20260720-003` был выполнен ровно один раз после origin
+readback. Private trust checks прошли, затем checksum-bound remote probe
+вернул только allowlisted failure envelope. Нормализованный результат:
+
+```text
+classification=remote_probe
+stage=systemd_cgroup_ports
+exit_code=1
+runner_sha_match=true
+remote_probe_sha_match=true
+source_match=true
+claim_present=true
+failure_evidence_present=true
+success_evidence_present=false
+```
+
+Raw SSH output, unit/PID/cgroup/FD/socket data и private target values не
+сохранялись и не публиковались. Retry, install, restart/stop, remediation,
+Telegram и AWG action не выполнялись. Run `003` consumed; следующий шаг —
+локальный allowlisted subreason diagnostic design и отдельный новый live gate.
