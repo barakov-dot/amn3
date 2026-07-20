@@ -1,4 +1,36 @@
-# Текущий override 2026-07-20: Spain run 005 fail-closed на render stage
+# Текущий override 2026-07-20: Spain render subreason diagnostic готов для run 006
+
+Локальная TDD-коррекция для render stage завершена: probe до JSON rendering
+проверяет только существующие зависимости `sha256sum`, `cut`, `tr`, `awk`,
+`sort`, `paste` и выдаёт safe пары `render/81..86`. Runner принимает только
+точные пары и сохраняет лишь allowlisted `subreason`, без raw command output,
+private target или иных remote values. `spain-fresh-20260720-006` ещё не
+создан и не выполнялся; run `005` остаётся consumed и не повторяется.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_render_subreason_diagnostic=implemented_locally|tdd_red_green_verified
+spain_render_subreason_allowlist=sha256sum|cut|tr|awk|sort|paste
+spain_render_subreason_exit_allowlist=81|82|83|84|85|86
+spain_next_outcome_run=spain-fresh-20260720-006|not_created|not_run|approval_required
+spain_immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D
+runner_sha256=FF9D9B731A2AEE12C7E1A98CA0AACB8B533F051D666E1D4C4352BFDE0F6B143D
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=focused_28_passed|full_204_passed
+fresh_install_gate=blocked_until_run_006_success
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+```
+
+Новая exact single-use approval может быть выдана только после commit/push,
+origin readback и final diff/security review этой локальной коррекции.
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и нетронутым.
+
+# Предыдущий override 2026-07-20: Spain run 005 fail-closed на render stage
 
 Literal approval для `spain-fresh-20260720-005` использована ровно один раз.
 Checksum-bound read-only probe дошёл до удалённого render stage и завершился

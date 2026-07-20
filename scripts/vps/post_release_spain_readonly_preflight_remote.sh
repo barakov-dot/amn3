@@ -30,6 +30,10 @@ safe_atom() {
     printf '%s' "$1" | tr -cd 'A-Za-z0-9._:+-'
 }
 
+assert_render_dependency() {
+    [[ "$(bool_command "$1")" == "true" ]] || emit_failure "$2"
+}
+
 safe_cgroup_path() {
     local path="$1" segment
     local -a segments
@@ -345,6 +349,12 @@ if [[ -n "$(command -v systemctl)" ]]; then
 fi
 
 CURRENT_STAGE="render"
+assert_render_dependency "sha256sum" 81
+assert_render_dependency "cut" 82
+assert_render_dependency "tr" 83
+assert_render_dependency "awk" 84
+assert_render_dependency "sort" 85
+assert_render_dependency "paste" 86
 printf '%s' '{"schema":"amn2.spain-readonly-preflight.v1"'
 printf ',"mode":"preflight"'
 printf ',"os_kernel":{"system":"%s","release":"%s"}' "$kernel_name" "$kernel_release"

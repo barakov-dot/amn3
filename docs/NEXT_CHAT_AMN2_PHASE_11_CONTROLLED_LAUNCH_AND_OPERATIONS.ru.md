@@ -1,5 +1,33 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release Spain render subreason diagnostic ready for run 006 2026-07-20
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+run_005=fail_closed|approval_consumed|never_repeat
+render_subreason_diagnostic=implemented_locally|tdd_red_green_verified
+safe_pairs=render/81..86
+safe_names=sha256sum|cut|tr|awk|sort|paste
+next_outcome_run=spain-fresh-20260720-006|not_created|not_run|approval_required
+immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D
+runner_sha256=FF9D9B731A2AEE12C7E1A98CA0AACB8B533F051D666E1D4C4352BFDE0F6B143D
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=focused_28_passed|full_204_passed
+fresh_install_gate=blocked_until_run_006_success
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+next=COMMIT_PUSH_VERIFY_ORIGIN_THEN_EXACT_READ_ONLY_PREFLIGHT_006_APPROVAL
+```
+
+Run `006` не выполнять без новой literal approval из отдельного approval doc.
+Run `005` не повторять; не выполнять ad-hoc SSH, install, retry или blind
+remediation. Fresh Spain install и Phase12 migration gate остаются закрыты до
+успешного outcome `006`.
+
 ## Post-release Spain run 005 failure override 2026-07-20
 
 ```text

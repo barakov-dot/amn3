@@ -1,6 +1,30 @@
 # Spain read-only preflight gate
 
-## Статус
+## Текущий локальный diagnostic contract для run 006
+
+До JSON rendering remote probe проверяет только шесть already-used external
+dependencies. Exact пары `render/81..86` маппятся runner-ом соответственно в
+`sha256sum`, `cut`, `tr`, `awk`, `sort`, `paste`. Незнакомая пара или
+malformed/mixed envelope не получает подпричину и закрывает gate. Никакие raw
+stderr/stdout, command path/name beyond the allowlisted label, private target,
+unit, PID, FD, socket или config value не сохраняются.
+
+`spain-fresh-20260720-006` ещё не создан, SSH/preflight не выполнялся и
+требует отдельную checksum-bound literal approval. Run `005` consumed и
+повторять его нельзя; fresh-install/Phase12 migration gate остаётся закрытым
+до успешного `006`.
+
+```text
+render_subreason_diagnostic=implemented_locally|tdd_red_green_verified
+render_safe_pairs=81:sha256sum|82:cut|83:tr|84:awk|85:sort|86:paste
+outcome_run=spain-fresh-20260720-006|not_created|not_run|approval_required
+immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D
+runner_sha256=FF9D9B731A2AEE12C7E1A98CA0AACB8B533F051D666E1D4C4352BFDE0F6B143D
+tests=focused_28_passed|full_204_passed
+```
+
+## Предыдущий статус
 
 Corrected single-use gate для `spain-fresh-20260720-005` выполнен ровно один
 раз и завершился fail-closed на sanitized `remote_probe/render/exit=127`.
