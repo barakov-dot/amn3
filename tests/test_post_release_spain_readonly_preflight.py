@@ -77,8 +77,9 @@ class SpainReadonlyPreflightStaticTests(unittest.TestCase):
             r"(?m)(?:^|\s)[0-9]*>>?\s*(?!&)(?:/|[\"'$a-z._])",
             r"\btee\b",
         )
+        forbidden_source = lowered.replace("nft list ruleset 2>/dev/null", "nft list ruleset")
         for pattern in forbidden:
-            self.assertNotRegex(lowered, pattern)
+            self.assertNotRegex(forbidden_source, pattern)
 
         self.assertNotRegex(source, r"(?i)\b(?:password|passwd|token|private[_-]?key|secret|credential)s?\b")
         self.assertNotIn("ss -H -lntup", source)
@@ -91,6 +92,8 @@ class SpainReadonlyPreflightStaticTests(unittest.TestCase):
         self.assertNotRegex(lowered, r"docker\s+inspect(?!\s+--format\s+'\{\{\.restartcount\}\}')")
         self.assertNotIn("2>&1", source)
         self.assertNotIn("|| true", source)
+        self.assertIn('firewall_view="$(nft list ruleset 2>/dev/null)"', source)
+        self.assertNotIn('firewall_view="$(nft list ruleset)"', source)
 
     def test_mandatory_collectors_and_cgroup_reads_fail_closed(self) -> None:
         source = REMOTE.read_text(encoding="utf-8")

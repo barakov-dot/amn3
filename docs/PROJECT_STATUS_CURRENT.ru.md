@@ -1,3 +1,42 @@
+# Текущий override 2026-07-20: Spain read-only preflight fail-closed, corrected gate ожидает новый approval
+
+Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа
+идёт в post-release controlled operations. Первый отдельно разрешённый Spain
+read-only preflight был запущен ровно один раз и завершился fail-closed до
+создания evidence: обязательный `nft list ruleset` вернул безопасное
+диагностическое предупреждение в stderr, которое Windows PowerShell преобразовал
+в terminating `NativeCommandError`. Повторный SSH-запуск не выполнялся.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_trust_run_id=spain-fresh-20260720-001|unchanged
+spain_preflight_attempt_1=fail_closed_before_evidence|approval_consumed
+spain_preflight_attempt_1_evidence=absent
+spain_preflight_attempt_1_cause=nft_diagnostic_stderr_to_powershell_native_command_error
+spain_remote_probe_correction=exact_nft_stderr_suppression_only|nonzero_status_preserved|set_e_preserved
+spain_runner_sha256=E2A00A9FDF3C1176300CA2B75ED3BDB9EEF6A62A7E8CAB9609C3414C120B14A8
+spain_remote_probe_sha256=4B73C2E892D9BF64F7A3F2840DB22C6124A990506DA8A8558E5D59E9510A4AF3
+spain_runner_source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=spain_preflight_focused_9_passed|root_full_185_passed|bash_powershell_parse_pass|diff_check_pass
+security=scan_8291665_3731823_20260720T074034Z|coverage_3_of_3|findings_0
+spain_preflight_retry=false|new_exact_approval_required_after_origin_sync
+spain_install_restart_stop_config=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+protected_monitor_baseline=untouched
+next=COMMIT_PUSH_VERIFY_ORIGIN_THEN_ISSUE_NEW_EXACT_READ_ONLY_PREFLIGHT_APPROVAL
+```
+
+Evidence:
+`docs/POST_RELEASE_SPAIN_READONLY_PREFLIGHT_NFT_STDERR_CORRECTION_EVIDENCE.ru.md`.
+Исправление подавляет только stderr точной диагностической команды `nft list
+ruleset`; её ненулевой код возврата по-прежнему закрывает remote probe через
+`set -euo pipefail`. Старый literal approval повторно использовать нельзя.
+Private target, login, key и host-key line в Git/evidence не добавлялись.
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и нетронутым.
+
 # Текущий override 2026-07-20: dedicated Spain SSH trust state полностью подготовлен
 
 Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа

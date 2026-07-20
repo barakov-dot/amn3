@@ -100,7 +100,7 @@ firewall_digest="$(sha256_text none)"
 firewall_rule_count=0
 if [[ -n "$(command -v nft)" ]]; then
     firewall_backend="nft"
-    firewall_view="$(nft list ruleset)"
+    firewall_view="$(nft list ruleset 2>/dev/null)"
     firewall_digest="$(sha256_text "$firewall_view")"
     firewall_rule_count="$(printf '%s\n' "$firewall_view" | awk '/^[[:space:]]*(ip|ip6|tcp|udp|iif|oif|ct|counter|accept|drop|reject)/ {n++} END {print n+0}')"
 elif [[ -n "$(command -v iptables-save)" ]]; then
