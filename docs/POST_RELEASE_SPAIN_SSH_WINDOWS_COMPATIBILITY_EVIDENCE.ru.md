@@ -1,7 +1,7 @@
 # Spain SSH onboarding: Windows OpenSSH compatibility evidence
 
 Дата: 2026-07-20
-Статус: локально проверено; Spain network contact не выполнялся
+Статус: trust state локально подготовлен; Spain network contact не выполнялся
 
 ## Причина коррекции
 
@@ -46,13 +46,29 @@ security_reportable_findings=0
 Runner перепривязан к текущему AMN2 source; approval со старым source
 `51fd...` больше не соответствует runner bytes и не может быть принят.
 
+## Provider-console trust checkpoint
+
+Оператор отдельно подтвердил установку dedicated public key и передал только
+безопасные public host-key evidence. Локальная проверка зафиксировала:
+
+```text
+private_target_binding=prepared|four_line_schema|acl_current_user_only
+known_hosts_spain=created_once|fingerprint_exact_match|acl_current_user_only
+dedicated_key_pair=exact_ed25519_material_match
+preflight_evidence=absent
+network_contact=false
+```
+
+Target address, login и raw host-key line остаются только в Git-ignored private
+artifacts и не записываются в status/evidence.
+
 ## Live boundary
 
 - Private key находится только в ACL-protected и Git-ignored artifact root.
-- Public key безопасно подготовлен для ручной установки через provider console.
-- Private target binding и `known_hosts_spain` ещё не созданы: требуется
-  независимо полученный provider-console host key и его SHA-256 fingerprint.
-- До этого запрещены SSH, read-only preflight, установка и выпуск конфигов.
+- Public key установлен оператором вручную через provider console.
+- Private target binding и `known_hosts_spain` созданы локально только после
+  независимого точного совпадения provider-console fingerprint.
+- SSH/read-only preflight всё ещё запрещён до отдельного literal approval.
 - Unrelated Spain service, production bot/web/database и AWG не контактировались
   и не изменялись.
 - `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` не затронут.
