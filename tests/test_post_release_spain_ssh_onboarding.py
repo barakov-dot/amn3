@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "vps" / "post_release_spain_ssh_onboarding.ps1"
 DOC = ROOT / "docs" / "POST_RELEASE_SPAIN_SSH_ONBOARDING.ru.md"
 POWERSHELL = Path(r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
+SSH_KEYGEN = Path(r"C:\Windows\System32\OpenSSH\ssh-keygen.exe")
 EXPECTED_PIN = "SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 
 
@@ -101,6 +102,30 @@ def prepare_only(tmp: Path, run_id: str, pin: str = EXPECTED_PIN) -> tuple[Path,
 
 @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
 class SpainSshOnboardingTests(unittest.TestCase):
+    @unittest.skipUnless(SSH_KEYGEN.exists(), "Windows OpenSSH ssh-keygen is required")
+    def test_prepare_key_works_with_real_windows_ssh_keygen(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            tmp = Path(raw_tmp)
+            root = tmp / "artifacts"
+            env = {
+                "AMN2_SPAIN_TEST_ALLOW_LOCAL_OVERRIDES": "1",
+            }
+
+            result = run_script(
+                "-Mode",
+                "prepare-key",
+                "-RunId",
+                "test-real-keygen",
+                "-ArtifactRoot",
+                str(root),
+                env=env,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            key_path = root / "test-real-keygen" / "id_ed25519_spain"
+            self.assertTrue(key_path.is_file())
+            self.assertTrue(key_path.with_suffix(".pub").is_file())
+
     def test_script_declares_only_local_modes_and_hardened_future_ssh_contract(self) -> None:
         self.assertTrue(SCRIPT.exists(), "Spain SSH onboarding script is missing")
         source = SCRIPT.read_text(encoding="utf-8")

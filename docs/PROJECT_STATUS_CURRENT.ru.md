@@ -1,4 +1,41 @@
-# Текущий override 2026-07-20: indefinite multi-slot operator issuance готова локально
+# Текущий override 2026-07-20: dedicated Spain SSH key готов, provider-console trust ожидается
+
+Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа
+идёт в post-release controlled operations. Реальный Windows OpenSSH integration
+test выявил и закрыл две fail-closed несовместимости локального onboarding:
+передачу пустой passphrase в `ssh-keygen` и допустимый comment в выводе
+`ssh-keygen -y`. Dedicated Spain key создан локально, защищён ACL и исключён из
+Git. Никакого SSH-соединения со Spain ещё не выполнялось.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_trust_run_id=spain-fresh-20260720-001
+spain_dedicated_key=prepared_local|ed25519|acl_current_user_only|git_ignored
+spain_operator_public_key_fingerprint=SHA256:22zMZFDsPF5SrU5tiF7k27aWvXEMmXwyjqw+CSyYqns
+spain_private_target_binding=pending_provider_console_host_key_and_login
+spain_independent_host_pin=pending|network_trust_not_created
+spain_onboarding_sha256=EB725B63723949D6EFF71C691C31695FBEDA44B555F6F3591C6E426263E3DCD2
+spain_runner_sha256=0F27113DEA48F8F4443CDCA6628F5D6527E7036F407447B6288595AD0FCCF5AC
+spain_remote_probe_sha256=5485260DF91713B742E45793C079F6A18BC1B83D54AF72556EB8E6A3CC0AB345
+spain_runner_source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=spain_focused_22_passed|root_full_185_passed|powershell_parse_pass
+security=scan_2071578_b7eaf7d_20260720T055655Z|coverage_4_of_4|findings_0
+spain_network_contact=false
+spain_preflight=false|approval_withheld_until_independent_host_pin
+spain_install_restart_stop_config=false
+spain_unrelated_service=untouched
+production_awg=untouched
+protected_monitor_baseline=untouched
+next=PROVIDER_CONSOLE_INSTALL_PUBLIC_KEY_AND_RETURN_SAFE_HOST_KEY_EVIDENCE
+```
+
+Evidence:
+`docs/POST_RELEASE_SPAIN_SSH_WINDOWS_COMPATIBILITY_EVIDENCE.ru.md`.
+Private key, target address, login и будущий host-key line не входят в Git или
+evidence. Старый approval, связанный с AMN2 `51fd...`, недействителен.
+
+# Предыдущий override 2026-07-20: indefinite multi-slot operator issuance готова локально
 
 Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа
 идёт в post-release controlled operations. Локальный операторский контур для

@@ -174,6 +174,7 @@ done
         self.assertNotIn('id_ed25519"', source)
         self.assertNotIn("Invoke-Expression", source)
         self.assertNotIn("[IO.File]::ReadAllText($RemoteScriptPath", source)
+        self.assertGreaterEqual(source.count(r"(?: [^\r\n]+)?$"), 2)
         self.assertIn("& $SshExe @SshArguments 2>$null", source)
         self.assertNotIn("& $SshExe @SshArguments 2>&1", source)
         self.assertGreaterEqual(source.count("$SshOutput = $null"), 2)
@@ -233,7 +234,7 @@ done
         self.assertIn("RUNNER_SHA_$actualRunnerSha", source)
         self.assertIn("REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha", source)
         self.assertIn(
-            "SOURCE_51FDBA29EE1B33442BD109A0D0611C4D1348F4DA",
+            "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19",
             source,
         )
 
@@ -243,7 +244,7 @@ done
         expected = (
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
-            "SOURCE_51FDBA29EE1B33442BD109A0D0611C4D1348F4DA_"
+            "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"

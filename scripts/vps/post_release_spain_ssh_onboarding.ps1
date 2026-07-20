@@ -119,7 +119,7 @@ function Assert-DedicatedKeyPair {
     if ($LASTEXITCODE -ne 0 -or $DerivedLines.Count -ne 1) {
         throw "Dedicated Spain private key is invalid."
     }
-    $DerivedMatch = [regex]::Match($DerivedLines[0].Trim(), '^ssh-ed25519 ([A-Za-z0-9+/]+={0,2})$')
+    $DerivedMatch = [regex]::Match($DerivedLines[0].Trim(), '^ssh-ed25519 ([A-Za-z0-9+/]+={0,2})(?: [^\r\n]+)?$')
     $PublicText = Get-Content -LiteralPath $PublicKeyPath -Raw
     $PublicMatch = [regex]::Match($PublicText.Trim(), '^ssh-ed25519 ([A-Za-z0-9+/]+={0,2})(?: [^\r\n]+)?$')
     if (-not $DerivedMatch.Success -or -not $PublicMatch.Success -or $DerivedMatch.Groups[1].Value -cne $PublicMatch.Groups[1].Value) {
@@ -197,7 +197,7 @@ switch ($Mode) {
             throw "Dedicated Spain key already exists."
         }
         Assert-LocalExecutable $SshKeygenExe "OpenSSH key generator"
-        & $SshKeygenExe -t ed25519 -f $KeyPath -C "AMN2 Spain dedicated operator key" -N ""
+        & $SshKeygenExe -t ed25519 -f $KeyPath -C "AMN2 Spain dedicated operator key" -N '""'
         if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $KeyPath -PathType Leaf) -or -not (Test-Path -LiteralPath $PublicKeyPath -PathType Leaf)) {
             throw "Dedicated Spain key generation failed."
         }
