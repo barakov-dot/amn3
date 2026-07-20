@@ -1,16 +1,34 @@
-# Текущий override 2026-07-20: corrected Spain preflight 005 готов локально
+# Текущий override 2026-07-20: Spain run 005 fail-closed на render stage
 
-Ложный `pid/76` для успешно прочитанного пустого `cgroup.procs` закрыт по TDD:
-regression сначала воспроизвёл отказ, затем минимальная ветка zero-row success
-прошла focused и полный suite. Любая существующая nonnumeric PID-строка и все
-прежние FD/readlink/socket failures остаются fail-closed.
+Literal approval для `spain-fresh-20260720-005` использована ровно один раз.
+Checksum-bound read-only probe дошёл до удалённого render stage и завершился
+sanitized failure: `classification=remote_probe`, `stage=render`,
+`subreason=unavailable`, `exit=127`. Claim и failure evidence присутствуют,
+success evidence отсутствует; runner/probe/source bindings совпали. Retry
+запрещён.
+
+Локальная проверка reviewed remote probe показывает, что render stage собирает
+redacted JSON через shell helpers и внешние утилиты; текущий sanitized envelope
+не раскрывает, какая именно команда отсутствует. Требуется отдельный локальный
+stage-coded diagnostic contract для render subreason без raw output/private
+values, затем новый outcome run `spain-fresh-20260720-006` и новая exact
+single-use read-only approval. Fresh-install/Phase12 migration gate остаётся
+закрытым до успешного Spain preflight.
 
 ```text
 active_phase=Post-release controlled operations
 phase11_status=completed-controlled-private-release|unchanged
 spain_run_004=fail_closed|approval_consumed|never_repeat
 spain_empty_cgroup_correction=implemented|tdd_red_green_verified
-spain_next_outcome_run=spain-fresh-20260720-005|not_created|not_run
+spain_run_005=fail_closed|approval_consumed|never_repeat
+spain_run_005_classification=remote_probe
+spain_run_005_stage=render
+spain_run_005_subreason=unavailable
+spain_run_005_exit=127
+spain_run_005_claim=present
+spain_run_005_failure_evidence=present|sanitized
+spain_run_005_success_evidence=absent
+spain_next_outcome_run=spain-fresh-20260720-006|required_after_render_diagnostic
 spain_immutable_trust_bundle=spain-fresh-20260720-001
 remote_probe_sha256=B45764A57E4258C8DD1AFC1570FE5F4359C755C146449225EAC0B74044E3F3F1
 runner_sha256=B42EEE2ED6D63DDC81BCDAF337B9A1581757C8B1E5B1475FACFF69322DD75C82
@@ -18,18 +36,19 @@ source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
 correction_commit=34628ddb0dd32022609313c1b4c54d31295edab8|origin_verified
 tests=focused_27_passed|full_203_passed|bash_powershell_parse_pass
 security=codex_diff_scan_complete|reportable_findings_0|secret_matches_0
-fresh_install_gate=blocked_until_preflight_005_success
+fresh_install_gate=blocked_until_new_preflight_success
 spain_install_restart_stop_config=false
 spain_unrelated_service=untouched
 telegram=untouched
 production_awg=untouched
 protected_monitor_baseline=untouched
-next=RETURN_EXACT_SINGLE_USE_SPAIN_PREFLIGHT_005_APPROVAL
+next=DESIGN_RENDER_STAGE_SUBREASON_DIAGNOSTIC_THEN_NEW_EXACT_PREFLIGHT_006_GATE
 ```
 
-Run `005` и SSH не выполнялись, outcome не создавался. Новая authority появится
-только после origin readback и возврата отдельной полностью совпадающей literal
-approval. Runs `001`–`004` не повторять; blind remediation запрещён.
+Run `005` повторять нельзя. Новая authority появится только после отдельного
+render diagnostic correction, commit/push/origin readback и возврата новой
+полностью совпадающей literal approval для нового outcome. Runs `001`–`005` не
+повторять; blind remediation запрещён.
 `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и нетронутым.
 
 # Предыдущий override 2026-07-20: Spain run 004 fail-closed на пустом cgroup process list

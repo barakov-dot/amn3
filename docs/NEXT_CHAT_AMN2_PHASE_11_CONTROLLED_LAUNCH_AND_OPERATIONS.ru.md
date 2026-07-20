@@ -1,13 +1,21 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
-## Post-release corrected Spain preflight 005 ready override 2026-07-20
+## Post-release Spain run 005 failure override 2026-07-20
 
 ```text
 active_phase=Post-release controlled operations
 phase11_status=completed-controlled-private-release|unchanged
 run_004=fail_closed|approval_consumed|never_repeat
 empty_cgroup_correction=implemented|tdd_red_green_verified
-next_outcome_run=spain-fresh-20260720-005|not_created|not_run
+run_005=fail_closed|approval_consumed|never_repeat
+classification=remote_probe
+stage=render
+subreason=unavailable
+exit=127
+claim=present
+failure_evidence=present|sanitized
+success_evidence=absent
+next_outcome_run=spain-fresh-20260720-006|required_after_render_diagnostic
 immutable_trust_bundle=spain-fresh-20260720-001
 remote_probe_sha256=B45764A57E4258C8DD1AFC1570FE5F4359C755C146449225EAC0B74044E3F3F1
 runner_sha256=B42EEE2ED6D63DDC81BCDAF337B9A1581757C8B1E5B1475FACFF69322DD75C82
@@ -15,19 +23,21 @@ source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
 correction_commit=34628ddb0dd32022609313c1b4c54d31295edab8|origin_verified
 tests=focused_27_passed|full_203_passed|bash_powershell_parse_pass
 security=codex_diff_scan_complete|reportable_findings_0|secret_matches_0
-fresh_install_gate=blocked_until_preflight_005_success
+fresh_install_gate=blocked_until_new_preflight_success
 spain_mutation=false
 spain_unrelated_service=untouched
 telegram=untouched
 production_awg=untouched
-next=RETURN_EXACT_SINGLE_USE_SPAIN_PREFLIGHT_005_APPROVAL
+next=RENDER_STAGE_SUBREASON_DIAGNOSTIC_DESIGN_THEN_NEW_EXACT_PREFLIGHT_006_GATE
 ```
 
-Run `005` не создан и не выполнялся; SSH не выполнялся. После trusted-origin
-readback напечатать exact approval безопасным empty-approval preview и ждать её
-буквального возврата. Только затем разрешён один checksum-bound read-only run.
-Не повторять runs `001`–`004`, не устанавливать и не изменять Spain/AWG или
-посторонний сервис.
+Run `005` выполнен ровно один раз и завершился fail-closed на sanitized
+`remote_probe/render/exit=127`. Не повторять runs `001`–`005`; не выполнять
+ad-hoc SSH, install, retry или blind remediation. Следующий локальный slice
+должен добавить allowlisted render subreason diagnostic без raw values/private
+target disclosure, затем подготовить новый outcome `spain-fresh-20260720-006`
+и отдельную exact read-only approval. Fresh Spain install и Phase12 migration
+gate не открывать до успешного нового preflight.
 
 ## Post-release Spain run 004 failure override 2026-07-20
 
