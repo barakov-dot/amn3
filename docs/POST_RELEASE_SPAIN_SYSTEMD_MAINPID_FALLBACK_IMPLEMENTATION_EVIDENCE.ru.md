@@ -83,3 +83,30 @@ Telegram, unrelated-service или AWG actions.
 Private target, login, SSH key, host-key line, raw diagnostics и конфиги не
 добавлялись в Git/evidence. `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` не
 изменялся.
+
+## LocalAppData binding correction и run 003
+
+Literal run `002` остановился до outcome claim и до SSH, потому что перенесённый
+`target.env` всё ещё ссылался на старый workspace key path. Approval `002`
+считается consumed и не повторялся.
+
+По отдельному authority атомарно изменена только строка `SSH_KEY_PATH`; old
+binding сохранён как protected backup. Target, user и expected host pin
+сравнены до/после, а SHA-256 private/public key и known-hosts bytes подтверждены
+неизменными без публикации значений. Полная owner/ACL/no-reparse chain,
+binding, Ed25519 pair и independent host pin прошли локальную проверку без SSH.
+
+```text
+run_002=fail_closed_before_outcome_and_ssh|approval_consumed
+binding_correction=ssh_key_path_only|verified
+binding_backup=protected|retained
+next_outcome_run=spain-fresh-20260720-003|absent
+runner_sha256=A27CC666EF47D6AF5983217169CFB3002F41E5A70DAF625EE3A422DAFB59FAEE
+remote_probe_sha256=3C8B341EC813776733835D39193F451E4FC21665851E1DCDADEFE69AD9D9BA0D
+focused_tests=24_passed
+root_full_tests=200_passed
+security_review=independent_diff_clean|reportable_findings_0|stale_run_fail_closed
+ssh=false
+telegram=false
+awg=untouched
+```

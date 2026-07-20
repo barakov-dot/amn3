@@ -1,4 +1,42 @@
-# Текущий override 2026-07-20: Spain MainPID fallback correction готов локально
+# Текущий override 2026-07-20: Spain LocalAppData binding correction готова для run 003
+
+Literal approval для `spain-fresh-20260720-002` была использована ровно один
+раз. Runner остановился fail-closed до outcome claim и до SSH: защищённая
+LocalAppData-копия `target.env` сохраняла старый workspace `SSH_KEY_PATH` и не
+совпала с новым dedicated key path. Run `002` не повторялся.
+
+После отдельного approval изменено только private поле `SSH_KEY_PATH`.
+Target/user/expected host pin и bytes private/public key и known-hosts сохранены;
+старый binding оставлен как protected backup. Owner/ACL/no-reparse, binding,
+keypair и host-pin локально проверены без SSH. Runner переведён на новый
+single-use outcome `spain-fresh-20260720-003`.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_run_002=fail_closed_before_outcome_and_ssh|approval_consumed
+spain_run_002_cause=localappdata_binding_old_workspace_key_path
+spain_run_002_outcome=absent
+spain_binding_correction=ssh_key_path_only|verified|protected_backup_retained
+spain_binding_preserved=target|user|host_pin|private_public_key_and_known_hosts_bytes
+spain_next_outcome_run=spain-fresh-20260720-003|not_created|exact_approval_required
+spain_runner_sha256=A27CC666EF47D6AF5983217169CFB3002F41E5A70DAF625EE3A422DAFB59FAEE
+spain_remote_probe_sha256=3C8B341EC813776733835D39193F451E4FC21665851E1DCDADEFE69AD9D9BA0D
+tests=spain_preflight_focused_24_passed|root_full_200_passed|bash_powershell_parse_pass|diff_check_pass
+security=independent_diff_review_clean|reportable_findings_0|stale_run_fail_closed
+spain_network_contact_run_002=false
+spain_install_restart_stop_config=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+protected_monitor_baseline=untouched
+next=COMMIT_PUSH_VERIFY_ORIGIN_THEN_ISSUE_EXACT_SINGLE_USE_SPAIN_PREFLIGHT_003_APPROVAL
+```
+
+Private target/login/key/host-key bytes не добавлены в Git или evidence.
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и нетронутым.
+
+# Предыдущий override 2026-07-20: Spain MainPID fallback correction готов локально
 
 Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа
 идёт в post-release controlled operations. Последний Spain outcome run

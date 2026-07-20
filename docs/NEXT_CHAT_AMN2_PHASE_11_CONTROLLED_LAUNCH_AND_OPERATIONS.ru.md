@@ -1,5 +1,28 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release Spain LocalAppData binding correction override 2026-07-20
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+run_002=fail_closed_before_outcome_and_ssh|approval_consumed
+run_002_cause=protected_binding_old_workspace_ssh_key_path
+binding_fix=ssh_key_path_only|target_user_pin_key_bytes_preserved|backup_retained
+next_outcome_run=spain-fresh-20260720-003|not_created
+runner_sha256=A27CC666EF47D6AF5983217169CFB3002F41E5A70DAF625EE3A422DAFB59FAEE
+remote_probe_sha256=3C8B341EC813776733835D39193F451E4FC21665851E1DCDADEFE69AD9D9BA0D
+tests=focused_24_passed|full_200_passed|bash_powershell_parse_pass
+security=independent_diff_review_clean|reportable_findings_0
+spain_live=false
+spain_unrelated_service=untouched
+production_awg=untouched
+next=PUSH_VERIFY_ORIGIN_THEN_EXACT_SINGLE_USE_READ_ONLY_PREFLIGHT_003_APPROVAL
+```
+
+Approval `002` не переиспользовать. Новый SSH разрешён только отдельной
+checksum-bound literal approval для run `003`. До неё не создавать outcome,
+не выполнять SSH/install/remediation и не изменять AWG или посторонний сервис.
+
 ## Post-release Spain MainPID correction override 2026-07-20
 
 ```text

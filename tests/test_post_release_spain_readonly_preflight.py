@@ -520,7 +520,7 @@ foreach ($case in $cases) {
     def test_runner_claims_exact_run_before_ssh_and_separates_outcomes(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         for marker in (
-            '$expectedRunId = "spain-fresh-20260720-002"',
+            '$expectedRunId = "spain-fresh-20260720-003"',
             "Exact Spain trust run id mismatch",
             'Join-Path $RunRoot "preflight-outcome.claim"',
             'Join-Path $RunRoot "preflight-failure-evidence.json"',
@@ -540,7 +540,7 @@ foreach ($case in $cases) {
     def test_runner_reuses_immutable_trust_bundle_but_claims_new_outcome_run(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         self.assertIn('$trustedBundleRunId = "spain-fresh-20260720-001"', source)
-        self.assertIn('$expectedRunId = "spain-fresh-20260720-002"', source)
+        self.assertIn('$expectedRunId = "spain-fresh-20260720-003"', source)
         self.assertIn('$TrustDirectory = Join-Path $ArtifactRoot $trustedBundleRunId', source)
         self.assertIn('$RunDirectory = Join-Path $ArtifactRoot $RunId', source)
         self.assertIn("[Environment]::GetFolderPath('LocalApplicationData')", source)
@@ -638,9 +638,9 @@ foreach ($case in $cases) {
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
             "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
-            "TRUST_RUN_ID_SPAIN_FRESH_20260720_002_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260720_003_"
             "IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_"
-            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_002_"
+            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_003_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"
@@ -724,9 +724,9 @@ class SpainReadonlyPreflightFailClosedTests(unittest.TestCase):
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
             "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
-            "TRUST_RUN_ID_SPAIN_FRESH_20260720_002_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260720_003_"
             "IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_"
-            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_002_"
+            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_003_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"

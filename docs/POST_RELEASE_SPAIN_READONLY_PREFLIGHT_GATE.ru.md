@@ -13,12 +13,12 @@ PowerShell `NativeCommandError`; вторая после узкого nft correc
 live-запуск не выполнялся. Новый запуск требует отдельного approval,
 привязанного к новым runner/probe SHA-256, source, immutable trust bundle
 `spain-fresh-20260720-001` и отдельному outcome run
-`spain-fresh-20260720-002` после origin readback. Telegram API не вызывался,
+`spain-fresh-20260720-003` после origin readback. Telegram API не вызывался,
 установка и любые live-изменения не производились.
 
 Runner допускает единственный режим `preflight` и до обращения к private
 artifacts требует полного точного approval и exact trust run id
-`spain-fresh-20260720-002`. Approval привязан одновременно к фактическому
+`spain-fresh-20260720-003`. Approval привязан одновременно к фактическому
 SHA-256 самого runner, SHA-256 удалённого probe, исходному AMN2 head и этому run
 id. При пустом `-Approval` runner печатает одну полностью материализованную
 строку и завершается с ошибкой до чтения private target или SSH; это безопасный
@@ -38,7 +38,7 @@ private-artifacts/post-release/spain-migration/<run_id>/known_hosts_spain
 
 Trust artifacts читаются только из protected local copy immutable run
 `spain-fresh-20260720-001` под `%LOCALAPPDATA%\AMN2`, а
-claim/evidence создаются только в новом run `spain-fresh-20260720-002`. Перед
+claim/evidence создаются только в новом run `spain-fresh-20260720-003`. Перед
 SSH runner до любого trust read проверяет current-user-only owner/ACL всей
 заранее подготовленной private-artifact parent chain, отвергает reparse points,
 проверяет точную четырёхстрочную схему
