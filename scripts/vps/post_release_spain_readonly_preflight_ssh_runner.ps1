@@ -17,14 +17,14 @@ Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Utility") -ErrorA
 
 $expectedRemoteScriptSha = "228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D"
 $trustedBundleRunId = "spain-fresh-20260720-001"
-$expectedRunId = "spain-fresh-20260720-006"
+$expectedRunId = "spain-fresh-20260720-007"
 $AllowedFailureStages = @(
     "bootstrap", "os_kernel", "capacity", "sockets", "firewall",
     "ssh_policy", "docker_inventory", "systemd_inventory",
     "systemd_unit_content", "systemd_cgroup_ports", "render"
 )
 $actualRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
-$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_RUNNER_SHA_$actualRunnerSha`_REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha`_SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_TRUST_RUN_ID_SPAIN_FRESH_20260720_006_IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_006_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
+$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_RUNNER_SHA_$actualRunnerSha`_REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha`_SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_TRUST_RUN_ID_SPAIN_FRESH_20260720_007_IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_007_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
 if ([string]::IsNullOrEmpty($Approval)) {
     Write-Output $expectedApproval
     throw "Exact read-only preflight approval mismatch."
@@ -264,6 +264,39 @@ function Read-SafeFailureEnvelope([string[]]$Lines, [int]$ProcessExitCode) {
     return [pscustomobject]@{ Stage = $Stage; ExitCode = $ExitCode; Subreason = $Subreason }
 }
 
+function Get-SafeTransportSubreason([object[]]$Lines, [int]$ProcessExitCode) {
+    if ($ProcessExitCode -ne 255) {
+        return "unavailable"
+    }
+    $Rules = @(
+        [pscustomobject]@{ Name = "connect_timeout"; Pattern = '^ssh: connect to host .+ port [0-9]+: Connection timed out$' },
+        [pscustomobject]@{ Name = "connect_timeout"; Pattern = '^Connection timed out during banner exchange$' },
+        [pscustomobject]@{ Name = "connection_refused"; Pattern = '^ssh: connect to host .+ port [0-9]+: Connection refused$' },
+        [pscustomobject]@{ Name = "no_route"; Pattern = '^ssh: connect to host .+ port [0-9]+: No route to host$' },
+        [pscustomobject]@{ Name = "name_resolution"; Pattern = '^ssh: Could not resolve hostname .+: .+$' },
+        [pscustomobject]@{ Name = "host_key"; Pattern = '^Host key verification failed\.$' },
+        [pscustomobject]@{ Name = "authentication"; Pattern = '^.+@.+: Permission denied \([A-Za-z0-9,.-]+\)\.$' },
+        [pscustomobject]@{ Name = "remote_closed"; Pattern = '^Connection closed by .+(?: port [0-9]+)?$' },
+        [pscustomobject]@{ Name = "remote_closed"; Pattern = '^kex_exchange_identification: Connection closed by remote host$' },
+        [pscustomobject]@{ Name = "remote_reset"; Pattern = '^Connection reset by .+(?: port [0-9]+)?$' },
+        [pscustomobject]@{ Name = "remote_reset"; Pattern = '^kex_exchange_identification: read: Connection reset by peer$' }
+    )
+    $Matched = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($Item in @($Lines)) {
+        $Line = [string]$Item
+        foreach ($Rule in $Rules) {
+            if ([regex]::IsMatch($Line, $Rule.Pattern, [Text.RegularExpressions.RegexOptions]::CultureInvariant)) {
+                [void]$Matched.Add($Rule.Name)
+            }
+        }
+        $Line = $null
+    }
+    if ($Matched.Count -ne 1) {
+        return "unavailable"
+    }
+    return @($Matched)[0]
+}
+
 function Assert-TargetHost([string]$Value) {
     if ($Value -notmatch '^[A-Za-z0-9](?:[A-Za-z0-9.:-]{0,252}[A-Za-z0-9])?$' -or $Value.Contains("..")) {
         throw "Target host has an invalid format."
@@ -379,7 +412,7 @@ $SshArguments = @(
     "bash -s -- preflight"
 )
 
-$SshOutput = @($RemoteText | & $SshExe @SshArguments 2>$null)
+$SshOutput = @($RemoteText | & $SshExe @SshArguments 2>&1)
 $ProcessExitCode = $LASTEXITCODE
 if ($ProcessExitCode -ne 0) {
     $FailurePrefixCount = @(
@@ -402,12 +435,14 @@ if ($ProcessExitCode -ne 0) {
         $FailureClassification = "transport"
         $FailureStage = "unavailable"
         $FailureExitCode = $ProcessExitCode
-        $FailureSubreason = "unavailable"
+        $FailureSubreason = Get-SafeTransportSubreason $SshOutput $ProcessExitCode
     } else {
         $SshOutput = $null
         $RemoteText = $null
         throw "Read-only Spain preflight failed without a safe exit classification."
     }
+    $SshOutput = $null
+    $RemoteText = $null
     $FailureJson = [ordered]@{
         schema = "amn2.spain-readonly-preflight-failure.v1"
         classification = $FailureClassification
@@ -418,8 +453,6 @@ if ($ProcessExitCode -ne 0) {
         remote_probe_sha256 = $expectedRemoteScriptSha
         source_revision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
     } | ConvertTo-Json -Compress
-    $SshOutput = $null
-    $RemoteText = $null
     try {
         Write-EvidenceCreateNew $FailureEvidencePath $FailureJson
         Protect-PrivatePath $FailureEvidencePath

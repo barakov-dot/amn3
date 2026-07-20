@@ -486,8 +486,7 @@ done
         self.assertNotIn("Invoke-Expression", source)
         self.assertNotIn("[IO.File]::ReadAllText($RemoteScriptPath", source)
         self.assertGreaterEqual(source.count(r"(?: [^\r\n]+)?$"), 2)
-        self.assertIn("& $SshExe @SshArguments 2>$null", source)
-        self.assertNotIn("& $SshExe @SshArguments 2>&1", source)
+        self.assertIn("& $SshExe @SshArguments 2>&1", source)
         self.assertGreaterEqual(source.count("$SshOutput = $null"), 2)
         self.assertNotIn("if (Test-Path -LiteralPath $EvidencePath)", source)
         self.assertNotIn("[IO.File]::WriteAllText($EvidencePath", source)
@@ -578,10 +577,55 @@ foreach ($case in $cases) {
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, "")
 
+    @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
+    def test_transport_classifier_returns_only_allowlisted_subreasons(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        classifier = extract_powershell_function(source, "Get-SafeTransportSubreason")
+        harness = classifier + r'''
+$cases = @(
+    [pscustomobject]@{ Lines=@('ssh: connect to host 203.0.113.1 port 22: Connection timed out'); ExitCode=255; Expected='connect_timeout' },
+    [pscustomobject]@{ Lines=@('ssh: connect to host 203.0.113.1 port 22: Connection refused'); ExitCode=255; Expected='connection_refused' },
+    [pscustomobject]@{ Lines=@('ssh: connect to host 203.0.113.1 port 22: No route to host'); ExitCode=255; Expected='no_route' },
+    [pscustomobject]@{ Lines=@('ssh: Could not resolve hostname example.invalid: No such host is known.'); ExitCode=255; Expected='name_resolution' },
+    [pscustomobject]@{ Lines=@('Host key verification failed.'); ExitCode=255; Expected='host_key' },
+    [pscustomobject]@{ Lines=@('operator@example.invalid: Permission denied (publickey).'); ExitCode=255; Expected='authentication' },
+    [pscustomobject]@{ Lines=@('Connection closed by 203.0.113.1 port 22'); ExitCode=255; Expected='remote_closed' },
+    [pscustomobject]@{ Lines=@('Connection reset by 203.0.113.1 port 22'); ExitCode=255; Expected='remote_reset' },
+    [pscustomobject]@{ Lines=@('unknown transport output'); ExitCode=255; Expected='unavailable' },
+    [pscustomobject]@{ Lines=@('ssh: connect to host 203.0.113.1 port 22: Connection timed out','ssh: connect to host 203.0.113.1 port 22: Connection refused'); ExitCode=255; Expected='unavailable' },
+    [pscustomobject]@{ Lines=@('Host key verification failed.'); ExitCode=1; Expected='unavailable' }
+)
+foreach ($case in $cases) {
+    $actual = Get-SafeTransportSubreason $case.Lines $case.ExitCode
+    if ($actual -cne $case.Expected) { exit 7 }
+}
+'''
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            harness_path = Path(raw_tmp) / "safe-transport-classifier.ps1"
+            harness_path.write_text(harness, encoding="utf-8")
+            result = subprocess.run(
+                [
+                    str(POWERSHELL),
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(harness_path),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "")
+
     def test_runner_claims_exact_run_before_ssh_and_separates_outcomes(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         for marker in (
-            '$expectedRunId = "spain-fresh-20260720-006"',
+            '$expectedRunId = "spain-fresh-20260720-007"',
             "Exact Spain trust run id mismatch",
             'Join-Path $RunRoot "preflight-outcome.claim"',
             'Join-Path $RunRoot "preflight-failure-evidence.json"',
@@ -595,13 +639,15 @@ foreach ($case in $cases) {
         self.assertLess(source.index("Exact Spain trust run id mismatch"), source.index("Read-Binding"))
         self.assertLess(source.index("Write-EvidenceCreateNew $OutcomeClaimPath"), source.index("& $SshExe"))
         self.assertIn("Read-SafeFailureEnvelope ([string[]]$SshOutput) $ProcessExitCode", source)
-        self.assertNotIn("2>&1", source)
+        self.assertIn("Get-SafeTransportSubreason $SshOutput $ProcessExitCode", source)
+        self.assertIn("2>&1", source)
         self.assertNotRegex(source, r"(?i)(?:stderr|ssherror).*(?:write|out-file|set-content)")
+        self.assertLess(source.index("$SshOutput = $null", source.index("$ProcessExitCode = $LASTEXITCODE")), source.index("$FailureJson = [ordered]@{"))
 
     def test_runner_reuses_immutable_trust_bundle_but_claims_new_outcome_run(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         self.assertIn('$trustedBundleRunId = "spain-fresh-20260720-001"', source)
-        self.assertIn('$expectedRunId = "spain-fresh-20260720-006"', source)
+        self.assertIn('$expectedRunId = "spain-fresh-20260720-007"', source)
         self.assertIn('$TrustDirectory = Join-Path $ArtifactRoot $trustedBundleRunId', source)
         self.assertIn('$RunDirectory = Join-Path $ArtifactRoot $RunId', source)
         self.assertIn("[Environment]::GetFolderPath('LocalApplicationData')", source)
@@ -723,9 +769,9 @@ foreach ($case in $cases) {
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
             "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
-            "TRUST_RUN_ID_SPAIN_FRESH_20260720_006_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260720_007_"
             "IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_"
-            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_006_"
+            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_007_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"
@@ -809,9 +855,9 @@ class SpainReadonlyPreflightFailClosedTests(unittest.TestCase):
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
             "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
-            "TRUST_RUN_ID_SPAIN_FRESH_20260720_006_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260720_007_"
             "IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_"
-            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_006_"
+            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_007_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"

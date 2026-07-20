@@ -1,4 +1,35 @@
-# Текущий override 2026-07-20: Spain run 006 fail-closed на transport boundary
+# Текущий override 2026-07-20: Spain transport subreason diagnostic готов для run 007
+
+Локальная TDD-коррекция завершена. Runner будущего outcome `007` получает
+OpenSSH output только во временную память, при `exit=255` возвращает ровно одну
+allowlisted transport category и очищает raw values до создания sanitized
+failure evidence. Unknown, ambiguous и non-255 inputs остаются `unavailable`.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_transport_subreason_diagnostic=implemented_locally|tdd_red_green_verified
+spain_transport_capture=in_memory_only|cleared_before_evidence_write
+spain_transport_subreason_allowlist=connect_timeout|connection_refused|no_route|name_resolution|host_key|authentication|remote_closed|remote_reset
+spain_next_outcome_run=spain-fresh-20260720-007|not_created|not_run|approval_required
+spain_immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D
+runner_sha256=9A6BCA57930A685B6D8B997E85972336A37F289D7D39073058EDAD4625DC34A3
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=focused_29_passed|full_205_passed
+fresh_install_gate=blocked_until_run_007_success
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+```
+
+Run `007` ещё не создан и не выполнялся. Новая exact single-use approval
+действительна только после commit/push/origin readback этой версии. Runs
+`001`–`006` не повторять. `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся
+вне scope и нетронутым.
+
+# Предыдущий override 2026-07-20: Spain run 006 fail-closed на transport boundary
 
 Literal approval для `spain-fresh-20260720-006` использована ровно один раз.
 Checksum-bound runner создал claim, но не получил remote failure envelope:

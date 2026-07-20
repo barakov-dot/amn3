@@ -1,5 +1,32 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release Spain transport subreason diagnostic ready for run 007 2026-07-20
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+run_006=fail_closed|approval_consumed|never_repeat
+transport_subreason_diagnostic=implemented_locally|tdd_red_green_verified
+transport_capture=in_memory_only|cleared_before_evidence_write
+safe_names=connect_timeout|connection_refused|no_route|name_resolution|host_key|authentication|remote_closed|remote_reset
+next_outcome_run=spain-fresh-20260720-007|not_created|not_run|approval_required
+immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D
+runner_sha256=9A6BCA57930A685B6D8B997E85972336A37F289D7D39073058EDAD4625DC34A3
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=focused_29_passed|full_205_passed
+fresh_install_gate=blocked_until_run_007_success
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+next=COMMIT_PUSH_VERIFY_ORIGIN_THEN_EXACT_READ_ONLY_PREFLIGHT_007_APPROVAL
+```
+
+Run `007` не выполнять без новой exact literal approval. Raw OpenSSH output
+не сохраняется; unknown/ambiguous transport remains `unavailable`. Fresh Spain
+install и Phase12 migration gate остаются закрыты до успешного outcome.
+
 ## Post-release Spain run 006 transport failure override 2026-07-20
 
 ```text

@@ -1,6 +1,30 @@
 # Spain read-only preflight gate
 
-## Текущий статус: run 006 transport fail-closed
+## Текущий локальный transport diagnostic contract для run 007
+
+Runner будущего `spain-fresh-20260720-007` временно принимает combined
+OpenSSH output в память и классифицирует только `exit=255`. Разрешены safe
+subreason: `connect_timeout`, `connection_refused`, `no_route`,
+`name_resolution`, `host_key`, `authentication`, `remote_closed`,
+`remote_reset`. Ровно одна distinct category обязательна; иначе сохраняется
+только `unavailable`.
+
+Raw output, target/user/port/path, host-key values и regex captures не
+переносятся в evidence и очищаются до evidence construction/write. Отдельных
+stderr files, network probes или remediation нет. Run `007` не создан и не
+выполнялся; без точного approval новый SSH/preflight не выполняется.
+
+```text
+transport_subreason_diagnostic=implemented_locally|tdd_red_green_verified
+transport_capture=in_memory_only|no_raw_persistence
+outcome_run=spain-fresh-20260720-007|not_created|not_run|approval_required
+immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D
+runner_sha256=9A6BCA57930A685B6D8B997E85972336A37F289D7D39073058EDAD4625DC34A3
+tests=focused_29_passed|full_205_passed
+```
+
+## Предыдущий статус: run 006 transport fail-closed
 
 Run `spain-fresh-20260720-006` выполнен один раз. Claim создан, но OpenSSH
 вернул exit `255` без remote diagnostic envelope; runner сохранил только
