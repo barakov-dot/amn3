@@ -1,3 +1,52 @@
+# Текущий override 2026-07-20: Spain stage-coded diagnostic gate готов локально
+
+Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа
+идёт в post-release controlled operations. Вторая отдельно разрешённая Spain
+read-only попытка также завершилась fail-closed до evidence: SSH вернул
+ненулевой status, а прежний runner намеренно не сохранял raw stderr/stdout и не
+мог различить transport от конкретного collector. Approval исчерпан, retry не
+выполнялся.
+
+Локально реализован отдельный stage-coded diagnostic contract. Remote failure
+передаёт только allowlisted stage и exit code; runner фиксирован на exact trust
+run id, создаёт single-use claim до SSH и атомарно записывает либо success
+evidence, либо sanitized failure evidence. Никакой live-запуск новым кодом не
+производился.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_trust_run_id=spain-fresh-20260720-001|exact_required
+spain_preflight_attempt_1=fail_closed_before_evidence|approval_consumed
+spain_preflight_attempt_2=fail_closed_before_evidence|approval_consumed|unclassified_nonzero_ssh
+spain_preflight_success_evidence=absent
+spain_preflight_failure_evidence=absent|new_contract_not_run
+spain_preflight_outcome_claim=absent|new_contract_not_run
+spain_stage_diagnostic=local_implementation_verified|live_not_run
+spain_failure_envelope=allowlisted_stage|exit_1_255|no_raw_stderr_or_command
+spain_single_use=fixed_trust_run_id|create_new_claim|success_failure_mutually_exclusive
+spain_runner_sha256=E754737965E994FE1C2E828785345E3078E2716514BA33EA84688176304B4CF1
+spain_remote_probe_sha256=16CE3F9E14A72DFB0DC957B2A1CA13F1ADBCA72F41C60FC2D4DD9904D3E74CD6
+spain_runner_source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tdd=bash_red_green|runner_red_green|mixed_envelope_red_green|explicit_exit_red_green
+tests=spain_preflight_focused_16_passed|root_full_192_passed|bash_powershell_parse_pass|diff_check_pass
+security=scan_ee02fcd_bf33180_20260720T090425Z|coverage_3_of_3|deferred_0|findings_0
+spain_network_contact_after_attempt_2=false
+spain_install_restart_stop_config=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+protected_monitor_baseline=untouched
+next=COMMIT_PUSH_VERIFY_ORIGIN_THEN_ISSUE_SEPARATE_EXACT_STAGE_DIAGNOSTIC_APPROVAL
+```
+
+Evidence:
+`docs/POST_RELEASE_SPAIN_PREFLIGHT_STAGE_DIAGNOSTIC_IMPLEMENTATION_EVIDENCE.ru.md`.
+Design `f5e22e4` и implementation plan `ee02fcd` исполнены локально. Старые
+approvals не разрешают новый запуск. Private target, login, key, host-key line и
+raw remote diagnostics в Git/evidence не добавлялись.
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и нетронутым.
+
 # Текущий override 2026-07-20: Spain read-only preflight fail-closed, corrected gate ожидает новый approval
 
 Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа

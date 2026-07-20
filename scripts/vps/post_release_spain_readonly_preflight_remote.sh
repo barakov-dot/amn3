@@ -1,5 +1,23 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
+
+CURRENT_STAGE="bootstrap"
+
+emit_failure() {
+    local rc="${1:-1}"
+    case "$CURRENT_STAGE" in
+        bootstrap|os_kernel|capacity|sockets|firewall|ssh_policy|docker_inventory|systemd_inventory|systemd_unit_content|systemd_cgroup_ports|render) ;;
+        *) CURRENT_STAGE="bootstrap" ;;
+    esac
+    if [[ ! "$rc" =~ ^[0-9]+$ ]] || (( rc < 1 || rc > 255 )); then
+        rc=1
+    fi
+    trap - ERR
+    printf 'AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=%s|exit=%s\n' "$CURRENT_STAGE" "$rc"
+    exit "$rc"
+}
+
+trap 'emit_failure "$?"' ERR
 
 readonly MODE="${1:-}"
 [[ "$MODE" == "preflight" ]] || { printf '%s\n' '{"error":"unsupported_mode"}'; exit 64; }
@@ -72,13 +90,16 @@ ports_for_cgroup() {
     done <<< "$all_hex_ports" | sort -nu | paste -sd, -
 }
 
+CURRENT_STAGE="os_kernel"
 kernel_name="$(safe_atom "$(uname -s)")"
 kernel_release="$(safe_atom "$(uname -r)")"
+CURRENT_STAGE="capacity"
 cpu_count="$(getconf _NPROCESSORS_ONLN)"
 memory_kib="$(awk '/^MemTotal:/ {print $2; exit}' /proc/meminfo)"
 disk_bytes="$(df -B1 --output=size / | awk 'NR==2 {print $1}')"
 clock_utc="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
+CURRENT_STAGE="sockets"
 socket_rows="$(ss -H -lntu | awk '
     function scope_of(a) {
         gsub(/^\[/, "", a); gsub(/\]$/, "", a)
@@ -95,6 +116,7 @@ socket_rows="$(ss -H -lntu | awk '
     }
 ' | sort -u)"
 
+CURRENT_STAGE="firewall"
 firewall_backend="none"
 firewall_digest="$(sha256_text none)"
 firewall_rule_count=0
@@ -109,9 +131,10 @@ elif [[ -n "$(command -v iptables-save)" ]]; then
     firewall_digest="$(sha256_text "$firewall_view")"
     firewall_rule_count="$(printf '%s\n' "$firewall_view" | awk '/^-A / {n++} END {print n+0}')"
 else
-    exit 68
+    emit_failure 68
 fi
 
+CURRENT_STAGE="ssh_policy"
 ssh_policy=""
 if [[ -n "$(command -v sshd)" ]]; then
     ssh_policy="$(sshd -T | awk '
@@ -120,45 +143,52 @@ if [[ -n "$(command -v sshd)" ]]; then
         $1 == "x11forwarding" {print $1 "|" $2}
     ' | sort -u)"
 else
-    exit 69
+    emit_failure 69
 fi
-[[ -n "$ssh_policy" ]] || exit 70
+[[ -n "$ssh_policy" ]] || emit_failure 70
 
+CURRENT_STAGE="docker_inventory"
 docker_rows=""
 if [[ -n "$(command -v docker)" ]]; then
     docker_base_rows="$(docker ps -a --format '{{.Names}}|{{.Image}}|{{.State}}|{{.Ports}}')"
     while IFS='|' read -r container_name image_name active_state port_text; do
         [[ -n "$container_name" ]] || continue
         restart_count="$(docker inspect --format '{{.RestartCount}}' "$container_name")"
-        [[ "$restart_count" =~ ^[0-9]+$ ]] || exit 65
+        [[ "$restart_count" =~ ^[0-9]+$ ]] || emit_failure 65
         docker_rows+="$container_name|$image_name|$active_state|$port_text|$restart_count"$'\n'
     done <<< "$docker_base_rows"
 fi
 
+CURRENT_STAGE="systemd_inventory"
 systemd_rows=""
 if [[ -n "$(command -v systemctl)" ]]; then
     systemd_base_rows="$(systemctl list-units --type=service --all --no-legend --no-pager | awk '$1 ~ /\.service$/ {print $1 "|" $3 "|" $4}')"
     while IFS='|' read -r unit_name active_state sub_state; do
         [[ -n "$unit_name" ]] || continue
         restart_count="$(systemctl show "$unit_name" --property=NRestarts --value)"
-        [[ "$restart_count" =~ ^[0-9]+$ ]] || exit 66
+        [[ "$restart_count" =~ ^[0-9]+$ ]] || emit_failure 66
+        CURRENT_STAGE="systemd_unit_content"
         unit_content="$(systemctl cat "$unit_name" --no-pager)"
         unit_content_sha="$(sha256_text "$unit_content")"
         unset unit_content
+        CURRENT_STAGE="systemd_inventory"
         unit_ports=""
         control_group="$(systemctl show "$unit_name" --property=ControlGroup --value)"
         if [[ -n "$control_group" ]]; then
+            CURRENT_STAGE="systemd_cgroup_ports"
             unit_ports="$(ports_for_cgroup "$control_group")"
             bound_port_status="cgroup_complete"
         elif [[ "$active_state" == "active" ]]; then
-            exit 67
+            emit_failure 67
         else
             bound_port_status="no_cgroup"
         fi
         systemd_rows+="$unit_name|$active_state|$sub_state|$restart_count|$unit_content_sha|$unit_ports|exact|$bound_port_status"$'\n'
+        CURRENT_STAGE="systemd_inventory"
     done <<< "$systemd_base_rows"
 fi
 
+CURRENT_STAGE="render"
 printf '%s' '{"schema":"amn2.spain-readonly-preflight.v1"'
 printf ',"mode":"preflight"'
 printf ',"os_kernel":{"system":"%s","release":"%s"}' "$kernel_name" "$kernel_release"

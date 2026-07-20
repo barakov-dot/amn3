@@ -3,16 +3,25 @@
 ## Статус
 
 Этот gate реализует только checksum-bound read-only инвентаризацию Spain VPS.
-Первый отдельно одобренный запуск 2026-07-20 завершился fail-closed до создания
-evidence из-за преобразования диагностического stderr `nft` в PowerShell
-`NativeCommandError`. Старый approval исчерпан; повторный SSH-запуск не выполнялся.
-Исправленный probe подавляет только stderr точной команды `nft list
-ruleset`, сохраняя её ненулевой exit status и действие `set -euo pipefail`.
-Новый запуск требует отдельного approval, привязанного к новым runner/probe
-SHA-256 после origin readback. Telegram API не вызывался, установка и любые
-live-изменения не производились.
+Две отдельно одобренные попытки 2026-07-20 завершились fail-closed до создания
+evidence. Первая выявила преобразование диагностического stderr `nft` в
+PowerShell `NativeCommandError`; вторая после узкого nft correction вернула
+ненулевой SSH status без безопасной классификации. Оба approval исчерпаны.
 
-Runner допускает единственный режим `preflight` и до обращения к private artifacts требует полного точного approval. Approval привязан одновременно к фактическому SHA-256 самого runner, SHA-256 удалённого probe и исходному AMN2 head. При пустом `-Approval` runner печатает одну полностью материализованную строку и завершается с ошибкой до чтения private target или SSH; это безопасный локальный preview, а не live-authority. Частичное совпадение, шаблон или approval другого gate не подходят.
+Текущая локальная версия добавляет stage-coded failure envelope без raw stderr.
+Новый live-запуск не выполнялся. Новый запуск требует отдельного approval, привязанного
+к новым runner/probe SHA-256, source и точному trust run id после origin
+readback. Telegram API не вызывался, установка и любые live-изменения не
+производились.
+
+Runner допускает единственный режим `preflight` и до обращения к private
+artifacts требует полного точного approval и exact trust run id
+`spain-fresh-20260720-001`. Approval привязан одновременно к фактическому
+SHA-256 самого runner, SHA-256 удалённого probe, исходному AMN2 head и этому run
+id. При пустом `-Approval` runner печатает одну полностью материализованную
+строку и завершается с ошибкой до чтения private target или SSH; это безопасный
+локальный preview, а не live-authority. Частичное совпадение, шаблон, другой run
+id или approval другого gate не подходят.
 
 ## Повторное использование trust state Task 7
 
@@ -42,6 +51,14 @@ private-artifacts/post-release/spain-migration/<run_id>/known_hosts_spain
 
 Evidence не содержит environment, config bodies, command line, IP/host, ключи, учётные данные или Telegram-значения. После проверки JSON runner атомарно создаёт `preflight-evidence.json` через create-new/no-replace в том же private run directory, затем отдельно защищает и повторно проверяет ACL. Конкурентный или повторный writer не может заменить уже записанные evidence bytes.
 
+До SSH runner атомарно создаёт защищённый `preflight-outcome.claim`. Claim
+остаётся постоянным single-use marker и не позволяет повторно использовать gate
+в том же exact trust run. При remote failure принимается только одна строка
+`AMN2_SPAIN_PREFLIGHT_FAILURE_V1` с allowlisted stage и exit code, совпадающим с
+OpenSSH exit code. Malformed, duplicate или mixed envelope закрывает gate.
+Успех создаёт только `preflight-evidence.json`; классифицированная ошибка —
+только `preflight-failure-evidence.json`. Raw stdout/stderr не сохраняется.
+
 Firewall inventory и effective SSH policy являются обязательными: отсутствие поддерживаемого reader, пустой результат или ошибка чтения закрывают gate. Для systemd fingerprint полное чтение unit content и cgroup socket state также обязательно; недоступный PID, FD, `readlink` или socket table не превращается в ложный пустой port set.
 
 Из `unrelated_service_fingerprint` исключаются только точные deployment-owned имена `amneziya-web.service`, `amneziya-bot.service` и `amnezia-awg2`. Похожие или расширенные имена не исключаются и остаются в fingerprint. Это публичные contract names, а не private resident-service identifiers.
@@ -53,4 +70,4 @@ Probe не устанавливает и не обновляет пакеты, �
 Наличие этого кода не является live-authority. Будущий оператор сначала
 проверяет repository head, SHA runner/probe и Task 7 trust artifacts, затем
 получает отдельное точное approval и только после этого запускает gate один раз.
-Первый approval не даёт права на retry; исправленный gate ещё не запускался.
+Два старых approval не дают права на retry; stage-coded gate ещё не запускался.

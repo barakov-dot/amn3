@@ -15,15 +15,24 @@ $ErrorActionPreference = "Stop"
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Security") -ErrorAction Stop
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Utility") -ErrorAction Stop
 
-$expectedRemoteScriptSha = "4B73C2E892D9BF64F7A3F2840DB22C6124A990506DA8A8558E5D59E9510A4AF3"
+$expectedRemoteScriptSha = "16CE3F9E14A72DFB0DC957B2A1CA13F1ADBCA72F41C60FC2D4DD9904D3E74CD6"
+$expectedRunId = "spain-fresh-20260720-001"
+$AllowedFailureStages = @(
+    "bootstrap", "os_kernel", "capacity", "sockets", "firewall",
+    "ssh_policy", "docker_inventory", "systemd_inventory",
+    "systemd_unit_content", "systemd_cgroup_ports", "render"
+)
 $actualRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
-$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_RUNNER_SHA_$actualRunnerSha`_REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha`_SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
+$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_RUNNER_SHA_$actualRunnerSha`_REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha`_SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_TRUST_RUN_ID_SPAIN_FRESH_20260720_001_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
 if ([string]::IsNullOrEmpty($Approval)) {
     Write-Output $expectedApproval
     throw "Exact read-only preflight approval mismatch."
 }
 if (-not [string]::Equals($Approval, $expectedApproval, [StringComparison]::Ordinal)) {
     throw "Exact read-only preflight approval mismatch."
+}
+if (-not [string]::Equals($RunId, $expectedRunId, [StringComparison]::Ordinal)) {
+    throw "Exact Spain trust run id mismatch."
 }
 
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
@@ -66,11 +75,14 @@ if ($RunId -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$' -or $RunId.Contains("..
 
 $ArtifactRoot = Join-Path $RepoRoot "private-artifacts\post-release\spain-migration"
 $RunDirectory = Join-Path $ArtifactRoot $RunId
+$RunRoot = $RunDirectory
 $BindingPath = Join-Path $RunDirectory "target.env"
 $KeyPath = Join-Path $RunDirectory "id_ed25519_spain"
 $PublicKeyPath = "$KeyPath.pub"
 $KnownHostsPath = Join-Path $RunDirectory "known_hosts_spain"
 $EvidencePath = Join-Path $RunDirectory "preflight-evidence.json"
+$FailureEvidencePath = Join-Path $RunRoot "preflight-failure-evidence.json"
+$OutcomeClaimPath = Join-Path $RunRoot "preflight-outcome.claim"
 $SshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
 $SshKeygenExe = "C:\Windows\System32\OpenSSH\ssh-keygen.exe"
 
@@ -133,6 +145,34 @@ function Write-EvidenceCreateNew([string]$Path, [string]$Json) {
         $EvidenceStream.Dispose()
         [Array]::Clear($EvidenceBytes, 0, $EvidenceBytes.Length)
     }
+}
+
+function Read-SafeFailureEnvelope([string[]]$Lines, [int]$ProcessExitCode) {
+    if ($ProcessExitCode -lt 1 -or $ProcessExitCode -gt 255) {
+        return $null
+    }
+    $Prefix = "AMN2_SPAIN_PREFLIGHT_FAILURE_V1"
+    $PrefixedLines = @(
+        $Lines | Where-Object { $_.StartsWith($Prefix, [StringComparison]::Ordinal) }
+    )
+    if ($PrefixedLines.Count -ne 1) {
+        return $null
+    }
+    $Pattern = '^AMN2_SPAIN_PREFLIGHT_FAILURE_V1\|stage=(?<stage>[a-z_]+)\|exit=(?<exit>[0-9]{1,3})$'
+    $Matches = @($Lines | Where-Object { $_ -cmatch $Pattern })
+    if ($Matches.Count -ne 1) {
+        return $null
+    }
+    $Parsed = [regex]::Match($Matches[0], $Pattern)
+    $Stage = $Parsed.Groups["stage"].Value
+    $ExitCode = [int]$Parsed.Groups["exit"].Value
+    if ($AllowedFailureStages -cnotcontains $Stage) {
+        return $null
+    }
+    if ($ExitCode -ne $ProcessExitCode) {
+        return $null
+    }
+    return [pscustomobject]@{ Stage = $Stage; ExitCode = $ExitCode }
 }
 
 function Assert-TargetHost([string]$Value) {
@@ -219,6 +259,23 @@ $Binding = Read-Binding
 Assert-DedicatedKeyPair
 Assert-VerifiedHostPin $Binding
 
+$ClaimJson = [ordered]@{
+    schema = "amn2.spain-readonly-preflight-claim.v1"
+    runner_sha256 = $actualRunnerSha
+    remote_probe_sha256 = $expectedRemoteScriptSha
+    source_revision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
+} | ConvertTo-Json -Compress
+try {
+    Write-EvidenceCreateNew $OutcomeClaimPath $ClaimJson
+    Protect-PrivatePath $OutcomeClaimPath
+    Assert-PrivatePath $OutcomeClaimPath
+} catch {
+    $RemoteText = $null
+    $ClaimJson = $null
+    throw "Single-use Spain preflight outcome claim creation failed."
+}
+$ClaimJson = $null
+
 $SshArguments = @(
     "-F", "none",
     "-o", "BatchMode=yes",
@@ -232,10 +289,53 @@ $SshArguments = @(
 )
 
 $SshOutput = @($RemoteText | & $SshExe @SshArguments 2>$null)
-if ($LASTEXITCODE -ne 0) {
+$ProcessExitCode = $LASTEXITCODE
+if ($ProcessExitCode -ne 0) {
+    $FailurePrefixCount = @(
+        $SshOutput | Where-Object {
+            ([string]$_).StartsWith("AMN2_SPAIN_PREFLIGHT_FAILURE_V1", [StringComparison]::Ordinal)
+        }
+    ).Count
+    $SafeFailure = Read-SafeFailureEnvelope ([string[]]$SshOutput) $ProcessExitCode
+    if ($FailurePrefixCount -gt 0 -and $null -eq $SafeFailure) {
+        $SshOutput = $null
+        $RemoteText = $null
+        throw "Read-only Spain preflight returned a malformed failure envelope."
+    }
+    if ($null -ne $SafeFailure) {
+        $FailureClassification = "remote_probe"
+        $FailureStage = $SafeFailure.Stage
+        $FailureExitCode = $SafeFailure.ExitCode
+    } elseif ($ProcessExitCode -ge 1 -and $ProcessExitCode -le 255) {
+        $FailureClassification = "transport"
+        $FailureStage = "unavailable"
+        $FailureExitCode = $ProcessExitCode
+    } else {
+        $SshOutput = $null
+        $RemoteText = $null
+        throw "Read-only Spain preflight failed without a safe exit classification."
+    }
+    $FailureJson = [ordered]@{
+        schema = "amn2.spain-readonly-preflight-failure.v1"
+        classification = $FailureClassification
+        stage = $FailureStage
+        exit_code = $FailureExitCode
+        runner_sha256 = $actualRunnerSha
+        remote_probe_sha256 = $expectedRemoteScriptSha
+        source_revision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
+    } | ConvertTo-Json -Compress
     $SshOutput = $null
     $RemoteText = $null
-    throw "Read-only Spain preflight transport failed without trusted evidence."
+    try {
+        Write-EvidenceCreateNew $FailureEvidencePath $FailureJson
+        Protect-PrivatePath $FailureEvidencePath
+        Assert-PrivatePath $FailureEvidencePath
+    } catch {
+        $FailureJson = $null
+        throw "Atomic read-only preflight failure evidence creation failed."
+    }
+    $FailureJson = $null
+    throw "Read-only Spain preflight failed at a sanitized stage; failure evidence created."
 }
 $RawEvidence = ($SshOutput -join "`n").Trim()
 $SshOutput = $null

@@ -13,6 +13,20 @@ DOC = ROOT / "docs" / "POST_RELEASE_SPAIN_READONLY_PREFLIGHT_GATE.ru.md"
 POWERSHELL = Path(r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
 BASH = Path(r"C:\Program Files\Git\bin\bash.exe")
 
+FAILURE_STAGES = (
+    "bootstrap",
+    "os_kernel",
+    "capacity",
+    "sockets",
+    "firewall",
+    "ssh_policy",
+    "docker_inventory",
+    "systemd_inventory",
+    "systemd_unit_content",
+    "systemd_cgroup_ports",
+    "render",
+)
+
 
 def extract_bash_function(source: str, name: str) -> str:
     match = re.search(rf"(?ms)^{re.escape(name)}\(\) \{{\n.*?^\}}\n", source)
@@ -33,7 +47,7 @@ class SpainReadonlyPreflightStaticTests(unittest.TestCase):
         self.assertTrue(REMOTE.exists(), "read-only Spain remote probe is missing")
         source = REMOTE.read_text(encoding="utf-8")
         for marker in (
-            "set -euo pipefail",
+            "set -Eeuo pipefail",
             'readonly MODE="${1:-}"',
             '[[ "$MODE" == "preflight" ]]',
             '"schema":"amn2.spain-readonly-preflight.v1"',
@@ -97,12 +111,89 @@ class SpainReadonlyPreflightStaticTests(unittest.TestCase):
 
     def test_mandatory_collectors_and_cgroup_reads_fail_closed(self) -> None:
         source = REMOTE.read_text(encoding="utf-8")
-        self.assertIn('else\n    exit 68\nfi', source)
-        self.assertIn('else\n    exit 69\nfi', source)
+        for exit_code in (65, 66, 67, 68, 69, 70):
+            self.assertIn(f"emit_failure {exit_code}", source)
+            self.assertNotRegex(source, rf"(?m)^\s*exit {exit_code}$")
         self.assertIn('target="$(readlink "$fd")" || return 1', source)
         self.assertIn('[[ -r "$cgroup_file" ]] || return 1', source)
         self.assertIn('[[ -r "$socket_table" ]] || return 1', source)
         self.assertNotIn('readlink "$fd")" || continue', source)
+
+    @unittest.skipUnless(BASH.exists(), "Git Bash is required")
+    def test_remote_failure_envelope_is_allowlisted_and_raw_free(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        emitter = extract_bash_function(source, "emit_failure")
+        harness = (
+            "set -Eeuo pipefail\n"
+            + emitter
+            + '\nCURRENT_STAGE="firewall"\nemit_failure 23\n'
+        )
+        result = subprocess.run(
+            [str(BASH), "-c", harness],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 23)
+        self.assertEqual(
+            result.stdout.strip(),
+            "AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=firewall|exit=23",
+        )
+        self.assertEqual(result.stderr, "")
+
+        for stage in FAILURE_STAGES:
+            self.assertIn(f'CURRENT_STAGE="{stage}"', source)
+        self.assertIn("set -Eeuo pipefail", source)
+        self.assertIn("trap 'emit_failure \"$?\"' ERR", source)
+        self.assertNotIn("$BASH_COMMAND", source)
+
+    @unittest.skipUnless(BASH.exists(), "Git Bash is required")
+    def test_remote_failure_envelope_normalizes_unknown_stage(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        emitter = extract_bash_function(source, "emit_failure")
+        harness = (
+            "set -Eeuo pipefail\n"
+            + emitter
+            + '\nCURRENT_STAGE="private:target:value"\nemit_failure 17\n'
+        )
+        result = subprocess.run(
+            [str(BASH), "-c", harness],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 17)
+        self.assertEqual(
+            result.stdout.strip(),
+            "AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=bootstrap|exit=17",
+        )
+        self.assertNotIn("private", result.stdout)
+
+    @unittest.skipUnless(BASH.exists(), "Git Bash is required")
+    def test_remote_err_trap_emits_one_external_envelope_for_substitution_failure(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        emitter = extract_bash_function(source, "emit_failure")
+        harness = (
+            "set -Eeuo pipefail\n"
+            + emitter
+            + '\ntrap \'emit_failure "$?"\' ERR\n'
+            + 'CURRENT_STAGE="sockets"\ncaptured="$(false)"\nprintf "unexpected:%s\\n" "$captured"\n'
+        )
+        result = subprocess.run(
+            [str(BASH), "-c", harness],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(
+            result.stdout.splitlines(),
+            ["AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=sockets|exit=1"],
+        )
+        self.assertEqual(result.stderr, "")
 
     @unittest.skipUnless(BASH.exists(), "Git Bash is required")
     def test_exact_target_allowlists_exclude_only_deployment_owned_resources(self) -> None:
@@ -188,6 +279,108 @@ done
         self.assertLess(source.index("Write-EvidenceCreateNew $EvidencePath"), source.index("Protect-PrivatePath $EvidencePath"))
         self.assertLess(source.index("Protect-PrivatePath $EvidencePath"), source.index("Assert-PrivatePath $EvidencePath"))
 
+    @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
+    def test_safe_failure_envelope_parser_accepts_exact_allowlisted_stage(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        parser = extract_powershell_function(source, "Read-SafeFailureEnvelope")
+        allowed = "$AllowedFailureStages = @('" + "','".join(FAILURE_STAGES) + "')\n"
+        harness = (
+            allowed
+            + parser
+            + "\n$result = Read-SafeFailureEnvelope "
+            + "@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=firewall|exit=23') 23\n"
+            + "if ($null -eq $result) { exit 2 }\n"
+            + "if ($result.Stage -cne 'firewall' -or $result.ExitCode -ne 23) { exit 3 }\n"
+        )
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            harness_path = Path(raw_tmp) / "safe-failure-parser-pass.ps1"
+            harness_path.write_text(harness, encoding="utf-8")
+            result = subprocess.run(
+                [
+                    str(POWERSHELL),
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(harness_path),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "")
+
+    @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
+    def test_safe_failure_envelope_parser_rejects_unsafe_variants(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        parser = extract_powershell_function(source, "Read-SafeFailureEnvelope")
+        allowed = "$AllowedFailureStages = @('" + "','".join(FAILURE_STAGES) + "')\n"
+        harness = (
+            allowed
+            + parser
+            + r'''
+$cases = @(
+    [pscustomobject]@{ Lines=@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=unknown|exit=23'); ExitCode=23 },
+    [pscustomobject]@{ Lines=@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=firewall|exit=0'); ExitCode=0 },
+    [pscustomobject]@{ Lines=@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=firewall|exit=256'); ExitCode=256 },
+    [pscustomobject]@{ Lines=@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=firewall|exit=23'); ExitCode=24 },
+    [pscustomobject]@{ Lines=@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=firewall|exit=23|target=private'); ExitCode=23 },
+    [pscustomobject]@{ Lines=@('prefix AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=firewall|exit=23'); ExitCode=23 },
+    [pscustomobject]@{ Lines=@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=firewall|exit=23','AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=firewall|exit=23'); ExitCode=23 },
+    [pscustomobject]@{ Lines=@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=firewall|exit=23','AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=firewall|exit=23|extra=1'); ExitCode=23 },
+    [pscustomobject]@{ Lines=@('nft warning: private target'); ExitCode=1 }
+)
+foreach ($case in $cases) {
+    if ($null -ne (Read-SafeFailureEnvelope $case.Lines $case.ExitCode)) { exit 4 }
+}
+'''
+        )
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            harness_path = Path(raw_tmp) / "safe-failure-parser-reject.ps1"
+            harness_path.write_text(harness, encoding="utf-8")
+            result = subprocess.run(
+                [
+                    str(POWERSHELL),
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(harness_path),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "")
+
+    def test_runner_claims_exact_run_before_ssh_and_separates_outcomes(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        for marker in (
+            '$expectedRunId = "spain-fresh-20260720-001"',
+            "Exact Spain trust run id mismatch",
+            'Join-Path $RunRoot "preflight-outcome.claim"',
+            'Join-Path $RunRoot "preflight-failure-evidence.json"',
+            '"amn2.spain-readonly-preflight-claim.v1"',
+            '"amn2.spain-readonly-preflight-failure.v1"',
+            '$FailureClassification = "remote_probe"',
+            '$FailureClassification = "transport"',
+            '$FailureStage = "unavailable"',
+        ):
+            self.assertIn(marker, source)
+        self.assertLess(source.index("Exact Spain trust run id mismatch"), source.index("Read-Binding"))
+        self.assertLess(source.index("Write-EvidenceCreateNew $OutcomeClaimPath"), source.index("& $SshExe"))
+        self.assertIn("Read-SafeFailureEnvelope ([string[]]$SshOutput) $ProcessExitCode", source)
+        self.assertNotIn("2>&1", source)
+        self.assertNotRegex(source, r"(?i)(?:stderr|ssherror).*(?:write|out-file|set-content)")
+
     def test_atomic_evidence_writer_never_replaces_existing_bytes(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         writer = extract_powershell_function(source, "Write-EvidenceCreateNew")
@@ -248,6 +441,7 @@ done
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
             "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260720_001_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"
@@ -323,6 +517,48 @@ class SpainReadonlyPreflightFailClosedTests(unittest.TestCase):
         combined = result.stdout + result.stderr
         self.assertNotIn("ssh.exe", combined.casefold())
         self.assertNotIn("target.env", combined)
+
+    def test_exact_approval_with_wrong_run_id_fails_before_private_state(self) -> None:
+        runner_sha = hashlib.sha256(RUNNER.read_bytes()).hexdigest().upper()
+        remote_sha = hashlib.sha256(REMOTE.read_bytes()).hexdigest().upper()
+        approval = (
+            "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
+            f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
+            "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260720_001_"
+            "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
+            "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
+            "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"
+            "CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
+        )
+        result = subprocess.run(
+            [
+                str(POWERSHELL),
+                "-NoLogo",
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(RUNNER),
+                "-Mode",
+                "preflight",
+                "-RunId",
+                "wrong-run",
+                "-Approval",
+                approval,
+            ],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=20,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Exact Spain trust run id mismatch", result.stderr)
+        combined = result.stdout + result.stderr
+        self.assertNotIn("target.env", combined)
+        self.assertNotIn("ssh.exe", combined.casefold())
 
 
 if __name__ == "__main__":
