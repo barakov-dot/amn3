@@ -1,5 +1,31 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release indefinite multi-slot override 2026-07-20
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+amn2_source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+operator_unassigned_slots=local_verified|not_deployed
+default_expiry=indefinite
+recipient_quantity=1_100|expanded_total_max_100
+canonical_names=NEOBYATNAYA.NET-recipient-01_04
+device_facts=unknown_allowed|passport_absent
+independent_lifecycle=disable_revoke_remote_first
+later_assignment=explicit_idempotent|no_peer_ip_filename_rotation
+tests=focused_61|full_1029_passed_1_skipped
+security=reportable_findings_0|secret_matches_0
+spain_live=false
+production_awg=untouched
+next=PUSH_VERIFY_ORIGINS_THEN_PRIVATE_SPAIN_SSH_TRUST_ONBOARDING
+```
+
+Не генерировать новые Spain-конфиги до fresh install и отдельного live gate.
+Получатели и quantities поступают одним операторским сообщением; если expiry не
+указан явно, slots бессрочные. Password/private key/host fingerprint нельзя
+передавать в чат, Git, CLI arguments или evidence. USA и Spain не удалять и не
+переустанавливать в рамках этого local slice.
+
 ## Post-release Spain fresh-start override 2026-07-19
 
 ```text

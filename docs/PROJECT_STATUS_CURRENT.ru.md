@@ -1,3 +1,41 @@
+# Текущий override 2026-07-20: indefinite multi-slot operator issuance готова локально
+
+Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа
+идёт в post-release controlled operations. Локальный операторский контур для
+новых Spain-конфигов теперь поддерживает несколько бессрочных неназначенных
+access slots одному получателю без фиктивных Device Passports.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+operator_unassigned_slots=local_implementation_verified|live_not_run
+amn2_source=codex-vps-test-prep|55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+default_expiry=indefinite|duration_days_null|expires_at_null
+multi_slot=quantity_1_100|expanded_cap_100|stable_01_04_naming
+identity=NEOBYATNAYA.NET-recipient-sequence|physical_device_unknown_allowed
+passport=none_until_explicit_later_assignment
+idempotency=request_fingerprint|exact_replay|safe_receipts
+admission=full_batch_quota_and_filename_collision_before_mutation
+lifecycle=independent_disable_revoke|remote_first|partial_failure_explicit
+later_assignment=one_passport|stored_fingerprint|peer_ip_filename_unchanged
+cli=dry_run_mutation_free|apply_configured_admin_and_exact_live_gate
+target_binding=name_host_ssh_port_endpoint_vpn_port
+amn2_tests=focused_61_passed|full_1029_passed_1_skipped_1_preexisting_warning
+amn2_security=diff_check_pass|added_line_secret_matches_0|reportable_findings_0
+spain_network_contact=false
+spain_install_restart_stop_config=false
+production_bot_web_database=not_contacted|unchanged
+production_awg=untouched
+protected_monitor_baseline=untouched
+next=PUSH_VERIFY_AMN2_AMN3_THEN_PREPARE_DEDICATED_SPAIN_TRUST_STATE
+```
+
+Evidence:
+`docs/POST_RELEASE_OPERATOR_UNASSIGNED_SLOTS_IMPLEMENTATION_EVIDENCE.ru.md`.
+Никакие конфиги ещё не генерировались и Spain не контактировалась. Следующий
+live шаг требует отдельного exact approval после private SSH trust onboarding.
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и нетронутым.
+
 # Текущий override 2026-07-19: Spain fresh-start issuance и read-only gate готовы локально
 
 Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа
