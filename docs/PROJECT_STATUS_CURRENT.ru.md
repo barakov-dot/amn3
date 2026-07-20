@@ -1,4 +1,49 @@
-# Текущий override 2026-07-20: Spain run 003 fail-closed на systemd cgroup ports
+# Текущий override 2026-07-20: Spain cgroup-port subreason gate готов для run 004
+
+Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа
+идёт в post-release controlled operations. Причина fail-closed run `003`
+локально разложена на шесть безопасных подпричин без раскрытия unit, PID, FD,
+пути, socket inode или raw output. Remote collector теперь вызывается напрямую,
+а не через command substitution, и возвращает либо нормализованный port set,
+либо одно allowlisted состояние: `cgroup_procs`, `pid`, `fd_directory`,
+`fd_readlink`, `socket_table`, `socket_parse`.
+
+Runner принимает эти значения только как точные пары
+`systemd_cgroup_ports/exit=75..80`, сохраняет в failure evidence только
+allowlisted `subreason` и отклоняет неизвестную пару. Он checksum-bound к новым
+probe bytes и к отдельному single-use outcome `spain-fresh-20260720-004`;
+immutable trust bundle остаётся `spain-fresh-20260720-001`.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_run_003=fail_closed|approval_consumed|no_retry
+spain_subreason_diagnostic=implemented_locally|verified
+spain_subreason_allowlist=cgroup_procs|pid|fd_directory|fd_readlink|socket_table|socket_parse
+spain_subreason_exit_allowlist=75|76|77|78|79|80
+spain_next_outcome_run=spain-fresh-20260720-004|not_created|not_run
+spain_immutable_trust_bundle=spain-fresh-20260720-001
+spain_runner_sha256=E3A252F0FD62757419BA0E66746DC44AD8F7F5FC4A4149674B822E09CAEFA6E8
+spain_remote_probe_sha256=59826109915A5D21C0B14775392205B672DD33E82AFAA4FB61A49C802A135623
+spain_runner_source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=spain_preflight_focused_27_passed|root_full_203_passed|bash_powershell_parse_pass|diff_check_pass
+security=independent_diff_review_medium_1_closed|fixed_snapshot_clean|reportable_findings_0|secret_matches_0
+spain_network_contact_after_run_003=false
+spain_install_restart_stop_config=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+protected_monitor_baseline=untouched
+next=COMMIT_PUSH_VERIFY_ORIGIN_THEN_ISSUE_EXACT_SINGLE_USE_SPAIN_PREFLIGHT_004_APPROVAL
+```
+
+До возврата буквальной approval для run `004` запрещены SSH, outcome creation,
+install, remediation и любые изменения сервисов. Private target, login,
+unit/PID/FD/path/socket values, raw diagnostics, key/host-pin bytes и конфиги в
+Git/evidence не добавлены. `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся
+вне scope и нетронутым.
+
+# Предыдущий override 2026-07-20: Spain run 003 fail-closed на systemd cgroup ports
 
 Literal approval для `spain-fresh-20260720-003` использована ровно один раз.
 Local binding, keypair и host pin прошли, SSH выполнил checksum-bound read-only

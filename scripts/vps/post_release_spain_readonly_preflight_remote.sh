@@ -154,20 +154,42 @@ is_target_unit() {
     esac
 }
 
-ports_for_cgroup() {
-    local control_group="$1"
-    local cgroup_file="/sys/fs/cgroup${control_group}/cgroup.procs"
+COLLECTED_UNIT_PORTS=""
+CGROUP_PORTS_SUBREASON=""
+
+collect_ports_for_cgroup() {
+    local control_group="$1" cgroup_root="$2" proc_root="$3"
+    local cgroup_file="${cgroup_root}${control_group}/cgroup.procs"
     local pid fd target inode pid_socket_inodes all_hex_ports pid_hex_ports hex_port cgroup_pids socket_table
-    [[ -r "$cgroup_file" ]] || return 1
+    local decimal_port decimal_ports normalized_ports
+    COLLECTED_UNIT_PORTS=""
+    CGROUP_PORTS_SUBREASON=""
+    if [[ ! -r "$cgroup_file" ]]; then
+        CGROUP_PORTS_SUBREASON="cgroup_procs"
+        return 1
+    fi
     all_hex_ports=""
-    cgroup_pids="$(awk '{print $1}' "$cgroup_file")" || return 1
+    if ! cgroup_pids="$(awk '{print $1}' "$cgroup_file")"; then
+        CGROUP_PORTS_SUBREASON="cgroup_procs"
+        return 1
+    fi
     while read -r pid; do
-        [[ "$pid" =~ ^[0-9]+$ ]] || return 1
-        [[ -r "/proc/$pid/fd" && -x "/proc/$pid/fd" ]] || return 1
+        if [[ ! "$pid" =~ ^[0-9]+$ ]]; then
+            CGROUP_PORTS_SUBREASON="pid"
+            return 1
+        fi
+        if [[ ! -r "$proc_root/$pid/fd" || ! -x "$proc_root/$pid/fd" ]]; then
+            CGROUP_PORTS_SUBREASON="fd_directory"
+            return 1
+        fi
         pid_socket_inodes=""
         shopt -s nullglob
-        for fd in "/proc/$pid/fd"/*; do
-            target="$(readlink "$fd")" || return 1
+        for fd in "$proc_root/$pid/fd"/*; do
+            if ! target="$(readlink "$fd")"; then
+                shopt -u nullglob
+                CGROUP_PORTS_SUBREASON="fd_readlink"
+                return 1
+            fi
             if [[ "$target" =~ ^socket:\[([0-9]+)\]$ ]]; then
                 inode="${BASH_REMATCH[1]}"
                 pid_socket_inodes+="$inode"$'\n'
@@ -175,10 +197,13 @@ ports_for_cgroup() {
         done
         shopt -u nullglob
         [[ -n "$pid_socket_inodes" ]] || continue
-        for socket_table in "/proc/$pid/net/tcp" "/proc/$pid/net/tcp6" "/proc/$pid/net/udp" "/proc/$pid/net/udp6"; do
-            [[ -r "$socket_table" ]] || return 1
+        for socket_table in "$proc_root/$pid/net/tcp" "$proc_root/$pid/net/tcp6" "$proc_root/$pid/net/udp" "$proc_root/$pid/net/udp6"; do
+            if [[ ! -r "$socket_table" ]]; then
+                CGROUP_PORTS_SUBREASON="socket_table"
+                return 1
+            fi
         done
-        pid_hex_ports="$(awk -v wanted="$pid_socket_inodes" '
+        if ! pid_hex_ports="$(awk -v wanted="$pid_socket_inodes" '
             BEGIN {
                 count=split(wanted, values, "\n")
                 for (i=1; i<=count; i++) if (values[i] != "") inode[values[i]]=1
@@ -187,13 +212,27 @@ ports_for_cgroup() {
                 split($2, local_endpoint, ":")
                 if (local_endpoint[2] != "0000") print local_endpoint[2]
             }
-        ' "/proc/$pid/net/tcp" "/proc/$pid/net/tcp6" "/proc/$pid/net/udp" "/proc/$pid/net/udp6")" || return 1
+        ' "$proc_root/$pid/net/tcp" "$proc_root/$pid/net/tcp6" "$proc_root/$pid/net/udp" "$proc_root/$pid/net/udp6")"; then
+            CGROUP_PORTS_SUBREASON="socket_parse"
+            return 1
+        fi
         all_hex_ports+="$pid_hex_ports"$'\n'
     done <<< "$cgroup_pids"
+    decimal_ports=""
     while read -r hex_port; do
         [[ -n "$hex_port" ]] || continue
-        printf '%d\n' "0x$hex_port"
-    done <<< "$all_hex_ports" | sort -nu | paste -sd, -
+        if [[ ! "$hex_port" =~ ^[0-9A-Fa-f]{4}$ ]] ||
+           ! decimal_port="$(printf '%d' "0x$hex_port")"; then
+            CGROUP_PORTS_SUBREASON="socket_parse"
+            return 1
+        fi
+        decimal_ports+="$decimal_port"$'\n'
+    done <<< "$all_hex_ports"
+    if ! normalized_ports="$(printf '%s' "$decimal_ports" | sort -nu | paste -sd, -)"; then
+        CGROUP_PORTS_SUBREASON="socket_parse"
+        return 1
+    fi
+    COLLECTED_UNIT_PORTS="$normalized_ports"
 }
 
 CURRENT_STAGE="os_kernel"
@@ -284,7 +323,18 @@ if [[ -n "$(command -v systemctl)" ]]; then
         unit_ports=""
         if [[ -n "$control_group" ]]; then
             CURRENT_STAGE="systemd_cgroup_ports"
-            unit_ports="$(ports_for_cgroup "$control_group")"
+            if ! collect_ports_for_cgroup "$control_group" /sys/fs/cgroup /proc; then
+                case "$CGROUP_PORTS_SUBREASON" in
+                    "cgroup_procs") emit_failure 75 ;;
+                    "pid") emit_failure 76 ;;
+                    "fd_directory") emit_failure 77 ;;
+                    "fd_readlink") emit_failure 78 ;;
+                    "socket_table") emit_failure 79 ;;
+                    "socket_parse") emit_failure 80 ;;
+                    *) emit_failure 1 ;;
+                esac
+            fi
+            unit_ports="$COLLECTED_UNIT_PORTS"
         fi
         systemd_rows+="$unit_name|$active_state|$sub_state|$restart_count|$unit_content_sha|$unit_ports|exact|$bound_port_status"$'\n'
         CURRENT_STAGE="systemd_inventory"

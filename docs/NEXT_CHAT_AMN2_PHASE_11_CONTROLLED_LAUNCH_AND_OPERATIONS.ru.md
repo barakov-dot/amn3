@@ -1,5 +1,33 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release Spain cgroup-port subreason gate override 2026-07-20
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+run_003=fail_closed|approval_consumed|never_repeat
+subreason_diagnostic=local_verified
+safe_pairs=systemd_cgroup_ports/75..80
+safe_names=cgroup_procs|pid|fd_directory|fd_readlink|socket_table|socket_parse
+next_outcome_run=spain-fresh-20260720-004|not_created|not_run
+immutable_trust_bundle=spain-fresh-20260720-001
+runner_sha256=E3A252F0FD62757419BA0E66746DC44AD8F7F5FC4A4149674B822E09CAEFA6E8
+remote_probe_sha256=59826109915A5D21C0B14775392205B672DD33E82AFAA4FB61A49C802A135623
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=focused_27_passed|full_203_passed|bash_powershell_parse_pass
+security=medium_1_closed|fixed_snapshot_clean|reportable_findings_0|secret_matches_0
+spain_live_after_run_003=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+next=COMMIT_PUSH_VERIFY_ORIGIN_THEN_EXACT_READ_ONLY_PREFLIGHT_004_APPROVAL
+```
+
+Не повторять run `001`–`003`. Run `004` разрешается только новой полностью
+совпадающей checksum-bound literal approval после origin readback. До неё не
+создавать outcome и не выполнять SSH/install/remediation; AWG и посторонний
+сервис не изменять.
+
 ## Post-release Spain run 003 failure override 2026-07-20
 
 ```text

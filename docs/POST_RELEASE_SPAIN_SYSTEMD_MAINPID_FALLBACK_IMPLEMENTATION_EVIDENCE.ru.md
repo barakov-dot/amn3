@@ -2,6 +2,41 @@
 
 Дата: 2026-07-20
 
+## Дополнение: cgroup-port subreason diagnostic для run 004
+
+После consumed fail-closed run `003` локально реализован следующий узкий
+диагностический слой. Collector больше не скрывает return status в command
+substitution: результат и причина возвращаются через отдельные переменные.
+Allowlist ограничен шестью состояниями и exit codes `75..80`; runner принимает
+их только при stage `systemd_cgroup_ports` и записывает лишь безопасное имя
+`subreason`. Unknown/mixed/malformed envelope остаётся fail-closed.
+
+```text
+run_003=consumed|failure_stage_systemd_cgroup_ports|no_retry
+new_outcome_run=spain-fresh-20260720-004|not_created|not_run
+immutable_trust_bundle=spain-fresh-20260720-001
+runner_sha256=E3A252F0FD62757419BA0E66746DC44AD8F7F5FC4A4149674B822E09CAEFA6E8
+remote_probe_sha256=59826109915A5D21C0B14775392205B672DD33E82AFAA4FB61A49C802A135623
+source_revision=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+focused_tests=27_passed
+root_full_tests=203_passed
+bash_parse=pass
+powershell_parse=pass
+git_diff_check=pass
+security_initial_finding=partial_hex_normalization|medium|closed
+security_fixed_snapshot=independent_review_clean|reportable_findings_0
+new_lines_sensitive_pattern_scan=pass
+live_contact=false
+install_restart_stop_config=false
+unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+```
+
+Private target/login, unit/PID/FD/path/socket values, raw diagnostics, keys,
+host pin и configs в Git/evidence не добавлялись. Live authority выдаётся
+только отдельной exact literal approval после commit/push/origin readback.
+
 Статус: local implementation verified; live preflight not run
 
 ## Authority и граница

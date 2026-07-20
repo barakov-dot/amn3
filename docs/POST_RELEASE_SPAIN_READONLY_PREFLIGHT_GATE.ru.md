@@ -6,25 +6,27 @@
 Run `spain-fresh-20260720-003` завершился fail-closed после SSH на sanitized
 `remote_probe/systemd_cgroup_ports/exit=1`. Claim и failure evidence созданы,
 success evidence отсутствует; approval consumed и не подлежит повтору.
-Следующий live run запрещён до отдельного subreason diagnostic contract,
-commit/push/origin readback и новой literal approval.
+Локальный subreason diagnostic contract реализован и проверен. Следующий live
+run `spain-fresh-20260720-004` запрещён до commit/push/origin readback и новой
+literal approval.
 
 Две отдельно одобренные попытки 2026-07-20 завершились fail-closed до создания
 evidence. Первая выявила преобразование диагностического stderr `nft` в
 PowerShell `NativeCommandError`; вторая после узкого nft correction вернула
 ненулевой SSH status без безопасной классификации. Оба approval исчерпаны.
 
-Текущая локальная версия добавляет stage-coded failure envelope без raw stderr
-и corrected systemd `ControlGroup -> MainPID -> procfs` resolver. Новый
-live-запуск не выполнялся. Новый запуск требует отдельного approval,
+Текущая локальная версия добавляет stage-coded failure envelope без raw stderr,
+corrected systemd `ControlGroup -> MainPID -> procfs` resolver и закрытый
+cgroup-port subreason allowlist. Новый live-запуск не выполнялся. Новый запуск
+требует отдельного approval,
 привязанного к новым runner/probe SHA-256, source, immutable trust bundle
 `spain-fresh-20260720-001` и отдельному outcome run
-`spain-fresh-20260720-003` после origin readback. Telegram API не вызывался,
+`spain-fresh-20260720-004` после origin readback. Telegram API не вызывался,
 установка и любые live-изменения не производились.
 
 Runner допускает единственный режим `preflight` и до обращения к private
 artifacts требует полного точного approval и exact trust run id
-`spain-fresh-20260720-003`. Approval привязан одновременно к фактическому
+`spain-fresh-20260720-004`. Approval привязан одновременно к фактическому
 SHA-256 самого runner, SHA-256 удалённого probe, исходному AMN2 head и этому run
 id. При пустом `-Approval` runner печатает одну полностью материализованную
 строку и завершается с ошибкой до чтения private target или SSH; это безопасный
@@ -44,7 +46,7 @@ private-artifacts/post-release/spain-migration/<run_id>/known_hosts_spain
 
 Trust artifacts читаются только из protected local copy immutable run
 `spain-fresh-20260720-001` под `%LOCALAPPDATA%\AMN2`, а
-claim/evidence создаются только в новом run `spain-fresh-20260720-003`. Перед
+claim/evidence создаются только в новом run `spain-fresh-20260720-004`. Перед
 SSH runner до любого trust read проверяет current-user-only owner/ACL всей
 заранее подготовленной private-artifact parent chain, отвергает reparse points,
 проверяет точную четырёхстрочную схему
@@ -84,6 +86,11 @@ systemd fingerprint полное чтение unit content и cgroup socket stat
 cgroup принимается только после canonical unit-id binding и повторной проверки
 стабильности PID, process starttime и cgroup. Недоступный или сменившийся PID,
 FD, `readlink` или socket table не превращается в ложный пустой port set.
+Такие ошибки переводятся только в пары `systemd_cgroup_ports/exit=75..80` и
+safe subreason `cgroup_procs`, `pid`, `fd_directory`, `fd_readlink`,
+`socket_table`, `socket_parse`. До конвертации каждый hex port строго
+валидируется; частичная нормализация запрещена. Runner отклоняет любую другую
+пару stage/exit и не сохраняет raw unit/PID/FD/path/socket values.
 
 Из `unrelated_service_fingerprint` исключаются только точные deployment-owned имена `amneziya-web.service`, `amneziya-bot.service` и `amnezia-awg2`. Похожие или расширенные имена не исключаются и остаются в fingerprint. Это публичные contract names, а не private resident-service identifiers.
 
@@ -94,4 +101,4 @@ Probe не устанавливает и не обновляет пакеты, �
 Наличие этого кода не является live-authority. Будущий оператор сначала
 проверяет repository head, SHA runner/probe и Task 7 trust artifacts, затем
 получает отдельное точное approval и только после этого запускает gate один раз.
-Два старых approval не дают права на retry; stage-coded gate ещё не запускался.
+Approvals runs `001`–`003` не дают права на retry; subreason gate ещё не запускался.

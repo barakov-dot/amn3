@@ -82,7 +82,7 @@ class SpainReadonlyPreflightStaticTests(unittest.TestCase):
             '--property=ControlGroup --value',
             '/sys/fs/cgroup',
             '/cgroup.procs',
-            '/proc/$pid/net/tcp',
+            '$proc_root/$pid/net/tcp',
             'unit_content_status',
             'bound_port_status',
         ):
@@ -121,13 +121,70 @@ class SpainReadonlyPreflightStaticTests(unittest.TestCase):
 
     def test_mandatory_collectors_and_cgroup_reads_fail_closed(self) -> None:
         source = REMOTE.read_text(encoding="utf-8")
-        for exit_code in (65, 66, 68, 69, 70, 71, 72, 73):
+        for exit_code in (65, 66, 68, 69, 70, 71, 72, 73, 75, 76, 77, 78, 79, 80):
             self.assertIn(f"emit_failure {exit_code}", source)
             self.assertNotRegex(source, rf"(?m)^\s*exit {exit_code}$")
-        self.assertIn('target="$(readlink "$fd")" || return 1', source)
-        self.assertIn('[[ -r "$cgroup_file" ]] || return 1', source)
-        self.assertIn('[[ -r "$socket_table" ]] || return 1', source)
+        self.assertIn('CGROUP_PORTS_SUBREASON="fd_readlink"', source)
         self.assertNotIn('readlink "$fd")" || continue', source)
+
+    @unittest.skipUnless(BASH.exists(), "Git Bash is required")
+    def test_ports_collector_reports_allowlisted_subreasons_without_raw_values(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        collector = extract_bash_function(source, "collect_ports_for_cgroup")
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            root = Path(raw_tmp)
+            cgroup_root = root / "cgroup"
+            proc_root = root / "proc"
+            cgroup_root.mkdir()
+            proc_root.mkdir()
+            cg = cgroup_root / "demo.service"
+            cg.mkdir()
+            cgroup_root_bash = str(cgroup_root).replace("\\", "/")
+            proc_root_bash = str(proc_root).replace("\\", "/")
+            harness = collector + rf'''
+assert_reason() {{
+    local expected="$1"
+    if collect_ports_for_cgroup /demo.service '{cgroup_root_bash}' '{proc_root_bash}'; then exit 90; fi
+    [[ "$CGROUP_PORTS_SUBREASON" == "$expected" ]] || exit 91
+    [[ -z "$COLLECTED_UNIT_PORTS" ]] || exit 92
+}}
+assert_reason cgroup_procs
+printf 'not-a-pid\n' > '{cgroup_root_bash}/demo.service/cgroup.procs'
+assert_reason pid
+printf '321\n' > '{cgroup_root_bash}/demo.service/cgroup.procs'
+assert_reason fd_directory
+mkdir -p '{proc_root_bash}/321/fd'
+: > '{proc_root_bash}/321/fd/7'
+assert_reason fd_readlink
+rm '{proc_root_bash}/321/fd/7'
+: > '{proc_root_bash}/321/fd/socket-entry'
+readlink() {{ printf 'socket:[123]\n'; }}
+assert_reason socket_table
+mkdir -p '{proc_root_bash}/321/net'
+for table in tcp tcp6 udp udp6; do : > '{proc_root_bash}/321/net/'"$table"; done
+awk() {{
+    if [[ "$*" == *"/net/tcp"* ]]; then return 1; fi
+    command awk "$@"
+}}
+assert_reason socket_parse
+awk() {{
+    if [[ "$*" == *"/net/tcp"* ]]; then printf 'GGGG\n0050\n'; return 0; fi
+    command awk "$@"
+}}
+assert_reason socket_parse
+'''
+            result = run_bash_harness(harness)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_cgroup_ports_caller_maps_only_allowlisted_subreasons(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        for code, reason in enumerate(
+            ("cgroup_procs", "pid", "fd_directory", "fd_readlink", "socket_table", "socket_parse"),
+            start=75,
+        ):
+            self.assertIn(f'{reason}") emit_failure {code}', source)
+        self.assertIn('collect_ports_for_cgroup "$control_group" /sys/fs/cgroup /proc', source)
+        self.assertNotIn('unit_ports="$(ports_for_cgroup', source)
 
     @unittest.skipUnless(BASH.exists(), "Git Bash is required")
     def test_proc_cgroup_parser_accepts_one_v2_or_systemd_v1_path_and_rejects_unsafe_input(self) -> None:
@@ -520,7 +577,7 @@ foreach ($case in $cases) {
     def test_runner_claims_exact_run_before_ssh_and_separates_outcomes(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         for marker in (
-            '$expectedRunId = "spain-fresh-20260720-003"',
+            '$expectedRunId = "spain-fresh-20260720-004"',
             "Exact Spain trust run id mismatch",
             'Join-Path $RunRoot "preflight-outcome.claim"',
             'Join-Path $RunRoot "preflight-failure-evidence.json"',
@@ -540,7 +597,7 @@ foreach ($case in $cases) {
     def test_runner_reuses_immutable_trust_bundle_but_claims_new_outcome_run(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         self.assertIn('$trustedBundleRunId = "spain-fresh-20260720-001"', source)
-        self.assertIn('$expectedRunId = "spain-fresh-20260720-003"', source)
+        self.assertIn('$expectedRunId = "spain-fresh-20260720-004"', source)
         self.assertIn('$TrustDirectory = Join-Path $ArtifactRoot $trustedBundleRunId', source)
         self.assertIn('$RunDirectory = Join-Path $ArtifactRoot $RunId', source)
         self.assertIn("[Environment]::GetFolderPath('LocalApplicationData')", source)
@@ -615,6 +672,17 @@ foreach ($case in $cases) {
             self.assertEqual(result.stdout.strip(), '{"first":true}')
             self.assertEqual(evidence_path.read_text(encoding="utf-8"), '{"first":true}\n')
 
+    def test_runner_maps_only_cgroup_port_exit_allowlist_to_safe_subreasons(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        parser = extract_powershell_function(source, "Read-SafeFailureEnvelope")
+        for code, reason in enumerate(
+            ("cgroup_procs", "pid", "fd_directory", "fd_readlink", "socket_table", "socket_parse"),
+            start=75,
+        ):
+            self.assertIn(f'{code} = "{reason}"', parser)
+        self.assertIn("Subreason = $Subreason", parser)
+        self.assertIn("subreason = $FailureSubreason", source)
+
     def test_embedded_remote_checksum_matches_exact_bytes(self) -> None:
         self.assertTrue(REMOTE.exists())
         self.assertTrue(RUNNER.exists())
@@ -638,9 +706,9 @@ foreach ($case in $cases) {
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
             "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
-            "TRUST_RUN_ID_SPAIN_FRESH_20260720_003_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260720_004_"
             "IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_"
-            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_003_"
+            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_004_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"
@@ -724,9 +792,9 @@ class SpainReadonlyPreflightFailClosedTests(unittest.TestCase):
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
             "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
-            "TRUST_RUN_ID_SPAIN_FRESH_20260720_003_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260720_004_"
             "IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_"
-            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_003_"
+            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_004_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"

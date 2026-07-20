@@ -15,16 +15,16 @@ $ErrorActionPreference = "Stop"
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Security") -ErrorAction Stop
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Utility") -ErrorAction Stop
 
-$expectedRemoteScriptSha = "3C8B341EC813776733835D39193F451E4FC21665851E1DCDADEFE69AD9D9BA0D"
+$expectedRemoteScriptSha = "59826109915A5D21C0B14775392205B672DD33E82AFAA4FB61A49C802A135623"
 $trustedBundleRunId = "spain-fresh-20260720-001"
-$expectedRunId = "spain-fresh-20260720-003"
+$expectedRunId = "spain-fresh-20260720-004"
 $AllowedFailureStages = @(
     "bootstrap", "os_kernel", "capacity", "sockets", "firewall",
     "ssh_policy", "docker_inventory", "systemd_inventory",
     "systemd_unit_content", "systemd_cgroup_ports", "render"
 )
 $actualRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
-$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_RUNNER_SHA_$actualRunnerSha`_REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha`_SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_TRUST_RUN_ID_SPAIN_FRESH_20260720_003_IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_003_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
+$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_RUNNER_SHA_$actualRunnerSha`_REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha`_SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_TRUST_RUN_ID_SPAIN_FRESH_20260720_004_IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_004_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
 if ([string]::IsNullOrEmpty($Approval)) {
     Write-Output $expectedApproval
     throw "Exact read-only preflight approval mismatch."
@@ -232,7 +232,22 @@ function Read-SafeFailureEnvelope([string[]]$Lines, [int]$ProcessExitCode) {
     if ($ExitCode -ne $ProcessExitCode) {
         return $null
     }
-    return [pscustomobject]@{ Stage = $Stage; ExitCode = $ExitCode }
+    $Subreason = "unavailable"
+    if ($Stage -ceq "systemd_cgroup_ports") {
+        $CgroupPortSubreasons = @{
+            75 = "cgroup_procs"
+            76 = "pid"
+            77 = "fd_directory"
+            78 = "fd_readlink"
+            79 = "socket_table"
+            80 = "socket_parse"
+        }
+        if (-not $CgroupPortSubreasons.ContainsKey($ExitCode)) {
+            return $null
+        }
+        $Subreason = $CgroupPortSubreasons[$ExitCode]
+    }
+    return [pscustomobject]@{ Stage = $Stage; ExitCode = $ExitCode; Subreason = $Subreason }
 }
 
 function Assert-TargetHost([string]$Value) {
@@ -368,10 +383,12 @@ if ($ProcessExitCode -ne 0) {
         $FailureClassification = "remote_probe"
         $FailureStage = $SafeFailure.Stage
         $FailureExitCode = $SafeFailure.ExitCode
+        $FailureSubreason = $SafeFailure.Subreason
     } elseif ($ProcessExitCode -ge 1 -and $ProcessExitCode -le 255) {
         $FailureClassification = "transport"
         $FailureStage = "unavailable"
         $FailureExitCode = $ProcessExitCode
+        $FailureSubreason = "unavailable"
     } else {
         $SshOutput = $null
         $RemoteText = $null
@@ -381,6 +398,7 @@ if ($ProcessExitCode -ne 0) {
         schema = "amn2.spain-readonly-preflight-failure.v1"
         classification = $FailureClassification
         stage = $FailureStage
+        subreason = $FailureSubreason
         exit_code = $FailureExitCode
         runner_sha256 = $actualRunnerSha
         remote_probe_sha256 = $expectedRemoteScriptSha
