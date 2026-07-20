@@ -1,4 +1,53 @@
-# Текущий override 2026-07-20: Spain stage-coded diagnostic gate готов локально
+# Текущий override 2026-07-20: Spain MainPID fallback correction готов локально
+
+Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа
+идёт в post-release controlled operations. Последний Spain outcome run
+`spain-fresh-20260720-001` остаётся consumed и immutable. Его stage-coded
+failure receipt безопасно локализовал причину: активный сторонний systemd unit
+имел пустой `ControlGroup` и `MainPID=0`, то есть был one-shot service без
+живого процесса, а старый probe ошибочно требовал cgroup.
+
+Локально реализован и проверен corrected resolver: непустой `ControlGroup`
+сохраняет прежний путь; `MainPID=0` получает явный статус
+`active_exited_no_live_process`; `MainPID>0` использует строгий procfs parser,
+проверяет canonical systemd unit id и стабильность PID/starttime/cgroup до
+признания port evidence полным. Security review дополнительно закрыл PID reuse
+и локальную ACL/reparse race: новый outcome `spain-fresh-20260720-002`
+создаётся отдельно от immutable trust bundle `001`, после current-user-only
+из заранее подготовленного current-user-only `%LOCALAPPDATA%\AMN2` trust root;
+runner до любого trust read проверяет owner/ACL/no-reparse всей private chain.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_trust_bundle=spain-fresh-20260720-001|immutable|consumed
+spain_next_outcome_run=spain-fresh-20260720-002|not_created|exact_approval_required
+spain_mainpid_fallback=local_implementation_verified|live_not_run
+spain_mainpid_zero=active_exited_no_live_process|no_false_ports
+spain_mainpid_live=canonical_unit_bound|starttime_and_cgroup_stable|fail_closed_71_74
+spain_outcome_root=localappdata_current_user_only_parent_chain|no_reparse|create_new
+spain_runner_sha256=ACA990D94D2730ADBE022F44A3EBFCD3ABD6FE14A598889244DD80038D60B76F
+spain_remote_probe_sha256=3C8B341EC813776733835D39193F451E4FC21665851E1DCDADEFE69AD9D9BA0D
+spain_runner_source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tdd=mainpid_and_procfs_red_green|new_outcome_red_green|security_regressions_red_green
+tests=spain_preflight_focused_24_passed|root_full_200_passed|bash_powershell_parse_pass|diff_check_pass
+security=independent_fixed_snapshot_review_clean|remote_2_of_2|runner_2_of_2|reportable_findings_0
+spain_network_contact_after_run_001=false
+spain_install_restart_stop_config=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+protected_monitor_baseline=untouched
+next=COMMIT_PUSH_VERIFY_ORIGIN_THEN_ISSUE_EXACT_SINGLE_USE_SPAIN_PREFLIGHT_002_APPROVAL
+```
+
+Evidence:
+`docs/POST_RELEASE_SPAIN_SYSTEMD_MAINPID_FALLBACK_IMPLEMENTATION_EVIDENCE.ru.md`.
+Старые approvals не разрешают новый запуск. Private target, login, key,
+host-key line, raw diagnostics и конфиги в Git/evidence не добавлялись.
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и нетронутым.
+
+# Предыдущий override 2026-07-20: Spain stage-coded diagnostic gate готов локально
 
 Phase 11 остаётся закрытой как `completed-controlled-private-release`; работа
 идёт в post-release controlled operations. Вторая отдельно разрешённая Spain

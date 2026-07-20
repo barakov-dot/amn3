@@ -8,15 +8,17 @@ evidence. Первая выявила преобразование диагно�
 PowerShell `NativeCommandError`; вторая после узкого nft correction вернула
 ненулевой SSH status без безопасной классификации. Оба approval исчерпаны.
 
-Текущая локальная версия добавляет stage-coded failure envelope без raw stderr.
-Новый live-запуск не выполнялся. Новый запуск требует отдельного approval, привязанного
-к новым runner/probe SHA-256, source и точному trust run id после origin
-readback. Telegram API не вызывался, установка и любые live-изменения не
-производились.
+Текущая локальная версия добавляет stage-coded failure envelope без raw stderr
+и corrected systemd `ControlGroup -> MainPID -> procfs` resolver. Новый
+live-запуск не выполнялся. Новый запуск требует отдельного approval,
+привязанного к новым runner/probe SHA-256, source, immutable trust bundle
+`spain-fresh-20260720-001` и отдельному outcome run
+`spain-fresh-20260720-002` после origin readback. Telegram API не вызывался,
+установка и любые live-изменения не производились.
 
 Runner допускает единственный режим `preflight` и до обращения к private
 artifacts требует полного точного approval и exact trust run id
-`spain-fresh-20260720-001`. Approval привязан одновременно к фактическому
+`spain-fresh-20260720-002`. Approval привязан одновременно к фактическому
 SHA-256 самого runner, SHA-256 удалённого probe, исходному AMN2 head и этому run
 id. При пустом `-Approval` runner печатает одну полностью материализованную
 строку и завершается с ошибкой до чтения private target или SSH; это безопасный
@@ -34,7 +36,16 @@ private-artifacts/post-release/spain-migration/<run_id>/id_ed25519_spain.pub
 private-artifacts/post-release/spain-migration/<run_id>/known_hosts_spain
 ```
 
-Перед SSH runner проверяет защищённые ACL, точную четырёхстрочную схему binding, соответствие `SSH_KEY_PATH` dedicated key, совпадение private/public Ed25519 пары и независимый fingerprint `known_hosts_spain`. Ambient SSH config отключён через `-F none`; обязательны batch mode, только dedicated identity и strict host-key checking.
+Trust artifacts читаются только из protected local copy immutable run
+`spain-fresh-20260720-001` под `%LOCALAPPDATA%\AMN2`, а
+claim/evidence создаются только в новом run `spain-fresh-20260720-002`. Перед
+SSH runner до любого trust read проверяет current-user-only owner/ACL всей
+заранее подготовленной private-artifact parent chain, отвергает reparse points,
+проверяет точную четырёхстрочную схему
+binding, соответствие `SSH_KEY_PATH` dedicated key, совпадение private/public
+Ed25519 пары и независимый fingerprint `known_hosts_spain`. Ambient SSH config
+отключён через `-F none`; обязательны batch mode, только dedicated identity и
+strict host-key checking.
 
 ## Состав evidence
 
@@ -59,7 +70,14 @@ OpenSSH exit code. Malformed, duplicate или mixed envelope закрывает
 Успех создаёт только `preflight-evidence.json`; классифицированная ошибка —
 только `preflight-failure-evidence.json`. Raw stdout/stderr не сохраняется.
 
-Firewall inventory и effective SSH policy являются обязательными: отсутствие поддерживаемого reader, пустой результат или ошибка чтения закрывают gate. Для systemd fingerprint полное чтение unit content и cgroup socket state также обязательно; недоступный PID, FD, `readlink` или socket table не превращается в ложный пустой port set.
+Firewall inventory и effective SSH policy являются обязательными: отсутствие
+поддерживаемого reader, пустой результат или ошибка чтения закрывают gate. Для
+systemd fingerprint полное чтение unit content и cgroup socket state также
+обязательно. Пустой `ControlGroup` у active unit разрешается только как
+`active_exited_no_live_process` при `MainPID=0`; при живом `MainPID` procfs
+cgroup принимается только после canonical unit-id binding и повторной проверки
+стабильности PID, process starttime и cgroup. Недоступный или сменившийся PID,
+FD, `readlink` или socket table не превращается в ложный пустой port set.
 
 Из `unrelated_service_fingerprint` исключаются только точные deployment-owned имена `amneziya-web.service`, `amneziya-bot.service` и `amnezia-awg2`. Похожие или расширенные имена не исключаются и остаются в fingerprint. Это публичные contract names, а не private resident-service identifiers.
 

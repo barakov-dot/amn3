@@ -15,15 +15,16 @@ $ErrorActionPreference = "Stop"
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Security") -ErrorAction Stop
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Utility") -ErrorAction Stop
 
-$expectedRemoteScriptSha = "16CE3F9E14A72DFB0DC957B2A1CA13F1ADBCA72F41C60FC2D4DD9904D3E74CD6"
-$expectedRunId = "spain-fresh-20260720-001"
+$expectedRemoteScriptSha = "3C8B341EC813776733835D39193F451E4FC21665851E1DCDADEFE69AD9D9BA0D"
+$trustedBundleRunId = "spain-fresh-20260720-001"
+$expectedRunId = "spain-fresh-20260720-002"
 $AllowedFailureStages = @(
     "bootstrap", "os_kernel", "capacity", "sockets", "firewall",
     "ssh_policy", "docker_inventory", "systemd_inventory",
     "systemd_unit_content", "systemd_cgroup_ports", "render"
 )
 $actualRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
-$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_RUNNER_SHA_$actualRunnerSha`_REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha`_SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_TRUST_RUN_ID_SPAIN_FRESH_20260720_001_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
+$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_RUNNER_SHA_$actualRunnerSha`_REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha`_SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_TRUST_RUN_ID_SPAIN_FRESH_20260720_002_IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_002_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
 if ([string]::IsNullOrEmpty($Approval)) {
     Write-Output $expectedApproval
     throw "Exact read-only preflight approval mismatch."
@@ -73,13 +74,21 @@ if ($RunId -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$' -or $RunId.Contains("..
     throw "RunId has an invalid format."
 }
 
-$ArtifactRoot = Join-Path $RepoRoot "private-artifacts\post-release\spain-migration"
+$LocalAppDataRoot = [Environment]::GetFolderPath('LocalApplicationData')
+if ([string]::IsNullOrWhiteSpace($LocalAppDataRoot)) {
+    throw "Local private-state root is unavailable."
+}
+$Amn2PrivateRoot = Join-Path $LocalAppDataRoot "AMN2"
+$PrivateArtifactsRoot = Join-Path $Amn2PrivateRoot "private-artifacts"
+$PostReleaseArtifactRoot = Join-Path $PrivateArtifactsRoot "post-release"
+$ArtifactRoot = Join-Path $PostReleaseArtifactRoot "spain-migration"
+$TrustDirectory = Join-Path $ArtifactRoot $trustedBundleRunId
 $RunDirectory = Join-Path $ArtifactRoot $RunId
 $RunRoot = $RunDirectory
-$BindingPath = Join-Path $RunDirectory "target.env"
-$KeyPath = Join-Path $RunDirectory "id_ed25519_spain"
+$BindingPath = Join-Path $TrustDirectory "target.env"
+$KeyPath = Join-Path $TrustDirectory "id_ed25519_spain"
 $PublicKeyPath = "$KeyPath.pub"
-$KnownHostsPath = Join-Path $RunDirectory "known_hosts_spain"
+$KnownHostsPath = Join-Path $TrustDirectory "known_hosts_spain"
 $EvidencePath = Join-Path $RunDirectory "preflight-evidence.json"
 $FailureEvidencePath = Join-Path $RunRoot "preflight-failure-evidence.json"
 $OutcomeClaimPath = Join-Path $RunRoot "preflight-outcome.claim"
@@ -96,6 +105,7 @@ function Assert-PrivatePath([string]$Path) {
     if (-not (Test-Path -LiteralPath $Path)) {
         throw "Required private artifact is missing."
     }
+    Assert-CurrentUserOwner $Path
     $CurrentSid = [Security.Principal.WindowsIdentity]::GetCurrent().User
     $VerifiedAcl = Get-Acl -LiteralPath $Path
     $VerifiedRules = @($VerifiedAcl.Access)
@@ -113,6 +123,7 @@ function Protect-PrivatePath([string]$Path) {
     }
     $CurrentSid = [Security.Principal.WindowsIdentity]::GetCurrent().User
     $Acl = Get-Acl -LiteralPath $Path
+    $Acl.SetOwner($CurrentSid)
     $Acl.SetAccessRuleProtection($true, $false)
     foreach ($ExistingRule in @($Acl.Access)) {
         $Acl.RemoveAccessRuleSpecific($ExistingRule)
@@ -126,6 +137,55 @@ function Protect-PrivatePath([string]$Path) {
     )
     $Acl.SetAccessRule($Rule)
     Set-Acl -LiteralPath $Path -AclObject $Acl
+    Assert-PrivatePath $Path
+}
+
+function Assert-NotReparsePoint([string]$Path) {
+    if (-not (Test-Path -LiteralPath $Path -PathType Container)) {
+        throw "Required private directory is missing."
+    }
+    $Item = Get-Item -LiteralPath $Path -Force
+    if (($Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "Private directory must not be a reparse point."
+    }
+}
+
+function Assert-CurrentUserOwner([string]$Path) {
+    if (-not (Test-Path -LiteralPath $Path)) {
+        throw "Required private artifact is missing."
+    }
+    $CurrentSid = [Security.Principal.WindowsIdentity]::GetCurrent().User
+    $OwnerSid = (Get-Acl -LiteralPath $Path).GetOwner(
+        [Security.Principal.SecurityIdentifier]
+    )
+    if ($OwnerSid.Value -cne $CurrentSid.Value) {
+        throw "Private artifact owner is not the current operator."
+    }
+}
+
+function Assert-PrivateRootChain() {
+    Assert-NotReparsePoint $LocalAppDataRoot
+    Assert-CurrentUserOwner $LocalAppDataRoot
+    foreach ($PrivateRoot in @(
+        $Amn2PrivateRoot,
+        $PrivateArtifactsRoot,
+        $PostReleaseArtifactRoot,
+        $ArtifactRoot,
+        $TrustDirectory
+    )) {
+        Assert-NotReparsePoint $PrivateRoot
+        Assert-PrivatePath $PrivateRoot
+    }
+}
+
+function Initialize-OutcomeDirectory([string]$Path) {
+    Assert-PrivateRootChain
+    if (Test-Path -LiteralPath $Path) {
+        throw "Single-use Spain outcome directory already exists."
+    }
+    [IO.Directory]::CreateDirectory($Path) | Out-Null
+    Assert-NotReparsePoint $Path
+    Protect-PrivatePath $Path
     Assert-PrivatePath $Path
 }
 
@@ -194,7 +254,7 @@ function Assert-Fingerprint([string]$Value) {
 }
 
 function Read-Binding {
-    Assert-PrivatePath $RunDirectory
+    Assert-PrivatePath $TrustDirectory
     Assert-PrivatePath $BindingPath
     $Lines = @(Get-Content -LiteralPath $BindingPath)
     $ExpectedNames = @("TARGET_HOST", "TARGET_USER", "SSH_KEY_PATH", "EXPECTED_HOST_KEY_SHA256")
@@ -255,9 +315,11 @@ function Assert-VerifiedHostPin([hashtable]$Binding) {
 
 Assert-LocalExecutable $SshExe "OpenSSH client"
 Assert-LocalExecutable $SshKeygenExe "OpenSSH key generator"
+Assert-PrivateRootChain
 $Binding = Read-Binding
 Assert-DedicatedKeyPair
 Assert-VerifiedHostPin $Binding
+Initialize-OutcomeDirectory $RunDirectory
 
 $ClaimJson = [ordered]@{
     schema = "amn2.spain-readonly-preflight-claim.v1"

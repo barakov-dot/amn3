@@ -1,5 +1,34 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release Spain MainPID correction override 2026-07-20
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+amn2_source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+immutable_trust_bundle=spain-fresh-20260720-001|consumed
+next_outcome_run=spain-fresh-20260720-002|not_created
+systemd_fallback=ControlGroup_then_MainPID_then_procfs|canonical_unit_and_identity_stability
+active_exited=MainPID_0|no_live_process|no_false_ports
+local_outcome_security=localappdata_current_user_only_parent_chain|no_reparse|create_new
+runner_sha256=ACA990D94D2730ADBE022F44A3EBFCD3ABD6FE14A598889244DD80038D60B76F
+remote_probe_sha256=3C8B341EC813776733835D39193F451E4FC21665851E1DCDADEFE69AD9D9BA0D
+tests=focused_24_passed|full_200_passed|bash_powershell_parse_pass
+security=fixed_snapshot_independent_review_clean|reportable_findings_0
+spain_live=false
+spain_unrelated_service=untouched
+production_awg=untouched
+next=PUSH_VERIFY_ORIGIN_THEN_EXACT_SINGLE_USE_READ_ONLY_PREFLIGHT_002_APPROVAL
+```
+
+Trust/key/host-pin читаются только из защищённой local copy immutable run
+`001` под `%LOCALAPPDATA%\AMN2`; новый claim и
+success/failure evidence допускаются только в run `002`. До буквального нового
+approval не выполнять SSH, preflight, install, retry или remediation. После
+approval — ровно один checksum-bound read-only запуск; при любом invariant
+failure остановиться без слепого исправления. AWG и посторонний сервис не
+останавливать и не изменять.
+
 ## Post-release indefinite multi-slot override 2026-07-20
 
 ```text

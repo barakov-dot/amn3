@@ -118,7 +118,10 @@ stage-coded emitter:
 - `72`: `MainPID>0`, но `/proc/<pid>/cgroup` недоступен либо PID исчез между
   чтением systemd и procfs;
 - `73`: procfs возвращает пустой, malformed, небезопасный или неоднозначный
-  cgroup path.
+  cgroup path;
+- `74`: canonical unit id не совпал с procfs cgroup либо MainPID, process
+  starttime или cgroup изменились во время snapshot; такое состояние не
+  признаётся полным evidence.
 
 Если существующий `ports_for_cgroup` не может завершить PID/FD/socket mapping,
 сохраняется его текущий ERR-trap path и stage `systemd_cgroup_ports`; такой

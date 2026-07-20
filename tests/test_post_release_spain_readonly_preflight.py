@@ -42,6 +42,16 @@ def extract_powershell_function(source: str, name: str) -> str:
     return match.group(0)
 
 
+def run_bash_harness(source: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [str(BASH), "-c", source],
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=False,
+    )
+
+
 class SpainReadonlyPreflightStaticTests(unittest.TestCase):
     def test_remote_probe_is_normalized_read_only_inventory(self) -> None:
         self.assertTrue(REMOTE.exists(), "read-only Spain remote probe is missing")
@@ -102,7 +112,7 @@ class SpainReadonlyPreflightStaticTests(unittest.TestCase):
         self.assertNotIn('if unit_content="$(systemctl cat', source)
         self.assertIn('|exact|$bound_port_status', source)
         self.assertIn('"unit_content_status":"%s"', source)
-        self.assertIn('bound_port_status="cgroup_complete"', source)
+        self.assertIn('RESOLVED_BOUND_PORT_STATUS="cgroup_complete"', source)
         self.assertNotRegex(lowered, r"docker\s+inspect(?!\s+--format\s+'\{\{\.restartcount\}\}')")
         self.assertNotIn("2>&1", source)
         self.assertNotIn("|| true", source)
@@ -111,13 +121,159 @@ class SpainReadonlyPreflightStaticTests(unittest.TestCase):
 
     def test_mandatory_collectors_and_cgroup_reads_fail_closed(self) -> None:
         source = REMOTE.read_text(encoding="utf-8")
-        for exit_code in (65, 66, 67, 68, 69, 70):
+        for exit_code in (65, 66, 68, 69, 70, 71, 72, 73):
             self.assertIn(f"emit_failure {exit_code}", source)
             self.assertNotRegex(source, rf"(?m)^\s*exit {exit_code}$")
         self.assertIn('target="$(readlink "$fd")" || return 1', source)
         self.assertIn('[[ -r "$cgroup_file" ]] || return 1', source)
         self.assertIn('[[ -r "$socket_table" ]] || return 1', source)
         self.assertNotIn('readlink "$fd")" || continue', source)
+
+    @unittest.skipUnless(BASH.exists(), "Git Bash is required")
+    def test_proc_cgroup_parser_accepts_one_v2_or_systemd_v1_path_and_rejects_unsafe_input(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        functions = extract_bash_function(source, "safe_cgroup_path") + extract_bash_function(
+            source, "parse_proc_cgroup_path"
+        )
+        harness = functions + r'''
+[[ "$(parse_proc_cgroup_path $'0::/system.slice/demo.service\n')" == "/system.slice/demo.service" ]] || exit 10
+[[ "$(parse_proc_cgroup_path $'2:cpu:/legacy\n1:name=systemd:/system.slice/legacy.service\n')" == "/system.slice/legacy.service" ]] || exit 11
+for bad in $'0::/ok\n0::/duplicate\n' $'1:cpu:/not-systemd\n' $'0::/../../escape\n'; do
+    if parse_proc_cgroup_path "$bad" >/dev/null 2>&1; then exit 12; fi
+done
+'''
+        result = run_bash_harness(harness)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    @unittest.skipUnless(BASH.exists(), "Git Bash is required")
+    def test_unit_cgroup_resolver_distinguishes_active_exited_and_live_mainpid(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        functions = "".join(
+            extract_bash_function(source, name)
+            for name in (
+                "emit_failure",
+                "safe_cgroup_path",
+                "parse_proc_cgroup_path",
+                "read_proc_starttime",
+                "resolve_unit_cgroup",
+            )
+        )
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            proc_root = Path(raw_tmp)
+            (proc_root / "321").mkdir()
+            (proc_root / "321" / "cgroup").write_text(
+                "0::/system.slice/live.service\n", encoding="utf-8"
+            )
+            (proc_root / "321" / "stat").write_text(
+                "321 (live worker) S 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 424242 20\n",
+                encoding="utf-8",
+            )
+            proc_root_bash = str(proc_root).replace("\\", "/")
+            harness = functions + rf'''
+systemctl() {{
+    if [[ "$*" == *"ControlGroup"* ]]; then printf '\n';
+    elif [[ "$*" == *"MainPID"* && "$1" == "show" && "$2" == "exited.service" ]]; then printf '0\n';
+    elif [[ "$*" == *"MainPID"* ]]; then printf '321\n';
+    elif [[ "$*" == *"Id"* ]]; then printf 'live.service\n';
+    else return 90; fi
+}}
+resolve_unit_cgroup exited.service active '{proc_root_bash}'
+[[ "$RESOLVED_BOUND_PORT_STATUS|$RESOLVED_CONTROL_GROUP" == "active_exited_no_live_process|" ]] || exit 20
+resolve_unit_cgroup live.service active '{proc_root_bash}'
+[[ "$RESOLVED_BOUND_PORT_STATUS|$RESOLVED_CONTROL_GROUP" == "mainpid_cgroup_complete|/system.slice/live.service" ]] || exit 21
+'''
+            result = run_bash_harness(harness)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    @unittest.skipUnless(BASH.exists(), "Git Bash is required")
+    def test_mainpid_fallback_rejects_process_identity_change(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        functions = "".join(
+            extract_bash_function(source, name)
+            for name in (
+                "emit_failure",
+                "safe_cgroup_path",
+                "parse_proc_cgroup_path",
+                "read_proc_starttime",
+                "resolve_unit_cgroup",
+            )
+        )
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            proc_root = Path(raw_tmp)
+            (proc_root / "321").mkdir()
+            (proc_root / "321" / "cgroup").write_text(
+                "0::/system.slice/demo.service\n", encoding="utf-8"
+            )
+            (proc_root / "321" / "stat").write_text(
+                "321 (replacement) S 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 999999 20\n",
+                encoding="utf-8",
+            )
+            proc_root_bash = str(proc_root).replace("\\", "/")
+            counter_file = proc_root / "mainpid-reads"
+            counter_file.write_text("0\n", encoding="utf-8")
+            counter_file_bash = str(counter_file).replace("\\", "/")
+            harness = functions + rf'''
+systemctl() {{
+    if [[ "$*" == *"ControlGroup"* ]]; then printf '\n';
+    elif [[ "$*" == *"MainPID"* ]]; then
+        mainpid_reads="$(<'{counter_file_bash}')"
+        ((mainpid_reads += 1))
+        printf '%s\n' "$mainpid_reads" > '{counter_file_bash}'
+        if (( mainpid_reads == 1 )); then printf '321\n'; else printf '654\n'; fi
+    elif [[ "$*" == *"Id"* ]]; then printf 'demo.service\n';
+    else return 90; fi
+}}
+resolve_unit_cgroup demo.service active '{proc_root_bash}'
+'''
+            result = run_bash_harness(harness)
+        self.assertEqual(result.returncode, 74, result.stderr)
+        self.assertNotIn("mainpid_cgroup_complete", result.stdout)
+
+    @unittest.skipUnless(BASH.exists(), "Git Bash is required")
+    def test_mainpid_fallback_rejects_cgroup_from_another_unit(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        functions = "".join(
+            extract_bash_function(source, name)
+            for name in (
+                "emit_failure",
+                "safe_cgroup_path",
+                "parse_proc_cgroup_path",
+                "read_proc_starttime",
+                "resolve_unit_cgroup",
+            )
+        )
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            proc_root = Path(raw_tmp)
+            (proc_root / "321").mkdir()
+            (proc_root / "321" / "cgroup").write_text(
+                "0::/system.slice/unrelated.service\n", encoding="utf-8"
+            )
+            (proc_root / "321" / "stat").write_text(
+                "321 (unrelated) S 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 777777 20\n",
+                encoding="utf-8",
+            )
+            proc_root_bash = str(proc_root).replace("\\", "/")
+            harness = functions + rf'''
+systemctl() {{
+    if [[ "$*" == *"ControlGroup"* ]]; then printf '\n';
+    elif [[ "$*" == *"MainPID"* ]]; then printf '321\n';
+    elif [[ "$*" == *"Id"* ]]; then printf 'demo.service\n';
+    else return 90; fi
+}}
+resolve_unit_cgroup demo.service active '{proc_root_bash}'
+'''
+            result = run_bash_harness(harness)
+        self.assertEqual(result.returncode, 74, result.stderr)
+        self.assertNotIn("mainpid_cgroup_complete", result.stdout)
+
+    def test_mainpid_fallback_is_fail_closed_and_raw_free(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        for code in (71, 72, 73, 74):
+            self.assertIn(f"emit_failure {code}", source)
+            self.assertNotRegex(source, rf"(?m)^\s*exit {code}$")
+        self.assertNotIn('printf "$main_pid"', source)
+        self.assertNotIn('printf "$proc_cgroup_text"', source)
+        self.assertNotIn('resolution="$(resolve_unit_cgroup', source)
 
     @unittest.skipUnless(BASH.exists(), "Git Bash is required")
     def test_remote_failure_envelope_is_allowlisted_and_raw_free(self) -> None:
@@ -364,7 +520,7 @@ foreach ($case in $cases) {
     def test_runner_claims_exact_run_before_ssh_and_separates_outcomes(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         for marker in (
-            '$expectedRunId = "spain-fresh-20260720-001"',
+            '$expectedRunId = "spain-fresh-20260720-002"',
             "Exact Spain trust run id mismatch",
             'Join-Path $RunRoot "preflight-outcome.claim"',
             'Join-Path $RunRoot "preflight-failure-evidence.json"',
@@ -380,6 +536,47 @@ foreach ($case in $cases) {
         self.assertIn("Read-SafeFailureEnvelope ([string[]]$SshOutput) $ProcessExitCode", source)
         self.assertNotIn("2>&1", source)
         self.assertNotRegex(source, r"(?i)(?:stderr|ssherror).*(?:write|out-file|set-content)")
+
+    def test_runner_reuses_immutable_trust_bundle_but_claims_new_outcome_run(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        self.assertIn('$trustedBundleRunId = "spain-fresh-20260720-001"', source)
+        self.assertIn('$expectedRunId = "spain-fresh-20260720-002"', source)
+        self.assertIn('$TrustDirectory = Join-Path $ArtifactRoot $trustedBundleRunId', source)
+        self.assertIn('$RunDirectory = Join-Path $ArtifactRoot $RunId', source)
+        self.assertIn("[Environment]::GetFolderPath('LocalApplicationData')", source)
+        self.assertNotIn('Join-Path $RepoRoot "private-artifacts', source)
+        self.assertIn('function Initialize-OutcomeDirectory([string]$Path)', source)
+        self.assertLess(
+            source.index("Initialize-OutcomeDirectory $RunDirectory"),
+            source.index("Write-EvidenceCreateNew $OutcomeClaimPath"),
+        )
+        self.assertNotIn("Remove-Item", source)
+
+    def test_runner_hardens_non_reparse_outcome_root_before_child_creation(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        initializer = extract_powershell_function(source, "Initialize-OutcomeDirectory")
+        self.assertIn(
+            "Assert-PrivateRootChain",
+            initializer,
+        )
+        self.assertNotIn("Protect-PrivatePath $ArtifactRoot", initializer)
+        self.assertLess(
+            initializer.index("Assert-PrivateRootChain"),
+            initializer.index("[IO.Directory]::CreateDirectory($Path)"),
+        )
+        self.assertIn("Assert-NotReparsePoint $Path", initializer)
+
+    def test_runner_verifies_private_root_and_trust_before_any_trust_read(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        verifier = extract_powershell_function(source, "Assert-PrivateRootChain")
+        self.assertIn("Assert-NotReparsePoint $LocalAppDataRoot", verifier)
+        self.assertIn("Assert-CurrentUserOwner $LocalAppDataRoot", verifier)
+        self.assertIn("Assert-NotReparsePoint $PrivateRoot", verifier)
+        self.assertIn("Assert-PrivatePath $PrivateRoot", verifier)
+        self.assertLess(source.index("Assert-PrivateRootChain\n"), source.index("$Binding = Read-Binding"))
+
+        private_path = extract_powershell_function(source, "Assert-PrivatePath")
+        self.assertIn("Assert-CurrentUserOwner $Path", private_path)
 
     def test_atomic_evidence_writer_never_replaces_existing_bytes(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
@@ -441,7 +638,9 @@ foreach ($case in $cases) {
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
             "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
-            "TRUST_RUN_ID_SPAIN_FRESH_20260720_001_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260720_002_"
+            "IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_"
+            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_002_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"
@@ -525,7 +724,9 @@ class SpainReadonlyPreflightFailClosedTests(unittest.TestCase):
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
             "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
-            "TRUST_RUN_ID_SPAIN_FRESH_20260720_001_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260720_002_"
+            "IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_"
+            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_002_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"

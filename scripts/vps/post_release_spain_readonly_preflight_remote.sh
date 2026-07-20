@@ -30,6 +30,112 @@ safe_atom() {
     printf '%s' "$1" | tr -cd 'A-Za-z0-9._:+-'
 }
 
+safe_cgroup_path() {
+    local path="$1" segment
+    local -a segments
+    [[ "$path" == /* && "$path" != *'|'* && "$path" != *$'\n'* && "$path" != *$'\r'* ]] || return 1
+    IFS='/' read -r -a segments <<< "$path"
+    for segment in "${segments[@]}"; do
+        [[ "$segment" != ".." ]] || return 1
+        [[ "$segment" != *[[:cntrl:]]* ]] || return 1
+    done
+}
+
+parse_proc_cgroup_path() {
+    local text="$1" hierarchy controllers path extra controller
+    local v2_path="" v2_count=0 v1_path="" v1_count=0
+    local -a controller_list
+    while IFS=: read -r hierarchy controllers path extra; do
+        if [[ -z "$hierarchy$controllers$path${extra:-}" ]]; then
+            continue
+        fi
+        [[ -n "$hierarchy$controllers$path" && -z "${extra:-}" ]] || return 1
+        if [[ "$hierarchy" == "0" && -z "$controllers" ]]; then
+            safe_cgroup_path "$path" || return 1
+            v2_path="$path"
+            ((v2_count += 1))
+            continue
+        fi
+        IFS=',' read -r -a controller_list <<< "$controllers"
+        for controller in "${controller_list[@]}"; do
+            if [[ "$controller" == "name=systemd" ]]; then
+                safe_cgroup_path "$path" || return 1
+                v1_path="$path"
+                ((v1_count += 1))
+            fi
+        done
+    done <<< "$text"
+    if (( v2_count == 1 )); then
+        printf '%s\n' "$v2_path"
+        return 0
+    fi
+    if (( v2_count == 0 && v1_count == 1 )); then
+        printf '%s\n' "$v1_path"
+        return 0
+    fi
+    return 1
+}
+
+read_proc_starttime() {
+    local stat_file="$1" stat_text stat_tail
+    local -a stat_fields
+    [[ -r "$stat_file" ]] || return 1
+    IFS= read -r stat_text < "$stat_file" || return 1
+    [[ "$stat_text" == *') '* ]] || return 1
+    stat_tail="${stat_text##*) }"
+    read -r -a stat_fields <<< "$stat_tail"
+    (( ${#stat_fields[@]} >= 20 )) || return 1
+    [[ "${stat_fields[19]}" =~ ^[0-9]+$ ]] || return 1
+    printf '%s\n' "${stat_fields[19]}"
+}
+
+resolve_unit_cgroup() {
+    local unit_name="$1" active_state="$2" proc_root="$3"
+    local control_group main_pid main_pid_after canonical_id proc_file proc_stat_file
+    local proc_cgroup_text proc_cgroup_text_after starttime_before starttime_after resolved
+    RESOLVED_BOUND_PORT_STATUS=""
+    RESOLVED_CONTROL_GROUP=""
+    control_group="$(systemctl show "$unit_name" --property=ControlGroup --value)"
+    if [[ -n "$control_group" ]]; then
+        safe_cgroup_path "$control_group" || emit_failure 73
+        RESOLVED_BOUND_PORT_STATUS="cgroup_complete"
+        RESOLVED_CONTROL_GROUP="$control_group"
+        return 0
+    fi
+    main_pid="$(systemctl show "$unit_name" --property=MainPID --value)"
+    [[ "$main_pid" =~ ^(0|[1-9][0-9]*)$ ]] || emit_failure 71
+    (( main_pid <= 4194304 )) || emit_failure 71
+    if (( main_pid == 0 )); then
+        if [[ "$active_state" == "active" ]]; then
+            RESOLVED_BOUND_PORT_STATUS="active_exited_no_live_process"
+        else
+            RESOLVED_BOUND_PORT_STATUS="no_cgroup"
+        fi
+        return 0
+    fi
+    proc_file="$proc_root/$main_pid/cgroup"
+    proc_stat_file="$proc_root/$main_pid/stat"
+    starttime_before="$(read_proc_starttime "$proc_stat_file")" || emit_failure 72
+    proc_cgroup_text="$(<"$proc_file")" || emit_failure 72
+    resolved="$(parse_proc_cgroup_path "$proc_cgroup_text")" || emit_failure 73
+    canonical_id="$(systemctl show "$unit_name" --property=Id --value)"
+    [[ "$canonical_id" =~ ^[A-Za-z0-9_.@:-]+\.service$ ]] || emit_failure 74
+    case "$resolved" in
+        */"$canonical_id"|*/"$canonical_id"/*) ;;
+        *) emit_failure 74 ;;
+    esac
+    starttime_after="$(read_proc_starttime "$proc_stat_file")" || emit_failure 72
+    proc_cgroup_text_after="$(<"$proc_file")" || emit_failure 72
+    main_pid_after="$(systemctl show "$unit_name" --property=MainPID --value)"
+    [[ "$main_pid_after" =~ ^(0|[1-9][0-9]*)$ ]] || emit_failure 71
+    if [[ "$main_pid_after" != "$main_pid" || "$starttime_after" != "$starttime_before" ||
+          "$proc_cgroup_text_after" != "$proc_cgroup_text" ]]; then
+        emit_failure 74
+    fi
+    RESOLVED_BOUND_PORT_STATUS="mainpid_cgroup_complete"
+    RESOLVED_CONTROL_GROUP="$resolved"
+}
+
 bool_command() {
     if [[ -n "$(command -v "$1")" ]]; then printf true; else printf false; fi
 }
@@ -172,16 +278,13 @@ if [[ -n "$(command -v systemctl)" ]]; then
         unit_content_sha="$(sha256_text "$unit_content")"
         unset unit_content
         CURRENT_STAGE="systemd_inventory"
+        resolve_unit_cgroup "$unit_name" "$active_state" /proc
+        bound_port_status="$RESOLVED_BOUND_PORT_STATUS"
+        control_group="$RESOLVED_CONTROL_GROUP"
         unit_ports=""
-        control_group="$(systemctl show "$unit_name" --property=ControlGroup --value)"
         if [[ -n "$control_group" ]]; then
             CURRENT_STAGE="systemd_cgroup_ports"
             unit_ports="$(ports_for_cgroup "$control_group")"
-            bound_port_status="cgroup_complete"
-        elif [[ "$active_state" == "active" ]]; then
-            emit_failure 67
-        else
-            bound_port_status="no_cgroup"
         fi
         systemd_rows+="$unit_name|$active_state|$sub_state|$restart_count|$unit_content_sha|$unit_ports|exact|$bound_port_status"$'\n'
         CURRENT_STAGE="systemd_inventory"
