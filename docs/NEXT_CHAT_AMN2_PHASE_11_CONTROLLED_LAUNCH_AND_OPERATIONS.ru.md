@@ -12,6 +12,7 @@ immutable_trust_bundle=spain-fresh-20260720-001
 remote_probe_sha256=B45764A57E4258C8DD1AFC1570FE5F4359C755C146449225EAC0B74044E3F3F1
 runner_sha256=B42EEE2ED6D63DDC81BCDAF337B9A1581757C8B1E5B1475FACFF69322DD75C82
 source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+correction_commit=34628ddb0dd32022609313c1b4c54d31295edab8|origin_verified
 tests=focused_27_passed|full_203_passed|bash_powershell_parse_pass
 security=codex_diff_scan_complete|reportable_findings_0|secret_matches_0
 fresh_install_gate=blocked_until_preflight_005_success
@@ -19,7 +20,7 @@ spain_mutation=false
 spain_unrelated_service=untouched
 telegram=untouched
 production_awg=untouched
-next=COMMIT_PUSH_VERIFY_ORIGIN_THEN_EXACT_SINGLE_USE_SPAIN_PREFLIGHT_005_APPROVAL
+next=RETURN_EXACT_SINGLE_USE_SPAIN_PREFLIGHT_005_APPROVAL
 ```
 
 Run `005` не создан и не выполнялся; SSH не выполнялся. После trusted-origin
