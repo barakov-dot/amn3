@@ -1,4 +1,38 @@
-# Текущий override 2026-07-20: Spain render subreason diagnostic готов для run 006
+# Текущий override 2026-07-20: Spain run 006 fail-closed на transport boundary
+
+Literal approval для `spain-fresh-20260720-006` использована ровно один раз.
+Checksum-bound runner создал claim, но не получил remote failure envelope:
+sanitized evidence содержит только `classification=transport`,
+`stage=unavailable`, `subreason=unavailable`, `exit=255`. Поэтому Spain OS,
+capacity, ports, Docker, systemd, firewall, SSH policy, clock и unrelated
+service не подтверждены этим run; повтор и blind remediation запрещены.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_run_006=fail_closed|approval_consumed|never_repeat
+spain_run_006_classification=transport
+spain_run_006_stage=unavailable
+spain_run_006_subreason=unavailable
+spain_run_006_exit=255
+spain_run_006_claim=present
+spain_run_006_failure_evidence=present|sanitized
+spain_run_006_success_evidence=absent
+spain_next_outcome_run=spain-fresh-20260720-007|required_after_transport_diagnostic
+spain_immutable_trust_bundle=spain-fresh-20260720-001
+fresh_install_gate=blocked_until_new_preflight_success
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+```
+
+Нужен отдельный local-only transport diagnostic contract, который даст
+allowlisted subreason без raw OpenSSH output/private target disclosure. До
+этого SSH не выполнять. `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся
+вне scope и нетронутым.
+
+# Предыдущий override 2026-07-20: Spain render subreason diagnostic готов для run 006
 
 Локальная TDD-коррекция для render stage завершена: probe до JSON rendering
 проверяет только существующие зависимости `sha256sum`, `cut`, `tr`, `awk`,

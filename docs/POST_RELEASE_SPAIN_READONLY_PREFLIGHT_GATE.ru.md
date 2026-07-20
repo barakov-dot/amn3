@@ -1,6 +1,26 @@
 # Spain read-only preflight gate
 
-## Текущий локальный diagnostic contract для run 006
+## Текущий статус: run 006 transport fail-closed
+
+Run `spain-fresh-20260720-006` выполнен один раз. Claim создан, но OpenSSH
+вернул exit `255` без remote diagnostic envelope; runner сохранил только
+sanitized transport failure evidence. Это не является подтверждением remote
+render/OS state. Run consumed, retry запрещён; без отдельного transport
+subreason diagnostic contract новый SSH/preflight не выполняется.
+
+```text
+outcome_run=spain-fresh-20260720-006|fail_closed|approval_consumed|never_repeat
+classification=transport
+stage=unavailable
+subreason=unavailable
+exit=255
+claim=present
+failure_evidence=present|sanitized
+success_evidence=absent
+next_outcome_run=spain-fresh-20260720-007|required_after_transport_diagnostic
+```
+
+## Предыдущий локальный diagnostic contract для run 006
 
 До JSON rendering remote probe проверяет только шесть already-used external
 dependencies. Exact пары `render/81..86` маппятся runner-ом соответственно в

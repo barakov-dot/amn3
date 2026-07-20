@@ -1,5 +1,32 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release Spain run 006 transport failure override 2026-07-20
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+run_006=fail_closed|approval_consumed|never_repeat
+classification=transport
+stage=unavailable
+subreason=unavailable
+exit=255
+claim=present
+failure_evidence=present|sanitized
+success_evidence=absent
+next_outcome_run=spain-fresh-20260720-007|required_after_transport_diagnostic
+immutable_trust_bundle=spain-fresh-20260720-001
+fresh_install_gate=blocked_until_new_preflight_success
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+next=TRANSPORT_SUBREASON_DIAGNOSTIC_DESIGN_THEN_NEW_EXACT_PREFLIGHT_007_GATE
+```
+
+Run `006` не повторять. Remote envelope отсутствует, поэтому не считать
+инварианты Spain доказанными; ad-hoc SSH, install, retry и blind remediation
+запрещены. Fresh Spain install и Phase12 migration gate остаются закрыты.
+
 ## Post-release Spain render subreason diagnostic ready for run 006 2026-07-20
 
 ```text
