@@ -1,4 +1,37 @@
-# Текущий override 2026-07-20: Spain run 004 fail-closed на пустом cgroup process list
+# Текущий override 2026-07-20: corrected Spain preflight 005 готов локально
+
+Ложный `pid/76` для успешно прочитанного пустого `cgroup.procs` закрыт по TDD:
+regression сначала воспроизвёл отказ, затем минимальная ветка zero-row success
+прошла focused и полный suite. Любая существующая nonnumeric PID-строка и все
+прежние FD/readlink/socket failures остаются fail-closed.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_run_004=fail_closed|approval_consumed|never_repeat
+spain_empty_cgroup_correction=implemented|tdd_red_green_verified
+spain_next_outcome_run=spain-fresh-20260720-005|not_created|not_run
+spain_immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=B45764A57E4258C8DD1AFC1570FE5F4359C755C146449225EAC0B74044E3F3F1
+runner_sha256=B42EEE2ED6D63DDC81BCDAF337B9A1581757C8B1E5B1475FACFF69322DD75C82
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=focused_27_passed|full_203_passed|bash_powershell_parse_pass
+security=codex_diff_scan_complete|reportable_findings_0|secret_matches_0
+fresh_install_gate=blocked_until_preflight_005_success
+spain_install_restart_stop_config=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+protected_monitor_baseline=untouched
+next=COMMIT_PUSH_VERIFY_ORIGIN_THEN_EXACT_SINGLE_USE_SPAIN_PREFLIGHT_005_APPROVAL
+```
+
+Run `005` и SSH не выполнялись, outcome не создавался. Новая authority появится
+только после origin readback и возврата отдельной полностью совпадающей literal
+approval. Runs `001`–`004` не повторять; blind remediation запрещён.
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся вне scope и нетронутым.
+
+# Предыдущий override 2026-07-20: Spain run 004 fail-closed на пустом cgroup process list
 
 Literal approval для `spain-fresh-20260720-004` использована ровно один раз.
 Checksum-bound read-only probe дошёл до systemd port collector и завершился

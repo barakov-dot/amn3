@@ -1,5 +1,33 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release corrected Spain preflight 005 ready override 2026-07-20
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+run_004=fail_closed|approval_consumed|never_repeat
+empty_cgroup_correction=implemented|tdd_red_green_verified
+next_outcome_run=spain-fresh-20260720-005|not_created|not_run
+immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=B45764A57E4258C8DD1AFC1570FE5F4359C755C146449225EAC0B74044E3F3F1
+runner_sha256=B42EEE2ED6D63DDC81BCDAF337B9A1581757C8B1E5B1475FACFF69322DD75C82
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=focused_27_passed|full_203_passed|bash_powershell_parse_pass
+security=codex_diff_scan_complete|reportable_findings_0|secret_matches_0
+fresh_install_gate=blocked_until_preflight_005_success
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+next=COMMIT_PUSH_VERIFY_ORIGIN_THEN_EXACT_SINGLE_USE_SPAIN_PREFLIGHT_005_APPROVAL
+```
+
+Run `005` не создан и не выполнялся; SSH не выполнялся. После trusted-origin
+readback напечатать exact approval безопасным empty-approval preview и ждать её
+буквального возврата. Только затем разрешён один checksum-bound read-only run.
+Не повторять runs `001`–`004`, не устанавливать и не изменять Spain/AWG или
+посторонний сервис.
+
 ## Post-release Spain run 004 failure override 2026-07-20
 
 ```text

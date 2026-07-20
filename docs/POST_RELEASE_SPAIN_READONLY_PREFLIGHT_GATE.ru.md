@@ -2,6 +2,22 @@
 
 ## Статус
 
+Corrected single-use gate для `spain-fresh-20260720-005` подготовлен только
+локально и ещё не запускался. Он принимает успешно прочитанный пустой
+`cgroup.procs` как завершённый empty port set, сохраняя строгий отказ для любой
+существующей nonnumeric PID-строки и прежние FD/readlink/socket проверки. До
+получения точного approval после commit/push/origin readback runner не читает
+private state, не создаёт outcome; SSH для run `005` не выполнялся.
+
+```text
+outcome_run=spain-fresh-20260720-005|not_created|not_run
+immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=B45764A57E4258C8DD1AFC1570FE5F4359C755C146449225EAC0B74044E3F3F1
+runner_sha256=B42EEE2ED6D63DDC81BCDAF337B9A1581757C8B1E5B1475FACFF69322DD75C82
+tests=focused_27_passed|full_203_passed|bash_powershell_parse_pass
+security=codex_diff_scan_complete|reportable_findings_0|secret_matches_0
+```
+
 Run `spain-fresh-20260720-004` выполнен ровно один раз и завершился fail-closed
 на safe pair `systemd_cgroup_ports/pid/exit=76`. Claim и sanitized failure
 evidence присутствуют, success evidence отсутствует; все checksum/source
@@ -60,7 +76,7 @@ private-artifacts/post-release/spain-migration/<run_id>/known_hosts_spain
 
 Trust artifacts читаются только из protected local copy immutable run
 `spain-fresh-20260720-001` под `%LOCALAPPDATA%\AMN2`, а
-claim/evidence создаются только в новом run `spain-fresh-20260720-004`. Перед
+claim/evidence создаются только в новом run `spain-fresh-20260720-005`. Перед
 SSH runner до любого trust read проверяет current-user-only owner/ACL всей
 заранее подготовленной private-artifact parent chain, отвергает reparse points,
 проверяет точную четырёхстрочную схему

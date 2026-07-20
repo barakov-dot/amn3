@@ -173,6 +173,9 @@ collect_ports_for_cgroup() {
         CGROUP_PORTS_SUBREASON="cgroup_procs"
         return 1
     fi
+    if [[ -z "$cgroup_pids" ]]; then
+        return 0
+    fi
     while read -r pid; do
         if [[ ! "$pid" =~ ^[0-9]+$ ]]; then
             CGROUP_PORTS_SUBREASON="pid"
