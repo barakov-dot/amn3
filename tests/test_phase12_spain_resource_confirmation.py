@@ -792,6 +792,37 @@ foreach ($case in $cases) {
         self.assertEqual(result.returncode, 0, result.stderr)
 
     @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
+    def test_process_boundary_returns_one_result_object_with_byte_properties(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        harness = (
+            extract_powershell_function(source, "ConvertTo-WindowsCommandLineArgument")
+            + extract_powershell_function(source, "Invoke-SshWithExactInput")
+            + r'''
+$SshExe = (Get-Command powershell.exe).Source
+$payload = [byte[]](0x41)
+$result = Invoke-SshWithExactInput $SshExe @('-NoLogo','-NoProfile','-NonInteractive','-Command','[Console]::Out.Write("ok")') $payload
+if ($result -is [array]) { exit 10 }
+if ($result.ExitCode -ne 0) { exit 11 }
+if ($result.StdoutBytes.Length -ne 2) { exit 12 }
+if ([Text.Encoding]::ASCII.GetString($result.StdoutBytes) -cne 'ok') { exit 13 }
+'''
+        )
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            path = Path(raw_tmp) / "result-object.ps1"
+            path.write_text(harness, encoding="utf-8")
+            result = subprocess.run(
+                [
+                    str(POWERSHELL), "-NoProfile", "-NonInteractive",
+                    "-ExecutionPolicy", "Bypass", "-File", str(path),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
     def test_conflict_decision_is_recomputed_from_exact_resource_plan(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         functions = "".join(
