@@ -1067,6 +1067,7 @@ Remove-Item -LiteralPath $path -Force
         self.assertRegex(source, r"(?s)try\s*\{.*Invoke-SshWithExactInput.*\}\s*catch\s*\{")
         self.assertNotIn("$_.Exception.Message", source)
         self.assertIn("$ClaimSha", source)
+        self.assertRegex(source, r"if \(\$Result\.ExitCode -ne 0\) \{\s*\$OutcomeStage = Get-SafeRemoteFailureStage")
 
     def test_fixture_binds_historical_run009_firewall_observation(self) -> None:
         reference = json.loads(REFERENCE.read_text(encoding="utf-8"))
