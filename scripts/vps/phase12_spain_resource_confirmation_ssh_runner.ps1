@@ -420,7 +420,7 @@ function Write-EvidenceCreateNew([string]$Path, [string]$Json) {
 
 function Write-AtomicPrivateJsonCreateNew([string]$Path, [string]$Json) {
     $PendingPath = "$Path.pending"
-    if (Test-Path -LiteralPath $Path -or Test-Path -LiteralPath $PendingPath) {
+    if ((Test-Path -LiteralPath $Path) -or (Test-Path -LiteralPath $PendingPath)) {
         throw "Single-use outcome receipt already exists."
     }
     $Bytes = (New-Object Text.UTF8Encoding($false)).GetBytes("$Json`n")

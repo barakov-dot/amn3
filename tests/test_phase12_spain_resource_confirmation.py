@@ -823,6 +823,35 @@ if ([Text.Encoding]::ASCII.GetString($result.StdoutBytes) -cne 'ok') { exit 13 }
         self.assertEqual(result.returncode, 0, result.stderr)
 
     @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
+    def test_atomic_receipt_creation_checks_both_paths_as_separate_expressions(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        harness = extract_powershell_function(source, "Write-AtomicPrivateJsonCreateNew") + r'''
+function Write-BytesCreateNew([string]$Path, [byte[]]$Bytes) {
+    [IO.File]::WriteAllBytes($Path, $Bytes)
+}
+function Protect-PrivatePath([string]$Path) {}
+$path = Join-Path $env:TEMP 'phase12-resource-confirmation-receipt.json'
+Write-AtomicPrivateJsonCreateNew $path '{"status":"passed"}'
+if (-not (Test-Path -LiteralPath $path)) { exit 10 }
+Remove-Item -LiteralPath $path -Force
+'''
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            path = Path(raw_tmp) / "atomic-receipt.ps1"
+            harness = harness.replace("$env:TEMP", f"'{raw_tmp.replace(chr(92), chr(92) * 2)}'")
+            path.write_text(harness, encoding="utf-8")
+            result = subprocess.run(
+                [
+                    str(POWERSHELL), "-NoProfile", "-NonInteractive",
+                    "-ExecutionPolicy", "Bypass", "-File", str(path),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
     def test_conflict_decision_is_recomputed_from_exact_resource_plan(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         functions = "".join(
