@@ -1,5 +1,25 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Final Spain preflight 009 passed; hand off to Phase 12 2026-07-21
+
+```text
+phase11=completed-controlled-private-release|post_release_pre_migration_gate_complete
+run_009=passed|approval_consumed|never_repeat
+evidence_sha256=8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8
+spain_mutation=false
+unrelated_service=untouched|fingerprint_entries_148
+docker=absent|install_requires_phase12_exact_gate
+occupied_ports=tcp_22_53_443_8080_10050|udp_53_443
+production_awg=untouched
+telegram=untouched
+fresh_install_gate=ready_for_phase12_design_package_and_separate_exact_approval
+next_phase=AMN2_PHASE_12_SPAIN_MIGRATION
+```
+
+Phase 11 больше не продолжать новыми Spain preflight attempts. Создать новый
+task и отправить целиком
+`docs/AMN2_PHASE_12_SPAIN_MIGRATION_FIRST_MESSAGE.ru.md`.
+
 ## Post-release Spain run 008 CRLF root cause and final run 009 2026-07-21
 
 ```text

@@ -1,3 +1,48 @@
+# Текущий override 2026-07-21: Spain preflight 009 passed; Phase 12 migration entry ready
+
+Финальный single-use outcome `spain-fresh-20260721-009` завершился успешно.
+Checksum-bound runner записал sanitized evidence SHA-256
+`8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8`.
+Run 009 consumed и не повторяется.
+
+```text
+active_phase=Post-release controlled operations|ready_for_phase12_spain_migration
+phase11_status=completed-controlled-private-release|unchanged
+spain_run_009=passed|approval_consumed|never_repeat
+spain_run_009_claim=present
+spain_run_009_success_evidence=present|sanitized|schema_v1
+spain_run_009_failure_evidence=absent
+spain_os=linux
+spain_capacity=cpu_1|memory_kib_984564|root_disk_bytes_10479628288
+spain_docker=absent|phase12_install_required
+spain_systemd=present
+spain_firewall=nft|rules_129
+spain_listening_ports=tcp_22_53_443_8080_10050|udp_53_443
+spain_unrelated_fingerprint_entries=148|baseline_sealed_for_post_install_equality
+spain_preflight_evidence_sha256=8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+fresh_install_gate=ready_for_separate_phase12_exact_approval
+next_phase=AMN2 Phase 12 Spain Migration
+```
+
+Preflight pass не разрешает install. Phase 12 должна выбрать conflict-free
+AMN2 names, Docker network, VPN subnet и ports, не используя занятые ports;
+установить Docker как отдельную allowlisted mutation; сохранить и после каждого
+этапа точно сравнить unrelated-service fingerprint. USA остаётся rollback
+contour до полного Spain acceptance и реальной выдачи новых конфигов.
+
+Phase 12/13 пакет:
+
+- `docs/AMN2_PHASE_12_SPAIN_MIGRATION_FIRST_MESSAGE.ru.md`;
+- `docs/AMN2_PHASE_12_SPAIN_MIGRATION_ENTRY.ru.md`;
+- `docs/NEXT_CHAT_AMN2_PHASE_12_SPAIN_MIGRATION.ru.md`;
+- `docs/AMN2_PHASE_13_POST_MIGRATION_CONTINUATION_FIRST_MESSAGE.ru.md`.
+
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся нетронутым.
+
 # Текущий override 2026-07-21: run 008 доказал CRLF stdin defect; финальный run 009 готовится
 
 Literal approval `spain-fresh-20260721-008` использована один раз. Outcome

@@ -1,5 +1,28 @@
 # Spain read-only preflight gate
 
+## Финальный статус: run 009 passed
+
+Final single-use run `spain-fresh-20260721-009` прошёл. Sanitized evidence
+соответствует schema `amn2.spain-readonly-preflight.v1`, mode `preflight`; SHA:
+`8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8`.
+
+```text
+outcome=passed|approval_consumed|never_repeat
+claim=present
+success_evidence=present|sanitized
+failure_evidence=absent
+capacity=cpu_1|memory_kib_984564|root_disk_bytes_10479628288
+docker=absent
+firewall=nft|rules_129
+occupied_ports=tcp_22_53_443_8080_10050|udp_53_443
+unrelated_service_fingerprint_entries=148
+mutation=false
+```
+
+Read-only gate закрыт успешно. Он не разрешает install. Следующий gate — новый
+Phase 12 checksum-bound install/rollback contract с conflict-free resources и
+exact equality unrelated-service fingerprint до/после.
+
 ## Текущий статус: run 008 выявил CRLF transport defect; финальный run 009
 
 Run 008 consumed. Claim создан, success/failure evidence отсутствуют. Локальный
