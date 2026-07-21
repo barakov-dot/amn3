@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Security") -ErrorAction Stop
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Utility") -ErrorAction Stop
 
-$expectedRemoteScriptSha = "E0C838748974A11438D1A0C0AB9FB0EB26DF18C54D70B0649D660209D1ABA147"
+$expectedRemoteScriptSha = "70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A"
 $expectedFingerprintSetSha = "2B4794DC286334B9D08F155A22C59571F351468800A69897D1204BB3A27C50EC"
 $expectedFingerprintSetBytes = 48205
 $expectedPackageResourcePlanSha = "29BE4B5E301EDBDEAA39B2596833D4A850BEC883C75A2CE3738D51DB13846264"
@@ -18,7 +18,7 @@ $run009FirewallBackend = "nft"
 $run009FirewallRulesSha = "35ED9383AE9E73268E3D1AB7F57612BC60EA59C0531D6A96372E5F3731883D00"
 $run009FirewallRuleCount = 129
 $trustedBundleRunId = "spain-fresh-20260720-001"
-$expectedRunId = "spain-resource-confirmation-20260721-006"
+$expectedRunId = "spain-resource-confirmation-20260721-007"
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
 $actualRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $RepositoryRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
