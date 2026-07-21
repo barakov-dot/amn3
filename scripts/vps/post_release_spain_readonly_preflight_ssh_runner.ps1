@@ -17,14 +17,14 @@ Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Utility") -ErrorA
 
 $expectedRemoteScriptSha = "228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D"
 $trustedBundleRunId = "spain-fresh-20260720-001"
-$expectedRunId = "spain-fresh-20260720-007"
+$expectedRunId = "spain-fresh-20260721-008"
 $AllowedFailureStages = @(
     "bootstrap", "os_kernel", "capacity", "sockets", "firewall",
     "ssh_policy", "docker_inventory", "systemd_inventory",
     "systemd_unit_content", "systemd_cgroup_ports", "render"
 )
 $actualRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
-$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_RUNNER_SHA_$actualRunnerSha`_REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha`_SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_TRUST_RUN_ID_SPAIN_FRESH_20260720_007_IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_007_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
+$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_RUNNER_SHA_$actualRunnerSha`_REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha`_SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_TRUST_RUN_ID_SPAIN_FRESH_20260721_008_IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_NEW_OUTCOME_RUN_SPAIN_FRESH_20260721_008_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
 if ([string]::IsNullOrEmpty($Approval)) {
     Write-Output $expectedApproval
     throw "Exact read-only preflight approval mismatch."
@@ -264,6 +264,35 @@ function Read-SafeFailureEnvelope([string[]]$Lines, [int]$ProcessExitCode) {
     return [pscustomobject]@{ Stage = $Stage; ExitCode = $ExitCode; Subreason = $Subreason }
 }
 
+function Get-SafeFailureEnvelopeRejectionSubreason([string[]]$Lines, [int]$ProcessExitCode) {
+    $Prefix = "AMN2_SPAIN_PREFLIGHT_FAILURE_V1"
+    $PrefixedLines = @(
+        $Lines | Where-Object { $_.StartsWith($Prefix, [StringComparison]::Ordinal) }
+    )
+    if ($PrefixedLines.Count -ne 1) {
+        return "prefix_count"
+    }
+    $Pattern = '^AMN2_SPAIN_PREFLIGHT_FAILURE_V1\|stage=(?<stage>[a-z_]+)\|exit=(?<exit>[0-9]{1,3})$'
+    $Parsed = [regex]::Match($PrefixedLines[0], $Pattern)
+    if (-not $Parsed.Success) {
+        return "shape"
+    }
+    $Stage = $Parsed.Groups["stage"].Value
+    if ($AllowedFailureStages -cnotcontains $Stage) {
+        return "stage"
+    }
+    $ExitCode = [int]$Parsed.Groups["exit"].Value
+    if ($ProcessExitCode -lt 1 -or $ProcessExitCode -gt 255 -or
+        $ExitCode -lt 1 -or $ExitCode -gt 255 -or $ExitCode -ne $ProcessExitCode) {
+        return "exit"
+    }
+    if (($Stage -ceq "systemd_cgroup_ports" -and $ExitCode -notin 75..80) -or
+        ($Stage -ceq "render" -and $ExitCode -notin 81..86)) {
+        return "stage_exit_mapping"
+    }
+    return "unavailable"
+}
+
 function Get-SafeTransportSubreason([object[]]$Lines, [int]$ProcessExitCode) {
     if ($ProcessExitCode -ne 255) {
         return "unavailable"
@@ -421,16 +450,16 @@ if ($ProcessExitCode -ne 0) {
         }
     ).Count
     $SafeFailure = Read-SafeFailureEnvelope ([string[]]$SshOutput) $ProcessExitCode
-    if ($FailurePrefixCount -gt 0 -and $null -eq $SafeFailure) {
-        $SshOutput = $null
-        $RemoteText = $null
-        throw "Read-only Spain preflight returned a malformed failure envelope."
-    }
     if ($null -ne $SafeFailure) {
         $FailureClassification = "remote_probe"
         $FailureStage = $SafeFailure.Stage
         $FailureExitCode = $SafeFailure.ExitCode
         $FailureSubreason = $SafeFailure.Subreason
+    } elseif ($FailurePrefixCount -gt 0 -and $ProcessExitCode -ge 1 -and $ProcessExitCode -le 255) {
+        $FailureClassification = "envelope_rejected"
+        $FailureStage = "unavailable"
+        $FailureExitCode = $ProcessExitCode
+        $FailureSubreason = Get-SafeFailureEnvelopeRejectionSubreason ([string[]]$SshOutput) $ProcessExitCode
     } elseif ($ProcessExitCode -ge 1 -and $ProcessExitCode -le 255) {
         $FailureClassification = "transport"
         $FailureStage = "unavailable"

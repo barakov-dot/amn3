@@ -1,3 +1,36 @@
+# Текущий override 2026-07-21: safe envelope rejection diagnostic готов для run 008
+
+Локальная TDD-коррекция завершена. Строгий failure-envelope parser не
+ослаблен: если prefix присутствует, но parser отклоняет envelope, runner
+сохраняет только `classification=envelope_rejected`, `stage=unavailable`,
+безопасный process exit и одну allowlisted причину. Raw OpenSSH output и
+разобранные remote values не сохраняются.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_envelope_rejection_diagnostic=implemented_locally|tdd_red_green_verified
+spain_envelope_rejection_allowlist=prefix_count|shape|stage|exit|stage_exit_mapping|unavailable
+spain_next_outcome_run=spain-fresh-20260721-008|not_created|not_run|approval_required
+spain_immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D
+runner_sha256=C4F00EC9E0C53D9B9582B083ED8598BD3CB3F7DC202AA638AF7B197F8B730652
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=focused_30_passed|full_206_passed
+remaining_live_attempt_cap=run_008_then_at_most_one_proven_fix_run_009
+fresh_install_gate=blocked_until_run_008_success
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+```
+
+Run `008` ещё не создан и не выполнялся. Он требует отдельной exact single-use
+approval после commit/push/origin readback. Если `008` докажет конкретную
+исправимую причину, допускается максимум один новый `009`; иначе диагностика
+переносится в provider console/другой подход. `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md`
+остаётся нетронутым.
+
 # Текущий override 2026-07-21: Spain run 007 fail-closed на envelope rejection
 
 Literal approval для `spain-fresh-20260720-007` использована ровно один раз.

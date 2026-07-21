@@ -1,5 +1,26 @@
 # Spain read-only preflight gate
 
+## Текущий статус: safe envelope rejection diagnostic готов для run 008
+
+Strict parser остаётся authority для remote failure envelope. При наличии
+prefix и parser rejection новый runner записывает только безопасную
+классификацию `envelope_rejected`, `stage=unavailable`, process exit и одну
+причину из `prefix_count|shape|stage|exit|stage_exit_mapping|unavailable`.
+Raw line, parsed stage и private remote values не сериализуются.
+
+```text
+outcome_run=spain-fresh-20260721-008|not_created|not_run|approval_required
+immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D
+runner_sha256=C4F00EC9E0C53D9B9582B083ED8598BD3CB3F7DC202AA638AF7B197F8B730652
+tests=focused_30_passed|full_206_passed
+remaining_live_attempt_cap=run_008_then_at_most_one_proven_fix_run_009
+```
+
+Run 008 требует отдельной exact approval. При его неуспехе разрешён максимум
+один доказательно обоснованный run 009; далее gate переводится на provider
+console/другой способ, а не на новый повтор.
+
 ## Текущий статус: run 007 envelope rejection fail-closed
 
 Run `spain-fresh-20260720-007` выполнен один раз. Failure prefix был замечен,

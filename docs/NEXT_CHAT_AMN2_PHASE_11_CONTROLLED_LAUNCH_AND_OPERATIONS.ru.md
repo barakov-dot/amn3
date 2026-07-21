@@ -1,5 +1,32 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release Spain safe envelope rejection diagnostic ready for run 008 2026-07-21
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+envelope_rejection_diagnostic=implemented_locally|tdd_red_green_verified
+safe_names=prefix_count|shape|stage|exit|stage_exit_mapping|unavailable
+next_outcome_run=spain-fresh-20260721-008|not_created|not_run|approval_required
+immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D
+runner_sha256=C4F00EC9E0C53D9B9582B083ED8598BD3CB3F7DC202AA638AF7B197F8B730652
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=focused_30_passed|full_206_passed
+remaining_live_attempt_cap=run_008_then_at_most_one_proven_fix_run_009
+fresh_install_gate=blocked_until_run_008_success
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+next=EXACT_SINGLE_USE_READ_ONLY_PREFLIGHT_008_APPROVAL
+```
+
+Run `008` не выполнять без новой literal approval. После него разрешён не
+более чем один `009`, и только если evidence докажет конкретную исправимую
+причину; затем обязательно сменить способ диагностики. Raw output не
+сохраняется, AWG и посторонний сервис не изменяются.
+
 ## Post-release Spain run 007 envelope rejection override 2026-07-21
 
 ```text

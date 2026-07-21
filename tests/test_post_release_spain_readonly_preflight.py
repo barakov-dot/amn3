@@ -578,6 +578,49 @@ foreach ($case in $cases) {
         self.assertEqual(result.stdout, "")
 
     @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
+    def test_envelope_rejection_classifier_returns_only_allowlisted_reasons(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        classifier = extract_powershell_function(
+            source, "Get-SafeFailureEnvelopeRejectionSubreason"
+        )
+        allowed = "$AllowedFailureStages = @('" + "','".join(FAILURE_STAGES) + "')\n"
+        harness = allowed + classifier + r'''
+$cases = @(
+    [pscustomobject]@{ Lines=@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=render|exit=127','AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=render|exit=127'); ExitCode=127; Expected='prefix_count' },
+    [pscustomobject]@{ Lines=@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=render|exit=127|private=value'); ExitCode=127; Expected='shape' },
+    [pscustomobject]@{ Lines=@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=unknown|exit=23'); ExitCode=23; Expected='stage' },
+    [pscustomobject]@{ Lines=@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=firewall|exit=23'); ExitCode=24; Expected='exit' },
+    [pscustomobject]@{ Lines=@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=render|exit=127'); ExitCode=127; Expected='stage_exit_mapping' },
+    [pscustomobject]@{ Lines=@('AMN2_SPAIN_PREFLIGHT_FAILURE_V1|stage=render|exit=81'); ExitCode=81; Expected='unavailable' }
+)
+foreach ($case in $cases) {
+    $actual = Get-SafeFailureEnvelopeRejectionSubreason $case.Lines $case.ExitCode
+    if ($actual -cne $case.Expected) { exit 8 }
+}
+'''
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            harness_path = Path(raw_tmp) / "safe-envelope-rejection-classifier.ps1"
+            harness_path.write_text(harness, encoding="utf-8")
+            result = subprocess.run(
+                [
+                    str(POWERSHELL),
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(harness_path),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "")
+
+    @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
     def test_transport_classifier_returns_only_allowlisted_subreasons(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         classifier = extract_powershell_function(source, "Get-SafeTransportSubreason")
@@ -625,7 +668,7 @@ foreach ($case in $cases) {
     def test_runner_claims_exact_run_before_ssh_and_separates_outcomes(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         for marker in (
-            '$expectedRunId = "spain-fresh-20260720-007"',
+            '$expectedRunId = "spain-fresh-20260721-008"',
             "Exact Spain trust run id mismatch",
             'Join-Path $RunRoot "preflight-outcome.claim"',
             'Join-Path $RunRoot "preflight-failure-evidence.json"',
@@ -633,12 +676,14 @@ foreach ($case in $cases) {
             '"amn2.spain-readonly-preflight-failure.v1"',
             '$FailureClassification = "remote_probe"',
             '$FailureClassification = "transport"',
+            '$FailureClassification = "envelope_rejected"',
             '$FailureStage = "unavailable"',
         ):
             self.assertIn(marker, source)
         self.assertLess(source.index("Exact Spain trust run id mismatch"), source.index("Read-Binding"))
         self.assertLess(source.index("Write-EvidenceCreateNew $OutcomeClaimPath"), source.index("& $SshExe"))
         self.assertIn("Read-SafeFailureEnvelope ([string[]]$SshOutput) $ProcessExitCode", source)
+        self.assertIn("Get-SafeFailureEnvelopeRejectionSubreason ([string[]]$SshOutput) $ProcessExitCode", source)
         self.assertIn("Get-SafeTransportSubreason $SshOutput $ProcessExitCode", source)
         self.assertIn("2>&1", source)
         self.assertNotRegex(source, r"(?i)(?:stderr|ssherror).*(?:write|out-file|set-content)")
@@ -647,7 +692,7 @@ foreach ($case in $cases) {
     def test_runner_reuses_immutable_trust_bundle_but_claims_new_outcome_run(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         self.assertIn('$trustedBundleRunId = "spain-fresh-20260720-001"', source)
-        self.assertIn('$expectedRunId = "spain-fresh-20260720-007"', source)
+        self.assertIn('$expectedRunId = "spain-fresh-20260721-008"', source)
         self.assertIn('$TrustDirectory = Join-Path $ArtifactRoot $trustedBundleRunId', source)
         self.assertIn('$RunDirectory = Join-Path $ArtifactRoot $RunId', source)
         self.assertIn("[Environment]::GetFolderPath('LocalApplicationData')", source)
@@ -769,9 +814,9 @@ foreach ($case in $cases) {
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
             "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
-            "TRUST_RUN_ID_SPAIN_FRESH_20260720_007_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260721_008_"
             "IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_"
-            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_007_"
+            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260721_008_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"
@@ -855,9 +900,9 @@ class SpainReadonlyPreflightFailClosedTests(unittest.TestCase):
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
             "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
-            "TRUST_RUN_ID_SPAIN_FRESH_20260720_007_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260721_008_"
             "IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_"
-            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260720_007_"
+            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260721_008_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"
