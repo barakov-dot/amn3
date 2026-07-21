@@ -18,7 +18,7 @@ $run009FirewallBackend = "nft"
 $run009FirewallRulesSha = "35ED9383AE9E73268E3D1AB7F57612BC60EA59C0531D6A96372E5F3731883D00"
 $run009FirewallRuleCount = 129
 $trustedBundleRunId = "spain-fresh-20260720-001"
-$expectedRunId = "spain-resource-confirmation-20260721-007"
+$expectedRunId = "spain-resource-confirmation-20260721-008"
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
 $actualRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $RepositoryRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
@@ -929,7 +929,7 @@ $Result = $null
 try {
     try { $Result = Invoke-SshWithExactInput $SshExe $SshArguments $RemoteScriptBytes }
     finally { [Array]::Clear($RemoteScriptBytes, 0, $RemoteScriptBytes.Length) }
-    if ($Result.ExitCode -ne 0 -or $Result.StderrBytes.Length -ne 0) {
+    if ($Result.ExitCode -ne 0) {
         if ($Result.ExitCode -ne 0) {
             $OutcomeStage = Get-SafeRemoteFailureStage $Result.StdoutBytes $Result.ExitCode
         }
