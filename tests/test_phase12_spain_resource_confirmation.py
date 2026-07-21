@@ -428,6 +428,10 @@ class Phase12RemoteCollectorContractTests(unittest.TestCase):
             )
             self.assertEqual(result.stderr, "")
 
+    def test_capacity_probe_uses_compatible_df_options(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        self.assertNotIn("df -P -B1 --output=avail,iavail", source)
+
 
 @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
 class Phase12RunnerContractTests(unittest.TestCase):

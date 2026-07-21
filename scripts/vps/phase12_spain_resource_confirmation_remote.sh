@@ -314,7 +314,7 @@ mem_available_kib="$(awk '/^MemAvailable:/ {print $2; exit}' /proc/meminfo)"
 mem_available_bytes=$((mem_available_kib * 1024))
 filesystem_rows=""
 for filesystem_path in / /opt /etc /var /run; do
-    filesystem_values="$(df -P -B1 --output=avail,iavail "$filesystem_path" | awk 'NR==2 {print $1 "|" $2}')"
+    filesystem_values="$(df -B1 --output=avail,iavail "$filesystem_path" | awk 'NR==2 {print $1 "|" $2}')"
     [[ "$filesystem_values" =~ ^[0-9]+\|[0-9]+$ ]] || emit_failure 93
     filesystem_rows+="$filesystem_path|$filesystem_values"$'\n'
 done
