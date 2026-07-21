@@ -1,5 +1,33 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release Spain run 008 CRLF root cause and final run 009 2026-07-21
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+run_008=fail_closed|approval_consumed|never_repeat
+run_008_root_cause=local_powershell_object_pipeline_appended_crlf
+probe_file_line_endings=lf_only
+exact_byte_transport=implemented_locally|tdd_verified
+next_outcome_run=spain-fresh-20260721-009|not_created|not_run|approval_required|final_allowed_attempt
+immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D
+runner_sha256=26ED19344B9E7F56069BFEBAC9864BB5779B413767312B4AAB411B7DBF859D76
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=focused_33_passed|full_209_passed
+remaining_live_attempt_cap=run_009_only_then_stop_and_switch_approach
+fresh_install_gate=blocked_until_run_009_success
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+next=EXACT_SINGLE_USE_FINAL_READ_ONLY_PREFLIGHT_009_APPROVAL
+```
+
+Run 009 без отдельной literal approval не выполнять. При fail новые attempts
+запрещены; перейти к provider console/другому подходу. При pass подготовить
+Phase12 Spain migration handoff.
+
 ## Post-release Spain safe envelope rejection diagnostic ready for run 008 2026-07-21
 
 ```text

@@ -450,7 +450,7 @@ done
             '[string]::Equals($Approval, $expectedApproval, [StringComparison]::Ordinal)',
             'Get-FileHash -InputStream $RemoteScriptStream -Algorithm SHA256',
             '[IO.FileShare]::Read',
-            '$RemoteReader.ReadToEnd()',
+            '$RemoteScriptBytes',
             'target.env',
             'id_ed25519_spain',
             'known_hosts_spain',
@@ -477,8 +477,8 @@ done
         approval_check = '[string]::Equals($Approval, $expectedApproval, [StringComparison]::Ordinal)'
         self.assertLess(source.index(approval_check), source.index("Get-FileHash -InputStream $RemoteScriptStream"))
         self.assertLess(source.index("Get-FileHash -InputStream $RemoteScriptStream"), source.index("Read-Binding"))
-        self.assertLess(source.rindex("\nAssert-VerifiedHostPin $Binding\n"), source.index("& $SshExe"))
-        self.assertLess(source.rindex("\nAssert-DedicatedKeyPair\n"), source.index("& $SshExe"))
+        self.assertLess(source.rindex("\nAssert-VerifiedHostPin $Binding\n"), source.rindex("Invoke-SshWithExactInput $SshExe"))
+        self.assertLess(source.rindex("\nAssert-DedicatedKeyPair\n"), source.rindex("Invoke-SshWithExactInput $SshExe"))
         self.assertRegex(source, r'\$expectedRemoteScriptSha\s*=\s*"[A-F0-9]{64}"')
         self.assertNotRegex(source, r"(?i)password|sshpass|plink|putty|accept-new|stricthostkeychecking=no")
         self.assertNotIn("known_hosts\"", source)
@@ -486,7 +486,7 @@ done
         self.assertNotIn("Invoke-Expression", source)
         self.assertNotIn("[IO.File]::ReadAllText($RemoteScriptPath", source)
         self.assertGreaterEqual(source.count(r"(?: [^\r\n]+)?$"), 2)
-        self.assertIn("& $SshExe @SshArguments 2>&1", source)
+        self.assertNotIn("$RemoteText | & $SshExe", source)
         self.assertGreaterEqual(source.count("$SshOutput = $null"), 2)
         self.assertNotIn("if (Test-Path -LiteralPath $EvidencePath)", source)
         self.assertNotIn("[IO.File]::WriteAllText($EvidencePath", source)
@@ -494,6 +494,86 @@ done
         self.assertIn("[IO.FileShare]::None", source)
         self.assertLess(source.index("Write-EvidenceCreateNew $EvidencePath"), source.index("Protect-PrivatePath $EvidencePath"))
         self.assertLess(source.index("Protect-PrivatePath $EvidencePath"), source.index("Assert-PrivatePath $EvidencePath"))
+
+    @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
+    def test_windows_command_line_argument_quoting_preserves_special_values(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        quoting = extract_powershell_function(source, "ConvertTo-WindowsCommandLineArgument")
+        harness = quoting + r'''
+$cases = @(
+    [pscustomobject]@{ Value='plain'; Expected='"plain"' },
+    [pscustomobject]@{ Value='two words'; Expected='"two words"' },
+    [pscustomobject]@{ Value='C:\path\'; Expected='"C:\path\\"' },
+    [pscustomobject]@{ Value='a"b'; Expected='"a\"b"' },
+    [pscustomobject]@{ Value=''; Expected='""' }
+)
+foreach ($case in $cases) {
+    if ((ConvertTo-WindowsCommandLineArgument $case.Value) -cne $case.Expected) { exit 9 }
+}
+'''
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            harness_path = Path(raw_tmp) / "windows-command-line-quoting.ps1"
+            harness_path.write_text(harness, encoding="utf-8")
+            result = subprocess.run(
+                [
+                    str(POWERSHELL),
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(harness_path),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_runner_writes_exact_probe_bytes_without_powershell_pipeline_newline(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        self.assertIn("RedirectStandardInput = $true", source)
+        self.assertIn("StandardInput.BaseStream.Write", source)
+        self.assertIn("$RemoteScriptBytes.Length", source)
+        self.assertIn("Invoke-SshWithExactInput", source)
+        self.assertIn("[Array]::Clear($RemoteScriptBytes", source)
+        self.assertNotIn("$RemoteText | & $SshExe", source)
+
+    @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
+    def test_exact_input_process_boundary_does_not_append_carriage_return(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        quoting = extract_powershell_function(source, "ConvertTo-WindowsCommandLineArgument")
+        invocation = extract_powershell_function(source, "Invoke-SshWithExactInput")
+        harness = quoting + invocation + r'''
+$SshExe = (Get-Command powershell.exe).Source
+$child = '$stream=[Console]::OpenStandardInput();$values=@();while(($value=$stream.ReadByte()) -ge 0){$values += $value};($values | ForEach-Object {$_.ToString("X2")}) -join ""'
+$payload = [byte[]](0x41, 0x0A)
+$result = Invoke-SshWithExactInput $SshExe @('-NoLogo','-NoProfile','-NonInteractive','-Command',$child) $payload
+if ($result.ExitCode -ne 0) { exit 10 }
+if ($result.Lines.Count -ne 1 -or $result.Lines[0] -cne '410A') { exit 11 }
+'''
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            harness_path = Path(raw_tmp) / "exact-input-process-boundary.ps1"
+            harness_path.write_text(harness, encoding="utf-8")
+            result = subprocess.run(
+                [
+                    str(POWERSHELL),
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(harness_path),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
 
     @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
     def test_safe_failure_envelope_parser_accepts_exact_allowlisted_stage(self) -> None:
@@ -668,7 +748,7 @@ foreach ($case in $cases) {
     def test_runner_claims_exact_run_before_ssh_and_separates_outcomes(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         for marker in (
-            '$expectedRunId = "spain-fresh-20260721-008"',
+            '$expectedRunId = "spain-fresh-20260721-009"',
             "Exact Spain trust run id mismatch",
             'Join-Path $RunRoot "preflight-outcome.claim"',
             'Join-Path $RunRoot "preflight-failure-evidence.json"',
@@ -681,18 +761,24 @@ foreach ($case in $cases) {
         ):
             self.assertIn(marker, source)
         self.assertLess(source.index("Exact Spain trust run id mismatch"), source.index("Read-Binding"))
-        self.assertLess(source.index("Write-EvidenceCreateNew $OutcomeClaimPath"), source.index("& $SshExe"))
+        self.assertLess(
+            source.index("Write-EvidenceCreateNew $OutcomeClaimPath"),
+            source.rindex("Invoke-SshWithExactInput $SshExe"),
+        )
         self.assertIn("Read-SafeFailureEnvelope ([string[]]$SshOutput) $ProcessExitCode", source)
         self.assertIn("Get-SafeFailureEnvelopeRejectionSubreason ([string[]]$SshOutput) $ProcessExitCode", source)
         self.assertIn("Get-SafeTransportSubreason $SshOutput $ProcessExitCode", source)
-        self.assertIn("2>&1", source)
+        self.assertIn("RedirectStandardError = $true", source)
         self.assertNotRegex(source, r"(?i)(?:stderr|ssherror).*(?:write|out-file|set-content)")
-        self.assertLess(source.index("$SshOutput = $null", source.index("$ProcessExitCode = $LASTEXITCODE")), source.index("$FailureJson = [ordered]@{"))
+        self.assertLess(
+            source.index("$SshOutput = $null", source.index("$ProcessExitCode = $SshResult.ExitCode")),
+            source.index("$FailureJson = [ordered]@{"),
+        )
 
     def test_runner_reuses_immutable_trust_bundle_but_claims_new_outcome_run(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         self.assertIn('$trustedBundleRunId = "spain-fresh-20260720-001"', source)
-        self.assertIn('$expectedRunId = "spain-fresh-20260721-008"', source)
+        self.assertIn('$expectedRunId = "spain-fresh-20260721-009"', source)
         self.assertIn('$TrustDirectory = Join-Path $ArtifactRoot $trustedBundleRunId', source)
         self.assertIn('$RunDirectory = Join-Path $ArtifactRoot $RunId', source)
         self.assertIn("[Environment]::GetFolderPath('LocalApplicationData')", source)
@@ -814,9 +900,9 @@ foreach ($case in $cases) {
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
             "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
-            "TRUST_RUN_ID_SPAIN_FRESH_20260721_008_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260721_009_"
             "IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_"
-            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260721_008_"
+            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260721_009_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"
@@ -900,9 +986,9 @@ class SpainReadonlyPreflightFailClosedTests(unittest.TestCase):
             "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_"
             f"RUNNER_SHA_{runner_sha}_REMOTE_SCRIPT_SHA_{remote_sha}_"
             "SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_"
-            "TRUST_RUN_ID_SPAIN_FRESH_20260721_008_"
+            "TRUST_RUN_ID_SPAIN_FRESH_20260721_009_"
             "IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_"
-            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260721_008_"
+            "NEW_OUTCOME_RUN_SPAIN_FRESH_20260721_009_"
             "DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_"
             "READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_"
             "AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_"

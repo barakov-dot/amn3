@@ -1,3 +1,44 @@
+# Текущий override 2026-07-21: run 008 доказал CRLF stdin defect; финальный run 009 готовится
+
+Literal approval `spain-fresh-20260721-008` использована один раз. Outcome
+создал claim и остановился fail-closed до sanitized evidence: PowerShell native
+object pipeline добавил Windows CRLF после LF-terminated probe, а remote Bash
+увидел отдельный carriage return после последней строки. Probe-файл проверен:
+`434 LF`, `0 CRLF`, последний byte `0A`; Spain VPS не является источником CR.
+
+Локальная TDD-коррекция заменяет object pipeline на exact byte forwarding через
+redirected `StandardInput.BaseStream`. Проверенные probe bytes читаются из того
+же checksum-validated stream, command-line arguments экранируются по Windows
+CreateProcess rules, stdout/stderr остаются только в памяти.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_run_008=fail_closed|approval_consumed|never_repeat
+spain_run_008_claim=present
+spain_run_008_failure_evidence=absent
+spain_run_008_success_evidence=absent
+spain_run_008_root_cause=local_powershell_pipeline_appended_crlf
+spain_exact_byte_transport=implemented_locally|tdd_verified
+spain_next_outcome_run=spain-fresh-20260721-009|not_created|not_run|approval_required|final_allowed_attempt
+spain_immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D
+runner_sha256=26ED19344B9E7F56069BFEBAC9864BB5779B413767312B4AAB411B7DBF859D76
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+tests=focused_33_passed|full_209_passed
+remaining_live_attempt_cap=run_009_only_then_stop_and_switch_approach
+fresh_install_gate=blocked_until_run_009_success
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+```
+
+Run `009` — последний разрешённый preflight attempt. При любом неуспехе новые
+runner/retry не создаются: дальнейшая диагностика только через provider console
+или иной согласованный подход. `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md`
+остаётся нетронутым.
+
 # Текущий override 2026-07-21: safe envelope rejection diagnostic готов для run 008
 
 Локальная TDD-коррекция завершена. Строгий failure-envelope parser не

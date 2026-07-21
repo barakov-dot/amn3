@@ -1,5 +1,28 @@
 # Spain read-only preflight gate
 
+## Текущий статус: run 008 выявил CRLF transport defect; финальный run 009
+
+Run 008 consumed. Claim создан, success/failure evidence отсутствуют. Локальный
+probe содержит только LF, но прежний PowerShell object pipeline добавил CRLF
+при передаче string в native stdin. Поэтому удалённый Bash получил лишний CR
+после последней строки; это доказанный локальный transport defect.
+
+Исправленный runner передаёт checksum-validated byte array напрямую через
+`StandardInput.BaseStream`. Локальный end-to-end regression подтвердил, что
+payload `41 0A` достигает child process ровно как `410A`, без добавленного CR.
+
+```text
+outcome_run=spain-fresh-20260721-009|not_created|not_run|approval_required|final_allowed_attempt
+immutable_trust_bundle=spain-fresh-20260720-001
+remote_probe_sha256=228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D
+runner_sha256=26ED19344B9E7F56069BFEBAC9864BB5779B413767312B4AAB411B7DBF859D76
+tests=focused_33_passed|full_209_passed
+remaining_live_attempt_cap=run_009_only_then_stop_and_switch_approach
+```
+
+Run 009 требует отдельной exact approval. Независимо от результата он является
+последним attempt в этой цепочке.
+
 ## Текущий статус: safe envelope rejection diagnostic готов для run 008
 
 Strict parser остаётся authority для remote failure envelope. При наличии

@@ -17,14 +17,14 @@ Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Utility") -ErrorA
 
 $expectedRemoteScriptSha = "228E53330DF694F18BBA6C2F13A7837C7F0B5F2A0D5D4757A134E126FB18945D"
 $trustedBundleRunId = "spain-fresh-20260720-001"
-$expectedRunId = "spain-fresh-20260721-008"
+$expectedRunId = "spain-fresh-20260721-009"
 $AllowedFailureStages = @(
     "bootstrap", "os_kernel", "capacity", "sockets", "firewall",
     "ssh_policy", "docker_inventory", "systemd_inventory",
     "systemd_unit_content", "systemd_cgroup_ports", "render"
 )
 $actualRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
-$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_RUNNER_SHA_$actualRunnerSha`_REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha`_SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_TRUST_RUN_ID_SPAIN_FRESH_20260721_008_IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_NEW_OUTCOME_RUN_SPAIN_FRESH_20260721_008_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
+$expectedApproval = "APPROVE POST_RELEASE_SPAIN_READ_ONLY_PREFLIGHT_RUNNER_SHA_$actualRunnerSha`_REMOTE_SCRIPT_SHA_$expectedRemoteScriptSha`_SOURCE_55DC243B8E6C6BDB57F8301B56326E4CD4072D19_TRUST_RUN_ID_SPAIN_FRESH_20260721_009_IMMUTABLE_TRUST_BUNDLE_SPAIN_FRESH_20260720_001_NEW_OUTCOME_RUN_SPAIN_FRESH_20260721_009_DEDICATED_ED25519_EXACT_PRIVATE_TARGET_AND_INDEPENDENT_HOST_KEY_PIN_READ_ONLY_OS_CAPACITY_PORT_SERVICE_DOCKER_SYSTEMD_FIREWALL_SSH_CLOCK_AND_UNRELATED_SERVICE_FINGERPRINT_NO_INSTALL_NO_RESTART_NO_STOP_NO_CONFIG_SECRET_TELEGRAM_OR_AWG_MUTATION"
 if ([string]::IsNullOrEmpty($Approval)) {
     Write-Output $expectedApproval
     throw "Exact read-only preflight approval mismatch."
@@ -47,26 +47,35 @@ $RemoteScriptStream = [IO.File]::Open(
     [IO.FileAccess]::Read,
     [IO.FileShare]::Read
 )
-$RemoteReader = $null
+$RemoteScriptBytes = $null
 try {
     $actualRemoteScriptSha = (Get-FileHash -InputStream $RemoteScriptStream -Algorithm SHA256).Hash.ToUpperInvariant()
     $RemoteScriptStream.Position = 0
-    $RemoteReader = [IO.StreamReader]::new(
-        $RemoteScriptStream,
-        (New-Object Text.UTF8Encoding($false, $true)),
-        $true,
-        1024,
-        $true
-    )
-    $RemoteText = $RemoteReader.ReadToEnd()
-} finally {
-    if ($null -ne $RemoteReader) {
-        $RemoteReader.Dispose()
+    if ($RemoteScriptStream.Length -lt 1 -or $RemoteScriptStream.Length -gt 1048576) {
+        throw "Reviewed remote probe length is unsafe."
     }
+    $RemoteScriptBytes = New-Object byte[] ([int]$RemoteScriptStream.Length)
+    $Offset = 0
+    while ($Offset -lt $RemoteScriptBytes.Length) {
+        $Read = $RemoteScriptStream.Read(
+            $RemoteScriptBytes,
+            $Offset,
+            $RemoteScriptBytes.Length - $Offset
+        )
+        if ($Read -le 0) {
+            throw "Reviewed remote probe byte read was incomplete."
+        }
+        $Offset += $Read
+    }
+    $StrictUtf8 = New-Object Text.UTF8Encoding($false, $true)
+    [void]$StrictUtf8.GetString($RemoteScriptBytes)
+} finally {
     $RemoteScriptStream.Dispose()
 }
 if ($actualRemoteScriptSha -cne $expectedRemoteScriptSha) {
-    $RemoteText = $null
+    if ($null -ne $RemoteScriptBytes) {
+        [Array]::Clear($RemoteScriptBytes, 0, $RemoteScriptBytes.Length)
+    }
     throw "Reviewed remote probe checksum mismatch."
 }
 
@@ -204,6 +213,89 @@ function Write-EvidenceCreateNew([string]$Path, [string]$Json) {
     } finally {
         $EvidenceStream.Dispose()
         [Array]::Clear($EvidenceBytes, 0, $EvidenceBytes.Length)
+    }
+}
+
+function ConvertTo-WindowsCommandLineArgument([string]$Value) {
+    if ($null -eq $Value) {
+        throw "Native process argument must not be null."
+    }
+    $Builder = [Text.StringBuilder]::new()
+    [void]$Builder.Append([char]34)
+    $BackslashCount = 0
+    foreach ($Character in $Value.ToCharArray()) {
+        if ([int]$Character -eq 92) {
+            $BackslashCount += 1
+            continue
+        }
+        if ([int]$Character -eq 34) {
+            if ($BackslashCount -gt 0) {
+                [void]$Builder.Append((('\' * ($BackslashCount * 2)) -join ''))
+            }
+            [void]$Builder.Append([char]92)
+            [void]$Builder.Append([char]34)
+        } else {
+            if ($BackslashCount -gt 0) {
+                [void]$Builder.Append((('\' * $BackslashCount) -join ''))
+            }
+            [void]$Builder.Append($Character)
+        }
+        $BackslashCount = 0
+    }
+    if ($BackslashCount -gt 0) {
+        [void]$Builder.Append((('\' * ($BackslashCount * 2)) -join ''))
+    }
+    [void]$Builder.Append([char]34)
+    return $Builder.ToString()
+}
+
+function Invoke-SshWithExactInput([string]$FileName, [string[]]$Arguments, [byte[]]$StandardInputBytes) {
+    if (-not [string]::Equals($FileName, $SshExe, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Executable path is outside the trusted OpenSSH client."
+    }
+    $StartInfo = [Diagnostics.ProcessStartInfo]::new()
+    $StartInfo.FileName = $FileName
+    $StartInfo.Arguments = (($Arguments | ForEach-Object {
+        ConvertTo-WindowsCommandLineArgument $_
+    }) -join ' ')
+    $StartInfo.UseShellExecute = $false
+    $StartInfo.CreateNoWindow = $true
+    $StartInfo.RedirectStandardInput = $true
+    $StartInfo.RedirectStandardOutput = $true
+    $StartInfo.RedirectStandardError = $true
+
+    $Process = [Diagnostics.Process]::new()
+    $Process.StartInfo = $StartInfo
+    try {
+        if (-not $Process.Start()) {
+            throw "Trusted OpenSSH client did not start."
+        }
+        $StdoutTask = $Process.StandardOutput.ReadToEndAsync()
+        $StderrTask = $Process.StandardError.ReadToEndAsync()
+        if ($StandardInputBytes.Length -gt 0) {
+            $Process.StandardInput.BaseStream.Write(
+                $StandardInputBytes,
+                0,
+                $StandardInputBytes.Length
+            )
+            $Process.StandardInput.BaseStream.Flush()
+        }
+        $Process.StandardInput.Close()
+        $Process.WaitForExit()
+        $Stdout = $StdoutTask.GetAwaiter().GetResult()
+        $Stderr = $StderrTask.GetAwaiter().GetResult()
+        $Lines = @()
+        foreach ($Text in @($Stdout, $Stderr)) {
+            if (-not [string]::IsNullOrEmpty($Text)) {
+                $Lines += @([regex]::Split($Text, '\r?\n') | Where-Object { $_.Length -gt 0 })
+            }
+        }
+        return [pscustomobject]@{
+            Lines = [string[]]$Lines
+            ExitCode = [int]$Process.ExitCode
+        }
+    } finally {
+        $Process.Dispose()
     }
 }
 
@@ -423,7 +515,7 @@ try {
     Protect-PrivatePath $OutcomeClaimPath
     Assert-PrivatePath $OutcomeClaimPath
 } catch {
-    $RemoteText = $null
+    [Array]::Clear($RemoteScriptBytes, 0, $RemoteScriptBytes.Length)
     $ClaimJson = $null
     throw "Single-use Spain preflight outcome claim creation failed."
 }
@@ -441,8 +533,14 @@ $SshArguments = @(
     "bash -s -- preflight"
 )
 
-$SshOutput = @($RemoteText | & $SshExe @SshArguments 2>&1)
-$ProcessExitCode = $LASTEXITCODE
+try {
+    $SshResult = Invoke-SshWithExactInput $SshExe $SshArguments $RemoteScriptBytes
+} finally {
+    [Array]::Clear($RemoteScriptBytes, 0, $RemoteScriptBytes.Length)
+}
+$SshOutput = @($SshResult.Lines)
+$ProcessExitCode = $SshResult.ExitCode
+$SshResult = $null
 if ($ProcessExitCode -ne 0) {
     $FailurePrefixCount = @(
         $SshOutput | Where-Object {
@@ -467,11 +565,9 @@ if ($ProcessExitCode -ne 0) {
         $FailureSubreason = Get-SafeTransportSubreason $SshOutput $ProcessExitCode
     } else {
         $SshOutput = $null
-        $RemoteText = $null
         throw "Read-only Spain preflight failed without a safe exit classification."
     }
     $SshOutput = $null
-    $RemoteText = $null
     $FailureJson = [ordered]@{
         schema = "amn2.spain-readonly-preflight-failure.v1"
         classification = $FailureClassification
@@ -495,7 +591,6 @@ if ($ProcessExitCode -ne 0) {
 }
 $RawEvidence = ($SshOutput -join "`n").Trim()
 $SshOutput = $null
-$RemoteText = $null
 if (-not $RawEvidence -or $RawEvidence.Contains($Binding["TARGET_HOST"])) {
     $RawEvidence = $null
     throw "Read-only Spain preflight returned unsafe evidence."
