@@ -18,7 +18,7 @@ $run009FirewallBackend = "nft"
 $run009FirewallRulesSha = "35ED9383AE9E73268E3D1AB7F57612BC60EA59C0531D6A96372E5F3731883D00"
 $run009FirewallRuleCount = 129
 $trustedBundleRunId = "spain-fresh-20260720-001"
-$expectedRunId = "spain-resource-confirmation-20260721-005"
+$expectedRunId = "spain-resource-confirmation-20260721-006"
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
 $actualRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $RepositoryRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
@@ -443,7 +443,11 @@ function Write-SanitizedOutcomeReceipt(
     [string]$ResourcePlanSha,
     [string[]]$ConflictCodes
 ) {
-    $AllowedStages = @("ssh", "framing", "content", "json", "schema", "fingerprint", "conflict", "persist", "completion")
+    $AllowedStages = @(
+        "ssh", "framing", "content", "json", "schema", "fingerprint", "conflict", "persist", "completion",
+        "bootstrap", "host_identity", "platform", "capacity", "candidate_inventory", "listeners", "network_state",
+        "firewall", "systemd_inventory", "systemd_unit_content", "systemd_cgroup_ports", "render"
+    )
     $AllowedReasons = @(
         "SSH_COLLECTION_FAILED", "STDOUT_FRAMING_INVALID", "STDOUT_CONTENT_UNSAFE",
         "JSON_INVALID", "SCHEMA_INVALID", "FINGERPRINT_MISMATCH",
