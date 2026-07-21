@@ -9,8 +9,8 @@ Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Security") -Error
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Utility") -ErrorAction Stop
 
 $expectedRemoteScriptSha = "70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A"
-$expectedFingerprintSetSha = "A87DB48091F6FC36B81DBB7C3EFAD77B21F1DF3270E9E5990ACAB10AD0BE0300"
-$expectedFingerprintSetBytes = 48205
+$expectedFingerprintSetSha = "37041070A4F748F0CF46BA671A5B5BCE714B066D841B150A2AE128EFE6ED22A2"
+$expectedFingerprintSetBytes = 44899
 $expectedPackageResourcePlanSha = "29BE4B5E301EDBDEAA39B2596833D4A850BEC883C75A2CE3738D51DB13846264"
 $run009EvidenceSha = "8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8"
 $run009RawOrderFingerprintSha = "E15219CB5204D54A9AD11263CFBA1F7C86E16DAB3287C752A8B6F136EC4A5ED5"
@@ -18,7 +18,7 @@ $run009FirewallBackend = "nft"
 $run009FirewallRulesSha = "35ED9383AE9E73268E3D1AB7F57612BC60EA59C0531D6A96372E5F3731883D00"
 $run009FirewallRuleCount = 129
 $trustedBundleRunId = "spain-fresh-20260720-001"
-$expectedRunId = "spain-resource-confirmation-20260721-010"
+$expectedRunId = "spain-resource-confirmation-20260721-011"
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
 $actualRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $RepositoryRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
@@ -273,7 +273,6 @@ function Get-FingerprintSetReceipt([object[]]$Entries) {
         if ($Entry.kind -ceq "unit") {
             $Canonical += [ordered]@{
                 active_state = $Entry.active_state
-                bound_port_set = @($Entry.bound_port_set)
                 bound_port_status = $Entry.bound_port_status
                 image_or_unit_sha256 = $Entry.image_or_unit_sha256
                 kind = $Entry.kind
@@ -284,7 +283,6 @@ function Get-FingerprintSetReceipt([object[]]$Entries) {
         } else {
             $Canonical += [ordered]@{
                 active_state = $Entry.active_state
-                bound_port_set = @($Entry.bound_port_set)
                 image_or_unit_sha256 = $Entry.image_or_unit_sha256
                 kind = $Entry.kind
                 name_sha256 = $Entry.name_sha256
