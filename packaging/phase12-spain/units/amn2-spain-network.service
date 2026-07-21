@@ -1,0 +1,27 @@
+[Unit]
+Description=AMN2 Spain sealed network contour
+Requires=amn2-spain-docker.service
+After=amn2-spain-docker.service nftables.service
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/amn2-spain/current/scripts/phase12_spain_network.py apply --ledger /var/lib/amn2-spain/network-ledger.json
+ExecStartPost=/usr/bin/python3 /opt/amn2-spain/current/scripts/phase12_spain_network.py verify --ledger /var/lib/amn2-spain/network-ledger.json
+ExecStop=/usr/bin/python3 /opt/amn2-spain/current/scripts/phase12_spain_network.py rollback --ledger /var/lib/amn2-spain/network-ledger.json
+RemainAfterExit=yes
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_NET_ADMIN
+AmbientCapabilities=CAP_NET_ADMIN
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/amn2-spain /proc/sys/net/ipv4/ip_forward
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+RestrictAddressFamilies=AF_UNIX AF_NETLINK AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

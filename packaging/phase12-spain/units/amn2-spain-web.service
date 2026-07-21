@@ -1,0 +1,22 @@
+[Unit]
+Description=AMN2 Spain loopback web service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=amn2-spain
+Group=amn2-spain
+EnvironmentFile=/etc/amn2-spain/runtime.env
+WorkingDirectory=/opt/amn2-spain/runtime/source
+ExecStart=/usr/bin/python3 -B -m app.cli web serve --host 127.0.0.1 --port 3031
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/amn2-spain
+
+[Install]
+WantedBy=multi-user.target

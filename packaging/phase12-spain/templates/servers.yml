@@ -1,0 +1,28 @@
+servers:
+  - name: spain
+    enabled: true
+    location: Spain
+    ssh:
+      host: __AMN2_SPAIN_ENDPOINT_HOST__
+      port: 22
+      user: root
+      auth:
+        type: key
+        private_key_path: null
+    vpn:
+      endpoint_host: __AMN2_SPAIN_ENDPOINT_HOST__
+      port: 30001
+      interface: awgsp0
+      network_cidr: 10.212.12.0/24
+      server_address: 10.212.12.1/24
+      dns: 1.1.1.1
+      allowed_ips: 0.0.0.0/0
+      max_devices: 254
+      server_public_key: __AMN2_GENERATED_SERVER_PUBLIC_KEY__
+    firewall:
+      provider: nftables
+      open_vpn_port: false
+    runtime:
+      type: docker
+      container_name: amn2-spain-awg
+      config_path: /etc/amnezia/amneziawg/awgsp0.conf

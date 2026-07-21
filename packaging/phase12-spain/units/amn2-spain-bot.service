@@ -1,0 +1,21 @@
+[Unit]
+Description=AMN2 Spain Telegram bot (issuance gate disabled)
+ConditionPathExists=/etc/amn2-spain/bot-enabled
+After=network-online.target
+
+[Service]
+Type=notify
+NotifyAccess=main
+User=amn2-spain
+Group=amn2-spain
+EnvironmentFile=/etc/amn2-spain/runtime.env
+WorkingDirectory=/opt/amn2-spain/runtime/source
+ExecStart=/usr/bin/python3 -B -m app.main
+Restart=no
+RuntimeDirectory=amn2-spain-bot
+RuntimeDirectoryMode=0750
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/amn2-spain

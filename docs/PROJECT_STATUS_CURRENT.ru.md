@@ -1,3 +1,31 @@
+# Текущий override 2026-07-21: Phase 12 checksum-bound package gate ready; awaiting separate read-only approval
+
+Phase 12 local package gate завершён без SSH и без Spain mutation. Готовые
+package и standalone executor собраны дважды byte-identical, offline
+clean-room verify/extract прошёл, а независимый GPT-5.6 SOL review дал `GO`
+без reportable findings. Повторять runs 001–009, builds, tests или review не
+нужно. Следующий live gate — только отдельный checksum-bound read-only
+resource confirmation; upload, install и любая mutation по-прежнему запрещены.
+
+```text
+active_phase=AMN2 Phase 12 Spain Migration|package_gate_ready
+phase12_package_archive_sha256=76F941869C8985A1C01C904314D033D95205C7C25BF1D9F46E795A3A389C5EA9
+phase12_package_archive_size=139909120
+phase12_manifest_sha256=B21B00A20B939B1A3B83E6CE32EFC37138C4A8E72110379D3FA0A49BD8C1E69A
+phase12_resource_plan_sha256=F313D5943E2EC142051735F0EF98CAEE6A453751E76BC7281830F5A2B44D8A0C
+phase12_executor_sha256=CFDC31A2D2576AECEB0630302B382DBD131508A6C9CA64FF59A2DD930D4DA23E
+phase12_executor_size=109116
+phase12_package_executor_reproducible=byte_identical_double_builds
+phase12_clean_room_verify_extract=passed
+phase12_independent_review=GO|no_reportable_findings
+phase12_next_live_gate=separate_exact_read_only_resource_confirmation_approval
+spain_mutation=false
+spain_unrelated_service=untouched
+production_awg=untouched
+```
+
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся нетронутым.
+
 # Текущий override 2026-07-21: Spain preflight 009 passed; Phase 12 migration entry ready
 
 Финальный single-use outcome `spain-fresh-20260721-009` завершился успешно.

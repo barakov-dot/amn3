@@ -1,0 +1,75 @@
+{
+  "schema": "amn2.spain-precondition-observation.v1",
+  "os": {
+    "family": "ubuntu",
+    "release": "24.04",
+    "kernel": "6.8.0-124-generic",
+    "architecture": "x86_64",
+    "python": "3.12.3",
+    "glibc": "2.39",
+    "python_soabi": "cpython-312-x86_64-linux-gnu"
+  },
+  "capacity": {
+    "disk_available_bytes": 7516192768,
+    "inodes_available": 750000,
+    "memory_available_kib": 524288,
+    "filesystems": {
+      "/opt": {"disk_available_bytes": 7516192768, "inodes_available": 750000},
+      "/etc": {"disk_available_bytes": 7516192768, "inodes_available": 750000},
+      "/var": {"disk_available_bytes": 7516192768, "inodes_available": 750000},
+      "/run": {"disk_available_bytes": 524288000, "inodes_available": 250000}
+    }
+  },
+  "existing": {
+    "paths": [],
+    "retained_paths": [],
+    "users": [],
+    "groups": [],
+    "units": [],
+    "containers": [],
+    "networks": [],
+    "bridges": [],
+    "interfaces": [],
+    "uids": [],
+    "gids": [],
+    "sockets": [],
+    "runtime_dirs": [],
+    "firewall_objects": [],
+    "owned_routes": [],
+    "sysctls": []
+  },
+  "listeners": [
+    "tcp|wildcard|22",
+    "tcp|wildcard|53",
+    "tcp|wildcard|443",
+    "tcp|wildcard|8080",
+    "tcp|wildcard|10050",
+    "udp|wildcard|53",
+    "udp|wildcard|443"
+  ],
+  "addresses": ["127.0.0.1/8", "203.0.113.10/24"],
+  "routes": ["0.0.0.0/0", "203.0.113.0/24"],
+  "docker_present": false,
+  "package_root": {"exists": false, "is_symlink": false, "owner_uid": null, "owner_gid": null, "mode": null},
+  "systemd_projection": [
+    {
+      "kind": "unit",
+      "name_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "image_or_unit_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "active_state": "active:running",
+      "restart_count": 0,
+      "bound_port_set": [443],
+      "unit_content_status": "exact",
+      "bound_port_status": "cgroup_complete"
+    }
+  ],
+  "firewall": {
+    "backend": "nft",
+    "rules_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "rule_count": 2,
+    "nft_json": {"nftables": [
+      {"table": {"family": "inet", "name": "unrelated"}},
+      {"chain": {"family": "inet", "table": "unrelated", "name": "input"}}
+    ]}
+  }
+}

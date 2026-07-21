@@ -1,0 +1,13 @@
+{
+  "hosts": ["unix:///run/amn2-spain-docker/docker.sock"],
+  "group": "root",
+  "data-root": "/var/lib/amn2-spain-docker",
+  "exec-root": "/run/amn2-spain-docker/exec",
+  "pidfile": "/run/amn2-spain-docker/docker.pid",
+  "bridge": "none",
+  "iptables": false,
+  "ip6tables": false,
+  "ip-forward": false,
+  "ip-masq": false,
+  "userland-proxy": false
+}

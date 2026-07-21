@@ -1,0 +1,22 @@
+[Unit]
+Description=AMN2 Spain dedicated static Docker runtime
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+Environment=PATH=/opt/amn2-spain/docker/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/opt/amn2-spain/docker/bin/dockerd --config-file=/etc/amn2-spain/docker-daemon.json
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=on-failure
+RestartSec=2
+RuntimeDirectory=amn2-spain-docker
+RuntimeDirectoryMode=0750
+Delegate=yes
+TasksMax=infinity
+LimitNOFILE=infinity
+KillMode=process
+OOMScoreAdjust=-500
+
+[Install]
+WantedBy=multi-user.target

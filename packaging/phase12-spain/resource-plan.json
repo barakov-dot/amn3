@@ -1,0 +1,74 @@
+{
+  "schema": "amn2.spain-resource-plan.v1",
+  "target": {
+    "os_family": "ubuntu",
+    "os_release": "24.04",
+    "kernel_prefix": "6.8.",
+    "architecture": "x86_64",
+    "python_major_minor": "3.12",
+    "glibc_minimum": "2.39",
+    "python_soabi": "cpython-312-x86_64-linux-gnu"
+  },
+  "capacity_minimums": {
+    "disk_available_bytes": 4294967296,
+    "inodes_available": 250000,
+    "memory_available_kib": 262144
+  },
+  "resources": {
+    "paths": [
+      "/opt/amn2-spain-package",
+      "/opt/amn2-spain",
+      "/etc/amn2-spain",
+      "/var/lib/amn2-spain",
+      "/var/lib/amn2-spain-docker",
+      "/run/amn2-spain-docker"
+    ],
+    "retained_paths": ["/var/lib/amn2-spain-phase12-audit"],
+    "users": ["amn2-spain"],
+    "groups": ["amn2-spain"],
+    "units": [
+      "amn2-spain-web.service",
+      "amn2-spain-bot.service",
+      "amn2-spain-docker.service",
+      "amn2-spain-network.service"
+    ],
+    "containers": ["amn2-spain-awg"],
+    "networks": ["amn2-spain-net"],
+    "bridges": ["amn2spbr0"],
+    "interfaces": ["awgsp0"],
+    "uids": [61212],
+    "gids": [61212],
+    "sockets": ["/run/amn2-spain-docker/docker.sock"],
+    "runtime_dirs": ["/run/amn2-spain-docker"],
+    "firewall_objects": [
+      "inet:amn2_spain",
+      "inet:amn2_spain:chain:prerouting",
+      "inet:amn2_spain:chain:forward",
+      "inet:amn2_spain:chain:postrouting",
+      "inet:amn2_spain:rule:udp30001",
+      "inet:amn2_spain:rule:forward-dnat",
+      "inet:amn2_spain:rule:forward-outbound",
+      "inet:amn2_spain:rule:forward-return",
+      "inet:amn2_spain:rule:masquerade"
+    ],
+    "owned_routes": ["10.212.12.0/24|via|172.29.251.2|dev|amn2spbr0"],
+    "sysctls": ["net.ipv4.ip_forward=1"]
+  },
+  "listeners": ["tcp|loopback|3031", "udp|wildcard|30001"],
+  "docker_cidr": "172.29.251.0/28",
+  "container_address": "172.29.251.2/28",
+  "vpn_cidr": "10.212.12.0/24",
+  "server_vpn_address": "10.212.12.1/24",
+  "owned_firewall_prefix": "amn2_spain",
+  "firewall_namespace": {"family": "inet", "table": "amn2_spain", "chains": ["prerouting", "forward", "postrouting"], "sets": []},
+  "package_root": {"path": "/opt/amn2-spain-package", "owner_uid": 0, "owner_gid": 0, "mode": "0700", "exclusive": true},
+  "capacity_filesystems": ["/opt", "/etc", "/var", "/run"],
+  "runtime_invariants": {
+    "database": "clean",
+    "peer_count": 0,
+    "vps_apply_enabled": false,
+    "bot_enabled": false,
+    "bot_running": false,
+    "web_listener": "127.0.0.1:3031"
+  }
+}
