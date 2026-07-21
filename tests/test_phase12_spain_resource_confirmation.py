@@ -1061,6 +1061,7 @@ Remove-Item -LiteralPath $path -Force
             "resource-confirmation-blocked-receipt.v1",
             "resource-confirmation-receipt.v1",
             "CONFLICT_FREE_REQUIRED",
+            "AMN2_PHASE12_RESOURCE_CONFIRMATION_FAILURE_V1",
         ):
             self.assertIn(marker, source)
         self.assertRegex(source, r"(?s)try\s*\{.*Invoke-SshWithExactInput.*\}\s*catch\s*\{")

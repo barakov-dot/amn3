@@ -18,7 +18,7 @@ $run009FirewallBackend = "nft"
 $run009FirewallRulesSha = "35ED9383AE9E73268E3D1AB7F57612BC60EA59C0531D6A96372E5F3731883D00"
 $run009FirewallRuleCount = 129
 $trustedBundleRunId = "spain-fresh-20260720-001"
-$expectedRunId = "spain-resource-confirmation-20260721-003"
+$expectedRunId = "spain-resource-confirmation-20260721-004"
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
 $actualRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $RepositoryRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
@@ -546,6 +546,14 @@ function Invoke-SshWithExactInput([string]$FileName, [string[]]$Arguments, [byte
     }
 }
 
+function Get-SafeRemoteFailureStage([byte[]]$Bytes, [int]$ExitCode) {
+    if ($ExitCode -lt 1 -or $ExitCode -gt 255 -or $Bytes.Length -lt 1 -or $Bytes.Length -gt 256) { return "ssh" }
+    try { $Text = $StrictUtf8.GetString($Bytes) } catch { return "ssh" }
+    $Match = [regex]::Match($Text, '^AMN2_PHASE12_RESOURCE_CONFIRMATION_FAILURE_V1\|stage=(?<stage>bootstrap|host_identity|platform|capacity|candidate_inventory|listeners|network_state|firewall|systemd_inventory|systemd_unit_content|systemd_cgroup_ports|render)\|exit=(?<exit>[0-9]{1,3})\r?\n$')
+    if (-not $Match.Success -or [int]$Match.Groups['exit'].Value -ne $ExitCode) { return "ssh" }
+    return $Match.Groups['stage'].Value
+}
+
 function Read-Binding() {
     Assert-PrivatePath $BindingPath
     $Lines = @(Get-Content -LiteralPath $BindingPath)
@@ -918,6 +926,9 @@ try {
     try { $Result = Invoke-SshWithExactInput $SshExe $SshArguments $RemoteScriptBytes }
     finally { [Array]::Clear($RemoteScriptBytes, 0, $RemoteScriptBytes.Length) }
     if ($Result.ExitCode -ne 0 -or $Result.StderrBytes.Length -ne 0) {
+        if ($Result.ExitCode -ne 0 -and $Result.StderrBytes.Length -eq 0) {
+            $OutcomeStage = Get-SafeRemoteFailureStage $Result.StdoutBytes $Result.ExitCode
+        }
         [Array]::Clear($Result.StdoutBytes, 0, $Result.StdoutBytes.Length)
         [Array]::Clear($Result.StderrBytes, 0, $Result.StderrBytes.Length)
         throw "Sanitized SSH collection failure."
