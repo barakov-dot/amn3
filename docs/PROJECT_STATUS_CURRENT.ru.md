@@ -1,4 +1,38 @@
-# Текущий override 2026-07-20: Spain transport subreason diagnostic готов для run 007
+# Текущий override 2026-07-21: Spain run 007 fail-closed на envelope rejection
+
+Literal approval для `spain-fresh-20260720-007` использована ровно один раз.
+Runner получил как минимум одну строку с failure prefix, но строгий parser
+отклонил envelope до построения sanitized failure JSON. Outcome содержит claim;
+success evidence и failure evidence отсутствуют. Raw OpenSSH output намеренно
+не сохранён, поэтому stage/exit/subreason не утверждаются и retry запрещён.
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+spain_run_007=fail_closed|approval_consumed|never_repeat
+spain_run_007_classification=envelope_rejected
+spain_run_007_prefix=present
+spain_run_007_parser_result=rejected
+spain_run_007_stage=not_proven
+spain_run_007_exit=not_proven
+spain_run_007_claim=present
+spain_run_007_failure_evidence=absent
+spain_run_007_success_evidence=absent
+spain_next_outcome_run=spain-fresh-20260721-008|required_after_safe_envelope_rejection_diagnostic
+fresh_install_gate=blocked_until_new_preflight_success
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+```
+
+Локальный synthetic test подтвердил, что PowerShell корректно передаёт exact
+prefix/envelope и сохраняет process exit; следовательно, generic stream/cast
+дефект не воспроизведён. Нужен отдельный fail-closed diagnostic contract,
+который различит safe причины parser rejection без raw values. До него SSH не
+выполнять. `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся нетронутым.
+
+# Предыдущий override 2026-07-20: Spain transport subreason diagnostic готов для run 007
 
 Локальная TDD-коррекция завершена. Runner будущего outcome `007` получает
 OpenSSH output только во временную память, при `exit=255` возвращает ровно одну

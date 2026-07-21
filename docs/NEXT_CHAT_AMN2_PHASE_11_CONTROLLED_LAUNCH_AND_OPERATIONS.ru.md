@@ -1,5 +1,31 @@
 # Следующий task: AMN2 Phase 11 Controlled Launch and Operations
 
+## Post-release Spain run 007 envelope rejection override 2026-07-21
+
+```text
+active_phase=Post-release controlled operations
+phase11_status=completed-controlled-private-release|unchanged
+run_007=fail_closed|approval_consumed|never_repeat
+classification=envelope_rejected
+failure_prefix=present
+parser_result=rejected
+stage=not_proven
+exit=not_proven
+claim=present
+failure_evidence=absent
+success_evidence=absent
+next_outcome_run=spain-fresh-20260721-008|required_after_safe_envelope_rejection_diagnostic
+fresh_install_gate=blocked_until_new_preflight_success
+spain_mutation=false
+spain_unrelated_service=untouched
+telegram=untouched
+production_awg=untouched
+next=SAFE_ENVELOPE_REJECTION_SUBREASON_DESIGN_THEN_NEW_EXACT_PREFLIGHT_008_GATE
+```
+
+Run `007` не повторять. Не делать ad-hoc SSH или blind remediation. Fresh
+Spain install и Phase12 migration gate остаются закрыты.
+
 ## Post-release Spain transport subreason diagnostic ready for run 007 2026-07-20
 
 ```text

@@ -1,6 +1,31 @@
 # Spain read-only preflight gate
 
-## Текущий локальный transport diagnostic contract для run 007
+## Текущий статус: run 007 envelope rejection fail-closed
+
+Run `spain-fresh-20260720-007` выполнен один раз. Failure prefix был замечен,
+но strict parser вернул `$null`; runner остановился до sanitized failure JSON.
+Outcome claim присутствует, success/failure evidence отсутствуют. Raw output не
+сохранён. Run consumed и не даёт authority на retry.
+
+```text
+outcome_run=spain-fresh-20260720-007|fail_closed|approval_consumed|never_repeat
+classification=envelope_rejected
+prefix=present
+parser_result=rejected
+stage=not_proven
+exit=not_proven
+claim=present
+failure_evidence=absent
+success_evidence=absent
+next_outcome_run=spain-fresh-20260721-008|required_after_safe_envelope_rejection_diagnostic
+```
+
+Локальная synthetic reproduction exact prefix/shape/exit успешно проходит
+текущий parser boundary, поэтому общий PowerShell stream/cast defect не доказан.
+Следующий local-only slice должен выдавать safe rejection reason, не сохраняя
+raw envelope или target values. Без нового exact approval SSH не выполняется.
+
+## Предыдущий локальный transport diagnostic contract для run 007
 
 Runner будущего `spain-fresh-20260720-007` временно принимает combined
 OpenSSH output в память и классифицирует только `exit=255`. Разрешены safe
