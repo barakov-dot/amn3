@@ -11,7 +11,7 @@ Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Utility") -ErrorA
 $expectedRemoteScriptSha = "70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A"
 $expectedFingerprintSetSha = "37041070A4F748F0CF46BA671A5B5BCE714B066D841B150A2AE128EFE6ED22A2"
 $expectedFingerprintSetBytes = 44899
-$expectedPackageResourcePlanSha = "29BE4B5E301EDBDEAA39B2596833D4A850BEC883C75A2CE3738D51DB13846264"
+$expectedPackageResourcePlanSha = "0352F6C5254A14DDCBA45433F055B782A34F1FC56FF175F7AC2F0CBF86825AC0"
 $run009EvidenceSha = "8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8"
 $run009RawOrderFingerprintSha = "E15219CB5204D54A9AD11263CFBA1F7C86E16DAB3287C752A8B6F136EC4A5ED5"
 $run009FirewallBackend = "nft"
@@ -753,6 +753,7 @@ function Get-ResourcePlanReceipt() {
     $CanonicalPlan = @(
         "target=$($Plan.target.os_family)|$($Plan.target.os_release)|$($Plan.target.kernel_prefix)|$($Plan.target.architecture)|$($Plan.target.python_major_minor)|$($Plan.target.python_soabi)|$($Plan.target.glibc_minimum)",
         "capacity=$($Plan.capacity_minimums.disk_available_bytes)|$($Plan.capacity_minimums.inodes_available)|$($Plan.capacity_minimums.memory_available_kib)",
+        "run_capacity=$($Plan.run_capacity_minimums.disk_available_bytes)|$($Plan.run_capacity_minimums.inodes_available)",
         "capacity_filesystems=$(@($Plan.capacity_filesystems) -join ',')",
         "paths=$(@($Plan.resources.paths) -join ',')",
         "retained_paths=$(@($Plan.resources.retained_paths) -join ',')",
@@ -835,12 +836,14 @@ function Get-ConflictDecision([object]$Evidence) {
     $RequiredFilesystems = @($Plan.capacity_filesystems)
     foreach ($FilesystemPath in $RequiredFilesystems) {
         $ObservedFilesystems = @($Evidence.capacity.filesystems | Where-Object { $_.path -ceq $FilesystemPath })
+        $MinimumBytes = if ($FilesystemPath -ceq "/run") { [int64]$Plan.run_capacity_minimums.disk_available_bytes } else { [int64]$Plan.capacity_minimums.disk_available_bytes }
+        $MinimumInodes = if ($FilesystemPath -ceq "/run") { [int64]$Plan.run_capacity_minimums.inodes_available } else { [int64]$Plan.capacity_minimums.inodes_available }
         if ($ObservedFilesystems.Count -ne 1 -or
-            [int64]$ObservedFilesystems[0].available_bytes -lt [int64]$Plan.capacity_minimums.disk_available_bytes) {
+            [int64]$ObservedFilesystems[0].available_bytes -lt $MinimumBytes) {
             $Codes.Add("CAPACITY_DISK_INSUFFICIENT")
         }
         if ($ObservedFilesystems.Count -ne 1 -or
-            [int64]$ObservedFilesystems[0].available_inodes -lt [int64]$Plan.capacity_minimums.inodes_available) {
+            [int64]$ObservedFilesystems[0].available_inodes -lt $MinimumInodes) {
             $Codes.Add("CAPACITY_INODES_INSUFFICIENT")
         }
     }

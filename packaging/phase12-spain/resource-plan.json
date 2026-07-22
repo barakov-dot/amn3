@@ -14,6 +14,10 @@
     "inodes_available": 250000,
     "memory_available_kib": 262144
   },
+  "run_capacity_minimums": {
+    "disk_available_bytes": 67108864,
+    "inodes_available": 100000
+  },
   "resources": {
     "paths": [
       "/opt/amn2-spain-package",

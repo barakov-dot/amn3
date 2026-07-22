@@ -166,10 +166,12 @@ def observation_from_resource_confirmation_evidence(
         },
         "capacity": {
             "disk_available_bytes": min(
-                row["disk_available_bytes"] for row in filesystem_map.values()
+                filesystem_map[mount]["disk_available_bytes"]
+                for mount in ("/opt", "/etc", "/var")
             ),
             "inodes_available": min(
-                row["inodes_available"] for row in filesystem_map.values()
+                filesystem_map[mount]["inodes_available"]
+                for mount in ("/opt", "/etc", "/var")
             ),
             "memory_available_kib": int(capacity["mem_available_bytes"]) // 1024,
             "filesystems": filesystem_map,
@@ -281,7 +283,8 @@ def validate_preconditions(
     plan_fields = {
         "schema", "target", "capacity_minimums", "resources", "listeners", "docker_cidr",
         "container_address", "vpn_cidr", "server_vpn_address", "owned_firewall_prefix",
-        "package_root", "capacity_filesystems", "runtime_invariants", "firewall_namespace"
+        "package_root", "capacity_filesystems", "runtime_invariants", "firewall_namespace",
+        "run_capacity_minimums"
     }
     if not isinstance(observation, dict) or set(observation) != observation_fields:
         _fail("observation has unknown/missing fields")
@@ -408,6 +411,21 @@ def validate_preconditions(
             for key in values
         ):
             _fail(f"invalid filesystem capacity: {mount}")
+    run_minimums = resource_plan.get("run_capacity_minimums")
+    run_values = filesystems.get("/run")
+    if (
+        not isinstance(run_minimums, dict)
+        or set(run_minimums) != {"disk_available_bytes", "inodes_available"}
+        or not isinstance(run_values, dict)
+        or any(
+            not isinstance(run_minimums[key], int)
+            or isinstance(run_minimums[key], bool)
+            or run_minimums[key] <= 0
+            or run_values[key] < run_minimums[key]
+            for key in run_minimums
+        )
+    ):
+        _fail("run capacity shortage")
     if observation.get("docker_present") is not False:
         _fail("Docker presence conflicts with dedicated static runtime")
     existing = observation.get("existing")

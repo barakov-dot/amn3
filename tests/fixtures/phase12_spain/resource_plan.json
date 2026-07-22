@@ -14,6 +14,10 @@
     "inodes_available": 250000,
     "memory_available_kib": 262144
   },
+  "run_capacity_minimums": {
+    "disk_available_bytes": 67108864,
+    "inodes_available": 100000
+  },
   "resources": {
     "paths": ["/opt/amn2-spain-package", "/opt/amn2-spain", "/etc/amn2-spain", "/var/lib/amn2-spain", "/var/lib/amn2-spain-docker", "/run/amn2-spain-docker"],
     "retained_paths": ["/var/lib/amn2-spain-phase12-audit"],

@@ -1223,6 +1223,21 @@ def test_precondition_allows_only_volatile_foreign_service_membership() -> None:
     assert report["result"] == "passed"
 
 
+def test_precondition_uses_separate_approved_run_capacity_policy() -> None:
+    observation = copy.deepcopy(OBSERVATION)
+    observation["capacity"]["filesystems"]["/run"] = {
+        "disk_available_bytes": 64 * 1024 * 1024,
+        "inodes_available": 100000,
+    }
+    plan = copy.deepcopy(RESOURCE_PLAN)
+    plan["run_capacity_minimums"] = {
+        "disk_available_bytes": 64 * 1024 * 1024,
+        "inodes_available": 100000,
+    }
+    report = validate_preconditions(observation, plan, baseline())
+    assert report["result"] == "passed"
+
+
 def test_precondition_derives_projection_and_firewall_from_bound_run009_bytes() -> None:
     observation = copy.deepcopy(OBSERVATION)
     forged = baseline()
