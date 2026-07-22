@@ -1069,6 +1069,8 @@ try {
     $OutcomeReason = "UNEXPECTED_POST_CLAIM_FAILURE"
     $ConflictDecision = Get-ConflictDecision $Evidence
 
+    $OutcomeStage = "persist"
+    $OutcomeReason = "EVIDENCE_PERSIST_FAILED"
     $RawHasher = [Security.Cryptography.SHA256]::Create()
     try { $RawStdoutSha = ([BitConverter]::ToString($RawHasher.ComputeHash($RawBytes))).Replace("-", "") }
     finally { $RawHasher.Dispose() }
