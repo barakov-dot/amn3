@@ -54,14 +54,15 @@ function Invoke-ExactSsh([string[]]$Arguments, [byte[]]$InputBytes) {
     $process.StartInfo = $info
     if (-not $process.Start()) { throw "SSH process did not start." }
     try {
+        $stdout = [IO.MemoryStream]::new(); $stderr = [IO.MemoryStream]::new()
+        $stdoutTask = $process.StandardOutput.BaseStream.CopyToAsync($stdout)
+        $stderrTask = $process.StandardError.BaseStream.CopyToAsync($stderr)
         $process.StandardInput.BaseStream.Write($InputBytes, 0, $InputBytes.Length)
         $process.StandardInput.BaseStream.Flush()
         $process.StandardInput.Close()
-        $stdout = [IO.MemoryStream]::new(); $stderr = [IO.MemoryStream]::new()
         try {
-            $process.StandardOutput.BaseStream.CopyTo($stdout)
-            $process.StandardError.BaseStream.CopyTo($stderr)
             $process.WaitForExit()
+            [Threading.Tasks.Task]::WaitAll(@($stdoutTask, $stderrTask))
             return [pscustomobject]@{ ExitCode=$process.ExitCode; Stdout=$stdout.ToArray(); Stderr=$stderr.ToArray() }
         } finally { $stdout.Dispose(); $stderr.Dispose() }
     } finally { $process.Dispose() }

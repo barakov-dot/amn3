@@ -3336,6 +3336,7 @@ def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() 
     assert "install-bound" in source
     assert "scp.exe" in source
     assert '"-P", "22"' in source
+    assert "CopyToAsync" in source
     assert "[Convert]::ToHexString" not in source
     assert "[A-Z0-9_]+" in source
     assert "resource-confirmation-evidence" not in source
