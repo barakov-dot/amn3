@@ -1,23 +1,32 @@
-# Текущий override 2026-07-22: Phase 12 install-boundary artifacts готовы локально; awaiting commit/push gate
+# Текущий override 2026-07-22: Phase 12 dynamic-precondition artifacts готовы локально; awaiting commit/push gate
 
-Phase 12 не выполняла upload, install или иные изменения Spain. Новый standalone
-executor содержит collector, run009 baseline и resource plan; при install-bound
+Предыдущая checksum-bound upload попытка дошла до precondition и завершилась
+до tombstone/state machine; install mutation не подтверждена. Текущие локальные
+artifacts ещё не загружались. Новый standalone executor содержит collector,
+run009 baseline и resource plan; при install-bound
 он строит precondition receipt в памяти и сохраняет только одноразовый
 authorization tombstone. Equality policy: persistent foreign identities должны
 совпасть, volatile identities фиксируются receipt; foreign service не
 останавливается и не изменяется. Локальные checks перед commit/push: double
 build byte-identical, offline verify/extract, Linux-wrapper/executor fail-closed
-и rollback/equality scoped tests.
+и rollback/equality scoped tests. Нулевое пересечение foreign identities
+допускается только как полностью volatile membership и также фиксируется в
+checksum-bound receipt; любое расхождение stable fields persistent identity
+по-прежнему fail-closed.
 
 ```text
-active_phase=AMN2 Phase 12 Spain Migration|install_boundary_local_gate
-phase12_package_archive_sha256=EA633C4B41A2FF86369485564BDF8E6F0B7AB7E3D74CA1D019B2F9879AF414E3
+active_phase=AMN2 Phase 12 Spain Migration|dynamic_precondition_local_gate
+phase12_package_archive_sha256=F11C15E97DB21D7B5368AF6438F0BFB1032B2670BCD02DBB5078A8806DC55B44
 phase12_package_archive_size=139929600
-phase12_manifest_sha256=1762D40FD59F7B6952278BAE2E998BE370845D9BBAAA4C14772D0CACF9460C33
+phase12_manifest_sha256=2905EEEC24509260C36C0EE7F00F5827A0517929026C90BFE7CAB928DD91BD78
 phase12_resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
-phase12_executor_sha256=676B2BFF9A25EBCBEE524816D4B3A461260789D8EF270D0AD93F90848C2B49E6
-phase12_executor_size=139019
+phase12_executor_sha256=46F5F8B374F9EF4B804268AE6C83A0A86297825B37BCB563C9C597C1A637F12E
+phase12_executor_size=139246
 phase12_foreign_equality_policy=dynamic_persistent_v1
+phase12_precondition_receipt=records_persistent_equality_and_volatile_before_after_counts
+phase12_scoped_tests=169_passed
+phase12_package_executor_reproducible=byte_identical_double_builds
+phase12_clean_room_verify_extract=passed
 spain_mutation=false
 spain_unrelated_service=untouched
 usa_rollback_contour=unchanged

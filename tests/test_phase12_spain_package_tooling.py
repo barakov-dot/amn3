@@ -1164,6 +1164,9 @@ def test_precondition_receipt_is_canonical_detached_and_verifiable() -> None:
     )
     assert receipt["result"] == "passed"
     assert receipt["mutation_authorized"] is False
+    assert receipt["foreign_service_persistent_equal"] is True
+    assert receipt["foreign_service_volatile_before_count"] == 0
+    assert receipt["foreign_service_volatile_after_count"] == 0
     verify_precondition_receipt(
         receipt,
         detached_sha256,
@@ -1176,6 +1179,21 @@ def test_precondition_receipt_is_canonical_detached_and_verifiable() -> None:
         package_archive_sha256="6" * 64,
         package_archive_size=123456,
     )
+    tampered = copy.deepcopy(receipt)
+    tampered["foreign_service_volatile_after_count"] = True
+    with pytest.raises(PreconditionError, match="binding"):
+        verify_precondition_receipt(
+            tampered,
+            hashlib.sha256(canonical_json_bytes(tampered)).hexdigest(),
+            package_manifest_sha256="1" * 64,
+            resource_plan_sha256=sha256_canonical(RESOURCE_PLAN),
+            host_identity_sha256=HOST_IDENTITY_SHA256,
+            boot_id=BOOT_ID,
+            collector_sha256=COLLECTOR_SHA256,
+            executor_sha256=EXECUTOR_SHA256,
+            package_archive_sha256="6" * 64,
+            package_archive_size=123456,
+        )
 
 
 @pytest.mark.parametrize(
@@ -1220,9 +1238,14 @@ def test_precondition_rejects_systemd_and_firewall_baseline_mismatch() -> None:
 
 def test_precondition_allows_only_volatile_foreign_service_membership() -> None:
     observation = copy.deepcopy(OBSERVATION)
-    observation["systemd_projection"] = observation["systemd_projection"][:-1]
+    observation["systemd_projection"] = []
     report = validate_preconditions(observation, RESOURCE_PLAN, baseline())
     assert report["result"] == "passed"
+    assert report["foreign_service_persistent_equal"] is True
+    assert report["foreign_service_volatile_before_count"] == len(
+        baseline()["systemd_projection"]
+    )
+    assert report["foreign_service_volatile_after_count"] == 0
 
 
 def test_precondition_uses_separate_approved_run_capacity_policy() -> None:
@@ -3330,8 +3353,8 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "2BDCB56DA2BB711F790B0901185007C6313FD2EC79E249F3A8FCEE3C3F6C4F8D"' in source
-    assert '$expectedExecutorSha = "8F6757D19364FB437AE6C3D2FEB09A927F258BC3692A6EF33D46520979AB885F"' in source
+    assert '$expectedPackageSha = "F11C15E97DB21D7B5368AF6438F0BFB1032B2670BCD02DBB5078A8806DC55B44"' in source
+    assert '$expectedExecutorSha = "46F5F8B374F9EF4B804268AE6C83A0A86297825B37BCB563C9C597C1A637F12E"' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source

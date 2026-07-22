@@ -8,8 +8,11 @@ baseline и resource plan: remote precondition receipt, baseline и collector н
 `dynamic_persistent_v1`: persistent identities обязаны совпасть; volatile
 identities только записываются. Spain foreign service не останавливается и не
 изменяется. Текущие локальные artifacts до commit/push: package
-`EA633C4B41A2FF86369485564BDF8E6F0B7AB7E3D74CA1D019B2F9879AF414E3`, executor
-`676B2BFF9A25EBCBEE524816D4B3A461260789D8EF270D0AD93F90848C2B49E6`.
+`F11C15E97DB21D7B5368AF6438F0BFB1032B2670BCD02DBB5078A8806DC55B44`, executor
+`46F5F8B374F9EF4B804268AE6C83A0A86297825B37BCB563C9C597C1A637F12E`.
+Policy receipt фиксирует `persistent_equal` и числа volatile entries до/после;
+полностью volatile membership допустим, но любое изменение stable fields
+persistent identity остаётся fail-closed.
 
 До exact checksum-bound install approval любые Spain upload/install/mutation
 запрещены. USA остаётся rollback contour.

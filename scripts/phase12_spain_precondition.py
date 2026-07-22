@@ -239,9 +239,9 @@ def _networks(values: object, label: str) -> list[ipaddress.IPv4Network | ipaddr
     return result
 
 
-def _persistent_foreign_projection_equal(expected: object, current: object) -> bool:
+def _foreign_projection_comparison(expected: object, current: object) -> dict[str, int | bool] | None:
     if not isinstance(expected, list) or not isinstance(current, list):
-        return False
+        return None
 
     def by_identity(entries: list[object]) -> dict[tuple[str, str], dict[str, Any]] | None:
         result: dict[tuple[str, str], dict[str, Any]] = {}
@@ -263,12 +263,16 @@ def _persistent_foreign_projection_equal(expected: object, current: object) -> b
     expected_by_identity = by_identity(expected)
     current_by_identity = by_identity(current)
     if expected_by_identity is None or current_by_identity is None:
-        return False
+        return None
     persistent = set(expected_by_identity) & set(current_by_identity)
-    return bool(persistent) and all(
-        expected_by_identity[identity] == current_by_identity[identity]
-        for identity in persistent
-    )
+    return {
+        "persistent_equal": all(
+            expected_by_identity[identity] == current_by_identity[identity]
+            for identity in persistent
+        ),
+        "volatile_before_count": len(set(expected_by_identity) - set(current_by_identity)),
+        "volatile_after_count": len(set(current_by_identity) - set(expected_by_identity)),
+    }
 
 
 def validate_preconditions(
@@ -501,9 +505,10 @@ def validate_preconditions(
         for candidate in candidates:
             if observed.version == candidate.version and observed.overlaps(candidate):
                 _fail(f"CIDR collision: {observed} overlaps {candidate}")
-    if not _persistent_foreign_projection_equal(
+    foreign_comparison = _foreign_projection_comparison(
         baseline.get("systemd_projection"), observation.get("systemd_projection")
-    ):
+    )
+    if foreign_comparison is None or foreign_comparison["persistent_equal"] is not True:
         _fail("systemd baseline projection mismatch")
     observed_firewall = observation.get("firewall")
     baseline_firewall = baseline.get("firewall")
@@ -534,6 +539,10 @@ def validate_preconditions(
         "resource_plan_sha256": sha256_canonical(resource_plan),
         "run009_evidence_sha256": baseline.get("run009_evidence_sha256"),
         "fingerprint_array_sha256": baseline.get("fingerprint_array_sha256"),
+        "foreign_service_policy": "dynamic-persistent-v1",
+        "foreign_service_persistent_equal": foreign_comparison["persistent_equal"],
+        "foreign_service_volatile_before_count": foreign_comparison["volatile_before_count"],
+        "foreign_service_volatile_after_count": foreign_comparison["volatile_after_count"],
         "checks": [
             "target_exact",
             "capacity",
@@ -599,6 +608,10 @@ def build_precondition_receipt(
         "fingerprint_array_sha256": report["fingerprint_array_sha256"],
         "observation_sha256": report["observation_sha256"],
         "baseline_sha256": report["baseline_sha256"],
+        "foreign_service_policy": report["foreign_service_policy"],
+        "foreign_service_persistent_equal": report["foreign_service_persistent_equal"],
+        "foreign_service_volatile_before_count": report["foreign_service_volatile_before_count"],
+        "foreign_service_volatile_after_count": report["foreign_service_volatile_after_count"],
         "host_identity_sha256": host_identity_sha256,
         "boot_id": boot_id,
         "collector_sha256": collector_sha256,
@@ -630,6 +643,8 @@ def verify_precondition_receipt(
         "schema", "result", "stage", "mutation_authorized", "package_manifest_sha256",
         "package_archive_sha256", "package_archive_size", "resource_plan_sha256", "run009_evidence_sha256",
         "fingerprint_array_sha256", "observation_sha256", "baseline_sha256",
+        "foreign_service_policy", "foreign_service_persistent_equal",
+        "foreign_service_volatile_before_count", "foreign_service_volatile_after_count",
         "host_identity_sha256", "boot_id", "collector_sha256", "executor_sha256",
         "issued_at_epoch", "expires_at_epoch", "nonce"
     } or (
@@ -645,6 +660,14 @@ def verify_precondition_receipt(
         or receipt.get("executor_sha256") != executor_sha256
         or receipt.get("package_archive_sha256") != package_archive_sha256
         or receipt.get("package_archive_size") != package_archive_size
+        or receipt.get("foreign_service_policy") != "dynamic-persistent-v1"
+        or receipt.get("foreign_service_persistent_equal") is not True
+        or not isinstance(receipt.get("foreign_service_volatile_before_count"), int)
+        or isinstance(receipt.get("foreign_service_volatile_before_count"), bool)
+        or receipt["foreign_service_volatile_before_count"] < 0
+        or not isinstance(receipt.get("foreign_service_volatile_after_count"), int)
+        or isinstance(receipt.get("foreign_service_volatile_after_count"), bool)
+        or receipt["foreign_service_volatile_after_count"] < 0
         or not isinstance(receipt.get("issued_at_epoch"), int)
         or not isinstance(receipt.get("expires_at_epoch"), int)
         or receipt["expires_at_epoch"] - receipt["issued_at_epoch"] < 60
