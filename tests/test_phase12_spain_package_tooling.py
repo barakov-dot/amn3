@@ -2968,6 +2968,9 @@ def test_rollback_equality_receipt_requires_exact_foreign_fingerprint_equality()
         "blueprint_sha256": "c" * 64,
         "foreign_service_fingerprint_before_sha256": fingerprint,
         "foreign_service_fingerprint_after_sha256": fingerprint,
+        "foreign_service_persistent_equal": True,
+        "foreign_service_volatile_before_count": 0,
+        "foreign_service_volatile_after_count": 0,
     }
     assert validate_rollback_equality_receipt(receipt) == receipt
     receipt["foreign_service_fingerprint_after_sha256"] = "e" * 64
@@ -3000,6 +3003,19 @@ def test_rollback_equality_observer_compares_stable_foreign_projections() -> Non
             current_observation=after,
             binding=binding,
         )
+
+
+def test_rollback_equality_receipt_records_volatile_foreign_entries() -> None:
+    before = copy.deepcopy(OBSERVATION)
+    after = copy.deepcopy(OBSERVATION)
+    after["systemd_projection"].append({"name_sha256": "f" * 64})
+    receipt = build_rollback_equality_receipt(
+        baseline_observation=before,
+        current_observation=after,
+        binding={"nonce": "a" * 64, "transaction_sha256": "b" * 64, "blueprint_sha256": "c" * 64},
+    )
+    assert receipt["foreign_service_persistent_equal"] is True
+    assert receipt["foreign_service_volatile_after_count"] == 1
 
 
 def test_remote_executor_is_closed_mode_wrapper_without_network_fetches() -> None:

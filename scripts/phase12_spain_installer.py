@@ -3984,8 +3984,6 @@ def build_rollback_equality_receipt(
         or baseline_observation["docker_present"]
         != current_observation["docker_present"]
         or before_existing != after_existing
-        or baseline_observation["systemd_projection"]
-        != current_observation["systemd_projection"]
         or not isinstance(package_root, Mapping)
         or package_root.get("exists") is not False
         or package_root.get("is_symlink") is not False
@@ -3998,12 +3996,13 @@ def build_rollback_equality_receipt(
         for key in ("listeners", "routes", "addresses")
     ):
         raise InstallError("rollback listeners/routes/addresses mismatch")
-    before_fingerprint = sha256_canonical(
-        baseline_observation["systemd_projection"]
-    )
-    after_fingerprint = sha256_canonical(
-        current_observation["systemd_projection"]
-    )
+    before_items = {str(item.get("name_sha256")): item for item in baseline_observation["systemd_projection"]}
+    after_items = {str(item.get("name_sha256")): item for item in current_observation["systemd_projection"]}
+    persistent = sorted(set(before_items) & set(after_items))
+    if any(before_items[key] != after_items[key] for key in persistent):
+        raise InstallError("rollback persistent foreign projection mismatch")
+    before_fingerprint = sha256_canonical([before_items[key] for key in persistent])
+    after_fingerprint = sha256_canonical([after_items[key] for key in persistent])
     return validate_rollback_equality_receipt(
         {
             "schema": "amn2.spain-rollback-equality.v1",
@@ -4014,6 +4013,9 @@ def build_rollback_equality_receipt(
             **dict(binding),
             "foreign_service_fingerprint_before_sha256": before_fingerprint,
             "foreign_service_fingerprint_after_sha256": after_fingerprint,
+            "foreign_service_persistent_equal": True,
+            "foreign_service_volatile_before_count": len(set(before_items) - set(after_items)),
+            "foreign_service_volatile_after_count": len(set(after_items) - set(before_items)),
         }
     )
 
@@ -4030,6 +4032,9 @@ def validate_rollback_equality_receipt(value: Any) -> dict[str, Any]:
         "blueprint_sha256",
         "foreign_service_fingerprint_before_sha256",
         "foreign_service_fingerprint_after_sha256",
+        "foreign_service_persistent_equal",
+        "foreign_service_volatile_before_count",
+        "foreign_service_volatile_after_count",
     }
     if (
         not isinstance(value, dict)
@@ -4039,6 +4044,9 @@ def validate_rollback_equality_receipt(value: Any) -> dict[str, Any]:
         or value.get("baseline_projection_equal") is not True
         or value.get("firewall_projection_equal") is not True
         or value.get("listeners_routes_addresses_equal") is not True
+        or value.get("foreign_service_persistent_equal") is not True
+        or not isinstance(value.get("foreign_service_volatile_before_count"), int)
+        or not isinstance(value.get("foreign_service_volatile_after_count"), int)
     ):
         raise InstallError("rollback equality receipt invalid")
     before = value["foreign_service_fingerprint_before_sha256"]
