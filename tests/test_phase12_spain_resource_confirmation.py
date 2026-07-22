@@ -221,6 +221,7 @@ class Phase12RemoteCollectorContractTests(unittest.TestCase):
                 "backend": "nft",
                 "rules_sha256": "e" * 64,
                 "rule_count": 7,
+                "semantic_sha256": "1" * 64,
                 "nft_json": {"nftables": []},
             },
         )

@@ -32,6 +32,7 @@ try:
         verify_package_fd,
     )
     from scripts.phase12_spain_precondition import (
+        FIREWALL_SEMANTIC_REBASELINE,
         PreconditionError,
         build_precondition_receipt,
         observation_from_resource_confirmation_evidence,
@@ -61,6 +62,7 @@ except ModuleNotFoundError:
         verify_package_fd,
     )
     from scripts.phase12_spain_precondition import (
+        FIREWALL_SEMANTIC_REBASELINE,
         PreconditionError,
         build_precondition_receipt,
         observation_from_resource_confirmation_evidence,
@@ -148,6 +150,7 @@ def _embedded_run009_baseline() -> dict[str, Any]:
         "fingerprint_array_sha256": package_backend.DEFAULT_RUN009_FINGERPRINT_SHA256,
         "systemd_projection": fingerprint,
         "firewall": firewall,
+        "firewall_semantic_rebaseline": copy.deepcopy(FIREWALL_SEMANTIC_REBASELINE),
         "run009_evidence_hex": payload.hex(),
     }
 

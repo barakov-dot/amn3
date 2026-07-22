@@ -136,6 +136,16 @@ def synthetic_baseline_policy(monkeypatch):
         "RUN009_FINGERPRINT_SHA256",
         hashlib.sha256(SYNTHETIC_FINGERPRINT_BYTES).hexdigest(),
     )
+    monkeypatch.setattr(
+        precondition_module,
+        "FIREWALL_SEMANTIC_REBASELINE",
+        {
+            "backend": "nft",
+            "rule_count": 2,
+            "semantic_sha256": "d" * 64,
+            "current_raw_sha256": "c" * 64,
+        },
+    )
 
 WHEEL_BYTES_STREAM = io.BytesIO()
 with zipfile.ZipFile(WHEEL_BYTES_STREAM, "w") as wheel:
@@ -1135,6 +1145,9 @@ def baseline() -> dict[str, object]:
         "fingerprint_array_sha256": package_module.RUN009_FINGERPRINT_SHA256,
         "systemd_projection": copy.deepcopy(OBSERVATION["systemd_projection"]),
         "firewall": copy.deepcopy(OBSERVATION["firewall"]),
+        "firewall_semantic_rebaseline": copy.deepcopy(
+            precondition_module.FIREWALL_SEMANTIC_REBASELINE
+        ),
         "run009_evidence_hex": SYNTHETIC_EVIDENCE_BYTES.hex(),
     }
 
@@ -1239,6 +1252,16 @@ def test_precondition_allows_volatile_restart_count_and_rejects_stable_systemd_d
         validate_preconditions(observation, RESOURCE_PLAN, baseline())
 
 
+def test_precondition_allows_raw_firewall_counter_drift_and_rejects_semantic_drift() -> None:
+    observation = copy.deepcopy(OBSERVATION)
+    observation["firewall"]["rules_sha256"] = "e" * 64
+    report = validate_preconditions(observation, RESOURCE_PLAN, baseline())
+    assert report["result"] == "passed"
+    observation["firewall"]["semantic_sha256"] = "f" * 64
+    with pytest.raises(PreconditionError, match="firewall semantic"):
+        validate_preconditions(observation, RESOURCE_PLAN, baseline())
+
+
 def test_precondition_allows_only_volatile_foreign_service_membership() -> None:
     observation = copy.deepcopy(OBSERVATION)
     observation["systemd_projection"] = []
@@ -1309,8 +1332,8 @@ def test_precondition_requires_capacity_on_every_target_filesystem_and_all_owned
     with pytest.raises(PreconditionError, match="uid"):
         validate_preconditions(observation, RESOURCE_PLAN, baseline())
     observation = copy.deepcopy(OBSERVATION)
-    observation["firewall"]["rules_sha256"] = "0" * 64
-    with pytest.raises(PreconditionError, match="firewall baseline"):
+    observation["firewall"]["semantic_sha256"] = "0" * 64
+    with pytest.raises(PreconditionError, match="firewall semantic"):
         validate_preconditions(observation, RESOURCE_PLAN, baseline())
 
 
@@ -3372,8 +3395,8 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "91E1B2CB276DEF68F57255F57476814B6D1F5EF829AD2BF0A2E3F678CBA2B24B"' in source
-    assert '$expectedExecutorSha = "02BFF28EA2C658CE4EA446835184DD32C7AB4B887B9D0F9132C189F4FBB1CFB3"' in source
+    assert '$expectedPackageSha = "936ACDFDE808A4A235659CF904BFF55F155DACF6655476FFEEAA1A5A646E2F59"' in source
+    assert '$expectedExecutorSha = "132464ECA59FAA8224B927479E423B72C2C5354700EF761FA6AA4102FDFA1611"' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source

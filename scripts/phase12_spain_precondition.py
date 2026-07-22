@@ -28,6 +28,12 @@ RECEIPT_SCHEMA = "amn2.spain-preconditions-passed.v1"
 SHA256_RE = __import__("re").compile(r"^[0-9a-f]{64}$")
 BOOT_ID_RE = __import__("re").compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 FOREIGN_SERVICE_VOLATILE_FIELDS = frozenset({"bound_port_set", "restart_count"})
+FIREWALL_SEMANTIC_REBASELINE = {
+    "backend": "nft",
+    "rule_count": 129,
+    "semantic_sha256": "fb8e1d41f6f4f0ebceb7c89d65e4e5e440e0ac0a4e780b4f638f96cee1b9a682",
+    "current_raw_sha256": "a953c0c88aaaa338573963c21fad43293d5ec4821288611c539baa8c3aa0917c",
+}
 DEFAULT_RUN009_EVIDENCE_SHA256 = "8d8a4e155b30c4b72c564056c71b159e222c53e3bdc60018c3f6099c1979e1a8"
 DEFAULT_RUN009_FINGERPRINT_SHA256 = "e15219cb5204d54a9ad11263cfba1f7c86e16dab3287c752a8b6f136ec4a5ed5"
 RUN009_EVIDENCE_SHA256 = DEFAULT_RUN009_EVIDENCE_SHA256
@@ -220,6 +226,7 @@ def observation_from_resource_confirmation_evidence(
             "backend": firewall["backend"],
             "rules_sha256": firewall["raw_sha256"],
             "rule_count": firewall["raw_rule_count"],
+            "semantic_sha256": firewall["semantic_sha256"],
             "nft_json": copy.deepcopy(structured),
         },
     }
@@ -303,6 +310,7 @@ def validate_preconditions(
         "fingerprint_array_sha256",
         "systemd_projection",
         "firewall",
+        "firewall_semantic_rebaseline",
         "run009_evidence_hex",
     }:
         _fail("baseline has unknown/missing fields")
@@ -354,6 +362,8 @@ def validate_preconditions(
         != authoritative_firewall
     ):
         _fail("authoritative run009 firewall baseline mismatch")
+    if baseline["firewall_semantic_rebaseline"] != FIREWALL_SEMANTIC_REBASELINE:
+        _fail("firewall semantic rebaseline mismatch")
     os_data = observation.get("os", {})
     target = resource_plan.get("target", {})
     if not isinstance(os_data, dict) or set(os_data) != {
@@ -516,8 +526,13 @@ def validate_preconditions(
     baseline_firewall = baseline.get("firewall")
     if not isinstance(observed_firewall, dict) or not isinstance(baseline_firewall, dict):
         _fail("invalid firewall baseline")
-    if observed_firewall != baseline_firewall:
-        _fail("firewall baseline projection mismatch")
+    semantic_firewall = baseline["firewall_semantic_rebaseline"]
+    if (
+        observed_firewall.get("backend") != semantic_firewall["backend"]
+        or observed_firewall.get("rule_count") != semantic_firewall["rule_count"]
+        or observed_firewall.get("semantic_sha256") != semantic_firewall["semantic_sha256"]
+    ):
+        _fail("firewall semantic baseline projection mismatch")
     package_root = observation["package_root"]
     planned_root = resource_plan["package_root"]
     if not isinstance(package_root, dict) or set(package_root) != {
@@ -552,7 +567,7 @@ def validate_preconditions(
             "listeners",
             "cidr",
             "systemd_projection",
-            "firewall_projection",
+            "firewall_semantic_projection",
         ],
     }
 

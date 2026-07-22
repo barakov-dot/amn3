@@ -67,6 +67,7 @@
     "backend": "nft",
     "rules_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
     "rule_count": 2,
+    "semantic_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
     "nft_json": {"nftables": [
       {"table": {"family": "inet", "name": "unrelated"}},
       {"chain": {"family": "inet", "table": "unrelated", "name": "input"}}
