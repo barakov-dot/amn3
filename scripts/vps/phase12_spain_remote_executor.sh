@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 readonly MODE="${1:-}"
 case "$MODE" in
-    install|recover|rollback|verify) ;;
+    install|install-bound|recover|rollback|verify) ;;
     *) printf '%s\n' 'unsupported_mode' >&2; exit 64 ;;
 esac
 

@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 from scripts.phase12_spain_precondition import (
     observation_from_resource_confirmation_evidence,
@@ -648,6 +649,31 @@ class Phase12RunnerContractTests(unittest.TestCase):
                 check=False,
             )
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_resource_observer_accepts_checksum_bound_in_memory_collector(self) -> None:
+        collector = b"#!/usr/bin/env bash\nprintf '%s\\n' collector\n"
+        expected = json.dumps(
+            sample_evidence(), separators=(",", ":"), ensure_ascii=True
+        ).encode("ascii") + b"\n"
+        seen: dict[str, bytes] = {}
+
+        def runner(argv: tuple[str, ...], **kwargs: object) -> bytes:
+            self.assertEqual(argv, ("/usr/bin/bash", "-s"))
+            descriptor = int(kwargs["input_fd"])
+            seen["collector"] = os.read(descriptor, 1024)
+            return expected
+
+        with tempfile.TemporaryFile() as backing, mock.patch.object(
+            os, "memfd_create", return_value=os.dup(backing.fileno()), create=True
+        ):
+            observer = ChecksumBoundResourceObserver(
+                collector_bytes=collector,
+                collector_sha256=hashlib.sha256(collector).hexdigest(),
+                runner=runner,
+                expected_uid=None,
+            )
+            self.assertEqual(observer.collect_evidence(), sample_evidence())
+        self.assertEqual(seen["collector"], collector)
 
     def test_evidence_file_receives_private_acl_at_create(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")

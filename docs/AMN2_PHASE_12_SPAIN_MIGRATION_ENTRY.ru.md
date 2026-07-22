@@ -1,5 +1,19 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-22
+
+Install boundary использует executor-embedded in-memory collector, run009
+baseline и resource plan: remote precondition receipt, baseline и collector не
+загружаются отдельными файлами. Foreign-service equality действует как
+`dynamic_persistent_v1`: persistent identities обязаны совпасть; volatile
+identities только записываются. Spain foreign service не останавливается и не
+изменяется. Текущие локальные artifacts до commit/push: package
+`EA633C4B41A2FF86369485564BDF8E6F0B7AB7E3D74CA1D019B2F9879AF414E3`, executor
+`676B2BFF9A25EBCBEE524816D4B3A461260789D8EF270D0AD93F90848C2B49E6`.
+
+До exact checksum-bound install approval любые Spain upload/install/mutation
+запрещены. USA остаётся rollback contour.
+
 ## Objective
 
 Deploy a fresh AMN2 production contour on the separate Spain VPS, accept it

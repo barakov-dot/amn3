@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import base64
 import hashlib
+import importlib.resources
 import ipaddress
 import json
 import os
@@ -32,7 +33,9 @@ try:
     )
     from scripts.phase12_spain_precondition import (
         PreconditionError,
+        build_precondition_receipt,
         observation_from_resource_confirmation_evidence,
+        validate_preconditions,
         verify_precondition_receipt,
     )
     from scripts.phase12_spain_network import expected_table_document
@@ -59,7 +62,9 @@ except ModuleNotFoundError:
     )
     from scripts.phase12_spain_precondition import (
         PreconditionError,
+        build_precondition_receipt,
         observation_from_resource_confirmation_evidence,
+        validate_preconditions,
         verify_precondition_receipt,
     )
     from scripts.phase12_spain_network import expected_table_document
@@ -76,6 +81,144 @@ class InstallError(RuntimeError):
     pass
 
 
+def _embedded_resource_collector_bytes() -> bytes:
+    """Return the resource collector shipped inside the standalone executor.
+
+    The production boundary must recheck resources without first writing a
+    separate collector to the target. Source-tree tests use the checked-in
+    shell script; the standalone executor reads the identically bound member
+    from its ``scripts`` package.
+    """
+    try:
+        payload = (
+            importlib.resources.files("scripts")
+            .joinpath("phase12_spain_resource_confirmation_remote.sh")
+            .read_bytes()
+        )
+    except (FileNotFoundError, ModuleNotFoundError, TypeError):
+        path = Path(__file__).resolve().parent / "vps" / "phase12_spain_resource_confirmation_remote.sh"
+        try:
+            payload = path.read_bytes()
+        except OSError as exc:
+            raise InstallError("embedded resource collector unavailable") from exc
+    if not payload or len(payload) > ChecksumBoundResourceObserver.MAX_COLLECTOR_BYTES:
+        raise InstallError("embedded resource collector size invalid")
+    return payload
+
+
+def _embedded_run009_baseline() -> dict[str, Any]:
+    """Load the sealed run009 baseline from the executor, never from SSH stdin."""
+    try:
+        payload = (
+            importlib.resources.files("scripts")
+            .joinpath("phase12_spain_run009_preflight_evidence.json")
+            .read_bytes()
+        )
+    except (FileNotFoundError, ModuleNotFoundError, TypeError):
+        path = (
+            Path(__file__).resolve().parents[1]
+            / "private-artifacts"
+            / "phase12-spain-install-package-inputs-20260721"
+            / "evidence"
+            / "run009-preflight-evidence.json"
+        )
+        try:
+            payload = path.read_bytes()
+        except OSError as exc:
+            raise InstallError("embedded run009 baseline unavailable") from exc
+    if hashlib.sha256(payload).hexdigest() != package_backend.DEFAULT_RUN009_EVIDENCE_SHA256:
+        raise InstallError("embedded run009 baseline checksum mismatch")
+    try:
+        evidence = json.loads(payload)
+        fingerprint = evidence["unrelated_service_fingerprint"]
+        firewall = evidence["firewall"]
+    except (KeyError, TypeError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise InstallError("embedded run009 baseline invalid") from exc
+    if (
+        not isinstance(fingerprint, list)
+        or hashlib.sha256(
+            package_backend.compact_json_bytes_preserving_object_order(fingerprint)
+        ).hexdigest()
+        != package_backend.DEFAULT_RUN009_FINGERPRINT_SHA256
+        or not isinstance(firewall, dict)
+    ):
+        raise InstallError("embedded run009 baseline binding mismatch")
+    return {
+        "run009_evidence_sha256": package_backend.DEFAULT_RUN009_EVIDENCE_SHA256,
+        "fingerprint_array_sha256": package_backend.DEFAULT_RUN009_FINGERPRINT_SHA256,
+        "systemd_projection": fingerprint,
+        "firewall": firewall,
+        "run009_evidence_hex": payload.hex(),
+    }
+
+
+def _embedded_resource_plan() -> dict[str, Any]:
+    expected_sha256 = "8bc5375f244f7cdd77a12bd4173ca19be7430c35e49756d7b846906719369f43"
+    try:
+        payload = (
+            importlib.resources.files("scripts")
+            .joinpath("phase12_spain_resource_plan.json")
+            .read_bytes()
+        )
+    except (FileNotFoundError, ModuleNotFoundError, TypeError):
+        try:
+            payload = (
+                Path(__file__).resolve().parents[1]
+                / "packaging"
+                / "phase12-spain"
+                / "resource-plan.json"
+            ).read_bytes()
+        except OSError as exc:
+            raise InstallError("embedded resource plan unavailable") from exc
+    try:
+        plan = json.loads(payload)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise InstallError("embedded resource plan invalid") from exc
+    if not isinstance(plan, dict) or sha256_canonical(plan) != expected_sha256:
+        raise InstallError("embedded resource plan checksum mismatch")
+    return plan
+
+
+def _read_boot_id(path: Path = Path("/proc/sys/kernel/random/boot_id"), *, expected_uid: int | None = 0) -> str:
+    candidate = Path(path)
+    if not candidate.is_absolute() or candidate.is_symlink():
+        raise InstallError("boot identity source invalid")
+    descriptor = -1
+    try:
+        descriptor = os.open(
+            candidate,
+            os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_BINARY", 0),
+        )
+        before = os.fstat(descriptor)
+        payload = os.read(descriptor, 64)
+        after = os.fstat(descriptor)
+    except OSError as exc:
+        raise InstallError("boot identity unavailable") from exc
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+    if (
+        not stat.S_ISREG(before.st_mode)
+        or (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+        != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+        or (
+            os.name != "nt"
+            and (
+                (stat.S_IMODE(before.st_mode) & 0o022) != 0
+                or (expected_uid is not None and before.st_uid != expected_uid)
+            )
+        )
+    ):
+        raise InstallError("boot identity owner/mode/type drift")
+    try:
+        value = payload.decode("ascii").strip()
+    except UnicodeDecodeError as exc:
+        raise InstallError("boot identity invalid") from exc
+    if re.fullmatch(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", value) is None:
+        raise InstallError("boot identity invalid")
+    return value
+
+
 class ChecksumBoundResourceObserver:
     MAX_COLLECTOR_BYTES = 1024 * 1024
     MAX_EVIDENCE_BYTES = 1024 * 1024
@@ -83,22 +226,32 @@ class ChecksumBoundResourceObserver:
     def __init__(
         self,
         *,
-        collector_path: Path,
+        collector_path: Path | None = None,
+        collector_bytes: bytes | None = None,
         collector_sha256: str,
         runner: Callable[..., bytes] | None = None,
         expected_uid: int | None = 0,
     ) -> None:
-        path = Path(collector_path)
+        if (collector_path is None) == (collector_bytes is None):
+            raise InstallError("resource observer dependency invalid")
+        path = Path(collector_path) if collector_path is not None else None
         if (
-            not path.is_absolute()
-            or path.is_symlink()
-            or not path.is_file()
+            (path is not None and (not path.is_absolute() or path.is_symlink() or not path.is_file()))
+            or (
+                collector_bytes is not None
+                and (
+                    not isinstance(collector_bytes, bytes)
+                    or not collector_bytes
+                    or len(collector_bytes) > self.MAX_COLLECTOR_BYTES
+                )
+            )
             or not isinstance(collector_sha256, str)
             or re.fullmatch(r"[0-9a-f]{64}", collector_sha256) is None
             or (runner is not None and not callable(runner))
         ):
             raise InstallError("resource observer dependency invalid")
         self.collector_path = path
+        self.collector_bytes = bytes(collector_bytes) if collector_bytes is not None else None
         self.collector_sha256 = collector_sha256
         self.expected_uid = expected_uid
         self._runner = runner or live_backend.FixedCommandRunner(
@@ -108,6 +261,10 @@ class ChecksumBoundResourceObserver:
         )
 
     def _open_verified_collector(self) -> tuple[int, os.stat_result]:
+        if self.collector_bytes is not None:
+            return self._open_verified_in_memory_collector()
+        if self.collector_path is None:
+            raise InstallError("resource observer dependency invalid")
         descriptor = -1
         try:
             descriptor = os.open(
@@ -147,6 +304,50 @@ class ChecksumBoundResourceObserver:
         except OSError as exc:
             os.close(descriptor)
             raise InstallError("resource observer collector cannot be pinned") from exc
+        return descriptor, info
+
+    def _open_verified_in_memory_collector(self) -> tuple[int, os.stat_result]:
+        payload = self.collector_bytes
+        if payload is None or hashlib.sha256(payload).hexdigest() != self.collector_sha256:
+            raise InstallError("resource observer collector checksum/owner drift")
+        if not hasattr(os, "memfd_create"):
+            raise InstallError("resource observer in-memory collector unavailable")
+        descriptor = -1
+        try:
+            descriptor = os.memfd_create(
+                "amn2-spain-resource-collector",
+                getattr(os, "MFD_CLOEXEC", 0),
+            )
+            offset = 0
+            while offset < len(payload):
+                written = os.write(descriptor, payload[offset:])
+                if written <= 0:
+                    raise InstallError("resource observer in-memory collector write failed")
+                offset += written
+            os.fchmod(descriptor, 0o600)
+            os.lseek(descriptor, 0, os.SEEK_SET)
+            info = os.fstat(descriptor)
+        except InstallError:
+            if descriptor >= 0:
+                os.close(descriptor)
+            raise
+        except OSError as exc:
+            if descriptor >= 0:
+                os.close(descriptor)
+            raise InstallError("resource observer in-memory collector unavailable") from exc
+        if (
+            not stat.S_ISREG(info.st_mode)
+            or info.st_size != len(payload)
+            or (
+                os.name != "nt"
+                and (
+                    (stat.S_IMODE(info.st_mode) & 0o022) != 0
+                    or (self.expected_uid is not None and info.st_uid != self.expected_uid)
+                )
+            )
+        ):
+            os.close(descriptor)
+            raise InstallError("resource observer collector checksum/owner drift")
         return descriptor, info
 
     def collect_evidence(self) -> dict[str, Any]:
@@ -1342,6 +1543,119 @@ class ChecksumBoundPackageStager:
 
 
 @dataclass(frozen=True)
+class InstallBoundaryIntent:
+    """Hash-only operator intent consumed inside the remote executor.
+
+    The raw boot identifier never crosses SSH or is persisted before the
+    one-time authorization tombstone; it is read and verified on the target.
+    """
+
+    approval_id: str
+    package_archive_sha256: str
+    package_archive_size: int
+    package_manifest_sha256: str
+    resource_plan_sha256: str
+    collector_sha256: str
+    executor_sha256: str
+    run009_evidence_sha256: str
+    fingerprint_array_sha256: str
+    expected_host_identity_sha256: str
+    expected_boot_id_sha256: str
+    endpoint_host: str
+    nonce: str
+    approved_at_epoch: int
+    expires_at_epoch: int
+
+    @classmethod
+    def from_mapping(cls, value: dict[str, Any]) -> "InstallBoundaryIntent":
+        fields = {
+            "schema", "mutation_authorized", "approval_id", "package_archive_sha256",
+            "package_archive_size", "package_manifest_sha256", "resource_plan_sha256",
+            "collector_sha256", "executor_sha256", "run009_evidence_sha256",
+            "fingerprint_array_sha256", "expected_host_identity_sha256",
+            "expected_boot_id_sha256", "endpoint_host", "nonce", "approved_at_epoch",
+            "expires_at_epoch",
+        }
+        if (
+            not isinstance(value, dict)
+            or set(value) != fields
+            or value.get("schema") != "amn2.spain-install-boundary-intent.v1"
+            or value.get("mutation_authorized") is not True
+        ):
+            raise InstallError("install boundary intent schema/result mismatch")
+        for key in (
+            "package_archive_sha256", "package_manifest_sha256", "resource_plan_sha256",
+            "collector_sha256", "executor_sha256", "run009_evidence_sha256",
+            "fingerprint_array_sha256", "expected_host_identity_sha256",
+            "expected_boot_id_sha256", "nonce",
+        ):
+            if not isinstance(value[key], str) or re.fullmatch(r"[0-9a-f]{64}", value[key]) is None:
+                raise InstallError(f"install boundary intent {key} invalid")
+        if not isinstance(value["approval_id"], str) or not value["approval_id"]:
+            raise InstallError("install boundary intent approval invalid")
+        if (
+            not isinstance(value["endpoint_host"], str)
+            or re.fullmatch(
+                r"(?=.{1,253}\Z)[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?",
+                value["endpoint_host"],
+            ) is None
+            or ".." in value["endpoint_host"]
+        ):
+            raise InstallError("install boundary intent endpoint invalid")
+        if (
+            not isinstance(value["package_archive_size"], int)
+            or isinstance(value["package_archive_size"], bool)
+            or value["package_archive_size"] <= 0
+            or value["package_archive_size"] > ChecksumBoundPackageStager.MAX_ARCHIVE_BYTES
+        ):
+            raise InstallError("install boundary intent package size invalid")
+        if (
+            not isinstance(value["approved_at_epoch"], int)
+            or isinstance(value["approved_at_epoch"], bool)
+            or not isinstance(value["expires_at_epoch"], int)
+            or isinstance(value["expires_at_epoch"], bool)
+            or value["expires_at_epoch"] <= value["approved_at_epoch"]
+        ):
+            raise InstallError("install boundary intent time window invalid")
+        return cls(**{key: value[key] for key in fields - {"schema", "mutation_authorized"}})
+
+    def to_authorization(
+        self, precondition_receipt_sha256: str, boot_id: str
+    ) -> "InstallAuthorization":
+        if (
+            not isinstance(precondition_receipt_sha256, str)
+            or re.fullmatch(r"[0-9a-f]{64}", precondition_receipt_sha256) is None
+            or not isinstance(boot_id, str)
+            or re.fullmatch(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", boot_id) is None
+            or hashlib.sha256(boot_id.encode("ascii")).hexdigest()
+            != self.expected_boot_id_sha256
+        ):
+            raise InstallError("install boundary intent boot identity mismatch")
+        return InstallAuthorization.from_mapping(
+            {
+                "schema": "amn2.spain-install-authorization.v1",
+                "mutation_authorized": True,
+                "approval_id": self.approval_id,
+                "precondition_receipt_sha256": precondition_receipt_sha256,
+                "package_archive_sha256": self.package_archive_sha256,
+                "package_archive_size": self.package_archive_size,
+                "package_manifest_sha256": self.package_manifest_sha256,
+                "resource_plan_sha256": self.resource_plan_sha256,
+                "collector_sha256": self.collector_sha256,
+                "executor_sha256": self.executor_sha256,
+                "run009_evidence_sha256": self.run009_evidence_sha256,
+                "fingerprint_array_sha256": self.fingerprint_array_sha256,
+                "host_identity_sha256": self.expected_host_identity_sha256,
+                "endpoint_host": self.endpoint_host,
+                "boot_id": boot_id,
+                "nonce": self.nonce,
+                "approved_at_epoch": self.approved_at_epoch,
+                "expires_at_epoch": self.expires_at_epoch,
+            }
+        )
+
+
+@dataclass(frozen=True)
 class InstallAuthorization:
     approval_id: str
     precondition_receipt_sha256: str
@@ -1443,6 +1757,79 @@ class InstallAuthorization:
             "approved_at_epoch": self.approved_at_epoch,
             "expires_at_epoch": self.expires_at_epoch,
         }
+
+
+def _build_in_memory_install_inputs(
+    *,
+    intent: InstallBoundaryIntent,
+    observation: dict[str, Any],
+    host_identity_sha256: str,
+    boot_id: str,
+    resource_plan: dict[str, Any],
+    baseline_value: dict[str, Any],
+    now_epoch: int,
+) -> tuple[dict[str, object], str, dict[str, Any], InstallAuthorization]:
+    if (
+        not isinstance(intent, InstallBoundaryIntent)
+        or not isinstance(observation, dict)
+        or not isinstance(resource_plan, dict)
+        or not isinstance(baseline_value, dict)
+        or not isinstance(now_epoch, int)
+        or host_identity_sha256 != intent.expected_host_identity_sha256
+    ):
+        raise InstallError("install boundary input binding mismatch")
+    try:
+        report = validate_preconditions(observation, resource_plan, baseline_value)
+        receipt, detached = build_precondition_receipt(
+            report,
+            package_manifest_sha256=intent.package_manifest_sha256,
+            resource_plan_sha256=intent.resource_plan_sha256,
+            host_identity_sha256=host_identity_sha256,
+            boot_id=boot_id,
+            collector_sha256=intent.collector_sha256,
+            executor_sha256=intent.executor_sha256,
+            package_archive_sha256=intent.package_archive_sha256,
+            package_archive_size=intent.package_archive_size,
+            issued_at_epoch=now_epoch,
+            ttl_seconds=300,
+            nonce=intent.nonce,
+        )
+    except PreconditionError as exc:
+        raise InstallError("install boundary precondition failed") from exc
+    authorization = intent.to_authorization(detached, boot_id)
+    return receipt, detached, copy.deepcopy(baseline_value), authorization
+
+
+def _build_in_memory_install_inputs_from_evidence(
+    *, intent: InstallBoundaryIntent, evidence: dict[str, Any], boot_id: str, now_epoch: int
+) -> tuple[dict[str, object], str, dict[str, Any], InstallAuthorization]:
+    if not isinstance(intent, InstallBoundaryIntent) or not isinstance(evidence, dict):
+        raise InstallError("install boundary evidence invalid")
+    try:
+        host_identity = evidence["host_identity"]
+        host_identity_sha256 = host_identity["machine_id_sha256"]
+        boot_id_sha256 = host_identity["boot_id_sha256"]
+    except (KeyError, TypeError) as exc:
+        raise InstallError("install boundary evidence invalid") from exc
+    if (
+        host_identity_sha256 != intent.expected_host_identity_sha256
+        or boot_id_sha256 != hashlib.sha256(boot_id.encode("ascii")).hexdigest()
+        or boot_id_sha256 != intent.expected_boot_id_sha256
+    ):
+        raise InstallError("install boundary host identity mismatch")
+    try:
+        observation = observation_from_resource_confirmation_evidence(evidence)
+    except PreconditionError as exc:
+        raise InstallError("install boundary evidence invalid") from exc
+    return _build_in_memory_install_inputs(
+        intent=intent,
+        observation=observation,
+        host_identity_sha256=host_identity_sha256,
+        boot_id=boot_id,
+        resource_plan=_embedded_resource_plan(),
+        baseline_value=_embedded_run009_baseline(),
+        now_epoch=now_epoch,
+    )
 
 
 class RetainedAuthorizationStore:
@@ -4826,6 +5213,30 @@ def _read_authorization_payload(payload: bytes) -> InstallAuthorization:
     return InstallAuthorization.from_mapping(value)
 
 
+def _read_install_boundary_intent_payload(payload: bytes) -> InstallBoundaryIntent:
+    if (
+        not isinstance(payload, bytes)
+        or not payload
+        or len(payload) > 64 * 1024
+        or not payload.endswith(b"\n")
+    ):
+        raise InstallError("install_bound_inputs_required")
+    try:
+        value = json.loads(payload)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise InstallError("install_bound_inputs_required") from exc
+    if (
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        + b"\n"
+        != payload
+    ):
+        raise InstallError("install_bound_inputs_required")
+    try:
+        return InstallBoundaryIntent.from_mapping(value)
+    except InstallError as exc:
+        raise InstallError("install_bound_inputs_required") from exc
+
+
 def _sha256_regular_file(
     path: Path,
     *,
@@ -5004,6 +5415,9 @@ def _production_install(
     authorization_payload: bytes,
     host_root: Path = Path("/"),
     expected_uid: int | None = 0,
+    receipt_override: dict[str, Any] | None = None,
+    baseline_override: dict[str, Any] | None = None,
+    authorization_override: InstallAuthorization | None = None,
 ) -> dict[str, Any]:
     if len(args) != 7:
         raise InstallError("install_inputs_required")
@@ -5014,13 +5428,23 @@ def _production_install(
         now_epoch = int(now_text)
     except ValueError as exc:
         raise InstallError("install trusted time invalid") from exc
-    authorization = _read_authorization_payload(authorization_payload)
-    receipt = _read_json_file(
-        Path(receipt_path), label="precondition receipt", expected_uid=expected_uid
-    )
-    baseline = _read_json_file(
-        Path(baseline_path), label="baseline observation", expected_uid=expected_uid
-    )
+    overrides = (receipt_override, baseline_override, authorization_override)
+    if any(value is None for value in overrides) and any(value is not None for value in overrides):
+        raise InstallError("install in-memory input set incomplete")
+    if all(value is not None for value in overrides):
+        receipt = copy.deepcopy(receipt_override)
+        baseline = copy.deepcopy(baseline_override)
+        authorization = authorization_override
+        if not isinstance(receipt, dict) or not isinstance(baseline, dict) or not isinstance(authorization, InstallAuthorization):
+            raise InstallError("install in-memory input set invalid")
+    else:
+        authorization = _read_authorization_payload(authorization_payload)
+        receipt = _read_json_file(
+            Path(receipt_path), label="precondition receipt", expected_uid=expected_uid
+        )
+        baseline = _read_json_file(
+            Path(baseline_path), label="baseline observation", expected_uid=expected_uid
+        )
     if (
         hashlib.sha256(package_backend.canonical_json_bytes(receipt)).hexdigest()
         != detached
@@ -5038,7 +5462,7 @@ def _production_install(
         expected_uid=expected_uid,
     )
     resource_observer = ChecksumBoundResourceObserver(
-        collector_path=Path(collector_path),
+        collector_bytes=_embedded_resource_collector_bytes(),
         collector_sha256=authorization.collector_sha256,
         expected_uid=expected_uid,
     )
@@ -5258,7 +5682,7 @@ def _recovery_inputs(
         expected_uid=expected_uid,
     )
     observer = ChecksumBoundResourceObserver(
-        collector_path=Path(collector_path),
+        collector_bytes=_embedded_resource_collector_bytes(),
         collector_sha256=authorization.collector_sha256,
         expected_uid=expected_uid,
     )
@@ -5442,9 +5866,49 @@ def run_production_command(
     expected_uid: int | None = 0,
 ) -> dict[str, Any]:
     args = list(argv)
-    if not args or args[0] not in {"install", "recover", "rollback", "verify"}:
+    if not args or args[0] not in {"install", "install-bound", "recover", "rollback", "verify"}:
         raise InstallError("unsupported_mode")
     mode = args.pop(0)
+    if mode == "install-bound":
+        if args:
+            raise InstallError("install_bound_inputs_required")
+        payload = authorization_payload
+        if payload is None:
+            payload = sys.stdin.buffer.read(64 * 1024 + 1)
+        intent = _read_install_boundary_intent_payload(payload)
+        try:
+            observer = ChecksumBoundResourceObserver(
+                collector_bytes=_embedded_resource_collector_bytes(),
+                collector_sha256=intent.collector_sha256,
+                expected_uid=expected_uid,
+            )
+            evidence = observer.collect_evidence()
+        except (InstallError, BackendError) as exc:
+            raise InstallError("install_bound_precondition_failed") from exc
+        boot_id = _read_boot_id(expected_uid=expected_uid)
+        receipt, detached, baseline, authorization = _build_in_memory_install_inputs_from_evidence(
+            intent=intent,
+            evidence=evidence,
+            boot_id=boot_id,
+            now_epoch=int(time.time()),
+        )
+        return _production_install(
+            [
+                "/in-memory/receipt",
+                detached,
+                "/in-memory/baseline",
+                "/in-memory/collector",
+                str(Path(sys.argv[0]).resolve()),
+                "/root/amn2-spain-phase12-install.tar",
+                str(int(time.time())),
+            ],
+            authorization_payload=b"",
+            host_root=host_root,
+            expected_uid=expected_uid,
+            receipt_override=receipt,
+            baseline_override=baseline,
+            authorization_override=authorization,
+        )
     if mode == "install":
         if len(args) != 7:
             raise InstallError("install_inputs_required")
@@ -5462,7 +5926,7 @@ def run_production_command(
             raise InstallError("verify_inputs_required")
         collector_path, collector_sha256 = args
         observation = ChecksumBoundResourceObserver(
-            collector_path=Path(collector_path),
+            collector_bytes=_embedded_resource_collector_bytes(),
             collector_sha256=collector_sha256,
             expected_uid=expected_uid,
         ).collect_observation()
@@ -5490,6 +5954,7 @@ def main(argv: list[str] | None = None) -> int:
         print(message if message else "install_failed", file=sys.stderr)
         if message in {
             "unsupported_mode",
+            "install_bound_inputs_required",
             "install_inputs_required",
             "recover_inputs_required",
             "rollback_inputs_required",

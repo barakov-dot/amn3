@@ -26,6 +26,7 @@ from scripts.phase12_spain_installer import (
     InstallError,
     InstallStateMachine,
     InstallAuthorization,
+    InstallBoundaryIntent,
     MemoryBackend,
     PackageVerificationReport,
     ProductionPostinstallObserver,
@@ -1327,6 +1328,252 @@ def valid_authorization(receipt_sha256: str) -> InstallAuthorization:
             "expires_at_epoch": RECEIPT_NOW + 300,
         }
     )
+
+
+def test_install_boundary_intent_accepts_only_hashed_host_and_boot_bindings() -> None:
+    value = {
+        "schema": "amn2.spain-install-boundary-intent.v1",
+        "mutation_authorized": True,
+        "approval_id": "phase12-test-approval",
+        "package_archive_sha256": "6" * 64,
+        "package_archive_size": 123456,
+        "package_manifest_sha256": "1" * 64,
+        "resource_plan_sha256": sha256_canonical(RESOURCE_PLAN),
+        "collector_sha256": COLLECTOR_SHA256,
+        "executor_sha256": EXECUTOR_SHA256,
+        "run009_evidence_sha256": package_module.RUN009_EVIDENCE_SHA256,
+        "fingerprint_array_sha256": package_module.RUN009_FINGERPRINT_SHA256,
+        "expected_host_identity_sha256": HOST_IDENTITY_SHA256,
+        "expected_boot_id_sha256": hashlib.sha256(BOOT_ID.encode("ascii")).hexdigest(),
+        "endpoint_host": "198.51.100.12",
+        "nonce": RECEIPT_NONCE,
+        "approved_at_epoch": RECEIPT_NOW + 1,
+        "expires_at_epoch": RECEIPT_NOW + 300,
+    }
+    intent = InstallBoundaryIntent.from_mapping(value)
+    assert intent.expected_host_identity_sha256 == HOST_IDENTITY_SHA256
+    assert intent.expected_boot_id_sha256 != BOOT_ID
+    value["boot_id"] = BOOT_ID
+    with pytest.raises(InstallError, match="schema/result"):
+        InstallBoundaryIntent.from_mapping(value)
+
+
+def test_embedded_run009_baseline_is_hash_bound() -> None:
+    baseline = installer_module._embedded_run009_baseline()
+    assert baseline["run009_evidence_sha256"] == package_module.DEFAULT_RUN009_EVIDENCE_SHA256
+    assert baseline["fingerprint_array_sha256"] == package_module.DEFAULT_RUN009_FINGERPRINT_SHA256
+    assert hashlib.sha256(bytes.fromhex(baseline["run009_evidence_hex"])).hexdigest() == (
+        package_module.DEFAULT_RUN009_EVIDENCE_SHA256
+    )
+
+
+def test_embedded_resource_plan_is_canonical_and_hash_bound() -> None:
+    plan = installer_module._embedded_resource_plan()
+    assert plan == RESOURCE_PLAN
+    assert sha256_canonical(plan) == sha256_canonical(RESOURCE_PLAN)
+
+
+def test_executor_rejects_incomplete_install_bound_input_before_mutation() -> None:
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "phase12_spain_installer.py"), "install-bound"],
+        cwd=ROOT,
+        input=b"{}\n",
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 64
+    assert result.stderr.replace(b"\r\n", b"\n") == b"install_bound_inputs_required\n"
+
+
+def test_executor_accepts_canonical_install_bound_intent_but_is_fail_closed() -> None:
+    value = {
+        "schema": "amn2.spain-install-boundary-intent.v1",
+        "mutation_authorized": True,
+        "approval_id": "phase12-test-approval",
+        "package_archive_sha256": "6" * 64,
+        "package_archive_size": 123456,
+        "package_manifest_sha256": "1" * 64,
+        "resource_plan_sha256": sha256_canonical(RESOURCE_PLAN),
+        "collector_sha256": COLLECTOR_SHA256,
+        "executor_sha256": EXECUTOR_SHA256,
+        "run009_evidence_sha256": package_module.RUN009_EVIDENCE_SHA256,
+        "fingerprint_array_sha256": package_module.RUN009_FINGERPRINT_SHA256,
+        "expected_host_identity_sha256": HOST_IDENTITY_SHA256,
+        "expected_boot_id_sha256": hashlib.sha256(BOOT_ID.encode("ascii")).hexdigest(),
+        "endpoint_host": "198.51.100.12",
+        "nonce": RECEIPT_NONCE,
+        "approved_at_epoch": RECEIPT_NOW + 1,
+        "expires_at_epoch": RECEIPT_NOW + 300,
+    }
+    payload = canonical_json_bytes(value) + b"\n"
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "phase12_spain_installer.py"), "install-bound"],
+        cwd=ROOT,
+        input=payload,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 78
+    assert result.stderr.replace(b"\r\n", b"\n") == b"install_bound_precondition_failed\n"
+
+
+def test_boot_id_reader_returns_only_valid_uuid_from_exact_file(tmp_path: Path) -> None:
+    path = tmp_path / "boot_id"
+    path.write_text(BOOT_ID + "\n", encoding="ascii")
+    assert installer_module._read_boot_id(path, expected_uid=None) == BOOT_ID
+    path.write_text("not-a-boot-id\n", encoding="ascii")
+    with pytest.raises(InstallError, match="boot identity"):
+        installer_module._read_boot_id(path, expected_uid=None)
+
+
+def test_install_boundary_intent_builds_authorization_only_for_matching_boot_hash() -> None:
+    intent = InstallBoundaryIntent.from_mapping(
+        {
+            "schema": "amn2.spain-install-boundary-intent.v1",
+            "mutation_authorized": True,
+            "approval_id": "phase12-test-approval",
+            "package_archive_sha256": "6" * 64,
+            "package_archive_size": 123456,
+            "package_manifest_sha256": "1" * 64,
+            "resource_plan_sha256": sha256_canonical(RESOURCE_PLAN),
+            "collector_sha256": COLLECTOR_SHA256,
+            "executor_sha256": EXECUTOR_SHA256,
+            "run009_evidence_sha256": package_module.RUN009_EVIDENCE_SHA256,
+            "fingerprint_array_sha256": package_module.RUN009_FINGERPRINT_SHA256,
+            "expected_host_identity_sha256": HOST_IDENTITY_SHA256,
+            "expected_boot_id_sha256": hashlib.sha256(BOOT_ID.encode("ascii")).hexdigest(),
+            "endpoint_host": "198.51.100.12",
+            "nonce": RECEIPT_NONCE,
+            "approved_at_epoch": RECEIPT_NOW + 1,
+            "expires_at_epoch": RECEIPT_NOW + 300,
+        }
+    )
+    authorization = intent.to_authorization("5" * 64, BOOT_ID)
+    assert authorization.precondition_receipt_sha256 == "5" * 64
+    with pytest.raises(InstallError, match="boot identity"):
+        intent.to_authorization("5" * 64, "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+
+
+def test_in_memory_install_inputs_bind_observation_without_paths() -> None:
+    intent = InstallBoundaryIntent.from_mapping(
+        {
+            "schema": "amn2.spain-install-boundary-intent.v1",
+            "mutation_authorized": True,
+            "approval_id": "phase12-test-approval",
+            "package_archive_sha256": "6" * 64,
+            "package_archive_size": 123456,
+            "package_manifest_sha256": "1" * 64,
+            "resource_plan_sha256": sha256_canonical(RESOURCE_PLAN),
+            "collector_sha256": COLLECTOR_SHA256,
+            "executor_sha256": EXECUTOR_SHA256,
+            "run009_evidence_sha256": package_module.RUN009_EVIDENCE_SHA256,
+            "fingerprint_array_sha256": package_module.RUN009_FINGERPRINT_SHA256,
+            "expected_host_identity_sha256": HOST_IDENTITY_SHA256,
+            "expected_boot_id_sha256": hashlib.sha256(BOOT_ID.encode("ascii")).hexdigest(),
+            "endpoint_host": "198.51.100.12",
+            "nonce": RECEIPT_NONCE,
+            "approved_at_epoch": RECEIPT_NOW + 1,
+            "expires_at_epoch": RECEIPT_NOW + 300,
+        }
+    )
+    receipt, detached, baseline_value, authorization = installer_module._build_in_memory_install_inputs(
+        intent=intent,
+        observation=OBSERVATION,
+        host_identity_sha256=HOST_IDENTITY_SHA256,
+        boot_id=BOOT_ID,
+        resource_plan=RESOURCE_PLAN,
+        baseline_value=baseline(),
+        now_epoch=RECEIPT_NOW + 2,
+    )
+    assert receipt["mutation_authorized"] is False
+    assert detached == authorization.precondition_receipt_sha256
+    assert baseline_value == baseline()
+
+
+def test_production_install_accepts_in_memory_inputs_without_json_paths(monkeypatch: pytest.MonkeyPatch) -> None:
+    receipt, detached = valid_receipt()
+    authorization = valid_authorization(detached)
+    monkeypatch.setattr(
+        installer_module,
+        "_read_json_file",
+        lambda *_args, **_kwargs: pytest.fail("path-based JSON reader was called"),
+    )
+    monkeypatch.setattr(
+        installer_module,
+        "_sha256_regular_file",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("in-memory-path-reached")),
+    )
+    with pytest.raises(RuntimeError, match="in-memory-path-reached"):
+        installer_module._production_install(
+            ["/unreadable/receipt", detached, "/unreadable/baseline", "/unused/collector", "/unused/executor", "/unused/package", str(RECEIPT_NOW + 2)],
+            authorization_payload=b"",
+            expected_uid=None,
+            receipt_override=receipt,
+            baseline_override=baseline(),
+            authorization_override=authorization,
+        )
+
+
+def test_current_evidence_builds_in_memory_install_inputs_before_mutation(monkeypatch: pytest.MonkeyPatch) -> None:
+    intent = InstallBoundaryIntent.from_mapping(
+        {
+            "schema": "amn2.spain-install-boundary-intent.v1", "mutation_authorized": True,
+            "approval_id": "phase12-test-approval", "package_archive_sha256": "6" * 64,
+            "package_archive_size": 123456, "package_manifest_sha256": "1" * 64,
+            "resource_plan_sha256": sha256_canonical(RESOURCE_PLAN), "collector_sha256": COLLECTOR_SHA256,
+            "executor_sha256": EXECUTOR_SHA256, "run009_evidence_sha256": package_module.RUN009_EVIDENCE_SHA256,
+            "fingerprint_array_sha256": package_module.RUN009_FINGERPRINT_SHA256,
+            "expected_host_identity_sha256": HOST_IDENTITY_SHA256,
+            "expected_boot_id_sha256": hashlib.sha256(BOOT_ID.encode("ascii")).hexdigest(),
+            "endpoint_host": "198.51.100.12", "nonce": RECEIPT_NONCE,
+            "approved_at_epoch": RECEIPT_NOW + 1, "expires_at_epoch": RECEIPT_NOW + 300,
+        }
+    )
+    monkeypatch.setattr(installer_module, "observation_from_resource_confirmation_evidence", lambda _value: OBSERVATION)
+    monkeypatch.setattr(installer_module, "_embedded_resource_plan", lambda: RESOURCE_PLAN)
+    monkeypatch.setattr(installer_module, "_embedded_run009_baseline", baseline)
+    receipt, detached, _baseline, authorization = installer_module._build_in_memory_install_inputs_from_evidence(
+        intent=intent,
+        evidence={"host_identity": {"machine_id_sha256": HOST_IDENTITY_SHA256, "boot_id_sha256": hashlib.sha256(BOOT_ID.encode("ascii")).hexdigest()}},
+        boot_id=BOOT_ID,
+        now_epoch=RECEIPT_NOW + 2,
+    )
+    assert receipt["result"] == "passed"
+    assert authorization.precondition_receipt_sha256 == detached
+
+
+def test_install_bound_mode_passes_only_in_memory_inputs_to_production(monkeypatch: pytest.MonkeyPatch) -> None:
+    intent = {
+        "schema": "amn2.spain-install-boundary-intent.v1", "mutation_authorized": True,
+        "approval_id": "phase12-test-approval", "package_archive_sha256": "6" * 64,
+        "package_archive_size": 123456, "package_manifest_sha256": "1" * 64,
+        "resource_plan_sha256": sha256_canonical(RESOURCE_PLAN), "collector_sha256": COLLECTOR_SHA256,
+        "executor_sha256": EXECUTOR_SHA256, "run009_evidence_sha256": package_module.RUN009_EVIDENCE_SHA256,
+        "fingerprint_array_sha256": package_module.RUN009_FINGERPRINT_SHA256,
+        "expected_host_identity_sha256": HOST_IDENTITY_SHA256,
+        "expected_boot_id_sha256": hashlib.sha256(BOOT_ID.encode("ascii")).hexdigest(),
+        "endpoint_host": "198.51.100.12", "nonce": RECEIPT_NONCE,
+        "approved_at_epoch": RECEIPT_NOW + 1, "expires_at_epoch": RECEIPT_NOW + 300,
+    }
+    evidence = {"host_identity": {"machine_id_sha256": HOST_IDENTITY_SHA256, "boot_id_sha256": hashlib.sha256(BOOT_ID.encode("ascii")).hexdigest()}}
+    monkeypatch.setattr(installer_module, "_read_install_boundary_intent_payload", lambda _payload: InstallBoundaryIntent.from_mapping(intent))
+    monkeypatch.setattr(installer_module, "_read_boot_id", lambda **_kwargs: BOOT_ID)
+    monkeypatch.setattr(installer_module, "_build_in_memory_install_inputs_from_evidence", lambda **_kwargs: (valid_receipt()[0], valid_receipt()[1], baseline(), valid_authorization(valid_receipt()[1])))
+    class FakeObserver:
+        MAX_COLLECTOR_BYTES = 1024 * 1024
+
+        def __init__(self, **_kwargs):
+            pass
+
+        def collect_evidence(self):
+            return evidence
+
+    monkeypatch.setattr(installer_module, "ChecksumBoundResourceObserver", FakeObserver)
+    captured = {}
+    monkeypatch.setattr(installer_module, "_production_install", lambda args, **kwargs: captured.update(args=args, kwargs=kwargs) or {"result": "passed"})
+    assert installer_module.run_production_command(["install-bound"], authorization_payload=b"ignored\n", expected_uid=None) == {"result": "passed"}
+    assert captured["kwargs"]["receipt_override"]["result"] == "passed"
+    assert captured["kwargs"]["baseline_override"] == baseline()
 
 
 def test_retained_authorization_tombstone_is_atomic_canonical_and_one_time(tmp_path: Path) -> None:
@@ -3056,7 +3303,7 @@ def test_rollback_equality_receipt_records_volatile_foreign_entries() -> None:
 def test_remote_executor_is_closed_mode_wrapper_without_network_fetches() -> None:
     source = REMOTE_EXECUTOR.read_text(encoding="utf-8")
     assert "set -Eeuo pipefail" in source
-    assert 'install|recover|rollback|verify)' in source
+    assert 'install|install-bound|recover|rollback|verify)' in source
     assert 'readonly EXECUTOR_BUNDLE="/root/amn2-spain-phase12-executor.pyz"' in source
     assert 'exec "$PYTHON_BIN" -I -B "$EXECUTOR_BUNDLE"' in source
     assert "PYTHONPATH" not in source
@@ -3105,6 +3352,9 @@ def test_standalone_executor_bundle_build_is_deterministic_and_fail_closed(
             "scripts/phase12_spain_network.py",
             "scripts/phase12_spain_package.py",
             "scripts/phase12_spain_precondition.py",
+            "scripts/phase12_spain_resource_confirmation_remote.sh",
+            "scripts/phase12_spain_run009_preflight_evidence.json",
+            "scripts/phase12_spain_resource_plan.json",
         }
     result = subprocess.run(
         [sys.executable, str(first), "unexpected"],

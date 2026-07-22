@@ -1,4 +1,32 @@
-# Текущий override 2026-07-21: Phase 12 checksum-bound package gate ready; awaiting separate read-only approval
+# Текущий override 2026-07-22: Phase 12 install-boundary artifacts готовы локально; awaiting commit/push gate
+
+Phase 12 не выполняла upload, install или иные изменения Spain. Новый standalone
+executor содержит collector, run009 baseline и resource plan; при install-bound
+он строит precondition receipt в памяти и сохраняет только одноразовый
+authorization tombstone. Equality policy: persistent foreign identities должны
+совпасть, volatile identities фиксируются receipt; foreign service не
+останавливается и не изменяется. Локальные checks перед commit/push: double
+build byte-identical, offline verify/extract, Linux-wrapper/executor fail-closed
+и rollback/equality scoped tests.
+
+```text
+active_phase=AMN2 Phase 12 Spain Migration|install_boundary_local_gate
+phase12_package_archive_sha256=EA633C4B41A2FF86369485564BDF8E6F0B7AB7E3D74CA1D019B2F9879AF414E3
+phase12_package_archive_size=139929600
+phase12_manifest_sha256=1762D40FD59F7B6952278BAE2E998BE370845D9BBAAA4C14772D0CACF9460C33
+phase12_resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
+phase12_executor_sha256=676B2BFF9A25EBCBEE524816D4B3A461260789D8EF270D0AD93F90848C2B49E6
+phase12_executor_size=139019
+phase12_foreign_equality_policy=dynamic_persistent_v1
+spain_mutation=false
+spain_unrelated_service=untouched
+usa_rollback_contour=unchanged
+next_gate=commit_push_origin_readback_then_checksum_bound_install_approval
+```
+
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся нетронутым.
+
+# Архивный override 2026-07-21: Phase 12 checksum-bound package gate ready; awaiting separate read-only approval
 
 Phase 12 local package gate завершён без SSH и без Spain mutation. Готовые
 package и standalone executor собраны дважды byte-identical, offline

@@ -87,6 +87,19 @@ def build_executor_bundle(
     sources = {
         "__main__.py": MAIN,
         "scripts/__init__.py": b"",
+        "scripts/phase12_spain_resource_confirmation_remote.sh": _read_bound_source(
+            scripts / "vps" / "phase12_spain_resource_confirmation_remote.sh"
+        ),
+        "scripts/phase12_spain_run009_preflight_evidence.json": _read_bound_source(
+            root
+            / "private-artifacts"
+            / "phase12-spain-install-package-inputs-20260721"
+            / "evidence"
+            / "run009-preflight-evidence.json"
+        ),
+        "scripts/phase12_spain_resource_plan.json": _read_bound_source(
+            root / "packaging" / "phase12-spain" / "resource-plan.json"
+        ),
         **{
             "scripts/" + name: _read_bound_source(scripts / name)
             for name in MODULES
