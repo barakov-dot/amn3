@@ -3330,8 +3330,8 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "EA633C4B41A2FF86369485564BDF8E6F0B7AB7E3D74CA1D019B2F9879AF414E3"' in source
-    assert '$expectedExecutorSha = "676B2BFF9A25EBCBEE524816D4B3A461260789D8EF270D0AD93F90848C2B49E6"' in source
+    assert '$expectedPackageSha = "2BDCB56DA2BB711F790B0901185007C6313FD2EC79E249F3A8FCEE3C3F6C4F8D"' in source
+    assert '$expectedExecutorSha = "8F6757D19364FB437AE6C3D2FEB09A927F258BC3692A6EF33D46520979AB885F"' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source

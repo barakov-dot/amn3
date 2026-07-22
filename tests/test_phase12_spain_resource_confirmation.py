@@ -225,6 +225,14 @@ class Phase12RemoteCollectorContractTests(unittest.TestCase):
             },
         )
 
+    def test_resource_evidence_adapter_accepts_listener_zone_suffix(self) -> None:
+        evidence = sample_evidence()
+        evidence["listening_sockets"] = [
+            {"protocol": "udp", "address": "127.0.0.53%lo", "port": 53}
+        ]
+        observation = observation_from_resource_confirmation_evidence(evidence)
+        self.assertEqual(observation["listeners"], ["udp|loopback|53"])
+
     def test_checksum_bound_resource_observer_executes_exact_reviewed_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             collector = Path(raw) / "collector.sh"

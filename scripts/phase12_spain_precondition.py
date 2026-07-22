@@ -104,7 +104,7 @@ def observation_from_resource_confirmation_evidence(
         network = candidates["network"]
         listeners: list[str] = []
         for row in evidence["listening_sockets"]:
-            address = str(row["address"]).strip("[]")
+            address = str(row["address"]).strip("[]").split("%", 1)[0]
             if address in {"0.0.0.0", "::", "*"}:
                 scope = "wildcard"
             else:
