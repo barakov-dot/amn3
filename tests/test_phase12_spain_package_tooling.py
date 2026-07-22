@@ -2433,6 +2433,53 @@ def test_checksum_bound_stager_streams_and_verifies_the_same_open_file(tmp_path:
     assert not (tmp_path / "opt" / "amn2-spain-package").exists()
 
 
+def test_critical_binding_revalidates_current_observation_without_raw_snapshot_equality(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed = copy.deepcopy(OBSERVATION)
+
+    class FakeObserver:
+        def collect_evidence(self):
+            return {
+                "host_identity": {
+                    "machine_id_sha256": HOST_IDENTITY_SHA256,
+                    "boot_id_sha256": hashlib.sha256(BOOT_ID.encode("ascii")).hexdigest(),
+                }
+            }
+
+    captured: dict[str, object] = {}
+    monkeypatch.setattr(
+        installer_module,
+        "observation_from_resource_confirmation_evidence",
+        lambda _evidence: observed,
+    )
+    monkeypatch.setattr(
+        installer_module,
+        "validate_preconditions",
+        lambda observation, resource_plan, baseline_value: captured.update(
+            observation=observation,
+            resource_plan=resource_plan,
+            baseline=baseline_value,
+        ) or {"result": "passed"},
+    )
+    binding, returned = installer_module._critical_resource_binding(
+        FakeObserver(),
+        valid_authorization("1" * 64),
+        resource_plan=RESOURCE_PLAN,
+        baseline=baseline(),
+    )
+    assert binding == {
+        "host_identity_sha256": HOST_IDENTITY_SHA256,
+        "boot_id": BOOT_ID,
+    }
+    assert returned == observed
+    assert captured == {
+        "observation": observed,
+        "resource_plan": RESOURCE_PLAN,
+        "baseline": baseline(),
+    }
+
+
 def test_checksum_bound_bootstrap_accepts_approval_before_in_memory_receipt_and_binds_report(tmp_path: Path) -> None:
     (tmp_path / "opt").mkdir()
     source = tmp_path / "incoming.tar"
@@ -2473,7 +2520,6 @@ def test_checksum_bound_bootstrap_accepts_approval_before_in_memory_receipt_and_
         critical_observation={
             "host_identity_sha256": HOST_IDENTITY_SHA256,
             "boot_id": BOOT_ID,
-            "observation_sha256": receipt["observation_sha256"],
         }
     )
     captured_bootstrap: list[object] = []
@@ -3422,8 +3468,8 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "324A6845F8B702AABF8C9CBADC38E66CCC6BE12AAE1DE6AA035F2394996E3426"' in source
-    assert '$expectedExecutorSha = "58648073D5E5001AF5736C15C633E9754D8E3C0460F373078374A36DD71BCBE7"' in source
+    assert '$expectedPackageSha = "77789F7AADB39DBA2E463AF178596A178577ABC3EF28A5DF71627848446F682F"' in source
+    assert '$expectedExecutorSha = "BF42F14D43FD74887FB7019FC9EEE40D26EF67BEBF8F188895A2707D04CD70DA"' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source

@@ -3933,7 +3933,6 @@ class ChecksumBoundBootstrap:
                 expected_critical = {
                     "host_identity_sha256": self.receipt["host_identity_sha256"],
                     "boot_id": self.receipt["boot_id"],
-                    "observation_sha256": self.receipt["observation_sha256"],
                 }
                 if critical != expected_critical:
                     raise InstallError("bootstrap critical recheck mismatch")
@@ -5373,6 +5372,9 @@ def _existing_opt_directory_lock(host_root: Path):
 def _critical_resource_binding(
     observer: ChecksumBoundResourceObserver,
     authorization: InstallAuthorization,
+    *,
+    resource_plan: dict[str, Any],
+    baseline: dict[str, Any],
 ) -> tuple[dict[str, str], dict[str, Any]]:
     evidence = observer.collect_evidence()
     try:
@@ -5387,11 +5389,14 @@ def _critical_resource_binding(
         != hashlib.sha256(authorization.boot_id.encode("ascii")).hexdigest()
     ):
         raise InstallError("critical host identity drift")
+    try:
+        validate_preconditions(observation, resource_plan, baseline)
+    except PreconditionError as exc:
+        raise InstallError("critical resource precondition drift") from exc
     return (
         {
             "host_identity_sha256": authorization.host_identity_sha256,
             "boot_id": authorization.boot_id,
-            "observation_sha256": sha256_canonical(observation),
         },
         observation,
     )
@@ -5466,6 +5471,9 @@ def _production_install(
         or sha256_canonical(baseline) != receipt.get("baseline_sha256")
     ):
         raise InstallError("install receipt/baseline binding mismatch")
+    critical_resource_plan = _embedded_resource_plan()
+    if sha256_canonical(critical_resource_plan) != authorization.resource_plan_sha256:
+        raise InstallError("critical resource plan binding mismatch")
     executor_sha256, _executor_size = _sha256_regular_file(
         Path(executor_path), expected_uid=expected_uid, max_bytes=64 * 1024 * 1024
     )
@@ -5510,7 +5518,10 @@ def _production_install(
     def critical_observer() -> dict[str, str]:
         nonlocal critical_cache
         critical_cache, _observation = _critical_resource_binding(
-            resource_observer, authorization
+            resource_observer,
+            authorization,
+            resource_plan=critical_resource_plan,
+            baseline=baseline,
         )
         return copy.deepcopy(critical_cache)
 
