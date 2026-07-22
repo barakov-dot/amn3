@@ -103,14 +103,22 @@ $transportOptions = @("-F", "none", "-o", "BatchMode=yes", "-o", "IdentitiesOnly
 $sshBase = @($transportOptions + @("-p", "22"))
 $scpBase = @($transportOptions + @("-P", "22"))
 $target = "$($binding['TARGET_USER'])@$($binding['TARGET_HOST'])"
-& $scpExe @scpBase $packagePath $executorPath "${target}:/root/"
-if ($LASTEXITCODE -ne 0) { throw "Approved artifact upload failed." }
-$hashResult = Invoke-ExactSsh (@($sshBase + @($target, "sha256sum /root/amn2-spain-phase12-install-a.tar /root/amn2-spain-phase12-executor-a.pyz"))) ([byte[]]@())
-if ($hashResult.ExitCode -ne 0) { throw "Remote artifact hash command failed." }
-$hashText = (New-Object Text.UTF8Encoding($false,$true)).GetString($hashResult.Stdout)
-if ($hashText -notmatch "(?im)^$($expectedPackageSha.ToLowerInvariant())  /root/amn2-spain-phase12-install-a\.tar$" -or $hashText -notmatch "(?im)^$($expectedExecutorSha.ToLowerInvariant())  /root/amn2-spain-phase12-executor-a\.pyz$") { throw "Remote artifact checksum mismatch." }
-& $sshExe @sshBase $target "mv -f /root/amn2-spain-phase12-install-a.tar /root/amn2-spain-phase12-install.tar && mv -f /root/amn2-spain-phase12-executor-a.pyz /root/amn2-spain-phase12-executor.pyz"
-if ($LASTEXITCODE -ne 0) { throw "Remote artifact activation failed." }
+$finalHashCommand = "sha256sum /root/amn2-spain-phase12-install.tar /root/amn2-spain-phase12-executor.pyz"
+$existingHashResult = Invoke-ExactSsh (@($sshBase + @($target, $finalHashCommand))) ([byte[]]@())
+$existingHashText = (New-Object Text.UTF8Encoding($false,$true)).GetString($existingHashResult.Stdout)
+$remoteArtifactsReady = $existingHashResult.ExitCode -eq 0 -and
+    $existingHashText -match "(?im)^$($expectedPackageSha.ToLowerInvariant())  /root/amn2-spain-phase12-install\.tar$" -and
+    $existingHashText -match "(?im)^$($expectedExecutorSha.ToLowerInvariant())  /root/amn2-spain-phase12-executor\.pyz$"
+if (-not $remoteArtifactsReady) {
+    & $scpExe @scpBase $packagePath $executorPath "${target}:/root/"
+    if ($LASTEXITCODE -ne 0) { throw "Approved artifact upload failed." }
+    $hashResult = Invoke-ExactSsh (@($sshBase + @($target, "sha256sum /root/amn2-spain-phase12-install-a.tar /root/amn2-spain-phase12-executor-a.pyz"))) ([byte[]]@())
+    if ($hashResult.ExitCode -ne 0) { throw "Remote artifact hash command failed." }
+    $hashText = (New-Object Text.UTF8Encoding($false,$true)).GetString($hashResult.Stdout)
+    if ($hashText -notmatch "(?im)^$($expectedPackageSha.ToLowerInvariant())  /root/amn2-spain-phase12-install-a\.tar$" -or $hashText -notmatch "(?im)^$($expectedExecutorSha.ToLowerInvariant())  /root/amn2-spain-phase12-executor-a\.pyz$") { throw "Remote artifact checksum mismatch." }
+    & $sshExe @sshBase $target "mv -f /root/amn2-spain-phase12-install-a.tar /root/amn2-spain-phase12-install.tar && mv -f /root/amn2-spain-phase12-executor-a.pyz /root/amn2-spain-phase12-executor.pyz"
+    if ($LASTEXITCODE -ne 0) { throw "Remote artifact activation failed." }
+}
 $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $nonceBytes = New-Object byte[] 32
 [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($nonceBytes)
