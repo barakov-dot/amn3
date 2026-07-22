@@ -643,20 +643,28 @@ function Convert-RemoteSnapshot([object]$Result, [string]$EvidenceOutputPath) {
     }
     $Bytes = [byte[]]$Result.StdoutBytes
     [Array]::Clear($Result.StderrBytes, 0, $Result.StderrBytes.Length)
+    $script:OutcomeStage = "framing"
+    $script:OutcomeReason = "STDOUT_FRAMING_INVALID"
     if ($Bytes.Length -lt 3 -or $Bytes.Length -gt 2097152 -or
         $Bytes[$Bytes.Length - 1] -ne 10 -or 13 -in $Bytes) {
         [Array]::Clear($Bytes, 0, $Bytes.Length)
         throw "Sanitized stdout framing failure."
     }
+    $script:OutcomeStage = "content"
+    $script:OutcomeReason = "STDOUT_CONTENT_UNSAFE"
     $Text = $StrictUtf8.GetString($Bytes, 0, $Bytes.Length - 1)
     if ($Text.Contains("`n") -or
         $Text -match '(?i)(authorization|bearer|BEGIN [A-Z ]+ KEY|api[_-]?key|credential|password|token|secret)') {
         [Array]::Clear($Bytes, 0, $Bytes.Length)
         throw "Sanitized stdout content failure."
     }
+    $script:OutcomeStage = "json"
+    $script:OutcomeReason = "JSON_INVALID"
     $Evidence = Assert-CanonicalJsonEncoding $Text
     Write-BytesCreateNew $EvidenceOutputPath $Bytes
     Protect-PrivatePath $EvidenceOutputPath
+    $script:OutcomeStage = "schema"
+    $script:OutcomeReason = "SCHEMA_INVALID"
     Assert-ResourceConfirmationSchema $Evidence
     return [pscustomobject]@{ Bytes = $Bytes; Evidence = $Evidence }
 }
@@ -1035,14 +1043,6 @@ $SecondRawBytes = $null
 $Result = $null
 $SecondResult = $null
 try {
-    $OutcomeStage = "framing"
-    $OutcomeReason = "STDOUT_FRAMING_INVALID"
-    $OutcomeStage = "content"
-    $OutcomeReason = "STDOUT_CONTENT_UNSAFE"
-    $OutcomeStage = "json"
-    $OutcomeReason = "JSON_INVALID"
-    $OutcomeStage = "schema"
-    $OutcomeReason = "SCHEMA_INVALID"
     try {
         $Result = Invoke-SshWithExactInput $SshExe $SshArguments $RemoteScriptBytes
         if ($Result.ExitCode -ne 0) { $OutcomeStage = Get-SafeRemoteFailureStage $Result.StdoutBytes $Result.ExitCode }
