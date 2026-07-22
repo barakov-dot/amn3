@@ -74,6 +74,7 @@ FIXTURES = ROOT / "tests" / "fixtures" / "phase12_spain"
 RESOURCE_PLAN = json.loads((FIXTURES / "resource_plan.json").read_text(encoding="utf-8"))
 OBSERVATION = json.loads((FIXTURES / "observation_ok.json").read_text(encoding="utf-8"))
 REMOTE_EXECUTOR = ROOT / "scripts" / "vps" / "phase12_spain_remote_executor.sh"
+INSTALL_SSH_RUNNER = ROOT / "scripts" / "vps" / "phase12_spain_install_ssh_runner.ps1"
 TRACKED_PACKAGE_ROOT = ROOT / "packaging" / "phase12-spain"
 HOST_IDENTITY_SHA256 = "7" * 64
 BOOT_ID = "12345678-1234-1234-1234-123456789abc"
@@ -3325,6 +3326,19 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
     )
     assert result.returncode == 64
     assert "unsupported_mode" in result.stderr
+
+
+def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
+    source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
+    assert '$expectedPackageSha = "EA633C4B41A2FF86369485564BDF8E6F0B7AB7E3D74CA1D019B2F9879AF414E3"' in source
+    assert '$expectedExecutorSha = "676B2BFF9A25EBCBEE524816D4B3A461260789D8EF270D0AD93F90848C2B49E6"' in source
+    assert "StrictHostKeyChecking=yes" in source
+    assert "install-bound" in source
+    assert "scp.exe" in source
+    assert "[Convert]::ToHexString" not in source
+    assert "resource-confirmation-evidence" not in source
+    assert "precondition-receipt" not in source
+    assert "baseline" not in source
 
 
 def test_standalone_executor_bundle_build_is_deterministic_and_fail_closed(
