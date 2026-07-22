@@ -71,7 +71,7 @@ function Read-PrivateBinding([string]$Path) {
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw "Private target binding unavailable." }
     $values = @{}
     foreach ($line in @(Get-Content -LiteralPath $Path)) {
-        if ($line -notmatch '^([A-Z_]+)=([^\r\n]+)$') { throw "Private target binding format invalid." }
+        if ($line -notmatch '^([A-Z0-9_]+)=([^\r\n]+)$') { throw "Private target binding format invalid." }
         if ($values.ContainsKey($Matches[1])) { throw "Private target binding duplicate key." }
         $values[$Matches[1]] = $Matches[2]
     }
