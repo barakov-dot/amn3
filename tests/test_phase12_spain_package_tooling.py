@@ -1229,9 +1229,12 @@ def test_precondition_rejects_target_and_resource_conflicts(field, value, match:
         validate_preconditions(observation, RESOURCE_PLAN, baseline())
 
 
-def test_precondition_rejects_systemd_and_firewall_baseline_mismatch() -> None:
+def test_precondition_allows_volatile_restart_count_and_rejects_stable_systemd_drift() -> None:
     observation = copy.deepcopy(OBSERVATION)
     observation["systemd_projection"][0]["restart_count"] = 1
+    report = validate_preconditions(observation, RESOURCE_PLAN, baseline())
+    assert report["result"] == "passed"
+    observation["systemd_projection"][0]["active_state"] = "inactive:dead"
     with pytest.raises(PreconditionError, match="systemd baseline"):
         validate_preconditions(observation, RESOURCE_PLAN, baseline())
 
@@ -3207,6 +3210,8 @@ def test_projection_helpers_allow_only_closed_owned_firewall_delta() -> None:
     )
     changed_foreign = copy.deepcopy(OBSERVATION["systemd_projection"])
     changed_foreign[0]["restart_count"] = 1
+    assert_systemd_projection(baseline()["systemd_projection"], changed_foreign)
+    changed_foreign[0]["active_state"] = "inactive:dead"
     with pytest.raises(InstallError, match="systemd projection"):
         assert_systemd_projection(baseline()["systemd_projection"], changed_foreign)
     baseline_nft = OBSERVATION["firewall"]["nft_json"]
@@ -3302,6 +3307,20 @@ def test_rollback_equality_observer_compares_stable_foreign_projections() -> Non
         receipt["foreign_service_fingerprint_before_sha256"]
         == receipt["foreign_service_fingerprint_after_sha256"]
     )
+    after["systemd_projection"][0]["restart_count"] = 1
+    restart_receipt = build_rollback_equality_receipt(
+        baseline_observation=before,
+        current_observation=after,
+        binding=binding,
+    )
+    assert restart_receipt["foreign_service_persistent_equal"] is True
+    after["systemd_projection"][0]["active_state"] = "inactive:dead"
+    with pytest.raises(InstallError, match="persistent foreign projection"):
+        build_rollback_equality_receipt(
+            baseline_observation=before,
+            current_observation=after,
+            binding=binding,
+        )
     after["listeners"].append("tcp|wildcard|9999")
     with pytest.raises(InstallError, match="listeners/routes/addresses"):
         build_rollback_equality_receipt(
@@ -3353,8 +3372,8 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "F11C15E97DB21D7B5368AF6438F0BFB1032B2670BCD02DBB5078A8806DC55B44"' in source
-    assert '$expectedExecutorSha = "46F5F8B374F9EF4B804268AE6C83A0A86297825B37BCB563C9C597C1A637F12E"' in source
+    assert '$expectedPackageSha = "91E1B2CB276DEF68F57255F57476814B6D1F5EF829AD2BF0A2E3F678CBA2B24B"' in source
+    assert '$expectedExecutorSha = "02BFF28EA2C658CE4EA446835184DD32C7AB4B887B9D0F9132C189F4FBB1CFB3"' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source

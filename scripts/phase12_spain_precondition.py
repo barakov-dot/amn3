@@ -27,6 +27,7 @@ OBSERVATION_SCHEMA = "amn2.spain-precondition-observation.v1"
 RECEIPT_SCHEMA = "amn2.spain-preconditions-passed.v1"
 SHA256_RE = __import__("re").compile(r"^[0-9a-f]{64}$")
 BOOT_ID_RE = __import__("re").compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+FOREIGN_SERVICE_VOLATILE_FIELDS = frozenset({"bound_port_set", "restart_count"})
 DEFAULT_RUN009_EVIDENCE_SHA256 = "8d8a4e155b30c4b72c564056c71b159e222c53e3bdc60018c3f6099c1979e1a8"
 DEFAULT_RUN009_FINGERPRINT_SHA256 = "e15219cb5204d54a9ad11263cfba1f7c86e16dab3287c752a8b6f136ec4a5ed5"
 RUN009_EVIDENCE_SHA256 = DEFAULT_RUN009_EVIDENCE_SHA256
@@ -256,7 +257,8 @@ def _foreign_projection_comparison(expected: object, current: object) -> dict[st
             if identity in result:
                 return None
             stable = dict(entry)
-            stable.pop("bound_port_set", None)
+            for field in FOREIGN_SERVICE_VOLATILE_FIELDS:
+                stable.pop(field, None)
             result[identity] = stable
         return result
 

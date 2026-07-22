@@ -4383,8 +4383,19 @@ def build_rollback_equality_receipt(
         for key in ("listeners", "routes", "addresses")
     ):
         raise InstallError("rollback listeners/routes/addresses mismatch")
-    before_items = {str(item.get("name_sha256")): item for item in baseline_observation["systemd_projection"]}
-    after_items = {str(item.get("name_sha256")): item for item in current_observation["systemd_projection"]}
+    def stable_foreign_item(item: Mapping[str, object]) -> dict[str, object]:
+        stable = dict(item)
+        stable.pop("bound_port_set", None)
+        stable.pop("restart_count", None)
+        return stable
+    before_items = {
+        str(item.get("name_sha256")): stable_foreign_item(item)
+        for item in baseline_observation["systemd_projection"]
+    }
+    after_items = {
+        str(item.get("name_sha256")): stable_foreign_item(item)
+        for item in current_observation["systemd_projection"]
+    }
     persistent = sorted(set(before_items) & set(after_items))
     if any(before_items[key] != after_items[key] for key in persistent):
         raise InstallError("rollback persistent foreign projection mismatch")
@@ -4466,6 +4477,7 @@ def assert_systemd_projection(expected: object, current: object) -> None:
                 raise InstallError("systemd projection mismatch")
             stable = dict(entry)
             stable.pop("bound_port_set", None)
+            stable.pop("restart_count", None)
             result[identity] = stable
         return result
     expected_by_identity = by_identity(expected)
