@@ -1115,6 +1115,17 @@ Remove-Item -LiteralPath $path -Force
             "AMN2_PHASE12_RESOURCE_CONFIRMATION_FAILURE_V1",
         ):
             self.assertIn(marker, source)
+
+    def test_validated_snapshots_are_persisted_before_conflict_decision(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        self.assertLess(
+            source.index("Write-BytesCreateNew $EvidencePath $RawBytes"),
+            source.index("$ConflictDecision = Get-ConflictDecision $Evidence"),
+        )
+        self.assertLess(
+            source.index("Write-BytesCreateNew $EvidenceSecondPath $SecondRawBytes"),
+            source.index("$ConflictDecision = Get-ConflictDecision $Evidence"),
+        )
         self.assertRegex(source, r"(?s)try\s*\{.*Invoke-SshWithExactInput.*\}\s*catch\s*\{")
         self.assertNotIn("$_.Exception.Message", source)
         self.assertIn("$ClaimSha", source)

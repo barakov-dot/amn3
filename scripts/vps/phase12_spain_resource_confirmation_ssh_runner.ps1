@@ -18,7 +18,7 @@ $run009FirewallBackend = "nft"
 $run009FirewallRulesSha = "35ED9383AE9E73268E3D1AB7F57612BC60EA59C0531D6A96372E5F3731883D00"
 $run009FirewallRuleCount = 129
 $trustedBundleRunId = "spain-fresh-20260720-001"
-$expectedRunId = "spain-resource-confirmation-20260722-012"
+$expectedRunId = "spain-resource-confirmation-20260722-013"
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
 $actualRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $RepositoryRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
@@ -1054,6 +1054,13 @@ try {
     $OutcomeReason = "FINGERPRINT_MISMATCH"
     $FingerprintReceipt = Get-PersistentFingerprintReceipt @($Evidence.unrelated_service_fingerprint) @($SecondEvidence.unrelated_service_fingerprint)
 
+    $OutcomeStage = "persist"
+    $OutcomeReason = "EVIDENCE_PERSIST_FAILED"
+    Write-BytesCreateNew $EvidencePath $RawBytes
+    Protect-PrivatePath $EvidencePath
+    Write-BytesCreateNew $EvidenceSecondPath $SecondRawBytes
+    Protect-PrivatePath $EvidenceSecondPath
+
     $OutcomeStage = "conflict"
     $OutcomeReason = "UNEXPECTED_POST_CLAIM_FAILURE"
     $ConflictDecision = Get-ConflictDecision $Evidence
@@ -1070,12 +1077,6 @@ try {
     try { $CanonicalEvidenceSha = ([BitConverter]::ToString($CanonicalHasher.ComputeHash($CanonicalBytes))).Replace("-", "") }
     finally { $CanonicalHasher.Dispose(); [Array]::Clear($CanonicalBytes, 0, $CanonicalBytes.Length) }
 
-    $OutcomeStage = "persist"
-    $OutcomeReason = "EVIDENCE_PERSIST_FAILED"
-    Write-BytesCreateNew $EvidencePath $RawBytes
-    Protect-PrivatePath $EvidencePath
-    Write-BytesCreateNew $EvidenceSecondPath $SecondRawBytes
-    Protect-PrivatePath $EvidenceSecondPath
     if ($ConflictDecision.conflict_free -ne $true) {
         $OutcomeStage = "conflict"
         $OutcomeReason = "CONFLICT_FREE_REQUIRED"
