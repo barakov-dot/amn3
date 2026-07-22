@@ -1119,11 +1119,11 @@ Remove-Item -LiteralPath $path -Force
     def test_validated_snapshots_are_persisted_before_conflict_decision(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         self.assertLess(
-            source.index("Write-BytesCreateNew $EvidencePath $RawBytes"),
+            source.index("Convert-RemoteSnapshot $Result $EvidencePath"),
             source.index("$ConflictDecision = Get-ConflictDecision $Evidence"),
         )
         self.assertLess(
-            source.index("Write-BytesCreateNew $EvidenceSecondPath $SecondRawBytes"),
+            source.index("Convert-RemoteSnapshot $SecondResult $EvidenceSecondPath"),
             source.index("$ConflictDecision = Get-ConflictDecision $Evidence"),
         )
         self.assertRegex(source, r"(?s)try\s*\{.*Invoke-SshWithExactInput.*\}\s*catch\s*\{")

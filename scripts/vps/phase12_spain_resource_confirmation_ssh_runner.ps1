@@ -635,7 +635,7 @@ function Get-SafeRemoteFailureStage([byte[]]$Bytes, [int]$ExitCode) {
     return $Match.Groups['stage'].Value
 }
 
-function Convert-RemoteSnapshot([object]$Result) {
+function Convert-RemoteSnapshot([object]$Result, [string]$EvidenceOutputPath) {
     if ($Result.ExitCode -ne 0) {
         [Array]::Clear($Result.StdoutBytes, 0, $Result.StdoutBytes.Length)
         [Array]::Clear($Result.StderrBytes, 0, $Result.StderrBytes.Length)
@@ -655,6 +655,8 @@ function Convert-RemoteSnapshot([object]$Result) {
         throw "Sanitized stdout content failure."
     }
     $Evidence = Assert-CanonicalJsonEncoding $Text
+    Write-BytesCreateNew $EvidenceOutputPath $Bytes
+    Protect-PrivatePath $EvidenceOutputPath
     Assert-ResourceConfirmationSchema $Evidence
     return [pscustomobject]@{ Bytes = $Bytes; Evidence = $Evidence }
 }
@@ -1044,12 +1046,12 @@ try {
     try {
         $Result = Invoke-SshWithExactInput $SshExe $SshArguments $RemoteScriptBytes
         if ($Result.ExitCode -ne 0) { $OutcomeStage = Get-SafeRemoteFailureStage $Result.StdoutBytes $Result.ExitCode }
-        $FirstSnapshot = Convert-RemoteSnapshot $Result
+        $FirstSnapshot = Convert-RemoteSnapshot $Result $EvidencePath
         $RawBytes = [byte[]]$FirstSnapshot.Bytes
         $Evidence = $FirstSnapshot.Evidence
         $SecondResult = Invoke-SshWithExactInput $SshExe $SshArguments $RemoteScriptBytes
         if ($SecondResult.ExitCode -ne 0) { $OutcomeStage = Get-SafeRemoteFailureStage $SecondResult.StdoutBytes $SecondResult.ExitCode }
-        $SecondSnapshot = Convert-RemoteSnapshot $SecondResult
+        $SecondSnapshot = Convert-RemoteSnapshot $SecondResult $EvidenceSecondPath
         $SecondRawBytes = [byte[]]$SecondSnapshot.Bytes
         $SecondEvidence = $SecondSnapshot.Evidence
     } finally { [Array]::Clear($RemoteScriptBytes, 0, $RemoteScriptBytes.Length) }
@@ -1059,10 +1061,6 @@ try {
 
     $OutcomeStage = "persist"
     $OutcomeReason = "EVIDENCE_PERSIST_FAILED"
-    Write-BytesCreateNew $EvidencePath $RawBytes
-    Protect-PrivatePath $EvidencePath
-    Write-BytesCreateNew $EvidenceSecondPath $SecondRawBytes
-    Protect-PrivatePath $EvidenceSecondPath
 
     $OutcomeStage = "conflict"
     $OutcomeReason = "UNEXPECTED_POST_CLAIM_FAILURE"
