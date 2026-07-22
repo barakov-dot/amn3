@@ -98,9 +98,11 @@ if ($binding["SSH_KEY_PATH"] -cne $keyPath -or -not (Test-Path -LiteralPath $key
 $runnerApproval = "APPROVE PHASE12 SPAIN CHECKSUM BOUND INSTALL RUNNER SHA256 $expectedRunnerSha PACKAGE SHA256 $expectedPackageSha PACKAGE BYTES $expectedPackageBytes MANIFEST SHA256 $expectedManifestSha RESOURCE PLAN SHA256 $expectedPlanSha EXECUTOR SHA256 $expectedExecutorSha EXECUTOR BYTES $expectedExecutorBytes COLLECTOR SHA256 $expectedCollectorSha SOURCE $sourceRevision RUN009 EVIDENCE SHA256 $run009EvidenceSha FINGERPRINT ARRAY SHA256 $fingerprintArraySha DYNAMIC FOREIGN EQUALITY PERSISTENT REQUIRED VOLATILE RECORDED EXACT PRIVATE TARGET DEDICATED ED25519 KEY INDEPENDENT HOST PIN STDIN ONLY UPLOAD PACKAGE EXECUTOR REMOTE HASH VERIFY INSTALL BOUND AUTOMATIC ROLLBACK NO FOREIGN SERVICE MUTATION USA ROLLBACK CONTOUR"
 if ($Approval -cne $runnerApproval) { Write-Output $runnerApproval; throw "Exact install approval mismatch." }
 
-$sshBase = @("-F", "none", "-o", "BatchMode=yes", "-o", "IdentitiesOnly=yes", "-o", "PasswordAuthentication=no", "-o", "KbdInteractiveAuthentication=no", "-o", "GSSAPIAuthentication=no", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "-o", "RequestTTY=no", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=$knownHostsPath", "-i", $keyPath, "-p", "22")
+$transportOptions = @("-F", "none", "-o", "BatchMode=yes", "-o", "IdentitiesOnly=yes", "-o", "PasswordAuthentication=no", "-o", "KbdInteractiveAuthentication=no", "-o", "GSSAPIAuthentication=no", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "-o", "RequestTTY=no", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=$knownHostsPath", "-i", $keyPath)
+$sshBase = @($transportOptions + @("-p", "22"))
+$scpBase = @($transportOptions + @("-P", "22"))
 $target = "$($binding['TARGET_USER'])@$($binding['TARGET_HOST'])"
-& $scpExe @sshBase $packagePath $executorPath "${target}:/root/"
+& $scpExe @scpBase $packagePath $executorPath "${target}:/root/"
 if ($LASTEXITCODE -ne 0) { throw "Approved artifact upload failed." }
 $hashResult = Invoke-ExactSsh (@($sshBase + @($target, "sha256sum /root/amn2-spain-phase12-install-a.tar /root/amn2-spain-phase12-executor-a.pyz"))) ([byte[]]@())
 if ($hashResult.ExitCode -ne 0) { throw "Remote artifact hash command failed." }
