@@ -119,5 +119,9 @@ $nonce = (ConvertTo-Hex $nonceBytes).ToLowerInvariant()
 $intent = [ordered]@{ approval_id=(Get-TextSha256 $Approval).ToLowerInvariant(); approved_at_epoch=$now; collector_sha256=$expectedCollectorSha.ToLowerInvariant(); endpoint_host=$binding['TARGET_HOST']; executor_sha256=$expectedExecutorSha.ToLowerInvariant(); expected_boot_id_sha256=$expectedBootSha.ToLowerInvariant(); expected_host_identity_sha256=$expectedMachineSha.ToLowerInvariant(); expires_at_epoch=($now + 300); fingerprint_array_sha256=$fingerprintArraySha.ToLowerInvariant(); mutation_authorized=$true; nonce=$nonce; package_archive_sha256=$expectedPackageSha.ToLowerInvariant(); package_archive_size=$expectedPackageBytes; package_manifest_sha256=$expectedManifestSha.ToLowerInvariant(); resource_plan_sha256=$expectedPlanSha.ToLowerInvariant(); run009_evidence_sha256=$run009EvidenceSha.ToLowerInvariant(); schema="amn2.spain-install-boundary-intent.v1" }
 $intentBytes = (New-Object Text.UTF8Encoding($false)).GetBytes(($intent | ConvertTo-Json -Compress) + "`n")
 $installResult = Invoke-ExactSsh (@($sshBase + @($target, "/usr/bin/python3 -I -B /root/amn2-spain-phase12-executor.pyz install-bound"))) $intentBytes
-if ($installResult.ExitCode -ne 0) { throw "Install-bound failed; remote executor is responsible for automatic rollback." }
+if ($installResult.ExitCode -ne 0) {
+    $safeRemoteError = (New-Object Text.UTF8Encoding($false,$true)).GetString($installResult.Stderr).Trim()
+    if (-not [string]::IsNullOrWhiteSpace($safeRemoteError)) { [Console]::Error.WriteLine($safeRemoteError) }
+    throw "Install-bound failed; remote executor is responsible for automatic rollback."
+}
 [Console]::WriteLine((New-Object Text.UTF8Encoding($false,$true)).GetString($installResult.Stdout))
