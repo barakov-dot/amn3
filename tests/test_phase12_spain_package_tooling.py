@@ -1374,7 +1374,7 @@ def valid_authorization(receipt_sha256: str) -> InstallAuthorization:
             "endpoint_host": "198.51.100.12",
             "boot_id": BOOT_ID,
             "nonce": RECEIPT_NONCE,
-            "approved_at_epoch": RECEIPT_NOW + 1,
+            "approved_at_epoch": RECEIPT_NOW - 1,
             "expires_at_epoch": RECEIPT_NOW + 300,
         }
     )
@@ -2433,7 +2433,7 @@ def test_checksum_bound_stager_streams_and_verifies_the_same_open_file(tmp_path:
     assert not (tmp_path / "opt" / "amn2-spain-package").exists()
 
 
-def test_checksum_bound_bootstrap_consumes_before_staging_and_binds_report(tmp_path: Path) -> None:
+def test_checksum_bound_bootstrap_accepts_approval_before_in_memory_receipt_and_binds_report(tmp_path: Path) -> None:
     (tmp_path / "opt").mkdir()
     source = tmp_path / "incoming.tar"
     payload = package_tar()
@@ -2460,6 +2460,8 @@ def test_checksum_bound_bootstrap_consumes_before_staging_and_binds_report(tmp_p
         package_archive_size=len(payload),
         package_manifest_sha256=package_report.manifest_sha256,
         resource_plan_sha256=package_report.resource_plan_sha256,
+        approved_at_epoch=RECEIPT_NOW - 1,
+        expires_at_epoch=RECEIPT_NOW + 299,
     )
     store = RetainedAuthorizationStore(tmp_path / "phase12-audit", expected_uid=None)
     stager = ChecksumBoundPackageStager(
@@ -2550,6 +2552,31 @@ def test_installer_binds_authorized_collector_executor_and_receipt_evidence() ->
             now_epoch=RECEIPT_NOW + 2,
         )
     assert backend.mutations == []
+
+
+def test_state_machine_accepts_approval_before_in_memory_receipt() -> None:
+    receipt, detached = valid_receipt()
+    authorization = replace(
+        valid_authorization(detached),
+        approved_at_epoch=RECEIPT_NOW - 1,
+        expires_at_epoch=RECEIPT_NOW + 299,
+    )
+    backend = observed_backend(
+        critical_observation={
+            "host_identity_sha256": HOST_IDENTITY_SHA256,
+            "boot_id": BOOT_ID,
+            "observation_sha256": receipt["observation_sha256"],
+        }
+    )
+    result = InstallStateMachine(backend, RESOURCE_PLAN, baseline()).install(
+        receipt,
+        detached,
+        package_manifest_sha256="1" * 64,
+        package_report=verified_package_report(),
+        authorization=authorization,
+        now_epoch=RECEIPT_NOW + 2,
+    )
+    assert result["result"] == "passed"
 
 
 def test_readonly_receipt_is_not_authorization_and_approval_is_one_time_under_lock() -> None:
@@ -3395,8 +3422,8 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "936ACDFDE808A4A235659CF904BFF55F155DACF6655476FFEEAA1A5A646E2F59"' in source
-    assert '$expectedExecutorSha = "132464ECA59FAA8224B927479E423B72C2C5354700EF761FA6AA4102FDFA1611"' in source
+    assert '$expectedPackageSha = "324A6845F8B702AABF8C9CBADC38E66CCC6BE12AAE1DE6AA035F2394996E3426"' in source
+    assert '$expectedExecutorSha = "58648073D5E5001AF5736C15C633E9754D8E3C0460F373078374A36DD71BCBE7"' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source

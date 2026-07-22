@@ -7,9 +7,14 @@ baseline и resource plan: remote precondition receipt, baseline и collector н
 загружаются отдельными файлами. Foreign-service equality действует как
 `dynamic_persistent_v1`: persistent identities обязаны совпасть; volatile
 identities только записываются. Spain foreign service не останавливается и не
-изменяется. Текущие локальные artifacts до commit/push: package
-`936ACDFDE808A4A235659CF904BFF55F155DACF6655476FFEEAA1A5A646E2F59`, executor
-`132464ECA59FAA8224B927479E423B72C2C5354700EF761FA6AA4102FDFA1611`.
+изменяется. Тихая SCP upload v4 завершилась с remote hash equality, но executor
+fail-closed до tombstone/state machine на инвертированном time-gate
+authorization/receipt; AMN2 services не запускались. Текущие v5 локальные
+artifacts до commit/push: package
+`324A6845F8B702AABF8C9CBADC38E66CCC6BE12AAE1DE6AA035F2394996E3426`, executor
+`58648073D5E5001AF5736C15C633E9754D8E3C0460F373078374A36DD71BCBE7`.
+Исправление допускает approval до выпуска in-memory receipt при сохранении
+строгого expiry/binding контроля.
 Policy receipt фиксирует `persistent_equal` и числа volatile entries до/после;
 полностью volatile membership допустим, но любое изменение stable fields
 persistent identity остаётся fail-closed. Volatile fields persistent identity:

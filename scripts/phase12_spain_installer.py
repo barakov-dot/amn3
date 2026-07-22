@@ -3896,7 +3896,7 @@ class ChecksumBoundBootstrap:
             or receipt.get("fingerprint_array_sha256")
             != authorization.fingerprint_array_sha256
             or receipt.get("nonce") != authorization.nonce
-            or authorization.approved_at_epoch < receipt.get("issued_at_epoch", -1)
+            or authorization.approved_at_epoch > receipt.get("issued_at_epoch", -1)
             or authorization.expires_at_epoch > receipt.get("expires_at_epoch", -1)
             or now_epoch < authorization.approved_at_epoch
             or now_epoch > authorization.expires_at_epoch
@@ -5134,7 +5134,7 @@ class InstallStateMachine:
             or authorization.run009_evidence_sha256 != package_report.run009_evidence_sha256
             or authorization.fingerprint_array_sha256 != package_report.fingerprint_array_sha256
             or authorization.nonce != receipt["nonce"]
-            or authorization.approved_at_epoch < receipt["issued_at_epoch"]
+            or authorization.approved_at_epoch > receipt["issued_at_epoch"]
             or authorization.expires_at_epoch > receipt["expires_at_epoch"]
             or now_epoch > authorization.expires_at_epoch
             or now_epoch < authorization.approved_at_epoch

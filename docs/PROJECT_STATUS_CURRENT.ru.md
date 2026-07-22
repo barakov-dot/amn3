@@ -1,8 +1,11 @@
-# Текущий override 2026-07-22: Phase 12 dynamic-precondition artifacts готовы локально; awaiting commit/push gate
+# Текущий override 2026-07-22: Phase 12 timing-gate artifacts готовы локально; awaiting commit/push gate
 
-Предыдущая checksum-bound upload попытка дошла до precondition и завершилась
-до tombstone/state machine; install mutation не подтверждена. Текущие локальные
-artifacts ещё не загружались. Новый standalone executor содержит collector,
+Тихая checksum-bound SCP upload попытка v4 завершилась: remote hashes package и
+executor совпали. Затем install-bound завершился до tombstone/state machine на
+`bootstrap authorization binding/expiry mismatch`; AMN2 mutation и запуск units
+не подтверждены. Исправлен инвертированный time-gate: approval может начаться
+до выпуска in-memory receipt, но по-прежнему обязан быть действующим и строго
+bound к receipt. Текущие v5 локальные artifacts ещё не загружались. Новый standalone executor содержит collector,
 run009 baseline и resource plan; при install-bound
 он строит precondition receipt в памяти и сохраняет только одноразовый
 authorization tombstone. Equality policy: persistent foreign identities должны
@@ -17,16 +20,16 @@ fields. Любое расхождение остальных stable fields persi
 
 ```text
 active_phase=AMN2 Phase 12 Spain Migration|dynamic_precondition_local_gate
-phase12_package_archive_sha256=936ACDFDE808A4A235659CF904BFF55F155DACF6655476FFEEAA1A5A646E2F59
+phase12_package_archive_sha256=324A6845F8B702AABF8C9CBADC38E66CCC6BE12AAE1DE6AA035F2394996E3426
 phase12_package_archive_size=139939840
-phase12_manifest_sha256=B9DCC4BDB0847E1776976D2ADA676D179B9B5E5BC8F03874DBC175684C57114A
+phase12_manifest_sha256=ACE9298A6816EAC812C2F91A8CC194FDF8437E513F028716A2C99F59C791DE29
 phase12_resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
-phase12_executor_sha256=132464ECA59FAA8224B927479E423B72C2C5354700EF761FA6AA4102FDFA1611
-phase12_executor_size=139710
+phase12_executor_sha256=58648073D5E5001AF5736C15C633E9754D8E3C0460F373078374A36DD71BCBE7
+phase12_executor_size=139705
 phase12_foreign_equality_policy=dynamic_persistent_v1
 phase12_precondition_receipt=records_persistent_equality_and_volatile_before_after_counts
 phase12_firewall_semantic_rebaseline=nft|rule_count_129|semantic_sha256_FB8E1D41F6F4F0EBCEB7C89D65E4E5E440E0AC0A4E780B4F638F96CEE1B9A682
-phase12_scoped_tests=169_passed
+phase12_scoped_tests=168_passed
 phase12_package_executor_reproducible=byte_identical_double_builds
 phase12_clean_room_verify_extract=passed
 spain_mutation=false
