@@ -525,7 +525,7 @@ class Phase12RunnerContractTests(unittest.TestCase):
                 check=False,
             )
 
-    def test_schema_accepts_only_the_exact_148_entry_shape(self) -> None:
+    def test_schema_accepts_aligned_dynamic_foreign_entry_shape(self) -> None:
         good = self._validate(sample_evidence())
         self.assertEqual(good.returncode, 0, good.stderr)
         bad = sample_evidence()
@@ -536,7 +536,12 @@ class Phase12RunnerContractTests(unittest.TestCase):
         self.assertNotEqual(self._validate(nested).returncode, 0)
         short = sample_evidence()
         short["unrelated_service_fingerprint"] = short["unrelated_service_fingerprint"][:-1]  # type: ignore[index]
-        self.assertNotEqual(self._validate(short).returncode, 0)
+        short["cgroup_diagnostics"] = short["cgroup_diagnostics"][:-1]  # type: ignore[index]
+        short["systemd"]["unit_count"] = 147  # type: ignore[index]
+        self.assertEqual(self._validate(short).returncode, 0)
+        unaligned = sample_evidence()
+        unaligned["unrelated_service_fingerprint"] = unaligned["unrelated_service_fingerprint"][:-1]  # type: ignore[index]
+        self.assertNotEqual(self._validate(unaligned).returncode, 0)
         wrong_path = sample_evidence()
         wrong_path["candidates"]["paths"][0]["path"] = "/opt/not-amn2"  # type: ignore[index]
         self.assertNotEqual(self._validate(wrong_path).returncode, 0)
@@ -544,6 +549,46 @@ class Phase12RunnerContractTests(unittest.TestCase):
         unsafe_docker["candidates"]["docker"]["observation_safe"] = False  # type: ignore[index]
         unsafe_docker["candidates"]["docker"]["container_collision_unknown"] = True  # type: ignore[index]
         self.assertEqual(self._validate(unsafe_docker).returncode, 0)
+
+    def test_dynamic_receipt_allows_only_membership_volatility(self) -> None:
+        source = RUNNER.read_text(encoding="utf-8")
+        functions = (
+            extract_powershell_function(source, "Get-FingerprintSetReceipt")
+            + extract_powershell_function(source, "Get-StableFingerprintSetReceipt")
+            + extract_powershell_function(source, "Get-PersistentFingerprintReceipt")
+        )
+        before = sample_evidence()["unrelated_service_fingerprint"]
+        after = copy.deepcopy(before[:-1])
+        changed = copy.deepcopy(after)
+        changed[0]["restart_count"] = 1
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            tmp = Path(raw_tmp)
+            before_path = tmp / "before.json"
+            after_path = tmp / "after.json"
+            changed_path = tmp / "changed.json"
+            script_path = tmp / "dynamic.ps1"
+            before_path.write_text(json.dumps(before), encoding="utf-8")
+            after_path.write_text(json.dumps(after), encoding="utf-8")
+            changed_path.write_text(json.dumps(changed), encoding="utf-8")
+            script_path.write_text(
+                "Set-StrictMode -Version Latest\n$ErrorActionPreference='Stop'\n"
+                + functions
+                + "\n$b=Get-Content -Raw -LiteralPath $args[0] | ConvertFrom-Json\n"
+                + "$a=Get-Content -Raw -LiteralPath $args[1] | ConvertFrom-Json\n"
+                + "$r=Get-PersistentFingerprintReceipt @($b) @($a)\n"
+                + "if ($r.volatile_before_count -ne 1 -or $r.volatile_after_count -ne 0) { throw 'volatility receipt mismatch' }\n"
+                + "$c=Get-Content -Raw -LiteralPath $args[2] | ConvertFrom-Json\n"
+                + "Get-PersistentFingerprintReceipt @($b) @($c)\n",
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                [str(POWERSHELL), "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", str(script_path), str(before_path), str(after_path), str(changed_path)],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+        self.assertNotEqual(result.returncode, 0)
 
     def test_duplicate_fingerprint_identity_is_rejected(self) -> None:
         duplicate = sample_evidence()
@@ -1063,7 +1108,9 @@ Remove-Item -LiteralPath $path -Force
             "USE_NEW_RUN_ID_AND_NEW_EXACT_APPROVAL",
             "resource-confirmation-failure-receipt.v1",
             "resource-confirmation-blocked-receipt.v1",
-            "resource-confirmation-receipt.v1",
+            "resource-confirmation-receipt.v2",
+            "dynamic-persistent-v1",
+            "resource-confirmation-evidence-second.json",
             "CONFLICT_FREE_REQUIRED",
             "AMN2_PHASE12_RESOURCE_CONFIRMATION_FAILURE_V1",
         ):

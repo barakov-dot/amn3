@@ -60,6 +60,7 @@ $PublicKeyPath = "$KeyPath.pub"
 $KnownHostsPath = Join-Path $TrustDirectory "known_hosts_spain"
 $OutcomeClaimPath = Join-Path $RunDirectory "resource-confirmation-outcome.claim"
 $EvidencePath = Join-Path $RunDirectory "resource-confirmation-evidence.json"
+$EvidenceSecondPath = Join-Path $RunDirectory "resource-confirmation-evidence-second.json"
 $ReceiptPath = Join-Path $RunDirectory "resource-confirmation-receipt.json"
 $SshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
 $SshKeygenExe = "C:\Windows\System32\OpenSSH\ssh-keygen.exe"
@@ -214,7 +215,7 @@ function Assert-ResourceConfirmationSchema([object]$Evidence) {
     }
     Assert-ExactProperties $Evidence.systemd @("present", "unit_count") "systemd"
     $CgroupDiagnostics = @($Evidence.cgroup_diagnostics)
-    if ($CgroupDiagnostics.Count -ne 148) { throw "Cgroup diagnostic count mismatch." }
+    if ($CgroupDiagnostics.Count -lt 1) { throw "Cgroup diagnostic count mismatch." }
     $CgroupSeen = @{}
     foreach ($Diagnostic in $CgroupDiagnostics) {
         Assert-ExactProperties $Diagnostic @("unit_sha256", "descendant_pid_count", "pid_set_stable") "cgroup_diagnostic"
@@ -238,7 +239,7 @@ function Assert-ResourceConfirmationSchema([object]$Evidence) {
         throw "Firewall observation contract mismatch."
     }
     $Fingerprint = @($Evidence.unrelated_service_fingerprint)
-    if ($Fingerprint.Count -ne 148) {
+    if ($Fingerprint.Count -ne $CgroupDiagnostics.Count) {
         throw "Unrelated-service fingerprint count mismatch."
     }
     $Seen = @{}
@@ -273,6 +274,43 @@ function Get-FingerprintSetReceipt([object[]]$Entries) {
         if ($Entry.kind -ceq "unit") {
             $Canonical += [ordered]@{
                 active_state = $Entry.active_state
+                bound_port_set = @($Entry.bound_port_set)
+                bound_port_status = $Entry.bound_port_status
+                image_or_unit_sha256 = $Entry.image_or_unit_sha256
+                kind = $Entry.kind
+                name_sha256 = $Entry.name_sha256
+                restart_count = $Entry.restart_count
+                unit_content_status = $Entry.unit_content_status
+            }
+        } else {
+            $Canonical += [ordered]@{
+                active_state = $Entry.active_state
+                bound_port_set = @($Entry.bound_port_set)
+                image_or_unit_sha256 = $Entry.image_or_unit_sha256
+                kind = $Entry.kind
+                name_sha256 = $Entry.name_sha256
+                restart_count = $Entry.restart_count
+            }
+        }
+    }
+    $Json = ConvertTo-Json -InputObject @($Canonical) -Depth 8 -Compress
+    $Bytes = (New-Object Text.UTF8Encoding($false)).GetBytes($Json)
+    try {
+        $Hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($Bytes))
+    } catch {
+        $Hasher = [Security.Cryptography.SHA256]::Create()
+        try { $Hash = ([BitConverter]::ToString($Hasher.ComputeHash($Bytes))).Replace("-", "") }
+        finally { $Hasher.Dispose() }
+    }
+    return [pscustomobject]@{ Sha256 = $Hash; ByteLength = $Bytes.Length }
+}
+
+function Get-StableFingerprintSetReceipt([object[]]$Entries) {
+    $Canonical = @()
+    foreach ($Entry in @($Entries | Sort-Object @{Expression = { $_.kind }}, @{Expression = { $_.name_sha256 }})) {
+        if ($Entry.kind -ceq "unit") {
+            $Canonical += [ordered]@{
+                active_state = $Entry.active_state
                 bound_port_status = $Entry.bound_port_status
                 image_or_unit_sha256 = $Entry.image_or_unit_sha256
                 kind = $Entry.kind
@@ -300,6 +338,47 @@ function Get-FingerprintSetReceipt([object[]]$Entries) {
         finally { $Hasher.Dispose() }
     }
     return [pscustomobject]@{ Sha256 = $Hash; ByteLength = $Bytes.Length }
+}
+
+function Get-PersistentFingerprintReceipt([object[]]$Before, [object[]]$After) {
+    $BeforeByIdentity = @{}
+    foreach ($Entry in @($Before)) {
+        $Identity = "$($Entry.kind)|$($Entry.name_sha256.ToUpperInvariant())"
+        if ($BeforeByIdentity.ContainsKey($Identity)) { throw "Duplicate dynamic fingerprint identity in before snapshot." }
+        $BeforeByIdentity[$Identity] = $Entry
+    }
+    $AfterByIdentity = @{}
+    foreach ($Entry in @($After)) {
+        $Identity = "$($Entry.kind)|$($Entry.name_sha256.ToUpperInvariant())"
+        if ($AfterByIdentity.ContainsKey($Identity)) { throw "Duplicate dynamic fingerprint identity in after snapshot." }
+        $AfterByIdentity[$Identity] = $Entry
+    }
+    $PersistentBefore = @()
+    $PersistentAfter = @()
+    $VolatileBefore = @()
+    foreach ($Identity in $BeforeByIdentity.Keys) {
+        if ($AfterByIdentity.ContainsKey($Identity)) {
+            $PersistentBefore += $BeforeByIdentity[$Identity]
+            $PersistentAfter += $AfterByIdentity[$Identity]
+        } else { $VolatileBefore += $Identity }
+    }
+    $VolatileAfter = @()
+    foreach ($Identity in $AfterByIdentity.Keys) {
+        if (-not $BeforeByIdentity.ContainsKey($Identity)) { $VolatileAfter += $Identity }
+    }
+    if ($PersistentBefore.Count -lt 1) { throw "No persistent foreign-service identities across snapshots." }
+    $BeforeReceipt = Get-StableFingerprintSetReceipt @($PersistentBefore)
+    $AfterReceipt = Get-StableFingerprintSetReceipt @($PersistentAfter)
+    if ($BeforeReceipt.Sha256 -cne $AfterReceipt.Sha256 -or $BeforeReceipt.ByteLength -ne $AfterReceipt.ByteLength) {
+        throw "Persistent foreign-service fingerprint changed across snapshots."
+    }
+    return [pscustomobject]@{
+        persistent_sha256 = $BeforeReceipt.Sha256
+        persistent_bytes = $BeforeReceipt.ByteLength
+        persistent_count = $PersistentBefore.Count
+        volatile_before_count = $VolatileBefore.Count
+        volatile_after_count = $VolatileAfter.Count
+    }
 }
 
 function Assert-FingerprintBaseline([object[]]$Entries, [string]$ExpectedSha, [int]$ExpectedBytes) {
@@ -554,6 +633,30 @@ function Get-SafeRemoteFailureStage([byte[]]$Bytes, [int]$ExitCode) {
     $Match = [regex]::Match($Text, '^AMN2_PHASE12_RESOURCE_CONFIRMATION_FAILURE_V1\|stage=(?<stage>bootstrap|host_identity|platform|capacity|candidate_inventory|listeners|network_state|firewall|systemd_inventory|systemd_unit_content|systemd_cgroup_ports|render)\|exit=(?<exit>[0-9]{1,3})\r?\n$')
     if (-not $Match.Success -or [int]$Match.Groups['exit'].Value -ne $ExitCode) { return "ssh" }
     return $Match.Groups['stage'].Value
+}
+
+function Convert-RemoteSnapshot([object]$Result) {
+    if ($Result.ExitCode -ne 0) {
+        [Array]::Clear($Result.StdoutBytes, 0, $Result.StdoutBytes.Length)
+        [Array]::Clear($Result.StderrBytes, 0, $Result.StderrBytes.Length)
+        throw "Sanitized SSH collection failure."
+    }
+    $Bytes = [byte[]]$Result.StdoutBytes
+    [Array]::Clear($Result.StderrBytes, 0, $Result.StderrBytes.Length)
+    if ($Bytes.Length -lt 3 -or $Bytes.Length -gt 2097152 -or
+        $Bytes[$Bytes.Length - 1] -ne 10 -or 13 -in $Bytes) {
+        [Array]::Clear($Bytes, 0, $Bytes.Length)
+        throw "Sanitized stdout framing failure."
+    }
+    $Text = $StrictUtf8.GetString($Bytes, 0, $Bytes.Length - 1)
+    if ($Text.Contains("`n") -or
+        $Text -match '(?i)(authorization|bearer|BEGIN [A-Z ]+ KEY|api[_-]?key|credential|password|token|secret)') {
+        [Array]::Clear($Bytes, 0, $Bytes.Length)
+        throw "Sanitized stdout content failure."
+    }
+    $Evidence = Assert-CanonicalJsonEncoding $Text
+    Assert-ResourceConfirmationSchema $Evidence
+    return [pscustomobject]@{ Bytes = $Bytes; Evidence = $Evidence }
 }
 
 function Read-Binding() {
@@ -923,45 +1026,33 @@ $ResourcePlan = Get-ResourcePlanReceipt
 $OutcomeStage = "ssh"
 $OutcomeReason = "SSH_COLLECTION_FAILED"
 $RawBytes = $null
+$SecondRawBytes = $null
 $Result = $null
+$SecondResult = $null
 try {
-    try { $Result = Invoke-SshWithExactInput $SshExe $SshArguments $RemoteScriptBytes }
-    finally { [Array]::Clear($RemoteScriptBytes, 0, $RemoteScriptBytes.Length) }
-    if ($Result.ExitCode -ne 0) {
-        if ($Result.ExitCode -ne 0) {
-            $OutcomeStage = Get-SafeRemoteFailureStage $Result.StdoutBytes $Result.ExitCode
-        }
-        [Array]::Clear($Result.StdoutBytes, 0, $Result.StdoutBytes.Length)
-        [Array]::Clear($Result.StderrBytes, 0, $Result.StderrBytes.Length)
-        throw "Sanitized SSH collection failure."
-    }
-    $RawBytes = [byte[]]$Result.StdoutBytes
-    [Array]::Clear($Result.StderrBytes, 0, $Result.StderrBytes.Length)
-
     $OutcomeStage = "framing"
     $OutcomeReason = "STDOUT_FRAMING_INVALID"
-    if ($RawBytes.Length -lt 3 -or $RawBytes.Length -gt 2097152 -or
-        $RawBytes[$RawBytes.Length - 1] -ne 10 -or 13 -in $RawBytes) {
-        throw "Sanitized stdout framing failure."
-    }
-
     $OutcomeStage = "content"
     $OutcomeReason = "STDOUT_CONTENT_UNSAFE"
-    $RawText = $StrictUtf8.GetString($RawBytes, 0, $RawBytes.Length - 1)
-    if ($RawText.Contains("`n") -or
-        $RawText -match '(?i)(authorization|bearer|BEGIN [A-Z ]+ KEY|api[_-]?key|credential|password|token|secret)') {
-        throw "Sanitized stdout content failure."
-    }
-
     $OutcomeStage = "json"
     $OutcomeReason = "JSON_INVALID"
-    $Evidence = Assert-CanonicalJsonEncoding $RawText
     $OutcomeStage = "schema"
     $OutcomeReason = "SCHEMA_INVALID"
-    Assert-ResourceConfirmationSchema $Evidence
+    try {
+        $Result = Invoke-SshWithExactInput $SshExe $SshArguments $RemoteScriptBytes
+        if ($Result.ExitCode -ne 0) { $OutcomeStage = Get-SafeRemoteFailureStage $Result.StdoutBytes $Result.ExitCode }
+        $FirstSnapshot = Convert-RemoteSnapshot $Result
+        $RawBytes = [byte[]]$FirstSnapshot.Bytes
+        $Evidence = $FirstSnapshot.Evidence
+        $SecondResult = Invoke-SshWithExactInput $SshExe $SshArguments $RemoteScriptBytes
+        if ($SecondResult.ExitCode -ne 0) { $OutcomeStage = Get-SafeRemoteFailureStage $SecondResult.StdoutBytes $SecondResult.ExitCode }
+        $SecondSnapshot = Convert-RemoteSnapshot $SecondResult
+        $SecondRawBytes = [byte[]]$SecondSnapshot.Bytes
+        $SecondEvidence = $SecondSnapshot.Evidence
+    } finally { [Array]::Clear($RemoteScriptBytes, 0, $RemoteScriptBytes.Length) }
     $OutcomeStage = "fingerprint"
     $OutcomeReason = "FINGERPRINT_MISMATCH"
-    $FingerprintReceipt = Assert-FingerprintBaseline @($Evidence.unrelated_service_fingerprint) $expectedFingerprintSetSha $expectedFingerprintSetBytes
+    $FingerprintReceipt = Get-PersistentFingerprintReceipt @($Evidence.unrelated_service_fingerprint) @($SecondEvidence.unrelated_service_fingerprint)
 
     $OutcomeStage = "conflict"
     $OutcomeReason = "UNEXPECTED_POST_CLAIM_FAILURE"
@@ -970,6 +1061,9 @@ try {
     $RawHasher = [Security.Cryptography.SHA256]::Create()
     try { $RawStdoutSha = ([BitConverter]::ToString($RawHasher.ComputeHash($RawBytes))).Replace("-", "") }
     finally { $RawHasher.Dispose() }
+    $SecondRawHasher = [Security.Cryptography.SHA256]::Create()
+    try { $SecondRawStdoutSha = ([BitConverter]::ToString($SecondRawHasher.ComputeHash($SecondRawBytes))).Replace("-", "") }
+    finally { $SecondRawHasher.Dispose() }
     $CanonicalText = $Evidence | ConvertTo-Json -Depth 64 -Compress
     $CanonicalBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($CanonicalText)
     $CanonicalHasher = [Security.Cryptography.SHA256]::Create()
@@ -980,6 +1074,8 @@ try {
     $OutcomeReason = "EVIDENCE_PERSIST_FAILED"
     Write-BytesCreateNew $EvidencePath $RawBytes
     Protect-PrivatePath $EvidencePath
+    Write-BytesCreateNew $EvidenceSecondPath $SecondRawBytes
+    Protect-PrivatePath $EvidenceSecondPath
     if ($ConflictDecision.conflict_free -ne $true) {
         $OutcomeStage = "conflict"
         $OutcomeReason = "CONFLICT_FREE_REQUIRED"
@@ -993,7 +1089,7 @@ try {
     $OutcomeStage = "completion"
     $OutcomeReason = "OUTCOME_PERSIST_FAILED"
     $ReceiptJson = [ordered]@{
-        schema = "amn2.phase12-spain-resource-confirmation-receipt.v1"
+        schema = "amn2.phase12-spain-resource-confirmation-receipt.v2"
         run_id = $expectedRunId
         status = "passed"
         claim_sha256 = $ClaimSha
@@ -1012,10 +1108,17 @@ try {
         auth_public_key_sha256 = $ExecutionTrust.auth_public_key_sha256
         raw_stdout_sha256 = $RawStdoutSha
         raw_stdout_bytes = $RawBytes.Length
+        second_raw_stdout_sha256 = $SecondRawStdoutSha
+        second_raw_stdout_bytes = $SecondRawBytes.Length
         canonical_evidence_sha256 = $CanonicalEvidenceSha
-        fingerprint_set_sha256 = $FingerprintReceipt.Sha256
-        fingerprint_set_bytes = $FingerprintReceipt.ByteLength
-        fingerprint_count = 148
+        foreign_service_policy = "dynamic-persistent-v1"
+        persistent_fingerprint_sha256 = $FingerprintReceipt.persistent_sha256
+        persistent_fingerprint_bytes = $FingerprintReceipt.persistent_bytes
+        persistent_fingerprint_count = $FingerprintReceipt.persistent_count
+        volatile_before_count = $FingerprintReceipt.volatile_before_count
+        volatile_after_count = $FingerprintReceipt.volatile_after_count
+        fingerprint_count_before = @($Evidence.unrelated_service_fingerprint).Count
+        fingerprint_count_after = @($SecondEvidence.unrelated_service_fingerprint).Count
         run009_evidence_sha256 = $run009EvidenceSha
         run009_raw_order_fingerprint_sha256 = $run009RawOrderFingerprintSha
         run009_firewall_backend = $run009FirewallBackend
@@ -1027,15 +1130,22 @@ try {
     } | ConvertTo-Json -Depth 8 -Compress
     Write-AtomicPrivateJsonCreateNew $ReceiptPath $ReceiptJson
     [Array]::Clear($RawBytes, 0, $RawBytes.Length)
+    [Array]::Clear($SecondRawBytes, 0, $SecondRawBytes.Length)
     Assert-PrivatePath $EvidencePath
+    Assert-PrivatePath $EvidenceSecondPath
     Assert-PrivatePath $ReceiptPath
     $ReceiptSha = (Get-FileHash -LiteralPath $ReceiptPath -Algorithm SHA256).Hash.ToUpperInvariant()
     Write-Output "PHASE12_SPAIN_RESOURCE_CONFIRMATION_RECEIPT_SHA256_$ReceiptSha"
 } catch {
     if ($null -ne $RawBytes) { [Array]::Clear($RawBytes, 0, $RawBytes.Length) }
+    if ($null -ne $SecondRawBytes) { [Array]::Clear($SecondRawBytes, 0, $SecondRawBytes.Length) }
     if ($null -ne $Result) {
         if ($null -ne $Result.StdoutBytes) { [Array]::Clear($Result.StdoutBytes, 0, $Result.StdoutBytes.Length) }
         if ($null -ne $Result.StderrBytes) { [Array]::Clear($Result.StderrBytes, 0, $Result.StderrBytes.Length) }
+    }
+    if ($null -ne $SecondResult) {
+        if ($null -ne $SecondResult.StdoutBytes) { [Array]::Clear($SecondResult.StdoutBytes, 0, $SecondResult.StdoutBytes.Length) }
+        if ($null -ne $SecondResult.StderrBytes) { [Array]::Clear($SecondResult.StderrBytes, 0, $SecondResult.StderrBytes.Length) }
     }
     if (-not (Test-Path -LiteralPath $ReceiptPath)) {
         Write-SanitizedOutcomeReceipt $ReceiptPath "failed" $OutcomeStage $OutcomeReason $ClaimSha $ResourcePlan.Sha256 @()

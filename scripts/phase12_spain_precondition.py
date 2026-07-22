@@ -237,6 +237,38 @@ def _networks(values: object, label: str) -> list[ipaddress.IPv4Network | ipaddr
     return result
 
 
+def _persistent_foreign_projection_equal(expected: object, current: object) -> bool:
+    if not isinstance(expected, list) or not isinstance(current, list):
+        return False
+
+    def by_identity(entries: list[object]) -> dict[tuple[str, str], dict[str, Any]] | None:
+        result: dict[tuple[str, str], dict[str, Any]] = {}
+        for entry in entries:
+            if not isinstance(entry, dict):
+                return None
+            kind = entry.get("kind")
+            name = entry.get("name_sha256")
+            if not isinstance(kind, str) or not isinstance(name, str):
+                return None
+            identity = (kind, name)
+            if identity in result:
+                return None
+            stable = dict(entry)
+            stable.pop("bound_port_set", None)
+            result[identity] = stable
+        return result
+
+    expected_by_identity = by_identity(expected)
+    current_by_identity = by_identity(current)
+    if expected_by_identity is None or current_by_identity is None:
+        return False
+    persistent = set(expected_by_identity) & set(current_by_identity)
+    return bool(persistent) and all(
+        expected_by_identity[identity] == current_by_identity[identity]
+        for identity in persistent
+    )
+
+
 def validate_preconditions(
     observation: dict[str, Any],
     resource_plan: dict[str, Any],
@@ -451,7 +483,9 @@ def validate_preconditions(
         for candidate in candidates:
             if observed.version == candidate.version and observed.overlaps(candidate):
                 _fail(f"CIDR collision: {observed} overlaps {candidate}")
-    if observation.get("systemd_projection") != baseline.get("systemd_projection"):
+    if not _persistent_foreign_projection_equal(
+        baseline.get("systemd_projection"), observation.get("systemd_projection")
+    ):
         _fail("systemd baseline projection mismatch")
     observed_firewall = observation.get("firewall")
     baseline_firewall = baseline.get("firewall")

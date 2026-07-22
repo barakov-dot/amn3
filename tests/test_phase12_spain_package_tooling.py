@@ -1216,6 +1216,13 @@ def test_precondition_rejects_systemd_and_firewall_baseline_mismatch() -> None:
         validate_preconditions(observation, RESOURCE_PLAN, baseline())
 
 
+def test_precondition_allows_only_volatile_foreign_service_membership() -> None:
+    observation = copy.deepcopy(OBSERVATION)
+    observation["systemd_projection"] = observation["systemd_projection"][:-1]
+    report = validate_preconditions(observation, RESOURCE_PLAN, baseline())
+    assert report["result"] == "passed"
+
+
 def test_precondition_derives_projection_and_firewall_from_bound_run009_bytes() -> None:
     observation = copy.deepcopy(OBSERVATION)
     forged = baseline()
@@ -1756,6 +1763,9 @@ def test_recovery_capsule_seals_rendered_payloads_and_callback_free_blueprint(
         "blueprint_sha256": blueprint.digest,
         "foreign_service_fingerprint_before_sha256": "f" * 64,
         "foreign_service_fingerprint_after_sha256": "f" * 64,
+        "foreign_service_persistent_equal": True,
+        "foreign_service_volatile_before_count": 0,
+        "foreign_service_volatile_after_count": 0,
     }
     equality_path = store.root / f"rollback-equality-{authorization.nonce}.json"
     equality_path.write_bytes(
@@ -2021,6 +2031,9 @@ def test_production_prepare_reconstruct_and_recovery_coordinator_roundtrip(
             **binding,
             "foreign_service_fingerprint_before_sha256": "f" * 64,
             "foreign_service_fingerprint_after_sha256": "f" * 64,
+            "foreign_service_persistent_equal": True,
+            "foreign_service_volatile_before_count": 0,
+            "foreign_service_volatile_after_count": 0,
         }
 
     receipt = ProductionRecoveryCoordinator(
@@ -2903,6 +2916,13 @@ def test_projection_helpers_allow_only_closed_owned_firewall_delta() -> None:
     assert_systemd_projection(
         baseline()["systemd_projection"], OBSERVATION["systemd_projection"]
     )
+    assert_systemd_projection(
+        baseline()["systemd_projection"], OBSERVATION["systemd_projection"][:-1]
+    )
+    changed_foreign = copy.deepcopy(OBSERVATION["systemd_projection"])
+    changed_foreign[0]["restart_count"] = 1
+    with pytest.raises(InstallError, match="systemd projection"):
+        assert_systemd_projection(baseline()["systemd_projection"], changed_foreign)
     baseline_nft = OBSERVATION["firewall"]["nft_json"]
     expected_owned = network_module.expected_table_document()
     current_nft = {

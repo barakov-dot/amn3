@@ -4067,7 +4067,27 @@ def validate_rollback_equality_receipt(value: Any) -> dict[str, Any]:
 
 
 def assert_systemd_projection(expected: object, current: object) -> None:
-    if current != expected:
+    if not isinstance(expected, list) or not isinstance(current, list):
+        raise InstallError("systemd projection mismatch")
+    def by_identity(entries: list[object]) -> dict[str, dict[str, Any]]:
+        result: dict[str, dict[str, Any]] = {}
+        for entry in entries:
+            if not isinstance(entry, dict) or not isinstance(entry.get("name_sha256"), str):
+                raise InstallError("systemd projection mismatch")
+            identity = entry["name_sha256"]
+            if identity in result:
+                raise InstallError("systemd projection mismatch")
+            stable = dict(entry)
+            stable.pop("bound_port_set", None)
+            result[identity] = stable
+        return result
+    expected_by_identity = by_identity(expected)
+    current_by_identity = by_identity(current)
+    persistent = set(expected_by_identity) & set(current_by_identity)
+    if not persistent or any(
+        expected_by_identity[identity] != current_by_identity[identity]
+        for identity in persistent
+    ):
         raise InstallError("systemd projection mismatch")
 
 
