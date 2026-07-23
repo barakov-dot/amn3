@@ -3910,16 +3910,16 @@ def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() 
     assert 'phase12-spain-install-boundary-docker-cause-v12-20260723' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
-    assert "scp.exe" in source
-    assert '"-O"' in source
-    assert '"-P", "22"' in source
+    assert "Invoke-BoundedSshUpload" in source
+    assert "scp.exe" not in source
+    assert 'cat > "$destination"' in source
+    assert '"-p", "22"' in source
     assert "ConnectTimeout=20" in source
     assert "ServerAliveInterval=15" in source
     assert "ServerAliveCountMax=4" in source
-    assert "Invoke-BoundedScp" in source
     assert "Approved artifact upload exceeded 300 seconds." in source
-    assert '${target}:/root/amn2-spain-phase12-install-a.tar' in source
-    assert '${target}:/root/amn2-spain-phase12-executor-a.pyz' in source
+    assert '"/root/amn2-spain-phase12-install-a.tar"' in source
+    assert '"/root/amn2-spain-phase12-executor-a.pyz"' in source
     assert "CopyToAsync" in source
     assert "installResult.Stderr" in source
     assert "remoteArtifactsReady" in source

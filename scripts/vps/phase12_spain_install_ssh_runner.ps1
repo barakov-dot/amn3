@@ -24,7 +24,6 @@ $artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-bou
 $packagePath = Join-Path $artifactRoot "package-a.tar"
 $executorPath = Join-Path $artifactRoot "executor-a.pyz"
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
-$scpExe = "C:\Windows\System32\OpenSSH\scp.exe"
 
 function Get-TextSha256([string]$Value) {
     $hasher = [Security.Cryptography.SHA256]::Create()
@@ -68,23 +67,52 @@ function Invoke-ExactSsh([string[]]$Arguments, [byte[]]$InputBytes) {
     } finally { $process.Dispose() }
 }
 
-function Invoke-BoundedScp([string[]]$Arguments) {
+function Invoke-BoundedSshUpload([string]$SourcePath, [string]$Destination) {
+    if ($Destination -cnotin @("/root/amn2-spain-phase12-install-a.tar", "/root/amn2-spain-phase12-executor-a.pyz")) {
+        throw "Approved artifact destination invalid."
+    }
     $info = [Diagnostics.ProcessStartInfo]::new()
-    $info.FileName = $scpExe
-    $info.Arguments = (($Arguments | ForEach-Object { ConvertTo-WindowsCommandLineArgument $_ }) -join ' ')
+    $info.FileName = $sshExe
+    $remoteCommand = 'destination=' + $Destination + '; umask 077; cat > "$destination"'
+    $info.Arguments = ((@($sshBase + @($target, $remoteCommand)) | ForEach-Object { ConvertTo-WindowsCommandLineArgument $_ }) -join ' ')
     $info.UseShellExecute = $false
     $info.CreateNoWindow = $true
+    $info.RedirectStandardInput = $true
+    $info.RedirectStandardOutput = $true
+    $info.RedirectStandardError = $true
     $process = [Diagnostics.Process]::new()
     $process.StartInfo = $info
     if (-not $process.Start()) { throw "Approved artifact upload did not start." }
+    $input = $null
+    $timedOut = $false
     try {
-        if (-not $process.WaitForExit(300000)) {
-            try { $process.Kill($true) } catch { }
-            $process.WaitForExit()
+        $stdoutTask = $process.StandardOutput.BaseStream.CopyToAsync([IO.Stream]::Null)
+        $stderrTask = $process.StandardError.BaseStream.CopyToAsync([IO.Stream]::Null)
+        $input = [IO.File]::Open($SourcePath, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::Read)
+        $copyTask = $input.CopyToAsync($process.StandardInput.BaseStream)
+        $deadline = [Diagnostics.Stopwatch]::StartNew()
+        if (-not $copyTask.Wait(300000)) {
+            $timedOut = $true
             throw "Approved artifact upload exceeded 300 seconds."
         }
+        $copyTask.GetAwaiter().GetResult()
+        $process.StandardInput.Close()
+        $remaining = [Math]::Max(0, 300000 - [int]$deadline.ElapsedMilliseconds)
+        if (-not $process.WaitForExit($remaining)) {
+            $timedOut = $true
+            throw "Approved artifact upload exceeded 300 seconds."
+        }
+        [Threading.Tasks.Task]::WaitAll(@($stdoutTask, $stderrTask))
         if ($process.ExitCode -ne 0) { throw "Approved artifact upload failed." }
+    } catch {
+        if ($timedOut) { throw }
+        throw "Approved artifact upload failed."
     } finally {
+        if (-not $process.HasExited) {
+            try { $process.Kill($true) } catch { }
+            $process.WaitForExit()
+        }
+        if ($null -ne $input) { $input.Dispose() }
         $process.Dispose()
     }
 }
@@ -105,7 +133,7 @@ function Read-PrivateBinding([string]$Path) {
     return $values
 }
 
-foreach ($path in @($packagePath, $executorPath, $sshExe, $scpExe)) {
+foreach ($path in @($packagePath, $executorPath, $sshExe)) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Required local artifact is unavailable." }
 }
 if ((Get-Item -LiteralPath $packagePath).Length -ne $expectedPackageBytes -or (Get-FileHash -LiteralPath $packagePath -Algorithm SHA256).Hash.ToUpperInvariant() -cne $expectedPackageSha) { throw "Package checksum/size mismatch." }
@@ -122,7 +150,6 @@ if ($Approval -cne $runnerApproval) { Write-Output $runnerApproval; throw "Exact
 
 $transportOptions = @("-F", "none", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=4", "-o", "IdentitiesOnly=yes", "-o", "PasswordAuthentication=no", "-o", "KbdInteractiveAuthentication=no", "-o", "GSSAPIAuthentication=no", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "-o", "RequestTTY=no", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=$knownHostsPath", "-i", $keyPath)
 $sshBase = @($transportOptions + @("-p", "22"))
-$scpBase = @($transportOptions + @("-O", "-P", "22"))
 $target = "$($binding['TARGET_USER'])@$($binding['TARGET_HOST'])"
 $finalHashCommand = "sha256sum /root/amn2-spain-phase12-install.tar /root/amn2-spain-phase12-executor.pyz"
 $existingHashResult = Invoke-ExactSsh (@($sshBase + @($target, $finalHashCommand))) ([byte[]]@())
@@ -131,8 +158,8 @@ $remoteArtifactsReady = $existingHashResult.ExitCode -eq 0 -and
     $existingHashText -match "(?im)^$($expectedPackageSha.ToLowerInvariant())  /root/amn2-spain-phase12-install\.tar$" -and
     $existingHashText -match "(?im)^$($expectedExecutorSha.ToLowerInvariant())  /root/amn2-spain-phase12-executor\.pyz$"
 if (-not $remoteArtifactsReady) {
-    Invoke-BoundedScp (@($scpBase + @($packagePath, "${target}:/root/amn2-spain-phase12-install-a.tar")))
-    Invoke-BoundedScp (@($scpBase + @($executorPath, "${target}:/root/amn2-spain-phase12-executor-a.pyz")))
+    Invoke-BoundedSshUpload $packagePath "/root/amn2-spain-phase12-install-a.tar"
+    Invoke-BoundedSshUpload $executorPath "/root/amn2-spain-phase12-executor-a.pyz"
     $hashResult = Invoke-ExactSsh (@($sshBase + @($target, "sha256sum /root/amn2-spain-phase12-install-a.tar /root/amn2-spain-phase12-executor-a.pyz"))) ([byte[]]@())
     if ($hashResult.ExitCode -ne 0) { throw "Remote artifact hash command failed." }
     $hashText = (New-Object Text.UTF8Encoding($false,$true)).GetString($hashResult.Stdout)
