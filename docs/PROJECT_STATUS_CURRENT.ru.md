@@ -37,6 +37,12 @@ basenames, а verifier ожидал AMN2-bound temporary `-a` paths. Испра�
 привязывает каждый upload к точному проверяемому remote temporary name; package,
 executor, install state machine и foreign-service policy не менялись.
 
+После path fix SFTP снова дошёл до controlled local timeout 300 секунд до
+remote hash/executor. Это повторяемо изолирует проблему в SFTP transport, а не
+в package или Spain installer. Новый runner переключает только SCP protocol на
+legacy `-O`, сохраняя dedicated key, independent host pin, `ConnectTimeout`,
+server liveness и checksum-bound temporary paths.
+
 Fresh install package и executor дважды собраны byte-equal из тех же
 sealed inputs; штатный no-follow clean-room verify/extract и source expansion
 подтвердили source commit `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`.
@@ -60,10 +66,11 @@ fresh_install_package_size=139970560
 fresh_install_manifest_sha256=B7124C5954D32E4FF08CA00E1897953651309BEB505E4067C2437ED946E26461
 fresh_install_executor_sha256=E86E0AFD883A7E6DC45F7987CA26062EFAFFA632164546DBF57BEC16F876981D
 fresh_install_executor_size=144710
-fresh_install_runner_sha256=139F74127C19C40153A5560C7F7ED73D82DFC88C5A64727CE12B399EAEEC40E2
+fresh_install_runner_sha256=ED7CB371D8E4BB451B7DAB00F7C6E621AAF283DBE4581ADA4CA9D678E95E34A4
 fresh_install_upload_attempt=client_sftp_hung|terminated_local_before_executor|no_second_upload
 fresh_install_remote_hash_attempt=failed_closed_before_executor|generic_upload_basename_vs_bound_temp_path
-fresh_install_transport_policy=connect_timeout_20|server_alive_15x4|scp_hard_timeout_300_seconds
+fresh_install_sftp_retry=failed_closed_before_remote_hash_and_executor|bounded_timeout_300_seconds
+fresh_install_transport_policy=legacy_scp_o|connect_timeout_20|server_alive_15x4|scp_hard_timeout_300_seconds
 fresh_install_remote_temp_binding=package_to_amn2_spain_phase12_install_a_tar|executor_to_amn2_spain_phase12_executor_a_pyz
 fresh_install_local_verification=package_executor_double_build_byte_equal|package_verify_passed|clean_room_extract_passed|source_55dc243_verified|scoped_151_passed|powershell_parse_passed
 terminal_recovery_nonce=E022F0B87A972F2256ACD7800A4999553A8CEEA2396A2644908F43C93A82FEBD

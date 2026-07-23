@@ -122,7 +122,7 @@ if ($Approval -cne $runnerApproval) { Write-Output $runnerApproval; throw "Exact
 
 $transportOptions = @("-F", "none", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=4", "-o", "IdentitiesOnly=yes", "-o", "PasswordAuthentication=no", "-o", "KbdInteractiveAuthentication=no", "-o", "GSSAPIAuthentication=no", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "-o", "RequestTTY=no", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=$knownHostsPath", "-i", $keyPath)
 $sshBase = @($transportOptions + @("-p", "22"))
-$scpBase = @($transportOptions + @("-P", "22"))
+$scpBase = @($transportOptions + @("-O", "-P", "22"))
 $target = "$($binding['TARGET_USER'])@$($binding['TARGET_HOST'])"
 $finalHashCommand = "sha256sum /root/amn2-spain-phase12-install.tar /root/amn2-spain-phase12-executor.pyz"
 $existingHashResult = Invoke-ExactSsh (@($sshBase + @($target, $finalHashCommand))) ([byte[]]@())

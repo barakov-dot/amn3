@@ -49,7 +49,7 @@ manifest_sha256=B7124C5954D32E4FF08CA00E1897953651309BEB505E4067C2437ED946E26461
 resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
 executor_sha256=E86E0AFD883A7E6DC45F7987CA26062EFAFFA632164546DBF57BEC16F876981D
 executor_bytes=144710
-runner_sha256=139F74127C19C40153A5560C7F7ED73D82DFC88C5A64727CE12B399EAEEC40E2
+runner_sha256=ED7CB371D8E4BB451B7DAB00F7C6E621AAF283DBE4581ADA4CA9D678E95E34A4
 manual_cleanup=passed|package_tree_absent|terminal_ledger_preserved|units_inactive
 manual_cleanup_executor_sha256=0E736B9DDF950DA050FE945F7D5F6D860F9C782A45066AE42429CCF56EF05585
 manual_cleanup_executor_bytes=140277
@@ -69,7 +69,8 @@ terminal_recovery_receipt_mode=verify_only|requires_exact_removed_ledger|no_repe
 terminal_recovery_v3_local_verification=148_passed|semantic_firewall_regression_red_green|executor_double_build_byte_identical|offline_zip_verify_passed|unsupported_mode_fail_closed|diff_check_passed
 fresh_install_upload_attempt=client_sftp_hung|terminated_local_before_executor|no_second_upload
 fresh_install_remote_hash_attempt=failed_closed_before_executor|generic_upload_basename_vs_bound_temp_path
-fresh_install_transport_policy=connect_timeout_20|server_alive_15x4|scp_hard_timeout_300_seconds
+fresh_install_sftp_retry=failed_closed_before_remote_hash_and_executor|bounded_timeout_300_seconds
+fresh_install_transport_policy=legacy_scp_o|connect_timeout_20|server_alive_15x4|scp_hard_timeout_300_seconds
 fresh_install_remote_temp_binding=package_to_amn2_spain_phase12_install_a_tar|executor_to_amn2_spain_phase12_executor_a_pyz
 fresh_install_local_verification=package_executor_double_build_byte_identical|package_verify_passed|clean_room_extract_passed|source_55dc243_verified|scoped_151_passed|powershell_parse_passed
 collector_sha256=70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A
@@ -88,9 +89,9 @@ Spain service. Do not migrate/delete USA data.
 
 Next gate: stage only Phase 12 files, commit and push current branch, verify
 origin readback, then issue one fresh exact checksum-bound install approval.
-The prior install approvals were consumed before executor invocation: first by
-local SFTP transport hang, second by remote hash-path mismatch. They must not
-be reused. Runner
+The prior install approvals were consumed before executor invocation: local SFTP
+transport hang, remote hash-path mismatch, then a bounded SFTP timeout after
+the path fix. They must not be reused. Runner
 uploads only the shown package/executor, verifies remote SHA, executes
 install-bound with automatic rollback, and proves clean DB/zero peers/write
 disabled/bot disabled/loopback web/AWG health/foreign equality. No blind reuse

@@ -3880,6 +3880,7 @@ def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() 
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source
+    assert '"-O"' in source
     assert '"-P", "22"' in source
     assert "ConnectTimeout=20" in source
     assert "ServerAliveInterval=15" in source
