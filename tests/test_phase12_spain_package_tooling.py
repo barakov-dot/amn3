@@ -3783,6 +3783,21 @@ def test_terminal_recovery_equality_allows_only_owned_inventory_removal() -> Non
     )
 
     assert receipt["result"] == "passed"
+    after["firewall"]["rules_sha256"] = "e" * 64
+    raw_counter_receipt = build_terminal_recovery_equality_receipt(
+        baseline_observation=before,
+        current_observation=after,
+        binding=binding,
+    )
+    assert raw_counter_receipt["firewall_projection_equal"] is True
+    after["firewall"]["semantic_sha256"] = "f" * 64
+    with pytest.raises(InstallError, match="terminal recovery firewall semantic"):
+        build_terminal_recovery_equality_receipt(
+            baseline_observation=before,
+            current_observation=after,
+            binding=binding,
+        )
+    after["firewall"] = copy.deepcopy(before["firewall"])
     after["systemd_projection"][0]["active_state"] = "inactive:dead"
     with pytest.raises(InstallError, match="persistent foreign projection"):
         build_terminal_recovery_equality_receipt(

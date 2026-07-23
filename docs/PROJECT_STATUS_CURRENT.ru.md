@@ -1,4 +1,4 @@
-# Текущий override 2026-07-23: Phase 12 terminal contour removed; receipt-only equality gate
+# Текущий override 2026-07-23: Phase 12 terminal receipt semantic-firewall local gate
 
 Checksum-bound terminal recovery v2 действительно удалил только exact
 AMN2-owned terminal contour: `/opt/amn2-spain`, `/etc/amn2-spain`,
@@ -16,6 +16,14 @@ mutation. Новый executor разделяет owned delta и foreign equality
 Docker, firewall, listeners/routes/addresses и persistent foreign projection,
 а `restart_count`/`bound_port_set` только фиксирует как volatile.
 
+Первый receipt-only run остановился fail-closed на raw firewall hash между
+двумя read-only samples. Это ожидаемо volatile для nft counters и уже не
+является authoritative comparator: текущая Phase 12 policy закрепляет
+`backend=nft`, rule-count=`129` и semantic SHA. v3 executor сравнивает именно
+эти stable fields; изменение backend, rule-count или semantic SHA остаётся
+fail-closed. Run не удалял объектов повторно, не запускал AMN2 и не менял
+foreign service.
+
 Следующий runner — строго receipt-only: он требует, чтобы ledger уже содержал
 полный exact set `removed`, и иначе fail-closed. В нём нет ветки повторного
 удаления. Сначала commit/push/origin readback, затем один exact approval на
@@ -25,10 +33,11 @@ remote hash-verified executor и receipt. SSH до этого gate не выпо
 active_phase=AMN2 Phase 12 Spain Migration|terminal_recovery_receipt_only_gate
 terminal_recovery_v2_live_outcome=owned_terminal_contour_removed|receipt_failed_closed_on_owned_inventory_comparator
 terminal_recovery_live_safety=package_absent|opt_etc_var_owned_paths_absent|docker_root_absent|amn2_units_inactive|terminal_ledger_manual_recovery_required
-terminal_recovery_receipt_executor_sha256=400A46C60CEE775303FCEEC2BDD297D5373D721F0C6F9BACF5449D68700126A5
-terminal_recovery_receipt_executor_size=144591
-terminal_recovery_receipt_runner_sha256=8F68D407C70D463A1AF1FE671598D08F88E9434E75F077B74D3B1F939EB2A90A
-terminal_recovery_receipt_local_verification=tests_148_passed|executor_double_build_byte_equal|offline_zip_verify_passed|unsupported_mode_fail_closed|diff_check_passed
+terminal_recovery_receipt_attempt_v1=failed_closed_on_raw_firewall_projection_drift|no_additional_mutation
+terminal_recovery_receipt_executor_sha256=E86E0AFD883A7E6DC45F7987CA26062EFAFFA632164546DBF57BEC16F876981D
+terminal_recovery_receipt_executor_size=144710
+terminal_recovery_receipt_runner_sha256=F5959D04CAE8E6BF534474D9CBD308228EF8B0EB424FDCC02F15DB6144BD1C89
+terminal_recovery_receipt_local_verification=tests_148_passed|semantic_firewall_regression_red_green|executor_double_build_byte_equal|offline_zip_verify_passed|unsupported_mode_fail_closed|diff_check_passed
 terminal_recovery_nonce=E022F0B87A972F2256ACD7800A4999553A8CEEA2396A2644908F43C93A82FEBD
 terminal_recovery_transaction_sha256=C58ED7EC5EA40F47C7C65C4A6D4691667160F2444764679A285A9EE47BEC8788
 terminal_recovery_capsule_sha256=FE7E203B3A772811489371C90CAB88E0247882882938045FD85D80709F6B63CC

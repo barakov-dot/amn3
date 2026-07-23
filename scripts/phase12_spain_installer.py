@@ -4623,6 +4623,23 @@ def build_terminal_recovery_equality_receipt(
         raise InstallError("terminal recovery owned inventory remains")
     normalized_baseline = copy.deepcopy(dict(baseline_observation))
     normalized_baseline["existing"] = copy.deepcopy(dict(existing))
+    baseline_firewall = normalized_baseline.get("firewall")
+    current_firewall = current_observation.get("firewall")
+    expected_firewall = {
+        "backend", "rules_sha256", "rule_count", "semantic_sha256", "nft_json",
+    }
+    if (
+        not isinstance(baseline_firewall, Mapping)
+        or not isinstance(current_firewall, Mapping)
+        or set(baseline_firewall) != expected_firewall
+        or set(current_firewall) != expected_firewall
+        or any(
+            baseline_firewall[key] != current_firewall[key]
+            for key in ("backend", "rule_count", "semantic_sha256")
+        )
+    ):
+        raise InstallError("terminal recovery firewall semantic projection mismatch")
+    normalized_baseline["firewall"] = copy.deepcopy(dict(current_firewall))
     return build_rollback_equality_receipt(
         baseline_observation=normalized_baseline,
         current_observation=current_observation,
