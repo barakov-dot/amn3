@@ -3881,6 +3881,11 @@ def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() 
     assert "install-bound" in source
     assert "scp.exe" in source
     assert '"-P", "22"' in source
+    assert "ConnectTimeout=20" in source
+    assert "ServerAliveInterval=15" in source
+    assert "ServerAliveCountMax=4" in source
+    assert "Invoke-BoundedScp" in source
+    assert "Approved artifact upload exceeded 300 seconds." in source
     assert "CopyToAsync" in source
     assert "installResult.Stderr" in source
     assert "remoteArtifactsReady" in source

@@ -1,4 +1,4 @@
-# Текущий override 2026-07-23: Phase 12 fresh install package local gate
+# Текущий override 2026-07-23: Phase 12 bounded install transport local gate
 
 Checksum-bound terminal recovery v2 действительно удалил только exact
 AMN2-owned terminal contour: `/opt/amn2-spain`, `/etc/amn2-spain`,
@@ -24,7 +24,14 @@ Docker, firewall, listeners/routes/addresses и persistent foreign projection,
 foreign persistent equality=`true`, volatile counts=`0`. Повторного удаления,
 AMN2 start или foreign-service mutation не было.
 
-Новый fresh install package и executor дважды собраны byte-equal из тех же
+Первый approved install attempt не дошёл до executor: локальный `scp`/SFTP
+transport завис без CPU и внешней TCP-сессии, поэтому был завершён только
+локально после пяти минут. Второй upload не запускался; installer, AMN2 и
+foreign service не были вызваны. Новый launcher ограничивает connect/liveness
+и общий SCP upload 300 секундами, после чего fail-closed завершает только
+локальный transport.
+
+Fresh install package и executor дважды собраны byte-equal из тех же
 sealed inputs; штатный no-follow clean-room verify/extract и source expansion
 подтвердили source commit `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`.
 Следующий gate: commit/push/origin readback, затем один exact checksum-bound
@@ -47,8 +54,10 @@ fresh_install_package_size=139970560
 fresh_install_manifest_sha256=B7124C5954D32E4FF08CA00E1897953651309BEB505E4067C2437ED946E26461
 fresh_install_executor_sha256=E86E0AFD883A7E6DC45F7987CA26062EFAFFA632164546DBF57BEC16F876981D
 fresh_install_executor_size=144710
-fresh_install_runner_sha256=24CBF3ED2D9717149A147E2683575A879AA93A4DCDA9FB2AEA54F382459B75A7
-fresh_install_local_verification=package_executor_double_build_byte_equal|package_verify_passed|clean_room_extract_passed|source_55dc243_verified|scoped_151_passed
+fresh_install_runner_sha256=581C156D0A4ED838DA50388468A324D882BEA5E658E318A5226F2EEFFB408F56
+fresh_install_upload_attempt=client_sftp_hung|terminated_local_before_executor|no_second_upload
+fresh_install_transport_policy=connect_timeout_20|server_alive_15x4|scp_hard_timeout_300_seconds
+fresh_install_local_verification=package_executor_double_build_byte_equal|package_verify_passed|clean_room_extract_passed|source_55dc243_verified|scoped_151_passed|powershell_parse_passed
 terminal_recovery_nonce=E022F0B87A972F2256ACD7800A4999553A8CEEA2396A2644908F43C93A82FEBD
 terminal_recovery_transaction_sha256=C58ED7EC5EA40F47C7C65C4A6D4691667160F2444764679A285A9EE47BEC8788
 terminal_recovery_capsule_sha256=FE7E203B3A772811489371C90CAB88E0247882882938045FD85D80709F6B63CC

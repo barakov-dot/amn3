@@ -68,6 +68,27 @@ function Invoke-ExactSsh([string[]]$Arguments, [byte[]]$InputBytes) {
     } finally { $process.Dispose() }
 }
 
+function Invoke-BoundedScp([string[]]$Arguments) {
+    $info = [Diagnostics.ProcessStartInfo]::new()
+    $info.FileName = $scpExe
+    $info.Arguments = (($Arguments | ForEach-Object { ConvertTo-WindowsCommandLineArgument $_ }) -join ' ')
+    $info.UseShellExecute = $false
+    $info.CreateNoWindow = $true
+    $process = [Diagnostics.Process]::new()
+    $process.StartInfo = $info
+    if (-not $process.Start()) { throw "Approved artifact upload did not start." }
+    try {
+        if (-not $process.WaitForExit(300000)) {
+            try { $process.Kill($true) } catch { }
+            $process.WaitForExit()
+            throw "Approved artifact upload exceeded 300 seconds."
+        }
+        if ($process.ExitCode -ne 0) { throw "Approved artifact upload failed." }
+    } finally {
+        $process.Dispose()
+    }
+}
+
 function Read-PrivateBinding([string]$Path) {
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw "Private target binding unavailable." }
     $values = @{}
@@ -99,7 +120,7 @@ if ($binding["SSH_KEY_PATH"] -cne $keyPath -or -not (Test-Path -LiteralPath $key
 $runnerApproval = "APPROVE PHASE12 SPAIN CHECKSUM BOUND INSTALL RUNNER SHA256 $expectedRunnerSha PACKAGE SHA256 $expectedPackageSha PACKAGE BYTES $expectedPackageBytes MANIFEST SHA256 $expectedManifestSha RESOURCE PLAN SHA256 $expectedPlanSha EXECUTOR SHA256 $expectedExecutorSha EXECUTOR BYTES $expectedExecutorBytes COLLECTOR SHA256 $expectedCollectorSha SOURCE $sourceRevision RUN009 EVIDENCE SHA256 $run009EvidenceSha FINGERPRINT ARRAY SHA256 $fingerprintArraySha DYNAMIC FOREIGN EQUALITY PERSISTENT REQUIRED VOLATILE RECORDED EXACT PRIVATE TARGET DEDICATED ED25519 KEY INDEPENDENT HOST PIN STDIN ONLY UPLOAD PACKAGE EXECUTOR REMOTE HASH VERIFY INSTALL BOUND AUTOMATIC ROLLBACK NO FOREIGN SERVICE MUTATION USA ROLLBACK CONTOUR"
 if ($Approval -cne $runnerApproval) { Write-Output $runnerApproval; throw "Exact install approval mismatch." }
 
-$transportOptions = @("-F", "none", "-o", "BatchMode=yes", "-o", "IdentitiesOnly=yes", "-o", "PasswordAuthentication=no", "-o", "KbdInteractiveAuthentication=no", "-o", "GSSAPIAuthentication=no", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "-o", "RequestTTY=no", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=$knownHostsPath", "-i", $keyPath)
+$transportOptions = @("-F", "none", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=4", "-o", "IdentitiesOnly=yes", "-o", "PasswordAuthentication=no", "-o", "KbdInteractiveAuthentication=no", "-o", "GSSAPIAuthentication=no", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "-o", "RequestTTY=no", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=$knownHostsPath", "-i", $keyPath)
 $sshBase = @($transportOptions + @("-p", "22"))
 $scpBase = @($transportOptions + @("-P", "22"))
 $target = "$($binding['TARGET_USER'])@$($binding['TARGET_HOST'])"
@@ -110,8 +131,7 @@ $remoteArtifactsReady = $existingHashResult.ExitCode -eq 0 -and
     $existingHashText -match "(?im)^$($expectedPackageSha.ToLowerInvariant())  /root/amn2-spain-phase12-install\.tar$" -and
     $existingHashText -match "(?im)^$($expectedExecutorSha.ToLowerInvariant())  /root/amn2-spain-phase12-executor\.pyz$"
 if (-not $remoteArtifactsReady) {
-    & $scpExe @scpBase $packagePath $executorPath "${target}:/root/"
-    if ($LASTEXITCODE -ne 0) { throw "Approved artifact upload failed." }
+    Invoke-BoundedScp (@($scpBase + @($packagePath, $executorPath, "${target}:/root/")))
     $hashResult = Invoke-ExactSsh (@($sshBase + @($target, "sha256sum /root/amn2-spain-phase12-install-a.tar /root/amn2-spain-phase12-executor-a.pyz"))) ([byte[]]@())
     if ($hashResult.ExitCode -ne 0) { throw "Remote artifact hash command failed." }
     $hashText = (New-Object Text.UTF8Encoding($false,$true)).GetString($hashResult.Stdout)
