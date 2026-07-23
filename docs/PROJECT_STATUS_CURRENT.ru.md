@@ -1,34 +1,36 @@
-# Текущий override 2026-07-22: Phase 12 stable-critical-binding artifacts готовы локально; awaiting commit/push gate
+# Текущий override 2026-07-23: Phase 12 pre-venv package fix rebuilt локально; awaiting commit/push gate
 
-Тихая checksum-bound SCP upload попытка v5 завершилась: remote hashes package и
-executor совпали. Затем install-bound завершился до tombstone/state machine на
-`bootstrap critical recheck mismatch`; AMN2 mutation и запуск units не
-подтверждены. Причина: full observation hash включает volatile free-capacity и
-nft counters. v6 повторно валидирует полные preconditions под install lock, но
-critical equality связывает только host/boot, поэтому volatile gauges не могут
-ложно заблокировать install. Текущие v6 локальные artifacts ещё не загружались. Новый standalone executor содержит collector,
-run009 baseline и resource plan; при install-bound
-он строит precondition receipt в памяти и сохраняет только одноразовый
-authorization tombstone. Equality policy: persistent foreign identities должны
-совпасть, volatile identities фиксируются receipt; foreign service не
-останавливается и не изменяется. Локальные checks перед commit/push: double
-build byte-identical, offline verify/extract, Linux-wrapper/executor fail-closed
-и rollback/equality scoped tests. Нулевое пересечение foreign identities
-допускается только как полностью volatile membership и также фиксируется в
-checksum-bound receipt; `restart_count` и `bound_port_set` являются volatile
-fields. Любое расхождение остальных stable fields persistent identity
-по-прежнему fail-closed.
+Тихая checksum-bound SCP upload v6 завершилась: remote hashes package и
+executor совпали. `install-bound` дошёл до production preparation, затем
+fail-closed завершился с automatic rollback. Read-only Spain receipt
+подтвердил: все AMN2 units inactive, staging пуст, `/opt/amn2-spain-package`
+отсутствует, transaction=`rolled_back`; foreign service не изменялся.
+
+Root cause: package-bound preparation импортировал authoritative
+`app.config.settings` до установки pinned wheelhouse; на чистом Spain нет
+system-site `pydantic` и `pydantic_settings`. v7 сохраняет раннюю Settings
+validation для source-only path, но в package-bound path откладывает этот
+импорт до runtime после развёртывания pinned dependencies. v7 package и
+standalone executor собраны дважды byte-identical, package verifier и
+clean-room extract прошли; scoped package/install suite=`133 passed`.
+Dynamic equality policy неизменна: persistent foreign identities должны
+совпасть, volatile identities фиксируются receipt; `restart_count` и
+`bound_port_set` volatile. Любое расхождение stable persistent fields
+по-прежнему fail-closed; foreign service не останавливается и не изменяется.
 
 ```text
-active_phase=AMN2 Phase 12 Spain Migration|dynamic_precondition_local_gate
-phase12_package_archive_sha256=77789F7AADB39DBA2E463AF178596A178577ABC3EF28A5DF71627848446F682F
+active_phase=AMN2 Phase 12 Spain Migration|prevenv_package_fix_local_gate
+phase12_package_archive_sha256=0752BD27A92B43BA804E094C4E6D2843460D78CD31DBD1B0F7481CDA4ADD35B6
 phase12_package_archive_size=139939840
-phase12_manifest_sha256=74441865D686E45EB28D6BFEF61D93A71598A36197D9FFDB6DD56EDBBC838F81
+phase12_manifest_sha256=79C92802B9D03D89702A3AE289619BFB701FFC0B94C5916F6E3A5B2014682A8B
 phase12_resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
-phase12_executor_sha256=BF42F14D43FD74887FB7019FC9EEE40D26EF67BEBF8F188895A2707D04CD70DA
-phase12_executor_size=139742
+phase12_executor_sha256=3B076EE963DEFCAAE1BC488F71D9E1DE0870C041598E928B63A27E411EDE838F
+phase12_executor_size=139848
+phase12_install_runner_sha256=71D80808B494DABA1D8CB348CDEBA9C22FC5EA0FF4C85D1FD04E292A15349367
 phase12_foreign_equality_policy=dynamic_persistent_v1
 phase12_precondition_receipt=records_persistent_equality_and_volatile_before_after_counts
+phase12_v6_install_outcome=rolled_back_before_amnezia_units_or_owned_paths
+phase12_v7_local_verification=double_build|package_verify|clean_room_extract|scoped_133_passed
 phase12_firewall_semantic_rebaseline=nft|rule_count_129|semantic_sha256_FB8E1D41F6F4F0EBCEB7C89D65E4E5E440E0AC0A4E780B4F638F96CEE1B9A682
 phase12_scoped_tests=169_passed
 phase12_package_executor_reproducible=byte_identical_double_builds
@@ -36,7 +38,7 @@ phase12_clean_room_verify_extract=passed
 spain_mutation=false
 spain_unrelated_service=untouched
 usa_rollback_contour=unchanged
-next_gate=commit_push_origin_readback_then_checksum_bound_install_approval
+next_gate=commit_push_origin_readback_then_new_checksum_bound_install_approval
 ```
 
 `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся нетронутым.

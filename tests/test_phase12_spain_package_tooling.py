@@ -515,6 +515,46 @@ def test_package_verifier_accepts_exact_allowlisted_package(tmp_path: Path) -> N
     assert report["resource_plan_sha256"] == sha256_canonical(RESOURCE_PLAN)
 
 
+def test_payload_preparation_defers_settings_import_until_runtime_site_packages(
+    tmp_path: Path, monkeypatch
+) -> None:
+    source_archive = (
+        ROOT
+        / "private-artifacts"
+        / "phase12-spain-install-boundary-stable-critical-v6-20260722"
+        / "offline-verify-extract"
+        / "payload"
+        / "source"
+        / "amn2-runtime-source-55dc243b8e6c6bdb57f8301b56326e4cd4072d19.tar.gz"
+    )
+    if not source_archive.is_file():
+        pytest.skip("official Phase 12 source archive unavailable")
+    with tarfile.open(source_archive, "r:gz") as archive:
+        archive.extractall(tmp_path, filter="data")
+    source_root = tmp_path / "source"
+    monkeypatch.setattr(
+        live_backend,
+        "_validate_authoritative_runtime_settings",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            live_backend.BackendError("system-site pydantic unavailable")
+        ),
+    )
+
+    prepared = live_backend.prepare_production_filesystem_payloads(
+        source_root=source_root,
+        endpoint_host="spain.example",
+        package_content_root=(
+            ROOT
+            / "private-artifacts"
+            / "phase12-spain-install-boundary-stable-critical-v6-20260722"
+            / "offline-verify-extract"
+        ),
+    )
+
+    assert prepared.endpoint_host == "spain.example"
+    assert "etc/amn2-spain/runtime.env" in prepared.rendered_payloads
+
+
 def test_package_verifier_can_bind_the_callers_already_open_descriptor(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -3468,8 +3508,8 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "77789F7AADB39DBA2E463AF178596A178577ABC3EF28A5DF71627848446F682F"' in source
-    assert '$expectedExecutorSha = "BF42F14D43FD74887FB7019FC9EEE40D26EF67BEBF8F188895A2707D04CD70DA"' in source
+    assert '$expectedPackageSha = "0752BD27A92B43BA804E094C4E6D2843460D78CD31DBD1B0F7481CDA4ADD35B6"' in source
+    assert '$expectedExecutorSha = "3B076EE963DEFCAAE1BC488F71D9E1DE0870C041598E928B63A27E411EDE838F"' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source

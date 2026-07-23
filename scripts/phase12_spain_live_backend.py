@@ -5971,7 +5971,13 @@ def prepare_production_filesystem_payloads(
         },
         template_root=template_root,
     )
-    _validate_authoritative_runtime_settings(source, _runtime_env_mapping(runtime_env))
+    # A package-bound install creates its verified wheelhouse later in the
+    # filesystem stage.  Do not import Settings from the system interpreter
+    # before those pinned dependencies exist on a clean host.
+    if content is None:
+        _validate_authoritative_runtime_settings(
+            source, _runtime_env_mapping(runtime_env)
+        )
     rendered = MappingProxyType(
         {
             "etc/amn2-spain/runtime.env": runtime_env.encode("utf-8"),
@@ -6067,11 +6073,12 @@ def recover_production_filesystem_payloads(
         or any("__AMN2_" in payload.decode("utf-8") for payload in rendered.values())
     ):
         raise BackendError("recovered production payload semantic drift")
-    _validate_authoritative_runtime_settings(
-        source,
-        _runtime_env_mapping(runtime_env),
-    )
     content = None if package_content_root is None else Path(package_content_root)
+    if content is None:
+        _validate_authoritative_runtime_settings(
+            source,
+            _runtime_env_mapping(runtime_env),
+        )
     package_template_prefix = (
         "packaging/phase12-spain/templates" if content is None else "templates"
     )
