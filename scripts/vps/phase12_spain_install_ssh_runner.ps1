@@ -7,12 +7,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
-$expectedPackageSha = "3967208F804655CF6BDF8543D9B91E92A16373A952E5E9FF96DF80A7A6BAC3A2"
+$expectedPackageSha = "C519CFBA6DAB59FE281B0EBBDF3D9D7639C295D6EFDC3EF6E8B5BE64A4D89519"
 $expectedPackageBytes = 139939840
-$expectedManifestSha = "3AF25ACA35E935833F4016A0732328060E6C4711C860936B6AB1A297CF076A9F"
+$expectedManifestSha = "7D9426141B2ADA655D8B9CD4A65D12BFC105C90B2232E2E4B88C359A7282913D"
 $expectedPlanSha = "8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43"
-$expectedExecutorSha = "BC649AC0B5F4D64F350898E813D27D17B6013FDE564817961D5EE982BCE88E3D"
-$expectedExecutorBytes = 139882
+$expectedExecutorSha = "90042FBA4AB896FF7F9E822680270569E280426BCDC12B6F4A102DC6C58C43E2"
+$expectedExecutorBytes = 140091
 $expectedCollectorSha = "70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A"
 $run009EvidenceSha = "8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8"
 $fingerprintArraySha = "E15219CB5204D54A9AD11263CFBA1F7C86E16DAB3287C752A8B6F136EC4A5ED5"
@@ -20,7 +20,7 @@ $expectedMachineSha = "3C3233534FD3B69280AAAD4E977A08E30409729D684B816E73C01DDBA
 $expectedBootSha = "099155E2A5578144C715124A1B9B4D8F5D572134C8F72FD98B75D5DE0EB54556"
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-boundary-retained-audit-v8-20260723"
+$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-boundary-safe-preparation-v9-20260723"
 $packagePath = Join-Path $artifactRoot "amn2-spain-phase12-install-a.tar"
 $executorPath = Join-Path $artifactRoot "amn2-spain-phase12-executor-a.pyz"
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"

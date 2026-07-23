@@ -83,6 +83,15 @@ class InstallError(RuntimeError):
     pass
 
 
+def _preparation_failure_message(exc: Exception) -> str:
+    """Expose only a bounded, non-sensitive pre-write failure label."""
+    detail = str(exc)
+    if re.fullmatch(r"[a-z][a-z0-9_ ./-]{0,159}", detail):
+        return "production installation preparation failed:" + detail
+    kind = re.sub(r"(?<!^)(?=[A-Z])", "_", type(exc).__name__).lower()
+    return "production installation preparation failed:" + kind
+
+
 def _embedded_resource_collector_bytes() -> bytes:
     """Return the resource collector shipped inside the standalone executor.
 
@@ -3453,7 +3462,7 @@ def prepare_production_installation(
     except InstallError:
         raise
     except (BackendError, PackageVerificationError) as exc:
-        raise InstallError("production installation preparation failed") from exc
+        raise InstallError(_preparation_failure_message(exc)) from exc
     return PreparedProductionInstallation(
         capsule=capsule,
         assembly=assembly,

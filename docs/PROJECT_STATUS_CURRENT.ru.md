@@ -1,4 +1,4 @@
-# Текущий override 2026-07-23: Phase 12 retained-audit precondition fix rebuilt локально; awaiting commit/push gate
+# Текущий override 2026-07-23: Phase 12 safe preparation-cause v9 rebuilt локально; awaiting commit/push gate
 
 Тихая checksum-bound SCP upload v6 завершилась: remote hashes package и
 executor совпали. `install-bound` дошёл до production preparation, затем
@@ -6,35 +6,38 @@ fail-closed завершился с automatic rollback. Read-only Spain receipt
 подтвердил: все AMN2 units inactive, staging пуст, `/opt/amn2-spain-package`
 отсутствует, transaction=`rolled_back`; foreign service не изменялся.
 
-v7 upload/hash verification завершились, однако `install-bound` до первой
-AMN2 mutation fail-closed остановился на precondition: legacy rollback receipt
-уже содержит единственный плановый retained path
-`/var/lib/amn2-spain-phase12-audit`. v8 разрешает исключительно declared
-retained audit path; любой дополнительный retained path по-прежнему
-fail-closed. На сохранённом Spain v7 evidence v8 validator=`passed`.
-v8 package и standalone executor собраны дважды byte-identical, package
-verifier и clean-room extract прошли; scoped package/install suite=`134 passed`.
+v8 upload/hash verification завершились; `install-bound` прошёл precondition
+и дошёл до `package_verified_remote`, затем fail-closed остановился в
+pre-write production preparation. Automatic rollback receipt подтверждён:
+transaction=`rolled_back`, все AMN2 units inactive, owned `/opt` и staging
+absent. До `capsule_committed` и любых install actions дело не дошло, поэтому
+foreign service не изменялся. Старый wrapper скрыл controlled внутреннюю
+причину. v9 меняет только этот failure receipt: безопасно выводит bounded
+Backend/PackageVerification cause label, не добавляя mutation.
+v9 package и standalone executor собраны дважды byte-identical, package
+verifier и clean-room extract прошли; scoped package/install suite=`135 passed`.
 Dynamic equality policy неизменна: persistent foreign identities должны
 совпасть, volatile identities фиксируются receipt; `restart_count` и
 `bound_port_set` volatile. Любое расхождение stable persistent fields
 по-прежнему fail-closed; foreign service не останавливается и не изменяется.
 
 ```text
-active_phase=AMN2 Phase 12 Spain Migration|retained_audit_precondition_fix_local_gate
-phase12_package_archive_sha256=3967208F804655CF6BDF8543D9B91E92A16373A952E5E9FF96DF80A7A6BAC3A2
+active_phase=AMN2 Phase 12 Spain Migration|safe_preparation_cause_v9_local_gate
+phase12_package_archive_sha256=C519CFBA6DAB59FE281B0EBBDF3D9D7639C295D6EFDC3EF6E8B5BE64A4D89519
 phase12_package_archive_size=139939840
-phase12_manifest_sha256=3AF25ACA35E935833F4016A0732328060E6C4711C860936B6AB1A297CF076A9F
+phase12_manifest_sha256=7D9426141B2ADA655D8B9CD4A65D12BFC105C90B2232E2E4B88C359A7282913D
 phase12_resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
-phase12_executor_sha256=BC649AC0B5F4D64F350898E813D27D17B6013FDE564817961D5EE982BCE88E3D
-phase12_executor_size=139882
-phase12_install_runner_sha256=D4095801D4080B1BB01752EAD3C20BABF47903DBA05C07F4AB9BDC11DE1C2840
+phase12_executor_sha256=90042FBA4AB896FF7F9E822680270569E280426BCDC12B6F4A102DC6C58C43E2
+phase12_executor_size=140091
+phase12_install_runner_sha256=6B44E93D474F8C2365C909AE47BDDE78332569902812DF87EBE75DCF1150321C
 phase12_foreign_equality_policy=dynamic_persistent_v1
 phase12_precondition_receipt=records_persistent_equality_and_volatile_before_after_counts
 phase12_v6_install_outcome=rolled_back_before_amnezia_units_or_owned_paths
 phase12_v7_install_outcome=precondition_failed_before_tombstone_or_amnezia_mutation|declared_retained_audit_path
-phase12_v8_local_verification=double_build|package_verify|clean_room_extract|scoped_134_passed
+phase12_v8_install_outcome=rolled_back_after_package_verified_remote_before_capsule_or_install_actions|foreign_untouched
+phase12_v9_local_verification=double_build|package_verify|clean_room_extract|scoped_135_passed
 phase12_firewall_semantic_rebaseline=nft|rule_count_129|semantic_sha256_FB8E1D41F6F4F0EBCEB7C89D65E4E5E440E0AC0A4E780B4F638F96CEE1B9A682
-phase12_scoped_tests=134_passed
+phase12_scoped_tests=135_passed
 phase12_package_executor_reproducible=byte_identical_double_builds
 phase12_clean_room_verify_extract=passed
 spain_mutation=false

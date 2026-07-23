@@ -1296,6 +1296,18 @@ def test_precondition_allows_declared_retained_audit_receipts() -> None:
         validate_preconditions(observation, RESOURCE_PLAN, baseline())
 
 
+def test_preparation_failure_message_keeps_only_safe_cause_labels() -> None:
+    assert installer_module._preparation_failure_message(
+        live_backend.BackendError("authoritative runtime credential preparation failed")
+    ) == (
+        "production installation preparation failed:"
+        "authoritative runtime credential preparation failed"
+    )
+    assert installer_module._preparation_failure_message(
+        live_backend.BackendError("token=secret")
+    ) == "production installation preparation failed:backend_error"
+
+
 def test_precondition_allows_volatile_restart_count_and_rejects_stable_systemd_drift() -> None:
     observation = copy.deepcopy(OBSERVATION)
     observation["systemd_projection"][0]["restart_count"] = 1
@@ -3522,8 +3534,8 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "3967208F804655CF6BDF8543D9B91E92A16373A952E5E9FF96DF80A7A6BAC3A2"' in source
-    assert '$expectedExecutorSha = "BC649AC0B5F4D64F350898E813D27D17B6013FDE564817961D5EE982BCE88E3D"' in source
+    assert '$expectedPackageSha = "C519CFBA6DAB59FE281B0EBBDF3D9D7639C295D6EFDC3EF6E8B5BE64A4D89519"' in source
+    assert '$expectedExecutorSha = "90042FBA4AB896FF7F9E822680270569E280426BCDC12B6F4A102DC6C58C43E2"' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source
