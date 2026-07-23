@@ -4596,6 +4596,40 @@ def build_rollback_equality_receipt(
     )
 
 
+def build_terminal_recovery_equality_receipt(
+    *,
+    baseline_observation: Mapping[str, Any],
+    current_observation: Mapping[str, Any],
+    binding: Mapping[str, str],
+) -> dict[str, Any]:
+    """Prove foreign equality while permitting only the owned recovery delta."""
+    if not isinstance(current_observation, Mapping):
+        raise InstallError("terminal recovery equality observation invalid")
+    existing = current_observation.get("existing")
+    expected_existing = {
+        "paths", "retained_paths", "users", "groups", "units", "containers",
+        "networks", "bridges", "interfaces", "uids", "gids", "sockets",
+        "runtime_dirs", "firewall_objects", "owned_routes", "sysctls",
+    }
+    if (
+        not isinstance(existing, Mapping)
+        or set(existing) != expected_existing
+        or any(
+            not isinstance(existing[key], list) or existing[key]
+            for key in expected_existing - {"retained_paths"}
+        )
+        or existing["retained_paths"] != ["/var/lib/amn2-spain-phase12-audit"]
+    ):
+        raise InstallError("terminal recovery owned inventory remains")
+    normalized_baseline = copy.deepcopy(dict(baseline_observation))
+    normalized_baseline["existing"] = copy.deepcopy(dict(existing))
+    return build_rollback_equality_receipt(
+        baseline_observation=normalized_baseline,
+        current_observation=current_observation,
+        binding=binding,
+    )
+
+
 def validate_rollback_equality_receipt(value: Any) -> dict[str, Any]:
     expected = {
         "schema",
@@ -6175,9 +6209,35 @@ def _production_manual_cleanup_bound(
     }
 
 
+def _classify_terminal_recovery_ledger(
+    *,
+    ledger: Any,
+    blueprint: Mapping[str, Any],
+    expected_objects: set[str],
+) -> str:
+    if any(
+        (event := ledger.event_for(name)) is not None and event["event"] == "intent"
+        for name in blueprint
+    ):
+        raise InstallError("terminal recovery mutation ledger mismatch")
+    committed = {
+        name for name in expected_objects
+        if (event := ledger.event_for(name)) is not None and event["event"] == "committed"
+    }
+    removed = {
+        name for name in expected_objects
+        if (event := ledger.event_for(name)) is not None and event["event"] == "removed"
+    }
+    if committed == expected_objects and not removed:
+        return "removed_verified_owned_objects"
+    if removed == expected_objects and not committed:
+        return "verified_previously_removed_owned_objects"
+    raise InstallError("terminal recovery mutation ledger mismatch")
+
+
 def _production_terminal_recovery_bound(
     intent: TerminalRecoveryIntent, *, host_root: Path = Path("/"), expected_uid: int | None = 0,
-    now_epoch: int | None = None,
+    now_epoch: int | None = None, receipt_only: bool = False,
 ) -> dict[str, Any]:
     now = int(time.time()) if now_epoch is None else now_epoch
     if now < intent.approved_at_epoch or now > intent.expires_at_epoch:
@@ -6236,25 +6296,26 @@ def _production_terminal_recovery_bound(
         raise InstallError("terminal recovery action blueprint mismatch")
     ledger_path = Path(capsule.blueprint.assembly_context["mutation_ledger_path"])
     ledger = live_backend.DurableMutationLedgerStore(ledger_path, expected_uid=expected_uid).load_or_create(set(blueprint))
-    committed = {name for name in blueprint if (event := ledger.event_for(name)) is not None and event["event"] == "committed"}
-    if committed != expected_objects or any(
-        (event := ledger.event_for(name)) is not None and event["event"] == "intent"
-        for name in blueprint
-    ):
-        raise InstallError("terminal recovery mutation ledger mismatch")
+    recovery_action = _classify_terminal_recovery_ledger(
+        ledger=ledger,
+        blueprint=blueprint,
+        expected_objects=expected_objects,
+    )
+    if receipt_only and recovery_action != "verified_previously_removed_owned_objects":
+        raise InstallError("terminal recovery receipt requires removed contour")
     observer = ChecksumBoundResourceObserver(collector_bytes=_embedded_resource_collector_bytes(), collector_sha256=hashlib.sha256(_embedded_resource_collector_bytes()).hexdigest(), expected_uid=expected_uid)
     before = observation_from_resource_confirmation_evidence(observer.collect_evidence())
-    ordered = [actions[entry["owned_object"]].operation for entry in capsule.blueprint.actions if entry["owned_object"] in actions]
-    lease = SharedInstallLockLease(lambda: _existing_opt_directory_lock(root))
-    with lease.acquire():
-        live_backend.LinuxBackend(adapter=live_backend.SystemOwnedAdapter(actions=actions), ledger=ledger).rollback(ordered)
+    if recovery_action == "removed_verified_owned_objects":
+        ordered = [actions[entry["owned_object"]].operation for entry in capsule.blueprint.actions if entry["owned_object"] in actions]
+        lease = SharedInstallLockLease(lambda: _existing_opt_directory_lock(root))
+        with lease.acquire():
+            live_backend.LinuxBackend(adapter=live_backend.SystemOwnedAdapter(actions=actions), ledger=ledger).rollback(ordered)
     after = observation_from_resource_confirmation_evidence(observer.collect_evidence())
-    validate_preconditions(after, _embedded_resource_plan(), _embedded_run009_baseline())
-    equality = build_rollback_equality_receipt(
+    equality = build_terminal_recovery_equality_receipt(
         baseline_observation=before, current_observation=after,
         binding={"nonce": intent.nonce, "transaction_sha256": transaction_sha256, "blueprint_sha256": capsule.blueprint.digest},
     )
-    return {"schema": "amn2.spain-terminal-recovery-receipt.v1", "result": "passed", "approval_id": intent.approval_id, "nonce": intent.nonce, "transaction_sha256": transaction_sha256, "capsule_sha256": capsule.sha256, "docker_tree_sha256": intent.docker_tree_sha256, "foreign_service_persistent_equal": equality["foreign_service_persistent_equal"], "foreign_service_volatile_before_count": equality["foreign_service_volatile_before_count"], "foreign_service_volatile_after_count": equality["foreign_service_volatile_after_count"]}
+    return {"schema": "amn2.spain-terminal-recovery-receipt.v1", "result": "passed", "recovery_action": recovery_action, "approval_id": intent.approval_id, "nonce": intent.nonce, "transaction_sha256": transaction_sha256, "capsule_sha256": capsule.sha256, "docker_tree_sha256": intent.docker_tree_sha256, "foreign_service_persistent_equal": equality["foreign_service_persistent_equal"], "foreign_service_volatile_before_count": equality["foreign_service_volatile_before_count"], "foreign_service_volatile_after_count": equality["foreign_service_volatile_after_count"]}
 
 
 def run_production_command(
@@ -6265,7 +6326,7 @@ def run_production_command(
     expected_uid: int | None = 0,
 ) -> dict[str, Any]:
     args = list(argv)
-    if not args or args[0] not in {"install", "install-bound", "manual-cleanup", "manual-cleanup-bound", "terminal-recovery-bound", "recover", "rollback", "verify"}:
+    if not args or args[0] not in {"install", "install-bound", "manual-cleanup", "manual-cleanup-bound", "terminal-recovery-bound", "terminal-recovery-receipt-bound", "recover", "rollback", "verify"}:
         raise InstallError("unsupported_mode")
     mode = args.pop(0)
     if mode == "install-bound":
@@ -6320,7 +6381,7 @@ def run_production_command(
             host_root=host_root,
             expected_uid=expected_uid,
         )
-    if mode == "terminal-recovery-bound":
+    if mode in {"terminal-recovery-bound", "terminal-recovery-receipt-bound"}:
         if args:
             raise InstallError("terminal_recovery_bound_inputs_required")
         payload = authorization_payload
@@ -6331,6 +6392,7 @@ def run_production_command(
             intent,
             host_root=host_root,
             expected_uid=expected_uid,
+            receipt_only=mode == "terminal-recovery-receipt-bound",
         )
     if mode == "install":
         if len(args) != 7:

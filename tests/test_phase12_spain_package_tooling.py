@@ -47,6 +47,7 @@ from scripts.phase12_spain_installer import (
     validate_rollback_equality_receipt,
     finalize_rolled_back_recovery,
     build_rollback_equality_receipt,
+    build_terminal_recovery_equality_receipt,
     prepare_production_installation,
     reconstruct_production_installation,
 )
@@ -3742,10 +3743,96 @@ def test_rollback_equality_receipt_records_volatile_foreign_entries() -> None:
     assert receipt["foreign_service_volatile_after_count"] == 1
 
 
+def test_terminal_recovery_equality_allows_only_owned_inventory_removal() -> None:
+    before = copy.deepcopy(OBSERVATION)
+    before["existing"] = {
+        "paths": [
+            "/opt/amn2-spain",
+            "/etc/amn2-spain",
+            "/var/lib/amn2-spain",
+            "/var/lib/amn2-spain-docker",
+        ],
+        "retained_paths": ["/var/lib/amn2-spain-phase12-audit"],
+        "users": ["amn2-spain"],
+        "groups": ["amn2-spain"],
+        "units": ["amn2-spain-web.service"],
+        "containers": [],
+        "networks": [],
+        "bridges": [],
+        "interfaces": [],
+        "uids": [61212],
+        "gids": [61212],
+        "sockets": [],
+        "runtime_dirs": [],
+        "firewall_objects": [],
+        "owned_routes": [],
+        "sysctls": [],
+    }
+    after = copy.deepcopy(OBSERVATION)
+    after["existing"]["retained_paths"] = ["/var/lib/amn2-spain-phase12-audit"]
+    binding = {
+        "nonce": "a" * 64,
+        "transaction_sha256": "b" * 64,
+        "blueprint_sha256": "c" * 64,
+    }
+
+    receipt = build_terminal_recovery_equality_receipt(
+        baseline_observation=before,
+        current_observation=after,
+        binding=binding,
+    )
+
+    assert receipt["result"] == "passed"
+    after["systemd_projection"][0]["active_state"] = "inactive:dead"
+    with pytest.raises(InstallError, match="persistent foreign projection"):
+        build_terminal_recovery_equality_receipt(
+            baseline_observation=before,
+            current_observation=after,
+            binding=binding,
+        )
+
+
+def test_terminal_recovery_resume_ignores_removed_events_outside_exact_contour() -> None:
+    class Ledger:
+        def event_for(self, name: str) -> dict[str, str] | None:
+            return {
+                "owned:docker-root": {"event": "removed"},
+                "already-rolled-back": {"event": "removed"},
+            }.get(name)
+
+    assert installer_module._classify_terminal_recovery_ledger(
+        ledger=Ledger(),
+        blueprint={"owned:docker-root": {}, "already-rolled-back": {}},
+        expected_objects={"owned:docker-root"},
+    ) == "verified_previously_removed_owned_objects"
+
+
+def test_terminal_recovery_receipt_mode_is_verify_only(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, object] = {}
+    sentinel = object()
+    monkeypatch.setattr(
+        installer_module,
+        "_read_terminal_recovery_intent_payload",
+        lambda _payload: sentinel,
+    )
+    monkeypatch.setattr(
+        installer_module,
+        "_production_terminal_recovery_bound",
+        lambda intent, **kwargs: captured.update(intent=intent, **kwargs) or {"result": "passed"},
+    )
+
+    assert installer_module.run_production_command(
+        ["terminal-recovery-receipt-bound"],
+        authorization_payload=b"{}",
+    ) == {"result": "passed"}
+    assert captured["intent"] is sentinel
+    assert captured["receipt_only"] is True
+
+
 def test_remote_executor_is_closed_mode_wrapper_without_network_fetches() -> None:
     source = REMOTE_EXECUTOR.read_text(encoding="utf-8")
     assert "set -Eeuo pipefail" in source
-    assert 'install|install-bound|manual-cleanup|manual-cleanup-bound|terminal-recovery-bound|recover|rollback|verify)' in source
+    assert 'install|install-bound|manual-cleanup|manual-cleanup-bound|terminal-recovery-bound|terminal-recovery-receipt-bound|recover|rollback|verify)' in source
     assert 'readonly EXECUTOR_BUNDLE="/root/amn2-spain-phase12-executor.pyz"' in source
     assert 'exec "$PYTHON_BIN" -I -B "$EXECUTOR_BUNDLE"' in source
     assert "PYTHONPATH" not in source
@@ -3804,9 +3891,10 @@ def test_manual_cleanup_ssh_runner_is_executor_only_and_stdin_bound() -> None:
 def test_terminal_recovery_ssh_runner_is_executor_only_and_tree_bound() -> None:
     source = TERMINAL_RECOVERY_SSH_RUNNER.read_text(encoding="utf-8")
     assert "StrictHostKeyChecking=yes" in source
-    assert "terminal-recovery-bound" in source
+    assert "terminal-recovery-receipt-bound" in source
     assert "terminal-recovery-intent.v1" in source
     assert "docker_tree_sha256" in source
+    assert "VERIFY RECORDED REMOVAL ONLY" in source
     assert "CopyToAsync" in source
     assert "phase12-install-a.tar" not in source
     assert "install-bound" not in source

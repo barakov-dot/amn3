@@ -6,8 +6,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$expectedExecutorSha = "A7F8465D56E76AFA96A8825BB12CCF66757DCC487BFCE28CE479CC3B50135FAF"
-$expectedExecutorBytes = 144052
+$expectedExecutorSha = "400A46C60CEE775303FCEEC2BDD297D5373D721F0C6F9BACF5449D68700126A5"
+$expectedExecutorBytes = 144591
 $expectedNonce = "e022f0b87a972f2256acd7800a4999553a8ceea2396a2644908f43c93a82febd"
 $expectedTransactionSha = "c58ed7ec5ea40f47c7c65c4a6d4691667160f2444764679a285a9ee47bec8788"
 $expectedCapsuleSha = "fe7e203b3a772811489371c90cab88e0247882882938045fd85d80709f6b63cc"
@@ -17,8 +17,8 @@ $expectedDockerTreeBytes = 41902300
 $expectedBlockRdev = 64770
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-terminal-recovery-v1-20260723"
-$executorPath = Join-Path $artifactRoot "executor-g.pyz"
+$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-terminal-recovery-v2-20260723"
+$executorPath = Join-Path $artifactRoot "executor-k.pyz"
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
 $scpExe = "C:\Windows\System32\OpenSSH\scp.exe"
 
@@ -80,7 +80,7 @@ $privateRoot = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 
 $bindingPath = Join-Path $privateRoot "target.env"; $keyPath = Join-Path $privateRoot "id_ed25519_spain"; $knownHostsPath = Join-Path $privateRoot "known_hosts_spain"
 $binding = Read-PrivateBinding $bindingPath
 if ($binding["SSH_KEY_PATH"] -cne $keyPath -or -not (Test-Path -LiteralPath $keyPath -PathType Leaf) -or -not (Test-Path -LiteralPath $knownHostsPath -PathType Leaf)) { throw "Private SSH material unavailable." }
-$runnerApproval = "APPROVE PHASE12 SPAIN TERMINAL RECOVERY CLEANUP RUNNER SHA256 $expectedRunnerSha EXECUTOR SHA256 $expectedExecutorSha EXECUTOR BYTES $expectedExecutorBytes NONCE $expectedNonce TRANSACTION SHA256 $expectedTransactionSha CAPSULE SHA256 $expectedCapsuleSha DOCKER TREE SHA256 $expectedDockerTreeSha ENTRIES $expectedDockerTreeEntries BYTES $expectedDockerTreeBytes RECORDED BLOCK RDEV $expectedBlockRdev SINGLE FILESYSTEM NO NESTED MOUNTS REMOVE ONLY VERIFIED AMN2 OWNED STALE OBJECTS PRESERVE TERMINAL LEDGER NO AMN2 START NO FOREIGN SERVICE MUTATION USA ROLLBACK CONTOUR"
+$runnerApproval = "APPROVE PHASE12 SPAIN TERMINAL RECOVERY RECEIPT RUNNER SHA256 $expectedRunnerSha EXECUTOR SHA256 $expectedExecutorSha EXECUTOR BYTES $expectedExecutorBytes NONCE $expectedNonce TRANSACTION SHA256 $expectedTransactionSha CAPSULE SHA256 $expectedCapsuleSha DOCKER TREE SHA256 $expectedDockerTreeSha ENTRIES $expectedDockerTreeEntries BYTES $expectedDockerTreeBytes RECORDED BLOCK RDEV $expectedBlockRdev SINGLE FILESYSTEM NO NESTED MOUNTS VERIFY RECORDED REMOVAL ONLY NO ADDITIONAL AMN2 MUTATION PRESERVE TERMINAL LEDGER NO AMN2 START NO FOREIGN SERVICE MUTATION USA ROLLBACK CONTOUR"
 if ($Approval -cne $runnerApproval) { Write-Output $runnerApproval; throw "Exact terminal recovery approval mismatch." }
 
 $transportOptions = @("-F", "none", "-o", "BatchMode=yes", "-o", "IdentitiesOnly=yes", "-o", "PasswordAuthentication=no", "-o", "KbdInteractiveAuthentication=no", "-o", "GSSAPIAuthentication=no", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "-o", "RequestTTY=no", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=$knownHostsPath", "-i", $keyPath)
@@ -99,10 +99,10 @@ if ($remoteHash.ExitCode -ne 0 -or $remoteText -notmatch "(?im)^$($expectedExecu
 $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $intent = [ordered]@{ approval_id=(Get-TextSha256 $Approval).ToLowerInvariant(); approved_at_epoch=$now; capsule_sha256=$expectedCapsuleSha; docker_tree_entry_count=$expectedDockerTreeEntries; docker_tree_sha256=$expectedDockerTreeSha; docker_tree_total_bytes=$expectedDockerTreeBytes; executor_sha256=$expectedExecutorSha.ToLowerInvariant(); expires_at_epoch=($now + 300); mutation_authorized=$true; nonce=$expectedNonce; schema="amn2.spain-terminal-recovery-intent.v1"; transaction_sha256=$expectedTransactionSha }
 $intentBytes = (New-Object Text.UTF8Encoding($false)).GetBytes(($intent | ConvertTo-Json -Compress) + "`n")
-$result = Invoke-ExactSsh (@($sshBase + @($target, "/usr/bin/python3 -I -B /root/amn2-spain-phase12-executor.pyz terminal-recovery-bound"))) $intentBytes
+$result = Invoke-ExactSsh (@($sshBase + @($target, "/usr/bin/python3 -I -B /root/amn2-spain-phase12-executor.pyz terminal-recovery-receipt-bound"))) $intentBytes
 if ($result.ExitCode -ne 0) {
     $safeRemoteError = (New-Object Text.UTF8Encoding($false,$true)).GetString($result.Stderr).Trim()
     if (-not [string]::IsNullOrWhiteSpace($safeRemoteError)) { [Console]::Error.WriteLine($safeRemoteError) }
-    throw "Terminal recovery failed; no stale object was accepted as safely removable."
+    throw "Terminal recovery receipt failed; recorded removal was not safely verified."
 }
 [Console]::WriteLine((New-Object Text.UTF8Encoding($false,$true)).GetString($result.Stdout))

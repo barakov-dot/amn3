@@ -11,18 +11,21 @@ USA остаётся rollback contour.
 receipt подтвердил inactive Docker/network/web/bot units. Foreign Spain
 service не затрагивался.
 
-Остаточный rollback contour не является install state: exact AMN2-owned
-`/etc/amn2-spain`, `/opt/amn2-spain`, `/var/lib/amn2-spain*` и Docker data-root
-ещё сохранены в terminal ledger. Fresh no-follow read-only receipt: Docker-root
-`916` entries, `41902300` bytes, mode `0710`, один root-owned `0600`
-single-link block inode rdev `64770`, one filesystem, nested mounts `0`.
-Новый executor перепроверяет canonical tree SHA дважды; он удаляет только этот
-sealed contour, сохраняет terminal ledger и не трогает foreign service.
+Terminal recovery v2 удалил exact AMN2-owned contour `/etc/amn2-spain`,
+`/opt/amn2-spain`, `/var/lib/amn2-spain*` и sealed Docker data-root. Immediate
+read-only safety receipt подтвердил отсутствие package/runtime/path candidates
+и inactive AMN2 Docker/network/web/bot units. Terminal ledger сохранён со
+status=`manual_recovery_required`; foreign Spain service не останавливался и
+не изменялся.
 
 Первый terminal-recovery attempt fail-closed до delete: Linux scanner выдал
-prefixed digest `sha256:<hex>`, а exact intent требует raw 64-hex. Read-only
-receipt подтвердил, что retained paths/ledger не изменились и `/opt` flock
-available. v2 заменяет только этот digest format; прежний approval недействителен.
+prefixed digest `sha256:<hex>`, а exact intent требует raw 64-hex. v2 исправил
+digest и удалил contour, но затем fail-closed на старом equality adapter:
+он ошибочно сравнивал owned `existing` inventory до/после. Новый executor
+разрешает только этот expected AMN2 delta, по-прежнему требует persistent
+foreign equality и записывает volatile fields. Его terminal-recovery receipt
+mode строго verify-only: exact ledger обязан уже содержать все `removed`, иначе
+он fail-closed без любой дополнительной mutation.
 
 v11 добавляет bounded category-only diagnostic для Docker image load. Он
 сохраняет только allowlisted label (`no_space`, `archive`, `permission`,
@@ -46,11 +49,13 @@ terminal_recovery_transaction_sha256=C58ED7EC5EA40F47C7C65C4A6D4691667160F244476
 terminal_recovery_capsule_sha256=FE7E203B3A772811489371C90CAB88E0247882882938045FD85D80709F6B63CC
 terminal_docker_tree_sha256=2328DA44BF2BDF6FD831A1AA27B50DF5BCE8649FBBEF015808A01CCD389A1CF4
 terminal_docker_tree=entries_916|bytes_41902300|mode_0710|block_rdev_64770|single_filesystem|nested_mounts_0
-terminal_recovery_executor_sha256=A7F8465D56E76AFA96A8825BB12CCF66757DCC487BFCE28CE479CC3B50135FAF
-terminal_recovery_executor_bytes=144052
-terminal_recovery_runner_sha256=1FF164521C2C1C6A1606F5F9BC95FAF0DBD00F715069F2CB0A75AF3C07ECDB19
+terminal_recovery_executor_sha256=400A46C60CEE775303FCEEC2BDD297D5373D721F0C6F9BACF5449D68700126A5
+terminal_recovery_executor_bytes=144591
+terminal_recovery_runner_sha256=8F68D407C70D463A1AF1FE671598D08F88E9434E75F077B74D3B1F939EB2A90A
 terminal_recovery_attempt_v1=failed_closed_before_delete|linux_digest_prefix_mismatch|retained_objects_unchanged|opt_flock_available
-terminal_recovery_v2_local_verification=145_passed|executor_double_build_byte_identical|offline_verify_passed|diff_check_passed
+terminal_recovery_attempt_v2=owned_terminal_contour_removed|equality_failed_closed_on_owned_inventory_comparator|foreign_untouched
+terminal_recovery_receipt_mode=verify_only|requires_exact_removed_ledger|no_repeat_deletion
+terminal_recovery_v3_local_verification=148_passed|executor_double_build_byte_identical|offline_zip_verify_passed|unsupported_mode_fail_closed|diff_check_passed
 collector_sha256=70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A
 source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
 run009_evidence_sha256=8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8
@@ -58,7 +63,7 @@ fingerprint_array_sha256=E15219CB5204D54A9AD11263CFBA1F7C86E16DAB3287C752A8B6F13
 foreign_equality_policy=dynamic_persistent_v1
 firewall_equality=semantic_nft_rule_count_129_sha256_FB8E1D41F6F4F0EBCEB7C89D65E4E5E440E0AC0A4E780B4F638F96CEE1B9A682
 local_verification=double_build_byte_identical|package_verify_pass|clean_room_extract_pass|scoped_136_passed|package_bound_units_test_pass
-spain_mutation=v10_attempt_rolled_back|manual_cleanup_package_tree_only|no_active_amn2_runtime
+spain_mutation=v10_attempt_rolled_back|manual_cleanup_package_tree_only|terminal_owned_contour_removed|no_active_amn2_runtime
 ```
 
 Do not repeat runs 001–009, resource-confirmation retries, prior builds, SOL
@@ -66,8 +71,9 @@ review, or security scans. Do not stop AWG. Do not stop or mutate the foreign
 Spain service. Do not migrate/delete USA data.
 
 Next gate: stage only Phase 12 files, commit and push current branch, verify
-origin readback, then issue one exact checksum-bound terminal-recovery cleanup
-approval. Runner uploads only its executor, verifies its remote SHA, rechecks
-the sealed Docker tree and removes only the verified AMN2 residual contour.
-After a passed cleanup receipt, rebuild the install package/executor and resume
-fresh install; no blind reuse of an old install approval.
+origin readback, then issue one exact checksum-bound terminal-recovery
+receipt-only approval. Runner uploads only its executor, verifies its remote
+SHA and can only validate the already-recorded `removed` contour and foreign
+equality; it has no deletion branch. After a passed receipt, rebuild the
+install package/executor and resume fresh install; no blind reuse of an old
+install approval.
