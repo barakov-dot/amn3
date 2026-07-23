@@ -2182,6 +2182,14 @@ def test_terminal_docker_tree_requires_single_filesystem_exact_block_inode() -> 
         )
 
 
+def test_terminal_docker_tree_digest_is_plain_sha256_hex() -> None:
+    rows = [{"path": "layer", "type": "dir", "mode": "0700", "uid": 0, "gid": 0}]
+    expected = hashlib.sha256(
+        json.dumps(rows, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    assert live_backend._terminal_docker_tree_digest(rows) == expected
+
+
 def test_recovery_capsule_seals_rendered_payloads_and_callback_free_blueprint(
     tmp_path: Path, monkeypatch
 ) -> None:

@@ -6,8 +6,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$expectedExecutorSha = "8227FCADA411F490154F559CDD7969C648949EDD4B25D156307A49A3DAA7CED8"
-$expectedExecutorBytes = 143989
+$expectedExecutorSha = "A7F8465D56E76AFA96A8825BB12CCF66757DCC487BFCE28CE479CC3B50135FAF"
+$expectedExecutorBytes = 144052
 $expectedNonce = "e022f0b87a972f2256acd7800a4999553a8ceea2396a2644908f43c93a82febd"
 $expectedTransactionSha = "c58ed7ec5ea40f47c7c65c4a6d4691667160f2444764679a285a9ee47bec8788"
 $expectedCapsuleSha = "fe7e203b3a772811489371c90cab88e0247882882938045fd85d80709f6b63cc"
@@ -18,7 +18,7 @@ $expectedBlockRdev = 64770
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-terminal-recovery-v1-20260723"
-$executorPath = Join-Path $artifactRoot "executor-e.pyz"
+$executorPath = Join-Path $artifactRoot "executor-g.pyz"
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
 $scpExe = "C:\Windows\System32\OpenSSH\scp.exe"
 

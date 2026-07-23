@@ -23,6 +23,12 @@ canonical tree SHA дважды перед unlink; non-block special files, mode
 drift и foreign filesystem остаются fail-closed. Foreign Spain service не
 останавливается и не изменяется.
 
+Первый terminal-recovery attempt остановился до удаления: Linux scanner вернул
+`sha256:<hex>`, тогда как intent корректно требует raw `<hex>`. Read-only
+receipt подтвердил неизменность всех nine retained objects, terminal ledger и
+available `/opt` flock. v2 приводит Linux digest к raw 64-hex форме; новый
+executor/runner checksum-bound заново и не переиспользует прежнее approval.
+
 v11 сохраняет безопасный cause label для следующего `docker image load`:
 `no_space`, `archive`, `permission`, `daemon_unavailable`, `layer_apply`,
 `unsupported` или numeric `exit_code`. Raw stderr, command output и secrets
@@ -66,9 +72,11 @@ phase12_terminal_recovery_transaction_sha256=C58ED7EC5EA40F47C7C65C4A6D469166716
 phase12_terminal_recovery_capsule_sha256=FE7E203B3A772811489371C90CAB88E0247882882938045FD85D80709F6B63CC
 phase12_terminal_docker_tree_sha256=2328DA44BF2BDF6FD831A1AA27B50DF5BCE8649FBBEF015808A01CCD389A1CF4
 phase12_terminal_docker_tree=entries_916|bytes_41902300|mode_0710|block_rdev_64770|single_filesystem|nested_mounts_0
-phase12_terminal_recovery_executor_sha256=8227FCADA411F490154F559CDD7969C648949EDD4B25D156307A49A3DAA7CED8
-phase12_terminal_recovery_executor_size=143989
-phase12_terminal_recovery_runner_sha256=1DE0DB31C21F288BFCCA66588D07604CD0FFCBE233FFFD85AD0EFE785F9B5FAD
+phase12_terminal_recovery_executor_sha256=A7F8465D56E76AFA96A8825BB12CCF66757DCC487BFCE28CE479CC3B50135FAF
+phase12_terminal_recovery_executor_size=144052
+phase12_terminal_recovery_runner_sha256=1FF164521C2C1C6A1606F5F9BC95FAF0DBD00F715069F2CB0A75AF3C07ECDB19
+phase12_terminal_recovery_attempt_v1=failed_closed_before_delete|linux_digest_prefix_mismatch|retained_objects_unchanged|opt_flock_available
+phase12_terminal_recovery_v2_local_verification=145_passed|executor_double_build_byte_identical|offline_verify_passed|diff_check_passed
 phase12_v11_docker_load_diagnostic=allowlisted_stderr_category_only|raw_stderr_false
 phase12_foreign_equality_policy=dynamic_persistent_v1
 phase12_precondition_receipt=records_persistent_equality_and_volatile_before_after_counts

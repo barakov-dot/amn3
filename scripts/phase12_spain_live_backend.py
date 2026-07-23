@@ -1543,6 +1543,11 @@ def _validate_terminal_docker_data_root_entry(
     return kind
 
 
+def _terminal_docker_tree_digest(rows: list[dict[str, object]]) -> str:
+    """Return the canonical Docker-tree digest in the intent's raw-hex form."""
+    return hashlib.sha256(_canonical(rows)).hexdigest()
+
+
 def _scan_terminal_docker_data_root(target: Path) -> dict[str, object]:
     """Hash the dedicated Docker root without following links or whiteouts."""
     target = Path(target)
@@ -1625,7 +1630,11 @@ def _scan_terminal_docker_data_root(target: Path) -> dict[str, object]:
         os.close(root_fd)
     if not rows or len(rows) > 10_000 or total_bytes > 2 * 1024 * 1024 * 1024:
         raise BackendError("terminal Docker data-root inventory bound invalid")
-    return {"tree_sha256": _digest(_canonical(rows)), "entry_count": len(rows), "total_bytes": total_bytes}
+    return {
+        "tree_sha256": _terminal_docker_tree_digest(rows),
+        "entry_count": len(rows),
+        "total_bytes": total_bytes,
+    }
 
 
 def _remove_terminal_docker_data_root_tree(target: Path) -> None:

@@ -19,6 +19,11 @@ single-link block inode rdev `64770`, one filesystem, nested mounts `0`.
 Новый executor перепроверяет canonical tree SHA дважды; он удаляет только этот
 sealed contour, сохраняет terminal ledger и не трогает foreign service.
 
+Первый terminal-recovery attempt fail-closed до delete: Linux scanner выдал
+prefixed digest `sha256:<hex>`, а exact intent требует raw 64-hex. Read-only
+receipt подтвердил, что retained paths/ledger не изменились и `/opt` flock
+available. v2 заменяет только этот digest format; прежний approval недействителен.
+
 v11 добавляет bounded category-only diagnostic для Docker image load. Он
 сохраняет только allowlisted label (`no_space`, `archive`, `permission`,
 `daemon_unavailable`, `layer_apply`, `unsupported` или exit code), никогда raw
@@ -41,9 +46,11 @@ terminal_recovery_transaction_sha256=C58ED7EC5EA40F47C7C65C4A6D4691667160F244476
 terminal_recovery_capsule_sha256=FE7E203B3A772811489371C90CAB88E0247882882938045FD85D80709F6B63CC
 terminal_docker_tree_sha256=2328DA44BF2BDF6FD831A1AA27B50DF5BCE8649FBBEF015808A01CCD389A1CF4
 terminal_docker_tree=entries_916|bytes_41902300|mode_0710|block_rdev_64770|single_filesystem|nested_mounts_0
-terminal_recovery_executor_sha256=8227FCADA411F490154F559CDD7969C648949EDD4B25D156307A49A3DAA7CED8
-terminal_recovery_executor_bytes=143989
-terminal_recovery_runner_sha256=1DE0DB31C21F288BFCCA66588D07604CD0FFCBE233FFFD85AD0EFE785F9B5FAD
+terminal_recovery_executor_sha256=A7F8465D56E76AFA96A8825BB12CCF66757DCC487BFCE28CE479CC3B50135FAF
+terminal_recovery_executor_bytes=144052
+terminal_recovery_runner_sha256=1FF164521C2C1C6A1606F5F9BC95FAF0DBD00F715069F2CB0A75AF3C07ECDB19
+terminal_recovery_attempt_v1=failed_closed_before_delete|linux_digest_prefix_mismatch|retained_objects_unchanged|opt_flock_available
+terminal_recovery_v2_local_verification=145_passed|executor_double_build_byte_identical|offline_verify_passed|diff_check_passed
 collector_sha256=70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A
 source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
 run009_evidence_sha256=8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8
