@@ -3873,9 +3873,10 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "012CC689247DD411EACEF82882E5734A6BEC56C2FDE7D1F4224691E6CF457A47"' in source
-    assert '$expectedExecutorSha = "A22A05CF1D2D761C9FF80DA5F458C1C5FBE6AFDEF4476D57BEB8A3677E6731B3"' in source
-    assert 'phase12-spain-docker-load-diagnostic-v11-20260723' in source
+    assert '$expectedPackageSha = "8975804C1D192F59FA94441A84DFCD7B5E0159505BBA5BE620B2FD23B675E154"' in source
+    assert '$expectedManifestSha = "B7124C5954D32E4FF08CA00E1897953651309BEB505E4067C2437ED946E26461"' in source
+    assert '$expectedExecutorSha = "E86E0AFD883A7E6DC45F7987CA26062EFAFFA632164546DBF57BEC16F876981D"' in source
+    assert 'phase12-spain-install-boundary-clean-recovery-v11-20260723' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source

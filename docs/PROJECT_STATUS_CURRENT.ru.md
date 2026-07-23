@@ -1,4 +1,4 @@
-# Текущий override 2026-07-23: Phase 12 terminal receipt semantic-firewall local gate
+# Текущий override 2026-07-23: Phase 12 fresh install package local gate
 
 Checksum-bound terminal recovery v2 действительно удалил только exact
 AMN2-owned terminal contour: `/opt/amn2-spain`, `/etc/amn2-spain`,
@@ -19,32 +19,43 @@ Docker, firewall, listeners/routes/addresses и persistent foreign projection,
 Первый receipt-only run остановился fail-closed на raw firewall hash между
 двумя read-only samples. Это ожидаемо volatile для nft counters и уже не
 является authoritative comparator: текущая Phase 12 policy закрепляет
-`backend=nft`, rule-count=`129` и semantic SHA. v3 executor сравнивает именно
-эти stable fields; изменение backend, rule-count или semantic SHA остаётся
-fail-closed. Run не удалял объектов повторно, не запускал AMN2 и не менял
-foreign service.
+`backend=nft`, rule-count=`129` и semantic SHA. v3 executor сравнил именно
+эти stable fields и прошёл: `recovery_action=verified_previously_removed_owned_objects`,
+foreign persistent equality=`true`, volatile counts=`0`. Повторного удаления,
+AMN2 start или foreign-service mutation не было.
 
-Следующий runner — строго receipt-only: он требует, чтобы ledger уже содержал
-полный exact set `removed`, и иначе fail-closed. В нём нет ветки повторного
-удаления. Сначала commit/push/origin readback, затем один exact approval на
-remote hash-verified executor и receipt. SSH до этого gate не выполняется.
+Новый fresh install package и executor дважды собраны byte-equal из тех же
+sealed inputs; штатный no-follow clean-room verify/extract и source expansion
+подтвердили source commit `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`.
+Следующий gate: commit/push/origin readback, затем один exact checksum-bound
+install approval. Он допускает только upload package/executor, remote hash
+verification, install-bound и automatic rollback; foreign service immutable,
+USA остаётся rollback contour.
 
 ```text
 active_phase=AMN2 Phase 12 Spain Migration|terminal_recovery_receipt_only_gate
 terminal_recovery_v2_live_outcome=owned_terminal_contour_removed|receipt_failed_closed_on_owned_inventory_comparator
 terminal_recovery_live_safety=package_absent|opt_etc_var_owned_paths_absent|docker_root_absent|amn2_units_inactive|terminal_ledger_manual_recovery_required
 terminal_recovery_receipt_attempt_v1=failed_closed_on_raw_firewall_projection_drift|no_additional_mutation
+terminal_recovery_receipt_v3=passed|verified_previously_removed_owned_objects|foreign_persistent_equal_true|volatile_before_0|volatile_after_0
 terminal_recovery_receipt_executor_sha256=E86E0AFD883A7E6DC45F7987CA26062EFAFFA632164546DBF57BEC16F876981D
 terminal_recovery_receipt_executor_size=144710
 terminal_recovery_receipt_runner_sha256=F5959D04CAE8E6BF534474D9CBD308228EF8B0EB424FDCC02F15DB6144BD1C89
 terminal_recovery_receipt_local_verification=tests_148_passed|semantic_firewall_regression_red_green|executor_double_build_byte_equal|offline_zip_verify_passed|unsupported_mode_fail_closed|diff_check_passed
+fresh_install_package_sha256=8975804C1D192F59FA94441A84DFCD7B5E0159505BBA5BE620B2FD23B675E154
+fresh_install_package_size=139970560
+fresh_install_manifest_sha256=B7124C5954D32E4FF08CA00E1897953651309BEB505E4067C2437ED946E26461
+fresh_install_executor_sha256=E86E0AFD883A7E6DC45F7987CA26062EFAFFA632164546DBF57BEC16F876981D
+fresh_install_executor_size=144710
+fresh_install_runner_sha256=24CBF3ED2D9717149A147E2683575A879AA93A4DCDA9FB2AEA54F382459B75A7
+fresh_install_local_verification=package_executor_double_build_byte_equal|package_verify_passed|clean_room_extract_passed|source_55dc243_verified|scoped_151_passed
 terminal_recovery_nonce=E022F0B87A972F2256ACD7800A4999553A8CEEA2396A2644908F43C93A82FEBD
 terminal_recovery_transaction_sha256=C58ED7EC5EA40F47C7C65C4A6D4691667160F2444764679A285A9EE47BEC8788
 terminal_recovery_capsule_sha256=FE7E203B3A772811489371C90CAB88E0247882882938045FD85D80709F6B63CC
 terminal_docker_tree_sha256=2328DA44BF2BDF6FD831A1AA27B50DF5BCE8649FBBEF015808A01CCD389A1CF4
 spain_unrelated_service=untouched
 usa_rollback_contour=unchanged
-next_gate=commit_push_origin_readback_then_exact_terminal_recovery_receipt_only_approval
+next_gate=commit_push_origin_readback_then_exact_checksum_bound_install_approval
 ```
 
 `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся нетронутым.
