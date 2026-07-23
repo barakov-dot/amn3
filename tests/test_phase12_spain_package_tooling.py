@@ -5,6 +5,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 import tarfile
@@ -75,6 +76,7 @@ RESOURCE_PLAN = json.loads((FIXTURES / "resource_plan.json").read_text(encoding=
 OBSERVATION = json.loads((FIXTURES / "observation_ok.json").read_text(encoding="utf-8"))
 REMOTE_EXECUTOR = ROOT / "scripts" / "vps" / "phase12_spain_remote_executor.sh"
 INSTALL_SSH_RUNNER = ROOT / "scripts" / "vps" / "phase12_spain_install_ssh_runner.ps1"
+CLEANUP_SSH_RUNNER = ROOT / "scripts" / "vps" / "phase12_spain_manual_cleanup_ssh_runner.ps1"
 TRACKED_PACKAGE_ROOT = ROOT / "packaging" / "phase12-spain"
 HOST_IDENTITY_SHA256 = "7" * 64
 BOOT_ID = "12345678-1234-1234-1234-123456789abc"
@@ -1979,6 +1981,98 @@ def test_bootstrap_package_recovery_crash_matrix(
     assert reopened.path.is_file()
 
 
+def test_manual_cleanup_removes_only_verified_terminal_package(
+    tmp_path: Path, monkeypatch
+) -> None:
+    (tmp_path / "opt").mkdir()
+    source = tmp_path / "incoming.tar"
+    source.write_bytes(package_tar())
+    report = PackageVerificationReport.from_mapping(verify_package(source))
+    authorization = replace(
+        valid_authorization("1" * 64),
+        package_archive_sha256=report.archive_sha256,
+        package_archive_size=report.archive_size,
+        package_manifest_sha256=report.manifest_sha256,
+        resource_plan_sha256=report.resource_plan_sha256,
+    )
+    store = RetainedAuthorizationStore(tmp_path / "phase12-audit", expected_uid=None)
+    stager = ChecksumBoundPackageStager(
+        host_root=tmp_path, expected_uid=None, expected_gid=None
+    )
+
+    @contextmanager
+    def lock():
+        yield
+
+    lease = SharedInstallLockLease(lock)
+    with lease.acquire():
+        _tombstone, transaction, existed = (
+            BootstrapTransactionLedger.open_or_create_for_authorization(
+                authorization_store=store,
+                authorization=authorization,
+                package_root=stager.package_root,
+                lock_lease=lease,
+            )
+        )
+        assert existed is False
+        descriptor = os.open(source, os.O_RDONLY)
+        try:
+            stager.stage(
+                descriptor,
+                expected_sha256=report.archive_sha256,
+                expected_size=report.archive_size,
+                transaction_ledger=transaction,
+            )
+        finally:
+            os.close(descriptor)
+        transaction.record_manual_recovery_required()
+
+    monkeypatch.setattr(
+        installer_module,
+        "_existing_opt_directory_lock",
+        lambda _host_root: lock(),
+    )
+    monkeypatch.setattr(
+        installer_module,
+        "_host_path",
+        lambda _host_root, live_path: store.root
+        if live_path == "/var/lib/amn2-spain-phase12-audit"
+        else tmp_path / live_path.lstrip("/"),
+    )
+    monkeypatch.setattr(
+        installer_module,
+        "_assert_running_executor",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(installer_module.time, "time", lambda: 150)
+    intent = {
+        "schema": "amn2.spain-manual-cleanup-intent.v1",
+        "mutation_authorized": True,
+        "approval_id": "test-manual-cleanup",
+        "executor_sha256": "2" * 64,
+        "nonce": authorization.nonce,
+        "approved_at_epoch": 100,
+        "expires_at_epoch": 200,
+    }
+
+    result = installer_module.run_production_command(
+        ["manual-cleanup-bound"],
+        authorization_payload=canonical_json_bytes(intent) + b"\n",
+        host_root=tmp_path,
+        expected_uid=None,
+    )
+
+    assert result["schema"] == "amn2.spain-manual-cleanup-receipt.v1"
+    assert result["result"] == "passed"
+    assert result["approval_id"] == "test-manual-cleanup"
+    assert result["nonce"] == authorization.nonce
+    assert result["transaction_status"] == "manual_recovery_required"
+    assert re.fullmatch(r"[0-9a-f]{64}", result["transaction_sha256"])
+    assert not stager.package_root.exists()
+    assert transaction.snapshot()["status"] == "manual_recovery_required"
+    assert transaction.path.is_file()
+
+
 def test_recovery_capsule_seals_rendered_payloads_and_callback_free_blueprint(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -3534,7 +3628,7 @@ def test_rollback_equality_receipt_records_volatile_foreign_entries() -> None:
 def test_remote_executor_is_closed_mode_wrapper_without_network_fetches() -> None:
     source = REMOTE_EXECUTOR.read_text(encoding="utf-8")
     assert "set -Eeuo pipefail" in source
-    assert 'install|install-bound|recover|rollback|verify)' in source
+    assert 'install|install-bound|manual-cleanup|manual-cleanup-bound|recover|rollback|verify)' in source
     assert 'readonly EXECUTOR_BUNDLE="/root/amn2-spain-phase12-executor.pyz"' in source
     assert 'exec "$PYTHON_BIN" -I -B "$EXECUTOR_BUNDLE"' in source
     assert "PYTHONPATH" not in source
@@ -3574,6 +3668,19 @@ def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() 
     assert "resource-confirmation-evidence" not in source
     assert "precondition-receipt" not in source
     assert "baseline" not in source
+
+
+def test_manual_cleanup_ssh_runner_is_executor_only_and_stdin_bound() -> None:
+    source = CLEANUP_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert "manual-cleanup-bound" in source
+    assert "scp.exe" in source
+    assert '"-P", "22"' in source
+    assert "CopyToAsync" in source
+    assert "manual-cleanup-intent.v1" in source
+    assert "/opt/amn2-spain-package" in source
+    assert "phase12-install-a.tar" not in source
+    assert "install-bound" not in source
 
 
 def test_standalone_executor_bundle_build_is_deterministic_and_fail_closed(

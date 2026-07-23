@@ -1368,6 +1368,8 @@ class ChecksumBoundPackageStager:
         self,
         transaction_ledger: "BootstrapTransactionLedger",
         lock_lease: SharedInstallLockLease,
+        *,
+        allow_manual_cleanup: bool = False,
     ) -> None:
         if (
             not isinstance(transaction_ledger, BootstrapTransactionLedger)
@@ -1386,11 +1388,12 @@ class ChecksumBoundPackageStager:
             if self.package_root.exists() or self.package_root.is_symlink():
                 raise InstallError("package recovery rolled-back state drift")
             return
-        if state["status"] == "manual_recovery_required":
+        if state["status"] == "manual_recovery_required" and not allow_manual_cleanup:
             raise InstallError("package recovery requires manual intervention")
         try:
             if not self.package_root.exists() and not self.package_root.is_symlink():
-                transaction_ledger.record_rolled_back()
+                if state["status"] != "manual_recovery_required":
+                    transaction_ledger.record_rolled_back()
                 return
             root_info = os.lstat(self.package_root)
             recorded_root = package["root_identity"]
@@ -1450,7 +1453,7 @@ class ChecksumBoundPackageStager:
                     actual_files.add(relative)
                     if os.name != "nt" and stat.S_IMODE(info.st_mode) != 0o644:
                         raise InstallError("package recovery content CAS drift")
-                    if state["status"] == "package_extracted":
+                    if state["status"] in {"package_extracted", "manual_recovery_required"}:
                         descriptor = os.open(
                             candidate,
                             os.O_RDONLY
@@ -1481,7 +1484,7 @@ class ChecksumBoundPackageStager:
                     not actual_files.issubset(set(inventory))
                     or not actual_directories.issubset(allowed_directories)
                     or (
-                        state["status"] == "package_extracted"
+                        state["status"] in {"package_extracted", "manual_recovery_required"}
                         and actual_files != set(inventory)
                     )
                 ):
@@ -1543,7 +1546,8 @@ class ChecksumBoundPackageStager:
             if any(self.package_root.iterdir()):
                 raise InstallError("package recovery root not empty")
             os.rmdir(self.package_root)
-            transaction_ledger.record_rolled_back()
+            if state["status"] != "manual_recovery_required":
+                transaction_ledger.record_rolled_back()
         except InstallError:
             if transaction_ledger.snapshot()["status"] != "manual_recovery_required":
                 transaction_ledger.record_manual_recovery_required()
@@ -1553,6 +1557,19 @@ class ChecksumBoundPackageStager:
                 transaction_ledger.record_manual_recovery_required()
             raise InstallError("package recovery failed") from exc
 
+    def manual_cleanup_terminal(
+        self,
+        transaction_ledger: "BootstrapTransactionLedger",
+        lock_lease: SharedInstallLockLease,
+    ) -> None:
+        """Remove only a fully verified retained package from a terminal manual state."""
+        if transaction_ledger.snapshot()["status"] != "manual_recovery_required":
+            raise InstallError("manual cleanup terminal state required")
+        self.recover_or_rollback(
+            transaction_ledger,
+            lock_lease,
+            allow_manual_cleanup=True,
+        )
 
 @dataclass(frozen=True)
 class InstallBoundaryIntent:
@@ -1664,6 +1681,60 @@ class InstallBoundaryIntent:
                 "approved_at_epoch": self.approved_at_epoch,
                 "expires_at_epoch": self.expires_at_epoch,
             }
+        )
+
+
+@dataclass(frozen=True)
+class ManualCleanupIntent:
+    """One-use authorization for verified removal of a terminal package tree."""
+
+    approval_id: str
+    executor_sha256: str
+    nonce: str
+    approved_at_epoch: int
+    expires_at_epoch: int
+
+    @classmethod
+    def from_mapping(cls, value: dict[str, Any]) -> "ManualCleanupIntent":
+        fields = {
+            "schema",
+            "mutation_authorized",
+            "approval_id",
+            "executor_sha256",
+            "nonce",
+            "approved_at_epoch",
+            "expires_at_epoch",
+        }
+        if (
+            not isinstance(value, dict)
+            or set(value) != fields
+            or value.get("schema") != "amn2.spain-manual-cleanup-intent.v1"
+            or value.get("mutation_authorized") is not True
+        ):
+            raise InstallError("manual cleanup intent schema/result mismatch")
+        for key in ("executor_sha256", "nonce"):
+            if (
+                not isinstance(value[key], str)
+                or re.fullmatch(r"[0-9a-f]{64}", value[key]) is None
+            ):
+                raise InstallError(f"manual cleanup intent {key} invalid")
+        if not isinstance(value["approval_id"], str) or not value["approval_id"]:
+            raise InstallError("manual cleanup intent approval invalid")
+        if (
+            not isinstance(value["approved_at_epoch"], int)
+            or isinstance(value["approved_at_epoch"], bool)
+            or not isinstance(value["expires_at_epoch"], int)
+            or isinstance(value["expires_at_epoch"], bool)
+            or value["expires_at_epoch"] <= value["approved_at_epoch"]
+            or value["expires_at_epoch"] - value["approved_at_epoch"] > 300
+        ):
+            raise InstallError("manual cleanup intent time window invalid")
+        return cls(
+            approval_id=value["approval_id"],
+            executor_sha256=value["executor_sha256"],
+            nonce=value["nonce"],
+            approved_at_epoch=value["approved_at_epoch"],
+            expires_at_epoch=value["expires_at_epoch"],
         )
 
 
@@ -5260,6 +5331,30 @@ def _read_install_boundary_intent_payload(payload: bytes) -> InstallBoundaryInte
         raise InstallError("install_bound_inputs_required") from exc
 
 
+def _read_manual_cleanup_intent_payload(payload: bytes) -> ManualCleanupIntent:
+    if (
+        not isinstance(payload, bytes)
+        or not payload
+        or len(payload) > 64 * 1024
+        or not payload.endswith(b"\n")
+    ):
+        raise InstallError("manual_cleanup_bound_inputs_required")
+    try:
+        value = json.loads(payload)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise InstallError("manual_cleanup_bound_inputs_required") from exc
+    if (
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        + b"\n"
+        != payload
+    ):
+        raise InstallError("manual_cleanup_bound_inputs_required")
+    try:
+        return ManualCleanupIntent.from_mapping(value)
+    except InstallError as exc:
+        raise InstallError("manual_cleanup_bound_inputs_required") from exc
+
+
 def _sha256_regular_file(
     path: Path,
     *,
@@ -5801,6 +5896,22 @@ def _production_recover(
         expected_uid=expected_uid,
     )
     status = transaction.snapshot()["status"]
+    stager = ChecksumBoundPackageStager(
+        host_root=Path(host_root),
+        expected_uid=expected_uid,
+        expected_gid=0 if expected_uid is not None else None,
+    )
+    if mode == "manual-cleanup":
+        if status != "manual_recovery_required":
+            raise InstallError("manual cleanup terminal state required")
+        with lock_lease.acquire():
+            stager.manual_cleanup_terminal(transaction, lock_lease)
+        return {
+            "schema": "amn2.spain-manual-cleanup-receipt.v1",
+            "result": "passed",
+            "nonce": nonce,
+            "transaction_status": transaction.snapshot()["status"],
+        }
     if status == "manual_recovery_required":
         raise InstallError("recovery requires manual intervention")
     capsule_statuses = {
@@ -5810,11 +5921,6 @@ def _production_recover(
     }
     if mode == "rollback" and status not in capsule_statuses:
         raise InstallError("rollback runtime state unavailable")
-    stager = ChecksumBoundPackageStager(
-        host_root=Path(host_root),
-        expected_uid=expected_uid,
-        expected_gid=0 if expected_uid is not None else None,
-    )
     equality_path = audit_root / ("rollback-equality-" + nonce + ".json")
     capsule_path = audit_root / ("recovery-capsule-" + nonce + ".json")
     capsule_temporary = capsule_path.parent / ("." + capsule_path.name + ".tmp")
@@ -5893,6 +5999,62 @@ def _production_recover(
     )
 
 
+def _production_manual_cleanup_bound(
+    intent: ManualCleanupIntent,
+    *,
+    host_root: Path = Path("/"),
+    expected_uid: int | None = 0,
+    now_epoch: int | None = None,
+) -> dict[str, Any]:
+    now = int(time.time()) if now_epoch is None else now_epoch
+    if not isinstance(now, int) or isinstance(now, bool):
+        raise InstallError("manual cleanup clock invalid")
+    if now < intent.approved_at_epoch or now > intent.expires_at_epoch:
+        raise InstallError("manual cleanup intent expired")
+    running_executor = Path(sys.argv[0]).resolve()
+    _assert_running_executor(
+        running_executor,
+        intent.executor_sha256,
+        expected_uid=expected_uid,
+    )
+    audit_root = _host_path(host_root, "/var/lib/amn2-spain-phase12-audit")
+    transaction = BootstrapTransactionLedger.open_existing(
+        audit_root=audit_root,
+        nonce=intent.nonce,
+        expected_uid=expected_uid,
+    )
+    tombstone = _read_json_file(
+        audit_root / ("authorization-" + intent.nonce + ".json"),
+        label="retained authorization tombstone",
+        expected_uid=expected_uid,
+    )
+    if InstallAuthorization.from_tombstone_mapping(tombstone).nonce != intent.nonce:
+        raise InstallError("manual cleanup authorization binding mismatch")
+    if transaction.snapshot()["status"] != "manual_recovery_required":
+        raise InstallError("manual cleanup terminal state required")
+    transaction_sha256 = hashlib.sha256(
+        BootstrapTransactionLedger._canonical(transaction.snapshot())
+    ).hexdigest()
+    lock_lease = SharedInstallLockLease(
+        lambda: _existing_opt_directory_lock(Path(host_root))
+    )
+    stager = ChecksumBoundPackageStager(
+        host_root=Path(host_root),
+        expected_uid=expected_uid,
+        expected_gid=0 if expected_uid is not None else None,
+    )
+    with lock_lease.acquire():
+        stager.manual_cleanup_terminal(transaction, lock_lease)
+    return {
+        "schema": "amn2.spain-manual-cleanup-receipt.v1",
+        "result": "passed",
+        "approval_id": intent.approval_id,
+        "nonce": intent.nonce,
+        "transaction_sha256": transaction_sha256,
+        "transaction_status": transaction.snapshot()["status"],
+    }
+
+
 def run_production_command(
     argv: list[str],
     *,
@@ -5901,7 +6063,7 @@ def run_production_command(
     expected_uid: int | None = 0,
 ) -> dict[str, Any]:
     args = list(argv)
-    if not args or args[0] not in {"install", "install-bound", "recover", "rollback", "verify"}:
+    if not args or args[0] not in {"install", "install-bound", "manual-cleanup", "manual-cleanup-bound", "recover", "rollback", "verify"}:
         raise InstallError("unsupported_mode")
     mode = args.pop(0)
     if mode == "install-bound":
@@ -5943,6 +6105,18 @@ def run_production_command(
             receipt_override=receipt,
             baseline_override=baseline,
             authorization_override=authorization,
+        )
+    if mode == "manual-cleanup-bound":
+        if args:
+            raise InstallError("manual_cleanup_bound_inputs_required")
+        payload = authorization_payload
+        if payload is None:
+            payload = sys.stdin.buffer.read(64 * 1024 + 1)
+        intent = _read_manual_cleanup_intent_payload(payload)
+        return _production_manual_cleanup_bound(
+            intent,
+            host_root=host_root,
+            expected_uid=expected_uid,
         )
     if mode == "install":
         if len(args) != 7:
