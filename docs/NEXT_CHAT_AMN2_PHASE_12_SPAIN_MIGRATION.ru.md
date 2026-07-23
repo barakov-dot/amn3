@@ -73,6 +73,15 @@ fresh_install_sftp_retry=failed_closed_before_remote_hash_and_executor|bounded_t
 fresh_install_transport_policy=legacy_scp_o|connect_timeout_20|server_alive_15x4|scp_hard_timeout_300_seconds
 fresh_install_remote_temp_binding=package_to_amn2_spain_phase12_install_a_tar|executor_to_amn2_spain_phase12_executor_a_pyz
 fresh_install_local_verification=package_executor_double_build_byte_identical|package_verify_passed|clean_room_extract_passed|source_55dc243_verified|scoped_151_passed|powershell_parse_passed
+current_install_outcome=legacy_scp_upload_and_executor_reached|production_runtime_rollback_failed|install_retry_forbidden
+current_recovery_transaction_nonce=1D7511ED51CB2D908B329386DCB8EB7FD5C727ABC93346452ED35A66342204B4
+current_recovery_transaction_sha256=08F1C860652FB561E3C1C921756549D3AACCAF86543CEB6C7FEA4EF845930883
+current_recovery_capsule_sha256=2E146365A29C89E9466A8E54E174A3D4D2C969B2BFAEEDC9531A59EC4F756A18
+current_recovery_docker_tree_sha256=6051924206A20BAB41384C9DEF68CB7D09AB02756515A0DCC05C7E290E3F3248
+current_recovery_docker_tree=entries_916|bytes_41902300|block_rdev_64770|single_filesystem|nested_mounts_0
+current_manual_cleanup_runner_sha256=5F0D7786DEA6462B7A4DB2D484677076BA827D37D0EEFDEAF9D4944AC348752D
+current_manual_cleanup_executor_sha256=E86E0AFD883A7E6DC45F7987CA26062EFAFFA632164546DBF57BEC16F876981D
+current_manual_cleanup_local_verification=scoped_152_passed|powershell_parse_passed|remote_executor_sha_readonly_passed|transaction_digest_readonly_passed
 collector_sha256=70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A
 source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
 run009_evidence_sha256=8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8
@@ -88,11 +97,10 @@ review, or security scans. Do not stop AWG. Do not stop or mutate the foreign
 Spain service. Do not migrate/delete USA data.
 
 Next gate: stage only Phase 12 files, commit and push current branch, verify
-origin readback, then issue one fresh exact checksum-bound install approval.
-The prior install approvals were consumed before executor invocation: local SFTP
-transport hang, remote hash-path mismatch, then a bounded SFTP timeout after
-the path fix. They must not be reused. Runner
-uploads only the shown package/executor, verifies remote SHA, executes
-install-bound with automatic rollback, and proves clean DB/zero peers/write
-disabled/bot disabled/loopback web/AWG health/foreign equality. No blind reuse
-of an old install approval.
+origin readback, then issue one exact current manual-cleanup approval. Legacy
+SCP upload reached executor, whose automatic rollback failed closed; current
+transaction is `manual_recovery_required`. Do not retry install. The cleanup
+runner requires current remote executor and transaction SHA, removes only the
+verified retained package tree, preserves terminal ledger, and starts nothing.
+Only after its receipt may a separately bound terminal rollback prove foreign
+equality before any fresh install attempt.

@@ -83,6 +83,9 @@ CLEANUP_SSH_RUNNER = ROOT / "scripts" / "vps" / "phase12_spain_manual_cleanup_ss
 TERMINAL_RECOVERY_SSH_RUNNER = (
     ROOT / "scripts" / "vps" / "phase12_spain_terminal_recovery_ssh_runner.ps1"
 )
+CURRENT_MANUAL_CLEANUP_SSH_RUNNER = (
+    ROOT / "scripts" / "vps" / "phase12_spain_current_manual_cleanup_ssh_runner.ps1"
+)
 TRACKED_PACKAGE_ROOT = ROOT / "packaging" / "phase12-spain"
 HOST_IDENTITY_SHA256 = "7" * 64
 BOOT_ID = "12345678-1234-1234-1234-123456789abc"
@@ -3922,6 +3925,21 @@ def test_terminal_recovery_ssh_runner_is_executor_only_and_tree_bound() -> None:
     assert "CopyToAsync" in source
     assert "phase12-install-a.tar" not in source
     assert "install-bound" not in source
+
+
+def test_current_manual_cleanup_runner_is_remote_executor_pinned_and_action_bound() -> None:
+    source = CURRENT_MANUAL_CLEANUP_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert "ConnectTimeout=20" in source
+    assert "ServerAliveInterval=15" in source
+    assert "ServerAliveCountMax=4" in source
+    assert "manual-cleanup-bound" in source
+    assert "terminal-recovery-bound" not in source
+    assert "scp.exe" not in source
+    assert "Remote current manual cleanup executor checksum mismatch." in source
+    assert '$expectedNonce = "1d7511ed51cb2d908b329386dcb8eb7fd5c727abc93346452ed35a66342204b4"' in source
+    assert '$expectedTransactionSha = "08f1c860652fb561e3c1c921756549d3aaccaf86543ceb6c7fea4ef845930883"' in source
+    assert "REMOVE ONLY VERIFIED RETAINED PACKAGE TREE" in source
 
 
 def test_standalone_executor_bundle_build_is_deterministic_and_fail_closed(
