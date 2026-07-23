@@ -131,7 +131,8 @@ $remoteArtifactsReady = $existingHashResult.ExitCode -eq 0 -and
     $existingHashText -match "(?im)^$($expectedPackageSha.ToLowerInvariant())  /root/amn2-spain-phase12-install\.tar$" -and
     $existingHashText -match "(?im)^$($expectedExecutorSha.ToLowerInvariant())  /root/amn2-spain-phase12-executor\.pyz$"
 if (-not $remoteArtifactsReady) {
-    Invoke-BoundedScp (@($scpBase + @($packagePath, $executorPath, "${target}:/root/")))
+    Invoke-BoundedScp (@($scpBase + @($packagePath, "${target}:/root/amn2-spain-phase12-install-a.tar")))
+    Invoke-BoundedScp (@($scpBase + @($executorPath, "${target}:/root/amn2-spain-phase12-executor-a.pyz")))
     $hashResult = Invoke-ExactSsh (@($sshBase + @($target, "sha256sum /root/amn2-spain-phase12-install-a.tar /root/amn2-spain-phase12-executor-a.pyz"))) ([byte[]]@())
     if ($hashResult.ExitCode -ne 0) { throw "Remote artifact hash command failed." }
     $hashText = (New-Object Text.UTF8Encoding($false,$true)).GetString($hashResult.Stdout)

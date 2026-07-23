@@ -3886,6 +3886,8 @@ def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() 
     assert "ServerAliveCountMax=4" in source
     assert "Invoke-BoundedScp" in source
     assert "Approved artifact upload exceeded 300 seconds." in source
+    assert '${target}:/root/amn2-spain-phase12-install-a.tar' in source
+    assert '${target}:/root/amn2-spain-phase12-executor-a.pyz' in source
     assert "CopyToAsync" in source
     assert "installResult.Stderr" in source
     assert "remoteArtifactsReady" in source
