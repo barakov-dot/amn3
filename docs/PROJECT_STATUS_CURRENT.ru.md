@@ -1,4 +1,4 @@
-# Текущий override 2026-07-23: Phase 12 pre-venv package fix rebuilt локально; awaiting commit/push gate
+# Текущий override 2026-07-23: Phase 12 retained-audit precondition fix rebuilt локально; awaiting commit/push gate
 
 Тихая checksum-bound SCP upload v6 завершилась: remote hashes package и
 executor совпали. `install-bound` дошёл до production preparation, затем
@@ -6,33 +6,35 @@ fail-closed завершился с automatic rollback. Read-only Spain receipt
 подтвердил: все AMN2 units inactive, staging пуст, `/opt/amn2-spain-package`
 отсутствует, transaction=`rolled_back`; foreign service не изменялся.
 
-Root cause: package-bound preparation импортировал authoritative
-`app.config.settings` до установки pinned wheelhouse; на чистом Spain нет
-system-site `pydantic` и `pydantic_settings`. v7 сохраняет раннюю Settings
-validation для source-only path, но в package-bound path откладывает этот
-импорт до runtime после развёртывания pinned dependencies. v7 package и
-standalone executor собраны дважды byte-identical, package verifier и
-clean-room extract прошли; scoped package/install suite=`133 passed`.
+v7 upload/hash verification завершились, однако `install-bound` до первой
+AMN2 mutation fail-closed остановился на precondition: legacy rollback receipt
+уже содержит единственный плановый retained path
+`/var/lib/amn2-spain-phase12-audit`. v8 разрешает исключительно declared
+retained audit path; любой дополнительный retained path по-прежнему
+fail-closed. На сохранённом Spain v7 evidence v8 validator=`passed`.
+v8 package и standalone executor собраны дважды byte-identical, package
+verifier и clean-room extract прошли; scoped package/install suite=`134 passed`.
 Dynamic equality policy неизменна: persistent foreign identities должны
 совпасть, volatile identities фиксируются receipt; `restart_count` и
 `bound_port_set` volatile. Любое расхождение stable persistent fields
 по-прежнему fail-closed; foreign service не останавливается и не изменяется.
 
 ```text
-active_phase=AMN2 Phase 12 Spain Migration|prevenv_package_fix_local_gate
-phase12_package_archive_sha256=0752BD27A92B43BA804E094C4E6D2843460D78CD31DBD1B0F7481CDA4ADD35B6
+active_phase=AMN2 Phase 12 Spain Migration|retained_audit_precondition_fix_local_gate
+phase12_package_archive_sha256=3967208F804655CF6BDF8543D9B91E92A16373A952E5E9FF96DF80A7A6BAC3A2
 phase12_package_archive_size=139939840
-phase12_manifest_sha256=79C92802B9D03D89702A3AE289619BFB701FFC0B94C5916F6E3A5B2014682A8B
+phase12_manifest_sha256=3AF25ACA35E935833F4016A0732328060E6C4711C860936B6AB1A297CF076A9F
 phase12_resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
-phase12_executor_sha256=3B076EE963DEFCAAE1BC488F71D9E1DE0870C041598E928B63A27E411EDE838F
-phase12_executor_size=139848
-phase12_install_runner_sha256=71D80808B494DABA1D8CB348CDEBA9C22FC5EA0FF4C85D1FD04E292A15349367
+phase12_executor_sha256=BC649AC0B5F4D64F350898E813D27D17B6013FDE564817961D5EE982BCE88E3D
+phase12_executor_size=139882
+phase12_install_runner_sha256=D4095801D4080B1BB01752EAD3C20BABF47903DBA05C07F4AB9BDC11DE1C2840
 phase12_foreign_equality_policy=dynamic_persistent_v1
 phase12_precondition_receipt=records_persistent_equality_and_volatile_before_after_counts
 phase12_v6_install_outcome=rolled_back_before_amnezia_units_or_owned_paths
-phase12_v7_local_verification=double_build|package_verify|clean_room_extract|scoped_133_passed
+phase12_v7_install_outcome=precondition_failed_before_tombstone_or_amnezia_mutation|declared_retained_audit_path
+phase12_v8_local_verification=double_build|package_verify|clean_room_extract|scoped_134_passed
 phase12_firewall_semantic_rebaseline=nft|rule_count_129|semantic_sha256_FB8E1D41F6F4F0EBCEB7C89D65E4E5E440E0AC0A4E780B4F638F96CEE1B9A682
-phase12_scoped_tests=169_passed
+phase12_scoped_tests=134_passed
 phase12_package_executor_reproducible=byte_identical_double_builds
 phase12_clean_room_verify_extract=passed
 spain_mutation=false

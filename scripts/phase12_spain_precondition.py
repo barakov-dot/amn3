@@ -473,6 +473,11 @@ def validate_preconditions(
         planned_values = planned.get(key)
         if not isinstance(observed_values, list) or not isinstance(planned_values, list):
             _fail(f"invalid {label} inventory")
+        if key == "retained_paths":
+            unexpected = set(observed_values) - set(planned_values)
+            if unexpected:
+                _fail(f"{label} collision: {sorted(unexpected)[0]}")
+            continue
         collision = set(observed_values) & set(planned_values)
         if collision:
             _fail(f"{label} collision: {sorted(collision)[0]}")

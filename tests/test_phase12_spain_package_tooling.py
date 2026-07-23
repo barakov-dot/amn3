@@ -1282,6 +1282,20 @@ def test_precondition_rejects_target_and_resource_conflicts(field, value, match:
         validate_preconditions(observation, RESOURCE_PLAN, baseline())
 
 
+def test_precondition_allows_declared_retained_audit_receipts() -> None:
+    observation = copy.deepcopy(OBSERVATION)
+    observation["existing"]["retained_paths"] = copy.deepcopy(
+        RESOURCE_PLAN["resources"]["retained_paths"]
+    )
+
+    report = validate_preconditions(observation, RESOURCE_PLAN, baseline())
+
+    assert report["result"] == "passed"
+    observation["existing"]["retained_paths"].append("/var/lib/foreign-audit")
+    with pytest.raises(PreconditionError, match="retained audit path collision"):
+        validate_preconditions(observation, RESOURCE_PLAN, baseline())
+
+
 def test_precondition_allows_volatile_restart_count_and_rejects_stable_systemd_drift() -> None:
     observation = copy.deepcopy(OBSERVATION)
     observation["systemd_projection"][0]["restart_count"] = 1
@@ -3508,8 +3522,8 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "0752BD27A92B43BA804E094C4E6D2843460D78CD31DBD1B0F7481CDA4ADD35B6"' in source
-    assert '$expectedExecutorSha = "3B076EE963DEFCAAE1BC488F71D9E1DE0870C041598E928B63A27E411EDE838F"' in source
+    assert '$expectedPackageSha = "3967208F804655CF6BDF8543D9B91E92A16373A952E5E9FF96DF80A7A6BAC3A2"' in source
+    assert '$expectedExecutorSha = "BC649AC0B5F4D64F350898E813D27D17B6013FDE564817961D5EE982BCE88E3D"' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source
