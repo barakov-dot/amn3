@@ -86,6 +86,9 @@ TERMINAL_RECOVERY_SSH_RUNNER = (
 CURRENT_MANUAL_CLEANUP_SSH_RUNNER = (
     ROOT / "scripts" / "vps" / "phase12_spain_current_manual_cleanup_ssh_runner.ps1"
 )
+CURRENT_TERMINAL_RECOVERY_SSH_RUNNER = (
+    ROOT / "scripts" / "vps" / "phase12_spain_current_terminal_recovery_ssh_runner.ps1"
+)
 TRACKED_PACKAGE_ROOT = ROOT / "packaging" / "phase12-spain"
 HOST_IDENTITY_SHA256 = "7" * 64
 BOOT_ID = "12345678-1234-1234-1234-123456789abc"
@@ -3940,6 +3943,24 @@ def test_current_manual_cleanup_runner_is_remote_executor_pinned_and_action_boun
     assert '$expectedNonce = "1d7511ed51cb2d908b329386dcb8eb7fd5c727abc93346452ed35a66342204b4"' in source
     assert '$expectedTransactionSha = "08f1c860652fb561e3c1c921756549d3aaccaf86543ceb6c7fea4ef845930883"' in source
     assert "REMOVE ONLY VERIFIED RETAINED PACKAGE TREE" in source
+
+
+def test_current_terminal_recovery_runner_is_remote_executor_pinned_and_action_bound() -> None:
+    source = CURRENT_TERMINAL_RECOVERY_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert "ConnectTimeout=20" in source
+    assert "ServerAliveInterval=15" in source
+    assert "ServerAliveCountMax=4" in source
+    assert "terminal-recovery-bound" in source
+    assert "terminal-recovery-receipt-bound" not in source
+    assert "scp.exe" not in source
+    assert "Remote current terminal recovery executor checksum mismatch." in source
+    assert '$expectedNonce = "1d7511ed51cb2d908b329386dcb8eb7fd5c727abc93346452ed35a66342204b4"' in source
+    assert '$expectedTransactionSha = "08f1c860652fb561e3c1c921756549d3aaccaf86543ceb6c7fea4ef845930883"' in source
+    assert '$expectedCapsuleSha = "2e146365a29c89e9466a8e54e174a3d4d2c969b2bfaeedc9531a59ec4f756a18"' in source
+    assert '$expectedDockerTreeSha = "6051924206a20bab41384c9def68cb7d09ab02756515a0dcc05c7e290e3f3248"' in source
+    assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in source
+    assert "VERIFY FOREIGN EQUALITY" in source
 
 
 def test_standalone_executor_bundle_build_is_deterministic_and_fail_closed(

@@ -82,6 +82,9 @@ current_recovery_docker_tree=entries_916|bytes_41902300|block_rdev_64770|single_
 current_manual_cleanup_runner_sha256=5F0D7786DEA6462B7A4DB2D484677076BA827D37D0EEFDEAF9D4944AC348752D
 current_manual_cleanup_executor_sha256=E86E0AFD883A7E6DC45F7987CA26062EFAFFA632164546DBF57BEC16F876981D
 current_manual_cleanup_local_verification=scoped_152_passed|powershell_parse_passed|remote_executor_sha_readonly_passed|transaction_digest_readonly_passed
+current_manual_cleanup_live_receipt=passed|approval_8b7bf91404b576382b3fa15b80b3e297e5f3c451a93fb2cfe78e523fd90f8eb6|package_tree_absent|terminal_ledger_preserved|units_inactive
+current_terminal_recovery_runner_sha256=72A6AB833CF87EC14C16FCA2E548E4E4992740B71F2CEBCAFA83FF6CF66B1653
+current_terminal_recovery_local_verification=scoped_153_passed|powershell_parse_passed|remote_executor_transaction_capsule_and_package_absence_preconditions
 collector_sha256=70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A
 source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
 run009_evidence_sha256=8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8
@@ -97,10 +100,9 @@ review, or security scans. Do not stop AWG. Do not stop or mutate the foreign
 Spain service. Do not migrate/delete USA data.
 
 Next gate: stage only Phase 12 files, commit and push current branch, verify
-origin readback, then issue one exact current manual-cleanup approval. Legacy
-SCP upload reached executor, whose automatic rollback failed closed; current
-transaction is `manual_recovery_required`. Do not retry install. The cleanup
-runner requires current remote executor and transaction SHA, removes only the
-verified retained package tree, preserves terminal ledger, and starts nothing.
-Only after its receipt may a separately bound terminal rollback prove foreign
-equality before any fresh install attempt.
+origin readback, then issue one exact current terminal-recovery approval.
+Manual cleanup passed and package tree is absent; current transaction remains
+`manual_recovery_required`. Do not retry install. The terminal runner requires
+remote executor, transaction/capsule SHA and package-tree absence, rolls back
+only sealed owned current actions, and proves foreign equality before any fresh
+install attempt.
