@@ -3920,7 +3920,9 @@ def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() 
     assert "ConnectTimeout=20" in source
     assert "ServerAliveInterval=15" in source
     assert "ServerAliveCountMax=4" in source
-    assert "Approved artifact upload exceeded 300 seconds." in source
+    assert "$uploadTimeoutMilliseconds = 900000" in source
+    assert "Approved artifact upload exceeded 900 seconds." in source
+    assert "UPLOAD TIMEOUT SECONDS 900" in source
     assert '"/root/amn2-spain-phase12-install-a.tar"' in source
     assert '"/root/amn2-spain-phase12-executor-a.pyz"' in source
     assert "CopyToAsync" in source

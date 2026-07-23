@@ -1,6 +1,6 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-07-23: SSH data-path diagnostic local gate complete
+## Current override 2026-07-23: capacity-bound upload local gate complete
 
 Current transaction `1d7511…` is terminally recovered. Bound terminal receipt
 `bb700842…` passed: it removed only verified AMN2-owned objects, preserved the
@@ -20,11 +20,13 @@ their first artifact upload after the same 300-second bound. Remote SHA,
 activation and executor were not reached; AMN2 install did not start. Do not
 repeat an install runner blindly.
 
-Prepared diagnostic is separate and nonpersistent: a dedicated pinned SSH
-session streams exactly 16 MiB zero bytes into `/dev/null` with compression
-disabled and a 60-second bound. It records only elapsed time and throughput;
-it writes no persistent remote file and cannot call AMN2, package/executor,
-install, rollback or foreign service.
+The nonpersistent 16 MiB `/dev/null` probe with compression disabled also
+timed out at 60 seconds. It did not call AMN2, package/executor, install,
+rollback or foreign service, and made no persistent remote file. This proves
+the existing 300-second bound is insufficient: even at the probe's upper
+throughput bound, the 139970560-byte package needs over 500 seconds. The next
+runner changes only its bounded upload allowance to 900 seconds; all artifact
+hashes, remote SHA checks and rollback behaviour stay unchanged.
 
 ```text
 package_sha256=CB972C722F1B676DF48CA22497C1DFE85E21DB3B53663A0703FA1BD54C37575A
@@ -33,7 +35,7 @@ manifest_sha256=AAA7980BDEF2787DC889C22D007177FDC2A75578CCA23DE71E2BC7733E552DD0
 resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
 executor_sha256=D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29
 executor_bytes=145505
-runner_sha256=0BB96BF6E463706EA18B9312075E72C62C3DDD6123B203F7CDA3207DF8992D95
+runner_sha256=172A0FBA9E9FB403D205EF40D9A3CB6A12A247A0AF29DB3FE9F4848E54133E6D
 collector_sha256=70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A
 source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
 run009_evidence_sha256=8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8
@@ -43,7 +45,9 @@ latest_live_transport=legacy_scp_timeout_300_seconds_and_pinned_ssh_stdin_timeou
 ssh_data_path_diagnostic_runner_sha256=DC858AC0441AB02422BDBCB3B9E946A4870F3E8FFA46801EFA9C4B281FEAECC2
 ssh_data_path_diagnostic=16MiB_to_dev_null|compression_disabled|timeout_60_seconds|no_persistent_remote_file|no_amn2_start
 ssh_data_path_diagnostic_attempt_v1=local_receipt_normalization_failed|no_canonical_receipt|no_amn2_start
-next_gate=commit_push_origin_readback_then_one_exact_ssh_data_path_diagnostic_approval
+ssh_data_path_diagnostic_attempt_v2=timeout_60_seconds|no_amn2_start|no_persistent_remote_file
+fresh_install_upload_timeout_policy=900_seconds|derived_from_16MiB_timeout_60_seconds|package_lower_bound_over_500_seconds
+next_gate=commit_push_origin_readback_then_one_exact_900_second_install_approval
 ```
 
 Do not repeat runs 001–009, resource-confirmation retries, prior builds,
