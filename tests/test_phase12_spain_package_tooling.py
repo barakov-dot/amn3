@@ -1308,6 +1308,32 @@ def test_preparation_failure_message_keeps_only_safe_cause_labels() -> None:
     ) == "production installation preparation failed:backend_error"
 
 
+def test_systemd_bundle_reads_units_from_package_content_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    observed: list[tuple[str, Path | None]] = []
+
+    def read_unit(relative: str, *, content_root: Path | None = None, **_kwargs: object) -> bytes:
+        observed.append((relative, content_root))
+        return b"[Unit]\nDescription=AMN2\n"
+
+    monkeypatch.setattr(live_backend, "_read_package_bound_bytes", read_unit)
+
+    live_backend.build_production_systemd_bundle(
+        root=tmp_path,
+        runner=lambda *_args, **_kwargs: b"LoadState=not-found\n",
+        root_uid=None,
+        root_gid=None,
+        package_content_root=tmp_path / "content",
+    )
+
+    assert observed
+    assert {content for _relative, content in observed} == {tmp_path / "content"}
+    assert {relative for relative, _content in observed} == {
+        "units/" + unit for unit in live_backend.SYSTEMD_UNIT_ORDER
+    }
+
+
 def test_precondition_allows_volatile_restart_count_and_rejects_stable_systemd_drift() -> None:
     observation = copy.deepcopy(OBSERVATION)
     observation["systemd_projection"][0]["restart_count"] = 1
@@ -3534,8 +3560,8 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "C519CFBA6DAB59FE281B0EBBDF3D9D7639C295D6EFDC3EF6E8B5BE64A4D89519"' in source
-    assert '$expectedExecutorSha = "90042FBA4AB896FF7F9E822680270569E280426BCDC12B6F4A102DC6C58C43E2"' in source
+    assert '$expectedPackageSha = "105379D86CF0BD5D02C54F2369C8A9A14DF075DC33601E7225B016E5EDEBCBEC"' in source
+    assert '$expectedExecutorSha = "1A20220F4EA7F75931C72CA538EE20FB4097D866650730739B89E081846217BF"' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source

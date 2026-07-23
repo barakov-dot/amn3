@@ -2704,6 +2704,7 @@ def assemble_production_install_actions(
     systemd = build_production_systemd_bundle(
         root=root,
         runner=systemd_runner,
+        package_content_root=content,
         root_uid=expected_root_uid,
         root_gid=expected_root_gid,
     )
@@ -2963,6 +2964,7 @@ def build_production_systemd_bundle(
     *,
     root: Path,
     runner: Callable[..., bytes],
+    package_content_root: Path | None = None,
     root_uid: int | None = 0,
     root_gid: int | None = 0,
 ) -> ProductionSystemdBundle:
@@ -3004,10 +3006,16 @@ def build_production_systemd_bundle(
             raise BackendError("bot enable marker collision")
 
     unit_actions: list[SystemAction] = []
+    unit_prefix = (
+        "packaging/phase12-spain/units/"
+        if package_content_root is None
+        else "units/"
+    )
     for unit in SYSTEMD_UNIT_ORDER:
         relative = "etc/systemd/system/" + unit
         payload = _read_package_bound_bytes(
-            "packaging/phase12-spain/units/" + unit,
+            unit_prefix + unit,
+            content_root=package_content_root,
             max_bytes=128 * 1024,
         )
         desired = _new_fs_identity(fs, relative, kind="file", mode=0o644, payload=payload)

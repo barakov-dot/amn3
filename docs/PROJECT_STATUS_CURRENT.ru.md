@@ -1,4 +1,4 @@
-# Текущий override 2026-07-23: Phase 12 safe preparation-cause v9 rebuilt локально; awaiting commit/push gate
+# Текущий override 2026-07-23: Phase 12 package-bound systemd-units v10 rebuilt локально; awaiting commit/push gate
 
 Тихая checksum-bound SCP upload v6 завершилась: remote hashes package и
 executor совпали. `install-bound` дошёл до production preparation, затем
@@ -14,30 +14,32 @@ absent. До `capsule_committed` и любых install actions дело не д�
 foreign service не изменялся. Старый wrapper скрыл controlled внутреннюю
 причину. v9 меняет только этот failure receipt: безопасно выводит bounded
 Backend/PackageVerification cause label, не добавляя mutation.
-v9 package и standalone executor собраны дважды byte-identical, package
-verifier и clean-room extract прошли; scoped package/install suite=`135 passed`.
+v9 safe cause receipt установил root cause: standalone executor читал systemd
+units из absent workspace path. v10 передаёт verified `content` root и читает
+package units только из `content/units`; source-mode fallback сохранен. v10
+package/executor double-build, verifier и clean-room extract прошли; scoped=`136 passed`.
 Dynamic equality policy неизменна: persistent foreign identities должны
 совпасть, volatile identities фиксируются receipt; `restart_count` и
 `bound_port_set` volatile. Любое расхождение stable persistent fields
 по-прежнему fail-closed; foreign service не останавливается и не изменяется.
 
 ```text
-active_phase=AMN2 Phase 12 Spain Migration|safe_preparation_cause_v9_local_gate
-phase12_package_archive_sha256=C519CFBA6DAB59FE281B0EBBDF3D9D7639C295D6EFDC3EF6E8B5BE64A4D89519
+active_phase=AMN2 Phase 12 Spain Migration|package_bound_systemd_units_v10_local_gate
+phase12_package_archive_sha256=105379D86CF0BD5D02C54F2369C8A9A14DF075DC33601E7225B016E5EDEBCBEC
 phase12_package_archive_size=139939840
-phase12_manifest_sha256=7D9426141B2ADA655D8B9CD4A65D12BFC105C90B2232E2E4B88C359A7282913D
+phase12_manifest_sha256=2A505C1CB7B1A734FF411A283930E54BD52D82342F08A26B775E2B185EF5F04D
 phase12_resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
-phase12_executor_sha256=90042FBA4AB896FF7F9E822680270569E280426BCDC12B6F4A102DC6C58C43E2
-phase12_executor_size=140091
-phase12_install_runner_sha256=6B44E93D474F8C2365C909AE47BDDE78332569902812DF87EBE75DCF1150321C
+phase12_executor_sha256=1A20220F4EA7F75931C72CA538EE20FB4097D866650730739B89E081846217BF
+phase12_executor_size=140147
+phase12_install_runner_sha256=0530C9FB53AB7FABA9C8DB5B40862D7109C375F24B4CE7401910B67682EE2F3C
 phase12_foreign_equality_policy=dynamic_persistent_v1
 phase12_precondition_receipt=records_persistent_equality_and_volatile_before_after_counts
 phase12_v6_install_outcome=rolled_back_before_amnezia_units_or_owned_paths
 phase12_v7_install_outcome=precondition_failed_before_tombstone_or_amnezia_mutation|declared_retained_audit_path
 phase12_v8_install_outcome=rolled_back_after_package_verified_remote_before_capsule_or_install_actions|foreign_untouched
-phase12_v9_local_verification=double_build|package_verify|clean_room_extract|scoped_135_passed
+phase12_v10_local_verification=double_build|package_verify|clean_room_extract|scoped_136_passed
 phase12_firewall_semantic_rebaseline=nft|rule_count_129|semantic_sha256_FB8E1D41F6F4F0EBCEB7C89D65E4E5E440E0AC0A4E780B4F638F96CEE1B9A682
-phase12_scoped_tests=135_passed
+phase12_scoped_tests=136_passed
 phase12_package_executor_reproducible=byte_identical_double_builds
 phase12_clean_room_verify_extract=passed
 spain_mutation=false
