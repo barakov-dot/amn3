@@ -1,6 +1,6 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-07-23: v13 SSH-stream transport local gate complete
+## Current override 2026-07-23: SSH data-path diagnostic local gate complete
 
 Current transaction `1d7511…` is terminally recovered. Bound terminal receipt
 `bb700842…` passed: it removed only verified AMN2-owned objects, preserved the
@@ -13,14 +13,18 @@ The previous install reached Docker image load, then automatic rollback ended
 terminally. v12 adds no new mutation or resource behaviour: it retains only an
 allowlisted `docker_image_load_*` causal label through a nested rollback
 failure, never raw stderr/output/secrets. Package/executor are double-built
-byte-identical; verify and clean-room extract passed; scoped suite=`154 passed`.
+byte-identical; verify and clean-room extract passed; scoped suite=`155 passed`.
 
-The approved v12 live attempt reached only the first legacy-SCP upload and
-stopped at its bounded 300-second client limit. Remote SHA, activation and
-executor were not reached; AMN2 install did not start. v13 replaces only this
-client transport with a bounded pinned-SSH stdin stream into the same two exact
-temporary paths; remote SHA verification, activation, install-bound and
-automatic rollback are unchanged.
+The approved v12 legacy-SCP and v13 pinned-SSH stdin attempts both stopped at
+their first artifact upload after the same 300-second bound. Remote SHA,
+activation and executor were not reached; AMN2 install did not start. Do not
+repeat an install runner blindly.
+
+Prepared diagnostic is separate and nonpersistent: a dedicated pinned SSH
+session streams exactly 16 MiB zero bytes into `/dev/null` with compression
+disabled and a 60-second bound. It records only elapsed time and throughput;
+it writes no persistent remote file and cannot call AMN2, package/executor,
+install, rollback or foreign service.
 
 ```text
 package_sha256=CB972C722F1B676DF48CA22497C1DFE85E21DB3B53663A0703FA1BD54C37575A
@@ -35,9 +39,10 @@ source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
 run009_evidence_sha256=8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8
 fingerprint_array_sha256=E15219CB5204D54A9AD11263CFBA1F7C86E16DAB3287C752A8B6F136EC4A5ED5
 capacity=root_free_13969006592|root_inodes_1165185|run_free_99786752|run_inodes_122377|policy_passed
-latest_live_transport=legacy_scp_timeout_300_seconds_before_remote_hash_activation_or_executor|no_amn2_install_started
-fresh_install_transport=bounded_pinned_ssh_stdin_two_exact_temp_paths|stdout_stderr_drained|shared_limit_300_seconds
-next_gate=commit_push_origin_readback_then_one_exact_v13_install_approval
+latest_live_transport=legacy_scp_timeout_300_seconds_and_pinned_ssh_stdin_timeout_300_seconds_before_remote_hash_activation_or_executor|no_amn2_install_started
+ssh_data_path_diagnostic_runner_sha256=40EBE590A90DB676C129AA263BFBD90FA99E1A17B6B6F802D8329DBD1CE02EBF
+ssh_data_path_diagnostic=16MiB_to_dev_null|compression_disabled|timeout_60_seconds|no_persistent_remote_file|no_amn2_start
+next_gate=commit_push_origin_readback_then_one_exact_ssh_data_path_diagnostic_approval
 ```
 
 Do not repeat runs 001–009, resource-confirmation retries, prior builds,

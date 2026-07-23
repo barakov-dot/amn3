@@ -79,6 +79,9 @@ RESOURCE_PLAN = json.loads((FIXTURES / "resource_plan.json").read_text(encoding=
 OBSERVATION = json.loads((FIXTURES / "observation_ok.json").read_text(encoding="utf-8"))
 REMOTE_EXECUTOR = ROOT / "scripts" / "vps" / "phase12_spain_remote_executor.sh"
 INSTALL_SSH_RUNNER = ROOT / "scripts" / "vps" / "phase12_spain_install_ssh_runner.ps1"
+SSH_DATA_PATH_DIAGNOSTIC_RUNNER = (
+    ROOT / "scripts" / "vps" / "phase12_spain_ssh_data_path_diagnostic_runner.ps1"
+)
 CLEANUP_SSH_RUNNER = ROOT / "scripts" / "vps" / "phase12_spain_manual_cleanup_ssh_runner.ps1"
 TERMINAL_RECOVERY_SSH_RUNNER = (
     ROOT / "scripts" / "vps" / "phase12_spain_terminal_recovery_ssh_runner.ps1"
@@ -3928,6 +3931,25 @@ def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() 
     assert "resource-confirmation-evidence" not in source
     assert "precondition-receipt" not in source
     assert "baseline" not in source
+
+
+def test_ssh_data_path_diagnostic_runner_is_pinned_bounded_and_nonpersistent() -> None:
+    source = SSH_DATA_PATH_DIAGNOSTIC_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert "Compression=no" in source
+    assert 'exec /bin/cat > /dev/null' in source
+    assert "16777216" in source
+    assert "Invoke-BoundedSshProbe" in source
+    assert "Approved data-path diagnostic exceeded 60 seconds." in source
+    assert "RedirectStandardInput" in source
+    assert "RedirectStandardOutput" in source
+    assert "RedirectStandardError" in source
+    assert "CopyToAsync" in source
+    assert "scp.exe" not in source
+    assert "install-bound" not in source
+    assert "manual-cleanup" not in source
+    assert "terminal-recovery" not in source
+    assert "/root/amn2-spain" not in source
 
 
 def test_manual_cleanup_ssh_runner_is_executor_only_and_stdin_bound() -> None:

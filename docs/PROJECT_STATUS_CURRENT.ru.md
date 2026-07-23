@@ -1,4 +1,4 @@
-# Текущий override 2026-07-23: Phase 12 v13 SSH-stream transport local gate
+# Текущий override 2026-07-23: Phase 12 data-path diagnostic local gate
 
 Current terminal recovery текущей транзакции `1d7511…` завершён `passed`:
 receipt `bb700842…` подтвердил удаление только exact AMN2-owned contour,
@@ -17,21 +17,25 @@ stderr, command output и секреты по-прежнему не записы
 
 v12 package/executor собраны дважды byte-equal, package verify и no-follow
 offline clean-room extract прошли (69 regular files, source=`55dc243…`).
-Scoped suite: `154 passed`; PowerShell parser runner passed. Current observed
+Scoped suite: `155 passed`; PowerShell parser runner passed. Current observed
 capacity также проходит утверждённую policy: root `/opt`/`/etc`/`/var`
 free=`13969006592` bytes, inodes=`1165185`; `/run` free=`99786752` bytes,
 inodes=`122377`.
 
-Approved v12 live attempt остановился на первом legacy-SCP upload ровно через
-300 секунд. До remote hash, activation и executor он не дошёл, поэтому AMN2
-install не запускался. v13 меняет только client transport: те же pinned SSH
-key/host options передают два exact temporary artifacts через SSH stdin в
-allowlisted paths, параллельно drain stdout/stderr и имеют общий 300-second
-limit. Remote SHA verification, atomic activation, install-bound и automatic
-rollback остаются прежними.
+Approved v12 legacy-SCP и v13 SSH-stdin attempts оба остановились на первом
+artifact upload ровно через 300 секунд. Ни один не дошёл до remote hash,
+activation или executor, поэтому AMN2 install не запускался. Это подтверждает
+не protocol-specific transport blocker; повторять install runner вслепую
+запрещено.
+
+Prepared separate diagnostic не записывает Spain filesystem: dedicated pinned
+SSH session передаёт ровно 16 MiB zero bytes в remote `/dev/null`, с
+`Compression=no`, 60-second bound и parallel stdout/stderr drain. Его receipt
+содержит только bytes, elapsed time и calculated throughput. Он не вызывает
+AMN2, package/executor, install, rollback или foreign service.
 
 ```text
-active_phase=AMN2 Phase 12 Spain Migration|v13_ssh_stream_transport_local_gate_complete
+active_phase=AMN2 Phase 12 Spain Migration|ssh_data_path_diagnostic_local_gate_complete
 current_terminal_recovery=passed|approval_bb700842ca035f36d542baf072c657eb4f832134e83eccf0b1547a540e19160b|foreign_persistent_equal_true|volatile_0_0
 current_terminal_postcheck=all_amn2_owned_paths_absent|amn2_and_docker_units_inactive|terminal_ledger_manual_recovery_required
 fresh_install_package_sha256=CB972C722F1B676DF48CA22497C1DFE85E21DB3B53663A0703FA1BD54C37575A
@@ -40,11 +44,12 @@ fresh_install_manifest_sha256=AAA7980BDEF2787DC889C22D007177FDC2A75578CCA23DE71E
 fresh_install_executor_sha256=D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29
 fresh_install_executor_size=145505
 fresh_install_runner_sha256=0BB96BF6E463706EA18B9312075E72C62C3DDD6123B203F7CDA3207DF8992D95
-fresh_install_local_verification=package_executor_double_build_byte_equal|package_verify_passed|offline_extract_69_files|scoped_154_passed|powershell_parse_passed
+fresh_install_local_verification=package_executor_double_build_byte_equal|package_verify_passed|offline_extract_69_files|scoped_155_passed|powershell_parse_passed
 docker_load_diagnostics=allowlisted_cause_chain_only|no_raw_stderr_or_secrets
-latest_live_transport=legacy_scp_timeout_300_seconds_before_remote_hash_activation_or_executor|no_amn2_install_started
-fresh_install_transport=bounded_pinned_ssh_stdin_two_exact_temp_paths|stdout_stderr_drained|shared_limit_300_seconds
-next_gate=commit_push_origin_readback_then_one_exact_v13_install_approval
+latest_live_transport=legacy_scp_timeout_300_seconds_and_pinned_ssh_stdin_timeout_300_seconds_before_remote_hash_activation_or_executor|no_amn2_install_started
+ssh_data_path_diagnostic_runner_sha256=40EBE590A90DB676C129AA263BFBD90FA99E1A17B6B6F802D8329DBD1CE02EBF
+ssh_data_path_diagnostic=16MiB_to_dev_null|compression_disabled|timeout_60_seconds|no_persistent_remote_file|no_amn2_start
+next_gate=commit_push_origin_readback_then_one_exact_ssh_data_path_diagnostic_approval
 spain_unrelated_service=untouched
 usa_rollback_contour=unchanged
 ```
