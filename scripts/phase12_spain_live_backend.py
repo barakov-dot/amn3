@@ -7,6 +7,7 @@ import json
 import os
 import importlib
 import importlib.util
+import re
 import secrets
 import stat
 import subprocess
@@ -1510,6 +1511,221 @@ def _remove_owned_tree(target: Path) -> None:
         os.fsync(parent_fd)
     finally:
         os.close(parent_fd)
+
+
+def _terminal_docker_data_root_entry_kind(mode: int, rdev: int) -> str:
+    if stat.S_ISDIR(mode):
+        return "dir"
+    if stat.S_ISREG(mode):
+        return "file"
+    if stat.S_ISLNK(mode):
+        return "symlink"
+    if stat.S_ISBLK(mode):
+        return "whiteout" if rdev == 0 else "block"
+    raise BackendError("terminal Docker data-root special file collision")
+
+
+def _validate_terminal_docker_data_root_entry(
+    info: os.stat_result, *, root_device: int
+) -> str:
+    """Accept only one-filesystem Docker-tree entries safe for no-follow unlink."""
+    if info.st_dev != root_device:
+        raise BackendError("terminal Docker data-root mount collision")
+    kind = _terminal_docker_data_root_entry_kind(info.st_mode, info.st_rdev)
+    if kind == "block" and (
+        info.st_rdev != root_device
+        or stat.S_IMODE(info.st_mode) != 0o600
+        or info.st_uid != 0
+        or info.st_gid != 0
+        or info.st_nlink != 1
+    ):
+        raise BackendError("terminal Docker data-root block device collision")
+    return kind
+
+
+def _scan_terminal_docker_data_root(target: Path) -> dict[str, object]:
+    """Hash the dedicated Docker root without following links or whiteouts."""
+    target = Path(target)
+    if not target.is_absolute():
+        raise BackendError("terminal Docker data-root path invalid")
+    if os.name == "nt":
+        tree = _scan_tree(target)
+        if tree is None:
+            raise BackendError("terminal Docker data-root unavailable")
+        rows = tree["rows"]
+        return {
+            "tree_sha256": tree["tree_sha256"],
+            "entry_count": len(rows),
+            "total_bytes": sum(
+                row.get("size", 0)
+                for row in rows
+                if row.get("type") == "file"
+            ),
+        }
+    try:
+        parent_fd = _tree_parent_fd(target)
+        root_fd = os.open(
+            target.name,
+            os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0),
+            dir_fd=parent_fd,
+        )
+    except OSError as exc:
+        raise BackendError("terminal Docker data-root unavailable") from exc
+    finally:
+        if "parent_fd" in locals():
+            os.close(parent_fd)
+    root_device = os.fstat(root_fd).st_dev
+    rows: list[dict[str, object]] = []
+    total_bytes = 0
+
+    def visit(descriptor: int, prefix: PurePosixPath) -> None:
+        nonlocal total_bytes
+        for name in sorted(os.listdir(descriptor)):
+            info = os.stat(name, dir_fd=descriptor, follow_symlinks=False)
+            kind = _validate_terminal_docker_data_root_entry(
+                info, root_device=root_device
+            )
+            row: dict[str, object] = {
+                "path": (prefix / name).as_posix(),
+                "type": kind,
+                "mode": f"{stat.S_IMODE(info.st_mode):04o}",
+                "uid": info.st_uid,
+                "gid": info.st_gid,
+            }
+            if kind == "dir":
+                child = os.open(name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0), dir_fd=descriptor)
+                try:
+                    visit(child, prefix / name)
+                finally:
+                    os.close(child)
+            elif kind == "file":
+                child = os.open(name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0), dir_fd=descriptor)
+                try:
+                    before = os.fstat(child); digest = hashlib.sha256(); size = 0
+                    while chunk := os.read(child, 1024 * 1024):
+                        digest.update(chunk); size += len(chunk)
+                    after = os.fstat(child)
+                finally:
+                    os.close(child)
+                if (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns) != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns):
+                    raise BackendError("terminal Docker data-root changed during scan")
+                row.update({"sha256": digest.hexdigest(), "size": size}); total_bytes += size
+            elif kind == "symlink":
+                value = os.readlink(name, dir_fd=descriptor)
+                row.update({"target_sha256": hashlib.sha256(value.encode("utf-8")).hexdigest(), "target_size": len(value.encode("utf-8"))})
+            elif kind == "block":
+                row.update({"rdev": info.st_rdev, "nlink": info.st_nlink})
+            else:
+                row["rdev"] = info.st_rdev
+            rows.append(row)
+
+    try:
+        visit(root_fd, PurePosixPath())
+    finally:
+        os.close(root_fd)
+    if not rows or len(rows) > 10_000 or total_bytes > 2 * 1024 * 1024 * 1024:
+        raise BackendError("terminal Docker data-root inventory bound invalid")
+    return {"tree_sha256": _digest(_canonical(rows)), "entry_count": len(rows), "total_bytes": total_bytes}
+
+
+def _remove_terminal_docker_data_root_tree(target: Path) -> None:
+    if os.name == "nt":
+        _remove_owned_tree(target)
+        return
+    parent_fd = _tree_parent_fd(target)
+    try:
+        root_fd = os.open(target.name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0), dir_fd=parent_fd)
+        root_device = os.fstat(root_fd).st_dev
+        def remove_children(descriptor: int) -> None:
+            for name in sorted(os.listdir(descriptor)):
+                info = os.stat(name, dir_fd=descriptor, follow_symlinks=False)
+                kind = _validate_terminal_docker_data_root_entry(
+                    info, root_device=root_device
+                )
+                if kind == "dir":
+                    child = os.open(name, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0), dir_fd=descriptor)
+                    try: remove_children(child)
+                    finally: os.close(child)
+                    os.rmdir(name, dir_fd=descriptor)
+                else:
+                    os.unlink(name, dir_fd=descriptor)
+            os.fsync(descriptor)
+        try: remove_children(root_fd)
+        finally: os.close(root_fd)
+        os.rmdir(target.name, dir_fd=parent_fd); os.fsync(parent_fd)
+    finally:
+        os.close(parent_fd)
+
+
+def cleanup_terminal_docker_data_root(
+    *,
+    fs: SafeFs,
+    relative: str,
+    expected_identity: str,
+    expected_tree_sha256: str,
+    expected_tree_entry_count: int,
+    expected_tree_total_bytes: int,
+) -> dict[str, object]:
+    """Remove a terminal Docker data-root after a daemon-only mode drift.
+
+    The normal directory action intentionally uses ``rmdir`` and therefore
+    stops if an abandoned ``docker load`` leaves layer data behind.  This
+    recovery primitive is narrower: it accepts only the recorded AMN2
+    data-root, root-owned modes 0700/0710, an exactly approved no-follow tree
+    inventory, and regular files/directories plus one tightly validated block
+    inode below that root.
+    """
+    if (
+        not isinstance(fs, SafeFs)
+        or relative != "var/lib/amn2-spain-docker"
+        or not isinstance(expected_identity, str)
+        or re.fullmatch(r"sha256:[0-9a-f]{64}", expected_identity) is None
+        or not isinstance(expected_tree_sha256, str)
+        or re.fullmatch(r"[0-9a-f]{64}", expected_tree_sha256) is None
+        or not isinstance(expected_tree_entry_count, int)
+        or isinstance(expected_tree_entry_count, bool)
+        or not 0 < expected_tree_entry_count <= 10_000
+        or not isinstance(expected_tree_total_bytes, int)
+        or isinstance(expected_tree_total_bytes, bool)
+        or not 0 < expected_tree_total_bytes <= 2 * 1024 * 1024 * 1024
+    ):
+        raise BackendError("terminal Docker data-root cleanup input invalid")
+    expected_operation = build_directory_action(
+        fs, "filesystem_staged", relative, 0o700
+    ).operation
+    if expected_operation.desired_identity != expected_identity:
+        raise BackendError("terminal Docker data-root ledger binding mismatch")
+    actual_identity = fs.identity(relative)
+    if actual_identity is None:
+        raise BackendError("terminal Docker data-root absent")
+    target = fs.root.joinpath(*fs._parts(relative))
+
+    def inspect() -> dict[str, object]:
+        root_mode = _tree_root_mode(target)
+        if root_mode not in {"0700", "0710"}:
+            raise BackendError("terminal Docker data-root mode drift")
+        tree = _scan_terminal_docker_data_root(target)
+        receipt = {
+            "tree_sha256": tree.get("tree_sha256"),
+            "entry_count": tree.get("entry_count"),
+            "total_bytes": tree.get("total_bytes"),
+            "root_mode": root_mode,
+        }
+        if (
+            receipt["tree_sha256"] != expected_tree_sha256
+            or receipt["entry_count"] != expected_tree_entry_count
+            or receipt["total_bytes"] != expected_tree_total_bytes
+        ):
+            raise BackendError("terminal Docker data-root tree drift")
+        return receipt
+
+    receipt = inspect()
+    if inspect() != receipt:
+        raise BackendError("terminal Docker data-root changed during verification")
+    _remove_terminal_docker_data_root_tree(target)
+    if fs.identity(relative) is not None:
+        raise BackendError("terminal Docker data-root removal not observable")
+    return receipt
 
 
 def _materialize_tree(target: Path, plan: dict[str, Any], payloads: Mapping[str, bytes]) -> None:

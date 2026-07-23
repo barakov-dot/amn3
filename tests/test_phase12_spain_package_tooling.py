@@ -6,9 +6,11 @@ import io
 import json
 import os
 import re
+import stat
 import subprocess
 import sys
 import tarfile
+import types
 import zipfile
 from contextlib import contextmanager
 from dataclasses import replace
@@ -77,6 +79,9 @@ OBSERVATION = json.loads((FIXTURES / "observation_ok.json").read_text(encoding="
 REMOTE_EXECUTOR = ROOT / "scripts" / "vps" / "phase12_spain_remote_executor.sh"
 INSTALL_SSH_RUNNER = ROOT / "scripts" / "vps" / "phase12_spain_install_ssh_runner.ps1"
 CLEANUP_SSH_RUNNER = ROOT / "scripts" / "vps" / "phase12_spain_manual_cleanup_ssh_runner.ps1"
+TERMINAL_RECOVERY_SSH_RUNNER = (
+    ROOT / "scripts" / "vps" / "phase12_spain_terminal_recovery_ssh_runner.ps1"
+)
 TRACKED_PACKAGE_ROOT = ROOT / "packaging" / "phase12-spain"
 HOST_IDENTITY_SHA256 = "7" * 64
 BOOT_ID = "12345678-1234-1234-1234-123456789abc"
@@ -2079,6 +2084,104 @@ def test_manual_cleanup_removes_only_verified_terminal_package(
     assert transaction.path.is_file()
 
 
+def test_terminal_recovery_intent_binds_transaction_capsule_and_docker_tree() -> None:
+    payload = {
+        "schema": "amn2.spain-terminal-recovery-intent.v1",
+        "mutation_authorized": True,
+        "approval_id": "test-terminal-recovery",
+        "executor_sha256": "2" * 64,
+        "nonce": "3" * 64,
+        "transaction_sha256": "4" * 64,
+        "capsule_sha256": "5" * 64,
+        "docker_tree_sha256": "6" * 64,
+        "docker_tree_entry_count": 916,
+        "docker_tree_total_bytes": 123456,
+        "approved_at_epoch": 100,
+        "expires_at_epoch": 200,
+    }
+
+    intent = installer_module._read_terminal_recovery_intent_payload(
+        canonical_json_bytes(payload) + b"\n"
+    )
+
+    assert intent.nonce == payload["nonce"]
+    assert intent.transaction_sha256 == payload["transaction_sha256"]
+    assert intent.capsule_sha256 == payload["capsule_sha256"]
+    assert intent.docker_tree_sha256 == payload["docker_tree_sha256"]
+    assert intent.docker_tree_entry_count == 916
+    assert intent.docker_tree_total_bytes == 123456
+
+
+def test_terminal_docker_data_root_cleanup_allows_recorded_0710_tree(
+    tmp_path: Path, monkeypatch
+) -> None:
+    target = tmp_path / "var" / "lib" / "amn2-spain-docker"
+    target.mkdir(parents=True)
+    (target / "image").mkdir()
+    payload = target / "image" / "layer.json"
+    payload.write_bytes(b"terminal-docker-layer\n")
+    fs = live_backend.SafeFs(root=tmp_path, expected_uid=None, expected_gid=None)
+    operation = live_backend.build_directory_action(
+        fs, "filesystem_staged", "var/lib/amn2-spain-docker", 0o700
+    ).operation
+    tree = live_backend._scan_tree(target)
+    assert tree is not None
+    monkeypatch.setattr(live_backend, "_tree_root_mode", lambda _target: "0710")
+
+    receipt = live_backend.cleanup_terminal_docker_data_root(
+        fs=fs,
+        relative="var/lib/amn2-spain-docker",
+        expected_identity=operation.desired_identity,
+        expected_tree_sha256=tree["tree_sha256"],
+        expected_tree_entry_count=len(tree["rows"]),
+        expected_tree_total_bytes=len(b"terminal-docker-layer\n"),
+    )
+
+    assert receipt["tree_sha256"] == tree["tree_sha256"]
+    assert receipt["entry_count"] == len(tree["rows"])
+    assert not target.exists()
+
+
+def test_terminal_docker_tree_allows_only_overlay_whiteout_block_device() -> None:
+    assert (
+        live_backend._terminal_docker_data_root_entry_kind(stat.S_IFBLK, 0)
+        == "whiteout"
+    )
+    with pytest.raises(live_backend.BackendError, match="special file"):
+        live_backend._terminal_docker_data_root_entry_kind(stat.S_IFCHR, 0)
+
+
+def test_terminal_docker_tree_allows_recorded_regular_block_inode() -> None:
+    assert (
+        live_backend._terminal_docker_data_root_entry_kind(
+            stat.S_IFBLK | 0o600, 64770
+        )
+        == "block"
+    )
+
+
+def test_terminal_docker_tree_requires_single_filesystem_exact_block_inode() -> None:
+    entry = types.SimpleNamespace(
+        st_mode=stat.S_IFBLK | 0o600,
+        st_rdev=64770,
+        st_uid=0,
+        st_gid=0,
+        st_nlink=1,
+        st_dev=64770,
+    )
+    assert (
+        live_backend._validate_terminal_docker_data_root_entry(
+            entry, root_device=64770
+        )
+        == "block"
+    )
+    entry.st_dev = 42
+    with pytest.raises(live_backend.BackendError, match="mount collision"):
+        live_backend._validate_terminal_docker_data_root_entry(
+            entry, root_device=64770
+        )
+
+
 def test_recovery_capsule_seals_rendered_payloads_and_callback_free_blueprint(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -3634,7 +3737,7 @@ def test_rollback_equality_receipt_records_volatile_foreign_entries() -> None:
 def test_remote_executor_is_closed_mode_wrapper_without_network_fetches() -> None:
     source = REMOTE_EXECUTOR.read_text(encoding="utf-8")
     assert "set -Eeuo pipefail" in source
-    assert 'install|install-bound|manual-cleanup|manual-cleanup-bound|recover|rollback|verify)' in source
+    assert 'install|install-bound|manual-cleanup|manual-cleanup-bound|terminal-recovery-bound|recover|rollback|verify)' in source
     assert 'readonly EXECUTOR_BUNDLE="/root/amn2-spain-phase12-executor.pyz"' in source
     assert 'exec "$PYTHON_BIN" -I -B "$EXECUTOR_BUNDLE"' in source
     assert "PYTHONPATH" not in source
@@ -3686,6 +3789,17 @@ def test_manual_cleanup_ssh_runner_is_executor_only_and_stdin_bound() -> None:
     assert "CopyToAsync" in source
     assert "manual-cleanup-intent.v1" in source
     assert "/opt/amn2-spain-package" in source
+    assert "phase12-install-a.tar" not in source
+    assert "install-bound" not in source
+
+
+def test_terminal_recovery_ssh_runner_is_executor_only_and_tree_bound() -> None:
+    source = TERMINAL_RECOVERY_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert "terminal-recovery-bound" in source
+    assert "terminal-recovery-intent.v1" in source
+    assert "docker_tree_sha256" in source
+    assert "CopyToAsync" in source
     assert "phase12-install-a.tar" not in source
     assert "install-bound" not in source
 

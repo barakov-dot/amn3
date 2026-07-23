@@ -11,6 +11,14 @@ USA остаётся rollback contour.
 receipt подтвердил inactive Docker/network/web/bot units. Foreign Spain
 service не затрагивался.
 
+Остаточный rollback contour не является install state: exact AMN2-owned
+`/etc/amn2-spain`, `/opt/amn2-spain`, `/var/lib/amn2-spain*` и Docker data-root
+ещё сохранены в terminal ledger. Fresh no-follow read-only receipt: Docker-root
+`916` entries, `41902300` bytes, mode `0710`, один root-owned `0600`
+single-link block inode rdev `64770`, one filesystem, nested mounts `0`.
+Новый executor перепроверяет canonical tree SHA дважды; он удаляет только этот
+sealed contour, сохраняет terminal ledger и не трогает foreign service.
+
 v11 добавляет bounded category-only diagnostic для Docker image load. Он
 сохраняет только allowlisted label (`no_space`, `archive`, `permission`,
 `daemon_unavailable`, `layer_apply`, `unsupported` или exit code), никогда raw
@@ -28,6 +36,14 @@ runner_sha256=D6E639E9EA80D6D6ADA2D56BF443BE8710E8AE7C21CB6C1C0FC3860CDB3B8797
 manual_cleanup=passed|package_tree_absent|terminal_ledger_preserved|units_inactive
 manual_cleanup_executor_sha256=0E736B9DDF950DA050FE945F7D5F6D860F9C782A45066AE42429CCF56EF05585
 manual_cleanup_executor_bytes=140277
+terminal_recovery_nonce=e022f0b87a972f2256acd7800a4999553a8ceea2396a2644908f43c93a82febd
+terminal_recovery_transaction_sha256=C58ED7EC5EA40F47C7C65C4A6D4691667160F2444764679A285A9EE47BEC8788
+terminal_recovery_capsule_sha256=FE7E203B3A772811489371C90CAB88E0247882882938045FD85D80709F6B63CC
+terminal_docker_tree_sha256=2328DA44BF2BDF6FD831A1AA27B50DF5BCE8649FBBEF015808A01CCD389A1CF4
+terminal_docker_tree=entries_916|bytes_41902300|mode_0710|block_rdev_64770|single_filesystem|nested_mounts_0
+terminal_recovery_executor_sha256=8227FCADA411F490154F559CDD7969C648949EDD4B25D156307A49A3DAA7CED8
+terminal_recovery_executor_bytes=143989
+terminal_recovery_runner_sha256=1DE0DB31C21F288BFCCA66588D07604CD0FFCBE233FFFD85AD0EFE785F9B5FAD
 collector_sha256=70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A
 source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
 run009_evidence_sha256=8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8
@@ -43,8 +59,8 @@ review, or security scans. Do not stop AWG. Do not stop or mutate the foreign
 Spain service. Do not migrate/delete USA data.
 
 Next gate: stage only Phase 12 files, commit and push current branch, verify
-origin readback, then issue one exact checksum-bound v11 install approval.
-Runner uploads package/executor, verifies remote SHA and runs `install-bound`.
-If Docker load fails again, it returns only its bounded category after automatic
-rollback; no blind third retry. If it passes, continue directly to smoke and
-foreign equality receipt.
+origin readback, then issue one exact checksum-bound terminal-recovery cleanup
+approval. Runner uploads only its executor, verifies its remote SHA, rechecks
+the sealed Docker tree and removes only the verified AMN2 residual contour.
+After a passed cleanup receipt, rebuild the install package/executor and resume
+fresh install; no blind reuse of an old install approval.

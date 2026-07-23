@@ -1750,6 +1750,91 @@ class ManualCleanupIntent:
 
 
 @dataclass(frozen=True)
+class TerminalRecoveryIntent:
+    """One-use authorization to replay a sealed terminal AMN2 rollback."""
+
+    approval_id: str
+    executor_sha256: str
+    nonce: str
+    transaction_sha256: str
+    capsule_sha256: str
+    docker_tree_sha256: str
+    docker_tree_entry_count: int
+    docker_tree_total_bytes: int
+    approved_at_epoch: int
+    expires_at_epoch: int
+
+    @classmethod
+    def from_mapping(cls, value: dict[str, Any]) -> "TerminalRecoveryIntent":
+        fields = {
+            "schema",
+            "mutation_authorized",
+            "approval_id",
+            "executor_sha256",
+            "nonce",
+            "transaction_sha256",
+            "capsule_sha256",
+            "docker_tree_sha256",
+            "docker_tree_entry_count",
+            "docker_tree_total_bytes",
+            "approved_at_epoch",
+            "expires_at_epoch",
+        }
+        if (
+            not isinstance(value, dict)
+            or set(value) != fields
+            or value.get("schema") != "amn2.spain-terminal-recovery-intent.v1"
+            or value.get("mutation_authorized") is not True
+        ):
+            raise InstallError("terminal recovery intent schema/result mismatch")
+        for key in (
+            "executor_sha256",
+            "nonce",
+            "transaction_sha256",
+            "capsule_sha256",
+            "docker_tree_sha256",
+        ):
+            if (
+                not isinstance(value[key], str)
+                or re.fullmatch(r"[0-9a-f]{64}", value[key]) is None
+            ):
+                raise InstallError(f"terminal recovery intent {key} invalid")
+        if not isinstance(value["approval_id"], str) or not value["approval_id"]:
+            raise InstallError("terminal recovery intent approval invalid")
+        for key, upper in (
+            ("docker_tree_entry_count", 10_000),
+            ("docker_tree_total_bytes", 2 * 1024 * 1024 * 1024),
+        ):
+            if (
+                not isinstance(value[key], int)
+                or isinstance(value[key], bool)
+                or not 0 < value[key] <= upper
+            ):
+                raise InstallError(f"terminal recovery intent {key} invalid")
+        if (
+            not isinstance(value["approved_at_epoch"], int)
+            or isinstance(value["approved_at_epoch"], bool)
+            or not isinstance(value["expires_at_epoch"], int)
+            or isinstance(value["expires_at_epoch"], bool)
+            or value["expires_at_epoch"] <= value["approved_at_epoch"]
+            or value["expires_at_epoch"] - value["approved_at_epoch"] > 300
+        ):
+            raise InstallError("terminal recovery intent time window invalid")
+        return cls(
+            approval_id=value["approval_id"],
+            executor_sha256=value["executor_sha256"],
+            nonce=value["nonce"],
+            transaction_sha256=value["transaction_sha256"],
+            capsule_sha256=value["capsule_sha256"],
+            docker_tree_sha256=value["docker_tree_sha256"],
+            docker_tree_entry_count=value["docker_tree_entry_count"],
+            docker_tree_total_bytes=value["docker_tree_total_bytes"],
+            approved_at_epoch=value["approved_at_epoch"],
+            expires_at_epoch=value["expires_at_epoch"],
+        )
+
+
+@dataclass(frozen=True)
 class InstallAuthorization:
     approval_id: str
     precondition_receipt_sha256: str
@@ -5366,6 +5451,30 @@ def _read_manual_cleanup_intent_payload(payload: bytes) -> ManualCleanupIntent:
         raise InstallError("manual_cleanup_bound_inputs_required") from exc
 
 
+def _read_terminal_recovery_intent_payload(payload: bytes) -> TerminalRecoveryIntent:
+    if (
+        not isinstance(payload, bytes)
+        or not payload
+        or len(payload) > 64 * 1024
+        or not payload.endswith(b"\n")
+    ):
+        raise InstallError("terminal_recovery_bound_inputs_required")
+    try:
+        value = json.loads(payload)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise InstallError("terminal_recovery_bound_inputs_required") from exc
+    if (
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        + b"\n"
+        != payload
+    ):
+        raise InstallError("terminal_recovery_bound_inputs_required")
+    try:
+        return TerminalRecoveryIntent.from_mapping(value)
+    except InstallError as exc:
+        raise InstallError("terminal_recovery_bound_inputs_required") from exc
+
+
 def _sha256_regular_file(
     path: Path,
     *,
@@ -6066,6 +6175,88 @@ def _production_manual_cleanup_bound(
     }
 
 
+def _production_terminal_recovery_bound(
+    intent: TerminalRecoveryIntent, *, host_root: Path = Path("/"), expected_uid: int | None = 0,
+    now_epoch: int | None = None,
+) -> dict[str, Any]:
+    now = int(time.time()) if now_epoch is None else now_epoch
+    if now < intent.approved_at_epoch or now > intent.expires_at_epoch:
+        raise InstallError("terminal recovery intent expired")
+    _assert_running_executor(Path(sys.argv[0]).resolve(), intent.executor_sha256, expected_uid=expected_uid)
+    audit_root = _host_path(host_root, "/var/lib/amn2-spain-phase12-audit")
+    transaction = BootstrapTransactionLedger.open_existing(audit_root=audit_root, nonce=intent.nonce, expected_uid=expected_uid)
+    state = transaction.snapshot()
+    transaction_sha256 = hashlib.sha256(BootstrapTransactionLedger._canonical(state)).hexdigest()
+    if state["status"] != "manual_recovery_required" or transaction_sha256 != intent.transaction_sha256:
+        raise InstallError("terminal recovery transaction binding mismatch")
+    capsule = RecoveryCapsuleStore.open_existing(audit_root=audit_root, nonce=intent.nonce, expected_uid=expected_uid)
+    if capsule.sha256 != intent.capsule_sha256 or state.get("recovery_capsule_sha256") != capsule.sha256:
+        raise InstallError("terminal recovery capsule binding mismatch")
+    package_root = _host_path(host_root, "/opt/amn2-spain-package")
+    if package_root.exists() or package_root.is_symlink():
+        raise InstallError("terminal recovery package tree must be absent")
+    root = Path(host_root)
+    root_fs = live_backend.SafeFs(root=root, expected_uid=0, expected_gid=0)
+    config_fs = live_backend.SafeFs(root=root, expected_uid=0, expected_gid=61212)
+    service_fs = live_backend.SafeFs(root=root, expected_uid=61212, expected_gid=61212)
+    directories = (
+        (root_fs, "opt/amn2-spain", 0o755),
+        (root_fs, "opt/amn2-spain/runtime", 0o755),
+        (config_fs, "etc/amn2-spain", 0o750),
+        (service_fs, "var/lib/amn2-spain", 0o750),
+        (service_fs, "var/lib/amn2-spain/logs", 0o750),
+        (service_fs, "var/lib/amn2-spain/config-templates", 0o750),
+    )
+    actions = {action.operation.owned_object: action for action in live_backend.build_production_identity_bundle().actions}
+    for fs, relative, mode in directories:
+        action = live_backend.build_directory_action(fs, "filesystem_staged", relative, mode)
+        actions[action.operation.owned_object] = action
+    docker_base = live_backend.build_directory_action(root_fs, "filesystem_staged", "var/lib/amn2-spain-docker", 0o700)
+    def observe_docker_rollback() -> str | None:
+        return None if root_fs.identity("var/lib/amn2-spain-docker") is None else docker_base.operation.desired_identity
+    docker_action = live_backend.SystemAction(
+        operation=docker_base.operation,
+        observe_identity=docker_base.observe_identity,
+        observe_rollback_identity=observe_docker_rollback,
+        create_exact=docker_base.create_exact,
+        remove_exact=lambda identity: live_backend.cleanup_terminal_docker_data_root(
+            fs=root_fs, relative="var/lib/amn2-spain-docker", expected_identity=identity,
+            expected_tree_sha256=intent.docker_tree_sha256,
+            expected_tree_entry_count=intent.docker_tree_entry_count,
+            expected_tree_total_bytes=intent.docker_tree_total_bytes,
+        ),
+    )
+    actions[docker_action.operation.owned_object] = docker_action
+    blueprint = {entry["owned_object"]: entry for entry in capsule.blueprint.actions}
+    expected_objects = set(actions)
+    if set(blueprint) & expected_objects != expected_objects or any(
+        live_backend.OwnedOperation(entry["stage"], entry["owned_object"], entry["desired_identity"]) != actions[name].operation
+        for name, entry in blueprint.items() if name in actions
+    ):
+        raise InstallError("terminal recovery action blueprint mismatch")
+    ledger_path = Path(capsule.blueprint.assembly_context["mutation_ledger_path"])
+    ledger = live_backend.DurableMutationLedgerStore(ledger_path, expected_uid=expected_uid).load_or_create(set(blueprint))
+    committed = {name for name in blueprint if (event := ledger.event_for(name)) is not None and event["event"] == "committed"}
+    if committed != expected_objects or any(
+        (event := ledger.event_for(name)) is not None and event["event"] == "intent"
+        for name in blueprint
+    ):
+        raise InstallError("terminal recovery mutation ledger mismatch")
+    observer = ChecksumBoundResourceObserver(collector_bytes=_embedded_resource_collector_bytes(), collector_sha256=hashlib.sha256(_embedded_resource_collector_bytes()).hexdigest(), expected_uid=expected_uid)
+    before = observation_from_resource_confirmation_evidence(observer.collect_evidence())
+    ordered = [actions[entry["owned_object"]].operation for entry in capsule.blueprint.actions if entry["owned_object"] in actions]
+    lease = SharedInstallLockLease(lambda: _existing_opt_directory_lock(root))
+    with lease.acquire():
+        live_backend.LinuxBackend(adapter=live_backend.SystemOwnedAdapter(actions=actions), ledger=ledger).rollback(ordered)
+    after = observation_from_resource_confirmation_evidence(observer.collect_evidence())
+    validate_preconditions(after, _embedded_resource_plan(), _embedded_run009_baseline())
+    equality = build_rollback_equality_receipt(
+        baseline_observation=before, current_observation=after,
+        binding={"nonce": intent.nonce, "transaction_sha256": transaction_sha256, "blueprint_sha256": capsule.blueprint.digest},
+    )
+    return {"schema": "amn2.spain-terminal-recovery-receipt.v1", "result": "passed", "approval_id": intent.approval_id, "nonce": intent.nonce, "transaction_sha256": transaction_sha256, "capsule_sha256": capsule.sha256, "docker_tree_sha256": intent.docker_tree_sha256, "foreign_service_persistent_equal": equality["foreign_service_persistent_equal"], "foreign_service_volatile_before_count": equality["foreign_service_volatile_before_count"], "foreign_service_volatile_after_count": equality["foreign_service_volatile_after_count"]}
+
+
 def run_production_command(
     argv: list[str],
     *,
@@ -6074,7 +6265,7 @@ def run_production_command(
     expected_uid: int | None = 0,
 ) -> dict[str, Any]:
     args = list(argv)
-    if not args or args[0] not in {"install", "install-bound", "manual-cleanup", "manual-cleanup-bound", "recover", "rollback", "verify"}:
+    if not args or args[0] not in {"install", "install-bound", "manual-cleanup", "manual-cleanup-bound", "terminal-recovery-bound", "recover", "rollback", "verify"}:
         raise InstallError("unsupported_mode")
     mode = args.pop(0)
     if mode == "install-bound":
@@ -6125,6 +6316,18 @@ def run_production_command(
             payload = sys.stdin.buffer.read(64 * 1024 + 1)
         intent = _read_manual_cleanup_intent_payload(payload)
         return _production_manual_cleanup_bound(
+            intent,
+            host_root=host_root,
+            expected_uid=expected_uid,
+        )
+    if mode == "terminal-recovery-bound":
+        if args:
+            raise InstallError("terminal_recovery_bound_inputs_required")
+        payload = authorization_payload
+        if payload is None:
+            payload = sys.stdin.buffer.read(64 * 1024 + 1)
+        intent = _read_terminal_recovery_intent_payload(payload)
+        return _production_terminal_recovery_bound(
             intent,
             host_root=host_root,
             expected_uid=expected_uid,

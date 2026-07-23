@@ -1,4 +1,4 @@
-# Текущий override 2026-07-23: Phase 12 bounded Docker-load diagnostic v11 local gate
+# Текущий override 2026-07-23: Phase 12 terminal recovery cleanup local gate
 
 v10 checksum-bound install дошёл до intent `awg_image_loaded` (`docker load`),
 который не был committed. Automatic rollback удалил Docker enable/start, все
@@ -13,6 +13,15 @@ canonical stdin intent привязан к exact terminal nonce и SHA executor;
 удалением он повторно проверяет ledger/tombstone и каждый CAS-объект retained
 tree. Receipt=`passed`; `/opt/amn2-spain-package` отсутствует, terminal ledger
 сохранён. AMN2 Docker/network/web/bot inactive; foreign service не затронут.
+
+Остался только sealed AMN2-owned rollback contour: `/etc/amn2-spain`,
+`/opt/amn2-spain`, `/var/lib/amn2-spain*` и exact Docker data-root. Read-only
+no-follow receipt для data-root: `916` entries, `41902300` bytes, mode=`0710`,
+один root-owned `0600`, single-link block inode rdev=`64770`; все entries на
+одном filesystem, nested mounts=`0`. Cleanup policy снова проверяет весь
+canonical tree SHA дважды перед unlink; non-block special files, mode/owner/link
+drift и foreign filesystem остаются fail-closed. Foreign Spain service не
+останавливается и не изменяется.
 
 v11 сохраняет безопасный cause label для следующего `docker image load`:
 `no_space`, `archive`, `permission`, `daemon_unavailable`, `layer_apply`,
@@ -38,7 +47,7 @@ Dynamic equality policy неизменна: persistent foreign identities дол
 по-прежнему fail-closed; foreign service не останавливается и не изменяется.
 
 ```text
-active_phase=AMN2 Phase 12 Spain Migration|bounded_docker_load_diagnostic_v11_local_gate
+active_phase=AMN2 Phase 12 Spain Migration|terminal_recovery_cleanup_local_gate
 phase12_package_archive_sha256=012CC689247DD411EACEF82882E5734A6BEC56C2FDE7D1F4224691E6CF457A47
 phase12_package_archive_size=139950080
 phase12_manifest_sha256=1A394537C3F62626B19D21A2D33DBB087E5299C7726AD55783384FC95E7977D7
@@ -52,6 +61,14 @@ phase12_manual_cleanup_executor_size=140277
 phase12_manual_cleanup_local_verification=focused_contracts_4_passed|executor_double_build_byte_identical
 phase12_manual_cleanup_outcome=passed|package_tree_absent|terminal_ledger_preserved|amn2_units_inactive
 phase12_v10_install_outcome=automatic_runtime_rollback|manual_recovery_required|retained_package_tree_cleaned
+phase12_terminal_recovery_nonce=e022f0b87a972f2256acd7800a4999553a8ceea2396a2644908f43c93a82febd
+phase12_terminal_recovery_transaction_sha256=C58ED7EC5EA40F47C7C65C4A6D4691667160F2444764679A285A9EE47BEC8788
+phase12_terminal_recovery_capsule_sha256=FE7E203B3A772811489371C90CAB88E0247882882938045FD85D80709F6B63CC
+phase12_terminal_docker_tree_sha256=2328DA44BF2BDF6FD831A1AA27B50DF5BCE8649FBBEF015808A01CCD389A1CF4
+phase12_terminal_docker_tree=entries_916|bytes_41902300|mode_0710|block_rdev_64770|single_filesystem|nested_mounts_0
+phase12_terminal_recovery_executor_sha256=8227FCADA411F490154F559CDD7969C648949EDD4B25D156307A49A3DAA7CED8
+phase12_terminal_recovery_executor_size=143989
+phase12_terminal_recovery_runner_sha256=1DE0DB31C21F288BFCCA66588D07604CD0FFCBE233FFFD85AD0EFE785F9B5FAD
 phase12_v11_docker_load_diagnostic=allowlisted_stderr_category_only|raw_stderr_false
 phase12_foreign_equality_policy=dynamic_persistent_v1
 phase12_precondition_receipt=records_persistent_equality_and_volatile_before_after_counts
@@ -66,7 +83,7 @@ phase12_clean_room_verify_extract=passed
 spain_mutation=v10_attempt_rolled_back|manual_cleanup_package_tree_only|no_active_amn2_runtime
 spain_unrelated_service=untouched
 usa_rollback_contour=unchanged
-next_gate=commit_push_origin_readback_then_exact_v11_checksum_bound_install_approval
+next_gate=commit_push_origin_readback_then_exact_terminal_recovery_cleanup_approval
 ```
 
 `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся нетронутым.
