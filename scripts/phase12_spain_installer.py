@@ -94,12 +94,23 @@ def _preparation_failure_message(exc: Exception) -> str:
 
 def _runtime_failure_message(exc: Exception) -> str:
     """Expose only the Docker image-load diagnostic allowlist after rollback."""
-    detail = str(exc)
-    if re.fullmatch(
-        r"docker_image_load_(?:no_space|archive|permission|daemon_unavailable|layer_apply|unsupported|exit_(?:[1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]|unknown))",
-        detail,
-    ):
-        return "production runtime rollback failed:" + detail
+    allowed = re.compile(
+        r"docker_image_load_(?:no_space|archive|permission|daemon_unavailable|layer_apply|unsupported|exit_(?:[1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]|unknown))"
+    )
+    pending: list[BaseException] = [exc]
+    visited: set[int] = set()
+    while pending:
+        current = pending.pop(0)
+        if id(current) in visited:
+            continue
+        visited.add(id(current))
+        detail = str(current)
+        if allowed.fullmatch(detail):
+            return "production runtime rollback failed:" + detail
+        if current.__cause__ is not None:
+            pending.append(current.__cause__)
+        if current.__context__ is not None:
+            pending.append(current.__context__)
     return "production runtime rollback failed"
 
 

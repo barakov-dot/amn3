@@ -7,12 +7,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
-$expectedPackageSha = "8975804C1D192F59FA94441A84DFCD7B5E0159505BBA5BE620B2FD23B675E154"
+$expectedPackageSha = "CB972C722F1B676DF48CA22497C1DFE85E21DB3B53663A0703FA1BD54C37575A"
 $expectedPackageBytes = 139970560
-$expectedManifestSha = "B7124C5954D32E4FF08CA00E1897953651309BEB505E4067C2437ED946E26461"
+$expectedManifestSha = "AAA7980BDEF2787DC889C22D007177FDC2A75578CCA23DE71E2BC7733E552DD0"
 $expectedPlanSha = "8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43"
-$expectedExecutorSha = "E86E0AFD883A7E6DC45F7987CA26062EFAFFA632164546DBF57BEC16F876981D"
-$expectedExecutorBytes = 144710
+$expectedExecutorSha = "D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29"
+$expectedExecutorBytes = 145505
 $expectedCollectorSha = "70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A"
 $run009EvidenceSha = "8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8"
 $fingerprintArraySha = "E15219CB5204D54A9AD11263CFBA1F7C86E16DAB3287C752A8B6F136EC4A5ED5"
@@ -20,7 +20,7 @@ $expectedMachineSha = "3C3233534FD3B69280AAAD4E977A08E30409729D684B816E73C01DDBA
 $expectedBootSha = "099155E2A5578144C715124A1B9B4D8F5D572134C8F72FD98B75D5DE0EB54556"
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-boundary-clean-recovery-v11-20260723"
+$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-boundary-docker-cause-v12-20260723"
 $packagePath = Join-Path $artifactRoot "package-a.tar"
 $executorPath = Join-Path $artifactRoot "executor-a.pyz"
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"

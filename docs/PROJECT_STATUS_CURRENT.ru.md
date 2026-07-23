@@ -1,4 +1,47 @@
-# Текущий override 2026-07-23: Phase 12 bounded install transport local gate
+# Текущий override 2026-07-23: Phase 12 v12 safe Docker-load cause local gate
+
+Current terminal recovery текущей транзакции `1d7511…` завершён `passed`:
+receipt `bb700842…` подтвердил удаление только exact AMN2-owned contour,
+`foreign_service_persistent_equal=true` и volatile counts `0/0`. Immediate
+post-check подтвердил отсутствие `/opt/amn2-spain-package`,
+`/opt/amn2-spain`, `/etc/amn2-spain`, `/var/lib/amn2-spain*` и
+`/run/amn2-spain`; AMN2 web/bot/AWG/Docker units inactive. Terminal ledger
+намеренно сохранён как `manual_recovery_required`; foreign Spain service не
+останавливался и не изменялся, USA остаётся rollback contour.
+
+Предыдущая попытка install безопасно остановилась после Docker image load и
+не оставила active AMN2 runtime. v12 не меняет install, rollback, resources
+или foreign-service policy: он сохраняет только allowlisted
+`docker_image_load_*` cause через вложенную цепочку failed rollback. Raw
+stderr, command output и секреты по-прежнему не записываются и не выдаются.
+
+v12 package/executor собраны дважды byte-equal, package verify и no-follow
+offline clean-room extract прошли (69 regular files, source=`55dc243…`).
+Scoped suite: `154 passed`; PowerShell parser runner passed. Current observed
+capacity также проходит утверждённую policy: root `/opt`/`/etc`/`/var`
+free=`13969006592` bytes, inodes=`1165185`; `/run` free=`99786752` bytes,
+inodes=`122377`.
+
+```text
+active_phase=AMN2 Phase 12 Spain Migration|v12_local_gate_complete
+current_terminal_recovery=passed|approval_bb700842ca035f36d542baf072c657eb4f832134e83eccf0b1547a540e19160b|foreign_persistent_equal_true|volatile_0_0
+current_terminal_postcheck=all_amn2_owned_paths_absent|amn2_and_docker_units_inactive|terminal_ledger_manual_recovery_required
+fresh_install_package_sha256=CB972C722F1B676DF48CA22497C1DFE85E21DB3B53663A0703FA1BD54C37575A
+fresh_install_package_size=139970560
+fresh_install_manifest_sha256=AAA7980BDEF2787DC889C22D007177FDC2A75578CCA23DE71E2BC7733E552DD0
+fresh_install_executor_sha256=D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29
+fresh_install_executor_size=145505
+fresh_install_runner_sha256=C22D856116353490640B33A4C9BFE31D0DD32E06513A401A70E1D0C2A7B8A16A
+fresh_install_local_verification=package_executor_double_build_byte_equal|package_verify_passed|offline_extract_69_files|scoped_154_passed|powershell_parse_passed
+docker_load_diagnostics=allowlisted_cause_chain_only|no_raw_stderr_or_secrets
+next_gate=commit_push_origin_readback_then_one_exact_v12_install_approval
+spain_unrelated_service=untouched
+usa_rollback_contour=unchanged
+```
+
+`docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся нетронутым.
+
+# Предыдущий override 2026-07-23: Phase 12 bounded install transport local gate
 
 Checksum-bound terminal recovery v2 действительно удалил только exact
 AMN2-owned terminal contour: `/opt/amn2-spain`, `/etc/amn2-spain`,

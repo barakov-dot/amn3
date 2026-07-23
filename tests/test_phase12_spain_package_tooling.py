@@ -1328,6 +1328,31 @@ def test_preparation_failure_message_keeps_only_safe_cause_labels() -> None:
     ) == "production runtime rollback failed"
 
 
+def test_runtime_failure_message_preserves_allowlisted_docker_cause_through_rollback_wrapper() -> None:
+    try:
+        try:
+            raise live_backend.BackendError("docker_image_load_layer_apply")
+        except live_backend.BackendError as cause:
+            raise InstallError("partial rollback failure after production_runtime") from cause
+    except InstallError as wrapped:
+        assert installer_module._runtime_failure_message(wrapped) == (
+            "production runtime rollback failed:docker_image_load_layer_apply"
+        )
+
+    try:
+        try:
+            try:
+                raise live_backend.BackendError("docker_image_load_archive")
+            except live_backend.BackendError as cause:
+                raise InstallError("partial rollback failure after production_runtime") from cause
+        except InstallError:
+            raise live_backend.BackendError("package recovery failed")
+    except live_backend.BackendError as recovery_error:
+        assert installer_module._runtime_failure_message(recovery_error) == (
+            "production runtime rollback failed:docker_image_load_archive"
+        )
+
+
 def test_systemd_bundle_reads_units_from_package_content_root(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -3879,10 +3904,10 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "8975804C1D192F59FA94441A84DFCD7B5E0159505BBA5BE620B2FD23B675E154"' in source
-    assert '$expectedManifestSha = "B7124C5954D32E4FF08CA00E1897953651309BEB505E4067C2437ED946E26461"' in source
-    assert '$expectedExecutorSha = "E86E0AFD883A7E6DC45F7987CA26062EFAFFA632164546DBF57BEC16F876981D"' in source
-    assert 'phase12-spain-install-boundary-clean-recovery-v11-20260723' in source
+    assert '$expectedPackageSha = "CB972C722F1B676DF48CA22497C1DFE85E21DB3B53663A0703FA1BD54C37575A"' in source
+    assert '$expectedManifestSha = "AAA7980BDEF2787DC889C22D007177FDC2A75578CCA23DE71E2BC7733E552DD0"' in source
+    assert '$expectedExecutorSha = "D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29"' in source
+    assert 'phase12-spain-install-boundary-docker-cause-v12-20260723' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source

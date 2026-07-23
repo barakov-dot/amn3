@@ -1,5 +1,42 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-23: v12 local gate complete
+
+Current transaction `1d7511…` is terminally recovered. Bound terminal receipt
+`bb700842…` passed: it removed only verified AMN2-owned objects, preserved the
+terminal ledger, confirmed persistent foreign-service equality and recorded
+zero volatile entries. Pinned post-check found no AMN2 package/runtime/config/
+Docker-data paths and all AMN2/Docker units inactive. The foreign Spain service
+was not stopped or mutated; USA remains the rollback contour.
+
+The previous install reached Docker image load, then automatic rollback ended
+terminally. v12 adds no new mutation or resource behaviour: it retains only an
+allowlisted `docker_image_load_*` causal label through a nested rollback
+failure, never raw stderr/output/secrets. Package/executor are double-built
+byte-identical; verify and clean-room extract passed; scoped suite=`154 passed`.
+
+```text
+package_sha256=CB972C722F1B676DF48CA22497C1DFE85E21DB3B53663A0703FA1BD54C37575A
+package_bytes=139970560
+manifest_sha256=AAA7980BDEF2787DC889C22D007177FDC2A75578CCA23DE71E2BC7733E552DD0
+resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
+executor_sha256=D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29
+executor_bytes=145505
+runner_sha256=C22D856116353490640B33A4C9BFE31D0DD32E06513A401A70E1D0C2A7B8A16A
+collector_sha256=70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+run009_evidence_sha256=8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8
+fingerprint_array_sha256=E15219CB5204D54A9AD11263CFBA1F7C86E16DAB3287C752A8B6F136EC4A5ED5
+capacity=root_free_13969006592|root_inodes_1165185|run_free_99786752|run_inodes_122377|policy_passed
+next_gate=commit_push_origin_readback_then_one_exact_v12_install_approval
+```
+
+Do not repeat runs 001–009, resource-confirmation retries, prior builds,
+SOL review or security scans. Do not stop AWG. Do not stop/mutate the foreign
+Spain service. Do not migrate/delete USA data.
+
+## Historical hand-off
+
 Current state: v10 `install-bound` прошёл до intent `awg_image_loaded`
 (`docker load`), но action не был committed. Automatic rollback удалил Docker
 enable/start, все AMN2 units, DB/config/runtime objects. Receipt подтверждает:
