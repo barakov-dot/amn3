@@ -92,6 +92,17 @@ def _preparation_failure_message(exc: Exception) -> str:
     return "production installation preparation failed:" + kind
 
 
+def _runtime_failure_message(exc: Exception) -> str:
+    """Expose only the Docker image-load diagnostic allowlist after rollback."""
+    detail = str(exc)
+    if re.fullmatch(
+        r"docker_image_load_(?:no_space|archive|permission|daemon_unavailable|layer_apply|unsupported|exit_(?:[1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]|unknown))",
+        detail,
+    ):
+        return "production runtime rollback failed:" + detail
+    return "production runtime rollback failed"
+
+
 def _embedded_resource_collector_bytes() -> bytes:
     """Return the resource collector shipped inside the standalone executor.
 
@@ -3876,7 +3887,7 @@ class ProductionRecoveryCoordinator:
                     self.transaction_ledger.record_manual_recovery_required()
                 if isinstance(exc, InstallError):
                     raise
-                raise InstallError("production runtime rollback failed") from exc
+                raise InstallError(_runtime_failure_message(exc)) from exc
             try:
                 self.package_stager.recover_or_rollback(
                     self.transaction_ledger,

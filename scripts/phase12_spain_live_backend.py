@@ -119,6 +119,30 @@ def _digest(value: bytes) -> str:
     return "sha256:" + hashlib.sha256(value).hexdigest()
 
 
+def classify_docker_image_load_failure(stderr: bytes, return_code: int) -> str:
+    """Reduce Docker image-load stderr to a fixed, secret-free failure label."""
+    text = stderr.decode("utf-8", errors="ignore").casefold()
+    if "no space left on device" in text:
+        return "docker_image_load_no_space"
+    if "invalid tar" in text or "unexpected eof" in text or "unexpected end of file" in text:
+        return "docker_image_load_archive"
+    if "permission denied" in text or "operation not permitted" in text:
+        return "docker_image_load_permission"
+    if (
+        "cannot connect to the docker daemon" in text
+        or "is the docker daemon running" in text
+        or "connection refused" in text
+    ):
+        return "docker_image_load_daemon_unavailable"
+    if "failed to register layer" in text or "failed to apply layer" in text:
+        return "docker_image_load_layer_apply"
+    if "not supported" in text or "unsupported" in text:
+        return "docker_image_load_unsupported"
+    if isinstance(return_code, int) and not isinstance(return_code, bool) and 1 <= return_code <= 255:
+        return "docker_image_load_exit_" + str(return_code)
+    return "docker_image_load_exit_unknown"
+
+
 class FixedCommandRunner:
     """Run only exact, pre-registered argv vectors with bounded resources."""
 
@@ -230,11 +254,12 @@ class FixedCommandRunner:
             raise BackendError("command pipes unavailable")
 
         output = bytearray()
+        failure_stderr = bytearray()
         combined_count = 0
         guard = threading.Lock()
         oversized = threading.Event()
 
-        def drain(stream: Any, *, capture: bool) -> None:
+        def drain(stream: Any, *, target: bytearray) -> None:
             nonlocal combined_count
             try:
                 while chunk := stream.read(64 * 1024):
@@ -242,8 +267,8 @@ class FixedCommandRunner:
                         combined_count += len(chunk)
                         if combined_count > effective_bound:
                             oversized.set()
-                    if capture and not oversized.is_set():
-                        output.extend(chunk)
+                    if not oversized.is_set():
+                        target.extend(chunk)
                     if oversized.is_set():
                         try:
                             process.kill()
@@ -254,8 +279,8 @@ class FixedCommandRunner:
                 stream.close()
 
         readers = (
-            threading.Thread(target=drain, args=(process.stdout,), kwargs={"capture": True}, daemon=True),
-            threading.Thread(target=drain, args=(process.stderr,), kwargs={"capture": False}, daemon=True),
+            threading.Thread(target=drain, args=(process.stdout,), kwargs={"target": output}, daemon=True),
+            threading.Thread(target=drain, args=(process.stderr,), kwargs={"target": failure_stderr}, daemon=True),
         )
         for reader in readers:
             reader.start()
@@ -305,6 +330,12 @@ class FixedCommandRunner:
             raise BackendError("command output exceeded bound")
         if return_code != 0:
             # Deliberately omit argv/stdout/stderr. They can carry generated secrets.
+            if argv == DOCKER_IMAGE_LOAD_ARGV:
+                raise BackendError(
+                    classify_docker_image_load_failure(
+                        bytes(failure_stderr), return_code
+                    )
+                )
             raise BackendError("command failed")
         return bytes(output)
 
@@ -4246,6 +4277,13 @@ def _closed_docker_runner(
             raise BackendError("Docker command boundary invalid")
         try:
             result = runner(argv, **kwargs)
+        except BackendError as exc:
+            if (
+                argv == DOCKER_IMAGE_LOAD_ARGV
+                and str(exc).startswith("docker_image_load_")
+            ):
+                raise
+            raise BackendError("Docker command failed") from None
         except Exception:
             raise BackendError("Docker command failed") from None
         if not isinstance(result, bytes) or len(result) > MAX_COMMAND_OUTPUT:

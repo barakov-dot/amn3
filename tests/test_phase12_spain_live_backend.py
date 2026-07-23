@@ -94,6 +94,39 @@ class FixedCommandRunnerTests(unittest.TestCase):
         self.assertNotIn(secret, str(caught.exception))
         self.assertNotIn(secret, repr(caught.exception))
 
+    def test_docker_load_failure_classifier_is_allowlisted_and_redacted(self) -> None:
+        classify = live_backend.classify_docker_image_load_failure
+        self.assertEqual(
+            classify(b"failed to register layer: no space left on device", 1),
+            "docker_image_load_no_space",
+        )
+        self.assertEqual(
+            classify(b"archive/tar: invalid tar header", 1),
+            "docker_image_load_archive",
+        )
+        self.assertEqual(
+            classify(b"operation not permitted", 1),
+            "docker_image_load_permission",
+        )
+        secret = b"token=private-value"
+        self.assertEqual(
+            classify(secret, 17),
+            "docker_image_load_exit_17",
+        )
+
+    def test_exact_docker_load_command_emits_only_allowlisted_failure_label(self) -> None:
+        secret = "private-image-load-detail"
+        argv = (
+            sys.executable,
+            "-c",
+            f"import sys; sys.stderr.write('{secret}: no space left on device'); sys.exit(1)",
+        )
+        with patch.object(live_backend, "DOCKER_IMAGE_LOAD_ARGV", argv):
+            runner = FixedCommandRunner(allowed_argv={argv})
+            with self.assertRaisesRegex(BackendError, "docker_image_load_no_space") as caught:
+                runner(argv)
+        self.assertNotIn(secret, str(caught.exception))
+
     def test_streams_large_regular_fd_without_the_small_input_bytes_limit(self) -> None:
         argv = (
             sys.executable,

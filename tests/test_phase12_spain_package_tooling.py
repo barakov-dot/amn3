@@ -1308,6 +1308,12 @@ def test_preparation_failure_message_keeps_only_safe_cause_labels() -> None:
     assert installer_module._preparation_failure_message(
         live_backend.BackendError("token=secret")
     ) == "production installation preparation failed:backend_error"
+    assert installer_module._runtime_failure_message(
+        live_backend.BackendError("docker_image_load_no_space")
+    ) == "production runtime rollback failed:docker_image_load_no_space"
+    assert installer_module._runtime_failure_message(
+        live_backend.BackendError("token=secret")
+    ) == "production runtime rollback failed"
 
 
 def test_systemd_bundle_reads_units_from_package_content_root(
@@ -3654,8 +3660,9 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "105379D86CF0BD5D02C54F2369C8A9A14DF075DC33601E7225B016E5EDEBCBEC"' in source
-    assert '$expectedExecutorSha = "1A20220F4EA7F75931C72CA538EE20FB4097D866650730739B89E081846217BF"' in source
+    assert '$expectedPackageSha = "012CC689247DD411EACEF82882E5734A6BEC56C2FDE7D1F4224691E6CF457A47"' in source
+    assert '$expectedExecutorSha = "A22A05CF1D2D761C9FF80DA5F458C1C5FBE6AFDEF4476D57BEB8A3677E6731B3"' in source
+    assert 'phase12-spain-docker-load-diagnostic-v11-20260723' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "scp.exe" in source

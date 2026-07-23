@@ -1,4 +1,4 @@
-# Текущий override 2026-07-23: Phase 12 terminal recovery cleanup local gate
+# Текущий override 2026-07-23: Phase 12 bounded Docker-load diagnostic v11 local gate
 
 v10 checksum-bound install дошёл до intent `awg_image_loaded` (`docker load`),
 который не был committed. Automatic rollback удалил Docker enable/start, все
@@ -8,11 +8,17 @@ AMN2 units, DB, configs и runtime trees. Read-only safety receipt подтве�
 `/opt/amn2-spain-package`; ledger terminal=`manual_recovery_required`, поэтому
 обычный recovery намеренно отказывается его удалять.
 
-Локально собран отдельный `manual-cleanup-bound` executor: short-lived
+`manual-cleanup-bound` executor выполнен: short-lived
 canonical stdin intent привязан к exact terminal nonce и SHA executor; перед
 удалением он повторно проверяет ledger/tombstone и каждый CAS-объект retained
-tree. Он удаляет только verified `/opt/amn2-spain-package`, terminal ledger
-сохраняет и не запускает AMN2, Docker или foreign service.
+tree. Receipt=`passed`; `/opt/amn2-spain-package` отсутствует, terminal ledger
+сохранён. AMN2 Docker/network/web/bot inactive; foreign service не затронут.
+
+v11 сохраняет безопасный cause label для следующего `docker image load`:
+`no_space`, `archive`, `permission`, `daemon_unavailable`, `layer_apply`,
+`unsupported` или numeric `exit_code`. Raw stderr, command output и secrets
+не записываются и не выводятся. Новый package/executor double-built
+byte-identical; package verify и clean-room extract прошли.
 
 v8 upload/hash verification завершились; `install-bound` прошёл precondition
 и дошёл до `package_verified_remote`, затем fail-closed остановился в
@@ -32,19 +38,21 @@ Dynamic equality policy неизменна: persistent foreign identities дол
 по-прежнему fail-closed; foreign service не останавливается и не изменяется.
 
 ```text
-active_phase=AMN2 Phase 12 Spain Migration|manual_recovery_cleanup_local_gate
-phase12_package_archive_sha256=105379D86CF0BD5D02C54F2369C8A9A14DF075DC33601E7225B016E5EDEBCBEC
-phase12_package_archive_size=139939840
-phase12_manifest_sha256=2A505C1CB7B1A734FF411A283930E54BD52D82342F08A26B775E2B185EF5F04D
+active_phase=AMN2 Phase 12 Spain Migration|bounded_docker_load_diagnostic_v11_local_gate
+phase12_package_archive_sha256=012CC689247DD411EACEF82882E5734A6BEC56C2FDE7D1F4224691E6CF457A47
+phase12_package_archive_size=139950080
+phase12_manifest_sha256=1A394537C3F62626B19D21A2D33DBB087E5299C7726AD55783384FC95E7977D7
 phase12_resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
-phase12_executor_sha256=1A20220F4EA7F75931C72CA538EE20FB4097D866650730739B89E081846217BF
-phase12_executor_size=140147
-phase12_install_runner_sha256=0530C9FB53AB7FABA9C8DB5B40862D7109C375F24B4CE7401910B67682EE2F3C
+phase12_executor_sha256=A22A05CF1D2D761C9FF80DA5F458C1C5FBE6AFDEF4476D57BEB8A3677E6731B3
+phase12_executor_size=140908
+phase12_install_runner_sha256=D6E639E9EA80D6D6ADA2D56BF443BE8710E8AE7C21CB6C1C0FC3860CDB3B8797
 phase12_manual_cleanup_nonce=e022f0b87a972f2256acd7800a4999553a8ceea2396a2644908f43c93a82febd
 phase12_manual_cleanup_executor_sha256=0E736B9DDF950DA050FE945F7D5F6D860F9C782A45066AE42429CCF56EF05585
 phase12_manual_cleanup_executor_size=140277
 phase12_manual_cleanup_local_verification=focused_contracts_4_passed|executor_double_build_byte_identical
-phase12_v10_install_outcome=automatic_runtime_rollback|manual_recovery_required|retained_package_tree_only
+phase12_manual_cleanup_outcome=passed|package_tree_absent|terminal_ledger_preserved|amn2_units_inactive
+phase12_v10_install_outcome=automatic_runtime_rollback|manual_recovery_required|retained_package_tree_cleaned
+phase12_v11_docker_load_diagnostic=allowlisted_stderr_category_only|raw_stderr_false
 phase12_foreign_equality_policy=dynamic_persistent_v1
 phase12_precondition_receipt=records_persistent_equality_and_volatile_before_after_counts
 phase12_v6_install_outcome=rolled_back_before_amnezia_units_or_owned_paths
@@ -55,10 +63,10 @@ phase12_firewall_semantic_rebaseline=nft|rule_count_129|semantic_sha256_FB8E1D41
 phase12_scoped_tests=136_passed
 phase12_package_executor_reproducible=byte_identical_double_builds
 phase12_clean_room_verify_extract=passed
-spain_mutation=v10_attempt_rolled_back|no_active_amn2_runtime
+spain_mutation=v10_attempt_rolled_back|manual_cleanup_package_tree_only|no_active_amn2_runtime
 spain_unrelated_service=untouched
 usa_rollback_contour=unchanged
-next_gate=commit_push_origin_readback_then_exact_manual_cleanup_approval
+next_gate=commit_push_origin_readback_then_exact_v11_checksum_bound_install_approval
 ```
 
 `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` остаётся нетронутым.

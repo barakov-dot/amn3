@@ -6,21 +6,26 @@ enable/start, все AMN2 units, DB/config/runtime objects. Receipt подтве
 AMN2 units inactive; foreign Spain service не останавливался и не изменялся;
 USA остаётся rollback contour.
 
-Transaction terminal=`manual_recovery_required`: retained только
-CAS-verified `/opt/amn2-spain-package`; обычный recovery специально запрещён.
-Локально подготовлен отдельный checksum-bound `manual-cleanup-bound` runner:
-проверяет terminal nonce, tombstone и CAS tree, затем удаляет исключительно
-этот retained tree, сохраняет ledger и не запускает AMN2/Docker.
+`manual-cleanup-bound` receipt=`passed`: CAS-verified retained
+`/opt/amn2-spain-package` удалён, terminal ledger сохранён. Scoped read-only
+receipt подтвердил inactive Docker/network/web/bot units. Foreign Spain
+service не затрагивался.
+
+v11 добавляет bounded category-only diagnostic для Docker image load. Он
+сохраняет только allowlisted label (`no_space`, `archive`, `permission`,
+`daemon_unavailable`, `layer_apply`, `unsupported` или exit code), никогда raw
+stderr/output/secrets. Package/executor double-built byte-identical; package
+verify и clean-room extract прошли.
 
 ```text
-package_sha256=105379D86CF0BD5D02C54F2369C8A9A14DF075DC33601E7225B016E5EDEBCBEC
-package_bytes=139939840
-manifest_sha256=2A505C1CB7B1A734FF411A283930E54BD52D82342F08A26B775E2B185EF5F04D
+package_sha256=012CC689247DD411EACEF82882E5734A6BEC56C2FDE7D1F4224691E6CF457A47
+package_bytes=139950080
+manifest_sha256=1A394537C3F62626B19D21A2D33DBB087E5299C7726AD55783384FC95E7977D7
 resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
-executor_sha256=1A20220F4EA7F75931C72CA538EE20FB4097D866650730739B89E081846217BF
-executor_bytes=140147
-runner_sha256=0530C9FB53AB7FABA9C8DB5B40862D7109C375F24B4CE7401910B67682EE2F3C
-manual_cleanup_nonce=e022f0b87a972f2256acd7800a4999553a8ceea2396a2644908f43c93a82febd
+executor_sha256=A22A05CF1D2D761C9FF80DA5F458C1C5FBE6AFDEF4476D57BEB8A3677E6731B3
+executor_bytes=140908
+runner_sha256=D6E639E9EA80D6D6ADA2D56BF443BE8710E8AE7C21CB6C1C0FC3860CDB3B8797
+manual_cleanup=passed|package_tree_absent|terminal_ledger_preserved|units_inactive
 manual_cleanup_executor_sha256=0E736B9DDF950DA050FE945F7D5F6D860F9C782A45066AE42429CCF56EF05585
 manual_cleanup_executor_bytes=140277
 collector_sha256=70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A
@@ -30,7 +35,7 @@ fingerprint_array_sha256=E15219CB5204D54A9AD11263CFBA1F7C86E16DAB3287C752A8B6F13
 foreign_equality_policy=dynamic_persistent_v1
 firewall_equality=semantic_nft_rule_count_129_sha256_FB8E1D41F6F4F0EBCEB7C89D65E4E5E440E0AC0A4E780B4F638F96CEE1B9A682
 local_verification=double_build_byte_identical|package_verify_pass|clean_room_extract_pass|scoped_136_passed|package_bound_units_test_pass
-spain_mutation=v10_attempt_rolled_back|no_active_amn2_runtime
+spain_mutation=v10_attempt_rolled_back|manual_cleanup_package_tree_only|no_active_amn2_runtime
 ```
 
 Do not repeat runs 001–009, resource-confirmation retries, prior builds, SOL
@@ -38,9 +43,8 @@ review, or security scans. Do not stop AWG. Do not stop or mutate the foreign
 Spain service. Do not migrate/delete USA data.
 
 Next gate: stage only Phase 12 files, commit and push current branch, verify
-origin readback, then issue one exact checksum-bound manual cleanup approval.
-The cleanup runner uploads only the new executor, verifies its remote SHA,
-executes `manual-cleanup-bound` with short-lived stdin intent and returns a
-terminal cleanup receipt. If it fails, no retry occurs until its exact cause is
-read-only classified. Only after a passed cleanup receipt may a new fresh
-install package gate be considered.
+origin readback, then issue one exact checksum-bound v11 install approval.
+Runner uploads package/executor, verifies remote SHA and runs `install-bound`.
+If Docker load fails again, it returns only its bounded category after automatic
+rollback; no blind third retry. If it passes, continue directly to smoke and
+foreign equality receipt.
