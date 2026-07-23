@@ -3945,6 +3945,8 @@ def test_ssh_data_path_diagnostic_runner_is_pinned_bounded_and_nonpersistent() -
     assert "RedirectStandardOutput" in source
     assert "RedirectStandardError" in source
     assert "CopyToAsync" in source
+    assert "$probeResults = @(Invoke-BoundedSshProbe" in source
+    assert "Approved data-path diagnostic result invalid." in source
     assert "scp.exe" not in source
     assert "install-bound" not in source
     assert "manual-cleanup" not in source

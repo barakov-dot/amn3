@@ -92,6 +92,13 @@ if ($Approval -cne $runnerApproval) { Write-Output $runnerApproval; throw "Exact
 
 $transportOptions = @("-F", "none", "-o", "BatchMode=yes", "-o", "Compression=no", "-o", "ConnectTimeout=20", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=4", "-o", "IdentitiesOnly=yes", "-o", "PasswordAuthentication=no", "-o", "KbdInteractiveAuthentication=no", "-o", "GSSAPIAuthentication=no", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "-o", "RequestTTY=no", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=$knownHostsPath", "-i", $keyPath, "-p", "22")
 $target = "$($binding['TARGET_USER'])@$($binding['TARGET_HOST'])"
-$result = Invoke-BoundedSshProbe (@($transportOptions + @($target, "exec /bin/cat > /dev/null")))
+$probeArguments = @($transportOptions + @($target, "exec /bin/cat > /dev/null"))
+$probeResults = @(Invoke-BoundedSshProbe $probeArguments)
+$probeReceipts = @($probeResults | Where-Object {
+    $null -ne $_.PSObject.Properties["Bytes"] -and
+    $null -ne $_.PSObject.Properties["ElapsedMilliseconds"]
+})
+if ($probeReceipts.Count -ne 1) { throw "Approved data-path diagnostic result invalid." }
+$result = $probeReceipts[0]
 $bytesPerSecond = [Math]::Floor(($result.Bytes * 1000.0) / [Math]::Max(1, $result.ElapsedMilliseconds))
 [Console]::WriteLine(([ordered]@{ schema="amn2.spain-ssh-data-path-diagnostic.v1"; result="passed"; probe_bytes=$result.Bytes; elapsed_milliseconds=$result.ElapsedMilliseconds; bytes_per_second=[int64]$bytesPerSecond; persistent_remote_write=$false; amn2_started=$false; foreign_service_mutation=$false } | ConvertTo-Json -Compress))
