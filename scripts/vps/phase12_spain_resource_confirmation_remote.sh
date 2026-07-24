@@ -186,7 +186,7 @@ collect_stable_cgroup_pids() {
     STABLE_CGROUP_PID_COUNT=${#STABLE_CGROUP_PID_SET[@]}
 }
 
-collect_ports_for_cgroup() {
+collect_ports_for_cgroup_once() {
     local control_group="$1" cgroup_root="$2" proc_root="$3"
     local pid fd target inode pid_socket_inodes all_hex_ports pid_hex_ports hex_port socket_table
     local decimal_port normalized_ports candidate_port
@@ -271,6 +271,19 @@ collect_ports_for_cgroup() {
         fi
     done
     COLLECTED_UNIT_PORTS="$normalized_ports"
+}
+
+collect_ports_for_cgroup() {
+    local fd_readlink_attempt
+    for fd_readlink_attempt in 1 2; do
+        if collect_ports_for_cgroup_once "$@"; then
+            return 0
+        fi
+        if [[ "$CGROUP_PORTS_SUBREASON" != "fd_readlink" || "$fd_readlink_attempt" == "2" ]]; then
+            return 1
+        fi
+    done
+    return 1
 }
 
 DESCENDANT_PID_COUNT=0

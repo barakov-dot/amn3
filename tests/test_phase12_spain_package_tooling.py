@@ -3948,9 +3948,10 @@ def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() 
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
     assert '$expectedPackageSha = "1B01019DB68A50811AD093E9D2DCA51BD86A143A7ABBD2D0765056394700C768"' in source
     assert '$expectedManifestSha = "D5830841AC55FD1B89552934C5A18C22955DF19B1C7B56F1E1DD4C5BE0F3B74A"' in source
-    assert '$expectedExecutorSha = "79A6EF80B1209F35E05958709B671A14CADB26F62647C39BCE6132787AE3A5BB"' in source
-    assert '$expectedExecutorBytes = 145806' in source
-    assert 'phase12-spain-install-boundary-bounded-load-v16-20260724' in source
+    assert '$expectedExecutorSha = "B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9"' in source
+    assert '$expectedExecutorBytes = 145873' in source
+    assert '$expectedCollectorSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"' in source
+    assert 'phase12-spain-install-boundary-cgroup-fd-retry-v17-20260724' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "Invoke-BoundedSshUpload" in source

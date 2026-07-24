@@ -407,9 +407,80 @@ class Phase12RemoteCollectorContractTests(unittest.TestCase):
         source = REMOTE.read_text(encoding="utf-8")
         self.assertIn("for filesystem_path in / /opt /etc /var /run", source)
         self.assertIn("collect_stable_cgroup_pids()", source)
-        ports = extract_shell_function(source, "collect_ports_for_cgroup")
+        ports = extract_shell_function(source, "collect_ports_for_cgroup_once")
         self.assertIn("collect_stable_cgroup_pids", ports)
         self.assertNotIn('local cgroup_file="${cgroup_root}${control_group}/cgroup.procs"', ports)
+        wrapper = extract_shell_function(source, "collect_ports_for_cgroup")
+        self.assertIn("for fd_readlink_attempt in 1 2", wrapper)
+        self.assertIn('"$CGROUP_PORTS_SUBREASON" != "fd_readlink"', wrapper)
+
+    @unittest.skipUnless(BASH, "bash is required")
+    def test_cgroup_fd_readlink_retries_one_full_snapshot_then_fails_closed(self) -> None:
+        source = REMOTE.read_text(encoding="utf-8")
+        functions = "\n".join(
+            extract_shell_function(source, name)
+            for name in (
+                "collect_stable_cgroup_pids",
+                "collect_ports_for_cgroup_once",
+                "collect_ports_for_cgroup",
+            )
+        )
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            root = Path(raw_tmp)
+            cgroup_root = root / "cgroup"
+            proc_root = root / "proc"
+            fd_root = proc_root / "321" / "fd"
+            net_root = proc_root / "321" / "net"
+            (cgroup_root / "demo.service" / "delegated").mkdir(parents=True)
+            fd_root.mkdir(parents=True)
+            net_root.mkdir(parents=True)
+            (cgroup_root / "demo.service" / "cgroup.procs").write_bytes(b"321\n")
+            (cgroup_root / "demo.service" / "delegated" / "cgroup.procs").write_bytes(b"321\n")
+            (fd_root / "socket-entry").write_text("", encoding="ascii")
+            for name in ("tcp", "tcp6", "udp", "udp6"):
+                (net_root / name).write_text("", encoding="ascii")
+            def bash_path(path: Path) -> str:
+                if os.name != "nt":
+                    return str(path)
+                conversion = subprocess.run(
+                    [str(BASH), "-c", 'cygpath -u -- "$1"', "bash", str(path)],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                    check=False,
+                )
+                self.assertEqual(conversion.returncode, 0, conversion.stderr)
+                return conversion.stdout.strip()
+
+            cgroup_root_bash = bash_path(cgroup_root)
+            proc_root_bash = bash_path(proc_root)
+            retry_marker_bash = bash_path(root / "readlink-retry-marker")
+            harness = rf'''set -Eeuo pipefail
+COLLECTED_UNIT_PORTS=""
+CGROUP_PORTS_SUBREASON=""
+STABLE_CGROUP_PID_COUNT=0
+declare -A STABLE_CGROUP_PID_SET=()
+{functions}
+readlink() {{
+    if [[ ! -e '{retry_marker_bash}' ]]; then : > '{retry_marker_bash}'; return 1; fi
+    printf 'socket:[123]\n'
+}}
+collect_ports_for_cgroup /demo.service '{cgroup_root_bash}' '{proc_root_bash}' || {{ printf 'reason=%s\n' "$CGROUP_PORTS_SUBREASON" >&2; exit 90; }}
+[[ -e '{retry_marker_bash}' ]] || exit 91
+[[ -z "$CGROUP_PORTS_SUBREASON" ]] || exit 92
+readlink() {{ return 1; }}
+if collect_ports_for_cgroup /demo.service '{cgroup_root_bash}' '{proc_root_bash}'; then exit 93; fi
+[[ "$CGROUP_PORTS_SUBREASON" == "fd_readlink" ]] || exit 94
+'''
+            result = subprocess.run(
+                [str(BASH), "-c", harness,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     @unittest.skipUnless(BASH, "bash is required")
     def test_failure_stage_envelope_is_sanitized_and_fail_closed(self) -> None:

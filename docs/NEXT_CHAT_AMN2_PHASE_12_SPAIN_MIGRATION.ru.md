@@ -1,6 +1,31 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-07-24: `a75d9d…` recovered; commit/push v16 before one new install attempt
+## Current override 2026-07-24: v17 bounded cgroup FD retry is locally and read-only verified
+
+The v16 install candidate stopped before transaction/tombstone creation and
+before install mutation. Its second bootstrap critical collector received the
+allowlisted read-only envelope `systemd_cgroup_ports|fd_readlink|78`: a foreign
+service FD disappeared during enumeration. Do not retry v16.
+
+v17 retries one full cgroup snapshot only after that transient FD condition;
+the second `fd_readlink` and every other subreason remain fail-closed. The
+checksum-bound collector `4705…` has passed two pinned SSH/stdin read-only
+probes: JSON, host/boot identity and semantic preconditions all passed. No
+remote file write, AMN2/AWG start, foreign-service mutation, or USA change
+occurred. No SCP is active now.
+
+```text
+package_sha256=1B01019DB68A50811AD093E9D2DCA51BD86A143A7ABBD2D0765056394700C768
+manifest_sha256=D5830841AC55FD1B89552934C5A18C22955DF19B1C7B56F1E1DD4C5BE0F3B74A
+executor_sha256=B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9
+executor_bytes=145873
+collector_sha256=4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D
+install_runner_sha256=AFA21BDE076DD59D596394985CF56C9C95EAD0DDD534C64D51624DBEF078124B
+verification=package_executor_double_build_byte_equal|offline_clean_room_passed|scoped_295_passed_4_skipped|two_pinned_read_only_probes_passed
+next=powershell_parse|diff_review|commit_push_origin_readback|exact_v17_install_approval
+```
+
+## Previous override 2026-07-24: `a75d9d…` recovered; commit/push v16 before one new install attempt
 
 The exact cleanup and terminal recovery of transaction
 `a75d9d957ace99c8d74c20d45c029e2e08d355a2c5a370d0066972561e73a1ac` passed.

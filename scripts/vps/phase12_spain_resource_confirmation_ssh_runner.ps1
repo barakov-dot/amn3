@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Security") -ErrorAction Stop
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Utility") -ErrorAction Stop
 
-$expectedRemoteScriptSha = "70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A"
+$expectedRemoteScriptSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"
 $expectedFingerprintSetSha = "37041070A4F748F0CF46BA671A5B5BCE714B066D841B150A2AE128EFE6ED22A2"
 $expectedFingerprintSetBytes = 44899
 $expectedPackageResourcePlanSha = "0352F6C5254A14DDCBA45433F055B782A34F1FC56FF175F7AC2F0CBF86825AC0"

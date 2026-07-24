@@ -1,6 +1,31 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
-## Current operational override — 2026-07-24: `a75d9d…` recovered; v16 is the sole local install candidate
+## Current operational override — 2026-07-24: v17 has passed two read-only collector probes; install remains unstarted
+
+v16 stopped fail-closed before transaction/tombstone creation and before install
+mutation. Its second bootstrap collector hit the fixed read-only condition
+`systemd_cgroup_ports|fd_readlink` (exit `78`): a foreign process FD vanished
+during enumeration. v17 retries exactly one complete cgroup snapshot only for
+that subreason; a repeated FD race and all other failures stay fail-closed.
+
+The v17 collector was executed twice over the existing pinned SSH/stdin path,
+with no remote file write. Both probes passed JSON, host/boot identity binding
+and semantic preconditions. Package bytes are unchanged; the executor delta is
+only `scripts/phase12_spain_resource_confirmation_remote.sh`. No SCP/upload
+is currently running; AMN2/AWG and the foreign Spain service are untouched,
+and USA remains rollback contour.
+
+```text
+package=1B01019DB68A50811AD093E9D2DCA51BD86A143A7ABBD2D0765056394700C768
+manifest=D5830841AC55FD1B89552934C5A18C22955DF19B1C7B56F1E1DD4C5BE0F3B74A
+executor=B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9|145873
+collector=4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D
+runner=AFA21BDE076DD59D596394985CF56C9C95EAD0DDD534C64D51624DBEF078124B
+local=package_executor_double_build_equal|offline_clean_room_passed|scoped_295_passed_4_skipped|two_pinned_read_only_probes_passed
+next=powershell_parse|diff_review|commit_push_readback|exact_checksum_bound_v17_install
+```
+
+## Previous operational override — 2026-07-24: `a75d9d…` recovered; v16 is the sole local install candidate
 
 Exact manual cleanup and terminal recovery for
 `a75d9d957ace99c8d74c20d45c029e2e08d355a2c5a370d0066972561e73a1ac` passed.

@@ -1,4 +1,32 @@
-# Текущий override 2026-07-24: `a75d9d…` terminal recovery passed; v16 готов локально, SCP не активен
+# Текущий override 2026-07-24: v17 устраняет подтверждённую FD race; два read-only probe passed, SCP не активен
+
+v16 install не повторяется. Его первый in-memory collector прошёл, а второй
+bootstrap critical recheck остановился fail-closed на read-only race:
+`systemd_cgroup_ports|fd_readlink` (collector exit `78`). Это произошло до
+создания tombstone/transaction и до install mutation. `a75d9d…` terminal
+recovery остаётся passed: recorded AMN2 contour удалён, persistent foreign
+equality=`true`, volatile=`0/0`; AMN2/AWG не стартовали, foreign Spain service
+и USA rollback contour не изменялись.
+
+v17 повторяет полный cgroup FD snapshot ровно один раз только при исчезнувшей
+FD; повторный `fd_readlink` и все остальные subreason остаются fail-closed.
+Новый collector `4705…` запущен дважды через pinned SSH/stdin без remote file
+write: оба ответа прошли JSON, host/boot binding и semantic preconditions.
+Package не изменился; executor delta содержит только embedded collector.
+
+```text
+v17_package_sha256=1B01019DB68A50811AD093E9D2DCA51BD86A143A7ABBD2D0765056394700C768
+v17_package_bytes=139970560
+v17_manifest_sha256=D5830841AC55FD1B89552934C5A18C22955DF19B1C7B56F1E1DD4C5BE0F3B74A
+v17_executor_sha256=B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9
+v17_executor_bytes=145873
+v17_collector_sha256=4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D
+v17_install_runner_sha256=AFA21BDE076DD59D596394985CF56C9C95EAD0DDD534C64D51624DBEF078124B
+local_verification=package_executor_double_build_byte_equal|offline_clean_room_passed|scoped_295_passed_4_skipped|two_pinned_read_only_probes_json_identity_semantic_passed|powershell_parser_pending
+next_gate=powershell_parser|diff_review|commit_push_origin_readback|exact_v17_install_approval
+```
+
+# Предыдущий override 2026-07-24: `a75d9d…` terminal recovery passed; v16 готов локально, SCP не активен
 
 Exact manual cleanup и terminal recovery transaction
 `a75d9d957ace99c8d74c20d45c029e2e08d355a2c5a370d0066972561e73a1ac`
