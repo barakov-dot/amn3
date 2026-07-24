@@ -1,4 +1,29 @@
-# Текущий override 2026-07-24: transaction `2315…` recovered; v14 classic-vfs package locally verified
+# Текущий override 2026-07-24: v14 reached Docker, failed at `awg_image_loaded`; transaction `544db…` recovery gate
+
+Approved v14 install прошёл upload/hash verification и reached `docker_started`,
+но ledger зафиксировал `awg_image_loaded=abandoned`. Normal automatic rollback
+вернул все четыре AMN2 unit в `inactive`, но fail-closed на retained dedicated
+Docker tree: current transaction=`manual_recovery_required`. Это не retry
+candidate и не доказательство нового network/listener/firewall изменения.
+
+Checksum-bound read-only inventory current transaction:
+
+```text
+nonce=544db99ee620bc0139914c75db98c9a2e16797aadffa6c106923825fc17a6b54
+transaction_sha256=89a9bec68c026ff6aa2865ab65f1a91333046e458746499ee29738b3a663c5cf
+capsule_sha256=6411c3a47d8055cf70dc4a2082d4fd23752c94698f6dcfde96da4ff3026af723
+docker_tree_sha256=0a086299782791b40464cf51087c9e72cbfbac254200cd4e39191f395e06c331
+docker_tree=2268_entries|42532407_bytes|root_mode_0710|2_regular_blocks_rdev_64770|whiteouts_0|single_filesystem
+ledger=awg_image_loaded_abandoned|docker_started_removed|manual_recovery_required
+next_gate=exact_manual_cleanup_then_exact_terminal_recovery_with_foreign_equality
+```
+
+Manual cleanup may remove only `/opt/amn2-spain-package`; terminal recovery may
+remove only the recorded current AMN2 contour and will be the first action that
+re-proves foreign persistent/volatile equality. No AMN2 start, AWG stop,
+foreign-service mutation or USA mutation is authorized by this status update.
+
+# Предыдущий override 2026-07-24: transaction `2315…` recovered; v14 classic-vfs package locally verified
 
 Exact terminal recovery для transaction
 `2315caba94df97a4a34c665fb58401f0bd56e1721a7cea59af20c38f23b8046c`

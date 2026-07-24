@@ -1,6 +1,26 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-07-24: transaction `2315…` recovered; v14 package is the only retry candidate
+## Current override 2026-07-24: v14 install is fail-closed; recover `544db…` before any diagnosis/retry
+
+v14 reached `docker_started`; its bounded ledger then recorded
+`awg_image_loaded=abandoned`. Normal automatic rollback left all AMN2 units
+inactive, but current transaction requires terminal recovery because the exact
+Docker tree retained two regular block devices. No further install is allowed.
+
+```text
+nonce=544db99ee620bc0139914c75db98c9a2e16797aadffa6c106923825fc17a6b54
+transaction_sha256=89a9bec68c026ff6aa2865ab65f1a91333046e458746499ee29738b3a663c5cf
+capsule_sha256=6411c3a47d8055cf70dc4a2082d4fd23752c94698f6dcfde96da4ff3026af723
+docker_tree_sha256=0a086299782791b40464cf51087c9e72cbfbac254200cd4e39191f395e06c331
+docker_tree=2268|42532407|0710|2_regular_blocks_rdev_64770|whiteouts_0|single_fs
+next=exact_manual_cleanup|exact_terminal_recovery|foreign_equality_receipt|bounded_docker_load_diagnosis
+```
+
+Terminal recovery must remove only exact current AMN2-owned objects and prove
+foreign persistent/volatile equality. No AWG stop, foreign-service mutation,
+USA data change, or blind install retry is permitted.
+
+## Previous override 2026-07-24: transaction `2315…` recovered; v14 package is the only retry candidate
 
 Terminal recovery for transaction
 `2315caba94df97a4a34c665fb58401f0bd56e1721a7cea59af20c38f23b8046c` passed

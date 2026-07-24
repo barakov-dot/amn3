@@ -1,6 +1,27 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
-## Current operational override — 2026-07-24: transaction `2315…` recovered; v14 classic-vfs package locally verified
+## Current operational override — 2026-07-24: v14 reached Docker; transaction `544db…` requires recovery
+
+The approved v14 install reached `docker_started`, but its retained mutation
+ledger shows `awg_image_loaded=abandoned`. Automatic rollback made all four
+AMN2 units `inactive`; it could not complete normal cleanup of the dedicated
+Docker tree and therefore left only current transaction
+`544db99ee620bc0139914c75db98c9a2e16797aadffa6c106923825fc17a6b54` in
+`manual_recovery_required`.
+
+Read-only exact bindings are transaction
+`89a9bec68c026ff6aa2865ab65f1a91333046e458746499ee29738b3a663c5cf`, capsule
+`6411c3a47d8055cf70dc4a2082d4fd23752c94698f6dcfde96da4ff3026af723`, Docker
+tree `0a086299782791b40464cf51087c9e72cbfbac254200cd4e39191f395e06c331`
+(`2268` entries, `42532407` bytes, root mode `0710`, two regular block devices
+RDEV `64770`, zero whiteouts, one filesystem/no nested mounts).
+
+Next live order is exact manual cleanup of `/opt/amn2-spain-package`, then
+exact terminal recovery of the recorded current contour with foreign equality.
+Do not retry install or claim foreign equality until that terminal receipt
+passes. USA remains rollback contour; foreign Spain service is immutable.
+
+## Previous operational override — 2026-07-24: transaction `2315…` recovered; v14 classic-vfs package locally verified
 
 Transaction `2315caba94df97a4a34c665fb58401f0bd56e1721a7cea59af20c38f23b8046c`
 terminally recovered: checksum-bound receipt=`passed`, action=
