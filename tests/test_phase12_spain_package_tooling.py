@@ -104,6 +104,18 @@ TRANSACTION_2F647_TERMINAL_RECOVERY_SSH_RUNNER = (
     / "vps"
     / "phase12_spain_transaction_2f647_terminal_recovery_ssh_runner.ps1"
 )
+TRANSACTION_2315_MANUAL_CLEANUP_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_2315_manual_cleanup_ssh_runner.ps1"
+)
+TRANSACTION_2315_TERMINAL_RECOVERY_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_2315_terminal_recovery_ssh_runner.ps1"
+)
 TRACKED_PACKAGE_ROOT = ROOT / "packaging" / "phase12-spain"
 HOST_IDENTITY_SHA256 = "7" * 64
 BOOT_ID = "12345678-1234-1234-1234-123456789abc"
@@ -4055,6 +4067,35 @@ def test_transaction_2f647_terminal_recovery_runner_is_pinned_and_action_bound()
     assert "stat -c %d /var/lib/amn2-spain-docker" in source
     assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in source
     assert "VERIFY FOREIGN EQUALITY" in source
+
+
+def test_transaction_2315_recovery_runners_are_pinned_and_action_bound() -> None:
+    cleanup = TRANSACTION_2315_MANUAL_CLEANUP_SSH_RUNNER.read_text(encoding="utf-8")
+    terminal = TRANSACTION_2315_TERMINAL_RECOVERY_SSH_RUNNER.read_text(encoding="utf-8")
+    nonce = "2315caba94df97a4a34c665fb58401f0bd56e1721a7cea59af20c38f23b8046c"
+    transaction = "e4507cd1483d9b6aeb89da825ffed9b18bba8239ce7aacbba97e1b9e36aedc74"
+    capsule = "e9e2b849a8afa296cad980396f5bec81dc5fe15913a99d5df738fa15cb4cef12"
+    tree = "067776d5cff3b28c7404ff9f9a6494ea2bd7c7fb473b410dcc62f37282a419e4"
+    for source in (cleanup, terminal):
+        assert "StrictHostKeyChecking=yes" in source
+        assert '$expectedExecutorSha = "D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29"' in source
+        assert f'$expectedNonce = "{nonce}"' in source
+        assert f'$expectedTransactionSha = "{transaction}"' in source
+        assert "scp.exe" not in source
+        assert "install-bound" not in source
+    assert "manual-cleanup-bound" in cleanup
+    assert "terminal-recovery-bound" not in cleanup
+    assert "REMOVE ONLY VERIFIED RETAINED PACKAGE TREE" in cleanup
+    assert "terminal-recovery-bound" in terminal
+    assert f'$expectedCapsuleSha = "{capsule}"' in terminal
+    assert f'$expectedDockerTreeSha = "{tree}"' in terminal
+    assert "$expectedDockerTreeEntries = 2268" in terminal
+    assert "$expectedDockerTreeBytes = 42532407" in terminal
+    assert "$expectedRegularBlockDevices = 2" in terminal
+    assert "$expectedRegularBlockRdev = 64770" in terminal
+    assert "$expectedWhiteoutCount = 0" in terminal
+    assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in terminal
+    assert "VERIFY FOREIGN EQUALITY" in terminal
 
 
 def test_standalone_executor_bundle_build_is_deterministic_and_fail_closed(

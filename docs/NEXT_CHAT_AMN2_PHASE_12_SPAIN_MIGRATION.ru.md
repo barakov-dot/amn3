@@ -1,5 +1,29 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-24: transaction `2315…` must be recovered before any retry
+
+The approved vfs-bound install reached `docker_started`, observed the dedicated
+vfs driver, then failed on abandoned `docker image load` action
+`awg_image_loaded`. Automatic rollback removed the normal AMN2 contour, but
+current transaction remains `manual_recovery_required`; no install retry is
+permitted.
+
+```text
+nonce=2315caba94df97a4a34c665fb58401f0bd56e1721a7cea59af20c38f23b8046c
+transaction_sha256=e4507cd1483d9b6aeb89da825ffed9b18bba8239ce7aacbba97e1b9e36aedc74
+capsule_sha256=e9e2b849a8afa296cad980396f5bec81dc5fe15913a99d5df738fa15cb4cef12
+executor_sha256=D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29
+docker_tree_sha256=067776d5cff3b28c7404ff9f9a6494ea2bd7c7fb473b410dcc62f37282a419e4
+docker_tree=entries_2268|bytes_42532407|root_mode_0710|single_filesystem|nested_mounts_0|regular_blocks_2_rdev_64770|whiteouts_0
+next_gate=commit_push_then_exact_manual_cleanup_then_exact_terminal_recovery
+```
+
+Recovery removes only the exact retained AMN2 package/runtime/config/DB/Docker
+contour and verifies persistent foreign equality with volatile receipt. It does
+not stop AMN2/AWG (all units are inactive), alter the foreign service, or
+touch USA. The only runtime causal label remains `unsupported`; do not treat
+vfs as a reason to retry before recovery and a new bounded diagnosis.
+
 ## Current override 2026-07-24: vfs-bound retry ready after transaction `2f647…` recovery
 
 Transaction `2f647f44976725fc569b045f923452b523db75c5edc86d651197875e1be887ed`

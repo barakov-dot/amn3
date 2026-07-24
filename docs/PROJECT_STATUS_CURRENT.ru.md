@@ -1,4 +1,31 @@
-# Текущий override 2026-07-24: Phase 12 vfs-bound fresh-install retry gate
+# Текущий override 2026-07-24: Phase 12 transaction `2315…` recovery gate after vfs attempt
+
+Checksum-bound vfs install был выполнен с package
+`192189BA6E8832223322FF5D90574265D9137DB281E3F14FE43B3DA76BD95C1F`.
+Dedicated Docker config подтвердил `storage-driver=vfs`, но runtime остановился
+на abandoned `awg_image_loaded` (`docker image load`). Automatic rollback
+удалил units/DB/config/runtime, но terminal ledger current transaction остался
+`manual_recovery_required`; повторять install запрещено.
+
+Pinned read-only receipt current transaction:
+`nonce=2315caba94df97a4a34c665fb58401f0bd56e1721a7cea59af20c38f23b8046c`,
+transaction SHA-256=`e4507cd1483d9b6aeb89da825ffed9b18bba8239ce7aacbba97e1b9e36aedc74`,
+capsule SHA-256=`e9e2b849a8afa296cad980396f5bec81dc5fe15913a99d5df738fa15cb4cef12`.
+Exact retained AMN2 Docker tree: SHA-256
+`067776d5cff3b28c7404ff9f9a6494ea2bd7c7fb473b410dcc62f37282a419e4`,
+2268 entries, 42532407 bytes, root mode `0710`, one filesystem/no nested
+mounts; canonical scanner accepted two regular block entries (`rdev=64770`)
+and zero whiteouts.
+Foreign service и USA не затрагивались; AMN2 units inactive.
+
+Следующий единственный mutation path: exact `manual-cleanup-bound` удаляет
+только retained `/opt/amn2-spain-package`, затем exact
+`terminal-recovery-bound` удаляет только recorded current AMN2 contour и
+проверяет dynamic foreign equality. Причина `docker image load` остаётся
+неустановленной beyond allowlisted `unsupported`; vfs не является основанием
+для нового install retry до recovery и отдельной диагностики.
+
+# Предыдущий override 2026-07-24: Phase 12 vfs-bound fresh-install retry gate
 
 Transaction `2f647f44976725fc569b045f923452b523db75c5edc86d651197875e1be887ed`
 полностью terminally recovered. Exact `manual-cleanup-bound` удалил только

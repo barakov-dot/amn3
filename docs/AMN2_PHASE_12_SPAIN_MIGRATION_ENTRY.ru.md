@@ -1,5 +1,25 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-24: vfs attempt ended in terminal recovery
+
+Approved vfs-bound install выполнил package staging, clean DB, units и
+dedicated Docker startup, однако `docker image load` action `awg_image_loaded`
+стал abandoned. Automatic rollback не запускал AMN2 и удалил normal owned
+contour, но оставил transaction
+`2315caba94df97a4a34c665fb58401f0bd56e1721a7cea59af20c38f23b8046c` в
+`manual_recovery_required`. Install повторять нельзя.
+
+Read-only canonical recovery scan привязан к transaction
+`e4507cd1483d9b6aeb89da825ffed9b18bba8239ce7aacbba97e1b9e36aedc74`,
+capsule `e9e2b849a8afa296cad980396f5bec81dc5fe15913a99d5df738fa15cb4cef12`
+и AMN2-owned Docker tree
+`067776d5cff3b28c7404ff9f9a6494ea2bd7c7fb473b410dcc62f37282a419e4`
+(2268 entries, 42532407 bytes, `0710`, one filesystem/no nested mounts,
+two canonical regular block entries with `rdev=64770`, zero whiteouts).
+Следующий gate — two-step checksum-bound
+manual cleanup then terminal recovery with dynamic foreign equality. Foreign
+Spain service остаётся immutable; USA остаётся rollback contour.
+
 ## Current operational override — 2026-07-24: terminal recovery passed, vfs package ready
 
 Transaction `2f647…887ed` больше не требует recovery action: checksum-bound
