@@ -1,6 +1,29 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-07-24: transaction `2315…` must be recovered before any retry
+## Current override 2026-07-24: transaction `2315…` recovered; v14 package is the only retry candidate
+
+Terminal recovery for transaction
+`2315caba94df97a4a34c665fb58401f0bd56e1721a7cea59af20c38f23b8046c` passed
+with `foreign_service_persistent_equal=true` and volatile receipt `0/0`.
+`recovery_action=verified_previously_removed_owned_objects`; AMN2 remains
+stopped and foreign Spain/USA contours remain untouched.
+
+Only the new package may be used after local gates: it seals
+`storage-driver=vfs` plus `features.containerd-snapshotter=false`, based on
+read-only evidence `unsupported` + `overlayfs_present=false` after Docker 29
+image load. No network/listener/firewall policy changed.
+
+```text
+package_sha256=984A2D87CC46EE84302E2462571659141D649CFE94206DE9FA6BBCF7AD8FA15B
+manifest_sha256=7C897DA62CD64F77B008DABE4A9684DA1A9E06C637725EEAB69AD49468E14592
+executor_sha256=D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29
+package_bytes=139970560
+executor_bytes=145505
+verification=double_build_byte_equal|package_verify_passed|offline_extract_68_artifacts
+next=scoped_tests|diff_review|commit_push_readback|exact_install_approval
+```
+
+## Previous override 2026-07-24: transaction `2315…` must be recovered before any retry
 
 The approved vfs-bound install reached `docker_started`, observed the dedicated
 vfs driver, then failed on abandoned `docker image load` action

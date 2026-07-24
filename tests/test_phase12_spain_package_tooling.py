@@ -3931,10 +3931,10 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "192189BA6E8832223322FF5D90574265D9137DB281E3F14FE43B3DA76BD95C1F"' in source
-    assert '$expectedManifestSha = "5D6CB1F3CD76503A9C5301CF4AD2747C4595E0A5A7E251CE4E98C1D51AB72609"' in source
+    assert '$expectedPackageSha = "984A2D87CC46EE84302E2462571659141D649CFE94206DE9FA6BBCF7AD8FA15B"' in source
+    assert '$expectedManifestSha = "7C897DA62CD64F77B008DABE4A9684DA1A9E06C637725EEAB69AD49468E14592"' in source
     assert '$expectedExecutorSha = "D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29"' in source
-    assert 'phase12-spain-install-boundary-vfs-v13-20260724' in source
+    assert 'phase12-spain-install-boundary-classic-vfs-v14-20260724' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "Invoke-BoundedSshUpload" in source

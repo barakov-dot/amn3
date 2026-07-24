@@ -1,6 +1,26 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
-## Current operational override — 2026-07-24: vfs attempt ended in terminal recovery
+## Current operational override — 2026-07-24: transaction `2315…` recovered; v14 classic-vfs package locally verified
+
+Transaction `2315caba94df97a4a34c665fb58401f0bd56e1721a7cea59af20c38f23b8046c`
+terminally recovered: checksum-bound receipt=`passed`, action=
+`verified_previously_removed_owned_objects`, persistent foreign equality=`true`,
+volatile=`0/0`. AMN2 remains stopped; no foreign-service or USA mutation occurred.
+
+The failed Docker 29 image-load path was investigated read-only: allowlisted
+category=`unsupported`, `overlayfs_present=false`. The new fresh package keeps
+the dedicated `storage-driver=vfs` and adds sealed
+`features.containerd-snapshotter=false`; it changes no listener, firewall or
+network policy. Double builds are byte-equal and offline verify/extract passed.
+
+```text
+package=984A2D87CC46EE84302E2462571659141D649CFE94206DE9FA6BBCF7AD8FA15B
+manifest=7C897DA62CD64F77B008DABE4A9684DA1A9E06C637725EEAB69AD49468E14592
+executor=D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29
+next=scoped_local_verification_then_commit_push_readback_then_exact_install
+```
+
+## Previous operational override — 2026-07-24: vfs attempt ended in terminal recovery
 
 Approved vfs-bound install выполнил package staging, clean DB, units и
 dedicated Docker startup, однако `docker image load` action `awg_image_loaded`

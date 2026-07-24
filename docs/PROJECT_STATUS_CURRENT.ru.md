@@ -1,4 +1,29 @@
-# Текущий override 2026-07-24: Phase 12 transaction `2315…` recovery gate after vfs attempt
+# Текущий override 2026-07-24: transaction `2315…` recovered; v14 classic-vfs package locally verified
+
+Exact terminal recovery для transaction
+`2315caba94df97a4a34c665fb58401f0bd56e1721a7cea59af20c38f23b8046c`
+прошёл (`result=passed`,
+`recovery_action=verified_previously_removed_owned_objects`). Receipt подтвердил
+`foreign_service_persistent_equal=true`, volatile=`0/0`; AMN2 не стартовал,
+foreign Spain service и USA rollback contour не изменялись.
+
+Read-only evidence после failed `docker image load` связывает runtime с Docker
+29/containerd (`unsupported`, `overlayfs_present=false`). Новый sealed package
+сохраняет dedicated `storage-driver=vfs` и явно отключает
+`features.containerd-snapshotter`, чтобы image import использовал classic vfs
+path, без изменения listener/network/firewall policy.
+
+```text
+package_sha256=984A2D87CC46EE84302E2462571659141D649CFE94206DE9FA6BBCF7AD8FA15B
+package_bytes=139970560
+manifest_sha256=7C897DA62CD64F77B008DABE4A9684DA1A9E06C637725EEAB69AD49468E14592
+executor_sha256=D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29
+executor_bytes=145505
+local_verification=double_build_byte_equal|package_verify_passed|offline_extract_68_artifacts
+next_gate=scoped_tests|diff_review|commit_push_readback|checksum_bound_fresh_install
+```
+
+# Предыдущий override 2026-07-24: Phase 12 transaction `2315…` recovery gate after vfs attempt
 
 Checksum-bound vfs install был выполнен с package
 `192189BA6E8832223322FF5D90574265D9137DB281E3F14FE43B3DA76BD95C1F`.
