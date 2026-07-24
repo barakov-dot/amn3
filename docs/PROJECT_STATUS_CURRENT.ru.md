@@ -1,4 +1,4 @@
-# Текущий override 2026-07-24: v17 дошёл до terminal manual recovery; следующий gate — verified package cleanup
+# Текущий override 2026-07-24: v17 package cleanup passed; terminal recovery is checksum-bound
 
 Approved v17 install дошёл до remote state machine, но вернул fail-closed
 `production runtime rollback failed`. Pinned read-only receipt подтвердил
@@ -6,19 +6,23 @@ Approved v17 install дошёл до remote state machine, но вернул fai
 с SHA-256 `9BA96EF4766BB4905D327519EB41A4D25917AD2D084A6B1D0A066F340A859D2D`
 и состоянием `manual_recovery_required`. Повторять install запрещено.
 
-`/opt/amn2-spain-package` и recorded AMN2-owned trees retained; проверенные
-units `amn2-spain-web`, `amn2-spain-bot`, `awg-quick@awgsp0` и Docker
-`inactive`. Следующая операция ограничена checksum-bound remove-only cleanup
-package tree; terminal recovery и equality receipt следуют только после него.
-Foreign Spain service не останавливался; equality будет проверена terminal
-receipt. USA остаётся rollback contour.
+Checksum-bound manual cleanup passed: it removed only retained
+`/opt/amn2-spain-package` and preserved terminal ledger. Queried units
+`amn2-spain-web`, `amn2-spain-bot`, `awg-quick@awgsp0` and Docker remain
+`inactive`. A read-only scan of the dedicated Docker root produced the exact
+terminal binding below. The next live action is terminal recovery of only the
+recorded AMN2 contour; its receipt is the first post-failure foreign-equality
+proof. Foreign Spain service is not stopped; USA remains rollback contour.
 
 ```text
-current_cleanup_executor_sha256=B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9
-current_cleanup_executor_bytes=145873
-current_cleanup_nonce=e968810382104e77e136565b6e3b5b28987a670d314efcd9fb9b7982ef168c82
-current_cleanup_transaction_sha256=9BA96EF4766BB4905D327519EB41A4D25917AD2D084A6B1D0A066F340A859D2D
-next=targeted_test|parser|diff_review|commit_push_readback|exact_current_manual_cleanup
+terminal_executor_sha256=B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9
+terminal_executor_bytes=145873
+terminal_nonce=e968810382104e77e136565b6e3b5b28987a670d314efcd9fb9b7982ef168c82
+terminal_transaction_sha256=9BA96EF4766BB4905D327519EB41A4D25917AD2D084A6B1D0A066F340A859D2D
+terminal_capsule_sha256=3643DC676017DE057972EB5D93BE6F94A79B19A84CF6C3A352C56821C7680679
+terminal_docker_tree_sha256=DB16C4E758FE4D210E1F74EE0C2774A1B100FE535FA4B24C706E1FBE5A86467D
+terminal_docker_tree=2268|42532407|0710|block_rdev_64770|single_filesystem
+next=targeted_test|parser|diff_review|commit_push_readback|exact_current_terminal_recovery
 ```
 
 # Предыдущий override 2026-07-24: v17 устраняет подтверждённую FD race; два read-only probe passed, SCP не активен

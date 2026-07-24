@@ -1,6 +1,6 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-07-24: v17 install is terminal; current work is exact package cleanup
+## Current override 2026-07-24: v17 package cleanup passed; current work is exact terminal recovery
 
 The approved v17 runner reached the remote state machine and returned
 `production runtime rollback failed`. Do not retry it. Pinned read-only state
@@ -9,14 +9,16 @@ confirms newest transaction
 `9BA96EF4766BB4905D327519EB41A4D25917AD2D084A6B1D0A066F340A859D2D`, status
 `manual_recovery_required`.
 
-Only `manual-cleanup-bound` is next: remove verified retained
-`/opt/amn2-spain-package`, preserve terminal ledger, and do not start AMN2.
-It is bound to executor
+`manual-cleanup-bound` passed: it removed only verified retained
+`/opt/amn2-spain-package` and preserved terminal ledger. The current
+read-only Docker-tree binding is
+`DB16C4E758FE4D210E1F74EE0C2774A1B100FE535FA4B24C706E1FBE5A86467D`,
+2268 entries, 42532407 bytes, mode `0710`, two `rdev=64770` blocks, one
+filesystem/no nested mounts. Next is exact terminal recovery using executor
 `B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9`
-(`145873` bytes). Then bind terminal recovery to its exact Docker-tree receipt;
-only its passed receipt can establish post-failure foreign equality. Queried
-web, bot, AWG and Docker units are inactive; no foreign-service mutation is
-authorized and USA remains rollback contour.
+(`145873` bytes). Only its passed receipt establishes post-failure foreign
+equality. Queried web, bot, AWG and Docker units are inactive; no
+foreign-service mutation is authorized and USA remains rollback contour.
 
 ## Current override 2026-07-24: v17 bounded cgroup FD retry is locally and read-only verified
 

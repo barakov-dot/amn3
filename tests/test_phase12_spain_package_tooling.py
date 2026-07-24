@@ -4051,10 +4051,15 @@ def test_current_terminal_recovery_runner_is_remote_executor_pinned_and_action_b
     assert "terminal-recovery-receipt-bound" not in source
     assert "scp.exe" not in source
     assert "Remote current terminal recovery executor checksum mismatch." in source
-    assert '$expectedNonce = "1d7511ed51cb2d908b329386dcb8eb7fd5c727abc93346452ed35a66342204b4"' in source
-    assert '$expectedTransactionSha = "08f1c860652fb561e3c1c921756549d3aaccaf86543ceb6c7fea4ef845930883"' in source
-    assert '$expectedCapsuleSha = "2e146365a29c89e9466a8e54e174a3d4d2c969b2bfaeedc9531a59ec4f756a18"' in source
-    assert '$expectedDockerTreeSha = "6051924206a20bab41384c9def68cb7d09ab02756515a0dcc05c7e290e3f3248"' in source
+    assert '$expectedExecutorSha = "B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9"' in source
+    assert '$expectedExecutorBytes = 145873' in source
+    assert '$expectedNonce = "e968810382104e77e136565b6e3b5b28987a670d314efcd9fb9b7982ef168c82"' in source
+    assert '$expectedTransactionSha = "9ba96ef4766bb4905d327519eb41a4d25917ad2d084a6b1d0a066f340a859d2d"' in source
+    assert '$expectedCapsuleSha = "3643dc676017de057972eb5d93be6f94a79b19a84cf6c3a352c56821c7680679"' in source
+    assert '$expectedDockerTreeSha = "db16c4e758fe4d210e1f74ee0c2774a1b100fe535fa4b24c706e1fbe5a86467d"' in source
+    assert '$expectedDockerTreeEntries = 2268' in source
+    assert '$expectedDockerTreeBytes = 42532407' in source
+    assert '$expectedBlockRdev = 64770' in source
     assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in source
     assert "VERIFY FOREIGN EQUALITY" in source
 
