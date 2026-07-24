@@ -1,4 +1,39 @@
-# Текущий override 2026-07-24: v17 package cleanup passed; terminal recovery is checksum-bound
+# Текущий override 2026-07-24: terminal recovery passed; v18 bounded post-load diagnostic is locally ready
+
+Approved v17 install reached `awg_image_loaded` and failed closed. Exact manual
+cleanup and terminal recovery for nonce
+`e968810382104e77e136565b6e3b5b28987a670d314efcd9fb9b7982ef168c82` have
+now passed: only the recorded AMN2-owned contour was removed,
+`foreign_service_persistent_equal=true`, volatile counts are `0/0`, and the
+foreign Spain service was neither stopped nor mutated. AMN2 did not start and
+USA remains the rollback contour.
+
+The inner AWG archive is structurally correct for the sealed contract:
+`RepoTags=null`, `repositories={}`, and its config digest matches the pinned
+image ID; the local action adds the owned tag after load. The remote receipt
+did not preserve a Docker root cause, so v18 does not claim one. It maps every
+failure in the bounded `awg_image_loaded` create/tag/post-state path to the
+existing fixed `docker_image_load_*` allowlist, with no raw stderr or secrets.
+
+```text
+terminal_transaction_sha256=9BA96EF4766BB4905D327519EB41A4D25917AD2D084A6B1D0A066F340A859D2D
+terminal_capsule_sha256=3643DC676017DE057972EB5D93BE6F94A79B19A84CF6C3A352C56821C7680679
+terminal_docker_tree_sha256=DB16C4E758FE4D210E1F74EE0C2774A1B100FE535FA4B24C706E1FBE5A86467D
+terminal_recovery=passed|removed_verified_owned_objects|foreign_persistent_true|volatile_0_0
+v18_package_sha256=D44DDB455E831D2FD7EB4E303579203D09C8F402CB1EBADCF5679B4F9CE1E0FB
+v18_package_bytes=139970560
+v18_manifest_sha256=3F2BA2524775A3DF5AFE6B68CC2FFF721F914293F25A8FF61C79BFFF1DAA78AA
+v18_executor_sha256=C5704E0F83FEFDAFAFC6A7EE174F29C0559E39A1B2429E30D5EA0DF955BE690E
+v18_executor_bytes=146011
+v18_install_runner_sha256=1015AFACE40004422DD1B6232613061CFD98663AD542A90E1C2D999B22660D82
+v18_local_verification=double_build_byte_equal|package_verify_passed|offline_clean_room_68_artifacts|source_55dc243_verified|powershell_parser_passed|scoped_235_passed_4_skipped
+next_gate=diff_review|commit_push_origin_readback|exact_v18_install_approval
+```
+
+No SCP/upload or AMN2 service is active now. Do not retry v17; the next
+install attempt can use only the published v18 checksum-bound literal.
+
+# Предыдущий override 2026-07-24: v17 package cleanup passed; terminal recovery is checksum-bound
 
 Approved v17 install дошёл до remote state machine, но вернул fail-closed
 `production runtime rollback failed`. Pinned read-only receipt подтвердил

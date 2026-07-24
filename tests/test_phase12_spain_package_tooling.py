@@ -3946,12 +3946,12 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "1B01019DB68A50811AD093E9D2DCA51BD86A143A7ABBD2D0765056394700C768"' in source
-    assert '$expectedManifestSha = "D5830841AC55FD1B89552934C5A18C22955DF19B1C7B56F1E1DD4C5BE0F3B74A"' in source
-    assert '$expectedExecutorSha = "B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9"' in source
-    assert '$expectedExecutorBytes = 145873' in source
+    assert '$expectedPackageSha = "D44DDB455E831D2FD7EB4E303579203D09C8F402CB1EBADCF5679B4F9CE1E0FB"' in source
+    assert '$expectedManifestSha = "3F2BA2524775A3DF5AFE6B68CC2FFF721F914293F25A8FF61C79BFFF1DAA78AA"' in source
+    assert '$expectedExecutorSha = "C5704E0F83FEFDAFAFC6A7EE174F29C0559E39A1B2429E30D5EA0DF955BE690E"' in source
+    assert '$expectedExecutorBytes = 146011' in source
     assert '$expectedCollectorSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"' in source
-    assert 'phase12-spain-install-boundary-cgroup-fd-retry-v17-20260724' in source
+    assert 'phase12-spain-install-boundary-postload-label-v18-20260724' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "Invoke-BoundedSshUpload" in source

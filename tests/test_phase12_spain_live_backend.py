@@ -2324,6 +2324,34 @@ class ProductionDockerRuntimeTests(unittest.TestCase):
             self.assertNotIn(live_backend.DOCKER_IMAGE_LOAD_ARGV, calls)
             self.assertIn(live_backend.DOCKER_IMAGE_TAG_ARGV, calls)
 
+    def test_post_load_image_state_failure_has_bounded_load_label(self) -> None:
+        """Keep a post-load Docker state failure non-sensitive and diagnosable."""
+
+        class PostLoadStateDriftRunner(_FakeDockerRunner):
+            def __call__(self, argv: tuple[str, ...], **kwargs: object) -> bytes:
+                if argv == live_backend.DOCKER_IMAGE_TAG_ARGV:
+                    self.assert_allowed(argv)
+                    self.calls.append((argv, dict(kwargs)))
+                    # Docker accepted the tag command but its subsequent image state
+                    # does not meet the exact full-image contract.
+                    return b""
+                return super().__call__(argv, **kwargs)
+
+        archive_body = self._image_archive()
+        with tempfile.TemporaryDirectory() as raw:
+            archive = Path(raw) / "awg-image.tar"
+            archive.write_bytes(archive_body)
+            action = live_backend.build_awg_image_action(
+                runner=PostLoadStateDriftRunner(),
+                archive_path=archive,
+                expected_sha256=hashlib.sha256(archive_body).hexdigest(),
+                expected_size=len(archive_body),
+            )
+            with self.assertRaisesRegex(
+                BackendError, "^docker_image_load_command_failed$"
+            ):
+                action.create_exact()
+
     def test_nonzero_peer_health_fails_closed_without_restart(self) -> None:
         runner = _FakeDockerRunner()
         runner.image = "full"

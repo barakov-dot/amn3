@@ -1,6 +1,36 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-07-24: v17 package cleanup passed; current work is exact terminal recovery
+## Current override 2026-07-24: terminal recovery passed; v18 is the sole local install candidate
+
+v17 is consumed and must not be retried. The exact cleanup and terminal
+recovery of nonce
+`e968810382104e77e136565b6e3b5b28987a670d314efcd9fb9b7982ef168c82` passed
+with transaction SHA-256
+`9BA96EF4766BB4905D327519EB41A4D25917AD2D084A6B1D0A066F340A859D2D`:
+`recovery_action=removed_verified_owned_objects`, persistent foreign equality
+`true`, volatile `0/0`. AMN2 did not start; the foreign Spain service and USA
+rollback contour are unchanged.
+
+v18 is a narrow diagnostics correction, not a claim about Docker root cause:
+the image archive is intentionally untagged and structurally valid, while any
+bounded `awg_image_loaded` create/tag/post-state error is retained as a fixed
+`docker_image_load_*` label through recovery. No raw stderr is persisted.
+
+```text
+package_sha256=D44DDB455E831D2FD7EB4E303579203D09C8F402CB1EBADCF5679B4F9CE1E0FB
+package_bytes=139970560
+manifest_sha256=3F2BA2524775A3DF5AFE6B68CC2FFF721F914293F25A8FF61C79BFFF1DAA78AA
+executor_sha256=C5704E0F83FEFDAFAFC6A7EE174F29C0559E39A1B2429E30D5EA0DF955BE690E
+executor_bytes=146011
+runner_sha256=1015AFACE40004422DD1B6232613061CFD98663AD542A90E1C2D999B22660D82
+verification=double_build_byte_equal|package_verify_passed|offline_clean_room_68_artifacts|source_55dc243_verified|powershell_parser_passed|scoped_235_passed_4_skipped
+next=diff_review|commit_push_origin_readback|exact_checksum_bound_v18_install
+```
+
+No SCP/upload is active. Proceed locally through diff review and publish
+readback; then use only the new v18 literal for install.
+
+## Previous override 2026-07-24: v17 package cleanup passed; current work is exact terminal recovery
 
 The approved v17 runner reached the remote state machine and returned
 `production runtime rollback failed`. Do not retry it. Pinned read-only state

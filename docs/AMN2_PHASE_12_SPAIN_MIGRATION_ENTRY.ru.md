@@ -1,6 +1,36 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
-## Current operational override — 2026-07-24: v17 cleanup passed; exact terminal recovery is next
+## Current operational override — 2026-07-24: terminal recovery passed; v18 diagnostic install candidate is locally verified
+
+The v17 transaction `e968810382104e77e136565b6e3b5b28987a670d314efcd9fb9b7982ef168c82`
+is no longer pending recovery. Exact manual cleanup and terminal recovery
+passed against transaction SHA-256
+`9BA96EF4766BB4905D327519EB41A4D25917AD2D084A6B1D0A066F340A859D2D`:
+only exact AMN2-owned objects were removed; foreign equality is persistent
+`true`, volatile `0/0`. No AMN2/AWG start, foreign-service mutation, or USA
+change occurred.
+
+Local v18 preserves the same pinned inputs and changes only the failure
+boundary of `awg_image_loaded`: post-load/tag/state `BackendError` is emitted
+as one existing bounded `docker_image_load_*` label. The sealed inner AWG
+archive is intentionally untagged (`RepoTags=null`, `repositories={}`), then
+tagged by the owned local Docker action; this is not a static archive mismatch.
+The actual Docker root cause remains unproven and is not claimed.
+
+```text
+v18_package=D44DDB455E831D2FD7EB4E303579203D09C8F402CB1EBADCF5679B4F9CE1E0FB|139970560
+v18_manifest=3F2BA2524775A3DF5AFE6B68CC2FFF721F914293F25A8FF61C79BFFF1DAA78AA
+v18_executor=C5704E0F83FEFDAFAFC6A7EE174F29C0559E39A1B2429E30D5EA0DF955BE690E|146011
+v18_runner=1015AFACE40004422DD1B6232613061CFD98663AD542A90E1C2D999B22660D82
+terminal_recovery=passed|removed_verified_owned_objects|persistent_true|volatile_0_0
+local=double_build_byte_equal|offline_clean_room_68_artifacts|source_55dc243_verified|powershell_parser_passed|scoped_235_passed_4_skipped
+next=diff_review|commit_push_readback|exact_checksum_bound_v18_install
+```
+
+No SCP/upload is active. v17 must not be retried; only the published v18
+checksum-bound literal may start a new install attempt.
+
+## Previous operational override — 2026-07-24: v17 cleanup passed; exact terminal recovery is next
 
 The approved v17 install entered the remote state machine and returned
 fail-closed `production runtime rollback failed`. A subsequent pinned read-only

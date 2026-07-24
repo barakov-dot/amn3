@@ -4776,19 +4776,25 @@ def build_awg_image_action(
         return None if _docker_image_state(runner) == "absent" else desired
 
     def create() -> None:
-        state = _docker_image_state(runner)
-        if state == "absent":
-            _load_bound_awg_image(
-                runner,
-                Path(archive_path),
-                expected_sha256=expected_sha256,
-                expected_size=expected_size,
-            )
+        try:
             state = _docker_image_state(runner)
-        if state == "partial":
-            runner(DOCKER_IMAGE_TAG_ARGV)
-        if _docker_image_state(runner) != "full":
-            raise BackendError("Docker image post-create drift")
+            if state == "absent":
+                _load_bound_awg_image(
+                    runner,
+                    Path(archive_path),
+                    expected_sha256=expected_sha256,
+                    expected_size=expected_size,
+                )
+                state = _docker_image_state(runner)
+            if state == "partial":
+                runner(DOCKER_IMAGE_TAG_ARGV)
+            if _docker_image_state(runner) != "full":
+                raise BackendError("Docker image post-create drift")
+        except BackendError as exc:
+            # The outer install/rollback path exposes only this allowlisted
+            # Docker-load classification.  It must also cover post-load state
+            # validation and tagging, not just the `docker image load` argv.
+            raise BackendError(_bounded_docker_image_load_failure_label(exc)) from exc
 
     def remove(identity: str) -> None:
         if identity != desired:
