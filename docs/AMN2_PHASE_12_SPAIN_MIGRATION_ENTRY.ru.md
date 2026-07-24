@@ -1,36 +1,29 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
-## Current operational override — 2026-07-24: v18 ended fail-closed; transaction `00d9da…` is recovery-only
+## Current operational override — 2026-07-24: `00d9da…` terminal recovery passed; no blind v19 retry
 
-The approved v18 install reached the owned `awg_image_loaded` action and
-returned fail-closed `production runtime rollback failed:`
-`docker_image_load_command_failed`. The label covers the bounded image
-create/tag/post-state path; it does not establish the underlying Docker root
-cause. Do not retry install.
-
-Pinned read-only evidence establishes current transaction
-`00d9daecb6701b443d5714e7d08ec8715ad8ce6aa01712607463b572a5212972` as
-`manual_recovery_required`; web, bot, AWG/network and Docker units are
-inactive. Retained package and Docker trees are present. The canonical
-no-follow Docker-tree scan was executed through the exact uploaded executor
-and is sealed as follows:
+The v18 `awg_image_loaded` failure was followed by exact manual cleanup and
+terminal recovery for transaction
+`00d9daecb6701b443d5714e7d08ec8715ad8ce6aa01712607463b572a5212972`.
+Both passed and removed only recorded AMN2-owned objects. The terminal receipt
+proves persistent foreign equality `true`, volatile `0/0`; the pinned
+postcheck finds all six owned paths absent and web/bot/Docker/network/AWG
+inactive. Foreign service and USA were not changed.
 
 ```text
 transaction=704C0C085B5F4CEC40FC7A8C9E7F7C7E55F29027F4D3168393E16C26B9090CE4
 capsule=19ADD794051040AC287D6DDB842E82DC01A96322BD135F9951A1412D18597A95
-docker_tree=587E6D2B0179317FDBDBB53D125B757DC53FD93E3B0CC786EC5D2D54FC010430|2268|42532407|0710
-executor=C5704E0F83FEFDAFAFC6A7EE174F29C0559E39A1B2429E30D5EA0DF955BE690E|146011
-manual_cleanup_runner=A279C05FBAAFD5D4C15A55BFF7A6B3EBED711A5978CF6A75B153EC4A097C1C09
-terminal_recovery_runner=7AB1FBD2E7E6129B238037E2A57FF86E41B4B76D3C1B0E9F2BD2DED6F8FBBA23
-local=red_green_binding_test|powershell_parser_passed|package_tooling_157_passed
-next=publish_readback|exact_manual_cleanup|exact_terminal_recovery
+manual_cleanup=passed|8D5844259EAD4DC00CB9AF149EEB1EC856583F98871C824DF8DAE062157D358A
+terminal_recovery=passed|06E1AF92C39EC799187A9304C2A4C5499E3668DC86873A4A77B26111AC57E9F4
+foreign=persistent_true|volatile_0_0
+journal=512_owned_docker_lines|snapshotter_overlay_error_5|image_load_only_unsupported_0|no_layer_permission_vfs_error
+next=architecture_decision_before_any_new_install_candidate
 ```
 
-The recovery order is fixed: checksum-bound manual cleanup removes only the
-verified retained package tree and preserves the ledger; checksum-bound
-terminal recovery then removes only the exact recorded AMN2 contour and
-verifies dynamic foreign equality. It does not start AMN2, stop/mutate the
-foreign Spain service, or change USA.
+The bounded `docker_image_load_command_failed` label is not a proven root
+cause. The current journal evidence contains only containerd/snapshotter
+overlay errors, not an image-load-only error. A new package/retry would be
+blind and is prohibited until the runtime path is selected explicitly.
 
 ## Current operational override — 2026-07-24: terminal recovery passed; v18 diagnostic install candidate is locally verified
 
