@@ -3946,11 +3946,11 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "DAA40D48B88B2AFB0FC4A57A1E5313D8B2851BCED89AEC655B628CB859AEA585"' in source
-    assert '$expectedManifestSha = "F13A7C4A02F7B9233629AD06DF06265BB1FC84B69478B4BDB03F1484515C79F2"' in source
-    assert '$expectedExecutorSha = "07E066F15FA671DBF9B9F74ECAD2373C00D4A7551972E316F51BCB8265B630CC"' in source
-    assert '$expectedExecutorBytes = 145791' in source
-    assert 'phase12-spain-install-boundary-bounded-load-v15-20260724' in source
+    assert '$expectedPackageSha = "1B01019DB68A50811AD093E9D2DCA51BD86A143A7ABBD2D0765056394700C768"' in source
+    assert '$expectedManifestSha = "D5830841AC55FD1B89552934C5A18C22955DF19B1C7B56F1E1DD4C5BE0F3B74A"' in source
+    assert '$expectedExecutorSha = "79A6EF80B1209F35E05958709B671A14CADB26F62647C39BCE6132787AE3A5BB"' in source
+    assert '$expectedExecutorBytes = 145806' in source
+    assert 'phase12-spain-install-boundary-bounded-load-v16-20260724' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "Invoke-BoundedSshUpload" in source
@@ -3966,6 +3966,7 @@ def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() 
     assert '"/root/amn2-spain-phase12-install-a.tar"' in source
     assert '"/root/amn2-spain-phase12-executor-a.pyz"' in source
     assert "CopyToAsync" in source
+    assert "[void]$copyTask.GetAwaiter().GetResult()" in source
     assert "[void][Threading.Tasks.Task]::WaitAll" in source
     assert "installResult.Stderr" in source
     assert "remoteArtifactsReady" in source

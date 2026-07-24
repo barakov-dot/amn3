@@ -143,6 +143,15 @@ class FixedCommandRunnerTests(unittest.TestCase):
                 with self.assertRaisesRegex(BackendError, "^" + label + "$"):
                     runner(live_backend.DOCKER_IMAGE_LOAD_ARGV)
 
+    def test_closed_image_load_runner_maps_non_backend_failure_to_allowlist(self) -> None:
+        def fail(_argv: tuple[str, ...], **_kwargs: object) -> bytes:
+            raise OSError("private transport detail")
+
+        runner = live_backend._closed_docker_runner(fail)
+
+        with self.assertRaisesRegex(BackendError, "^docker_image_load_command_failed$"):
+            runner(live_backend.DOCKER_IMAGE_LOAD_ARGV)
+
     def test_streams_large_regular_fd_without_the_small_input_bytes_limit(self) -> None:
         argv = (
             sys.executable,

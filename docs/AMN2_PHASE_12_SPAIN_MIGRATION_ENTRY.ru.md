@@ -1,6 +1,30 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
-## Current operational override — 2026-07-24: v15 install ended fail-closed; `a75d9d…` recovery is required
+## Current operational override — 2026-07-24: `a75d9d…` recovered; v16 is the sole local install candidate
+
+Exact manual cleanup and terminal recovery for
+`a75d9d957ace99c8d74c20d45c029e2e08d355a2c5a370d0066972561e73a1ac` passed.
+Only recorded AMN2-owned objects were removed; the receipt records persistent
+foreign equality `true` and volatile counts `0/0`. No AMN2/AWG start, foreign
+Spain service mutation, or USA change occurred. No SCP/upload is currently
+running.
+
+v16 fixes the closed-runner ordinary-exception path that caused v15 to report
+only a generic terminal failure. It converts that image-load-only path to the
+fixed `docker_image_load_command_failed` label without exposing stderr. It is
+not a claim of a Docker root cause, and it changes no resource plan or runtime
+payload.
+
+```text
+package=1B01019DB68A50811AD093E9D2DCA51BD86A143A7ABBD2D0765056394700C768
+manifest=D5830841AC55FD1B89552934C5A18C22955DF19B1C7B56F1E1DD4C5BE0F3B74A
+executor=79A6EF80B1209F35E05958709B671A14CADB26F62647C39BCE6132787AE3A5BB|145806
+runner=C6DB6A5AE4F4491A79789A9E2746B632257EDBE028C0AD450D6E6593D86ED6C2
+local=package_executor_double_build_equal|offline_clean_room_passed|scoped_234_passed_4_skipped|powershell_parse_passed
+next=diff_review|commit_push_readback|exact_checksum_bound_v16_install
+```
+
+## Previous operational override — 2026-07-24: v15 install ended fail-closed; `a75d9d…` recovery is required
 
 The approved v15 install reached the remote state machine and returned only
 `production runtime rollback failed`; it did not expose a causal Docker label,

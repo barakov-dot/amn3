@@ -7,12 +7,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
-$expectedPackageSha = "DAA40D48B88B2AFB0FC4A57A1E5313D8B2851BCED89AEC655B628CB859AEA585"
+$expectedPackageSha = "1B01019DB68A50811AD093E9D2DCA51BD86A143A7ABBD2D0765056394700C768"
 $expectedPackageBytes = 139970560
-$expectedManifestSha = "F13A7C4A02F7B9233629AD06DF06265BB1FC84B69478B4BDB03F1484515C79F2"
+$expectedManifestSha = "D5830841AC55FD1B89552934C5A18C22955DF19B1C7B56F1E1DD4C5BE0F3B74A"
 $expectedPlanSha = "8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43"
-$expectedExecutorSha = "07E066F15FA671DBF9B9F74ECAD2373C00D4A7551972E316F51BCB8265B630CC"
-$expectedExecutorBytes = 145791
+$expectedExecutorSha = "79A6EF80B1209F35E05958709B671A14CADB26F62647C39BCE6132787AE3A5BB"
+$expectedExecutorBytes = 145806
 $expectedCollectorSha = "70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A"
 $run009EvidenceSha = "8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8"
 $fingerprintArraySha = "E15219CB5204D54A9AD11263CFBA1F7C86E16DAB3287C752A8B6F136EC4A5ED5"
@@ -21,7 +21,7 @@ $expectedBootSha = "099155E2A5578144C715124A1B9B4D8F5D572134C8F72FD98B75D5DE0EB5
 $uploadTimeoutMilliseconds = 900000
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-boundary-bounded-load-v15-20260724"
+$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-boundary-bounded-load-v16-20260724"
 $packagePath = Join-Path $artifactRoot "package-a.tar"
 $executorPath = Join-Path $artifactRoot "executor-a.pyz"
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
@@ -96,7 +96,7 @@ function Invoke-BoundedSshUpload([string]$SourcePath, [string]$Destination) {
             $timedOut = $true
             throw "Approved artifact upload exceeded 900 seconds."
         }
-        $copyTask.GetAwaiter().GetResult()
+        [void]$copyTask.GetAwaiter().GetResult()
         $process.StandardInput.Close()
         $remaining = [Math]::Max(0, $uploadTimeoutMilliseconds - [int]$deadline.ElapsedMilliseconds)
         if (-not $process.WaitForExit($remaining)) {

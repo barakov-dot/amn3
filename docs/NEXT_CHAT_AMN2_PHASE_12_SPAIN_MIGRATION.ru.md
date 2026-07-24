@@ -1,6 +1,31 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-07-24: recover `a75d9d…` before any v15 retry
+## Current override 2026-07-24: `a75d9d…` recovered; commit/push v16 before one new install attempt
+
+The exact cleanup and terminal recovery of transaction
+`a75d9d957ace99c8d74c20d45c029e2e08d355a2c5a370d0066972561e73a1ac` passed.
+They removed only recorded AMN2-owned objects and proved
+`foreign_service_persistent_equal=true`, volatile `0/0`. No AMN2/AWG start,
+foreign-service mutation, or USA change occurred. There is no active SCP or
+remote install now.
+
+v16 is the only local candidate. It maps the formerly unclassified ordinary
+exception from the Docker image-load closed runner to the fixed
+`docker_image_load_command_failed` label; it exposes no stderr and makes no
+claim about the underlying Docker cause. The package delta is only its manifest
+and live-backend script; resource plan and runtime payload stay unchanged.
+
+```text
+package_sha256=1B01019DB68A50811AD093E9D2DCA51BD86A143A7ABBD2D0765056394700C768
+manifest_sha256=D5830841AC55FD1B89552934C5A18C22955DF19B1C7B56F1E1DD4C5BE0F3B74A
+executor_sha256=79A6EF80B1209F35E05958709B671A14CADB26F62647C39BCE6132787AE3A5BB
+executor_bytes=145806
+install_runner_sha256=C6DB6A5AE4F4491A79789A9E2746B632257EDBE028C0AD450D6E6593D86ED6C2
+verification=double_build_byte_equal|offline_clean_room_passed|scoped_234_passed_4_skipped|powershell_parse_passed
+next=diff_review|commit_push_origin_readback|exact_v16_install_approval
+```
+
+## Previous override 2026-07-24: recover `a75d9d…` before any v15 retry
 
 The approved v15 install is fail-closed, not a retry candidate. Its only safe
 current state is transaction

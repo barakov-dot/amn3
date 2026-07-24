@@ -1,4 +1,33 @@
-# Текущий override 2026-07-24: v15 install fail-closed; transaction `a75d9d…` требует exact recovery
+# Текущий override 2026-07-24: `a75d9d…` terminal recovery passed; v16 готов локально, SCP не активен
+
+Exact manual cleanup и terminal recovery transaction
+`a75d9d957ace99c8d74c20d45c029e2e08d355a2c5a370d0066972561e73a1ac`
+прошли. Recovery удалил только recorded AMN2-owned contour;
+`foreign_service_persistent_equal=true`, volatile=`0/0`. AMN2/AWG не
+стартовали, foreign Spain service не останавливался/не изменялся, USA остаётся
+rollback contour. На Spain сейчас нет активного SCP или install.
+
+v15 fail-closed не повторяется: локально подтверждён путь обычного exception,
+который обходил allowlisted diagnostic для `docker image load`. v16 закрывает
+только этот путь фиксированным `docker_image_load_command_failed`, не выводит
+raw stderr и не утверждает недоказанную Docker root cause. Package delta:
+только `manifest.json` и `scripts/phase12_spain_live_backend.py`; resource
+plan и runtime payload не изменены.
+
+```text
+recovered_transaction_sha256=B87AD6123C37DB4D10F7E082951A411FE313E18F584AC91579CD5AFCF3E686E3
+recovery_capsule_sha256=C5E164098E25AB9643FABAF707BD1F760108805F06663E1E825CCDF8E7B7F350
+v16_package_sha256=1B01019DB68A50811AD093E9D2DCA51BD86A143A7ABBD2D0765056394700C768
+v16_package_bytes=139970560
+v16_manifest_sha256=D5830841AC55FD1B89552934C5A18C22955DF19B1C7B56F1E1DD4C5BE0F3B74A
+v16_executor_sha256=79A6EF80B1209F35E05958709B671A14CADB26F62647C39BCE6132787AE3A5BB
+v16_executor_bytes=145806
+v16_install_runner_sha256=C6DB6A5AE4F4491A79789A9E2746B632257EDBE028C0AD450D6E6593D86ED6C2
+local_verification=double_build_byte_equal|offline_clean_room_passed|scoped_234_passed_4_skipped|powershell_parser_passed
+next_gate=diff_review|commit_push_origin_readback|exact_v16_install_approval
+```
+
+# Предыдущий override 2026-07-24: v15 install fail-closed; transaction `a75d9d…` требует exact recovery
 
 Одобренный v15 checksum-bound install прошёл remote artifact binding, но
 завершился fail-closed с `production runtime rollback failed`. Новый runtime

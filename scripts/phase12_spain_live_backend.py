@@ -4524,6 +4524,8 @@ def _closed_docker_runner(
                 raise BackendError(_bounded_docker_image_load_failure_label(exc)) from None
             raise BackendError("Docker command failed") from None
         except Exception:
+            if argv == DOCKER_IMAGE_LOAD_ARGV:
+                raise BackendError("docker_image_load_command_failed") from None
             raise BackendError("Docker command failed") from None
         if not isinstance(result, bytes) or len(result) > MAX_COMMAND_OUTPUT:
             raise BackendError("Docker command output invalid")
