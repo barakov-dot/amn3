@@ -1,4 +1,27 @@
-# Текущий override 2026-07-24: v17 устраняет подтверждённую FD race; два read-only probe passed, SCP не активен
+# Текущий override 2026-07-24: v17 дошёл до terminal manual recovery; следующий gate — verified package cleanup
+
+Approved v17 install дошёл до remote state machine, но вернул fail-closed
+`production runtime rollback failed`. Pinned read-only receipt подтвердил
+самую свежую transaction `e968810382104e77e136565b6e3b5b28987a670d314efcd9fb9b7982ef168c82`
+с SHA-256 `9BA96EF4766BB4905D327519EB41A4D25917AD2D084A6B1D0A066F340A859D2D`
+и состоянием `manual_recovery_required`. Повторять install запрещено.
+
+`/opt/amn2-spain-package` и recorded AMN2-owned trees retained; проверенные
+units `amn2-spain-web`, `amn2-spain-bot`, `awg-quick@awgsp0` и Docker
+`inactive`. Следующая операция ограничена checksum-bound remove-only cleanup
+package tree; terminal recovery и equality receipt следуют только после него.
+Foreign Spain service не останавливался; equality будет проверена terminal
+receipt. USA остаётся rollback contour.
+
+```text
+current_cleanup_executor_sha256=B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9
+current_cleanup_executor_bytes=145873
+current_cleanup_nonce=e968810382104e77e136565b6e3b5b28987a670d314efcd9fb9b7982ef168c82
+current_cleanup_transaction_sha256=9BA96EF4766BB4905D327519EB41A4D25917AD2D084A6B1D0A066F340A859D2D
+next=targeted_test|parser|diff_review|commit_push_readback|exact_current_manual_cleanup
+```
+
+# Предыдущий override 2026-07-24: v17 устраняет подтверждённую FD race; два read-only probe passed, SCP не активен
 
 v16 install не повторяется. Его первый in-memory collector прошёл, а второй
 bootstrap critical recheck остановился fail-closed на read-only race:

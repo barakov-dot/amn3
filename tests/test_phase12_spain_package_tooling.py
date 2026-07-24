@@ -4034,8 +4034,10 @@ def test_current_manual_cleanup_runner_is_remote_executor_pinned_and_action_boun
     assert "terminal-recovery-bound" not in source
     assert "scp.exe" not in source
     assert "Remote current manual cleanup executor checksum mismatch." in source
-    assert '$expectedNonce = "1d7511ed51cb2d908b329386dcb8eb7fd5c727abc93346452ed35a66342204b4"' in source
-    assert '$expectedTransactionSha = "08f1c860652fb561e3c1c921756549d3aaccaf86543ceb6c7fea4ef845930883"' in source
+    assert '$expectedExecutorSha = "B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9"' in source
+    assert '$expectedExecutorBytes = 145873' in source
+    assert '$expectedNonce = "e968810382104e77e136565b6e3b5b28987a670d314efcd9fb9b7982ef168c82"' in source
+    assert '$expectedTransactionSha = "9ba96ef4766bb4905d327519eb41a4d25917ad2d084a6b1d0a066f340a859d2d"' in source
     assert "REMOVE ONLY VERIFIED RETAINED PACKAGE TREE" in source
 
 

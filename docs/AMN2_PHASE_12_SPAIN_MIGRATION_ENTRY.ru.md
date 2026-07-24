@@ -1,5 +1,24 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-24: v17 is terminal; only verified package cleanup is next
+
+The approved v17 install entered the remote state machine and returned
+fail-closed `production runtime rollback failed`. A subsequent pinned read-only
+receipt identifies newest transaction
+`e968810382104e77e136565b6e3b5b28987a670d314efcd9fb9b7982ef168c82`:
+`manual_recovery_required`, transaction SHA-256
+`9BA96EF4766BB4905D327519EB41A4D25917AD2D084A6B1D0A066F340A859D2D`.
+Do not retry install.
+
+The retained package tree and AMN2-owned contour are the recovery subject;
+queried web, bot, AWG and Docker units are inactive. The immediate live action
+is checksum-bound `manual-cleanup-bound` for only
+`/opt/amn2-spain-package`, using executor
+`B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9`
+(`145873` bytes). Terminal recovery and foreign-equality receipt occur only
+after that cleanup. The foreign Spain service remains immutable; USA remains
+rollback contour.
+
 ## Current operational override — 2026-07-24: v17 has passed two read-only collector probes; install remains unstarted
 
 v16 stopped fail-closed before transaction/tombstone creation and before install
