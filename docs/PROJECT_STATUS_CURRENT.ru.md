@@ -1,4 +1,36 @@
-# Текущий override 2026-07-24: v14 reached Docker, failed at `awg_image_loaded`; transaction `544db…` recovery gate
+# Текущий override 2026-07-24: transaction `544db…` terminally recovered; v15 bounded Docker-load diagnostic package locally verified
+
+Exact manual cleanup для transaction
+`544db99ee620bc0139914c75db98c9a2e16797aadffa6c106923825fc17a6b54`
+прошёл и удалил только retained `/opt/amn2-spain-package`. Последующий exact
+terminal recovery также прошёл:
+`recovery_action=removed_verified_owned_objects`,
+`foreign_service_persistent_equal=true`, volatile=`0/0`. Он удалил только
+recorded current AMN2 contour. AMN2 не запускался; foreign Spain service не
+останавливался/не изменялся; USA остаётся rollback contour.
+
+Read-only разбор journal уточнил, что прежний `unsupported` относится к
+containerd/snapshotter строкам и сам по себе не является доказанной причиной
+`docker image load`. Поэтому v15 не делает blind runtime change: он сохраняет
+classic-vfs package и добавляет только fail-closed диагностические labels для
+image load (`timeout`, `input_changed`, `output_exceeded`,
+`command_failed`). Raw stderr и секреты по-прежнему не выводятся.
+
+```text
+v15_package_sha256=DAA40D48B88B2AFB0FC4A57A1E5313D8B2851BCED89AEC655B628CB859AEA585
+v15_package_bytes=139970560
+v15_manifest_sha256=F13A7C4A02F7B9233629AD06DF06265BB1FC84B69478B4BDB03F1484515C79F2
+v15_executor_sha256=07E066F15FA671DBF9B9F74ECAD2373C00D4A7551972E316F51BCB8265B630CC
+v15_executor_bytes=145791
+v15_install_runner_sha256=762428179994934DE358F08CE55E0D6489E5095DD7C48742AA827B851C16AE9B
+resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
+collector_sha256=70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+local_verification=double_build_byte_equal|offline_clean_room_69_artifacts|source_55dc243_verified|scoped_233_passed_4_skipped|powershell_parser_passed
+next_gate=diff_review|commit_push_origin_readback|exact_v15_install_approval
+```
+
+# Предыдущий override 2026-07-24: v14 reached Docker, failed at `awg_image_loaded`; transaction `544db…` recovery gate
 
 Approved v14 install прошёл upload/hash verification и reached `docker_started`,
 но ledger зафиксировал `awg_image_loaded=abandoned`. Normal automatic rollback

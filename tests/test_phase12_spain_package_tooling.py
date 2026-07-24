@@ -1363,6 +1363,9 @@ def test_preparation_failure_message_keeps_only_safe_cause_labels() -> None:
         live_backend.BackendError("docker_image_load_no_space")
     ) == "production runtime rollback failed:docker_image_load_no_space"
     assert installer_module._runtime_failure_message(
+        live_backend.BackendError("docker_image_load_timeout")
+    ) == "production runtime rollback failed:docker_image_load_timeout"
+    assert installer_module._runtime_failure_message(
         live_backend.BackendError("token=secret")
     ) == "production runtime rollback failed"
 
@@ -3943,10 +3946,11 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "984A2D87CC46EE84302E2462571659141D649CFE94206DE9FA6BBCF7AD8FA15B"' in source
-    assert '$expectedManifestSha = "7C897DA62CD64F77B008DABE4A9684DA1A9E06C637725EEAB69AD49468E14592"' in source
-    assert '$expectedExecutorSha = "D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29"' in source
-    assert 'phase12-spain-install-boundary-classic-vfs-v14-20260724' in source
+    assert '$expectedPackageSha = "DAA40D48B88B2AFB0FC4A57A1E5313D8B2851BCED89AEC655B628CB859AEA585"' in source
+    assert '$expectedManifestSha = "F13A7C4A02F7B9233629AD06DF06265BB1FC84B69478B4BDB03F1484515C79F2"' in source
+    assert '$expectedExecutorSha = "07E066F15FA671DBF9B9F74ECAD2373C00D4A7551972E316F51BCB8265B630CC"' in source
+    assert '$expectedExecutorBytes = 145791' in source
+    assert 'phase12-spain-install-boundary-bounded-load-v15-20260724' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "Invoke-BoundedSshUpload" in source
@@ -3962,6 +3966,7 @@ def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() 
     assert '"/root/amn2-spain-phase12-install-a.tar"' in source
     assert '"/root/amn2-spain-phase12-executor-a.pyz"' in source
     assert "CopyToAsync" in source
+    assert "[void][Threading.Tasks.Task]::WaitAll" in source
     assert "installResult.Stderr" in source
     assert "remoteArtifactsReady" in source
     assert "[Convert]::ToHexString" not in source

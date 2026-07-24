@@ -1,6 +1,31 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
-## Current operational override — 2026-07-24: v14 reached Docker; transaction `544db…` requires recovery
+## Current operational override — 2026-07-24: `544db…` recovered; v15 package binds bounded image-load diagnosis
+
+Exact manual cleanup and terminal recovery for
+`544db99ee620bc0139914c75db98c9a2e16797aadffa6c106923825fc17a6b54` passed.
+The cleanup removed only retained `/opt/amn2-spain-package`; terminal recovery
+removed only exact recorded AMN2-owned objects. Its receipt is
+`recovery_action=removed_verified_owned_objects`, persistent foreign equality
+is `true`, volatile counts are `0/0`. AMN2 did not start; the foreign Spain
+service and USA rollback contour remain untouched.
+
+The former journal label `unsupported` was narrowed read-only to containerd
+snapshotter lines, not accepted as a causal Docker-load diagnosis. v15 keeps
+the sealed classic-vfs runtime policy and changes only diagnostic propagation:
+Docker load timeout, changed input, oversized output, or other closed-runner
+failure becomes a fixed `docker_image_load_*` label. No raw stderr is exposed.
+
+```text
+package=DAA40D48B88B2AFB0FC4A57A1E5313D8B2851BCED89AEC655B628CB859AEA585
+manifest=F13A7C4A02F7B9233629AD06DF06265BB1FC84B69478B4BDB03F1484515C79F2
+executor=07E066F15FA671DBF9B9F74ECAD2373C00D4A7551972E316F51BCB8265B630CC
+runner=762428179994934DE358F08CE55E0D6489E5095DD7C48742AA827B851C16AE9B
+local=package_executor_double_build_equal|offline_clean_room_passed|scoped_233_passed_4_skipped|powershell_parse_passed
+next=diff_review|commit_push_readback|exact_checksum_bound_v15_install
+```
+
+## Previous operational override — 2026-07-24: v14 reached Docker; transaction `544db…` requires recovery
 
 The approved v14 install reached `docker_started`, but its retained mutation
 ledger shows `awg_image_loaded=abandoned`. Automatic rollback made all four

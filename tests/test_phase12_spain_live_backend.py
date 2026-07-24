@@ -127,6 +127,22 @@ class FixedCommandRunnerTests(unittest.TestCase):
                 runner(argv)
         self.assertNotIn(secret, str(caught.exception))
 
+    def test_closed_image_load_runner_maps_transport_failures_to_allowlist(self) -> None:
+        expected = {
+            "command timed out": "docker_image_load_timeout",
+            "command stream input changed or truncated": "docker_image_load_input_changed",
+            "command output exceeded bound": "docker_image_load_output_exceeded",
+            "unbounded private failure detail": "docker_image_load_command_failed",
+        }
+        for detail, label in expected.items():
+            with self.subTest(detail=detail):
+                def fail(_argv: tuple[str, ...], **_kwargs: object) -> bytes:
+                    raise BackendError(detail)
+
+                runner = live_backend._closed_docker_runner(fail)
+                with self.assertRaisesRegex(BackendError, "^" + label + "$"):
+                    runner(live_backend.DOCKER_IMAGE_LOAD_ARGV)
+
     def test_streams_large_regular_fd_without_the_small_input_bytes_limit(self) -> None:
         argv = (
             sys.executable,

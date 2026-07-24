@@ -144,6 +144,23 @@ def classify_docker_image_load_failure(stderr: bytes, return_code: int) -> str:
     return "docker_image_load_exit_unknown"
 
 
+_DOCKER_IMAGE_LOAD_SAFE_LABEL = re.compile(
+    r"docker_image_load_(?:no_space|archive|permission|daemon_unavailable|layer_apply|unsupported|timeout|input_changed|output_exceeded|command_failed|exit_(?:[1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]|unknown))"
+)
+
+
+def _bounded_docker_image_load_failure_label(error: BackendError) -> str:
+    """Map every loader failure to a fixed, non-sensitive diagnostic label."""
+    detail = str(error)
+    if _DOCKER_IMAGE_LOAD_SAFE_LABEL.fullmatch(detail):
+        return detail
+    return {
+        "command timed out": "docker_image_load_timeout",
+        "command stream input changed or truncated": "docker_image_load_input_changed",
+        "command output exceeded bound": "docker_image_load_output_exceeded",
+    }.get(detail, "docker_image_load_command_failed")
+
+
 class FixedCommandRunner:
     """Run only exact, pre-registered argv vectors with bounded resources."""
 
@@ -4503,11 +4520,8 @@ def _closed_docker_runner(
         try:
             result = runner(argv, **kwargs)
         except BackendError as exc:
-            if (
-                argv == DOCKER_IMAGE_LOAD_ARGV
-                and str(exc).startswith("docker_image_load_")
-            ):
-                raise
+            if argv == DOCKER_IMAGE_LOAD_ARGV:
+                raise BackendError(_bounded_docker_image_load_failure_label(exc)) from None
             raise BackendError("Docker command failed") from None
         except Exception:
             raise BackendError("Docker command failed") from None

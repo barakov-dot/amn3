@@ -7,12 +7,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
-$expectedPackageSha = "984A2D87CC46EE84302E2462571659141D649CFE94206DE9FA6BBCF7AD8FA15B"
+$expectedPackageSha = "DAA40D48B88B2AFB0FC4A57A1E5313D8B2851BCED89AEC655B628CB859AEA585"
 $expectedPackageBytes = 139970560
-$expectedManifestSha = "7C897DA62CD64F77B008DABE4A9684DA1A9E06C637725EEAB69AD49468E14592"
+$expectedManifestSha = "F13A7C4A02F7B9233629AD06DF06265BB1FC84B69478B4BDB03F1484515C79F2"
 $expectedPlanSha = "8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43"
-$expectedExecutorSha = "D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29"
-$expectedExecutorBytes = 145505
+$expectedExecutorSha = "07E066F15FA671DBF9B9F74ECAD2373C00D4A7551972E316F51BCB8265B630CC"
+$expectedExecutorBytes = 145791
 $expectedCollectorSha = "70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A"
 $run009EvidenceSha = "8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8"
 $fingerprintArraySha = "E15219CB5204D54A9AD11263CFBA1F7C86E16DAB3287C752A8B6F136EC4A5ED5"
@@ -21,7 +21,7 @@ $expectedBootSha = "099155E2A5578144C715124A1B9B4D8F5D572134C8F72FD98B75D5DE0EB5
 $uploadTimeoutMilliseconds = 900000
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-boundary-classic-vfs-v14-20260724"
+$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-boundary-bounded-load-v15-20260724"
 $packagePath = Join-Path $artifactRoot "package-a.tar"
 $executorPath = Join-Path $artifactRoot "executor-a.pyz"
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
@@ -62,7 +62,7 @@ function Invoke-ExactSsh([string[]]$Arguments, [byte[]]$InputBytes) {
         $process.StandardInput.Close()
         try {
             $process.WaitForExit()
-            [Threading.Tasks.Task]::WaitAll(@($stdoutTask, $stderrTask))
+            [void][Threading.Tasks.Task]::WaitAll(@($stdoutTask, $stderrTask))
             return [pscustomobject]@{ ExitCode=$process.ExitCode; Stdout=$stdout.ToArray(); Stderr=$stderr.ToArray() }
         } finally { $stdout.Dispose(); $stderr.Dispose() }
     } finally { $process.Dispose() }
@@ -103,7 +103,7 @@ function Invoke-BoundedSshUpload([string]$SourcePath, [string]$Destination) {
             $timedOut = $true
             throw "Approved artifact upload exceeded 900 seconds."
         }
-        [Threading.Tasks.Task]::WaitAll(@($stdoutTask, $stderrTask))
+        [void][Threading.Tasks.Task]::WaitAll(@($stdoutTask, $stderrTask))
         if ($process.ExitCode -ne 0) { throw "Approved artifact upload failed." }
     } catch {
         if ($timedOut) { throw }
