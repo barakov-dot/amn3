@@ -1,5 +1,39 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-24: transaction `2f647…` recovery required
+
+Manual split-upload assembly is verified exactly: final package
+`CB972C722F1B676DF48CA22497C1DFE85E21DB3B53663A0703FA1BD54C37575A`,
+`139970560` bytes; final executor
+`D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29`,
+`145505` bytes. The approved runner skipped upload and reached
+`package_verified_remote`, but fail-closed with
+`production runtime rollback failed`; do not retry install.
+
+Pinned read-only inventory found no AMN2 units and inactive Docker. Current
+transaction nonce=`2f647f44976725fc569b045f923452b523db75c5edc86d651197875e1be887ed`,
+transaction SHA=`44ed0fc0273854100a6cccdf44230081ea90051b29c94d64bffe221614337f28`,
+capsule SHA=`b0470aa26f836b78cfbc961bda7d12457e08bebe9cf981e1df404093cc42fb93`,
+status=`manual_recovery_required`. Retained contour is AMN2-owned only.
+Docker scanner receipt is
+`41b0b3b43e5177a03ad7e75e2efa3655d4464988485b576a87803ae2564bea65`,
+916 entries, 41902300 bytes, RDEV 64770, one filesystem/no nested mounts.
+
+Local, not-yet-pushed gates:
+
+1. `phase12_spain_transaction_2f647_manual_cleanup_ssh_runner.ps1` — SHA
+   `4E50A01DC83042F053DB7855A1CC095C297BADACA76F7AE5C1730D8155C4A018`;
+   removes only verified retained `/opt/amn2-spain-package`.
+2. `phase12_spain_transaction_2f647_terminal_recovery_ssh_runner.ps1` — SHA
+   `86A81022EC3D2943D8BD563E59BCCF8021DBE636994EAFD7B9811205F7E8EEAD`;
+   then rolls back exact recorded owned current contour, validates RDEV and
+   foreign equality.
+
+Local verification: scoped suite `154 passed`, both PowerShell runners parsed,
+and `git diff --check` passed. Next: commit/push/readback, exact manual-cleanup
+approval, then exact terminal-recovery approval. Do not mutate foreign Spain
+service, USA, AWG or unrelated files.
+
 ## Current override 2026-07-23: capacity-bound upload local gate complete
 
 Current transaction `1d7511…` is terminally recovered. Bound terminal receipt

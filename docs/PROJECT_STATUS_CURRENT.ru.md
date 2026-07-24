@@ -1,4 +1,43 @@
-# Текущий override 2026-07-23: Phase 12 capacity-bound upload local gate
+# Текущий override 2026-07-24: Phase 12 current transaction recovery gate
+
+Manual 20-MiB staging на Spain прошёл checksum verification: final package
+`CB972C…7575A` (`139970560` bytes) и executor `D792D…AC29` (`145505`
+bytes) совпали с local artifacts. Approved install runner увидел final cache и
+не выполнял SCP, но остановился fail-closed с safe label
+`production runtime rollback failed`; повтор install запрещён.
+
+Pinned read-only inventory: AMN2 units отсутствуют, Docker inactive, foreign
+Spain service не останавливался и не изменялся. Current transaction
+`2f647f…887ed` имеет `manual_recovery_required`; retained только AMN2-owned
+`/opt/amn2-spain-package`, `/opt/amn2-spain`, `/etc/amn2-spain` и
+`/var/lib/amn2-spain*`. Journal завершён на `package_verified_remote`.
+Mutation ledger подтверждает удаление DB/files/units/Docker enable/start и
+abandoned AWG image action; retained dirs plus AMN2 user/group подлежат только
+exact terminal recovery.
+
+Подготовлены два отдельных pinned runners: сначала CAS-verified manual cleanup
+удаляет только retained package tree, затем terminal recovery удаляет только
+recorded owned contour и повторно проверяет foreign equality. Docker data-root
+для transaction привязан к scanner receipt, не к предполагаемому содержимому.
+
+```text
+active_phase=AMN2 Phase 12 Spain Migration|current_transaction_recovery_gate
+manual_staging=package_and_executor_final_hash_size_exact|scp_skipped
+current_install=package_verified_remote_then_production_runtime_rollback_failed|retry_forbidden
+current_transaction_nonce=2F647F44976725FC569B045F923452B523DB75C5EDC86D651197875E1BE887ED
+current_transaction_sha256=44ED0FC0273854100A6CCCDF44230081EA90051B29C94D64BFFE221614337F28
+current_capsule_sha256=B0470AA26F836B78CFBC961BDA7D12457E08BEBE9CF981E1DF404093CC42FB93
+current_docker_tree=sha256_41B0B3B43E5177A03AD7E75E2EFA3655D4464988485B576A87803AE2564BEA65|entries_916|bytes_41902300|block_rdev_64770|single_filesystem|nested_mounts_0
+current_live_state=amn2_units_absent|docker_inactive|retained_owned_paths_only
+current_manual_cleanup_runner_sha256=4E50A01DC83042F053DB7855A1CC095C297BADACA76F7AE5C1730D8155C4A018
+current_terminal_recovery_runner_sha256=86A81022EC3D2943D8BD563E59BCCF8021DBE636994EAFD7B9811205F7E8EEAD
+current_recovery_local_verification=scoped_154_passed|powershell_parse_2_runners|diff_check_pass
+next_gate=COMMIT_PUSH_ORIGIN_READBACK_THEN_EXACT_MANUAL_CLEANUP_APPROVAL
+spain_unrelated_service=untouched
+usa_rollback_contour=unchanged
+```
+
+# Предыдущий override 2026-07-23: Phase 12 capacity-bound upload local gate
 
 Current terminal recovery текущей транзакции `1d7511…` завершён `passed`:
 receipt `bb700842…` подтвердил удаление только exact AMN2-owned contour,

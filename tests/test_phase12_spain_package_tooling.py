@@ -92,6 +92,18 @@ CURRENT_MANUAL_CLEANUP_SSH_RUNNER = (
 CURRENT_TERMINAL_RECOVERY_SSH_RUNNER = (
     ROOT / "scripts" / "vps" / "phase12_spain_current_terminal_recovery_ssh_runner.ps1"
 )
+TRANSACTION_2F647_MANUAL_CLEANUP_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_2f647_manual_cleanup_ssh_runner.ps1"
+)
+TRANSACTION_2F647_TERMINAL_RECOVERY_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_2f647_terminal_recovery_ssh_runner.ps1"
+)
 TRACKED_PACKAGE_ROOT = ROOT / "packaging" / "phase12-spain"
 HOST_IDENTITY_SHA256 = "7" * 64
 BOOT_ID = "12345678-1234-1234-1234-123456789abc"
@@ -4010,6 +4022,37 @@ def test_current_terminal_recovery_runner_is_remote_executor_pinned_and_action_b
     assert '$expectedTransactionSha = "08f1c860652fb561e3c1c921756549d3aaccaf86543ceb6c7fea4ef845930883"' in source
     assert '$expectedCapsuleSha = "2e146365a29c89e9466a8e54e174a3d4d2c969b2bfaeedc9531a59ec4f756a18"' in source
     assert '$expectedDockerTreeSha = "6051924206a20bab41384c9def68cb7d09ab02756515a0dcc05c7e290e3f3248"' in source
+    assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in source
+    assert "VERIFY FOREIGN EQUALITY" in source
+
+
+def test_transaction_2f647_manual_cleanup_runner_is_pinned_and_action_bound() -> None:
+    assert TRANSACTION_2F647_MANUAL_CLEANUP_SSH_RUNNER.exists()
+    source = TRANSACTION_2F647_MANUAL_CLEANUP_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert "manual-cleanup-bound" in source
+    assert "terminal-recovery-bound" not in source
+    assert '$expectedExecutorSha = "D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29"' in source
+    assert '$expectedNonce = "2f647f44976725fc569b045f923452b523db75c5edc86d651197875e1be887ed"' in source
+    assert '$expectedTransactionSha = "44ed0fc0273854100a6cccdf44230081ea90051b29c94d64bffe221614337f28"' in source
+    assert "REMOVE ONLY VERIFIED RETAINED PACKAGE TREE" in source
+
+
+def test_transaction_2f647_terminal_recovery_runner_is_pinned_and_action_bound() -> None:
+    assert TRANSACTION_2F647_TERMINAL_RECOVERY_SSH_RUNNER.exists()
+    source = TRANSACTION_2F647_TERMINAL_RECOVERY_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert "terminal-recovery-bound" in source
+    assert "terminal-recovery-receipt-bound" not in source
+    assert '$expectedExecutorSha = "D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29"' in source
+    assert '$expectedNonce = "2f647f44976725fc569b045f923452b523db75c5edc86d651197875e1be887ed"' in source
+    assert '$expectedTransactionSha = "44ed0fc0273854100a6cccdf44230081ea90051b29c94d64bffe221614337f28"' in source
+    assert '$expectedCapsuleSha = "b0470aa26f836b78cfbc961bda7d12457e08bebe9cf981e1df404093cc42fb93"' in source
+    assert '$expectedDockerTreeSha = "41b0b3b43e5177a03ad7e75e2efa3655d4464988485b576a87803ae2564bea65"' in source
+    assert "$expectedDockerTreeEntries = 916" in source
+    assert "$expectedDockerTreeBytes = 41902300" in source
+    assert "$expectedBlockRdev = 64770" in source
+    assert "stat -c %d /var/lib/amn2-spain-docker" in source
     assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in source
     assert "VERIFY FOREIGN EQUALITY" in source
 

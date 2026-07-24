@@ -1,5 +1,29 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-24
+
+Manual 20-MiB package staging и final remote hash/size verification прошли:
+package `CB972C…7575A` (`139970560` bytes), executor `D792D…AC29`
+(`145505` bytes). Approved install runner пропустил upload, дошёл до
+`package_verified_remote`, затем вернул fail-closed
+`production runtime rollback failed`. Новый install retry запрещён.
+
+Read-only pinned inventory фиксирует: AMN2 units отсутствуют, Docker inactive,
+foreign service untouched; current transaction
+`2f647f44976725fc569b045f923452b523db75c5edc86d651197875e1be887ed`
+имеет `manual_recovery_required`. Capsule SHA-256:
+`b0470aa26f836b78cfbc961bda7d12457e08bebe9cf981e1df404093cc42fb93`.
+Docker data-root scanner receipt:
+`41b0b3b43e5177a03ad7e75e2efa3655d4464988485b576a87803ae2564bea65`,
+916 entries, 41902300 bytes, block RDEV 64770, single filesystem, nested
+mounts 0.
+
+Recovery sequence is fixed: (1) checksum-bound `manual-cleanup-bound` removes
+only `/opt/amn2-spain-package` after CAS verification and preserves terminal
+ledger; (2) checksum-bound `terminal-recovery-bound` removes only exact
+recorded owned contour and verifies dynamic foreign equality. No AMN2 start,
+no foreign-service mutation, USA remains rollback contour.
+
 ## Current operational override — 2026-07-22
 
 Install boundary использует executor-embedded in-memory collector, run009
