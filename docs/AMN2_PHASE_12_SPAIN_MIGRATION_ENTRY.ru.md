@@ -1,6 +1,28 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
-## Current operational override — 2026-07-24
+## Current operational override — 2026-07-24: terminal recovery passed, vfs package ready
+
+Transaction `2f647…887ed` больше не требует recovery action: checksum-bound
+manual cleanup и terminal recovery прошли. Они удалили только exact AMN2-owned
+package/runtime/config/DB/Docker-data contour, сохранили terminal ledger и
+подтвердили dynamic foreign equality: persistent=`true`, volatile=`0/0`.
+Pinned post-check: шесть owned paths отсутствуют, четыре AMN2 units inactive.
+Foreign Spain service не останавливался и не изменялся; USA остаётся rollback
+contour.
+
+Read-only diagnosis после recovery установил фактический blocker предыдущей
+попытки: Docker journal category=`unsupported`, `overlayfs_present=false`
+(cgroup v2, userns=1). Новый checksum-bound package выбирает dedicated Docker
+`storage-driver=vfs`; иных runtime/network/firewall/listener changes нет.
+Package SHA-256=`192189BA6E8832223322FF5D90574265D9137DB281E3F14FE43B3DA76BD95C1F`,
+manifest=`5D6CB1F3CD76503A9C5301CF4AD2747C4595E0A5A7E251CE4E98C1D51AB72609`,
+executor=`D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29`.
+Double build, package verification, no-follow clean-room extract/source
+expansion и scoped suite `290 passed, 4 skipped` прошли локально. Next gate:
+publish/readback, then checksum-bound vfs install; no blind retry of old
+package.
+
+## Previous operational override — 2026-07-24
 
 Manual 20-MiB package staging и final remote hash/size verification прошли:
 package `CB972C…7575A` (`139970560` bytes), executor `D792D…AC29`

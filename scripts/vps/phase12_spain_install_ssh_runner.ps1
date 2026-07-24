@@ -7,9 +7,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
-$expectedPackageSha = "CB972C722F1B676DF48CA22497C1DFE85E21DB3B53663A0703FA1BD54C37575A"
+$expectedPackageSha = "192189BA6E8832223322FF5D90574265D9137DB281E3F14FE43B3DA76BD95C1F"
 $expectedPackageBytes = 139970560
-$expectedManifestSha = "AAA7980BDEF2787DC889C22D007177FDC2A75578CCA23DE71E2BC7733E552DD0"
+$expectedManifestSha = "5D6CB1F3CD76503A9C5301CF4AD2747C4595E0A5A7E251CE4E98C1D51AB72609"
 $expectedPlanSha = "8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43"
 $expectedExecutorSha = "D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29"
 $expectedExecutorBytes = 145505
@@ -21,7 +21,7 @@ $expectedBootSha = "099155E2A5578144C715124A1B9B4D8F5D572134C8F72FD98B75D5DE0EB5
 $uploadTimeoutMilliseconds = 900000
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-boundary-docker-cause-v12-20260723"
+$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-boundary-vfs-v13-20260724"
 $packagePath = Join-Path $artifactRoot "package-a.tar"
 $executorPath = Join-Path $artifactRoot "executor-a.pyz"
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"

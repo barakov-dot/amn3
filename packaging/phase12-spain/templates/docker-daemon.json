@@ -2,6 +2,7 @@
   "hosts": ["unix:///run/amn2-spain-docker/docker.sock"],
   "group": "root",
   "data-root": "/var/lib/amn2-spain-docker",
+  "storage-driver": "vfs",
   "exec-root": "/run/amn2-spain-docker/exec",
   "pidfile": "/run/amn2-spain-docker/docker.pid",
   "bridge": "none",

@@ -1908,6 +1908,7 @@ class ExactRuntimeContractTests(unittest.TestCase):
         self.assertEqual(daemon["data-root"], "/var/lib/amn2-spain-docker")
         self.assertEqual(daemon["exec-root"], "/run/amn2-spain-docker/exec")
         self.assertEqual(daemon["pidfile"], "/run/amn2-spain-docker/docker.pid")
+        self.assertEqual(daemon["storage-driver"], "vfs")
         for key in ("iptables", "ip6tables", "ip-forward", "ip-masq", "userland-proxy"):
             self.assertIs(daemon[key], False)
         self.assertEqual(daemon["bridge"], "none")

@@ -1,6 +1,36 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-07-24: transaction `2f647…` recovery required
+## Current override 2026-07-24: vfs-bound retry ready after transaction `2f647…` recovery
+
+Transaction `2f647f44976725fc569b045f923452b523db75c5edc86d651197875e1be887ed`
+is recovered, not pending. Exact manual cleanup removed only the retained
+package tree; exact terminal recovery removed only recorded AMN2-owned
+objects. Its receipt passed persistent foreign equality with volatile counts
+`0/0`. Pinned post-check passed: six AMN2 owned paths are absent, four AMN2
+units are inactive, and terminal ledger remains `manual_recovery_required`.
+No AMN2 start, foreign-service mutation, USA mutation or AWG stop occurred.
+
+Root cause is evidenced rather than guessed: Docker journal returned
+allowlisted `unsupported` and a read-only host probe returned
+`overlayfs_present=false` (cgroup v2, userns=1). The new fresh-install package
+changes only sealed Docker config to `storage-driver=vfs`.
+
+```text
+package_sha256=192189BA6E8832223322FF5D90574265D9137DB281E3F14FE43B3DA76BD95C1F
+package_bytes=139970560
+manifest_sha256=5D6CB1F3CD76503A9C5301CF4AD2747C4595E0A5A7E251CE4E98C1D51AB72609
+executor_sha256=D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29
+executor_bytes=145505
+install_runner_sha256=3C68CB302BA4948E220B6148052D9BCAE50C95B49E19CF618AFDEF2B4AB89F6A
+resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
+collector_sha256=70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+foreign_equality=terminal_recovery_persistent_true|volatile_0_0
+local_verification=package_executor_double_build_byte_equal|package_verify_passed|offline_clean_room_69_artifacts|source_55dc243_verified|scoped_290_passed_4_skipped|powershell_parser_passed|diff_check_passed
+next_gate=commit_push_origin_readback_then_checksum_bound_vfs_install
+```
+
+## Previous override 2026-07-24: transaction `2f647…` recovery required
 
 Manual split-upload assembly is verified exactly: final package
 `CB972C722F1B676DF48CA22497C1DFE85E21DB3B53663A0703FA1BD54C37575A`,

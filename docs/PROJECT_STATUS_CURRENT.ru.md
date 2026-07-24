@@ -1,4 +1,47 @@
-# Текущий override 2026-07-24: Phase 12 current transaction recovery gate
+# Текущий override 2026-07-24: Phase 12 vfs-bound fresh-install retry gate
+
+Transaction `2f647f44976725fc569b045f923452b523db75c5edc86d651197875e1be887ed`
+полностью terminally recovered. Exact `manual-cleanup-bound` удалил только
+retained `/opt/amn2-spain-package`; exact `terminal-recovery-bound` удалил
+только recorded AMN2-owned contour. Receipt=`passed` подтверждает
+`foreign_service_persistent_equal=true` и volatile=`0/0`. Immediate pinned
+post-check=`passed`: отсутствуют шесть AMN2-owned paths, четыре AMN2 units
+inactive; terminal ledger намеренно остаётся `manual_recovery_required`.
+AMN2 не стартовал, foreign Spain service не останавливался/не изменялся,
+USA остаётся rollback contour.
+
+Root-cause evidence предыдущего Docker load: category-only journal diagnostic
+вернул `unsupported`, а read-only kernel probe — `overlayfs_present=false`
+(cgroup v2, userns=1). Следовательно, default Docker storage driver не может
+опираться на overlayfs на этом host. Новый package фиксирует только
+`"storage-driver":"vfs"` в sealed dedicated Docker config; это вывод из
+двух read-only receipts, не повторный blind install.
+
+Новый package/executor собраны дважды byte-equal, package verify и no-follow
+offline clean-room extract/source expansion прошли. Scoped Phase 12 suite:
+`290 passed, 4 skipped`. Новый install runner связывает только эти hashes.
+
+```text
+active_phase=AMN2 Phase 12 Spain Migration|vfs_bound_fresh_install_retry_gate
+terminal_recovery_2f647=passed|owned_contour_removed|foreign_persistent_equal_true|volatile_0_0
+post_terminal_safety=passed|owned_paths_absent_6|amn2_units_inactive_4|terminal_ledger_manual_recovery_required
+docker_root_cause=journal_unsupported|overlayfs_present_false|cgroup_v2|userns_1|sealed_driver_vfs
+fresh_install_package_sha256=192189BA6E8832223322FF5D90574265D9137DB281E3F14FE43B3DA76BD95C1F
+fresh_install_package_size=139970560
+fresh_install_manifest_sha256=5D6CB1F3CD76503A9C5301CF4AD2747C4595E0A5A7E251CE4E98C1D51AB72609
+fresh_install_executor_sha256=D792D9CABB6B7FE3FABD7BC4B07D833D27549FE1484900770B54214D38FEAC29
+fresh_install_executor_size=145505
+fresh_install_runner_sha256=3C68CB302BA4948E220B6148052D9BCAE50C95B49E19CF618AFDEF2B4AB89F6A
+resource_plan_sha256=8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43
+collector_sha256=70316AEED9CF2BB4A45484F4E0A0A50CDD0D6359044CE6537B92241BCF52847A
+source=55dc243b8e6c6bdb57f8301b56326e4cd4072d19
+local_verification=package_executor_double_build_byte_equal|package_verify_passed|offline_clean_room_69_artifacts|source_55dc243_verified|scoped_290_passed_4_skipped|powershell_parser_passed|diff_check_passed
+next_gate=commit_push_origin_readback_then_checksum_bound_vfs_install
+spain_unrelated_service=untouched
+usa_rollback_contour=unchanged
+```
+
+# Предыдущий override 2026-07-24: Phase 12 current transaction recovery gate
 
 Manual 20-MiB staging на Spain прошёл checksum verification: final package
 `CB972C…7575A` (`139970560` bytes) и executor `D792D…AC29` (`145505`
