@@ -2324,6 +2324,37 @@ class ProductionDockerRuntimeTests(unittest.TestCase):
             self.assertNotIn(live_backend.DOCKER_IMAGE_LOAD_ARGV, calls)
             self.assertIn(live_backend.DOCKER_IMAGE_TAG_ARGV, calls)
 
+    def test_post_load_untagged_image_is_visible_for_exact_tagging(self) -> None:
+        class DockerDefaultVisibilityRunner(_FakeDockerRunner):
+            def __call__(self, argv: tuple[str, ...], **kwargs: object) -> bytes:
+                if (
+                    argv == live_backend.DOCKER_IMAGE_LIST_ARGV
+                    and self.image == "partial"
+                    and "--all" not in argv
+                ):
+                    self.assert_allowed(argv)
+                    self.calls.append((argv, dict(kwargs)))
+                    # Docker's default image listing hides dangling images.
+                    return b""
+                return super().__call__(argv, **kwargs)
+
+        archive_body = self._image_archive()
+        with tempfile.TemporaryDirectory() as raw:
+            archive = Path(raw) / "awg-image.tar"
+            archive.write_bytes(archive_body)
+            runner = DockerDefaultVisibilityRunner()
+            action = live_backend.build_awg_image_action(
+                runner=runner,
+                archive_path=archive,
+                expected_sha256=hashlib.sha256(archive_body).hexdigest(),
+                expected_size=len(archive_body),
+            )
+            action.create_exact()
+            self.assertEqual(runner.image, "full")
+            self.assertIn(live_backend.DOCKER_IMAGE_TAG_ARGV, [
+                argv for argv, _kwargs in runner.calls
+            ])
+
     def test_post_load_image_state_failure_has_bounded_load_label(self) -> None:
         """Keep a post-load Docker state failure non-sensitive and diagnosable."""
 

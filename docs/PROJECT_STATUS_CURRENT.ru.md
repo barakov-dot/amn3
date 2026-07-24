@@ -1,11 +1,17 @@
-# Текущий override 2026-07-24: transaction `00d9da…` terminally recovered; Docker cause remains unproven
+# Текущий override 2026-07-24: Docker image-list root cause доказан; v19 локально проверен, live retry ещё не запускался
 
-v18 дошёл до `awg_image_loaded` и fail-closed с bounded label
-`docker_image_load_command_failed`. Exact manual cleanup и terminal recovery
+v18 дошёл до `awg_image_loaded`, затем exact manual cleanup и terminal recovery
 transaction `00d9daecb6701b443d5714e7d08ec8715ad8ce6aa01712607463b572a5212972`
-затем прошли: удалены только verified AMN2-owned package/runtime/Docker
-objects; terminal ledger сохранён. Terminal receipt подтвердил persistent
-foreign equality=`true`, volatile=`0/0`.
+прошли: удалены только verified AMN2-owned package/runtime/Docker objects,
+terminal ledger сохранён, persistent foreign equality=`true`, volatile=`0/0`.
+
+Причина v18 теперь доказана на source path и RED/GREEN regression test. Sealed
+AWG archive намеренно даёт untagged image (`RepoTags=null`, `repositories={}`),
+а default `docker image ls` скрывает dangling image. Поэтому после успешного
+`docker image load` прежняя exact observation ошибочно видела `absent`, tag не
+выполнялся и путь заканчивался bounded `docker_image_load_command_failed`.
+v19 добавляет только `--all` в allowlisted `DOCKER_IMAGE_LIST_ARGV`; transport,
+host pin, foreign-service policy, rollback и runtime resources не менялись.
 
 ```text
 transaction_sha256=704C0C085B5F4CEC40FC7A8C9E7F7C7E55F29027F4D3168393E16C26B9090CE4
@@ -14,15 +20,16 @@ manual_cleanup=passed|approval_8D5844259EAD4DC00CB9AF149EEB1EC856583F98871C824DF
 terminal_recovery=passed|removed_verified_owned_objects|approval_06E1AF92C39EC799187A9304C2A4C5499E3668DC86873A4A77B26111AC57E9F4
 foreign_equality=persistent_true|volatile_before_0|volatile_after_0
 postcheck=all_6_owned_paths_absent|web_bot_docker_network_awg_inactive
-journal_diagnosis=owned_unit_512_lines|snapshotter_overlay_error_5|image_load_only_unsupported_0|layer_apply_0|permission_0|vfs_graphdriver_error_0
-next=DO_NOT_RETRY_OR_BUILD_V19|operator_architecture_decision_required
+v19_package_sha256=FF9E8FA4604C4E9F7A3EE139B1D7B96D53FA4693E4555808B7E1725BDBAD4974|139970560
+v19_manifest_sha256=3B0B6574F982ADF8745A13AD77CA49824A04ACEFD4BD065E763B2E29B628FB70
+v19_executor_sha256=04B0F5142E7D7464C7CA6555E482A17F4C3D79D1F209A0E7327CD44144AD6978|146014
+v19_install_runner_sha256=C8C82E4A73A3ECB700255720A90A6B53F01FA6639B277AE0F0AAD85F32857050
+local=red_green_dangling_image_regression|double_build_byte_equal|clean_room_revalidated|source_55dc243_verified|backend_80_passed_4_skipped|tooling_157_passed|assembler_3_passed|powershell_parser_passed
+next=diff_review|commit_push_origin_readback|checksum_bound_v19_install
 ```
 
-Read-only journal evidence excludes a proved image-load cause: all five
-overlay error-context markers belong to containerd/snapshotter, and no
-image-load-only unsupported/permission/layer/vfs error was observed. Поэтому
-новая install package или retry были бы слепыми. AMN2 не стартует; foreign
-Spain service не останавливается/не изменяется; USA остаётся rollback contour.
+AMN2 не стартует; foreign Spain service не останавливается и не изменяется;
+USA остаётся rollback contour. v19 ещё не загружался на Spain.
 
 # Предыдущий override 2026-07-24: terminal recovery passed; v18 bounded post-load diagnostic is locally ready
 

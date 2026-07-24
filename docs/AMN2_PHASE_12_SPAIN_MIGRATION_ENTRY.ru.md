@@ -1,14 +1,20 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
-## Current operational override — 2026-07-24: `00d9da…` terminal recovery passed; no blind v19 retry
+## Current operational override — 2026-07-24: v19 fixes proved untagged-image visibility defect; not yet live-run
 
-The v18 `awg_image_loaded` failure was followed by exact manual cleanup and
-terminal recovery for transaction
-`00d9daecb6701b443d5714e7d08ec8715ad8ce6aa01712607463b572a5212972`.
-Both passed and removed only recorded AMN2-owned objects. The terminal receipt
-proves persistent foreign equality `true`, volatile `0/0`; the pinned
-postcheck finds all six owned paths absent and web/bot/Docker/network/AWG
-inactive. Foreign service and USA were not changed.
+Exact manual cleanup and terminal recovery for v18 transaction
+`00d9daecb6701b443d5714e7d08ec8715ad8ce6aa01712607463b572a5212972` passed.
+They removed only recorded AMN2-owned objects; terminal receipt proves
+persistent foreign equality `true`, volatile `0/0`, and the pinned postcheck
+finds all six owned paths absent and web/bot/Docker/network/AWG inactive.
+
+The specific v18 failure mechanism is now source-proved: the sealed AWG archive
+is deliberately untagged, but default Docker `image ls` hides that dangling
+image. The old action therefore observed `absent` after a successful load,
+skipped the owned tag, and returned the bounded post-load failure label. A
+RED/GREEN regression test reproduces that sequence. v19 changes only the exact
+allowlisted image-list argv by adding `--all`; no host, transport, firewall,
+foreign-service or USA-contour behavior changes.
 
 ```text
 transaction=704C0C085B5F4CEC40FC7A8C9E7F7C7E55F29027F4D3168393E16C26B9090CE4
@@ -16,14 +22,16 @@ capsule=19ADD794051040AC287D6DDB842E82DC01A96322BD135F9951A1412D18597A95
 manual_cleanup=passed|8D5844259EAD4DC00CB9AF149EEB1EC856583F98871C824DF8DAE062157D358A
 terminal_recovery=passed|06E1AF92C39EC799187A9304C2A4C5499E3668DC86873A4A77B26111AC57E9F4
 foreign=persistent_true|volatile_0_0
-journal=512_owned_docker_lines|snapshotter_overlay_error_5|image_load_only_unsupported_0|no_layer_permission_vfs_error
-next=architecture_decision_before_any_new_install_candidate
+v19_package=FF9E8FA4604C4E9F7A3EE139B1D7B96D53FA4693E4555808B7E1725BDBAD4974|139970560
+v19_manifest=3B0B6574F982ADF8745A13AD77CA49824A04ACEFD4BD065E763B2E29B628FB70
+v19_executor=04B0F5142E7D7464C7CA6555E482A17F4C3D79D1F209A0E7327CD44144AD6978|146014
+v19_runner=C8C82E4A73A3ECB700255720A90A6B53F01FA6639B277AE0F0AAD85F32857050
+local=red_green|package_executor_double_build_equal|offline_clean_room_revalidated|scoped_240_passed_4_skipped|powershell_parser_passed
+next=diff_review|commit_push_readback|checksum_bound_v19_install
 ```
 
-The bounded `docker_image_load_command_failed` label is not a proven root
-cause. The current journal evidence contains only containerd/snapshotter
-overlay errors, not an image-load-only error. A new package/retry would be
-blind and is prohibited until the runtime path is selected explicitly.
+No SCP/upload is active. AMN2 did not start; foreign service and USA were not
+changed. v19 must be the only next install candidate after publish/readback.
 
 ## Current operational override — 2026-07-24: terminal recovery passed; v18 diagnostic install candidate is locally verified
 

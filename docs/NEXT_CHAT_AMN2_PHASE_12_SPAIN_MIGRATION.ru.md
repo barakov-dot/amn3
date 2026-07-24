@@ -1,28 +1,37 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-07-24: `00d9da…` recovery passed; runtime architecture decision is the only gate
+## Current override 2026-07-24: Docker dangling-image visibility defect fixed locally; v19 awaits publish then install
 
-v18 is consumed. Its `awg_image_loaded` failure was recovered completely:
-manual cleanup and terminal recovery for nonce
-`00d9daecb6701b443d5714e7d08ec8715ad8ce6aa01712607463b572a5212972` passed.
-Only verified AMN2-owned objects were removed; persistent foreign equality is
-`true`, volatile `0/0`. Postcheck: six owned paths absent; AMN2 web/bot/
-Docker/network/AWG inactive. Foreign service and USA remain unchanged.
+v18 is consumed and fully recovered: manual cleanup and terminal recovery for
+nonce `00d9daecb6701b443d5714e7d08ec8715ad8ce6aa01712607463b572a5212972`
+passed. Only verified AMN2-owned objects were removed; persistent foreign
+equality is `true`, volatile `0/0`, and six owned paths plus web/bot/Docker/
+network/AWG are absent/inactive. Foreign service and USA remain unchanged.
+
+Source analysis and a RED/GREEN regression test establish the exact defect:
+the owned AWG archive loads an intentionally untagged image, while Docker's
+default `image ls` hides dangling images. The old observer saw `absent`, never
+issued the owned tag, then emitted the bounded post-load label. v19 adds only
+`--all` to that allowlisted observer and rebuilds all checksum-bound artifacts.
 
 ```text
 transaction_sha256=704C0C085B5F4CEC40FC7A8C9E7F7C7E55F29027F4D3168393E16C26B9090CE4
 manual_cleanup_receipt=8D5844259EAD4DC00CB9AF149EEB1EC856583F98871C824DF8DAE062157D358A
 terminal_recovery_receipt=06E1AF92C39EC799187A9304C2A4C5499E3668DC86873A4A77B26111AC57E9F4
 foreign=persistent_true|volatile_0_0
-journal=owned_docker_512_lines|snapshotter_overlay_error_5|image_load_only_unsupported_0|permission_layer_vfs_0
-next=DO_NOT_BUILD_V19_OR_RETRY|choose_runtime_architecture
+package_sha256=FF9E8FA4604C4E9F7A3EE139B1D7B96D53FA4693E4555808B7E1725BDBAD4974
+package_bytes=139970560
+manifest_sha256=3B0B6574F982ADF8745A13AD77CA49824A04ACEFD4BD065E763B2E29B628FB70
+executor_sha256=04B0F5142E7D7464C7CA6555E482A17F4C3D79D1F209A0E7327CD44144AD6978
+executor_bytes=146014
+runner_sha256=C8C82E4A73A3ECB700255720A90A6B53F01FA6639B277AE0F0AAD85F32857050
+verification=red_green_dangling_image|double_build_byte_equal|offline_clean_room_revalidated|source_55dc243_verified|scoped_240_passed_4_skipped|powershell_parser_passed
+next=diff_review|commit_push_origin_readback|checksum_bound_v19_install
 ```
 
-The bounded label does not establish a Docker cause. Current safe evidence
-does not justify another package tweak. Before a fresh install, the operator
-must choose either an explicitly approved disposable Docker capability
-diagnostic or a Spain host/runtime change; no foreign-service mutation is part
-of either option.
+No SCP/upload is active. Do not retry v18. The only next live candidate is the
+published v19 literal; it still forbids foreign-service mutation and keeps USA
+as rollback contour.
 
 ## Current override 2026-07-24: terminal recovery passed; v18 is the sole local install candidate
 

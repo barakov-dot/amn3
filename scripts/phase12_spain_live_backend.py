@@ -4414,7 +4414,7 @@ _CONTAINER_INSPECT_FORMAT = (
     '"Running":{{json .State.Running}},'
     '"TmpfsRun":{{json (index .HostConfig.Tmpfs "/run")}}}'
 )
-DOCKER_IMAGE_LIST_ARGV = (*_DOCKER_BASE, "image", "ls", "--no-trunc", "--format", _IMAGE_LIST_FORMAT)
+DOCKER_IMAGE_LIST_ARGV = (*_DOCKER_BASE, "image", "ls", "--all", "--no-trunc", "--format", _IMAGE_LIST_FORMAT)
 DOCKER_IMAGE_INSPECT_TAG_ARGV = (
     *_DOCKER_BASE, "image", "inspect", "--format", _IMAGE_INSPECT_FORMAT, AWG_LOCAL_IMAGE_TAG,
 )
