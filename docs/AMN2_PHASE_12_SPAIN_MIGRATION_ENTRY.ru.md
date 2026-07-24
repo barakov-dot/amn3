@@ -1,5 +1,28 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-24: v15 install ended fail-closed; `a75d9d…` recovery is required
+
+The approved v15 install reached the remote state machine and returned only
+`production runtime rollback failed`; it did not expose a causal Docker label,
+so no retry is authorized. Read-only pinned evidence identifies current terminal
+transaction `a75d9d957ace99c8d74c20d45c029e2e08d355a2c5a370d0066972561e73a1ac`
+as `manual_recovery_required` with retained `/opt/amn2-spain-package`.
+
+```text
+transaction=B87AD6123C37DB4D10F7E082951A411FE313E18F584AC91579CD5AFCF3E686E3
+capsule=C5E164098E25AB9643FABAF707BD1F760108805F06663E1E825CCDF8E7B7F350
+executor=07E066F15FA671DBF9B9F74ECAD2373C00D4A7551972E316F51BCB8265B630CC|145791
+docker_tree=F6CAF7B0DC1DA9C100DDA22049957F7501748D01A01A99F359B4DE19D2E7E8E9|2268|42532407|rdev_64770
+manual_cleanup_runner=4F2FC7F35542C15B61259FE354E918C85CBD4F69E4838AF052B9B41AA3379EC7
+terminal_recovery_runner=6C5E28C05430BA6D5CC04F40A47697B256CF2D2FF703074F8E234C5EA9EE6D1B
+```
+
+The exact order is manual cleanup of the verified package tree, then terminal
+recovery of only the sealed AMN2 contour with dynamic foreign equality. The
+foreign Spain service remains immutable and USA remains the rollback contour.
+
+## Previous operational override — 2026-07-24: `544db…` recovered; v15 package binds bounded image-load diagnosis
+
 ## Current operational override — 2026-07-24: `544db…` recovered; v15 package binds bounded image-load diagnosis
 
 Exact manual cleanup and terminal recovery for

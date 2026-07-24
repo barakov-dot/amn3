@@ -1,5 +1,33 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-24: recover `a75d9d…` before any v15 retry
+
+The approved v15 install is fail-closed, not a retry candidate. Its only safe
+current state is transaction
+`a75d9d957ace99c8d74c20d45c029e2e08d355a2c5a370d0066972561e73a1ac`:
+`manual_recovery_required`, retained package tree present, normal automatic
+rollback incomplete. The remote output did not produce an allowlisted causal
+Docker-load label.
+
+```text
+transaction_sha256=B87AD6123C37DB4D10F7E082951A411FE313E18F584AC91579CD5AFCF3E686E3
+capsule_sha256=C5E164098E25AB9643FABAF707BD1F760108805F06663E1E825CCDF8E7B7F350
+executor_sha256=07E066F15FA671DBF9B9F74ECAD2373C00D4A7551972E316F51BCB8265B630CC
+docker_tree_sha256=F6CAF7B0DC1DA9C100DDA22049957F7501748D01A01A99F359B4DE19D2E7E8E9
+docker_tree=2268|42532407|rdev_64770|single_fs|no_nested_mounts
+manual_cleanup_runner_sha256=4F2FC7F35542C15B61259FE354E918C85CBD4F69E4838AF052B9B41AA3379EC7
+terminal_recovery_runner_sha256=6C5E28C05430BA6D5CC04F40A47697B256CF2D2FF703074F8E234C5EA9EE6D1B
+next=commit_push_readback|exact_manual_cleanup|exact_terminal_recovery|foreign_equality_receipt
+```
+
+Manual cleanup can remove only `/opt/amn2-spain-package` after exact transaction
+and executor checksum checks. Terminal recovery may then remove only the exact
+recorded AMN2 contour and prove persistent foreign equality with a volatile
+receipt. No AMN2/AWG start, foreign-service mutation, USA change, or install
+retry is allowed before that receipt.
+
+## Previous override 2026-07-24: `544db…` terminal recovery passed; v15 is the only local install candidate
+
 ## Current override 2026-07-24: `544db…` terminal recovery passed; v15 is the only local install candidate
 
 Transaction `544db99ee620bc0139914c75db98c9a2e16797aadffa6c106923825fc17a6b54`

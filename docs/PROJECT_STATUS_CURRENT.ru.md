@@ -1,4 +1,31 @@
-# Текущий override 2026-07-24: transaction `544db…` terminally recovered; v15 bounded Docker-load diagnostic package locally verified
+# Текущий override 2026-07-24: v15 install fail-closed; transaction `a75d9d…` требует exact recovery
+
+Одобренный v15 checksum-bound install прошёл remote artifact binding, но
+завершился fail-closed с `production runtime rollback failed`. Новый runtime
+cause не доказан: allowlisted Docker label не получен, raw stderr не выводится.
+Повторять install запрещено. Pinned read-only receipt показывает только новую
+AMN2 transaction `a75d9d957ace99c8d74c20d45c029e2e08d355a2c5a370d0066972561e73a1ac`
+в `manual_recovery_required`; retained `/opt/amn2-spain-package` присутствует.
+
+```text
+transaction_sha256=B87AD6123C37DB4D10F7E082951A411FE313E18F584AC91579CD5AFCF3E686E3
+capsule_sha256=C5E164098E25AB9643FABAF707BD1F760108805F06663E1E825CCDF8E7B7F350
+executor_sha256=07E066F15FA671DBF9B9F74ECAD2373C00D4A7551972E316F51BCB8265B630CC
+executor_bytes=145791
+docker_tree_sha256=F6CAF7B0DC1DA9C100DDA22049957F7501748D01A01A99F359B4DE19D2E7E8E9
+docker_tree=2268_entries|42532407_bytes|2_regular_blocks_rdev_64770|single_filesystem|no_nested_mounts
+manual_cleanup_runner_sha256=4F2FC7F35542C15B61259FE354E918C85CBD4F69E4838AF052B9B41AA3379EC7
+terminal_recovery_runner_sha256=6C5E28C05430BA6D5CC04F40A47697B256CF2D2FF703074F8E234C5EA9EE6D1B
+next_gate=commit_push_origin_readback|exact_manual_cleanup|exact_terminal_recovery|foreign_equality_receipt
+```
+
+Manual cleanup удалит только verified retained package tree и сохранит terminal
+ledger. Terminal recovery сможет удалить только sealed AMN2-owned contour и
+заново проверить dynamic persistent/volatile equality. До его passed receipt
+не заявлять equality для этой transaction. AMN2/AWG не стартуют; foreign Spain
+service не останавливается/не изменяется; USA остаётся rollback contour.
+
+# Предыдущий override 2026-07-24: transaction `544db…` terminally recovered; v15 bounded Docker-load diagnostic package locally verified
 
 Exact manual cleanup для transaction
 `544db99ee620bc0139914c75db98c9a2e16797aadffa6c106923825fc17a6b54`
