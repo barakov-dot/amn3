@@ -1,5 +1,38 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-24: v18 is consumed; execute recovery, not another install retry
+
+The approved v18 runner reached `awg_image_loaded` and failed closed with
+`production runtime rollback failed:docker_image_load_command_failed`. This
+is an allowlisted bounded failure class, not a proven Docker root cause. Do
+not build v19 and do not retry the install.
+
+The only current Spain state is transaction
+`00d9daecb6701b443d5714e7d08ec8715ad8ce6aa01712607463b572a5212972`,
+status=`manual_recovery_required`. Read-only evidence: AMN2 web/bot/
+AWG-network/Docker units inactive; package tree and dedicated Docker tree
+present. The terminal Docker tree was canonical-scanned using the exact
+uploaded executor, with no write or foreign-service action.
+
+```text
+transaction_sha256=704C0C085B5F4CEC40FC7A8C9E7F7C7E55F29027F4D3168393E16C26B9090CE4
+capsule_sha256=19ADD794051040AC287D6DDB842E82DC01A96322BD135F9951A1412D18597A95
+docker_tree_sha256=587E6D2B0179317FDBDBB53D125B757DC53FD93E3B0CC786EC5D2D54FC010430
+docker_tree=2268_entries|42532407_bytes|root_mode_0710|single_filesystem|no_nested_mounts
+executor_sha256=C5704E0F83FEFDAFAFC6A7EE174F29C0559E39A1B2429E30D5EA0DF955BE690E
+executor_bytes=146011
+manual_cleanup_runner_sha256=A279C05FBAAFD5D4C15A55BFF7A6B3EBED711A5978CF6A75B153EC4A097C1C09
+terminal_recovery_runner_sha256=7AB1FBD2E7E6129B238037E2A57FF86E41B4B76D3C1B0E9F2BD2DED6F8FBBA23
+local_verification=red_green_binding_test|powershell_parser_passed|package_tooling_157_passed
+next=commit_push_readback|exact_manual_cleanup|exact_terminal_recovery|stop_for_root_cause_decision
+```
+
+Manual cleanup is allowed to remove only `/opt/amn2-spain-package` after
+remote executor/transaction checksum checks. Terminal recovery then removes
+only the sealed current AMN2 contour, verifies persistent foreign equality and
+records volatile entries. No AMN2 start, foreign-service mutation, USA change
+or fresh install is authorized before both receipts pass.
+
 ## Current override 2026-07-24: terminal recovery passed; v18 is the sole local install candidate
 
 v17 is consumed and must not be retried. The exact cleanup and terminal

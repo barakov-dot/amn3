@@ -128,6 +128,18 @@ TRANSACTION_544DB_TERMINAL_RECOVERY_SSH_RUNNER = (
     / "vps"
     / "phase12_spain_transaction_544db_terminal_recovery_ssh_runner.ps1"
 )
+TRANSACTION_00D9DA_MANUAL_CLEANUP_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_00d9da_manual_cleanup_ssh_runner.ps1"
+)
+TRANSACTION_00D9DA_TERMINAL_RECOVERY_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_00d9da_terminal_recovery_ssh_runner.ps1"
+)
 TRACKED_PACKAGE_ROOT = ROOT / "packaging" / "phase12-spain"
 HOST_IDENTITY_SHA256 = "7" * 64
 BOOT_ID = "12345678-1234-1234-1234-123456789abc"
@@ -4149,6 +4161,37 @@ def test_transaction_544db_recovery_runners_are_pinned_and_action_bound() -> Non
     assert "$expectedRegularBlockDevices = 2" in terminal
     assert "$expectedRegularBlockRdev = 64770" in terminal
     assert "$expectedWhiteoutCount = 0" in terminal
+    assert "ROOT MODE 0710" in terminal
+    assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in terminal
+    assert "VERIFY FOREIGN EQUALITY" in terminal
+
+
+def test_transaction_00d9da_recovery_runners_are_pinned_and_action_bound() -> None:
+    assert TRANSACTION_00D9DA_MANUAL_CLEANUP_SSH_RUNNER.exists()
+    assert TRANSACTION_00D9DA_TERMINAL_RECOVERY_SSH_RUNNER.exists()
+    cleanup = TRANSACTION_00D9DA_MANUAL_CLEANUP_SSH_RUNNER.read_text(encoding="utf-8")
+    terminal = TRANSACTION_00D9DA_TERMINAL_RECOVERY_SSH_RUNNER.read_text(encoding="utf-8")
+    nonce = "00d9daecb6701b443d5714e7d08ec8715ad8ce6aa01712607463b572a5212972"
+    transaction = "704c0c085b5f4cec40fc7a8c9e7f7c7e55f29027f4d3168393e16c26b9090ce4"
+    capsule = "19add794051040ac287d6ddb842e82dc01a96322bd135f9951a1412d18597a95"
+    tree = "587e6d2b0179317fdbdbb53d125b757dc53fd93e3b0cc786ec5d2d54fc010430"
+    for source in (cleanup, terminal):
+        assert "StrictHostKeyChecking=yes" in source
+        assert '$expectedExecutorSha = "C5704E0F83FEFDAFAFC6A7EE174F29C0559E39A1B2429E30D5EA0DF955BE690E"' in source
+        assert "$expectedExecutorBytes = 146011" in source
+        assert f'$expectedNonce = "{nonce}"' in source
+        assert f'$expectedTransactionSha = "{transaction}"' in source
+        assert "scp.exe" not in source
+        assert "install-bound" not in source
+    assert "manual-cleanup-bound" in cleanup
+    assert "terminal-recovery-bound" not in cleanup
+    assert "REMOVE ONLY VERIFIED RETAINED PACKAGE TREE" in cleanup
+    assert "terminal-recovery-bound" in terminal
+    assert "terminal-recovery-receipt-bound" not in terminal
+    assert f'$expectedCapsuleSha = "{capsule}"' in terminal
+    assert f'$expectedDockerTreeSha = "{tree}"' in terminal
+    assert "$expectedDockerTreeEntries = 2268" in terminal
+    assert "$expectedDockerTreeBytes = 42532407" in terminal
     assert "ROOT MODE 0710" in terminal
     assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in terminal
     assert "VERIFY FOREIGN EQUALITY" in terminal
