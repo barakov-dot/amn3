@@ -1,5 +1,23 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-25: terminal recovery finalized; fresh v20 ready
+
+Transaction `52fab7` terminal finalize passed. The ledger advanced from
+`990A6668BF31F16668AC8F7098F309B156E1E182F4B2B28AC188047F0CBCBC78`
+to `E118EA7B299E96F891C92309AC420A44B6E8254FFA0E1A91A4BFCD614A3FFABD`;
+the already-absent primary group is now recorded removed. Run009-to-current and
+current before/after persistent foreign-service equality are true, with volatile
+counts `0/0`. The old AMN2 contour is absent; no install ran after finalization.
+
+Fresh v20 package and executor were double-built byte-equal and offline verified:
+package `60CDAE7927A856573B5A3BABDE364BC18F0347FDD92A9EDB31C36EA0E82A6177`
+(`140042240` bytes), manifest
+`571C48C20E1B9B819722344A310751A76F0F73C7344E82C92B607BF23384F9CD`,
+executor `E621C0CC23B89FB7109DDEFA665EF16B3F3A8105D31AE9B7589A102E9ED1E8D4`
+(`153174` bytes). Full Phase 12 scope: `320 passed, 4 skipped`; PowerShell parse
+and diff checks passed. Next gate: commit/push bindings, then one exact
+checksum-bound Spain install approval.
+
 ## Current operational override — 2026-07-25: AMN2 contour absent; exact ledger finalize ready
 
 The approved resume removed the exact AMN2 units, trees, runtime and user. The

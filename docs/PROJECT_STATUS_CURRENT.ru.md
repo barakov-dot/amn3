@@ -1,3 +1,21 @@
+# Текущий override 2026-07-25: terminal recovery finalized; fresh install v20 готов
+
+Transaction `52fab7` terminal finalize passed. Ledger перешёл с
+`990A6668BF31F16668AC8F7098F309B156E1E182F4B2B28AC188047F0CBCBC78`
+на `E118EA7B299E96F891C92309AC420A44B6E8254FFA0E1A91A4BFCD614A3FFABD`;
+уже отсутствующий primary group отмечен removed. Run009-to-current и current
+before/after persistent foreign-service equality равны `true`, volatile counts
+`0/0`. Старый AMN2 contour отсутствует; install после finalize ещё не запускался.
+
+Fresh v20 package/executor собраны дважды byte-equal и offline verified:
+package `60CDAE7927A856573B5A3BABDE364BC18F0347FDD92A9EDB31C36EA0E82A6177`
+(`140042240` bytes), manifest
+`571C48C20E1B9B819722344A310751A76F0F73C7344E82C92B607BF23384F9CD`,
+executor `E621C0CC23B89FB7109DDEFA665EF16B3F3A8105D31AE9B7589A102E9ED1E8D4`
+(`153174` bytes). Full Phase 12 scope: `320 passed, 4 skipped`; PowerShell parse
+и `git diff --check` passed. Следующий gate — commit/push bindings, затем один
+exact checksum-bound Spain install approval.
+
 # Текущий override 2026-07-25: AMN2 contour удалён; exact ledger finalize готов
 
 Approved resume удалил exact AMN2 units/trees/runtime и user, но primary group
