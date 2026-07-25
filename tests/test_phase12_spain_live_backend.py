@@ -2483,6 +2483,42 @@ class ProductionDockerRuntimeTests(unittest.TestCase):
             [argv for argv, _kwargs in runner.calls],
         )
 
+    def test_awg_start_waits_bounded_for_interface_without_restart(self) -> None:
+        class DelayedAwgRunner(_FakeDockerRunner):
+            remaining_not_ready = 2
+
+            def __call__(self, argv: tuple[str, ...], **kwargs: object) -> bytes:
+                if (
+                    argv == live_backend.DOCKER_ZERO_PEER_ARGV
+                    and self.remaining_not_ready
+                ):
+                    self.remaining_not_ready -= 1
+                    raise BackendError("AWG interface not ready")
+                return super().__call__(argv, **kwargs)
+
+        runner = DelayedAwgRunner()
+        runner.image = "full"
+        runner.network = True
+        runner.container = True
+        sleeps: list[float] = []
+        _container, active = live_backend.build_awg_container_actions(
+            runner=runner,
+            readiness_attempts=3,
+            readiness_interval_seconds=0.25,
+            sleeper=sleeps.append,
+        )
+
+        active.create_exact()
+
+        self.assertTrue(runner.running)
+        self.assertEqual(sleeps, [0.25, 0.25])
+        self.assertEqual(
+            [argv for argv, _kwargs in runner.calls].count(
+                live_backend.DOCKER_CONTAINER_START_ARGV
+            ),
+            1,
+        )
+
     def test_image_archive_must_be_untagged_with_empty_repositories_before_mutation(self) -> None:
         for label, body in (
             (

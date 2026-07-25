@@ -15,6 +15,7 @@ import sys
 import tarfile
 import tempfile
 import threading
+import time
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
@@ -5293,8 +5294,25 @@ def _docker_container_rollback_state(
 
 
 def build_awg_container_actions(
-    *, runner: Callable[..., bytes], stage: str = "network_container_started"
+    *,
+    runner: Callable[..., bytes],
+    stage: str = "network_container_started",
+    readiness_attempts: int = 60,
+    readiness_interval_seconds: float = 0.25,
+    sleeper: Callable[[float], None] = time.sleep,
 ) -> tuple[SystemAction, SystemAction]:
+    if (
+        not isinstance(readiness_attempts, int)
+        or isinstance(readiness_attempts, bool)
+        or readiness_attempts < 1
+        or readiness_attempts > 120
+        or not isinstance(readiness_interval_seconds, (int, float))
+        or isinstance(readiness_interval_seconds, bool)
+        or readiness_interval_seconds < 0
+        or readiness_interval_seconds > 1
+        or not callable(sleeper)
+    ):
+        raise BackendError("AWG readiness policy invalid")
     runner = _closed_docker_runner(runner)
     container_desired = _semantic_identity(
         {
@@ -5383,8 +5401,16 @@ def build_awg_container_actions(
             raise BackendError("AWG container missing before start")
         if not running:
             runner(DOCKER_CONTAINER_START_ARGV)
-        if observe_active() != active_desired:
-            raise BackendError("AWG zero-peer start health failed")
+        last_error: BackendError | None = None
+        for attempt in range(readiness_attempts):
+            try:
+                if observe_active() == active_desired:
+                    return
+            except BackendError as exc:
+                last_error = exc
+            if attempt + 1 < readiness_attempts:
+                sleeper(float(readiness_interval_seconds))
+        raise BackendError("AWG bounded readiness timeout") from last_error
 
     def remove_active(identity: str) -> None:
         if identity != active_desired:

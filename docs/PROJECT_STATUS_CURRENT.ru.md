@@ -49,14 +49,18 @@ Transaction `52fab7` terminal finalize passed. Ledger перешёл с
 before/after persistent foreign-service equality равны `true`, volatile counts
 `0/0`. Старый AMN2 contour отсутствует; install после finalize ещё не запускался.
 
-Fresh v20 package/executor собраны дважды byte-equal и offline verified:
-package `60CDAE7927A856573B5A3BABDE364BC18F0347FDD92A9EDB31C36EA0E82A6177`
+Fresh v21 package/executor с bounded AWG readiness (один start, без restart)
+собраны дважды byte-equal и offline verified: package
+`83497AEC5FDB4558B4E6AED57B9C8B217AB1593E8EBAE2A839DDF14AB881D8FA`
 (`140042240` bytes), manifest
-`571C48C20E1B9B819722344A310751A76F0F73C7344E82C92B607BF23384F9CD`,
-executor `E621C0CC23B89FB7109DDEFA665EF16B3F3A8105D31AE9B7589A102E9ED1E8D4`
-(`153174` bytes). Full Phase 12 scope: `320 passed, 4 skipped`; PowerShell parse
-и `git diff --check` passed. Следующий gate — commit/push bindings, затем один
-exact checksum-bound Spain install approval.
+`FB8EEFC7AA9CB8A623A34119FF9C55F5FD7FB3245B958EA9A7005A0C7941D09F`,
+executor `6DA2326382E32B4C7E373D927187B14D9A6F861E202F42BD0F11C930F5BA9284`
+(`152752` bytes). Transaction `958e91` rollback завершён: AMN2 contour absent,
+foreign persistent equality passed. Full Phase 12 suite: `325 passed, 4 skipped`;
+PowerShell parse passed; install runner
+`C32CB9C9DAFC94B36196F37AC218A2BF7655ED0984452BE37CA5C5FDD1D75957`.
+Следующий gate — commit/push bindings, затем exact checksum-bound Spain install
+approval.
 
 # Текущий override 2026-07-25: AMN2 contour удалён; exact ledger finalize готов
 

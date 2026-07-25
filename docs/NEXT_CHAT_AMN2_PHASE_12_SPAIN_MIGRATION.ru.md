@@ -43,15 +43,18 @@ Run009-to-current and current before/after persistent foreign equality passed;
 volatile counts are `0/0`. The old AMN2 contour is absent and no install ran
 after finalization.
 
-Fresh v20 bindings: package
-`60CDAE7927A856573B5A3BABDE364BC18F0347FDD92A9EDB31C36EA0E82A6177`
+Fresh v21 bindings with bounded AWG readiness (one start, no restart): package
+`83497AEC5FDB4558B4E6AED57B9C8B217AB1593E8EBAE2A839DDF14AB881D8FA`
 (`140042240` bytes), manifest
-`571C48C20E1B9B819722344A310751A76F0F73C7344E82C92B607BF23384F9CD`,
-executor `E621C0CC23B89FB7109DDEFA665EF16B3F3A8105D31AE9B7589A102E9ED1E8D4`
-(`153174` bytes). Double builds are byte-equal, package offline verification
-passed, and the complete Phase 12 scope is `320 passed, 4 skipped`.
-Next: push the fresh binding commit, then execute one exact checksum-bound
-Spain install approval.
+`FB8EEFC7AA9CB8A623A34119FF9C55F5FD7FB3245B958EA9A7005A0C7941D09F`,
+executor `6DA2326382E32B4C7E373D927187B14D9A6F861E202F42BD0F11C930F5BA9284`
+(`152752` bytes). Double builds are byte-equal and offline verification passed.
+Transaction `958e91` rollback completed with absent AMN2 contour and foreign
+persistent equality. Full Phase 12 suite: `325 passed, 4 skipped`; PowerShell
+parse passed; install runner
+`C32CB9C9DAFC94B36196F37AC218A2BF7655ED0984452BE37CA5C5FDD1D75957`.
+Next: push the binding commit, then execute one exact checksum-bound Spain
+install approval.
 
 ## Current override 2026-07-25: exact post-contour ledger finalize is next
 

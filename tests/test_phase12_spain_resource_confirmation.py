@@ -745,7 +745,7 @@ class Phase12RunnerContractTests(unittest.TestCase):
 
         with tempfile.TemporaryFile() as backing, mock.patch.object(
             os, "memfd_create", return_value=os.dup(backing.fileno()), create=True
-        ):
+        ), mock.patch.object(os, "fchmod", create=True):
             observer = ChecksumBoundResourceObserver(
                 collector_bytes=collector,
                 collector_sha256=hashlib.sha256(collector).hexdigest(),
