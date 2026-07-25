@@ -167,6 +167,12 @@ TRANSACTION_52FAB_CURRENT_AUDIT_SSH_RUNNER = (
     / "vps"
     / "phase12_spain_transaction_52fab_current_audit_ssh_runner.ps1"
 )
+TRANSACTION_52FAB_CURRENT_RESUME_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_52fab_current_resume_ssh_runner.ps1"
+)
 TRACKED_PACKAGE_ROOT = ROOT / "packaging" / "phase12-spain"
 HOST_IDENTITY_SHA256 = "7" * 64
 BOOT_ID = "12345678-1234-1234-1234-123456789abc"
@@ -2249,6 +2255,36 @@ def test_current_terminal_recovery_audit_intent_binds_current_ledger() -> None:
     assert intent.mutation_ledger_sha256 == payload["mutation_ledger_sha256"]
 
 
+def test_current_terminal_recovery_resume_intent_binds_audited_contour() -> None:
+    payload = {
+        "schema": "amn2.spain-current-terminal-recovery-resume-intent.v1",
+        "recovery_authorized": True,
+        "approval_id": "test-current-terminal-resume",
+        "executor_sha256": "1" * 64,
+        "nonce": "2" * 64,
+        "transaction_sha256": "3" * 64,
+        "capsule_sha256": "4" * 64,
+        "mutation_ledger_sha256": "5" * 64,
+        "committed_objects_sha256": "6" * 64,
+        "removed_objects_sha256": "7" * 64,
+        "pending_objects_sha256": "8" * 64,
+        "systemd_sha256": "9" * 64,
+        "owned_tree_inventories": {
+            "etc": {"tree_sha256": "a" * 64, "entry_count": 4, "total_bytes": 10, "root_mode": "0750"},
+            "opt": {"tree_sha256": "b" * 64, "entry_count": 5, "total_bytes": 20, "root_mode": "0755"},
+            "var": {"tree_sha256": "c" * 64, "entry_count": 1, "total_bytes": 30, "root_mode": "0750"},
+        },
+        "run_directory_identity": "sha256:" + "d" * 64,
+        "approved_at_epoch": 100,
+        "expires_at_epoch": 200,
+    }
+    intent = installer_module._read_current_terminal_recovery_resume_intent_payload(
+        canonical_json_bytes(payload) + b"\n"
+    )
+    assert intent.mutation_ledger_sha256 == payload["mutation_ledger_sha256"]
+    assert dict(intent.owned_tree_inventories["opt"]) == payload["owned_tree_inventories"]["opt"]
+
+
 def test_current_terminal_recovery_audit_reports_sealed_current_state(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -2560,6 +2596,37 @@ def test_terminal_owned_tree_inventory_is_bounded_and_no_follow(
     assert receipt["total_bytes"] == len(b"phase12\n")
     assert receipt["root_mode"] == "0755"
     assert re.fullmatch(r"[0-9a-f]{64}", str(receipt["tree_sha256"]))
+
+
+def test_terminal_owned_tree_cleanup_requires_exact_double_inventory(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "opt" / "amn2-spain"
+    target.mkdir(parents=True)
+    (target / "runtime").mkdir()
+    (target / "runtime" / "app.py").write_bytes(b"phase12\n")
+    receipt = live_backend.inspect_terminal_owned_tree(target)
+
+    assert live_backend.cleanup_terminal_owned_tree(
+        target,
+        expected_tree_sha256=str(receipt["tree_sha256"]),
+        expected_entry_count=int(receipt["entry_count"]),
+        expected_total_bytes=int(receipt["total_bytes"]),
+        expected_root_mode=str(receipt["root_mode"]),
+    ) == receipt
+    assert not target.exists()
+
+    drift = tmp_path / "etc" / "amn2-spain"
+    drift.mkdir(parents=True)
+    (drift / "runtime.env").write_bytes(b"drift\n")
+    with pytest.raises(live_backend.BackendError, match="terminal owned tree inventory drift"):
+        live_backend.cleanup_terminal_owned_tree(
+            drift,
+            expected_tree_sha256="0" * 64,
+            expected_entry_count=1,
+            expected_total_bytes=6,
+            expected_root_mode="0755",
+        )
 
 
 def test_terminal_docker_tree_allows_only_overlay_whiteout_block_device() -> None:
@@ -4304,6 +4371,35 @@ def test_current_terminal_recovery_audit_mode_routes_only_bound_intent(
         )
 
 
+def test_current_terminal_recovery_resume_mode_routes_only_bound_intent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+    sentinel = object()
+    monkeypatch.setattr(
+        installer_module,
+        "_read_current_terminal_recovery_resume_intent_payload",
+        lambda _payload: sentinel,
+    )
+    monkeypatch.setattr(
+        installer_module,
+        "_production_current_terminal_recovery_resume_bound",
+        lambda intent, **kwargs: captured.update(intent=intent, **kwargs)
+        or {"result": "passed"},
+    )
+    assert installer_module.run_production_command(
+        ["current-terminal-recovery-resume-bound"], authorization_payload=b"{}"
+    ) == {"result": "passed"}
+    assert captured["intent"] is sentinel
+    with pytest.raises(
+        InstallError, match="current_terminal_recovery_resume_bound_inputs_required"
+    ):
+        installer_module.run_production_command(
+            ["current-terminal-recovery-resume-bound", "unexpected"],
+            authorization_payload=b"{}",
+        )
+
+
 def test_runtime_recovery_mode_routes_only_bound_intent(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -4395,6 +4491,21 @@ def test_transaction_52fab_current_audit_runner_is_read_only_and_executor_pinned
     assert "CopyToAsync" in source
     assert "NO INSTALL NO CLEANUP NO AMN2 START" in source
     assert "terminal-recovery-bound" not in source
+    assert "manual-cleanup-bound" not in source
+
+
+def test_transaction_52fab_current_resume_runner_is_audit_and_executor_bound() -> None:
+    assert TRANSACTION_52FAB_CURRENT_RESUME_SSH_RUNNER.exists()
+    source = TRANSACTION_52FAB_CURRENT_RESUME_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert "current-terminal-recovery-resume-bound" in source
+    assert "current-terminal-recovery-resume-intent.v1" in source
+    assert '$expectedExecutorSha = "88FE4633126E3BC5732A68EADD679BE2D30AD5D89A5B780F01FA45BB41CBE480"' in source
+    assert '$expectedLedgerSha = "0ee87dfa762739457eafa5d6c8c81168f99da745b6ddd0f30bc60388f7e660c9"' in source
+    assert "0f2f2ade8f6876dfdd65ef495f7131555caab6be6361dca2d6811ca9f3d25119" in source
+    assert "CopyToAsync" in source
+    assert "REMOVE EXACT AUDITED AMN2 CONTOUR" in source
+    assert "install-bound" not in source
     assert "manual-cleanup-bound" not in source
 
 

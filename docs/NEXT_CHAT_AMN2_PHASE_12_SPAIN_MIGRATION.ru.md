@@ -1,5 +1,21 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-25: 52FAB7 audit-v2 passed; exact terminal resume next
+
+Audit-v2 passed for current ledger
+`0EE87DFA762739457EAFA5D6C8C81168F99DA745B6DDD0F30BC60388F7E660C9`:
+29 committed, 6 removed, 5 unrecorded, all recorded stages blueprint-equal.
+The exact retained tree hashes are `/opt` `0F2F2ADE…D25119`, `/etc`
+`CD947553…CAF5A7`, `/var` `8F95E1F1…27BC99`. Only the dedicated AMN2 Docker
+unit is active/enabled. Foreign service and USA remain unchanged.
+
+Next gate is exact audit-bound terminal resume: executor
+`88FE4633126E3BC5732A68EADD679BE2D30AD5D89A5B780F01FA45BB41CBE480`
+(`151821` bytes), runner
+`1EAF78A1F22BFB62217A135AAC2C7490DA34D61B3E26E810B4416086EF7B87A0`.
+It removes only the audited AMN2 contour and returns dynamic foreign-equality
+receipt. Scoped verification: `254 passed, 4 skipped`; diff check passed.
+
 ## Current override 2026-07-25: `52fab7…` partial terminal recovery; exact read-only audit is next
 
 Do not retry install. Manual cleanup removed the verified package tree. The

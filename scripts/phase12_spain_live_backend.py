@@ -1595,6 +1595,44 @@ def inspect_terminal_owned_tree(target: Path) -> dict[str, object]:
     }
 
 
+def cleanup_terminal_owned_tree(
+    target: Path,
+    *,
+    expected_tree_sha256: str,
+    expected_entry_count: int,
+    expected_total_bytes: int,
+    expected_root_mode: str,
+) -> dict[str, object]:
+    """Remove one audit-bound regular-file/directory tree without following links."""
+    target = Path(target)
+    expected = {
+        "tree_sha256": expected_tree_sha256,
+        "entry_count": expected_entry_count,
+        "total_bytes": expected_total_bytes,
+        "root_mode": expected_root_mode,
+    }
+    if (
+        not target.is_absolute()
+        or re.fullmatch(r"[0-9a-f]{64}", expected_tree_sha256) is None
+        or not isinstance(expected_entry_count, int)
+        or isinstance(expected_entry_count, bool)
+        or not 0 < expected_entry_count <= 50_000
+        or not isinstance(expected_total_bytes, int)
+        or isinstance(expected_total_bytes, bool)
+        or not 0 <= expected_total_bytes <= 2 * 1024 * 1024 * 1024
+        or expected_root_mode not in {"0750", "0755"}
+    ):
+        raise BackendError("terminal owned tree cleanup input invalid")
+    first = inspect_terminal_owned_tree(target)
+    second = inspect_terminal_owned_tree(target)
+    if first != expected or second != expected:
+        raise BackendError("terminal owned tree inventory drift")
+    _remove_owned_tree(target)
+    if target.exists() or target.is_symlink():
+        raise BackendError("terminal owned tree removal not observable")
+    return first
+
+
 def _remove_owned_tree(target: Path) -> None:
     if os.name == "nt":
         for current, directories, files in os.walk(target, topdown=False, followlinks=False):
@@ -1618,10 +1656,13 @@ def _remove_owned_tree(target: Path) -> None:
             os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0),
             dir_fd=parent_fd,
         )
+        root_device = os.fstat(root_fd).st_dev
 
         def remove_children(descriptor: int) -> None:
             for name in sorted(os.listdir(descriptor)):
                 info = os.stat(name, dir_fd=descriptor, follow_symlinks=False)
+                if info.st_dev != root_device:
+                    raise BackendError("owned tree mount collision")
                 if stat.S_ISDIR(info.st_mode):
                     child = os.open(
                         name,

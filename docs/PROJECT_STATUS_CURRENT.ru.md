@@ -1,3 +1,25 @@
+# Текущий override 2026-07-25: 52FAB7 audit-v2 passed; exact terminal resume готов
+
+Read-only audit-v2 passed для ledger
+`0EE87DFA762739457EAFA5D6C8C81168F99DA745B6DDD0F30BC60388F7E660C9`:
+29 committed, 6 removed, 5 unrecorded; все stages совпадают с blueprint.
+Retained inventories: `/opt/amn2-spain`
+`0F2F2ADE8F6876DFDD65EF495F7131555CAAB6BE6361DCA2D6811CA9F3D25119`
+(2903/313921242/0755), `/etc/amn2-spain`
+`CD94755306A8C864B29FEC3B336565F470A5FC49FC7AF26982CD18ECD9CAF5A7`
+(4/2392/0750), `/var/lib/amn2-spain`
+`8F95E1F1F0CE9BA9C204B5143B5111AD350B2122996DBAE6EC1DD543B527BC99`
+(1/249856/0750). Dedicated Docker unit active/enabled; остальные AMN2 units
+inactive. Foreign service не останавливался и не изменялся.
+
+Exact audit-bound resume готов: executor
+`88FE4633126E3BC5732A68EADD679BE2D30AD5D89A5B780F01FA45BB41CBE480`
+(`151821` bytes), runner
+`1EAF78A1F22BFB62217A135AAC2C7490DA34D61B3E26E810B4416086EF7B87A0`.
+Он может удалить только exact audited AMN2 contour, остановить/disable только
+`amn2-spain-docker.service`, seal ledger и проверить dynamic foreign equality.
+Scoped suite: `254 passed, 4 skipped`; `git diff --check` passed.
+
 # Текущий override 2026-07-25: transaction `52fab7…` partial terminal recovery; read-only audit gate готов
 
 Manual cleanup удалил только verified `/opt/amn2-spain-package`. Последующий

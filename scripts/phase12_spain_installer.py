@@ -16,6 +16,7 @@ import time
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any, Callable, ContextManager, Mapping
 
 try:
@@ -1985,6 +1986,103 @@ class CurrentTerminalRecoveryAuditIntent:
             transaction_sha256=value["transaction_sha256"],
             capsule_sha256=value["capsule_sha256"],
             mutation_ledger_sha256=value["mutation_ledger_sha256"],
+            approved_at_epoch=value["approved_at_epoch"],
+            expires_at_epoch=value["expires_at_epoch"],
+        )
+
+
+@dataclass(frozen=True)
+class CurrentTerminalRecoveryResumeIntent:
+    """Mutation binding for one audited partial terminal-recovery contour."""
+
+    approval_id: str
+    executor_sha256: str
+    nonce: str
+    transaction_sha256: str
+    capsule_sha256: str
+    mutation_ledger_sha256: str
+    committed_objects_sha256: str
+    removed_objects_sha256: str
+    pending_objects_sha256: str
+    systemd_sha256: str
+    owned_tree_inventories: Mapping[str, Mapping[str, object]]
+    run_directory_identity: str
+    approved_at_epoch: int
+    expires_at_epoch: int
+
+    @classmethod
+    def from_mapping(cls, value: dict[str, Any]) -> "CurrentTerminalRecoveryResumeIntent":
+        fields = {
+            "schema", "recovery_authorized", "approval_id", "executor_sha256",
+            "nonce", "transaction_sha256", "capsule_sha256",
+            "mutation_ledger_sha256", "committed_objects_sha256",
+            "removed_objects_sha256", "pending_objects_sha256", "systemd_sha256",
+            "owned_tree_inventories", "run_directory_identity",
+            "approved_at_epoch", "expires_at_epoch",
+        }
+        if (
+            not isinstance(value, dict)
+            or set(value) != fields
+            or value.get("schema")
+            != "amn2.spain-current-terminal-recovery-resume-intent.v1"
+            or value.get("recovery_authorized") is not True
+        ):
+            raise InstallError("current terminal recovery resume intent schema/result mismatch")
+        for key in (
+            "executor_sha256", "nonce", "transaction_sha256", "capsule_sha256",
+            "mutation_ledger_sha256", "committed_objects_sha256",
+            "removed_objects_sha256", "pending_objects_sha256", "systemd_sha256",
+        ):
+            if not isinstance(value[key], str) or re.fullmatch(r"[0-9a-f]{64}", value[key]) is None:
+                raise InstallError(f"current terminal recovery resume intent {key} invalid")
+        if (
+            not isinstance(value["approval_id"], str)
+            or not value["approval_id"]
+            or re.fullmatch(r"sha256:[0-9a-f]{64}", value["run_directory_identity"] or "") is None
+        ):
+            raise InstallError("current terminal recovery resume intent approval/identity invalid")
+        inventories = value["owned_tree_inventories"]
+        if not isinstance(inventories, dict) or set(inventories) != {"etc", "opt", "var"}:
+            raise InstallError("current terminal recovery resume tree inventory invalid")
+        normalized: dict[str, Mapping[str, object]] = {}
+        expected_modes = {"etc": "0750", "opt": "0755", "var": "0750"}
+        for label in ("etc", "opt", "var"):
+            item = inventories[label]
+            if (
+                not isinstance(item, dict)
+                or set(item) != {"tree_sha256", "entry_count", "total_bytes", "root_mode"}
+                or not isinstance(item["tree_sha256"], str)
+                or re.fullmatch(r"[0-9a-f]{64}", item["tree_sha256"]) is None
+                or not isinstance(item["entry_count"], int)
+                or isinstance(item["entry_count"], bool)
+                or not 0 < item["entry_count"] <= 50_000
+                or not isinstance(item["total_bytes"], int)
+                or isinstance(item["total_bytes"], bool)
+                or not 0 <= item["total_bytes"] <= 2 * 1024 * 1024 * 1024
+                or item["root_mode"] != expected_modes[label]
+            ):
+                raise InstallError("current terminal recovery resume tree inventory invalid")
+            normalized[label] = MappingProxyType(dict(item))
+        if (
+            not isinstance(value["approved_at_epoch"], int)
+            or isinstance(value["approved_at_epoch"], bool)
+            or not isinstance(value["expires_at_epoch"], int)
+            or isinstance(value["expires_at_epoch"], bool)
+            or value["expires_at_epoch"] <= value["approved_at_epoch"]
+            or value["expires_at_epoch"] - value["approved_at_epoch"] > 300
+        ):
+            raise InstallError("current terminal recovery resume intent time window invalid")
+        return cls(
+            approval_id=value["approval_id"], executor_sha256=value["executor_sha256"],
+            nonce=value["nonce"], transaction_sha256=value["transaction_sha256"],
+            capsule_sha256=value["capsule_sha256"],
+            mutation_ledger_sha256=value["mutation_ledger_sha256"],
+            committed_objects_sha256=value["committed_objects_sha256"],
+            removed_objects_sha256=value["removed_objects_sha256"],
+            pending_objects_sha256=value["pending_objects_sha256"],
+            systemd_sha256=value["systemd_sha256"],
+            owned_tree_inventories=MappingProxyType(normalized),
+            run_directory_identity=value["run_directory_identity"],
             approved_at_epoch=value["approved_at_epoch"],
             expires_at_epoch=value["expires_at_epoch"],
         )
@@ -5708,6 +5806,28 @@ def _read_current_terminal_recovery_audit_intent_payload(
         raise InstallError("current_terminal_recovery_audit_bound_inputs_required") from exc
 
 
+def _read_current_terminal_recovery_resume_intent_payload(
+    payload: bytes,
+) -> CurrentTerminalRecoveryResumeIntent:
+    if (
+        not isinstance(payload, bytes)
+        or not payload
+        or len(payload) > 64 * 1024
+        or not payload.endswith(b"\n")
+    ):
+        raise InstallError("current_terminal_recovery_resume_bound_inputs_required")
+    try:
+        value = json.loads(payload)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise InstallError("current_terminal_recovery_resume_bound_inputs_required") from exc
+    if json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8") + b"\n" != payload:
+        raise InstallError("current_terminal_recovery_resume_bound_inputs_required")
+    try:
+        return CurrentTerminalRecoveryResumeIntent.from_mapping(value)
+    except InstallError as exc:
+        raise InstallError("current_terminal_recovery_resume_bound_inputs_required") from exc
+
+
 def _read_runtime_recovery_intent_payload(payload: bytes) -> RuntimeRecoveryIntent:
     if (
         not isinstance(payload, bytes)
@@ -6881,6 +7001,244 @@ def _production_current_terminal_recovery_audit_bound(
     }
 
 
+def _production_current_terminal_recovery_resume_bound(
+    intent: CurrentTerminalRecoveryResumeIntent,
+    *,
+    host_root: Path = Path("/"),
+    expected_uid: int | None = 0,
+    now_epoch: int | None = None,
+) -> dict[str, Any]:
+    """Finish one exact audited partial rollback without touching foreign state."""
+    now = int(time.time()) if now_epoch is None else now_epoch
+    if now < intent.approved_at_epoch or now > intent.expires_at_epoch:
+        raise InstallError("current terminal recovery resume intent expired")
+    _assert_running_executor(
+        Path(sys.argv[0]).resolve(), intent.executor_sha256, expected_uid=expected_uid
+    )
+    root = Path(host_root)
+    audit_root = _host_path(root, "/var/lib/amn2-spain-phase12-audit")
+    lease = SharedInstallLockLease(lambda: _existing_opt_directory_lock(root))
+    observer = ChecksumBoundResourceObserver(
+        collector_bytes=_embedded_resource_collector_bytes(),
+        collector_sha256=hashlib.sha256(_embedded_resource_collector_bytes()).hexdigest(),
+        expected_uid=expected_uid,
+    )
+    removed_now: list[str] = []
+    with lease.acquire():
+        transaction = BootstrapTransactionLedger.open_existing(
+            audit_root=audit_root, nonce=intent.nonce, expected_uid=expected_uid
+        )
+        state = transaction.snapshot()
+        transaction_sha256 = hashlib.sha256(
+            BootstrapTransactionLedger._canonical(state)
+        ).hexdigest()
+        if state["status"] != "manual_recovery_required" or transaction_sha256 != intent.transaction_sha256:
+            raise InstallError("current terminal recovery resume transaction binding mismatch")
+        capsule = RecoveryCapsuleStore.open_existing(
+            audit_root=audit_root, nonce=intent.nonce, expected_uid=expected_uid
+        )
+        if capsule.sha256 != intent.capsule_sha256 or state.get("recovery_capsule_sha256") != capsule.sha256:
+            raise InstallError("current terminal recovery resume capsule binding mismatch")
+        package_root = _host_path(root, "/opt/amn2-spain-package")
+        if package_root.exists() or package_root.is_symlink():
+            raise InstallError("current terminal recovery resume package tree must be absent")
+        blueprint = {entry["owned_object"]: entry for entry in capsule.blueprint.actions}
+        ledger_path = Path(capsule.blueprint.assembly_context["mutation_ledger_path"])
+        ledger_sha256, _ledger_size = _sha256_regular_file(
+            ledger_path, expected_uid=expected_uid, max_bytes=16 * 1024 * 1024
+        )
+        if ledger_sha256 != intent.mutation_ledger_sha256:
+            raise InstallError("current terminal recovery resume mutation ledger binding mismatch")
+        ledger = live_backend.DurableMutationLedgerStore(
+            ledger_path, expected_uid=expected_uid
+        ).load_or_create(set(blueprint))
+        committed: list[str] = []
+        removed: list[str] = []
+        pending: list[str] = []
+        for owned_object in sorted(blueprint):
+            event = ledger.event_for(owned_object)
+            if event is None:
+                pending.append(owned_object)
+            elif event["event"] == "committed":
+                committed.append(owned_object)
+            elif event["event"] == "removed":
+                removed.append(owned_object)
+            else:
+                pending.append(owned_object)
+        if (
+            package_backend.sha256_canonical(committed) != intent.committed_objects_sha256
+            or package_backend.sha256_canonical(removed) != intent.removed_objects_sha256
+            or package_backend.sha256_canonical(pending) != intent.pending_objects_sha256
+        ):
+            raise InstallError("current terminal recovery resume ledger contour mismatch")
+        root_fs = live_backend.SafeFs(root=root, expected_uid=0, expected_gid=0)
+        config_fs = live_backend.SafeFs(root=root, expected_uid=0, expected_gid=61212)
+        service_fs = live_backend.SafeFs(root=root, expected_uid=61212, expected_gid=61212)
+        tree_specs = {
+            "etc": (config_fs, "etc/amn2-spain", _host_path(root, "/etc/amn2-spain")),
+            "opt": (root_fs, "opt/amn2-spain", _host_path(root, "/opt/amn2-spain")),
+            "var": (service_fs, "var/lib/amn2-spain", _host_path(root, "/var/lib/amn2-spain")),
+        }
+        for label, (fs, relative, target) in tree_specs.items():
+            event = ledger.event_for("dir:/" + relative)
+            if event is None or event["event"] != "committed" or fs.identity(relative) != event["actual_identity"]:
+                raise InstallError("current terminal recovery resume tree root binding mismatch")
+            if live_backend.inspect_terminal_owned_tree(target) != dict(intent.owned_tree_inventories[label]):
+                raise InstallError("current terminal recovery resume tree inventory mismatch")
+        for owned_object in committed:
+            if owned_object.startswith(("dir:/opt/amn2-spain", "file:/opt/amn2-spain")):
+                fs = root_fs
+            elif owned_object.startswith(("dir:/etc/amn2-spain", "file:/etc/amn2-spain", "secret:/etc/amn2-spain")):
+                fs = config_fs
+            elif owned_object.startswith(("dir:/var/lib/amn2-spain", "file:/var/lib/amn2-spain")):
+                fs = service_fs
+            else:
+                continue
+            relative = owned_object.split(":/", maxsplit=1)[1]
+            event = ledger.event_for(owned_object)
+            if event is None or fs.identity(relative) != event["actual_identity"]:
+                raise InstallError("current terminal recovery resume owned path binding mismatch")
+        if root_fs.identity("run/amn2-spain-docker") != intent.run_directory_identity:
+            raise InstallError("current terminal recovery resume run directory mismatch")
+
+        systemd_runner = live_backend.FixedCommandRunner(
+            allowed_argv=live_backend.SYSTEMCTL_COMMAND_ALLOWLIST
+        )
+
+        def run_systemctl(*argv: str) -> bytes:
+            return systemd_runner(
+                (live_backend.SYSTEMCTL, *argv),
+                timeout=live_backend.DEFAULT_COMMAND_TIMEOUT,
+                max_output=live_backend.MAX_SYSTEMCTL_SHOW_BYTES,
+            )
+
+        def show(unit: str) -> dict[str, str]:
+            return live_backend.parse_systemctl_show(
+                systemd_runner(
+                    live_backend._systemctl_show_argv(unit),
+                    timeout=live_backend.DEFAULT_COMMAND_TIMEOUT,
+                    max_output=live_backend.MAX_SYSTEMCTL_SHOW_BYTES,
+                ),
+                unit=unit,
+            )
+
+        systemd_before = {unit: show(unit) for unit in live_backend.SYSTEMD_UNIT_ORDER}
+        if package_backend.sha256_canonical(systemd_before) != intent.systemd_sha256:
+            raise InstallError("current terminal recovery resume systemd binding mismatch")
+        before = observation_from_resource_confirmation_evidence(observer.collect_evidence())
+
+        def mark_removed(owned_object: str) -> None:
+            event = ledger.event_for(owned_object)
+            if event is None or event["event"] != "committed":
+                raise InstallError("current terminal recovery resume ledger transition mismatch")
+            ledger.removed(event["stage"], owned_object, event["actual_identity"])
+            removed_now.append(owned_object)
+
+        docker_unit = "amn2-spain-docker.service"
+        run_systemctl("stop", docker_unit)
+        stopped = show(docker_unit)
+        if stopped["ActiveState"] != "inactive" or stopped["UnitFileState"] != "enabled":
+            raise InstallError("current terminal recovery resume Docker stop mismatch")
+        mark_removed("systemd-active:" + docker_unit)
+        run_systemctl("disable", docker_unit)
+        disabled = show(docker_unit)
+        if disabled["ActiveState"] != "inactive" or disabled["UnitFileState"] != "disabled":
+            raise InstallError("current terminal recovery resume Docker disable mismatch")
+        mark_removed("systemd-enabled:" + docker_unit)
+
+        for unit in live_backend.SYSTEMD_UNIT_ORDER:
+            relative = "etc/systemd/system/" + unit
+            owned_object = "file:/" + relative
+            event = ledger.event_for(owned_object)
+            if event is None or event["event"] != "committed" or root_fs.identity(relative) != event["actual_identity"]:
+                raise InstallError("current terminal recovery resume unit file binding mismatch")
+            current = show(unit)
+            expected_unit_state = "static" if unit == "amn2-spain-bot.service" else "disabled"
+            if current["ActiveState"] != "inactive" or current["UnitFileState"] != expected_unit_state:
+                raise InstallError("current terminal recovery resume unit state mismatch")
+            root_fs.remove_exact(relative, event["actual_identity"])
+            mark_removed(owned_object)
+        run_systemctl("daemon-reload")
+        if any(show(unit)["LoadState"] != "not-found" for unit in live_backend.SYSTEMD_UNIT_ORDER):
+            raise InstallError("current terminal recovery resume unit removal mismatch")
+
+        run_event = ledger.event_for("dir:/run/amn2-spain-docker")
+        if run_event is None or run_event["event"] != "committed":
+            raise InstallError("current terminal recovery resume run ledger mismatch")
+        root_fs.remove_exact("run/amn2-spain-docker", run_event["actual_identity"])
+        mark_removed("dir:/run/amn2-spain-docker")
+
+        for label in ("opt", "etc", "var"):
+            _fs, _relative, target = tree_specs[label]
+            inventory = intent.owned_tree_inventories[label]
+            live_backend.cleanup_terminal_owned_tree(
+                target,
+                expected_tree_sha256=str(inventory["tree_sha256"]),
+                expected_entry_count=int(inventory["entry_count"]),
+                expected_total_bytes=int(inventory["total_bytes"]),
+                expected_root_mode=str(inventory["root_mode"]),
+            )
+            prefixes = {
+                "opt": ("dir:/opt/amn2-spain", "file:/opt/amn2-spain", "tree:/opt/amn2-spain"),
+                "etc": ("dir:/etc/amn2-spain", "file:/etc/amn2-spain", "secret:/etc/amn2-spain"),
+                "var": ("dir:/var/lib/amn2-spain", "database:/var/lib/amn2-spain"),
+            }[label]
+            for owned_object in committed:
+                if owned_object.startswith(prefixes) and ledger.event_for(owned_object)["event"] == "committed":
+                    mark_removed(owned_object)
+            if label == "opt" and ledger.event_for("runtime:docker-static")["event"] == "committed":
+                mark_removed("runtime:docker-static")
+
+        identity_actions = {
+            action.operation.owned_object: action
+            for action in live_backend.build_production_identity_bundle().actions
+        }
+        for owned_object in ("user:amn2-spain", "group:amn2-spain"):
+            event = ledger.event_for(owned_object)
+            action = identity_actions[owned_object]
+            if event is None or event["event"] != "committed" or action.observe_identity() != event["actual_identity"]:
+                raise InstallError("current terminal recovery resume identity binding mismatch")
+            action.remove_exact(event["actual_identity"])
+            if action.observe_identity() is not None:
+                raise InstallError("current terminal recovery resume identity removal mismatch")
+            mark_removed(owned_object)
+
+        remaining_committed = sorted(
+            name for name in blueprint
+            if (event := ledger.event_for(name)) is not None and event["event"] == "committed"
+        )
+        if remaining_committed:
+            raise InstallError("current terminal recovery resume incomplete ledger contour")
+        ledger_after_sha256, _ledger_after_size = _sha256_regular_file(
+            ledger_path, expected_uid=expected_uid, max_bytes=16 * 1024 * 1024
+        )
+        after = observation_from_resource_confirmation_evidence(observer.collect_evidence())
+        equality = build_terminal_recovery_equality_receipt(
+            baseline_observation=before,
+            current_observation=after,
+            binding={
+                "nonce": intent.nonce,
+                "transaction_sha256": transaction_sha256,
+                "blueprint_sha256": capsule.blueprint.digest,
+            },
+        )
+    return {
+        "schema": "amn2.spain-current-terminal-recovery-resume-receipt.v1",
+        "result": "passed",
+        "approval_id": intent.approval_id,
+        "nonce": intent.nonce,
+        "transaction_sha256": transaction_sha256,
+        "capsule_sha256": capsule.sha256,
+        "mutation_ledger_before_sha256": intent.mutation_ledger_sha256,
+        "mutation_ledger_after_sha256": ledger_after_sha256,
+        "removed_owned_objects": sorted(removed_now),
+        "pending_owned_objects": pending,
+        "foreign_service_persistent_equal": equality["foreign_service_persistent_equal"],
+        "foreign_service_volatile_before_count": equality["foreign_service_volatile_before_count"],
+        "foreign_service_volatile_after_count": equality["foreign_service_volatile_after_count"],
+    }
+
+
 def run_production_command(
     argv: list[str],
     *,
@@ -6889,7 +7247,7 @@ def run_production_command(
     expected_uid: int | None = 0,
 ) -> dict[str, Any]:
     args = list(argv)
-    if not args or args[0] not in {"install", "install-bound", "manual-cleanup", "manual-cleanup-bound", "runtime-recovery-bound", "terminal-recovery-bound", "terminal-recovery-receipt-bound", "current-terminal-recovery-audit-bound", "recover", "rollback", "verify"}:
+    if not args or args[0] not in {"install", "install-bound", "manual-cleanup", "manual-cleanup-bound", "runtime-recovery-bound", "terminal-recovery-bound", "terminal-recovery-receipt-bound", "current-terminal-recovery-audit-bound", "current-terminal-recovery-resume-bound", "recover", "rollback", "verify"}:
         raise InstallError("unsupported_mode")
     mode = args.pop(0)
     if mode == "install-bound":
@@ -6980,6 +7338,16 @@ def run_production_command(
             intent,
             host_root=host_root,
             expected_uid=expected_uid,
+        )
+    if mode == "current-terminal-recovery-resume-bound":
+        if args:
+            raise InstallError("current_terminal_recovery_resume_bound_inputs_required")
+        payload = authorization_payload
+        if payload is None:
+            payload = sys.stdin.buffer.read(64 * 1024 + 1)
+        intent = _read_current_terminal_recovery_resume_intent_payload(payload)
+        return _production_current_terminal_recovery_resume_bound(
+            intent, host_root=host_root, expected_uid=expected_uid
         )
     if mode == "install":
         if len(args) != 7:
