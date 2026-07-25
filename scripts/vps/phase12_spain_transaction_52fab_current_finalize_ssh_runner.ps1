@@ -129,8 +129,8 @@ if (-not $hasCurrent) {
 }
 $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $intent = [ordered]@{
-    approval_id=(Get-TextSha256 $Approval).ToLowerInvariant(); approved_at_epoch=$now; capsule_sha256=$expectedCapsuleSha; committed_objects_sha256=$expectedCommittedSha; executor_sha256=$expectedExecutorSha.ToLowerInvariant(); expires_at_epoch=($now+300); mutation_ledger_sha256=$expectedLedgerSha; nonce=$expectedNonce
-    finalize_owned_object="group:amn2-spain"; pending_objects_sha256=$expectedPendingSha; recovery_authorized=$true; removed_objects_sha256=$expectedRemovedSha; schema="amn2.spain-current-terminal-recovery-finalize-intent.v1"; systemd_sha256=$expectedSystemdSha; transaction_sha256=$expectedTransactionSha
+    approval_id=(Get-TextSha256 $Approval).ToLowerInvariant(); approved_at_epoch=$now; capsule_sha256=$expectedCapsuleSha; committed_objects_sha256=$expectedCommittedSha; executor_sha256=$expectedExecutorSha.ToLowerInvariant(); expires_at_epoch=($now+300); finalize_owned_object="group:amn2-spain"
+    mutation_ledger_sha256=$expectedLedgerSha; nonce=$expectedNonce; pending_objects_sha256=$expectedPendingSha; recovery_authorized=$true; removed_objects_sha256=$expectedRemovedSha; schema="amn2.spain-current-terminal-recovery-finalize-intent.v1"; systemd_sha256=$expectedSystemdSha; transaction_sha256=$expectedTransactionSha
 }
 $intentBytes = (New-Object Text.UTF8Encoding($false)).GetBytes(($intent | ConvertTo-Json -Compress -Depth 6) + "`n")
 $result = Invoke-ExactSsh (@($sshBase + @($target, "/usr/bin/python3 -I -B $remoteExecutorPath current-terminal-recovery-finalize-bound"))) $intentBytes

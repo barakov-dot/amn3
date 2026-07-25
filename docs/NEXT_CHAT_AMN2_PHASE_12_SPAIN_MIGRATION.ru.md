@@ -9,9 +9,11 @@ group ledger object remains committed. Current ledger is
 (1 committed/34 removed/5 pending). Exact finalize uses executor
 `B425E32A61C45F1615C3AB2223BB899CB1B1E82F985A301A18057DCE13D5DD4D`
 (`152917` bytes) and runner
-`98C9B8A6F4E28D9E80C6C1919FE7A5B271AFD4568F193212CADF0AB2A9E49E98`.
+`A7C74767AAB694377DCC762A29EDC6BDB95E3CBF06250342F945B4C1A0E13837`.
 It writes only the already-absent group ledger event and verifies run009 and
 current foreign equality. `258 passed, 4 skipped`; parse/diff passed.
+The first finalize payload was rejected before function/mutation; canonical key
+order is corrected and verified by the real parser.
 
 ## Current override 2026-07-25: corrected terminal resume v3 is the next exact gate
 

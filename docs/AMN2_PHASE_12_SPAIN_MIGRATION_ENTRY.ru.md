@@ -16,8 +16,10 @@ event and proves both run009-to-current and current before/after dynamic foreign
 equality. Executor SHA-256 is
 `B425E32A61C45F1615C3AB2223BB899CB1B1E82F985A301A18057DCE13D5DD4D`
 (`152917` bytes); runner SHA-256 is
-`98C9B8A6F4E28D9E80C6C1919FE7A5B271AFD4568F193212CADF0AB2A9E49E98`.
+`A7C74767AAB694377DCC762A29EDC6BDB95E3CBF06250342F945B4C1A0E13837`.
 Double build byte-equal; `258 passed, 4 skipped`; parse/diff checks passed.
+The first finalize literal was rejected by the canonical JSON parser before the
+function or any mutation; the corrected key order passed the real payload parser.
 
 ## Current operational override — 2026-07-25: first resume failed before mutation; corrected v3 ready
 

@@ -13,8 +13,10 @@ Exact idempotent finalize добавляет только один ledger `remov
 foreign equality. Executor
 `B425E32A61C45F1615C3AB2223BB899CB1B1E82F985A301A18057DCE13D5DD4D`
 (`152917` bytes), runner
-`98C9B8A6F4E28D9E80C6C1919FE7A5B271AFD4568F193212CADF0AB2A9E49E98`.
+`A7C74767AAB694377DCC762A29EDC6BDB95E3CBF06250342F945B4C1A0E13837`.
 Double build byte-equal; scoped suite `258 passed, 4 skipped`; parse/diff passed.
+Первый finalize literal был отклонён canonical JSON parser до function/mutation;
+исправленный key order проверен реальным payload parser локально.
 
 # Текущий override 2026-07-25: first resume fail-closed без мутации; corrected v3 готов
 
