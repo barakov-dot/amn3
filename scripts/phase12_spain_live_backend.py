@@ -1078,6 +1078,7 @@ class SystemAction:
         default=None, repr=False
     )
     reconcile_absent_removal: bool = False
+    adopt_exact_observation: bool = False
 
     def __post_init__(self) -> None:
         if not all(
@@ -1093,7 +1094,10 @@ class SystemAction:
             self.observe_rollback_identity
         ):
             raise BackendError("system rollback observer invalid")
-        if type(self.reconcile_absent_removal) is not bool:
+        if (
+            type(self.reconcile_absent_removal) is not bool
+            or type(self.adopt_exact_observation) is not bool
+        ):
             raise BackendError("system absent-removal policy invalid")
 
 
@@ -1135,6 +1139,10 @@ class SystemOwnedAdapter:
         action = self._action(operation)
         observer = action.observe_pending_identity or action.observe_identity
         return observer()
+
+    def can_adopt_exact(self, operation: OwnedOperation, identity: str) -> bool:
+        action = self._action(operation)
+        return action.adopt_exact_observation and identity == operation.desired_identity
 
     def observe_rollback(self, operation: OwnedOperation) -> str | None:
         action = self._action(operation)
@@ -3829,11 +3837,19 @@ class LinuxBackend:
                 raise BackendError("owned operation outside ledger allowlist")
             event = self.ledger.event_for(operation.owned_object)
             if event is None:
-                if self.adapter.observe(operation) is not None:
+                observed = self.adapter.observe(operation)
+                adopter = getattr(self.adapter, "can_adopt_exact", None)
+                if observed is not None and not (
+                    callable(adopter) and adopter(operation, observed)
+                ):
                     raise BackendError("pre-existing owned-object collision")
                 self.ledger.intent(
                     operation.stage, operation.owned_object, operation.desired_identity
                 )
+                if observed is not None:
+                    self.ledger.commit(
+                        operation.stage, operation.owned_object, observed
+                    )
                 event = self.ledger.event_for(operation.owned_object)
             if event is None:
                 raise BackendError("ledger intent not observable")
@@ -5433,6 +5449,7 @@ def build_awg_container_actions(
         create_exact=create_active,
         remove_exact=remove_active,
         reconcile_absent_removal=True,
+        adopt_exact_observation=True,
     )
     return container_action, active_action
 

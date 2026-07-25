@@ -7839,3 +7839,23 @@ phase11_telegram_002b_next=DOCS_COMMIT_PUSH_ORIGIN_READBACK_THEN_ISSUE_DF9E_EXAC
 
 AWG, provider, Telegram profile, web source и peer configuration не
 изменялись.
+# Текущий override 2026-07-25: v21 rollback закрыт; fresh v22 готов
+
+Fresh v21 install создал transaction
+`08aaf19769b06723a826b63b39235bd848fde5db5e2c5cd659516186c9a8fab3`,
+но fail-closed остановился после auto-start контейнера: exact healthy AWG
+наблюдался до записи interface intent и ошибочно считался pre-existing
+collision. Checksum-bound manual cleanup и terminal recovery прошли; удалён
+только доказанный AMN2-контур. Post-recovery audit: AMN2 paths/units absent,
+foreign persistent equality `true`, volatile counts `0/0`; USA не изменялась.
+
+Исправление разрешает adopt только exact desired identity и только для AWG
+active action; команда start/restart при adopt не выполняется. Fresh v22
+собран дважды byte-equal и clean-room verified: package
+`BEF0981BF305E1D0CF4D89D4FD3EDFA55655FF452B805A22DECD841F2D35501D`
+(`140042240` bytes), manifest
+`A3EC728F7B7ACD6A41EC1738F4D72252A184C0370890810F7133F881EAF2DF37`,
+executor `3604CA5532C248D988E32B2728A2EBD9C72FAC34CFE8F0564943CD9CAA1EC02C`
+(`152888` bytes). Authoritative source `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`;
+full Phase 12 scope `326 passed, 4 skipped`; install runner
+`4ED081A0040C3E7C78FF26F9204674A761BEB9F6020EA7D223819EF708F39142`.

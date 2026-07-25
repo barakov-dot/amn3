@@ -632,3 +632,23 @@ Manual cleanup passed and package tree is absent; current transaction remains
 remote executor, transaction/capsule SHA and package-tree absence, rolls back
 only sealed owned current actions, and proves foreign equality before any fresh
 install attempt.
+# Current override 2026-07-25: v21 recovered; fresh v22 ready
+
+Fresh v21 transaction
+`08aaf19769b06723a826b63b39235bd848fde5db5e2c5cd659516186c9a8fab3`
+failed closed after Docker auto-start exposed exact healthy AWG before the
+interface intent was recorded. Checksum-bound manual cleanup and terminal
+recovery passed: the exact AMN2 contour is absent, foreign persistent equality
+is true, volatile counts are `0/0`, and USA is unchanged.
+
+The fix adopts only the exact desired AWG active identity and issues no
+start/restart during adoption. Fresh v22 is double-built byte-equal and
+clean-room verified: package
+`BEF0981BF305E1D0CF4D89D4FD3EDFA55655FF452B805A22DECD841F2D35501D`
+(`140042240` bytes), manifest
+`A3EC728F7B7ACD6A41EC1738F4D72252A184C0370890810F7133F881EAF2DF37`,
+executor `3604CA5532C248D988E32B2728A2EBD9C72FAC34CFE8F0564943CD9CAA1EC02C`
+(`152888` bytes). Source is
+`55dc243b8e6c6bdb57f8301b56326e4cd4072d19`; Phase 12 scope is
+`326 passed, 4 skipped`; install runner is
+`4ED081A0040C3E7C78FF26F9204674A761BEB9F6020EA7D223819EF708F39142`.

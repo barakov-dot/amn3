@@ -4932,12 +4932,12 @@ def test_transaction_958e_terminal_recovery_runner_is_mixed_contour_bound() -> N
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "83497AEC5FDB4558B4E6AED57B9C8B217AB1593E8EBAE2A839DDF14AB881D8FA"' in source
-    assert '$expectedManifestSha = "FB8EEFC7AA9CB8A623A34119FF9C55F5FD7FB3245B958EA9A7005A0C7941D09F"' in source
-    assert '$expectedExecutorSha = "6DA2326382E32B4C7E373D927187B14D9A6F861E202F42BD0F11C930F5BA9284"' in source
-    assert '$expectedExecutorBytes = 152752' in source
+    assert '$expectedPackageSha = "BEF0981BF305E1D0CF4D89D4FD3EDFA55655FF452B805A22DECD841F2D35501D"' in source
+    assert '$expectedManifestSha = "A3EC728F7B7ACD6A41EC1738F4D72252A184C0370890810F7133F881EAF2DF37"' in source
+    assert '$expectedExecutorSha = "3604CA5532C248D988E32B2728A2EBD9C72FAC34CFE8F0564943CD9CAA1EC02C"' in source
+    assert '$expectedExecutorBytes = 152888' in source
     assert '$expectedCollectorSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"' in source
-    assert 'phase12-spain-install-fresh-v21-20260725' in source
+    assert 'phase12-spain-install-fresh-v22-20260725' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "Invoke-BoundedSshUpload" in source

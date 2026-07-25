@@ -2519,6 +2519,31 @@ class ProductionDockerRuntimeTests(unittest.TestCase):
             1,
         )
 
+    def test_awg_exact_auto_started_health_is_adopted_without_restart(self) -> None:
+        runner = _FakeDockerRunner()
+        runner.image = "full"
+        runner.network = True
+        runner.container = True
+        runner.running = True
+        _container, active = live_backend.build_awg_container_actions(runner=runner)
+        ledger = MutationLedger(allowed_objects={active.operation.owned_object})
+        backend = LinuxBackend(
+            adapter=live_backend.SystemOwnedAdapter(
+                actions={active.operation.owned_object: active}
+            ),
+            ledger=ledger,
+        )
+
+        backend.apply((active.operation,))
+
+        self.assertEqual(
+            ledger.event_for(active.operation.owned_object)["event"], "committed"
+        )
+        self.assertNotIn(
+            live_backend.DOCKER_CONTAINER_START_ARGV,
+            [argv for argv, _kwargs in runner.calls],
+        )
+
     def test_image_archive_must_be_untagged_with_empty_repositories_before_mutation(self) -> None:
         for label, body in (
             (
