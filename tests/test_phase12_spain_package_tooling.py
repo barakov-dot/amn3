@@ -161,6 +161,12 @@ TRANSACTION_958E_MANUAL_CLEANUP_SSH_RUNNER = (
     / "vps"
     / "phase12_spain_transaction_958e_manual_cleanup_ssh_runner.ps1"
 )
+TRANSACTION_958E_CURRENT_AUDIT_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_958e_current_audit_ssh_runner.ps1"
+)
 TRANSACTION_52FAB_TERMINAL_RECOVERY_SSH_RUNNER = (
     ROOT
     / "scripts"
@@ -4866,6 +4872,21 @@ def test_transaction_958e_manual_cleanup_runner_is_exact_and_package_only() -> N
     assert "REMOVE ONLY VERIFIED RETAINED PACKAGE TREE" in source
     assert "terminal-recovery-bound" not in source
     assert "runtime-recovery-bound" not in source
+    assert "install-bound" not in source
+
+
+def test_transaction_958e_current_audit_runner_is_exact_and_read_only() -> None:
+    assert TRANSACTION_958E_CURRENT_AUDIT_SSH_RUNNER.exists()
+    source = TRANSACTION_958E_CURRENT_AUDIT_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert '$expectedExecutorSha = "E621C0CC23B89FB7109DDEFA665EF16B3F3A8105D31AE9B7589A102E9ED1E8D4"' in source
+    assert '$expectedNonce = "958e91b682d226fc1f229b1bee2592dfe6340443fb768f3e2c9a9df45f6979b8"' in source
+    assert '$expectedTransactionSha = "b66e6540582fc328b89c559fda2b08263f27c56e28010aec81aff4eb28375810"' in source
+    assert '$expectedCapsuleSha = "0b4890a6b9786a13145879f604924cbe4162d8d6eb94716e0f1b0f76f8e02e0f"' in source
+    assert '$expectedLedgerSha = "93676697ccabe3f8de849bcbe412a81d93ba3fe33e410c0181d9e07a900f443a"' in source
+    assert "current-terminal-recovery-audit-bound" in source
+    assert "READ ONLY CURRENT AMN2 LEDGER SYSTEMD OWNED TREE INVENTORY" in source
+    assert "manual-cleanup-bound" not in source
     assert "install-bound" not in source
 
 

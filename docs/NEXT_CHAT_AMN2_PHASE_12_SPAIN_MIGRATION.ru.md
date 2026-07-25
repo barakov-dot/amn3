@@ -1,5 +1,15 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-25: transaction 958e read-only terminal audit is next
+
+Manual package cleanup passed and removed only `/opt/amn2-spain-package`.
+Transaction SHA remains
+`B66E6540582FC328B89C559FDA2B08263F27C56E28010AEC81AFF4EB28375810`.
+Next read-only runner SHA is
+`92552A251ADA7DB0AFDB7A28216D572EA8C0B9F6AB1C34C53AF7CF7E8210B764`;
+it binds the remaining ledger/tree/systemd contour before one exact recovery.
+`322 passed, 4 skipped`.
+
 ## Current override 2026-07-25: transaction 958e manual cleanup is next
 
 Fresh v20 install ended `production runtime rollback failed`. Current transaction

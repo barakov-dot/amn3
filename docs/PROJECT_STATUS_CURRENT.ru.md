@@ -1,3 +1,12 @@
+# Текущий override 2026-07-25: 958e package cleanup passed; terminal audit готов
+
+Checksum-bound manual cleanup passed: удалён только retained
+`/opt/amn2-spain-package`; transaction остаётся `manual_recovery_required` с
+SHA-256 `B66E6540582FC328B89C559FDA2B08263F27C56E28010AEC81AFF4EB28375810`.
+Следующий runner `92552A251ADA7DB0AFDB7A28216D572EA8C0B9F6AB1C34C53AF7CF7E8210B764`
+выполняет только read-only audit exact transaction/capsule/ledger и remaining
+owned trees/systemd. Full Phase 12 scope `322 passed, 4 skipped`.
+
 # Текущий override 2026-07-25: v20 install rollback incomplete; 958e cleanup готов
 
 Fresh v20 package был checksum-verified/uploaded, install создал transaction

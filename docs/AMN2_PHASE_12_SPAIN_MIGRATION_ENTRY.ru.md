@@ -1,5 +1,14 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-25: 958e package cleanup passed; terminal audit ready
+
+Checksum-bound manual cleanup passed and removed only the retained
+`/opt/amn2-spain-package`. The transaction remains `manual_recovery_required`
+at SHA-256 `B66E6540582FC328B89C559FDA2B08263F27C56E28010AEC81AFF4EB28375810`.
+Runner `92552A251ADA7DB0AFDB7A28216D572EA8C0B9F6AB1C34C53AF7CF7E8210B764`
+performs only a read-only audit of the exact transaction/capsule/ledger and
+remaining owned trees/systemd state. Full Phase 12 scope: `322 passed, 4 skipped`.
+
 ## Current operational override — 2026-07-25: v20 rollback incomplete; 958e cleanup ready
 
 The fresh v20 package was checksum-verified and uploaded. Install created
