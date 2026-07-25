@@ -1,3 +1,19 @@
+# Текущий override 2026-07-25: 958e mixed-contour terminal recovery готов
+
+Старый current-audit fail-closed без mutation: он ожидал retained run-directory,
+но реальный ledger уже фиксирует `/run/amn2-spain-docker` removed. Root cause:
+terminal recovery classifier принимал только all-committed/all-removed exact set,
+не частичный idempotent rollback. Mixed committed+removed exact contour теперь
+разрешён при полном покрытии expected set; missing/intent state по-прежнему denied.
+
+Canonical double inventory `/var/lib/amn2-spain-docker`: SHA-256
+`642B64ADF9CF3B5B8EC4D8F141E24603DC0723C6DB544C94025D202B1AEF588B`,
+49 entries, 262199 bytes, root mode 0710. Recovery executor
+`8196CDD272FCA5ADE5C1DBCEE036597926C6A003DC8D380985DE80EE45A41B67`
+(`153172` bytes), double build byte-equal; runner
+`A9A638E1F2087670104974C439CB55573A39D0E3EC37782BDBB3A792C6D945F7`.
+Full Phase 12 scope `324 passed, 4 skipped`; parse/diff passed.
+
 # Текущий override 2026-07-25: 958e package cleanup passed; terminal audit готов
 
 Checksum-bound manual cleanup passed: удалён только retained

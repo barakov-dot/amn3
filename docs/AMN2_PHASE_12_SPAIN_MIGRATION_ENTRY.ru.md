@@ -1,5 +1,21 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-25: 958e mixed-contour recovery ready
+
+The legacy current audit failed closed without mutation because it expected the
+run directory to remain, while the real ledger already records it removed. The
+terminal recovery classifier accepted only all-committed or all-removed exact
+sets; it now accepts a fully covered mixed committed/removed exact set while
+still rejecting missing or intent state.
+
+Canonical double inventory of `/var/lib/amn2-spain-docker`: SHA-256
+`642B64ADF9CF3B5B8EC4D8F141E24603DC0723C6DB544C94025D202B1AEF588B`,
+49 entries, 262199 bytes, root mode 0710. Recovery executor SHA-256 is
+`8196CDD272FCA5ADE5C1DBCEE036597926C6A003DC8D380985DE80EE45A41B67`
+(`153172` bytes), double-built byte-equal; runner SHA-256 is
+`A9A638E1F2087670104974C439CB55573A39D0E3EC37782BDBB3A792C6D945F7`.
+Full Phase 12 scope: `324 passed, 4 skipped`; parse/diff checks passed.
+
 ## Current operational override — 2026-07-25: 958e package cleanup passed; terminal audit ready
 
 Checksum-bound manual cleanup passed and removed only the retained

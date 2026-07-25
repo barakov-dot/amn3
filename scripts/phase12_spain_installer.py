@@ -6687,9 +6687,11 @@ def _classify_terminal_recovery_ledger(
         name for name in expected_objects
         if (event := ledger.event_for(name)) is not None and event["event"] == "removed"
     }
-    if committed == expected_objects and not removed:
+    if committed | removed != expected_objects:
+        raise InstallError("terminal recovery mutation ledger mismatch")
+    if committed:
         return "removed_verified_owned_objects"
-    if removed == expected_objects and not committed:
+    if removed:
         return "verified_previously_removed_owned_objects"
     raise InstallError("terminal recovery mutation ledger mismatch")
 

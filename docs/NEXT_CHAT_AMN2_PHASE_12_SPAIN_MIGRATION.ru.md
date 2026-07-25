@@ -1,5 +1,16 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-25: transaction 958e terminal recovery is next
+
+The old read-only audit failed closed because the run directory is already
+removed. Mixed exact ledger recovery is now supported and tested. Docker tree
+binding: `642B64ADF9CF3B5B8EC4D8F141E24603DC0723C6DB544C94025D202B1AEF588B`,
+49 entries, 262199 bytes, mode 0710. Executor
+`8196CDD272FCA5ADE5C1DBCEE036597926C6A003DC8D380985DE80EE45A41B67`,
+runner `A9A638E1F2087670104974C439CB55573A39D0E3EC37782BDBB3A792C6D945F7`.
+Next exact gate resumes only the remaining audited AMN2 contour and verifies
+foreign equality. `324 passed, 4 skipped`.
+
 ## Current override 2026-07-25: transaction 958e read-only terminal audit is next
 
 Manual package cleanup passed and removed only `/opt/amn2-spain-package`.

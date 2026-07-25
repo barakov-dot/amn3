@@ -167,6 +167,12 @@ TRANSACTION_958E_CURRENT_AUDIT_SSH_RUNNER = (
     / "vps"
     / "phase12_spain_transaction_958e_current_audit_ssh_runner.ps1"
 )
+TRANSACTION_958E_TERMINAL_RECOVERY_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_958e_terminal_recovery_ssh_runner.ps1"
+)
 TRANSACTION_52FAB_TERMINAL_RECOVERY_SSH_RUNNER = (
     ROOT
     / "scripts"
@@ -4607,6 +4613,21 @@ def test_terminal_recovery_resume_ignores_removed_events_outside_exact_contour()
     ) == "verified_previously_removed_owned_objects"
 
 
+def test_terminal_recovery_resumes_mixed_exact_contour() -> None:
+    class Ledger:
+        def event_for(self, name: str) -> dict[str, str] | None:
+            return {
+                "owned:retained": {"event": "committed"},
+                "owned:already-removed": {"event": "removed"},
+            }.get(name)
+
+    assert installer_module._classify_terminal_recovery_ledger(
+        ledger=Ledger(),
+        blueprint={"owned:retained": {}, "owned:already-removed": {}},
+        expected_objects={"owned:retained", "owned:already-removed"},
+    ) == "removed_verified_owned_objects"
+
+
 def test_terminal_recovery_receipt_mode_is_verify_only(monkeypatch: pytest.MonkeyPatch) -> None:
     captured: dict[str, object] = {}
     sentinel = object()
@@ -4887,6 +4908,25 @@ def test_transaction_958e_current_audit_runner_is_exact_and_read_only() -> None:
     assert "current-terminal-recovery-audit-bound" in source
     assert "READ ONLY CURRENT AMN2 LEDGER SYSTEMD OWNED TREE INVENTORY" in source
     assert "manual-cleanup-bound" not in source
+    assert "install-bound" not in source
+
+
+def test_transaction_958e_terminal_recovery_runner_is_mixed_contour_bound() -> None:
+    assert TRANSACTION_958E_TERMINAL_RECOVERY_SSH_RUNNER.exists()
+    source = TRANSACTION_958E_TERMINAL_RECOVERY_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert '$expectedExecutorSha = "8196CDD272FCA5ADE5C1DBCEE036597926C6A003DC8D380985DE80EE45A41B67"' in source
+    assert '$expectedPriorExecutorSha = "E621C0CC23B89FB7109DDEFA665EF16B3F3A8105D31AE9B7589A102E9ED1E8D4"' in source
+    assert '$expectedNonce = "958e91b682d226fc1f229b1bee2592dfe6340443fb768f3e2c9a9df45f6979b8"' in source
+    assert '$expectedTransactionSha = "b66e6540582fc328b89c559fda2b08263f27c56e28010aec81aff4eb28375810"' in source
+    assert '$expectedCapsuleSha = "0b4890a6b9786a13145879f604924cbe4162d8d6eb94716e0f1b0f76f8e02e0f"' in source
+    assert '$expectedDockerTreeSha = "642b64adf9cf3b5b8ec4d8f141e24603dc0723c6db544c94025d202b1aef588b"' in source
+    assert "$expectedDockerTreeEntries = 49" in source
+    assert "$expectedDockerTreeBytes = 262199" in source
+    assert "Invoke-BoundedSshUpload" in source
+    assert "terminal-recovery-bound" in source
+    assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in source
+    assert "VERIFY FOREIGN EQUALITY" in source
     assert "install-bound" not in source
 
 
