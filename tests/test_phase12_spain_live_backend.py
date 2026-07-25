@@ -2304,6 +2304,91 @@ class ProductionDockerRuntimeTests(unittest.TestCase):
             )
             self.assertEqual(len(socket_checks), len(runner.calls))
 
+    def test_pending_drifted_amnezia_container_rolls_back_owned_runtime_contour(
+        self,
+    ) -> None:
+        """A crash after ``docker create`` must not strand the dedicated contour.
+
+        The live Spain failure retained a pending container ledger intent while
+        Docker reported only capability, endpoint, and address drift.  Those
+        fields are not an authorization to accept a foreign container: the
+        dedicated daemon still has to prove every immutable AMN2 anchor before
+        the rollback path may stop and remove it.
+        """
+
+        class DriftedOwnedContainerRunner(_FakeDockerRunner):
+            def __call__(
+                self, argv: tuple[str, ...], **kwargs: object
+            ) -> bytes:
+                payload = super().__call__(argv, **kwargs)
+                if argv == live_backend.DOCKER_CONTAINER_INSPECT_ARGV:
+                    value = json.loads(payload)
+                    value["CapAdd"] = ["NET_ADMIN", "SYS_ADMIN"]
+                    value["NetworkEndpointID"] = ""
+                    value["NetworkIPAddress"] = ""
+                    return self._line(value)
+                return payload
+
+        archive_body = self._image_archive()
+        with tempfile.TemporaryDirectory() as raw:
+            archive = Path(raw) / "awg-image.tar"
+            archive.write_bytes(archive_body)
+            runner = DriftedOwnedContainerRunner()
+            bundle = live_backend.build_production_docker_runtime_bundle(
+                runner=runner,
+                image_archive_path=archive,
+                image_archive_sha256=hashlib.sha256(archive_body).hexdigest(),
+                image_archive_size=len(archive_body),
+                socket_observer=lambda: {
+                    "kind": "unix-socket",
+                    "path": "/run/amn2-spain-docker/docker.sock",
+                    "mode": "0660",
+                    "uid": 0,
+                    "gid": 0,
+                },
+            )
+            operations = tuple(action.operation for action in bundle.actions)
+            image = next(item for item in operations if item.owned_object.startswith("image:"))
+            network = next(item for item in operations if item.owned_object.startswith("network:"))
+            container = next(item for item in operations if item.owned_object.startswith("container:"))
+            runner.image = "full"
+            runner.network = True
+            runner.container = True
+            ledger = MutationLedger(
+                allowed_objects={item.owned_object for item in operations}
+            )
+            for operation in (image, network):
+                ledger.intent(
+                    operation.stage,
+                    operation.owned_object,
+                    operation.desired_identity,
+                )
+                ledger.commit(
+                    operation.stage,
+                    operation.owned_object,
+                    operation.desired_identity,
+                )
+            ledger.intent(
+                container.stage,
+                container.owned_object,
+                container.desired_identity,
+            )
+            backend = LinuxBackend(
+                adapter=SystemOwnedAdapter(
+                    actions={action.operation.owned_object: action for action in bundle.actions}
+                ),
+                ledger=ledger,
+            )
+
+            backend.rollback(operations)
+
+            self.assertEqual(ledger.state(container.owned_object), "removed")
+            self.assertEqual(ledger.state(network.owned_object), "removed")
+            self.assertEqual(ledger.state(image.owned_object), "removed")
+            self.assertFalse(runner.container)
+            self.assertFalse(runner.network)
+            self.assertEqual(runner.image, "absent")
+
     def test_crash_after_load_adopts_exact_config_id_without_reloading(self) -> None:
         archive_body = self._image_archive()
         with tempfile.TemporaryDirectory() as raw:

@@ -1761,6 +1761,75 @@ class ManualCleanupIntent:
 
 
 @dataclass(frozen=True)
+class RuntimeRecoveryIntent:
+    """One-use authorization for one exact pending AMN2 Docker contour."""
+
+    approval_id: str
+    executor_sha256: str
+    nonce: str
+    transaction_sha256: str
+    capsule_sha256: str
+    mutation_ledger_sha256: str
+    approved_at_epoch: int
+    expires_at_epoch: int
+
+    @classmethod
+    def from_mapping(cls, value: dict[str, Any]) -> "RuntimeRecoveryIntent":
+        fields = {
+            "schema",
+            "mutation_authorized",
+            "approval_id",
+            "executor_sha256",
+            "nonce",
+            "transaction_sha256",
+            "capsule_sha256",
+            "mutation_ledger_sha256",
+            "approved_at_epoch",
+            "expires_at_epoch",
+        }
+        if (
+            not isinstance(value, dict)
+            or set(value) != fields
+            or value.get("schema") != "amn2.spain-runtime-recovery-intent.v1"
+            or value.get("mutation_authorized") is not True
+        ):
+            raise InstallError("runtime recovery intent schema/result mismatch")
+        for key in (
+            "executor_sha256",
+            "nonce",
+            "transaction_sha256",
+            "capsule_sha256",
+            "mutation_ledger_sha256",
+        ):
+            if (
+                not isinstance(value[key], str)
+                or re.fullmatch(r"[0-9a-f]{64}", value[key]) is None
+            ):
+                raise InstallError(f"runtime recovery intent {key} invalid")
+        if not isinstance(value["approval_id"], str) or not value["approval_id"]:
+            raise InstallError("runtime recovery intent approval invalid")
+        if (
+            not isinstance(value["approved_at_epoch"], int)
+            or isinstance(value["approved_at_epoch"], bool)
+            or not isinstance(value["expires_at_epoch"], int)
+            or isinstance(value["expires_at_epoch"], bool)
+            or value["expires_at_epoch"] <= value["approved_at_epoch"]
+            or value["expires_at_epoch"] - value["approved_at_epoch"] > 300
+        ):
+            raise InstallError("runtime recovery intent time window invalid")
+        return cls(
+            approval_id=value["approval_id"],
+            executor_sha256=value["executor_sha256"],
+            nonce=value["nonce"],
+            transaction_sha256=value["transaction_sha256"],
+            capsule_sha256=value["capsule_sha256"],
+            mutation_ledger_sha256=value["mutation_ledger_sha256"],
+            approved_at_epoch=value["approved_at_epoch"],
+            expires_at_epoch=value["expires_at_epoch"],
+        )
+
+
+@dataclass(frozen=True)
 class TerminalRecoveryIntent:
     """One-use authorization to replay a sealed terminal AMN2 rollback."""
 
@@ -5537,6 +5606,30 @@ def _read_terminal_recovery_intent_payload(payload: bytes) -> TerminalRecoveryIn
         raise InstallError("terminal_recovery_bound_inputs_required") from exc
 
 
+def _read_runtime_recovery_intent_payload(payload: bytes) -> RuntimeRecoveryIntent:
+    if (
+        not isinstance(payload, bytes)
+        or not payload
+        or len(payload) > 64 * 1024
+        or not payload.endswith(b"\n")
+    ):
+        raise InstallError("runtime_recovery_bound_inputs_required")
+    try:
+        value = json.loads(payload)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise InstallError("runtime_recovery_bound_inputs_required") from exc
+    if (
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        + b"\n"
+        != payload
+    ):
+        raise InstallError("runtime_recovery_bound_inputs_required")
+    try:
+        return RuntimeRecoveryIntent.from_mapping(value)
+    except InstallError as exc:
+        raise InstallError("runtime_recovery_bound_inputs_required") from exc
+
+
 def _sha256_regular_file(
     path: Path,
     *,
@@ -6263,6 +6356,212 @@ def _classify_terminal_recovery_ledger(
     raise InstallError("terminal recovery mutation ledger mismatch")
 
 
+def _classify_runtime_recovery_ledger(
+    *,
+    ledger: Any,
+    operations: tuple[live_backend.OwnedOperation, ...],
+) -> str:
+    required = (
+        (
+            "image:" + live_backend.AWG_IMAGE_CONFIG_DIGEST,
+            "awg_image_loaded",
+            "committed",
+        ),
+        ("network:amn2-spain-net", "network_container_started", "committed"),
+        ("container:amn2-spain-awg", "network_container_started", "intent"),
+        ("interface:awgsp0", "network_container_started", None),
+    )
+    by_object = {operation.owned_object: operation for operation in operations}
+    if len(by_object) != len(operations) or set(by_object) != {
+        owned_object for owned_object, _stage, _event in required
+    }:
+        raise InstallError("runtime recovery action contour mismatch")
+    for owned_object, stage, expected_event in required:
+        operation = by_object[owned_object]
+        if operation.stage != stage:
+            raise InstallError("runtime recovery action contour mismatch")
+        event = ledger.event_for(owned_object)
+        if expected_event is None:
+            if event is not None:
+                raise InstallError("runtime recovery mutation ledger mismatch")
+            continue
+        if (
+            not isinstance(event, Mapping)
+            or event.get("event") != expected_event
+            or event.get("stage") != operation.stage
+            or event.get("desired_identity") != operation.desired_identity
+            or (
+                expected_event == "committed"
+                and event.get("actual_identity") != operation.desired_identity
+            )
+            or (
+                expected_event == "intent"
+                and event.get("actual_identity") is not None
+            )
+        ):
+            raise InstallError("runtime recovery mutation ledger mismatch")
+    return "remove_exact_pending_runtime_contour"
+
+
+def _production_runtime_recovery_bound(
+    intent: RuntimeRecoveryIntent,
+    *,
+    host_root: Path = Path("/"),
+    expected_uid: int | None = 0,
+    now_epoch: int | None = None,
+) -> dict[str, Any]:
+    now = int(time.time()) if now_epoch is None else now_epoch
+    if not isinstance(now, int) or isinstance(now, bool):
+        raise InstallError("runtime recovery clock invalid")
+    if now < intent.approved_at_epoch or now > intent.expires_at_epoch:
+        raise InstallError("runtime recovery intent expired")
+    _assert_running_executor(
+        Path(sys.argv[0]).resolve(), intent.executor_sha256, expected_uid=expected_uid
+    )
+    root = Path(host_root)
+    audit_root = _host_path(root, "/var/lib/amn2-spain-phase12-audit")
+    lease = SharedInstallLockLease(lambda: _existing_opt_directory_lock(root))
+    with lease.acquire():
+        transaction = BootstrapTransactionLedger.open_existing(
+            audit_root=audit_root,
+            nonce=intent.nonce,
+            expected_uid=expected_uid,
+        )
+        state = transaction.snapshot()
+        transaction_sha256 = hashlib.sha256(
+            BootstrapTransactionLedger._canonical(state)
+        ).hexdigest()
+        if (
+            state["status"] != "manual_recovery_required"
+            or transaction_sha256 != intent.transaction_sha256
+        ):
+            raise InstallError("runtime recovery transaction binding mismatch")
+        capsule = RecoveryCapsuleStore.open_existing(
+            audit_root=audit_root,
+            nonce=intent.nonce,
+            expected_uid=expected_uid,
+        )
+        if (
+            capsule.sha256 != intent.capsule_sha256
+            or state.get("recovery_capsule_sha256") != capsule.sha256
+        ):
+            raise InstallError("runtime recovery capsule binding mismatch")
+        tombstone = _read_json_file(
+            audit_root / ("authorization-" + intent.nonce + ".json"),
+            label="retained authorization tombstone",
+            expected_uid=expected_uid,
+        )
+        authorization = InstallAuthorization.from_tombstone_mapping(tombstone)
+        if authorization.nonce != intent.nonce:
+            raise InstallError("runtime recovery authorization binding mismatch")
+        package_root = _host_path(root, "/opt/amn2-spain-package")
+        if (
+            package_root.is_symlink()
+            or not package_root.is_dir()
+            or not package_root.exists()
+        ):
+            raise InstallError("runtime recovery package tree required")
+        prepared = reconstruct_production_installation(
+            capsule=capsule,
+            transaction_ledger=transaction,
+            authorization=authorization,
+        )
+        all_actions = {
+            action.operation.owned_object: action
+            for action in prepared.assembly.action_plan.actions
+        }
+        runtime_objects = {
+            "image:" + live_backend.AWG_IMAGE_CONFIG_DIGEST,
+            "network:amn2-spain-net",
+            "container:amn2-spain-awg",
+            "interface:awgsp0",
+        }
+        if {
+            name
+            for name in all_actions
+            if name.startswith(("image:", "network:", "container:", "interface:"))
+        } != runtime_objects:
+            raise InstallError("runtime recovery action contour mismatch")
+        blueprint = {entry["owned_object"]: entry for entry in capsule.blueprint.actions}
+        if (
+            not runtime_objects <= set(blueprint)
+            or any(
+                live_backend.OwnedOperation(
+                    blueprint[name]["stage"],
+                    blueprint[name]["owned_object"],
+                    blueprint[name]["desired_identity"],
+                )
+                != all_actions[name].operation
+                for name in runtime_objects
+            )
+        ):
+            raise InstallError("runtime recovery action blueprint mismatch")
+        operations = tuple(
+            action.operation
+            for action in prepared.assembly.action_plan.actions
+            if action.operation.owned_object in runtime_objects
+        )
+        ledger_path = Path(capsule.blueprint.assembly_context["mutation_ledger_path"])
+        ledger_sha256, _ledger_size = _sha256_regular_file(
+            ledger_path,
+            expected_uid=expected_uid,
+            max_bytes=16 * 1024 * 1024,
+        )
+        if ledger_sha256 != intent.mutation_ledger_sha256:
+            raise InstallError("runtime recovery mutation ledger binding mismatch")
+        ledger = live_backend.DurableMutationLedgerStore(
+            ledger_path,
+            expected_uid=expected_uid,
+        ).load_or_create(set(blueprint))
+        if hashlib.sha256(ledger.to_bytes()).hexdigest() != intent.mutation_ledger_sha256:
+            raise InstallError("runtime recovery mutation ledger binding mismatch")
+        recovery_action = _classify_runtime_recovery_ledger(
+            ledger=ledger,
+            operations=operations,
+        )
+        try:
+            live_backend.LinuxBackend(
+                adapter=live_backend.SystemOwnedAdapter(actions=all_actions),
+                ledger=ledger,
+            ).rollback(operations)
+        except BackendError as exc:
+            raise InstallError("runtime recovery bounded rollback failed") from exc
+        for operation in operations:
+            event = ledger.event_for(operation.owned_object)
+            if operation.owned_object == "interface:awgsp0":
+                if event is not None:
+                    raise InstallError("runtime recovery interface state mismatch")
+                continue
+            if (
+                event is None
+                or event.get("event") != "removed"
+                or event.get("actual_identity") != operation.desired_identity
+            ):
+                raise InstallError("runtime recovery rollback receipt mismatch")
+        ledger_after_sha256, _ledger_after_size = _sha256_regular_file(
+            ledger_path,
+            expected_uid=expected_uid,
+            max_bytes=16 * 1024 * 1024,
+        )
+    return {
+        "schema": "amn2.spain-runtime-recovery-receipt.v1",
+        "result": "passed",
+        "recovery_action": recovery_action,
+        "approval_id": intent.approval_id,
+        "nonce": intent.nonce,
+        "transaction_sha256": transaction_sha256,
+        "capsule_sha256": capsule.sha256,
+        "mutation_ledger_before_sha256": intent.mutation_ledger_sha256,
+        "mutation_ledger_after_sha256": ledger_after_sha256,
+        "removed_owned_objects": [
+            "image:" + live_backend.AWG_IMAGE_CONFIG_DIGEST,
+            "network:amn2-spain-net",
+            "container:amn2-spain-awg",
+        ],
+        "foreign_service_mutation": False,
+    }
+
+
 def _production_terminal_recovery_bound(
     intent: TerminalRecoveryIntent, *, host_root: Path = Path("/"), expected_uid: int | None = 0,
     now_epoch: int | None = None, receipt_only: bool = False,
@@ -6354,7 +6653,7 @@ def run_production_command(
     expected_uid: int | None = 0,
 ) -> dict[str, Any]:
     args = list(argv)
-    if not args or args[0] not in {"install", "install-bound", "manual-cleanup", "manual-cleanup-bound", "terminal-recovery-bound", "terminal-recovery-receipt-bound", "recover", "rollback", "verify"}:
+    if not args or args[0] not in {"install", "install-bound", "manual-cleanup", "manual-cleanup-bound", "runtime-recovery-bound", "terminal-recovery-bound", "terminal-recovery-receipt-bound", "recover", "rollback", "verify"}:
         raise InstallError("unsupported_mode")
     mode = args.pop(0)
     if mode == "install-bound":
@@ -6405,6 +6704,18 @@ def run_production_command(
             payload = sys.stdin.buffer.read(64 * 1024 + 1)
         intent = _read_manual_cleanup_intent_payload(payload)
         return _production_manual_cleanup_bound(
+            intent,
+            host_root=host_root,
+            expected_uid=expected_uid,
+        )
+    if mode == "runtime-recovery-bound":
+        if args:
+            raise InstallError("runtime_recovery_bound_inputs_required")
+        payload = authorization_payload
+        if payload is None:
+            payload = sys.stdin.buffer.read(64 * 1024 + 1)
+        intent = _read_runtime_recovery_intent_payload(payload)
+        return _production_runtime_recovery_bound(
             intent,
             host_root=host_root,
             expected_uid=expected_uid,

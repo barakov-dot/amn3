@@ -5066,6 +5066,71 @@ def _docker_container_state(
     return "full", value["Running"], value["NetworkEndpointID"]
 
 
+def _docker_container_rollback_state(
+    runner: Callable[..., bytes],
+) -> tuple[str, bool]:
+    """Recognize an AMN2-owned partial container only for rollback.
+
+    A crash during ``docker create`` may leave the dedicated AMN2 daemon with
+    incomplete capability and network fields.  Forward installation keeps its
+    complete contract strict; rollback may remove this partial object only
+    after every immutable AMN2 ownership anchor still matches.
+    """
+    rows = _docker_json_lines(
+        runner(DOCKER_CONTAINER_LIST_ARGV),
+        keys={"ID", "Names"},
+        label="container list",
+    )
+    matches = [row for row in rows if row["Names"] == "amn2-spain-awg"]
+    if (
+        len(rows) > 1
+        or len(matches) != len(rows)
+        or any(
+            not _valid_dynamic_endpoint(row["ID"])
+            or not isinstance(row["Names"], str)
+            for row in rows
+        )
+    ):
+        raise BackendError("Docker container rollback ownership drift")
+    if not matches:
+        return "absent", False
+    value = _docker_one_json(
+        runner(DOCKER_CONTAINER_INSPECT_ARGV),
+        keys={
+            "CapAdd", "CapDrop", "ConfigImage", "Devices", "Entrypoint", "ID",
+            "Image", "Mounts", "Name", "NetworkEndpointID",
+            "NetworkIPAddress", "ReadonlyRootfs", "RestartCount",
+            "RestartName", "Running", "TmpfsRun",
+        },
+        label="container inspect",
+    )
+    devices = value["Devices"]
+    listed_container_id = matches[0]["ID"]
+    if (
+        value["Name"] != "/amn2-spain-awg"
+        or value["ID"] != listed_container_id
+        or not _valid_dynamic_endpoint(value["ID"])
+        or value["Image"] != AWG_IMAGE_CONFIG_DIGEST
+        or value["ConfigImage"] != AWG_LOCAL_IMAGE_TAG
+        or value["Entrypoint"] != ["/usr/local/sbin/amn2-awg-start"]
+        or value["ReadonlyRootfs"] is not True
+        or not isinstance(devices, list)
+        or len(devices) != 1
+        or not isinstance(devices[0], dict)
+        or devices[0].get("PathOnHost") != "/dev/net/tun"
+        or devices[0].get("PathInContainer") != "/dev/net/tun"
+        or devices[0].get("CgroupPermissions") != "rwm"
+        or not _exact_tmpfs_run(value["TmpfsRun"])
+        or value["RestartName"] != "unless-stopped"
+        or not isinstance(value["Running"], bool)
+        or type(value["RestartCount"]) is not int
+        or value["RestartCount"] != 0
+        or not _exact_mounts(value["Mounts"])
+    ):
+        raise BackendError("Docker container rollback ownership drift")
+    return "owned", value["Running"]
+
+
 def build_awg_container_actions(
     *, runner: Callable[..., bytes], stage: str = "network_container_started"
 ) -> tuple[SystemAction, SystemAction]:
@@ -5103,18 +5168,26 @@ def build_awg_container_actions(
     def remove_container(identity: str) -> None:
         if identity != container_desired:
             raise BackendError("Docker container rollback CAS drift")
-        state, running, _endpoint = _docker_container_state(runner)
+        state, running = _docker_container_rollback_state(runner)
         if state == "absent":
             return
         if running:
-            raise BackendError("Docker container must be stopped before removal")
+            runner(DOCKER_CONTAINER_STOP_ARGV)
+        state, running = _docker_container_rollback_state(runner)
+        if state != "owned" or running:
+            raise BackendError("Docker container stop verification failed")
         runner(DOCKER_CONTAINER_RM_ARGV)
-        if _docker_container_state(runner)[0] != "absent":
+        if _docker_container_rollback_state(runner)[0] != "absent":
             raise BackendError("Docker container rollback drift")
 
     container_action = SystemAction(
         operation=container_operation,
         observe_identity=observe_container,
+        observe_rollback_identity=lambda: (
+            None
+            if _docker_container_rollback_state(runner)[0] == "absent"
+            else container_desired
+        ),
         create_exact=create_container,
         remove_exact=remove_container,
         reconcile_absent_removal=True,

@@ -1,4 +1,35 @@
-# Текущий override 2026-07-25: v19 upload timeout до executor; post-timeout staging recovery прошёл
+# Текущий override 2026-07-25: transaction `52fab7…` — bounded runtime recovery локально готов, live не запускался
+
+Последний fail-closed install оставил текущую transaction
+`52fab7ac3eaf2ea1d1c7bf5f21778662ddc5964a9796188d29c98b0fcafee246`
+в `manual_recovery_required`. Read-only evidence привязано к transaction
+`7BEEC673258DE6B4B68206F8013AB8CC9C8D1FB488E38E39340BAA1C571D6E1C`,
+capsule `EB6B3EE6864504F724F7AC7D8839983BDEC717C576871CADC7C98B95337CF088`
+и mutation ledger `DE027712753DDA4FEE2FE0714550B4A1BED3D975FC17EAA4FF81351F15306B01`.
+Единственный pending runtime contour доказан как
+`image=committed`, `network=committed`, `container=intent`, `interface=none`.
+
+Добавлен executor-bound режим, который до первой Docker-мутации проверяет
+executor/transaction/capsule/ledger и эти ровно четыре action. Он может удалить
+только AMN2 container `amn2-spain-awg`, network `amn2-spain-net` и pinned AWG
+image; затем отдельными gates остаются manual cleanup и terminal recovery с
+foreign-equality receipt. Новый executor собран дважды byte-identically:
+`4D110B0DC169BE38A65B16A89DD8A9B54AEB5840117E5F4B443CC4538939D4DC`,
+`147586` bytes. Новый local runner SHA-256:
+`730AFE757BEF14CE78EC242AB308CB6E19A97419CD7251EA863260AE50C578F6`.
+
+```text
+local=runtime_recovery_red_green|scoped_243_passed_4_skipped|executor_double_build_equal|offline_member_verify|offline_fail_closed|powershell_parse_and_approval_gate
+live=not_started
+foreign_service=not_stopped_not_mutated
+usa=rollback_contour_unchanged
+next=commit_push_origin_readback|exact_runtime_recovery_approval|fresh_manual_cleanup_binding|fresh_terminal_recovery_binding
+```
+
+Не повторять install до terminal cleanup. Не останавливать AWG; не изменять
+foreign Spain service и USA data.
+
+# Предыдущий override 2026-07-25: v19 upload timeout до executor; post-timeout staging recovery прошёл
 
 v18 дошёл до `awg_image_loaded`, затем exact manual cleanup и terminal recovery
 transaction `00d9daecb6701b443d5714e7d08ec8715ad8ce6aa01712607463b572a5212972`

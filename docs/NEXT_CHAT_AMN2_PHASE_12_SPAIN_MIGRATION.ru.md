@@ -1,5 +1,29 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-25: transaction `52fab7…` needs bounded runtime recovery before any install retry
+
+Do not retry install. The current terminal transaction is nonce
+`52fab7ac3eaf2ea1d1c7bf5f21778662ddc5964a9796188d29c98b0fcafee246`,
+status `manual_recovery_required`, transaction SHA
+`7BEEC673258DE6B4B68206F8013AB8CC9C8D1FB488E38E39340BAA1C571D6E1C`,
+capsule SHA `EB6B3EE6864504F724F7AC7D8839983BDEC717C576871CADC7C98B95337CF088`,
+and mutation-ledger SHA
+`DE027712753DDA4FEE2FE0714550B4A1BED3D975FC17EAA4FF81351F15306B01`.
+Read-only evidence proves only `image=committed`, `network=committed`,
+`container=intent`, `interface=none` within the AMN2 Docker runtime contour.
+
+Local implementation is ready but not live-run: executor
+`4D110B0DC169BE38A65B16A89DD8A9B54AEB5840117E5F4B443CC4538939D4DC`
+(`147586` bytes), runner
+`730AFE757BEF14CE78EC242AB308CB6E19A97419CD7251EA863260AE50C578F6`,
+two byte-identical builds, offline closed-mode checks and scoped suite
+`243 passed, 4 skipped`. The runner may replace only the verified cached
+executor, then removes only the dedicated AMN2 AWG container/network/image.
+It does not start AMN2, mutate the foreign service or USA data. After a passed
+runtime receipt, issue fresh current manual-cleanup and terminal-recovery
+bindings; their terminal receipt is still the equality proof. First next gate:
+commit/push/readback, then exact runtime-recovery approval.
+
 ## Current override 2026-07-25: v19 transport timed out before executor; post-timeout staging recovery passed
 
 v18 is consumed and fully recovered: manual cleanup and terminal recovery for

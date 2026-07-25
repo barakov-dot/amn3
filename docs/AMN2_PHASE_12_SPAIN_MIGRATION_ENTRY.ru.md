@@ -1,5 +1,27 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-25: transaction `52fab7…` bounded runtime recovery is local-ready only
+
+Read-only discovery fixes the newest terminal transaction to nonce
+`52fab7ac3eaf2ea1d1c7bf5f21778662ddc5964a9796188d29c98b0fcafee246`,
+status `manual_recovery_required`, transaction SHA
+`7BEEC673258DE6B4B68206F8013AB8CC9C8D1FB488E38E39340BAA1C571D6E1C`,
+capsule SHA `EB6B3EE6864504F724F7AC7D8839983BDEC717C576871CADC7C98B95337CF088`,
+and mutation-ledger SHA
+`DE027712753DDA4FEE2FE0714550B4A1BED3D975FC17EAA4FF81351F15306B01`.
+Its exact runtime shape is image and network committed, container intent, and
+no interface action. No live recovery has been run in this local change.
+
+The new executor-bound recovery checks all bindings and the exact four-action
+shape before it can remove only the dedicated AMN2 container, network, and AWG
+image. It neither starts AMN2 nor touches the foreign Spain service or USA
+data. The rebuilt executor is
+`4D110B0DC169BE38A65B16A89DD8A9B54AEB5840117E5F4B443CC4538939D4DC`
+(`147586` bytes), with two byte-identical local builds and scoped verification
+`243 passed, 4 skipped`. Next gate is commit/push/readback and a fresh exact
+runtime-recovery approval; manual cleanup and terminal recovery remain separate
+post-recovery gates.
+
 ## Current operational override — 2026-07-25: v19 transport timed out before executor; post-timeout staging recovery passed
 
 Exact manual cleanup and terminal recovery for v18 transaction

@@ -143,6 +143,12 @@ TRANSACTION_00D9DA_TERMINAL_RECOVERY_SSH_RUNNER = (
 POST_TIMEOUT_TRANSPORT_RECOVERY_SSH_RUNNER = (
     ROOT / "scripts" / "vps" / "phase12_spain_post_timeout_transport_recovery_ssh_runner.ps1"
 )
+TRANSACTION_52FAB_RUNTIME_RECOVERY_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_52fab_runtime_recovery_ssh_runner.ps1"
+)
 TRACKED_PACKAGE_ROOT = ROOT / "packaging" / "phase12-spain"
 HOST_IDENTITY_SHA256 = "7" * 64
 BOOT_ID = "12345678-1234-1234-1234-123456789abc"
@@ -2201,6 +2207,94 @@ def test_terminal_recovery_intent_binds_transaction_capsule_and_docker_tree() ->
     assert intent.docker_tree_total_bytes == 123456
 
 
+def test_runtime_recovery_intent_binds_current_terminal_runtime_contour() -> None:
+    payload = {
+        "schema": "amn2.spain-runtime-recovery-intent.v1",
+        "mutation_authorized": True,
+        "approval_id": "test-runtime-recovery",
+        "executor_sha256": "2" * 64,
+        "nonce": "3" * 64,
+        "transaction_sha256": "4" * 64,
+        "capsule_sha256": "5" * 64,
+        "mutation_ledger_sha256": "6" * 64,
+        "approved_at_epoch": 100,
+        "expires_at_epoch": 200,
+    }
+
+    intent = installer_module._read_runtime_recovery_intent_payload(
+        canonical_json_bytes(payload) + b"\n"
+    )
+
+    assert intent.nonce == payload["nonce"]
+    assert intent.transaction_sha256 == payload["transaction_sha256"]
+    assert intent.capsule_sha256 == payload["capsule_sha256"]
+    assert intent.mutation_ledger_sha256 == payload["mutation_ledger_sha256"]
+
+
+def test_runtime_recovery_ledger_requires_exact_pending_container_shape() -> None:
+    image = live_backend.OwnedOperation(
+        "awg_image_loaded",
+        "image:" + live_backend.AWG_IMAGE_CONFIG_DIGEST,
+        "sha256:" + "1" * 64,
+    )
+    network = live_backend.OwnedOperation(
+        "network_container_started",
+        "network:amn2-spain-net",
+        "sha256:" + "2" * 64,
+    )
+    container = live_backend.OwnedOperation(
+        "network_container_started",
+        "container:amn2-spain-awg",
+        "sha256:" + "3" * 64,
+    )
+    interface = live_backend.OwnedOperation(
+        "network_container_started",
+        "interface:awgsp0",
+        "sha256:" + "4" * 64,
+    )
+
+    class Ledger:
+        events = {
+            image.owned_object: {
+                "event": "committed",
+                "stage": image.stage,
+                "desired_identity": image.desired_identity,
+                "actual_identity": image.desired_identity,
+            },
+            network.owned_object: {
+                "event": "committed",
+                "stage": network.stage,
+                "desired_identity": network.desired_identity,
+                "actual_identity": network.desired_identity,
+            },
+            container.owned_object: {
+                "event": "intent",
+                "stage": container.stage,
+                "desired_identity": container.desired_identity,
+                "actual_identity": None,
+            },
+        }
+
+        def event_for(self, name: str) -> dict[str, str] | None:
+            return self.events.get(name)
+
+    operations = (image, network, container, interface)
+    assert installer_module._classify_runtime_recovery_ledger(
+        ledger=Ledger(), operations=operations
+    ) == "remove_exact_pending_runtime_contour"
+
+    Ledger.events[image.owned_object] = {
+        "event": "intent",
+        "stage": image.stage,
+        "desired_identity": image.desired_identity,
+        "actual_identity": None,
+    }
+    with pytest.raises(InstallError, match="runtime recovery mutation ledger mismatch"):
+        installer_module._classify_runtime_recovery_ledger(
+            ledger=Ledger(), operations=operations
+        )
+
+
 def test_terminal_docker_data_root_cleanup_allows_recorded_0710_tree(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -3932,6 +4026,32 @@ def test_terminal_recovery_receipt_mode_is_verify_only(monkeypatch: pytest.Monke
     assert captured["receipt_only"] is True
 
 
+def test_runtime_recovery_mode_routes_only_bound_intent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+    sentinel = object()
+    monkeypatch.setattr(
+        installer_module,
+        "_read_runtime_recovery_intent_payload",
+        lambda _payload: sentinel,
+    )
+    monkeypatch.setattr(
+        installer_module,
+        "_production_runtime_recovery_bound",
+        lambda intent, **kwargs: captured.update(intent=intent, **kwargs) or {"result": "passed"},
+    )
+
+    assert installer_module.run_production_command(
+        ["runtime-recovery-bound"], authorization_payload=b"{}"
+    ) == {"result": "passed"}
+    assert captured["intent"] is sentinel
+    with pytest.raises(InstallError, match="runtime_recovery_bound_inputs_required"):
+        installer_module.run_production_command(
+            ["runtime-recovery-bound", "unexpected"], authorization_payload=b"{}"
+        )
+
+
 def test_remote_executor_is_closed_mode_wrapper_without_network_fetches() -> None:
     source = REMOTE_EXECUTOR.read_text(encoding="utf-8")
     assert "set -Eeuo pipefail" in source
@@ -3957,6 +4077,34 @@ def test_remote_executor_rejects_unknown_mode_without_mutation() -> None:
     )
     assert result.returncode == 64
     assert "unsupported_mode" in result.stderr
+
+
+def test_transaction_52fab_runtime_recovery_runner_is_executor_and_ledger_bound() -> None:
+    assert TRANSACTION_52FAB_RUNTIME_RECOVERY_SSH_RUNNER.exists()
+    source = TRANSACTION_52FAB_RUNTIME_RECOVERY_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert "ConnectTimeout=20" in source
+    assert "ServerAliveInterval=15" in source
+    assert "runtime-recovery-bound" in source
+    assert "install-bound" not in source
+    assert "manual-cleanup-bound" not in source
+    assert "terminal-recovery-bound" not in source
+    assert '$expectedExecutorSha = "4D110B0DC169BE38A65B16A89DD8A9B54AEB5840117E5F4B443CC4538939D4DC"' in source
+    assert "$expectedExecutorBytes = 147586" in source
+    assert '$expectedPriorExecutorSha = "04B0F5142E7D7464C7CA6555E482A17F4C3D79D1F209A0E7327CD44144AD6978"' in source
+    assert '$expectedNonce = "52fab7ac3eaf2ea1d1c7bf5f21778662ddc5964a9796188d29c98b0fcafee246"' in source
+    assert '$expectedTransactionSha = "7beec673258de6b4b68206f8013ab8cc9c8d1fb488e38e39340baa1c571d6e1c"' in source
+    assert '$expectedCapsuleSha = "eb6b3ee6864504f724f7ac7d8839983bdec717c576871cadc7c98b95337cf088"' in source
+    assert '$expectedLedgerSha = "de027712753dda4fee2fe0714550b4a1bed3d975fc17eaa4ff81351f15306b01"' in source
+    assert "Invoke-BoundedSshUpload" in source
+    assert '"/root/amn2-spain-phase12-runtime-recovery-executor-a.pyz"' in source
+    assert "REMOVE ONLY AMN2 DEDICATED DOCKER CONTAINER NETWORK IMAGE" in source
+    assert "NO FOREIGN SERVICE MUTATION" in source
+    assert "NO USA DATA MUTATION" in source
+    assert "scp.exe" not in source
+    assert "$expectedRemovedObjects" in source
+    assert "Compare-Object -ReferenceObject" in source
+    assert "@($receipt[\"removed_owned_objects\"]) -cne" not in source
 
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
