@@ -6,10 +6,10 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$expectedExecutorSha = "84BB2D4BB04E375351823AEBD22D5A1D23745BA4389EEAA6970B3AC0226B1DE9"
-$expectedExecutorBytes = 149069
-$expectedPriorExecutorSha = "4D110B0DC169BE38A65B16A89DD8A9B54AEB5840117E5F4B443CC4538939D4DC"
-$expectedPriorExecutorBytes = 147586
+$expectedExecutorSha = "AA4602CF011790EBDB3DC8C4D815361FA683E2B378958620BC9BEE9D02D9821A"
+$expectedExecutorBytes = 149242
+$expectedPriorExecutorSha = "84BB2D4BB04E375351823AEBD22D5A1D23745BA4389EEAA6970B3AC0226B1DE9"
+$expectedPriorExecutorBytes = 149069
 $expectedNonce = "52fab7ac3eaf2ea1d1c7bf5f21778662ddc5964a9796188d29c98b0fcafee246"
 $expectedTransactionSha = "7beec673258de6b4b68206f8013ab8cc9c8d1fb488e38e39340baa1c571d6e1c"
 $expectedCapsuleSha = "eb6b3ee6864504f724f7ac7d8839983bdec717c576871cadc7c98b95337cf088"
@@ -17,7 +17,7 @@ $expectedLedgerSha = "0ee87dfa762739457eafa5d6c8c81168f99da745b6ddd0f30bc60388f7
 $uploadTimeoutMilliseconds = 60000
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-current-terminal-audit-52fab7-20260725"
+$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-current-terminal-audit-v2-52fab7-20260725"
 $executorPath = Join-Path $artifactRoot "executor-a.pyz"
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
 

@@ -10,12 +10,15 @@ Transaction остаётся `manual_recovery_required`; install повторя�
 
 Current mutation-ledger SHA-256:
 `0EE87DFA762739457EAFA5D6C8C81168F99DA745B6DDD0F30BC60388F7E660C9`.
-Подготовлен отдельный read-only current-state audit: executor SHA-256
-`84BB2D4BB04E375351823AEBD22D5A1D23745BA4389EEAA6970B3AC0226B1DE9`,
-`149069` bytes; runner SHA-256
-`59C7AD7F3FA5BF1CB289C6DD96918FED918240A73D778EF60F08A1D51E926841`.
-Он не выполняет install/cleanup/start, а привязывает exact ledger, systemd и
-no-follow inventory трёх retained owned trees. Scoped suite:
+Read-only audit-v1 был fail-closed без install/cleanup/start: validator ошибочно
+требовал только terminal `committed/removed`, хотя recovery ledger легитимно
+содержит `abandoned/unrecorded`. Audit-v2 теперь описательно возвращает полный
+sealed `owned_object_states` и `pending_owned_objects`. Executor SHA-256
+`AA4602CF011790EBDB3DC8C4D815361FA683E2B378958620BC9BEE9D02D9821A`,
+`149242` bytes; runner SHA-256
+`9F1E1C6F8CF725A3B4141C93D5E8485FB1FB8EA81E8817BF6DF2F445535D2657`.
+Он привязывает exact ledger, systemd и no-follow inventory трёх retained owned
+trees. Scoped suite:
 `250 passed, 4 skipped`; `git diff --check` passed. Foreign equality пока не
 заявлена: её обязан доказать terminal receipt после отдельно bound recovery.
 
@@ -24,7 +27,7 @@ live=partial_terminal_recovery_fail_closed
 foreign_service=not_stopped_not_mutated
 foreign_equality=not_yet_claimed_terminal_receipt_required
 usa=rollback_contour_unchanged
-next=commit_push_readback|exact_current_readonly_audit|bounded_terminal_resume|fresh_install
+next=commit_push_readback|exact_current_readonly_audit_v2|bounded_terminal_resume|fresh_install
 ```
 
 # Текущий override 2026-07-25: transaction `52fab7…` runtime contour удалён; pending — cleanup и terminal equality

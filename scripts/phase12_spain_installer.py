@@ -6800,16 +6800,35 @@ def _production_current_terminal_recovery_audit_bound(
         raise InstallError("current terminal recovery audit mutation ledger binding mismatch")
     committed: list[str] = []
     removed: list[str] = []
+    pending: list[str] = []
+    object_states: list[dict[str, Any]] = []
     for owned_object in sorted(blueprint):
         event = ledger.event_for(owned_object)
-        if event is None or event["stage"] != blueprint[owned_object]["stage"]:
-            raise InstallError("current terminal recovery audit ledger state mismatch")
-        if event["event"] == "committed":
+        blueprint_stage = blueprint[owned_object]["stage"]
+        event_name = "unrecorded" if event is None else event["event"]
+        ledger_stage = None if event is None else event["stage"]
+        object_states.append(
+            {
+                "owned_object": owned_object,
+                "blueprint_stage": blueprint_stage,
+                "event": event_name,
+                "ledger_stage": ledger_stage,
+                "stage_matches_blueprint": event is None
+                or ledger_stage == blueprint_stage,
+                "desired_identity": None
+                if event is None
+                else event.get("desired_identity"),
+                "actual_identity": None
+                if event is None
+                else event.get("actual_identity"),
+            }
+        )
+        if event_name == "committed":
             committed.append(owned_object)
-        elif event["event"] == "removed":
+        elif event_name == "removed":
             removed.append(owned_object)
         else:
-            raise InstallError("current terminal recovery audit ledger state mismatch")
+            pending.append(owned_object)
     root_fs = live_backend.SafeFs(root=root, expected_uid=0, expected_gid=0)
     config_fs = live_backend.SafeFs(root=root, expected_uid=0, expected_gid=61212)
     service_fs = live_backend.SafeFs(root=root, expected_uid=61212, expected_gid=61212)
@@ -6854,6 +6873,8 @@ def _production_current_terminal_recovery_audit_bound(
         "mutation_ledger_sha256": ledger_sha256,
         "committed_owned_objects": committed,
         "removed_owned_objects": removed,
+        "pending_owned_objects": pending,
+        "owned_object_states": object_states,
         "owned_tree_inventories": inventories,
         "run_directory_identity": root_fs.identity("run/amn2-spain-docker"),
         "systemd": systemd,

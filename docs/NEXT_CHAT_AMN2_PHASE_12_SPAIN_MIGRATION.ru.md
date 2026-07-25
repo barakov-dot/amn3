@@ -10,10 +10,12 @@ inactive/absent. The recorded AMN2-owned `/opt/amn2-spain`, `/etc/amn2-spain`,
 and `/var/lib/amn2-spain` trees remain. Current ledger SHA-256:
 `0EE87DFA762739457EAFA5D6C8C81168F99DA745B6DDD0F30BC60388F7E660C9`.
 
-Next exact gate is the read-only current-state audit, executor
-`84BB2D4BB04E375351823AEBD22D5A1D23745BA4389EEAA6970B3AC0226B1DE9`
-(`149069` bytes), runner
-`59C7AD7F3FA5BF1CB289C6DD96918FED918240A73D778EF60F08A1D51E926841`.
+Audit-v1 was consumed fail-closed without install/cleanup/start: it incorrectly
+required only terminal `committed/removed` states. Audit-v2 returns the full
+sealed `abandoned/unrecorded` state map. Next exact gate uses executor
+`AA4602CF011790EBDB3DC8C4D815361FA683E2B378958620BC9BEE9D02D9821A`
+(`149242` bytes), runner
+`9F1E1C6F8CF725A3B4141C93D5E8485FB1FB8EA81E8817BF6DF2F445535D2657`.
 It performs no install, cleanup, or AMN2 start. Scoped verification is
 `250 passed, 4 skipped`; `git diff --check` passed. A separately bound terminal
 resume must follow its inventory, and only its terminal receipt may claim

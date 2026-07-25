@@ -2276,6 +2276,14 @@ def test_current_terminal_recovery_audit_reports_sealed_current_state(
             "owned_object": "runtime:docker-static",
             "stage": "filesystem_staged",
         },
+        {
+            "owned_object": "container:amn2-spain-awg",
+            "stage": "network_container_started",
+        },
+        {
+            "owned_object": "interface:awgsp0",
+            "stage": "network_container_started",
+        },
     )
     capsule = types.SimpleNamespace(
         sha256="c" * 64,
@@ -2296,6 +2304,15 @@ def test_current_terminal_recovery_audit_reports_sealed_current_state(
             return ledger_bytes
 
         def event_for(self, owned_object: str):
+            if owned_object == "interface:awgsp0":
+                return None
+            if owned_object == "container:amn2-spain-awg":
+                return {
+                    "event": "abandoned",
+                    "stage": "network_container_started",
+                    "desired_identity": "sha256:" + "b" * 64,
+                    "actual_identity": None,
+                }
             return {
                 "event": "removed"
                 if owned_object == "runtime:docker-static"
@@ -2396,6 +2413,18 @@ def test_current_terminal_recovery_audit_reports_sealed_current_state(
         "dir:/var/lib/amn2-spain",
     ]
     assert result["removed_owned_objects"] == ["runtime:docker-static"]
+    assert result["pending_owned_objects"] == [
+        "container:amn2-spain-awg",
+        "interface:awgsp0",
+    ]
+    assert [row["event"] for row in result["owned_object_states"]] == [
+        "abandoned",
+        "committed",
+        "committed",
+        "committed",
+        "unrecorded",
+        "removed",
+    ]
     assert result["run_directory_identity"] == "sha256:" + "a" * 64
 
 

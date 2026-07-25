@@ -12,10 +12,13 @@ retried while the transaction is `manual_recovery_required`.
 
 Current mutation-ledger SHA-256 is
 `0EE87DFA762739457EAFA5D6C8C81168F99DA745B6DDD0F30BC60388F7E660C9`.
-The read-only current-state audit is bound to executor
-`84BB2D4BB04E375351823AEBD22D5A1D23745BA4389EEAA6970B3AC0226B1DE9`
-(`149069` bytes) and runner
-`59C7AD7F3FA5BF1CB289C6DD96918FED918240A73D778EF60F08A1D51E926841`.
+Audit-v1 failed closed without install/cleanup/start because it incorrectly
+required every ledger object to be terminal `committed/removed`; recovery
+ledgers legitimately retain `abandoned/unrecorded` states. Audit-v2 reports a
+sealed full state map and is bound to executor
+`AA4602CF011790EBDB3DC8C4D815361FA683E2B378958620BC9BEE9D02D9821A`
+(`149242` bytes) and runner
+`9F1E1C6F8CF725A3B4141C93D5E8485FB1FB8EA81E8817BF6DF2F445535D2657`.
 It can only observe the exact ledger, systemd state, and no-follow inventories
 of those three owned trees. Scoped verification is `250 passed, 4 skipped`;
 `git diff --check` passed. Foreign equality remains unclaimed until a later
