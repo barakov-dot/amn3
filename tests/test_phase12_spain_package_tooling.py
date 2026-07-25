@@ -149,6 +149,18 @@ TRANSACTION_52FAB_RUNTIME_RECOVERY_SSH_RUNNER = (
     / "vps"
     / "phase12_spain_transaction_52fab_runtime_recovery_ssh_runner.ps1"
 )
+TRANSACTION_52FAB_MANUAL_CLEANUP_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_52fab_manual_cleanup_ssh_runner.ps1"
+)
+TRANSACTION_52FAB_TERMINAL_RECOVERY_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_52fab_terminal_recovery_ssh_runner.ps1"
+)
 TRACKED_PACKAGE_ROOT = ROOT / "packaging" / "phase12-spain"
 HOST_IDENTITY_SHA256 = "7" * 64
 BOOT_ID = "12345678-1234-1234-1234-123456789abc"
@@ -4105,6 +4117,40 @@ def test_transaction_52fab_runtime_recovery_runner_is_executor_and_ledger_bound(
     assert "$expectedRemovedObjects" in source
     assert "Compare-Object -ReferenceObject" in source
     assert "@($receipt[\"removed_owned_objects\"]) -cne" not in source
+
+
+def test_transaction_52fab_followup_recovery_runners_are_pinned_and_action_bound() -> None:
+    assert TRANSACTION_52FAB_MANUAL_CLEANUP_SSH_RUNNER.exists()
+    assert TRANSACTION_52FAB_TERMINAL_RECOVERY_SSH_RUNNER.exists()
+    cleanup = TRANSACTION_52FAB_MANUAL_CLEANUP_SSH_RUNNER.read_text(encoding="utf-8")
+    terminal = TRANSACTION_52FAB_TERMINAL_RECOVERY_SSH_RUNNER.read_text(encoding="utf-8")
+    nonce = "52fab7ac3eaf2ea1d1c7bf5f21778662ddc5964a9796188d29c98b0fcafee246"
+    transaction = "7beec673258de6b4b68206f8013ab8cc9c8d1fb488e38e39340baa1c571d6e1c"
+    capsule = "eb6b3ee6864504f724f7ac7d8839983bdec717c576871cadc7c98b95337cf088"
+    tree = "9aaf13904fd0738d88fe13db54527f6426f783b06664e3baf6e41ff140755aee"
+    for source in (cleanup, terminal):
+        assert "StrictHostKeyChecking=yes" in source
+        assert "ConnectTimeout=20" in source
+        assert "ServerAliveInterval=15" in source
+        assert "ServerAliveCountMax=4" in source
+        assert '$expectedExecutorSha = "4D110B0DC169BE38A65B16A89DD8A9B54AEB5840117E5F4B443CC4538939D4DC"' in source
+        assert "$expectedExecutorBytes = 147586" in source
+        assert f'$expectedNonce = "{nonce}"' in source
+        assert f'$expectedTransactionSha = "{transaction}"' in source
+        assert "scp.exe" not in source
+        assert "install-bound" not in source
+    assert "manual-cleanup-bound" in cleanup
+    assert "terminal-recovery-bound" not in cleanup
+    assert "REMOVE ONLY VERIFIED RETAINED PACKAGE TREE" in cleanup
+    assert "terminal-recovery-bound" in terminal
+    assert "terminal-recovery-receipt-bound" not in terminal
+    assert f'$expectedCapsuleSha = "{capsule}"' in terminal
+    assert f'$expectedDockerTreeSha = "{tree}"' in terminal
+    assert "$expectedDockerTreeEntries = 49" in terminal
+    assert "$expectedDockerTreeBytes = 262199" in terminal
+    assert "ROOT MODE 0710" in terminal
+    assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in terminal
+    assert "VERIFY FOREIGN EQUALITY" in terminal
 
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:

@@ -1,28 +1,27 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-07-25: transaction `52fab7…` needs bounded runtime recovery before any install retry
+## Current override 2026-07-25: transaction `52fab7…` runtime contour removed; exact cleanup is next
 
-Do not retry install. The current terminal transaction is nonce
-`52fab7ac3eaf2ea1d1c7bf5f21778662ddc5964a9796188d29c98b0fcafee246`,
-status `manual_recovery_required`, transaction SHA
-`7BEEC673258DE6B4B68206F8013AB8CC9C8D1FB488E38E39340BAA1C571D6E1C`,
-capsule SHA `EB6B3EE6864504F724F7AC7D8839983BDEC717C576871CADC7C98B95337CF088`,
-and mutation-ledger SHA
-`DE027712753DDA4FEE2FE0714550B4A1BED3D975FC17EAA4FF81351F15306B01`.
-Read-only evidence proves only `image=committed`, `network=committed`,
-`container=intent`, `interface=none` within the AMN2 Docker runtime contour.
+Do not retry install. The approved bounded runtime recovery removed only the
+AMN2 container/network/image contour for nonce
+`52fab7ac3eaf2ea1d1c7bf5f21778662ddc5964a9796188d29c98b0fcafee246`.
+The runner's local stdout framing was fail-closed, but read-only state proves
+all AMN2 units inactive, those objects absent, and mutation-ledger events
+`70..72` removed; its current SHA is
+`CA48BF5F3C7AA6C1A2D09E2AD380812AA89BA098BB193371ABD690EC11CC0A71`.
+The transaction remains `manual_recovery_required`; the verified package tree
+still exists.
 
-Local implementation is ready but not live-run: executor
+Current executor:
 `4D110B0DC169BE38A65B16A89DD8A9B54AEB5840117E5F4B443CC4538939D4DC`
-(`147586` bytes), runner
-`730AFE757BEF14CE78EC242AB308CB6E19A97419CD7251EA863260AE50C578F6`,
-two byte-identical builds, offline closed-mode checks and scoped suite
-`243 passed, 4 skipped`. The runner may replace only the verified cached
-executor, then removes only the dedicated AMN2 AWG container/network/image.
-It does not start AMN2, mutate the foreign service or USA data. After a passed
-runtime receipt, issue fresh current manual-cleanup and terminal-recovery
-bindings; their terminal receipt is still the equality proof. First next gate:
-commit/push/readback, then exact runtime-recovery approval.
+(`147586` bytes). Dedicated Docker-root read-only binding:
+`9AAF13904FD0738D88FE13DB54527F6426F783B06664E3BAF6E41FF140755AEE`,
+49 entries, 262199 bytes, mode `0710`. Prepared next sequence is exact manual
+cleanup runner `41B35A8AF7B82A8CEAD1950801CBF9E240482D01246187D0BD68503AB1944971`,
+then exact terminal recovery runner
+`D11E18FE83C30717FA7E295D05C23E0A00C70C2F8DA1D01896524225F056BF41`.
+No foreign equality is claimed until the terminal receipt passes. Scoped suite:
+`244 passed, 4 skipped`.
 
 ## Current override 2026-07-25: v19 transport timed out before executor; post-timeout staging recovery passed
 
