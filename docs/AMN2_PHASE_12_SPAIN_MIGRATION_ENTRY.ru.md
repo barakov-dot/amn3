@@ -1,5 +1,24 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-25: v20 rollback incomplete; 958e cleanup ready
+
+The fresh v20 package was checksum-verified and uploaded. Install created
+transaction `958e91b682d226fc1f229b1bee2592dfe6340443fb768f3e2c9a9df45f6979b8`
+but ended with `production runtime rollback failed`. Read-only evidence binds
+manual-recovery transaction SHA-256
+`B66E6540582FC328B89C559FDA2B08263F27C56E28010AEC81AFF4EB28375810`,
+capsule `0B4890A6B9786A13145879F604924CBE4162D8D6EB94716E0F1B0F76F8E02E0F`,
+and mutation ledger
+`93676697CCABE3F8DE849BCBE412A81D93BA3FE33E410C0181D9E07A900F443A`.
+Container, network, image and all AMN2 units are removed/not-found; rollback
+stopped after removing `/run/amn2-spain-docker`, while the verified package tree
+is retained.
+
+The next exact gate removes only `/opt/amn2-spain-package` and preserves the
+terminal ledger/capsule. Runner SHA-256 is
+`51F4A4BCC8A997329A9E5FF16355C55D58AE5C29D080489F92441B9F986D05B5`.
+PowerShell parse/diff checks passed; full Phase 12 scope is `321 passed, 4 skipped`.
+
 ## Current operational override — 2026-07-25: terminal recovery finalized; fresh v20 ready
 
 Transaction `52fab7` terminal finalize passed. The ledger advanced from

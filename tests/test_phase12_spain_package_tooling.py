@@ -155,6 +155,12 @@ TRANSACTION_52FAB_MANUAL_CLEANUP_SSH_RUNNER = (
     / "vps"
     / "phase12_spain_transaction_52fab_manual_cleanup_ssh_runner.ps1"
 )
+TRANSACTION_958E_MANUAL_CLEANUP_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_958e_manual_cleanup_ssh_runner.ps1"
+)
 TRANSACTION_52FAB_TERMINAL_RECOVERY_SSH_RUNNER = (
     ROOT
     / "scripts"
@@ -4846,6 +4852,21 @@ def test_transaction_52fab_followup_recovery_runners_are_pinned_and_action_bound
     assert "ROOT MODE 0710" in terminal
     assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in terminal
     assert "VERIFY FOREIGN EQUALITY" in terminal
+
+
+def test_transaction_958e_manual_cleanup_runner_is_exact_and_package_only() -> None:
+    assert TRANSACTION_958E_MANUAL_CLEANUP_SSH_RUNNER.exists()
+    source = TRANSACTION_958E_MANUAL_CLEANUP_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert '$expectedExecutorSha = "E621C0CC23B89FB7109DDEFA665EF16B3F3A8105D31AE9B7589A102E9ED1E8D4"' in source
+    assert "$expectedExecutorBytes = 153174" in source
+    assert '$expectedNonce = "958e91b682d226fc1f229b1bee2592dfe6340443fb768f3e2c9a9df45f6979b8"' in source
+    assert '$expectedTransactionSha = "b66e6540582fc328b89c559fda2b08263f27c56e28010aec81aff4eb28375810"' in source
+    assert "manual-cleanup-bound" in source
+    assert "REMOVE ONLY VERIFIED RETAINED PACKAGE TREE" in source
+    assert "terminal-recovery-bound" not in source
+    assert "runtime-recovery-bound" not in source
+    assert "install-bound" not in source
 
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:

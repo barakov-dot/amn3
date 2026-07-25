@@ -1,3 +1,20 @@
+# Текущий override 2026-07-25: v20 install rollback incomplete; 958e cleanup готов
+
+Fresh v20 package был checksum-verified/uploaded, install создал transaction
+`958e91b682d226fc1f229b1bee2592dfe6340443fb768f3e2c9a9df45f6979b8`,
+но завершился `production runtime rollback failed`. Read-only audit: transaction
+`manual_recovery_required`, SHA-256
+`B66E6540582FC328B89C559FDA2B08263F27C56E28010AEC81AFF4EB28375810`,
+capsule `0B4890A6B9786A13145879F604924CBE4162D8D6EB94716E0F1B0F76F8E02E0F`,
+mutation ledger `93676697CCABE3F8DE849BCBE412A81D93BA3FE33E410C0181D9E07A900F443A`.
+Container/network/image и все AMN2 units уже removed/not-found; rollback остановился
+после удаления `/run/amn2-spain-docker`, а verified package tree сохранён.
+
+Следующий exact gate удаляет только `/opt/amn2-spain-package`, сохраняя terminal
+ledger/capsule; runner
+`51F4A4BCC8A997329A9E5FF16355C55D58AE5C29D080489F92441B9F986D05B5`.
+PowerShell parse, diff check и full Phase 12 scope `321 passed, 4 skipped`.
+
 # Текущий override 2026-07-25: terminal recovery finalized; fresh install v20 готов
 
 Transaction `52fab7` terminal finalize passed. Ledger перешёл с

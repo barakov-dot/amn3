@@ -1,5 +1,19 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-25: transaction 958e manual cleanup is next
+
+Fresh v20 install ended `production runtime rollback failed`. Current transaction
+`958e91b682d226fc1f229b1bee2592dfe6340443fb768f3e2c9a9df45f6979b8`
+is `manual_recovery_required`, transaction SHA
+`B66E6540582FC328B89C559FDA2B08263F27C56E28010AEC81AFF4EB28375810`,
+capsule SHA `0B4890A6B9786A13145879F604924CBE4162D8D6EB94716E0F1B0F76F8E02E0F`,
+ledger SHA `93676697CCABE3F8DE849BCBE412A81D93BA3FE33E410C0181D9E07A900F443A`.
+Docker runtime objects and AMN2 units are removed/not-found; the verified package
+tree remains. Next runner
+`51F4A4BCC8A997329A9E5FF16355C55D58AE5C29D080489F92441B9F986D05B5`
+removes only `/opt/amn2-spain-package`, then a separate read-only terminal audit
+will bind the remaining filesystem/identity rollback. `321 passed, 4 skipped`.
+
 ## Current override 2026-07-25: terminal recovery finalized; fresh install v20 next
 
 Transaction `52fab7` is terminally finalized at ledger
