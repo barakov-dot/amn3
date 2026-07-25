@@ -14,12 +14,14 @@ one committed group, 34 removed objects and five pending objects.
 The exact idempotent finalize writes only the missing group `removed` ledger
 event and proves both run009-to-current and current before/after dynamic foreign
 equality. Executor SHA-256 is
-`B425E32A61C45F1615C3AB2223BB899CB1B1E82F985A301A18057DCE13D5DD4D`
-(`152917` bytes); runner SHA-256 is
-`A7C74767AAB694377DCC762A29EDC6BDB95E3CBF06250342F945B4C1A0E13837`.
-Double build byte-equal; `258 passed, 4 skipped`; parse/diff checks passed.
+`E621C0CC23B89FB7109DDEFA665EF16B3F3A8105D31AE9B7589A102E9ED1E8D4`
+(`153174` bytes); runner SHA-256 is
+`FAADBB6139CFF107A412934B03465A7B6A8F2478E3C73BFCEB91D1D9FC810197`.
+Double build byte-equal; `259 passed, 4 skipped`; parse/diff checks passed.
 The first finalize literal was rejected by the canonical JSON parser before the
 function or any mutation; the corrected key order passed the real payload parser.
+The following v1 run failed closed at evidence conversion before ledger mutation
+because run009 uses the legacy schema. V2 uses the tested sealed projection adapter.
 
 ## Current operational override — 2026-07-25: first resume failed before mutation; corrected v3 ready
 

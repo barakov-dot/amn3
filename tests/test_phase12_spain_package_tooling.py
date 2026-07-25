@@ -2485,6 +2485,11 @@ def test_current_terminal_recovery_finalize_seals_auto_removed_primary_group(
     )
     monkeypatch.setattr(
         installer_module,
+        "_terminal_run009_baseline_observation",
+        lambda current: copy.deepcopy(current),
+    )
+    monkeypatch.setattr(
+        installer_module,
         "build_terminal_recovery_equality_receipt",
         lambda **_kwargs: {
             "foreign_service_persistent_equal": True,
@@ -2519,6 +2524,41 @@ def test_current_terminal_recovery_finalize_seals_auto_removed_primary_group(
     assert result["pending_owned_objects"] == ["interface:awgsp0"]
     assert result["mutation_ledger_after_sha256"] == ledger_after
     assert result["foreign_service_persistent_equal"] is True
+
+
+def test_terminal_run009_projection_adapts_legacy_baseline_without_reparsing_evidence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    current = {
+        "systemd_projection": [{"name_sha256": "current"}],
+        "firewall": {
+            "backend": "nft", "rules_sha256": "current-raw", "rule_count": 129,
+            "semantic_sha256": "semantic", "nft_json": {"current": True},
+        },
+        "listeners": ["current"],
+    }
+    monkeypatch.setattr(
+        installer_module,
+        "_embedded_run009_baseline",
+        lambda: {
+            "systemd_projection": [{"name_sha256": "sealed"}],
+            "firewall": {"backend": "nft", "rule_count": 129, "rules_sha256": "sealed-raw"},
+            "firewall_semantic_rebaseline": {
+                "backend": "nft", "rule_count": 129,
+                "current_raw_sha256": "ignored", "semantic_sha256": "semantic",
+            },
+        },
+    )
+
+    result = installer_module._terminal_run009_baseline_observation(current)
+
+    assert result["systemd_projection"] == [{"name_sha256": "sealed"}]
+    assert result["firewall"] == {
+        "backend": "nft", "rules_sha256": "sealed-raw", "rule_count": 129,
+        "semantic_sha256": "semantic", "nft_json": {"current": True},
+    }
+    assert result["listeners"] == ["current"]
+    assert current["systemd_projection"] == [{"name_sha256": "current"}]
 
 
 def test_current_terminal_recovery_audit_reports_sealed_current_state(

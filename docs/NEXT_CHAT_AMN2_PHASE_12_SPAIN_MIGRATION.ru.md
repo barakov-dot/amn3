@@ -7,13 +7,15 @@ identities are absent. User removal auto-removed its primary group, so only the
 group ledger object remains committed. Current ledger is
 `990A6668BF31F16668AC8F7098F309B156E1E182F4B2B28AC188047F0CBCBC78`
 (1 committed/34 removed/5 pending). Exact finalize uses executor
-`B425E32A61C45F1615C3AB2223BB899CB1B1E82F985A301A18057DCE13D5DD4D`
-(`152917` bytes) and runner
-`A7C74767AAB694377DCC762A29EDC6BDB95E3CBF06250342F945B4C1A0E13837`.
+`E621C0CC23B89FB7109DDEFA665EF16B3F3A8105D31AE9B7589A102E9ED1E8D4`
+(`153174` bytes) and runner
+`FAADBB6139CFF107A412934B03465A7B6A8F2478E3C73BFCEB91D1D9FC810197`.
 It writes only the already-absent group ledger event and verifies run009 and
-current foreign equality. `258 passed, 4 skipped`; parse/diff passed.
+current foreign equality. `259 passed, 4 skipped`; parse/diff passed.
 The first finalize payload was rejected before function/mutation; canonical key
 order is corrected and verified by the real parser.
+V1 then failed before ledger mutation on legacy run009 evidence conversion; V2
+uses the tested sealed projection adapter.
 
 ## Current override 2026-07-25: corrected terminal resume v3 is the next exact gate
 

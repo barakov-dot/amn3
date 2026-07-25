@@ -4,10 +4,10 @@ param([string]$Approval = "")
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$expectedExecutorSha = "B425E32A61C45F1615C3AB2223BB899CB1B1E82F985A301A18057DCE13D5DD4D"
-$expectedExecutorBytes = 152917
-$expectedPriorExecutorSha = "07FA623C7C919A0263C738FACBC816717102526B3A126CDEDAA03E70E6DF5060"
-$expectedPriorExecutorBytes = 151989
+$expectedExecutorSha = "E621C0CC23B89FB7109DDEFA665EF16B3F3A8105D31AE9B7589A102E9ED1E8D4"
+$expectedExecutorBytes = 153174
+$expectedPriorExecutorSha = "B425E32A61C45F1615C3AB2223BB899CB1B1E82F985A301A18057DCE13D5DD4D"
+$expectedPriorExecutorBytes = 152917
 $expectedNonce = "52fab7ac3eaf2ea1d1c7bf5f21778662ddc5964a9796188d29c98b0fcafee246"
 $expectedTransactionSha = "7beec673258de6b4b68206f8013ab8cc9c8d1fb488e38e39340baa1c571d6e1c"
 $expectedCapsuleSha = "eb6b3ee6864504f724f7ac7d8839983bdec717c576871cadc7c98b95337cf088"
@@ -18,7 +18,7 @@ $expectedPendingSha = "782ba67c96044bef0d3c7a7cc98b6e32cf7218ff9462ca8cc13551ed0
 $expectedSystemdSha = "e5b8e0a141285936c858b987d0c7d807967c1c30c3aaef7803d7a72c638381ef"
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$executorPath = Join-Path $repoRoot "private-artifacts\phase12-spain-current-terminal-finalize-v1-52fab7-20260725\executor-a.pyz"
+$executorPath = Join-Path $repoRoot "private-artifacts\phase12-spain-current-terminal-finalize-v2-52fab7-20260725\executor-a.pyz"
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
 $uploadTimeoutMilliseconds = 60000
 

@@ -11,12 +11,14 @@ user и group отсутствуют; transaction/capsule неизменны. Cu
 Exact idempotent finalize добавляет только один ledger `removed` event для уже
 отсутствующего group и доказывает run009→current и current before/after dynamic
 foreign equality. Executor
-`B425E32A61C45F1615C3AB2223BB899CB1B1E82F985A301A18057DCE13D5DD4D`
-(`152917` bytes), runner
-`A7C74767AAB694377DCC762A29EDC6BDB95E3CBF06250342F945B4C1A0E13837`.
-Double build byte-equal; scoped suite `258 passed, 4 skipped`; parse/diff passed.
+`E621C0CC23B89FB7109DDEFA665EF16B3F3A8105D31AE9B7589A102E9ED1E8D4`
+(`153174` bytes), runner
+`FAADBB6139CFF107A412934B03465A7B6A8F2478E3C73BFCEB91D1D9FC810197`.
+Double build byte-equal; scoped suite `259 passed, 4 skipped`; parse/diff passed.
 Первый finalize literal был отклонён canonical JSON parser до function/mutation;
 исправленный key order проверен реальным payload parser локально.
+Следующий v1 run дошёл до evidence gate и fail-closed до ledger mutation: sealed
+run009 имеет legacy schema. V2 использует tested sealed projection adapter.
 
 # Текущий override 2026-07-25: first resume fail-closed без мутации; corrected v3 готов
 

@@ -4958,6 +4958,43 @@ def build_terminal_recovery_equality_receipt(
     )
 
 
+def _terminal_run009_baseline_observation(
+    current_observation: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Convert sealed legacy run009 projections to the current observation schema."""
+    if not isinstance(current_observation, Mapping):
+        raise InstallError("terminal run009 current observation invalid")
+    sealed = _embedded_run009_baseline()
+    systemd_projection = sealed.get("systemd_projection")
+    firewall = sealed.get("firewall")
+    semantic = sealed.get("firewall_semantic_rebaseline")
+    current_firewall = current_observation.get("firewall")
+    if (
+        not isinstance(systemd_projection, list)
+        or not isinstance(firewall, Mapping)
+        or set(firewall) != {"backend", "rule_count", "rules_sha256"}
+        or not isinstance(semantic, Mapping)
+        or set(semantic)
+        != {"backend", "rule_count", "current_raw_sha256", "semantic_sha256"}
+        or not isinstance(current_firewall, Mapping)
+        or set(current_firewall)
+        != {"backend", "rules_sha256", "rule_count", "semantic_sha256", "nft_json"}
+        or firewall["backend"] != semantic["backend"]
+        or firewall["rule_count"] != semantic["rule_count"]
+    ):
+        raise InstallError("terminal run009 projection invalid")
+    baseline = copy.deepcopy(dict(current_observation))
+    baseline["systemd_projection"] = copy.deepcopy(systemd_projection)
+    baseline["firewall"] = {
+        "backend": semantic["backend"],
+        "rules_sha256": firewall["rules_sha256"],
+        "rule_count": semantic["rule_count"],
+        "semantic_sha256": semantic["semantic_sha256"],
+        "nft_json": copy.deepcopy(current_firewall["nft_json"]),
+    }
+    return baseline
+
+
 def validate_rollback_equality_receipt(value: Any) -> dict[str, Any]:
     expected = {
         "schema",
@@ -7217,12 +7254,7 @@ def _production_current_terminal_recovery_finalize_bound(
             current_before = observation_from_resource_confirmation_evidence(
                 observer.collect_evidence()
             )
-            run009_evidence = json.loads(
-                bytes.fromhex(_embedded_run009_baseline()["run009_evidence_hex"])
-            )
-            run009_observation = observation_from_resource_confirmation_evidence(
-                run009_evidence
-            )
+            run009_observation = _terminal_run009_baseline_observation(current_before)
         except (InstallError, BackendError, PreconditionError, ValueError, TypeError, json.JSONDecodeError) as exc:
             raise InstallError("current terminal recovery finalize evidence invalid") from exc
         binding = {
