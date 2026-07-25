@@ -1,5 +1,24 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-25: `52fab7…` partial terminal recovery; exact read-only audit is next
+
+Do not retry install. Manual cleanup removed the verified package tree. The
+terminal recovery then removed recorded AMN2-owned Docker/config-template/log
+trees but failed closed before equality while retained files kept the remaining
+parents non-empty. All AMN2 units and dedicated Docker runtime objects are
+inactive/absent. The recorded AMN2-owned `/opt/amn2-spain`, `/etc/amn2-spain`,
+and `/var/lib/amn2-spain` trees remain. Current ledger SHA-256:
+`0EE87DFA762739457EAFA5D6C8C81168F99DA745B6DDD0F30BC60388F7E660C9`.
+
+Next exact gate is the read-only current-state audit, executor
+`84BB2D4BB04E375351823AEBD22D5A1D23745BA4389EEAA6970B3AC0226B1DE9`
+(`149069` bytes), runner
+`59C7AD7F3FA5BF1CB289C6DD96918FED918240A73D778EF60F08A1D51E926841`.
+It performs no install, cleanup, or AMN2 start. Scoped verification is
+`250 passed, 4 skipped`; `git diff --check` passed. A separately bound terminal
+resume must follow its inventory, and only its terminal receipt may claim
+foreign-service equality.
+
 ## Current override 2026-07-25: transaction `52fab7…` runtime contour removed; exact cleanup is next
 
 Do not retry install. The approved bounded runtime recovery removed only the

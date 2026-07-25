@@ -1475,6 +1475,126 @@ def _tree_root_mode(target: Path) -> str | None:
         os.close(descriptor)
 
 
+def inspect_terminal_owned_tree(target: Path) -> dict[str, object]:
+    """Return a bounded no-follow inventory for one dedicated AMN2 tree."""
+    from scripts import phase12_spain_package as package
+
+    target = Path(target)
+    if not target.is_absolute():
+        raise BackendError("terminal owned tree path invalid")
+    if os.name == "nt":
+        tree = _scan_tree(target)
+        if tree is None:
+            raise BackendError("terminal owned tree unavailable")
+        rows = tree["rows"]
+        total_bytes = sum(
+            row.get("size", 0) for row in rows if row.get("type") == "file"
+        )
+        return {
+            "tree_sha256": tree["tree_sha256"],
+            "entry_count": len(rows),
+            "total_bytes": total_bytes,
+            "root_mode": _tree_root_mode(target),
+        }
+    try:
+        parent_fd = _tree_parent_fd(target)
+        root_fd = os.open(
+            target.name,
+            os.O_RDONLY
+            | getattr(os, "O_DIRECTORY", 0)
+            | getattr(os, "O_NOFOLLOW", 0),
+            dir_fd=parent_fd,
+        )
+    except OSError as exc:
+        raise BackendError("terminal owned tree unavailable") from exc
+    finally:
+        if "parent_fd" in locals():
+            os.close(parent_fd)
+    root_info = os.fstat(root_fd)
+    root_device = root_info.st_dev
+    rows: list[dict[str, object]] = []
+    total_bytes = 0
+
+    def visit(descriptor: int, prefix: PurePosixPath) -> None:
+        nonlocal total_bytes
+        for name in sorted(os.listdir(descriptor)):
+            info = os.stat(name, dir_fd=descriptor, follow_symlinks=False)
+            if info.st_dev != root_device:
+                raise BackendError("terminal owned tree mount collision")
+            relative = (prefix / name).as_posix()
+            if stat.S_ISDIR(info.st_mode):
+                rows.append(
+                    {
+                        "path": relative,
+                        "type": "dir",
+                        "mode": f"{stat.S_IMODE(info.st_mode):04o}",
+                        "sha256": None,
+                    }
+                )
+                child = os.open(
+                    name,
+                    os.O_RDONLY
+                    | getattr(os, "O_DIRECTORY", 0)
+                    | getattr(os, "O_NOFOLLOW", 0),
+                    dir_fd=descriptor,
+                )
+                try:
+                    visit(child, prefix / name)
+                finally:
+                    os.close(child)
+            elif stat.S_ISREG(info.st_mode):
+                child = os.open(
+                    name,
+                    os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+                    dir_fd=descriptor,
+                )
+                try:
+                    before = os.fstat(child)
+                    digest = hashlib.sha256()
+                    while chunk := os.read(child, 1024 * 1024):
+                        digest.update(chunk)
+                    after = os.fstat(child)
+                finally:
+                    os.close(child)
+                if (
+                    before.st_dev,
+                    before.st_ino,
+                    before.st_size,
+                    before.st_mtime_ns,
+                ) != (
+                    after.st_dev,
+                    after.st_ino,
+                    after.st_size,
+                    after.st_mtime_ns,
+                ):
+                    raise BackendError("terminal owned tree changed during observation")
+                rows.append(
+                    {
+                        "path": relative,
+                        "type": "file",
+                        "mode": f"{stat.S_IMODE(info.st_mode):04o}",
+                        "sha256": digest.hexdigest(),
+                        "size": after.st_size,
+                    }
+                )
+                total_bytes += after.st_size
+            else:
+                raise BackendError("terminal owned tree special file collision")
+
+    try:
+        visit(root_fd, PurePosixPath())
+    finally:
+        os.close(root_fd)
+    if not rows or len(rows) > 50_000 or total_bytes > 2 * 1024 * 1024 * 1024:
+        raise BackendError("terminal owned tree inventory bound invalid")
+    return {
+        "tree_sha256": package.sha256_canonical(rows),
+        "entry_count": len(rows),
+        "total_bytes": total_bytes,
+        "root_mode": f"{stat.S_IMODE(root_info.st_mode):04o}",
+    }
+
+
 def _remove_owned_tree(target: Path) -> None:
     if os.name == "nt":
         for current, directories, files in os.walk(target, topdown=False, followlinks=False):

@@ -1,3 +1,32 @@
+# Текущий override 2026-07-25: transaction `52fab7…` partial terminal recovery; read-only audit gate готов
+
+Manual cleanup удалил только verified `/opt/amn2-spain-package`. Последующий
+terminal recovery не дошёл до equality receipt: он удалил recorded AMN2-owned
+`/var/lib/amn2-spain-docker`, `config-templates` и `logs`, затем fail-closed на
+непустом retained contour. Все AMN2 units inactive; dedicated Docker
+container/network/image отсутствуют. На сервере остаются только recorded
+AMN2-owned `/opt/amn2-spain`, `/etc/amn2-spain` и `/var/lib/amn2-spain`.
+Transaction остаётся `manual_recovery_required`; install повторять нельзя.
+
+Current mutation-ledger SHA-256:
+`0EE87DFA762739457EAFA5D6C8C81168F99DA745B6DDD0F30BC60388F7E660C9`.
+Подготовлен отдельный read-only current-state audit: executor SHA-256
+`84BB2D4BB04E375351823AEBD22D5A1D23745BA4389EEAA6970B3AC0226B1DE9`,
+`149069` bytes; runner SHA-256
+`59C7AD7F3FA5BF1CB289C6DD96918FED918240A73D778EF60F08A1D51E926841`.
+Он не выполняет install/cleanup/start, а привязывает exact ledger, systemd и
+no-follow inventory трёх retained owned trees. Scoped suite:
+`250 passed, 4 skipped`; `git diff --check` passed. Foreign equality пока не
+заявлена: её обязан доказать terminal receipt после отдельно bound recovery.
+
+```text
+live=partial_terminal_recovery_fail_closed
+foreign_service=not_stopped_not_mutated
+foreign_equality=not_yet_claimed_terminal_receipt_required
+usa=rollback_contour_unchanged
+next=commit_push_readback|exact_current_readonly_audit|bounded_terminal_resume|fresh_install
+```
+
 # Текущий override 2026-07-25: transaction `52fab7…` runtime contour удалён; pending — cleanup и terminal equality
 
 Approved bounded runtime recovery для nonce

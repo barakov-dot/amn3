@@ -161,6 +161,12 @@ TRANSACTION_52FAB_TERMINAL_RECOVERY_SSH_RUNNER = (
     / "vps"
     / "phase12_spain_transaction_52fab_terminal_recovery_ssh_runner.ps1"
 )
+TRANSACTION_52FAB_CURRENT_AUDIT_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_52fab_current_audit_ssh_runner.ps1"
+)
 TRACKED_PACKAGE_ROOT = ROOT / "packaging" / "phase12-spain"
 HOST_IDENTITY_SHA256 = "7" * 64
 BOOT_ID = "12345678-1234-1234-1234-123456789abc"
@@ -2219,6 +2225,180 @@ def test_terminal_recovery_intent_binds_transaction_capsule_and_docker_tree() ->
     assert intent.docker_tree_total_bytes == 123456
 
 
+def test_current_terminal_recovery_audit_intent_binds_current_ledger() -> None:
+    payload = {
+        "schema": "amn2.spain-current-terminal-recovery-audit-intent.v1",
+        "audit_authorized": True,
+        "approval_id": "test-current-terminal-audit",
+        "executor_sha256": "1" * 64,
+        "nonce": "2" * 64,
+        "transaction_sha256": "3" * 64,
+        "capsule_sha256": "4" * 64,
+        "mutation_ledger_sha256": "5" * 64,
+        "approved_at_epoch": 100,
+        "expires_at_epoch": 200,
+    }
+
+    intent = installer_module._read_current_terminal_recovery_audit_intent_payload(
+        canonical_json_bytes(payload) + b"\n"
+    )
+
+    assert intent.nonce == payload["nonce"]
+    assert intent.transaction_sha256 == payload["transaction_sha256"]
+    assert intent.capsule_sha256 == payload["capsule_sha256"]
+    assert intent.mutation_ledger_sha256 == payload["mutation_ledger_sha256"]
+
+
+def test_current_terminal_recovery_audit_reports_sealed_current_state(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    state = {
+        "status": "manual_recovery_required",
+        "recovery_capsule_sha256": "c" * 64,
+    }
+    transaction_sha256 = hashlib.sha256(
+        installer_module.BootstrapTransactionLedger._canonical(state)
+    ).hexdigest()
+    actions = (
+        {
+            "owned_object": "dir:/opt/amn2-spain",
+            "stage": "filesystem_staged",
+        },
+        {
+            "owned_object": "dir:/etc/amn2-spain",
+            "stage": "filesystem_staged",
+        },
+        {
+            "owned_object": "dir:/var/lib/amn2-spain",
+            "stage": "filesystem_staged",
+        },
+        {
+            "owned_object": "runtime:docker-static",
+            "stage": "filesystem_staged",
+        },
+    )
+    capsule = types.SimpleNamespace(
+        sha256="c" * 64,
+        blueprint=types.SimpleNamespace(
+            actions=actions,
+            assembly_context={"mutation_ledger_path": str(tmp_path / "ledger.json")},
+        ),
+    )
+    ledger_bytes = b"sealed-ledger\n"
+    ledger_sha256 = hashlib.sha256(ledger_bytes).hexdigest()
+
+    class Transaction:
+        def snapshot(self):
+            return copy.deepcopy(state)
+
+    class Ledger:
+        def to_bytes(self):
+            return ledger_bytes
+
+        def event_for(self, owned_object: str):
+            return {
+                "event": "removed"
+                if owned_object == "runtime:docker-static"
+                else "committed",
+                "stage": "filesystem_staged",
+                "actual_identity": "sha256:" + "a" * 64,
+            }
+
+    class Store:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def load_or_create(self, allowed_objects):
+            assert allowed_objects == {entry["owned_object"] for entry in actions}
+            return Ledger()
+
+    identities = {
+        "opt/amn2-spain": "sha256:" + "a" * 64,
+        "etc/amn2-spain": "sha256:" + "a" * 64,
+        "var/lib/amn2-spain": "sha256:" + "a" * 64,
+        "run/amn2-spain-docker": "sha256:" + "a" * 64,
+    }
+
+    class Fs:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def identity(self, relative: str):
+            return identities.get(relative)
+
+    monkeypatch.setattr(installer_module, "_assert_running_executor", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        installer_module,
+        "_host_path",
+        lambda _root, live_path: tmp_path.joinpath(
+            *(part for part in live_path.split("/") if part)
+        ),
+    )
+    monkeypatch.setattr(
+        installer_module.BootstrapTransactionLedger,
+        "open_existing",
+        classmethod(lambda _cls, **_kwargs: Transaction()),
+    )
+    monkeypatch.setattr(
+        installer_module.RecoveryCapsuleStore,
+        "open_existing",
+        classmethod(lambda _cls, **_kwargs: capsule),
+    )
+    monkeypatch.setattr(
+        installer_module,
+        "_sha256_regular_file",
+        lambda *_args, **_kwargs: (ledger_sha256, len(ledger_bytes)),
+    )
+    monkeypatch.setattr(live_backend, "DurableMutationLedgerStore", Store)
+    monkeypatch.setattr(live_backend, "SafeFs", Fs)
+    monkeypatch.setattr(
+        live_backend,
+        "inspect_terminal_owned_tree",
+        lambda target: {
+            "tree_sha256": hashlib.sha256(str(target).encode("utf-8")).hexdigest(),
+            "entry_count": 1,
+            "total_bytes": 1,
+            "root_mode": "0755"
+            if str(target).endswith("opt\\amn2-spain")
+            else "0750",
+        },
+    )
+    monkeypatch.setattr(live_backend, "FixedCommandRunner", lambda **_kwargs: lambda *_args, **_kwargs: b"ignored")
+    monkeypatch.setattr(
+        live_backend,
+        "parse_systemctl_show",
+        lambda _output, *, unit: {
+            "LoadState": "loaded",
+            "FragmentPath": "/etc/systemd/system/" + unit,
+            "UnitFileState": "disabled",
+            "ActiveState": "inactive",
+        },
+    )
+    intent = installer_module.CurrentTerminalRecoveryAuditIntent(
+        approval_id="test-audit",
+        executor_sha256="b" * 64,
+        nonce="d" * 64,
+        transaction_sha256=transaction_sha256,
+        capsule_sha256="c" * 64,
+        mutation_ledger_sha256=ledger_sha256,
+        approved_at_epoch=100,
+        expires_at_epoch=200,
+    )
+
+    result = installer_module._production_current_terminal_recovery_audit_bound(
+        intent, host_root=tmp_path, expected_uid=None, now_epoch=150
+    )
+
+    assert result["result"] == "passed"
+    assert result["committed_owned_objects"] == [
+        "dir:/etc/amn2-spain",
+        "dir:/opt/amn2-spain",
+        "dir:/var/lib/amn2-spain",
+    ]
+    assert result["removed_owned_objects"] == ["runtime:docker-static"]
+    assert result["run_directory_identity"] == "sha256:" + "a" * 64
+
+
 def test_runtime_recovery_intent_binds_current_terminal_runtime_contour() -> None:
     payload = {
         "schema": "amn2.spain-runtime-recovery-intent.v1",
@@ -2335,6 +2515,22 @@ def test_terminal_docker_data_root_cleanup_allows_recorded_0710_tree(
     assert receipt["tree_sha256"] == tree["tree_sha256"]
     assert receipt["entry_count"] == len(tree["rows"])
     assert not target.exists()
+
+
+def test_terminal_owned_tree_inventory_is_bounded_and_no_follow(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "opt" / "amn2-spain"
+    target.mkdir(parents=True)
+    (target / "runtime").mkdir()
+    (target / "runtime" / "app.py").write_bytes(b"phase12\n")
+
+    receipt = live_backend.inspect_terminal_owned_tree(target)
+
+    assert receipt["entry_count"] == 2
+    assert receipt["total_bytes"] == len(b"phase12\n")
+    assert receipt["root_mode"] == "0755"
+    assert re.fullmatch(r"[0-9a-f]{64}", str(receipt["tree_sha256"]))
 
 
 def test_terminal_docker_tree_allows_only_overlay_whiteout_block_device() -> None:
@@ -3465,6 +3661,17 @@ def test_shared_install_lock_lease_is_single_owner_and_non_reentrant() -> None:
     assert events == ["enter", "exit"]
 
 
+def test_shared_install_lock_lease_preserves_backend_error_from_body() -> None:
+    @contextmanager
+    def lock():
+        yield
+
+    lease = SharedInstallLockLease(lock)
+    with pytest.raises(live_backend.BackendError, match="terminal rollback exact removal failed"):
+        with lease.acquire():
+            raise live_backend.BackendError("terminal rollback exact removal failed")
+
+
 def test_state_machine_requires_immutable_verified_package_and_real_observation() -> None:
     receipt, detached = valid_receipt()
     backend = observed_backend(runtime_overrides={"peer_count": 1})
@@ -4038,6 +4245,36 @@ def test_terminal_recovery_receipt_mode_is_verify_only(monkeypatch: pytest.Monke
     assert captured["receipt_only"] is True
 
 
+def test_current_terminal_recovery_audit_mode_routes_only_bound_intent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+    sentinel = object()
+    monkeypatch.setattr(
+        installer_module,
+        "_read_current_terminal_recovery_audit_intent_payload",
+        lambda _payload: sentinel,
+    )
+    monkeypatch.setattr(
+        installer_module,
+        "_production_current_terminal_recovery_audit_bound",
+        lambda intent, **kwargs: captured.update(intent=intent, **kwargs)
+        or {"result": "passed"},
+    )
+
+    assert installer_module.run_production_command(
+        ["current-terminal-recovery-audit-bound"], authorization_payload=b"{}"
+    ) == {"result": "passed"}
+    assert captured["intent"] is sentinel
+    with pytest.raises(
+        InstallError, match="current_terminal_recovery_audit_bound_inputs_required"
+    ):
+        installer_module.run_production_command(
+            ["current-terminal-recovery-audit-bound", "unexpected"],
+            authorization_payload=b"{}",
+        )
+
+
 def test_runtime_recovery_mode_routes_only_bound_intent(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -4117,6 +4354,19 @@ def test_transaction_52fab_runtime_recovery_runner_is_executor_and_ledger_bound(
     assert "$expectedRemovedObjects" in source
     assert "Compare-Object -ReferenceObject" in source
     assert "@($receipt[\"removed_owned_objects\"]) -cne" not in source
+
+
+def test_transaction_52fab_current_audit_runner_is_read_only_and_executor_pinned() -> None:
+    assert TRANSACTION_52FAB_CURRENT_AUDIT_SSH_RUNNER.exists()
+    source = TRANSACTION_52FAB_CURRENT_AUDIT_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert "current-terminal-recovery-audit-bound" in source
+    assert "current-terminal-recovery-audit-intent.v1" in source
+    assert "mutation_ledger_sha256" in source
+    assert "CopyToAsync" in source
+    assert "NO INSTALL NO CLEANUP NO AMN2 START" in source
+    assert "terminal-recovery-bound" not in source
+    assert "manual-cleanup-bound" not in source
 
 
 def test_transaction_52fab_followup_recovery_runners_are_pinned_and_action_bound() -> None:

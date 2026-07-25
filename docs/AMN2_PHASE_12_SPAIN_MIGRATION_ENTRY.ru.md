@@ -1,5 +1,26 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-25: `52fab7…` partial terminal recovery; read-only audit ready
+
+Manual cleanup removed only the verified package tree. The following terminal
+recovery removed recorded AMN2-owned Docker/config-template/log trees, then
+failed closed before the terminal equality receipt while retained files still
+made parent trees non-empty. All AMN2 units are inactive and the dedicated
+container/network/image are absent. `/opt/amn2-spain`, `/etc/amn2-spain`, and
+`/var/lib/amn2-spain` remain recorded AMN2-owned state; install must not be
+retried while the transaction is `manual_recovery_required`.
+
+Current mutation-ledger SHA-256 is
+`0EE87DFA762739457EAFA5D6C8C81168F99DA745B6DDD0F30BC60388F7E660C9`.
+The read-only current-state audit is bound to executor
+`84BB2D4BB04E375351823AEBD22D5A1D23745BA4389EEAA6970B3AC0226B1DE9`
+(`149069` bytes) and runner
+`59C7AD7F3FA5BF1CB289C6DD96918FED918240A73D778EF60F08A1D51E926841`.
+It can only observe the exact ledger, systemd state, and no-follow inventories
+of those three owned trees. Scoped verification is `250 passed, 4 skipped`;
+`git diff --check` passed. Foreign equality remains unclaimed until a later
+terminal receipt passes.
+
 ## Current operational override — 2026-07-25: transaction `52fab7…` runtime recovery is verified; cleanup is next
 
 The approved runtime recovery for nonce
