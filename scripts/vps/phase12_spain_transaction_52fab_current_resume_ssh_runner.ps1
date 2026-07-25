@@ -4,10 +4,10 @@ param([string]$Approval = "")
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$expectedExecutorSha = "88FE4633126E3BC5732A68EADD679BE2D30AD5D89A5B780F01FA45BB41CBE480"
-$expectedExecutorBytes = 151821
-$expectedPriorExecutorSha = "AA4602CF011790EBDB3DC8C4D815361FA683E2B378958620BC9BEE9D02D9821A"
-$expectedPriorExecutorBytes = 149242
+$expectedExecutorSha = "07FA623C7C919A0263C738FACBC816717102526B3A126CDEDAA03E70E6DF5060"
+$expectedExecutorBytes = 151989
+$expectedPriorExecutorSha = "88FE4633126E3BC5732A68EADD679BE2D30AD5D89A5B780F01FA45BB41CBE480"
+$expectedPriorExecutorBytes = 151821
 $expectedNonce = "52fab7ac3eaf2ea1d1c7bf5f21778662ddc5964a9796188d29c98b0fcafee246"
 $expectedTransactionSha = "7beec673258de6b4b68206f8013ab8cc9c8d1fb488e38e39340baa1c571d6e1c"
 $expectedCapsuleSha = "eb6b3ee6864504f724f7ac7d8839983bdec717c576871cadc7c98b95337cf088"
@@ -22,7 +22,7 @@ $expectedOptTree = [ordered]@{ entry_count=2903; root_mode="0755"; total_bytes=3
 $expectedVarTree = [ordered]@{ entry_count=1; root_mode="0750"; total_bytes=249856; tree_sha256="8f95e1f1f0ce9ba9c204b5143b5111ad350b2122996dbae6ec1dd543b527bc99" }
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$executorPath = Join-Path $repoRoot "private-artifacts\phase12-spain-current-terminal-resume-v2-52fab7-20260725\executor-a.pyz"
+$executorPath = Join-Path $repoRoot "private-artifacts\phase12-spain-current-terminal-resume-v3-52fab7-20260725\executor-a.pyz"
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
 $uploadTimeoutMilliseconds = 60000
 
@@ -139,7 +139,7 @@ $intent = [ordered]@{
 }
 $intentBytes = (New-Object Text.UTF8Encoding($false)).GetBytes(($intent | ConvertTo-Json -Compress -Depth 6) + "`n")
 $result = Invoke-ExactSsh (@($sshBase + @($target, "/usr/bin/python3 -I -B $remoteExecutorPath current-terminal-recovery-resume-bound"))) $intentBytes
-if ($result.ExitCode -ne 0) { $safe = (New-Object Text.UTF8Encoding($false,$true)).GetString($result.Stderr).Trim(); if ($safe -match '^[a-zA-Z0-9_ /-]{1,200}$') { [Console]::Error.WriteLine($safe) }; throw "Current terminal recovery resume failed; transaction remains fail-closed." }
+if ($result.ExitCode -ne 0) { $safe = (New-Object Text.UTF8Encoding($false,$true)).GetString($result.Stderr).Trim(); $safeLine = @($safe -split '\r?\n')[0]; if ($safeLine -match '^[a-zA-Z0-9_ /-]{1,200}$') { [Console]::Error.WriteLine($safeLine) }; throw "Current terminal recovery resume failed; transaction remains fail-closed." }
 $resultText = (New-Object Text.UTF8Encoding($false,$true)).GetString($result.Stdout).Trim()
 try { $receipt = $resultText | ConvertFrom-Json -AsHashtable } catch { throw "Current terminal recovery resume receipt JSON invalid." }
 if ($receipt["schema"] -cne "amn2.spain-current-terminal-recovery-resume-receipt.v1" -or $receipt["result"] -cne "passed" -or $receipt["nonce"] -cne $expectedNonce -or $receipt["transaction_sha256"] -cne $expectedTransactionSha -or $receipt["capsule_sha256"] -cne $expectedCapsuleSha -or $receipt["mutation_ledger_before_sha256"] -cne $expectedLedgerSha -or $receipt["mutation_ledger_after_sha256"] -notmatch '^[0-9a-f]{64}$' -or @($receipt["removed_owned_objects"]).Count -ne 29 -or @($receipt["pending_owned_objects"]).Count -ne 5 -or $receipt["foreign_service_persistent_equal"] -ne $true) { throw "Current terminal recovery resume receipt binding mismatch." }

@@ -7088,8 +7088,12 @@ def _production_current_terminal_recovery_resume_bound(
         for owned_object in committed:
             if owned_object.startswith(("dir:/opt/amn2-spain", "file:/opt/amn2-spain")):
                 fs = root_fs
-            elif owned_object.startswith(("dir:/etc/amn2-spain", "file:/etc/amn2-spain", "secret:/etc/amn2-spain")):
+            elif owned_object.startswith("dir:/etc/amn2-spain") or owned_object == "file:/etc/amn2-spain/servers.yml":
                 fs = config_fs
+            elif owned_object.startswith("file:/etc/amn2-spain"):
+                fs = root_fs
+            elif owned_object.startswith("secret:/etc/amn2-spain"):
+                fs = root_fs
             elif owned_object.startswith(("dir:/var/lib/amn2-spain", "file:/var/lib/amn2-spain")):
                 fs = service_fs
             else:
@@ -7098,6 +7102,24 @@ def _production_current_terminal_recovery_resume_bound(
             event = ledger.event_for(owned_object)
             if event is None or fs.identity(relative) != event["actual_identity"]:
                 raise InstallError("current terminal recovery resume owned path binding mismatch")
+        secret_object = "secret:/etc/amn2-spain/awgsp0.conf"
+        secret_event = ledger.event_for(secret_object)
+        secret_payloads = capsule.rendered_payloads()
+        secret_action = live_backend.build_file_action(
+            root_fs,
+            blueprint[secret_object]["stage"],
+            "etc/amn2-spain/awgsp0.conf",
+            secret_payloads["etc/amn2-spain/awgsp0.conf"],
+            0o600,
+            owned_kind="secret",
+        )
+        if (
+            secret_event is None
+            or secret_event["event"] != "committed"
+            or secret_action.operation.desired_identity != secret_event["actual_identity"]
+            or secret_action.observe_identity() != secret_event["actual_identity"]
+        ):
+            raise InstallError("current terminal recovery resume secret binding mismatch")
         if root_fs.identity("run/amn2-spain-docker") != intent.run_directory_identity:
             raise InstallError("current terminal recovery resume run directory mismatch")
 

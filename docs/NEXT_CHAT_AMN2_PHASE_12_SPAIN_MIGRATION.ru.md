@@ -1,5 +1,16 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-25: corrected terminal resume v3 is the next exact gate
+
+The first resume failed closed before mutation on mixed-gid `/etc/amn2-spain`
+filesystem selection. Read-only safety evidence proves ledger
+`0EE87DFA…E660C9`, retained AMN2 trees, and dedicated Docker unit state are
+unchanged; foreign service and USA are unchanged. Corrected v3 uses executor
+`07FA623C7C919A0263C738FACBC816717102526B3A126CDEDAA03E70E6DF5060`
+(`151989` bytes); runner SHA is
+`15E243C0251FD2528987A0A67C50E1D875CC49CB405E9AA1A8AFCBBFB4F6EDFC`.
+Double build byte-equal; `254 passed, 4 skipped`; parse/diff checks passed.
+
 ## Current override 2026-07-25: 52FAB7 audit-v2 passed; exact terminal resume next
 
 Audit-v2 passed for current ledger

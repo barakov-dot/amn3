@@ -4500,7 +4500,7 @@ def test_transaction_52fab_current_resume_runner_is_audit_and_executor_bound() -
     assert "StrictHostKeyChecking=yes" in source
     assert "current-terminal-recovery-resume-bound" in source
     assert "current-terminal-recovery-resume-intent.v1" in source
-    assert '$expectedExecutorSha = "88FE4633126E3BC5732A68EADD679BE2D30AD5D89A5B780F01FA45BB41CBE480"' in source
+    assert '$expectedExecutorSha = "07FA623C7C919A0263C738FACBC816717102526B3A126CDEDAA03E70E6DF5060"' in source
     assert '$expectedLedgerSha = "0ee87dfa762739457eafa5d6c8c81168f99da745b6ddd0f30bc60388f7e660c9"' in source
     assert "0f2f2ade8f6876dfdd65ef495f7131555caab6be6361dca2d6811ca9f3d25119" in source
     assert "CopyToAsync" in source

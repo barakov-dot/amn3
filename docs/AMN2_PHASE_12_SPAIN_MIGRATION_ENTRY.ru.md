@@ -1,5 +1,22 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-25: first resume failed before mutation; corrected v3 ready
+
+The first exact terminal resume failed closed before mutation because mixed-gid
+`/etc/amn2-spain` objects were all inspected through `config_fs`, while the
+root-owned secrets require `root_fs`. A following read-only safety audit proved
+the ledger unchanged at `0EE87DFA…E660C9`, with only the dedicated Docker unit
+active/enabled and all three retained AMN2 trees intact. The foreign service and
+USA were unchanged.
+
+Corrected v3 binds each audited object to its exact filesystem owner and checks
+the secret identity separately. Executor SHA-256 is
+`07FA623C7C919A0263C738FACBC816717102526B3A126CDEDAA03E70E6DF5060`
+(`151989` bytes); runner SHA-256 is
+`15E243C0251FD2528987A0A67C50E1D875CC49CB405E9AA1A8AFCBBFB4F6EDFC`.
+Double build is byte-equal; scoped verification is `254 passed, 4 skipped`;
+PowerShell parse and `git diff --check` passed.
+
 ## Current operational override — 2026-07-25: 52FAB7 audit-v2 passed; exact terminal resume ready
 
 Read-only audit-v2 passed on ledger

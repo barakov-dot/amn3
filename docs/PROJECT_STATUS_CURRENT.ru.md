@@ -1,3 +1,20 @@
+# Текущий override 2026-07-25: first resume fail-closed без мутации; corrected v3 готов
+
+Первый exact terminal resume завершился до mutation: mixed-gid `/etc/amn2-spain`
+был проверен одним `config_fs`, хотя root-owned secrets требуют `root_fs`.
+Последующий read-only safety audit подтвердил неизменный ledger
+`0EE87DFA762739457EAFA5D6C8C81168F99DA745B6DDD0F30BC60388F7E660C9`,
+active/enabled только `amn2-spain-docker.service` и все три retained AMN2 tree
+на месте. Foreign service и USA не изменены.
+
+Corrected v3 выбирает filesystem owner по exact audited object и отдельно
+проверяет secret identity: executor
+`07FA623C7C919A0263C738FACBC816717102526B3A126CDEDAA03E70E6DF5060`
+(`151989` bytes), runner
+`15E243C0251FD2528987A0A67C50E1D875CC49CB405E9AA1A8AFCBBFB4F6EDFC`.
+Double build byte-equal; scoped suite `254 passed, 4 skipped`;
+PowerShell parse и `git diff --check` passed.
+
 # Текущий override 2026-07-25: 52FAB7 audit-v2 passed; exact terminal resume готов
 
 Read-only audit-v2 passed для ledger
