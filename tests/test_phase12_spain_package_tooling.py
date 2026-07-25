@@ -140,6 +140,9 @@ TRANSACTION_00D9DA_TERMINAL_RECOVERY_SSH_RUNNER = (
     / "vps"
     / "phase12_spain_transaction_00d9da_terminal_recovery_ssh_runner.ps1"
 )
+POST_TIMEOUT_TRANSPORT_RECOVERY_SSH_RUNNER = (
+    ROOT / "scripts" / "vps" / "phase12_spain_post_timeout_transport_recovery_ssh_runner.ps1"
+)
 TRACKED_PACKAGE_ROOT = ROOT / "packaging" / "phase12-spain"
 HOST_IDENTITY_SHA256 = "7" * 64
 BOOT_ID = "12345678-1234-1234-1234-123456789abc"
@@ -4195,6 +4198,28 @@ def test_transaction_00d9da_recovery_runners_are_pinned_and_action_bound() -> No
     assert "ROOT MODE 0710" in terminal
     assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in terminal
     assert "VERIFY FOREIGN EQUALITY" in terminal
+
+
+def test_post_timeout_transport_recovery_runner_is_partial_only_and_fail_closed() -> None:
+    assert POST_TIMEOUT_TRANSPORT_RECOVERY_SSH_RUNNER.exists()
+    source = POST_TIMEOUT_TRANSPORT_RECOVERY_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert "AUTHORIZE AMN2 PHASE12 POST-TIMEOUT TRANSPORT RECOVERY IN GO MODE" in source
+    assert '$expectedPackageSha = "FF9E8FA4604C4E9F7A3EE139B1D7B96D53FA4693E4555808B7E1725BDBAD4974"' in source
+    assert "$expectedPackageBytes = 139970560" in source
+    assert '$expectedExecutorSha = "04B0F5142E7D7464C7CA6555E482A17F4C3D79D1F209A0E7327CD44144AD6978"' in source
+    assert "$expectedExecutorBytes = 146014" in source
+    assert "/root/amn2-spain-phase12-install-a.tar" in source
+    assert "/root/amn2-spain-phase12-executor-a.pyz" in source
+    assert "active_install_transaction" in source
+    assert "amn2_units_active" in source
+    assert '"partial"' in source
+    assert '"complete_current"' in source
+    assert 'rm -f -- "$package_path"' in source
+    assert 'rm -f -- "$executor_path"' in source
+    assert "[void]$writeTask.GetAwaiter().GetResult()" in source
+    assert "scp.exe" not in source
+    assert "phase12_spain_remote_executor.sh" not in source
 
 
 def test_standalone_executor_bundle_build_is_deterministic_and_fail_closed(

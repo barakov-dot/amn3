@@ -1,6 +1,6 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-07-24: Docker dangling-image visibility defect fixed locally; v19 awaits publish then install
+## Current override 2026-07-25: v19 transport timed out before executor; post-timeout staging recovery passed
 
 v18 is consumed and fully recovered: manual cleanup and terminal recovery for
 nonce `00d9daecb6701b443d5714e7d08ec8715ad8ce6aa01712607463b572a5212972`
@@ -26,12 +26,19 @@ executor_sha256=04B0F5142E7D7464C7CA6555E482A17F4C3D79D1F209A0E7327CD44144AD6978
 executor_bytes=146014
 runner_sha256=C8C82E4A73A3ECB700255720A90A6B53F01FA6639B277AE0F0AAD85F32857050
 verification=red_green_dangling_image|double_build_byte_equal|offline_clean_room_revalidated|source_55dc243_verified|scoped_240_passed_4_skipped|powershell_parser_passed
-next=diff_review|commit_push_origin_readback|checksum_bound_v19_install
+v19_upload=timed_out_900_seconds_before_remote_hash_or_executor
+post_timeout_recovery_runner=FE46BC1F099EECDE1FA0A3B59ED9E64609B2A717EBDC30354B56FA871CE93E2F
+post_timeout_recovery=passed|package_a_absent|executor_a_absent|active_install_transaction_false|amn2_units_active_false|action_none|removed_count_0
+post_timeout_local=tooling_158_passed|powershell_parser_passed|single_receipt_wrapper_passed|diff_check_passed
+next=transport_remediation|fresh_checksum_bound_install_approval
 ```
 
-No SCP/upload is active. Do not retry v18. The only next live candidate is the
-published v19 literal; it still forbids foreign-service mutation and keeps USA
-as rollback contour.
+No SCP/upload is active. The timeout happened before executor invocation, and
+the recovery receipt confirms no retained staging or active AMN2 transaction.
+Do not retry v18 or blindly reuse the consumed v19 install authority. The next
+live candidate needs a new transport decision and fresh checksum-bound install
+approval; it must still forbid foreign-service mutation and keep USA as rollback
+contour.
 
 ## Current override 2026-07-24: terminal recovery passed; v18 is the sole local install candidate
 

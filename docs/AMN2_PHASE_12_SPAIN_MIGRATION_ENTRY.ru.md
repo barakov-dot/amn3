@@ -1,6 +1,6 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
-## Current operational override — 2026-07-24: v19 fixes proved untagged-image visibility defect; not yet live-run
+## Current operational override — 2026-07-25: v19 transport timed out before executor; post-timeout staging recovery passed
 
 Exact manual cleanup and terminal recovery for v18 transaction
 `00d9daecb6701b443d5714e7d08ec8715ad8ce6aa01712607463b572a5212972` passed.
@@ -27,11 +27,18 @@ v19_manifest=3B0B6574F982ADF8745A13AD77CA49824A04ACEFD4BD065E763B2E29B628FB70
 v19_executor=04B0F5142E7D7464C7CA6555E482A17F4C3D79D1F209A0E7327CD44144AD6978|146014
 v19_runner=C8C82E4A73A3ECB700255720A90A6B53F01FA6639B277AE0F0AAD85F32857050
 local=red_green|package_executor_double_build_equal|offline_clean_room_revalidated|scoped_240_passed_4_skipped|powershell_parser_passed
-next=diff_review|commit_push_readback|checksum_bound_v19_install
+v19_upload=timed_out_900_seconds_before_remote_hash_or_executor
+post_timeout_recovery_runner=FE46BC1F099EECDE1FA0A3B59ED9E64609B2A717EBDC30354B56FA871CE93E2F
+post_timeout_recovery=passed|package_a_absent|executor_a_absent|active_install_transaction_false|amn2_units_active_false|action_none|removed_count_0
+post_timeout_local=tooling_158_passed|powershell_parser_passed|single_receipt_wrapper_passed|diff_check_passed
+next=transport_remediation|fresh_checksum_bound_install_approval
 ```
 
-No SCP/upload is active. AMN2 did not start; foreign service and USA were not
-changed. v19 must be the only next install candidate after publish/readback.
+No SCP/upload is active. The v19 transport timeout occurred before executor
+invocation, so AMN2 did not start. The recovery receipt confirms no retained
+staging paths or active AMN2 transaction. Foreign service and USA were not
+changed. A new transport decision and fresh checksum-bound install approval are
+required; blind retry is forbidden.
 
 ## Current operational override — 2026-07-24: terminal recovery passed; v18 diagnostic install candidate is locally verified
 

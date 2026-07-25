@@ -1,4 +1,4 @@
-# Текущий override 2026-07-24: Docker image-list root cause доказан; v19 локально проверен, live retry ещё не запускался
+# Текущий override 2026-07-25: v19 upload timeout до executor; post-timeout staging recovery прошёл
 
 v18 дошёл до `awg_image_loaded`, затем exact manual cleanup и terminal recovery
 transaction `00d9daecb6701b443d5714e7d08ec8715ad8ce6aa01712607463b572a5212972`
@@ -25,11 +25,18 @@ v19_manifest_sha256=3B0B6574F982ADF8745A13AD77CA49824A04ACEFD4BD065E763B2E29B628
 v19_executor_sha256=04B0F5142E7D7464C7CA6555E482A17F4C3D79D1F209A0E7327CD44144AD6978|146014
 v19_install_runner_sha256=C8C82E4A73A3ECB700255720A90A6B53F01FA6639B277AE0F0AAD85F32857050
 local=red_green_dangling_image_regression|double_build_byte_equal|clean_room_revalidated|source_55dc243_verified|backend_80_passed_4_skipped|tooling_157_passed|assembler_3_passed|powershell_parser_passed
-next=diff_review|commit_push_origin_readback|checksum_bound_v19_install
+v19_upload=timed_out_900_seconds_before_remote_hash_or_executor
+post_timeout_recovery_runner_sha256=FE46BC1F099EECDE1FA0A3B59ED9E64609B2A717EBDC30354B56FA871CE93E2F
+post_timeout_recovery=passed|package_a_absent|executor_a_absent|active_install_transaction_false|amn2_units_active_false|action_none|removed_count_0
+post_timeout_local=tooling_158_passed|powershell_parser_passed|single_receipt_wrapper_passed|diff_check_passed
+next=transport_remediation|fresh_checksum_bound_install_approval
 ```
 
-AMN2 не стартует; foreign Spain service не останавливается и не изменяется;
-USA остаётся rollback contour. v19 ещё не загружался на Spain.
+Timeout v19 произошёл до remote hash/executor, поэтому AMN2 не стартует.
+Post-timeout receipt подтвердил отсутствие обоих `-a` staging paths и active
+AMN2 transaction/units. Foreign Spain service не останавливается и не
+изменяется; USA остаётся rollback contour. Blind retry запрещён: следующая
+попытка требует нового transport decision и fresh checksum-bound approval.
 
 # Предыдущий override 2026-07-24: terminal recovery passed; v18 bounded post-load diagnostic is locally ready
 
