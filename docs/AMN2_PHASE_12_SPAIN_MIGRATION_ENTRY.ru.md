@@ -1,5 +1,24 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-25: AMN2 contour absent; exact ledger finalize ready
+
+The approved resume removed the exact AMN2 units, trees, runtime and user. The
+primary group was automatically removed with that user, leaving its ledger
+object `committed` although the OS identity was already absent; the resume
+therefore failed closed before its receipt. Read-only evidence proves every
+AMN2 unit is `not-found`, all owned trees and identities are absent, and the
+transaction/capsule are unchanged. Current ledger SHA-256 is
+`990A6668BF31F16668AC8F7098F309B156E1E182F4B2B28AC188047F0CBCBC78`:
+one committed group, 34 removed objects and five pending objects.
+
+The exact idempotent finalize writes only the missing group `removed` ledger
+event and proves both run009-to-current and current before/after dynamic foreign
+equality. Executor SHA-256 is
+`B425E32A61C45F1615C3AB2223BB899CB1B1E82F985A301A18057DCE13D5DD4D`
+(`152917` bytes); runner SHA-256 is
+`98C9B8A6F4E28D9E80C6C1919FE7A5B271AFD4568F193212CADF0AB2A9E49E98`.
+Double build byte-equal; `258 passed, 4 skipped`; parse/diff checks passed.
+
 ## Current operational override — 2026-07-25: first resume failed before mutation; corrected v3 ready
 
 The first exact terminal resume failed closed before mutation because mixed-gid

@@ -1,5 +1,18 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-25: exact post-contour ledger finalize is next
+
+The AMN2 contour is now absent: all units are `not-found`, owned trees and
+identities are absent. User removal auto-removed its primary group, so only the
+group ledger object remains committed. Current ledger is
+`990A6668BF31F16668AC8F7098F309B156E1E182F4B2B28AC188047F0CBCBC78`
+(1 committed/34 removed/5 pending). Exact finalize uses executor
+`B425E32A61C45F1615C3AB2223BB899CB1B1E82F985A301A18057DCE13D5DD4D`
+(`152917` bytes) and runner
+`98C9B8A6F4E28D9E80C6C1919FE7A5B271AFD4568F193212CADF0AB2A9E49E98`.
+It writes only the already-absent group ledger event and verifies run009 and
+current foreign equality. `258 passed, 4 skipped`; parse/diff passed.
+
 ## Current override 2026-07-25: corrected terminal resume v3 is the next exact gate
 
 The first resume failed closed before mutation on mixed-gid `/etc/amn2-spain`

@@ -2285,6 +2285,242 @@ def test_current_terminal_recovery_resume_intent_binds_audited_contour() -> None
     assert dict(intent.owned_tree_inventories["opt"]) == payload["owned_tree_inventories"]["opt"]
 
 
+def test_current_terminal_recovery_finalize_intent_binds_post_contour_state() -> None:
+    payload = {
+        "schema": "amn2.spain-current-terminal-recovery-finalize-intent.v1",
+        "recovery_authorized": True,
+        "approval_id": "test-current-terminal-finalize",
+        "executor_sha256": "1" * 64,
+        "nonce": "2" * 64,
+        "transaction_sha256": "3" * 64,
+        "capsule_sha256": "4" * 64,
+        "mutation_ledger_sha256": "5" * 64,
+        "committed_objects_sha256": "6" * 64,
+        "removed_objects_sha256": "7" * 64,
+        "pending_objects_sha256": "8" * 64,
+        "systemd_sha256": "9" * 64,
+        "finalize_owned_object": "group:amn2-spain",
+        "approved_at_epoch": 100,
+        "expires_at_epoch": 200,
+    }
+    intent = installer_module._read_current_terminal_recovery_finalize_intent_payload(
+        canonical_json_bytes(payload) + b"\n"
+    )
+    assert intent.mutation_ledger_sha256 == "5" * 64
+    assert intent.finalize_owned_object == "group:amn2-spain"
+
+
+def test_terminal_identity_reconciliation_records_primary_group_already_removed() -> None:
+    recorded: list[tuple[str, str, str]] = []
+
+    class Ledger:
+        def event_for(self, owned_object: str):
+            assert owned_object == "group:amn2-spain"
+            return {
+                "event": "committed",
+                "stage": "identity_created",
+                "actual_identity": "sha256:" + "a" * 64,
+            }
+
+        def removed(self, stage: str, owned_object: str, identity: str) -> None:
+            recorded.append((stage, owned_object, identity))
+
+    class Action:
+        def observe_identity(self):
+            return None
+
+        def remove_exact(self, _identity: str) -> None:
+            raise AssertionError("already-absent primary group must not be removed twice")
+
+    result = installer_module._reconcile_terminal_identity_removal(
+        ledger=Ledger(), action=Action(), owned_object="group:amn2-spain"
+    )
+    assert result == "already_absent"
+    assert recorded == [
+        ("identity_created", "group:amn2-spain", "sha256:" + "a" * 64)
+    ]
+
+
+def test_current_terminal_recovery_finalize_seals_auto_removed_primary_group(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    state = {"status": "manual_recovery_required", "recovery_capsule_sha256": "c" * 64}
+    transaction_sha256 = hashlib.sha256(
+        installer_module.BootstrapTransactionLedger._canonical(state)
+    ).hexdigest()
+    ledger_before = "5" * 64
+    ledger_after = "a" * 64
+    events = {
+        "group:amn2-spain": {
+            "event": "committed", "stage": "identity_created",
+            "actual_identity": "sha256:" + "b" * 64,
+        },
+        "user:amn2-spain": {
+            "event": "removed", "stage": "identity_created",
+            "actual_identity": "sha256:" + "d" * 64,
+        },
+    }
+    actions = (
+        {"owned_object": "group:amn2-spain", "stage": "identity_created"},
+        {"owned_object": "user:amn2-spain", "stage": "identity_created"},
+        {"owned_object": "interface:awgsp0", "stage": "network_container_started"},
+    )
+    capsule = types.SimpleNamespace(
+        sha256="c" * 64,
+        blueprint=types.SimpleNamespace(
+            digest="e" * 64,
+            actions=actions,
+            assembly_context={"mutation_ledger_path": str(tmp_path / "ledger.json")},
+        ),
+    )
+
+    class Transaction:
+        def snapshot(self):
+            return copy.deepcopy(state)
+
+    class Ledger:
+        def event_for(self, owned_object: str):
+            return copy.deepcopy(events.get(owned_object))
+
+        def removed(self, stage: str, owned_object: str, identity: str) -> None:
+            assert (stage, owned_object, identity) == (
+                "identity_created", "group:amn2-spain", "sha256:" + "b" * 64
+            )
+            events[owned_object]["event"] = "removed"
+
+    ledger = Ledger()
+
+    class Store:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def load_or_create(self, allowed_objects):
+            assert allowed_objects == {entry["owned_object"] for entry in actions}
+            return ledger
+
+    class Lease:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def assert_held(self):
+            return None
+
+    class LeaseFactory:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def acquire(self):
+            return Lease()
+
+    class Observer:
+        MAX_COLLECTOR_BYTES = 1024 * 1024
+        calls = 0
+
+        def __init__(self, **_kwargs):
+            pass
+
+        def collect_evidence(self):
+            self.calls += 1
+            return {"sequence": self.calls}
+
+    class IdentityAction:
+        def __init__(self, owned_object: str):
+            self.operation = types.SimpleNamespace(owned_object=owned_object)
+
+        def observe_identity(self):
+            return None
+
+        def remove_exact(self, _identity: str):
+            raise AssertionError("post-contour identities must already be absent")
+
+    monkeypatch.setattr(installer_module, "_assert_running_executor", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        installer_module,
+        "_host_path",
+        lambda _root, live_path: tmp_path.joinpath(*(p for p in live_path.split("/") if p)),
+    )
+    monkeypatch.setattr(
+        installer_module.BootstrapTransactionLedger,
+        "open_existing",
+        classmethod(lambda _cls, **_kwargs: Transaction()),
+    )
+    monkeypatch.setattr(
+        installer_module.RecoveryCapsuleStore,
+        "open_existing",
+        classmethod(lambda _cls, **_kwargs: capsule),
+    )
+    monkeypatch.setattr(
+        installer_module,
+        "_sha256_regular_file",
+        lambda *_args, **_kwargs: (
+            ledger_after if events["group:amn2-spain"]["event"] == "removed" else ledger_before,
+            1,
+        ),
+    )
+    monkeypatch.setattr(installer_module, "SharedInstallLockLease", LeaseFactory)
+    monkeypatch.setattr(installer_module, "ChecksumBoundResourceObserver", Observer)
+    monkeypatch.setattr(live_backend, "DurableMutationLedgerStore", Store)
+    monkeypatch.setattr(
+        live_backend,
+        "build_production_identity_bundle",
+        lambda: types.SimpleNamespace(
+            actions=[IdentityAction("user:amn2-spain"), IdentityAction("group:amn2-spain")]
+        ),
+    )
+    monkeypatch.setattr(live_backend, "FixedCommandRunner", lambda **_kwargs: lambda *_args, **_kwargs: b"ignored")
+    monkeypatch.setattr(
+        live_backend,
+        "parse_systemctl_show",
+        lambda _output, *, unit: {
+            "LoadState": "not-found", "FragmentPath": "", "UnitFileState": "", "ActiveState": "inactive"
+        },
+    )
+    monkeypatch.setattr(
+        installer_module,
+        "observation_from_resource_confirmation_evidence",
+        lambda evidence: {"sequence": evidence.get("sequence", 0)},
+    )
+    monkeypatch.setattr(
+        installer_module,
+        "build_terminal_recovery_equality_receipt",
+        lambda **_kwargs: {
+            "foreign_service_persistent_equal": True,
+            "foreign_service_volatile_before_count": 0,
+            "foreign_service_volatile_after_count": 0,
+        },
+    )
+    committed = ["group:amn2-spain"]
+    removed = ["user:amn2-spain"]
+    pending = ["interface:awgsp0"]
+    systemd = {
+        unit: {"LoadState": "not-found", "FragmentPath": "", "UnitFileState": "", "ActiveState": "inactive"}
+        for unit in live_backend.SYSTEMD_UNIT_ORDER
+    }
+    intent = installer_module.CurrentTerminalRecoveryFinalizeIntent(
+        approval_id="test-finalize", executor_sha256="1" * 64, nonce="2" * 64,
+        transaction_sha256=transaction_sha256, capsule_sha256="c" * 64,
+        mutation_ledger_sha256=ledger_before,
+        committed_objects_sha256=installer_module.package_backend.sha256_canonical(committed),
+        removed_objects_sha256=installer_module.package_backend.sha256_canonical(removed),
+        pending_objects_sha256=installer_module.package_backend.sha256_canonical(pending),
+        systemd_sha256=installer_module.package_backend.sha256_canonical(systemd),
+        finalize_owned_object="group:amn2-spain", approved_at_epoch=100, expires_at_epoch=200,
+    )
+
+    result = installer_module._production_current_terminal_recovery_finalize_bound(
+        intent, host_root=tmp_path, expected_uid=None, now_epoch=150
+    )
+
+    assert result["result"] == "passed"
+    assert result["removed_owned_objects"] == ["group:amn2-spain"]
+    assert result["pending_owned_objects"] == ["interface:awgsp0"]
+    assert result["mutation_ledger_after_sha256"] == ledger_after
+    assert result["foreign_service_persistent_equal"] is True
+
+
 def test_current_terminal_recovery_audit_reports_sealed_current_state(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -4396,6 +4632,35 @@ def test_current_terminal_recovery_resume_mode_routes_only_bound_intent(
     ):
         installer_module.run_production_command(
             ["current-terminal-recovery-resume-bound", "unexpected"],
+            authorization_payload=b"{}",
+        )
+
+
+def test_current_terminal_recovery_finalize_mode_routes_only_bound_intent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+    sentinel = object()
+    monkeypatch.setattr(
+        installer_module,
+        "_read_current_terminal_recovery_finalize_intent_payload",
+        lambda _payload: sentinel,
+    )
+    monkeypatch.setattr(
+        installer_module,
+        "_production_current_terminal_recovery_finalize_bound",
+        lambda intent, **kwargs: captured.update(intent=intent, **kwargs)
+        or {"result": "passed"},
+    )
+    assert installer_module.run_production_command(
+        ["current-terminal-recovery-finalize-bound"], authorization_payload=b"{}"
+    ) == {"result": "passed"}
+    assert captured["intent"] is sentinel
+    with pytest.raises(
+        InstallError, match="current_terminal_recovery_finalize_bound_inputs_required"
+    ):
+        installer_module.run_production_command(
+            ["current-terminal-recovery-finalize-bound", "unexpected"],
             authorization_payload=b"{}",
         )
 

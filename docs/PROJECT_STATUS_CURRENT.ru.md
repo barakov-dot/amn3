@@ -1,3 +1,21 @@
+# Текущий override 2026-07-25: AMN2 contour удалён; exact ledger finalize готов
+
+Approved resume удалил exact AMN2 units/trees/runtime и user, но primary group
+был автоматически удалён вместе с user. Поэтому group оставался `committed` в
+ledger, хотя OS identity уже отсутствовала; resume завершился fail-closed до
+receipt. Read-only audit подтвердил: все AMN2 units `not-found`, owned trees,
+user и group отсутствуют; transaction/capsule неизменны. Current ledger
+`990A6668BF31F16668AC8F7098F309B156E1E182F4B2B28AC188047F0CBCBC78`:
+1 committed group, 34 removed, 5 pending.
+
+Exact idempotent finalize добавляет только один ledger `removed` event для уже
+отсутствующего group и доказывает run009→current и current before/after dynamic
+foreign equality. Executor
+`B425E32A61C45F1615C3AB2223BB899CB1B1E82F985A301A18057DCE13D5DD4D`
+(`152917` bytes), runner
+`98C9B8A6F4E28D9E80C6C1919FE7A5B271AFD4568F193212CADF0AB2A9E49E98`.
+Double build byte-equal; scoped suite `258 passed, 4 skipped`; parse/diff passed.
+
 # Текущий override 2026-07-25: first resume fail-closed без мутации; corrected v3 готов
 
 Первый exact terminal resume завершился до mutation: mixed-gid `/etc/amn2-spain`

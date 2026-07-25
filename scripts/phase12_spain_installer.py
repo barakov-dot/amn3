@@ -2089,6 +2089,63 @@ class CurrentTerminalRecoveryResumeIntent:
 
 
 @dataclass(frozen=True)
+class CurrentTerminalRecoveryFinalizeIntent:
+    """Mutation binding for one exact post-contour terminal-recovery state."""
+
+    approval_id: str
+    executor_sha256: str
+    nonce: str
+    transaction_sha256: str
+    capsule_sha256: str
+    mutation_ledger_sha256: str
+    committed_objects_sha256: str
+    removed_objects_sha256: str
+    pending_objects_sha256: str
+    systemd_sha256: str
+    finalize_owned_object: str
+    approved_at_epoch: int
+    expires_at_epoch: int
+
+    @classmethod
+    def from_mapping(cls, value: dict[str, Any]) -> "CurrentTerminalRecoveryFinalizeIntent":
+        fields = {
+            "schema", "recovery_authorized", "approval_id", "executor_sha256",
+            "nonce", "transaction_sha256", "capsule_sha256",
+            "mutation_ledger_sha256", "committed_objects_sha256",
+            "removed_objects_sha256", "pending_objects_sha256", "systemd_sha256",
+            "finalize_owned_object", "approved_at_epoch", "expires_at_epoch",
+        }
+        if (
+            not isinstance(value, dict)
+            or set(value) != fields
+            or value.get("schema")
+            != "amn2.spain-current-terminal-recovery-finalize-intent.v1"
+            or value.get("recovery_authorized") is not True
+            or value.get("finalize_owned_object") != "group:amn2-spain"
+        ):
+            raise InstallError("current terminal recovery finalize intent schema/result mismatch")
+        for key in (
+            "executor_sha256", "nonce", "transaction_sha256", "capsule_sha256",
+            "mutation_ledger_sha256", "committed_objects_sha256",
+            "removed_objects_sha256", "pending_objects_sha256", "systemd_sha256",
+        ):
+            if not isinstance(value[key], str) or re.fullmatch(r"[0-9a-f]{64}", value[key]) is None:
+                raise InstallError(f"current terminal recovery finalize intent {key} invalid")
+        if not isinstance(value["approval_id"], str) or not value["approval_id"]:
+            raise InstallError("current terminal recovery finalize intent approval invalid")
+        if (
+            not isinstance(value["approved_at_epoch"], int)
+            or isinstance(value["approved_at_epoch"], bool)
+            or not isinstance(value["expires_at_epoch"], int)
+            or isinstance(value["expires_at_epoch"], bool)
+            or value["expires_at_epoch"] <= value["approved_at_epoch"]
+            or value["expires_at_epoch"] - value["approved_at_epoch"] > 300
+        ):
+            raise InstallError("current terminal recovery finalize intent time window invalid")
+        return cls(**{key: value[key] for key in fields - {"schema", "recovery_authorized"}})
+
+
+@dataclass(frozen=True)
 class InstallAuthorization:
     approval_id: str
     precondition_receipt_sha256: str
@@ -5828,6 +5885,28 @@ def _read_current_terminal_recovery_resume_intent_payload(
         raise InstallError("current_terminal_recovery_resume_bound_inputs_required") from exc
 
 
+def _read_current_terminal_recovery_finalize_intent_payload(
+    payload: bytes,
+) -> CurrentTerminalRecoveryFinalizeIntent:
+    if (
+        not isinstance(payload, bytes)
+        or not payload
+        or len(payload) > 64 * 1024
+        or not payload.endswith(b"\n")
+    ):
+        raise InstallError("current_terminal_recovery_finalize_bound_inputs_required")
+    try:
+        value = json.loads(payload)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise InstallError("current_terminal_recovery_finalize_bound_inputs_required") from exc
+    if json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8") + b"\n" != payload:
+        raise InstallError("current_terminal_recovery_finalize_bound_inputs_required")
+    try:
+        return CurrentTerminalRecoveryFinalizeIntent.from_mapping(value)
+    except InstallError as exc:
+        raise InstallError("current_terminal_recovery_finalize_bound_inputs_required") from exc
+
+
 def _read_runtime_recovery_intent_payload(payload: bytes) -> RuntimeRecoveryIntent:
     if (
         not isinstance(payload, bytes)
@@ -7001,6 +7080,200 @@ def _production_current_terminal_recovery_audit_bound(
     }
 
 
+def _reconcile_terminal_identity_removal(*, ledger: Any, action: Any, owned_object: str) -> str:
+    event = ledger.event_for(owned_object)
+    if event is None or event["event"] != "committed":
+        raise InstallError("current terminal recovery identity ledger mismatch")
+    observed = action.observe_identity()
+    if observed is None:
+        result = "already_absent"
+    else:
+        if observed != event["actual_identity"]:
+            raise InstallError("current terminal recovery identity binding mismatch")
+        action.remove_exact(event["actual_identity"])
+        if action.observe_identity() is not None:
+            raise InstallError("current terminal recovery identity removal mismatch")
+        result = "removed"
+    ledger.removed(event["stage"], owned_object, event["actual_identity"])
+    return result
+
+
+def _production_current_terminal_recovery_finalize_bound(
+    intent: CurrentTerminalRecoveryFinalizeIntent,
+    *,
+    host_root: Path = Path("/"),
+    expected_uid: int | None = 0,
+    now_epoch: int | None = None,
+) -> dict[str, Any]:
+    now = int(time.time()) if now_epoch is None else now_epoch
+    if now < intent.approved_at_epoch or now > intent.expires_at_epoch:
+        raise InstallError("current terminal recovery finalize intent expired")
+    _assert_running_executor(
+        Path(sys.argv[0]).resolve(), intent.executor_sha256, expected_uid=expected_uid
+    )
+    root = Path(host_root)
+    audit_root = _host_path(root, "/var/lib/amn2-spain-phase12-audit")
+    lease = SharedInstallLockLease(lambda: _existing_opt_directory_lock(root))
+    observer = ChecksumBoundResourceObserver(
+        collector_bytes=_embedded_resource_collector_bytes(),
+        collector_sha256=hashlib.sha256(_embedded_resource_collector_bytes()).hexdigest(),
+        expected_uid=expected_uid,
+    )
+    with lease.acquire():
+        transaction = BootstrapTransactionLedger.open_existing(
+            audit_root=audit_root, nonce=intent.nonce, expected_uid=expected_uid
+        )
+        state = transaction.snapshot()
+        transaction_sha256 = hashlib.sha256(
+            BootstrapTransactionLedger._canonical(state)
+        ).hexdigest()
+        if (
+            state["status"] != "manual_recovery_required"
+            or transaction_sha256 != intent.transaction_sha256
+        ):
+            raise InstallError("current terminal recovery finalize transaction binding mismatch")
+        capsule = RecoveryCapsuleStore.open_existing(
+            audit_root=audit_root, nonce=intent.nonce, expected_uid=expected_uid
+        )
+        if (
+            capsule.sha256 != intent.capsule_sha256
+            or state.get("recovery_capsule_sha256") != capsule.sha256
+        ):
+            raise InstallError("current terminal recovery finalize capsule binding mismatch")
+        blueprint = {entry["owned_object"]: entry for entry in capsule.blueprint.actions}
+        ledger_path = Path(capsule.blueprint.assembly_context["mutation_ledger_path"])
+        ledger_before_sha256, _ledger_before_size = _sha256_regular_file(
+            ledger_path, expected_uid=expected_uid, max_bytes=16 * 1024 * 1024
+        )
+        if ledger_before_sha256 != intent.mutation_ledger_sha256:
+            raise InstallError("current terminal recovery finalize ledger binding mismatch")
+        ledger = live_backend.DurableMutationLedgerStore(
+            ledger_path, expected_uid=expected_uid
+        ).load_or_create(set(blueprint))
+        committed: list[str] = []
+        removed: list[str] = []
+        pending: list[str] = []
+        for owned_object in sorted(blueprint):
+            event = ledger.event_for(owned_object)
+            if event is None or event["event"] not in {"committed", "removed"}:
+                pending.append(owned_object)
+            elif event["event"] == "committed":
+                committed.append(owned_object)
+            else:
+                removed.append(owned_object)
+        if (
+            committed != [intent.finalize_owned_object]
+            or package_backend.sha256_canonical(committed) != intent.committed_objects_sha256
+            or package_backend.sha256_canonical(removed) != intent.removed_objects_sha256
+            or package_backend.sha256_canonical(pending) != intent.pending_objects_sha256
+        ):
+            raise InstallError("current terminal recovery finalize ledger contour mismatch")
+        absent_paths = (
+            "/opt/amn2-spain", "/etc/amn2-spain", "/var/lib/amn2-spain",
+            "/var/lib/amn2-spain-docker", "/run/amn2-spain-docker",
+            "/opt/amn2-spain-package",
+            "/etc/systemd/system/amn2-spain-docker.service",
+            "/etc/systemd/system/amn2-spain-network.service",
+            "/etc/systemd/system/amn2-spain-web.service",
+            "/etc/systemd/system/amn2-spain-bot.service",
+        )
+        if any(
+            (path := _host_path(root, live_path)).exists() or path.is_symlink()
+            for live_path in absent_paths
+        ):
+            raise InstallError("current terminal recovery finalize owned contour remains")
+        identity_actions = {
+            action.operation.owned_object: action
+            for action in live_backend.build_production_identity_bundle().actions
+        }
+        if any(
+            identity_actions[name].observe_identity() is not None
+            for name in ("user:amn2-spain", "group:amn2-spain")
+        ):
+            raise InstallError("current terminal recovery finalize identity remains")
+        systemd_runner = live_backend.FixedCommandRunner(
+            allowed_argv=live_backend.SYSTEMCTL_COMMAND_ALLOWLIST
+        )
+        systemd = {
+            unit: live_backend.parse_systemctl_show(
+                systemd_runner(
+                    live_backend._systemctl_show_argv(unit),
+                    timeout=live_backend.DEFAULT_COMMAND_TIMEOUT,
+                    max_output=live_backend.MAX_SYSTEMCTL_SHOW_BYTES,
+                ),
+                unit=unit,
+            )
+            for unit in live_backend.SYSTEMD_UNIT_ORDER
+        }
+        if (
+            package_backend.sha256_canonical(systemd) != intent.systemd_sha256
+            or any(
+                row["LoadState"] != "not-found" or row["ActiveState"] != "inactive"
+                for row in systemd.values()
+            )
+        ):
+            raise InstallError("current terminal recovery finalize systemd binding mismatch")
+        try:
+            current_before = observation_from_resource_confirmation_evidence(
+                observer.collect_evidence()
+            )
+            run009_evidence = json.loads(
+                bytes.fromhex(_embedded_run009_baseline()["run009_evidence_hex"])
+            )
+            run009_observation = observation_from_resource_confirmation_evidence(
+                run009_evidence
+            )
+        except (InstallError, BackendError, PreconditionError, ValueError, TypeError, json.JSONDecodeError) as exc:
+            raise InstallError("current terminal recovery finalize evidence invalid") from exc
+        binding = {
+            "nonce": intent.nonce,
+            "transaction_sha256": transaction_sha256,
+            "blueprint_sha256": capsule.blueprint.digest,
+        }
+        run009_equality = build_terminal_recovery_equality_receipt(
+            baseline_observation=run009_observation,
+            current_observation=current_before,
+            binding=binding,
+        )
+        _reconcile_terminal_identity_removal(
+            ledger=ledger,
+            action=identity_actions[intent.finalize_owned_object],
+            owned_object=intent.finalize_owned_object,
+        )
+        if any(
+            (event := ledger.event_for(name)) is not None and event["event"] == "committed"
+            for name in blueprint
+        ):
+            raise InstallError("current terminal recovery finalize committed contour remains")
+        ledger_after_sha256, _ledger_after_size = _sha256_regular_file(
+            ledger_path, expected_uid=expected_uid, max_bytes=16 * 1024 * 1024
+        )
+        current_after = observation_from_resource_confirmation_evidence(
+            observer.collect_evidence()
+        )
+        equality = build_terminal_recovery_equality_receipt(
+            baseline_observation=current_before,
+            current_observation=current_after,
+            binding=binding,
+        )
+    return {
+        "schema": "amn2.spain-current-terminal-recovery-finalize-receipt.v1",
+        "result": "passed",
+        "approval_id": intent.approval_id,
+        "nonce": intent.nonce,
+        "transaction_sha256": transaction_sha256,
+        "capsule_sha256": capsule.sha256,
+        "mutation_ledger_before_sha256": intent.mutation_ledger_sha256,
+        "mutation_ledger_after_sha256": ledger_after_sha256,
+        "removed_owned_objects": [intent.finalize_owned_object],
+        "pending_owned_objects": pending,
+        "run009_foreign_service_persistent_equal": run009_equality["foreign_service_persistent_equal"],
+        "foreign_service_persistent_equal": equality["foreign_service_persistent_equal"],
+        "foreign_service_volatile_before_count": equality["foreign_service_volatile_before_count"],
+        "foreign_service_volatile_after_count": equality["foreign_service_volatile_after_count"],
+    }
+
+
 def _production_current_terminal_recovery_resume_bound(
     intent: CurrentTerminalRecoveryResumeIntent,
     *,
@@ -7216,14 +7489,11 @@ def _production_current_terminal_recovery_resume_bound(
             for action in live_backend.build_production_identity_bundle().actions
         }
         for owned_object in ("user:amn2-spain", "group:amn2-spain"):
-            event = ledger.event_for(owned_object)
             action = identity_actions[owned_object]
-            if event is None or event["event"] != "committed" or action.observe_identity() != event["actual_identity"]:
-                raise InstallError("current terminal recovery resume identity binding mismatch")
-            action.remove_exact(event["actual_identity"])
-            if action.observe_identity() is not None:
-                raise InstallError("current terminal recovery resume identity removal mismatch")
-            mark_removed(owned_object)
+            _reconcile_terminal_identity_removal(
+                ledger=ledger, action=action, owned_object=owned_object
+            )
+            removed_now.append(owned_object)
 
         remaining_committed = sorted(
             name for name in blueprint
@@ -7269,7 +7539,7 @@ def run_production_command(
     expected_uid: int | None = 0,
 ) -> dict[str, Any]:
     args = list(argv)
-    if not args or args[0] not in {"install", "install-bound", "manual-cleanup", "manual-cleanup-bound", "runtime-recovery-bound", "terminal-recovery-bound", "terminal-recovery-receipt-bound", "current-terminal-recovery-audit-bound", "current-terminal-recovery-resume-bound", "recover", "rollback", "verify"}:
+    if not args or args[0] not in {"install", "install-bound", "manual-cleanup", "manual-cleanup-bound", "runtime-recovery-bound", "terminal-recovery-bound", "terminal-recovery-receipt-bound", "current-terminal-recovery-audit-bound", "current-terminal-recovery-resume-bound", "current-terminal-recovery-finalize-bound", "recover", "rollback", "verify"}:
         raise InstallError("unsupported_mode")
     mode = args.pop(0)
     if mode == "install-bound":
@@ -7369,6 +7639,16 @@ def run_production_command(
             payload = sys.stdin.buffer.read(64 * 1024 + 1)
         intent = _read_current_terminal_recovery_resume_intent_payload(payload)
         return _production_current_terminal_recovery_resume_bound(
+            intent, host_root=host_root, expected_uid=expected_uid
+        )
+    if mode == "current-terminal-recovery-finalize-bound":
+        if args:
+            raise InstallError("current_terminal_recovery_finalize_bound_inputs_required")
+        payload = authorization_payload
+        if payload is None:
+            payload = sys.stdin.buffer.read(64 * 1024 + 1)
+        intent = _read_current_terminal_recovery_finalize_intent_payload(payload)
+        return _production_current_terminal_recovery_finalize_bound(
             intent, host_root=host_root, expected_uid=expected_uid
         )
     if mode == "install":
