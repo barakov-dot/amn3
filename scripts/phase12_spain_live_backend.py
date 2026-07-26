@@ -1079,6 +1079,7 @@ class SystemAction:
     )
     reconcile_absent_removal: bool = False
     adopt_exact_observation: bool = False
+    defer_initial_observation_error: bool = False
 
     def __post_init__(self) -> None:
         if not all(
@@ -1097,6 +1098,7 @@ class SystemAction:
         if (
             type(self.reconcile_absent_removal) is not bool
             or type(self.adopt_exact_observation) is not bool
+            or type(self.defer_initial_observation_error) is not bool
         ):
             raise BackendError("system absent-removal policy invalid")
 
@@ -1143,6 +1145,9 @@ class SystemOwnedAdapter:
     def can_adopt_exact(self, operation: OwnedOperation, identity: str) -> bool:
         action = self._action(operation)
         return action.adopt_exact_observation and identity == operation.desired_identity
+
+    def can_defer_initial_observation_error(self, operation: OwnedOperation) -> bool:
+        return self._action(operation).defer_initial_observation_error
 
     def observe_rollback(self, operation: OwnedOperation) -> str | None:
         action = self._action(operation)
@@ -3837,7 +3842,15 @@ class LinuxBackend:
                 raise BackendError("owned operation outside ledger allowlist")
             event = self.ledger.event_for(operation.owned_object)
             if event is None:
-                observed = self.adapter.observe(operation)
+                try:
+                    observed = self.adapter.observe(operation)
+                except BackendError:
+                    deferrer = getattr(
+                        self.adapter, "can_defer_initial_observation_error", None
+                    )
+                    if not (callable(deferrer) and deferrer(operation)):
+                        raise
+                    observed = None
                 adopter = getattr(self.adapter, "can_adopt_exact", None)
                 if observed is not None and not (
                     callable(adopter) and adopter(operation, observed)
@@ -3857,11 +3870,19 @@ class LinuxBackend:
                 raise BackendError("owned operation disagrees with retained ledger")
             if event["event"] == "intent":
                 pending_observer = getattr(self.adapter, "observe_pending", None)
-                actual = (
-                    pending_observer(operation)
-                    if callable(pending_observer)
-                    else self.adapter.observe(operation)
-                )
+                try:
+                    actual = (
+                        pending_observer(operation)
+                        if callable(pending_observer)
+                        else self.adapter.observe(operation)
+                    )
+                except BackendError:
+                    deferrer = getattr(
+                        self.adapter, "can_defer_initial_observation_error", None
+                    )
+                    if not (callable(deferrer) and deferrer(operation)):
+                        raise
+                    actual = None
                 if actual is None:
                     self.adapter.create(operation)
                     actual = self.adapter.observe(operation)
@@ -5450,6 +5471,7 @@ def build_awg_container_actions(
         remove_exact=remove_active,
         reconcile_absent_removal=True,
         adopt_exact_observation=True,
+        defer_initial_observation_error=True,
     )
     return container_action, active_action
 

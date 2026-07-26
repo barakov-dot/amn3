@@ -580,3 +580,23 @@ executor SHA-256
 `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`; Phase 12 scope is
 `326 passed, 4 skipped`; install runner SHA-256 is
 `4ED081A0040C3E7C78FF26F9204674A761BEB9F6020EA7D223819EF708F39142`.
+# AMN2 Phase 12 — current operational override 2026-07-26: fresh v23 ready
+
+Fresh v22 transaction
+`49da84044f816b72f13cad6d6e65529748606af54050eabd6a591cea38d4b339`
+failed closed on transient initial AWG health before interface intent.
+Checksum-bound cleanup and terminal recovery passed: AMN2 contour is absent,
+foreign persistent equality is true with volatile counts `0/0`; USA is unchanged.
+
+Only AWG active action defers initial/pending transient observation errors into
+its existing bounded readiness. All other actions remain strict; an already
+running container is not started or restarted. Full Phase 12 scope is
+`327 passed, 4 skipped`. Fresh v23 double-build is byte-equal and clean-room
+verified: package SHA-256
+`9F70FF120B6F8022A9BD046BF3B18F4AB23E58076151A6EB2E60A45B87104402`
+(`140042240` bytes), manifest SHA-256
+`FEFB385A583D2A97DF7338003AFE0C97CBCDD7884058002687457832533CA3D6`,
+executor SHA-256
+`F6AD44B35B2A9E9637693C04983F2F0A52F6E2AC031CB63EA2CD0DC63923EDDA`
+(`153021` bytes); install runner SHA-256
+`E097CC186503C6772311D728C480B08211CD766AC1216CB87684B6855E7F540C`.

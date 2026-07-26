@@ -2544,6 +2544,57 @@ class ProductionDockerRuntimeTests(unittest.TestCase):
             [argv for argv, _kwargs in runner.calls],
         )
 
+    def test_awg_auto_started_transient_health_enters_bounded_readiness(self) -> None:
+        class AutoStartedDelayedAwgRunner(_FakeDockerRunner):
+            remaining_not_ready = 2
+
+            def __call__(self, argv: tuple[str, ...], **kwargs: object) -> bytes:
+                if (
+                    argv == live_backend.DOCKER_ZERO_PEER_ARGV
+                    and self.remaining_not_ready
+                ):
+                    self.remaining_not_ready -= 1
+                    raise BackendError("AWG interface not ready")
+                return super().__call__(argv, **kwargs)
+
+        runner = AutoStartedDelayedAwgRunner()
+        runner.image = "full"
+        runner.network = True
+        runner.container = True
+        runner.running = True
+        sleeps: list[float] = []
+        _container, active = live_backend.build_awg_container_actions(
+            runner=runner,
+            readiness_attempts=3,
+            readiness_interval_seconds=0.25,
+            sleeper=sleeps.append,
+        )
+        ledger = MutationLedger(allowed_objects={active.operation.owned_object})
+        backend = LinuxBackend(
+            adapter=live_backend.SystemOwnedAdapter(
+                actions={active.operation.owned_object: active}
+            ),
+            ledger=ledger,
+        )
+
+        backend.apply((active.operation,))
+
+        self.assertEqual(
+            ledger.event_for(active.operation.owned_object)["event"], "committed"
+        )
+        self.assertEqual(sleeps, [])
+        self.assertEqual(
+            [argv for argv, _kwargs in runner.calls].count(
+                live_backend.DOCKER_ZERO_PEER_ARGV
+            ),
+            2,
+        )
+        self.assertEqual(runner.remaining_not_ready, 0)
+        self.assertNotIn(
+            live_backend.DOCKER_CONTAINER_START_ARGV,
+            [argv for argv, _kwargs in runner.calls],
+        )
+
     def test_image_archive_must_be_untagged_with_empty_repositories_before_mutation(self) -> None:
         for label, body in (
             (
