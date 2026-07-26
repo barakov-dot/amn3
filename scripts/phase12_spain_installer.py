@@ -99,7 +99,8 @@ def _runtime_failure_message(exc: Exception) -> str:
         r"(?:"
         r"docker_image_load_(?:no_space|archive|permission|daemon_unavailable|layer_apply|unsupported|timeout|input_changed|output_exceeded|command_failed|exit_(?:[1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]|unknown))"
         r"|awg_bounded_readiness_timeout"
-        r"|(?:docker|systemd|network|web)_retry_exhausted"
+        r"|docker_retry_exhausted(?:_container_(?:immutable|stopped_endpoint|running_endpoint|network_membership))?"
+        r"|(?:systemd|network|web)_retry_exhausted"
         r"|ledger_transition_persist_failed"
         r")"
     )

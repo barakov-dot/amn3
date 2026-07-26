@@ -7994,3 +7994,44 @@ No-follow extract содержит 69 regular entries и разворачива�
 отличаются только parts `001` и `007`. Install runner SHA-256
 `DC1207F7DB48587C06FE4EE274D65312E4D25F24D5258FEE7E7506FE5F6046D5`;
 следующая live-операция — fresh checksum-bound v27 install.
+
+# Текущий override 2026-07-26: v27 rollback закрыт; fresh v28 готов
+
+Fresh v27 transaction
+`c59219abb245424edc7a97d352b9f3b16dde061140944bd4a92044eef38efca9`
+fail-closed завершилась с `docker_retry_exhausted`. Checksum-bound cleanup и
+terminal recovery прошли. Итоговый ledger SHA-256
+`2B0FD6FA548C48BDA344DB81BE2CF3E1EDC69785342EDA8127539F627CD10932`
+содержит 105 событий; все шесть AMN2-owned paths отсутствуют, четыре AMN2
+systemd units inactive. Foreign persistent equality `true`, volatile `0/0`;
+посторонний Spain-сервис и USA contour не изменялись.
+
+Bounded read-only journal показал healthy Docker 29.6.2 с `vfs` и graceful
+shutdown. Корневая причина была в pre-start observation: Docker нормализует
+единственную capability как `CAP_NET_ADMIN`, а остановленный container до
+первого start может иметь пустые endpoint/IP. Старый validator принимал только
+`NET_ADMIN` и требовал готовый endpoint до start, поэтому exact-created stopped
+container ошибочно классифицировался как partial. Fresh v28 принимает только
+одну эквивалентную capability (`NET_ADMIN` или `CAP_NET_ADMIN`), допускает
+одновременно пустые endpoint/IP только для exact stopped container без network
+attachment и сохраняет strict endpoint/IP/membership для running container.
+Running AWG не останавливается, не перезапускается и не пересоздаётся.
+
+Fresh v28 double-build byte-equal и clean-room verified: package SHA-256
+`86D15B5C06679C513557DA50BB7CE104448F457B3418F0C1BBE0D586D887113A`
+(`140052480` bytes), manifest SHA-256
+`FBF66EAA56D7B1789B0F90F6697DE5AAC58BAC04037DCD3EE6EAB0826E2C6D2B`,
+executor SHA-256
+`D8E51499A4F5CF5CFDE59DF056FF0BFB074B0E251C4AD474F6AED2DE5642F072`
+(`155830` bytes), resource plan SHA-256
+`8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43`.
+No-follow clean-room extract содержит 69 regular entries, 141 source files и
+source inventory SHA-256
+`C0FD4A1E1A88B877392DE4E59E289FE58239AA6B98A43F9F049068D2D5F581D7`;
+source exact `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`. Full Phase 12 scope:
+`336 passed, 4 skipped`; PowerShell parser и empty-approval fail-closed gate
+passed. Install runner SHA-256
+`F9A765010508E269C4FC308280128E5D7848F007B2F300DE10B38DFECF9FD2AB`.
+Runner переиспользует verified v27 parts `002`–`006` по hash/size и передаёт
+только отсутствующие/изменённые parts `001`, `007` и executor. Следующая
+live-операция — fresh checksum-bound v28 install.

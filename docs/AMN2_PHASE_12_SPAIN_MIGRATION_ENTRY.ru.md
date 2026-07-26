@@ -719,3 +719,44 @@ The no-follow extract contains 69 regular entries and expands source
 parts `001` and `007` differ from v26. Install runner SHA-256 is
 `DC1207F7DB48587C06FE4EE274D65312E4D25F24D5258FEE7E7506FE5F6046D5`.
 The next live operation is the fresh checksum-bound v27 install.
+
+# AMN2 Phase 12 — current operational override 2026-07-26: v27 recovered; fresh v28 ready
+
+Fresh v27 transaction
+`c59219abb245424edc7a97d352b9f3b16dde061140944bd4a92044eef38efca9`
+failed closed with `docker_retry_exhausted`. Checksum-bound cleanup and terminal
+recovery passed. The final ledger SHA-256
+`2B0FD6FA548C48BDA344DB81BE2CF3E1EDC69785342EDA8127539F627CD10932`
+has 105 events; all six AMN2-owned paths are absent and all four AMN2 systemd
+units are inactive. Foreign persistent equality is `true`, volatile counts are
+`0/0`; the foreign Spain service and USA rollback contour were not mutated.
+
+Bounded read-only journal evidence shows a healthy Docker 29.6.2 daemon using
+`vfs` and shutting down cleanly. The root cause was pre-start observation:
+Docker normalized the sole capability to `CAP_NET_ADMIN`, while a stopped
+container before first start can expose empty endpoint/IP. The old validator
+accepted only `NET_ADMIN` and required a ready endpoint before start, so it
+misclassified an exact-created stopped container as partial. Fresh v28 accepts
+only one equivalent capability (`NET_ADMIN` or `CAP_NET_ADMIN`), permits both
+endpoint and IP to be empty only for an exact stopped container with no network
+attachment, and preserves strict endpoint/IP/membership checks for a running
+container. Running AWG is never stopped, restarted, or recreated.
+
+Fresh v28 is double-built byte-equal and clean-room verified: package SHA-256
+`86D15B5C06679C513557DA50BB7CE104448F457B3418F0C1BBE0D586D887113A`
+(`140052480` bytes), manifest SHA-256
+`FBF66EAA56D7B1789B0F90F6697DE5AAC58BAC04037DCD3EE6EAB0826E2C6D2B`,
+executor SHA-256
+`D8E51499A4F5CF5CFDE59DF056FF0BFB074B0E251C4AD474F6AED2DE5642F072`
+(`155830` bytes), resource plan SHA-256
+`8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43`.
+The no-follow clean-room extract contains 69 regular entries, 141 source files,
+and source inventory SHA-256
+`C0FD4A1E1A88B877392DE4E59E289FE58239AA6B98A43F9F049068D2D5F581D7`;
+source is exactly `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`. Full Phase 12 scope is
+`336 passed, 4 skipped`; PowerShell parsing and empty-approval fail-closed gate
+passed. Install runner SHA-256 is
+`F9A765010508E269C4FC308280128E5D7848F007B2F300DE10B38DFECF9FD2AB`.
+The runner reuses verified v27 parts `002`–`006` by hash and size, uploading only
+missing/changed parts `001`, `007`, and the executor. The next live operation is
+the fresh checksum-bound v28 install.

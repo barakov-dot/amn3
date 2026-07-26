@@ -1431,6 +1431,10 @@ def test_preparation_failure_message_keeps_only_safe_cause_labels() -> None:
     for label in (
         "awg_bounded_readiness_timeout",
         "docker_retry_exhausted",
+        "docker_retry_exhausted_container_immutable",
+        "docker_retry_exhausted_container_stopped_endpoint",
+        "docker_retry_exhausted_container_running_endpoint",
+        "docker_retry_exhausted_container_network_membership",
         "systemd_retry_exhausted",
         "network_retry_exhausted",
         "web_retry_exhausted",
@@ -4943,19 +4947,22 @@ def test_transaction_958e_terminal_recovery_runner_is_mixed_contour_bound() -> N
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "0D170F3F9F25C842B86E69186489A58706CEDE835DC36F08DD9D450BB1FDDA0F"' in source
-    assert '$expectedManifestSha = "E67043F179CBC3A4F5067D045F713CC58F062964FBCAF6B619DB3EC8016FCEDF"' in source
-    assert '$expectedExecutorSha = "A93CA5716FA4F9B44D8C9CF3B27A9D4968C7A0600CB9843A0AF177ABDAE72D44"' in source
-    assert '$expectedExecutorBytes = 155460' in source
+    assert '$expectedPackageSha = "86D15B5C06679C513557DA50BB7CE104448F457B3418F0C1BBE0D586D887113A"' in source
+    assert '$expectedManifestSha = "FBF66EAA56D7B1789B0F90F6697DE5AAC58BAC04037DCD3EE6EAB0826E2C6D2B"' in source
+    assert '$expectedExecutorSha = "D8E51499A4F5CF5CFDE59DF056FF0BFB074B0E251C4AD474F6AED2DE5642F072"' in source
+    assert '$expectedExecutorBytes = 155830' in source
     assert '$expectedCollectorSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"' in source
-    assert 'phase12-spain-install-stopped-partial-retry-v27-20260726' in source
+    assert 'phase12-spain-install-docker29-prestart-v28-20260726' in source
     assert 'UNIFIED BOUNDED FALLBACK LADDER EXACT CACHE OR VERIFIED 20MIB PARTS' in source
-    assert 'STOPPED PARTIAL EXACT OWNED REMOVE BEFORE SINGLE CREATE RETRY' in source
-    assert 'amn2-spain-phase12-install-v27.tar.part-001' in source
-    assert '2DC233166A990CC3D5CD3093D15B33B03BF5AE3958F80390076CD87B09DC50C8' in source
-    assert 'amn2-spain-phase12-install-v27.tar.part-007' in source
-    assert '70FBFFB7C1ED7E8EEA0BBA54F95038633C5181EDE20F265A30D67A57DCF5289D' in source
+    assert 'DOCKER29 PRESTART CAPABILITY NORMALIZATION STOPPED EMPTY ENDPOINT ALLOWED RUNNING ENDPOINT STRICT' in source
+    assert 'amn2-spain-phase12-install-v28.tar.part-001' in source
+    assert 'CB4832E9DD568532DC4085C01BF1CF11C73494CEF3CCED7D0BD42BD7502E6BC6' in source
+    assert 'amn2-spain-phase12-install-v28.tar.part-007' in source
+    assert 'BB5458EF9A76EAC53DD8287131CA786C7A1EEC3C1309CB5B3FE56A97224DEFFB' in source
     assert 'Remote package part assembly mismatch.' in source
+    assert 'LegacyName="amn2-spain-phase12-install-v27.tar.part-002"' in source
+    assert '$approvedUploadDestinations' in source
+    assert 'Remote package part checksum mismatch.' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "Invoke-BoundedSshUpload" in source

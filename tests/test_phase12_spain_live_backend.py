@@ -2350,6 +2350,28 @@ class _PartialDockerCreateRunner(_FakeDockerRunner):
             self.partial_container = False
         return payload
 
+class _Docker29PrestartRunner(_FakeDockerRunner):
+    """Model Docker 29 capability normalization and pre-start networking."""
+
+    def __call__(self, argv: tuple[str, ...], **kwargs: object) -> bytes:
+        payload = super().__call__(argv, **kwargs)
+        if argv == live_backend.DOCKER_CONTAINER_INSPECT_ARGV and self.container:
+            value = json.loads(payload)
+            value["CapAdd"] = ["CAP_NET_ADMIN"]
+            if not self.running:
+                value["NetworkEndpointID"] = ""
+                value["NetworkIPAddress"] = ""
+            return self._line(value)
+        if (
+            argv == live_backend.DOCKER_NETWORK_INSPECT_ARGV
+            and self.container
+            and not self.running
+        ):
+            value = json.loads(payload)
+            value["Containers"] = {}
+            return self._line(value)
+        return payload
+
 
 class ProductionDockerRuntimeTests(unittest.TestCase):
     CONFIG_BODY = b'{"architecture":"amd64","os":"linux"}'
@@ -2602,6 +2624,91 @@ class ProductionDockerRuntimeTests(unittest.TestCase):
             ["stopped_partial_recreate", "bounded_idempotent_retry"],
         )
 
+    def test_docker29_prestart_state_is_committed_then_started_once(self) -> None:
+        runner = _Docker29PrestartRunner()
+        runner.network = True
+        container, active = live_backend.build_awg_container_actions(
+            runner=runner,
+            readiness_attempts=1,
+            readiness_interval_seconds=0,
+        )
+        ledger = MutationLedger(
+            allowed_objects={
+                container.operation.owned_object,
+                active.operation.owned_object,
+            }
+        )
+        backend = LinuxBackend(
+            adapter=SystemOwnedAdapter(
+                actions={
+                    container.operation.owned_object: container,
+                    active.operation.owned_object: active,
+                }
+            ),
+            ledger=ledger,
+        )
+
+        backend.apply((container.operation, active.operation))
+
+        calls = [argv for argv, _kwargs in runner.calls]
+        self.assertEqual(calls.count(build_container_create_argv()), 1)
+        self.assertEqual(calls.count(live_backend.DOCKER_CONTAINER_START_ARGV), 1)
+        self.assertNotIn(live_backend.DOCKER_CONTAINER_RM_ARGV, calls)
+        self.assertTrue(runner.running)
+        self.assertEqual(ledger.state(container.operation.owned_object), "committed")
+        self.assertEqual(ledger.state(active.operation.owned_object), "committed")
+
+    def test_running_container_rejects_empty_endpoint_state(self) -> None:
+        class EmptyRunningEndpoint(_Docker29PrestartRunner):
+            def __call__(
+                self, argv: tuple[str, ...], **kwargs: object
+            ) -> bytes:
+                payload = super().__call__(argv, **kwargs)
+                if argv == live_backend.DOCKER_CONTAINER_INSPECT_ARGV:
+                    value = json.loads(payload)
+                    value["NetworkEndpointID"] = ""
+                    value["NetworkIPAddress"] = ""
+                    return self._line(value)
+                return payload
+
+        runner = EmptyRunningEndpoint()
+        runner.network = True
+        runner.container = True
+        runner.running = True
+
+        with self.assertRaisesRegex(
+            BackendError,
+            "Docker container running endpoint drift",
+        ):
+            live_backend._docker_container_state(runner)
+
+    def test_docker_retry_exposes_only_allowlisted_contract_cause(self) -> None:
+        operation = OwnedOperation(
+            "network_container_started",
+            "container:amn2-spain-awg",
+            "sha256:" + "c" * 64,
+        )
+        action = live_backend.SystemAction(
+            operation=operation,
+            observe_identity=lambda: None,
+            create_exact=lambda: (_ for _ in ()).throw(
+                BackendError("Docker container immutable contract drift")
+            ),
+            remove_exact=lambda _identity: None,
+            create_attempts=2,
+            retry_category="docker",
+        )
+        backend = LinuxBackend(
+            adapter=SystemOwnedAdapter(actions={operation.owned_object: action}),
+            ledger=MutationLedger(allowed_objects={operation.owned_object}),
+        )
+
+        with self.assertRaisesRegex(
+            BackendError,
+            "^docker_retry_exhausted_container_immutable$",
+        ):
+            backend.apply((operation,))
+
     def test_running_partial_container_fails_closed_without_stop_remove_or_retry(
         self,
     ) -> None:
@@ -2650,7 +2757,7 @@ class ProductionDockerRuntimeTests(unittest.TestCase):
         )
 
         with patch.object(live_backend.time, "sleep"), self.assertRaisesRegex(
-            BackendError, "^docker_retry_exhausted$"
+            BackendError, "^docker_retry_exhausted_container_immutable$"
         ):
             backend.apply((container.operation,))
 

@@ -3887,6 +3887,18 @@ def build_systemd_unit_actions(
     )
     return enabled_action, active_action
 
+def _bounded_retry_failure_label(category: str, exc: BackendError) -> str:
+    label = f"{category}_retry_exhausted"
+    if category != "docker":
+        return label
+    suffix = {
+        "Docker container immutable contract drift": "container_immutable",
+        "Docker container stopped endpoint drift": "container_stopped_endpoint",
+        "Docker container running endpoint drift": "container_running_endpoint",
+        "Docker dynamic endpoint membership drift": "container_network_membership",
+    }.get(str(exc))
+    return label if suffix is None else f"{label}_{suffix}"
+
 
 class LinuxBackend:
     """Crash-reconciling executor; approval locking remains installer-owned."""
@@ -3953,7 +3965,9 @@ class LinuxBackend:
                     if observation_attempt + 1 < observation_attempts:
                         time.sleep(float(observation_interval))
                 if attempt >= attempts:
-                    raise BackendError(f"{category}_retry_exhausted") from exc
+                    raise BackendError(
+                        _bounded_retry_failure_label(category, exc)
+                    ) from exc
                 retry_preparer = getattr(self.adapter, "prepare_retry", None)
                 if callable(retry_preparer):
                     try:
@@ -5375,6 +5389,14 @@ def _exact_tmpfs_run(value: Any) -> bool:
     )
 
 
+def _exact_capability_list(value: Any, expected: str) -> bool:
+    return (
+        isinstance(value, list)
+        and len(value) == 1
+        and value[0] in {expected, "CAP_" + expected}
+    )
+
+
 def _docker_container_state(
     runner: Callable[..., bytes],
 ) -> tuple[str, bool, str | None]:
@@ -5408,6 +5430,7 @@ def _docker_container_state(
     )
     devices = value["Devices"]
     listed_container_id = matches[0]["ID"]
+    running = value["Running"]
     if (
         value["Name"] != "/amn2-spain-awg"
         or value["ID"] != listed_container_id
@@ -5417,7 +5440,7 @@ def _docker_container_state(
         or value["Entrypoint"] != ["/usr/local/sbin/amn2-awg-start"]
         or value["ReadonlyRootfs"] is not True
         or value["CapDrop"] != ["ALL"]
-        or value["CapAdd"] != ["NET_ADMIN"]
+        or not _exact_capability_list(value["CapAdd"], "NET_ADMIN")
         or not isinstance(devices, list)
         or len(devices) != 1
         or not isinstance(devices[0], dict)
@@ -5426,29 +5449,34 @@ def _docker_container_state(
         or devices[0].get("CgroupPermissions") != "rwm"
         or not _exact_tmpfs_run(value["TmpfsRun"])
         or value["RestartName"] != "unless-stopped"
-        or value["NetworkIPAddress"] != "172.29.251.2"
-        or not _valid_dynamic_endpoint(value["NetworkEndpointID"])
-        or not isinstance(value["Running"], bool)
+        or not isinstance(running, bool)
         or type(value["RestartCount"]) is not int
         or value["RestartCount"] != 0
         or not _exact_mounts(value["Mounts"])
     ):
-        raise BackendError("Docker container contract drift")
+        raise BackendError("Docker container immutable contract drift")
     (
         network_state,
         network_endpoint,
         network_container_id,
         _network_id,
     ) = _docker_network_state(runner)
-    if (
-        network_state != "full"
-        or network_endpoint is None
-        or network_endpoint != value["NetworkEndpointID"]
-        or network_container_id != value["ID"]
-    ):
+    if network_state != "full":
         raise BackendError("Docker dynamic endpoint membership drift")
-    return "full", value["Running"], value["NetworkEndpointID"]
-
+    endpoint = value["NetworkEndpointID"]
+    address = value["NetworkIPAddress"]
+    if not running and endpoint == "" and address == "":
+        if network_endpoint is not None or network_container_id is not None:
+            raise BackendError("Docker dynamic endpoint membership drift")
+        return "full", False, None
+    if running:
+        if address != "172.29.251.2" or not _valid_dynamic_endpoint(endpoint):
+            raise BackendError("Docker container running endpoint drift")
+    elif address != "172.29.251.2" or not _valid_dynamic_endpoint(endpoint):
+        raise BackendError("Docker container stopped endpoint drift")
+    if network_endpoint != endpoint or network_container_id != value["ID"]:
+        raise BackendError("Docker dynamic endpoint membership drift")
+    return "full", running, endpoint
 
 def _docker_container_rollback_state(
     runner: Callable[..., bytes],
