@@ -4943,15 +4943,17 @@ def test_transaction_958e_terminal_recovery_runner_is_mixed_contour_bound() -> N
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "0DBA42FDB8EA035E4D7DE9029B03B5E33A5E2443B0178A8C0EE03EAA156B973D"' in source
-    assert '$expectedManifestSha = "3139EB05099D6122610FB56A3A8D3479A8CEAEA76D67F875AD1A23A244836500"' in source
-    assert '$expectedExecutorSha = "13B55CE5B44F49AB744035810A550ED8BA0E3BD314E2288EF213C5DEF19C386A"' in source
-    assert '$expectedExecutorBytes = 154002' in source
+    assert '$expectedPackageSha = "14A5FDECCA1B2BB4E34BFA0194C560F27984604AE31B408D72BE9AF3B5CE4764"' in source
+    assert '$expectedManifestSha = "A5035AC08F1FC5611E9D9FF0BA02272BD5BAF60181FB257BF306B2D42BD09E03"' in source
+    assert '$expectedExecutorSha = "026000487A707D279499B355508DEA3E8D47F3EF788AEEBFEB0B45C08E694F0F"' in source
+    assert '$expectedExecutorBytes = 154649' in source
     assert '$expectedCollectorSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"' in source
-    assert 'phase12-spain-install-unified-v24-20260726' in source
+    assert 'phase12-spain-install-final-observation-v25-20260726' in source
     assert 'UNIFIED BOUNDED FALLBACK LADDER EXACT CACHE OR VERIFIED 20MIB PARTS' in source
-    assert 'amn2-spain-phase12-install-v24.tar.part-001' in source
-    assert 'amn2-spain-phase12-install-v24.tar.part-007' in source
+    assert 'amn2-spain-phase12-install-v25.tar.part-001' in source
+    assert 'B92AF759E77C2B719730EEA0E9DA73AB5F6BB525B4EFCC4A42E583F83FD78328' in source
+    assert 'amn2-spain-phase12-install-v25.tar.part-007' in source
+    assert 'A5D55A86A8C5164DD4D3156BE6EDA858035034D7674538B537B0C6DF256EEB2F' in source
     assert 'Remote package part assembly mismatch.' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source

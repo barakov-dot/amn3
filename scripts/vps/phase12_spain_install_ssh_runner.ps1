@@ -7,12 +7,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
-$expectedPackageSha = "0DBA42FDB8EA035E4D7DE9029B03B5E33A5E2443B0178A8C0EE03EAA156B973D"
+$expectedPackageSha = "14A5FDECCA1B2BB4E34BFA0194C560F27984604AE31B408D72BE9AF3B5CE4764"
 $expectedPackageBytes = 140042240
-$expectedManifestSha = "3139EB05099D6122610FB56A3A8D3479A8CEAEA76D67F875AD1A23A244836500"
+$expectedManifestSha = "A5035AC08F1FC5611E9D9FF0BA02272BD5BAF60181FB257BF306B2D42BD09E03"
 $expectedPlanSha = "8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43"
-$expectedExecutorSha = "13B55CE5B44F49AB744035810A550ED8BA0E3BD314E2288EF213C5DEF19C386A"
-$expectedExecutorBytes = 154002
+$expectedExecutorSha = "026000487A707D279499B355508DEA3E8D47F3EF788AEEBFEB0B45C08E694F0F"
+$expectedExecutorBytes = 154649
 $expectedCollectorSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"
 $run009EvidenceSha = "8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8"
 $fingerprintArraySha = "E15219CB5204D54A9AD11263CFBA1F7C86E16DAB3287C752A8B6F136EC4A5ED5"
@@ -21,17 +21,17 @@ $expectedBootSha = "099155E2A5578144C715124A1B9B4D8F5D572134C8F72FD98B75D5DE0EB5
 $uploadTimeoutMilliseconds = 900000
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-unified-v24-20260726"
+$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-final-observation-v25-20260726"
 $packagePath = Join-Path $artifactRoot "package-a.tar"
 $executorPath = Join-Path $artifactRoot "executor-a.pyz"
 $expectedParts = @(
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-001"; Bytes=20971520; Sha="61DA3C3571D086995C9FBD2557EE5DDC51C0EAFF543B16B9CBBF3694FD41626C" },
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-002"; Bytes=20971520; Sha="4B37E48F5C31B6562778A25561B1B4641F9BBA367CBDD7CB4ECCC39A9733E5FD" },
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-003"; Bytes=20971520; Sha="6D0E4EB2F4872D802F697457A152A2B5522C79A998399DD5977EFFABEBA62239" },
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-004"; Bytes=20971520; Sha="A6A4CEAF1CFF35B96668757D1904645602F101A79084ADE46171F8423174E5E7" },
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-005"; Bytes=20971520; Sha="A68C3A0C4310C2D7A9A16D34C8768965B35C07B95446493755C146BB783E91E2" },
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-006"; Bytes=20971520; Sha="A49AA6D65340DC8BEED8A24B3FACE27AAB83288C00C6FE388EA50D94B24E3C19" },
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-007"; Bytes=14213120; Sha="B90E36174C0A2062AF4D5306611C962BF0BCB281A7B3146C2F43C256D23A7C46" }
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v25.tar.part-001"; Bytes=20971520; Sha="B92AF759E77C2B719730EEA0E9DA73AB5F6BB525B4EFCC4A42E583F83FD78328" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v25.tar.part-002"; Bytes=20971520; Sha="4B37E48F5C31B6562778A25561B1B4641F9BBA367CBDD7CB4ECCC39A9733E5FD" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v25.tar.part-003"; Bytes=20971520; Sha="6D0E4EB2F4872D802F697457A152A2B5522C79A998399DD5977EFFABEBA62239" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v25.tar.part-004"; Bytes=20971520; Sha="A6A4CEAF1CFF35B96668757D1904645602F101A79084ADE46171F8423174E5E7" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v25.tar.part-005"; Bytes=20971520; Sha="A68C3A0C4310C2D7A9A16D34C8768965B35C07B95446493755C146BB783E91E2" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v25.tar.part-006"; Bytes=20971520; Sha="A49AA6D65340DC8BEED8A24B3FACE27AAB83288C00C6FE388EA50D94B24E3C19" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v25.tar.part-007"; Bytes=14213120; Sha="A5D55A86A8C5164DD4D3156BE6EDA858035034D7674538B537B0C6DF256EEB2F" }
 )
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
 

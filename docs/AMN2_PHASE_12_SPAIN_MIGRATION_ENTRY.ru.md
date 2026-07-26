@@ -629,3 +629,31 @@ executor SHA-256
 Source remains `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`; full Phase 12
 scope is `328 passed, 4 skipped`. Seven verified upload parts are ready; the
 v24 live install has not yet run.
+
+# AMN2 Phase 12 — current operational override 2026-07-26: fresh v25 ready
+
+Unified v24 transaction `e63c1ac4556f568d91cde4c243c60e63a27101eaf1aed771ba19e9945c8c3e59`
+failed closed with `docker_retry_exhausted`. Bundled checksum-bound cleanup and
+terminal recovery passed: the AMN2 contour is absent, foreign persistent
+equality is true with volatile counts `0/0`, and USA is unchanged.
+
+Ledger and recovery evidence proved an ambiguous client result: after the final
+idempotent Docker create error, the exact desired container already existed and
+was later exact-observed and safely removed by rollback. Fresh v25 now performs
+final exact observation after every idempotent error, including the last one.
+Only exact desired identity is accepted; strict categories still fail
+immediately.
+
+Fresh v25 is double-built byte-equal and clean-room verified: package SHA-256
+`14A5FDECCA1B2BB4E34BFA0194C560F27984604AE31B408D72BE9AF3B5CE4764`
+(`140042240` bytes), manifest SHA-256
+`A5035AC08F1FC5611E9D9FF0BA02272BD5BAF60181FB257BF306B2D42BD09E03`,
+executor SHA-256
+`026000487A707D279499B355508DEA3E8D47F3EF788AEEBFEB0B45C08E694F0F`
+(`154649` bytes), resource plan SHA-256
+`8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43`.
+Source remains `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`; full Phase 12
+scope is `329 passed, 4 skipped`. Seven verified 20 MiB upload parts are ready;
+install runner SHA-256 is
+`A8D6A5F386DD9FAA403936ED6CE28071B5311C7F092928AB7335313312A78259`.
+The next live operation is the fresh checksum-bound v25 install.

@@ -7907,3 +7907,30 @@ executor `13B55CE5B44F49AB744035810A550ED8BA0E3BD314E2288EF213C5DEF19C386A`
 Authoritative source remains `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`;
 full Phase 12 scope `328 passed, 4 skipped`. Seven verified upload parts are
 prepared locally. Install v24 has not yet been executed.
+
+# Текущий override 2026-07-26: v24 rollback закрыт; fresh v25 готов
+
+Unified v24 transaction `e63c1ac4556f568d91cde4c243c60e63a27101eaf1aed771ba19e9945c8c3e59`
+fail-closed завершилась с `docker_retry_exhausted`. Bundled checksum-bound
+cleanup и terminal recovery прошли: AMN2-контур отсутствует, foreign persistent
+equality `true`, volatile `0/0`, USA не изменялась.
+
+Ledger и recovery evidence доказали ambiguous client result: после финальной
+idempotent Docker create ошибки exact desired container уже существовал и был
+позже exact-observed и безопасно удалён rollback. Fresh v25 выполняет final
+exact observation после каждой idempotent ошибки, включая последнюю; success
+принимается только при exact desired identity, strict категории по-прежнему
+завершаются немедленно.
+
+Fresh v25 double-build byte-equal и clean-room verified: package
+`14A5FDECCA1B2BB4E34BFA0194C560F27984604AE31B408D72BE9AF3B5CE4764`
+(`140042240` bytes), manifest
+`A5035AC08F1FC5611E9D9FF0BA02272BD5BAF60181FB257BF306B2D42BD09E03`,
+executor `026000487A707D279499B355508DEA3E8D47F3EF788AEEBFEB0B45C08E694F0F`
+(`154649` bytes), resource plan
+`8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43`.
+Authoritative source remains `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`;
+Phase 12 scope `329 passed, 4 skipped`. Seven verified 20 MiB upload parts
+prepared locally. Install runner SHA-256
+`A8D6A5F386DD9FAA403936ED6CE28071B5311C7F092928AB7335313312A78259`;
+fresh v25 live install ещё не выполнялся.

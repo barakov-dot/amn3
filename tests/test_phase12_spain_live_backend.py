@@ -503,6 +503,48 @@ class LinuxBackendReconcileTests(unittest.TestCase):
             ],
         )
 
+    def test_bounded_retry_accepts_exact_object_after_final_client_error(self) -> None:
+        operation = OwnedOperation(
+            "network_container_started",
+            "container:amn2-spain-awg",
+            "sha256:" + "b" * 64,
+        )
+        state: dict[str, str] = {}
+        calls = 0
+
+        def create() -> None:
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                state[operation.owned_object] = operation.desired_identity
+            raise BackendError("Docker client did not return a success status")
+
+        action = live_backend.SystemAction(
+            operation=operation,
+            observe_identity=lambda: state.get(operation.owned_object),
+            create_exact=create,
+            remove_exact=lambda _identity: state.pop(operation.owned_object),
+            create_attempts=2,
+            retry_category="docker",
+        )
+        ledger = MutationLedger(allowed_objects={operation.owned_object})
+        backend = LinuxBackend(
+            adapter=SystemOwnedAdapter(actions={operation.owned_object: action}),
+            ledger=ledger,
+        )
+
+        with patch.object(live_backend.time, "sleep") as sleeper:
+            backend.apply((operation,))
+
+        self.assertEqual(calls, 2)
+        sleeper.assert_called_once_with(0.25)
+        self.assertEqual(
+            ledger.event_for(operation.owned_object)["event"], "committed"
+        )
+        self.assertEqual(
+            backend.fallback_trace[0]["strategy"], "bounded_idempotent_retry"
+        )
+
     def test_fault_before_and_after_every_mutation_is_reconcilable(self) -> None:
         for operation in _operations():
             with self.subTest(operation=operation.owned_object, fault="before"):

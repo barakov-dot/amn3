@@ -3873,10 +3873,8 @@ class LinuxBackend:
                 self.adapter.create(operation)
                 return attempt
             except BackendError as exc:
-                if attempt >= attempts:
-                    if category == "strict":
-                        raise
-                    raise BackendError(f"{category}_retry_exhausted") from exc
+                if category == "strict":
+                    raise
                 pending_observer = getattr(self.adapter, "observe_pending", None)
                 try:
                     observed = (
@@ -3888,6 +3886,8 @@ class LinuxBackend:
                     observed = None
                 if observed == operation.desired_identity:
                     return attempt
+                if attempt >= attempts:
+                    raise BackendError(f"{category}_retry_exhausted") from exc
                 time.sleep(0.25)
         raise BackendError("bounded create retry state invalid")
 
