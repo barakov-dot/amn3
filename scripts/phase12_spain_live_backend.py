@@ -1085,6 +1085,9 @@ class SystemAction:
     retry_category: str = "strict"
     post_failure_observation_attempts: int = 1
     post_failure_observation_interval_seconds: float = 0.25
+    prepare_retry_exact: Callable[[], str | None] | None = field(
+        default=None, repr=False
+    )
 
     def __post_init__(self) -> None:
         if not all(
@@ -1100,6 +1103,10 @@ class SystemAction:
             self.observe_rollback_identity
         ):
             raise BackendError("system rollback observer invalid")
+        if self.prepare_retry_exact is not None and not callable(
+            self.prepare_retry_exact
+        ):
+            raise BackendError("system retry preparation invalid")
         if (
             type(self.reconcile_absent_removal) is not bool
             or type(self.adopt_exact_observation) is not bool
@@ -1120,6 +1127,10 @@ class SystemAction:
             or (
                 self.retry_category == "strict"
                 and self.post_failure_observation_attempts != 1
+            )
+            or (
+                self.prepare_retry_exact is not None
+                and self.retry_category != "docker"
             )
         ):
             raise BackendError("system absent-removal policy invalid")
@@ -1186,6 +1197,10 @@ class SystemOwnedAdapter:
             action.post_failure_observation_attempts,
             float(action.post_failure_observation_interval_seconds),
         )
+
+    def prepare_retry(self, operation: OwnedOperation) -> str | None:
+        callback = self._action(operation).prepare_retry_exact
+        return None if callback is None else callback()
 
     def observe_rollback(self, operation: OwnedOperation) -> str | None:
         action = self._action(operation)
@@ -3939,6 +3954,25 @@ class LinuxBackend:
                         time.sleep(float(observation_interval))
                 if attempt >= attempts:
                     raise BackendError(f"{category}_retry_exhausted") from exc
+                retry_preparer = getattr(self.adapter, "prepare_retry", None)
+                if callable(retry_preparer):
+                    try:
+                        strategy = retry_preparer(operation)
+                    except BackendError as prepare_exc:
+                        raise BackendError(
+                            f"{category}_retry_exhausted"
+                        ) from prepare_exc
+                    if strategy is not None:
+                        if strategy != "stopped_partial_recreate":
+                            raise BackendError("retry preparation strategy invalid")
+                        self._fallback_trace.append(
+                            {
+                                "attempts": attempt,
+                                "owned_object": operation.owned_object,
+                                "stage": operation.stage,
+                                "strategy": strategy,
+                            }
+                        )
                 time.sleep(0.25)
         raise BackendError("bounded create retry state invalid")
 
@@ -5547,6 +5581,23 @@ def build_awg_container_actions(
         if _docker_container_rollback_state(runner)[0] != "absent":
             raise BackendError("Docker container rollback drift")
 
+    def prepare_container_retry() -> str | None:
+        try:
+            state, _running, _endpoint = _docker_container_state(runner)
+        except BackendError:
+            state = "partial"
+        if state == "full":
+            return None
+        rollback_state, running = _docker_container_rollback_state(runner)
+        if rollback_state == "absent":
+            return None
+        if running:
+            raise BackendError("Docker running partial container retry denied")
+        runner(DOCKER_CONTAINER_RM_ARGV)
+        if _docker_container_rollback_state(runner)[0] != "absent":
+            raise BackendError("Docker partial container retry cleanup drift")
+        return "stopped_partial_recreate"
+
     container_action = SystemAction(
         operation=container_operation,
         observe_identity=observe_container,
@@ -5562,6 +5613,7 @@ def build_awg_container_actions(
         retry_category="docker",
         post_failure_observation_attempts=readiness_attempts,
         post_failure_observation_interval_seconds=readiness_interval_seconds,
+        prepare_retry_exact=prepare_container_retry,
     )
 
     active_desired = _semantic_identity(

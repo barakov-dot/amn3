@@ -2314,6 +2314,43 @@ class _FakeDockerRunner:
             raise AssertionError("fd boundary drift")
 
 
+class _PartialDockerCreateRunner(_FakeDockerRunner):
+    """Model the Spain daemon retaining an incomplete create result."""
+
+    def __init__(
+        self,
+        *,
+        full_on_attempt: int | None,
+        running_partial: bool = False,
+    ) -> None:
+        super().__init__()
+        self.full_on_attempt = full_on_attempt
+        self.running_partial = running_partial
+        self.create_calls = 0
+        self.partial_container = False
+
+    def __call__(self, argv: tuple[str, ...], **kwargs: object) -> bytes:
+        if argv == build_container_create_argv():
+            payload = super().__call__(argv, **kwargs)
+            self.create_calls += 1
+            self.partial_container = (
+                self.full_on_attempt is None
+                or self.create_calls < self.full_on_attempt
+            )
+            self.running = self.partial_container and self.running_partial
+            return payload
+        payload = super().__call__(argv, **kwargs)
+        if argv == live_backend.DOCKER_CONTAINER_INSPECT_ARGV and self.partial_container:
+            value = json.loads(payload)
+            value["CapAdd"] = ["NET_ADMIN", "SYS_ADMIN"]
+            value["NetworkEndpointID"] = ""
+            value["NetworkIPAddress"] = ""
+            return self._line(value)
+        if argv == live_backend.DOCKER_CONTAINER_RM_ARGV:
+            self.partial_container = False
+        return payload
+
+
 class ProductionDockerRuntimeTests(unittest.TestCase):
     CONFIG_BODY = b'{"architecture":"amd64","os":"linux"}'
 
@@ -2531,6 +2568,96 @@ class ProductionDockerRuntimeTests(unittest.TestCase):
             self.assertFalse(runner.container)
             self.assertFalse(runner.network)
             self.assertEqual(runner.image, "absent")
+
+    def test_stopped_partial_container_is_removed_before_single_create_retry(
+        self,
+    ) -> None:
+        runner = _PartialDockerCreateRunner(full_on_attempt=2)
+        runner.network = True
+        container, _active = live_backend.build_awg_container_actions(
+            runner=runner,
+            readiness_attempts=1,
+            readiness_interval_seconds=0,
+        )
+        ledger = MutationLedger(allowed_objects={container.operation.owned_object})
+        backend = LinuxBackend(
+            adapter=SystemOwnedAdapter(
+                actions={container.operation.owned_object: container}
+            ),
+            ledger=ledger,
+        )
+
+        with patch.object(live_backend.time, "sleep"):
+            backend.apply((container.operation,))
+
+        calls = [argv for argv, _kwargs in runner.calls]
+        self.assertEqual(runner.create_calls, 2)
+        self.assertEqual(calls.count(live_backend.DOCKER_CONTAINER_RM_ARGV), 1)
+        self.assertNotIn(live_backend.DOCKER_CONTAINER_STOP_ARGV, calls)
+        self.assertEqual(
+            ledger.event_for(container.operation.owned_object)["event"], "committed"
+        )
+        self.assertEqual(
+            [entry["strategy"] for entry in backend.fallback_trace],
+            ["stopped_partial_recreate", "bounded_idempotent_retry"],
+        )
+
+    def test_running_partial_container_fails_closed_without_stop_remove_or_retry(
+        self,
+    ) -> None:
+        runner = _PartialDockerCreateRunner(
+            full_on_attempt=None,
+            running_partial=True,
+        )
+        runner.network = True
+        container, _active = live_backend.build_awg_container_actions(
+            runner=runner,
+            readiness_attempts=1,
+            readiness_interval_seconds=0,
+        )
+        ledger = MutationLedger(allowed_objects={container.operation.owned_object})
+        backend = LinuxBackend(
+            adapter=SystemOwnedAdapter(
+                actions={container.operation.owned_object: container}
+            ),
+            ledger=ledger,
+        )
+
+        with self.assertRaisesRegex(BackendError, "^docker_retry_exhausted$"):
+            backend.apply((container.operation,))
+
+        calls = [argv for argv, _kwargs in runner.calls]
+        self.assertEqual(runner.create_calls, 1)
+        self.assertNotIn(live_backend.DOCKER_CONTAINER_STOP_ARGV, calls)
+        self.assertNotIn(live_backend.DOCKER_CONTAINER_RM_ARGV, calls)
+
+    def test_second_partial_container_exhausts_without_third_create(
+        self,
+    ) -> None:
+        runner = _PartialDockerCreateRunner(full_on_attempt=None)
+        runner.network = True
+        container, _active = live_backend.build_awg_container_actions(
+            runner=runner,
+            readiness_attempts=1,
+            readiness_interval_seconds=0,
+        )
+        ledger = MutationLedger(allowed_objects={container.operation.owned_object})
+        backend = LinuxBackend(
+            adapter=SystemOwnedAdapter(
+                actions={container.operation.owned_object: container}
+            ),
+            ledger=ledger,
+        )
+
+        with patch.object(live_backend.time, "sleep"), self.assertRaisesRegex(
+            BackendError, "^docker_retry_exhausted$"
+        ):
+            backend.apply((container.operation,))
+
+        calls = [argv for argv, _kwargs in runner.calls]
+        self.assertEqual(runner.create_calls, 2)
+        self.assertEqual(calls.count(live_backend.DOCKER_CONTAINER_RM_ARGV), 1)
+        self.assertNotIn(live_backend.DOCKER_CONTAINER_STOP_ARGV, calls)
 
     def test_crash_after_load_adopts_exact_config_id_without_reloading(self) -> None:
         archive_body = self._image_archive()

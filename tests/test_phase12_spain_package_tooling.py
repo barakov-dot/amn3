@@ -4943,17 +4943,18 @@ def test_transaction_958e_terminal_recovery_runner_is_mixed_contour_bound() -> N
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "7E07A48B0E3F55176D79A3F8FE617DBF59F8B97D52C457ACD286ED13E60773F5"' in source
-    assert '$expectedManifestSha = "B28C383ACA8968F28416808E3D3F2BC6DDD443620507B168C75B2B5E52178838"' in source
-    assert '$expectedExecutorSha = "9320F4D6113AD0562C7B67B3C62F69DACE01161D4665365395D962B82269FB6B"' in source
-    assert '$expectedExecutorBytes = 155089' in source
+    assert '$expectedPackageSha = "0D170F3F9F25C842B86E69186489A58706CEDE835DC36F08DD9D450BB1FDDA0F"' in source
+    assert '$expectedManifestSha = "E67043F179CBC3A4F5067D045F713CC58F062964FBCAF6B619DB3EC8016FCEDF"' in source
+    assert '$expectedExecutorSha = "A93CA5716FA4F9B44D8C9CF3B27A9D4968C7A0600CB9843A0AF177ABDAE72D44"' in source
+    assert '$expectedExecutorBytes = 155460' in source
     assert '$expectedCollectorSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"' in source
-    assert 'phase12-spain-install-post-failure-observation-v26-20260726' in source
+    assert 'phase12-spain-install-stopped-partial-retry-v27-20260726' in source
     assert 'UNIFIED BOUNDED FALLBACK LADDER EXACT CACHE OR VERIFIED 20MIB PARTS' in source
-    assert 'amn2-spain-phase12-install-v26.tar.part-001' in source
-    assert 'B84960F3F159D3975FE79B6EFA937236B08A1BF4FB2014C052B6F8CFD6D287A7' in source
-    assert 'amn2-spain-phase12-install-v26.tar.part-007' in source
-    assert '187766D1A9D1670DA94488E33E1B830F845DBABF7AB77B214165FCB66083B73E' in source
+    assert 'STOPPED PARTIAL EXACT OWNED REMOVE BEFORE SINGLE CREATE RETRY' in source
+    assert 'amn2-spain-phase12-install-v27.tar.part-001' in source
+    assert '2DC233166A990CC3D5CD3093D15B33B03BF5AE3958F80390076CD87B09DC50C8' in source
+    assert 'amn2-spain-phase12-install-v27.tar.part-007' in source
+    assert '70FBFFB7C1ED7E8EEA0BBA54F95038633C5181EDE20F265A30D67A57DCF5289D' in source
     assert 'Remote package part assembly mismatch.' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source

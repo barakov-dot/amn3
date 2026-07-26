@@ -7962,3 +7962,35 @@ Phase 12 scope `330 passed, 4 skipped`. Seven verified 20 MiB upload parts
 готовы; от v25 отличаются только parts `001` и `007`. Install runner SHA-256
 `71314C97DF31A1F00130019783EE8FF5E3622F3C2B1B84936513637142EA2D80`;
 следующая live-операция — fresh checksum-bound v26 install.
+
+# Текущий override 2026-07-26: v26 rollback закрыт; fresh v27 готов
+
+Fresh v26 transaction `4c8d88d5fdf64f6f5b7c2f1d5a352a654378a1c360b3eb5a610e8a977858963f`
+fail-closed завершилась с `docker_retry_exhausted`. Разрешённые automatic manual
+cleanup и terminal recovery прошли: AMN2-контур отсутствует, foreign persistent
+equality `true`, volatile `0/0`, USA не изменялась и остаётся rollback contour.
+
+Retained ledger доказал, что после первого create Docker оставил exact-owned,
+остановленный, но неполный AWG container. Его immutable ownership anchors
+(image, entrypoint, mounts, device, tmpfs, restart, name и ID) совпали, однако
+strict forward capability/network contract не совпал. Fresh v27 удаляет только
+такой остановленный partial object, доказывает его отсутствие и выполняет один
+уже bounded create retry. Running partial никогда не останавливается, не
+удаляется, не перезапускается и не пересоздаётся; второй неполный create
+fail-closed исчерпывает retry без третьего create и сохраняет automatic exact
+rollback.
+
+Fresh v27 double-build byte-equal и clean-room verified: package SHA-256
+`0D170F3F9F25C842B86E69186489A58706CEDE835DC36F08DD9D450BB1FDDA0F`
+(`140052480` bytes), manifest SHA-256
+`E67043F179CBC3A4F5067D045F713CC58F062964FBCAF6B619DB3EC8016FCEDF`,
+executor SHA-256
+`A93CA5716FA4F9B44D8C9CF3B27A9D4968C7A0600CB9843A0AF177ABDAE72D44`
+(`155460` bytes), resource plan SHA-256
+`8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43`.
+No-follow extract содержит 69 regular entries и разворачивает source
+`55dc243b8e6c6bdb57f8301b56326e4cd4072d19`. Full Phase 12 scope
+`333 passed, 4 skipped`. Семь verified 20 MiB upload parts готовы; от v26
+отличаются только parts `001` и `007`. Install runner SHA-256
+`DC1207F7DB48587C06FE4EE274D65312E4D25F24D5258FEE7E7506FE5F6046D5`;
+следующая live-операция — fresh checksum-bound v27 install.

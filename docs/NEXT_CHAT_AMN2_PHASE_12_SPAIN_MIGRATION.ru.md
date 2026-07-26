@@ -755,3 +755,35 @@ Source remains `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`; Phase 12 scope is
 parts `001` and `007` differ from v25. Install runner SHA-256 is
 `71314C97DF31A1F00130019783EE8FF5E3622F3C2B1B84936513637142EA2D80`.
 The next live operation is the fresh checksum-bound v26 install.
+
+# AMN2 Phase 12 — current operational override 2026-07-26: v26 recovered; fresh v27 ready
+
+Fresh v26 transaction `4c8d88d5fdf64f6f5b7c2f1d5a352a654378a1c360b3eb5a610e8a977858963f`
+failed closed with `docker_retry_exhausted`. The approved automatic manual
+cleanup and terminal recovery completed: the AMN2 contour is absent, foreign
+persistent equality is `true`, volatile counts are `0/0`, and USA remains
+unchanged as the rollback contour.
+
+The retained ledger proved the Docker daemon left an exact-owned, stopped but
+incomplete AWG container after the first create. Its immutable image, entrypoint,
+mount, device, tmpfs, restart, name and ID ownership anchors matched, while the
+strict forward capability/network contract did not. Fresh v27 therefore removes
+only that stopped partial object, proves it absent, and performs the one already
+bounded create retry. A running partial container is never stopped, removed,
+restarted or recreated; a second incomplete create exhausts fail-closed without
+a third create, preserving automatic exact rollback.
+
+Fresh v27 is double-built byte-equal and clean-room verified: package SHA-256
+`0D170F3F9F25C842B86E69186489A58706CEDE835DC36F08DD9D450BB1FDDA0F`
+(`140052480` bytes), manifest SHA-256
+`E67043F179CBC3A4F5067D045F713CC58F062964FBCAF6B619DB3EC8016FCEDF`,
+executor SHA-256
+`A93CA5716FA4F9B44D8C9CF3B27A9D4968C7A0600CB9843A0AF177ABDAE72D44`
+(`155460` bytes), resource plan SHA-256
+`8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43`.
+The no-follow extract contains 69 regular entries and expands source
+`55dc243b8e6c6bdb57f8301b56326e4cd4072d19`. Full Phase 12 scope is
+`333 passed, 4 skipped`. Seven verified 20 MiB upload parts are ready; only
+parts `001` and `007` differ from v26. Install runner SHA-256 is
+`DC1207F7DB48587C06FE4EE274D65312E4D25F24D5258FEE7E7506FE5F6046D5`.
+The next live operation is the fresh checksum-bound v27 install.
