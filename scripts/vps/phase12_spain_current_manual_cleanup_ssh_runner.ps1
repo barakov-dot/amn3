@@ -6,10 +6,14 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$expectedExecutorSha = "B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9"
-$expectedExecutorBytes = 145873
-$expectedNonce = "e968810382104e77e136565b6e3b5b28987a670d314efcd9fb9b7982ef168c82"
-$expectedTransactionSha = "9ba96ef4766bb4905d327519eb41a4d25917ad2d084a6b1d0a066f340a859d2d"
+$expectedExecutorSha = "13B55CE5B44F49AB744035810A550ED8BA0E3BD314E2288EF213C5DEF19C386A"
+$expectedExecutorBytes = 154002
+$expectedNonce = "9e425681bd5a4d71acc6209636d3c8deaa6ff903edeb779bd50b02e3b4a3c044"
+$expectedTransactionSha = "e63c1ac4556f568d91cde4c243c60e63a27101eaf1aed771ba19e9945c8c3e59"
+$expectedCapsuleSha = "7bbcfa4964e9280e405825e6973f5266616fbb180e3c665c95873b1c5c989eb2"
+$expectedDockerTreeSha = "d90b28b71540f2c5363d6af6254c3189407f15800f5ed92fd2ffebbee1d66bb9"
+$expectedDockerTreeEntries = 49
+$expectedDockerTreeBytes = 262199
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
 
@@ -67,25 +71,37 @@ $privateRoot = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 
 $bindingPath = Join-Path $privateRoot "target.env"; $keyPath = Join-Path $privateRoot "id_ed25519_spain"; $knownHostsPath = Join-Path $privateRoot "known_hosts_spain"
 $binding = Read-PrivateBinding $bindingPath
 if ($binding["SSH_KEY_PATH"] -cne $keyPath -or -not (Test-Path -LiteralPath $keyPath -PathType Leaf) -or -not (Test-Path -LiteralPath $knownHostsPath -PathType Leaf)) { throw "Private SSH material unavailable." }
-$runnerApproval = "APPROVE PHASE12 SPAIN CURRENT MANUAL RECOVERY CLEANUP RUNNER SHA256 $expectedRunnerSha EXECUTOR SHA256 $expectedExecutorSha EXECUTOR BYTES $expectedExecutorBytes NONCE $expectedNonce TRANSACTION SHA256 $expectedTransactionSha REMOVE ONLY VERIFIED RETAINED PACKAGE TREE /opt/amn2-spain-package PRESERVE TERMINAL LEDGER NO AMN2 START NO FOREIGN SERVICE MUTATION USA ROLLBACK CONTOUR"
-if ($Approval -cne $runnerApproval) { Write-Output $runnerApproval; throw "Exact current manual cleanup approval mismatch." }
+$runnerApproval = "APPROVE PHASE12 SPAIN TRANSACTION 9E425 BUNDLED RECOVERY RUNNER SHA256 $expectedRunnerSha EXECUTOR SHA256 $expectedExecutorSha EXECUTOR BYTES $expectedExecutorBytes NONCE $expectedNonce TRANSACTION SHA256 $expectedTransactionSha CAPSULE SHA256 $expectedCapsuleSha DOCKER TREE SHA256 $expectedDockerTreeSha ENTRIES $expectedDockerTreeEntries BYTES $expectedDockerTreeBytes REMOVE ONLY VERIFIED RETAINED PACKAGE TREE /opt/amn2-spain-package THEN ROLLBACK EXACT OWNED CURRENT TRANSACTION VERIFY FOREIGN EQUALITY NO AMN2 START NO FOREIGN SERVICE MUTATION NO USA DATA MUTATION USA ROLLBACK CONTOUR"
+if ($Approval -cne $runnerApproval) { Write-Output $runnerApproval; throw "Exact transaction 9E425 bundled recovery approval mismatch." }
 
 $transportOptions = @("-F", "none", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=4", "-o", "IdentitiesOnly=yes", "-o", "PasswordAuthentication=no", "-o", "KbdInteractiveAuthentication=no", "-o", "GSSAPIAuthentication=no", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "-o", "RequestTTY=no", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=$knownHostsPath", "-i", $keyPath)
 $sshBase = @($transportOptions + @("-p", "22")); $target = "$($binding['TARGET_USER'])@$($binding['TARGET_HOST'])"
-$remoteHash = Invoke-ExactSsh (@($sshBase + @($target, "sha256sum /root/amn2-spain-phase12-executor.pyz"))) ([byte[]]@())
+$remoteHash = Invoke-ExactSsh (@($sshBase + @($target, "sha256sum /root/amn2-spain-phase12-executor.pyz && stat -c '%s' /root/amn2-spain-phase12-executor.pyz"))) ([byte[]]@())
 $remoteText = (New-Object Text.UTF8Encoding($false,$true)).GetString($remoteHash.Stdout)
-if ($remoteHash.ExitCode -ne 0 -or $remoteText -notmatch "(?im)^$($expectedExecutorSha.ToLowerInvariant())  /root/amn2-spain-phase12-executor\.pyz$") { throw "Remote current manual cleanup executor checksum mismatch." }
+if ($remoteHash.ExitCode -ne 0 -or $remoteText -notmatch "(?im)^$($expectedExecutorSha.ToLowerInvariant())  /root/amn2-spain-phase12-executor\.pyz$" -or $remoteText -notmatch "(?m)^$expectedExecutorBytes$") { throw "Remote current manual cleanup executor checksum mismatch." }
 $transactionPath = "/var/lib/amn2-spain-phase12-audit/transaction-$expectedNonce.json"
-$remoteTransaction = Invoke-ExactSsh (@($sshBase + @($target, "sha256sum $transactionPath"))) ([byte[]]@())
+$capsulePath = "/var/lib/amn2-spain-phase12-audit/recovery-capsule-$expectedNonce.json"
+$remoteTransaction = Invoke-ExactSsh (@($sshBase + @($target, "sha256sum $transactionPath $capsulePath && test -d /opt/amn2-spain-package && test ! -L /opt/amn2-spain-package"))) ([byte[]]@())
 $remoteTransactionText = (New-Object Text.UTF8Encoding($false,$true)).GetString($remoteTransaction.Stdout)
-if ($remoteTransaction.ExitCode -ne 0 -or $remoteTransactionText -notmatch "(?im)^$($expectedTransactionSha.ToLowerInvariant())  $([regex]::Escape($transactionPath))$") { throw "Current manual cleanup transaction checksum mismatch." }
+if ($remoteTransaction.ExitCode -ne 0 -or $remoteTransactionText -notmatch "(?im)^$($expectedTransactionSha.ToLowerInvariant())  $([regex]::Escape($transactionPath))$" -or $remoteTransactionText -notmatch "(?im)^$($expectedCapsuleSha.ToLowerInvariant())  $([regex]::Escape($capsulePath))$") { throw "Current manual cleanup transaction checksum mismatch." }
 $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $intent = [ordered]@{ approval_id=(Get-TextSha256 $Approval).ToLowerInvariant(); approved_at_epoch=$now; executor_sha256=$expectedExecutorSha.ToLowerInvariant(); expires_at_epoch=($now + 300); mutation_authorized=$true; nonce=$expectedNonce; schema="amn2.spain-manual-cleanup-intent.v1" }
 $intentBytes = (New-Object Text.UTF8Encoding($false)).GetBytes(($intent | ConvertTo-Json -Compress) + "`n")
-$result = Invoke-ExactSsh (@($sshBase + @($target, "/usr/bin/python3 -I -B /root/amn2-spain-phase12-executor.pyz manual-cleanup-bound"))) $intentBytes
-if ($result.ExitCode -ne 0) {
-    $safeRemoteError = (New-Object Text.UTF8Encoding($false,$true)).GetString($result.Stderr).Trim()
+$cleanupResult = Invoke-ExactSsh (@($sshBase + @($target, "/usr/bin/python3 -I -B /root/amn2-spain-phase12-executor.pyz manual-cleanup-bound"))) $intentBytes
+if ($cleanupResult.ExitCode -ne 0) {
+    $safeRemoteError = (New-Object Text.UTF8Encoding($false,$true)).GetString($cleanupResult.Stderr).Trim()
     if (-not [string]::IsNullOrWhiteSpace($safeRemoteError)) { [Console]::Error.WriteLine($safeRemoteError) }
     throw "Current manual cleanup failed; retained package tree was not accepted as safely removable."
 }
-[Console]::WriteLine((New-Object Text.UTF8Encoding($false,$true)).GetString($result.Stdout))
+$packageAbsent = Invoke-ExactSsh (@($sshBase + @($target, "test ! -e /opt/amn2-spain-package && test ! -L /opt/amn2-spain-package"))) ([byte[]]@())
+if ($packageAbsent.ExitCode -ne 0) { throw "Current manual cleanup package absence verification failed." }
+$terminalIntent = [ordered]@{ approval_id=(Get-TextSha256 $Approval).ToLowerInvariant(); approved_at_epoch=$now; capsule_sha256=$expectedCapsuleSha; docker_tree_entry_count=$expectedDockerTreeEntries; docker_tree_sha256=$expectedDockerTreeSha; docker_tree_total_bytes=$expectedDockerTreeBytes; executor_sha256=$expectedExecutorSha.ToLowerInvariant(); expires_at_epoch=($now + 300); mutation_authorized=$true; nonce=$expectedNonce; schema="amn2.spain-terminal-recovery-intent.v1"; transaction_sha256=$expectedTransactionSha }
+$terminalIntentBytes = (New-Object Text.UTF8Encoding($false)).GetBytes(($terminalIntent | ConvertTo-Json -Compress) + "`n")
+$terminalResult = Invoke-ExactSsh (@($sshBase + @($target, "/usr/bin/python3 -I -B /root/amn2-spain-phase12-executor.pyz terminal-recovery-bound"))) $terminalIntentBytes
+if ($terminalResult.ExitCode -ne 0) {
+    $safeRemoteError = (New-Object Text.UTF8Encoding($false,$true)).GetString($terminalResult.Stderr).Trim()
+    if (-not [string]::IsNullOrWhiteSpace($safeRemoteError)) { [Console]::Error.WriteLine($safeRemoteError) }
+    throw "Transaction 9E425 terminal recovery failed; current transaction remains fail-closed."
+}
+[Console]::WriteLine((New-Object Text.UTF8Encoding($false,$true)).GetString($cleanupResult.Stdout))
+[Console]::WriteLine((New-Object Text.UTF8Encoding($false,$true)).GetString($terminalResult.Stdout))

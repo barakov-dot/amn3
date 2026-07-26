@@ -5025,21 +5025,27 @@ def test_terminal_recovery_ssh_runner_is_executor_only_and_tree_bound() -> None:
     assert "install-bound" not in source
 
 
-def test_current_manual_cleanup_runner_is_remote_executor_pinned_and_action_bound() -> None:
+def test_current_manual_cleanup_runner_bundles_exact_terminal_recovery() -> None:
     source = CURRENT_MANUAL_CLEANUP_SSH_RUNNER.read_text(encoding="utf-8")
     assert "StrictHostKeyChecking=yes" in source
     assert "ConnectTimeout=20" in source
     assert "ServerAliveInterval=15" in source
     assert "ServerAliveCountMax=4" in source
     assert "manual-cleanup-bound" in source
-    assert "terminal-recovery-bound" not in source
+    assert "terminal-recovery-bound" in source
+    assert "amn2.spain-terminal-recovery-intent.v1" in source
     assert "scp.exe" not in source
     assert "Remote current manual cleanup executor checksum mismatch." in source
-    assert '$expectedExecutorSha = "B2E90D67CBC9172A9C099155E4B67FBBADBB47DA1FEF6AD8A724DB79228555E9"' in source
-    assert '$expectedExecutorBytes = 145873' in source
-    assert '$expectedNonce = "e968810382104e77e136565b6e3b5b28987a670d314efcd9fb9b7982ef168c82"' in source
-    assert '$expectedTransactionSha = "9ba96ef4766bb4905d327519eb41a4d25917ad2d084a6b1d0a066f340a859d2d"' in source
+    assert '$expectedExecutorSha = "13B55CE5B44F49AB744035810A550ED8BA0E3BD314E2288EF213C5DEF19C386A"' in source
+    assert '$expectedExecutorBytes = 154002' in source
+    assert '$expectedNonce = "9e425681bd5a4d71acc6209636d3c8deaa6ff903edeb779bd50b02e3b4a3c044"' in source
+    assert '$expectedTransactionSha = "e63c1ac4556f568d91cde4c243c60e63a27101eaf1aed771ba19e9945c8c3e59"' in source
+    assert '$expectedCapsuleSha = "7bbcfa4964e9280e405825e6973f5266616fbb180e3c665c95873b1c5c989eb2"' in source
+    assert '$expectedDockerTreeSha = "d90b28b71540f2c5363d6af6254c3189407f15800f5ed92fd2ffebbee1d66bb9"' in source
+    assert '$expectedDockerTreeEntries = 49' in source
+    assert '$expectedDockerTreeBytes = 262199' in source
     assert "REMOVE ONLY VERIFIED RETAINED PACKAGE TREE" in source
+    assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in source
 
 
 def test_current_terminal_recovery_runner_is_remote_executor_pinned_and_action_bound() -> None:
