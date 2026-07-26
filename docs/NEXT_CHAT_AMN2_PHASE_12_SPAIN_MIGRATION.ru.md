@@ -671,3 +671,32 @@ verified: package
 executor `F6AD44B35B2A9E9637693C04983F2F0A52F6E2AC031CB63EA2CD0DC63923EDDA`
 (`153021` bytes); install runner
 `E097CC186503C6772311D728C480B08211CD766AC1216CB87684B6855E7F540C`.
+
+# Current override 2026-07-26: v23 recovered; unified v24 ready
+
+Fresh v23 transaction
+`a8a30f5a0759562706213325e02823e10abd4f4994dfca90753d9e7ee01a8669`
+failed closed after committed Docker container/network and before the
+`interface:awgsp0` intent. Checksum-bound cleanup and terminal recovery passed:
+the AMN2 contour is absent, foreign persistent equality is true, volatile
+counts are `0/0`, and USA is unchanged.
+
+Unified v24 persists durable interface intent before the fallible AWG probe,
+adopts only exact healthy AWG identity, uses bounded readiness `60 x 0.25s`,
+and never restarts or recreates a running container. Idempotent Docker,
+systemd, network and web stages get at most one retry with an allowlisted
+cause/attempt receipt; failure triggers exact automatic rollback. Transport
+selects exact artifact cache, then a verified seven-part 20 MiB cache, then
+bounded whole-file upload.
+
+Fresh v24 is double-built byte-equal and clean-room verified: package
+`0DBA42FDB8EA035E4D7DE9029B03B5E33A5E2443B0178A8C0EE03EAA156B973D`
+(`140042240` bytes), manifest
+`3139EB05099D6122610FB56A3A8D3479A8CEAEA76D67F875AD1A23A244836500`,
+executor `13B55CE5B44F49AB744035810A550ED8BA0E3BD314E2288EF213C5DEF19C386A`
+(`154002` bytes), resource plan
+`8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43`.
+Authoritative source remains `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`;
+the full Phase 12 scope is `328 passed, 4 skipped`. Seven verified upload parts
+are prepared locally. Do not repeat old resource-confirmation runs. The next
+live operation is the fresh checksum-bound v24 install.

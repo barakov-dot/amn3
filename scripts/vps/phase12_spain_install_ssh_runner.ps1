@@ -7,12 +7,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
-$expectedPackageSha = "9F70FF120B6F8022A9BD046BF3B18F4AB23E58076151A6EB2E60A45B87104402"
+$expectedPackageSha = "0DBA42FDB8EA035E4D7DE9029B03B5E33A5E2443B0178A8C0EE03EAA156B973D"
 $expectedPackageBytes = 140042240
-$expectedManifestSha = "FEFB385A583D2A97DF7338003AFE0C97CBCDD7884058002687457832533CA3D6"
+$expectedManifestSha = "3139EB05099D6122610FB56A3A8D3479A8CEAEA76D67F875AD1A23A244836500"
 $expectedPlanSha = "8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43"
-$expectedExecutorSha = "F6AD44B35B2A9E9637693C04983F2F0A52F6E2AC031CB63EA2CD0DC63923EDDA"
-$expectedExecutorBytes = 153021
+$expectedExecutorSha = "13B55CE5B44F49AB744035810A550ED8BA0E3BD314E2288EF213C5DEF19C386A"
+$expectedExecutorBytes = 154002
 $expectedCollectorSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"
 $run009EvidenceSha = "8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8"
 $fingerprintArraySha = "E15219CB5204D54A9AD11263CFBA1F7C86E16DAB3287C752A8B6F136EC4A5ED5"
@@ -21,9 +21,18 @@ $expectedBootSha = "099155E2A5578144C715124A1B9B4D8F5D572134C8F72FD98B75D5DE0EB5
 $uploadTimeoutMilliseconds = 900000
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-fresh-v23-20260726"
+$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-unified-v24-20260726"
 $packagePath = Join-Path $artifactRoot "package-a.tar"
 $executorPath = Join-Path $artifactRoot "executor-a.pyz"
+$expectedParts = @(
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-001"; Bytes=20971520; Sha="61DA3C3571D086995C9FBD2557EE5DDC51C0EAFF543B16B9CBBF3694FD41626C" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-002"; Bytes=20971520; Sha="4B37E48F5C31B6562778A25561B1B4641F9BBA367CBDD7CB4ECCC39A9733E5FD" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-003"; Bytes=20971520; Sha="6D0E4EB2F4872D802F697457A152A2B5522C79A998399DD5977EFFABEBA62239" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-004"; Bytes=20971520; Sha="A6A4CEAF1CFF35B96668757D1904645602F101A79084ADE46171F8423174E5E7" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-005"; Bytes=20971520; Sha="A68C3A0C4310C2D7A9A16D34C8768965B35C07B95446493755C146BB783E91E2" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-006"; Bytes=20971520; Sha="A49AA6D65340DC8BEED8A24B3FACE27AAB83288C00C6FE388EA50D94B24E3C19" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v24.tar.part-007"; Bytes=14213120; Sha="B90E36174C0A2062AF4D5306611C962BF0BCB281A7B3146C2F43C256D23A7C46" }
+)
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
 
 function Get-TextSha256([string]$Value) {
@@ -139,6 +148,14 @@ foreach ($path in @($packagePath, $executorPath, $sshExe)) {
 }
 if ((Get-Item -LiteralPath $packagePath).Length -ne $expectedPackageBytes -or (Get-FileHash -LiteralPath $packagePath -Algorithm SHA256).Hash.ToUpperInvariant() -cne $expectedPackageSha) { throw "Package checksum/size mismatch." }
 if ((Get-Item -LiteralPath $executorPath).Length -ne $expectedExecutorBytes -or (Get-FileHash -LiteralPath $executorPath -Algorithm SHA256).Hash.ToUpperInvariant() -cne $expectedExecutorSha) { throw "Executor checksum/size mismatch." }
+foreach ($part in $expectedParts) {
+    $partPath = Join-Path $artifactRoot $part.Name
+    if (
+        -not (Test-Path -LiteralPath $partPath -PathType Leaf) -or
+        (Get-Item -LiteralPath $partPath).Length -ne $part.Bytes -or
+        (Get-FileHash -LiteralPath $partPath -Algorithm SHA256).Hash.ToUpperInvariant() -cne $part.Sha
+    ) { throw "Package part checksum/size mismatch." }
+}
 
 $privateRoot = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) "AMN2\private-artifacts\post-release\spain-migration\spain-fresh-20260720-001"
 $bindingPath = Join-Path $privateRoot "target.env"
@@ -146,7 +163,7 @@ $keyPath = Join-Path $privateRoot "id_ed25519_spain"
 $knownHostsPath = Join-Path $privateRoot "known_hosts_spain"
 $binding = Read-PrivateBinding $bindingPath
 if ($binding["SSH_KEY_PATH"] -cne $keyPath -or -not (Test-Path -LiteralPath $keyPath -PathType Leaf) -or -not (Test-Path -LiteralPath $knownHostsPath -PathType Leaf)) { throw "Private SSH material unavailable." }
-$runnerApproval = "APPROVE PHASE12 SPAIN CHECKSUM BOUND INSTALL RUNNER SHA256 $expectedRunnerSha PACKAGE SHA256 $expectedPackageSha PACKAGE BYTES $expectedPackageBytes MANIFEST SHA256 $expectedManifestSha RESOURCE PLAN SHA256 $expectedPlanSha EXECUTOR SHA256 $expectedExecutorSha EXECUTOR BYTES $expectedExecutorBytes COLLECTOR SHA256 $expectedCollectorSha SOURCE $sourceRevision RUN009 EVIDENCE SHA256 $run009EvidenceSha FINGERPRINT ARRAY SHA256 $fingerprintArraySha DYNAMIC FOREIGN EQUALITY PERSISTENT REQUIRED VOLATILE RECORDED EXACT PRIVATE TARGET DEDICATED ED25519 KEY INDEPENDENT HOST PIN STDIN ONLY UPLOAD TIMEOUT SECONDS 900 UPLOAD PACKAGE EXECUTOR REMOTE HASH VERIFY INSTALL BOUND AUTOMATIC ROLLBACK NO FOREIGN SERVICE MUTATION USA ROLLBACK CONTOUR"
+$runnerApproval = "APPROVE PHASE12 SPAIN CHECKSUM BOUND INSTALL RUNNER SHA256 $expectedRunnerSha PACKAGE SHA256 $expectedPackageSha PACKAGE BYTES $expectedPackageBytes MANIFEST SHA256 $expectedManifestSha RESOURCE PLAN SHA256 $expectedPlanSha EXECUTOR SHA256 $expectedExecutorSha EXECUTOR BYTES $expectedExecutorBytes COLLECTOR SHA256 $expectedCollectorSha SOURCE $sourceRevision RUN009 EVIDENCE SHA256 $run009EvidenceSha FINGERPRINT ARRAY SHA256 $fingerprintArraySha UNIFIED BOUNDED FALLBACK LADDER EXACT CACHE OR VERIFIED 20MIB PARTS DYNAMIC FOREIGN EQUALITY PERSISTENT REQUIRED VOLATILE RECORDED EXACT PRIVATE TARGET DEDICATED ED25519 KEY INDEPENDENT HOST PIN STDIN ONLY UPLOAD TIMEOUT SECONDS 900 UPLOAD PACKAGE EXECUTOR REMOTE HASH VERIFY INSTALL BOUND AUTOMATIC ROLLBACK NO FOREIGN SERVICE MUTATION USA ROLLBACK CONTOUR"
 if ($Approval -cne $runnerApproval) { Write-Output $runnerApproval; throw "Exact install approval mismatch." }
 
 $transportOptions = @("-F", "none", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=4", "-o", "IdentitiesOnly=yes", "-o", "PasswordAuthentication=no", "-o", "KbdInteractiveAuthentication=no", "-o", "GSSAPIAuthentication=no", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "-o", "RequestTTY=no", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=$knownHostsPath", "-i", $keyPath)
@@ -159,8 +176,25 @@ $remoteArtifactsReady = $existingHashResult.ExitCode -eq 0 -and
     $existingHashText -match "(?im)^$($expectedPackageSha.ToLowerInvariant())  /root/amn2-spain-phase12-install\.tar$" -and
     $existingHashText -match "(?im)^$($expectedExecutorSha.ToLowerInvariant())  /root/amn2-spain-phase12-executor\.pyz$"
 if (-not $remoteArtifactsReady) {
-    Invoke-BoundedSshUpload $packagePath "/root/amn2-spain-phase12-install-a.tar"
-    Invoke-BoundedSshUpload $executorPath "/root/amn2-spain-phase12-executor-a.pyz"
+    $remotePartPaths = @($expectedParts | ForEach-Object { "/root/$($_.Name)" })
+    $partHashResult = Invoke-ExactSsh (@($sshBase + @($target, "sha256sum $($remotePartPaths -join ' ')"))) ([byte[]]@())
+    $partHashText = (New-Object Text.UTF8Encoding($false,$true)).GetString($partHashResult.Stdout)
+    $remotePartsReady = $partHashResult.ExitCode -eq 0
+    foreach ($part in $expectedParts) {
+        if ($partHashText -notmatch "(?im)^$($part.Sha.ToLowerInvariant())  /root/$([regex]::Escape($part.Name))$") {
+            $remotePartsReady = $false
+        }
+    }
+    if ($remotePartsReady) {
+        $assemblyCommand = "cat -- $($remotePartPaths -join ' ') > /root/amn2-spain-phase12-install-a.tar && test `$(stat -c %s /root/amn2-spain-phase12-install-a.tar) = $expectedPackageBytes && sha256sum /root/amn2-spain-phase12-install-a.tar"
+        $assemblyResult = Invoke-ExactSsh (@($sshBase + @($target, $assemblyCommand))) ([byte[]]@())
+        $assemblyText = (New-Object Text.UTF8Encoding($false,$true)).GetString($assemblyResult.Stdout)
+        if ($assemblyResult.ExitCode -ne 0 -or $assemblyText -notmatch "(?im)^$($expectedPackageSha.ToLowerInvariant())  /root/amn2-spain-phase12-install-a\.tar$") { throw "Remote package part assembly mismatch." }
+        Invoke-BoundedSshUpload $executorPath "/root/amn2-spain-phase12-executor-a.pyz"
+    } else {
+        Invoke-BoundedSshUpload $packagePath "/root/amn2-spain-phase12-install-a.tar"
+        Invoke-BoundedSshUpload $executorPath "/root/amn2-spain-phase12-executor-a.pyz"
+    }
     $hashResult = Invoke-ExactSsh (@($sshBase + @($target, "sha256sum /root/amn2-spain-phase12-install-a.tar /root/amn2-spain-phase12-executor-a.pyz"))) ([byte[]]@())
     if ($hashResult.ExitCode -ne 0) { throw "Remote artifact hash command failed." }
     $hashText = (New-Object Text.UTF8Encoding($false,$true)).GetString($hashResult.Stdout)

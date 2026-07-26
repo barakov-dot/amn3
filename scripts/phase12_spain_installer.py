@@ -94,9 +94,14 @@ def _preparation_failure_message(exc: Exception) -> str:
 
 
 def _runtime_failure_message(exc: Exception) -> str:
-    """Expose only the Docker image-load diagnostic allowlist after rollback."""
+    """Expose only bounded non-sensitive runtime labels after rollback."""
     allowed = re.compile(
+        r"(?:"
         r"docker_image_load_(?:no_space|archive|permission|daemon_unavailable|layer_apply|unsupported|timeout|input_changed|output_exceeded|command_failed|exit_(?:[1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]|unknown))"
+        r"|awg_bounded_readiness_timeout"
+        r"|(?:docker|systemd|network|web)_retry_exhausted"
+        r"|ledger_transition_persist_failed"
+        r")"
     )
     pending: list[BaseException] = [exc]
     visited: set[int] = set()
@@ -5248,6 +5253,10 @@ class ProductionBackend:
             )
         ]
 
+    @property
+    def fallback_trace(self) -> list[dict[str, object]]:
+        return self.linux_backend.fallback_trace
+
     def append_journal(self, stage: str) -> None:
         self._require_lock("production journal append requires install lock")
         try:
@@ -5567,11 +5576,17 @@ class InstallStateMachine:
             if isinstance(exc, InstallError):
                 raise
             raise InstallError(f"install failed at {stage}") from exc
+        fallback_trace = getattr(self.backend, "fallback_trace", [])
+        if callable(fallback_trace):
+            fallback_trace = fallback_trace()
+        if not isinstance(fallback_trace, list):
+            raise InstallError("backend fallback trace invalid")
         return {
             "schema": "amn2.spain-install-result.v1",
             "result": "passed",
             "stage": "postinstall_verified",
             "owned_objects": list(self.backend.created_objects),
+            "fallback_trace": copy.deepcopy(fallback_trace),
         }
 
     def install_after_bootstrap(

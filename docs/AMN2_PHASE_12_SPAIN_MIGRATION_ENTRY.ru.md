@@ -600,3 +600,32 @@ executor SHA-256
 `F6AD44B35B2A9E9637693C04983F2F0A52F6E2AC031CB63EA2CD0DC63923EDDA`
 (`153021` bytes); install runner SHA-256
 `E097CC186503C6772311D728C480B08211CD766AC1216CB87684B6855E7F540C`.
+
+# AMN2 Phase 12 — current operational override 2026-07-26: unified v24 ready
+
+Fresh v23 transaction
+`a8a30f5a0759562706213325e02823e10abd4f4994dfca90753d9e7ee01a8669`
+failed closed after Docker container/network commit and before durable
+`interface:awgsp0` intent. Checksum-bound cleanup and terminal recovery passed:
+the AMN2 contour is absent, foreign persistent equality is true with volatile
+counts `0/0`, and USA is unchanged.
+
+Unified v24 persists interface intent before the fallible AWG probe, adopts
+only exact healthy AWG identity, uses bounded readiness `60 x 0.25s`, and does
+not restart or recreate a running container. Idempotent Docker, systemd,
+network and web stages have at most one retry and an allowlisted strategy,
+attempt and cause receipt. Every unsuccessful strategy retains exact automatic
+rollback. Artifact transport uses exact final cache, verified seven-part 20 MiB
+cache, or bounded whole-file upload in that order.
+
+Fresh v24 is double-built byte-equal and clean-room verified: package SHA-256
+`0DBA42FDB8EA035E4D7DE9029B03B5E33A5E2443B0178A8C0EE03EAA156B973D`
+(`140042240` bytes), manifest SHA-256
+`3139EB05099D6122610FB56A3A8D3479A8CEAEA76D67F875AD1A23A244836500`,
+executor SHA-256
+`13B55CE5B44F49AB744035810A550ED8BA0E3BD314E2288EF213C5DEF19C386A`
+(`154002` bytes), resource plan SHA-256
+`8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43`.
+Source remains `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`; full Phase 12
+scope is `328 passed, 4 skipped`. Seven verified upload parts are ready; the
+v24 live install has not yet run.

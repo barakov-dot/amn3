@@ -456,6 +456,53 @@ def _operations() -> tuple[OwnedOperation, ...]:
 
 
 class LinuxBackendReconcileTests(unittest.TestCase):
+    def test_bounded_idempotent_create_retries_once_and_records_strategy(self) -> None:
+        operation = OwnedOperation(
+            "network_container_started",
+            "network:amn2-spain-net",
+            "sha256:" + "a" * 64,
+        )
+        state: dict[str, str] = {}
+        calls = 0
+
+        def create() -> None:
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise BackendError("transient Docker command failure")
+            state[operation.owned_object] = operation.desired_identity
+
+        action = live_backend.SystemAction(
+            operation=operation,
+            observe_identity=lambda: state.get(operation.owned_object),
+            create_exact=create,
+            remove_exact=lambda _identity: state.pop(operation.owned_object),
+            create_attempts=2,
+            retry_category="docker",
+        )
+        ledger = MutationLedger(allowed_objects={operation.owned_object})
+        backend = LinuxBackend(
+            adapter=SystemOwnedAdapter(actions={operation.owned_object: action}),
+            ledger=ledger,
+        )
+
+        with patch.object(live_backend.time, "sleep") as sleeper:
+            backend.apply((operation,))
+
+        self.assertEqual(calls, 2)
+        sleeper.assert_called_once_with(0.25)
+        self.assertEqual(
+            backend.fallback_trace,
+            [
+                {
+                    "attempts": 2,
+                    "owned_object": operation.owned_object,
+                    "stage": operation.stage,
+                    "strategy": "bounded_idempotent_retry",
+                }
+            ],
+        )
+
     def test_fault_before_and_after_every_mutation_is_reconcilable(self) -> None:
         for operation in _operations():
             with self.subTest(operation=operation.owned_object, fault="before"):
@@ -2545,6 +2592,9 @@ class ProductionDockerRuntimeTests(unittest.TestCase):
         )
 
     def test_awg_auto_started_transient_health_enters_bounded_readiness(self) -> None:
+        ledger_holder: dict[str, object] = {}
+        health_probe_ledger_states: list[str | None] = []
+
         class AutoStartedDelayedAwgRunner(_FakeDockerRunner):
             remaining_not_ready = 2
 
@@ -2553,6 +2603,12 @@ class ProductionDockerRuntimeTests(unittest.TestCase):
                     argv == live_backend.DOCKER_ZERO_PEER_ARGV
                     and self.remaining_not_ready
                 ):
+                    ledger = ledger_holder["ledger"]
+                    operation = ledger_holder["operation"]
+                    event = ledger.event_for(operation.owned_object)
+                    health_probe_ledger_states.append(
+                        None if event is None else event["event"]
+                    )
                     self.remaining_not_ready -= 1
                     raise BackendError("AWG interface not ready")
                 return super().__call__(argv, **kwargs)
@@ -2570,6 +2626,7 @@ class ProductionDockerRuntimeTests(unittest.TestCase):
             sleeper=sleeps.append,
         )
         ledger = MutationLedger(allowed_objects={active.operation.owned_object})
+        ledger_holder.update(ledger=ledger, operation=active.operation)
         backend = LinuxBackend(
             adapter=live_backend.SystemOwnedAdapter(
                 actions={active.operation.owned_object: active}
@@ -2582,7 +2639,8 @@ class ProductionDockerRuntimeTests(unittest.TestCase):
         self.assertEqual(
             ledger.event_for(active.operation.owned_object)["event"], "committed"
         )
-        self.assertEqual(sleeps, [])
+        self.assertEqual(health_probe_ledger_states, ["intent", "intent"])
+        self.assertEqual(sleeps, [0.25])
         self.assertEqual(
             [argv for argv, _kwargs in runner.calls].count(
                 live_backend.DOCKER_ZERO_PEER_ARGV

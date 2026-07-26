@@ -1080,6 +1080,9 @@ class SystemAction:
     reconcile_absent_removal: bool = False
     adopt_exact_observation: bool = False
     defer_initial_observation_error: bool = False
+    intent_before_observation: bool = False
+    create_attempts: int = 1
+    retry_category: str = "strict"
 
     def __post_init__(self) -> None:
         if not all(
@@ -1099,6 +1102,12 @@ class SystemAction:
             type(self.reconcile_absent_removal) is not bool
             or type(self.adopt_exact_observation) is not bool
             or type(self.defer_initial_observation_error) is not bool
+            or type(self.intent_before_observation) is not bool
+            or type(self.create_attempts) is not int
+            or not 1 <= self.create_attempts <= 2
+            or self.retry_category
+            not in {"strict", "docker", "systemd", "network", "web"}
+            or (self.create_attempts == 1) != (self.retry_category == "strict")
         ):
             raise BackendError("system absent-removal policy invalid")
 
@@ -1148,6 +1157,13 @@ class SystemOwnedAdapter:
 
     def can_defer_initial_observation_error(self, operation: OwnedOperation) -> bool:
         return self._action(operation).defer_initial_observation_error
+
+    def can_intent_before_observation(self, operation: OwnedOperation) -> bool:
+        return self._action(operation).intent_before_observation
+
+    def create_retry_policy(self, operation: OwnedOperation) -> tuple[int, str]:
+        action = self._action(operation)
+        return action.create_attempts, action.retry_category
 
     def observe_rollback(self, operation: OwnedOperation) -> str | None:
         action = self._action(operation)
@@ -2896,6 +2912,8 @@ def build_network_service_contour_action(
         create_exact=create,
         remove_exact=remove,
         reconcile_absent_removal=True,
+        create_attempts=2,
+        retry_category="network",
     )
 
 
@@ -3674,6 +3692,12 @@ def build_production_systemd_bundle(
             observe_identity=observe_enabled,
             create_exact=create_enabled,
             remove_exact=remove_enabled,
+            create_attempts=2,
+            retry_category={
+                "docker_started": "docker",
+                "host_network_applied": "network",
+                "web_started": "web",
+            }[stage],
         )
 
         def observe_active(
@@ -3733,6 +3757,12 @@ def build_production_systemd_bundle(
             observe_identity=observe_active,
             create_exact=create_active,
             remove_exact=remove_active,
+            create_attempts=2,
+            retry_category={
+                "docker_started": "docker",
+                "host_network_applied": "network",
+                "web_started": "web",
+            }[stage],
         )
         state_actions.extend((enabled_action, active_action))
 
@@ -3827,6 +3857,39 @@ class LinuxBackend:
     def __init__(self, *, adapter: OwnedAdapter, ledger: MutationLedger) -> None:
         self.adapter = adapter
         self.ledger = ledger
+        self._fallback_trace: list[dict[str, object]] = []
+
+    @property
+    def fallback_trace(self) -> list[dict[str, object]]:
+        return copy.deepcopy(self._fallback_trace)
+
+    def _create_with_bounded_retry(self, operation: OwnedOperation) -> int:
+        policy = getattr(self.adapter, "create_retry_policy", None)
+        attempts, category = (1, "strict")
+        if callable(policy):
+            attempts, category = policy(operation)
+        for attempt in range(1, attempts + 1):
+            try:
+                self.adapter.create(operation)
+                return attempt
+            except BackendError as exc:
+                if attempt >= attempts:
+                    if category == "strict":
+                        raise
+                    raise BackendError(f"{category}_retry_exhausted") from exc
+                pending_observer = getattr(self.adapter, "observe_pending", None)
+                try:
+                    observed = (
+                        pending_observer(operation)
+                        if callable(pending_observer)
+                        else self.adapter.observe(operation)
+                    )
+                except BackendError:
+                    observed = None
+                if observed == operation.desired_identity:
+                    return attempt
+                time.sleep(0.25)
+        raise BackendError("bounded create retry state invalid")
 
     @staticmethod
     def _validate_operations(operations: Iterable[OwnedOperation]) -> tuple[OwnedOperation, ...]:
@@ -3842,27 +3905,58 @@ class LinuxBackend:
                 raise BackendError("owned operation outside ledger allowlist")
             event = self.ledger.event_for(operation.owned_object)
             if event is None:
-                try:
-                    observed = self.adapter.observe(operation)
-                except BackendError:
-                    deferrer = getattr(
-                        self.adapter, "can_defer_initial_observation_error", None
-                    )
-                    if not (callable(deferrer) and deferrer(operation)):
-                        raise
-                    observed = None
-                adopter = getattr(self.adapter, "can_adopt_exact", None)
-                if observed is not None and not (
-                    callable(adopter) and adopter(operation, observed)
-                ):
-                    raise BackendError("pre-existing owned-object collision")
-                self.ledger.intent(
-                    operation.stage, operation.owned_object, operation.desired_identity
+                intent_first = getattr(
+                    self.adapter, "can_intent_before_observation", None
                 )
-                if observed is not None:
-                    self.ledger.commit(
-                        operation.stage, operation.owned_object, observed
+                if callable(intent_first) and intent_first(operation):
+                    try:
+                        self.ledger.intent(
+                            operation.stage,
+                            operation.owned_object,
+                            operation.desired_identity,
+                        )
+                    except BackendError as exc:
+                        raise BackendError("ledger_transition_persist_failed") from exc
+                    self._fallback_trace.append(
+                        {
+                            "attempts": 1,
+                            "owned_object": operation.owned_object,
+                            "stage": operation.stage,
+                            "strategy": "durable_intent_before_probe",
+                        }
                     )
+                else:
+                    try:
+                        observed = self.adapter.observe(operation)
+                    except BackendError:
+                        deferrer = getattr(
+                            self.adapter, "can_defer_initial_observation_error", None
+                        )
+                        if not (callable(deferrer) and deferrer(operation)):
+                            raise
+                        observed = None
+                    adopter = getattr(self.adapter, "can_adopt_exact", None)
+                    if observed is not None and not (
+                        callable(adopter) and adopter(operation, observed)
+                    ):
+                        raise BackendError("pre-existing owned-object collision")
+                    self.ledger.intent(
+                        operation.stage,
+                        operation.owned_object,
+                        operation.desired_identity,
+                    )
+                    if observed is not None:
+                        self.ledger.commit(
+                            operation.stage, operation.owned_object, observed
+                        )
+                        self._fallback_trace.append(
+                            {
+                                "attempts": 1,
+                                "owned_object": operation.owned_object,
+                                "stage": operation.stage,
+                                "strategy": "healthy_exact_adopt",
+                            }
+                        )
                 event = self.ledger.event_for(operation.owned_object)
             if event is None:
                 raise BackendError("ledger intent not observable")
@@ -3884,7 +3978,16 @@ class LinuxBackend:
                         raise
                     actual = None
                 if actual is None:
-                    self.adapter.create(operation)
+                    create_attempts = self._create_with_bounded_retry(operation)
+                    if create_attempts > 1:
+                        self._fallback_trace.append(
+                            {
+                                "attempts": create_attempts,
+                                "owned_object": operation.owned_object,
+                                "stage": operation.stage,
+                                "strategy": "bounded_idempotent_retry",
+                            }
+                        )
                     actual = self.adapter.observe(operation)
                 if actual != operation.desired_identity:
                     raise BackendError("owned object post-mutation identity drift")
@@ -4524,6 +4627,8 @@ def build_static_docker_action(
         create_exact=create,
         remove_exact=remove,
         reconcile_absent_removal=True,
+        create_attempts=2,
+        retry_category="docker",
     )
 
 
@@ -5015,6 +5120,8 @@ def build_awg_image_action(
         create_exact=create,
         remove_exact=remove,
         reconcile_absent_removal=True,
+        create_attempts=2,
+        retry_category="docker",
     )
 
 
@@ -5145,6 +5252,8 @@ def build_docker_network_action(
         create_exact=create,
         remove_exact=remove,
         reconcile_absent_removal=True,
+        create_attempts=2,
+        retry_category="docker",
     )
 
 
@@ -5407,6 +5516,8 @@ def build_awg_container_actions(
         create_exact=create_container,
         remove_exact=remove_container,
         reconcile_absent_removal=True,
+        create_attempts=2,
+        retry_category="docker",
     )
 
     active_desired = _semantic_identity(
@@ -5447,7 +5558,7 @@ def build_awg_container_actions(
                 last_error = exc
             if attempt + 1 < readiness_attempts:
                 sleeper(float(readiness_interval_seconds))
-        raise BackendError("AWG bounded readiness timeout") from last_error
+        raise BackendError("awg_bounded_readiness_timeout") from last_error
 
     def remove_active(identity: str) -> None:
         if identity != active_desired:
@@ -5472,6 +5583,7 @@ def build_awg_container_actions(
         reconcile_absent_removal=True,
         adopt_exact_observation=True,
         defer_initial_observation_error=True,
+        intent_before_observation=True,
     )
     return container_action, active_action
 

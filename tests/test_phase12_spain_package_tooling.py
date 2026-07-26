@@ -1428,6 +1428,17 @@ def test_preparation_failure_message_keeps_only_safe_cause_labels() -> None:
     assert installer_module._runtime_failure_message(
         live_backend.BackendError("docker_image_load_timeout")
     ) == "production runtime rollback failed:docker_image_load_timeout"
+    for label in (
+        "awg_bounded_readiness_timeout",
+        "docker_retry_exhausted",
+        "systemd_retry_exhausted",
+        "network_retry_exhausted",
+        "web_retry_exhausted",
+        "ledger_transition_persist_failed",
+    ):
+        assert installer_module._runtime_failure_message(
+            live_backend.BackendError(label)
+        ) == "production runtime rollback failed:" + label
     assert installer_module._runtime_failure_message(
         live_backend.BackendError("token=secret")
     ) == "production runtime rollback failed"
@@ -4932,12 +4943,16 @@ def test_transaction_958e_terminal_recovery_runner_is_mixed_contour_bound() -> N
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "9F70FF120B6F8022A9BD046BF3B18F4AB23E58076151A6EB2E60A45B87104402"' in source
-    assert '$expectedManifestSha = "FEFB385A583D2A97DF7338003AFE0C97CBCDD7884058002687457832533CA3D6"' in source
-    assert '$expectedExecutorSha = "F6AD44B35B2A9E9637693C04983F2F0A52F6E2AC031CB63EA2CD0DC63923EDDA"' in source
-    assert '$expectedExecutorBytes = 153021' in source
+    assert '$expectedPackageSha = "0DBA42FDB8EA035E4D7DE9029B03B5E33A5E2443B0178A8C0EE03EAA156B973D"' in source
+    assert '$expectedManifestSha = "3139EB05099D6122610FB56A3A8D3479A8CEAEA76D67F875AD1A23A244836500"' in source
+    assert '$expectedExecutorSha = "13B55CE5B44F49AB744035810A550ED8BA0E3BD314E2288EF213C5DEF19C386A"' in source
+    assert '$expectedExecutorBytes = 154002' in source
     assert '$expectedCollectorSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"' in source
-    assert 'phase12-spain-install-fresh-v23-20260726' in source
+    assert 'phase12-spain-install-unified-v24-20260726' in source
+    assert 'UNIFIED BOUNDED FALLBACK LADDER EXACT CACHE OR VERIFIED 20MIB PARTS' in source
+    assert 'amn2-spain-phase12-install-v24.tar.part-001' in source
+    assert 'amn2-spain-phase12-install-v24.tar.part-007' in source
+    assert 'Remote package part assembly mismatch.' in source
     assert "StrictHostKeyChecking=yes" in source
     assert "install-bound" in source
     assert "Invoke-BoundedSshUpload" in source
