@@ -545,6 +545,60 @@ class LinuxBackendReconcileTests(unittest.TestCase):
             backend.fallback_trace[0]["strategy"], "bounded_idempotent_retry"
         )
 
+    def test_bounded_retry_waits_for_delayed_exact_object_after_final_client_error(
+        self,
+    ) -> None:
+        operation = OwnedOperation(
+            "network_container_started",
+            "container:amn2-spain-awg",
+            "sha256:" + "c" * 64,
+        )
+        calls = 0
+        visibility_polls: int | None = None
+
+        def create() -> None:
+            nonlocal calls, visibility_polls
+            calls += 1
+            if calls == 2:
+                visibility_polls = 2
+            raise BackendError("Docker client did not return a success status")
+
+        def observe() -> str | None:
+            nonlocal visibility_polls
+            if visibility_polls is None:
+                return None
+            if visibility_polls:
+                visibility_polls -= 1
+                return None
+            return operation.desired_identity
+
+        action = live_backend.SystemAction(
+            operation=operation,
+            observe_identity=observe,
+            create_exact=create,
+            remove_exact=lambda _identity: None,
+            create_attempts=2,
+            retry_category="docker",
+            post_failure_observation_attempts=3,
+            post_failure_observation_interval_seconds=0.25,
+        )
+        ledger = MutationLedger(allowed_objects={operation.owned_object})
+        backend = LinuxBackend(
+            adapter=SystemOwnedAdapter(actions={operation.owned_object: action}),
+            ledger=ledger,
+        )
+        sleeps: list[float] = []
+
+        with patch.object(live_backend.time, "sleep", side_effect=sleeps.append):
+            backend.apply((operation,))
+
+        self.assertEqual(calls, 2)
+        self.assertEqual(visibility_polls, 0)
+        self.assertEqual(sleeps, [0.25] * 5)
+        self.assertEqual(
+            ledger.event_for(operation.owned_object)["event"], "committed"
+        )
+
     def test_fault_before_and_after_every_mutation_is_reconcilable(self) -> None:
         for operation in _operations():
             with self.subTest(operation=operation.owned_object, fault="before"):

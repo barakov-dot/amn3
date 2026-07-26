@@ -657,3 +657,33 @@ scope is `329 passed, 4 skipped`. Seven verified 20 MiB upload parts are ready;
 install runner SHA-256 is
 `A8D6A5F386DD9FAA403936ED6CE28071B5311C7F092928AB7335313312A78259`.
 The next live operation is the fresh checksum-bound v25 install.
+
+# AMN2 Phase 12 — current operational override 2026-07-26: v25 recovered; fresh v26 ready
+
+Fresh v25 transaction `af340c8f4a24e40c00d1e659030c5ab1ec9fd0303a772cd8411a14965a462e49`
+failed closed with `docker_retry_exhausted`. The approved automatic recovery
+completed through checksum-bound manual cleanup and terminal recovery: the
+AMN2 contour is absent, foreign persistent equality is true with volatile
+counts `0/0`, and USA is unchanged.
+
+The retained ledger proved that the exact AWG container became observable only
+after the final immediate post-error observation. It was then exact-adopted by
+rollback reconciliation and safely removed. Fresh v26 therefore applies the
+already bounded AWG readiness policy (`60 x 0.25s`) as a post-failure exact
+observation window before declaring Docker retry exhaustion. It accepts only
+the exact desired identity, never restarts or recreates a running AWG
+container, and preserves exact automatic rollback.
+
+Fresh v26 is double-built byte-equal and clean-room verified: package SHA-256
+`7E07A48B0E3F55176D79A3F8FE617DBF59F8B97D52C457ACD286ED13E60773F5`
+(`140052480` bytes), manifest SHA-256
+`B28C383ACA8968F28416808E3D3F2BC6DDD443620507B168C75B2B5E52178838`,
+executor SHA-256
+`9320F4D6113AD0562C7B67B3C62F69DACE01161D4665365395D962B82269FB6B`
+(`155089` bytes), resource plan SHA-256
+`8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43`.
+Source remains `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`; full Phase 12
+scope is `330 passed, 4 skipped`. Seven verified 20 MiB upload parts are ready;
+only parts `001` and `007` differ from v25. Install runner SHA-256 is
+`71314C97DF31A1F00130019783EE8FF5E3622F3C2B1B84936513637142EA2D80`.
+The next live operation is the fresh checksum-bound v26 install.

@@ -1083,6 +1083,8 @@ class SystemAction:
     intent_before_observation: bool = False
     create_attempts: int = 1
     retry_category: str = "strict"
+    post_failure_observation_attempts: int = 1
+    post_failure_observation_interval_seconds: float = 0.25
 
     def __post_init__(self) -> None:
         if not all(
@@ -1108,6 +1110,17 @@ class SystemAction:
             or self.retry_category
             not in {"strict", "docker", "systemd", "network", "web"}
             or (self.create_attempts == 1) != (self.retry_category == "strict")
+            or type(self.post_failure_observation_attempts) is not int
+            or not 1 <= self.post_failure_observation_attempts <= 120
+            or not isinstance(
+                self.post_failure_observation_interval_seconds, (int, float)
+            )
+            or isinstance(self.post_failure_observation_interval_seconds, bool)
+            or not 0 <= self.post_failure_observation_interval_seconds <= 1
+            or (
+                self.retry_category == "strict"
+                and self.post_failure_observation_attempts != 1
+            )
         ):
             raise BackendError("system absent-removal policy invalid")
 
@@ -1164,6 +1177,15 @@ class SystemOwnedAdapter:
     def create_retry_policy(self, operation: OwnedOperation) -> tuple[int, str]:
         action = self._action(operation)
         return action.create_attempts, action.retry_category
+
+    def post_failure_observation_policy(
+        self, operation: OwnedOperation
+    ) -> tuple[int, float]:
+        action = self._action(operation)
+        return (
+            action.post_failure_observation_attempts,
+            float(action.post_failure_observation_interval_seconds),
+        )
 
     def observe_rollback(self, operation: OwnedOperation) -> str | None:
         action = self._action(operation)
@@ -3868,24 +3890,53 @@ class LinuxBackend:
         attempts, category = (1, "strict")
         if callable(policy):
             attempts, category = policy(operation)
+        observation_policy = getattr(
+            self.adapter, "post_failure_observation_policy", None
+        )
+        observation_attempts, observation_interval = (1, 0.25)
+        if callable(observation_policy):
+            observation_attempts, observation_interval = observation_policy(operation)
+        if (
+            type(observation_attempts) is not int
+            or not 1 <= observation_attempts <= 120
+            or not isinstance(observation_interval, (int, float))
+            or isinstance(observation_interval, bool)
+            or not 0 <= observation_interval <= 1
+        ):
+            raise BackendError("post-failure observation policy invalid")
+
+        def record_fallback(attempt: int) -> int:
+            self._fallback_trace.append(
+                {
+                    "attempts": attempt,
+                    "owned_object": operation.owned_object,
+                    "stage": operation.stage,
+                    "strategy": "bounded_idempotent_retry",
+                }
+            )
+            return attempt
+
         for attempt in range(1, attempts + 1):
             try:
                 self.adapter.create(operation)
-                return attempt
+                return record_fallback(attempt) if attempt > 1 else attempt
             except BackendError as exc:
                 if category == "strict":
                     raise
                 pending_observer = getattr(self.adapter, "observe_pending", None)
-                try:
-                    observed = (
-                        pending_observer(operation)
-                        if callable(pending_observer)
-                        else self.adapter.observe(operation)
-                    )
-                except BackendError:
-                    observed = None
-                if observed == operation.desired_identity:
-                    return attempt
+                for observation_attempt in range(observation_attempts):
+                    try:
+                        observed = (
+                            pending_observer(operation)
+                            if callable(pending_observer)
+                            else self.adapter.observe(operation)
+                        )
+                    except BackendError:
+                        observed = None
+                    if observed == operation.desired_identity:
+                        return record_fallback(attempt)
+                    if observation_attempt + 1 < observation_attempts:
+                        time.sleep(float(observation_interval))
                 if attempt >= attempts:
                     raise BackendError(f"{category}_retry_exhausted") from exc
                 time.sleep(0.25)
@@ -3978,16 +4029,7 @@ class LinuxBackend:
                         raise
                     actual = None
                 if actual is None:
-                    create_attempts = self._create_with_bounded_retry(operation)
-                    if create_attempts > 1:
-                        self._fallback_trace.append(
-                            {
-                                "attempts": create_attempts,
-                                "owned_object": operation.owned_object,
-                                "stage": operation.stage,
-                                "strategy": "bounded_idempotent_retry",
-                            }
-                        )
+                    self._create_with_bounded_retry(operation)
                     actual = self.adapter.observe(operation)
                 if actual != operation.desired_identity:
                     raise BackendError("owned object post-mutation identity drift")
@@ -5518,6 +5560,8 @@ def build_awg_container_actions(
         reconcile_absent_removal=True,
         create_attempts=2,
         retry_category="docker",
+        post_failure_observation_attempts=readiness_attempts,
+        post_failure_observation_interval_seconds=readiness_interval_seconds,
     )
 
     active_desired = _semantic_identity(

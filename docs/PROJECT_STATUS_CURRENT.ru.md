@@ -7934,3 +7934,31 @@ Phase 12 scope `329 passed, 4 skipped`. Seven verified 20 MiB upload parts
 prepared locally. Install runner SHA-256
 `A8D6A5F386DD9FAA403936ED6CE28071B5311C7F092928AB7335313312A78259`;
 fresh v25 live install ещё не выполнялся.
+
+# Текущий override 2026-07-26: v25 rollback закрыт; fresh v26 готов
+
+Fresh v25 transaction `af340c8f4a24e40c00d1e659030c5ab1ec9fd0303a772cd8411a14965a462e49`
+fail-closed завершилась с `docker_retry_exhausted`. Разрешённые checksum-bound
+manual cleanup и terminal recovery прошли: AMN2-контур отсутствует, foreign
+persistent equality `true`, volatile `0/0`, USA не изменялась.
+
+Retained ledger доказал, что exact AWG container стал observable только после
+финальной немедленной post-error проверки; rollback reconciliation затем
+exact-adopted и безопасно удалил его. Fresh v26 применяет уже bounded AWG
+readiness policy (`60 x 0.25s`) как post-failure exact-observation window до
+объявления Docker retry exhaustion. Принимается только exact desired identity;
+running AWG не перезапускается и не пересоздаётся, automatic exact rollback
+сохранён.
+
+Fresh v26 double-build byte-equal и clean-room verified: package
+`7E07A48B0E3F55176D79A3F8FE617DBF59F8B97D52C457ACD286ED13E60773F5`
+(`140052480` bytes), manifest
+`B28C383ACA8968F28416808E3D3F2BC6DDD443620507B168C75B2B5E52178838`,
+executor `9320F4D6113AD0562C7B67B3C62F69DACE01161D4665365395D962B82269FB6B`
+(`155089` bytes), resource plan
+`8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43`.
+Authoritative source remains `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`;
+Phase 12 scope `330 passed, 4 skipped`. Seven verified 20 MiB upload parts
+готовы; от v25 отличаются только parts `001` и `007`. Install runner SHA-256
+`71314C97DF31A1F00130019783EE8FF5E3622F3C2B1B84936513637142EA2D80`;
+следующая live-операция — fresh checksum-bound v26 install.
