@@ -114,6 +114,12 @@ TRANSACTION_AD0E8B_BUNDLED_RECOVERY_SSH_RUNNER = (
     / "phase12_spain_transaction_ad0e8b_bundled_recovery_ssh_runner.ps1"
 )
 
+TRANSACTION_8C0EB7_BUNDLED_RECOVERY_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_8c0eb7_bundled_recovery_ssh_runner.ps1"
+)
 TRANSACTION_EAF145_BUNDLED_RECOVERY_SSH_RUNNER = (
     ROOT
     / "scripts"
@@ -5080,6 +5086,27 @@ def test_transaction_ad0e8b_runner_bundles_exact_terminal_recovery() -> None:
     assert "6dae7cd3b2d6af6534fb6b0d66269e8e961b7acf8df915c0398935098de7c0b7" in source
     assert "94e41971abb6bcc01f3105d1ce6ddf8106cd5b5e7dd6ad44770e32c274727561" in source
     assert "98af670852d8976e04592fb8a45d7349f4024de29c52f241dab052e1bc1305a7" in source
+    assert "$expectedDockerTreeEntries = 51" in source
+    assert "$expectedDockerTreeBytes = 360503" in source
+    assert "NO FOREIGN SERVICE MUTATION" in source
+
+def test_transaction_8c0eb7_runner_bundles_exact_terminal_recovery() -> None:
+    source = TRANSACTION_8C0EB7_BUNDLED_RECOVERY_SSH_RUNNER.read_text(
+        encoding="utf-8"
+    )
+    assert "StrictHostKeyChecking=yes" in source
+    assert "manual-cleanup-bound" in source
+    assert "terminal-recovery-bound" in source
+    assert source.index("manual-cleanup-bound") < source.index(
+        "terminal-recovery-bound"
+    )
+    assert "install-bound" not in source
+    assert "scp.exe" not in source
+    assert "22A208A638D29E785BE2881FF2390B02AD90ABE280FCDF2A71E578E24F86E479" in source
+    assert "8c0eb7e9b1345f599c33de55f9b00779b553aa7b5d570b41d54da497074310c3" in source
+    assert "7f0684a098ee51ec21d01f0240f91ed0e49036b9c9784028ce8212f615df016c" in source
+    assert "38a07bbb54172f677883043b3c2280999ebb0305654a2fef57850576c4cc710a" in source
+    assert "92f854a48f607bb29eca714bd42cceca0ca7bf14ab3533bf26596970edd29cbb" in source
     assert "$expectedDockerTreeEntries = 51" in source
     assert "$expectedDockerTreeBytes = 360503" in source
     assert "NO FOREIGN SERVICE MUTATION" in source
