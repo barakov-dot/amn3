@@ -8112,3 +8112,24 @@ source exact `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`. Full Phase 12 scope:
 `git diff --check` passed. Install runner SHA-256
 `7B1514E6733FF00325502D5D782F8130AEA3FF53865B7512BAFCC28BD74AD805`.
 Следующая live-операция — fresh checksum-bound v30 install.
+
+# Текущий override 2026-07-27: v30 fail-closed; AD0E8B recovery готов
+
+Fresh v30 дошла до production runtime и завершилась
+`production runtime rollback failed`. Transaction SHA-256
+`6DAE7CD3B2D6AF6534FB6B0D66269E8E961B7ACF8DF915C0398935098DE7C0B7`
+имеет status `manual_recovery_required`, nonce
+`ad0e8bc5f43f2cb4de3958d7ac151f5d4242ea18d0707d6e6696e0f6909b6375`.
+Все четыре AMN2 units inactive; retained package/identity/filesystem contour
+остаётся fail-closed. Docker tree read-only bound: SHA-256
+`98AF670852D8976E04592FB8A45D7349F4024DE29C52F241DAB052E1BC1305A7`,
+51 entries, 360503 bytes.
+
+Bundled recovery runner SHA-256
+`A97425BB4215DC5AB5C1D16FEBFB1DCE4CF5EA15F3A716813BA141BB778E9F88`
+привязан к capsule SHA-256
+`94E41971ABB6BCC01F3105D1CE6DDF8106CD5B5E7DD6AD44770E32C274727561`
+и current v30 executor. Он выполняет только verified package cleanup, exact
+owned rollback и foreign equality. Full Phase 12 scope:
+`389 passed, 4 skipped`; parser/empty-approval fail-closed passed.
+Следующая live-операция — checksum-bound AD0E8B bundled recovery.

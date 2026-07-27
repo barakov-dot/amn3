@@ -107,6 +107,13 @@ TRANSACTION_9D2D0D_BUNDLED_RECOVERY_SSH_RUNNER = (
 )
 
 
+TRANSACTION_AD0E8B_BUNDLED_RECOVERY_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_ad0e8b_bundled_recovery_ssh_runner.ps1"
+)
+
 TRANSACTION_EAF145_BUNDLED_RECOVERY_SSH_RUNNER = (
     ROOT
     / "scripts"
@@ -5055,6 +5062,27 @@ def test_transaction_9d2d0d_runner_bundles_exact_terminal_recovery() -> None:
     assert "$expectedDockerTreeBytes = 360503" in source
     assert "NO FOREIGN SERVICE MUTATION" in source
 
+
+def test_transaction_ad0e8b_runner_bundles_exact_terminal_recovery() -> None:
+    source = TRANSACTION_AD0E8B_BUNDLED_RECOVERY_SSH_RUNNER.read_text(
+        encoding="utf-8"
+    )
+    assert "StrictHostKeyChecking=yes" in source
+    assert "manual-cleanup-bound" in source
+    assert "terminal-recovery-bound" in source
+    assert source.index("manual-cleanup-bound") < source.index(
+        "terminal-recovery-bound"
+    )
+    assert "install-bound" not in source
+    assert "scp.exe" not in source
+    assert "AE459D0779D4ECDC5C307182336B744E0E986FA893AEADED8342CAC139F04BE4" in source
+    assert "ad0e8bc5f43f2cb4de3958d7ac151f5d4242ea18d0707d6e6696e0f6909b6375" in source
+    assert "6dae7cd3b2d6af6534fb6b0d66269e8e961b7acf8df915c0398935098de7c0b7" in source
+    assert "94e41971abb6bcc01f3105d1ce6ddf8106cd5b5e7dd6ad44770e32c274727561" in source
+    assert "98af670852d8976e04592fb8a45d7349f4024de29c52f241dab052e1bc1305a7" in source
+    assert "$expectedDockerTreeEntries = 51" in source
+    assert "$expectedDockerTreeBytes = 360503" in source
+    assert "NO FOREIGN SERVICE MUTATION" in source
 
 def test_transaction_eaf145_runner_bundles_exact_terminal_recovery() -> None:
     source = TRANSACTION_EAF145_BUNDLED_RECOVERY_SSH_RUNNER.read_text(
