@@ -92,6 +92,13 @@ CURRENT_MANUAL_CLEANUP_SSH_RUNNER = (
 CURRENT_TERMINAL_RECOVERY_SSH_RUNNER = (
     ROOT / "scripts" / "vps" / "phase12_spain_current_terminal_recovery_ssh_runner.ps1"
 )
+TRANSACTION_EAF145_BUNDLED_RECOVERY_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_eaf145_bundled_recovery_ssh_runner.ps1"
+)
+
 TRANSACTION_2F647_MANUAL_CLEANUP_SSH_RUNNER = (
     ROOT
     / "scripts"
@@ -4987,6 +4994,46 @@ def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() 
     assert "resource-confirmation-evidence" not in source
     assert "precondition-receipt" not in source
     assert "baseline" not in source
+
+
+def test_transaction_eaf145_runner_bundles_exact_terminal_recovery() -> None:
+    source = TRANSACTION_EAF145_BUNDLED_RECOVERY_SSH_RUNNER.read_text(
+        encoding="utf-8"
+    )
+    assert "StrictHostKeyChecking=yes" in source
+    assert "manual-cleanup-bound" in source
+    assert "terminal-recovery-bound" in source
+    assert source.index("manual-cleanup-bound") < source.index(
+        "terminal-recovery-bound"
+    )
+    assert "amn2.spain-terminal-recovery-intent.v1" in source
+    assert "install-bound" not in source
+    assert "scp.exe" not in source
+    assert (
+        "D8E51499A4F5CF5CFDE59DF056FF0BFB074B0E251C4AD474F6AED2DE5642F072"
+        in source
+    )
+    assert (
+        "eaf145ae2372c2dc1ce9e84ec4f0e30c4c29490b1a20bb137cd812a2b7dd355b"
+        in source
+    )
+    assert (
+        "88ca0dfc1c2ab0af972e965b515deb01f5d9fc47166985715eb4fa76284e7693"
+        in source
+    )
+    assert (
+        "5e10f9fad1ef7c19048743297f4362249cc034e9914b84bead3004fddedab3fb"
+        in source
+    )
+    assert (
+        "7e74d39018511064ae9fffaf52016c0e34504142f7105b3388b590a0a22d542e"
+        in source
+    )
+    assert "$expectedDockerTreeEntries = 51" in source
+    assert "$expectedDockerTreeBytes = 360503" in source
+    assert "REMOVE ONLY VERIFIED RETAINED PACKAGE TREE" in source
+    assert "ROLLBACK EXACT OWNED CURRENT TRANSACTION" in source
+    assert "NO FOREIGN SERVICE MUTATION" in source
 
 
 def test_ssh_data_path_diagnostic_runner_is_pinned_bounded_and_nonpersistent() -> None:
