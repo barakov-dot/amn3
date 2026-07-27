@@ -2370,7 +2370,9 @@ def test_current_terminal_recovery_resume_intent_binds_audited_contour() -> None
         canonical_json_bytes(payload) + b"\n"
     )
     assert absent_run_intent.run_directory_identity is None
+
     payload["run_directory_identity"] = "not-an-identity"
+
     with pytest.raises(installer_module.InstallError, match="current_terminal_recovery_resume_bound_inputs_required"):
         installer_module._read_current_terminal_recovery_resume_intent_payload(
             canonical_json_bytes(payload) + b"\n"
@@ -2399,6 +2401,16 @@ def test_current_terminal_recovery_resume_intent_binds_audited_contour() -> None
         )
 
 
+
+def test_current_terminal_recovery_resume_uses_root_fs_for_docker_data_root() -> None:
+    root_fs = object()
+    config_fs = object()
+    service_fs = object()
+
+    assert installer_module._current_terminal_recovery_fs_for_owned_object(
+        "dir:/var/lib/amn2-spain-docker", root_fs=root_fs,
+        config_fs=config_fs, service_fs=service_fs,
+    ) is root_fs
 
 def test_current_terminal_recovery_finalize_intent_binds_post_contour_state() -> None:
     payload = {

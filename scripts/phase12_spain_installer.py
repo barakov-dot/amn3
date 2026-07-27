@@ -7571,6 +7571,21 @@ def _production_current_terminal_recovery_finalize_bound(
     }
 
 
+def _current_terminal_recovery_fs_for_owned_object(
+    owned_object: str, *, root_fs: Any, config_fs: Any, service_fs: Any,
+) -> Any | None:
+    if owned_object.startswith(("dir:/opt/amn2-spain", "file:/opt/amn2-spain")):
+        return root_fs
+    if owned_object.startswith("dir:/etc/amn2-spain") or owned_object == "file:/etc/amn2-spain/servers.yml":
+        return config_fs
+    if owned_object.startswith(("file:/etc/amn2-spain", "secret:/etc/amn2-spain")):
+        return root_fs
+    if owned_object == "dir:/var/lib/amn2-spain-docker":
+        return root_fs
+    if owned_object == "dir:/var/lib/amn2-spain" or owned_object.startswith(("dir:/var/lib/amn2-spain/", "file:/var/lib/amn2-spain/")):
+        return service_fs
+    return None
+
 def _production_current_terminal_recovery_resume_bound(
     intent: CurrentTerminalRecoveryResumeIntent,
     *,
@@ -7658,17 +7673,10 @@ def _production_current_terminal_recovery_resume_bound(
             ) != dict(intent.owned_tree_inventories[label]):
                 raise InstallError("current terminal recovery resume tree inventory mismatch")
         for owned_object in committed:
-            if owned_object.startswith(("dir:/opt/amn2-spain", "file:/opt/amn2-spain")):
-                fs = root_fs
-            elif owned_object.startswith("dir:/etc/amn2-spain") or owned_object == "file:/etc/amn2-spain/servers.yml":
-                fs = config_fs
-            elif owned_object.startswith("file:/etc/amn2-spain"):
-                fs = root_fs
-            elif owned_object.startswith("secret:/etc/amn2-spain"):
-                fs = root_fs
-            elif owned_object.startswith(("dir:/var/lib/amn2-spain", "file:/var/lib/amn2-spain")):
-                fs = service_fs
-            else:
+            fs = _current_terminal_recovery_fs_for_owned_object(
+                owned_object, root_fs=root_fs, config_fs=config_fs, service_fs=service_fs,
+            )
+            if fs is None:
                 continue
             relative = owned_object.split(":/", maxsplit=1)[1]
             event = ledger.event_for(owned_object)
