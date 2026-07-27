@@ -788,3 +788,23 @@ and 141 source files from exact source
 20 MiB parts are ready. Install runner SHA-256 is
 `F37013B32E46EA6A3B7988604C00519477260C4CB9DA5F64B5CBE21F3C45304D`.
 The next live operation is the fresh checksum-bound v29 install.
+
+# AMN2 Phase 12 — current operational override 2026-07-27: v29 failed closed; recovery ready
+
+Fresh v29 transaction
+`75f0f66c438d4115c0bf7640bdfbfec1c320ac8f06aac36229ad7681de0f1df2`
+ended in `manual_recovery_required`. Runtime, network, and Docker objects are
+removed; all four AMN2 units are inactive, and the AMN2 nft table and route are
+absent. Retained ledger SHA-256
+`5C7FEFC65270C670B9E581F740D474BE820F3B1AEA3A145F1C40E11B93853841`
+contains nine committed identity/filesystem objects.
+
+The checksum-bound bundled recovery runner SHA-256
+`E7DA04FC21841152C90A57B3CAB706E4207D0B4DA0530122D815BED7F4DE18AA`
+is bound to nonce `9d2d0d0b3bae9df38a717efd8995e4715893ec6ff861eb4824510ed9aa201889`,
+capsule SHA-256
+`9D912BD1D9BED6DD1C2678E6B4A8EE7B26D74ED9592B4B405DED82184427FD7C`,
+and Docker tree SHA-256
+`DB76EB0118231F1F2AAB6CB679E77453293BCBDD2157E5BE3DF7A2F644731013`
+(`51` entries, `360503` bytes). Expanded Phase 12 gate:
+`388 passed, 4 skipped`.

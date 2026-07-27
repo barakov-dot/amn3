@@ -99,6 +99,14 @@ TRANSACTION_89C835_BUNDLED_RECOVERY_SSH_RUNNER = (
     / "phase12_spain_transaction_89c835_bundled_recovery_ssh_runner.ps1"
 )
 
+TRANSACTION_9D2D0D_BUNDLED_RECOVERY_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_9d2d0d_bundled_recovery_ssh_runner.ps1"
+)
+
+
 TRANSACTION_EAF145_BUNDLED_RECOVERY_SSH_RUNNER = (
     ROOT
     / "scripts"
@@ -5021,6 +5029,28 @@ def test_transaction_89c835_runner_bundles_exact_terminal_recovery() -> None:
     assert "34454708115b48218bb8ec5ef6a1edce8ab6f401e22afa1bd41f38482cbf7b5f" in source
     assert "dd6b6227349dc63aa04b1c06324a4cd51ff6a7e9cb3cc5c36fae3fb3e6396b0d" in source
     assert "b73ccebfde0aa4a21e47b3236e96f99b4c3801af2384cfd96d3b28fb161f1774" in source
+    assert "$expectedDockerTreeEntries = 51" in source
+    assert "$expectedDockerTreeBytes = 360503" in source
+    assert "NO FOREIGN SERVICE MUTATION" in source
+
+
+def test_transaction_9d2d0d_runner_bundles_exact_terminal_recovery() -> None:
+    source = TRANSACTION_9D2D0D_BUNDLED_RECOVERY_SSH_RUNNER.read_text(
+        encoding="utf-8"
+    )
+    assert "StrictHostKeyChecking=yes" in source
+    assert "manual-cleanup-bound" in source
+    assert "terminal-recovery-bound" in source
+    assert source.index("manual-cleanup-bound") < source.index(
+        "terminal-recovery-bound"
+    )
+    assert "install-bound" not in source
+    assert "scp.exe" not in source
+    assert "7DB67E85436E3530E5CF0DA0D46897353AE86182539DD9C91154CEA004D49758" in source
+    assert "9d2d0d0b3bae9df38a717efd8995e4715893ec6ff861eb4824510ed9aa201889" in source
+    assert "75f0f66c438d4115c0bf7640bdfbfec1c320ac8f06aac36229ad7681de0f1df2" in source
+    assert "9d912bd1d9bed6dd1c2678e6b4a8ee7b26d74ed9592b4b405ded82184427fd7c" in source
+    assert "db76eb0118231f1f2aab6cb679e77453293bcbdd2157e5be3df7a2f644731013" in source
     assert "$expectedDockerTreeEntries = 51" in source
     assert "$expectedDockerTreeBytes = 360503" in source
     assert "NO FOREIGN SERVICE MUTATION" in source
