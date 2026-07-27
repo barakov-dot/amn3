@@ -1949,8 +1949,91 @@ def cleanup_terminal_docker_data_root(
     ).operation
     if expected_operation.desired_identity != expected_identity:
         raise BackendError("terminal Docker data-root ledger binding mismatch")
-    actual_identity = fs.identity(relative)
-    if actual_identity is None:
+    receipt = inspect_terminal_docker_data_root(
+        fs=fs,
+        relative=relative,
+        expected_identity=expected_identity,
+        expected_tree_sha256=expected_tree_sha256,
+        expected_tree_entry_count=expected_tree_entry_count,
+        expected_tree_total_bytes=expected_tree_total_bytes,
+    )
+    target = fs.root.joinpath(*fs._parts(relative))
+    _remove_terminal_docker_data_root_tree(target)
+    if fs.identity(relative) is not None:
+        raise BackendError("terminal Docker data-root removal not observable")
+    return receipt
+
+
+
+
+def observe_terminal_docker_data_root(
+    *, fs: SafeFs, relative: str, expected_identity: str,
+) -> dict[str, object]:
+    """Double-read a bounded AMN2 Docker data-root without mutation."""
+    if (
+        not isinstance(fs, SafeFs)
+        or relative != "var/lib/amn2-spain-docker"
+        or not isinstance(expected_identity, str)
+        or re.fullmatch(r"sha256:[0-9a-f]{64}", expected_identity) is None
+    ):
+        raise BackendError("terminal Docker data-root observation input invalid")
+    expected_operation = build_directory_action(
+        fs, "filesystem_staged", relative, 0o700
+    ).operation
+    if expected_operation.desired_identity != expected_identity:
+        raise BackendError("terminal Docker data-root ledger binding mismatch")
+    if fs.identity(relative) is None:
+        raise BackendError("terminal Docker data-root absent")
+    target = fs.root.joinpath(*fs._parts(relative))
+
+    def scan() -> dict[str, object]:
+        root_mode = _tree_root_mode(target)
+        if root_mode not in {"0700", "0710"}:
+            raise BackendError("terminal Docker data-root mode drift")
+        tree = _scan_terminal_docker_data_root(target)
+        return {
+            "tree_sha256": tree.get("tree_sha256"),
+            "entry_count": tree.get("entry_count"),
+            "total_bytes": tree.get("total_bytes"),
+            "root_mode": root_mode,
+        }
+
+    receipt = scan()
+    if scan() != receipt:
+        raise BackendError("terminal Docker data-root changed during verification")
+    return receipt
+
+def inspect_terminal_docker_data_root(
+    *,
+    fs: SafeFs,
+    relative: str,
+    expected_identity: str,
+    expected_tree_sha256: str,
+    expected_tree_entry_count: int,
+    expected_tree_total_bytes: int,
+) -> dict[str, object]:
+    """Return only a double-read, exact AMN2 Docker data-root receipt."""
+    if (
+        not isinstance(fs, SafeFs)
+        or relative != "var/lib/amn2-spain-docker"
+        or not isinstance(expected_identity, str)
+        or re.fullmatch(r"sha256:[0-9a-f]{64}", expected_identity) is None
+        or not isinstance(expected_tree_sha256, str)
+        or re.fullmatch(r"[0-9a-f]{64}", expected_tree_sha256) is None
+        or not isinstance(expected_tree_entry_count, int)
+        or isinstance(expected_tree_entry_count, bool)
+        or not 0 < expected_tree_entry_count <= 10_000
+        or not isinstance(expected_tree_total_bytes, int)
+        or isinstance(expected_tree_total_bytes, bool)
+        or not 0 < expected_tree_total_bytes <= 2 * 1024 * 1024 * 1024
+    ):
+        raise BackendError("terminal Docker data-root cleanup input invalid")
+    expected_operation = build_directory_action(
+        fs, "filesystem_staged", relative, 0o700
+    ).operation
+    if expected_operation.desired_identity != expected_identity:
+        raise BackendError("terminal Docker data-root ledger binding mismatch")
+    if fs.identity(relative) is None:
         raise BackendError("terminal Docker data-root absent")
     target = fs.root.joinpath(*fs._parts(relative))
 
@@ -1976,9 +2059,6 @@ def cleanup_terminal_docker_data_root(
     receipt = inspect()
     if inspect() != receipt:
         raise BackendError("terminal Docker data-root changed during verification")
-    _remove_terminal_docker_data_root_tree(target)
-    if fs.identity(relative) is not None:
-        raise BackendError("terminal Docker data-root removal not observable")
     return receipt
 
 

@@ -14,7 +14,7 @@ import sys
 import tempfile
 import time
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Callable, ContextManager, Mapping
@@ -2012,6 +2012,7 @@ class CurrentTerminalRecoveryResumeIntent:
     pending_objects_sha256: str
     systemd_sha256: str
     owned_tree_inventories: Mapping[str, Mapping[str, object]]
+    docker_data_root_inventory: Mapping[str, object]
     run_directory_identity: str
     approved_at_epoch: int
     expires_at_epoch: int
@@ -2023,7 +2024,7 @@ class CurrentTerminalRecoveryResumeIntent:
             "nonce", "transaction_sha256", "capsule_sha256",
             "mutation_ledger_sha256", "committed_objects_sha256",
             "removed_objects_sha256", "pending_objects_sha256", "systemd_sha256",
-            "owned_tree_inventories", "run_directory_identity",
+            "owned_tree_inventories", "docker_data_root_inventory", "run_directory_identity",
             "approved_at_epoch", "expires_at_epoch",
         }
         if (
@@ -2069,6 +2070,21 @@ class CurrentTerminalRecoveryResumeIntent:
             ):
                 raise InstallError("current terminal recovery resume tree inventory invalid")
             normalized[label] = MappingProxyType(dict(item))
+        docker_inventory = value["docker_data_root_inventory"]
+        if (
+            not isinstance(docker_inventory, dict)
+            or set(docker_inventory) != {"tree_sha256", "entry_count", "total_bytes", "root_mode"}
+            or not isinstance(docker_inventory["tree_sha256"], str)
+            or re.fullmatch(r"[0-9a-f]{64}", docker_inventory["tree_sha256"]) is None
+            or not isinstance(docker_inventory["entry_count"], int)
+            or isinstance(docker_inventory["entry_count"], bool)
+            or not 0 < docker_inventory["entry_count"] <= 10_000
+            or not isinstance(docker_inventory["total_bytes"], int)
+            or isinstance(docker_inventory["total_bytes"], bool)
+            or not 0 < docker_inventory["total_bytes"] <= 2 * 1024 * 1024 * 1024
+            or docker_inventory["root_mode"] not in {"0700", "0710"}
+        ):
+            raise InstallError("current terminal recovery resume Docker inventory invalid")
         if (
             not isinstance(value["approved_at_epoch"], int)
             or isinstance(value["approved_at_epoch"], bool)
@@ -2088,6 +2104,7 @@ class CurrentTerminalRecoveryResumeIntent:
             pending_objects_sha256=value["pending_objects_sha256"],
             systemd_sha256=value["systemd_sha256"],
             owned_tree_inventories=MappingProxyType(normalized),
+            docker_data_root_inventory=MappingProxyType(dict(docker_inventory)),
             run_directory_identity=value["run_directory_identity"],
             approved_at_epoch=value["approved_at_epoch"],
             expires_at_epoch=value["expires_at_epoch"],
@@ -4385,6 +4402,65 @@ class ProductionRecoveryCoordinator:
         self.lock_lease = lock_lease
         self.equality_observer = equality_observer
 
+    def _bound_rollback_actions(
+        self, mutation_ledger: live_backend.DurableMutationLedgerStore
+    ) -> dict[str, live_backend.SystemAction]:
+        """Bind Docker data-root cleanup to one double-observed current tree."""
+        actions = {
+            action.operation.owned_object: action
+            for action in self.prepared.assembly.action_plan.actions
+        }
+        owned_object = "dir:/var/lib/amn2-spain-docker"
+        action = actions.get(owned_object)
+        event = mutation_ledger.event_for(owned_object)
+        if action is None or event is None or event["event"] != "committed":
+            return actions
+        context = self.prepared.capsule.blueprint.assembly_context
+        root = Path(context["host_root"])
+        root_fs = live_backend.SafeFs(root=root, expected_uid=0, expected_gid=0)
+        expected = live_backend.build_directory_action(
+            root_fs, "filesystem_staged", "var/lib/amn2-spain-docker", 0o700
+        ).operation
+        if (
+            action.operation != expected
+            or event["stage"] != expected.stage
+            or event["desired_identity"] != expected.desired_identity
+            or event["actual_identity"] != expected.desired_identity
+            or root_fs.identity("var/lib/amn2-spain-docker") is None
+        ):
+            raise InstallError("Docker data-root rollback binding mismatch")
+        inventory = live_backend.observe_terminal_docker_data_root(
+            fs=root_fs,
+            relative="var/lib/amn2-spain-docker",
+            expected_identity=expected.desired_identity,
+        )
+
+        def observe_rollback() -> str | None:
+            return (
+                None
+                if root_fs.identity("var/lib/amn2-spain-docker") is None
+                else expected.desired_identity
+            )
+
+        def remove_exact(identity: str) -> None:
+            if identity != expected.desired_identity:
+                raise BackendError("Docker data-root rollback CAS mismatch")
+            live_backend.cleanup_terminal_docker_data_root(
+                fs=root_fs,
+                relative="var/lib/amn2-spain-docker",
+                expected_identity=expected.desired_identity,
+                expected_tree_sha256=str(inventory["tree_sha256"]),
+                expected_tree_entry_count=int(inventory["entry_count"]),
+                expected_tree_total_bytes=int(inventory["total_bytes"]),
+            )
+
+        actions[owned_object] = replace(
+            action,
+            observe_rollback_identity=observe_rollback,
+            remove_exact=remove_exact,
+        )
+        return actions
+
     def rollback(self) -> dict[str, Any]:
         assembly = self.prepared.assembly
         context = self.prepared.capsule.blueprint.assembly_context
@@ -4401,10 +4477,7 @@ class ProductionRecoveryCoordinator:
                 mutation_ledger = store.load_or_create(allowed)
                 backend = live_backend.LinuxBackend(
                     adapter=live_backend.SystemOwnedAdapter(
-                        actions={
-                            action.operation.owned_object: action
-                            for action in assembly.action_plan.actions
-                        }
+                        actions=self._bound_rollback_actions(mutation_ledger)
                     ),
                     ledger=mutation_ledger,
                 )
@@ -7250,6 +7323,24 @@ def _production_current_terminal_recovery_audit_bound(
         if receipt["root_mode"] != mode:
             raise InstallError("current terminal recovery audit root mode mismatch")
         inventories[label] = receipt
+    docker_object = "dir:/var/lib/amn2-spain-docker"
+    docker_event = ledger.event_for(docker_object)
+    docker_action = live_backend.build_directory_action(
+        root_fs, "filesystem_staged", "var/lib/amn2-spain-docker", 0o700
+    )
+    if (
+        docker_event is None
+        or docker_event["event"] != "committed"
+        or docker_event["stage"] != docker_action.operation.stage
+        or docker_event["desired_identity"] != docker_action.operation.desired_identity
+        or docker_event["actual_identity"] != docker_action.operation.desired_identity
+    ):
+        raise InstallError("current terminal recovery audit Docker ledger binding mismatch")
+    docker_inventory = live_backend.observe_terminal_docker_data_root(
+        fs=root_fs,
+        relative="var/lib/amn2-spain-docker",
+        expected_identity=docker_action.operation.desired_identity,
+    )
     runner = live_backend.FixedCommandRunner(
         allowed_argv=live_backend.SYSTEMCTL_COMMAND_ALLOWLIST
     )
@@ -7277,6 +7368,7 @@ def _production_current_terminal_recovery_audit_bound(
         "pending_owned_objects": pending,
         "owned_object_states": object_states,
         "owned_tree_inventories": inventories,
+        "docker_data_root_inventory": docker_inventory,
         "run_directory_identity": root_fs.identity("run/amn2-spain-docker"),
         "systemd": systemd,
     }
@@ -7659,6 +7751,39 @@ def _production_current_terminal_recovery_resume_bound(
             raise InstallError("current terminal recovery resume run ledger mismatch")
         root_fs.remove_exact("run/amn2-spain-docker", run_event["actual_identity"])
         mark_removed("dir:/run/amn2-spain-docker")
+
+        docker_object = "dir:/var/lib/amn2-spain-docker"
+        docker_event = ledger.event_for(docker_object)
+        docker_action = live_backend.build_directory_action(
+            root_fs, "filesystem_staged", "var/lib/amn2-spain-docker", 0o700
+        )
+        if (
+            docker_event is None
+            or docker_event["event"] != "committed"
+            or docker_event["stage"] != docker_action.operation.stage
+            or docker_event["desired_identity"] != docker_action.operation.desired_identity
+            or docker_event["actual_identity"] != docker_action.operation.desired_identity
+        ):
+            raise InstallError("current terminal recovery resume Docker ledger binding mismatch")
+        docker_inventory = live_backend.inspect_terminal_docker_data_root(
+            fs=root_fs,
+            relative="var/lib/amn2-spain-docker",
+            expected_identity=docker_action.operation.desired_identity,
+            expected_tree_sha256=str(intent.docker_data_root_inventory["tree_sha256"]),
+            expected_tree_entry_count=int(intent.docker_data_root_inventory["entry_count"]),
+            expected_tree_total_bytes=int(intent.docker_data_root_inventory["total_bytes"]),
+        )
+        if docker_inventory != dict(intent.docker_data_root_inventory):
+            raise InstallError("current terminal recovery resume Docker inventory mismatch")
+        live_backend.cleanup_terminal_docker_data_root(
+            fs=root_fs,
+            relative="var/lib/amn2-spain-docker",
+            expected_identity=docker_action.operation.desired_identity,
+            expected_tree_sha256=str(intent.docker_data_root_inventory["tree_sha256"]),
+            expected_tree_entry_count=int(intent.docker_data_root_inventory["entry_count"]),
+            expected_tree_total_bytes=int(intent.docker_data_root_inventory["total_bytes"]),
+        )
+        mark_removed(docker_object)
 
         for label in ("opt", "etc", "var"):
             _fs, _relative, target = tree_specs[label]

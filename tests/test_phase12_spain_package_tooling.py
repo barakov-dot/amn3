@@ -2348,6 +2348,12 @@ def test_current_terminal_recovery_resume_intent_binds_audited_contour() -> None
             "opt": {"tree_sha256": "b" * 64, "entry_count": 5, "total_bytes": 20, "root_mode": "0755"},
             "var": {"tree_sha256": "c" * 64, "entry_count": 1, "total_bytes": 30, "root_mode": "0750"},
         },
+        "docker_data_root_inventory": {
+            "tree_sha256": "e" * 64,
+            "entry_count": 49,
+            "total_bytes": 262199,
+            "root_mode": "0710",
+        },
         "run_directory_identity": "sha256:" + "d" * 64,
         "approved_at_epoch": 100,
         "expires_at_epoch": 200,
@@ -2357,6 +2363,7 @@ def test_current_terminal_recovery_resume_intent_binds_audited_contour() -> None
     )
     assert intent.mutation_ledger_sha256 == payload["mutation_ledger_sha256"]
     assert dict(intent.owned_tree_inventories["opt"]) == payload["owned_tree_inventories"]["opt"]
+    assert dict(intent.docker_data_root_inventory) == payload["docker_data_root_inventory"]
 
 
 def test_current_terminal_recovery_finalize_intent_binds_post_contour_state() -> None:
@@ -2659,6 +2666,10 @@ def test_current_terminal_recovery_audit_reports_sealed_current_state(
             "stage": "filesystem_staged",
         },
         {
+            "owned_object": "dir:/var/lib/amn2-spain-docker",
+            "stage": "filesystem_staged",
+        },
+        {
             "owned_object": "runtime:docker-static",
             "stage": "filesystem_staged",
         },
@@ -2698,6 +2709,13 @@ def test_current_terminal_recovery_audit_reports_sealed_current_state(
                     "stage": "network_container_started",
                     "desired_identity": "sha256:" + "b" * 64,
                     "actual_identity": None,
+                }
+            if owned_object == "dir:/var/lib/amn2-spain-docker":
+                return {
+                    "event": "committed",
+                    "stage": "filesystem_staged",
+                    "desired_identity": "sha256:" + "a" * 64,
+                    "actual_identity": "sha256:" + "a" * 64,
                 }
             return {
                 "event": "removed"
@@ -2756,6 +2774,27 @@ def test_current_terminal_recovery_audit_reports_sealed_current_state(
     monkeypatch.setattr(live_backend, "SafeFs", Fs)
     monkeypatch.setattr(
         live_backend,
+        "build_directory_action",
+        lambda *_args, **_kwargs: types.SimpleNamespace(
+            operation=live_backend.OwnedOperation(
+                "filesystem_staged",
+                "dir:/var/lib/amn2-spain-docker",
+                "sha256:" + "a" * 64,
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        live_backend,
+        "observe_terminal_docker_data_root",
+        lambda **_kwargs: {
+            "tree_sha256": "f" * 64,
+            "entry_count": 49,
+            "total_bytes": 262199,
+            "root_mode": "0710",
+        },
+    )
+    monkeypatch.setattr(
+        live_backend,
         "inspect_terminal_owned_tree",
         lambda target: {
             "tree_sha256": hashlib.sha256(str(target).encode("utf-8")).hexdigest(),
@@ -2797,6 +2836,7 @@ def test_current_terminal_recovery_audit_reports_sealed_current_state(
         "dir:/etc/amn2-spain",
         "dir:/opt/amn2-spain",
         "dir:/var/lib/amn2-spain",
+        "dir:/var/lib/amn2-spain-docker",
     ]
     assert result["removed_owned_objects"] == ["runtime:docker-static"]
     assert result["pending_owned_objects"] == [
@@ -2808,10 +2848,12 @@ def test_current_terminal_recovery_audit_reports_sealed_current_state(
         "committed",
         "committed",
         "committed",
+        "committed",
         "unrecorded",
         "removed",
     ]
     assert result["run_directory_identity"] == "sha256:" + "a" * 64
+    assert result["docker_data_root_inventory"]["tree_sha256"] == "f" * 64
 
 
 def test_runtime_recovery_intent_binds_current_terminal_runtime_contour() -> None:

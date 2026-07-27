@@ -1,3 +1,21 @@
+# Текущий override 2026-07-27: rollback repair для transaction 21ca готов локально
+
+V32 install дошёл до automatic rollback и fail-closed на непустом
+AMN2-owned `/var/lib/amn2-spain-docker`: Docker инициализировал dedicated
+`data-root`, а обычный directory rollback использовал только `rmdir`. Это не
+SCP/network failure и не изменение постороннего Spain-сервиса. Transaction
+`21ca61639577cff46e75f736d4b0e9034bd92d611b733e2f3f78a06d8b25c2e1`
+остаётся `manual_recovery_required` до checksum-bound recovery.
+
+Repair добавляет double-read no-follow/single-filesystem receipt (SHA дерева,
+число entries, bytes, mode `0700|0710`) и удаляет Docker tree только при exact
+совпадении до rollback родительских AMN2 каталогов. Тот же механизм включён в
+обычный automatic rollback будущего fresh install. Посторонний Spain-сервис и
+USA contour не затрагиваются. Local scoped suite: `190 passed`.
+
+Следующий gate: commit/push/readback, затем один checksum-bound current
+transaction recovery: verify transaction и exact Docker inventory → bounded
+cleanup → foreign equality receipt. Новый install до успешного recovery запрещён.
 # Текущий override 2026-07-27: V32 network-unit failure receipt локально готов
 
 После предыдущего rollback systemd unit, journal и network ledger были удалены
