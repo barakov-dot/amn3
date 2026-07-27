@@ -8133,3 +8133,34 @@ Bundled recovery runner SHA-256
 owned rollback и foreign equality. Full Phase 12 scope:
 `389 passed, 4 skipped`; parser/empty-approval fail-closed passed.
 Следующая live-операция — checksum-bound AD0E8B bundled recovery.
+
+# Текущий override 2026-07-27: AD0E8B recovery закрыт; fresh v31 готов
+
+Checksum-bound bundled recovery AD0E8B прошёл. Manual-cleanup и terminal
+recovery receipts имеют `result=passed`; foreign persistent equality `true`,
+volatile before/after count `0`. Retained package tree и exact AMN2-owned
+contour удалены. Посторонний Spain-сервис и USA rollback contour не изменялись.
+
+Read-only audit сохранённого mutation ledger доказал точную границу v30:
+Docker image, network, container и `interface:awgsp0` были committed;
+`systemd-enabled:amn2-spain-network.service` был committed, а composite
+`network-contour:amn2-spain` не дошёл до outer intent. Причина: initial
+observer отклонял structurally valid current-boot prepared network ledger до
+входа в уже существующий bounded resume path. v31 принимает только
+schema-valid, current-boot и state-compatible prepared ledger; foreign,
+stale-boot и state-drift ledger остаются collision.
+
+Fresh v31 double-build byte-equal и no-follow clean-room verified: package
+SHA-256 `80B5DE15EC96C689003629C2A426E0371A72B39E8390C1DC7A6BE08FAC7B4069`
+(`140052480` bytes), manifest SHA-256
+`4121F790E7C42CD25F43B85E83BBCA364D588DA6789BB9EECE9C960C0264843A`,
+executor SHA-256
+`22A208A638D29E785BE2881FF2390B02AD90ABE280FCDF2A71E578E24F86E479`
+(`156276` bytes). Clean-room: 69 regular entries, 141 source files, source
+inventory SHA-256
+`C0FD4A1E1A88B877392DE4E59E289FE58239AA6B98A43F9F049068D2D5F581D7`,
+source exact `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`. Full Phase 12 scope:
+`345 passed, 4 skipped`; focused v31 runner/network scope: `29 passed`.
+Install runner SHA-256
+`69871A30536F039223F210311A7F9B9C0471B899917750C2BDDDCD77FE553BFF`.
+Следующая live-операция — fresh checksum-bound v31 install после commit/push.

@@ -1282,6 +1282,83 @@ class CompositeNetworkActionTests(unittest.TestCase):
         self.assertEqual(controller.apply_calls, 0)
         self.assertIsNone(ledger.event_for(action.operation.owned_object))
 
+    def test_bound_prepared_ledger_is_resumed_after_outer_intent(self) -> None:
+        state = {
+            "active": False,
+            "exact": False,
+            "ledger": {"schema": "prepared"},
+            "resume_calls": 0,
+            "start_calls": 0,
+        }
+        active_identity = "sha256:" + "b" * 64
+
+        class Controller:
+            def read_ledger(self) -> dict[str, object] | None:
+                return state["ledger"]
+
+            def assert_absent(self) -> None:
+                return None
+
+            def is_exact(self, _ledger: dict[str, object]) -> bool:
+                return bool(state["exact"])
+
+            def is_resumable(self, ledger: dict[str, object]) -> bool:
+                return ledger == {"schema": "prepared"}
+
+            def apply(self) -> dict[str, object]:
+                state["resume_calls"] += 1
+                state["exact"] = True
+                state["ledger"] = {"schema": "prepared-and-final"}
+                return state["ledger"]
+
+            def rollback(self, _ledger: dict[str, object]) -> None:
+                state["exact"] = False
+
+            def remove_ledger(self, _ledger: dict[str, object]) -> None:
+                state["ledger"] = None
+
+        def start() -> None:
+            state["start_calls"] += 1
+            if not state["exact"]:
+                raise BackendError("systemd network start failed")
+            state["active"] = True
+
+        action = live_backend.build_network_service_contour_action(
+            systemd_active_action=live_backend.SystemAction(
+                operation=OwnedOperation(
+                    "host_network_applied",
+                    "systemd-active:amn2-spain-network.service",
+                    active_identity,
+                ),
+                observe_identity=lambda: (
+                    active_identity if state["active"] else None
+                ),
+                create_exact=start,
+                remove_exact=lambda _identity: None,
+            ),
+            controller=Controller(),
+        )
+        ledger = MutationLedger(
+            allowed_objects={action.operation.owned_object}
+        )
+        backend = LinuxBackend(
+            adapter=SystemOwnedAdapter(
+                actions={action.operation.owned_object: action}
+            ),
+            ledger=ledger,
+        )
+
+        backend.apply((action.operation,))
+
+        self.assertEqual(state["resume_calls"], 1)
+        self.assertEqual(state["start_calls"], 2)
+        self.assertTrue(state["active"])
+        self.assertTrue(state["exact"])
+        self.assertEqual(
+            ledger.state(action.operation.owned_object),
+            "committed",
+        )
+
     def test_one_physical_action_recovers_prepared_ledger_and_rolls_back_once(self) -> None:
         class Controller:
             ledger: dict[str, object] | None = None

@@ -2887,7 +2887,10 @@ def build_network_service_contour_action(
         ledger = controller.read_ledger()
         if service is None:
             if ledger is not None:
-                raise BackendError("network service contour collision")
+                resumable = getattr(controller, "is_resumable", None)
+                if not callable(resumable) or not resumable(ledger):
+                    raise BackendError("network service contour collision")
+                return None
             controller.assert_absent()
             return None
         if service != systemd_identity or ledger is None or not controller.is_exact(ledger):
@@ -3349,6 +3352,13 @@ class SystemNetworkContourController:
         except NetworkError:
             return False
         return True
+
+    def is_resumable(self, ledger: dict[str, Any]) -> bool:
+        return bool(
+            self.manager.prepared_is_resumable(
+                ledger, expected_boot_id=self.expected_boot_id
+            )
+        )
 
     def apply(self) -> dict[str, Any]:
         from scripts.phase12_spain_network import NetworkError, _write_ledger

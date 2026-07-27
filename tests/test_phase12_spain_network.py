@@ -253,6 +253,24 @@ def test_prepared_intent_recovers_crash_after_each_network_syscall(
     assert runner.owned is None and runner.route is None and runner.sysctl == "0"
 
 
+def test_prepared_resumability_is_bound_to_current_boot_and_compatible_state() -> None:
+    runner = FakeRunner()
+    manager = NetworkManager(runner)
+    ledger = durable_apply(manager)
+    manager.rollback(ledger)
+
+    assert manager.prepared_is_resumable(
+        ledger, expected_boot_id=BOOT_ID
+    ) is True
+
+    other_boot = copy.deepcopy(ledger)
+    other_boot["boot_id"] = "87654321-4321-4321-4321-cba987654321"
+    assert manager.prepared_is_resumable(
+        other_boot, expected_boot_id=BOOT_ID
+    ) is False
+    assert runner.owned is None and runner.route is None and runner.sysctl == "0"
+
+
 def test_apply_and_verify_are_idempotent_for_exact_existing_state() -> None:
     runner = FakeRunner(owned=expected_table_document(), route=ROUTE, sysctl="1")
     manager = NetworkManager(runner)

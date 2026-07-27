@@ -484,6 +484,33 @@ class NetworkManager:
         if self._sysctl_state() != "1":
             raise NetworkError("sysctl verification failed")
 
+    def prepared_is_resumable(
+        self, ledger: dict[str, Any], *, expected_boot_id: str
+    ) -> bool:
+        try:
+            value = self._validate_ledger(ledger)
+            if value["boot_id"] != expected_boot_id:
+                return False
+            self._assert_boot(expected_boot_id)
+            owned_declared = self._assert_foreign_compatible()
+            nft_state = self._owned_state(owned_declared)
+            route_state = self._route_state()
+            sysctl_state = self._sysctl_state()
+        except (CommandError, NetworkError):
+            return False
+        return (
+            nft_state
+            in ({"absent", "exact"} if value["nft"]["created"] else {"exact"})
+            and route_state
+            in ({"absent", "exact"} if value["route"]["created"] else {"exact"})
+            and sysctl_state
+            in (
+                {value["sysctl"]["previous"], value["sysctl"]["applied"]}
+                if value["sysctl"]["changed"]
+                else {value["sysctl"]["applied"]}
+            )
+        )
+
     def rollback(self, ledger: dict[str, Any]) -> None:
         value = self._validate_ledger(ledger)
         self._assert_boot(value["boot_id"])

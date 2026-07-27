@@ -4976,21 +4976,21 @@ def test_transaction_958e_terminal_recovery_runner_is_mixed_contour_bound() -> N
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "15B5C4523A8D0D4A98BD10180FF024A088E84E649FDF7E67D7C58F6704024609"' in source
-    assert '$expectedManifestSha = "D4971A5D7DB4AA628923561B3F1EA07C0C55DE96724E2210FDD893B6F619E099"' in source
-    assert '$expectedExecutorSha = "AE459D0779D4ECDC5C307182336B744E0E986FA893AEADED8342CAC139F04BE4"' in source
-    assert '$expectedExecutorBytes = 156055' in source
+    assert '$expectedPackageSha = "80B5DE15EC96C689003629C2A426E0371A72B39E8390C1DC7A6BE08FAC7B4069"' in source
+    assert '$expectedManifestSha = "4121F790E7C42CD25F43B85E83BBCA364D588DA6789BB9EECE9C960C0264843A"' in source
+    assert '$expectedExecutorSha = "22A208A638D29E785BE2881FF2390B02AD90ABE280FCDF2A71E578E24F86E479"' in source
+    assert '$expectedExecutorBytes = 156276' in source
     assert '$expectedCollectorSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"' in source
-    assert 'phase12-spain-install-network-resume-v30-a-20260727' in source
+    assert 'phase12-spain-install-prepared-resume-v31-a-20260727' in source
     assert 'UNIFIED BOUNDED FALLBACK LADDER EXACT CACHE OR VERIFIED 20MIB PARTS' in source
     assert 'DOCKER29 PRESTART CAPABILITY NORMALIZATION STOPPED EMPTY ENDPOINT ALLOWED RUNNING ENDPOINT STRICT' in source
-    assert 'NETWORK SERVICE PREPARED LEDGER RESUME THEN ONE START RETRY' in source
-    assert 'amn2-spain-phase12-install-v30.tar.part-001' in source
-    assert 'ECD077499726E597832C540AB020FC8D9EB5E28A238FCBB7F52B60AF78EB875B' in source
-    assert 'amn2-spain-phase12-install-v30.tar.part-007' in source
-    assert 'DA81E48A8E8DA1D2599D3C6823B549548DE5F0A02CF54C7A76B5A10FBC665563' in source
+    assert 'NETWORK SERVICE BOUND PREPARED LEDGER OBSERVATION RESUME THEN ONE START RETRY' in source
+    assert 'amn2-spain-phase12-install-v31.tar.part-001' in source
+    assert '6759390413268E07936FAF93E1D1F4F67D28EFC8781D4A09BC27CF5B243DF233' in source
+    assert 'amn2-spain-phase12-install-v31.tar.part-007' in source
+    assert 'BE6245D523571D83FF6FF81828D2D399A3D3F3BFB2A74567DB02CAAE21A090EA' in source
     assert 'Remote package part assembly mismatch.' in source
-    assert 'LegacyName="amn2-spain-phase12-install-v29.tar.part-002"' in source
+    assert 'LegacyName="amn2-spain-phase12-install-v30.tar.part-002"' in source
     assert '$approvedUploadDestinations' in source
     assert 'Remote package part checksum mismatch.' in source
     assert "StrictHostKeyChecking=yes" in source

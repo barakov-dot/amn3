@@ -860,3 +860,37 @@ and the current v30 executor. It permits only verified package cleanup, exact
 owned rollback, and foreign equality. Full Phase 12 scope:
 `389 passed, 4 skipped`; parser and empty-approval fail-closed passed. The next
 live operation is checksum-bound AD0E8B bundled recovery.
+
+## Current operational override — 2026-07-27: AD0E8B recovered; v31 ready
+
+The checksum-bound AD0E8B bundled recovery passed. Both manual-cleanup and
+terminal recovery receipts report `result=passed`; foreign persistent equality
+is `true`, with volatile before/after count `0`. The retained package tree and
+exact AMN2-owned contour are absent. The foreign Spain service and USA rollback
+contour were not changed.
+
+The saved mutation ledger proves the exact v30 boundary: the Docker image,
+network, container, and `interface:awgsp0` were committed;
+`systemd-enabled:amn2-spain-network.service` was committed, while the composite
+`network-contour:amn2-spain` did not reach its outer intent. The initial
+observer rejected a structurally valid current-boot prepared network ledger
+before entering the existing bounded resume path. v31 accepts only
+schema-valid, current-boot, state-compatible prepared ledgers; foreign,
+stale-boot, or state-drift ledgers remain collisions.
+
+Fresh v31 is double-build byte-equal and no-follow clean-room verified:
+package SHA-256
+`80B5DE15EC96C689003629C2A426E0371A72B39E8390C1DC7A6BE08FAC7B4069`
+(`140052480` bytes), manifest SHA-256
+`4121F790E7C42CD25F43B85E83BBCA364D588DA6789BB9EECE9C960C0264843A`,
+executor SHA-256
+`22A208A638D29E785BE2881FF2390B02AD90ABE280FCDF2A71E578E24F86E479`
+(`156276` bytes). Clean-room: 69 regular entries, 141 source files, source
+inventory SHA-256
+`C0FD4A1E1A88B877392DE4E59E289FE58239AA6B98A43F9F049068D2D5F581D7`,
+source exact `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`. Full Phase 12 scope:
+`345 passed, 4 skipped`; focused v31 runner/network scope: `29 passed`.
+Install runner SHA-256:
+`69871A30536F039223F210311A7F9B9C0471B899917750C2BDDDCD77FE553BFF`.
+The next live operation is the fresh checksum-bound v31 install after
+commit/push.

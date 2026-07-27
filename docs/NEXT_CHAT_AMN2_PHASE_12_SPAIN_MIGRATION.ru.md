@@ -877,3 +877,32 @@ and the current v30 executor. It permits only verified package cleanup, exact
 owned rollback, and foreign equality. Full Phase 12 scope:
 `389 passed, 4 skipped`; parser and empty-approval fail-closed passed. The next
 live operation is checksum-bound AD0E8B bundled recovery.
+
+## Current override 2026-07-27: AD0E8B recovery passed; fresh v31 ready
+
+AD0E8B bundled recovery passed: cleanup and terminal receipts both report
+`result=passed`, foreign persistent equality is `true`, volatile before/after
+count is `0`, and the exact AMN2 contour is absent. The foreign Spain service
+and USA rollback contour were not changed.
+
+The saved v30 ledger commits Docker image/network/container/interface and the
+network unit enabled state, but has no outer `network-contour:amn2-spain`
+intent. The initial observer therefore blocked a valid current-boot prepared
+network ledger before the bounded resume path. v31 allows only schema-valid,
+current-boot and state-compatible prepared ledgers to reach that resume path;
+foreign, stale-boot and state-drift ledgers remain fail-closed collisions.
+
+v31 package SHA-256:
+`80B5DE15EC96C689003629C2A426E0371A72B39E8390C1DC7A6BE08FAC7B4069`
+(`140052480` bytes); manifest SHA-256:
+`4121F790E7C42CD25F43B85E83BBCA364D588DA6789BB9EECE9C960C0264843A`;
+executor SHA-256:
+`22A208A638D29E785BE2881FF2390B02AD90ABE280FCDF2A71E578E24F86E479`
+(`156276` bytes). Double-build is byte-equal; no-follow clean-room passed with
+69 regular entries, 141 source files, source inventory SHA-256
+`C0FD4A1E1A88B877392DE4E59E289FE58239AA6B98A43F9F049068D2D5F581D7`
+and exact source `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`.
+Full Phase 12 scope: `345 passed, 4 skipped`; focused v31 runner/network:
+`29 passed`. Install runner SHA-256:
+`69871A30536F039223F210311A7F9B9C0471B899917750C2BDDDCD77FE553BFF`.
+Next live operation: fresh checksum-bound v31 install after commit/push.
