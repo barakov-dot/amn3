@@ -1,3 +1,9 @@
+# Текущий override 2026-07-27: V36 idempotent terminal-resume repair
+
+V35 resume stop произошёл до mutation: transaction, capsule и mutation ledger не изменились; AMN2 units inactive, `/opt` и dedicated Docker root сохранились. Причина — recovery code требовал ещё committed secret/run/systemd objects, хотя exact audit подтвердил их ledger-recorded `removed`. V36 принимает только подтверждённые removed states и проверяет фактическое отсутствие; committed branches не ослаблены.
+
+V36 executor double-build byte-identical: SHA-256 `0247C24C03801FCE85FBBAE19BDD39FAD30D10B1D8BB0AF7AB6478123C7037E7`, `159911` bytes. Scoped suite: `191 passed`; diff hygiene passed. Следующий action: один checksum-bound resume с exact V34 audit contour; только remaining AMN2-owned Docker/root/identity contour, foreign equality обязательна, install не запускается.
+
 # Текущий override 2026-07-27: V35 terminal resume repair после passed audit
 
 Checksum-bound V34 current terminal audit для nonce `21ca…` прошёл: exact empty `/etc/amn2-spain` принят только по разрешённому контракту; AMN2 units inactive. Audit показал следующий legacy-state mismatch: `/run/amn2-spain-docker` уже ledger-recorded `removed`, поэтому identity = `null`; parser resume ранее требовал hash. V35 допускает `null` только как bound absent run-directory state и resume всё равно требует, чтобы каталог фактически отсутствовал.

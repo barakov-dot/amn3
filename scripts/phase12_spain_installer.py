@@ -7685,12 +7685,18 @@ def _production_current_terminal_recovery_resume_bound(
             0o600,
             owned_kind="secret",
         )
-        if (
-            secret_event is None
-            or secret_event["event"] != "committed"
-            or secret_action.operation.desired_identity != secret_event["actual_identity"]
-            or secret_action.observe_identity() != secret_event["actual_identity"]
-        ):
+        if secret_event is None:
+            raise InstallError("current terminal recovery resume secret binding mismatch")
+        if secret_event["event"] == "committed":
+            if (
+                secret_action.operation.desired_identity != secret_event["actual_identity"]
+                or secret_action.observe_identity() != secret_event["actual_identity"]
+            ):
+                raise InstallError("current terminal recovery resume secret binding mismatch")
+        elif secret_event["event"] == "removed":
+            if root_fs.identity("etc/amn2-spain/awgsp0.conf") is not None:
+                raise InstallError("current terminal recovery resume secret removal mismatch")
+        else:
             raise InstallError("current terminal recovery resume secret binding mismatch")
         if root_fs.identity("run/amn2-spain-docker") != intent.run_directory_identity:
             raise InstallError("current terminal recovery resume run directory mismatch")
@@ -7729,24 +7735,45 @@ def _production_current_terminal_recovery_resume_bound(
             removed_now.append(owned_object)
 
         docker_unit = "amn2-spain-docker.service"
-        run_systemctl("stop", docker_unit)
-        stopped = show(docker_unit)
-        if stopped["ActiveState"] != "inactive" or stopped["UnitFileState"] != "enabled":
-            raise InstallError("current terminal recovery resume Docker stop mismatch")
-        mark_removed("systemd-active:" + docker_unit)
-        run_systemctl("disable", docker_unit)
-        disabled = show(docker_unit)
-        if disabled["ActiveState"] != "inactive" or disabled["UnitFileState"] != "disabled":
-            raise InstallError("current terminal recovery resume Docker disable mismatch")
-        mark_removed("systemd-enabled:" + docker_unit)
+        docker_active_event = ledger.event_for("systemd-active:" + docker_unit)
+        docker_enabled_event = ledger.event_for("systemd-enabled:" + docker_unit)
+        if (
+            docker_active_event is not None and docker_active_event["event"] == "removed"
+            and docker_enabled_event is not None and docker_enabled_event["event"] == "removed"
+        ):
+            current = show(docker_unit)
+            if current["ActiveState"] != "inactive" or current["LoadState"] != "not-found":
+                raise InstallError("current terminal recovery resume Docker removed-state mismatch")
+        elif (
+            docker_active_event is not None and docker_active_event["event"] == "committed"
+            and docker_enabled_event is not None and docker_enabled_event["event"] == "committed"
+        ):
+            run_systemctl("stop", docker_unit)
+            stopped = show(docker_unit)
+            if stopped["ActiveState"] != "inactive" or stopped["UnitFileState"] != "enabled":
+                raise InstallError("current terminal recovery resume Docker stop mismatch")
+            mark_removed("systemd-active:" + docker_unit)
+            run_systemctl("disable", docker_unit)
+            disabled = show(docker_unit)
+            if disabled["ActiveState"] != "inactive" or disabled["UnitFileState"] != "disabled":
+                raise InstallError("current terminal recovery resume Docker disable mismatch")
+            mark_removed("systemd-enabled:" + docker_unit)
+        else:
+            raise InstallError("current terminal recovery resume Docker ledger mismatch")
 
         for unit in live_backend.SYSTEMD_UNIT_ORDER:
             relative = "etc/systemd/system/" + unit
             owned_object = "file:/" + relative
             event = ledger.event_for(owned_object)
-            if event is None or event["event"] != "committed" or root_fs.identity(relative) != event["actual_identity"]:
+            if event is None:
                 raise InstallError("current terminal recovery resume unit file binding mismatch")
             current = show(unit)
+            if event["event"] == "removed":
+                if current["LoadState"] != "not-found":
+                    raise InstallError("current terminal recovery resume unit removed-state mismatch")
+                continue
+            if event["event"] != "committed" or root_fs.identity(relative) != event["actual_identity"]:
+                raise InstallError("current terminal recovery resume unit file binding mismatch")
             expected_unit_state = "static" if unit == "amn2-spain-bot.service" else "disabled"
             if current["ActiveState"] != "inactive" or current["UnitFileState"] != expected_unit_state:
                 raise InstallError("current terminal recovery resume unit state mismatch")
@@ -7757,10 +7784,16 @@ def _production_current_terminal_recovery_resume_bound(
             raise InstallError("current terminal recovery resume unit removal mismatch")
 
         run_event = ledger.event_for("dir:/run/amn2-spain-docker")
-        if run_event is None or run_event["event"] != "committed":
+        if run_event is None:
             raise InstallError("current terminal recovery resume run ledger mismatch")
-        root_fs.remove_exact("run/amn2-spain-docker", run_event["actual_identity"])
-        mark_removed("dir:/run/amn2-spain-docker")
+        if run_event["event"] == "committed":
+            root_fs.remove_exact("run/amn2-spain-docker", run_event["actual_identity"])
+            mark_removed("dir:/run/amn2-spain-docker")
+        elif run_event["event"] == "removed":
+            if root_fs.identity("run/amn2-spain-docker") is not None:
+                raise InstallError("current terminal recovery resume run removed-state mismatch")
+        else:
+            raise InstallError("current terminal recovery resume run ledger mismatch")
 
         docker_object = "dir:/var/lib/amn2-spain-docker"
         docker_event = ledger.event_for(docker_object)
