@@ -2365,6 +2365,18 @@ def test_current_terminal_recovery_resume_intent_binds_audited_contour() -> None
     assert dict(intent.owned_tree_inventories["opt"]) == payload["owned_tree_inventories"]["opt"]
     assert dict(intent.docker_data_root_inventory) == payload["docker_data_root_inventory"]
 
+    payload["run_directory_identity"] = None
+    absent_run_intent = installer_module._read_current_terminal_recovery_resume_intent_payload(
+        canonical_json_bytes(payload) + b"\n"
+    )
+    assert absent_run_intent.run_directory_identity is None
+    payload["run_directory_identity"] = "not-an-identity"
+    with pytest.raises(installer_module.InstallError, match="current_terminal_recovery_resume_bound_inputs_required"):
+        installer_module._read_current_terminal_recovery_resume_intent_payload(
+            canonical_json_bytes(payload) + b"\n"
+        )
+    payload["run_directory_identity"] = "sha256:" + "d" * 64
+
     payload["owned_tree_inventories"]["etc"] = {
         "tree_sha256": "a" * 64, "entry_count": 0, "total_bytes": 0, "root_mode": "0750"
     }

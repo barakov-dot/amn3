@@ -2013,7 +2013,7 @@ class CurrentTerminalRecoveryResumeIntent:
     systemd_sha256: str
     owned_tree_inventories: Mapping[str, Mapping[str, object]]
     docker_data_root_inventory: Mapping[str, object]
-    run_directory_identity: str
+    run_directory_identity: str | None
     approved_at_epoch: int
     expires_at_epoch: int
 
@@ -2045,7 +2045,12 @@ class CurrentTerminalRecoveryResumeIntent:
         if (
             not isinstance(value["approval_id"], str)
             or not value["approval_id"]
-            or re.fullmatch(r"sha256:[0-9a-f]{64}", value["run_directory_identity"] or "") is None
+            or (
+                value["run_directory_identity"] is not None
+                and re.fullmatch(
+                    r"sha256:[0-9a-f]{64}", value["run_directory_identity"]
+                ) is None
+            )
         ):
             raise InstallError("current terminal recovery resume intent approval/identity invalid")
         inventories = value["owned_tree_inventories"]

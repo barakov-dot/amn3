@@ -1,3 +1,9 @@
+# Текущий override 2026-07-27: V35 terminal resume repair после passed audit
+
+Checksum-bound V34 current terminal audit для nonce `21ca…` прошёл: exact empty `/etc/amn2-spain` принят только по разрешённому контракту; AMN2 units inactive. Audit показал следующий legacy-state mismatch: `/run/amn2-spain-docker` уже ledger-recorded `removed`, поэтому identity = `null`; parser resume ранее требовал hash. V35 допускает `null` только как bound absent run-directory state и resume всё равно требует, чтобы каталог фактически отсутствовал.
+
+V35 executor double-build byte-identical: SHA-256 `2845DB4A11DEB8051713E225417E2C993EB8631318BA96FF257920A3DD7A77F0`, `159730` bytes. Scoped suite: `191 passed`; `git diff --check` passed. Следующий authorized action: checksum-bound current terminal resume для exact audited transaction; это удаляет только AMN2-owned Docker data-root и roots, затем verifies foreign equality. Install не запускается.
+
 # Текущий override 2026-07-27: V34 exact empty `/etc/amn2-spain` recovery package готов
 
 V34 реализует только разрешённый repair для terminal recovery nonce `21ca61639577cff46e75f736d4b0e9034bd92d611b733e2f3f78a06d8b25c2e1`: пустой `/etc/amn2-spain` принимается только как AMN2-owned inventory `0750`, UID `0`, GID `61212`, `entry_count=0`, `total_bytes=0`. Empty `/opt` и `/var` остаются fail-closed; no-follow/single-filesystem/identity/double-read и Docker data-root cleanup не ослаблены.
