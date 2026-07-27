@@ -120,6 +120,12 @@ TRANSACTION_8C0EB7_BUNDLED_RECOVERY_SSH_RUNNER = (
     / "vps"
     / "phase12_spain_transaction_8c0eb7_bundled_recovery_ssh_runner.ps1"
 )
+TRANSACTION_84AA1F_BUNDLED_RECOVERY_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_84aa1f_bundled_recovery_ssh_runner.ps1"
+)
 TRANSACTION_EAF145_BUNDLED_RECOVERY_SSH_RUNNER = (
     ROOT
     / "scripts"
@@ -5107,6 +5113,27 @@ def test_transaction_8c0eb7_runner_bundles_exact_terminal_recovery() -> None:
     assert "7f0684a098ee51ec21d01f0240f91ed0e49036b9c9784028ce8212f615df016c" in source
     assert "38a07bbb54172f677883043b3c2280999ebb0305654a2fef57850576c4cc710a" in source
     assert "92f854a48f607bb29eca714bd42cceca0ca7bf14ab3533bf26596970edd29cbb" in source
+    assert "$expectedDockerTreeEntries = 51" in source
+    assert "$expectedDockerTreeBytes = 360503" in source
+    assert "NO FOREIGN SERVICE MUTATION" in source
+
+def test_transaction_84aa1f_runner_bundles_exact_terminal_recovery() -> None:
+    source = TRANSACTION_84AA1F_BUNDLED_RECOVERY_SSH_RUNNER.read_text(
+        encoding="utf-8"
+    )
+    assert "StrictHostKeyChecking=yes" in source
+    assert "manual-cleanup-bound" in source
+    assert "terminal-recovery-bound" in source
+    assert source.index("manual-cleanup-bound") < source.index(
+        "terminal-recovery-bound"
+    )
+    assert "install-bound" not in source
+    assert "scp.exe" not in source
+    assert "22A208A638D29E785BE2881FF2390B02AD90ABE280FCDF2A71E578E24F86E479" in source
+    assert "84aa1f36cdda4af588640e527c690a98dc364091591409ab0cf03ed21519ac59" in source
+    assert "663d27a5bc97fcef339aef157c118194c688ed44d9913326e6c40728c3759238" in source
+    assert "b57058e9a374cebec4155a1797e316b021aa9113df262b2d90be903dca1134a2" in source
+    assert "2affb8479f3fb5a465e1af48c9f30d9837e42151805f078384d443f893b4bbb7" in source
     assert "$expectedDockerTreeEntries = 51" in source
     assert "$expectedDockerTreeBytes = 360503" in source
     assert "NO FOREIGN SERVICE MUTATION" in source
