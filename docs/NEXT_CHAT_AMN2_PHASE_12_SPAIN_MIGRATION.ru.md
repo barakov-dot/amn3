@@ -828,3 +828,31 @@ passed. Install runner SHA-256 is
 The runner reuses verified v27 parts `002`–`006` by hash and size, uploading only
 missing/changed parts `001`, `007`, and the executor. The next live operation is
 the fresh checksum-bound v28 install.
+
+## Current override 2026-07-27: recovery 9D2D0D passed; fresh v30 ready
+
+Transaction
+`75f0f66c438d4115c0bf7640bdfbfec1c320ac8f06aac36229ad7681de0f1df2`
+is closed by checksum-bound bundled recovery. The exact AMN2 contour is
+absent, all four AMN2 units are inactive, and foreign persistent equality is
+`true`; the foreign Spain service and USA rollback contour were not changed.
+
+Read-only live `nft --check` passed. v29 failed because its composite fallback
+treated the first systemd start's durable prepared network ledger as
+non-resumable after compensation. v30 resumes that exact ledger with
+`controller.apply(existing_ledger)` and performs at most one start retry,
+retaining exact rollback on every failure.
+
+v30 package SHA-256:
+`15B5C4523A8D0D4A98BD10180FF024A088E84E649FDF7E67D7C58F6704024609`
+(`140052480` bytes); manifest SHA-256:
+`D4971A5D7DB4AA628923561B3F1EA07C0C55DE96724E2210FDD893B6F619E099`;
+executor SHA-256:
+`AE459D0779D4ECDC5C307182336B744E0E986FA893AEADED8342CAC139F04BE4`
+(`156055` bytes). Double-build is byte-equal; no-follow clean-room passed with
+69 regular entries, 141 source files, source inventory SHA-256
+`C0FD4A1E1A88B877392DE4E59E289FE58239AA6B98A43F9F049068D2D5F581D7`
+and exact source `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`.
+Full Phase 12 scope: `388 passed, 4 skipped`. Install runner SHA-256:
+`7B1514E6733FF00325502D5D782F8130AEA3FF53865B7512BAFCC28BD74AD805`.
+Next live operation: fresh checksum-bound v30 install.

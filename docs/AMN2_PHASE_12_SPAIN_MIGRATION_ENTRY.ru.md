@@ -808,3 +808,34 @@ and Docker tree SHA-256
 `DB76EB0118231F1F2AAB6CB679E77453293BCBDD2157E5BE3DF7A2F644731013`
 (`51` entries, `360503` bytes). Expanded Phase 12 gate:
 `388 passed, 4 skipped`.
+
+## Current operational override — 2026-07-27: 9D2D0D recovered; v30 ready
+
+The checksum-bound bundled recovery for transaction
+`75f0f66c438d4115c0bf7640bdfbfec1c320ac8f06aac36229ad7681de0f1df2`
+passed. The retained package tree and exact AMN2-owned contour are absent,
+all four AMN2 units are inactive, and foreign persistent equality is `true`.
+The foreign Spain service and USA rollback contour were not changed.
+
+A read-only live `nft --check` accepted the package-bound ruleset. The v29
+failure was traced to a resumable durable prepared network ledger being
+removed by the composite fallback after the first systemd start compensated.
+Fresh v30 resumes that exact ledger through
+`controller.apply(existing_ledger)` and then permits one start retry only;
+any apply or retry failure remains fail-closed with exact rollback.
+
+Fresh v30 is double-build byte-equal and no-follow clean-room verified:
+package SHA-256
+`15B5C4523A8D0D4A98BD10180FF024A088E84E649FDF7E67D7C58F6704024609`
+(`140052480` bytes), manifest SHA-256
+`D4971A5D7DB4AA628923561B3F1EA07C0C55DE96724E2210FDD893B6F619E099`,
+executor SHA-256
+`AE459D0779D4ECDC5C307182336B744E0E986FA893AEADED8342CAC139F04BE4`
+(`156055` bytes). The clean-room contains 69 regular entries and 141 source
+files; source inventory SHA-256 is
+`C0FD4A1E1A88B877392DE4E59E289FE58239AA6B98A43F9F049068D2D5F581D7`
+and source is exact
+`55dc243b8e6c6bdb57f8301b56326e4cd4072d19`. Full Phase 12 scope:
+`388 passed, 4 skipped`. Install runner SHA-256 is
+`7B1514E6733FF00325502D5D782F8130AEA3FF53865B7512BAFCC28BD74AD805`.
+The next live operation is the fresh checksum-bound v30 install.

@@ -2919,7 +2919,7 @@ def build_network_service_contour_action(
             systemd_active_action.create_exact()
         except BackendError as start_error:
             ledger = controller.read_ledger()
-            if ledger is None:
+            if ledger is None or not controller.is_exact(ledger):
                 try:
                     ledger = controller.apply()
                 except BackendError as apply_error:

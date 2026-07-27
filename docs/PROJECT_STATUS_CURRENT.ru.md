@@ -8081,3 +8081,34 @@ capsule SHA-256
 `DB76EB0118231F1F2AAB6CB679E77453293BCBDD2157E5BE3DF7A2F644731013`
 (`51` entries, `360503` bytes). Expanded Phase 12 gate:
 `388 passed, 4 skipped`.
+
+# Текущий override 2026-07-27: recovery 9D2D0D закрыт; fresh v30 готов
+
+Checksum-bound bundled recovery для transaction
+`75f0f66c438d4115c0bf7640bdfbfec1c320ac8f06aac36229ad7681de0f1df2`
+прошёл. Retained package tree и exact AMN2-owned contour удалены, четыре AMN2
+units inactive, foreign persistent equality `true`; посторонний Spain-сервис
+и USA rollback contour не изменялись.
+
+Read-only live `nft --check` для package-bound ruleset прошёл. Root cause v29
+локализован в fallback logic: первый systemd start мог оставить durable
+prepared network ledger после собственной compensation, а composite action
+ошибочно удалял этот resumable ledger вместо bounded
+`controller.apply(existing_ledger)`. Fresh v30 возобновляет exact prepared
+ledger, затем допускает ровно один повторный start; любой apply/retry failure
+остаётся fail-closed с exact rollback.
+
+Fresh v30 double-build byte-equal и no-follow clean-room verified: package
+SHA-256 `15B5C4523A8D0D4A98BD10180FF024A088E84E649FDF7E67D7C58F6704024609`
+(`140052480` bytes), manifest SHA-256
+`D4971A5D7DB4AA628923561B3F1EA07C0C55DE96724E2210FDD893B6F619E099`,
+executor SHA-256
+`AE459D0779D4ECDC5C307182336B744E0E986FA893AEADED8342CAC139F04BE4`
+(`156055` bytes). Clean-room: 69 regular entries, 141 source files,
+source inventory SHA-256
+`C0FD4A1E1A88B877392DE4E59E289FE58239AA6B98A43F9F049068D2D5F581D7`,
+source exact `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`. Full Phase 12 scope:
+`388 passed, 4 skipped`; PowerShell parser, empty-approval fail-closed и
+`git diff --check` passed. Install runner SHA-256
+`7B1514E6733FF00325502D5D782F8130AEA3FF53865B7512BAFCC28BD74AD805`.
+Следующая live-операция — fresh checksum-bound v30 install.
