@@ -1069,6 +1069,173 @@ class CompositeNetworkActionTests(unittest.TestCase):
         backend.rollback((action.operation,))
         self.assertEqual(state, {"active": False, "ledger": None, "exact": False})
 
+    def test_systemd_start_falls_back_to_durable_direct_apply_once(self) -> None:
+        state = {
+            "active": False,
+            "ledger": None,
+            "exact": False,
+            "start_calls": 0,
+            "apply_calls": 0,
+        }
+        active_identity = "sha256:" + "8" * 64
+
+        class Controller:
+            def read_ledger(self) -> dict[str, object] | None:
+                return state["ledger"]
+
+            def assert_absent(self) -> None:
+                if state["exact"]:
+                    raise BackendError("network contour collision")
+
+            def is_exact(self, _ledger: dict[str, object]) -> bool:
+                return bool(state["exact"])
+
+            def apply(self) -> dict[str, object]:
+                state["apply_calls"] += 1
+                state["ledger"] = {"schema": "prepared-and-final"}
+                state["exact"] = True
+                return state["ledger"]
+
+            def rollback(self, _ledger: dict[str, object]) -> None:
+                state["exact"] = False
+
+            def remove_ledger(self, _ledger: dict[str, object]) -> None:
+                state["ledger"] = None
+
+        def start() -> None:
+            state["start_calls"] += 1
+            if not state["exact"]:
+                raise BackendError("systemd network start failed")
+            state["active"] = True
+
+        active_action = live_backend.SystemAction(
+            operation=OwnedOperation(
+                "host_network_applied",
+                "systemd-active:amn2-spain-network.service",
+                active_identity,
+            ),
+            observe_identity=lambda: active_identity if state["active"] else None,
+            create_exact=start,
+            remove_exact=lambda identity: (
+                (_ for _ in ()).throw(BackendError("systemd active CAS drift"))
+                if identity != active_identity
+                else state.update(active=False, ledger=None, exact=False)
+            ),
+        )
+        action = live_backend.build_network_service_contour_action(
+            systemd_active_action=active_action,
+            controller=Controller(),
+        )
+        adapter = SystemOwnedAdapter(actions={action.operation.owned_object: action})
+        ledger = MutationLedger(allowed_objects={action.operation.owned_object})
+        backend = LinuxBackend(adapter=adapter, ledger=ledger)
+
+        backend.apply((action.operation,))
+        self.assertEqual(state["start_calls"], 2)
+        self.assertEqual(state["apply_calls"], 1)
+        self.assertTrue(state["active"])
+        self.assertTrue(state["exact"])
+        backend.rollback((action.operation,))
+        self.assertFalse(state["active"])
+        self.assertFalse(state["exact"])
+        self.assertIsNone(state["ledger"])
+
+    def test_systemd_retry_failure_rolls_back_direct_network_apply(self) -> None:
+        state = {"ledger": None, "exact": False, "start_calls": 0}
+        active_identity = "sha256:" + "9" * 64
+
+        class Controller:
+            def read_ledger(self) -> dict[str, object] | None:
+                return state["ledger"]
+
+            def assert_absent(self) -> None:
+                return None
+
+            def is_exact(self, _ledger: dict[str, object]) -> bool:
+                return bool(state["exact"])
+
+            def apply(self) -> dict[str, object]:
+                state["ledger"] = {"schema": "prepared-and-final"}
+                state["exact"] = True
+                return state["ledger"]
+
+            def rollback(self, _ledger: dict[str, object]) -> None:
+                state["exact"] = False
+
+            def remove_ledger(self, _ledger: dict[str, object]) -> None:
+                state["ledger"] = None
+
+        def start() -> None:
+            state["start_calls"] += 1
+            raise BackendError("systemd network start failed")
+
+        action = live_backend.build_network_service_contour_action(
+            systemd_active_action=live_backend.SystemAction(
+                operation=OwnedOperation(
+                    "host_network_applied",
+                    "systemd-active:amn2-spain-network.service",
+                    active_identity,
+                ),
+                observe_identity=lambda: None,
+                create_exact=start,
+                remove_exact=lambda _identity: None,
+            ),
+            controller=Controller(),
+        )
+
+        with self.assertRaisesRegex(BackendError, "network_retry_exhausted"):
+            action.create_exact()
+        self.assertEqual(state["start_calls"], 2)
+        self.assertFalse(state["exact"])
+        self.assertIsNone(state["ledger"])
+
+    def test_first_start_partial_ledger_is_rolled_back_without_retry(self) -> None:
+        state = {"ledger": None, "rollback_calls": 0, "start_calls": 0}
+        active_identity = "sha256:" + "a" * 64
+
+        class Controller:
+            def read_ledger(self) -> dict[str, object] | None:
+                return state["ledger"]
+
+            def assert_absent(self) -> None:
+                return None
+
+            def is_exact(self, _ledger: dict[str, object]) -> bool:
+                return False
+
+            def apply(self) -> dict[str, object]:
+                raise AssertionError("partial first-start ledger must not be applied over")
+
+            def rollback(self, _ledger: dict[str, object]) -> None:
+                state["rollback_calls"] += 1
+
+            def remove_ledger(self, _ledger: dict[str, object]) -> None:
+                state["ledger"] = None
+
+        def start() -> None:
+            state["start_calls"] += 1
+            state["ledger"] = {"schema": "prepared"}
+            raise BackendError("systemd network start failed")
+
+        action = live_backend.build_network_service_contour_action(
+            systemd_active_action=live_backend.SystemAction(
+                operation=OwnedOperation(
+                    "host_network_applied",
+                    "systemd-active:amn2-spain-network.service",
+                    active_identity,
+                ),
+                observe_identity=lambda: None,
+                create_exact=start,
+                remove_exact=lambda _identity: None,
+            ),
+            controller=Controller(),
+        )
+
+        with self.assertRaisesRegex(BackendError, "network_retry_exhausted"):
+            action.create_exact()
+        self.assertEqual(state["start_calls"], 1)
+        self.assertEqual(state["rollback_calls"], 1)
+        self.assertIsNone(state["ledger"])
     def test_partial_ledger_before_installer_intent_is_a_collision(self) -> None:
         class Controller:
             ledger: dict[str, object] | None = {"prepared": True}

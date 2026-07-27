@@ -2859,7 +2859,7 @@ def build_network_service_contour_action(
     controller: NetworkContourController,
 ) -> SystemAction:
     required = (
-        "read_ledger", "assert_absent", "is_exact", "rollback",
+        "read_ledger", "assert_absent", "is_exact", "apply", "rollback",
         "remove_ledger",
     )
     expected_systemd_object = "systemd-active:amn2-spain-network.service"
@@ -2915,7 +2915,46 @@ def build_network_service_contour_action(
     def create() -> None:
         if observe() is not None:
             return
-        systemd_active_action.create_exact()
+        try:
+            systemd_active_action.create_exact()
+        except BackendError as start_error:
+            ledger = controller.read_ledger()
+            if ledger is None:
+                try:
+                    ledger = controller.apply()
+                except BackendError as apply_error:
+                    prepared = controller.read_ledger()
+                    if prepared is not None:
+                        controller.rollback(prepared)
+                        controller.remove_ledger(prepared)
+                    raise BackendError("network_retry_exhausted") from apply_error
+            if not controller.is_exact(ledger):
+                try:
+                    controller.rollback(ledger)
+                    controller.remove_ledger(ledger)
+                except BackendError as cleanup_error:
+                    raise BackendError("network_retry_exhausted") from cleanup_error
+                raise BackendError("network_retry_exhausted") from start_error
+            try:
+                systemd_active_action.create_exact()
+            except BackendError as retry_error:
+                retry_service = systemd_active_action.observe_identity()
+                retry_ledger = controller.read_ledger()
+                if (
+                    retry_service == systemd_identity
+                    and retry_ledger is not None
+                    and controller.is_exact(retry_ledger)
+                ):
+                    return
+                if retry_service is not None:
+                    raise BackendError("network_retry_exhausted") from retry_error
+                if retry_ledger is not None:
+                    try:
+                        controller.rollback(retry_ledger)
+                        controller.remove_ledger(retry_ledger)
+                    except BackendError as cleanup_error:
+                        raise BackendError("network_retry_exhausted") from cleanup_error
+                raise BackendError("network_retry_exhausted") from retry_error
         if observe() != desired:
             raise BackendError("network service contour post-start drift")
 

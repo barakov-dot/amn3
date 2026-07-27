@@ -8035,3 +8035,30 @@ passed. Install runner SHA-256
 Runner переиспользует verified v27 parts `002`–`006` по hash/size и передаёт
 только отсутствующие/изменённые parts `001`, `007` и executor. Следующая
 live-операция — fresh checksum-bound v28 install.
+
+# Текущий override 2026-07-27: v28 rollback закрыт; fresh v29 готов
+
+Fresh v28 дошла до `host_network_applied`, после чего composite start
+`amn2-spain-network.service` fail-closed перешёл в rollback. Transaction
+`34454708115b48218bb8ec5ef6a1edce8ab6f401e22afa1bd41f38482cbf7b5f`
+закрыта checksum-bound bundled recovery: AMN2-owned contour отсутствует,
+все AMN2 units inactive, foreign persistent equality `true`; посторонний
+Spain-сервис и USA rollback contour не изменялись.
+
+Fresh v29 сохраняет systemd-first путь, а при первом отказе применяет exact
+network contour через durable controller ledger и делает ровно один повторный
+start. Running/exact service принимается без restart; любой второй отказ
+завершается `network_retry_exhausted` с automatic exact rollback.
+
+Fresh v29 double-build byte-equal и clean-room verified: package SHA-256
+`94B21C160676606FEE0FF1F0E86D86032B0650E5D2A8BF4F157CC7B60E97ECC6`
+(`140052480` bytes), manifest SHA-256
+`BB6CDECF1F14AAE516E6FB85DB23CF254E4E75132B78374258CAA17EBD24FD1E`,
+executor SHA-256
+`7DB67E85436E3530E5CF0DA0D46897353AE86182539DD9C91154CEA004D49758`
+(`156056` bytes). No-follow clean-room extract: 69 regular entries, 141 source
+files, exact source `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`. Full Phase 12 scope:
+`387 passed, 4 skipped`; PowerShell AST и diff check passed. Семь verified
+20 MiB parts готовы. Install runner SHA-256
+`F37013B32E46EA6A3B7988604C00519477260C4CB9DA5F64B5CBE21F3C45304D`.
+Следующая live-операция — fresh checksum-bound v29 install.
