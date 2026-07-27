@@ -2365,6 +2365,28 @@ def test_current_terminal_recovery_resume_intent_binds_audited_contour() -> None
     assert dict(intent.owned_tree_inventories["opt"]) == payload["owned_tree_inventories"]["opt"]
     assert dict(intent.docker_data_root_inventory) == payload["docker_data_root_inventory"]
 
+    payload["owned_tree_inventories"]["etc"] = {
+        "tree_sha256": "a" * 64, "entry_count": 0, "total_bytes": 0, "root_mode": "0750"
+    }
+    empty_etc_intent = installer_module._read_current_terminal_recovery_resume_intent_payload(
+        canonical_json_bytes(payload) + b"\n"
+    )
+    assert empty_etc_intent.owned_tree_inventories["etc"]["entry_count"] == 0
+
+    payload["owned_tree_inventories"]["etc"]["total_bytes"] = 1
+    with pytest.raises(installer_module.InstallError, match="current_terminal_recovery_resume_bound_inputs_required"):
+        installer_module._read_current_terminal_recovery_resume_intent_payload(
+            canonical_json_bytes(payload) + b"\n"
+        )
+    payload["owned_tree_inventories"]["etc"]["total_bytes"] = 0
+
+    payload["owned_tree_inventories"]["opt"]["entry_count"] = 0
+    with pytest.raises(installer_module.InstallError, match="current_terminal_recovery_resume_bound_inputs_required"):
+        installer_module._read_current_terminal_recovery_resume_intent_payload(
+            canonical_json_bytes(payload) + b"\n"
+        )
+
+
 
 def test_current_terminal_recovery_finalize_intent_binds_post_contour_state() -> None:
     payload = {
@@ -2796,7 +2818,7 @@ def test_current_terminal_recovery_audit_reports_sealed_current_state(
     monkeypatch.setattr(
         live_backend,
         "inspect_terminal_owned_tree",
-        lambda target: {
+        lambda target, **_kwargs: {
             "tree_sha256": hashlib.sha256(str(target).encode("utf-8")).hexdigest(),
             "entry_count": 1,
             "total_bytes": 1,
@@ -2988,6 +3010,29 @@ def test_terminal_owned_tree_inventory_is_bounded_and_no_follow(
     assert receipt["total_bytes"] == len(b"phase12\n")
     assert receipt["root_mode"] == "0755"
     assert re.fullmatch(r"[0-9a-f]{64}", str(receipt["tree_sha256"]))
+
+
+def test_terminal_owned_tree_empty_requires_explicit_bound(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "etc" / "amn2-spain"
+    target.mkdir(parents=True)
+
+    with pytest.raises(live_backend.BackendError, match="owned tree is unexpectedly empty"):
+        live_backend.inspect_terminal_owned_tree(target)
+
+    receipt = live_backend.inspect_terminal_owned_tree(target, allow_empty=True)
+    assert receipt["entry_count"] == 0
+    assert receipt["total_bytes"] == 0
+    assert live_backend.cleanup_terminal_owned_tree(
+        target,
+        expected_tree_sha256=str(receipt["tree_sha256"]),
+        expected_entry_count=0,
+        expected_total_bytes=0,
+        expected_root_mode=str(receipt["root_mode"]),
+        allow_empty=True,
+    ) == receipt
+    assert not target.exists()
 
 
 def test_terminal_owned_tree_cleanup_requires_exact_double_inventory(

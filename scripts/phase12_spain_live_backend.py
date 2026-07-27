@@ -1411,7 +1411,7 @@ def _open_tree_directory(root_fd: int, parts: tuple[str, ...]) -> int:
         raise
 
 
-def _scan_tree(target: Path) -> dict[str, Any] | None:
+def _scan_tree(target: Path, *, allow_empty: bool = False) -> dict[str, Any] | None:
     from scripts import phase12_spain_package as package
 
     rows: list[dict[str, Any]] = []
@@ -1509,7 +1509,7 @@ def _scan_tree(target: Path) -> dict[str, Any] | None:
             visit(root_fd, PurePosixPath())
         finally:
             os.close(root_fd)
-    if not rows:
+    if not rows and not allow_empty:
         raise BackendError("owned tree is unexpectedly empty")
     return package._canonical_tree_plan(rows)
 
@@ -1542,7 +1542,9 @@ def _tree_root_mode(target: Path) -> str | None:
         os.close(descriptor)
 
 
-def inspect_terminal_owned_tree(target: Path) -> dict[str, object]:
+def inspect_terminal_owned_tree(
+    target: Path, *, allow_empty: bool = False
+) -> dict[str, object]:
     """Return a bounded no-follow inventory for one dedicated AMN2 tree."""
     from scripts import phase12_spain_package as package
 
@@ -1550,7 +1552,7 @@ def inspect_terminal_owned_tree(target: Path) -> dict[str, object]:
     if not target.is_absolute():
         raise BackendError("terminal owned tree path invalid")
     if os.name == "nt":
-        tree = _scan_tree(target)
+        tree = _scan_tree(target, allow_empty=allow_empty)
         if tree is None:
             raise BackendError("terminal owned tree unavailable")
         rows = tree["rows"]
@@ -1652,7 +1654,11 @@ def inspect_terminal_owned_tree(target: Path) -> dict[str, object]:
         visit(root_fd, PurePosixPath())
     finally:
         os.close(root_fd)
-    if not rows or len(rows) > 50_000 or total_bytes > 2 * 1024 * 1024 * 1024:
+    if (
+        (not rows and not allow_empty)
+        or len(rows) > 50_000
+        or total_bytes > 2 * 1024 * 1024 * 1024
+    ):
         raise BackendError("terminal owned tree inventory bound invalid")
     return {
         "tree_sha256": package.sha256_canonical(rows),
@@ -1669,6 +1675,7 @@ def cleanup_terminal_owned_tree(
     expected_entry_count: int,
     expected_total_bytes: int,
     expected_root_mode: str,
+    allow_empty: bool = False,
 ) -> dict[str, object]:
     """Remove one audit-bound regular-file/directory tree without following links."""
     target = Path(target)
@@ -1683,15 +1690,16 @@ def cleanup_terminal_owned_tree(
         or re.fullmatch(r"[0-9a-f]{64}", expected_tree_sha256) is None
         or not isinstance(expected_entry_count, int)
         or isinstance(expected_entry_count, bool)
-        or not 0 < expected_entry_count <= 50_000
+        or not (0 <= expected_entry_count <= 50_000)
+        or (expected_entry_count == 0 and not allow_empty)
         or not isinstance(expected_total_bytes, int)
         or isinstance(expected_total_bytes, bool)
         or not 0 <= expected_total_bytes <= 2 * 1024 * 1024 * 1024
         or expected_root_mode not in {"0750", "0755"}
     ):
         raise BackendError("terminal owned tree cleanup input invalid")
-    first = inspect_terminal_owned_tree(target)
-    second = inspect_terminal_owned_tree(target)
+    first = inspect_terminal_owned_tree(target, allow_empty=allow_empty)
+    second = inspect_terminal_owned_tree(target, allow_empty=allow_empty)
     if first != expected or second != expected:
         raise BackendError("terminal owned tree inventory drift")
     _remove_owned_tree(target)

@@ -1,3 +1,13 @@
+# Текущий override 2026-07-27: V34 exact empty `/etc/amn2-spain` recovery package готов
+
+V34 реализует только разрешённый repair для terminal recovery nonce `21ca61639577cff46e75f736d4b0e9034bd92d611b733e2f3f78a06d8b25c2e1`: пустой `/etc/amn2-spain` принимается только как AMN2-owned inventory `0750`, UID `0`, GID `61212`, `entry_count=0`, `total_bytes=0`. Empty `/opt` и `/var` остаются fail-closed; no-follow/single-filesystem/identity/double-read и Docker data-root cleanup не ослаблены.
+
+Double-build byte-identical: package SHA-256 `488F6516045D0F6EB74E26C76D5A4AEDF0AE028132FBC573BF73ED00427C33FA` (`140093440` bytes), manifest `CDDD5DE69F50F832F21046D349A12E20CCF790D98D46AB72B245FF564B1B1A93`, executor SHA-256 `63F2DF9781A8657D66E3ED7CA38A61A879CA9E8737FF6A77698D2D4FABEEC193` (`159712` bytes). Offline no-follow clean-room extraction: `69` entries, inventory exact match. Scoped suite: `191 passed`. До checksum-bound recovery никакой foreign/USA/live install mutation этим repair не выполнялась.
+
+# Текущий override 2026-07-27: exact empty `/etc/amn2-spain` recovery repair
+
+Для transaction `21ca61639577cff46e75f736d4b0e9034bd92d611b733e2f3f78a06d8b25c2e1` read-only terminal audit установил единственный оставшийся blocker: `/etc/amn2-spain` существует как exact пустой AMN2-owned каталог (`0750`, UID `0`, GID `61212`). Recovery repair допускает нулевой inventory только для этой метки и только при `total_bytes=0`; `/opt` и `/var` остаются строго непустыми. No-follow, single-filesystem, exact identity, double-read, Docker data-root cleanup и foreign equality сохраняются. До нового checksum-bound recovery live-изменений этим repair не выполнено.
+
 # Текущий override 2026-07-27: rollback repair для transaction 21ca готов локально
 
 V32 install дошёл до automatic rollback и fail-closed на непустом

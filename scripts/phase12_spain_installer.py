@@ -2062,10 +2062,12 @@ class CurrentTerminalRecoveryResumeIntent:
                 or re.fullmatch(r"[0-9a-f]{64}", item["tree_sha256"]) is None
                 or not isinstance(item["entry_count"], int)
                 or isinstance(item["entry_count"], bool)
-                or not 0 < item["entry_count"] <= 50_000
+                or not (0 <= item["entry_count"] <= 50_000)
+                or (item["entry_count"] == 0 and label != "etc")
                 or not isinstance(item["total_bytes"], int)
                 or isinstance(item["total_bytes"], bool)
                 or not 0 <= item["total_bytes"] <= 2 * 1024 * 1024 * 1024
+                or (item["entry_count"] == 0 and item["total_bytes"] != 0)
                 or item["root_mode"] != expected_modes[label]
             ):
                 raise InstallError("current terminal recovery resume tree inventory invalid")
@@ -7318,7 +7320,8 @@ def _production_current_terminal_recovery_audit_bound(
         if fs.identity(relative) != event["actual_identity"]:
             raise InstallError("current terminal recovery audit root identity mismatch")
         receipt = live_backend.inspect_terminal_owned_tree(
-            _host_path(root, "/" + relative)
+            _host_path(root, "/" + relative),
+            allow_empty=label == "etc",
         )
         if receipt["root_mode"] != mode:
             raise InstallError("current terminal recovery audit root mode mismatch")
@@ -7645,7 +7648,9 @@ def _production_current_terminal_recovery_resume_bound(
             event = ledger.event_for("dir:/" + relative)
             if event is None or event["event"] != "committed" or fs.identity(relative) != event["actual_identity"]:
                 raise InstallError("current terminal recovery resume tree root binding mismatch")
-            if live_backend.inspect_terminal_owned_tree(target) != dict(intent.owned_tree_inventories[label]):
+            if live_backend.inspect_terminal_owned_tree(
+                target, allow_empty=label == "etc"
+            ) != dict(intent.owned_tree_inventories[label]):
                 raise InstallError("current terminal recovery resume tree inventory mismatch")
         for owned_object in committed:
             if owned_object.startswith(("dir:/opt/amn2-spain", "file:/opt/amn2-spain")):
@@ -7794,6 +7799,7 @@ def _production_current_terminal_recovery_resume_bound(
                 expected_entry_count=int(inventory["entry_count"]),
                 expected_total_bytes=int(inventory["total_bytes"]),
                 expected_root_mode=str(inventory["root_mode"]),
+                allow_empty=label == "etc",
             )
             prefixes = {
                 "opt": ("dir:/opt/amn2-spain", "file:/opt/amn2-spain", "tree:/opt/amn2-spain"),
