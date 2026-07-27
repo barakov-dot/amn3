@@ -7,12 +7,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $sourceRevision = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
-$expectedPackageSha = "80B5DE15EC96C689003629C2A426E0371A72B39E8390C1DC7A6BE08FAC7B4069"
-$expectedPackageBytes = 140052480
-$expectedManifestSha = "4121F790E7C42CD25F43B85E83BBCA364D588DA6789BB9EECE9C960C0264843A"
+$expectedPackageSha = "E36421C92F1519BE391C1777171F308F57375E77885F4B104D0A899D05E0F19C"
+$expectedPackageBytes = 140062720
+$expectedManifestSha = "BC5FCB8DECB361F3C4F41AAA9D05D87BEEA3410A766C7634538BCEE0BF29CE2C"
 $expectedPlanSha = "8BC5375F244F7CDD77A12BD4173CA19BE7430C35E49756D7B846906719369F43"
-$expectedExecutorSha = "22A208A638D29E785BE2881FF2390B02AD90ABE280FCDF2A71E578E24F86E479"
-$expectedExecutorBytes = 156276
+$expectedExecutorSha = "DEDD72A206B48001A334CE9B260316D495854FCF983D3A7C12E3DB8CD5F2D75E"
+$expectedExecutorBytes = 157707
 $expectedCollectorSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"
 $run009EvidenceSha = "8D8A4E155B30C4B72C564056C71B159E222C53E3BDC60018C3F6099C1979E1A8"
 $fingerprintArraySha = "E15219CB5204D54A9AD11263CFBA1F7C86E16DAB3287C752A8B6F136EC4A5ED5"
@@ -21,17 +21,17 @@ $expectedBootSha = "099155E2A5578144C715124A1B9B4D8F5D572134C8F72FD98B75D5DE0EB5
 $uploadTimeoutMilliseconds = 900000
 $expectedRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-prepared-resume-v31-a-20260727"
+$artifactRoot = Join-Path $repoRoot "private-artifacts\phase12-spain-install-network-unit-receipt-v32-a-20260727"
 $packagePath = Join-Path $artifactRoot "package.tar"
 $executorPath = Join-Path $artifactRoot "executor.pyz"
 $expectedParts = @(
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v31.tar.part-001"; LegacyName=$null; Bytes=20971520; Sha="6759390413268E07936FAF93E1D1F4F67D28EFC8781D4A09BC27CF5B243DF233" },
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v31.tar.part-002"; LegacyName="amn2-spain-phase12-install-v30.tar.part-002"; Bytes=20971520; Sha="4B37E48F5C31B6562778A25561B1B4641F9BBA367CBDD7CB4ECCC39A9733E5FD" },
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v31.tar.part-003"; LegacyName="amn2-spain-phase12-install-v30.tar.part-003"; Bytes=20971520; Sha="6D0E4EB2F4872D802F697457A152A2B5522C79A998399DD5977EFFABEBA62239" },
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v31.tar.part-004"; LegacyName="amn2-spain-phase12-install-v30.tar.part-004"; Bytes=20971520; Sha="A6A4CEAF1CFF35B96668757D1904645602F101A79084ADE46171F8423174E5E7" },
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v31.tar.part-005"; LegacyName="amn2-spain-phase12-install-v30.tar.part-005"; Bytes=20971520; Sha="A68C3A0C4310C2D7A9A16D34C8768965B35C07B95446493755C146BB783E91E2" },
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v31.tar.part-006"; LegacyName="amn2-spain-phase12-install-v30.tar.part-006"; Bytes=20971520; Sha="A49AA6D65340DC8BEED8A24B3FACE27AAB83288C00C6FE388EA50D94B24E3C19" },
-    [pscustomobject]@{ Name="amn2-spain-phase12-install-v31.tar.part-007"; LegacyName=$null; Bytes=14223360; Sha="BE6245D523571D83FF6FF81828D2D399A3D3F3BFB2A74567DB02CAAE21A090EA" }
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v32.tar.part-001"; LegacyName=$null; Bytes=20971520; Sha="D459CB36D3EDD1F202CDFBD4ED8C5DB4F2D1A6BE7FA14CD50E4D4B5AE89AB43A" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v32.tar.part-002"; LegacyName="amn2-spain-phase12-install-v31.tar.part-002"; Bytes=20971520; Sha="4B37E48F5C31B6562778A25561B1B4641F9BBA367CBDD7CB4ECCC39A9733E5FD" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v32.tar.part-003"; LegacyName="amn2-spain-phase12-install-v31.tar.part-003"; Bytes=20971520; Sha="6D0E4EB2F4872D802F697457A152A2B5522C79A998399DD5977EFFABEBA62239" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v32.tar.part-004"; LegacyName="amn2-spain-phase12-install-v31.tar.part-004"; Bytes=20971520; Sha="A6A4CEAF1CFF35B96668757D1904645602F101A79084ADE46171F8423174E5E7" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v32.tar.part-005"; LegacyName="amn2-spain-phase12-install-v31.tar.part-005"; Bytes=20971520; Sha="A68C3A0C4310C2D7A9A16D34C8768965B35C07B95446493755C146BB783E91E2" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v32.tar.part-006"; LegacyName="amn2-spain-phase12-install-v31.tar.part-006"; Bytes=20971520; Sha="A49AA6D65340DC8BEED8A24B3FACE27AAB83288C00C6FE388EA50D94B24E3C19" },
+    [pscustomobject]@{ Name="amn2-spain-phase12-install-v32.tar.part-007"; LegacyName=$null; Bytes=14233600; Sha="8EBA65E05EAFE72A87BCA75FB157145826AB2FC5E4E50FF2137DBCC050120022" }
 )
 $approvedUploadDestinations = @(
     "/root/amn2-spain-phase12-install-a.tar",
@@ -167,7 +167,7 @@ $keyPath = Join-Path $privateRoot "id_ed25519_spain"
 $knownHostsPath = Join-Path $privateRoot "known_hosts_spain"
 $binding = Read-PrivateBinding $bindingPath
 if ($binding["SSH_KEY_PATH"] -cne $keyPath -or -not (Test-Path -LiteralPath $keyPath -PathType Leaf) -or -not (Test-Path -LiteralPath $knownHostsPath -PathType Leaf)) { throw "Private SSH material unavailable." }
-$runnerApproval = "APPROVE PHASE12 SPAIN CHECKSUM BOUND INSTALL RUNNER SHA256 $expectedRunnerSha PACKAGE SHA256 $expectedPackageSha PACKAGE BYTES $expectedPackageBytes MANIFEST SHA256 $expectedManifestSha RESOURCE PLAN SHA256 $expectedPlanSha EXECUTOR SHA256 $expectedExecutorSha EXECUTOR BYTES $expectedExecutorBytes COLLECTOR SHA256 $expectedCollectorSha SOURCE $sourceRevision RUN009 EVIDENCE SHA256 $run009EvidenceSha FINGERPRINT ARRAY SHA256 $fingerprintArraySha UNIFIED BOUNDED FALLBACK LADDER EXACT CACHE OR VERIFIED 20MIB PARTS DOCKER29 PRESTART CAPABILITY NORMALIZATION STOPPED EMPTY ENDPOINT ALLOWED RUNNING ENDPOINT STRICT NETWORK SERVICE BOUND PREPARED LEDGER OBSERVATION RESUME THEN ONE START RETRY DYNAMIC FOREIGN EQUALITY PERSISTENT REQUIRED VOLATILE RECORDED EXACT PRIVATE TARGET DEDICATED ED25519 KEY INDEPENDENT HOST PIN STDIN ONLY UPLOAD TIMEOUT SECONDS 900 UPLOAD PACKAGE EXECUTOR REMOTE HASH VERIFY INSTALL BOUND AUTOMATIC ROLLBACK NO FOREIGN SERVICE MUTATION USA ROLLBACK CONTOUR"
+$runnerApproval = "APPROVE PHASE12 SPAIN CHECKSUM BOUND INSTALL RUNNER SHA256 $expectedRunnerSha PACKAGE SHA256 $expectedPackageSha PACKAGE BYTES $expectedPackageBytes MANIFEST SHA256 $expectedManifestSha RESOURCE PLAN SHA256 $expectedPlanSha EXECUTOR SHA256 $expectedExecutorSha EXECUTOR BYTES $expectedExecutorBytes COLLECTOR SHA256 $expectedCollectorSha SOURCE $sourceRevision RUN009 EVIDENCE SHA256 $run009EvidenceSha FINGERPRINT ARRAY SHA256 $fingerprintArraySha NETWORK UNIT FAILURE RECEIPT ALLOWLISTED SYSTEMD RESULT EXECMAINCODE EXECMAINSTATUS AND SCRIPT LABEL BEFORE ROLLBACK CAPSULE BOUND AUDIT RECEIPT NO RAW JOURNAL OR SECRETS UNIFIED BOUNDED FALLBACK LADDER EXACT CACHE OR VERIFIED 20MIB PARTS DOCKER29 PRESTART CAPABILITY NORMALIZATION STOPPED EMPTY ENDPOINT ALLOWED RUNNING ENDPOINT STRICT NETWORK SERVICE BOUND PREPARED LEDGER OBSERVATION RESUME THEN ONE START RETRY DYNAMIC FOREIGN EQUALITY PERSISTENT REQUIRED VOLATILE RECORDED EXACT PRIVATE TARGET DEDICATED ED25519 KEY INDEPENDENT HOST PIN STDIN ONLY UPLOAD TIMEOUT SECONDS 900 UPLOAD PACKAGE EXECUTOR REMOTE HASH VERIFY INSTALL BOUND AUTOMATIC ROLLBACK NO FOREIGN SERVICE MUTATION USA ROLLBACK CONTOUR"
 if ($Approval -cne $runnerApproval) { Write-Output $runnerApproval; throw "Exact install approval mismatch." }
 
 $transportOptions = @("-F", "none", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=4", "-o", "IdentitiesOnly=yes", "-o", "PasswordAuthentication=no", "-o", "KbdInteractiveAuthentication=no", "-o", "GSSAPIAuthentication=no", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "-o", "RequestTTY=no", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=$knownHostsPath", "-i", $keyPath)

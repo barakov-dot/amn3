@@ -1460,6 +1460,24 @@ class ProductionInstallActionPlanTests(unittest.TestCase):
         )
 
 
+class NetworkFailureReceiptTests(unittest.TestCase):
+    def test_network_unit_failure_status_is_allowlisted(self) -> None:
+        payload = (
+            b"Result=exit-code\n"
+            b"ExecMainCode=exited\n"
+            b"ExecMainStatus=1\n"
+        )
+
+        self.assertEqual(
+            live_backend.parse_network_unit_failure_show(payload),
+            {
+                "result": "exit-code",
+                "exec_main_code": "exited",
+                "exec_main_status": "1",
+                "network_script_failure_label": "network_script_exit_1",
+            },
+        )
+
 class SystemdActionTests(unittest.TestCase):
     def test_enable_and_active_are_separate_reconcilable_actions(self) -> None:
         state = {"UnitFileState": "disabled", "ActiveState": "inactive"}

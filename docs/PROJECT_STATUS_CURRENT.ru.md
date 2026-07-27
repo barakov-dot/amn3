@@ -1,3 +1,25 @@
+# Текущий override 2026-07-27: V32 network-unit failure receipt локально готов
+
+После предыдущего rollback systemd unit, journal и network ledger были удалены
+вместе с AMN2 contour, поэтому live-причина `amn2-spain-network.service` уже
+неизвлекаема. V32 добавляет ровно один fail-closed receipt до rollback:
+capsule-bound append-only audit sibling содержит только allowlisted systemd
+`Result`, `ExecMainCode`, `ExecMainStatus` и derived
+`network_script_failure_label`; raw journal, stderr и secrets не сохраняются.
+Посторонний Spain-сервис и USA rollback contour не меняются.
+
+V32 package/executor double-build byte-equal: package SHA-256
+`E36421C92F1519BE391C1777171F308F57375E77885F4B104D0A899D05E0F19C`
+(`140062720` bytes), manifest SHA-256
+`BC5FCB8DECB361F3C4F41AAA9D05D87BEEA3410A766C7634538BCEE0BF29CE2C`,
+executor SHA-256
+`DEDD72A206B48001A334CE9B260316D495854FCF983D3A7C12E3DB8CD5F2D75E`
+(`157707` bytes), runner SHA-256
+`D18D4B274DB0EAD287B9238D79ED0C97755174661623CB7D3565907BDD52C2FC`.
+Package verify passed; no-follow clean-room extracted 69 entries with inventory
+equality. Scoped Linux/executor/rollback/equality suite: `291 passed, 4
+skipped`; PowerShell parser passed. Live install ещё не запускался. Следующий
+gate: commit/push/readback, затем один fresh checksum-bound install approval.
 # Текущий override 2026-07-25: 958e mixed-contour terminal recovery готов
 
 Старый current-audit fail-closed без mutation: он ожидал retained run-directory,

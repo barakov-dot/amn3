@@ -3437,6 +3437,13 @@ def _systemctl_show_argv(unit: str) -> tuple[str, ...]:
         "--property=LoadState,FragmentPath,UnitFileState,ActiveState",
     )
 
+NETWORK_UNIT_FAILURE_SHOW_ARGV = (
+    SYSTEMCTL,
+    "show",
+    "amn2-spain-network.service",
+    "--no-pager",
+    "--property=Result,ExecMainCode,ExecMainStatus",
+)
 
 SYSTEMCTL_COMMAND_ALLOWLIST = frozenset(
     {(SYSTEMCTL, "daemon-reload")}
@@ -3490,6 +3497,39 @@ def parse_systemctl_show(payload: bytes, *, unit: str) -> dict[str, str]:
         raise BackendError("systemd show observation invalid")
     return values
 
+def parse_network_unit_failure_show(payload: bytes) -> dict[str, str]:
+    """Reduce fixed systemd failure state to a bounded, secret-free label."""
+    if not isinstance(payload, bytes) or not payload or len(payload) > MAX_SYSTEMCTL_SHOW_BYTES:
+        raise BackendError("network failure status invalid")
+    try:
+        text = payload.decode("ascii")
+    except UnicodeDecodeError as exc:
+        raise BackendError("network failure status invalid") from exc
+    values: dict[str, str] = {}
+    for line in text.splitlines():
+        if "=" not in line:
+            raise BackendError("network failure status invalid")
+        key, value = line.split("=", maxsplit=1)
+        if key in values:
+            raise BackendError("network failure status invalid")
+        values[key] = value
+    if set(values) != {"Result", "ExecMainCode", "ExecMainStatus"}:
+        raise BackendError("network failure status invalid")
+    result = values["Result"]
+    code = values["ExecMainCode"]
+    status = values["ExecMainStatus"]
+    if (
+        result != "exit-code"
+        or code != "exited"
+        or re.fullmatch(r"[1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]", status) is None
+    ):
+        raise BackendError("network failure status invalid")
+    return {
+        "result": result,
+        "exec_main_code": code,
+        "exec_main_status": status,
+        "network_script_failure_label": "network_script_exit_" + status,
+    }
 
 @dataclass(frozen=True, repr=False)
 class ProductionSystemdBundle:

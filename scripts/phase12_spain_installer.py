@@ -4048,6 +4048,134 @@ def reconstruct_production_installation(
     )
 
 
+def capture_network_unit_failure_receipt(
+    *,
+    audit_root: Path,
+    nonce: str,
+    capsule_sha256: str,
+    systemd_runner: Callable[..., bytes],
+    expected_uid: int | None,
+) -> Path:
+    """Read exact network-unit status and persist its safe receipt."""
+    if not callable(systemd_runner):
+        raise InstallError("network unit failure runner invalid")
+    try:
+        payload = systemd_runner(
+            live_backend.NETWORK_UNIT_FAILURE_SHOW_ARGV,
+            timeout=live_backend.DEFAULT_COMMAND_TIMEOUT,
+            max_output=live_backend.MAX_SYSTEMCTL_SHOW_BYTES,
+        )
+        status = live_backend.parse_network_unit_failure_show(payload)
+    except BackendError as exc:
+        raise InstallError("network unit failure status unavailable") from exc
+    except Exception as exc:
+        raise InstallError("network unit failure status unavailable") from exc
+    return persist_network_unit_failure_receipt(
+        audit_root=audit_root,
+        nonce=nonce,
+        capsule_sha256=capsule_sha256,
+        stage="host_network_applied",
+        status=status,
+        expected_uid=expected_uid,
+    )
+
+def persist_network_unit_failure_receipt(
+    *,
+    audit_root: Path,
+    nonce: str,
+    capsule_sha256: str,
+    stage: str,
+    status: Mapping[str, str],
+    expected_uid: int | None,
+) -> Path:
+    """Persist one safe, capsule-bound network-unit failure receipt."""
+    if (
+        re.fullmatch(r"[0-9a-f]{64}", nonce) is None
+        or re.fullmatch(r"[0-9a-f]{64}", capsule_sha256) is None
+        or stage != "host_network_applied"
+        or not isinstance(status, Mapping)
+        or set(status) != {
+            "result", "exec_main_code", "exec_main_status", "network_script_failure_label"
+        }
+        or status.get("result") != "exit-code"
+        or status.get("exec_main_code") != "exited"
+        or not isinstance(status.get("exec_main_status"), str)
+        or re.fullmatch(r"[1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]", status["exec_main_status"]) is None
+        or status.get("network_script_failure_label")
+        != "network_script_exit_" + status["exec_main_status"]
+    ):
+        raise InstallError("network unit failure receipt invalid")
+    root = Path(audit_root)
+    if root.is_symlink() or not root.is_dir():
+        raise InstallError("network unit failure receipt root invalid")
+    value = {
+        "capsule_sha256": capsule_sha256,
+        "network_script_failure_label": status["network_script_failure_label"],
+        "nonce": nonce,
+        "schema": "amn2.spain-network-unit-failure-receipt.v1",
+        "stage": stage,
+        "systemd": {
+            "exec_main_code": status["exec_main_code"],
+            "exec_main_status": status["exec_main_status"],
+            "result": status["result"],
+        },
+    }
+    payload = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8") + b"\n"
+    target = root / ("network-unit-failure-" + nonce + ".json")
+    temporary = root / ("." + target.name + ".tmp")
+    if target.exists() or target.is_symlink() or temporary.exists() or temporary.is_symlink():
+        raise InstallError("network unit failure receipt collision")
+    descriptor = -1
+    try:
+        descriptor = os.open(
+            temporary,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_BINARY", 0),
+            0o600,
+        )
+        if os.name != "nt":
+            os.fchmod(descriptor, 0o600)
+        offset = 0
+        while offset < len(payload):
+            written = os.write(descriptor, payload[offset:])
+            if written <= 0:
+                raise InstallError("network unit failure receipt short write")
+            offset += written
+        os.fsync(descriptor)
+        os.close(descriptor)
+        descriptor = -1
+        os.link(temporary, target)
+        BootstrapTransactionLedger._fsync_directory(root)
+        os.unlink(temporary)
+        BootstrapTransactionLedger._fsync_directory(root)
+    except InstallError:
+        raise
+    except OSError as exc:
+        raise InstallError("network unit failure receipt write failed") from exc
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+        if temporary.exists() or temporary.is_symlink():
+            try:
+                os.unlink(temporary)
+            except OSError:
+                pass
+    try:
+        info = os.lstat(target)
+        observed = target.read_bytes()
+    except OSError as exc:
+        raise InstallError("network unit failure receipt unavailable") from exc
+    if (
+        target.is_symlink()
+        or not stat.S_ISREG(info.st_mode)
+        or observed != payload
+        or (
+            os.name != "nt"
+            and (stat.S_IMODE(info.st_mode) != 0o600 or (expected_uid is not None and info.st_uid != expected_uid))
+        )
+    ):
+        raise InstallError("network unit failure receipt verification failed")
+    return target
+
 def _persist_or_open_rollback_equality_receipt(
     *,
     audit_root: Path,
@@ -5153,6 +5281,7 @@ class ProductionBackend:
         critical_observer: Callable[[], dict[str, str]],
         authorization_consumer: Callable[[str], None],
         postinstall_observer: Callable[[], dict[str, object]],
+        network_failure_recorder: Callable[[], None] | None = None,
     ) -> None:
         if (
             not isinstance(action_plan, ProductionInstallActionPlan)
@@ -5169,6 +5298,7 @@ class ProductionBackend:
                     postinstall_observer,
                 )
             )
+            or (network_failure_recorder is not None and not callable(network_failure_recorder))
         ):
             raise InstallError("production backend dependency invalid")
         expected_objects = {operation.owned_object for operation in action_plan.operations}
@@ -5234,6 +5364,7 @@ class ProductionBackend:
         self._critical_observer = critical_observer
         self._authorization_consumer = authorization_consumer
         self._postinstall_observer = postinstall_observer
+        self._network_failure_recorder = network_failure_recorder
         self._runtime_invariants: dict[str, object] | None = None
 
     def stage_object_contract(self) -> dict[str, list[str]]:
@@ -5277,6 +5408,11 @@ class ProductionBackend:
         try:
             self.linux_backend.apply(self.action_plan.operations_by_stage[stage])
         except BackendError as exc:
+            if stage == "host_network_applied" and self._network_failure_recorder is not None:
+                try:
+                    self._network_failure_recorder()
+                except Exception as receipt_exc:
+                    raise InstallError("production network failure receipt failed") from receipt_exc
             raise InstallError(f"production stage failed: {stage}") from exc
 
     def set_runtime_state(self, state: dict[str, object]) -> None:
@@ -6320,6 +6456,16 @@ def _production_install(
             ),
             runtime_env_path=_host_path(host_root, "/etc/amn2-spain/runtime.env"),
         )
+        def record_network_failure() -> None:
+            capture_network_unit_failure_receipt(
+                audit_root=audit_root,
+                nonce=authorization.nonce,
+                capsule_sha256=prepared.capsule.sha256,
+                systemd_runner=live_backend.FixedCommandRunner(
+                    allowed_argv=live_backend.SYSTEMCTL_COMMAND_ALLOWLIST
+                ),
+                expected_uid=expected_uid,
+            )
         backend = ProductionBackend(
             action_plan=prepared.assembly.action_plan,
             blueprint=prepared.capsule.blueprint,
@@ -6332,6 +6478,7 @@ def _production_install(
                 InstallError("authorization already consumed by bootstrap")
             ),
             postinstall_observer=postinstall.observe,
+            network_failure_recorder=record_network_failure,
         )
         backend_holder["value"] = backend
         return InstallStateMachine(backend, resource_plan, baseline).install_after_bootstrap(

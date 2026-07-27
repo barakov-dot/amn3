@@ -4536,6 +4536,53 @@ def test_rollback_equality_receipt_requires_exact_foreign_fingerprint_equality()
         validate_rollback_equality_receipt(receipt)
 
 
+def test_network_unit_failure_receipt_is_capsule_bound(tmp_path: Path) -> None:
+    receipt = installer_module.persist_network_unit_failure_receipt(
+        audit_root=tmp_path,
+        nonce="a" * 64,
+        capsule_sha256="b" * 64,
+        stage="host_network_applied",
+        status={
+            "result": "exit-code",
+            "exec_main_code": "exited",
+            "exec_main_status": "1",
+            "network_script_failure_label": "network_script_exit_1",
+        },
+        expected_uid=None,
+    )
+
+    assert receipt.name == "network-unit-failure-" + ("a" * 64) + ".json"
+    assert json.loads(receipt.read_text(encoding="utf-8")) == {
+        "capsule_sha256": "b" * 64,
+        "network_script_failure_label": "network_script_exit_1",
+        "nonce": "a" * 64,
+        "schema": "amn2.spain-network-unit-failure-receipt.v1",
+        "stage": "host_network_applied",
+        "systemd": {
+            "exec_main_code": "exited",
+            "exec_main_status": "1",
+            "result": "exit-code",
+        },
+    }
+
+def test_capture_network_unit_failure_receipt_uses_exact_status_command(tmp_path: Path) -> None:
+    calls: list[tuple[str, ...]] = []
+
+    def runner(argv: tuple[str, ...], **_kwargs: object) -> bytes:
+        calls.append(argv)
+        return b"Result=exit-code\nExecMainCode=exited\nExecMainStatus=1\n"
+
+    receipt = installer_module.capture_network_unit_failure_receipt(
+        audit_root=tmp_path,
+        nonce="a" * 64,
+        capsule_sha256="b" * 64,
+        systemd_runner=runner,
+        expected_uid=None,
+    )
+
+    assert calls == [live_backend.NETWORK_UNIT_FAILURE_SHOW_ARGV]
+    assert json.loads(receipt.read_text(encoding="utf-8"))["network_script_failure_label"] == "network_script_exit_1"
+
 def test_rollback_equality_observer_compares_stable_foreign_projections() -> None:
     before = copy.deepcopy(OBSERVATION)
     after = copy.deepcopy(OBSERVATION)
@@ -4988,21 +5035,22 @@ def test_transaction_958e_terminal_recovery_runner_is_mixed_contour_bound() -> N
 
 def test_install_ssh_runner_binds_only_artifacts_and_in_memory_install_intent() -> None:
     source = INSTALL_SSH_RUNNER.read_text(encoding="utf-8")
-    assert '$expectedPackageSha = "80B5DE15EC96C689003629C2A426E0371A72B39E8390C1DC7A6BE08FAC7B4069"' in source
-    assert '$expectedManifestSha = "4121F790E7C42CD25F43B85E83BBCA364D588DA6789BB9EECE9C960C0264843A"' in source
-    assert '$expectedExecutorSha = "22A208A638D29E785BE2881FF2390B02AD90ABE280FCDF2A71E578E24F86E479"' in source
-    assert '$expectedExecutorBytes = 156276' in source
+    assert '$expectedPackageSha = "E36421C92F1519BE391C1777171F308F57375E77885F4B104D0A899D05E0F19C"' in source
+    assert '$expectedManifestSha = "BC5FCB8DECB361F3C4F41AAA9D05D87BEEA3410A766C7634538BCEE0BF29CE2C"' in source
+    assert '$expectedExecutorSha = "DEDD72A206B48001A334CE9B260316D495854FCF983D3A7C12E3DB8CD5F2D75E"' in source
+    assert '$expectedExecutorBytes = 157707' in source
     assert '$expectedCollectorSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"' in source
-    assert 'phase12-spain-install-prepared-resume-v31-a-20260727' in source
+    assert 'phase12-spain-install-network-unit-receipt-v32-a-20260727' in source
     assert 'UNIFIED BOUNDED FALLBACK LADDER EXACT CACHE OR VERIFIED 20MIB PARTS' in source
+    assert 'NETWORK UNIT FAILURE RECEIPT ALLOWLISTED SYSTEMD RESULT EXECMAINCODE EXECMAINSTATUS AND SCRIPT LABEL BEFORE ROLLBACK CAPSULE BOUND AUDIT RECEIPT NO RAW JOURNAL OR SECRETS' in source
     assert 'DOCKER29 PRESTART CAPABILITY NORMALIZATION STOPPED EMPTY ENDPOINT ALLOWED RUNNING ENDPOINT STRICT' in source
     assert 'NETWORK SERVICE BOUND PREPARED LEDGER OBSERVATION RESUME THEN ONE START RETRY' in source
-    assert 'amn2-spain-phase12-install-v31.tar.part-001' in source
-    assert '6759390413268E07936FAF93E1D1F4F67D28EFC8781D4A09BC27CF5B243DF233' in source
-    assert 'amn2-spain-phase12-install-v31.tar.part-007' in source
-    assert 'BE6245D523571D83FF6FF81828D2D399A3D3F3BFB2A74567DB02CAAE21A090EA' in source
+    assert 'amn2-spain-phase12-install-v32.tar.part-001' in source
+    assert 'D459CB36D3EDD1F202CDFBD4ED8C5DB4F2D1A6BE7FA14CD50E4D4B5AE89AB43A' in source
+    assert 'amn2-spain-phase12-install-v32.tar.part-007' in source
+    assert '8EBA65E05EAFE72A87BCA75FB157145826AB2FC5E4E50FF2137DBCC050120022' in source
     assert 'Remote package part assembly mismatch.' in source
-    assert 'LegacyName="amn2-spain-phase12-install-v30.tar.part-002"' in source
+    assert 'LegacyName="amn2-spain-phase12-install-v31.tar.part-002"' in source
     assert '$approvedUploadDestinations' in source
     assert 'Remote package part checksum mismatch.' in source
     assert "StrictHostKeyChecking=yes" in source
