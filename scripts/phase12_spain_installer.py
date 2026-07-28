@@ -7581,7 +7581,7 @@ def _current_terminal_recovery_fs_for_owned_object(
     if owned_object.startswith(("file:/etc/amn2-spain", "secret:/etc/amn2-spain")):
         return root_fs
     if owned_object == "dir:/var/lib/amn2-spain-docker":
-        return root_fs
+        return None
     if owned_object == "dir:/var/lib/amn2-spain" or owned_object.startswith(("dir:/var/lib/amn2-spain/", "file:/var/lib/amn2-spain/")):
         return service_fs
     return None

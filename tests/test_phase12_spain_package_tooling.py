@@ -2402,7 +2402,7 @@ def test_current_terminal_recovery_resume_intent_binds_audited_contour() -> None
 
 
 
-def test_current_terminal_recovery_resume_uses_root_fs_for_docker_data_root() -> None:
+def test_current_terminal_recovery_resume_skips_generic_path_check_for_docker_data_root() -> None:
     root_fs = object()
     config_fs = object()
     service_fs = object()
@@ -2410,7 +2410,7 @@ def test_current_terminal_recovery_resume_uses_root_fs_for_docker_data_root() ->
     assert installer_module._current_terminal_recovery_fs_for_owned_object(
         "dir:/var/lib/amn2-spain-docker", root_fs=root_fs,
         config_fs=config_fs, service_fs=service_fs,
-    ) is root_fs
+    ) is None
 
 def test_current_terminal_recovery_finalize_intent_binds_post_contour_state() -> None:
     payload = {
