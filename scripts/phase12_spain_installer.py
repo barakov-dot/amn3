@@ -5079,7 +5079,25 @@ def build_rollback_equality_receipt(
         or package_root.get("is_symlink") is not False
     ):
         raise InstallError("rollback baseline projection mismatch")
-    if baseline_observation["firewall"] != current_observation["firewall"]:
+    firewall_fields = {
+        "backend",
+        "rules_sha256",
+        "rule_count",
+        "semantic_sha256",
+        "nft_json",
+    }
+    baseline_firewall = baseline_observation["firewall"]
+    current_firewall = current_observation["firewall"]
+    if (
+        not isinstance(baseline_firewall, Mapping)
+        or not isinstance(current_firewall, Mapping)
+        or set(baseline_firewall) != firewall_fields
+        or set(current_firewall) != firewall_fields
+        or any(
+            baseline_firewall[key] != current_firewall[key]
+            for key in ("backend", "rule_count", "semantic_sha256")
+        )
+    ):
         raise InstallError("rollback firewall projection mismatch")
     if any(
         baseline_observation[key] != current_observation[key]

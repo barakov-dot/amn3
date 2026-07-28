@@ -4735,6 +4735,32 @@ def test_rollback_equality_observer_compares_stable_foreign_projections() -> Non
         )
 
 
+def test_rollback_equality_uses_semantic_firewall_projection() -> None:
+    before = copy.deepcopy(OBSERVATION)
+    after = copy.deepcopy(OBSERVATION)
+    binding = {
+        "nonce": "a" * 64,
+        "transaction_sha256": "b" * 64,
+        "blueprint_sha256": "c" * 64,
+    }
+    after["firewall"]["rules_sha256"] = "e" * 64
+    after["firewall"]["nft_json"]["nftables"][1]["chain"]["handle"] = 91
+
+    receipt = build_rollback_equality_receipt(
+        baseline_observation=before,
+        current_observation=after,
+        binding=binding,
+    )
+
+    assert receipt["firewall_projection_equal"] is True
+    after["firewall"]["semantic_sha256"] = "f" * 64
+    with pytest.raises(InstallError, match="rollback firewall projection"):
+        build_rollback_equality_receipt(
+            baseline_observation=before,
+            current_observation=after,
+            binding=binding,
+        )
+
 def test_production_rollback_baseline_captures_first_observation_once() -> None:
     holder: dict[str, object] = {}
     first = copy.deepcopy(OBSERVATION)
