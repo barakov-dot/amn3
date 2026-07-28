@@ -4735,6 +4735,19 @@ def test_rollback_equality_observer_compares_stable_foreign_projections() -> Non
         )
 
 
+def test_production_rollback_baseline_captures_first_observation_once() -> None:
+    holder: dict[str, object] = {}
+    first = copy.deepcopy(OBSERVATION)
+    second = copy.deepcopy(OBSERVATION)
+    second["listeners"] = [*second["listeners"], "tcp|loopback|3031"]
+
+    installer_module._capture_production_rollback_baseline(holder, first)
+    installer_module._capture_production_rollback_baseline(holder, second)
+    first["listeners"].append("tcp|loopback|9999")
+
+    assert holder == {"value": OBSERVATION}
+
+
 def test_rollback_equality_receipt_records_volatile_foreign_entries() -> None:
     before = copy.deepcopy(OBSERVATION)
     after = copy.deepcopy(OBSERVATION)

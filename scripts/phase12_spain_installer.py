@@ -6366,6 +6366,37 @@ def _production_equality_observer(
     return observe
 
 
+def _capture_production_rollback_baseline(
+    holder: dict[str, object],
+    observation: Mapping[str, Any],
+) -> None:
+    required = {
+        "schema",
+        "os",
+        "capacity",
+        "existing",
+        "listeners",
+        "addresses",
+        "routes",
+        "docker_present",
+        "package_root",
+        "systemd_projection",
+        "firewall",
+    }
+    if not isinstance(holder, dict):
+        raise InstallError("rollback baseline holder invalid")
+    if "value" in holder:
+        return
+    if (
+        not isinstance(observation, Mapping)
+        or set(observation) != required
+        or observation.get("schema")
+        != "amn2.spain-precondition-observation.v1"
+    ):
+        raise InstallError("rollback baseline observation invalid")
+    holder["value"] = copy.deepcopy(dict(observation))
+
+
 def _load_resource_plan(staged: StagedPackage) -> dict[str, Any]:
     plan = _read_json_file(
         staged.path.parent / "content" / "metadata" / "resource-plan.json",
@@ -6463,14 +6494,19 @@ def _production_install(
         journal.append_stage(stage)
 
     critical_cache: dict[str, str] | None = None
+    rollback_baseline_holder: dict[str, object] = {}
 
     def critical_observer() -> dict[str, str]:
         nonlocal critical_cache
-        critical_cache, _observation = _critical_resource_binding(
+        critical_cache, observation = _critical_resource_binding(
             resource_observer,
             authorization,
             resource_plan=critical_resource_plan,
             baseline=baseline,
+        )
+        _capture_production_rollback_baseline(
+            rollback_baseline_holder,
+            observation,
         )
         return copy.deepcopy(critical_cache)
 
@@ -6580,6 +6616,9 @@ def _production_install(
     except InstallError:
         prepared = prepared_holder.get("value")
         if prepared is not None:
+            rollback_baseline = rollback_baseline_holder.get("value")
+            if not isinstance(rollback_baseline, Mapping):
+                raise InstallError("rollback baseline observation unavailable")
             transaction = BootstrapTransactionLedger.open_existing(
                 audit_root=audit_root,
                 nonce=authorization.nonce,
@@ -6592,7 +6631,7 @@ def _production_install(
                 lock_lease=lock_lease,
                 equality_observer=_production_equality_observer(
                     resource_observer=resource_observer,
-                    baseline=baseline,
+                    baseline=rollback_baseline,
                 ),
             ).rollback()
         raise
