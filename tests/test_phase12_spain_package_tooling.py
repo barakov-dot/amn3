@@ -4694,6 +4694,36 @@ def test_capture_network_unit_failure_receipt_uses_exact_status_command(tmp_path
     assert calls == [live_backend.NETWORK_UNIT_FAILURE_SHOW_ARGV]
     assert json.loads(receipt.read_text(encoding="utf-8"))["network_script_failure_label"] == "network_script_exit_1"
 
+def test_network_failure_receipt_falls_back_to_allowlisted_exception_cause(tmp_path: Path) -> None:
+    root = network_module.NetworkError("foreign forward base chain is incompatible")
+    failure = live_backend.BackendError("network contour absence observation failed")
+    failure.__cause__ = root
+
+    def runner(_argv: tuple[str, ...], **_kwargs: object) -> bytes:
+        return b"Result=success\nExecMainCode=exited\nExecMainStatus=0\n"
+
+    receipt = installer_module.capture_network_unit_failure_receipt(
+        audit_root=tmp_path,
+        nonce="a" * 64,
+        capsule_sha256="b" * 64,
+        systemd_runner=runner,
+        expected_uid=None,
+        failure=failure,
+    )
+
+    assert json.loads(receipt.read_text(encoding="utf-8")) == {
+        "capsule_sha256": "b" * 64,
+        "failure_label": "foreign_forward_base_chain_incompatible",
+        "nonce": "a" * 64,
+        "schema": "amn2.spain-network-stage-failure-receipt.v1",
+        "stage": "host_network_applied",
+    }
+
+def test_network_failure_classifier_redacts_unknown_exception_text() -> None:
+    failure = live_backend.BackendError("PrivateKey=must-not-escape")
+
+    assert installer_module._classify_network_stage_failure(failure) == "unclassified"
+
 def test_rollback_equality_observer_compares_stable_foreign_projections() -> None:
     before = copy.deepcopy(OBSERVATION)
     after = copy.deepcopy(OBSERVATION)

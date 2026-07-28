@@ -894,3 +894,41 @@ Install runner SHA-256:
 `69871A30536F039223F210311A7F9B9C0471B899917750C2BDDDCD77FE553BFF`.
 The next live operation is the fresh checksum-bound v31 install after
 commit/push.
+# Текущий override 2026-07-28: v42 rollback завершён; safe network cause receipt готов
+
+Checksum-bound v42 install runner SHA-256
+`54159348552A45B0DC0CB550D1C558A9C0056F44FCEA66EEF4CFB7D180BE7C8D`
+прошёл package/hash/precondition и production stages до
+`host_network_applied`, затем завершился fail-closed. Transaction nonce
+`17e1359f6878f47d315db19b168a9e4fa30016e8808e4e9e09774314e26f025b`
+имеет terminal status `rolled_back`; transaction SHA-256
+`FAA3B8817A1A71346F6A31AA87BC4587DD9272260B823A15659A63FE90B9C80A`,
+mutation ledger SHA-256
+`2A680E04F264DF094335C93CB8342B5740CEFDF34D759B2C0B84589CC9498DE5`.
+Rollback equality receipt SHA-256
+`013327C97635C578420D89089AA8F1A24E1DBF477E15105230C04DC74654A017`
+подтверждает `result=passed`, persistent equality `true`, volatile `0/0` и
+firewall semantic equality `true`. После rollback все четыре AMN2 units
+inactive; AMN2-owned `/opt`, `/etc`, `/var/lib`, `/run` и dedicated Docker
+socket отсутствуют. Посторонний Spain-сервис не останавливался и не изменялся;
+USA остаётся rollback contour.
+
+Первичный network-unit receipt не был создан, потому что failure произошёл до
+нормального systemd `exit-code` receipt. Добавлен fail-closed allowlisted
+`amn2.spain-network-stage-failure-receipt.v1`: он получает исходную цепочку
+`BackendError`, записывает только один из фиксированных safe labels (либо
+`unclassified`) в no-follow mode-0600 capsule-bound receipt и не сохраняет raw
+journal, stderr или exception text. Strict firewall compatibility и rollback
+foreign equality не ослаблены. Phase 12 local gate: `358 passed, 4 skipped`;
+`git diff --check` passed.
+V43 diagnostic package/executor double-build byte-equal и offline no-follow
+clean-room verified: package SHA-256
+`2ADE56FB2A5DF3DC88710B4BFC50C9BB1C71512F0B48A124D9B31DC6EE86703A`
+(`140103680` bytes), manifest SHA-256
+`FC45F349B94E6326A089493FFA3CB13B99DB18D37CDBDCE870DFFF064A1CC256`,
+executor SHA-256
+`E7C48DAC4682D31FE5BD219B2689CFF783EA3176D9CF41A277C79D823E7AB268`
+(`161422` bytes). Clean-room package содержит `69` regular entries; source
+содержит `141` files, exact commit
+`55dc243b8e6c6bdb57f8301b56326e4cd4072d19`, inventory SHA-256
+`C0FD4A1E1A88B877392DE4E59E289FE58239AA6B98A43F9F049068D2D5F581D7`.

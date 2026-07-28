@@ -4072,6 +4072,115 @@ def reconstruct_production_installation(
     )
 
 
+_NETWORK_STAGE_FAILURE_LABELS = {
+    "foreign forward base chain is incompatible": "foreign_forward_base_chain_incompatible",
+    "network contour absence observation failed": "network_contour_absence_observation_failed",
+    "network contour pre-existing collision": "network_contour_preexisting_collision",
+    "network service contour collision": "network_service_contour_collision",
+    "network_retry_exhausted": "network_retry_exhausted",
+    "systemd start precondition drift": "systemd_start_precondition_drift",
+    "systemd start verification failed": "systemd_start_verification_failed",
+}
+
+
+def _classify_network_stage_failure(failure: BaseException) -> str:
+    current: BaseException | None = failure
+    selected = "unclassified"
+    seen: set[int] = set()
+    for _ in range(16):
+        if current is None or id(current) in seen:
+            break
+        seen.add(id(current))
+        label = _NETWORK_STAGE_FAILURE_LABELS.get(str(current))
+        if label is not None:
+            selected = label
+        current = current.__cause__
+    return selected
+
+
+def persist_network_stage_failure_receipt(
+    *,
+    audit_root: Path,
+    nonce: str,
+    capsule_sha256: str,
+    failure_label: str,
+    expected_uid: int | None,
+) -> Path:
+    allowed = frozenset({*_NETWORK_STAGE_FAILURE_LABELS.values(), "unclassified"})
+    if (
+        re.fullmatch(r"[0-9a-f]{64}", nonce) is None
+        or re.fullmatch(r"[0-9a-f]{64}", capsule_sha256) is None
+        or failure_label not in allowed
+    ):
+        raise InstallError("network stage failure receipt invalid")
+    root = Path(audit_root)
+    if root.is_symlink() or not root.is_dir():
+        raise InstallError("network stage failure receipt root invalid")
+    if expected_uid is not None and (not isinstance(expected_uid, int) or expected_uid < 0):
+        raise InstallError("network stage failure receipt owner invalid")
+    value = {
+        "capsule_sha256": capsule_sha256,
+        "failure_label": failure_label,
+        "nonce": nonce,
+        "schema": "amn2.spain-network-stage-failure-receipt.v1",
+        "stage": "host_network_applied",
+    }
+    payload = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8") + b"\n"
+    target = root / ("network-stage-failure-" + nonce + ".json")
+    temporary = root / ("." + target.name + ".tmp")
+    if target.exists() or target.is_symlink() or temporary.exists() or temporary.is_symlink():
+        raise InstallError("network stage failure receipt collision")
+    descriptor = -1
+    try:
+        descriptor = os.open(
+            temporary,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_BINARY", 0),
+            0o600,
+        )
+        if os.name != "nt":
+            os.fchmod(descriptor, 0o600)
+        offset = 0
+        while offset < len(payload):
+            written = os.write(descriptor, payload[offset:])
+            if written <= 0:
+                raise InstallError("network stage failure receipt short write")
+            offset += written
+        os.fsync(descriptor)
+        os.close(descriptor)
+        descriptor = -1
+        os.link(temporary, target)
+        BootstrapTransactionLedger._fsync_directory(root)
+        os.unlink(temporary)
+        BootstrapTransactionLedger._fsync_directory(root)
+    except InstallError:
+        raise
+    except OSError as exc:
+        raise InstallError("network stage failure receipt write failed") from exc
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+        if temporary.exists() or temporary.is_symlink():
+            try:
+                os.unlink(temporary)
+            except OSError:
+                pass
+    try:
+        info = os.lstat(target)
+        observed = target.read_bytes()
+    except OSError as exc:
+        raise InstallError("network stage failure receipt unavailable") from exc
+    if (
+        target.is_symlink()
+        or not stat.S_ISREG(info.st_mode)
+        or observed != payload
+        or (
+            os.name != "nt"
+            and (stat.S_IMODE(info.st_mode) != 0o600 or (expected_uid is not None and info.st_uid != expected_uid))
+        )
+    ):
+        raise InstallError("network stage failure receipt verification failed")
+    return target
+
 def capture_network_unit_failure_receipt(
     *,
     audit_root: Path,
@@ -4079,6 +4188,7 @@ def capture_network_unit_failure_receipt(
     capsule_sha256: str,
     systemd_runner: Callable[..., bytes],
     expected_uid: int | None,
+    failure: BaseException | None = None,
 ) -> Path:
     """Read exact network-unit status and persist its safe receipt."""
     if not callable(systemd_runner):
@@ -4090,10 +4200,16 @@ def capture_network_unit_failure_receipt(
             max_output=live_backend.MAX_SYSTEMCTL_SHOW_BYTES,
         )
         status = live_backend.parse_network_unit_failure_show(payload)
-    except BackendError as exc:
-        raise InstallError("network unit failure status unavailable") from exc
     except Exception as exc:
-        raise InstallError("network unit failure status unavailable") from exc
+        if failure is None:
+            raise InstallError("network unit failure status unavailable") from exc
+        return persist_network_stage_failure_receipt(
+            audit_root=audit_root,
+            nonce=nonce,
+            capsule_sha256=capsule_sha256,
+            failure_label=_classify_network_stage_failure(failure),
+            expected_uid=expected_uid,
+        )
     return persist_network_unit_failure_receipt(
         audit_root=audit_root,
         nonce=nonce,
@@ -5379,7 +5495,7 @@ class ProductionBackend:
         critical_observer: Callable[[], dict[str, str]],
         authorization_consumer: Callable[[str], None],
         postinstall_observer: Callable[[], dict[str, object]],
-        network_failure_recorder: Callable[[], None] | None = None,
+        network_failure_recorder: Callable[[BackendError], None] | None = None,
     ) -> None:
         if (
             not isinstance(action_plan, ProductionInstallActionPlan)
@@ -5508,7 +5624,7 @@ class ProductionBackend:
         except BackendError as exc:
             if stage == "host_network_applied" and self._network_failure_recorder is not None:
                 try:
-                    self._network_failure_recorder()
+                    self._network_failure_recorder(exc)
                 except Exception as receipt_exc:
                     raise InstallError("production network failure receipt failed") from receipt_exc
             raise InstallError(f"production stage failed: {stage}") from exc
@@ -6599,7 +6715,7 @@ def _production_install(
             ),
             runtime_env_path=_host_path(host_root, "/etc/amn2-spain/runtime.env"),
         )
-        def record_network_failure() -> None:
+        def record_network_failure(failure: BackendError) -> None:
             capture_network_unit_failure_receipt(
                 audit_root=audit_root,
                 nonce=authorization.nonce,
@@ -6608,6 +6724,7 @@ def _production_install(
                     allowed_argv=live_backend.SYSTEMCTL_COMMAND_ALLOWLIST
                 ),
                 expected_uid=expected_uid,
+                failure=failure,
             )
         backend = ProductionBackend(
             action_plan=prepared.assembly.action_plan,
