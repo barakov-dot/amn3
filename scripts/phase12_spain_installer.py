@@ -6375,12 +6375,21 @@ def _production_equality_observer(
     baseline: Mapping[str, Any],
 ) -> Callable[[dict[str, str]], dict[str, Any]]:
     def observe(binding: dict[str, str]) -> dict[str, Any]:
-        return build_rollback_equality_receipt(
-            baseline_observation=baseline,
-            current_observation=resource_observer.collect_observation(),
-            binding=binding,
-        )
-
+        for attempt in range(5):
+            try:
+                return build_rollback_equality_receipt(
+                    baseline_observation=baseline,
+                    current_observation=resource_observer.collect_observation(),
+                    binding=binding,
+                )
+            except InstallError as exc:
+                if (
+                    str(exc) != "rollback persistent foreign projection mismatch"
+                    or attempt == 4
+                ):
+                    raise
+                time.sleep(0.25)
+        raise AssertionError("unreachable")
     return observe
 
 

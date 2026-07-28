@@ -4774,6 +4774,71 @@ def test_production_rollback_baseline_captures_first_observation_once() -> None:
     assert holder == {"value": OBSERVATION}
 
 
+def test_production_equality_observer_waits_for_exact_foreign_convergence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    transient = copy.deepcopy(OBSERVATION)
+    transient["systemd_projection"][0]["active_state"] = "inactive:dead"
+    observations = [transient, copy.deepcopy(OBSERVATION)]
+
+    class Observer:
+        def collect_observation(self) -> dict[str, Any]:
+            return observations.pop(0)
+
+    sleeps: list[float] = []
+    monkeypatch.setattr(installer_module.time, "sleep", sleeps.append)
+    observe = installer_module._production_equality_observer(
+        resource_observer=Observer(),
+        baseline=OBSERVATION,
+    )
+
+    receipt = observe(
+        {
+            "nonce": "a" * 64,
+            "transaction_sha256": "b" * 64,
+            "blueprint_sha256": "c" * 64,
+        }
+    )
+
+    assert receipt["result"] == "passed"
+    assert sleeps == [0.25]
+
+
+def test_production_equality_observer_fails_closed_after_bounded_convergence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    transient = copy.deepcopy(OBSERVATION)
+    transient["systemd_projection"][0]["active_state"] = "inactive:dead"
+
+    class Observer:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def collect_observation(self) -> dict[str, Any]:
+            self.calls += 1
+            return copy.deepcopy(transient)
+
+    observer = Observer()
+    sleeps: list[float] = []
+    monkeypatch.setattr(installer_module.time, "sleep", sleeps.append)
+    observe = installer_module._production_equality_observer(
+        resource_observer=observer,
+        baseline=OBSERVATION,
+    )
+
+    with pytest.raises(InstallError, match="persistent foreign projection"):
+        observe(
+            {
+                "nonce": "a" * 64,
+                "transaction_sha256": "b" * 64,
+                "blueprint_sha256": "c" * 64,
+            }
+        )
+
+    assert observer.calls == 5
+    assert sleeps == [0.25] * 4
+
+
 def test_rollback_equality_receipt_records_volatile_foreign_entries() -> None:
     before = copy.deepcopy(OBSERVATION)
     after = copy.deepcopy(OBSERVATION)

@@ -8226,3 +8226,23 @@ source exact `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`. Full Phase 12 scope:
 Install runner SHA-256
 `69871A30536F039223F210311A7F9B9C0471B899917750C2BDDDCD77FE553BFF`.
 Следующая live-операция — fresh checksum-bound v31 install после commit/push.
+
+# Текущий override 2026-07-28: v41 rollback закрыт; bounded strict convergence готов
+
+Checksum-bound v41 install дошла до production runtime и завершилась
+fail-closed с `rollback persistent foreign projection mismatch`. Automatic
+rollback полностью удалил AMN2 contour: четыре AMN2 units inactive; `/opt`,
+`/etc`, `/var/lib`, `/run` и dedicated Docker socket AMN2 отсутствуют.
+Посторонний Spain-сервис не останавливался и не изменялся; USA остаётся
+rollback contour. Последующий checksum-bound read-only verify прошёл, что
+подтверждает transient observation mismatch, а не подтверждённую persistent
+mutation.
+
+Rollback equality остаётся строгой: `active_state`, content identity и
+`bound_port_status` не исключаются из сравнения. Production observer теперь
+делает максимум пять read-only наблюдений с интервалом 250 ms только при exact
+`rollback persistent foreign projection mismatch`; успех возможен только при
+полном возврате persistent projection к pre-mutation baseline. Любое другое
+расхождение завершается немедленно, а устойчивое расхождение после пятой
+попытки остаётся fail-closed. Phase 12 scoped gate: `356 passed, 4 skipped`;
+`git diff --check` passed.
