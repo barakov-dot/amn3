@@ -932,3 +932,43 @@ executor SHA-256
 содержит `141` files, exact commit
 `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`, inventory SHA-256
 `C0FD4A1E1A88B877392DE4E59E289FE58239AA6B98A43F9F049068D2D5F581D7`.
+# Текущий override 2026-07-29: v43 exact cause доказана; v44 Docker29 fix готов
+
+Checksum-bound v43 install дошёл до `host_network_applied` и зафиксировал
+allowlisted cause `foreign_forward_base_chain_incompatible`. Nonce
+`5effaa1e85242658e81dcddf9d6ad2a8c94ac54d31d0acdaa460d821020b163a`,
+terminal transaction SHA-256
+`7BC0B54C558FDACB167858511A8F4A9F7841DFAA9DF5DF3D4B477F0AF3528CE3`
+имеет status `rolled_back`. Network failure receipt SHA-256
+`9E50833E288A2DE9E7B2489C724FD6E064E8F7781A912FD4294780AF633C764B`;
+rollback equality receipt SHA-256
+`20A77E4C55604D70F0A84235B05960E58647AB49C8D995284D6764F208C011AB`
+подтверждает `result=passed`, persistent equality `true`, volatile `0/1`,
+firewall/baseline/listeners-routes-addresses equality `true` и одинаковый
+foreign fingerprint SHA-256
+`11BD6C6B5C8F6236804B536B86AC8C06514BCF6B2D5BCDDE68302F682C8B0958`
+до/после. Все AMN2 units inactive; AMN2-owned runtime paths отсутствуют.
+
+Bundled Docker 29.6.2 непосредственно подтверждает option
+`ip-forward-no-drop`. Package-bound daemon config теперь задаёт
+`ip-forward-no-drop=true` вместе с уже существующими `iptables=false`,
+`ip6tables=false`, `ip-forward=false`, `ip-masq=false`; strict foreign
+forward-chain guard не изменён и не ослаблен. Full Phase 12 scope:
+`358 passed, 4 skipped`; `git diff --check` passed.
+
+Fresh v44 double-build byte-equal и no-follow clean-room verified: package
+SHA-256
+`59BBFDA322A7CF35B3EBE7E3B9494172E45C0B8138EB440DBEC19D168CFD3B5E`
+(`140103680` bytes), manifest SHA-256
+`2AA7F70A9EE63E703269B5C1A94CCB7CD7661284E08B9432F89F656412BC4DE8`,
+executor SHA-256
+`E7C48DAC4682D31FE5BD219B2689CFF783EA3176D9CF41A277C79D823E7AB268`
+(`161422` bytes). Clean-room package содержит `69` regular entries; source
+остаётся exact
+`55dc243b8e6c6bdb57f8301b56326e4cd4072d19`.
+V44 delta runner SHA-256
+`65C5961B4CF9337ED225130E827A687CE01330711CD9D0FBEFB44BF21214AC6A`;
+install runner SHA-256
+`188AE5E2596299CDBC27CDB294013CD48DCF282812451404E595BD2D3693A431`.
+Следующая live-операция после push/readback — checksum-bound V44 delta cache
+reconstruction, затем V44 install/smoke/equality.

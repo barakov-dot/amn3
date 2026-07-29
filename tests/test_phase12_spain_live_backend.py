@@ -2353,6 +2353,7 @@ class ExactRuntimeContractTests(unittest.TestCase):
         self.assertEqual(daemon["features"]["containerd-snapshotter"], False)
         for key in ("iptables", "ip6tables", "ip-forward", "ip-masq", "userland-proxy"):
             self.assertIs(daemon[key], False)
+        self.assertIs(daemon["ip-forward-no-drop"], True)
         self.assertEqual(daemon["bridge"], "none")
 
     def test_awg_pid1_and_container_contract_have_no_peer_or_restart_side_effect(self) -> None:
