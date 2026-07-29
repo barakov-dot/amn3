@@ -58,12 +58,14 @@ class FakeRunner:
         sysctl: str = "0",
         boot_id: str = BOOT_ID,
         foreign_policy: str = "accept",
+        extra_nftables: list[dict] | None = None,
     ) -> None:
         self.owned = copy.deepcopy(owned)
         self.route = copy.deepcopy(route)
         self.sysctl = sysctl
         self.boot_id = boot_id
         self.foreign_policy = foreign_policy
+        self.extra_nftables = copy.deepcopy(extra_nftables or [])
         self.calls: list[tuple[tuple[str, ...], bytes | None, float, int]] = []
         self.fail_on: tuple[str, ...] | None = None
 
@@ -103,6 +105,7 @@ class FakeRunner:
                             }
                         },
                     ]
+            entries.extend(copy.deepcopy(self.extra_nftables))
             if self.owned is not None:
                 entries.extend(copy.deepcopy(self.owned["nftables"]))
             return json.dumps({"nftables": entries}).encode()
@@ -326,6 +329,38 @@ def test_foreign_forward_drop_policy_is_incompatible_before_mutation() -> None:
         durable_apply(NetworkManager(runner))
     assert runner.owned is None and runner.route is None and runner.sysctl == "0"
 
+
+def test_dedicated_docker_nftables_forward_drop_is_not_foreign() -> None:
+    docker_entries = [
+        {"table": {"family": "ip", "name": "docker-bridges"}},
+        {
+            "chain": {
+                "family": "ip", "table": "docker-bridges", "name": "forward",
+                "type": "filter", "hook": "forward", "prio": 0, "policy": "accept",
+            }
+        },
+        {
+            "rule": {
+                "family": "ip", "table": "docker-bridges", "chain": "forward",
+                "expr": [{"drop": None}],
+            }
+        },
+    ]
+    ledger = durable_apply(NetworkManager(FakeRunner(extra_nftables=docker_entries)))
+    assert ledger["schema"] == "amn2.spain-network-ledger.v1"
+
+
+def test_non_docker_foreign_forward_drop_rule_remains_incompatible() -> None:
+    foreign_drop = [
+        {
+            "rule": {
+                "family": "inet", "table": "foreign_filter", "chain": "forward",
+                "expr": [{"drop": None}],
+            }
+        }
+    ]
+    with pytest.raises(NetworkError, match="foreign forward base chain is incompatible"):
+        durable_apply(NetworkManager(FakeRunner(extra_nftables=foreign_drop)))
 
 def test_route_conflict_and_invalid_sysctl_are_rejected_before_mutation() -> None:
     conflict = {"dst": "10.212.12.0/24", "gateway": "192.0.2.1", "dev": "eth0"}

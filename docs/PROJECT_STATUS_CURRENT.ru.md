@@ -1,3 +1,10 @@
+# Текущий override 2026-07-29: V46 dedicated Docker firewall ownership fix готов локально
+
+V45 checksum-bound install снова fail-closed на `host_network_applied` с `foreign_forward_base_chain_incompatible`. Read-only audit transaction `4418d334ec41ab719b4d8d37c96e7d2ca649c644437f40c4b33a4c8efc6df016` подтвердил полный rollback: status `rolled_back`, retained package tree отсутствует, все AMN2 units inactive, foreign mutation не выполнялась.
+
+Корневая причина локализована: network guard и post-install firewall equality ошибочно классифицировали созданную dedicated Docker 29 nftables-таблицу `ip/ip6 docker-bridges` как foreign. V46 считает только этот exact namespace AMN2 runtime-owned, запрещает его наличие в premutation baseline и сохраняет fail-closed проверку всех остальных foreign forward chains/drop/reject.
+
+V46 double-build byte-identical: package SHA-256 `17F856C33D0BBBA46D5442E77150DA88C2BEF8E20BAD1C0D99F4DCA29701B7E5` (`140093440` bytes), manifest SHA-256 `D2E1BF3672DD676C95E8F2A3F7E74AB971EA5EEF04711B010C0463F57195B154`, executor SHA-256 `D0F76CD62CE1A36C196EC9DBCA0905D35448A52BD6B8BBDCDFC03A11D58A60B2` (`160069` bytes). Offline verify/no-follow extraction passed: 69 package entries; source commit `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`, 141 source entries. Scoped suite: `319 passed, 4 skipped`; `git diff --check` passed. Следующий gate: commit/push/readback, затем checksum-bound V46 install.
 # Текущий override 2026-07-27: V36 idempotent terminal-resume repair
 
 V35 resume stop произошёл до mutation: transaction, capsule и mutation ledger не изменились; AMN2 units inactive, `/opt` и dedicated Docker root сохранились. Причина — recovery code требовал ещё committed secret/run/systemd objects, хотя exact audit подтвердил их ledger-recorded `removed`. V36 принимает только подтверждённые removed states и проверяет фактическое отсутствие; committed branches не ослаблены.

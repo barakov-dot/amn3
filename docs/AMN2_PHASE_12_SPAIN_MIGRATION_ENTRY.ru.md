@@ -1,5 +1,10 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-29: V46 Docker nftables ownership fix ready
+
+V45 failed closed at `host_network_applied`; independent read-only audit proved transaction `4418d334ec41ab719b4d8d37c96e7d2ca649c644437f40c4b33a4c8efc6df016` is `rolled_back`, no retained package tree exists, and every AMN2 unit is inactive. The failure was internal classification: the dedicated Docker 29 `ip/ip6 docker-bridges` nftables namespace was treated as foreign by both the network guard and post-install firewall equality.
+
+V46 binds that exact namespace as AMN2 runtime-owned only after a baseline that contains no such namespace; every unrelated foreign forward chain and drop/reject rule remains fail-closed. Double build is byte-identical: package `17F856C33D0BBBA46D5442E77150DA88C2BEF8E20BAD1C0D99F4DCA29701B7E5` (`140093440` bytes), manifest `D2E1BF3672DD676C95E8F2A3F7E74AB971EA5EEF04711B010C0463F57195B154`, executor `D0F76CD62CE1A36C196EC9DBCA0905D35448A52BD6B8BBDCDFC03A11D58A60B2` (`160069` bytes). Offline no-follow extraction passed with 69 entries and source commit `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`; scoped suite is `319 passed, 4 skipped`.
 ## Current operational override — 2026-07-25: 958e mixed-contour recovery ready
 
 The legacy current audit failed closed without mutation because it expected the

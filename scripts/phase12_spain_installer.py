@@ -5436,11 +5436,12 @@ def assert_firewall_projection(
     except Exception as exc:
         raise InstallError("invalid exact owned firewall model") from exc
 
-    def classify(model: object) -> tuple[list[bytes], list[dict[str, Any]]]:
+    def classify(model: object) -> tuple[list[bytes], list[dict[str, Any]], list[dict[str, Any]]]:
         if not isinstance(model, dict) or set(model) != {"nftables"} or not isinstance(model["nftables"], list):
             raise InstallError("invalid structured nft firewall projection")
         foreign: list[bytes] = []
         owned: list[dict[str, Any]] = []
+        docker_owned: list[dict[str, Any]] = []
         for item in model["nftables"]:
             if not isinstance(item, dict) or len(item) != 1:
                 raise InstallError("invalid structured nft object")
@@ -5455,6 +5456,9 @@ def assert_firewall_projection(
             if is_owned:
                 owned.append(copy.deepcopy(item))
                 continue
+            if family in {"ip", "ip6"} and table == "docker-bridges":
+                docker_owned.append(copy.deepcopy(item))
+                continue
             if object_type == "rule" and str(value.get("comment", "")).startswith(
                 sealed_namespace["table"] + ":"
             ):
@@ -5464,11 +5468,11 @@ def assert_firewall_projection(
             foreign.append(
                 json.dumps(item, sort_keys=True, separators=(",", ":")).encode("utf-8")
             )
-        return sorted(foreign), owned
+        return sorted(foreign), owned, docker_owned
 
-    baseline_foreign, baseline_owned = classify(baseline_nft)
-    current_foreign, current_owned = classify(current_nft)
-    if baseline_owned:
+    baseline_foreign, baseline_owned, baseline_docker_owned = classify(baseline_nft)
+    current_foreign, current_owned, _current_docker_owned = classify(current_nft)
+    if baseline_owned or baseline_docker_owned:
         raise InstallError("firewall projection baseline already contains owned namespace")
     if current_foreign != baseline_foreign:
         raise InstallError("firewall projection contains foreign change")

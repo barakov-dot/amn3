@@ -295,7 +295,15 @@ class NetworkManager:
             ):
                 raise NetworkError("nft ruleset JSON schema mismatch")
             chain = body if kind == "chain" else None
-            if chain is None or chain.get("hook") != "forward" or chain.get("table") == "amn2_spain":
+            if (
+                chain is None
+                or chain.get("hook") != "forward"
+                or chain.get("table") == "amn2_spain"
+                or (
+                    chain.get("family") in {"ip", "ip6"}
+                    and chain.get("table") == "docker-bridges"
+                )
+            ):
                 continue
             identity = (chain.get("family"), chain.get("table"), chain.get("name"))
             if not all(isinstance(part, str) and part for part in identity):

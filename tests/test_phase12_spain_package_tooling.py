@@ -4584,6 +4584,38 @@ def test_projection_helpers_allow_only_closed_owned_firewall_delta() -> None:
         sealed_namespace=RESOURCE_PLAN["firewall_namespace"],
         expected_owned_nft=expected_owned,
     )
+    docker_owned = [
+        {"table": {"family": "ip", "name": "docker-bridges"}},
+        {
+            "chain": {
+                "family": "ip", "table": "docker-bridges", "name": "forward",
+                "type": "filter", "hook": "forward", "prio": 0, "policy": "accept",
+            }
+        },
+        {
+            "rule": {
+                "family": "ip", "table": "docker-bridges", "chain": "forward",
+                "expr": [{"drop": None}],
+            }
+        },
+    ]
+    current_with_docker = copy.deepcopy(current_nft)
+    current_with_docker["nftables"].extend(docker_owned)
+    assert_firewall_projection(
+        baseline_nft,
+        current_with_docker,
+        sealed_namespace=RESOURCE_PLAN["firewall_namespace"],
+        expected_owned_nft=expected_owned,
+    )
+    baseline_with_docker = copy.deepcopy(baseline_nft)
+    baseline_with_docker["nftables"].extend(docker_owned)
+    with pytest.raises(InstallError, match="baseline already contains owned namespace"):
+        assert_firewall_projection(
+            baseline_with_docker,
+            current_with_docker,
+            sealed_namespace=RESOURCE_PLAN["firewall_namespace"],
+            expected_owned_nft=expected_owned,
+        )
     owned_injection = copy.deepcopy(current_nft)
     owned_injection["nftables"].append(
         {
