@@ -1,3 +1,10 @@
+# Текущий override 2026-07-29: V47 baseline foreign drop-policy fix готов локально
+
+V46 transaction `c22e32789531ade62f1fee9ebb9005c1cec4e94a5463c2ccab51a2a58c6187b3` снова fail-closed на `host_network_applied`. Independent read-only audit подтвердил полный rollback (`rolled_back`, retained package tree отсутствует, все AMN2 units inactive) и локализовал точную причину в неизменённом baseline: 2 foreign filter forward chains имеют policy `drop`; non-filter=0, drop/reject rules=0, Docker chains после rollback=0. Следовательно прежний blanket-запрет policy `drop` делал install заведомо невозможным ещё на исходном firewall.
+
+V47 разрешает только валидные nft base-chain policies `accept|drop`, сохраняет type=`filter`, запрет foreign drop/reject rules, exact foreign firewall equality и automatic rollback. Foreign firewall не изменяется; фактическую проходимость обязан подтвердить smoke.
+
+V47 double-build byte-identical: package SHA-256 `D2ACD04CB4974DDE8E4162BEBA0D072E0D4F5D98C22BCBCC11E55C3FD8EE3327` (`140093440` bytes), manifest `762687335EDA3E839BA1D3E54AA3295A874CB9B68FE2B5A3C14F753435C8CAC5`, executor `5B55AA29FFCD3DAFC50DEA0D46B772D23FD48F66BBA1C356EB10D4AD9E80DE67` (`160075` bytes). Offline no-follow extraction passed: 69 entries; source commit `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`. Scoped suite: `320 passed, 4 skipped`; diff check passed.
 # Текущий override 2026-07-29: V46 dedicated Docker firewall ownership fix готов локально
 
 V45 checksum-bound install снова fail-closed на `host_network_applied` с `foreign_forward_base_chain_incompatible`. Read-only audit transaction `4418d334ec41ab719b4d8d37c96e7d2ca649c644437f40c4b33a4c8efc6df016` подтвердил полный rollback: status `rolled_back`, retained package tree отсутствует, все AMN2 units inactive, foreign mutation не выполнялась.

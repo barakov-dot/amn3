@@ -309,7 +309,7 @@ class NetworkManager:
             if not all(isinstance(part, str) and part for part in identity):
                 raise NetworkError("nft ruleset JSON schema mismatch")
             foreign_forward_chains.add(identity)
-            if chain.get("type") != "filter" or chain.get("policy") != "accept":
+            if chain.get("type") != "filter" or chain.get("policy") not in {"accept", "drop"}:
                 raise NetworkError("foreign forward base chain is incompatible")
         for entry in value["nftables"]:
             rule = entry.get("rule") if isinstance(entry, dict) else None

@@ -1,5 +1,10 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-29: V47 baseline drop-policy compatibility ready
+
+The C22E32 read-only audit proved complete rollback and found the exact baseline blocker: two unchanged foreign filter forward chains use nftables policy `drop`; there are no foreign drop/reject rules and no Docker chains after rollback. V47 accepts only valid base-chain policies `accept|drop` while preserving filter-type validation, foreign drop/reject rule rejection, exact foreign firewall equality, smoke verification, and automatic rollback.
+
+V47 double-build is byte-identical: package `D2ACD04CB4974DDE8E4162BEBA0D072E0D4F5D98C22BCBCC11E55C3FD8EE3327` (`140093440` bytes), manifest `762687335EDA3E839BA1D3E54AA3295A874CB9B68FE2B5A3C14F753435C8CAC5`, executor `5B55AA29FFCD3DAFC50DEA0D46B772D23FD48F66BBA1C356EB10D4AD9E80DE67` (`160075` bytes). Offline extraction/source binding passed; scoped suite is `320 passed, 4 skipped`.
 ## Current operational override — 2026-07-29: V46 Docker nftables ownership fix ready
 
 V45 failed closed at `host_network_applied`; independent read-only audit proved transaction `4418d334ec41ab719b4d8d37c96e7d2ca649c644437f40c4b33a4c8efc6df016` is `rolled_back`, no retained package tree exists, and every AMN2 unit is inactive. The failure was internal classification: the dedicated Docker 29 `ip/ip6 docker-bridges` nftables namespace was treated as foreign by both the network guard and post-install firewall equality.

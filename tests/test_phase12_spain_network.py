@@ -323,8 +323,14 @@ def test_owned_table_list_nonzero_is_not_treated_as_absence_when_ruleset_declare
     assert ("/usr/sbin/nft", "-f", "-") not in [call[0] for call in runner.calls]
 
 
-def test_foreign_forward_drop_policy_is_incompatible_before_mutation() -> None:
+def test_foreign_forward_drop_policy_is_preserved_without_mutation() -> None:
     runner = FakeRunner(foreign_policy="drop")
+    ledger = durable_apply(NetworkManager(runner))
+    assert ledger["schema"] == "amn2.spain-network-ledger.v1"
+
+
+def test_unknown_foreign_forward_policy_is_incompatible_before_mutation() -> None:
+    runner = FakeRunner(foreign_policy="reject")
     with pytest.raises(NetworkError, match="foreign forward base chain is incompatible"):
         durable_apply(NetworkManager(runner))
     assert runner.owned is None and runner.route is None and runner.sysctl == "0"
