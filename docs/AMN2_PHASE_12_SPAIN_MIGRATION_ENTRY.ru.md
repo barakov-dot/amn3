@@ -972,3 +972,30 @@ install runner SHA-256
 `188AE5E2596299CDBC27CDB294013CD48DCF282812451404E595BD2D3693A431`.
 Следующая live-операция после push/readback — checksum-bound V44 delta cache
 reconstruction, затем V44 install/smoke/equality.
+
+# Текущий override 2026-07-29: v44 rollback закрыт; v45 nftables backend готов
+
+Checksum-bound v44 повторно остановился на `host_network_applied` с
+allowlisted cause `foreign_forward_base_chain_incompatible`. Nonce
+`efecb3c555275acdeb9f0808c71c7c4f21bcaedee89e062a7c6ea892a8074001`;
+transaction SHA-256
+`3431B6E6FAA48578418E233FA7F7F8A3D545AED1EF3C43D0A97DDA22572EEF7F`,
+mutation-ledger SHA-256
+`FAF047E286F9AC9B66445A189543E2B79468C38226CF6F08728569B696FCDE20`.
+Read-only audit подтвердил terminal status `rolled_back`, отсутствие retained
+package tree и recovery-capsule, а также `inactive` для всех пяти AMN2 units.
+Новая установка после этого audit не запускалась.
+
+V45 переводит только dedicated Docker 29 firewall backend на package-bound
+`nftables`, сохраняя `iptables=false`, `ip6tables=false`, `ip-forward=false`,
+`ip-forward-no-drop=true` и неизменный strict foreign guard. Phase 12 scope:
+`358 passed, 4 skipped`; `git diff --check` passed. V45 A/B package byte-equal
+и no-follow clean-room verified: package SHA-256
+`53C36D58D9D552288BAB447BE6B54EEA5516CFCB8668F84197EAB9F3573E0F93`
+(`140103680` bytes), manifest SHA-256
+`7E24CC3676DEB3B139CDBABBA83EE217BA19D8F6B77F6B1CC3EB78EBCF8CA1E7`.
+V45 executor A/B SHA-256
+`C77AF7373576430660138D00D6BD4F7F929B4A1B1F22129532936F2F8760C29`
+(`160733` bytes); его members идентичны v44 executor members. V45 delta
+содержит только `957` bytes для частей `001` и `007`; остальные пять
+20 MiB частей переиспользуются по exact SHA-256.

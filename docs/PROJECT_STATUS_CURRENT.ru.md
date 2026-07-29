@@ -8318,3 +8318,26 @@ install runner SHA-256
 `188AE5E2596299CDBC27CDB294013CD48DCF282812451404E595BD2D3693A431`.
 Следующая live-операция после push/readback — checksum-bound V44 delta cache
 reconstruction, затем V44 install/smoke/equality.
+
+# AMN2 Phase 12 Spain override 2026-07-29: v44 rolled back; v45 ready
+
+V44 transaction
+`efecb3c555275acdeb9f0808c71c7c4f21bcaedee89e062a7c6ea892a8074001`
+завершена terminal status `rolled_back`: transaction SHA-256
+`3431B6E6FAA48578418E233FA7F7F8A3D545AED1EF3C43D0A97DDA22572EEF7F`,
+ledger SHA-256
+`FAF047E286F9AC9B66445A189543E2B79468C38226CF6F08728569B696FCDE20`.
+Retained package tree и recovery-capsule отсутствуют; все AMN2 units inactive.
+Safe cause остался `foreign_forward_base_chain_incompatible`; foreign Spain
+service и USA rollback contour не изменялись.
+
+V45 использует package-bound Docker 29 `firewall-backend=nftables`, сохраняя
+все прежние Docker firewall prohibitions и strict foreign equality guard.
+Verification: `358 passed, 4 skipped`, `git diff --check`, deterministic A/B,
+no-follow clean-room extraction `69` entries. Package SHA-256
+`53C36D58D9D552288BAB447BE6B54EEA5516CFCB8668F84197EAB9F3573E0F93`
+(`140103680` bytes), manifest
+`7E24CC3676DEB3B139CDBABBA83EE217BA19D8F6B77F6B1CC3EB78EBCF8CA1E7`,
+executor
+`C77AF7373576430660138D00D6BD4F7F929B4A1B1F22129532936F2F8760C29`
+(`160733` bytes). V45 delta upload volume is `957` bytes.

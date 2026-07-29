@@ -9,6 +9,7 @@
   "exec-root": "/run/amn2-spain-docker/exec",
   "pidfile": "/run/amn2-spain-docker/docker.pid",
   "bridge": "none",
+  "firewall-backend": "nftables",
   "iptables": false,
   "ip6tables": false,
   "ip-forward": false,
