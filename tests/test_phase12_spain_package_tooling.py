@@ -1546,6 +1546,27 @@ def test_systemd_bundle_reads_units_from_package_content_root(
     }
 
 
+def test_terminal_recovery_systemd_parser_accepts_only_allowlisted_failed_state() -> None:
+    unit = "amn2-spain-network.service"
+    failed = (
+        b"LoadState=loaded\n"
+        b"FragmentPath=/etc/systemd/system/amn2-spain-network.service\n"
+        b"UnitFileState=disabled\n"
+        b"ActiveState=failed\n"
+    )
+    assert live_backend.parse_terminal_recovery_systemctl_show(
+        failed, unit=unit
+    )["ActiveState"] == "failed"
+    with pytest.raises(
+        live_backend.BackendError,
+        match="terminal recovery systemd observation invalid",
+    ):
+        live_backend.parse_terminal_recovery_systemctl_show(
+            failed.replace(b"ActiveState=failed", b"ActiveState=activating"),
+            unit=unit,
+        )
+
+
 def test_precondition_allows_volatile_restart_count_and_rejects_stable_systemd_drift() -> None:
     observation = copy.deepcopy(OBSERVATION)
     observation["systemd_projection"][0]["restart_count"] = 1
@@ -5303,6 +5324,11 @@ def test_transaction_6153_current_audit_runner_is_exact_and_read_only() -> None:
     assert "StrictHostKeyChecking=yes" in source
     assert (
         '$expectedExecutorSha = '
+        '"414F1DE0D3FA5F0A74A159F758D45B76BF50F46E147457866BD3B9A9882BB254"'
+        in source
+    )
+    assert (
+        '$expectedPriorExecutorSha = '
         '"5B55AA29FFCD3DAFC50DEA0D46B772D23FD48F66BBA1C356EB10D4AD9E80DE67"'
         in source
     )
@@ -5327,8 +5353,8 @@ def test_transaction_6153_current_audit_runner_is_exact_and_read_only() -> None:
         in source
     )
     assert "current-terminal-recovery-audit-bound" in source
-    assert "NO FILE WRITE NO INSTALL NO CLEANUP NO AMN2 START" in source
-    assert "Invoke-BoundedSshUpload" not in source
+    assert "UPLOAD ONLY VERIFIED AUDIT EXECUTOR THEN READ ONLY" in source
+    assert "Current audit executor upload failed." in source
     assert "manual-cleanup-bound" not in source
     assert "terminal-recovery-bound" not in source
     assert "install-bound" not in source

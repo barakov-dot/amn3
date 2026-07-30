@@ -7547,7 +7547,9 @@ def _production_current_terminal_recovery_audit_bound(
                 timeout=live_backend.DEFAULT_COMMAND_TIMEOUT,
                 max_output=live_backend.MAX_SYSTEMCTL_SHOW_BYTES,
             )
-            systemd[unit] = live_backend.parse_systemctl_show(output, unit=unit)
+            systemd[unit] = live_backend.parse_terminal_recovery_systemctl_show(
+                output, unit=unit
+            )
         except BackendError as exc:
             raise InstallError("current terminal recovery audit systemd observation failed") from exc
     return {

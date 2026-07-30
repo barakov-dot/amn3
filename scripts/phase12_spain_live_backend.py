@@ -3585,6 +3585,45 @@ def parse_systemctl_show(payload: bytes, *, unit: str) -> dict[str, str]:
         raise BackendError("systemd show observation invalid")
     return values
 
+
+def parse_terminal_recovery_systemctl_show(
+    payload: bytes, *, unit: str
+) -> dict[str, str]:
+    """Parse AMN2 unit state during fail-closed terminal recovery audit."""
+    try:
+        return parse_systemctl_show(payload, unit=unit)
+    except BackendError:
+        pass
+    if (
+        unit not in SYSTEMD_UNITS
+        or not isinstance(payload, bytes)
+        or not payload
+        or len(payload) > MAX_SYSTEMCTL_SHOW_BYTES
+    ):
+        raise BackendError("terminal recovery systemd observation invalid")
+    try:
+        text = payload.decode("ascii")
+    except UnicodeDecodeError as exc:
+        raise BackendError("terminal recovery systemd observation invalid") from exc
+    values: dict[str, str] = {}
+    for line in text.splitlines():
+        if "=" not in line:
+            raise BackendError("terminal recovery systemd observation invalid")
+        key, value = line.split("=", maxsplit=1)
+        if key in values:
+            raise BackendError("terminal recovery systemd observation invalid")
+        values[key] = value
+    if (
+        set(values) != {"LoadState", "FragmentPath", "UnitFileState", "ActiveState"}
+        or values["LoadState"] != "loaded"
+        or values["FragmentPath"] != "/etc/systemd/system/" + unit
+        or values["UnitFileState"] not in {"disabled", "enabled", "static"}
+        or values["ActiveState"] != "failed"
+    ):
+        raise BackendError("terminal recovery systemd observation invalid")
+    return values
+
+
 def parse_network_unit_failure_show(payload: bytes) -> dict[str, str]:
     """Reduce fixed systemd failure state to a bounded, secret-free label."""
     if not isinstance(payload, bytes) or not payload or len(payload) > MAX_SYSTEMCTL_SHOW_BYTES:

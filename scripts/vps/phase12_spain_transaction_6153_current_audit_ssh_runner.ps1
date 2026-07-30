@@ -4,8 +4,10 @@ param([string]$Approval = "")
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$expectedExecutorSha = "5B55AA29FFCD3DAFC50DEA0D46B772D23FD48F66BBA1C356EB10D4AD9E80DE67"
-$expectedExecutorBytes = 160075
+$expectedExecutorSha = "414F1DE0D3FA5F0A74A159F758D45B76BF50F46E147457866BD3B9A9882BB254"
+$expectedExecutorBytes = 160972
+$expectedPriorExecutorSha = "5B55AA29FFCD3DAFC50DEA0D46B772D23FD48F66BBA1C356EB10D4AD9E80DE67"
+$expectedPriorExecutorBytes = 160075
 $expectedNonce = "6153dac4843cd83610b9175dc7bb02ea8338328deda93ed155e4c18358562b71"
 $expectedTransactionSha = "2454512ceee787d905707cbdff1865905cdf7fded30949e9ddf8399db27f5cb2"
 $expectedCapsuleSha = "57653921943a6c4b0eb2c0b9b014cc8ad895d7cad78480ab014474fb98efa8cf"
@@ -13,6 +15,10 @@ $expectedLedgerSha = "494b3fac58ac79837c802163b03381e98540c11188f12f73064acb01dc
 $expectedRunnerSha = (
     Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256
 ).Hash.ToUpperInvariant()
+$repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+$executorPath = Join-Path $repoRoot (
+    "private-artifacts\phase12-spain-terminal-audit-failed-systemd-a-20260730\executor.pyz"
+)
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
 
 function Get-TextSha256([string]$Value) {
@@ -122,7 +128,7 @@ function Read-PrivateBinding([string]$Path) {
     return $values
 }
 
-$runnerApproval = "APPROVE PHASE12 SPAIN TRANSACTION 6153DA CURRENT TERMINAL READ ONLY AUDIT RUNNER SHA256 $expectedRunnerSha EXECUTOR SHA256 $expectedExecutorSha EXECUTOR BYTES $expectedExecutorBytes NONCE $expectedNonce TRANSACTION SHA256 $expectedTransactionSha CAPSULE SHA256 $expectedCapsuleSha LEDGER SHA256 $($expectedLedgerSha.ToUpperInvariant()) READ ONLY CURRENT AMN2 LEDGER SYSTEMD OWNED TREE INVENTORY NO FILE WRITE NO INSTALL NO CLEANUP NO AMN2 START NO FOREIGN SERVICE MUTATION NO USA DATA MUTATION USA ROLLBACK CONTOUR"
+$runnerApproval = "APPROVE PHASE12 SPAIN TRANSACTION 6153DA CURRENT TERMINAL READ ONLY AUDIT V2 RUNNER SHA256 $expectedRunnerSha EXECUTOR SHA256 $expectedExecutorSha EXECUTOR BYTES $expectedExecutorBytes PRIOR EXECUTOR SHA256 $expectedPriorExecutorSha PRIOR EXECUTOR BYTES $expectedPriorExecutorBytes NONCE $expectedNonce TRANSACTION SHA256 $expectedTransactionSha CAPSULE SHA256 $expectedCapsuleSha LEDGER SHA256 $($expectedLedgerSha.ToUpperInvariant()) UPLOAD ONLY VERIFIED AUDIT EXECUTOR THEN READ ONLY CURRENT AMN2 LEDGER SYSTEMD OWNED TREE INVENTORY NO INSTALL NO CLEANUP NO AMN2 START NO FOREIGN SERVICE MUTATION NO USA DATA MUTATION USA ROLLBACK CONTOUR"
 if ($Approval -cne $runnerApproval) {
     Write-Output $runnerApproval
     throw "Exact current terminal read only audit approval mismatch."
@@ -143,6 +149,14 @@ if (
 ) {
     throw "Private SSH material unavailable."
 }
+if (
+    -not (Test-Path -LiteralPath $executorPath -PathType Leaf) -or
+    (Get-Item -LiteralPath $executorPath).Length -ne $expectedExecutorBytes -or
+    (Get-FileHash -LiteralPath $executorPath -Algorithm SHA256).Hash -cne
+        $expectedExecutorSha
+) {
+    throw "Local current audit executor checksum mismatch."
+}
 
 $transportOptions = @(
     "-F", "none", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20",
@@ -156,7 +170,7 @@ $transportOptions = @(
 )
 $sshBase = @($transportOptions + @("-p", "22"))
 $target = "$($binding['TARGET_USER'])@$($binding['TARGET_HOST'])"
-$executorPath = "/root/amn2-spain-phase12-executor.pyz"
+$remoteExecutorPath = "/root/amn2-spain-phase12-executor.pyz"
 $transactionPath = (
     "/var/lib/amn2-spain-phase12-audit/transaction-$expectedNonce.json"
 )
@@ -166,10 +180,35 @@ $capsulePath = (
 $ledgerPath = (
     "/var/lib/amn2-spain-phase12-audit/mutation-ledger-$expectedNonce.json"
 )
+$executorResult = Invoke-ExactSsh (
+    @($sshBase + @(
+        $target,
+        "sha256sum $remoteExecutorPath && stat -c '%s' $remoteExecutorPath"
+    ))
+) ([byte[]]@())
+$executorText = (
+    New-Object Text.UTF8Encoding($false, $true)
+).GetString($executorResult.Stdout)
+$remoteHasCurrentExecutor = (
+    $executorResult.ExitCode -eq 0 -and
+    $executorText -match
+        "(?im)^$($expectedExecutorSha.ToLowerInvariant())  $([regex]::Escape($remoteExecutorPath))$" -and
+    $executorText -match "(?m)^$expectedExecutorBytes$"
+)
+$remoteHasPriorExecutor = (
+    $executorResult.ExitCode -eq 0 -and
+    $executorText -match
+        "(?im)^$($expectedPriorExecutorSha.ToLowerInvariant())  $([regex]::Escape($remoteExecutorPath))$" -and
+    $executorText -match "(?m)^$expectedPriorExecutorBytes$"
+)
+if (-not ($remoteHasCurrentExecutor -or $remoteHasPriorExecutor)) {
+    throw "Remote current audit executor precondition mismatch."
+}
+
 $bindingResult = Invoke-ExactSsh (
     @($sshBase + @(
         $target,
-        "sha256sum $executorPath $transactionPath $capsulePath $ledgerPath && stat -c '%s' $executorPath && test ! -e /opt/amn2-spain-package && test ! -L /opt/amn2-spain-package"
+        "sha256sum $transactionPath $capsulePath $ledgerPath && test ! -e /opt/amn2-spain-package && test ! -L /opt/amn2-spain-package"
     ))
 ) ([byte[]]@())
 $bindingText = (
@@ -178,16 +217,60 @@ $bindingText = (
 if (
     $bindingResult.ExitCode -ne 0 -or
     $bindingText -notmatch
-        "(?im)^$($expectedExecutorSha.ToLowerInvariant())  $([regex]::Escape($executorPath))$" -or
-    $bindingText -notmatch
         "(?im)^$($expectedTransactionSha.ToLowerInvariant())  $([regex]::Escape($transactionPath))$" -or
     $bindingText -notmatch
         "(?im)^$($expectedCapsuleSha.ToLowerInvariant())  $([regex]::Escape($capsulePath))$" -or
     $bindingText -notmatch
-        "(?im)^$($expectedLedgerSha.ToLowerInvariant())  $([regex]::Escape($ledgerPath))$" -or
-    $bindingText -notmatch "(?m)^$expectedExecutorBytes$"
+        "(?im)^$($expectedLedgerSha.ToLowerInvariant())  $([regex]::Escape($ledgerPath))$"
 ) {
     throw "Current audit checksum binding mismatch."
+}
+
+if (-not $remoteHasCurrentExecutor) {
+    $stagingPath = "/root/amn2-spain-phase12-current-audit-executor-a.pyz"
+    $uploadResult = Invoke-ExactSsh (
+        @($sshBase + @(
+            $target,
+            "umask 077; cat > $stagingPath"
+        ))
+    ) ([IO.File]::ReadAllBytes($executorPath))
+    if ($uploadResult.ExitCode -ne 0) {
+        throw "Current audit executor upload failed."
+    }
+    $uploadedResult = Invoke-ExactSsh (
+        @($sshBase + @(
+            $target,
+            "sha256sum $stagingPath && stat -c '%s' $stagingPath"
+        ))
+    ) ([byte[]]@())
+    $uploadedText = (
+        New-Object Text.UTF8Encoding($false, $true)
+    ).GetString($uploadedResult.Stdout)
+    if (
+        $uploadedResult.ExitCode -ne 0 -or
+        $uploadedText -notmatch
+            "(?im)^$($expectedExecutorSha.ToLowerInvariant())  $([regex]::Escape($stagingPath))$" -or
+        $uploadedText -notmatch "(?m)^$expectedExecutorBytes$"
+    ) {
+        throw "Current audit executor uploaded checksum mismatch."
+    }
+    $activationResult = Invoke-ExactSsh (
+        @($sshBase + @(
+            $target,
+            "mv -f $stagingPath $remoteExecutorPath && chmod 0644 $remoteExecutorPath && sha256sum $remoteExecutorPath && stat -c '%s' $remoteExecutorPath"
+        ))
+    ) ([byte[]]@())
+    $activationText = (
+        New-Object Text.UTF8Encoding($false, $true)
+    ).GetString($activationResult.Stdout)
+    if (
+        $activationResult.ExitCode -ne 0 -or
+        $activationText -notmatch
+            "(?im)^$($expectedExecutorSha.ToLowerInvariant())  $([regex]::Escape($remoteExecutorPath))$" -or
+        $activationText -notmatch "(?m)^$expectedExecutorBytes$"
+    ) {
+        throw "Current audit executor activation mismatch."
+    }
 }
 
 $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
@@ -209,7 +292,7 @@ $intentBytes = (New-Object Text.UTF8Encoding($false)).GetBytes(
 $result = Invoke-ExactSsh (
     @($sshBase + @(
         $target,
-        "/usr/bin/python3 -I -B $executorPath current-terminal-recovery-audit-bound"
+        "/usr/bin/python3 -I -B $remoteExecutorPath current-terminal-recovery-audit-bound"
     ))
 ) $intentBytes
 if ($result.ExitCode -ne 0) {
