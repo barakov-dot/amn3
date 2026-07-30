@@ -1,5 +1,19 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-07-30: Spain live, next action is device acceptance
+
+Spain runtime is healthy: Docker/network/web active, bot disabled, web
+loopback-only, clean DB, zero peers, AWG up on UDP `30001`, and persistent
+foreign equality passed. USA is unchanged and remains the rollback contour.
+Authoritative evidence is
+`docs/AMN2_PHASE_12_SPAIN_OPERATOR_ADOPTION_RECEIPT.ru.md`.
+
+Next required input is one message containing recipient names and slot counts
+for 1–2 test configs. Device may be `unknown`; expiry defaults to indefinite.
+After config issuance, the operator must confirm the connection on a real
+device. Then produce the Phase 12 final closeout packet and the complete
+placeholder-free Phase 13 opening text.
+
 ## Current override 2026-07-25: transaction 958e terminal recovery is next
 
 The old read-only audit failed closed because the run directory is already

@@ -1546,6 +1546,18 @@ def test_systemd_bundle_reads_units_from_package_content_root(
     }
 
 
+def test_network_unit_can_replace_root_owned_ledger_in_service_owned_directory() -> None:
+    source = (
+        TRACKED_PACKAGE_ROOT / "units" / "amn2-spain-network.service"
+    ).read_text(encoding="utf-8")
+    assert "User=root\n" in source
+    assert "Group=root\n" in source
+    assert "SupplementaryGroups=amn2-spain\n" in source
+    assert "CapabilityBoundingSet=CAP_NET_ADMIN CAP_DAC_OVERRIDE\n" in source
+    assert "AmbientCapabilities=CAP_NET_ADMIN CAP_DAC_OVERRIDE\n" in source
+    assert "ReadWritePaths=/var/lib/amn2-spain /proc/sys/net/ipv4/ip_forward\n" in source
+
+
 def test_terminal_recovery_systemd_parser_accepts_only_allowlisted_failed_state() -> None:
     unit = "amn2-spain-network.service"
     failed = (

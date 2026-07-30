@@ -1,3 +1,26 @@
+# Текущий override 2026-07-30: Spain runtime healthy, ожидается device acceptance
+
+Phase 12 дошла до рабочего Spain runtime. После approved точечного добавления
+`CAP_DAC_OVERRIDE` network unit активен, web доступен только на
+`127.0.0.1:3031`, bot disabled, `VPS_APPLY_ENABLED=false`, DB clean, peers `0`,
+AWG up на UDP `30001`. Foreign persistent equality passed: `150` entries,
+before/after SHA-256
+`3DA96B893428858FD3DDC705E19E41A87877E0F98C09B1A40DDE6E96B6346D61`.
+USA остаётся неизменённым rollback contour.
+
+Authoritative local package:
+`9F56EFDDBFAF8F3768112EED0B4AE3CA6A94178B7824A54FF10282FE572906D0`
+(`140093440` bytes), manifest
+`72061B9FD7F25B9661BCA49654CA3A08E7428F44E838D13BC7FFC9D9135D36C0`,
+executor
+`0A20AA67D75FDAF2AB3AE4DD59ED4AC6AA916CCCB4407A72CD6CFCEF8E335DF9`.
+Полный receipt:
+`docs/AMN2_PHASE_12_SPAIN_OPERATOR_ADOPTION_RECEIPT.ru.md`.
+
+Остался обязательный операторский gate: получить список получателей/slots,
+выдать 1–2 fresh configs и подтвердить подключение на реальном устройстве.
+Только после этого оформляется Phase 12 final closeout.
+
 # Текущий override 2026-07-29: V47 baseline foreign drop-policy fix готов локально
 
 V46 transaction `c22e32789531ade62f1fee9ebb9005c1cec4e94a5463c2ccab51a2a58c6187b3` снова fail-closed на `host_network_applied`. Independent read-only audit подтвердил полный rollback (`rolled_back`, retained package tree отсутствует, все AMN2 units inactive) и локализовал точную причину в неизменённом baseline: 2 foreign filter forward chains имеют policy `drop`; non-filter=0, drop/reject rules=0, Docker chains после rollback=0. Следовательно прежний blanket-запрет policy `drop` делал install заведомо невозможным ещё на исходном firewall.

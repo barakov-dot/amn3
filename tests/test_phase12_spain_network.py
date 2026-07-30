@@ -168,8 +168,8 @@ def test_canonical_nft_config_and_unit_are_exact() -> None:
     assert "After=amn2-spain-docker.service nftables.service" in unit
     assert "Requires=amn2-spain-docker.service" in unit
     assert "RemainAfterExit=yes" in unit
-    assert "CapabilityBoundingSet=CAP_NET_ADMIN" in unit
-    assert "AmbientCapabilities=CAP_NET_ADMIN" in unit
+    assert "CapabilityBoundingSet=CAP_NET_ADMIN CAP_DAC_OVERRIDE" in unit
+    assert "AmbientCapabilities=CAP_NET_ADMIN CAP_DAC_OVERRIDE" in unit
     assert "ExecStart=/usr/bin/python3 /opt/amn2-spain/current/scripts/phase12_spain_network.py apply --ledger /var/lib/amn2-spain/network-ledger.json" in unit
     assert "ExecStartPost=/usr/bin/python3 /opt/amn2-spain/current/scripts/phase12_spain_network.py verify --ledger /var/lib/amn2-spain/network-ledger.json" in unit
     assert "ExecStop=/usr/bin/python3 /opt/amn2-spain/current/scripts/phase12_spain_network.py rollback --ledger /var/lib/amn2-spain/network-ledger.json" in unit
@@ -292,6 +292,56 @@ def test_apply_and_verify_are_idempotent_for_exact_existing_state() -> None:
     assert ledger["nft"]["created"] is False
     assert ledger["route"]["created"] is False
     assert ledger["sysctl"]["changed"] is False
+
+
+def test_exact_owned_table_accepts_kernel_reordered_semantic_entries() -> None:
+    owned = expected_table_document()
+    entries = owned["nftables"]
+    owned["nftables"] = [
+        entries[0],
+        entries[1],
+        entries[3],
+        entries[7],
+        entries[2],
+        entries[4],
+        entries[5],
+        entries[6],
+        entries[8],
+    ]
+    runner = FakeRunner(owned=owned, route=ROUTE, sysctl="1")
+
+    ledger = durable_apply(NetworkManager(runner))
+
+    assert ledger["schema"] == "amn2.spain-network-ledger.v1"
+    assert not any(
+        argv
+        in {
+            ("/usr/sbin/nft", "-f", "-"),
+            (
+                "/usr/sbin/ip", "route", "add", "10.212.12.0/24",
+                "via", "172.29.251.2", "dev", "amn2spbr0",
+            ),
+            ("/usr/sbin/sysctl", "-q", "-w", "net.ipv4.ip_forward=1"),
+        }
+        for argv, *_ in runner.calls
+    )
+
+
+def test_exact_owned_table_accepts_kernel_added_ipv4_dnat_family() -> None:
+    owned = expected_table_document()
+    prerouting = next(
+        entry["rule"]
+        for entry in owned["nftables"]
+        if entry.get("rule", {}).get("comment") == "amn2_spain:udp30001"
+    )
+    dnat = next(expression["dnat"] for expression in prerouting["expr"] if "dnat" in expression)
+    dnat["family"] = "ip"
+    runner = FakeRunner(owned=owned, route=ROUTE, sysctl="1")
+
+    ledger = durable_apply(NetworkManager(runner))
+
+    assert ledger["schema"] == "amn2.spain-network-ledger.v1"
+    assert ("/usr/sbin/nft", "-f", "-") not in [call[0] for call in runner.calls]
 
 
 @pytest.mark.parametrize("mutation", ["extra_rule", "missing_rule", "extra_chain"])

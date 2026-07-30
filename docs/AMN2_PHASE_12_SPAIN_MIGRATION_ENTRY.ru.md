@@ -1,5 +1,28 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-07-30: runtime healthy, device acceptance pending
+
+Spain runtime is operational after the approved network-unit DAC override.
+Docker and web are running, network is active/exited, bot is disabled, web is
+loopback-only on `127.0.0.1:3031`, the database is clean, peer count is zero,
+and AWG is up on UDP `30001`. Persistent foreign equality passed for all `150`
+entries with identical before/after SHA-256
+`3DA96B893428858FD3DDC705E19E41A87877E0F98C09B1A40DDE6E96B6346D61`.
+USA remains the untouched rollback contour.
+
+The final local package is
+`9F56EFDDBFAF8F3768112EED0B4AE3CA6A94178B7824A54FF10282FE572906D0`
+(`140093440` bytes), manifest
+`72061B9FD7F25B9661BCA49654CA3A08E7428F44E838D13BC7FFC9D9135D36C0`,
+executor
+`0A20AA67D75FDAF2AB3AE4DD59ED4AC6AA916CCCB4407A72CD6CFCEF8E335DF9`.
+The authoritative evidence is
+`docs/AMN2_PHASE_12_SPAIN_OPERATOR_ADOPTION_RECEIPT.ru.md`.
+
+The only remaining Phase 12 acceptance gate is issuing 1–2 fresh configs from
+an operator-provided recipient/slot list and confirming a real-device
+connection.
+
 ## Current operational override — 2026-07-29: V47 baseline drop-policy compatibility ready
 
 The C22E32 read-only audit proved complete rollback and found the exact baseline blocker: two unchanged foreign filter forward chains use nftables policy `drop`; there are no foreign drop/reject rules and no Docker chains after rollback. V47 accepts only valid base-chain policies `accept|drop` while preserving filter-type validation, foreign drop/reject rule rejection, exact foreign firewall equality, smoke verification, and automatic rollback.

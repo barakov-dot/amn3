@@ -224,7 +224,8 @@ def _remove_volatile(value: Any) -> Any:
 def _owned_semantics(document: Any) -> dict[str, Any]:
     if not isinstance(document, dict) or set(document) != {"nftables"} or not isinstance(document["nftables"], list):
         raise NetworkError("owned nft JSON schema mismatch")
-    entries: list[dict[str, Any]] = []
+    entries: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
+    rule_ordinals: dict[tuple[str, str, str], int] = {}
     for entry in document["nftables"]:
         if not isinstance(entry, dict) or len(entry) != 1:
             raise NetworkError("owned nft JSON schema mismatch")
@@ -233,8 +234,44 @@ def _owned_semantics(document: Any) -> dict[str, Any]:
             continue
         if kind not in {"table", "chain", "rule"} or not isinstance(body, dict):
             raise NetworkError("owned nft JSON schema mismatch")
-        entries.append({kind: _remove_volatile(body)})
-    return {"nftables": entries}
+        normalized = _remove_volatile(body)
+        if kind == "rule":
+            for expression in normalized.get("expr", []):
+                dnat = expression.get("dnat") if isinstance(expression, dict) else None
+                if (
+                    isinstance(dnat, dict)
+                    and dnat.get("family") == "ip"
+                    and dnat.get("addr") == "172.29.251.2"
+                    and dnat.get("port") == 30001
+                ):
+                    dnat.pop("family")
+        if kind == "table":
+            identity = (normalized.get("family"), normalized.get("name"))
+            if not all(isinstance(value, str) and value for value in identity):
+                raise NetworkError("owned nft JSON schema mismatch")
+            sort_key: tuple[Any, ...] = (0, *identity)
+        elif kind == "chain":
+            identity = (
+                normalized.get("family"),
+                normalized.get("table"),
+                normalized.get("name"),
+            )
+            if not all(isinstance(value, str) and value for value in identity):
+                raise NetworkError("owned nft JSON schema mismatch")
+            sort_key = (1, *identity)
+        else:
+            identity = (
+                normalized.get("family"),
+                normalized.get("table"),
+                normalized.get("chain"),
+            )
+            if not all(isinstance(value, str) and value for value in identity):
+                raise NetworkError("owned nft JSON schema mismatch")
+            ordinal = rule_ordinals.get(identity, 0)
+            rule_ordinals[identity] = ordinal + 1
+            sort_key = (2, *identity, ordinal)
+        entries.append((sort_key, {kind: normalized}))
+    return {"nftables": [entry for _key, entry in sorted(entries)]}
 
 
 EXPECTED_NFT_SEMANTICS = _owned_semantics(expected_table_document())
