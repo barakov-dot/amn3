@@ -96,8 +96,16 @@ State-machine transaction
 device может быть `unknown`; expiry по умолчанию indefinite. После проверки
 подключения на реальном устройстве можно оформить final closeout Phase 12.
 
-На момент финальной локальной синхронизации SSH к Spain дважды завершился до
-аутентификации (`connect timeout`, затем `banner exchange timeout`). Поэтому
-новый authoritative package `9F56…` локально полностью проверен, но обновление
-remote artifact cache с предыдущего package `EF772…` не подтверждено. Это не
-влияет на уже работающий live unit: его SHA-256 подтверждён отдельно.
+После двух временных SSH transport timeout соединение восстановилось. Remote
+artifact cache обновлён checksum-bound delta из предыдущего package `EF772…`
+и подтверждён полным readback:
+
+- `/root/amn2-spain-phase12-install.tar`:
+  `9F56EFDDBFAF8F3768112EED0B4AE3CA6A94178B7824A54FF10282FE572906D0`,
+  `140093440` bytes;
+- `/root/amn2-spain-phase12-executor.pyz`:
+  `0A20AA67D75FDAF2AB3AE4DD59ED4AC6AA916CCCB4407A72CD6CFCEF8E335DF9`,
+  `161269` bytes.
+
+После cache replacement Docker/network/web остались active, bot — inactive;
+service restart/recreate не выполнялся.
