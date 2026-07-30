@@ -208,6 +208,12 @@ TRANSACTION_958E_CURRENT_AUDIT_SSH_RUNNER = (
     / "vps"
     / "phase12_spain_transaction_958e_current_audit_ssh_runner.ps1"
 )
+TRANSACTION_6153_CURRENT_AUDIT_SSH_RUNNER = (
+    ROOT
+    / "scripts"
+    / "vps"
+    / "phase12_spain_transaction_6153_current_audit_ssh_runner.ps1"
+)
 TRANSACTION_958E_TERMINAL_RECOVERY_SSH_RUNNER = (
     ROOT
     / "scripts"
@@ -5288,6 +5294,43 @@ def test_transaction_958e_current_audit_runner_is_exact_and_read_only() -> None:
     assert "current-terminal-recovery-audit-bound" in source
     assert "READ ONLY CURRENT AMN2 LEDGER SYSTEMD OWNED TREE INVENTORY" in source
     assert "manual-cleanup-bound" not in source
+    assert "install-bound" not in source
+
+
+def test_transaction_6153_current_audit_runner_is_exact_and_read_only() -> None:
+    assert TRANSACTION_6153_CURRENT_AUDIT_SSH_RUNNER.exists()
+    source = TRANSACTION_6153_CURRENT_AUDIT_SSH_RUNNER.read_text(encoding="utf-8")
+    assert "StrictHostKeyChecking=yes" in source
+    assert (
+        '$expectedExecutorSha = '
+        '"5B55AA29FFCD3DAFC50DEA0D46B772D23FD48F66BBA1C356EB10D4AD9E80DE67"'
+        in source
+    )
+    assert (
+        '$expectedNonce = '
+        '"6153dac4843cd83610b9175dc7bb02ea8338328deda93ed155e4c18358562b71"'
+        in source
+    )
+    assert (
+        '$expectedTransactionSha = '
+        '"2454512ceee787d905707cbdff1865905cdf7fded30949e9ddf8399db27f5cb2"'
+        in source
+    )
+    assert (
+        '$expectedCapsuleSha = '
+        '"57653921943a6c4b0eb2c0b9b014cc8ad895d7cad78480ab014474fb98efa8cf"'
+        in source
+    )
+    assert (
+        '$expectedLedgerSha = '
+        '"494b3fac58ac79837c802163b03381e98540c11188f12f73064acb01dc0422fc"'
+        in source
+    )
+    assert "current-terminal-recovery-audit-bound" in source
+    assert "NO FILE WRITE NO INSTALL NO CLEANUP NO AMN2 START" in source
+    assert "Invoke-BoundedSshUpload" not in source
+    assert "manual-cleanup-bound" not in source
+    assert "terminal-recovery-bound" not in source
     assert "install-bound" not in source
 
 
