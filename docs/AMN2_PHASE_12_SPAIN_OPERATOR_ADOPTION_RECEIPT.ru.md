@@ -6,8 +6,8 @@
 
 Spain runtime установлен и принят в операторский контур после точечного
 исправления sandbox прав `amn2-spain-network.service`. Live smoke и equality
-прошли. До полного закрытия Phase 12 остаётся только выдать 1–2 свежих
-конфигурации и подтвердить подключение на реальном устройстве.
+прошли. Три fresh-конфигурации выданы recipient `SooL`; до полного закрытия
+Phase 12 остаётся только подтвердить подключение на реальном устройстве.
 
 ## Authoritative identities
 
@@ -63,8 +63,9 @@ State-machine transaction
 - Web listener: только `127.0.0.1:3031`.
 - `/` возвращает redirect на `/login`; `/login` возвращает HTTP 200.
 - `VPS_APPLY_ENABLED=false`.
-- Clean DB: все проверенные AMN2 таблицы содержат `0` строк.
-- Peers: `0`.
+- Fresh DB до первой выдачи: все проверенные AMN2 таблицы содержали `0` строк.
+- После выдачи: users `1`, active devices `3`, completed receipts `3`, failed
+  receipts `0`, persistent/live peers `3/3`.
 - AWG: container running, interface up, UDP listen port `30001`.
 - Route: `10.212.12.0/24 via 172.29.251.2 dev amn2spbr0`.
 - AWG не перезапускался и не пересоздавался после успешного запуска.
@@ -89,12 +90,40 @@ State-machine transaction
 Посторонний Spain-сервис не останавливался и не изменялся. USA data не
 переносились и не удалялись.
 
+## Fresh config issuance
+
+- Request: `phase12-spain-sool-test-20260730-001`, status `completed`.
+- Recipient: `SooL`.
+- Devices: `Проектор`, `Телевизор`, `ARM-HOME`.
+- Expiry: indefinite для всех трёх.
+- Persistent/live peer sets: exact equal; SHA-256
+  `E111BFDAFD17D3762EC9C1AC03557B469F6AE5FE0A06A68F9A9C52138B7C08EA`.
+- AWG container restart count после выдачи: `0`.
+- Три local artifacts проверены byte-for-byte и сохранены в private-artifacts;
+  их содержимое и ключи в docs/git не публикуются.
+- Восемь exact временных `/root` staging/artifact files удалены после
+  подтверждённого скачивания; runtime, DB и peers при cleanup не менялись.
+
+Свежий post-issuance collector SHA-256:
+`4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D`;
+evidence SHA-256:
+`60EB160C333BD08F778908A4D046A4841F2E5EF0464E7E52248A94833D2D041B`.
+Equality относительно принятого post-cleanup evidence:
+
+- persistent entries: `152`;
+- changed persistent entries: `0`;
+- persistent before/after SHA-256:
+  `93076664864CB4E9A61E011CA074BD515016D3D08855C97FFB1BBB2932ED270D`;
+- volatile before/after: `0/0`;
+- receipt SHA-256:
+  `B012368C6A18EAEE6930024CCF01988A23616B9DF6B9232ACDA1E153648D5392`.
+
 ## Незакрытый операторский gate
 
-Нужен список получателей и количество fresh slots для выдачи 1–2 тестовых
-конфигураций. Формат имени: `NEOBYATNAYA.NET — recipient — slot/device`;
-device может быть `unknown`; expiry по умолчанию indefinite. После проверки
-подключения на реальном устройстве можно оформить final closeout Phase 12.
+Импортировать один из трёх выданных конфигов и подтвердить реальное
+подключение. Рекомендованный первый тест — `ARM-HOME`. После подтверждения
+можно оформить final closeout Phase 12. `ARM-WORK`, `NOTEBOOK`, `IPAD`,
+`IPHONE` до успешного теста не создаются.
 
 После двух временных SSH transport timeout соединение восстановилось. Remote
 artifact cache обновлён checksum-bound delta из предыдущего package `EF772…`

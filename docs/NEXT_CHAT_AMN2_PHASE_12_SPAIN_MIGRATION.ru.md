@@ -1,18 +1,25 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-07-30: Spain live, next action is device acceptance
+## Current override 2026-07-31: three configs issued, device test is next
 
 Spain runtime is healthy: Docker/network/web active, bot disabled, web
-loopback-only, clean DB, zero peers, AWG up on UDP `30001`, and persistent
-foreign equality passed. USA is unchanged and remains the rollback contour.
+loopback-only, AWG up on UDP `30001`. The fresh DB started empty; issuance
+request `phase12-spain-sool-test-20260730-001` completed for `SooL` with
+`Проектор`, `Телевизор`, and `ARM-HOME`, all indefinite. Current state:
+users/devices/receipts `1/3/3`, failed receipts `0`, persistent/live peers
+`3/3`, exact peer-set equality, AWG restart count `0`. Post-issuance foreign
+equality passed for `152` persistent entries with no changes and volatile
+`0/0`; receipt SHA-256
+`B012368C6A18EAEE6930024CCF01988A23616B9DF6B9232ACDA1E153648D5392`.
+USA is unchanged and remains the rollback contour.
 Authoritative evidence is
 `docs/AMN2_PHASE_12_SPAIN_OPERATOR_ADOPTION_RECEIPT.ru.md`.
 
-Next required input is one message containing recipient names and slot counts
-for 1–2 test configs. Device may be `unknown`; expiry defaults to indefinite.
-After config issuance, the operator must confirm the connection on a real
-device. Then produce the Phase 12 final closeout packet and the complete
-placeholder-free Phase 13 opening text.
+Next required action is the operator importing one issued config on a real
+device; `ARM-HOME` is recommended first. After a successful connection,
+produce the Phase 12 final closeout packet and the complete placeholder-free
+Phase 13 opening text. Do not create `ARM-WORK`, `NOTEBOOK`, `IPAD`, or
+`IPHONE` before that confirmation.
 
 ## Current override 2026-07-25: transaction 958e terminal recovery is next
 

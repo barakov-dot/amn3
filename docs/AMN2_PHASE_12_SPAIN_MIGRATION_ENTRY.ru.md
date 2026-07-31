@@ -1,13 +1,21 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
-## Current operational override — 2026-07-30: runtime healthy, device acceptance pending
+## Current operational override — 2026-07-31: three configs issued, device test pending
 
 Spain runtime is operational after the approved network-unit DAC override.
 Docker and web are running, network is active/exited, bot is disabled, web is
-loopback-only on `127.0.0.1:3031`, the database is clean, peer count is zero,
-and AWG is up on UDP `30001`. Persistent foreign equality passed for all `150`
-entries with identical before/after SHA-256
-`3DA96B893428858FD3DDC705E19E41A87877E0F98C09B1A40DDE6E96B6346D61`.
+loopback-only on `127.0.0.1:3031`, and AWG is up on UDP `30001`. The fresh DB
+started empty. Request `phase12-spain-sool-test-20260730-001` completed for
+recipient `SooL` and devices `Проектор`, `Телевизор`, `ARM-HOME`, all with
+indefinite expiry. Runtime audit reports one user, three active devices, three
+completed and zero failed receipts, and exact equality of three persistent and
+three live peers. The AWG container restart count stayed zero.
+
+Post-issuance persistent foreign equality passed for all `152` current entries:
+changed `0`, volatile `0/0`, identical before/after SHA-256
+`93076664864CB4E9A61E011CA074BD515016D3D08855C97FFB1BBB2932ED270D`.
+Receipt SHA-256 is
+`B012368C6A18EAEE6930024CCF01988A23616B9DF6B9232ACDA1E153648D5392`.
 USA remains the untouched rollback contour.
 
 The final local package is
@@ -19,9 +27,9 @@ executor
 The authoritative evidence is
 `docs/AMN2_PHASE_12_SPAIN_OPERATOR_ADOPTION_RECEIPT.ru.md`.
 
-The only remaining Phase 12 acceptance gate is issuing 1–2 fresh configs from
-an operator-provided recipient/slot list and confirming a real-device
-connection.
+The only remaining Phase 12 acceptance gate is importing one of the three
+issued configs and confirming a real-device connection. `ARM-WORK`,
+`NOTEBOOK`, `IPAD`, and `IPHONE` remain uncreated until that test passes.
 
 ## Current operational override — 2026-07-29: V47 baseline drop-policy compatibility ready
 

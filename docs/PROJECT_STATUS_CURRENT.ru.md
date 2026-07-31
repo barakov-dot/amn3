@@ -1,11 +1,19 @@
-# Текущий override 2026-07-30: Spain runtime healthy, ожидается device acceptance
+# Текущий override 2026-07-31: 3 Spain configs выданы, ожидается device test
 
 Phase 12 дошла до рабочего Spain runtime. После approved точечного добавления
 `CAP_DAC_OVERRIDE` network unit активен, web доступен только на
-`127.0.0.1:3031`, bot disabled, `VPS_APPLY_ENABLED=false`, DB clean, peers `0`,
-AWG up на UDP `30001`. Foreign persistent equality passed: `150` entries,
-before/after SHA-256
-`3DA96B893428858FD3DDC705E19E41A87877E0F98C09B1A40DDE6E96B6346D61`.
+`127.0.0.1:3031`, bot disabled, `VPS_APPLY_ENABLED=false`, AWG up на UDP
+`30001`. Fresh DB была пустой до первой выдачи. Request
+`phase12-spain-sool-test-20260730-001` завершён: recipient `SooL`, devices
+`Проектор`, `Телевизор`, `ARM-HOME`, expiry indefinite; users/devices/receipts
+`1/3/3`, failed receipts `0`, persistent/live peers `3/3` с exact peer-set
+equality. AWG container не перезапускался и не пересоздавался.
+
+Post-issuance foreign equality passed по approved persistent/volatile policy:
+`152` persistent entries, changed `0`, volatile `0/0`; before/after SHA-256
+`93076664864CB4E9A61E011CA074BD515016D3D08855C97FFB1BBB2932ED270D`.
+Receipt SHA-256:
+`B012368C6A18EAEE6930024CCF01988A23616B9DF6B9232ACDA1E153648D5392`.
 USA остаётся неизменённым rollback contour.
 
 Authoritative local package:
@@ -17,9 +25,10 @@ executor
 Полный receipt:
 `docs/AMN2_PHASE_12_SPAIN_OPERATOR_ADOPTION_RECEIPT.ru.md`.
 
-Остался обязательный операторский gate: получить список получателей/slots,
-выдать 1–2 fresh configs и подтвердить подключение на реальном устройстве.
-Только после этого оформляется Phase 12 final closeout.
+Единственный оставшийся обязательный операторский gate — импортировать один из
+трёх выданных конфигов и подтвердить подключение на реальном устройстве. Только
+после этого оформляется Phase 12 final closeout. `ARM-WORK`, `NOTEBOOK`, `IPAD`
+и `IPHONE` до успешного теста не создаются.
 
 # Текущий override 2026-07-29: V47 baseline foreign drop-policy fix готов локально
 
