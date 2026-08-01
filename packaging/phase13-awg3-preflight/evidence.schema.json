@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "amn2.phase13.awg3-readonly-preflight-evidence.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "outcome_id",
+    "checked_at",
+    "source_head",
+    "manifest_sha256",
+    "runner_sha256",
+    "collector_sha256",
+    "schema_sha256",
+    "phase12_foundation_sha256",
+    "candidate_resources",
+    "awg2_equality",
+    "foreign_equality",
+    "safety_receipt",
+    "decision",
+    "stop_reasons"
+  ],
+  "properties": {
+    "schema": {"const": "amn2.phase13.awg3-readonly-preflight.v1"},
+    "outcome_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$"},
+    "checked_at": {"type": "string", "format": "date-time"},
+    "source_head": {"const": "ff115b63ca1329640ca13ae0a502d155f99b456b"},
+    "manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "runner_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "collector_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "schema_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "phase12_foundation_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "candidate_resources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["resource", "declared_value", "state", "observation_sha256"],
+        "properties": {
+          "resource": {"type": "string", "minLength": 1},
+          "declared_value": {"type": "string", "minLength": 1},
+          "state": {"enum": ["absent", "free", "conflict", "ambiguous", "unavailable"]},
+          "observation_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "awg2_equality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "container_equal",
+        "service_equal",
+        "interface_equal",
+        "udp_port_equal",
+        "vpn_cidr_route_equal",
+        "persistent_peers",
+        "live_peers",
+        "peer_set_sha256",
+        "restart_count",
+        "forward_rule_count",
+        "web_listener_equal",
+        "bot_disabled",
+        "equal"
+      ],
+      "properties": {
+        "container_equal": {"type": "boolean"},
+        "service_equal": {"type": "boolean"},
+        "interface_equal": {"type": "boolean"},
+        "udp_port_equal": {"type": "boolean"},
+        "vpn_cidr_route_equal": {"type": "boolean"},
+        "persistent_peers": {"type": "integer", "minimum": 0},
+        "live_peers": {"type": "integer", "minimum": 0},
+        "peer_set_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "restart_count": {"type": "integer", "minimum": 0},
+        "forward_rule_count": {"type": "integer", "minimum": 0},
+        "web_listener_equal": {"type": "boolean"},
+        "bot_disabled": {"type": "boolean"},
+        "equal": {"type": "boolean"}
+      }
+    },
+    "foreign_equality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "persistent_entries",
+        "stable_sha256",
+        "changed",
+        "equality_receipt_sha256",
+        "equal"
+      ],
+      "properties": {
+        "persistent_entries": {"type": "integer", "minimum": 0},
+        "stable_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "changed": {"type": "integer", "minimum": 0},
+        "equality_receipt_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "equal": {"type": "boolean"}
+      }
+    },
+    "safety_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mutation_attempted",
+        "remote_file_written",
+        "service_action_attempted",
+        "container_action_attempted",
+        "firewall_action_attempted",
+        "secret_bearing_config_accessed",
+        "raw_peer_identifiers_emitted",
+        "raw_output_persisted"
+      ],
+      "properties": {
+        "mutation_attempted": {"const": false},
+        "remote_file_written": {"const": false},
+        "service_action_attempted": {"const": false},
+        "container_action_attempted": {"const": false},
+        "firewall_action_attempted": {"const": false},
+        "secret_bearing_config_accessed": {"const": false},
+        "raw_peer_identifiers_emitted": {"const": false},
+        "raw_output_persisted": {"const": false}
+      }
+    },
+    "decision": {"enum": ["pass", "stop"]},
+    "stop_reasons": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    }
+  }
+}

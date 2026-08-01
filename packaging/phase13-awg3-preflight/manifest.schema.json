@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "amn2.phase13.awg3-readonly-preflight-manifest.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "outcome_id",
+    "created_at",
+    "expires_at",
+    "target_role",
+    "source_base",
+    "source_head",
+    "spain_overlay",
+    "candidate",
+    "artifacts",
+    "foundation_sha256",
+    "allowed_command_families",
+    "forbidden_actions",
+    "max_attempts",
+    "remote_write_allowed",
+    "package_build_allowed",
+    "live_action_authorized"
+  ],
+  "properties": {
+    "schema": {"const": "amn2.phase13.awg3-readonly-preflight-manifest.v1"},
+    "outcome_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "target_role": {"const": "spain-primary"},
+    "source_base": {"const": "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"},
+    "source_head": {"const": "ff115b63ca1329640ca13ae0a502d155f99b456b"},
+    "spain_overlay": {"const": "f1bf099ddb47da26a4080714376babaf5b0de92c"},
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runtime_instance_id",
+        "protocol_version",
+        "interface_name",
+        "host_bridge",
+        "udp_port",
+        "vpn_cidr",
+        "server_vpn_address",
+        "container_cidr",
+        "container_name",
+        "service_name",
+        "state_root",
+        "config_path"
+      ],
+      "properties": {
+        "runtime_instance_id": {"const": "spain-awg3-candidate-001"},
+        "protocol_version": {"const": "awg3"},
+        "interface_name": {"const": "awg3"},
+        "host_bridge": {"const": "amn2sp3br0"},
+        "udp_port": {"const": 30002},
+        "vpn_cidr": {"const": "10.212.13.0/24"},
+        "server_vpn_address": {"const": "10.212.13.1/24"},
+        "container_cidr": {"const": "172.29.252.0/28"},
+        "container_name": {"const": "amn2-spain-awg3"},
+        "service_name": {"const": "amn2-spain-awg3.service"},
+        "state_root": {"const": "/var/lib/amn2-spain/awg3"},
+        "config_path": {"const": "/var/lib/amn2-spain/awg3/awg3.conf"}
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "size", "sha256"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "size": {"type": "integer", "minimum": 0},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "foundation_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "allowed_command_families": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "forbidden_actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "max_attempts": {"const": 1},
+    "remote_write_allowed": {"const": false},
+    "package_build_allowed": {"const": false},
+    "live_action_authorized": {"const": false}
+  }
+}

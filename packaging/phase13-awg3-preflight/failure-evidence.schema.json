@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "amn2.phase13.awg3-readonly-preflight-failure.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "outcome_id",
+    "checked_at",
+    "source_head",
+    "manifest_sha256",
+    "stage",
+    "reason_code",
+    "decision",
+    "safety_receipt"
+  ],
+  "properties": {
+    "schema": {"const": "amn2.phase13.awg3-readonly-preflight-failure.v1"},
+    "outcome_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$"},
+    "checked_at": {"type": "string", "format": "date-time"},
+    "source_head": {"const": "ff115b63ca1329640ca13ae0a502d155f99b456b"},
+    "manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "stage": {
+      "enum": [
+        "argument_validation",
+        "checksum_verification",
+        "approval_validation",
+        "private_root_validation",
+        "outcome_claim",
+        "trust_binding",
+        "transport",
+        "collector",
+        "schema_validation"
+      ]
+    },
+    "reason_code": {
+      "enum": [
+        "udp_port_conflict",
+        "interface_conflict",
+        "vpn_cidr_overlap",
+        "container_cidr_overlap",
+        "container_name_conflict",
+        "service_name_conflict",
+        "state_path_conflict",
+        "runtime_capability_unavailable",
+        "awg2_equality_mismatch",
+        "foreign_equality_mismatch",
+        "observation_ambiguous",
+        "artifact_checksum_mismatch",
+        "outcome_replay",
+        "schema_validation_failed",
+        "secret_pattern_detected"
+      ]
+    },
+    "decision": {"const": "stop"},
+    "safety_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mutation_attempted",
+        "remote_file_written",
+        "service_action_attempted",
+        "container_action_attempted",
+        "firewall_action_attempted",
+        "secret_bearing_config_accessed",
+        "raw_peer_identifiers_emitted",
+        "raw_output_persisted"
+      ],
+      "properties": {
+        "mutation_attempted": {"const": false},
+        "remote_file_written": {"const": false},
+        "service_action_attempted": {"const": false},
+        "container_action_attempted": {"const": false},
+        "firewall_action_attempted": {"const": false},
+        "secret_bearing_config_accessed": {"const": false},
+        "raw_peer_identifiers_emitted": {"const": false},
+        "raw_output_persisted": {"const": false}
+      }
+    }
+  }
+}

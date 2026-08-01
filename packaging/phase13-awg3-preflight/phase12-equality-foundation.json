@@ -1,0 +1,20 @@
+{
+  "schema": "amn2.phase13.phase12-equality-foundation.v1",
+  "source_head": "ff115b63ca1329640ca13ae0a502d155f99b456b",
+  "foreign": {
+    "persistent_entries": 153,
+    "stable_sha256": "f5767f361a9441dd4b5361c07da164a3059e0d1347d5217594534797d367b7e8",
+    "equality_receipt_sha256": "bc9065b3fa7cab40f5eefebbfd8093f2d62477e972777fe665e8d9f6028aa704"
+  },
+  "awg2": {
+    "udp_port": 30001,
+    "vpn_cidr": "10.212.12.0/24",
+    "route_device": "amn2spbr0",
+    "persistent_peers": 7,
+    "live_peers": 7,
+    "restart_count": 59,
+    "forward_rule_count": 3,
+    "web_listener": "127.0.0.1:3031",
+    "bot_enabled": false
+  }
+}
