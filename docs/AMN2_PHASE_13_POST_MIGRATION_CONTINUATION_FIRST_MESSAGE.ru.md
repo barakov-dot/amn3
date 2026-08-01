@@ -89,6 +89,11 @@ security review -> docs/status sync -> commit -> push -> exact live approval.
 Не трогай посторонние изменения и
 docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md.
 
+После появления нового task проверь active automation
+amn2-upstream-orchestrator и ретаргеть только target task на этот новый task,
+если это поддерживается. Сохрани исходные ACTIVE status, weekly upstream
+prompt и schedule; legacy three-step upstream chain оставь PAUSED.
+
 Всегда заканчивай вариантами: Одиночная, Двойная, Тройная, Четверная,
 Более — рекомендовано; план и остаток работ показывай по критичности:
 критичные, очень важные, важные, средние, простые и косметические.
