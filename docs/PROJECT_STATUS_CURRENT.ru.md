@@ -1,3 +1,26 @@
+# Текущий authoritative override 2026-08-01: Phase 13 AWG2/AWG3 design записан и ожидает review
+
+Design-only gate `REVIEW_PHASE13_AWG2_AWG3_VERSION_ADMISSION_AND_ISOLATED_RUNTIME_DESIGN_GATE`
+выполнен до written-spec review. Bilingual spec:
+`docs/superpowers/specs/2026-08-01-amn2-phase13-awg2-awg3-version-admission-isolated-runtime-design.ru.md`.
+
+Принятое архитектурное направление: exact application/platform/version
+admission, fail-closed compatibility evidence, first-class isolated
+`VpnRuntimeInstance`, разные typed AWG2/AWG3 renderers и evidence-bound
+Passport/receipt/Desired-Observed-Drift linkage. Официальный release claim сам
+по себе не открывает AWG3 issuance. Production остаётся AWG2-only до отдельной
+Spain server/config/data/reboot/rollback acceptance.
+
+Spain AWG2 d1–d7, USA rollback contour и посторонний Spain-сервис не
+изменялись. Implementation, SSH/VPS, config/peer, Docker/firewall, reboot и
+public/bot actions не разрешены. Следующий gate — operator review записанной
+spec; только после него допускается отдельный TDD implementation plan.
+
+USA retirement добавлен как отдельный fail-closed readiness/notification
+gate. До полного backup/restore/dependency/replacement-rollback evidence и
+отдельного exact approval USA нельзя отключать, очищать или использовать по
+иному назначению.
+
 # Текущий authoritative override 2026-08-01: Phase 13 handoff пересобран с AWG2/AWG3 gate
 
 Phase 12 остаётся полностью принятой; её rollout, controlled reboot и issuance

@@ -2,6 +2,19 @@
 
 Этот файл фиксирует рабочую карту решений после анализа PRVTPRO/Amnezia-Web-Panel, wg-easy/wg-easy, kyoresuas/amnezia-api и текущего состояния `amn2`.
 
+Актуализация 2026-08-01 Phase 13: фактический Spain baseline имеет семь
+принятых AWG2 slots; production AWG3 ещё не принят. Первый критичный slice —
+written review, затем отдельный TDD plan для exact client-version admission и
+isolated `VpnRuntimeInstance`. Device Passport и Desired/Observed/Drift следуют
+с protocol/runtime/client compatibility evidence для фактических d1–d7.
+Quota default `5` пока не меняется и требует отдельного product decision.
+
+USA retirement/reuse является отдельным fail-closed readiness gate, а не
+частью AWG3 rollout. До Spain stability, encrypted backup, independent restore
+rehearsal, replacement rollback capacity, dependency audit и exact approval
+USA остаётся неизменённым rollback contour; оператору должна быть выдана явная
+readiness notification до любого shutdown/wipe/reuse.
+
 Актуализация 2026-06-02: API integration уже перешла из plan stage в активную собственную ветку `amn2/codex/read-only-api-route-shell`, head `2010d60`. Следующий gate - real VPS loopback API smoke, а не новый параллельный implementation plan.
 
 Актуализация 2026-06-09: AMN2 target VPS Phase 3 service-mode зафиксирован в AMN3 commit `bc00b77`. Текущий web/admin access path - приватный SSH local port forward к loopback `127.0.0.1:3030`; публичный домен, HTTPS reverse proxy/public cutover, TCP `80/443`, public API `3040` и direct public web `3030` не используются. Для PRVTPRO/Web Panel направления ближайший фокус - read-only UX/product review и безопасные обзорные улучшения, без destructive/admin write assumptions.

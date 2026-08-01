@@ -120,3 +120,19 @@ design gate без live mutation. Device Passport и Desired/Observed/Drift не
 отменяются: protocol version, client application/version и compatibility
 evidence должны стать их полями, после чего работа продолжается на фактических
 семи Spain slots.
+
+## Written design checkpoint
+
+Design записан в
+`docs/superpowers/specs/2026-08-01-amn2-phase13-awg2-awg3-version-admission-isolated-runtime-design.ru.md`
+и ожидает operator review. Документ выбирает first-class isolated
+`VpnRuntimeInstance`, exact client admission, separate typed renderers и
+fail-closed compatibility evidence. Он не разрешает implementation или live
+mutation.
+
+В design также добавлен отдельный USA retirement/reuse notification gate. USA
+остаётся rollback contour до подтверждённых Spain stability, device
+acceptance, 14-day post-mutation observation, encrypted backup, independent
+restore rehearsal, replacement rollback capacity, dependency audit и
+secret-safe retirement plan. Readiness notification не является approval на
+shutdown, wipe или reuse.
