@@ -1,5 +1,31 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-08-01: exact client display packages ready
+
+The three existing Spain config byte streams were repackaged offline without
+key, peer, DB, config-byte, or live-state mutation. Each slot has a unique
+outer ZIP containing exact `NEOBYATNAYA.NET.conf` plus a secret-free manifest.
+Recipient/device/device-ID identity remains outside the client filename, so
+multiple slots cannot collide while the imported profile name has no suffix.
+
+Receipt SHA-256 is
+`2A0375F8D14ED76FA5799E466A6F533D8833CB459530DB03D832AE535BE9C3BC`.
+Archive SHA-256 values are
+`7E097939F42299BD78961A80D857447F5BB646CEE24F782989D135DE065844EF`
+(Projector/d1),
+`6F7F8C55FA92F6745713701954AA7929BFABA3D1AFB5647003EB07BAB8E89377`
+(TV/d2), and
+`844B8AD650A3A70F5AA672CEDC44C1AB0B42A580971215C11D09D697BE93E207`
+(ARM-HOME/d3). Build and independent verification passed; every 477-byte inner
+config is byte-equal to its authoritative source. Test evidence: focused
+`7 passed`, Phase 12 `378 passed, 5 skipped`, tracked repository full suite
+`587 passed, 5 skipped`.
+
+The next required gate is one real AmneziaVPN import confirming exact
+`NEOBYATNAYA.NET` both in the large profile header and server list. Then repeat
+the previously deferred controlled-reboot persistence approval. No reboot has
+occurred yet.
+
 ## Current operational override — 2026-08-01: ARM-HOME data passed; durable dataplane deployed
 
 ARM-HOME passed the full Spain data-path test. Live audit confirms peer

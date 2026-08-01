@@ -1,3 +1,36 @@
+# Текущий override 2026-08-01: exact `NEOBYATNAYA.NET` client packages готовы
+
+Три уже выданных Spain config переупакованы offline без изменения config bytes,
+ключей, peers, DB или live Spain state. Для каждого slot создан уникальный ZIP;
+внутри каждого архива единственный client config называется exact
+`NEOBYATNAYA.NET.conf`. Recipient/device/device-ID сохранены только во внешнем
+archive name и secret-free package manifest, поэтому multi-slot filename
+collision исключён.
+
+Package receipt SHA-256:
+`2A0375F8D14ED76FA5799E466A6F533D8833CB459530DB03D832AE535BE9C3BC`.
+Outer archives:
+
+- `SooL/Проектор/d1`: SHA-256
+  `7E097939F42299BD78961A80D857447F5BB646CEE24F782989D135DE065844EF`;
+- `SooL/Телевизор/d2`: SHA-256
+  `6F7F8C55FA92F6745713701954AA7929BFABA3D1AFB5647003EB07BAB8E89377`;
+- `SooL/ARM-HOME/d3`: SHA-256
+  `844B8AD650A3A70F5AA672CEDC44C1AB0B42A580971215C11D09D697BE93E207`.
+
+Build и independent verify passed; все три inner configs byte-equal исходным
+477-byte artifacts. TDD focused suite: `7 passed`; Phase 12 scope:
+`378 passed, 5 skipped`; tracked repository full suite:
+`587 passed, 5 skipped`. Authoritative extracted source snapshot не содержит
+tests, поэтому отдельный AMN2 source pytest корректно сообщил `No files were
+found in testpaths` и не используется как pass/fail evidence.
+
+Следующий обязательный gate — импортировать один extracted
+`NEOBYATNAYA.NET.conf` в реальный AmneziaVPN и подтвердить exact
+`NEOBYATNAYA.NET` одновременно в большом заголовке и списке серверов, без
+suffix. После этого повторяется ранее не выполненная exact команда controlled
+reboot persistence test. Сервер сейчас не перезагружался.
+
 # Текущий override 2026-08-01: ARM-HOME data passed; durable dataplane deployed
 
 ARM-HOME прошёл полный data test на Spain: пользователь подтвердил рабочую

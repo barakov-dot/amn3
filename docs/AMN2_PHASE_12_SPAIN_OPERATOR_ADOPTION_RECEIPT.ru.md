@@ -1,13 +1,36 @@
 # AMN2 Phase 12 — Spain operator adoption receipt
 
-Дата фиксации: 2026-07-30.
+Дата фиксации: 2026-08-01.
+
+## Exact client display-name correction
+
+Три existing config artifacts переупакованы byte-for-byte без regeneration
+ключей/peers/configs и без изменения DB/live Spain. Каждый уникальный per-slot
+ZIP содержит exact `NEOBYATNAYA.NET.conf` и secret-free
+`package-manifest.json`. Package receipt SHA-256:
+`2A0375F8D14ED76FA5799E466A6F533D8833CB459530DB03D832AE535BE9C3BC`.
+
+- `SooL/Проектор/d1`: archive SHA-256
+  `7E097939F42299BD78961A80D857447F5BB646CEE24F782989D135DE065844EF`;
+- `SooL/Телевизор/d2`: archive SHA-256
+  `6F7F8C55FA92F6745713701954AA7929BFABA3D1AFB5647003EB07BAB8E89377`;
+- `SooL/ARM-HOME/d3`: archive SHA-256
+  `844B8AD650A3A70F5AA672CEDC44C1AB0B42A580971215C11D09D697BE93E207`.
+
+Build/independent verify доказали exact inner filename, unique outer identities
+и byte equality всех трёх 477-byte configs. Tests: focused `7 passed`, Phase 12
+`378 passed, 5 skipped`, tracked repository full `587 passed, 5 skipped`.
+Остаётся real AmneziaVPN import: big header и servers list должны показать
+exact `NEOBYATNAYA.NET` без suffix. После этого выполняется отдельно
+разрешённый controlled reboot persistence test; reboot ещё не выполнялся.
 
 ## Итог
 
 Spain runtime установлен и принят в операторский контур после точечного
 исправления sandbox прав `amn2-spain-network.service`. Live smoke и equality
-прошли. Три fresh-конфигурации выданы recipient `SooL`; до полного закрытия
-Phase 12 остаётся только подтвердить подключение на реальном устройстве.
+прошли. Три fresh-конфигурации выданы recipient `SooL`; ARM-HOME full data
+прошёл. До полного закрытия Phase 12 остаются exact display-name import и
+controlled reboot persistence confirmation.
 
 ## Authoritative identities
 

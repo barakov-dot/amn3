@@ -1,5 +1,20 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-08-01: exact client name packages built; import then reboot
+
+Three existing configs were reused byte-for-byte and wrapped in unique per-slot
+ZIPs. Every archive contains exact `NEOBYATNAYA.NET.conf`; recipient/device/ID
+remain only in the outer archive and secret-free manifest. Receipt SHA-256:
+`2A0375F8D14ED76FA5799E466A6F533D8833CB459530DB03D832AE535BE9C3BC`.
+Build/independent verify passed. Tests: focused `7 passed`, Phase 12
+`378 passed, 5 skipped`, tracked repository full `587 passed, 5 skipped`.
+
+Next operator action: extract one archive, import its exact
+`NEOBYATNAYA.NET.conf` into AmneziaVPN, and confirm that both the large header
+and servers list show exact `NEOBYATNAYA.NET` with no suffix. After that, repeat
+the controlled-reboot persistence approval literal. Spain has not been
+rebooted. Do not regenerate configs, keys or peers.
+
 ## Current override 2026-08-01: durable dataplane deployed; controlled reboot is next
 
 ARM-HOME passed the full Spain data test. Live peer `10.212.12.4/32` has
