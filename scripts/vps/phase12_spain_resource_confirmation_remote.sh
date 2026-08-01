@@ -344,7 +344,7 @@ if awk -F: '$1 == "amn2-spain" {found=1} END {exit(found ? 0 : 1)}' /etc/group; 
 if awk -F: '$3 == "61212" {found=1} END {exit(found ? 0 : 1)}' /etc/passwd; then uid_exists=true; else uid_exists=false; fi
 if awk -F: '$3 == "61212" {found=1} END {exit(found ? 0 : 1)}' /etc/group; then gid_exists=true; else gid_exists=false; fi
 candidate_unit_rows=""
-for candidate_unit in amn2-spain-web.service amn2-spain-bot.service amn2-spain-docker.service amn2-spain-network.service; do
+for candidate_unit in amn2-spain-web.service amn2-spain-bot.service amn2-spain-docker.service amn2-spain-network.service amn2-spain-forward-compat.service; do
     load_state="$(systemctl show "$candidate_unit" --property=LoadState --value 2>/dev/null)"
     if [[ "$load_state" == "not-found" || -z "$load_state" ]]; then exists=false; else exists=true; fi
     candidate_unit_rows+="$candidate_unit|$exists"$'\n'

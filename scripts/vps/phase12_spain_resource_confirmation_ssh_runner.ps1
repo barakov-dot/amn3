@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Security") -ErrorAction Stop
 Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Utility") -ErrorAction Stop
 
-$expectedRemoteScriptSha = "4705B22EC68A0EA2820BDE82E41DB8D364EBD41D884A2A3D080FFE214CBC4D8D"
+$expectedRemoteScriptSha = "8B49104E1DB25F9505251930CD92E18FC13A7127796705C09C1ED3C3CE8CCC54"
 $expectedFingerprintSetSha = "37041070A4F748F0CF46BA671A5B5BCE714B066D841B150A2AE128EFE6ED22A2"
 $expectedFingerprintSetBytes = 44899
 $expectedPackageResourcePlanSha = "0352F6C5254A14DDCBA45433F055B782A34F1FC56FF175F7AC2F0CBF86825AC0"
@@ -147,7 +147,7 @@ function Assert-ResourceConfirmationSchema([object]$Evidence) {
     foreach ($Unit in @($Evidence.candidates.units)) {
         Assert-ExactProperties $Unit @("name", "exists") "candidates.unit"
     }
-    if ((@($Evidence.candidates.units.name) -join '|') -cne 'amn2-spain-web.service|amn2-spain-bot.service|amn2-spain-docker.service|amn2-spain-network.service') {
+    if ((@($Evidence.candidates.units.name) -join '|') -cne 'amn2-spain-web.service|amn2-spain-bot.service|amn2-spain-docker.service|amn2-spain-network.service|amn2-spain-forward-compat.service') {
         throw "Candidate unit list mismatch."
     }
     if (@($Evidence.candidates.units | Where-Object { $_.exists -isnot [bool] }).Count -ne 0) {

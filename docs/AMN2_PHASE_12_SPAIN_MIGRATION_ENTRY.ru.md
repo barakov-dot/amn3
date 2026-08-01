@@ -1,5 +1,29 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Current operational override — 2026-08-01: ARM-HOME data passed; durable dataplane deployed
+
+ARM-HOME passed the full Spain data-path test. Live audit confirms peer
+`10.212.12.4/32`, non-zero RX/TX `60941276/135251812`, matching DB/live/client
+server-key hashes, and AWG restart count `0`.
+
+The approved durable fix was deployed without reboot. The checksum-bound
+`amn2-spain-forward-compat.service` is active and enabled; manager SHA-256 is
+`F7978A0D50F91F2E48886B9FFD9B99E9F7D32C4F2A3559FB65C0F1A57B1D41B9`
+and unit SHA-256 is
+`47987BA66A13F47638911F2C1354D87E0D0E21B4AA33E295AD562AC39059FAC3`.
+It adopted exact tagged handles `157/158/159`, verified container
+`net.ipv4.ip_forward=1`, and created no duplicate rules. The ineffective UDP
+relay and its unit are absent. Deployment passed with strategy `adopted` and
+identical foreign semantic before/after SHA-256
+`908F069A79590A9A992FD271CB9ED724A5C3D4296F9AC63E01F578E5C18AF752`.
+The DB has one user and three active devices; bot remains inactive, web remains
+loopback-only, and USA remains the untouched rollback contour.
+
+No reboot has occurred after this deployment. The only critical remaining
+acceptance gate is a separately approved controlled reboot followed by proof
+that the service restores container forwarding and the three tagged rules,
+AWG and full data remain healthy, and foreign-service equality still holds.
+
 ## Current operational override — 2026-07-31: three configs issued, device test pending
 
 Spain runtime is operational after the approved network-unit DAC override.

@@ -15,6 +15,7 @@ MODULES = (
     "phase12_spain_installer.py",
     "phase12_spain_live_backend.py",
     "phase12_spain_network.py",
+    "phase12_spain_forward_compat.py",
     "phase12_spain_package.py",
     "phase12_spain_precondition.py",
 )

@@ -1,0 +1,28 @@
+[Unit]
+Description=AMN2 Spain UFW forward compatibility
+Requires=amn2-spain-network.service
+After=amn2-spain-network.service
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+SupplementaryGroups=amn2-spain
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/amn2-spain/current/scripts/phase12_spain_forward_compat.py apply --ledger /var/lib/amn2-spain/forward-compat-ledger.json
+ExecStartPost=/usr/bin/python3 /opt/amn2-spain/current/scripts/phase12_spain_forward_compat.py verify --ledger /var/lib/amn2-spain/forward-compat-ledger.json
+ExecStop=/usr/bin/python3 /opt/amn2-spain/current/scripts/phase12_spain_forward_compat.py rollback --ledger /var/lib/amn2-spain/forward-compat-ledger.json
+RemainAfterExit=yes
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_DAC_OVERRIDE CAP_SYS_ADMIN
+AmbientCapabilities=CAP_NET_ADMIN CAP_DAC_OVERRIDE CAP_SYS_ADMIN
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/amn2-spain
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+RestrictAddressFamilies=AF_UNIX AF_NETLINK AF_INET
+
+[Install]
+WantedBy=multi-user.target

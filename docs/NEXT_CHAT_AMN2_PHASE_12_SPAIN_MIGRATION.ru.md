@@ -1,5 +1,25 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Current override 2026-08-01: durable dataplane deployed; controlled reboot is next
+
+ARM-HOME passed the full Spain data test. Live peer `10.212.12.4/32` has
+non-zero RX/TX `60941276/135251812`, key equality passed, and AWG restart count
+is `0`. The durable forward-compat service is active/enabled and adopted exact
+tagged nft handles `157/158/159`; container `net.ipv4.ip_forward=1`. Manager
+SHA-256 is
+`F7978A0D50F91F2E48886B9FFD9B99E9F7D32C4F2A3559FB65C0F1A57B1D41B9`,
+unit SHA-256 is
+`47987BA66A13F47638911F2C1354D87E0D0E21B4AA33E295AD562AC39059FAC3`.
+The ineffective relay was removed. Durable deployment result is `passed`,
+strategy `adopted`, and foreign semantic before/after SHA-256 is
+`908F069A79590A9A992FD271CB9ED724A5C3D4296F9AC63E01F578E5C18AF752`.
+
+Do not reboot without an exact controlled-reboot approval. The next and only
+critical acceptance gate is reboot persistence: after Spain returns, verify
+forward-compat active/enabled, exactly three tagged rules, container forwarding
+enabled, AWG/full data healthy, bot disabled, web loopback-only, DB one user
+and three active devices, and unchanged foreign service. USA remains rollback.
+
 ## Current override 2026-07-31: three configs issued, device test is next
 
 Spain runtime is healthy: Docker/network/web active, bot disabled, web

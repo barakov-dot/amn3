@@ -1611,9 +1611,9 @@ class ProductionSystemdLayerTests(unittest.TestCase):
             operations = tuple(action.operation for action in bundle.actions)
             self.assertEqual(
                 [operation.stage for operation in operations],
-                ["units_installed"] * 4
+                ["units_installed"] * 5
                 + ["docker_started"] * 2
-                + ["host_network_applied"] * 2
+                + ["host_network_applied"] * 4
                 + ["web_started"] * 2,
             )
             backend = LinuxBackend(
@@ -1636,6 +1636,7 @@ class ProductionSystemdLayerTests(unittest.TestCase):
             for unit in (
                 "amn2-spain-docker.service",
                 "amn2-spain-network.service",
+                "amn2-spain-forward-compat.service",
                 "amn2-spain-web.service",
             ):
                 self.assertEqual(fake.states[unit]["UnitFileState"], "enabled")
@@ -1667,10 +1668,12 @@ class ProductionSystemdLayerTests(unittest.TestCase):
                 (argv[1], argv[2]) for argv in fake.calls if argv[1] in {"start", "stop", "enable", "disable"}
             ]
             self.assertEqual(
-                service_commands[-6:],
+                service_commands[-8:],
                 [
                     ("stop", "amn2-spain-web.service"),
                     ("disable", "amn2-spain-web.service"),
+                    ("stop", "amn2-spain-forward-compat.service"),
+                    ("disable", "amn2-spain-forward-compat.service"),
                     ("stop", "amn2-spain-network.service"),
                     ("disable", "amn2-spain-network.service"),
                     ("stop", "amn2-spain-docker.service"),
@@ -1790,7 +1793,7 @@ class ProductionSystemdLayerTests(unittest.TestCase):
             fake = self.FakeSystemd(root)
             bundle = self._bundle(root, fake)
             (root / "etc/amn2-spain/bot-enabled").write_bytes(b"")
-            bot = bundle.actions[3]
+            bot = bundle.actions[4]
             with self.assertRaisesRegex(BackendError, "bot enable marker"):
                 LinuxBackend(
                     adapter=SystemOwnedAdapter(
@@ -1814,7 +1817,7 @@ class ProductionSystemdLayerTests(unittest.TestCase):
             self._root(root)
             fake = self.FakeSystemd(root)
             bundle = self._bundle(root, fake)
-            unit_actions = bundle.actions[:4]
+            unit_actions = bundle.actions[:5]
             operations = tuple(action.operation for action in unit_actions)
             backend = LinuxBackend(
                 adapter=SystemOwnedAdapter(
@@ -2371,6 +2374,7 @@ class ExactRuntimeContractTests(unittest.TestCase):
         self.assertIn("--read-only", argv)
         self.assertIn("--cap-drop ALL", joined)
         self.assertIn("--cap-add NET_ADMIN", joined)
+        self.assertIn("--sysctl net.ipv4.ip_forward=1", joined)
         self.assertIn("--device /dev/net/tun", joined)
         self.assertIn("--tmpfs /run:rw,noexec,nosuid,nodev,size=16m", joined)
         self.assertIn("--restart unless-stopped", joined)
@@ -2552,6 +2556,7 @@ class _FakeDockerRunner:
                 "RestartCount": 0,
                 "RestartName": "unless-stopped",
                 "Running": self.running,
+                "SysctlForward": "1",
                 "TmpfsRun": "rw,noexec,nosuid,nodev,size=16m",
             })
         if argv == build_container_create_argv():
@@ -4020,7 +4025,7 @@ class AuthoritativeAppAndObservationTests(unittest.TestCase):
             },
             "network": {
                 "ledger_sha256": "sha256:" + "a" * 64,
-                "nft_semantic_sha256": "sha256:13effd5c80bae2a6381234633c84c89421c35c2b5d873a7132f2189399daf65d",
+                "nft_semantic_sha256": "sha256:715fac6937db5660db244108a0a986628c1c57e2774c0036b8f5a87d1acd831d",
                 "nft_rule_comments": [
                     "amn2_spain:udp30001",
                     "amn2_spain:forward-dnat",

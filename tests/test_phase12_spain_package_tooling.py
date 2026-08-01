@@ -567,6 +567,7 @@ REQUIRED_ARTIFACTS = {
     "units/amn2-spain-bot.service": ("systemd_unit", b"bot"),
     "units/amn2-spain-docker.service": ("systemd_unit", b"docker-unit"),
     "units/amn2-spain-network.service": ("systemd_unit", b"network-unit"),
+    "units/amn2-spain-forward-compat.service": ("systemd_unit", b"forward-unit"),
     "templates/runtime.env": ("env_template", b"env"),
     "templates/docker-daemon.json": ("docker_daemon_template", b"{}"),
     "templates/awgsp0.conf": ("server_config_template", b"awg"),
@@ -579,6 +580,7 @@ REQUIRED_ARTIFACTS = {
     "scripts/phase12_spain_installer.py": ("rollback", b"rollback"),
     "scripts/phase12_spain_live_backend.py": ("live_backend", b"backend"),
     "scripts/phase12_spain_network.py": ("network_manager", b"network"),
+    "scripts/phase12_spain_forward_compat.py": ("network_manager", b"forward-compat"),
     "metadata/resource-plan.json": ("resource_plan", canonical_json_bytes(RESOURCE_PLAN)),
     "metadata/run009-evidence.json": ("baseline_evidence", SYNTHETIC_EVIDENCE_BYTES),
     "metadata/fingerprint-array.json": ("fingerprint_array", SYNTHETIC_FINGERPRINT_BYTES),
@@ -692,6 +694,14 @@ def test_payload_preparation_defers_settings_import_until_runtime_site_packages(
     )
     if not source_archive.is_file():
         pytest.skip("official Phase 12 source archive unavailable")
+    package_root = (
+        ROOT
+        / "private-artifacts"
+        / "phase12-spain-install-boundary-stable-critical-v6-20260722"
+        / "offline-verify-extract"
+    )
+    if not (package_root / "scripts" / "phase12_spain_forward_compat.py").is_file():
+        pytest.skip("archived package predates durable forward compatibility")
     with tarfile.open(source_archive, "r:gz") as archive:
         archive.extractall(tmp_path, filter="data")
     source_root = tmp_path / "source"
@@ -706,12 +716,7 @@ def test_payload_preparation_defers_settings_import_until_runtime_site_packages(
     prepared = live_backend.prepare_production_filesystem_payloads(
         source_root=source_root,
         endpoint_host="spain.example",
-        package_content_root=(
-            ROOT
-            / "private-artifacts"
-            / "phase12-spain-install-boundary-stable-critical-v6-20260722"
-            / "offline-verify-extract"
-        ),
+        package_content_root=package_root,
     )
 
     assert prepared.endpoint_host == "spain.example"
@@ -835,6 +840,10 @@ def test_package_verifier_accepts_faithful_staged_official_raw_inputs(
             "systemd_unit",
             (TRACKED_PACKAGE_ROOT / "units" / "amn2-spain-network.service").read_bytes(),
         ),
+        "units/amn2-spain-forward-compat.service": (
+            "systemd_unit",
+            (TRACKED_PACKAGE_ROOT / "units" / "amn2-spain-forward-compat.service").read_bytes(),
+        ),
         "templates/runtime.env": (
             "env_template",
             (TRACKED_PACKAGE_ROOT / "templates" / "runtime.env").read_bytes(),
@@ -882,6 +891,10 @@ def test_package_verifier_accepts_faithful_staged_official_raw_inputs(
         "scripts/phase12_spain_network.py": (
             "network_manager",
             (ROOT / "scripts" / "phase12_spain_network.py").read_bytes(),
+        ),
+        "scripts/phase12_spain_forward_compat.py": (
+            "network_manager",
+            (ROOT / "scripts" / "phase12_spain_forward_compat.py").read_bytes(),
         ),
         "metadata/resource-plan.json": (
             "resource_plan",
@@ -3539,6 +3552,7 @@ def test_production_prepare_reconstruct_and_recovery_coordinator_roundtrip(
         },
         package_bound_payloads={
             "opt/amn2-spain/current/scripts/phase12_spain_network.py": b"# network\n",
+            "opt/amn2-spain/current/scripts/phase12_spain_forward_compat.py": b"# forward compat\n",
             "opt/amn2-spain/current/packaging/phase12-spain/templates/nftables.conf": network_module.NFT_CONFIG.encode(),
         },
     )
@@ -5842,6 +5856,7 @@ def test_standalone_executor_bundle_build_is_deterministic_and_fail_closed(
             "scripts/phase12_spain_installer.py",
             "scripts/phase12_spain_live_backend.py",
             "scripts/phase12_spain_network.py",
+            "scripts/phase12_spain_forward_compat.py",
             "scripts/phase12_spain_package.py",
             "scripts/phase12_spain_precondition.py",
             "scripts/phase12_spain_resource_confirmation_remote.sh",

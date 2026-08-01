@@ -128,6 +128,7 @@ def sample_evidence() -> dict[str, object]:
                     "amn2-spain-bot.service",
                     "amn2-spain-docker.service",
                     "amn2-spain-network.service",
+                    "amn2-spain-forward-compat.service",
                 )
             ],
             "docker": {

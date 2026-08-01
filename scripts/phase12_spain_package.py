@@ -52,7 +52,13 @@ REQUIRED_KINDS = frozenset(
     }
 )
 MULTIPLE_ALLOWED_KINDS = frozenset(
-    {"systemd_unit", "env_template", "server_config_template", "python_wheel"}
+    {
+        "systemd_unit",
+        "env_template",
+        "server_config_template",
+        "python_wheel",
+        "network_manager",
+    }
 )
 MAX_MANIFEST_BYTES = 1024 * 1024
 MAX_TOTAL_UNPACKED_BYTES = 8 * 1024 * 1024 * 1024
@@ -85,6 +91,7 @@ FIXED_ARTIFACT_PATHS = {
         "units/amn2-spain-bot.service",
         "units/amn2-spain-docker.service",
         "units/amn2-spain-network.service",
+        "units/amn2-spain-forward-compat.service",
     },
     "env_template": {"templates/runtime.env"},
     "server_config_template": {"templates/awgsp0.conf", "templates/servers.yml"},
@@ -92,7 +99,10 @@ FIXED_ARTIFACT_PATHS = {
     "firewall_template": {"templates/nftables.conf"},
     "runtime_script": {"templates/awg-start.sh"},
     "live_backend": {"scripts/phase12_spain_live_backend.py"},
-    "network_manager": {"scripts/phase12_spain_network.py"},
+    "network_manager": {
+        "scripts/phase12_spain_network.py",
+        "scripts/phase12_spain_forward_compat.py",
+    },
     "package_verifier": {"scripts/phase12_spain_package.py"},
     "precondition": {"scripts/phase12_spain_precondition.py"},
     "installer": {"scripts/phase12_spain_remote_executor.sh"},

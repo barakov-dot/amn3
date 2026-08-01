@@ -73,6 +73,7 @@ REQUIRED_CLOSED_DELTA_OBJECTS = frozenset(
         "database:/var/lib/amn2-spain/amn2.sqlite3",
         "unit:amn2-spain-docker.service",
         "unit:amn2-spain-network.service",
+        "unit:amn2-spain-forward-compat.service",
         "unit:amn2-spain-web.service",
         "unit:amn2-spain-bot.service",
     }
@@ -86,6 +87,9 @@ PRODUCTION_FILE_SECURITY = MappingProxyType(
         "etc/amn2-spain/docker-daemon.json": ("root", "root", 0o644),
         "opt/amn2-spain/runtime/awg-start.sh": ("root", "root", 0o755),
         "opt/amn2-spain/current/scripts/phase12_spain_network.py": (
+            "root", "root", 0o644,
+        ),
+        "opt/amn2-spain/current/scripts/phase12_spain_forward_compat.py": (
             "root", "root", 0o644,
         ),
         "opt/amn2-spain/current/packaging/phase12-spain/templates/nftables.conf": (
@@ -3504,11 +3508,13 @@ SYSTEMD_UNITS = frozenset(
         "amn2-spain-bot.service",
         "amn2-spain-docker.service",
         "amn2-spain-network.service",
+        "amn2-spain-forward-compat.service",
     }
 )
 SYSTEMD_UNIT_ORDER = (
     "amn2-spain-docker.service",
     "amn2-spain-network.service",
+    "amn2-spain-forward-compat.service",
     "amn2-spain-web.service",
     "amn2-spain-bot.service",
 )
@@ -3666,8 +3672,8 @@ class ProductionSystemdBundle:
     def __post_init__(self) -> None:
         operations = tuple(action.operation for action in self.actions)
         if (
-            len(operations) != 10
-            or len({operation.owned_object for operation in operations}) != 10
+            len(operations) != 13
+            or len({operation.owned_object for operation in operations}) != 13
             or set(self.logical_receipt)
             != {operation.owned_object for operation in operations}
             or any(
@@ -3870,6 +3876,7 @@ def build_production_systemd_bundle(
     for unit, stage in (
         ("amn2-spain-docker.service", "docker_started"),
         ("amn2-spain-network.service", "host_network_applied"),
+        ("amn2-spain-forward-compat.service", "host_network_applied"),
         ("amn2-spain-web.service", "web_started"),
     ):
         enabled_identity = _semantic_identity(
@@ -4978,6 +4985,8 @@ def build_container_create_argv() -> tuple[str, ...]:
         "ALL",
         "--cap-add",
         "NET_ADMIN",
+        "--sysctl",
+        "net.ipv4.ip_forward=1",
         "--device",
         "/dev/net/tun",
         "--tmpfs",
@@ -5019,6 +5028,7 @@ _CONTAINER_INSPECT_FORMAT = (
     '"NetworkEndpointID":{{json (index .NetworkSettings.Networks "amn2-spain-net").EndpointID}},'
     '"NetworkIPAddress":{{json (index .NetworkSettings.Networks "amn2-spain-net").IPAddress}},'
     '"ReadonlyRootfs":{{json .HostConfig.ReadonlyRootfs}},'
+    '"SysctlForward":{{json (index .HostConfig.Sysctls "net.ipv4.ip_forward")}},'
     '"RestartCount":{{json .RestartCount}},'
     '"RestartName":{{json .HostConfig.RestartPolicy.Name}},'
     '"Running":{{json .State.Running}},'
@@ -5640,7 +5650,7 @@ def _docker_container_state(
             "CapAdd", "CapDrop", "ConfigImage", "Devices", "Entrypoint", "ID",
             "Image", "Mounts", "Name", "NetworkEndpointID",
             "NetworkIPAddress", "ReadonlyRootfs", "RestartCount",
-            "RestartName", "Running", "TmpfsRun",
+            "RestartName", "Running", "SysctlForward", "TmpfsRun",
         },
         label="container inspect",
     )
@@ -5665,6 +5675,7 @@ def _docker_container_state(
         or devices[0].get("CgroupPermissions") != "rwm"
         or not _exact_tmpfs_run(value["TmpfsRun"])
         or value["RestartName"] != "unless-stopped"
+        or value["SysctlForward"] != "1"
         or not isinstance(running, bool)
         or type(value["RestartCount"]) is not int
         or value["RestartCount"] != 0
@@ -5728,7 +5739,7 @@ def _docker_container_rollback_state(
             "CapAdd", "CapDrop", "ConfigImage", "Devices", "Entrypoint", "ID",
             "Image", "Mounts", "Name", "NetworkEndpointID",
             "NetworkIPAddress", "ReadonlyRootfs", "RestartCount",
-            "RestartName", "Running", "TmpfsRun",
+            "RestartName", "Running", "SysctlForward", "TmpfsRun",
         },
         label="container inspect",
     )
@@ -5750,6 +5761,7 @@ def _docker_container_rollback_state(
         or devices[0].get("CgroupPermissions") != "rwm"
         or not _exact_tmpfs_run(value["TmpfsRun"])
         or value["RestartName"] != "unless-stopped"
+        or value["SysctlForward"] != "1"
         or not isinstance(value["Running"], bool)
         or type(value["RestartCount"]) is not int
         or value["RestartCount"] != 0
@@ -6815,6 +6827,7 @@ class PreparedProductionFilesystemPayloads:
             or set(self.package_bound_payloads)
             != {
                 "opt/amn2-spain/current/scripts/phase12_spain_network.py",
+                "opt/amn2-spain/current/scripts/phase12_spain_forward_compat.py",
                 "opt/amn2-spain/current/packaging/phase12-spain/templates/nftables.conf",
             }
             or any(
@@ -7050,6 +7063,10 @@ def prepare_production_filesystem_payloads(
                 "scripts/phase12_spain_network.py",
                 content_root=content,
             ),
+            "opt/amn2-spain/current/scripts/phase12_spain_forward_compat.py": _read_package_bound_bytes(
+                "scripts/phase12_spain_forward_compat.py",
+                content_root=content,
+            ),
             "opt/amn2-spain/current/packaging/phase12-spain/templates/nftables.conf": _read_package_bound_bytes(
                 package_template_prefix + "/nftables.conf",
                 content_root=content,
@@ -7130,6 +7147,10 @@ def recover_production_filesystem_payloads(
         {
             "opt/amn2-spain/current/scripts/phase12_spain_network.py": _read_package_bound_bytes(
                 "scripts/phase12_spain_network.py",
+                content_root=content,
+            ),
+            "opt/amn2-spain/current/scripts/phase12_spain_forward_compat.py": _read_package_bound_bytes(
+                "scripts/phase12_spain_forward_compat.py",
                 content_root=content,
             ),
             "opt/amn2-spain/current/packaging/phase12-spain/templates/nftables.conf": _read_package_bound_bytes(
@@ -7213,6 +7234,9 @@ def build_production_filesystem_bundle(
     network_script = prepared.package_bound_payloads[
         "opt/amn2-spain/current/scripts/phase12_spain_network.py"
     ]
+    forward_compat_script = prepared.package_bound_payloads[
+        "opt/amn2-spain/current/scripts/phase12_spain_forward_compat.py"
+    ]
     nftables_template = prepared.package_bound_payloads[
         "opt/amn2-spain/current/packaging/phase12-spain/templates/nftables.conf"
     ]
@@ -7270,6 +7294,11 @@ def build_production_filesystem_bundle(
                 "filesystem_staged",
                 "opt/amn2-spain/current/scripts/phase12_spain_network.py",
                 network_script,
+            ),
+            production_file_action(
+                "filesystem_staged",
+                "opt/amn2-spain/current/scripts/phase12_spain_forward_compat.py",
+                forward_compat_script,
             ),
             production_file_action(
                 "filesystem_staged",

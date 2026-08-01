@@ -1,3 +1,30 @@
+# Текущий override 2026-08-01: ARM-HOME data passed; durable dataplane deployed
+
+ARM-HOME прошёл полный data test на Spain: пользователь подтвердил рабочую
+передачу данных, live peer `10.212.12.4/32` присутствует, RX/TX
+`60941276/135251812`, server-key равен в DB, live AWG и клиентском config.
+Контейнер AWG не перезапускался и не пересоздавался (`restart_count=0`).
+
+Approved durable dataplane fix установлен без reboot: service
+`amn2-spain-forward-compat.service` active/enabled, manager SHA-256
+`F7978A0D50F91F2E48886B9FFD9B99E9F7D32C4F2A3559FB65C0F1A57B1D41B9`,
+unit SHA-256
+`47987BA66A13F47638911F2C1354D87E0D0E21B4AA33E295AD562AC39059FAC3`.
+Он принял текущие exact tagged handles `157/158/159`, подтвердил container
+`net.ipv4.ip_forward=1` и не создавал дубликатов. Неэффективный UDP relay
+checksum-verified удалён; relay unit отсутствует. Deployment receipt:
+`result=passed`, `strategy=adopted`, foreign semantic before/after SHA-256
+`908F069A79590A9A992FD271CB9ED724A5C3D4296F9AC63E01F578E5C18AF752`.
+DB state: один пользователь, три активных устройства; bot inactive, Docker,
+network и loopback-only web active. USA не изменялась и остаётся rollback
+contour.
+
+Сервер после durable deployment ещё не перезагружался. Единственный критичный
+оставшийся acceptance gate — отдельный controlled reboot и post-boot проверка
+автоматического восстановления container `ip_forward`, трёх tagged rules,
+AWG/data path и equality постороннего Spain-сервиса. До exact reboot approval
+перезагрузка запрещена.
+
 # Текущий override 2026-07-31: 3 Spain configs выданы, ожидается device test
 
 Phase 12 дошла до рабочего Spain runtime. После approved точечного добавления
