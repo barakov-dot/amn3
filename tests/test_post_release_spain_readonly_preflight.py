@@ -542,7 +542,9 @@ foreach ($case in $cases) {
         self.assertNotIn("$RemoteText | & $SshExe", source)
 
     @unittest.skipUnless(POWERSHELL.exists(), "Windows PowerShell is required")
-    def test_exact_input_process_boundary_does_not_append_carriage_return(self) -> None:
+    def test_exact_input_process_boundary_preserves_caller_encoding_while_suppressing_bom(
+        self,
+    ) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         quoting = extract_powershell_function(source, "ConvertTo-WindowsCommandLineArgument")
         invocation = extract_powershell_function(source, "Invoke-SshWithExactInput")
@@ -550,9 +552,21 @@ foreach ($case in $cases) {
 $SshExe = (Get-Command powershell.exe).Source
 $child = '$stream=[Console]::OpenStandardInput();$values=@();while(($value=$stream.ReadByte()) -ge 0){$values += $value};($values | ForEach-Object {$_.ToString("X2")}) -join ""'
 $payload = [byte[]](0x41, 0x0A)
-$result = Invoke-SshWithExactInput $SshExe @('-NoLogo','-NoProfile','-NonInteractive','-Command',$child) $payload
-if ($result.ExitCode -ne 0) { exit 10 }
-if ($result.Lines.Count -ne 1 -or $result.Lines[0] -cne '410A') { exit 11 }
+$originalInputEncoding = [Console]::InputEncoding
+$hostileInputEncoding = New-Object Text.UTF8Encoding($true)
+try {
+    [Console]::InputEncoding = $hostileInputEncoding
+    $result = Invoke-SshWithExactInput $SshExe @('-NoLogo','-NoProfile','-NonInteractive','-Command',$child) $payload
+    if ($result.ExitCode -ne 0) { exit 10 }
+    if ($result.Lines.Count -ne 1 -or $result.Lines[0] -cne '410A') { exit 11 }
+    $restoredPreamble = (([Console]::InputEncoding.GetPreamble() | ForEach-Object {
+        $_.ToString("X2")
+    }) -join "")
+    if ([Console]::InputEncoding.CodePage -ne $hostileInputEncoding.CodePage) { exit 12 }
+    if ($restoredPreamble -cne 'EFBBBF') { exit 13 }
+} finally {
+    [Console]::InputEncoding = $originalInputEncoding
+}
 '''
         with tempfile.TemporaryDirectory() as raw_tmp:
             harness_path = Path(raw_tmp) / "exact-input-process-boundary.ps1"

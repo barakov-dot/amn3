@@ -266,7 +266,9 @@ function Invoke-SshWithExactInput([string]$FileName, [string[]]$Arguments, [byte
 
     $Process = [Diagnostics.Process]::new()
     $Process.StartInfo = $StartInfo
+    $PreviousConsoleInputEncoding = [Console]::InputEncoding
     try {
+        [Console]::InputEncoding = New-Object Text.UTF8Encoding($false)
         if (-not $Process.Start()) {
             throw "Trusted OpenSSH client did not start."
         }
@@ -295,6 +297,7 @@ function Invoke-SshWithExactInput([string]$FileName, [string[]]$Arguments, [byte
             ExitCode = [int]$Process.ExitCode
         }
     } finally {
+        [Console]::InputEncoding = $PreviousConsoleInputEncoding
         $Process.Dispose()
     }
 }
