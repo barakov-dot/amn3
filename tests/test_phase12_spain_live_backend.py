@@ -5,6 +5,7 @@ import hashlib
 import inspect
 import io
 import os
+import shutil
 import stat
 import subprocess
 import sys
@@ -2363,7 +2364,8 @@ class ExactRuntimeContractTests(unittest.TestCase):
     def test_awg_pid1_and_container_contract_have_no_peer_or_restart_side_effect(self) -> None:
         start = (TEMPLATES / "awg-start.sh").read_text(encoding="utf-8")
         self.assertIn("awg-quick up awgsp0", start)
-        self.assertIn("awg show awgsp0 peers", start)
+        self.assertNotIn("awg show awgsp0 peers", start)
+        self.assertNotIn("unexpected_peer", start)
         self.assertIn("trap", start)
         self.assertIn("trap shutdown INT TERM", start)
         self.assertIn("exit 0", start)
@@ -2389,6 +2391,53 @@ class ExactRuntimeContractTests(unittest.TestCase):
         self.assertIn("--subnet 172.29.251.0/28", network)
         self.assertIn("--gateway 172.29.251.1", network)
         self.assertIn("com.docker.network.bridge.name=amn2spbr0", network)
+
+    def test_awg_pid1_survives_reboot_with_existing_peers(self) -> None:
+        shell = shutil.which("sh")
+        if shell is None and os.name == "nt":
+            candidate = Path(r"C:\Program Files\Git\usr\bin\sh.exe")
+            shell = str(candidate) if candidate.is_file() else None
+        if shell is None:
+            self.skipTest("POSIX sh is required for the AWG PID1 behavior test")
+
+        def shell_path(path: Path) -> str:
+            value = path.resolve().as_posix()
+            if os.name == "nt" and len(value) > 2 and value[1:3] == ":/":
+                return "/" + value[0].lower() + value[2:]
+            return value
+
+        with tempfile.TemporaryDirectory() as raw_root:
+            root = Path(raw_root)
+            bin_dir = root / "bin"
+            bin_dir.mkdir()
+            (bin_dir / "awg-quick").write_text(
+                "#!/bin/sh\nexit 0\n", encoding="utf-8", newline="\n"
+            )
+            (bin_dir / "awg").write_text(
+                "#!/bin/sh\nprintf '%s\\n' existing-peer-public-key\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+            (bin_dir / "sleep").write_text(
+                "#!/bin/sh\nkill -TERM \"$PPID\"\nexit 0\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+            for command in bin_dir.iterdir():
+                command.chmod(0o755)
+            env = os.environ.copy()
+            env["PATH"] = shell_path(bin_dir) + ":/usr/bin:/bin"
+            completed = subprocess.run(
+                [shell, shell_path(TEMPLATES / "awg-start.sh")],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=10,
+                check=False,
+                env=env,
+            )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertNotIn("unexpected_peer", completed.stderr)
 
     def test_rendered_awg_and_servers_are_write_disabled_and_zero_peer(self) -> None:
         private = "A" * 43 + "="
