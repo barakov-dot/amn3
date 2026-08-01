@@ -1,5 +1,31 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
+## Final accepted override — 2026-08-01
+
+Phase 12 is complete. Spain is the accepted primary runtime at source
+`55dc243b8e6c6bdb57f8301b56326e4cd4072d19` and operational overlay
+`f1bf099ddb47da26a4080714376babaf5b0de92c`. Controlled reboot persistence
+and ARM-HOME full data passed. Final audit proves one user, seven active
+indefinite devices, seven completed receipts, seven passports, exact DB/file/live
+peer equality `7/7/7`, AWG running with stable restart count `59`, container
+forwarding enabled, exactly three tagged rules, bot disabled and loopback-only
+web.
+
+The remaining request issued `ARM-WORK`, `NOTEBOOK`, `IPAD`, and `IPHONE`
+without AWG restart/recreate. Its quota `7` existed only in that process;
+runtime default remains `5`. The nine exact remote staging files were removed
+after verified download and packaging. Final live-audit receipt SHA-256 is
+`B1F12A5A18871C82F855F17CDC60ABA133B542CF2B68CF049AE64E533761F0C5`.
+
+Foreign persistent equality passed with `153` persistent entries, zero
+changes, stable SHA-256
+`F5767F361A9441DD4B5361C07DA164A3059E0D1347D5217594534797D367B7E8`;
+receipt SHA-256 is
+`BC9065B3FA7CAB40F5EEFEBBFD8093F2D62477E972777FE665E8D9F6028AA704`.
+USA overlay `0b858c5cdbc5b565cc265966a2edfe2d339d65e0` remains the
+unchanged rollback contour. Continue with the final closeout packet and Phase
+13 handoff; do not repeat Phase 12 rollout or preflight runs.
+
 ## Current operational override — 2026-08-01: manual rename is required
 
 The real ARM-HOME import created `Server 2`; therefore full AmneziaVPN does

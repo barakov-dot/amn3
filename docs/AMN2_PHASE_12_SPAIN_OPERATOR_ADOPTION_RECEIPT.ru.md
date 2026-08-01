@@ -1,5 +1,34 @@
 # AMN2 Phase 12 — Spain operator adoption receipt
 
+## Final acceptance override
+
+Phase 12 is accepted. Controlled reboot persistence and ARM-HOME full data
+passed. Final live audit receipt SHA-256:
+`B1F12A5A18871C82F855F17CDC60ABA133B542CF2B68CF049AE64E533761F0C5`.
+It proves users `1`, active/indefinite devices `7/7`, completed/noncompleted
+receipts `7/0`, active passports `7`, request 002 completed receipts `4`, DB
+integrity `ok`, foreign-key issues `0`, and exact DB/persistent/live peer sets
+`7/7/7`. AWG is running with stable restart count `59`; container forwarding
+is `1`; Docker/network/forward-compat/web are active, bot is inactive, and web
+is loopback-only. Exactly one instance of each approved tagged rule exists.
+
+Final foreign equality receipt SHA-256:
+`BC9065B3FA7CAB40F5EEFEBBFD8093F2D62477E972777FE665E8D9F6028AA704`.
+Persistent entries `153`, changed `0`, stable before/after SHA-256
+`F5767F361A9441DD4B5361C07DA164A3059E0D1347D5217594534797D367B7E8`;
+volatile `1/0`. Nine exact request-002 staging files were checksum-verified and
+removed after download. Foreign service and USA data were not mutated.
+
+The accepted slot set for `SooL` is `Проектор`, `Телевизор`, `ARM-HOME`,
+`ARM-WORK`, `NOTEBOOK`, `IPAD`, `IPHONE`, all indefinite. The final four were
+issued with a one-time process-only quota override to `7`; runtime default
+remains `5`. AmneziaVPN requires manual rename to exact `NEOBYATNAYA.NET`.
+
+Authoritative source/Spain overlay:
+`55dc243b8e6c6bdb57f8301b56326e4cd4072d19` /
+`f1bf099ddb47da26a4080714376babaf5b0de92c`. USA overlay
+`0b858c5cdbc5b565cc265966a2edfe2d339d65e0` remains rollback.
+
 Дата фиксации: 2026-08-01.
 
 ## Реальный результат client display-name

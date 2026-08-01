@@ -1,4 +1,42 @@
-# Текущий override 2026-08-01: AmneziaVPN manual rename подтверждён
+# Текущий authoritative override 2026-08-01: Phase 12 Spain принята
+
+Phase 12 Spain Migration завершена и принята. Spain является primary runtime;
+authoritative source — `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`, Spain
+operational overlay — `f1bf099ddb47da26a4080714376babaf5b0de92c`.
+USA overlay `0b858c5cdbc5b565cc265966a2edfe2d339d65e0` не изменён и
+остаётся rollback contour до отдельного решения Phase 13.
+
+Controlled reboot persistence и ARM-HOME full-data test прошли. Финальный live
+audit: users `1`, active/indefinite devices `7/7`, completed receipts `7`,
+failed `0`, active passports `7`, persistent/live/DB peers `7/7/7` с exact
+peer-set equality; AWG running, restart count `59` стабилен, container
+`net.ipv4.ip_forward=1`. Forward-compat active/enabled и содержит ровно три
+AMN2-tagged rules. Bot inactive, web только `127.0.0.1:3031`, DB integrity
+`ok`, foreign-key issues `0`. Final live-audit receipt SHA-256:
+`B1F12A5A18871C82F855F17CDC60ABA133B542CF2B68CF049AE64E533761F0C5`.
+
+Recipient `SooL` имеет семь indefinite slots: `Проектор`, `Телевизор`,
+`ARM-HOME`, `ARM-WORK`, `NOTEBOOK`, `IPAD`, `IPHONE`. Request
+`phase12-spain-sool-remaining-20260801-002` выдал только четыре последних
+slot через одноразовый process-only quota override `MAX_DEVICES_PER_USER=7`;
+runtime.env не менялся, default остаётся `5`. AWG не перезапускался и не
+пересоздавался. Девять checksum-verified временных файлов request 002 удалены.
+
+Post-remaining foreign equality passed: persistent entries `153`, changed `0`,
+stable before/after SHA-256
+`F5767F361A9441DD4B5361C07DA164A3059E0D1347D5217594534797D367B7E8`;
+volatile before/after `1/0`. Evidence SHA-256:
+`5C99B0E669A2B267624B534F00FC05E2F101636A7EEC9D36AA9022855A388583`;
+equality receipt SHA-256:
+`BC9065B3FA7CAB40F5EEFEBBFD8093F2D62477E972777FE665E8D9F6028AA704`.
+Посторонний Spain-сервис и USA data не изменялись.
+
+AmneziaVPN не принимает inner filename как display name: после импорта нужен
+ручной rename в exact `NEOBYATNAYA.NET`. Конфиги не регенерируются. Полный
+closeout: `docs/AMN2_PHASE_12_FINAL_CLOSEOUT_PACKET.ru.md`. Следующая фаза:
+`docs/AMN2_PHASE_13_POST_MIGRATION_CONTINUATION_FIRST_MESSAGE.ru.md`.
+
+# Предыдущий override 2026-08-01: AmneziaVPN manual rename подтверждён
 
 Реальный импорт ARM-HOME опроверг предположение, что имя внутреннего файла
 задаёт display name в полном клиенте AmneziaVPN: импорт создал `Server 2`.

@@ -1,5 +1,23 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
+## Final override 2026-08-01: task closed
+
+Phase 12 Spain Migration is accepted; this file is now historical and must not
+be used to repeat rollout, preflight or issuance. Authoritative closeout:
+`docs/AMN2_PHASE_12_FINAL_CLOSEOUT_PACKET.ru.md`. The next task starts from the
+exact text in
+`docs/AMN2_PHASE_13_POST_MIGRATION_CONTINUATION_FIRST_MESSAGE.ru.md`.
+
+Accepted state: Spain source/overlay
+`55dc243b8e6c6bdb57f8301b56326e4cd4072d19` /
+`f1bf099ddb47da26a4080714376babaf5b0de92c`; users/devices/receipts/peers
+`1/7/7/7`; controlled reboot and ARM-HOME full data passed; bot disabled; web
+loopback-only; foreign persistent equality passed; USA overlay
+`0b858c5cdbc5b565cc265966a2edfe2d339d65e0` remains rollback.
+
+No Phase 12 live action remains. AmneziaVPN imports still require manual rename
+to exact `NEOBYATNAYA.NET`; do not regenerate peer/config bytes for naming.
+
 ## Current override 2026-08-01: ARM-HOME manual rename passed; reboot next
 
 Real Windows AmneziaVPN import created `Server 2`; exact inner filename does
