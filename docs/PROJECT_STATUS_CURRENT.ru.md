@@ -1,3 +1,32 @@
+# Текущий authoritative override 2026-08-01: Phase 13 design утверждён, отдельный TDD plan подготовлен
+
+Оператор exact-фразой утвердил записанную AWG2/AWG3 version-admission и
+isolated-runtime design spec и разрешил подготовить отдельный TDD
+implementation plan без implementation и без любых live Spain/USA/AWG
+mutation. План записан в
+`docs/superpowers/plans/2026-08-01-amn2-phase13-awg2-awg3-version-admission-isolated-runtime.md`.
+
+План привязан к authoritative AMN2 source
+`55dc243b8e6c6bdb57f8301b56326e4cd4072d19` и разбит на локальные RED/GREEN
+срезы: protocol/config versions, additive schema, isolated runtime planner,
+exact client compatibility/admission, отдельный typed AWG3 renderer,
+admission-before-issuance, Passport/Drift, backup/restore и чистый USA
+retirement readiness evaluator. Реализация, package build, SSH/preflight,
+deploy, config/peer issuance, reboot/rollback rehearsal и отключение USA этим
+решением не разрешены.
+
+USA остаётся rollback contour. План содержит обязательное уведомление о
+готовности только после полного fail-closed gate; даже положительное
+уведомление оставляет `live_action_authorized=false` и требует отдельного exact
+approval на shutdown/cleanup/reuse.
+
+Automation `amn2-upstream-orchestrator` проверена перед завтрашним weekly run:
+она `ACTIVE`, привязана к текущей Phase 13 task, сначала читает верхний
+authoritative block этого файла и автоматически переключается на фактическую
+active phase. Поэтому run обязан учитывать утверждённую Phase 13 design и этот
+TDD plan как подготовленный, но ещё не исполненный. Weekly prompt и schedule
+сохранены без изменения; legacy three-step upstream chain остаётся `PAUSED`.
+
 # Текущий authoritative override 2026-08-01: Phase 13 AWG2/AWG3 design записан и ожидает review
 
 Design-only gate `REVIEW_PHASE13_AWG2_AWG3_VERSION_ADMISSION_AND_ISOLATED_RUNTIME_DESIGN_GATE`

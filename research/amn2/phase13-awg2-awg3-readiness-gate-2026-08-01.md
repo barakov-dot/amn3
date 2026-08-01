@@ -125,10 +125,13 @@ evidence должны стать их полями, после чего рабо
 
 Design записан в
 `docs/superpowers/specs/2026-08-01-amn2-phase13-awg2-awg3-version-admission-isolated-runtime-design.ru.md`
-и ожидает operator review. Документ выбирает first-class isolated
+и утверждён оператором exact-фразой 2026-08-01. Документ выбирает first-class isolated
 `VpnRuntimeInstance`, exact client admission, separate typed renderers и
-fail-closed compatibility evidence. Он не разрешает implementation или live
-mutation.
+fail-closed compatibility evidence. Отдельный TDD implementation plan записан
+в
+`docs/superpowers/plans/2026-08-01-amn2-phase13-awg2-awg3-version-admission-isolated-runtime.md`
+и ожидает отдельного разрешения на исполнение. Ни design approval, ни plan не
+разрешают implementation, package build или live mutation.
 
 В design также добавлен отдельный USA retirement/reuse notification gate. USA
 остаётся rollback contour до подтверждённых Spain stability, device

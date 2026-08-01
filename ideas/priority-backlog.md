@@ -3,17 +3,23 @@
 Этот файл фиксирует рабочую карту решений после анализа PRVTPRO/Amnezia-Web-Panel, wg-easy/wg-easy, kyoresuas/amnezia-api и текущего состояния `amn2`.
 
 Актуализация 2026-08-01 Phase 13: фактический Spain baseline имеет семь
-принятых AWG2 slots; production AWG3 ещё не принят. Первый критичный slice —
-written review, затем отдельный TDD plan для exact client-version admission и
-isolated `VpnRuntimeInstance`. Device Passport и Desired/Observed/Drift следуют
-с protocol/runtime/client compatibility evidence для фактических d1–d7.
-Quota default `5` пока не меняется и требует отдельного product decision.
+принятых AWG2 slots; production AWG3 ещё не принят. Written design утверждён,
+отдельный local-only TDD implementation plan подготовлен и ожидает отдельного
+разрешения на исполнение. План покрывает exact client-version admission,
+isolated `VpnRuntimeInstance`, typed AWG2/AWG3 rendering, backup/restore и
+USA-readiness evaluator. Device Passport и Desired/Observed/Drift получают
+protocol/runtime/client compatibility evidence; фактические d1–d7 не
+перевыпускаются и не получают автоматический backfill. Quota default `5` пока
+не меняется и требует отдельного product decision.
 
 USA retirement/reuse является отдельным fail-closed readiness gate, а не
-частью AWG3 rollout. До Spain stability, encrypted backup, independent restore
-rehearsal, replacement rollback capacity, dependency audit и exact approval
-USA остаётся неизменённым rollback contour; оператору должна быть выдана явная
-readiness notification до любого shutdown/wipe/reuse.
+частью AWG3 rollout. До Spain stability, полного device/client evidence,
+14-дневного post-mutation окна, encrypted backup с checksum/secret
+inventory/retention/restore inputs, independent restore rehearsal,
+replacement rollback capacity либо отдельно принятого no-failover risk,
+dependency audit и secret-safe retirement plan USA остаётся неизменённым
+rollback contour. Положительная readiness notification сама по себе не
+разрешает shutdown/wipe/reuse и всегда требует отдельного exact approval.
 
 Актуализация 2026-06-02: API integration уже перешла из plan stage в активную собственную ветку `amn2/codex/read-only-api-route-shell`, head `2010d60`. Следующий gate - real VPS loopback API smoke, а не новый параллельный implementation plan.
 
