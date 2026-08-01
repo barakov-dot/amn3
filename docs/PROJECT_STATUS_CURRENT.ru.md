@@ -1,31 +1,41 @@
-# Текущий authoritative override 2026-08-01: Phase 13 design утверждён, отдельный TDD plan подготовлен
+# Текущий authoritative override 2026-08-01: Phase 13 Tasks 1–10 local-only implementation reviewed
 
-Оператор exact-фразой утвердил записанную AWG2/AWG3 version-admission и
-isolated-runtime design spec и разрешил подготовить отдельный TDD
-implementation plan без implementation и без любых live Spain/USA/AWG
-mutation. План записан в
-`docs/superpowers/plans/2026-08-01-amn2-phase13-awg2-awg3-version-admission-isolated-runtime.md`.
+Оператор утвердил AWG2/AWG3 version-admission и isolated-runtime TDD plan и
+разрешил Tasks 1–10 только в новом изолированном AMN2 worktree без package
+build, SSH, preflight, config/peer issuance и любых live Spain/USA/AWG
+mutation. Local-only implementation reviewed от authoritative base
+`55dc243b8e6c6bdb57f8301b56326e4cd4072d19` до exact head
+`ff115b63ca1329640ca13ae0a502d155f99b456b`.
 
-План привязан к authoritative AMN2 source
-`55dc243b8e6c6bdb57f8301b56326e4cd4072d19` и разбит на локальные RED/GREEN
-срезы: protocol/config versions, additive schema, isolated runtime planner,
-exact client compatibility/admission, отдельный typed AWG3 renderer,
-admission-before-issuance, Passport/Drift, backup/restore и чистый USA
-retirement readiness evaluator. Реализация, package build, SSH/preflight,
-deploy, config/peer issuance, reboot/rollback rehearsal и отключение USA этим
-решением не разрешены.
+Выполнены task-by-task commits для protocol/config versions, additive schema,
+isolated runtime planner, exact compatibility/admission, typed AWG3 renderer,
+admission-before-issuance, Passport/Drift evidence, backup/restore и
+advisory-only USA retirement readiness. Итоговый source suite: `1108 passed,
+1 skipped, 1 warning`; Phase 13 focused suite: `129 passed`.
 
-USA остаётся rollback contour. План содержит обязательное уведомление о
-готовности только после полного fail-closed gate; даже положительное
-уведомление оставляет `live_action_authorized=false` и требует отдельного exact
-approval на shutdown/cleanup/reuse.
+Sealed security diff review exact `55dc243…ff115b63` завершён: reportable
+findings `0`; coverage `partial` только из-за одного bounded future follow-up
+для Drift, если позднее появится normal writer non-positive compatibility
+evidence на active device. Report SHA-256:
+`150E7DADEB1C6156777C9E8203B1FE6EB09E09667C48187FAE633FB31774D52B`.
+Secret-free receipt:
+`research/amn2/phase13-awg2-awg3-local-implementation-receipt-2026-08-01.md`.
 
-Automation `amn2-upstream-orchestrator` проверена перед завтрашним weekly run:
-она `ACTIVE`, привязана к текущей Phase 13 task, сначала читает верхний
-authoritative block этого файла и автоматически переключается на фактическую
-active phase. Поэтому run обязан учитывать утверждённую Phase 13 design и этот
-TDD plan как подготовленный, но ещё не исполненный. Weekly prompt и schedule
-сохранены без изменения; legacy three-step upstream chain остаётся `PAUSED`.
+Spain AWG2 d1–d7, USA rollback contour и посторонний Spain-сервис не
+изменялись. AWG3 остаётся candidate, а не production issuance. USA readiness
+остаётся advisory-only с `live_action_authorized=false`; shutdown, cleanup или
+reuse USA требуют полной отдельной readiness evidence и exact live approval.
+
+Следующий отдельный gate может разрешить только preparation/design
+checksum-bound isolated-runtime package и read-only Spain conflict/equality
+preflight. Он не разрешает deploy, peer/config issuance, reboot, rollback
+rehearsal, AWG2 alteration или USA retirement.
+
+Automation `amn2-upstream-orchestrator` остаётся `ACTIVE` и перед weekly run
+должна читать этот верхний authoritative block: Phase 13 design, TDD plan и
+local-only Tasks 1–10 уже выполнены, но package/live gate ещё не утверждён.
+Weekly prompt и schedule сохранены; legacy three-step upstream chain остаётся
+`PAUSED`.
 
 # Текущий authoritative override 2026-08-01: Phase 13 AWG2/AWG3 design записан и ожидает review
 
