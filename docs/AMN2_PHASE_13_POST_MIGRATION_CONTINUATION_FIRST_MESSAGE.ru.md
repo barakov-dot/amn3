@@ -13,6 +13,7 @@ AMN2_PHASE_13_POST_MIGRATION_CONTINUATION_START
 - docs/AMN2_PHASE_12_FINAL_CLOSEOUT_PACKET.ru.md
 - docs/AMN2_PHASE_12_SPAIN_OPERATOR_ADOPTION_RECEIPT.ru.md
 - docs/AMN2_PHASE_13_POST_MIGRATION_CONTINUATION_FIRST_MESSAGE.ru.md
+- research/amn2/phase13-awg2-awg3-readiness-gate-2026-08-01.md
 - текущие ideas/priority-backlog.md и research/amn2 evidence
 
 Phase 12 не повторять. Runs 001–009, Spain preflight, install/recovery chain,
@@ -50,6 +51,24 @@ NEOBYATNAYA.NET; не регенерировать конфиги, peers или 
 текущий default остаётся 5. В Phase 13 отдельно принять продуктовую политику
 quota: recipient/plan-specific либо новый согласованный default.
 
+Текущий Spain runtime и семь выданных профилей — принятый AWG2 baseline.
+Существующие d1–d7 не перевыпускать автоматически. Официальные AmneziaVPN
+5.0.0.5 и DefaultVPN 2.0.0 уже заявляют AWG3 support, но Spain ещё не имеет
+принятого AWG3 server runtime/config/data evidence. До отдельного gate
+production issuance остаётся AWG2-only.
+
+Целевая новая выдача AMN2 — AWG2 и AWG3; новую AWG1/legacy выдачу не
+развивать, существующие legacy-профили не удалять. Перед каждой новой выдачей
+обязательно запросить точное приложение, платформу и версию клиента. AWG3 не
+выбирать только по ОС или словам «последняя версия». Unknown/unverified client
+version должна fail closed до upgrade или compatibility check.
+
+Не преобразовывать AWG2-конфиги добавлением AWG3-полей и не обновлять текущий
+Spain AWG вслепую. Первый AWG3 slice проектирует отдельный version-admission
+contract и изолированный runtime/interface/UDP-port candidate с собственными
+IPAM, port-conflict, data, reboot и rollback gates. Текущий AWG2, USA contour и
+посторонний Spain-сервис остаются нетронутыми.
+
 North star Phase 13: safe lifecycle control plane — Device Passport,
 recipient/slot assignment, explainable Desired/Observed/Drift, per-device
 disable/revoke, privacy-safe health/support, backup/restore и bounded fleet
@@ -58,7 +77,12 @@ readiness. Сначала переоценить backlog по фактическ
 broad write surfaces без отдельного design и exact live approval.
 
 Первое действие без live mutation:
-GPT-5.6 SOL -> REVIEW_PHASE13_FIRST_REAL_BATCH_DEVICE_PASSPORT_ASSIGNMENT_AND_EXPLAINABLE_DRIFT_FEEDBACK -> SELECT_ONE_POST_MIGRATION_PRODUCT_SLICE
+GPT-5.6 SOL -> REVIEW_PHASE13_AWG2_AWG3_VERSION_ADMISSION_AND_ISOLATED_RUNTIME_DESIGN_GATE -> VERIFY_CURRENT_SPAIN_AWG2_BASELINE_AND_OFFICIAL_AWG3_CONTRACTS -> WRITE_BILINGUAL_DESIGN_SPEC -> PREPARE_EXACT_DESIGN_APPROVAL_PHRASE
+
+После утверждения AWG2/AWG3 design отдельно написать TDD implementation plan и
+только затем готовить checksum-bound live gate. Device Passport и
+Desired/Observed/Drift продолжить следом, добавив protocol version, client
+application/version и compatibility evidence к фактическим семи Spain slots.
 
 Работай в /GO: product/engineering evidence -> scoped tests -> diff/secret/
 security review -> docs/status sync -> commit -> push -> exact live approval.

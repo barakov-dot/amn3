@@ -1,4 +1,25 @@
-# Текущий authoritative override 2026-08-01: Phase 12 Spain принята
+# Текущий authoritative override 2026-08-01: Phase 13 handoff пересобран с AWG2/AWG3 gate
+
+Phase 12 остаётся полностью принятой; её rollout, controlled reboot и issuance
+не повторяются. Канонический первый текст Phase 13 обновлён по фактическому
+Spain closeout и новым официальным AWG3 evidence:
+`docs/AMN2_PHASE_13_POST_MIGRATION_CONTINUATION_FIRST_MESSAGE.ru.md`.
+
+Официальный AmneziaVPN `5.0.0.5` и DefaultVPN `2.0.0` заявляют AWG3 support;
+официальный client commit `5e9def4184f0799f9984d2bbde5d4237dc649abc`
+добавляет AWG3 fields/runtime dependencies. Текущий Spain runtime и семь
+выданных d1–d7 остаются принятым AWG2 baseline. Production AWG3 issuance ещё
+не разрешена: отсутствуют отдельные Spain server/config/data/rollback evidence.
+
+Phase 13 начинает с local-only AWG2/AWG3 version-admission и isolated-runtime
+design gate. Перед будущей выдачей обязательны exact client application,
+platform и version; unknown/unverified versions fail closed. Новые issuance
+targets — AWG2 и AWG3, новую AWG1/legacy выдачу не развивать; существующие
+legacy-профили не удалять. Текущий AWG2, USA rollback contour и посторонний
+Spain-сервис не изменять. Полное evidence и boundary:
+`research/amn2/phase13-awg2-awg3-readiness-gate-2026-08-01.md`.
+
+# Предыдущий authoritative override 2026-08-01: Phase 12 Spain принята
 
 Phase 12 Spain Migration завершена и принята. Spain является primary runtime;
 authoritative source — `55dc243b8e6c6bdb57f8301b56326e4cd4072d19`, Spain
