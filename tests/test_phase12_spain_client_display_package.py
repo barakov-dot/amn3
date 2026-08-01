@@ -55,7 +55,7 @@ def test_builds_unique_archives_with_exact_inner_name_and_unchanged_bytes(tmp_pa
 
     receipt = package.build_packages(manifest, configs, tmp_path / "out")
 
-    assert receipt["schema"] == "amn2.phase12-client-display-package-receipt.v1"
+    assert receipt["schema"] == "amn2.phase12-client-display-package-receipt.v2"
     assert len(receipt["items"]) == 3
     assert len({item["archive_filename"] for item in receipt["items"]}) == 3
     assert len({item["slot_identity"] for item in receipt["items"]}) == 3
@@ -67,6 +67,22 @@ def test_builds_unique_archives_with_exact_inner_name_and_unchanged_bytes(tmp_pa
             metadata = json.loads(archive.read("package-manifest.json"))
             assert metadata["inner_filename"] == "NEOBYATNAYA.NET.conf"
             assert metadata["device_id"] == item["device_id"]
+
+
+def test_receipt_reports_amneziavpn_manual_rename_requirement(tmp_path: Path) -> None:
+    package = load_module()
+    manifest, configs, _payloads = sample_three_slot_inputs(tmp_path)
+
+    receipt = package.build_packages(manifest, configs, tmp_path / "out")
+
+    assert receipt["requested_display_name"] == "NEOBYATNAYA.NET"
+    assert receipt["amneziavpn_display_name_strategy"] == "manual_rename_required"
+    assert "display_name" not in receipt
+    for item in receipt["items"]:
+        with ZipFile(tmp_path / "out" / item["archive_filename"]) as archive:
+            metadata = json.loads(archive.read("package-manifest.json"))
+            assert metadata["requested_display_name"] == "NEOBYATNAYA.NET"
+            assert metadata["amneziavpn_display_name_strategy"] == "manual_rename_required"
 
 
 def test_rejects_duplicate_slot_identity(tmp_path: Path) -> None:

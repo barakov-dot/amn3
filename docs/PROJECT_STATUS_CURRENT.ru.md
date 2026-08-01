@@ -1,4 +1,23 @@
-# Текущий override 2026-08-01: exact `NEOBYATNAYA.NET` client packages готовы
+# Текущий override 2026-08-01: AmneziaVPN manual rename подтверждён
+
+Реальный импорт ARM-HOME опроверг предположение, что имя внутреннего файла
+задаёт display name в полном клиенте AmneziaVPN: импорт создал `Server 2`.
+Оператор вручную переименовал его в exact `NEOBYATNAYA.NET`; повторное
+подключение прошло, и большой заголовок показывает exact имя. Это
+`automatic_import_name=failed`, `manual_rename=passed`. Конфиг, peer, ключи,
+DB и live Spain не изменялись.
+
+Исправленный package receipt v2 явно содержит
+`amneziavpn_display_name_strategy=manual_rename_required`; SHA-256
+`66E4ACCABAA7600EAB00A1BA207F04813C46CBFFD09948F617F049FFF6BF4F0F`.
+Следующий критичный gate — controlled reboot persistence test. Новые устройства
+`ARM-WORK`, `NOTEBOOK`, `IPAD`, `IPHONE` выдаются после него и требуют такого
+же ручного client-side rename в AmneziaVPN.
+
+# Предыдущий override 2026-08-01: exact filename packages готовы
+
+Следующий блок сохраняется как история artifact packaging. Его предположение
+об автоматическом имени AmneziaVPN отменено текущим override выше.
 
 Три уже выданных Spain config переупакованы offline без изменения config bytes,
 ключей, peers, DB или live Spain state. Для каждого slot создан уникальный ZIP;

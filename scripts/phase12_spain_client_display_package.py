@@ -13,8 +13,10 @@ from zipfile import ZIP_STORED, ZipFile, ZipInfo
 
 INNER_FILENAME = "NEOBYATNAYA.NET.conf"
 INNER_MANIFEST = "package-manifest.json"
-RECEIPT_SCHEMA = "amn2.phase12-client-display-package-receipt.v1"
-PACKAGE_SCHEMA = "amn2.phase12-client-display-package.v1"
+RECEIPT_SCHEMA = "amn2.phase12-client-display-package-receipt.v2"
+PACKAGE_SCHEMA = "amn2.phase12-client-display-package.v2"
+REQUESTED_DISPLAY_NAME = "NEOBYATNAYA.NET"
+AMNEZIAVPN_DISPLAY_NAME_STRATEGY = "manual_rename_required"
 SOURCE_RE = re.compile(
     r"^NEOBYATNAYA\.NET-(?P<body>[A-Za-z0-9._-]+)-"
     r"d(?P<device_id>[1-9][0-9]*)\.conf$"
@@ -123,6 +125,8 @@ def _package_manifest(
         "slot_identity": f'{item["recipient_label"]}/{item["device_label"]}/d{device_id}',
         "source_filename": source.name,
         "inner_filename": INNER_FILENAME,
+        "requested_display_name": REQUESTED_DISPLAY_NAME,
+        "amneziavpn_display_name_strategy": AMNEZIAVPN_DISPLAY_NAME_STRATEGY,
         "config_sha256": _sha256(config),
         "config_bytes": len(config),
         "archive_filename": archive_filename,
@@ -182,7 +186,8 @@ def build_packages(
             "schema": RECEIPT_SCHEMA,
             "request_id": manifest["request_id"],
             "server": "spain",
-            "display_name": "NEOBYATNAYA.NET",
+            "requested_display_name": REQUESTED_DISPLAY_NAME,
+            "amneziavpn_display_name_strategy": AMNEZIAVPN_DISPLAY_NAME_STRATEGY,
             "items": receipt_items,
         }
         verify_packages(receipt, configs_dir, output_dir)
@@ -197,10 +202,15 @@ def verify_packages(
 ) -> None:
     if (
         not isinstance(receipt, dict)
-        or set(receipt) != {"schema", "request_id", "server", "display_name", "items"}
+        or set(receipt) != {
+            "schema", "request_id", "server", "requested_display_name",
+            "amneziavpn_display_name_strategy", "items",
+        }
         or receipt["schema"] != RECEIPT_SCHEMA
         or receipt["server"] != "spain"
-        or receipt["display_name"] != "NEOBYATNAYA.NET"
+        or receipt["requested_display_name"] != REQUESTED_DISPLAY_NAME
+        or receipt["amneziavpn_display_name_strategy"]
+        != AMNEZIAVPN_DISPLAY_NAME_STRATEGY
         or not isinstance(receipt["items"], list)
         or not receipt["items"]
     ):
@@ -217,12 +227,19 @@ def verify_packages(
             "schema", "request_id", "recipient_label", "device_label", "device_id",
             "slot_identity", "source_filename", "inner_filename", "config_sha256",
             "config_bytes", "archive_filename", "device_slug", "archive_sha256",
-            "archive_bytes",
+            "archive_bytes", "requested_display_name",
+            "amneziavpn_display_name_strategy",
         }
         if set(item) != required or item["schema"] != PACKAGE_SCHEMA:
             raise PackageError("receipt item schema mismatch")
         if item["inner_filename"] != INNER_FILENAME:
             raise PackageError("inner filename mismatch")
+        if (
+            item["requested_display_name"] != REQUESTED_DISPLAY_NAME
+            or item["amneziavpn_display_name_strategy"]
+            != AMNEZIAVPN_DISPLAY_NAME_STRATEGY
+        ):
+            raise PackageError("display name strategy mismatch")
         if item["slot_identity"] in slots:
             raise PackageError("duplicate slot identity")
         slots.add(item["slot_identity"])

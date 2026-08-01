@@ -2,7 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Repackage the three already generated Spain configs so AmneziaVPN imports each as exact `NEOBYATNAYA.NET` while retaining unique recipient/slot identity outside the config bytes.
+**Corrected acceptance:** Real Windows AmneziaVPN imported the profile as `Server 2`; exact `NEOBYATNAYA.NET` requires manual client-side rename. The package must preserve bytes and explicitly report `manual_rename_required`, never promise automatic naming.
+
+**Goal:** Repackage the three already generated Spain configs with exact inner filename and unique recipient/slot identity outside the config bytes, while accurately documenting the AmneziaVPN manual-rename requirement.
 
 **Architecture:** A focused offline packager consumes the existing safe issuance manifest and three immutable `.conf` files, maps each manifest item to its existing device-ID filename, and emits one deterministic ZIP per slot. Every ZIP contains exact `NEOBYATNAYA.NET.conf` plus a secret-free canonical manifest; a verifier independently proves byte equality, uniqueness, and allowed membership.
 

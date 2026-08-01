@@ -1,6 +1,21 @@
 # Next task — AMN2 Phase 12 Spain Migration
 
-## Current override 2026-08-01: exact client name packages built; import then reboot
+## Current override 2026-08-01: ARM-HOME manual rename passed; reboot next
+
+Real Windows AmneziaVPN import created `Server 2`; exact inner filename does
+not set the full client's display name. The operator manually renamed it to
+exact `NEOBYATNAYA.NET` and confirmed the connected large header. Record this
+as `automatic_import_name=failed`, `manual_rename=passed`. Corrected receipt
+v2 SHA-256 is
+`66E4ACCABAA7600EAB00A1BA207F04813C46CBFFD09948F617F049FFF6BF4F0F`
+and explicitly declares `manual_rename_required`.
+
+Do not rebuild the peer or config for naming. The next critical action is the
+controlled reboot persistence test. After it passes, issue `ARM-WORK`,
+`NOTEBOOK`, `IPAD`, and `IPHONE`; each AmneziaVPN import uses the same manual
+rename procedure.
+
+## Historical override 2026-08-01: exact filename packages built
 
 Three existing configs were reused byte-for-byte and wrapped in unique per-slot
 ZIPs. Every archive contains exact `NEOBYATNAYA.NET.conf`; recipient/device/ID

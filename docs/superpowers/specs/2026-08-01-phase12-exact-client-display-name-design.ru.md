@@ -1,5 +1,19 @@
 # Phase 12 — exact `NEOBYATNAYA.NET` client display name correction / Точное имя в клиенте
 
+## Acceptance correction / Коррекция по реальному тесту
+
+Real Windows AmneziaVPN import produced `Server 2`. The inner filename is an
+artifact and standalone-client aid; it cannot guarantee the display name in
+full AmneziaVPN. Exact `NEOBYATNAYA.NET` is achieved there by manual rename.
+The receipt must say `manual_rename_required` and must never describe the
+filename as automatic AmneziaVPN naming. This correction supersedes any
+contrary assumption below without changing existing config bytes.
+
+Реальный импорт Windows AmneziaVPN создал `Server 2`. Внутреннее имя файла
+остаётся artifact/standalone-client механизмом, но не гарантирует имя в полном
+AmneziaVPN. Exact `NEOBYATNAYA.NET` достигается ручным переименованием; receipt
+обязан явно указывать `manual_rename_required`.
+
 ## Решение / Decision
 
 Каждый уже выданный slot получает отдельный уникально названный ZIP-архив.

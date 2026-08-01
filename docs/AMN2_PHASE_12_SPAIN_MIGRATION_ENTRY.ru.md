@@ -1,6 +1,21 @@
 # AMN2 Phase 12 — Spain Migration Entry
 
-## Current operational override — 2026-08-01: exact client display packages ready
+## Current operational override — 2026-08-01: manual rename is required
+
+The real ARM-HOME import created `Server 2`; therefore full AmneziaVPN does
+not derive its display name from `NEOBYATNAYA.NET.conf`. The operator manually
+renamed the imported server to exact `NEOBYATNAYA.NET` and confirmed the
+connected large header. Classification: `automatic_import_name=failed`,
+`manual_rename=passed`. No config, peer, key, DB, or Spain runtime mutation was
+used for the rename.
+
+Corrected receipt v2 records
+`amneziavpn_display_name_strategy=manual_rename_required`; SHA-256 is
+`66E4ACCABAA7600EAB00A1BA207F04813C46CBFFD09948F617F049FFF6BF4F0F`.
+The earlier automatic-name assumption below is superseded. Controlled reboot
+persistence is the next critical gate.
+
+## Historical override — 2026-08-01: exact filename packages ready
 
 The three existing Spain config byte streams were repackaged offline without
 key, peer, DB, config-byte, or live-state mutation. Each slot has a unique

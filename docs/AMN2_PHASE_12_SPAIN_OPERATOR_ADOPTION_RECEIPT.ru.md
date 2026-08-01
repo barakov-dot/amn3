@@ -2,7 +2,23 @@
 
 Дата фиксации: 2026-08-01.
 
-## Exact client display-name correction
+## Реальный результат client display-name
+
+ARM-HOME импортирован в полный Windows-клиент AmneziaVPN. Автоматический
+результат: `Server 2`, то есть exact filename не управляет display name этого
+клиента. Оператор вручную переименовал server в `NEOBYATNAYA.NET` и подтвердил
+connected screen с exact большим заголовком. Итог:
+
+- `automatic_import_name=failed`;
+- `manual_rename=passed`;
+- `config_peer_key_regeneration=false`;
+- `live_spain_mutation=false`.
+
+Corrected receipt v2 SHA-256:
+`66E4ACCABAA7600EAB00A1BA207F04813C46CBFFD09948F617F049FFF6BF4F0F`;
+strategy: `manual_rename_required`. Следующий gate — controlled reboot.
+
+## Historical exact-filename packaging
 
 Три existing config artifacts переупакованы byte-for-byte без regeneration
 ключей/peers/configs и без изменения DB/live Spain. Каждый уникальный per-slot
