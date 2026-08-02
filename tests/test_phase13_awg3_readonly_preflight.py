@@ -520,6 +520,36 @@ try {{ Write-BytesCreateNew -Path $path -Bytes ([Text.Encoding]::UTF8.GetBytes('
     assert result.stdout == '{"first":true}|true'
 
 
+def test_private_outcome_claim_is_create_new_and_contains_no_target_material(tmp_path):
+    outcome_root = tmp_path / "outcomes"
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$root = '{outcome_root}'
+$sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+$claim = New-Phase13OutcomeClaim -OutcomeRoot $root -OutcomeId 'test-outcome-claim-001' -OwnerSid $sid -ManifestSha256 ('a' * 64) -RunnerSha256 ('b' * 64) -CollectorSha256 ('c' * 64) -TargetRole 'spain-primary'
+$replayed = $false
+try {{ New-Phase13OutcomeClaim -OutcomeRoot $root -OutcomeId 'test-outcome-claim-001' -OwnerSid $sid -ManifestSha256 ('a' * 64) -RunnerSha256 ('b' * 64) -CollectorSha256 ('c' * 64) -TargetRole 'spain-primary' }} catch {{ $replayed = $true }}
+$document = Get-Content -Raw -LiteralPath $claim | ConvertFrom-Json
+[Console]::Out.Write("$($replayed.ToString().ToLowerInvariant())|$($document.PSObject.Properties.Name -join ',')")
+""",
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == (
+        "true|schema,outcome_id,manifest_sha256,runner_sha256,collector_sha256,"
+        "target_role,created_at"
+    )
+
+
+def test_runner_creates_claim_before_the_intentional_pre_transport_stop():
+    source = RUNNER.read_text(encoding="utf-8")
+    claim_call = source.index("[void](New-Phase13OutcomeClaim")
+    stop_call = source.index(
+        'Write-RunnerFailureLine "trust_binding" "runtime_capability_unavailable"'
+    )
+    assert claim_call < stop_call
+
+
 def test_private_path_rejects_wrong_owner_weak_acl_and_reparse_point(tmp_path):
     private_dir = tmp_path / "private"
     private_dir.mkdir()

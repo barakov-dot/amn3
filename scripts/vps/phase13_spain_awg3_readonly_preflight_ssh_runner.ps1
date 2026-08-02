@@ -12,6 +12,8 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Security") -ErrorAction Stop
+Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Utility") -ErrorAction Stop
 $script:Utf8NoBom = New-Object Text.UTF8Encoding($false)
 [Console]::OutputEncoding = $script:Utf8NoBom
 [Console]::InputEncoding = $script:Utf8NoBom
@@ -179,6 +181,81 @@ function Write-BytesCreateNew {
     } finally {
         $Stream.Dispose()
     }
+}
+
+function Protect-Phase13PrivateDirectory {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$OwnerSid
+    )
+    if (-not (Test-Path -LiteralPath $Path)) {
+        [IO.Directory]::CreateDirectory($Path) | Out-Null
+    }
+    $Item = Get-Item -LiteralPath $Path -Force -ErrorAction Stop
+    if (-not $Item.PSIsContainer -or ($Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "Private outcome directory is unsafe."
+    }
+    $Owner = New-Object Security.Principal.SecurityIdentifier($OwnerSid)
+    $Acl = Get-Acl -LiteralPath $Item.FullName
+    $Acl.SetOwner($Owner)
+    $Acl.SetAccessRuleProtection($true, $false)
+    foreach ($Rule in @($Acl.Access)) {
+        $Acl.RemoveAccessRuleSpecific($Rule)
+    }
+    $Acl.SetAccessRule((New-Object Security.AccessControl.FileSystemAccessRule(
+        $Owner,
+        [Security.AccessControl.FileSystemRights]::FullControl,
+        [Security.AccessControl.InheritanceFlags]'ContainerInherit, ObjectInherit',
+        [Security.AccessControl.PropagationFlags]::None,
+        [Security.AccessControl.AccessControlType]::Allow
+    )))
+    Set-Acl -LiteralPath $Item.FullName -AclObject $Acl
+    Assert-PrivatePath -Path $Item.FullName -ExpectedOwnerSid $OwnerSid
+}
+
+function New-Phase13OutcomeClaim {
+    param(
+        [Parameter(Mandatory = $true)][string]$OutcomeRoot,
+        [Parameter(Mandatory = $true)][string]$OutcomeId,
+        [Parameter(Mandatory = $true)][string]$OwnerSid,
+        [Parameter(Mandatory = $true)][string]$ManifestSha256,
+        [Parameter(Mandatory = $true)][string]$RunnerSha256,
+        [Parameter(Mandatory = $true)][string]$CollectorSha256,
+        [Parameter(Mandatory = $true)][string]$TargetRole
+    )
+    Assert-OutcomeId -Value $OutcomeId
+    foreach ($Hash in @($ManifestSha256, $RunnerSha256, $CollectorSha256)) {
+        if ($Hash -cnotmatch '^[0-9a-f]{64}$') {
+            throw "Outcome claim checksum is invalid."
+        }
+    }
+    if ($TargetRole -cne "spain-primary") {
+        throw "Outcome claim target role is invalid."
+    }
+    Protect-Phase13PrivateDirectory -Path $OutcomeRoot -OwnerSid $OwnerSid
+    $OutcomeDirectory = Join-Path $OutcomeRoot $OutcomeId
+    if (Test-Path -LiteralPath $OutcomeDirectory) {
+        throw "Outcome claim already exists."
+    }
+    [IO.Directory]::CreateDirectory($OutcomeDirectory) | Out-Null
+    Protect-Phase13PrivateDirectory -Path $OutcomeDirectory -OwnerSid $OwnerSid
+    $Claim = [ordered]@{
+        schema = "amn2.phase13.awg3-readonly-preflight-claim.v1"
+        outcome_id = $OutcomeId
+        manifest_sha256 = $ManifestSha256
+        runner_sha256 = $RunnerSha256
+        collector_sha256 = $CollectorSha256
+        target_role = $TargetRole
+        created_at = [DateTimeOffset]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")
+    }
+    $ClaimPath = Join-Path $OutcomeDirectory "outcome-claim.json"
+    $ClaimBytes = $script:Utf8NoBom.GetBytes(($Claim | ConvertTo-Json -Compress) + "`n")
+    try {
+        Write-BytesCreateNew -Path $ClaimPath -Bytes $ClaimBytes
+    } finally {
+        [Array]::Clear($ClaimBytes, 0, $ClaimBytes.Length)
+    }
+    return $ClaimPath
 }
 
 function Assert-PrivatePath {
@@ -461,10 +538,17 @@ function Invoke-RunnerMain {
     }
 
     $LocalAppData = [Environment]::GetFolderPath('LocalApplicationData')
-    $TrustRoot = Join-Path $LocalAppData "AMN2\private-artifacts\post-release\spain-migration\$($script:TrustedBundleRunId)"
     $CurrentSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
-    try { Assert-PrivatePath -Path $TrustRoot -ExpectedOwnerSid $CurrentSid }
+    $PrivateArtifactsRoot = Join-Path $LocalAppData "AMN2\private-artifacts"
+    try { Assert-PrivatePath -Path $PrivateArtifactsRoot -ExpectedOwnerSid $CurrentSid }
     catch { Write-RunnerFailureLine "private_root_validation" "observation_ambiguous"; return 72 }
+    $OutcomeRoot = Join-Path $PrivateArtifactsRoot "phase13-awg3-preflight\outcomes"
+    try {
+        [void](New-Phase13OutcomeClaim -OutcomeRoot $OutcomeRoot -OutcomeId $OutcomeId -OwnerSid $CurrentSid -ManifestSha256 $ManifestSha -RunnerSha256 $RunnerSha -CollectorSha256 $CollectorSha -TargetRole "spain-primary")
+    } catch {
+        Write-RunnerFailureLine "outcome_claim" "outcome_replay"
+        return 66
+    }
 
     # Production transport remains unreachable until Task 6 supplies a verified
     # manifest and a separately approved binding of the sanitized observations.
