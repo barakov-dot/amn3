@@ -1237,27 +1237,37 @@ $result = Invoke-Phase13OneSshTransport -SshExecutable '{sys.executable}' -SshAr
     assert result.stdout == "success|0|{}|Reason,Document,ExitCode"
 
 
-def test_one_ssh_transport_drops_raw_stderr_from_sanitized_result(tmp_path):
+@pytest.mark.parametrize(
+    ("exit_code", "expected_reason"),
+    [
+        (255, "ssh_client_failure"),
+        (127, "remote_command_unavailable"),
+        (99, "remote_exit_unclassified"),
+    ],
+)
+def test_one_ssh_transport_classifies_exit_without_exposing_raw_stderr(
+    tmp_path, exit_code, expected_reason
+):
     fake_ssh = tmp_path / "fake_ssh.py"
     fake_ssh.write_text(
         """import sys
 sys.stdin.buffer.read()
 sys.stderr.buffer.write(b'private-target-material')
-raise SystemExit(255)
+raise SystemExit(int(sys.argv[1]))
 """,
         encoding="utf-8",
     )
     result = run_powershell_harness(
         tmp_path,
         f"""
-$result = Invoke-Phase13OneSshTransport -SshExecutable '{sys.executable}' -SshArguments @('{fake_ssh}') -CollectorBytes ([Text.Encoding]::UTF8.GetBytes('collector')) -TimeoutMilliseconds 2000 -MaximumOutputBytes 4096
+$result = Invoke-Phase13OneSshTransport -SshExecutable '{sys.executable}' -SshArguments @('{fake_ssh}', '{exit_code}') -CollectorBytes ([Text.Encoding]::UTF8.GetBytes('collector')) -TimeoutMilliseconds 2000 -MaximumOutputBytes 4096
 [Console]::Out.Write("$($result.Reason)|$($result.Document)|$($result.PSObject.Properties.Name -join ',')")
 """,
     )
 
     combined = result.stdout + result.stderr
     assert result.returncode == 0, result.stderr
-    assert result.stdout == "unknown_remote_outcome||Reason,Document,ExitCode"
+    assert result.stdout == f"{expected_reason}||Reason,Document,ExitCode"
     assert "private-target-material" not in combined
 
 
@@ -1345,7 +1355,9 @@ $secret = Test-Phase13EvidenceSecretSafe -EvidenceBytes ([Text.Encoding]::UTF8.G
     [
         ("transport_timeout", -1, "transport|observation_ambiguous|timeout|67"),
         ("output_oversized", -1, "transport|observation_ambiguous|output_oversized|67"),
-        ("unknown_remote_outcome", 255, "transport|observation_ambiguous|ssh_exit_unclassified|67"),
+        ("ssh_client_failure", 255, "transport|observation_ambiguous|ssh_client_failure|67"),
+        ("remote_command_unavailable", 127, "transport|observation_ambiguous|remote_command_unavailable|67"),
+        ("remote_exit_unclassified", 99, "transport|observation_ambiguous|remote_exit_unclassified|67"),
         ("unexpected_transport_reason", -1, "transport|observation_ambiguous|transport_internal_failure|67"),
         ("schema_validation_failed", 0, "schema_validation|schema_validation_failed|not_applicable|68"),
         ("SCHEMA_VALIDATION_FAILED", 0, "transport|observation_ambiguous|transport_internal_failure|67"),
@@ -1441,7 +1453,7 @@ def test_runner_orders_claim_trust_and_one_ssh_without_legacy_stop():
         ("crlf", "crlf_corruption"),
         ("invalid", "invalid_utf8"),
         ("oversized", "output_oversized"),
-        ("unknown", "unknown_remote_outcome"),
+        ("unknown", "remote_exit_unclassified"),
     ],
 )
 def test_fake_ssh_transport_envelope_is_bounded_and_fail_closed(tmp_path, scenario, expected_reason):

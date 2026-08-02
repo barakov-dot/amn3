@@ -842,6 +842,16 @@ function Invoke-BoundedTransport {
     }
 }
 
+function Resolve-Phase13SshExitReason {
+    param([Parameter(Mandatory = $true)][int]$ExitCode)
+    if ($ExitCode -eq 255) { return "ssh_client_failure" }
+    if ($ExitCode -eq 127) { return "remote_command_unavailable" }
+    if ($ExitCode -ne 0 -and ($ExitCode -lt 64 -or $ExitCode -gt 74)) {
+        return "remote_exit_unclassified"
+    }
+    return "transport_internal_failure"
+}
+
 function ConvertFrom-BoundedCollectorEnvelope {
     param([Parameter(Mandatory = $true)]$Transport)
     if ($Transport.LocalFailureReason -ceq "local_process_failure") {
@@ -855,7 +865,8 @@ function ConvertFrom-BoundedCollectorEnvelope {
         return [pscustomobject]@{ Reason = "output_oversized"; Document = $null }
     }
     if ($Transport.ExitCode -ne 0 -and ($Transport.ExitCode -lt 64 -or $Transport.ExitCode -gt 74)) {
-        return [pscustomobject]@{ Reason = "unknown_remote_outcome"; Document = $null }
+        $ExitReason = Resolve-Phase13SshExitReason -ExitCode $Transport.ExitCode
+        return [pscustomobject]@{ Reason = $ExitReason; Document = $null }
     }
     $StrictUtf8 = New-Object Text.UTF8Encoding($false, $true)
     try {
@@ -974,7 +985,9 @@ function Resolve-Phase13TransportFailure {
     $TransportSubreason = switch -CaseSensitive ($TransportResult.Reason) {
         "transport_timeout" { "timeout"; break }
         "output_oversized" { "output_oversized"; break }
-        "unknown_remote_outcome" { "ssh_exit_unclassified"; break }
+        "ssh_client_failure" { "ssh_client_failure"; break }
+        "remote_command_unavailable" { "remote_command_unavailable"; break }
+        "remote_exit_unclassified" { "remote_exit_unclassified"; break }
         "local_process_failure" { "local_process_failure"; break }
         default { "transport_internal_failure" }
     }
