@@ -1,4 +1,39 @@
-# Текущий обязательный приоритет 2026-08-02: USA dependency audit не разрешает retirement
+# Текущий обязательный приоритет 2026-08-02: bot/web migration USA → Spain обязательна до освобождения USA
+
+Оператор уточнил Phase 13 exit condition: existing private Telegram bot,
+web-панель, database и required application data обязательно переносятся с USA
+на Spain. USA не может считаться освобождённой для самостоятельной
+переустановки до Spain web/data acceptance и single-instance bot cutover.
+
+Утверждённый secret-safe read-only audit выполнен без mutation. Spain:
+web active/enabled, healthy и только `127.0.0.1:3031`; bot inactive/static,
+enable marker absent; DB integrity `ok`, FK issues `0`, tables/rows `18/46`,
+users/devices/passports `1/7/7`. USA: web и bot active/enabled, restart `0`;
+web loopback-only и healthy; DB integrity `ok`, FK issues `0`, tables/rows
+`15/88`, users/devices/plans/orders `6/8/8/8`, API-token records `12`,
+configured bot admins `2`.
+
+Одноразовый ephemeral-HMAC proof без raw values/stable fingerprints доказал,
+что USA и Spain имеют разные Telegram bot token, `APP_SECRET_KEY`, web password
+hash и web session secret. Spain source `55dc243…` является потомком USA
+overlay `0b858c5…`, поэтому source copy/downgrade не нужен. Принят design:
+encrypted USA source snapshot, logical merge preview поверх Spain DB,
+external-only/revoked legacy device metadata, exclusion usable USA API/device
+secrets, disabled Spain stage, отдельный web/data apply и two-host
+single-instance bot cutover с rollback-before-mutation.
+
+Design spec:
+`docs/superpowers/specs/2026-08-02-amn2-phase13-usa-spain-bot-web-migration-design.ru.md`.
+TDD plan:
+`docs/superpowers/plans/2026-08-02-amn2-phase13-usa-spain-bot-web-migration.ru.md`.
+Secret-free audit receipt:
+`research/amn2/phase13-usa-spain-bot-web-migration-readonly-audit-2026-08-02.md`.
+
+Следующий gate — отдельное local-only выполнение TDD Tasks 1–8. Package build
+из live inputs, SSH, DB apply, stage, bot cutover, USA shutdown/reinstall/reuse
+и любые Spain/USA/AWG mutation не разрешены.
+
+# Предыдущий текущий приоритет 2026-08-02: USA dependency audit не разрешает retirement
 
 Утверждённый read-only Spain stability / USA retirement dependency audit
 выполнен по root head `b58738b8a8b7562c86dfc237b00669b004058ffe`:

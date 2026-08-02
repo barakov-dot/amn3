@@ -21,6 +21,15 @@ dependency audit и secret-safe retirement plan USA остаётся неизм�
 rollback contour. Положительная readiness notification сама по себе не
 разрешает shutdown/wipe/reuse и всегда требует отдельного exact approval.
 
+Актуализация 2026-08-02: operator decision требует перенести existing private
+Telegram bot, web-панель, database и required application data с USA на Spain
+до самостоятельной переустановки USA. Read-only audit подтвердил разные DB
+schemas/state и разные bot/app/web secret references; blind DB restore запрещён.
+Активный путь — encrypted source snapshot, versioned logical merge поверх
+Spain DB, disabled stage, loopback-only web acceptance и two-host
+single-instance bot cutover. USA API tokens/sessions и usable device secrets не
+оживляются; Spain d1–d7/passports/receipts/AWG2/foreign service сохраняются.
+
 Актуализация 2026-06-02: API integration уже перешла из plan stage в активную собственную ветку `amn2/codex/read-only-api-route-shell`, head `2010d60`. Следующий gate - real VPS loopback API smoke, а не новый параллельный implementation plan.
 
 Актуализация 2026-06-09: AMN2 target VPS Phase 3 service-mode зафиксирован в AMN3 commit `bc00b77`. Текущий web/admin access path - приватный SSH local port forward к loopback `127.0.0.1:3030`; публичный домен, HTTPS reverse proxy/public cutover, TCP `80/443`, public API `3040` и direct public web `3030` не используются. Для PRVTPRO/Web Panel направления ближайший фокус - read-only UX/product review и безопасные обзорные улучшения, без destructive/admin write assumptions.
