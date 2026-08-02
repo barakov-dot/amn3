@@ -1,3 +1,24 @@
+# Текущий обязательный приоритет 2026-08-02: USA dependency audit не разрешает retirement
+
+Утверждённый read-only Spain stability / USA retirement dependency audit
+выполнен по root head `b58738b8a8b7562c86dfc237b00669b004058ffe`:
+ровно один SSH process для Spain и один для USA, без live mutation. Secret-free
+receipt:
+`research/amn2/phase13-spain-stability-usa-retirement-dependency-readonly-audit-2026-08-02.md`.
+
+Spain transport завершился как `ssh_client_failure`; текущая AWG2 и foreign
+equality этим запуском не доказаны и остаются `unverified`, а не mismatch.
+Raw stdout/stderr, target и private trust data не читались и не сохранялись.
+
+USA read-only probe passed: overlay equal, AWG running, DB integrity `ok`,
+foreign-key issues `0`. Dependency audit не clear: persistent/live contour
+содержит `12` peers; агрегированная активность — `2` recent handshakes за 24
+часа и `4` за 7/30 дней; bot и web active. Следовательно, USA сейчас реально
+используется и shutdown/cleanup/reuse не разрешены. Для продолжения требуется
+явное operator decision по активным USA dependencies и затем отдельный exact
+live approval. Package build, deploy, issuance, reboot, service/container/
+network action и Spain/USA/AWG mutation не выполнялись.
+
 # Текущий обязательный приоритет 2026-08-02: Outcome-Claim Failure-Mapping Tasks 1–3 локально проверены, live gate отсутствует
 
 Локальная fail-closed цепочка Phase 13 Outcome-Claim Failure-Mapping проверена
