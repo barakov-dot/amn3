@@ -1,30 +1,33 @@
-# Текущий обязательный приоритет 2026-08-01: проект пакета и предварительной проверки Phase 13 AWG3 записан и ожидает проверки
+# Текущий обязательный приоритет 2026-08-02: локальный комплект Phase 13 AWG3 проверен, live gate отсутствует
 
-Оператор разрешил только проектирование пакета изолированного runtime с
-контрольными суммами и предварительной проверки конфликтов и равенства Spain
-только для чтения для AWG3 candidate. Русскоязычная проектная спецификация
-записана:
-`docs/superpowers/specs/2026-08-01-amn2-phase13-awg3-isolated-runtime-package-readonly-spain-preflight-design.ru.md`.
+Локальные schemas, manifest/evidence validator, read-only collector и
+checksum/outcome runner для AWG3 candidate проверены на root head
+`0e768930247148ab7edfecdb0fd89e9eeee1d3ca`. Проверка не строила пакет, не
+запускала SSH или collector на Spain и не изменяла Spain, USA, AWG2/AWG3,
+посторонний Spain-сервис, peers либо configs. Secret-free receipt:
+`research/amn2/phase13-awg3-preflight-local-tooling-receipt-2026-08-01.md`.
 
-Выбрана архитектура: неизменяемая основа проверки равенства Phase 12 плюс
-новые управляющий сценарий и схема Phase 13. Спецификация фиксирует
-ресурсы-кандидаты, контракты манифеста и доказательств, классификацию
-конфликтов, условия равенства AWG2 и постороннего сервиса, границу команд
-только для чтения, одноразовый результат и коды безопасной остановки. Квитанция
-без секретов:
-`research/amn2/phase13-awg3-package-preflight-design-receipt-2026-08-01.md`.
+Принята неизменяемая Phase 12 equality foundation и checksum-bound Phase 13
+wrapper. Локальные результаты: Phase 13 AWG3 tooling `60 passed`; утверждённый
+Spain regression scope `233 passed, 1 skipped`; syntax и diff checks passed;
+secret matches `0`. `verify-local` подтвердил
+`network_attempted=false`, `package_build_performed=false` и
+`live_action_authorized=false`; неизвестный production mode fail-closed с
+exit `64`. Вместо нового broad security scan выполнен только ручной scoped
+review, как отдельно разрешил оператор; reportable findings не заявляются и
+новый security report не создан.
 
-Реализация, сборка пакета, запуск SSH или предварительной проверки и любые
-изменения Spain/USA/AWG не выполнялись и не разрешены. Следующий этап —
-проверка этой спецификации оператором; после утверждения допускается только
-отдельный локальный план TDD реализации. Точное разрешение на SSH можно будет
-подготовить лишь после готовых управляющего сценария, сборщика, схемы и
-манифеста с контрольными суммами.
+Checksum-bound package build, production manifest/outcome, SSH approval,
+read-only Spain preflight и любые live actions остаются неразрешёнными. AWG3
+не является production issuance; Spain AWG2 d1–d7 остаются принятым baseline.
+USA остаётся rollback contour: shutdown, cleanup или reuse требуют отдельного
+USA retirement readiness gate с полной evidence и последующего exact live
+approval; `live_action_authorized=false`.
 
-USA остаётся контуром отката. Даже будущая успешная предварительная проверка
-только для чтения не разрешает отключение, очистку или перепрофилирование USA
-и сохраняет
-`live_action_authorized=false`.
+Automation `amn2-upstream-orchestrator` остаётся `ACTIVE`; weekly run должен
+читать этот верхний authoritative block, Phase 13 receipts и backlog. Weekly
+prompt и schedule сохранены; legacy three-step upstream chain остаётся
+`PAUSED`.
 
 # Предыдущий authoritative override 2026-08-01: Phase 13 Tasks 1–10 local-only implementation reviewed
 
