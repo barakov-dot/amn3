@@ -1,4 +1,7 @@
 import copy
+from datetime import datetime, timezone
+import hashlib
+import importlib
 import json
 import re
 from pathlib import Path
@@ -216,3 +219,114 @@ def test_manifest_requires_every_bound_artifact_sha256() -> None:
     invalid_hash["artifacts"]["merged_target_db"]["sha256"] = "A" * 64
     with pytest.raises(ContractError, match="pattern"):
         validate(invalid_hash, load_schema("manifest.schema.json"))
+
+
+def contract_module():
+    try:
+        return importlib.import_module("scripts.phase13_bot_web_migration_contract")
+    except ModuleNotFoundError as error:
+        pytest.fail(f"Phase 13 bot/web contract module is missing: {error}")
+
+
+def valid_local_plan() -> dict[str, object]:
+    return {
+        "schema": "amn2.phase13.bot-web-migration-plan.v1",
+        "migration_id": "bot-web-migration-001",
+        "source_role": "usa-source",
+        "target_role": "spain-target",
+        "source_audit_sha256": "3" * 64,
+        "target_audit_sha256": "4" * 64,
+        "preserve_target_app_secrets": True,
+        "api_tokens_reissue_required": 12,
+        "usable_secret_records_imported": 0,
+        "live_mutation_authorized": False,
+    }
+
+
+def write_bound_artifacts(root: Path) -> None:
+    root.mkdir()
+    for name, content in (
+        ("source-full-backup.enc", b"source-backup"),
+        ("target-before-backup.enc", b"target-backup"),
+        ("merged-target.sqlite3.enc", b"merged-db"),
+        ("merge-preview.json", b"{}\n"),
+        ("rollback-plan.json", b"{}\n"),
+    ):
+        (root / name).write_bytes(content)
+
+
+def build_test_manifest(contract, root: Path) -> dict[str, object]:
+    return contract.build_manifest(
+        root,
+        valid_local_plan(),
+        outcome_id="bot-web-migration-001",
+        expires_at=datetime(2099, 8, 3, tzinfo=timezone.utc),
+    )
+
+
+def test_canonical_manifest_binds_exact_regular_artifact_bytes(tmp_path: Path) -> None:
+    contract = contract_module()
+    root = tmp_path / "artifact-root"
+    write_bound_artifacts(root)
+
+    assert contract.canonical_json_bytes({"b": 2, "a": 1}) == b'{"a":1,"b":2}\n'
+    manifest = build_test_manifest(contract, root)
+    assert manifest["artifacts"]["merged_target_db"] == {
+        "path": "merged-target.sqlite3.enc",
+        "size": len(b"merged-db"),
+        "sha256": hashlib.sha256(b"merged-db").hexdigest(),
+    }
+    assert contract.verify_local(
+        root, manifest, now=datetime(2099, 8, 2, tzinfo=timezone.utc)
+    ) == manifest
+
+    (root / "merged-target.sqlite3.enc").write_bytes(b"changedxx")
+    with pytest.raises(contract.ContractError, match="checksum"):
+        contract.verify_local(root, manifest, now=datetime(2099, 8, 2, tzinfo=timezone.utc))
+
+
+def test_verify_local_rejects_path_traversal_before_artifact_read(tmp_path: Path) -> None:
+    contract = contract_module()
+    root = tmp_path / "artifact-root"
+    write_bound_artifacts(root)
+    manifest = build_test_manifest(contract, root)
+    manifest["artifacts"]["source_full_backup"]["path"] = "../outside"
+
+    with pytest.raises(contract.ContractError, match="artifact path"):
+        contract.verify_local(root, manifest, now=datetime(2099, 8, 2, tzinfo=timezone.utc))
+
+
+def test_verify_local_rejects_symlink_artifact(tmp_path: Path) -> None:
+    contract = contract_module()
+    root = tmp_path / "artifact-root"
+    write_bound_artifacts(root)
+    manifest = build_test_manifest(contract, root)
+    original = root / "source-full-backup.enc"
+    target = root / "source-full-backup-target.enc"
+    target.write_bytes(original.read_bytes())
+    original.unlink()
+    try:
+        original.symlink_to(target.name)
+    except OSError:
+        pytest.skip("symlink creation unavailable")
+
+    with pytest.raises(contract.ContractError, match="symlink"):
+        contract.verify_local(root, manifest, now=datetime(2099, 8, 2, tzinfo=timezone.utc))
+
+
+def test_verify_local_rejects_expired_manifest_before_artifact_read(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    contract = contract_module()
+    root = tmp_path / "artifact-root"
+    write_bound_artifacts(root)
+    manifest = build_test_manifest(contract, root)
+    manifest["expires_at"] = "2020-01-01T00:00:00Z"
+    monkeypatch.setattr(
+        contract,
+        "sha256_file",
+        lambda _path: pytest.fail("expired manifest read an artifact"),
+    )
+
+    with pytest.raises(contract.ContractError, match="expired"):
+        contract.verify_local(root, manifest, now=datetime(2099, 8, 2, tzinfo=timezone.utc))
