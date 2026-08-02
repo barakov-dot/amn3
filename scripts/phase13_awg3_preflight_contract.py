@@ -24,6 +24,7 @@ MANIFEST_SCHEMA = "amn2.phase13.awg3-readonly-preflight-manifest.v1"
 SUCCESS_SCHEMA = "amn2.phase13.awg3-readonly-preflight.v1"
 FAILURE_SCHEMA_V1 = "amn2.phase13.awg3-readonly-preflight-failure.v1"
 FAILURE_SCHEMA_V2 = "amn2.phase13.awg3-readonly-preflight-failure.v2"
+FAILURE_SCHEMA_V3 = "amn2.phase13.awg3-readonly-preflight-failure.v3"
 FAILURE_SCHEMA = FAILURE_SCHEMA_V1
 SOURCE_BASE = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
 SOURCE_HEAD = "ff115b63ca1329640ca13ae0a502d155f99b456b"
@@ -121,6 +122,7 @@ FAILURE_KEYS_V1 = {
 }
 
 FAILURE_KEYS_V2 = FAILURE_KEYS_V1 | {"transport_subreason"}
+FAILURE_KEYS_V3 = FAILURE_KEYS_V1 | {"transport_subreason"}
 FAILURE_KEYS = FAILURE_KEYS_V1
 
 SAFETY_KEYS = {
@@ -164,10 +166,20 @@ FAILURE_REASONS = {
     "secret_pattern_detected",
 }
 
-TRANSPORT_SUBREASONS = {
+TRANSPORT_SUBREASONS_V2 = {
     "timeout",
     "output_oversized",
     "ssh_exit_unclassified",
+    "local_process_failure",
+    "transport_internal_failure",
+}
+
+TRANSPORT_SUBREASONS_V3 = {
+    "ssh_client_failure",
+    "remote_command_unavailable",
+    "remote_exit_unclassified",
+    "timeout",
+    "output_oversized",
     "local_process_failure",
     "transport_internal_failure",
 }
@@ -416,6 +428,9 @@ def validate_failure_evidence(
     elif schema == FAILURE_SCHEMA_V2:
         evidence = _require_exact_object(value, FAILURE_KEYS_V2, "failure evidence")
         failure_schema = FAILURE_SCHEMA_V2
+    elif schema == FAILURE_SCHEMA_V3:
+        evidence = _require_exact_object(value, FAILURE_KEYS_V3, "failure evidence")
+        failure_schema = FAILURE_SCHEMA_V3
     else:
         raise ContractError("failure evidence schema")
     manifest_value = _require_exact_object(manifest, MANIFEST_KEYS, "manifest")
@@ -424,12 +439,17 @@ def validate_failure_evidence(
         raise ContractError("failure evidence stage")
     if evidence["reason_code"] not in FAILURE_REASONS:
         raise ContractError("failure evidence reason")
-    if failure_schema == FAILURE_SCHEMA_V2:
+    if failure_schema in {FAILURE_SCHEMA_V2, FAILURE_SCHEMA_V3}:
         subreason = evidence["transport_subreason"]
         if evidence["stage"] == "transport":
             if evidence["reason_code"] != "observation_ambiguous":
                 raise ContractError("failure evidence transport reason")
-            if subreason not in TRANSPORT_SUBREASONS:
+            allowed_subreasons = (
+                TRANSPORT_SUBREASONS_V2
+                if failure_schema == FAILURE_SCHEMA_V2
+                else TRANSPORT_SUBREASONS_V3
+            )
+            if subreason not in allowed_subreasons:
                 raise ContractError("failure evidence transport subreason")
         elif subreason != NOT_APPLICABLE_SUBREASON:
             raise ContractError("failure evidence subreason must be not applicable")

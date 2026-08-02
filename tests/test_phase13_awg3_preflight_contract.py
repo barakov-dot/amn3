@@ -18,6 +18,7 @@ MANIFEST_SCHEMA = ARTIFACT_ROOT / "manifest.schema.json"
 EVIDENCE_SCHEMA = ARTIFACT_ROOT / "evidence.schema.json"
 FAILURE_SCHEMA_V1 = ARTIFACT_ROOT / "failure-evidence.schema.json"
 FAILURE_SCHEMA_V2 = ARTIFACT_ROOT / "failure-evidence-v2.schema.json"
+FAILURE_SCHEMA_V3 = ARTIFACT_ROOT / "failure-evidence-v3.schema.json"
 CONTRACT_SCRIPT = ROOT / "scripts" / "phase13_awg3_preflight_contract.py"
 EXIT_CODE_FIXTURE = ROOT / "tests" / "fixtures" / "phase13-awg3-preflight" / "exit-code-matrix.json"
 
@@ -499,3 +500,58 @@ def test_failure_evidence_v2_requires_stage_scoped_secret_safe_transport_subreas
     non_transport["transport_subreason"] = "not_applicable"
     non_transport["reason_code"] = "schema_validation_failed"
     assert contract.validate_failure_evidence(non_transport, manifest=manifest) == non_transport
+
+
+def test_failure_evidence_v3_accepts_only_new_secret_safe_transport_subreasons(
+    tmp_path: Path,
+):
+    contract = contract_module()
+    _, manifest = build_test_manifest(contract, tmp_path)
+    safety = valid_success_evidence(contract, manifest)["safety_receipt"]
+    failure = {
+        "schema": "amn2.phase13.awg3-readonly-preflight-failure.v3",
+        "outcome_id": manifest["outcome_id"],
+        "checked_at": "2026-08-02T12:00:00Z",
+        "source_head": manifest["source_head"],
+        "manifest_sha256": contract.sha256_bytes(contract.canonical_json_bytes(manifest)),
+        "stage": "transport",
+        "reason_code": "observation_ambiguous",
+        "transport_subreason": "ssh_client_failure",
+        "decision": "stop",
+        "safety_receipt": safety,
+    }
+
+    assert FAILURE_SCHEMA_V3.is_file()
+    for subreason in (
+        "ssh_client_failure",
+        "remote_command_unavailable",
+        "remote_exit_unclassified",
+        "timeout",
+        "output_oversized",
+        "local_process_failure",
+        "transport_internal_failure",
+    ):
+        candidate = copy.deepcopy(failure)
+        candidate["transport_subreason"] = subreason
+        assert contract.validate_failure_evidence(candidate, manifest=manifest) == candidate
+
+    for invalid_subreason in (
+        "ssh_exit_unclassified",
+        "not_applicable",
+        "ssh: private data must not persist",
+    ):
+        invalid = copy.deepcopy(failure)
+        invalid["transport_subreason"] = invalid_subreason
+        with pytest.raises(contract.ContractError, match="transport subreason"):
+            contract.validate_failure_evidence(invalid, manifest=manifest)
+
+    non_transport = copy.deepcopy(failure)
+    non_transport["stage"] = "schema_validation"
+    non_transport["reason_code"] = "schema_validation_failed"
+    non_transport["transport_subreason"] = "not_applicable"
+    assert contract.validate_failure_evidence(non_transport, manifest=manifest) == non_transport
+
+    invalid_non_transport = copy.deepcopy(non_transport)
+    invalid_non_transport["transport_subreason"] = "ssh_client_failure"
+    with pytest.raises(contract.ContractError, match="not applicable"):
+        contract.validate_failure_evidence(invalid_non_transport, manifest=manifest)
