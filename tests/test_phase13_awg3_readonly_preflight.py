@@ -767,6 +767,93 @@ $document = Get-Content -Raw -LiteralPath $claim | ConvertFrom-Json
     )
 
 
+@pytest.mark.parametrize(
+    ("claim_subreason", "expected_exit", "expected_stage", "expected_reason"),
+    [
+        ("existing_valid_claim", 66, "outcome_claim", "outcome_replay"),
+        (
+            "private_root_preparation_failed",
+            75,
+            "private_root_validation",
+            "observation_ambiguous",
+        ),
+        ("private_root_unsafe", 75, "private_root_validation", "observation_ambiguous"),
+        ("outcome_directory_partial", 75, "outcome_claim", "observation_ambiguous"),
+        (
+            "outcome_directory_create_failed",
+            75,
+            "outcome_claim",
+            "observation_ambiguous",
+        ),
+        (
+            "outcome_directory_protection_failed",
+            75,
+            "outcome_claim",
+            "observation_ambiguous",
+        ),
+        ("claim_write_failed", 75, "outcome_claim", "observation_ambiguous"),
+        ("claim_validation_failed", 75, "outcome_claim", "observation_ambiguous"),
+        ("claim_internal_failure", 75, "outcome_claim", "observation_ambiguous"),
+    ],
+)
+def test_pure_claim_failure_mapping_has_closed_secret_safe_outcomes(
+    tmp_path, claim_subreason, expected_exit, expected_stage, expected_reason
+):
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$mapped = Resolve-Phase13ClaimFailure -ClaimSubreason '{claim_subreason}'
+[Console]::Out.Write("$($mapped.ExitCode)|$($mapped.Stage)|$($mapped.ReasonCode)|$($mapped.ClaimSubreason)")
+""",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == (
+        f"{expected_exit}|{expected_stage}|{expected_reason}|{claim_subreason}"
+    )
+
+
+def test_pure_claim_failure_mapping_rejects_unknown_subreason(tmp_path):
+    result = run_powershell_harness(
+        tmp_path,
+        """
+$rejected = $false
+try { Resolve-Phase13ClaimFailure -ClaimSubreason 'unknown_claim_subreason' | Out-Null } catch { $rejected = $true }
+[Console]::Out.Write($rejected.ToString().ToLowerInvariant())
+""",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true"
+
+
+def test_pure_expired_manifest_mapping_is_exit_64_before_private_state_or_network(tmp_path):
+    result = run_powershell_harness(
+        tmp_path,
+        """
+$mapped = Resolve-Phase13ExpiredManifestFailure
+[Console]::Out.Write("$($mapped.ExitCode)|$($mapped.Stage)|$($mapped.ReasonCode)|$($mapped.ClaimSubreason)")
+""",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "64|argument_validation|schema_validation_failed|not_applicable"
+
+
+def test_exit_code_matrix_reserves_66_for_existing_valid_outcome_claim_only():
+    matrix = json.loads(
+        (
+            ROOT
+            / "tests"
+            / "fixtures"
+            / "phase13-awg3-preflight"
+            / "exit-code-matrix.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    assert matrix["66"] == "existing_valid_outcome_claim_only"
+
+
 def test_runner_creates_claim_before_the_one_ssh_transport():
     source = RUNNER.read_text(encoding="utf-8")
     claim_call = source.index("New-Phase13OutcomeClaim", source.index("$OutcomeRoot"))

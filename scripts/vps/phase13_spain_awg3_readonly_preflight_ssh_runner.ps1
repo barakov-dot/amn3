@@ -162,6 +162,95 @@ function New-ExactApprovalPhrase {
     return "$RussianPrefix READ-ONLY SPAIN PREFLIGHT OUTCOME_$OutcomeId MANIFEST_SHA_$ManifestSha256 RUNNER_SHA_$RunnerSha256 COLLECTOR_SHA_$CollectorSha256 SCHEMA_SHA_$SchemaSha256 FOUNDATION_SHA_$FoundationSha256 NO_PACKAGE_BUILD_NO_DEPLOY_NO_MUTATION"
 }
 
+function Resolve-Phase13ClaimFailure {
+    param([Parameter(Mandatory = $true)][string]$ClaimSubreason)
+
+    switch -CaseSensitive ($ClaimSubreason) {
+        "existing_valid_claim" {
+            return [pscustomobject][ordered]@{
+                ExitCode = 66
+                Stage = "outcome_claim"
+                ReasonCode = "outcome_replay"
+                ClaimSubreason = $ClaimSubreason
+            }
+        }
+        "private_root_preparation_failed" {
+            return [pscustomobject][ordered]@{
+                ExitCode = 75
+                Stage = "private_root_validation"
+                ReasonCode = "observation_ambiguous"
+                ClaimSubreason = $ClaimSubreason
+            }
+        }
+        "private_root_unsafe" {
+            return [pscustomobject][ordered]@{
+                ExitCode = 75
+                Stage = "private_root_validation"
+                ReasonCode = "observation_ambiguous"
+                ClaimSubreason = $ClaimSubreason
+            }
+        }
+        "outcome_directory_partial" {
+            return [pscustomobject][ordered]@{
+                ExitCode = 75
+                Stage = "outcome_claim"
+                ReasonCode = "observation_ambiguous"
+                ClaimSubreason = $ClaimSubreason
+            }
+        }
+        "outcome_directory_create_failed" {
+            return [pscustomobject][ordered]@{
+                ExitCode = 75
+                Stage = "outcome_claim"
+                ReasonCode = "observation_ambiguous"
+                ClaimSubreason = $ClaimSubreason
+            }
+        }
+        "outcome_directory_protection_failed" {
+            return [pscustomobject][ordered]@{
+                ExitCode = 75
+                Stage = "outcome_claim"
+                ReasonCode = "observation_ambiguous"
+                ClaimSubreason = $ClaimSubreason
+            }
+        }
+        "claim_write_failed" {
+            return [pscustomobject][ordered]@{
+                ExitCode = 75
+                Stage = "outcome_claim"
+                ReasonCode = "observation_ambiguous"
+                ClaimSubreason = $ClaimSubreason
+            }
+        }
+        "claim_validation_failed" {
+            return [pscustomobject][ordered]@{
+                ExitCode = 75
+                Stage = "outcome_claim"
+                ReasonCode = "observation_ambiguous"
+                ClaimSubreason = $ClaimSubreason
+            }
+        }
+        "claim_internal_failure" {
+            return [pscustomobject][ordered]@{
+                ExitCode = 75
+                Stage = "outcome_claim"
+                ReasonCode = "observation_ambiguous"
+                ClaimSubreason = $ClaimSubreason
+            }
+        }
+        default { throw "Claim subreason is not allowlisted." }
+    }
+}
+
+function Resolve-Phase13ExpiredManifestFailure {
+    return [pscustomobject][ordered]@{
+        ExitCode = 64
+        Stage = "argument_validation"
+        ReasonCode = "schema_validation_failed"
+        ClaimSubreason = "not_applicable"
+    }
+}
+
 function Write-BytesCreateNew {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
