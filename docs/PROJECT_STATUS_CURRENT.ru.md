@@ -1,26 +1,30 @@
-# Текущий обязательный приоритет 2026-08-02: Transport Subreason Tasks 1–4 локально проверены, live gate отсутствует
+# Текущий обязательный приоритет 2026-08-02: Outcome-Claim Failure-Mapping Tasks 1–3 локально проверены, live gate отсутствует
 
-Локальная fail-closed цепочка Phase 13 Transport Subreason проверена на root
-head `fcea09f9f2e2bf89770e5c8bd6e3cfecc2fabb07`. Она включает failure evidence
-V2 contract, pure transport mapping, local process classification и strict
-sanitized writer/call sites. Secret-free receipt:
-`research/amn2/phase13-transport-subreason-tasks-1-4-local-verification-receipt-2026-08-02.md`.
+Локальная fail-closed цепочка Phase 13 Outcome-Claim Failure-Mapping проверена
+на root head `bd477232e1a62e278f3a876ceda400839c46448c`. Она включает pure
+claim mapping, typed claim boundaries и интеграцию `Invoke-RunnerMain` с
+secret-safe terminal line. Secret-free receipt:
+`research/amn2/phase13-outcome-claim-failure-mapping-tasks-1-3-local-verification-receipt-2026-08-02.md`.
 
-Локальные результаты: Phase 13 focused scope `102 passed`; утверждённый Phase
+Локальные результаты: Phase 13 focused scope `128 passed`; утверждённый Phase
 12 Spain regression scope `233 passed, 1 skipped`; Bash/PowerShell/Python
-syntax, `verify-local` для `7` contract artifacts и `git diff --check` passed.
-V2 требует обязательный `transport_subreason`: transport принимает только
-allowlist, а не-transport stages — `not_applicable`. Исторический V1 contract
-сохранён; consumed `spain-awg3-20260802-002` остаётся failure-only и не может
-быть повторно использован. Manual scoped security review завершён без
-reportable findings; новый broad security scan и security report не создавались.
+syntax и `git diff --check` passed. Expired manifest завершается с `exit 64`
+до private state и network; `exit 66 / outcome_replay` допускается только для
+existing valid canonical claim; typed ACL/filesystem/partial/invalid/
+claim-write/internal failures завершаются `exit 75 / observation_ambiguous`.
+Terminal line содержит только allowlisted `stage`, `reason` и
+`claim_subreason`. Scoped secret/mutation и manual security review завершены
+без reportable findings; новый broad security scan и security report не
+создавались.
 
-Текущие materialized manifest/outcome stale относительно проверенных bytes и
-не могут применяться. Новый checksum-bound manifest/outcome, package build,
-SSH approval, Spain preflight и любые live actions остаются неразрешёнными.
-AWG3 не является production issuance; Spain AWG2 d1–d7 остаются принятым
-baseline. USA остаётся rollback contour: shutdown, cleanup или reuse требуют
-отдельного USA retirement readiness gate и exact live approval;
+Исторические failure evidence V1/V2, manifest artifact count и consumed
+`spain-awg3-20260802-003` сохранены. Текущие materialized manifest/outcome
+stale относительно проверенных bytes и не могут применяться. Live gate
+отсутствует. Новый checksum-bound manifest/outcome, package build, SSH
+approval, Spain preflight и любые live actions остаются неразрешёнными. AWG3
+остаётся candidate, а не production issuance; Spain AWG2 d1–d7 остаются
+принятым baseline. USA остаётся rollback contour: shutdown, cleanup или reuse
+требуют отдельного USA retirement readiness gate и exact live approval;
 `live_action_authorized=false`.
 
 Automation `amn2-upstream-orchestrator` остаётся `ACTIVE`; weekly run должен
