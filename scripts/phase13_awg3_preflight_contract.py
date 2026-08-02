@@ -8,6 +8,8 @@ import os
 from pathlib import Path
 import re
 import stat
+import sys
+import tempfile
 
 
 class ContractError(ValueError):
@@ -24,6 +26,7 @@ FAILURE_SCHEMA = "amn2.phase13.awg3-readonly-preflight-failure.v1"
 SOURCE_BASE = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
 SOURCE_HEAD = "ff115b63ca1329640ca13ae0a502d155f99b456b"
 SPAIN_OVERLAY = "f1bf099ddb47da26a4080714376babaf5b0de92c"
+PHASE12_FOUNDATION_SHA256 = "0e5a5926821d88ae4a2515f9e95cd7c3f69db52100c1a1ec74e99fb794222281"
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 OUTCOME_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{2,63}$")
 
@@ -155,6 +158,27 @@ FAILURE_REASONS = {
     "schema_validation_failed",
     "secret_pattern_detected",
 }
+
+LOCAL_ARTIFACT_NAMES = (
+    "evidence.schema.json",
+    "failure-evidence.schema.json",
+    "manifest.schema.json",
+    "phase12-equality-foundation.json",
+    "phase13_spain_awg3_readonly_preflight_remote.sh",
+    "phase13_spain_awg3_readonly_preflight_ssh_runner.ps1",
+)
+
+LOCAL_ARTIFACT_RELATIVE_PATHS = (
+    "packaging/phase13-awg3-preflight/evidence.schema.json",
+    "packaging/phase13-awg3-preflight/failure-evidence.schema.json",
+    "packaging/phase13-awg3-preflight/manifest.schema.json",
+    "packaging/phase13-awg3-preflight/phase12-equality-foundation.json",
+    "scripts/vps/phase13_spain_awg3_readonly_preflight_remote.sh",
+    "scripts/vps/phase13_spain_awg3_readonly_preflight_ssh_runner.ps1",
+)
+
+TEST_MANIFEST_CREATED_AT = datetime(2099, 8, 1, tzinfo=timezone.utc)
+TEST_MANIFEST_EXPIRES_AT = datetime(2099, 8, 2, tzinfo=timezone.utc)
 
 
 def canonical_json_bytes(value: object) -> bytes:
@@ -379,6 +403,61 @@ def validate_failure_evidence(
     return dict(evidence)
 
 
+def verify_local(*, repo_root: Path = ROOT) -> dict[str, object]:
+    if not isinstance(repo_root, Path) or repo_root.is_symlink() or not repo_root.is_dir():
+        raise ContractError("repository root")
+    artifact_payloads = tuple(
+        _read_regular_file(repo_root / relative_path, label="local artifact")
+        for relative_path in LOCAL_ARTIFACT_RELATIVE_PATHS
+    )
+    if len(artifact_payloads) != len(LOCAL_ARTIFACT_NAMES):
+        raise ContractError("local artifact inventory")
+    if sha256_bytes(artifact_payloads[3]) != PHASE12_FOUNDATION_SHA256:
+        raise ContractError("foundation checksum")
+    try:
+        foundation = json.loads(artifact_payloads[3].decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ContractError("phase12 foundation") from error
+    if foundation.get("schema") != "amn2.phase13.phase12-equality-foundation.v1":
+        raise ContractError("phase12 foundation")
+    return {
+        "artifact_count": len(LOCAL_ARTIFACT_NAMES),
+        "candidate_sha256": sha256_bytes(canonical_json_bytes(CANDIDATE)),
+        "live_action_authorized": False,
+        "network_attempted": False,
+        "package_build_performed": False,
+        "result": "passed",
+    }
+
+
+def prepare_test_manifest(
+    *, artifact_root: Path, output_path: Path, outcome_id: str
+) -> dict[str, object]:
+    root = _require_temp_directory(artifact_root, "artifact root")
+    output = _require_temp_output_path(output_path)
+    artifact_paths = tuple(root / name for name in LOCAL_ARTIFACT_NAMES)
+    manifest = build_manifest(
+        outcome_id=outcome_id,
+        created_at=TEST_MANIFEST_CREATED_AT,
+        expires_at=TEST_MANIFEST_EXPIRES_AT,
+        artifact_paths=artifact_paths,
+    )
+    validate_manifest(manifest, artifact_root=root)
+    payload = canonical_json_bytes(manifest)
+    try:
+        with output.open("xb") as stream:
+            stream.write(payload)
+    except OSError as error:
+        raise ContractError("test manifest write") from error
+    return {
+        "artifact_count": len(LOCAL_ARTIFACT_NAMES),
+        "manifest_sha256": sha256_bytes(payload),
+        "network_attempted": False,
+        "package_build_performed": False,
+        "result": "prepared_test_manifest",
+    }
+
+
 def _read_regular_file(path: Path, *, label: str) -> bytes:
     if not isinstance(path, Path) or path.is_symlink() or not path.is_file():
         raise ContractError(f"{label} must be a regular non-symlink file")
@@ -520,3 +599,55 @@ def _validate_safety_receipt(value: object) -> None:
     receipt = _require_exact_object(value, SAFETY_KEYS, "safety receipt")
     if any(receipt[key] is not False for key in SAFETY_KEYS):
         raise ContractError("safety receipt")
+
+
+def _require_temp_directory(value: Path, label: str) -> Path:
+    if not isinstance(value, Path) or value.is_symlink() or not value.is_dir():
+        raise ContractError(label)
+    resolved = value.resolve(strict=True)
+    temporary_root = Path(tempfile.gettempdir()).resolve(strict=True)
+    try:
+        resolved.relative_to(temporary_root)
+    except ValueError as error:
+        raise ContractError(label) from error
+    return resolved
+
+
+def _require_temp_output_path(value: Path) -> Path:
+    if not isinstance(value, Path) or value.suffix != ".json":
+        raise ContractError("test manifest output")
+    parent = value.parent
+    if parent.is_symlink() or not parent.is_dir():
+        raise ContractError("test manifest output")
+    resolved = value.resolve(strict=False)
+    temporary_root = Path(tempfile.gettempdir()).resolve(strict=True)
+    try:
+        resolved.relative_to(temporary_root)
+    except ValueError as error:
+        raise ContractError("test manifest output") from error
+    return resolved
+
+
+def _main(arguments: list[str]) -> int:
+    try:
+        if arguments == ["verify-local"]:
+            sys.stdout.buffer.write(canonical_json_bytes(verify_local()))
+            return 0
+        if len(arguments) == 7 and arguments[0] == "prepare-test-manifest":
+            option_values = dict(zip(arguments[1::2], arguments[2::2], strict=True))
+            if set(option_values) != {"--artifact-root", "--out", "--outcome-id"}:
+                raise ContractError("invocation")
+            report = prepare_test_manifest(
+                artifact_root=Path(option_values["--artifact-root"]),
+                output_path=Path(option_values["--out"]),
+                outcome_id=option_values["--outcome-id"],
+            )
+            sys.stdout.buffer.write(canonical_json_bytes(report))
+            return 0
+    except (ContractError, OSError, ValueError):
+        return 64
+    return 64
+
+
+if __name__ == "__main__":
+    raise SystemExit(_main(sys.argv[1:]))

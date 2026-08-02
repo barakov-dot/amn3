@@ -4,6 +4,10 @@ import hashlib
 import importlib
 import json
 from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
 
 import pytest
 
@@ -13,6 +17,8 @@ FOUNDATION_PATH = ARTIFACT_ROOT / "phase12-equality-foundation.json"
 MANIFEST_SCHEMA = ARTIFACT_ROOT / "manifest.schema.json"
 EVIDENCE_SCHEMA = ARTIFACT_ROOT / "evidence.schema.json"
 FAILURE_SCHEMA = ARTIFACT_ROOT / "failure-evidence.schema.json"
+CONTRACT_SCRIPT = ROOT / "scripts" / "phase13_awg3_preflight_contract.py"
+EXIT_CODE_FIXTURE = ROOT / "tests" / "fixtures" / "phase13-awg3-preflight" / "exit-code-matrix.json"
 
 
 def load_json(path: Path) -> dict[str, object]:
@@ -24,6 +30,45 @@ def contract_module():
         return importlib.import_module("scripts.phase13_awg3_preflight_contract")
     except ModuleNotFoundError as error:
         pytest.fail(f"Phase 13 contract module is missing: {error}")
+
+
+def run_contract_cli(*arguments: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(CONTRACT_SCRIPT), *arguments],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="strict",
+        timeout=20,
+    )
+
+
+def copy_local_bundle(destination: Path) -> Path:
+    destination.mkdir(parents=True)
+    for artifact in ARTIFACT_ROOT.iterdir():
+        if artifact.is_file():
+            shutil.copy2(artifact, destination / artifact.name)
+    for name in (
+        "phase13_spain_awg3_readonly_preflight_remote.sh",
+        "phase13_spain_awg3_readonly_preflight_ssh_runner.ps1",
+    ):
+        shutil.copy2(ROOT / "scripts" / "vps" / name, destination / name)
+    return destination
+
+
+def copy_local_repository(destination: Path) -> Path:
+    package = destination / "packaging" / "phase13-awg3-preflight"
+    scripts = destination / "scripts" / "vps"
+    copy_local_bundle(package)
+    scripts.mkdir(parents=True)
+    for name in (
+        "phase13_spain_awg3_readonly_preflight_remote.sh",
+        "phase13_spain_awg3_readonly_preflight_ssh_runner.ps1",
+    ):
+        shutil.copy2(ROOT / "scripts" / "vps" / name, scripts / name)
+    return destination
 
 
 def assert_every_object_is_closed(value: object) -> None:
@@ -64,6 +109,70 @@ def test_phase12_foundation_contains_exact_accepted_safe_facts():
             "bot_enabled": False,
         },
     }
+
+
+def test_verify_local_binds_six_existing_artifacts_without_network_or_build():
+    result = run_contract_cli("verify-local")
+
+    assert result.returncode == 0, result.stderr
+    assert result.stderr == ""
+    report = json.loads(result.stdout)
+    assert report == {
+        "artifact_count": 6,
+        "candidate_sha256": report["candidate_sha256"],
+        "live_action_authorized": False,
+        "network_attempted": False,
+        "package_build_performed": False,
+        "result": "passed",
+    }
+    assert re.fullmatch(r"[0-9a-f]{64}", report["candidate_sha256"])
+    assert result.stdout.encode("utf-8") == contract_module().canonical_json_bytes(report)
+
+
+def test_verify_local_rejects_changed_immutable_phase12_foundation(tmp_path: Path):
+    contract = contract_module()
+    repo_root = copy_local_repository(tmp_path / "repo")
+    foundation = repo_root / "packaging" / "phase13-awg3-preflight" / "phase12-equality-foundation.json"
+    foundation.write_bytes(foundation.read_bytes() + b"\n")
+
+    with pytest.raises(contract.ContractError, match="foundation checksum"):
+        contract.verify_local(repo_root=repo_root)
+
+
+def test_prepare_test_manifest_is_deterministic_and_refuses_non_temp_output(tmp_path: Path):
+    artifact_root = copy_local_bundle(tmp_path / "artifacts")
+    first = tmp_path / "first.json"
+    second = tmp_path / "second.json"
+    base_arguments = (
+        "prepare-test-manifest",
+        "--artifact-root",
+        str(artifact_root),
+        "--outcome-id",
+        "test-outcome-prepare-001",
+    )
+
+    first_result = run_contract_cli(*base_arguments, "--out", str(first))
+    second_result = run_contract_cli(*base_arguments, "--out", str(second))
+
+    assert first_result.returncode == 0, first_result.stderr
+    assert second_result.returncode == 0, second_result.stderr
+    assert first.read_bytes() == second.read_bytes()
+    manifest = contract_module().load_json_object_strict(first.read_bytes(), label="manifest")
+    assert contract_module().validate_manifest(manifest, artifact_root=artifact_root) == manifest
+
+    rejected = run_contract_cli(*base_arguments, "--out", str(ROOT / "forbidden-manifest.json"))
+    assert rejected.returncode == 64
+    assert not (ROOT / "forbidden-manifest.json").exists()
+
+
+def test_local_cli_rejects_unknown_modes_and_exit_matrix_is_complete():
+    result = run_contract_cli("production-outcome")
+    matrix = load_json(EXIT_CODE_FIXTURE)
+
+    assert result.returncode == 64
+    assert set(matrix) == {str(code) for code in range(64, 76)}
+    assert matrix["64"] == "invalid_invocation_or_manifest"
+    assert matrix["75"] == "protected_local_evidence_write_or_acl_failure"
 
 
 def test_all_phase13_schemas_are_recursively_closed_objects():
@@ -123,8 +232,8 @@ def build_test_manifest(contract, tmp_path: Path) -> tuple[Path, dict[str, objec
     collector.write_bytes(b"#!/bin/sh\nexit 0\n")
     manifest = contract.build_manifest(
         outcome_id="test-outcome-001",
-        created_at=datetime(2026, 8, 1, tzinfo=timezone.utc),
-        expires_at=datetime(2026, 8, 2, tzinfo=timezone.utc),
+        created_at=datetime(2099, 8, 1, tzinfo=timezone.utc),
+        expires_at=datetime(2099, 8, 2, tzinfo=timezone.utc),
         artifact_paths=(collector,),
     )
     return collector, manifest
