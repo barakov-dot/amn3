@@ -19,3 +19,6 @@ ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
 ReadWritePaths=/var/lib/amn2-spain
+
+[Install]
+WantedBy=multi-user.target
