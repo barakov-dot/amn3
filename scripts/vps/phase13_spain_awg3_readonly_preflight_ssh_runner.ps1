@@ -302,6 +302,117 @@ function Protect-Phase13PrivateDirectory {
     Assert-PrivatePath -Path $Item.FullName -ExpectedOwnerSid $OwnerSid
 }
 
+function Throw-Phase13ClaimFailure {
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet(
+            "existing_valid_claim",
+            "private_root_preparation_failed",
+            "private_root_unsafe",
+            "outcome_directory_partial",
+            "outcome_directory_create_failed",
+            "outcome_directory_protection_failed",
+            "claim_write_failed",
+            "claim_validation_failed",
+            "claim_internal_failure"
+        )]
+        [string]$ClaimSubreason
+    )
+    $Exception = New-Object InvalidOperationException "Phase 13 outcome claim failed."
+    $Exception.Data["AMN2_PHASE13_CLAIM_SUBREASON"] = $ClaimSubreason
+    throw $Exception
+}
+
+function Get-Phase13ClaimFailureSubreason {
+    param([Parameter(Mandatory = $true)][Exception]$Exception)
+    $Allowed = @(
+        "existing_valid_claim",
+        "private_root_preparation_failed",
+        "private_root_unsafe",
+        "outcome_directory_partial",
+        "outcome_directory_create_failed",
+        "outcome_directory_protection_failed",
+        "claim_write_failed",
+        "claim_validation_failed",
+        "claim_internal_failure"
+    )
+    $Current = $Exception
+    for ($Index = 0; $Index -lt 4 -and $null -ne $Current; $Index++) {
+        if ($Current.Data.Contains("AMN2_PHASE13_CLAIM_SUBREASON")) {
+            $Candidate = [string]$Current.Data["AMN2_PHASE13_CLAIM_SUBREASON"]
+            if ($Candidate -cin $Allowed) {
+                return $Candidate
+            }
+        }
+        $Current = $Current.InnerException
+    }
+    return "claim_internal_failure"
+}
+
+function Get-Phase13ExistingOutcomeClaimSubreason {
+    param(
+        [Parameter(Mandatory = $true)][string]$OutcomeDirectory,
+        [Parameter(Mandatory = $true)][string]$OutcomeId,
+        [Parameter(Mandatory = $true)][string]$ManifestSha256,
+        [Parameter(Mandatory = $true)][string]$RunnerSha256,
+        [Parameter(Mandatory = $true)][string]$CollectorSha256,
+        [Parameter(Mandatory = $true)][string]$TargetRole
+    )
+    try {
+        $DirectoryItem = Get-Item -LiteralPath $OutcomeDirectory -Force -ErrorAction Stop
+        if (-not $DirectoryItem.PSIsContainer -or ($DirectoryItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            return "outcome_directory_partial"
+        }
+        $ClaimPath = Join-Path $DirectoryItem.FullName "outcome-claim.json"
+        if (-not (Test-Path -LiteralPath $ClaimPath -PathType Leaf)) {
+            return "outcome_directory_partial"
+        }
+        $ClaimItem = Get-Item -LiteralPath $ClaimPath -Force -ErrorAction Stop
+        if ($ClaimItem.PSIsContainer -or ($ClaimItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            return "claim_validation_failed"
+        }
+        $ClaimBytes = Read-StrictUtf8Bytes -Path $ClaimItem.FullName -MaximumBytes 4096
+        try {
+            if (@($ClaimBytes | Where-Object { $_ -eq 13 }).Count -ne 0 -or $ClaimBytes[$ClaimBytes.Length - 1] -ne 10) {
+                return "claim_validation_failed"
+            }
+            $StrictUtf8 = New-Object Text.UTF8Encoding($false, $true)
+            $ClaimText = $StrictUtf8.GetString($ClaimBytes)
+            if ($ClaimText.Substring(0, $ClaimText.Length - 1).Contains("`n")) {
+                return "claim_validation_failed"
+            }
+            $Claim = $ClaimText | ConvertFrom-Json -ErrorAction Stop
+            $ExpectedProperties = @(
+                "schema", "outcome_id", "manifest_sha256", "runner_sha256",
+                "collector_sha256", "target_role", "created_at"
+            )
+            $ActualProperties = @($Claim.PSObject.Properties.Name)
+            if ($ActualProperties.Count -ne $ExpectedProperties.Count) {
+                return "claim_validation_failed"
+            }
+            foreach ($Name in $ExpectedProperties) {
+                if ($ActualProperties -cnotcontains $Name) {
+                    return "claim_validation_failed"
+                }
+            }
+            if ([string]$Claim.schema -cne "amn2.phase13.awg3-readonly-preflight-claim.v1" -or
+                [string]$Claim.outcome_id -cne $OutcomeId -or
+                [string]$Claim.manifest_sha256 -cne $ManifestSha256 -or
+                [string]$Claim.runner_sha256 -cne $RunnerSha256 -or
+                [string]$Claim.collector_sha256 -cne $CollectorSha256 -or
+                [string]$Claim.target_role -cne $TargetRole -or
+                $ClaimText -cnotmatch '"created_at":"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z"') {
+                return "claim_validation_failed"
+            }
+            return "existing_valid_claim"
+        } finally {
+            [Array]::Clear($ClaimBytes, 0, $ClaimBytes.Length)
+        }
+    } catch {
+        return "claim_validation_failed"
+    }
+}
+
 function New-Phase13OutcomeClaim {
     param(
         [Parameter(Mandatory = $true)][string]$OutcomeRoot,
@@ -321,13 +432,39 @@ function New-Phase13OutcomeClaim {
     if ($TargetRole -cne "spain-primary") {
         throw "Outcome claim target role is invalid."
     }
-    Protect-Phase13PrivateDirectory -Path $OutcomeRoot -OwnerSid $OwnerSid
+    try {
+        if (Test-Path -LiteralPath $OutcomeRoot) {
+            $OutcomeRootItem = Get-Item -LiteralPath $OutcomeRoot -Force -ErrorAction Stop
+            if (-not $OutcomeRootItem.PSIsContainer -or ($OutcomeRootItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+                Throw-Phase13ClaimFailure -ClaimSubreason "private_root_unsafe"
+            }
+        }
+    } catch {
+        $Subreason = Get-Phase13ClaimFailureSubreason -Exception $_.Exception
+        if ($Subreason -ceq "private_root_unsafe") {
+            throw
+        }
+        Throw-Phase13ClaimFailure -ClaimSubreason "private_root_preparation_failed"
+    }
+    try {
+        Protect-Phase13PrivateDirectory -Path $OutcomeRoot -OwnerSid $OwnerSid
+    } catch {
+        Throw-Phase13ClaimFailure -ClaimSubreason "private_root_preparation_failed"
+    }
     $OutcomeDirectory = Join-Path $OutcomeRoot $OutcomeId
     if (Test-Path -LiteralPath $OutcomeDirectory) {
-        throw "Outcome claim already exists."
+        Throw-Phase13ClaimFailure -ClaimSubreason (Get-Phase13ExistingOutcomeClaimSubreason -OutcomeDirectory $OutcomeDirectory -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha256 -RunnerSha256 $RunnerSha256 -CollectorSha256 $CollectorSha256 -TargetRole $TargetRole)
     }
-    [IO.Directory]::CreateDirectory($OutcomeDirectory) | Out-Null
-    Protect-Phase13PrivateDirectory -Path $OutcomeDirectory -OwnerSid $OwnerSid
+    try {
+        [IO.Directory]::CreateDirectory($OutcomeDirectory) | Out-Null
+    } catch {
+        Throw-Phase13ClaimFailure -ClaimSubreason "outcome_directory_create_failed"
+    }
+    try {
+        Protect-Phase13PrivateDirectory -Path $OutcomeDirectory -OwnerSid $OwnerSid
+    } catch {
+        Throw-Phase13ClaimFailure -ClaimSubreason "outcome_directory_protection_failed"
+    }
     $Claim = [ordered]@{
         schema = "amn2.phase13.awg3-readonly-preflight-claim.v1"
         outcome_id = $OutcomeId
@@ -341,6 +478,12 @@ function New-Phase13OutcomeClaim {
     $ClaimBytes = $script:Utf8NoBom.GetBytes(($Claim | ConvertTo-Json -Compress) + "`n")
     try {
         Write-BytesCreateNew -Path $ClaimPath -Bytes $ClaimBytes
+    } catch {
+        $Subreason = Get-Phase13ExistingOutcomeClaimSubreason -OutcomeDirectory $OutcomeDirectory -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha256 -RunnerSha256 $RunnerSha256 -CollectorSha256 $CollectorSha256 -TargetRole $TargetRole
+        if ($Subreason -ceq "existing_valid_claim") {
+            Throw-Phase13ClaimFailure -ClaimSubreason $Subreason
+        }
+        Throw-Phase13ClaimFailure -ClaimSubreason "claim_write_failed"
     } finally {
         [Array]::Clear($ClaimBytes, 0, $ClaimBytes.Length)
     }

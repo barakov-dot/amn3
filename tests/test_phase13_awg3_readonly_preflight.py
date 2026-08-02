@@ -767,6 +767,100 @@ $document = Get-Content -Raw -LiteralPath $claim | ConvertFrom-Json
     )
 
 
+def test_existing_valid_canonical_claim_is_typed_as_replay_after_exact_binding_check(tmp_path):
+    outcome_root = tmp_path / "outcomes"
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$root = '{outcome_root}'
+$sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+New-Phase13OutcomeClaim -OutcomeRoot $root -OutcomeId 'test-outcome-claim-typed-001' -OwnerSid $sid -ManifestSha256 ('a' * 64) -RunnerSha256 ('b' * 64) -CollectorSha256 ('c' * 64) -TargetRole 'spain-primary' | Out-Null
+$subreason = ''
+try {{ New-Phase13OutcomeClaim -OutcomeRoot $root -OutcomeId 'test-outcome-claim-typed-001' -OwnerSid $sid -ManifestSha256 ('a' * 64) -RunnerSha256 ('b' * 64) -CollectorSha256 ('c' * 64) -TargetRole 'spain-primary' | Out-Null }} catch {{ $subreason = Get-Phase13ClaimFailureSubreason -Exception $_.Exception }}
+[Console]::Out.Write($subreason)
+""",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "existing_valid_claim"
+
+
+def test_partial_or_mismatched_existing_outcome_is_typed_non_replay(tmp_path):
+    partial_root = tmp_path / "partial-outcomes"
+    mismatched_root = tmp_path / "mismatched-outcomes"
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+$partialRoot = '{partial_root}'
+Protect-Phase13PrivateDirectory -Path $partialRoot -OwnerSid $sid
+$partialDirectory = Join-Path $partialRoot 'test-outcome-claim-partial-001'
+[IO.Directory]::CreateDirectory($partialDirectory) | Out-Null
+Protect-Phase13PrivateDirectory -Path $partialDirectory -OwnerSid $sid
+$partial = ''
+try {{ New-Phase13OutcomeClaim -OutcomeRoot $partialRoot -OutcomeId 'test-outcome-claim-partial-001' -OwnerSid $sid -ManifestSha256 ('a' * 64) -RunnerSha256 ('b' * 64) -CollectorSha256 ('c' * 64) -TargetRole 'spain-primary' | Out-Null }} catch {{ $partial = Get-Phase13ClaimFailureSubreason -Exception $_.Exception }}
+
+$mismatchedRoot = '{mismatched_root}'
+Protect-Phase13PrivateDirectory -Path $mismatchedRoot -OwnerSid $sid
+$mismatchedDirectory = Join-Path $mismatchedRoot 'test-outcome-claim-mismatched-001'
+[IO.Directory]::CreateDirectory($mismatchedDirectory) | Out-Null
+Protect-Phase13PrivateDirectory -Path $mismatchedDirectory -OwnerSid $sid
+$claimPath = Join-Path $mismatchedDirectory 'outcome-claim.json'
+$claim = '{{"schema":"amn2.phase13.awg3-readonly-preflight-claim.v1","outcome_id":"test-outcome-claim-mismatched-001","manifest_sha256":"{('d' * 64)}","runner_sha256":"{('b' * 64)}","collector_sha256":"{('c' * 64)}","target_role":"spain-primary","created_at":"2026-08-02T00:00:00Z"}}' + "`n"
+[IO.File]::WriteAllBytes($claimPath, (New-Object Text.UTF8Encoding($false)).GetBytes($claim))
+$mismatched = ''
+try {{ New-Phase13OutcomeClaim -OutcomeRoot $mismatchedRoot -OutcomeId 'test-outcome-claim-mismatched-001' -OwnerSid $sid -ManifestSha256 ('a' * 64) -RunnerSha256 ('b' * 64) -CollectorSha256 ('c' * 64) -TargetRole 'spain-primary' | Out-Null }} catch {{ $mismatched = Get-Phase13ClaimFailureSubreason -Exception $_.Exception }}
+[Console]::Out.Write("$partial|$mismatched")
+""",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "outcome_directory_partial|claim_validation_failed"
+
+
+def test_unsafe_root_and_acl_failure_are_typed_without_exception_output(tmp_path):
+    outcome_root = tmp_path / "acl-outcomes"
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+$unsafe = ''
+try {{ New-Phase13OutcomeClaim -OutcomeRoot '{RUNNER}' -OutcomeId 'test-outcome-claim-unsafe-001' -OwnerSid $sid -ManifestSha256 ('a' * 64) -RunnerSha256 ('b' * 64) -CollectorSha256 ('c' * 64) -TargetRole 'spain-primary' | Out-Null }} catch {{ $unsafe = Get-Phase13ClaimFailureSubreason -Exception $_.Exception }}
+
+function Protect-Phase13PrivateDirectory {{ param([string]$Path, [string]$OwnerSid) throw [UnauthorizedAccessException]::new('simulated') }}
+$acl = ''
+try {{ New-Phase13OutcomeClaim -OutcomeRoot '{outcome_root}' -OutcomeId 'test-outcome-claim-acl-001' -OwnerSid $sid -ManifestSha256 ('a' * 64) -RunnerSha256 ('b' * 64) -CollectorSha256 ('c' * 64) -TargetRole 'spain-primary' | Out-Null }} catch {{ $acl = Get-Phase13ClaimFailureSubreason -Exception $_.Exception }}
+[Console]::Out.Write("$unsafe|$acl")
+""",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "private_root_unsafe|private_root_preparation_failed"
+    assert "simulated" not in (result.stdout + result.stderr).casefold()
+
+
+def test_create_new_claim_race_with_valid_competitor_is_typed_replay(tmp_path):
+    outcome_root = tmp_path / "race-outcomes"
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+function Write-BytesCreateNew {{
+    param([string]$Path, [byte[]]$Bytes)
+    [IO.File]::WriteAllBytes($Path, $Bytes)
+    throw [IO.IOException]::new('simulated')
+}}
+$subreason = ''
+try {{ New-Phase13OutcomeClaim -OutcomeRoot '{outcome_root}' -OutcomeId 'test-outcome-claim-race-001' -OwnerSid $sid -ManifestSha256 ('a' * 64) -RunnerSha256 ('b' * 64) -CollectorSha256 ('c' * 64) -TargetRole 'spain-primary' | Out-Null }} catch {{ $subreason = Get-Phase13ClaimFailureSubreason -Exception $_.Exception }}
+[Console]::Out.Write($subreason)
+""",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "existing_valid_claim"
+    assert "simulated" not in (result.stdout + result.stderr).casefold()
+
+
 @pytest.mark.parametrize(
     ("claim_subreason", "expected_exit", "expected_stage", "expected_reason"),
     [
