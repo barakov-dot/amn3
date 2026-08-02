@@ -1,28 +1,27 @@
-# Текущий обязательный приоритет 2026-08-02: Production Transport Tasks 1–4 локально проверены, live gate отсутствует
+# Текущий обязательный приоритет 2026-08-02: Transport Subreason Tasks 1–4 локально проверены, live gate отсутствует
 
-Локальная fail-closed цепочка Phase 13 Production Transport проверена на root
-head `8221e5b0cdaf78ec08cd01b6e21de8d2a2941618`: exact approval, create-new
-claim, Phase 12 trust-bundle adapter, один bounded SSH transport и
-self-observing read-only Spain collector. AMN2 AWG3 worktree сохранён на
-`82290c06942176c36d2e09a9d968900560a49048`. Secret-free receipt:
-`research/amn2/phase13-production-transport-tasks-1-4-local-verification-receipt-2026-08-02.md`.
+Локальная fail-closed цепочка Phase 13 Transport Subreason проверена на root
+head `fcea09f9f2e2bf89770e5c8bd6e3cfecc2fabb07`. Она включает failure evidence
+V2 contract, pure transport mapping, local process classification и strict
+sanitized writer/call sites. Secret-free receipt:
+`research/amn2/phase13-transport-subreason-tasks-1-4-local-verification-receipt-2026-08-02.md`.
 
-Локальные результаты: Phase 13 focused scope `91 passed`; утверждённый Phase
-12 Spain regression scope `233 passed, 1 skipped`; Bash/PowerShell syntax и
-`git diff --check` passed. Подтверждены exits: foreign mismatch `69`, AWG2
-mismatch `70`, candidate conflict `71`, ambiguous observation `72`. Collector
-не принимает пользовательские или ENV-подменяемые AWG2/foreign observed
-projection values; Phase 12 equality foundation остаётся только expected
-projection. Manual scoped security review завершён без reportable findings;
-новый broad security scan и security report не создавались.
+Локальные результаты: Phase 13 focused scope `102 passed`; утверждённый Phase
+12 Spain regression scope `233 passed, 1 skipped`; Bash/PowerShell/Python
+syntax, `verify-local` для `7` contract artifacts и `git diff --check` passed.
+V2 требует обязательный `transport_subreason`: transport принимает только
+allowlist, а не-transport stages — `not_applicable`. Исторический V1 contract
+сохранён; consumed `spain-awg3-20260802-002` остаётся failure-only и не может
+быть повторно использован. Manual scoped security review завершён без
+reportable findings; новый broad security scan и security report не создавались.
 
-Предыдущие materialized manifest/outcome нельзя применять: collector bytes
-теперь относятся к root `8221e5b`. Новый checksum-bound manifest/outcome,
-package build, SSH approval, Spain preflight и любые live actions остаются
-неразрешёнными. AWG3 не является production issuance; Spain AWG2 d1–d7
-остаются принятым baseline. USA остаётся rollback contour: shutdown, cleanup
-или reuse требуют отдельного USA retirement readiness gate и exact live
-approval; `live_action_authorized=false`.
+Текущие materialized manifest/outcome stale относительно проверенных bytes и
+не могут применяться. Новый checksum-bound manifest/outcome, package build,
+SSH approval, Spain preflight и любые live actions остаются неразрешёнными.
+AWG3 не является production issuance; Spain AWG2 d1–d7 остаются принятым
+baseline. USA остаётся rollback contour: shutdown, cleanup или reuse требуют
+отдельного USA retirement readiness gate и exact live approval;
+`live_action_authorized=false`.
 
 Automation `amn2-upstream-orchestrator` остаётся `ACTIVE`; weekly run должен
 читать этот верхний authoritative block, Phase 13 receipts и backlog. Weekly
