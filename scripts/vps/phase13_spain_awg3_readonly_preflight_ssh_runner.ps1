@@ -416,6 +416,53 @@ function Assert-Phase13VerifiedHostPin {
     }
 }
 
+function New-Phase13SshArguments {
+    param(
+        [Parameter(Mandatory = $true)][hashtable]$Binding,
+        [Parameter(Mandatory = $true)][string]$KnownHostsPath,
+        [Parameter(Mandatory = $true)][string]$KeyPath,
+        [Parameter(Mandatory = $true)][string]$OutcomeId,
+        [Parameter(Mandatory = $true)][string]$ManifestSha256,
+        [Parameter(Mandatory = $true)][string]$RunnerSha256,
+        [Parameter(Mandatory = $true)][string]$CollectorSha256,
+        [Parameter(Mandatory = $true)][string]$SchemaSha256,
+        [Parameter(Mandatory = $true)][string]$FoundationSha256
+    )
+    Assert-OutcomeId -Value $OutcomeId
+    Assert-Phase13TargetHost -Value $Binding["TARGET_HOST"]
+    Assert-Phase13TargetUser -Value $Binding["TARGET_USER"]
+    foreach ($Hash in @($ManifestSha256, $RunnerSha256, $CollectorSha256, $SchemaSha256, $FoundationSha256)) {
+        if ($Hash -cnotmatch '^[0-9a-f]{64}$') {
+            throw "Remote checksum binding rejected."
+        }
+    }
+    $RemoteCommand = @(
+        "AMN2_PHASE13_OUTCOME_ID=$OutcomeId",
+        "AMN2_PHASE13_MANIFEST_SHA256=$ManifestSha256",
+        "AMN2_PHASE13_RUNNER_SHA256=$RunnerSha256",
+        "AMN2_PHASE13_COLLECTOR_SHA256=$CollectorSha256",
+        "AMN2_PHASE13_SCHEMA_SHA256=$SchemaSha256",
+        "AMN2_PHASE13_FOUNDATION_SHA256=$FoundationSha256",
+        "bash -s -- preflight"
+    ) -join ' '
+    return @(
+        "-T",
+        "-F", "none",
+        "-o", "BatchMode=yes",
+        "-o", "IdentitiesOnly=yes",
+        "-o", "StrictHostKeyChecking=yes",
+        "-o", "UserKnownHostsFile=$KnownHostsPath",
+        "-o", "ConnectTimeout=10",
+        "-o", "ConnectionAttempts=1",
+        "-o", "ServerAliveInterval=5",
+        "-o", "ServerAliveCountMax=1",
+        "-i", $KeyPath,
+        "-p", "22",
+        "$($Binding['TARGET_USER'])@$($Binding['TARGET_HOST'])",
+        $RemoteCommand
+    )
+}
+
 function ConvertTo-ProcessArgumentString {
     param([string[]]$Arguments)
     $Quoted = foreach ($Argument in $Arguments) {
@@ -556,6 +603,87 @@ function ConvertFrom-BoundedCollectorEnvelope {
     return [pscustomobject]@{ Reason = "collector_failure"; Document = $Document }
 }
 
+function Invoke-Phase13OneSshTransport {
+    param(
+        [Parameter(Mandatory = $true)][string]$SshExecutable,
+        [Parameter(Mandatory = $true)][string[]]$SshArguments,
+        [Parameter(Mandatory = $true)][byte[]]$CollectorBytes,
+        [int]$TimeoutMilliseconds = 15000,
+        [int]$MaximumOutputBytes = 65536
+    )
+    $Transport = $null
+    try {
+        $Transport = Invoke-BoundedTransport -Executable $SshExecutable -Arguments $SshArguments -InputBytes $CollectorBytes -TimeoutMilliseconds $TimeoutMilliseconds -MaximumOutputBytes $MaximumOutputBytes -MaximumInputBytes 1048576
+        $Envelope = ConvertFrom-BoundedCollectorEnvelope -Transport $Transport
+        return [pscustomobject]@{
+            Reason = $Envelope.Reason
+            Document = $Envelope.Document
+            ExitCode = $Transport.ExitCode
+        }
+    } finally {
+        if ($null -ne $Transport) {
+            if ($null -ne $Transport.StdoutBytes) {
+                [Array]::Clear($Transport.StdoutBytes, 0, $Transport.StdoutBytes.Length)
+            }
+            if ($null -ne $Transport.StderrBytes) {
+                [Array]::Clear($Transport.StderrBytes, 0, $Transport.StderrBytes.Length)
+            }
+        }
+        $Transport = $null
+    }
+}
+
+function Test-Phase13EvidenceSecretSafe {
+    param(
+        [Parameter(Mandatory = $true)][byte[]]$EvidenceBytes,
+        [string[]]$SensitiveValues = @()
+    )
+    $StrictUtf8 = New-Object Text.UTF8Encoding($false, $true)
+    try { $Text = $StrictUtf8.GetString($EvidenceBytes) }
+    catch { return $false }
+    if ([regex]::IsMatch($Text, '(?i)BEGIN [^-\r\n]*PRIVATE KEY|PrivateKey"?\s*[=:]|PresharedKey"?\s*[=:]|HeaderProtectionKey"?\s*[=:]|vpn://|password"?\s*[=:]|token"?\s*[=:]')) {
+        return $false
+    }
+    foreach ($Value in @($SensitiveValues)) {
+        if (-not [string]::IsNullOrEmpty($Value) -and $Text.Contains($Value)) {
+            return $false
+        }
+    }
+    return $true
+}
+
+function Resolve-Phase13TransportFailure {
+    param([Parameter(Mandatory = $true)]$TransportResult)
+
+    if ($TransportResult.Reason -ceq "collector_failure") {
+        $ExitCode = if ($TransportResult.ExitCode -ge 64 -and $TransportResult.ExitCode -le 74) {
+            [int]$TransportResult.ExitCode
+        }
+        else {
+            67
+        }
+        return [pscustomobject]@{
+            Stage = "collector"
+            ReasonCode = "observation_ambiguous"
+            ExitCode = $ExitCode
+        }
+    }
+
+    if ($TransportResult.Reason -in @("invalid_utf8", "crlf_corruption", "extra_output")) {
+        return [pscustomobject]@{
+            Stage = "schema_validation"
+            ReasonCode = "schema_validation_failed"
+            ExitCode = 68
+        }
+    }
+
+    return [pscustomobject]@{
+        Stage = "transport"
+        ReasonCode = "observation_ambiguous"
+        ExitCode = 67
+    }
+}
+
 function Test-EvidenceContract {
     param(
         [Parameter(Mandatory = $true)][string]$PythonExecutable,
@@ -571,7 +699,7 @@ function Test-EvidenceContract {
         }
     }
     $ContractDirectory = Split-Path -Parent $ContractPath
-    $PythonCode = "sys=__import__('sys');Path=__import__('pathlib',fromlist=['Path']).Path;sys.path.insert(0,sys.argv[1]);c=__import__('phase13_awg3_preflight_contract');raw_m=Path(sys.argv[2]).read_bytes();m=c.load_json_object_strict(raw_m,label='manifest');c.validate_manifest(m,artifact_root=Path(sys.argv[3]));raw=sys.stdin.buffer.read();e=c.load_json_object_strict(raw,label='evidence');c.validate_success_evidence(e,manifest=m);sys.stdout.buffer.write(b'passed\n')"
+    $PythonCode = "sys=__import__('sys');Path=__import__('pathlib',fromlist=['Path']).Path;sys.path.insert(0,sys.argv[1]);c=__import__('phase13_awg3_preflight_contract');raw_m=Path(sys.argv[2]).read_bytes();m=c.load_json_object_strict(raw_m,label='manifest');c.validate_manifest(m,artifact_root=Path(sys.argv[3]));raw=sys.stdin.buffer.read();e=c.load_json_object_strict(raw,label='evidence');c.validate_success_evidence(e,manifest=m);a={Path(x['path']).name:x['sha256'] for x in m['artifacts']};assert e['runner_sha256']==a['phase13_spain_awg3_readonly_preflight_ssh_runner.ps1'];assert e['collector_sha256']==a['phase13_spain_awg3_readonly_preflight_remote.sh'];assert e['schema_sha256']==a['evidence.schema.json'];sys.stdout.buffer.write(b'passed\n')"
     try {
         $Validation = Invoke-BoundedTransport -Executable $PythonExecutable -Arguments @("-I", "-B", "-c", $PythonCode, $ContractDirectory, $ManifestPath, $RepositoryRoot) -InputBytes $EvidenceBytes -TimeoutMilliseconds 5000 -MaximumOutputBytes 4096
     } catch {
@@ -674,7 +802,7 @@ function Invoke-RunnerMain {
     catch { Write-RunnerFailureLine "private_root_validation" "observation_ambiguous"; return 72 }
     $OutcomeRoot = Join-Path $PrivateArtifactsRoot "phase13-awg3-preflight\outcomes"
     try {
-        [void](New-Phase13OutcomeClaim -OutcomeRoot $OutcomeRoot -OutcomeId $OutcomeId -OwnerSid $CurrentSid -ManifestSha256 $ManifestSha -RunnerSha256 $RunnerSha -CollectorSha256 $CollectorSha -TargetRole "spain-primary")
+        $ClaimPath = New-Phase13OutcomeClaim -OutcomeRoot $OutcomeRoot -OutcomeId $OutcomeId -OwnerSid $CurrentSid -ManifestSha256 $ManifestSha -RunnerSha256 $RunnerSha -CollectorSha256 $CollectorSha -TargetRole "spain-primary"
     } catch {
         Write-RunnerFailureLine "outcome_claim" "outcome_replay"
         return 66
@@ -698,10 +826,89 @@ function Invoke-RunnerMain {
         return 73
     }
 
-    # Production transport remains unreachable until the separately approved
-    # one-SSH transport and sanitized observation binding are implemented.
-    Write-RunnerFailureLine "trust_binding" "runtime_capability_unavailable"
-    return 73
+    $CollectorPath = Join-Path $PackageRoot "phase13_spain_awg3_readonly_preflight_remote.sh"
+    $ContractPath = Join-Path $RepositoryRoot "scripts\phase13_awg3_preflight_contract.py"
+    $PythonExecutable = Join-Path $RepositoryRoot "worktrees\amn2-phase13-awg2-awg3-local\.venv\Scripts\python.exe"
+    $OutcomeDirectory = Split-Path -Parent $ClaimPath
+    $EvidencePath = Join-Path $OutcomeDirectory "preflight-evidence.json"
+    $FailurePath = Join-Path $OutcomeDirectory "preflight-failure.json"
+    $CollectorBytes = $null
+    $SshArguments = $null
+    $TransportResult = $null
+    try {
+        $CollectorBytes = Read-StrictUtf8Bytes -Path $CollectorPath -MaximumBytes 1048576
+        $SshArguments = New-Phase13SshArguments -Binding $Binding -KnownHostsPath $KnownHostsPath -KeyPath $KeyPath -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha -RunnerSha256 $RunnerSha -CollectorSha256 $CollectorSha -SchemaSha256 $SchemaSha -FoundationSha256 $FoundationSha
+        $TransportResult = Invoke-Phase13OneSshTransport -SshExecutable $SshExecutable -SshArguments $SshArguments -CollectorBytes $CollectorBytes -TimeoutMilliseconds 15000 -MaximumOutputBytes 65536
+    } catch {
+        try {
+            Write-SanitizedFailureCreateNew -Path $FailurePath -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha -Stage "transport" -ReasonCode "observation_ambiguous"
+        } catch {
+            Write-RunnerFailureLine "private_root_validation" "observation_ambiguous"
+            return 75
+        }
+        Write-RunnerFailureLine "transport" "observation_ambiguous"
+        return 67
+    } finally {
+        if ($null -ne $CollectorBytes) {
+            [Array]::Clear($CollectorBytes, 0, $CollectorBytes.Length)
+        }
+        $CollectorBytes = $null
+        $SshArguments = $null
+    }
+
+    if ($TransportResult.Reason -cne "success") {
+        $Failure = Resolve-Phase13TransportFailure -TransportResult $TransportResult
+        $TransportResult = $null
+        try {
+            Write-SanitizedFailureCreateNew -Path $FailurePath -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha -Stage $Failure.Stage -ReasonCode $Failure.ReasonCode
+        } catch {
+            Write-RunnerFailureLine "private_root_validation" "observation_ambiguous"
+            return 75
+        }
+        Write-RunnerFailureLine $Failure.Stage $Failure.ReasonCode
+        return $Failure.ExitCode
+    }
+
+    $EvidenceBytes = $script:Utf8NoBom.GetBytes($TransportResult.Document + "`n")
+    $TransportResult = $null
+    $SensitiveValues = @(
+        $Binding["TARGET_HOST"],
+        $Binding["TARGET_USER"],
+        $Binding["EXPECTED_HOST_KEY_SHA256"],
+        $KeyPath,
+        $PublicKeyPath,
+        $KnownHostsPath
+    )
+    try {
+        if (-not (Test-EvidenceContract -PythonExecutable $PythonExecutable -ContractPath $ContractPath -ManifestPath $ManifestPath -RepositoryRoot $PackageRoot -EvidenceBytes $EvidenceBytes)) {
+            throw "Evidence contract rejected."
+        }
+        if (-not (Test-Phase13EvidenceSecretSafe -EvidenceBytes $EvidenceBytes -SensitiveValues $SensitiveValues)) {
+            Write-SanitizedFailureCreateNew -Path $FailurePath -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha -Stage "schema_validation" -ReasonCode "secret_pattern_detected"
+            Write-RunnerFailureLine "schema_validation" "secret_pattern_detected"
+            return 74
+        }
+        Write-BytesCreateNew -Path $EvidencePath -Bytes $EvidenceBytes
+        $EvidenceSha256 = Get-Sha256Hex -Path $EvidencePath
+    } catch {
+        if (-not (Test-Path -LiteralPath $FailurePath)) {
+            try {
+                Write-SanitizedFailureCreateNew -Path $FailurePath -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha -Stage "schema_validation" -ReasonCode "schema_validation_failed"
+            } catch {
+                Write-RunnerFailureLine "private_root_validation" "observation_ambiguous"
+                return 75
+            }
+        }
+        Write-RunnerFailureLine "schema_validation" "schema_validation_failed"
+        return 68
+    } finally {
+        [Array]::Clear($EvidenceBytes, 0, $EvidenceBytes.Length)
+        $EvidenceBytes = $null
+        $SensitiveValues = $null
+        $Binding = $null
+    }
+    [Console]::Out.WriteLine("AMN2_PHASE13_AWG3_RUNNER_SUCCESS_V1|outcome_id=$OutcomeId|evidence_sha256=$EvidenceSha256")
+    return 0
 }
 
 if ($MyInvocation.InvocationName -ne '.') {

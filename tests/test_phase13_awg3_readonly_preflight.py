@@ -3,6 +3,7 @@ import json
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -253,6 +254,10 @@ foreach ($path in @({quoted_paths})) {{ Protect-TestTrustPath $path }}
 def valid_success_evidence_for_manifest(manifest_path: Path) -> bytes:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest_sha = hashlib.sha256(canonical_json(manifest)).hexdigest()
+    artifact_hashes = {
+        Path(artifact["path"]).name: artifact["sha256"]
+        for artifact in manifest["artifacts"]
+    }
     evidence = {
         "awg2_equality": {
             "bot_disabled": True,
@@ -271,7 +276,9 @@ def valid_success_evidence_for_manifest(manifest_path: Path) -> bytes:
         },
         "candidate_resources": [{"declared_value": "30002", "observation_sha256": "4" * 64, "resource": "udp_port", "state": "free"}],
         "checked_at": "2026-08-01T12:00:00Z",
-        "collector_sha256": "2" * 64,
+        "collector_sha256": artifact_hashes[
+            "phase13_spain_awg3_readonly_preflight_remote.sh"
+        ],
         "decision": "pass",
         "foreign_equality": {
             "changed": 0,
@@ -283,7 +290,9 @@ def valid_success_evidence_for_manifest(manifest_path: Path) -> bytes:
         "manifest_sha256": manifest_sha,
         "outcome_id": manifest["outcome_id"],
         "phase12_foundation_sha256": manifest["foundation_sha256"],
-        "runner_sha256": "1" * 64,
+        "runner_sha256": artifact_hashes[
+            "phase13_spain_awg3_readonly_preflight_ssh_runner.ps1"
+        ],
         "safety_receipt": {
             "container_action_attempted": False,
             "firewall_action_attempted": False,
@@ -295,7 +304,7 @@ def valid_success_evidence_for_manifest(manifest_path: Path) -> bytes:
             "service_action_attempted": False,
         },
         "schema": "amn2.phase13.awg3-readonly-preflight.v1",
-        "schema_sha256": "3" * 64,
+        "schema_sha256": artifact_hashes["evidence.schema.json"],
         "source_head": manifest["source_head"],
         "stop_reasons": [],
     }
@@ -622,13 +631,11 @@ $document = Get-Content -Raw -LiteralPath $claim | ConvertFrom-Json
     )
 
 
-def test_runner_creates_claim_before_the_intentional_pre_transport_stop():
+def test_runner_creates_claim_before_the_one_ssh_transport():
     source = RUNNER.read_text(encoding="utf-8")
-    claim_call = source.index("[void](New-Phase13OutcomeClaim")
-    stop_call = source.index(
-        'Write-RunnerFailureLine "trust_binding" "runtime_capability_unavailable"'
-    )
-    assert claim_call < stop_call
+    claim_call = source.index("New-Phase13OutcomeClaim", source.index("$OutcomeRoot"))
+    transport_call = source.index("Invoke-Phase13OneSshTransport", claim_call)
+    assert claim_call < transport_call
 
 
 def test_private_path_rejects_wrong_owner_weak_acl_and_reparse_point(tmp_path):
@@ -739,17 +746,173 @@ try {{ Read-Phase13TrustBinding -TrustRoot '{bundle['root']}' -BindingPath '{bun
 
 def test_runner_binds_phase12_trust_adapter_after_claim_to_fixed_private_bundle():
     source = RUNNER.read_text(encoding="utf-8")
-    claim_call = source.index("[void](New-Phase13OutcomeClaim")
+    claim_call = source.index("New-Phase13OutcomeClaim", source.index("$OutcomeRoot"))
     trust_call = source.index("Read-Phase13TrustBinding", claim_call)
-    stop_call = source.index(
-        'Write-RunnerFailureLine "trust_binding" "runtime_capability_unavailable"',
-        trust_call,
-    )
+    transport_call = source.index("Invoke-Phase13OneSshTransport", trust_call)
 
-    assert claim_call < trust_call < stop_call
+    assert claim_call < trust_call < transport_call
     assert '"post-release\\spain-migration\\$($script:TrustedBundleRunId)"' in source
     assert '"C:\\Windows\\System32\\OpenSSH\\ssh.exe"' in source
     assert '"C:\\Windows\\System32\\OpenSSH\\ssh-keygen.exe"' in source
+
+
+def test_one_ssh_transport_starts_once_and_delivers_exact_collector_bytes(tmp_path):
+    fake_ssh = tmp_path / "fake_ssh.py"
+    counter = tmp_path / "counter.txt"
+    captured = tmp_path / "stdin.bin"
+    collector = b"#!/usr/bin/env bash\nset -Eeuo pipefail\n"
+    fake_ssh.write_text(
+        """from pathlib import Path
+import sys
+counter = Path(sys.argv[1])
+captured = Path(sys.argv[2])
+count = int(counter.read_text()) if counter.exists() else 0
+counter.write_text(str(count + 1))
+captured.write_bytes(sys.stdin.buffer.read())
+sys.stdout.buffer.write(b'{}\\n')
+""",
+        encoding="utf-8",
+    )
+    collector_b64 = __import__("base64").b64encode(collector).decode("ascii")
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$result = Invoke-Phase13OneSshTransport -SshExecutable '{sys.executable}' -SshArguments @('{fake_ssh}', '{counter}', '{captured}') -CollectorBytes ([Convert]::FromBase64String('{collector_b64}')) -TimeoutMilliseconds 2000 -MaximumOutputBytes 4096
+[Console]::Out.Write("$($result.Reason)|$($result.ExitCode)|$($result.Document)|$($result.PSObject.Properties.Name -join ',')")
+""",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert counter.read_text() == "1"
+    assert captured.read_bytes() == collector
+    assert result.stdout == "success|0|{}|Reason,Document,ExitCode"
+
+
+def test_one_ssh_transport_drops_raw_stderr_from_sanitized_result(tmp_path):
+    fake_ssh = tmp_path / "fake_ssh.py"
+    fake_ssh.write_text(
+        """import sys
+sys.stdin.buffer.read()
+sys.stderr.buffer.write(b'private-target-material')
+raise SystemExit(255)
+""",
+        encoding="utf-8",
+    )
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$result = Invoke-Phase13OneSshTransport -SshExecutable '{sys.executable}' -SshArguments @('{fake_ssh}') -CollectorBytes ([Text.Encoding]::UTF8.GetBytes('collector')) -TimeoutMilliseconds 2000 -MaximumOutputBytes 4096
+[Console]::Out.Write("$($result.Reason)|$($result.Document)|$($result.PSObject.Properties.Name -join ',')")
+""",
+    )
+
+    combined = result.stdout + result.stderr
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "unknown_remote_outcome||Reason,Document,ExitCode"
+    assert "private-target-material" not in combined
+
+
+def test_success_evidence_filter_rejects_secret_patterns_and_target_literals(tmp_path):
+    result = run_powershell_harness(
+        tmp_path,
+        """
+$safe = Test-Phase13EvidenceSecretSafe -EvidenceBytes ([Text.Encoding]::UTF8.GetBytes('{"state":"free"}`n')) -SensitiveValues @('spain.test.invalid', 'operator', 'C:\\private\\key', 'SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+$target = Test-Phase13EvidenceSecretSafe -EvidenceBytes ([Text.Encoding]::UTF8.GetBytes('{"state":"spain.test.invalid"}`n')) -SensitiveValues @('spain.test.invalid')
+$secret = Test-Phase13EvidenceSecretSafe -EvidenceBytes ([Text.Encoding]::UTF8.GetBytes('{"PrivateKey":"raw"}`n')) -SensitiveValues @()
+[Console]::Out.Write("$($safe.ToString().ToLowerInvariant())|$($target.ToString().ToLowerInvariant())|$($secret.ToString().ToLowerInvariant())")
+""",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|false|false"
+
+
+@pytest.mark.parametrize(
+    ("reason", "remote_exit", "expected"),
+    [
+        ("transport_timeout", -1, "transport|observation_ambiguous|67"),
+        ("output_oversized", -1, "transport|observation_ambiguous|67"),
+        ("unknown_remote_outcome", 255, "transport|observation_ambiguous|67"),
+        ("invalid_utf8", 0, "schema_validation|schema_validation_failed|68"),
+        ("crlf_corruption", 0, "schema_validation|schema_validation_failed|68"),
+        ("extra_output", 0, "schema_validation|schema_validation_failed|68"),
+        ("collector_failure", 71, "collector|observation_ambiguous|71"),
+    ],
+)
+def test_transport_failure_mapping_is_sanitized_and_fail_closed(
+    tmp_path, reason, remote_exit, expected
+):
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$transport = [pscustomobject]@{{ Reason = '{reason}'; Document = 'raw-not-returned'; ExitCode = {remote_exit} }}
+$failure = Resolve-Phase13TransportFailure -TransportResult $transport
+[Console]::Out.Write("$($failure.Stage)|$($failure.ReasonCode)|$($failure.ExitCode)")
+""",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == expected
+    assert "raw-not-returned" not in result.stdout
+
+
+def test_phase13_ssh_arguments_are_fixed_pinned_and_noninteractive(tmp_path):
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$binding = @{{ TARGET_USER = 'operator'; TARGET_HOST = 'spain.test.invalid' }}
+$arguments = New-Phase13SshArguments -Binding $binding -KnownHostsPath '{tmp_path / 'known hosts'}' -KeyPath '{tmp_path / 'dedicated key'}' -OutcomeId 'test-outcome-001' -ManifestSha256 ('a' * 64) -RunnerSha256 ('b' * 64) -CollectorSha256 ('c' * 64) -SchemaSha256 ('d' * 64) -FoundationSha256 ('e' * 64)
+[Console]::Out.Write(($arguments | ConvertTo-Json -Compress))
+""",
+    )
+
+    assert result.returncode == 0, result.stderr
+    arguments = json.loads(result.stdout)
+    assert arguments[:-1] == [
+        "-T",
+        "-F",
+        "none",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "IdentitiesOnly=yes",
+        "-o",
+        "StrictHostKeyChecking=yes",
+        "-o",
+        f"UserKnownHostsFile={tmp_path / 'known hosts'}",
+        "-o",
+        "ConnectTimeout=10",
+        "-o",
+        "ConnectionAttempts=1",
+        "-o",
+        "ServerAliveInterval=5",
+        "-o",
+        "ServerAliveCountMax=1",
+        "-i",
+        str(tmp_path / "dedicated key"),
+        "-p",
+        "22",
+        "operator@spain.test.invalid",
+    ]
+    remote_command = arguments[-1]
+    assert remote_command.endswith("bash -s -- preflight")
+    assert "AMN2_PHASE13_OUTCOME_ID=test-outcome-001" in remote_command
+    assert "AMN2_PHASE13_MANIFEST_SHA256=" + ("a" * 64) in remote_command
+    assert "accept-new" not in remote_command.casefold()
+
+
+def test_runner_orders_claim_trust_and_one_ssh_without_legacy_stop():
+    source = RUNNER.read_text(encoding="utf-8")
+    claim_call = source.index("New-Phase13OutcomeClaim", source.index("$OutcomeRoot"))
+    trust_call = source.index("Read-Phase13TrustBinding", claim_call)
+    transport_call = source.index("Invoke-Phase13OneSshTransport", trust_call)
+
+    assert claim_call < trust_call < transport_call
+    assert source.count("Invoke-Phase13OneSshTransport", transport_call) == 1
+    assert (
+        'Write-RunnerFailureLine "trust_binding" "runtime_capability_unavailable"'
+        not in source[transport_call:]
+    )
 
 
 @pytest.mark.parametrize(
@@ -835,14 +998,20 @@ def test_python_contract_validation_accepts_only_exact_canonical_success_evidenc
     python_exe = ROOT / "worktrees" / "amn2-phase13-awg2-awg3-local" / ".venv" / "Scripts" / "python.exe"
     valid_b64 = __import__("base64").b64encode(valid_success_evidence_for_manifest(manifest)).decode("ascii")
     invalid_b64 = __import__("base64").b64encode(b"{}").decode("ascii")
+    wrong_binding = json.loads(valid_success_evidence_for_manifest(manifest))
+    wrong_binding["runner_sha256"] = "0" * 64
+    wrong_binding_b64 = __import__("base64").b64encode(
+        canonical_json(wrong_binding)
+    ).decode("ascii")
 
     result = run_powershell_harness(
         tmp_path,
         f"""
 $valid = Test-EvidenceContract -PythonExecutable '{python_exe}' -ContractPath '{contract}' -ManifestPath '{manifest}' -RepositoryRoot '{package}' -EvidenceBytes ([Convert]::FromBase64String('{valid_b64}'))
 $invalid = Test-EvidenceContract -PythonExecutable '{python_exe}' -ContractPath '{contract}' -ManifestPath '{manifest}' -RepositoryRoot '{package}' -EvidenceBytes ([Convert]::FromBase64String('{invalid_b64}'))
-[Console]::Out.Write("$($valid.ToString().ToLowerInvariant())|$($invalid.ToString().ToLowerInvariant())")
+$wrongBinding = Test-EvidenceContract -PythonExecutable '{python_exe}' -ContractPath '{contract}' -ManifestPath '{manifest}' -RepositoryRoot '{package}' -EvidenceBytes ([Convert]::FromBase64String('{wrong_binding_b64}'))
+[Console]::Out.Write("$($valid.ToString().ToLowerInvariant())|$($invalid.ToString().ToLowerInvariant())|$($wrongBinding.ToString().ToLowerInvariant())")
 """,
     )
     assert result.returncode == 0, result.stderr
-    assert result.stdout == "true|false"
+    assert result.stdout == "true|false|false"
