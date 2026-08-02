@@ -16,7 +16,8 @@ ARTIFACT_ROOT = ROOT / "packaging" / "phase13-awg3-preflight"
 FOUNDATION_PATH = ARTIFACT_ROOT / "phase12-equality-foundation.json"
 MANIFEST_SCHEMA = ARTIFACT_ROOT / "manifest.schema.json"
 EVIDENCE_SCHEMA = ARTIFACT_ROOT / "evidence.schema.json"
-FAILURE_SCHEMA = ARTIFACT_ROOT / "failure-evidence.schema.json"
+FAILURE_SCHEMA_V1 = ARTIFACT_ROOT / "failure-evidence.schema.json"
+FAILURE_SCHEMA_V2 = ARTIFACT_ROOT / "failure-evidence-v2.schema.json"
 CONTRACT_SCRIPT = ROOT / "scripts" / "phase13_awg3_preflight_contract.py"
 EXIT_CODE_FIXTURE = ROOT / "tests" / "fixtures" / "phase13-awg3-preflight" / "exit-code-matrix.json"
 
@@ -111,14 +112,14 @@ def test_phase12_foundation_contains_exact_accepted_safe_facts():
     }
 
 
-def test_verify_local_binds_six_existing_artifacts_without_network_or_build():
+def test_verify_local_binds_seven_contract_artifacts_without_network_or_build():
     result = run_contract_cli("verify-local")
 
     assert result.returncode == 0, result.stderr
     assert result.stderr == ""
     report = json.loads(result.stdout)
     assert report == {
-        "artifact_count": 6,
+        "artifact_count": 7,
         "candidate_sha256": report["candidate_sha256"],
         "live_action_authorized": False,
         "network_attempted": False,
@@ -176,7 +177,7 @@ def test_local_cli_rejects_unknown_modes_and_exit_matrix_is_complete():
 
 
 def test_all_phase13_schemas_are_recursively_closed_objects():
-    for path in (MANIFEST_SCHEMA, EVIDENCE_SCHEMA, FAILURE_SCHEMA):
+    for path in (MANIFEST_SCHEMA, EVIDENCE_SCHEMA, FAILURE_SCHEMA_V1, FAILURE_SCHEMA_V2):
         schema = load_json(path)
 
         assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
@@ -455,3 +456,46 @@ def test_success_and_failure_evidence_fail_closed_on_inconsistent_decision_and_o
         "safety_receipt": success["safety_receipt"],
     }
     assert contract.validate_failure_evidence(failure, manifest=manifest) == failure
+
+
+def test_failure_evidence_v2_requires_stage_scoped_secret_safe_transport_subreason(
+    tmp_path: Path,
+):
+    contract = contract_module()
+    _, manifest = build_test_manifest(contract, tmp_path)
+    safety = valid_success_evidence(contract, manifest)["safety_receipt"]
+    failure = {
+        "schema": "amn2.phase13.awg3-readonly-preflight-failure.v2",
+        "outcome_id": manifest["outcome_id"],
+        "checked_at": "2026-08-02T12:00:00Z",
+        "source_head": manifest["source_head"],
+        "manifest_sha256": contract.sha256_bytes(contract.canonical_json_bytes(manifest)),
+        "stage": "transport",
+        "reason_code": "observation_ambiguous",
+        "transport_subreason": "timeout",
+        "decision": "stop",
+        "safety_receipt": safety,
+    }
+
+    assert FAILURE_SCHEMA_V2.is_file()
+    assert contract.validate_failure_evidence(failure, manifest=manifest) == failure
+
+    for invalid_subreason in (
+        "unknown",
+        "not_applicable",
+        "ssh: private data must not persist",
+    ):
+        invalid = copy.deepcopy(failure)
+        invalid["transport_subreason"] = invalid_subreason
+        with pytest.raises(contract.ContractError, match="transport subreason"):
+            contract.validate_failure_evidence(invalid, manifest=manifest)
+
+    invalid_stage = copy.deepcopy(failure)
+    invalid_stage["stage"] = "schema_validation"
+    with pytest.raises(contract.ContractError, match="not applicable"):
+        contract.validate_failure_evidence(invalid_stage, manifest=manifest)
+
+    non_transport = copy.deepcopy(invalid_stage)
+    non_transport["transport_subreason"] = "not_applicable"
+    non_transport["reason_code"] = "schema_validation_failed"
+    assert contract.validate_failure_evidence(non_transport, manifest=manifest) == non_transport

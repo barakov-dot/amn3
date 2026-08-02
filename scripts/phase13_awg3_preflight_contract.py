@@ -22,7 +22,9 @@ FOUNDATION_PATH = ARTIFACT_ROOT / "phase12-equality-foundation.json"
 
 MANIFEST_SCHEMA = "amn2.phase13.awg3-readonly-preflight-manifest.v1"
 SUCCESS_SCHEMA = "amn2.phase13.awg3-readonly-preflight.v1"
-FAILURE_SCHEMA = "amn2.phase13.awg3-readonly-preflight-failure.v1"
+FAILURE_SCHEMA_V1 = "amn2.phase13.awg3-readonly-preflight-failure.v1"
+FAILURE_SCHEMA_V2 = "amn2.phase13.awg3-readonly-preflight-failure.v2"
+FAILURE_SCHEMA = FAILURE_SCHEMA_V1
 SOURCE_BASE = "55dc243b8e6c6bdb57f8301b56326e4cd4072d19"
 SOURCE_HEAD = "ff115b63ca1329640ca13ae0a502d155f99b456b"
 SPAIN_OVERLAY = "f1bf099ddb47da26a4080714376babaf5b0de92c"
@@ -106,7 +108,7 @@ SUCCESS_KEYS = {
     "stop_reasons",
 }
 
-FAILURE_KEYS = {
+FAILURE_KEYS_V1 = {
     "schema",
     "outcome_id",
     "checked_at",
@@ -117,6 +119,9 @@ FAILURE_KEYS = {
     "decision",
     "safety_receipt",
 }
+
+FAILURE_KEYS_V2 = FAILURE_KEYS_V1 | {"transport_subreason"}
+FAILURE_KEYS = FAILURE_KEYS_V1
 
 SAFETY_KEYS = {
     "mutation_attempted",
@@ -159,9 +164,20 @@ FAILURE_REASONS = {
     "secret_pattern_detected",
 }
 
+TRANSPORT_SUBREASONS = {
+    "timeout",
+    "output_oversized",
+    "ssh_exit_unclassified",
+    "local_process_failure",
+    "transport_internal_failure",
+}
+
+NOT_APPLICABLE_SUBREASON = "not_applicable"
+
 LOCAL_ARTIFACT_NAMES = (
     "evidence.schema.json",
     "failure-evidence.schema.json",
+    "failure-evidence-v2.schema.json",
     "manifest.schema.json",
     "phase12-equality-foundation.json",
     "phase13_spain_awg3_readonly_preflight_remote.sh",
@@ -171,6 +187,7 @@ LOCAL_ARTIFACT_NAMES = (
 LOCAL_ARTIFACT_RELATIVE_PATHS = (
     "packaging/phase13-awg3-preflight/evidence.schema.json",
     "packaging/phase13-awg3-preflight/failure-evidence.schema.json",
+    "packaging/phase13-awg3-preflight/failure-evidence-v2.schema.json",
     "packaging/phase13-awg3-preflight/manifest.schema.json",
     "packaging/phase13-awg3-preflight/phase12-equality-foundation.json",
     "scripts/vps/phase13_spain_awg3_readonly_preflight_remote.sh",
@@ -390,13 +407,32 @@ def validate_success_evidence(
 def validate_failure_evidence(
     value: object, *, manifest: Mapping[str, object]
 ) -> dict[str, object]:
-    evidence = _require_exact_object(value, FAILURE_KEYS, "failure evidence")
+    if not isinstance(value, Mapping):
+        raise ContractError("failure evidence keys")
+    schema = value.get("schema")
+    if schema == FAILURE_SCHEMA_V1:
+        evidence = _require_exact_object(value, FAILURE_KEYS_V1, "failure evidence")
+        failure_schema = FAILURE_SCHEMA_V1
+    elif schema == FAILURE_SCHEMA_V2:
+        evidence = _require_exact_object(value, FAILURE_KEYS_V2, "failure evidence")
+        failure_schema = FAILURE_SCHEMA_V2
+    else:
+        raise ContractError("failure evidence schema")
     manifest_value = _require_exact_object(manifest, MANIFEST_KEYS, "manifest")
-    _validate_evidence_identity(evidence, manifest_value, FAILURE_SCHEMA)
+    _validate_evidence_identity(evidence, manifest_value, failure_schema)
     if evidence["stage"] not in FAILURE_STAGES:
         raise ContractError("failure evidence stage")
     if evidence["reason_code"] not in FAILURE_REASONS:
         raise ContractError("failure evidence reason")
+    if failure_schema == FAILURE_SCHEMA_V2:
+        subreason = evidence["transport_subreason"]
+        if evidence["stage"] == "transport":
+            if evidence["reason_code"] != "observation_ambiguous":
+                raise ContractError("failure evidence transport reason")
+            if subreason not in TRANSPORT_SUBREASONS:
+                raise ContractError("failure evidence transport subreason")
+        elif subreason != NOT_APPLICABLE_SUBREASON:
+            raise ContractError("failure evidence subreason must be not applicable")
     if evidence["decision"] != "stop":
         raise ContractError("failure evidence decision")
     _validate_safety_receipt(evidence["safety_receipt"])
@@ -412,10 +448,11 @@ def verify_local(*, repo_root: Path = ROOT) -> dict[str, object]:
     )
     if len(artifact_payloads) != len(LOCAL_ARTIFACT_NAMES):
         raise ContractError("local artifact inventory")
-    if sha256_bytes(artifact_payloads[3]) != PHASE12_FOUNDATION_SHA256:
+    foundation_index = LOCAL_ARTIFACT_NAMES.index("phase12-equality-foundation.json")
+    if sha256_bytes(artifact_payloads[foundation_index]) != PHASE12_FOUNDATION_SHA256:
         raise ContractError("foundation checksum")
     try:
-        foundation = json.loads(artifact_payloads[3].decode("utf-8"))
+        foundation = json.loads(artifact_payloads[foundation_index].decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
         raise ContractError("phase12 foundation") from error
     if foundation.get("schema") != "amn2.phase13.phase12-equality-foundation.v1":
