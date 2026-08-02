@@ -472,7 +472,7 @@ def test_awg2_projection_requires_the_accepted_phase13_baseline():
         "validate_awg2_projection 30001 10.212.12.0/24 amn2spbr0 "
         f"7 6 59 3 true true {peer_hash} {'b' * 64}",
     )
-    assert invalid.returncode == 73
+    assert invalid.returncode == 70
     assert invalid.stdout == "awg2_equality_mismatch\n"
 
 
@@ -491,8 +491,144 @@ def test_foreign_projection_requires_the_immutable_phase12_foundation():
         ("validate_foreign_projection",),
         f"validate_foreign_projection 152 {STABLE_FOREIGN_SHA256} 1 false {FOREIGN_RECEIPT_SHA256}",
     )
-    assert invalid.returncode == 74
+    assert invalid.returncode == 69
     assert invalid.stdout == "foreign_equality_mismatch\n"
+
+
+def test_collector_observes_awg2_and_foreign_state_without_projection_environment_inputs():
+    source = collector_source()
+
+    assert "AMN2_PHASE13_AWG2_" not in source
+    assert "AMN2_PHASE13_FOREIGN_" not in source
+    for marker in (
+        'readonly SYSTEM_DOCKER="/usr/bin/docker"',
+        'readonly SPAIN_DOCKER="/opt/amn2-spain/docker/bin/docker"',
+        'readonly SPAIN_DOCKER_HOST="unix:///run/amn2-spain-docker/docker.sock"',
+        'readonly ACCEPTED_AWG2_CONTAINER="amn2-spain-awg"',
+        'readonly ACCEPTED_AWG2_INTERFACE="awg0"',
+        'readonly ACCEPTED_AWG2_DB="/var/lib/amn2-spain/amn2.sqlite3"',
+        "observe_awg2_projection",
+        "observe_foreign_projection",
+        "system_docker ps -a --format '{{.Names}}'",
+        "system_docker network ls -q",
+        "spain_docker ps -a --format '{{.Names}}'",
+        "spain_docker network ls -q",
+        '"--root=/proc/${pid}/root"',
+        '"amn2_spain:compat-forward-dnat"',
+        '"amn2_spain:compat-forward-outbound"',
+        '"amn2_spain:compat-forward-return"',
+    ):
+        assert marker in source
+    assert re.search(r"(?m)^\s*docker\s", source) is None
+
+
+def test_peer_projection_normalizes_exact_public_key_set_without_emitting_keys():
+    source = collector_source()
+    peers = [f"{letter}{'A' * 42}=" for letter in "ABCDEFG"]
+    expected_hash = hashlib.sha256(("\n".join(peers) + "\n").encode()).hexdigest()
+    payload = "\n".join(reversed(peers))
+    payload_literal = "$'" + payload.replace("'", "\\'").replace("\n", "\\n") + "'"
+    result = run_harness(
+        source,
+        ("normalize_peer_projection",),
+        f"normalize_peer_projection {payload_literal}",
+    )
+
+    assert result.returncode == 0
+    assert result.stdout == f"7|{expected_hash}\n"
+    assert all(peer not in result.stdout for peer in peers)
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        "A" * 43 + "=\n" + "A" * 43 + "=",
+        "not-a-wireguard-public-key",
+        "",
+    ],
+)
+def test_peer_projection_fails_closed_on_duplicate_malformed_or_empty_input(payload):
+    source = collector_source()
+    payload_literal = "$'" + payload.replace("'", "\\'").replace("\n", "\\n") + "'"
+    result = run_harness(
+        source,
+        ("normalize_peer_projection",),
+        f"normalize_peer_projection {payload_literal}",
+    )
+
+    assert result.returncode == 72
+    assert result.stdout == "observation_ambiguous\n"
+
+
+@pytest.mark.parametrize(
+    ("before", "after", "expected_rc", "expected_stdout"),
+    [
+        ("true|59|1234", "true|59|1234", 0, ""),
+        ("true|59|1234", "true|60|1234", 72, "observation_ambiguous\n"),
+        ("true|59|1234", "true|59|5678", 72, "observation_ambiguous\n"),
+        ("true|59|1234", "false|59|1234", 72, "observation_ambiguous\n"),
+    ],
+)
+def test_awg2_container_identity_must_remain_stable_across_observation(
+    before, after, expected_rc, expected_stdout
+):
+    source = collector_source()
+    result = run_harness(
+        source,
+        ("validate_awg2_container_stability",),
+        f"validate_awg2_container_stability {before!r} {after!r}",
+    )
+
+    assert result.returncode == expected_rc
+    assert result.stdout == expected_stdout
+
+
+def test_foreign_projection_receipt_is_canonical_and_identity_unique():
+    source = collector_source()
+    container_name = "1" * 64
+    container_image = "2" * 64
+    unit_name = "3" * 64
+    unit_content = "4" * 64
+    rows = (
+        f"unit|{unit_name}|{unit_content}|active:running|exact|cgroup_complete\n"
+        f"container|{container_name}|{container_image}|running||"
+    )
+    canonical = [
+        {
+            "active_state": "running",
+            "image_or_unit_sha256": container_image,
+            "kind": "container",
+            "name_sha256": container_name,
+        },
+        {
+            "active_state": "active:running",
+            "bound_port_status": "cgroup_complete",
+            "image_or_unit_sha256": unit_content,
+            "kind": "unit",
+            "name_sha256": unit_name,
+            "unit_content_status": "exact",
+        },
+    ]
+    expected_hash = hashlib.sha256(canonical_json(canonical)).hexdigest()
+    rows_literal = "$'" + rows.replace("'", "\\'").replace("\n", "\\n") + "'"
+    result = run_harness(
+        source,
+        ("build_foreign_stable_receipt",),
+        f"build_foreign_stable_receipt {rows_literal} python",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == f"2|{expected_hash}\n"
+
+    duplicate = run_harness(
+        source,
+        ("build_foreign_stable_receipt",),
+        "build_foreign_stable_receipt $'"
+        + (rows + "\n" + rows.splitlines()[0]).replace("'", "\\'").replace("\n", "\\n")
+        + "' python",
+    )
+    assert duplicate.returncode == 72
+    assert duplicate.stdout == "observation_ambiguous\n"
 
 
 def test_render_contract_is_secret_free_and_marks_all_observations_read_only():
