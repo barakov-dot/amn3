@@ -297,3 +297,214 @@ function Invoke-Phase13LocalFakeAuditPair {
         [Array]::Clear($Key, 0, $Key.Length)
     }
 }
+
+function Get-Phase13Sha256Hex {
+    param([Parameter(Mandatory = $true)][byte[]]$Bytes)
+    $Hasher = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        return -join ($Hasher.ComputeHash($Bytes) | ForEach-Object { $_.ToString("x2") })
+    } finally {
+        $Hasher.Dispose()
+    }
+}
+
+function Test-Phase13ExactPropertySet {
+    param(
+        [Parameter(Mandatory = $true)]$Value,
+        [Parameter(Mandatory = $true)][string[]]$Expected,
+        [Parameter(Mandatory = $true)][string]$Message
+    )
+    if ($null -eq $Value) {
+        throw $Message
+    }
+    $Actual = @($Value.PSObject.Properties.Name | Sort-Object)
+    $Required = @($Expected | Sort-Object)
+    if (($Actual -join "`n") -cne ($Required -join "`n")) {
+        throw $Message
+    }
+}
+
+function Test-Phase13CutoverBinding {
+    param(
+        [Parameter(Mandatory = $true)][byte[]]$ManifestBytes,
+        [Parameter(Mandatory = $true)][byte[]]$CutoverBytes,
+        [Parameter(Mandatory = $true)][byte[]]$RunnerBytes,
+        [Parameter(Mandatory = $true)][DateTimeOffset]$NowUtc
+    )
+    if ($ManifestBytes.Length -lt 2 -or $CutoverBytes.Length -lt 1 -or $RunnerBytes.Length -lt 1) {
+        throw "cutover binding bytes invalid"
+    }
+    try {
+        $Decoder = New-Object System.Text.UTF8Encoding($false, $true)
+        $Manifest = $Decoder.GetString($ManifestBytes) | ConvertFrom-Json
+    } catch {
+        throw "cutover manifest invalid"
+    }
+    Test-Phase13ExactPropertySet -Value $Manifest -Expected @(
+        "approval_mode", "artifacts", "created_at", "expires_at",
+        "live_mutation_authorized", "outcome_id", "schema", "trust_bundles",
+        "web_data_apply_authorized"
+    ) -Message "cutover manifest keys invalid"
+    if ($Manifest.schema -cne "amn2.phase13.bot-web-cutover-manifest.v1" -or
+        $Manifest.approval_mode -cne "bot_cutover" -or
+        $Manifest.live_mutation_authorized -ne $false -or
+        $Manifest.web_data_apply_authorized -ne $false -or
+        [string]$Manifest.outcome_id -cnotmatch '^[a-z0-9][a-z0-9-]{2,63}$') {
+        throw "cutover manifest contract invalid"
+    }
+    try {
+        $CreatedAt = [DateTimeOffset]::Parse(
+            [string]$Manifest.created_at,
+            [Globalization.CultureInfo]::InvariantCulture,
+            [Globalization.DateTimeStyles]::AssumeUniversal
+        ).ToUniversalTime()
+        $ExpiresAt = [DateTimeOffset]::Parse(
+            [string]$Manifest.expires_at,
+            [Globalization.CultureInfo]::InvariantCulture,
+            [Globalization.DateTimeStyles]::AssumeUniversal
+        ).ToUniversalTime()
+    } catch {
+        throw "cutover manifest time invalid"
+    }
+    if ($ExpiresAt -le $NowUtc.ToUniversalTime()) {
+        throw "cutover manifest expired"
+    }
+    if ($CreatedAt -gt $ExpiresAt) {
+        throw "cutover manifest time invalid"
+    }
+
+    Test-Phase13ExactPropertySet -Value $Manifest.artifacts -Expected @(
+        "cutover_remote", "ssh_runner"
+    ) -Message "cutover artifact set invalid"
+    $ExpectedArtifacts = @{
+        "cutover_remote" = $CutoverBytes
+        "ssh_runner" = $RunnerBytes
+    }
+    foreach ($Name in @("cutover_remote", "ssh_runner")) {
+        $Binding = $Manifest.artifacts.$Name
+        Test-Phase13ExactPropertySet -Value $Binding -Expected @(
+            "sha256", "size"
+        ) -Message "cutover artifact binding invalid"
+        $Bytes = [byte[]]$ExpectedArtifacts[$Name]
+        if ([string]$Binding.sha256 -cnotmatch '^[0-9a-f]{64}$' -or
+            [long]$Binding.size -ne $Bytes.Length -or
+            [string]$Binding.sha256 -cne (Get-Phase13Sha256Hex -Bytes $Bytes)) {
+            throw "cutover artifact checksum invalid"
+        }
+    }
+
+    Test-Phase13ExactPropertySet -Value $Manifest.trust_bundles -Expected @(
+        "usa", "spain"
+    ) -Message "cutover trust bundle set invalid"
+    foreach ($Role in @("usa", "spain")) {
+        $Trust = $Manifest.trust_bundles.$Role
+        Test-Phase13ExactPropertySet -Value $Trust -Expected @(
+            "role", "trust_root"
+        ) -Message "cutover trust bundle invalid"
+        if ([string]$Trust.role -cne $Role -or
+            [string]$Trust.trust_root -cne [string]$script:RoleTrustRoots[$Role]) {
+            throw "cutover trust bundle invalid"
+        }
+    }
+
+    return [pscustomobject]@{
+        Schema = "amn2.phase13.bot-web-cutover-binding.v1"
+        OutcomeId = [string]$Manifest.outcome_id
+        ManifestSha256 = Get-Phase13Sha256Hex -Bytes $ManifestBytes
+        CutoverSha256 = Get-Phase13Sha256Hex -Bytes $CutoverBytes
+        RunnerSha256 = Get-Phase13Sha256Hex -Bytes $RunnerBytes
+        ExpiresAt = $ExpiresAt.ToString("o")
+        TrustRoles = @("usa", "spain")
+    }
+}
+
+function New-Phase13LocalFakeCutoverClaim {
+    param(
+        [Parameter(Mandatory = $true)][string]$FakeRoot,
+        [Parameter(Mandatory = $true)]$Binding
+    )
+    Test-Phase13ExactPropertySet -Value $Binding -Expected @(
+        "Schema", "OutcomeId", "ManifestSha256", "CutoverSha256",
+        "RunnerSha256", "ExpiresAt", "TrustRoles"
+    ) -Message "cutover binding invalid"
+    if ($Binding.Schema -cne "amn2.phase13.bot-web-cutover-binding.v1" -or
+        [string]$Binding.OutcomeId -cnotmatch '^[a-z0-9][a-z0-9-]{2,63}$' -or
+        [string]$Binding.ManifestSha256 -cnotmatch '^[0-9a-f]{64}$' -or
+        [string]$Binding.CutoverSha256 -cnotmatch '^[0-9a-f]{64}$' -or
+        [string]$Binding.RunnerSha256 -cnotmatch '^[0-9a-f]{64}$' -or
+        (@($Binding.TrustRoles) -join ",") -cne "usa,spain") {
+        throw "cutover binding invalid"
+    }
+    try {
+        $BindingExpiresAt = [DateTimeOffset]::Parse(
+            [string]$Binding.ExpiresAt,
+            [Globalization.CultureInfo]::InvariantCulture,
+            [Globalization.DateTimeStyles]::AssumeUniversal
+        ).ToUniversalTime()
+    } catch {
+        throw "cutover binding invalid"
+    }
+    if ($BindingExpiresAt -le [DateTimeOffset]::UtcNow) {
+        throw "cutover binding expired"
+    }
+    if (-not [IO.Path]::IsPathRooted($FakeRoot)) {
+        throw "local fake root invalid"
+    }
+    $ResolvedRoot = [IO.Path]::GetFullPath($FakeRoot)
+    $RootItem = Get-Item -LiteralPath $ResolvedRoot -Force -ErrorAction Stop
+    if (-not $RootItem.PSIsContainer -or ($RootItem.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        throw "local fake root invalid"
+    }
+    $SentinelPath = Join-Path $ResolvedRoot ".amn2-phase13-local-fake-harness"
+    $SentinelItem = Get-Item -LiteralPath $SentinelPath -Force -ErrorAction Stop
+    if ($SentinelItem.PSIsContainer -or
+        ($SentinelItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -or
+        [IO.File]::ReadAllText($SentinelPath, (New-Object Text.UTF8Encoding($false, $true))) -cne "task8-local-only`n") {
+        throw "local fake root invalid"
+    }
+    $OutcomeRoot = Join-Path $ResolvedRoot "outcomes"
+    if ([IO.Directory]::Exists($OutcomeRoot)) {
+        $OutcomeItem = Get-Item -LiteralPath $OutcomeRoot -Force -ErrorAction Stop
+        if (-not $OutcomeItem.PSIsContainer -or
+            ($OutcomeItem.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw "local fake root invalid"
+        }
+    } else {
+        [void][IO.Directory]::CreateDirectory($OutcomeRoot)
+    }
+    $ClaimPath = Join-Path $OutcomeRoot ("{0}.claim.json" -f $Binding.OutcomeId)
+    if ([IO.File]::Exists($ClaimPath)) {
+        throw "outcome claim replay"
+    }
+    $Claim = [ordered]@{
+        cutover_sha256 = [string]$Binding.CutoverSha256
+        expires_at = [string]$Binding.ExpiresAt
+        manifest_sha256 = [string]$Binding.ManifestSha256
+        outcome_id = [string]$Binding.OutcomeId
+        runner_sha256 = [string]$Binding.RunnerSha256
+        schema = "amn2.phase13.bot-web-cutover-claim.v1"
+    }
+    $ClaimBytes = (New-Object Text.UTF8Encoding($false)).GetBytes(
+        (($Claim | ConvertTo-Json -Depth 4 -Compress) + "`n")
+    )
+    try {
+        $Stream = New-Object IO.FileStream(
+            $ClaimPath,
+            [IO.FileMode]::CreateNew,
+            [IO.FileAccess]::Write,
+            [IO.FileShare]::None
+        )
+        try {
+            $Stream.Write($ClaimBytes, 0, $ClaimBytes.Length)
+            $Stream.Flush($true)
+        } finally {
+            $Stream.Dispose()
+        }
+    } catch [IO.IOException] {
+        if ([IO.File]::Exists($ClaimPath)) {
+            throw "outcome claim replay"
+        }
+        throw "outcome claim write failed"
+    }
+    return $ClaimPath
+}
