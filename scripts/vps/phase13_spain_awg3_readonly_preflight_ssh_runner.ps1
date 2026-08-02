@@ -743,6 +743,7 @@ function Resolve-Phase13TransportFailure {
         "transport_timeout" { "timeout"; break }
         "output_oversized" { "output_oversized"; break }
         "unknown_remote_outcome" { "ssh_exit_unclassified"; break }
+        "local_process_failure" { "local_process_failure"; break }
         default { "transport_internal_failure" }
     }
 
@@ -790,8 +791,36 @@ function Write-SanitizedFailureCreateNew {
         [Parameter(Mandatory = $true)][string]$OutcomeId,
         [Parameter(Mandatory = $true)][string]$ManifestSha256,
         [Parameter(Mandatory = $true)][string]$Stage,
-        [Parameter(Mandatory = $true)][string]$ReasonCode
+        [Parameter(Mandatory = $true)][string]$ReasonCode,
+        [Parameter(Mandatory = $true)][string]$TransportSubreason
     )
+    $AllowedStages = @(
+        "argument_validation", "checksum_verification", "approval_validation",
+        "private_root_validation", "outcome_claim", "trust_binding", "transport",
+        "collector", "schema_validation"
+    )
+    $AllowedReasons = @(
+        "udp_port_conflict", "interface_conflict", "vpn_cidr_overlap",
+        "container_cidr_overlap", "container_name_conflict", "service_name_conflict",
+        "state_path_conflict", "runtime_capability_unavailable", "awg2_equality_mismatch",
+        "foreign_equality_mismatch", "observation_ambiguous", "artifact_checksum_mismatch",
+        "outcome_replay", "schema_validation_failed", "secret_pattern_detected"
+    )
+    $TransportSubreasons = @(
+        "timeout", "output_oversized", "ssh_exit_unclassified",
+        "local_process_failure", "transport_internal_failure"
+    )
+    if ($Stage -cnotin $AllowedStages -or $ReasonCode -cnotin $AllowedReasons) {
+        throw "Failure receipt contract rejected."
+    }
+    if ($Stage -ceq "transport") {
+        if ($ReasonCode -cne "observation_ambiguous" -or $TransportSubreason -cnotin $TransportSubreasons) {
+            throw "Failure receipt contract rejected."
+        }
+    }
+    elseif ($TransportSubreason -cne "not_applicable") {
+        throw "Failure receipt contract rejected."
+    }
     $Safety = [ordered]@{
         container_action_attempted = $false
         firewall_action_attempted = $false
@@ -809,9 +838,10 @@ function Write-SanitizedFailureCreateNew {
         outcome_id = $OutcomeId
         reason_code = $ReasonCode
         safety_receipt = $Safety
-        schema = "amn2.phase13.awg3-readonly-preflight-failure.v1"
+        schema = "amn2.phase13.awg3-readonly-preflight-failure.v2"
         source_head = $script:SourceHead
         stage = $Stage
+        transport_subreason = $TransportSubreason
     }
     $Json = ($Receipt | ConvertTo-Json -Depth 8 -Compress) + "`n"
     Write-BytesCreateNew -Path $Path -Bytes ((New-Object Text.UTF8Encoding($false)).GetBytes($Json))
@@ -911,7 +941,7 @@ function Invoke-RunnerMain {
         $TransportResult = Invoke-Phase13OneSshTransport -SshExecutable $SshExecutable -SshArguments $SshArguments -CollectorBytes $CollectorBytes -TimeoutMilliseconds 15000 -MaximumOutputBytes 65536
     } catch {
         try {
-            Write-SanitizedFailureCreateNew -Path $FailurePath -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha -Stage "transport" -ReasonCode "observation_ambiguous"
+            Write-SanitizedFailureCreateNew -Path $FailurePath -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha -Stage "transport" -ReasonCode "observation_ambiguous" -TransportSubreason "transport_internal_failure"
         } catch {
             Write-RunnerFailureLine "private_root_validation" "observation_ambiguous"
             return 75
@@ -930,7 +960,7 @@ function Invoke-RunnerMain {
         $Failure = Resolve-Phase13TransportFailure -TransportResult $TransportResult
         $TransportResult = $null
         try {
-            Write-SanitizedFailureCreateNew -Path $FailurePath -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha -Stage $Failure.Stage -ReasonCode $Failure.ReasonCode
+            Write-SanitizedFailureCreateNew -Path $FailurePath -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha -Stage $Failure.Stage -ReasonCode $Failure.ReasonCode -TransportSubreason $Failure.TransportSubreason
         } catch {
             Write-RunnerFailureLine "private_root_validation" "observation_ambiguous"
             return 75
@@ -954,7 +984,7 @@ function Invoke-RunnerMain {
             throw "Evidence contract rejected."
         }
         if (-not (Test-Phase13EvidenceSecretSafe -EvidenceBytes $EvidenceBytes -SensitiveValues $SensitiveValues)) {
-            Write-SanitizedFailureCreateNew -Path $FailurePath -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha -Stage "schema_validation" -ReasonCode "secret_pattern_detected"
+            Write-SanitizedFailureCreateNew -Path $FailurePath -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha -Stage "schema_validation" -ReasonCode "secret_pattern_detected" -TransportSubreason "not_applicable"
             Write-RunnerFailureLine "schema_validation" "secret_pattern_detected"
             return 74
         }
@@ -963,7 +993,7 @@ function Invoke-RunnerMain {
     } catch {
         if (-not (Test-Path -LiteralPath $FailurePath)) {
             try {
-                Write-SanitizedFailureCreateNew -Path $FailurePath -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha -Stage "schema_validation" -ReasonCode "schema_validation_failed"
+                Write-SanitizedFailureCreateNew -Path $FailurePath -OutcomeId $OutcomeId -ManifestSha256 $ManifestSha -Stage "schema_validation" -ReasonCode "schema_validation_failed" -TransportSubreason "not_applicable"
             } catch {
                 Write-RunnerFailureLine "private_root_validation" "observation_ambiguous"
                 return 75

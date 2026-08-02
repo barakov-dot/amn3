@@ -1180,17 +1180,82 @@ def test_failure_receipt_create_new_never_persists_raw_transport_output(tmp_path
     result = run_powershell_harness(
         tmp_path,
         f"""
-Write-SanitizedFailureCreateNew -Path '{target}' -OutcomeId 'test-outcome-001' -ManifestSha256 ('a' * 64) -Stage 'transport' -ReasonCode 'observation_ambiguous'
+$failure = Resolve-Phase13TransportFailure -TransportResult ([pscustomobject]@{{ Reason = 'transport_timeout'; ExitCode = -1; TimedOut = $true; LocalFailureReason = $null }})
+Write-SanitizedFailureCreateNew -Path '{target}' -OutcomeId 'test-outcome-001' -ManifestSha256 ('a' * 64) -Stage $failure.Stage -ReasonCode $failure.ReasonCode -TransportSubreason $failure.TransportSubreason
 [Console]::Out.Write((Get-Content -Raw -LiteralPath '{target}'))
 """,
     )
     receipt = json.loads(result.stdout)
     assert result.returncode == 0, result.stderr
+    assert receipt["schema"] == "amn2.phase13.awg3-readonly-preflight-failure.v2"
     assert receipt["decision"] == "stop"
     assert receipt["reason_code"] == "observation_ambiguous"
+    assert receipt["transport_subreason"] == "timeout"
+    assert all(value is False for value in receipt["safety_receipt"].values())
     assert "stdout" not in receipt
     assert "stderr" not in receipt
     assert "raw" not in receipt
+
+
+@pytest.mark.parametrize(
+    ("stage", "reason_code", "transport_subreason"),
+    [
+        ("transport", "observation_ambiguous", "not_applicable"),
+        ("schema_validation", "schema_validation_failed", "timeout"),
+        ("transport", "observation_ambiguous", "unknown_transport_failure"),
+    ],
+)
+def test_failure_receipt_v2_rejects_stage_subreason_mismatch(
+    tmp_path, stage, reason_code, transport_subreason
+):
+    target = tmp_path / "invalid-failure.json"
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$rejected = $false
+try {{
+    Write-SanitizedFailureCreateNew -Path '{target}' -OutcomeId 'test-outcome-002' -ManifestSha256 ('b' * 64) -Stage '{stage}' -ReasonCode '{reason_code}' -TransportSubreason '{transport_subreason}'
+}} catch {{
+    $rejected = $true
+}}
+[Console]::Out.Write("$($rejected.ToString().ToLowerInvariant())|$((Test-Path -LiteralPath '{target}').ToString().ToLowerInvariant())")
+""",
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|false"
+
+
+def test_failure_receipt_v2_propagates_local_process_subreason_without_details(tmp_path):
+    target = tmp_path / "local-process-failure.json"
+    missing_executable = tmp_path / "missing-ssh.exe"
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$transport = Invoke-Phase13OneSshTransport -SshExecutable '{missing_executable}' -SshArguments @('unused') -CollectorBytes ([byte[]]@(0)) -TimeoutMilliseconds 2000 -MaximumOutputBytes 4096
+$failure = Resolve-Phase13TransportFailure -TransportResult $transport
+Write-SanitizedFailureCreateNew -Path '{target}' -OutcomeId 'test-outcome-003' -ManifestSha256 ('c' * 64) -Stage $failure.Stage -ReasonCode $failure.ReasonCode -TransportSubreason $failure.TransportSubreason
+[Console]::Out.Write((Get-Content -Raw -LiteralPath '{target}'))
+""",
+    )
+    assert result.returncode == 0, result.stderr
+    receipt = json.loads(result.stdout)
+    assert receipt["stage"] == "transport"
+    assert receipt["reason_code"] == "observation_ambiguous"
+    assert receipt["transport_subreason"] == "local_process_failure"
+    forbidden = {
+        "stdout",
+        "stderr",
+        "exception",
+        "system_error_code",
+        "executable",
+        "arguments",
+        "path",
+        "target_user",
+        "host_key",
+        "fingerprint",
+        "raw",
+    }
+    assert forbidden.isdisjoint(receipt)
 
 
 def test_python_contract_validation_accepts_only_exact_canonical_success_evidence(tmp_path):
