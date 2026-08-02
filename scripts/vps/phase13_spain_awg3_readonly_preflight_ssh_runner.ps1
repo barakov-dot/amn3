@@ -472,6 +472,19 @@ function ConvertTo-ProcessArgumentString {
     return ($Quoted -join ' ')
 }
 
+function New-BoundedTransportLocalProcessFailure {
+    param([Parameter(Mandatory = $true)][int]$MaximumOutputBytes)
+    return [pscustomobject]@{
+        ExitCode = -1
+        TimedOut = $false
+        OutputLimitExceeded = $false
+        LocalFailureReason = "local_process_failure"
+        StdoutBytes = [byte[]]@()
+        StderrBytes = [byte[]]@()
+        MaximumOutputBytes = $MaximumOutputBytes
+    }
+}
+
 function Invoke-BoundedTransport {
     param(
         [Parameter(Mandatory = $true)][string]$Executable,
@@ -498,19 +511,31 @@ function Invoke-BoundedTransport {
     $Process.StartInfo = $StartInfo
     $Stdout = New-Object IO.MemoryStream
     $Stderr = New-Object IO.MemoryStream
-    if (-not $Process.Start()) { throw "Transport process could not start." }
-    $StdoutBuffer = New-Object byte[] 4096
-    $StderrBuffer = New-Object byte[] 4096
-    $StdoutEof = $false
-    $StderrEof = $false
-    $StdoutTask = $Process.StandardOutput.BaseStream.ReadAsync($StdoutBuffer, 0, $StdoutBuffer.Length)
-    $StderrTask = $Process.StandardError.BaseStream.ReadAsync($StderrBuffer, 0, $StderrBuffer.Length)
+    $ProcessStarted = $false
     try {
-        if ($InputBytes.Length -gt 0) {
-            $Process.StandardInput.BaseStream.Write($InputBytes, 0, $InputBytes.Length)
-            $Process.StandardInput.BaseStream.Flush()
+        try {
+            if (-not $Process.Start()) {
+                return New-BoundedTransportLocalProcessFailure -MaximumOutputBytes $MaximumOutputBytes
+            }
+            $ProcessStarted = $true
+        } catch {
+            return New-BoundedTransportLocalProcessFailure -MaximumOutputBytes $MaximumOutputBytes
         }
-        $Process.StandardInput.Close()
+        $StdoutBuffer = New-Object byte[] 4096
+        $StderrBuffer = New-Object byte[] 4096
+        $StdoutEof = $false
+        $StderrEof = $false
+        $StdoutTask = $Process.StandardOutput.BaseStream.ReadAsync($StdoutBuffer, 0, $StdoutBuffer.Length)
+        $StderrTask = $Process.StandardError.BaseStream.ReadAsync($StderrBuffer, 0, $StderrBuffer.Length)
+        try {
+            if ($InputBytes.Length -gt 0) {
+                $Process.StandardInput.BaseStream.Write($InputBytes, 0, $InputBytes.Length)
+                $Process.StandardInput.BaseStream.Flush()
+            }
+            $Process.StandardInput.Close()
+        } catch {
+            return New-BoundedTransportLocalProcessFailure -MaximumOutputBytes $MaximumOutputBytes
+        }
         $Deadline = [DateTime]::UtcNow.AddMilliseconds($TimeoutMilliseconds)
         $TimedOut = $false
         $OutputLimitExceeded = $false
@@ -553,11 +578,32 @@ function Invoke-BoundedTransport {
             ExitCode = $ExitCode
             TimedOut = $TimedOut
             OutputLimitExceeded = $OutputLimitExceeded
+            LocalFailureReason = $null
             StdoutBytes = $Stdout.ToArray()
             StderrBytes = $Stderr.ToArray()
             MaximumOutputBytes = $MaximumOutputBytes
         }
     } finally {
+        if ($ProcessStarted) {
+            try {
+                if (-not $Process.HasExited) {
+                    $Process.Kill()
+                    [void]$Process.WaitForExit(5000)
+                }
+            } catch { }
+        }
+        try {
+            if ($Stdout.Length -gt 0) {
+                $StdoutBufferToClear = $Stdout.GetBuffer()
+                [Array]::Clear($StdoutBufferToClear, 0, $StdoutBufferToClear.Length)
+            }
+        } catch { }
+        try {
+            if ($Stderr.Length -gt 0) {
+                $StderrBufferToClear = $Stderr.GetBuffer()
+                [Array]::Clear($StderrBufferToClear, 0, $StderrBufferToClear.Length)
+            }
+        } catch { }
         $Process.Dispose()
         $Stdout.Dispose()
         $Stderr.Dispose()
@@ -566,6 +612,12 @@ function Invoke-BoundedTransport {
 
 function ConvertFrom-BoundedCollectorEnvelope {
     param([Parameter(Mandatory = $true)]$Transport)
+    if ($Transport.LocalFailureReason -ceq "local_process_failure") {
+        return [pscustomobject]@{ Reason = "local_process_failure"; Document = $null }
+    }
+    if ($null -ne $Transport.LocalFailureReason) {
+        return [pscustomobject]@{ Reason = "transport_internal_failure"; Document = $null }
+    }
     if ($Transport.TimedOut) { return [pscustomobject]@{ Reason = "transport_timeout"; Document = $null } }
     if ($Transport.OutputLimitExceeded -or $Transport.StdoutBytes.Length -gt $Transport.MaximumOutputBytes -or $Transport.StderrBytes.Length -gt $Transport.MaximumOutputBytes) {
         return [pscustomobject]@{ Reason = "output_oversized"; Document = $null }
@@ -613,12 +665,20 @@ function Invoke-Phase13OneSshTransport {
     )
     $Transport = $null
     try {
-        $Transport = Invoke-BoundedTransport -Executable $SshExecutable -Arguments $SshArguments -InputBytes $CollectorBytes -TimeoutMilliseconds $TimeoutMilliseconds -MaximumOutputBytes $MaximumOutputBytes -MaximumInputBytes 1048576
-        $Envelope = ConvertFrom-BoundedCollectorEnvelope -Transport $Transport
-        return [pscustomobject]@{
-            Reason = $Envelope.Reason
-            Document = $Envelope.Document
-            ExitCode = $Transport.ExitCode
+        try {
+            $Transport = Invoke-BoundedTransport -Executable $SshExecutable -Arguments $SshArguments -InputBytes $CollectorBytes -TimeoutMilliseconds $TimeoutMilliseconds -MaximumOutputBytes $MaximumOutputBytes -MaximumInputBytes 1048576
+            $Envelope = ConvertFrom-BoundedCollectorEnvelope -Transport $Transport
+            return [pscustomobject]@{
+                Reason = $Envelope.Reason
+                Document = $Envelope.Document
+                ExitCode = $Transport.ExitCode
+            }
+        } catch {
+            return [pscustomobject]@{
+                Reason = "transport_internal_failure"
+                Document = $null
+                ExitCode = -1
+            }
         }
     } finally {
         if ($null -ne $Transport) {

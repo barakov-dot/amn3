@@ -948,6 +948,70 @@ $result = Invoke-Phase13OneSshTransport -SshExecutable '{sys.executable}' -SshAr
     assert "private-target-material" not in combined
 
 
+def test_one_ssh_transport_classifies_process_start_failure_without_details(tmp_path):
+    missing_executable = tmp_path / "missing-process.exe"
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$result = Invoke-Phase13OneSshTransport -SshExecutable '{missing_executable}' -SshArguments @('unused') -CollectorBytes ([byte[]]@(0)) -TimeoutMilliseconds 2000 -MaximumOutputBytes 4096
+[Console]::Out.Write("$($result.Reason)|$($result.Document)|$($result.ExitCode)|$($result.PSObject.Properties.Name -join ',')")
+""",
+    )
+
+    combined = result.stdout + result.stderr
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "local_process_failure||-1|Reason,Document,ExitCode"
+    assert str(missing_executable) not in combined
+    assert "cannot find" not in combined.casefold()
+
+
+def test_one_ssh_transport_classifies_closed_stdin_and_starts_once(tmp_path):
+    fake_process = tmp_path / "fake_process.py"
+    counter = tmp_path / "counter.txt"
+    fake_process.write_text(
+        """from pathlib import Path
+import os, sys, time
+counter = Path(sys.argv[1])
+count = int(counter.read_text()) if counter.exists() else 0
+counter.write_text(str(count + 1))
+os.close(sys.stdin.fileno())
+time.sleep(1)
+""",
+        encoding="utf-8",
+    )
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$collector = New-Object byte[] 1048576
+$result = Invoke-Phase13OneSshTransport -SshExecutable '{sys.executable}' -SshArguments @('{fake_process}', '{counter}') -CollectorBytes $collector -TimeoutMilliseconds 2000 -MaximumOutputBytes 4096
+[Console]::Out.Write("$($result.Reason)|$($result.Document)|$($result.ExitCode)|$($result.PSObject.Properties.Name -join ',')")
+""",
+    )
+
+    combined = result.stdout + result.stderr
+    assert result.returncode == 0, result.stderr
+    assert counter.read_text() == "1"
+    assert result.stdout == "local_process_failure||-1|Reason,Document,ExitCode"
+    assert str(fake_process) not in combined
+    assert str(counter) not in combined
+
+
+def test_one_ssh_transport_classifies_unexpected_internal_failure_without_start(tmp_path):
+    missing_executable = tmp_path / "must-not-start.exe"
+    result = run_powershell_harness(
+        tmp_path,
+        f"""
+$result = Invoke-Phase13OneSshTransport -SshExecutable '{missing_executable}' -SshArguments @('unused') -CollectorBytes ([byte[]]@(0)) -TimeoutMilliseconds 0 -MaximumOutputBytes 4096
+[Console]::Out.Write("$($result.Reason)|$($result.Document)|$($result.ExitCode)|$($result.PSObject.Properties.Name -join ',')")
+""",
+    )
+
+    combined = result.stdout + result.stderr
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "transport_internal_failure||-1|Reason,Document,ExitCode"
+    assert str(missing_executable) not in combined
+
+
 def test_success_evidence_filter_rejects_secret_patterns_and_target_literals(tmp_path):
     result = run_powershell_harness(
         tmp_path,
