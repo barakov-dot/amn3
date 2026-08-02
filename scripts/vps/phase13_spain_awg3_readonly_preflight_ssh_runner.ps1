@@ -665,21 +665,31 @@ function Resolve-Phase13TransportFailure {
         return [pscustomobject]@{
             Stage = "collector"
             ReasonCode = "observation_ambiguous"
+            TransportSubreason = "not_applicable"
             ExitCode = $ExitCode
         }
     }
 
-    if ($TransportResult.Reason -in @("invalid_utf8", "crlf_corruption", "extra_output")) {
+    if ($TransportResult.Reason -cin @("schema_validation_failed", "invalid_utf8", "crlf_corruption", "extra_output")) {
         return [pscustomobject]@{
             Stage = "schema_validation"
             ReasonCode = "schema_validation_failed"
+            TransportSubreason = "not_applicable"
             ExitCode = 68
         }
+    }
+
+    $TransportSubreason = switch -CaseSensitive ($TransportResult.Reason) {
+        "transport_timeout" { "timeout"; break }
+        "output_oversized" { "output_oversized"; break }
+        "unknown_remote_outcome" { "ssh_exit_unclassified"; break }
+        default { "transport_internal_failure" }
     }
 
     return [pscustomobject]@{
         Stage = "transport"
         ReasonCode = "observation_ambiguous"
+        TransportSubreason = $TransportSubreason
         ExitCode = 67
     }
 }

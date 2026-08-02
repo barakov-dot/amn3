@@ -966,13 +966,16 @@ $secret = Test-Phase13EvidenceSecretSafe -EvidenceBytes ([Text.Encoding]::UTF8.G
 @pytest.mark.parametrize(
     ("reason", "remote_exit", "expected"),
     [
-        ("transport_timeout", -1, "transport|observation_ambiguous|67"),
-        ("output_oversized", -1, "transport|observation_ambiguous|67"),
-        ("unknown_remote_outcome", 255, "transport|observation_ambiguous|67"),
-        ("invalid_utf8", 0, "schema_validation|schema_validation_failed|68"),
-        ("crlf_corruption", 0, "schema_validation|schema_validation_failed|68"),
-        ("extra_output", 0, "schema_validation|schema_validation_failed|68"),
-        ("collector_failure", 71, "collector|observation_ambiguous|71"),
+        ("transport_timeout", -1, "transport|observation_ambiguous|timeout|67"),
+        ("output_oversized", -1, "transport|observation_ambiguous|output_oversized|67"),
+        ("unknown_remote_outcome", 255, "transport|observation_ambiguous|ssh_exit_unclassified|67"),
+        ("unexpected_transport_reason", -1, "transport|observation_ambiguous|transport_internal_failure|67"),
+        ("schema_validation_failed", 0, "schema_validation|schema_validation_failed|not_applicable|68"),
+        ("SCHEMA_VALIDATION_FAILED", 0, "transport|observation_ambiguous|transport_internal_failure|67"),
+        ("invalid_utf8", 0, "schema_validation|schema_validation_failed|not_applicable|68"),
+        ("crlf_corruption", 0, "schema_validation|schema_validation_failed|not_applicable|68"),
+        ("extra_output", 0, "schema_validation|schema_validation_failed|not_applicable|68"),
+        ("collector_failure", 71, "collector|observation_ambiguous|not_applicable|71"),
     ],
 )
 def test_transport_failure_mapping_is_sanitized_and_fail_closed(
@@ -983,7 +986,7 @@ def test_transport_failure_mapping_is_sanitized_and_fail_closed(
         f"""
 $transport = [pscustomobject]@{{ Reason = '{reason}'; Document = 'raw-not-returned'; ExitCode = {remote_exit} }}
 $failure = Resolve-Phase13TransportFailure -TransportResult $transport
-[Console]::Out.Write("$($failure.Stage)|$($failure.ReasonCode)|$($failure.ExitCode)")
+[Console]::Out.Write("$($failure.Stage)|$($failure.ReasonCode)|$($failure.TransportSubreason)|$($failure.ExitCode)")
 """,
     )
 
