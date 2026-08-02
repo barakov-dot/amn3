@@ -286,6 +286,136 @@ function Assert-PrivatePath {
     }
 }
 
+function Assert-Phase13TrustPath {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$ExpectedOwnerSid
+    )
+    Assert-PrivatePath -Path $Path -ExpectedOwnerSid $ExpectedOwnerSid
+    $Acl = Get-Acl -LiteralPath $Path
+    $Rules = @($Acl.Access)
+    if ($Rules.Count -ne 1) {
+        throw "Trust path ACL is not current-user-only."
+    }
+    $RuleSid = $Rules[0].IdentityReference.Value
+    try { $RuleSid = $Rules[0].IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value }
+    catch { }
+    if ($RuleSid -cne $ExpectedOwnerSid -or
+        $Rules[0].AccessControlType -ne [Security.AccessControl.AccessControlType]::Allow -or
+        (($Rules[0].FileSystemRights -band [Security.AccessControl.FileSystemRights]::FullControl) -ne [Security.AccessControl.FileSystemRights]::FullControl)) {
+        throw "Trust path ACL is not current-user-only."
+    }
+}
+
+function Assert-Phase13LocalExecutable {
+    param([string]$Path)
+    if (-not [IO.Path]::IsPathRooted($Path) -or -not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        throw "Required local executable is unavailable."
+    }
+    $Item = Get-Item -LiteralPath $Path -Force -ErrorAction Stop
+    if (($Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "Local executable reparse point rejected."
+    }
+}
+
+function Assert-Phase13TargetHost([string]$Value) {
+    if ($Value -notmatch '^[A-Za-z0-9](?:[A-Za-z0-9.:-]{0,252}[A-Za-z0-9])?$' -or $Value.Contains("..")) {
+        throw "Private target host format rejected."
+    }
+}
+
+function Assert-Phase13TargetUser([string]$Value) {
+    if ($Value -notmatch '^[a-z_][a-z0-9_-]{0,31}$') {
+        throw "Private target user format rejected."
+    }
+}
+
+function Assert-Phase13Fingerprint([string]$Value) {
+    if ($Value -notmatch '^SHA256:[A-Za-z0-9+/]{43}$') {
+        throw "Private host-key fingerprint format rejected."
+    }
+}
+
+function Read-Phase13TrustBinding {
+    param(
+        [Parameter(Mandatory = $true)][string]$TrustRoot,
+        [Parameter(Mandatory = $true)][string]$BindingPath,
+        [Parameter(Mandatory = $true)][string]$KeyPath,
+        [Parameter(Mandatory = $true)][string]$ExpectedOwnerSid
+    )
+    Assert-Phase13TrustPath -Path $TrustRoot -ExpectedOwnerSid $ExpectedOwnerSid
+    Assert-Phase13TrustPath -Path $BindingPath -ExpectedOwnerSid $ExpectedOwnerSid
+    $Lines = @(Get-Content -LiteralPath $BindingPath)
+    $ExpectedNames = @("TARGET_HOST", "TARGET_USER", "SSH_KEY_PATH", "EXPECTED_HOST_KEY_SHA256")
+    if ($Lines.Count -ne $ExpectedNames.Count) {
+        throw "Private target binding schema rejected."
+    }
+    $Binding = @{}
+    for ($Index = 0; $Index -lt $ExpectedNames.Count; $Index++) {
+        $Prefix = "$($ExpectedNames[$Index])="
+        if (-not $Lines[$Index].StartsWith($Prefix, [StringComparison]::Ordinal)) {
+            throw "Private target binding schema rejected."
+        }
+        $Binding[$ExpectedNames[$Index]] = $Lines[$Index].Substring($Prefix.Length)
+    }
+    Assert-Phase13TargetHost $Binding["TARGET_HOST"]
+    Assert-Phase13TargetUser $Binding["TARGET_USER"]
+    Assert-Phase13Fingerprint $Binding["EXPECTED_HOST_KEY_SHA256"]
+    if ($Binding["SSH_KEY_PATH"] -cne $KeyPath) {
+        throw "Private target binding dedicated key mismatch."
+    }
+    return $Binding
+}
+
+function Assert-Phase13DedicatedEd25519KeyPair {
+    param(
+        [Parameter(Mandatory = $true)][string]$PrivateKeyPath,
+        [Parameter(Mandatory = $true)][string]$PublicKeyPath,
+        [Parameter(Mandatory = $true)][string]$SshKeygenExecutable,
+        [Parameter(Mandatory = $true)][string]$ExpectedOwnerSid
+    )
+    Assert-Phase13LocalExecutable -Path $SshKeygenExecutable
+    Assert-Phase13TrustPath -Path $PrivateKeyPath -ExpectedOwnerSid $ExpectedOwnerSid
+    Assert-Phase13TrustPath -Path $PublicKeyPath -ExpectedOwnerSid $ExpectedOwnerSid
+    $DerivedLines = @(& $SshKeygenExecutable -y -f $PrivateKeyPath 2>$null)
+    if ($LASTEXITCODE -ne 0 -or $DerivedLines.Count -ne 1) {
+        throw "Dedicated Ed25519 private key rejected."
+    }
+    $DerivedMatch = [regex]::Match($DerivedLines[0].Trim(), '^ssh-ed25519 ([A-Za-z0-9+/]+={0,2})(?: [^\r\n]+)?$')
+    $PublicMatch = [regex]::Match((Get-Content -LiteralPath $PublicKeyPath -Raw).Trim(), '^ssh-ed25519 ([A-Za-z0-9+/]+={0,2})(?: [^\r\n]+)?$')
+    if (-not $DerivedMatch.Success -or -not $PublicMatch.Success -or
+        $DerivedMatch.Groups[1].Value -cne $PublicMatch.Groups[1].Value) {
+        throw "Dedicated Ed25519 key pair mismatch."
+    }
+}
+
+function Assert-Phase13VerifiedHostPin {
+    param(
+        [Parameter(Mandatory = $true)][string]$KnownHostsPath,
+        [Parameter(Mandatory = $true)][hashtable]$Binding,
+        [Parameter(Mandatory = $true)][string]$SshKeygenExecutable,
+        [Parameter(Mandatory = $true)][string]$ExpectedOwnerSid
+    )
+    Assert-Phase13LocalExecutable -Path $SshKeygenExecutable
+    Assert-Phase13TrustPath -Path $KnownHostsPath -ExpectedOwnerSid $ExpectedOwnerSid
+    $HostLines = @(Get-Content -LiteralPath $KnownHostsPath)
+    if ($HostLines.Count -ne 1) {
+        throw "Independent host-key pin schema rejected."
+    }
+    $HostMatch = [regex]::Match($HostLines[0], '^([^ ]+) (ssh-ed25519|ecdsa-sha2-nistp256|rsa-sha2-(?:256|512)) ([A-Za-z0-9+/]+={0,2})$')
+    if (-not $HostMatch.Success -or $HostMatch.Groups[1].Value -cne $Binding["TARGET_HOST"]) {
+        throw "Independent host-key pin target mismatch."
+    }
+    $FingerprintOutput = @(& $SshKeygenExecutable -lf $KnownHostsPath 2>$null)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Independent host-key pin verification failed."
+    }
+    $ObservedFingerprint = [regex]::Match(($FingerprintOutput -join " "), 'SHA256:[A-Za-z0-9+/]{43}').Value
+    if (-not $ObservedFingerprint -or $ObservedFingerprint -cne $Binding["EXPECTED_HOST_KEY_SHA256"]) {
+        throw "Independent host-key fingerprint mismatch."
+    }
+}
+
 function ConvertTo-ProcessArgumentString {
     param([string[]]$Arguments)
     $Quoted = foreach ($Argument in $Arguments) {
@@ -550,8 +680,26 @@ function Invoke-RunnerMain {
         return 66
     }
 
-    # Production transport remains unreachable until Task 6 supplies a verified
-    # manifest and a separately approved binding of the sanitized observations.
+    $TrustRoot = Join-Path $PrivateArtifactsRoot "post-release\spain-migration\$($script:TrustedBundleRunId)"
+    $BindingPath = Join-Path $TrustRoot "target.env"
+    $KeyPath = Join-Path $TrustRoot "id_ed25519_spain"
+    $PublicKeyPath = "$KeyPath.pub"
+    $KnownHostsPath = Join-Path $TrustRoot "known_hosts_spain"
+    $SshExecutable = "C:\Windows\System32\OpenSSH\ssh.exe"
+    $SshKeygenExecutable = "C:\Windows\System32\OpenSSH\ssh-keygen.exe"
+    try {
+        Assert-Phase13LocalExecutable -Path $SshExecutable
+        Assert-Phase13LocalExecutable -Path $SshKeygenExecutable
+        $Binding = Read-Phase13TrustBinding -TrustRoot $TrustRoot -BindingPath $BindingPath -KeyPath $KeyPath -ExpectedOwnerSid $CurrentSid
+        Assert-Phase13DedicatedEd25519KeyPair -PrivateKeyPath $KeyPath -PublicKeyPath $PublicKeyPath -SshKeygenExecutable $SshKeygenExecutable -ExpectedOwnerSid $CurrentSid
+        Assert-Phase13VerifiedHostPin -KnownHostsPath $KnownHostsPath -Binding $Binding -SshKeygenExecutable $SshKeygenExecutable -ExpectedOwnerSid $CurrentSid
+    } catch {
+        Write-RunnerFailureLine "trust_binding" "runtime_capability_unavailable"
+        return 73
+    }
+
+    # Production transport remains unreachable until the separately approved
+    # one-SSH transport and sanitized observation binding are implemented.
     Write-RunnerFailureLine "trust_binding" "runtime_capability_unavailable"
     return 73
 }

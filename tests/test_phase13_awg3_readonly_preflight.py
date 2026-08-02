@@ -169,6 +169,87 @@ def run_powershell_harness(tmp_path: Path, body: str):
     )
 
 
+def prepare_fake_trust_bundle(tmp_path: Path, *, binding_key_path: Path | None = None):
+    trust_root = tmp_path / "trust"
+    trust_root.mkdir()
+    key_path = trust_root / "id_ed25519_spain"
+    public_key_path = trust_root / "id_ed25519_spain.pub"
+    known_hosts_path = trust_root / "known_hosts_spain"
+    binding_path = trust_root / "target.env"
+    fake_keygen = tmp_path / "fake-ssh-keygen.ps1"
+    target_host = "spain.test.invalid"
+    target_user = "operator"
+    fingerprint = "SHA256:" + ("A" * 43)
+    key_path.write_text("private-test-material\n", encoding="utf-8")
+    public_key_path.write_text("ssh-ed25519 VEVTVEtFWQ== test\n", encoding="utf-8")
+    known_hosts_path.write_text(
+        f"{target_host} ssh-ed25519 VEVTVEtFWQ==\n", encoding="utf-8"
+    )
+    bound_key_path = binding_key_path or key_path
+    binding_path.write_text(
+        "\n".join(
+            (
+                f"TARGET_HOST={target_host}",
+                f"TARGET_USER={target_user}",
+                f"SSH_KEY_PATH={bound_key_path}",
+                f"EXPECTED_HOST_KEY_SHA256={fingerprint}",
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    fake_keygen.write_text(
+        """if ($args[0] -ceq '-y') {
+    Write-Output 'ssh-ed25519 VEVTVEtFWQ=='
+    exit 0
+}
+if ($args[0] -ceq '-lf') {
+    Write-Output '256 SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA fake (ED25519)'
+    exit 0
+}
+exit 1
+""",
+        encoding="utf-8",
+    )
+    return {
+        "root": trust_root,
+        "binding": binding_path,
+        "key": key_path,
+        "public_key": public_key_path,
+        "known_hosts": known_hosts_path,
+        "keygen": fake_keygen,
+        "target_host": target_host,
+        "target_user": target_user,
+        "fingerprint": fingerprint,
+    }
+
+
+def trust_bundle_acl_setup(bundle: dict[str, Path | str], *, protect_root: bool = True) -> str:
+    paths = [bundle["binding"], bundle["key"], bundle["public_key"], bundle["known_hosts"]]
+    if protect_root:
+        paths.insert(0, bundle["root"])
+    quoted_paths = ",".join(f"'{path}'" for path in paths)
+    return f"""
+function Protect-TestTrustPath([string]$Path) {{
+    $sid = [Security.Principal.WindowsIdentity]::GetCurrent().User
+    $acl = Get-Acl -LiteralPath $Path
+    $acl.SetOwner($sid)
+    $acl.SetAccessRuleProtection($true, $false)
+    foreach ($rule in @($acl.Access)) {{ $acl.RemoveAccessRuleSpecific($rule) }}
+    $allow = New-Object Security.AccessControl.FileSystemAccessRule(
+        $sid,
+        [Security.AccessControl.FileSystemRights]::FullControl,
+        [Security.AccessControl.InheritanceFlags]::None,
+        [Security.AccessControl.PropagationFlags]::None,
+        [Security.AccessControl.AccessControlType]::Allow
+    )
+    $acl.SetAccessRule($allow)
+    Set-Acl -LiteralPath $Path -AclObject $acl
+}}
+foreach ($path in @({quoted_paths})) {{ Protect-TestTrustPath $path }}
+"""
+
+
 def valid_success_evidence_for_manifest(manifest_path: Path) -> bytes:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest_sha = hashlib.sha256(canonical_json(manifest)).hexdigest()
@@ -570,6 +651,105 @@ try {{ Assert-PrivatePath -Path '{junction}' -ExpectedOwnerSid $currentSid }} ca
     )
     assert result.returncode == 0, result.stderr
     assert result.stdout == "true|true|true"
+
+
+def test_phase12_trust_bundle_adapter_accepts_exact_private_binding_without_secret_output(tmp_path):
+    bundle = prepare_fake_trust_bundle(tmp_path)
+    result = run_powershell_harness(
+        tmp_path,
+        trust_bundle_acl_setup(bundle)
+        + f"""
+$sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+$binding = Read-Phase13TrustBinding -TrustRoot '{bundle['root']}' -BindingPath '{bundle['binding']}' -KeyPath '{bundle['key']}' -ExpectedOwnerSid $sid
+Assert-Phase13DedicatedEd25519KeyPair -PrivateKeyPath '{bundle['key']}' -PublicKeyPath '{bundle['public_key']}' -SshKeygenExecutable '{bundle['keygen']}' -ExpectedOwnerSid $sid
+Assert-Phase13VerifiedHostPin -KnownHostsPath '{bundle['known_hosts']}' -Binding $binding -SshKeygenExecutable '{bundle['keygen']}' -ExpectedOwnerSid $sid
+[Console]::Out.Write('passed')
+""",
+    )
+
+    combined = result.stdout + result.stderr
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "passed"
+    assert bundle["target_host"] not in combined
+    assert bundle["target_user"] not in combined
+    assert str(bundle["key"]) not in combined
+    assert bundle["fingerprint"] not in combined
+
+
+@pytest.mark.parametrize("scenario", ["key_path", "key_pair", "host_pin", "fingerprint"])
+def test_phase12_trust_bundle_adapter_fails_closed_on_trust_material_mismatch(
+    tmp_path, scenario
+):
+    bundle = prepare_fake_trust_bundle(tmp_path)
+    mismatched_key = tmp_path / "not-the-dedicated-key"
+    mutations = {
+        "key_path": f"(Get-Content -LiteralPath '{bundle['binding']}') -replace '^SSH_KEY_PATH=.*$', 'SSH_KEY_PATH={mismatched_key}' | Set-Content -LiteralPath '{bundle['binding']}' -Encoding UTF8",
+        "key_pair": f"Set-Content -LiteralPath '{bundle['public_key']}' -Value 'ssh-ed25519 QUJDRA== test' -Encoding UTF8",
+        "host_pin": f"Set-Content -LiteralPath '{bundle['known_hosts']}' -Value 'different.test.invalid ssh-ed25519 VEVTVEtFWQ==' -Encoding UTF8",
+        "fingerprint": f"(Get-Content -LiteralPath '{bundle['binding']}') -replace '^EXPECTED_HOST_KEY_SHA256=.*$', 'EXPECTED_HOST_KEY_SHA256=SHA256:{'B' * 43}' | Set-Content -LiteralPath '{bundle['binding']}' -Encoding UTF8",
+    }
+    result = run_powershell_harness(
+        tmp_path,
+        trust_bundle_acl_setup(bundle)
+        + f"""
+$sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+$baseline = Read-Phase13TrustBinding -TrustRoot '{bundle['root']}' -BindingPath '{bundle['binding']}' -KeyPath '{bundle['key']}' -ExpectedOwnerSid $sid
+Assert-Phase13DedicatedEd25519KeyPair -PrivateKeyPath '{bundle['key']}' -PublicKeyPath '{bundle['public_key']}' -SshKeygenExecutable '{bundle['keygen']}' -ExpectedOwnerSid $sid
+Assert-Phase13VerifiedHostPin -KnownHostsPath '{bundle['known_hosts']}' -Binding $baseline -SshKeygenExecutable '{bundle['keygen']}' -ExpectedOwnerSid $sid
+{mutations[scenario]}
+$rejected = $false
+try {{
+    $binding = Read-Phase13TrustBinding -TrustRoot '{bundle['root']}' -BindingPath '{bundle['binding']}' -KeyPath '{bundle['key']}' -ExpectedOwnerSid $sid
+    Assert-Phase13DedicatedEd25519KeyPair -PrivateKeyPath '{bundle['key']}' -PublicKeyPath '{bundle['public_key']}' -SshKeygenExecutable '{bundle['keygen']}' -ExpectedOwnerSid $sid
+    Assert-Phase13VerifiedHostPin -KnownHostsPath '{bundle['known_hosts']}' -Binding $binding -SshKeygenExecutable '{bundle['keygen']}' -ExpectedOwnerSid $sid
+}} catch {{ $rejected = $true }}
+[Console]::Out.Write($rejected.ToString().ToLowerInvariant())
+""",
+    )
+
+    combined = result.stdout + result.stderr
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true"
+    assert bundle["target_host"] not in combined
+    assert bundle["target_user"] not in combined
+    assert str(bundle["key"]) not in combined
+    assert bundle["fingerprint"] not in combined
+
+
+def test_phase12_trust_bundle_adapter_rejects_unprotected_root_acl(tmp_path):
+    bundle = prepare_fake_trust_bundle(tmp_path)
+    result = run_powershell_harness(
+        tmp_path,
+        trust_bundle_acl_setup(bundle)
+        + f"""
+$sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+$baseline = Read-Phase13TrustBinding -TrustRoot '{bundle['root']}' -BindingPath '{bundle['binding']}' -KeyPath '{bundle['key']}' -ExpectedOwnerSid $sid
+$rootAcl = Get-Acl -LiteralPath '{bundle['root']}'
+$rootAcl.SetAccessRuleProtection($false, $true)
+Set-Acl -LiteralPath '{bundle['root']}' -AclObject $rootAcl
+$rejected = $false
+try {{ Read-Phase13TrustBinding -TrustRoot '{bundle['root']}' -BindingPath '{bundle['binding']}' -KeyPath '{bundle['key']}' -ExpectedOwnerSid $sid }} catch {{ $rejected = $true }}
+[Console]::Out.Write($rejected.ToString().ToLowerInvariant())
+""",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true"
+
+
+def test_runner_binds_phase12_trust_adapter_after_claim_to_fixed_private_bundle():
+    source = RUNNER.read_text(encoding="utf-8")
+    claim_call = source.index("[void](New-Phase13OutcomeClaim")
+    trust_call = source.index("Read-Phase13TrustBinding", claim_call)
+    stop_call = source.index(
+        'Write-RunnerFailureLine "trust_binding" "runtime_capability_unavailable"',
+        trust_call,
+    )
+
+    assert claim_call < trust_call < stop_call
+    assert '"post-release\\spain-migration\\$($script:TrustedBundleRunId)"' in source
+    assert '"C:\\Windows\\System32\\OpenSSH\\ssh.exe"' in source
+    assert '"C:\\Windows\\System32\\OpenSSH\\ssh-keygen.exe"' in source
 
 
 @pytest.mark.parametrize(
