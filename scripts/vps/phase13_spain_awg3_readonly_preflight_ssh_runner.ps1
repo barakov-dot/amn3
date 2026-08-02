@@ -1084,6 +1084,25 @@ function Write-RunnerFailureLine {
     [Console]::Out.WriteLine("AMN2_PHASE13_AWG3_RUNNER_FAILURE_V1|stage=$Stage|reason=$Reason")
 }
 
+function Write-RunnerClaimFailureLine {
+    param([Parameter(Mandatory = $true)]$Failure)
+
+    if ([string]$Failure.ClaimSubreason -ceq "not_applicable") {
+        $Expected = Resolve-Phase13ExpiredManifestFailure
+    } else {
+        $Expected = Resolve-Phase13ClaimFailure -ClaimSubreason ([string]$Failure.ClaimSubreason)
+    }
+    if ([int]$Failure.ExitCode -ne [int]$Expected.ExitCode -or
+        [string]$Failure.Stage -cne [string]$Expected.Stage -or
+        [string]$Failure.ReasonCode -cne [string]$Expected.ReasonCode -or
+        [string]$Failure.ClaimSubreason -cne [string]$Expected.ClaimSubreason) {
+        throw "Claim failure mapping is inconsistent."
+    }
+    [Console]::Out.WriteLine(
+        "AMN2_PHASE13_AWG3_CLAIM_FAILURE_V1|stage=$($Expected.Stage)|reason=$($Expected.ReasonCode)|claim_subreason=$($Expected.ClaimSubreason)"
+    )
+}
+
 function Invoke-RunnerMain {
     param([string]$Mode, [string]$OutcomeId, [string]$Approval)
     try { Assert-OutcomeId -Value $OutcomeId }
@@ -1098,8 +1117,9 @@ function Invoke-RunnerMain {
         Assert-ManifestContract -Manifest $Manifest -ExpectedOutcomeId $OutcomeId
     } catch {
         if ($_.Exception.Message -like '*expired*') {
-            Write-RunnerFailureLine "outcome_claim" "outcome_replay"
-            return 66
+            $Failure = Resolve-Phase13ExpiredManifestFailure
+            Write-RunnerClaimFailureLine -Failure $Failure
+            return $Failure.ExitCode
         }
         Write-RunnerFailureLine "checksum_verification" "artifact_checksum_mismatch"
         return 65
@@ -1136,8 +1156,10 @@ function Invoke-RunnerMain {
     try {
         $ClaimPath = New-Phase13OutcomeClaim -OutcomeRoot $OutcomeRoot -OutcomeId $OutcomeId -OwnerSid $CurrentSid -ManifestSha256 $ManifestSha -RunnerSha256 $RunnerSha -CollectorSha256 $CollectorSha -TargetRole "spain-primary"
     } catch {
-        Write-RunnerFailureLine "outcome_claim" "outcome_replay"
-        return 66
+        $ClaimSubreason = Get-Phase13ClaimFailureSubreason -Exception $_.Exception
+        $Failure = Resolve-Phase13ClaimFailure -ClaimSubreason $ClaimSubreason
+        Write-RunnerClaimFailureLine -Failure $Failure
+        return $Failure.ExitCode
     }
 
     $TrustRoot = Join-Path $PrivateArtifactsRoot "post-release\spain-migration\$($script:TrustedBundleRunId)"

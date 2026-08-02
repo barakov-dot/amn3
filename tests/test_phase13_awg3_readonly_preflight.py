@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import json
 import re
@@ -161,6 +162,62 @@ def run_powershell_harness(tmp_path: Path, body: str):
     )
     return subprocess.run(
         [str(POWERSHELL), "-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", str(harness)],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=20,
+    )
+
+
+def run_runner_main_claim_harness(
+    repo: Path,
+    *,
+    outcome_id: str,
+    approval: str,
+    claim_subreason: str | None = None,
+    untyped_exception: str | None = None,
+):
+    runner = repo / "scripts" / "vps" / RUNNER.name
+    harness = repo / "invoke-runner-main-harness.ps1"
+    approval_b64 = base64.b64encode(approval.encode("utf-8")).decode("ascii")
+    if (claim_subreason is not None):
+        claim_failure = (
+            "Throw-Phase13ClaimFailure "
+            f"-ClaimSubreason '{claim_subreason}'"
+        )
+    else:
+        claim_failure = "throw [InvalidOperationException]::new(" f"'{untyped_exception}')"
+    harness.write_text(
+        "$ErrorActionPreference = 'Stop'\n"
+        "$utf8 = New-Object Text.UTF8Encoding($false)\n"
+        "[Console]::OutputEncoding = $utf8\n"
+        f". '{runner}' -Mode preflight -OutcomeId '{outcome_id}'\n"
+        "function Assert-PrivatePath { param([string]$Path, [string]$ExpectedOwnerSid) }\n"
+        "function New-Phase13OutcomeClaim {\n"
+        "    param([string]$OutcomeRoot, [string]$OutcomeId, [string]$OwnerSid, "
+        "[string]$ManifestSha256, [string]$RunnerSha256, [string]$CollectorSha256, "
+        "[string]$TargetRole)\n"
+        f"    {claim_failure}\n"
+        "}\n"
+        f"$approval = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('{approval_b64}'))\n"
+        f"$exitCode = Invoke-RunnerMain -Mode preflight -OutcomeId '{outcome_id}' -Approval $approval\n"
+        "exit $exitCode\n",
+        encoding="utf-8",
+    )
+    return subprocess.run(
+        [
+            str(POWERSHELL),
+            "-NoLogo",
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(harness),
+        ],
+        cwd=repo,
         check=False,
         capture_output=True,
         text=True,
@@ -723,11 +780,86 @@ def test_expired_manifest_blocks_before_approval_private_state_and_ssh(tmp_path)
     repo = prepare_runner_repo(tmp_path, outcome_id="test-outcome-003", expired=True)
     result = run_runner(repo, "test-outcome-003")
 
-    assert result.returncode == 66
-    assert "outcome_replay" in result.stdout
+    assert result.returncode == 64
+    assert result.stdout == (
+        "AMN2_PHASE13_AWG3_CLAIM_FAILURE_V1|stage=argument_validation|"
+        "reason=schema_validation_failed|claim_subreason=not_applicable\n"
+    )
     combined = (result.stdout + result.stderr).casefold()
     assert "ssh.exe" not in combined
     assert "target.env" not in combined
+
+
+@pytest.mark.parametrize(
+    ("claim_subreason", "expected_exit", "expected_stage", "expected_reason"),
+    [
+        ("existing_valid_claim", 66, "outcome_claim", "outcome_replay"),
+        (
+            "private_root_preparation_failed",
+            75,
+            "private_root_validation",
+            "observation_ambiguous",
+        ),
+        ("private_root_unsafe", 75, "private_root_validation", "observation_ambiguous"),
+        ("outcome_directory_partial", 75, "outcome_claim", "observation_ambiguous"),
+        ("outcome_directory_create_failed", 75, "outcome_claim", "observation_ambiguous"),
+        (
+            "outcome_directory_protection_failed",
+            75,
+            "outcome_claim",
+            "observation_ambiguous",
+        ),
+        ("claim_write_failed", 75, "outcome_claim", "observation_ambiguous"),
+        ("claim_validation_failed", 75, "outcome_claim", "observation_ambiguous"),
+        ("claim_internal_failure", 75, "outcome_claim", "observation_ambiguous"),
+    ],
+)
+def test_invoke_runner_main_maps_typed_claim_failure_to_secret_safe_terminal_line(
+    tmp_path, claim_subreason, expected_exit, expected_stage, expected_reason
+):
+    outcome_id = f"test-main-{claim_subreason.replace('_', '-')}"
+    repo = prepare_runner_repo(tmp_path, outcome_id=outcome_id)
+    approval = run_runner(repo, outcome_id).stdout.strip()
+
+    result = run_runner_main_claim_harness(
+        repo,
+        outcome_id=outcome_id,
+        approval=approval,
+        claim_subreason=claim_subreason,
+    )
+
+    assert result.returncode == expected_exit, result.stderr
+    assert result.stdout == (
+        "AMN2_PHASE13_AWG3_CLAIM_FAILURE_V1|"
+        f"stage={expected_stage}|reason={expected_reason}|"
+        f"claim_subreason={claim_subreason}\n"
+    )
+    combined = result.stdout + result.stderr
+    assert "ssh.exe" not in combined.casefold()
+    assert "target.env" not in combined.casefold()
+
+
+def test_invoke_runner_main_sanitizes_untyped_claim_exception(tmp_path):
+    outcome_id = "test-main-untyped-claim-failure"
+    repo = prepare_runner_repo(tmp_path, outcome_id=outcome_id)
+    approval = run_runner(repo, outcome_id).stdout.strip()
+
+    result = run_runner_main_claim_harness(
+        repo,
+        outcome_id=outcome_id,
+        approval=approval,
+        untyped_exception="raw-private-sentinel",
+    )
+
+    assert result.returncode == 75, result.stderr
+    assert result.stdout == (
+        "AMN2_PHASE13_AWG3_CLAIM_FAILURE_V1|stage=outcome_claim|"
+        "reason=observation_ambiguous|claim_subreason=claim_internal_failure\n"
+    )
+    combined = result.stdout + result.stderr
+    assert "raw-private-sentinel" not in combined
+    assert "ssh.exe" not in combined.casefold()
+    assert "target.env" not in combined.casefold()
 
 
 def test_create_new_writer_refuses_replacement_and_preserves_first_bytes(tmp_path):
