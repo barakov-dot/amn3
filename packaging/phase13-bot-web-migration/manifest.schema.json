@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "amn2.phase13.bot-web-migration-manifest.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "outcome_id",
+    "created_at",
+    "expires_at",
+    "source_role",
+    "target_role",
+    "source_audit_sha256",
+    "target_audit_sha256",
+    "artifacts",
+    "live_mutation_authorized"
+  ],
+  "properties": {
+    "schema": {"const": "amn2.phase13.bot-web-migration-manifest.v1"},
+    "outcome_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "source_role": {"const": "usa-source"},
+    "target_role": {"const": "spain-target"},
+    "source_audit_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "target_audit_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_full_backup",
+        "target_before_backup",
+        "merged_target_db",
+        "merge_preview",
+        "rollback_plan"
+      ],
+      "properties": {
+        "source_full_backup": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "size", "sha256"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "size": {"type": "integer", "minimum": 0},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        },
+        "target_before_backup": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "size", "sha256"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "size": {"type": "integer", "minimum": 0},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        },
+        "merged_target_db": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "size", "sha256"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "size": {"type": "integer", "minimum": 0},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        },
+        "merge_preview": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "size", "sha256"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "size": {"type": "integer", "minimum": 0},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        },
+        "rollback_plan": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "size", "sha256"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "size": {"type": "integer", "minimum": 0},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        }
+      }
+    },
+    "live_mutation_authorized": {"const": false}
+  }
+}

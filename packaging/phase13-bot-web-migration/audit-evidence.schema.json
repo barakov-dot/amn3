@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "amn2.phase13.bot-web-audit.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "role",
+    "checked_at",
+    "services",
+    "database",
+    "environment",
+    "required_artifacts",
+    "safety_receipt"
+  ],
+  "properties": {
+    "schema": {"const": "amn2.phase13.bot-web-audit.v1"},
+    "role": {"enum": ["usa-source", "spain-target"]},
+    "checked_at": {"type": "string", "format": "date-time"},
+    "services": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["web_active", "bot_active", "web_loopback_only"],
+      "properties": {
+        "web_active": {"type": "boolean"},
+        "bot_active": {"type": "boolean"},
+        "web_loopback_only": {"type": "boolean"}
+      }
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integrity_ok",
+        "foreign_key_violations",
+        "table_count",
+        "schema_sha256",
+        "counts_sha256"
+      ],
+      "properties": {
+        "integrity_ok": {"type": "boolean"},
+        "foreign_key_violations": {"type": "integer", "minimum": 0},
+        "table_count": {"type": "integer", "minimum": 0},
+        "schema_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "counts_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "telegram_bot_token_present",
+        "app_secret_present",
+        "web_password_hash_present",
+        "session_secret_present"
+      ],
+      "properties": {
+        "telegram_bot_token_present": {"type": "boolean"},
+        "app_secret_present": {"type": "boolean"},
+        "web_password_hash_present": {"type": "boolean"},
+        "session_secret_present": {"type": "boolean"}
+      }
+    },
+    "required_artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["database_readable", "environment_reference_proof_available"],
+      "properties": {
+        "database_readable": {"type": "boolean"},
+        "environment_reference_proof_available": {"type": "boolean"}
+      }
+    },
+    "safety_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mutation_attempted",
+        "raw_output_persisted",
+        "secret_bearing_data_persisted"
+      ],
+      "properties": {
+        "mutation_attempted": {"const": false},
+        "raw_output_persisted": {"const": false},
+        "secret_bearing_data_persisted": {"const": false}
+      }
+    }
+  }
+}
