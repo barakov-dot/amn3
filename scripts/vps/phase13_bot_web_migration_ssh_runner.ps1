@@ -3,6 +3,7 @@ $ErrorActionPreference = "Stop"
 
 $script:MaximumTimeoutMilliseconds = 60000
 $script:MaximumOutputBytes = 1048576
+$script:MaximumInputBytes = 1048576
 $script:RoleTrustRoots = @{
     "usa" = "C:\ProgramData\AMN2\trust\usa"
     "spain" = "C:\ProgramData\AMN2\trust\spain"
@@ -59,7 +60,7 @@ function Invoke-Phase13BoundedProcess {
     )
     if ($TimeoutMilliseconds -lt 1 -or $TimeoutMilliseconds -gt $script:MaximumTimeoutMilliseconds -or
         $MaximumOutputBytes -lt 1 -or $MaximumOutputBytes -gt $script:MaximumOutputBytes -or
-        $InputBytes.Length -gt 4096) {
+        $InputBytes.Length -gt $script:MaximumInputBytes) {
         throw "bounded process contract invalid"
     }
     $StartInfo = New-Object System.Diagnostics.ProcessStartInfo
@@ -507,4 +508,561 @@ function New-Phase13LocalFakeCutoverClaim {
         throw "outcome claim write failed"
     }
     return $ClaimPath
+}
+
+function Get-Phase13AuditArtifactContract {
+    return [ordered]@{
+        audit_evidence_schema = "audit-evidence.schema.json"
+        audit_package = "audit-package.py"
+        audit_tooling_manifest_schema = "audit-tooling-manifest.schema.json"
+        db_schema = "db-schema.py"
+        failure_evidence_schema = "failure-evidence.schema.json"
+        merge = "merge.py"
+        migration_contract = "migration-contract.py"
+        migration_manifest_schema = "migration-manifest.schema.json"
+        migration_package = "migration-package.py"
+        migration_plan_schema = "migration-plan.schema.json"
+        readonly_collector = "readonly-collector.py"
+        remote_cutover = "remote-cutover.sh"
+        remote_stage = "remote-stage.sh"
+        ssh_runner = "ssh-runner.ps1"
+    }
+}
+
+function Get-Phase13AuditExactApprovalPhrase {
+    param([Parameter(Mandatory = $true)]$Binding)
+    $Prefix = [Text.Encoding]::UTF8.GetString(
+        [Convert]::FromBase64String(
+            "0KPQotCS0JXQoNCW0JTQkNCuINCe0JTQmNCdIFRXTy1IT1NUIFJFQUQtT05MWSBVU0EvU1BBSU4gQk9UL1dFQiBBVURJVA=="
+        )
+    )
+    return @(
+        "$Prefix OUTCOME_$($Binding.OutcomeId)",
+        "MANIFEST_SHA_$($Binding.ManifestSha256)",
+        "RUNNER_SHA_$($Binding.RunnerSha256)",
+        "COLLECTOR_SHA_$($Binding.CollectorSha256)",
+        "AUDIT_SCHEMA_SHA_$($Binding.AuditSchemaSha256)",
+        "ROOT_BASE_$($Binding.RootHead)",
+        "AMN2_HEAD_$($Binding.Amn2Head)",
+        "EXPIRES_AT_$($Binding.ExpiresAt)",
+        "MAX_ATTEMPTS_1",
+        "NO_BACKUP_NO_DATA_TRANSFER_NO_DEPLOY_NO_DB_APPLY_NO_BOT_CUTOVER_NO_USA_RELEASE_NO_MUTATION"
+    ) -join " "
+}
+
+function Read-Phase13AuditStrictJson {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [int]$MaximumBytes = 1048576
+    )
+    $Item = Get-Item -LiteralPath $Path -Force -ErrorAction Stop
+    if ($Item.PSIsContainer -or
+        ($Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or
+        $Item.Length -lt 2 -or $Item.Length -gt $MaximumBytes) {
+        throw "audit tooling manifest is unsafe"
+    }
+    $Bytes = [IO.File]::ReadAllBytes($Item.FullName)
+    if ($Bytes[$Bytes.Length - 1] -ne 10 -or @($Bytes | Where-Object { $_ -eq 13 }).Count -ne 0) {
+        throw "audit tooling manifest is not canonical"
+    }
+    try {
+        $Text = (New-Object Text.UTF8Encoding($false, $true)).GetString($Bytes)
+        $Value = $Text | ConvertFrom-Json -ErrorAction Stop
+    } catch {
+        throw "audit tooling manifest is invalid"
+    }
+    return [pscustomobject]@{ Bytes = $Bytes; Value = $Value }
+}
+
+function Test-Phase13AuditToolingBinding {
+    param(
+        [Parameter(Mandatory = $true)][string]$PackageRoot,
+        [Parameter(Mandatory = $true)][string]$ExactApprovalPhrase,
+        [DateTimeOffset]$NowUtc = [DateTimeOffset]::UtcNow
+    )
+    if (-not [IO.Path]::IsPathRooted($PackageRoot)) {
+        throw "audit tooling root is unsafe"
+    }
+    $RootItem = Get-Item -LiteralPath $PackageRoot -Force -ErrorAction Stop
+    if (-not $RootItem.PSIsContainer -or
+        ($RootItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "audit tooling root is unsafe"
+    }
+    $Root = $RootItem.FullName
+    $ArtifactContract = Get-Phase13AuditArtifactContract
+    $ExpectedFiles = @($ArtifactContract.Values) + @("manifest.json")
+    $ActualItems = @(Get-ChildItem -LiteralPath $Root -Force)
+    if ($ActualItems.Count -ne $ExpectedFiles.Count -or
+        (@($ActualItems.Name | Sort-Object) -join "`n") -cne (@($ExpectedFiles | Sort-Object) -join "`n")) {
+        throw "audit tooling artifact set is invalid"
+    }
+    foreach ($Item in $ActualItems) {
+        if ($Item.PSIsContainer -or ($Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            throw "audit tooling artifact is unsafe"
+        }
+    }
+    $ManifestDocument = Read-Phase13AuditStrictJson -Path (Join-Path $Root "manifest.json")
+    $Manifest = $ManifestDocument.Value
+    Test-Phase13ExactPropertySet -Value $Manifest -Expected @(
+        "amn2_head", "artifacts", "created_at", "expires_at", "max_attempts",
+        "outcome_id", "roles", "root_head", "safety", "schema", "trust_bundles"
+    ) -Message "audit tooling manifest keys are invalid"
+    if ($Manifest.schema -cne "amn2.phase13.bot-web-audit-tooling-manifest.v1" -or
+        $Manifest.root_head -cne "408298982ce820b6a73c4f6721ce71e85e9c93e6" -or
+        $Manifest.amn2_head -cne "910539eaa8051cb1b59131d38b9fa27b9392744d" -or
+        [int]$Manifest.max_attempts -ne 1 -or
+        [string]$Manifest.outcome_id -cnotmatch '^[a-z0-9][a-z0-9-]{2,63}$') {
+        throw "audit tooling manifest contract is invalid"
+    }
+    Test-Phase13ExactPropertySet -Value $Manifest.roles -Expected @("source", "target") -Message "audit tooling role binding is invalid"
+    if ($Manifest.roles.source -cne "usa-source" -or $Manifest.roles.target -cne "spain-target") {
+        throw "audit tooling role binding is invalid"
+    }
+    Test-Phase13ExactPropertySet -Value $Manifest.safety -Expected @(
+        "backup_allowed", "bot_cutover_allowed", "data_transfer_allowed",
+        "db_apply_allowed", "live_mutation_authorized", "package_build_allowed",
+        "remote_write_allowed", "usa_release_allowed"
+    ) -Message "audit tooling safety contract is invalid"
+    foreach ($Name in $Manifest.safety.PSObject.Properties.Name) {
+        if ($Manifest.safety.$Name -ne $false) {
+            throw "audit tooling safety contract is invalid"
+        }
+    }
+    try {
+        $CreatedAt = [DateTimeOffset]::Parse([string]$Manifest.created_at).ToUniversalTime()
+        $ExpiresAt = [DateTimeOffset]::Parse([string]$Manifest.expires_at).ToUniversalTime()
+    } catch {
+        throw "audit tooling manifest time is invalid"
+    }
+    if ($CreatedAt -ge $ExpiresAt) {
+        throw "audit tooling manifest time is invalid"
+    }
+    $Now = $NowUtc.ToUniversalTime()
+    if ($Now -lt $CreatedAt) {
+        throw "audit tooling manifest not yet valid"
+    }
+    if ($Now -ge $ExpiresAt) {
+        throw "audit tooling manifest expired"
+    }
+    Test-Phase13ExactPropertySet -Value $Manifest.artifacts -Expected @($ArtifactContract.Keys) -Message "audit tooling artifact binding is invalid"
+    $ArtifactHashes = @{}
+    foreach ($ArtifactId in $ArtifactContract.Keys) {
+        $ExpectedFilename = [string]$ArtifactContract[$ArtifactId]
+        $ArtifactBinding = $Manifest.artifacts.$ArtifactId
+        Test-Phase13ExactPropertySet -Value $ArtifactBinding -Expected @("filename", "sha256", "size") -Message "audit tooling artifact binding is invalid"
+        if ([string]$ArtifactBinding.filename -cne $ExpectedFilename -or
+            [string]$ArtifactBinding.sha256 -cnotmatch '^[0-9a-f]{64}$' -or
+            [long]$ArtifactBinding.size -lt 1 -or [long]$ArtifactBinding.size -gt 4194304) {
+            throw "audit tooling artifact binding is invalid"
+        }
+        $ArtifactPath = Join-Path $Root $ExpectedFilename
+        $ArtifactItem = Get-Item -LiteralPath $ArtifactPath -Force -ErrorAction Stop
+        if ($ArtifactItem.PSIsContainer -or
+            ($ArtifactItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or
+            $ArtifactItem.Length -ne [long]$ArtifactBinding.size) {
+            throw "audit tooling artifact checksum mismatch"
+        }
+        $ObservedHash = Get-Phase13Sha256Hex -Bytes ([IO.File]::ReadAllBytes($ArtifactPath))
+        if ($ObservedHash -cne [string]$ArtifactBinding.sha256) {
+            throw "audit tooling artifact checksum mismatch"
+        }
+        $ArtifactHashes[$ArtifactId] = $ObservedHash
+    }
+    Test-Phase13ExactPropertySet -Value $Manifest.trust_bundles -Expected @("usa", "spain") -Message "audit tooling trust binding is invalid"
+    $ExpectedTrust = @{
+        usa = @{ BindingId = "phase13-bot-web-runner-fixed-usa-v1"; Role = "usa-source" }
+        spain = @{ BindingId = "phase13-bot-web-runner-fixed-spain-v1"; Role = "spain-target" }
+    }
+    foreach ($Role in @("usa", "spain")) {
+        $Trust = $Manifest.trust_bundles.$Role
+        Test-Phase13ExactPropertySet -Value $Trust -Expected @("binding_id", "overridable", "role", "runner_sha256") -Message "audit tooling trust binding is invalid"
+        if ($Trust.binding_id -cne $ExpectedTrust[$Role].BindingId -or
+            $Trust.role -cne $ExpectedTrust[$Role].Role -or
+            $Trust.overridable -ne $false -or
+            $Trust.runner_sha256 -cne $ArtifactHashes["ssh_runner"]) {
+            throw "audit tooling trust binding is invalid"
+        }
+    }
+    $Binding = [pscustomobject]@{
+        Amn2Head = [string]$Manifest.amn2_head
+        AuditSchemaSha256 = [string]$ArtifactHashes["audit_evidence_schema"]
+        CollectorBytes = [IO.File]::ReadAllBytes((Join-Path $Root $ArtifactContract["readonly_collector"]))
+        CollectorSha256 = [string]$ArtifactHashes["readonly_collector"]
+        ExpiresAt = [string]$Manifest.expires_at
+        ManifestSha256 = Get-Phase13Sha256Hex -Bytes $ManifestDocument.Bytes
+        OutcomeId = [string]$Manifest.outcome_id
+        PackageRoot = $Root
+        RootHead = [string]$Manifest.root_head
+        RunnerSha256 = [string]$ArtifactHashes["ssh_runner"]
+    }
+    if ($ExactApprovalPhrase -cne (Get-Phase13AuditExactApprovalPhrase -Binding $Binding)) {
+        throw "exact approval mismatch"
+    }
+    return $Binding
+}
+
+function ConvertTo-Phase13AuditCanonicalJsonBytes {
+    param([Parameter(Mandatory = $true)]$Value)
+    return (New-Object Text.UTF8Encoding($false)).GetBytes(
+        (($Value | ConvertTo-Json -Depth 24 -Compress) + "`n")
+    )
+}
+
+function Write-Phase13AuditCreateNewJson {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)]$Value
+    )
+    $Bytes = ConvertTo-Phase13AuditCanonicalJsonBytes -Value $Value
+    try {
+        $Stream = New-Object IO.FileStream(
+            $Path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None
+        )
+        try {
+            $Stream.Write($Bytes, 0, $Bytes.Length)
+            $Stream.Flush($true)
+        } finally {
+            $Stream.Dispose()
+        }
+    } catch [IO.IOException] {
+        throw "sanitized outcome write failed"
+    } finally {
+        [Array]::Clear($Bytes, 0, $Bytes.Length)
+    }
+}
+
+function New-Phase13AuditOutcomeClaim {
+    param(
+        [Parameter(Mandatory = $true)][string]$OutcomeRoot,
+        [Parameter(Mandatory = $true)]$Binding,
+        [Parameter(Mandatory = $true)][DateTimeOffset]$NowUtc
+    )
+    $RootItem = Get-Item -LiteralPath $OutcomeRoot -Force -ErrorAction Stop
+    if (-not $RootItem.PSIsContainer -or
+        ($RootItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "private outcome root unsafe"
+    }
+    if ($NowUtc.ToUniversalTime() -ge [DateTimeOffset]::Parse($Binding.ExpiresAt).ToUniversalTime()) {
+        throw "audit tooling manifest expired"
+    }
+    $ClaimPath = Join-Path $RootItem.FullName ("{0}.claim.json" -f $Binding.OutcomeId)
+    if ([IO.File]::Exists($ClaimPath)) {
+        throw "outcome claim replay"
+    }
+    $Claim = [ordered]@{
+        collector_sha256 = [string]$Binding.CollectorSha256
+        expires_at = [string]$Binding.ExpiresAt
+        manifest_sha256 = [string]$Binding.ManifestSha256
+        outcome_id = [string]$Binding.OutcomeId
+        runner_sha256 = [string]$Binding.RunnerSha256
+        schema = "amn2.phase13.bot-web-audit-claim.v1"
+    }
+    try {
+        Write-Phase13AuditCreateNewJson -Path $ClaimPath -Value $Claim
+    } catch {
+        if ([IO.File]::Exists($ClaimPath)) {
+            throw "outcome claim replay"
+        }
+        throw "outcome claim write failed"
+    }
+    return $ClaimPath
+}
+
+function New-Phase13AuditTransportEnvelope {
+    param(
+        [Parameter(Mandatory = $true)][byte[]]$CollectorBytes,
+        [Parameter(Mandatory = $true)][string]$CollectorSha256,
+        [Parameter(Mandatory = $true)][byte[]]$EphemeralHmacKey
+    )
+    $Envelope = [ordered]@{
+        collector_b64 = [Convert]::ToBase64String($CollectorBytes)
+        collector_sha256 = $CollectorSha256
+        ephemeral_hmac_key_b64 = [Convert]::ToBase64String($EphemeralHmacKey)
+    }
+    $Bytes = ConvertTo-Phase13AuditCanonicalJsonBytes -Value $Envelope
+    if ($Bytes.Length -gt $script:MaximumInputBytes) {
+        [Array]::Clear($Bytes, 0, $Bytes.Length)
+        throw "bounded audit input oversized"
+    }
+    return $Bytes
+}
+
+function New-Phase13AuditSshArguments {
+    param(
+        [Parameter(Mandatory = $true)][ValidateSet("usa", "spain")][string]$Role,
+        [Parameter(Mandatory = $true)]$RoleBinding
+    )
+    if ([string]$RoleBinding.TargetHost -cnotmatch '^[A-Za-z0-9](?:[A-Za-z0-9.:-]{0,252}[A-Za-z0-9])?$' -or
+        [string]$RoleBinding.TargetUser -cnotmatch '^[a-z_][a-z0-9_-]{0,31}$') {
+        throw "fixed target binding invalid"
+    }
+    $Bootstrap = 'import base64,hashlib,io,json,sys;e=json.load(sys.stdin);s=base64.b64decode(e["collector_b64"],validate=True);hashlib.sha256(s).hexdigest()==e["collector_sha256"] or sys.exit(70);k=e["ephemeral_hmac_key_b64"];sys.argv=["collector","--role",sys.argv[1]];sys.stdin=io.StringIO(k+"\n");exec(compile(s,"<collector>","exec"),{"__name__":"__main__"})'
+    $RemoteCommand = "python3 -c '$Bootstrap' $Role"
+    return @(
+        "-T", "-F", "none",
+        "-o", "BatchMode=yes",
+        "-o", "IdentitiesOnly=yes",
+        "-o", "StrictHostKeyChecking=yes",
+        "-o", "UserKnownHostsFile=$($RoleBinding.KnownHostsPath)",
+        "-o", "ConnectTimeout=10",
+        "-o", "ConnectionAttempts=1",
+        "-o", "ServerAliveInterval=5",
+        "-o", "ServerAliveCountMax=1",
+        "-i", [string]$RoleBinding.KeyPath,
+        "-p", "22",
+        "$($RoleBinding.TargetUser)@$($RoleBinding.TargetHost)",
+        $RemoteCommand
+    )
+}
+
+function Write-Phase13AuditFailureOutcome {
+    param(
+        [Parameter(Mandatory = $true)][string]$OutcomeRoot,
+        [Parameter(Mandatory = $true)]$Binding,
+        [Parameter(Mandatory = $true)][DateTimeOffset]$NowUtc,
+        [Parameter(Mandatory = $true)][ValidateSet("audit_incomplete", "schema_validation_failed")][string]$ReasonCode
+    )
+    $Path = Join-Path $OutcomeRoot ("{0}.failure.json" -f $Binding.OutcomeId)
+    $Failure = [ordered]@{
+        checked_at = $NowUtc.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+        decision = "stop"
+        outcome_id = [string]$Binding.OutcomeId
+        reason_code = $ReasonCode
+        safety_receipt = [ordered]@{
+            mutation_attempted = $false
+            raw_output_persisted = $false
+            secret_bearing_data_persisted = $false
+        }
+        schema = "amn2.phase13.bot-web-migration-failure.v1"
+        stage = "audit"
+    }
+    Write-Phase13AuditCreateNewJson -Path $Path -Value $Failure
+    return $Path
+}
+
+function Write-Phase13AuditSuccessOutcome {
+    param(
+        [Parameter(Mandatory = $true)][string]$OutcomeRoot,
+        [Parameter(Mandatory = $true)]$Binding,
+        [Parameter(Mandatory = $true)][DateTimeOffset]$NowUtc,
+        [Parameter(Mandatory = $true)]$Evidence
+    )
+    $Path = Join-Path $OutcomeRoot ("{0}.success.json" -f $Binding.OutcomeId)
+    $Success = [ordered]@{
+        checked_at = $NowUtc.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+        decision = "passed"
+        evidence = $Evidence
+        manifest_sha256 = [string]$Binding.ManifestSha256
+        outcome_id = [string]$Binding.OutcomeId
+        safety_receipt = [ordered]@{
+            backup_created = $false
+            data_transferred = $false
+            db_applied = $false
+            live_mutation_attempted = $false
+            service_action_attempted = $false
+        }
+        schema = "amn2.phase13.bot-web-audit-outcome.v1"
+    }
+    Write-Phase13AuditCreateNewJson -Path $Path -Value $Success
+    return $Path
+}
+
+function Invoke-Phase13ProductionAuditCore {
+    param(
+        [Parameter(Mandatory = $true)]$Binding,
+        [Parameter(Mandatory = $true)][string]$OutcomeRoot,
+        [Parameter(Mandatory = $true)][string]$SshExecutable,
+        [string[]]$SshPrefixArguments = @(),
+        [Parameter(Mandatory = $true)]$RoleBindings,
+        [DateTimeOffset]$NowUtc = [DateTimeOffset]::UtcNow
+    )
+    $null = New-Phase13AuditOutcomeClaim -OutcomeRoot $OutcomeRoot -Binding $Binding -NowUtc $NowUtc
+    $Key = New-Phase13EphemeralHmacKey
+    $EnvelopeBytes = $null
+    try {
+        $EnvelopeBytes = New-Phase13AuditTransportEnvelope -CollectorBytes $Binding.CollectorBytes -CollectorSha256 $Binding.CollectorSha256 -EphemeralHmacKey $Key
+        $Documents = @{}
+        $TransportFailed = $false
+        foreach ($Role in @("usa", "spain")) {
+            $Arguments = @($SshPrefixArguments) + @(New-Phase13AuditSshArguments -Role $Role -RoleBinding $RoleBindings[$Role])
+            $Transport = Invoke-Phase13BoundedProcess -Executable $SshExecutable -Arguments $Arguments -InputBytes $EnvelopeBytes -TimeoutMilliseconds 60000 -MaximumOutputBytes 1048576
+            if ($Transport.Reason -cne "success") {
+                $TransportFailed = $true
+                continue
+            }
+            try {
+                $Documents[$Role] = $Transport.Document | ConvertFrom-Json -ErrorAction Stop
+            } catch {
+                $TransportFailed = $true
+            }
+        }
+        if ($TransportFailed -or $Documents.Count -ne 2) {
+            $FailurePath = Write-Phase13AuditFailureOutcome -OutcomeRoot $OutcomeRoot -Binding $Binding -NowUtc $NowUtc -ReasonCode "audit_incomplete"
+            return [pscustomobject]@{ OutcomePath = $FailurePath; Status = "failure" }
+        }
+        try {
+            $SanitizedJson = ConvertTo-Phase13SanitizedAuditPair -UsaDocument $Documents["usa"] -SpainDocument $Documents["spain"]
+            $Sanitized = $SanitizedJson | ConvertFrom-Json -ErrorAction Stop
+        } catch {
+            $FailurePath = Write-Phase13AuditFailureOutcome -OutcomeRoot $OutcomeRoot -Binding $Binding -NowUtc $NowUtc -ReasonCode "schema_validation_failed"
+            return [pscustomobject]@{ OutcomePath = $FailurePath; Status = "failure" }
+        }
+        $SuccessPath = Write-Phase13AuditSuccessOutcome -OutcomeRoot $OutcomeRoot -Binding $Binding -NowUtc $NowUtc -Evidence $Sanitized
+        return [pscustomobject]@{ OutcomePath = $SuccessPath; Status = "success" }
+    } catch {
+        try {
+            $FailurePath = Write-Phase13AuditFailureOutcome -OutcomeRoot $OutcomeRoot -Binding $Binding -NowUtc $NowUtc -ReasonCode "audit_incomplete"
+            return [pscustomobject]@{ OutcomePath = $FailurePath; Status = "failure" }
+        } catch {
+            throw "sanitized outcome write failed"
+        }
+    } finally {
+        if ($null -ne $EnvelopeBytes) { [Array]::Clear($EnvelopeBytes, 0, $EnvelopeBytes.Length) }
+        [Array]::Clear($Key, 0, $Key.Length)
+    }
+}
+
+function ConvertTo-Phase13PublicAuditReceipt {
+    param(
+        [Parameter(Mandatory = $true)]$CoreResult,
+        [Parameter(Mandatory = $true)][string]$OutcomeId
+    )
+    if ([string]$CoreResult.Status -cnotin @("success", "failure") -or
+        $OutcomeId -cnotmatch '^[a-z0-9][a-z0-9-]{2,63}$') {
+        throw "production audit result invalid"
+    }
+    return [ordered]@{
+        decision = if ($CoreResult.Status -ceq "success") { "passed" } else { "stop" }
+        outcome_id = $OutcomeId
+        status = [string]$CoreResult.Status
+    }
+}
+
+function Assert-Phase13AuditPrivatePath {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$ExpectedOwnerSid
+    )
+    $Item = Get-Item -LiteralPath $Path -Force -ErrorAction Stop
+    if (($Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "private trust path unsafe"
+    }
+    $Acl = Get-Acl -LiteralPath $Item.FullName
+    $OwnerSid = $Acl.Owner
+    try { $OwnerSid = ([Security.Principal.NTAccount]$Acl.Owner).Translate([Security.Principal.SecurityIdentifier]).Value } catch { }
+    if ($OwnerSid -cne $ExpectedOwnerSid -or -not $Acl.AreAccessRulesProtected) {
+        throw "private trust path ACL invalid"
+    }
+    foreach ($Rule in $Acl.Access) {
+        $RuleSid = $Rule.IdentityReference.Value
+        try { $RuleSid = $Rule.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value } catch { }
+        if ($Rule.IsInherited -or
+            ($Rule.AccessControlType -eq [Security.AccessControl.AccessControlType]::Allow -and $RuleSid -cne $ExpectedOwnerSid)) {
+            throw "private trust path ACL invalid"
+        }
+    }
+}
+
+function Protect-Phase13AuditOutcomeRoot {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$OwnerSid
+    )
+    [void][IO.Directory]::CreateDirectory($Path)
+    $Item = Get-Item -LiteralPath $Path -Force -ErrorAction Stop
+    if (-not $Item.PSIsContainer -or ($Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "private outcome root unsafe"
+    }
+    $Owner = New-Object Security.Principal.SecurityIdentifier($OwnerSid)
+    $Acl = Get-Acl -LiteralPath $Item.FullName
+    $Acl.SetOwner($Owner)
+    $Acl.SetAccessRuleProtection($true, $false)
+    foreach ($Rule in @($Acl.Access)) { [void]$Acl.RemoveAccessRuleAll($Rule) }
+    $Rule = New-Object Security.AccessControl.FileSystemAccessRule(
+        $Owner, [Security.AccessControl.FileSystemRights]::FullControl,
+        [Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [Security.AccessControl.InheritanceFlags]::ObjectInherit,
+        [Security.AccessControl.PropagationFlags]::None,
+        [Security.AccessControl.AccessControlType]::Allow
+    )
+    [void]$Acl.AddAccessRule($Rule)
+    Set-Acl -LiteralPath $Item.FullName -AclObject $Acl
+    Assert-Phase13AuditPrivatePath -Path $Item.FullName -ExpectedOwnerSid $OwnerSid
+}
+
+function Read-Phase13AuditFixedRoleBinding {
+    param(
+        [Parameter(Mandatory = $true)][ValidateSet("usa", "spain")][string]$Role,
+        [Parameter(Mandatory = $true)][string]$ExpectedOwnerSid,
+        [Parameter(Mandatory = $true)][string]$SshKeygenExecutable
+    )
+    $Contract = Get-Phase13RoleTransportContract -Role $Role
+    foreach ($Path in @($Contract.TrustRoot, $Contract.BindingPath, $Contract.KeyPath, $Contract.KnownHostsPath)) {
+        Assert-Phase13AuditPrivatePath -Path $Path -ExpectedOwnerSid $ExpectedOwnerSid
+    }
+    $Lines = @(Get-Content -LiteralPath $Contract.BindingPath)
+    $Names = @("TARGET_HOST", "TARGET_USER", "SSH_KEY_PATH", "EXPECTED_HOST_KEY_SHA256")
+    if ($Lines.Count -ne $Names.Count) { throw "private target binding invalid" }
+    $Values = @{}
+    for ($Index = 0; $Index -lt $Names.Count; $Index++) {
+        $Prefix = "$($Names[$Index])="
+        if (-not $Lines[$Index].StartsWith($Prefix, [StringComparison]::Ordinal)) {
+            throw "private target binding invalid"
+        }
+        $Values[$Names[$Index]] = $Lines[$Index].Substring($Prefix.Length)
+    }
+    if ($Values["TARGET_HOST"] -notmatch '^[A-Za-z0-9](?:[A-Za-z0-9.:-]{0,252}[A-Za-z0-9])?$' -or
+        $Values["TARGET_USER"] -notmatch '^[a-z_][a-z0-9_-]{0,31}$' -or
+        $Values["SSH_KEY_PATH"] -cne $Contract.KeyPath -or
+        $Values["EXPECTED_HOST_KEY_SHA256"] -notmatch '^SHA256:[A-Za-z0-9+/]{43}$') {
+        throw "private target binding invalid"
+    }
+    $HostLines = @(Get-Content -LiteralPath $Contract.KnownHostsPath)
+    if ($HostLines.Count -ne 1 -or
+        $HostLines[0] -notmatch '^([^ ]+) (ssh-ed25519|ecdsa-sha2-nistp256|rsa-sha2-(?:256|512)) ([A-Za-z0-9+/]+={0,2})$' -or
+        $Matches[1] -cne $Values["TARGET_HOST"]) {
+        throw "private host pin invalid"
+    }
+    $FingerprintOutput = @(& $SshKeygenExecutable -lf $Contract.KnownHostsPath 2>$null)
+    $Observed = [regex]::Match(($FingerprintOutput -join " "), 'SHA256:[A-Za-z0-9+/]{43}').Value
+    if ($LASTEXITCODE -ne 0 -or $Observed -cne $Values["EXPECTED_HOST_KEY_SHA256"]) {
+        throw "private host pin invalid"
+    }
+    return [pscustomobject]@{
+        KeyPath = $Contract.KeyPath
+        KnownHostsPath = $Contract.KnownHostsPath
+        TargetHost = $Values["TARGET_HOST"]
+        TargetUser = $Values["TARGET_USER"]
+    }
+}
+
+function Invoke-Phase13ProductionAudit {
+    param(
+        [string]$PackageRoot,
+        [string]$ExactApprovalPhrase
+    )
+    if ([string]::IsNullOrEmpty($PackageRoot) -or [string]::IsNullOrEmpty($ExactApprovalPhrase)) {
+        throw "production audit arguments required"
+    }
+    try {
+        $Binding = Test-Phase13AuditToolingBinding -PackageRoot $PackageRoot -ExactApprovalPhrase $ExactApprovalPhrase
+        $CurrentSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+        $SshExecutable = "C:\Windows\System32\OpenSSH\ssh.exe"
+        $SshKeygenExecutable = "C:\Windows\System32\OpenSSH\ssh-keygen.exe"
+        foreach ($Executable in @($SshExecutable, $SshKeygenExecutable)) {
+            $Item = Get-Item -LiteralPath $Executable -Force -ErrorAction Stop
+            if ($Item.PSIsContainer -or ($Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+                throw "fixed transport executable invalid"
+            }
+        }
+        $RoleBindings = @{
+            usa = Read-Phase13AuditFixedRoleBinding -Role "usa" -ExpectedOwnerSid $CurrentSid -SshKeygenExecutable $SshKeygenExecutable
+            spain = Read-Phase13AuditFixedRoleBinding -Role "spain" -ExpectedOwnerSid $CurrentSid -SshKeygenExecutable $SshKeygenExecutable
+        }
+        $OutcomeRoot = "C:\ProgramData\AMN2\private\phase13-bot-web-audit\outcomes"
+        Protect-Phase13AuditOutcomeRoot -Path $OutcomeRoot -OwnerSid $CurrentSid
+        $CoreResult = Invoke-Phase13ProductionAuditCore -Binding $Binding -OutcomeRoot $OutcomeRoot -SshExecutable $SshExecutable -RoleBindings $RoleBindings
+        return ConvertTo-Phase13PublicAuditReceipt -CoreResult $CoreResult -OutcomeId $Binding.OutcomeId
+    } catch {
+        throw "production audit failed closed"
+    }
 }
