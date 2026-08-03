@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "amn2.phase13.bot-web-audit-tooling-manifest.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "outcome_id",
+    "created_at",
+    "expires_at",
+    "root_head",
+    "amn2_head",
+    "roles",
+    "trust_bundles",
+    "artifacts",
+    "max_attempts",
+    "safety"
+  ],
+  "properties": {
+    "schema": {"const": "amn2.phase13.bot-web-audit-tooling-manifest.v1"},
+    "outcome_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "root_head": {"const": "408298982ce820b6a73c4f6721ce71e85e9c93e6"},
+    "amn2_head": {"const": "910539eaa8051cb1b59131d38b9fa27b9392744d"},
+    "roles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "target"],
+      "properties": {
+        "source": {"const": "usa-source"},
+        "target": {"const": "spain-target"}
+      }
+    },
+    "trust_bundles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["usa", "spain"],
+      "properties": {
+        "usa": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["binding_id", "overridable", "role", "runner_sha256"],
+          "properties": {
+            "binding_id": {"const": "phase13-bot-web-runner-fixed-usa-v1"},
+            "overridable": {"const": false},
+            "role": {"const": "usa-source"},
+            "runner_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        },
+        "spain": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["binding_id", "overridable", "role", "runner_sha256"],
+          "properties": {
+            "binding_id": {"const": "phase13-bot-web-runner-fixed-spain-v1"},
+            "overridable": {"const": false},
+            "role": {"const": "spain-target"},
+            "runner_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "audit_evidence_schema",
+        "audit_package",
+        "audit_tooling_manifest_schema",
+        "db_schema",
+        "failure_evidence_schema",
+        "merge",
+        "migration_contract",
+        "migration_manifest_schema",
+        "migration_package",
+        "migration_plan_schema",
+        "readonly_collector",
+        "remote_cutover",
+        "remote_stage",
+        "ssh_runner"
+      ],
+      "properties": {
+        "audit_evidence_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "audit-evidence.schema.json"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        },
+        "audit_package": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "audit-package.py"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        },
+        "audit_tooling_manifest_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "audit-tooling-manifest.schema.json"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        },
+        "db_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "db-schema.py"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        },
+        "failure_evidence_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "failure-evidence.schema.json"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        },
+        "merge": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "merge.py"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        },
+        "migration_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "migration-contract.py"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        },
+        "migration_manifest_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "migration-manifest.schema.json"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        },
+        "migration_package": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "migration-package.py"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        },
+        "migration_plan_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "migration-plan.schema.json"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        },
+        "readonly_collector": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "readonly-collector.py"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        },
+        "remote_cutover": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "remote-cutover.sh"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        },
+        "remote_stage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "remote-stage.sh"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        },
+        "ssh_runner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size"],
+          "properties": {
+            "filename": {"const": "ssh-runner.ps1"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "size": {"type": "integer", "minimum": 1, "maximum": 4194304}
+          }
+        }
+      }
+    },
+    "max_attempts": {"const": 1},
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backup_allowed",
+        "bot_cutover_allowed",
+        "data_transfer_allowed",
+        "db_apply_allowed",
+        "live_mutation_authorized",
+        "package_build_allowed",
+        "remote_write_allowed",
+        "usa_release_allowed"
+      ],
+      "properties": {
+        "backup_allowed": {"const": false},
+        "bot_cutover_allowed": {"const": false},
+        "data_transfer_allowed": {"const": false},
+        "db_apply_allowed": {"const": false},
+        "live_mutation_authorized": {"const": false},
+        "package_build_allowed": {"const": false},
+        "remote_write_allowed": {"const": false},
+        "usa_release_allowed": {"const": false}
+      }
+    }
+  }
+}
