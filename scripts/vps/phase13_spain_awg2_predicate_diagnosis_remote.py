@@ -380,16 +380,25 @@ def execute_diagnosis(payload: dict[str, object], backend: DiagnosisBackend) -> 
         ):
             raise DiagnosisError("payload", "payload_invalid")
         evaluated = evaluate_awg2_observation(backend.collect_awg2_observation())
-        foreign_equal = backend.foreign_equal()
+        foreign_observed = True
+        reason = "diagnosed"
+        try:
+            foreign_equal = backend.foreign_equal()
+        except DiagnosisError as error:
+            if error.stage != "foreign" or error.reason != "foreign_observation_failed":
+                raise
+            foreign_equal = False
+            foreign_observed = False
+            reason = "diagnosed_foreign_unavailable"
         return {
             **evaluated,
             "foreign_equal": foreign_equal,
-            "foreign_observed": True,
+            "foreign_observed": foreign_observed,
             "mutation_performed": False,
             "outcome": "success",
             "outcome_id": outcome_id,
             "raw_output_persisted": False,
-            "reason": "diagnosed",
+            "reason": reason,
             "schema": RECEIPT_SCHEMA,
             "stage": "complete",
         }

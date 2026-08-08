@@ -125,6 +125,39 @@ def test_remote_receipt_is_strict_secret_safe_and_read_only() -> None:
         assert forbidden not in serialized
 
 
+def test_foreign_observation_failure_preserves_completed_awg2_diagnosis() -> None:
+    module = load("phase13_awg2_diagnosis_foreign_unavailable", REMOTE)
+
+    class FakeBackend:
+        def collect_awg2_observation(self) -> dict[str, object]:
+            return good_observation(module)
+
+        def foreign_equal(self) -> bool:
+            raise module.DiagnosisError("foreign", "foreign_observation_failed")
+
+    receipt = module.execute_diagnosis(
+        {
+            "expires_at": future().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "max_attempts": 1,
+            "outcome_id": "spain-awg2-diagnosis-test-001",
+            "schema": module.PAYLOAD_SCHEMA,
+        },
+        FakeBackend(),
+    )
+
+    assert receipt["outcome"] == "success"
+    assert receipt["awg2_equal"] is True
+    assert receipt["failed_predicates"] == []
+    assert receipt["foreign_observed"] is False
+    assert receipt["foreign_equal"] is False
+    assert receipt["reason"] == "diagnosed_foreign_unavailable"
+    local = load("phase13_awg2_diagnosis_foreign_unavailable_parser", LOCAL)
+    parsed = local._parse_remote_receipt(
+        canonical(receipt), "spain-awg2-diagnosis-test-001"
+    )
+    assert parsed["awg2_equal"] is True
+
+
 def test_package_is_deterministic_strict_and_approval_bound(tmp_path: Path) -> None:
     module = load("phase13_awg2_diagnosis_package", LOCAL)
     inputs = package_inputs(module)

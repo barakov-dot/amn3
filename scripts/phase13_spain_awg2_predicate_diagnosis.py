@@ -391,7 +391,7 @@ def _parse_remote_receipt(value: bytes, outcome_id: str) -> dict[str, object]:
         "failed_predicates", "outcome", "outcome_id", "reason", "schema", "stage"
     }
     reason_allowlist = {
-        "diagnosed", "foundation_invalid", "foreign_observation_failed",
+        "diagnosed", "diagnosed_foreign_unavailable", "foundation_invalid", "foreign_observation_failed",
         "internal_failure", "observation_failed", "observation_invalid",
         "payload_invalid",
     }
