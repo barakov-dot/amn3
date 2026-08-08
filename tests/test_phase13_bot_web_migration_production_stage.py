@@ -812,6 +812,10 @@ with counter.open('a', encoding='utf-8') as handle:
 if role == fail_at:
     sys.stderr.write('raw-secret-sentinel')
     raise SystemExit(255)
+if fail_at == role + '-127':
+    raise SystemExit(127)
+if fail_at == role + '-42':
+    raise SystemExit(42)
 envelope = json.loads(sys.stdin.buffer.read())
 if role == 'stage':
     payload = envelope['payload']
@@ -952,8 +956,10 @@ try {{
     ("fail_at", "expected_processes", "expected_role", "expected_subreason"),
     [
         ("none", ["usa", "spain", "stage"], "not_applicable", "not_applicable"),
-        ("usa", ["usa", "spain"], "usa", "ssh_process_failed"),
-        ("spain", ["usa", "spain"], "spain", "ssh_process_failed"),
+        ("usa", ["usa", "spain"], "usa", "ssh_client_failure"),
+        ("spain", ["usa", "spain"], "spain", "ssh_client_failure"),
+        ("usa-127", ["usa", "spain"], "usa", "remote_command_unavailable"),
+        ("usa-42", ["usa", "spain"], "usa", "remote_exit_unclassified"),
     ],
 )
 def test_claim_precedes_exact_three_process_chain_and_failures_are_sanitized(

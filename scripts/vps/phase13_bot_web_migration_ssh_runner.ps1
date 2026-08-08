@@ -156,6 +156,13 @@ function Invoke-Phase13BoundedProcess {
         $Reason = "process_failure"
         $Document = $null
         $ExitCode = -1
+        try {
+            $null = $Process.Id
+            if ($Process.WaitForExit(1000)) {
+                $ExitCode = $Process.ExitCode
+            }
+        } catch {
+        }
     } finally {
         [Console]::InputEncoding = $PreviousConsoleInputEncoding
         if (-not $Process.HasExited) {

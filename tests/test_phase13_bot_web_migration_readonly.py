@@ -259,6 +259,25 @@ try {{
     assert result.stdout == "output_oversized|timeout|Reason,Document,ExitCode|EFBBBF"
 
 
+def test_runner_preserves_early_process_exit_code_when_stdin_write_fails(
+    tmp_path: Path,
+) -> None:
+    fake = tmp_path / "early_exit.py"
+    fake.write_text("raise SystemExit(255)\n", encoding="utf-8")
+    invocation = f"""
+. '{RUNNER}'
+$inputBytes = [byte[]]::new(1048576)
+$result = Invoke-Phase13BoundedProcess -Executable '{sys.executable}' -Arguments @('{fake}') -InputBytes $inputBytes -TimeoutMilliseconds 2000 -MaximumOutputBytes 64
+[Console]::Out.Write("$($result.Reason)|$($result.ExitCode)")
+"""
+
+    result = run_powershell(invocation)
+
+    assert result.returncode == 0, result.stderr
+    assert result.stderr == ""
+    assert result.stdout == "process_failure|255"
+
+
 def test_runner_resolves_only_fixed_private_trust_roots() -> None:
     invocation = f"""
 . '{RUNNER}'

@@ -340,6 +340,23 @@ function Write-Phase13ProductionStageFailure {
     return $Path
 }
 
+function Get-Phase13ProductionStageAuditTransportSubreason {
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("success", "timeout", "output_oversized", "process_failure")]
+        [string]$Reason,
+        [Parameter(Mandatory = $true)][int]$ExitCode
+    )
+    if ($Reason -ceq "success") { return "not_applicable" }
+    if ($Reason -ceq "timeout") { return "timeout" }
+    if ($Reason -ceq "output_oversized") { return "output_oversized" }
+    if ($ExitCode -eq -1) { return "local_process_failure" }
+    if ($ExitCode -eq 255) { return "ssh_client_failure" }
+    if ($ExitCode -eq 127) { return "remote_command_unavailable" }
+    if ($ExitCode -ge 1 -and $ExitCode -le 254) { return "remote_exit_unclassified" }
+    return "transport_internal_failure"
+}
+
 function Invoke-Phase13ProductionStageAuditTransport {
     param(
         [Parameter(Mandatory = $true)]$Binding,
@@ -372,11 +389,9 @@ function Invoke-Phase13ProductionStageAuditTransport {
                 $Failed = $true
                 if ($FailureRole -ceq "not_applicable") {
                     $FailureRole = $Role
-                    $FailureSubreason = switch ([string]$Transport.Reason) {
-                        "timeout" { "timeout" }
-                        "output_oversized" { "output_oversized" }
-                        default { "ssh_process_failed" }
-                    }
+                    $FailureSubreason = Get-Phase13ProductionStageAuditTransportSubreason `
+                        -Reason ([string]$Transport.Reason) `
+                        -ExitCode ([int]$Transport.ExitCode)
                 }
                 continue
             }
@@ -700,7 +715,9 @@ function ConvertTo-Phase13ProductionStagePublicReceipt {
     $FailureSubreason = [string]$CoreResult.FailureSubreason
     if ($FailureRole -cnotin @("usa", "spain", "not_applicable") -or
         $FailureSubreason -cnotin @(
-            "timeout", "output_oversized", "ssh_process_failed", "frame_invalid",
+            "timeout", "output_oversized", "ssh_client_failure",
+            "remote_command_unavailable", "remote_exit_unclassified",
+            "local_process_failure", "transport_internal_failure", "frame_invalid",
             "audit_pair_invalid", "not_applicable"
         )) {
         throw "production stage public receipt invalid"
