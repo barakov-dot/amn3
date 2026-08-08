@@ -356,6 +356,8 @@ function Invoke-Phase13ProductionStageAuditTransport {
             -EphemeralHmacKey $Key
         $Documents = @{}
         $Failed = $false
+        $FailureRole = "not_applicable"
+        $FailureSubreason = "not_applicable"
         foreach ($Role in @("usa", "spain")) {
             $Arguments = @($SshPrefixArguments) + @(
                 New-Phase13AuditSshArguments -Role $Role -RoleBinding $RoleBindings[$Role]
@@ -368,16 +370,34 @@ function Invoke-Phase13ProductionStageAuditTransport {
                 -MaximumOutputBytes $script:ProductionMaximumOutputBytes
             if ($Transport.Reason -cne "success") {
                 $Failed = $true
+                if ($FailureRole -ceq "not_applicable") {
+                    $FailureRole = $Role
+                    $FailureSubreason = switch ([string]$Transport.Reason) {
+                        "timeout" { "timeout" }
+                        "output_oversized" { "output_oversized" }
+                        default { "ssh_process_failed" }
+                    }
+                }
                 continue
             }
             try {
                 $Documents[$Role] = $Transport.Document | ConvertFrom-Json -ErrorAction Stop
             } catch {
                 $Failed = $true
+                if ($FailureRole -ceq "not_applicable") {
+                    $FailureRole = $Role
+                    $FailureSubreason = "frame_invalid"
+                }
             }
         }
         if ($Failed -or $Documents.Count -ne 2) {
-            return [pscustomobject]@{ AuditBytes = $null; ProcessCount = 2; Success = $false }
+            return [pscustomobject]@{
+                AuditBytes = $null
+                FailureRole = $FailureRole
+                FailureSubreason = $FailureSubreason
+                ProcessCount = 2
+                Success = $false
+            }
         }
         try {
             $PairText = ConvertTo-Phase13SanitizedAuditPair `
@@ -385,9 +405,21 @@ function Invoke-Phase13ProductionStageAuditTransport {
                 -SpainDocument $Documents["spain"]
             $PairBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($PairText + "`n")
         } catch {
-            return [pscustomobject]@{ AuditBytes = $null; ProcessCount = 2; Success = $false }
+            return [pscustomobject]@{
+                AuditBytes = $null
+                FailureRole = "not_applicable"
+                FailureSubreason = "audit_pair_invalid"
+                ProcessCount = 2
+                Success = $false
+            }
         }
-        return [pscustomobject]@{ AuditBytes = $PairBytes; ProcessCount = 2; Success = $true }
+        return [pscustomobject]@{
+            AuditBytes = $PairBytes
+            FailureRole = "not_applicable"
+            FailureSubreason = "not_applicable"
+            ProcessCount = 2
+            Success = $true
+        }
     } finally {
         if ($null -ne $EnvelopeBytes) { [Array]::Clear($EnvelopeBytes, 0, $EnvelopeBytes.Length) }
         [Array]::Clear($Key, 0, $Key.Length)
@@ -593,7 +625,13 @@ function Invoke-Phase13ProductionStageCore {
         $Path = Write-Phase13ProductionStageFailure `
             -OutcomeRoot $OutcomeRoot -Binding $Binding -NowUtc $NowUtc `
             -Stage "audit" -ReasonCode "audit_incomplete" -MutationAttempted $false
-        return [pscustomobject]@{ OutcomePath = $Path; ProcessCount = 2; Status = "failure" }
+        return [pscustomobject]@{
+            FailureRole = [string]$Audit.FailureRole
+            FailureSubreason = [string]$Audit.FailureSubreason
+            OutcomePath = $Path
+            ProcessCount = 2
+            Status = "failure"
+        }
     }
     $PayloadBytes = $null
     try {
@@ -608,7 +646,13 @@ function Invoke-Phase13ProductionStageCore {
         $Path = Write-Phase13ProductionStageFailure `
             -OutcomeRoot $OutcomeRoot -Binding $Binding -NowUtc $NowUtc `
             -Stage "stage" -ReasonCode "checksum_mismatch" -MutationAttempted $false
-        return [pscustomobject]@{ OutcomePath = $Path; ProcessCount = 2; Status = "failure" }
+        return [pscustomobject]@{
+            FailureRole = "not_applicable"
+            FailureSubreason = "not_applicable"
+            OutcomePath = $Path
+            ProcessCount = 2
+            Status = "failure"
+        }
     } finally {
         if ($null -ne $Audit.AuditBytes) { [Array]::Clear($Audit.AuditBytes, 0, $Audit.AuditBytes.Length) }
     }
@@ -623,12 +667,24 @@ function Invoke-Phase13ProductionStageCore {
             $Path = Write-Phase13ProductionStageFailure `
                 -OutcomeRoot $OutcomeRoot -Binding $Binding -NowUtc $NowUtc `
                 -Stage "rollback" -ReasonCode "rollback_required" -MutationAttempted $true
-            return [pscustomobject]@{ OutcomePath = $Path; ProcessCount = 3; Status = "failure" }
+            return [pscustomobject]@{
+                FailureRole = "not_applicable"
+                FailureSubreason = "not_applicable"
+                OutcomePath = $Path
+                ProcessCount = 3
+                Status = "failure"
+            }
         }
         $Path = Write-Phase13ProductionStageTerminalReceipt `
             -OutcomeRoot $OutcomeRoot -Binding $Binding -Receipt $Mutation.Document
         $Status = if ($Mutation.Success) { "success" } else { "failure" }
-        return [pscustomobject]@{ OutcomePath = $Path; ProcessCount = 3; Status = $Status }
+        return [pscustomobject]@{
+            FailureRole = "not_applicable"
+            FailureSubreason = "not_applicable"
+            OutcomePath = $Path
+            ProcessCount = 3
+            Status = $Status
+        }
     } finally {
         if ($null -ne $PayloadBytes) { [Array]::Clear($PayloadBytes, 0, $PayloadBytes.Length) }
     }
@@ -640,7 +696,18 @@ function ConvertTo-Phase13ProductionStagePublicReceipt {
         [Parameter(Mandatory = $true)][string]$OutcomeId
     )
     $Hash = Get-Phase13Sha256Hex -Bytes ([IO.File]::ReadAllBytes($CoreResult.OutcomePath))
+    $FailureRole = [string]$CoreResult.FailureRole
+    $FailureSubreason = [string]$CoreResult.FailureSubreason
+    if ($FailureRole -cnotin @("usa", "spain", "not_applicable") -or
+        $FailureSubreason -cnotin @(
+            "timeout", "output_oversized", "ssh_process_failed", "frame_invalid",
+            "audit_pair_invalid", "not_applicable"
+        )) {
+        throw "production stage public receipt invalid"
+    }
     return [pscustomobject]@{
+        FailureRole = $FailureRole
+        FailureSubreason = $FailureSubreason
         OutcomeId = $OutcomeId
         OutcomeSha256 = $Hash
         ProcessCount = [int]$CoreResult.ProcessCount

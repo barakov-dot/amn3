@@ -949,11 +949,19 @@ try {{
 
 
 @pytest.mark.parametrize(
-    ("fail_at", "expected_processes"),
-    [("none", ["usa", "spain", "stage"]), ("usa", ["usa", "spain"]), ("spain", ["usa", "spain"])],
+    ("fail_at", "expected_processes", "expected_role", "expected_subreason"),
+    [
+        ("none", ["usa", "spain", "stage"], "not_applicable", "not_applicable"),
+        ("usa", ["usa", "spain"], "usa", "ssh_process_failed"),
+        ("spain", ["usa", "spain"], "spain", "ssh_process_failed"),
+    ],
 )
 def test_claim_precedes_exact_three_process_chain_and_failures_are_sanitized(
-    tmp_path: Path, fail_at: str, expected_processes: list[str]
+    tmp_path: Path,
+    fail_at: str,
+    expected_processes: list[str],
+    expected_role: str,
+    expected_subreason: str,
 ) -> None:
     receipt, approval, payload = materialize_production_package(tmp_path)
     outcome_root = tmp_path / "outcomes"
@@ -970,8 +978,9 @@ $roles = @{{
     spain = [pscustomobject]@{{ TargetHost='spain.test'; TargetUser='operator'; KeyPath='fixed-key'; KnownHostsPath='fixed-known-hosts' }}
 }}
 $result = Invoke-Phase13ProductionStageCore -Binding $binding -PackageRoot '{ps_literal(receipt.output_root)}' -OutcomeRoot '{ps_literal(outcome_root)}' -SshExecutable '{ps_literal(sys.executable)}' -SshPrefixArguments @('{ps_literal(fake_ssh)}','{ps_literal(counter)}','{ps_literal(claim)}','{fail_at}') -RoleBindings $roles -PreparedPayloadBytes ([Convert]::FromBase64String('{base64.b64encode(payload).decode("ascii")}')) -NowUtc ([DateTimeOffset]'2026-08-08T17:31:00Z')
+$public = ConvertTo-Phase13ProductionStagePublicReceipt -CoreResult $result -OutcomeId $binding.OutcomeId
 $text = [IO.File]::ReadAllText($result.OutcomePath)
-[Console]::Out.Write((@{{ status=$result.Status; processes=@([IO.File]::ReadAllLines('{ps_literal(counter)}')); text=$text }} | ConvertTo-Json -Depth 8 -Compress))
+[Console]::Out.Write((@{{ failure_role=$public.FailureRole; failure_subreason=$public.FailureSubreason; status=$result.Status; processes=@([IO.File]::ReadAllLines('{ps_literal(counter)}')); text=$text }} | ConvertTo-Json -Depth 8 -Compress))
 """
     result = run_powershell(invocation)
     assert result.returncode == 0, result.stderr
@@ -980,9 +989,50 @@ $text = [IO.File]::ReadAllText($result.OutcomePath)
     assert "raw-secret-sentinel" not in document["text"]
     if fail_at == "none":
         assert document["status"] == "success"
+        assert document["failure_role"] == expected_role
+        assert document["failure_subreason"] == expected_subreason
         assert json.loads(document["text"])["outcome"] == "passed"
     else:
         assert document["status"] == "failure"
+        assert document["failure_role"] == expected_role
+        assert document["failure_subreason"] == expected_subreason
         failure = json.loads(document["text"])
         assert failure["decision"] == "stop"
         assert failure["reason_code"] == "audit_incomplete"
+
+
+def test_audit_transport_classifies_invalid_frame_without_raw_output() -> None:
+    invocation = f"""
+. '{ps_literal(RUNNER)}'
+function Invoke-Phase13BoundedProcess {{
+    return [pscustomobject]@{{
+        Document = '{{invalid-frame'
+        ExitCode = 0
+        Reason = 'success'
+    }}
+}}
+$binding = [pscustomobject]@{{
+    CollectorBytes = [Text.Encoding]::UTF8.GetBytes('fixture')
+    CollectorSha256 = '0' * 64
+}}
+$roles = @{{
+    usa = [pscustomobject]@{{ TargetHost='usa.test'; TargetUser='operator'; KeyPath='fixed-key'; KnownHostsPath='fixed-known-hosts' }}
+    spain = [pscustomobject]@{{ TargetHost='spain.test'; TargetUser='operator'; KeyPath='fixed-key'; KnownHostsPath='fixed-known-hosts' }}
+}}
+$result = Invoke-Phase13ProductionStageAuditTransport -Binding $binding -SshExecutable 'fake' -RoleBindings $roles
+[Console]::Out.Write((@{{
+    failure_role = $result.FailureRole
+    failure_subreason = $result.FailureSubreason
+    success = $result.Success
+}} | ConvertTo-Json -Compress))
+"""
+
+    result = run_powershell(invocation)
+
+    assert result.returncode == 0, result.stderr
+    assert result.stderr == ""
+    assert json.loads(result.stdout) == {
+        "failure_role": "usa",
+        "failure_subreason": "frame_invalid",
+        "success": False,
+    }
