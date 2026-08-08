@@ -198,6 +198,15 @@ def test_bound_foundation_adapter_uses_real_spain_backend() -> None:
     assert backend.foundation_backend.__class__.__name__ == "RealSpainBackend"
 
 
+def test_runtime_stage_accepts_authoritative_phase12_or_hardened_bot_unit() -> None:
+    module = load("phase13_runtime_stage_bot_unit_admission", REMOTE)
+    phase12_live = "389792d871cc980d8972bfe6a9b3f18ebebd4500c1bfadc92477b3382e0135f9"
+    hardened = "9383450e3ad3b9f079828ab12996994fe58b4a8559874a4fbde4210d4c4d2fd8"
+    assert module._bot_unit_hash_accepted(phase12_live, hardened) is True
+    assert module._bot_unit_hash_accepted(hardened, hardened) is True
+    assert module._bot_unit_hash_accepted("0" * 64, hardened) is False
+
+
 class FakeBackend:
     def __init__(self, fail_at: str | None = None) -> None:
         self.fail_at = fail_at

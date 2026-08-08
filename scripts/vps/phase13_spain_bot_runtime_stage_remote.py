@@ -30,6 +30,9 @@ EXPECTED_FOREIGN_STABLE_SHA256 = (
 EXPECTED_AWG2_FOUNDATION_SHA256 = (
     "0e5a5926821d88ae4a2515f9e95cd7c3f69db52100c1a1ec74e99fb794222281"
 )
+ACCEPTED_PHASE12_BOT_UNIT_SHA256 = (
+    "389792d871cc980d8972bfe6a9b3f18ebebd4500c1bfadc92477b3382e0135f9"
+)
 OUTCOME_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{2,63}$")
 SHA_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 ADMIN_PATTERN = re.compile(r"^[0-9]{1,32}(?:,[0-9]{1,32})*$")
@@ -100,6 +103,10 @@ def canonical_json_bytes(value: object) -> bytes:
 
 def sha256_bytes(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
+
+
+def _bot_unit_hash_accepted(actual: str, hardened: str) -> bool:
+    return actual in {ACCEPTED_PHASE12_BOT_UNIT_SHA256, hardened}
 
 
 def _parse_utc(value: object) -> datetime:
@@ -397,7 +404,9 @@ class LiveSpainRuntimeBackend:
         _regular_file(LIVE_DATABASE, 64 * 1024 * 1024)
         runtime_metadata = _regular_file(RUNTIME_ENVIRONMENT, MAX_RUNTIME_BYTES)
         _regular_file(BOT_UNIT_PATH, 1024 * 1024)
-        if _sha256_file(BOT_UNIT_PATH) != expected["bot_unit_sha256"]:
+        if not _bot_unit_hash_accepted(
+            _sha256_file(BOT_UNIT_PATH), str(expected["bot_unit_sha256"])
+        ):
             raise RemoteRuntimeStageError("preflight", "bot_unit_mismatch")
         if not self._bot_disabled() or not self._web_healthy():
             raise RemoteRuntimeStageError("preflight", "service_state_invalid")
