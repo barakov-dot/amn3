@@ -1,4 +1,41 @@
-# Текущий обязательный приоритет 2026-08-02: bot/web migration USA → Spain обязательна до освобождения USA
+# Текущий обязательный приоритет 2026-08-08: production stage/web-data apply entrypoint локально проверен
+
+Phase 13 ограничена завершением bot/web migration USA → Spain и достижением
+`USA_REINSTALL_READY`; AWG3 полностью перенесена в Phase 14. В изолированном
+VPS-OPS-LAB worktree от exact base `1b55f7c83c3453829e24af5dd11facedb2188447`
+локально проверен checksum-bound production disabled-stage и web/data-apply
+entrypoint. AMN2 exact head
+`910539eaa8051cb1b59131d38b9fa27b9392744d` сохранён без изменений.
+
+Public entrypoint принимает только package root и exact approval phrase,
+создаёт claim до network и использует fixed pinned USA/Spain trust bindings.
+Будущий process contract ограничен двумя read-only audit SSH и одним
+self-contained Spain stage/apply/verify/rollback SSH; SCP, remote temp package,
+retry и user-overridable target/path/service/mode отсутствуют.
+
+Local production preflight покрывает exact Spain target-before DB/runtime,
+web active/enabled/healthy/loopback-only, bot disabled/inactive/process-zero,
+D1–D7 database invariants, AWG2 persistent/live peer equality `7/7`, UDP
+`30001`, route/device, restart count `59` и ровно три tagged forward rules.
+Foreign projection приведена к canonical Phase 12 container/unit semantics:
+`153` persistent entries и exact stable SHA-256
+`F5767F361A9441DD4B5361C07DA164A3059E0D1347D5217594534797D367B7E8`.
+
+Локальные результаты: новый focused scope `24 passed`; aggregate BOT/WEB и
+утверждённый Phase 12 Spain regression scope `175 passed`; Python/PowerShell
+syntax, diff, secret, mutation и manual scoped security review passed,
+reportable findings `0`. Broad security scan не запускался. Reference
+local-fake stage/cutover scripts сохранены byte-for-byte. Secret-free receipt:
+`research/amn2/phase13-bot-web-production-stage-web-data-apply-entrypoint-local-verification-receipt-2026-08-08.md`.
+
+Expired unclaimed `bot-web-spain-stage-20260808-173758` не claimed и не
+использовался. Real SSH, data transfer, live DB apply, service action, bot
+cutover, USA release и live mutation не выполнялись. После commit/push
+разрешена только local materialization свежего final package; literal exact
+approval должен быть подготовлен отдельно, после чего выполнение обязано
+остановиться до SSH.
+
+# Предыдущий обязательный приоритет 2026-08-02: bot/web migration USA → Spain обязательна до освобождения USA
 
 Оператор уточнил Phase 13 exit condition: existing private Telegram bot,
 web-панель, database и required application data обязательно переносятся с USA
