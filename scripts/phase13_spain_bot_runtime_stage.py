@@ -31,6 +31,9 @@ from scripts.phase13_bot_media_readonly import (
 )
 from scripts.phase13_bot_web_migration_fresh_inputs import (
     FixedRoleBinding,
+    MAX_TRANSPORT_INPUT_BYTES as FOUNDATION_MAX_TRANSPORT_INPUT_BYTES,
+    MAX_TRANSPORT_OUTPUT_BYTES as FOUNDATION_MAX_TRANSPORT_OUTPUT_BYTES,
+    MAX_TRANSPORT_TIMEOUT_SECONDS as FOUNDATION_MAX_TRANSPORT_TIMEOUT_SECONDS,
     load_fixed_role_binding,
     run_bounded_process,
 )
@@ -69,7 +72,7 @@ SHA_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 HEAD_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 ADMIN_PATTERN = re.compile(r"^[0-9]{1,32}(?:,[0-9]{1,32})*$")
 MAX_ARTIFACT_BYTES = 64 * 1024 * 1024
-MAX_TRANSPORT_BYTES = 4 * 1024 * 1024
+MAX_TRANSPORT_BYTES = FOUNDATION_MAX_TRANSPORT_INPUT_BYTES
 MAX_OUTPUT_BYTES = 1024 * 1024
 FIXED_SSH_EXECUTABLE = r"C:\Windows\System32\OpenSSH\ssh.exe"
 
@@ -556,7 +559,8 @@ def run_runtime_stage_gate(
         )
         ssh_process_count = 1
         output = process_runner(
-            FIXED_SSH_EXECUTABLE, arguments, envelope, timeout_seconds=120.0,
+            FIXED_SSH_EXECUTABLE, arguments, envelope,
+            timeout_seconds=FOUNDATION_MAX_TRANSPORT_TIMEOUT_SECONDS,
             maximum_input_bytes=MAX_TRANSPORT_BYTES, maximum_output_bytes=MAX_OUTPUT_BYTES
         )
         receipt = _parse_remote_receipt(output, binding.outcome_id)

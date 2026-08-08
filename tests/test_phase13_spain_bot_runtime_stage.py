@@ -291,7 +291,11 @@ def test_runner_claims_before_exactly_one_fixed_spain_ssh(tmp_path: Path) -> Non
     )
     calls: list[tuple[str, tuple[str, ...], bytes]] = []
 
-    def fake_process(executable, arguments, input_bytes, **_kwargs):
+    def fake_process(executable, arguments, input_bytes, **kwargs):
+        assert kwargs["timeout_seconds"] == module.FOUNDATION_MAX_TRANSPORT_TIMEOUT_SECONDS
+        assert kwargs["maximum_input_bytes"] <= module.FOUNDATION_MAX_TRANSPORT_INPUT_BYTES
+        assert kwargs["maximum_output_bytes"] <= module.FOUNDATION_MAX_TRANSPORT_OUTPUT_BYTES
+        assert len(input_bytes) <= kwargs["maximum_input_bytes"]
         calls.append((executable, tuple(arguments), input_bytes))
         return canonical(
             {
