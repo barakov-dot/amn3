@@ -185,15 +185,21 @@ function ConvertTo-Phase13CanonicalAudit {
     )
     if ($Audit.schema -ne "amn2.phase13.bot-web-audit.v1" -or
         $Audit.role -ne $ExpectedRole -or
-        [string]$Audit.checked_at -notmatch '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$' -or
+        [string]$Audit.checked_at -notmatch '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$') {
+        throw "audit identity invalid"
+    }
+    if (
         [string]$Audit.database.schema_sha256 -notmatch '^[0-9a-f]{64}$' -or
         [string]$Audit.database.counts_sha256 -notmatch '^[0-9a-f]{64}$' -or
         $Audit.database.foreign_key_violations -lt 0 -or
-        $Audit.database.table_count -lt 0 -or
+        $Audit.database.table_count -lt 0) {
+        throw "audit database invalid"
+    }
+    if (
         $Audit.safety_receipt.mutation_attempted -ne $false -or
         $Audit.safety_receipt.raw_output_persisted -ne $false -or
         $Audit.safety_receipt.secret_bearing_data_persisted -ne $false) {
-        throw "audit projection invalid"
+        throw "audit safety invalid"
     }
     foreach ($BooleanValue in @(
         $Audit.services.web_active,
@@ -267,12 +273,26 @@ function ConvertTo-Phase13SanitizedAuditPair {
     try {
         $UsaAudit = ConvertTo-Phase13CanonicalAudit -Audit $UsaDocument.audit -ExpectedRole "usa-source"
     } catch {
-        throw "usa audit invalid"
+        $Category = switch -CaseSensitive ([string]$_.Exception.Message) {
+            "audit identity invalid" { "identity" }
+            "audit database invalid" { "database" }
+            "audit safety invalid" { "safety" }
+            "audit boolean invalid" { "boolean" }
+            default { "internal" }
+        }
+        throw "usa audit $Category invalid"
     }
     try {
         $SpainAudit = ConvertTo-Phase13CanonicalAudit -Audit $SpainDocument.audit -ExpectedRole "spain-target"
     } catch {
-        throw "spain audit invalid"
+        $Category = switch -CaseSensitive ([string]$_.Exception.Message) {
+            "audit identity invalid" { "identity" }
+            "audit database invalid" { "database" }
+            "audit safety invalid" { "safety" }
+            "audit boolean invalid" { "boolean" }
+            default { "internal" }
+        }
+        throw "spain audit $Category invalid"
     }
     $Result = [ordered]@{
         schema = "amn2.phase13.bot-web-audit-pair.v1"

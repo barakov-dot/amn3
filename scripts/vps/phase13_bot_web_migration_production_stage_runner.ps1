@@ -391,6 +391,30 @@ function Get-Phase13ProductionStageAuditPairFailure {
                 Subreason = "audit_spain_projection_invalid"
             }
         }
+        "usa audit identity invalid" {
+            return [pscustomobject]@{ Role = "usa"; Subreason = "audit_usa_identity_invalid" }
+        }
+        "usa audit database invalid" {
+            return [pscustomobject]@{ Role = "usa"; Subreason = "audit_usa_database_invalid" }
+        }
+        "usa audit safety invalid" {
+            return [pscustomobject]@{ Role = "usa"; Subreason = "audit_usa_safety_invalid" }
+        }
+        "usa audit boolean invalid" {
+            return [pscustomobject]@{ Role = "usa"; Subreason = "audit_usa_boolean_invalid" }
+        }
+        "spain audit identity invalid" {
+            return [pscustomobject]@{ Role = "spain"; Subreason = "audit_spain_identity_invalid" }
+        }
+        "spain audit database invalid" {
+            return [pscustomobject]@{ Role = "spain"; Subreason = "audit_spain_database_invalid" }
+        }
+        "spain audit safety invalid" {
+            return [pscustomobject]@{ Role = "spain"; Subreason = "audit_spain_safety_invalid" }
+        }
+        "spain audit boolean invalid" {
+            return [pscustomobject]@{ Role = "spain"; Subreason = "audit_spain_boolean_invalid" }
+        }
         default {
             return [pscustomobject]@{
                 Role = "not_applicable"
@@ -769,6 +793,10 @@ function ConvertTo-Phase13ProductionStagePublicReceipt {
             "collector_output_failed", "audit_collector_envelope_invalid",
             "audit_ephemeral_proof_invalid", "audit_usa_projection_invalid",
             "audit_spain_projection_invalid", "audit_pair_internal_failure",
+            "audit_usa_identity_invalid", "audit_usa_database_invalid",
+            "audit_usa_safety_invalid", "audit_usa_boolean_invalid",
+            "audit_spain_identity_invalid", "audit_spain_database_invalid",
+            "audit_spain_safety_invalid", "audit_spain_boolean_invalid",
             "audit_pair_invalid", "not_applicable"
         )) {
         throw "production stage public receipt invalid"
