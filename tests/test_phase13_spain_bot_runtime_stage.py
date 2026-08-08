@@ -207,6 +207,30 @@ def test_runtime_stage_accepts_authoritative_phase12_or_hardened_bot_unit() -> N
     assert module._bot_unit_hash_accepted("0" * 64, hardened) is False
 
 
+def test_runtime_stage_accepts_phase12_static_inactive_bot(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = load("phase13_runtime_stage_static_bot", REMOTE)
+
+    class FoundationBackend:
+        state = {
+            "ActiveState": "inactive",
+            "MainPID": "0",
+            "UnitFileState": "static",
+        }
+
+        def _service_values(self, unit: str) -> dict[str, str]:
+            assert unit == module.BOT_UNIT_PATH.name
+            return dict(self.state)
+
+    backend = module.LiveSpainRuntimeBackend.__new__(module.LiveSpainRuntimeBackend)
+    backend.foundation_backend = FoundationBackend()
+    monkeypatch.setattr(module.os.path, "lexists", lambda _path: False)
+    assert backend._bot_disabled() is True
+    backend.foundation_backend.state["UnitFileState"] = "enabled"
+    assert backend._bot_disabled() is False
+
+
 class FakeBackend:
     def __init__(self, fail_at: str | None = None) -> None:
         self.fail_at = fail_at

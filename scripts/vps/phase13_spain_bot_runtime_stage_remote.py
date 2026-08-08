@@ -382,10 +382,15 @@ class LiveSpainRuntimeBackend:
 
     def _bot_disabled(self) -> bool:
         try:
-            self.foundation_backend._assert_bot_disabled()
+            bot = self.foundation_backend._service_values(BOT_UNIT_PATH.name)
         except Exception:
             return False
-        return not os.path.lexists(BOT_ENABLE_MARKER)
+        return bool(
+            bot["ActiveState"] == "inactive"
+            and bot["MainPID"] in {"", "0"}
+            and bot["UnitFileState"] in {"disabled", "static"}
+            and not os.path.lexists(BOT_ENABLE_MARKER)
+        )
 
     def _web_healthy(self) -> bool:
         try:
