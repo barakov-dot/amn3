@@ -58,6 +58,24 @@ class CollectorError(RuntimeError):
     pass
 
 
+class CollectorStageError(CollectorError):
+    EXIT_CODES = {
+        "environment": 75,
+        "services": 76,
+        "database": 77,
+        "listener": 78,
+        "health": 79,
+        "output": 80,
+    }
+
+    def __init__(self, stage: str) -> None:
+        if stage not in self.EXIT_CODES:
+            raise ValueError("invalid collector stage")
+        self.stage = stage
+        self.exit_code = self.EXIT_CODES[stage]
+        super().__init__("collector stage failed")
+
+
 def canonical_json_bytes(value: object) -> bytes:
     return (
         json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -187,10 +205,31 @@ def collect(role: str, ephemeral_key: bytes) -> dict[str, object]:
     contract = ROLE_CONTRACTS[role]
     database = Path(contract["database"])
     environment = Path(contract["environment"])
-    env_values = _read_environment(environment)
-    references = _secret_references(env_values)
-    web_state = _service_state(str(contract["web_unit"]))
-    bot_state = _service_state(str(contract["bot_unit"]))
+    try:
+        env_values = _read_environment(environment)
+        references = _secret_references(env_values)
+    except Exception:
+        raise CollectorStageError("environment") from None
+    try:
+        web_state = _service_state(str(contract["web_unit"]))
+        bot_state = _service_state(str(contract["bot_unit"]))
+    except Exception:
+        raise CollectorStageError("services") from None
+    try:
+        database_observation = inspect_database(database)
+    except Exception:
+        raise CollectorStageError("database") from None
+    try:
+        web_loopback_only = _listener_loopback_only(int(contract["web_port"]))
+    except Exception:
+        raise CollectorStageError("listener") from None
+    try:
+        login_healthy = _login_healthy(str(contract["login_url"]))
+        required_paths_present = all(
+            Path(path).exists() for path in contract["required_paths"]
+        )
+    except Exception:
+        raise CollectorStageError("health") from None
     audit = {
         "schema": "amn2.phase13.bot-web-audit.v1",
         "role": contract["audit_role"],
@@ -198,9 +237,9 @@ def collect(role: str, ephemeral_key: bytes) -> dict[str, object]:
         "services": {
             "web_active": web_state["active"],
             "bot_active": bot_state["active"],
-            "web_loopback_only": _listener_loopback_only(int(contract["web_port"])),
+            "web_loopback_only": web_loopback_only,
         },
-        "database": inspect_database(database),
+        "database": database_observation,
         "environment": {
             "telegram_bot_token_present": bool(references["telegram_bot_token"]),
             "app_secret_present": bool(references["app_secret_key"]),
@@ -217,25 +256,26 @@ def collect(role: str, ephemeral_key: bytes) -> dict[str, object]:
             "secret_bearing_data_persisted": False,
         },
     }
-    return {
-        "schema": "amn2.phase13.bot-web-collector.v1",
-        "role": role,
-        "audit": audit,
-        "service_observation": {
-            "web_enabled": web_state["enabled"],
-            "web_restart_count": web_state["restart_count"],
-            "bot_enabled": bot_state["enabled"],
-            "bot_restart_count": bot_state["restart_count"],
-            "login_healthy": _login_healthy(str(contract["login_url"])),
-            "required_paths_present": all(
-                Path(path).exists() for path in contract["required_paths"]
-            ),
-        },
-        "secret_reference_hmac": {
-            name: ephemeral_reference_hmac(reference, ephemeral_key)
-            for name, reference in references.items()
-        },
-    }
+    try:
+        return {
+            "schema": "amn2.phase13.bot-web-collector.v1",
+            "role": role,
+            "audit": audit,
+            "service_observation": {
+                "web_enabled": web_state["enabled"],
+                "web_restart_count": web_state["restart_count"],
+                "bot_enabled": bot_state["enabled"],
+                "bot_restart_count": bot_state["restart_count"],
+                "login_healthy": login_healthy,
+                "required_paths_present": required_paths_present,
+            },
+            "secret_reference_hmac": {
+                name: ephemeral_reference_hmac(reference, ephemeral_key)
+                for name, reference in references.items()
+            },
+        }
+    except Exception:
+        raise CollectorStageError("output") from None
 
 
 def _read_ephemeral_key() -> bytes:
@@ -259,6 +299,9 @@ def main(arguments: Sequence[str] | None = None) -> int:
             for index in range(len(key)):
                 key[index] = 0
         return 0
+    except CollectorStageError as error:
+        sys.stdout.write("collector_failed\n")
+        return error.exit_code
     except (CollectorError, OSError, sqlite3.Error, subprocess.SubprocessError):
         sys.stdout.write("collector_failed\n")
         return 74

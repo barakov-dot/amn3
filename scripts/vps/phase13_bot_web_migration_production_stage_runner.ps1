@@ -353,6 +353,13 @@ function Get-Phase13ProductionStageAuditTransportSubreason {
     if ($ExitCode -eq -1) { return "local_process_failure" }
     if ($ExitCode -eq 255) { return "ssh_client_failure" }
     if ($ExitCode -eq 127) { return "remote_command_unavailable" }
+    if ($ExitCode -eq 74) { return "collector_failed" }
+    if ($ExitCode -eq 75) { return "collector_environment_failed" }
+    if ($ExitCode -eq 76) { return "collector_services_failed" }
+    if ($ExitCode -eq 77) { return "collector_database_failed" }
+    if ($ExitCode -eq 78) { return "collector_listener_failed" }
+    if ($ExitCode -eq 79) { return "collector_health_failed" }
+    if ($ExitCode -eq 80) { return "collector_output_failed" }
     if ($ExitCode -ge 1 -and $ExitCode -le 254) { return "remote_exit_unclassified" }
     return "transport_internal_failure"
 }
@@ -718,7 +725,10 @@ function ConvertTo-Phase13ProductionStagePublicReceipt {
             "timeout", "output_oversized", "ssh_client_failure",
             "remote_command_unavailable", "remote_exit_unclassified",
             "local_process_failure", "transport_internal_failure", "frame_invalid",
-            "audit_pair_invalid", "not_applicable"
+            "collector_failed", "collector_environment_failed",
+            "collector_services_failed", "collector_database_failed",
+            "collector_listener_failed", "collector_health_failed",
+            "collector_output_failed", "audit_pair_invalid", "not_applicable"
         )) {
         throw "production stage public receipt invalid"
     }

@@ -1042,3 +1042,68 @@ $result = Invoke-Phase13ProductionStageAuditTransport -Binding $binding -SshExec
         "failure_subreason": "frame_invalid",
         "success": False,
     }
+
+
+@pytest.mark.parametrize(
+    ("exit_code", "expected_subreason"),
+    [
+        (74, "collector_failed"),
+        (75, "collector_environment_failed"),
+        (76, "collector_services_failed"),
+        (77, "collector_database_failed"),
+        (78, "collector_listener_failed"),
+        (79, "collector_health_failed"),
+        (80, "collector_output_failed"),
+    ],
+)
+def test_audit_transport_maps_collector_stage_exit_codes_without_raw_output(
+    exit_code: int, expected_subreason: str
+) -> None:
+    invocation = f"""
+. '{ps_literal(RUNNER)}'
+$subreason = Get-Phase13ProductionStageAuditTransportSubreason -Reason 'process_failure' -ExitCode {exit_code}
+[Console]::Out.Write($subreason)
+"""
+
+    result = run_powershell(invocation)
+
+    assert result.returncode == 0, result.stderr
+    assert result.stderr == ""
+    assert result.stdout == expected_subreason
+
+
+@pytest.mark.parametrize(
+    "subreason",
+    [
+        "collector_failed",
+        "collector_environment_failed",
+        "collector_services_failed",
+        "collector_database_failed",
+        "collector_listener_failed",
+        "collector_health_failed",
+        "collector_output_failed",
+    ],
+)
+def test_public_receipt_accepts_only_closed_collector_stage_subreasons(
+    tmp_path: Path, subreason: str
+) -> None:
+    outcome = tmp_path / "failure.json"
+    outcome.write_text("{}\n", encoding="utf-8")
+    invocation = f"""
+. '{ps_literal(RUNNER)}'
+$core = [pscustomobject]@{{
+    FailureRole = 'usa'
+    FailureSubreason = '{subreason}'
+    OutcomePath = '{ps_literal(outcome)}'
+    ProcessCount = 2
+    Status = 'failure'
+}}
+$public = ConvertTo-Phase13ProductionStagePublicReceipt -CoreResult $core -OutcomeId 'outcome-test'
+[Console]::Out.Write($public.FailureSubreason)
+"""
+
+    result = run_powershell(invocation)
+
+    assert result.returncode == 0, result.stderr
+    assert result.stderr == ""
+    assert result.stdout == subreason

@@ -149,6 +149,92 @@ def test_ephemeral_hmac_proof_never_returns_raw_reference() -> None:
     assert "test-reference" not in json.dumps({"digest": digest})
 
 
+@pytest.mark.parametrize(
+    ("failed_stage", "expected_exit_code"),
+    [
+        ("environment", 75),
+        ("services", 76),
+        ("database", 77),
+        ("listener", 78),
+        ("health", 79),
+        ("output", 80),
+    ],
+)
+def test_collector_failures_have_closed_secret_safe_stage_exit_codes(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    failed_stage: str,
+    expected_exit_code: int,
+) -> None:
+    collector = collector_module()
+    required = tmp_path / "required"
+    required.mkdir()
+    monkeypatch.setitem(
+        collector.ROLE_CONTRACTS,
+        "usa",
+        {
+            "audit_role": "usa-source",
+            "database": tmp_path / "database.sqlite3",
+            "environment": tmp_path / "runtime.env",
+            "web_unit": "web.service",
+            "bot_unit": "bot.service",
+            "web_port": 3030,
+            "login_url": "http://127.0.0.1:3030/login",
+            "required_paths": (required,),
+        },
+    )
+    monkeypatch.setattr(
+        collector,
+        "_read_environment",
+        lambda _path: {
+            "TELEGRAM_BOT_TOKEN": "fixture",
+            "APP_SECRET_KEY": "fixture",
+            "WEB_ADMIN_PASSWORD_HASH": "fixture",
+            "WEB_SESSION_SECRET": "fixture",
+        },
+    )
+    monkeypatch.setattr(
+        collector,
+        "_service_state",
+        lambda _unit: {"active": True, "enabled": True, "restart_count": 0},
+    )
+    monkeypatch.setattr(
+        collector,
+        "inspect_database",
+        lambda _path: {
+            "integrity_ok": True,
+            "foreign_key_violations": 0,
+            "table_count": 1,
+            "schema_sha256": "a" * 64,
+            "counts_sha256": "b" * 64,
+        },
+    )
+    monkeypatch.setattr(collector, "_listener_loopback_only", lambda _port: True)
+    monkeypatch.setattr(collector, "_login_healthy", lambda _url: True)
+    original_hmac = collector.ephemeral_reference_hmac
+
+    def fail(*_args: object, **_kwargs: object) -> object:
+        raise OSError("raw-secret-sentinel")
+
+    failure_targets = {
+        "environment": "_read_environment",
+        "services": "_service_state",
+        "database": "inspect_database",
+        "listener": "_listener_loopback_only",
+        "health": "_login_healthy",
+        "output": "ephemeral_reference_hmac",
+    }
+    monkeypatch.setattr(collector, failure_targets[failed_stage], fail)
+
+    with pytest.raises(collector.CollectorStageError) as captured:
+        collector.collect("usa", bytes(range(32)))
+
+    assert captured.value.exit_code == expected_exit_code
+    assert captured.value.stage == failed_stage
+    assert "raw-secret-sentinel" not in str(captured.value)
+    monkeypatch.setattr(collector, "ephemeral_reference_hmac", original_hmac)
+
+
 def test_runner_fake_pair_uses_one_process_per_role_and_emits_only_booleans(
     tmp_path: Path,
 ) -> None:
