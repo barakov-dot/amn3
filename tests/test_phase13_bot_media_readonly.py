@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 
 import pytest
 
@@ -372,3 +373,34 @@ def test_gate_rejects_preexisting_private_root_with_unprotected_acl_before_netwo
             ),
         )
     assert calls == 0
+
+
+def test_direct_script_materialize_entrypoint_loads_repository_modules(
+    tmp_path: Path,
+) -> None:
+    repository = Path(__file__).parents[1]
+    expires_at = datetime.now(UTC) + timedelta(hours=1)
+    result = subprocess.run(
+        (
+            sys.executable,
+            str(repository / "scripts/phase13_bot_media_readonly.py"),
+            "materialize",
+            "--outcome-id",
+            "bot-media-check-cli-test",
+            "--expires-at",
+            expires_at.replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "--output-parent",
+            str(tmp_path / "packages"),
+        ),
+        cwd=repository,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        timeout=30,
+    )
+
+    assert result.returncode == 0, result.stderr
+    document = json.loads(result.stdout)
+    assert document["status"] == "materialized"
+    assert document["outcome_id"] == "bot-media-check-cli-test"

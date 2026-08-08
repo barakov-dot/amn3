@@ -19,6 +19,9 @@ import sys
 from types import ModuleType
 from typing import Callable, Mapping
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from scripts.phase13_bot_web_migration_fresh_inputs import (
     FixedRoleBinding,
     load_fixed_role_binding,
