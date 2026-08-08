@@ -231,6 +231,30 @@ def test_runtime_stage_accepts_phase12_static_inactive_bot(
     assert backend._bot_disabled() is False
 
 
+def test_foundation_snapshot_failure_is_translated_without_internal_failure() -> None:
+    module = load("phase13_runtime_stage_snapshot_adapter", REMOTE)
+
+    class FoundationError(RuntimeError):
+        def __init__(self, reason: str) -> None:
+            super().__init__(reason)
+            self.reason = reason
+
+    class Foundation:
+        RemoteStageError = FoundationError
+
+    class FoundationBackend:
+        def _awg_snapshot(self) -> str:
+            raise FoundationError("awg2_equality_mismatch")
+
+    backend = module.LiveSpainRuntimeBackend.__new__(module.LiveSpainRuntimeBackend)
+    backend.foundation = Foundation
+    backend.foundation_backend = FoundationBackend()
+    with pytest.raises(module.RemoteRuntimeStageError) as captured:
+        backend._capture_foundation_snapshot("awg2", stage="preflight")
+    assert captured.value.stage == "preflight"
+    assert captured.value.reason == "awg2_equality_mismatch"
+
+
 class FakeBackend:
     def __init__(self, fail_at: str | None = None) -> None:
         self.fail_at = fail_at

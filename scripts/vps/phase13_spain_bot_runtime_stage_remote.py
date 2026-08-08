@@ -77,6 +77,14 @@ TERMINAL_KEYS = {
     "source_equal",
     "web_loopback_healthy",
 }
+FOUNDATION_SNAPSHOT_REASONS = {
+    "awg2": {"awg2_observation_failed", "awg2_equality_mismatch"},
+    "foreign": {"foreign_observation_failed", "foreign_equality_mismatch"},
+}
+FOUNDATION_SNAPSHOT_METHODS = {
+    "awg2": "_awg_snapshot",
+    "foreign": "_foreign_snapshot",
+}
 
 
 class RemoteRuntimeStageError(RuntimeError):
@@ -403,6 +411,25 @@ class LiveSpainRuntimeBackend:
         except Exception:
             return False
 
+    def _capture_foundation_snapshot(self, kind: str, *, stage: str) -> str:
+        if kind not in FOUNDATION_SNAPSHOT_REASONS:
+            raise RemoteRuntimeStageError(stage, "observation_failed")
+        fallback = f"{kind}_observation_failed"
+        try:
+            snapshot = getattr(
+                self.foundation_backend, FOUNDATION_SNAPSHOT_METHODS[kind]
+            )()
+        except self.foundation.RemoteStageError as error:
+            reason = str(getattr(error, "reason", ""))
+            if reason not in FOUNDATION_SNAPSHOT_REASONS[kind]:
+                reason = fallback
+            raise RemoteRuntimeStageError(stage, reason) from error
+        except Exception as error:
+            raise RemoteRuntimeStageError(stage, fallback) from error
+        if not isinstance(snapshot, str) or SHA_PATTERN.fullmatch(snapshot) is None:
+            raise RemoteRuntimeStageError(stage, fallback)
+        return snapshot
+
     def preflight(self, payload: dict[str, object]) -> None:
         expected = payload["expected"]
         assert isinstance(expected, dict)
@@ -435,8 +462,8 @@ class LiveSpainRuntimeBackend:
         if len(self.runtime_before) != runtime_metadata.st_size:
             raise RemoteRuntimeStageError("preflight", "runtime_environment_invalid")
         self.database_sha = _sha256_file(LIVE_DATABASE)
-        self.awg_before = self.foundation_backend._awg_snapshot()
-        self.foreign_before = self.foundation_backend._foreign_snapshot()
+        self.awg_before = self._capture_foundation_snapshot("awg2", stage="preflight")
+        self.foreign_before = self._capture_foundation_snapshot("foreign", stage="preflight")
         outcome_root = PROTECTED_ROOT / str(payload["outcome_id"])
         if os.path.lexists(outcome_root):
             raise RemoteRuntimeStageError("preflight", "stage_replay")
@@ -478,9 +505,9 @@ class LiveSpainRuntimeBackend:
             raise RemoteRuntimeStageError("post_verify", "preservation_failed")
         if not self._bot_disabled() or not self._web_healthy():
             raise RemoteRuntimeStageError("post_verify", "service_state_invalid")
-        if self.foundation_backend._awg_snapshot() != self.awg_before:
+        if self._capture_foundation_snapshot("awg2", stage="post_verify") != self.awg_before:
             raise RemoteRuntimeStageError("post_verify", "awg2_equality_mismatch")
-        if self.foundation_backend._foreign_snapshot() != self.foreign_before:
+        if self._capture_foundation_snapshot("foreign", stage="post_verify") != self.foreign_before:
             raise RemoteRuntimeStageError("post_verify", "foreign_equality_mismatch")
 
     def rollback(self, payload: dict[str, object]) -> None:
