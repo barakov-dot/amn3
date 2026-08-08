@@ -27,6 +27,23 @@ from scripts.phase13_bot_web_migration_fresh_inputs import (
 from scripts.vps import phase13_bot_web_migration_fresh_input_remote as remote
 
 
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def authoritative_spain_server_config_path() -> Path:
+    runtime_environment = (
+        ROOT / "packaging" / "phase12-spain" / "templates" / "runtime.env"
+    )
+    prefix = "SERVER_CONFIG_PATH="
+    matches = [
+        line.removeprefix(prefix)
+        for line in runtime_environment.read_text(encoding="utf-8").splitlines()
+        if line.startswith(prefix)
+    ]
+    assert len(matches) == 1
+    return Path(matches[0])
+
+
 def canonical(value: object) -> bytes:
     return (
         json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -138,6 +155,14 @@ def test_remote_collector_uses_consistent_memory_snapshot_and_fixed_allowlist(
         "runtime.env",
         "server-config.yml",
     }
+
+
+def test_spain_fresh_collector_uses_authoritative_phase12_server_config_path() -> None:
+    application_files = dict(remote.ROLE_CONTRACTS["spain"]["application_files"])
+
+    assert application_files["server-config.yml"] == (
+        authoritative_spain_server_config_path()
+    )
 
 
 @dataclass(frozen=True)

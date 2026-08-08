@@ -41,7 +41,7 @@ ROLE_CONTRACTS = {
         "login_url": "http://127.0.0.1:3031/login",
         "required_paths": (
             Path("/var/lib/amn2-spain/source"),
-            Path("/var/lib/amn2-spain/server-config.yml"),
+            Path("/etc/amn2-spain/servers.yml"),
         ),
     },
 }

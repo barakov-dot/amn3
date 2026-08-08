@@ -24,6 +24,20 @@ def collector_module():
         pytest.fail(f"Phase 13 bot/web read-only collector is missing: {error}")
 
 
+def authoritative_spain_server_config_path() -> Path:
+    runtime_environment = (
+        ROOT / "packaging" / "phase12-spain" / "templates" / "runtime.env"
+    )
+    prefix = "SERVER_CONFIG_PATH="
+    matches = [
+        line.removeprefix(prefix)
+        for line in runtime_environment.read_text(encoding="utf-8").splitlines()
+        if line.startswith(prefix)
+    ]
+    assert len(matches) == 1
+    return Path(matches[0])
+
+
 def powershell_executable() -> str:
     executable = shutil.which("powershell") or shutil.which("pwsh")
     if executable is None:
@@ -94,6 +108,14 @@ def test_collector_accepts_only_fixed_roles_and_no_path_arguments() -> None:
         collector.parse_arguments(["--role", "other"])
     with pytest.raises(SystemExit):
         collector.parse_arguments(["--role", "usa", "--database", "elsewhere"])
+
+
+def test_spain_audit_collector_uses_authoritative_phase12_server_config_path() -> None:
+    collector = collector_module()
+
+    assert authoritative_spain_server_config_path() in collector.ROLE_CONTRACTS[
+        "spain"
+    ]["required_paths"]
 
 
 def test_sqlite_projection_is_exact_and_does_not_change_database(tmp_path: Path) -> None:

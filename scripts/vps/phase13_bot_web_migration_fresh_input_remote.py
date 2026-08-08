@@ -40,7 +40,7 @@ ROLE_CONTRACTS: dict[str, dict[str, object]] = {
         "database": Path("/var/lib/amn2-spain/amn2.sqlite3"),
         "application_files": (
             ("runtime.env", Path("/etc/amn2-spain/runtime.env")),
-            ("server-config.yml", Path("/var/lib/amn2-spain/server-config.yml")),
+            ("server-config.yml", Path("/etc/amn2-spain/servers.yml")),
         ),
     },
 }
