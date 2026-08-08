@@ -6,8 +6,10 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 import importlib.util
 import json
+import io
 from pathlib import Path
 import sys
+import tarfile
 
 import pytest
 
@@ -148,6 +150,23 @@ def test_exact_amn2_diff_is_migration_only_and_accepted_source_is_bound() -> Non
     assert "app/bot/assets/NEOBYATNAYA-AMNZ-BOT.png" in manifest["files"]
     assert "app/bot/assets/NEOBYATNAYA-AMNZ-LANGUAGE-HEADER.png" in manifest["files"]
     assert "app/web/static/brand-full.png" in manifest["files"]
+
+
+def test_accepted_role_archive_normalizes_only_safe_dot_slash_prefix() -> None:
+    module = load("phase13_runtime_stage_role_archive", LOCAL)
+    buffer = io.BytesIO()
+    values = {
+        "./database.sqlite3": b"SQLite format 3\x00fixture",
+        "./runtime.env": b"TELEGRAM_BOT_TOKEN=fixture\nADMIN_TELEGRAM_IDS=1\n",
+        "./server-config.yml": b"servers: []\n",
+    }
+    with tarfile.open(fileobj=buffer, mode="w:gz") as archive:
+        for name, value in values.items():
+            info = tarfile.TarInfo(name)
+            info.size = len(value)
+            archive.addfile(info, io.BytesIO(value))
+    parsed = module._role_archive_files(buffer.getvalue())
+    assert set(parsed) == {"database.sqlite3", "runtime.env", "server-config.yml"}
 
 
 def test_runtime_merge_changes_only_token_and_admin_ids() -> None:

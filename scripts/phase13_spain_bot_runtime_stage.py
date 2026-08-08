@@ -651,14 +651,15 @@ def _role_archive_files(value: bytes) -> dict[str, bytes]:
     try:
         with tarfile.open(fileobj=io.BytesIO(value), mode="r:gz") as archive:
             for member in archive.getmembers():
-                if not member.isfile() or member.name not in {
+                name = member.name.removeprefix("./")
+                if not member.isfile() or name not in {
                     "database.sqlite3", "runtime.env", "server-config.yml"
-                } or member.name in files:
+                } or name in files or member.size < 1 or member.size > MAX_ARTIFACT_BYTES:
                     raise RuntimeStageError("source archive invalid")
                 handle = archive.extractfile(member)
                 if handle is None:
                     raise RuntimeStageError("source archive invalid")
-                files[member.name] = handle.read()
+                files[name] = handle.read()
     except tarfile.TarError as error:
         raise RuntimeStageError("source archive invalid") from error
     if set(files) != {"database.sqlite3", "runtime.env", "server-config.yml"}:
