@@ -17,6 +17,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 LOCAL = ROOT / "scripts/phase13_spain_bot_runtime_stage.py"
 REMOTE = ROOT / "scripts/vps/phase13_spain_bot_runtime_stage_remote.py"
+FOUNDATION = ROOT / "scripts/vps/phase13_bot_web_migration_production_stage_remote.py"
 
 
 def load(name: str, path: Path):
@@ -188,6 +189,13 @@ def test_runtime_merge_changes_only_token_and_admin_ids() -> None:
     )
     with pytest.raises(module.RemoteRuntimeStageError, match="runtime_delta_invalid"):
         module.merge_runtime_environment(before, delta + b"APP_SECRET_KEY=forbidden\n")
+
+
+def test_bound_foundation_adapter_uses_real_spain_backend() -> None:
+    module = load("phase13_runtime_stage_real_foundation", REMOTE)
+    foundation = module._load_foundation(FOUNDATION.read_bytes())
+    backend = module.LiveSpainRuntimeBackend(foundation, {"files": {}})
+    assert backend.foundation_backend.__class__.__name__ == "RealSpainBackend"
 
 
 class FakeBackend:

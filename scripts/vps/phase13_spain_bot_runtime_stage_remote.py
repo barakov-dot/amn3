@@ -352,7 +352,7 @@ def _sha256_file(path: Path) -> str:
 class LiveSpainRuntimeBackend:
     def __init__(self, foundation: ModuleType, source_manifest: Mapping[str, object]) -> None:
         self.foundation = foundation
-        self.foundation_backend = foundation.ProductionBackend()
+        self.foundation_backend = foundation.RealSpainBackend()
         self.source_manifest = source_manifest
         self.runtime_before = b""
         self.database_sha = ""
@@ -534,7 +534,7 @@ def _load_foundation(value: bytes) -> ModuleType:
     except Exception as error:
         sys.modules.pop(module.__name__, None)
         raise RemoteRuntimeStageError("package_verify", "foundation_invalid") from error
-    if not hasattr(module, "ProductionBackend"):
+    if not hasattr(module, "RealSpainBackend"):
         raise RemoteRuntimeStageError("package_verify", "foundation_invalid")
     return module
 
