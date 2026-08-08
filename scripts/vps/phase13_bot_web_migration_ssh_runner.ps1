@@ -264,8 +264,16 @@ function ConvertTo-Phase13SanitizedAuditPair {
         }
         $Equality[$SecretClass] = [System.StringComparer]::Ordinal.Equals($UsaDigest, $SpainDigest)
     }
-    $UsaAudit = ConvertTo-Phase13CanonicalAudit -Audit $UsaDocument.audit -ExpectedRole "usa-source"
-    $SpainAudit = ConvertTo-Phase13CanonicalAudit -Audit $SpainDocument.audit -ExpectedRole "spain-target"
+    try {
+        $UsaAudit = ConvertTo-Phase13CanonicalAudit -Audit $UsaDocument.audit -ExpectedRole "usa-source"
+    } catch {
+        throw "usa audit invalid"
+    }
+    try {
+        $SpainAudit = ConvertTo-Phase13CanonicalAudit -Audit $SpainDocument.audit -ExpectedRole "spain-target"
+    } catch {
+        throw "spain audit invalid"
+    }
     $Result = [ordered]@{
         schema = "amn2.phase13.bot-web-audit-pair.v1"
         audits = @($UsaAudit, $SpainAudit)

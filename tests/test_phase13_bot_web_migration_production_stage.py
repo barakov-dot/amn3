@@ -1107,3 +1107,45 @@ $public = ConvertTo-Phase13ProductionStagePublicReceipt -CoreResult $core -Outco
     assert result.returncode == 0, result.stderr
     assert result.stderr == ""
     assert result.stdout == subreason
+
+
+@pytest.mark.parametrize(
+    ("failure_message", "expected_role", "expected_subreason"),
+    [
+        (
+            "collector envelope invalid",
+            "not_applicable",
+            "audit_collector_envelope_invalid",
+        ),
+        (
+            "ephemeral proof invalid",
+            "not_applicable",
+            "audit_ephemeral_proof_invalid",
+        ),
+        ("usa audit invalid", "usa", "audit_usa_projection_invalid"),
+        ("spain audit invalid", "spain", "audit_spain_projection_invalid"),
+        (
+            "raw-secret-sentinel",
+            "not_applicable",
+            "audit_pair_internal_failure",
+        ),
+    ],
+)
+def test_audit_pair_failure_mapping_is_closed_and_secret_safe(
+    failure_message: str, expected_role: str, expected_subreason: str
+) -> None:
+    invocation = f"""
+. '{ps_literal(RUNNER)}'
+$result = Get-Phase13ProductionStageAuditPairFailure -FailureMessage '{failure_message}'
+[Console]::Out.Write((@{{ role=$result.Role; subreason=$result.Subreason }} | ConvertTo-Json -Compress))
+"""
+
+    result = run_powershell(invocation)
+
+    assert result.returncode == 0, result.stderr
+    assert result.stderr == ""
+    assert json.loads(result.stdout) == {
+        "role": expected_role,
+        "subreason": expected_subreason,
+    }
+    assert "raw-secret-sentinel" not in result.stdout

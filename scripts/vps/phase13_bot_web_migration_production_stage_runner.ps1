@@ -364,6 +364,42 @@ function Get-Phase13ProductionStageAuditTransportSubreason {
     return "transport_internal_failure"
 }
 
+function Get-Phase13ProductionStageAuditPairFailure {
+    param([Parameter(Mandatory = $true)][string]$FailureMessage)
+    switch -CaseSensitive ($FailureMessage) {
+        "collector envelope invalid" {
+            return [pscustomobject]@{
+                Role = "not_applicable"
+                Subreason = "audit_collector_envelope_invalid"
+            }
+        }
+        "ephemeral proof invalid" {
+            return [pscustomobject]@{
+                Role = "not_applicable"
+                Subreason = "audit_ephemeral_proof_invalid"
+            }
+        }
+        "usa audit invalid" {
+            return [pscustomobject]@{
+                Role = "usa"
+                Subreason = "audit_usa_projection_invalid"
+            }
+        }
+        "spain audit invalid" {
+            return [pscustomobject]@{
+                Role = "spain"
+                Subreason = "audit_spain_projection_invalid"
+            }
+        }
+        default {
+            return [pscustomobject]@{
+                Role = "not_applicable"
+                Subreason = "audit_pair_internal_failure"
+            }
+        }
+    }
+}
+
 function Invoke-Phase13ProductionStageAuditTransport {
     param(
         [Parameter(Mandatory = $true)]$Binding,
@@ -427,10 +463,12 @@ function Invoke-Phase13ProductionStageAuditTransport {
                 -SpainDocument $Documents["spain"]
             $PairBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($PairText + "`n")
         } catch {
+            $PairFailure = Get-Phase13ProductionStageAuditPairFailure `
+                -FailureMessage ([string]$_.Exception.Message)
             return [pscustomobject]@{
                 AuditBytes = $null
-                FailureRole = "not_applicable"
-                FailureSubreason = "audit_pair_invalid"
+                FailureRole = [string]$PairFailure.Role
+                FailureSubreason = [string]$PairFailure.Subreason
                 ProcessCount = 2
                 Success = $false
             }
@@ -728,7 +766,10 @@ function ConvertTo-Phase13ProductionStagePublicReceipt {
             "collector_failed", "collector_environment_failed",
             "collector_services_failed", "collector_database_failed",
             "collector_listener_failed", "collector_health_failed",
-            "collector_output_failed", "audit_pair_invalid", "not_applicable"
+            "collector_output_failed", "audit_collector_envelope_invalid",
+            "audit_ephemeral_proof_invalid", "audit_usa_projection_invalid",
+            "audit_spain_projection_invalid", "audit_pair_internal_failure",
+            "audit_pair_invalid", "not_applicable"
         )) {
         throw "production stage public receipt invalid"
     }
