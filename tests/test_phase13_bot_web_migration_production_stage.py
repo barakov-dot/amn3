@@ -433,6 +433,28 @@ def run_powershell(script: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def run_pwsh(script: str) -> subprocess.CompletedProcess[str]:
+    executable = shutil.which("pwsh")
+    if executable is None:
+        pytest.skip("PowerShell 7 is unavailable")
+    return subprocess.run(
+        [
+            executable,
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            script,
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8-sig",
+        errors="strict",
+        timeout=40,
+    )
+
+
 def ps_literal(value: Path | str) -> str:
     return str(value).replace("'", "''")
 
@@ -894,6 +916,36 @@ def materialize_production_package(tmp_path: Path):
         now="2026-08-08T17:31:00Z",
     )
     return receipt, approval, payload
+
+
+@pytest.mark.parametrize("culture", ["ru-RU", "en-US"])
+def test_exact_approval_expiry_is_canonical_utc_across_cultures(
+    tmp_path: Path, culture: str
+) -> None:
+    receipt, approval, _payload = materialize_production_package(tmp_path)
+    canonical_expiry = "2099-08-08T18:30:00Z"
+    assert f"EXPIRES_AT_{canonical_expiry}" in approval
+    localized_approval = approval.replace(
+        f"EXPIRES_AT_{canonical_expiry}",
+        "EXPIRES_AT_08/08/2099 18:30:00",
+    )
+    script = f"""
+. '{ps_literal(RUNNER)}'
+[Globalization.CultureInfo]::CurrentCulture = [Globalization.CultureInfo]::GetCultureInfo('{culture}')
+[Globalization.CultureInfo]::CurrentUICulture = [Globalization.CultureInfo]::GetCultureInfo('{culture}')
+$binding = Test-Phase13ProductionStagePackage -PackageRoot '{ps_literal(receipt.output_root)}' -ExactApprovalPhrase '{approval.replace("'", "''")}' -NowUtc ([DateTimeOffset]'2026-08-08T17:31:00Z')
+$localized = 'accepted'
+try {{
+    $null = Test-Phase13ProductionStagePackage -PackageRoot '{ps_literal(receipt.output_root)}' -ExactApprovalPhrase '{localized_approval.replace("'", "''")}' -NowUtc ([DateTimeOffset]'2026-08-08T17:31:00Z')
+}} catch {{
+    $localized = 'rejected'
+}}
+[Console]::Out.Write((@{{ expires_at=$binding.ExpiresAt; localized=$localized }} | ConvertTo-Json -Compress))
+"""
+    result = run_pwsh(script)
+    assert result.returncode == 0, result.stderr
+    document = json.loads(result.stdout)
+    assert document == {"expires_at": canonical_expiry, "localized": "rejected"}
 
 
 @pytest.mark.parametrize(

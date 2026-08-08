@@ -152,7 +152,16 @@ function Test-Phase13ProductionStagePackage {
         [string]$Manifest.target_audit_sha256 -cnotmatch '^[0-9a-f]{64}$') {
         throw "manifest contract invalid"
     }
-    $ExpiresAt = [DateTimeOffset]::Parse([string]$Manifest.expires_at).ToUniversalTime()
+    $ExpiresAt = if ($Manifest.expires_at -is [DateTime]) {
+        [DateTimeOffset]$Manifest.expires_at
+    } else {
+        [DateTimeOffset]::Parse(
+            [string]$Manifest.expires_at,
+            [Globalization.CultureInfo]::InvariantCulture,
+            [Globalization.DateTimeStyles]::AssumeUniversal
+        )
+    }
+    $ExpiresAt = $ExpiresAt.ToUniversalTime()
     if ($NowUtc.ToUniversalTime() -ge $ExpiresAt) {
         throw "production stage manifest expired"
     }
@@ -252,7 +261,7 @@ function Test-Phase13ProductionStagePackage {
     $Binding = [pscustomobject]@{
         CollectorBytes = [IO.File]::ReadAllBytes((Join-Path $Root "readonly-collector.py"))
         CollectorSha256 = Get-Phase13Sha256Hex -Bytes ([IO.File]::ReadAllBytes((Join-Path $Root "readonly-collector.py")))
-        ExpiresAt = [string]$Manifest.expires_at
+        ExpiresAt = $ExpiresAt.ToString("yyyy-MM-ddTHH:mm:ssZ", [Globalization.CultureInfo]::InvariantCulture)
         Expected = $Rollback.expected
         ManifestSha256 = $ManifestSha256
         OutcomeId = [string]$Manifest.outcome_id
