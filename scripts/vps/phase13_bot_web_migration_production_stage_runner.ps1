@@ -394,6 +394,15 @@ function Get-Phase13ProductionStageAuditPairFailure {
         "usa audit identity invalid" {
             return [pscustomobject]@{ Role = "usa"; Subreason = "audit_usa_identity_invalid" }
         }
+        "usa audit schema invalid" {
+            return [pscustomobject]@{ Role = "usa"; Subreason = "audit_usa_schema_invalid" }
+        }
+        "usa audit role invalid" {
+            return [pscustomobject]@{ Role = "usa"; Subreason = "audit_usa_role_invalid" }
+        }
+        "usa audit checked_at invalid" {
+            return [pscustomobject]@{ Role = "usa"; Subreason = "audit_usa_checked_at_invalid" }
+        }
         "usa audit database invalid" {
             return [pscustomobject]@{ Role = "usa"; Subreason = "audit_usa_database_invalid" }
         }
@@ -405,6 +414,15 @@ function Get-Phase13ProductionStageAuditPairFailure {
         }
         "spain audit identity invalid" {
             return [pscustomobject]@{ Role = "spain"; Subreason = "audit_spain_identity_invalid" }
+        }
+        "spain audit schema invalid" {
+            return [pscustomobject]@{ Role = "spain"; Subreason = "audit_spain_schema_invalid" }
+        }
+        "spain audit role invalid" {
+            return [pscustomobject]@{ Role = "spain"; Subreason = "audit_spain_role_invalid" }
+        }
+        "spain audit checked_at invalid" {
+            return [pscustomobject]@{ Role = "spain"; Subreason = "audit_spain_checked_at_invalid" }
         }
         "spain audit database invalid" {
             return [pscustomobject]@{ Role = "spain"; Subreason = "audit_spain_database_invalid" }
@@ -797,6 +815,9 @@ function ConvertTo-Phase13ProductionStagePublicReceipt {
             "audit_usa_safety_invalid", "audit_usa_boolean_invalid",
             "audit_spain_identity_invalid", "audit_spain_database_invalid",
             "audit_spain_safety_invalid", "audit_spain_boolean_invalid",
+            "audit_usa_schema_invalid", "audit_usa_role_invalid",
+            "audit_usa_checked_at_invalid", "audit_spain_schema_invalid",
+            "audit_spain_role_invalid", "audit_spain_checked_at_invalid",
             "audit_pair_invalid", "not_applicable"
         )) {
         throw "production stage public receipt invalid"

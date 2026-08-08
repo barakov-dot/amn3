@@ -183,10 +183,14 @@ function ConvertTo-Phase13CanonicalAudit {
         [Parameter(Mandatory = $true)]$Audit,
         [Parameter(Mandatory = $true)][ValidateSet("usa-source", "spain-target")][string]$ExpectedRole
     )
-    if ($Audit.schema -ne "amn2.phase13.bot-web-audit.v1" -or
-        $Audit.role -ne $ExpectedRole -or
-        [string]$Audit.checked_at -notmatch '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$') {
-        throw "audit identity invalid"
+    if ($Audit.schema -ne "amn2.phase13.bot-web-audit.v1") {
+        throw "audit schema invalid"
+    }
+    if ($Audit.role -ne $ExpectedRole) {
+        throw "audit role invalid"
+    }
+    if ([string]$Audit.checked_at -notmatch '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$') {
+        throw "audit checked_at invalid"
     }
     if (
         [string]$Audit.database.schema_sha256 -notmatch '^[0-9a-f]{64}$' -or
@@ -274,7 +278,9 @@ function ConvertTo-Phase13SanitizedAuditPair {
         $UsaAudit = ConvertTo-Phase13CanonicalAudit -Audit $UsaDocument.audit -ExpectedRole "usa-source"
     } catch {
         $Category = switch -CaseSensitive ([string]$_.Exception.Message) {
-            "audit identity invalid" { "identity" }
+            "audit schema invalid" { "schema" }
+            "audit role invalid" { "role" }
+            "audit checked_at invalid" { "checked_at" }
             "audit database invalid" { "database" }
             "audit safety invalid" { "safety" }
             "audit boolean invalid" { "boolean" }
@@ -286,7 +292,9 @@ function ConvertTo-Phase13SanitizedAuditPair {
         $SpainAudit = ConvertTo-Phase13CanonicalAudit -Audit $SpainDocument.audit -ExpectedRole "spain-target"
     } catch {
         $Category = switch -CaseSensitive ([string]$_.Exception.Message) {
-            "audit identity invalid" { "identity" }
+            "audit schema invalid" { "schema" }
+            "audit role invalid" { "role" }
+            "audit checked_at invalid" { "checked_at" }
             "audit database invalid" { "database" }
             "audit safety invalid" { "safety" }
             "audit boolean invalid" { "boolean" }
