@@ -201,6 +201,74 @@ try {{
     assert result.stdout == "ExactApprovalPhrase,PackageRoot|exact approval mismatch|0"
 
 
+def test_outcome_root_protection_constructs_current_user_only_inheritable_acl(
+    tmp_path: Path,
+) -> None:
+    outcome_root = tmp_path / "outcomes"
+    invocation = f"""
+. '{ps_literal(RUNNER)}'
+$ownerSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+$script:testAcl = New-Object Security.AccessControl.DirectorySecurity
+function Get-Acl {{ return $script:testAcl }}
+function Set-Acl {{
+    param([string]$LiteralPath, [object]$AclObject)
+    $script:testAcl = $AclObject
+}}
+function Assert-Phase13AuditPrivatePath {{
+    param([string]$Path, [string]$ExpectedOwnerSid)
+}}
+Protect-Phase13AuditOutcomeRoot -Path '{ps_literal(outcome_root)}' -OwnerSid $ownerSid
+$acl = $script:testAcl
+$owner = $acl.Owner
+try {{
+    $owner = ([Security.Principal.NTAccount]$acl.Owner).Translate(
+        [Security.Principal.SecurityIdentifier]
+    ).Value
+}} catch {{}}
+$allowRules = @($acl.Access | Where-Object {{
+    $_.AccessControlType -eq [Security.AccessControl.AccessControlType]::Allow
+}})
+$foreignAllowRules = @($allowRules | Where-Object {{
+    $sid = $_.IdentityReference.Value
+    try {{
+        $sid = $_.IdentityReference.Translate(
+            [Security.Principal.SecurityIdentifier]
+        ).Value
+    }} catch {{}}
+    $sid -cne $ownerSid
+}})
+$rule = $allowRules | Where-Object {{
+    $sid = $_.IdentityReference.Value
+    try {{
+        $sid = $_.IdentityReference.Translate(
+            [Security.Principal.SecurityIdentifier]
+        ).Value
+    }} catch {{}}
+    $sid -ceq $ownerSid
+}} | Select-Object -First 1
+[Console]::Out.Write((@{{
+    acl_protected = $acl.AreAccessRulesProtected
+    foreign_allow_rules = $foreignAllowRules.Count
+    inheritance_flags = [string]$rule.InheritanceFlags
+    owner_match = $owner -ceq $ownerSid
+    rights = [string]$rule.FileSystemRights
+}} | ConvertTo-Json -Compress))
+"""
+
+    result = run_powershell(invocation)
+
+    assert result.returncode == 0, result.stderr
+    assert result.stderr == ""
+    document = json.loads(result.stdout)
+    assert document == {
+        "acl_protected": True,
+        "foreign_allow_rules": 0,
+        "inheritance_flags": "ContainerInherit, ObjectInherit",
+        "owner_match": True,
+        "rights": "FullControl",
+    }
+
+
 def test_manifest_and_expiry_are_verified_before_claim_or_transport(tmp_path: Path) -> None:
     package_root = tmp_path / "package"
     packaged_runner, manifest = materialize_package(

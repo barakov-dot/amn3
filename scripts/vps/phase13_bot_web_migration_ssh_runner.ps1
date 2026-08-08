@@ -978,9 +978,12 @@ function Protect-Phase13AuditOutcomeRoot {
     $Acl.SetOwner($Owner)
     $Acl.SetAccessRuleProtection($true, $false)
     foreach ($Rule in @($Acl.Access)) { [void]$Acl.RemoveAccessRuleAll($Rule) }
+    $InheritanceFlags =
+        [Security.AccessControl.InheritanceFlags]::ContainerInherit -bor
+        [Security.AccessControl.InheritanceFlags]::ObjectInherit
     $Rule = New-Object Security.AccessControl.FileSystemAccessRule(
         $Owner, [Security.AccessControl.FileSystemRights]::FullControl,
-        [Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [Security.AccessControl.InheritanceFlags]::ObjectInherit,
+        $InheritanceFlags,
         [Security.AccessControl.PropagationFlags]::None,
         [Security.AccessControl.AccessControlType]::Allow
     )
