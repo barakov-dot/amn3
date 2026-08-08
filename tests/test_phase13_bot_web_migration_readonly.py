@@ -1,7 +1,9 @@
+import base64
 import hashlib
 import importlib
 import json
 from pathlib import Path
+import re
 import shutil
 import sqlite3
 import subprocess
@@ -362,6 +364,39 @@ $result = Invoke-Phase13BoundedProcess -Executable '{sys.executable}' -Arguments
     assert result.returncode == 0, result.stderr
     assert result.stderr == ""
     assert result.stdout == "process_failure|255"
+
+
+def test_audit_bootstrap_exposes_binary_stdin_to_actual_collector() -> None:
+    runner_text = RUNNER.read_text(encoding="utf-8")
+    match = re.search(r"\$Bootstrap = '([^']+)'", runner_text)
+    assert match is not None
+    bootstrap = match.group(1)
+    collector = REMOTE.read_bytes()
+    envelope = (
+        json.dumps(
+            {
+                "collector_b64": base64.b64encode(collector).decode("ascii"),
+                "collector_sha256": hashlib.sha256(collector).hexdigest(),
+                "ephemeral_hmac_key_b64": base64.b64encode(bytes(range(32))).decode(
+                    "ascii"
+                ),
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        + "\n"
+    ).encode("utf-8")
+
+    result = subprocess.run(
+        [sys.executable, "-c", bootstrap, "usa"],
+        input=envelope,
+        capture_output=True,
+        timeout=10,
+    )
+
+    assert result.returncode == 75
+    assert result.stdout.splitlines() == [b"collector_failed"]
+    assert result.stderr == b""
 
 
 def test_runner_resolves_only_fixed_private_trust_roots() -> None:

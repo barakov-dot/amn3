@@ -803,7 +803,7 @@ function New-Phase13AuditSshArguments {
         [string]$RoleBinding.TargetUser -cnotmatch '^[a-z_][a-z0-9_-]{0,31}$') {
         throw "fixed target binding invalid"
     }
-    $Bootstrap = 'import base64,hashlib,io,json,sys;e=json.load(sys.stdin);s=base64.b64decode(e["collector_b64"],validate=True);hashlib.sha256(s).hexdigest()==e["collector_sha256"] or sys.exit(70);k=e["ephemeral_hmac_key_b64"];sys.argv=["collector","--role",sys.argv[1]];sys.stdin=io.StringIO(k+"\n");exec(compile(s,"<collector>","exec"),{"__name__":"__main__"})'
+    $Bootstrap = 'import base64,hashlib,io,json,sys;e=json.load(sys.stdin);s=base64.b64decode(e["collector_b64"],validate=True);hashlib.sha256(s).hexdigest()==e["collector_sha256"] or sys.exit(70);k=e["ephemeral_hmac_key_b64"];sys.argv=["collector","--role",sys.argv[1]];sys.stdin=io.TextIOWrapper(io.BytesIO((k+"\n").encode("ascii")),encoding="ascii");exec(compile(s,"<collector>","exec"),{"__name__":"__main__"})'
     $RemoteCommand = "python3 -c '$Bootstrap' $Role"
     return @(
         "-T", "-F", "none",
