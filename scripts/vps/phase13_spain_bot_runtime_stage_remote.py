@@ -591,12 +591,31 @@ def main_bound_envelope(envelope: object) -> None:
         if sha256_bytes(foundation_bytes) != envelope["foundation_sha256"]:
             raise ValueError
         payload = json.loads(payload_bytes)
+    except Exception:
+        raise SystemExit(65)
+    try:
         validated, _delta, manifest = _validate_payload(payload)
         foundation = _load_foundation(foundation_bytes)
         backend = LiveSpainRuntimeBackend(foundation, manifest)
         receipt = execute_runtime_stage(validated, backend)
+    except RemoteRuntimeStageError as error:
+        receipt = _receipt(
+            payload if isinstance(payload, dict) else {},
+            outcome="failure",
+            stage=error.stage,
+            reason=error.reason,
+            rolled_back=False,
+            state={key: False for key in TERMINAL_KEYS},
+        )
     except Exception:
-        raise SystemExit(65)
+        receipt = _receipt(
+            payload if isinstance(payload, dict) else {},
+            outcome="failure",
+            stage="package_verify",
+            reason="internal_failure",
+            rolled_back=False,
+            state={key: False for key in TERMINAL_KEYS},
+        )
     sys.stdout.buffer.write(canonical_json_bytes(receipt))
     # A valid failure receipt is intentionally returned with exit 0 so the
     # local runner can persist its allowlisted stage/reason without raw output.

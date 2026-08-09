@@ -198,6 +198,43 @@ def test_bound_foundation_adapter_uses_real_spain_backend() -> None:
     assert backend.foundation_backend.__class__.__name__ == "RealSpainBackend"
 
 
+def test_bound_entrypoint_returns_sanitized_foundation_failure(
+    capsysbinary: pytest.CaptureFixture[bytes],
+) -> None:
+    module = load("phase13_runtime_stage_bound_foundation_failure", REMOTE)
+    payload = remote_payload(module)
+    foundation = b"not valid python"
+    envelope = {
+        "foundation_b64": base64.b64encode(foundation).decode("ascii"),
+        "foundation_sha256": sha256(foundation),
+        "payload_b64": base64.b64encode(canonical(payload)).decode("ascii"),
+    }
+
+    with pytest.raises(SystemExit) as captured:
+        module.main_bound_envelope(envelope)
+
+    assert captured.value.code == 0
+    receipt = json.loads(capsysbinary.readouterr().out)
+    assert receipt == {
+        "awg2_equal": False,
+        "bot_disabled": False,
+        "database_equal": False,
+        "foreign_equal": False,
+        "marker_absent": False,
+        "outcome": "failure",
+        "outcome_id": payload["outcome_id"],
+        "raw_output_persisted": False,
+        "reason": "foundation_invalid",
+        "rolled_back": False,
+        "runtime_delta_equal": False,
+        "schema": module.RECEIPT_SCHEMA,
+        "service_action_performed": False,
+        "source_equal": False,
+        "stage": "package_verify",
+        "web_loopback_healthy": False,
+    }
+
+
 def test_runtime_stage_accepts_authoritative_phase12_or_hardened_bot_unit() -> None:
     module = load("phase13_runtime_stage_bot_unit_admission", REMOTE)
     phase12_live = "389792d871cc980d8972bfe6a9b3f18ebebd4500c1bfadc92477b3382e0135f9"
