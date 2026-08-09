@@ -212,3 +212,32 @@ def test_remote_pure_state_machine_is_role_and_mode_closed() -> None:
     assert rejected["outcome"] == "failure"
     assert rejected["reason"] == "unsupported_transition"
     assert set(rejected) == module.RECEIPT_KEYS
+
+
+def test_readonly_diagnosis_preserves_only_allowlisted_subreason() -> None:
+    module = load("phase13_cutover_diagnosis", LOCAL)
+    receipt = module.preflight_diagnosis_receipt(
+        {
+            "bot_active": False,
+            "bot_process_count": 0,
+            "outcome": "failure",
+            "reason": "service_action_failed",
+        },
+        "bot-cutover-diagnosis-test-001",
+    )
+    assert receipt == {
+        "bot_active": False,
+        "bot_process_count": 0,
+        "outcome": "failure",
+        "outcome_id": "bot-cutover-diagnosis-test-001",
+        "raw_output_persisted": False,
+        "reason": "service_action_failed",
+        "schema": "amn2.phase13.bot-cutover-preflight-diagnosis.v1",
+        "service_action_performed": False,
+        "ssh_process_count": 1,
+    }
+    unknown = module.preflight_diagnosis_receipt(
+        {"outcome": "failure", "reason": "raw secret-like detail"},
+        "bot-cutover-diagnosis-test-002",
+    )
+    assert unknown["reason"] == "unclassified_failure"

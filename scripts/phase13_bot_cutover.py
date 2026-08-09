@@ -69,6 +69,19 @@ REMOTE_KEYS = {
     "schema", "service_action_performed", "source_equal",
     "web_loopback_healthy",
 }
+DIAGNOSIS_SCHEMA = "amn2.phase13.bot-cutover-preflight-diagnosis.v1"
+DIAGNOSIS_REASONS = {
+    "completed",
+    "envelope_invalid",
+    "foundation_invalid",
+    "internal_failure",
+    "observation_failed",
+    "payload_expired",
+    "payload_invalid",
+    "service_action_failed",
+    "transport_failure",
+    "unsupported_transition",
+}
 
 
 class CutoverError(RuntimeError):
@@ -314,6 +327,40 @@ def exact_approval_phrase(binding: CutoverBinding) -> str:
     )
 
 
+def exact_diagnosis_approval_phrase(binding: CutoverBinding) -> str:
+    return (
+        "УТВЕРЖДАЮ ОДИН CHECKSUM-BOUND USA BOT PREFLIGHT READ-ONLY DIAGNOSIS "
+        f"OUTCOME_{binding.outcome_id} MANIFEST_SHA_{binding.manifest_sha256} "
+        f"RUNNER_SHA_{binding.runner_sha256} REMOTE_SHA_{binding.remote_sha256} "
+        f"TOOLING_HEAD_{binding.tooling_head} EXPIRES_AT_{_format_utc(binding.expires_at)} "
+        "MAX_ATTEMPTS_1 ONE_SSH_READ_ONLY NO_SERVICE_ACTION NO_SPAIN_ACCESS "
+        "NO_USA_SERVER_SHUTDOWN NO_DATABASE_APPLY NO_WEB_ACTION NO_AWG_MUTATION "
+        "NO_FOREIGN_MUTATION"
+    )
+
+
+def preflight_diagnosis_receipt(
+    remote: Mapping[str, object], outcome_id: str
+) -> dict[str, object]:
+    raw_reason = str(remote.get("reason", "")).lower()
+    reason = raw_reason if raw_reason in DIAGNOSIS_REASONS else "unclassified_failure"
+    count = remote.get("bot_process_count")
+    safe_count = count if isinstance(count, int) and count in {0, 1} else 0
+    active = remote.get("bot_active") is True and safe_count == 1
+    outcome = "success" if remote.get("outcome") == "success" else "failure"
+    return {
+        "bot_active": active,
+        "bot_process_count": safe_count,
+        "outcome": outcome,
+        "outcome_id": outcome_id,
+        "raw_output_persisted": False,
+        "reason": reason,
+        "schema": DIAGNOSIS_SCHEMA,
+        "service_action_performed": False,
+        "ssh_process_count": 1,
+    }
+
+
 def _call_ok(value: Mapping[str, object]) -> bool:
     return value.get("outcome") == "success"
 
@@ -552,6 +599,60 @@ def run_cutover_gate(
     )
 
 
+def run_preflight_diagnosis(
+    package_root: Path, exact_approval: str, *,
+    now: datetime | None = None,
+    process_runner: Callable[..., bytes] = run_bounded_process,
+    role_loader: Callable[[str], FixedRoleBinding] = load_fixed_role_binding,
+    private_root: Path | None = None,
+) -> CutoverRunReceipt:
+    checked_at = now or datetime.now(UTC)
+    binding = verify_local_cutover_package(package_root, now=checked_at)
+    if exact_approval != exact_diagnosis_approval_phrase(binding):
+        raise CutoverError("exact diagnosis approval mismatch")
+    if process_runner is run_bounded_process:
+        if sha256_bytes(Path(__file__).read_bytes()) != binding.runner_sha256:
+            raise CutoverError("runner source mismatch")
+        head = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parents[1],
+            check=True, capture_output=True, text=True,
+        ).stdout.strip()
+        if head != binding.tooling_head:
+            raise CutoverError("exact head mismatch")
+    usa = role_loader("usa")
+    if usa.role != "usa":
+        raise CutoverError("fixed role binding invalid")
+    root = private_root or (
+        Path(os.environ.get("LOCALAPPDATA", ""))
+        / "AMN2/private-state/phase13-bot-web-migration/bot-cutover-diagnosis"
+    )
+    _create_private_directory(root)
+    outcomes, receipts = root / "outcomes", root / "receipts"
+    _create_private_directory(outcomes)
+    _create_private_directory(receipts)
+    _write_create_new(
+        outcomes / f"{binding.outcome_id}.claim.json",
+        canonical_json_bytes(
+            {
+                "manifest_sha256": binding.manifest_sha256,
+                "outcome_id": binding.outcome_id,
+                "schema": CLAIM_SCHEMA,
+            }
+        ),
+        private=True,
+    )
+    transport = _ProductionTransport(binding, {"usa": usa}, process_runner)
+    remote = transport("usa", "preflight", {})
+    receipt = preflight_diagnosis_receipt(remote, binding.outcome_id)
+    suffix = "success" if receipt["outcome"] == "success" else "failure"
+    path = receipts / f"{binding.outcome_id}.{suffix}.json"
+    _write_create_new(path, canonical_json_bytes(receipt), private=True)
+    return CutoverRunReceipt(
+        status=str(receipt["outcome"]), outcome_id=binding.outcome_id,
+        ssh_process_count=1, receipt_path=path,
+    )
+
+
 def _current_runtime_stage_receipt() -> Path:
     return (
         Path(os.environ.get("LOCALAPPDATA", ""))
@@ -602,6 +703,9 @@ def main(argv: list[str] | None = None) -> int:
     run = sub.add_parser("run")
     run.add_argument("--package-root", type=Path, required=True)
     run.add_argument("--exact-approval", required=True)
+    diagnose = sub.add_parser("diagnose")
+    diagnose.add_argument("--package-root", type=Path, required=True)
+    diagnose.add_argument("--exact-approval", required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "materialize-current":
@@ -618,7 +722,11 @@ def main(argv: list[str] | None = None) -> int:
                 }
             ).decode("utf-8"), end="")
             return 0
-        result = run_cutover_gate(args.package_root, args.exact_approval)
+        result = (
+            run_preflight_diagnosis(args.package_root, args.exact_approval)
+            if args.command == "diagnose"
+            else run_cutover_gate(args.package_root, args.exact_approval)
+        )
         print(canonical_json_bytes(
             {
                 "outcome_id": result.outcome_id,
