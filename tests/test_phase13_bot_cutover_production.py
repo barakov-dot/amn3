@@ -89,6 +89,13 @@ def test_package_is_checksum_bound_deterministic_and_exact_approval(tmp_path: Pa
     assert first_binding.manifest_sha256 in phrase
 
 
+def test_cutover_transport_bounds_do_not_exceed_shared_foundation() -> None:
+    module = load("phase13_cutover_transport_bounds", LOCAL)
+    assert module.MAX_INPUT_BYTES == module.FOUNDATION_MAX_TRANSPORT_INPUT_BYTES
+    assert module.MAX_INPUT_BYTES == 1024 * 1024
+    assert module.MAX_OUTPUT_BYTES <= module.FOUNDATION_MAX_TRANSPORT_OUTPUT_BYTES
+
+
 def test_package_rejects_tamper_and_unknown_artifact(tmp_path: Path) -> None:
     module = load("phase13_cutover_tamper", LOCAL)
     receipt = module.materialize_cutover_package(package_inputs(module), tmp_path)

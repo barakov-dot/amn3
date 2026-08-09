@@ -26,6 +26,8 @@ from scripts.phase13_bot_media_readonly import (
 )
 from scripts.phase13_bot_web_migration_fresh_inputs import (
     FixedRoleBinding,
+    MAX_TRANSPORT_INPUT_BYTES as FOUNDATION_MAX_TRANSPORT_INPUT_BYTES,
+    MAX_TRANSPORT_OUTPUT_BYTES as FOUNDATION_MAX_TRANSPORT_OUTPUT_BYTES,
     load_fixed_role_binding,
     run_bounded_process,
 )
@@ -40,7 +42,7 @@ RUNTIME_STAGE_RECEIPT_SCHEMA = "amn2.phase13.spain-bot-runtime-stage-receipt.v1"
 CURRENT_RUNTIME_STAGE_OUTCOME = "spain-bot-runtime-stage-20260809-113453"
 MAX_SSH_PROCESSES = 10
 MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
-MAX_INPUT_BYTES = 4 * 1024 * 1024
+MAX_INPUT_BYTES = FOUNDATION_MAX_TRANSPORT_INPUT_BYTES
 MAX_OUTPUT_BYTES = 1024 * 1024
 FIXED_SSH_EXECUTABLE = r"C:\Windows\System32\OpenSSH\ssh.exe"
 OUTCOME_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{2,63}$")
