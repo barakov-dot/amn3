@@ -373,7 +373,7 @@ def test_remote_success_is_runtime_only_and_bot_stays_disabled() -> None:
     assert backend.events == ["preflight", "runtime_apply", "post_verify"]
 
 
-def test_runtime_foreign_snapshot_uses_fresh_repeat_stable_binding() -> None:
+def test_runtime_foreign_snapshot_uses_fresh_repeat_stable_binding(monkeypatch) -> None:
     module = load("phase13_runtime_stage_fresh_foreign_binding", REMOTE)
     row = {
         "active_state": "active:running",
@@ -389,6 +389,10 @@ def test_runtime_foreign_snapshot_uses_fresh_repeat_stable_binding() -> None:
         pass
 
     class FakeFoundationBackend:
+        @staticmethod
+        def _awg_snapshot():
+            return "a" * 64
+
         def _foreign_snapshot(self):
             raise AssertionError("stale foundation predicate must not be used")
 
@@ -419,6 +423,20 @@ def test_runtime_foreign_snapshot_uses_fresh_repeat_stable_binding() -> None:
     backend = module.LiveSpainRuntimeBackend(foundation, {"files": {}})
 
     assert backend._capture_foundation_snapshot("foreign", stage="preflight") == expected
+    backend.foreign_before = expected
+    backend.awg_before = "a" * 64
+    backend.database_sha = "d" * 64
+    backend.expected_runtime = b"runtime"
+    monkeypatch.setattr(backend, "_bot_disabled", lambda: True)
+    monkeypatch.setattr(backend, "_web_healthy", lambda: True)
+    monkeypatch.setattr(backend, "_source_equal", lambda: True)
+    monkeypatch.setattr(module, "_sha256_file", lambda _path: "d" * 64)
+    monkeypatch.setattr(
+        type(module.RUNTIME_ENVIRONMENT), "read_bytes", lambda _self: b"runtime"
+    )
+    monkeypatch.setattr(module.os.path, "lexists", lambda _path: False)
+
+    assert backend.terminal_state({})["foreign_equal"] is True
 
 
 def test_remote_rejects_absolute_foreign_hash_contract() -> None:

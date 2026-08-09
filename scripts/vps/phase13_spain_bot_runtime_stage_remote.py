@@ -557,7 +557,13 @@ class LiveSpainRuntimeBackend:
             state["source_equal"] = self._source_equal()
             state["runtime_delta_equal"] = bool(self.expected_runtime and RUNTIME_ENVIRONMENT.read_bytes() == self.expected_runtime)
             state["awg2_equal"] = bool(self.awg_before and self.foundation_backend._awg_snapshot() == self.awg_before)
-            state["foreign_equal"] = bool(self.foreign_before and self.foundation_backend._foreign_snapshot() == self.foreign_before)
+            state["foreign_equal"] = bool(
+                self.foreign_before
+                and self._capture_foundation_snapshot(
+                    "foreign", stage="terminal"
+                )
+                == self.foreign_before
+            )
         except Exception:
             pass
         return state
