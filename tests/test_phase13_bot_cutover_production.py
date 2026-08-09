@@ -83,6 +83,7 @@ def test_package_is_checksum_bound_deterministic_and_exact_approval(tmp_path: Pa
     phrase = module.exact_approval_phrase(first_binding)
     assert "TWO-HOST SINGLE-INSTANCE BOT CUTOVER" in phrase
     assert "MAX_SSH_PROCESSES_10" in phrase
+    assert "USA_ALREADY_ZERO_ALLOWED" in phrase
     assert "NO_USA_SERVER_SHUTDOWN" in phrase
     assert "NO_AWG_MUTATION" in phrase
     assert first_binding.manifest_sha256 in phrase
@@ -102,11 +103,13 @@ def test_package_rejects_tamper_and_unknown_artifact(tmp_path: Path) -> None:
 
 
 class FakeTransport:
-    def __init__(self, module, *, fail_spain_start: bool = False) -> None:
+    def __init__(
+        self, module, *, fail_spain_start: bool = False, usa_initial: int = 1
+    ) -> None:
         self.module = module
         self.fail_spain_start = fail_spain_start
         self.calls: list[tuple[str, str]] = []
-        self.usa = 1
+        self.usa = usa_initial
         self.spain = 0
         self.marker = False
 
@@ -155,6 +158,22 @@ def test_success_sequence_never_starts_spain_before_usa_zero() -> None:
         ("spain", "start"),
         ("usa", "postflight"),
         ("spain", "postflight"),
+    ]
+
+
+def test_already_zero_usa_is_safe_and_skips_redundant_stop() -> None:
+    module = load("phase13_cutover_already_zero", LOCAL)
+    transport = FakeTransport(module, usa_initial=0)
+    result = module.execute_cutover_state_machine(transport)
+    assert result["outcome"] == "success"
+    assert result["single_owner"] is True
+    assert result["usa_active"] is False
+    assert result["spain_active"] is True
+    assert ("usa", "stop") not in transport.calls
+    assert transport.calls[:3] == [
+        ("usa", "preflight"),
+        ("spain", "preflight"),
+        ("spain", "start"),
     ]
 
 

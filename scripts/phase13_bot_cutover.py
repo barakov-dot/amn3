@@ -307,7 +307,8 @@ def exact_approval_phrase(binding: CutoverBinding) -> str:
         f"FOUNDATION_SHA_{binding.foundation_sha256} "
         f"RUNTIME_STAGE_RECEIPT_SHA_{binding.runtime_stage_receipt_sha256} "
         f"TOOLING_HEAD_{binding.tooling_head} EXPIRES_AT_{_format_utc(binding.expires_at)} "
-        "MAX_ATTEMPTS_1 MAX_SSH_PROCESSES_10 STOP_USA_BOT_ONLY START_SPAIN_BOT "
+        "MAX_ATTEMPTS_1 MAX_SSH_PROCESSES_10 USA_ALREADY_ZERO_ALLOWED "
+        "STOP_USA_BOT_ONLY START_SPAIN_BOT "
         "ROLLBACK_TO_SINGLE_USA NO_USA_SERVER_SHUTDOWN NO_DATABASE_APPLY "
         "NO_WEB_ACTION NO_AWG_MUTATION NO_FOREIGN_MUTATION"
     )
@@ -341,7 +342,9 @@ def _result(
 
 def execute_cutover_state_machine(transport: Transport) -> dict[str, object]:
     usa = transport("usa", "preflight", {})
-    if not _active(usa, True):
+    usa_initially_active = _active(usa, True)
+    usa_initially_zero = _active(usa, False)
+    if not (usa_initially_active or usa_initially_zero):
         return _result(
             outcome="failure", reason="USA_BOT_PREFLIGHT_FAILED", rolled_back=False,
             usa_active=bool(usa.get("bot_active", False)), spain_active=False,
@@ -357,7 +360,11 @@ def execute_cutover_state_machine(transport: Transport) -> dict[str, object]:
             outcome="failure", reason="SPAIN_PREFLIGHT_FAILED", rolled_back=False,
             usa_active=True, spain_active=bool(spain.get("bot_active", False)),
         )
-    stopped = transport("usa", "stop", {})
+    stopped = (
+        transport("usa", "stop", {})
+        if usa_initially_active
+        else usa
+    )
     if not _active(stopped, False):
         reason = "USA_BOT_STOP_UNCONFIRMED"
     else:
@@ -374,20 +381,26 @@ def execute_cutover_state_machine(transport: Transport) -> dict[str, object]:
         else:
             reason = "SPAIN_BOT_ADMISSION_FAILED"
     spain_rollback = transport("spain", "rollback_stop", dict(continuation))
-    usa_rollback = transport("usa", "rollback_start", {})
+    usa_rollback = (
+        transport("usa", "rollback_start", {})
+        if usa_initially_active
+        else usa
+    )
     usa_proof = transport("usa", "postflight", {})
     spain_proof = transport("spain", "postflight", dict(continuation))
     rolled_back = bool(
         _active(spain_rollback, False)
         and spain_rollback.get("marker_present") is False
-        and _active(usa_rollback, True)
-        and _active(usa_proof, True)
+        and _active(usa_rollback, usa_initially_active)
+        and _active(usa_proof, usa_initially_active)
         and _active(spain_proof, False)
         and spain_proof.get("marker_present") is False
     )
     return _result(
         outcome="failure", reason=reason if rolled_back else "ROLLBACK_FAILED",
-        rolled_back=rolled_back, usa_active=rolled_back, spain_active=False,
+        rolled_back=rolled_back,
+        usa_active=rolled_back and usa_initially_active,
+        spain_active=False,
     )
 
 

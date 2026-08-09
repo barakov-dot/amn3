@@ -175,8 +175,6 @@ def execute(value: object, backend: Backend) -> dict[str, object]:
         active = bool(state.get("bot_active", False))
         if active != (count == 1):
             raise RemoteCutoverError("observation_failed")
-        if role == "usa" and mode == "preflight" and not active:
-            raise RemoteCutoverError("usa_bot_not_active")
         if role == "spain" and mode == "preflight" and (
             active
             or bool(state.get("marker_present", False))
