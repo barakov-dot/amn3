@@ -9,8 +9,10 @@ NotifyAccess=main
 User=amn2-spain
 Group=amn2-spain
 EnvironmentFile=/etc/amn2-spain/runtime.env
+Environment=TELEGRAM_EXPECTED_BOT_USERNAME=NeobyatnayaAMNZ_bot TELEGRAM_ADMISSION_TIMEOUT_SECONDS=30 TELEGRAM_POLLING_TIMEOUT_SECONDS=20
 WorkingDirectory=/opt/amn2-spain/runtime/source
 ExecStart=/usr/bin/python3 -B -m app.main
+TimeoutStartSec=40s
 Restart=no
 RuntimeDirectory=amn2-spain-bot
 RuntimeDirectoryMode=0750

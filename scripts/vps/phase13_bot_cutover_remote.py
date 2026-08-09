@@ -70,6 +70,12 @@ def validate_bot_unit(value: bytes) -> bytes:
         or not value
         or len(value) > 1024 * 1024
         or b"ConditionPathExists=/etc/amn2-spain/bot-enabled\n" not in value
+        or (
+            b"Environment=TELEGRAM_EXPECTED_BOT_USERNAME=NeobyatnayaAMNZ_bot "
+            b"TELEGRAM_ADMISSION_TIMEOUT_SECONDS=30 "
+            b"TELEGRAM_POLLING_TIMEOUT_SECONDS=20\n"
+        ) not in value
+        or b"TimeoutStartSec=40s\n" not in value
         or b"WantedBy=multi-user.target\n" not in value
         or b"ExecStart=/usr/bin/python3 -B -m app.main\n" not in value
         or b"\x00" in value

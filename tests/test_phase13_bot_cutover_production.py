@@ -354,12 +354,34 @@ def test_hardened_spain_bot_unit_contract_is_exact_and_persistent() -> None:
     module = load("phase13_cutover_bot_unit", REMOTE)
     value = (
         b"[Unit]\nConditionPathExists=/etc/amn2-spain/bot-enabled\n"
-        b"[Service]\nExecStart=/usr/bin/python3 -B -m app.main\n"
+        b"[Service]\nEnvironment=TELEGRAM_EXPECTED_BOT_USERNAME=NeobyatnayaAMNZ_bot "
+        b"TELEGRAM_ADMISSION_TIMEOUT_SECONDS=30 "
+        b"TELEGRAM_POLLING_TIMEOUT_SECONDS=20\n"
+        b"TimeoutStartSec=40s\nExecStart=/usr/bin/python3 -B -m app.main\n"
         b"[Install]\nWantedBy=multi-user.target\n"
     )
     assert module.validate_bot_unit(value) == value
     with pytest.raises(module.RemoteCutoverError, match="bot_unit_invalid"):
         module.validate_bot_unit(value.replace(b"WantedBy=multi-user.target\n", b""))
+    with pytest.raises(module.RemoteCutoverError, match="bot_unit_invalid"):
+        module.validate_bot_unit(
+            value.replace(
+                b"Environment=TELEGRAM_EXPECTED_BOT_USERNAME=NeobyatnayaAMNZ_bot ",
+                b"",
+            )
+        )
+
+
+def test_packaged_spain_bot_unit_binds_required_admission_identity() -> None:
+    value = (ROOT / "packaging/phase12-spain/units/amn2-spain-bot.service").read_text(
+        encoding="utf-8"
+    )
+    assert (
+        "Environment=TELEGRAM_EXPECTED_BOT_USERNAME=NeobyatnayaAMNZ_bot "
+        "TELEGRAM_ADMISSION_TIMEOUT_SECONDS=30 "
+        "TELEGRAM_POLLING_TIMEOUT_SECONDS=20\n"
+    ) in value
+    assert "TimeoutStartSec=40s\n" in value
 
 
 def test_dual_recovery_diagnosis_reports_both_roles_without_mutation() -> None:
