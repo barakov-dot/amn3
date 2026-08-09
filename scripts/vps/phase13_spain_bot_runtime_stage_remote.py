@@ -21,13 +21,10 @@ from types import ModuleType
 from typing import Mapping, Protocol
 
 
-PAYLOAD_SCHEMA = "amn2.phase13.spain-bot-runtime-stage-payload.v1"
+PAYLOAD_SCHEMA = "amn2.phase13.spain-bot-runtime-stage-payload.v2"
 RECEIPT_SCHEMA = "amn2.phase13.spain-bot-runtime-stage-receipt.v1"
 SOURCE_MANIFEST_SCHEMA = "amn2.phase13.spain-accepted-source-manifest.v1"
-EXPECTED_FOREIGN_STABLE_SHA256 = (
-    "28f77ae21c1f91c26d8bba49bd93a054b671c5682f3688a66efe1a7045b38e4d"
-)
-EXPECTED_FOREIGN_PERSISTENT_ENTRIES = 149
+FOREIGN_PRESERVATION_MODE = "capture_before_repeat_stable_and_preserve"
 EXPECTED_AWG2_FOUNDATION_SHA256 = (
     "0e5a5926821d88ae4a2515f9e95cd7c3f69db52100c1a1ec74e99fb794222281"
 )
@@ -65,7 +62,7 @@ EXPECTED_KEYS = {
     "accepted_source_head",
     "awg2_foundation_sha256",
     "bot_unit_sha256",
-    "foreign_stable_sha256",
+    "foreign_preservation_mode",
     "source_manifest_sha256",
 }
 TERMINAL_KEYS = {
@@ -256,14 +253,14 @@ def _validate_payload(value: object) -> tuple[dict[str, object], bytes, dict[str
     expected = value.get("expected")
     if not isinstance(expected, dict) or set(expected) != EXPECTED_KEYS:
         raise RemoteRuntimeStageError("package_verify", "schema_validation_failed")
-    for key in EXPECTED_KEYS - {"accepted_source_head"}:
+    for key in EXPECTED_KEYS - {"accepted_source_head", "foreign_preservation_mode"}:
         if SHA_PATTERN.fullmatch(str(expected.get(key, ""))) is None:
             raise RemoteRuntimeStageError("package_verify", "schema_validation_failed")
     if not re.fullmatch(r"[0-9a-f]{40}", str(expected.get("accepted_source_head", ""))):
         raise RemoteRuntimeStageError("package_verify", "schema_validation_failed")
     if (
         expected["awg2_foundation_sha256"] != EXPECTED_AWG2_FOUNDATION_SHA256
-        or expected["foreign_stable_sha256"] != EXPECTED_FOREIGN_STABLE_SHA256
+        or expected["foreign_preservation_mode"] != FOREIGN_PRESERVATION_MODE
     ):
         raise RemoteRuntimeStageError("package_verify", "foundation_mismatch")
     delta = _decode_b64(value["runtime_delta_b64"], maximum=MAX_RUNTIME_BYTES, label="runtime_delta")
@@ -434,9 +431,10 @@ class LiveSpainRuntimeBackend:
             except Exception as error:
                 raise RemoteRuntimeStageError(stage, fallback) from error
             if (
-                len(persistent) != EXPECTED_FOREIGN_PERSISTENT_ENTRIES
+                not persistent
+                or len(persistent) > 4096
                 or before_digest != after_digest
-                or before_digest != EXPECTED_FOREIGN_STABLE_SHA256
+                or SHA_PATTERN.fullmatch(before_digest) is None
             ):
                 raise RemoteRuntimeStageError(
                     stage, "foreign_equality_mismatch"

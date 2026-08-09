@@ -349,7 +349,7 @@ def remote_payload(module) -> dict[str, object]:
             "accepted_source_head": "55dc243b8e6c6bdb57f8301b56326e4cd4072d19",
             "awg2_foundation_sha256": module.EXPECTED_AWG2_FOUNDATION_SHA256,
             "bot_unit_sha256": "1" * 64,
-            "foreign_stable_sha256": module.EXPECTED_FOREIGN_STABLE_SHA256,
+            "foreign_preservation_mode": "capture_before_repeat_stable_and_preserve",
             "source_manifest_sha256": sha256(source_manifest),
         },
         "manifest_sha256": "3" * 64,
@@ -412,8 +412,6 @@ def test_runtime_foreign_snapshot_uses_fresh_repeat_stable_binding() -> None:
             )
 
     expected = FakeFoundationBackend._phase12_stable_digest([row])
-    module.EXPECTED_FOREIGN_PERSISTENT_ENTRIES = 1
-    module.EXPECTED_FOREIGN_STABLE_SHA256 = expected
     foundation = SimpleNamespace(
         RealSpainBackend=FakeFoundationBackend,
         RemoteStageError=FoundationError,
@@ -421,6 +419,19 @@ def test_runtime_foreign_snapshot_uses_fresh_repeat_stable_binding() -> None:
     backend = module.LiveSpainRuntimeBackend(foundation, {"files": {}})
 
     assert backend._capture_foundation_snapshot("foreign", stage="preflight") == expected
+
+
+def test_remote_rejects_absolute_foreign_hash_contract() -> None:
+    module = load("phase13_runtime_stage_rejects_absolute_foreign_hash", REMOTE)
+    payload = remote_payload(module)
+    payload["expected"].pop("foreign_preservation_mode")
+    payload["expected"]["foreign_stable_sha256"] = "1" * 64
+
+    receipt = module.execute_runtime_stage(payload, FakeBackend())
+
+    assert receipt["outcome"] == "failure"
+    assert receipt["stage"] == "package_verify"
+    assert receipt["reason"] == "schema_validation_failed"
 
 
 @pytest.mark.parametrize("failure", ["runtime_apply", "post_verify"])

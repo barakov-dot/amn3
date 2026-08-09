@@ -59,9 +59,7 @@ CURRENT_SOURCE_MANIFEST_SHA256 = (
 EXPECTED_AWG2_FOUNDATION_SHA256 = (
     "0e5a5926821d88ae4a2515f9e95cd7c3f69db52100c1a1ec74e99fb794222281"
 )
-EXPECTED_FOREIGN_STABLE_SHA256 = (
-    "28f77ae21c1f91c26d8bba49bd93a054b671c5682f3688a66efe1a7045b38e4d"
-)
+FOREIGN_PRESERVATION_MODE = "capture_before_repeat_stable_and_preserve"
 EXPECTED_MIGRATION_ONLY_DIFF = {
     "app/db/schema.py",
     "app/migration/__init__.py",
@@ -517,7 +515,7 @@ def run_runtime_stage_gate(
                 "accepted_source_head": ACCEPTED_SPAIN_SOURCE_HEAD,
                 "awg2_foundation_sha256": EXPECTED_AWG2_FOUNDATION_SHA256,
                 "bot_unit_sha256": sha256_bytes(bot_unit),
-                "foreign_stable_sha256": EXPECTED_FOREIGN_STABLE_SHA256,
+                "foreign_preservation_mode": FOREIGN_PRESERVATION_MODE,
                 "source_manifest_sha256": sha256_bytes(source_manifest),
             },
             "manifest_sha256": binding.manifest_sha256,
@@ -525,7 +523,7 @@ def run_runtime_stage_gate(
             "outcome_id": binding.outcome_id,
             "runtime_delta_b64": base64.b64encode(bytes(delta)).decode("ascii"),
             "runtime_delta_sha256": sha256_bytes(bytes(delta)),
-            "schema": "amn2.phase13.spain-bot-runtime-stage-payload.v1",
+            "schema": "amn2.phase13.spain-bot-runtime-stage-payload.v2",
             "source_manifest_b64": base64.b64encode(source_manifest).decode("ascii"),
         }
         bound = {
