@@ -116,7 +116,7 @@ def test_final_acceptance_requires_single_spain_owner_and_stable_foundations() -
         "final-test-001",
     )
     receipt = module.final_acceptance_receipt(
-        usa, spain, "final-test-001", "a" * 64, ssh_process_count=3
+        usa, spain, "final-test-001", "a" * 64, ssh_process_count=2
     )
     assert receipt["outcome"] == "success"
     assert receipt["usa_reinstall_ready"] is True
@@ -126,7 +126,7 @@ def test_final_acceptance_requires_single_spain_owner_and_stable_foundations() -
     assert receipt["service_action_performed"] is False
     failed = module.final_acceptance_receipt(
         usa, {**spain, "source_equal": False}, "final-test-002", "b" * 64,
-        ssh_process_count=3,
+        ssh_process_count=2,
     )
     assert failed["outcome"] == "failure"
     assert failed["usa_reinstall_ready"] is False

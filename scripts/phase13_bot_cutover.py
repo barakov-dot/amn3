@@ -76,7 +76,6 @@ REMOTE_KEYS = {
 DIAGNOSIS_SCHEMA = "amn2.phase13.bot-cutover-preflight-diagnosis.v2"
 DUAL_DIAGNOSIS_SCHEMA = "amn2.phase13.bot-cutover-dual-recovery-diagnosis.v1"
 FINAL_ACCEPTANCE_SCHEMA = "amn2.phase13.bot-web-final-acceptance.v1"
-FINAL_CONTINUATION_KEYS = {"awg", "database", "foreign", "runtime", "source", "unit"}
 DIAGNOSIS_REASONS = {
     "completed",
     "envelope_invalid",
@@ -382,12 +381,12 @@ def exact_dual_diagnosis_approval_phrase(binding: CutoverBinding) -> str:
 def exact_final_acceptance_approval_phrase(binding: CutoverBinding) -> str:
     cutover_sha256 = sha256_bytes(_validated_current_cutover_receipt())
     return (
-        "УТВЕРЖДАЮ ОДИН CHECKSUM-BOUND THREE-SSH BOT/WEB FINAL READ-ONLY ACCEPTANCE "
+        "УТВЕРЖДАЮ ОДИН CHECKSUM-BOUND TWO-SSH BOT/WEB FINAL READ-ONLY ACCEPTANCE "
         f"OUTCOME_{binding.outcome_id} MANIFEST_SHA_{binding.manifest_sha256} "
         f"RUNNER_SHA_{binding.runner_sha256} REMOTE_SHA_{binding.remote_sha256} "
         f"CUTOVER_RECEIPT_SHA_{cutover_sha256} TOOLING_HEAD_{binding.tooling_head} "
         f"EXPIRES_AT_{_format_utc(binding.expires_at)} MAX_ATTEMPTS_1 "
-        "THREE_SSH_READ_ONLY USA_REINSTALL_READY_EVALUATION NO_SERVICE_ACTION "
+        "TWO_SSH_READ_ONLY USA_REINSTALL_READY_EVALUATION NO_SERVICE_ACTION "
         "NO_USA_SERVER_SHUTDOWN NO_DATABASE_APPLY NO_WEB_ACTION NO_AWG_MUTATION "
         "NO_FOREIGN_MUTATION"
     )
@@ -471,7 +470,7 @@ def final_acceptance_receipt(
         and spain_active
         and spain.get("marker_present") is True
         and foundations_equal
-        and ssh_process_count == 3
+        and ssh_process_count == 2
     )
     return {
         "awg2_equal": spain.get("awg2_equal") is True,
@@ -921,21 +920,7 @@ def run_final_acceptance(
     )
     transport = _ProductionTransport(binding, roles, process_runner)
     usa_raw = transport("usa", "postflight", {})
-    spain_baseline = transport("spain", "postflight", {})
-    continuation = spain_baseline.get("continuation", {})
-    continuation_valid = bool(
-        isinstance(continuation, dict)
-        and set(continuation) == FINAL_CONTINUATION_KEYS
-        and all(
-            isinstance(value, str) and SHA_PATTERN.fullmatch(value)
-            for value in continuation.values()
-        )
-    )
-    spain_raw = (
-        transport("spain", "postflight", dict(continuation))
-        if continuation_valid
-        else {"outcome": "failure", "reason": "observation_failed"}
-    )
+    spain_raw = transport("spain", "postflight", {})
     usa = preflight_diagnosis_receipt(usa_raw, binding.outcome_id)
     spain = preflight_diagnosis_receipt(spain_raw, binding.outcome_id)
     receipt = final_acceptance_receipt(
