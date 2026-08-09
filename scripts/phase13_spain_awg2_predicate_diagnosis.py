@@ -14,6 +14,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+from threading import Event, Lock, Thread
 from typing import Callable, Mapping
 
 if __package__ in {None, ""}:
@@ -27,7 +28,6 @@ from scripts.phase13_bot_media_readonly import (
 from scripts.phase13_bot_web_migration_fresh_inputs import (
     FixedRoleBinding,
     load_fixed_role_binding,
-    run_bounded_process,
 )
 
 
@@ -109,10 +109,29 @@ FAILED_PREDICATE_ALLOWLIST = {
     "route_equal",
     "units_active_enabled",
 }
+TRANSPORT_SUBREASON_ALLOWLIST = {
+    "local_process_failure",
+    "output_oversized",
+    "remote_command_unavailable",
+    "remote_exit_unclassified",
+    "ssh_client_failure",
+    "timeout",
+    "transport_internal_failure",
+}
 
 
 class DiagnosticError(RuntimeError):
     """Secret-safe local package or runner failure."""
+
+
+class DiagnosticTransportError(DiagnosticError):
+    """Secret-safe classified local transport failure."""
+
+    def __init__(self, subreason: str) -> None:
+        if subreason not in TRANSPORT_SUBREASON_ALLOWLIST:
+            raise DiagnosticError("transport subreason invalid")
+        self.subreason = subreason
+        super().__init__(f"diagnostic transport failed: {subreason}")
 
 
 @dataclass(frozen=True)
@@ -341,6 +360,145 @@ def _load_fixed_spain_binding() -> FixedSpainBinding:
     )
 
 
+def _classify_transport_subreason(reason: str, exit_code: int) -> str:
+    if reason == "success":
+        return "not_applicable"
+    if reason == "timeout":
+        return "timeout"
+    if reason == "output_oversized":
+        return "output_oversized"
+    if exit_code == -1:
+        return "local_process_failure"
+    if exit_code == 255:
+        return "ssh_client_failure"
+    if exit_code == 127:
+        return "remote_command_unavailable"
+    if 1 <= exit_code <= 254:
+        return "remote_exit_unclassified"
+    return "transport_internal_failure"
+
+
+def _run_diagnostic_process(
+    executable: str,
+    arguments: tuple[str, ...],
+    input_bytes: bytes,
+    *,
+    timeout_seconds: float = MAX_TIMEOUT_SECONDS,
+    maximum_input_bytes: int = MAX_TRANSPORT_BYTES,
+    maximum_output_bytes: int = MAX_OUTPUT_BYTES,
+) -> bytes:
+    if (
+        not isinstance(input_bytes, bytes)
+        or maximum_input_bytes < 1
+        or maximum_input_bytes > MAX_TRANSPORT_BYTES
+        or maximum_output_bytes < 1
+        or maximum_output_bytes > MAX_OUTPUT_BYTES
+        or timeout_seconds <= 0
+        or timeout_seconds > MAX_TIMEOUT_SECONDS
+    ):
+        raise DiagnosticError("bounded process contract invalid")
+    if len(input_bytes) > maximum_input_bytes:
+        raise DiagnosticError("bounded process input oversized")
+    try:
+        process = subprocess.Popen(
+            (str(executable), *tuple(str(item) for item in arguments)),
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=False,
+        )
+    except OSError as error:
+        raise DiagnosticTransportError("local_process_failure") from error
+
+    output = bytearray()
+    total = [0]
+    oversized = Event()
+    io_failure = Event()
+    lock = Lock()
+
+    def read_stream(stream, *, capture: bool) -> None:
+        if stream is None:
+            io_failure.set()
+            return
+        try:
+            while True:
+                chunk = stream.read(4096)
+                if not chunk:
+                    return
+                with lock:
+                    total[0] += len(chunk)
+                    if total[0] > maximum_output_bytes:
+                        oversized.set()
+                    elif capture:
+                        output.extend(chunk)
+                if oversized.is_set():
+                    try:
+                        process.kill()
+                    except OSError:
+                        pass
+                    return
+        except OSError:
+            io_failure.set()
+
+    def write_input() -> None:
+        try:
+            if process.stdin is None:
+                io_failure.set()
+                return
+            if input_bytes:
+                process.stdin.write(input_bytes)
+                process.stdin.flush()
+        except (BrokenPipeError, OSError):
+            io_failure.set()
+        finally:
+            if process.stdin is not None:
+                try:
+                    process.stdin.close()
+                except OSError:
+                    io_failure.set()
+
+    stdout_thread = Thread(
+        target=read_stream,
+        args=(process.stdout,),
+        kwargs={"capture": True},
+        daemon=True,
+    )
+    stderr_thread = Thread(
+        target=read_stream,
+        args=(process.stderr,),
+        kwargs={"capture": False},
+        daemon=True,
+    )
+    input_thread = Thread(target=write_input, daemon=True)
+    stdout_thread.start()
+    stderr_thread.start()
+    input_thread.start()
+    try:
+        process.wait(timeout=timeout_seconds)
+    except subprocess.TimeoutExpired as error:
+        process.kill()
+        process.wait()
+        raise DiagnosticTransportError("timeout") from error
+    finally:
+        input_thread.join(timeout=1)
+        stdout_thread.join(timeout=1)
+        stderr_thread.join(timeout=1)
+        for stream in (process.stdout, process.stderr):
+            if stream is not None:
+                stream.close()
+    if oversized.is_set():
+        raise DiagnosticTransportError("output_oversized")
+    if io_failure.is_set():
+        raise DiagnosticTransportError("local_process_failure")
+    subreason = _classify_transport_subreason(
+        "success" if process.returncode == 0 else "process_failure",
+        int(process.returncode if process.returncode is not None else -1),
+    )
+    if subreason != "not_applicable":
+        raise DiagnosticTransportError(subreason)
+    return bytes(output)
+
+
 def safe_success_receipt(outcome_id: str) -> dict[str, object]:
     return {
         "awg2_equal": True,
@@ -424,7 +582,7 @@ def run_diagnostic_gate(
     package_root: Path,
     exact_approval: str,
     *,
-    process_runner: Callable[..., bytes] = run_bounded_process,
+    process_runner: Callable[..., bytes] = _run_diagnostic_process,
     binding_loader: Callable[[], FixedSpainBinding] = _load_fixed_spain_binding,
     private_root: Path | None = None,
     now: datetime | None = None,
@@ -433,7 +591,7 @@ def run_diagnostic_gate(
     binding = verify_local_diagnostic_package(package_root, now=checked_at)
     if exact_approval != exact_approval_phrase(binding):
         raise DiagnosticError("exact approval mismatch")
-    if process_runner is run_bounded_process:
+    if process_runner is _run_diagnostic_process:
         if sha256_bytes(Path(__file__).read_bytes()) != binding.runner_sha256:
             raise DiagnosticError("runner source mismatch")
         head = subprocess.run(
@@ -517,6 +675,22 @@ def run_diagnostic_gate(
             ssh_process_count=ssh_process_count,
             receipt_path=receipt_path,
         )
+    except DiagnosticTransportError as error:
+        failure_path = receipts / f"{binding.outcome_id}.failure.json"
+        failure = {
+            "outcome": "failure",
+            "outcome_id": binding.outcome_id,
+            "raw_output_persisted": False,
+            "reason": "transport_or_remote_failure",
+            "schema": "amn2.phase13.spain-awg2-predicate-diagnosis-local-failure.v2",
+            "ssh_process_count": ssh_process_count,
+            "transport_subreason": error.subreason,
+        }
+        try:
+            _write_create_new(failure_path, canonical_json_bytes(failure), private=True)
+        except Exception:
+            pass
+        raise DiagnosticError("diagnosis failed") from error
     except DiagnosticError:
         raise
     except Exception as error:
@@ -526,8 +700,9 @@ def run_diagnostic_gate(
             "outcome_id": binding.outcome_id,
             "raw_output_persisted": False,
             "reason": "transport_or_remote_failure",
-            "schema": "amn2.phase13.spain-awg2-predicate-diagnosis-local-failure.v1",
+            "schema": "amn2.phase13.spain-awg2-predicate-diagnosis-local-failure.v2",
             "ssh_process_count": ssh_process_count,
+            "transport_subreason": "transport_internal_failure",
         }
         try:
             _write_create_new(failure_path, canonical_json_bytes(failure), private=True)

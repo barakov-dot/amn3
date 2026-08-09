@@ -230,6 +230,111 @@ def test_runner_claims_before_exactly_one_fixed_spain_ssh(tmp_path: Path) -> Non
 
 
 @pytest.mark.parametrize(
+    ("reason", "exit_code", "expected"),
+    [
+        ("success", 0, "not_applicable"),
+        ("timeout", -1, "timeout"),
+        ("output_oversized", -1, "output_oversized"),
+        ("process_failure", -1, "local_process_failure"),
+        ("process_failure", 255, "ssh_client_failure"),
+        ("process_failure", 127, "remote_command_unavailable"),
+        ("process_failure", 42, "remote_exit_unclassified"),
+        ("process_failure", 0, "transport_internal_failure"),
+    ],
+)
+def test_diagnostic_transport_mapping_preserves_allowlisted_subreason(
+    reason: str, exit_code: int, expected: str
+) -> None:
+    module = load(
+        f"phase13_awg2_diagnosis_transport_mapping_{reason}_{exit_code}", LOCAL
+    )
+
+    assert module._classify_transport_subreason(reason, exit_code) == expected
+
+
+def test_diagnostic_process_boundary_classifies_ssh_exit_without_raw_stderr() -> None:
+    module = load("phase13_awg2_diagnosis_process_boundary", LOCAL)
+
+    with pytest.raises(module.DiagnosticTransportError) as caught:
+        module._run_diagnostic_process(
+            sys.executable,
+            (
+                "-c",
+                "import sys;sys.stdin.buffer.read();"
+                "sys.stderr.write('raw-sensitive-detail');sys.exit(255)",
+            ),
+            b"bounded-input",
+            timeout_seconds=5.0,
+            maximum_input_bytes=1024,
+            maximum_output_bytes=1024,
+        )
+
+    assert caught.value.subreason == "ssh_client_failure"
+    assert "raw-sensitive-detail" not in str(caught.value)
+
+
+def test_runner_writes_strict_sanitized_transport_failure_v2(tmp_path: Path) -> None:
+    module = load("phase13_awg2_diagnosis_transport_receipt", LOCAL)
+    inputs = replace(
+        package_inputs(module),
+        runner_bytes=LOCAL.read_bytes(),
+        remote_bytes=REMOTE.read_bytes(),
+        foundation_bytes=FOUNDATION.read_bytes(),
+    )
+    package = module.materialize_diagnostic_package(inputs, tmp_path / "packages")
+    binding = module.verify_local_diagnostic_package(
+        package.package_root, now=datetime.now(timezone.utc)
+    )
+    private_root = tmp_path / "private"
+
+    def fail_process(*args, **kwargs):
+        raise module.DiagnosticTransportError("ssh_client_failure")
+
+    with pytest.raises(module.DiagnosticError, match="diagnosis failed"):
+        module.run_diagnostic_gate(
+            package.package_root,
+            module.exact_approval_phrase(binding),
+            process_runner=fail_process,
+            binding_loader=lambda: module.FixedSpainBinding(
+                target_host="fixed-host",
+                target_user="fixed-user",
+                key_path=tmp_path / "id",
+                known_hosts_path=tmp_path / "known_hosts",
+            ),
+            private_root=private_root,
+            now=datetime.now(timezone.utc),
+        )
+
+    failure = json.loads(
+        (
+            private_root
+            / "receipts/spain-awg2-diagnosis-test-001.failure.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert failure == {
+        "outcome": "failure",
+        "outcome_id": "spain-awg2-diagnosis-test-001",
+        "raw_output_persisted": False,
+        "reason": "transport_or_remote_failure",
+        "schema": "amn2.phase13.spain-awg2-predicate-diagnosis-local-failure.v2",
+        "ssh_process_count": 1,
+        "transport_subreason": "ssh_client_failure",
+    }
+    serialized = canonical(failure).decode("utf-8")
+    for forbidden in (
+        "raw-sensitive-detail",
+        "stderr",
+        "stdout",
+        "target_host",
+        "target_user",
+        "key_path",
+        "fingerprint",
+        "system_error",
+    ):
+        assert forbidden not in serialized
+
+
+@pytest.mark.parametrize(
     ("field", "unsafe_value"),
     [
         ("awg2_equal", "true"),
