@@ -25,8 +25,9 @@ PAYLOAD_SCHEMA = "amn2.phase13.spain-bot-runtime-stage-payload.v1"
 RECEIPT_SCHEMA = "amn2.phase13.spain-bot-runtime-stage-receipt.v1"
 SOURCE_MANIFEST_SCHEMA = "amn2.phase13.spain-accepted-source-manifest.v1"
 EXPECTED_FOREIGN_STABLE_SHA256 = (
-    "f5767f361a9441dd4b5361c07da164a3059e0d1347d5217594534797d367b7e8"
+    "28f77ae21c1f91c26d8bba49bd93a054b671c5682f3688a66efe1a7045b38e4d"
 )
+EXPECTED_FOREIGN_PERSISTENT_ENTRIES = 149
 EXPECTED_AWG2_FOUNDATION_SHA256 = (
     "0e5a5926821d88ae4a2515f9e95cd7c3f69db52100c1a1ec74e99fb794222281"
 )
@@ -415,6 +416,32 @@ class LiveSpainRuntimeBackend:
         if kind not in FOUNDATION_SNAPSHOT_REASONS:
             raise RemoteRuntimeStageError(stage, "observation_failed")
         fallback = f"{kind}_observation_failed"
+        if kind == "foreign":
+            try:
+                before = self.foundation_backend._collect_foreign_rows()
+                after = self.foundation_backend._collect_foreign_rows()
+                persistent = sorted(set(before).intersection(after))
+                before_rows = [before[identity] for identity in persistent]
+                after_rows = [after[identity] for identity in persistent]
+                before_digest = self.foundation_backend._phase12_stable_digest(
+                    before_rows
+                )
+                after_digest = self.foundation_backend._phase12_stable_digest(
+                    after_rows
+                )
+            except self.foundation.RemoteStageError as error:
+                raise RemoteRuntimeStageError(stage, fallback) from error
+            except Exception as error:
+                raise RemoteRuntimeStageError(stage, fallback) from error
+            if (
+                len(persistent) != EXPECTED_FOREIGN_PERSISTENT_ENTRIES
+                or before_digest != after_digest
+                or before_digest != EXPECTED_FOREIGN_STABLE_SHA256
+            ):
+                raise RemoteRuntimeStageError(
+                    stage, "foreign_equality_mismatch"
+                )
+            return before_digest
         try:
             snapshot = getattr(
                 self.foundation_backend, FOUNDATION_SNAPSHOT_METHODS[kind]

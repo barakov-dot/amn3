@@ -10,6 +10,7 @@ import io
 from pathlib import Path
 import sys
 import tarfile
+from types import SimpleNamespace
 
 import pytest
 
@@ -370,6 +371,56 @@ def test_remote_success_is_runtime_only_and_bot_stays_disabled() -> None:
     assert receipt["service_action_performed"] is False
     assert receipt["database_equal"] is True
     assert backend.events == ["preflight", "runtime_apply", "post_verify"]
+
+
+def test_runtime_foreign_snapshot_uses_fresh_repeat_stable_binding() -> None:
+    module = load("phase13_runtime_stage_fresh_foreign_binding", REMOTE)
+    row = {
+        "active_state": "active:running",
+        "bound_port_status": "none",
+        "image_or_unit_sha256": "4" * 64,
+        "kind": "unit",
+        "name_sha256": "3" * 64,
+        "restart_count": 2,
+        "unit_content_status": "exact",
+    }
+
+    class FoundationError(RuntimeError):
+        pass
+
+    class FakeFoundationBackend:
+        def _foreign_snapshot(self):
+            raise AssertionError("stale foundation predicate must not be used")
+
+        @staticmethod
+        def _collect_foreign_rows():
+            return {("unit", "3" * 64): dict(row)}
+
+        @staticmethod
+        def _phase12_stable_digest(rows):
+            stable = []
+            for item in rows:
+                value = dict(item)
+                value.pop("bound_port_set", None)
+                value.pop("restart_count", None)
+                stable.append(value)
+            stable.sort(key=lambda value: str(value["name_sha256"]))
+            return module.sha256_bytes(
+                json.dumps(
+                    stable, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+                ).encode("utf-8")
+            )
+
+    expected = FakeFoundationBackend._phase12_stable_digest([row])
+    module.EXPECTED_FOREIGN_PERSISTENT_ENTRIES = 1
+    module.EXPECTED_FOREIGN_STABLE_SHA256 = expected
+    foundation = SimpleNamespace(
+        RealSpainBackend=FakeFoundationBackend,
+        RemoteStageError=FoundationError,
+    )
+    backend = module.LiveSpainRuntimeBackend(foundation, {"files": {}})
+
+    assert backend._capture_foundation_snapshot("foreign", stage="preflight") == expected
 
 
 @pytest.mark.parametrize("failure", ["runtime_apply", "post_verify"])
