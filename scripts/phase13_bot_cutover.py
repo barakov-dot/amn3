@@ -73,6 +73,7 @@ REMOTE_KEYS = {
     "web_loopback_healthy",
 }
 DIAGNOSIS_SCHEMA = "amn2.phase13.bot-cutover-preflight-diagnosis.v2"
+DUAL_DIAGNOSIS_SCHEMA = "amn2.phase13.bot-cutover-dual-recovery-diagnosis.v1"
 DIAGNOSIS_REASONS = {
     "completed",
     "envelope_invalid",
@@ -355,6 +356,17 @@ def exact_diagnosis_approval_phrase(
     )
 
 
+def exact_dual_diagnosis_approval_phrase(binding: CutoverBinding) -> str:
+    return (
+        "УТВЕРЖДАЮ ОДИН CHECKSUM-BOUND TWO-HOST BOT ROLLBACK READ-ONLY DIAGNOSIS "
+        f"OUTCOME_{binding.outcome_id} MANIFEST_SHA_{binding.manifest_sha256} "
+        f"RUNNER_SHA_{binding.runner_sha256} REMOTE_SHA_{binding.remote_sha256} "
+        f"TOOLING_HEAD_{binding.tooling_head} EXPIRES_AT_{_format_utc(binding.expires_at)} "
+        "MAX_ATTEMPTS_1 TWO_SSH_READ_ONLY NO_SERVICE_ACTION NO_USA_SERVER_SHUTDOWN "
+        "NO_DATABASE_APPLY NO_WEB_ACTION NO_AWG_MUTATION NO_FOREIGN_MUTATION"
+    )
+
+
 def preflight_diagnosis_receipt(
     remote: Mapping[str, object], outcome_id: str
 ) -> dict[str, object]:
@@ -385,6 +397,30 @@ def preflight_diagnosis_receipt(
         "source_equal": remote.get("source_equal") is True,
         "ssh_process_count": 1,
         "web_loopback_healthy": remote.get("web_loopback_healthy") is True,
+    }
+
+
+def dual_diagnosis_receipt(
+    usa: Mapping[str, object], spain: Mapping[str, object], outcome_id: str
+) -> dict[str, object]:
+    usa_active = usa.get("bot_active") is True and usa.get("bot_process_count") == 1
+    spain_active = spain.get("bot_active") is True and spain.get("bot_process_count") == 1
+    observations_complete = (
+        usa.get("outcome") == "success" and spain.get("outcome") == "success"
+    )
+    return {
+        "outcome": "success" if observations_complete else "failure",
+        "outcome_id": outcome_id,
+        "raw_output_persisted": False,
+        "reason": "completed" if observations_complete else "role_observation_failed",
+        "schema": DUAL_DIAGNOSIS_SCHEMA,
+        "service_action_performed": False,
+        "single_owner": int(usa_active) + int(spain_active) == 1,
+        "spain": dict(spain),
+        "spain_active": spain_active,
+        "ssh_process_count": 2,
+        "usa": dict(usa),
+        "usa_active": usa_active,
     }
 
 
@@ -689,6 +725,52 @@ def run_preflight_diagnosis(
     )
 
 
+def run_dual_recovery_diagnosis(
+    package_root: Path, exact_approval: str, *,
+    now: datetime | None = None,
+    process_runner: Callable[..., bytes] = run_bounded_process,
+    role_loader: Callable[[str], FixedRoleBinding] = load_fixed_role_binding,
+    private_root: Path | None = None,
+) -> CutoverRunReceipt:
+    checked_at = now or datetime.now(UTC)
+    binding = verify_local_cutover_package(package_root, now=checked_at)
+    if exact_approval != exact_dual_diagnosis_approval_phrase(binding):
+        raise CutoverError("exact dual diagnosis approval mismatch")
+    if process_runner is run_bounded_process:
+        if sha256_bytes(Path(__file__).read_bytes()) != binding.runner_sha256:
+            raise CutoverError("runner source mismatch")
+        head = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parents[1],
+            check=True, capture_output=True, text=True,
+        ).stdout.strip()
+        if head != binding.tooling_head:
+            raise CutoverError("exact head mismatch")
+    roles = {role: role_loader(role) for role in ("usa", "spain")}
+    if any(value.role != role for role, value in roles.items()):
+        raise CutoverError("fixed role binding invalid")
+    root = private_root or (
+        Path(os.environ.get("LOCALAPPDATA", ""))
+        / "AMN2/private-state/phase13-bot-web-migration/bot-cutover-dual-diagnosis"
+    )
+    _create_private_directory(root)
+    outcomes, receipts = root / "outcomes", root / "receipts"
+    _create_private_directory(outcomes)
+    _create_private_directory(receipts)
+    _write_create_new(
+        outcomes / f"{binding.outcome_id}.claim.json",
+        canonical_json_bytes({"manifest_sha256": binding.manifest_sha256, "outcome_id": binding.outcome_id, "schema": CLAIM_SCHEMA}),
+        private=True,
+    )
+    transport = _ProductionTransport(binding, roles, process_runner)
+    usa = preflight_diagnosis_receipt(transport("usa", "preflight", {}), binding.outcome_id)
+    spain = preflight_diagnosis_receipt(transport("spain", "preflight", {}), binding.outcome_id)
+    receipt = dual_diagnosis_receipt(usa, spain, binding.outcome_id)
+    status = str(receipt["outcome"])
+    path = receipts / f"{binding.outcome_id}.{status}.json"
+    _write_create_new(path, canonical_json_bytes(receipt), private=True)
+    return CutoverRunReceipt(status, binding.outcome_id, 2, path)
+
+
 def _current_runtime_stage_receipt() -> Path:
     return (
         Path(os.environ.get("LOCALAPPDATA", ""))
@@ -744,6 +826,9 @@ def main(argv: list[str] | None = None) -> int:
     diagnose.add_argument("--package-root", type=Path, required=True)
     diagnose.add_argument("--exact-approval", required=True)
     diagnose.add_argument("--role", choices=("usa", "spain"), required=True)
+    dual = sub.add_parser("diagnose-both")
+    dual.add_argument("--package-root", type=Path, required=True)
+    dual.add_argument("--exact-approval", required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "materialize-current":
@@ -760,13 +845,18 @@ def main(argv: list[str] | None = None) -> int:
                 }
             ).decode("utf-8"), end="")
             return 0
-        result = (
-            run_preflight_diagnosis(
-                args.package_root, args.exact_approval, role=args.role
+        if args.command == "diagnose-both":
+            result = run_dual_recovery_diagnosis(
+                args.package_root, args.exact_approval
             )
-            if args.command == "diagnose"
-            else run_cutover_gate(args.package_root, args.exact_approval)
-        )
+        else:
+            result = (
+                run_preflight_diagnosis(
+                args.package_root, args.exact_approval, role=args.role
+                )
+                if args.command == "diagnose"
+                else run_cutover_gate(args.package_root, args.exact_approval)
+            )
         print(canonical_json_bytes(
             {
                 "outcome_id": result.outcome_id,

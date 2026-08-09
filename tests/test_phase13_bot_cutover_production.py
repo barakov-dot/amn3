@@ -93,6 +93,11 @@ def test_package_is_checksum_bound_deterministic_and_exact_approval(tmp_path: Pa
     assert "NO_USA_SERVER_SHUTDOWN" in phrase
     assert "NO_AWG_MUTATION" in phrase
     assert first_binding.manifest_sha256 in phrase
+    diagnosis_phrase = module.exact_dual_diagnosis_approval_phrase(first_binding)
+    assert "TWO-HOST BOT ROLLBACK READ-ONLY DIAGNOSIS" in diagnosis_phrase
+    assert "TWO_SSH_READ_ONLY" in diagnosis_phrase
+    assert "NO_SERVICE_ACTION" in diagnosis_phrase
+    assert first_binding.manifest_sha256 in diagnosis_phrase
 
 
 def test_cutover_transport_bounds_do_not_exceed_shared_foundation() -> None:
@@ -332,3 +337,34 @@ def test_hardened_spain_bot_unit_contract_is_exact_and_persistent() -> None:
     assert module.validate_bot_unit(value) == value
     with pytest.raises(module.RemoteCutoverError, match="bot_unit_invalid"):
         module.validate_bot_unit(value.replace(b"WantedBy=multi-user.target\n", b""))
+
+
+def test_dual_recovery_diagnosis_reports_both_roles_without_mutation() -> None:
+    module = load("phase13_cutover_dual_diagnosis", LOCAL)
+    usa = module.preflight_diagnosis_receipt(
+        {"role": "usa", "outcome": "success", "reason": "completed", "bot_active": True, "bot_process_count": 1},
+        "dual-test-001",
+    )
+    spain = module.preflight_diagnosis_receipt(
+        {"role": "spain", "outcome": "failure", "reason": "spain_preflight_failed", "bot_active": False, "bot_process_count": 0, "marker_present": False},
+        "dual-test-001",
+    )
+    receipt = module.dual_diagnosis_receipt(usa, spain, "dual-test-001")
+    assert receipt["outcome"] == "failure"
+    assert receipt["reason"] == "role_observation_failed"
+    assert receipt["usa_active"] is True
+    assert receipt["spain_active"] is False
+    assert receipt["single_owner"] is True
+    assert receipt["service_action_performed"] is False
+    assert receipt["ssh_process_count"] == 2
+
+    completed = module.dual_diagnosis_receipt(
+        usa,
+        module.preflight_diagnosis_receipt(
+            {"role": "spain", "outcome": "success", "reason": "completed", "bot_active": False, "bot_process_count": 0, "marker_present": False},
+            "dual-test-001",
+        ),
+        "dual-test-001",
+    )
+    assert completed["outcome"] == "success"
+    assert completed["reason"] == "completed"
