@@ -299,7 +299,6 @@ def test_foreign_projection_matches_phase12_container_and_unit_receipt() -> None
             "image_or_unit_sha256": sha256(b"foreign-image"),
             "kind": "container",
             "name_sha256": sha256(b"foreign-container"),
-            "restart_count": 0,
         }
     ]
     rows.extend(
@@ -309,7 +308,6 @@ def test_foreign_projection_matches_phase12_container_and_unit_receipt() -> None
             "image_or_unit_sha256": sha256(content.rstrip(b"\n")),
             "kind": "unit",
             "name_sha256": sha256(unit.encode()),
-            "restart_count": 0,
             "unit_content_status": "exact",
         }
         for unit, content in unit_contents.items()
@@ -369,7 +367,6 @@ def test_foreign_projection_skips_absent_system_docker_and_intersects_two_snapsh
             "image_or_unit_sha256": sha256(content.rstrip(b"\n")),
             "kind": "unit",
             "name_sha256": sha256(unit.encode()),
-            "restart_count": 0,
             "unit_content_status": "exact",
         }
         for unit, content in persistent_units.items()
@@ -411,6 +408,31 @@ def test_foreign_projection_skips_absent_system_docker_and_intersects_two_snapsh
 
     assert module.RealSpainBackend._foreign_snapshot() == expected
     assert list_calls == 2
+
+
+def test_phase12_stable_foreign_digest_ignores_volatile_fields() -> None:
+    module = load_module("phase13_production_stage_foreign_volatile", REMOTE)
+    stable_row = {
+        "active_state": "active:running",
+        "bound_port_status": "cgroup_complete",
+        "image_or_unit_sha256": "a" * 64,
+        "kind": "unit",
+        "name_sha256": "b" * 64,
+        "unit_content_status": "exact",
+    }
+    expected = sha256(
+        json.dumps(
+            [stable_row],
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    )
+    first = {**stable_row, "bound_port_set": [3031], "restart_count": 0}
+    second = {**stable_row, "bound_port_set": [9999], "restart_count": 17}
+
+    assert module.RealSpainBackend._phase12_stable_digest([first]) == expected
+    assert module.RealSpainBackend._phase12_stable_digest([second]) == expected
 
 
 @pytest.mark.parametrize(
