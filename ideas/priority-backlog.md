@@ -2,6 +2,15 @@
 
 Этот файл фиксирует рабочую карту решений после анализа PRVTPRO/Amnezia-Web-Panel, wg-easy/wg-easy, kyoresuas/amnezia-api и текущего состояния `amn2`.
 
+Актуализация 2026-08-09: Phase 13 bot/web migration закрыта с
+`USA_REINSTALL_READY=true`. Поздний operator override заменяет более раннее
+требование blind/full USA database migration: Spain database остаётся
+authoritative; перенесены private bot runtime, admin IDs и media/source, Spain
+web подтверждён loopback-only healthy. Single-instance cutover завершён: Spain
+bot active, USA bot inactive. USA VPS не выключалась и может быть самостоятельно
+переустановлена оператором. AWG3 полностью отложена в Phase 14 и не должна
+возвращаться в Phase 13 backlog.
+
 Актуализация 2026-08-01 Phase 13: фактический Spain baseline имеет семь
 принятых AWG2 slots; production AWG3 ещё не принят. Written design утверждён,
 отдельный local-only TDD implementation plan подготовлен и ожидает отдельного

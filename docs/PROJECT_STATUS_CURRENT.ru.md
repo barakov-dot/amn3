@@ -1,3 +1,36 @@
+# Текущий обязательный приоритет 2026-08-09: Phase 13 закрыта, USA_REINSTALL_READY подтверждён
+
+Phase 13 exit condition выполнено: private Telegram bot runtime, admin IDs и
+bot media/source перенесены на Spain; Spain web подтверждён healthy и остаётся
+только на loopback. Поздний operator override сузил live migration scope:
+Spain database остаётся authoritative, USA legacy database не восстанавливается
+поверх неё. USA VPS можно самостоятельно переустанавливать под другие задачи.
+
+Single-instance cutover `bot-cutover-20260809-103106` завершён успешно за
+`6` SSH processes: `single_owner=true`, Spain bot active, USA bot inactive,
+rollback не выполнялся, USA server не изменялся. Final checksum-bound read-only
+acceptance `bot-web-final-acceptance-20260809-110018` завершён ровно за `2` SSH
+processes и подтвердил `USA_REINSTALL_READY=true`, Spain web loopback health,
+database/runtime/source equality, Spain AWG2 equality и foreign equality.
+Service actions в final acceptance отсутствовали.
+
+Final focused regression scope: `106 passed`; syntax, diff, secret и manual
+scoped security review passed, reportable findings `0`. Sanitized final receipt
+SHA-256:
+`305a24a69dc668b6c42819815d7f5f3caf784eb399ff577c7afeaf7930b434d0`.
+Secret-free closeout:
+`research/amn2/phase13-bot-web-migration-final-acceptance-closeout-2026-08-09.md`.
+
+USA shutdown, cleanup, reinstall, reuse и provider mutation не выполнялись.
+AWG не останавливался, не перезапускался, не пересоздавался и не обновлялся;
+Spain D1–D7, configs, keys, firewall/forward rules и foreign service не
+изменялись. AMN2 head
+`910539eaa8051cb1b59131d38b9fa27b9392744d` сохранён без изменений.
+
+AWG3 полностью перенесена в Phase 14. Следующий шаг — только отдельный exact
+Phase 14 start gate; никакие Phase 13 approvals не разрешают AWG3 package,
+preflight или live action.
+
 # Текущий обязательный приоритет 2026-08-08: production stage/web-data apply entrypoint локально проверен
 
 Phase 13 ограничена завершением bot/web migration USA → Spain и достижением
