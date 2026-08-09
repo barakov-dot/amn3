@@ -71,7 +71,7 @@ REMOTE_KEYS = {
     "schema", "service_action_performed", "source_equal",
     "web_loopback_healthy",
 }
-DIAGNOSIS_SCHEMA = "amn2.phase13.bot-cutover-preflight-diagnosis.v1"
+DIAGNOSIS_SCHEMA = "amn2.phase13.bot-cutover-preflight-diagnosis.v2"
 DIAGNOSIS_REASONS = {
     "completed",
     "envelope_invalid",
@@ -81,6 +81,7 @@ DIAGNOSIS_REASONS = {
     "payload_expired",
     "payload_invalid",
     "service_action_failed",
+    "spain_preflight_failed",
     "transport_failure",
     "unsupported_transition",
 }
@@ -329,13 +330,19 @@ def exact_approval_phrase(binding: CutoverBinding) -> str:
     )
 
 
-def exact_diagnosis_approval_phrase(binding: CutoverBinding) -> str:
+def exact_diagnosis_approval_phrase(
+    binding: CutoverBinding, role: str = "usa"
+) -> str:
+    if role not in {"usa", "spain"}:
+        raise CutoverError("diagnosis role invalid")
+    role_label = role.upper()
+    opposite = "SPAIN" if role == "usa" else "USA"
     return (
-        "УТВЕРЖДАЮ ОДИН CHECKSUM-BOUND USA BOT PREFLIGHT READ-ONLY DIAGNOSIS "
+        f"УТВЕРЖДАЮ ОДИН CHECKSUM-BOUND {role_label} BOT PREFLIGHT READ-ONLY DIAGNOSIS "
         f"OUTCOME_{binding.outcome_id} MANIFEST_SHA_{binding.manifest_sha256} "
         f"RUNNER_SHA_{binding.runner_sha256} REMOTE_SHA_{binding.remote_sha256} "
         f"TOOLING_HEAD_{binding.tooling_head} EXPIRES_AT_{_format_utc(binding.expires_at)} "
-        "MAX_ATTEMPTS_1 ONE_SSH_READ_ONLY NO_SERVICE_ACTION NO_SPAIN_ACCESS "
+        f"MAX_ATTEMPTS_1 ONE_SSH_READ_ONLY NO_SERVICE_ACTION NO_{opposite}_ACCESS "
         "NO_USA_SERVER_SHUTDOWN NO_DATABASE_APPLY NO_WEB_ACTION NO_AWG_MUTATION "
         "NO_FOREIGN_MUTATION"
     )
@@ -350,16 +357,27 @@ def preflight_diagnosis_receipt(
     safe_count = count if isinstance(count, int) and count in {0, 1} else 0
     active = remote.get("bot_active") is True and safe_count == 1
     outcome = "success" if remote.get("outcome") == "success" else "failure"
+    role = str(remote.get("role", "usa"))
+    if role not in {"usa", "spain"}:
+        role = "usa"
     return {
+        "awg2_equal": remote.get("awg2_equal") is True,
         "bot_active": active,
         "bot_process_count": safe_count,
+        "database_equal": remote.get("database_equal") is True,
+        "foreign_equal": remote.get("foreign_equal") is True,
+        "marker_present": remote.get("marker_present") is True,
         "outcome": outcome,
         "outcome_id": outcome_id,
         "raw_output_persisted": False,
         "reason": reason,
+        "role": role,
+        "runtime_equal": remote.get("runtime_equal") is True,
         "schema": DIAGNOSIS_SCHEMA,
         "service_action_performed": False,
+        "source_equal": remote.get("source_equal") is True,
         "ssh_process_count": 1,
+        "web_loopback_healthy": remote.get("web_loopback_healthy") is True,
     }
 
 
@@ -607,10 +625,13 @@ def run_preflight_diagnosis(
     process_runner: Callable[..., bytes] = run_bounded_process,
     role_loader: Callable[[str], FixedRoleBinding] = load_fixed_role_binding,
     private_root: Path | None = None,
+    role: str = "usa",
 ) -> CutoverRunReceipt:
     checked_at = now or datetime.now(UTC)
     binding = verify_local_cutover_package(package_root, now=checked_at)
-    if exact_approval != exact_diagnosis_approval_phrase(binding):
+    if role not in {"usa", "spain"}:
+        raise CutoverError("diagnosis role invalid")
+    if exact_approval != exact_diagnosis_approval_phrase(binding, role):
         raise CutoverError("exact diagnosis approval mismatch")
     if process_runner is run_bounded_process:
         if sha256_bytes(Path(__file__).read_bytes()) != binding.runner_sha256:
@@ -621,8 +642,8 @@ def run_preflight_diagnosis(
         ).stdout.strip()
         if head != binding.tooling_head:
             raise CutoverError("exact head mismatch")
-    usa = role_loader("usa")
-    if usa.role != "usa":
+    fixed = role_loader(role)
+    if fixed.role != role:
         raise CutoverError("fixed role binding invalid")
     root = private_root or (
         Path(os.environ.get("LOCALAPPDATA", ""))
@@ -643,8 +664,8 @@ def run_preflight_diagnosis(
         ),
         private=True,
     )
-    transport = _ProductionTransport(binding, {"usa": usa}, process_runner)
-    remote = transport("usa", "preflight", {})
+    transport = _ProductionTransport(binding, {role: fixed}, process_runner)
+    remote = transport(role, "preflight", {})
     receipt = preflight_diagnosis_receipt(remote, binding.outcome_id)
     suffix = "success" if receipt["outcome"] == "success" else "failure"
     path = receipts / f"{binding.outcome_id}.{suffix}.json"
@@ -708,6 +729,7 @@ def main(argv: list[str] | None = None) -> int:
     diagnose = sub.add_parser("diagnose")
     diagnose.add_argument("--package-root", type=Path, required=True)
     diagnose.add_argument("--exact-approval", required=True)
+    diagnose.add_argument("--role", choices=("usa", "spain"), required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "materialize-current":
@@ -725,7 +747,9 @@ def main(argv: list[str] | None = None) -> int:
             ).decode("utf-8"), end="")
             return 0
         result = (
-            run_preflight_diagnosis(args.package_root, args.exact_approval)
+            run_preflight_diagnosis(
+                args.package_root, args.exact_approval, role=args.role
+            )
             if args.command == "diagnose"
             else run_cutover_gate(args.package_root, args.exact_approval)
         )

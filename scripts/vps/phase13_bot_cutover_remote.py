@@ -163,6 +163,7 @@ def execute(value: object, backend: Backend) -> dict[str, object]:
             role=str(role), outcome="failure", reason="unsupported_transition",
             action=False,
         )
+    state: Mapping[str, object] = {}
     try:
         state = (
             backend.mutate(role, mode, continuation)
@@ -205,6 +206,7 @@ def execute(value: object, backend: Backend) -> dict[str, object]:
     except RemoteCutoverError as error:
         return _receipt(
             role=role, outcome="failure", reason=str(error), action=action,
+            state=state,
         )
     except Exception:
         return _receipt(

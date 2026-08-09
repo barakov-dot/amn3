@@ -233,18 +233,52 @@ def test_readonly_diagnosis_preserves_only_allowlisted_subreason() -> None:
         "bot-cutover-diagnosis-test-001",
     )
     assert receipt == {
+        "awg2_equal": False,
         "bot_active": False,
         "bot_process_count": 0,
+        "database_equal": False,
+        "foreign_equal": False,
+        "marker_present": False,
         "outcome": "failure",
         "outcome_id": "bot-cutover-diagnosis-test-001",
         "raw_output_persisted": False,
         "reason": "service_action_failed",
-        "schema": "amn2.phase13.bot-cutover-preflight-diagnosis.v1",
+        "role": "usa",
+        "runtime_equal": False,
+        "schema": "amn2.phase13.bot-cutover-preflight-diagnosis.v2",
         "service_action_performed": False,
+        "source_equal": False,
         "ssh_process_count": 1,
+        "web_loopback_healthy": False,
     }
     unknown = module.preflight_diagnosis_receipt(
         {"outcome": "failure", "reason": "raw secret-like detail"},
         "bot-cutover-diagnosis-test-002",
     )
     assert unknown["reason"] == "unclassified_failure"
+
+
+def test_spain_diagnosis_preserves_safe_predicate_booleans() -> None:
+    module = load("phase13_cutover_spain_diagnosis", LOCAL)
+    receipt = module.preflight_diagnosis_receipt(
+        {
+            "awg2_equal": True,
+            "bot_active": False,
+            "bot_process_count": 0,
+            "database_equal": True,
+            "foreign_equal": False,
+            "marker_present": False,
+            "outcome": "failure",
+            "reason": "spain_preflight_failed",
+            "role": "spain",
+            "runtime_equal": True,
+            "source_equal": True,
+            "web_loopback_healthy": True,
+        },
+        "bot-cutover-diagnosis-test-003",
+    )
+    assert receipt["role"] == "spain"
+    assert receipt["foreign_equal"] is False
+    assert receipt["awg2_equal"] is True
+    assert receipt["database_equal"] is True
+    assert receipt["service_action_performed"] is False
