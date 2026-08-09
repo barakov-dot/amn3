@@ -56,6 +56,21 @@ def good_observation(module) -> dict[str, object]:
     }
 
 
+def good_foreign_diagnosis() -> dict[str, object]:
+    expected = "f5767f361a9441dd4b5361c07da164a3059e0d1347d5217594534797d367b7e8"
+    return {
+        "foreign_container_entries": 7,
+        "foreign_count_equal": True,
+        "foreign_expected_entries": 153,
+        "foreign_expected_equal": True,
+        "foreign_persistent_entries": 153,
+        "foreign_repeat_equal": True,
+        "foreign_stable_sha256_after": expected,
+        "foreign_stable_sha256_before": expected,
+        "foreign_unit_entries": 146,
+    }
+
+
 def package_inputs(module):
     return module.DiagnosticPackageInputs(
         outcome_id="spain-awg2-diagnosis-test-001",
@@ -178,8 +193,8 @@ def test_remote_receipt_is_strict_secret_safe_and_read_only() -> None:
         def collect_awg2_observation(self) -> dict[str, object]:
             return good_observation(module)
 
-        def foreign_equal(self) -> bool:
-            return True
+        def collect_foreign_diagnosis(self) -> dict[str, object]:
+            return good_foreign_diagnosis()
 
     receipt = module.execute_diagnosis(
         {
@@ -194,6 +209,10 @@ def test_remote_receipt_is_strict_secret_safe_and_read_only() -> None:
     assert receipt["outcome"] == "success"
     assert receipt["awg2_equal"] is True
     assert receipt["foreign_equal"] is True
+    assert receipt["foreign_persistent_entries"] == 153
+    assert receipt["foreign_stable_sha256_before"] == (
+        "f5767f361a9441dd4b5361c07da164a3059e0d1347d5217594534797d367b7e8"
+    )
     assert receipt["mutation_performed"] is False
     assert receipt["raw_output_persisted"] is False
     serialized = canonical(receipt).decode("utf-8")
@@ -208,7 +227,7 @@ def test_foreign_observation_failure_preserves_completed_awg2_diagnosis() -> Non
         def collect_awg2_observation(self) -> dict[str, object]:
             return good_observation(module)
 
-        def foreign_equal(self) -> bool:
+        def collect_foreign_diagnosis(self) -> dict[str, object]:
             raise module.DiagnosisError("foreign", "foreign_observation_failed")
 
     receipt = module.execute_diagnosis(
@@ -232,6 +251,79 @@ def test_foreign_observation_failure_preserves_completed_awg2_diagnosis() -> Non
         canonical(receipt), "spain-awg2-diagnosis-test-001"
     )
     assert parsed["awg2_equal"] is True
+
+
+def test_live_foreign_diagnosis_reports_only_safe_counts_hashes_and_booleans() -> None:
+    module = load("phase13_awg2_diagnosis_live_foreign_fingerprint", REMOTE)
+    first = {
+        ("container", "1" * 64): {
+            "active_state": "running",
+            "image_or_unit_sha256": "2" * 64,
+            "kind": "container",
+            "name_sha256": "1" * 64,
+            "restart_count": 9,
+        },
+        ("unit", "3" * 64): {
+            "active_state": "active:running",
+            "bound_port_status": "none",
+            "image_or_unit_sha256": "4" * 64,
+            "kind": "unit",
+            "name_sha256": "3" * 64,
+            "restart_count": 2,
+            "unit_content_status": "exact",
+        },
+    }
+    second = json.loads(json.dumps(list(first.values())))
+    second_rows = {
+        (str(row["kind"]), str(row["name_sha256"])): row for row in second
+    }
+
+    class FakeRealSpainBackend:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def _collect_foreign_rows(self):
+            self.calls += 1
+            return first if self.calls == 1 else second_rows
+
+        @staticmethod
+        def _phase12_stable_digest(rows):
+            stable = []
+            for row in rows:
+                item = dict(row)
+                item.pop("restart_count", None)
+                item.pop("bound_port_set", None)
+                stable.append(item)
+            stable.sort(key=lambda row: str(row["name_sha256"]))
+            return module.sha256_bytes(
+                json.dumps(
+                    stable, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+                ).encode("utf-8")
+            )
+
+    expected = FakeRealSpainBackend._phase12_stable_digest(list(first.values()))
+    foundation = SimpleNamespace(
+        EXPECTED_FOREIGN_PERSISTENT_ENTRIES=2,
+        EXPECTED_FOREIGN_STABLE_SHA256=expected,
+        RealSpainBackend=FakeRealSpainBackend,
+    )
+
+    result = module.LiveDiagnosisBackend(foundation).collect_foreign_diagnosis()
+
+    assert result == {
+        "foreign_container_entries": 1,
+        "foreign_count_equal": True,
+        "foreign_expected_entries": 2,
+        "foreign_expected_equal": True,
+        "foreign_persistent_entries": 2,
+        "foreign_repeat_equal": True,
+        "foreign_stable_sha256_after": expected,
+        "foreign_stable_sha256_before": expected,
+        "foreign_unit_entries": 1,
+    }
+    serialized = canonical(result).decode("utf-8")
+    for forbidden in ("service", "target", "user", "path", "stdout", "stderr"):
+        assert forbidden not in serialized
 
 
 def test_package_is_deterministic_strict_and_approval_bound(tmp_path: Path) -> None:

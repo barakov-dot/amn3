@@ -20,7 +20,7 @@ from typing import Mapping, Protocol
 
 UTC = timezone.utc
 PAYLOAD_SCHEMA = "amn2.phase13.spain-awg2-predicate-diagnosis-payload.v1"
-RECEIPT_SCHEMA = "amn2.phase13.spain-awg2-predicate-diagnosis-receipt.v1"
+RECEIPT_SCHEMA = "amn2.phase13.spain-awg2-predicate-diagnosis-receipt.v2"
 OUTCOME_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{2,63}$")
 SHA_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 PEER_PATTERN = re.compile(r"^[A-Za-z0-9+/]{43}=$")
@@ -43,6 +43,17 @@ OBSERVATION_KEYS = {
     "restart_count_current",
     "route_equal",
     "units_active_enabled",
+}
+FOREIGN_DIAGNOSIS_KEYS = {
+    "foreign_container_entries",
+    "foreign_count_equal",
+    "foreign_expected_entries",
+    "foreign_expected_equal",
+    "foreign_persistent_entries",
+    "foreign_repeat_equal",
+    "foreign_stable_sha256_after",
+    "foreign_stable_sha256_before",
+    "foreign_unit_entries",
 }
 DIRECT_PREDICATES = (
     "container_running",
@@ -86,7 +97,7 @@ class DiagnosisError(RuntimeError):
 class DiagnosisBackend(Protocol):
     def collect_awg2_observation(self) -> dict[str, object]: ...
 
-    def foreign_equal(self) -> bool: ...
+    def collect_foreign_diagnosis(self) -> dict[str, object]: ...
 
 
 def canonical_json_bytes(value: object) -> bytes:
@@ -165,6 +176,36 @@ def evaluate_awg2_observation(observation: Mapping[str, object]) -> dict[str, ob
         "route_equal": predicates["route_equal"],
         "units_active_enabled": predicates["units_active_enabled"],
     }
+
+
+def evaluate_foreign_diagnosis(observation: Mapping[str, object]) -> dict[str, object]:
+    if not isinstance(observation, Mapping) or set(observation) != FOREIGN_DIAGNOSIS_KEYS:
+        raise DiagnosisError("foreign", "foreign_observation_failed")
+    for key in (
+        "foreign_container_entries",
+        "foreign_expected_entries",
+        "foreign_persistent_entries",
+        "foreign_unit_entries",
+    ):
+        value = observation[key]
+        if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 4096:
+            raise DiagnosisError("foreign", "foreign_observation_failed")
+    for key in (
+        "foreign_count_equal",
+        "foreign_expected_equal",
+        "foreign_repeat_equal",
+    ):
+        if not isinstance(observation[key], bool):
+            raise DiagnosisError("foreign", "foreign_observation_failed")
+    for key in ("foreign_stable_sha256_after", "foreign_stable_sha256_before"):
+        if not isinstance(observation[key], str) or SHA_PATTERN.fullmatch(observation[key]) is None:
+            raise DiagnosisError("foreign", "foreign_observation_failed")
+    if (
+        observation["foreign_container_entries"] + observation["foreign_unit_entries"]
+        != observation["foreign_persistent_entries"]
+    ):
+        raise DiagnosisError("foreign", "foreign_observation_failed")
+    return dict(observation)
 
 
 def _load_foundation(value: bytes) -> ModuleType:
@@ -312,19 +353,44 @@ class LiveDiagnosisBackend:
             ),
         }
 
-    def foreign_equal(self) -> bool:
+    def collect_foreign_diagnosis(self) -> dict[str, object]:
         try:
-            snapshot = self.backend._foreign_snapshot()
-        except self.foundation.RemoteStageError as error:
-            if getattr(error, "reason", "") == "foreign_equality_mismatch":
-                return False
-            raise DiagnosisError("foreign", "foreign_observation_failed") from error
+            before = self.backend._collect_foreign_rows()
+            after = self.backend._collect_foreign_rows()
+            persistent = sorted(set(before).intersection(after))
+            before_rows = [before[identity] for identity in persistent]
+            after_rows = [after[identity] for identity in persistent]
+            before_digest = self.backend._phase12_stable_digest(before_rows)
+            after_digest = self.backend._phase12_stable_digest(after_rows)
+            expected_entries = self.foundation.EXPECTED_FOREIGN_PERSISTENT_ENTRIES
+            expected_digest = self.foundation.EXPECTED_FOREIGN_STABLE_SHA256
+            if (
+                isinstance(expected_entries, bool)
+                or not isinstance(expected_entries, int)
+                or not isinstance(expected_digest, str)
+                or SHA_PATTERN.fullmatch(expected_digest) is None
+            ):
+                raise DiagnosisError("foreign", "foreign_observation_failed")
         except Exception as error:
+            if isinstance(error, DiagnosisError):
+                raise
             raise DiagnosisError("foreign", "foreign_observation_failed") from error
-        return bool(
-            isinstance(snapshot, str)
-            and SHA_PATTERN.fullmatch(snapshot) is not None
-            and snapshot == self.foundation.EXPECTED_FOREIGN_STABLE_SHA256
+        return evaluate_foreign_diagnosis(
+            {
+                "foreign_container_entries": sum(
+                    row.get("kind") == "container" for row in before_rows
+                ),
+                "foreign_count_equal": len(persistent) == expected_entries,
+                "foreign_expected_entries": expected_entries,
+                "foreign_expected_equal": before_digest == expected_digest,
+                "foreign_persistent_entries": len(persistent),
+                "foreign_repeat_equal": before_digest == after_digest,
+                "foreign_stable_sha256_after": after_digest,
+                "foreign_stable_sha256_before": before_digest,
+                "foreign_unit_entries": sum(
+                    row.get("kind") == "unit" for row in before_rows
+                ),
+            }
         )
 
 
@@ -338,7 +404,16 @@ def _failure_receipt(outcome_id: str, stage: str, reason: str) -> dict[str, obje
         "expected_peer_count": EXPECTED_PEER_COUNT,
         "failed_predicates": [],
         "foreign_equal": False,
+        "foreign_container_entries": 0,
+        "foreign_count_equal": False,
+        "foreign_expected_entries": 0,
+        "foreign_expected_equal": False,
         "foreign_observed": False,
+        "foreign_persistent_entries": 0,
+        "foreign_repeat_equal": False,
+        "foreign_stable_sha256_after": "0" * 64,
+        "foreign_stable_sha256_before": "0" * 64,
+        "foreign_unit_entries": 0,
         "forward_comments_equal": False,
         "forward_rule_count": 0,
         "forward_rule_count_equal": False,
@@ -383,15 +458,32 @@ def execute_diagnosis(payload: dict[str, object], backend: DiagnosisBackend) -> 
         foreign_observed = True
         reason = "diagnosed"
         try:
-            foreign_equal = backend.foreign_equal()
+            foreign = evaluate_foreign_diagnosis(backend.collect_foreign_diagnosis())
+            foreign_equal = bool(
+                foreign["foreign_count_equal"]
+                and foreign["foreign_repeat_equal"]
+                and foreign["foreign_expected_equal"]
+            )
         except DiagnosisError as error:
             if error.stage != "foreign" or error.reason != "foreign_observation_failed":
                 raise
             foreign_equal = False
             foreign_observed = False
             reason = "diagnosed_foreign_unavailable"
+            foreign = {
+                "foreign_container_entries": 0,
+                "foreign_count_equal": False,
+                "foreign_expected_entries": 0,
+                "foreign_expected_equal": False,
+                "foreign_persistent_entries": 0,
+                "foreign_repeat_equal": False,
+                "foreign_stable_sha256_after": "0" * 64,
+                "foreign_stable_sha256_before": "0" * 64,
+                "foreign_unit_entries": 0,
+            }
         return {
             **evaluated,
+            **foreign,
             "foreign_equal": foreign_equal,
             "foreign_observed": foreign_observed,
             "mutation_performed": False,

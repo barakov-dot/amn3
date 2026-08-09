@@ -35,7 +35,7 @@ UTC = timezone.utc
 PACKAGE_SCHEMA = "amn2.phase13.spain-awg2-predicate-diagnosis-package.v1"
 PAYLOAD_SCHEMA = "amn2.phase13.spain-awg2-predicate-diagnosis-payload.v1"
 CLAIM_SCHEMA = "amn2.phase13.spain-awg2-predicate-diagnosis-claim.v1"
-RECEIPT_SCHEMA = "amn2.phase13.spain-awg2-predicate-diagnosis-receipt.v1"
+RECEIPT_SCHEMA = "amn2.phase13.spain-awg2-predicate-diagnosis-receipt.v2"
 OUTCOME_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{2,63}$")
 SHA_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 HEAD_PATTERN = re.compile(r"^[0-9a-f]{40}$")
@@ -66,8 +66,17 @@ REMOTE_RECEIPT_KEYS = {
     "expected_forward_rule_count",
     "expected_peer_count",
     "failed_predicates",
+    "foreign_container_entries",
+    "foreign_count_equal",
     "foreign_equal",
+    "foreign_expected_entries",
+    "foreign_expected_equal",
     "foreign_observed",
+    "foreign_persistent_entries",
+    "foreign_repeat_equal",
+    "foreign_stable_sha256_after",
+    "foreign_stable_sha256_before",
+    "foreign_unit_entries",
     "forward_comments_equal",
     "forward_rule_count",
     "forward_rule_count_equal",
@@ -508,8 +517,17 @@ def safe_success_receipt(outcome_id: str) -> dict[str, object]:
         "expected_forward_rule_count": 3,
         "expected_peer_count": 7,
         "failed_predicates": [],
+        "foreign_container_entries": 7,
+        "foreign_count_equal": True,
         "foreign_equal": True,
+        "foreign_expected_entries": 153,
+        "foreign_expected_equal": True,
         "foreign_observed": True,
+        "foreign_persistent_entries": 153,
+        "foreign_repeat_equal": True,
+        "foreign_stable_sha256_after": "f5767f361a9441dd4b5361c07da164a3059e0d1347d5217594534797d367b7e8",
+        "foreign_stable_sha256_before": "f5767f361a9441dd4b5361c07da164a3059e0d1347d5217594534797d367b7e8",
+        "foreign_unit_entries": 146,
         "forward_comments_equal": True,
         "forward_rule_count": 3,
         "forward_rule_count_equal": True,
@@ -542,10 +560,13 @@ def _parse_remote_receipt(value: bytes, outcome_id: str) -> dict[str, object]:
     failed = receipt.get("failed_predicates")
     count_keys = {
         "expected_forward_rule_count", "expected_peer_count", "forward_rule_count",
+        "foreign_container_entries", "foreign_expected_entries",
+        "foreign_persistent_entries", "foreign_unit_entries",
         "live_peer_count", "persistent_peer_count", "restart_count_current",
         "restart_count_expected",
     }
-    boolean_keys = REMOTE_RECEIPT_KEYS - count_keys - {
+    sha_keys = {"foreign_stable_sha256_after", "foreign_stable_sha256_before"}
+    boolean_keys = REMOTE_RECEIPT_KEYS - count_keys - sha_keys - {
         "failed_predicates", "outcome", "outcome_id", "reason", "schema", "stage"
     }
     reason_allowlist = {
@@ -569,6 +590,11 @@ def _parse_remote_receipt(value: bytes, outcome_id: str) -> dict[str, object]:
         or any(
             isinstance(receipt.get(key), bool) or not isinstance(receipt.get(key), int)
             for key in count_keys
+        )
+        or any(
+            not isinstance(receipt.get(key), str)
+            or SHA_PATTERN.fullmatch(receipt.get(key)) is None
+            for key in sha_keys
         )
         or any(not isinstance(receipt.get(key), bool) for key in boolean_keys)
         or receipt.get("reason") not in reason_allowlist
