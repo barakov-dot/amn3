@@ -879,7 +879,7 @@ class RealSpainBackend:
             item.pop("bound_port_set", None)
             item.pop("restart_count", None)
             stable.append(item)
-        stable.sort(key=lambda row: (str(row["kind"]), str(row["name_sha256"])))
+        stable.sort(key=lambda row: str(row["name_sha256"]))
         encoded = json.dumps(
             stable,
             ensure_ascii=False,

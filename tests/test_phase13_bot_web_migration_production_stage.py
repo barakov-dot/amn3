@@ -314,7 +314,7 @@ def test_foreign_projection_matches_phase12_container_and_unit_receipt() -> None
     )
     expected = sha256(
         json.dumps(
-            sorted(rows, key=lambda row: (row["kind"], row["name_sha256"])),
+            sorted(rows, key=lambda row: row["name_sha256"]),
             ensure_ascii=False,
             sort_keys=True,
             separators=(",", ":"),
@@ -433,6 +433,36 @@ def test_phase12_stable_foreign_digest_ignores_volatile_fields() -> None:
 
     assert module.RealSpainBackend._phase12_stable_digest([first]) == expected
     assert module.RealSpainBackend._phase12_stable_digest([second]) == expected
+
+
+def test_phase12_stable_foreign_digest_orders_only_by_name_hash() -> None:
+    module = load_module("phase13_production_stage_foreign_order", REMOTE)
+    rows = [
+        {
+            "active_state": "running",
+            "image_or_unit_sha256": "a" * 64,
+            "kind": "container",
+            "name_sha256": "f" * 64,
+        },
+        {
+            "active_state": "active:running",
+            "bound_port_status": "cgroup_complete",
+            "image_or_unit_sha256": "b" * 64,
+            "kind": "unit",
+            "name_sha256": "0" * 64,
+            "unit_content_status": "exact",
+        },
+    ]
+    expected = sha256(
+        json.dumps(
+            [rows[1], rows[0]],
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    )
+
+    assert module.RealSpainBackend._phase12_stable_digest(rows) == expected
 
 
 @pytest.mark.parametrize(
