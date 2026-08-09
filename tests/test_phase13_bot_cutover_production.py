@@ -282,3 +282,35 @@ def test_spain_diagnosis_preserves_safe_predicate_booleans() -> None:
     assert receipt["awg2_equal"] is True
     assert receipt["database_equal"] is True
     assert receipt["service_action_performed"] is False
+
+
+def test_foreign_snapshot_uses_verified_stable_row_digest_not_tuple_key_json() -> None:
+    module = load("phase13_cutover_foreign_digest", REMOTE)
+
+    class FoundationBackend:
+        calls = 0
+
+        def _collect_foreign_rows(self):
+            self.calls += 1
+            return {
+                ("unit", "example.service"): {
+                    "kind": "unit",
+                    "name": "example.service",
+                    "state": "active",
+                }
+            }
+
+        def _phase12_stable_digest(self, rows):
+            assert rows == [
+                {
+                    "kind": "unit",
+                    "name": "example.service",
+                    "state": "active",
+                }
+            ]
+            return "c" * 64
+
+    backend = module.LiveBackend.__new__(module.LiveBackend)
+    backend.spain = FoundationBackend()
+    assert backend._foreign_sha() == "c" * 64
+    assert backend.spain.calls == 2

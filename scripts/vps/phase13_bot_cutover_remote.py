@@ -278,11 +278,19 @@ class LiveBackend:
     def _foreign_sha(self) -> str:
         before = self.spain._collect_foreign_rows()
         after = self.spain._collect_foreign_rows()
-        persistent = {
-            key: before[key] for key in sorted(set(before).intersection(after))
-            if before[key] == after[key]
-        }
-        return sha256_bytes(canonical_json_bytes(persistent))
+        persistent = sorted(set(before).intersection(after))
+        before_rows = [before[identity] for identity in persistent]
+        after_rows = [after[identity] for identity in persistent]
+        before_digest = self.spain._phase12_stable_digest(before_rows)
+        after_digest = self.spain._phase12_stable_digest(after_rows)
+        if (
+            not persistent
+            or len(persistent) > 4096
+            or before_digest != after_digest
+            or SHA_PATTERN.fullmatch(before_digest) is None
+        ):
+            raise RemoteCutoverError("foreign_equality_mismatch")
+        return before_digest
 
     def _spain_continuation(self) -> dict[str, str]:
         unit = Path("/etc/systemd/system") / SPAIN_UNIT
