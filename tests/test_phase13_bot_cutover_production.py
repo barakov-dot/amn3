@@ -100,6 +100,38 @@ def test_package_is_checksum_bound_deterministic_and_exact_approval(tmp_path: Pa
     assert first_binding.manifest_sha256 in diagnosis_phrase
 
 
+def test_final_acceptance_requires_single_spain_owner_and_stable_foundations() -> None:
+    module = load("phase13_cutover_final_acceptance", LOCAL)
+    usa = module.preflight_diagnosis_receipt(
+        {"role": "usa", "outcome": "success", "reason": "completed", "bot_active": False, "bot_process_count": 0},
+        "final-test-001",
+    )
+    spain = module.preflight_diagnosis_receipt(
+        {
+            "role": "spain", "outcome": "success", "reason": "completed",
+            "bot_active": True, "bot_process_count": 1, "marker_present": True,
+            "awg2_equal": True, "database_equal": True, "foreign_equal": True,
+            "runtime_equal": True, "source_equal": True, "web_loopback_healthy": True,
+        },
+        "final-test-001",
+    )
+    receipt = module.final_acceptance_receipt(
+        usa, spain, "final-test-001", "a" * 64, ssh_process_count=3
+    )
+    assert receipt["outcome"] == "success"
+    assert receipt["usa_reinstall_ready"] is True
+    assert receipt["single_owner"] is True
+    assert receipt["spain_active"] is True
+    assert receipt["usa_active"] is False
+    assert receipt["service_action_performed"] is False
+    failed = module.final_acceptance_receipt(
+        usa, {**spain, "source_equal": False}, "final-test-002", "b" * 64,
+        ssh_process_count=3,
+    )
+    assert failed["outcome"] == "failure"
+    assert failed["usa_reinstall_ready"] is False
+
+
 def test_cutover_transport_bounds_do_not_exceed_shared_foundation() -> None:
     module = load("phase13_cutover_transport_bounds", LOCAL)
     assert module.MAX_INPUT_BYTES == module.FOUNDATION_MAX_TRANSPORT_INPUT_BYTES

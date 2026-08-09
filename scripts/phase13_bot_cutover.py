@@ -40,6 +40,7 @@ RECEIPT_SCHEMA = "amn2.phase13.bot-cutover-receipt.v1"
 REMOTE_RECEIPT_SCHEMA = "amn2.phase13.bot-cutover-remote-receipt.v1"
 RUNTIME_STAGE_RECEIPT_SCHEMA = "amn2.phase13.spain-bot-runtime-stage-receipt.v1"
 CURRENT_RUNTIME_STAGE_OUTCOME = "spain-bot-runtime-stage-20260809-113453"
+CURRENT_SUCCESSFUL_CUTOVER_OUTCOME = "bot-cutover-20260809-103106"
 MAX_SSH_PROCESSES = 10
 MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
 MAX_INPUT_BYTES = FOUNDATION_MAX_TRANSPORT_INPUT_BYTES
@@ -74,6 +75,8 @@ REMOTE_KEYS = {
 }
 DIAGNOSIS_SCHEMA = "amn2.phase13.bot-cutover-preflight-diagnosis.v2"
 DUAL_DIAGNOSIS_SCHEMA = "amn2.phase13.bot-cutover-dual-recovery-diagnosis.v1"
+FINAL_ACCEPTANCE_SCHEMA = "amn2.phase13.bot-web-final-acceptance.v1"
+FINAL_CONTINUATION_KEYS = {"awg", "database", "foreign", "runtime", "source", "unit"}
 DIAGNOSIS_REASONS = {
     "completed",
     "envelope_invalid",
@@ -376,6 +379,20 @@ def exact_dual_diagnosis_approval_phrase(binding: CutoverBinding) -> str:
     )
 
 
+def exact_final_acceptance_approval_phrase(binding: CutoverBinding) -> str:
+    cutover_sha256 = sha256_bytes(_validated_current_cutover_receipt())
+    return (
+        "УТВЕРЖДАЮ ОДИН CHECKSUM-BOUND THREE-SSH BOT/WEB FINAL READ-ONLY ACCEPTANCE "
+        f"OUTCOME_{binding.outcome_id} MANIFEST_SHA_{binding.manifest_sha256} "
+        f"RUNNER_SHA_{binding.runner_sha256} REMOTE_SHA_{binding.remote_sha256} "
+        f"CUTOVER_RECEIPT_SHA_{cutover_sha256} TOOLING_HEAD_{binding.tooling_head} "
+        f"EXPIRES_AT_{_format_utc(binding.expires_at)} MAX_ATTEMPTS_1 "
+        "THREE_SSH_READ_ONLY USA_REINSTALL_READY_EVALUATION NO_SERVICE_ACTION "
+        "NO_USA_SERVER_SHUTDOWN NO_DATABASE_APPLY NO_WEB_ACTION NO_AWG_MUTATION "
+        "NO_FOREIGN_MUTATION"
+    )
+
+
 def preflight_diagnosis_receipt(
     remote: Mapping[str, object], outcome_id: str
 ) -> dict[str, object]:
@@ -430,6 +447,52 @@ def dual_diagnosis_receipt(
         "ssh_process_count": 2,
         "usa": dict(usa),
         "usa_active": usa_active,
+    }
+
+
+def final_acceptance_receipt(
+    usa: Mapping[str, object], spain: Mapping[str, object], outcome_id: str,
+    cutover_receipt_sha256: str, *, ssh_process_count: int,
+) -> dict[str, object]:
+    usa_active = usa.get("bot_active") is True and usa.get("bot_process_count") == 1
+    spain_active = spain.get("bot_active") is True and spain.get("bot_process_count") == 1
+    foundations_equal = all(
+        spain.get(key) is True
+        for key in (
+            "awg2_equal", "database_equal", "foreign_equal", "runtime_equal",
+            "source_equal", "web_loopback_healthy",
+        )
+    )
+    ready = bool(
+        usa.get("outcome") == "success"
+        and spain.get("outcome") == "success"
+        and not usa_active
+        and usa.get("bot_process_count") == 0
+        and spain_active
+        and spain.get("marker_present") is True
+        and foundations_equal
+        and ssh_process_count == 3
+    )
+    return {
+        "awg2_equal": spain.get("awg2_equal") is True,
+        "cutover_receipt_sha256": cutover_receipt_sha256,
+        "database_equal": spain.get("database_equal") is True,
+        "foreign_equal": spain.get("foreign_equal") is True,
+        "outcome": "success" if ready else "failure",
+        "outcome_id": outcome_id,
+        "raw_output_persisted": False,
+        "reason": "completed" if ready else "final_acceptance_failed",
+        "runtime_equal": spain.get("runtime_equal") is True,
+        "schema": FINAL_ACCEPTANCE_SCHEMA,
+        "service_action_performed": False,
+        "single_owner": int(usa_active) + int(spain_active) == 1,
+        "source_equal": spain.get("source_equal") is True,
+        "spain_active": spain_active,
+        "ssh_process_count": ssh_process_count,
+        "usa_active": usa_active,
+        "usa_reinstall_ready": ready,
+        "usa_server_mutated": False,
+        "web_loopback_healthy": spain.get("web_loopback_healthy") is True,
     }
 
 
@@ -782,6 +845,109 @@ def run_dual_recovery_diagnosis(
     return CutoverRunReceipt(status, binding.outcome_id, 2, path)
 
 
+def _current_cutover_success_receipt() -> Path:
+    return (
+        Path(os.environ.get("LOCALAPPDATA", ""))
+        / "AMN2/private-state/phase13-bot-web-migration/bot-cutover/receipts"
+        / f"{CURRENT_SUCCESSFUL_CUTOVER_OUTCOME}.success.json"
+    )
+
+
+def _validated_current_cutover_receipt() -> bytes:
+    value = _require_regular_file(
+        _current_cutover_success_receipt(), maximum=MAX_ARTIFACT_BYTES
+    )
+    document = _canonical_object(value, "cutover success receipt")
+    if (
+        document.get("schema") != RECEIPT_SCHEMA
+        or document.get("outcome_id") != CURRENT_SUCCESSFUL_CUTOVER_OUTCOME
+        or document.get("outcome") != "success"
+        or document.get("reason") != "COMPLETED"
+        or document.get("rolled_back") is not False
+        or document.get("single_owner") is not True
+        or document.get("spain_active") is not True
+        or document.get("usa_active") is not False
+        or document.get("usa_server_mutated") is not False
+        or document.get("raw_output_persisted") is not False
+    ):
+        raise CutoverError("cutover success receipt invalid")
+    return value
+
+
+def run_final_acceptance(
+    package_root: Path, exact_approval: str, *,
+    now: datetime | None = None,
+    process_runner: Callable[..., bytes] = run_bounded_process,
+    role_loader: Callable[[str], FixedRoleBinding] = load_fixed_role_binding,
+    private_root: Path | None = None,
+) -> CutoverRunReceipt:
+    checked_at = now or datetime.now(UTC)
+    binding = verify_local_cutover_package(package_root, now=checked_at)
+    cutover_receipt = _validated_current_cutover_receipt()
+    cutover_sha256 = sha256_bytes(cutover_receipt)
+    if exact_approval != exact_final_acceptance_approval_phrase(binding):
+        raise CutoverError("exact final acceptance approval mismatch")
+    if process_runner is run_bounded_process:
+        if sha256_bytes(Path(__file__).read_bytes()) != binding.runner_sha256:
+            raise CutoverError("runner source mismatch")
+        head = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parents[1],
+            check=True, capture_output=True, text=True,
+        ).stdout.strip()
+        if head != binding.tooling_head:
+            raise CutoverError("exact head mismatch")
+    roles = {role: role_loader(role) for role in ("usa", "spain")}
+    if any(value.role != role for role, value in roles.items()):
+        raise CutoverError("fixed role binding invalid")
+    root = private_root or (
+        Path(os.environ.get("LOCALAPPDATA", ""))
+        / "AMN2/private-state/phase13-bot-web-migration/final-acceptance"
+    )
+    _create_private_directory(root)
+    outcomes, receipts = root / "outcomes", root / "receipts"
+    _create_private_directory(outcomes)
+    _create_private_directory(receipts)
+    _write_create_new(
+        outcomes / f"{binding.outcome_id}.claim.json",
+        canonical_json_bytes(
+            {
+                "cutover_receipt_sha256": cutover_sha256,
+                "manifest_sha256": binding.manifest_sha256,
+                "outcome_id": binding.outcome_id,
+                "schema": CLAIM_SCHEMA,
+            }
+        ),
+        private=True,
+    )
+    transport = _ProductionTransport(binding, roles, process_runner)
+    usa_raw = transport("usa", "postflight", {})
+    spain_baseline = transport("spain", "postflight", {})
+    continuation = spain_baseline.get("continuation", {})
+    continuation_valid = bool(
+        isinstance(continuation, dict)
+        and set(continuation) == FINAL_CONTINUATION_KEYS
+        and all(
+            isinstance(value, str) and SHA_PATTERN.fullmatch(value)
+            for value in continuation.values()
+        )
+    )
+    spain_raw = (
+        transport("spain", "postflight", dict(continuation))
+        if continuation_valid
+        else {"outcome": "failure", "reason": "observation_failed"}
+    )
+    usa = preflight_diagnosis_receipt(usa_raw, binding.outcome_id)
+    spain = preflight_diagnosis_receipt(spain_raw, binding.outcome_id)
+    receipt = final_acceptance_receipt(
+        usa, spain, binding.outcome_id, cutover_sha256,
+        ssh_process_count=transport.count,
+    )
+    status = str(receipt["outcome"])
+    path = receipts / f"{binding.outcome_id}.{status}.json"
+    _write_create_new(path, canonical_json_bytes(receipt), private=True)
+    return CutoverRunReceipt(status, binding.outcome_id, transport.count, path)
+
+
 def _current_runtime_stage_receipt() -> Path:
     return (
         Path(os.environ.get("LOCALAPPDATA", ""))
@@ -840,6 +1006,9 @@ def main(argv: list[str] | None = None) -> int:
     dual = sub.add_parser("diagnose-both")
     dual.add_argument("--package-root", type=Path, required=True)
     dual.add_argument("--exact-approval", required=True)
+    final = sub.add_parser("accept-final")
+    final.add_argument("--package-root", type=Path, required=True)
+    final.add_argument("--exact-approval", required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "materialize-current":
@@ -856,7 +1025,11 @@ def main(argv: list[str] | None = None) -> int:
                 }
             ).decode("utf-8"), end="")
             return 0
-        if args.command == "diagnose-both":
+        if args.command == "accept-final":
+            result = run_final_acceptance(
+                args.package_root, args.exact_approval
+            )
+        elif args.command == "diagnose-both":
             result = run_dual_recovery_diagnosis(
                 args.package_root, args.exact_approval
             )
