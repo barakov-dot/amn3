@@ -122,10 +122,13 @@ def test_package_rejects_tamper_and_unknown_artifact(tmp_path: Path) -> None:
 
 class FakeTransport:
     def __init__(
-        self, module, *, fail_spain_start: bool = False, usa_initial: int = 1
+        self, module, *, fail_spain_start: bool = False,
+        start_failure_reason: str = "spain_bot_admission_failed",
+        usa_initial: int = 1,
     ) -> None:
         self.module = module
         self.fail_spain_start = fail_spain_start
+        self.start_failure_reason = start_failure_reason
         self.calls: list[tuple[str, str]] = []
         self.usa = usa_initial
         self.spain = 0
@@ -142,7 +145,7 @@ class FakeTransport:
             return {"outcome": "success", "reason": "completed", "bot_active": False, "bot_enabled": False, "bot_process_count": 0, "continuation": {}}
         if role == "spain" and mode == "start":
             if self.fail_spain_start:
-                return {"outcome": "failure", "reason": "spain_bot_admission_failed", "bot_active": False, "bot_enabled": False, "bot_process_count": 0, "continuation": {}}
+                return {"outcome": "failure", "reason": self.start_failure_reason, "bot_active": False, "bot_enabled": False, "bot_process_count": 0, "continuation": {}}
             self.spain = 1
             self.marker = True
             return {"outcome": "success", "reason": "completed", "bot_active": True, "bot_enabled": True, "bot_process_count": 1, "marker_present": True, "continuation": {}}
@@ -211,6 +214,26 @@ def test_spain_admission_failure_restores_exact_single_usa_owner() -> None:
         ("usa", "postflight"),
         ("spain", "postflight"),
     ]
+
+
+def test_spain_start_failure_preserves_only_allowlisted_terminal_reason() -> None:
+    module = load("phase13_cutover_start_reason", LOCAL)
+    known = module.execute_cutover_state_machine(
+        FakeTransport(
+            module,
+            fail_spain_start=True,
+            start_failure_reason="service_action_failed",
+        )
+    )
+    assert known["reason"] == "SPAIN_SERVICE_ACTION_FAILED"
+    unknown = module.execute_cutover_state_machine(
+        FakeTransport(
+            module,
+            fail_spain_start=True,
+            start_failure_reason="raw untrusted detail",
+        )
+    )
+    assert unknown["reason"] == "SPAIN_BOT_ADMISSION_FAILED"
 
 
 def test_remote_pure_state_machine_is_role_and_mode_closed() -> None:
@@ -368,3 +391,33 @@ def test_dual_recovery_diagnosis_reports_both_roles_without_mutation() -> None:
     )
     assert completed["outcome"] == "success"
     assert completed["reason"] == "completed"
+
+
+def test_spain_start_timeout_exceeds_bot_admission_window(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = load("phase13_cutover_spain_start_timeout", REMOTE)
+    marker = tmp_path / "bot-enabled"
+    monkeypatch.setattr(module, "SPAIN_MARKER", marker)
+    backend = module.LiveBackend.__new__(module.LiveBackend)
+    backend._stage_bot_unit = lambda: None
+    calls: list[tuple[tuple[str, ...], int]] = []
+
+    def run(arguments: tuple[str, ...], *, require_success: bool = True, timeout_seconds: int = 20) -> bytes:
+        calls.append((arguments, timeout_seconds))
+        return b""
+
+    backend._run = run
+    backend.observe = lambda role, continuation=None: {
+        "bot_active": True,
+        "bot_enabled": True,
+        "bot_process_count": 1,
+        "continuation": {},
+        "marker_present": True,
+    }
+    state = backend.mutate("spain", "start", {})
+    assert state["bot_active"] is True
+    assert calls == [
+        (("/usr/bin/systemctl", "enable", "--now", module.SPAIN_UNIT), 45)
+    ]
+    assert 45 > 30

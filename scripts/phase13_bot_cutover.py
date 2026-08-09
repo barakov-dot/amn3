@@ -87,6 +87,15 @@ DIAGNOSIS_REASONS = {
     "transport_failure",
     "unsupported_transition",
 }
+SPAIN_START_FAILURE_REASONS = {
+    "bot_unit_update_failed": "SPAIN_BOT_UNIT_UPDATE_FAILED",
+    "internal_failure": "SPAIN_INTERNAL_FAILURE",
+    "service_action_failed": "SPAIN_SERVICE_ACTION_FAILED",
+    "spain_bot_admission_failed": "SPAIN_BOT_ADMISSION_FAILED",
+    "TRANSPORT_FAILURE": "SPAIN_TRANSPORT_FAILURE",
+    "transport_input_oversized": "SPAIN_TRANSPORT_FAILURE",
+    "unsafe_marker_state": "SPAIN_UNSAFE_MARKER_STATE",
+}
 
 
 class CutoverError(RuntimeError):
@@ -489,7 +498,9 @@ def execute_cutover_state_machine(transport: Transport) -> dict[str, object]:
                 )
             reason = "POSTFLIGHT_FAILED"
         else:
-            reason = "SPAIN_BOT_ADMISSION_FAILED"
+            reason = SPAIN_START_FAILURE_REASONS.get(
+                str(started.get("reason", "")), "SPAIN_BOT_ADMISSION_FAILED"
+            )
     spain_rollback = transport("spain", "rollback_stop", dict(continuation))
     usa_rollback = (
         transport("usa", "rollback_start", {})

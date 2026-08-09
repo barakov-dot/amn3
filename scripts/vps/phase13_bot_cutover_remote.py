@@ -274,10 +274,16 @@ class LiveBackend:
         self.rollback_unit = self.rollback_root / "amn2-spain-bot.service.before"
 
     @staticmethod
-    def _run(arguments: tuple[str, ...], *, require_success: bool = True) -> bytes:
+    def _run(
+        arguments: tuple[str, ...], *, require_success: bool = True,
+        timeout_seconds: int = 20,
+    ) -> bytes:
+        if timeout_seconds not in {20, 45}:
+            raise RemoteCutoverError("service_action_failed")
         try:
             result = subprocess.run(
-                arguments, check=False, capture_output=True, timeout=20
+                arguments, check=False, capture_output=True,
+                timeout=timeout_seconds,
             )
         except (OSError, subprocess.SubprocessError) as error:
             raise RemoteCutoverError("service_action_failed") from error
@@ -434,7 +440,10 @@ class LiveBackend:
                 0o600,
             )
             os.close(descriptor)
-            self._run(("/usr/bin/systemctl", "enable", "--now", SPAIN_UNIT))
+            self._run(
+                ("/usr/bin/systemctl", "enable", "--now", SPAIN_UNIT),
+                timeout_seconds=45,
+            )
         elif role == "spain" and mode == "rollback_stop":
             self._run(
                 ("/usr/bin/systemctl", "disable", "--now", SPAIN_UNIT),
