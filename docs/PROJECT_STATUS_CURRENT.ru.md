@@ -21,6 +21,19 @@ SHA-256:
 Secret-free closeout:
 `research/amn2/phase13-bot-web-migration-final-acceptance-closeout-2026-08-09.md`.
 
+Post-cutover operator-manual Telegram smoke завершён успешно: configured admin
+отправил ровно `/start`, и действующий Spain bot вернул нормальный языковой
+ответ/меню в пределах 120 секунд. Кнопки не нажимались, config/peer не
+запрашивались и не выдавались; raw response и идентификаторы не сохранялись.
+Secret-free receipt:
+`research/amn2/phase13-post-cutover-telegram-operator-smoke-2026-08-09.md`.
+
+AMN2 migration head `910539eaa8051cb1b59131d38b9fa27b9392744d`
+опубликован без force-push в отдельной archival branch
+`codex/phase13-bot-web-migration-local`; default branch не изменялась. Focused
+AMN2 scope: `21 passed`, scoped diff/secret review: reportable findings `0`.
+`PHASE13_FORMALLY_SEALED=true`; `PHASE14_NOT_STARTED=true`.
+
 USA shutdown, cleanup, reinstall, reuse и provider mutation не выполнялись.
 AWG не останавливался, не перезапускался, не пересоздавался и не обновлялся;
 Spain D1–D7, configs, keys, firewall/forward rules и foreign service не
