@@ -6,6 +6,7 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -93,6 +94,81 @@ def test_structural_drift_lists_only_allowlisted_failed_predicates() -> None:
         "persistent_peer_count_equal",
     ]
     assert set(result).isdisjoint({"peer_public_keys", "host", "user", "stderr"})
+
+
+def test_live_forwarding_accepts_missing_docker_host_sysctl() -> None:
+    module = load("phase13_awg2_diagnosis_live_forwarding", REMOTE)
+    peers = tuple(f"{chr(65 + index) * 43}=" for index in range(7))
+
+    class FakeRealSpainBackend:
+        def _service_values(self, _unit: str) -> dict[str, str]:
+            return {"ActiveState": "active", "UnitFileState": "enabled"}
+
+        def _run(self, arguments: tuple[str, ...]) -> bytes:
+            if "inspect" in arguments:
+                return json.dumps(
+                    [
+                        {
+                            "Image": "sha256:" + "1" * 64,
+                            "HostConfig": {
+                                "NetworkMode": "amn2-spain-net",
+                                "Sysctls": {},
+                            },
+                            "RestartCount": 59,
+                            "State": {"Running": True},
+                        }
+                    ]
+                ).encode()
+            if "peers" in arguments:
+                return ("\n".join(peers) + "\n").encode()
+            if "listen-port" in arguments:
+                return b"30001\n"
+            if "sysctl" in arguments:
+                return b"1\n"
+            if arguments[:4] == ("/usr/sbin/ip", "-j", "route", "show"):
+                return b'[{"dst":"10.212.12.0/24","dev":"amn2spbr0"}]'
+            return json.dumps(
+                {
+                    "nftables": [
+                        {"rule": {"chain": "forward", "comment": comment}}
+                        for comment in (
+                            "amn2_spain:forward-dnat",
+                            "amn2_spain:forward-outbound",
+                            "amn2_spain:forward-return",
+                        )
+                    ]
+                }
+            ).encode()
+
+    foundation = SimpleNamespace(
+        AWG_CONTAINER="amn2-spain-awg",
+        AWG_INTERFACE="awgsp0",
+        DOCKER="/opt/amn2-spain/docker/bin/docker",
+        DOCKER_HOST="unix:///run/amn2-spain-docker/docker.sock",
+        EXPECTED_ACTIVE_ENABLED_UNITS=(
+            "amn2-spain-docker.service",
+            "amn2-spain-network.service",
+            "amn2-spain-forward-compat.service",
+        ),
+        EXPECTED_AWG_NETWORK="amn2-spain-net",
+        EXPECTED_FORWARD_COMMENTS={
+            "amn2_spain:forward-dnat",
+            "amn2_spain:forward-outbound",
+            "amn2_spain:forward-return",
+        },
+        EXPECTED_ROUTE_DEVICE="amn2spbr0",
+        EXPECTED_UDP_PORT=30001,
+        EXPECTED_VPN_CIDR="10.212.12.0/24",
+        LIVE_DATABASE=Path("unused"),
+        RealSpainBackend=FakeRealSpainBackend,
+    )
+    backend = module.LiveDiagnosisBackend(foundation)
+    backend._persistent_peers = lambda: peers
+
+    observation = backend.collect_awg2_observation()
+
+    assert observation["configured_ip_forward_equal"] is True
+    assert observation["live_ip_forward_equal"] is True
 
 
 def test_remote_receipt_is_strict_secret_safe_and_read_only() -> None:

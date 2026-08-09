@@ -299,6 +299,7 @@ def test_foreign_projection_matches_phase12_container_and_unit_receipt() -> None
             "image_or_unit_sha256": sha256(b"foreign-image"),
             "kind": "container",
             "name_sha256": sha256(b"foreign-container"),
+            "restart_count": 0,
         }
     ]
     rows.extend(
@@ -308,17 +309,28 @@ def test_foreign_projection_matches_phase12_container_and_unit_receipt() -> None
             "image_or_unit_sha256": sha256(content.rstrip(b"\n")),
             "kind": "unit",
             "name_sha256": sha256(unit.encode()),
+            "restart_count": 0,
             "unit_content_status": "exact",
         }
         for unit, content in unit_contents.items()
     )
-    expected = sha256(canonical(sorted(rows, key=lambda row: (row["kind"], row["name_sha256"]))))
+    expected = sha256(
+        json.dumps(
+            sorted(rows, key=lambda row: (row["kind"], row["name_sha256"])),
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    )
     module.EXPECTED_FOREIGN_STABLE_SHA256 = expected
+    module.RealSpainBackend._system_docker_available = classmethod(lambda _cls: True)
 
     def fake_run(_cls, arguments: tuple[str, ...], timeout: int = 15) -> bytes:
         del timeout
         if arguments[:3] == ("/usr/bin/docker", "ps", "-a"):
             return b"foreign-container|foreign-image|running\n"
+        if arguments[:3] == ("/usr/bin/docker", "inspect", "--format"):
+            return b"0\n"
         if "list-units" in arguments:
             return "".join(
                 f"{unit} loaded active running Foreign unit\n"
@@ -326,6 +338,8 @@ def test_foreign_projection_matches_phase12_container_and_unit_receipt() -> None
             ).encode()
         if "cat" in arguments:
             return unit_contents[arguments[2]]
+        if "--property=NRestarts" in arguments:
+            return b"0\n"
         if "--property=ControlGroup" in arguments:
             return f"/system.slice/{arguments[2]}\n".encode()
         raise AssertionError(arguments)
@@ -335,6 +349,68 @@ def test_foreign_projection_matches_phase12_container_and_unit_receipt() -> None
     unit_contents["foreign-017.service"] = b"[Service]\nExecStart=/bin/false\n"
     with pytest.raises(module.RemoteStageError, match="foreign_equality_mismatch"):
         module.RealSpainBackend._foreign_snapshot()
+
+
+def test_foreign_projection_skips_absent_system_docker_and_intersects_two_snapshots() -> None:
+    module = load_module("phase13_production_stage_foreign_persistent", REMOTE)
+    persistent_units = {
+        f"foreign-{index:03d}.service": f"[Service]\nExecStart=/bin/true #{index}\n".encode()
+        for index in range(153)
+    }
+    transient_unit = "transient-observer.service"
+    all_contents = {
+        **persistent_units,
+        transient_unit: b"[Service]\nExecStart=/bin/true #transient\n",
+    }
+    rows = [
+        {
+            "active_state": "active:running",
+            "bound_port_status": "cgroup_complete",
+            "image_or_unit_sha256": sha256(content.rstrip(b"\n")),
+            "kind": "unit",
+            "name_sha256": sha256(unit.encode()),
+            "restart_count": 0,
+            "unit_content_status": "exact",
+        }
+        for unit, content in persistent_units.items()
+    ]
+    expected = sha256(
+        json.dumps(
+            sorted(rows, key=lambda row: (row["kind"], row["name_sha256"])),
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    )
+    module.EXPECTED_FOREIGN_STABLE_SHA256 = expected
+    module.RealSpainBackend._system_docker_available = classmethod(lambda _cls: False)
+    list_calls = 0
+
+    def fake_run(_cls, arguments: tuple[str, ...], timeout: int = 15) -> bytes:
+        nonlocal list_calls
+        del timeout
+        if arguments and arguments[0] == "/usr/bin/docker":
+            raise AssertionError("absent system Docker must not be invoked")
+        if "list-units" in arguments:
+            list_calls += 1
+            units = list(persistent_units)
+            if list_calls == 1:
+                units.append(transient_unit)
+            return "".join(
+                f"{unit} loaded active running Foreign unit\n" for unit in units
+            ).encode()
+        if "cat" in arguments:
+            return all_contents[arguments[2]]
+        if "--property=NRestarts" in arguments:
+            return b"0\n"
+        if "--property=ControlGroup" in arguments:
+            return f"/system.slice/{arguments[2]}\n".encode()
+        raise AssertionError(arguments)
+
+    module.RealSpainBackend._run = classmethod(fake_run)
+
+    assert module.RealSpainBackend._foreign_snapshot() == expected
+    assert list_calls == 2
 
 
 @pytest.mark.parametrize(
@@ -356,7 +432,7 @@ def test_awg_projection_rejects_only_a_fourth_tagged_forward_rule(
                         "Image": "sha256:" + "1" * 64,
                         "HostConfig": {
                             "NetworkMode": "amn2-spain-net",
-                            "Sysctls": {"net.ipv4.ip_forward": "1"},
+                            "Sysctls": {},
                         },
                         "RestartCount": 59,
                         "State": {"Running": True},

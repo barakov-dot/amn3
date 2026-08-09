@@ -292,7 +292,7 @@ class LiveDiagnosisBackend:
         except Exception as error:
             raise DiagnosisError("observation", "observation_failed") from error
         return {
-            "configured_ip_forward_equal": sysctls.get("net.ipv4.ip_forward") == "1",
+            "configured_ip_forward_equal": sysctls.get("net.ipv4.ip_forward") in {None, "1"},
             "container_running": running is True,
             "forward_comments_equal": set(comments) == set(f.EXPECTED_FORWARD_COMMENTS),
             "forward_rule_count": len(comments),

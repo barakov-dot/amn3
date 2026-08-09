@@ -693,7 +693,7 @@ class RealSpainBackend:
             or not selected["image"]
             or selected["network_mode"] != EXPECTED_AWG_NETWORK
             or selected["restart_count"] != EXPECTED_RESTART_COUNT
-            or selected["sysctls"].get("net.ipv4.ip_forward") != "1"
+            or selected["sysctls"].get("net.ipv4.ip_forward") not in {None, "1"}
             or any(
                 values["ActiveState"] != "active"
                 or values["UnitFileState"] != "enabled"
@@ -761,12 +761,25 @@ class RealSpainBackend:
         return "mainpid_cgroup_complete"
 
     @classmethod
-    def _foreign_snapshot(cls) -> str:
-        rows: list[dict[str, str]] = []
-        docker_output = cls._run(
-            (SYSTEM_DOCKER, "ps", "-a", "--format", "{{.Names}}|{{.Image}}|{{.State}}")
-        ).decode("utf-8", errors="strict")
-        for line in docker_output.splitlines():
+    def _system_docker_available(cls) -> bool:
+        return os.path.isfile(SYSTEM_DOCKER) and os.access(SYSTEM_DOCKER, os.X_OK)
+
+    @classmethod
+    def _collect_foreign_rows(cls) -> dict[tuple[str, str], dict[str, object]]:
+        rows: list[dict[str, object]] = []
+        docker_output = b""
+        if cls._system_docker_available():
+            docker_output = cls._run(
+                (
+                    SYSTEM_DOCKER,
+                    "ps",
+                    "-a",
+                    "--format",
+                    "{{.Names}}|{{.Image}}|{{.State}}",
+                )
+            )
+        docker_text = docker_output.decode("utf-8", errors="strict")
+        for line in docker_text.splitlines():
             if not line:
                 continue
             parts = line.split("|")
@@ -781,12 +794,18 @@ class RealSpainBackend:
                 or re.fullmatch(r"[A-Za-z0-9_.:+-]+", state_value) is None
             ):
                 raise RemoteStageError("preflight", "foreign_observation_failed")
+            restart_text = cls._run(
+                (SYSTEM_DOCKER, "inspect", "--format", "{{.RestartCount}}", name)
+            ).decode("ascii", errors="strict").strip()
+            if not restart_text.isdigit():
+                raise RemoteStageError("preflight", "foreign_observation_failed")
             rows.append(
                 {
                     "active_state": state_value,
                     "image_or_unit_sha256": sha256_bytes(image.encode("utf-8")),
                     "kind": "container",
                     "name_sha256": sha256_bytes(name.encode("utf-8")),
+                    "restart_count": int(restart_text),
                 }
             )
 
@@ -819,6 +838,17 @@ class RealSpainBackend:
             unit_content = cls._run(
                 ("/usr/bin/systemctl", "cat", unit, "--no-pager")
             ).rstrip(b"\n")
+            restart_text = cls._run(
+                (
+                    "/usr/bin/systemctl",
+                    "show",
+                    unit,
+                    "--property=NRestarts",
+                    "--value",
+                )
+            ).decode("ascii", errors="strict").strip()
+            if not restart_text.isdigit():
+                raise RemoteStageError("preflight", "foreign_observation_failed")
             bound_status = cls._foreign_unit_bound_status(unit, active_state)
             if re.fullmatch(r"[A-Za-z0-9_.:+-]+", bound_status) is None:
                 raise RemoteStageError("preflight", "foreign_observation_failed")
@@ -829,19 +859,45 @@ class RealSpainBackend:
                     "image_or_unit_sha256": sha256_bytes(unit_content),
                     "kind": "unit",
                     "name_sha256": sha256_bytes(unit.encode("utf-8")),
+                    "restart_count": int(restart_text),
                     "unit_content_status": "exact",
                 }
             )
-        identities = {(row["kind"], row["name_sha256"]) for row in rows}
-        stable = sorted(rows, key=lambda row: (row["kind"], row["name_sha256"]))
-        digest = sha256_bytes(canonical_json_bytes(stable))
+        by_identity: dict[tuple[str, str], dict[str, object]] = {}
+        for row in rows:
+            identity = (str(row["kind"]), str(row["name_sha256"]))
+            if identity in by_identity:
+                raise RemoteStageError("preflight", "foreign_observation_failed")
+            by_identity[identity] = row
+        return by_identity
+
+    @staticmethod
+    def _phase12_stable_digest(rows: list[dict[str, object]]) -> str:
+        stable = sorted(rows, key=lambda row: (str(row["kind"]), str(row["name_sha256"])))
+        encoded = json.dumps(
+            stable,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        return sha256_bytes(encoded)
+
+    @classmethod
+    def _foreign_snapshot(cls) -> str:
+        before = cls._collect_foreign_rows()
+        after = cls._collect_foreign_rows()
+        persistent = sorted(set(before).intersection(after))
+        before_rows = [before[identity] for identity in persistent]
+        after_rows = [after[identity] for identity in persistent]
+        before_digest = cls._phase12_stable_digest(before_rows)
+        after_digest = cls._phase12_stable_digest(after_rows)
         if (
-            len(rows) != EXPECTED_FOREIGN_PERSISTENT_ENTRIES
-            or len(identities) != len(rows)
-            or digest != EXPECTED_FOREIGN_STABLE_SHA256
+            len(persistent) != EXPECTED_FOREIGN_PERSISTENT_ENTRIES
+            or before_digest != after_digest
+            or before_digest != EXPECTED_FOREIGN_STABLE_SHA256
         ):
             raise RemoteStageError("preflight", "foreign_equality_mismatch")
-        return digest
+        return before_digest
 
     def _assert_bot_disabled(self) -> None:
         bot = self._service_values(BOT_UNIT)
