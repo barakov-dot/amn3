@@ -49,6 +49,7 @@ OUTCOME_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{2,63}$")
 SHA_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 HEAD_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 ARTIFACT_FILENAMES = {
+    "bot_unit": "amn2-spain-bot.service",
     "foundation": "foundation.py",
     "remote": "remote.py",
     "runner": "runner.py",
@@ -106,6 +107,7 @@ class CutoverPackageInputs:
     runner_bytes: bytes
     remote_bytes: bytes
     foundation_bytes: bytes
+    bot_unit_bytes: bytes
     runtime_stage_receipt: bytes
 
 
@@ -127,6 +129,7 @@ class CutoverBinding:
     runner_sha256: str
     remote_sha256: str
     foundation_sha256: str
+    bot_unit_sha256: str
     runtime_stage_receipt_sha256: str
 
 
@@ -210,6 +213,7 @@ def materialize_cutover_package(
     ):
         raise CutoverError("package inputs invalid")
     artifacts = {
+        "bot_unit": inputs.bot_unit_bytes,
         "foundation": inputs.foundation_bytes,
         "remote": inputs.remote_bytes,
         "runner": inputs.runner_bytes,
@@ -311,6 +315,7 @@ def verify_local_cutover_package(
         runner_sha256=hashes["runner"],
         remote_sha256=hashes["remote"],
         foundation_sha256=hashes["foundation"],
+        bot_unit_sha256=hashes["bot_unit"],
         runtime_stage_receipt_sha256=hashes["runtime_stage_receipt"],
     )
 
@@ -321,9 +326,11 @@ def exact_approval_phrase(binding: CutoverBinding) -> str:
         f"OUTCOME_{binding.outcome_id} MANIFEST_SHA_{binding.manifest_sha256} "
         f"RUNNER_SHA_{binding.runner_sha256} REMOTE_SHA_{binding.remote_sha256} "
         f"FOUNDATION_SHA_{binding.foundation_sha256} "
+        f"BOT_UNIT_SHA_{binding.bot_unit_sha256} "
         f"RUNTIME_STAGE_RECEIPT_SHA_{binding.runtime_stage_receipt_sha256} "
         f"TOOLING_HEAD_{binding.tooling_head} EXPIRES_AT_{_format_utc(binding.expires_at)} "
         "MAX_ATTEMPTS_1 MAX_SSH_PROCESSES_10 USA_ALREADY_ZERO_ALLOWED "
+        "SPAIN_BOT_UNIT_ATOMIC_UPDATE ROLLBACK_EXACT_UNIT_RESTORE "
         "STOP_USA_BOT_ONLY START_SPAIN_BOT "
         "ROLLBACK_TO_SINGLE_USA NO_USA_SERVER_SHUTDOWN NO_DATABASE_APPLY "
         "NO_WEB_ACTION NO_AWG_MUTATION NO_FOREIGN_MUTATION"
@@ -482,6 +489,10 @@ class _ProductionTransport:
         self.count = 0
         self.remote = _require_regular_file(binding.package_root / "remote.py", maximum=MAX_ARTIFACT_BYTES)
         self.foundation = _require_regular_file(binding.package_root / "foundation.py", maximum=MAX_ARTIFACT_BYTES)
+        self.bot_unit = _require_regular_file(
+            binding.package_root / "amn2-spain-bot.service",
+            maximum=MAX_ARTIFACT_BYTES,
+        )
 
     def __call__(
         self, role: str, mode: str, continuation: dict[str, str] | None = None,
@@ -491,6 +502,8 @@ class _ProductionTransport:
         payload = canonical_json_bytes(
             {
                 "continuation": dict(continuation or {}),
+                "bot_unit_b64": base64.b64encode(self.bot_unit).decode("ascii"),
+                "bot_unit_sha256": sha256_bytes(self.bot_unit),
                 "expires_at": _format_utc(self.binding.expires_at),
                 "manifest_sha256": self.binding.manifest_sha256,
                 "max_attempts": 1,
@@ -705,6 +718,7 @@ def materialize_current(outcome_id: str, expires_at: datetime) -> tuple[CutoverP
         runner_bytes=Path(__file__).read_bytes(),
         remote_bytes=(root / "scripts/vps/phase13_bot_cutover_remote.py").read_bytes(),
         foundation_bytes=(root / "scripts/vps/phase13_bot_web_migration_production_stage_remote.py").read_bytes(),
+        bot_unit_bytes=(root / "packaging/phase12-spain/units/amn2-spain-bot.service").read_bytes(),
         runtime_stage_receipt=_require_regular_file(
             _current_runtime_stage_receipt(), maximum=MAX_ARTIFACT_BYTES
         ),

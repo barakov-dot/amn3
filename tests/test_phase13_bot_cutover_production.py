@@ -43,6 +43,10 @@ def package_inputs(module):
         runner_bytes=b"runner",
         remote_bytes=b"remote",
         foundation_bytes=b"foundation",
+        bot_unit_bytes=(
+            b"[Unit]\nConditionPathExists=/etc/amn2-spain/bot-enabled\n"
+            b"[Install]\nWantedBy=multi-user.target\n"
+        ),
         runtime_stage_receipt=canonical(
             {
                 "awg2_equal": True,
@@ -84,6 +88,8 @@ def test_package_is_checksum_bound_deterministic_and_exact_approval(tmp_path: Pa
     assert "TWO-HOST SINGLE-INSTANCE BOT CUTOVER" in phrase
     assert "MAX_SSH_PROCESSES_10" in phrase
     assert "USA_ALREADY_ZERO_ALLOWED" in phrase
+    assert "SPAIN_BOT_UNIT_ATOMIC_UPDATE" in phrase
+    assert first_binding.bot_unit_sha256 in phrase
     assert "NO_USA_SERVER_SHUTDOWN" in phrase
     assert "NO_AWG_MUTATION" in phrase
     assert first_binding.manifest_sha256 in phrase
@@ -123,29 +129,29 @@ class FakeTransport:
     def __call__(self, role: str, mode: str, continuation: dict[str, str] | None = None):
         self.calls.append((role, mode))
         if role == "usa" and mode == "preflight":
-            return {"outcome": "success", "reason": "completed", "bot_active": self.usa == 1, "bot_process_count": self.usa, "continuation": {}}
+            return {"outcome": "success", "reason": "completed", "bot_active": self.usa == 1, "bot_enabled": self.usa == 1, "bot_process_count": self.usa, "continuation": {}}
         if role == "spain" and mode == "preflight":
-            return {"outcome": "success", "reason": "completed", "bot_active": False, "bot_process_count": self.spain, "marker_present": self.marker, "continuation": {"state": "a" * 64}}
+            return {"outcome": "success", "reason": "completed", "bot_active": False, "bot_enabled": False, "bot_process_count": self.spain, "marker_present": self.marker, "continuation": {"state": "a" * 64}}
         if role == "usa" and mode == "stop":
             self.usa = 0
-            return {"outcome": "success", "reason": "completed", "bot_active": False, "bot_process_count": 0, "continuation": {}}
+            return {"outcome": "success", "reason": "completed", "bot_active": False, "bot_enabled": False, "bot_process_count": 0, "continuation": {}}
         if role == "spain" and mode == "start":
             if self.fail_spain_start:
-                return {"outcome": "failure", "reason": "spain_bot_admission_failed", "bot_active": False, "bot_process_count": 0, "continuation": {}}
+                return {"outcome": "failure", "reason": "spain_bot_admission_failed", "bot_active": False, "bot_enabled": False, "bot_process_count": 0, "continuation": {}}
             self.spain = 1
             self.marker = True
-            return {"outcome": "success", "reason": "completed", "bot_active": True, "bot_process_count": 1, "marker_present": True, "continuation": {}}
+            return {"outcome": "success", "reason": "completed", "bot_active": True, "bot_enabled": True, "bot_process_count": 1, "marker_present": True, "continuation": {}}
         if role == "usa" and mode == "postflight":
-            return {"outcome": "success", "reason": "completed", "bot_active": self.usa == 1, "bot_process_count": self.usa, "continuation": {}}
+            return {"outcome": "success", "reason": "completed", "bot_active": self.usa == 1, "bot_enabled": self.usa == 1, "bot_process_count": self.usa, "continuation": {}}
         if role == "spain" and mode == "postflight":
-            return {"outcome": "success", "reason": "completed", "bot_active": self.spain == 1, "bot_process_count": self.spain, "marker_present": self.marker, "continuation": {}}
+            return {"outcome": "success", "reason": "completed", "bot_active": self.spain == 1, "bot_enabled": self.spain == 1, "bot_process_count": self.spain, "marker_present": self.marker, "continuation": {}}
         if role == "spain" and mode == "rollback_stop":
             self.spain = 0
             self.marker = False
-            return {"outcome": "success", "reason": "completed", "bot_active": False, "bot_process_count": 0, "marker_present": False, "continuation": {}}
+            return {"outcome": "success", "reason": "completed", "bot_active": False, "bot_enabled": False, "bot_process_count": 0, "marker_present": False, "continuation": {}}
         if role == "usa" and mode == "rollback_start":
             self.usa = 1
-            return {"outcome": "success", "reason": "completed", "bot_active": True, "bot_process_count": 1, "continuation": {}}
+            return {"outcome": "success", "reason": "completed", "bot_active": True, "bot_enabled": True, "bot_process_count": 1, "continuation": {}}
         raise AssertionError((role, mode))
 
 
@@ -314,3 +320,15 @@ def test_foreign_snapshot_uses_verified_stable_row_digest_not_tuple_key_json() -
     backend.spain = FoundationBackend()
     assert backend._foreign_sha() == "c" * 64
     assert backend.spain.calls == 2
+
+
+def test_hardened_spain_bot_unit_contract_is_exact_and_persistent() -> None:
+    module = load("phase13_cutover_bot_unit", REMOTE)
+    value = (
+        b"[Unit]\nConditionPathExists=/etc/amn2-spain/bot-enabled\n"
+        b"[Service]\nExecStart=/usr/bin/python3 -B -m app.main\n"
+        b"[Install]\nWantedBy=multi-user.target\n"
+    )
+    assert module.validate_bot_unit(value) == value
+    with pytest.raises(module.RemoteCutoverError, match="bot_unit_invalid"):
+        module.validate_bot_unit(value.replace(b"WantedBy=multi-user.target\n", b""))

@@ -26,6 +26,8 @@ SHA_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 USA_UNIT = "amneziya-bot.service"
 SPAIN_UNIT = "amn2-spain-bot.service"
 SPAIN_MARKER = Path("/etc/amn2-spain/bot-enabled")
+SPAIN_UNIT_PATH = Path("/etc/systemd/system/amn2-spain-bot.service")
+CUTOVER_ROOT = Path("/var/lib/amn2-phase13-bot-cutover")
 SPAIN_DATABASE = Path("/var/lib/amn2-spain/amn2.sqlite3")
 SPAIN_RUNTIME = Path("/etc/amn2-spain/runtime.env")
 SPAIN_SOURCE = Path("/opt/amn2-spain/runtime/source")
@@ -60,6 +62,20 @@ RECEIPT_KEYS = {
 
 class RemoteCutoverError(RuntimeError):
     """Allowlisted remote failure without raw process detail."""
+
+
+def validate_bot_unit(value: bytes) -> bytes:
+    if (
+        not isinstance(value, bytes)
+        or not value
+        or len(value) > 1024 * 1024
+        or b"ConditionPathExists=/etc/amn2-spain/bot-enabled\n" not in value
+        or b"WantedBy=multi-user.target\n" not in value
+        or b"ExecStart=/usr/bin/python3 -B -m app.main\n" not in value
+        or b"\x00" in value
+    ):
+        raise RemoteCutoverError("bot_unit_invalid")
+    return value
 
 
 class Backend(Protocol):
@@ -242,9 +258,20 @@ def _tree_sha(root: Path) -> str:
 
 
 class LiveBackend:
-    def __init__(self, foundation: ModuleType) -> None:
+    def __init__(self, foundation: ModuleType, payload: Mapping[str, object]) -> None:
         self.foundation = foundation
         self.spain = foundation.RealSpainBackend()
+        self.outcome_id = str(payload["outcome_id"])
+        try:
+            unit = base64.b64decode(str(payload["bot_unit_b64"]), validate=True)
+        except Exception as error:
+            raise RemoteCutoverError("bot_unit_invalid") from error
+        self.bot_unit = validate_bot_unit(unit)
+        self.bot_unit_sha256 = str(payload["bot_unit_sha256"])
+        if sha256_bytes(self.bot_unit) != self.bot_unit_sha256:
+            raise RemoteCutoverError("bot_unit_invalid")
+        self.rollback_root = CUTOVER_ROOT / self.outcome_id
+        self.rollback_unit = self.rollback_root / "amn2-spain-bot.service.before"
 
     @staticmethod
     def _run(arguments: tuple[str, ...], *, require_success: bool = True) -> bytes:
@@ -291,6 +318,64 @@ class LiveBackend:
         ):
             raise RemoteCutoverError("foreign_equality_mismatch")
         return before_digest
+
+    @staticmethod
+    def _safe_directory(path: Path) -> None:
+        if os.path.lexists(path):
+            metadata = os.lstat(path)
+            if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISDIR(metadata.st_mode):
+                raise RemoteCutoverError("unsafe_path")
+            return
+        os.mkdir(path, 0o700)
+
+    @staticmethod
+    def _write_create_new(path: Path, value: bytes) -> None:
+        descriptor = os.open(
+            path,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+            0o600,
+        )
+        try:
+            with os.fdopen(descriptor, "wb") as handle:
+                descriptor = -1
+                handle.write(value)
+                handle.flush()
+                os.fsync(handle.fileno())
+        finally:
+            if descriptor >= 0:
+                os.close(descriptor)
+
+    @staticmethod
+    def _atomic_replace(path: Path, value: bytes) -> None:
+        temporary = path.with_name(path.name + ".phase13-new")
+        if os.path.lexists(temporary):
+            raise RemoteCutoverError("unsafe_path")
+        LiveBackend._write_create_new(temporary, value)
+        os.chmod(temporary, 0o644)
+        os.replace(temporary, path)
+
+    def _stage_bot_unit(self) -> None:
+        _regular_sha(SPAIN_UNIT_PATH)
+        current = SPAIN_UNIT_PATH.read_bytes()
+        validate_bot_unit(self.bot_unit)
+        if sha256_bytes(current) == self.bot_unit_sha256:
+            return
+        self._safe_directory(CUTOVER_ROOT)
+        self._safe_directory(self.rollback_root)
+        if not os.path.lexists(self.rollback_unit):
+            self._write_create_new(self.rollback_unit, current)
+        self._atomic_replace(SPAIN_UNIT_PATH, self.bot_unit)
+        self._run(("/usr/bin/systemctl", "daemon-reload"))
+        if _regular_sha(SPAIN_UNIT_PATH) != self.bot_unit_sha256:
+            raise RemoteCutoverError("bot_unit_update_failed")
+
+    def _restore_bot_unit(self) -> None:
+        if not os.path.lexists(self.rollback_unit):
+            return
+        _regular_sha(self.rollback_unit)
+        before = self.rollback_unit.read_bytes()
+        self._atomic_replace(SPAIN_UNIT_PATH, before)
+        self._run(("/usr/bin/systemctl", "daemon-reload"))
 
     def _spain_continuation(self) -> dict[str, str]:
         unit = Path("/etc/systemd/system") / SPAIN_UNIT
@@ -342,6 +427,7 @@ class LiveBackend:
         elif role == "spain" and mode == "start":
             if os.path.lexists(SPAIN_MARKER):
                 raise RemoteCutoverError("unsafe_marker_state")
+            self._stage_bot_unit()
             descriptor = os.open(
                 SPAIN_MARKER,
                 os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
@@ -350,12 +436,16 @@ class LiveBackend:
             os.close(descriptor)
             self._run(("/usr/bin/systemctl", "enable", "--now", SPAIN_UNIT))
         elif role == "spain" and mode == "rollback_stop":
-            self._run(("/usr/bin/systemctl", "disable", "--now", SPAIN_UNIT))
+            self._run(
+                ("/usr/bin/systemctl", "disable", "--now", SPAIN_UNIT),
+                require_success=False,
+            )
             if os.path.lexists(SPAIN_MARKER):
                 metadata = os.lstat(SPAIN_MARKER)
                 if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISREG(metadata.st_mode):
                     raise RemoteCutoverError("unsafe_marker_state")
                 os.unlink(SPAIN_MARKER)
+            self._restore_bot_unit()
         else:
             raise RemoteCutoverError("unsupported_transition")
         return self.observe(role, continuation)
@@ -401,7 +491,7 @@ def main_bound_envelope(envelope: object) -> None:
         payload_bytes = base64.b64decode(str(envelope["payload_b64"]), validate=True)
         payload = json.loads(payload_bytes)
         if canonical_json_bytes(payload) != payload_bytes or set(payload) != {
-            "continuation", "expires_at", "manifest_sha256", "max_attempts",
+            "bot_unit_b64", "bot_unit_sha256", "continuation", "expires_at", "manifest_sha256", "max_attempts",
             "mode", "outcome_id", "role", "schema"
         }:
             raise RemoteCutoverError("payload_invalid")
@@ -410,10 +500,11 @@ def main_bound_envelope(envelope: object) -> None:
             or payload.get("max_attempts") != 1
             or OUTCOME_PATTERN.fullmatch(str(payload.get("outcome_id", ""))) is None
             or SHA_PATTERN.fullmatch(str(payload.get("manifest_sha256", ""))) is None
+            or SHA_PATTERN.fullmatch(str(payload.get("bot_unit_sha256", ""))) is None
         ):
             raise RemoteCutoverError("payload_invalid")
         _parse_utc(payload["expires_at"])
-        result = execute(payload, LiveBackend(_load_foundation(foundation)))
+        result = execute(payload, LiveBackend(_load_foundation(foundation), payload))
     except RemoteCutoverError as error:
         result = _receipt(
             role=str(payload.get("role", "unknown")), outcome="failure",
