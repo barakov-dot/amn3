@@ -28,6 +28,20 @@ Post-cutover operator-manual Telegram smoke завершён успешно: con
 Secret-free receipt:
 `research/amn2/phase13-post-cutover-telegram-operator-smoke-2026-08-09.md`.
 
+Post-closeout Spain existing-client assurance завершён со статусом
+`PASS_WITH_PERFORMANCE_WARNING`. Оператор подтвердил, что Telegram и сайты
+фактически работают через Spain. Локальное read-only evidence подтвердило
+стабильность tunnel/route/DNS, выключенный Windows proxy, `6/6` site и `6/6`
+Telegram HTTPS проверок с реалистичным 15-second timeout и completed
+2 MiB transfer. Наблюдаются периодические задержки установления соединений и
+краткие Codex reconnect; это не классифицировано как tunnel drop или Phase 13
+blocker. MTU `1280` не устранил симптом и не является accepted profile;
+сохраняется исходный accepted ARM-HOME profile. Secret-free receipt:
+`research/amn2/phase13-post-closeout-spain-client-assurance-2026-08-09.md`.
+Performance warning перенесён в Phase 14 как non-blocking read-only diagnostic
+candidate; `PHASE14_NOT_STARTED=true` сохраняется. Handoff подготовлен:
+`docs/AMN2_PHASE_14_START_HANDOFF.ru.md`; `PHASE14_HANDOFF_READY=true`.
+
 AMN2 migration head `910539eaa8051cb1b59131d38b9fa27b9392744d`
 опубликован без force-push в отдельной archival branch
 `codex/phase13-bot-web-migration-local`; default branch не изменялась. Focused

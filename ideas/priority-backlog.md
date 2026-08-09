@@ -11,6 +11,15 @@ bot active, USA bot inactive. USA VPS не выключалась и может 
 переустановлена оператором. AWG3 полностью отложена в Phase 14 и не должна
 возвращаться в Phase 13 backlog.
 
+Post-closeout Spain client assurance принят со статусом
+`PASS_WITH_PERFORMANCE_WARNING`: оператор подтвердил работу Telegram и сайтов,
+а local read-only evidence подтвердило tunnel/route/DNS, выключенный Windows
+proxy, realistic-timeout HTTPS и sustained transfer. Периодические задержки
+установления соединений и краткие Codex reconnect не являются Phase 13 blocker
+и не разрешают blind MTU/config/peer/server mutation. В Phase 14 это только
+non-blocking read-only diagnostic candidate: сначала собрать воспроизводимое
+evidence и определить root cause, затем отдельно решать о любом изменении.
+
 Актуализация 2026-08-01 Phase 13: фактический Spain baseline имеет семь
 принятых AWG2 slots; production AWG3 ещё не принят. Written design утверждён,
 отдельный local-only TDD implementation plan подготовлен и ожидает отдельного
