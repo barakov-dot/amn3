@@ -1,4 +1,53 @@
-# Текущий обязательный приоритет 2026-08-09: Phase 13 закрыта, USA_REINSTALL_READY подтверждён
+# Текущий обязательный приоритет 2026-08-10: Phase 14 design/status gate завершён, implementation не разрешён
+
+Phase 14 local source-integration/readiness завершён на clean AMN2 branch
+`codex/phase14-awg3-readiness-local`, exact HEAD
+`4547af1b23e4774822119f98004568c6eb039303`. Verification receipt
+`research/amn2/phase14-awg3-readiness-local-verification-receipt-2026-08-09.md`
+повторно подтверждена SHA-256
+`3DF5A62B23C5BE565E08383288269AA7F486EE23F9E1A60D4D767D53A240316B`.
+AMN2 worktree clean; source branch/remotes не изменялись.
+
+Утверждён standalone Phase 14 dual-protocol contract. AWG2 продолжает
+выпускаться и остаётся default. AWG3 является параллельным изолированным
+runtime: exact client identity включает platform/application/version/build;
+global runtime/build acceptance и отдельный issuance enable обязательны;
+после enable совместимому пользователю не требуется индивидуальное admin
+approval. На одном device passport допускаются один AWG2 и один AWG3 profile.
+
+Утверждённая design spec:
+`docs/superpowers/specs/2026-08-10-amn2-phase14-dual-protocol-package-readonly-preflight-design.ru.md`.
+Из-за независимых подсистем подготовлены два последовательных plan:
+
+- application/self-service issuance:
+  `docs/superpowers/plans/2026-08-10-amn2-phase14-dual-protocol-self-service-issuance.md`;
+- package/read-only preflight tooling:
+  `docs/superpowers/plans/2026-08-10-amn2-phase14-package-readonly-preflight-tooling.md`.
+
+Application plan должен завершиться local receipt до package tooling.
+Package tooling должно завершиться без materialized production package.
+Materialization, application preflight/stage, runtime preflight/stage,
+admin-only pilot, global acceptance и issuance enable требуют последовательных
+отдельных approvals. Успех одного gate не запускает следующий.
+
+Текущий design/status gate не создавал package, manifest, outcome, config,
+QR, peer или secret; не выполнял preflight, SSH, issuance, deploy, service,
+firewall, runtime, client или live mutation; push отсутствовал. Старые Phase
+13 packaging trees, `docs/CLIENT_RELEASE_MONITOR_BASELINE.ru.md` и unrelated
+untracked files не изменялись. Admin runtime alerts через Telegram bot
+сохранены как отложенный monitoring backlog.
+
+```text
+TASK_STATUS=PHASE14_DESIGN_AND_PLANS_READY_IMPLEMENTATION_NOT_AUTHORIZED
+TASK_PLAN_BY_CRITICALITY=CRITICAL_DUAL_PROTOCOL_APPLICATION_TDD_PENDING_OUT_OF_CURRENT_SCOPE;CRITICAL_PACKAGE_PREFLIGHT_TOOLING_PENDING_AFTER_APPLICATION_OUT_OF_CURRENT_SCOPE;CRITICAL_PACKAGE_MATERIALIZATION_PENDING_SEPARATE_GATE;CRITICAL_APPLICATION_AND_RUNTIME_PREFLIGHT_PENDING_SEPARATE_GATES;CRITICAL_ADMIN_PILOT_ACCEPTANCE_AND_ENABLE_PENDING_SEPARATE_GATES;IMPORTANT_MONITORING_ALERTS_DEFERRED
+CURRENT_MODEL=GPT-5.6_SOL_HIGH
+CURRENT_EFFORT=HIGH
+RECOMMENDED_MODEL_NEXT=GPT-5.6_SOL_HIGH
+RECOMMENDED_EFFORT_NEXT=HIGH
+MODEL_RECOMMENDATION_REASON=DUAL_PROTOCOL_APPLICATION_TDD_HAS_CROSS_CUTTING_SCHEMA_ISSUANCE_SECRET_AND_AWG2_NON_INTERFERENCE_RISK
+```
+
+# Предыдущий обязательный приоритет 2026-08-09: Phase 13 закрыта, USA_REINSTALL_READY подтверждён
 
 Phase 13 exit condition выполнено: private Telegram bot runtime, admin IDs и
 bot media/source перенесены на Spain; Spain web подтверждён healthy и остаётся
