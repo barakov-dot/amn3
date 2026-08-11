@@ -11,9 +11,9 @@ mutation, production issuance, or live-approval artifact.
 ## Source identity
 
 - Approved source base: `4547af1b23e4774822119f98004568c6eb039303`
-- Verified application HEAD: `1cb3b058b535391ef8eed195d4c481055cdca58b`
+- Verified application HEAD: `36981d7afc1fcd9eb17386c62f70adf175d76263`
 - Source branch: `codex/phase14-dual-protocol-application-local`
-- Source-fix scoped re-review: `ALL ADDRESSED`; no findings
+- Final whole-branch and scoped re-reviews: `ALL ADDRESSED`; no open findings
 
 ## Application commit ledger
 
@@ -52,39 +52,43 @@ mutation, production issuance, or live-approval artifact.
 
 - `1cb3b058b535391ef8eed195d4c481055cdca58b` — `test: remove raw-shaped dual protocol fixtures`
 
+### Task 8 consolidated issuance/revocation safety
+
+- `171904889630b2ec8d459ad067202d442aaa7b38` — `fix: serialize dual protocol issuance and revocation`
+- `348a026b0fd6529847877f4643f4f1a39bf7a5aa` — `fix: harden issuance migration and recovery`
+- `324c8190132aa8c71c5e03e0b4c4b50c65a36a72` — `fix: close phase14 whole branch findings`
+- `ab1245e2180f40acdc90f1e149e795426be57aa8` — `fix: persist issuance recovery before remote effects`
+- `36981d7afc1fcd9eb17386c62f70adf175d76263` — `fix: make admin issuance finalization atomic`
+
 ## Final verification evidence
 
-Targeted corrected bot fixtures:
+Fresh post-review Phase 14 integrated focused suite:
 
 ```text
-99 passed in 20.20s
+345 passed, 1 warning in 84.46s
 ```
 
-Exact Task 7 integrated focused suite:
+Fresh post-review full source suite:
 
 ```text
-235 passed, 1 warning in 25.14s
-```
-
-Completed full source suite:
-
-```text
-1285 passed, 1 skipped, 1 warning in 183.66s (0:03:03)
+1321 passed, 1 skipped, 1 warning in 197.64s
 ```
 
 The known warning is the existing Starlette `httpx` test-client deprecation.
 
-An earlier pre-fix full-suite invocation was terminated by the execution
-harness at its 120-second timeout with exit 124 before pytest produced a
-summary. That invocation was partial, reported no test failure, and is not
-used as acceptance evidence. The completed post-fix full-suite result above
-is the final evidence.
+The fresh post-review checks ran at exact source HEAD
+`36981d7afc1fcd9eb17386c62f70adf175d76263`. Source status, index and range
+diff checks were clean. The complete Phase 14 range from the approved base
+contains 39 files, 9,936 additions and 57 deletions. Final whole-branch and
+scoped reviews found no remaining Critical, Important or Minor findings.
 
-Diff, source status, scoped source-fix re-review, and manual secret/scope
-review were clean. No raw configuration, private key, PSK, QR payload, or
-secret-bearing import material is recorded in this receipt. No AWG2 golden or
-runtime artifact, monitoring code, package/preflight/live script, Phase 13
-tree, or production bootstrap was changed by the scoped source fix.
+Manual secret/scope review found no PEM/private-key material, WireGuard key
+assignment or production-shaped import URI in added lines. Two generic token
+matches were short synthetic `token-N` values in bot tests. No raw
+configuration, private key, PSK, QR payload or secret-bearing import material
+is recorded in this receipt. No AWG2 golden or runtime artifact, monitoring
+code, package/preflight/live script, Phase 13 tree or production bootstrap was
+changed by the final scoped fixes.
 
 ## Task 5 production bootstrap deferral
 
