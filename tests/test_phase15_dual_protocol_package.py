@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import base64
+
 import hashlib
 import importlib.util
 import json
@@ -404,6 +406,54 @@ def test_verifier_rejects_symlinked_package_ancestor(tmp_path: Path) -> None:
             "app/sensitive_jinja_attribute.html",
             b'<input name="api_token" value="{{ x }}">\n',
         ),
+        (
+            "app/invalid_python_secret.py",
+            b"API_TOKEN = 'public-test!punctuation?1234'\nif (\n",
+        ),
+        (
+            "app/invalid_utf8_secret.py",
+            b"API_TOKEN = 'public-test!punctuation?1234'\n# \xff\n",
+        ),
+        (
+            "app/invalid_utf8_secret.html",
+            b'<input name="api_token" value="public-test!punctuation?1234">\xff\n',
+        ),
+        (
+            "app/invalid_utf8_secret.tpl",
+            b"api_token=public-test!punctuation?1234\xff\n",
+        ),
+        (
+            "app/invalid_utf8_secret.css",
+            b":root { --api-token: public-test!punctuation?1234; }\xff\n",
+        ),
+        (
+            "app/multiline_sensitive_assignment.tpl",
+            b"api_token=\n    public-test!punctuation?1234\n",
+        ),
+        (
+            "app/sensitive_jinja_set.tpl",
+            b"{% set api_token = 'public-test!punctuation?1234' %}\n",
+        ),
+        (
+            "app/sensitive_inline_script.html",
+            b"<script>const api_token = 'public-test!punctuation?1234';</script>\n",
+        ),
+        (
+            "app/sensitive_custom_property.css",
+            b":root { --api-token: public-test!punctuation?1234; }\n",
+        ),
+        (
+            "app/composite_api_token.py",
+            b"API_TOKEN_VALUE = 'public-test!punctuation?1234'\n",
+        ),
+        (
+            "app/composite_jwt_secret.py",
+            b"JWT_SECRET_VALUE = 'public-test!punctuation?1234'\n",
+        ),
+        (
+            "app/composite_authorization.py",
+            b"AUTHORIZATION_HEADER = 'public-test!punctuation?1234'\n",
+        ),
         ("app/state.py", b"SQLite format 3\x00synthetic"),
         ("app/token.py", b"TOKEN = '123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi'\n"),
         ("app/peers/device.json", b"{}\n"),
@@ -426,6 +476,53 @@ def test_materializer_rejects_forbidden_secret_qr_peer_config_or_cache_material(
 
     with pytest.raises(package.PackageContractError, match="forbidden"):
         package.materialize_package(source_root=repo, source_head=head, package_id=PACKAGE_ID, output_root=tmp_path / "forbidden", tooling_root=repo)
+
+
+def test_materializer_rejects_excessively_nested_structural_jwt(tmp_path: Path) -> None:
+    package = load_package_module()
+    repo, _head = make_repo(tmp_path)
+    nested_header_json = (
+        b'{"alg":' + (b"[" * 1100) + b"0" + (b"]" * 1100) + b"}"
+    )
+    header = base64.urlsafe_b64encode(nested_header_json).rstrip(b"=")
+    payload = base64.urlsafe_b64encode(b'{"sub":"subject"}').rstrip(b"=")
+    target = repo / "app" / "excessively_nested_jwt.py"
+    target.write_bytes(b"MESSAGE = '" + header + b"." + payload + b".x'\n")
+    run_git(repo, "add", "app/excessively_nested_jwt.py")
+    run_git(repo, "commit", "-m", "add excessively nested jwt")
+    head = run_git(repo, "rev-parse", "HEAD").decode("ascii").strip()
+
+    with pytest.raises(package.PackageContractError):
+        package.materialize_package(
+            source_root=repo,
+            source_head=head,
+            package_id=PACKAGE_ID,
+            output_root=tmp_path / "deep-jwt",
+            tooling_root=repo,
+        )
+
+
+def test_materializer_rejects_excessively_deep_static_sensitive_expression(
+    tmp_path: Path,
+) -> None:
+    package = load_package_module()
+    repo, _head = make_repo(tmp_path)
+    target = repo / "app" / "excessively_deep_token.py"
+    target.write_bytes(
+        b"API_TOKEN = " + b" + ".join([b"'x'"] * 1500) + b"\n"
+    )
+    run_git(repo, "add", "app/excessively_deep_token.py")
+    run_git(repo, "commit", "-m", "add excessively deep token expression")
+    head = run_git(repo, "rev-parse", "HEAD").decode("ascii").strip()
+
+    with pytest.raises(package.PackageContractError):
+        package.materialize_package(
+            source_root=repo,
+            source_head=head,
+            package_id=PACKAGE_ID,
+            output_root=tmp_path / "deep-static-expression",
+            tooling_root=repo,
+        )
 
 
 def test_materializer_allows_only_necessary_non_concrete_jinja_secret_placeholders(tmp_path: Path) -> None:
@@ -468,6 +565,12 @@ def test_materializer_allows_ordinary_non_secret_code_and_jinja(tmp_path: Path) 
             b'<span data-display-name="{{ user.display_name }}">public-label!123456789</span>\n'
         ),
         "app/ordinary_template.tpl": b"display_label={{ user.display_name }}\n",
+        "app/ordinary_inline_script.html": (
+            b'<script>const display_label = "{{ user.display_name }}";</script>\n'
+        ),
+        "app/ordinary_style.css": (
+            b":root { --display-label: {{ theme.display_label }}; }\n"
+        ),
     }
     for relative, body in ordinary_files.items():
         target = repo.joinpath(*relative.split("/"))

@@ -145,6 +145,23 @@ TEXT_ASSIGNMENT_RE = re.compile(
     r"(?m)^\s*(?P<target>[A-Za-z_][A-Za-z0-9_.-]*)"
     r"(?:\s*:\s*[^=\r\n]+)?\s*=\s*(?P<value>[^\r\n]+?)\s*$"
 )
+JINJA_SET_ASSIGNMENT_RE = re.compile(
+    r"(?is)\{%\s*set\s+(?P<target>[A-Za-z_][A-Za-z0-9_.-]*)"
+    r"\s*=\s*(?P<value>.*?)\s*%\}"
+)
+INLINE_SCRIPT_ASSIGNMENT_RE = re.compile(
+    r"(?im)\b(?:const|let|var)\s+"
+    r"(?P<target>[A-Za-z_$][A-Za-z0-9_$.-]*)"
+    r"\s*=\s*(?P<value>[^;\r\n]+?)\s*;"
+)
+CSS_CUSTOM_PROPERTY_RE = re.compile(
+    r"(?im)(?P<target>--[A-Za-z_][A-Za-z0-9_-]*)"
+    r"\s*:\s*(?P<value>[^;\r\n}]+?)\s*;"
+)
+TEXT_SOURCE_SUFFIXES = {".css", ".html", ".py", ".tpl"}
+MAX_STATIC_EXPRESSION_DEPTH = 64
+MAX_STATIC_EXPRESSION_NODES = 512
+MAX_STATIC_VALUE_BYTES = 8192
 ENTRY_KEYS = {"gate", "mode", "path", "role", "rollback_role", "secret_classification", "sha256", "size"}
 ROLES = {spec[0] for spec in TOOLING_SPECS.values()} | {
     "application_snapshot", "callback_bootstrap", "dependency_lock_tool",
@@ -384,7 +401,10 @@ def _is_sensitive_identifier(value: str) -> bool:
     if not normalized:
         return False
     parts = normalized.split("_")
-    if parts[-1] in {"authorization", "credential", "password", "secret", "token"}:
+    if any(
+        part in {"authorization", "credential", "password", "secret", "token"}
+        for part in parts
+    ):
         return True
     joined = "_".join(parts)
     return any(
@@ -424,19 +444,62 @@ def _reject_sensitive_value(relative: str, value: str | bytes) -> None:
         raise PackageContractError(f"forbidden sensitive assignment: {relative}")
 
 
-def _static_python_value(node: ast.AST) -> str | bytes | None:
+class _StaticPythonValueLimit(Exception):
+    pass
+
+
+def _static_value_size(value: str | bytes) -> int:
+    if isinstance(value, bytes):
+        return len(value)
+    return len(value.encode("utf-8"))
+
+
+def _static_python_value(
+    node: ast.AST,
+    *,
+    depth: int = 0,
+    budget: list[int] | None = None,
+) -> str | bytes | None:
+    if budget is None:
+        budget = [MAX_STATIC_EXPRESSION_NODES]
+    if depth > MAX_STATIC_EXPRESSION_DEPTH or budget[0] <= 0:
+        raise _StaticPythonValueLimit
+    budget[0] -= 1
     if isinstance(node, ast.Constant) and isinstance(node.value, (str, bytes)):
+        if _static_value_size(node.value) > MAX_STATIC_VALUE_BYTES:
+            raise _StaticPythonValueLimit
         return node.value
     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
-        left = _static_python_value(node.left)
-        right = _static_python_value(node.right)
+        left = _static_python_value(
+            node.left,
+            depth=depth + 1,
+            budget=budget,
+        )
+        right = _static_python_value(
+            node.right,
+            depth=depth + 1,
+            budget=budget,
+        )
         if left is not None and right is not None and type(left) is type(right):
-            return left + right
-    if isinstance(node, ast.JoinedStr) and all(
-        isinstance(value, ast.Constant) and isinstance(value.value, str)
-        for value in node.values
-    ):
-        return "".join(value.value for value in node.values)
+            result = left + right
+            if _static_value_size(result) > MAX_STATIC_VALUE_BYTES:
+                raise _StaticPythonValueLimit
+            return result
+    if isinstance(node, ast.JoinedStr):
+        pieces: list[str] = []
+        for value_node in node.values:
+            value = _static_python_value(
+                value_node,
+                depth=depth + 1,
+                budget=budget,
+            )
+            if not isinstance(value, str):
+                return None
+            pieces.append(value)
+        result = "".join(pieces)
+        if _static_value_size(result) > MAX_STATIC_VALUE_BYTES:
+            raise _StaticPythonValueLimit
+        return result
     return None
 
 
@@ -455,41 +518,43 @@ def _python_target_identifiers(node: ast.AST) -> list[str]:
 def _reject_python_sensitive_assignments(relative: str, text: str) -> None:
     try:
         tree = ast.parse(text)
-    except SyntaxError:
-        return
-    for node in ast.walk(tree):
-        targets: list[ast.AST] = []
-        value_node: ast.AST | None = None
-        if isinstance(node, ast.Assign):
-            targets = list(node.targets)
-            value_node = node.value
-        elif isinstance(node, ast.AnnAssign):
-            targets = [node.target]
-            value_node = node.value
-        if value_node is not None and any(
-            _is_sensitive_identifier(name)
-            for target in targets
-            for name in _python_target_identifiers(target)
-        ):
-            value = _static_python_value(value_node)
-            if value is not None:
-                _reject_sensitive_value(relative, value)
-        if isinstance(node, ast.Dict):
-            for key, value_node in zip(node.keys, node.values, strict=True):
-                if (
-                    isinstance(key, ast.Constant)
-                    and isinstance(key.value, str)
-                    and _is_sensitive_identifier(key.value)
-                ):
-                    value = _static_python_value(value_node)
-                    if value is not None:
-                        _reject_sensitive_value(relative, value)
-        if isinstance(node, ast.Call):
-            for keyword in node.keywords:
-                if keyword.arg and _is_sensitive_identifier(keyword.arg):
-                    value = _static_python_value(keyword.value)
-                    if value is not None:
-                        _reject_sensitive_value(relative, value)
+        for node in ast.walk(tree):
+            targets: list[ast.AST] = []
+            value_node: ast.AST | None = None
+            if isinstance(node, ast.Assign):
+                targets = list(node.targets)
+                value_node = node.value
+            elif isinstance(node, ast.AnnAssign):
+                targets = [node.target]
+                value_node = node.value
+            if value_node is not None and any(
+                _is_sensitive_identifier(name)
+                for target in targets
+                for name in _python_target_identifiers(target)
+            ):
+                value = _static_python_value(value_node)
+                if value is not None:
+                    _reject_sensitive_value(relative, value)
+            if isinstance(node, ast.Dict):
+                for key, value_node in zip(node.keys, node.values, strict=True):
+                    if (
+                        isinstance(key, ast.Constant)
+                        and isinstance(key.value, str)
+                        and _is_sensitive_identifier(key.value)
+                    ):
+                        value = _static_python_value(value_node)
+                        if value is not None:
+                            _reject_sensitive_value(relative, value)
+            if isinstance(node, ast.Call):
+                for keyword in node.keywords:
+                    if keyword.arg and _is_sensitive_identifier(keyword.arg):
+                        value = _static_python_value(keyword.value)
+                        if value is not None:
+                            _reject_sensitive_value(relative, value)
+    except (SyntaxError, RecursionError, _StaticPythonValueLimit) as exc:
+        raise PackageContractError(
+            f"forbidden unscannable Python source: {relative}"
+        ) from exc
 
 
 class _SensitiveHTMLParser(HTMLParser):
@@ -515,11 +580,15 @@ class _SensitiveHTMLParser(HTMLParser):
 
 
 def _reject_contextual_sensitive_values(relative: str, body: bytes) -> None:
+    suffix = PurePosixPath(relative).suffix.casefold()
     try:
         text = body.decode("utf-8")
-    except UnicodeDecodeError:
+    except UnicodeDecodeError as exc:
+        if suffix in TEXT_SOURCE_SUFFIXES:
+            raise PackageContractError(
+                f"forbidden undecodable source text: {relative}"
+            ) from exc
         return
-    suffix = PurePosixPath(relative).suffix.casefold()
     if suffix == ".py":
         _reject_python_sensitive_assignments(relative, text)
     if suffix == ".html":
@@ -528,6 +597,16 @@ def _reject_contextual_sensitive_values(relative: str, body: bytes) -> None:
         parser.close()
     if suffix in {".html", ".tpl"}:
         for assignment in TEXT_ASSIGNMENT_RE.finditer(text):
+            if _is_sensitive_identifier(assignment.group("target")):
+                _reject_sensitive_value(relative, assignment.group("value"))
+        for assignment in JINJA_SET_ASSIGNMENT_RE.finditer(text):
+            if _is_sensitive_identifier(assignment.group("target")):
+                _reject_sensitive_value(relative, assignment.group("value"))
+        for assignment in INLINE_SCRIPT_ASSIGNMENT_RE.finditer(text):
+            if _is_sensitive_identifier(assignment.group("target")):
+                _reject_sensitive_value(relative, assignment.group("value"))
+    if suffix == ".css":
+        for assignment in CSS_CUSTOM_PROPERTY_RE.finditer(text):
             if _is_sensitive_identifier(assignment.group("target")):
                 _reject_sensitive_value(relative, assignment.group("value"))
 
