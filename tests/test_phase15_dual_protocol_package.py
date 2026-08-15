@@ -378,6 +378,32 @@ def test_verifier_rejects_symlinked_package_ancestor(tmp_path: Path) -> None:
         ("app/bearer.py", b"AUTHORIZATION = 'Bearer live_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345'\n"),
         ("app/api_key.py", b"API_TOKEN = 'live_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345'\n"),
         ("app/base64_key.py", b"PRIVATE_KEY = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='\n"),
+        ("app/short_bearer.py", b"MESSAGE = 'Bearer x'\n"),
+        (
+            "app/structural_jwt.py",
+            b"MESSAGE = 'IHsiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiJzdWJqZWN0In0.c2lnbmF0dXJl'\n",
+        ),
+        ("app/aws_key.py", b"AWS_ACCESS_KEY_ID = 'public-test!punctuation?1234'\n"),
+        ("app/bot_token.py", b"BOT_TOKEN = 'public-test!punctuation?1234'\n"),
+        ("app/dotted_token.py", b"self.api_token = 'public-test!punctuation?1234'\n"),
+        ("app/dict_token.py", b"payload = {\"api_token\": \"public-test!punctuation?1234\"}\n"),
+        ("app/typed_token.py", b"api_token: str = 'public-test!punctuation?1234'\n"),
+        (
+            "app/concatenated_token.py",
+            b"API_TOKEN = (\n    'public-test!'\n    'punctuation?1234'\n)\n",
+        ),
+        (
+            "app/sensitive_attribute.html",
+            b'<input name="api_token" value="public-test!punctuation?1234">\n',
+        ),
+        ("app/sensitive_value.tpl", b"api_token=public-test!punctuation?1234\n"),
+        ("app/unknown_sensitive_jinja.tpl", b"api_token={{ x }}\n"),
+        ("app/prefixed_allowed_jinja.tpl", b"api_token=pre{{ issued_raw_token }}\n"),
+        ("app/suffixed_allowed_jinja.tpl", b"api_token={{ issued_raw_token }}post\n"),
+        (
+            "app/sensitive_jinja_attribute.html",
+            b'<input name="api_token" value="{{ x }}">\n',
+        ),
         ("app/state.py", b"SQLite format 3\x00synthetic"),
         ("app/token.py", b"TOKEN = '123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi'\n"),
         ("app/peers/device.json", b"{}\n"),
@@ -422,6 +448,40 @@ def test_materializer_allows_only_necessary_non_concrete_jinja_secret_placeholde
         source_head=head,
         package_id=PACKAGE_ID,
         output_root=tmp_path / "placeholders",
+        tooling_root=repo,
+    )
+    assert receipt.file_count > 0
+
+
+def test_materializer_allows_ordinary_non_secret_code_and_jinja(tmp_path: Path) -> None:
+    package = load_package_module()
+    repo, _head = make_repo(tmp_path)
+    ordinary_files = {
+        "app/ordinary_code.py": (
+            b"PUBLIC_ASSET_DIGEST = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$'\n"
+            b"BOT_TOKEN = os.environ['BOT_TOKEN']\n"
+            b"api_token: str | None = None\n"
+            b"self.api_token = token_provider()\n"
+            b"payload = {'api_token': token_provider()}\n"
+        ),
+        "app/ordinary_template.html": (
+            b'<span data-display-name="{{ user.display_name }}">public-label!123456789</span>\n'
+        ),
+        "app/ordinary_template.tpl": b"display_label={{ user.display_name }}\n",
+    }
+    for relative, body in ordinary_files.items():
+        target = repo.joinpath(*relative.split("/"))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(body)
+        run_git(repo, "add", relative)
+    run_git(repo, "commit", "-m", "add ordinary non-secret source")
+    head = run_git(repo, "rev-parse", "HEAD").decode("ascii").strip()
+
+    receipt = package.materialize_package(
+        source_root=repo,
+        source_head=head,
+        package_id=PACKAGE_ID,
+        output_root=tmp_path / "ordinary",
         tooling_root=repo,
     )
     assert receipt.file_count > 0

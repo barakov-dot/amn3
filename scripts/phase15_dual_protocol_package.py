@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import argparse
+import ast
+import base64
+import binascii
 import hashlib
+from html.parser import HTMLParser
 import io
 import json
 import os
@@ -121,13 +125,7 @@ PRIVATE_MATERIAL_PATTERNS = (
     re.compile(rb"-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----"),
     re.compile(rb"(?im)^\s*(?:PrivateKey|PresharedKey)\s*=\s*[A-Za-z0-9+/]{42,44}={0,2}\s*$"),
     re.compile(rb"\b[0-9]{6,12}:[A-Za-z0-9_-]{30,}\b"),
-    re.compile(rb"\beyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b"),
-    re.compile(rb"(?i)\bBearer\s+[A-Za-z0-9._~+/=-]{16,}"),
-)
-SENSITIVE_ASSIGNMENT_RE = re.compile(
-    rb"(?im)^\s*(?:api[_-]?key|api[_-]?token|access[_-]?token|refresh[_-]?token|token|"
-    rb"authorization|private[_-]?key|preshared[_-]?key|password|secret)\s*[:=]\s*"
-    rb"(?P<quote>['\"]?)(?P<value>[A-Za-z0-9_./+={}\- ]{16,})(?P=quote)\s*,?\s*$"
+    re.compile(rb"(?i)\bBearer[ \t]+(?=[^\s'\"<>])"),
 )
 APPROVED_TEMPLATE_PLACEHOLDERS = {
     b"{{ issued_raw_token }}",
@@ -135,6 +133,18 @@ APPROVED_TEMPLATE_PLACEHOLDERS = {
     b"{{ revealed_secrets.private_key }}",
     b"{{ revealed_secrets.preshared_key }}",
 }
+APPROVED_TEMPLATE_PLACEHOLDER_TEXT = {
+    placeholder.decode("ascii") for placeholder in APPROVED_TEMPLATE_PLACEHOLDERS
+}
+JWT_CANDIDATE_RE = re.compile(
+    rb"(?<![A-Za-z0-9_-])([A-Za-z0-9_-]{1,8192})\."
+    rb"([A-Za-z0-9_-]{1,8192})\.([A-Za-z0-9_-]{1,8192})(?![A-Za-z0-9_-])"
+)
+JINJA_EXPRESSION_RE = re.compile(r"\{\{[^{}]*\}\}")
+TEXT_ASSIGNMENT_RE = re.compile(
+    r"(?m)^\s*(?P<target>[A-Za-z_][A-Za-z0-9_.-]*)"
+    r"(?:\s*:\s*[^=\r\n]+)?\s*=\s*(?P<value>[^\r\n]+?)\s*$"
+)
 ENTRY_KEYS = {"gate", "mode", "path", "role", "rollback_role", "secret_classification", "sha256", "size"}
 ROLES = {spec[0] for spec in TOOLING_SPECS.values()} | {
     "application_snapshot", "callback_bootstrap", "dependency_lock_tool",
@@ -349,6 +359,179 @@ def _source_spec(relative: str) -> tuple[str, str, str] | None:
     return None
 
 
+def _is_structural_jwt(body: bytes) -> bool:
+    for candidate in JWT_CANDIDATE_RE.finditer(body):
+        decoded: list[object] = []
+        for segment in candidate.groups()[:2]:
+            padded = segment + b"=" * (-len(segment) % 4)
+            try:
+                raw = base64.b64decode(padded, altchars=b"-_", validate=True)
+                decoded.append(json.loads(raw.decode("utf-8")))
+            except (binascii.Error, UnicodeDecodeError, json.JSONDecodeError):
+                break
+        if len(decoded) == 2 and all(isinstance(value, dict) for value in decoded):
+            return True
+    return False
+
+
+def _normalize_identifier(value: str) -> str:
+    separated = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", value)
+    return re.sub(r"[^a-z0-9]+", "_", separated.casefold()).strip("_")
+
+
+def _is_sensitive_identifier(value: str) -> bool:
+    normalized = _normalize_identifier(value)
+    if not normalized:
+        return False
+    parts = normalized.split("_")
+    if parts[-1] in {"authorization", "credential", "password", "secret", "token"}:
+        return True
+    joined = "_".join(parts)
+    return any(
+        marker in joined
+        for marker in (
+            "access_key", "api_key", "private_key", "preshared_key", "secret_key",
+        )
+    ) or joined in {"apikey", "privatekey", "presharedkey"}
+
+
+def _strip_scalar_quotes(value: str) -> str:
+    scalar = value.strip()
+    if len(scalar) >= 2 and scalar[0] == scalar[-1] and scalar[0] in {"'", '"'}:
+        return scalar[1:-1].strip()
+    return scalar
+
+
+def _reject_sensitive_value(relative: str, value: str | bytes) -> None:
+    if isinstance(value, bytes):
+        try:
+            scalar = value.decode("utf-8")
+        except UnicodeDecodeError:
+            if len(value) >= 16:
+                raise PackageContractError(f"forbidden sensitive assignment: {relative}")
+            return
+    else:
+        scalar = value
+    scalar = _strip_scalar_quotes(scalar)
+    expressions = list(JINJA_EXPRESSION_RE.finditer(scalar))
+    if expressions:
+        if len(expressions) != 1 or expressions[0].span() != (0, len(scalar)):
+            raise PackageContractError(f"forbidden composite sensitive template: {relative}")
+        if expressions[0].group(0) not in APPROVED_TEMPLATE_PLACEHOLDER_TEXT:
+            raise PackageContractError(f"forbidden sensitive template: {relative}")
+        return
+    if len(scalar) >= 16:
+        raise PackageContractError(f"forbidden sensitive assignment: {relative}")
+
+
+def _static_python_value(node: ast.AST) -> str | bytes | None:
+    if isinstance(node, ast.Constant) and isinstance(node.value, (str, bytes)):
+        return node.value
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+        left = _static_python_value(node.left)
+        right = _static_python_value(node.right)
+        if left is not None and right is not None and type(left) is type(right):
+            return left + right
+    if isinstance(node, ast.JoinedStr) and all(
+        isinstance(value, ast.Constant) and isinstance(value.value, str)
+        for value in node.values
+    ):
+        return "".join(value.value for value in node.values)
+    return None
+
+
+def _python_target_identifiers(node: ast.AST) -> list[str]:
+    if isinstance(node, ast.Name):
+        return [node.id]
+    if isinstance(node, ast.Attribute):
+        return [node.attr]
+    if isinstance(node, ast.Subscript) and isinstance(node.slice, ast.Constant) and isinstance(node.slice.value, str):
+        return [node.slice.value]
+    if isinstance(node, (ast.List, ast.Tuple)):
+        return [name for item in node.elts for name in _python_target_identifiers(item)]
+    return []
+
+
+def _reject_python_sensitive_assignments(relative: str, text: str) -> None:
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return
+    for node in ast.walk(tree):
+        targets: list[ast.AST] = []
+        value_node: ast.AST | None = None
+        if isinstance(node, ast.Assign):
+            targets = list(node.targets)
+            value_node = node.value
+        elif isinstance(node, ast.AnnAssign):
+            targets = [node.target]
+            value_node = node.value
+        if value_node is not None and any(
+            _is_sensitive_identifier(name)
+            for target in targets
+            for name in _python_target_identifiers(target)
+        ):
+            value = _static_python_value(value_node)
+            if value is not None:
+                _reject_sensitive_value(relative, value)
+        if isinstance(node, ast.Dict):
+            for key, value_node in zip(node.keys, node.values, strict=True):
+                if (
+                    isinstance(key, ast.Constant)
+                    and isinstance(key.value, str)
+                    and _is_sensitive_identifier(key.value)
+                ):
+                    value = _static_python_value(value_node)
+                    if value is not None:
+                        _reject_sensitive_value(relative, value)
+        if isinstance(node, ast.Call):
+            for keyword in node.keywords:
+                if keyword.arg and _is_sensitive_identifier(keyword.arg):
+                    value = _static_python_value(keyword.value)
+                    if value is not None:
+                        _reject_sensitive_value(relative, value)
+
+
+class _SensitiveHTMLParser(HTMLParser):
+    def __init__(self, relative: str) -> None:
+        super().__init__(convert_charrefs=True)
+        self.relative = relative
+
+    def handle_starttag(self, _tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = {name.casefold(): value for name, value in attrs}
+        sensitive_context = any(
+            value is not None and _is_sensitive_identifier(value)
+            for name, value in attrs
+            if name.casefold() in {"id", "name"}
+        )
+        if sensitive_context:
+            for name in ("content", "value"):
+                value = values.get(name)
+                if value is not None:
+                    _reject_sensitive_value(self.relative, value)
+        for name, value in attrs:
+            if value is not None and _is_sensitive_identifier(name):
+                _reject_sensitive_value(self.relative, value)
+
+
+def _reject_contextual_sensitive_values(relative: str, body: bytes) -> None:
+    try:
+        text = body.decode("utf-8")
+    except UnicodeDecodeError:
+        return
+    suffix = PurePosixPath(relative).suffix.casefold()
+    if suffix == ".py":
+        _reject_python_sensitive_assignments(relative, text)
+    if suffix == ".html":
+        parser = _SensitiveHTMLParser(relative)
+        parser.feed(text)
+        parser.close()
+    if suffix in {".html", ".tpl"}:
+        for assignment in TEXT_ASSIGNMENT_RE.finditer(text):
+            if _is_sensitive_identifier(assignment.group("target")):
+                _reject_sensitive_value(relative, assignment.group("value"))
+
+
 def _reject_forbidden_source(relative: str, body: bytes) -> None:
     path = PurePosixPath(relative)
     folded_parts = {part.casefold() for part in path.parts}
@@ -362,13 +545,13 @@ def _reject_forbidden_source(relative: str, body: bytes) -> None:
         expected_brand = APPROVED_BRAND_PNGS.get(relative)
         if expected_brand is None or (len(body), _sha256(body)) != expected_brand:
             raise PackageContractError(f"forbidden source material: {relative}")
-    if body.startswith(b"SQLite format 3\x00") or any(pattern.search(body) for pattern in PRIVATE_MATERIAL_PATTERNS):
+    if (
+        body.startswith(b"SQLite format 3\x00")
+        or any(pattern.search(body) for pattern in PRIVATE_MATERIAL_PATTERNS)
+        or _is_structural_jwt(body)
+    ):
         raise PackageContractError(f"forbidden raw secret material: {relative}")
-    scan_body = body
-    for placeholder in APPROVED_TEMPLATE_PLACEHOLDERS:
-        scan_body = scan_body.replace(placeholder, b"")
-    if SENSITIVE_ASSIGNMENT_RE.search(scan_body):
-        raise PackageContractError(f"forbidden sensitive assignment: {relative}")
+    _reject_contextual_sensitive_values(relative, body)
 
 
 def _source_payloads(root: Path, head: str) -> dict[str, tuple[bytes, str, str, str, str]]:
