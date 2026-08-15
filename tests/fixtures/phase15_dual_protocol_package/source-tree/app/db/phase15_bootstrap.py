@@ -1,0 +1,1 @@
+SCHEMA = "synthetic-additive-migration"

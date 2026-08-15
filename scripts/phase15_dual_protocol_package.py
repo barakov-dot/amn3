@@ -1,0 +1,456 @@
+from __future__ import annotations
+
+import argparse
+import hashlib
+import io
+import json
+import os
+from pathlib import Path, PurePosixPath
+import re
+import shutil
+import stat
+import subprocess
+import tarfile
+import tempfile
+from typing import NamedTuple
+
+
+class PackageContractError(ValueError):
+    pass
+
+
+class PackageReceipt(NamedTuple):
+    root: Path
+    manifest_path: Path
+    package_identity_sha256: str
+    file_count: int
+
+
+ROOT = Path(__file__).resolve().parents[1]
+PACKAGE_ID = "phase15-dual-protocol-bootstrap-20260811-001"
+SOURCE_BRANCH = "codex/phase15-local-package-bootstrap-readiness"
+MANIFEST_SCHEMA = "amn2.phase15.package-manifest.v1"
+PHASE14_RECEIPT_PATH = "research/amn2/phase14-dual-protocol-application-readiness-receipt.md"
+PHASE14_RECEIPT_COMMIT = "4e1052c079e1e25031a6c80f4dae1763e457ca48"
+PHASE14_RECEIPT_SHA256 = "d33e69b53c7397c567b16c4f1caea12af97969d9436d3e95e6038148054aa982"
+PHASE15_SOURCE_RECEIPT_PATH = "research/amn2/phase15-source-readiness-receipt.md"
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+HEAD_RE = re.compile(r"^[0-9a-f]{40}$")
+
+RESOURCE_PLAN = {
+    "awg2_resources_unchanged": True,
+    "future_only": True,
+    "package_id": PACKAGE_ID,
+    "resources": {
+        "bridge": "amn2sp3br0",
+        "config_path": "/var/lib/amn2-spain/awg3/awg3.conf",
+        "container": "amn2-spain-awg3",
+        "container_cidr": "172.29.252.0/28",
+        "interface": "awg3",
+        "server_address": "10.212.13.1/24",
+        "service": "amn2-spain-awg3.service",
+        "state_root": "/var/lib/amn2-spain/awg3",
+        "udp_port": 30002,
+        "vpn_cidr": "10.212.13.0/24",
+    },
+    "schema": "amn2.phase15.resource-plan.v1",
+}
+
+SOURCE_ARCHIVE_PATHS = (
+    "README.md",
+    "app",
+    "requirements/phase15-runtime-py312.lock",
+    "requirements/phase15-test-py312.lock",
+    "scripts/phase15_dependency_lock.py",
+)
+REQUIRED_SOURCE_PATHS = {
+    "app/main.py",
+    "app/db/phase15_bootstrap.py",
+    "app/services/phase15_bootstrap.py",
+    "app/services/telegram_callback_state.py",
+    "requirements/phase15-runtime-py312.lock",
+    "requirements/phase15-test-py312.lock",
+    "scripts/phase15_dependency_lock.py",
+}
+TOOLING_SPECS = {
+    "docs/superpowers/plans/2026-08-11-amn2-phase15-local-package-bootstrap-readiness.md": ("operator_documentation", "OPERATOR", "operator"),
+    "docs/superpowers/specs/2026-08-11-amn2-phase15-local-package-bootstrap-readiness-design.ru.md": ("operator_documentation", "OPERATOR", "operator"),
+    "packaging/phase15-dual-protocol-bootstrap-contract/failure-outcome.schema.json": ("failure_schema", "LOCAL_VERIFY", "preflight"),
+    "packaging/phase15-dual-protocol-bootstrap-contract/package-manifest.schema.json": ("contract_schema", "LOCAL_VERIFY", "none"),
+    "packaging/phase15-dual-protocol-bootstrap-contract/preflight-evidence.schema.json": ("preflight_evidence_schema", "LOCAL_VERIFY", "preflight"),
+    "packaging/phase15-dual-protocol-bootstrap-contract/resource-plan.json": ("resource_plan", "LOCAL_VERIFY", "awg3-runtime"),
+    PHASE15_SOURCE_RECEIPT_PATH: ("phase15_source_receipt", "LOCAL_VERIFY", "operator"),
+    "scripts/phase15_dual_protocol_package.py": ("package_verifier", "LOCAL_VERIFY", "none"),
+    "scripts/phase15_preflight_contract.py": ("preflight_contract", "PREFLIGHT", "preflight"),
+    "scripts/vps/phase15_application_stage_remote.sh": ("stage_envelope", "APPLICATION_STAGE", "application"),
+    "scripts/vps/phase15_awg3_runtime_stage_remote.sh": ("stage_envelope", "AWG3_RUNTIME_STAGE", "awg3-runtime"),
+    "scripts/vps/phase15_spain_readonly_preflight_remote.sh": ("readonly_collector", "PREFLIGHT", "preflight"),
+    "scripts/vps/phase15_spain_readonly_preflight_ssh_runner.ps1": ("readonly_collector", "PREFLIGHT", "preflight"),
+}
+ENTRY_KEYS = {"gate", "mode", "path", "role", "rollback_role", "secret_classification", "sha256", "size"}
+ROLES = {spec[0] for spec in TOOLING_SPECS.values()} | {
+    "application_snapshot", "callback_bootstrap", "dependency_lock_tool",
+    "phase14_receipt", "runtime_dependency_lock", "test_dependency_lock",
+}
+GATES = {"ACCEPTANCE", "ADMIN_PILOT", "APPLICATION_STAGE", "AWG3_RUNTIME_STAGE", "ENABLE_ISSUANCE", "LOCAL_VERIFY", "OPERATOR", "PREFLIGHT"}
+ROLLBACK_ROLES = {"application", "awg3-runtime", "none", "operator", "preflight"}
+
+
+def canonical_json_bytes(value: object) -> bytes:
+    try:
+        rendered = json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    except (TypeError, ValueError) as exc:
+        raise PackageContractError("value is not canonical JSON") from exc
+    return rendered.encode("utf-8") + b"\n"
+
+
+def load_canonical_json(raw: bytes, *, label: str) -> dict[str, object]:
+    if not isinstance(raw, bytes):
+        raise PackageContractError(f"{label} must be bytes")
+
+    def no_duplicates(pairs: list[tuple[str, object]]) -> dict[str, object]:
+        result: dict[str, object] = {}
+        for key, value in pairs:
+            if key in result:
+                raise PackageContractError(f"{label} duplicate key")
+            result[key] = value
+        return result
+
+    try:
+        value = json.loads(raw.decode("utf-8"), object_pairs_hook=no_duplicates)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise PackageContractError(f"{label} invalid JSON") from exc
+    if not isinstance(value, dict) or raw != canonical_json_bytes(value):
+        raise PackageContractError(f"{label} is not canonical JSON")
+    return value
+
+
+def _sha256(raw: bytes) -> str:
+    return hashlib.sha256(raw).hexdigest()
+
+
+def _exact_dict(value: object, keys: set[str], label: str) -> dict[str, object]:
+    if not isinstance(value, dict) or set(value) != keys:
+        raise PackageContractError(f"{label} keys")
+    return value
+
+
+def _safe_path(value: object) -> str:
+    if not isinstance(value, str) or not value or "\\" in value or "\x00" in value:
+        raise PackageContractError("entry path")
+    path = PurePosixPath(value)
+    if path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts):
+        raise PackageContractError("entry path")
+    if value != path.as_posix() or path.parts[0] not in {"source", "tooling"} or ":" in path.parts[0]:
+        raise PackageContractError("entry path")
+    folded = value.casefold()
+    if "phase13" in folded and any(word in folded for word in ("manifest", "outcome", "evidence")):
+        raise PackageContractError("stale Phase 13 artifact")
+    return value
+
+
+def validate_manifest(value: object, *, verify_identity: bool = True) -> dict[str, object]:
+    manifest = _exact_dict(value, {"dependency_locks", "entries", "package_id", "package_identity_sha256", "receipts", "schema", "source"}, "manifest")
+    if manifest["schema"] != MANIFEST_SCHEMA or manifest["package_id"] != PACKAGE_ID:
+        raise PackageContractError("manifest package identity")
+    source = _exact_dict(manifest["source"], {"branch", "head"}, "source")
+    if source["branch"] != SOURCE_BRANCH or not isinstance(source["head"], str) or HEAD_RE.fullmatch(source["head"]) is None:
+        raise PackageContractError("manifest source")
+    receipts = _exact_dict(manifest["receipts"], {"phase14", "phase15_source"}, "receipts")
+    phase14 = _exact_dict(receipts["phase14"], {"commit", "path", "sha256"}, "phase14 receipt")
+    if phase14 != {"commit": PHASE14_RECEIPT_COMMIT, "path": PHASE14_RECEIPT_PATH, "sha256": PHASE14_RECEIPT_SHA256}:
+        raise PackageContractError("phase14 receipt identity")
+    phase15 = _exact_dict(receipts["phase15_source"], {"path", "sha256"}, "phase15 receipt")
+    if phase15["path"] != PHASE15_SOURCE_RECEIPT_PATH or not isinstance(phase15["sha256"], str) or SHA256_RE.fullmatch(phase15["sha256"]) is None:
+        raise PackageContractError("phase15 receipt identity")
+    locks = _exact_dict(manifest["dependency_locks"], {"runtime", "test"}, "dependency locks")
+    for name in ("runtime", "test"):
+        lock = _exact_dict(locks[name], {"path", "sha256"}, f"{name} lock")
+        _safe_path(lock["path"])
+        if not isinstance(lock["sha256"], str) or SHA256_RE.fullmatch(lock["sha256"]) is None:
+            raise PackageContractError("dependency lock hash")
+    entries = manifest["entries"]
+    if not isinstance(entries, list) or not entries:
+        raise PackageContractError("manifest entries")
+    paths: list[str] = []
+    folded_paths: set[str] = set()
+    by_path: dict[str, dict[str, object]] = {}
+    for value_entry in entries:
+        entry = _exact_dict(value_entry, ENTRY_KEYS, "entry")
+        path = _safe_path(entry["path"])
+        if path.casefold() in folded_paths:
+            raise PackageContractError("duplicate or case-colliding entry path")
+        folded_paths.add(path.casefold())
+        paths.append(path)
+        by_path[path] = entry
+        if not isinstance(entry["size"], int) or isinstance(entry["size"], bool) or entry["size"] < 0:
+            raise PackageContractError("entry size")
+        if not isinstance(entry["sha256"], str) or SHA256_RE.fullmatch(entry["sha256"]) is None:
+            raise PackageContractError("entry sha256")
+        if entry["role"] not in ROLES or entry["mode"] not in {"0644", "0755"}:
+            raise PackageContractError("entry classification")
+        if entry["secret_classification"] not in {"none", "synthetic-test"}:
+            raise PackageContractError("forbidden secret classification")
+        if entry["gate"] not in GATES or entry["rollback_role"] not in ROLLBACK_ROLES:
+            raise PackageContractError("entry gate or rollback role")
+    if paths != sorted(paths):
+        raise PackageContractError("manifest entries must be sorted")
+    for lock_name in ("runtime", "test"):
+        lock = locks[lock_name]
+        entry = by_path.get(lock["path"])
+        if entry is None or entry["sha256"] != lock["sha256"]:
+            raise PackageContractError("dependency lock binding")
+    expected_receipts = {
+        "tooling/" + PHASE14_RECEIPT_PATH: ("phase14_receipt", PHASE14_RECEIPT_SHA256),
+        "tooling/" + PHASE15_SOURCE_RECEIPT_PATH: ("phase15_source_receipt", phase15["sha256"]),
+    }
+    for path, (role, digest) in expected_receipts.items():
+        entry = by_path.get(path)
+        if entry is None or entry["role"] != role or entry["sha256"] != digest:
+            raise PackageContractError("receipt entry binding")
+    identity = manifest["package_identity_sha256"]
+    if not isinstance(identity, str) or SHA256_RE.fullmatch(identity) is None:
+        raise PackageContractError("package identity sha256")
+    if verify_identity:
+        unsigned = dict(manifest)
+        unsigned.pop("package_identity_sha256")
+        if identity != _sha256(canonical_json_bytes(unsigned)):
+            raise PackageContractError("package identity mismatch")
+    return dict(manifest)
+
+
+def _git(root: Path, *args: str) -> bytes:
+    try:
+        result = subprocess.run(["git", *args], cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    except OSError as exc:
+        raise PackageContractError("git unavailable") from exc
+    if result.returncode != 0:
+        raise PackageContractError("git command failed")
+    return result.stdout
+
+
+def _checked_repo(root: Path) -> tuple[Path, str]:
+    root = Path(root).resolve()
+    if root.is_symlink() or not root.is_dir():
+        raise PackageContractError("repository root")
+    if _git(root, "status", "--porcelain=v1", "--untracked-files=all"):
+        raise PackageContractError("repository must be clean")
+    branch = _git(root, "branch", "--show-current").decode("ascii").strip()
+    if branch != SOURCE_BRANCH:
+        raise PackageContractError("repository branch")
+    head = _git(root, "rev-parse", "HEAD").decode("ascii").strip()
+    if HEAD_RE.fullmatch(head) is None:
+        raise PackageContractError("repository head")
+    return root, head
+
+
+def _git_mode(root: Path, revision: str, relative: str) -> str:
+    raw = _git(root, "ls-tree", revision, "--", relative).decode("utf-8")
+    rows = [row for row in raw.splitlines() if row]
+    if len(rows) != 1 or "\t" not in rows[0]:
+        raise PackageContractError("tracked tooling inventory")
+    mode, kind, _object = rows[0].split("\t", 1)[0].split(" ", 2)
+    if kind != "blob" or mode not in {"100644", "100755"}:
+        raise PackageContractError("non-regular tracked file")
+    return "0755" if mode == "100755" else "0644"
+
+
+def _source_spec(relative: str) -> tuple[str, str, str] | None:
+    if relative == "README.md":
+        return "operator_documentation", "OPERATOR", "operator"
+    if relative == "requirements/phase15-runtime-py312.lock":
+        return "runtime_dependency_lock", "LOCAL_VERIFY", "application"
+    if relative == "requirements/phase15-test-py312.lock":
+        return "test_dependency_lock", "LOCAL_VERIFY", "application"
+    if relative == "scripts/phase15_dependency_lock.py":
+        return "dependency_lock_tool", "LOCAL_VERIFY", "application"
+    if relative in {"app/db/phase15_bootstrap.py", "app/services/phase15_bootstrap.py", "app/services/telegram_callback_state.py"}:
+        return "callback_bootstrap", "APPLICATION_STAGE", "application"
+    if relative.startswith("app/") and Path(relative).suffix.casefold() in {".css", ".html", ".png", ".py", ".tpl"}:
+        return "application_snapshot", "APPLICATION_STAGE", "application"
+    return None
+
+
+def _source_payloads(root: Path, head: str) -> dict[str, tuple[bytes, str, str, str, str]]:
+    archive = _git(root, "archive", "--format=tar", head, "--", *SOURCE_ARCHIVE_PATHS)
+    result: dict[str, tuple[bytes, str, str, str, str]] = {}
+    try:
+        with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as stream:
+            for member in stream.getmembers():
+                if member.isdir():
+                    continue
+                relative = PurePosixPath(member.name)
+                if not member.isfile() or relative.is_absolute() or ".." in relative.parts:
+                    raise PackageContractError("source archive member")
+                spec = _source_spec(relative.as_posix())
+                if spec is None:
+                    raise PackageContractError(f"unclassified source file: {relative.as_posix()}")
+                extracted = stream.extractfile(member)
+                if extracted is None:
+                    raise PackageContractError("source archive member unreadable")
+                role, gate, rollback = spec
+                result[relative.as_posix()] = (extracted.read(), "0755" if member.mode & 0o111 else "0644", role, gate, rollback)
+    except tarfile.TarError as exc:
+        raise PackageContractError("invalid git archive") from exc
+    if not REQUIRED_SOURCE_PATHS.issubset(result):
+        raise PackageContractError("source inventory incomplete")
+    return result
+
+
+def _tooling_payloads(root: Path, head: str) -> dict[str, tuple[bytes, str, str, str, str]]:
+    result: dict[str, tuple[bytes, str, str, str, str]] = {}
+    for relative, (role, gate, rollback) in TOOLING_SPECS.items():
+        body = _git(root, "show", f"{head}:{relative}")
+        result[relative] = (body, _git_mode(root, head, relative), role, gate, rollback)
+    contract_ids = {
+        "failure-outcome.schema.json": "amn2.phase15.readonly-preflight-failure.v1",
+        "package-manifest.schema.json": MANIFEST_SCHEMA,
+        "preflight-evidence.schema.json": "amn2.phase15.readonly-preflight-evidence.v1",
+    }
+    prefix = "packaging/phase15-dual-protocol-bootstrap-contract/"
+    for name, schema_id in contract_ids.items():
+        value = load_canonical_json(result[prefix + name][0], label=name)
+        if value.get("$id") != schema_id or value.get("additionalProperties") is not False:
+            raise PackageContractError("contract schema identity")
+    resource = load_canonical_json(result[prefix + "resource-plan.json"][0], label="resource plan")
+    if resource != RESOURCE_PLAN:
+        raise PackageContractError("resource plan identity")
+    return result
+
+
+def _phase14_blob() -> bytes:
+    body = _git(ROOT, "show", f"{PHASE14_RECEIPT_COMMIT}:{PHASE14_RECEIPT_PATH}")
+    if _sha256(body) != PHASE14_RECEIPT_SHA256:
+        raise PackageContractError("phase14 receipt hash")
+    return body
+
+
+def _entry(path: str, body: bytes, mode: str, role: str, gate: str, rollback: str) -> dict[str, object]:
+    return {"gate": gate, "mode": mode, "path": path, "role": role, "rollback_role": rollback, "secret_classification": "none", "sha256": _sha256(body), "size": len(body)}
+
+
+def materialize_package(*, source_root: Path, source_head: str, package_id: str, output_root: Path, tooling_root: Path = ROOT) -> PackageReceipt:
+    if package_id != PACKAGE_ID:
+        raise PackageContractError("package id")
+    output = Path(output_root).resolve()
+    if output.is_symlink() or (output.exists() and (not output.is_dir() or any(output.iterdir()))):
+        raise PackageContractError("output must not be non-empty")
+    source, actual_head = _checked_repo(Path(source_root))
+    tooling, tooling_head = _checked_repo(Path(tooling_root))
+    if not isinstance(source_head, str) or HEAD_RE.fullmatch(source_head) is None or source_head != actual_head:
+        raise PackageContractError("source head mismatch")
+    source_items = _source_payloads(source, source_head)
+    tooling_items = _tooling_payloads(tooling, tooling_head)
+    files: dict[str, tuple[bytes, str, str, str, str]] = {
+        "source/" + path: item for path, item in source_items.items()
+    }
+    files.update({"tooling/" + path: item for path, item in tooling_items.items()})
+    phase14_path = "tooling/" + PHASE14_RECEIPT_PATH
+    files[phase14_path] = (_phase14_blob(), "0644", "phase14_receipt", "LOCAL_VERIFY", "operator")
+    if len({path.casefold() for path in files}) != len(files):
+        raise PackageContractError("package path collision")
+    entries = [_entry(path, *files[path]) for path in sorted(files)]
+    by_path = {entry["path"]: entry for entry in entries}
+    runtime_path = "source/requirements/phase15-runtime-py312.lock"
+    test_path = "source/requirements/phase15-test-py312.lock"
+    phase15_path = "tooling/" + PHASE15_SOURCE_RECEIPT_PATH
+    unsigned: dict[str, object] = {
+        "dependency_locks": {
+            "runtime": {"path": runtime_path, "sha256": by_path[runtime_path]["sha256"]},
+            "test": {"path": test_path, "sha256": by_path[test_path]["sha256"]},
+        },
+        "entries": entries,
+        "package_id": PACKAGE_ID,
+        "receipts": {
+            "phase14": {"commit": PHASE14_RECEIPT_COMMIT, "path": PHASE14_RECEIPT_PATH, "sha256": PHASE14_RECEIPT_SHA256},
+            "phase15_source": {"path": PHASE15_SOURCE_RECEIPT_PATH, "sha256": by_path[phase15_path]["sha256"]},
+        },
+        "schema": MANIFEST_SCHEMA,
+        "source": {"branch": SOURCE_BRANCH, "head": source_head},
+    }
+    manifest = dict(unsigned)
+    manifest["package_identity_sha256"] = _sha256(canonical_json_bytes(unsigned))
+    validate_manifest(manifest)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    staging = Path(tempfile.mkdtemp(prefix=f".{output.name}.", dir=output.parent))
+    try:
+        for path, (body, mode, _role, _gate, _rollback) in files.items():
+            destination = staging.joinpath(*PurePosixPath(path).parts)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            with destination.open("xb") as stream:
+                stream.write(body)
+            if os.name != "nt":
+                os.chmod(destination, int(mode, 8))
+        (staging / "manifest.json").write_bytes(canonical_json_bytes(manifest))
+        verified = verify_package(staging)
+        if output.exists():
+            output.rmdir()
+        staging.replace(output)
+        return PackageReceipt(output, output / "manifest.json", verified.package_identity_sha256, verified.file_count)
+    except Exception:
+        shutil.rmtree(staging, ignore_errors=True)
+        raise
+
+
+def _regular_files(root: Path) -> set[str]:
+    paths: set[str] = set()
+    for current, directories, filenames in os.walk(root, followlinks=False):
+        current_path = Path(current)
+        for name in directories:
+            if (current_path / name).is_symlink():
+                raise PackageContractError("package symlink")
+        for name in filenames:
+            path = current_path / name
+            info = os.lstat(path)
+            if not stat.S_ISREG(info.st_mode):
+                raise PackageContractError("package non-regular file")
+            paths.add(path.relative_to(root).as_posix())
+    return paths
+
+
+def verify_package(package_root: Path) -> PackageReceipt:
+    root = Path(package_root).resolve()
+    if root.is_symlink() or not root.is_dir():
+        raise PackageContractError("package root")
+    manifest_path = root / "manifest.json"
+    if manifest_path.is_symlink() or not manifest_path.is_file():
+        raise PackageContractError("package manifest")
+    manifest = validate_manifest(load_canonical_json(manifest_path.read_bytes(), label="package manifest"))
+    expected = {"manifest.json"} | {entry["path"] for entry in manifest["entries"]}
+    if _regular_files(root) != expected:
+        raise PackageContractError("package inventory mismatch")
+    for entry in manifest["entries"]:
+        path = root.joinpath(*PurePosixPath(entry["path"]).parts)
+        body = path.read_bytes()
+        if len(body) != entry["size"] or _sha256(body) != entry["sha256"]:
+            raise PackageContractError("package checksum mismatch")
+    return PackageReceipt(root, manifest_path, manifest["package_identity_sha256"], len(manifest["entries"]))
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    commands = parser.add_subparsers(dest="command", required=True)
+    materialize = commands.add_parser("materialize")
+    materialize.add_argument("--source-root", required=True, type=Path)
+    materialize.add_argument("--source-head", required=True)
+    materialize.add_argument("--package-id", required=True)
+    materialize.add_argument("--output-root", required=True, type=Path)
+    verify = commands.add_parser("verify")
+    verify.add_argument("--package-root", required=True, type=Path)
+    args = parser.parse_args(argv)
+    try:
+        if args.command == "materialize":
+            tooling_root = Path(os.environ.get("PHASE15_TOOLING_ROOT", ROOT))
+            receipt = materialize_package(source_root=args.source_root, source_head=args.source_head, package_id=args.package_id, output_root=args.output_root, tooling_root=tooling_root)
+            result = {"file_count": receipt.file_count, "package_identity_sha256": receipt.package_identity_sha256, "result": "materialized"}
+        else:
+            receipt = verify_package(args.package_root)
+            result = {"file_count": receipt.file_count, "package_identity_sha256": receipt.package_identity_sha256, "result": "verified"}
+    except PackageContractError as exc:
+        parser.error(str(exc))
+    print(canonical_json_bytes(result).decode("ascii"), end="")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
