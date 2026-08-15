@@ -99,18 +99,42 @@ EXPECTED_LOCK_PATHS = {
     "runtime": "source/requirements/phase15-runtime-py312.lock",
     "test": "source/requirements/phase15-test-py312.lock",
 }
-APPROVED_BRAND_PNG_PATHS = {
-    "app/bot/assets/NEOBYATNAYA-AMNZ-BOT.png",
-    "app/bot/assets/NEOBYATNAYA-AMNZ-LANGUAGE-HEADER.png",
-    "app/web/static/brand-full.png",
+APPROVED_BRAND_PNGS = {
+    "app/bot/assets/NEOBYATNAYA-AMNZ-BOT.png": (
+        2_950_469,
+        "40acd9465dc9fda06644d2d829da996e1d9bf6c856e95298b624b31154fec791",
+    ),
+    "app/bot/assets/NEOBYATNAYA-AMNZ-LANGUAGE-HEADER.png": (
+        2_647_131,
+        "bbddfa72d1d1fc37e412d2f4a9b4124001ff91fbd641635e31a47e008fc4611f",
+    ),
+    "app/web/static/brand-full.png": (
+        2_950_469,
+        "40acd9465dc9fda06644d2d829da996e1d9bf6c856e95298b624b31154fec791",
+    ),
 }
-FORBIDDEN_SOURCE_COMPONENTS = {"cache", "caches", "peer", "peers", "secret", "secrets"}
+FORBIDDEN_SOURCE_COMPONENTS = {
+    ".cache", "__pycache__", "cache", "caches", "peer", "peers", "secret", "secrets",
+}
 FORBIDDEN_SOURCE_SUFFIXES = {".conf", ".config", ".db", ".ini", ".key", ".pem", ".p12", ".pfx", ".sqlite", ".sqlite3", ".toml", ".yaml", ".yml", ".json"}
 PRIVATE_MATERIAL_PATTERNS = (
     re.compile(rb"-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----"),
     re.compile(rb"(?im)^\s*(?:PrivateKey|PresharedKey)\s*=\s*[A-Za-z0-9+/]{42,44}={0,2}\s*$"),
     re.compile(rb"\b[0-9]{6,12}:[A-Za-z0-9_-]{30,}\b"),
+    re.compile(rb"\beyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b"),
+    re.compile(rb"(?i)\bBearer\s+[A-Za-z0-9._~+/=-]{16,}"),
 )
+SENSITIVE_ASSIGNMENT_RE = re.compile(
+    rb"(?im)^\s*(?:api[_-]?key|api[_-]?token|access[_-]?token|refresh[_-]?token|token|"
+    rb"authorization|private[_-]?key|preshared[_-]?key|password|secret)\s*[:=]\s*"
+    rb"(?P<quote>['\"]?)(?P<value>[A-Za-z0-9_./+={}\- ]{16,})(?P=quote)\s*,?\s*$"
+)
+APPROVED_TEMPLATE_PLACEHOLDERS = {
+    b"{{ issued_raw_token }}",
+    b"{{ csrf_token }}",
+    b"{{ revealed_secrets.private_key }}",
+    b"{{ revealed_secrets.preshared_key }}",
+}
 ENTRY_KEYS = {"gate", "mode", "path", "role", "rollback_role", "secret_classification", "sha256", "size"}
 ROLES = {spec[0] for spec in TOOLING_SPECS.values()} | {
     "application_snapshot", "callback_bootstrap", "dependency_lock_tool",
@@ -165,7 +189,7 @@ def _safe_path(value: object) -> str:
     path = PurePosixPath(value)
     if path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts):
         raise PackageContractError("entry path")
-    if value != path.as_posix() or path.parts[0] not in {"source", "tooling"} or ":" in path.parts[0]:
+    if value != path.as_posix() or path.parts[0] not in {"source", "tooling"} or any(":" in part for part in path.parts):
         raise PackageContractError("entry path")
     folded = value.casefold()
     if "phase13" in folded and any(word in folded for word in ("manifest", "outcome", "evidence")):
@@ -231,6 +255,19 @@ def validate_manifest(value: object, *, verify_identity: bool = True) -> dict[st
         expected_mode = "0755" if required_path.endswith(".sh") else "0644"
         if actual_spec != expected_spec or entry["mode"] != expected_mode or entry["secret_classification"] != "none":
             raise PackageContractError(f"required package entry contract: {required_path}")
+    dynamic_spec = ("application_snapshot", "APPLICATION_STAGE", "application")
+    for path, entry in by_path.items():
+        if path in REQUIRED_ENTRY_SPECS:
+            continue
+        relative = path.removeprefix("source/")
+        actual_spec = (entry["role"], entry["gate"], entry["rollback_role"])
+        if (
+            not path.startswith("source/app/")
+            or _source_spec(relative) != dynamic_spec
+            or actual_spec != dynamic_spec
+            or entry["secret_classification"] != "none"
+        ):
+            raise PackageContractError(f"unexpected package entry: {path}")
     for lock_name in ("runtime", "test"):
         lock = locks[lock_name]
         entry = by_path.get(lock["path"])
@@ -322,10 +359,16 @@ def _reject_forbidden_source(relative: str, body: bytes) -> None:
     if name == ".env" or name.startswith(".env.") or suffix in FORBIDDEN_SOURCE_SUFFIXES:
         raise PackageContractError(f"forbidden source material: {relative}")
     if suffix == ".png":
-        if relative not in APPROVED_BRAND_PNG_PATHS or not body.startswith(b"\x89PNG\r\n\x1a\n"):
+        expected_brand = APPROVED_BRAND_PNGS.get(relative)
+        if expected_brand is None or (len(body), _sha256(body)) != expected_brand:
             raise PackageContractError(f"forbidden source material: {relative}")
     if body.startswith(b"SQLite format 3\x00") or any(pattern.search(body) for pattern in PRIVATE_MATERIAL_PATTERNS):
         raise PackageContractError(f"forbidden raw secret material: {relative}")
+    scan_body = body
+    for placeholder in APPROVED_TEMPLATE_PLACEHOLDERS:
+        scan_body = scan_body.replace(placeholder, b"")
+    if SENSITIVE_ASSIGNMENT_RE.search(scan_body):
+        raise PackageContractError(f"forbidden sensitive assignment: {relative}")
 
 
 def _source_payloads(root: Path, head: str) -> dict[str, tuple[bytes, str, str, str, str]]:
@@ -377,8 +420,8 @@ def _tooling_payloads(root: Path, head: str) -> dict[str, tuple[bytes, str, str,
     return result
 
 
-def _phase14_blob(root: Path, head: str) -> bytes:
-    body = _git(root, "show", f"{head}:{PHASE14_RECEIPT_PATH}")
+def _phase14_blob(root: Path) -> bytes:
+    body = _git(root, "show", f"{PHASE14_RECEIPT_COMMIT}:{PHASE14_RECEIPT_PATH}")
     if _sha256(body) != PHASE14_RECEIPT_SHA256:
         raise PackageContractError("phase14 receipt hash")
     return body
@@ -388,12 +431,27 @@ def _entry(path: str, body: bytes, mode: str, role: str, gate: str, rollback: st
     return {"gate": gate, "mode": mode, "path": path, "role": role, "rollback_role": rollback, "secret_classification": "none", "sha256": _sha256(body), "size": len(body)}
 
 
+def _reject_symlink_or_reparse_path(value: Path, *, label: str) -> Path:
+    lexical = Path(os.path.abspath(os.fspath(value)))
+    reparse_flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+    for candidate in reversed((lexical, *lexical.parents)):
+        try:
+            info = os.lstat(candidate)
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            raise PackageContractError(f"{label} path inspection") from exc
+        if stat.S_ISLNK(info.st_mode) or (
+            reparse_flag and getattr(info, "st_file_attributes", 0) & reparse_flag
+        ):
+            raise PackageContractError(f"{label} symlink or reparse point")
+    return lexical
+
+
 def materialize_package(*, source_root: Path, source_head: str, package_id: str, output_root: Path, tooling_root: Path = ROOT) -> PackageReceipt:
     if package_id != PACKAGE_ID:
         raise PackageContractError("package id")
-    lexical_output = Path(output_root)
-    if lexical_output.is_symlink():
-        raise PackageContractError("output symlink")
+    lexical_output = _reject_symlink_or_reparse_path(Path(output_root), label="output")
     output = lexical_output.resolve()
     if output.exists() and (not output.is_dir() or any(output.iterdir())):
         raise PackageContractError("output must not be non-empty")
@@ -408,7 +466,7 @@ def materialize_package(*, source_root: Path, source_head: str, package_id: str,
     }
     files.update({"tooling/" + path: item for path, item in tooling_items.items()})
     phase14_path = "tooling/" + PHASE14_RECEIPT_PATH
-    files[phase14_path] = (_phase14_blob(tooling, tooling_head), "0644", "phase14_receipt", "LOCAL_VERIFY", "operator")
+    files[phase14_path] = (_phase14_blob(tooling), "0644", "phase14_receipt", "LOCAL_VERIFY", "operator")
     if len({path.casefold() for path in files}) != len(files):
         raise PackageContractError("package path collision")
     entries = [_entry(path, *files[path]) for path in sorted(files)]
@@ -446,8 +504,7 @@ def materialize_package(*, source_root: Path, source_head: str, package_id: str,
                 os.chmod(destination, int(mode, 8))
         (staging / "manifest.json").write_bytes(canonical_json_bytes(manifest))
         verified = verify_package(staging)
-        if lexical_output.is_symlink():
-            raise PackageContractError("output symlink")
+        _reject_symlink_or_reparse_path(lexical_output, label="output")
         if output.exists():
             output.rmdir()
         staging.replace(output)
@@ -474,9 +531,7 @@ def _regular_files(root: Path) -> set[str]:
 
 
 def verify_package(package_root: Path) -> PackageReceipt:
-    lexical_root = Path(package_root)
-    if lexical_root.is_symlink():
-        raise PackageContractError("package root symlink")
+    lexical_root = _reject_symlink_or_reparse_path(Path(package_root), label="package root")
     root = lexical_root.resolve()
     if not root.is_dir():
         raise PackageContractError("package root")

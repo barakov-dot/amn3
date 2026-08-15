@@ -157,7 +157,10 @@ def test_manifest_schema_requires_all_identity_and_entry_contracts() -> None:
         "entries",
         "package_identity_sha256",
     }
-    entry = schema["properties"]["entries"]["items"]
+    entries_schema = schema["properties"]["entries"]
+    assert "x-casefold-unique-paths" not in entries_schema
+    assert "x-sorted-by" not in entries_schema
+    entry, closed_inventory = entries_schema["items"]["allOf"]
     assert set(entry["required"]) == {
         "path",
         "size",
@@ -169,11 +172,23 @@ def test_manifest_schema_requires_all_identity_and_entry_contracts() -> None:
         "rollback_role",
     }
     assert "secret" not in entry["properties"]["secret_classification"]["enum"]
-    entries_schema = schema["properties"]["entries"]
     assert entries_schema["uniqueItems"] is True
-    assert entries_schema["x-casefold-unique-paths"] is True
-    assert entries_schema["x-sorted-by"] == "path"
-    assert set(entries_schema["x-required-paths"]) == {item[0] for item in REQUIRED_ENTRY_SPECS}
+    branches = closed_inventory["oneOf"]
+    fixed_paths = {
+        branch["properties"]["path"]["const"]
+        for branch in branches
+        if "const" in branch.get("properties", {}).get("path", {})
+    }
+    assert fixed_paths == {item[0] for item in REQUIRED_ENTRY_SPECS}
+    dynamic = next(
+        branch for branch in branches
+        if "pattern" in branch.get("properties", {}).get("path", {})
+    )
+    assert dynamic["properties"]["path"]["pattern"].startswith("^source/app/")
+    assert dynamic["properties"]["role"] == {"const": "application_snapshot"}
+    assert dynamic["properties"]["gate"] == {"const": "APPLICATION_STAGE"}
+    assert dynamic["properties"]["rollback_role"] == {"const": "application"}
+    assert dynamic["properties"]["secret_classification"] == {"const": "none"}
     path_pattern = entry["properties"]["path"]["pattern"]
     for invalid in ("source/../x", "source//x", "source/./x", "/source/x", "C:/source/x", "source\\x"):
         assert re.fullmatch(path_pattern, invalid) is None
@@ -250,6 +265,64 @@ def test_manifest_validator_rejects_resigned_lock_and_tooling_rebinding() -> Non
 
     with pytest.raises(package.PackageContractError, match="exact dependency lock|tooling identity"):
         package.validate_manifest(value)
+
+
+@pytest.mark.parametrize(
+    "entry",
+    [
+        {
+            "gate": "OPERATOR",
+            "mode": "0644",
+            "path": "tooling/extra.txt",
+            "role": "operator_documentation",
+            "rollback_role": "operator",
+            "secret_classification": "none",
+            "sha256": SHA,
+            "size": 1,
+        },
+        {
+            "gate": "OPERATOR",
+            "mode": "0644",
+            "path": "source/app/extra.py",
+            "role": "operator_documentation",
+            "rollback_role": "operator",
+            "secret_classification": "none",
+            "sha256": SHA,
+            "size": 1,
+        },
+    ],
+)
+def test_manifest_validator_rejects_resigned_unexpected_or_misclassified_entry(
+    entry: dict[str, object],
+) -> None:
+    package = load_package_module()
+    value = manifest()
+    value["entries"].append(entry)
+    value["entries"].sort(key=lambda item: item["path"])
+    unsigned = dict(value)
+    unsigned.pop("package_identity_sha256")
+    value["package_identity_sha256"] = hashlib.sha256(canonical(unsigned)).hexdigest()
+
+    with pytest.raises(package.PackageContractError, match="unexpected package entry"):
+        package.validate_manifest(value)
+
+
+def test_brand_png_contract_pins_exact_approved_blobs() -> None:
+    package = load_package_module()
+    assert package.APPROVED_BRAND_PNGS == {
+        "app/bot/assets/NEOBYATNAYA-AMNZ-BOT.png": (
+            2_950_469,
+            "40acd9465dc9fda06644d2d829da996e1d9bf6c856e95298b624b31154fec791",
+        ),
+        "app/bot/assets/NEOBYATNAYA-AMNZ-LANGUAGE-HEADER.png": (
+            2_647_131,
+            "bbddfa72d1d1fc37e412d2f4a9b4124001ff91fbd641635e31a47e008fc4611f",
+        ),
+        "app/web/static/brand-full.png": (
+            2_950_469,
+            "40acd9465dc9fda06644d2d829da996e1d9bf6c856e95298b624b31154fec791",
+        ),
+    }
 
 
 @pytest.mark.parametrize(

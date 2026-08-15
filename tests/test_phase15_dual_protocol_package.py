@@ -43,23 +43,15 @@ def run_git(root: Path, *args: str, input_bytes: bytes | None = None) -> bytes:
 
 def make_repo(tmp_path: Path) -> tuple[Path, str]:
     repo = tmp_path / "repo"
-    shutil.copytree(FIXTURE, repo)
+    run_git(tmp_path, "clone", "--no-hardlinks", str(ROOT), str(repo))
+    shutil.copytree(FIXTURE, repo, dirs_exist_ok=True)
     shutil.copytree(
         ROOT / "packaging" / "phase15-dual-protocol-bootstrap-contract",
         repo / "packaging" / "phase15-dual-protocol-bootstrap-contract",
+        dirs_exist_ok=True,
     )
     (repo / "scripts").mkdir(exist_ok=True)
     shutil.copy2(SCRIPT, repo / "scripts" / SCRIPT.name)
-    phase14 = run_git(
-        ROOT,
-        "show",
-        "4e1052c079e1e25031a6c80f4dae1763e457ca48:research/amn2/phase14-dual-protocol-application-readiness-receipt.md",
-    )
-    receipt = repo / "research" / "amn2" / "phase14-dual-protocol-application-readiness-receipt.md"
-    receipt.parent.mkdir(parents=True, exist_ok=True)
-    receipt.write_bytes(phase14)
-
-    run_git(repo, "init", "-b", BRANCH)
     run_git(repo, "config", "user.name", "Phase15 Fixture")
     run_git(repo, "config", "user.email", "phase15-fixture@example.invalid")
     run_git(repo, "add", ".")
@@ -129,6 +121,29 @@ def test_materialization_is_deterministic_and_uses_canonical_receipt_blob(tmp_pa
     )
     assert phase14_entry["sha256"] == PHASE14_SHA
     assert package.verify_package(first).package_identity_sha256 == receipt_one.package_identity_sha256
+
+
+def test_materializer_reads_phase14_receipt_from_fixed_commit_not_tooling_head(tmp_path: Path) -> None:
+    package = load_package_module()
+    repo, _head = make_repo(tmp_path)
+    receipt_path = repo / "research" / "amn2" / "phase14-dual-protocol-application-readiness-receipt.md"
+    receipt_path.write_text("tampered at tooling head\n", encoding="utf-8")
+    run_git(repo, "add", "research/amn2/phase14-dual-protocol-application-readiness-receipt.md")
+    run_git(repo, "commit", "-m", "tamper current receipt")
+    head = run_git(repo, "rev-parse", "HEAD").decode("ascii").strip()
+
+    output = tmp_path / "fixed-receipt"
+    package.materialize_package(
+        source_root=repo,
+        source_head=head,
+        package_id=PACKAGE_ID,
+        output_root=output,
+        tooling_root=repo,
+    )
+    manifest = json.loads((output / "manifest.json").read_text("utf-8"))
+    assert manifest["tooling"]["head"] == head
+    packaged = output / "tooling" / "research" / "amn2" / "phase14-dual-protocol-application-readiness-receipt.md"
+    assert hashlib.sha256(packaged.read_bytes()).hexdigest() == PHASE14_SHA
 
 
 def test_materializer_sanitizes_git_repository_selection_environment(tmp_path: Path, monkeypatch) -> None:
@@ -303,14 +318,66 @@ def test_verifier_rejects_package_root_symlink(tmp_path: Path) -> None:
         package.verify_package(link)
 
 
+def test_materializer_rejects_symlinked_output_ancestor(tmp_path: Path) -> None:
+    package = load_package_module()
+    repo, head = make_repo(tmp_path)
+    real_parent = tmp_path / "real-parent"
+    real_parent.mkdir()
+    linked_parent = tmp_path / "linked-parent"
+    try:
+        linked_parent.symlink_to(real_parent, target_is_directory=True)
+    except OSError as error:
+        pytest.skip(f"directory symlink unavailable: {error}")
+
+    with pytest.raises(package.PackageContractError, match="symlink|reparse"):
+        package.materialize_package(
+            source_root=repo,
+            source_head=head,
+            package_id=PACKAGE_ID,
+            output_root=linked_parent / "package",
+            tooling_root=repo,
+        )
+    assert not (real_parent / "package").exists()
+
+
+def test_verifier_rejects_symlinked_package_ancestor(tmp_path: Path) -> None:
+    package = load_package_module()
+    repo, head = make_repo(tmp_path)
+    real_parent = tmp_path / "real-parent"
+    real_parent.mkdir()
+    package_root = real_parent / "package"
+    package.materialize_package(
+        source_root=repo,
+        source_head=head,
+        package_id=PACKAGE_ID,
+        output_root=package_root,
+        tooling_root=repo,
+    )
+    linked_parent = tmp_path / "linked-parent"
+    try:
+        linked_parent.symlink_to(real_parent, target_is_directory=True)
+    except OSError as error:
+        pytest.skip(f"directory symlink unavailable: {error}")
+
+    with pytest.raises(package.PackageContractError, match="symlink|reparse"):
+        package.verify_package(linked_parent / "package")
+
+
 @pytest.mark.parametrize(
     ("relative", "body"),
     [
         ("app/.env", b"TOKEN=synthetic-but-forbidden\n"),
         ("app/cache/state.py", b"CACHE = True\n"),
+        ("app/.cache/state.py", b"CACHE = True\n"),
+        ("app/__pycache__/state.pyc", b"synthetic bytecode"),
         ("app/client-qr.png", b"\x89PNG\r\n\x1a\nsynthetic-qr"),
+        ("app/web/static/brand-full.png", b"\x89PNG\r\n\x1a\nsubstituted-qr"),
         ("app/leaked_key.py", b"KEY = '''-----BEGIN PRIVATE KEY-----'''\n"),
         ("app/raw_peer.py", b"PrivateKey = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\n"),
+        ("app/jwt.py", b"ACCESS_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdWJqZWN0In0.signature0123456789'\n"),
+        ("app/bearer.py", b"AUTHORIZATION = 'Bearer live_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345'\n"),
+        ("app/api_key.py", b"API_TOKEN = 'live_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345'\n"),
+        ("app/base64_key.py", b"PRIVATE_KEY = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='\n"),
         ("app/state.py", b"SQLite format 3\x00synthetic"),
         ("app/token.py", b"TOKEN = '123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi'\n"),
         ("app/peers/device.json", b"{}\n"),
@@ -324,12 +391,40 @@ def test_materializer_rejects_forbidden_secret_qr_peer_config_or_cache_material(
     target = repo.joinpath(*relative.split("/"))
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes(body)
-    run_git(repo, "add", relative)
+    if relative == "app/__pycache__/state.pyc":
+        run_git(repo, "add", "-f", "--", relative)
+    else:
+        run_git(repo, "add", relative)
     run_git(repo, "commit", "-m", "add forbidden material")
     head = run_git(repo, "rev-parse", "HEAD").decode("ascii").strip()
 
     with pytest.raises(package.PackageContractError, match="forbidden"):
         package.materialize_package(source_root=repo, source_head=head, package_id=PACKAGE_ID, output_root=tmp_path / "forbidden", tooling_root=repo)
+
+
+def test_materializer_allows_only_necessary_non_concrete_jinja_secret_placeholders(tmp_path: Path) -> None:
+    package = load_package_module()
+    repo, _head = make_repo(tmp_path)
+    template = repo / "app" / "approved-secret-placeholders.tpl"
+    template.write_text(
+        "api_token={{ issued_raw_token }}\n"
+        "csrf_token={{ csrf_token }}\n"
+        "private_key={{ revealed_secrets.private_key }}\n"
+        "preshared_key={{ revealed_secrets.preshared_key }}\n",
+        encoding="utf-8",
+    )
+    run_git(repo, "add", "app/approved-secret-placeholders.tpl")
+    run_git(repo, "commit", "-m", "add approved placeholders")
+    head = run_git(repo, "rev-parse", "HEAD").decode("ascii").strip()
+
+    receipt = package.materialize_package(
+        source_root=repo,
+        source_head=head,
+        package_id=PACKAGE_ID,
+        output_root=tmp_path / "placeholders",
+        tooling_root=repo,
+    )
+    assert receipt.file_count > 0
 
 
 def test_cli_materialize_and_verify(tmp_path: Path) -> None:
