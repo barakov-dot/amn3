@@ -156,7 +156,7 @@ JINJA_BLOCK_SET_ASSIGNMENT_RE = re.compile(
 INLINE_SCRIPT_ASSIGNMENT_RE = re.compile(
     r"(?im)\b(?:(?:const|let|var)\s+)?"
     r"(?P<target>[A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)*)"
-    r"\s*=\s*(?P<value>[^;\r\n<]+?)\s*(?:;|(?=</script>|$))"
+    r"\s*=(?!=|>)\s*(?P<value>[^;\r\n<]+?)\s*(?:;|(?=</script>|$))"
 )
 CSS_CUSTOM_PROPERTY_RE = re.compile(
     r"(?im)(?P<target>--[A-Za-z_][A-Za-z0-9_-]*)"

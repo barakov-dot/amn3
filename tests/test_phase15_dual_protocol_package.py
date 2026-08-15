@@ -594,6 +594,61 @@ def test_materializer_allows_only_necessary_non_concrete_jinja_secret_placeholde
     assert receipt.file_count > 0
 
 
+def test_materializer_rejects_semicolonless_sensitive_javascript_assignment_before_next_statement(
+    tmp_path: Path,
+) -> None:
+    package = load_package_module()
+    repo, _head = make_repo(tmp_path)
+    target = repo / "app" / "sensitive_asi_assignment.html"
+    target.write_bytes(
+        b"<script>\n"
+        b"const api_token = 'public-test!punctuation?1234'\n"
+        b"window.bootstrapApplication()\n"
+        b"</script>\n"
+    )
+    run_git(repo, "add", "app/sensitive_asi_assignment.html")
+    run_git(repo, "commit", "-m", "add sensitive asi assignment")
+    head = run_git(repo, "rev-parse", "HEAD").decode("ascii").strip()
+
+    with pytest.raises(package.PackageContractError, match="forbidden"):
+        package.materialize_package(
+            source_root=repo,
+            source_head=head,
+            package_id=PACKAGE_ID,
+            output_root=tmp_path / "sensitive-asi-assignment",
+            tooling_root=repo,
+        )
+
+
+@pytest.mark.parametrize(
+    "expression",
+    [
+        b"if (api_token == 'public-test!punctuation?1234') { window.render() }",
+        b"if (api_token === 'public-test!punctuation?1234') { window.render() }",
+        b"consume(api_token => 'public-test!punctuation?1234')",
+    ],
+)
+def test_materializer_allows_javascript_equality_and_arrow_operators_on_sensitive_looking_identifiers(
+    tmp_path: Path, expression: bytes
+) -> None:
+    package = load_package_module()
+    repo, _head = make_repo(tmp_path)
+    target = repo / "app" / "ordinary_operator_expression.html"
+    target.write_bytes(b"<script>\n" + expression + b"\n</script>\n")
+    run_git(repo, "add", "app/ordinary_operator_expression.html")
+    run_git(repo, "commit", "-m", "add ordinary operator expression")
+    head = run_git(repo, "rev-parse", "HEAD").decode("ascii").strip()
+
+    receipt = package.materialize_package(
+        source_root=repo,
+        source_head=head,
+        package_id=PACKAGE_ID,
+        output_root=tmp_path / "ordinary-operator-expression",
+        tooling_root=repo,
+    )
+    assert receipt.file_count > 0
+
+
 def test_materializer_allows_ordinary_non_secret_code_and_jinja(tmp_path: Path) -> None:
     package = load_package_module()
     repo, _head = make_repo(tmp_path)
