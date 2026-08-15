@@ -82,6 +82,19 @@ def tree_hashes(root: Path) -> dict[str, str]:
     }
 
 
+def resign_manifest(package, root: Path, mutate) -> dict[str, object]:
+    path = root / "manifest.json"
+    value = json.loads(path.read_text("utf-8"))
+    mutate(value)
+    unsigned = dict(value)
+    unsigned.pop("package_identity_sha256")
+    value["package_identity_sha256"] = hashlib.sha256(
+        package.canonical_json_bytes(unsigned)
+    ).hexdigest()
+    path.write_bytes(package.canonical_json_bytes(value))
+    return value
+
+
 def test_materialization_is_deterministic_and_uses_canonical_receipt_blob(tmp_path: Path) -> None:
     package = load_package_module()
     repo, head = make_repo(tmp_path)
@@ -109,12 +122,35 @@ def test_materialization_is_deterministic_and_uses_canonical_receipt_blob(tmp_pa
     manifest = json.loads(manifest_raw.decode("utf-8"))
     assert manifest_raw == package.canonical_json_bytes(manifest)
     assert manifest["source"] == {"branch": BRANCH, "head": head}
+    assert manifest["tooling"] == {"branch": BRANCH, "head": head}
     assert manifest["receipts"]["phase14"]["sha256"] == PHASE14_SHA
     phase14_entry = next(
         item for item in manifest["entries"] if item["role"] == "phase14_receipt"
     )
     assert phase14_entry["sha256"] == PHASE14_SHA
     assert package.verify_package(first).package_identity_sha256 == receipt_one.package_identity_sha256
+
+
+def test_materializer_sanitizes_git_repository_selection_environment(tmp_path: Path, monkeypatch) -> None:
+    package = load_package_module()
+    repo, head = make_repo(tmp_path)
+    monkeypatch.setenv("GIT_DIR", str(tmp_path / "poison.git"))
+    monkeypatch.setenv("GIT_WORK_TREE", str(tmp_path / "poison-worktree"))
+    monkeypatch.setenv("GIT_INDEX_FILE", str(tmp_path / "poison.index"))
+    monkeypatch.setenv("GIT_OBJECT_DIRECTORY", str(tmp_path / "poison-objects"))
+    monkeypatch.setenv("GIT_ALTERNATE_OBJECT_DIRECTORIES", str(tmp_path / "poison-alternates"))
+    monkeypatch.setenv("GIT_CONFIG_COUNT", "1")
+    monkeypatch.setenv("GIT_CONFIG_KEY_0", "core.bare")
+    monkeypatch.setenv("GIT_CONFIG_VALUE_0", "true")
+
+    receipt = package.materialize_package(
+        source_root=repo,
+        source_head=head,
+        package_id=PACKAGE_ID,
+        output_root=tmp_path / "sanitized",
+        tooling_root=repo,
+    )
+    assert receipt.file_count > 0
 
 
 def test_materializer_refuses_dirty_or_mismatched_source(tmp_path: Path) -> None:
@@ -205,16 +241,111 @@ def test_verifier_detects_file_and_manifest_mutation(tmp_path: Path) -> None:
         package.verify_package(output)
 
 
+def test_verifier_rejects_resigned_required_entry_omission(tmp_path: Path) -> None:
+    package = load_package_module()
+    repo, head = make_repo(tmp_path)
+    output = tmp_path / "omission"
+    package.materialize_package(source_root=repo, source_head=head, package_id=PACKAGE_ID, output_root=output, tooling_root=repo)
+    omitted = "tooling/packaging/phase15-dual-protocol-bootstrap-contract/resource-plan.json"
+    output.joinpath(*omitted.split("/")).unlink()
+    resign_manifest(package, output, lambda value: value["entries"].__setitem__(
+        slice(None), [entry for entry in value["entries"] if entry["path"] != omitted]
+    ))
+
+    with pytest.raises(package.PackageContractError, match="required package entry"):
+        package.verify_package(output)
+
+
+def test_verifier_rejects_resigned_required_entry_rebinding(tmp_path: Path) -> None:
+    package = load_package_module()
+    repo, head = make_repo(tmp_path)
+    output = tmp_path / "rebinding"
+    package.materialize_package(source_root=repo, source_head=head, package_id=PACKAGE_ID, output_root=output, tooling_root=repo)
+
+    def rebind(value: dict[str, object]) -> None:
+        entry = next(item for item in value["entries"] if item["path"] == "tooling/scripts/phase15_dual_protocol_package.py")
+        entry["role"] = "operator_documentation"
+
+    resign_manifest(package, output, rebind)
+    with pytest.raises(package.PackageContractError, match="entry contract"):
+        package.verify_package(output)
+
+
+def test_materializer_rejects_output_symlink_before_publication(tmp_path: Path) -> None:
+    package = load_package_module()
+    repo, head = make_repo(tmp_path)
+    target = tmp_path / "empty-target"
+    target.mkdir()
+    link = tmp_path / "output-link"
+    try:
+        link.symlink_to(target, target_is_directory=True)
+    except OSError as error:
+        pytest.skip(f"directory symlink unavailable: {error}")
+
+    with pytest.raises(package.PackageContractError, match="symlink"):
+        package.materialize_package(source_root=repo, source_head=head, package_id=PACKAGE_ID, output_root=link, tooling_root=repo)
+    assert link.is_symlink()
+    assert not any(target.iterdir())
+
+
+def test_verifier_rejects_package_root_symlink(tmp_path: Path) -> None:
+    package = load_package_module()
+    repo, head = make_repo(tmp_path)
+    target = tmp_path / "real-package"
+    package.materialize_package(source_root=repo, source_head=head, package_id=PACKAGE_ID, output_root=target, tooling_root=repo)
+    link = tmp_path / "package-link"
+    try:
+        link.symlink_to(target, target_is_directory=True)
+    except OSError as error:
+        pytest.skip(f"directory symlink unavailable: {error}")
+
+    with pytest.raises(package.PackageContractError, match="symlink"):
+        package.verify_package(link)
+
+
+@pytest.mark.parametrize(
+    ("relative", "body"),
+    [
+        ("app/.env", b"TOKEN=synthetic-but-forbidden\n"),
+        ("app/cache/state.py", b"CACHE = True\n"),
+        ("app/client-qr.png", b"\x89PNG\r\n\x1a\nsynthetic-qr"),
+        ("app/leaked_key.py", b"KEY = '''-----BEGIN PRIVATE KEY-----'''\n"),
+        ("app/raw_peer.py", b"PrivateKey = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\n"),
+        ("app/state.py", b"SQLite format 3\x00synthetic"),
+        ("app/token.py", b"TOKEN = '123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi'\n"),
+        ("app/peers/device.json", b"{}\n"),
+    ],
+)
+def test_materializer_rejects_forbidden_secret_qr_peer_config_or_cache_material(
+    tmp_path: Path, relative: str, body: bytes
+) -> None:
+    package = load_package_module()
+    repo, _head = make_repo(tmp_path)
+    target = repo.joinpath(*relative.split("/"))
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(body)
+    run_git(repo, "add", relative)
+    run_git(repo, "commit", "-m", "add forbidden material")
+    head = run_git(repo, "rev-parse", "HEAD").decode("ascii").strip()
+
+    with pytest.raises(package.PackageContractError, match="forbidden"):
+        package.materialize_package(source_root=repo, source_head=head, package_id=PACKAGE_ID, output_root=tmp_path / "forbidden", tooling_root=repo)
+
+
 def test_cli_materialize_and_verify(tmp_path: Path) -> None:
     package = load_package_module()
     repo, head = make_repo(tmp_path)
     output = tmp_path / "cli-package"
+    second_output = tmp_path / "cli-package-poisoned-env"
+    cli_script = repo / "scripts" / SCRIPT.name
     env = dict(os.environ)
-    env["PHASE15_TOOLING_ROOT"] = str(repo)
-    created = subprocess.run(
+    env.pop("PHASE15_TOOLING_ROOT", None)
+
+    def run_materialize(destination: Path, command_env: dict[str, str]):
+        return subprocess.run(
         [
             os.sys.executable,
-            str(SCRIPT),
+            str(cli_script),
             "materialize",
             "--source-root",
             str(repo),
@@ -223,18 +354,25 @@ def test_cli_materialize_and_verify(tmp_path: Path) -> None:
             "--package-id",
             PACKAGE_ID,
             "--output-root",
-            str(output),
+            str(destination),
         ],
-        cwd=ROOT,
-        env=env,
+        cwd=repo,
+        env=command_env,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=False,
-    )
+        )
+
+    created = run_materialize(output, env)
     assert created.returncode == 0, created.stderr.decode("utf-8", "replace")
+    poisoned = dict(env)
+    poisoned["PHASE15_TOOLING_ROOT"] = str(tmp_path / "ambient-poison")
+    created_poisoned = run_materialize(second_output, poisoned)
+    assert created_poisoned.returncode == 0, created_poisoned.stderr.decode("utf-8", "replace")
+    assert tree_hashes(output) == tree_hashes(second_output)
     verified = subprocess.run(
-        [os.sys.executable, str(SCRIPT), "verify", "--package-root", str(output)],
-        cwd=ROOT,
+        [os.sys.executable, str(cli_script), "verify", "--package-root", str(output)],
+        cwd=repo,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=False,

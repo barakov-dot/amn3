@@ -29,6 +29,7 @@ class PackageReceipt(NamedTuple):
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ID = "phase15-dual-protocol-bootstrap-20260811-001"
 SOURCE_BRANCH = "codex/phase15-local-package-bootstrap-readiness"
+TOOLING_BRANCH = SOURCE_BRANCH
 MANIFEST_SCHEMA = "amn2.phase15.package-manifest.v1"
 PHASE14_RECEIPT_PATH = "research/amn2/phase14-dual-protocol-application-readiness-receipt.md"
 PHASE14_RECEIPT_COMMIT = "4e1052c079e1e25031a6c80f4dae1763e457ca48"
@@ -63,15 +64,17 @@ SOURCE_ARCHIVE_PATHS = (
     "requirements/phase15-test-py312.lock",
     "scripts/phase15_dependency_lock.py",
 )
-REQUIRED_SOURCE_PATHS = {
-    "app/main.py",
-    "app/db/phase15_bootstrap.py",
-    "app/services/phase15_bootstrap.py",
-    "app/services/telegram_callback_state.py",
-    "requirements/phase15-runtime-py312.lock",
-    "requirements/phase15-test-py312.lock",
-    "scripts/phase15_dependency_lock.py",
+REQUIRED_SOURCE_SPECS = {
+    "README.md": ("operator_documentation", "OPERATOR", "operator"),
+    "app/main.py": ("application_snapshot", "APPLICATION_STAGE", "application"),
+    "app/db/phase15_bootstrap.py": ("callback_bootstrap", "APPLICATION_STAGE", "application"),
+    "app/services/phase15_bootstrap.py": ("callback_bootstrap", "APPLICATION_STAGE", "application"),
+    "app/services/telegram_callback_state.py": ("callback_bootstrap", "APPLICATION_STAGE", "application"),
+    "requirements/phase15-runtime-py312.lock": ("runtime_dependency_lock", "LOCAL_VERIFY", "application"),
+    "requirements/phase15-test-py312.lock": ("test_dependency_lock", "LOCAL_VERIFY", "application"),
+    "scripts/phase15_dependency_lock.py": ("dependency_lock_tool", "LOCAL_VERIFY", "application"),
 }
+REQUIRED_SOURCE_PATHS = set(REQUIRED_SOURCE_SPECS)
 TOOLING_SPECS = {
     "docs/superpowers/plans/2026-08-11-amn2-phase15-local-package-bootstrap-readiness.md": ("operator_documentation", "OPERATOR", "operator"),
     "docs/superpowers/specs/2026-08-11-amn2-phase15-local-package-bootstrap-readiness-design.ru.md": ("operator_documentation", "OPERATOR", "operator"),
@@ -87,6 +90,27 @@ TOOLING_SPECS = {
     "scripts/vps/phase15_spain_readonly_preflight_remote.sh": ("readonly_collector", "PREFLIGHT", "preflight"),
     "scripts/vps/phase15_spain_readonly_preflight_ssh_runner.ps1": ("readonly_collector", "PREFLIGHT", "preflight"),
 }
+REQUIRED_ENTRY_SPECS = {
+    **{"source/" + path: spec for path, spec in REQUIRED_SOURCE_SPECS.items()},
+    **{"tooling/" + path: spec for path, spec in TOOLING_SPECS.items()},
+    "tooling/" + PHASE14_RECEIPT_PATH: ("phase14_receipt", "LOCAL_VERIFY", "operator"),
+}
+EXPECTED_LOCK_PATHS = {
+    "runtime": "source/requirements/phase15-runtime-py312.lock",
+    "test": "source/requirements/phase15-test-py312.lock",
+}
+APPROVED_BRAND_PNG_PATHS = {
+    "app/bot/assets/NEOBYATNAYA-AMNZ-BOT.png",
+    "app/bot/assets/NEOBYATNAYA-AMNZ-LANGUAGE-HEADER.png",
+    "app/web/static/brand-full.png",
+}
+FORBIDDEN_SOURCE_COMPONENTS = {"cache", "caches", "peer", "peers", "secret", "secrets"}
+FORBIDDEN_SOURCE_SUFFIXES = {".conf", ".config", ".db", ".ini", ".key", ".pem", ".p12", ".pfx", ".sqlite", ".sqlite3", ".toml", ".yaml", ".yml", ".json"}
+PRIVATE_MATERIAL_PATTERNS = (
+    re.compile(rb"-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----"),
+    re.compile(rb"(?im)^\s*(?:PrivateKey|PresharedKey)\s*=\s*[A-Za-z0-9+/]{42,44}={0,2}\s*$"),
+    re.compile(rb"\b[0-9]{6,12}:[A-Za-z0-9_-]{30,}\b"),
+)
 ENTRY_KEYS = {"gate", "mode", "path", "role", "rollback_role", "secret_classification", "sha256", "size"}
 ROLES = {spec[0] for spec in TOOLING_SPECS.values()} | {
     "application_snapshot", "callback_bootstrap", "dependency_lock_tool",
@@ -150,12 +174,15 @@ def _safe_path(value: object) -> str:
 
 
 def validate_manifest(value: object, *, verify_identity: bool = True) -> dict[str, object]:
-    manifest = _exact_dict(value, {"dependency_locks", "entries", "package_id", "package_identity_sha256", "receipts", "schema", "source"}, "manifest")
+    manifest = _exact_dict(value, {"dependency_locks", "entries", "package_id", "package_identity_sha256", "receipts", "schema", "source", "tooling"}, "manifest")
     if manifest["schema"] != MANIFEST_SCHEMA or manifest["package_id"] != PACKAGE_ID:
         raise PackageContractError("manifest package identity")
     source = _exact_dict(manifest["source"], {"branch", "head"}, "source")
     if source["branch"] != SOURCE_BRANCH or not isinstance(source["head"], str) or HEAD_RE.fullmatch(source["head"]) is None:
         raise PackageContractError("manifest source")
+    tooling = _exact_dict(manifest["tooling"], {"branch", "head"}, "tooling")
+    if tooling["branch"] != TOOLING_BRANCH or not isinstance(tooling["head"], str) or HEAD_RE.fullmatch(tooling["head"]) is None:
+        raise PackageContractError("tooling identity")
     receipts = _exact_dict(manifest["receipts"], {"phase14", "phase15_source"}, "receipts")
     phase14 = _exact_dict(receipts["phase14"], {"commit", "path", "sha256"}, "phase14 receipt")
     if phase14 != {"commit": PHASE14_RECEIPT_COMMIT, "path": PHASE14_RECEIPT_PATH, "sha256": PHASE14_RECEIPT_SHA256}:
@@ -164,9 +191,10 @@ def validate_manifest(value: object, *, verify_identity: bool = True) -> dict[st
     if phase15["path"] != PHASE15_SOURCE_RECEIPT_PATH or not isinstance(phase15["sha256"], str) or SHA256_RE.fullmatch(phase15["sha256"]) is None:
         raise PackageContractError("phase15 receipt identity")
     locks = _exact_dict(manifest["dependency_locks"], {"runtime", "test"}, "dependency locks")
-    for name in ("runtime", "test"):
+    for name, expected_path in EXPECTED_LOCK_PATHS.items():
         lock = _exact_dict(locks[name], {"path", "sha256"}, f"{name} lock")
-        _safe_path(lock["path"])
+        if lock["path"] != expected_path:
+            raise PackageContractError("exact dependency lock binding")
         if not isinstance(lock["sha256"], str) or SHA256_RE.fullmatch(lock["sha256"]) is None:
             raise PackageContractError("dependency lock hash")
     entries = manifest["entries"]
@@ -195,6 +223,14 @@ def validate_manifest(value: object, *, verify_identity: bool = True) -> dict[st
             raise PackageContractError("entry gate or rollback role")
     if paths != sorted(paths):
         raise PackageContractError("manifest entries must be sorted")
+    for required_path, expected_spec in REQUIRED_ENTRY_SPECS.items():
+        entry = by_path.get(required_path)
+        if entry is None:
+            raise PackageContractError(f"required package entry missing: {required_path}")
+        actual_spec = (entry["role"], entry["gate"], entry["rollback_role"])
+        expected_mode = "0755" if required_path.endswith(".sh") else "0644"
+        if actual_spec != expected_spec or entry["mode"] != expected_mode or entry["secret_classification"] != "none":
+            raise PackageContractError(f"required package entry contract: {required_path}")
     for lock_name in ("runtime", "test"):
         lock = locks[lock_name]
         entry = by_path.get(lock["path"])
@@ -219,9 +255,22 @@ def validate_manifest(value: object, *, verify_identity: bool = True) -> dict[st
     return dict(manifest)
 
 
+def _git_environment() -> dict[str, str]:
+    environment = {key: value for key, value in os.environ.items() if not key.upper().startswith("GIT_")}
+    environment.update({"GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1", "GIT_TERMINAL_PROMPT": "0"})
+    return environment
+
+
 def _git(root: Path, *args: str) -> bytes:
     try:
-        result = subprocess.run(["git", *args], cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+        result = subprocess.run(
+            ["git", "-c", "core.autocrlf=input", "-c", "core.safecrlf=false", *args],
+            cwd=root,
+            env=_git_environment(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
     except OSError as exc:
         raise PackageContractError("git unavailable") from exc
     if result.returncode != 0:
@@ -256,19 +305,27 @@ def _git_mode(root: Path, revision: str, relative: str) -> str:
 
 
 def _source_spec(relative: str) -> tuple[str, str, str] | None:
-    if relative == "README.md":
-        return "operator_documentation", "OPERATOR", "operator"
-    if relative == "requirements/phase15-runtime-py312.lock":
-        return "runtime_dependency_lock", "LOCAL_VERIFY", "application"
-    if relative == "requirements/phase15-test-py312.lock":
-        return "test_dependency_lock", "LOCAL_VERIFY", "application"
-    if relative == "scripts/phase15_dependency_lock.py":
-        return "dependency_lock_tool", "LOCAL_VERIFY", "application"
-    if relative in {"app/db/phase15_bootstrap.py", "app/services/phase15_bootstrap.py", "app/services/telegram_callback_state.py"}:
-        return "callback_bootstrap", "APPLICATION_STAGE", "application"
+    if relative in REQUIRED_SOURCE_SPECS:
+        return REQUIRED_SOURCE_SPECS[relative]
     if relative.startswith("app/") and Path(relative).suffix.casefold() in {".css", ".html", ".png", ".py", ".tpl"}:
         return "application_snapshot", "APPLICATION_STAGE", "application"
     return None
+
+
+def _reject_forbidden_source(relative: str, body: bytes) -> None:
+    path = PurePosixPath(relative)
+    folded_parts = {part.casefold() for part in path.parts}
+    name = path.name.casefold()
+    suffix = path.suffix.casefold()
+    if folded_parts & FORBIDDEN_SOURCE_COMPONENTS:
+        raise PackageContractError(f"forbidden source material: {relative}")
+    if name == ".env" or name.startswith(".env.") or suffix in FORBIDDEN_SOURCE_SUFFIXES:
+        raise PackageContractError(f"forbidden source material: {relative}")
+    if suffix == ".png":
+        if relative not in APPROVED_BRAND_PNG_PATHS or not body.startswith(b"\x89PNG\r\n\x1a\n"):
+            raise PackageContractError(f"forbidden source material: {relative}")
+    if body.startswith(b"SQLite format 3\x00") or any(pattern.search(body) for pattern in PRIVATE_MATERIAL_PATTERNS):
+        raise PackageContractError(f"forbidden raw secret material: {relative}")
 
 
 def _source_payloads(root: Path, head: str) -> dict[str, tuple[bytes, str, str, str, str]]:
@@ -282,14 +339,16 @@ def _source_payloads(root: Path, head: str) -> dict[str, tuple[bytes, str, str, 
                 relative = PurePosixPath(member.name)
                 if not member.isfile() or relative.is_absolute() or ".." in relative.parts:
                     raise PackageContractError("source archive member")
-                spec = _source_spec(relative.as_posix())
-                if spec is None:
-                    raise PackageContractError(f"unclassified source file: {relative.as_posix()}")
                 extracted = stream.extractfile(member)
                 if extracted is None:
                     raise PackageContractError("source archive member unreadable")
+                body = extracted.read()
+                _reject_forbidden_source(relative.as_posix(), body)
+                spec = _source_spec(relative.as_posix())
+                if spec is None:
+                    raise PackageContractError(f"unclassified source file: {relative.as_posix()}")
                 role, gate, rollback = spec
-                result[relative.as_posix()] = (extracted.read(), "0755" if member.mode & 0o111 else "0644", role, gate, rollback)
+                result[relative.as_posix()] = (body, "0755" if member.mode & 0o111 else "0644", role, gate, rollback)
     except tarfile.TarError as exc:
         raise PackageContractError("invalid git archive") from exc
     if not REQUIRED_SOURCE_PATHS.issubset(result):
@@ -318,8 +377,8 @@ def _tooling_payloads(root: Path, head: str) -> dict[str, tuple[bytes, str, str,
     return result
 
 
-def _phase14_blob() -> bytes:
-    body = _git(ROOT, "show", f"{PHASE14_RECEIPT_COMMIT}:{PHASE14_RECEIPT_PATH}")
+def _phase14_blob(root: Path, head: str) -> bytes:
+    body = _git(root, "show", f"{head}:{PHASE14_RECEIPT_PATH}")
     if _sha256(body) != PHASE14_RECEIPT_SHA256:
         raise PackageContractError("phase14 receipt hash")
     return body
@@ -332,8 +391,11 @@ def _entry(path: str, body: bytes, mode: str, role: str, gate: str, rollback: st
 def materialize_package(*, source_root: Path, source_head: str, package_id: str, output_root: Path, tooling_root: Path = ROOT) -> PackageReceipt:
     if package_id != PACKAGE_ID:
         raise PackageContractError("package id")
-    output = Path(output_root).resolve()
-    if output.is_symlink() or (output.exists() and (not output.is_dir() or any(output.iterdir()))):
+    lexical_output = Path(output_root)
+    if lexical_output.is_symlink():
+        raise PackageContractError("output symlink")
+    output = lexical_output.resolve()
+    if output.exists() and (not output.is_dir() or any(output.iterdir())):
         raise PackageContractError("output must not be non-empty")
     source, actual_head = _checked_repo(Path(source_root))
     tooling, tooling_head = _checked_repo(Path(tooling_root))
@@ -346,7 +408,7 @@ def materialize_package(*, source_root: Path, source_head: str, package_id: str,
     }
     files.update({"tooling/" + path: item for path, item in tooling_items.items()})
     phase14_path = "tooling/" + PHASE14_RECEIPT_PATH
-    files[phase14_path] = (_phase14_blob(), "0644", "phase14_receipt", "LOCAL_VERIFY", "operator")
+    files[phase14_path] = (_phase14_blob(tooling, tooling_head), "0644", "phase14_receipt", "LOCAL_VERIFY", "operator")
     if len({path.casefold() for path in files}) != len(files):
         raise PackageContractError("package path collision")
     entries = [_entry(path, *files[path]) for path in sorted(files)]
@@ -367,6 +429,7 @@ def materialize_package(*, source_root: Path, source_head: str, package_id: str,
         },
         "schema": MANIFEST_SCHEMA,
         "source": {"branch": SOURCE_BRANCH, "head": source_head},
+        "tooling": {"branch": TOOLING_BRANCH, "head": tooling_head},
     }
     manifest = dict(unsigned)
     manifest["package_identity_sha256"] = _sha256(canonical_json_bytes(unsigned))
@@ -383,6 +446,8 @@ def materialize_package(*, source_root: Path, source_head: str, package_id: str,
                 os.chmod(destination, int(mode, 8))
         (staging / "manifest.json").write_bytes(canonical_json_bytes(manifest))
         verified = verify_package(staging)
+        if lexical_output.is_symlink():
+            raise PackageContractError("output symlink")
         if output.exists():
             output.rmdir()
         staging.replace(output)
@@ -409,8 +474,11 @@ def _regular_files(root: Path) -> set[str]:
 
 
 def verify_package(package_root: Path) -> PackageReceipt:
-    root = Path(package_root).resolve()
-    if root.is_symlink() or not root.is_dir():
+    lexical_root = Path(package_root)
+    if lexical_root.is_symlink():
+        raise PackageContractError("package root symlink")
+    root = lexical_root.resolve()
+    if not root.is_dir():
         raise PackageContractError("package root")
     manifest_path = root / "manifest.json"
     if manifest_path.is_symlink() or not manifest_path.is_file():
@@ -440,8 +508,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == "materialize":
-            tooling_root = Path(os.environ.get("PHASE15_TOOLING_ROOT", ROOT))
-            receipt = materialize_package(source_root=args.source_root, source_head=args.source_head, package_id=args.package_id, output_root=args.output_root, tooling_root=tooling_root)
+            receipt = materialize_package(source_root=args.source_root, source_head=args.source_head, package_id=args.package_id, output_root=args.output_root, tooling_root=ROOT)
             result = {"file_count": receipt.file_count, "package_identity_sha256": receipt.package_identity_sha256, "result": "materialized"}
         else:
             receipt = verify_package(args.package_root)
