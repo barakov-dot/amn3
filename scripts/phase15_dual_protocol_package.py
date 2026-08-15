@@ -137,8 +137,8 @@ APPROVED_TEMPLATE_PLACEHOLDER_TEXT = {
     placeholder.decode("ascii") for placeholder in APPROVED_TEMPLATE_PLACEHOLDERS
 }
 JWT_CANDIDATE_RE = re.compile(
-    rb"(?<![A-Za-z0-9_-])([A-Za-z0-9_-]{1,8192})\."
-    rb"([A-Za-z0-9_-]{1,8192})\.([A-Za-z0-9_-]{1,8192})(?![A-Za-z0-9_-])"
+    rb"(?<![A-Za-z0-9_-])([A-Za-z0-9_-]+)\."
+    rb"([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)(?![A-Za-z0-9_-])"
 )
 JINJA_EXPRESSION_RE = re.compile(r"\{\{[^{}]*\}\}")
 TEXT_ASSIGNMENT_RE = re.compile(
@@ -149,16 +149,21 @@ JINJA_SET_ASSIGNMENT_RE = re.compile(
     r"(?is)\{%\s*set\s+(?P<target>[A-Za-z_][A-Za-z0-9_.-]*)"
     r"\s*=\s*(?P<value>.*?)\s*%\}"
 )
+JINJA_BLOCK_SET_ASSIGNMENT_RE = re.compile(
+    r"(?is)\{%\s*set\s+(?P<target>[A-Za-z_][A-Za-z0-9_.-]*)\s*%\}"
+    r"(?P<value>.*?)\{%\s*endset\s*%\}"
+)
 INLINE_SCRIPT_ASSIGNMENT_RE = re.compile(
-    r"(?im)\b(?:const|let|var)\s+"
-    r"(?P<target>[A-Za-z_$][A-Za-z0-9_$.-]*)"
-    r"\s*=\s*(?P<value>[^;\r\n]+?)\s*;"
+    r"(?im)\b(?:(?:const|let|var)\s+)?"
+    r"(?P<target>[A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)*)"
+    r"\s*=\s*(?P<value>[^;\r\n<]+?)\s*(?:;|(?=</script>|$))"
 )
 CSS_CUSTOM_PROPERTY_RE = re.compile(
     r"(?im)(?P<target>--[A-Za-z_][A-Za-z0-9_-]*)"
-    r"\s*:\s*(?P<value>[^;\r\n}]+?)\s*;"
+    r"\s*:\s*(?P<value>[^;\r\n}]+?)\s*(?:;|(?=\}))"
 )
 TEXT_SOURCE_SUFFIXES = {".css", ".html", ".py", ".tpl"}
+MAX_JWT_SEGMENT_BYTES = 8192
 MAX_STATIC_EXPRESSION_DEPTH = 64
 MAX_STATIC_EXPRESSION_NODES = 512
 MAX_STATIC_VALUE_BYTES = 8192
@@ -378,12 +383,18 @@ def _source_spec(relative: str) -> tuple[str, str, str] | None:
 
 def _is_structural_jwt(body: bytes) -> bool:
     for candidate in JWT_CANDIDATE_RE.finditer(body):
+        if any(len(segment) > MAX_JWT_SEGMENT_BYTES for segment in candidate.groups()):
+            raise PackageContractError("forbidden oversized JWT candidate")
         decoded: list[object] = []
         for segment in candidate.groups()[:2]:
             padded = segment + b"=" * (-len(segment) % 4)
             try:
                 raw = base64.b64decode(padded, altchars=b"-_", validate=True)
                 decoded.append(json.loads(raw.decode("utf-8")))
+            except RecursionError as exc:
+                raise PackageContractError(
+                    "forbidden recursively nested JWT candidate"
+                ) from exc
             except (binascii.Error, UnicodeDecodeError, json.JSONDecodeError):
                 break
         if len(decoded) == 2 and all(isinstance(value, dict) for value in decoded):
@@ -600,6 +611,9 @@ def _reject_contextual_sensitive_values(relative: str, body: bytes) -> None:
             if _is_sensitive_identifier(assignment.group("target")):
                 _reject_sensitive_value(relative, assignment.group("value"))
         for assignment in JINJA_SET_ASSIGNMENT_RE.finditer(text):
+            if _is_sensitive_identifier(assignment.group("target")):
+                _reject_sensitive_value(relative, assignment.group("value"))
+        for assignment in JINJA_BLOCK_SET_ASSIGNMENT_RE.finditer(text):
             if _is_sensitive_identifier(assignment.group("target")):
                 _reject_sensitive_value(relative, assignment.group("value"))
         for assignment in INLINE_SCRIPT_ASSIGNMENT_RE.finditer(text):

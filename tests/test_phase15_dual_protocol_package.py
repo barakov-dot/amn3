@@ -435,12 +435,32 @@ def test_verifier_rejects_symlinked_package_ancestor(tmp_path: Path) -> None:
             b"{% set api_token = 'public-test!punctuation?1234' %}\n",
         ),
         (
+            "app/sensitive_jinja_block_set.tpl",
+            b"{% set api_token %}public-test!punctuation?1234{% endset %}\n",
+        ),
+        (
             "app/sensitive_inline_script.html",
             b"<script>const api_token = 'public-test!punctuation?1234';</script>\n",
         ),
         (
+            "app/sensitive_semicolonless_declaration.html",
+            b"<script>const api_token = 'public-test!punctuation?1234'</script>\n",
+        ),
+        (
+            "app/sensitive_script_property.html",
+            b"<script>window.session.apiToken = 'public-test!punctuation?1234';</script>\n",
+        ),
+        (
+            "app/sensitive_semicolonless_property.html",
+            b"<script>window.session.apiToken = 'public-test!punctuation?1234'</script>\n",
+        ),
+        (
             "app/sensitive_custom_property.css",
             b":root { --api-token: public-test!punctuation?1234; }\n",
+        ),
+        (
+            "app/sensitive_final_custom_property.css",
+            b":root { --api-token: public-test!punctuation?1234 }\n",
         ),
         (
             "app/composite_api_token.py",
@@ -482,9 +502,10 @@ def test_materializer_rejects_excessively_nested_structural_jwt(tmp_path: Path) 
     package = load_package_module()
     repo, _head = make_repo(tmp_path)
     nested_header_json = (
-        b'{"alg":' + (b"[" * 1100) + b"0" + (b"]" * 1100) + b"}"
+        b'{"alg":' + (b"[" * 3000) + b"0" + (b"]" * 3000) + b"}"
     )
     header = base64.urlsafe_b64encode(nested_header_json).rstrip(b"=")
+    assert len(header) <= 8192
     payload = base64.urlsafe_b64encode(b'{"sub":"subject"}').rstrip(b"=")
     target = repo / "app" / "excessively_nested_jwt.py"
     target.write_bytes(b"MESSAGE = '" + header + b"." + payload + b".x'\n")
@@ -492,12 +513,34 @@ def test_materializer_rejects_excessively_nested_structural_jwt(tmp_path: Path) 
     run_git(repo, "commit", "-m", "add excessively nested jwt")
     head = run_git(repo, "rev-parse", "HEAD").decode("ascii").strip()
 
-    with pytest.raises(package.PackageContractError):
+    with pytest.raises(package.PackageContractError, match="forbidden") as error:
         package.materialize_package(
             source_root=repo,
             source_head=head,
             package_id=PACKAGE_ID,
             output_root=tmp_path / "deep-jwt",
+            tooling_root=repo,
+        )
+    assert isinstance(error.value.__cause__, RecursionError)
+
+
+def test_materializer_rejects_oversized_jwt_shaped_candidate(tmp_path: Path) -> None:
+    package = load_package_module()
+    repo, _head = make_repo(tmp_path)
+    header = b"A" * 8193
+    payload = base64.urlsafe_b64encode(b'{"sub":"subject"}').rstrip(b"=")
+    target = repo / "app" / "oversized_jwt.py"
+    target.write_bytes(b"MESSAGE = '" + header + b"." + payload + b".x'\n")
+    run_git(repo, "add", "app/oversized_jwt.py")
+    run_git(repo, "commit", "-m", "add oversized jwt candidate")
+    head = run_git(repo, "rev-parse", "HEAD").decode("ascii").strip()
+
+    with pytest.raises(package.PackageContractError, match="forbidden"):
+        package.materialize_package(
+            source_root=repo,
+            source_head=head,
+            package_id=PACKAGE_ID,
+            output_root=tmp_path / "oversized-jwt",
             tooling_root=repo,
         )
 
@@ -533,7 +576,8 @@ def test_materializer_allows_only_necessary_non_concrete_jinja_secret_placeholde
         "api_token={{ issued_raw_token }}\n"
         "csrf_token={{ csrf_token }}\n"
         "private_key={{ revealed_secrets.private_key }}\n"
-        "preshared_key={{ revealed_secrets.preshared_key }}\n",
+        "preshared_key={{ revealed_secrets.preshared_key }}\n"
+        "{% set api_token %}{{ issued_raw_token }}{% endset %}\n",
         encoding="utf-8",
     )
     run_git(repo, "add", "app/approved-secret-placeholders.tpl")
@@ -565,11 +609,18 @@ def test_materializer_allows_ordinary_non_secret_code_and_jinja(tmp_path: Path) 
             b'<span data-display-name="{{ user.display_name }}">public-label!123456789</span>\n'
         ),
         "app/ordinary_template.tpl": b"display_label={{ user.display_name }}\n",
+        "app/ordinary_block_set.tpl": (
+            b"{% set display_label %}{{ user.display_name }}{% endset %}\n"
+        ),
         "app/ordinary_inline_script.html": (
-            b'<script>const display_label = "{{ user.display_name }}";</script>\n'
+            b'<script>const display_label = "{{ user.display_name }}"</script>\n'
+        ),
+        "app/ordinary_script_properties.html": (
+            b'<script>window.view.displayLabel = "{{ user.display_name }}";\n'
+            b'window.view.secondaryLabel = "{{ user.secondary_name }}"</script>\n'
         ),
         "app/ordinary_style.css": (
-            b":root { --display-label: {{ theme.display_label }}; }\n"
+            b":root { --display-label: {{ theme.display_label }} }\n"
         ),
     }
     for relative, body in ordinary_files.items():
