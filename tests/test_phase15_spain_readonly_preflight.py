@@ -4,6 +4,7 @@ import io
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 import threading
@@ -86,7 +87,9 @@ def run_collector(name: str):
 
 def collector_python_namespace() -> dict[str, object]:
     source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
-    match = re.search(r'(?ms)^exec "\$python_executable" -c \'\n(?P<body>.*)\n\'(?: .*)?$', source)
+    match = re.search(r'(?ms)^exec "\$python_executable" - "\$1" "\$2" "\$3" "\$4" "\$5" <<\'PHASE15_PY\'\n(?P<body>.*)\nPHASE15_PY$', source)
+    if match is None:
+        match = re.search(r'(?ms)^exec "\$python_executable" -c \'\n(?P<body>.*)\n\'(?: .*)?$', source)
     if match is None:
         pytest.fail("collector embedded Python not found")
     body = match.group("body")
@@ -101,6 +104,54 @@ def collector_helper(name: str):
     if not callable(helper):
         pytest.fail(f"missing collector helper: {name}")
     return helper
+
+
+def test_actual_shell_entrypoint_preserves_embedded_python_literals_and_exact_argv(tmp_path: Path):
+    harness = tmp_path / "collector_harness.py"
+    wrapper = tmp_path / "python-double"
+    expected = [PACKAGE_ID, MANIFEST_SHA256, COLLECTOR_SHA256, "phase15-preflight-test-001", "spain.test.invalid"]
+    harness.write_text(
+        "import sys\n"
+        "source = sys.stdin.read()\n"
+        "assert sys.argv[1] == '-'\n"
+        f"assert sys.argv[2:] == {expected!r}\n"
+        "compile(source, '<phase15-collector>', 'exec')\n"
+        "prefix = source.split('\\ntry:\\n    claim_id', 1)[0]\n"
+        "namespace = {'__name__': 'phase15_entrypoint_test'}\n"
+        "exec(compile(prefix, '<phase15-prefix>', 'exec'), namespace)\n"
+        "assert namespace['_network_conflicts']('192.0.2.0/24') is False\n"
+        "assert namespace['_nft_scalar_conflict']({'prefix': {'addr': '192.0.2.0', 'len': 24}}, 'saddr') is False\n"
+        "assert namespace['parse_awg2_container_probe']((0, b'true|4242|0\\n', b'', 'success')) == (4242, 0)\n"
+        "assert namespace['current_spain_identity']()['interface'] == 'awg0'\n"
+        "print('ENTRYPOINT_OK')\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    python_path = str(Path(sys.executable)).replace("\\", "/")
+    harness_path = str(harness).replace("\\", "/")
+    wrapper.write_text(
+        f"#!/usr/bin/env bash\nexec {shlex.quote(python_path)} {shlex.quote(harness_path)} \"$@\"\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    environment = os.environ.copy()
+    environment["PHASE15_PYTHON"] = str(wrapper).replace("\\", "/")
+    result = subprocess.run(
+        [str(BASH), str(COLLECTOR), *expected],
+        check=False,
+        capture_output=True,
+        text=True,
+        env=environment,
+        timeout=10,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "ENTRYPOINT_OK\n"
+    source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
+    assert "<<'PHASE15_PY'" in source
+    assert '"$1" "$2" "$3" "$4" "$5"' in source
+    assert ' -c \'\n' not in source
+    assert "prefix['addr']" in source and "prefix['len']" in source and ".decode('ascii')" in source
 
 
 def test_ready_fixture_emits_one_utf8_json_document_without_writes():
@@ -274,6 +325,41 @@ def test_collector_command_fails_closed_on_reader_exception_or_incomplete_eof(mo
         release.set()
 
 
+def test_collector_kill_and_wait_paths_are_bounded_and_fail_incomplete(monkeypatch: pytest.MonkeyPatch):
+    namespace = collector_python_namespace()
+    command = namespace["command"]
+    subprocess_module = namespace["subprocess"]
+
+    class RetainedProcess:
+        def __init__(self):
+            self.stdout = io.BytesIO()
+            self.stderr = io.BytesIO()
+            self.wait_timeouts: list[float | None] = []
+            self.kills = 0
+
+        def poll(self):
+            return 0
+
+        def wait(self, timeout=None):
+            self.wait_timeouts.append(timeout)
+            raise subprocess.TimeoutExpired("synthetic", timeout)
+
+        def kill(self):
+            self.kills += 1
+
+    process = RetainedProcess()
+    monkeypatch.setattr(subprocess_module, "Popen", lambda *_args, **_kwargs: process)
+    result = command(["synthetic"], timeout_seconds=0)
+
+    assert result[0] != 0
+    assert result[3] == "incomplete_output"
+    assert process.kills >= 1
+    assert process.wait_timeouts and all(timeout is not None and timeout <= 1 for timeout in process.wait_timeouts)
+    source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
+    command_source = source[source.index("def command") : source.index("def probe_ok")]
+    assert "process.wait()" not in command_source
+
+
 @pytest.mark.parametrize(
     ("return_code", "stderr", "expected"),
     [
@@ -343,7 +429,41 @@ def test_phase13_current_spain_identity_and_dedicated_docker_inventory_are_exact
     ):
         assert literal in source
     assert '[SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "ps", "-a", "--format", "{{.Names}}"]' in source
-    assert '[SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "network", "ls", "-q"]' in source
+    assert '[SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "network", "ls", "-q", "--no-trunc"]' in source
+
+
+def test_candidate_inventory_combines_system_and_dedicated_docker_with_exact_absence_semantics():
+    classify = collector_helper("classify_spain_docker_sources")
+    success = "success"
+    unavailable = (127, b"", b"", "unavailable")
+    failed = (126, b"", b"permission denied\n", "launch_failed")
+    clean_inventory = (0, b"other\n", b"", success)
+    candidate_inventory = (0, b"amn2-spain-awg3\n", b"", success)
+    network_ids = (0, (b"a" * 64) + b"\n", b"", success)
+    clean_subnets = [(0, b"172.28.0.0/16\n", b"", success)]
+    conflict_subnets = [(0, b"172.29.252.8/29\n", b"", success)]
+    dedicated = (clean_inventory, network_ids, clean_subnets)
+
+    assert classify((unavailable, None, []), dedicated) == ("pass", "free", "free")
+    assert classify((candidate_inventory, network_ids, clean_subnets), dedicated) == ("pass", "stop", "free")
+    assert classify((clean_inventory, network_ids, conflict_subnets), dedicated) == ("pass", "free", "stop")
+    assert classify((failed, None, []), dedicated) == ("stop", "stop", "stop")
+    assert classify((unavailable, None, []), (unavailable, None, [])) == ("stop", "stop", "stop")
+
+    source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
+    assert '["docker", "ps", "-a", "--format", "{{.Names}}"]' in source
+    assert '["docker", "network", "ls", "-q", "--no-trunc"]' in source
+    assert '[SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "network", "ls", "-q", "--no-trunc"]' in source
+
+
+def test_strict_docker_network_ids_reject_real_default_truncation():
+    parse_ids = collector_helper("_docker_network_ids")
+    with pytest.raises(ValueError, match="docker network inventory"):
+        parse_ids((0, b"0123456789ab\n", b"", "success"))
+
+    fixture = json.loads((FIXTURES / "ready" / "observations.json").read_text(encoding="utf-8"))
+    assert fixture["observations"]["container_capability"]["raw"] == "system-and-dedicated-docker-inventories-readable"
+    assert fixture["observations"]["container_name"]["raw"] == "system-and-dedicated-stopped-container-inventories-free"
 
 
 def test_systemd_exit_one_is_allowed_only_for_exact_degraded_state():
@@ -360,6 +480,11 @@ def test_phase13_bot_identity_requires_exact_inactive_disabled_state():
     assert classify((0, b"inactive\n", b"", success), (0, b"disabled\n", b"", success)) == "pass"
     assert classify((0, b"active\n", b"", success), (0, b"enabled\n", b"", success)) == "stop"
     assert classify((0, b"inactive\n", b"warning\n", success), (0, b"disabled\n", b"", success)) == "stop"
+    source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
+    assert '["systemctl", "show", CURRENT_BOT_UNIT, "--property=ActiveState", "--value"]' in source
+    assert '["systemctl", "show", CURRENT_BOT_UNIT, "--property=UnitFileState", "--value"]' in source
+    assert '["systemctl", "is-active", CURRENT_BOT_UNIT]' not in source
+    assert '["systemctl", "is-enabled", CURRENT_BOT_UNIT]' not in source
 
 
 def test_firewall_fallback_and_parsing_are_fail_closed():
@@ -579,29 +704,43 @@ def test_recovery_marker_scan_uses_explicit_stat_and_fails_closed(monkeypatch: p
 def test_awg2_health_requires_current_container_netns_interface_and_fresh_strict_handshake(handshakes: bytes, expected: str):
     classify = collector_helper("classify_awg2_health")
     success = "success"
-    container = (0, b"true|4242\n", b"", success)
+    container = (0, b"true|4242|0\n", b"", success)
     interface = (0, b"7: awg0: <POINTOPOINT,UP>\n", b"", success)
     peer_state = (0, handshakes, b"", success)
 
-    assert classify(container, interface, peer_state, now_epoch=1_700_000_000) == expected
+    assert classify(container, interface, peer_state, container, now_epoch=1_700_000_000) == expected
 
 
 def test_awg2_health_fails_closed_on_any_probe_error():
     classify = collector_helper("classify_awg2_health")
     failed = (1, b"", b"failed", "command_failed")
-    good_container = (0, b"true|4242\n", b"", "success")
+    good_container = (0, b"true|4242|0\n", b"", "success")
     good_interface = (0, b"7: awg0: <POINTOPOINT,UP>\n", b"", "success")
     fresh = (0, b"A" * 43 + b"=\t1699999940\n", b"", "success")
 
-    assert classify(failed, good_interface, fresh, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_container, failed, fresh, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_container, good_interface, failed, now_epoch=1_700_000_000) == "stop"
-    assert classify((0, b"true|4242\n", b"warning\n", "success"), good_interface, fresh, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_container, (0, b"7: awg0: <POINTOPOINT,UP>\n", b"warning\n", "success"), fresh, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_container, good_interface, (0, fresh[1], b"warning\n", "success"), now_epoch=1_700_000_000) == "stop"
-    assert classify(good_container, (0, b"not-awg0\n", b"", "success"), fresh, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_container, good_interface, (0, fresh[1].rstrip(b"\n"), b"", "success"), now_epoch=1_700_000_000) == "stop"
-    assert classify((0, b"false|0\n", b"", "success"), good_interface, fresh, now_epoch=1_700_000_000) == "stop"
+    assert classify(failed, good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_container, failed, fresh, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_container, good_interface, failed, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_container, good_interface, fresh, failed, now_epoch=1_700_000_000) == "stop"
+    assert classify((0, b"true|4242|0\n", b"warning\n", "success"), good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_container, (0, b"7: awg0: <POINTOPOINT,UP>\n", b"warning\n", "success"), fresh, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_container, good_interface, (0, fresh[1], b"warning\n", "success"), good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_container, (0, b"not-awg0\n", b"", "success"), fresh, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_container, good_interface, (0, fresh[1].rstrip(b"\n"), b"", "success"), good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify((0, b"false|0|0\n", b"", "success"), good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
+
+
+@pytest.mark.parametrize("after", [b"true|4243|0\n", b"true|4242|1\n", b"false|4242|0\n"])
+def test_awg2_health_rejects_pid_restart_or_running_state_race(after: bytes):
+    classify = collector_helper("classify_awg2_health")
+    success = "success"
+    before = (0, b"true|4242|0\n", b"", success)
+    interface = (0, b"7: awg0: <POINTOPOINT,UP>\n", b"", success)
+    handshakes = (0, b"A" * 43 + b"=\t1699999940\n", b"", success)
+
+    assert classify(before, interface, handshakes, (0, after, b"", success), now_epoch=1_700_000_000) == "stop"
+    source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
+    assert source.count('"{{.State.Running}}|{{.State.Pid}}|{{.RestartCount}}"') == 2
 
 
 def run_powershell(body: str):
@@ -637,7 +776,7 @@ def test_runner_rejects_missing_future_claim_before_any_acceptance():
     assert result.stdout == "false"
 
 
-def test_runner_validates_claim_lifetime_against_single_captured_started_at(tmp_path: Path):
+def test_runner_validates_claim_lifetime_against_fresh_pre_reservation_time(tmp_path: Path):
     claim_path = valid_runner_claim(
         tmp_path,
         issued_at="2026-08-16T00:00:00Z",
@@ -657,8 +796,10 @@ def test_runner_validates_claim_lifetime_against_single_captured_started_at(tmp_
     source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
     main = source[source.index("function Invoke-Phase15RunnerMain") :]
     assert main.index("$startedAt =") < main.index("Read-Phase15ManifestArtifact")
-    assert main.index("$startedAt =") < main.index("Test-Phase15FutureClaim")
-    assert "-At $startedAt" in main
+    assert main.index("Reconcile-Phase15Transaction") < main.index("$reservationAt =")
+    assert main.index("$reservationAt =") < main.index("Test-Phase15FutureClaim")
+    assert "-At $reservationAt" in main
+    assert "-ReservedAt $reservationAt" in main
 
 
 def valid_runner_claim(tmp_path: Path, **overrides: object) -> Path:
@@ -1163,6 +1304,65 @@ def test_claim_lock_is_exclusive_for_whole_transaction_and_contender_cannot_reco
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == "claim_replay|true"
+
+
+def test_journal_durable_writer_surfaces_mid_write_failure_before_flush():
+    result = run_powershell(
+        "$script:count = 0; $script:flushed = $false; "
+        "$stream = [pscustomobject]@{}; "
+        "$stream | Add-Member -MemberType ScriptMethod -Name WriteByte -Value {param($value) if ($script:count -eq 3) { throw 'synthetic_write_failure' }; $script:count++}; "
+        "$stream | Add-Member -MemberType ScriptMethod -Name Flush -Value {param($durable) $script:flushed = $true}; "
+        "$message = ''; try { Write-Phase15DurableBytes -Stream $stream -Bytes ([byte[]](1,2,3,4,5)) } catch { $message = $_.Exception.Message }; "
+        "[Console]::Out.Write(\"$message|$script:count|$($script:flushed.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "synthetic_write_failure" in result.stdout
+    assert result.stdout.endswith("|3|false")
+
+
+def test_initial_journal_publish_is_atomic_and_cleans_stale_owned_temp(tmp_path: Path):
+    state_root = str(tmp_path / "state").replace("'", "''")
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        f"$lock = Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; "
+        f"$transactionRoot = Join-Path '{state_root}' 'transactions'; $null = [IO.Directory]::CreateDirectory($transactionRoot); "
+        f"$journalPath = Get-Phase15TransactionPath -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; "
+        "$stale = $journalPath + '.create-deadbeefdeadbeefdeadbeefdeadbeef.tmp'; [IO.File]::WriteAllBytes($stale, [byte[]](1,2,3)); "
+        f"$tx = Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' "
+        f"-ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
+        "$journal = ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath; $staleGone = -not (Test-Path -LiteralPath $stale); $lock.Stream.Dispose(); "
+        "[Console]::Out.Write(\"$($staleGone.ToString().ToLowerInvariant())|$($journal.phase)\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|owned"
+    source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
+    durable = source[source.index("function Write-Phase15DurableBytes") : source.index("function Write-Phase15AtomicCreateNewJson")]
+    atomic = source[source.index("function Write-Phase15AtomicCreateNewJson") : source.index("function Write-Phase15AtomicJson")]
+    assert "Flush($true)" in durable
+    assert "Write-Phase15DurableBytes -Stream $stream -Bytes $bytes" in atomic
+    assert "[IO.File]::Move($temporaryPath, $fullPath)" in atomic
+    starter = source[source.index("function Start-Phase15Transaction") : source.index("function Set-Phase15TransactionPhase")]
+    assert "Write-Phase15AtomicCreateNewJson -Path $journalPath -Value $journal" in starter
+
+
+def test_atomic_journal_publish_never_overwrites_existing_final_and_cleans_temp(tmp_path: Path):
+    journal_path = tmp_path / "transaction.json"
+    original = b'{"owner":"existing"}\n'
+    journal_path.write_bytes(original)
+    escaped = str(journal_path).replace("'", "''")
+    result = run_powershell(
+        f"$failed = $false; try {{ Write-Phase15AtomicCreateNewJson -Path '{escaped}' -Value ([ordered]@{{owner='contender'}}) }} catch {{ $failed = $true }}; "
+        f"$bytes = [IO.File]::ReadAllBytes('{escaped}'); $temps = @([IO.Directory]::GetFiles((Split-Path -Parent '{escaped}'), 'transaction.json.create-*.tmp')); "
+        "[Console]::Out.Write(\"$($failed.ToString().ToLowerInvariant())|$([Convert]::ToBase64String($bytes))|$($temps.Count)\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    failed, encoded, temp_count = result.stdout.split("|", 2)
+    assert failed == "true"
+    assert base64.b64decode(encoded) == original
+    assert temp_count == "0"
 
 
 def test_outcome_slot_is_atomically_reserved_and_claim_owned(tmp_path: Path):
