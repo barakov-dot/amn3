@@ -410,9 +410,7 @@ function Invoke-Phase15OneSshTransport {
 
 function Write-Phase15CreateNewJson {
     param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][object]$Value)
-    $bytes = [Text.UTF8Encoding]::new($false).GetBytes((ConvertTo-Phase15CanonicalJsonText -Value $Value) + "`n")
-    $stream = [IO.FileStream]::new($Path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
-    try { $stream.Write($bytes, 0, $bytes.Length) } finally { $stream.Dispose() }
+    Write-Phase15AtomicCreateNewJson -Path $Path -Value $Value
 }
 
 function Write-Phase15DurableBytes {
@@ -610,10 +608,6 @@ function Start-Phase15Transaction {
         $createdLifecycle = Reserve-Phase15Claim -LifecycleRoot $lifecycleRoot -ClaimId $ClaimId -ReservedAt $ReservedAt
         return [pscustomobject]@{ JournalPath = $journalPath; LifecyclePath = $createdLifecycle; ReservationPath = $createdReservation; StagedPath = $stagedPath }
     } catch {
-        if (Test-Phase15OutcomeOwnership -ReservationPath $reservationPath -ClaimId $ClaimId) { [IO.File]::Delete($reservationPath) }
-        $currentLifecycle = ConvertFrom-Phase15CanonicalJsonFile -Path $lifecyclePath
-        if ($null -ne $currentLifecycle -and $currentLifecycle.claim_id -ceq $ClaimId -and $currentLifecycle.status -ceq 'reserved') { [IO.File]::Delete($lifecyclePath) }
-        if (Test-Path -LiteralPath $journalPath -PathType Leaf) { [IO.File]::Delete($journalPath) }
         throw
     }
 }

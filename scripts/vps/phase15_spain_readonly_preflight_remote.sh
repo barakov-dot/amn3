@@ -28,14 +28,26 @@ CURRENT_APPLICATION_ROOT = "/opt/amn2-spain"
 CURRENT_DATABASE_PATH = "/var/lib/amn2-spain/amn2.sqlite3"
 CURRENT_AWG2_CONTAINER = "amn2-spain-awg"
 CURRENT_AWG2_INTERFACE = "awg0"
+CURRENT_AWG2_OWNER_UNIT = "amn2-spain-docker.service"
 CURRENT_BOT_UNIT = "amn2-spain-bot.service"
+SYSTEM_DOCKER = "/usr/bin/docker"
+SYSTEM_DOCKER_HOST = "unix:///var/run/docker.sock"
 SPAIN_DOCKER = "/opt/amn2-spain/docker/bin/docker"
 SPAIN_DOCKER_HOST = "unix:///run/amn2-spain-docker/docker.sock"
+PODMAN = "/usr/bin/podman"
+PODMAN_HOST = "unix:///run/podman/podman.sock"
 CLAIM_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,127}$")
 EXPECTED_HOST_RE = re.compile(r"^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 HANDSHAKE_RE = re.compile(rb"^[A-Za-z0-9+/]{43}=\t([0-9]+)$")
 MAXIMUM_OUTPUT_BYTES = 65536
+MAX_CONTAINER_ROWS = 512
+MAX_NETWORK_IDS = 256
+MAX_RECOVERY_ENTRIES = 4096
+MAX_COMMAND_INVOCATIONS = 96
+COLLECTOR_WORK_SECONDS = 45
+_collector_deadline = time.monotonic() + COLLECTOR_WORK_SECONDS
+_command_invocations = 0
 EXPECTED_NAMES = {
     "application_state", "architecture", "awg2_health", "backup_capability",
     "bridge_amn2sp3br0", "config_path", "container_capability",
@@ -52,7 +64,15 @@ CONFLICT_NAMES = {
 }
 
 def command(parts, maximum_output_bytes=MAXIMUM_OUTPUT_BYTES, timeout_seconds=8):
+    global _command_invocations
+    remaining_budget = _collector_deadline - time.monotonic()
+    if remaining_budget <= 0 or MAX_COMMAND_INVOCATIONS <= _command_invocations:
+        return 124, b"", b"", "work_budget_exceeded"
+    _command_invocations += 1
+    timeout_seconds = min(timeout_seconds, remaining_budget)
     environment = os.environ.copy()
+    for selector in ("DOCKER_HOST", "DOCKER_CONTEXT", "CONTAINER_HOST", "CONTAINER_CONNECTION", "PODMAN_HOST", "PODMAN_CONNECTION"):
+        environment.pop(selector, None)
     environment["LC_ALL"] = "C"
     try:
         process = subprocess.Popen(parts, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=environment)
@@ -89,7 +109,7 @@ def command(parts, maximum_output_bytes=MAXIMUM_OUTPUT_BYTES, timeout_seconds=8)
     ]
     for thread in threads:
         thread.start()
-    deadline = time.monotonic() + timeout_seconds
+    deadline = min(time.monotonic() + timeout_seconds, _collector_deadline)
     disposition = "success"
     while process.poll() is None:
         if overflow.is_set():
@@ -161,6 +181,8 @@ def classify_container_inventory(results):
             if raw and (not raw.endswith(b"\n") or b"\r" in raw):
                 return "stop", "stop"
             lines = raw.decode("utf-8", errors="strict").splitlines()
+            if MAX_CONTAINER_ROWS < len(names) + len(lines):
+                return "stop", "stop"
             if any(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", line) is None for line in lines):
                 return "stop", "stop"
             names.extend(lines)
@@ -187,6 +209,8 @@ def _docker_network_ids(probe):
     if raw and (not raw.endswith(b"\n") or b"\r" in raw):
         raise ValueError("docker network inventory")
     identifiers = raw.decode("ascii", errors="strict").splitlines()
+    if MAX_NETWORK_IDS < len(identifiers):
+        raise ValueError("network inventory limit")
     if any(re.fullmatch(r"[0-9a-f]{64}", item) is None for item in identifiers) or len(identifiers) != len(set(identifiers)):
         raise ValueError("docker network inventory")
     return identifiers
@@ -213,48 +237,54 @@ def classify_dedicated_spain_docker(inventory_probe, network_list_probe, network
     except (UnicodeDecodeError, ValueError, TypeError):
         return stopped
 
-def classify_spain_docker_sources(system_source, dedicated_source):
+def classify_spain_docker_sources(system_source, dedicated_source, podman_source):
     stopped = ("stop", "stop", "stop")
     system_inventory, system_networks, system_inspects = system_source
-    if system_inventory[3] == "unavailable":
-        if system_networks is not None or system_inspects:
-            return stopped
-        system_result = ("absent", "free", "free")
-    else:
-        if system_networks is None:
-            return stopped
-        system_result = classify_dedicated_spain_docker(system_inventory, system_networks, system_inspects)
+    if system_networks is None:
+        return stopped
+    system_result = classify_dedicated_spain_docker(system_inventory, system_networks, system_inspects)
     dedicated_inventory, dedicated_networks, dedicated_inspects = dedicated_source
     if dedicated_networks is None:
         return stopped
     dedicated_result = classify_dedicated_spain_docker(dedicated_inventory, dedicated_networks, dedicated_inspects)
-    if system_result[0] == "stop" or dedicated_result[0] != "pass":
+    podman_inventory, podman_networks, podman_inspects = podman_source
+    if podman_inventory[3] == "unavailable":
+        if podman_networks is not None or podman_inspects:
+            return stopped
+        podman_result = ("absent", "free", "free")
+    else:
+        if podman_networks is None:
+            return stopped
+        podman_result = classify_dedicated_spain_docker(podman_inventory, podman_networks, podman_inspects)
+    if system_result[0] != "pass" or dedicated_result[0] != "pass" or podman_result[0] == "stop":
         return stopped
     return (
         "pass",
-        "stop" if "stop" in {system_result[1], dedicated_result[1]} else "free",
-        "stop" if "stop" in {system_result[2], dedicated_result[2]} else "free",
+        "stop" if "stop" in {system_result[1], dedicated_result[1], podman_result[1]} else "free",
+        "stop" if "stop" in {system_result[2], dedicated_result[2], podman_result[2]} else "free",
     )
 
-def production_docker_source(dedicated):
-    if dedicated:
-        inventory = command([SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "ps", "-a", "--format", "{{.Names}}"])
-        if inventory[3] == "unavailable":
-            return inventory, None, []
-        networks = command([SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "network", "ls", "-q", "--no-trunc"])
+def production_container_source(engine):
+    if engine == "system-docker":
+        prefix = [SYSTEM_DOCKER, "--host", SYSTEM_DOCKER_HOST]
+        subnet_format = "{{range .IPAM.Config}}{{println .Subnet}}{{end}}"
+    elif engine == "spain-docker":
+        prefix = [SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST]
+        subnet_format = "{{range .IPAM.Config}}{{println .Subnet}}{{end}}"
+    elif engine == "podman":
+        prefix = [PODMAN, "--url", PODMAN_HOST]
+        subnet_format = "{{range .Subnets}}{{println .Subnet}}{{end}}"
     else:
-        inventory = command(["docker", "ps", "-a", "--format", "{{.Names}}"])
-        if inventory[3] == "unavailable":
-            return inventory, None, []
-        networks = command(["docker", "network", "ls", "-q", "--no-trunc"])
+        raise ValueError("container engine")
+    inventory = command(prefix + ["ps", "-a", "--format", "{{.Names}}"])
+    if inventory[3] == "unavailable":
+        return inventory, None, []
+    networks = command(prefix + ["network", "ls", "-q", "--no-trunc"])
     try:
         identifiers = _docker_network_ids(networks)
     except (UnicodeDecodeError, ValueError):
         return inventory, networks, []
-    if dedicated:
-        inspections = [command([SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "network", "inspect", "--format", "{{range .IPAM.Config}}{{println .Subnet}}{{end}}", network_id]) for network_id in identifiers]
-    else:
-        inspections = [command(["docker", "network", "inspect", "--format", "{{range .IPAM.Config}}{{println .Subnet}}{{end}}", network_id]) for network_id in identifiers]
+    inspections = [command(prefix + ["network", "inspect", "--format", subnet_format, network_id]) for network_id in identifiers]
     return inventory, networks, inspections
 
 def classify_systemd_capability(probe):
@@ -688,8 +718,10 @@ def parse_awg2_container_probe(probe):
         return None
     return int(match.group(1).decode('ascii')), int(match.group(2).decode('ascii'))
 
-def classify_awg2_health(initial_probe, interface_probe, handshake_probe, final_probe, now_epoch):
-    if not all(probe_ok(probe) for probe in (initial_probe, interface_probe, handshake_probe, final_probe)):
+def classify_awg2_health(owner_probe, initial_probe, interface_probe, handshake_probe, final_probe, now_epoch):
+    if not all(probe_ok(probe) for probe in (owner_probe, initial_probe, interface_probe, handshake_probe, final_probe)):
+        return "stop"
+    if owner_probe[1] != b"active\n":
         return "stop"
     container_state = parse_awg2_container_probe(initial_probe)
     if initial_probe[1] != final_probe[1]:
@@ -734,6 +766,7 @@ def resource_path_state(path):
 def scan_recovery_markers(roots):
     marker_tokens = ("incomplete", "pending", "recovery")
     markers = []
+    entry_count = 0
     pending = [pathlib.Path(root) for root in roots]
     try:
         while pending:
@@ -744,6 +777,9 @@ def scan_recovery_markers(roots):
                 continue
             with iterator:
                 for entry in iterator:
+                    entry_count += 1
+                    if MAX_RECOVERY_ENTRIES < entry_count:
+                        return "stop", "entry_limit_exceeded"
                     stat_result = entry.stat(follow_symlinks=False)
                     mode = stat_result.st_mode
                     if entry.is_symlink():
@@ -785,16 +821,18 @@ def production_observations():
     values["backup_capability"] = observed("pass" if backup_ok else "stop", f"backup-ready:{backup_ok}")
     systemd_probe = command(["systemctl", "is-system-running"])
     values["service_capability"] = observed(classify_systemd_capability(systemd_probe), systemd_probe[1] + systemd_probe[2])
-    system_docker_source = production_docker_source(False)
-    dedicated_docker_source = production_docker_source(True)
-    container_capability, container_name, docker_cidr_state = classify_spain_docker_sources(system_docker_source, dedicated_docker_source)
+    system_docker_source = production_container_source("system-docker")
+    dedicated_docker_source = production_container_source("spain-docker")
+    podman_source = production_container_source("podman")
+    container_capability, container_name, docker_cidr_state = classify_spain_docker_sources(system_docker_source, dedicated_docker_source, podman_source)
     inventory_raw = b"".join(
         probe[1] + probe[2]
-        for source in (system_docker_source, dedicated_docker_source)
+        for source in (system_docker_source, dedicated_docker_source, podman_source)
         for probe in ([source[0]] + ([source[1]] if source[1] is not None else []) + source[2])
     )
     values["container_capability"] = observed(container_capability, inventory_raw)
     values["container_name"] = observed(container_name, inventory_raw)
+    awg_owner = command(["systemctl", "show", CURRENT_AWG2_OWNER_UNIT, "--property=ActiveState", "--value"])
     awg_unit = command([SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "inspect", "--format", "{{.State.Running}}|{{.State.Pid}}|{{.RestartCount}}", CURRENT_AWG2_CONTAINER])
     awg_container_state = parse_awg2_container_probe(awg_unit)
     if awg_container_state is None:
@@ -805,7 +843,7 @@ def production_observations():
         awg_link = command(["nsenter", netns, "ip", "-o", "link", "show", "dev", CURRENT_AWG2_INTERFACE])
         awg_handshakes = command(["nsenter", netns, "/usr/bin/awg", "show", CURRENT_AWG2_INTERFACE, "latest-handshakes"])
     awg_final = command([SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "inspect", "--format", "{{.State.Running}}|{{.State.Pid}}|{{.RestartCount}}", CURRENT_AWG2_CONTAINER])
-    values["awg2_health"] = observed(classify_awg2_health(awg_unit, awg_link, awg_handshakes, awg_final, int(time.time())), awg_unit[1] + awg_unit[2] + awg_link[1] + awg_link[2] + awg_handshakes[1] + awg_handshakes[2] + awg_final[1] + awg_final[2])
+    values["awg2_health"] = observed(classify_awg2_health(awg_owner, awg_unit, awg_link, awg_handshakes, awg_final, int(time.time())), awg_owner[1] + awg_owner[2] + awg_unit[1] + awg_unit[2] + awg_link[1] + awg_link[2] + awg_handshakes[1] + awg_handshakes[2] + awg_final[1] + awg_final[2])
     bot_active_probe = command(["systemctl", "show", CURRENT_BOT_UNIT, "--property=ActiveState", "--value"])
     bot_enabled_probe = command(["systemctl", "show", CURRENT_BOT_UNIT, "--property=UnitFileState", "--value"])
     values["telegram_prerequisites"] = observed(classify_phase13_bot_unit(bot_active_probe, bot_enabled_probe), bot_active_probe[1] + bot_active_probe[2] + bot_enabled_probe[1] + bot_enabled_probe[2])

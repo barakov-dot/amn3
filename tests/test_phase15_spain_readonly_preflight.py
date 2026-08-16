@@ -392,7 +392,6 @@ def test_container_inventory_includes_stopped_objects_and_errors_fail_closed():
     assert stderr_on_success == ("stop", "stop")
     assert malformed_name == ("stop", "stop")
     assert duplicate_name == ("stop", "stop")
-    assert '[SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "ps", "-a", "--format", "{{.Names}}"]' in require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
 
 
 def test_phase13_current_spain_identity_and_dedicated_docker_inventory_are_exact():
@@ -428,11 +427,9 @@ def test_phase13_current_spain_identity_and_dedicated_docker_inventory_are_exact
         'SPAIN_DOCKER_HOST = "unix:///run/amn2-spain-docker/docker.sock"',
     ):
         assert literal in source
-    assert '[SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "ps", "-a", "--format", "{{.Names}}"]' in source
-    assert '[SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "network", "ls", "-q", "--no-trunc"]' in source
 
 
-def test_candidate_inventory_combines_system_and_dedicated_docker_with_exact_absence_semantics():
+def test_candidate_inventory_combines_explicit_local_system_spain_and_podman_engines():
     classify = collector_helper("classify_spain_docker_sources")
     success = "success"
     unavailable = (127, b"", b"", "unavailable")
@@ -444,16 +441,77 @@ def test_candidate_inventory_combines_system_and_dedicated_docker_with_exact_abs
     conflict_subnets = [(0, b"172.29.252.8/29\n", b"", success)]
     dedicated = (clean_inventory, network_ids, clean_subnets)
 
-    assert classify((unavailable, None, []), dedicated) == ("pass", "free", "free")
-    assert classify((candidate_inventory, network_ids, clean_subnets), dedicated) == ("pass", "stop", "free")
-    assert classify((clean_inventory, network_ids, conflict_subnets), dedicated) == ("pass", "free", "stop")
-    assert classify((failed, None, []), dedicated) == ("stop", "stop", "stop")
-    assert classify((unavailable, None, []), (unavailable, None, [])) == ("stop", "stop", "stop")
+    system = (clean_inventory, network_ids, clean_subnets)
 
-    source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
-    assert '["docker", "ps", "-a", "--format", "{{.Names}}"]' in source
-    assert '["docker", "network", "ls", "-q", "--no-trunc"]' in source
-    assert '[SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "network", "ls", "-q", "--no-trunc"]' in source
+    assert classify(system, dedicated, (unavailable, None, [])) == ("pass", "free", "free")
+    assert classify((candidate_inventory, network_ids, clean_subnets), dedicated, (unavailable, None, [])) == ("pass", "stop", "free")
+    assert classify(system, dedicated, (candidate_inventory, network_ids, clean_subnets)) == ("pass", "stop", "free")
+    assert classify((clean_inventory, network_ids, conflict_subnets), dedicated, (unavailable, None, [])) == ("pass", "free", "stop")
+    assert classify(system, dedicated, (failed, None, [])) == ("stop", "stop", "stop")
+    assert classify((unavailable, None, []), dedicated, (unavailable, None, [])) == ("stop", "stop", "stop")
+
+
+def test_container_engine_commands_bind_local_endpoints_and_inventory_all_rows_and_networks():
+    namespace = collector_python_namespace()
+    production_source = namespace.get("production_container_source")
+    assert callable(production_source), "missing explicit container-engine inventory"
+    network_id = "a" * 64
+    calls: list[list[str]] = []
+
+    def local_double(parts, **_kwargs):
+        calls.append(parts)
+        if "ps" in parts:
+            return 0, b"other-container\n", b"", "success"
+        if parts[-3:] == ["ls", "-q", "--no-trunc"]:
+            return 0, (network_id + "\n").encode(), b"", "success"
+        return 0, b"172.28.0.0/16\n", b"", "success"
+
+    namespace["command"] = local_double
+    for engine in ("system-docker", "spain-docker", "podman"):
+        inventory, networks, inspections = production_source(engine)
+        assert inventory[3] == networks[3] == inspections[0][3] == "success"
+
+    assert calls == [
+        ["/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "ps", "-a", "--format", "{{.Names}}"],
+        ["/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "network", "ls", "-q", "--no-trunc"],
+        ["/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "network", "inspect", "--format", "{{range .IPAM.Config}}{{println .Subnet}}{{end}}", network_id],
+        ["/opt/amn2-spain/docker/bin/docker", "--host", "unix:///run/amn2-spain-docker/docker.sock", "ps", "-a", "--format", "{{.Names}}"],
+        ["/opt/amn2-spain/docker/bin/docker", "--host", "unix:///run/amn2-spain-docker/docker.sock", "network", "ls", "-q", "--no-trunc"],
+        ["/opt/amn2-spain/docker/bin/docker", "--host", "unix:///run/amn2-spain-docker/docker.sock", "network", "inspect", "--format", "{{range .IPAM.Config}}{{println .Subnet}}{{end}}", network_id],
+        ["/usr/bin/podman", "--url", "unix:///run/podman/podman.sock", "ps", "-a", "--format", "{{.Names}}"],
+        ["/usr/bin/podman", "--url", "unix:///run/podman/podman.sock", "network", "ls", "-q", "--no-trunc"],
+        ["/usr/bin/podman", "--url", "unix:///run/podman/podman.sock", "network", "inspect", "--format", "{{range .Subnets}}{{println .Subnet}}{{end}}", network_id],
+    ]
+
+
+def test_command_removes_ambient_container_connection_selectors(monkeypatch: pytest.MonkeyPatch):
+    namespace = collector_python_namespace()
+    command = namespace["command"]
+    captured: dict[str, str] = {}
+    for name in ("DOCKER_HOST", "DOCKER_CONTEXT", "CONTAINER_HOST", "CONTAINER_CONNECTION", "PODMAN_HOST", "PODMAN_CONNECTION"):
+        monkeypatch.setenv(name, "tcp://remote.invalid:2375")
+
+    class Process:
+        stdout = io.BytesIO()
+        stderr = io.BytesIO()
+
+        def poll(self):
+            return 0
+
+        def wait(self, timeout=None):
+            return 0
+
+        def kill(self):
+            pass
+
+    def popen(_parts, **kwargs):
+        captured.update(kwargs["env"])
+        return Process()
+
+    monkeypatch.setattr(namespace["subprocess"], "Popen", popen)
+    assert command(["synthetic"])[3] == "success"
+    assert captured["LC_ALL"] == "C"
+    assert not set(captured).intersection({"DOCKER_HOST", "DOCKER_CONTEXT", "CONTAINER_HOST", "CONTAINER_CONNECTION", "PODMAN_HOST", "PODMAN_CONNECTION"})
 
 
 def test_strict_docker_network_ids_reject_real_default_truncation():
@@ -462,8 +520,8 @@ def test_strict_docker_network_ids_reject_real_default_truncation():
         parse_ids((0, b"0123456789ab\n", b"", "success"))
 
     fixture = json.loads((FIXTURES / "ready" / "observations.json").read_text(encoding="utf-8"))
-    assert fixture["observations"]["container_capability"]["raw"] == "system-and-dedicated-docker-inventories-readable"
-    assert fixture["observations"]["container_name"]["raw"] == "system-and-dedicated-stopped-container-inventories-free"
+    assert fixture["observations"]["container_capability"]["raw"] == "local-system-docker-spain-docker-and-podman-inventories-readable"
+    assert fixture["observations"]["container_name"]["raw"] == "all-local-engine-stopped-container-inventories-free"
 
 
 def test_systemd_exit_one_is_allowed_only_for_exact_degraded_state():
@@ -705,29 +763,50 @@ def test_awg2_health_requires_current_container_netns_interface_and_fresh_strict
     classify = collector_helper("classify_awg2_health")
     success = "success"
     container = (0, b"true|4242|0\n", b"", success)
+    owner = (0, b"active\n", b"", success)
     interface = (0, b"7: awg0: <POINTOPOINT,UP>\n", b"", success)
     peer_state = (0, handshakes, b"", success)
 
-    assert classify(container, interface, peer_state, container, now_epoch=1_700_000_000) == expected
+    assert classify(owner, container, interface, peer_state, container, now_epoch=1_700_000_000) == expected
 
 
 def test_awg2_health_fails_closed_on_any_probe_error():
     classify = collector_helper("classify_awg2_health")
     failed = (1, b"", b"failed", "command_failed")
     good_container = (0, b"true|4242|0\n", b"", "success")
+    good_owner = (0, b"active\n", b"", "success")
     good_interface = (0, b"7: awg0: <POINTOPOINT,UP>\n", b"", "success")
     fresh = (0, b"A" * 43 + b"=\t1699999940\n", b"", "success")
 
-    assert classify(failed, good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_container, failed, fresh, good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_container, good_interface, failed, good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_container, good_interface, fresh, failed, now_epoch=1_700_000_000) == "stop"
-    assert classify((0, b"true|4242|0\n", b"warning\n", "success"), good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_container, (0, b"7: awg0: <POINTOPOINT,UP>\n", b"warning\n", "success"), fresh, good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_container, good_interface, (0, fresh[1], b"warning\n", "success"), good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_container, (0, b"not-awg0\n", b"", "success"), fresh, good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_container, good_interface, (0, fresh[1].rstrip(b"\n"), b"", "success"), good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify((0, b"false|0|0\n", b"", "success"), good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(failed, good_container, good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, failed, good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, failed, fresh, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, good_interface, failed, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, good_interface, fresh, failed, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, (0, b"true|4242|0\n", b"warning\n", "success"), good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, (0, b"7: awg0: <POINTOPOINT,UP>\n", b"warning\n", "success"), fresh, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, good_interface, (0, fresh[1], b"warning\n", "success"), good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, (0, b"not-awg0\n", b"", "success"), fresh, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, good_interface, (0, fresh[1].rstrip(b"\n"), b"", "success"), good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, (0, b"false|0|0\n", b"", "success"), good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
+
+
+@pytest.mark.parametrize("owner", [b"inactive\n", b"failed\n", b"unknown\n", b"active\r\n"])
+def test_awg2_health_requires_exact_active_phase13_docker_owner_unit(owner: bytes):
+    classify = collector_helper("classify_awg2_health")
+    success = "success"
+    assert classify(
+        (0, owner, b"", success),
+        (0, b"true|4242|0\n", b"", success),
+        (0, b"7: awg0: <POINTOPOINT,UP>\n", b"", success),
+        (0, b"A" * 43 + b"=\t1699999940\n", b"", success),
+        (0, b"true|4242|0\n", b"", success),
+        now_epoch=1_700_000_000,
+    ) == "stop"
+
+    source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
+    assert 'CURRENT_AWG2_OWNER_UNIT = "amn2-spain-docker.service"' in source
+    assert '["systemctl", "show", CURRENT_AWG2_OWNER_UNIT, "--property=ActiveState", "--value"]' in source
 
 
 @pytest.mark.parametrize("after", [b"true|4243|0\n", b"true|4242|1\n", b"false|4242|0\n"])
@@ -738,7 +817,8 @@ def test_awg2_health_rejects_pid_restart_or_running_state_race(after: bytes):
     interface = (0, b"7: awg0: <POINTOPOINT,UP>\n", b"", success)
     handshakes = (0, b"A" * 43 + b"=\t1699999940\n", b"", success)
 
-    assert classify(before, interface, handshakes, (0, after, b"", success), now_epoch=1_700_000_000) == "stop"
+    owner = (0, b"active\n", b"", success)
+    assert classify(owner, before, interface, handshakes, (0, after, b"", success), now_epoch=1_700_000_000) == "stop"
     source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
     assert source.count('"{{.State.Running}}|{{.State.Pid}}|{{.RestartCount}}"') == 2
 
@@ -1595,3 +1675,123 @@ def test_runner_bounded_buffer_keeps_only_limit_plus_one_bytes():
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == "true|5"
+
+
+def test_collector_aggregate_limits_stop_network_container_and_recovery_inventory(tmp_path: Path):
+    namespace = collector_python_namespace()
+    parse_ids = namespace["_docker_network_ids"]
+    classify_inventory = namespace["classify_container_inventory"]
+    scan_recovery = namespace["scan_recovery_markers"]
+    success = "success"
+    max_networks = namespace["MAX_NETWORK_IDS"]
+    max_containers = namespace["MAX_CONTAINER_ROWS"]
+    max_recovery = namespace["MAX_RECOVERY_ENTRIES"]
+
+    network_lines = b"".join(f"{index:064x}\n".encode() for index in range(max_networks + 1))
+    with pytest.raises(ValueError, match="network inventory limit"):
+        parse_ids((0, network_lines, b"", success))
+
+    container_lines = b"".join(f"container-{index}\n".encode() for index in range(max_containers + 1))
+    assert classify_inventory([("synthetic", (0, container_lines, b"", success))]) == ("stop", "stop")
+
+    recovery_root = tmp_path / "recovery"
+    recovery_root.mkdir()
+    for index in range(max_recovery + 1):
+        (recovery_root / f"entry-{index}").write_bytes(b"")
+    assert scan_recovery((recovery_root,)) == ("stop", "entry_limit_exceeded")
+
+
+def test_collector_global_deadline_stops_before_starting_another_command(monkeypatch: pytest.MonkeyPatch):
+    namespace = collector_python_namespace()
+    namespace["_collector_deadline"] = namespace["time"].monotonic() - 1
+    started = []
+
+    class Process:
+        stdout = io.BytesIO()
+        stderr = io.BytesIO()
+
+        def poll(self):
+            return 0
+
+        def wait(self, timeout=None):
+            return 0
+
+        def kill(self):
+            pass
+
+    def popen(*_args, **_kwargs):
+        started.append(True)
+        return Process()
+
+    monkeypatch.setattr(namespace["subprocess"], "Popen", popen)
+
+    assert namespace["command"](["synthetic"]) == (124, b"", b"", "work_budget_exceeded")
+    assert started == []
+
+
+@pytest.mark.parametrize("reservation", ["claim", "outcome"])
+def test_reservations_are_durable_atomic_and_mid_write_never_publishes_partial_file(tmp_path: Path, reservation: str):
+    lifecycle_root = str(tmp_path / "claims").replace("'", "''")
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    body = f"$null = [IO.Directory]::CreateDirectory('{lifecycle_root}'); "
+    if reservation == "claim":
+        target = str(tmp_path / "claims" / "phase15-preflight-test-001.json").replace("'", "''")
+        invocation = f"Reserve-Phase15Claim -LifecycleRoot '{lifecycle_root}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z'"
+    else:
+        target = outcome
+        invocation = f"Reserve-Phase15OutcomeSlot -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z'"
+    result = run_powershell(
+        body
+        + "function Write-Phase15DurableBytes { param($Stream,$Bytes) $Stream.WriteByte($Bytes[0]); throw 'synthetic_power_loss' }; "
+        + f"$failed=$false; try {{ $null = {invocation} }} catch {{ $failed=$true }}; "
+        + f"$published=Test-Path -LiteralPath '{target}'; $temps=@([IO.Directory]::GetFiles((Split-Path -Parent '{target}'), '*.create-*.tmp')); "
+        + "[Console]::Out.Write(\"$($failed.ToString().ToLowerInvariant())|$($published.ToString().ToLowerInvariant())|$($temps.Count)\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|false|0"
+
+
+def test_journal_phase_rewrite_is_durable_atomic_on_mid_write_failure(tmp_path: Path):
+    state_root = str(tmp_path / "state").replace("'", "''")
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        f"$lock=Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; "
+        f"$tx=Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
+        "$before=[IO.File]::ReadAllBytes($tx.JournalPath); function Write-Phase15DurableBytes { param($Stream,$Bytes) $Stream.WriteByte($Bytes[0]); throw 'synthetic_power_loss' }; "
+        "$failed=$false; try { $null=Set-Phase15TransactionPhase -TransactionPath $tx.JournalPath -ClaimId 'phase15-preflight-test-001' -Phase 'transport_attempted' -Lock $lock } catch { $failed=$true }; "
+        "$after=[IO.File]::ReadAllBytes($tx.JournalPath); $same=[Convert]::ToBase64String($before) -ceq [Convert]::ToBase64String($after); $temps=@([IO.Directory]::GetFiles((Split-Path -Parent $tx.JournalPath), '*.atomic-*')); $lock.Stream.Dispose(); "
+        "[Console]::Out.Write(\"$($failed.ToString().ToLowerInvariant())|$($same.ToString().ToLowerInvariant())|$($temps.Count)\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|true|0"
+
+
+def test_terminal_lifecycle_rewrite_is_durable_atomic_on_mid_write_failure(tmp_path: Path):
+    lifecycle_root = str(tmp_path / "claims").replace("'", "''")
+    result = run_powershell(
+        f"$null=[IO.Directory]::CreateDirectory('{lifecycle_root}'); $path=Reserve-Phase15Claim -LifecycleRoot '{lifecycle_root}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z'; "
+        "$before=[IO.File]::ReadAllBytes($path); function Write-Phase15DurableBytes { param($Stream,$Bytes) $Stream.WriteByte($Bytes[0]); throw 'synthetic_power_loss' }; "
+        "$failed=$false; try { $null=Set-Phase15ClaimTerminal -LifecyclePath $path -ClaimId 'phase15-preflight-test-001' -Status 'failed' -EndedAt '2026-08-16T00:00:01Z' -ReasonCode 'transport_failed' } catch { $failed=$true }; "
+        "$after=[IO.File]::ReadAllBytes($path); $same=[Convert]::ToBase64String($before) -ceq [Convert]::ToBase64String($after); $temps=@([IO.Directory]::GetFiles((Split-Path -Parent $path), '*.terminal-*')); "
+        "[Console]::Out.Write(\"$($failed.ToString().ToLowerInvariant())|$($same.ToString().ToLowerInvariant())|$($temps.Count)\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|true|0"
+
+
+def test_transaction_start_preserves_durable_journal_and_owned_outcome_on_lifecycle_uncertainty(tmp_path: Path):
+    state_root = str(tmp_path / "state").replace("'", "''")
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        f"$lock=Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; "
+        "function Reserve-Phase15Claim { throw 'synthetic_lifecycle_uncertain' }; $failed=$false; "
+        f"try {{ $null=Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock }} catch {{ $failed=$true }}; "
+        f"$journal=Get-Phase15TransactionPath -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; $journalExists=Test-Path -LiteralPath $journal; $owned=Test-Phase15OutcomeOwnership -ReservationPath '{outcome}' -ClaimId 'phase15-preflight-test-001'; $lock.Stream.Dispose(); "
+        "[Console]::Out.Write(\"$($failed.ToString().ToLowerInvariant())|$($journalExists.ToString().ToLowerInvariant())|$($owned.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|true|true"
