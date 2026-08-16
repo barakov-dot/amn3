@@ -206,3 +206,40 @@ def test_contract_rejects_secret_or_raw_command_material(unsafe_value: str):
             transport_disposition="read_only_completed",
             ssh_used=False,
         )
+
+
+@pytest.mark.parametrize(
+    "reason",
+    ["arbitrary_reason", "transport_failed", "Bearer synthetic-sensitive-value"],
+)
+def test_evidence_rejects_non_collector_stop_reasons(reason: str):
+    contract = load_contract()
+
+    with pytest.raises(contract.PreflightContractError):
+        contract.bind_evidence(
+            valid_claim(),
+            observations=observations(stopped=True),
+            stop_reasons=[reason],
+            started_at="2099-08-11T11:31:00Z",
+            ended_at="2099-08-11T11:32:00Z",
+            transport_disposition="read_only_completed",
+            ssh_used=True,
+        )
+
+
+@pytest.mark.parametrize(
+    "host",
+    ["-bad", "user@spain.test.invalid", "Spain.test.invalid", "spain..test.invalid", "spain_test.invalid"],
+)
+def test_claim_rejects_unsafe_expected_host_grammar(host: str):
+    contract = load_contract()
+
+    with pytest.raises(contract.PreflightContractError):
+        contract.validate_claim(
+            valid_claim(expected_host=host),
+            package_id=PACKAGE_ID,
+            manifest_sha256=MANIFEST_SHA256,
+            collector_sha256=COLLECTOR_SHA256,
+            expected_host=host,
+            now=datetime(2099, 8, 11, 11, 30, tzinfo=timezone.utc),
+        )

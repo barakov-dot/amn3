@@ -42,14 +42,14 @@ def write_claim(path: Path, *, script: Path, gate: str, **overrides: object) -> 
         "expected_current_state_sha256": "c" * 64,
         "expires_at": "2099-08-11T12:00:00Z",
         "future_gate": gate,
-        "issued_at": "2099-08-11T11:00:00Z",
+        "issued_at": "2025-08-11T11:00:00Z",
         "package_id": PACKAGE_ID,
         "schema": "amn2.phase15.stage-claim.v1",
         "stage_script_sha256": hashlib.sha256(script.read_bytes()).hexdigest(),
         "status": "issued",
     }
     claim.update(overrides)
-    path.write_text(json.dumps(claim, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
+    path.write_bytes((json.dumps(claim, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8"))
     return claim
 
 
@@ -130,6 +130,52 @@ def test_stage_envelope_rejects_unbound_or_reused_claim(
     assert result.returncode == 65
     assert result.stdout == ""
     assert expected_reason in result.stderr
+
+
+@pytest.mark.parametrize(("script", "gate"), STAGES)
+def test_stage_envelope_rejects_claim_issued_in_the_future(tmp_path: Path, script: Path, gate: str):
+    script_source(script)
+    claim = tmp_path / "future-claim.json"
+    write_claim(
+        claim,
+        script=script,
+        gate=gate,
+        issued_at="2098-08-11T11:00:00Z",
+        expires_at="2099-08-11T12:00:00Z",
+    )
+
+    result = run_stage(script, claim=claim, gate=gate)
+
+    assert result.returncode == 65
+    assert result.stdout == ""
+    assert "claim_invalid" in result.stderr
+
+
+@pytest.mark.parametrize(("script", "gate"), STAGES)
+def test_stage_envelope_rejects_noncanonical_claim_bytes(tmp_path: Path, script: Path, gate: str):
+    script_source(script)
+    claim = tmp_path / "noncanonical-claim.json"
+    value = write_claim(claim, script=script, gate=gate)
+    claim.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+
+    result = run_stage(script, claim=claim, gate=gate)
+
+    assert result.returncode == 65
+    assert result.stdout == ""
+    assert "claim_invalid" in result.stderr
+
+
+@pytest.mark.parametrize(("script", "gate"), STAGES)
+def test_stage_envelope_requires_exact_utc_timestamp_grammar(tmp_path: Path, script: Path, gate: str):
+    script_source(script)
+    claim = tmp_path / "timestamp-claim.json"
+    write_claim(claim, script=script, gate=gate, issued_at="2025-08-11T11:00:00+00:00")
+
+    result = run_stage(script, claim=claim, gate=gate)
+
+    assert result.returncode == 65
+    assert result.stdout == ""
+    assert "claim_invalid" in result.stderr
 
 
 def test_phase15_scripts_contain_no_forbidden_mutation_tokens():

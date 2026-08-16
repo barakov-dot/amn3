@@ -12,6 +12,10 @@ CLAIM_SCHEMA = "amn2.phase15.readonly-preflight-claim.v1"
 EVIDENCE_SCHEMA = "amn2.phase15.readonly-preflight-evidence.v1"
 FAILURE_SCHEMA = "amn2.phase15.readonly-preflight-failure.v1"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+CLAIM_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,127}$")
+EXPECTED_HOST_RE = re.compile(
+    r"^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$"
+)
 SECRET_PATTERNS = (
     re.compile(r"\b[0-9]{6,12}:[A-Za-z0-9_-]{30,}\b"),
     re.compile(r"(?i)\bBearer\s+\S+"),
@@ -40,6 +44,12 @@ FAILURE_REASONS = {
     "observation_ambiguous",
     "schema_invalid",
     "transport_failed",
+}
+STOP_REASONS = {
+    "identity_mismatch",
+    "observation_failed",
+    "recovery_incomplete",
+    "resource_conflict",
 }
 
 
@@ -130,13 +140,15 @@ def validate_claim(
     expected_collector = _sha256(collector_sha256, label="expected collector")
     if claim["manifest_sha256"] != expected_manifest or claim["collector_sha256"] != expected_collector:
         raise PreflightContractError("claim checksum binding")
-    if not isinstance(expected_host, str) or not expected_host or claim["expected_host"] != expected_host:
+    if not isinstance(expected_host, str) or EXPECTED_HOST_RE.fullmatch(expected_host) is None:
+        raise PreflightContractError("expected host grammar")
+    if claim["expected_host"] != expected_host:
         raise PreflightContractError("claim host binding")
     if claim["future_gate"] != "PREFLIGHT":
         raise PreflightContractError("claim future gate")
     if claim["status"] != "issued" or claim["consumed_at"] is not None:
         raise PreflightContractError("claim already used")
-    if not isinstance(claim["claim_id"], str) or not claim["claim_id"] or len(claim["claim_id"]) > 128:
+    if not isinstance(claim["claim_id"], str) or CLAIM_ID_RE.fullmatch(claim["claim_id"]) is None:
         raise PreflightContractError("claim id")
     issued = _timestamp(claim["issued_at"], label="issued_at")
     expires = _timestamp(claim["expires_at"], label="expires_at")
@@ -223,7 +235,7 @@ def bind_evidence(
 ) -> dict[str, object]:
     _validated_window(claim, started_at, ended_at)
     checked_observations = _validate_observations(observations)
-    if not isinstance(stop_reasons, list) or any(not isinstance(reason, str) or not reason for reason in stop_reasons):
+    if not isinstance(stop_reasons, list) or any(reason not in STOP_REASONS for reason in stop_reasons):
         raise PreflightContractError("stop reasons")
     if stop_reasons != sorted(set(stop_reasons)):
         raise PreflightContractError("stop reason order")
