@@ -1433,7 +1433,7 @@ def test_initial_journal_publish_is_atomic_and_cleans_stale_owned_temp(tmp_path:
         f"$lock = Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; "
         f"$transactionRoot = Join-Path '{state_root}' 'transactions'; $null = [IO.Directory]::CreateDirectory($transactionRoot); "
         f"$journalPath = Get-Phase15TransactionPath -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; "
-        "$stale = $journalPath + '.create-deadbeefdeadbeefdeadbeefdeadbeef.tmp'; [IO.File]::WriteAllBytes($stale, [byte[]](1,2,3)); "
+        "$stale = $journalPath + '.phase15-phase15-preflight-test-001.create-deadbeefdeadbeefdeadbeefdeadbeef.tmp'; [IO.File]::WriteAllBytes($stale, [byte[]](1,2,3)); "
         f"$tx = Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' "
         f"-ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
         "$journal = ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath; $staleGone = -not (Test-Path -LiteralPath $stale); $lock.Stream.Dispose(); "
@@ -1458,8 +1458,8 @@ def test_atomic_journal_publish_never_overwrites_existing_final_and_cleans_temp(
     journal_path.write_bytes(original)
     escaped = str(journal_path).replace("'", "''")
     result = run_powershell(
-        f"$failed = $false; try {{ Write-Phase15AtomicCreateNewJson -Path '{escaped}' -Value ([ordered]@{{owner='contender'}}) }} catch {{ $failed = $true }}; "
-        f"$bytes = [IO.File]::ReadAllBytes('{escaped}'); $temps = @([IO.Directory]::GetFiles((Split-Path -Parent '{escaped}'), 'transaction.json.create-*.tmp')); "
+        f"$failed = $false; try {{ Write-Phase15AtomicCreateNewJson -Path '{escaped}' -Value ([ordered]@{{owner='contender'}}) -OwnerId 'phase15-preflight-test-001' }} catch {{ $failed = $true }}; "
+        f"$bytes = [IO.File]::ReadAllBytes('{escaped}'); $temps = @([IO.Directory]::GetFiles((Split-Path -Parent '{escaped}'), 'transaction.json.phase15-phase15-preflight-test-001.create-*.tmp')); "
         "[Console]::Out.Write(\"$($failed.ToString().ToLowerInvariant())|$([Convert]::ToBase64String($bytes))|$($temps.Count)\")"
     )
 
@@ -1508,7 +1508,8 @@ def test_runner_reconciles_before_atomic_transaction_ownership_and_transport():
     assert main.index("Test-Phase15FutureClaim") < main.index("Start-Phase15Transaction")
     assert main.index("Start-Phase15Transaction") < main.index("Invoke-Phase15OneSshTransport")
     assert "-TransactionPath $transaction.JournalPath" in main
-    assert "finally { $claimLock.Stream.Dispose() }" in main
+    assert "$transaction.OutcomeLock.Stream.Dispose()" in main
+    assert "$claimLock.Stream.Dispose()" in main
 
 
 @pytest.mark.parametrize(
@@ -1538,7 +1539,7 @@ def test_interrupted_transaction_reconciles_to_one_sanitized_terminal_failure(tm
         f"-ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z' "
         f"-ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
         f"{setup}"
-        f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z' -Lock $lock; "
+        f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z' -Lock $lock -OutcomeLock $tx.OutcomeLock; "
         "$lifecycle = ConvertFrom-Phase15CanonicalJsonFile -Path $tx.LifecyclePath; "
         "$published = ConvertFrom-Phase15CanonicalJsonFile -Path $reconciled.OutcomePath; "
         "$originalRaw = if (Test-Path -LiteralPath $tx.ReservationPath) { [IO.File]::ReadAllText($tx.ReservationPath) } else { '' }; "
@@ -1593,7 +1594,7 @@ def test_recovery_safety_is_conservative_for_every_persisted_crash_phase(tmp_pat
             if phase != "owned"
             else ""
         )
-        + f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z' -Lock $lock; "
+        + f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z' -Lock $lock -OutcomeLock $tx.OutcomeLock; "
         "$failure = ConvertFrom-Phase15CanonicalJsonFile -Path $reconciled.OutcomePath; $lock.Stream.Dispose(); "
         "[Console]::Out.Write($failure.safety.ssh_used.ToString().ToLowerInvariant())"
     )
@@ -1611,7 +1612,7 @@ def test_recovery_never_overwrites_another_claim_outcome_owner(tmp_path: Path):
         f"-ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
         "[IO.File]::Delete($tx.ReservationPath); "
         f"$null = Reserve-Phase15OutcomeSlot -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-002' -ReservedAt '2026-08-16T00:00:01Z'; "
-        f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z' -Lock $lock; "
+        f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z' -Lock $lock -OutcomeLock $tx.OutcomeLock; "
         "$otherStillOwns = Test-Phase15OutcomeOwnership -ReservationPath $tx.ReservationPath -ClaimId 'phase15-preflight-test-002'; "
         "$failure = ConvertFrom-Phase15CanonicalJsonFile -Path $reconciled.OutcomePath; $lock.Stream.Dispose(); "
         "[Console]::Out.Write(\"$($otherStillOwns.ToString().ToLowerInvariant())|$($reconciled.OutcomePath)|$($failure.reason_code)\")"
@@ -1637,7 +1638,7 @@ def test_expired_claim_identity_can_recover_prior_transport_but_cannot_start_new
         f"$tx = Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId $claim.claim_id -ReservedAt '2026-08-16T00:00:30Z' "
         f"-ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
         "$null = Set-Phase15TransactionPhase -TransactionPath $tx.JournalPath -ClaimId $claim.claim_id -Phase 'transport_attempted' -Lock $lock; "
-        f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId $claim.claim_id -EndedAt '2026-08-16T00:02:00Z' -Lock $lock; "
+        f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId $claim.claim_id -EndedAt '2026-08-16T00:02:00Z' -Lock $lock -OutcomeLock $tx.OutcomeLock; "
         "$failure = ConvertFrom-Phase15CanonicalJsonFile -Path $reconciled.OutcomePath; $lock.Stream.Dispose(); "
         "[Console]::Out.Write(\"$($identity.ToString().ToLowerInvariant())|$($current.ToString().ToLowerInvariant())|$($failure.safety.ssh_used.ToString().ToLowerInvariant())\")"
     )
@@ -1974,9 +1975,9 @@ def test_round8_unknown_journal_phase_cannot_transition_and_recovers_terminal_fa
     result = run_powershell(
         f"$lock=Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; "
         f"$tx=Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
-        "$journal=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath; $journal.phase='corrupt'; Write-Phase15AtomicJson -Path $tx.JournalPath -Value $journal; "
+        "$journal=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath; $journal.phase='corrupt'; Write-Phase15AtomicJson -Path $tx.JournalPath -Value $journal -OwnerId 'phase15-preflight-test-001'; "
         "$transitionRejected=$false; try{$null=Set-Phase15TransactionPhase -TransactionPath $tx.JournalPath -ClaimId 'phase15-preflight-test-001' -Phase 'transport_attempted' -Lock $lock}catch{$transitionRejected=$true}; "
-        f"$recovered=Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z' -Lock $lock; "
+        f"$recovered=Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z' -Lock $lock -OutcomeLock $tx.OutcomeLock; "
         "$terminal=ConvertFrom-Phase15CanonicalJsonFile -Path $recovered.OutcomePath; $lock.Stream.Dispose(); "
         "[Console]::Out.Write(\"$($transitionRejected.ToString().ToLowerInvariant())|$($recovered.Recovered.ToString().ToLowerInvariant())|$($terminal.reason_code)|$($terminal.safety.ssh_used.ToString().ToLowerInvariant())\")"
     )
@@ -2007,20 +2008,20 @@ def test_round8_startup_cleanup_removes_only_exact_claim_owned_temp_and_backup_r
     own_guid = "a" * 32
     other_guid = "b" * 32
     own = [
-        Path(str(transaction) + f".atomic-{own_guid}"),
-        Path(str(transaction) + f".backup-{own_guid}"),
-        Path(str(lifecycle) + f".terminal-{own_guid}"),
-        Path(str(lifecycle) + f".backup-{own_guid}"),
-        Path(str(outcome) + f".reservation-backup-phase15-preflight-test-001-{own_guid}"),
+        Path(str(transaction) + f".phase15-phase15-preflight-test-001.atomic-{own_guid}"),
+        Path(str(transaction) + f".phase15-phase15-preflight-test-001.backup-{own_guid}"),
+        Path(str(lifecycle) + f".phase15-phase15-preflight-test-001.terminal-{own_guid}"),
+        Path(str(lifecycle) + f".phase15-phase15-preflight-test-001.backup-{own_guid}"),
+        Path(str(outcome) + f".phase15-phase15-preflight-test-001.reservation-backup-{own_guid}"),
     ]
-    other = Path(str(outcome) + f".reservation-backup-phase15-preflight-test-002-{other_guid}")
+    other = Path(str(outcome) + f".phase15-phase15-preflight-test-002.reservation-backup-{other_guid}")
     for path in [*own, other]:
         path.write_bytes(b"synthetic")
     transaction_ps = str(transaction).replace("'", "''")
     lifecycle_ps = str(lifecycle).replace("'", "''")
     outcome_ps = str(outcome).replace("'", "''")
     result = run_powershell(
-        f"Remove-Phase15TransactionTemps -TransactionPath '{transaction_ps}'; "
+        f"Remove-Phase15TransactionTemps -TransactionPath '{transaction_ps}' -ClaimId 'phase15-preflight-test-001'; "
         f"Remove-Phase15OwnedStateResidues -LifecyclePath '{lifecycle_ps}' -OutcomePath '{outcome_ps}' -ClaimId 'phase15-preflight-test-001'; "
         "[Console]::Out.Write('clean')"
     )
@@ -2143,18 +2144,18 @@ def test_round9_cleanup_covers_every_exact_writer_residue_including_recovery(tmp
     guid = "c" * 32
     claim_id = "phase15-preflight-test-001"
     owned = [
-        Path(str(lifecycle) + f".create-{guid}.tmp"),
-        Path(str(lifecycle) + f".atomic-{guid}"),
-        Path(str(lifecycle) + f".atomic-{guid}.create-{guid}.tmp"),
-        Path(str(lifecycle) + f".terminal-{guid}.create-{guid}.tmp"),
-        Path(str(outcome) + f".phase15-{claim_id}.staged.create-{guid}.tmp"),
-        Path(str(outcome) + f".pending-{guid}.create-{guid}.tmp"),
-        Path(str(outcome) + f".atomic-{guid}.create-{guid}.tmp"),
-        Path(str(recovery) + f".atomic-{guid}"),
-        Path(str(recovery) + f".atomic-{guid}.create-{guid}.tmp"),
-        Path(str(recovery) + f".backup-{guid}"),
+        Path(str(lifecycle) + f".phase15-{claim_id}.create-{guid}.tmp"),
+        Path(str(lifecycle) + f".phase15-{claim_id}.atomic-{guid}"),
+        Path(str(lifecycle) + f".phase15-{claim_id}.atomic-{guid}.phase15-{claim_id}.create-{guid}.tmp"),
+        Path(str(lifecycle) + f".phase15-{claim_id}.terminal-{guid}.phase15-{claim_id}.create-{guid}.tmp"),
+        Path(str(outcome) + f".phase15-{claim_id}.staged.phase15-{claim_id}.create-{guid}.tmp"),
+        Path(str(outcome) + f".phase15-{claim_id}.pending-{guid}.phase15-{claim_id}.create-{guid}.tmp"),
+        Path(str(outcome) + f".phase15-{claim_id}.atomic-{guid}.phase15-{claim_id}.create-{guid}.tmp"),
+        Path(str(recovery) + f".phase15-{claim_id}.atomic-{guid}"),
+        Path(str(recovery) + f".phase15-{claim_id}.atomic-{guid}.phase15-{claim_id}.create-{guid}.tmp"),
+        Path(str(recovery) + f".phase15-{claim_id}.backup-{guid}"),
     ]
-    unrelated = Path(str(outcome) + ".phase15-other-claim.staged.create-" + guid + ".tmp")
+    unrelated = Path(str(outcome) + ".phase15-other-claim.staged.phase15-other-claim.create-" + guid + ".tmp")
     for path in [*owned, unrelated]:
         path.write_bytes(b"synthetic")
     lifecycle_ps = str(lifecycle).replace("'", "''")
@@ -2169,3 +2170,157 @@ def test_round9_cleanup_covers_every_exact_writer_residue_including_recovery(tmp
     assert result.stdout == "clean"
     assert all(not path.exists() for path in owned)
     assert unrelated.read_bytes() == b"synthetic"
+
+
+def test_round10_managed_state_acl_rejects_reparse_inheritance_and_unapproved_writers():
+    result = run_powershell(
+        "$authorized='S-1-5-21-1000'; $system='S-1-5-18'; $admins='S-1-5-32-544'; "
+        "$full=[int64][Security.AccessControl.FileSystemRights]::FullControl; "
+        "$inherit=[int][Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [int][Security.AccessControl.InheritanceFlags]::ObjectInherit; "
+        "function New-Rule($sid,$inherited=$false){[pscustomobject]@{Sid=$sid;Type='Allow';Rights=$full;IsInherited=$inherited;Inheritance=$inherit;Propagation=0}}; "
+        "$rules=@((New-Rule $authorized),(New-Rule $system),(New-Rule $admins)); "
+        "$valid=[pscustomobject]@{Exists=$true;FullName='C:\\ProgramData\\AMN2';IsDirectory=$true;IsReparse=$false;OwnerSid=$authorized;Protected=$true;Rules=$rules}; "
+        "$validResult=Test-Phase15ManagedStateDirectoryFacts -Facts $valid -ExpectedPath 'C:\\ProgramData\\AMN2' -AuthorizedSid $authorized; "
+        "$reparse=$valid.PSObject.Copy(); $reparse.IsReparse=$true; "
+        "$unprotected=$valid.PSObject.Copy(); $unprotected.Protected=$false; "
+        "$inherited=$valid.PSObject.Copy(); $inherited.Rules=@((New-Rule $authorized $true),(New-Rule $system),(New-Rule $admins)); "
+        "$users=$valid.PSObject.Copy(); $users.Rules=@($rules + [pscustomobject]@{Sid='S-1-5-32-545';Type='Allow';Rights=[int64][Security.AccessControl.FileSystemRights]::Write;IsInherited=$false;Inheritance=$inherit;Propagation=0}); "
+        "$badOwner=$valid.PSObject.Copy(); $badOwner.OwnerSid=$users.Rules[-1].Sid; "
+        "[Console]::Out.Write(\"$($validResult.ToString().ToLowerInvariant())|$((Test-Phase15ManagedStateDirectoryFacts -Facts $reparse -ExpectedPath 'C:\\ProgramData\\AMN2' -AuthorizedSid $authorized).ToString().ToLowerInvariant())|$((Test-Phase15ManagedStateDirectoryFacts -Facts $unprotected -ExpectedPath 'C:\\ProgramData\\AMN2' -AuthorizedSid $authorized).ToString().ToLowerInvariant())|$((Test-Phase15ManagedStateDirectoryFacts -Facts $inherited -ExpectedPath 'C:\\ProgramData\\AMN2' -AuthorizedSid $authorized).ToString().ToLowerInvariant())|$((Test-Phase15ManagedStateDirectoryFacts -Facts $users -ExpectedPath 'C:\\ProgramData\\AMN2' -AuthorizedSid $authorized).ToString().ToLowerInvariant())|$((Test-Phase15ManagedStateDirectoryFacts -Facts $badOwner -ExpectedPath 'C:\\ProgramData\\AMN2' -AuthorizedSid $authorized).ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|false|false|false|false|false"
+
+
+def test_round10_programdata_anchor_requires_exact_protected_platform_acl():
+    result = run_powershell(
+        "$rules=@([pscustomobject]@{Sid='S-1-3-0';Type='Allow';Rights=[int64]268435456;IsInherited=$false;Inheritance=3;Propagation=2},[pscustomobject]@{Sid='S-1-5-18';Type='Allow';Rights=[int64]2032127;IsInherited=$false;Inheritance=3;Propagation=0},[pscustomobject]@{Sid='S-1-5-32-544';Type='Allow';Rights=[int64]2032127;IsInherited=$false;Inheritance=3;Propagation=0},[pscustomobject]@{Sid='S-1-5-32-545';Type='Allow';Rights=[int64]278;IsInherited=$false;Inheritance=1;Propagation=0},[pscustomobject]@{Sid='S-1-5-32-545';Type='Allow';Rights=[int64]1179817;IsInherited=$false;Inheritance=3;Propagation=0}); "
+        "$valid=[pscustomobject]@{Exists=$true;FullName='C:\\ProgramData';IsDirectory=$true;IsReparse=$false;OwnerSid='S-1-5-18';Protected=$true;Rules=$rules}; "
+        "$extra=$valid.PSObject.Copy();$extra.Rules=@($rules+[pscustomobject]@{Sid='S-1-1-0';Type='Allow';Rights=[int64]2032127;IsInherited=$false;Inheritance=3;Propagation=0}); "
+        "$inherited=$valid.PSObject.Copy();$copied=@($rules|ForEach-Object{$_.PSObject.Copy()});$copied[0].IsInherited=$true;$inherited.Rules=$copied; "
+        "$ok=Test-Phase15ProgramDataAnchorFacts -Facts $valid -ExpectedPath 'C:\\ProgramData';$badExtra=Test-Phase15ProgramDataAnchorFacts -Facts $extra -ExpectedPath 'C:\\ProgramData';$badInherited=Test-Phase15ProgramDataAnchorFacts -Facts $inherited -ExpectedPath 'C:\\ProgramData'; "
+        "[Console]::Out.Write(\"$($ok.ToString().ToLowerInvariant())|$($badExtra.ToString().ToLowerInvariant())|$($badInherited.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|false|false"
+
+
+def test_round10_state_root_is_provisioned_under_one_global_lock_with_synthetic_acl_doubles():
+    result = run_powershell(
+        "$script:events=[Collections.Generic.List[string]]::new(); $script:facts=@{}; $authorized='S-1-5-21-1000'; "
+        "$anchor='C:\\SyntheticProgramData'; $root='C:\\SyntheticProgramData\\AMN2\\phase15\\readonly-preflight'; "
+        "$full=[int64][Security.AccessControl.FileSystemRights]::FullControl; $inherit=3; "
+        "$anchorRules=@([pscustomobject]@{Sid='S-1-3-0';Type='Allow';Rights=[int64]268435456;IsInherited=$false;Inheritance=3;Propagation=2},[pscustomobject]@{Sid='S-1-5-18';Type='Allow';Rights=[int64]2032127;IsInherited=$false;Inheritance=3;Propagation=0},[pscustomobject]@{Sid='S-1-5-32-544';Type='Allow';Rights=[int64]2032127;IsInherited=$false;Inheritance=3;Propagation=0},[pscustomobject]@{Sid='S-1-5-32-545';Type='Allow';Rights=[int64]278;IsInherited=$false;Inheritance=1;Propagation=0},[pscustomobject]@{Sid='S-1-5-32-545';Type='Allow';Rights=[int64]1179817;IsInherited=$false;Inheritance=3;Propagation=0}); "
+        "function New-ManagedFacts($path){$rules=@('S-1-5-21-1000','S-1-5-18','S-1-5-32-544' | ForEach-Object {[pscustomobject]@{Sid=$_;Type='Allow';Rights=$full;IsInherited=$false;Inheritance=$inherit;Propagation=0}}); [pscustomobject]@{Exists=$true;FullName=$path;IsDirectory=$true;IsReparse=$false;OwnerSid='S-1-5-21-1000';Protected=$true;Rules=$rules}}; "
+        "$script:facts[$anchor]=[pscustomobject]@{Exists=$true;FullName=$anchor;IsDirectory=$true;IsReparse=$false;OwnerSid='S-1-5-18';Protected=$true;Rules=$anchorRules}; "
+        "function Enter-Phase15StateRootCreationLock{$script:events.Add('lock');[pscustomobject]@{Acquired=$true}}; "
+        "function Exit-Phase15StateRootCreationLock{param($Lock)$script:events.Add('unlock')}; "
+        "function Get-Phase15StateDirectoryFacts{param($Path)$script:events.Add('facts:'+([IO.Path]::GetFileName($Path)));if($script:facts.ContainsKey($Path)){return $script:facts[$Path]};[pscustomobject]@{Exists=$false;FullName=$Path}}; "
+        "function New-Phase15SecureStateDirectory{param($ParentPath,$Path,$AuthorizedSid)$script:events.Add('create:'+([IO.Path]::GetFileName($Path)));$script:facts[$Path]=New-ManagedFacts $Path}; "
+        "$actual=Initialize-Phase15TrustedStateRoot -AnchorPath $anchor -StateRoot $root -AuthorizedSid $authorized; "
+        "$created=@($script:events | Where-Object {$_ -like 'create:*'} | ForEach-Object {$_.Substring(7)}); "
+        "$locked=$script:events[0] -eq 'lock' -and $script:events[-1] -eq 'unlock'; "
+        "[Console]::Out.Write(\"$($actual -ceq $root)|$($locked.ToString().ToLowerInvariant())|$($created -join ',')\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "True|true|AMN2,phase15,readonly-preflight,locks,outcome-locks,claims,transactions,recovery-outcomes"
+
+
+def test_round10_attacker_precreated_managed_tree_is_rejected_without_provisioning():
+    result = run_powershell(
+        "$script:createCount=0; $authorized='S-1-5-21-1000'; $anchor='C:\\SyntheticProgramData'; $root='C:\\SyntheticProgramData\\AMN2\\phase15\\readonly-preflight'; "
+        "$full=[int64][Security.AccessControl.FileSystemRights]::FullControl; $inherit=3; "
+        "$anchorRules=@([pscustomobject]@{Sid='S-1-3-0';Type='Allow';Rights=[int64]268435456;IsInherited=$false;Inheritance=3;Propagation=2},[pscustomobject]@{Sid='S-1-5-18';Type='Allow';Rights=[int64]2032127;IsInherited=$false;Inheritance=3;Propagation=0},[pscustomobject]@{Sid='S-1-5-32-544';Type='Allow';Rights=[int64]2032127;IsInherited=$false;Inheritance=3;Propagation=0},[pscustomobject]@{Sid='S-1-5-32-545';Type='Allow';Rights=[int64]278;IsInherited=$false;Inheritance=1;Propagation=0},[pscustomobject]@{Sid='S-1-5-32-545';Type='Allow';Rights=[int64]1179817;IsInherited=$false;Inheritance=3;Propagation=0}); "
+        "$goodRules=@('S-1-5-21-1000','S-1-5-18','S-1-5-32-544' | ForEach-Object {[pscustomobject]@{Sid=$_;Type='Allow';Rights=$full;IsInherited=$false;Inheritance=$inherit;Propagation=0}}); "
+        "$badRules=@($goodRules + [pscustomobject]@{Sid='S-1-5-32-545';Type='Allow';Rights=[int64][Security.AccessControl.FileSystemRights]::Write;IsInherited=$false;Inheritance=$inherit;Propagation=0}); "
+        "function Enter-Phase15StateRootCreationLock{[pscustomobject]@{Acquired=$true}}; function Exit-Phase15StateRootCreationLock{param($Lock)}; "
+        "function Get-Phase15StateDirectoryFacts{param($Path)if($Path -ceq $anchor){return [pscustomobject]@{Exists=$true;FullName=$anchor;IsDirectory=$true;IsReparse=$false;OwnerSid='S-1-5-18';Protected=$true;Rules=$anchorRules}};if($Path -ceq 'C:\\SyntheticProgramData\\AMN2'){return [pscustomobject]@{Exists=$true;FullName=$Path;IsDirectory=$true;IsReparse=$false;OwnerSid=$authorized;Protected=$true;Rules=$badRules}};[pscustomobject]@{Exists=$false;FullName=$Path}}; "
+        "function New-Phase15SecureStateDirectory{param($ParentPath,$Path,$AuthorizedSid)$script:createCount++}; "
+        "$message='';try{$null=Initialize-Phase15TrustedStateRoot -AnchorPath $anchor -StateRoot $root -AuthorizedSid $authorized}catch{$message=$_.Exception.Message}; "
+        "[Console]::Out.Write(\"$message|$script:createCount\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "state_root_invalid|0"
+
+
+def test_round10_outcome_path_lock_is_canonical_exclusive_and_claim_independent(tmp_path: Path):
+    state_root = str(tmp_path / "state").replace("'", "''")
+    outcome = str(tmp_path / "result.json").replace("'", "''")
+    equivalent = str(tmp_path / "unused" / ".." / "result.json").replace("'", "''")
+    result = run_powershell(
+        f"$null=[IO.Directory]::CreateDirectory((Join-Path '{state_root}' 'outcome-locks')); "
+        f"$firstPath=Get-Phase15OutcomeLockPath -StateRoot '{state_root}' -OutcomePath '{outcome}'; "
+        f"$samePath=Get-Phase15OutcomeLockPath -StateRoot '{state_root}' -OutcomePath '{equivalent}'; "
+        f"$owner=Enter-Phase15OutcomeLock -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001'; "
+        "$message=''; try { "
+        f"$null=Enter-Phase15OutcomeLock -StateRoot '{state_root}' -OutcomePath '{equivalent}' -ClaimId 'phase15-preflight-test-002' "
+        "} catch {$message=$_.Exception.Message}; $owner.Stream.Dispose(); "
+        f"$next=Enter-Phase15OutcomeLock -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-002'; $next.Stream.Dispose(); "
+        "[Console]::Out.Write(\"$($firstPath -ceq $samePath)|$message\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "True|outcome_replay"
+
+
+def test_round10_outcome_lock_blocks_contender_before_owner_residue_cleanup(tmp_path: Path):
+    state_root = str(tmp_path / "state").replace("'", "''")
+    outcome_path = tmp_path / "result.json"
+    outcome = str(outcome_path).replace("'", "''")
+    claim_a = "phase15-preflight-test-001"
+    claim_b = "phase15-preflight-test-002"
+    owner_temp = Path(str(outcome_path) + f".phase15-{claim_a}.create-{'a' * 32}.tmp")
+    owner_temp.write_bytes(b"owner-in-progress")
+    result = run_powershell(
+        f"$null=[IO.Directory]::CreateDirectory((Join-Path '{state_root}' 'outcome-locks')); "
+        f"$owner=Enter-Phase15OutcomeLock -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId '{claim_a}'; "
+        "$message=''; try { "
+        f"$null=Enter-Phase15OutcomeLock -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId '{claim_b}' "
+        "} catch {$message=$_.Exception.Message}; "
+        f"$still=[IO.File]::ReadAllText('{str(owner_temp).replace("'", "''")}'); $owner.Stream.Dispose(); "
+        "[Console]::Out.Write(\"$message|$still\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "outcome_replay|owner-in-progress"
+
+
+def test_round10_distinct_claim_transaction_contender_cannot_touch_active_outcome_owner(tmp_path: Path):
+    state_root = str(tmp_path / "state").replace("'", "''")
+    outcome_path = tmp_path / "result.json"
+    outcome = str(outcome_path).replace("'", "''")
+    claim_a = "phase15-preflight-test-001"
+    claim_b = "phase15-preflight-test-002"
+    owner_temp = Path(str(outcome_path) + f".phase15-{claim_a}.create-{'a' * 32}.tmp")
+    result = run_powershell(
+        f"$firstClaim=Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId '{claim_a}'; "
+        f"$tx=Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId '{claim_a}' -ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $firstClaim; "
+        f"[IO.File]::WriteAllText('{str(owner_temp).replace("'", "''")}', 'owner-in-progress', [Text.UTF8Encoding]::new($false)); $before=[IO.File]::ReadAllBytes($tx.JournalPath); "
+        f"$secondClaim=Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId '{claim_b}'; $message=''; try {{ "
+        f"$null=Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId '{claim_b}' -ReservedAt '2026-08-16T00:00:01Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $secondClaim "
+        "} catch {$message=$_.Exception.Message}; "
+        f"$after=[IO.File]::ReadAllBytes($tx.JournalPath); $same=[Convert]::ToBase64String($before) -ceq [Convert]::ToBase64String($after); $owned=Test-Phase15OutcomeOwnership -ReservationPath '{outcome}' -ClaimId '{claim_a}'; $temp=[IO.File]::ReadAllText('{str(owner_temp).replace("'", "''")}'); "
+        "$tx.OutcomeLock.Stream.Dispose(); $secondClaim.Stream.Dispose(); $firstClaim.Stream.Dispose(); "
+        "[Console]::Out.Write(\"$message|$($same.ToString().ToLowerInvariant())|$($owned.ToString().ToLowerInvariant())|$temp\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "outcome_replay|true|true|owner-in-progress"
+
+
+def test_round10_atomic_writer_temp_name_is_exactly_claim_owned(tmp_path: Path):
+    artifact = str(tmp_path / "artifact.json").replace("'", "''")
+    claim_id = "phase15-preflight-test-001"
+    result = run_powershell(
+        "$script:temporaryName=''; "
+        "function Write-Phase15DurableBytes{param($Stream,$Bytes)$script:temporaryName=[IO.Path]::GetFileName($Stream.Name);foreach($value in $Bytes){$Stream.WriteByte($value)};$Stream.Flush($true)}; "
+        f"Write-Phase15AtomicCreateNewJson -Path '{artifact}' -Value ([ordered]@{{status='reserved'}}) -OwnerId '{claim_id}'; "
+        "[Console]::Out.Write($script:temporaryName)"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert re.fullmatch(rf"artifact\.json\.phase15-{re.escape(claim_id)}\.create-[0-9a-f]{{32}}\.tmp", result.stdout)

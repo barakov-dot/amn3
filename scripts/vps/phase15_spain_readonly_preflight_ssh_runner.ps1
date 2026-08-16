@@ -16,6 +16,9 @@ $script:Phase15CollectorSchema = 'amn2.phase15.spain-readonly-collector.v1'
 $script:Phase15EvidenceSchema = 'amn2.phase15.readonly-preflight-evidence.v1'
 $script:Phase15FailureSchema = 'amn2.phase15.readonly-preflight-failure.v1'
 $script:Phase15ProductionStateRoot = 'C:\ProgramData\AMN2\phase15\readonly-preflight'
+$script:Phase15StateRootCreationMutexName = 'Global\AMN2-Phase15-ReadonlyPreflight-StateRoot-v1'
+$script:Phase15SystemSid = 'S-1-5-18'
+$script:Phase15AdministratorsSid = 'S-1-5-32-544'
 $script:Phase15TrustedBundleRunId = 'spain-fresh-20260720-001'
 $script:Phase15SpainTargetUser = 'root'
 $script:Phase15SpainHostKeySha256 = 'SHA256:XVFOmBAXMHYlngo9+x7lGAJbzlOqiMiG/6/4qhRC4HU'
@@ -601,8 +604,8 @@ function Invoke-Phase15OneSshTransport {
 }
 
 function Write-Phase15CreateNewJson {
-    param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][object]$Value)
-    Write-Phase15AtomicCreateNewJson -Path $Path -Value $Value
+    param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][object]$Value, [Parameter(Mandatory)][string]$OwnerId)
+    Write-Phase15AtomicCreateNewJson -Path $Path -Value $Value -OwnerId $OwnerId
 }
 
 function Write-Phase15DurableBytes {
@@ -612,9 +615,10 @@ function Write-Phase15DurableBytes {
 }
 
 function Write-Phase15AtomicCreateNewJson {
-    param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][object]$Value)
+    param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][object]$Value, [Parameter(Mandatory)][string]$OwnerId)
+    if ($OwnerId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$') { throw 'writer_owner_invalid' }
     $fullPath = [IO.Path]::GetFullPath($Path)
-    $temporaryPath = $fullPath + '.create-' + [Guid]::NewGuid().ToString('N') + '.tmp'
+    $temporaryPath = $fullPath + '.phase15-' + $OwnerId + '.create-' + [Guid]::NewGuid().ToString('N') + '.tmp'
     $bytes = [Text.UTF8Encoding]::new($false).GetBytes((ConvertTo-Phase15CanonicalJsonText -Value $Value) + "`n")
     $stream = $null
     try {
@@ -630,12 +634,14 @@ function Write-Phase15AtomicCreateNewJson {
 }
 
 function Remove-Phase15TransactionTemps {
-    param([Parameter(Mandatory)][string]$TransactionPath)
+    param([Parameter(Mandatory)][string]$TransactionPath, [Parameter(Mandatory)][string]$ClaimId)
+    if ($ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$') { throw 'transaction_invalid' }
     $fullPath = [IO.Path]::GetFullPath($TransactionPath)
     $parent = [IO.Path]::GetDirectoryName($fullPath)
     $leaf = [IO.Path]::GetFileName($fullPath)
     if (-not (Test-Path -LiteralPath $parent -PathType Container)) { return }
-    $allowed = '^' + [regex]::Escape($leaf) + '(?:\.create-[0-9a-f]{32}\.tmp|\.atomic-[0-9a-f]{32}(?:\.create-[0-9a-f]{32}\.tmp)?|\.backup-[0-9a-f]{32})$'
+    $owner = [regex]::Escape($ClaimId)
+    $allowed = '^' + [regex]::Escape($leaf) + '\.phase15-' + $owner + '(?:\.create-[0-9a-f]{32}\.tmp|\.atomic-[0-9a-f]{32}(?:\.phase15-' + $owner + '\.create-[0-9a-f]{32}\.tmp)?|\.backup-[0-9a-f]{32})$'
     foreach ($candidate in [IO.Directory]::EnumerateFiles($parent, $leaf + '.*', [IO.SearchOption]::TopDirectoryOnly)) {
         if ([IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($candidate)) -cne $parent -or [IO.Path]::GetFileName($candidate) -cnotmatch $allowed) { continue }
         if (([IO.File]::GetAttributes($candidate) -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'transaction_invalid' }
@@ -652,11 +658,11 @@ function Remove-Phase15OwnedStateResidues {
     )
     if ($ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$') { throw 'transaction_invalid' }
     $targets = @(
-        [pscustomobject]@{ Path = [IO.Path]::GetFullPath($LifecyclePath); Suffix = '(?:create-[0-9a-f]{32}\.tmp|atomic-[0-9a-f]{32}(?:\.create-[0-9a-f]{32}\.tmp)?|terminal-[0-9a-f]{32}(?:\.create-[0-9a-f]{32}\.tmp)?|backup-[0-9a-f]{32})' },
-        [pscustomobject]@{ Path = [IO.Path]::GetFullPath($OutcomePath); Suffix = '(?:create-[0-9a-f]{32}\.tmp|atomic-[0-9a-f]{32}(?:\.create-[0-9a-f]{32}\.tmp)?|pending-[0-9a-f]{32}(?:\.create-[0-9a-f]{32}\.tmp)?|phase15-' + [regex]::Escape($ClaimId) + '\.staged\.create-[0-9a-f]{32}\.tmp|reservation-backup-' + [regex]::Escape($ClaimId) + '-[0-9a-f]{32})' }
+        [pscustomobject]@{ Path = [IO.Path]::GetFullPath($LifecyclePath); Suffix = 'phase15-' + [regex]::Escape($ClaimId) + '(?:\.create-[0-9a-f]{32}\.tmp|\.atomic-[0-9a-f]{32}(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.terminal-[0-9a-f]{32}(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.backup-[0-9a-f]{32})' },
+        [pscustomobject]@{ Path = [IO.Path]::GetFullPath($OutcomePath); Suffix = 'phase15-' + [regex]::Escape($ClaimId) + '(?:\.create-[0-9a-f]{32}\.tmp|\.atomic-[0-9a-f]{32}(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.pending-[0-9a-f]{32}(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.staged(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.reservation-backup-[0-9a-f]{32})' }
     )
     if (-not [string]::IsNullOrWhiteSpace($RecoveryOutcomePath)) {
-        $targets += [pscustomobject]@{ Path = [IO.Path]::GetFullPath($RecoveryOutcomePath); Suffix = '(?:create-[0-9a-f]{32}\.tmp|atomic-[0-9a-f]{32}(?:\.create-[0-9a-f]{32}\.tmp)?|backup-[0-9a-f]{32})' }
+        $targets += [pscustomobject]@{ Path = [IO.Path]::GetFullPath($RecoveryOutcomePath); Suffix = 'phase15-' + [regex]::Escape($ClaimId) + '(?:\.create-[0-9a-f]{32}\.tmp|\.atomic-[0-9a-f]{32}(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.backup-[0-9a-f]{32})' }
     }
     foreach ($target in $targets) {
         $parent = [IO.Path]::GetDirectoryName($target.Path)
@@ -672,12 +678,13 @@ function Remove-Phase15OwnedStateResidues {
 }
 
 function Write-Phase15AtomicJson {
-    param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][object]$Value)
+    param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][object]$Value, [Parameter(Mandatory)][string]$OwnerId)
+    if ($OwnerId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$') { throw 'writer_owner_invalid' }
     $fullPath = [IO.Path]::GetFullPath($Path)
-    $temporaryPath = $fullPath + '.atomic-' + [Guid]::NewGuid().ToString('N')
-    $backupPath = $fullPath + '.backup-' + [Guid]::NewGuid().ToString('N')
+    $temporaryPath = $fullPath + '.phase15-' + $OwnerId + '.atomic-' + [Guid]::NewGuid().ToString('N')
+    $backupPath = $fullPath + '.phase15-' + $OwnerId + '.backup-' + [Guid]::NewGuid().ToString('N')
     try {
-        Write-Phase15CreateNewJson -Path $temporaryPath -Value $Value
+        Write-Phase15CreateNewJson -Path $temporaryPath -Value $Value -OwnerId $OwnerId
         if (Test-Path -LiteralPath $fullPath -PathType Leaf) {
             [IO.File]::Replace($temporaryPath, $fullPath, $backupPath, $true)
         } else {
@@ -698,8 +705,168 @@ function Get-Phase15LifecyclePath {
     return $path
 }
 
+function Get-Phase15StateDirectoryFacts {
+    param([Parameter(Mandatory)][string]$Path)
+    $fullPath = [IO.Path]::GetFullPath($Path).TrimEnd([IO.Path]::DirectorySeparatorChar)
+    if (-not (Test-Path -LiteralPath $fullPath)) { return [pscustomobject]@{ Exists = $false; FullName = $fullPath } }
+    $item = Get-Item -LiteralPath $fullPath -Force -ErrorAction Stop
+    $acl = Get-Acl -LiteralPath $fullPath -ErrorAction Stop
+    $rules = @($acl.GetAccessRules($true, $true, [Security.Principal.SecurityIdentifier]) | ForEach-Object {
+        [pscustomobject]@{
+            Inheritance = [int]$_.InheritanceFlags
+            IsInherited = [bool]$_.IsInherited
+            Propagation = [int]$_.PropagationFlags
+            Rights = [int64]$_.FileSystemRights
+            Sid = $_.IdentityReference.Value
+            Type = $_.AccessControlType.ToString()
+        }
+    })
+    return [pscustomobject]@{
+        Exists = $true
+        FullName = [IO.Path]::GetFullPath($item.FullName).TrimEnd([IO.Path]::DirectorySeparatorChar)
+        IsDirectory = [bool]$item.PSIsContainer
+        IsReparse = (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0)
+        OwnerSid = $acl.GetOwner([Security.Principal.SecurityIdentifier]).Value
+        Protected = [bool]$acl.AreAccessRulesProtected
+        Rules = $rules
+    }
+}
+
+function Test-Phase15ProgramDataAnchorFacts {
+    param([Parameter(Mandatory)][object]$Facts, [Parameter(Mandatory)][string]$ExpectedPath)
+    if ($null -eq $Facts -or -not (Test-Phase15ExactProperties -Value $Facts -Required @('Exists','FullName','IsDirectory','IsReparse','OwnerSid','Protected','Rules'))) { return $false }
+    if ($Facts.Exists -isnot [bool] -or -not $Facts.Exists -or $Facts.IsDirectory -isnot [bool] -or -not $Facts.IsDirectory -or $Facts.IsReparse -isnot [bool] -or $Facts.IsReparse) { return $false }
+    if ($Facts.FullName -isnot [string] -or -not [IO.Path]::IsPathRooted($Facts.FullName) -or -not [IO.Path]::GetFullPath($Facts.FullName).TrimEnd([IO.Path]::DirectorySeparatorChar).Equals([IO.Path]::GetFullPath($ExpectedPath).TrimEnd([IO.Path]::DirectorySeparatorChar), [StringComparison]::OrdinalIgnoreCase)) { return $false }
+    if ($Facts.OwnerSid -isnot [string] -or $Facts.OwnerSid -notin @($script:Phase15SystemSid, $script:Phase15AdministratorsSid)) { return $false }
+    if ($Facts.Protected -isnot [bool] -or -not $Facts.Protected -or $Facts.Rules -isnot [System.Collections.IEnumerable]) { return $false }
+    $expected = @(
+        [pscustomobject]@{ Sid = 'S-1-3-0'; Rights = [int64]268435456; Inheritance = 3; Propagation = 2 },
+        [pscustomobject]@{ Sid = $script:Phase15SystemSid; Rights = [int64]2032127; Inheritance = 3; Propagation = 0 },
+        [pscustomobject]@{ Sid = $script:Phase15AdministratorsSid; Rights = [int64]2032127; Inheritance = 3; Propagation = 0 },
+        [pscustomobject]@{ Sid = 'S-1-5-32-545'; Rights = [int64]278; Inheritance = 1; Propagation = 0 },
+        [pscustomobject]@{ Sid = 'S-1-5-32-545'; Rights = [int64]1179817; Inheritance = 3; Propagation = 0 }
+    )
+    $rules = @($Facts.Rules)
+    if ($rules.Count -ne $expected.Count) { return $false }
+    foreach ($wanted in $expected) {
+        $matching = @($rules | Where-Object { $_.Sid -is [string] -and $_.Sid -ceq $wanted.Sid -and [int64]$_.Rights -eq $wanted.Rights -and [int]$_.Inheritance -eq $wanted.Inheritance -and [int]$_.Propagation -eq $wanted.Propagation })
+        if ($matching.Count -ne 1) { return $false }
+        $rule = $matching[0]
+        if (-not (Test-Phase15ExactProperties -Value $rule -Required @('Inheritance','IsInherited','Propagation','Rights','Sid','Type')) -or $rule.Type -isnot [string] -or $rule.Type -cne 'Allow' -or $rule.IsInherited -isnot [bool] -or $rule.IsInherited) { return $false }
+    }
+    return $true
+}
+
+function Test-Phase15ManagedStateDirectoryFacts {
+    param([Parameter(Mandatory)][object]$Facts, [Parameter(Mandatory)][string]$ExpectedPath, [Parameter(Mandatory)][string]$AuthorizedSid)
+    if ($AuthorizedSid -cnotmatch '^S-1-[0-9-]+$' -or $null -eq $Facts -or -not (Test-Phase15ExactProperties -Value $Facts -Required @('Exists','FullName','IsDirectory','IsReparse','OwnerSid','Protected','Rules'))) { return $false }
+    if ($Facts.Exists -isnot [bool] -or -not $Facts.Exists -or $Facts.IsDirectory -isnot [bool] -or -not $Facts.IsDirectory -or $Facts.IsReparse -isnot [bool] -or $Facts.IsReparse) { return $false }
+    if ($Facts.FullName -isnot [string] -or -not [IO.Path]::IsPathRooted($Facts.FullName) -or -not [IO.Path]::GetFullPath($Facts.FullName).TrimEnd([IO.Path]::DirectorySeparatorChar).Equals([IO.Path]::GetFullPath($ExpectedPath).TrimEnd([IO.Path]::DirectorySeparatorChar), [StringComparison]::OrdinalIgnoreCase)) { return $false }
+    if ($Facts.OwnerSid -isnot [string] -or $Facts.OwnerSid -cne $AuthorizedSid -or $Facts.Protected -isnot [bool] -or -not $Facts.Protected) { return $false }
+    $expectedSids = @($AuthorizedSid, $script:Phase15SystemSid, $script:Phase15AdministratorsSid)
+    $rules = @($Facts.Rules)
+    if ($rules.Count -ne $expectedSids.Count) { return $false }
+    $fullControl = [int64][Security.AccessControl.FileSystemRights]::FullControl
+    $inheritance = [int][Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [int][Security.AccessControl.InheritanceFlags]::ObjectInherit
+    foreach ($sid in $expectedSids) {
+        $matching = @($rules | Where-Object { $_.Sid -is [string] -and $_.Sid -ceq $sid })
+        if ($matching.Count -ne 1) { return $false }
+        $rule = $matching[0]
+        if (-not (Test-Phase15ExactProperties -Value $rule -Required @('Inheritance','IsInherited','Propagation','Rights','Sid','Type'))) { return $false }
+        if ($rule.Type -isnot [string] -or $rule.Type -cne 'Allow' -or [int64]$rule.Rights -ne $fullControl -or $rule.IsInherited -isnot [bool] -or $rule.IsInherited -or [int]$rule.Inheritance -ne $inheritance -or [int]$rule.Propagation -ne 0) { return $false }
+    }
+    return $true
+}
+
+function Enter-Phase15StateRootCreationLock {
+    $mutex = [Threading.Mutex]::new($false, $script:Phase15StateRootCreationMutexName)
+    $acquired = $false
+    try {
+        try { $acquired = $mutex.WaitOne(0) } catch [Threading.AbandonedMutexException] { $acquired = $true }
+        if (-not $acquired) { throw 'state_root_busy' }
+        return [pscustomobject]@{ Acquired = $true; Mutex = $mutex }
+    } catch {
+        if (-not $acquired) { $mutex.Dispose() }
+        throw
+    }
+}
+
+function Exit-Phase15StateRootCreationLock {
+    param([Parameter(Mandatory)][object]$Lock)
+    if ($null -eq $Lock -or $Lock.Acquired -isnot [bool] -or -not $Lock.Acquired -or $null -eq $Lock.Mutex) { throw 'state_root_lock_invalid' }
+    try { $Lock.Mutex.ReleaseMutex() } finally { $Lock.Mutex.Dispose() }
+}
+
+function New-Phase15SecureStateDirectory {
+    param([Parameter(Mandatory)][string]$ParentPath, [Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][string]$AuthorizedSid)
+    $parent = [IO.Path]::GetFullPath($ParentPath).TrimEnd([IO.Path]::DirectorySeparatorChar)
+    $target = [IO.Path]::GetFullPath($Path).TrimEnd([IO.Path]::DirectorySeparatorChar)
+    if ([IO.Path]::GetDirectoryName($target).TrimEnd([IO.Path]::DirectorySeparatorChar) -cne $parent -or $AuthorizedSid -cnotmatch '^S-1-[0-9-]+$') { throw 'state_root_invalid' }
+    $security = [Security.AccessControl.DirectorySecurity]::new()
+    $security.SetAccessRuleProtection($true, $false)
+    $owner = [Security.Principal.SecurityIdentifier]::new($AuthorizedSid)
+    $security.SetOwner($owner)
+    $inheritance = [Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [Security.AccessControl.InheritanceFlags]::ObjectInherit
+    foreach ($sidValue in @($AuthorizedSid, $script:Phase15SystemSid, $script:Phase15AdministratorsSid)) {
+        $sid = [Security.Principal.SecurityIdentifier]::new($sidValue)
+        $rule = [Security.AccessControl.FileSystemAccessRule]::new($sid, [Security.AccessControl.FileSystemRights]::FullControl, $inheritance, [Security.AccessControl.PropagationFlags]::None, [Security.AccessControl.AccessControlType]::Allow)
+        [void]$security.AddAccessRule($rule)
+    }
+    $temporary = Join-Path $parent ('.phase15-state-root.create-' + [Guid]::NewGuid().ToString('N') + '.tmp')
+    try {
+        [void][IO.Directory]::CreateDirectory($temporary, $security)
+        $temporaryFacts = Get-Phase15StateDirectoryFacts -Path $temporary
+        if (-not (Test-Phase15ManagedStateDirectoryFacts -Facts $temporaryFacts -ExpectedPath $temporary -AuthorizedSid $AuthorizedSid)) { throw 'state_root_invalid' }
+        try { [IO.Directory]::Move($temporary, $target) } catch [IO.IOException] {
+            $existing = Get-Phase15StateDirectoryFacts -Path $target
+            if (-not (Test-Phase15ManagedStateDirectoryFacts -Facts $existing -ExpectedPath $target -AuthorizedSid $AuthorizedSid)) { throw 'state_root_invalid' }
+        }
+    } finally {
+        $remaining = Get-Phase15StateDirectoryFacts -Path $temporary
+        if ($remaining.Exists) {
+            if (-not (Test-Phase15ManagedStateDirectoryFacts -Facts $remaining -ExpectedPath $temporary -AuthorizedSid $AuthorizedSid)) { throw 'state_root_invalid' }
+            [IO.Directory]::Delete($temporary, $false)
+        }
+    }
+}
+
+function Initialize-Phase15TrustedStateRoot {
+    param([Parameter(Mandatory)][string]$AnchorPath, [Parameter(Mandatory)][string]$StateRoot, [Parameter(Mandatory)][string]$AuthorizedSid)
+    $anchor = [IO.Path]::GetFullPath($AnchorPath).TrimEnd([IO.Path]::DirectorySeparatorChar)
+    $root = [IO.Path]::GetFullPath($StateRoot).TrimEnd([IO.Path]::DirectorySeparatorChar)
+    $expectedRoot = [IO.Path]::Combine($anchor, 'AMN2', 'phase15', 'readonly-preflight')
+    if (-not $root.Equals($expectedRoot, [StringComparison]::OrdinalIgnoreCase)) { throw 'state_root_invalid' }
+    $lock = Enter-Phase15StateRootCreationLock
+    try {
+        $anchorFacts = Get-Phase15StateDirectoryFacts -Path $anchor
+        if (-not (Test-Phase15ProgramDataAnchorFacts -Facts $anchorFacts -ExpectedPath $anchor)) { throw 'state_root_invalid' }
+        $current = $anchor
+        foreach ($leaf in @('AMN2','phase15','readonly-preflight')) {
+            $next = [IO.Path]::Combine($current, $leaf)
+            $facts = Get-Phase15StateDirectoryFacts -Path $next
+            if (-not $facts.Exists) { New-Phase15SecureStateDirectory -ParentPath $current -Path $next -AuthorizedSid $AuthorizedSid; $facts = Get-Phase15StateDirectoryFacts -Path $next }
+            if (-not (Test-Phase15ManagedStateDirectoryFacts -Facts $facts -ExpectedPath $next -AuthorizedSid $AuthorizedSid)) { throw 'state_root_invalid' }
+            $current = $next
+        }
+        foreach ($leaf in @('locks','outcome-locks','claims','transactions','recovery-outcomes')) {
+            $next = [IO.Path]::Combine($root, $leaf)
+            $facts = Get-Phase15StateDirectoryFacts -Path $next
+            if (-not $facts.Exists) { New-Phase15SecureStateDirectory -ParentPath $root -Path $next -AuthorizedSid $AuthorizedSid; $facts = Get-Phase15StateDirectoryFacts -Path $next }
+            if (-not (Test-Phase15ManagedStateDirectoryFacts -Facts $facts -ExpectedPath $next -AuthorizedSid $AuthorizedSid)) { throw 'state_root_invalid' }
+        }
+        return $root
+    } finally { Exit-Phase15StateRootCreationLock -Lock $lock }
+}
+
 function Get-Phase15ProductionStateRoot {
     return $script:Phase15ProductionStateRoot
+}
+
+function Initialize-Phase15ProductionStateRoot {
+    $anchor = [Environment]::GetFolderPath([Environment+SpecialFolder]::CommonApplicationData)
+    if ([string]::IsNullOrWhiteSpace($anchor) -or -not [IO.Path]::IsPathRooted($anchor)) { throw 'state_root_invalid' }
+    $authorizedSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+    return Initialize-Phase15TrustedStateRoot -AnchorPath $anchor -StateRoot $script:Phase15ProductionStateRoot -AuthorizedSid $authorizedSid
 }
 
 function Get-Phase15TransactionPath {
@@ -715,7 +882,7 @@ function Get-Phase15ClaimLockPath {
 function Enter-Phase15ClaimLock {
     param([Parameter(Mandatory)][string]$StateRoot, [Parameter(Mandatory)][string]$ClaimId)
     if ($ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$') { throw 'claim_invalid' }
-    foreach ($root in @($StateRoot, (Join-Path $StateRoot 'locks'))) {
+    foreach ($root in @($StateRoot, (Join-Path $StateRoot 'locks'), (Join-Path $StateRoot 'outcome-locks'))) {
         if (-not (Test-Path -LiteralPath $root)) { [void][IO.Directory]::CreateDirectory($root) }
         $item = Get-Item -LiteralPath $root -Force
         if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'claim_lifecycle_invalid' }
@@ -734,6 +901,41 @@ function Test-Phase15ClaimLock {
     return $Lock.ClaimId -is [string] -and $Lock.ClaimId -ceq $ClaimId -and $Lock.Path -is [string] -and [IO.Path]::GetFullPath($Lock.Path) -ceq [IO.Path]::GetFullPath($expected) -and $Lock.Stream -is [IO.FileStream] -and $Lock.Stream.CanWrite
 }
 
+function Get-Phase15OutcomeLockPath {
+    param([Parameter(Mandatory)][string]$StateRoot, [Parameter(Mandatory)][string]$OutcomePath)
+    $root = [IO.Path]::GetFullPath($StateRoot).TrimEnd([IO.Path]::DirectorySeparatorChar)
+    $lockRoot = [IO.Path]::GetFullPath((Join-Path $root 'outcome-locks')).TrimEnd([IO.Path]::DirectorySeparatorChar)
+    if ([IO.Path]::GetDirectoryName($lockRoot).TrimEnd([IO.Path]::DirectorySeparatorChar) -cne $root) { throw 'outcome_lock_invalid' }
+    $canonicalOutcome = [IO.Path]::GetFullPath($OutcomePath).TrimEnd([IO.Path]::DirectorySeparatorChar).ToUpperInvariant()
+    $bytes = [Text.UTF8Encoding]::new($false).GetBytes($canonicalOutcome)
+    $digest = Get-Phase15BytesSha256 -Bytes $bytes
+    return [IO.Path]::Combine($lockRoot, $digest + '.lock')
+}
+
+function Enter-Phase15OutcomeLock {
+    param([Parameter(Mandatory)][string]$StateRoot, [Parameter(Mandatory)][string]$OutcomePath, [Parameter(Mandatory)][string]$ClaimId)
+    if ($ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$') { throw 'outcome_lock_invalid' }
+    $lockRoot = Join-Path ([IO.Path]::GetFullPath($StateRoot)) 'outcome-locks'
+    if (-not (Test-Path -LiteralPath $lockRoot -PathType Container)) { throw 'outcome_lock_invalid' }
+    $lockItem = Get-Item -LiteralPath $lockRoot -Force -ErrorAction Stop
+    if (($lockItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'outcome_lock_invalid' }
+    $path = Get-Phase15OutcomeLockPath -StateRoot $StateRoot -OutcomePath $OutcomePath
+    try { $stream = [IO.FileStream]::new($path, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None) } catch [IO.IOException] { throw 'outcome_replay' }
+    return [pscustomobject]@{ ClaimId = $ClaimId; OutcomePath = [IO.Path]::GetFullPath($OutcomePath); Path = $path; Stream = $stream }
+}
+
+function Test-Phase15OutcomeLock {
+    param([Parameter(Mandatory)][object]$Lock, [Parameter(Mandatory)][string]$StateRoot, [Parameter(Mandatory)][string]$OutcomePath, [Parameter(Mandatory)][string]$ClaimId)
+    if ($null -eq $Lock -or -not (Test-Phase15ExactProperties -Value $Lock -Required @('ClaimId','OutcomePath','Path','Stream'))) { return $false }
+    $expectedPath = Get-Phase15OutcomeLockPath -StateRoot $StateRoot -OutcomePath $OutcomePath
+    return (
+        $Lock.ClaimId -is [string] -and $Lock.ClaimId -ceq $ClaimId -and
+        $Lock.OutcomePath -is [string] -and [IO.Path]::GetFullPath($Lock.OutcomePath).Equals([IO.Path]::GetFullPath($OutcomePath), [StringComparison]::OrdinalIgnoreCase) -and
+        $Lock.Path -is [string] -and [IO.Path]::GetFullPath($Lock.Path) -ceq [IO.Path]::GetFullPath($expectedPath) -and
+        $Lock.Stream -is [IO.FileStream] -and $Lock.Stream.CanWrite
+    )
+}
+
 function Reserve-Phase15Claim {
     param([Parameter(Mandatory)][string]$LifecycleRoot, [Parameter(Mandatory)][string]$ClaimId, [Parameter(Mandatory)][string]$ReservedAt)
     if ($ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$' -or -not (Test-Phase15UtcTimestamp -Value $ReservedAt)) { throw 'claim_invalid' }
@@ -741,7 +943,7 @@ function Reserve-Phase15Claim {
     $rootItem = Get-Item -LiteralPath $LifecycleRoot -Force
     if (($rootItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'claim_lifecycle_invalid' }
     $lifecyclePath = Get-Phase15LifecyclePath -LifecycleRoot $LifecycleRoot -ClaimId $ClaimId
-    Write-Phase15CreateNewJson -Path $lifecyclePath -Value ([ordered]@{ claim_id = $ClaimId; reason_code = 'not_applicable'; reserved_at = $ReservedAt; status = 'reserved' })
+    Write-Phase15CreateNewJson -Path $lifecyclePath -Value ([ordered]@{ claim_id = $ClaimId; reason_code = 'not_applicable'; reserved_at = $ReservedAt; status = 'reserved' }) -OwnerId $ClaimId
     return $lifecyclePath
 }
 
@@ -751,7 +953,7 @@ function Reserve-Phase15OutcomeSlot {
     $fullPath = [IO.Path]::GetFullPath($OutcomePath)
     $parent = [IO.Path]::GetDirectoryName($fullPath)
     if ([string]::IsNullOrWhiteSpace($parent) -or -not (Test-Path -LiteralPath $parent -PathType Container)) { throw 'outcome_reservation_invalid' }
-    Write-Phase15CreateNewJson -Path $fullPath -Value ([ordered]@{ claim_id = $ClaimId; reserved_at = $ReservedAt; status = 'reserved' })
+    Write-Phase15CreateNewJson -Path $fullPath -Value ([ordered]@{ claim_id = $ClaimId; reserved_at = $ReservedAt; status = 'reserved' }) -OwnerId $ClaimId
     return $fullPath
 }
 
@@ -798,38 +1000,40 @@ function Start-Phase15Transaction {
         $item = Get-Item -LiteralPath $root -Force
         if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'transaction_invalid' }
     }
-    $lifecyclePath = Get-Phase15LifecyclePath -LifecycleRoot $lifecycleRoot -ClaimId $ClaimId
-    $journalPath = Get-Phase15TransactionPath -StateRoot $StateRoot -ClaimId $ClaimId
-    Remove-Phase15TransactionTemps -TransactionPath $journalPath
     $reservationPath = [IO.Path]::GetFullPath($OutcomePath)
-    Remove-Phase15OwnedStateResidues -LifecyclePath $lifecyclePath -OutcomePath $reservationPath -ClaimId $ClaimId
-    $stagedPath = $reservationPath + '.phase15-' + $ClaimId + '.staged'
-    if (Test-Path -LiteralPath $lifecyclePath) { throw 'claim_replay' }
-    if (Test-Path -LiteralPath $journalPath) { throw 'transaction_pending' }
-    if (Test-Path -LiteralPath $reservationPath) { throw 'outcome_reservation_invalid' }
-    $journal = [ordered]@{
-        claim_id = $ClaimId
-        collector_sha256 = $CollectorSha256
-        expected_host = $ExpectedHost
-        manifest_sha256 = $ManifestSha256
-        outcome_path = $reservationPath
-        phase = 'owned'
-        reserved_at = $ReservedAt
-        schema = 'amn2.phase15.readonly-preflight-transaction.v1'
-        ssh_used = $false
-        staged_path = $stagedPath
-        terminal_ended_at = $null
-        terminal_outcome_sha256 = $null
-        terminal_path = $null
-        terminal_reason_code = $null
-        terminal_status = $null
-    }
-    Write-Phase15AtomicCreateNewJson -Path $journalPath -Value $journal
+    $outcomeLock = Enter-Phase15OutcomeLock -StateRoot $StateRoot -OutcomePath $reservationPath -ClaimId $ClaimId
     try {
+        $lifecyclePath = Get-Phase15LifecyclePath -LifecycleRoot $lifecycleRoot -ClaimId $ClaimId
+        $journalPath = Get-Phase15TransactionPath -StateRoot $StateRoot -ClaimId $ClaimId
+        Remove-Phase15TransactionTemps -TransactionPath $journalPath -ClaimId $ClaimId
+        Remove-Phase15OwnedStateResidues -LifecyclePath $lifecyclePath -OutcomePath $reservationPath -ClaimId $ClaimId
+        $stagedPath = $reservationPath + '.phase15-' + $ClaimId + '.staged'
+        if (Test-Path -LiteralPath $lifecyclePath) { throw 'claim_replay' }
+        if (Test-Path -LiteralPath $journalPath) { throw 'transaction_pending' }
+        if (Test-Path -LiteralPath $reservationPath) { throw 'outcome_reservation_invalid' }
+        $journal = [ordered]@{
+            claim_id = $ClaimId
+            collector_sha256 = $CollectorSha256
+            expected_host = $ExpectedHost
+            manifest_sha256 = $ManifestSha256
+            outcome_path = $reservationPath
+            phase = 'owned'
+            reserved_at = $ReservedAt
+            schema = 'amn2.phase15.readonly-preflight-transaction.v1'
+            ssh_used = $false
+            staged_path = $stagedPath
+            terminal_ended_at = $null
+            terminal_outcome_sha256 = $null
+            terminal_path = $null
+            terminal_reason_code = $null
+            terminal_status = $null
+        }
+        Write-Phase15AtomicCreateNewJson -Path $journalPath -Value $journal -OwnerId $ClaimId
         $createdReservation = Reserve-Phase15OutcomeSlot -OutcomePath $reservationPath -ClaimId $ClaimId -ReservedAt $ReservedAt
         $createdLifecycle = Reserve-Phase15Claim -LifecycleRoot $lifecycleRoot -ClaimId $ClaimId -ReservedAt $ReservedAt
-        return [pscustomobject]@{ JournalPath = $journalPath; LifecyclePath = $createdLifecycle; ReservationPath = $createdReservation; StagedPath = $stagedPath }
+        return [pscustomobject]@{ JournalPath = $journalPath; LifecyclePath = $createdLifecycle; OutcomeLock = $outcomeLock; ReservationPath = $createdReservation; StagedPath = $stagedPath }
     } catch {
+        $outcomeLock.Stream.Dispose()
         throw
     }
 }
@@ -851,7 +1055,7 @@ function Set-Phase15TransactionPhase {
     if ($currentPhaseIndex -lt 0 -or $nextPhaseIndex -lt 0 -or $nextPhaseIndex -lt $currentPhaseIndex) { throw 'transaction_invalid' }
     $journal.phase = $Phase
     if ($nextPhaseIndex -ge 1) { $journal.ssh_used = $true }
-    Write-Phase15AtomicJson -Path $TransactionPath -Value $journal
+    Write-Phase15AtomicJson -Path $TransactionPath -Value $journal -OwnerId $ClaimId
     return $TransactionPath
 }
 
@@ -860,14 +1064,15 @@ function Reconcile-Phase15Transaction {
         [Parameter(Mandatory)][string]$StateRoot,
         [Parameter(Mandatory)][string]$ClaimId,
         [Parameter(Mandatory)][string]$EndedAt,
-        [Parameter(Mandatory)][object]$Lock
+        [Parameter(Mandatory)][object]$Lock,
+        [object]$OutcomeLock
     )
     if (-not (Test-Phase15UtcTimestamp -Value $EndedAt)) { throw 'transaction_invalid' }
     if (-not (Test-Phase15ClaimLock -Lock $Lock -StateRoot $StateRoot -ClaimId $ClaimId)) { throw 'claim_lock_invalid' }
     $transactionRoot = Join-Path $StateRoot 'transactions'
     if (-not (Test-Path -LiteralPath $transactionRoot -PathType Container)) { return [pscustomobject]@{ Recovered = $false; OutcomePath = $null } }
     $journalPath = Get-Phase15TransactionPath -StateRoot $StateRoot -ClaimId $ClaimId
-    Remove-Phase15TransactionTemps -TransactionPath $journalPath
+    Remove-Phase15TransactionTemps -TransactionPath $journalPath -ClaimId $ClaimId
     if (-not (Test-Path -LiteralPath $journalPath -PathType Leaf)) { return [pscustomobject]@{ Recovered = $false; OutcomePath = $null } }
     $journal = ConvertFrom-Phase15CanonicalJsonFile -Path $journalPath
     $required = @('claim_id','collector_sha256','expected_host','manifest_sha256','outcome_path','phase','reserved_at','schema','ssh_used','staged_path','terminal_ended_at','terminal_outcome_sha256','terminal_path','terminal_reason_code','terminal_status')
@@ -889,6 +1094,12 @@ function Reconcile-Phase15Transaction {
     if ($journal.manifest_sha256 -cnotmatch '^[0-9a-f]{64}$' -or $journal.collector_sha256 -cnotmatch '^[0-9a-f]{64}$' -or -not (Test-Phase15ExpectedHost -ExpectedHost $journal.expected_host) -or -not (Test-Phase15UtcTimestamp -Value $journal.reserved_at)) { throw 'transaction_invalid' }
     $expectedStagedPath = [IO.Path]::GetFullPath($journal.outcome_path) + '.phase15-' + $ClaimId + '.staged'
     if ([IO.Path]::GetFullPath($journal.staged_path) -cne $expectedStagedPath) { throw 'transaction_invalid' }
+    $ownsOutcomeLock = $false
+    if ($null -eq $OutcomeLock) {
+        $OutcomeLock = Enter-Phase15OutcomeLock -StateRoot $StateRoot -OutcomePath $journal.outcome_path -ClaimId $ClaimId
+        $ownsOutcomeLock = $true
+    } elseif (-not (Test-Phase15OutcomeLock -Lock $OutcomeLock -StateRoot $StateRoot -OutcomePath $journal.outcome_path -ClaimId $ClaimId)) { throw 'outcome_lock_invalid' }
+    try {
     $lifecycleRoot = Join-Path $StateRoot 'claims'
     if (-not (Test-Path -LiteralPath $lifecycleRoot)) { [void][IO.Directory]::CreateDirectory($lifecycleRoot) }
     $lifecyclePath = Get-Phase15LifecyclePath -LifecycleRoot $lifecycleRoot -ClaimId $ClaimId
@@ -922,14 +1133,17 @@ function Reconcile-Phase15Transaction {
     $journal.terminal_path = $publishedPath
     $journal.terminal_reason_code = 'transport_failed'
     $journal.terminal_status = 'failed'
-    Write-Phase15AtomicJson -Path $journalPath -Value $journal
+    Write-Phase15AtomicJson -Path $journalPath -Value $journal -OwnerId $ClaimId
     $terminal = [ordered]@{ claim_id = $ClaimId; ended_at = $EndedAt; reason_code = 'transport_failed'; status = 'failed' }
-    Write-Phase15AtomicJson -Path $lifecyclePath -Value $terminal
-    Write-Phase15AtomicJson -Path $publishedPath -Value $failure
+    Write-Phase15AtomicJson -Path $lifecyclePath -Value $terminal -OwnerId $ClaimId
+    Write-Phase15AtomicJson -Path $publishedPath -Value $failure -OwnerId $ClaimId
     if (Test-Path -LiteralPath $journal.staged_path -PathType Leaf) { [IO.File]::Delete($journal.staged_path) }
     [IO.File]::Delete($journalPath)
     if (Test-Path -LiteralPath $journalPath) { throw 'transaction_reconciliation_failed' }
     return [pscustomobject]@{ Recovered = $true; OutcomePath = $publishedPath }
+    } finally {
+        if ($ownsOutcomeLock) { $OutcomeLock.Stream.Dispose() }
+    }
 }
 
 function Set-Phase15ClaimTerminal {
@@ -945,10 +1159,10 @@ function Set-Phase15ClaimTerminal {
     $current = ConvertFrom-Phase15CanonicalJsonFile -Path $LifecyclePath
     if ($null -eq $current -or $current.claim_id -cne $ClaimId -or $current.status -notin @('reserved','completed','failed')) { throw 'claim_lifecycle_invalid' }
     if ($Status -ceq 'completed' -and $current.status -cne 'reserved') { throw 'claim_lifecycle_invalid' }
-    $temporaryPath = $LifecyclePath + '.terminal-' + [Guid]::NewGuid().ToString('N')
-    $backupPath = $LifecyclePath + '.backup-' + [Guid]::NewGuid().ToString('N')
+    $temporaryPath = $LifecyclePath + '.phase15-' + $ClaimId + '.terminal-' + [Guid]::NewGuid().ToString('N')
+    $backupPath = $LifecyclePath + '.phase15-' + $ClaimId + '.backup-' + [Guid]::NewGuid().ToString('N')
     try {
-        Write-Phase15CreateNewJson -Path $temporaryPath -Value ([ordered]@{ claim_id = $ClaimId; ended_at = $EndedAt; reason_code = $ReasonCode; status = $Status })
+        Write-Phase15CreateNewJson -Path $temporaryPath -Value ([ordered]@{ claim_id = $ClaimId; ended_at = $EndedAt; reason_code = $ReasonCode; status = $Status }) -OwnerId $ClaimId
         [IO.File]::Replace($temporaryPath, $LifecyclePath, $backupPath, $true)
     } finally {
         if (Test-Path -LiteralPath $temporaryPath -PathType Leaf) { Remove-Item -LiteralPath $temporaryPath -Force }
@@ -968,13 +1182,15 @@ function Publish-Phase15TerminalOutcome {
         [Parameter(Mandatory)][string]$ReasonCode,
         [Parameter(Mandatory)][object]$Outcome,
         [string]$TransactionPath,
-        [object]$Lock
+        [object]$Lock,
+        [object]$OutcomeLock
     )
     if ([IO.Path]::GetFullPath($ReservationPath) -cne [IO.Path]::GetFullPath($OutcomePath) -or -not (Test-Phase15OutcomeOwnership -ReservationPath $ReservationPath -ClaimId $ClaimId)) { throw 'outcome_reservation_invalid' }
     if (-not [string]::IsNullOrWhiteSpace($TransactionPath)) {
         $journal = ConvertFrom-Phase15CanonicalJsonFile -Path $TransactionPath
         $stateRoot = Split-Path -Parent (Split-Path -Parent ([IO.Path]::GetFullPath($TransactionPath)))
         if (-not (Test-Phase15ClaimLock -Lock $Lock -StateRoot $stateRoot -ClaimId $ClaimId)) { throw 'claim_lock_invalid' }
+        if (-not (Test-Phase15OutcomeLock -Lock $OutcomeLock -StateRoot $stateRoot -OutcomePath $OutcomePath -ClaimId $ClaimId)) { throw 'outcome_lock_invalid' }
         if ($null -eq $journal -or $journal.claim_id -cne $ClaimId -or $journal.outcome_path -cne [IO.Path]::GetFullPath($OutcomePath) -or $journal.phase -notin @('ssh_started','transport_attempted')) { throw 'transaction_invalid' }
         $pendingPath = [string]$journal.staged_path
         $journal.terminal_ended_at = $EndedAt
@@ -982,13 +1198,13 @@ function Publish-Phase15TerminalOutcome {
         $journal.terminal_path = [IO.Path]::GetFullPath($OutcomePath)
         $journal.terminal_reason_code = $ReasonCode
         $journal.terminal_status = $Status
-        Write-Phase15AtomicJson -Path $TransactionPath -Value $journal
+        Write-Phase15AtomicJson -Path $TransactionPath -Value $journal -OwnerId $ClaimId
     } else {
-        $pendingPath = $OutcomePath + '.pending-' + [Guid]::NewGuid().ToString('N')
+        $pendingPath = $OutcomePath + '.phase15-' + $ClaimId + '.pending-' + [Guid]::NewGuid().ToString('N')
     }
-    $backupPath = $OutcomePath + '.reservation-backup-' + $ClaimId + '-' + [Guid]::NewGuid().ToString('N')
+    $backupPath = $OutcomePath + '.phase15-' + $ClaimId + '.reservation-backup-' + [Guid]::NewGuid().ToString('N')
     try {
-        Write-Phase15CreateNewJson -Path $pendingPath -Value $Outcome
+        Write-Phase15CreateNewJson -Path $pendingPath -Value $Outcome -OwnerId $ClaimId
         if (-not [string]::IsNullOrWhiteSpace($TransactionPath)) { [void](Set-Phase15TransactionPhase -TransactionPath $TransactionPath -ClaimId $ClaimId -Phase 'outcome_staged' -Lock $Lock) }
         [void](Set-Phase15ClaimTerminal -LifecyclePath $LifecyclePath -ClaimId $ClaimId -Status $Status -EndedAt $EndedAt -ReasonCode $ReasonCode)
         if (-not [string]::IsNullOrWhiteSpace($TransactionPath)) { [void](Set-Phase15TransactionPhase -TransactionPath $TransactionPath -ClaimId $ClaimId -Phase 'finalizing' -Lock $Lock) }
@@ -1041,8 +1257,9 @@ function Invoke-Phase15RunnerMain {
     [void](Assert-Phase15SpainTrustBundle -ExpectedHost $ExpectedHost)
     $claim = Read-Phase15FutureClaim -ClaimPath $FutureClaimPath
     if ($null -eq $claim -or -not (Test-Phase15ClaimIdentity -Claim $claim -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost)) { throw 'claim_invalid' }
-    $stateRoot = Get-Phase15ProductionStateRoot
+    $stateRoot = Initialize-Phase15ProductionStateRoot
     $claimLock = Enter-Phase15ClaimLock -StateRoot $stateRoot -ClaimId $claim.claim_id
+    $transaction = $null
     try {
         $reconciled = Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claim.claim_id -EndedAt $startedAt -Lock $claimLock
         if ($reconciled.Recovered) { throw 'claim_replay' }
@@ -1063,25 +1280,28 @@ function Invoke-Phase15RunnerMain {
             if ($null -eq $document) { $failureReason = 'schema_invalid'; throw 'collector_schema_invalid' }
             if (-not (Test-Phase15CollectorDocument -Document $document -ExpectedHost $ExpectedHost -ExpectedClaimId $claim.claim_id -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -StartedAt $startedAt -EndedAt $endedAt)) { $failureReason = 'schema_invalid'; throw 'collector_schema_invalid' }
             $evidence = ConvertTo-Phase15Evidence -Document $document -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -StartedAt $startedAt -EndedAt $endedAt
-            Publish-Phase15TerminalOutcome -LifecyclePath $transaction.LifecyclePath -ReservationPath $transaction.ReservationPath -OutcomePath $OutcomePath -ClaimId $claim.claim_id -Status 'completed' -EndedAt $endedAt -ReasonCode 'not_applicable' -Outcome $evidence -TransactionPath $transaction.JournalPath -Lock $claimLock
+            Publish-Phase15TerminalOutcome -LifecyclePath $transaction.LifecyclePath -ReservationPath $transaction.ReservationPath -OutcomePath $OutcomePath -ClaimId $claim.claim_id -Status 'completed' -EndedAt $endedAt -ReasonCode 'not_applicable' -Outcome $evidence -TransactionPath $transaction.JournalPath -Lock $claimLock -OutcomeLock $transaction.OutcomeLock
         } catch {
             $sshUsed = $sshUsed -or $transportStarted
             $endedAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
             try {
                 if (Test-Phase15OutcomeOwnership -ReservationPath $transaction.ReservationPath -ClaimId $claim.claim_id) {
                     $failure = New-Phase15FailureOutcome -ReasonCode $failureReason -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -StartedAt $startedAt -EndedAt $endedAt -SshUsed $sshUsed
-                    Publish-Phase15TerminalOutcome -LifecyclePath $transaction.LifecyclePath -ReservationPath $transaction.ReservationPath -OutcomePath $OutcomePath -ClaimId $claim.claim_id -Status 'failed' -EndedAt $endedAt -ReasonCode $failureReason -Outcome $failure -TransactionPath $transaction.JournalPath -Lock $claimLock
+                    Publish-Phase15TerminalOutcome -LifecyclePath $transaction.LifecyclePath -ReservationPath $transaction.ReservationPath -OutcomePath $OutcomePath -ClaimId $claim.claim_id -Status 'failed' -EndedAt $endedAt -ReasonCode $failureReason -Outcome $failure -TransactionPath $transaction.JournalPath -Lock $claimLock -OutcomeLock $transaction.OutcomeLock
                 } elseif (Test-Path -LiteralPath $transaction.JournalPath -PathType Leaf) {
-                    [void](Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claim.claim_id -EndedAt $endedAt -Lock $claimLock)
+                    [void](Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claim.claim_id -EndedAt $endedAt -Lock $claimLock -OutcomeLock $transaction.OutcomeLock)
                 }
             } catch {
                 if (Test-Path -LiteralPath $transaction.JournalPath -PathType Leaf) {
-                    [void](Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claim.claim_id -EndedAt $endedAt -Lock $claimLock)
+                    [void](Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claim.claim_id -EndedAt $endedAt -Lock $claimLock -OutcomeLock $transaction.OutcomeLock)
                 }
             }
             throw
         }
-    } finally { $claimLock.Stream.Dispose() }
+    } finally {
+        if ($null -ne $transaction -and $null -ne $transaction.OutcomeLock) { $transaction.OutcomeLock.Stream.Dispose() }
+        $claimLock.Stream.Dispose()
+    }
 }
 
 if ($MyInvocation.InvocationName -ne '.') {
