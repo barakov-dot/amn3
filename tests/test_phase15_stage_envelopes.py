@@ -2,6 +2,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -53,16 +54,49 @@ def write_claim(path: Path, *, script: Path, gate: str, **overrides: object) -> 
     return claim
 
 
-def run_stage(script: Path, *, claim: Path | None, gate: str, state_hash: str = "c" * 64):
+def local_stage_copy(tmp_path: Path, script: Path, *, preserve_legacy_override: bool = False) -> Path:
+    source = script_source(script)
+    local_python = shlex.quote(sys.executable.replace("\\", "/"))
+    if "exec -c /usr/bin/python3 -I -B -" in source:
+        source = source.replace("exec -c /usr/bin/python3 -I -B -", f"exec -c {local_python} -I -B -")
+    elif not preserve_legacy_override:
+        source = source.replace(
+            'python_executable="${PHASE15_PYTHON:-python3}"',
+            f"python_executable={local_python}",
+        )
+    runtime = tmp_path / script.name
+    runtime.write_text(source, encoding="utf-8", newline="\n")
+    return runtime
+
+
+def stage_python_namespace(script: Path) -> dict[str, object]:
+    source = script_source(script)
+    match = re.search(
+        r"(?ms)<<'PHASE15_STAGE_PY'\n(?P<body>.*)\nPHASE15_STAGE_PY$",
+        source,
+    )
+    if match is None:
+        pytest.fail("stage embedded Python not found")
+    prefix = match.group("body").split(
+        "\nclaim_path, script_path, package_id, gate, state_hash, supplied_package_id, supplied_gate = sys.argv[1:]",
+        1,
+    )[0]
+    namespace: dict[str, object] = {"__name__": "phase15_stage_test"}
+    exec(compile(prefix, str(script), "exec"), namespace)
+    return namespace
+
+
+def run_stage(script: Path, *, claim: Path | None, gate: str, state_hash: str = "c" * 64, extra_env: dict[str, str] | None = None):
     env = os.environ.copy()
     env.update(
         {
             "PHASE15_EXPECTED_CURRENT_STATE_SHA256": state_hash,
             "PHASE15_FUTURE_GATE": gate,
             "PHASE15_PACKAGE_ID": PACKAGE_ID,
-            "PHASE15_PYTHON": sys.executable.replace("\\", "/"),
         }
     )
+    if extra_env:
+        env.update(extra_env)
     if claim is not None:
         env["PHASE15_STAGE_CLAIM_FILE"] = str(claim).replace("\\", "/")
     return subprocess.run(
@@ -76,10 +110,10 @@ def run_stage(script: Path, *, claim: Path | None, gate: str, state_hash: str = 
 
 
 @pytest.mark.parametrize(("script", "gate"), STAGES)
-def test_stage_envelope_refuses_without_one_time_claim(script: Path, gate: str):
-    script_source(script)
+def test_stage_envelope_refuses_without_one_time_claim(tmp_path: Path, script: Path, gate: str):
+    runtime = local_stage_copy(tmp_path, script)
 
-    result = run_stage(script, claim=None, gate=gate)
+    result = run_stage(runtime, claim=None, gate=gate)
 
     assert result.returncode == 64
     assert result.stdout == ""
@@ -90,12 +124,12 @@ def test_stage_envelope_refuses_without_one_time_claim(script: Path, gate: str):
 def test_checksum_bound_valid_claim_reaches_only_inert_phase15_boundary(
     tmp_path: Path, script: Path, gate: str
 ):
-    script_source(script)
+    runtime = local_stage_copy(tmp_path, script)
     claim = tmp_path / "claim.json"
-    write_claim(claim, script=script, gate=gate)
+    write_claim(claim, script=runtime, gate=gate)
 
     before = claim.read_bytes()
-    result = run_stage(script, claim=claim, gate=gate)
+    result = run_stage(runtime, claim=claim, gate=gate)
 
     assert result.returncode == 78
     assert result.stdout == ""
@@ -121,11 +155,11 @@ def test_stage_envelope_rejects_unbound_or_reused_claim(
     overrides: dict[str, object],
     expected_reason: str,
 ):
-    script_source(script)
+    runtime = local_stage_copy(tmp_path, script)
     claim = tmp_path / "claim.json"
-    write_claim(claim, script=script, gate=gate, **overrides)
+    write_claim(claim, script=runtime, gate=gate, **overrides)
 
-    result = run_stage(script, claim=claim, gate=gate)
+    result = run_stage(runtime, claim=claim, gate=gate)
 
     assert result.returncode == 65
     assert result.stdout == ""
@@ -134,17 +168,17 @@ def test_stage_envelope_rejects_unbound_or_reused_claim(
 
 @pytest.mark.parametrize(("script", "gate"), STAGES)
 def test_stage_envelope_rejects_claim_issued_in_the_future(tmp_path: Path, script: Path, gate: str):
-    script_source(script)
+    runtime = local_stage_copy(tmp_path, script)
     claim = tmp_path / "future-claim.json"
     write_claim(
         claim,
-        script=script,
+        script=runtime,
         gate=gate,
         issued_at="2098-08-11T11:00:00Z",
         expires_at="2099-08-11T12:00:00Z",
     )
 
-    result = run_stage(script, claim=claim, gate=gate)
+    result = run_stage(runtime, claim=claim, gate=gate)
 
     assert result.returncode == 65
     assert result.stdout == ""
@@ -153,12 +187,12 @@ def test_stage_envelope_rejects_claim_issued_in_the_future(tmp_path: Path, scrip
 
 @pytest.mark.parametrize(("script", "gate"), STAGES)
 def test_stage_envelope_rejects_noncanonical_claim_bytes(tmp_path: Path, script: Path, gate: str):
-    script_source(script)
+    runtime = local_stage_copy(tmp_path, script)
     claim = tmp_path / "noncanonical-claim.json"
-    value = write_claim(claim, script=script, gate=gate)
+    value = write_claim(claim, script=runtime, gate=gate)
     claim.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
-    result = run_stage(script, claim=claim, gate=gate)
+    result = run_stage(runtime, claim=claim, gate=gate)
 
     assert result.returncode == 65
     assert result.stdout == ""
@@ -167,15 +201,81 @@ def test_stage_envelope_rejects_noncanonical_claim_bytes(tmp_path: Path, script:
 
 @pytest.mark.parametrize(("script", "gate"), STAGES)
 def test_stage_envelope_requires_exact_utc_timestamp_grammar(tmp_path: Path, script: Path, gate: str):
-    script_source(script)
+    runtime = local_stage_copy(tmp_path, script)
     claim = tmp_path / "timestamp-claim.json"
-    write_claim(claim, script=script, gate=gate, issued_at="2025-08-11T11:00:00+00:00")
+    write_claim(claim, script=runtime, gate=gate, issued_at="2025-08-11T11:00:00+00:00")
 
-    result = run_stage(script, claim=claim, gate=gate)
+    result = run_stage(runtime, claim=claim, gate=gate)
 
     assert result.returncode == 65
     assert result.stdout == ""
     assert "claim_invalid" in result.stderr
+
+
+@pytest.mark.parametrize(("script", "gate"), STAGES)
+def test_stage_envelope_ignores_ambient_python_and_path_before_claim_gate(tmp_path: Path, script: Path, gate: str):
+    marker = tmp_path / "ambient-executed"
+    attacker = tmp_path / "attacker-python"
+    attacker.write_text(
+        f"#!/usr/bin/env bash\nprintf ambient > {shlex.quote(str(marker).replace('\\', '/'))}\nexit 99\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    runtime = local_stage_copy(tmp_path, script, preserve_legacy_override=True)
+
+    result = run_stage(
+        runtime,
+        claim=None,
+        gate=gate,
+        extra_env={
+            "PATH": str(tmp_path).replace("\\", "/"),
+            "PHASE15_PYTHON": str(attacker).replace("\\", "/"),
+            "PYTHONPATH": str(tmp_path).replace("\\", "/"),
+        },
+    )
+
+    assert result.returncode == 64
+    assert result.stdout == ""
+    assert result.stderr == "claim_required\n"
+    assert not marker.exists()
+
+
+@pytest.mark.parametrize(("script", "gate"), STAGES)
+def test_stage_envelope_rejects_oversized_claim_before_json_parse(tmp_path: Path, script: Path, gate: str):
+    runtime = local_stage_copy(tmp_path, script)
+    claim = tmp_path / "oversized-claim.json"
+    write_claim(claim, script=runtime, gate=gate, claim_id="x" * 5000)
+
+    result = run_stage(runtime, claim=claim, gate=gate)
+
+    assert result.returncode == 65
+    assert result.stdout == ""
+    assert result.stderr == "claim_invalid\n"
+
+
+@pytest.mark.parametrize(("script", "_gate"), STAGES)
+def test_stage_claim_reader_stops_at_limit_plus_one_before_json(tmp_path: Path, script: Path, _gate: str):
+    namespace = stage_python_namespace(script)
+    oversized = tmp_path / "oversized.json"
+    oversized.write_bytes(b"x" * 4097)
+
+    with pytest.raises(ValueError, match="regular bounded file|file size"):
+        namespace["read_regular_bounded"](oversized, namespace["MAX_CLAIM_BYTES"])
+
+
+@pytest.mark.parametrize(("script", "gate"), STAGES)
+def test_stage_envelope_rejects_symlink_claim_artifact(tmp_path: Path, script: Path, gate: str):
+    runtime = local_stage_copy(tmp_path, script)
+    target = tmp_path / "claim-target.json"
+    write_claim(target, script=runtime, gate=gate)
+    claim = tmp_path / "claim-link.json"
+    claim.symlink_to(target)
+
+    result = run_stage(runtime, claim=claim, gate=gate)
+
+    assert result.returncode == 65
+    assert result.stdout == ""
+    assert result.stderr == "claim_invalid\n"
 
 
 def test_phase15_scripts_contain_no_forbidden_mutation_tokens():

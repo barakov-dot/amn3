@@ -1139,7 +1139,7 @@ def test_transport_success_requires_empty_stderr_and_bounded_io_starts_before_st
     assert result.stdout == "true|false|false"
     source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
     transport = source[source.index("function Invoke-Phase15OneSshTransport") : source.index("function Write-Phase15CreateNewJson")]
-    assert transport.index("$deadline") < transport.index("WriteAsync")
+    assert transport.index("$clock = [Diagnostics.Stopwatch]::StartNew()") < transport.index("WriteAsync")
     assert transport.index("StandardOutput.BaseStream.ReadAsync") < transport.index("WriteAsync")
     assert transport.index("StandardError.BaseStream.ReadAsync") < transport.index("WriteAsync")
     assert "[ref]$Started" in transport
@@ -2029,3 +2029,143 @@ def test_round8_startup_cleanup_removes_only_exact_claim_owned_temp_and_backup_r
     assert result.stdout == "clean"
     assert all(not path.exists() for path in own)
     assert other.read_bytes() == b"synthetic"
+
+
+def test_round9_private_trust_buffers_are_cleared_when_second_read_fails():
+    result = run_powershell(
+        "$script:keyBuffer=[Text.ASCIIEncoding]::new().GetBytes('-----BEGIN OPENSSH PRIVATE KEY-----`nYWJj`n-----END OPENSSH PRIVATE KEY-----`n'); "
+        "$script:readCount=0; "
+        "function Get-Phase15SpainTrustContract { [pscustomobject]@{TrustRoot='C:\\synthetic'; KeyPath='C:\\synthetic\\key'; KnownHostsPath='C:\\synthetic\\known'; ExpectedHostKeySha256='SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'; TargetUser='root'; AnchorPath='C:\\'} }; "
+        "function Assert-Phase15TrustAnchor { param($Path) }; function Assert-Phase15TrustParentChain { param($AnchorPath,$TrustRoot,$ExpectedOwnerSid) }; function Assert-Phase15TrustPath { param($Path,$ExpectedOwnerSid,[switch]$RequireLeaf) }; "
+        "function Read-Phase15BoundedFileBytes { param($Path,$MaximumBytes) $script:readCount++; if($script:readCount -eq 1){Write-Output -NoEnumerate $script:keyBuffer; return}; throw 'synthetic_second_read_failure' }; "
+        "$failed=$false; try{$null=Assert-Phase15SpainTrustBundle -ExpectedHost 'spain.test.invalid'}catch{$failed=$true}; "
+        "$cleared=(@($script:keyBuffer | Where-Object {$_ -ne 0}).Count -eq 0); "
+        "[Console]::Out.Write(\"$($failed.ToString().ToLowerInvariant())|$($cleared.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|true"
+
+
+def test_round9_private_key_framing_is_validated_directly_over_mutable_ascii_bytes():
+    valid = base64.b64encode(
+        b"-----BEGIN OPENSSH PRIVATE KEY-----\nYWJj\n-----END OPENSSH PRIVATE KEY-----\n"
+    ).decode("ascii")
+    missing_footer = base64.b64encode(
+        b"-----BEGIN OPENSSH PRIVATE KEY-----\nYWJj\n"
+    ).decode("ascii")
+    nul = base64.b64encode(
+        b"-----BEGIN OPENSSH PRIVATE KEY-----\nYW\x00Jj\n-----END OPENSSH PRIVATE KEY-----\n"
+    ).decode("ascii")
+    result = run_powershell(
+        f"$valid=Test-Phase15PrivateKeyBytes -Bytes ([Convert]::FromBase64String('{valid}')); "
+        f"$missing=Test-Phase15PrivateKeyBytes -Bytes ([Convert]::FromBase64String('{missing_footer}')); "
+        f"$nul=Test-Phase15PrivateKeyBytes -Bytes ([Convert]::FromBase64String('{nul}')); "
+        "[Console]::Out.Write(\"$($valid.ToString().ToLowerInvariant())|$($missing.ToString().ToLowerInvariant())|$($nul.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|false|false"
+    trust = require_file(RUNNER, "runner").read_text(encoding="utf-8")
+    trust = trust[trust.index("function Assert-Phase15SpainTrustBundle") : trust.index("function Assert-Phase15LocalExecutable")]
+    assert "GetString($keyBytes)" not in trust
+    assert "$keyText" not in trust
+
+
+def test_round9_trust_parent_chain_enumerates_every_fixed_component_below_localappdata(tmp_path: Path):
+    anchor = str(tmp_path / "Local").replace("'", "''")
+    trust = str(
+        tmp_path
+        / "Local"
+        / "AMN2"
+        / "private-artifacts"
+        / "post-release"
+        / "spain-migration"
+        / "spain-fresh-20260720-001"
+    ).replace("'", "''")
+    result = run_powershell(
+        f"$paths=@(Get-Phase15TrustParentPaths -AnchorPath '{anchor}' -TrustRoot '{trust}'); "
+        "[Console]::Out.Write(($paths | ForEach-Object {[IO.Path]::GetFileName($_)}) -join '|')"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "AMN2|private-artifacts|post-release|spain-migration|spain-fresh-20260720-001"
+
+
+def test_round9_os_release_accepts_only_exact_debian_symlink_layout(tmp_path: Path):
+    namespace = collector_python_namespace()
+    read_os_release = namespace.get("bounded_os_release_bytes")
+    assert callable(read_os_release)
+    etc = tmp_path / "etc"
+    canonical = tmp_path / "usr" / "lib" / "os-release"
+    etc.mkdir()
+    canonical.parent.mkdir(parents=True)
+    canonical.write_bytes(b"ID=debian\nVERSION_ID=12\n")
+    link = etc / "os-release"
+    link.symlink_to("../usr/lib/os-release")
+
+    assert read_os_release(str(link), str(canonical)) == b"ID=debian\nVERSION_ID=12\n"
+
+    link.unlink()
+    link.write_bytes(canonical.read_bytes())
+    with pytest.raises(OSError):
+        read_os_release(str(link), str(canonical))
+    link.unlink()
+    link.symlink_to("../usr/lib/not-os-release")
+    with pytest.raises(OSError):
+        read_os_release(str(link), str(canonical))
+
+
+def test_round9_transport_uses_one_monotonic_65_second_total_budget():
+    result = run_powershell(
+        "$clock=[Diagnostics.Stopwatch]::StartNew(); "
+        "$first=Get-Phase15TransportRemainingMilliseconds -Clock $clock -DeadlineMilliseconds 65000; "
+        "Start-Sleep -Milliseconds 25; "
+        "$second=Get-Phase15TransportRemainingMilliseconds -Clock $clock -DeadlineMilliseconds 65000; "
+        "[Console]::Out.Write(\"$($first -le 65000 -and $first -gt 64000)|$($second -lt $first)\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.lower() == "true|true"
+    source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
+    transport = source[source.index("function Invoke-Phase15OneSshTransport") : source.index("function Write-Phase15CreateNewJson")]
+    assert "[Diagnostics.Stopwatch]::StartNew()" in transport
+    assert "[DateTimeOffset]::UtcNow" not in transport
+    assert "65000" in source
+
+
+def test_round9_cleanup_covers_every_exact_writer_residue_including_recovery(tmp_path: Path):
+    lifecycle = tmp_path / "claims" / "phase15-preflight-test-001.json"
+    outcome = tmp_path / "outcome.json"
+    recovery = tmp_path / "recovery-outcomes" / "phase15-preflight-test-001.json"
+    lifecycle.parent.mkdir()
+    recovery.parent.mkdir()
+    guid = "c" * 32
+    claim_id = "phase15-preflight-test-001"
+    owned = [
+        Path(str(lifecycle) + f".create-{guid}.tmp"),
+        Path(str(lifecycle) + f".atomic-{guid}"),
+        Path(str(lifecycle) + f".atomic-{guid}.create-{guid}.tmp"),
+        Path(str(lifecycle) + f".terminal-{guid}.create-{guid}.tmp"),
+        Path(str(outcome) + f".phase15-{claim_id}.staged.create-{guid}.tmp"),
+        Path(str(outcome) + f".pending-{guid}.create-{guid}.tmp"),
+        Path(str(outcome) + f".atomic-{guid}.create-{guid}.tmp"),
+        Path(str(recovery) + f".atomic-{guid}"),
+        Path(str(recovery) + f".atomic-{guid}.create-{guid}.tmp"),
+        Path(str(recovery) + f".backup-{guid}"),
+    ]
+    unrelated = Path(str(outcome) + ".phase15-other-claim.staged.create-" + guid + ".tmp")
+    for path in [*owned, unrelated]:
+        path.write_bytes(b"synthetic")
+    lifecycle_ps = str(lifecycle).replace("'", "''")
+    outcome_ps = str(outcome).replace("'", "''")
+    recovery_ps = str(recovery).replace("'", "''")
+    result = run_powershell(
+        f"Remove-Phase15OwnedStateResidues -LifecyclePath '{lifecycle_ps}' -OutcomePath '{outcome_ps}' -RecoveryOutcomePath '{recovery_ps}' -ClaimId '{claim_id}'; "
+        "[Console]::Out.Write('clean')"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "clean"
+    assert all(not path.exists() for path in owned)
+    assert unrelated.read_bytes() == b"synthetic"

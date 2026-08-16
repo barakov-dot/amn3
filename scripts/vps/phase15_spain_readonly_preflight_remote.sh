@@ -16,6 +16,7 @@ import pathlib
 import re
 import shlex
 import shutil
+import stat
 import subprocess
 import sys
 import threading
@@ -82,16 +83,52 @@ def bounded_file_bytes(path, maximum_bytes=MAXIMUM_OUTPUT_BYTES):
     ensure_work_budget()
     candidate = pathlib.Path(path)
     stat_result = candidate.lstat()
-    if not candidate.is_file() or candidate.is_symlink():
+    if not stat.S_ISREG(stat_result.st_mode) or candidate.is_symlink():
         raise OSError("input is not a regular file")
-    if stat_result.st_size < 1 or maximum_bytes < stat_result.st_size:
+    if stat_result.st_size < 1:
         raise OSError("input size rejected")
-    with candidate.open("rb") as stream:
-        raw = stream.read(maximum_bytes + 1)
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(candidate, flags)
+    try:
+        opened = os.fstat(descriptor)
+        if not stat.S_ISREG(opened.st_mode) or (stat_result.st_dev, stat_result.st_ino) != (opened.st_dev, opened.st_ino):
+            raise OSError("input identity rejected")
+        chunks = bytearray()
+        while len(chunks) < maximum_bytes + 1:
+            chunk = os.read(descriptor, min(4096, maximum_bytes + 1 - len(chunks)))
+            if not chunk:
+                break
+            chunks.extend(chunk)
+        raw = bytes(chunks)
+    finally:
+        os.close(descriptor)
     ensure_work_budget()
     if not raw or maximum_bytes < len(raw):
         raise OSError("input size rejected")
     return raw
+
+def bounded_os_release_bytes(etc_path="/etc/os-release", canonical_path="/usr/lib/os-release"):
+    ensure_work_budget()
+    link = pathlib.Path(etc_path)
+    canonical = pathlib.Path(canonical_path)
+    link_stat = link.lstat()
+    if not stat.S_ISLNK(link_stat.st_mode):
+        raise OSError("os release link rejected")
+    link_target = os.readlink(link)
+    if link_target != "../usr/lib/os-release":
+        raise OSError("os release target rejected")
+    lexical_target = pathlib.Path(os.path.abspath(os.path.join(str(link.parent), link_target)))
+    canonical_target = pathlib.Path(os.path.abspath(str(canonical)))
+    if os.path.normcase(str(lexical_target)) != os.path.normcase(str(canonical_target)):
+        raise OSError("os release target rejected")
+    for directory in (canonical_target.parent.parent, canonical_target.parent):
+        directory_stat = directory.lstat()
+        if not stat.S_ISDIR(directory_stat.st_mode) or directory.is_symlink():
+            raise OSError("os release parent rejected")
+    target_stat = canonical_target.lstat()
+    if not stat.S_ISREG(target_stat.st_mode) or canonical_target.is_symlink():
+        raise OSError("os release target rejected")
+    return bounded_file_bytes(canonical_target)
 
 def command(parts, maximum_output_bytes=MAXIMUM_OUTPUT_BYTES, timeout_seconds=8):
     global _command_invocations
@@ -964,7 +1001,7 @@ def production_observations():
     ensure_work_budget()
     values = {}
     try:
-        os_raw = bounded_file_bytes("/etc/os-release")
+        os_raw = bounded_os_release_bytes()
         os_state, os_evidence = classify_os_release(os_raw)
     except OSError as exc:
         os_state, os_evidence = "stop", type(exc).__name__.encode("ascii")
