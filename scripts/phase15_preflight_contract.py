@@ -51,6 +51,14 @@ STOP_REASONS = {
     "recovery_incomplete",
     "resource_conflict",
 }
+EXPECTED_OBSERVATION_NAMES = {
+    "application_state", "architecture", "awg2_health", "backup_capability",
+    "bridge_amn2sp3br0", "config_path", "container_capability",
+    "container_cidr_172_29_252_0_28", "container_name", "database_state",
+    "disk_space", "firewall", "interface_awg3", "os_compatibility", "python_3_12",
+    "recovery_markers_phase14_phase15", "routes", "service_capability", "service_name",
+    "state_root", "telegram_prerequisites", "udp_30002", "vpn_cidr_10_212_13_0_24",
+}
 
 
 class PreflightContractError(ValueError):
@@ -192,6 +200,8 @@ def _validate_observations(value: object) -> list[dict[str, str]]:
         result.append(dict(item))
     if [item["name"] for item in result] != sorted(names):
         raise PreflightContractError("observation order")
+    if names != EXPECTED_OBSERVATION_NAMES:
+        raise PreflightContractError("observation inventory")
     _secret_safe(result)
     return result
 

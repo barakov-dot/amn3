@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -11,6 +12,14 @@ PACKAGE_ID = "phase15-dual-protocol-bootstrap-20260811-001"
 MANIFEST_SHA256 = "a" * 64
 COLLECTOR_SHA256 = "b" * 64
 EXPECTED_HOST = "spain.test.invalid"
+EXPECTED_OBSERVATION_NAMES = {
+    "application_state", "architecture", "awg2_health", "backup_capability",
+    "bridge_amn2sp3br0", "config_path", "container_capability",
+    "container_cidr_172_29_252_0_28", "container_name", "database_state",
+    "disk_space", "firewall", "interface_awg3", "os_compatibility", "python_3_12",
+    "recovery_markers_phase14_phase15", "routes", "service_capability", "service_name",
+    "state_root", "telegram_prerequisites", "udp_30002", "vpn_cidr_10_212_13_0_24",
+}
 
 
 def load_contract():
@@ -43,12 +52,8 @@ def valid_claim(**overrides: object) -> dict[str, object]:
 
 def observations(*, stopped: bool = False) -> list[dict[str, str]]:
     return [
-        {"name": "awg2_health", "observation_sha256": "c" * 64, "state": "pass"},
-        {
-            "name": "udp_30002",
-            "observation_sha256": "d" * 64,
-            "state": "stop" if stopped else "free",
-        },
+        {"name": name, "observation_sha256": hashlib.sha256(name.encode()).hexdigest(), "state": "stop" if stopped and name == "udp_30002" else "pass"}
+        for name in sorted(EXPECTED_OBSERVATION_NAMES)
     ]
 
 
@@ -242,4 +247,23 @@ def test_claim_rejects_unsafe_expected_host_grammar(host: str):
             collector_sha256=COLLECTOR_SHA256,
             expected_host=host,
             now=datetime(2099, 8, 11, 11, 30, tzinfo=timezone.utc),
+        )
+
+
+@pytest.mark.parametrize("name", ["unknown_observation", "Bearer synthetic-sensitive-value"])
+def test_evidence_requires_exact_observation_inventory(name: str):
+    contract = load_contract()
+    invalid = observations()
+    invalid[0] = dict(invalid[0], name=name)
+    invalid.sort(key=lambda item: item["name"])
+
+    with pytest.raises(contract.PreflightContractError):
+        contract.bind_evidence(
+            valid_claim(),
+            observations=invalid,
+            stop_reasons=[],
+            started_at="2099-08-11T11:31:00Z",
+            ended_at="2099-08-11T11:32:00Z",
+            transport_disposition="read_only_completed",
+            ssh_used=True,
         )

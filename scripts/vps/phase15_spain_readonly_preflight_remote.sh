@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 python_executable="${PHASE15_PYTHON:-python3}"
-if [[ "$#" -ne 3 ]]; then
+if [[ "$#" -ne 5 ]]; then
     "$python_executable" -c 'import sys; sys.stderr.buffer.write(b"collector_envelope_invalid\n")'
     exit 64
 fi
@@ -10,6 +10,7 @@ fi
 exec "$python_executable" -c '
 import datetime
 import hashlib
+import ipaddress
 import json
 import os
 import pathlib
@@ -24,6 +25,7 @@ import time
 PACKAGE_ID = "phase15-dual-protocol-bootstrap-20260811-001"
 CLAIM_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,127}$")
 EXPECTED_HOST_RE = re.compile(r"^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$")
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 HANDSHAKE_RE = re.compile(rb"^[A-Za-z0-9+/]{43}=\t([0-9]+)$")
 MAXIMUM_OUTPUT_BYTES = 65536
 EXPECTED_NAMES = {
@@ -103,6 +105,15 @@ def command(parts, maximum_output_bytes=MAXIMUM_OUTPUT_BYTES, timeout_seconds=8)
 def probe_ok(probe):
     return probe[0] == 0 and probe[3] == "success"
 
+def validate_envelope(package_id, manifest_sha256, collector_sha256, claim_id, expected_host):
+    return (
+        package_id == PACKAGE_ID
+        and SHA256_RE.fullmatch(manifest_sha256) is not None
+        and SHA256_RE.fullmatch(collector_sha256) is not None
+        and CLAIM_ID_RE.fullmatch(claim_id) is not None
+        and EXPECTED_HOST_RE.fullmatch(expected_host) is not None
+    )
+
 def classify_ip_link(probe, name):
     if probe_ok(probe):
         return "stop"
@@ -121,6 +132,105 @@ def classify_container_inventory(results):
         except UnicodeDecodeError:
             return "stop", "stop"
     return "pass", "stop" if "amn2-spain-awg3" in names else "free"
+
+def classify_systemd_capability(probe):
+    if probe_ok(probe) and probe[1] == b"running\n" and probe[2] == b"":
+        return "pass"
+    if probe[0] == 1 and probe[1] == b"degraded\n" and probe[2] == b"" and probe[3] == "command_failed":
+        return "pass"
+    return "stop"
+
+def classify_routes(probe):
+    stopped = ("stop", "stop", "stop")
+    if not probe_ok(probe) or probe[2] != b"":
+        return stopped
+    try:
+        value = json.loads(probe[1].decode("utf-8", errors="strict"))
+        if not isinstance(value, list):
+            return stopped
+        routes = []
+        for item in value:
+            if not isinstance(item, dict) or not isinstance(item.get("dst"), str):
+                return stopped
+            if item["dst"] != "default":
+                routes.append(ipaddress.ip_network(item["dst"], strict=False))
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError, TypeError):
+        return stopped
+    vpn = ipaddress.ip_network("10.212.13.0/24")
+    container = ipaddress.ip_network("172.29.252.0/28")
+    return (
+        "pass",
+        "stop" if any(route.overlaps(vpn) for route in routes) else "free",
+        "stop" if any(route.overlaps(container) for route in routes) else "free",
+    )
+
+def classify_udp_port(probe):
+    if not probe_ok(probe) or probe[2] != b"":
+        return "stop"
+    try:
+        lines = probe[1].decode("utf-8", errors="strict").splitlines()
+    except UnicodeDecodeError:
+        return "stop"
+    for line in lines:
+        match = re.fullmatch(r"UNCONN\s+[0-9]+\s+[0-9]+\s+(\S+)\s+(\S+)", line)
+        if match is None:
+            return "stop"
+        local = match.group(1)
+        try:
+            port = int(local.rsplit(":", 1)[1])
+        except (IndexError, ValueError):
+            return "stop"
+        if port == 30002:
+            return "stop"
+    return "free"
+
+def _has_firewall_conflict(value):
+    if isinstance(value, bool) or value is None:
+        return False
+    if isinstance(value, int):
+        return value == 30002
+    if isinstance(value, str):
+        return any(token in {"awg3", "30002"} for token in re.findall(r"[A-Za-z0-9_.:-]+", value))
+    if isinstance(value, list):
+        return any(_has_firewall_conflict(item) for item in value)
+    if isinstance(value, dict):
+        return any(isinstance(key, str) and (_has_firewall_conflict(key) or _has_firewall_conflict(item)) for key, item in value.items())
+    raise ValueError("firewall value")
+
+def _parse_iptables_save(raw):
+    text = raw.decode("utf-8", errors="strict")
+    conflict = False
+    for line in text.splitlines():
+        valid = (
+            re.fullmatch(r"\*[a-z0-9_-]+", line) is not None
+            or re.fullmatch(r":[A-Za-z0-9_-]+\s+(?:ACCEPT|DROP|REJECT|-)\s+\[[0-9]+:[0-9]+\]", line) is not None
+            or line == "COMMIT"
+            or line.startswith("-A ")
+            or line.startswith("#")
+        )
+        if not valid:
+            raise ValueError("iptables syntax")
+        tokens = set(re.findall(r"[A-Za-z0-9_.:-]+", line))
+        conflict = conflict or "awg3" in tokens or "30002" in tokens
+    return conflict
+
+def classify_firewall(nft_probe, iptables_probe):
+    if nft_probe[3] == "unavailable":
+        if iptables_probe is None or not probe_ok(iptables_probe) or iptables_probe[2] != b"":
+            return "stop"
+        try:
+            return "stop" if _parse_iptables_save(iptables_probe[1]) else "pass"
+        except (UnicodeDecodeError, ValueError):
+            return "stop"
+    if not probe_ok(nft_probe) or nft_probe[2] != b"":
+        return "stop"
+    try:
+        value = json.loads(nft_probe[1].decode("utf-8", errors="strict"))
+        if not isinstance(value, dict) or set(value) != {"nftables"} or not isinstance(value["nftables"], list):
+            return "stop"
+        return "stop" if _has_firewall_conflict(value) else "pass"
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError, TypeError):
+        return "stop"
 
 def classify_awg2_health(unit_probe, interface_probe, handshake_probe, now_epoch):
     if not all(probe_ok(probe) for probe in (unit_probe, interface_probe, handshake_probe)):
@@ -185,8 +295,7 @@ def production_observations():
     backup_ok = backup_root.is_dir() and os.access(backup_root, os.W_OK) and database_ok
     values["backup_capability"] = observed("pass" if backup_ok else "stop", f"backup-ready:{backup_ok}")
     systemd_probe = command(["systemctl", "is-system-running"])
-    systemd_ok = probe_ok(systemd_probe) or (systemd_probe[0] == 1 and systemd_probe[3] == "command_failed")
-    values["service_capability"] = observed("pass" if systemd_ok else "stop", systemd_probe[1] + systemd_probe[2])
+    values["service_capability"] = observed(classify_systemd_capability(systemd_probe), systemd_probe[1] + systemd_probe[2])
     inventories = []
     for engine in ("docker", "podman"):
         if shutil.which(engine):
@@ -207,14 +316,16 @@ def production_observations():
     values["interface_awg3"] = observed(classify_ip_link(awg3_probe, "awg3"), awg3_probe[1] + awg3_probe[2])
     values["bridge_amn2sp3br0"] = observed(classify_ip_link(bridge_probe, "amn2sp3br0"), bridge_probe[1] + bridge_probe[2])
     socket_probe = command(["ss", "-H", "-lun"])
-    values["udp_30002"] = observed("free" if probe_ok(socket_probe) and b":30002" not in socket_probe[1] else "stop", socket_probe[1] + socket_probe[2])
-    route_probe = command(["ip", "route", "show"])
-    values["routes"] = observed("pass" if probe_ok(route_probe) else "stop", route_probe[1] + route_probe[2])
-    values["vpn_cidr_10_212_13_0_24"] = observed("free" if probe_ok(route_probe) and b"10.212.13.0/24" not in route_probe[1] else "stop", route_probe[1] + route_probe[2])
-    values["container_cidr_172_29_252_0_28"] = observed("free" if probe_ok(route_probe) and b"172.29.252.0/28" not in route_probe[1] else "stop", route_probe[1] + route_probe[2])
-    nft_probe = command(["nft", "list", "ruleset"])
-    firewall_probe = nft_probe if probe_ok(nft_probe) else command(["iptables", "-S"])
-    values["firewall"] = observed("pass" if probe_ok(firewall_probe) and b"30002" not in firewall_probe[1] and b"awg3" not in firewall_probe[1] else "stop", firewall_probe[1] + firewall_probe[2])
+    values["udp_30002"] = observed(classify_udp_port(socket_probe), socket_probe[1] + socket_probe[2])
+    route_probe = command(["ip", "-j", "route", "show", "table", "all"])
+    route_state, vpn_state, container_cidr_state = classify_routes(route_probe)
+    values["routes"] = observed(route_state, route_probe[1] + route_probe[2])
+    values["vpn_cidr_10_212_13_0_24"] = observed(vpn_state, route_probe[1] + route_probe[2])
+    values["container_cidr_172_29_252_0_28"] = observed(container_cidr_state, route_probe[1] + route_probe[2])
+    nft_probe = command(["nft", "-j", "list", "ruleset"])
+    iptables_probe = command(["iptables-save"]) if nft_probe[3] == "unavailable" else None
+    firewall_raw = nft_probe[1] + nft_probe[2] + ((iptables_probe[1] + iptables_probe[2]) if iptables_probe else b"")
+    values["firewall"] = observed(classify_firewall(nft_probe, iptables_probe), firewall_raw)
     values["config_path"] = resource_path_state("/var/lib/amn2-spain/awg3/awg3.conf")
     values["state_root"] = resource_path_state("/var/lib/amn2-spain/awg3")
     service_probe = command(["systemctl", "show", "amn2-spain-awg3.service", "--property=LoadState", "--value"])
@@ -231,30 +342,10 @@ def production_observations():
     values["recovery_markers_phase14_phase15"] = observed("stop" if marker_error or markers else "absent", marker_raw)
     return socket.getfqdn(), values
 
-def fixture_observations(root):
-    fixture = pathlib.Path(root) / "observations.json"
-    value = json.loads(fixture.read_bytes().decode("utf-8"))
-    if not isinstance(value, dict) or set(value) != {"host_identity", "observations"}:
-        raise ValueError("invalid fixture envelope")
-    raw_observations = value["observations"]
-    if not isinstance(raw_observations, dict) or set(raw_observations) != EXPECTED_NAMES:
-        raise ValueError("invalid fixture inventory")
-    result = {}
-    for name, item in raw_observations.items():
-        if not isinstance(item, dict) or set(item) != {"raw", "state"}:
-            raise ValueError("invalid fixture observation")
-        result[name] = observed(item["state"], item["raw"])
-    return value["host_identity"], result
-
-try:
-    claim_id = sys.argv[2]
-    expected_host = sys.argv[3]
-    package_id = sys.argv[1]
-    if package_id != PACKAGE_ID or CLAIM_ID_RE.fullmatch(claim_id) is None or EXPECTED_HOST_RE.fullmatch(expected_host) is None:
+def build_document(*, package_id, manifest_sha256, collector_sha256, claim_id, expected_host, host_identity, raw_values, observed_at):
+    if not validate_envelope(package_id, manifest_sha256, collector_sha256, claim_id, expected_host):
         raise ValueError("preflight identity binding")
-    fixture_root = os.environ.get("PHASE15_PREFLIGHT_FIXTURE_ROOT")
-    host_identity, raw_values = fixture_observations(fixture_root) if fixture_root else production_observations()
-    if set(raw_values) != EXPECTED_NAMES:
+    if not isinstance(host_identity, str) or set(raw_values) != EXPECTED_NAMES:
         raise ValueError("observation inventory")
     observations = [
         {"name": name, "observation_sha256": hashlib.sha256(raw_values[name][1]).hexdigest(), "state": raw_values[name][0]}
@@ -269,19 +360,32 @@ try:
         reasons.append("resource_conflict")
     if any(state in {"stop", "unknown"} for name, (state, _raw) in raw_values.items() if name not in CONFLICT_NAMES and name != "recovery_markers_phase14_phase15"):
         reasons.append("observation_failed")
-    document = {
+    return {
         "blocking_reasons": sorted(set(reasons)),
         "claim_id": claim_id,
+        "collector_sha256": collector_sha256,
         "decision": "stop" if reasons else "pass",
         "host_identity": host_identity,
-        "observed_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "manifest_sha256": manifest_sha256,
+        "observed_at": observed_at,
         "observations": observations,
-        "package_id": PACKAGE_ID,
+        "package_id": package_id,
         "safety": {"live_mutation": False, "raw_output_persisted": False, "remote_file_written": False},
         "schema": "amn2.phase15.spain-readonly-collector.v1",
     }
+
+try:
+    claim_id = sys.argv[4]
+    package_id = sys.argv[1]
+    manifest_sha256 = sys.argv[2]
+    collector_sha256 = sys.argv[3]
+    expected_host = sys.argv[5]
+    if not validate_envelope(package_id, manifest_sha256, collector_sha256, claim_id, expected_host):
+        raise ValueError("preflight identity binding")
+    host_identity, raw_values = production_observations()
+    document = build_document(package_id=package_id, manifest_sha256=manifest_sha256, collector_sha256=collector_sha256, claim_id=claim_id, expected_host=expected_host, host_identity=host_identity, raw_values=raw_values, observed_at=datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
     sys.stdout.buffer.write(json.dumps(document, ensure_ascii=True, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8") + b"\n")
 except Exception as exc:
     sys.stderr.write("collector_failed:" + type(exc).__name__ + "\n")
     raise SystemExit(71)
-' "$1" "$2" "$3"
+' "$1" "$2" "$3" "$4" "$5"
