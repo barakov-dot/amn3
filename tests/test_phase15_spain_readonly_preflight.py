@@ -87,7 +87,9 @@ def run_collector(name: str):
 
 def collector_python_namespace() -> dict[str, object]:
     source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
-    match = re.search(r'(?ms)^exec "\$python_executable" - "\$1" "\$2" "\$3" "\$4" "\$5" <<\'PHASE15_PY\'\n(?P<body>.*)\nPHASE15_PY$', source)
+    match = re.search(r'(?ms)^exec /usr/bin/python3 -I -B - "\$1" "\$2" "\$3" "\$4" "\$5" <<\'PHASE15_PY\'\n(?P<body>.*)\nPHASE15_PY$', source)
+    if match is None:
+        match = re.search(r'(?ms)^exec "\$python_executable" - "\$1" "\$2" "\$3" "\$4" "\$5" <<\'PHASE15_PY\'\n(?P<body>.*)\nPHASE15_PY$', source)
     if match is None:
         match = re.search(r'(?ms)^exec "\$python_executable" -c \'\n(?P<body>.*)\n\'(?: .*)?$', source)
     if match is None:
@@ -109,6 +111,7 @@ def collector_helper(name: str):
 def test_actual_shell_entrypoint_preserves_embedded_python_literals_and_exact_argv(tmp_path: Path):
     harness = tmp_path / "collector_harness.py"
     wrapper = tmp_path / "python-double"
+    collector_copy = tmp_path / "collector.sh"
     expected = [PACKAGE_ID, MANIFEST_SHA256, COLLECTOR_SHA256, "phase15-preflight-test-001", "spain.test.invalid"]
     harness.write_text(
         "import sys\n"
@@ -130,18 +133,22 @@ def test_actual_shell_entrypoint_preserves_embedded_python_literals_and_exact_ar
     python_path = str(Path(sys.executable)).replace("\\", "/")
     harness_path = str(harness).replace("\\", "/")
     wrapper.write_text(
-        f"#!/usr/bin/env bash\nexec {shlex.quote(python_path)} {shlex.quote(harness_path)} \"$@\"\n",
+        f"#!/usr/bin/env bash\nshift 2\nexec {shlex.quote(python_path)} {shlex.quote(harness_path)} \"$@\"\n",
         encoding="utf-8",
         newline="\n",
     )
-    environment = os.environ.copy()
-    environment["PHASE15_PYTHON"] = str(wrapper).replace("\\", "/")
+    source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
+    wrapper_path = str(wrapper).replace("\\", "/")
+    collector_copy.write_text(
+        source.replace("exec /usr/bin/python3 -I -B -", f'exec /usr/bin/bash "{wrapper_path}" -I -B -'),
+        encoding="utf-8",
+        newline="\n",
+    )
     result = subprocess.run(
-        [str(BASH), str(COLLECTOR), *expected],
+        [str(BASH), str(collector_copy), *expected],
         check=False,
         capture_output=True,
         text=True,
-        env=environment,
         timeout=10,
     )
 
@@ -211,18 +218,29 @@ def test_observation_hashes_bind_safe_states_without_returning_raw_fixture_value
     assert fixture["observations"]["telegram_prerequisites"]["raw"].encode("utf-8") not in result.stdout
 
 
-def test_collector_requires_exact_positional_remote_envelope():
+def test_collector_requires_exact_positional_remote_envelope(tmp_path: Path):
     require_file(COLLECTOR, "collector")
-    env = os.environ.copy()
-    env["PHASE15_PYTHON"] = sys.executable.replace("\\", "/")
-
-    result = subprocess.run(
-        [str(BASH), str(COLLECTOR)],
-        check=False,
-        capture_output=True,
-        env=env,
-        timeout=10,
+    source = COLLECTOR.read_text(encoding="utf-8")
+    temporary = tmp_path / "collector.sh"
+    wrapper = tmp_path / "python-wrapper"
+    python_path = sys.executable.replace("\\", "/")
+    wrapper.write_text(f'#!/usr/bin/env bash\nexec "{python_path}" "$@"\n', encoding="utf-8", newline="\n")
+    wrapper_path = str(wrapper).replace("\\", "/")
+    temporary.write_text(
+        source.replace("    /usr/bin/python3 -I -B -c", f'    /usr/bin/bash "{wrapper_path}" -I -B -c'),
+        encoding="utf-8",
+        newline="\n",
     )
+
+    try:
+        result = subprocess.run(
+            [str(BASH), str(temporary)],
+            check=False,
+            capture_output=True,
+            timeout=10,
+        )
+    finally:
+        temporary.unlink(missing_ok=True)
 
     assert result.returncode == 64
     assert result.stdout == b""
@@ -232,6 +250,7 @@ def test_collector_requires_exact_positional_remote_envelope():
 def test_collector_has_no_production_fixture_environment_bypass():
     source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
     assert "PHASE15_PREFLIGHT_FIXTURE_ROOT" not in source
+    assert "PHASE15_PYTHON" not in source
 
 
 @pytest.mark.parametrize(
@@ -251,7 +270,9 @@ def test_collector_five_field_envelope_is_exact(values: tuple[str, ...]):
 
 
 def test_collector_command_streams_and_caps_stdout_and_stderr_at_limit_plus_one():
-    command = collector_helper("command")
+    namespace = collector_python_namespace()
+    namespace["ALLOWED_COMMANDS"].add(sys.executable)
+    command = namespace["command"]
     result = command(
         [sys.executable, "-c", "import sys;sys.stdout.buffer.write(b'x'*4096);sys.stderr.buffer.write(b'y'*4096)"],
         maximum_output_bytes=32,
@@ -271,10 +292,10 @@ def test_collector_command_only_classifies_exact_missing_binary_as_unavailable(m
     subprocess_module = namespace["subprocess"]
 
     monkeypatch.setattr(subprocess_module, "Popen", lambda *_args, **_kwargs: (_ for _ in ()).throw(FileNotFoundError()))
-    assert command(["missing-binary"]) == (127, b"", b"", "unavailable")
+    assert command(["/usr/bin/systemctl"]) == (127, b"", b"", "unavailable")
 
     monkeypatch.setattr(subprocess_module, "Popen", lambda *_args, **_kwargs: (_ for _ in ()).throw(PermissionError()))
-    assert command(["permission-denied-binary"])[3] == "launch_failed"
+    assert command(["/usr/bin/systemctl"])[3] == "launch_failed"
 
 
 def test_collector_command_fails_closed_on_reader_exception_or_incomplete_eof(monkeypatch: pytest.MonkeyPatch):
@@ -315,12 +336,12 @@ def test_collector_command_fails_closed_on_reader_exception_or_incomplete_eof(mo
             pass
 
     monkeypatch.setattr(subprocess_module, "Popen", lambda *_args, **_kwargs: FakeProcess(RaisingStream(), io.BytesIO()))
-    assert command(["synthetic"])[3] == "incomplete_output"
+    assert command(["/usr/bin/systemctl"])[3] == "incomplete_output"
 
     release = threading.Event()
     monkeypatch.setattr(subprocess_module, "Popen", lambda *_args, **_kwargs: FakeProcess(BlockingStream(release), io.BytesIO()))
     try:
-        assert command(["synthetic"])[3] == "incomplete_output"
+        assert command(["/usr/bin/systemctl"])[3] == "incomplete_output"
     finally:
         release.set()
 
@@ -349,7 +370,7 @@ def test_collector_kill_and_wait_paths_are_bounded_and_fail_incomplete(monkeypat
 
     process = RetainedProcess()
     monkeypatch.setattr(subprocess_module, "Popen", lambda *_args, **_kwargs: process)
-    result = command(["synthetic"], timeout_seconds=0)
+    result = command(["/usr/bin/systemctl"], timeout_seconds=0)
 
     assert result[0] != 0
     assert result[3] == "incomplete_output"
@@ -400,14 +421,14 @@ def test_phase13_current_spain_identity_and_dedicated_docker_inventory_are_exact
     success = "success"
     inventory = (0, b"amn2-spain-awg\nother\n", b"", success)
     networks = (0, (b"a" * 64) + b"\n", b"", success)
-    clean_subnets = [(0, b"172.28.0.0/16\n", b"", success)]
-    conflict_subnets = [(0, b"172.29.252.8/29\n", b"", success)]
+    clean_subnets = [(0, b'"bridge"\t"bridge"\t{"Config":[{"Subnet":"172.28.0.0/16"}],"Driver":"default","Options":{}}\n', b"", success)]
+    conflict_subnets = [(0, b'"bridge"\t"bridge"\t{"Config":[{"Subnet":"172.29.252.8/29"}],"Driver":"default","Options":{}}\n', b"", success)]
 
     assert classify(inventory, networks, clean_subnets) == ("pass", "free", "free")
     assert classify((0, b"amn2-spain-awg3\n", b"", success), networks, clean_subnets) == ("pass", "stop", "free")
     assert classify(inventory, networks, conflict_subnets) == ("pass", "free", "stop")
     assert classify(inventory, (0, b"malformed-id\n", b"", success), clean_subnets) == ("stop", "stop", "stop")
-    assert classify(inventory, networks, [(0, b"172.28.0.0/16\n", b"warning\n", success)]) == ("stop", "stop", "stop")
+    assert classify(inventory, networks, [(0, clean_subnets[0][1], b"warning\n", success)]) == ("stop", "stop", "stop")
     assert identity == {
         "application_root": "/opt/amn2-spain",
         "bot_unit": "amn2-spain-bot.service",
@@ -437,8 +458,8 @@ def test_candidate_inventory_combines_explicit_local_system_spain_and_podman_eng
     clean_inventory = (0, b"other\n", b"", success)
     candidate_inventory = (0, b"amn2-spain-awg3\n", b"", success)
     network_ids = (0, (b"a" * 64) + b"\n", b"", success)
-    clean_subnets = [(0, b"172.28.0.0/16\n", b"", success)]
-    conflict_subnets = [(0, b"172.29.252.8/29\n", b"", success)]
+    clean_subnets = [(0, b'"bridge"\t"bridge"\t{"Config":[{"Subnet":"172.28.0.0/16"}],"Driver":"default","Options":{}}\n', b"", success)]
+    conflict_subnets = [(0, b'"bridge"\t"bridge"\t{"Config":[{"Subnet":"172.29.252.8/29"}],"Driver":"default","Options":{}}\n', b"", success)]
     dedicated = (clean_inventory, network_ids, clean_subnets)
 
     system = (clean_inventory, network_ids, clean_subnets)
@@ -464,7 +485,9 @@ def test_container_engine_commands_bind_local_endpoints_and_inventory_all_rows_a
             return 0, b"other-container\n", b"", "success"
         if parts[-3:] == ["ls", "-q", "--no-trunc"]:
             return 0, (network_id + "\n").encode(), b"", "success"
-        return 0, b"172.28.0.0/16\n", b"", "success"
+        if "/usr/bin/podman" in parts:
+            return 0, b'"podman"\t"bridge"\t[{"subnet":"172.28.0.0/16"}]\n', b"", "success"
+        return 0, b'"bridge"\t"bridge"\t{"Config":[{"Subnet":"172.28.0.0/16"}],"Driver":"default","Options":{}}\n', b"", "success"
 
     namespace["command"] = local_double
     for engine in ("system-docker", "spain-docker", "podman"):
@@ -474,13 +497,13 @@ def test_container_engine_commands_bind_local_endpoints_and_inventory_all_rows_a
     assert calls == [
         ["/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "ps", "-a", "--format", "{{.Names}}"],
         ["/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "network", "ls", "-q", "--no-trunc"],
-        ["/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "network", "inspect", "--format", "{{range .IPAM.Config}}{{println .Subnet}}{{end}}", network_id],
+        ["/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "network", "inspect", "--format", "{{json .Name}}\t{{json .Driver}}\t{{json .IPAM}}", network_id],
         ["/opt/amn2-spain/docker/bin/docker", "--host", "unix:///run/amn2-spain-docker/docker.sock", "ps", "-a", "--format", "{{.Names}}"],
         ["/opt/amn2-spain/docker/bin/docker", "--host", "unix:///run/amn2-spain-docker/docker.sock", "network", "ls", "-q", "--no-trunc"],
-        ["/opt/amn2-spain/docker/bin/docker", "--host", "unix:///run/amn2-spain-docker/docker.sock", "network", "inspect", "--format", "{{range .IPAM.Config}}{{println .Subnet}}{{end}}", network_id],
+        ["/opt/amn2-spain/docker/bin/docker", "--host", "unix:///run/amn2-spain-docker/docker.sock", "network", "inspect", "--format", "{{json .Name}}\t{{json .Driver}}\t{{json .IPAM}}", network_id],
         ["/usr/bin/podman", "--url", "unix:///run/podman/podman.sock", "ps", "-a", "--format", "{{.Names}}"],
         ["/usr/bin/podman", "--url", "unix:///run/podman/podman.sock", "network", "ls", "-q", "--no-trunc"],
-        ["/usr/bin/podman", "--url", "unix:///run/podman/podman.sock", "network", "inspect", "--format", "{{range .Subnets}}{{println .Subnet}}{{end}}", network_id],
+        ["/usr/bin/podman", "--url", "unix:///run/podman/podman.sock", "network", "inspect", "--format", "{{json .Name}}\t{{json .Driver}}\t{{json .Subnets}}", network_id],
     ]
 
 
@@ -509,7 +532,7 @@ def test_command_removes_ambient_container_connection_selectors(monkeypatch: pyt
         return Process()
 
     monkeypatch.setattr(namespace["subprocess"], "Popen", popen)
-    assert command(["synthetic"])[3] == "success"
+    assert command(["/usr/bin/systemctl"])[3] == "success"
     assert captured["LC_ALL"] == "C"
     assert not set(captured).intersection({"DOCKER_HOST", "DOCKER_CONTEXT", "CONTAINER_HOST", "CONTAINER_CONNECTION", "PODMAN_HOST", "PODMAN_CONNECTION"})
 
@@ -539,8 +562,8 @@ def test_phase13_bot_identity_requires_exact_inactive_disabled_state():
     assert classify((0, b"active\n", b"", success), (0, b"enabled\n", b"", success)) == "stop"
     assert classify((0, b"inactive\n", b"warning\n", success), (0, b"disabled\n", b"", success)) == "stop"
     source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
-    assert '["systemctl", "show", CURRENT_BOT_UNIT, "--property=ActiveState", "--value"]' in source
-    assert '["systemctl", "show", CURRENT_BOT_UNIT, "--property=UnitFileState", "--value"]' in source
+    assert '[SYSTEMCTL, "show", CURRENT_BOT_UNIT, "--property=ActiveState", "--value"]' in source
+    assert '[SYSTEMCTL, "show", CURRENT_BOT_UNIT, "--property=UnitFileState", "--value"]' in source
     assert '["systemctl", "is-active", CURRENT_BOT_UNIT]' not in source
     assert '["systemctl", "is-enabled", CURRENT_BOT_UNIT]' not in source
 
@@ -571,8 +594,8 @@ def test_firewall_inspects_every_available_backend_without_clean_backend_masking
     assert classify(clean_nft, unavailable) == "pass"
     assert classify(unavailable, unavailable) == "stop"
     source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
-    assert 'command(["iptables-save"])' in source
-    assert 'command(["iptables-legacy-save"])' in source
+    assert 'command([IPTABLES_SAVE])' in source
+    assert 'command([IPTABLES_LEGACY_SAVE])' in source
 
 
 @pytest.mark.parametrize(
@@ -767,7 +790,7 @@ def test_awg2_health_requires_current_container_netns_interface_and_fresh_strict
     interface = (0, b"7: awg0: <POINTOPOINT,UP>\n", b"", success)
     peer_state = (0, handshakes, b"", success)
 
-    assert classify(owner, container, interface, peer_state, container, now_epoch=1_700_000_000) == expected
+    assert classify(owner, container, interface, peer_state, container, owner, now_epoch=1_700_000_000) == expected
 
 
 def test_awg2_health_fails_closed_on_any_probe_error():
@@ -778,17 +801,18 @@ def test_awg2_health_fails_closed_on_any_probe_error():
     good_interface = (0, b"7: awg0: <POINTOPOINT,UP>\n", b"", "success")
     fresh = (0, b"A" * 43 + b"=\t1699999940\n", b"", "success")
 
-    assert classify(failed, good_container, good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_owner, failed, good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_owner, good_container, failed, fresh, good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_owner, good_container, good_interface, failed, good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_owner, good_container, good_interface, fresh, failed, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_owner, (0, b"true|4242|0\n", b"warning\n", "success"), good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_owner, good_container, (0, b"7: awg0: <POINTOPOINT,UP>\n", b"warning\n", "success"), fresh, good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_owner, good_container, good_interface, (0, fresh[1], b"warning\n", "success"), good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_owner, good_container, (0, b"not-awg0\n", b"", "success"), fresh, good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_owner, good_container, good_interface, (0, fresh[1].rstrip(b"\n"), b"", "success"), good_container, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_owner, (0, b"false|0|0\n", b"", "success"), good_interface, fresh, good_container, now_epoch=1_700_000_000) == "stop"
+    assert classify(failed, good_container, good_interface, fresh, good_container, good_owner, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, failed, good_interface, fresh, good_container, good_owner, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, failed, fresh, good_container, good_owner, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, good_interface, failed, good_container, good_owner, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, good_interface, fresh, failed, good_owner, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, good_interface, fresh, good_container, failed, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, (0, b"true|4242|0\n", b"warning\n", "success"), good_interface, fresh, good_container, good_owner, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, (0, b"7: awg0: <POINTOPOINT,UP>\n", b"warning\n", "success"), fresh, good_container, good_owner, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, good_interface, (0, fresh[1], b"warning\n", "success"), good_container, good_owner, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, (0, b"not-awg0\n", b"", "success"), fresh, good_container, good_owner, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, good_container, good_interface, (0, fresh[1].rstrip(b"\n"), b"", "success"), good_container, good_owner, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_owner, (0, b"false|0|0\n", b"", "success"), good_interface, fresh, good_container, good_owner, now_epoch=1_700_000_000) == "stop"
 
 
 @pytest.mark.parametrize("owner", [b"inactive\n", b"failed\n", b"unknown\n", b"active\r\n"])
@@ -801,12 +825,13 @@ def test_awg2_health_requires_exact_active_phase13_docker_owner_unit(owner: byte
         (0, b"7: awg0: <POINTOPOINT,UP>\n", b"", success),
         (0, b"A" * 43 + b"=\t1699999940\n", b"", success),
         (0, b"true|4242|0\n", b"", success),
+        (0, b"active\n", b"", success),
         now_epoch=1_700_000_000,
     ) == "stop"
 
     source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
     assert 'CURRENT_AWG2_OWNER_UNIT = "amn2-spain-docker.service"' in source
-    assert '["systemctl", "show", CURRENT_AWG2_OWNER_UNIT, "--property=ActiveState", "--value"]' in source
+    assert source.count('[SYSTEMCTL, "show", CURRENT_AWG2_OWNER_UNIT, "--property=ActiveState", "--value"]') == 2
 
 
 @pytest.mark.parametrize("after", [b"true|4243|0\n", b"true|4242|1\n", b"false|4242|0\n"])
@@ -818,7 +843,7 @@ def test_awg2_health_rejects_pid_restart_or_running_state_race(after: bytes):
     handshakes = (0, b"A" * 43 + b"=\t1699999940\n", b"", success)
 
     owner = (0, b"active\n", b"", success)
-    assert classify(owner, before, interface, handshakes, (0, after, b"", success), now_epoch=1_700_000_000) == "stop"
+    assert classify(owner, before, interface, handshakes, (0, after, b"", success), owner, now_epoch=1_700_000_000) == "stop"
     source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
     assert source.count('"{{.State.Running}}|{{.State.Pid}}|{{.RestartCount}}"') == 2
 
@@ -1044,8 +1069,8 @@ def test_runner_builds_positional_remote_envelope_with_safe_option_boundary():
     arguments = json.loads(result.stdout)
     assert arguments[-3:] == [
         "--",
-        "spain.test.invalid",
-        f"bash -s -- '{PACKAGE_ID}' '{MANIFEST_SHA256}' '{COLLECTOR_SHA256}' 'phase15-preflight-test-001' 'spain.test.invalid'",
+        "root@spain.test.invalid",
+        f"/usr/bin/bash -s -- '{PACKAGE_ID}' '{MANIFEST_SHA256}' '{COLLECTOR_SHA256}' 'phase15-preflight-test-001' 'spain.test.invalid'",
     ]
     assert "$start.Environment['AMN2_PHASE15_" not in require_file(RUNNER, "runner").read_text(encoding="utf-8")
 
@@ -1068,7 +1093,7 @@ def test_runner_hashes_and_transports_one_immutable_collector_byte_array(tmp_pat
     assert base64.b64decode(encoded) == original
     source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
     artifact_reader = source[source.index("function Read-Phase15CollectorArtifact") : source.index("function ConvertTo-Phase15CanonicalJsonText")]
-    assert artifact_reader.count("[IO.File]::ReadAllBytes($Path)") == 1
+    assert artifact_reader.count("Read-Phase15BoundedFileBytes -Path $Path") == 1
     main = source[source.index("function Invoke-Phase15RunnerMain") :]
     assert main.count("Read-Phase15CollectorArtifact -Path $collectorPath") == 1
     assert "Get-Phase15FileSha256 -Path $collectorPath" not in main
@@ -1095,7 +1120,7 @@ def test_runner_canonical_parses_and_hashes_one_immutable_manifest_byte_array(tm
     assert base64.b64decode(encoded) == original
     source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
     reader = source[source.index("function Read-Phase15ManifestArtifact") : source.index("function Read-Phase15CollectorArtifact")]
-    assert reader.count("[IO.File]::ReadAllBytes($Path)") == 1
+    assert reader.count("Read-Phase15BoundedFileBytes -Path $Path") == 1
     main = source[source.index("function Invoke-Phase15RunnerMain") :]
     assert main.count("Read-Phase15ManifestArtifact -Path $manifestPath") == 1
     assert "ConvertFrom-Phase15CanonicalJsonFile -Path $manifestPath" not in main
@@ -1795,3 +1820,212 @@ def test_transaction_start_preserves_durable_journal_and_owned_outcome_on_lifecy
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == "true|true|true"
+
+
+def test_round8_runner_binds_authoritative_phase13_spain_trust_and_no_ambient_ssh():
+    result = run_powershell(
+        f"$contract=Get-Phase15SpainTrustContract; $args=New-Phase15SshArguments -ExpectedHost '138.124.181.246' "
+        f"-ClaimId 'phase15-preflight-test-001' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}'; "
+        "[Console]::Out.Write(($contract | ConvertTo-Json -Compress) + \"`n\" + (($args | ConvertTo-Json -Compress)))"
+    )
+
+    assert result.returncode == 0, result.stderr
+    contract_text, arguments_text = result.stdout.splitlines()
+    contract = json.loads(contract_text)
+    arguments = json.loads(arguments_text)
+    assert contract["TargetUser"] == "root"
+    assert contract["TrustRoot"].endswith(r"post-release\spain-migration\spain-fresh-20260720-001")
+    assert contract["KeyPath"].endswith(r"spain-fresh-20260720-001\id_ed25519_spain")
+    assert contract["KnownHostsPath"].endswith(r"spain-fresh-20260720-001\known_hosts_spain")
+    assert contract["ExpectedHostKeySha256"] == "SHA256:XVFOmBAXMHYlngo9+x7lGAJbzlOqiMiG/6/4qhRC4HU"
+    assert arguments[-3:] == [
+        "--",
+        "root@138.124.181.246",
+        f"/usr/bin/bash -s -- '{PACKAGE_ID}' '{MANIFEST_SHA256}' '{COLLECTOR_SHA256}' 'phase15-preflight-test-001' '138.124.181.246'",
+    ]
+    for required in (
+        "BatchMode=yes",
+        "IdentitiesOnly=yes",
+        "StrictHostKeyChecking=yes",
+        "IdentityAgent=none",
+        "PasswordAuthentication=no",
+        "KbdInteractiveAuthentication=no",
+        "GSSAPIAuthentication=no",
+        f"UserKnownHostsFile={contract['KnownHostsPath']}",
+        contract["KeyPath"],
+    ):
+        assert required in arguments
+    assert "-F" in arguments and arguments[arguments.index("-F") + 1] == "none"
+
+
+def test_round8_runner_rejects_host_options_and_uses_bounded_artifact_reads(tmp_path: Path):
+    oversized = tmp_path / "oversized.json"
+    oversized.write_bytes(b"x" * 65)
+    escaped = str(oversized).replace("'", "''")
+    result = run_powershell(
+        f"$bad=@('root@host','-oProxyCommand=x','host value','host/part'); $rejected=@($bad | %{{-not (Test-Phase15ExpectedHost -ExpectedHost $_)}}); "
+        f"$bounded=$false; try {{ Read-Phase15BoundedFileBytes -Path '{escaped}' -MaximumBytes 64 }} catch {{ $bounded=$true }}; "
+        "[Console]::Out.Write(\"$((@($rejected | ?{$_}).Count))|$($bounded.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "4|true"
+    source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
+    assert "[IO.File]::ReadAllBytes" not in source
+
+
+def test_round8_collector_uses_fixed_isolated_executables_and_minimal_environment(monkeypatch: pytest.MonkeyPatch):
+    namespace = collector_python_namespace()
+    command = namespace["command"]
+    captured: dict[str, str] = {}
+    for name in ("PYTHONPATH", "PYTHONHOME", "GIT_CONFIG_GLOBAL", "DOCKER_HOST", "DOCKER_CONTEXT", "CONTAINER_HOST", "CONTAINER_CONNECTION", "PODMAN_HOST", "PODMAN_CONNECTION"):
+        monkeypatch.setenv(name, "unsafe-ambient-value")
+
+    class Process:
+        stdout = io.BytesIO()
+        stderr = io.BytesIO()
+
+        def poll(self):
+            return 0
+
+        def wait(self, timeout=None):
+            return 0
+
+        def kill(self):
+            pass
+
+    def popen(_parts, **kwargs):
+        captured.update(kwargs["env"])
+        assert kwargs["cwd"] == "/"
+        return Process()
+
+    monkeypatch.setattr(namespace["subprocess"], "Popen", popen)
+    assert command(["/usr/bin/systemctl"])[3] == "success"
+    assert captured == {
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "HOME": "/root",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PATH": "/usr/sbin:/usr/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    }
+    source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
+    assert "PHASE15_PYTHON" not in source
+    assert "exec /usr/bin/python3 -I -B -" in source
+    assert "socket.getfqdn" not in source
+    for relative in ('"systemctl"', '["ip"', '["nsenter"', '["ss"', '["nft"', '["iptables-save"', '["iptables-legacy-save"'):
+        assert relative not in source
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        (b'ID=debian\nVERSION_ID="12"\n', ("pass", b"debian:12")),
+        (b'ID=ubuntu\nVERSION_ID="24.04"\n', ("stop", b"unsupported-os")),
+        (b'ID=debian\nVERSION_ID="13"\n', ("stop", b"unsupported-os")),
+        (b'ID=debian\r\nVERSION_ID="12"\r\n', ("stop", b"malformed-os-release")),
+        (b'ID=debian\nID=debian\nVERSION_ID="12"\n', ("stop", b"malformed-os-release")),
+        (b'ID=debian\nVERSION_ID="12"\nBROKEN="unterminated\n', ("stop", b"malformed-os-release")),
+    ],
+)
+def test_round8_os_release_parser_is_strict_and_exact_debian_12(raw: bytes, expected: tuple[str, bytes]):
+    assert collector_helper("classify_os_release")(raw) == expected
+
+
+def test_round8_docker_none_network_is_the_only_empty_ipam_exception():
+    classify = collector_helper("classify_dedicated_spain_docker")
+    success = "success"
+    inventory = (0, b"other\n", b"", success)
+    ids = (0, (b"a" * 64) + b"\n", b"", success)
+    none = (0, b'"none"\t"null"\t{"Config":[],"Driver":"default","Options":null}\n', b"", success)
+    bridge_empty = (0, b'"bridge"\t"bridge"\t{"Config":[],"Driver":"default","Options":{}}\n', b"", success)
+    malformed_none = (0, b'"none"\t"bridge"\t{"Config":[],"Driver":"default","Options":{}}\n', b"", success)
+
+    assert classify(inventory, ids, [none]) == ("pass", "free", "free")
+    assert classify(inventory, ids, [bridge_empty]) == ("stop", "stop", "stop")
+    assert classify(inventory, ids, [malformed_none]) == ("stop", "stop", "stop")
+
+
+def test_round8_container_limits_are_shared_across_all_engines():
+    classify = collector_helper("classify_spain_docker_sources")
+    success = "success"
+    none = (0, b'"none"\t"null"\t{"Config":[],"Driver":"default","Options":null}\n', b"", success)
+    source_a = ((0, b"".join(f"a-{i}\n".encode() for i in range(256)), b"", success), (0, (b"a" * 64) + b"\n", b"", success), [none])
+    source_b = ((0, b"".join(f"b-{i}\n".encode() for i in range(256)), b"", success), (0, (b"b" * 64) + b"\n", b"", success), [none])
+    overflow = ((0, b"extra\n", b"", success), (0, (b"c" * 64) + b"\n", b"", success), [none])
+
+    assert classify(source_a, source_b, overflow) == ("stop", "stop", "stop")
+
+
+def test_round8_global_deadline_covers_filesystem_scan_and_final_emission(tmp_path: Path):
+    namespace = collector_python_namespace()
+    namespace["_collector_deadline"] = namespace["time"].monotonic() - 1
+    assert namespace["scan_recovery_markers"]((tmp_path,)) == ("stop", "work_budget_exceeded")
+    with pytest.raises(TimeoutError, match="work budget"):
+        namespace["ensure_work_budget"]()
+
+
+def test_round8_unknown_journal_phase_cannot_transition_and_recovers_terminal_failure(tmp_path: Path):
+    state_root = str(tmp_path / "state").replace("'", "''")
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        f"$lock=Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; "
+        f"$tx=Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
+        "$journal=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath; $journal.phase='corrupt'; Write-Phase15AtomicJson -Path $tx.JournalPath -Value $journal; "
+        "$transitionRejected=$false; try{$null=Set-Phase15TransactionPhase -TransactionPath $tx.JournalPath -ClaimId 'phase15-preflight-test-001' -Phase 'transport_attempted' -Lock $lock}catch{$transitionRejected=$true}; "
+        f"$recovered=Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z' -Lock $lock; "
+        "$terminal=ConvertFrom-Phase15CanonicalJsonFile -Path $recovered.OutcomePath; $lock.Stream.Dispose(); "
+        "[Console]::Out.Write(\"$($transitionRejected.ToString().ToLowerInvariant())|$($recovered.Recovered.ToString().ToLowerInvariant())|$($terminal.reason_code)|$($terminal.safety.ssh_used.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|true|transport_failed|true"
+
+
+def test_round8_awg2_requires_final_owner_unit_recheck():
+    classify = collector_helper("classify_awg2_health")
+    success = "success"
+    owner = (0, b"active\n", b"", success)
+    changed_owner = (0, b"inactive\n", b"", success)
+    container = (0, b"true|4242|0\n", b"", success)
+    interface = (0, b"7: awg0: <POINTOPOINT,UP>\n", b"", success)
+    handshakes = (0, b"A" * 43 + b"=\t1699999940\n", b"", success)
+
+    assert classify(owner, container, interface, handshakes, container, changed_owner, now_epoch=1_700_000_000) == "stop"
+    assert classify(owner, container, interface, handshakes, container, owner, now_epoch=1_700_000_000) == "pass"
+
+
+def test_round8_startup_cleanup_removes_only_exact_claim_owned_temp_and_backup_residues(tmp_path: Path):
+    transaction = tmp_path / "transactions" / "phase15-preflight-test-001.json"
+    lifecycle = tmp_path / "claims" / "phase15-preflight-test-001.json"
+    outcome = tmp_path / "outcome.json"
+    transaction.parent.mkdir()
+    lifecycle.parent.mkdir()
+    own_guid = "a" * 32
+    other_guid = "b" * 32
+    own = [
+        Path(str(transaction) + f".atomic-{own_guid}"),
+        Path(str(transaction) + f".backup-{own_guid}"),
+        Path(str(lifecycle) + f".terminal-{own_guid}"),
+        Path(str(lifecycle) + f".backup-{own_guid}"),
+        Path(str(outcome) + f".reservation-backup-phase15-preflight-test-001-{own_guid}"),
+    ]
+    other = Path(str(outcome) + f".reservation-backup-phase15-preflight-test-002-{other_guid}")
+    for path in [*own, other]:
+        path.write_bytes(b"synthetic")
+    transaction_ps = str(transaction).replace("'", "''")
+    lifecycle_ps = str(lifecycle).replace("'", "''")
+    outcome_ps = str(outcome).replace("'", "''")
+    result = run_powershell(
+        f"Remove-Phase15TransactionTemps -TransactionPath '{transaction_ps}'; "
+        f"Remove-Phase15OwnedStateResidues -LifecyclePath '{lifecycle_ps}' -OutcomePath '{outcome_ps}' -ClaimId 'phase15-preflight-test-001'; "
+        "[Console]::Out.Write('clean')"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "clean"
+    assert all(not path.exists() for path in own)
+    assert other.read_bytes() == b"synthetic"

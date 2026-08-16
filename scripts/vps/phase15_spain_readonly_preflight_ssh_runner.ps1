@@ -16,6 +16,10 @@ $script:Phase15CollectorSchema = 'amn2.phase15.spain-readonly-collector.v1'
 $script:Phase15EvidenceSchema = 'amn2.phase15.readonly-preflight-evidence.v1'
 $script:Phase15FailureSchema = 'amn2.phase15.readonly-preflight-failure.v1'
 $script:Phase15ProductionStateRoot = 'C:\ProgramData\AMN2\phase15\readonly-preflight'
+$script:Phase15TrustedBundleRunId = 'spain-fresh-20260720-001'
+$script:Phase15SpainTargetUser = 'root'
+$script:Phase15SpainHostKeySha256 = 'SHA256:XVFOmBAXMHYlngo9+x7lGAJbzlOqiMiG/6/4qhRC4HU'
+$script:Phase15MaximumArtifactBytes = 1048576
 $script:Phase15ObservationNames = @(
     'application_state','architecture','awg2_health','backup_capability','bridge_amn2sp3br0',
     'config_path','container_capability','container_cidr_172_29_252_0_28','container_name',
@@ -26,11 +30,6 @@ $script:Phase15ObservationNames = @(
 $script:Phase15StopReasons = @('identity_mismatch','observation_failed','recovery_incomplete','resource_conflict')
 $script:Phase15FailureReasons = @('claim_invalid','collector_failed','identity_mismatch','observation_ambiguous','schema_invalid','transport_failed')
 $script:Phase15ConflictNames = @('bridge_amn2sp3br0','config_path','container_cidr_172_29_252_0_28','container_name','firewall','interface_awg3','routes','service_name','state_root','udp_30002','vpn_cidr_10_212_13_0_24')
-
-function Get-Phase15FileSha256 {
-    param([Parameter(Mandatory)][string]$Path)
-    return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
-}
 
 function Get-Phase15BytesSha256 {
     param([Parameter(Mandatory)][byte[]]$Bytes)
@@ -45,9 +44,33 @@ function Get-Phase15CanonicalJsonSha256 {
     return Get-Phase15BytesSha256 -Bytes $bytes
 }
 
+function Read-Phase15BoundedFileBytes {
+    param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][int]$MaximumBytes)
+    if ($MaximumBytes -lt 1) { throw 'input_size_invalid' }
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction Stop
+    if ($item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or $item.Length -lt 1 -or $item.Length -gt $MaximumBytes) { throw 'input_size_invalid' }
+    $stream = [IO.FileStream]::new($item.FullName, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::Read)
+    $buffer = [IO.MemoryStream]::new()
+    try {
+        $chunk = [byte[]]::new(4096)
+        while ($true) {
+            $remaining = ($MaximumBytes + 1) - [int]$buffer.Length
+            if ($remaining -le 0) { throw 'input_size_invalid' }
+            $count = $stream.Read($chunk, 0, [Math]::Min($chunk.Length, $remaining))
+            if ($count -eq 0) { break }
+            $buffer.Write($chunk, 0, $count)
+        }
+        if ($buffer.Length -lt 1 -or $buffer.Length -gt $MaximumBytes) { throw 'input_size_invalid' }
+        return [byte[]]$buffer.ToArray()
+    } finally {
+        $buffer.Dispose()
+        $stream.Dispose()
+    }
+}
+
 function Read-Phase15ManifestArtifact {
     param([Parameter(Mandatory)][string]$Path)
-    $bytes = [IO.File]::ReadAllBytes($Path)
+    $bytes = Read-Phase15BoundedFileBytes -Path $Path -MaximumBytes $script:Phase15MaximumArtifactBytes
     try {
         $text = [Text.UTF8Encoding]::new($false, $true).GetString($bytes)
         $value = ConvertFrom-Phase15CanonicalJsonText -Text $text
@@ -58,7 +81,7 @@ function Read-Phase15ManifestArtifact {
 
 function Read-Phase15CollectorArtifact {
     param([Parameter(Mandatory)][string]$Path)
-    $bytes = [IO.File]::ReadAllBytes($Path)
+    $bytes = Read-Phase15BoundedFileBytes -Path $Path -MaximumBytes $script:Phase15MaximumArtifactBytes
     return [pscustomobject]@{
         Bytes = [byte[]]$bytes
         Sha256 = Get-Phase15BytesSha256 -Bytes $bytes
@@ -100,7 +123,7 @@ function ConvertFrom-Phase15CanonicalJsonFile {
     param([Parameter(Mandatory)][string]$Path)
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return $null }
     try {
-        $bytes = [IO.File]::ReadAllBytes($Path)
+        $bytes = Read-Phase15BoundedFileBytes -Path $Path -MaximumBytes $script:Phase15MaximumArtifactBytes
         $strictUtf8 = [Text.UTF8Encoding]::new($false, $true)
         $text = $strictUtf8.GetString($bytes)
         $value = $text | ConvertFrom-Json
@@ -288,11 +311,85 @@ function ConvertTo-Phase15Evidence {
     }
 }
 
+function Get-Phase15SpainTrustContract {
+    $localAppData = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
+    if ([string]::IsNullOrWhiteSpace($localAppData) -or -not [IO.Path]::IsPathRooted($localAppData)) { throw 'trust_binding_invalid' }
+    $trustRoot = Join-Path $localAppData "AMN2\private-artifacts\post-release\spain-migration\$($script:Phase15TrustedBundleRunId)"
+    return [pscustomobject]@{
+        ExpectedHostKeySha256 = $script:Phase15SpainHostKeySha256
+        KeyPath = Join-Path $trustRoot 'id_ed25519_spain'
+        KnownHostsPath = Join-Path $trustRoot 'known_hosts_spain'
+        TargetUser = $script:Phase15SpainTargetUser
+        TrustRoot = $trustRoot
+    }
+}
+
+function Assert-Phase15TrustPath {
+    param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][string]$ExpectedOwnerSid, [switch]$RequireLeaf)
+    if (-not [IO.Path]::IsPathRooted($Path)) { throw 'trust_binding_invalid' }
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction Stop
+    if (($RequireLeaf -and $item.PSIsContainer) -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'trust_binding_invalid' }
+    $acl = Get-Acl -LiteralPath $item.FullName -ErrorAction Stop
+    $ownerSid = $acl.Owner
+    try { $ownerSid = ([Security.Principal.NTAccount]$acl.Owner).Translate([Security.Principal.SecurityIdentifier]).Value } catch { }
+    $rules = @($acl.Access)
+    if ($ownerSid -cne $ExpectedOwnerSid -or -not $acl.AreAccessRulesProtected -or $rules.Count -ne 1 -or $rules[0].IsInherited) { throw 'trust_binding_invalid' }
+    $ruleSid = $rules[0].IdentityReference.Value
+    try { $ruleSid = $rules[0].IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value } catch { }
+    if ($ruleSid -cne $ExpectedOwnerSid -or $rules[0].AccessControlType -ne [Security.AccessControl.AccessControlType]::Allow -or (($rules[0].FileSystemRights -band [Security.AccessControl.FileSystemRights]::FullControl) -ne [Security.AccessControl.FileSystemRights]::FullControl)) { throw 'trust_binding_invalid' }
+}
+
+function Assert-Phase15SpainTrustBundle {
+    param([Parameter(Mandatory)][string]$ExpectedHost)
+    if (-not (Test-Phase15ExpectedHost -ExpectedHost $ExpectedHost)) { throw 'trust_binding_invalid' }
+    $contract = Get-Phase15SpainTrustContract
+    $currentSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+    Assert-Phase15TrustPath -Path $contract.TrustRoot -ExpectedOwnerSid $currentSid
+    Assert-Phase15TrustPath -Path $contract.KeyPath -ExpectedOwnerSid $currentSid -RequireLeaf
+    Assert-Phase15TrustPath -Path $contract.KnownHostsPath -ExpectedOwnerSid $currentSid -RequireLeaf
+    $keyBytes = Read-Phase15BoundedFileBytes -Path $contract.KeyPath -MaximumBytes 16384
+    $knownHostsBytes = Read-Phase15BoundedFileBytes -Path $contract.KnownHostsPath -MaximumBytes 4096
+    try {
+        if (@($keyBytes | Where-Object { $_ -gt 127 }).Count -ne 0 -or @($knownHostsBytes | Where-Object { $_ -gt 127 }).Count -ne 0) { throw 'trust_binding_invalid' }
+        $strictAscii = [Text.ASCIIEncoding]::new()
+        $keyText = $strictAscii.GetString($keyBytes)
+        if (-not ($keyText.StartsWith("-----BEGIN OPENSSH PRIVATE KEY-----`n", [StringComparison]::Ordinal) -or $keyText.StartsWith("-----BEGIN OPENSSH PRIVATE KEY-----`r`n", [StringComparison]::Ordinal)) -or $keyText.Contains([char]0)) { throw 'trust_binding_invalid' }
+        $knownText = $strictAscii.GetString($knownHostsBytes)
+        $match = [regex]::Match($knownText, '^([^ \r\n]+) (ssh-ed25519) ([A-Za-z0-9+/]+={0,2})\r?\n$')
+        if (-not $match.Success -or $match.Groups[1].Value -cne $ExpectedHost) { throw 'trust_binding_invalid' }
+        $blob = [Convert]::FromBase64String($match.Groups[3].Value)
+        $hasher = [Security.Cryptography.SHA256]::Create()
+        try { $digest = $hasher.ComputeHash($blob) } finally { $hasher.Dispose() }
+        $fingerprint = 'SHA256:' + [Convert]::ToBase64String($digest).TrimEnd('=')
+        if ($fingerprint -cne $contract.ExpectedHostKeySha256) { throw 'trust_binding_invalid' }
+    } finally {
+        [Array]::Clear($keyBytes, 0, $keyBytes.Length)
+        [Array]::Clear($knownHostsBytes, 0, $knownHostsBytes.Length)
+    }
+    return $contract
+}
+
+function Assert-Phase15LocalExecutable {
+    param([Parameter(Mandatory)][string]$Path)
+    if (-not [IO.Path]::IsPathRooted($Path) -or -not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw 'local_executable_invalid' }
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction Stop
+    if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or $item.Length -lt 1 -or $item.Length -gt 33554432) { throw 'local_executable_invalid' }
+}
+
 function New-Phase15SshArguments {
     param([Parameter(Mandatory)][string]$ExpectedHost, [Parameter(Mandatory)][string]$ClaimId, [Parameter(Mandatory)][string]$ManifestSha256, [Parameter(Mandatory)][string]$CollectorSha256)
     if (-not (Test-Phase15ExpectedHost -ExpectedHost $ExpectedHost) -or $ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$' -or $ManifestSha256 -cnotmatch '^[0-9a-f]{64}$' -or $CollectorSha256 -cnotmatch '^[0-9a-f]{64}$') { throw 'transport_envelope_invalid' }
-    $remote = "bash -s -- '$($script:Phase15PackageId)' '$ManifestSha256' '$CollectorSha256' '$ClaimId' '$ExpectedHost'"
-    return @('-T','-F','none','-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=10','-o','ConnectionAttempts=1','--',$ExpectedHost,$remote)
+    $contract = Get-Phase15SpainTrustContract
+    $remote = "/usr/bin/bash -s -- '$($script:Phase15PackageId)' '$ManifestSha256' '$CollectorSha256' '$ClaimId' '$ExpectedHost'"
+    return @(
+        '-T','-F','none',
+        '-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','IdentityAgent=none',
+        '-o','PasswordAuthentication=no','-o','KbdInteractiveAuthentication=no','-o','GSSAPIAuthentication=no',
+        '-o','ForwardAgent=no','-o','ClearAllForwardings=yes','-o','RequestTTY=no',
+        '-o','StrictHostKeyChecking=yes','-o',"UserKnownHostsFile=$($contract.KnownHostsPath)",
+        '-o','GlobalKnownHostsFile=NUL','-o','ConnectTimeout=10','-o','ConnectionAttempts=1',
+        '-i',$contract.KeyPath,'--',"$($contract.TargetUser)@$ExpectedHost",$remote
+    )
 }
 
 function ConvertTo-Phase15WindowsArgument {
@@ -342,12 +439,19 @@ function Invoke-Phase15OneSshTransport {
     $Started.Value = $false
     $start = [Diagnostics.ProcessStartInfo]::new()
     $start.FileName = 'C:\Windows\System32\OpenSSH\ssh.exe'
+    Assert-Phase15LocalExecutable -Path $start.FileName
     $start.Arguments = ((New-Phase15SshArguments -ExpectedHost $ExpectedHost -ClaimId $ClaimId -ManifestSha256 $ManifestSha256 -CollectorSha256 $CollectorSha256) | ForEach-Object { ConvertTo-Phase15WindowsArgument -Argument $_ }) -join ' '
     $start.UseShellExecute = $false
     $start.CreateNoWindow = $true
     $start.RedirectStandardInput = $true
     $start.RedirectStandardOutput = $true
     $start.RedirectStandardError = $true
+    $start.EnvironmentVariables.Clear()
+    $start.EnvironmentVariables['SYSTEMROOT'] = $env:SystemRoot
+    $start.EnvironmentVariables['WINDIR'] = $env:WINDIR
+    $start.EnvironmentVariables['PATH'] = 'C:\Windows\System32\OpenSSH;C:\Windows\System32'
+    $start.EnvironmentVariables['HOME'] = 'C:\ProgramData\AMN2\phase15\no-ambient-home'
+    $start.EnvironmentVariables['USERPROFILE'] = 'C:\ProgramData\AMN2\phase15\no-ambient-profile'
     $process = [Diagnostics.Process]::new()
     $process.StartInfo = $start
     $stdout = $null
@@ -443,10 +547,31 @@ function Remove-Phase15TransactionTemps {
     $parent = [IO.Path]::GetDirectoryName($fullPath)
     $leaf = [IO.Path]::GetFileName($fullPath)
     if (-not (Test-Path -LiteralPath $parent -PathType Container)) { return }
-    foreach ($candidate in [IO.Directory]::EnumerateFiles($parent, $leaf + '.create-*.tmp', [IO.SearchOption]::TopDirectoryOnly)) {
-        if ([IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($candidate)) -cne $parent -or [IO.Path]::GetFileName($candidate) -cnotmatch ('^' + [regex]::Escape($leaf) + '\.create-[0-9a-f]{32}\.tmp$')) { throw 'transaction_invalid' }
+    $allowed = '^' + [regex]::Escape($leaf) + '(?:\.create-[0-9a-f]{32}\.tmp|\.atomic-[0-9a-f]{32}(?:\.create-[0-9a-f]{32}\.tmp)?|\.backup-[0-9a-f]{32})$'
+    foreach ($candidate in [IO.Directory]::EnumerateFiles($parent, $leaf + '.*', [IO.SearchOption]::TopDirectoryOnly)) {
+        if ([IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($candidate)) -cne $parent -or [IO.Path]::GetFileName($candidate) -cnotmatch $allowed) { continue }
         if (([IO.File]::GetAttributes($candidate) -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'transaction_invalid' }
         [IO.File]::Delete($candidate)
+    }
+}
+
+function Remove-Phase15OwnedStateResidues {
+    param([Parameter(Mandatory)][string]$LifecyclePath, [Parameter(Mandatory)][string]$OutcomePath, [Parameter(Mandatory)][string]$ClaimId)
+    if ($ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$') { throw 'transaction_invalid' }
+    $targets = @(
+        [pscustomobject]@{ Path = [IO.Path]::GetFullPath($LifecyclePath); Suffix = '(?:terminal|backup)-[0-9a-f]{32}(?:\.create-[0-9a-f]{32}\.tmp)?' },
+        [pscustomobject]@{ Path = [IO.Path]::GetFullPath($OutcomePath); Suffix = '(?:pending-[0-9a-f]{32}(?:\.create-[0-9a-f]{32}\.tmp)?|reservation-backup-' + [regex]::Escape($ClaimId) + '-[0-9a-f]{32})' }
+    )
+    foreach ($target in $targets) {
+        $parent = [IO.Path]::GetDirectoryName($target.Path)
+        $leaf = [IO.Path]::GetFileName($target.Path)
+        if (-not (Test-Path -LiteralPath $parent -PathType Container)) { continue }
+        $pattern = '^' + [regex]::Escape($leaf) + '\.' + $target.Suffix + '$'
+        foreach ($candidate in [IO.Directory]::EnumerateFiles($parent, $leaf + '.*', [IO.SearchOption]::TopDirectoryOnly)) {
+            if ([IO.Path]::GetFileName($candidate) -cnotmatch $pattern) { continue }
+            if (([IO.File]::GetAttributes($candidate) -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'transaction_invalid' }
+            [IO.File]::Delete($candidate)
+        }
     }
 }
 
@@ -581,6 +706,7 @@ function Start-Phase15Transaction {
     $journalPath = Get-Phase15TransactionPath -StateRoot $StateRoot -ClaimId $ClaimId
     Remove-Phase15TransactionTemps -TransactionPath $journalPath
     $reservationPath = [IO.Path]::GetFullPath($OutcomePath)
+    Remove-Phase15OwnedStateResidues -LifecyclePath $lifecyclePath -OutcomePath $reservationPath -ClaimId $ClaimId
     $stagedPath = $reservationPath + '.phase15-' + $ClaimId + '.staged'
     if (Test-Path -LiteralPath $lifecyclePath) { throw 'claim_replay' }
     if (Test-Path -LiteralPath $journalPath) { throw 'transaction_pending' }
@@ -624,9 +750,11 @@ function Set-Phase15TransactionPhase {
     $journal = ConvertFrom-Phase15CanonicalJsonFile -Path $TransactionPath
     if ($null -eq $journal -or $journal.claim_id -isnot [string] -or $journal.claim_id -cne $ClaimId -or $journal.phase -isnot [string]) { throw 'transaction_invalid' }
     $phases = @('owned','transport_attempted','ssh_started','outcome_staged','finalizing')
-    if ([Array]::IndexOf($phases, $Phase) -lt [Array]::IndexOf($phases, [string]$journal.phase)) { throw 'transaction_invalid' }
+    $currentPhaseIndex = [Array]::IndexOf($phases, [string]$journal.phase)
+    $nextPhaseIndex = [Array]::IndexOf($phases, $Phase)
+    if ($currentPhaseIndex -lt 0 -or $nextPhaseIndex -lt 0 -or $nextPhaseIndex -lt $currentPhaseIndex) { throw 'transaction_invalid' }
     $journal.phase = $Phase
-    if ([Array]::IndexOf($phases, $Phase) -ge 1) { $journal.ssh_used = $true }
+    if ($nextPhaseIndex -ge 1) { $journal.ssh_used = $true }
     Write-Phase15AtomicJson -Path $TransactionPath -Value $journal
     return $TransactionPath
 }
@@ -660,13 +788,15 @@ function Reconcile-Phase15Transaction {
         $journal.terminal_path -isnot [string] -or $journal.terminal_reason_code -isnot [string] -or $journal.terminal_status -isnot [string] -or
         $journal.terminal_status -notin @('completed','failed')
     )) { throw 'transaction_invalid' }
-    if ($journal.claim_id -cne $ClaimId -or $journal.schema -cne 'amn2.phase15.readonly-preflight-transaction.v1' -or $journal.phase -notin @('owned','transport_attempted','ssh_started','outcome_staged','finalizing')) { throw 'transaction_invalid' }
+    if ($journal.claim_id -cne $ClaimId -or $journal.schema -cne 'amn2.phase15.readonly-preflight-transaction.v1') { throw 'transaction_invalid' }
+    $phaseValid = $journal.phase -in @('owned','transport_attempted','ssh_started','outcome_staged','finalizing')
     if ($journal.manifest_sha256 -cnotmatch '^[0-9a-f]{64}$' -or $journal.collector_sha256 -cnotmatch '^[0-9a-f]{64}$' -or -not (Test-Phase15ExpectedHost -ExpectedHost $journal.expected_host) -or -not (Test-Phase15UtcTimestamp -Value $journal.reserved_at)) { throw 'transaction_invalid' }
     $expectedStagedPath = [IO.Path]::GetFullPath($journal.outcome_path) + '.phase15-' + $ClaimId + '.staged'
     if ([IO.Path]::GetFullPath($journal.staged_path) -cne $expectedStagedPath) { throw 'transaction_invalid' }
     $lifecycleRoot = Join-Path $StateRoot 'claims'
     if (-not (Test-Path -LiteralPath $lifecycleRoot)) { [void][IO.Directory]::CreateDirectory($lifecycleRoot) }
     $lifecyclePath = Get-Phase15LifecyclePath -LifecycleRoot $lifecycleRoot -ClaimId $ClaimId
+    Remove-Phase15OwnedStateResidues -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -ClaimId $ClaimId
     if ($null -ne $journal.terminal_path) {
         $published = ConvertFrom-Phase15CanonicalJsonFile -Path $journal.terminal_path
         $lifecycle = ConvertFrom-Phase15CanonicalJsonFile -Path $lifecyclePath
@@ -678,7 +808,7 @@ function Reconcile-Phase15Transaction {
             return [pscustomobject]@{ Recovered = $true; OutcomePath = [IO.Path]::GetFullPath($journal.terminal_path) }
         }
     }
-    $sshUsed = [bool]$journal.ssh_used
+    $sshUsed = if ($phaseValid) { [bool]$journal.ssh_used } else { $true }
     $failure = New-Phase15FailureOutcome -ReasonCode 'transport_failed' -ManifestSha256 $journal.manifest_sha256 -CollectorSha256 $journal.collector_sha256 -ExpectedHost $journal.expected_host -StartedAt $journal.reserved_at -EndedAt $EndedAt -SshUsed $sshUsed
     if (Test-Phase15OutcomeOwnership -ReservationPath $journal.outcome_path -ClaimId $ClaimId) {
         $publishedPath = [IO.Path]::GetFullPath($journal.outcome_path)
@@ -759,7 +889,7 @@ function Publish-Phase15TerminalOutcome {
     } else {
         $pendingPath = $OutcomePath + '.pending-' + [Guid]::NewGuid().ToString('N')
     }
-    $backupPath = $OutcomePath + '.reservation-backup-' + [Guid]::NewGuid().ToString('N')
+    $backupPath = $OutcomePath + '.reservation-backup-' + $ClaimId + '-' + [Guid]::NewGuid().ToString('N')
     try {
         Write-Phase15CreateNewJson -Path $pendingPath -Value $Outcome
         if (-not [string]::IsNullOrWhiteSpace($TransactionPath)) { [void](Set-Phase15TransactionPhase -TransactionPath $TransactionPath -ClaimId $ClaimId -Phase 'outcome_staged' -Lock $Lock) }
@@ -811,6 +941,7 @@ function Invoke-Phase15RunnerMain {
     $collectorSha256 = $collectorArtifact.Sha256
     $entry = @($manifest.entries | Where-Object { $_.path -ceq 'tooling/scripts/vps/phase15_spain_readonly_preflight_remote.sh' })
     if ($entry.Count -ne 1 -or $entry[0].sha256 -cne $collectorSha256) { throw 'collector_checksum_invalid' }
+    [void](Assert-Phase15SpainTrustBundle -ExpectedHost $ExpectedHost)
     $claim = Read-Phase15FutureClaim -ClaimPath $FutureClaimPath
     if ($null -eq $claim -or -not (Test-Phase15ClaimIdentity -Claim $claim -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost)) { throw 'claim_invalid' }
     $stateRoot = Get-Phase15ProductionStateRoot

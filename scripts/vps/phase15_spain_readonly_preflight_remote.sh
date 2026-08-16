@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-python_executable="${PHASE15_PYTHON:-python3}"
 if [[ "$#" -ne 5 ]]; then
-    "$python_executable" -c 'import sys; sys.stderr.buffer.write(b"collector_envelope_invalid\n")'
+    /usr/bin/python3 -I -B -c 'import sys; sys.stderr.buffer.write(b"collector_envelope_invalid\n")'
     exit 64
 fi
 
-exec "$python_executable" - "$1" "$2" "$3" "$4" "$5" <<'PHASE15_PY'
+exec /usr/bin/python3 -I -B - "$1" "$2" "$3" "$4" "$5" <<'PHASE15_PY'
 import datetime
 import hashlib
 import ipaddress
@@ -17,7 +16,6 @@ import pathlib
 import re
 import shlex
 import shutil
-import socket
 import subprocess
 import sys
 import threading
@@ -36,6 +34,19 @@ SPAIN_DOCKER = "/opt/amn2-spain/docker/bin/docker"
 SPAIN_DOCKER_HOST = "unix:///run/amn2-spain-docker/docker.sock"
 PODMAN = "/usr/bin/podman"
 PODMAN_HOST = "unix:///run/podman/podman.sock"
+SYSTEMCTL = "/usr/bin/systemctl"
+IP = "/usr/sbin/ip"
+NSENTER = "/usr/bin/nsenter"
+SS = "/usr/bin/ss"
+NFT = "/usr/sbin/nft"
+IPTABLES_SAVE = "/usr/sbin/iptables-save"
+IPTABLES_LEGACY_SAVE = "/usr/sbin/iptables-legacy-save"
+HOSTNAME = "/usr/bin/hostname"
+PYTHON_3_12 = "/usr/bin/python3"
+ALLOWED_COMMANDS = {
+    HOSTNAME, IP, IPTABLES_LEGACY_SAVE, IPTABLES_SAVE, NFT, NSENTER, PODMAN,
+    PYTHON_3_12, SPAIN_DOCKER, SS, SYSTEMCTL, SYSTEM_DOCKER,
+}
 CLAIM_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,127}$")
 EXPECTED_HOST_RE = re.compile(r"^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -63,6 +74,25 @@ CONFLICT_NAMES = {
     "state_root", "udp_30002", "vpn_cidr_10_212_13_0_24",
 }
 
+def ensure_work_budget():
+    if _collector_deadline <= time.monotonic():
+        raise TimeoutError("collector work budget exceeded")
+
+def bounded_file_bytes(path, maximum_bytes=MAXIMUM_OUTPUT_BYTES):
+    ensure_work_budget()
+    candidate = pathlib.Path(path)
+    stat_result = candidate.lstat()
+    if not candidate.is_file() or candidate.is_symlink():
+        raise OSError("input is not a regular file")
+    if stat_result.st_size < 1 or maximum_bytes < stat_result.st_size:
+        raise OSError("input size rejected")
+    with candidate.open("rb") as stream:
+        raw = stream.read(maximum_bytes + 1)
+    ensure_work_budget()
+    if not raw or maximum_bytes < len(raw):
+        raise OSError("input size rejected")
+    return raw
+
 def command(parts, maximum_output_bytes=MAXIMUM_OUTPUT_BYTES, timeout_seconds=8):
     global _command_invocations
     remaining_budget = _collector_deadline - time.monotonic()
@@ -70,12 +100,21 @@ def command(parts, maximum_output_bytes=MAXIMUM_OUTPUT_BYTES, timeout_seconds=8)
         return 124, b"", b"", "work_budget_exceeded"
     _command_invocations += 1
     timeout_seconds = min(timeout_seconds, remaining_budget)
-    environment = os.environ.copy()
-    for selector in ("DOCKER_HOST", "DOCKER_CONTEXT", "CONTAINER_HOST", "CONTAINER_CONNECTION", "PODMAN_HOST", "PODMAN_CONNECTION"):
-        environment.pop(selector, None)
-    environment["LC_ALL"] = "C"
+    environment = {
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "HOME": "/root",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PATH": "/usr/sbin:/usr/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    }
     try:
-        process = subprocess.Popen(parts, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=environment)
+        if not parts or not isinstance(parts[0], str) or parts[0] not in ALLOWED_COMMANDS:
+            return 126, b"", b"", "launch_failed"
+        process = subprocess.Popen(parts, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=environment, cwd="/")
     except FileNotFoundError:
         return 127, b"", b"", "unavailable"
     except OSError:
@@ -215,6 +254,68 @@ def _docker_network_ids(probe):
         raise ValueError("docker network inventory")
     return identifiers
 
+def _strict_json(text):
+    def reject_duplicates(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate json key")
+            result[key] = value
+        return result
+    return json.loads(
+        text,
+        object_pairs_hook=reject_duplicates,
+        parse_constant=lambda _value: (_ for _ in ()).throw(ValueError("non-finite json value")),
+    )
+
+def _parse_network_inspection(probe):
+    if not probe_ok(probe):
+        raise ValueError("network inspection")
+    raw = probe[1]
+    if not raw or not raw.endswith(b"\n") or raw.count(b"\n") != 1 or b"\r" in raw:
+        raise ValueError("network inspection")
+    fields = raw[:-1].decode("utf-8", errors="strict").split("\t")
+    if len(fields) != 3:
+        raise ValueError("network inspection")
+    name, driver, address_data = (_strict_json(field) for field in fields)
+    if not isinstance(name, str) or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", name) is None:
+        raise ValueError("network name")
+    if not isinstance(driver, str) or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}", driver) is None:
+        raise ValueError("network driver")
+    subnets = []
+    if isinstance(address_data, dict):
+        if set(address_data) != {"Config", "Driver", "Options"}:
+            raise ValueError("docker ipam schema")
+        if not isinstance(address_data["Driver"], str) or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}", address_data["Driver"]) is None:
+            raise ValueError("docker ipam driver")
+        if address_data["Options"] is not None and (not isinstance(address_data["Options"], dict) or any(not isinstance(key, str) or not isinstance(value, str) for key, value in address_data["Options"].items())):
+            raise ValueError("docker ipam options")
+        config = address_data["Config"]
+        if not isinstance(config, list):
+            raise ValueError("docker ipam config")
+        for item in config:
+            allowed = {"AuxiliaryAddresses", "Gateway", "IPRange", "Subnet"}
+            if not isinstance(item, dict) or "Subnet" not in item or not set(item).issubset(allowed):
+                raise ValueError("docker ipam entry")
+            if not isinstance(item["Subnet"], str):
+                raise ValueError("docker subnet")
+            subnets.append(ipaddress.ip_network(item["Subnet"], strict=False))
+            for field in ("Gateway", "IPRange"):
+                if field in item and not isinstance(item[field], str):
+                    raise ValueError("docker ipam value")
+            if "AuxiliaryAddresses" in item and (not isinstance(item["AuxiliaryAddresses"], dict) or any(not isinstance(key, str) or not isinstance(value, str) for key, value in item["AuxiliaryAddresses"].items())):
+                raise ValueError("docker auxiliary addresses")
+    elif isinstance(address_data, list):
+        for item in address_data:
+            if not isinstance(item, dict) or set(item) - {"gateway", "lease_range", "subnet"} or not isinstance(item.get("subnet"), str):
+                raise ValueError("podman subnet schema")
+            subnets.append(ipaddress.ip_network(item["subnet"], strict=False))
+    else:
+        raise ValueError("network address schema")
+    if not subnets and not (name == "none" and driver == "null" and isinstance(address_data, dict)):
+        raise ValueError("empty network ipam")
+    return name, driver, subnets
+
 def classify_dedicated_spain_docker(inventory_probe, network_list_probe, network_inspect_probes):
     stopped = ("stop", "stop", "stop")
     try:
@@ -224,13 +325,8 @@ def classify_dedicated_spain_docker(inventory_probe, network_list_probe, network
             return stopped
         networks = []
         for probe in network_inspect_probes:
-            if not probe_ok(probe):
-                return stopped
-            raw = probe[1]
-            if not raw or not raw.endswith(b"\n") or b"\r" in raw:
-                return stopped
-            for line in raw.decode("ascii", errors="strict").splitlines():
-                networks.append(ipaddress.ip_network(line, strict=False))
+            _name, _driver, subnets = _parse_network_inspection(probe)
+            networks.extend(subnets)
         target = ipaddress.ip_network("172.29.252.0/28")
         cidr_state = "stop" if any(network.version == target.version and network.overlaps(target) for network in networks) else "free"
         return capability, candidate_name, cidr_state
@@ -239,6 +335,23 @@ def classify_dedicated_spain_docker(inventory_probe, network_list_probe, network
 
 def classify_spain_docker_sources(system_source, dedicated_source, podman_source):
     stopped = ("stop", "stop", "stop")
+    try:
+        present_sources = [system_source, dedicated_source]
+        if podman_source[0][3] != "unavailable":
+            present_sources.append(podman_source)
+        total_containers = 0
+        total_networks = 0
+        for inventory_probe, network_probe, inspect_probes in present_sources:
+            if network_probe is None:
+                return stopped
+            if not probe_ok(inventory_probe):
+                return stopped
+            total_containers += len(inventory_probe[1].decode("utf-8", errors="strict").splitlines())
+            total_networks += len(_docker_network_ids(network_probe))
+            if MAX_CONTAINER_ROWS < total_containers or MAX_NETWORK_IDS < total_networks or len(inspect_probes) != len(_docker_network_ids(network_probe)):
+                return stopped
+    except (UnicodeDecodeError, ValueError, TypeError):
+        return stopped
     system_inventory, system_networks, system_inspects = system_source
     if system_networks is None:
         return stopped
@@ -267,13 +380,13 @@ def classify_spain_docker_sources(system_source, dedicated_source, podman_source
 def production_container_source(engine):
     if engine == "system-docker":
         prefix = [SYSTEM_DOCKER, "--host", SYSTEM_DOCKER_HOST]
-        subnet_format = "{{range .IPAM.Config}}{{println .Subnet}}{{end}}"
+        inspect_format = "{{json .Name}}\t{{json .Driver}}\t{{json .IPAM}}"
     elif engine == "spain-docker":
         prefix = [SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST]
-        subnet_format = "{{range .IPAM.Config}}{{println .Subnet}}{{end}}"
+        inspect_format = "{{json .Name}}\t{{json .Driver}}\t{{json .IPAM}}"
     elif engine == "podman":
         prefix = [PODMAN, "--url", PODMAN_HOST]
-        subnet_format = "{{range .Subnets}}{{println .Subnet}}{{end}}"
+        inspect_format = "{{json .Name}}\t{{json .Driver}}\t{{json .Subnets}}"
     else:
         raise ValueError("container engine")
     inventory = command(prefix + ["ps", "-a", "--format", "{{.Names}}"])
@@ -284,7 +397,10 @@ def production_container_source(engine):
         identifiers = _docker_network_ids(networks)
     except (UnicodeDecodeError, ValueError):
         return inventory, networks, []
-    inspections = [command(prefix + ["network", "inspect", "--format", subnet_format, network_id]) for network_id in identifiers]
+    inspections = []
+    for network_id in identifiers:
+        ensure_work_budget()
+        inspections.append(command(prefix + ["network", "inspect", "--format", inspect_format, network_id]))
     return inventory, networks, inspections
 
 def classify_systemd_capability(probe):
@@ -718,10 +834,10 @@ def parse_awg2_container_probe(probe):
         return None
     return int(match.group(1).decode('ascii')), int(match.group(2).decode('ascii'))
 
-def classify_awg2_health(owner_probe, initial_probe, interface_probe, handshake_probe, final_probe, now_epoch):
-    if not all(probe_ok(probe) for probe in (owner_probe, initial_probe, interface_probe, handshake_probe, final_probe)):
+def classify_awg2_health(owner_probe, initial_probe, interface_probe, handshake_probe, final_probe, final_owner_probe, now_epoch):
+    if not all(probe_ok(probe) for probe in (owner_probe, initial_probe, interface_probe, handshake_probe, final_probe, final_owner_probe)):
         return "stop"
-    if owner_probe[1] != b"active\n":
+    if owner_probe[1] != b"active\n" or final_owner_probe[1] != owner_probe[1]:
         return "stop"
     container_state = parse_awg2_container_probe(initial_probe)
     if initial_probe[1] != final_probe[1]:
@@ -744,6 +860,46 @@ def classify_awg2_health(owner_probe, initial_probe, interface_probe, handshake_
 def classify_service_absence(probe):
     return "free" if probe_ok(probe) and probe[1] == b"not-found\n" else "stop"
 
+def classify_os_release(raw):
+    try:
+        if not isinstance(raw, bytes) or not raw or not raw.endswith(b"\n") or b"\r" in raw:
+            raise ValueError("os release bytes")
+        text = raw.decode("ascii", errors="strict")
+        values = {}
+        for line in text.splitlines():
+            match = re.fullmatch(r"([A-Z][A-Z0-9_]*)=(?:\"([^\"\\]*)\"|([A-Za-z0-9._+:/() -]+))", line)
+            if match is None or match.group(1) in values:
+                raise ValueError("os release syntax")
+            values[match.group(1)] = match.group(2) if match.group(2) is not None else match.group(3)
+        if "ID" not in values or "VERSION_ID" not in values:
+            raise ValueError("os release identity")
+    except (UnicodeDecodeError, ValueError, TypeError):
+        return "stop", b"malformed-os-release"
+    if values["ID"] != "debian" or values["VERSION_ID"] != "12":
+        return "stop", b"unsupported-os"
+    return "pass", b"debian:12"
+
+def local_host_identity(expected_host):
+    ensure_work_budget()
+    try:
+        expected_address = ipaddress.ip_address(expected_host)
+    except ValueError:
+        expected_address = None
+    probe = command([HOSTNAME, "-I"] if expected_address is not None else [HOSTNAME])
+    if not probe_ok(probe) or not probe[1].endswith(b"\n") or b"\r" in probe[1]:
+        raise ValueError("host identity unavailable")
+    text = probe[1][:-1].decode("ascii", errors="strict")
+    if expected_address is not None:
+        addresses = []
+        for token in text.split():
+            addresses.append(ipaddress.ip_address(token))
+        if expected_address not in addresses:
+            raise ValueError("host identity mismatch")
+        return expected_host
+    if EXPECTED_HOST_RE.fullmatch(text) is None:
+        raise ValueError("host identity malformed")
+    return text
+
 def observed(state, raw):
     if state not in STATES:
         raise ValueError("invalid observation state")
@@ -754,6 +910,10 @@ def observed(state, raw):
     return state, raw
 
 def resource_path_state(path):
+    try:
+        ensure_work_budget()
+    except TimeoutError:
+        return observed("stop", "work_budget_exceeded")
     candidate = pathlib.Path(path)
     try:
         os.lstat(candidate)
@@ -770,6 +930,10 @@ def scan_recovery_markers(roots):
     pending = [pathlib.Path(root) for root in roots]
     try:
         while pending:
+            try:
+                ensure_work_budget()
+            except TimeoutError:
+                return "stop", "work_budget_exceeded"
             root = pending.pop()
             try:
                 iterator = os.scandir(root)
@@ -777,6 +941,10 @@ def scan_recovery_markers(roots):
                 continue
             with iterator:
                 for entry in iterator:
+                    try:
+                        ensure_work_budget()
+                    except TimeoutError:
+                        return "stop", "work_budget_exceeded"
                     entry_count += 1
                     if MAX_RECOVERY_ENTRIES < entry_count:
                         return "stop", "entry_limit_exceeded"
@@ -793,17 +961,17 @@ def scan_recovery_markers(roots):
         return "stop", type(exc).__name__
 
 def production_observations():
+    ensure_work_budget()
     values = {}
-    os_release = pathlib.Path("/etc/os-release")
     try:
-        os_raw = os_release.read_bytes()[:MAXIMUM_OUTPUT_BYTES + 1]
-        os_ok = os.name == "posix" and os_release.is_file() and len(os_raw) <= MAXIMUM_OUTPUT_BYTES
+        os_raw = bounded_file_bytes("/etc/os-release")
+        os_state, os_evidence = classify_os_release(os_raw)
     except OSError as exc:
-        os_raw, os_ok = type(exc).__name__.encode("ascii"), False
-    values["os_compatibility"] = observed("pass" if os_ok else "stop", os_raw)
+        os_state, os_evidence = "stop", type(exc).__name__.encode("ascii")
+    values["os_compatibility"] = observed(os_state, os_evidence)
     machine = os.uname().machine if hasattr(os, "uname") else "unknown"
     values["architecture"] = observed("pass" if machine in {"x86_64", "amd64"} else "stop", machine)
-    py_probe = command(["python3.12", "--version"])
+    py_probe = command([PYTHON_3_12, "-I", "-B", "--version"])
     values["python_3_12"] = observed("pass" if probe_ok(py_probe) and py_probe[1].startswith(b"Python 3.12.") else "stop", py_probe[1] + py_probe[2])
     try:
         free_bytes = shutil.disk_usage("/var/lib").free
@@ -819,7 +987,7 @@ def production_observations():
     values["database_state"] = observed("present" if database_ok else "stop", f"file-readable:{database_ok}")
     backup_ok = backup_root.is_dir() and os.access(backup_root, os.W_OK) and database_ok
     values["backup_capability"] = observed("pass" if backup_ok else "stop", f"backup-ready:{backup_ok}")
-    systemd_probe = command(["systemctl", "is-system-running"])
+    systemd_probe = command([SYSTEMCTL, "is-system-running"])
     values["service_capability"] = observed(classify_systemd_capability(systemd_probe), systemd_probe[1] + systemd_probe[2])
     system_docker_source = production_container_source("system-docker")
     dedicated_docker_source = production_container_source("spain-docker")
@@ -832,7 +1000,7 @@ def production_observations():
     )
     values["container_capability"] = observed(container_capability, inventory_raw)
     values["container_name"] = observed(container_name, inventory_raw)
-    awg_owner = command(["systemctl", "show", CURRENT_AWG2_OWNER_UNIT, "--property=ActiveState", "--value"])
+    awg_owner = command([SYSTEMCTL, "show", CURRENT_AWG2_OWNER_UNIT, "--property=ActiveState", "--value"])
     awg_unit = command([SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "inspect", "--format", "{{.State.Running}}|{{.State.Pid}}|{{.RestartCount}}", CURRENT_AWG2_CONTAINER])
     awg_container_state = parse_awg2_container_probe(awg_unit)
     if awg_container_state is None:
@@ -840,37 +1008,39 @@ def production_observations():
         awg_handshakes = (125, b"", b"", "incomplete_output")
     else:
         netns = f"--net=/proc/{awg_container_state[0]}/ns/net"
-        awg_link = command(["nsenter", netns, "ip", "-o", "link", "show", "dev", CURRENT_AWG2_INTERFACE])
-        awg_handshakes = command(["nsenter", netns, "/usr/bin/awg", "show", CURRENT_AWG2_INTERFACE, "latest-handshakes"])
+        awg_link = command([NSENTER, netns, IP, "-o", "link", "show", "dev", CURRENT_AWG2_INTERFACE])
+        awg_handshakes = command([NSENTER, netns, "/usr/bin/awg", "show", CURRENT_AWG2_INTERFACE, "latest-handshakes"])
     awg_final = command([SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "inspect", "--format", "{{.State.Running}}|{{.State.Pid}}|{{.RestartCount}}", CURRENT_AWG2_CONTAINER])
-    values["awg2_health"] = observed(classify_awg2_health(awg_owner, awg_unit, awg_link, awg_handshakes, awg_final, int(time.time())), awg_owner[1] + awg_owner[2] + awg_unit[1] + awg_unit[2] + awg_link[1] + awg_link[2] + awg_handshakes[1] + awg_handshakes[2] + awg_final[1] + awg_final[2])
-    bot_active_probe = command(["systemctl", "show", CURRENT_BOT_UNIT, "--property=ActiveState", "--value"])
-    bot_enabled_probe = command(["systemctl", "show", CURRENT_BOT_UNIT, "--property=UnitFileState", "--value"])
+    awg_owner_final = command([SYSTEMCTL, "show", CURRENT_AWG2_OWNER_UNIT, "--property=ActiveState", "--value"])
+    values["awg2_health"] = observed(classify_awg2_health(awg_owner, awg_unit, awg_link, awg_handshakes, awg_final, awg_owner_final, int(time.time())), awg_owner[1] + awg_owner[2] + awg_unit[1] + awg_unit[2] + awg_link[1] + awg_link[2] + awg_handshakes[1] + awg_handshakes[2] + awg_final[1] + awg_final[2] + awg_owner_final[1] + awg_owner_final[2])
+    bot_active_probe = command([SYSTEMCTL, "show", CURRENT_BOT_UNIT, "--property=ActiveState", "--value"])
+    bot_enabled_probe = command([SYSTEMCTL, "show", CURRENT_BOT_UNIT, "--property=UnitFileState", "--value"])
     values["telegram_prerequisites"] = observed(classify_phase13_bot_unit(bot_active_probe, bot_enabled_probe), bot_active_probe[1] + bot_active_probe[2] + bot_enabled_probe[1] + bot_enabled_probe[2])
-    awg3_probe = command(["ip", "link", "show", "awg3"])
-    bridge_probe = command(["ip", "link", "show", "amn2sp3br0"])
+    awg3_probe = command([IP, "link", "show", "awg3"])
+    bridge_probe = command([IP, "link", "show", "amn2sp3br0"])
     values["interface_awg3"] = observed(classify_ip_link(awg3_probe, "awg3"), awg3_probe[1] + awg3_probe[2])
     values["bridge_amn2sp3br0"] = observed(classify_ip_link(bridge_probe, "amn2sp3br0"), bridge_probe[1] + bridge_probe[2])
-    socket_probe = command(["ss", "-H", "-lun"])
+    socket_probe = command([SS, "-H", "-lun"])
     values["udp_30002"] = observed(classify_udp_port(socket_probe), socket_probe[1] + socket_probe[2])
-    route_probe = command(["ip", "-j", "route", "show", "table", "all"])
+    route_probe = command([IP, "-j", "route", "show", "table", "all"])
     route_state, vpn_state, container_cidr_state = classify_routes(route_probe)
     values["routes"] = observed(route_state, route_probe[1] + route_probe[2])
     values["vpn_cidr_10_212_13_0_24"] = observed(vpn_state, route_probe[1] + route_probe[2])
     combined_container_cidr_state = "free" if container_cidr_state == "free" and docker_cidr_state == "free" else "stop"
     values["container_cidr_172_29_252_0_28"] = observed(combined_container_cidr_state, route_probe[1] + route_probe[2] + inventory_raw)
-    nft_probe = command(["nft", "-j", "list", "ruleset"])
-    iptables_probe = command(["iptables-save"])
-    iptables_legacy_probe = command(["iptables-legacy-save"])
+    nft_probe = command([NFT, "-j", "list", "ruleset"])
+    iptables_probe = command([IPTABLES_SAVE])
+    iptables_legacy_probe = command([IPTABLES_LEGACY_SAVE])
     firewall_raw = nft_probe[1] + nft_probe[2] + iptables_probe[1] + iptables_probe[2] + iptables_legacy_probe[1] + iptables_legacy_probe[2]
     values["firewall"] = observed(classify_firewall(nft_probe, iptables_probe, iptables_legacy_probe), firewall_raw)
     values["config_path"] = resource_path_state("/var/lib/amn2-spain/awg3/awg3.conf")
     values["state_root"] = resource_path_state("/var/lib/amn2-spain/awg3")
-    service_probe = command(["systemctl", "show", "amn2-spain-awg3.service", "--property=LoadState", "--value"])
+    service_probe = command([SYSTEMCTL, "show", "amn2-spain-awg3.service", "--property=LoadState", "--value"])
     values["service_name"] = observed(classify_service_absence(service_probe), service_probe[1] + service_probe[2])
     marker_state, marker_raw = scan_recovery_markers((pathlib.Path("/run/amn2-spain"), pathlib.Path("/var/lib/amn2-spain")))
     values["recovery_markers_phase14_phase15"] = observed(marker_state, marker_raw)
-    return socket.getfqdn(), values
+    ensure_work_budget()
+    return values
 
 def build_document(*, package_id, manifest_sha256, collector_sha256, claim_id, expected_host, host_identity, raw_values, observed_at):
     if not validate_envelope(package_id, manifest_sha256, collector_sha256, claim_id, expected_host):
@@ -912,8 +1082,11 @@ try:
     expected_host = sys.argv[5]
     if not validate_envelope(package_id, manifest_sha256, collector_sha256, claim_id, expected_host):
         raise ValueError("preflight identity binding")
-    host_identity, raw_values = production_observations()
+    host_identity = local_host_identity(expected_host)
+    raw_values = production_observations()
+    ensure_work_budget()
     document = build_document(package_id=package_id, manifest_sha256=manifest_sha256, collector_sha256=collector_sha256, claim_id=claim_id, expected_host=expected_host, host_identity=host_identity, raw_values=raw_values, observed_at=datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+    ensure_work_budget()
     sys.stdout.buffer.write(json.dumps(document, ensure_ascii=True, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8") + b"\n")
 except Exception as exc:
     sys.stderr.write("collector_failed:" + type(exc).__name__ + "\n")
