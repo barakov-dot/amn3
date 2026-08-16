@@ -15,6 +15,7 @@ $script:Phase15ClaimSchema = 'amn2.phase15.readonly-preflight-claim.v1'
 $script:Phase15CollectorSchema = 'amn2.phase15.spain-readonly-collector.v1'
 $script:Phase15EvidenceSchema = 'amn2.phase15.readonly-preflight-evidence.v1'
 $script:Phase15FailureSchema = 'amn2.phase15.readonly-preflight-failure.v1'
+$script:Phase15ProductionStateRoot = 'C:\ProgramData\AMN2\phase15\readonly-preflight'
 $script:Phase15ObservationNames = @(
     'application_state','architecture','awg2_health','backup_capability','bridge_amn2sp3br0',
     'config_path','container_capability','container_cidr_172_29_252_0_28','container_name',
@@ -91,6 +92,11 @@ function ConvertFrom-Phase15JsonFile {
     return ConvertFrom-Phase15CanonicalJsonFile -Path $Path
 }
 
+function Read-Phase15FutureClaim {
+    param([Parameter(Mandatory)][string]$ClaimPath)
+    return ConvertFrom-Phase15CanonicalJsonFile -Path $ClaimPath
+}
+
 function Test-Phase15ExpectedHost {
     param([Parameter(Mandatory)][string]$ExpectedHost)
     return $ExpectedHost -cmatch '^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$'
@@ -115,8 +121,7 @@ function Test-Phase15UtcTimestamp {
 
 function Test-Phase15FutureClaim {
     param(
-        [Parameter(Mandatory)][string]$ClaimPath,
-        [string]$LifecycleRoot,
+        [Parameter(Mandatory)][object]$Claim,
         [Parameter(Mandatory)][string]$ExpectedPackageId,
         [Parameter(Mandatory)][string]$ExpectedManifestSha256,
         [Parameter(Mandatory)][string]$ExpectedCollectorSha256,
@@ -125,21 +130,18 @@ function Test-Phase15FutureClaim {
     if ($ExpectedPackageId -cne $script:Phase15PackageId) { return $false }
     if ($ExpectedManifestSha256 -cnotmatch '^[0-9a-f]{64}$' -or $ExpectedCollectorSha256 -cnotmatch '^[0-9a-f]{64}$') { return $false }
     if (-not (Test-Phase15ExpectedHost -ExpectedHost $ExpectedHost)) { return $false }
-    $claim = ConvertFrom-Phase15CanonicalJsonFile -Path $ClaimPath
-    if ($null -eq $claim) { return $false }
     $required = @('claim_id','collector_sha256','consumed_at','expected_host','expires_at','future_gate','issued_at','manifest_sha256','package_id','schema','status')
-    if (-not (Test-Phase15ExactProperties -Value $claim -Required $required)) { return $false }
-    if ($claim.schema -cne $script:Phase15ClaimSchema -or $claim.package_id -cne $ExpectedPackageId) { return $false }
-    if ($claim.manifest_sha256 -cne $ExpectedManifestSha256 -or $claim.collector_sha256 -cne $ExpectedCollectorSha256) { return $false }
-    if ($claim.expected_host -cne $ExpectedHost -or $claim.claim_id -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$') { return $false }
-    if (-not [string]::IsNullOrWhiteSpace($LifecycleRoot)) {
-        try { $lifecyclePath = Get-Phase15LifecyclePath -LifecycleRoot $LifecycleRoot -ClaimId $claim.claim_id } catch { return $false }
-        if (Test-Path -LiteralPath $lifecyclePath) { return $false }
+    if (-not (Test-Phase15ExactProperties -Value $Claim -Required $required)) { return $false }
+    foreach ($field in @('claim_id','collector_sha256','expected_host','expires_at','future_gate','issued_at','manifest_sha256','package_id','schema','status')) {
+        if ($Claim.$field -isnot [string]) { return $false }
     }
-    if ($claim.future_gate -cne 'PREFLIGHT' -or $claim.status -cne 'issued' -or $null -ne $claim.consumed_at) { return $false }
-    if (-not (Test-Phase15UtcTimestamp -Value $claim.issued_at) -or -not (Test-Phase15UtcTimestamp -Value $claim.expires_at)) { return $false }
-    $issued = [DateTimeOffset]::ParseExact($claim.issued_at, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
-    $expires = [DateTimeOffset]::ParseExact($claim.expires_at, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
+    if ($Claim.schema -cne $script:Phase15ClaimSchema -or $Claim.package_id -cne $ExpectedPackageId) { return $false }
+    if ($Claim.manifest_sha256 -cne $ExpectedManifestSha256 -or $Claim.collector_sha256 -cne $ExpectedCollectorSha256) { return $false }
+    if ($Claim.expected_host -cne $ExpectedHost -or $Claim.claim_id -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$') { return $false }
+    if ($Claim.future_gate -cne 'PREFLIGHT' -or $Claim.status -cne 'issued' -or $null -ne $Claim.consumed_at) { return $false }
+    if (-not (Test-Phase15UtcTimestamp -Value $Claim.issued_at) -or -not (Test-Phase15UtcTimestamp -Value $Claim.expires_at)) { return $false }
+    $issued = [DateTimeOffset]::ParseExact($Claim.issued_at, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
+    $expires = [DateTimeOffset]::ParseExact($Claim.expires_at, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
     $now = [DateTimeOffset]::UtcNow
     if ($issued -ge $expires -or $now -lt $issued -or $now -ge $expires) { return $false }
     return $true
@@ -156,6 +158,9 @@ function Test-Phase15CollectorDocument {
     try {
         $required = @('blocking_reasons','claim_id','collector_sha256','decision','host_identity','manifest_sha256','observed_at','observations','package_id','safety','schema')
         if (-not (Test-Phase15ExactProperties -Value $Document -Required $required)) { return $false }
+        foreach ($field in @('claim_id','collector_sha256','decision','host_identity','manifest_sha256','observed_at','package_id','schema')) {
+            if ($Document.$field -isnot [string]) { return $false }
+        }
         if ($Document.schema -cne $script:Phase15CollectorSchema -or $Document.package_id -cne $script:Phase15PackageId) { return $false }
         if ($ExpectedManifestSha256 -cnotmatch '^[0-9a-f]{64}$' -or $ExpectedCollectorSha256 -cnotmatch '^[0-9a-f]{64}$') { return $false }
         if ($Document.manifest_sha256 -isnot [string] -or $Document.collector_sha256 -isnot [string]) { return $false }
@@ -330,6 +335,10 @@ function Get-Phase15LifecyclePath {
     return $path
 }
 
+function Get-Phase15ProductionStateRoot {
+    return $script:Phase15ProductionStateRoot
+}
+
 function Reserve-Phase15Claim {
     param([Parameter(Mandatory)][string]$LifecycleRoot, [Parameter(Mandatory)][string]$ClaimId, [Parameter(Mandatory)][string]$ReservedAt)
     if ($ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$' -or -not (Test-Phase15UtcTimestamp -Value $ReservedAt)) { throw 'claim_invalid' }
@@ -339,6 +348,36 @@ function Reserve-Phase15Claim {
     $lifecyclePath = Get-Phase15LifecyclePath -LifecycleRoot $LifecycleRoot -ClaimId $ClaimId
     Write-Phase15CreateNewJson -Path $lifecyclePath -Value ([ordered]@{ claim_id = $ClaimId; reason_code = 'not_applicable'; reserved_at = $ReservedAt; status = 'reserved' })
     return $lifecyclePath
+}
+
+function Reserve-Phase15OutcomeSlot {
+    param([Parameter(Mandatory)][string]$OutcomePath, [Parameter(Mandatory)][string]$ClaimId, [Parameter(Mandatory)][string]$ReservedAt)
+    if ($ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$' -or -not (Test-Phase15UtcTimestamp -Value $ReservedAt)) { throw 'outcome_reservation_invalid' }
+    $fullPath = [IO.Path]::GetFullPath($OutcomePath)
+    $parent = [IO.Path]::GetDirectoryName($fullPath)
+    if ([string]::IsNullOrWhiteSpace($parent) -or -not (Test-Path -LiteralPath $parent -PathType Container)) { throw 'outcome_reservation_invalid' }
+    Write-Phase15CreateNewJson -Path $fullPath -Value ([ordered]@{ claim_id = $ClaimId; reserved_at = $ReservedAt; status = 'reserved' })
+    return $fullPath
+}
+
+function Test-Phase15OutcomeOwnership {
+    param([Parameter(Mandatory)][string]$ReservationPath, [Parameter(Mandatory)][string]$ClaimId)
+    if ($ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$') { return $false }
+    $reservation = ConvertFrom-Phase15CanonicalJsonFile -Path $ReservationPath
+    if ($null -eq $reservation -or -not (Test-Phase15ExactProperties -Value $reservation -Required @('claim_id','reserved_at','status'))) { return $false }
+    return (
+        $reservation.claim_id -is [string] -and $reservation.claim_id -ceq $ClaimId -and
+        $reservation.status -is [string] -and $reservation.status -ceq 'reserved' -and
+        $reservation.reserved_at -is [string] -and (Test-Phase15UtcTimestamp -Value $reservation.reserved_at)
+    )
+}
+
+function Release-Phase15OutcomeSlot {
+    param([Parameter(Mandatory)][string]$ReservationPath, [Parameter(Mandatory)][string]$ClaimId)
+    if (Test-Phase15OutcomeOwnership -ReservationPath $ReservationPath -ClaimId $ClaimId) {
+        [IO.File]::Delete($ReservationPath)
+        if (Test-Path -LiteralPath $ReservationPath) { throw 'outcome_reservation_release_failed' }
+    }
 }
 
 function Set-Phase15ClaimTerminal {
@@ -369,6 +408,7 @@ function Set-Phase15ClaimTerminal {
 function Publish-Phase15TerminalOutcome {
     param(
         [Parameter(Mandatory)][string]$LifecyclePath,
+        [Parameter(Mandatory)][string]$ReservationPath,
         [Parameter(Mandatory)][string]$OutcomePath,
         [Parameter(Mandatory)][string]$ClaimId,
         [Parameter(Mandatory)][ValidateSet('completed','failed')][string]$Status,
@@ -376,14 +416,17 @@ function Publish-Phase15TerminalOutcome {
         [Parameter(Mandatory)][string]$ReasonCode,
         [Parameter(Mandatory)][object]$Outcome
     )
-    if (Test-Path -LiteralPath $OutcomePath) { throw 'outcome_exists' }
+    if ([IO.Path]::GetFullPath($ReservationPath) -cne [IO.Path]::GetFullPath($OutcomePath) -or -not (Test-Phase15OutcomeOwnership -ReservationPath $ReservationPath -ClaimId $ClaimId)) { throw 'outcome_reservation_invalid' }
     $pendingPath = $OutcomePath + '.pending-' + [Guid]::NewGuid().ToString('N')
+    $backupPath = $OutcomePath + '.reservation-backup-' + [Guid]::NewGuid().ToString('N')
     try {
         Write-Phase15CreateNewJson -Path $pendingPath -Value $Outcome
         [void](Set-Phase15ClaimTerminal -LifecyclePath $LifecyclePath -ClaimId $ClaimId -Status $Status -EndedAt $EndedAt -ReasonCode $ReasonCode)
-        [IO.File]::Move($pendingPath, $OutcomePath)
+        if (-not (Test-Phase15OutcomeOwnership -ReservationPath $ReservationPath -ClaimId $ClaimId)) { throw 'outcome_reservation_invalid' }
+        [IO.File]::Replace($pendingPath, $OutcomePath, $backupPath, $true)
     } finally {
         if (Test-Path -LiteralPath $pendingPath -PathType Leaf) { Remove-Item -LiteralPath $pendingPath -Force }
+        if (Test-Path -LiteralPath $backupPath -PathType Leaf) { Remove-Item -LiteralPath $backupPath -Force }
     }
 }
 
@@ -408,10 +451,8 @@ function New-Phase15FailureOutcome {
 function Invoke-Phase15RunnerMain {
     if (-not $FutureAuthorization -or [string]::IsNullOrWhiteSpace($FutureClaimPath)) { throw 'future_claim_required' }
     if ([string]::IsNullOrWhiteSpace($PackageRoot) -or [string]::IsNullOrWhiteSpace($OutcomePath) -or -not (Test-Phase15ExpectedHost -ExpectedHost $ExpectedHost)) { throw 'runner_arguments_invalid' }
-    if (Test-Path -LiteralPath $OutcomePath) { throw 'outcome_exists' }
     $outcomeParent = Split-Path -Parent ([IO.Path]::GetFullPath($OutcomePath))
     if (-not (Test-Path -LiteralPath $outcomeParent -PathType Container)) { throw 'runner_arguments_invalid' }
-    $lifecycleRoot = Join-Path $outcomeParent '.phase15-claim-lifecycle'
     $manifestPath = Join-Path $PackageRoot 'manifest.json'
     $collectorPath = Join-Path $PackageRoot 'tooling\scripts\vps\phase15_spain_readonly_preflight_remote.sh'
     $manifest = ConvertFrom-Phase15CanonicalJsonFile -Path $manifestPath
@@ -420,30 +461,41 @@ function Invoke-Phase15RunnerMain {
     $collectorSha256 = Get-Phase15FileSha256 -Path $collectorPath
     $entry = @($manifest.entries | Where-Object { $_.path -ceq 'tooling/scripts/vps/phase15_spain_readonly_preflight_remote.sh' })
     if ($entry.Count -ne 1 -or $entry[0].sha256 -cne $collectorSha256) { throw 'collector_checksum_invalid' }
-    if (-not (Test-Phase15FutureClaim -ClaimPath $FutureClaimPath -LifecycleRoot $lifecycleRoot -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost)) { throw 'claim_invalid' }
-    $claim = ConvertFrom-Phase15CanonicalJsonFile -Path $FutureClaimPath
+    $claim = Read-Phase15FutureClaim -ClaimPath $FutureClaimPath
+    if ($null -eq $claim -or -not (Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost)) { throw 'claim_invalid' }
     $startedAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+    $stateRoot = Get-Phase15ProductionStateRoot
+    if (-not (Test-Path -LiteralPath $stateRoot)) { [void][IO.Directory]::CreateDirectory($stateRoot) }
+    $stateRootItem = Get-Item -LiteralPath $stateRoot -Force
+    if (($stateRootItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'claim_lifecycle_invalid' }
+    $lifecycleRoot = Join-Path $stateRoot 'claims'
     if (-not (Test-Path -LiteralPath $lifecycleRoot)) { [void][IO.Directory]::CreateDirectory($lifecycleRoot) }
-    $lifecyclePath = Reserve-Phase15Claim -LifecycleRoot $lifecycleRoot -ClaimId $claim.claim_id -ReservedAt $startedAt
-    $sshUsed = $false
-    $failureReason = 'transport_failed'
+    $outcomeReservationPath = Reserve-Phase15OutcomeSlot -OutcomePath $OutcomePath -ClaimId $claim.claim_id -ReservedAt $startedAt
+    $lifecyclePath = $null
     try {
-        $collectorBytes = [IO.File]::ReadAllBytes($collectorPath)
-        $sshUsed = $true
-        $rawDocument = Invoke-Phase15OneSshTransport -ExpectedHost $ExpectedHost -CollectorBytes $collectorBytes -ClaimId $claim.claim_id -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256
-        $document = ConvertFrom-Phase15CanonicalJsonText -Text $rawDocument
-        if ($null -eq $document) { $failureReason = 'schema_invalid'; throw 'collector_schema_invalid' }
-        if (-not (Test-Phase15CollectorDocument -Document $document -ExpectedHost $ExpectedHost -ExpectedClaimId $claim.claim_id -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256)) { $failureReason = 'schema_invalid'; throw 'collector_schema_invalid' }
-        $endedAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
-        $evidence = ConvertTo-Phase15Evidence -Document $document -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -StartedAt $startedAt -EndedAt $endedAt
-        Publish-Phase15TerminalOutcome -LifecyclePath $lifecyclePath -OutcomePath $OutcomePath -ClaimId $claim.claim_id -Status 'completed' -EndedAt $endedAt -ReasonCode 'not_applicable' -Outcome $evidence
-    } catch {
-        $endedAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
-        if (-not (Test-Path -LiteralPath $OutcomePath)) {
-            $failure = New-Phase15FailureOutcome -ReasonCode $failureReason -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -StartedAt $startedAt -EndedAt $endedAt -SshUsed $sshUsed
-            Publish-Phase15TerminalOutcome -LifecyclePath $lifecyclePath -OutcomePath $OutcomePath -ClaimId $claim.claim_id -Status 'failed' -EndedAt $endedAt -ReasonCode $failureReason -Outcome $failure
+        $lifecyclePath = Reserve-Phase15Claim -LifecycleRoot $lifecycleRoot -ClaimId $claim.claim_id -ReservedAt $startedAt
+        $sshUsed = $false
+        $failureReason = 'transport_failed'
+        try {
+            $collectorBytes = [IO.File]::ReadAllBytes($collectorPath)
+            $sshUsed = $true
+            $rawDocument = Invoke-Phase15OneSshTransport -ExpectedHost $ExpectedHost -CollectorBytes $collectorBytes -ClaimId $claim.claim_id -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256
+            $document = ConvertFrom-Phase15CanonicalJsonText -Text $rawDocument
+            if ($null -eq $document) { $failureReason = 'schema_invalid'; throw 'collector_schema_invalid' }
+            if (-not (Test-Phase15CollectorDocument -Document $document -ExpectedHost $ExpectedHost -ExpectedClaimId $claim.claim_id -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256)) { $failureReason = 'schema_invalid'; throw 'collector_schema_invalid' }
+            $endedAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+            $evidence = ConvertTo-Phase15Evidence -Document $document -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -StartedAt $startedAt -EndedAt $endedAt
+            Publish-Phase15TerminalOutcome -LifecyclePath $lifecyclePath -ReservationPath $outcomeReservationPath -OutcomePath $OutcomePath -ClaimId $claim.claim_id -Status 'completed' -EndedAt $endedAt -ReasonCode 'not_applicable' -Outcome $evidence
+        } catch {
+            $endedAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+            if (Test-Phase15OutcomeOwnership -ReservationPath $outcomeReservationPath -ClaimId $claim.claim_id) {
+                $failure = New-Phase15FailureOutcome -ReasonCode $failureReason -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -StartedAt $startedAt -EndedAt $endedAt -SshUsed $sshUsed
+                Publish-Phase15TerminalOutcome -LifecyclePath $lifecyclePath -ReservationPath $outcomeReservationPath -OutcomePath $OutcomePath -ClaimId $claim.claim_id -Status 'failed' -EndedAt $endedAt -ReasonCode $failureReason -Outcome $failure
+            }
+            throw
         }
-        throw
+    } finally {
+        Release-Phase15OutcomeSlot -ReservationPath $outcomeReservationPath -ClaimId $claim.claim_id
     }
 }
 

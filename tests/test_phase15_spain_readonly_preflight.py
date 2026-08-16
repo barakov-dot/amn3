@@ -234,10 +234,16 @@ def test_container_inventory_includes_stopped_objects_and_errors_fail_closed():
     stopped_conflict = classify([("docker", (0, b"amn2-spain-awg3\n", b"", "success"))])
     clean = classify([("podman", (0, b"other-container\n", b"", "success"))])
     errored = classify([("docker", (125, b"", b"daemon unavailable", "command_failed"))])
+    stderr_on_success = classify([("docker", (0, b"other-container\n", b"warning\n", "success"))])
+    malformed_name = classify([("docker", (0, b"valid-name\ninvalid name\n", b"", "success"))])
+    duplicate_name = classify([("docker", (0, b"same-name\nsame-name\n", b"", "success"))])
 
     assert stopped_conflict == ("pass", "stop")
     assert clean == ("pass", "free")
     assert errored == ("stop", "stop")
+    assert stderr_on_success == ("stop", "stop")
+    assert malformed_name == ("stop", "stop")
+    assert duplicate_name == ("stop", "stop")
     assert '[engine, "ps", "-a", "--format", "{{.Names}}"]' in require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
 
 
@@ -261,6 +267,38 @@ def test_firewall_fallback_and_parsing_are_fail_closed():
     assert classify(unavailable, clean_iptables) == "pass"
     assert classify(permission, clean_iptables) == "stop"
     assert classify(malformed, None) == "stop"
+    assert classify((0, b'{"nftables":[],"nftables":[]}\n', b"", "success"), None) == "stop"
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        b'{"nftables":[{"unknown":{"family":"inet"}}]}\n',
+        b'{"nftables":[{"rule":{"expr":[{"match":{"left":{"payload":{"field":"dport","protocol":"udp"}},"op":"==","right":{"range":[30000,30005]}}}]}}]}\n',
+        b'{"nftables":[{"rule":{"expr":[{"match":{"left":{"payload":{"field":"saddr","protocol":"ip"}},"op":"==","right":{"prefix":{"addr":"10.212.13.128","len":25}}}}]}}]}\n',
+        b'{"nftables":[{"rule":{"expr":[{"match":{"left":{"meta":{"key":"iifname"}},"op":"==","right":"amn2sp3br0"}}]}}]}\n',
+    ],
+)
+def test_nft_structure_ranges_interfaces_and_prefixes_fail_closed_or_conflict(payload: bytes):
+    classify = collector_helper("classify_firewall")
+
+    assert classify((0, payload, b"", "success"), None) == "stop"
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        b"*filter\n:INPUT ACCEPT [0:0]\n-A INPUT -p udp --dport 30000:30005 -j ACCEPT\nCOMMIT\n",
+        b"*filter\n:INPUT ACCEPT [0:0]\n-A INPUT -s 172.29.252.8/29 -j ACCEPT\nCOMMIT\n",
+        b"*filter\n:INPUT ACCEPT [0:0]\n-A INPUT -i amn2sp3br0 -j ACCEPT\nCOMMIT\n",
+        b"*filter\n:INPUT ACCEPT [0:0]\n-A INPUT --unknown-option value -j ACCEPT\nCOMMIT\n",
+    ],
+)
+def test_iptables_save_ranges_networks_interfaces_and_unknown_syntax_stop(payload: bytes):
+    classify = collector_helper("classify_firewall")
+    unavailable = (127, b"", b"", "unavailable")
+
+    assert classify(unavailable, (0, payload, b"", "success")) == "stop"
 
 
 def test_route_overlap_udp_and_firewall_outputs_require_strict_parsing():
@@ -274,6 +312,16 @@ def test_route_overlap_udp_and_firewall_outputs_require_strict_parsing():
     assert classify_udp((0, b"UNCONN 0 0 0.0.0.0:30002 0.0.0.0:*\n", b"", success)) == "stop"
     assert classify_udp((0, b"malformed\n", b"", success)) == "stop"
     assert classify_udp((0, b"", b"", success)) == "free"
+    assert classify_udp((0, b"UNCONN 0 0 0.0.0.0:70000 0.0.0.0:*\n", b"", success)) == "stop"
+    assert classify_udp((0, b"UNCONN 0 0 0.0.0.0:30001 0.0.0.0:*\n", b"warning\n", success)) == "stop"
+
+
+def test_service_absence_requires_exact_stdout_and_empty_stderr():
+    classify = collector_helper("classify_service_absence")
+    assert classify((0, b"not-found\n", b"", "success")) == "free"
+    assert classify((0, b"not-found\n", b"warning\n", "success")) == "stop"
+    assert classify((0, b"not-found trailing\n", b"", "success")) == "stop"
+    assert classify((1, b"not-found\n", b"", "command_failed")) == "stop"
 
 
 @pytest.mark.parametrize(
@@ -300,12 +348,17 @@ def test_awg2_health_fails_closed_on_any_probe_error():
     classify = collector_helper("classify_awg2_health")
     failed = (1, b"", b"failed", "command_failed")
     good_unit = (0, b"active\n", b"", "success")
-    good_interface = (0, b"awg2\n", b"", "success")
+    good_interface = (0, b"7: awg2: <POINTOPOINT,UP>\n", b"", "success")
     fresh = (0, b"A" * 43 + b"=\t1699999940\n", b"", "success")
 
     assert classify(failed, good_interface, fresh, now_epoch=1_700_000_000) == "stop"
     assert classify(good_unit, failed, fresh, now_epoch=1_700_000_000) == "stop"
     assert classify(good_unit, good_interface, failed, now_epoch=1_700_000_000) == "stop"
+    assert classify((0, b"active\n", b"warning\n", "success"), good_interface, fresh, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_unit, (0, b"7: awg2: <POINTOPOINT,UP>\n", b"warning\n", "success"), fresh, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_unit, good_interface, (0, fresh[1], b"warning\n", "success"), now_epoch=1_700_000_000) == "stop"
+    assert classify(good_unit, (0, b"not-awg2\n", b"", "success"), fresh, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_unit, good_interface, (0, fresh[1].rstrip(b"\n"), b"", "success"), now_epoch=1_700_000_000) == "stop"
 
 
 def run_powershell(body: str):
@@ -330,9 +383,10 @@ def run_powershell(body: str):
 
 def test_runner_rejects_missing_future_claim_before_any_acceptance():
     result = run_powershell(
-        "$ok = Test-Phase15FutureClaim -ClaimPath 'Z:\\missing-phase15-claim.json' "
+        "$claim = Read-Phase15FutureClaim -ClaimPath 'Z:\\missing-phase15-claim.json'; "
+        "$ok = $null -ne $claim -and (Test-Phase15FutureClaim -Claim $claim "
         f"-ExpectedPackageId '{PACKAGE_ID}' -ExpectedManifestSha256 '{'a' * 64}' "
-        f"-ExpectedCollectorSha256 '{'b' * 64}' -ExpectedHost 'spain.test.invalid'; "
+        f"-ExpectedCollectorSha256 '{'b' * 64}' -ExpectedHost 'spain.test.invalid'); "
         "[Console]::Out.Write($ok.ToString().ToLowerInvariant())"
     )
 
@@ -364,10 +418,11 @@ def test_runner_acceptance_requires_package_collector_host_and_schema_binding(tm
     claim = valid_runner_claim(tmp_path)
     claim_path = str(claim).replace("'", "''")
     result = run_powershell(
-        f"$valid = Test-Phase15FutureClaim -ClaimPath '{claim_path}' -ExpectedPackageId '{PACKAGE_ID}' "
+        f"$claim = Read-Phase15FutureClaim -ClaimPath '{claim_path}'; "
+        f"$valid = Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId '{PACKAGE_ID}' "
         f"-ExpectedManifestSha256 '{'a' * 64}' -ExpectedCollectorSha256 '{'b' * 64}' "
         "-ExpectedHost 'spain.test.invalid'; "
-        f"$wrongHost = Test-Phase15FutureClaim -ClaimPath '{claim_path}' -ExpectedPackageId '{PACKAGE_ID}' "
+        f"$wrongHost = Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId '{PACKAGE_ID}' "
         f"-ExpectedManifestSha256 '{'a' * 64}' -ExpectedCollectorSha256 '{'b' * 64}' "
         "-ExpectedHost 'other.test.invalid'; "
         "[Console]::Out.Write(\"$($valid.ToString().ToLowerInvariant())|$($wrongHost.ToString().ToLowerInvariant())\")"
@@ -414,13 +469,81 @@ def test_runner_rejects_future_issued_or_noncanonical_claim(tmp_path: Path):
         f"-ExpectedCollectorSha256 '{'b' * 64}' -ExpectedHost 'spain.test.invalid'"
     )
     result = run_powershell(
-        f"$future = Test-Phase15FutureClaim -ClaimPath '{future_path}' {call}; "
-        f"$pretty = Test-Phase15FutureClaim -ClaimPath '{pretty_path}' {call}; "
+        f"$futureClaim = Read-Phase15FutureClaim -ClaimPath '{future_path}'; "
+        f"$prettyClaim = Read-Phase15FutureClaim -ClaimPath '{pretty_path}'; "
+        f"$future = $null -ne $futureClaim -and (Test-Phase15FutureClaim -Claim $futureClaim {call}); "
+        f"$pretty = $null -ne $prettyClaim -and (Test-Phase15FutureClaim -Claim $prettyClaim {call}); "
         "[Console]::Out.Write(\"$($future.ToString().ToLowerInvariant())|$($pretty.ToString().ToLowerInvariant())\")"
     )
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == "false|false"
+
+
+def test_runner_validates_one_immutable_claim_object_after_single_canonical_read(tmp_path: Path):
+    claim = valid_runner_claim(tmp_path)
+    claim_path = str(claim).replace("'", "''")
+    invalid = base64.b64encode(b'{"schema":"replaced-after-read"}\n').decode()
+    result = run_powershell(
+        f"$claim = Read-Phase15FutureClaim -ClaimPath '{claim_path}'; "
+        f"[IO.File]::WriteAllBytes('{claim_path}', [Convert]::FromBase64String('{invalid}')); "
+        f"$valid = Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId '{PACKAGE_ID}' "
+        f"-ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' "
+        "-ExpectedHost 'spain.test.invalid'; "
+        "[Console]::Out.Write($valid.ToString().ToLowerInvariant())"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true"
+    source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
+    main = source[source.index("function Invoke-Phase15RunnerMain") :]
+    assert main.count("Read-Phase15FutureClaim -ClaimPath $FutureClaimPath") == 1
+    assert "ConvertFrom-Phase15CanonicalJsonFile -Path $FutureClaimPath" not in main
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "schema",
+        "package_id",
+        "manifest_sha256",
+        "collector_sha256",
+        "expected_host",
+        "claim_id",
+        "future_gate",
+        "status",
+        "issued_at",
+        "expires_at",
+    ],
+)
+def test_runner_rejects_singleton_array_claim_scalars(tmp_path: Path, field: str):
+    claim_path = valid_runner_claim(tmp_path)
+    value = json.loads(claim_path.read_text(encoding="utf-8"))
+    canonical_scalar = {
+        "schema": "amn2.phase15.readonly-preflight-claim.v1",
+        "package_id": PACKAGE_ID,
+        "manifest_sha256": MANIFEST_SHA256,
+        "collector_sha256": COLLECTOR_SHA256,
+        "expected_host": "spain.test.invalid",
+        "claim_id": "phase15-preflight-test-001",
+        "future_gate": "PREFLIGHT",
+        "status": "issued",
+        "issued_at": "2025-08-11T11:00:00Z",
+        "expires_at": "2099-08-11T12:00:00Z",
+    }[field]
+    value[field] = [canonical_scalar]
+    claim_path.write_bytes((json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode())
+    escaped = str(claim_path).replace("'", "''")
+    result = run_powershell(
+        f"$claim = Read-Phase15FutureClaim -ClaimPath '{escaped}'; "
+        f"$valid = Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId '{PACKAGE_ID}' "
+        f"-ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' "
+        "-ExpectedHost 'spain.test.invalid'; "
+        "[Console]::Out.Write($valid.ToString().ToLowerInvariant())"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "false"
 
 
 def test_runner_builds_positional_remote_envelope_with_safe_option_boundary():
@@ -515,6 +638,14 @@ def test_runner_collector_validation_is_exact_and_reconstructs_allowlisted_canon
         "numeric_state",
         "manifest_mismatch",
         "collector_mismatch",
+        "array_schema",
+        "array_package_id",
+        "array_manifest_sha256",
+        "array_collector_sha256",
+        "array_host_identity",
+        "array_claim_id",
+        "array_observed_at",
+        "array_decision",
     ],
 )
 def test_runner_rejects_non_schema_equivalent_collector_documents(mutation: str):
@@ -551,6 +682,9 @@ def test_runner_rejects_non_schema_equivalent_collector_documents(mutation: str)
         document["manifest_sha256"] = "c" * 64
     elif mutation == "collector_mismatch":
         document["collector_sha256"] = "d" * 64
+    elif mutation.startswith("array_"):
+        field = mutation.removeprefix("array_")
+        document[field] = [document[field]]
     result = runner_document_result(
         document,
         f"$valid = Test-Phase15CollectorDocument -Document $document -ExpectedHost 'spain.test.invalid' -ExpectedClaimId 'phase15-preflight-test-001' -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}'; [Console]::Out.Write($valid.ToString().ToLowerInvariant())",
@@ -588,7 +722,8 @@ def test_runner_claim_reservation_is_create_new_and_terminal_transition_is_canon
         f"$null = [IO.Directory]::CreateDirectory('{lifecycle_root}'); "
         f"$lifecycle = Reserve-Phase15Claim -LifecycleRoot '{lifecycle_root}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z'; "
         f"$replayed = $false; try {{ Reserve-Phase15Claim -LifecycleRoot '{lifecycle_root}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:01Z' }} catch {{ $replayed = $true }}; "
-        f"$renamedAccepted = Test-Phase15FutureClaim -ClaimPath '{renamed_path}' -LifecycleRoot '{lifecycle_root}' -ExpectedPackageId '{PACKAGE_ID}' -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid'; "
+        f"$renamedClaim = Read-Phase15FutureClaim -ClaimPath '{renamed_path}'; "
+        f"$renamedAccepted = Test-Phase15FutureClaim -Claim $renamedClaim -ExpectedPackageId '{PACKAGE_ID}' -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid'; "
         "$reserved = [IO.File]::ReadAllText($lifecycle); "
         "$null = Set-Phase15ClaimTerminal -LifecyclePath $lifecycle -ClaimId 'phase15-preflight-test-001' -Status 'completed' -EndedAt '2026-08-16T00:00:02Z' -ReasonCode 'not_applicable'; "
         "$terminal = [IO.File]::ReadAllText($lifecycle); "
@@ -598,7 +733,7 @@ def test_runner_claim_reservation_is_create_new_and_terminal_transition_is_canon
     assert result.returncode == 0, result.stderr
     replayed, renamed_accepted, lifecycle_path, reserved_raw, terminal_raw = result.stdout.split("|", 4)
     assert replayed == "true"
-    assert renamed_accepted == "false"
+    assert renamed_accepted == "true"
     assert Path(lifecycle_path).parent == tmp_path / "lifecycle"
     assert Path(lifecycle_path).name == "phase15-preflight-test-001.json"
     reserved = json.loads(reserved_raw)
@@ -625,15 +760,48 @@ def test_lifecycle_paths_are_collision_safe_and_claim_id_scoped(tmp_path: Path):
     assert {first.name, second.name} == {"phase15-preflight-test-001.json", "phase15-preflight-test-002.json"}
 
 
+def test_production_lifecycle_root_is_stable_and_not_derived_from_user_paths(tmp_path: Path):
+    first_cwd = str(tmp_path).replace("'", "''")
+    second_cwd = str(tmp_path / "other").replace("'", "''")
+    result = run_powershell(
+        f"$null = [IO.Directory]::CreateDirectory('{second_cwd}'); "
+        f"Set-Location '{first_cwd}'; $first = Get-Phase15ProductionStateRoot; "
+        f"Set-Location '{second_cwd}'; $second = Get-Phase15ProductionStateRoot; "
+        "[Console]::Out.Write(\"$first|$second\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    first, second = result.stdout.split("|", 1)
+    assert first == second == r"C:\ProgramData\AMN2\phase15\readonly-preflight"
+
+
+def test_outcome_slot_is_atomically_reserved_and_claim_owned(tmp_path: Path):
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        f"$reservation = Reserve-Phase15OutcomeSlot -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z'; "
+        "$secondRejected = $false; try { "
+        f"Reserve-Phase15OutcomeSlot -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-002' -ReservedAt '2026-08-16T00:00:01Z' "
+        "} catch { $secondRejected = $true }; "
+        "$firstOwner = Test-Phase15OutcomeOwnership -ReservationPath $reservation -ClaimId 'phase15-preflight-test-001'; "
+        "$secondOwner = Test-Phase15OutcomeOwnership -ReservationPath $reservation -ClaimId 'phase15-preflight-test-002'; "
+        "Release-Phase15OutcomeSlot -ReservationPath $reservation -ClaimId 'phase15-preflight-test-001'; "
+        "$residue = Test-Path -LiteralPath $reservation; "
+        "[Console]::Out.Write(\"$($secondRejected.ToString().ToLowerInvariant())|$($firstOwner.ToString().ToLowerInvariant())|$($secondOwner.ToString().ToLowerInvariant())|$($residue.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|true|false|false"
+
+
 def test_runner_reserves_claim_before_transport_and_has_terminal_failure_path():
     source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
     main = source[source.index("function Invoke-Phase15RunnerMain") :]
     publisher = source[source.index("function Publish-Phase15TerminalOutcome") : source.index("function New-Phase15FailureOutcome")]
 
     assert main.index("Reserve-Phase15Claim") < main.index("Invoke-Phase15OneSshTransport")
-    assert main.index("Test-Path -LiteralPath $OutcomePath") < main.index("Reserve-Phase15Claim")
+    assert main.index("Reserve-Phase15OutcomeSlot") < main.index("Invoke-Phase15OneSshTransport")
     assert "Publish-Phase15TerminalOutcome" in main
-    assert publisher.index("Set-Phase15ClaimTerminal") < publisher.index("[IO.File]::Move")
+    assert publisher.index("Set-Phase15ClaimTerminal") < publisher.index("[IO.File]::Replace")
     assert "amn2.phase15.readonly-preflight-failure.v1" in source
 
 
@@ -641,16 +809,19 @@ def test_terminal_outcome_is_staged_and_not_published_when_terminal_transition_f
     outcome = str(tmp_path / "outcome.json").replace("'", "''")
     missing_lifecycle = str(tmp_path / "missing.lifecycle").replace("'", "''")
     result = run_powershell(
+        f"$reservation = Reserve-Phase15OutcomeSlot -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z'; "
         "$failed = $false; try { "
-        f"Publish-Phase15TerminalOutcome -LifecyclePath '{missing_lifecycle}' -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' "
+        f"Publish-Phase15TerminalOutcome -LifecyclePath '{missing_lifecycle}' -ReservationPath $reservation -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' "
         "-Status 'completed' -EndedAt '2026-08-16T00:00:02Z' -ReasonCode 'not_applicable' -Outcome ([ordered]@{schema='synthetic'}) "
         "} catch { $failed = $true }; "
+        "$reserved = Test-Phase15OutcomeOwnership -ReservationPath $reservation -ClaimId 'phase15-preflight-test-001'; "
+        "Release-Phase15OutcomeSlot -ReservationPath $reservation -ClaimId 'phase15-preflight-test-001'; "
         f"$published = Test-Path -LiteralPath '{outcome}'; "
-        "[Console]::Out.Write(\"$($failed.ToString().ToLowerInvariant())|$($published.ToString().ToLowerInvariant())\")"
+        "[Console]::Out.Write(\"$($failed.ToString().ToLowerInvariant())|$($reserved.ToString().ToLowerInvariant())|$($published.ToString().ToLowerInvariant())\")"
     )
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout == "true|false"
+    assert result.stdout == "true|true|false"
 
 
 @pytest.mark.parametrize(("status", "reason"), [("completed", "not_applicable"), ("failed", "transport_failed")])
@@ -660,18 +831,22 @@ def test_terminal_outcome_and_lifecycle_finalize_consistently(tmp_path: Path, st
     result = run_powershell(
         f"$null = [IO.Directory]::CreateDirectory('{lifecycle_root}'); "
         f"$lifecycle = Reserve-Phase15Claim -LifecycleRoot '{lifecycle_root}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z'; "
-        f"Publish-Phase15TerminalOutcome -LifecyclePath $lifecycle -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' "
+        f"$reservation = Reserve-Phase15OutcomeSlot -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z'; "
+        f"Publish-Phase15TerminalOutcome -LifecyclePath $lifecycle -ReservationPath $reservation -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' "
         f"-Status '{status}' -EndedAt '2026-08-16T00:00:02Z' -ReasonCode '{reason}' -Outcome ([ordered]@{{decision='stop';schema='synthetic'}}); "
+        "Release-Phase15OutcomeSlot -ReservationPath $reservation -ClaimId 'phase15-preflight-test-001'; "
         f"$published = [IO.File]::ReadAllText('{outcome}'); $terminal = [IO.File]::ReadAllText($lifecycle); "
-        "[Console]::Out.Write(\"$published|$terminal\")"
+        "$residue = Test-Phase15OutcomeOwnership -ReservationPath $reservation -ClaimId 'phase15-preflight-test-001'; "
+        "[Console]::Out.Write(\"$published|$terminal|$($residue.ToString().ToLowerInvariant())\")"
     )
 
     assert result.returncode == 0, result.stderr
-    published_raw, terminal_raw = result.stdout.split("|", 1)
+    published_raw, terminal_raw, residue = result.stdout.split("|", 2)
     assert json.loads(published_raw) == {"decision": "stop", "schema": "synthetic"}
     terminal = json.loads(terminal_raw)
     assert terminal["status"] == status
     assert terminal["reason_code"] == reason
+    assert residue == "false"
 
 
 def test_runner_bounded_buffer_keeps_only_limit_plus_one_bytes():

@@ -267,3 +267,45 @@ def test_evidence_requires_exact_observation_inventory(name: str):
             transport_disposition="read_only_completed",
             ssh_used=True,
         )
+
+
+@pytest.mark.parametrize(
+    ("field", "invalid"),
+    [
+        ("name", {"unexpected": "mapping"}),
+        ("name", ["application_state"]),
+        ("state", {"unexpected": "mapping"}),
+        ("state", ["pass"]),
+    ],
+)
+def test_observation_wrong_container_types_raise_classified_contract_error(field: str, invalid: object):
+    contract = load_contract()
+    values = observations()
+    values[0] = dict(values[0], **{field: invalid})
+
+    with pytest.raises(contract.PreflightContractError):
+        contract.bind_evidence(
+            valid_claim(),
+            observations=values,
+            stop_reasons=[],
+            started_at="2099-08-11T11:31:00Z",
+            ended_at="2099-08-11T11:32:00Z",
+            transport_disposition="read_only_completed",
+            ssh_used=True,
+        )
+
+
+@pytest.mark.parametrize("invalid", [{"reason": "resource_conflict"}, ["resource_conflict"]])
+def test_stop_reason_wrong_container_types_raise_classified_contract_error(invalid: object):
+    contract = load_contract()
+
+    with pytest.raises(contract.PreflightContractError):
+        contract.bind_evidence(
+            valid_claim(),
+            observations=observations(stopped=True),
+            stop_reasons=[invalid],
+            started_at="2099-08-11T11:31:00Z",
+            ended_at="2099-08-11T11:32:00Z",
+            transport_disposition="read_only_completed",
+            ssh_used=True,
+        )

@@ -193,7 +193,13 @@ def _validate_observations(value: object) -> list[dict[str, str]]:
             raise PreflightContractError("observation keys")
         name = item["name"]
         state = item["state"]
-        if not isinstance(name, str) or not name or name in names or state not in OBSERVATION_STATES:
+        if (
+            not isinstance(name, str)
+            or not name
+            or name in names
+            or not isinstance(state, str)
+            or state not in OBSERVATION_STATES
+        ):
             raise PreflightContractError("observation identity")
         _sha256(item["observation_sha256"], label="observation")
         names.add(name)
@@ -245,7 +251,9 @@ def bind_evidence(
 ) -> dict[str, object]:
     _validated_window(claim, started_at, ended_at)
     checked_observations = _validate_observations(observations)
-    if not isinstance(stop_reasons, list) or any(reason not in STOP_REASONS for reason in stop_reasons):
+    if not isinstance(stop_reasons, list) or any(
+        not isinstance(reason, str) or reason not in STOP_REASONS for reason in stop_reasons
+    ):
         raise PreflightContractError("stop reasons")
     if stop_reasons != sorted(set(stop_reasons)):
         raise PreflightContractError("stop reason order")
@@ -285,7 +293,7 @@ def bind_failure(
     ssh_used: bool,
 ) -> dict[str, object]:
     _validated_window(claim, started_at, ended_at)
-    if reason_code not in FAILURE_REASONS:
+    if not isinstance(reason_code, str) or reason_code not in FAILURE_REASONS:
         raise PreflightContractError("failure reason")
     if transport_disposition not in {"not_run", "read_only_failed"}:
         raise PreflightContractError("failure transport disposition")

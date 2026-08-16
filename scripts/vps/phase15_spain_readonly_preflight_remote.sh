@@ -15,6 +15,7 @@ import json
 import os
 import pathlib
 import re
+import shlex
 import shutil
 import socket
 import subprocess
@@ -103,7 +104,7 @@ def command(parts, maximum_output_bytes=MAXIMUM_OUTPUT_BYTES, timeout_seconds=8)
     return return_code, bytes(outputs[0]), bytes(outputs[1]), disposition
 
 def probe_ok(probe):
-    return probe[0] == 0 and probe[3] == "success"
+    return probe[0] == 0 and probe[2] == b"" and probe[3] == "success"
 
 def validate_envelope(package_id, manifest_sha256, collector_sha256, claim_id, expected_host):
     return (
@@ -128,9 +129,17 @@ def classify_container_inventory(results):
     names = []
     for _engine, probe in results:
         try:
-            names.extend(line for line in probe[1].decode("utf-8", errors="strict").splitlines() if line)
+            raw = probe[1]
+            if raw and (not raw.endswith(b"\n") or b"\r" in raw):
+                return "stop", "stop"
+            lines = raw.decode("utf-8", errors="strict").splitlines()
+            if any(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", line) is None for line in lines):
+                return "stop", "stop"
+            names.extend(lines)
         except UnicodeDecodeError:
             return "stop", "stop"
+    if len(names) != len(set(names)):
+        return "stop", "stop"
     return "pass", "stop" if "amn2-spain-awg3" in names else "free"
 
 def classify_systemd_capability(probe):
@@ -171,47 +180,166 @@ def classify_udp_port(probe):
         lines = probe[1].decode("utf-8", errors="strict").splitlines()
     except UnicodeDecodeError:
         return "stop"
+    if probe[1] and (not probe[1].endswith(b"\n") or b"\r" in probe[1]):
+        return "stop"
+
+    def endpoint_port(value, allow_wildcard):
+        if value.startswith("["):
+            closing = value.rfind("]:")
+            if closing < 0:
+                raise ValueError("endpoint")
+            host, port_text = value[1:closing], value[closing + 2:]
+            ipaddress.ip_address(host.split("%", 1)[0])
+        else:
+            host, separator, port_text = value.rpartition(":")
+            if not separator or not host:
+                raise ValueError("endpoint")
+            if host != "*":
+                ipaddress.ip_address(host.split("%", 1)[0])
+        if allow_wildcard and port_text == "*":
+            return None
+        if re.fullmatch(r"[0-9]{1,5}", port_text) is None:
+            raise ValueError("port")
+        port = int(port_text)
+        if not 0 <= port <= 65535:
+            raise ValueError("port")
+        return port
+
     for line in lines:
-        match = re.fullmatch(r"UNCONN\s+[0-9]+\s+[0-9]+\s+(\S+)\s+(\S+)", line)
+        match = re.fullmatch(r"UNCONN [0-9]+ [0-9]+ (\S+) (\S+)", line)
         if match is None:
             return "stop"
-        local = match.group(1)
         try:
-            port = int(local.rsplit(":", 1)[1])
-        except (IndexError, ValueError):
+            port = endpoint_port(match.group(1), False)
+            endpoint_port(match.group(2), True)
+        except ValueError:
             return "stop"
         if port == 30002:
             return "stop"
     return "free"
 
-def _has_firewall_conflict(value):
+FIREWALL_ENTRY_TYPES = {
+    "chain", "counter", "ct helper", "element", "flowtable", "limit", "map",
+    "metainfo", "quota", "rule", "set", "synproxy", "table",
+}
+TARGET_NETWORKS = (
+    ipaddress.ip_network("10.212.13.0/24"),
+    ipaddress.ip_network("172.29.252.0/28"),
+)
+
+def _port_spec_conflicts(value):
+    if not isinstance(value, str) or not value:
+        raise ValueError("port specification")
+    for part in value.split(","):
+        match = re.fullmatch(r"([0-9]{1,5})(?:[:-]([0-9]{1,5}))?", part)
+        if match is None:
+            raise ValueError("port specification")
+        first = int(match.group(1))
+        last = int(match.group(2) or match.group(1))
+        if not (0 <= first <= last <= 65535):
+            raise ValueError("port specification")
+        if first <= 30002 <= last:
+            return True
+    return False
+
+def _network_conflicts(value):
+    try:
+        network = ipaddress.ip_network(value, strict=False)
+    except ValueError as exc:
+        raise ValueError("network specification") from exc
+    return any(network.version == target.version and network.overlaps(target) for target in TARGET_NETWORKS)
+
+def _has_firewall_conflict(value, context=None):
     if isinstance(value, bool) or value is None:
         return False
     if isinstance(value, int):
+        if not 0 <= value <= 65535:
+            raise ValueError("integer range")
         return value == 30002
     if isinstance(value, str):
-        return any(token in {"awg3", "30002"} for token in re.findall(r"[A-Za-z0-9_.:-]+", value))
+        if value in {"awg3", "amn2sp3br0"}:
+            return True
+        if context in {"dport", "sport", "port", "range"} or re.fullmatch(r"[0-9]{1,5}(?:[:-][0-9]{1,5})?(?:,[0-9]{1,5}(?:[:-][0-9]{1,5})?)*", value):
+            return _port_spec_conflicts(value)
+        if "/" in value:
+            return _network_conflicts(value)
+        return False
     if isinstance(value, list):
+        if context == "range":
+            if len(value) != 2 or any(isinstance(item, bool) or not isinstance(item, int) for item in value):
+                raise ValueError("firewall range")
+            first, last = value
+            if not 0 <= first <= last <= 65535:
+                raise ValueError("firewall range")
+            return first <= 30002 <= last
         return any(_has_firewall_conflict(item) for item in value)
     if isinstance(value, dict):
-        return any(isinstance(key, str) and (_has_firewall_conflict(key) or _has_firewall_conflict(item)) for key, item in value.items())
+        if "prefix" in value:
+            if set(value) != {"prefix"} or not isinstance(value["prefix"], dict) or set(value["prefix"]) != {"addr", "len"}:
+                raise ValueError("firewall prefix")
+            address = value["prefix"]["addr"]
+            length = value["prefix"]["len"]
+            if not isinstance(address, str) or isinstance(length, bool) or not isinstance(length, int):
+                raise ValueError("firewall prefix")
+            return _network_conflicts(f"{address}/{length}")
+        return any(isinstance(key, str) and _has_firewall_conflict(item, key) for key, item in value.items())
     raise ValueError("firewall value")
 
 def _parse_iptables_save(raw):
     text = raw.decode("utf-8", errors="strict")
+    if not text or "\r" in text or not text.endswith("\n"):
+        raise ValueError("iptables canonical text")
     conflict = False
+    in_table = False
     for line in text.splitlines():
-        valid = (
-            re.fullmatch(r"\*[a-z0-9_-]+", line) is not None
-            or re.fullmatch(r":[A-Za-z0-9_-]+\s+(?:ACCEPT|DROP|REJECT|-)\s+\[[0-9]+:[0-9]+\]", line) is not None
-            or line == "COMMIT"
-            or line.startswith("-A ")
-            or line.startswith("#")
-        )
-        if not valid:
+        if re.fullmatch(r"#[\x20-\x7e]*", line):
+            continue
+        if re.fullmatch(r"\*[a-z0-9_-]+", line):
+            if in_table:
+                raise ValueError("iptables table nesting")
+            in_table = True
+            continue
+        if re.fullmatch(r":[A-Za-z0-9_-]+ (?:ACCEPT|DROP|REJECT|-) \[[0-9]+:[0-9]+\]", line):
+            if not in_table:
+                raise ValueError("iptables chain placement")
+            continue
+        if line == "COMMIT":
+            if not in_table:
+                raise ValueError("iptables commit placement")
+            in_table = False
+            continue
+        if not line.startswith("-A ") or not in_table:
             raise ValueError("iptables syntax")
-        tokens = set(re.findall(r"[A-Za-z0-9_.:-]+", line))
-        conflict = conflict or "awg3" in tokens or "30002" in tokens
+        tokens = shlex.split(line, posix=True)
+        if len(tokens) < 2 or tokens[0] != "-A" or re.fullmatch(r"[A-Za-z0-9_-]+", tokens[1]) is None:
+            raise ValueError("iptables rule")
+        single = {
+            "-p", "--protocol", "-s", "--source", "-d", "--destination", "-i", "--in-interface",
+            "-o", "--out-interface", "-j", "--jump", "-g", "--goto", "-m", "--match", "--sport",
+            "--source-port", "--dport", "--destination-port", "--sports", "--source-ports", "--dports",
+            "--destination-ports", "--ctstate", "--state", "--comment", "--icmp-type",
+        }
+        zero = {"!", "-f", "--fragment", "--syn"}
+        index = 2
+        while index < len(tokens):
+            option = tokens[index]
+            if option in zero:
+                index += 1
+                continue
+            if option not in single or not index + 1 < len(tokens) or tokens[index + 1].startswith("-"):
+                raise ValueError("iptables option")
+            argument = tokens[index + 1]
+            if option in {"-i", "--in-interface", "-o", "--out-interface"}:
+                if re.fullmatch(r"[A-Za-z0-9_.+-]{1,64}", argument) is None:
+                    raise ValueError("iptables interface")
+                conflict = conflict or argument in {"awg3", "amn2sp3br0"}
+            elif option in {"-s", "--source", "-d", "--destination"}:
+                conflict = conflict or _network_conflicts(argument)
+            elif option in {"--sport", "--source-port", "--dport", "--destination-port", "--sports", "--source-ports", "--dports", "--destination-ports"}:
+                conflict = conflict or _port_spec_conflicts(argument)
+            index += 2
+    if in_table:
+        raise ValueError("iptables missing commit")
     return conflict
 
 def classify_firewall(nft_probe, iptables_probe):
@@ -225,17 +353,34 @@ def classify_firewall(nft_probe, iptables_probe):
     if not probe_ok(nft_probe) or nft_probe[2] != b"":
         return "stop"
     try:
-        value = json.loads(nft_probe[1].decode("utf-8", errors="strict"))
+        if not nft_probe[1].endswith(b"\n") or b"\r" in nft_probe[1]:
+            return "stop"
+        def reject_duplicates(pairs):
+            result = {}
+            for key, item in pairs:
+                if key in result:
+                    raise ValueError("duplicate nft key")
+                result[key] = item
+            return result
+        value = json.loads(nft_probe[1].decode("utf-8", errors="strict"), object_pairs_hook=reject_duplicates)
         if not isinstance(value, dict) or set(value) != {"nftables"} or not isinstance(value["nftables"], list):
             return "stop"
-        return "stop" if _has_firewall_conflict(value) else "pass"
+        for entry in value["nftables"]:
+            if not isinstance(entry, dict) or len(entry) != 1:
+                return "stop"
+            entry_type, payload = next(iter(entry.items()))
+            if entry_type not in FIREWALL_ENTRY_TYPES or not isinstance(payload, dict):
+                return "stop"
+        return "stop" if _has_firewall_conflict(value["nftables"]) else "pass"
     except (UnicodeDecodeError, json.JSONDecodeError, ValueError, TypeError):
         return "stop"
 
 def classify_awg2_health(unit_probe, interface_probe, handshake_probe, now_epoch):
     if not all(probe_ok(probe) for probe in (unit_probe, interface_probe, handshake_probe)):
         return "stop"
-    if unit_probe[1] != b"active\n" or not interface_probe[1]:
+    if unit_probe[1] != b"active\n" or re.fullmatch(rb"[0-9]+: awg2(?:@[^: \n]+)?: <[A-Z0-9_,]+\x3e(?: [^\r\n]*)?\n(?:    [^\r\n]+\n)*", interface_probe[1]) is None:
+        return "stop"
+    if not handshake_probe[1].endswith(b"\n") or b"\r" in handshake_probe[1]:
         return "stop"
     lines = handshake_probe[1].splitlines()
     if not lines:
@@ -247,6 +392,9 @@ def classify_awg2_health(unit_probe, interface_probe, handshake_probe, now_epoch
             return "stop"
         timestamps.append(int(match.group(1)))
     return "pass" if any(0 < timestamp and 0 <= now_epoch - timestamp <= 600 for timestamp in timestamps) else "stop"
+
+def classify_service_absence(probe):
+    return "free" if probe_ok(probe) and probe[1] == b"not-found\n" else "stop"
 
 def observed(state, raw):
     if state not in STATES:
@@ -329,7 +477,7 @@ def production_observations():
     values["config_path"] = resource_path_state("/var/lib/amn2-spain/awg3/awg3.conf")
     values["state_root"] = resource_path_state("/var/lib/amn2-spain/awg3")
     service_probe = command(["systemctl", "show", "amn2-spain-awg3.service", "--property=LoadState", "--value"])
-    values["service_name"] = observed("free" if probe_ok(service_probe) and service_probe[1] == b"not-found\n" else "stop", service_probe[1] + service_probe[2])
+    values["service_name"] = observed(classify_service_absence(service_probe), service_probe[1] + service_probe[2])
     markers = []
     marker_error = None
     try:
