@@ -309,3 +309,59 @@ def test_stop_reason_wrong_container_types_raise_classified_contract_error(inval
             transport_disposition="read_only_completed",
             ssh_used=True,
         )
+
+
+@pytest.mark.parametrize(
+    ("stopped_name", "reason"),
+    [
+        ("udp_30002", "observation_failed"),
+        ("recovery_markers_phase14_phase15", "resource_conflict"),
+        ("architecture", "resource_conflict"),
+        ("udp_30002", "identity_mismatch"),
+    ],
+)
+def test_stop_reasons_must_exactly_match_runner_observation_categories(stopped_name: str, reason: str):
+    contract = load_contract()
+    values = observations()
+    for item in values:
+        if item["name"] == stopped_name:
+            item["state"] = "stop"
+
+    with pytest.raises(contract.PreflightContractError):
+        contract.bind_evidence(
+            valid_claim(),
+            observations=values,
+            stop_reasons=[reason],
+            started_at="2099-08-11T11:31:00Z",
+            ended_at="2099-08-11T11:32:00Z",
+            transport_disposition="read_only_completed",
+            ssh_used=True,
+        )
+
+
+@pytest.mark.parametrize(
+    ("stopped_name", "reason"),
+    [
+        ("udp_30002", "resource_conflict"),
+        ("recovery_markers_phase14_phase15", "recovery_incomplete"),
+        ("architecture", "observation_failed"),
+    ],
+)
+def test_stop_reasons_accept_exact_runner_category_mapping(stopped_name: str, reason: str):
+    contract = load_contract()
+    values = observations()
+    for item in values:
+        if item["name"] == stopped_name:
+            item["state"] = "stop"
+
+    evidence = contract.bind_evidence(
+        valid_claim(),
+        observations=values,
+        stop_reasons=[reason],
+        started_at="2099-08-11T11:31:00Z",
+        ended_at="2099-08-11T11:32:00Z",
+        transport_disposition="read_only_completed",
+        ssh_used=True,
+    )
+
+    assert evidence["stop_reasons"] == [reason]

@@ -59,6 +59,20 @@ EXPECTED_OBSERVATION_NAMES = {
     "recovery_markers_phase14_phase15", "routes", "service_capability", "service_name",
     "state_root", "telegram_prerequisites", "udp_30002", "vpn_cidr_10_212_13_0_24",
 }
+CONFLICT_OBSERVATION_NAMES = {
+    "bridge_amn2sp3br0",
+    "config_path",
+    "container_cidr_172_29_252_0_28",
+    "container_name",
+    "firewall",
+    "interface_awg3",
+    "routes",
+    "service_name",
+    "state_root",
+    "udp_30002",
+    "vpn_cidr_10_212_13_0_24",
+}
+RECOVERY_OBSERVATION_NAME = "recovery_markers_phase14_phase15"
 
 
 class PreflightContractError(ValueError):
@@ -258,9 +272,19 @@ def bind_evidence(
     if stop_reasons != sorted(set(stop_reasons)):
         raise PreflightContractError("stop reason order")
     _secret_safe(stop_reasons)
-    must_stop = any(item["state"] in {"stop", "unknown"} for item in checked_observations)
-    if must_stop != bool(stop_reasons):
+    stopped_names = {
+        item["name"] for item in checked_observations if item["state"] in {"stop", "unknown"}
+    }
+    expected_reasons: set[str] = set()
+    if stopped_names & CONFLICT_OBSERVATION_NAMES:
+        expected_reasons.add("resource_conflict")
+    if RECOVERY_OBSERVATION_NAME in stopped_names:
+        expected_reasons.add("recovery_incomplete")
+    if stopped_names - CONFLICT_OBSERVATION_NAMES - {RECOVERY_OBSERVATION_NAME}:
+        expected_reasons.add("observation_failed")
+    if stop_reasons != sorted(expected_reasons):
         raise PreflightContractError("decision binding")
+    must_stop = bool(expected_reasons)
     if transport_disposition not in {"not_run", "read_only_completed"}:
         raise PreflightContractError("transport disposition")
     if (transport_disposition == "not_run") != (not ssh_used):

@@ -212,6 +212,18 @@ def test_collector_command_streams_and_caps_stdout_and_stderr_at_limit_plus_one(
     assert disposition == "output_oversized"
 
 
+def test_collector_command_only_classifies_exact_missing_binary_as_unavailable(monkeypatch: pytest.MonkeyPatch):
+    namespace = collector_python_namespace()
+    command = namespace["command"]
+    subprocess_module = namespace["subprocess"]
+
+    monkeypatch.setattr(subprocess_module, "Popen", lambda *_args, **_kwargs: (_ for _ in ()).throw(FileNotFoundError()))
+    assert command(["missing-binary"]) == (127, b"", b"", "unavailable")
+
+    monkeypatch.setattr(subprocess_module, "Popen", lambda *_args, **_kwargs: (_ for _ in ()).throw(PermissionError()))
+    assert command(["permission-denied-binary"])[3] == "launch_failed"
+
+
 @pytest.mark.parametrize(
     ("return_code", "stderr", "expected"),
     [
@@ -270,6 +282,40 @@ def test_firewall_fallback_and_parsing_are_fail_closed():
     assert classify((0, b'{"nftables":[],"nftables":[]}\n', b"", "success"), None) == "stop"
 
 
+def test_firewall_inspects_every_available_backend_without_clean_backend_masking_conflict():
+    classify = collector_helper("classify_firewall")
+    clean_nft = (0, b'{"nftables":[]}\n', b"", "success")
+    conflict_iptables = (0, b"*filter\n:INPUT ACCEPT [0:0]\n-A INPUT -p udp --dport 30002 -j ACCEPT\nCOMMIT\n", b"", "success")
+    unavailable = (127, b"", b"", "unavailable")
+
+    assert classify(clean_nft, conflict_iptables) == "stop"
+    assert classify(clean_nft, unavailable, conflict_iptables) == "stop"
+    assert classify(clean_nft, unavailable) == "pass"
+    assert classify(unavailable, unavailable) == "stop"
+    source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
+    assert 'command(["iptables-save"])' in source
+    assert 'command(["iptables-legacy-save"])' in source
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        b"# comment only\n",
+        b"*filter\n:INPUT ACCEPT [0:0]\n-A MISSING -j ACCEPT\nCOMMIT\n",
+        b"*filter\n:INPUT ACCEPT [0:0]\n-A INPUT -p arbitrary -j ACCEPT\nCOMMIT\n",
+        b"*filter\n:INPUT ACCEPT [0:0]\n-A INPUT -j MISSING\nCOMMIT\n",
+        b"*arbitrary\n:INPUT ACCEPT [0:0]\nCOMMIT\n",
+        b"*filter\nCOMMIT\n",
+        b"*filter\n:INPUT ACCEPT [0:0]\n-A INPUT -p icmp --icmp-type arbitrary -j ACCEPT\nCOMMIT\n",
+    ],
+)
+def test_iptables_requires_declared_table_chains_and_allowlisted_values(payload: bytes):
+    classify = collector_helper("classify_firewall")
+    unavailable = (127, b"", b"", "unavailable")
+
+    assert classify(unavailable, (0, payload, b"", "success")) == "stop"
+
+
 @pytest.mark.parametrize(
     "payload",
     [
@@ -283,6 +329,31 @@ def test_nft_structure_ranges_interfaces_and_prefixes_fail_closed_or_conflict(pa
     classify = collector_helper("classify_firewall")
 
     assert classify((0, payload, b"", "success"), None) == "stop"
+
+
+def test_nft_context_parser_ignores_large_handles_but_detects_host_ip_and_unknown_nodes():
+    classify = collector_helper("classify_firewall")
+    clean_large_counter = b'{"nftables":[{"rule":{"chain":"INPUT","expr":[{"counter":{"bytes":999999999,"packets":777777}}],"family":"inet","handle":999999,"table":"filter"}}]}\n'
+    reserved_host = b'{"nftables":[{"rule":{"chain":"INPUT","expr":[{"match":{"left":{"payload":{"field":"saddr","protocol":"ip"}},"op":"==","right":"10.212.13.42"}}],"family":"inet","handle":7,"table":"filter"}}]}\n'
+    unknown_nested = b'{"nftables":[{"rule":{"chain":"INPUT","expr":[{"mystery":{"value":"clean"}}],"family":"inet","handle":7,"table":"filter"}}]}\n'
+
+    assert classify((0, clean_large_counter, b"", "success"), (127, b"", b"", "unavailable")) == "pass"
+    assert classify((0, reserved_host, b"", "success"), (127, b"", b"", "unavailable")) == "stop"
+    assert classify((0, unknown_nested, b"", "success"), (127, b"", b"", "unavailable")) == "stop"
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        b'{"nftables":[{"rule":{"chain":"INPUT","expr":[],"family":"arbitrary","handle":7,"table":"filter"}}]}\n',
+        b'{"nftables":[{"rule":{"chain":"INPUT","expr":[],"family":"inet","handle":true,"table":"filter"}}]}\n',
+        b'{"nftables":[{"chain":{"family":"inet","hook":"arbitrary","name":"INPUT","table":"filter","type":"filter"}}]}\n',
+    ],
+)
+def test_nft_context_parser_validates_allowlisted_field_types_and_values(payload: bytes):
+    classify = collector_helper("classify_firewall")
+
+    assert classify((0, payload, b"", "success"), (127, b"", b"", "unavailable")) == "stop"
 
 
 @pytest.mark.parametrize(
@@ -314,6 +385,39 @@ def test_route_overlap_udp_and_firewall_outputs_require_strict_parsing():
     assert classify_udp((0, b"", b"", success)) == "free"
     assert classify_udp((0, b"UNCONN 0 0 0.0.0.0:70000 0.0.0.0:*\n", b"", success)) == "stop"
     assert classify_udp((0, b"UNCONN 0 0 0.0.0.0:30001 0.0.0.0:*\n", b"warning\n", success)) == "stop"
+    assert classify_udp((0, b"UNCONN   0    0   0.0.0.0:30002    0.0.0.0:*\n", b"", success)) == "stop"
+    assert classify_udp((0, b"UNCONN   0    0   0.0.0.0:30001    0.0.0.0:*\n", b"", success)) == "free"
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        b'[{"dst":"default","dst":"10.212.13.0/24"}]\n',
+        b'[{"dst":"default","unknown":"value"}]\n',
+        b'[{"dst":"default","metric":NaN}]\n',
+        b'[{"dst":"default"}]\r\n',
+        b'[{"dst":"default"}]',
+    ],
+)
+def test_route_json_requires_duplicate_free_canonical_lf_and_allowlisted_schema(payload: bytes):
+    classify = collector_helper("classify_routes")
+
+    assert classify((0, payload, b"", "success")) == ("stop", "stop", "stop")
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        b'[{"dst":"default","metric":"one"}]\n',
+        b'[{"dev":7,"dst":"default"}]\n',
+        b'[{"dst":"default","gateway":"not-an-ip"}]\n',
+        b'[{"dst":"default","scope":false}]\n',
+    ],
+)
+def test_route_json_validates_allowlisted_field_types_and_values(payload: bytes):
+    classify = collector_helper("classify_routes")
+
+    assert classify((0, payload, b"", "success")) == ("stop", "stop", "stop")
 
 
 def test_service_absence_requires_exact_stdout_and_empty_stderr():
@@ -322,6 +426,24 @@ def test_service_absence_requires_exact_stdout_and_empty_stderr():
     assert classify((0, b"not-found\n", b"warning\n", "success")) == "stop"
     assert classify((0, b"not-found trailing\n", b"", "success")) == "stop"
     assert classify((1, b"not-found\n", b"", "command_failed")) == "stop"
+
+
+def test_recovery_marker_scan_uses_explicit_stat_and_fails_closed(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    namespace = collector_python_namespace()
+    scan = namespace.get("scan_recovery_markers")
+    assert callable(scan), "missing explicit recovery marker scanner"
+
+    clean = tmp_path / "clean"
+    clean.mkdir()
+    assert scan((clean,))[0] == "absent"
+
+    marker = clean / "phase15-pending.marker"
+    marker.write_text("synthetic", encoding="utf-8")
+    assert scan((clean,))[0] == "stop"
+
+    os_module = namespace["os"]
+    monkeypatch.setattr(os_module, "scandir", lambda _path: (_ for _ in ()).throw(PermissionError()))
+    assert scan((clean,))[0] == "stop"
 
 
 @pytest.mark.parametrize(
@@ -562,6 +684,50 @@ def test_runner_builds_positional_remote_envelope_with_safe_option_boundary():
     assert "$start.Environment['AMN2_PHASE15_" not in require_file(RUNNER, "runner").read_text(encoding="utf-8")
 
 
+def test_runner_hashes_and_transports_one_immutable_collector_byte_array(tmp_path: Path):
+    artifact_path = tmp_path / "collector.sh"
+    original = b"#!/bin/sh\nprintf immutable\n"
+    artifact_path.write_bytes(original)
+    escaped = str(artifact_path).replace("'", "''")
+    replacement = base64.b64encode(b"replaced-after-read\n").decode()
+    result = run_powershell(
+        f"$artifact = Read-Phase15CollectorArtifact -Path '{escaped}'; "
+        f"[IO.File]::WriteAllBytes('{escaped}', [Convert]::FromBase64String('{replacement}')); "
+        "[Console]::Out.Write(\"$($artifact.Sha256)|$([Convert]::ToBase64String($artifact.Bytes))\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    digest, encoded = result.stdout.split("|", 1)
+    assert digest == hashlib.sha256(original).hexdigest()
+    assert base64.b64decode(encoded) == original
+    source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
+    artifact_reader = source[source.index("function Read-Phase15CollectorArtifact") : source.index("function ConvertTo-Phase15CanonicalJsonText")]
+    assert artifact_reader.count("[IO.File]::ReadAllBytes($Path)") == 1
+    main = source[source.index("function Invoke-Phase15RunnerMain") :]
+    assert main.count("Read-Phase15CollectorArtifact -Path $collectorPath") == 1
+    assert "Get-Phase15FileSha256 -Path $collectorPath" not in main
+    assert "ReadAllBytes($collectorPath)" not in main
+
+
+def test_transport_success_requires_empty_stderr_and_bounded_io_starts_before_stdin():
+    result = run_powershell(
+        "$clean = Test-Phase15TransportCompletion -ExitCode 0 -StderrLength 0; "
+        "$stderr = Test-Phase15TransportCompletion -ExitCode 0 -StderrLength 1; "
+        "$failed = Test-Phase15TransportCompletion -ExitCode 1 -StderrLength 0; "
+        "[Console]::Out.Write(\"$($clean.ToString().ToLowerInvariant())|$($stderr.ToString().ToLowerInvariant())|$($failed.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|false|false"
+    source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
+    transport = source[source.index("function Invoke-Phase15OneSshTransport") : source.index("function Write-Phase15CreateNewJson")]
+    assert transport.index("$deadline") < transport.index("WriteAsync")
+    assert transport.index("StandardOutput.BaseStream.ReadAsync") < transport.index("WriteAsync")
+    assert transport.index("StandardError.BaseStream.ReadAsync") < transport.index("WriteAsync")
+    assert "[ref]$Started" in transport
+    assert transport.index("$Started.Value = $true") > transport.index("$process.Start()")
+
+
 def valid_collector_document(*, stopped: bool = False) -> dict[str, object]:
     observations = [
         {
@@ -601,7 +767,7 @@ def test_runner_collector_validation_is_exact_and_reconstructs_allowlisted_canon
     document = valid_collector_document()
     result = runner_document_result(
         document,
-        f"$valid = Test-Phase15CollectorDocument -Document $document -ExpectedHost 'spain.test.invalid' -ExpectedClaimId 'phase15-preflight-test-001' -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}'; "
+        f"$valid = Test-Phase15CollectorDocument -Document $document -ExpectedHost 'spain.test.invalid' -ExpectedClaimId 'phase15-preflight-test-001' -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -StartedAt '2026-08-15T23:59:59Z' -EndedAt '2026-08-16T00:00:01Z'; "
         "$evidence = ConvertTo-Phase15Evidence -Document $document -ManifestSha256 ('a' * 64) -CollectorSha256 ('b' * 64) -ExpectedHost 'spain.test.invalid' -StartedAt '2026-08-16T00:00:01Z' -EndedAt '2026-08-16T00:00:02Z'; "
         "$json = ConvertTo-Phase15CanonicalJsonText -Value $evidence; "
         "[Console]::Out.Write(\"$($valid.ToString().ToLowerInvariant())|$json\")",
@@ -617,6 +783,19 @@ def test_runner_collector_validation_is_exact_and_reconstructs_allowlisted_canon
     assert evidence["observations"] == document["observations"]
     assert "observed_at" not in evidence
     assert "claim_id" not in evidence
+
+
+@pytest.mark.parametrize("observed_at", ["2026-08-15T23:59:58Z", "2026-08-16T00:00:02Z"])
+def test_runner_binds_remote_observed_at_to_local_execution_window(observed_at: str):
+    document = valid_collector_document()
+    document["observed_at"] = observed_at
+    result = runner_document_result(
+        document,
+        f"$valid = Test-Phase15CollectorDocument -Document $document -ExpectedHost 'spain.test.invalid' -ExpectedClaimId 'phase15-preflight-test-001' -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -StartedAt '2026-08-15T23:59:59Z' -EndedAt '2026-08-16T00:00:01Z'; [Console]::Out.Write($valid.ToString().ToLowerInvariant())",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "false"
 
 
 @pytest.mark.parametrize(
@@ -687,7 +866,7 @@ def test_runner_rejects_non_schema_equivalent_collector_documents(mutation: str)
         document[field] = [document[field]]
     result = runner_document_result(
         document,
-        f"$valid = Test-Phase15CollectorDocument -Document $document -ExpectedHost 'spain.test.invalid' -ExpectedClaimId 'phase15-preflight-test-001' -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}'; [Console]::Out.Write($valid.ToString().ToLowerInvariant())",
+        f"$valid = Test-Phase15CollectorDocument -Document $document -ExpectedHost 'spain.test.invalid' -ExpectedClaimId 'phase15-preflight-test-001' -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -StartedAt '2026-08-15T23:59:59Z' -EndedAt '2026-08-16T00:00:01Z'; [Console]::Out.Write($valid.ToString().ToLowerInvariant())",
     )
 
     assert result.returncode == 0, result.stderr
@@ -798,11 +977,71 @@ def test_runner_reserves_claim_before_transport_and_has_terminal_failure_path():
     main = source[source.index("function Invoke-Phase15RunnerMain") :]
     publisher = source[source.index("function Publish-Phase15TerminalOutcome") : source.index("function New-Phase15FailureOutcome")]
 
-    assert main.index("Reserve-Phase15Claim") < main.index("Invoke-Phase15OneSshTransport")
-    assert main.index("Reserve-Phase15OutcomeSlot") < main.index("Invoke-Phase15OneSshTransport")
+    assert main.index("Start-Phase15Transaction") < main.index("Invoke-Phase15OneSshTransport")
     assert "Publish-Phase15TerminalOutcome" in main
     assert publisher.index("Set-Phase15ClaimTerminal") < publisher.index("[IO.File]::Replace")
     assert "amn2.phase15.readonly-preflight-failure.v1" in source
+
+
+def test_runner_reconciles_before_atomic_transaction_ownership_and_transport():
+    source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
+    main = source[source.index("function Invoke-Phase15RunnerMain") :]
+
+    assert main.index("Reconcile-Phase15Transaction") < main.index("Start-Phase15Transaction")
+    assert main.index("Start-Phase15Transaction") < main.index("Invoke-Phase15OneSshTransport")
+    assert "-TransactionPath $transaction.JournalPath" in main
+
+
+@pytest.mark.parametrize(
+    "crash_point",
+    ["owned", "corrupt_outcome_reservation", "terminal_lifecycle", "orphan_outcome"],
+)
+def test_interrupted_transaction_reconciles_to_one_sanitized_terminal_failure(tmp_path: Path, crash_point: str):
+    state_root = str(tmp_path / "state").replace("'", "''")
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    setup = ""
+    if crash_point == "corrupt_outcome_reservation":
+        setup = "[IO.File]::WriteAllText($tx.ReservationPath, '{}', [Text.UTF8Encoding]::new($false)); "
+    elif crash_point == "terminal_lifecycle":
+        setup = (
+            "$null = Set-Phase15ClaimTerminal -LifecyclePath $tx.LifecyclePath "
+            "-ClaimId 'phase15-preflight-test-001' -Status 'completed' "
+            "-EndedAt '2026-08-16T00:00:01Z' -ReasonCode 'not_applicable'; "
+        )
+    elif crash_point == "orphan_outcome":
+        setup = (
+            "[IO.File]::Delete($tx.LifecyclePath); "
+            "[IO.File]::WriteAllText($tx.ReservationPath, '{\"decision\":\"pass\",\"schema\":\"synthetic\"}' + [Environment]::NewLine, [Text.UTF8Encoding]::new($false)); "
+        )
+    result = run_powershell(
+        f"$tx = Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' "
+        f"-ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z' "
+        f"-ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid'; "
+        f"{setup}"
+        f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z'; "
+        "$lifecycle = ConvertFrom-Phase15CanonicalJsonFile -Path $tx.LifecyclePath; "
+        "$published = ConvertFrom-Phase15CanonicalJsonFile -Path $tx.ReservationPath; "
+        "$journalExists = Test-Path -LiteralPath $tx.JournalPath; "
+        "$owned = Test-Phase15OutcomeOwnership -ReservationPath $tx.ReservationPath -ClaimId 'phase15-preflight-test-001'; "
+        "[Console]::Out.Write((@{journal_exists=$journalExists;lifecycle=$lifecycle;outcome=$published;owned=$owned;reconciled=$reconciled} | ConvertTo-Json -Compress -Depth 10))"
+    )
+
+    assert result.returncode == 0, result.stderr
+    state = json.loads(result.stdout)
+    assert state["reconciled"] is True
+    assert state["journal_exists"] is False
+    assert state["owned"] is False
+    assert state["lifecycle"]["status"] == "failed"
+    assert state["lifecycle"]["reason_code"] == "transport_failed"
+    assert state["outcome"]["schema"] == "amn2.phase15.readonly-preflight-failure.v1"
+    assert state["outcome"]["decision"] == "stop"
+    assert state["outcome"]["reason_code"] == "transport_failed"
+    assert state["outcome"]["safety"] == {
+        "live_mutation": False,
+        "raw_output_persisted": False,
+        "remote_file_written": False,
+        "ssh_used": False,
+    }
 
 
 def test_terminal_outcome_is_staged_and_not_published_when_terminal_transition_fails(tmp_path: Path):
