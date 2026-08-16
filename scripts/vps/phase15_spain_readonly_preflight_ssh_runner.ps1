@@ -763,7 +763,7 @@ function Test-Phase15ManagedStateDirectoryFacts {
     if ($Facts.Exists -isnot [bool] -or -not $Facts.Exists -or $Facts.IsDirectory -isnot [bool] -or -not $Facts.IsDirectory -or $Facts.IsReparse -isnot [bool] -or $Facts.IsReparse) { return $false }
     if ($Facts.FullName -isnot [string] -or -not [IO.Path]::IsPathRooted($Facts.FullName) -or -not [IO.Path]::GetFullPath($Facts.FullName).TrimEnd([IO.Path]::DirectorySeparatorChar).Equals([IO.Path]::GetFullPath($ExpectedPath).TrimEnd([IO.Path]::DirectorySeparatorChar), [StringComparison]::OrdinalIgnoreCase)) { return $false }
     if ($Facts.OwnerSid -isnot [string] -or $Facts.OwnerSid -cne $AuthorizedSid -or $Facts.Protected -isnot [bool] -or -not $Facts.Protected) { return $false }
-    $expectedSids = @($AuthorizedSid, $script:Phase15SystemSid, $script:Phase15AdministratorsSid)
+    $expectedSids = @(Get-Phase15AllowedStateSids -AuthorizedSid $AuthorizedSid)
     $rules = @($Facts.Rules)
     if ($rules.Count -ne $expectedSids.Count) { return $false }
     $fullControl = [int64][Security.AccessControl.FileSystemRights]::FullControl
@@ -776,6 +776,32 @@ function Test-Phase15ManagedStateDirectoryFacts {
         if ($rule.Type -isnot [string] -or $rule.Type -cne 'Allow' -or [int64]$rule.Rights -ne $fullControl -or $rule.IsInherited -isnot [bool] -or $rule.IsInherited -or [int]$rule.Inheritance -ne $inheritance -or [int]$rule.Propagation -ne 0) { return $false }
     }
     return $true
+}
+
+function Get-Phase15AllowedStateSids {
+    param([Parameter(Mandatory)][string]$AuthorizedSid)
+    if ($AuthorizedSid -cnotmatch '^S-1-[0-9-]+$') { throw 'state_root_invalid' }
+    $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $ordered = [Collections.Generic.List[string]]::new()
+    foreach ($sid in @($AuthorizedSid, $script:Phase15SystemSid, $script:Phase15AdministratorsSid)) {
+        if ($seen.Add($sid)) { [void]$ordered.Add($sid) }
+    }
+    return [string[]]$ordered.ToArray()
+}
+
+function New-Phase15ManagedStateDirectorySecurity {
+    param([Parameter(Mandatory)][string]$AuthorizedSid)
+    $allowedSids = @(Get-Phase15AllowedStateSids -AuthorizedSid $AuthorizedSid)
+    $security = [Security.AccessControl.DirectorySecurity]::new()
+    $security.SetAccessRuleProtection($true, $false)
+    $security.SetOwner([Security.Principal.SecurityIdentifier]::new($AuthorizedSid))
+    $inheritance = [Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [Security.AccessControl.InheritanceFlags]::ObjectInherit
+    foreach ($sidValue in $allowedSids) {
+        $sid = [Security.Principal.SecurityIdentifier]::new($sidValue)
+        $rule = [Security.AccessControl.FileSystemAccessRule]::new($sid, [Security.AccessControl.FileSystemRights]::FullControl, $inheritance, [Security.AccessControl.PropagationFlags]::None, [Security.AccessControl.AccessControlType]::Allow)
+        [void]$security.AddAccessRule($rule)
+    }
+    return $security
 }
 
 function Enter-Phase15StateRootCreationLock {
@@ -802,16 +828,7 @@ function New-Phase15SecureStateDirectory {
     $parent = [IO.Path]::GetFullPath($ParentPath).TrimEnd([IO.Path]::DirectorySeparatorChar)
     $target = [IO.Path]::GetFullPath($Path).TrimEnd([IO.Path]::DirectorySeparatorChar)
     if ([IO.Path]::GetDirectoryName($target).TrimEnd([IO.Path]::DirectorySeparatorChar) -cne $parent -or $AuthorizedSid -cnotmatch '^S-1-[0-9-]+$') { throw 'state_root_invalid' }
-    $security = [Security.AccessControl.DirectorySecurity]::new()
-    $security.SetAccessRuleProtection($true, $false)
-    $owner = [Security.Principal.SecurityIdentifier]::new($AuthorizedSid)
-    $security.SetOwner($owner)
-    $inheritance = [Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [Security.AccessControl.InheritanceFlags]::ObjectInherit
-    foreach ($sidValue in @($AuthorizedSid, $script:Phase15SystemSid, $script:Phase15AdministratorsSid)) {
-        $sid = [Security.Principal.SecurityIdentifier]::new($sidValue)
-        $rule = [Security.AccessControl.FileSystemAccessRule]::new($sid, [Security.AccessControl.FileSystemRights]::FullControl, $inheritance, [Security.AccessControl.PropagationFlags]::None, [Security.AccessControl.AccessControlType]::Allow)
-        [void]$security.AddAccessRule($rule)
-    }
+    $security = New-Phase15ManagedStateDirectorySecurity -AuthorizedSid $AuthorizedSid
     $temporary = Join-Path $parent ('.phase15-state-root.create-' + [Guid]::NewGuid().ToString('N') + '.tmp')
     try {
         [void][IO.Directory]::CreateDirectory($temporary, $security)
@@ -1257,6 +1274,7 @@ function Invoke-Phase15RunnerMain {
     [void](Assert-Phase15SpainTrustBundle -ExpectedHost $ExpectedHost)
     $claim = Read-Phase15FutureClaim -ClaimPath $FutureClaimPath
     if ($null -eq $claim -or -not (Test-Phase15ClaimIdentity -Claim $claim -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost)) { throw 'claim_invalid' }
+    if (-not (Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -At $startedAt)) { throw 'claim_invalid' }
     $stateRoot = Initialize-Phase15ProductionStateRoot
     $claimLock = Enter-Phase15ClaimLock -StateRoot $stateRoot -ClaimId $claim.claim_id
     $transaction = $null

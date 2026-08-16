@@ -900,9 +900,12 @@ def test_runner_validates_claim_lifetime_against_fresh_pre_reservation_time(tmp_
     assert result.stdout == "true|false|false"
     source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
     main = source[source.index("function Invoke-Phase15RunnerMain") :]
+    lifetime_checks = [match.start() for match in re.finditer("Test-Phase15FutureClaim", main)]
+    assert len(lifetime_checks) == 2
     assert main.index("$startedAt =") < main.index("Read-Phase15ManifestArtifact")
+    assert main.index("Test-Phase15ClaimIdentity") < lifetime_checks[0] < main.index("Initialize-Phase15ProductionStateRoot")
     assert main.index("Reconcile-Phase15Transaction") < main.index("$reservationAt =")
-    assert main.index("$reservationAt =") < main.index("Test-Phase15FutureClaim")
+    assert main.index("$reservationAt =") < lifetime_checks[1]
     assert "-At $reservationAt" in main
     assert "-ReservedAt $reservationAt" in main
 
@@ -1502,10 +1505,13 @@ def test_runner_reserves_claim_before_transport_and_has_terminal_failure_path():
 def test_runner_reconciles_before_atomic_transaction_ownership_and_transport():
     source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
     main = source[source.index("function Invoke-Phase15RunnerMain") :]
+    lifetime_checks = [match.start() for match in re.finditer("Test-Phase15FutureClaim", main)]
 
+    assert len(lifetime_checks) == 2
+    assert main.index("Test-Phase15ClaimIdentity") < lifetime_checks[0] < main.index("Initialize-Phase15ProductionStateRoot")
     assert main.index("Enter-Phase15ClaimLock") < main.index("Reconcile-Phase15Transaction")
-    assert main.index("Reconcile-Phase15Transaction") < main.index("Test-Phase15FutureClaim")
-    assert main.index("Test-Phase15FutureClaim") < main.index("Start-Phase15Transaction")
+    assert main.index("Reconcile-Phase15Transaction") < lifetime_checks[1]
+    assert lifetime_checks[1] < main.index("Start-Phase15Transaction")
     assert main.index("Start-Phase15Transaction") < main.index("Invoke-Phase15OneSshTransport")
     assert "-TransactionPath $transaction.JournalPath" in main
     assert "$transaction.OutcomeLock.Stream.Dispose()" in main
@@ -2324,3 +2330,63 @@ def test_round10_atomic_writer_temp_name_is_exactly_claim_owned(tmp_path: Path):
 
     assert result.returncode == 0, result.stderr
     assert re.fullmatch(rf"artifact\.json\.phase15-{re.escape(claim_id)}\.create-[0-9a-f]{{32}}\.tmp", result.stdout)
+
+
+@pytest.mark.parametrize(
+    ("issued_at", "expires_at"),
+    [
+        ("2099-08-16T00:00:00Z", "2100-08-16T00:00:00Z"),
+        ("2020-08-16T00:00:00Z", "2021-08-16T00:00:00Z"),
+    ],
+    ids=("future", "expired"),
+)
+def test_round11_time_invalid_claim_never_initializes_production_state(
+    tmp_path: Path, issued_at: str, expires_at: str
+):
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        "$FutureAuthorization=$true; $FutureClaimPath='synthetic-claim.json'; $PackageRoot='C:\\synthetic-package'; "
+        f"$OutcomePath='{outcome}'; $ExpectedHost='spain.test.invalid'; $script:initializerCount=0; "
+        f"$script:claim=[pscustomobject][ordered]@{{claim_id='phase15-preflight-test-001';collector_sha256='{COLLECTOR_SHA256}';consumed_at=$null;expected_host='spain.test.invalid';expires_at='{expires_at}';future_gate='PREFLIGHT';issued_at='{issued_at}';manifest_sha256='{MANIFEST_SHA256}';package_id='{PACKAGE_ID}';schema='amn2.phase15.readonly-preflight-claim.v1';status='issued'}}; "
+        f"function Read-Phase15ManifestArtifact{{[pscustomobject]@{{Value=[pscustomobject]@{{package_id='{PACKAGE_ID}';entries=@([pscustomobject]@{{path='tooling/scripts/vps/phase15_spain_readonly_preflight_remote.sh';sha256='{COLLECTOR_SHA256}'}})}};Sha256='{MANIFEST_SHA256}'}}}}; "
+        f"function Read-Phase15CollectorArtifact{{[pscustomobject]@{{Bytes=[byte[]]@(1);Sha256='{COLLECTOR_SHA256}'}}}}; "
+        "function Assert-Phase15SpainTrustBundle{param($ExpectedHost)[pscustomobject]@{Validated=$true}}; "
+        "function Read-Phase15FutureClaim{param($ClaimPath)$script:claim}; "
+        "function Initialize-Phase15ProductionStateRoot{$script:initializerCount++;throw 'initializer_called'}; "
+        "$message='';try{Invoke-Phase15RunnerMain}catch{$message=$_.Exception.Message}; "
+        "[Console]::Out.Write(\"$message|$script:initializerCount\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "claim_invalid|0"
+
+
+@pytest.mark.parametrize(
+    ("authorized_sid", "expected_sids"),
+    [
+        ("S-1-5-18", "S-1-5-18,S-1-5-32-544"),
+        ("S-1-5-32-544", "S-1-5-32-544,S-1-5-18"),
+        ("S-1-5-21-1000", "S-1-5-21-1000,S-1-5-18,S-1-5-32-544"),
+    ],
+    ids=("system", "administrators", "ordinary-runner"),
+)
+def test_round11_managed_acl_creation_and_validation_share_unique_sid_set(
+    authorized_sid: str, expected_sids: str
+):
+    result = run_powershell(
+        f"$authorized='{authorized_sid}'; $expected='{expected_sids}'; "
+        "$security=New-Phase15ManagedStateDirectorySecurity -AuthorizedSid $authorized; "
+        "$actual=@($security.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier]) | ForEach-Object {$_.IdentityReference.Value}); "
+        "$full=[int64][Security.AccessControl.FileSystemRights]::FullControl; $inherit=[int][Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [int][Security.AccessControl.InheritanceFlags]::ObjectInherit; "
+        "$facts=[pscustomobject]@{Exists=$true;FullName='C:\\ProgramData\\AMN2';IsDirectory=$true;IsReparse=$false;OwnerSid=$authorized;Protected=$true;Rules=@($actual | ForEach-Object {[pscustomobject]@{Sid=$_;Type='Allow';Rights=$full;IsInherited=$false;Inheritance=$inherit;Propagation=0}})}; "
+        "$valid=Test-Phase15ManagedStateDirectoryFacts -Facts $facts -ExpectedPath 'C:\\ProgramData\\AMN2' -AuthorizedSid $authorized; "
+        "[Console]::Out.Write(\"$($actual -join ',')|$($security.GetOwner([Security.Principal.SecurityIdentifier]).Value)|$($valid.ToString().ToLowerInvariant())|$($actual.Count)\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    expected_count = len(expected_sids.split(","))
+    actual_sids, owner_sid, valid, actual_count = result.stdout.split("|", 3)
+    assert set(actual_sids.split(",")) == set(expected_sids.split(","))
+    assert owner_sid == authorized_sid
+    assert valid == "true"
+    assert actual_count == str(expected_count)
