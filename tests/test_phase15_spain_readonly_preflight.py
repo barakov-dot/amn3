@@ -1,10 +1,12 @@
 import base64
 import hashlib
+import io
 import json
 import os
 import re
 import subprocess
 import sys
+import threading
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -224,6 +226,54 @@ def test_collector_command_only_classifies_exact_missing_binary_as_unavailable(m
     assert command(["permission-denied-binary"])[3] == "launch_failed"
 
 
+def test_collector_command_fails_closed_on_reader_exception_or_incomplete_eof(monkeypatch: pytest.MonkeyPatch):
+    namespace = collector_python_namespace()
+    command = namespace["command"]
+    subprocess_module = namespace["subprocess"]
+
+    class RaisingStream:
+        def read(self, _count: int):
+            raise OSError("synthetic reader failure")
+
+        def close(self):
+            pass
+
+    class BlockingStream:
+        def __init__(self, release: threading.Event):
+            self.release = release
+
+        def read(self, _count: int):
+            self.release.wait(2)
+            return b""
+
+        def close(self):
+            pass
+
+    class FakeProcess:
+        def __init__(self, stdout, stderr):
+            self.stdout = stdout
+            self.stderr = stderr
+
+        def poll(self):
+            return 0
+
+        def wait(self, timeout=None):
+            return 0
+
+        def kill(self):
+            pass
+
+    monkeypatch.setattr(subprocess_module, "Popen", lambda *_args, **_kwargs: FakeProcess(RaisingStream(), io.BytesIO()))
+    assert command(["synthetic"])[3] == "incomplete_output"
+
+    release = threading.Event()
+    monkeypatch.setattr(subprocess_module, "Popen", lambda *_args, **_kwargs: FakeProcess(BlockingStream(release), io.BytesIO()))
+    try:
+        assert command(["synthetic"])[3] == "incomplete_output"
+    finally:
+        release.set()
+
+
 @pytest.mark.parametrize(
     ("return_code", "stderr", "expected"),
     [
@@ -256,7 +306,44 @@ def test_container_inventory_includes_stopped_objects_and_errors_fail_closed():
     assert stderr_on_success == ("stop", "stop")
     assert malformed_name == ("stop", "stop")
     assert duplicate_name == ("stop", "stop")
-    assert '[engine, "ps", "-a", "--format", "{{.Names}}"]' in require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
+    assert '[SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "ps", "-a", "--format", "{{.Names}}"]' in require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
+
+
+def test_phase13_current_spain_identity_and_dedicated_docker_inventory_are_exact():
+    classify = collector_helper("classify_dedicated_spain_docker")
+    identity = collector_helper("current_spain_identity")()
+    success = "success"
+    inventory = (0, b"amn2-spain-awg\nother\n", b"", success)
+    networks = (0, (b"a" * 64) + b"\n", b"", success)
+    clean_subnets = [(0, b"172.28.0.0/16\n", b"", success)]
+    conflict_subnets = [(0, b"172.29.252.8/29\n", b"", success)]
+
+    assert classify(inventory, networks, clean_subnets) == ("pass", "free", "free")
+    assert classify((0, b"amn2-spain-awg3\n", b"", success), networks, clean_subnets) == ("pass", "stop", "free")
+    assert classify(inventory, networks, conflict_subnets) == ("pass", "free", "stop")
+    assert classify(inventory, (0, b"malformed-id\n", b"", success), clean_subnets) == ("stop", "stop", "stop")
+    assert classify(inventory, networks, [(0, b"172.28.0.0/16\n", b"warning\n", success)]) == ("stop", "stop", "stop")
+    assert identity == {
+        "application_root": "/opt/amn2-spain",
+        "bot_unit": "amn2-spain-bot.service",
+        "container": "amn2-spain-awg",
+        "database_path": "/var/lib/amn2-spain/amn2.sqlite3",
+        "docker_host": "unix:///run/amn2-spain-docker/docker.sock",
+        "interface": "awg0",
+    }
+
+    source = require_file(COLLECTOR, "collector").read_text(encoding="utf-8")
+    for literal in (
+        'CURRENT_APPLICATION_ROOT = "/opt/amn2-spain"',
+        'CURRENT_DATABASE_PATH = "/var/lib/amn2-spain/amn2.sqlite3"',
+        'CURRENT_AWG2_CONTAINER = "amn2-spain-awg"',
+        'CURRENT_AWG2_INTERFACE = "awg0"',
+        'CURRENT_BOT_UNIT = "amn2-spain-bot.service"',
+        'SPAIN_DOCKER_HOST = "unix:///run/amn2-spain-docker/docker.sock"',
+    ):
+        assert literal in source
+    assert '[SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "ps", "-a", "--format", "{{.Names}}"]' in source
+    assert '[SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "network", "ls", "-q"]' in source
 
 
 def test_systemd_exit_one_is_allowed_only_for_exact_degraded_state():
@@ -265,6 +352,14 @@ def test_systemd_exit_one_is_allowed_only_for_exact_degraded_state():
     assert classify((1, b"", b"permission denied\n", "command_failed")) == "stop"
     assert classify((1, b"unknown\n", b"", "command_failed")) == "stop"
     assert classify((0, b"running trailing\n", b"", "success")) == "stop"
+
+
+def test_phase13_bot_identity_requires_exact_inactive_disabled_state():
+    classify = collector_helper("classify_phase13_bot_unit")
+    success = "success"
+    assert classify((0, b"inactive\n", b"", success), (0, b"disabled\n", b"", success)) == "pass"
+    assert classify((0, b"active\n", b"", success), (0, b"enabled\n", b"", success)) == "stop"
+    assert classify((0, b"inactive\n", b"warning\n", success), (0, b"disabled\n", b"", success)) == "stop"
 
 
 def test_firewall_fallback_and_parsing_are_fail_closed():
@@ -320,9 +415,9 @@ def test_iptables_requires_declared_table_chains_and_allowlisted_values(payload:
     "payload",
     [
         b'{"nftables":[{"unknown":{"family":"inet"}}]}\n',
-        b'{"nftables":[{"rule":{"expr":[{"match":{"left":{"payload":{"field":"dport","protocol":"udp"}},"op":"==","right":{"range":[30000,30005]}}}]}}]}\n',
-        b'{"nftables":[{"rule":{"expr":[{"match":{"left":{"payload":{"field":"saddr","protocol":"ip"}},"op":"==","right":{"prefix":{"addr":"10.212.13.128","len":25}}}}]}}]}\n',
-        b'{"nftables":[{"rule":{"expr":[{"match":{"left":{"meta":{"key":"iifname"}},"op":"==","right":"amn2sp3br0"}}]}}]}\n',
+        b'{"nftables":[{"rule":{"chain":"INPUT","expr":[{"match":{"left":{"payload":{"field":"dport","protocol":"udp"}},"op":"==","right":{"range":[30000,30005]}}}],"family":"inet","table":"filter"}}]}\n',
+        b'{"nftables":[{"rule":{"chain":"INPUT","expr":[{"match":{"left":{"payload":{"field":"saddr","protocol":"ip"}},"op":"==","right":{"prefix":{"addr":"10.212.13.128","len":25}}}}],"family":"inet","table":"filter"}}]}\n',
+        b'{"nftables":[{"rule":{"chain":"INPUT","expr":[{"match":{"left":{"meta":{"key":"iifname"}},"op":"==","right":"amn2sp3br0"}}],"family":"inet","table":"filter"}}]}\n',
     ],
 )
 def test_nft_structure_ranges_interfaces_and_prefixes_fail_closed_or_conflict(payload: bytes):
@@ -359,6 +454,19 @@ def test_nft_context_parser_validates_allowlisted_field_types_and_values(payload
 @pytest.mark.parametrize(
     "payload",
     [
+        b'{"nftables":[{"rule":{"chain":"INPUT","expr":[{"match":{"left":{"payload":{"field":"dport","protocol":"ip"}},"op":"==","right":30001}}],"family":"inet","table":"filter"}}]}\n',
+        b'{"nftables":[{"rule":{"chain":"INPUT","expr":[{"match":{"left":{"payload":{"field":"saddr","protocol":"tcp"}},"op":"==","right":"192.0.2.1"}}],"family":"inet","table":"filter"}}]}\n',
+    ],
+)
+def test_nft_payload_protocol_must_match_field_semantics(payload: bytes):
+    classify = collector_helper("classify_firewall")
+
+    assert classify((0, payload, b"", "success"), (127, b"", b"", "unavailable")) == "stop"
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
         b"*filter\n:INPUT ACCEPT [0:0]\n-A INPUT -p udp --dport 30000:30005 -j ACCEPT\nCOMMIT\n",
         b"*filter\n:INPUT ACCEPT [0:0]\n-A INPUT -s 172.29.252.8/29 -j ACCEPT\nCOMMIT\n",
         b"*filter\n:INPUT ACCEPT [0:0]\n-A INPUT -i amn2sp3br0 -j ACCEPT\nCOMMIT\n",
@@ -370,6 +478,18 @@ def test_iptables_save_ranges_networks_interfaces_and_unknown_syntax_stop(payloa
     unavailable = (127, b"", b"", "unavailable")
 
     assert classify(unavailable, (0, payload, b"", "success")) == "stop"
+
+
+def test_iptables_interface_prefix_semantics_detect_reserved_names():
+    classify = collector_helper("classify_firewall")
+    unavailable = (127, b"", b"", "unavailable")
+
+    def probe(interface: str):
+        return (0, f"*filter\n:INPUT ACCEPT [0:0]\n-A INPUT -i {interface} -j ACCEPT\nCOMMIT\n".encode(), b"", "success")
+
+    assert classify(unavailable, probe("awg+")) == "stop"
+    assert classify(unavailable, probe("amn2sp3+")) == "stop"
+    assert classify(unavailable, probe("eth+")) == "pass"
 
 
 def test_route_overlap_udp_and_firewall_outputs_require_strict_parsing():
@@ -456,31 +576,32 @@ def test_recovery_marker_scan_uses_explicit_stat_and_fails_closed(monkeypatch: p
         (b"", "stop"),
     ],
 )
-def test_awg2_health_requires_active_unit_interface_and_fresh_strict_handshake(handshakes: bytes, expected: str):
+def test_awg2_health_requires_current_container_netns_interface_and_fresh_strict_handshake(handshakes: bytes, expected: str):
     classify = collector_helper("classify_awg2_health")
     success = "success"
-    unit = (0, b"active\n", b"", success)
-    interface = (0, b"7: awg2: <POINTOPOINT,UP>\n", b"", success)
+    container = (0, b"true|4242\n", b"", success)
+    interface = (0, b"7: awg0: <POINTOPOINT,UP>\n", b"", success)
     peer_state = (0, handshakes, b"", success)
 
-    assert classify(unit, interface, peer_state, now_epoch=1_700_000_000) == expected
+    assert classify(container, interface, peer_state, now_epoch=1_700_000_000) == expected
 
 
 def test_awg2_health_fails_closed_on_any_probe_error():
     classify = collector_helper("classify_awg2_health")
     failed = (1, b"", b"failed", "command_failed")
-    good_unit = (0, b"active\n", b"", "success")
-    good_interface = (0, b"7: awg2: <POINTOPOINT,UP>\n", b"", "success")
+    good_container = (0, b"true|4242\n", b"", "success")
+    good_interface = (0, b"7: awg0: <POINTOPOINT,UP>\n", b"", "success")
     fresh = (0, b"A" * 43 + b"=\t1699999940\n", b"", "success")
 
     assert classify(failed, good_interface, fresh, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_unit, failed, fresh, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_unit, good_interface, failed, now_epoch=1_700_000_000) == "stop"
-    assert classify((0, b"active\n", b"warning\n", "success"), good_interface, fresh, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_unit, (0, b"7: awg2: <POINTOPOINT,UP>\n", b"warning\n", "success"), fresh, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_unit, good_interface, (0, fresh[1], b"warning\n", "success"), now_epoch=1_700_000_000) == "stop"
-    assert classify(good_unit, (0, b"not-awg2\n", b"", "success"), fresh, now_epoch=1_700_000_000) == "stop"
-    assert classify(good_unit, good_interface, (0, fresh[1].rstrip(b"\n"), b"", "success"), now_epoch=1_700_000_000) == "stop"
+    assert classify(good_container, failed, fresh, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_container, good_interface, failed, now_epoch=1_700_000_000) == "stop"
+    assert classify((0, b"true|4242\n", b"warning\n", "success"), good_interface, fresh, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_container, (0, b"7: awg0: <POINTOPOINT,UP>\n", b"warning\n", "success"), fresh, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_container, good_interface, (0, fresh[1], b"warning\n", "success"), now_epoch=1_700_000_000) == "stop"
+    assert classify(good_container, (0, b"not-awg0\n", b"", "success"), fresh, now_epoch=1_700_000_000) == "stop"
+    assert classify(good_container, good_interface, (0, fresh[1].rstrip(b"\n"), b"", "success"), now_epoch=1_700_000_000) == "stop"
+    assert classify((0, b"false|0\n", b"", "success"), good_interface, fresh, now_epoch=1_700_000_000) == "stop"
 
 
 def run_powershell(body: str):
@@ -514,6 +635,30 @@ def test_runner_rejects_missing_future_claim_before_any_acceptance():
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == "false"
+
+
+def test_runner_validates_claim_lifetime_against_single_captured_started_at(tmp_path: Path):
+    claim_path = valid_runner_claim(
+        tmp_path,
+        issued_at="2026-08-16T00:00:00Z",
+        expires_at="2026-08-16T00:10:00Z",
+    )
+    escaped = str(claim_path).replace("'", "''")
+    result = run_powershell(
+        f"$claim = Read-Phase15FutureClaim -ClaimPath '{escaped}'; "
+        f"$atIssued = Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId '{PACKAGE_ID}' -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -At '2026-08-16T00:00:00Z'; "
+        f"$before = Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId '{PACKAGE_ID}' -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -At '2026-08-15T23:59:59Z'; "
+        f"$expired = Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId '{PACKAGE_ID}' -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -At '2026-08-16T00:10:00Z'; "
+        "[Console]::Out.Write(\"$($atIssued.ToString().ToLowerInvariant())|$($before.ToString().ToLowerInvariant())|$($expired.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|false|false"
+    source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
+    main = source[source.index("function Invoke-Phase15RunnerMain") :]
+    assert main.index("$startedAt =") < main.index("Read-Phase15ManifestArtifact")
+    assert main.index("$startedAt =") < main.index("Test-Phase15FutureClaim")
+    assert "-At $startedAt" in main
 
 
 def valid_runner_claim(tmp_path: Path, **overrides: object) -> Path:
@@ -709,6 +854,33 @@ def test_runner_hashes_and_transports_one_immutable_collector_byte_array(tmp_pat
     assert "ReadAllBytes($collectorPath)" not in main
 
 
+def test_runner_canonical_parses_and_hashes_one_immutable_manifest_byte_array(tmp_path: Path):
+    manifest_path = tmp_path / "manifest.json"
+    original_value = {"entries": [], "package_id": PACKAGE_ID}
+    original = (json.dumps(original_value, sort_keys=True, separators=(",", ":")) + "\n").encode()
+    manifest_path.write_bytes(original)
+    escaped = str(manifest_path).replace("'", "''")
+    replacement = base64.b64encode(b'{"package_id":"replaced-after-read"}\n').decode()
+    result = run_powershell(
+        f"$artifact = Read-Phase15ManifestArtifact -Path '{escaped}'; "
+        f"[IO.File]::WriteAllBytes('{escaped}', [Convert]::FromBase64String('{replacement}')); "
+        "[Console]::Out.Write(\"$($artifact.Sha256)|$($artifact.Value.package_id)|$([Convert]::ToBase64String($artifact.Bytes))\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    digest, package_id, encoded = result.stdout.split("|", 2)
+    assert digest == hashlib.sha256(original).hexdigest()
+    assert package_id == PACKAGE_ID
+    assert base64.b64decode(encoded) == original
+    source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
+    reader = source[source.index("function Read-Phase15ManifestArtifact") : source.index("function Read-Phase15CollectorArtifact")]
+    assert reader.count("[IO.File]::ReadAllBytes($Path)") == 1
+    main = source[source.index("function Invoke-Phase15RunnerMain") :]
+    assert main.count("Read-Phase15ManifestArtifact -Path $manifestPath") == 1
+    assert "ConvertFrom-Phase15CanonicalJsonFile -Path $manifestPath" not in main
+    assert "Get-Phase15FileSha256 -Path $manifestPath" not in main
+
+
 def test_transport_success_requires_empty_stderr_and_bounded_io_starts_before_stdin():
     result = run_powershell(
         "$clean = Test-Phase15TransportCompletion -ExitCode 0 -StderrLength 0; "
@@ -726,6 +898,25 @@ def test_transport_success_requires_empty_stderr_and_bounded_io_starts_before_st
     assert transport.index("StandardError.BaseStream.ReadAsync") < transport.index("WriteAsync")
     assert "[ref]$Started" in transport
     assert transport.index("$Started.Value = $true") > transport.index("$process.Start()")
+
+
+def test_transport_abort_kills_alive_child_and_waits_bounded_before_dispose():
+    result = run_powershell(
+        "$script:killed = $false; $script:waited = 0; "
+        "$process = [pscustomobject]@{HasExited=$false}; "
+        "$process | Add-Member -MemberType ScriptMethod -Name Kill -Value {$script:killed=$true; $this.HasExited=$true}; "
+        "$process | Add-Member -MemberType ScriptMethod -Name WaitForExit -Value {param($milliseconds) $script:waited=$milliseconds; return $true}; "
+        "Stop-Phase15TransportProcess -Process $process -WaitMilliseconds 2000; "
+        "[Console]::Out.Write(\"$($script:killed.ToString().ToLowerInvariant())|$script:waited\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|2000"
+    source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
+    transport = source[source.index("function Invoke-Phase15OneSshTransport") : source.index("function Write-Phase15CreateNewJson")]
+    assert "catch {" in transport
+    assert "Stop-Phase15TransportProcess -Process $process" in transport
+    assert transport.index("Stop-Phase15TransportProcess -Process $process") < transport.index("$process.Dispose()")
 
 
 def valid_collector_document(*, stopped: bool = False) -> dict[str, object]:
@@ -954,6 +1145,26 @@ def test_production_lifecycle_root_is_stable_and_not_derived_from_user_paths(tmp
     assert first == second == r"C:\ProgramData\AMN2\phase15\readonly-preflight"
 
 
+def test_claim_lock_is_exclusive_for_whole_transaction_and_contender_cannot_reconcile(tmp_path: Path):
+    state_root = str(tmp_path / "state").replace("'", "''")
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        f"$owner = Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; "
+        f"$tx = Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' "
+        f"-ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $owner; "
+        "$before = [IO.File]::ReadAllBytes($tx.JournalPath); $message = ''; "
+        f"try {{ $null = Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' }} catch {{ $message = $_.Exception.Message }}; "
+        "$after = [IO.File]::ReadAllBytes($tx.JournalPath); "
+        "$same = [Convert]::ToBase64String($before) -ceq [Convert]::ToBase64String($after); "
+        "$owner.Stream.Dispose(); "
+        f"$next = Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; $next.Stream.Dispose(); "
+        "[Console]::Out.Write(\"$message|$($same.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "claim_replay|true"
+
+
 def test_outcome_slot_is_atomically_reserved_and_claim_owned(tmp_path: Path):
     outcome = str(tmp_path / "outcome.json").replace("'", "''")
     result = run_powershell(
@@ -987,9 +1198,12 @@ def test_runner_reconciles_before_atomic_transaction_ownership_and_transport():
     source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
     main = source[source.index("function Invoke-Phase15RunnerMain") :]
 
-    assert main.index("Reconcile-Phase15Transaction") < main.index("Start-Phase15Transaction")
+    assert main.index("Enter-Phase15ClaimLock") < main.index("Reconcile-Phase15Transaction")
+    assert main.index("Reconcile-Phase15Transaction") < main.index("Test-Phase15FutureClaim")
+    assert main.index("Test-Phase15FutureClaim") < main.index("Start-Phase15Transaction")
     assert main.index("Start-Phase15Transaction") < main.index("Invoke-Phase15OneSshTransport")
     assert "-TransactionPath $transaction.JournalPath" in main
+    assert "finally { $claimLock.Stream.Dispose() }" in main
 
 
 @pytest.mark.parametrize(
@@ -1014,16 +1228,19 @@ def test_interrupted_transaction_reconciles_to_one_sanitized_terminal_failure(tm
             "[IO.File]::WriteAllText($tx.ReservationPath, '{\"decision\":\"pass\",\"schema\":\"synthetic\"}' + [Environment]::NewLine, [Text.UTF8Encoding]::new($false)); "
         )
     result = run_powershell(
+        f"$lock = Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; "
         f"$tx = Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' "
         f"-ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z' "
-        f"-ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid'; "
+        f"-ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
         f"{setup}"
-        f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z'; "
+        f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z' -Lock $lock; "
         "$lifecycle = ConvertFrom-Phase15CanonicalJsonFile -Path $tx.LifecyclePath; "
-        "$published = ConvertFrom-Phase15CanonicalJsonFile -Path $tx.ReservationPath; "
+        "$published = ConvertFrom-Phase15CanonicalJsonFile -Path $reconciled.OutcomePath; "
+        "$originalRaw = if (Test-Path -LiteralPath $tx.ReservationPath) { [IO.File]::ReadAllText($tx.ReservationPath) } else { '' }; "
         "$journalExists = Test-Path -LiteralPath $tx.JournalPath; "
         "$owned = Test-Phase15OutcomeOwnership -ReservationPath $tx.ReservationPath -ClaimId 'phase15-preflight-test-001'; "
-        "[Console]::Out.Write((@{journal_exists=$journalExists;lifecycle=$lifecycle;outcome=$published;owned=$owned;reconciled=$reconciled} | ConvertTo-Json -Compress -Depth 10))"
+        "$lock.Stream.Dispose(); "
+        "[Console]::Out.Write((@{journal_exists=$journalExists;lifecycle=$lifecycle;original_raw=$originalRaw;outcome=$published;outcome_path=$reconciled.OutcomePath;owned=$owned;reconciled=$reconciled.Recovered} | ConvertTo-Json -Compress -Depth 10))"
     )
 
     assert result.returncode == 0, result.stderr
@@ -1042,6 +1259,86 @@ def test_interrupted_transaction_reconciles_to_one_sanitized_terminal_failure(tm
         "remote_file_written": False,
         "ssh_used": False,
     }
+    if crash_point in {"corrupt_outcome_reservation", "orphan_outcome"}:
+        assert Path(state["outcome_path"]) != tmp_path / "outcome.json"
+        assert state["original_raw"] in {"{}", '{"decision":"pass","schema":"synthetic"}\r\n', '{"decision":"pass","schema":"synthetic"}\n'}
+    else:
+        assert Path(state["outcome_path"]) == tmp_path / "outcome.json"
+
+
+@pytest.mark.parametrize(
+    ("phase", "ssh_used"),
+    [
+        ("owned", False),
+        ("transport_attempted", True),
+        ("ssh_started", True),
+        ("outcome_staged", True),
+        ("finalizing", True),
+    ],
+)
+def test_recovery_safety_is_conservative_for_every_persisted_crash_phase(tmp_path: Path, phase: str, ssh_used: bool):
+    state_root = str(tmp_path / "state").replace("'", "''")
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        f"$lock = Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; "
+        f"$tx = Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' "
+        f"-ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
+        + (
+            f"$null = Set-Phase15TransactionPhase -TransactionPath $tx.JournalPath -ClaimId 'phase15-preflight-test-001' -Phase '{phase}' -Lock $lock; "
+            if phase != "owned"
+            else ""
+        )
+        + f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z' -Lock $lock; "
+        "$failure = ConvertFrom-Phase15CanonicalJsonFile -Path $reconciled.OutcomePath; $lock.Stream.Dispose(); "
+        "[Console]::Out.Write($failure.safety.ssh_used.ToString().ToLowerInvariant())"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == str(ssh_used).lower()
+
+
+def test_recovery_never_overwrites_another_claim_outcome_owner(tmp_path: Path):
+    state_root = str(tmp_path / "state").replace("'", "''")
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        f"$lock = Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; "
+        f"$tx = Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' "
+        f"-ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
+        "[IO.File]::Delete($tx.ReservationPath); "
+        f"$null = Reserve-Phase15OutcomeSlot -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-002' -ReservedAt '2026-08-16T00:00:01Z'; "
+        f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:02Z' -Lock $lock; "
+        "$otherStillOwns = Test-Phase15OutcomeOwnership -ReservationPath $tx.ReservationPath -ClaimId 'phase15-preflight-test-002'; "
+        "$failure = ConvertFrom-Phase15CanonicalJsonFile -Path $reconciled.OutcomePath; $lock.Stream.Dispose(); "
+        "[Console]::Out.Write(\"$($otherStillOwns.ToString().ToLowerInvariant())|$($reconciled.OutcomePath)|$($failure.reason_code)\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    still_owned, recovery_path, reason = result.stdout.split("|", 2)
+    assert still_owned == "true"
+    assert Path(recovery_path) != tmp_path / "outcome.json"
+    assert reason == "transport_failed"
+
+
+def test_expired_claim_identity_can_recover_prior_transport_but_cannot_start_new_transport(tmp_path: Path):
+    state_root = str(tmp_path / "state").replace("'", "''")
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    claim_path = valid_runner_claim(tmp_path, issued_at="2026-08-16T00:00:00Z", expires_at="2026-08-16T00:01:00Z")
+    escaped_claim = str(claim_path).replace("'", "''")
+    result = run_powershell(
+        f"$claim = Read-Phase15FutureClaim -ClaimPath '{escaped_claim}'; "
+        f"$identity = Test-Phase15ClaimIdentity -Claim $claim -ExpectedPackageId '{PACKAGE_ID}' -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid'; "
+        f"$current = Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId '{PACKAGE_ID}' -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -At '2026-08-16T00:02:00Z'; "
+        f"$lock = Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId $claim.claim_id; "
+        f"$tx = Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId $claim.claim_id -ReservedAt '2026-08-16T00:00:30Z' "
+        f"-ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
+        "$null = Set-Phase15TransactionPhase -TransactionPath $tx.JournalPath -ClaimId $claim.claim_id -Phase 'transport_attempted' -Lock $lock; "
+        f"$reconciled = Reconcile-Phase15Transaction -StateRoot '{state_root}' -ClaimId $claim.claim_id -EndedAt '2026-08-16T00:02:00Z' -Lock $lock; "
+        "$failure = ConvertFrom-Phase15CanonicalJsonFile -Path $reconciled.OutcomePath; $lock.Stream.Dispose(); "
+        "[Console]::Out.Write(\"$($identity.ToString().ToLowerInvariant())|$($current.ToString().ToLowerInvariant())|$($failure.safety.ssh_used.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|false|true"
 
 
 def test_terminal_outcome_is_staged_and_not_published_when_terminal_transition_fails(tmp_path: Path):

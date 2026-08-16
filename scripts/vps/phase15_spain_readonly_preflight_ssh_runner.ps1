@@ -32,18 +32,36 @@ function Get-Phase15FileSha256 {
     return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
 }
 
+function Get-Phase15BytesSha256 {
+    param([Parameter(Mandatory)][byte[]]$Bytes)
+    $algorithm = [Security.Cryptography.SHA256]::Create()
+    try { $digest = $algorithm.ComputeHash($Bytes) } finally { $algorithm.Dispose() }
+    return ([BitConverter]::ToString($digest)).Replace('-', '').ToLowerInvariant()
+}
+
+function Get-Phase15CanonicalJsonSha256 {
+    param([Parameter(Mandatory)][object]$Value)
+    $bytes = [Text.UTF8Encoding]::new($false).GetBytes((ConvertTo-Phase15CanonicalJsonText -Value $Value) + "`n")
+    return Get-Phase15BytesSha256 -Bytes $bytes
+}
+
+function Read-Phase15ManifestArtifact {
+    param([Parameter(Mandatory)][string]$Path)
+    $bytes = [IO.File]::ReadAllBytes($Path)
+    try {
+        $text = [Text.UTF8Encoding]::new($false, $true).GetString($bytes)
+        $value = ConvertFrom-Phase15CanonicalJsonText -Text $text
+    } catch { throw 'manifest_invalid' }
+    if ($null -eq $value) { throw 'manifest_invalid' }
+    return [pscustomobject]@{ Bytes = [byte[]]$bytes; Sha256 = Get-Phase15BytesSha256 -Bytes $bytes; Value = $value }
+}
+
 function Read-Phase15CollectorArtifact {
     param([Parameter(Mandatory)][string]$Path)
     $bytes = [IO.File]::ReadAllBytes($Path)
-    $algorithm = [Security.Cryptography.SHA256]::Create()
-    try {
-        $digest = $algorithm.ComputeHash($bytes)
-    } finally {
-        $algorithm.Dispose()
-    }
     return [pscustomobject]@{
         Bytes = [byte[]]$bytes
-        Sha256 = ([BitConverter]::ToString($digest)).Replace('-', '').ToLowerInvariant()
+        Sha256 = Get-Phase15BytesSha256 -Bytes $bytes
     }
 }
 
@@ -134,7 +152,7 @@ function Test-Phase15UtcTimestamp {
     } catch { return $false }
 }
 
-function Test-Phase15FutureClaim {
+function Test-Phase15ClaimIdentity {
     param(
         [Parameter(Mandatory)][object]$Claim,
         [Parameter(Mandatory)][string]$ExpectedPackageId,
@@ -157,9 +175,26 @@ function Test-Phase15FutureClaim {
     if (-not (Test-Phase15UtcTimestamp -Value $Claim.issued_at) -or -not (Test-Phase15UtcTimestamp -Value $Claim.expires_at)) { return $false }
     $issued = [DateTimeOffset]::ParseExact($Claim.issued_at, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
     $expires = [DateTimeOffset]::ParseExact($Claim.expires_at, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
-    $now = [DateTimeOffset]::UtcNow
-    if ($issued -ge $expires -or $now -lt $issued -or $now -ge $expires) { return $false }
+    if ($issued -ge $expires) { return $false }
     return $true
+}
+
+function Test-Phase15FutureClaim {
+    param(
+        [Parameter(Mandatory)][object]$Claim,
+        [Parameter(Mandatory)][string]$ExpectedPackageId,
+        [Parameter(Mandatory)][string]$ExpectedManifestSha256,
+        [Parameter(Mandatory)][string]$ExpectedCollectorSha256,
+        [Parameter(Mandatory)][string]$ExpectedHost,
+        [string]$At
+    )
+    if (-not (Test-Phase15ClaimIdentity -Claim $Claim -ExpectedPackageId $ExpectedPackageId -ExpectedManifestSha256 $ExpectedManifestSha256 -ExpectedCollectorSha256 $ExpectedCollectorSha256 -ExpectedHost $ExpectedHost)) { return $false }
+    if ([string]::IsNullOrWhiteSpace($At)) { $atValue = [DateTimeOffset]::UtcNow } elseif (-not (Test-Phase15UtcTimestamp -Value $At)) { return $false } else {
+        $atValue = [DateTimeOffset]::ParseExact($At, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
+    }
+    $issued = [DateTimeOffset]::ParseExact($Claim.issued_at, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
+    $expires = [DateTimeOffset]::ParseExact($Claim.expires_at, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
+    return $issued -le $atValue -and $atValue -lt $expires
 }
 
 function Test-Phase15CollectorDocument {
@@ -287,6 +322,12 @@ function Test-Phase15TransportCompletion {
     return $ExitCode -eq 0 -and $StderrLength -eq 0
 }
 
+function Stop-Phase15TransportProcess {
+    param([Parameter(Mandatory)][object]$Process, [int]$WaitMilliseconds = 2000)
+    if (-not $Process.HasExited) { $Process.Kill() }
+    if (-not $Process.WaitForExit($WaitMilliseconds)) { throw 'transport_child_retained' }
+}
+
 function Invoke-Phase15OneSshTransport {
     param(
         [Parameter(Mandatory)][string]$ExpectedHost,
@@ -294,7 +335,9 @@ function Invoke-Phase15OneSshTransport {
         [Parameter(Mandatory)][string]$ClaimId,
         [Parameter(Mandatory)][string]$ManifestSha256,
         [Parameter(Mandatory)][string]$CollectorSha256,
-        [Parameter(Mandatory)][ref]$Started
+        [Parameter(Mandatory)][ref]$Started,
+        [Parameter(Mandatory)][string]$TransactionPath,
+        [Parameter(Mandatory)][object]$Lock
     )
     $Started.Value = $false
     $start = [Diagnostics.ProcessStartInfo]::new()
@@ -307,12 +350,16 @@ function Invoke-Phase15OneSshTransport {
     $start.RedirectStandardError = $true
     $process = [Diagnostics.Process]::new()
     $process.StartInfo = $start
-    if (-not $process.Start()) { throw 'transport_failed' }
-    $Started.Value = $true
-    $stdout = [IO.MemoryStream]::new()
-    $stderr = [IO.MemoryStream]::new()
-    $cancellation = [Threading.CancellationTokenSource]::new()
+    $stdout = $null
+    $stderr = $null
+    $cancellation = $null
     try {
+        if (-not $process.Start()) { throw 'transport_failed' }
+        $Started.Value = $true
+        [void](Set-Phase15TransactionPhase -TransactionPath $TransactionPath -ClaimId $ClaimId -Phase 'ssh_started' -Lock $Lock)
+        $stdout = [IO.MemoryStream]::new()
+        $stderr = [IO.MemoryStream]::new()
+        $cancellation = [Threading.CancellationTokenSource]::new()
         $stdoutBytes = [byte[]]::new(4096)
         $stderrBytes = [byte[]]::new(4096)
         $deadline = [DateTimeOffset]::UtcNow.AddSeconds(30)
@@ -323,7 +370,7 @@ function Invoke-Phase15OneSshTransport {
         $stderrDone = $false
         $stdinDone = $false
         while (-not ($process.HasExited -and $stdoutDone -and $stderrDone -and $stdinDone)) {
-            if ([DateTimeOffset]::UtcNow -ge $deadline) { $cancellation.Cancel(); $process.Kill(); throw 'transport_failed' }
+            if ([DateTimeOffset]::UtcNow -ge $deadline) { $cancellation.Cancel(); throw 'transport_failed' }
             if (-not $stdinDone -and $stdinTask.IsCompleted) {
                 $stdinTask.GetAwaiter().GetResult()
                 $process.StandardInput.Close()
@@ -332,14 +379,14 @@ function Invoke-Phase15OneSshTransport {
             if (-not $stdoutDone -and $stdoutTask.IsCompleted) {
                 $count = $stdoutTask.GetAwaiter().GetResult()
                 if ($count -eq 0) { $stdoutDone = $true } else {
-                    if (Add-Phase15BoundedBytes -Buffer $stdout -Bytes $stdoutBytes -Count $count -MaximumBytes 65536) { $process.Kill(); throw 'transport_failed' }
+                    if (Add-Phase15BoundedBytes -Buffer $stdout -Bytes $stdoutBytes -Count $count -MaximumBytes 65536) { throw 'transport_failed' }
                     $stdoutTask = $process.StandardOutput.BaseStream.ReadAsync($stdoutBytes, 0, $stdoutBytes.Length, $cancellation.Token)
                 }
             }
             if (-not $stderrDone -and $stderrTask.IsCompleted) {
                 $count = $stderrTask.GetAwaiter().GetResult()
                 if ($count -eq 0) { $stderrDone = $true } else {
-                    if (Add-Phase15BoundedBytes -Buffer $stderr -Bytes $stderrBytes -Count $count -MaximumBytes 65536) { $process.Kill(); throw 'transport_failed' }
+                    if (Add-Phase15BoundedBytes -Buffer $stderr -Bytes $stderrBytes -Count $count -MaximumBytes 65536) { throw 'transport_failed' }
                     $stderrTask = $process.StandardError.BaseStream.ReadAsync($stderrBytes, 0, $stderrBytes.Length, $cancellation.Token)
                 }
             }
@@ -347,12 +394,16 @@ function Invoke-Phase15OneSshTransport {
         }
         if (-not (Test-Phase15TransportCompletion -ExitCode $process.ExitCode -StderrLength $stderr.Length)) { throw 'transport_failed' }
         return [Text.UTF8Encoding]::new($false, $true).GetString($stdout.ToArray())
+    } catch {
+        if ($Started.Value) { Stop-Phase15TransportProcess -Process $process }
+        throw
     } finally {
-        $cancellation.Cancel()
-        try { $process.StandardInput.Close() } catch {}
-        $cancellation.Dispose()
-        $stdout.Dispose()
-        $stderr.Dispose()
+        if ($null -ne $cancellation) { $cancellation.Cancel() }
+        if ($Started.Value) { try { $process.StandardInput.Close() } catch {} }
+        if ($null -ne $cancellation) { $cancellation.Dispose() }
+        if ($null -ne $stdout) { $stdout.Dispose() }
+        if ($null -ne $stderr) { $stderr.Dispose() }
+        if ($Started.Value -and -not $process.HasExited) { Stop-Phase15TransportProcess -Process $process }
         $process.Dispose()
     }
 }
@@ -398,6 +449,33 @@ function Get-Phase15ProductionStateRoot {
 function Get-Phase15TransactionPath {
     param([Parameter(Mandatory)][string]$StateRoot, [Parameter(Mandatory)][string]$ClaimId)
     return Get-Phase15LifecyclePath -LifecycleRoot (Join-Path $StateRoot 'transactions') -ClaimId $ClaimId
+}
+
+function Get-Phase15ClaimLockPath {
+    param([Parameter(Mandatory)][string]$StateRoot, [Parameter(Mandatory)][string]$ClaimId)
+    return Get-Phase15LifecyclePath -LifecycleRoot (Join-Path $StateRoot 'locks') -ClaimId $ClaimId
+}
+
+function Enter-Phase15ClaimLock {
+    param([Parameter(Mandatory)][string]$StateRoot, [Parameter(Mandatory)][string]$ClaimId)
+    if ($ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$') { throw 'claim_invalid' }
+    foreach ($root in @($StateRoot, (Join-Path $StateRoot 'locks'))) {
+        if (-not (Test-Path -LiteralPath $root)) { [void][IO.Directory]::CreateDirectory($root) }
+        $item = Get-Item -LiteralPath $root -Force
+        if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'claim_lifecycle_invalid' }
+    }
+    $path = Get-Phase15ClaimLockPath -StateRoot $StateRoot -ClaimId $ClaimId
+    try {
+        $stream = [IO.FileStream]::new($path, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
+    } catch [IO.IOException] { throw 'claim_replay' }
+    return [pscustomobject]@{ ClaimId = $ClaimId; Path = $path; Stream = $stream }
+}
+
+function Test-Phase15ClaimLock {
+    param([Parameter(Mandatory)][object]$Lock, [Parameter(Mandatory)][string]$StateRoot, [Parameter(Mandatory)][string]$ClaimId)
+    if ($null -eq $Lock -or -not (Test-Phase15ExactProperties -Value $Lock -Required @('ClaimId','Path','Stream'))) { return $false }
+    $expected = Get-Phase15ClaimLockPath -StateRoot $StateRoot -ClaimId $ClaimId
+    return $Lock.ClaimId -is [string] -and $Lock.ClaimId -ceq $ClaimId -and $Lock.Path -is [string] -and [IO.Path]::GetFullPath($Lock.Path) -ceq [IO.Path]::GetFullPath($expected) -and $Lock.Stream -is [IO.FileStream] -and $Lock.Stream.CanWrite
 }
 
 function Reserve-Phase15Claim {
@@ -449,9 +527,11 @@ function Start-Phase15Transaction {
         [Parameter(Mandatory)][string]$ReservedAt,
         [Parameter(Mandatory)][string]$ManifestSha256,
         [Parameter(Mandatory)][string]$CollectorSha256,
-        [Parameter(Mandatory)][string]$ExpectedHost
+        [Parameter(Mandatory)][string]$ExpectedHost,
+        [Parameter(Mandatory)][object]$Lock
     )
     if ($ManifestSha256 -cnotmatch '^[0-9a-f]{64}$' -or $CollectorSha256 -cnotmatch '^[0-9a-f]{64}$' -or -not (Test-Phase15ExpectedHost -ExpectedHost $ExpectedHost)) { throw 'transaction_invalid' }
+    if (-not (Test-Phase15ClaimLock -Lock $Lock -StateRoot $StateRoot -ClaimId $ClaimId)) { throw 'claim_lock_invalid' }
     if (-not (Test-Path -LiteralPath $StateRoot)) { [void][IO.Directory]::CreateDirectory($StateRoot) }
     $stateItem = Get-Item -LiteralPath $StateRoot -Force
     if (($stateItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'transaction_invalid' }
@@ -465,6 +545,7 @@ function Start-Phase15Transaction {
     $lifecyclePath = Get-Phase15LifecyclePath -LifecycleRoot $lifecycleRoot -ClaimId $ClaimId
     $journalPath = Get-Phase15TransactionPath -StateRoot $StateRoot -ClaimId $ClaimId
     $reservationPath = [IO.Path]::GetFullPath($OutcomePath)
+    $stagedPath = $reservationPath + '.phase15-' + $ClaimId + '.staged'
     if (Test-Path -LiteralPath $lifecyclePath) { throw 'claim_replay' }
     if (Test-Path -LiteralPath $journalPath) { throw 'transaction_pending' }
     if (Test-Path -LiteralPath $reservationPath) { throw 'outcome_reservation_invalid' }
@@ -474,17 +555,22 @@ function Start-Phase15Transaction {
         expected_host = $ExpectedHost
         manifest_sha256 = $ManifestSha256
         outcome_path = $reservationPath
-        phase = 'preparing'
+        phase = 'owned'
         reserved_at = $ReservedAt
         schema = 'amn2.phase15.readonly-preflight-transaction.v1'
+        ssh_used = $false
+        staged_path = $stagedPath
+        terminal_ended_at = $null
+        terminal_outcome_sha256 = $null
+        terminal_path = $null
+        terminal_reason_code = $null
+        terminal_status = $null
     }
     Write-Phase15CreateNewJson -Path $journalPath -Value $journal
     try {
-        $createdLifecycle = Reserve-Phase15Claim -LifecycleRoot $lifecycleRoot -ClaimId $ClaimId -ReservedAt $ReservedAt
         $createdReservation = Reserve-Phase15OutcomeSlot -OutcomePath $reservationPath -ClaimId $ClaimId -ReservedAt $ReservedAt
-        $journal.phase = 'owned'
-        Write-Phase15AtomicJson -Path $journalPath -Value $journal
-        return [pscustomobject]@{ JournalPath = $journalPath; LifecyclePath = $createdLifecycle; ReservationPath = $createdReservation }
+        $createdLifecycle = Reserve-Phase15Claim -LifecycleRoot $lifecycleRoot -ClaimId $ClaimId -ReservedAt $ReservedAt
+        return [pscustomobject]@{ JournalPath = $journalPath; LifecyclePath = $createdLifecycle; ReservationPath = $createdReservation; StagedPath = $stagedPath }
     } catch {
         if (Test-Phase15OutcomeOwnership -ReservationPath $reservationPath -ClaimId $ClaimId) { [IO.File]::Delete($reservationPath) }
         $currentLifecycle = ConvertFrom-Phase15CanonicalJsonFile -Path $lifecyclePath
@@ -494,35 +580,96 @@ function Start-Phase15Transaction {
     }
 }
 
+function Set-Phase15TransactionPhase {
+    param(
+        [Parameter(Mandatory)][string]$TransactionPath,
+        [Parameter(Mandatory)][string]$ClaimId,
+        [Parameter(Mandatory)][ValidateSet('owned','transport_attempted','ssh_started','outcome_staged','finalizing')][string]$Phase,
+        [Parameter(Mandatory)][object]$Lock
+    )
+    $stateRoot = Split-Path -Parent (Split-Path -Parent ([IO.Path]::GetFullPath($TransactionPath)))
+    if (-not (Test-Phase15ClaimLock -Lock $Lock -StateRoot $stateRoot -ClaimId $ClaimId)) { throw 'claim_lock_invalid' }
+    $journal = ConvertFrom-Phase15CanonicalJsonFile -Path $TransactionPath
+    if ($null -eq $journal -or $journal.claim_id -isnot [string] -or $journal.claim_id -cne $ClaimId -or $journal.phase -isnot [string]) { throw 'transaction_invalid' }
+    $phases = @('owned','transport_attempted','ssh_started','outcome_staged','finalizing')
+    if ([Array]::IndexOf($phases, $Phase) -lt [Array]::IndexOf($phases, [string]$journal.phase)) { throw 'transaction_invalid' }
+    $journal.phase = $Phase
+    if ([Array]::IndexOf($phases, $Phase) -ge 1) { $journal.ssh_used = $true }
+    Write-Phase15AtomicJson -Path $TransactionPath -Value $journal
+    return $TransactionPath
+}
+
 function Reconcile-Phase15Transaction {
     param(
         [Parameter(Mandatory)][string]$StateRoot,
         [Parameter(Mandatory)][string]$ClaimId,
-        [Parameter(Mandatory)][string]$EndedAt
+        [Parameter(Mandatory)][string]$EndedAt,
+        [Parameter(Mandatory)][object]$Lock
     )
     if (-not (Test-Phase15UtcTimestamp -Value $EndedAt)) { throw 'transaction_invalid' }
+    if (-not (Test-Phase15ClaimLock -Lock $Lock -StateRoot $StateRoot -ClaimId $ClaimId)) { throw 'claim_lock_invalid' }
     $transactionRoot = Join-Path $StateRoot 'transactions'
-    if (-not (Test-Path -LiteralPath $transactionRoot -PathType Container)) { return $false }
+    if (-not (Test-Path -LiteralPath $transactionRoot -PathType Container)) { return [pscustomobject]@{ Recovered = $false; OutcomePath = $null } }
     $journalPath = Get-Phase15TransactionPath -StateRoot $StateRoot -ClaimId $ClaimId
-    if (-not (Test-Path -LiteralPath $journalPath -PathType Leaf)) { return $false }
+    if (-not (Test-Path -LiteralPath $journalPath -PathType Leaf)) { return [pscustomobject]@{ Recovered = $false; OutcomePath = $null } }
     $journal = ConvertFrom-Phase15CanonicalJsonFile -Path $journalPath
-    $required = @('claim_id','collector_sha256','expected_host','manifest_sha256','outcome_path','phase','reserved_at','schema')
+    $required = @('claim_id','collector_sha256','expected_host','manifest_sha256','outcome_path','phase','reserved_at','schema','ssh_used','staged_path','terminal_ended_at','terminal_outcome_sha256','terminal_path','terminal_reason_code','terminal_status')
     if ($null -eq $journal -or -not (Test-Phase15ExactProperties -Value $journal -Required $required)) { throw 'transaction_invalid' }
-    foreach ($field in @('claim_id','collector_sha256','expected_host','manifest_sha256','outcome_path','phase','reserved_at','schema')) {
+    foreach ($field in @('claim_id','collector_sha256','expected_host','manifest_sha256','outcome_path','phase','reserved_at','schema','staged_path')) {
         if ($journal.$field -isnot [string]) { throw 'transaction_invalid' }
     }
-    if ($journal.claim_id -cne $ClaimId -or $journal.schema -cne 'amn2.phase15.readonly-preflight-transaction.v1' -or $journal.phase -notin @('preparing','owned','finalizing')) { throw 'transaction_invalid' }
+    if ($journal.ssh_used -isnot [bool]) { throw 'transaction_invalid' }
+    $terminalValues = @($journal.terminal_ended_at, $journal.terminal_outcome_sha256, $journal.terminal_path, $journal.terminal_reason_code, $journal.terminal_status)
+    if (@($terminalValues | Where-Object { $null -ne $_ }).Count -notin @(0, 5)) { throw 'transaction_invalid' }
+    if ($null -ne $journal.terminal_status -and (
+        $journal.terminal_ended_at -isnot [string] -or -not (Test-Phase15UtcTimestamp -Value $journal.terminal_ended_at) -or
+        $journal.terminal_outcome_sha256 -isnot [string] -or $journal.terminal_outcome_sha256 -cnotmatch '^[0-9a-f]{64}$' -or
+        $journal.terminal_path -isnot [string] -or $journal.terminal_reason_code -isnot [string] -or $journal.terminal_status -isnot [string] -or
+        $journal.terminal_status -notin @('completed','failed')
+    )) { throw 'transaction_invalid' }
+    if ($journal.claim_id -cne $ClaimId -or $journal.schema -cne 'amn2.phase15.readonly-preflight-transaction.v1' -or $journal.phase -notin @('owned','transport_attempted','ssh_started','outcome_staged','finalizing')) { throw 'transaction_invalid' }
     if ($journal.manifest_sha256 -cnotmatch '^[0-9a-f]{64}$' -or $journal.collector_sha256 -cnotmatch '^[0-9a-f]{64}$' -or -not (Test-Phase15ExpectedHost -ExpectedHost $journal.expected_host) -or -not (Test-Phase15UtcTimestamp -Value $journal.reserved_at)) { throw 'transaction_invalid' }
+    $expectedStagedPath = [IO.Path]::GetFullPath($journal.outcome_path) + '.phase15-' + $ClaimId + '.staged'
+    if ([IO.Path]::GetFullPath($journal.staged_path) -cne $expectedStagedPath) { throw 'transaction_invalid' }
     $lifecycleRoot = Join-Path $StateRoot 'claims'
     if (-not (Test-Path -LiteralPath $lifecycleRoot)) { [void][IO.Directory]::CreateDirectory($lifecycleRoot) }
     $lifecyclePath = Get-Phase15LifecyclePath -LifecycleRoot $lifecycleRoot -ClaimId $ClaimId
+    if ($null -ne $journal.terminal_path) {
+        $published = ConvertFrom-Phase15CanonicalJsonFile -Path $journal.terminal_path
+        $lifecycle = ConvertFrom-Phase15CanonicalJsonFile -Path $lifecyclePath
+        $lifecycleValid = $null -ne $lifecycle -and (Test-Phase15ExactProperties -Value $lifecycle -Required @('claim_id','ended_at','reason_code','status'))
+        $publishedDigest = if ($null -ne $published) { Get-Phase15CanonicalJsonSha256 -Value $published } else { '' }
+        if ($lifecycleValid -and $publishedDigest -ceq $journal.terminal_outcome_sha256 -and $lifecycle.claim_id -ceq $ClaimId -and $lifecycle.status -ceq $journal.terminal_status -and $lifecycle.reason_code -ceq $journal.terminal_reason_code -and $lifecycle.ended_at -ceq $journal.terminal_ended_at) {
+            if (Test-Path -LiteralPath $journal.staged_path -PathType Leaf) { [IO.File]::Delete($journal.staged_path) }
+            [IO.File]::Delete($journalPath)
+            return [pscustomobject]@{ Recovered = $true; OutcomePath = [IO.Path]::GetFullPath($journal.terminal_path) }
+        }
+    }
+    $sshUsed = [bool]$journal.ssh_used
+    $failure = New-Phase15FailureOutcome -ReasonCode 'transport_failed' -ManifestSha256 $journal.manifest_sha256 -CollectorSha256 $journal.collector_sha256 -ExpectedHost $journal.expected_host -StartedAt $journal.reserved_at -EndedAt $EndedAt -SshUsed $sshUsed
+    if (Test-Phase15OutcomeOwnership -ReservationPath $journal.outcome_path -ClaimId $ClaimId) {
+        $publishedPath = [IO.Path]::GetFullPath($journal.outcome_path)
+    } else {
+        $recoveryRoot = Join-Path $StateRoot 'recovery-outcomes'
+        if (-not (Test-Path -LiteralPath $recoveryRoot)) { [void][IO.Directory]::CreateDirectory($recoveryRoot) }
+        $recoveryItem = Get-Item -LiteralPath $recoveryRoot -Force
+        if (($recoveryItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'transaction_invalid' }
+        $publishedPath = Get-Phase15LifecyclePath -LifecycleRoot $recoveryRoot -ClaimId $ClaimId
+    }
+    $journal.phase = 'finalizing'
+    $journal.terminal_ended_at = $EndedAt
+    $journal.terminal_outcome_sha256 = Get-Phase15CanonicalJsonSha256 -Value $failure
+    $journal.terminal_path = $publishedPath
+    $journal.terminal_reason_code = 'transport_failed'
+    $journal.terminal_status = 'failed'
+    Write-Phase15AtomicJson -Path $journalPath -Value $journal
     $terminal = [ordered]@{ claim_id = $ClaimId; ended_at = $EndedAt; reason_code = 'transport_failed'; status = 'failed' }
     Write-Phase15AtomicJson -Path $lifecyclePath -Value $terminal
-    $failure = New-Phase15FailureOutcome -ReasonCode 'transport_failed' -ManifestSha256 $journal.manifest_sha256 -CollectorSha256 $journal.collector_sha256 -ExpectedHost $journal.expected_host -StartedAt $journal.reserved_at -EndedAt $EndedAt -SshUsed $false
-    Write-Phase15AtomicJson -Path $journal.outcome_path -Value $failure
+    Write-Phase15AtomicJson -Path $publishedPath -Value $failure
+    if (Test-Path -LiteralPath $journal.staged_path -PathType Leaf) { [IO.File]::Delete($journal.staged_path) }
     [IO.File]::Delete($journalPath)
     if (Test-Path -LiteralPath $journalPath) { throw 'transaction_reconciliation_failed' }
-    return $true
+    return [pscustomobject]@{ Recovered = $true; OutcomePath = $publishedPath }
 }
 
 function Set-Phase15ClaimTerminal {
@@ -536,7 +683,7 @@ function Set-Phase15ClaimTerminal {
     if (-not (Test-Path -LiteralPath $LifecyclePath -PathType Leaf) -or -not (Test-Phase15UtcTimestamp -Value $EndedAt)) { throw 'claim_lifecycle_invalid' }
     if (($Status -ceq 'completed' -and $ReasonCode -cne 'not_applicable') -or ($Status -ceq 'failed' -and $ReasonCode -cnotin $script:Phase15FailureReasons)) { throw 'claim_lifecycle_invalid' }
     $current = ConvertFrom-Phase15CanonicalJsonFile -Path $LifecyclePath
-    if ($null -eq $current -or $current.claim_id -cne $ClaimId -or $current.status -notin @('reserved','completed')) { throw 'claim_lifecycle_invalid' }
+    if ($null -eq $current -or $current.claim_id -cne $ClaimId -or $current.status -notin @('reserved','completed','failed')) { throw 'claim_lifecycle_invalid' }
     if ($Status -ceq 'completed' -and $current.status -cne 'reserved') { throw 'claim_lifecycle_invalid' }
     $temporaryPath = $LifecyclePath + '.terminal-' + [Guid]::NewGuid().ToString('N')
     $backupPath = $LifecyclePath + '.backup-' + [Guid]::NewGuid().ToString('N')
@@ -560,20 +707,31 @@ function Publish-Phase15TerminalOutcome {
         [Parameter(Mandatory)][string]$EndedAt,
         [Parameter(Mandatory)][string]$ReasonCode,
         [Parameter(Mandatory)][object]$Outcome,
-        [string]$TransactionPath
+        [string]$TransactionPath,
+        [object]$Lock
     )
     if ([IO.Path]::GetFullPath($ReservationPath) -cne [IO.Path]::GetFullPath($OutcomePath) -or -not (Test-Phase15OutcomeOwnership -ReservationPath $ReservationPath -ClaimId $ClaimId)) { throw 'outcome_reservation_invalid' }
     if (-not [string]::IsNullOrWhiteSpace($TransactionPath)) {
         $journal = ConvertFrom-Phase15CanonicalJsonFile -Path $TransactionPath
-        if ($null -eq $journal -or $journal.claim_id -cne $ClaimId -or $journal.outcome_path -cne [IO.Path]::GetFullPath($OutcomePath) -or $journal.phase -notin @('owned','finalizing')) { throw 'transaction_invalid' }
-        $journal.phase = 'finalizing'
+        $stateRoot = Split-Path -Parent (Split-Path -Parent ([IO.Path]::GetFullPath($TransactionPath)))
+        if (-not (Test-Phase15ClaimLock -Lock $Lock -StateRoot $stateRoot -ClaimId $ClaimId)) { throw 'claim_lock_invalid' }
+        if ($null -eq $journal -or $journal.claim_id -cne $ClaimId -or $journal.outcome_path -cne [IO.Path]::GetFullPath($OutcomePath) -or $journal.phase -notin @('ssh_started','transport_attempted')) { throw 'transaction_invalid' }
+        $pendingPath = [string]$journal.staged_path
+        $journal.terminal_ended_at = $EndedAt
+        $journal.terminal_outcome_sha256 = Get-Phase15CanonicalJsonSha256 -Value $Outcome
+        $journal.terminal_path = [IO.Path]::GetFullPath($OutcomePath)
+        $journal.terminal_reason_code = $ReasonCode
+        $journal.terminal_status = $Status
         Write-Phase15AtomicJson -Path $TransactionPath -Value $journal
+    } else {
+        $pendingPath = $OutcomePath + '.pending-' + [Guid]::NewGuid().ToString('N')
     }
-    $pendingPath = $OutcomePath + '.pending-' + [Guid]::NewGuid().ToString('N')
     $backupPath = $OutcomePath + '.reservation-backup-' + [Guid]::NewGuid().ToString('N')
     try {
         Write-Phase15CreateNewJson -Path $pendingPath -Value $Outcome
+        if (-not [string]::IsNullOrWhiteSpace($TransactionPath)) { [void](Set-Phase15TransactionPhase -TransactionPath $TransactionPath -ClaimId $ClaimId -Phase 'outcome_staged' -Lock $Lock) }
         [void](Set-Phase15ClaimTerminal -LifecyclePath $LifecyclePath -ClaimId $ClaimId -Status $Status -EndedAt $EndedAt -ReasonCode $ReasonCode)
+        if (-not [string]::IsNullOrWhiteSpace($TransactionPath)) { [void](Set-Phase15TransactionPhase -TransactionPath $TransactionPath -ClaimId $ClaimId -Phase 'finalizing' -Lock $Lock) }
         if (-not (Test-Phase15OutcomeOwnership -ReservationPath $ReservationPath -ClaimId $ClaimId)) { throw 'outcome_reservation_invalid' }
         [IO.File]::Replace($pendingPath, $OutcomePath, $backupPath, $true)
         if (-not [string]::IsNullOrWhiteSpace($TransactionPath)) {
@@ -609,50 +767,59 @@ function Invoke-Phase15RunnerMain {
     if ([string]::IsNullOrWhiteSpace($PackageRoot) -or [string]::IsNullOrWhiteSpace($OutcomePath) -or -not (Test-Phase15ExpectedHost -ExpectedHost $ExpectedHost)) { throw 'runner_arguments_invalid' }
     $outcomeParent = Split-Path -Parent ([IO.Path]::GetFullPath($OutcomePath))
     if (-not (Test-Path -LiteralPath $outcomeParent -PathType Container)) { throw 'runner_arguments_invalid' }
+    $startedAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
     $manifestPath = Join-Path $PackageRoot 'manifest.json'
     $collectorPath = Join-Path $PackageRoot 'tooling\scripts\vps\phase15_spain_readonly_preflight_remote.sh'
-    $manifest = ConvertFrom-Phase15CanonicalJsonFile -Path $manifestPath
+    $manifestArtifact = Read-Phase15ManifestArtifact -Path $manifestPath
+    $manifest = $manifestArtifact.Value
     if ($null -eq $manifest -or $manifest.package_id -cne $script:Phase15PackageId) { throw 'package_identity_invalid' }
-    $manifestSha256 = Get-Phase15FileSha256 -Path $manifestPath
+    $manifestSha256 = $manifestArtifact.Sha256
     $collectorArtifact = Read-Phase15CollectorArtifact -Path $collectorPath
     $collectorSha256 = $collectorArtifact.Sha256
     $entry = @($manifest.entries | Where-Object { $_.path -ceq 'tooling/scripts/vps/phase15_spain_readonly_preflight_remote.sh' })
     if ($entry.Count -ne 1 -or $entry[0].sha256 -cne $collectorSha256) { throw 'collector_checksum_invalid' }
     $claim = Read-Phase15FutureClaim -ClaimPath $FutureClaimPath
-    if ($null -eq $claim -or -not (Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost)) { throw 'claim_invalid' }
-    $startedAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+    if ($null -eq $claim -or -not (Test-Phase15ClaimIdentity -Claim $claim -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost)) { throw 'claim_invalid' }
     $stateRoot = Get-Phase15ProductionStateRoot
-    [void](Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claim.claim_id -EndedAt $startedAt)
-    $transaction = Start-Phase15Transaction -StateRoot $stateRoot -OutcomePath $OutcomePath -ClaimId $claim.claim_id -ReservedAt $startedAt -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost
-    $sshUsed = $false
-    $failureReason = 'transport_failed'
+    $claimLock = Enter-Phase15ClaimLock -StateRoot $stateRoot -ClaimId $claim.claim_id
     try {
+        $reconciled = Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claim.claim_id -EndedAt $startedAt -Lock $claimLock
+        if ($reconciled.Recovered) { throw 'claim_replay' }
+        $lifecyclePath = Get-Phase15LifecyclePath -LifecycleRoot (Join-Path $stateRoot 'claims') -ClaimId $claim.claim_id
+        if (Test-Path -LiteralPath $lifecyclePath) { throw 'claim_replay' }
+        if (-not (Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -At $startedAt)) { throw 'claim_invalid' }
+        $transaction = Start-Phase15Transaction -StateRoot $stateRoot -OutcomePath $OutcomePath -ClaimId $claim.claim_id -ReservedAt $startedAt -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -Lock $claimLock
+        $sshUsed = $false
+        $failureReason = 'transport_failed'
         $transportStarted = $false
-        $rawDocument = Invoke-Phase15OneSshTransport -ExpectedHost $ExpectedHost -CollectorBytes $collectorArtifact.Bytes -ClaimId $claim.claim_id -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -Started ([ref]$transportStarted)
-        $sshUsed = $transportStarted
-        $endedAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
-        $document = ConvertFrom-Phase15CanonicalJsonText -Text $rawDocument
-        if ($null -eq $document) { $failureReason = 'schema_invalid'; throw 'collector_schema_invalid' }
-        if (-not (Test-Phase15CollectorDocument -Document $document -ExpectedHost $ExpectedHost -ExpectedClaimId $claim.claim_id -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -StartedAt $startedAt -EndedAt $endedAt)) { $failureReason = 'schema_invalid'; throw 'collector_schema_invalid' }
-        $evidence = ConvertTo-Phase15Evidence -Document $document -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -StartedAt $startedAt -EndedAt $endedAt
-        Publish-Phase15TerminalOutcome -LifecyclePath $transaction.LifecyclePath -ReservationPath $transaction.ReservationPath -OutcomePath $OutcomePath -ClaimId $claim.claim_id -Status 'completed' -EndedAt $endedAt -ReasonCode 'not_applicable' -Outcome $evidence -TransactionPath $transaction.JournalPath
-    } catch {
-        $sshUsed = $sshUsed -or $transportStarted
-        $endedAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
         try {
-            if (Test-Phase15OutcomeOwnership -ReservationPath $transaction.ReservationPath -ClaimId $claim.claim_id) {
-                $failure = New-Phase15FailureOutcome -ReasonCode $failureReason -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -StartedAt $startedAt -EndedAt $endedAt -SshUsed $sshUsed
-                Publish-Phase15TerminalOutcome -LifecyclePath $transaction.LifecyclePath -ReservationPath $transaction.ReservationPath -OutcomePath $OutcomePath -ClaimId $claim.claim_id -Status 'failed' -EndedAt $endedAt -ReasonCode $failureReason -Outcome $failure -TransactionPath $transaction.JournalPath
-            } elseif (Test-Path -LiteralPath $transaction.JournalPath -PathType Leaf) {
-                [void](Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claim.claim_id -EndedAt $endedAt)
-            }
+            [void](Set-Phase15TransactionPhase -TransactionPath $transaction.JournalPath -ClaimId $claim.claim_id -Phase 'transport_attempted' -Lock $claimLock)
+            $rawDocument = Invoke-Phase15OneSshTransport -ExpectedHost $ExpectedHost -CollectorBytes $collectorArtifact.Bytes -ClaimId $claim.claim_id -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -Started ([ref]$transportStarted) -TransactionPath $transaction.JournalPath -Lock $claimLock
+            $sshUsed = $transportStarted
+            $endedAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+            $document = ConvertFrom-Phase15CanonicalJsonText -Text $rawDocument
+            if ($null -eq $document) { $failureReason = 'schema_invalid'; throw 'collector_schema_invalid' }
+            if (-not (Test-Phase15CollectorDocument -Document $document -ExpectedHost $ExpectedHost -ExpectedClaimId $claim.claim_id -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -StartedAt $startedAt -EndedAt $endedAt)) { $failureReason = 'schema_invalid'; throw 'collector_schema_invalid' }
+            $evidence = ConvertTo-Phase15Evidence -Document $document -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -StartedAt $startedAt -EndedAt $endedAt
+            Publish-Phase15TerminalOutcome -LifecyclePath $transaction.LifecyclePath -ReservationPath $transaction.ReservationPath -OutcomePath $OutcomePath -ClaimId $claim.claim_id -Status 'completed' -EndedAt $endedAt -ReasonCode 'not_applicable' -Outcome $evidence -TransactionPath $transaction.JournalPath -Lock $claimLock
         } catch {
-            if (Test-Path -LiteralPath $transaction.JournalPath -PathType Leaf) {
-                [void](Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claim.claim_id -EndedAt $endedAt)
+            $sshUsed = $sshUsed -or $transportStarted
+            $endedAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+            try {
+                if (Test-Phase15OutcomeOwnership -ReservationPath $transaction.ReservationPath -ClaimId $claim.claim_id) {
+                    $failure = New-Phase15FailureOutcome -ReasonCode $failureReason -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -StartedAt $startedAt -EndedAt $endedAt -SshUsed $sshUsed
+                    Publish-Phase15TerminalOutcome -LifecyclePath $transaction.LifecyclePath -ReservationPath $transaction.ReservationPath -OutcomePath $OutcomePath -ClaimId $claim.claim_id -Status 'failed' -EndedAt $endedAt -ReasonCode $failureReason -Outcome $failure -TransactionPath $transaction.JournalPath -Lock $claimLock
+                } elseif (Test-Path -LiteralPath $transaction.JournalPath -PathType Leaf) {
+                    [void](Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claim.claim_id -EndedAt $endedAt -Lock $claimLock)
+                }
+            } catch {
+                if (Test-Path -LiteralPath $transaction.JournalPath -PathType Leaf) {
+                    [void](Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claim.claim_id -EndedAt $endedAt -Lock $claimLock)
+                }
             }
+            throw
         }
-        throw
-    }
+    } finally { $claimLock.Stream.Dispose() }
 }
 
 if ($MyInvocation.InvocationName -ne '.') {

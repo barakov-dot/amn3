@@ -24,6 +24,13 @@ import threading
 import time
 
 PACKAGE_ID = "phase15-dual-protocol-bootstrap-20260811-001"
+CURRENT_APPLICATION_ROOT = "/opt/amn2-spain"
+CURRENT_DATABASE_PATH = "/var/lib/amn2-spain/amn2.sqlite3"
+CURRENT_AWG2_CONTAINER = "amn2-spain-awg"
+CURRENT_AWG2_INTERFACE = "awg0"
+CURRENT_BOT_UNIT = "amn2-spain-bot.service"
+SPAIN_DOCKER = "/opt/amn2-spain/docker/bin/docker"
+SPAIN_DOCKER_HOST = "unix:///run/amn2-spain-docker/docker.sock"
 CLAIM_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,127}$")
 EXPECTED_HOST_RE = re.compile(r"^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -55,12 +62,15 @@ def command(parts, maximum_output_bytes=MAXIMUM_OUTPUT_BYTES, timeout_seconds=8)
         return 126, b"", b"", "launch_failed"
     overflow = threading.Event()
     outputs = [bytearray(), bytearray()]
+    reader_errors = []
+    reader_eof = [False, False]
 
-    def read_bounded(stream, output):
+    def read_bounded(stream, output, index):
         try:
             while True:
                 chunk = stream.read(4096)
                 if not chunk:
+                    reader_eof[index] = True
                     return
                 remaining = maximum_output_bytes + 1 - len(output)
                 if 0 < remaining:
@@ -68,12 +78,14 @@ def command(parts, maximum_output_bytes=MAXIMUM_OUTPUT_BYTES, timeout_seconds=8)
                 if maximum_output_bytes < len(output):
                     overflow.set()
                     return
+        except Exception as exc:
+            reader_errors.append(type(exc).__name__)
         finally:
             stream.close()
 
     threads = [
-        threading.Thread(target=read_bounded, args=(process.stdout, outputs[0]), daemon=True),
-        threading.Thread(target=read_bounded, args=(process.stderr, outputs[1]), daemon=True),
+        threading.Thread(target=read_bounded, args=(process.stdout, outputs[0], 0), daemon=True),
+        threading.Thread(target=read_bounded, args=(process.stderr, outputs[1], 1), daemon=True),
     ]
     for thread in threads:
         thread.start()
@@ -99,6 +111,16 @@ def command(parts, maximum_output_bytes=MAXIMUM_OUTPUT_BYTES, timeout_seconds=8)
         thread.join(timeout=1)
     if overflow.is_set():
         disposition = "output_oversized"
+        if return_code == 0:
+            return_code = 125
+    elif reader_errors or any(thread.is_alive() for thread in threads) or not all(reader_eof):
+        disposition = "incomplete_output"
+        if process.poll() is None:
+            process.kill()
+            try:
+                process.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                pass
         if return_code == 0:
             return_code = 125
     elif disposition == "success" and return_code != 0:
@@ -144,12 +166,58 @@ def classify_container_inventory(results):
         return "stop", "stop"
     return "pass", "stop" if "amn2-spain-awg3" in names else "free"
 
+def current_spain_identity():
+    return {
+        "application_root": CURRENT_APPLICATION_ROOT,
+        "bot_unit": CURRENT_BOT_UNIT,
+        "container": CURRENT_AWG2_CONTAINER,
+        "database_path": CURRENT_DATABASE_PATH,
+        "docker_host": SPAIN_DOCKER_HOST,
+        "interface": CURRENT_AWG2_INTERFACE,
+    }
+
+def _docker_network_ids(probe):
+    if not probe_ok(probe):
+        raise ValueError("docker network inventory")
+    raw = probe[1]
+    if raw and (not raw.endswith(b"\n") or b"\r" in raw):
+        raise ValueError("docker network inventory")
+    identifiers = raw.decode("ascii", errors="strict").splitlines()
+    if any(re.fullmatch(r"[0-9a-f]{64}", item) is None for item in identifiers) or len(identifiers) != len(set(identifiers)):
+        raise ValueError("docker network inventory")
+    return identifiers
+
+def classify_dedicated_spain_docker(inventory_probe, network_list_probe, network_inspect_probes):
+    stopped = ("stop", "stop", "stop")
+    try:
+        capability, candidate_name = classify_container_inventory([("spain-docker", inventory_probe)])
+        identifiers = _docker_network_ids(network_list_probe)
+        if capability != "pass" or len(network_inspect_probes) != len(identifiers):
+            return stopped
+        networks = []
+        for probe in network_inspect_probes:
+            if not probe_ok(probe):
+                return stopped
+            raw = probe[1]
+            if not raw or not raw.endswith(b"\n") or b"\r" in raw:
+                return stopped
+            for line in raw.decode("ascii", errors="strict").splitlines():
+                networks.append(ipaddress.ip_network(line, strict=False))
+        target = ipaddress.ip_network("172.29.252.0/28")
+        cidr_state = "stop" if any(network.version == target.version and network.overlaps(target) for network in networks) else "free"
+        return capability, candidate_name, cidr_state
+    except (UnicodeDecodeError, ValueError, TypeError):
+        return stopped
+
 def classify_systemd_capability(probe):
     if probe_ok(probe) and probe[1] == b"running\n" and probe[2] == b"":
         return "pass"
     if probe[0] == 1 and probe[1] == b"degraded\n" and probe[2] == b"" and probe[3] == "command_failed":
         return "pass"
     return "stop"
+
+def classify_phase13_bot_unit(active_probe, enabled_probe):
+    return "pass" if probe_ok(active_probe) and probe_ok(enabled_probe) and active_probe[1] == b"inactive\n" and enabled_probe[1] == b"disabled\n" else "stop"
 
 def classify_routes(probe):
     stopped = ("stop", "stop", "stop")
@@ -329,7 +397,7 @@ def _nft_scalar_conflict(value, context):
             if not isinstance(prefix, dict) or set(prefix) != {"addr", "len"} or not isinstance(prefix["addr"], str) or isinstance(prefix["len"], bool) or not isinstance(prefix["len"], int):
                 raise ValueError("nft prefix")
             return _network_conflicts(f"{prefix['addr']}/{prefix['len']}")
-        raise ValueError("nft address")
+        raise ValueError("nft network")
     if context in {"iifname", "oifname"}:
         if not isinstance(value, str) or re.fullmatch(r"[A-Za-z0-9_.+-]{1,64}", value) is None:
             raise ValueError("nft interface")
@@ -361,6 +429,10 @@ def _parse_nft_expression(expression):
             context = descriptor["field"]
             if context not in {"dport", "sport", "saddr", "daddr"}:
                 raise ValueError("nft payload field")
+            if context in {"dport", "sport"} and descriptor["protocol"] not in {"tcp", "udp"}:
+                raise ValueError("nft port protocol")
+            if context in {"saddr", "daddr"} and descriptor["protocol"] not in {"ip", "ip6"}:
+                raise ValueError("nft network protocol")
         elif left_kind == "meta":
             if not isinstance(descriptor, dict) or set(descriptor) != {"key"} or descriptor["key"] not in {"iifname", "oifname"}:
                 raise ValueError("nft meta")
@@ -503,9 +575,13 @@ def _parse_iptables_save(raw):
                 if argument not in {"destination-unreachable", "echo-reply", "echo-request", "parameter-problem", "redirect", "source-quench", "time-exceeded"} and not (argument.isdigit() and 0 <= int(argument) <= 255):
                     raise ValueError("iptables icmp type")
             elif option in {"-i", "--in-interface", "-o", "--out-interface"}:
-                if re.fullmatch(r"[A-Za-z0-9_.+-]{1,64}", argument) is None:
+                if re.fullmatch(r"(?:[A-Za-z0-9_.-]{1,63}\+|[A-Za-z0-9_.-]{1,64})", argument) is None:
                     raise ValueError("iptables interface")
-                conflict = conflict or argument in {"awg3", "amn2sp3br0"}
+                if argument.endswith("+"):
+                    prefix = argument[:-1]
+                    conflict = conflict or any(name.startswith(prefix) for name in {"awg3", "amn2sp3br0"})
+                else:
+                    conflict = conflict or argument in {"awg3", "amn2sp3br0"}
             elif option in {"-s", "--source", "-d", "--destination"}:
                 conflict = conflict or _network_conflicts(argument)
             elif option in {"--sport", "--source-port", "--dport", "--destination-port", "--sports", "--source-ports", "--dports", "--destination-ports"}:
@@ -559,7 +635,8 @@ def classify_firewall(nft_probe, iptables_probe, iptables_legacy_probe=None):
 def classify_awg2_health(unit_probe, interface_probe, handshake_probe, now_epoch):
     if not all(probe_ok(probe) for probe in (unit_probe, interface_probe, handshake_probe)):
         return "stop"
-    if unit_probe[1] != b"active\n" or re.fullmatch(rb"[0-9]+: awg2(?:@[^: \n]+)?: <[A-Z0-9_,]+\x3e(?: [^\r\n]*)?\n(?:    [^\r\n]+\n)*", interface_probe[1]) is None:
+    container_match = re.fullmatch(rb"true\|([1-9][0-9]{0,9})\n", unit_probe[1])
+    if container_match is None or re.fullmatch(rb"[0-9]+: awg0(?:@[^: \n]+)?: <[A-Z0-9_,]+\x3e(?: [^\r\n]*)?\n(?:    [^\r\n]+\n)*", interface_probe[1]) is None:
         return "stop"
     if not handshake_probe[1].endswith(b"\n") or b"\r" in handshake_probe[1]:
         return "stop"
@@ -640,8 +717,8 @@ def production_observations():
     except OSError as exc:
         disk_state, disk_raw = "stop", type(exc).__name__
     values["disk_space"] = observed(disk_state, disk_raw)
-    app_root = pathlib.Path("/opt/amn2")
-    database = pathlib.Path("/var/lib/amn2/amn2.db")
+    app_root = pathlib.Path(CURRENT_APPLICATION_ROOT)
+    database = pathlib.Path(CURRENT_DATABASE_PATH)
     backup_root = pathlib.Path("/var/backups")
     values["application_state"] = observed("present" if app_root.is_dir() else "stop", f"directory:{app_root.is_dir()}")
     database_ok = database.is_file() and os.access(database, os.R_OK)
@@ -650,21 +727,35 @@ def production_observations():
     values["backup_capability"] = observed("pass" if backup_ok else "stop", f"backup-ready:{backup_ok}")
     systemd_probe = command(["systemctl", "is-system-running"])
     values["service_capability"] = observed(classify_systemd_capability(systemd_probe), systemd_probe[1] + systemd_probe[2])
-    inventories = []
-    for engine in ("docker", "podman"):
-        if shutil.which(engine):
-            inventories.append((engine, command([engine, "ps", "-a", "--format", "{{.Names}}"])))
-    container_capability, container_name = classify_container_inventory(inventories)
-    inventory_raw = b"\n".join(probe[1] + probe[2] for _engine, probe in inventories) or b"no-container-engine"
+    inventory_probe = command([SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "ps", "-a", "--format", "{{.Names}}"])
+    network_list_probe = command([SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "network", "ls", "-q"])
+    network_inspect_probes = []
+    try:
+        network_ids = _docker_network_ids(network_list_probe)
+    except (UnicodeDecodeError, ValueError):
+        network_ids = []
+    if network_ids or (probe_ok(network_list_probe) and network_list_probe[1] == b""):
+        network_inspect_probes = [
+            command([SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "network", "inspect", "--format", "{{range .IPAM.Config}}{{println .Subnet}}{{end}}", network_id])
+            for network_id in network_ids
+        ]
+    container_capability, container_name, docker_cidr_state = classify_dedicated_spain_docker(inventory_probe, network_list_probe, network_inspect_probes)
+    inventory_raw = inventory_probe[1] + inventory_probe[2] + network_list_probe[1] + network_list_probe[2] + b"".join(probe[1] + probe[2] for probe in network_inspect_probes)
     values["container_capability"] = observed(container_capability, inventory_raw)
     values["container_name"] = observed(container_name, inventory_raw)
-    awg_unit = command(["systemctl", "is-active", "amn2-spain-awg2.service"])
-    awg_link = command(["ip", "link", "show", "awg2"])
-    awg_tool = "awg" if shutil.which("awg") else ("wg" if shutil.which("wg") else None)
-    awg_handshakes = command([awg_tool, "show", "awg2", "latest-handshakes"]) if awg_tool else (127, b"", b"", "unavailable")
+    awg_unit = command([SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "inspect", "--format", "{{.State.Running}}|{{.State.Pid}}", CURRENT_AWG2_CONTAINER])
+    awg_container_match = re.fullmatch(rb"true\|([1-9][0-9]{0,9})\n", awg_unit[1]) if probe_ok(awg_unit) else None
+    if awg_container_match is None:
+        awg_link = (125, b"", b"", "incomplete_output")
+        awg_handshakes = (125, b"", b"", "incomplete_output")
+    else:
+        netns = f"--net=/proc/{awg_container_match.group(1).decode('ascii')}/ns/net"
+        awg_link = command(["nsenter", netns, "ip", "-o", "link", "show", "dev", CURRENT_AWG2_INTERFACE])
+        awg_handshakes = command(["nsenter", netns, "/usr/bin/awg", "show", CURRENT_AWG2_INTERFACE, "latest-handshakes"])
     values["awg2_health"] = observed(classify_awg2_health(awg_unit, awg_link, awg_handshakes, int(time.time())), awg_unit[1] + awg_unit[2] + awg_link[1] + awg_link[2] + awg_handshakes[1] + awg_handshakes[2])
-    telegram_probe = command(["systemctl", "is-active", "amn2-telegram.service"])
-    values["telegram_prerequisites"] = observed("pass" if probe_ok(telegram_probe) and telegram_probe[1] == b"active\n" else "stop", telegram_probe[1] + telegram_probe[2])
+    bot_active_probe = command(["systemctl", "is-active", CURRENT_BOT_UNIT])
+    bot_enabled_probe = command(["systemctl", "is-enabled", CURRENT_BOT_UNIT])
+    values["telegram_prerequisites"] = observed(classify_phase13_bot_unit(bot_active_probe, bot_enabled_probe), bot_active_probe[1] + bot_active_probe[2] + bot_enabled_probe[1] + bot_enabled_probe[2])
     awg3_probe = command(["ip", "link", "show", "awg3"])
     bridge_probe = command(["ip", "link", "show", "amn2sp3br0"])
     values["interface_awg3"] = observed(classify_ip_link(awg3_probe, "awg3"), awg3_probe[1] + awg3_probe[2])
@@ -675,7 +766,8 @@ def production_observations():
     route_state, vpn_state, container_cidr_state = classify_routes(route_probe)
     values["routes"] = observed(route_state, route_probe[1] + route_probe[2])
     values["vpn_cidr_10_212_13_0_24"] = observed(vpn_state, route_probe[1] + route_probe[2])
-    values["container_cidr_172_29_252_0_28"] = observed(container_cidr_state, route_probe[1] + route_probe[2])
+    combined_container_cidr_state = "free" if container_cidr_state == "free" and docker_cidr_state == "free" else "stop"
+    values["container_cidr_172_29_252_0_28"] = observed(combined_container_cidr_state, route_probe[1] + route_probe[2] + inventory_raw)
     nft_probe = command(["nft", "-j", "list", "ruleset"])
     iptables_probe = command(["iptables-save"])
     iptables_legacy_probe = command(["iptables-legacy-save"])
