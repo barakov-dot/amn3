@@ -2450,9 +2450,9 @@ def test_round12_fresh_clock_stops_expired_claim_before_reservation_or_transport
         "function Read-Phase15FutureClaim{param($ClaimPath)$script:claim}; "
         "function Initialize-Phase15ProductionStateRoot{$script:initializerCount++;$script:stateRoot}; "
         f"{reset_override}"
-        "function Invoke-Phase15OneSshTransport{param($ExpectedHost,$CollectorBytes,$Claim,$ClaimId,$ManifestSha256,$CollectorSha256,[ref]$Started,$TransactionPath,$Lock) "
+        "function Invoke-Phase15OneSshTransport{param($ExpectedHost,$CollectorBytes,$Claim,$ClaimId,$ManifestSha256,$CollectorSha256,$ExpectedOutcomePath,$ReservedAt,[ref]$Started,$TransactionPath,$Lock) "
         "$process=[pscustomobject]@{}; $process|Add-Member -MemberType ScriptMethod -Name Start -Value {$script:sshCount++;return $true}; "
-        "[void](Start-Phase15AuthorizedSshProcess -Process $process -Claim $Claim -ExpectedHost $ExpectedHost -ClaimId $ClaimId -ManifestSha256 $ManifestSha256 -CollectorSha256 $CollectorSha256 -TransactionPath $TransactionPath -Lock $Lock); $Started.Value=$true; throw 'ssh_double_called'}; "
+        "[void](Start-Phase15AuthorizedSshProcess -Process $process -Claim $Claim -ExpectedHost $ExpectedHost -ClaimId $ClaimId -ManifestSha256 $ManifestSha256 -CollectorSha256 $CollectorSha256 -ExpectedOutcomePath $ExpectedOutcomePath -ReservedAt $ReservedAt -TransactionPath $TransactionPath -Lock $Lock); $Started.Value=$true; throw 'ssh_double_called'}; "
         "$message='';try{Invoke-Phase15RunnerMain}catch{$message=$_.Exception.Message}; "
         "$lifecyclePath=Get-Phase15LifecyclePath -LifecycleRoot (Join-Path $script:stateRoot 'claims') -ClaimId $script:claim.claim_id; $journalPath=Get-Phase15TransactionPath -StateRoot $script:stateRoot -ClaimId $script:claim.claim_id; "
         "$lifecycle=ConvertFrom-Phase15CanonicalJsonFile -Path $lifecyclePath; $outcome=ConvertFrom-Phase15CanonicalJsonFile -Path $OutcomePath; "
@@ -2484,3 +2484,43 @@ def test_round13_fresh_claim_gate_is_adjacent_to_actual_process_start():
     assert "Write-Phase15AtomicJson" not in launch[lifetime:process_start]
     assert "[DateTimeOffset]::UtcNow" not in transport
     assert "-Claim $Claim" in transport
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "$journal.PSObject.Properties.Remove('schema')",
+        "$journal | Add-Member -MemberType NoteProperty -Name unexpected -Value 'x'",
+        "$journal.schema='wrong'",
+        "$journal.manifest_sha256='0'",
+        "$journal.manifest_sha256=('c'*64 -join '')",
+        "$journal.collector_sha256='0'",
+        "$journal.collector_sha256=('d'*64 -join '')",
+        "$journal.expected_host='bad host'",
+        "$journal.expected_host='other.test.invalid'",
+        "$journal.outcome_path='relative.json'",
+        "$journal.outcome_path=[IO.Path]::GetFullPath($journal.outcome_path+'.other')",
+        "$journal.staged_path=$journal.outcome_path+'.wrong'",
+        "$journal.reserved_at='not-a-time'",
+        "$journal.reserved_at='2026-08-16T00:00:01Z'",
+        "$journal.terminal_reason_code='claim_invalid'",
+    ],
+)
+def test_round15_malformed_owned_or_partial_reset_journal_is_always_conservative(tmp_path: Path, mutation: str):
+    state_root = str(tmp_path / "state").replace("'", "''")
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        f"$lock=Enter-Phase15ClaimLock -StateRoot '{state_root}' -ClaimId 'phase15-preflight-test-001'; "
+        f"$tx=Start-Phase15Transaction -StateRoot '{state_root}' -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' "
+        f"-ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
+        f"$journal=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath; {mutation}; "
+        "$null=Write-Phase15AtomicJson -Path $tx.JournalPath -Value $journal -OwnerId 'phase15-preflight-test-001'; "
+        f"$conservative=Test-Phase15TransactionRequiresConservativeSshUsed -TransactionPath $tx.JournalPath -ClaimId 'phase15-preflight-test-001' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -ExpectedOutcomePath '{outcome}' -ReservedAt '2026-08-16T00:00:00Z' -Lock $lock; "
+        "$journal.phase='transport_attempted'; $journal.ssh_used=$true; $null=Write-Phase15AtomicJson -Path $tx.JournalPath -Value $journal -OwnerId 'phase15-preflight-test-001'; "
+        f"$resetRejected=$false; try{{$null=Reset-Phase15UnstartedTransaction -TransactionPath $tx.JournalPath -ClaimId 'phase15-preflight-test-001' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -ExpectedOutcomePath '{outcome}' -ReservedAt '2026-08-16T00:00:00Z' -Lock $lock}}catch{{$resetRejected=$true}}; "
+        "$tx.OutcomeLock.Stream.Dispose(); $lock.Stream.Dispose(); "
+        "[Console]::Out.Write(\"$($conservative.ToString().ToLowerInvariant())|$($resetRejected.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|true"
