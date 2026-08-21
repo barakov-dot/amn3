@@ -902,12 +902,13 @@ def test_runner_validates_claim_lifetime_against_fresh_pre_reservation_time(tmp_
     source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
     main = source[source.index("function Invoke-Phase15RunnerMain") :]
     lifetime_checks = [match.start() for match in re.finditer("Test-Phase15FutureClaim", main)]
-    assert len(lifetime_checks) == 3
+    launch = source[source.index("function Start-Phase15AuthorizedSshProcess") : source.index("function Invoke-Phase15OneSshTransport")]
+    assert len(lifetime_checks) == 2
     assert main.index("$startedAt =") < main.index("Read-Phase15ManifestArtifact")
     assert main.index("Test-Phase15ClaimIdentity") < lifetime_checks[0] < main.index("Initialize-Phase15ProductionStateRoot")
     assert main.index("Reconcile-Phase15Transaction") < main.index("$reservationAt =")
     assert main.index("$reservationAt =") < lifetime_checks[1]
-    assert main.index("Start-Phase15Transaction") < lifetime_checks[2] < main.index("Invoke-Phase15OneSshTransport")
+    assert launch.index("Test-Phase15FutureClaim") < launch.index("$Process.Start()")
     assert "-At $startedAt" not in main
     assert "-At $reservationAt" in main
     assert "-ReservedAt $reservationAt" in main
@@ -1149,7 +1150,7 @@ def test_transport_success_requires_empty_stderr_and_bounded_io_starts_before_st
     assert transport.index("StandardOutput.BaseStream.ReadAsync") < transport.index("WriteAsync")
     assert transport.index("StandardError.BaseStream.ReadAsync") < transport.index("WriteAsync")
     assert "[ref]$Started" in transport
-    assert transport.index("$Started.Value = $true") > transport.index("$process.Start()")
+    assert transport.index("$Started.Value = $true") > transport.index("Start-Phase15AuthorizedSshProcess")
 
 
 def test_transport_abort_kills_alive_child_and_waits_bounded_before_dispose():
@@ -1509,13 +1510,14 @@ def test_runner_reconciles_before_atomic_transaction_ownership_and_transport():
     source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
     main = source[source.index("function Invoke-Phase15RunnerMain") :]
     lifetime_checks = [match.start() for match in re.finditer("Test-Phase15FutureClaim", main)]
+    launch = source[source.index("function Start-Phase15AuthorizedSshProcess") : source.index("function Invoke-Phase15OneSshTransport")]
 
-    assert len(lifetime_checks) == 3
+    assert len(lifetime_checks) == 2
     assert main.index("Test-Phase15ClaimIdentity") < lifetime_checks[0] < main.index("Initialize-Phase15ProductionStateRoot")
     assert main.index("Enter-Phase15ClaimLock") < main.index("Reconcile-Phase15Transaction")
     assert main.index("Reconcile-Phase15Transaction") < lifetime_checks[1]
     assert lifetime_checks[1] < main.index("Start-Phase15Transaction")
-    assert main.index("Start-Phase15Transaction") < lifetime_checks[2] < main.index("Invoke-Phase15OneSshTransport")
+    assert launch.index("Test-Phase15FutureClaim") < launch.index("$Process.Start()")
     assert main.index("Start-Phase15Transaction") < main.index("Invoke-Phase15OneSshTransport")
     assert "-TransactionPath $transaction.JournalPath" in main
     assert "$transaction.OutcomeLock.Stream.Dispose()" in main
@@ -2446,7 +2448,9 @@ def test_round12_fresh_clock_stops_expired_claim_before_reservation_or_transport
         "function Assert-Phase15SpainTrustBundle{param($ExpectedHost)[pscustomobject]@{Validated=$true}}; "
         "function Read-Phase15FutureClaim{param($ClaimPath)$script:claim}; "
         "function Initialize-Phase15ProductionStateRoot{$script:initializerCount++;$script:stateRoot}; "
-        "function Invoke-Phase15OneSshTransport{$script:sshCount++;throw 'ssh_double_called'}; "
+        "function Invoke-Phase15OneSshTransport{param($ExpectedHost,$CollectorBytes,$Claim,$ClaimId,$ManifestSha256,$CollectorSha256,[ref]$Started,$TransactionPath,$Lock) "
+        "$process=[pscustomobject]@{}; $process|Add-Member -MemberType ScriptMethod -Name Start -Value {$script:sshCount++;return $true}; "
+        "[void](Start-Phase15AuthorizedSshProcess -Process $process -Claim $Claim -ExpectedHost $ExpectedHost -ClaimId $ClaimId -ManifestSha256 $ManifestSha256 -CollectorSha256 $CollectorSha256 -TransactionPath $TransactionPath -Lock $Lock); $Started.Value=$true; throw 'ssh_double_called'}; "
         "$message='';try{Invoke-Phase15RunnerMain}catch{$message=$_.Exception.Message}; "
         "$lifecyclePath=Get-Phase15LifecyclePath -LifecycleRoot (Join-Path $script:stateRoot 'claims') -ClaimId $script:claim.claim_id; $journalPath=Get-Phase15TransactionPath -StateRoot $script:stateRoot -ClaimId $script:claim.claim_id; "
         "$lifecycle=ConvertFrom-Phase15CanonicalJsonFile -Path $lifecyclePath; $outcome=ConvertFrom-Phase15CanonicalJsonFile -Path $OutcomePath; "
@@ -2460,3 +2464,19 @@ def test_round12_fresh_clock_stops_expired_claim_before_reservation_or_transport
         assert result.stdout == "claim_invalid|1|0|absent|absent|absent|absent|absent|false"
     else:
         assert result.stdout == "claim_invalid|1|0|failed|claim_invalid|false|not_run|failed:claim_invalid|false"
+
+
+def test_round13_fresh_claim_gate_is_adjacent_to_actual_process_start():
+    source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
+    launch = source[source.index("function Start-Phase15AuthorizedSshProcess") : source.index("function Invoke-Phase15OneSshTransport")]
+    transport = source[source.index("function Invoke-Phase15OneSshTransport") : source.index("function Write-Phase15CreateNewJson")]
+
+    attempted = launch.index("-Phase 'transport_attempted'")
+    lifetime = launch.index("Test-Phase15FutureClaim")
+    reset = launch.index("Reset-Phase15UnstartedTransaction")
+    process_start = launch.index("$Process.Start()")
+    assert attempted < lifetime < reset < process_start
+    assert "Assert-Phase15LocalExecutable" not in launch[lifetime:process_start]
+    assert "Write-Phase15AtomicJson" not in launch[lifetime:process_start]
+    assert "[DateTimeOffset]::UtcNow" not in transport
+    assert "-Claim $Claim" in transport
