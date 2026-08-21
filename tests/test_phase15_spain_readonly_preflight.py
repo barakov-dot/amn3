@@ -2241,7 +2241,7 @@ def test_round10_state_root_is_provisioned_under_one_global_lock_with_synthetic_
     )
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout == "True|true|AMN2,phase15,readonly-preflight,locks,outcome-locks,claims,transactions,recovery-outcomes"
+    assert result.stdout == "True|true|AMN2,phase15,readonly-preflight,locks,outcome-locks,claims,transactions,recovery-outcomes,outcomes"
 
 
 def test_round10_attacker_precreated_managed_tree_is_rejected_without_provisioning():
@@ -2451,7 +2451,7 @@ def test_round12_fresh_clock_stops_expired_claim_before_reservation_or_transport
         f"function Read-Phase15CollectorArtifact{{[pscustomobject]@{{Bytes=[byte[]]@(1);Sha256='{COLLECTOR_SHA256}'}}}}; "
         "function Assert-Phase15SpainTrustBundle{param($ExpectedHost)[pscustomobject]@{Validated=$true}}; "
         "function Read-Phase15FutureClaim{param($ClaimPath)$script:claim}; "
-        "function Initialize-Phase15ProductionStateRoot{$script:initializerCount++;$script:stateRoot}; "
+        "function Initialize-Phase15ProductionStateRoot{$script:initializerCount++;$script:stateRoot}; function Assert-Phase15TrustedOutcomeParent{param($StateRoot,$OutcomePath,$AuthorizedSid)[IO.Path]::GetFullPath($OutcomePath)}; "
         f"{reset_override}"
         "function Invoke-Phase15OneSshTransport{param($ExpectedHost,$CollectorBytes,$Claim,$ClaimId,$ManifestSha256,$CollectorSha256,$ExpectedOutcomePath,$ReservedAt,[ref]$Started,$TransactionPath,$Lock) "
         "$process=[pscustomobject]@{}; $process|Add-Member -MemberType ScriptMethod -Name Start -Value {$script:sshCount++;return $true}; "
@@ -2547,7 +2547,7 @@ def test_round16_real_catch_never_publishes_to_malformed_journal_staged_path(tmp
         f"$script:claim=[pscustomobject][ordered]@{{claim_id='phase15-preflight-test-001';collector_sha256='{COLLECTOR_SHA256}';consumed_at=$null;expected_host='spain.test.invalid';expires_at='{expires_at}';future_gate='PREFLIGHT';issued_at='{issued_at}';manifest_sha256='{MANIFEST_SHA256}';package_id='{PACKAGE_ID}';schema='amn2.phase15.readonly-preflight-claim.v1';status='issued'}}; "
         f"function Read-Phase15ManifestArtifact{{[pscustomobject]@{{Value=[pscustomobject]@{{package_id='{PACKAGE_ID}';entries=@([pscustomobject]@{{path='tooling/scripts/vps/phase15_spain_readonly_preflight_remote.sh';sha256='{COLLECTOR_SHA256}'}})}};Sha256='{MANIFEST_SHA256}'}}}}; "
         f"function Read-Phase15CollectorArtifact{{[pscustomobject]@{{Bytes=[byte[]]@(1);Sha256='{COLLECTOR_SHA256}'}}}}; "
-        "function Assert-Phase15SpainTrustBundle{param($ExpectedHost)[pscustomobject]@{Validated=$true}}; function Read-Phase15FutureClaim{param($ClaimPath)$script:claim}; function Initialize-Phase15ProductionStateRoot{$script:stateRoot}; "
+        "function Assert-Phase15SpainTrustBundle{param($ExpectedHost)[pscustomobject]@{Validated=$true}}; function Read-Phase15FutureClaim{param($ClaimPath)$script:claim}; function Initialize-Phase15ProductionStateRoot{$script:stateRoot}; function Assert-Phase15TrustedOutcomeParent{param($StateRoot,$OutcomePath,$AuthorizedSid)[IO.Path]::GetFullPath($OutcomePath)}; "
         "$script:originalAtomicJson=${function:Write-Phase15AtomicJson}; function Write-Phase15AtomicJson{param($Path,$Value,$OwnerId) if($null -ne $Value.terminal_ended_at -and $Value.staged_path -ceq $script:offPath){$script:unboundTerminalWrites++}; & $script:originalAtomicJson -Path $Path -Value $Value -OwnerId $OwnerId}; "
         "function Write-Phase15CreateNewJson{param($Path,$Value,$OwnerId) if([IO.Path]::GetFullPath($Path) -ceq $script:offPath){$script:offPathWrites++}; Write-Phase15AtomicCreateNewJson -Path $Path -Value $Value -OwnerId $OwnerId}; "
         "function Reset-Phase15UnstartedTransaction{param($TransactionPath,$ClaimId,$ManifestSha256,$CollectorSha256,$ExpectedHost,$ExpectedOutcomePath,$ReservedAt,$Lock) $journal=ConvertFrom-Phase15CanonicalJsonFile -Path $TransactionPath; $journal.staged_path=$script:offPath; Write-Phase15AtomicJson -Path $TransactionPath -Value $journal -OwnerId $ClaimId; throw 'reset_failed'}; "
@@ -2559,3 +2559,75 @@ def test_round16_real_catch_never_publishes_to_malformed_journal_staged_path(tmp
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == "reset_failed|0|0|false|transport_failed|true|read_only_failed|failed:transport_failed|false"
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        f"$journal.manifest_sha256='{'c' * 64}'",
+        f"$journal.collector_sha256='{'d' * 64}'",
+        "$journal.expected_host='other.test.invalid'",
+        "$journal.reserved_at='2026-08-16T00:00:01Z'",
+    ],
+)
+def test_round17_real_catch_never_reconciles_valid_looking_forged_binding(tmp_path: Path, mutation: str):
+    now = datetime.now(timezone.utc).replace(microsecond=0)
+    issued_at = (now - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    expires_at = (now + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    valid_at = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    state_root_path = tmp_path / "state"
+    state_root = str(state_root_path).replace("'", "''")
+    outcome = str(state_root_path / "outcomes" / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        "$FutureAuthorization=$true; $FutureClaimPath='synthetic-claim.json'; $PackageRoot='C:\\synthetic-package'; "
+        f"$OutcomePath='{outcome}'; $ExpectedHost='spain.test.invalid'; $script:stateRoot='{state_root}'; "
+        "foreach($leaf in @('locks','outcome-locks','claims','transactions','recovery-outcomes','outcomes')){$null=[IO.Directory]::CreateDirectory((Join-Path $script:stateRoot $leaf))}; "
+        "$script:clock=[Collections.Generic.Queue[DateTimeOffset]]::new(); "
+        f"foreach($value in @('{valid_at}','{valid_at}','{expires_at}')){{$script:clock.Enqueue([DateTimeOffset]::ParseExact($value,'yyyy-MM-ddTHH:mm:ssZ',[Globalization.CultureInfo]::InvariantCulture,[Globalization.DateTimeStyles]::AssumeUniversal))}}; "
+        "$script:Phase15AuthorizationClock={if($script:clock.Count -eq 0){throw 'clock_exhausted'};$script:clock.Dequeue()}; "
+        f"$script:claim=[pscustomobject][ordered]@{{claim_id='phase15-preflight-test-001';collector_sha256='{COLLECTOR_SHA256}';consumed_at=$null;expected_host='spain.test.invalid';expires_at='{expires_at}';future_gate='PREFLIGHT';issued_at='{issued_at}';manifest_sha256='{MANIFEST_SHA256}';package_id='{PACKAGE_ID}';schema='amn2.phase15.readonly-preflight-claim.v1';status='issued'}}; "
+        f"function Read-Phase15ManifestArtifact{{[pscustomobject]@{{Value=[pscustomobject]@{{package_id='{PACKAGE_ID}';entries=@([pscustomobject]@{{path='tooling/scripts/vps/phase15_spain_readonly_preflight_remote.sh';sha256='{COLLECTOR_SHA256}'}})}};Sha256='{MANIFEST_SHA256}'}}}}; "
+        f"function Read-Phase15CollectorArtifact{{[pscustomobject]@{{Bytes=[byte[]]@(1);Sha256='{COLLECTOR_SHA256}'}}}}; "
+        "function Assert-Phase15SpainTrustBundle{param($ExpectedHost)[pscustomobject]@{Validated=$true}}; function Read-Phase15FutureClaim{param($ClaimPath)$script:claim}; function Initialize-Phase15ProductionStateRoot{$script:stateRoot}; function Assert-Phase15TrustedOutcomeParent{param($StateRoot,$OutcomePath,$AuthorizedSid)[IO.Path]::GetFullPath($OutcomePath)}; "
+        f"function Reset-Phase15UnstartedTransaction{{param($TransactionPath,$ClaimId,$ManifestSha256,$CollectorSha256,$ExpectedHost,$ExpectedOutcomePath,$ReservedAt,$Lock) $journal=ConvertFrom-Phase15CanonicalJsonFile -Path $TransactionPath; {mutation}; Write-Phase15AtomicJson -Path $TransactionPath -Value $journal -OwnerId $ClaimId; throw 'reset_failed'}}; "
+        "function Invoke-Phase15OneSshTransport{param($ExpectedHost,$CollectorBytes,$Claim,$ClaimId,$ManifestSha256,$CollectorSha256,$ExpectedOutcomePath,$ReservedAt,[ref]$Started,$TransactionPath,$Lock) $process=[pscustomobject]@{}; $process|Add-Member -MemberType ScriptMethod -Name Start -Value {throw 'ssh_must_not_start'}; [void](Start-Phase15AuthorizedSshProcess -Process $process -Claim $Claim -ExpectedHost $ExpectedHost -ClaimId $ClaimId -ManifestSha256 $ManifestSha256 -CollectorSha256 $CollectorSha256 -ExpectedOutcomePath $ExpectedOutcomePath -ReservedAt $ReservedAt -TransactionPath $TransactionPath -Lock $Lock)}; "
+        "$message='';try{Invoke-Phase15RunnerMain}catch{$message=$_.Exception.Message}; $journalPath=Get-Phase15TransactionPath -StateRoot $script:stateRoot -ClaimId $script:claim.claim_id; $lifecyclePath=Get-Phase15LifecyclePath -LifecycleRoot (Join-Path $script:stateRoot 'claims') -ClaimId $script:claim.claim_id; "
+        "$journalExists=(Test-Path -LiteralPath $journalPath).ToString().ToLowerInvariant(); $outcomeDoc=ConvertFrom-Phase15CanonicalJsonFile -Path $OutcomePath; $lifecycle=ConvertFrom-Phase15CanonicalJsonFile -Path $lifecyclePath; $isTerminal=$null -ne $outcomeDoc -and @($outcomeDoc.PSObject.Properties.Name) -contains 'reason_code'; $terminal=$isTerminal.ToString().ToLowerInvariant(); $outcomeState=if($isTerminal){'terminal'}elseif($null -eq $outcomeDoc){'absent'}else{$outcomeDoc.status}; "
+        "[Console]::Out.Write(\"$message|$terminal|$outcomeState|$($lifecycle.status)|$journalExists\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "transaction_invalid|false|reserved|reserved|true"
+
+
+def test_round17_trusted_outcome_parent_facts_reject_off_root_reparse_and_unapproved_writer():
+    result = run_powershell(
+        "$authorized='S-1-5-21-1000'; $stateRoot='C:\\ProgramData\\AMN2\\phase15\\readonly-preflight'; $outcome=$stateRoot+'\\outcomes\\result.json'; $parent=$stateRoot+'\\outcomes'; "
+        "$full=[int64][Security.AccessControl.FileSystemRights]::FullControl; $inherit=3; function New-Rule($sid){[pscustomobject]@{Sid=$sid;Type='Allow';Rights=$full;IsInherited=$false;Inheritance=$inherit;Propagation=0}}; $rules=@((New-Rule $authorized),(New-Rule 'S-1-5-18'),(New-Rule 'S-1-5-32-544')); "
+        "$valid=[pscustomobject]@{Exists=$true;FullName=$parent;IsDirectory=$true;IsReparse=$false;OwnerSid=$authorized;Protected=$true;Rules=$rules}; $reparse=$valid.PSObject.Copy();$reparse.IsReparse=$true; $offRoot=$valid.PSObject.Copy();$offRoot.FullName='C:\\Synthetic\\outcomes'; $writer=$valid.PSObject.Copy();$writer.Rules=@($rules+[pscustomobject]@{Sid='S-1-5-32-545';Type='Allow';Rights=$full;IsInherited=$false;Inheritance=$inherit;Propagation=0}); "
+        "$a=Test-Phase15TrustedOutcomeParentFacts -Facts $valid -StateRoot $stateRoot -OutcomePath $outcome -AuthorizedSid $authorized; $b=Test-Phase15TrustedOutcomeParentFacts -Facts $reparse -StateRoot $stateRoot -OutcomePath $outcome -AuthorizedSid $authorized; $c=Test-Phase15TrustedOutcomeParentFacts -Facts $offRoot -StateRoot $stateRoot -OutcomePath $outcome -AuthorizedSid $authorized; $d=Test-Phase15TrustedOutcomeParentFacts -Facts $writer -StateRoot $stateRoot -OutcomePath $outcome -AuthorizedSid $authorized; "
+        "[Console]::Out.Write(\"$($a.ToString().ToLowerInvariant())|$($b.ToString().ToLowerInvariant())|$($c.ToString().ToLowerInvariant())|$($d.ToString().ToLowerInvariant())\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|false|false|false"
+
+
+def test_round17_publisher_stops_if_trusted_outcome_parent_changes_before_replace(tmp_path: Path):
+    state_root_path = tmp_path / "state"
+    state_root = str(state_root_path).replace("'", "''")
+    outcome = str(state_root_path / "outcomes" / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        f"$stateRoot='{state_root}'; foreach($leaf in @('locks','outcome-locks','claims','transactions','recovery-outcomes','outcomes')){{$null=[IO.Directory]::CreateDirectory((Join-Path $stateRoot $leaf))}}; "
+        "$authorized='S-1-5-21-1000'; $lock=Enter-Phase15ClaimLock -StateRoot $stateRoot -ClaimId 'phase15-preflight-test-001'; "
+        f"$tx=Start-Phase15Transaction -StateRoot $stateRoot -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
+        "$null=Set-Phase15TransactionPhase -TransactionPath $tx.JournalPath -ClaimId 'phase15-preflight-test-001' -Phase 'transport_attempted' -Lock $lock; $script:parentChecks=0; "
+        "function Assert-Phase15TrustedOutcomeParent{param($StateRoot,$OutcomePath,$AuthorizedSid)$script:parentChecks++;if($script:parentChecks -eq 3){throw 'outcome_parent_invalid'};[IO.Path]::GetFullPath($OutcomePath)}; "
+        f"$failure=New-Phase15FailureOutcome -ReasonCode 'transport_failed' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -StartedAt '2026-08-16T00:00:00Z' -EndedAt '2026-08-16T00:00:02Z' -SshUsed $true; "
+        f"$message='';try{{Publish-Phase15TerminalOutcome -LifecyclePath $tx.LifecyclePath -ReservationPath $tx.ReservationPath -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' -Status 'failed' -EndedAt '2026-08-16T00:00:02Z' -ReasonCode 'transport_failed' -Outcome $failure -TransactionPath $tx.JournalPath -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -ReservedAt '2026-08-16T00:00:00Z' -StateRoot $stateRoot -AuthorizedSid $authorized -Lock $lock -OutcomeLock $tx.OutcomeLock}}catch{{$message=$_.Exception.Message}}; "
+        "$outcomeDoc=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.ReservationPath; $lifecycle=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.LifecyclePath; $staged=(Test-Path -LiteralPath $tx.StagedPath).ToString().ToLowerInvariant(); $journal=(Test-Path -LiteralPath $tx.JournalPath).ToString().ToLowerInvariant(); $tx.OutcomeLock.Stream.Dispose();$lock.Stream.Dispose(); "
+        "[Console]::Out.Write(\"$message|$script:parentChecks|$($outcomeDoc.status)|$($lifecycle.status)|$staged|$journal\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "outcome_parent_invalid|3|reserved|failed|false|true"
