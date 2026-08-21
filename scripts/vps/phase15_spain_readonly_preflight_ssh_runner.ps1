@@ -1456,10 +1456,12 @@ function Reconcile-Phase15Transaction {
     $v2Required = @('claim_id','collector_sha256','expected_host','manifest_sha256','outcome_path','phase','reserved_at','schema','ssh_used','staged_path','started_at','terminal_ended_at','terminal_outcome_sha256','terminal_path','terminal_reason_code','terminal_status')
     $v1Required = @('claim_id','collector_sha256','expected_host','manifest_sha256','outcome_path','phase','reserved_at','schema','ssh_used','staged_path','terminal_ended_at','terminal_outcome_sha256','terminal_path','terminal_reason_code','terminal_status')
     $isV2 = $null -ne $journal -and (Test-Phase15ExactProperties -Value $journal -Required $v2Required) -and $journal.schema -is [string] -and $journal.schema -ceq 'amn2.phase15.readonly-preflight-transaction.v2'
-    $isPredecessorV1 = $null -ne $journal -and (Test-Phase15ExactProperties -Value $journal -Required $v1Required) -and $journal.schema -is [string] -and $journal.schema -ceq 'amn2.phase15.readonly-preflight-transaction.v1'
-    if (-not $isV2 -and -not $isPredecessorV1) { throw 'transaction_invalid' }
+    $isImmediatePredecessorV1 = $null -ne $journal -and (Test-Phase15ExactProperties -Value $journal -Required $v2Required) -and $journal.schema -is [string] -and $journal.schema -ceq 'amn2.phase15.readonly-preflight-transaction.v1'
+    $isLegacyV1 = $null -ne $journal -and (Test-Phase15ExactProperties -Value $journal -Required $v1Required) -and $journal.schema -is [string] -and $journal.schema -ceq 'amn2.phase15.readonly-preflight-transaction.v1'
+    if (-not $isV2 -and -not $isImmediatePredecessorV1 -and -not $isLegacyV1) { throw 'transaction_invalid' }
+    $hasStoredStartedAt = $isV2 -or $isImmediatePredecessorV1
     $stringFields = @('claim_id','collector_sha256','expected_host','manifest_sha256','outcome_path','phase','reserved_at','schema','staged_path')
-    if ($isV2) { $stringFields += 'started_at' }
+    if ($hasStoredStartedAt) { $stringFields += 'started_at' }
     foreach ($field in $stringFields) {
         if ($journal.$field -isnot [string]) { throw 'transaction_invalid' }
     }
@@ -1475,7 +1477,7 @@ function Reconcile-Phase15Transaction {
     if ($journal.claim_id -cne $ClaimId) { throw 'transaction_invalid' }
     $phaseValid = $journal.phase -cin @('owned','transport_attempted','ssh_started','outcome_staged','finalizing')
     if ($journal.manifest_sha256 -cnotmatch '^[0-9a-f]{64}$' -or $journal.collector_sha256 -cnotmatch '^[0-9a-f]{64}$' -or -not (Test-Phase15ExpectedHost -ExpectedHost $journal.expected_host) -or
-        -not (Test-Phase15UtcTimestamp -Value $journal.reserved_at) -or ($isV2 -and -not (Test-Phase15UtcTimestamp -Value $journal.started_at))) { throw 'transaction_invalid' }
+        -not (Test-Phase15UtcTimestamp -Value $journal.reserved_at) -or ($hasStoredStartedAt -and -not (Test-Phase15UtcTimestamp -Value $journal.started_at))) { throw 'transaction_invalid' }
     if ($hasExpectedBindings -and (
         $journal.manifest_sha256 -cne $ExpectedManifestSha256 -or
         $journal.collector_sha256 -cne $ExpectedCollectorSha256 -or
@@ -1534,26 +1536,43 @@ function Reconcile-Phase15Transaction {
         }
     $recoveryRoot = Join-Path $StateRoot 'recovery-outcomes'
     $recoveryOutcomePath = Get-Phase15LifecyclePath -LifecycleRoot $recoveryRoot -ClaimId $ClaimId
-    if ($isPredecessorV1) {
-        $journal | Add-Member -NotePropertyName started_at -NotePropertyValue $journal.reserved_at
-        $journal.schema = 'amn2.phase15.readonly-preflight-transaction.v2'
+    if ($isImmediatePredecessorV1 -or $isLegacyV1) {
+        $migrationStartedAt = if ($isImmediatePredecessorV1) { $journal.started_at } elseif ($null -eq $journal.terminal_path) { $journal.reserved_at } else { $null }
+        if ($isLegacyV1 -and $null -eq $journal.terminal_path) {
+            $journal | Add-Member -NotePropertyName started_at -NotePropertyValue $migrationStartedAt
+        }
+        if ($isImmediatePredecessorV1 -or $null -ne $migrationStartedAt) {
+            $journal.schema = 'amn2.phase15.readonly-preflight-transaction.v2'
+        }
         if ($null -ne $journal.terminal_path) {
             if (-not (Test-Phase15ExactTerminalJournalBinding -Journal $journal -StateRoot $StateRoot -ClaimId $ClaimId -ExpectedOutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath)) { throw 'transaction_invalid' }
             $predecessorTerminalPath = [IO.Path]::GetFullPath($journal.terminal_path)
+            $authoritativeArtifactFound = $false
             foreach ($artifactPath in @($journal.staged_path, $predecessorTerminalPath)) {
                 if (-not (Test-Path -LiteralPath $artifactPath -PathType Leaf)) { continue }
                 if ([IO.Path]::GetFullPath($artifactPath) -ceq [IO.Path]::GetFullPath($journal.outcome_path) -and
                     (Test-Phase15OutcomeOwnership -ReservationPath $journal.outcome_path -ClaimId $ClaimId)) { continue }
                 $artifact = ConvertFrom-Phase15CanonicalJsonFile -Path $artifactPath
-                if ($null -eq $artifact -or (Get-Phase15CanonicalJsonSha256 -Value $artifact) -cne $journal.terminal_outcome_sha256 -or
-                    -not (Test-Phase15ExactPublishedTerminalOutcome -Document $artifact -Journal $journal)) { throw 'transaction_invalid' }
+                if ($null -eq $artifact -or (Get-Phase15CanonicalJsonSha256 -Value $artifact) -cne $journal.terminal_outcome_sha256) { throw 'transaction_invalid' }
+                if ($isLegacyV1) {
+                    if (@($artifact.PSObject.Properties.Name) -cnotcontains 'started_at' -or $artifact.started_at -isnot [string] -or
+                        -not (Test-Phase15UtcTimestamp -Value $artifact.started_at)) { throw 'transaction_invalid' }
+                    if ($null -eq $migrationStartedAt) {
+                        $migrationStartedAt = $artifact.started_at
+                        $journal | Add-Member -NotePropertyName started_at -NotePropertyValue $migrationStartedAt
+                        $journal.schema = 'amn2.phase15.readonly-preflight-transaction.v2'
+                    } elseif ($artifact.started_at -cne $migrationStartedAt) { throw 'transaction_invalid' }
+                }
+                if (-not (Test-Phase15ExactPublishedTerminalOutcome -Document $artifact -Journal $journal)) { throw 'transaction_invalid' }
+                $authoritativeArtifactFound = $true
             }
+            if ($isLegacyV1 -and -not $authoritativeArtifactFound) { throw 'transaction_invalid' }
         }
         [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcomes'))
         Write-Phase15AtomicJson -Path $journalPath -Value $journal -OwnerId $ClaimId
         $journal = ConvertFrom-Phase15CanonicalJsonFile -Path $journalPath
         if ($null -eq $journal -or -not (Test-Phase15ExactProperties -Value $journal -Required $v2Required) -or $journal.schema -cne 'amn2.phase15.readonly-preflight-transaction.v2' -or
-            $journal.started_at -cne $journal.reserved_at) { throw 'transaction_invalid' }
+            $journal.started_at -cne $migrationStartedAt) { throw 'transaction_invalid' }
     }
     if ($null -ne $journal.terminal_path -and -not (Test-Phase15ExactTerminalJournalBinding -Journal $journal -StateRoot $StateRoot -ClaimId $ClaimId -ExpectedOutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath)) { throw 'transaction_invalid' }
     Remove-Phase15TransactionTemps -TransactionPath $journalPath -ClaimId $ClaimId
