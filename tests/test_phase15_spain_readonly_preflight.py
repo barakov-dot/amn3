@@ -2637,6 +2637,8 @@ def test_round17_publisher_stops_if_trusted_outcome_parent_changes_before_replac
         ("lifecycle", "{"),
         ("lifecycle", '{"claim_id":"phase15-preflight-test-001", "reason_code":"not_applicable","reserved_at":"2026-08-16T00:00:00Z","status":"reserved"}\n'),
         ("lifecycle", '{"status":"unknown"}\n'),
+        ("lifecycle", '{"claim_id":"phase15-preflight-test-001","ended_at":"2026-08-16T00:00:02Z","reason_code":"not_applicable","status":"Completed"}\n'),
+        ("lifecycle", '{"claim_id":"phase15-preflight-test-001","ended_at":"2026-08-16T00:00:02Z","reason_code":"transport_failed","status":"Failed"}\n'),
         ("outcome", "{"),
         ("outcome", '{"claim_id":"phase15-preflight-test-001", "reserved_at":"2026-08-16T00:00:00Z","status":"reserved"}\n'),
         ("outcome", '{"status":"unknown"}\n'),
@@ -2692,6 +2694,90 @@ def test_round18_terminal_journal_binding_derives_recovery_path_from_state_ident
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == "false"
+
+
+def test_round19_published_evidence_rejects_mixed_case_decision():
+    document = valid_collector_document()
+    result = runner_document_result(
+        document,
+        "$evidence=ConvertTo-Phase15Evidence -Document $document -ManifestSha256 ('a'*64) -CollectorSha256 ('b'*64) -ExpectedHost 'spain.test.invalid' -StartedAt '2026-08-16T00:00:00Z' -EndedAt '2026-08-16T00:00:02Z'; "
+        "$evidence=ConvertFrom-Phase15CanonicalJsonText -Text ((ConvertTo-Phase15CanonicalJsonText -Value $evidence)+\"`n\"); "
+        "$journal=[pscustomobject]@{manifest_sha256=('a'*64);collector_sha256=('b'*64);expected_host='spain.test.invalid';terminal_status='completed';terminal_reason_code='not_applicable';terminal_ended_at='2026-08-16T00:00:02Z';ssh_used=$true}; "
+        "$lower=Test-Phase15ExactPublishedTerminalOutcome -Document $evidence -Journal $journal;$evidence.decision='PASS';$mixed=Test-Phase15ExactPublishedTerminalOutcome -Document $evidence -Journal $journal; [Console]::Out.Write(\"$($lower.ToString().ToLowerInvariant())|$($mixed.ToString().ToLowerInvariant())\")",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|false"
+
+
+@pytest.mark.parametrize("crash_point", ["tuple", "staged", "lifecycle", "finalizing", "replaced"])
+def test_round19_reconcile_completes_only_exact_legitimate_partial_publication(tmp_path: Path, crash_point: str):
+    state_root_path = tmp_path / "state"
+    state_root = str(state_root_path).replace("'", "''")
+    outcome_path = state_root_path / "outcomes" / "outcome.json"
+    outcome = str(outcome_path).replace("'", "''")
+    setup = ""
+    if crash_point in {"staged", "lifecycle", "finalizing", "replaced"}:
+        setup += "Write-Phase15CreateNewJson -Path $tx.StagedPath -Value $failure -OwnerId 'phase15-preflight-test-001'; "
+    if crash_point in {"lifecycle", "finalizing", "replaced"}:
+        setup += "$null=Set-Phase15TransactionPhase -TransactionPath $tx.JournalPath -ClaimId 'phase15-preflight-test-001' -Phase 'outcome_staged' -Lock $lock; $null=Set-Phase15ClaimTerminal -LifecyclePath $tx.LifecyclePath -ClaimId 'phase15-preflight-test-001' -Status 'failed' -EndedAt '2026-08-16T00:00:02Z' -ReasonCode 'collector_failed'; "
+    if crash_point in {"finalizing", "replaced"}:
+        setup += "$null=Set-Phase15TransactionPhase -TransactionPath $tx.JournalPath -ClaimId 'phase15-preflight-test-001' -Phase 'finalizing' -Lock $lock; "
+    if crash_point == "replaced":
+        setup += "$backup=$tx.ReservationPath+'.phase15-test-backup';[IO.File]::Replace($tx.StagedPath,$tx.ReservationPath,$backup,$true);if(Test-Path -LiteralPath $backup){[IO.File]::Delete($backup)}; "
+    result = run_powershell(
+        f"$stateRoot='{state_root}';foreach($leaf in @('locks','outcome-locks','claims','transactions','recovery-outcomes','outcomes')){{$null=[IO.Directory]::CreateDirectory((Join-Path $stateRoot $leaf))}}; "
+        "$authorized='S-1-5-21-1000';function Assert-Phase15TrustedOutcomeParent{param($StateRoot,$OutcomePath,$AuthorizedSid)[IO.Path]::GetFullPath($OutcomePath)};function Assert-Phase15TrustedManagedStateChain{param($StateRoot,$AuthorizedSid,$RequiredChildren)$StateRoot}; "
+        "$lock=Enter-Phase15ClaimLock -StateRoot $stateRoot -ClaimId 'phase15-preflight-test-001'; "
+        f"$tx=Start-Phase15Transaction -StateRoot $stateRoot -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock; "
+        "$null=Set-Phase15TransactionPhase -TransactionPath $tx.JournalPath -ClaimId 'phase15-preflight-test-001' -Phase 'ssh_started' -Lock $lock; "
+        f"$failure=New-Phase15FailureOutcome -ReasonCode 'collector_failed' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -StartedAt '2026-08-16T00:00:00Z' -EndedAt '2026-08-16T00:00:02Z' -SshUsed $true; "
+        "$journal=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath;$journal.terminal_ended_at='2026-08-16T00:00:02Z';$journal.terminal_outcome_sha256=Get-Phase15CanonicalJsonSha256 -Value $failure;$journal.terminal_path=$tx.ReservationPath;$journal.terminal_reason_code='collector_failed';$journal.terminal_status='failed';Write-Phase15AtomicJson -Path $tx.JournalPath -Value $journal -OwnerId 'phase15-preflight-test-001'; "
+        f"{setup}"
+        f"$message='';$reconciled=$null;try{{$reconciled=Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:03Z' -Lock $lock -OutcomeLock $tx.OutcomeLock -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -ExpectedOutcomePath '{outcome}' -ExpectedReservedAt '2026-08-16T00:00:00Z' -AuthorizedSid $authorized}}catch{{$message=$_.Exception.Message}}; "
+        "$published=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.ReservationPath;$lifecycle=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.LifecyclePath;$journalExists=(Test-Path -LiteralPath $tx.JournalPath).ToString().ToLowerInvariant();$stagedExists=(Test-Path -LiteralPath $tx.StagedPath).ToString().ToLowerInvariant();$outcomeReason=if($null-ne$published-and@($published.PSObject.Properties.Name)-ccontains'reason_code'){$published.reason_code}else{'absent'};$outcomeSsh=if($null-ne$published-and@($published.PSObject.Properties.Name)-ccontains'safety'){$published.safety.ssh_used}else{$false};$tx.OutcomeLock.Stream.Dispose();$lock.Stream.Dispose(); "
+        "[Console]::Out.Write((@{message=$message;recovered=($null-ne$reconciled-and$reconciled.Recovered);journal=$journalExists;staged=$stagedExists;outcome_reason=$outcomeReason;outcome_ssh=$outcomeSsh;lifecycle_status=$lifecycle.status;lifecycle_reason=$lifecycle.reason_code} | ConvertTo-Json -Compress))"
+    )
+
+    assert result.returncode == 0, result.stderr
+    state = json.loads(result.stdout)
+    assert state == {
+        "journal": "false",
+        "lifecycle_reason": "transport_failed" if crash_point == "tuple" else "collector_failed",
+        "lifecycle_status": "failed",
+        "message": "",
+        "outcome_reason": "transport_failed" if crash_point == "tuple" else "collector_failed",
+        "outcome_ssh": True,
+        "recovered": True,
+        "staged": "false",
+    }
+
+
+@pytest.mark.parametrize("case", ["staged_digest", "lifecycle_mismatch", "published_wrong_phase"])
+def test_round19_reconcile_preserves_mixed_partial_publication_for_manual_recovery(tmp_path: Path, case: str):
+    state_root_path = tmp_path / "state"
+    state_root = str(state_root_path).replace("'", "''")
+    outcome_path = state_root_path / "outcomes" / "outcome.json"
+    outcome = str(outcome_path).replace("'", "''")
+    setup = "Write-Phase15CreateNewJson -Path $tx.StagedPath -Value $failure -OwnerId 'phase15-preflight-test-001'; "
+    if case == "staged_digest":
+        setup += "$journal=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath;$journal.terminal_outcome_sha256=('f'*64);Write-Phase15AtomicJson -Path $tx.JournalPath -Value $journal -OwnerId 'phase15-preflight-test-001'; "
+    elif case == "lifecycle_mismatch":
+        setup += "$null=Set-Phase15TransactionPhase -TransactionPath $tx.JournalPath -ClaimId 'phase15-preflight-test-001' -Phase 'outcome_staged' -Lock $lock;$null=Set-Phase15ClaimTerminal -LifecyclePath $tx.LifecyclePath -ClaimId 'phase15-preflight-test-001' -Status 'failed' -EndedAt '2026-08-16T00:00:02Z' -ReasonCode 'transport_failed'; "
+    else:
+        setup += "$null=Set-Phase15TransactionPhase -TransactionPath $tx.JournalPath -ClaimId 'phase15-preflight-test-001' -Phase 'outcome_staged' -Lock $lock;$null=Set-Phase15ClaimTerminal -LifecyclePath $tx.LifecyclePath -ClaimId 'phase15-preflight-test-001' -Status 'failed' -EndedAt '2026-08-16T00:00:02Z' -ReasonCode 'collector_failed';$backup=$tx.ReservationPath+'.phase15-test-backup';[IO.File]::Replace($tx.StagedPath,$tx.ReservationPath,$backup,$true);if(Test-Path -LiteralPath $backup){[IO.File]::Delete($backup)}; "
+    result = run_powershell(
+        f"$stateRoot='{state_root}';foreach($leaf in @('locks','outcome-locks','claims','transactions','recovery-outcomes','outcomes')){{$null=[IO.Directory]::CreateDirectory((Join-Path $stateRoot $leaf))}}; "
+        "$authorized='S-1-5-21-1000';function Assert-Phase15TrustedOutcomeParent{param($StateRoot,$OutcomePath,$AuthorizedSid)[IO.Path]::GetFullPath($OutcomePath)};function Assert-Phase15TrustedManagedStateChain{param($StateRoot,$AuthorizedSid,$RequiredChildren)$StateRoot};$lock=Enter-Phase15ClaimLock -StateRoot $stateRoot -ClaimId 'phase15-preflight-test-001'; "
+        f"$tx=Start-Phase15Transaction -StateRoot $stateRoot -OutcomePath '{outcome}' -ClaimId 'phase15-preflight-test-001' -ReservedAt '2026-08-16T00:00:00Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock;$null=Set-Phase15TransactionPhase -TransactionPath $tx.JournalPath -ClaimId 'phase15-preflight-test-001' -Phase 'ssh_started' -Lock $lock; "
+        f"$failure=New-Phase15FailureOutcome -ReasonCode 'collector_failed' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -StartedAt '2026-08-16T00:00:00Z' -EndedAt '2026-08-16T00:00:02Z' -SshUsed $true;$journal=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath;$journal.terminal_ended_at='2026-08-16T00:00:02Z';$journal.terminal_outcome_sha256=Get-Phase15CanonicalJsonSha256 -Value $failure;$journal.terminal_path=$tx.ReservationPath;$journal.terminal_reason_code='collector_failed';$journal.terminal_status='failed';Write-Phase15AtomicJson -Path $tx.JournalPath -Value $journal -OwnerId 'phase15-preflight-test-001'; "
+        f"{setup}"
+        f"$message='';try{{$null=Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId 'phase15-preflight-test-001' -EndedAt '2026-08-16T00:00:03Z' -Lock $lock -OutcomeLock $tx.OutcomeLock -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -ExpectedOutcomePath '{outcome}' -ExpectedReservedAt '2026-08-16T00:00:00Z' -AuthorizedSid $authorized}}catch{{$message=$_.Exception.Message}}; "
+        "$journalExists=(Test-Path -LiteralPath $tx.JournalPath).ToString().ToLowerInvariant();$stagedExists=Test-Path -LiteralPath $tx.StagedPath -PathType Leaf;$outcomeDoc=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.ReservationPath;$published=($null-ne$outcomeDoc-and@($outcomeDoc.PSObject.Properties.Name)-ccontains'reason_code');$durable=($stagedExists-or$published).ToString().ToLowerInvariant();$tx.OutcomeLock.Stream.Dispose();$lock.Stream.Dispose();[Console]::Out.Write(\"$message|$journalExists|$durable\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "transaction_invalid|true|true"
 
 
 def test_round18_outcomes_namespace_lock_serializes_cooperating_runners(tmp_path: Path):
