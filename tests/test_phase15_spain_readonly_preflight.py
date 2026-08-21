@@ -3208,3 +3208,73 @@ def test_round24_legacy_v1_15_nonterminal_fallback_requires_all_terminal_artifac
         "transaction_invalid|amn2.phase15.readonly-preflight-transaction.v1|false|"
         + expected_locations
     )
+
+
+def test_round25_legacy_v1_15_nonterminal_artifact_free_exact_reservation_uses_reserved_at(
+    tmp_path: Path,
+):
+    state_root_path = tmp_path / "state"
+    state_root = str(state_root_path).replace("'", "''")
+    outcome = str(state_root_path / "outcomes" / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        f"$stateRoot='{state_root}';foreach($leaf in @('locks','outcome-locks','claims','transactions','recovery-outcomes','outcomes')){{$null=[IO.Directory]::CreateDirectory((Join-Path $stateRoot $leaf))}};$claimId='phase15-preflight-test-001';$authorized='S-1-5-21-1000';"
+        "function Assert-Phase15TrustedOutcomeParent{param($StateRoot,$OutcomePath,$AuthorizedSid)[IO.Path]::GetFullPath($OutcomePath)};function Assert-Phase15TrustedManagedStateChain{param($StateRoot,$AuthorizedSid,$RequiredChildren)$StateRoot};"
+        "$lock=Enter-Phase15ClaimLock -StateRoot $stateRoot -ClaimId $claimId;"
+        f"$tx=Start-Phase15Transaction -StateRoot $stateRoot -OutcomePath '{outcome}' -ClaimId $claimId -StartedAt '2026-08-16T00:00:00Z' -ReservedAt '2026-08-16T00:00:07Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock;"
+        "$journal=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath;$journal.PSObject.Properties.Remove('started_at');$journal.schema='amn2.phase15.readonly-preflight-transaction.v1';Write-Phase15AtomicJson -Path $tx.JournalPath -Value $journal -OwnerId $claimId;"
+        f"$message='';try{{$null=Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claimId -EndedAt '2026-08-16T00:00:10Z' -Lock $lock -OutcomeLock $tx.OutcomeLock -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -ExpectedOutcomePath '{outcome}' -ExpectedReservedAt '2026-08-16T00:00:07Z' -AuthorizedSid $authorized}}catch{{$message=$_.Exception.Message}};"
+        "$published=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.ReservationPath;$journalExists=(Test-Path -LiteralPath $tx.JournalPath).ToString().ToLowerInvariant();$reason=if($null-ne$published-and@($published.PSObject.Properties.Name)-ccontains'reason_code'){$published.reason_code}else{'absent'};$start=if($null-ne$published-and@($published.PSObject.Properties.Name)-ccontains'started_at'){$published.started_at}else{'absent'};$ssh=if($null-ne$published-and@($published.PSObject.Properties.Name)-ccontains'safety'){$published.safety.ssh_used.ToString().ToLowerInvariant()}else{'absent'};$tx.OutcomeLock.Stream.Dispose();$lock.Stream.Dispose();[Console]::Out.Write(\"$message|$journalExists|$reason|$start|$ssh\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "|false|transport_failed|2026-08-16T00:00:07Z|false"
+
+
+@pytest.mark.parametrize("recovery_parent", ["missing", "reparse"])
+def test_round25_legacy_migration_validates_recovery_parent_before_probe_or_rewrite(
+    tmp_path: Path, recovery_parent: str
+):
+    state_root_path = tmp_path / "state"
+    state_root = str(state_root_path).replace("'", "''")
+    outcome = str(state_root_path / "outcomes" / "outcome.json").replace("'", "''")
+    parent_setup = (
+        "$recoveryRoot=Join-Path $stateRoot 'recovery-outcomes';[IO.Directory]::Delete($recoveryRoot);"
+        if recovery_parent == "missing"
+        else "$recoveryRoot=Join-Path $stateRoot 'recovery-outcomes';$target=Join-Path $stateRoot 'outside-recovery';$null=[IO.Directory]::CreateDirectory($target);[IO.Directory]::Delete($recoveryRoot);$null=New-Item -ItemType Junction -Path $recoveryRoot -Target $target;"
+    )
+    cleanup = "" if recovery_parent == "missing" else "[IO.Directory]::Delete($recoveryRoot);"
+    result = run_powershell(
+        f"$stateRoot='{state_root}';foreach($leaf in @('locks','outcome-locks','claims','transactions','recovery-outcomes','outcomes')){{$null=[IO.Directory]::CreateDirectory((Join-Path $stateRoot $leaf))}};$claimId='phase15-preflight-test-001';$authorized='S-1-5-21-1000';"
+        "function Assert-Phase15TrustedOutcomeParent{param($StateRoot,$OutcomePath,$AuthorizedSid)[IO.Path]::GetFullPath($OutcomePath)};function Assert-Phase15TrustedManagedStateChain{param($StateRoot,$AuthorizedSid,$RequiredChildren)foreach($leaf in $RequiredChildren){$path=Join-Path $StateRoot $leaf;if(-not(Test-Path -LiteralPath $path -PathType Container)){throw 'state_root_invalid'};$item=Get-Item -LiteralPath $path -Force;if(($item.Attributes-band[IO.FileAttributes]::ReparsePoint)-ne0){throw 'state_root_invalid'}};$StateRoot};"
+        "$lock=Enter-Phase15ClaimLock -StateRoot $stateRoot -ClaimId $claimId;"
+        f"$tx=Start-Phase15Transaction -StateRoot $stateRoot -OutcomePath '{outcome}' -ClaimId $claimId -StartedAt '2026-08-16T00:00:00Z' -ReservedAt '2026-08-16T00:00:07Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock;"
+        "$journal=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath;$journal.PSObject.Properties.Remove('started_at');$journal.schema='amn2.phase15.readonly-preflight-transaction.v1';Write-Phase15AtomicJson -Path $tx.JournalPath -Value $journal -OwnerId $claimId;$before=[IO.File]::ReadAllBytes($tx.JournalPath);"
+        f"{parent_setup}$message='';try{{$null=Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claimId -EndedAt '2026-08-16T00:00:10Z' -Lock $lock -OutcomeLock $tx.OutcomeLock -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -ExpectedOutcomePath '{outcome}' -ExpectedReservedAt '2026-08-16T00:00:07Z' -AuthorizedSid $authorized}}catch{{$message=$_.Exception.Message}};"
+        "$exists=(Test-Path -LiteralPath $tx.JournalPath -PathType Leaf);$same=$exists-and([Convert]::ToBase64String([IO.File]::ReadAllBytes($tx.JournalPath))-ceq[Convert]::ToBase64String($before));"
+        f"$tx.OutcomeLock.Stream.Dispose();$lock.Stream.Dispose();{cleanup}[Console]::Out.Write(\"$message|$exists|$same\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "state_root_invalid|True|True"
+
+
+@pytest.mark.parametrize("artifact_path", ["staged", "current", "recovery"])
+def test_round25_legacy_nonterminal_dangling_link_is_occupied_without_rewrite_or_cleanup(
+    tmp_path: Path, artifact_path: str
+):
+    state_root_path = tmp_path / "state"
+    state_root = str(state_root_path).replace("'", "''")
+    outcome = str(state_root_path / "outcomes" / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        f"$stateRoot='{state_root}';foreach($leaf in @('locks','outcome-locks','claims','transactions','recovery-outcomes','outcomes')){{$null=[IO.Directory]::CreateDirectory((Join-Path $stateRoot $leaf))}};$claimId='phase15-preflight-test-001';$authorized='S-1-5-21-1000';"
+        "function Assert-Phase15TrustedOutcomeParent{param($StateRoot,$OutcomePath,$AuthorizedSid)[IO.Path]::GetFullPath($OutcomePath)};function Assert-Phase15TrustedManagedStateChain{param($StateRoot,$AuthorizedSid,$RequiredChildren)foreach($leaf in $RequiredChildren){$path=Join-Path $StateRoot $leaf;if(-not(Test-Path -LiteralPath $path -PathType Container)){throw 'state_root_invalid'};$item=Get-Item -LiteralPath $path -Force;if(($item.Attributes-band[IO.FileAttributes]::ReparsePoint)-ne0){throw 'state_root_invalid'}};$StateRoot};"
+        "$lock=Enter-Phase15ClaimLock -StateRoot $stateRoot -ClaimId $claimId;"
+        f"$tx=Start-Phase15Transaction -StateRoot $stateRoot -OutcomePath '{outcome}' -ClaimId $claimId -StartedAt '2026-08-16T00:00:00Z' -ReservedAt '2026-08-16T00:00:07Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock;"
+        "$recoveryPath=Get-Phase15LifecyclePath -LifecycleRoot (Join-Path $stateRoot 'recovery-outcomes') -ClaimId $claimId;$journal=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath;$journal.PSObject.Properties.Remove('started_at');$journal.schema='amn2.phase15.readonly-preflight-transaction.v1';Write-Phase15AtomicJson -Path $tx.JournalPath -Value $journal -OwnerId $claimId;$before=[IO.File]::ReadAllBytes($tx.JournalPath);"
+        f"$candidate=if('{artifact_path}'-ceq'staged'){{$tx.StagedPath}}elseif('{artifact_path}'-ceq'current'){{$tx.ReservationPath}}else{{$recoveryPath}};if('{artifact_path}'-ceq'current'){{[IO.File]::Delete($tx.ReservationPath)}};$target=Join-Path $stateRoot 'dangling-target.json';[IO.File]::WriteAllText($target,'target');$null=New-Item -ItemType SymbolicLink -Path $candidate -Target $target;[IO.File]::Delete($target);$script:round25FalseAbsent=[IO.Path]::GetFullPath($candidate);function Test-Path{{[CmdletBinding()]param([string]$LiteralPath,[Microsoft.PowerShell.Commands.TestPathType]$PathType)if(-not[string]::IsNullOrWhiteSpace($LiteralPath)-and[IO.Path]::GetFullPath($LiteralPath)-ceq$script:round25FalseAbsent){{return $false}};if($PSBoundParameters.ContainsKey('PathType')){{Microsoft.PowerShell.Management\\Test-Path -LiteralPath $LiteralPath -PathType $PathType}}else{{Microsoft.PowerShell.Management\\Test-Path -LiteralPath $LiteralPath}}}};"
+        f"$message='';try{{$null=Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claimId -EndedAt '2026-08-16T00:00:10Z' -Lock $lock -OutcomeLock $tx.OutcomeLock -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -ExpectedOutcomePath '{outcome}' -ExpectedReservedAt '2026-08-16T00:00:07Z' -AuthorizedSid $authorized}}catch{{$message=$_.Exception.Message}};"
+        "$journalExists=Test-Path -LiteralPath $tx.JournalPath -PathType Leaf;$same=$journalExists-and([Convert]::ToBase64String([IO.File]::ReadAllBytes($tx.JournalPath))-ceq[Convert]::ToBase64String($before));$parent=[IO.DirectoryInfo]::new([IO.Path]::GetDirectoryName($candidate));$entry=@($parent.EnumerateFileSystemInfos()|Where-Object{$_.Name-ceq[IO.Path]::GetFileName($candidate)});$linkPresent=$entry.Count-eq1-and(($entry[0].Attributes-band[IO.FileAttributes]::ReparsePoint)-ne0);$tx.OutcomeLock.Stream.Dispose();$lock.Stream.Dispose();if($linkPresent){[IO.File]::Delete($candidate)};[Console]::Out.Write(\"$message|$same|$linkPresent\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "transaction_invalid|True|True"

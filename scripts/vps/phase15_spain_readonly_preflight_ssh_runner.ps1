@@ -1417,6 +1417,32 @@ function Test-Phase15ExactTerminalJournalBinding {
     } catch { return $false }
 }
 
+function Get-Phase15NoFollowPathState {
+    param([Parameter(Mandatory)][string]$Path)
+    try {
+        $fullPath = [IO.Path]::GetFullPath($Path)
+        $parentPath = [IO.Path]::GetDirectoryName($fullPath)
+        $leaf = [IO.Path]::GetFileName($fullPath)
+        if ([string]::IsNullOrWhiteSpace($parentPath) -or [string]::IsNullOrWhiteSpace($leaf)) { throw 'transaction_invalid' }
+        $parent = [IO.DirectoryInfo]::new($parentPath)
+        if (-not $parent.Exists -or ($parent.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'transaction_invalid' }
+        $matches = @(
+            $parent.EnumerateFileSystemInfos() | Where-Object {
+                $_.Name.Equals($leaf, [StringComparison]::OrdinalIgnoreCase)
+            }
+        )
+        if ($matches.Count -eq 0) { return 'absent' }
+        if ($matches.Count -ne 1) { throw 'transaction_invalid' }
+        $item = $matches[0]
+        if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { return 'reparse' }
+        if ($item -is [IO.FileInfo]) { return 'file' }
+        if ($item -is [IO.DirectoryInfo]) { return 'directory' }
+        return 'other'
+    } catch {
+        throw 'transaction_invalid'
+    }
+}
+
 function Reconcile-Phase15Transaction {
     param(
         [Parameter(Mandatory)][string]$StateRoot,
@@ -1537,18 +1563,18 @@ function Reconcile-Phase15Transaction {
     $recoveryRoot = Join-Path $StateRoot 'recovery-outcomes'
     $recoveryOutcomePath = Get-Phase15LifecyclePath -LifecycleRoot $recoveryRoot -ClaimId $ClaimId
     if ($isImmediatePredecessorV1 -or $isLegacyV1) {
+        [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('locks','outcome-locks','claims','transactions','recovery-outcomes','outcomes'))
         if ($isLegacyV1 -and $null -eq $journal.terminal_path) {
-            try {
-                $stagedPathOccupied = Test-Path -LiteralPath $journal.staged_path -ErrorAction Stop
-                $outcomePathOccupied = Test-Path -LiteralPath $journal.outcome_path -ErrorAction Stop
-                $recoveryPathOccupied = Test-Path -LiteralPath $recoveryOutcomePath -ErrorAction Stop
-            } catch { throw 'transaction_invalid' }
-            $outcomeIsExactReservation = $outcomeExists -and $null -ne $reservedOutcome -and
-                (Test-Phase15ExactProperties -Value $reservedOutcome -Required @('claim_id','reserved_at','status')) -and
-                $reservedOutcome.claim_id -is [string] -and $reservedOutcome.claim_id -ceq $ClaimId -and
-                $reservedOutcome.reserved_at -is [string] -and $reservedOutcome.reserved_at -ceq $journal.reserved_at -and
-                $reservedOutcome.status -is [string] -and $reservedOutcome.status -ceq 'reserved'
-            if ($stagedPathOccupied -or $recoveryPathOccupied -or ($outcomePathOccupied -and -not $outcomeIsExactReservation)) {
+            $stagedPathState = Get-Phase15NoFollowPathState -Path $journal.staged_path
+            $outcomePathState = Get-Phase15NoFollowPathState -Path $journal.outcome_path
+            $recoveryPathState = Get-Phase15NoFollowPathState -Path $recoveryOutcomePath
+            $legacyReservation = if ($outcomePathState -ceq 'file') { ConvertFrom-Phase15CanonicalJsonFile -Path $journal.outcome_path } else { $null }
+            $outcomeIsExactReservation = $outcomePathState -ceq 'file' -and $null -ne $legacyReservation -and
+                (Test-Phase15ExactProperties -Value $legacyReservation -Required @('claim_id','reserved_at','status')) -and
+                $legacyReservation.claim_id -is [string] -and $legacyReservation.claim_id -ceq $ClaimId -and
+                $legacyReservation.reserved_at -is [string] -and $legacyReservation.reserved_at -ceq $journal.reserved_at -and
+                $legacyReservation.status -is [string] -and $legacyReservation.status -ceq 'reserved'
+            if ($stagedPathState -cne 'absent' -or $recoveryPathState -cne 'absent' -or ($outcomePathState -cne 'absent' -and -not $outcomeIsExactReservation)) {
                 throw 'transaction_invalid'
             }
         }
