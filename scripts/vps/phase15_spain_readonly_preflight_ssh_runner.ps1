@@ -543,7 +543,7 @@ function Test-Phase15ExactNonterminalTransactionJournal {
         $expectedStagedPath = $expectedOutcomeFullPath + '.phase15-' + $ClaimId + '.staged'
         return (
             [IO.Path]::GetFullPath($TransactionPath) -ceq [IO.Path]::GetFullPath($expectedTransactionPath) -and
-            $Journal.schema -ceq 'amn2.phase15.readonly-preflight-transaction.v1' -and
+            $Journal.schema -ceq 'amn2.phase15.readonly-preflight-transaction.v2' -and
             $Journal.claim_id -ceq $ClaimId -and
             $Journal.manifest_sha256 -ceq $ManifestSha256 -and $Journal.manifest_sha256 -cmatch '^[0-9a-f]{64}$' -and
             $Journal.collector_sha256 -ceq $CollectorSha256 -and $Journal.collector_sha256 -cmatch '^[0-9a-f]{64}$' -and
@@ -767,7 +767,7 @@ function Remove-Phase15TransactionTemps {
     }
 }
 
-function Remove-Phase15OwnedStateResidues {
+function Get-Phase15OwnedStateResiduePaths {
     param(
         [Parameter(Mandatory)][string]$LifecyclePath,
         [Parameter(Mandatory)][string]$OutcomePath,
@@ -782,6 +782,7 @@ function Remove-Phase15OwnedStateResidues {
     if (-not [string]::IsNullOrWhiteSpace($RecoveryOutcomePath)) {
         $targets += [pscustomobject]@{ Path = [IO.Path]::GetFullPath($RecoveryOutcomePath); Suffix = 'phase15-' + [regex]::Escape($ClaimId) + '(?:\.create-[0-9a-f]{32}\.tmp|\.atomic-[0-9a-f]{32}(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.backup-[0-9a-f]{32})' }
     }
+    $residuePaths = [Collections.Generic.List[string]]::new()
     foreach ($target in $targets) {
         $parent = [IO.Path]::GetDirectoryName($target.Path)
         $leaf = [IO.Path]::GetFileName($target.Path)
@@ -790,9 +791,35 @@ function Remove-Phase15OwnedStateResidues {
         foreach ($candidate in [IO.Directory]::EnumerateFiles($parent, $leaf + '.*', [IO.SearchOption]::TopDirectoryOnly)) {
             if ([IO.Path]::GetFileName($candidate) -cnotmatch $pattern) { continue }
             if (([IO.File]::GetAttributes($candidate) -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'transaction_invalid' }
-            [IO.File]::Delete($candidate)
+            [void]$residuePaths.Add([IO.Path]::GetFullPath($candidate))
         }
     }
+    return @($residuePaths)
+}
+
+function Assert-Phase15OwnedStateResiduesAbsent {
+    param(
+        [Parameter(Mandatory)][string]$LifecyclePath,
+        [Parameter(Mandatory)][string]$OutcomePath,
+        [string]$RecoveryOutcomePath,
+        [Parameter(Mandatory)][string]$ClaimId
+    )
+    if (@(Get-Phase15OwnedStateResiduePaths -LifecyclePath $LifecyclePath -OutcomePath $OutcomePath -RecoveryOutcomePath $RecoveryOutcomePath -ClaimId $ClaimId).Count -ne 0) {
+        throw 'transaction_finalize_failed'
+    }
+}
+
+function Remove-Phase15OwnedStateResidues {
+    param(
+        [Parameter(Mandatory)][string]$LifecyclePath,
+        [Parameter(Mandatory)][string]$OutcomePath,
+        [string]$RecoveryOutcomePath,
+        [Parameter(Mandatory)][string]$ClaimId
+    )
+    foreach ($candidate in @(Get-Phase15OwnedStateResiduePaths -LifecyclePath $LifecyclePath -OutcomePath $OutcomePath -RecoveryOutcomePath $RecoveryOutcomePath -ClaimId $ClaimId)) {
+        [IO.File]::Delete($candidate)
+    }
+    Assert-Phase15OwnedStateResiduesAbsent -LifecyclePath $LifecyclePath -OutcomePath $OutcomePath -RecoveryOutcomePath $RecoveryOutcomePath -ClaimId $ClaimId
 }
 
 function Write-Phase15AtomicJson {
@@ -1247,7 +1274,7 @@ function Start-Phase15Transaction {
             outcome_path = $reservationPath
             phase = 'owned'
             reserved_at = $ReservedAt
-            schema = 'amn2.phase15.readonly-preflight-transaction.v1'
+            schema = 'amn2.phase15.readonly-preflight-transaction.v2'
             ssh_used = $false
             staged_path = $stagedPath
             started_at = $StartedAt
@@ -1341,7 +1368,8 @@ function Test-Phase15ExactPublishedTerminalOutcome {
         } else { return $false }
         if ($Document.manifest_sha256 -cne $Journal.manifest_sha256 -or $Document.collector_sha256 -cne $Journal.collector_sha256 -or
             $Document.expected_host -cne $Journal.expected_host -or $Document.ended_at -cne $Journal.terminal_ended_at -or
-            -not (Test-Phase15UtcTimestamp -Value $Document.started_at) -or -not (Test-Phase15UtcTimestamp -Value $Document.ended_at)) { return $false }
+            $Document.started_at -cne $Journal.started_at -or -not (Test-Phase15UtcTimestamp -Value $Document.started_at) -or
+            -not (Test-Phase15UtcTimestamp -Value $Document.ended_at)) { return $false }
         $started = [DateTimeOffset]::ParseExact($Document.started_at, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
         $ended = [DateTimeOffset]::ParseExact($Document.ended_at, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
         if ($ended -lt $started -or -not (Test-Phase15ExactProperties -Value $Document.safety -Required @('live_mutation','raw_output_persisted','remote_file_written','ssh_used')) -or
@@ -1423,10 +1451,16 @@ function Reconcile-Phase15Transaction {
         if ($hasExpectedBindings) { Remove-Phase15TransactionTemps -TransactionPath $journalPath -ClaimId $ClaimId }
         return [pscustomobject]@{ Recovered = $false; OutcomePath = $null }
     }
+    if (-not $hasExpectedBindings) { throw 'transaction_invalid' }
     $journal = ConvertFrom-Phase15CanonicalJsonFile -Path $journalPath
-    $required = @('claim_id','collector_sha256','expected_host','manifest_sha256','outcome_path','phase','reserved_at','schema','ssh_used','staged_path','started_at','terminal_ended_at','terminal_outcome_sha256','terminal_path','terminal_reason_code','terminal_status')
-    if ($null -eq $journal -or -not (Test-Phase15ExactProperties -Value $journal -Required $required)) { throw 'transaction_invalid' }
-    foreach ($field in @('claim_id','collector_sha256','expected_host','manifest_sha256','outcome_path','phase','reserved_at','schema','staged_path','started_at')) {
+    $v2Required = @('claim_id','collector_sha256','expected_host','manifest_sha256','outcome_path','phase','reserved_at','schema','ssh_used','staged_path','started_at','terminal_ended_at','terminal_outcome_sha256','terminal_path','terminal_reason_code','terminal_status')
+    $v1Required = @('claim_id','collector_sha256','expected_host','manifest_sha256','outcome_path','phase','reserved_at','schema','ssh_used','staged_path','terminal_ended_at','terminal_outcome_sha256','terminal_path','terminal_reason_code','terminal_status')
+    $isV2 = $null -ne $journal -and (Test-Phase15ExactProperties -Value $journal -Required $v2Required) -and $journal.schema -is [string] -and $journal.schema -ceq 'amn2.phase15.readonly-preflight-transaction.v2'
+    $isPredecessorV1 = $null -ne $journal -and (Test-Phase15ExactProperties -Value $journal -Required $v1Required) -and $journal.schema -is [string] -and $journal.schema -ceq 'amn2.phase15.readonly-preflight-transaction.v1'
+    if (-not $isV2 -and -not $isPredecessorV1) { throw 'transaction_invalid' }
+    $stringFields = @('claim_id','collector_sha256','expected_host','manifest_sha256','outcome_path','phase','reserved_at','schema','staged_path')
+    if ($isV2) { $stringFields += 'started_at' }
+    foreach ($field in $stringFields) {
         if ($journal.$field -isnot [string]) { throw 'transaction_invalid' }
     }
     if ($journal.ssh_used -isnot [bool]) { throw 'transaction_invalid' }
@@ -1438,10 +1472,10 @@ function Reconcile-Phase15Transaction {
         $journal.terminal_path -isnot [string] -or $journal.terminal_reason_code -isnot [string] -or $journal.terminal_status -isnot [string] -or
         $journal.terminal_status -cnotin @('completed','failed')
     )) { throw 'transaction_invalid' }
-    if ($journal.claim_id -cne $ClaimId -or $journal.schema -cne 'amn2.phase15.readonly-preflight-transaction.v1') { throw 'transaction_invalid' }
+    if ($journal.claim_id -cne $ClaimId) { throw 'transaction_invalid' }
     $phaseValid = $journal.phase -cin @('owned','transport_attempted','ssh_started','outcome_staged','finalizing')
     if ($journal.manifest_sha256 -cnotmatch '^[0-9a-f]{64}$' -or $journal.collector_sha256 -cnotmatch '^[0-9a-f]{64}$' -or -not (Test-Phase15ExpectedHost -ExpectedHost $journal.expected_host) -or
-        -not (Test-Phase15UtcTimestamp -Value $journal.reserved_at) -or -not (Test-Phase15UtcTimestamp -Value $journal.started_at)) { throw 'transaction_invalid' }
+        -not (Test-Phase15UtcTimestamp -Value $journal.reserved_at) -or ($isV2 -and -not (Test-Phase15UtcTimestamp -Value $journal.started_at))) { throw 'transaction_invalid' }
     if ($hasExpectedBindings -and (
         $journal.manifest_sha256 -cne $ExpectedManifestSha256 -or
         $journal.collector_sha256 -cne $ExpectedCollectorSha256 -or
@@ -1500,7 +1534,27 @@ function Reconcile-Phase15Transaction {
         }
     $recoveryRoot = Join-Path $StateRoot 'recovery-outcomes'
     $recoveryOutcomePath = Get-Phase15LifecyclePath -LifecycleRoot $recoveryRoot -ClaimId $ClaimId
-    if ($null -ne $journal.terminal_path -and -not $hasExpectedBindings) { throw 'transaction_invalid' }
+    if ($isPredecessorV1) {
+        $journal | Add-Member -NotePropertyName started_at -NotePropertyValue $journal.reserved_at
+        $journal.schema = 'amn2.phase15.readonly-preflight-transaction.v2'
+        if ($null -ne $journal.terminal_path) {
+            if (-not (Test-Phase15ExactTerminalJournalBinding -Journal $journal -StateRoot $StateRoot -ClaimId $ClaimId -ExpectedOutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath)) { throw 'transaction_invalid' }
+            $predecessorTerminalPath = [IO.Path]::GetFullPath($journal.terminal_path)
+            foreach ($artifactPath in @($journal.staged_path, $predecessorTerminalPath)) {
+                if (-not (Test-Path -LiteralPath $artifactPath -PathType Leaf)) { continue }
+                if ([IO.Path]::GetFullPath($artifactPath) -ceq [IO.Path]::GetFullPath($journal.outcome_path) -and
+                    (Test-Phase15OutcomeOwnership -ReservationPath $journal.outcome_path -ClaimId $ClaimId)) { continue }
+                $artifact = ConvertFrom-Phase15CanonicalJsonFile -Path $artifactPath
+                if ($null -eq $artifact -or (Get-Phase15CanonicalJsonSha256 -Value $artifact) -cne $journal.terminal_outcome_sha256 -or
+                    -not (Test-Phase15ExactPublishedTerminalOutcome -Document $artifact -Journal $journal)) { throw 'transaction_invalid' }
+            }
+        }
+        [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcomes'))
+        Write-Phase15AtomicJson -Path $journalPath -Value $journal -OwnerId $ClaimId
+        $journal = ConvertFrom-Phase15CanonicalJsonFile -Path $journalPath
+        if ($null -eq $journal -or -not (Test-Phase15ExactProperties -Value $journal -Required $v2Required) -or $journal.schema -cne 'amn2.phase15.readonly-preflight-transaction.v2' -or
+            $journal.started_at -cne $journal.reserved_at) { throw 'transaction_invalid' }
+    }
     if ($null -ne $journal.terminal_path -and -not (Test-Phase15ExactTerminalJournalBinding -Journal $journal -StateRoot $StateRoot -ClaimId $ClaimId -ExpectedOutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath)) { throw 'transaction_invalid' }
     Remove-Phase15TransactionTemps -TransactionPath $journalPath -ClaimId $ClaimId
     if ($null -ne $journal.terminal_path) {
@@ -1529,6 +1583,7 @@ function Reconcile-Phase15Transaction {
             if ($journal.phase -cne 'finalizing' -or -not $lifecycleTerminal -or $stagedExists) { throw 'transaction_invalid' }
             [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes','outcomes'))
             Remove-Phase15OwnedStateResidues -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
+            Assert-Phase15OwnedStateResiduesAbsent -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
             [IO.File]::Delete($journalPath)
             return [pscustomobject]@{ Recovered = $true; OutcomePath = $terminalPath }
         }
@@ -1562,6 +1617,7 @@ function Reconcile-Phase15Transaction {
             }
             [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes','outcomes'))
             Remove-Phase15OwnedStateResidues -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
+            Assert-Phase15OwnedStateResiduesAbsent -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
             [IO.File]::Delete($journalPath)
             return [pscustomobject]@{ Recovered = $true; OutcomePath = [IO.Path]::GetFullPath($journal.outcome_path) }
         }
@@ -1580,6 +1636,7 @@ function Reconcile-Phase15Transaction {
             Write-Phase15AtomicJson -Path $journal.outcome_path -Value $expectedCurrent -OwnerId $ClaimId
             [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes','outcomes'))
             Remove-Phase15OwnedStateResidues -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
+            Assert-Phase15OwnedStateResiduesAbsent -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
             [IO.File]::Delete($journalPath)
             return [pscustomobject]@{ Recovered = $true; OutcomePath = [IO.Path]::GetFullPath($journal.outcome_path) }
         }
@@ -1598,6 +1655,7 @@ function Reconcile-Phase15Transaction {
             } elseif (-not $publishedValid) { throw 'transaction_invalid' }
             [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes','outcomes'))
             Remove-Phase15OwnedStateResidues -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
+            Assert-Phase15OwnedStateResiduesAbsent -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
             [IO.File]::Delete($journalPath)
             return [pscustomobject]@{ Recovered = $true; OutcomePath = [IO.Path]::GetFullPath($recoveryOutcomePath) }
         }
@@ -1643,6 +1701,7 @@ function Reconcile-Phase15Transaction {
     Write-Phase15AtomicJson -Path $publishedPath -Value $failure -OwnerId $ClaimId
     if ($hasExpectedBindings) { [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes','outcomes')) }
     if (Test-Path -LiteralPath $journal.staged_path -PathType Leaf) { [IO.File]::Delete($journal.staged_path) }
+    Assert-Phase15OwnedStateResiduesAbsent -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
     [IO.File]::Delete($journalPath)
     if (Test-Path -LiteralPath $journalPath) { throw 'transaction_reconciliation_failed' }
     return [pscustomobject]@{ Recovered = $true; OutcomePath = $publishedPath }
@@ -1755,6 +1814,7 @@ function Publish-Phase15TerminalOutcome {
             [void](Assert-Phase15TrustedManagedStateChain -StateRoot $transactionStateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcome-locks','outcomes'))
             $recoveryOutcomePath = Get-Phase15LifecyclePath -LifecycleRoot (Join-Path $transactionStateRoot 'recovery-outcomes') -ClaimId $ClaimId
             Remove-Phase15OwnedStateResidues -LifecyclePath $LifecyclePath -OutcomePath $OutcomePath -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
+            Assert-Phase15OwnedStateResiduesAbsent -LifecyclePath $LifecyclePath -OutcomePath $OutcomePath -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
             [IO.File]::Delete($TransactionPath)
             if (Test-Path -LiteralPath $TransactionPath) { throw 'transaction_finalize_failed' }
         }
