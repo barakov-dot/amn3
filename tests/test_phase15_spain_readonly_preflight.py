@@ -3161,3 +3161,50 @@ def test_round23_legacy_v1_15_terminal_migration_requires_one_exact_authoritativ
         "transaction_invalid|amn2.phase15.readonly-preflight-transaction.v1|false|"
         + ("true" if artifact == "forged_binding" else "false")
     )
+
+
+@pytest.mark.parametrize(
+    ("artifact", "expected_locations"),
+    [
+        ("staged", "true|false|false"),
+        ("published", "false|true|false"),
+        ("recovery", "false|false|true"),
+        ("multiple", "true|false|true"),
+    ],
+)
+def test_round24_legacy_v1_15_nonterminal_fallback_requires_all_terminal_artifacts_absent(
+    tmp_path: Path, artifact: str, expected_locations: str
+):
+    state_root_path = tmp_path / "state"
+    state_root = str(state_root_path).replace("'", "''")
+    outcome = str(state_root_path / "outcomes" / "outcome.json").replace("'", "''")
+    artifact_setup = {
+        "staged": "Write-Phase15CreateNewJson -Path $tx.StagedPath -Value $artifactDocument -OwnerId $claimId;",
+        "published": "Write-Phase15AtomicJson -Path $tx.ReservationPath -Value $artifactDocument -OwnerId $claimId;",
+        "recovery": "Write-Phase15CreateNewJson -Path $recoveryPath -Value $artifactDocument -OwnerId $claimId;",
+        "multiple": (
+            "Write-Phase15CreateNewJson -Path $tx.StagedPath -Value $artifactDocument -OwnerId $claimId;"
+            "Write-Phase15CreateNewJson -Path $recoveryPath -Value $artifactDocument -OwnerId $claimId;"
+        ),
+    }[artifact]
+    result = run_powershell(
+        f"$stateRoot='{state_root}';foreach($leaf in @('locks','outcome-locks','claims','transactions','recovery-outcomes','outcomes')){{$null=[IO.Directory]::CreateDirectory((Join-Path $stateRoot $leaf))}};$claimId='phase15-preflight-test-001';$authorized='S-1-5-21-1000';"
+        "function Assert-Phase15TrustedOutcomeParent{param($StateRoot,$OutcomePath,$AuthorizedSid)[IO.Path]::GetFullPath($OutcomePath)};function Assert-Phase15TrustedManagedStateChain{param($StateRoot,$AuthorizedSid,$RequiredChildren)$StateRoot};"
+        "$lock=Enter-Phase15ClaimLock -StateRoot $stateRoot -ClaimId $claimId;"
+        f"$tx=Start-Phase15Transaction -StateRoot $stateRoot -OutcomePath '{outcome}' -ClaimId $claimId -StartedAt '2026-08-16T00:00:00Z' -ReservedAt '2026-08-16T00:00:07Z' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -Lock $lock;"
+        f"$artifactDocument=New-Phase15FailureOutcome -ReasonCode 'transport_failed' -ManifestSha256 '{MANIFEST_SHA256}' -CollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -StartedAt '2026-08-16T00:00:00Z' -EndedAt '2026-08-16T00:00:09Z' -SshUsed $false;$artifactDigest=Get-Phase15CanonicalJsonSha256 -Value $artifactDocument;"
+        "$recoveryPath=Get-Phase15LifecyclePath -LifecycleRoot (Join-Path $stateRoot 'recovery-outcomes') -ClaimId $claimId;"
+        "$journal=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath;$journal.PSObject.Properties.Remove('started_at');$journal.schema='amn2.phase15.readonly-preflight-transaction.v1';Write-Phase15AtomicJson -Path $tx.JournalPath -Value $journal -OwnerId $claimId;"
+        f"{artifact_setup}"
+        f"$message='';try{{$null=Reconcile-Phase15Transaction -StateRoot $stateRoot -ClaimId $claimId -EndedAt '2026-08-16T00:00:10Z' -Lock $lock -OutcomeLock $tx.OutcomeLock -ExpectedManifestSha256 '{MANIFEST_SHA256}' -ExpectedCollectorSha256 '{COLLECTOR_SHA256}' -ExpectedHost 'spain.test.invalid' -ExpectedOutcomePath '{outcome}' -ExpectedReservedAt '2026-08-16T00:00:07Z' -AuthorizedSid $authorized}}catch{{$message=$_.Exception.Message}};"
+        "$journalAfter=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.JournalPath;$schema=if($null-ne$journalAfter){$journalAfter.schema}else{'absent'};$hasStart=if($null-ne$journalAfter){(@($journalAfter.PSObject.Properties.Name)-ccontains'started_at').ToString().ToLowerInvariant()}else{'absent'};"
+        "$staged=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.StagedPath;$current=ConvertFrom-Phase15CanonicalJsonFile -Path $tx.ReservationPath;$recovery=ConvertFrom-Phase15CanonicalJsonFile -Path $recoveryPath;"
+        "$stagedMatch=($null-ne$staged-and(Get-Phase15CanonicalJsonSha256 -Value $staged)-ceq$artifactDigest).ToString().ToLowerInvariant();$currentMatch=($null-ne$current-and(Get-Phase15CanonicalJsonSha256 -Value $current)-ceq$artifactDigest).ToString().ToLowerInvariant();$recoveryMatch=($null-ne$recovery-and(Get-Phase15CanonicalJsonSha256 -Value $recovery)-ceq$artifactDigest).ToString().ToLowerInvariant();"
+        "$tx.OutcomeLock.Stream.Dispose();$lock.Stream.Dispose();[Console]::Out.Write(\"$message|$schema|$hasStart|$stagedMatch|$currentMatch|$recoveryMatch\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == (
+        "transaction_invalid|amn2.phase15.readonly-preflight-transaction.v1|false|"
+        + expected_locations
+    )

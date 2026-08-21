@@ -1537,6 +1537,21 @@ function Reconcile-Phase15Transaction {
     $recoveryRoot = Join-Path $StateRoot 'recovery-outcomes'
     $recoveryOutcomePath = Get-Phase15LifecyclePath -LifecycleRoot $recoveryRoot -ClaimId $ClaimId
     if ($isImmediatePredecessorV1 -or $isLegacyV1) {
+        if ($isLegacyV1 -and $null -eq $journal.terminal_path) {
+            try {
+                $stagedPathOccupied = Test-Path -LiteralPath $journal.staged_path -ErrorAction Stop
+                $outcomePathOccupied = Test-Path -LiteralPath $journal.outcome_path -ErrorAction Stop
+                $recoveryPathOccupied = Test-Path -LiteralPath $recoveryOutcomePath -ErrorAction Stop
+            } catch { throw 'transaction_invalid' }
+            $outcomeIsExactReservation = $outcomeExists -and $null -ne $reservedOutcome -and
+                (Test-Phase15ExactProperties -Value $reservedOutcome -Required @('claim_id','reserved_at','status')) -and
+                $reservedOutcome.claim_id -is [string] -and $reservedOutcome.claim_id -ceq $ClaimId -and
+                $reservedOutcome.reserved_at -is [string] -and $reservedOutcome.reserved_at -ceq $journal.reserved_at -and
+                $reservedOutcome.status -is [string] -and $reservedOutcome.status -ceq 'reserved'
+            if ($stagedPathOccupied -or $recoveryPathOccupied -or ($outcomePathOccupied -and -not $outcomeIsExactReservation)) {
+                throw 'transaction_invalid'
+            }
+        }
         $migrationStartedAt = if ($isImmediatePredecessorV1) { $journal.started_at } elseif ($null -eq $journal.terminal_path) { $journal.reserved_at } else { $null }
         if ($isLegacyV1 -and $null -eq $journal.terminal_path) {
             $journal | Add-Member -NotePropertyName started_at -NotePropertyValue $migrationStartedAt
