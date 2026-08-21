@@ -19,6 +19,7 @@ $script:Phase15ProductionStateRoot = 'C:\ProgramData\AMN2\phase15\readonly-prefl
 $script:Phase15StateRootCreationMutexName = 'Global\AMN2-Phase15-ReadonlyPreflight-StateRoot-v1'
 $script:Phase15SystemSid = 'S-1-5-18'
 $script:Phase15AdministratorsSid = 'S-1-5-32-544'
+$script:Phase15AuthorizationClock = $null
 $script:Phase15TrustedBundleRunId = 'spain-fresh-20260720-001'
 $script:Phase15SpainTargetUser = 'root'
 $script:Phase15SpainHostKeySha256 = 'SHA256:XVFOmBAXMHYlngo9+x7lGAJbzlOqiMiG/6/4qhRC4HU'
@@ -1071,7 +1072,8 @@ function Set-Phase15TransactionPhase {
     $nextPhaseIndex = [Array]::IndexOf($phases, $Phase)
     if ($currentPhaseIndex -lt 0 -or $nextPhaseIndex -lt 0 -or $nextPhaseIndex -lt $currentPhaseIndex) { throw 'transaction_invalid' }
     $journal.phase = $Phase
-    if ($nextPhaseIndex -ge 1) { $journal.ssh_used = $true }
+    $preTransportClaimFailure = $journal.terminal_reason_code -ceq 'claim_invalid' -and $journal.ssh_used -eq $false
+    if ($nextPhaseIndex -ge 1 -and -not $preTransportClaimFailure) { $journal.ssh_used = $true }
     Write-Phase15AtomicJson -Path $TransactionPath -Value $journal -OwnerId $ClaimId
     return $TransactionPath
 }
@@ -1208,7 +1210,8 @@ function Publish-Phase15TerminalOutcome {
         $stateRoot = Split-Path -Parent (Split-Path -Parent ([IO.Path]::GetFullPath($TransactionPath)))
         if (-not (Test-Phase15ClaimLock -Lock $Lock -StateRoot $stateRoot -ClaimId $ClaimId)) { throw 'claim_lock_invalid' }
         if (-not (Test-Phase15OutcomeLock -Lock $OutcomeLock -StateRoot $stateRoot -OutcomePath $OutcomePath -ClaimId $ClaimId)) { throw 'outcome_lock_invalid' }
-        if ($null -eq $journal -or $journal.claim_id -cne $ClaimId -or $journal.outcome_path -cne [IO.Path]::GetFullPath($OutcomePath) -or $journal.phase -notin @('ssh_started','transport_attempted')) { throw 'transaction_invalid' }
+        $preTransportClaimFailure = $null -ne $journal -and $journal.phase -ceq 'owned' -and $Status -ceq 'failed' -and $ReasonCode -ceq 'claim_invalid'
+        if ($null -eq $journal -or $journal.claim_id -cne $ClaimId -or $journal.outcome_path -cne [IO.Path]::GetFullPath($OutcomePath) -or (-not $preTransportClaimFailure -and $journal.phase -notin @('ssh_started','transport_attempted'))) { throw 'transaction_invalid' }
         $pendingPath = [string]$journal.staged_path
         $journal.terminal_ended_at = $EndedAt
         $journal.terminal_outcome_sha256 = Get-Phase15CanonicalJsonSha256 -Value $Outcome
@@ -1274,7 +1277,10 @@ function Invoke-Phase15RunnerMain {
     [void](Assert-Phase15SpainTrustBundle -ExpectedHost $ExpectedHost)
     $claim = Read-Phase15FutureClaim -ClaimPath $FutureClaimPath
     if ($null -eq $claim -or -not (Test-Phase15ClaimIdentity -Claim $claim -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost)) { throw 'claim_invalid' }
-    if (-not (Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -At $startedAt)) { throw 'claim_invalid' }
+    $preProvisionNow = if ($null -eq $script:Phase15AuthorizationClock) { [DateTimeOffset]::UtcNow } else { & $script:Phase15AuthorizationClock }
+    if ($preProvisionNow -isnot [DateTimeOffset]) { throw 'clock_invalid' }
+    $preProvisionAt = $preProvisionNow.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+    if (-not (Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -At $preProvisionAt)) { throw 'claim_invalid' }
     $stateRoot = Initialize-Phase15ProductionStateRoot
     $claimLock = Enter-Phase15ClaimLock -StateRoot $stateRoot -ClaimId $claim.claim_id
     $transaction = $null
@@ -1283,13 +1289,19 @@ function Invoke-Phase15RunnerMain {
         if ($reconciled.Recovered) { throw 'claim_replay' }
         $lifecyclePath = Get-Phase15LifecyclePath -LifecycleRoot (Join-Path $stateRoot 'claims') -ClaimId $claim.claim_id
         if (Test-Path -LiteralPath $lifecyclePath) { throw 'claim_replay' }
-        $reservationAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+        $reservationNow = if ($null -eq $script:Phase15AuthorizationClock) { [DateTimeOffset]::UtcNow } else { & $script:Phase15AuthorizationClock }
+        if ($reservationNow -isnot [DateTimeOffset]) { throw 'clock_invalid' }
+        $reservationAt = $reservationNow.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
         if (-not (Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -At $reservationAt)) { throw 'claim_invalid' }
         $transaction = Start-Phase15Transaction -StateRoot $stateRoot -OutcomePath $OutcomePath -ClaimId $claim.claim_id -ReservedAt $reservationAt -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -Lock $claimLock
         $sshUsed = $false
         $failureReason = 'transport_failed'
         $transportStarted = $false
         try {
+            $preTransportNow = if ($null -eq $script:Phase15AuthorizationClock) { [DateTimeOffset]::UtcNow } else { & $script:Phase15AuthorizationClock }
+            if ($preTransportNow -isnot [DateTimeOffset]) { throw 'clock_invalid' }
+            $preTransportAt = $preTransportNow.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+            if (-not (Test-Phase15FutureClaim -Claim $claim -ExpectedPackageId $script:Phase15PackageId -ExpectedManifestSha256 $manifestSha256 -ExpectedCollectorSha256 $collectorSha256 -ExpectedHost $ExpectedHost -At $preTransportAt)) { $failureReason = 'claim_invalid'; throw 'claim_invalid' }
             [void](Set-Phase15TransactionPhase -TransactionPath $transaction.JournalPath -ClaimId $claim.claim_id -Phase 'transport_attempted' -Lock $claimLock)
             $rawDocument = Invoke-Phase15OneSshTransport -ExpectedHost $ExpectedHost -CollectorBytes $collectorArtifact.Bytes -ClaimId $claim.claim_id -ManifestSha256 $manifestSha256 -CollectorSha256 $collectorSha256 -Started ([ref]$transportStarted) -TransactionPath $transaction.JournalPath -Lock $claimLock
             $sshUsed = $transportStarted

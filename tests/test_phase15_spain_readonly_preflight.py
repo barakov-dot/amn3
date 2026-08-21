@@ -8,6 +8,7 @@ import shlex
 import subprocess
 import sys
 import threading
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -901,11 +902,13 @@ def test_runner_validates_claim_lifetime_against_fresh_pre_reservation_time(tmp_
     source = require_file(RUNNER, "runner").read_text(encoding="utf-8")
     main = source[source.index("function Invoke-Phase15RunnerMain") :]
     lifetime_checks = [match.start() for match in re.finditer("Test-Phase15FutureClaim", main)]
-    assert len(lifetime_checks) == 2
+    assert len(lifetime_checks) == 3
     assert main.index("$startedAt =") < main.index("Read-Phase15ManifestArtifact")
     assert main.index("Test-Phase15ClaimIdentity") < lifetime_checks[0] < main.index("Initialize-Phase15ProductionStateRoot")
     assert main.index("Reconcile-Phase15Transaction") < main.index("$reservationAt =")
     assert main.index("$reservationAt =") < lifetime_checks[1]
+    assert main.index("Start-Phase15Transaction") < lifetime_checks[2] < main.index("Invoke-Phase15OneSshTransport")
+    assert "-At $startedAt" not in main
     assert "-At $reservationAt" in main
     assert "-ReservedAt $reservationAt" in main
 
@@ -1507,11 +1510,12 @@ def test_runner_reconciles_before_atomic_transaction_ownership_and_transport():
     main = source[source.index("function Invoke-Phase15RunnerMain") :]
     lifetime_checks = [match.start() for match in re.finditer("Test-Phase15FutureClaim", main)]
 
-    assert len(lifetime_checks) == 2
+    assert len(lifetime_checks) == 3
     assert main.index("Test-Phase15ClaimIdentity") < lifetime_checks[0] < main.index("Initialize-Phase15ProductionStateRoot")
     assert main.index("Enter-Phase15ClaimLock") < main.index("Reconcile-Phase15Transaction")
     assert main.index("Reconcile-Phase15Transaction") < lifetime_checks[1]
     assert lifetime_checks[1] < main.index("Start-Phase15Transaction")
+    assert main.index("Start-Phase15Transaction") < lifetime_checks[2] < main.index("Invoke-Phase15OneSshTransport")
     assert main.index("Start-Phase15Transaction") < main.index("Invoke-Phase15OneSshTransport")
     assert "-TransactionPath $transaction.JournalPath" in main
     assert "$transaction.OutcomeLock.Stream.Dispose()" in main
@@ -2390,3 +2394,69 @@ def test_round11_managed_acl_creation_and_validation_share_unique_sid_set(
     assert owner_sid == authorized_sid
     assert valid == "true"
     assert actual_count == str(expected_count)
+
+
+def test_round12_claim_expiring_during_package_reads_never_initializes_state(tmp_path: Path):
+    now = datetime.now(timezone.utc).replace(microsecond=0)
+    issued_at = (now - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    expires_at = (now + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    outcome = str(tmp_path / "outcome.json").replace("'", "''")
+    result = run_powershell(
+        "$FutureAuthorization=$true; $FutureClaimPath='synthetic-claim.json'; $PackageRoot='C:\\synthetic-package'; "
+        f"$OutcomePath='{outcome}'; $ExpectedHost='spain.test.invalid'; $script:initializerCount=0; "
+        f"$script:claim=[pscustomobject][ordered]@{{claim_id='phase15-preflight-test-001';collector_sha256='{COLLECTOR_SHA256}';consumed_at=$null;expected_host='spain.test.invalid';expires_at='{expires_at}';future_gate='PREFLIGHT';issued_at='{issued_at}';manifest_sha256='{MANIFEST_SHA256}';package_id='{PACKAGE_ID}';schema='amn2.phase15.readonly-preflight-claim.v1';status='issued'}}; "
+        f"function Read-Phase15ManifestArtifact{{[pscustomobject]@{{Value=[pscustomobject]@{{package_id='{PACKAGE_ID}';entries=@([pscustomobject]@{{path='tooling/scripts/vps/phase15_spain_readonly_preflight_remote.sh';sha256='{COLLECTOR_SHA256}'}})}};Sha256='{MANIFEST_SHA256}'}}}}; "
+        f"function Read-Phase15CollectorArtifact{{[pscustomobject]@{{Bytes=[byte[]]@(1);Sha256='{COLLECTOR_SHA256}'}}}}; "
+        "function Assert-Phase15SpainTrustBundle{param($ExpectedHost)[pscustomobject]@{Validated=$true}}; "
+        "function Read-Phase15FutureClaim{param($ClaimPath)$script:claim}; "
+        f"$script:Phase15AuthorizationClock={{[DateTimeOffset]::ParseExact('{expires_at}','yyyy-MM-ddTHH:mm:ssZ',[Globalization.CultureInfo]::InvariantCulture,[Globalization.DateTimeStyles]::AssumeUniversal)}}; "
+        "function Initialize-Phase15ProductionStateRoot{$script:initializerCount++;throw 'initializer_called'}; "
+        "$message='';try{Invoke-Phase15RunnerMain}catch{$message=$_.Exception.Message}; "
+        "[Console]::Out.Write(\"$message|$script:initializerCount\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "claim_invalid|0"
+
+
+@pytest.mark.parametrize("boundary", ["reservation", "transport"])
+def test_round12_fresh_clock_stops_expired_claim_before_reservation_or_transport(tmp_path: Path, boundary: str):
+    now = datetime.now(timezone.utc).replace(microsecond=0)
+    issued_at = (now - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    expires_at = (now + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    valid_at = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    clock_values = (valid_at, expires_at) if boundary == "reservation" else (valid_at, valid_at, expires_at)
+    state_root_path = tmp_path / "state"
+    state_root = str(state_root_path).replace("'", "''")
+    outcome_path = tmp_path / "outcome.json"
+    outcome = str(outcome_path).replace("'", "''")
+    enqueue = "".join(
+        f"$script:clock.Enqueue([DateTimeOffset]::ParseExact('{value}','yyyy-MM-ddTHH:mm:ssZ',[Globalization.CultureInfo]::InvariantCulture,[Globalization.DateTimeStyles]::AssumeUniversal));"
+        for value in clock_values
+    )
+    result = run_powershell(
+        "$FutureAuthorization=$true; $FutureClaimPath='synthetic-claim.json'; $PackageRoot='C:\\synthetic-package'; "
+        f"$OutcomePath='{outcome}'; $ExpectedHost='spain.test.invalid'; $script:initializerCount=0; $script:sshCount=0; "
+        f"$script:stateRoot='{state_root}'; foreach($leaf in @('locks','outcome-locks','claims','transactions','recovery-outcomes')){{$null=[IO.Directory]::CreateDirectory((Join-Path $script:stateRoot $leaf))}}; "
+        "$script:clock=[Collections.Generic.Queue[DateTimeOffset]]::new(); "
+        f"{enqueue} $script:Phase15AuthorizationClock={{if($script:clock.Count -eq 0){{throw 'clock_exhausted'}};$script:clock.Dequeue()}}; "
+        f"$script:claim=[pscustomobject][ordered]@{{claim_id='phase15-preflight-test-001';collector_sha256='{COLLECTOR_SHA256}';consumed_at=$null;expected_host='spain.test.invalid';expires_at='{expires_at}';future_gate='PREFLIGHT';issued_at='{issued_at}';manifest_sha256='{MANIFEST_SHA256}';package_id='{PACKAGE_ID}';schema='amn2.phase15.readonly-preflight-claim.v1';status='issued'}}; "
+        f"function Read-Phase15ManifestArtifact{{[pscustomobject]@{{Value=[pscustomobject]@{{package_id='{PACKAGE_ID}';entries=@([pscustomobject]@{{path='tooling/scripts/vps/phase15_spain_readonly_preflight_remote.sh';sha256='{COLLECTOR_SHA256}'}})}};Sha256='{MANIFEST_SHA256}'}}}}; "
+        f"function Read-Phase15CollectorArtifact{{[pscustomobject]@{{Bytes=[byte[]]@(1);Sha256='{COLLECTOR_SHA256}'}}}}; "
+        "function Assert-Phase15SpainTrustBundle{param($ExpectedHost)[pscustomobject]@{Validated=$true}}; "
+        "function Read-Phase15FutureClaim{param($ClaimPath)$script:claim}; "
+        "function Initialize-Phase15ProductionStateRoot{$script:initializerCount++;$script:stateRoot}; "
+        "function Invoke-Phase15OneSshTransport{$script:sshCount++;throw 'ssh_double_called'}; "
+        "$message='';try{Invoke-Phase15RunnerMain}catch{$message=$_.Exception.Message}; "
+        "$lifecyclePath=Get-Phase15LifecyclePath -LifecycleRoot (Join-Path $script:stateRoot 'claims') -ClaimId $script:claim.claim_id; $journalPath=Get-Phase15TransactionPath -StateRoot $script:stateRoot -ClaimId $script:claim.claim_id; "
+        "$lifecycle=ConvertFrom-Phase15CanonicalJsonFile -Path $lifecyclePath; $outcome=ConvertFrom-Phase15CanonicalJsonFile -Path $OutcomePath; "
+        "$terminalOutcome=$null -ne $outcome -and @($outcome.PSObject.Properties.Name) -contains 'reason_code'; $outcomeStatus=if(-not $terminalOutcome){'absent'}else{'failed'}; $outcomeReason=if(-not $terminalOutcome){'absent'}else{$outcome.reason_code}; $outcomeSsh=if(-not $terminalOutcome){'absent'}else{$outcome.safety.ssh_used.ToString().ToLowerInvariant()}; $disposition=if(-not $terminalOutcome){'absent'}else{$outcome.transport_disposition}; "
+        "$lifecycleState=if($null -eq $lifecycle){'absent'}else{$lifecycle.status+':'+$lifecycle.reason_code}; $journalExists=(Test-Path -LiteralPath $journalPath).ToString().ToLowerInvariant(); "
+        "[Console]::Out.Write(\"$message|$script:initializerCount|$script:sshCount|$outcomeStatus|$outcomeReason|$outcomeSsh|$disposition|$lifecycleState|$journalExists\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    if boundary == "reservation":
+        assert result.stdout == "claim_invalid|1|0|absent|absent|absent|absent|absent|false"
+    else:
+        assert result.stdout == "claim_invalid|1|0|failed|claim_invalid|false|not_run|failed:claim_invalid|false"
