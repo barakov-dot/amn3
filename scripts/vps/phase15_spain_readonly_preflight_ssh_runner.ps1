@@ -265,7 +265,7 @@ function Test-Phase15CollectorDocument {
         $started = [DateTimeOffset]::ParseExact($StartedAt, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
         $ended = [DateTimeOffset]::ParseExact($EndedAt, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
         if ($ended -lt $started -or $observed -lt $started -or $observed -gt $ended) { return $false }
-        if ($Document.decision -isnot [string] -or $Document.decision -notin @('pass','stop')) { return $false }
+        if ($Document.decision -isnot [string] -or $Document.decision -cnotin @('pass','stop')) { return $false }
         if (-not (Test-Phase15ExactProperties -Value $Document.safety -Required @('live_mutation','raw_output_persisted','remote_file_written'))) { return $false }
         if ($Document.safety.live_mutation -isnot [bool] -or $Document.safety.remote_file_written -isnot [bool] -or $Document.safety.raw_output_persisted -isnot [bool]) { return $false }
         if ($Document.safety.live_mutation -ne $false -or $Document.safety.remote_file_written -ne $false -or $Document.safety.raw_output_persisted -ne $false) { return $false }
@@ -776,7 +776,7 @@ function Remove-Phase15OwnedStateResidues {
     if ($ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$') { throw 'transaction_invalid' }
     $targets = @(
         [pscustomobject]@{ Path = [IO.Path]::GetFullPath($LifecyclePath); Suffix = 'phase15-' + [regex]::Escape($ClaimId) + '(?:\.create-[0-9a-f]{32}\.tmp|\.atomic-[0-9a-f]{32}(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.terminal-[0-9a-f]{32}(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.backup-[0-9a-f]{32})' },
-        [pscustomobject]@{ Path = [IO.Path]::GetFullPath($OutcomePath); Suffix = 'phase15-' + [regex]::Escape($ClaimId) + '(?:\.create-[0-9a-f]{32}\.tmp|\.atomic-[0-9a-f]{32}(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.pending-[0-9a-f]{32}(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.staged(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.reservation-backup-[0-9a-f]{32})' }
+        [pscustomobject]@{ Path = [IO.Path]::GetFullPath($OutcomePath); Suffix = 'phase15-' + [regex]::Escape($ClaimId) + '(?:\.create-[0-9a-f]{32}\.tmp|\.atomic-[0-9a-f]{32}(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.pending-[0-9a-f]{32}(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.staged(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.(?:reservation|recovery)-backup-[0-9a-f]{32})' }
     )
     if (-not [string]::IsNullOrWhiteSpace($RecoveryOutcomePath)) {
         $targets += [pscustomobject]@{ Path = [IO.Path]::GetFullPath($RecoveryOutcomePath); Suffix = 'phase15-' + [regex]::Escape($ClaimId) + '(?:\.create-[0-9a-f]{32}\.tmp|\.atomic-[0-9a-f]{32}(?:\.phase15-' + [regex]::Escape($ClaimId) + '\.create-[0-9a-f]{32}\.tmp)?|\.backup-[0-9a-f]{32})' }
@@ -1492,6 +1492,7 @@ function Reconcile-Phase15Transaction {
         }
     $recoveryRoot = Join-Path $StateRoot 'recovery-outcomes'
     $recoveryOutcomePath = Get-Phase15LifecyclePath -LifecycleRoot $recoveryRoot -ClaimId $ClaimId
+    if ($null -ne $journal.terminal_path -and -not $hasExpectedBindings) { throw 'transaction_invalid' }
     if ($null -ne $journal.terminal_path -and -not (Test-Phase15ExactTerminalJournalBinding -Journal $journal -StateRoot $StateRoot -ClaimId $ClaimId -ExpectedOutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath)) { throw 'transaction_invalid' }
     if ($null -ne $journal.terminal_path) {
         $terminalPath = [IO.Path]::GetFullPath($journal.terminal_path)
@@ -1517,39 +1518,59 @@ function Reconcile-Phase15Transaction {
 
         if ($publishedValid) {
             if ($journal.phase -cne 'finalizing' -or -not $lifecycleTerminal -or $stagedExists) { throw 'transaction_invalid' }
-            if ($hasExpectedBindings) { [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes','outcomes')) }
+            [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes','outcomes'))
+            Remove-Phase15OwnedStateResidues -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
             [IO.File]::Delete($journalPath)
             return [pscustomobject]@{ Recovered = $true; OutcomePath = $terminalPath }
         }
 
         if ($terminalIsCurrent -and $stagedValid -and $outcomeOwned) {
-            if ($journal.phase -cnotin @('ssh_started','outcome_staged','finalizing')) { throw 'transaction_invalid' }
-            if (($journal.phase -ceq 'ssh_started' -and -not $lifecycleReserved) -or
+            if ($journal.phase -cnotin @('owned','transport_attempted','ssh_started','outcome_staged','finalizing')) { throw 'transaction_invalid' }
+            if (($journal.phase -cin @('owned','transport_attempted','ssh_started') -and -not $lifecycleReserved) -or
                 ($journal.phase -ceq 'outcome_staged' -and -not ($lifecycleReserved -or $lifecycleTerminal)) -or
                 ($journal.phase -ceq 'finalizing' -and -not $lifecycleTerminal)) { throw 'transaction_invalid' }
-            if ($journal.phase -ceq 'ssh_started') {
-                if ($hasExpectedBindings) { [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcomes')) }
+            if ($journal.phase -cin @('owned','transport_attempted','ssh_started')) {
+                [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcomes'))
                 [void](Set-Phase15TransactionPhase -TransactionPath $journalPath -ClaimId $ClaimId -Phase 'outcome_staged' -Lock $Lock)
                 $journal.phase = 'outcome_staged'
             }
             if ($lifecycleReserved) {
-                if ($hasExpectedBindings) { [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcomes')) }
+                [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcomes'))
                 [void](Set-Phase15ClaimTerminal -LifecyclePath $lifecyclePath -ClaimId $ClaimId -Status $journal.terminal_status -EndedAt $journal.terminal_ended_at -ReasonCode $journal.terminal_reason_code)
             }
             if ($journal.phase -cne 'finalizing') {
-                if ($hasExpectedBindings) { [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcomes')) }
+                [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcomes'))
                 [void](Set-Phase15TransactionPhase -TransactionPath $journalPath -ClaimId $ClaimId -Phase 'finalizing' -Lock $Lock)
                 $journal.phase = 'finalizing'
             }
             $backupPath = $journal.outcome_path + '.phase15-' + $ClaimId + '.recovery-backup-' + [Guid]::NewGuid().ToString('N')
             try {
-                if ($hasExpectedBindings) { [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcomes')); [void](Assert-Phase15TrustedOutcomeParent -StateRoot $StateRoot -OutcomePath $journal.outcome_path -AuthorizedSid $AuthorizedSid) }
+                [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcomes')); [void](Assert-Phase15TrustedOutcomeParent -StateRoot $StateRoot -OutcomePath $journal.outcome_path -AuthorizedSid $AuthorizedSid)
                 if (-not (Test-Phase15OutcomeOwnership -ReservationPath $journal.outcome_path -ClaimId $ClaimId)) { throw 'transaction_invalid' }
                 [IO.File]::Replace($journal.staged_path, $journal.outcome_path, $backupPath, $true)
             } finally {
                 if (Test-Path -LiteralPath $backupPath -PathType Leaf) { [IO.File]::Delete($backupPath) }
             }
-            if ($hasExpectedBindings) { [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcomes')) }
+            [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes','outcomes'))
+            Remove-Phase15OwnedStateResidues -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
+            [IO.File]::Delete($journalPath)
+            return [pscustomobject]@{ Recovered = $true; OutcomePath = [IO.Path]::GetFullPath($journal.outcome_path) }
+        }
+
+        if ($terminalIsCurrent -and $journal.phase -ceq 'finalizing' -and -not $stagedExists -and $outcomeOwned) {
+            $expectedCurrent = New-Phase15FailureOutcome -ReasonCode 'transport_failed' -ManifestSha256 $journal.manifest_sha256 -CollectorSha256 $journal.collector_sha256 -ExpectedHost $journal.expected_host -StartedAt $journal.reserved_at -EndedAt $journal.terminal_ended_at -SshUsed $journal.ssh_used
+            $expectedCurrentValid = $journal.terminal_status -ceq 'failed' -and $journal.terminal_reason_code -ceq 'transport_failed' -and (Get-Phase15CanonicalJsonSha256 -Value $expectedCurrent) -ceq $journal.terminal_outcome_sha256
+            if (-not $expectedCurrentValid -or -not ($lifecycleReserved -or $lifecycleTerminal)) { throw 'transaction_invalid' }
+            if ($lifecycleReserved) {
+                [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcomes'))
+                [void](Set-Phase15ClaimTerminal -LifecyclePath $lifecyclePath -ClaimId $ClaimId -Status 'failed' -EndedAt $journal.terminal_ended_at -ReasonCode 'transport_failed')
+            }
+            [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','outcomes'))
+            [void](Assert-Phase15TrustedOutcomeParent -StateRoot $StateRoot -OutcomePath $journal.outcome_path -AuthorizedSid $AuthorizedSid)
+            if (-not (Test-Phase15OutcomeOwnership -ReservationPath $journal.outcome_path -ClaimId $ClaimId)) { throw 'transaction_invalid' }
+            Write-Phase15AtomicJson -Path $journal.outcome_path -Value $expectedCurrent -OwnerId $ClaimId
+            [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes','outcomes'))
+            Remove-Phase15OwnedStateResidues -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
             [IO.File]::Delete($journalPath)
             return [pscustomobject]@{ Recovered = $true; OutcomePath = [IO.Path]::GetFullPath($journal.outcome_path) }
         }
@@ -1559,14 +1580,15 @@ function Reconcile-Phase15Transaction {
             $expectedRecoveryValid = $journal.terminal_status -ceq 'failed' -and $journal.terminal_reason_code -ceq 'transport_failed' -and (Get-Phase15CanonicalJsonSha256 -Value $expectedRecovery) -ceq $journal.terminal_outcome_sha256
             if (-not $expectedRecoveryValid -or -not ($lifecycleReserved -or $lifecycleTerminal)) { throw 'transaction_invalid' }
             if ($lifecycleReserved) {
-                if ($hasExpectedBindings) { [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes')) }
+                [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes'))
                 Write-Phase15AtomicJson -Path $lifecyclePath -Value ([ordered]@{ claim_id = $ClaimId; ended_at = $journal.terminal_ended_at; reason_code = 'transport_failed'; status = 'failed' }) -OwnerId $ClaimId
             }
             if (-not $publishedExists) {
-                if ($hasExpectedBindings) { [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes')) }
+                [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes'))
                 Write-Phase15AtomicJson -Path $recoveryOutcomePath -Value $expectedRecovery -OwnerId $ClaimId
             } elseif (-not $publishedValid) { throw 'transaction_invalid' }
-            if ($hasExpectedBindings) { [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes')) }
+            [void](Assert-Phase15TrustedManagedStateChain -StateRoot $StateRoot -AuthorizedSid $AuthorizedSid -RequiredChildren @('claims','transactions','recovery-outcomes','outcomes'))
+            Remove-Phase15OwnedStateResidues -LifecyclePath $lifecyclePath -OutcomePath $journal.outcome_path -RecoveryOutcomePath $recoveryOutcomePath -ClaimId $ClaimId
             [IO.File]::Delete($journalPath)
             return [pscustomobject]@{ Recovered = $true; OutcomePath = [IO.Path]::GetFullPath($recoveryOutcomePath) }
         }
