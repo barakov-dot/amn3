@@ -2421,13 +2421,14 @@ def test_round12_claim_expiring_during_package_reads_never_initializes_state(tmp
     assert result.stdout == "claim_invalid|0"
 
 
-@pytest.mark.parametrize("boundary", ["reservation", "transport"])
+@pytest.mark.parametrize("boundary", ["reservation", "transport", "reset_failure"])
 def test_round12_fresh_clock_stops_expired_claim_before_reservation_or_transport(tmp_path: Path, boundary: str):
     now = datetime.now(timezone.utc).replace(microsecond=0)
     issued_at = (now - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
     expires_at = (now + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
     valid_at = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     clock_values = (valid_at, expires_at) if boundary == "reservation" else (valid_at, valid_at, expires_at)
+    reset_override = "function Reset-Phase15UnstartedTransaction{throw 'reset_failed'}; " if boundary == "reset_failure" else ""
     state_root_path = tmp_path / "state"
     state_root = str(state_root_path).replace("'", "''")
     outcome_path = tmp_path / "outcome.json"
@@ -2448,6 +2449,7 @@ def test_round12_fresh_clock_stops_expired_claim_before_reservation_or_transport
         "function Assert-Phase15SpainTrustBundle{param($ExpectedHost)[pscustomobject]@{Validated=$true}}; "
         "function Read-Phase15FutureClaim{param($ClaimPath)$script:claim}; "
         "function Initialize-Phase15ProductionStateRoot{$script:initializerCount++;$script:stateRoot}; "
+        f"{reset_override}"
         "function Invoke-Phase15OneSshTransport{param($ExpectedHost,$CollectorBytes,$Claim,$ClaimId,$ManifestSha256,$CollectorSha256,[ref]$Started,$TransactionPath,$Lock) "
         "$process=[pscustomobject]@{}; $process|Add-Member -MemberType ScriptMethod -Name Start -Value {$script:sshCount++;return $true}; "
         "[void](Start-Phase15AuthorizedSshProcess -Process $process -Claim $Claim -ExpectedHost $ExpectedHost -ClaimId $ClaimId -ManifestSha256 $ManifestSha256 -CollectorSha256 $CollectorSha256 -TransactionPath $TransactionPath -Lock $Lock); $Started.Value=$true; throw 'ssh_double_called'}; "
@@ -2462,8 +2464,10 @@ def test_round12_fresh_clock_stops_expired_claim_before_reservation_or_transport
     assert result.returncode == 0, result.stderr
     if boundary == "reservation":
         assert result.stdout == "claim_invalid|1|0|absent|absent|absent|absent|absent|false"
-    else:
+    elif boundary == "transport":
         assert result.stdout == "claim_invalid|1|0|failed|claim_invalid|false|not_run|failed:claim_invalid|false"
+    else:
+        assert result.stdout == "reset_failed|1|0|failed|transport_failed|true|read_only_failed|failed:transport_failed|false"
 
 
 def test_round13_fresh_claim_gate_is_adjacent_to_actual_process_start():

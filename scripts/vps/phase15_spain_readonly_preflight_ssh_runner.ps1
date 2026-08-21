@@ -536,6 +536,26 @@ function Reset-Phase15UnstartedTransaction {
     return $TransactionPath
 }
 
+function Test-Phase15TransactionRequiresConservativeSshUsed {
+    param(
+        [Parameter(Mandatory)][string]$TransactionPath,
+        [Parameter(Mandatory)][string]$ClaimId,
+        [Parameter(Mandatory)][object]$Lock
+    )
+    try {
+        $stateRoot = Split-Path -Parent (Split-Path -Parent ([IO.Path]::GetFullPath($TransactionPath)))
+        if (-not (Test-Phase15ClaimLock -Lock $Lock -StateRoot $stateRoot -ClaimId $ClaimId)) { return $true }
+        $journal = ConvertFrom-Phase15CanonicalJsonFile -Path $TransactionPath
+        if (
+            $null -eq $journal -or $journal.claim_id -isnot [string] -or $journal.claim_id -cne $ClaimId -or
+            $journal.phase -isnot [string] -or $journal.ssh_used -isnot [bool]
+        ) { return $true }
+        return -not ($journal.phase -ceq 'owned' -and $journal.ssh_used -eq $false)
+    } catch {
+        return $true
+    }
+}
+
 function Start-Phase15AuthorizedSshProcess {
     param(
         [Parameter(Mandatory)][object]$Process,
@@ -1355,7 +1375,7 @@ function Invoke-Phase15RunnerMain {
             Publish-Phase15TerminalOutcome -LifecyclePath $transaction.LifecyclePath -ReservationPath $transaction.ReservationPath -OutcomePath $OutcomePath -ClaimId $claim.claim_id -Status 'completed' -EndedAt $endedAt -ReasonCode 'not_applicable' -Outcome $evidence -TransactionPath $transaction.JournalPath -Lock $claimLock -OutcomeLock $transaction.OutcomeLock
         } catch {
             if (-not $transportStarted -and $_.Exception.Message -ceq 'claim_invalid') { $failureReason = 'claim_invalid' }
-            $sshUsed = $sshUsed -or $transportStarted
+            $sshUsed = $sshUsed -or $transportStarted -or (Test-Phase15TransactionRequiresConservativeSshUsed -TransactionPath $transaction.JournalPath -ClaimId $claim.claim_id -Lock $claimLock)
             $endedAt = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
             try {
                 if (Test-Phase15OutcomeOwnership -ReservationPath $transaction.ReservationPath -ClaimId $claim.claim_id) {
