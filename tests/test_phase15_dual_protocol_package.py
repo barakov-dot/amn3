@@ -117,6 +117,58 @@ def test_python_secret_classification_metadata_is_not_treated_as_secret_material
         )
 
 
+def test_python_sensitive_metadata_allowlist_requires_exact_path_identifier_and_value(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    package = load_package_module()
+    metadata = "approved policy label"
+    digest = hashlib.sha256(metadata.encode("utf-8")).hexdigest()
+    monkeypatch.setattr(
+        package,
+        "APPROVED_STATIC_SENSITIVE_METADATA_SHA256",
+        {("app/known.py", "token_label"): frozenset({digest})},
+    )
+
+    package._reject_python_sensitive_assignments(
+        "app/known.py",
+        f'token_label = "{metadata}"\n',
+    )
+
+    with pytest.raises(package.PackageContractError, match="forbidden sensitive assignment"):
+        package._reject_python_sensitive_assignments(
+            "app/known.py",
+            'token_label = "changed policy label"\n',
+        )
+    with pytest.raises(package.PackageContractError, match="forbidden sensitive assignment"):
+        package._reject_python_sensitive_assignments(
+            "app/other.py",
+            f'token_label = "{metadata}"\n',
+        )
+
+
+def test_raw_secret_context_allowlist_requires_exact_path_kind_and_line(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    package = load_package_module()
+    context = b'MESSAGE = "hash-only bearer token policy label"\n'
+    digest = hashlib.sha256(context).hexdigest()
+    monkeypatch.setattr(
+        package,
+        "APPROVED_RAW_SECRET_CONTEXT_LINE_SHA256",
+        {("app/known.py", 3): frozenset({digest})},
+    )
+
+    package._reject_forbidden_source("app/known.py", context)
+
+    with pytest.raises(package.PackageContractError, match="forbidden raw secret material"):
+        package._reject_forbidden_source("app/other.py", context)
+    with pytest.raises(package.PackageContractError, match="forbidden raw secret material"):
+        package._reject_forbidden_source(
+            "app/known.py",
+            b'MESSAGE = "hash-only bearer token policy label changed"\n',
+        )
+
+
 def resign_manifest(package, root: Path, mutate) -> dict[str, object]:
     path = root / "manifest.json"
     value = json.loads(path.read_text("utf-8"))

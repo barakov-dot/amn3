@@ -164,6 +164,43 @@ CSS_CUSTOM_PROPERTY_RE = re.compile(
 )
 TEXT_SOURCE_SUFFIXES = {".css", ".html", ".py", ".tpl"}
 NON_SECRET_CLASSIFICATION_IDENTIFIERS = {"config_secret_class"}
+APPROVED_STATIC_SENSITIVE_METADATA_SHA256 = {
+    ("app/security/surface_bindings.py", "public_token_form_view"): frozenset({
+        "19320c3c6e1302ab0eb1dd47a408ae8a0d167e2f125c19ae236d3aab50e5d382",
+    }),
+    ("app/services/api_tokens.py", "stored_secret_material"): frozenset({
+        "c6c83a3e7fa6995a8d493dccb65718e5c5c3a649cf3926e2a7b73a38c5e4fcc2",
+    }),
+    ("app/services/device_enrollment.py", "stored_secret_material"): frozenset({
+        "c6c83a3e7fa6995a8d493dccb65718e5c5c3a649cf3926e2a7b73a38c5e4fcc2",
+    }),
+    ("app/services/fresh_install_wizard.py", "secret_handoff_policy_doc"): frozenset({
+        "c143fbc9038b6b436ef44bc36a3a4d3ada86baf2f7c6cb4ef9ea13c90c6b8ed1",
+    }),
+    ("app/services/productization_boundary.py", "token_material"): frozenset({
+        "8ad9daf7945517e6ba19a295b4193c92c20a35f5243e037b96ff1c8d1b8e51b7",
+    }),
+    ("app/services/productization_boundary.py", "raw_token_return_policy"): frozenset({
+        "b121ab80ed64c2445e4cd832f9d140e17ab87c90e95dd68d4a7b8f02cc0e9403",
+    }),
+    ("app/web/app.py", "private_key"): frozenset({
+        "10e4bdfa85a95e23e62efa0f28faa17a28c267a30494a49a2b0bc84e0c7559f1",
+    }),
+    ("app/web/app.py", "preshared_key"): frozenset({
+        "a32af243ee5c79d50ab95591d1a992e6ba790e793aaa0e114341c91d81a5ba49",
+    }),
+    ("app/web/app.py", "token_label"): frozenset({
+        "3ee75029c70e284c46b5af29eb87592f923e747f460353b02059a645f332b990",
+    }),
+    ("app/web/auth.py", "password_hash_error"): frozenset({
+        "1f7981c8117bb7cc9c535075d24025a33b987f83293d9e1c4c10f186f22059d7",
+    }),
+}
+APPROVED_RAW_SECRET_CONTEXT_LINE_SHA256 = {
+    ("app/security/surface_policy.py", 3): frozenset({
+        "4de4b5321d2217e385696e936d321f514eba38d33fb0c24afc726baf5618c105",
+    }),
+}
 MAX_JWT_SEGMENT_BYTES = 8192
 MAX_STATIC_EXPRESSION_DEPTH = 64
 MAX_STATIC_EXPRESSION_NODES = 512
@@ -438,6 +475,29 @@ def _is_sensitive_identifier(value: str) -> bool:
     ) or joined in {"apikey", "privatekey", "presharedkey"}
 
 
+def _is_approved_static_sensitive_metadata(relative: str, identifier: str, value: str | bytes) -> bool:
+    payload = value if isinstance(value, bytes) else value.encode("utf-8")
+    allowed_hashes = APPROVED_STATIC_SENSITIVE_METADATA_SHA256.get(
+        (relative, _normalize_identifier(identifier)),
+        frozenset(),
+    )
+    return _sha256(payload) in allowed_hashes
+
+
+def _is_approved_raw_secret_context(relative: str, pattern_index: int, body: bytes, match: re.Match[bytes]) -> bool:
+    line_start = body.rfind(b"\n", 0, match.start()) + 1
+    line_end = body.find(b"\n", match.start())
+    if line_end < 0:
+        line_end = len(body)
+    else:
+        line_end += 1
+    allowed_hashes = APPROVED_RAW_SECRET_CONTEXT_LINE_SHA256.get(
+        (relative, pattern_index),
+        frozenset(),
+    )
+    return _sha256(body[line_start:line_end]) in allowed_hashes
+
+
 def _strip_scalar_quotes(value: str) -> str:
     scalar = value.strip()
     if len(scalar) >= 2 and scalar[0] == scalar[-1] and scalar[0] in {"'", '"'}:
@@ -550,13 +610,18 @@ def _reject_python_sensitive_assignments(relative: str, text: str) -> None:
             elif isinstance(node, ast.AnnAssign):
                 targets = [node.target]
                 value_node = node.value
-            if value_node is not None and any(
-                _is_sensitive_identifier(name)
+            identifiers = [
+                name
                 for target in targets
                 for name in _python_target_identifiers(target)
-            ):
+                if _is_sensitive_identifier(name)
+            ]
+            if value_node is not None and identifiers:
                 value = _static_python_value(value_node)
-                if value is not None:
+                if value is not None and not all(
+                    _is_approved_static_sensitive_metadata(relative, name, value)
+                    for name in identifiers
+                ):
                     _reject_sensitive_value(relative, value)
             if isinstance(node, ast.Dict):
                 for key, value_node in zip(node.keys, node.values, strict=True):
@@ -566,13 +631,17 @@ def _reject_python_sensitive_assignments(relative: str, text: str) -> None:
                         and _is_sensitive_identifier(key.value)
                     ):
                         value = _static_python_value(value_node)
-                        if value is not None:
+                        if value is not None and not _is_approved_static_sensitive_metadata(
+                            relative, key.value, value
+                        ):
                             _reject_sensitive_value(relative, value)
             if isinstance(node, ast.Call):
                 for keyword in node.keywords:
                     if keyword.arg and _is_sensitive_identifier(keyword.arg):
                         value = _static_python_value(keyword.value)
-                        if value is not None:
+                        if value is not None and not _is_approved_static_sensitive_metadata(
+                            relative, keyword.arg, value
+                        ):
                             _reject_sensitive_value(relative, value)
     except (SyntaxError, RecursionError, _StaticPythonValueLimit) as exc:
         raise PackageContractError(
@@ -650,11 +719,12 @@ def _reject_forbidden_source(relative: str, body: bytes) -> None:
         expected_brand = APPROVED_BRAND_PNGS.get(relative)
         if expected_brand is None or (len(body), _sha256(body)) != expected_brand:
             raise PackageContractError(f"forbidden source material: {relative}")
-    if (
-        body.startswith(b"SQLite format 3\x00")
-        or any(pattern.search(body) for pattern in PRIVATE_MATERIAL_PATTERNS)
-        or _is_structural_jwt(body)
-    ):
+    has_unapproved_raw_secret = any(
+        match is not None and not _is_approved_raw_secret_context(relative, index, body, match)
+        for index, pattern in enumerate(PRIVATE_MATERIAL_PATTERNS)
+        for match in (pattern.search(body),)
+    )
+    if body.startswith(b"SQLite format 3\x00") or has_unapproved_raw_secret or _is_structural_jwt(body):
         raise PackageContractError(f"forbidden raw secret material: {relative}")
     _reject_contextual_sensitive_values(relative, body)
 
