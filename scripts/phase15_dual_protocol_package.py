@@ -125,7 +125,7 @@ PRIVATE_MATERIAL_PATTERNS = (
     re.compile(rb"-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----"),
     re.compile(rb"(?im)^\s*(?:PrivateKey|PresharedKey)\s*=\s*[A-Za-z0-9+/]{42,44}={0,2}\s*$"),
     re.compile(rb"\b[0-9]{6,12}:[A-Za-z0-9_-]{30,}\b"),
-    re.compile(rb"(?i)\bBearer[ \t]+(?=[^\s'\"<>])"),
+    re.compile(rb"(?i)\bBearer[ \t]+(?=[^\s'\"<>{}])"),
 )
 APPROVED_TEMPLATE_PLACEHOLDERS = {
     b"{{ issued_raw_token }}",

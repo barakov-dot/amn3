@@ -406,6 +406,20 @@ def test_verifier_rejects_symlinked_package_ancestor(tmp_path: Path) -> None:
         package.verify_package(linked_parent / "package")
 
 
+def test_materializer_allows_runtime_bearer_header_expression() -> None:
+    package = load_package_module()
+
+    package._reject_forbidden_source(
+        "app/cli.py",
+        b'headers = {"Authorization": f"Bearer {token}"}\n',
+    )
+    with pytest.raises(package.PackageContractError, match="forbidden raw secret material"):
+        package._reject_forbidden_source(
+            "app/cli.py",
+            b'AUTHORIZATION = "Bearer live_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345"\n',
+        )
+
+
 @pytest.mark.parametrize(
     ("relative", "body"),
     [
