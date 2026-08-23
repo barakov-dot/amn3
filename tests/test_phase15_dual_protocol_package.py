@@ -102,6 +102,21 @@ def test_git_scopes_safe_directory_to_resolved_root(tmp_path: Path, monkeypatch:
     ]]
 
 
+def test_python_secret_classification_metadata_is_not_treated_as_secret_material() -> None:
+    package = load_package_module()
+
+    package._reject_python_sensitive_assignments(
+        "app/bot/delivery.py",
+        'config_secret_class = "restricted-delivery"\n',
+    )
+
+    with pytest.raises(package.PackageContractError, match="forbidden sensitive assignment"):
+        package._reject_python_sensitive_assignments(
+            "app/bot/delivery.py",
+            'delivery_token = "abcdefghijklmnopqrstuvwxyz"\n',
+        )
+
+
 def resign_manifest(package, root: Path, mutate) -> dict[str, object]:
     path = root / "manifest.json"
     value = json.loads(path.read_text("utf-8"))

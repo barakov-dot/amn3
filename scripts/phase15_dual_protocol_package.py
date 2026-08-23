@@ -163,6 +163,7 @@ CSS_CUSTOM_PROPERTY_RE = re.compile(
     r"\s*:\s*(?P<value>[^;\r\n}]+?)\s*(?:;|(?=\}))"
 )
 TEXT_SOURCE_SUFFIXES = {".css", ".html", ".py", ".tpl"}
+NON_SECRET_CLASSIFICATION_IDENTIFIERS = {"config_secret_class"}
 MAX_JWT_SEGMENT_BYTES = 8192
 MAX_STATIC_EXPRESSION_DEPTH = 64
 MAX_STATIC_EXPRESSION_NODES = 512
@@ -419,6 +420,8 @@ def _normalize_identifier(value: str) -> str:
 def _is_sensitive_identifier(value: str) -> bool:
     normalized = _normalize_identifier(value)
     if not normalized:
+        return False
+    if normalized in NON_SECRET_CLASSIFICATION_IDENTIFIERS:
         return False
     parts = normalized.split("_")
     if any(
