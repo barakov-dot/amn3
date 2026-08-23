@@ -333,7 +333,16 @@ def _git_environment() -> dict[str, str]:
 def _git(root: Path, *args: str) -> bytes:
     try:
         result = subprocess.run(
-            ["git", "-c", "core.autocrlf=input", "-c", "core.safecrlf=false", *args],
+            [
+                "git",
+                "-c",
+                f"safe.directory={Path(root).resolve()}",
+                "-c",
+                "core.autocrlf=input",
+                "-c",
+                "core.safecrlf=false",
+                *args,
+            ],
             cwd=root,
             env=_git_environment(),
             stdout=subprocess.PIPE,

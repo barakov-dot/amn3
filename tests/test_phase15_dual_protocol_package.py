@@ -76,6 +76,32 @@ def tree_hashes(root: Path) -> dict[str, str]:
     }
 
 
+def test_git_scopes_safe_directory_to_resolved_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    package = load_package_module()
+    root = tmp_path / "repository"
+    root.mkdir()
+    calls: list[list[str]] = []
+
+    def fake_run(args, **kwargs):
+        calls.append(args)
+        return subprocess.CompletedProcess(args, 0, stdout=b"", stderr=b"")
+
+    monkeypatch.setattr(package.subprocess, "run", fake_run)
+
+    assert package._git(root, "status", "--porcelain=v1") == b""
+    assert calls == [[
+        "git",
+        "-c",
+        f"safe.directory={root.resolve()}",
+        "-c",
+        "core.autocrlf=input",
+        "-c",
+        "core.safecrlf=false",
+        "status",
+        "--porcelain=v1",
+    ]]
+
+
 def resign_manifest(package, root: Path, mutate) -> dict[str, object]:
     path = root / "manifest.json"
     value = json.loads(path.read_text("utf-8"))
