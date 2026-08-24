@@ -31,6 +31,21 @@ remote preflight, SSH, stage, issuance, deployment, push, or live mutation.
 - Per-file SHA-256 inventory was produced after the focused suite.
 - Second local verifier: `verified`, with the same package identity and the same manifest SHA-256.
 
+## Task 8 legacy-suite waiver
+
+- The exact full VPS tooling repository suite on the available Windows host
+  completed with `51 failed, 1391 passed, 7 skipped in 418.76s`.
+- All 51 failures are outside the Phase 15 targeted suite and are confined to
+  legacy Phase 11-13 platform/environment contracts, including unavailable
+  Windows `os.fchmod`, checkout-byte assumptions and absent historical sibling
+  worktrees. The exact Phase 15 targeted suite and package verifier remained
+  successful.
+- On 2026-08-24 the operator explicitly approved closing Task 8 with a waiver
+  of the full legacy tooling suite and accepted the Phase 15 targeted and
+  checksum-bound package gates as sufficient.
+- This waiver does not authorize Spain preflight execution, SSH, stage,
+  deployment, issuance, service/firewall/runtime/client mutation or push.
+
 ## Resource plan
 
 The packaged plan is future-only and preserves AWG2 unchanged. It reserves
