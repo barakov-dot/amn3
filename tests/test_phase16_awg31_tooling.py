@@ -72,6 +72,89 @@ def canonical(value: object) -> bytes:
     ).encode("utf-8")
 
 
+def collector_python_namespace() -> dict[str, object]:
+    source = COLLECTOR.read_text(encoding="utf-8")
+    match = re.search(
+        r"(?ms)^exec /usr/bin/python3 -I -B - \"\$1\" \"\$2\" \"\$3\" \"\$4\" \"\$5\" <<'PHASE16_PY'\n(?P<body>.*)\nPHASE16_PY$",
+        source,
+    )
+    if match is None:
+        pytest.fail("Phase 16 collector embedded Python not found")
+    prefix = match.group("body").split("\ntry:\n    claim_id", 1)[0]
+    namespace: dict[str, object] = {"__name__": "phase16_collector_test"}
+    exec(compile(prefix, str(COLLECTOR), "exec"), namespace)
+    return namespace
+
+
+def collector_helper(name: str):
+    helper = collector_python_namespace().get(name)
+    if not callable(helper):
+        pytest.fail(f"missing Phase 16 collector helper: {name}")
+    return helper
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        (b'ID=ubuntu\nVERSION_ID="24.04"\n', ("pass", b"ubuntu:24.04")),
+        (b'ID=debian\nVERSION_ID="12"\n', ("stop", b"unsupported-os")),
+        (b'ID=ubuntu\nVERSION_ID="22.04"\n', ("stop", b"unsupported-os")),
+        (b'ID=ubuntu\r\nVERSION_ID="24.04"\r\n', ("stop", b"malformed-os-release")),
+    ],
+)
+def test_phase16_spain_os_admission_is_exact_ubuntu_2404(
+    raw: bytes, expected: tuple[str, bytes]
+):
+    assert collector_helper("classify_os_release")(raw) == expected
+
+
+def test_phase16_accepts_clean_dedicated_docker_when_optional_engines_are_unavailable():
+    classify = collector_helper("classify_spain_docker_sources")
+    success = "success"
+    unavailable = (127, b"", b"", "unavailable")
+    inventory = (0, b"other\n", b"", success)
+    network_ids = (0, (b"a" * 64) + b"\n", b"", success)
+    clean_subnets = [
+        (
+            0,
+            b'"bridge"\t"bridge"\t{"Config":[{"Subnet":"172.28.0.0/16"}],"Driver":"default","Options":{}}\n',
+            b"",
+            success,
+        )
+    ]
+    dedicated = (inventory, network_ids, clean_subnets)
+
+    assert classify((unavailable, None, []), dedicated, (unavailable, None, [])) == (
+        "pass",
+        "free",
+        "free",
+    )
+
+
+def test_phase16_optional_container_engine_launch_failure_still_stops():
+    classify = collector_helper("classify_spain_docker_sources")
+    success = "success"
+    unavailable = (127, b"", b"", "unavailable")
+    failed = (126, b"", b"permission denied\n", "launch_failed")
+    inventory = (0, b"other\n", b"", success)
+    network_ids = (0, (b"a" * 64) + b"\n", b"", success)
+    clean_subnets = [
+        (
+            0,
+            b'"bridge"\t"bridge"\t{"Config":[{"Subnet":"172.28.0.0/16"}],"Driver":"default","Options":{}}\n',
+            b"",
+            success,
+        )
+    ]
+    dedicated = (inventory, network_ids, clean_subnets)
+
+    assert classify((failed, None, []), dedicated, (unavailable, None, [])) == (
+        "stop",
+        "stop",
+        "stop",
+    )
+
+
 def test_phase16_package_and_preflight_identities_are_exact():
     package = load_module(PACKAGE_SCRIPT, "phase16_package")
     preflight = load_module(PREFLIGHT_SCRIPT, "phase16_preflight")

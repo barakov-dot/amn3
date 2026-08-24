@@ -373,7 +373,9 @@ def classify_dedicated_spain_docker(inventory_probe, network_list_probe, network
 def classify_spain_docker_sources(system_source, dedicated_source, podman_source):
     stopped = ("stop", "stop", "stop")
     try:
-        present_sources = [system_source, dedicated_source]
+        present_sources = [dedicated_source]
+        if system_source[0][3] != "unavailable":
+            present_sources.append(system_source)
         if podman_source[0][3] != "unavailable":
             present_sources.append(podman_source)
         total_containers = 0
@@ -390,9 +392,14 @@ def classify_spain_docker_sources(system_source, dedicated_source, podman_source
     except (UnicodeDecodeError, ValueError, TypeError):
         return stopped
     system_inventory, system_networks, system_inspects = system_source
-    if system_networks is None:
-        return stopped
-    system_result = classify_dedicated_spain_docker(system_inventory, system_networks, system_inspects)
+    if system_inventory[3] == "unavailable":
+        if system_networks is not None or system_inspects:
+            return stopped
+        system_result = ("absent", "free", "free")
+    else:
+        if system_networks is None:
+            return stopped
+        system_result = classify_dedicated_spain_docker(system_inventory, system_networks, system_inspects)
     dedicated_inventory, dedicated_networks, dedicated_inspects = dedicated_source
     if dedicated_networks is None:
         return stopped
@@ -406,7 +413,7 @@ def classify_spain_docker_sources(system_source, dedicated_source, podman_source
         if podman_networks is None:
             return stopped
         podman_result = classify_dedicated_spain_docker(podman_inventory, podman_networks, podman_inspects)
-    if system_result[0] != "pass" or dedicated_result[0] != "pass" or podman_result[0] == "stop":
+    if system_result[0] == "stop" or dedicated_result[0] != "pass" or podman_result[0] == "stop":
         return stopped
     return (
         "pass",
@@ -912,9 +919,9 @@ def classify_os_release(raw):
             raise ValueError("os release identity")
     except (UnicodeDecodeError, ValueError, TypeError):
         return "stop", b"malformed-os-release"
-    if values["ID"] != "debian" or values["VERSION_ID"] != "12":
+    if values["ID"] != "ubuntu" or values["VERSION_ID"] != "24.04":
         return "stop", b"unsupported-os"
-    return "pass", b"debian:12"
+    return "pass", b"ubuntu:24.04"
 
 def local_host_identity(expected_host):
     ensure_work_budget()
