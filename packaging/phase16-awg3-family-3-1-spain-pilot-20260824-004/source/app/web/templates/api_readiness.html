@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <p class="eyebrow">Read-only API baseline</p>
+    <h1>Готовность API</h1>
+  </section>
+
+  <section class="settings-grid" aria-label="API readiness">
+    <article class="panel">
+      <div class="panel-header">
+      <h2>Разрешенные read scopes</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <thead>
+            <tr>
+              <th>Scope</th>
+              <th>Режим</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for scope in allowed_scopes %}
+              <tr>
+                <td><code>{{ scope }}</code></td>
+                <td>read-only</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+      <h2>Текущее агрегированное состояние</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Серверы</td>
+              <td>{{ metrics.servers_total }}</td>
+            </tr>
+            <tr>
+              <td>Пользователи</td>
+              <td>{{ metrics.users_total }}</td>
+            </tr>
+            <tr>
+              <td>Устройства</td>
+              <td>{{ metrics.devices_total }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Заблокировано в этом slice</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="settings-table">
+        <tbody>
+          {% for surface in blocked_surfaces %}
+            <tr>
+              <td>{{ surface }}</td>
+              <td>требуется отдельный gate</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}
