@@ -10,7 +10,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$script:Phase16PackageId = 'phase16-awg3-family-3-1-spain-pilot-20260824-001'
+$script:Phase16PackageId = 'phase16-awg3-family-3-1-spain-pilot-20260824-002'
 $script:Phase16ClaimSchema = 'amn2.phase16.readonly-preflight-claim.v1'
 $script:Phase16CollectorSchema = 'amn2.phase16.spain-readonly-collector.v1'
 $script:Phase16EvidenceSchema = 'amn2.phase16.readonly-preflight-evidence.v1'
@@ -923,6 +923,31 @@ function Test-Phase16ManagedStateDirectoryFacts {
     return $true
 }
 
+function Test-Phase16SharedNamespaceDirectoryFacts {
+    param([Parameter(Mandatory)][object]$Facts, [Parameter(Mandatory)][string]$ExpectedPath)
+    if ($null -eq $Facts -or -not (Test-Phase16ExactProperties -Value $Facts -Required @('Exists','FullName','IsDirectory','IsReparse','OwnerSid','Protected','Rules'))) { return $false }
+    if ($Facts.Exists -isnot [bool] -or -not $Facts.Exists -or $Facts.IsDirectory -isnot [bool] -or -not $Facts.IsDirectory -or $Facts.IsReparse -isnot [bool] -or $Facts.IsReparse) { return $false }
+    if ($Facts.FullName -isnot [string] -or -not [IO.Path]::IsPathRooted($Facts.FullName) -or -not [IO.Path]::GetFullPath($Facts.FullName).TrimEnd([IO.Path]::DirectorySeparatorChar).Equals([IO.Path]::GetFullPath($ExpectedPath).TrimEnd([IO.Path]::DirectorySeparatorChar), [StringComparison]::OrdinalIgnoreCase)) { return $false }
+    if ($Facts.OwnerSid -isnot [string] -or $Facts.OwnerSid -notin @($script:Phase16SystemSid, $script:Phase16AdministratorsSid)) { return $false }
+    if ($Facts.Protected -isnot [bool] -or $Facts.Protected -or $Facts.Rules -isnot [System.Collections.IEnumerable]) { return $false }
+    $expected = @(
+        [pscustomobject]@{ Sid = 'S-1-3-0'; Rights = [int64]268435456; Inheritance = 3; Propagation = 2 },
+        [pscustomobject]@{ Sid = $script:Phase16SystemSid; Rights = [int64]2032127; Inheritance = 3; Propagation = 0 },
+        [pscustomobject]@{ Sid = $script:Phase16AdministratorsSid; Rights = [int64]2032127; Inheritance = 3; Propagation = 0 },
+        [pscustomobject]@{ Sid = 'S-1-5-32-545'; Rights = [int64]278; Inheritance = 1; Propagation = 0 },
+        [pscustomobject]@{ Sid = 'S-1-5-32-545'; Rights = [int64]1179817; Inheritance = 3; Propagation = 0 }
+    )
+    $rules = @($Facts.Rules)
+    if ($rules.Count -ne $expected.Count) { return $false }
+    foreach ($wanted in $expected) {
+        $matching = @($rules | Where-Object { $_.Sid -is [string] -and $_.Sid -ceq $wanted.Sid -and [int64]$_.Rights -eq $wanted.Rights -and [int]$_.Inheritance -eq $wanted.Inheritance -and [int]$_.Propagation -eq $wanted.Propagation })
+        if ($matching.Count -ne 1) { return $false }
+        $rule = $matching[0]
+        if (-not (Test-Phase16ExactProperties -Value $rule -Required @('Inheritance','IsInherited','Propagation','Rights','Sid','Type')) -or $rule.Type -isnot [string] -or $rule.Type -cne 'Allow' -or $rule.IsInherited -isnot [bool] -or -not $rule.IsInherited) { return $false }
+    }
+    return $true
+}
+
 function Get-Phase16AllowedStateSids {
     param([Parameter(Mandatory)][string]$AuthorizedSid)
     if ($AuthorizedSid -cnotmatch '^S-1-[0-9-]+$') { throw 'state_root_invalid' }
@@ -1003,7 +1028,12 @@ function Initialize-Phase16TrustedStateRoot {
         $anchorFacts = Get-Phase16StateDirectoryFacts -Path $anchor
         if (-not (Test-Phase16ProgramDataAnchorFacts -Facts $anchorFacts -ExpectedPath $anchor)) { throw 'state_root_invalid' }
         $current = $anchor
-        foreach ($leaf in @('AMN2','phase16','readonly-preflight')) {
+        $namespace = [IO.Path]::Combine($current, 'AMN2')
+        $namespaceFacts = Get-Phase16StateDirectoryFacts -Path $namespace
+        if (-not $namespaceFacts.Exists) { New-Phase16SecureStateDirectory -ParentPath $current -Path $namespace -AuthorizedSid $AuthorizedSid; $namespaceFacts = Get-Phase16StateDirectoryFacts -Path $namespace }
+        if (-not (Test-Phase16ManagedStateDirectoryFacts -Facts $namespaceFacts -ExpectedPath $namespace -AuthorizedSid $AuthorizedSid) -and -not (Test-Phase16SharedNamespaceDirectoryFacts -Facts $namespaceFacts -ExpectedPath $namespace)) { throw 'state_root_invalid' }
+        $current = $namespace
+        foreach ($leaf in @('phase16','readonly-preflight')) {
             $next = [IO.Path]::Combine($current, $leaf)
             $facts = Get-Phase16StateDirectoryFacts -Path $next
             if (-not $facts.Exists) { New-Phase16SecureStateDirectory -ParentPath $current -Path $next -AuthorizedSid $AuthorizedSid; $facts = Get-Phase16StateDirectoryFacts -Path $next }
@@ -1077,8 +1107,10 @@ function Assert-Phase16TrustedManagedStateChain {
     $anchor = [IO.Path]::GetFullPath($anchor).TrimEnd([IO.Path]::DirectorySeparatorChar)
     $anchorFacts = Get-Phase16StateDirectoryFacts -Path $anchor
     if (-not (Test-Phase16ProgramDataAnchorFacts -Facts $anchorFacts -ExpectedPath $anchor)) { throw 'state_root_invalid' }
-    $current = $anchor
-    foreach ($leaf in @('AMN2','phase16','readonly-preflight')) {
+    $current = [IO.Path]::Combine($anchor, 'AMN2')
+    $namespaceFacts = Get-Phase16StateDirectoryFacts -Path $current
+    if (-not (Test-Phase16ManagedStateDirectoryFacts -Facts $namespaceFacts -ExpectedPath $current -AuthorizedSid $AuthorizedSid) -and -not (Test-Phase16SharedNamespaceDirectoryFacts -Facts $namespaceFacts -ExpectedPath $current)) { throw 'state_root_invalid' }
+    foreach ($leaf in @('phase16','readonly-preflight')) {
         $current = [IO.Path]::Combine($current, $leaf)
         $facts = Get-Phase16StateDirectoryFacts -Path $current
         if (-not (Test-Phase16ManagedStateDirectoryFacts -Facts $facts -ExpectedPath $current -AuthorizedSid $AuthorizedSid)) { throw 'state_root_invalid' }

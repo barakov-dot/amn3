@@ -15,7 +15,7 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-001"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-002"
 RUNTIME_IDENTITY = (
     "docker.io/amneziavpn/amneziawg-go@"
     "sha256:4e1fd2840f8d26eb6ec8bc1598e66f2f17f5d0201cd2baadbde560c104d4fc9d"
@@ -33,6 +33,26 @@ RUNTIME_STAGE = ROOT / "scripts" / "vps" / "phase16_awg31_runtime_stage_remote.s
 COLLECTOR = ROOT / "scripts" / "vps" / "phase16_spain_readonly_preflight_remote.sh"
 RUNNER = ROOT / "scripts" / "vps" / "phase16_spain_readonly_preflight_ssh_runner.ps1"
 BASH = Path(r"C:\Program Files\Git\bin\bash.exe")
+POWERSHELL = Path(r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
+
+
+def run_powershell(body: str):
+    harness = f". '{RUNNER}'\n{body}"
+    return subprocess.run(
+        [
+            str(POWERSHELL),
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            harness,
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
 
 
 def load_module(path: Path, name: str):
@@ -281,6 +301,56 @@ def test_phase16_preflight_transport_assets_are_read_only_and_phase_exact():
         r"\bsqlite3\s",
     ):
         assert re.search(pattern, collector, flags=re.IGNORECASE) is None
+
+
+def test_existing_safe_shared_amn2_namespace_allows_managed_phase16_leaf_provisioning():
+    result = run_powershell(
+        "$script:events=[Collections.Generic.List[string]]::new();$script:facts=@{};"
+        "$authorized='S-1-5-21-1000';$anchor='C:\\ProgramData';"
+        "$root='C:\\ProgramData\\AMN2\\phase16\\readonly-preflight';"
+        "$full=[int64][Security.AccessControl.FileSystemRights]::FullControl;$inherit=3;"
+        "$platform=@([pscustomobject]@{Sid='S-1-3-0';Type='Allow';Rights=[int64]268435456;IsInherited=$false;Inheritance=3;Propagation=2},"
+        "[pscustomobject]@{Sid='S-1-5-18';Type='Allow';Rights=[int64]2032127;IsInherited=$false;Inheritance=3;Propagation=0},"
+        "[pscustomobject]@{Sid='S-1-5-32-544';Type='Allow';Rights=[int64]2032127;IsInherited=$false;Inheritance=3;Propagation=0},"
+        "[pscustomobject]@{Sid='S-1-5-32-545';Type='Allow';Rights=[int64]278;IsInherited=$false;Inheritance=1;Propagation=0},"
+        "[pscustomobject]@{Sid='S-1-5-32-545';Type='Allow';Rights=[int64]1179817;IsInherited=$false;Inheritance=3;Propagation=0});"
+        "$shared=@($platform|ForEach-Object{$copy=$_.PSObject.Copy();$copy.IsInherited=$true;$copy});"
+        "function New-ManagedFacts($path){$rules=@('S-1-5-21-1000','S-1-5-18','S-1-5-32-544'|ForEach-Object{[pscustomobject]@{Sid=$_;Type='Allow';Rights=$full;IsInherited=$false;Inheritance=$inherit;Propagation=0}});[pscustomobject]@{Exists=$true;FullName=$path;IsDirectory=$true;IsReparse=$false;OwnerSid=$authorized;Protected=$true;Rules=$rules}};"
+        "$script:facts[$anchor]=[pscustomobject]@{Exists=$true;FullName=$anchor;IsDirectory=$true;IsReparse=$false;OwnerSid='S-1-5-18';Protected=$true;Rules=$platform};"
+        "$amn2=Join-Path $anchor 'AMN2';$script:facts[$amn2]=[pscustomobject]@{Exists=$true;FullName=$amn2;IsDirectory=$true;IsReparse=$false;OwnerSid='S-1-5-32-544';Protected=$false;Rules=$shared};"
+        "function Enter-Phase16StateRootCreationLock{$script:events.Add('lock');[pscustomobject]@{Acquired=$true}};"
+        "function Exit-Phase16StateRootCreationLock{param($Lock)$script:events.Add('unlock')};"
+        "function Get-Phase16StateDirectoryFacts{param($Path)if($script:facts.ContainsKey($Path)){return $script:facts[$Path]};[pscustomobject]@{Exists=$false;FullName=$Path}};"
+        "function New-Phase16SecureStateDirectory{param($ParentPath,$Path,$AuthorizedSid)$script:events.Add('create:'+([IO.Path]::GetFileName($Path)));$script:facts[$Path]=New-ManagedFacts $Path};"
+        "$message='';$actual='';$chain='';try{$actual=Initialize-Phase16TrustedStateRoot -AnchorPath $anchor -StateRoot $root -AuthorizedSid $authorized;$chain=Assert-Phase16TrustedManagedStateChain -StateRoot $root -AuthorizedSid $authorized -RequiredChildren @('locks','outcome-locks','claims','transactions','recovery-outcomes','outcomes')}catch{$message=$_.Exception.Message};"
+        "$created=@($script:events|Where-Object{$_ -like 'create:*'}|ForEach-Object{$_.Substring(7)});"
+        "[Console]::Out.Write(\"$message|$($actual -ceq $root)|$($chain -ceq $root)|$($created -join ',')\")"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == (
+        "|True|True|phase16,readonly-preflight,locks,outcome-locks,claims,"
+        "transactions,recovery-outcomes,outcomes"
+    )
+
+
+def test_shared_amn2_namespace_rejects_reparse_extra_acl_and_wrong_owner():
+    result = run_powershell(
+        "$rules=@([pscustomobject]@{Sid='S-1-3-0';Type='Allow';Rights=[int64]268435456;IsInherited=$true;Inheritance=3;Propagation=2},"
+        "[pscustomobject]@{Sid='S-1-5-18';Type='Allow';Rights=[int64]2032127;IsInherited=$true;Inheritance=3;Propagation=0},"
+        "[pscustomobject]@{Sid='S-1-5-32-544';Type='Allow';Rights=[int64]2032127;IsInherited=$true;Inheritance=3;Propagation=0},"
+        "[pscustomobject]@{Sid='S-1-5-32-545';Type='Allow';Rights=[int64]278;IsInherited=$true;Inheritance=1;Propagation=0},"
+        "[pscustomobject]@{Sid='S-1-5-32-545';Type='Allow';Rights=[int64]1179817;IsInherited=$true;Inheritance=3;Propagation=0});"
+        "$valid=[pscustomobject]@{Exists=$true;FullName='C:\\ProgramData\\AMN2';IsDirectory=$true;IsReparse=$false;OwnerSid='S-1-5-32-544';Protected=$false;Rules=$rules};"
+        "$reparse=$valid.PSObject.Copy();$reparse.IsReparse=$true;"
+        "$extra=$valid.PSObject.Copy();$extra.Rules=@($rules+[pscustomobject]@{Sid='S-1-1-0';Type='Allow';Rights=[int64]2032127;IsInherited=$true;Inheritance=3;Propagation=0});"
+        "$owner=$valid.PSObject.Copy();$owner.OwnerSid='S-1-5-32-545';"
+        "$values=@($valid,$reparse,$extra,$owner|ForEach-Object{(Test-Phase16SharedNamespaceDirectoryFacts -Facts $_ -ExpectedPath 'C:\\ProgramData\\AMN2').ToString().ToLowerInvariant()});"
+        "[Console]::Out.Write(($values -join '|'))"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "true|false|false|false"
 
 
 def test_phase16_manifest_schema_matches_closed_package_inventory():
