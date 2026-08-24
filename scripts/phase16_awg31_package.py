@@ -423,14 +423,14 @@ def _git(root: Path, *args: str) -> bytes:
     return result.stdout
 
 
-def _checked_repo(root: Path) -> tuple[Path, str]:
+def _checked_repo(root: Path, expected_branch: str) -> tuple[Path, str]:
     root = Path(root).resolve()
     if root.is_symlink() or not root.is_dir():
         raise PackageContractError("repository root")
     if _git(root, "status", "--porcelain=v1", "--untracked-files=all"):
         raise PackageContractError("repository must be clean")
     branch = _git(root, "branch", "--show-current").decode("ascii").strip()
-    if branch != SOURCE_BRANCH:
+    if branch != expected_branch:
         raise PackageContractError("repository branch")
     head = _git(root, "rev-parse", "HEAD").decode("ascii").strip()
     if HEAD_RE.fullmatch(head) is None:
@@ -842,8 +842,8 @@ def materialize_package(*, source_root: Path, source_head: str, package_id: str,
     output = lexical_output.resolve()
     if output.exists() and (not output.is_dir() or any(output.iterdir())):
         raise PackageContractError("output must not be non-empty")
-    source, actual_head = _checked_repo(Path(source_root))
-    tooling, tooling_head = _checked_repo(Path(tooling_root))
+    source, actual_head = _checked_repo(Path(source_root), SOURCE_BRANCH)
+    tooling, tooling_head = _checked_repo(Path(tooling_root), TOOLING_BRANCH)
     if not isinstance(source_head, str) or HEAD_RE.fullmatch(source_head) is None or source_head != actual_head:
         raise PackageContractError("source head mismatch")
     source_items = _source_payloads(source, source_head)

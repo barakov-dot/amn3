@@ -173,6 +173,36 @@ def test_phase16_package_and_preflight_identities_are_exact():
     assert preflight.EVIDENCE_SCHEMA == "amn2.phase16.readonly-preflight-evidence.v1"
 
 
+def test_phase16_materializer_applies_distinct_source_and_tooling_branch_gates(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+):
+    package = load_module(PACKAGE_SCRIPT, "phase16_package_branch_gates")
+    source = tmp_path / "source"
+    tooling = tmp_path / "tooling"
+    source.mkdir()
+    tooling.mkdir()
+    observed: list[tuple[Path, str]] = []
+
+    def checked_repo(root: Path, expected_branch: str):
+        observed.append((Path(root), expected_branch))
+        if len(observed) == 2:
+            raise package.PackageContractError("halt after branch gates")
+        return Path(root), "a" * 40
+
+    monkeypatch.setattr(package, "_checked_repo", checked_repo)
+
+    with pytest.raises(package.PackageContractError, match="halt after branch gates"):
+        package.materialize_package(
+            source_root=source,
+            source_head="a" * 40,
+            package_id=PACKAGE_ID,
+            output_root=tmp_path / "package",
+            tooling_root=tooling,
+        )
+
+    assert observed == [(source, SOURCE_BRANCH), (tooling, TOOLING_BRANCH)]
+
+
 def test_historic_phase16_package_003_remains_checksum_immutable():
     manifest_path = HISTORIC_PACKAGE_003 / "manifest.json"
     collector_path = (
