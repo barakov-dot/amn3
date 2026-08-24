@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading page-heading">
+    <div>
+      <p class="eyebrow">User management</p>
+      <h1>{{ user.display_label }}</h1>
+    </div>
+    <div class="button-row">
+      <a class="button button-secondary" href="/users">Back</a>
+      {% if user.has_telegram_identity %}
+        <a class="button" href="/users/{{ user.id }}/edit">Edit</a>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="detail-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Profile</h2>
+      </div>
+      <dl class="details">
+        <div>
+          <dt>Recipient</dt>
+          <dd>{{ user.display_label }}</dd>
+        </div>
+        <div>
+          <dt>Telegram ID</dt>
+          <dd>{{ user.telegram_id if user.has_telegram_identity else "Telegram identity unavailable" }}</dd>
+        </div>
+        <div>
+          <dt>Name</dt>
+          <dd>{{ user.first_name or "" }} {{ user.last_name or "" }}</dd>
+        </div>
+        <div>
+          <dt>Email</dt>
+          <dd>
+            {{ user.email or "-" }}
+            <span class="muted-text">{{ "verified" if user.email_verified_at else "unverified" }}</span>
+            {% if user.email %}
+              <form action="/users/{{ user.id }}/email/verify/start" method="post" class="inline-action">
+                <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                <button class="button button-secondary button-small" type="submit">Send verification</button>
+              </form>
+            {% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd><span class="status status-{{ user.status }}">{{ user.status }}</span></dd>
+        </div>
+        <div>
+          <dt>Role</dt>
+          <dd>{{ "admin" if user.is_admin else "user" }}</dd>
+        </div>
+        <div>
+          <dt>Devices</dt>
+          <dd>{{ user.active_device_count }} / {{ user.total_device_count }}</dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Actions</h2>
+      </div>
+      <div class="action-stack">
+        <form action="/users/{{ user.id }}/block" method="post">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-secondary" type="submit">Block</button>
+        </form>
+        <form action="/users/{{ user.id }}/disable-vpn" method="post" data-confirm="Disable VPN for this user? This changes local device status and may remove active peers from AmneziaWG when VPS_APPLY_ENABLED=true.">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button
+            class="button button-secondary"
+            name="{{ 'disable_vpn' if vpn_actions.disable.available else 'disable_vpn_unavailable' }}"
+            type="submit"
+            {% if not vpn_actions.disable.available %}disabled{% endif %}
+          >Disable VPN</button>
+          <p class="action-note">{{ vpn_actions.disable.hint }}</p>
+        </form>
+        <form action="/users/{{ user.id }}/enable-vpn" method="post" data-confirm="Enable VPN for this user? This changes local device status and may add disabled peers back to AmneziaWG when VPS_APPLY_ENABLED=true.">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button
+            class="button button-secondary"
+            name="{{ 'enable_vpn' if vpn_actions.enable.available else 'enable_vpn_unavailable' }}"
+            type="submit"
+            {% if not vpn_actions.enable.available %}disabled{% endif %}
+          >Enable VPN</button>
+          <p class="action-note">{{ vpn_actions.enable.hint }}</p>
+        </form>
+        <form action="/users/{{ user.id }}/delete" method="post" data-confirm="Soft delete this user in the admin database?">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-danger" type="submit">Soft delete</button>
+        </form>
+        <form action="/users/{{ user.id }}/destroy" method="post" data-confirm="Permanently delete this user and all related data? This cannot be undone.">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-danger" type="submit">Delete permanently</button>
+        </form>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Create operator device</h2>
+      {% if operator_device_form.apply_enabled %}
+        <span class="status status-active">Apply available</span>
+      {% else %}
+        <span class="status status-disabled">Apply is closed</span>
+      {% endif %}
+    </div>
+
+    {% if operator_device_plan is defined %}
+      <div class="notice notice-success">
+        <strong>Dry-run ready</strong>
+        <p>{{ operator_device_plan.device_name }} · {{ operator_device_plan.server_name }} · {{ operator_device_plan.duration_days }} days · {{ operator_device_plan.assignment_mode }} · {{ operator_device_plan.execution_target }}</p>
+        <p>No database, peer or artifact changes were made.</p>
+      </div>
+    {% endif %}
+
+    {% if operator_device_result is defined %}
+      <div class="notice notice-success">
+        <strong>Operator device created</strong>
+        <p>#{{ operator_device_result.device_id }} {{ operator_device_result.device_name }} · {{ operator_device_result.server_name }} · {{ operator_device_result.assignment_mode }}</p>
+        <p>Private artifact: <code class="wrap-text">{{ operator_device_result.output }}</code></p>
+      </div>
+    {% endif %}
+
+    <form action="/users/{{ user.id }}/devices/create-operator" method="post" class="form form-wide">
+      <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+      <div class="form-grid">
+        <label class="field">
+          Device name
+          <input name="device_name" type="text" value="{{ operator_device_form.default_device_name }}" required>
+        </label>
+        <label class="field">
+          Server
+          <select name="server_name" required {% if not operator_device_form.servers %}disabled{% endif %}>
+            {% for server_name in operator_device_form.servers %}
+              <option value="{{ server_name }}" {% if server_name == operator_device_form.default_server %}selected{% endif %}>{{ server_name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="field">
+          Duration, days
+          <input name="duration_days" type="number" min="1" value="{{ operator_device_form.default_duration_days }}" required>
+        </label>
+        <label class="field">
+          Config version
+          <select name="config_version" required>
+            {% for config_version in operator_device_form.config_versions %}
+              <option value="{{ config_version }}" {% if config_version == "amneziawg_v2" %}selected{% endif %}>{{ config_version }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="field">
+          Assignment
+          <select name="assignment_mode" required>
+            {% for assignment_mode in operator_device_form.assignment_modes %}
+              <option value="{{ assignment_mode }}" {% if assignment_mode == "dedicated_device" %}selected{% endif %}>{{ assignment_mode }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="field">
+          Execution target
+          <select name="execution_target" required>
+            <option value="local" selected>local</option>
+            <option value="remote-ssh">remote-ssh</option>
+          </select>
+        </label>
+      </div>
+      <label class="checkbox-field">
+        <input name="confirm_one_device_gate" type="checkbox" value="on">
+        Exact config-assignment gate confirmed
+      </label>
+      {% if operator_device_form.config_error %}
+        <p class="action-note">{{ operator_device_form.config_error }}</p>
+      {% endif %}
+      <div class="form-actions">
+        <button class="button button-secondary" name="mode" type="submit" value="dry-run" {% if not operator_device_form.available %}disabled{% endif %}>Dry-run</button>
+        <button class="button" name="mode" type="submit" value="apply" {% if not operator_device_form.apply_enabled %}disabled{% endif %}>Apply</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="dashboard-grid" aria-label="User summaries">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Devices</h2>
+      </div>
+      {% if devices %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Server</th>
+                <th>Assignment</th>
+                <th>Status</th>
+                <th>Expires</th>
+                <th>IP</th>
+                <th>Secrets</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for device in devices %}
+                <tr>
+                  <td>#{{ device.id }}</td>
+                  <td>{{ device.name }}</td>
+                  <td>{{ device.server_name }}</td>
+                  <td>
+                    {% if device.assignment_mode == "recipient_unassigned" %}
+                      не назначено
+                    {% else %}
+                      {{ device.assignment_mode }}
+                    {% endif %}
+                  </td>
+                  <td><span class="status status-{{ device.status }}">{{ device.status }}</span></td>
+                  <td>
+                    {% if device.expiry_policy == "indefinite" %}
+                      бессрочно
+                    {% else %}
+                      {{ device.expires_at or "-" }}
+                    {% endif %}
+                  </td>
+                  <td>{{ device.vpn_ip }}</td>
+                  <td>
+                    {% if device.config_material_status == "external_only" %}
+                      <span class="muted-text">external-only импорт</span>
+                      <p class="action-note">Импортировано только для видимости; исходный конфиг недоступен.</p>
+                    {% elif revealed_device_id is defined and revealed_device_id == device.id %}
+                      <div class="secret-lines">
+                        <span class="muted-text">PrivateKey</span>
+                        <code class="wrap-text">{{ revealed_secrets.private_key }}</code>
+                        <span class="muted-text">PresharedKey</span>
+                        <code class="wrap-text">{{ revealed_secrets.preshared_key }}</code>
+                      </div>
+                    {% else %}
+                      <span class="muted-text">********</span>
+                      <form action="/users/{{ user.id }}/devices/{{ device.id }}/secrets" method="post" class="inline-action">
+                        <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                        <button class="button button-secondary button-small" type="submit">Show secrets</button>
+                      </form>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div class="button-row">
+                      {% if device.config_material_status == "external_only" %}
+                        <span class="muted-text">Повторная отправка конфига, секреты и email-доставка недоступны для этой external-only записи.</span>
+                      {% elif user.email %}
+                        <form action="/users/{{ user.id }}/devices/{{ device.id }}/email-config" method="post">
+                          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                          <button class="button button-secondary button-small" type="submit">Email config</button>
+                        </form>
+                        <form action="/users/{{ user.id }}/devices/{{ device.id }}/email-recovery/start" method="post">
+                          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                          <button class="button button-secondary button-small" type="submit">Email recovery</button>
+                        </form>
+                      {% else %}
+                        <span class="muted-text">No email</span>
+                      {% endif %}
+                      <form action="/users/{{ user.id }}/devices/{{ device.id }}/delete" method="post" data-confirm="Delete this device? This deletes local data and may revoke its peer from AmneziaWG when VPS_APPLY_ENABLED=true. This cannot be undone.">
+                        <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                        <button class="button button-danger button-small" type="submit">Удалить устройство</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-state">No devices.</p>
+      {% endif %}
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Orders</h2>
+      </div>
+      {% if orders %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Status</th>
+                <th>Plan</th>
+                <th>Device</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+                <tr>
+                  <td>#{{ order.id }}</td>
+                  <td>{{ order.status }}</td>
+                  <td>{{ order.plan_name or order.plan_id or "-" }}</td>
+                  <td>{{ order.device_name or "-" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-state">No orders.</p>
+      {% endif %}
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Admin actions</h2>
+      </div>
+      {% if admin_actions %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Action</th>
+                <th>Admin</th>
+                <th>Target device</th>
+                <th>Created</th>
+                <th>Metadata</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for action in admin_actions %}
+                <tr>
+                  <td>#{{ action.id }}</td>
+                  <td>{{ action.action }}</td>
+                  <td>{{ action.admin_telegram_id }}</td>
+                  <td>
+                    {% if action.target_device_id %}
+                      #{{ action.target_device_id }}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
+                  <td>{{ action.created_at }}</td>
+                  <td class="wrap-text">{{ action.metadata_json or "-" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-state">No admin actions.</p>
+      {% endif %}
+    </article>
+  </section>
+{% endblock %}
