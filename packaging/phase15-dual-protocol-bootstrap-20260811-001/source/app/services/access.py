@@ -6,7 +6,7 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Protocol
+from typing import Callable, Literal, Protocol
 
 from app.access_expiry import AccessExpiry, DURATION, INDEFINITE
 from app.db.repositories import Repository
@@ -43,6 +43,7 @@ from app.vpn.protocol_versions import ProtocolVersion
 
 
 IP_ALLOCATION_ATTEMPTS = 3
+IpAllocationStrategy = Literal["remote_high_watermark", "lowest_free"]
 
 
 class MaxDevicesReached(ValueError):
@@ -74,6 +75,10 @@ class OperatorOwnerSharedRequiresAdmin(ValueError):
 
 
 class OperatorPeerApplierRequired(RuntimeError):
+    pass
+
+
+class Awg3HeaderProtectionKeyUnavailable(ValueError):
     pass
 
 
@@ -301,6 +306,22 @@ class AccessService:
         runtime_target: RuntimeInstanceSpec | None = None,
         runtime_peer_applier: PeerApplier | None = None,
     ) -> OperatorDeviceCreateResult:
+        config_version = _validate_operator_config_boundary(
+            config_version=config_version,
+            device_context=device_context,
+            awg3_material=awg3_material,
+            runtime_target=runtime_target,
+            runtime_peer_applier=runtime_peer_applier,
+        )
+        if config_version == "amneziawg_v3":
+            _validate_awg3_runtime_inputs(
+                server_id=server_id,
+                client_build=client_build,
+                device_context=device_context,
+                awg3_material=awg3_material,
+                runtime_target=runtime_target,
+                runtime_peer_applier=runtime_peer_applier,
+            )
         remote_mutation: RemoteMutationResult | None = None
 
         def record_remote_mutation(result: RemoteMutationResult) -> None:
@@ -352,6 +373,7 @@ class AccessService:
         runtime_target: RuntimeInstanceSpec,
         runtime_peer_applier: PeerApplier,
     ) -> OperatorDeviceCreateResult:
+        config_version = _require_awg3_config_version(config_version)
         remote_mutation: RemoteMutationResult | None = None
 
         def record_remote_mutation(result: RemoteMutationResult) -> None:
@@ -403,7 +425,7 @@ class AccessService:
             or client_build.casefold() in {"latest", "current", "unknown"}
         ):
             raise ValueError("exact client_build is required")
-        config_version = validate_config_version(config_version)
+        config_version = _require_awg3_config_version(config_version)
         validate_device_passport_context(
             platform=device_context.platform,
             official_client_type=device_context.official_client_type,
@@ -504,6 +526,7 @@ class AccessService:
             resolved_hpk=resolved_hpk,
             runtime_target=runtime_target,
             runtime_peer_applier=runtime_peer_applier,
+            allocation_strategy="lowest_free",
         )
         return OperatorDeviceCreateResult(
             device_id=device_id,
@@ -541,7 +564,13 @@ class AccessService:
         if not normalized_device_display_name:
             raise ValueError("device_name must be non-blank")
         expiry = _resolve_operator_expiry(duration_days=duration_days, expiry=expiry)
-        config_version = validate_config_version(config_version)
+        config_version = _validate_operator_config_boundary(
+            config_version=config_version,
+            device_context=device_context,
+            awg3_material=awg3_material,
+            runtime_target=runtime_target,
+            runtime_peer_applier=runtime_peer_applier,
+        )
         assignment_mode = validate_config_assignment_mode(assignment_mode)
         assignment_policy = config_assignment_policy(assignment_mode)
         if passport_device_id is not None and not assignment_policy.passport_required:
@@ -633,6 +662,11 @@ class AccessService:
             resolved_hpk=resolved_hpk,
             runtime_target=runtime_target,
             runtime_peer_applier=runtime_peer_applier,
+            allocation_strategy=(
+                "lowest_free"
+                if config_version == "amneziawg_v3"
+                else "remote_high_watermark"
+            ),
         )
 
         self._repo.record_admin_action(
@@ -760,6 +794,7 @@ class AccessService:
                 "review, verify the server peer, and reconcile local state."
             ),
             remote_mutation_observer=remote_mutation_observer,
+            allocation_strategy="remote_high_watermark",
         )
         self._repo.mark_order_fulfilled(order_id, device_id)
         self._repo.record_admin_action(
@@ -797,6 +832,7 @@ class AccessService:
         remote_operation_id: str,
         remote_recovery_note: Callable[[int], str],
         remote_mutation_observer: Callable[[RemoteMutationResult], None] | None,
+        allocation_strategy: IpAllocationStrategy,
         protocol_version: str | None = None,
         runtime_instance_id: str | None = None,
         compatibility_evidence_id: str | None = None,
@@ -807,34 +843,24 @@ class AccessService:
         runtime_peer_applier: PeerApplier | None = None,
     ) -> tuple[int, str, str]:
         last_error: sqlite3.IntegrityError | None = None
-        active_peer_applier = (
-            runtime_peer_applier if runtime_target is not None else self._peer_applier
-        )
-        network_cidr = (
-            runtime_target.vpn_cidr
-            if runtime_target is not None
-            else str(server["vpn_network_cidr"])
-        )
-        server_address = (
-            _runtime_server_address(runtime_target.vpn_cidr)
-            if runtime_target is not None
-            else server["server_address"]
-        )
-        endpoint_host = (
-            awg3_material.endpoint_host
-            if runtime_target is not None and awg3_material is not None
-            else str(server["endpoint_host"])
-        )
-        endpoint_port = (
-            runtime_target.udp_port
-            if runtime_target is not None
-            else server["vpn_port"]
-        )
-        server_public_key = (
-            awg3_material.server_public_key
-            if runtime_target is not None and awg3_material is not None
-            else str(server["server_public_key"])
-        )
+        if allocation_strategy == "lowest_free":
+            if runtime_target is None or awg3_material is None:
+                raise ValueError("validated AWG3 runtime inputs are required")
+            active_peer_applier = runtime_peer_applier
+            network_cidr = runtime_target.vpn_cidr
+            server_address = _runtime_server_address(runtime_target.vpn_cidr)
+            endpoint_host = awg3_material.endpoint_host
+            endpoint_port = runtime_target.udp_port
+            server_public_key = awg3_material.server_public_key
+        elif allocation_strategy == "remote_high_watermark":
+            active_peer_applier = self._peer_applier
+            network_cidr = str(server["vpn_network_cidr"])
+            server_address = server["server_address"]
+            endpoint_host = str(server["endpoint_host"])
+            endpoint_port = server["vpn_port"]
+            server_public_key = str(server["server_public_key"])
+        else:
+            raise ValueError("unsupported IP allocation strategy")
 
         for _ in range(IP_ALLOCATION_ATTEMPTS):
             allocated_ips = (
@@ -842,7 +868,7 @@ class AccessService:
                     server_id,
                     runtime_target.runtime_instance_id,
                 )
-                if runtime_target is not None
+                if allocation_strategy == "lowest_free" and runtime_target is not None
                 else self._repo.list_allocated_ips(server_id)
             )
             try:
@@ -854,6 +880,7 @@ class AccessService:
                         active_peer_applier,
                         server=server,
                     ),
+                    strategy=allocation_strategy,
                 )
             except RuntimeError as exc:
                 raise IpAllocationConflict("Could not allocate a unique VPN IP address") from exc
@@ -972,6 +999,60 @@ class AccessService:
         raise IpAllocationConflict("Could not allocate a unique VPN IP address") from last_error
 
 
+def _validate_operator_config_boundary(
+    *,
+    config_version: str,
+    device_context: OperatorDeviceContext,
+    awg3_material: Awg3IssuerMaterial | None,
+    runtime_target: RuntimeInstanceSpec | None,
+    runtime_peer_applier: PeerApplier | None,
+) -> str:
+    validated = validate_config_version(config_version)
+    if validated != "amneziawg_v3":
+        if (
+            awg3_material is not None
+            or runtime_target is not None
+            or runtime_peer_applier is not None
+            or device_context.protocol_version == ProtocolVersion.AWG3.value
+        ):
+            raise ValueError("AWG3-only inputs require amneziawg_v3")
+        _validate_awg2_operator_context(device_context)
+    return validated
+
+
+def _validate_awg2_operator_context(device_context: OperatorDeviceContext) -> None:
+    evidence_fields = (
+        device_context.runtime_instance_id,
+        device_context.client_identity_evidence_status,
+        device_context.compatibility_evidence_id,
+    )
+    if device_context.protocol_version is None:
+        if any(value is not None for value in evidence_fields):
+            raise ValueError("complete AWG2 client context is required")
+        return
+    if device_context.protocol_version != ProtocolVersion.AWG2.value:
+        raise ValueError("complete AWG2 client context is required")
+    if all(value is None for value in evidence_fields):
+        return
+    _require_exact_material_text(
+        device_context.runtime_instance_id,
+        "runtime_instance_id",
+    )
+    if device_context.client_identity_evidence_status != "verified":
+        raise ValueError("client_identity_evidence_status")
+    _require_exact_material_text(
+        device_context.compatibility_evidence_id,
+        "compatibility_evidence_id",
+    )
+
+
+def _require_awg3_config_version(config_version: str) -> str:
+    validated = validate_config_version(config_version)
+    if validated != "amneziawg_v3":
+        raise ValueError("protocol device creation requires amneziawg_v3")
+    return validated
+
+
 def _validate_awg3_runtime_inputs(
     *,
     server_id: int,
@@ -981,6 +1062,18 @@ def _validate_awg3_runtime_inputs(
     runtime_target: RuntimeInstanceSpec | None,
     runtime_peer_applier: PeerApplier | None,
 ) -> None:
+    if device_context.protocol_version != ProtocolVersion.AWG3.value:
+        raise ValueError("complete AWG3 client context is required")
+    _require_exact_material_text(
+        device_context.runtime_instance_id,
+        "runtime_instance_id",
+    )
+    if device_context.client_identity_evidence_status != "verified":
+        raise ValueError("client_identity_evidence_status")
+    _require_exact_material_text(
+        device_context.compatibility_evidence_id,
+        "compatibility_evidence_id",
+    )
     if not isinstance(awg3_material, Awg3IssuerMaterial):
         raise ValueError("strict AWG3 issuer material is required")
     awg3_material.validate()
@@ -1012,19 +1105,24 @@ def _validate_awg3_runtime_inputs(
 
 
 def _resolve_awg3_hpk(material: Awg3IssuerMaterial) -> str:
-    reference = material.header_protection_key.reference
-    resolved_hpk = material.secret_resolver.resolve(reference)
-    _require_exact_material_text(
-        resolved_hpk,
-        "resolved header_protection_key",
-        maximum=4096,
-    )
-    resolved_fingerprint = "sha256:" + hashlib.sha256(
-        resolved_hpk.encode("utf-8")
-    ).hexdigest()
-    if resolved_fingerprint != material.header_protection_key.fingerprint:
-        raise ValueError("header_protection_key fingerprint mismatch")
-    return resolved_hpk
+    try:
+        reference = material.header_protection_key.reference
+        resolved_hpk = material.secret_resolver.resolve(reference)
+        _require_exact_material_text(
+            resolved_hpk,
+            "resolved header_protection_key",
+            maximum=4096,
+        )
+        resolved_fingerprint = "sha256:" + hashlib.sha256(
+            resolved_hpk.encode("utf-8")
+        ).hexdigest()
+        if resolved_fingerprint != material.header_protection_key.fingerprint:
+            raise ValueError("header_protection_key fingerprint mismatch")
+        return resolved_hpk
+    except Exception:
+        raise Awg3HeaderProtectionKeyUnavailable(
+            "AWG3 header protection key is unavailable"
+        ) from None
 
 
 def _runtime_server_address(vpn_cidr: str) -> str:
@@ -1042,29 +1140,37 @@ def _allocate_vpn_ip(
     server_address: str | None,
     allocated_ips: list[str],
     remote_allocated_ips: list[str] | None = None,
+    strategy: IpAllocationStrategy = "remote_high_watermark",
 ) -> str:
     network = ipaddress.ip_network(network_cidr, strict=False)
+    local_addresses = [_parse_allocated_ip(raw_ip) for raw_ip in allocated_ips]
+    remote_addresses = [
+        _parse_allocated_ip(raw_ip) for raw_ip in remote_allocated_ips or []
+    ]
     reserved = {
         parsed_ip
-        for raw_ip in [*allocated_ips, *(remote_allocated_ips or [])]
-        for parsed_ip in [_parse_allocated_ip(raw_ip)]
+        for parsed_ip in [*local_addresses, *remote_addresses]
         if parsed_ip in network
     }
     if server_address is not None:
         reserved.add(_parse_allocated_ip(server_address))
 
-    hosts = list(network.hosts())
-    first_index = 0
-    remote_reserved = [
-        _parse_allocated_ip(raw_ip)
-        for raw_ip in remote_allocated_ips or []
-        if _parse_allocated_ip(raw_ip) in network
-    ]
-    if remote_reserved:
-        last_remote_ip = max(remote_reserved)
-        first_index = hosts.index(last_remote_ip) + 1 if last_remote_ip in hosts else 0
+    if strategy == "remote_high_watermark":
+        remote_high_watermark = max(
+            (address for address in remote_addresses if address in network),
+            default=None,
+        )
+    elif strategy == "lowest_free":
+        remote_high_watermark = None
+    else:
+        raise ValueError("unsupported IP allocation strategy")
 
-    for ip_address in hosts[first_index:]:
+    for ip_address in network.hosts():
+        if (
+            remote_high_watermark is not None
+            and ip_address <= remote_high_watermark
+        ):
+            continue
         if ip_address not in reserved:
             return str(ip_address)
 

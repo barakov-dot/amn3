@@ -29,6 +29,15 @@ COMPATIBILITY_EVIDENCE_STATUSES = {"claimed", "passed", "failed", "superseded"}
 SHA256_DIGEST_PATTERN = re.compile(r"[0-9a-f]{64}\Z")
 
 
+def _ascii_lower(text: str) -> str:
+    return "".join(
+        chr(ord(character) + 32)
+        if "A" <= character <= "Z"
+        else character
+        for character in text
+    )
+
+
 def _require_sha256_digest(value: object, field_name: str) -> None:
     if (
         not isinstance(value, str)
@@ -84,6 +93,7 @@ class Repository:
         self._transaction_depth = 0
         self._active_outer_transaction_identity: object | None = None
         self._protocol_issuance_execution_leases: dict[object, dict[str, Any]] = {}
+        self._active_phase15_claims: set[tuple[str, str, str]] = set()
 
     @contextmanager
     def transaction(self) -> Iterator[None]:
@@ -832,7 +842,10 @@ class Repository:
                 (handle_digest,),
             ).fetchone()
             assert row is not None
-            return row
+        self._active_phase15_claims.add(
+            ("callback", handle_digest, claim_id_digest)
+        )
+        return row
 
     def release_callback_handle_claim(
         self,
@@ -866,7 +879,10 @@ class Repository:
                 (handle_digest,),
             ).fetchone()
             assert row is not None
-            return row
+        self._active_phase15_claims.discard(
+            ("callback", handle_digest, claim_id_digest)
+        )
+        return row
 
     def consume_callback_handle(
         self,
@@ -904,7 +920,10 @@ class Repository:
                 (handle_digest,),
             ).fetchone()
             assert row is not None
-            return row
+        self._active_phase15_claims.discard(
+            ("callback", handle_digest, claim_id_digest)
+        )
+        return row
 
     def consume_expired_callback_handle(
         self,
@@ -918,6 +937,24 @@ class Repository:
         if not expected_purpose:
             raise ValueError("expected_purpose")
         with self.transaction():
+            current = self._conn.execute(
+                "SELECT * FROM telegram_callback_handles WHERE handle_digest = ?",
+                (handle_digest,),
+            ).fetchone()
+            if (
+                current is None
+                or int(current["owner_user_id"]) != owner_user_id
+                or str(current["purpose"]) != expected_purpose
+                or current["consumed_at"] is not None
+                or str(current["expires_at"]) > now
+                or not self._phase15_claim_is_abandoned(
+                    "callback",
+                    handle_digest,
+                    current,
+                    now,
+                )
+            ):
+                return None
             cursor = self._conn.execute(
                 """
                 UPDATE telegram_callback_handles
@@ -927,11 +964,20 @@ class Repository:
                   AND purpose = ?
                   AND consumed_at IS NULL
                   AND expires_at <= ?
-                  AND claim_id_digest IS NULL
-                  AND claimed_at IS NULL
-                  AND claim_expires_at IS NULL
+                  AND claim_id_digest IS ?
+                  AND claimed_at IS ?
+                  AND claim_expires_at IS ?
                 """,
-                (now, handle_digest, owner_user_id, expected_purpose, now),
+                (
+                    now,
+                    handle_digest,
+                    owner_user_id,
+                    expected_purpose,
+                    now,
+                    current["claim_id_digest"],
+                    current["claimed_at"],
+                    current["claim_expires_at"],
+                ),
             )
             if cursor.rowcount != 1:
                 return None
@@ -940,7 +986,12 @@ class Repository:
                 (handle_digest,),
             ).fetchone()
             assert row is not None
-            return row
+        claim_digest = current["claim_id_digest"]
+        if claim_digest is not None:
+            self._active_phase15_claims.discard(
+                ("callback", handle_digest, str(claim_digest))
+            )
+        return row
 
     def create_issuance_confirmation(
         self,
@@ -1014,8 +1065,31 @@ class Repository:
         if claim_expires_at <= now:
             raise ValueError("claim_expires_at must be later than now")
         with self.transaction():
-            cursor = self._conn.execute(
+            confirmation_columns = {
+                _ascii_lower(str(row[1]))
+                for row in self._conn.execute(
+                    "PRAGMA table_info(protocol_issuance_confirmations)"
+                )
+            }
+            durable_attempt_guard = ""
+            if "issuance_attempt_id" in confirmation_columns:
+                durable_attempt_guard = """
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM protocol_issuance_attempts AS attempt
+                      WHERE attempt.id =
+                                protocol_issuance_confirmations.issuance_attempt_id
+                        AND attempt.owner_user_id =
+                                protocol_issuance_confirmations.owner_user_id
+                        AND attempt.intended_passport_device_id =
+                                protocol_issuance_confirmations.passport_device_id
+                        AND attempt.request_fingerprint =
+                                protocol_issuance_confirmations.request_fingerprint
+                        AND attempt.state IN ('reserved', 'recovery_required')
+                  )
                 """
+            cursor = self._conn.execute(
+                f"""
                 UPDATE protocol_issuance_confirmations
                 SET claim_id_digest = ?,
                     claimed_at = ?,
@@ -1028,6 +1102,7 @@ class Repository:
                       claim_id_digest IS NULL
                       OR claim_expires_at <= ?
                   )
+                  {durable_attempt_guard}
                 """,
                 (
                     claim_id_digest,
@@ -1047,7 +1122,10 @@ class Repository:
                 (token_digest,),
             ).fetchone()
             assert row is not None
-            return row
+        self._active_phase15_claims.add(
+            ("confirmation", token_digest, claim_id_digest)
+        )
+        return row
 
     def release_issuance_confirmation_claim(
         self,
@@ -1073,6 +1151,103 @@ class Repository:
                   AND claim_id_digest = ?
                 """,
                 (token_digest, owner_user_id, now, claim_id_digest),
+            )
+            if cursor.rowcount != 1:
+                return None
+            row = self._conn.execute(
+                "SELECT * FROM protocol_issuance_confirmations "
+                "WHERE token_digest = ?",
+                (token_digest,),
+            ).fetchone()
+            assert row is not None
+        self._active_phase15_claims.discard(
+            ("confirmation", token_digest, claim_id_digest)
+        )
+        return row
+
+    def renew_issuance_confirmation_claim(
+        self,
+        token_digest: str,
+        owner_user_id: int,
+        now: str,
+        *,
+        claim_id_digest: str,
+        claim_expires_at: str,
+    ) -> sqlite3.Row | None:
+        _require_sha256_digest(token_digest, "token_digest")
+        _require_sha256_digest(claim_id_digest, "claim_id_digest")
+        if claim_expires_at <= now:
+            raise ValueError("claim_expires_at must be later than now")
+        with self.transaction():
+            cursor = self._conn.execute(
+                """
+                UPDATE protocol_issuance_confirmations
+                SET claim_expires_at = ?
+                WHERE token_digest = ?
+                  AND owner_user_id = ?
+                  AND consumed_at IS NULL
+                  AND expires_at > ?
+                  AND claim_id_digest = ?
+                """,
+                (
+                    claim_expires_at,
+                    token_digest,
+                    owner_user_id,
+                    now,
+                    claim_id_digest,
+                ),
+            )
+            if cursor.rowcount != 1:
+                return None
+            row = self._conn.execute(
+                "SELECT * FROM protocol_issuance_confirmations "
+                "WHERE token_digest = ?",
+                (token_digest,),
+            ).fetchone()
+            assert row is not None
+        self._active_phase15_claims.add(
+            ("confirmation", token_digest, claim_id_digest)
+        )
+        return row
+
+    def bind_issuance_confirmation_attempt(
+        self,
+        token_digest: str,
+        owner_user_id: int,
+        *,
+        claim_id_digest: str,
+        attempt_id: int,
+    ) -> sqlite3.Row | None:
+        _require_sha256_digest(token_digest, "token_digest")
+        _require_sha256_digest(claim_id_digest, "claim_id_digest")
+        with self.transaction():
+            attempt = self.get_protocol_issuance_attempt(attempt_id)
+            if (
+                attempt is None
+                or str(attempt["state"])
+                not in {"reserved", "recovery_required"}
+                or int(attempt["owner_user_id"]) != owner_user_id
+            ):
+                return None
+            cursor = self._conn.execute(
+                """
+                UPDATE protocol_issuance_confirmations
+                SET issuance_attempt_id = ?
+                WHERE token_digest = ?
+                  AND owner_user_id = ?
+                  AND consumed_at IS NULL
+                  AND claim_id_digest = ?
+                  AND passport_device_id = ?
+                  AND request_fingerprint = ?
+                """,
+                (
+                    attempt_id,
+                    token_digest,
+                    owner_user_id,
+                    claim_id_digest,
+                    attempt["intended_passport_device_id"],
+                    attempt["request_fingerprint"],
+                ),
             )
             if cursor.rowcount != 1:
                 return None
@@ -1121,29 +1296,53 @@ class Repository:
                 (token_digest,),
             ).fetchone()
             assert row is not None
-            return row
+        self._active_phase15_claims.discard(
+            ("confirmation", token_digest, claim_id_digest)
+        )
+        return row
 
-    def consume_expired_issuance_confirmation(
+    def consume_bound_issuance_confirmation(
         self,
         token_digest: str,
         owner_user_id: int,
         now: str,
+        terminal_reason: str,
+        *,
+        claim_id_digest: str,
+        attempt_id: int,
     ) -> sqlite3.Row | None:
         _require_sha256_digest(token_digest, "token_digest")
+        _require_sha256_digest(claim_id_digest, "claim_id_digest")
         with self.transaction():
+            attempt = self.get_protocol_issuance_attempt(attempt_id)
+            if (
+                attempt is None
+                or str(attempt["state"]) != "completed"
+                or int(attempt["owner_user_id"]) != owner_user_id
+            ):
+                return None
             cursor = self._conn.execute(
                 """
                 UPDATE protocol_issuance_confirmations
-                SET consumed_at = ?, terminal_reason = 'expired'
+                SET consumed_at = ?, terminal_reason = ?
                 WHERE token_digest = ?
                   AND owner_user_id = ?
                   AND consumed_at IS NULL
-                  AND expires_at <= ?
-                  AND claim_id_digest IS NULL
-                  AND claimed_at IS NULL
-                  AND claim_expires_at IS NULL
+                  AND claim_id_digest = ?
+                  AND issuance_attempt_id = ?
+                  AND passport_device_id = ?
+                  AND request_fingerprint = ?
                 """,
-                (now, token_digest, owner_user_id, now),
+                (
+                    now,
+                    terminal_reason,
+                    token_digest,
+                    owner_user_id,
+                    claim_id_digest,
+                    attempt_id,
+                    attempt["intended_passport_device_id"],
+                    attempt["request_fingerprint"],
+                ),
             )
             if cursor.rowcount != 1:
                 return None
@@ -1153,37 +1352,115 @@ class Repository:
                 (token_digest,),
             ).fetchone()
             assert row is not None
-            return row
+        self._active_phase15_claims.discard(
+            ("confirmation", token_digest, claim_id_digest)
+        )
+        return row
+
+    def consume_expired_issuance_confirmation(
+        self,
+        token_digest: str,
+        owner_user_id: int,
+        now: str,
+    ) -> sqlite3.Row | None:
+        _require_sha256_digest(token_digest, "token_digest")
+        with self.transaction():
+            current = self._conn.execute(
+                "SELECT * FROM protocol_issuance_confirmations "
+                "WHERE token_digest = ?",
+                (token_digest,),
+            ).fetchone()
+            if (
+                current is None
+                or int(current["owner_user_id"]) != owner_user_id
+                or current["consumed_at"] is not None
+                or str(current["expires_at"]) > now
+                or not self._phase15_claim_is_abandoned(
+                    "confirmation",
+                    token_digest,
+                    current,
+                    now,
+                )
+            ):
+                return None
+            cursor = self._conn.execute(
+                """
+                UPDATE protocol_issuance_confirmations
+                SET consumed_at = ?, terminal_reason = 'expired'
+                WHERE token_digest = ?
+                  AND owner_user_id = ?
+                  AND consumed_at IS NULL
+                  AND expires_at <= ?
+                  AND claim_id_digest IS ?
+                  AND claimed_at IS ?
+                  AND claim_expires_at IS ?
+                """,
+                (
+                    now,
+                    token_digest,
+                    owner_user_id,
+                    now,
+                    current["claim_id_digest"],
+                    current["claimed_at"],
+                    current["claim_expires_at"],
+                ),
+            )
+            if cursor.rowcount != 1:
+                return None
+            row = self._conn.execute(
+                "SELECT * FROM protocol_issuance_confirmations "
+                "WHERE token_digest = ?",
+                (token_digest,),
+            ).fetchone()
+            assert row is not None
+        claim_digest = current["claim_id_digest"]
+        if claim_digest is not None:
+            self._active_phase15_claims.discard(
+                ("confirmation", token_digest, str(claim_digest))
+            )
+        return row
 
     def prune_expired_phase15_callback_state(self, now: str) -> int:
+        pruned_claims: list[tuple[str, str, str]] = []
+        deleted = 0
         with self.transaction():
-            confirmation_cursor = self._conn.execute(
+            confirmation_rows = self._conn.execute(
                 """
-                DELETE FROM protocol_issuance_confirmations
+                SELECT * FROM protocol_issuance_confirmations
                 WHERE expires_at <= ?
-                  AND (
-                      consumed_at IS NOT NULL
-                      OR (
-                          claim_id_digest IS NULL
-                          AND claimed_at IS NULL
-                          AND claim_expires_at IS NULL
-                      )
-                  )
                 """,
                 (now,),
-            )
-            callback_cursor = self._conn.execute(
+            ).fetchall()
+            for row in confirmation_rows:
+                token_digest = str(row["token_digest"])
+                if (
+                    row["consumed_at"] is None
+                    and not self._phase15_claim_is_abandoned(
+                        "confirmation",
+                        token_digest,
+                        row,
+                        now,
+                    )
+                ):
+                    continue
+                cursor = self._conn.execute(
+                    "DELETE FROM protocol_issuance_confirmations "
+                    "WHERE token_digest = ?",
+                    (token_digest,),
+                )
+                deleted += int(cursor.rowcount)
+                if row["claim_id_digest"] is not None:
+                    pruned_claims.append(
+                        (
+                            "confirmation",
+                            token_digest,
+                            str(row["claim_id_digest"]),
+                        )
+                    )
+            callback_rows = self._conn.execute(
                 """
-                DELETE FROM telegram_callback_handles
+                SELECT * FROM telegram_callback_handles
                 WHERE expires_at <= ?
-                  AND (
-                      consumed_at IS NOT NULL
-                      OR (
-                          claim_id_digest IS NULL
-                          AND claimed_at IS NULL
-                          AND claim_expires_at IS NULL
-                      )
-                  )
                   AND NOT EXISTS (
                       SELECT 1
                       FROM protocol_issuance_confirmations
@@ -1191,8 +1468,81 @@ class Repository:
                   )
                 """,
                 (now,),
+            ).fetchall()
+            for row in callback_rows:
+                handle_digest = str(row["handle_digest"])
+                if (
+                    row["consumed_at"] is None
+                    and not self._phase15_claim_is_abandoned(
+                        "callback",
+                        handle_digest,
+                        row,
+                        now,
+                    )
+                ):
+                    continue
+                cursor = self._conn.execute(
+                    "DELETE FROM telegram_callback_handles "
+                    "WHERE handle_digest = ?",
+                    (handle_digest,),
+                )
+                deleted += int(cursor.rowcount)
+                if row["claim_id_digest"] is not None:
+                    pruned_claims.append(
+                        ("callback", handle_digest, str(row["claim_id_digest"]))
+                    )
+        for claim in pruned_claims:
+            self._active_phase15_claims.discard(claim)
+        return deleted
+
+    def _phase15_claim_is_abandoned(
+        self,
+        row_kind: str,
+        row_digest: str,
+        row: Mapping[str, Any],
+        now: str,
+    ) -> bool:
+        if row_kind == "confirmation" and self._confirmation_has_durable_attempt(row):
+            return False
+        claim_digest = row["claim_id_digest"]
+        if claim_digest is None:
+            return (
+                row["claimed_at"] is None
+                and row["claim_expires_at"] is None
             )
-            return confirmation_cursor.rowcount + callback_cursor.rowcount
+        claim_expires_at = row["claim_expires_at"]
+        return (
+            claim_expires_at is not None
+            and str(claim_expires_at) <= now
+            and (row_kind, row_digest, str(claim_digest))
+            not in self._active_phase15_claims
+        )
+
+    def _confirmation_has_durable_attempt(self, row: Mapping[str, Any]) -> bool:
+        attempt_id = row["issuance_attempt_id"]
+        if attempt_id is None:
+            return False
+        return (
+            self._conn.execute(
+                """
+                SELECT 1
+                FROM protocol_issuance_attempts
+                WHERE id = ?
+                  AND owner_user_id = ?
+                  AND intended_passport_device_id = ?
+                  AND request_fingerprint = ?
+                  AND state IN ('reserved', 'recovery_required')
+                LIMIT 1
+                """,
+                (
+                    attempt_id,
+                    row["owner_user_id"],
+                    row["passport_device_id"],
+                    row["request_fingerprint"],
+                ),
+            ).fetchone()
+            is not None
+        )
 
     def reserve_protocol_issuance_attempt(
         self,
@@ -1556,6 +1906,54 @@ class Repository:
                 raise ProtocolIssuanceExecutionBlocked("passport_inactive")
         state["bound_transaction"] = self._active_outer_transaction_identity
         return attempt
+
+    def cancel_protocol_issuance_attempt_before_side_effect(
+        self,
+        attempt_id: int,
+        *,
+        reason_code: str,
+        execution_lease: object,
+    ) -> sqlite3.Row:
+        if reason_code != "issuer_unavailable_before_side_effect":
+            raise ValueError("invalid pre-side-effect cancellation reason")
+        with self.transaction():
+            lease_state = self._protocol_issuance_execution_leases.get(
+                execution_lease
+            )
+            if (
+                lease_state is None
+                or int(lease_state["attempt_id"]) != attempt_id
+            ):
+                raise ValueError("invalid execution lease")
+            if bool(lease_state["used"]):
+                raise ValueError("execution lease already used")
+            if (
+                self._active_outer_transaction_identity is None
+                or lease_state["bound_transaction"]
+                is not self._active_outer_transaction_identity
+            ):
+                raise ValueError(
+                    "execution lease is not bound to current outer transaction"
+                )
+            cursor = self._conn.execute(
+                """
+                UPDATE protocol_issuance_attempts
+                SET state = 'cancelled',
+                    reason_code = ?,
+                    cancelled_at = CURRENT_TIMESTAMP,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                  AND state = 'recovery_required'
+                  AND reason_code = 'issuer_in_progress'
+                """,
+                (reason_code, attempt_id),
+            )
+            if cursor.rowcount != 1:
+                raise ValueError("issuance execution marker changed")
+            lease_state["used"] = True
+            attempt = self.get_protocol_issuance_attempt(attempt_id)
+            assert attempt is not None
+            return attempt
 
     def complete_protocol_issuance_attempt(
         self,
