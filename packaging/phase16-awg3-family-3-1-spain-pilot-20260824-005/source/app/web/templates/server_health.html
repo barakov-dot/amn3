@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading page-heading">
+    <div>
+      <p class="eyebrow">Server health</p>
+      <h1>{{ server.name }}</h1>
+    </div>
+    <div class="button-row">
+      <a class="button button-secondary" href="/servers/{{ server.id }}">Back</a>
+      <form action="/servers/{{ server.id }}/health/run" method="post">
+        <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+        <button class="button" type="submit">Run health check</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Latest stored check</h2>
+    </div>
+    {% if latest_health %}
+      <dl class="details">
+        <div>
+          <dt>Status</dt>
+          <dd><span class="status status-{{ latest_health.status }}">{{ latest_health.status }}</span></dd>
+        </div>
+        <div>
+          <dt>Latency</dt>
+          <dd>
+            {% if latest_health.latency_ms is not none %}
+              {{ latest_health.latency_ms }} ms
+            {% else %}
+              -
+            {% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt>Checked</dt>
+          <dd>{{ latest_health.checked_at }}</dd>
+        </div>
+        <div>
+          <dt>SSH</dt>
+          <dd>ssh: {{ "ok" if latest_health.ssh_ok else "failed" }}</dd>
+        </div>
+        <div>
+          <dt>AmneziaWG</dt>
+          <dd>awg: {{ "ok" if latest_health.awg_ok else "failed" }}</dd>
+        </div>
+        <div>
+          <dt>UDP port</dt>
+          <dd>udp port: {{ "ok" if latest_health.udp_port_ok else "failed" }}</dd>
+        </div>
+        <div>
+          <dt>Error</dt>
+          <dd>{{ latest_health.error or "-" }}</dd>
+        </div>
+      </dl>
+    {% else %}
+      <p class="empty-state">No health check has been stored yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}
