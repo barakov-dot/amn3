@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-package_id='phase16-awg3-family-3-1-spain-pilot-20260824-003'
+package_id='phase16-awg3-family-3-1-spain-pilot-20260824-004'
 required_gate='APPLICATION_STAGE'
 claim_path="${PHASE16_STAGE_CLAIM_FILE:-}"
 state_hash="${PHASE16_EXPECTED_CURRENT_STATE_SHA256:-}"

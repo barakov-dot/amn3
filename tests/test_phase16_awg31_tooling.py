@@ -15,7 +15,12 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-003"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-004"
+SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
+TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-004"
+HISTORIC_PACKAGE_003 = (
+    ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-003"
+)
 RUNTIME_IDENTITY = (
     "docker.io/amneziavpn/amneziawg-go@"
     "sha256:4e1fd2840f8d26eb6ec8bc1598e66f2f17f5d0201cd2baadbde560c104d4fc9d"
@@ -160,12 +165,43 @@ def test_phase16_package_and_preflight_identities_are_exact():
     preflight = load_module(PREFLIGHT_SCRIPT, "phase16_preflight")
 
     assert package.PACKAGE_ID == PACKAGE_ID
-    assert package.SOURCE_BRANCH == "codex/phase16-awg3-family-3-1-spain-pilot"
-    assert package.TOOLING_BRANCH == package.SOURCE_BRANCH
+    assert package.SOURCE_BRANCH == SOURCE_BRANCH
+    assert package.TOOLING_BRANCH == TOOLING_BRANCH
     assert package.MANIFEST_SCHEMA == "amn2.phase16.package-manifest.v1"
     assert preflight.PACKAGE_ID == PACKAGE_ID
     assert preflight.CLAIM_SCHEMA == "amn2.phase16.readonly-preflight-claim.v1"
     assert preflight.EVIDENCE_SCHEMA == "amn2.phase16.readonly-preflight-evidence.v1"
+
+
+def test_historic_phase16_package_003_remains_checksum_immutable():
+    manifest_path = HISTORIC_PACKAGE_003 / "manifest.json"
+    collector_path = (
+        HISTORIC_PACKAGE_003
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_remote.sh"
+    )
+    runner_path = (
+        HISTORIC_PACKAGE_003
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_ssh_runner.ps1"
+    )
+
+    assert hashlib.sha256(manifest_path.read_bytes()).hexdigest() == (
+        "526ed0afda915f3ded0679a48899922c0081bf664b97849ee73f8892b205408c"
+    )
+    assert hashlib.sha256(collector_path.read_bytes()).hexdigest() == (
+        "971b2fb1d49f09c448ecbe9a33e942eb065261b21e57bc546b6e5a4043f7093a"
+    )
+    assert hashlib.sha256(runner_path.read_bytes()).hexdigest() == (
+        "6b3ed7fd32a4db2ef8c27feac4d09bb854310b7bdf9b60fbdf833b5cb2972ce6"
+    )
+    assert json.loads(manifest_path.read_text(encoding="utf-8"))[
+        "package_identity_sha256"
+    ] == "d47a189a86fb4ca3a475e2ec3acde20ededf0ae12a82a2d06f8e086daef4e128"
 
 
 def test_resource_plan_binds_awg31_runtime_client_capabilities_and_rollback():

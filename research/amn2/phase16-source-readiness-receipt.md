@@ -1,9 +1,10 @@
 # Phase 16 application source readiness receipt
 
-- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-003`
+- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-004`
 - Baseline application SHA: `c01c2e34ca506102e485ee3fa50b9420de6e591a`
 - Application branch: `codex/phase16-awg3-family-3-1-spain-pilot`
 - Application source SHA: `a3682fc44dd9e74ff96392ad99623474facf377f`
+- Tooling branch: `codex/phase16-awg3-family-3-1-spain-pilot-004`
 - Protocol family: `awg3`
 - Protocol revision: `3.1`
 - Config revision: `amneziawg_v3_1`
@@ -13,11 +14,16 @@
 - Pilot client: `amneziawg/android/v3.1.20260814/12`
 - Pilot client artifact: `github:amnezia-vpn/amneziawg-android/releases/v3.1.20260814/AmneziaWG-3.1.202060814.apk@sha256:74f109a948f012e8b90b4055e98bb9bee77bbb8e5d0fe7d5a057dd9698009697`
 - Targeted application regression: `279 passed in 27.94s`
-- Targeted tooling regression: `16 passed in 1.94s`
+- Spain prerequisite evidence SHA-256: `24dc77231bea9ceb738ff1b2ac6efef143546a7dcfd073bb4fb4825ded43d3d6`
+- Exact collector diagnostic stdout SHA-256: `5a83427b0b45b4b4e9eb6c66f0e7d63a4a104cfb77e7668a57601d6531fa474a`
+- Exact Spain OS admission: `ubuntu:24.04`; Debian and every other OS fail closed
+- Container admission: dedicated Spain Docker is mandatory; absent system Docker and Podman are accepted, while launch failures and conflicts fail closed
+- Targeted tooling regression: `23 passed in 1.76s`
+- Windows PowerShell 5 full-payload async transport diagnostic: pass; production runner unchanged
 - SSH `ProgramData` TDD correction commit: `18103d21bf3b2180ec126933e063cf8e5c9639b4`
 - `git diff --check`: pass
 - Added-line secret matches: `0`
 - Application tracked status after commit: clean
-- Spain/SSH/stage activity during the package revision 003 local correction: none
+- Spain/SSH/stage activity during the package revision 004 local correction: none
 
 This receipt records the real Phase 16 application evidence change. It does not authorize Spain staging, runtime creation, pilot issuance, or global AWG3 issuance.
