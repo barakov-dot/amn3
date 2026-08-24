@@ -572,6 +572,32 @@ def test_phase16_ssh_process_environment_keeps_windows_openssh_runnable():
     assert version.startswith("OpenSSH_for_Windows_")
 
 
+def test_phase16_byte_hash_accepts_empty_array():
+    result = run_powershell(
+        "$bytes=[byte[]]::new(0);"
+        "[Console]::Out.Write((Get-Phase16BytesSha256 -Bytes $bytes))"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == (
+        "e3b0c44298fc1c149afbf4c8996fb924"
+        "27ae41e4649b934ca495991b7852b855"
+    )
+    assert result.stderr == ""
+
+
+def test_phase16_void_task_completion_emits_no_pipeline_output():
+    result = run_powershell(
+        "$task=[Threading.Tasks.Task]::CompletedTask;"
+        "Complete-Phase16VoidTask -Task $task;"
+        "[Console]::Out.Write('clean')"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "clean"
+    assert result.stderr == ""
+
+
 def test_phase16_powershell5_stdin_filter_removes_only_the_utf8_bom():
     result = run_powershell(
         "$code=Get-Phase16PowerShell5StdinFilterCode;"

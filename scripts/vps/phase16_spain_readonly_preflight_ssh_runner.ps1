@@ -39,10 +39,15 @@ $script:Phase16FailureReasons = @('claim_invalid','collector_failed','identity_m
 $script:Phase16ConflictNames = @('bridge_amn2sp3br0','config_path','container_cidr_172_29_252_0_28','container_name','firewall','interface_awg3','routes','service_name','state_root','udp_30002','vpn_cidr_10_212_13_0_24')
 
 function Get-Phase16BytesSha256 {
-    param([Parameter(Mandatory)][byte[]]$Bytes)
+    param([Parameter(Mandatory)][AllowEmptyCollection()][byte[]]$Bytes)
     $algorithm = [Security.Cryptography.SHA256]::Create()
     try { $digest = $algorithm.ComputeHash($Bytes) } finally { $algorithm.Dispose() }
     return ([BitConverter]::ToString($digest)).Replace('-', '').ToLowerInvariant()
+}
+
+function Complete-Phase16VoidTask {
+    param([Parameter(Mandatory)][Threading.Tasks.Task]$Task)
+    [void]$Task.GetAwaiter().GetResult()
 }
 
 function Get-Phase16CanonicalJsonSha256 {
@@ -707,7 +712,7 @@ function Invoke-Phase16OneSshTransport {
             $remaining = Get-Phase16TransportRemainingMilliseconds -Clock $clock -DeadlineMilliseconds $script:Phase16TransportOperationMilliseconds
             if ($remaining -le 0) { $cancellation.Cancel(); throw 'transport_failed' }
             if (-not $stdinDone -and $stdinTask.IsCompleted) {
-                $stdinTask.GetAwaiter().GetResult()
+                Complete-Phase16VoidTask -Task $stdinTask
                 $process.StandardInput.Close()
                 $stdinDone = $true
             }
