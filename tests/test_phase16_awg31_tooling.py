@@ -303,6 +303,41 @@ def test_phase16_preflight_transport_assets_are_read_only_and_phase_exact():
         assert re.search(pattern, collector, flags=re.IGNORECASE) is None
 
 
+def test_phase16_ssh_process_environment_keeps_windows_openssh_runnable():
+    result = run_powershell(
+        "$start=New-Phase16SshProcessStartInfo -Arguments @('-V');"
+        "$process=[Diagnostics.Process]::new();$process.StartInfo=$start;"
+        "try{if(-not $process.Start()){throw 'ssh_start_failed'};"
+        "$stdoutTask=$process.StandardOutput.ReadToEndAsync();"
+        "$stderrTask=$process.StandardError.ReadToEndAsync();"
+        "if(-not $process.WaitForExit(5000)){$process.Kill();throw 'ssh_timeout'};"
+        "$stdout=$stdoutTask.GetAwaiter().GetResult();"
+        "$stderr=$stderrTask.GetAwaiter().GetResult();"
+        "[Console]::Out.Write(($process.ExitCode.ToString()+'|'+$stdout.Length.ToString()+'|'+$stderr.Trim()))"
+        "}finally{$process.Dispose()}"
+    )
+
+    assert result.returncode == 0, result.stderr
+    exit_code, stdout_length, version = result.stdout.split("|", 2)
+    assert exit_code == "0"
+    assert stdout_length == "0"
+    assert version.startswith("OpenSSH_for_Windows_")
+
+
+@pytest.mark.parametrize("program_data", ("", r"C:\Windows"))
+def test_phase16_ssh_process_environment_rejects_untrusted_programdata(program_data: str):
+    escaped = program_data.replace("'", "''")
+    result = run_powershell(
+        f"$env:ProgramData='{escaped}';"
+        "try{$null=New-Phase16SshProcessStartInfo -Arguments @('-V');"
+        "[Console]::Out.Write('accepted')}"
+        "catch{[Console]::Out.Write($_.Exception.Message)}"
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "local_environment_invalid"
+
+
 def test_existing_safe_shared_amn2_namespace_allows_managed_phase16_leaf_provisioning():
     result = run_powershell(
         "$script:events=[Collections.Generic.List[string]]::new();$script:facts=@{};"

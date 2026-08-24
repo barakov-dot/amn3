@@ -481,6 +481,41 @@ function ConvertTo-Phase16WindowsArgument {
     return '"' + $escaped + '"'
 }
 
+function Get-Phase16ValidatedProgramDataEnvironmentValue {
+    $candidate = $env:ProgramData
+    if ([string]::IsNullOrWhiteSpace($candidate)) { throw 'local_environment_invalid' }
+    try {
+        $expected = [IO.Path]::GetFullPath('C:\ProgramData').TrimEnd([IO.Path]::DirectorySeparatorChar)
+        $actual = [IO.Path]::GetFullPath($candidate).TrimEnd([IO.Path]::DirectorySeparatorChar)
+    } catch {
+        throw 'local_environment_invalid'
+    }
+    if (-not $actual.Equals($expected, [StringComparison]::OrdinalIgnoreCase)) { throw 'local_environment_invalid' }
+    return 'C:\ProgramData'
+}
+
+function New-Phase16SshProcessStartInfo {
+    param([Parameter(Mandatory)][string[]]$Arguments)
+    $programData = Get-Phase16ValidatedProgramDataEnvironmentValue
+    $start = [Diagnostics.ProcessStartInfo]::new()
+    $start.FileName = 'C:\Windows\System32\OpenSSH\ssh.exe'
+    Assert-Phase16LocalExecutable -Path $start.FileName
+    $start.Arguments = ($Arguments | ForEach-Object { ConvertTo-Phase16WindowsArgument -Argument $_ }) -join ' '
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardInput = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $start.EnvironmentVariables.Clear()
+    $start.EnvironmentVariables['SYSTEMROOT'] = $env:SystemRoot
+    $start.EnvironmentVariables['WINDIR'] = $env:WINDIR
+    $start.EnvironmentVariables['PATH'] = 'C:\Windows\System32\OpenSSH;C:\Windows\System32'
+    $start.EnvironmentVariables['PROGRAMDATA'] = $programData
+    $start.EnvironmentVariables['HOME'] = 'C:\ProgramData\AMN2\phase16\no-ambient-home'
+    $start.EnvironmentVariables['USERPROFILE'] = 'C:\ProgramData\AMN2\phase16\no-ambient-profile'
+    return $start
+}
+
 function Add-Phase16BoundedBytes {
     param(
         [Parameter(Mandatory)][IO.MemoryStream]$Buffer,
@@ -639,21 +674,8 @@ function Invoke-Phase16OneSshTransport {
     )
     $Started.Value = $false
     $clock = [Diagnostics.Stopwatch]::StartNew()
-    $start = [Diagnostics.ProcessStartInfo]::new()
-    $start.FileName = 'C:\Windows\System32\OpenSSH\ssh.exe'
-    Assert-Phase16LocalExecutable -Path $start.FileName
-    $start.Arguments = ((New-Phase16SshArguments -ExpectedHost $ExpectedHost -ClaimId $ClaimId -ManifestSha256 $ManifestSha256 -CollectorSha256 $CollectorSha256) | ForEach-Object { ConvertTo-Phase16WindowsArgument -Argument $_ }) -join ' '
-    $start.UseShellExecute = $false
-    $start.CreateNoWindow = $true
-    $start.RedirectStandardInput = $true
-    $start.RedirectStandardOutput = $true
-    $start.RedirectStandardError = $true
-    $start.EnvironmentVariables.Clear()
-    $start.EnvironmentVariables['SYSTEMROOT'] = $env:SystemRoot
-    $start.EnvironmentVariables['WINDIR'] = $env:WINDIR
-    $start.EnvironmentVariables['PATH'] = 'C:\Windows\System32\OpenSSH;C:\Windows\System32'
-    $start.EnvironmentVariables['HOME'] = 'C:\ProgramData\AMN2\phase16\no-ambient-home'
-    $start.EnvironmentVariables['USERPROFILE'] = 'C:\ProgramData\AMN2\phase16\no-ambient-profile'
+    $sshArguments = New-Phase16SshArguments -ExpectedHost $ExpectedHost -ClaimId $ClaimId -ManifestSha256 $ManifestSha256 -CollectorSha256 $CollectorSha256
+    $start = New-Phase16SshProcessStartInfo -Arguments $sshArguments
     $process = [Diagnostics.Process]::new()
     $process.StartInfo = $start
     $stdout = $null
