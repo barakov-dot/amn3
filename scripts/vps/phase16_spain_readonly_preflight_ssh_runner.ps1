@@ -10,7 +10,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$script:Phase16PackageId = 'phase16-awg3-family-3-1-spain-pilot-20260824-004'
+$script:Phase16PackageId = 'phase16-awg3-family-3-1-spain-pilot-20260824-005'
 $script:Phase16ClaimSchema = 'amn2.phase16.readonly-preflight-claim.v1'
 $script:Phase16CollectorSchema = 'amn2.phase16.spain-readonly-collector.v1'
 $script:Phase16EvidenceSchema = 'amn2.phase16.readonly-preflight-evidence.v1'
@@ -26,6 +26,7 @@ $script:Phase16SpainHostKeySha256 = 'SHA256:XVFOmBAXMHYlngo9+x7lGAJbzlOqiMiG/6/4
 $script:Phase16MaximumArtifactBytes = 1048576
 $script:Phase16TransportOperationMilliseconds = 60000
 $script:Phase16TransportBudgetMilliseconds = 65000
+$script:Phase16MaximumFutureClockSkewSeconds = 15
 $script:Phase16ObservationNames = @(
     'application_state','architecture','awg2_health','backup_capability','bridge_amn2sp3br0',
     'config_path','container_capability','container_cidr_172_29_252_0_28','container_name',
@@ -264,7 +265,8 @@ function Test-Phase16CollectorDocument {
         $observed = [DateTimeOffset]::ParseExact($Document.observed_at, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
         $started = [DateTimeOffset]::ParseExact($StartedAt, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
         $ended = [DateTimeOffset]::ParseExact($EndedAt, 'yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)
-        if ($ended -lt $started -or $observed -lt $started -or $observed -gt $ended) { return $false }
+        $maximumObserved = $ended.AddSeconds($script:Phase16MaximumFutureClockSkewSeconds)
+        if ($ended -lt $started -or $observed -lt $started -or $observed -gt $maximumObserved) { return $false }
         if ($Document.decision -isnot [string] -or $Document.decision -cnotin @('pass','stop')) { return $false }
         if (-not (Test-Phase16ExactProperties -Value $Document.safety -Required @('live_mutation','raw_output_persisted','remote_file_written'))) { return $false }
         if ($Document.safety.live_mutation -isnot [bool] -or $Document.safety.remote_file_written -isnot [bool] -or $Document.safety.raw_output_persisted -isnot [bool]) { return $false }
@@ -458,11 +460,16 @@ function Assert-Phase16LocalExecutable {
     if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or $item.Length -lt 1 -or $item.Length -gt 33554432) { throw 'local_executable_invalid' }
 }
 
+function Get-Phase16PowerShell5StdinFilterCode {
+    return 'import sys; source=sys.stdin.buffer; prefix=source.read(3); prefix == bytes((239,187,191)) or sys.exit(65); sys.stdout.buffer.write(source.read())'
+}
+
 function New-Phase16SshArguments {
     param([Parameter(Mandatory)][string]$ExpectedHost, [Parameter(Mandatory)][string]$ClaimId, [Parameter(Mandatory)][string]$ManifestSha256, [Parameter(Mandatory)][string]$CollectorSha256)
     if (-not (Test-Phase16ExpectedHost -ExpectedHost $ExpectedHost) -or $ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$' -or $ManifestSha256 -cnotmatch '^[0-9a-f]{64}$' -or $CollectorSha256 -cnotmatch '^[0-9a-f]{64}$') { throw 'transport_envelope_invalid' }
     $contract = Get-Phase16SpainTrustContract
-    $remote = "/usr/bin/bash -s -- '$($script:Phase16PackageId)' '$ManifestSha256' '$CollectorSha256' '$ClaimId' '$ExpectedHost'"
+    $filterCode = Get-Phase16PowerShell5StdinFilterCode
+    $remote = '/usr/bin/bash -o pipefail -c ''/usr/bin/python3 -I -B -c "{0}" | /usr/bin/bash -s -- "$@"'' -- ''{1}'' ''{2}'' ''{3}'' ''{4}'' ''{5}''' -f $filterCode,$script:Phase16PackageId,$ManifestSha256,$CollectorSha256,$ClaimId,$ExpectedHost
     return @(
         '-T','-F','none',
         '-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','IdentityAgent=none',

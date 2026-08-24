@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import datetime as dt
 import hashlib
 import importlib.util
@@ -15,11 +16,14 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-004"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-005"
 SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
-TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-004"
+TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-005"
 HISTORIC_PACKAGE_003 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-003"
+)
+HISTORIC_PACKAGE_004 = (
+    ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-004"
 )
 RUNTIME_IDENTITY = (
     "docker.io/amneziavpn/amneziawg-go@"
@@ -39,6 +43,31 @@ COLLECTOR = ROOT / "scripts" / "vps" / "phase16_spain_readonly_preflight_remote.
 RUNNER = ROOT / "scripts" / "vps" / "phase16_spain_readonly_preflight_ssh_runner.ps1"
 BASH = Path(r"C:\Program Files\Git\bin\bash.exe")
 POWERSHELL = Path(r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
+PHASE16_OBSERVATIONS = [
+    "application_state",
+    "architecture",
+    "awg2_health",
+    "backup_capability",
+    "bridge_amn2sp3br0",
+    "config_path",
+    "container_capability",
+    "container_cidr_172_29_252_0_28",
+    "container_name",
+    "database_state",
+    "disk_space",
+    "firewall",
+    "interface_awg3",
+    "os_compatibility",
+    "python_3_12",
+    "recovery_markers_phase14_phase15_phase16",
+    "routes",
+    "service_capability",
+    "service_name",
+    "state_root",
+    "telegram_prerequisites",
+    "udp_30002",
+    "vpn_cidr_10_212_13_0_24",
+]
 
 
 def run_powershell(body: str):
@@ -57,6 +86,45 @@ def run_powershell(body: str):
         capture_output=True,
         text=True,
         timeout=10,
+    )
+
+
+def phase16_collector_document(*, observed_at: str) -> dict[str, object]:
+    return {
+        "blocking_reasons": [],
+        "claim_id": "phase16-preflight-test-001",
+        "collector_sha256": "b" * 64,
+        "decision": "pass",
+        "host_identity": "138.124.181.246",
+        "manifest_sha256": "a" * 64,
+        "observed_at": observed_at,
+        "observations": [
+            {
+                "name": name,
+                "observation_sha256": hashlib.sha256(name.encode()).hexdigest(),
+                "state": "pass",
+            }
+            for name in PHASE16_OBSERVATIONS
+        ],
+        "package_id": PACKAGE_ID,
+        "safety": {
+            "live_mutation": False,
+            "raw_output_persisted": False,
+            "remote_file_written": False,
+        },
+        "schema": "amn2.phase16.spain-readonly-collector.v1",
+    }
+
+
+def phase16_runner_document_result(document: dict[str, object], expression: str):
+    encoded = base64.b64encode(
+        json.dumps(document, separators=(",", ":")).encode()
+    ).decode()
+    return run_powershell(
+        "$document=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('"
+        + encoded
+        + "'))|ConvertFrom-Json;"
+        + expression
     )
 
 
@@ -232,6 +300,37 @@ def test_historic_phase16_package_003_remains_checksum_immutable():
     assert json.loads(manifest_path.read_text(encoding="utf-8"))[
         "package_identity_sha256"
     ] == "d47a189a86fb4ca3a475e2ec3acde20ededf0ae12a82a2d06f8e086daef4e128"
+
+
+def test_historic_phase16_package_004_remains_checksum_immutable():
+    manifest_path = HISTORIC_PACKAGE_004 / "manifest.json"
+    collector_path = (
+        HISTORIC_PACKAGE_004
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_remote.sh"
+    )
+    runner_path = (
+        HISTORIC_PACKAGE_004
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_ssh_runner.ps1"
+    )
+
+    assert hashlib.sha256(manifest_path.read_bytes()).hexdigest() == (
+        "d19327ccb101febaa4d9cbb7a29cfb6101a62a67554e1c409909f49a3bd9b5c9"
+    )
+    assert hashlib.sha256(collector_path.read_bytes()).hexdigest() == (
+        "cb71fcfff529361c2f9c79cf65b332be884add5309703f76751ff511e36b0842"
+    )
+    assert hashlib.sha256(runner_path.read_bytes()).hexdigest() == (
+        "16475d543fdcf1934b51c58ad47b2f849c17af68badc41bd2313b3063dd6a62f"
+    )
+    assert json.loads(manifest_path.read_text(encoding="utf-8"))[
+        "package_identity_sha256"
+    ] == "aec11e7ca78ba6f5f77c55e05506c613c582ec3c1bdb87f4a1338d9e3cac6d48"
 
 
 def test_resource_plan_binds_awg31_runtime_client_capabilities_and_rollback():
@@ -471,6 +570,88 @@ def test_phase16_ssh_process_environment_keeps_windows_openssh_runnable():
     assert exit_code == "0"
     assert stdout_length == "0"
     assert version.startswith("OpenSSH_for_Windows_")
+
+
+def test_phase16_powershell5_stdin_filter_removes_only_the_utf8_bom():
+    result = run_powershell(
+        "$code=Get-Phase16PowerShell5StdinFilterCode;"
+        "$bytes=[Text.UTF8Encoding]::new($false).GetBytes($code);"
+        "[Console]::Out.Write([Convert]::ToBase64String($bytes))"
+    )
+
+    assert result.returncode == 0, result.stderr
+    code = base64.b64decode(result.stdout).decode("utf-8")
+    collector = b"#!/usr/bin/env bash\nprintf 'collector-ok\\n'\n"
+    filtered = subprocess.run(
+        [sys.executable, "-I", "-B", "-c", code],
+        input=b"\xef\xbb\xbf" + collector,
+        capture_output=True,
+        check=False,
+        timeout=10,
+    )
+    missing_bom = subprocess.run(
+        [sys.executable, "-I", "-B", "-c", code],
+        input=collector,
+        capture_output=True,
+        check=False,
+        timeout=10,
+    )
+
+    assert filtered.returncode == 0
+    assert filtered.stdout == collector
+    assert filtered.stderr == b""
+    assert missing_bom.returncode == 65
+    assert missing_bom.stdout == b""
+    assert missing_bom.stderr == b""
+
+
+def test_phase16_ssh_remote_command_uses_fail_closed_bom_filter():
+    result = run_powershell(
+        "$arguments=New-Phase16SshArguments -ExpectedHost '138.124.181.246' "
+        "-ClaimId 'phase16-preflight-test-001' -ManifestSha256 ('a'*64) "
+        "-CollectorSha256 ('b'*64);"
+        "$remote=$arguments[$arguments.Count-1];"
+        "$bytes=[Text.UTF8Encoding]::new($false).GetBytes($remote);"
+        "[Console]::Out.Write([Convert]::ToBase64String($bytes))"
+    )
+
+    assert result.returncode == 0, result.stderr
+    remote = base64.b64decode(result.stdout).decode("utf-8")
+    assert remote.startswith("/usr/bin/bash -o pipefail -c '")
+    assert "/usr/bin/python3 -I -B -c \"" in remote
+    assert "| /usr/bin/bash -s -- \"$@\"" in remote
+    assert remote.endswith(
+        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-005' "
+        "'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' "
+        "'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' "
+        "'phase16-preflight-test-001' '138.124.181.246'"
+    )
+
+
+@pytest.mark.parametrize(
+    ("observed_at", "expected"),
+    [
+        ("2026-08-24T12:00:25Z", "true"),
+        ("2026-08-24T12:00:26Z", "false"),
+        ("2026-08-24T11:59:59Z", "false"),
+    ],
+)
+def test_phase16_collector_window_allows_at_most_15_seconds_future_skew(
+    observed_at: str, expected: str
+):
+    document = phase16_collector_document(observed_at=observed_at)
+    result = phase16_runner_document_result(
+        document,
+        "$valid=Test-Phase16CollectorDocument -Document $document "
+        "-ExpectedHost '138.124.181.246' "
+        "-ExpectedClaimId 'phase16-preflight-test-001' "
+        "-ExpectedManifestSha256 ('a'*64) -ExpectedCollectorSha256 ('b'*64) "
+        "-StartedAt '2026-08-24T12:00:00Z' -EndedAt '2026-08-24T12:00:10Z';"
+        "[Console]::Out.Write($valid.ToString().ToLowerInvariant())",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == expected
 
 
 @pytest.mark.parametrize("program_data", ("", r"C:\Windows"))
