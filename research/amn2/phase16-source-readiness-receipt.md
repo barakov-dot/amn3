@@ -18,7 +18,7 @@
 - Exact collector diagnostic stdout SHA-256: `5a83427b0b45b4b4e9eb6c66f0e7d63a4a104cfb77e7668a57601d6531fa474a`
 - Exact Spain OS admission: `ubuntu:24.04`; Debian and every other OS fail closed
 - Container admission: dedicated Spain Docker is mandatory; absent system Docker and Podman are accepted, while launch failures and conflicts fail closed
-- Targeted tooling regression: `23 passed in 1.76s`
+- Targeted tooling regression: `24 passed in 1.71s`
 - Windows PowerShell 5 full-payload async transport diagnostic: pass; production runner unchanged
 - SSH `ProgramData` TDD correction commit: `18103d21bf3b2180ec126933e063cf8e5c9639b4`
 - `git diff --check`: pass
