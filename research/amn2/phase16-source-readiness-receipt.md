@@ -12,8 +12,8 @@
 - Runtime capabilities: `disable_cookies`, `random_trailers`
 - Pilot client: `amneziawg/android/v3.1.20260814/12`
 - Pilot client artifact: `github:amnezia-vpn/amneziawg-android/releases/v3.1.20260814/AmneziaWG-3.1.202060814.apk@sha256:74f109a948f012e8b90b4055e98bb9bee77bbb8e5d0fe7d5a057dd9698009697`
-- Targeted application regression: `279 passed in 27.33s`
-- Targeted tooling regression: `16 passed in 1.91s`
+- Targeted application regression: `279 passed in 27.94s`
+- Targeted tooling regression: `16 passed in 1.94s`
 - SSH `ProgramData` TDD correction commit: `18103d21bf3b2180ec126933e063cf8e5c9639b4`
 - `git diff --check`: pass
 - Added-line secret matches: `0`
