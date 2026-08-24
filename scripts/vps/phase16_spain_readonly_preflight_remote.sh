@@ -22,7 +22,7 @@ import sys
 import threading
 import time
 
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-002"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-003"
 CURRENT_APPLICATION_ROOT = "/opt/amn2-spain"
 CURRENT_DATABASE_PATH = "/var/lib/amn2-spain/amn2.sqlite3"
 CURRENT_AWG2_CONTAINER = "amn2-spain-awg"

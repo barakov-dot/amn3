@@ -15,7 +15,7 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-002"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-003"
 RUNTIME_IDENTITY = (
     "docker.io/amneziavpn/amneziawg-go@"
     "sha256:4e1fd2840f8d26eb6ec8bc1598e66f2f17f5d0201cd2baadbde560c104d4fc9d"

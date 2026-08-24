@@ -31,7 +31,7 @@ class PackageReceipt(NamedTuple):
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-002"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-003"
 SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
 TOOLING_BRANCH = SOURCE_BRANCH
 MANIFEST_SCHEMA = "amn2.phase16.package-manifest.v1"
