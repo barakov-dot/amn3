@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="login-panel" aria-labelledby="login-title">
+    <img class="login-visual" src="/static/brand-full.png" alt="" width="1254" height="1254">
+
+    <div class="section-heading">
+      <p class="eyebrow">Администрирование</p>
+      <h1 id="login-title">Вход</h1>
+    </div>
+
+    {% if error %}
+      <div class="alert" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <form class="form" action="/login" method="post">
+      <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+      <label class="field">
+        <span>Имя пользователя</span>
+        <input name="username" type="text" value="{{ username }}" autocomplete="username" autofocus>
+      </label>
+      <label class="field">
+        <span>Пароль</span>
+        <input name="password" type="password" autocomplete="current-password">
+      </label>
+      <button class="button" type="submit">Войти</button>
+    </form>
+  </section>
+{% endblock %}

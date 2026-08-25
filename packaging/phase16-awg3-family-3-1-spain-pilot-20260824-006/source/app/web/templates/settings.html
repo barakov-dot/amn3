@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <p class="eyebrow">Операционная конфигурация</p>
+    <h1>Настройки</h1>
+  </section>
+
+  <section class="settings-grid" aria-label="Группы настроек">
+    {% for section in settings_sections %}
+      <article class="panel">
+        <div class="panel-header">
+          <h2>{{ section.title }}</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="settings-table">
+            <thead>
+              <tr>
+                <th>Параметр</th>
+                <th>Значение</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in section["items"] %}
+                <tr>
+                  <td><code>{{ item.name }}</code></td>
+                  <td class="wrap-text">{{ item.value }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </article>
+    {% endfor %}
+  </section>
+{% endblock %}
