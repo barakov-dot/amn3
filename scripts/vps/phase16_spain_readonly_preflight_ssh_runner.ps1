@@ -10,7 +10,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$script:Phase16PackageId = 'phase16-awg3-family-3-1-spain-pilot-20260824-006'
+$script:Phase16PackageId = 'phase16-awg3-family-3-1-spain-pilot-20260824-007'
 $script:Phase16ClaimSchema = 'amn2.phase16.readonly-preflight-claim.v1'
 $script:Phase16CollectorSchema = 'amn2.phase16.spain-readonly-collector.v1'
 $script:Phase16EvidenceSchema = 'amn2.phase16.readonly-preflight-evidence.v1'
@@ -466,7 +466,7 @@ function Assert-Phase16LocalExecutable {
 }
 
 function Get-Phase16PowerShell5StdinFilterCode {
-    return 'import sys; source=sys.stdin.buffer; prefix=source.read(3); prefix == bytes((239,187,191)) or sys.exit(65); sys.stdout.buffer.write(source.read())'
+    return 'import hashlib,sys; source=sys.stdin.buffer; data=source.read(1048580); bom=bytes((239,187,191)); len(data)<=1048579 or sys.exit(65); data=data[3:] if data.startswith(bom) else data; data and not data.startswith(bom) and hashlib.sha256(data).hexdigest()==sys.argv[1] or sys.exit(65); sys.stdout.buffer.write(data)'
 }
 
 function New-Phase16SshArguments {
@@ -474,7 +474,7 @@ function New-Phase16SshArguments {
     if (-not (Test-Phase16ExpectedHost -ExpectedHost $ExpectedHost) -or $ClaimId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,127}$' -or $ManifestSha256 -cnotmatch '^[0-9a-f]{64}$' -or $CollectorSha256 -cnotmatch '^[0-9a-f]{64}$') { throw 'transport_envelope_invalid' }
     $contract = Get-Phase16SpainTrustContract
     $filterCode = Get-Phase16PowerShell5StdinFilterCode
-    $remote = '/usr/bin/bash -o pipefail -c ''/usr/bin/python3 -I -B -c "{0}" | /usr/bin/bash -s -- "$@"'' -- ''{1}'' ''{2}'' ''{3}'' ''{4}'' ''{5}''' -f $filterCode,$script:Phase16PackageId,$ManifestSha256,$CollectorSha256,$ClaimId,$ExpectedHost
+    $remote = '/usr/bin/bash -o pipefail -c ''/usr/bin/python3 -I -B -c "{0}" "$3" | /usr/bin/bash -s -- "$@"'' -- ''{1}'' ''{2}'' ''{3}'' ''{4}'' ''{5}''' -f $filterCode,$script:Phase16PackageId,$ManifestSha256,$CollectorSha256,$ClaimId,$ExpectedHost
     return @(
         '-T','-F','none',
         '-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','IdentityAgent=none',

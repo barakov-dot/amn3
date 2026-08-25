@@ -16,9 +16,9 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-006"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-007"
 SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
-TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-006"
+TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-007"
 HISTORIC_PACKAGE_003 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-003"
 )
@@ -27,6 +27,9 @@ HISTORIC_PACKAGE_004 = (
 )
 HISTORIC_PACKAGE_005 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-005"
+)
+HISTORIC_PACKAGE_006 = (
+    ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-006"
 )
 RUNTIME_IDENTITY = (
     "docker.io/amneziavpn/amneziawg-go@"
@@ -367,6 +370,37 @@ def test_historic_phase16_package_005_remains_checksum_immutable():
     ] == "08e39f4425f0ad433759caabc6cbb5a83fcfd57fde37c3016bde2e05bb2b8306"
 
 
+def test_historic_phase16_package_006_remains_checksum_immutable():
+    manifest_path = HISTORIC_PACKAGE_006 / "manifest.json"
+    collector_path = (
+        HISTORIC_PACKAGE_006
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_remote.sh"
+    )
+    runner_path = (
+        HISTORIC_PACKAGE_006
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_ssh_runner.ps1"
+    )
+
+    assert hashlib.sha256(manifest_path.read_bytes()).hexdigest() == (
+        "36c79003e5b5db564380fbb4471d464e5525d2439a5cfbfd2711cd1376421fe0"
+    )
+    assert hashlib.sha256(collector_path.read_bytes()).hexdigest() == (
+        "ed9b645839b50de4fe7fcd0fa7572ba6cbd874c7f7222e3f0f58e5c6da1b42e3"
+    )
+    assert hashlib.sha256(runner_path.read_bytes()).hexdigest() == (
+        "3d96607c7d5b011da1bd7db299861098cd56705a67c41298f9bb3b14244a56ad"
+    )
+    assert json.loads(manifest_path.read_text(encoding="utf-8"))[
+        "package_identity_sha256"
+    ] == "172aba5925719473056b8d291b8f42fc0ae54e217e11094b54b81ef588efffa4"
+
+
 def test_resource_plan_binds_awg31_runtime_client_capabilities_and_rollback():
     package = load_module(PACKAGE_SCRIPT, "phase16_package_resource")
     raw = (CONTRACT_ROOT / "resource-plan.json").read_bytes()
@@ -632,7 +666,7 @@ def test_phase16_void_task_completion_emits_no_pipeline_output():
     assert result.stderr == ""
 
 
-def test_phase16_powershell5_stdin_filter_removes_only_the_utf8_bom():
+def test_phase16_powershell5_stdin_filter_accepts_zero_or_one_bom_and_binds_hash():
     result = run_powershell(
         "$code=Get-Phase16PowerShell5StdinFilterCode;"
         "$bytes=[Text.UTF8Encoding]::new($false).GetBytes($code);"
@@ -642,27 +676,28 @@ def test_phase16_powershell5_stdin_filter_removes_only_the_utf8_bom():
     assert result.returncode == 0, result.stderr
     code = base64.b64decode(result.stdout).decode("utf-8")
     collector = b"#!/usr/bin/env bash\nprintf 'collector-ok\\n'\n"
-    filtered = subprocess.run(
-        [sys.executable, "-I", "-B", "-c", code],
-        input=b"\xef\xbb\xbf" + collector,
-        capture_output=True,
-        check=False,
-        timeout=10,
-    )
-    missing_bom = subprocess.run(
-        [sys.executable, "-I", "-B", "-c", code],
-        input=collector,
-        capture_output=True,
-        check=False,
-        timeout=10,
-    )
+    expected_hash = hashlib.sha256(collector).hexdigest()
 
-    assert filtered.returncode == 0
-    assert filtered.stdout == collector
-    assert filtered.stderr == b""
-    assert missing_bom.returncode == 65
-    assert missing_bom.stdout == b""
-    assert missing_bom.stderr == b""
+    def run_filter(value: bytes):
+        return subprocess.run(
+            [sys.executable, "-I", "-B", "-c", code, expected_hash],
+            input=value,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+
+    for accepted in (collector, b"\xef\xbb\xbf" + collector):
+        filtered = run_filter(accepted)
+        assert filtered.returncode == 0
+        assert filtered.stdout == collector
+        assert filtered.stderr == b""
+
+    for rejected in (collector + b"x", b"\xef\xbb\xbf\xef\xbb\xbf" + collector):
+        filtered = run_filter(rejected)
+        assert filtered.returncode == 65
+        assert filtered.stdout == b""
+        assert filtered.stderr == b""
 
 
 def test_phase16_ssh_remote_command_uses_fail_closed_bom_filter():
@@ -679,9 +714,10 @@ def test_phase16_ssh_remote_command_uses_fail_closed_bom_filter():
     remote = base64.b64decode(result.stdout).decode("utf-8")
     assert remote.startswith("/usr/bin/bash -o pipefail -c '")
     assert "/usr/bin/python3 -I -B -c \"" in remote
+    assert '" "$3" | /usr/bin/bash -s -- "$@"' in remote
     assert "| /usr/bin/bash -s -- \"$@\"" in remote
     assert remote.endswith(
-        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-006' "
+        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-007' "
         "'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' "
         "'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' "
         "'phase16-preflight-test-001' '138.124.181.246'"
