@@ -327,6 +327,77 @@ def test_phase16_empty_successful_legacy_iptables_backend_is_no_conflict():
     assert classify(unavailable, unavailable, empty_legacy) == "pass"
 
 
+def test_phase16_observed_nft_metainfo_types_are_admitted_without_resource_conflicts():
+    classify = collector_helper("classify_firewall")
+    unavailable = (127, b"", b"", "unavailable")
+    observed_metainfo = (
+        0,
+        canonical(
+            {
+                "nftables": [
+                    {
+                        "metainfo": {
+                            "json_schema_version": 1,
+                            "release_name": "fixture-release",
+                            "version": "fixture-version",
+                        }
+                    }
+                ]
+            }
+        ),
+        b"",
+        "success",
+    )
+
+    assert classify(observed_metainfo, unavailable) == "pass"
+
+
+@pytest.mark.parametrize(
+    "metainfo",
+    [
+        {
+            "json_schema_version": "1",
+            "release_name": "fixture-release",
+            "version": "fixture-version",
+        },
+        {
+            "json_schema_version": True,
+            "release_name": "fixture-release",
+            "version": "fixture-version",
+        },
+        {
+            "json_schema_version": 1,
+            "release_name": 5,
+            "version": "fixture-version",
+        },
+        {
+            "json_schema_version": 1,
+            "release_name": "fixture-release",
+            "version": 109,
+        },
+        {
+            "json_schema_version": 1,
+            "release_name": "fixture-release",
+            "unknown": "fixture-value",
+            "version": "fixture-version",
+        },
+    ],
+)
+def test_phase16_nft_metainfo_contract_remains_exact_and_fail_closed(
+    metainfo: dict[str, object],
+):
+    classify = collector_helper("classify_firewall")
+    unavailable = (127, b"", b"", "unavailable")
+    nft_probe = (
+        0,
+        canonical({"nftables": [{"metainfo": metainfo}]}),
+        b"",
+        "success",
+    )
+
+    assert classify(nft_probe, unavailable) == "stop"
+
+
 def test_phase16_observed_nft_expression_shapes_are_admitted_without_resource_conflicts():
     classify = collector_helper("classify_firewall")
     unavailable = (127, b"", b"", "unavailable")

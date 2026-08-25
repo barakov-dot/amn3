@@ -814,7 +814,15 @@ def _parse_nft_entry(entry):
     if entry_type == "metainfo":
         if not set(payload).issubset({"json_schema_version", "release_name", "version"}):
             raise ValueError("nft metainfo")
-        if any(not isinstance(item, str) for item in payload.values()):
+        if "json_schema_version" in payload and (
+            isinstance(payload["json_schema_version"], bool)
+            or not isinstance(payload["json_schema_version"], int)
+        ):
+            raise ValueError("nft metainfo")
+        if any(
+            field in payload and not isinstance(payload[field], str)
+            for field in ("release_name", "version")
+        ):
             raise ValueError("nft metainfo")
         return False
     if entry_type == "table":
