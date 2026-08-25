@@ -16,14 +16,17 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-005"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-006"
 SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
-TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-005"
+TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-006"
 HISTORIC_PACKAGE_003 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-003"
 )
 HISTORIC_PACKAGE_004 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-004"
+)
+HISTORIC_PACKAGE_005 = (
+    ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-005"
 )
 RUNTIME_IDENTITY = (
     "docker.io/amneziavpn/amneziawg-go@"
@@ -331,6 +334,37 @@ def test_historic_phase16_package_004_remains_checksum_immutable():
     assert json.loads(manifest_path.read_text(encoding="utf-8"))[
         "package_identity_sha256"
     ] == "aec11e7ca78ba6f5f77c55e05506c613c582ec3c1bdb87f4a1338d9e3cac6d48"
+
+
+def test_historic_phase16_package_005_remains_checksum_immutable():
+    manifest_path = HISTORIC_PACKAGE_005 / "manifest.json"
+    collector_path = (
+        HISTORIC_PACKAGE_005
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_remote.sh"
+    )
+    runner_path = (
+        HISTORIC_PACKAGE_005
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_ssh_runner.ps1"
+    )
+
+    assert hashlib.sha256(manifest_path.read_bytes()).hexdigest() == (
+        "0237057d79e45a129198ff15765df89319d9fa6b85366af37036dee2d44137d2"
+    )
+    assert hashlib.sha256(collector_path.read_bytes()).hexdigest() == (
+        "f56841cb701f8bddbe8d5f88f5d6c02d45028ee2191e70dde47f61bdcedce9be"
+    )
+    assert hashlib.sha256(runner_path.read_bytes()).hexdigest() == (
+        "87e3809a208306898f8e5c12e7bf12f2c140ae3c4565912da74c22b101eae7ab"
+    )
+    assert json.loads(manifest_path.read_text(encoding="utf-8"))[
+        "package_identity_sha256"
+    ] == "08e39f4425f0ad433759caabc6cbb5a83fcfd57fde37c3016bde2e05bb2b8306"
 
 
 def test_resource_plan_binds_awg31_runtime_client_capabilities_and_rollback():
@@ -647,7 +681,7 @@ def test_phase16_ssh_remote_command_uses_fail_closed_bom_filter():
     assert "/usr/bin/python3 -I -B -c \"" in remote
     assert "| /usr/bin/bash -s -- \"$@\"" in remote
     assert remote.endswith(
-        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-005' "
+        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-006' "
         "'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' "
         "'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' "
         "'phase16-preflight-test-001' '138.124.181.246'"

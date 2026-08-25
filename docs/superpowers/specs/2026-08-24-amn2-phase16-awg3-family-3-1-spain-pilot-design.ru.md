@@ -153,7 +153,7 @@ Tooling:
 
 12. Новый package ID:
 
-   phase16-awg3-family-3-1-spain-pilot-20260824-005
+   phase16-awg3-family-3-1-spain-pilot-20260824-006
 
 13. Stage scripts должны оставаться checksum-bound, state-bound, claim-bound, fail-closed и rollback-aware.
 
