@@ -16,9 +16,9 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-008"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-009"
 SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
-TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-008"
+TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-009"
 HISTORIC_PACKAGE_003 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-003"
 )
@@ -33,6 +33,9 @@ HISTORIC_PACKAGE_006 = (
 )
 HISTORIC_PACKAGE_007 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-007"
+)
+HISTORIC_PACKAGE_008 = (
+    ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-008"
 )
 RUNTIME_IDENTITY = (
     "docker.io/amneziavpn/amneziawg-go@"
@@ -321,6 +324,106 @@ def test_phase16_empty_successful_legacy_iptables_backend_is_no_conflict():
     assert classify(unavailable, unavailable, empty_legacy) == "pass"
 
 
+def test_phase16_observed_nft_expression_shapes_are_admitted_without_resource_conflicts():
+    classify = collector_helper("classify_firewall")
+    unavailable = (127, b"", b"", "unavailable")
+    observed_safe_shapes = (
+        0,
+        canonical(
+            {
+                "nftables": [
+                    {
+                        "rule": {
+                            "chain": "postrouting",
+                            "expr": [
+                                {
+                                    "dnat": {
+                                        "addr": "192.0.2.10",
+                                        "family": "ip",
+                                        "port": 443,
+                                    }
+                                },
+                                {"limit": {"burst": 10, "per": "second", "rate": 5}},
+                                {"masquerade": None},
+                                {"xt": {"name": "comment", "type": "match"}},
+                            ],
+                            "family": "ip",
+                            "table": "nat",
+                        }
+                    }
+                ]
+            }
+        ),
+        b"",
+        "success",
+    )
+
+    assert classify(observed_safe_shapes, unavailable) == "pass"
+
+
+@pytest.mark.parametrize(
+    ("payload", "expected"),
+    [
+        ({"addr": "192.0.2.10", "family": "ip", "port": 443}, False),
+        ({"addr": "10.212.13.42", "family": "ip", "port": 443}, True),
+        ({"addr": "192.0.2.10", "family": "ip", "port": 30002}, True),
+    ],
+)
+def test_phase16_observed_nft_dnat_preserves_address_and_port_conflict_detection(
+    payload: dict[str, object], expected: bool
+):
+    parse = collector_helper("_parse_nft_expression")
+
+    assert parse({"dnat": payload}) is expected
+
+
+@pytest.mark.parametrize(
+    "expression",
+    [
+        {"dnat": {"addr": "192.0.2.10", "family": "ip", "port": True}},
+        {"dnat": {"addr": "192.0.2.10", "extra": 1, "family": "ip", "port": 443}},
+        {"limit": {"burst": 0, "per": "second", "rate": 5}},
+        {"limit": {"burst": 10, "per": "", "rate": 5}},
+        {"masquerade": {}},
+        {"xt": {"name": "comment", "type": "match", "unknown": "value"}},
+        {"xt": {"name": "bad value", "type": "match"}},
+    ],
+)
+def test_phase16_observed_nft_expression_shapes_remain_exact_and_fail_closed(
+    expression: dict[str, object],
+):
+    parse = collector_helper("_parse_nft_expression")
+
+    with pytest.raises(ValueError, match="nft"):
+        parse(expression)
+
+
+def test_phase16_observed_successful_single_comment_iptables_is_no_conflict():
+    classify = collector_helper("classify_firewall")
+    unavailable = (127, b"", b"", "unavailable")
+    comment_only = (0, b"# iptables-save output is provided by nftables\n", b"", "success")
+
+    assert classify(unavailable, comment_only) == "pass"
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        b"# first comment\n# second comment\n",
+        b"# comment\nnot-a-comment\n",
+        b"# non-ascii: \xff\n",
+        b"# missing newline",
+    ],
+)
+def test_phase16_comment_only_iptables_admission_remains_single_line_and_fail_closed(
+    payload: bytes,
+):
+    classify = collector_helper("classify_firewall")
+    unavailable = (127, b"", b"", "unavailable")
+
+    assert classify(unavailable, (0, payload, b"", "success")) == "stop"
+
+
 def test_phase16_telegram_prerequisite_requires_stable_active_enabled_state():
     observe = collector_helper("observe_phase13_bot_unit")
     success = "success"
@@ -545,6 +648,37 @@ def test_historic_phase16_package_007_remains_checksum_immutable():
     assert json.loads(manifest_path.read_text(encoding="utf-8"))[
         "package_identity_sha256"
     ] == "5065c10c11f82356f3bcf49432512ffae66fd7ea12b61c98c38c4ff5691af5c2"
+
+
+def test_historic_phase16_package_008_remains_checksum_immutable():
+    manifest_path = HISTORIC_PACKAGE_008 / "manifest.json"
+    collector_path = (
+        HISTORIC_PACKAGE_008
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_remote.sh"
+    )
+    runner_path = (
+        HISTORIC_PACKAGE_008
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_ssh_runner.ps1"
+    )
+
+    assert hashlib.sha256(manifest_path.read_bytes()).hexdigest() == (
+        "065d3369b8dd11783572365f06f84c6ec3ed207e71c758dea2f1d57a02baf24e"
+    )
+    assert hashlib.sha256(collector_path.read_bytes()).hexdigest() == (
+        "b2e112eec77a3a6c272be8d79c7fd010a8f54ad1f6d833002f76d1fcfba03ada"
+    )
+    assert hashlib.sha256(runner_path.read_bytes()).hexdigest() == (
+        "dfc47725248376a0c3e816a9e8681385c615cf3a713ef7cba079fbfbd8d32828"
+    )
+    assert json.loads(manifest_path.read_text(encoding="utf-8"))[
+        "package_identity_sha256"
+    ] == "e1cf967208467acebdfcaaac30557436855b75a92b5154ab41fc3429f747a7c3"
 
 
 def test_resource_plan_binds_awg31_runtime_client_capabilities_and_rollback():
@@ -863,7 +997,7 @@ def test_phase16_ssh_remote_command_uses_fail_closed_bom_filter():
     assert '" "$3" | /usr/bin/bash -s -- "$@"' in remote
     assert "| /usr/bin/bash -s -- \"$@\"" in remote
     assert remote.endswith(
-        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-008' "
+        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-009' "
         "'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' "
         "'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' "
         "'phase16-preflight-test-001' '138.124.181.246'"

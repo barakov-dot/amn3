@@ -22,7 +22,7 @@ import sys
 import threading
 import time
 
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-008"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-009"
 CURRENT_APPLICATION_ROOT = "/opt/amn2-spain"
 CURRENT_DATABASE_PATH = "/var/lib/amn2-spain/amn2.sqlite3"
 CURRENT_AWG2_CONTAINER = "amn2-spain-awg"
@@ -671,6 +671,39 @@ def _parse_nft_expression(expression):
     if not isinstance(expression, dict) or len(expression) != 1:
         raise ValueError("nft expression")
     kind, payload = next(iter(expression.items()))
+    if kind == "dnat":
+        if not isinstance(payload, dict) or set(payload) != {"addr", "family", "port"}:
+            raise ValueError("nft dnat")
+        if payload["family"] not in {"ip", "ip6"} or not isinstance(payload["addr"], str):
+            raise ValueError("nft dnat")
+        try:
+            address = ipaddress.ip_address(payload["addr"])
+        except ValueError as exc:
+            raise ValueError("nft dnat") from exc
+        if (address.version == 4) != (payload["family"] == "ip"):
+            raise ValueError("nft dnat")
+        if isinstance(payload["port"], bool) or not isinstance(payload["port"], int) or not 0 <= payload["port"] <= 65535:
+            raise ValueError("nft dnat")
+        return _nft_scalar_conflict(payload["addr"], "daddr") or _nft_scalar_conflict(payload["port"], "dport")
+    if kind == "limit":
+        if not isinstance(payload, dict) or set(payload) != {"burst", "per", "rate"}:
+            raise ValueError("nft limit")
+        for field in ("burst", "rate"):
+            if isinstance(payload[field], bool) or not isinstance(payload[field], int) or not 0 < payload[field] <= 2**63 - 1:
+                raise ValueError("nft limit")
+        if not isinstance(payload["per"], str) or re.fullmatch(r"[a-z]{1,16}", payload["per"]) is None:
+            raise ValueError("nft limit")
+        return False
+    if kind == "masquerade":
+        if payload is not None:
+            raise ValueError("nft masquerade")
+        return False
+    if kind == "xt":
+        if not isinstance(payload, dict) or set(payload) != {"name", "type"}:
+            raise ValueError("nft xt")
+        if any(not isinstance(payload[field], str) or re.fullmatch(r"[A-Za-z0-9_.+-]{1,64}", payload[field]) is None for field in ("name", "type")):
+            raise ValueError("nft xt")
+        return False
     if kind == "counter":
         if not isinstance(payload, dict) or set(payload) != {"bytes", "packets"}:
             raise ValueError("nft counter")
@@ -765,12 +798,15 @@ def _parse_iptables_save(raw):
     text = raw.decode("utf-8", errors="strict")
     if not text or "\r" in text or not text.endswith("\n"):
         raise ValueError("iptables canonical text")
+    lines = text.splitlines()
+    if len(lines) == 1 and len(lines[0]) <= 256 and re.fullmatch(r"#[\x20-\x7e]*", lines[0]):
+        return False
     conflict = False
     in_table = False
     saw_table = False
     declared_chains = set()
     pending_rules = []
-    for line in text.splitlines():
+    for line in lines:
         if re.fullmatch(r"#[\x20-\x7e]*", line):
             continue
         if re.fullmatch(r"\*(?:filter|mangle|nat|raw|security)", line):
