@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading page-heading">
+    <div>
+      <p class="eyebrow">Email</p>
+      <h1>{{ heading }}</h1>
+      <p class="muted-text">{{ message }}</p>
+    </div>
+  </section>
+
+  {% if form_action %}
+    <section class="panel email-token-panel">
+      <form action="{{ form_action }}" method="post" class="form-grid">
+        <label>
+          {{ token_label }}
+          <input name="token" type="text" autocomplete="one-time-code" required>
+        </label>
+        <div class="button-row">
+          <button class="button" type="submit">{{ submit_label }}</button>
+        </div>
+      </form>
+    </section>
+  {% endif %}
+{% endblock %}
