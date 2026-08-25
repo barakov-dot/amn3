@@ -153,11 +153,23 @@ Tooling:
 
 12. Новый package ID:
 
-   phase16-awg3-family-3-1-spain-pilot-20260824-011
+   phase16-awg3-family-3-1-spain-pilot-20260824-012
 
 13. Stage scripts должны оставаться checksum-bound, state-bound, claim-bound, fail-closed и rollback-aware.
 
 14. Никаких Spain/SSH/remote действий во время Task 1.
+
+15. Package 011 остаётся checksum-immutable; package 012 исправляет только фактически наблюдавшиеся stage prerequisites Spain.
+
+16. Application stage использует текущую БД `/var/lib/amn2-spain/amn2.sqlite3` и Python `sqlite3.Connection.backup`; зависимость от `sqlite3` CLI запрещена.
+
+17. AWG3.1 runtime использует только `/opt/amn2-spain/docker/bin/docker` и `unix:///run/amn2-spain-docker/docker.sock` под `amn2-spain-docker.service`.
+
+18. Server-only AWG3.1 config генерируется внутри controlled stage, имеет ноль `[Peer]` и не включает global issuance.
+
+19. Controlled stage coordinator обязан проверять exact package manifest/identity, approval checksum, current-state checksum и canonical rollback-scope checksum; при failure удаляются только созданные транзакцией ресурсы, checksum-bound SQLite backup сохраняется.
+
+20. AWG2 freshness policy остаётся 600 секунд и не изменяется этим исправлением.
 
 TASK 1 TESTING
 
@@ -273,7 +285,7 @@ TASK 2 OUTPUT / STAGE GATE
 
 Вывести один exact следующий approval:
 
-/APPROVE PHASE16 SPAIN APPLICATION_AND_AWG31_STAGE PACKAGE_<PACKAGE_ID> IDENTITY_<PACKAGE_IDENTITY> STATE_<STATE_SHA256> MANDATORY_ROLLBACK_ON_FAILURE AWG2_UNTOUCHED
+/APPROVE PHASE16 SPAIN APPLICATION_AND_AWG31_STAGE PACKAGE_<PACKAGE_ID> IDENTITY_<PACKAGE_IDENTITY> MANIFEST_SHA256_<MANIFEST_SHA256> STATE_<STATE_SHA256> ROLLBACK_SCOPE_SHA256_<ROLLBACK_SCOPE_SHA256> TRANSACTION_<TRANSACTION_ID> MANDATORY_ROLLBACK_ON_FAILURE AWG2_UNTOUCHED
 
 Не выполнять stage без этого отдельного сообщения пользователя.
 

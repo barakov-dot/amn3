@@ -31,9 +31,9 @@ class PackageReceipt(NamedTuple):
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-011"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-012"
 SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
-TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-011"
+TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-012"
 MANIFEST_SCHEMA = "amn2.phase16.package-manifest.v1"
 PHASE14_RECEIPT_PATH = "research/amn2/phase14-dual-protocol-application-readiness-receipt.md"
 PHASE14_RECEIPT_COMMIT = "4e1052c079e1e25031a6c80f4dae1763e457ca48"
@@ -120,8 +120,11 @@ TOOLING_SPECS = {
     "scripts/phase16_preflight_contract.py": ("preflight_contract", "PREFLIGHT", "preflight"),
     "scripts/vps/phase16_application_stage_remote.sh": ("stage_envelope", "APPLICATION_STAGE", "application"),
     "scripts/vps/phase16_awg31_runtime_stage_remote.sh": ("stage_envelope", "AWG31_RUNTIME_STAGE", "awg3-runtime"),
+    "scripts/vps/phase16_controlled_stage_coordinator.py": ("stage_coordinator", "CONTROLLED_STAGE", "coordinator"),
+    "scripts/vps/phase16_controlled_stage_ssh_runner.ps1": ("stage_coordinator", "CONTROLLED_STAGE", "coordinator"),
     "scripts/vps/phase16_spain_readonly_preflight_remote.sh": ("readonly_collector", "PREFLIGHT", "preflight"),
     "scripts/vps/phase16_spain_readonly_preflight_ssh_runner.ps1": ("readonly_collector", "PREFLIGHT", "preflight"),
+    "scripts/vps/phase16_stage_support.py": ("stage_support", "CONTROLLED_STAGE", "coordinator"),
 }
 REQUIRED_ENTRY_SPECS = {
     **{"source/" + path: spec for path, spec in REQUIRED_SOURCE_SPECS.items()},
@@ -239,8 +242,8 @@ ROLES = {spec[0] for spec in TOOLING_SPECS.values()} | {
     "application_snapshot", "callback_bootstrap", "dependency_lock_tool",
     "phase14_receipt", "runtime_dependency_lock", "test_dependency_lock",
 }
-GATES = {"ACCEPTANCE", "ADMIN_PILOT", "APPLICATION_STAGE", "AWG31_RUNTIME_STAGE", "ENABLE_ISSUANCE", "LOCAL_VERIFY", "OPERATOR", "PREFLIGHT"}
-ROLLBACK_ROLES = {"application", "awg3-runtime", "none", "operator", "preflight"}
+GATES = {"ACCEPTANCE", "ADMIN_PILOT", "APPLICATION_STAGE", "AWG31_RUNTIME_STAGE", "CONTROLLED_STAGE", "ENABLE_ISSUANCE", "LOCAL_VERIFY", "OPERATOR", "PREFLIGHT"}
+ROLLBACK_ROLES = {"application", "awg3-runtime", "coordinator", "none", "operator", "preflight"}
 
 
 def canonical_json_bytes(value: object) -> bytes:

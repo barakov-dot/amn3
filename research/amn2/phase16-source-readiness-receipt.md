@@ -1,10 +1,10 @@
 # Phase 16 application source readiness receipt
 
-- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-011`
+- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-012`
 - Baseline application SHA: `c01c2e34ca506102e485ee3fa50b9420de6e591a`
 - Application branch: `codex/phase16-awg3-family-3-1-spain-pilot`
 - Application source SHA: `a3682fc44dd9e74ff96392ad99623474facf377f`
-- Tooling branch: `codex/phase16-awg3-family-3-1-spain-pilot-011`
+- Tooling branch: `codex/phase16-awg3-family-3-1-spain-pilot-012`
 - Protocol family: `awg3`
 - Protocol revision: `3.1`
 - Config revision: `amneziawg_v3_1`
@@ -69,5 +69,20 @@
 - Package revision 010 immutability: manifest `e79ce27b34d175495ff3f5eebb3e19b1a2cbe6c51c47493fab01113fe2a63805`, collector `da54841074b70b1cdd0c2704ceefa23b81a79cae6c26e70722b7371e728efc45`, runner `70cb93f165bb4578ee8d5de3bd4cc71b8b54ed66bce34352fc074aff1468742c`, identity `0d9367c120b98d85981a8ad591870f84d5ff6544f5c1168d833f3e53a7e4d658`
 - Spain/SSH/stage/install activity during the package revision 011 local correction: none
 - AWG2 changes or service operations: none
+- Package revision 012 approved baseline commit: `f4ad82ba97533f2fa5ee2384b943c03e9d73be13`
+- Package revision 012 stage-prerequisite gate evidence SHA-256: `204b95c542bcd2cb5a754e2a0ef53495278885fa540bd9c50406fe7f16a2daac`
+- Package revision 012 observed prerequisites: current database `/var/lib/amn2-spain/amn2.sqlite3`; no `sqlite3` CLI dependency; dedicated Docker `/opt/amn2-spain/docker/bin/docker` with `unix:///run/amn2-spain-docker/docker.sock`; remote package/config absent before stage
+- Package revision 012 TDD RED: `1 passed, 5 failed, 84 deselected`; failures were the five new missing/old prerequisite contracts
+- Package revision 012 bounded SQLite lifecycle correction: initial GREEN `5 passed, 1 failed, 84 deselected`; explicit connection close plus writable-descriptor `fsync`
+- Package revision 012 focused GREEN: `6 passed, 84 deselected in 0.08s`
+- Package revision 012 Python 3.14 regression runtime STOP: `74 passed, 16 subprocess tests not started`; every failure was the same Windows `WinError 6` from `DuplicateHandle` before Bash or PowerShell execution
+- Package revision 012 stable-runtime probe: Python `3.12.10` loading the existing pytest `8.4.2`, previously blocked subprocess test `1 passed in 0.54s`; no dependency installation
+- Package revision 012 complete targeted tooling regression on stable Python 3.12: `90 passed in 5.23s`
+- Package revision 012 Bash syntax: pass; Python 3.12 compile syntax: pass; PowerShell parser after one bounded parenthesis correction: pass
+- Package revision 012 canonical cross-language rollback-scope SHA-256: Python coordinator and PowerShell runner both `7cd469347f8ebf5158ab66b2898d69d3054260f317bbf49c866438524219093d`
+- Package revision 012 focused post-correction recheck: `6 passed, 84 deselected in 0.15s`
+- Package revision 011 immutability: manifest `7275a07be0039ef418d52791df5ee9557c5ff00e6e369d35cf80deb17ff4d0fb`, collector `60c312fa42fc34680e348927624b458eb28f0844cc1e72e33f8deb9068af426d`, runner `29edab80f7fad171078ffd51fbcddc0ded06878327919585c4fb81e790514623`, application stage `3561d9070afdeea84dd7251f33a5837d4855db30ff2e55cbb2b8d8cedf7d2307`, runtime stage `952a6be47df6a8a70ad1f75b3ce840af6837c825ace560aaa609bac0461c3230`, identity `d04679e145551117ce1dcab762304cf54f6b67ea9ca028a5ffc367cdeb507e99`
+- Package revision 012 Spain/SSH/remote-write/stage/install activity during local correction: none
+- Package revision 012 AWG2 freshness policy: unchanged at `600` seconds; AWG2 mutations: none
 
 This receipt records the real Phase 16 application evidence change. It does not authorize Spain staging, runtime creation, pilot issuance, or global AWG3 issuance.

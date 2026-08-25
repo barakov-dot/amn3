@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-package_id='phase16-awg3-family-3-1-spain-pilot-20260824-011'
+package_id='phase16-awg3-family-3-1-spain-pilot-20260824-012'
 required_gate='APPLICATION_STAGE'
 claim_path="${PHASE16_STAGE_CLAIM_FILE:-}"
 state_hash="${PHASE16_EXPECTED_CURRENT_STATE_SHA256:-}"
@@ -103,7 +103,7 @@ database_path="${PHASE16_DATABASE_PATH:-}"
 ledger_path="${PHASE16_STAGE_LEDGER:-}"
 expected_package_root='/var/lib/amn2-phase16/package'
 expected_release_root="/opt/amn2-spain/releases/${package_id}"
-expected_database_path='/var/lib/amn2-spain/amn2.db'
+expected_database_path='/var/lib/amn2-spain/amn2.sqlite3'
 expected_ledger_path='/var/lib/amn2-phase16/stage/application.json'
 
 if [[ -z "$package_root" || -z "$release_root" || -z "$database_path" || -z "$ledger_path" ]]; then
@@ -117,6 +117,7 @@ fi
 
 backup_path="/var/lib/amn2-phase16/rollback/application/${state_hash}.sqlite3"
 staging_root="${release_root}.staging"
+support_path="${package_root}/tooling/scripts/vps/phase16_stage_support.py"
 release_created=false
 
 rollback_application_stage() {
@@ -135,10 +136,10 @@ trap rollback_application_stage ERR
 
 create_checksum_bound_db_backup() {
     [[ -f "$database_path" && ! -L "$database_path" ]]
+    [[ -f "$support_path" && ! -L "$support_path" ]]
     /usr/bin/install -d -m 0700 "$(dirname "$backup_path")"
     [[ ! -e "$backup_path" ]]
-    /usr/bin/sqlite3 "$database_path" ".backup '$backup_path'"
-    /usr/bin/chmod 0600 "$backup_path"
+    /usr/bin/python3 -I -B "$support_path" online-sqlite-backup "$database_path" "$backup_path" >/dev/null
     /usr/bin/sha256sum "$backup_path" >/dev/null
 }
 

@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import re
 import shlex
+import sqlite3
 import subprocess
 import sys
 
@@ -16,9 +17,9 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-011"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-012"
 SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
-TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-011"
+TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-012"
 HISTORIC_PACKAGE_003 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-003"
 )
@@ -43,6 +44,9 @@ HISTORIC_PACKAGE_009 = (
 HISTORIC_PACKAGE_010 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-010"
 )
+HISTORIC_PACKAGE_011 = (
+    ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-011"
+)
 RUNTIME_IDENTITY = (
     "docker.io/amneziavpn/amneziawg-go@"
     "sha256:4e1fd2840f8d26eb6ec8bc1598e66f2f17f5d0201cd2baadbde560c104d4fc9d"
@@ -57,6 +61,11 @@ PREFLIGHT_SCRIPT = ROOT / "scripts" / "phase16_preflight_contract.py"
 CONTRACT_ROOT = ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-contract"
 APPLICATION_STAGE = ROOT / "scripts" / "vps" / "phase16_application_stage_remote.sh"
 RUNTIME_STAGE = ROOT / "scripts" / "vps" / "phase16_awg31_runtime_stage_remote.sh"
+STAGE_SUPPORT = ROOT / "scripts" / "vps" / "phase16_stage_support.py"
+STAGE_COORDINATOR = (
+    ROOT / "scripts" / "vps" / "phase16_controlled_stage_coordinator.py"
+)
+STAGE_RUNNER = ROOT / "scripts" / "vps" / "phase16_controlled_stage_ssh_runner.ps1"
 COLLECTOR = ROOT / "scripts" / "vps" / "phase16_spain_readonly_preflight_remote.sh"
 RUNNER = ROOT / "scripts" / "vps" / "phase16_spain_readonly_preflight_ssh_runner.ps1"
 BASH = Path(r"C:\Program Files\Git\bin\bash.exe")
@@ -1022,6 +1031,25 @@ def test_historic_phase16_package_010_remains_checksum_immutable():
     ] == "0d9367c120b98d85981a8ad591870f84d5ff6544f5c1168d833f3e53a7e4d658"
 
 
+def test_stage_observed_spain_package_011_remains_checksum_immutable():
+    manifest_path = HISTORIC_PACKAGE_011 / "manifest.json"
+    tooling_root = HISTORIC_PACKAGE_011 / "tooling" / "scripts" / "vps"
+
+    expected_hashes = {
+        manifest_path: "7275a07be0039ef418d52791df5ee9557c5ff00e6e369d35cf80deb17ff4d0fb",
+        tooling_root / "phase16_spain_readonly_preflight_remote.sh": "60c312fa42fc34680e348927624b458eb28f0844cc1e72e33f8deb9068af426d",
+        tooling_root / "phase16_spain_readonly_preflight_ssh_runner.ps1": "29edab80f7fad171078ffd51fbcddc0ded06878327919585c4fb81e790514623",
+        tooling_root / "phase16_application_stage_remote.sh": "3561d9070afdeea84dd7251f33a5837d4855db30ff2e55cbb2b8d8cedf7d2307",
+        tooling_root / "phase16_awg31_runtime_stage_remote.sh": "952a6be47df6a8a70ad1f75b3ce840af6837c825ace560aaa609bac0461c3230",
+    }
+
+    for path, expected in expected_hashes.items():
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == expected
+    assert json.loads(manifest_path.read_text(encoding="utf-8"))[
+        "package_identity_sha256"
+    ] == "d04679e145551117ce1dcab762304cf54f6b67ea9ca028a5ffc367cdeb507e99"
+
+
 def test_resource_plan_binds_awg31_runtime_client_capabilities_and_rollback():
     package = load_module(PACKAGE_SCRIPT, "phase16_package_resource")
     raw = (CONTRACT_ROOT / "resource-plan.json").read_bytes()
@@ -1217,6 +1245,169 @@ def test_runtime_stage_is_pinned_capability_checked_and_awg2_isolated():
     assert "ENABLE_ISSUANCE" not in source
 
 
+def test_stage_observed_spain_online_sqlite_backup_is_consistent_and_create_new(
+    tmp_path: Path,
+):
+    support = load_module(STAGE_SUPPORT, "phase16_stage_support_backup")
+    source = tmp_path / "amn2.sqlite3"
+    destination = tmp_path / "rollback" / ("c" * 64 + ".sqlite3")
+    connection = sqlite3.connect(source)
+    try:
+        assert connection.execute("PRAGMA journal_mode=WAL").fetchone()[0] == "wal"
+        connection.execute("CREATE TABLE pilot (id INTEGER PRIMARY KEY, value TEXT)")
+        connection.execute("INSERT INTO pilot(value) VALUES ('before-stage')")
+        connection.commit()
+
+        observed_sha256 = support.online_sqlite_backup(source, destination)
+
+        assert observed_sha256 == hashlib.sha256(destination.read_bytes()).hexdigest()
+        with sqlite3.connect(destination) as backup:
+            assert backup.execute("PRAGMA integrity_check").fetchone() == ("ok",)
+            assert backup.execute("SELECT value FROM pilot").fetchall() == [
+                ("before-stage",)
+            ]
+        connection.execute("INSERT INTO pilot(value) VALUES ('source-still-online')")
+        connection.commit()
+        with pytest.raises(FileExistsError):
+            support.online_sqlite_backup(source, destination)
+    finally:
+        connection.close()
+
+
+def test_stage_observed_spain_server_only_config_and_unit_use_dedicated_runtime():
+    support = load_module(STAGE_SUPPORT, "phase16_stage_support_runtime")
+    private_key = "A" * 43 + "="
+
+    config = support.render_server_only_awg31_config(private_key)
+    unit = support.render_awg31_runtime_unit()
+
+    assert config == (
+        "[Interface]\n"
+        f"PrivateKey = {private_key}\n"
+        "ListenPort = 30002\n"
+        "RandomTrailers = on\n"
+        "DisableCookies = on\n"
+    )
+    assert "[Peer]" not in config
+    assert "PresharedKey" not in config
+    assert "/opt/amn2-spain/docker/bin/docker" in unit
+    assert "--host unix:///run/amn2-spain-docker/docker.sock" in unit
+    assert "Requires=amn2-spain-docker.service" in unit
+    assert "After=amn2-spain-docker.service network-online.target" in unit
+    assert "/usr/bin/docker" not in unit
+    assert "Requires=docker.service" not in unit
+    assert "amn2-spain-awg2" not in unit
+
+
+def test_stage_observed_spain_coordinator_binds_approval_state_and_rollback():
+    coordinator = load_module(
+        STAGE_COORDINATOR, "phase16_controlled_stage_coordinator_contract"
+    )
+    assert coordinator.rollback_scope_sha256() == (
+        "7cd469347f8ebf5158ab66b2898d69d3054260f317bbf49c866438524219093d"
+    )
+    approval = (
+        "/APPROVE PHASE16 SPAIN APPLICATION_AND_AWG31_STAGE "
+        f"PACKAGE_{PACKAGE_ID} STATE_{'a' * 64} MANDATORY_ROLLBACK_ON_FAILURE "
+        "AWG2_UNTOUCHED"
+    ).encode("ascii")
+    manifest = canonical(
+        {
+            "package_id": PACKAGE_ID,
+            "package_identity_sha256": "e" * 64,
+        }
+    )
+    request = {
+        "approval_sha256": hashlib.sha256(approval).hexdigest(),
+        "expected_current_state_sha256": "a" * 64,
+        "manifest_sha256": hashlib.sha256(manifest).hexdigest(),
+        "package_id": PACKAGE_ID,
+        "package_identity_sha256": "e" * 64,
+        "rollback_scope_sha256": "f" * 64,
+        "schema": "amn2.phase16.controlled-stage-request.v1",
+        "transaction_id": "phase16-stage-test-012",
+    }
+
+    validated = coordinator.validate_stage_request(
+        canonical(request), manifest_bytes=manifest, approval_bytes=approval
+    )
+    claim = coordinator.build_stage_claim(
+        validated,
+        gate="APPLICATION_STAGE",
+        script_bytes=b"#!/bin/sh\nexit 0\n",
+        issued_at="2026-08-25T12:00:00Z",
+        expires_at="2026-08-25T12:05:00Z",
+    )
+
+    assert claim["expected_current_state_sha256"] == request[
+        "expected_current_state_sha256"
+    ]
+    assert claim["manifest_sha256"] == request["manifest_sha256"]
+    assert claim["package_identity_sha256"] == request[
+        "package_identity_sha256"
+    ]
+    assert claim["rollback_scope_sha256"] == request["rollback_scope_sha256"]
+    assert claim["stage_script_sha256"] == hashlib.sha256(
+        b"#!/bin/sh\nexit 0\n"
+    ).hexdigest()
+    with pytest.raises(coordinator.StageCoordinatorError, match="request binding"):
+        coordinator.validate_stage_request(
+            canonical(dict(request, rollback_scope_sha256="0" * 64)),
+            manifest_bytes=manifest,
+            approval_bytes=approval,
+            expected_rollback_scope_sha256="f" * 64,
+        )
+
+
+def test_stage_observed_spain_envelopes_match_current_remote_prerequisites():
+    application = APPLICATION_STAGE.read_text(encoding="utf-8")
+    runtime = RUNTIME_STAGE.read_text(encoding="utf-8")
+    preflight = COLLECTOR.read_text(encoding="utf-8")
+
+    assert "expected_database_path='/var/lib/amn2-spain/amn2.sqlite3'" in application
+    assert "phase16_stage_support.py" in application
+    assert "online-sqlite-backup" in application
+    assert "/usr/bin/sqlite3" not in application
+    assert "/opt/amn2-spain/docker/bin/docker" in runtime
+    assert "unix:///run/amn2-spain-docker/docker.sock" in runtime
+    assert "phase16_stage_support.py" in runtime
+    assert "server-only-config" in runtime
+    assert "PHASE16_AWG31_CONFIG_SOURCE" not in runtime
+    assert "/usr/bin/docker" not in runtime
+    assert "ENABLE_ISSUANCE" not in application + runtime
+    assert "0 <= now_epoch - timestamp <= 600" in preflight
+    for target in (r"amn2-spain-awg2(?:\s|$)", r"amn2-spain-awg(?:\s|$)", r"awgsp0(?:\s|$)"):
+        assert re.search(rf"(?:restart|stop|rm -f)[^\n]*{target}", application + runtime) is None
+
+
+def test_stage_observed_spain_package_012_identity_inventory_and_transport_contract():
+    package = load_module(PACKAGE_SCRIPT, "phase16_package_012_stage_inventory")
+    preflight = load_module(PREFLIGHT_SCRIPT, "phase16_preflight_012_stage_inventory")
+    coordinator = STAGE_COORDINATOR.read_text(encoding="utf-8")
+    runner = STAGE_RUNNER.read_text(encoding="utf-8")
+
+    assert package.PACKAGE_ID == PACKAGE_ID
+    assert package.TOOLING_BRANCH == TOOLING_BRANCH
+    assert preflight.PACKAGE_ID == PACKAGE_ID
+    expected_tooling = {
+        "scripts/vps/phase16_stage_support.py",
+        "scripts/vps/phase16_controlled_stage_coordinator.py",
+        "scripts/vps/phase16_controlled_stage_ssh_runner.ps1",
+    }
+    assert expected_tooling <= set(package.TOOLING_SPECS)
+    assert PACKAGE_ID in coordinator
+    assert PACKAGE_ID in runner
+    assert "StrictHostKeyChecking=yes" in runner
+    assert "ConnectionAttempts=1" in runner
+    assert "RedirectStandardInput = $true" in runner
+    assert "phase16_controlled_stage_coordinator.py" in runner
+    assert "$MyInvocation.InvocationName -ne '.'" in runner
+    assert "rollback_scope_sha256" in coordinator
+    assert "expected_current_state_sha256" in coordinator
+    assert "general_issuance_enabled" in coordinator
+    assert "ENABLE_ISSUANCE" not in coordinator + runner
+
+
 def test_phase16_preflight_transport_assets_are_read_only_and_phase_exact():
     contract = PREFLIGHT_SCRIPT.read_text(encoding="utf-8")
     collector = COLLECTOR.read_text(encoding="utf-8")
@@ -1340,7 +1531,7 @@ def test_phase16_ssh_remote_command_uses_fail_closed_bom_filter():
     assert '" "$3" | /usr/bin/bash -s -- "$@"' in remote
     assert "| /usr/bin/bash -s -- \"$@\"" in remote
     assert remote.endswith(
-        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-011' "
+        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-012' "
         "'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' "
         "'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' "
         "'phase16-preflight-test-001' '138.124.181.246'"

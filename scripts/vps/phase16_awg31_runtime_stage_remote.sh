@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-package_id='phase16-awg3-family-3-1-spain-pilot-20260824-011'
+package_id='phase16-awg3-family-3-1-spain-pilot-20260824-012'
 required_gate='AWG31_RUNTIME_STAGE'
 runtime_identity='docker.io/amneziavpn/amneziawg-go@sha256:4e1fd2840f8d26eb6ec8bc1598e66f2f17f5d0201cd2baadbde560c104d4fc9d'
 claim_path="${PHASE16_STAGE_CLAIM_FILE:-}"
@@ -97,30 +97,38 @@ if not valid:
 PHASE16_STAGE_PY
 
 package_root="${PHASE16_PACKAGE_ROOT:-}"
-config_source="${PHASE16_AWG31_CONFIG_SOURCE:-}"
 ledger_path="${PHASE16_STAGE_LEDGER:-}"
 expected_package_root='/var/lib/amn2-phase16/package'
-expected_config_source='/var/lib/amn2-phase16/input/awg3.conf'
 expected_ledger_path='/var/lib/amn2-phase16/stage/awg31-runtime.json'
 
-if [[ -z "$package_root" || -z "$config_source" || -z "$ledger_path" ]]; then
+if [[ -z "$package_root" || -z "$ledger_path" ]]; then
     printf '%s\n' 'stage_inputs_required' >&2
     exit 66
 fi
-if [[ "$package_root" != "$expected_package_root" || "$config_source" != "$expected_config_source" || "$ledger_path" != "$expected_ledger_path" ]]; then
+if [[ "$package_root" != "$expected_package_root" || "$ledger_path" != "$expected_ledger_path" ]]; then
     printf '%s\n' 'stage_inputs_invalid' >&2
     exit 67
 fi
 
 state_root='/var/lib/amn2-spain/awg3'
 config_path="${state_root}/awg3.conf"
+support_path="${package_root}/tooling/scripts/vps/phase16_stage_support.py"
 unit_path='/etc/systemd/system/amn2-spain-awg3.service'
 container_name='amn2-spain-awg3'
 network_name='amn2sp3'
 bridge_name='amn2sp3br0'
+docker_binary='/opt/amn2-spain/docker/bin/docker'
+docker_socket='unix:///run/amn2-spain-docker/docker.sock'
 created_state=false
 created_unit=false
 created_network=false
+runtime_attempted=false
+image_preexisting=false
+image_pulled=false
+
+docker_cmd() {
+    "$docker_binary" --host "$docker_socket" "$@"
+}
 
 rollback_awg31_stage() {
     local status=$?
@@ -130,12 +138,17 @@ rollback_awg31_stage() {
         /usr/bin/rm -f "$unit_path"
         /usr/bin/systemctl daemon-reload >/dev/null 2>&1 || true
     fi
-    /usr/bin/docker rm -f "$container_name" >/dev/null 2>&1 || true
+    if [[ "$runtime_attempted" == true ]]; then
+        docker_cmd rm -f "$container_name" >/dev/null 2>&1 || true
+    fi
     if [[ "$created_network" == true ]]; then
-        /usr/bin/docker network rm "$network_name" >/dev/null 2>&1 || true
+        docker_cmd network rm "$network_name" >/dev/null 2>&1 || true
     fi
     if [[ "$created_state" == true && -d "$state_root" ]]; then
         /usr/bin/rm -rf --one-file-system "$state_root"
+    fi
+    if [[ "$image_preexisting" == false && "$image_pulled" == true ]]; then
+        docker_cmd image rm "$runtime_identity" >/dev/null 2>&1 || true
     fi
     printf '%s\n' 'awg31_runtime_stage_rolled_back' >&2
     exit "$status"
@@ -162,52 +175,33 @@ PHASE16_CONSUME_PY
 }
 
 validate_runtime_config() {
-    [[ -f "$config_source" && ! -L "$config_source" ]]
+    [[ -f "$config_path" && ! -L "$config_path" ]]
     local mode
-    mode="$(/usr/bin/stat -c '%a' "$config_source")"
+    mode="$(/usr/bin/stat -c '%a' "$config_path")"
     [[ "$mode" == 400 || "$mode" == 600 ]]
-    ! /usr/bin/grep -Eq '^\[Peer\][[:space:]]*$' "$config_source"
-    /usr/bin/grep -Eq '^ListenPort[[:space:]]*=[[:space:]]*30002[[:space:]]*$' "$config_source"
-    /usr/bin/grep -Eq '^RandomTrailers[[:space:]]*=[[:space:]]*on[[:space:]]*$' "$config_source"
-    /usr/bin/grep -Eq '^DisableCookies[[:space:]]*=[[:space:]]*on[[:space:]]*$' "$config_source"
+    ! /usr/bin/grep -Eq '^\[Peer\][[:space:]]*$' "$config_path"
+    /usr/bin/grep -Eq '^ListenPort[[:space:]]*=[[:space:]]*30002[[:space:]]*$' "$config_path"
+    /usr/bin/grep -Eq '^RandomTrailers[[:space:]]*=[[:space:]]*on[[:space:]]*$' "$config_path"
+    /usr/bin/grep -Eq '^DisableCookies[[:space:]]*=[[:space:]]*on[[:space:]]*$' "$config_path"
 }
 
 verify_runtime_capabilities() {
-    /usr/bin/docker run --rm "$runtime_identity" /bin/sh -ec \
+    docker_cmd run --rm "$runtime_identity" /bin/sh -ec \
         '/bin/grep -a -q random_trailers /usr/bin/amneziawg-go && /bin/grep -a -q disable_cookies /usr/bin/amneziawg-go'
 }
 
 write_runtime_unit() {
-    /usr/bin/install -m 0644 /dev/stdin "$unit_path" <<PHASE16_UNIT
-[Unit]
-Description=AMN2 Spain isolated AWG 3.1 runtime
-After=docker.service network-online.target
-Requires=docker.service
-
-[Service]
-Type=simple
-ExecStartPre=-/usr/bin/docker rm -f ${container_name}
-ExecStart=/usr/bin/docker run --rm --name ${container_name} --network ${network_name} --ip 172.29.252.2 --cap-add NET_ADMIN --device /dev/net/tun -v ${config_path}:/etc/amneziawg/awg3.conf:ro -p 30002:30002/udp ${runtime_identity} /usr/bin/amneziawg-go -f awg3
-ExecStartPost=/usr/bin/docker exec ${container_name} /usr/bin/awg setconf awg3 /etc/amneziawg/awg3.conf
-ExecStartPost=/usr/bin/docker exec ${container_name} /sbin/ip address add 10.212.13.1/24 dev awg3
-ExecStartPost=/usr/bin/docker exec ${container_name} /sbin/ip link set awg3 up
-ExecStartPost=/usr/bin/docker exec ${container_name} /sbin/iptables -t nat -A POSTROUTING -s 10.212.13.0/24 -o eth0 -j MASQUERADE
-ExecStop=-/usr/bin/docker stop -t 10 ${container_name}
-Restart=on-failure
-RestartSec=3
-
-[Install]
-WantedBy=multi-user.target
-PHASE16_UNIT
+    [[ -f "$support_path" && ! -L "$support_path" ]]
+    /usr/bin/python3 -I -B "$support_path" runtime-unit "$unit_path" >/dev/null
     created_unit=true
 }
 
 write_stage_ledger() {
     /usr/bin/install -d -m 0700 "$(dirname "$ledger_path")"
-    /usr/bin/python3 -I -B - "$ledger_path" "$package_id" "$package_identity" "$runtime_identity" "$state_hash" <<'PHASE16_LEDGER_PY'
+    /usr/bin/python3 -I -B - "$ledger_path" "$package_id" "$package_identity" "$runtime_identity" "$state_hash" "$image_preexisting" <<'PHASE16_LEDGER_PY'
 import json, os, sys, tempfile
-path, package_id, package_identity, runtime_identity, state_hash = sys.argv[1:]
-value = {"created_resources": ["amn2-spain-awg3.service", "amn2-spain-awg3", "amn2sp3", "/var/lib/amn2-spain/awg3"], "general_issuance_enabled": False, "package_id": package_id, "package_identity_sha256": package_identity, "rollback_scope": ["awg31-created-resources"], "runtime_identity": runtime_identity, "state_sha256": state_hash, "status": "staged"}
+path, package_id, package_identity, runtime_identity, state_hash, image_preexisting = sys.argv[1:]
+value = {"created_resources": ["amn2-spain-awg3.service", "amn2-spain-awg3", "amn2sp3", "/var/lib/amn2-spain/awg3"], "general_issuance_enabled": False, "package_id": package_id, "package_identity_sha256": package_identity, "rollback_scope": ["awg31-created-resources"], "runtime_identity": runtime_identity, "runtime_image_created": image_preexisting == "false", "state_sha256": state_hash, "status": "staged"}
 raw = json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode("utf-8") + b"\n"
 descriptor, temporary = tempfile.mkstemp(prefix=".runtime-ledger-", dir=os.path.dirname(path))
 try:
@@ -220,22 +214,31 @@ PHASE16_LEDGER_PY
 }
 
 [[ -f "$package_root/manifest.json" ]]
-validate_runtime_config
+[[ -f "$support_path" && ! -L "$support_path" ]]
+[[ -x "$docker_binary" && -S "${docker_socket#unix://}" ]]
 consume_stage_claim
-/usr/bin/docker pull "$runtime_identity"
+if docker_cmd image inspect "$runtime_identity" >/dev/null 2>&1; then
+    image_preexisting=true
+fi
+docker_cmd pull "$runtime_identity"
+image_pulled=true
 verify_runtime_capabilities
 [[ ! -e "$state_root" && ! -e "$unit_path" ]]
-[[ -z "$(/usr/bin/docker ps -a --filter "name=^/${container_name}$" --format '{{.ID}}')" ]]
+[[ -z "$(docker_cmd ps -a --filter "name=^/${container_name}$" --format '{{.ID}}')" ]]
+[[ -z "$(docker_cmd network ls --filter "name=^${network_name}$" --format '{{.ID}}')" ]]
 /usr/bin/install -d -m 0700 "$state_root"
 created_state=true
-/usr/bin/install -m 0600 "$config_source" "$config_path"
-/usr/bin/docker network create --driver bridge --subnet 172.29.252.0/28 --opt "com.docker.network.bridge.name=${bridge_name}" "$network_name" >/dev/null
+docker_cmd run --rm "$runtime_identity" /usr/bin/awg genkey | /usr/bin/python3 -I -B "$support_path" server-only-config "$config_path" >/dev/null
+validate_runtime_config
+docker_cmd network create --driver bridge --subnet 172.29.252.0/28 --opt "com.docker.network.bridge.name=${bridge_name}" "$network_name" >/dev/null
 created_network=true
 write_runtime_unit
 /usr/bin/systemctl daemon-reload
+runtime_attempted=true
 /usr/bin/systemctl start amn2-spain-awg3.service
 /usr/bin/systemctl is-active --quiet amn2-spain-awg3.service
-/usr/bin/docker exec "$container_name" /usr/bin/awg show awg3 >/dev/null
+docker_cmd exec "$container_name" /usr/bin/awg show awg3 >/dev/null
+[[ -z "$(docker_cmd exec "$container_name" /usr/bin/awg show awg3 peers)" ]]
 write_stage_ledger
 trap - ERR
 printf '%s\n' '{"general_issuance_enabled":false,"result":"awg31_runtime_staged"}'

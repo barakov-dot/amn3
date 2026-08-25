@@ -7,7 +7,7 @@ import re
 from typing import Any
 
 
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-011"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-012"
 CLAIM_SCHEMA = "amn2.phase16.readonly-preflight-claim.v1"
 EVIDENCE_SCHEMA = "amn2.phase16.readonly-preflight-evidence.v1"
 FAILURE_SCHEMA = "amn2.phase16.readonly-preflight-failure.v1"
