@@ -16,9 +16,9 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-010"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-011"
 SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
-TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-010"
+TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-011"
 HISTORIC_PACKAGE_003 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-003"
 )
@@ -39,6 +39,9 @@ HISTORIC_PACKAGE_008 = (
 )
 HISTORIC_PACKAGE_009 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-009"
+)
+HISTORIC_PACKAGE_010 = (
+    ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-010"
 )
 RUNTIME_IDENTITY = (
     "docker.io/amneziavpn/amneziawg-go@"
@@ -732,6 +735,13 @@ def test_phase16_package_and_preflight_identities_are_exact():
     assert preflight.PACKAGE_ID == PACKAGE_ID
     assert preflight.CLAIM_SCHEMA == "amn2.phase16.readonly-preflight-claim.v1"
     assert preflight.EVIDENCE_SCHEMA == "amn2.phase16.readonly-preflight-evidence.v1"
+    for schema_name in (
+        "failure-outcome.schema.json",
+        "package-manifest.schema.json",
+        "preflight-evidence.schema.json",
+    ):
+        schema = json.loads((CONTRACT_ROOT / schema_name).read_text(encoding="utf-8"))
+        assert schema["properties"]["package_id"] == {"const": PACKAGE_ID}
 
 
 def test_phase16_materializer_applies_distinct_source_and_tooling_branch_gates(
@@ -981,6 +991,37 @@ def test_historic_phase16_package_009_remains_checksum_immutable():
     ] == "2a4549c05daca9f3666ffe1babfa17851c93c59cc1b902efe9dca16002d9fe5d"
 
 
+def test_historic_phase16_package_010_remains_checksum_immutable():
+    manifest_path = HISTORIC_PACKAGE_010 / "manifest.json"
+    collector_path = (
+        HISTORIC_PACKAGE_010
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_remote.sh"
+    )
+    runner_path = (
+        HISTORIC_PACKAGE_010
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_ssh_runner.ps1"
+    )
+
+    assert hashlib.sha256(manifest_path.read_bytes()).hexdigest() == (
+        "e79ce27b34d175495ff3f5eebb3e19b1a2cbe6c51c47493fab01113fe2a63805"
+    )
+    assert hashlib.sha256(collector_path.read_bytes()).hexdigest() == (
+        "da54841074b70b1cdd0c2704ceefa23b81a79cae6c26e70722b7371e728efc45"
+    )
+    assert hashlib.sha256(runner_path.read_bytes()).hexdigest() == (
+        "70cb93f165bb4578ee8d5de3bd4cc71b8b54ed66bce34352fc074aff1468742c"
+    )
+    assert json.loads(manifest_path.read_text(encoding="utf-8"))[
+        "package_identity_sha256"
+    ] == "0d9367c120b98d85981a8ad591870f84d5ff6544f5c1168d833f3e53a7e4d658"
+
+
 def test_resource_plan_binds_awg31_runtime_client_capabilities_and_rollback():
     package = load_module(PACKAGE_SCRIPT, "phase16_package_resource")
     raw = (CONTRACT_ROOT / "resource-plan.json").read_bytes()
@@ -1147,6 +1188,7 @@ def test_stage_claim_rejects_wrong_rollback_binding(
 def test_application_stage_is_backup_first_claim_bound_and_rollback_aware():
     source = APPLICATION_STAGE.read_text(encoding="utf-8")
 
+    assert PACKAGE_ID in source
     assert source.index("create_checksum_bound_db_backup") < source.index(
         "stage_application_snapshot"
     )
@@ -1160,6 +1202,7 @@ def test_application_stage_is_backup_first_claim_bound_and_rollback_aware():
 def test_runtime_stage_is_pinned_capability_checked_and_awg2_isolated():
     source = RUNTIME_STAGE.read_text(encoding="utf-8")
 
+    assert PACKAGE_ID in source
     assert RUNTIME_IDENTITY in source
     assert "verify_runtime_capabilities" in source
     assert "random_trailers" in source
@@ -1297,7 +1340,7 @@ def test_phase16_ssh_remote_command_uses_fail_closed_bom_filter():
     assert '" "$3" | /usr/bin/bash -s -- "$@"' in remote
     assert "| /usr/bin/bash -s -- \"$@\"" in remote
     assert remote.endswith(
-        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-010' "
+        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-011' "
         "'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' "
         "'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' "
         "'phase16-preflight-test-001' '138.124.181.246'"
