@@ -1,10 +1,10 @@
 # Phase 16 application source readiness receipt
 
-- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-010`
+- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-011`
 - Baseline application SHA: `c01c2e34ca506102e485ee3fa50b9420de6e591a`
 - Application branch: `codex/phase16-awg3-family-3-1-spain-pilot`
 - Application source SHA: `a3682fc44dd9e74ff96392ad99623474facf377f`
-- Tooling branch: `codex/phase16-awg3-family-3-1-spain-pilot-010`
+- Tooling branch: `codex/phase16-awg3-family-3-1-spain-pilot-011`
 - Protocol family: `awg3`
 - Protocol revision: `3.1`
 - Config revision: `amneziawg_v3_1`
@@ -18,7 +18,7 @@
 - Exact collector diagnostic stdout SHA-256: `5a83427b0b45b4b4e9eb6c66f0e7d63a4a104cfb77e7668a57601d6531fa474a`
 - Exact Spain OS admission: `ubuntu:24.04`; Debian and every other OS fail closed
 - Container admission: dedicated Spain Docker is mandatory; absent system Docker and Podman are accepted, while launch failures and conflicts fail closed
-- Targeted tooling regression: `77 passed in 4.82s`; scoped AWG2 classifier correction: `1 passed, 40 deselected in 0.03s`
+- Targeted tooling regression: `83 passed in 4.65s`; scoped AWG2 classifier correction: `1 passed, 40 deselected in 0.03s`
 - Package 006 diagnostic: exact SSH/filter exit `65`, zero stdout/stderr, no collector schema; receipt commit `a541737545bd4b5963edbb048d49c10cc22a193c`
 - Windows PowerShell 5 producer/filter TDD: RED `2 failed, 31 deselected`; GREEN `2 passed, 31 deselected in 0.50s`; raw and single-BOM inputs restore the exact checksum-bound collector while tampered and double-BOM inputs fail closed with exit `65`
 - Package revision 007 binding TDD: RED `3 failed, 1 passed, 30 deselected`; GREEN `5 passed, 29 deselected in 0.52s`
@@ -47,6 +47,15 @@
 - Complete revision 010 targeted tooling regression: `77 passed in 4.82s`
 - Package revision 010 nft match-contract correction commit: `333b8f377b16b7171fd2974b6f52adaefe181f33`
 - Exact local source/tooling scope for revision 010: `13` files
+- Spain package 010 blockers-differential V6 stdout SHA-256: `0ce16aba1cefa13bfa0d9b7ab4e33fa39158ed555c17c419fd4395f46338a087`
+- Spain package 010 nft-metainfo V7 stdout SHA-256: `703343a0f55de97dd18c6c587b3887ccb14118abfaaa5eb4a20d3f474ad415d1`
+- Spain package 010 nft-metainfo V7 receipt SHA-256: `9a155db4f8f0c7deb325bc204793d88684e58cec1caf771d837f53e284286d12`
+- Observed nft metainfo-contract TDD: RED `2 failed, 4 passed, 77 deselected in 0.18s`; GREEN `6 passed, 77 deselected in 0.12s`; complete targeted tooling regression `83 passed in 4.65s`
+- Package revision 011 nft metainfo-contract correction commit: `554572f909eef549fa0c4ac4f8ef997db525f896`
+- Exact parser correction scope for revision 011: `2` files
+- Package revision 011 binding TDD: RED `8 failed, 1 passed, 75 deselected in 0.45s`; GREEN `9 passed, 75 deselected in 0.33s`
+- Package revision 011 binding commit: `718ea670172d26f93700f1f54b3fc2d14afa8be8`
+- Exact local source/tooling scope for revision 011: `13` files
 - Collector Bash syntax check: pass
 - Phase 16 revision 005 local correction commit: `a43c91e`
 - SSH `ProgramData` TDD correction commit: `18103d21bf3b2180ec126933e063cf8e5c9639b4`
@@ -57,7 +66,8 @@
 - Package revision 007 immutability: manifest `24eb848d13845b4a0abf9a8200a6c30d2bd67be28ea904c8e08e1aaf830e312b`, collector `c3ca7538c556555121da29e2b361bc3139a6b1e76f579856416259aac7bbca37`, runner `7aca3daa62d0552ef533c47cbca68a1c4fcf622156423936183069d0499a9060`, identity `5065c10c11f82356f3bcf49432512ffae66fd7ea12b61c98c38c4ff5691af5c2`
 - Package revision 008 immutability: manifest `065d3369b8dd11783572365f06f84c6ec3ed207e71c758dea2f1d57a02baf24e`, collector `b2e112eec77a3a6c272be8d79c7fd010a8f54ad1f6d833002f76d1fcfba03ada`, runner `dfc47725248376a0c3e816a9e8681385c615cf3a713ef7cba079fbfbd8d32828`, identity `e1cf967208467acebdfcaaac30557436855b75a92b5154ab41fc3429f747a7c3`
 - Package revision 009 immutability: manifest `084302df340f4741109103dc7baf94601dd24163406d002b82756fde8d9c80c1`, collector `80b3347b8787ca1490b40f1763ccff01fb4428233ca4f240c068fd02e35cef15`, runner `f0d0843c05c341b340dce8721d30f55380b6a8493aff70da7013185875301fbf`, identity `2a4549c05daca9f3666ffe1babfa17851c93c59cc1b902efe9dca16002d9fe5d`
-- Spain/SSH/stage/install activity during the package revision 010 local correction: none
+- Package revision 010 immutability: manifest `e79ce27b34d175495ff3f5eebb3e19b1a2cbe6c51c47493fab01113fe2a63805`, collector `da54841074b70b1cdd0c2704ceefa23b81a79cae6c26e70722b7371e728efc45`, runner `70cb93f165bb4578ee8d5de3bd4cc71b8b54ed66bce34352fc074aff1468742c`, identity `0d9367c120b98d85981a8ad591870f84d5ff6544f5c1168d833f3e53a7e4d658`
+- Spain/SSH/stage/install activity during the package revision 011 local correction: none
 - AWG2 changes or service operations: none
 
 This receipt records the real Phase 16 application evidence change. It does not authorize Spain staging, runtime creation, pilot issuance, or global AWG3 issuance.
