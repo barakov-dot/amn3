@@ -16,9 +16,9 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-007"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-008"
 SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
-TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-007"
+TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-008"
 HISTORIC_PACKAGE_003 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-003"
 )
@@ -30,6 +30,9 @@ HISTORIC_PACKAGE_005 = (
 )
 HISTORIC_PACKAGE_006 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-006"
+)
+HISTORIC_PACKAGE_007 = (
+    ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-007"
 )
 RUNTIME_IDENTITY = (
     "docker.io/amneziavpn/amneziawg-go@"
@@ -234,6 +237,118 @@ def test_phase16_optional_container_engine_launch_failure_still_stops():
     )
 
 
+def test_phase16_awg2_probe_uses_observed_interface_and_container_mount_namespace():
+    namespace = collector_python_namespace()
+    build = collector_helper("awg2_runtime_command")
+
+    assert namespace["CURRENT_AWG2_INTERFACE"] == "awgsp0"
+    assert build(4242, "latest-handshakes") == [
+        "/usr/bin/nsenter",
+        "--mount=/proc/4242/ns/mnt",
+        "--net=/proc/4242/ns/net",
+        "/usr/bin/awg",
+        "show",
+        "awgsp0",
+        "latest-handshakes",
+    ]
+
+
+def test_phase16_awg2_health_admits_the_observed_awgsp0_interface():
+    classify = collector_helper("classify_awg2_health")
+    success = "success"
+    owner = (0, b"active\n", b"", success)
+    container = (0, b"true|4242|59\n", b"", success)
+    interface = (0, b"7: awgsp0: <POINTOPOINT,UP>\n", b"", success)
+    handshakes = (0, b"A" * 43 + b"=\t1699999940\n", b"", success)
+
+    assert classify(
+        owner,
+        container,
+        interface,
+        handshakes,
+        container,
+        owner,
+        now_epoch=1_700_000_000,
+    ) == "pass"
+
+
+def test_phase16_docker_builtin_null_ipam_is_empty_only_for_host_and_none():
+    parse = collector_helper("_parse_network_inspection")
+    success = "success"
+
+    host = (
+        0,
+        b'"host"\t"host"\t{"Config":null,"Driver":"default","Options":null}\n',
+        b"",
+        success,
+    )
+    none = (
+        0,
+        b'"none"\t"null"\t{"Config":null,"Driver":"default","Options":null}\n',
+        b"",
+        success,
+    )
+    custom = (
+        0,
+        b'"custom"\t"bridge"\t{"Config":null,"Driver":"default","Options":null}\n',
+        b"",
+        success,
+    )
+
+    assert parse(host) == ("host", "host", [])
+    assert parse(none) == ("none", "null", [])
+    with pytest.raises(ValueError, match="docker ipam config"):
+        parse(custom)
+
+
+def test_phase16_route_pref_enum_is_admitted_without_weakening_unknown_values():
+    classify = collector_helper("classify_routes")
+    success = "success"
+
+    for preference in ("low", "medium", "high"):
+        payload = canonical([{"dev": "eth0", "dst": "default", "pref": preference}])
+        assert classify((0, payload, b"", success)) == ("pass", "free", "free")
+
+    invalid = canonical([{"dev": "eth0", "dst": "default", "pref": "urgent"}])
+    assert classify((0, invalid, b"", success)) == ("stop", "stop", "stop")
+
+
+def test_phase16_empty_successful_legacy_iptables_backend_is_no_conflict():
+    classify = collector_helper("classify_firewall")
+    unavailable = (127, b"", b"", "unavailable")
+    empty_legacy = (0, b"", b"", "success")
+
+    assert classify(unavailable, unavailable, empty_legacy) == "pass"
+
+
+def test_phase16_telegram_prerequisite_requires_stable_active_enabled_state():
+    observe = collector_helper("observe_phase13_bot_unit")
+    success = "success"
+    active = (0, b"active\n", b"", success)
+    enabled = (0, b"enabled\n", b"", success)
+    inactive = (0, b"inactive\n", b"", success)
+
+    calls: list[list[str]] = []
+    responses = iter((active, enabled, active, enabled))
+
+    def stable_command(arguments: list[str]):
+        calls.append(arguments)
+        return next(responses)
+
+    state, _raw = observe(stable_command)
+    assert state == "pass"
+    assert calls == [
+        ["/usr/bin/systemctl", "show", "amn2-spain-bot.service", "--property=ActiveState", "--value"],
+        ["/usr/bin/systemctl", "show", "amn2-spain-bot.service", "--property=UnitFileState", "--value"],
+        ["/usr/bin/systemctl", "show", "amn2-spain-bot.service", "--property=ActiveState", "--value"],
+        ["/usr/bin/systemctl", "show", "amn2-spain-bot.service", "--property=UnitFileState", "--value"],
+    ]
+
+    drifted = iter((active, enabled, inactive, enabled))
+    state, _raw = observe(lambda _arguments: next(drifted))
+    assert state == "stop"
+
+
 def test_phase16_package_and_preflight_identities_are_exact():
     package = load_module(PACKAGE_SCRIPT, "phase16_package")
     preflight = load_module(PREFLIGHT_SCRIPT, "phase16_preflight")
@@ -399,6 +514,37 @@ def test_historic_phase16_package_006_remains_checksum_immutable():
     assert json.loads(manifest_path.read_text(encoding="utf-8"))[
         "package_identity_sha256"
     ] == "172aba5925719473056b8d291b8f42fc0ae54e217e11094b54b81ef588efffa4"
+
+
+def test_historic_phase16_package_007_remains_checksum_immutable():
+    manifest_path = HISTORIC_PACKAGE_007 / "manifest.json"
+    collector_path = (
+        HISTORIC_PACKAGE_007
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_remote.sh"
+    )
+    runner_path = (
+        HISTORIC_PACKAGE_007
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_ssh_runner.ps1"
+    )
+
+    assert hashlib.sha256(manifest_path.read_bytes()).hexdigest() == (
+        "24eb848d13845b4a0abf9a8200a6c30d2bd67be28ea904c8e08e1aaf830e312b"
+    )
+    assert hashlib.sha256(collector_path.read_bytes()).hexdigest() == (
+        "c3ca7538c556555121da29e2b361bc3139a6b1e76f579856416259aac7bbca37"
+    )
+    assert hashlib.sha256(runner_path.read_bytes()).hexdigest() == (
+        "7aca3daa62d0552ef533c47cbca68a1c4fcf622156423936183069d0499a9060"
+    )
+    assert json.loads(manifest_path.read_text(encoding="utf-8"))[
+        "package_identity_sha256"
+    ] == "5065c10c11f82356f3bcf49432512ffae66fd7ea12b61c98c38c4ff5691af5c2"
 
 
 def test_resource_plan_binds_awg31_runtime_client_capabilities_and_rollback():
@@ -717,7 +863,7 @@ def test_phase16_ssh_remote_command_uses_fail_closed_bom_filter():
     assert '" "$3" | /usr/bin/bash -s -- "$@"' in remote
     assert "| /usr/bin/bash -s -- \"$@\"" in remote
     assert remote.endswith(
-        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-007' "
+        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-008' "
         "'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' "
         "'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' "
         "'phase16-preflight-test-001' '138.124.181.246'"

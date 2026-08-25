@@ -22,11 +22,11 @@ import sys
 import threading
 import time
 
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-007"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-008"
 CURRENT_APPLICATION_ROOT = "/opt/amn2-spain"
 CURRENT_DATABASE_PATH = "/var/lib/amn2-spain/amn2.sqlite3"
 CURRENT_AWG2_CONTAINER = "amn2-spain-awg"
-CURRENT_AWG2_INTERFACE = "awg0"
+CURRENT_AWG2_INTERFACE = "awgsp0"
 CURRENT_AWG2_OWNER_UNIT = "amn2-spain-docker.service"
 CURRENT_BOT_UNIT = "amn2-spain-bot.service"
 SYSTEM_DOCKER = "/usr/bin/docker"
@@ -328,7 +328,10 @@ def _parse_network_inspection(probe):
         if address_data["Options"] is not None and (not isinstance(address_data["Options"], dict) or any(not isinstance(key, str) or not isinstance(value, str) for key, value in address_data["Options"].items())):
             raise ValueError("docker ipam options")
         config = address_data["Config"]
-        if not isinstance(config, list):
+        builtin_empty = (name, driver) in {("host", "host"), ("none", "null")}
+        if config is None and builtin_empty:
+            config = []
+        elif not isinstance(config, list):
             raise ValueError("docker ipam config")
         for item in config:
             allowed = {"AuxiliaryAddresses", "Gateway", "IPRange", "Subnet"}
@@ -349,7 +352,10 @@ def _parse_network_inspection(probe):
             subnets.append(ipaddress.ip_network(item["subnet"], strict=False))
     else:
         raise ValueError("network address schema")
-    if not subnets and not (name == "none" and driver == "null" and isinstance(address_data, dict)):
+    if not subnets and not (
+        isinstance(address_data, dict)
+        and (name, driver) in {("host", "host"), ("none", "null")}
+    ):
         raise ValueError("empty network ipam")
     return name, driver, subnets
 
@@ -454,8 +460,23 @@ def classify_systemd_capability(probe):
         return "pass"
     return "stop"
 
-def classify_phase13_bot_unit(active_probe, enabled_probe):
-    return "pass" if probe_ok(active_probe) and probe_ok(enabled_probe) and active_probe[1] == b"inactive\n" and enabled_probe[1] == b"disabled\n" else "stop"
+def classify_phase13_bot_unit(initial_active, initial_enabled, final_active, final_enabled):
+    probes = (initial_active, initial_enabled, final_active, final_enabled)
+    return "pass" if (
+        all(probe_ok(probe) for probe in probes)
+        and initial_active[1] == b"active\n"
+        and initial_enabled[1] == b"enabled\n"
+        and final_active[1] == initial_active[1]
+        and final_enabled[1] == initial_enabled[1]
+    ) else "stop"
+
+def observe_phase13_bot_unit(command_fn):
+    initial_active = command_fn([SYSTEMCTL, "show", CURRENT_BOT_UNIT, "--property=ActiveState", "--value"])
+    initial_enabled = command_fn([SYSTEMCTL, "show", CURRENT_BOT_UNIT, "--property=UnitFileState", "--value"])
+    final_active = command_fn([SYSTEMCTL, "show", CURRENT_BOT_UNIT, "--property=ActiveState", "--value"])
+    final_enabled = command_fn([SYSTEMCTL, "show", CURRENT_BOT_UNIT, "--property=UnitFileState", "--value"])
+    probes = (initial_active, initial_enabled, final_active, final_enabled)
+    return classify_phase13_bot_unit(*probes), b"".join(probe[1] + probe[2] for probe in probes)
 
 def classify_routes(probe):
     stopped = ("stop", "stop", "stop")
@@ -482,7 +503,7 @@ def classify_routes(probe):
         )
         if not isinstance(value, list):
             return stopped
-        allowed_keys = {"dev", "dst", "flags", "gateway", "metric", "prefsrc", "protocol", "scope", "src", "table", "type"}
+        allowed_keys = {"dev", "dst", "flags", "gateway", "metric", "pref", "prefsrc", "protocol", "scope", "src", "table", "type"}
         routes = []
         for item in value:
             if not isinstance(item, dict) or not item or not set(item).issubset(allowed_keys) or not isinstance(item.get("dst"), str):
@@ -494,6 +515,8 @@ def classify_routes(probe):
             if "dev" in item and (not isinstance(item["dev"], str) or re.fullmatch(r"[A-Za-z0-9_.:+-]{1,64}", item["dev"]) is None):
                 return stopped
             if "metric" in item and (isinstance(item["metric"], bool) or not isinstance(item["metric"], int) or not 0 <= item["metric"] <= 4294967295):
+                return stopped
+            if "pref" in item and item["pref"] not in {"high", "low", "medium"}:
                 return stopped
             for address_field in ("gateway", "prefsrc", "src"):
                 if address_field in item:
@@ -862,6 +885,8 @@ def classify_firewall(nft_probe, iptables_probe, iptables_legacy_probe=None):
                 backend_states.append("unavailable")
             elif not probe_ok(probe):
                 return "stop"
+            elif probe[1] == b"":
+                backend_states.append("pass")
             else:
                 backend_states.append("conflict" if _parse_iptables_save(probe[1]) else "pass")
     except (UnicodeDecodeError, json.JSONDecodeError, ValueError, TypeError):
@@ -878,6 +903,21 @@ def parse_awg2_container_probe(probe):
         return None
     return int(match.group(1).decode('ascii')), int(match.group(2).decode('ascii'))
 
+def awg2_runtime_command(pid, operation):
+    if isinstance(pid, bool) or not isinstance(pid, int) or not 0 < pid <= 9999999999:
+        raise ValueError("container pid")
+    if operation != "latest-handshakes":
+        raise ValueError("awg operation")
+    return [
+        NSENTER,
+        f"--mount=/proc/{pid}/ns/mnt",
+        f"--net=/proc/{pid}/ns/net",
+        "/usr/bin/awg",
+        "show",
+        CURRENT_AWG2_INTERFACE,
+        operation,
+    ]
+
 def classify_awg2_health(owner_probe, initial_probe, interface_probe, handshake_probe, final_probe, final_owner_probe, now_epoch):
     if not all(probe_ok(probe) for probe in (owner_probe, initial_probe, interface_probe, handshake_probe, final_probe, final_owner_probe)):
         return "stop"
@@ -886,7 +926,12 @@ def classify_awg2_health(owner_probe, initial_probe, interface_probe, handshake_
     container_state = parse_awg2_container_probe(initial_probe)
     if initial_probe[1] != final_probe[1]:
         return "stop"
-    if container_state is None or re.fullmatch(rb"[0-9]+: awg0(?:@[^: \n]+)?: <[A-Z0-9_,]+\x3e(?: [^\r\n]*)?\n(?:    [^\r\n]+\n)*", interface_probe[1]) is None:
+    interface_pattern = (
+        rb"[0-9]+: "
+        + re.escape(CURRENT_AWG2_INTERFACE.encode("ascii"))
+        + rb"(?:@[^: \n]+)?: <[A-Z0-9_,]+\x3e(?: [^\r\n]*)?\n(?:    [^\r\n]+\n)*"
+    )
+    if container_state is None or re.fullmatch(interface_pattern, interface_probe[1]) is None:
         return "stop"
     if not handshake_probe[1].endswith(b"\n") or b"\r" in handshake_probe[1]:
         return "stop"
@@ -1053,13 +1098,12 @@ def production_observations():
     else:
         netns = f"--net=/proc/{awg_container_state[0]}/ns/net"
         awg_link = command([NSENTER, netns, IP, "-o", "link", "show", "dev", CURRENT_AWG2_INTERFACE])
-        awg_handshakes = command([NSENTER, netns, "/usr/bin/awg", "show", CURRENT_AWG2_INTERFACE, "latest-handshakes"])
+        awg_handshakes = command(awg2_runtime_command(awg_container_state[0], "latest-handshakes"))
     awg_final = command([SPAIN_DOCKER, "--host", SPAIN_DOCKER_HOST, "inspect", "--format", "{{.State.Running}}|{{.State.Pid}}|{{.RestartCount}}", CURRENT_AWG2_CONTAINER])
     awg_owner_final = command([SYSTEMCTL, "show", CURRENT_AWG2_OWNER_UNIT, "--property=ActiveState", "--value"])
     values["awg2_health"] = observed(classify_awg2_health(awg_owner, awg_unit, awg_link, awg_handshakes, awg_final, awg_owner_final, int(time.time())), awg_owner[1] + awg_owner[2] + awg_unit[1] + awg_unit[2] + awg_link[1] + awg_link[2] + awg_handshakes[1] + awg_handshakes[2] + awg_final[1] + awg_final[2] + awg_owner_final[1] + awg_owner_final[2])
-    bot_active_probe = command([SYSTEMCTL, "show", CURRENT_BOT_UNIT, "--property=ActiveState", "--value"])
-    bot_enabled_probe = command([SYSTEMCTL, "show", CURRENT_BOT_UNIT, "--property=UnitFileState", "--value"])
-    values["telegram_prerequisites"] = observed(classify_phase13_bot_unit(bot_active_probe, bot_enabled_probe), bot_active_probe[1] + bot_active_probe[2] + bot_enabled_probe[1] + bot_enabled_probe[2])
+    bot_state, bot_raw = observe_phase13_bot_unit(command)
+    values["telegram_prerequisites"] = observed(bot_state, bot_raw)
     awg3_probe = command([IP, "link", "show", "awg3"])
     bridge_probe = command([IP, "link", "show", "amn2sp3br0"])
     values["interface_awg3"] = observed(classify_ip_link(awg3_probe, "awg3"), awg3_probe[1] + awg3_probe[2])
