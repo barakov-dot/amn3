@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <p class="eyebrow">Статус сборки</p>
+    <h1>О системе</h1>
+  </section>
+
+  <section class="settings-grid" aria-label="Статус сборки">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Приложение</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Название</td>
+              <td>{{ about.application.name }}</td>
+            </tr>
+            <tr>
+              <td>Версия приложения</td>
+              <td><code>{{ about.application.version }}</code></td>
+            </tr>
+            <tr>
+              <td>Источник сборки</td>
+              <td>{{ about.application.source }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Среда выполнения</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Python runtime</td>
+              <td><code>{{ about.runtime.python }}</code></td>
+            </tr>
+            <tr>
+              <td>Реализация</td>
+              <td>{{ about.runtime.implementation }}</td>
+            </tr>
+            <tr>
+              <td>Система</td>
+              <td>{{ about.runtime.system }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Статус сборки</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="settings-table">
+        <tbody>
+          <tr>
+            <td>Режим</td>
+            <td>{{ about.build.status }}</td>
+          </tr>
+          <tr>
+            <td>Автообновление</td>
+            <td>{{ about.build.auto_update }}</td>
+          </tr>
+          <tr>
+            <td>Write-действия</td>
+            <td>{{ about.build.write_actions }}</td>
+          </tr>
+          <tr>
+            <td>Публичный доступ</td>
+            <td>{{ about.build.public_exposure }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Заблокировано здесь</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="settings-table">
+        <tbody>
+          {% for surface in about.blocked_surfaces %}
+            <tr>
+              <td>{{ surface }}</td>
+              <td>требуется отдельный gate</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

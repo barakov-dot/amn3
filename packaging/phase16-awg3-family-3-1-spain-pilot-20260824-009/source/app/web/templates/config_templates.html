@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <p class="eyebrow">Доставка клиентских конфигов</p>
+    <h1>Шаблоны конфигурации</h1>
+  </section>
+
+  <section class="panel panel-spaced" aria-label="Безопасность delivery artifacts">
+    <div class="panel-header">
+      <h2>Секретные delivery artifacts</h2>
+    </div>
+    <p class="empty-state">Реальные .conf, QR и vpn:// payloads считаются секретами. Редактирование шаблонов требует named gate.</p>
+    <p class="action-note">Матрица клиентов: iOS DefaultVPN — основной путь в РФ; iOS AmneziaWG — только если приложение уже установлено; Android AmneziaWG — отдельный поддерживаемый путь. .conf остается первым fallback.</p>
+  </section>
+
+  <section class="template-grid" aria-label="Шаблоны клиентских конфигов">
+    {% for item in config_templates %}
+      <article class="panel">
+        <div class="panel-header">
+          <h2>{{ item.version }}</h2>
+          <span class="status">{{ item.source }}</span>
+        </div>
+        <dl class="details details-compact">
+          <div>
+            <dt>Файл</dt>
+            <dd><code>{{ item.filename }}</code></dd>
+          </div>
+          <div>
+            <dt>Директория</dt>
+            <dd>{{ template_dir_name }}</dd>
+          </div>
+        </dl>
+        {% if item.error %}
+          <p class="empty-state">{{ item.error }}</p>
+        {% endif %}
+        <form action="/config-templates/{{ item.version }}/save" method="post" class="form">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <label class="field">
+            Шаблон
+            <textarea name="template_text" rows="22" spellcheck="false" disabled>{{ item.template_text }}</textarea>
+          </label>
+          <button class="button button-primary" type="submit" disabled>Сохранить шаблон</button>
+          <p class="action-note">Редактирование шаблонов требует named gate.</p>
+        </form>
+        <form action="/config-templates/{{ item.version }}/reset" method="post">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-secondary" type="submit" disabled>Сбросить к встроенному шаблону</button>
+        </form>
+        {% if not item.error %}
+          <div class="template-block">
+            <h3>Preview</h3>
+            <pre class="config-preview"><code>{{ item.preview }}</code></pre>
+          </div>
+          <div class="template-block">
+            <h3>vpn://</h3>
+            <code class="vpn-link">{{ item.vpn_import_link }}</code>
+          </div>
+        {% endif %}
+      </article>
+    {% endfor %}
+  </section>
+
+  <section class="panel panel-spaced" aria-label="Placeholder шаблонов">
+    <div class="panel-header">
+      <h2>Placeholder клиентского конфига</h2>
+    </div>
+    <div class="placeholder-list">
+      {% for placeholder in config_placeholders %}
+        <code>{{ placeholder }}</code>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel panel-spaced" aria-label="Шаблон сообщения доставки">
+    <div class="panel-header">
+      <h2>{{ delivery_template.key }}</h2>
+    </div>
+    <div class="placeholder-list">
+      {% for placeholder in delivery_template.placeholders %}
+        <code>{{ placeholder }}</code>
+      {% endfor %}
+    </div>
+    <pre class="config-preview"><code>{{ delivery_template.preview }}</code></pre>
+  </section>
+{% endblock %}

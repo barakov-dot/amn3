@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <p class="eyebrow">Диагностика runtime</p>
+    <h1>Логи приложения</h1>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Источник логов</h2>
+    </div>
+    <dl class="details">
+      <div>
+        <dt>Статус</dt>
+        <dd>
+          {% if log_enabled %}
+            <span class="status status-active">включено</span>
+          {% else %}
+            <span class="status status-disabled">отключено</span>
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>Уровень</dt>
+        <dd>{{ log_level }}</dd>
+      </div>
+      <div>
+        <dt>Путь</dt>
+        <dd class="wrap-text">{{ log_path }}</dd>
+      </div>
+      <div>
+        <dt>Максимум строк</dt>
+        <dd>{{ log_max_lines }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Последние строки</h2>
+    </div>
+    {% if not log_enabled %}
+      <p class="empty-state">Логирование отключено.</p>
+    {% elif log_lines %}
+      <ol class="log-lines">
+        {% for line in log_lines %}
+          <li><code>{{ line }}</code></li>
+        {% endfor %}
+      </ol>
+    {% else %}
+      <p class="empty-state">Строк логов не найдено.</p>
+    {% endif %}
+  </section>
+{% endblock %}
