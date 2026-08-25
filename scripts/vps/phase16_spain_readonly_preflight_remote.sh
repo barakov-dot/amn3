@@ -22,7 +22,7 @@ import sys
 import threading
 import time
 
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-009"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-010"
 CURRENT_APPLICATION_ROOT = "/opt/amn2-spain"
 CURRENT_DATABASE_PATH = "/var/lib/amn2-spain/amn2.sqlite3"
 CURRENT_AWG2_CONTAINER = "amn2-spain-awg"
@@ -604,6 +604,11 @@ TARGET_NETWORKS = (
     ipaddress.ip_network("10.212.13.0/24"),
     ipaddress.ip_network("172.29.252.0/28"),
 )
+NFT_CT_STATES = {"established", "invalid", "new", "related", "untracked"}
+NFT_CT_STATUSES = {
+    "assured", "confirmed", "dnat", "dying", "expected", "seen-reply",
+    "snat", "template", "untracked",
+}
 
 def _port_spec_conflicts(value):
     if not isinstance(value, str) or not value:
@@ -667,6 +672,25 @@ def _nft_scalar_conflict(value, context):
         return False
     raise ValueError("nft scalar")
 
+def _nft_l4_protocol_conflict(value):
+    if not isinstance(value, str) or re.fullmatch(r"[a-z][a-z0-9+.-]{0,15}", value) is None:
+        raise ValueError("nft l4 protocol")
+    return False
+
+def _nft_ct_state_conflict(value):
+    if not isinstance(value, list) or not value:
+        raise ValueError("nft ct state")
+    if any(not isinstance(item, str) or item not in NFT_CT_STATES for item in value):
+        raise ValueError("nft ct state")
+    if len(value) != len(set(value)):
+        raise ValueError("nft ct state")
+    return False
+
+def _nft_ct_status_conflict(value):
+    if not isinstance(value, str) or value not in NFT_CT_STATUSES:
+        raise ValueError("nft ct status")
+    return False
+
 def _parse_nft_expression(expression):
     if not isinstance(expression, dict) or len(expression) != 1:
         raise ValueError("nft expression")
@@ -711,7 +735,7 @@ def _parse_nft_expression(expression):
             raise ValueError("nft counter")
         return False
     if kind == "match":
-        if not isinstance(payload, dict) or set(payload) != {"left", "op", "right"} or payload["op"] not in {"==", "in"}:
+        if not isinstance(payload, dict) or set(payload) != {"left", "op", "right"} or not isinstance(payload["op"], str):
             raise ValueError("nft match")
         left = payload["left"]
         if not isinstance(left, dict) or len(left) != 1:
@@ -721,16 +745,42 @@ def _parse_nft_expression(expression):
             if not isinstance(descriptor, dict) or set(descriptor) != {"field", "protocol"} or not isinstance(descriptor["field"], str) or not isinstance(descriptor["protocol"], str):
                 raise ValueError("nft payload")
             context = descriptor["field"]
-            if context not in {"dport", "sport", "saddr", "daddr"}:
+            if context == "protocol":
+                if descriptor["protocol"] != "ip" or payload["op"] != "==":
+                    raise ValueError("nft payload protocol")
+                return _nft_l4_protocol_conflict(payload["right"])
+            if context not in {"dport", "sport", "saddr", "daddr"} or payload["op"] not in {"==", "in"}:
                 raise ValueError("nft payload field")
             if context in {"dport", "sport"} and descriptor["protocol"] not in {"tcp", "udp"}:
                 raise ValueError("nft port protocol")
             if context in {"saddr", "daddr"} and descriptor["protocol"] not in {"ip", "ip6"}:
                 raise ValueError("nft network protocol")
         elif left_kind == "meta":
-            if not isinstance(descriptor, dict) or set(descriptor) != {"key"} or descriptor["key"] not in {"iifname", "oifname"}:
+            if not isinstance(descriptor, dict) or set(descriptor) != {"key"}:
                 raise ValueError("nft meta")
             context = descriptor["key"]
+            if context == "l4proto":
+                if payload["op"] != "==":
+                    raise ValueError("nft meta l4proto")
+                return _nft_l4_protocol_conflict(payload["right"])
+            if context not in {"iifname", "oifname"}:
+                raise ValueError("nft meta")
+            if payload["op"] not in {"==", "in"} and not (
+                context == "oifname" and payload["op"] == "!="
+            ):
+                raise ValueError("nft meta operator")
+        elif left_kind == "ct":
+            if not isinstance(descriptor, dict) or set(descriptor) != {"key"}:
+                raise ValueError("nft ct")
+            if descriptor["key"] == "state":
+                if payload["op"] != "in":
+                    raise ValueError("nft ct state operator")
+                return _nft_ct_state_conflict(payload["right"])
+            if descriptor["key"] == "status":
+                if payload["op"] != "in":
+                    raise ValueError("nft ct status operator")
+                return _nft_ct_status_conflict(payload["right"])
+            raise ValueError("nft ct key")
         else:
             raise ValueError("nft left kind")
         return _nft_scalar_conflict(payload["right"], context)

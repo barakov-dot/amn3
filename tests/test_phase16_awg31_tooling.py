@@ -16,9 +16,9 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-009"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-010"
 SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
-TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-009"
+TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-010"
 HISTORIC_PACKAGE_003 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-003"
 )
@@ -36,6 +36,9 @@ HISTORIC_PACKAGE_007 = (
 )
 HISTORIC_PACKAGE_008 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-008"
+)
+HISTORIC_PACKAGE_009 = (
+    ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-009"
 )
 RUNTIME_IDENTITY = (
     "docker.io/amneziavpn/amneziawg-go@"
@@ -345,6 +348,46 @@ def test_phase16_observed_nft_expression_shapes_are_admitted_without_resource_co
                                 },
                                 {"limit": {"burst": 10, "per": "second", "rate": 5}},
                                 {"masquerade": None},
+                                {
+                                    "match": {
+                                        "left": {
+                                            "payload": {
+                                                "field": "protocol",
+                                                "protocol": "ip",
+                                            }
+                                        },
+                                        "op": "==",
+                                        "right": "tcp",
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        "left": {"meta": {"key": "l4proto"}},
+                                        "op": "==",
+                                        "right": "ipv6-icmp",
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        "left": {"ct": {"key": "state"}},
+                                        "op": "in",
+                                        "right": ["established", "related"],
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        "left": {"ct": {"key": "status"}},
+                                        "op": "in",
+                                        "right": "dnat",
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        "left": {"meta": {"key": "oifname"}},
+                                        "op": "!=",
+                                        "right": "docker0",
+                                    }
+                                },
                                 {"xt": {"name": "comment", "type": "match"}},
                             ],
                             "family": "ip",
@@ -375,6 +418,161 @@ def test_phase16_observed_nft_dnat_preserves_address_and_port_conflict_detection
     parse = collector_helper("_parse_nft_expression")
 
     assert parse({"dnat": payload}) is expected
+
+
+@pytest.mark.parametrize(
+    "expression",
+    [
+        {
+            "match": {
+                "left": {"payload": {"field": "protocol", "protocol": "ip"}},
+                "op": "==",
+                "right": "tcp",
+            }
+        },
+        {
+            "match": {
+                "left": {"meta": {"key": "l4proto"}},
+                "op": "==",
+                "right": "ipv6-icmp",
+            }
+        },
+        {
+            "match": {
+                "left": {"ct": {"key": "state"}},
+                "op": "in",
+                "right": ["established", "related"],
+            }
+        },
+        {
+            "match": {
+                "left": {"ct": {"key": "status"}},
+                "op": "in",
+                "right": "dnat",
+            }
+        },
+        {
+            "match": {
+                "left": {"meta": {"key": "oifname"}},
+                "op": "!=",
+                "right": "docker0",
+            }
+        },
+    ],
+)
+def test_phase16_observed_nft_match_contracts_are_admitted_without_resource_conflicts(
+    expression: dict[str, object],
+):
+    parse = collector_helper("_parse_nft_expression")
+
+    assert parse(expression) is False
+
+
+@pytest.mark.parametrize("target_interface", ["awg3", "amn2sp3br0"])
+def test_phase16_observed_nft_oifname_not_equal_preserves_target_conflict_detection(
+    target_interface: str,
+):
+    parse = collector_helper("_parse_nft_expression")
+    expression = {
+        "match": {
+            "left": {"meta": {"key": "oifname"}},
+            "op": "!=",
+            "right": target_interface,
+        }
+    }
+
+    assert parse(expression) is True
+
+
+@pytest.mark.parametrize(
+    "expression",
+    [
+        {
+            "match": {
+                "left": {"payload": {"field": "protocol", "protocol": "ip"}},
+                "op": "==",
+                "right": "TCP",
+            }
+        },
+        {
+            "match": {
+                "left": {"payload": {"field": "protocol", "protocol": "ip"}},
+                "op": "==",
+                "right": "a" * 17,
+            }
+        },
+        {
+            "match": {
+                "left": {"payload": {"field": "protocol", "protocol": "ip6"}},
+                "op": "==",
+                "right": "tcp",
+            }
+        },
+        {
+            "match": {
+                "left": {"meta": {"key": "l4proto"}},
+                "op": "in",
+                "right": "tcp",
+            }
+        },
+        {
+            "match": {
+                "left": {"ct": {"key": "state"}},
+                "op": "in",
+                "right": "established",
+            }
+        },
+        {
+            "match": {
+                "left": {"ct": {"key": "state"}},
+                "op": "in",
+                "right": [],
+            }
+        },
+        {
+            "match": {
+                "left": {"ct": {"key": "state"}},
+                "op": "in",
+                "right": ["established", "established"],
+            }
+        },
+        {
+            "match": {
+                "left": {"ct": {"key": "state"}},
+                "op": "in",
+                "right": ["established", "private-state"],
+            }
+        },
+        {
+            "match": {
+                "left": {"ct": {"key": "status"}},
+                "op": "in",
+                "right": "private-status",
+            }
+        },
+        {
+            "match": {
+                "left": {"ct": {"key": "status"}},
+                "op": "==",
+                "right": "dnat",
+            }
+        },
+        {
+            "match": {
+                "left": {"meta": {"key": "iifname"}},
+                "op": "!=",
+                "right": "docker0",
+            }
+        },
+    ],
+)
+def test_phase16_observed_nft_match_contracts_remain_bounded_and_fail_closed(
+    expression: dict[str, object],
+):
+    parse = collector_helper("_parse_nft_expression")
+
+    with pytest.raises(ValueError, match="nft"):
+        parse(expression)
 
 
 @pytest.mark.parametrize(
@@ -679,6 +877,37 @@ def test_historic_phase16_package_008_remains_checksum_immutable():
     assert json.loads(manifest_path.read_text(encoding="utf-8"))[
         "package_identity_sha256"
     ] == "e1cf967208467acebdfcaaac30557436855b75a92b5154ab41fc3429f747a7c3"
+
+
+def test_historic_phase16_package_009_remains_checksum_immutable():
+    manifest_path = HISTORIC_PACKAGE_009 / "manifest.json"
+    collector_path = (
+        HISTORIC_PACKAGE_009
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_remote.sh"
+    )
+    runner_path = (
+        HISTORIC_PACKAGE_009
+        / "tooling"
+        / "scripts"
+        / "vps"
+        / "phase16_spain_readonly_preflight_ssh_runner.ps1"
+    )
+
+    assert hashlib.sha256(manifest_path.read_bytes()).hexdigest() == (
+        "084302df340f4741109103dc7baf94601dd24163406d002b82756fde8d9c80c1"
+    )
+    assert hashlib.sha256(collector_path.read_bytes()).hexdigest() == (
+        "80b3347b8787ca1490b40f1763ccff01fb4428233ca4f240c068fd02e35cef15"
+    )
+    assert hashlib.sha256(runner_path.read_bytes()).hexdigest() == (
+        "f0d0843c05c341b340dce8721d30f55380b6a8493aff70da7013185875301fbf"
+    )
+    assert json.loads(manifest_path.read_text(encoding="utf-8"))[
+        "package_identity_sha256"
+    ] == "2a4549c05daca9f3666ffe1babfa17851c93c59cc1b902efe9dca16002d9fe5d"
 
 
 def test_resource_plan_binds_awg31_runtime_client_capabilities_and_rollback():
@@ -997,7 +1226,7 @@ def test_phase16_ssh_remote_command_uses_fail_closed_bom_filter():
     assert '" "$3" | /usr/bin/bash -s -- "$@"' in remote
     assert "| /usr/bin/bash -s -- \"$@\"" in remote
     assert remote.endswith(
-        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-009' "
+        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-010' "
         "'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' "
         "'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' "
         "'phase16-preflight-test-001' '138.124.181.246'"
