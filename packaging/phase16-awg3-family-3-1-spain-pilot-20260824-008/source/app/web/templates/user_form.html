@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading page-heading">
+    <div>
+      <p class="eyebrow">User management</p>
+      <h1>{{ submit_label }}</h1>
+    </div>
+    <a class="button button-secondary" href="/users">Back to users</a>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>User details</h2>
+    </div>
+    <form action="{{ action_url }}" method="post" class="form form-wide">
+      <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+      <div class="form-grid">
+        <label class="field">
+          Telegram ID
+          <input name="telegram_id" type="number" value="{{ user.telegram_id or '' }}" required>
+        </label>
+        <label class="field">
+          Username
+          <input name="username" type="text" value="{{ user.username or '' }}">
+        </label>
+        <label class="field">
+          First name
+          <input name="first_name" type="text" value="{{ user.first_name or '' }}">
+        </label>
+        <label class="field">
+          Last name
+          <input name="last_name" type="text" value="{{ user.last_name or '' }}">
+        </label>
+        <label class="field">
+          Email
+          <input name="email" type="email" value="{{ user.email or '' }}">
+        </label>
+        <label class="field">
+          Status
+          <select name="status">
+            {% for status in statuses %}
+              <option value="{{ status }}" {% if user.status == status %}selected{% endif %}>{{ status }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+      <label class="checkbox-field">
+        <input name="is_admin" type="checkbox" value="on" {% if user.is_admin %}checked{% endif %}>
+        Admin
+      </label>
+      <div class="form-actions">
+        <button class="button" type="submit">{{ submit_label }}</button>
+        <a class="button button-secondary" href="/users">Cancel</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}
