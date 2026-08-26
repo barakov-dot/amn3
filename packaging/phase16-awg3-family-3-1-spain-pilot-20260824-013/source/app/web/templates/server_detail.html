@@ -1,0 +1,433 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading page-heading">
+    <div>
+      <p class="eyebrow">Server management</p>
+      <h1>{{ server.name }}</h1>
+    </div>
+    <div class="button-row">
+      <a class="button button-secondary" href="/servers">Back</a>
+      <a class="button" href="/servers/{{ server.id }}/edit">Edit</a>
+      <a class="button button-secondary" href="/servers/{{ server.id }}/health">Health</a>
+    </div>
+  </section>
+
+  <section class="detail-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Configuration</h2>
+      </div>
+      <dl class="details">
+        <div>
+          <dt>SSH host</dt>
+          <dd>{{ server.host or "-" }}:{{ server.ssh_port or "-" }}</dd>
+        </div>
+        <div>
+          <dt>Endpoint</dt>
+          <dd>{{ server.endpoint_host or "-" }}:{{ server.vpn_port or "-" }}</dd>
+        </div>
+        <div>
+          <dt>Network</dt>
+          <dd>{{ server.vpn_network_cidr }}</dd>
+        </div>
+        <div>
+          <dt>Server address</dt>
+          <dd>{{ server.server_address or "-" }}</dd>
+        </div>
+        <div>
+          <dt>Public key</dt>
+          <dd class="wrap-text">{{ server.server_public_key or "-" }}</dd>
+        </div>
+        <div>
+          <dt>Runtime</dt>
+          <dd>{{ server.runtime or "-" }}</dd>
+        </div>
+        <div>
+          <dt>Firewall</dt>
+          <dd>{{ server.firewall or "-" }}</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd><span class="status status-{{ server.status }}">{{ server.status }}</span></dd>
+        </div>
+        <div>
+          <dt>Devices</dt>
+          <dd>{{ server.active_device_count }} / {{ server.total_device_count }}</dd>
+        </div>
+        <div>
+          <dt>Max devices</dt>
+          <dd>{{ server.max_devices }}</dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Actions</h2>
+      </div>
+      <div class="action-stack">
+        <form action="/servers/{{ server.id }}/health/run" method="post">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button" type="submit">Run health check</button>
+          <p class="action-note">Только локальная запись: сохраняет статус проверки; VPS не меняет.</p>
+        </form>
+        <form action="/servers/{{ server.id }}/sync/run" method="post">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-secondary" type="submit">Run peer sync</button>
+          <p class="action-note">Только сравнение: инвентаризирует peer AmneziaWG без добавления или удаления.</p>
+        </form>
+        <form action="/servers/{{ server.id }}/disable" method="post" data-confirm="Disable this server in the admin database only? No VPS peers will be changed.">
+          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+          <button class="button button-danger" type="submit">Disable</button>
+        </form>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>VPS readiness</h2>
+    </div>
+    <dl class="details">
+      {% for check in vps_readiness.checks %}
+        <div>
+          <dt>{{ check.label }}</dt>
+          <dd>
+            <span class="status status-{{ check.status_class }}">{{ check.status }}</span>
+            <span class="muted-text wrap-text">{{ check.detail }}</span>
+          </dd>
+        </div>
+      {% endfor %}
+    </dl>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Read-only server summary</h2>
+    </div>
+    <p class="action-note">
+      safe internal alias; private operator panel; {{ read_only_server_summary.action_hint }}
+    </p>
+    <dl class="details">
+      <div>
+        <dt>server_label</dt>
+        <dd>{{ read_only_server_summary.server_label }}</dd>
+      </div>
+      <div>
+        <dt>runtime_kind</dt>
+        <dd>{{ read_only_server_summary.runtime_kind }}</dd>
+      </div>
+      <div>
+        <dt>service_mode</dt>
+        <dd>{{ read_only_server_summary.service_mode }}</dd>
+      </div>
+      <div>
+        <dt>latest_health_status</dt>
+        <dd>
+          <span class="status status-{{ read_only_server_summary.latest_health_status }}">
+            {{ read_only_server_summary.latest_health_status }}
+          </span>
+        </dd>
+      </div>
+      <div>
+        <dt>latest_latency_ms</dt>
+        <dd>
+          {% if read_only_server_summary.latest_latency_ms is not none %}
+            {{ read_only_server_summary.latest_latency_ms }} ms
+          {% else %}
+            -
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>last_checked_at</dt>
+        <dd>{{ read_only_server_summary.last_checked_at }}</dd>
+      </div>
+      <div>
+        <dt>data_source</dt>
+        <dd>{{ read_only_server_summary.data_source }}</dd>
+      </div>
+      <div>
+        <dt>freshness</dt>
+        <dd>{{ read_only_server_summary.freshness }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>VPS retest bundle</h2>
+    </div>
+    <ol class="command-list">
+      {% for command in vps_retest_commands %}
+        <li><code>{{ command }}</code></li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Latest health</h2>
+    </div>
+    {% if latest_health %}
+      <dl class="details">
+        <div>
+          <dt>Status</dt>
+          <dd><span class="status status-{{ latest_health.status }}">{{ latest_health.status }}</span></dd>
+        </div>
+        <div>
+          <dt>Latency</dt>
+          <dd>
+            {% if latest_health.latency_ms is not none %}
+              {{ latest_health.latency_ms }} ms
+            {% else %}
+              -
+            {% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt>Checked</dt>
+          <dd>{{ latest_health.checked_at }}</dd>
+        </div>
+        <div>
+          <dt>Error</dt>
+          <dd>{{ latest_health.error or "-" }}</dd>
+        </div>
+      </dl>
+    {% else %}
+      <p class="empty-state">No health check has been stored yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Recent server actions</h2>
+    </div>
+    {% if server_actions %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Action</th>
+              <th>Admin</th>
+              <th>Created</th>
+              <th>Metadata</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for action in server_actions %}
+              <tr>
+                <td>#{{ action.id }}</td>
+                <td>{{ action.action }}</td>
+                <td>{{ action.admin_telegram_id }}</td>
+                <td>{{ action.created_at }}</td>
+                <td class="wrap-text">{{ action.metadata_json or "-" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="empty-state">No server actions.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Синхронизация peer</h2>
+    </div>
+    {% if server_managed_configs %}
+      <div class="table-wrap panel-spaced">
+        <h3>Working configs on server</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Owner</th>
+              <th>Device</th>
+              <th>Status</th>
+              <th>Config</th>
+              <th>VPN IP</th>
+              <th>Live status</th>
+              <th>Live Allowed IPs</th>
+              <th>Peer</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for config in server_managed_configs %}
+              <tr>
+                <td>
+                  <a href="/users/{{ config.user_id }}">{{ config.user_display }}</a>
+                  <span class="muted-text">{{ config.user_telegram_id }}</span>
+                </td>
+                <td>#{{ config.device_id }} {{ config.device_name }}</td>
+                <td><span class="status status-{{ config.device_status }}">{{ config.device_status }}</span></td>
+                <td>{{ config.config_version }}</td>
+                <td>{{ config.vpn_ip }}/32</td>
+                <td><span class="status status-{{ config.live_status_class }}">{{ config.live_status }}</span></td>
+                <td>{{ config.live_allowed_ips or "-" }}</td>
+                <td class="wrap-text">{{ config.peer_public_key }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+    {% if peer_sync %}
+      {% if peer_sync.error %}
+        <p class="empty-state">{{ peer_sync.error }}</p>
+      {% else %}
+        {% if peer_sync.last_operation %}
+          <div class="notice notice-success">
+            <strong>{{ peer_sync.last_operation.title }}</strong>
+            <span>{{ peer_sync.last_operation.detail }}</span>
+          </div>
+        {% endif %}
+        <dl class="details">
+          <div>
+            <dt>Известные peer панели</dt>
+            <dd>{{ peer_sync.known_count }}</dd>
+          </div>
+          <div>
+            <dt>Amnezia / отсутствуют</dt>
+            <dd>{{ peer_sync.known_count }} / {{ peer_sync.unknown_count }} / {{ peer_sync.missing_count }}</dd>
+          </div>
+          <div>
+            <dt>Созданы в Amnezia</dt>
+            <dd>{{ peer_sync.ignored_count }}</dd>
+          </div>
+        </dl>
+        {% if peer_sync.reconciliation_snapshots %}
+          <div class="table-wrap panel-spaced">
+            <table>
+              <thead>
+                <tr>
+                  <th>Subject / Passport</th>
+                  <th>Desired</th>
+                  <th>Observed</th>
+                  <th>Drift / Freshness</th>
+                  <th>Reason</th>
+                  <th>Recommended action</th>
+                  <th>Evidence</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for snapshot in peer_sync.reconciliation_snapshots %}
+                  <tr>
+                    <td>
+                      <span>{{ snapshot.subject_id }}</span>
+                      <span class="muted-text">{{ snapshot.passport_device_id or "no passport" }}</span>
+                    </td>
+                    <td>{{ snapshot.desired_state.peer_expected }}</td>
+                    <td>{{ snapshot.observed_state.peer_present }}</td>
+                    <td>
+                      <span class="status status-{{ snapshot.drift_state }}">{{ snapshot.drift_state }}</span>
+                      <span class="muted-text">{{ snapshot.freshness }}</span>
+                    </td>
+                    <td>{{ snapshot.drift_reason }}</td>
+                    <td>{{ snapshot.recommended_next_action }}</td>
+                    <td>{{ snapshot.evidence | length }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+        {% if peer_sync.unknown_peers %}
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Peer из Amnezia</th>
+                  <th>Allowed IPs</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for peer in peer_sync.unknown_peers %}
+                  <tr>
+                    <td class="wrap-text">{{ peer.peer_public_key }}</td>
+                    <td>{{ peer.allowed_ips }}</td>
+                    <td>
+                      <div class="button-row">
+                        <form action="/servers/{{ server.id }}/unknown-peers/ignore" method="post">
+                          <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                          <input name="peer_public_key" type="hidden" value="{{ peer.peer_public_key }}">
+                          <input name="allowed_ips" type="hidden" value="{{ peer.allowed_ips }}">
+                          <button class="button button-secondary button-small" type="submit">Пометить как созданный в Amnezia</button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+        {% if peer_sync.ignored_peers %}
+          <div class="table-wrap panel-spaced">
+            <table>
+              <thead>
+                <tr>
+                  <th>Созданы в Amnezia</th>
+                  <th>Allowed IPs</th>
+                  <th>Пометка</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for peer in peer_sync.ignored_peers %}
+                  <tr>
+                    <td class="wrap-text">{{ peer.peer_public_key }}</td>
+                    <td>{{ peer.allowed_ips }}</td>
+                    <td>Не трогать, создано в приложении Amnezia</td>
+                    <td>
+                      <form action="/servers/{{ server.id }}/amnezia-peers/unmark" method="post">
+                        <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                        <input name="peer_public_key" type="hidden" value="{{ peer.peer_public_key }}">
+                        <button class="button button-secondary button-small" type="submit">Снять пометку</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+        {% if peer_sync.missing_peers %}
+          <div class="table-wrap panel-spaced">
+            <p class="action-note">VPS write gate: adding a missing local device writes one peer to AmneziaWG.</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Локальное устройство без peer на сервере</th>
+                  <th>Peer</th>
+                  <th>IP</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for peer in peer_sync.missing_peers %}
+                  <tr>
+                    <td>#{{ peer.device_id }} {{ peer.device_name }}</td>
+                    <td class="wrap-text">{{ peer.peer_public_key }}</td>
+                    <td>{{ peer.vpn_ip }}/32</td>
+                    <td>
+                      <form action="/servers/{{ server.id }}/missing-devices/{{ peer.device_id }}/add" method="post" data-confirm="Add this local device peer to AmneziaWG on the VPS? This is a live write and should follow the VPS gate.">
+                        <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+                        <button class="button button-secondary button-small" type="submit">Добавить в Amnezia</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      {% endif %}
+    {% else %}
+      <p class="empty-state">Запустите синхронизацию, чтобы сравнить peer в AmneziaWG с локальными устройствами.</p>
+    {% endif %}
+  </section>
+{% endblock %}

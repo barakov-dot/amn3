@@ -1,0 +1,671 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <p class="eyebrow">Read-only integration gate</p>
+    <h1>Статус интеграции</h1>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Граница operator-only</h2>
+    </div>
+    <p class="action-note">Операторский пилот: web/admin остается на 127.0.0.1:3030 через SSH-туннель; API 3040 только loopback/read-only.</p>
+    <p class="action-note">Публичный доступ, выдача конфигов и write routes требуют отдельных named gates.</p>
+  </section>
+
+  <section class="settings-grid" aria-label="Integration status">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Текущее решение</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Статус</td>
+              <td>{{ report.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Controlled prod решение</td>
+              <td>{{ report.controlled_prod_readiness.decision|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Stable head</td>
+              <td><code>{{ report.api_baseline.stable_head }}</code></td>
+            </tr>
+            <tr>
+              <td>Branch head</td>
+              <td><code>{{ report.source_checkpoint.current_branch_head }}</code></td>
+            </tr>
+            <tr>
+              <td>Latest VPS-smoked package</td>
+              <td><code>{{ report.source_checkpoint.latest_vps_smoked_package_head }}</code></td>
+            </tr>
+            <tr>
+              <td>Branch package status</td>
+              <td>{{ report.source_checkpoint.package_status_for_branch_head|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Source overlay</td>
+              <td><code>{{ report.controlled_prod_readiness.source_overlay_head }}</code></td>
+            </tr>
+            <tr>
+              <td>VPS smoke run</td>
+              <td><code>{{ report.controlled_prod_readiness.vps_smoke_run_id }}</code></td>
+            </tr>
+            {% if report.controlled_prod_readiness.source_update_run_id %}
+              <tr>
+                <td>Source update run</td>
+                <td><code>{{ report.controlled_prod_readiness.source_update_run_id }}</code></td>
+              </tr>
+            {% endif %}
+            <tr>
+              <td>API/web baseline</td>
+              <td><code>{{ report.api_baseline.api_web_baseline_head }}</code></td>
+            </tr>
+            <tr>
+              <td>Web/admin доступ</td>
+              <td>{{ report.controlled_prod_readiness.web_admin_access|replace("_", "-") }}</td>
+            </tr>
+            {% if report.controlled_prod_readiness.manual_web_check %}
+              <tr>
+                <td>Manual web проверка</td>
+                <td>{{ report.controlled_prod_readiness.manual_web_check|replace("_", "-") }}</td>
+              </tr>
+            {% endif %}
+            {% if report.controlled_prod_readiness.service_deployment %}
+              <tr>
+                <td>Service deployment</td>
+                <td>{{ report.controlled_prod_readiness.service_deployment|replace("_", "-") }}</td>
+              </tr>
+            {% endif %}
+            <tr>
+              <td>API listener</td>
+              <td>{{ report.controlled_prod_readiness.api_listener|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Local read-only head</td>
+              <td><code>{{ report.local_read_only_extension.head }}</code></td>
+            </tr>
+            <tr>
+              <td>Статус local head</td>
+              <td>{{ report.local_read_only_extension.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Remote operation Phase 1</td>
+              <td>{{ report.remote_operation_gate.phase_1|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Phase 2 live write gate</td>
+              <td>{{ report.remote_operation_gate.phase_2|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Write routes enabled</td>
+              <td>{{ report.api_baseline.write_routes_enabled }}</td>
+            </tr>
+            <tr>
+              <td>Remote writes enabled</td>
+              <td>{{ report.remote_operation_gate.write_operations_enabled }}</td>
+            </tr>
+            <tr>
+              <td>Public API exposed</td>
+              <td>{{ report.api_baseline.public_api_exposed }}</td>
+            </tr>
+            <tr>
+              <td>VPS apply default</td>
+              <td>{{ report.controlled_prod_readiness.vps_apply_enabled_default }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Агрегированное состояние</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Серверы</td>
+              <td>{{ report.aggregate_state.servers }}</td>
+            </tr>
+            <tr>
+              <td>Пользователи</td>
+              <td>{{ report.aggregate_state.users }}</td>
+            </tr>
+            <tr>
+              <td>Устройства</td>
+              <td>{{ report.aggregate_state.devices }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="settings-grid" aria-label="Capability registry">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Capability registry</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Registry status</td>
+              <td>{{ report.capability_registry.status|replace("_", "-") }}</td>
+            </tr>
+            {% for capability in report.capability_registry.server_capabilities %}
+              <tr>
+                <td>{{ capability.capability|replace("_", "-") }}</td>
+                <td>
+                  {{ capability.status|replace("_", "-") }} /
+                  {{ capability.runtime }} /
+                  {{ capability.protocol }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Future protocols</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            {% for protocol in report.capability_registry.future_protocols %}
+              <tr>
+                <td>{{ protocol.protocol }}</td>
+                <td>{{ protocol.status|replace("_", "-") }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="settings-grid" aria-label="Productization boundary">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Commercial boundary</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Status</td>
+              <td>{{ report.productization_boundary.commercial_access.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>payment processor enabled</td>
+              <td>{{ report.productization_boundary.commercial_access.payment_processor_enabled }}</td>
+            </tr>
+            <tr>
+              <td>manual approval required</td>
+              <td>{{ report.productization_boundary.commercial_access.manual_approval_required }}</td>
+            </tr>
+            <tr>
+              <td>automatic entitlement on payment</td>
+              <td>{{ report.productization_boundary.commercial_access.automatic_entitlement_on_payment }}</td>
+            </tr>
+            <tr>
+              <td>config delivery on payment</td>
+              <td>{{ report.productization_boundary.commercial_access.config_delivery_on_payment }}</td>
+            </tr>
+            <tr>
+              <td>tokenized config link</td>
+              <td>{{ report.productization_boundary.config_delivery_link_boundary.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>short link runtime enabled</td>
+              <td>{{ report.productization_boundary.config_delivery_link_boundary.short_link_runtime_enabled }}</td>
+            </tr>
+            <tr>
+              <td>entitlement audit</td>
+              <td>{{ report.productization_boundary.commercial_entitlement_audit.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>automatic activation enabled</td>
+              <td>{{ report.productization_boundary.commercial_entitlement_audit.automatic_activation_enabled }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Bot runtime split</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Status</td>
+              <td>{{ report.productization_boundary.bot_runtime_split.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>access bot</td>
+              <td>{{ report.productization_boundary.bot_runtime_split.access_bot.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>support bot</td>
+              <td>{{ report.productization_boundary.bot_runtime_split.support_bot.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>news bot</td>
+              <td>{{ report.productization_boundary.bot_runtime_split.news_bot.status|replace("_", "-") }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Telegram profile icon gate</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="settings-table">
+        <tbody>
+          <tr>
+            <td>Status</td>
+            <td>{{ report.productization_boundary.telegram_profile_icon_apply.status|replace("_", "-") }}</td>
+          </tr>
+          <tr>
+            <td>telegram api enabled</td>
+            <td>{{ report.productization_boundary.telegram_profile_icon_apply.telegram_api_enabled }}</td>
+          </tr>
+          <tr>
+            <td>Codex apply allowed</td>
+            <td>{{ report.productization_boundary.telegram_profile_icon_apply.codex_apply_allowed }}</td>
+          </tr>
+          <tr>
+            <td>Required gate</td>
+            <td>{{ report.productization_boundary.telegram_profile_icon_apply.requires_named_gate }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="settings-grid" aria-label="Privacy status boundary">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Health/status privacy</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Status</td>
+              <td>{{ report.privacy_status_boundary.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Scheduler contract</td>
+              <td>{{ report.privacy_status_boundary.health_status_scheduler.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>live probes enabled</td>
+              <td>{{ report.privacy_status_boundary.health_status_scheduler.live_probes_enabled }}</td>
+            </tr>
+            <tr>
+              <td>Source</td>
+              <td>{{ report.privacy_status_boundary.health_status_scheduler.source|replace("_", "-") }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Admin analytics privacy</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Status</td>
+              <td>{{ report.privacy_status_boundary.admin_analytics.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>per user breakdown enabled</td>
+              <td>{{ report.privacy_status_boundary.admin_analytics.per_user_breakdown_enabled }}</td>
+            </tr>
+            <tr>
+              <td>per peer breakdown enabled</td>
+              <td>{{ report.privacy_status_boundary.admin_analytics.per_peer_breakdown_enabled }}</td>
+            </tr>
+            <tr>
+              <td>Policy doc</td>
+              <td><code>{{ report.privacy_status_boundary.docs.policy_doc }}</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="settings-grid" aria-label="Reconciliation release boundary">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Attach-existing reconciliation</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Status</td>
+              <td>{{ report.reconciliation_release_boundary.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Plan status</td>
+              <td>{{ report.reconciliation_release_boundary.attach_existing_server_reconciliation.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>live reconciliation enabled</td>
+              <td>{{ report.reconciliation_release_boundary.attach_existing_server_reconciliation.live_reconciliation_enabled }}</td>
+            </tr>
+            <tr>
+              <td>Enabled by default</td>
+              <td>{{ report.reconciliation_release_boundary.attach_existing_server_reconciliation.enabled_by_default }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Release checklist</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Status</td>
+              <td>{{ report.reconciliation_release_boundary.release_checklist.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Default action</td>
+              <td>{{ report.reconciliation_release_boundary.release_checklist.default_release_action|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Branch package status</td>
+              <td>{{ report.reconciliation_release_boundary.release_checklist.branch_head_package_status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Policy doc</td>
+              <td><code>{{ report.reconciliation_release_boundary.docs.policy_doc }}</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Client compatibility</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="settings-table">
+        <tbody>
+          <tr>
+            <td>Status</td>
+            <td>{{ report.client_compatibility_boundary.status|replace("_", "-") }}</td>
+          </tr>
+          <tr>
+            <td>iOS primary RF path</td>
+            <td>{{ report.client_compatibility_boundary.ios.primary_rf_path }}</td>
+          </tr>
+          <tr>
+            <td>iOS installed legacy path</td>
+            <td>{{ report.client_compatibility_boundary.ios.installed_legacy_path }}</td>
+          </tr>
+          <tr>
+            <td>Android supported path</td>
+            <td>{{ report.client_compatibility_boundary.android.supported_path }}</td>
+          </tr>
+          <tr>
+            <td>Fallback order</td>
+            <td>{{ report.client_compatibility_boundary.fallback_order|join(", ") }}</td>
+          </tr>
+          <tr>
+            <td>live client import verified</td>
+            <td>{{ report.client_compatibility_boundary.live_client_import_verified }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Fresh install wizard</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="settings-table">
+        <tbody>
+          <tr>
+            <td>Status</td>
+            <td>{{ report.fresh_install_wizard_boundary.status|replace("_", "-") }}</td>
+          </tr>
+          <tr>
+            <td>Mode</td>
+            <td>{{ report.fresh_install_wizard_boundary.mode|replace("_", "-") }}</td>
+          </tr>
+          <tr>
+            <td>live VPS commands enabled</td>
+            <td>{{ report.fresh_install_wizard_boundary.safety.live_vps_commands_enabled }}</td>
+          </tr>
+          <tr>
+            <td>destructive cleanup enabled</td>
+            <td>{{ report.fresh_install_wizard_boundary.safety.destructive_cleanup_enabled }}</td>
+          </tr>
+          <tr>
+            <td>Runbook</td>
+            <td><code>{{ report.fresh_install_wizard_boundary.docs.runbook }}</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="settings-grid" aria-label="Public docs and cleanup gates">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Public docs/API taxonomy</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Status</td>
+              <td>{{ report.public_docs_api_taxonomy_boundary.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>publication enabled</td>
+              <td>{{ report.public_docs_api_taxonomy_boundary.publication_enabled }}</td>
+            </tr>
+            <tr>
+              <td>public API exposed</td>
+              <td>{{ report.public_docs_api_taxonomy_boundary.public_api_exposed }}</td>
+            </tr>
+            <tr>
+              <td>Required gate</td>
+              <td>{{ report.public_docs_api_taxonomy_boundary.requires_public_exposure_gate }}</td>
+            </tr>
+            <tr>
+              <td>Policy doc</td>
+              <td><code>{{ report.public_docs_api_taxonomy_boundary.docs.taxonomy_doc }}</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Destructive cleanup checklist</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Status</td>
+              <td>{{ report.destructive_cleanup_gate_checklist.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Mode</td>
+              <td>{{ report.destructive_cleanup_gate_checklist.mode|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>destructive execution enabled</td>
+              <td>{{ report.destructive_cleanup_gate_checklist.destructive_execution_enabled }}</td>
+            </tr>
+            <tr>
+              <td>Required gate</td>
+              <td>{{ report.destructive_cleanup_gate_checklist.requires_named_gate }}</td>
+            </tr>
+            <tr>
+              <td>Checklist doc</td>
+              <td><code>{{ report.destructive_cleanup_gate_checklist.docs.checklist_doc }}</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="settings-grid" aria-label="Telemetry retention policy">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Telemetry retention</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Status</td>
+              <td>{{ report.telemetry_retention_policy.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Retention status</td>
+              <td>{{ report.telemetry_retention_policy.aggregate_retention.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Raw export enabled</td>
+              <td>{{ report.telemetry_retention_policy.aggregate_retention.raw_export_enabled }}</td>
+            </tr>
+            <tr>
+              <td>Aggregate retention days</td>
+              <td>{{ report.telemetry_retention_policy.aggregate_retention.aggregate_retention_days }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Upstream refresh</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            <tr>
+              <td>Status</td>
+              <td>{{ report.telemetry_retention_policy.upstream_refresh_incorporation.status|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Default action</td>
+              <td>{{ report.telemetry_retention_policy.upstream_refresh_incorporation.default_action|replace("_", "-") }}</td>
+            </tr>
+            <tr>
+              <td>Live actions enabled</td>
+              <td>{{ report.telemetry_retention_policy.upstream_refresh_incorporation.live_actions_enabled }}</td>
+            </tr>
+            <tr>
+              <td>Code copy enabled</td>
+              <td>{{ report.telemetry_retention_policy.upstream_refresh_incorporation.code_copy_enabled }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Разрешенные read scopes</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="settings-table">
+        <tbody>
+          {% for scope in report.api_baseline.allowed_scopes %}
+            <tr>
+              <td><code>{{ scope }}</code></td>
+              <td>read-only</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="settings-grid" aria-label="Integration lanes">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Разрешенные направления</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            {% for lane in report.allowed_lanes %}
+              <tr>
+                <td>{{ lane }}</td>
+                <td>available</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Заблокированные направления</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="settings-table">
+          <tbody>
+            {% for lane in report.blocked_lanes %}
+              <tr>
+                <td>{{ lane }}</td>
+                <td>separate gate required</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel panel-spaced">
+    <div class="panel-header">
+      <h2>Следующий gate</h2>
+    </div>
+    <p>{{ report.next_gate }}</p>
+  </section>
+{% endblock %}
