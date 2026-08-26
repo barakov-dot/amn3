@@ -143,7 +143,7 @@ function Invoke-Phase16ControlledStageRunnerMain {
     if ([string]::IsNullOrWhiteSpace($StagePackageRoot) -or [string]::IsNullOrWhiteSpace($StageApproval) -or
         $StageExpectedCurrentStateSha256 -cnotmatch '^[0-9a-f]{64}$' -or $StageTransactionId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,79}$' -or
         [string]::IsNullOrWhiteSpace($StageOutcomePath) -or -not (Test-Phase16ExpectedHost -ExpectedHost $StageExpectedHost)) { throw 'stage_arguments_invalid' }
-    Assert-Phase16SpainTrustBundle
+    Assert-Phase16SpainTrustBundle -ExpectedHost $StageExpectedHost
     $package = Read-Phase16ControlledStagePackage -Root $StagePackageRoot
     $rollbackSha256 = Get-Phase16CanonicalJsonSha256 -Value (Get-Phase16ControlledStageRollbackScope)
     $expectedApproval = "/APPROVE PHASE16 SPAIN APPLICATION_AND_AWG31_STAGE PACKAGE_$($script:Phase16ControlledStagePackageId) IDENTITY_$($package.Manifest.package_identity_sha256) MANIFEST_SHA256_$($package.ManifestSha256) STATE_$StageExpectedCurrentStateSha256 ROLLBACK_SCOPE_SHA256_$rollbackSha256 TRANSACTION_$StageTransactionId MANDATORY_ROLLBACK_ON_FAILURE AWG2_UNTOUCHED"
