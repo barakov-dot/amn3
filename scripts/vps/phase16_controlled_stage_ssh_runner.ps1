@@ -13,10 +13,135 @@ $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'phase16_spain_readonly_preflight_ssh_runner.ps1')
 
-$script:Phase16ControlledStagePackageId = 'phase16-awg3-family-3-1-spain-pilot-20260824-013'
+$script:Phase16ControlledStagePackageId = 'phase16-awg3-family-3-1-spain-pilot-20260824-014'
 $script:Phase16ControlledStageRequestSchema = 'amn2.phase16.controlled-stage-request.v1'
 $script:Phase16ControlledStageMaximumArchiveBytes = 268435456
 $script:Phase16ControlledStageTimeoutMilliseconds = 300000
+$script:Phase16ControlledStageFailureClasses = @(
+    'arguments_validation',
+    'trust_validation',
+    'package_validation',
+    'approval_validation',
+    'archive_construction',
+    'process_start',
+    'stdin_write',
+    'transport_timeout',
+    'transport_wait',
+    'transport_exit',
+    'transport_output',
+    'outcome_schema',
+    'outcome_write',
+    'stage_result',
+    'internal'
+)
+$script:Phase16ControlledStageMilestones = @(
+    'runner_started',
+    'arguments_validated',
+    'trust_validated',
+    'package_validated',
+    'approval_validated',
+    'archive_built',
+    'process_started',
+    'stdin_written',
+    'transport_completed',
+    'output_validated',
+    'outcome_validated',
+    'outcome_written',
+    'stage_confirmed'
+)
+$script:Phase16ControlledStageRunState = $null
+
+function Reset-Phase16ControlledStageRunState {
+    $empty = [byte[]]::new(0)
+    $script:Phase16ControlledStageRunState = [ordered]@{
+        FailureClass = 'arguments_validation'
+        LastCompletedMilestone = 'runner_started'
+        StderrBytes = [int64]0
+        StderrSha256 = Get-Phase16BytesSha256 -Bytes $empty
+        StdoutBytes = [int64]0
+        StdoutSha256 = Get-Phase16BytesSha256 -Bytes $empty
+        TransportExitCode = $null
+    }
+}
+
+function Set-Phase16ControlledStageFailureBoundary {
+    param(
+        [Parameter(Mandatory)][string]$FailureClass,
+        [Parameter(Mandatory)][string]$LastCompletedMilestone
+    )
+    if ($null -eq $script:Phase16ControlledStageRunState -or
+        $FailureClass -cnotin $script:Phase16ControlledStageFailureClasses -or
+        $LastCompletedMilestone -cnotin $script:Phase16ControlledStageMilestones) { throw 'failure_state_invalid' }
+    $script:Phase16ControlledStageRunState.FailureClass = $FailureClass
+    $script:Phase16ControlledStageRunState.LastCompletedMilestone = $LastCompletedMilestone
+}
+
+function Set-Phase16ControlledStageTransportSummary {
+    param(
+        [Parameter(Mandatory)][AllowEmptyString()][string]$StdoutText,
+        [Parameter(Mandatory)][AllowEmptyString()][string]$StderrText,
+        [Parameter(Mandatory)][int]$ExitCode
+    )
+    if ($null -eq $script:Phase16ControlledStageRunState) { throw 'failure_state_invalid' }
+    $encoding = [Text.UTF8Encoding]::new($false)
+    $stdoutBytes = $encoding.GetBytes($StdoutText)
+    $stderrBytes = $encoding.GetBytes($StderrText)
+    try {
+        $script:Phase16ControlledStageRunState.StdoutBytes = [int64]$stdoutBytes.Length
+        $script:Phase16ControlledStageRunState.StdoutSha256 = Get-Phase16BytesSha256 -Bytes $stdoutBytes
+        $script:Phase16ControlledStageRunState.StderrBytes = [int64]$stderrBytes.Length
+        $script:Phase16ControlledStageRunState.StderrSha256 = Get-Phase16BytesSha256 -Bytes $stderrBytes
+        $script:Phase16ControlledStageRunState.TransportExitCode = $ExitCode
+    } finally {
+        [Array]::Clear($stdoutBytes, 0, $stdoutBytes.Length)
+        [Array]::Clear($stderrBytes, 0, $stderrBytes.Length)
+    }
+}
+
+function New-Phase16ControlledStageFailureDocument {
+    param([Parameter(Mandatory)][string]$TransactionId)
+    $state = $script:Phase16ControlledStageRunState
+    if ($null -eq $state -or $TransactionId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,79}$' -or
+        $state.FailureClass -isnot [string] -or $state.FailureClass -cnotin $script:Phase16ControlledStageFailureClasses -or
+        $state.LastCompletedMilestone -isnot [string] -or $state.LastCompletedMilestone -cnotin $script:Phase16ControlledStageMilestones -or
+        $state.StdoutBytes -isnot [int64] -or $state.StdoutBytes -lt 0 -or
+        $state.StderrBytes -isnot [int64] -or $state.StderrBytes -lt 0 -or
+        $state.StdoutSha256 -isnot [string] -or $state.StdoutSha256 -cnotmatch '^[0-9a-f]{64}$' -or
+        $state.StderrSha256 -isnot [string] -or $state.StderrSha256 -cnotmatch '^[0-9a-f]{64}$' -or
+        ($null -ne $state.TransportExitCode -and $state.TransportExitCode -isnot [int32])) { throw 'failure_state_invalid' }
+    return [ordered]@{
+        failure_class = $state.FailureClass
+        last_completed_milestone = $state.LastCompletedMilestone
+        package_id = $script:Phase16ControlledStagePackageId
+        raw_output_persisted = $false
+        result = 'runner_stop'
+        schema = 'amn2.phase16.controlled-stage-runner-failure.v1'
+        stderr_bytes = $state.StderrBytes
+        stderr_sha256 = $state.StderrSha256
+        stdout_bytes = $state.StdoutBytes
+        stdout_sha256 = $state.StdoutSha256
+        transaction_id = $TransactionId
+        transport_exit_code = $state.TransportExitCode
+    }
+}
+
+function Write-Phase16ControlledStageFailureArtifact {
+    param(
+        [Parameter(Mandatory)][string]$OutcomePath,
+        [Parameter(Mandatory)][string]$TransactionId
+    )
+    $fullOutcome = [IO.Path]::GetFullPath($OutcomePath)
+    $parent = Split-Path -Parent $fullOutcome
+    if (-not (Test-Path -LiteralPath $parent -PathType Container)) { throw 'failure_path_invalid' }
+    $failurePath = $fullOutcome + '.runner-failure.json'
+    $document = New-Phase16ControlledStageFailureDocument -TransactionId $TransactionId
+    $bytes = [Text.UTF8Encoding]::new($false).GetBytes((ConvertTo-Phase16CanonicalJsonText -Value $document) + "`n")
+    try {
+        Write-Phase16ControlledStageOutcome -Path $failurePath -Bytes $bytes
+    } finally {
+        [Array]::Clear($bytes, 0, $bytes.Length)
+    }
+}
 
 function Get-Phase16ControlledStageRollbackScope {
     return [ordered]@{
@@ -140,11 +265,15 @@ function Write-Phase16ControlledStageOutcome {
 }
 
 function Invoke-Phase16ControlledStageRunnerMain {
+    if ($null -eq $script:Phase16ControlledStageRunState) { Reset-Phase16ControlledStageRunState }
     if ([string]::IsNullOrWhiteSpace($StagePackageRoot) -or [string]::IsNullOrWhiteSpace($StageApproval) -or
         $StageExpectedCurrentStateSha256 -cnotmatch '^[0-9a-f]{64}$' -or $StageTransactionId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,79}$' -or
         [string]::IsNullOrWhiteSpace($StageOutcomePath) -or -not (Test-Phase16ExpectedHost -ExpectedHost $StageExpectedHost)) { throw 'stage_arguments_invalid' }
+    Set-Phase16ControlledStageFailureBoundary -FailureClass 'trust_validation' -LastCompletedMilestone 'arguments_validated'
     Assert-Phase16SpainTrustBundle -ExpectedHost $StageExpectedHost
+    Set-Phase16ControlledStageFailureBoundary -FailureClass 'package_validation' -LastCompletedMilestone 'trust_validated'
     $package = Read-Phase16ControlledStagePackage -Root $StagePackageRoot
+    Set-Phase16ControlledStageFailureBoundary -FailureClass 'approval_validation' -LastCompletedMilestone 'package_validated'
     $rollbackSha256 = Get-Phase16CanonicalJsonSha256 -Value (Get-Phase16ControlledStageRollbackScope)
     $expectedApproval = "/APPROVE PHASE16 SPAIN APPLICATION_AND_AWG31_STAGE PACKAGE_$($script:Phase16ControlledStagePackageId) IDENTITY_$($package.Manifest.package_identity_sha256) MANIFEST_SHA256_$($package.ManifestSha256) STATE_$StageExpectedCurrentStateSha256 ROLLBACK_SCOPE_SHA256_$rollbackSha256 TRANSACTION_$StageTransactionId MANDATORY_ROLLBACK_ON_FAILURE AWG2_UNTOUCHED"
     if ($StageApproval -cne $expectedApproval) { throw 'stage_approval_invalid' }
@@ -159,6 +288,7 @@ function Invoke-Phase16ControlledStageRunnerMain {
         schema = $script:Phase16ControlledStageRequestSchema
         transaction_id = $StageTransactionId
     }
+    Set-Phase16ControlledStageFailureBoundary -FailureClass 'archive_construction' -LastCompletedMilestone 'approval_validated'
     $archive = New-Phase16ControlledStageArchive -Files $package.Files
     $coordinatorSha256 = Get-Phase16BytesSha256 -Bytes $package.CoordinatorBytes
     $header = [ordered]@{
@@ -171,13 +301,17 @@ function Invoke-Phase16ControlledStageRunnerMain {
     $headerBytes = [Text.UTF8Encoding]::new($false).GetBytes((ConvertTo-Phase16CanonicalJsonText -Value $header) + "`n")
     $prefix = [Text.Encoding]::ASCII.GetBytes(('{0:x8}' -f $headerBytes.Length))
     $coordinatorPrefix = [Text.Encoding]::ASCII.GetBytes(('{0:x8}' -f $package.CoordinatorBytes.Length))
+    Set-Phase16ControlledStageFailureBoundary -FailureClass 'process_start' -LastCompletedMilestone 'archive_built'
     $arguments = New-Phase16ControlledStageSshArguments -ExpectedHost $StageExpectedHost -CoordinatorSha256 $coordinatorSha256
     $start = New-Phase16SshProcessStartInfo -Arguments $arguments
     $start.RedirectStandardInput = $true
     $process = [Diagnostics.Process]::new()
     $process.StartInfo = $start
+    $processStarted = $false
     try {
         if (-not $process.Start()) { throw 'transport_failed' }
+        $processStarted = $true
+        Set-Phase16ControlledStageFailureBoundary -FailureClass 'stdin_write' -LastCompletedMilestone 'process_started'
         $stdoutTask = $process.StandardOutput.ReadToEndAsync()
         $stderrTask = $process.StandardError.ReadToEndAsync()
         $stream = $process.StandardInput.BaseStream
@@ -188,30 +322,54 @@ function Invoke-Phase16ControlledStageRunnerMain {
         $stream.Write($archive, 0, $archive.Length)
         $stream.Flush()
         $process.StandardInput.Close()
-        if (-not $process.WaitForExit($script:Phase16ControlledStageTimeoutMilliseconds)) { try { $process.Kill() } catch {}; throw 'transport_timeout' }
+        Set-Phase16ControlledStageFailureBoundary -FailureClass 'transport_wait' -LastCompletedMilestone 'stdin_written'
+        if (-not $process.WaitForExit($script:Phase16ControlledStageTimeoutMilliseconds)) {
+            Set-Phase16ControlledStageFailureBoundary -FailureClass 'transport_timeout' -LastCompletedMilestone 'stdin_written'
+            try { $process.Kill() } catch {}
+            throw 'transport_timeout'
+        }
         $stdout = $stdoutTask.GetAwaiter().GetResult()
         $stderr = $stderrTask.GetAwaiter().GetResult()
+        Set-Phase16ControlledStageTransportSummary -StdoutText $stdout -StderrText $stderr -ExitCode $process.ExitCode
+        Set-Phase16ControlledStageFailureBoundary -FailureClass 'transport_output' -LastCompletedMilestone 'transport_completed'
         if (-not [string]::IsNullOrEmpty($stderr) -or [Text.Encoding]::UTF8.GetByteCount($stdout) -gt 8192) { throw 'transport_output_invalid' }
+        if ($process.ExitCode -ne 0 -and [string]::IsNullOrEmpty($stdout)) {
+            Set-Phase16ControlledStageFailureBoundary -FailureClass 'transport_exit' -LastCompletedMilestone 'transport_completed'
+            throw 'transport_exit_invalid'
+        }
+        Set-Phase16ControlledStageFailureBoundary -FailureClass 'outcome_schema' -LastCompletedMilestone 'output_validated'
         $document = ConvertFrom-Phase16CanonicalJsonText -Text $stdout
         if ($null -eq $document -or $document.schema -cne 'amn2.phase16.controlled-stage-outcome.v1' -or $document.package_id -cne $script:Phase16ControlledStagePackageId -or
             $document.general_issuance_enabled -isnot [bool] -or $document.general_issuance_enabled -ne $false) { throw 'stage_outcome_invalid' }
         $outcomeBytes = [Text.UTF8Encoding]::new($false).GetBytes($stdout)
+        Set-Phase16ControlledStageFailureBoundary -FailureClass 'outcome_write' -LastCompletedMilestone 'outcome_validated'
         Write-Phase16ControlledStageOutcome -Path $StageOutcomePath -Bytes $outcomeBytes
+        Set-Phase16ControlledStageFailureBoundary -FailureClass 'stage_result' -LastCompletedMilestone 'outcome_written'
         if ($process.ExitCode -ne 0 -or $document.result -cne 'application_and_awg31_staged') { throw 'stage_failed' }
+        Set-Phase16ControlledStageFailureBoundary -FailureClass 'internal' -LastCompletedMilestone 'stage_confirmed'
         [Console]::Out.Write($stdout)
     } finally {
-        if (-not $process.HasExited) { try { $process.Kill() } catch {} }
+        if ($processStarted -and -not $process.HasExited) { try { $process.Kill() } catch {} }
         $process.Dispose()
         [Array]::Clear($archive, 0, $archive.Length)
     }
 }
 
-if ($MyInvocation.InvocationName -ne '.') {
+function Invoke-Phase16ControlledStageRunnerEntrypoint {
+    Reset-Phase16ControlledStageRunState
     try {
         Invoke-Phase16ControlledStageRunnerMain
-        exit 0
+        return 0
     } catch {
+        try {
+            Write-Phase16ControlledStageFailureArtifact -OutcomePath $StageOutcomePath -TransactionId $StageTransactionId
+        } catch {}
         [Console]::Error.WriteLine('AMN2_PHASE16_CONTROLLED_STAGE_RUNNER_STOP')
-        exit 64
+        return 64
     }
+}
+
+if ($MyInvocation.InvocationName -ne '.') {
+    $exitCode = Invoke-Phase16ControlledStageRunnerEntrypoint
+    exit $exitCode
 }
