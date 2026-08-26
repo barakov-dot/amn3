@@ -26,7 +26,14 @@
 - Stage-support SHA-256: `871d2e7ef3926723a35912947886828faeabb576ebfec6a5573064ae5b932098`
 - Controlled-stage coordinator SHA-256: `02c9c3cdf5184b0d4ed5eb1dbb381634119ab0a0b4cf2c4a2adf7f54c7b2523d`
 - Controlled-stage SSH runner SHA-256: `50c517f763303b9cdc5cd294fffafcf41c5121ebda74c250d55782bc625b6a8d`
-- Canonical rollback-scope SHA-256: `7cd469347f8ebf5158ab66b2898d69d3054260f317bbf49c866438524219093d`
+- Canonical rollback-scope SHA-256: `c70437c363cc822b602d90902d095917041e78044bb299426d7fa01aa8f17d85`
+
+Correction recorded after the transaction-002 local prelaunch STOP: the
+previous value was inherited from package 012. The package-013 stage runner
+computes the corrected value above because `application_release` is bound to
+the package-013 ID. Package contents, manifest, package identity, and the
+completed read-only preflight outcome were not changed by this evidence
+correction.
 
 ## Terminal evidence
 
@@ -69,14 +76,14 @@ Operator-generated Spain AWG2 traffic produced a fresh handshake within the unch
 
 ## Mandatory rollback scope and stage gate
 
-- Proposed transaction: `phase16-spain-stage-20260826-002`
+- Proposed transaction: `phase16-spain-stage-20260826-003`
 - Application ledger: `/var/lib/amn2-phase16/stage/application.json`
 - Coordinator ledger: `/var/lib/amn2-phase16/stage/coordinator.json`
 - Runtime ledger: `/var/lib/amn2-phase16/stage/awg31-runtime.json`
 - Package root: `/var/lib/amn2-phase16/package`
 - Runtime rollback resources: `/etc/systemd/system/amn2-spain-awg3.service`, `/var/lib/amn2-spain/awg3`, `container:amn2-spain-awg3`, `network:amn2sp3`
 - Backup policy: `preserve_checksum_bound_sqlite_backup`
-- Any failure must remove only resources created by transaction `phase16-spain-stage-20260826-002`, preserve the checksum-bound SQLite backup, perform rollback readback, and STOP.
+- Any failure must remove only resources created by transaction `phase16-spain-stage-20260826-003`, preserve the checksum-bound SQLite backup, perform rollback readback, and STOP.
 - AWG2 runtime, interface, peers, golden bytes, routes, and firewall ownership remain outside rollback scope.
 
 ## Safety boundary
