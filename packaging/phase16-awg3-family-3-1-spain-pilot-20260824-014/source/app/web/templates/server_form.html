@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading page-heading">
+    <div>
+      <p class="eyebrow">Server management</p>
+      <h1>{{ submit_label }}</h1>
+    </div>
+    <a class="button button-secondary" href="/servers">Back to servers</a>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Server details</h2>
+    </div>
+    <form action="{{ action_url }}" method="post" class="form form-wide">
+      <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
+      <div class="form-grid">
+        <label class="field">
+          Name
+          <input name="name" type="text" value="{{ server.name or '' }}" required>
+        </label>
+        <label class="field">
+          SSH host
+          <input name="host" type="text" value="{{ server.host or '' }}" required>
+        </label>
+        <label class="field">
+          SSH port
+          <input name="ssh_port" type="number" min="1" max="65535" value="{{ server.ssh_port or 22 }}" required>
+        </label>
+        <label class="field">
+          Endpoint host
+          <input name="endpoint_host" type="text" value="{{ server.endpoint_host or '' }}" required>
+        </label>
+        <label class="field">
+          VPN port
+          <input name="vpn_port" type="number" min="1" max="65535" value="{{ server.vpn_port or 30001 }}" required>
+        </label>
+        <label class="field">
+          VPN network CIDR
+          <input name="vpn_network_cidr" type="text" value="{{ server.vpn_network_cidr or '' }}" required>
+        </label>
+        <label class="field">
+          Server address
+          <input name="server_address" type="text" value="{{ server.server_address or '' }}" required>
+        </label>
+        <label class="field">
+          Server public key
+          <input name="server_public_key" type="text" value="{{ server.server_public_key or '' }}">
+        </label>
+        <label class="field">
+          Runtime
+          <input name="runtime" type="text" value="{{ server.runtime or 'host_systemd' }}" required>
+        </label>
+        <label class="field">
+          Firewall
+          <input name="firewall" type="text" value="{{ server.firewall or 'ufw' }}" required>
+        </label>
+        <label class="field">
+          Status
+          <select name="status">
+            {% for status in statuses %}
+              <option value="{{ status }}" {% if server.status == status %}selected{% endif %}>{{ status }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="field">
+          Max devices
+          <input name="max_devices" type="number" min="0" value="{{ server.max_devices if server.max_devices is not none else 254 }}" required>
+        </label>
+      </div>
+      <div class="form-actions">
+        <button class="button" type="submit">{{ submit_label }}</button>
+        <a class="button button-secondary" href="/servers">Cancel</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}
