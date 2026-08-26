@@ -13,7 +13,7 @@ $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'phase16_spain_readonly_preflight_ssh_runner.ps1')
 
-$script:Phase16ControlledStagePackageId = 'phase16-awg3-family-3-1-spain-pilot-20260824-012'
+$script:Phase16ControlledStagePackageId = 'phase16-awg3-family-3-1-spain-pilot-20260824-013'
 $script:Phase16ControlledStageRequestSchema = 'amn2.phase16.controlled-stage-request.v1'
 $script:Phase16ControlledStageMaximumArchiveBytes = 268435456
 $script:Phase16ControlledStageTimeoutMilliseconds = 300000

@@ -10,7 +10,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$script:Phase16PackageId = 'phase16-awg3-family-3-1-spain-pilot-20260824-012'
+$script:Phase16PackageId = 'phase16-awg3-family-3-1-spain-pilot-20260824-013'
 $script:Phase16ClaimSchema = 'amn2.phase16.readonly-preflight-claim.v1'
 $script:Phase16CollectorSchema = 'amn2.phase16.spain-readonly-collector.v1'
 $script:Phase16EvidenceSchema = 'amn2.phase16.readonly-preflight-evidence.v1'

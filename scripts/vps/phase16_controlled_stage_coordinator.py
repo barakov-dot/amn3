@@ -18,7 +18,7 @@ import tempfile
 import zipfile
 
 
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-012"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-013"
 REQUEST_SCHEMA = "amn2.phase16.controlled-stage-request.v1"
 CLAIM_SCHEMA = "amn2.phase16.stage-claim.v1"
 PACKAGE_ROOT = Path("/var/lib/amn2-phase16/package")

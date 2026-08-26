@@ -1,10 +1,10 @@
 # Phase 16 application source readiness receipt
 
-- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-012`
+- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-013`
 - Baseline application SHA: `c01c2e34ca506102e485ee3fa50b9420de6e591a`
 - Application branch: `codex/phase16-awg3-family-3-1-spain-pilot`
 - Application source SHA: `a3682fc44dd9e74ff96392ad99623474facf377f`
-- Tooling branch: `codex/phase16-awg3-family-3-1-spain-pilot-012`
+- Tooling branch: `codex/phase16-awg3-family-3-1-spain-pilot-013`
 - Protocol family: `awg3`
 - Protocol revision: `3.1`
 - Config revision: `amneziawg_v3_1`
@@ -84,5 +84,13 @@
 - Package revision 011 immutability: manifest `7275a07be0039ef418d52791df5ee9557c5ff00e6e369d35cf80deb17ff4d0fb`, collector `60c312fa42fc34680e348927624b458eb28f0844cc1e72e33f8deb9068af426d`, runner `29edab80f7fad171078ffd51fbcddc0ded06878327919585c4fb81e790514623`, application stage `3561d9070afdeea84dd7251f33a5837d4855db30ff2e55cbb2b8d8cedf7d2307`, runtime stage `952a6be47df6a8a70ad1f75b3ce840af6837c825ace560aaa609bac0461c3230`, identity `d04679e145551117ce1dcab762304cf54f6b67ea9ca028a5ffc367cdeb507e99`
 - Package revision 012 Spain/SSH/remote-write/stage/install activity during local correction: none
 - Package revision 012 AWG2 freshness policy: unchanged at `600` seconds; AWG2 mutations: none
+- Package revision 013 prelaunch STOP receipt SHA-256: `51fcd94a3efeae64d1d3cb15f2b6aa50688a0f2e130eae30dca743f4d9aa8d43`; exact runner stderr SHA-256: `9e650e4049eb870274ee7321d57cca26007736a1136ff2860ba43c9cd89aeb48`; transaction 001 was not created and SSH attempts were zero
+- Package revision 013 host-forwarding TDD RED: `1 failed`; observed `not-called` plus the missing mandatory `ExpectedHost` parameter instead of the expected Spain host
+- Package revision 013 host-forwarding TDD GREEN: `1 passed`; `StageExpectedHost` reached the trust assertion exactly
+- Package revision 013 host-forwarding correction commit: `5f6a28d2583ff7b2aa7c8cd5fbaa422111157195`
+- Package revision 013 targeted regression: host-forwarding `1 passed`; plain Phase 16 contract tests `7 passed`; Python AST `6 passed`; Bash syntax `3 passed`; PowerShell parser `2 passed`
+- Package revision 013 dependency disposition: the previously recorded Python 3.12/pytest runtime is no longer present; no dependency was installed, and the bounded regression used the available standard-library runtime plus existing plain contract tests
+- Package revision 012 immutability recheck: manifest, preflight collector/runner, application/runtime stage, stage support/coordinator/runner and package identity all matched their recorded SHA-256 values
+- Package revision 013 Spain/SSH/remote-write/stage/install activity during local correction: none; AWG2 mutations: none
 
 This receipt records the real Phase 16 application evidence change. It does not authorize Spain staging, runtime creation, pilot issuance, or global AWG3 issuance.
