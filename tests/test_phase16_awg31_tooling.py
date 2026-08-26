@@ -17,9 +17,9 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-013"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-014"
 SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
-TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-013"
+TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-014"
 HISTORIC_PACKAGE_003 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-003"
 )
@@ -49,6 +49,9 @@ HISTORIC_PACKAGE_011 = (
 )
 HISTORIC_PACKAGE_012 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-012"
+)
+HISTORIC_PACKAGE_013 = (
+    ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-014"
 )
 RUNTIME_IDENTITY = (
     "docker.io/amneziavpn/amneziawg-go@"
@@ -1075,6 +1078,28 @@ def test_stage_prelaunch_stop_package_012_remains_checksum_immutable():
     ] == "0db6ff252790130ab1de2cd0adabdcf42237255f8ba8f64e3d6addde1469d92c"
 
 
+def test_controlled_stage_stop_package_013_remains_checksum_immutable():
+    manifest_path = HISTORIC_PACKAGE_013 / "manifest.json"
+    tooling_root = HISTORIC_PACKAGE_013 / "tooling" / "scripts" / "vps"
+
+    expected_hashes = {
+        manifest_path: "a80cd8d651b80c0fa24bbe26da3c310a7823db368093d5cc7d9f4edbb864ed47",
+        tooling_root / "phase16_spain_readonly_preflight_remote.sh": "39da47ad8776d8c77198f306c387d26e43d70631b435a7fc50f909b855ce8a66",
+        tooling_root / "phase16_spain_readonly_preflight_ssh_runner.ps1": "27684b4bc33704d91f3ece34f195d1aa9aba6d6c5f811283323e3560575e366c",
+        tooling_root / "phase16_application_stage_remote.sh": "70042dc351c315fc842b2042eb984b3b7430b11e21610610471be143680905a4",
+        tooling_root / "phase16_awg31_runtime_stage_remote.sh": "9dd153aa350b65c737de770ae7697d2fc8c59a663c9b3553c388e7a25052e0a9",
+        tooling_root / "phase16_stage_support.py": "871d2e7ef3926723a35912947886828faeabb576ebfec6a5573064ae5b932098",
+        tooling_root / "phase16_controlled_stage_coordinator.py": "02c9c3cdf5184b0d4ed5eb1dbb381634119ab0a0b4cf2c4a2adf7f54c7b2523d",
+        tooling_root / "phase16_controlled_stage_ssh_runner.ps1": "50c517f763303b9cdc5cd294fffafcf41c5121ebda74c250d55782bc625b6a8d",
+    }
+
+    for path, expected in expected_hashes.items():
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == expected
+    assert json.loads(manifest_path.read_text(encoding="utf-8"))[
+        "package_identity_sha256"
+    ] == "9cca04dd98143ff8a2dd7877d882cd53eccd09e4638ac2307cd92d0e31b3441c"
+
+
 def test_resource_plan_binds_awg31_runtime_client_capabilities_and_rollback():
     package = load_module(PACKAGE_SCRIPT, "phase16_package_resource")
     raw = (CONTRACT_ROOT / "resource-plan.json").read_bytes()
@@ -1350,7 +1375,7 @@ def test_stage_observed_spain_coordinator_binds_approval_state_and_rollback():
         "package_identity_sha256": "e" * 64,
         "rollback_scope_sha256": "f" * 64,
         "schema": "amn2.phase16.controlled-stage-request.v1",
-        "transaction_id": "phase16-stage-test-013",
+        "transaction_id": "phase16-stage-test-014",
     }
 
     validated = coordinator.validate_stage_request(
@@ -1405,9 +1430,9 @@ def test_stage_observed_spain_envelopes_match_current_remote_prerequisites():
         assert re.search(rf"(?:restart|stop|rm -f)[^\n]*{target}", application + runtime) is None
 
 
-def test_stage_observed_spain_package_013_identity_inventory_and_transport_contract():
-    package = load_module(PACKAGE_SCRIPT, "phase16_package_013_stage_inventory")
-    preflight = load_module(PREFLIGHT_SCRIPT, "phase16_preflight_013_stage_inventory")
+def test_stage_observed_spain_package_014_identity_inventory_and_transport_contract():
+    package = load_module(PACKAGE_SCRIPT, "phase16_package_014_stage_inventory")
+    preflight = load_module(PREFLIGHT_SCRIPT, "phase16_preflight_014_stage_inventory")
     coordinator = STAGE_COORDINATOR.read_text(encoding="utf-8")
     runner = STAGE_RUNNER.read_text(encoding="utf-8")
 
@@ -1556,7 +1581,7 @@ def test_phase16_ssh_remote_command_uses_fail_closed_bom_filter():
     assert '" "$3" | /usr/bin/bash -s -- "$@"' in remote
     assert "| /usr/bin/bash -s -- \"$@\"" in remote
     assert remote.endswith(
-        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-013' "
+        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-014' "
         "'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' "
         "'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' "
         "'phase16-preflight-test-001' '138.124.181.246'"

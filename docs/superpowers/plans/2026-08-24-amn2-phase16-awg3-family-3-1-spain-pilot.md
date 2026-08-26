@@ -153,13 +153,13 @@ Tooling:
 
 12. Новый package ID:
 
-   phase16-awg3-family-3-1-spain-pilot-20260824-013
+   phase16-awg3-family-3-1-spain-pilot-20260824-014
 
 13. Stage scripts должны оставаться checksum-bound, state-bound, claim-bound, fail-closed и rollback-aware.
 
 14. Никаких Spain/SSH/remote действий во время Task 1.
 
-15. Package 012 остаётся checksum-immutable; package 013 исправляет только доказанное локальное отсутствие передачи `StageExpectedHost` в trust-bundle assertion.
+15. Packages 012 и 013 остаются checksum-immutable; package 014 сохраняет исправленную передачу `StageExpectedHost` и добавляет только allowlisted local failure class, transport milestones, stdout/stderr SHA-256 и длины без raw output или automatic retry.
 
 16. Application stage использует текущую БД `/var/lib/amn2-spain/amn2.sqlite3` и Python `sqlite3.Connection.backup`; зависимость от `sqlite3` CLI запрещена.
 

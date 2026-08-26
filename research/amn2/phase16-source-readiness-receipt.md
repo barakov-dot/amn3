@@ -1,10 +1,10 @@
 # Phase 16 application source readiness receipt
 
-- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-013`
+- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-014`
 - Baseline application SHA: `c01c2e34ca506102e485ee3fa50b9420de6e591a`
 - Application branch: `codex/phase16-awg3-family-3-1-spain-pilot`
 - Application source SHA: `a3682fc44dd9e74ff96392ad99623474facf377f`
-- Tooling branch: `codex/phase16-awg3-family-3-1-spain-pilot-013`
+- Tooling branch: `codex/phase16-awg3-family-3-1-spain-pilot-014`
 - Protocol family: `awg3`
 - Protocol revision: `3.1`
 - Config revision: `amneziawg_v3_1`
@@ -92,5 +92,16 @@
 - Package revision 013 dependency disposition: the previously recorded Python 3.12/pytest runtime is no longer present; no dependency was installed, and the bounded regression used the available standard-library runtime plus existing plain contract tests
 - Package revision 012 immutability recheck: manifest, preflight collector/runner, application/runtime stage, stage support/coordinator/runner and package identity all matched their recorded SHA-256 values
 - Package revision 013 Spain/SSH/remote-write/stage/install activity during local correction: none; AWG2 mutations: none
+- Package revision 013 transaction 003 STOP receipt SHA-256: `bb12ad98b5faa35e273fae73b66ab7494409ca9ab13a9972dca5b3590bd61fca`; transaction consumed and not reusable
+- Package revision 013 recovery receipt SHA-256: `ba4500201961fb0502cb5cd9f0ad2c15e6bbc2285ca36c191204202152a4ca9c`; remote stage artifacts absent and rollback not required
+- Package revision 013 bootstrap diagnostic receipt SHA-256: `473c4ab9a3708a5492e28bdd1187484f44680e7c513f1f52d3615d857fc61e26`; normalized stdout SHA-256 `36677d68bb2f726476b347171154bd5bff5793d1358d3f470eef565396907cec`; base SSH/bootstrap framing PASS
+- Package revision 014 runner-observability TDD RED: `3 failed, 1 passed`; failures were the three missing failure-artifact/state functions
+- Package revision 014 runner-observability TDD GREEN: `4 passed in 1.379s`; fixed STOP token, allowlisted state, hash/length-only transport summary and no raw diagnostic persistence confirmed
+- Package revision 014 runner-observability correction commit: `a66532ccbdf7a62d143cd23b3862093b256166ae`
+- Package revision 014 binding RED: active package script returned revision 013 instead of required revision 014
+- Package revision 014 binding GREEN: active package/tooling/preflight/stage identities are revision 014; immutable package 013 manifest, seven packaged transport/stage assets and package identity matched their recorded SHA-256 values
+- Package revision 014 targeted regression: runner `unittest` `4 passed in 1.654s`; binding/immutability `1 passed`; Python AST `6 passed`; Bash syntax `3 passed`; PowerShell parser `2 passed`
+- Package revision 014 dependency disposition: bundled Python was used without installing dependencies; `pytest` was unavailable, so the runnable observability contract uses standard-library `unittest`
+- Package revision 014 Spain/SSH/remote-write/stage/install/config/issuance activity during local correction: none; automatic stage retry: none; AWG2 mutations: none
 
 This receipt records the real Phase 16 application evidence change. It does not authorize Spain staging, runtime creation, pilot issuance, or global AWG3 issuance.
