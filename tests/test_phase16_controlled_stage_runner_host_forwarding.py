@@ -119,6 +119,41 @@ class ControlledStageRunnerHostForwardingTest(unittest.TestCase):
             serialized = failure_path.read_text(encoding="utf-8")
             self.assertNotIn("raw-sensitive-trust-detail", serialized)
 
+    def test_failure_after_successful_trust_has_scalar_nonzero_process_exit(self) -> None:
+        # A successful trust assertion must not turn the later exit 64 into an array.
+        with tempfile.TemporaryDirectory() as temporary:
+            outcome_path = Path(temporary) / "outcome.json"
+            failure_path = Path(str(outcome_path) + ".runner-failure.json")
+            harness = (
+                f". '{ps_literal(STAGE_RUNNER)}'\n"
+                "function Assert-Phase16SpainTrustBundle {"
+                "param([Parameter(Mandatory)][string]$ExpectedHost);"
+                "Get-Phase16SpainTrustContract"
+                "};"
+                "function Read-Phase16ControlledStagePackage {"
+                "param([string]$Root);throw 'synthetic-package-rejection'"
+                "};"
+                "$StagePackageRoot='unused-local-fixture';"
+                "$StageApproval='unused-local-fixture';"
+                f"$StageExpectedCurrentStateSha256='{'a' * 64}';"
+                "$StageTransactionId='phase16-local-scalar-exit-test';"
+                f"$StageOutcomePath='{ps_literal(outcome_path)}';"
+                "$StageExpectedHost='138.124.181.246';"
+                "$code=Invoke-Phase16ControlledStageRunnerEntrypoint;exit $code"
+            )
+
+            result = run_powershell(harness)
+
+            self.assertEqual(result.returncode, 64, result.stderr)
+            self.assertEqual(result.stdout, "")
+            self.assertEqual(result.stderr, "AMN2_PHASE16_CONTROLLED_STAGE_RUNNER_STOP\n")
+            self.assertFalse(outcome_path.exists())
+            failure = json.loads(failure_path.read_bytes())
+            self.assertEqual(failure["failure_class"], "package_validation")
+            self.assertEqual(failure["last_completed_milestone"], "trust_validated")
+            self.assertEqual(failure["transport_exit_code"], None)
+            self.assertNotIn("synthetic-package-rejection", failure_path.read_text())
+
     def test_transport_failure_document_keeps_only_hashes_lengths_and_allowlists(
         self,
     ) -> None:

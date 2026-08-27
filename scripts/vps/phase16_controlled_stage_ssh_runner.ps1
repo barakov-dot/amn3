@@ -270,7 +270,7 @@ function Invoke-Phase16ControlledStageRunnerMain {
         $StageExpectedCurrentStateSha256 -cnotmatch '^[0-9a-f]{64}$' -or $StageTransactionId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,79}$' -or
         [string]::IsNullOrWhiteSpace($StageOutcomePath) -or -not (Test-Phase16ExpectedHost -ExpectedHost $StageExpectedHost)) { throw 'stage_arguments_invalid' }
     Set-Phase16ControlledStageFailureBoundary -FailureClass 'trust_validation' -LastCompletedMilestone 'arguments_validated'
-    Assert-Phase16SpainTrustBundle -ExpectedHost $StageExpectedHost
+    $null = Assert-Phase16SpainTrustBundle -ExpectedHost $StageExpectedHost
     Set-Phase16ControlledStageFailureBoundary -FailureClass 'package_validation' -LastCompletedMilestone 'trust_validated'
     $package = Read-Phase16ControlledStagePackage -Root $StagePackageRoot
     Set-Phase16ControlledStageFailureBoundary -FailureClass 'approval_validation' -LastCompletedMilestone 'package_validated'
@@ -309,8 +309,16 @@ function Invoke-Phase16ControlledStageRunnerMain {
     $process.StartInfo = $start
     $processStarted = $false
     try {
-        if (-not $process.Start()) { throw 'transport_failed' }
-        $processStarted = $true
+        $inputEncoding = [Console]::InputEncoding
+        try {
+            # .NET Framework creates an auto-flushing stdin writer during Start.
+            # Keep its preamble out of the binary frame, then restore caller state.
+            [Console]::InputEncoding = [Text.UTF8Encoding]::new($false)
+            if (-not $process.Start()) { throw 'transport_failed' }
+            $processStarted = $true
+        } finally {
+            [Console]::InputEncoding = $inputEncoding
+        }
         Set-Phase16ControlledStageFailureBoundary -FailureClass 'stdin_write' -LastCompletedMilestone 'process_started'
         $stdoutTask = $process.StandardOutput.ReadToEndAsync()
         $stderrTask = $process.StandardError.ReadToEndAsync()

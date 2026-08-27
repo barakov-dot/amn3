@@ -73,11 +73,18 @@ class Package015BindingTest(unittest.TestCase):
             "scripts/vps/phase16_application_stage_remote.sh",
             "scripts/vps/phase16_awg31_runtime_stage_remote.sh",
             "scripts/vps/phase16_stage_support.py",
-            "scripts/vps/phase16_controlled_stage_ssh_runner.ps1",
             "packaging/phase16-awg3-family-3-1-spain-pilot-contract/resource-plan.json",
         ):
             current = (ROOT / path).read_bytes().replace(PACKAGE_ID.encode(), PREVIOUS_ID.encode())
             self.assertEqual(current, (PREVIOUS / "tooling" / path).read_bytes(), path)
+        # The frozen 015 runner remains original; mutable runner exit/stdin fixes
+        # have executable regression coverage instead of a source-byte equality.
+        runner_path = "scripts/vps/phase16_controlled_stage_ssh_runner.ps1"
+        frozen_runner = ROOT / "packaging" / PACKAGE_ID / "tooling" / runner_path
+        self.assertEqual(
+            frozen_runner.read_bytes().replace(PACKAGE_ID.encode(), PREVIOUS_ID.encode()),
+            (PREVIOUS / "tooling" / runner_path).read_bytes(),
+        )
 
     def test_python_and_powershell_bind_the_same_exact_rollback_scope(self):
         scope = {
