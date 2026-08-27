@@ -1,5 +1,17 @@
 /GO PHASE 16 — AWG3 FAMILY 3.1, SPAIN PREFLIGHT, CONTROLLED STAGE AND ONE PILOT
 
+ТЕКУЩИЙ BOUNDED LOCAL GO — PACKAGE 016, 2026-08-27
+
+- Exact baseline: `392cc339f7f6afaed0a0dc2a0a80139ca030f560`; local-fix receipt SHA256: `549b515ea50e7668f56f433772633a63c674aaba973876f978f0a2ea15f823de`.
+- Подготовить `phase16-awg3-family-3-1-spain-pilot-20260824-016`: обновить только package/branch bindings и evidence. Сохранить исправленный scalar exit и BOM-free binary stdin producer; новый transport fix не разрешён.
+- Один focused binding RED/GREEN, один итоговый targeted regression, локальные commits, ровно одна materialization и один separate verifier. Не повторять их после receipt-only commit.
+- Package 015 immutable; transaction `phase16-spain-stage-20260827-006` consumed и не переиспользуется. Исторические результаты ниже не являются новым remote readback.
+- NO_SPAIN_EGRESS, NO_REMOTE_WRITE, NO_STAGE, NO_INSTALL, NO_CONFIG, NO_ISSUANCE, AWG2_UNTOUCHED. Task 2/3 и прежние approvals не разрешают внешний запуск этой ревизии.
+- После локального PASS запросить новый exact checksum-bound preflight approval. Сохранить linked worktree и локальную ветку 016; push не выполнять до отдельного informed approval публичной публикации накопленной истории.
+- Task 4 — первый pilot для АРМ/Windows; Task 4.5 — обязательный AWG2 ↔ AWG3.1 transport-quality A/B gate до Task 5 и closeout. Client admission/runtime/resource contracts этим GO не меняются.
+
+Ниже — исходный план и сохранённые требования предыдущих ревизий; при конфликте текущий bounded GO имеет приоритет.
+
 Выполнить единую Phase 16 внутри проекта VPS-OPS-LAB. Эта фаза объединяет ранее предполагавшиеся Phase 16 и Phase 17. Не создавать отдельную Phase 17.
 
 Модель:
@@ -163,7 +175,7 @@ Tooling:
 
 12. Новый package ID:
 
-   phase16-awg3-family-3-1-spain-pilot-20260824-015
+   phase16-awg3-family-3-1-spain-pilot-20260824-016
 
 13. Stage scripts должны оставаться checksum-bound, state-bound, claim-bound, fail-closed и rollback-aware.
 

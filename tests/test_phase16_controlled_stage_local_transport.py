@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 RUNNER = ROOT / "scripts/vps/phase16_controlled_stage_ssh_runner.ps1"
 COORDINATOR = ROOT / "scripts/vps/phase16_controlled_stage_coordinator.py"
 POWERSHELL = Path(r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-015"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-016"
 
 
 def literal(value: object) -> str:

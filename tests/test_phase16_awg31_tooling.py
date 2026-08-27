@@ -17,9 +17,9 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-015"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-016"
 SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
-TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-015"
+TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-016"
 HISTORIC_PACKAGE_003 = (
     ROOT / "packaging" / "phase16-awg3-family-3-1-spain-pilot-20260824-003"
 )
@@ -1430,9 +1430,9 @@ def test_stage_observed_spain_envelopes_match_current_remote_prerequisites():
         assert re.search(rf"(?:restart|stop|rm -f)[^\n]*{target}", application + runtime) is None
 
 
-def test_stage_observed_spain_package_015_identity_inventory_and_transport_contract():
-    package = load_module(PACKAGE_SCRIPT, "phase16_package_015_stage_inventory")
-    preflight = load_module(PREFLIGHT_SCRIPT, "phase16_preflight_015_stage_inventory")
+def test_stage_observed_spain_package_016_identity_inventory_and_transport_contract():
+    package = load_module(PACKAGE_SCRIPT, "phase16_package_016_stage_inventory")
+    preflight = load_module(PREFLIGHT_SCRIPT, "phase16_preflight_016_stage_inventory")
     coordinator = STAGE_COORDINATOR.read_text(encoding="utf-8")
     runner = STAGE_RUNNER.read_text(encoding="utf-8")
 
@@ -1581,7 +1581,7 @@ def test_phase16_ssh_remote_command_uses_fail_closed_bom_filter():
     assert '" "$3" | /usr/bin/bash -s -- "$@"' in remote
     assert "| /usr/bin/bash -s -- \"$@\"" in remote
     assert remote.endswith(
-        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-015' "
+        "' -- 'phase16-awg3-family-3-1-spain-pilot-20260824-016' "
         "'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' "
         "'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' "
         "'phase16-preflight-test-001' '138.124.181.246'"

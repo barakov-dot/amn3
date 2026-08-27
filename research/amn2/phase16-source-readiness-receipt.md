@@ -1,10 +1,10 @@
 # Phase 16 application source readiness receipt
 
-- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-015`
+- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-016`
 - Baseline application SHA: `c01c2e34ca506102e485ee3fa50b9420de6e591a`
 - Application branch: `codex/phase16-awg3-family-3-1-spain-pilot`
 - Application source SHA: `a3682fc44dd9e74ff96392ad99623474facf377f`
-- Tooling branch: `codex/phase16-awg3-family-3-1-spain-pilot-015`
+- Tooling branch: `codex/phase16-awg3-family-3-1-spain-pilot-016`
 - Protocol family: `awg3`
 - Protocol revision: `3.1`
 - Config revision: `amneziawg_v3_1`
@@ -126,4 +126,20 @@
 - Package revision 015 execution-policy readback before/after the resumed regression: `MachinePolicy=Undefined`, `UserPolicy=Undefined`, `Process=Undefined`, `CurrentUser=Undefined`, `LocalMachine=RemoteSigned`; process-local test argument did not mutate these policies
 - Package revision 015 resumed disposition: local test STOP resolved; ready for local commits and the authorized one materialization and one separate verifier. This source receipt does not claim that package creation or verification has already occurred
 
-This receipt records Phase 16 source and local tooling evidence. The application source remains unchanged for package 015. It does not authorize Spain preflight, staging, runtime creation, pilot issuance, or global AWG3 issuance.
+## Package revision 016 local preparation
+
+- Approved baseline: `392cc339f7f6afaed0a0dc2a0a80139ca030f560`; local scalar-exit/stdin-EOF fix receipt SHA256: `549b515ea50e7668f56f433772633a63c674aaba973876f978f0a2ea15f823de`.
+- Retained implementation commit: `0e5b57a0a5b506bdea6f4b2672f6b67894f594df`. This preparation changes package/branch bindings and evidence only; no further transport correction is made.
+- Binding TDD RED: `1 expected failure in 0.107s`; the real manifest admission rejected the in-memory revision-016 fixture while production remained revision 015. No package was materialized by the test.
+- Binding focused GREEN: `6 passed in 1.141s`; exact current admission, old-revision/tampered-identity rejection, declarative bindings, immutable package 015, preserved production bytes and cross-language rollback scope.
+- One final targeted regression: `24 passed in 4.845s`, 0 failures/errors. Modules: runner/host/scalar-exit (5), local binary stdin/EOF (4), coordinator failure-locus/milestones/rollback (9), package-016 binding/preservation (6).
+- Standard-library unittest on bundled Python, `-I -B`; test child PSModulePath removed, Windows PowerShell `-NoProfile -NonInteractive -ExecutionPolicy Bypass`. No installation or persistent policy change.
+- Package 015: all `171` entries and `172`-file inventory matched original checksums. Manifest SHA256: `f19f7f177d22b9b66311cb1db552f6b8ae9242f7d374b43d50afc17c09be6c74`; identity: `7ceafccd337323b84c1de0cf57d949023bfe48365ce313e1d1d99a7afb937509`.
+- The current runner, after normalizing only package 016 back to 015, has approved fixed-source SHA256 `fbdeda5f061eda91e8ca835e5b7c95b1233c4e6698ef497b33374ab353711635`. It is intentionally not the frozen package-015 runner.
+- Preflight/AWG2/application/runtime/support/coordinator/resource-plan bytes are unchanged from package 015 after package-ID normalization. AWG2 freshness remains 600 seconds.
+- Transaction `phase16-spain-stage-20260827-006` remains consumed. The historical incident's complete root cause is not established by local BOM reproduction, and a local PASS is not live stage acceptance.
+- Application source remains `a3682fc44dd9e74ff96392ad99623474facf377f`; runtime/client artifact bindings, global issuance and AWG2 settings are unchanged. ARM/Windows remains the requested first pilot; exact client admission is a later gate.
+- No Spain egress, remote write, live preflight/stage/install, config, peer or issuance operation occurred in this local preparation.
+- Disposition: ready for local commit and the authorized one materialization plus one separate verifier. This source receipt does not pre-claim package creation/verification; their results belong in the subsequent package-016 readiness receipt.
+
+This receipt records Phase 16 source and local tooling evidence. The application source remains unchanged for package 016. Historical test and remote results above are not refreshed by a package-binding update. It does not authorize Spain preflight, staging, runtime creation, pilot issuance, or global AWG3 issuance.

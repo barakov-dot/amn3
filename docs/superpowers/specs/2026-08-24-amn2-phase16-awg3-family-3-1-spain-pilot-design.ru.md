@@ -1,5 +1,9 @@
 /GO PHASE 16 — AWG3 FAMILY 3.1, SPAIN PREFLIGHT, CONTROLLED STAGE AND ONE PILOT
 
+ТЕКУЩАЯ РЕВИЗИЯ — PACKAGE 016, 2026-08-27
+
+Approved local preparation: baseline `392cc339f7f6afaed0a0dc2a0a80139ca030f560`, local-fix receipt SHA256 `549b515ea50e7668f56f433772633a63c674aaba973876f978f0a2ea15f823de`. Изменяются только package/branch bindings и локальное evidence; scalar-exit и BOM-free stdin fixes сохраняются. Один targeted regression, одна materialization и один separate verifier. Package 015 immutable, transaction 006 consumed. Spain egress, remote write, stage/install, config/issuance и AWG2 changes запрещены. После локальной готовности нужен новый exact preflight approval; прежние approvals не переиспользуются. Подробный текущий scope и вертикальный статус находятся в плане Phase 16; требования ниже сохранены как исходный контракт.
+
 Выполнить единую Phase 16 внутри проекта VPS-OPS-LAB. Эта фаза объединяет ранее предполагавшиеся Phase 16 и Phase 17. Не создавать отдельную Phase 17.
 
 Модель:
@@ -153,7 +157,7 @@ Tooling:
 
 12. Новый package ID:
 
-   phase16-awg3-family-3-1-spain-pilot-20260824-015
+   phase16-awg3-family-3-1-spain-pilot-20260824-016
 
 13. Stage scripts должны оставаться checksum-bound, state-bound, claim-bound, fail-closed и rollback-aware.
 

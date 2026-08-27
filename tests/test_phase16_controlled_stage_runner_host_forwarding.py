@@ -11,7 +11,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 STAGE_RUNNER = ROOT / "scripts" / "vps" / "phase16_controlled_stage_ssh_runner.ps1"
 POWERSHELL = Path(r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-015"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-016"
 EMPTY_SHA256 = hashlib.sha256(b"").hexdigest()
 
 
