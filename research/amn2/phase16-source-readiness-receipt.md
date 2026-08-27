@@ -1,10 +1,10 @@
 # Phase 16 application source readiness receipt
 
-- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-014`
+- Package ID: `phase16-awg3-family-3-1-spain-pilot-20260824-015`
 - Baseline application SHA: `c01c2e34ca506102e485ee3fa50b9420de6e591a`
 - Application branch: `codex/phase16-awg3-family-3-1-spain-pilot`
 - Application source SHA: `a3682fc44dd9e74ff96392ad99623474facf377f`
-- Tooling branch: `codex/phase16-awg3-family-3-1-spain-pilot-014`
+- Tooling branch: `codex/phase16-awg3-family-3-1-spain-pilot-015`
 - Protocol family: `awg3`
 - Protocol revision: `3.1`
 - Config revision: `amneziawg_v3_1`
@@ -104,4 +104,26 @@
 - Package revision 014 dependency disposition: bundled Python was used without installing dependencies; `pytest` was unavailable, so the runnable observability contract uses standard-library `unittest`
 - Package revision 014 Spain/SSH/remote-write/stage/install/config/issuance activity during local correction: none; automatic stage retry: none; AWG2 mutations: none
 
-This receipt records the real Phase 16 application evidence change. It does not authorize Spain staging, runtime creation, pilot issuance, or global AWG3 issuance.
+- Package revision 015 approved baseline: `b255bf3d48ea491ea9067be3e4320b5dcb5398c8`; transaction `phase16-spain-stage-20260827-004` is consumed and cannot be retried
+- Package revision 015 recovery receipt SHA-256: `7c10849f3b6d2a1544c407e9c01c6c1757ae9ee4d1b278b703add65703b97936`; normalized stdout SHA-256 `dfc4e42185c440d24bb9e8f93396fa71998669ab891a1bbf55a87dacbe79832c`; diagnostic source SHA-256 `dd502db08c30f1b7378edfd4aa13a5f4fdd3296ceec9a6b9daba4b4f2dc61fa8`
+- Package revision 015 semantic correction: consumed claims prove entry only; application/runtime completion and post-runtime snapshot, equality and outcome publication have separate ordered milestones
+- Package revision 015 no-raw audit artifacts: transaction-local `milestones.json` and `failure-locus.json`, bound to package, manifest, state, rollback scope and transaction; fixed terminal outcome and runner STOP token preserved
+- Package revision 015 rollback reporting: `attempts_completed_unverified` is not a resource readback; a failed cleanup action records `attempt_failed` while remaining authorized cleanup actions are still attempted; backup preservation and original resource boundaries retained
+- Package revision 015 image query: successful bounded Docker image inventory distinguishes `absent` and `present_baseline_unknown`; failed/malformed queries remain `query_failed`, without matching or persisting daemon error text
+- Package revision 015 TDD RED after local harness correction: `13` test methods, `28` expected missing-helper/artifact subtest errors and `1` expected missing-checkpoint failure; `5` existing/fixed-envelope test methods passed
+- Package revision 015 bounded harness correction: Windows text-mode descriptor writes expanded LF to CRLF and changed the Linux package fixture checksum; the test OS boundary now emulates POSIX binary writes, with no production transport change
+- Package revision 015 focused GREEN: `13 passed in 2.142s`, including actual coordinator execution with temporary local artifacts and simulated OS commands only
+- Package revision 015 binding RED: active materializer returned revision 014 instead of required revision 015
+- Package revision 015 binding GREEN attempt: `3 passed, 1 failed in 0.466s`; active bindings, all package-014 bytes and unchanged preflight/AWG2/runtime contracts passed. Cross-language rollback comparison did not start because the new local PowerShell test invocation omitted its process-local execution-policy option
+- Package revision 015 initial-run disposition: `STOP_SECOND_UNEXPECTED_TEST_FAILURE`; no further correction/retry, no commits, materialization `0/1`, separate verifier `0/1`. See `research/amn2/phase16-package-015-local-stop-receipt.md`; package 015 was not ready or materialized at that STOP
+- Package revision 015 Python runtime: bundled Python `3.12.13`; standard-library `unittest`, no dependency installation and no full legacy suite
+- Package revision 015 local activity: no Spain egress, SSH, remote write, stage, install, config/peer issuance, automatic retry or AWG2 mutation; freshness policy remains `600` seconds
+- Package revision 015 resumed local authorization: exact `/GO LOCAL_FIX_PACKAGE015_TEST_HARNESS_EXECUTION_POLICY_ONLY`, bound to STOP receipt SHA-256 `e89ac65b2d48981c8e14617c1d2d43d3f392c1cbc263c20c8010449dbb742934`; all existing worktree changes preserved
+- Package revision 015 resumed code correction: only the new local test subprocess arguments gained `-ExecutionPolicy Bypass`; no production code, machine/user execution policy, source application or immutable package changed in the resumed correction
+- Package revision 015 single resumed targeted regression: `17 passed in 2.091s`; Python AST `8 passed`; Bash syntax `3 passed`; PowerShell parser `2 passed`; no second test run
+- Package revision 015 rollback-scope comparison: real local Python coordinator and PowerShell runner returned the same canonical checksum for the independently specified revision-015 scope
+- Package revision 015 preservation checks: all package-014 `171` entries and exact `172`-file inventory unchanged; preflight, AWG2, runtime stage, support and runner behavior byte-equal to package 014 after normalization of only the package ID
+- Package revision 015 execution-policy readback before/after the resumed regression: `MachinePolicy=Undefined`, `UserPolicy=Undefined`, `Process=Undefined`, `CurrentUser=Undefined`, `LocalMachine=RemoteSigned`; process-local test argument did not mutate these policies
+- Package revision 015 resumed disposition: local test STOP resolved; ready for local commits and the authorized one materialization and one separate verifier. This source receipt does not claim that package creation or verification has already occurred
+
+This receipt records Phase 16 source and local tooling evidence. The application source remains unchanged for package 015. It does not authorize Spain preflight, staging, runtime creation, pilot issuance, or global AWG3 issuance.

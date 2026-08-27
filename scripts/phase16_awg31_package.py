@@ -31,9 +31,9 @@ class PackageReceipt(NamedTuple):
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-014"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-015"
 SOURCE_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot"
-TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-014"
+TOOLING_BRANCH = "codex/phase16-awg3-family-3-1-spain-pilot-015"
 MANIFEST_SCHEMA = "amn2.phase16.package-manifest.v1"
 PHASE14_RECEIPT_PATH = "research/amn2/phase14-dual-protocol-application-readiness-receipt.md"
 PHASE14_RECEIPT_COMMIT = "4e1052c079e1e25031a6c80f4dae1763e457ca48"

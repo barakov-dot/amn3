@@ -153,13 +153,13 @@ Tooling:
 
 12. Новый package ID:
 
-   phase16-awg3-family-3-1-spain-pilot-20260824-014
+   phase16-awg3-family-3-1-spain-pilot-20260824-015
 
 13. Stage scripts должны оставаться checksum-bound, state-bound, claim-bound, fail-closed и rollback-aware.
 
 14. Никаких Spain/SSH/remote действий во время Task 1.
 
-15. Packages 012 и 013 остаются checksum-immutable; package 014 сохраняет исправленную передачу `StageExpectedHost` и добавляет только allowlisted local failure class, transport milestones, stdout/stderr SHA-256 и длины без raw output или automatic retry.
+15. Package 014 остаётся checksum-immutable; package 015 сохраняет передачу `StageExpectedHost`, fixed runner STOP/outcome и local hash/length-only transport evidence. Transaction 004 consumed и не переиспользуется.
 
 16. Application stage использует текущую БД `/var/lib/amn2-spain/amn2.sqlite3` и Python `sqlite3.Connection.backup`; зависимость от `sqlite3` CLI запрещена.
 
@@ -170,6 +170,18 @@ Tooling:
 19. Controlled stage coordinator обязан проверять exact package manifest/identity, approval checksum, current-state checksum и canonical rollback-scope checksum; при failure удаляются только созданные транзакцией ресурсы, checksum-bound SQLite backup сохраняется.
 
 20. AWG2 freshness policy остаётся 600 секунд и не изменяется этим исправлением.
+
+21. Package 015: claim `consumed` означает только вход. `application_complete`, `runtime_entry`, `runtime_complete`, post-runtime AWG2 snapshot/equality и публикация outcome фиксируются раздельно в ordered transaction-bound `milestones.json`.
+
+22. На failure coordinator сохраняет `failure-locus.json` только с allowlisted locus/class, milestone prefix, claim-entry classes, checksum bindings и normalized runtime-image class. Raw stdout/stderr/exception text не сохраняются; терминальный failure outcome остаётся фиксированным.
+
+23. Milestone `*_entry` означает вход coordinator в вызов этапа; фактическое consumption подтверждается отдельным claim-entry class. Completion записывается только после успешного возврата stage subprocess, а не из status claim.
+
+24. Mandatory rollback выполняется до публикации failure artifact; ошибка одного действия не пропускает остальные действия в прежнем rollback scope. `rollback_attempts_completed`/`attempts_completed_unverified` не равны resource readback или доказательству clean remote; ошибка отмечается как `attempt_failed`. Backup и transaction audit сохраняются.
+
+25. Runtime-image class выводится из успешной bounded выдачи `docker image ls --all --digests --no-trunc`; неизвестная/неуспешная выдача даёт `query_failed`. Текст daemon errors не является доказательством отсутствия image.
+
+Для текущего local `/GO` package 015 разрешены только TDD, локальные commits, одна materialization и один separate verifier. Ни раздел Task 2 ниже, ни прежние approvals не разрешают egress этой ревизии: новый Spain preflight требует нового exact checksum-bound `/APPROVE`. Stage/install/config/issuance запрещены текущим запуском.
 
 TASK 1 TESTING
 

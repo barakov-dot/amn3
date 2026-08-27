@@ -18,7 +18,7 @@ import tempfile
 import zipfile
 
 
-PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-014"
+PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-015"
 REQUEST_SCHEMA = "amn2.phase16.controlled-stage-request.v1"
 CLAIM_SCHEMA = "amn2.phase16.stage-claim.v1"
 PACKAGE_ROOT = Path("/var/lib/amn2-phase16/package")
@@ -30,12 +30,33 @@ COORDINATOR_LEDGER = Path("/var/lib/amn2-phase16/stage/coordinator.json")
 DATABASE_PATH = Path("/var/lib/amn2-spain/amn2.sqlite3")
 DOCKER_BINARY = "/opt/amn2-spain/docker/bin/docker"
 DOCKER_SOCKET = "unix:///run/amn2-spain-docker/docker.sock"
+RUNTIME_STATE_ROOT = Path("/var/lib/amn2-spain/awg3")
+RUNTIME_UNIT_PATH = Path("/etc/systemd/system/amn2-spain-awg3.service")
+RUNTIME_IDENTITY = "docker.io/amneziavpn/amneziawg-go@sha256:4e1fd2840f8d26eb6ec8bc1598e66f2f17f5d0201cd2baadbde560c104d4fc9d"
 MAX_HEADER_BYTES = 65536
 MAX_ARCHIVE_BYTES = 268435456
 MAX_ENTRY_BYTES = 67108864
 MAX_ENTRIES = 4096
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 TRANSACTION_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,79}$")
+STAGE_MILESTONES = (
+    "transaction_created", "package_verified", "request_bound",
+    "awg2_before_captured", "package_installed", "claims_issued",
+    "application_entry", "application_complete", "runtime_entry",
+    "runtime_complete", "awg2_after_captured", "awg2_equality_confirmed",
+    "coordinator_outcome_written", "transaction_outcome_written",
+)
+FAILURE_LOCI = frozenset({
+    "package_verification", "request_binding", "awg2_before_snapshot",
+    "package_installation", "claim_publication", "application_stage",
+    "runtime_stage", "awg2_after_snapshot", "awg2_equality",
+    "coordinator_outcome_publication", "transaction_outcome_publication",
+    "milestone_publication",
+})
+FAILURE_CLASSES = frozenset({
+    "contract", "process_exit", "stderr_not_empty", "stdout_shape",
+    "output_bound", "timeout", "os_error", "internal",
+})
 
 ROLLBACK_SCOPE = {
     "application_ledger": "/var/lib/amn2-phase16/stage/application.json",
@@ -55,7 +76,21 @@ ROLLBACK_SCOPE = {
 
 
 class StageCoordinatorError(ValueError):
-    pass
+    def __init__(self, message: str, *, failure_class: str = "contract") -> None:
+        super().__init__(message)
+        self.failure_class = failure_class if failure_class in FAILURE_CLASSES else "internal"
+
+
+def classify_stage_failure(error: Exception) -> str:
+    """Never derive a persisted class from exception text or subprocess output."""
+    if isinstance(error, StageCoordinatorError):
+        value = error.failure_class
+        return value if isinstance(value, str) and value in FAILURE_CLASSES else "internal"
+    if isinstance(error, subprocess.TimeoutExpired):
+        return "timeout"
+    if isinstance(error, OSError):
+        return "os_error"
+    return "internal"
 
 
 def canonical_json_bytes(value: object) -> bytes:
@@ -309,6 +344,107 @@ def _atomic_json(path: Path, value: object) -> None:
     os.replace(temporary, path)
 
 
+def build_milestone_document(
+    request: dict[str, object], milestones: list[str],
+) -> dict[str, object]:
+    if (
+        not isinstance(milestones, list) or not milestones
+        or tuple(milestones) != STAGE_MILESTONES[:len(milestones)]
+        or request.get("package_id") != PACKAGE_ID
+        or not isinstance(request.get("transaction_id"), str)
+        or TRANSACTION_RE.fullmatch(request["transaction_id"]) is None
+    ):
+        raise StageCoordinatorError("milestone binding")
+    for key in (
+        "manifest_sha256", "package_identity_sha256",
+        "expected_current_state_sha256", "rollback_scope_sha256",
+    ):
+        if not isinstance(request.get(key), str) or SHA256_RE.fullmatch(request[key]) is None:
+            raise StageCoordinatorError("milestone binding")
+    return {
+        "completed_milestones": list(milestones),
+        "general_issuance_enabled": False,
+        "last_completed_milestone": milestones[-1],
+        "manifest_sha256": request["manifest_sha256"],
+        "package_id": PACKAGE_ID,
+        "package_identity_sha256": request["package_identity_sha256"],
+        "raw_output_persisted": False,
+        "rollback_scope_sha256": request["rollback_scope_sha256"],
+        "schema": "amn2.phase16.controlled-stage-milestones.v1",
+        "state_sha256": request["expected_current_state_sha256"],
+        "transaction_id": request["transaction_id"],
+    }
+
+
+def classify_claim_entry(path: Path, expected: dict[str, object] | None) -> str:
+    """Consumption is entry evidence, never evidence of stage completion."""
+    if expected is None:
+        return "unavailable"
+    try:
+        before = os.lstat(path)
+        if not stat.S_ISREG(before.st_mode) or not 1 <= before.st_size <= 8192:
+            return "invalid"
+        descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        try:
+            opened = os.fstat(descriptor)
+            if (before.st_dev, before.st_ino) != (opened.st_dev, opened.st_ino):
+                return "invalid"
+            raw = os.read(descriptor, 8193)
+        finally:
+            os.close(descriptor)
+        if len(raw) > 8192:
+            return "invalid"
+        observed = _load_canonical(raw, label="claim entry")
+        original = dict(observed, consumed_at=None, status="issued")
+        if original != expected:
+            return "invalid"
+        if observed["status"] == "issued" and observed["consumed_at"] is None:
+            return "issued_not_entered"
+        consumed_at = observed["consumed_at"]
+        if (
+            observed["status"] != "consumed" or not isinstance(consumed_at, str)
+            or re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z", consumed_at) is None
+        ):
+            return "invalid"
+        dt.datetime.strptime(consumed_at, "%Y-%m-%dT%H:%M:%SZ")
+        return "consumed_entry_only"
+    except OSError:
+        return "unavailable"
+    except (ValueError, TypeError, KeyError):
+        return "invalid"
+
+
+def classify_runtime_image_query(returncode: int, stdout: bytes, stderr: bytes) -> str:
+    """Classify an image inventory, not locale-dependent Docker error messages."""
+    if (
+        type(returncode) is not int or returncode != 0
+        or not isinstance(stdout, bytes) or not isinstance(stderr, bytes)
+        or stderr or len(stdout) > 8192 or stdout and not stdout.endswith(b"\n")
+    ):
+        return "query_failed"
+    target = RUNTIME_IDENTITY.removeprefix("docker.io/").encode("ascii")
+    present = False
+    for line in stdout.splitlines():
+        if re.fullmatch(
+            rb"(?:[a-z0-9][a-z0-9._:/-]{0,254}|<none>)@(?:sha256:[0-9a-f]{64}|<none>)", line
+        ) is None:
+            return "query_failed"
+        if line.removeprefix(b"docker.io/") == target:
+            present = True
+    return "present_baseline_unknown" if present else "absent"
+
+
+def _runtime_image_state() -> str:
+    try:
+        result = _docker(
+            "image", "ls", "--all", "--digests", "--no-trunc",
+            "--format", "{{.Repository}}@{{.Digest}}", timeout=10,
+        )
+        return classify_runtime_image_query(result.returncode, result.stdout, result.stderr)
+    except Exception:
+        return "query_failed"
+
+
 def _run(arguments: list[str], *, env: dict[str, str] | None = None, timeout: int = 180) -> subprocess.CompletedProcess[bytes]:
     result = subprocess.run(
         arguments,
@@ -320,7 +456,7 @@ def _run(arguments: list[str], *, env: dict[str, str] | None = None, timeout: in
         env=env,
     )
     if len(result.stdout) > 8192 or len(result.stderr) > 8192:
-        raise StageCoordinatorError("stage output bound")
+        raise StageCoordinatorError("stage output bound", failure_class="output_bound")
     return result
 
 
@@ -353,8 +489,12 @@ def _run_stage(script: Path, claim: Path, gate: str, request: dict[str, object])
     else:
         environment["PHASE16_STAGE_LEDGER"] = str(RUNTIME_LEDGER)
     result = _run(["/usr/bin/bash", str(script)], env=environment)
-    if result.returncode != 0 or result.stderr or not result.stdout.endswith(b"\n"):
-        raise StageCoordinatorError("stage envelope failed")
+    if result.returncode != 0:
+        raise StageCoordinatorError("stage envelope failed", failure_class="process_exit")
+    if result.stderr:
+        raise StageCoordinatorError("stage envelope failed", failure_class="stderr_not_empty")
+    if not result.stdout.endswith(b"\n"):
+        raise StageCoordinatorError("stage envelope failed", failure_class="stdout_shape")
 
 
 def _docker(*arguments: str, timeout: int = 30) -> subprocess.CompletedProcess[bytes]:
@@ -384,29 +524,36 @@ def _awg2_snapshot() -> str:
     return hashlib.sha256(normalized).hexdigest()
 
 
-def _rollback_runtime() -> None:
+def _rollback_runtime() -> bool:
+    failed = False
+
+    def attempt(operation) -> None:
+        nonlocal failed
+        try:
+            result = operation()
+            if isinstance(result, subprocess.CompletedProcess) and result.returncode != 0:
+                failed = True
+        except Exception:
+            failed = True
+
     image_created = False
     try:
         ledger = _load_canonical(RUNTIME_LEDGER.read_bytes(), label="runtime ledger")
         image_created = ledger.get("runtime_image_created") is True
     except Exception:
-        pass
-    _run(["/usr/bin/systemctl", "stop", "amn2-spain-awg3.service"], timeout=30)
-    Path("/etc/systemd/system/amn2-spain-awg3.service").unlink(missing_ok=True)
-    _run(["/usr/bin/systemctl", "daemon-reload"], timeout=30)
-    _docker("rm", "-f", "amn2-spain-awg3", timeout=30)
-    _docker("network", "rm", "amn2sp3", timeout=30)
-    state_root = Path("/var/lib/amn2-spain/awg3")
-    if state_root.is_dir() and not state_root.is_symlink():
-        shutil.rmtree(state_root)
-    RUNTIME_LEDGER.unlink(missing_ok=True)
+        failed = True
+    attempt(lambda: _run(["/usr/bin/systemctl", "stop", "amn2-spain-awg3.service"], timeout=30))
+    attempt(lambda: RUNTIME_UNIT_PATH.unlink(missing_ok=True))
+    attempt(lambda: _run(["/usr/bin/systemctl", "daemon-reload"], timeout=30))
+    attempt(lambda: _docker("rm", "-f", "amn2-spain-awg3", timeout=30))
+    attempt(lambda: _docker("network", "rm", "amn2sp3", timeout=30))
+    if RUNTIME_STATE_ROOT.is_dir() and not RUNTIME_STATE_ROOT.is_symlink():
+        attempt(lambda: shutil.rmtree(RUNTIME_STATE_ROOT))
+    attempt(lambda: RUNTIME_LEDGER.unlink(missing_ok=True))
     if image_created:
-        _docker(
-            "image",
-            "rm",
-            "docker.io/amneziavpn/amneziawg-go@sha256:4e1fd2840f8d26eb6ec8bc1598e66f2f17f5d0201cd2baadbde560c104d4fc9d",
-            timeout=30,
-        )
+        attempt(lambda: _docker("image", "rm", RUNTIME_IDENTITY, timeout=30))
+    # Successful attempts are not a resource readback or proof of remote cleanliness.
+    return not failed
 
 
 def _approval_text(request: dict[str, object]) -> str:
@@ -482,25 +629,45 @@ def execute_stage(header: dict[str, object], archive: bytes) -> dict[str, object
     application_completed = False
     runtime_completed = False
     before_awg2 = ""
+    request = None
+    expected_claims = {}
+    milestones = ["transaction_created"]
+    failure_locus = "package_verification"
+
+    def checkpoint(milestone: str) -> None:
+        nonlocal failure_locus
+        # Append only after the operation returns; a consumed claim never appends completion.
+        milestones.append(milestone)
+        failure_locus = "milestone_publication"
+        _atomic_json(transaction / "milestones.json", build_milestone_document(request, milestones))
+
     try:
         manifest_bytes = _extract_verified_package(archive, staged_package)
-        request = validate_stage_request(
+        milestones.append("package_verified")
+        failure_locus = "request_binding"
+        candidate_request = validate_stage_request(
             canonical_json_bytes(request_value),
             manifest_bytes=manifest_bytes,
             approval_bytes=str(header["approval"]).encode("ascii"),
             expected_rollback_scope_sha256=rollback_scope_sha256(),
         )
-        if header["approval"] != _approval_text(request):
+        if header["approval"] != _approval_text(candidate_request):
             raise StageCoordinatorError("approval binding")
         coordinator_path = staged_package / "tooling/scripts/vps/phase16_controlled_stage_coordinator.py"
         coordinator_sha = hashlib.sha256(coordinator_path.read_bytes()).hexdigest()
         embedded_sha = globals().get("PHASE16_EMBEDDED_SOURCE_SHA256", "")
         if coordinator_sha != header["coordinator_sha256"] or embedded_sha != coordinator_sha:
             raise StageCoordinatorError("coordinator binding")
+        request = candidate_request
+        checkpoint("request_bound")
+        failure_locus = "awg2_before_snapshot"
         before_awg2 = _awg2_snapshot()
+        checkpoint("awg2_before_captured")
+        failure_locus = "package_installation"
         PACKAGE_ROOT.parent.mkdir(mode=0o700, exist_ok=True)
         staged_package.replace(PACKAGE_ROOT)
         package_installed = True
+        checkpoint("package_installed")
         now = dt.datetime.now(dt.timezone.utc).replace(microsecond=0)
         expires = now + dt.timedelta(minutes=5)
         issued_at = now.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -509,33 +676,43 @@ def execute_stage(header: dict[str, object], archive: bytes) -> dict[str, object
         runtime_script = PACKAGE_ROOT / "tooling/scripts/vps/phase16_awg31_runtime_stage_remote.sh"
         app_claim = transaction / "application-claim.json"
         runtime_claim = transaction / "runtime-claim.json"
-        _atomic_json(
-            app_claim,
-            build_stage_claim(
+        failure_locus = "claim_publication"
+        expected_claims = {
+            "application": build_stage_claim(
                 request,
                 gate="APPLICATION_STAGE",
                 script_bytes=app_script.read_bytes(),
                 issued_at=issued_at,
                 expires_at=expires_at,
             ),
-        )
-        _atomic_json(
-            runtime_claim,
-            build_stage_claim(
+            "runtime": build_stage_claim(
                 request,
                 gate="AWG31_RUNTIME_STAGE",
                 script_bytes=runtime_script.read_bytes(),
                 issued_at=issued_at,
                 expires_at=expires_at,
             ),
-        )
+        }
+        _atomic_json(app_claim, expected_claims["application"])
+        _atomic_json(runtime_claim, expected_claims["runtime"])
+        checkpoint("claims_issued")
+        checkpoint("application_entry")
+        failure_locus = "application_stage"
         _run_stage(app_script, app_claim, "APPLICATION_STAGE", request)
         application_completed = True
+        checkpoint("application_complete")
+        checkpoint("runtime_entry")
+        failure_locus = "runtime_stage"
         _run_stage(runtime_script, runtime_claim, "AWG31_RUNTIME_STAGE", request)
         runtime_completed = True
+        checkpoint("runtime_complete")
+        failure_locus = "awg2_after_snapshot"
         after_awg2 = _awg2_snapshot()
+        checkpoint("awg2_after_captured")
+        failure_locus = "awg2_equality"
         if after_awg2 != before_awg2:
             raise StageCoordinatorError("awg2 state changed")
+        checkpoint("awg2_equality_confirmed")
         outcome = {
             "awg2_state_equal": True,
             "general_issuance_enabled": False,
@@ -548,22 +725,34 @@ def execute_stage(header: dict[str, object], archive: bytes) -> dict[str, object
             "state_sha256": request["expected_current_state_sha256"],
             "transaction_id": transaction_id,
         }
+        failure_locus = "coordinator_outcome_publication"
         _atomic_json(COORDINATOR_LEDGER, outcome)
+        checkpoint("coordinator_outcome_written")
+        failure_locus = "transaction_outcome_publication"
         _atomic_json(transaction / "outcome.json", outcome)
+        checkpoint("transaction_outcome_written")
         return outcome
-    except Exception:
-        if runtime_completed:
+    except Exception as error:
+        rollback_failed = False
+        rollback_milestones = ["rollback_started"]
+
+        def rollback_attempt(operation) -> None:
+            nonlocal rollback_failed
             try:
-                _rollback_runtime()
+                if operation() is False:
+                    rollback_failed = True
             except Exception:
-                pass
+                rollback_failed = True
+
+        if runtime_completed:
+            rollback_attempt(_rollback_runtime)
         if application_completed:
             if APPLICATION_RELEASE.is_dir() and not APPLICATION_RELEASE.is_symlink():
-                shutil.rmtree(APPLICATION_RELEASE)
-            APPLICATION_LEDGER.unlink(missing_ok=True)
-        COORDINATOR_LEDGER.unlink(missing_ok=True)
+                rollback_attempt(lambda: shutil.rmtree(APPLICATION_RELEASE))
+            rollback_attempt(lambda: APPLICATION_LEDGER.unlink(missing_ok=True))
+        rollback_attempt(lambda: COORDINATOR_LEDGER.unlink(missing_ok=True))
         if package_installed and PACKAGE_ROOT.is_dir() and not PACKAGE_ROOT.is_symlink():
-            shutil.rmtree(PACKAGE_ROOT)
+            rollback_attempt(lambda: shutil.rmtree(PACKAGE_ROOT))
         failure = {
             "awg2_state_equal": None,
             "backup_preserved": True,
@@ -573,8 +762,29 @@ def execute_stage(header: dict[str, object], archive: bytes) -> dict[str, object
             "schema": "amn2.phase16.controlled-stage-outcome.v1",
             "transaction_id": transaction_id,
         }
+        rollback_attempt(lambda: _atomic_json(transaction / "outcome.json", failure))
+        if not rollback_failed:
+            rollback_milestones.append("rollback_attempts_completed")
         try:
-            _atomic_json(transaction / "outcome.json", failure)
+            # Audit publication cannot prevent or replace mandatory rollback above.
+            # No artifact is trusted before exact request/approval/coordinator binding.
+            if request is not None and failure_locus in FAILURE_LOCI:
+                artifact = build_milestone_document(request, milestones)
+                artifact.update({
+                    "application_claim_entry": classify_claim_entry(
+                        transaction / "application-claim.json", expected_claims.get("application"),
+                    ),
+                    "failure_class": classify_stage_failure(error),
+                    "failure_locus": failure_locus,
+                    "rollback_milestones": rollback_milestones,
+                    "rollback_status": "attempt_failed" if rollback_failed else "attempts_completed_unverified",
+                    "runtime_claim_entry": classify_claim_entry(
+                        transaction / "runtime-claim.json", expected_claims.get("runtime"),
+                    ),
+                    "runtime_image": _runtime_image_state(),
+                    "schema": "amn2.phase16.controlled-stage-failure-locus.v1",
+                })
+                _atomic_json(transaction / "failure-locus.json", artifact)
         except Exception:
             pass
         raise
