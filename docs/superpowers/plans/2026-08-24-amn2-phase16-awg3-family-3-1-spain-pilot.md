@@ -16,6 +16,16 @@
 5. После отдельного approval выдать ровно один операторский AWG3.1 pilot config.
 6. Проверить его на реальном клиенте и принять либо откатить пилот.
 
+ОПЕРАТОРСКОЕ УТОЧНЕНИЕ — 2026-08-27: ФОРМАТ СТАТУСА И GIT
+
+- После каждого прогона показывать полный статус Phase 16 вертикальным списком: отдельная строка для Task 0, 1, 2, 3, 4, 4.5, 5 и 6. Использовать `✅`, `▶️`, `⏳`, `❌`; не сжимать список в одну строку ни в промежуточных обновлениях, ни в итоговом ответе.
+- После завершения одобренного шага коммитить относящиеся к нему изменения и публиковать текущую именованную Phase 16-ветку в уже настроенный `origin`. Не создавать пустые коммиты и не включать unrelated changes.
+- Это прямое указание оператора заменяет прежний общий запрет `NO_PUSH` только для указанной Git-публикации. Более поздний явный запрет конкретного запуска сохраняет приоритет.
+- Перед push проверять remote, исходящий состав и отсутствие чувствительных данных; после push подтверждать совпадение remote HEAD и локального commit SHA. При блокере не считать push выполненным.
+- Не выполнять force-push, merge, push в `master`/`main`, публикацию других веток или создание PR без отдельного указания.
+- Рабочую ветку и linked worktree сохранять. Immutable packages не изменять; для receipt-only/doc-only commit не повторять package materialization, verifier или полные suites.
+- Разрешение Git commit/push не разрешает Spain SSH, диагностический egress, повтор preflight, stage/install, rollback, создание конфигов или issuance. Их exact approval gates сохраняются; AWG2 не затрагивать.
+
 РАБОЧИЙ КОНТЕКСТ
 
 Основной проект:
@@ -273,7 +283,7 @@ TASK 2 — CHECKSUM-BOUND SPAIN READ-ONLY PREFLIGHT
 - issuance;
 - AWG2 restart/stop/change;
 - live AWG3 runtime start;
-- push.
+- push вне разрешённой текущей Phase 16-ветки, force-push или merge.
 
 При transport timeout:
 - проверить отсутствие orphan upload process и partial remote artifact;
@@ -420,7 +430,7 @@ TASK 6 — CONCISE CLOSEOUT
 - повтор package materialization;
 - rollout на других пользователей;
 - global AWG3 issuance;
-- push.
+- push вне разрешённой текущей Phase 16-ветки, force-push или merge.
 
 ОГРАНИЧЕНИЯ ВСЕЙ PHASE 16
 
@@ -431,7 +441,7 @@ TASK 6 — CONCISE CLOSEOUT
 - Не останавливать AWG2 для тестов.
 - Не менять Phase 14 contracts, кроме минимального additive AWG3 revision wiring.
 - Не трогать unrelated untracked files.
-- Не делать push.
+- Commit/push текущей Phase 16-ветки выполнять по операторскому уточнению от 2026-08-27; остальные ветки и remote-настройки не изменять.
 - Не расширять scope на QR, vpn://, general import subsystem, libagw или global rollout.
 - Любой scope expansion требует отдельного решения пользователя.
 
