@@ -26,3 +26,5 @@ Evidence: ignored tmp/phase16-pilot-first-client-diagnostic-001.json, phase16-pi
 ## Next boundary
 
 Prepare a minimal pilot-only host firewall/NAT correction with rollback of only its added resources. Do not disable UFW, flush nftables, change existing AWG2 rules, reinstall the host, restart AWG2 or regenerate this peer. Re-test the workstation only after the network path is verified. Task 4.5 failed; Task 5 and closeout remain blocked.
+
+Update at 18:49 UTC: the operator subsequently authorized the scoped correction. Temporary application and both network-path probes succeeded; the first real VPN handshake still remains pending. See [the separate firewall-fix receipt](phase16-pilot-firewall-fix-2026-08-28.md). This does not retroactively change the failed first test or claim client acceptance.
