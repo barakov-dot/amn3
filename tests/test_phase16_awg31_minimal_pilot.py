@@ -301,6 +301,23 @@ class MinimalPilotTests(unittest.TestCase):
         self.assertIn(("exec", "amn2-spain-awg", "/usr/bin/awg", "show", "awgsp0", "peers"), calls)
         self.assertTrue(all(args[0] in ("ps", "inspect", "exec") for args in calls))
 
+    def test_awg2_fingerprint_ignores_peer_order_but_preserves_peer_changes(self):
+        m = module()
+        fingerprints = []
+        for peers in ("PEER_A\nPEER_B", "PEER_B\nPEER_A", "PEER_A\nPEER_C", "PEER_A\nPEER_A\nPEER_B"):
+            def docker(*args, **kwargs):
+                if args[0] == "ps":
+                    return "a" * 12
+                if args[0] == "inspect":
+                    return json.dumps([{"Id": "a" * 64, "Image": "fixed", "HostConfig": {}, "Mounts": [],
+                                        "RestartCount": 0, "State": {"Running": True, "StartedAt": "fixed"}}])
+                return peers
+            with patch.object(m, "command", return_value="active\nrunning\nenabled"):
+                fingerprints.append(m.awg2_snapshot(docker))
+        self.assertEqual(fingerprints[0], fingerprints[1])
+        self.assertNotEqual(fingerprints[0], fingerprints[2])
+        self.assertNotEqual(fingerprints[0], fingerprints[3])
+
     def test_live_cli_modes_refuse_windows_before_any_external_command(self):
         m = module()
         for argv in (["check"], ["render", "--key-directory", "missing", "--dns", "1.1.1.1"]):

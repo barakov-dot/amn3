@@ -200,6 +200,7 @@ def awg2_snapshot(docker):
         raise PilotError("awg2_identity_ambiguous")
     data = json.loads(docker("inspect", identities))
     peers = docker("exec", "amn2-spain-awg", "/usr/bin/awg", "show", "awgsp0", "peers") if data[0]["State"]["Running"] else "not_running"
+    peers = "\n".join(sorted(peers.splitlines()))
     return fingerprint({"owner": owner, "peers_sha256": hashlib.sha256(peers.encode()).hexdigest(),
                         "containers": [{key: item[key] for key in ("Id", "Image", "HostConfig", "Mounts", "RestartCount")}
                                        | {"running": item["State"]["Running"], "started": item["State"]["StartedAt"]}
