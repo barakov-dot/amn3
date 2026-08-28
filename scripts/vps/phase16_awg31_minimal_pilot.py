@@ -28,7 +28,7 @@ DOCKER_SOCKET = "unix:///run/amn2-spain-docker/docker.sock"
 CONTAINER = "amn2-spain-awg31-pilot"
 NETWORK = "amn2sp31pilot"
 BRIDGE = "amn2sp31p0"
-INPUT_DIR = Path("/var/lib/amn2-phase16/pilot-input")
+INPUT_DIR = Path("/var/lib/amn2-phase16/pilot-input-v2")
 CLAIM_ROOT = Path("/var/lib/amn2-phase16/pilot-attempts")
 PEER_COUNT = 1
 KEY_FIELDS = ("server_private", "server_public", "client_private", "client_public", "psk", "hpk")
@@ -75,13 +75,13 @@ def render_pair(keys, *, dns, mtu=1280):
     server = (
         f"[Interface]\nPrivateKey = {keys['server_private']}\nListenPort = 30002\n"
         + shared + f"\n[Peer]\nPublicKey = {keys['client_public']}\n"
-        f"PresharedKey = {keys['psk']}\nAllowedIPs = 10.212.13.2/32\nAdvancedSecurity = on\n"
+        f"PresharedKey = {keys['psk']}\nAllowedIPs = 10.212.13.2/32\n"
     )
     client = (
         f"[Interface]\nPrivateKey = {keys['client_private']}\nAddress = 10.212.13.2/32\n"
         f"DNS = {address}\nMTU = {mtu}\n" + shared
         + f"\n[Peer]\nPublicKey = {keys['server_public']}\nPresharedKey = {keys['psk']}\n"
-        f"Endpoint = {TARGET}:30002\nAllowedIPs = 0.0.0.0/0, ::/0\nPersistentKeepalive = 25\nAdvancedSecurity = on\n"
+        f"Endpoint = {TARGET}:30002\nAllowedIPs = 0.0.0.0/0, ::/0\nPersistentKeepalive = 25\n"
     )
     return {"server.conf": server, "windows.conf": client}
 

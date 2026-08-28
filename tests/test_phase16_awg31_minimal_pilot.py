@@ -53,6 +53,23 @@ class FakeDocker:
 
 
 class MinimalPilotTests(unittest.TestCase):
+    def test_userspace_profiles_omit_kernel_only_advanced_security(self):
+        m = module()
+        keys = synthetic_keys()
+        profiles = m.render_pair(keys, dns="1.1.1.1", mtu=1280)
+        for body in profiles.values():
+            self.assertNotIn("AdvancedSecurity", body)
+            self.assertIn("HeaderProtectionKey = " + keys["hpk"], body)
+            for field in ("S1", "S2", "S3", "S4"):
+                self.assertIn(field + " = 12\n", body)
+            self.assertEqual(body.count("[Peer]"), 1)
+        self.assertEqual(m.INPUT_DIR, Path("/var/lib/amn2-phase16/pilot-input-v2"))
+        m.validate_pair(profiles)
+        incompatible = dict(profiles)
+        incompatible["server.conf"] += "AdvancedSecurity = on\n"
+        with self.assertRaises(m.PilotError):
+            m.validate_pair(incompatible)
+
     def test_00_runtime_only_contract_exists(self):
         self.assertTrue(SOURCE.is_file(), "missing independent runtime-only implementation")
         m = module()
@@ -60,7 +77,7 @@ class MinimalPilotTests(unittest.TestCase):
 
     def test_pilot_inputs_use_root_owned_phase16_namespace(self):
         m = module()
-        self.assertEqual(m.INPUT_DIR, Path("/var/lib/amn2-phase16/pilot-input"))
+        self.assertEqual(m.INPUT_DIR, Path("/var/lib/amn2-phase16/pilot-input-v2"))
         self.assertEqual(m.INPUT_DIR.parent, m.CLAIM_ROOT.parent)
         nonroot_parent = SimpleNamespace(
             parents=(), exists=lambda: True, is_symlink=lambda: False,
