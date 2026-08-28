@@ -107,13 +107,17 @@ class ControlledStageRunnerHostForwardingTest(unittest.TestCase):
                     "package_id": PACKAGE_ID,
                     "raw_output_persisted": False,
                     "result": "runner_stop",
-                    "schema": "amn2.phase16.controlled-stage-runner-failure.v1",
+                    "schema": "amn2.phase16.controlled-stage-runner-failure.v2",
                     "stderr_bytes": 0,
                     "stderr_sha256": EMPTY_SHA256,
+                    "stdin_exception_class": "not_observed",
+                    "stdin_write_segment": "not_started",
                     "stdout_bytes": 0,
                     "stdout_sha256": EMPTY_SHA256,
                     "transaction_id": transaction_id,
+                    "transport_exit_class": "not_observed",
                     "transport_exit_code": None,
+                    "transport_summary_state": "not_collected",
                 },
             )
             serialized = failure_path.read_text(encoding="utf-8")
@@ -179,6 +183,8 @@ class ControlledStageRunnerHostForwardingTest(unittest.TestCase):
         self.assertEqual(document["failure_class"], "transport_output")
         self.assertEqual(document["last_completed_milestone"], "transport_completed")
         self.assertEqual(document["transport_exit_code"], 255)
+        self.assertEqual(document["transport_exit_class"], "nonzero_exit")
+        self.assertEqual(document["transport_summary_state"], "complete")
         self.assertEqual(document["stdout_bytes"], len(stdout_text.encode("utf-8")))
         self.assertEqual(document["stderr_bytes"], len(stderr_text.encode("utf-8")))
         self.assertEqual(
@@ -209,6 +215,28 @@ class ControlledStageRunnerHostForwardingTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, "failure_state_invalid")
         self.assertEqual(result.stderr, "")
+
+    def test_failure_document_rejects_unallowlisted_stdin_and_transport_state(self) -> None:
+        harness = (
+            f". '{ps_literal(STAGE_RUNNER)}'\n"
+            "$results=@();"
+            "foreach($field in @('StdinWriteSegment','StdinExceptionClass',"
+            "'TransportExitClass','TransportSummaryState')){"
+            "foreach($value in @('raw-sensitive-state-detail',7)){"
+            "Reset-Phase16ControlledStageRunState;"
+            "$script:Phase16ControlledStageRunState[$field]=$value;"
+            "try{"
+            "$null=New-Phase16ControlledStageFailureDocument "
+            "-TransactionId 'phase16-local-invalid-state';"
+            "$results+='accepted'"
+            "}catch{$results+=$_.Exception.Message}"
+            "}};"
+            "[Console]::Out.Write(($results -join '|'))"
+        )
+        result = run_powershell(harness)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stderr, "")
+        self.assertEqual(result.stdout.split("|"), ["failure_state_invalid"] * 8)
 
 
 if __name__ == "__main__":

@@ -20,6 +20,8 @@ RUNNER = ROOT / "scripts/vps/phase16_controlled_stage_ssh_runner.ps1"
 COORDINATOR = ROOT / "scripts/vps/phase16_controlled_stage_coordinator.py"
 POWERSHELL = Path(r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
 PACKAGE_ID = "phase16-awg3-family-3-1-spain-pilot-20260824-016"
+EARLY_STDOUT = b"synthetic-early-exit-stdout"
+EARLY_STDERR = b"synthetic-early-exit-stderr"
 
 
 def literal(value: object) -> str:
@@ -28,6 +30,7 @@ def literal(value: object) -> str:
 
 def run_local_runner(
     directory: Path, *, input_encoding: str = "default", start_failure: bool = False,
+    early_exit_code: int | None = None,
 ):
     """Run real framing/entrypoint with local trust/package/transport boundaries."""
     payload = hashlib.shake_256(b"phase16-local-binary-frame-fixture").digest(262144)
@@ -53,6 +56,19 @@ result = {{
     "payload_sha256": hashlib.sha256(payload).hexdigest(),
 }}
 sys.stdout.buffer.write(module.canonical_json_bytes(result))
+""".encode("utf-8")
+    if early_exit_code is not None:
+        # Consume the header, then exit without draining the larger-than-pipe archive.
+        consumer = f"""
+import sys
+stream = sys.stdin.buffer
+header_size = int(stream.read(8), 16)
+assert len(stream.read(header_size)) == header_size
+sys.stdout.buffer.write({EARLY_STDOUT!r})
+sys.stdout.buffer.flush()
+sys.stderr.buffer.write({EARLY_STDERR!r})
+sys.stderr.buffer.flush()
+sys.exit({early_exit_code!r})
 """.encode("utf-8")
     harness = "\n".join((
         f". {literal(RUNNER)}",
@@ -120,6 +136,31 @@ sys.stdout.buffer.write(module.canonical_json_bytes(result))
 
 
 class ControlledStageLocalTransportTest(unittest.TestCase):
+    def test_early_exit_during_archive_write_retains_only_normalized_diagnostics(self):
+        for exit_code in (0, 65):
+            with self.subTest(exit_code=exit_code):
+                with tempfile.TemporaryDirectory() as temporary:
+                    result, outcome, failure, _ = run_local_runner(
+                        Path(temporary), early_exit_code=exit_code,
+                    )
+                self.assertEqual(result.returncode, 64, result.stderr)
+                self.assertEqual(result.stdout, "")
+                self.assertEqual(result.stderr, "AMN2_PHASE16_CONTROLLED_STAGE_RUNNER_STOP\n")
+                self.assertIsNone(outcome)
+                self.assertEqual(failure["failure_class"], "stdin_write")
+                self.assertEqual(failure["last_completed_milestone"], "process_started")
+                self.assertEqual(failure["transport_exit_code"], exit_code)
+                self.assertEqual(failure["schema"], "amn2.phase16.controlled-stage-runner-failure.v2")
+                self.assertEqual(failure["stdin_write_segment"], "archive")
+                self.assertEqual(failure["stdin_exception_class"], "io_error")
+                self.assertEqual(failure["transport_exit_class"], "zero_exit" if exit_code == 0 else "nonzero_exit")
+                self.assertEqual(failure["transport_summary_state"], "complete")
+                for name, raw in (("stdout", EARLY_STDOUT), ("stderr", EARLY_STDERR)):
+                    self.assertEqual(failure[f"{name}_bytes"], len(raw))
+                    self.assertEqual(failure[f"{name}_sha256"], hashlib.sha256(raw).hexdigest())
+                    self.assertNotIn(raw.decode(), json.dumps(failure))
+                self.assertFalse(failure["raw_output_persisted"])
+
     def test_start_failure_restores_input_encoding_and_retains_stop_contract(self):
         with tempfile.TemporaryDirectory() as temporary:
             result, outcome, failure, _ = run_local_runner(

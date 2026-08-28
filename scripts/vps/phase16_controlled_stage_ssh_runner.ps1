@@ -49,6 +49,15 @@ $script:Phase16ControlledStageMilestones = @(
     'outcome_written',
     'stage_confirmed'
 )
+$script:Phase16ControlledStageStdinWriteSegments = @(
+    'not_started', 'coordinator_prefix', 'coordinator_source', 'frame_prefix',
+    'frame_header', 'archive', 'flush', 'close', 'complete'
+)
+$script:Phase16ControlledStageStdinExceptionClasses = @(
+    'not_observed', 'io_error', 'object_disposed', 'invalid_operation', 'win32_error', 'other'
+)
+$script:Phase16ControlledStageTransportExitClasses = @('not_observed', 'running', 'zero_exit', 'nonzero_exit')
+$script:Phase16ControlledStageTransportSummaryStates = @('not_collected', 'unavailable', 'complete')
 $script:Phase16ControlledStageRunState = $null
 
 function Reset-Phase16ControlledStageRunState {
@@ -58,9 +67,13 @@ function Reset-Phase16ControlledStageRunState {
         LastCompletedMilestone = 'runner_started'
         StderrBytes = [int64]0
         StderrSha256 = Get-Phase16BytesSha256 -Bytes $empty
+        StdinExceptionClass = 'not_observed'
+        StdinWriteSegment = 'not_started'
         StdoutBytes = [int64]0
         StdoutSha256 = Get-Phase16BytesSha256 -Bytes $empty
+        TransportExitClass = 'not_observed'
         TransportExitCode = $null
+        TransportSummaryState = 'not_collected'
     }
 }
 
@@ -92,9 +105,43 @@ function Set-Phase16ControlledStageTransportSummary {
         $script:Phase16ControlledStageRunState.StderrBytes = [int64]$stderrBytes.Length
         $script:Phase16ControlledStageRunState.StderrSha256 = Get-Phase16BytesSha256 -Bytes $stderrBytes
         $script:Phase16ControlledStageRunState.TransportExitCode = $ExitCode
+        $script:Phase16ControlledStageRunState.TransportExitClass = if ($ExitCode -eq 0) { 'zero_exit' } else { 'nonzero_exit' }
+        $script:Phase16ControlledStageRunState.TransportSummaryState = 'complete'
     } finally {
         [Array]::Clear($stdoutBytes, 0, $stdoutBytes.Length)
         [Array]::Clear($stderrBytes, 0, $stderrBytes.Length)
+    }
+}
+
+function Set-Phase16ControlledStageStdinFailureSummary {
+    param(
+        [Parameter(Mandatory)][Exception]$Exception,
+        [Parameter(Mandatory)][Diagnostics.Process]$Process,
+        [Parameter(Mandatory)][Threading.Tasks.Task]$StdoutTask,
+        [Parameter(Mandatory)][Threading.Tasks.Task]$StderrTask
+    )
+    $state = $script:Phase16ControlledStageRunState
+    $base = $Exception.GetBaseException()
+    $state.StdinExceptionClass = if ($base -is [IO.IOException]) { 'io_error' }
+        elseif ($base -is [ObjectDisposedException]) { 'object_disposed' }
+        elseif ($base -is [InvalidOperationException]) { 'invalid_operation' }
+        elseif ($base -is [ComponentModel.Win32Exception]) { 'win32_error' }
+        else { 'other' }
+    $state.TransportSummaryState = 'unavailable'
+    try {
+        # Observe only after a failed write: no retry, restart, close or signal.
+        # Both waits are bounded; unavailable output is not reported as observed empty.
+        if (-not $Process.WaitForExit(250)) {
+            $state.TransportExitClass = 'running'
+            return
+        }
+        $state.TransportExitCode = [int]$Process.ExitCode
+        $state.TransportExitClass = if ($Process.ExitCode -eq 0) { 'zero_exit' } else { 'nonzero_exit' }
+        if ([Threading.Tasks.Task]::WaitAll([Threading.Tasks.Task[]]@($StdoutTask, $StderrTask), 250)) {
+            Set-Phase16ControlledStageTransportSummary -StdoutText $StdoutTask.GetAwaiter().GetResult() -StderrText $StderrTask.GetAwaiter().GetResult() -ExitCode $Process.ExitCode
+        }
+    } catch {
+        # Observation must not replace the original stdin failure.
     }
 }
 
@@ -104,6 +151,10 @@ function New-Phase16ControlledStageFailureDocument {
     if ($null -eq $state -or $TransactionId -cnotmatch '^[a-z0-9][a-z0-9._-]{0,79}$' -or
         $state.FailureClass -isnot [string] -or $state.FailureClass -cnotin $script:Phase16ControlledStageFailureClasses -or
         $state.LastCompletedMilestone -isnot [string] -or $state.LastCompletedMilestone -cnotin $script:Phase16ControlledStageMilestones -or
+        $state.StdinWriteSegment -isnot [string] -or $state.StdinWriteSegment -cnotin $script:Phase16ControlledStageStdinWriteSegments -or
+        $state.StdinExceptionClass -isnot [string] -or $state.StdinExceptionClass -cnotin $script:Phase16ControlledStageStdinExceptionClasses -or
+        $state.TransportExitClass -isnot [string] -or $state.TransportExitClass -cnotin $script:Phase16ControlledStageTransportExitClasses -or
+        $state.TransportSummaryState -isnot [string] -or $state.TransportSummaryState -cnotin $script:Phase16ControlledStageTransportSummaryStates -or
         $state.StdoutBytes -isnot [int64] -or $state.StdoutBytes -lt 0 -or
         $state.StderrBytes -isnot [int64] -or $state.StderrBytes -lt 0 -or
         $state.StdoutSha256 -isnot [string] -or $state.StdoutSha256 -cnotmatch '^[0-9a-f]{64}$' -or
@@ -115,13 +166,17 @@ function New-Phase16ControlledStageFailureDocument {
         package_id = $script:Phase16ControlledStagePackageId
         raw_output_persisted = $false
         result = 'runner_stop'
-        schema = 'amn2.phase16.controlled-stage-runner-failure.v1'
+        schema = 'amn2.phase16.controlled-stage-runner-failure.v2'
         stderr_bytes = $state.StderrBytes
         stderr_sha256 = $state.StderrSha256
+        stdin_exception_class = $state.StdinExceptionClass
+        stdin_write_segment = $state.StdinWriteSegment
         stdout_bytes = $state.StdoutBytes
         stdout_sha256 = $state.StdoutSha256
         transaction_id = $TransactionId
+        transport_exit_class = $state.TransportExitClass
         transport_exit_code = $state.TransportExitCode
+        transport_summary_state = $state.TransportSummaryState
     }
 }
 
@@ -322,14 +377,29 @@ function Invoke-Phase16ControlledStageRunnerMain {
         Set-Phase16ControlledStageFailureBoundary -FailureClass 'stdin_write' -LastCompletedMilestone 'process_started'
         $stdoutTask = $process.StandardOutput.ReadToEndAsync()
         $stderrTask = $process.StandardError.ReadToEndAsync()
-        $stream = $process.StandardInput.BaseStream
-        $stream.Write($coordinatorPrefix, 0, $coordinatorPrefix.Length)
-        $stream.Write($package.CoordinatorBytes, 0, $package.CoordinatorBytes.Length)
-        $stream.Write($prefix, 0, $prefix.Length)
-        $stream.Write($headerBytes, 0, $headerBytes.Length)
-        $stream.Write($archive, 0, $archive.Length)
-        $stream.Flush()
-        $process.StandardInput.Close()
+        try {
+            $script:Phase16ControlledStageRunState.StdinWriteSegment = 'coordinator_prefix'
+            $stream = $process.StandardInput.BaseStream
+            $stream.Write($coordinatorPrefix, 0, $coordinatorPrefix.Length)
+            $script:Phase16ControlledStageRunState.StdinWriteSegment = 'coordinator_source'
+            $stream.Write($package.CoordinatorBytes, 0, $package.CoordinatorBytes.Length)
+            $script:Phase16ControlledStageRunState.StdinWriteSegment = 'frame_prefix'
+            $stream.Write($prefix, 0, $prefix.Length)
+            $script:Phase16ControlledStageRunState.StdinWriteSegment = 'frame_header'
+            $stream.Write($headerBytes, 0, $headerBytes.Length)
+            $script:Phase16ControlledStageRunState.StdinWriteSegment = 'archive'
+            $stream.Write($archive, 0, $archive.Length)
+            $script:Phase16ControlledStageRunState.StdinWriteSegment = 'flush'
+            $stream.Flush()
+            $script:Phase16ControlledStageRunState.StdinWriteSegment = 'close'
+            $process.StandardInput.Close()
+            $script:Phase16ControlledStageRunState.StdinWriteSegment = 'complete'
+        } catch {
+            try {
+                Set-Phase16ControlledStageStdinFailureSummary -Exception $_.Exception -Process $process -StdoutTask $stdoutTask -StderrTask $stderrTask
+            } catch {}
+            throw
+        }
         Set-Phase16ControlledStageFailureBoundary -FailureClass 'transport_wait' -LastCompletedMilestone 'stdin_written'
         if (-not $process.WaitForExit($script:Phase16ControlledStageTimeoutMilliseconds)) {
             Set-Phase16ControlledStageFailureBoundary -FailureClass 'transport_timeout' -LastCompletedMilestone 'stdin_written'

@@ -101,10 +101,11 @@ class Package016BindingTest(unittest.TestCase):
             current = (ROOT / path).read_bytes().replace(PACKAGE_ID.encode(), PREVIOUS_ID.encode())
             self.assertEqual(current, (PREVIOUS / "tooling" / path).read_bytes(), path)
 
-    def test_fixed_runner_changes_only_package_binding_from_approved_commit(self):
+    def test_packaged_runner_changes_only_package_binding_from_approved_commit(self):
         # Exact approved bytes from 392cc339, not the older immutable 015 runner.
-        # Scalar-exit and binary-stdin behavior also run in the transport suite.
-        current = (ROOT / "scripts/vps/phase16_controlled_stage_ssh_runner.ps1").read_bytes()
+        # Historical package binding belongs to the frozen artifact, not local
+        # source that may receive separately authorized, unpackaged diagnostics.
+        current = (ROOT / "packaging" / PACKAGE_ID / "tooling/scripts/vps/phase16_controlled_stage_ssh_runner.ps1").read_bytes()
         normalized = current.replace(PACKAGE_ID.encode(), PREVIOUS_ID.encode())
         self.assertEqual(
             hashlib.sha256(normalized).hexdigest(),
