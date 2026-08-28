@@ -2,6 +2,8 @@
 
 Реализация: `scripts/vps/phase16_awg31_minimal_pilot.py`. Локальная подготовка от commit `830517a`. Это отдельный сценарий, не изменение package 016 и не разрешение на серверные операции.
 
+Локальная поправка 2026-08-28: целевой путь профилей изменён на `/var/lib/amn2-phase16/pilot-input`; будущие ключи — `/var/lib/amn2-phase16/pilot-keys`. Read-only проверка установила, что `/var/lib/amn2-spain` принадлежит не root, поэтому использовать его родителем root-only секретов нельзя. Проверки владельца/прав не ослаблены, права существующих каталогов не меняются. Прежний файл на сервере с SHA256 `95f0f52b875328425df54b0564e70bfdcb2bfef4ac2ccac0aeef8fb5c29a2f92` не изменён; обновлённая версия требует отдельного разрешения на новую загрузку, без перезаписи старой.
+
 ## Режимы
 
 - Без аргументов / `plan`: только несекретный JSON-план, без внешних команд и записи файлов.
@@ -29,5 +31,7 @@
 TDD: ожидаемый RED отсутствующего исполнителя. Первый набор: 16 PASS, две ошибки одной опечатки `readstring`; после исправления одной строки — 18 PASS за 0.319 s. Затем отдельный RED/GREEN одного теста разделения `check` / `check --with-profiles`: PASS за 0.015 s, без повторения полного набора. Итого покрыты 19 тестовых методов; проверки Docker/хоста заменены локальными имитациями, используются только синтетические ключи. Проверен синтаксис трёх shell-фрагментов Git Bash и инертный CLI реальным Python-процессом.
 
 WSL/Docker на рабочем компьютере недоступны. Реальный Linux runtime, штатный parser внутри образа и трафик ещё не проверены. В этом шаге SSH, Spain egress, stage/install, настоящие ключи/конфиги, materialization и package verifier не запускались. Package 016 и AWG2 не изменялись; push не выполнялся.
+
+Последующая поправка пути: один новый тест `test_pilot_inputs_use_root_owned_phase16_namespace` — RED на старом пути (0.045 s), GREEN после изменения одной константы (0.008 s). Тест также сохраняет отказ для non-root родителя. Полный набор не повторялся. Серверная подготовка остановилась до image pull/keygen/render; её фактический результат и отдельное read-only уточнение записаны в `research/amn2/phase16-minimal-pilot-keygen-render-stop-2026-08-28.md`.
 
 Источники: [официальный runtime и параметры](https://github.com/amnezia-vpn/amneziawg-go), [официальный parser](https://github.com/amnezia-vpn/amneziawg-tools/blob/master/src/config.c), [awg-quick](https://github.com/amnezia-vpn/amneziawg-tools/blob/master/src/wg-quick/linux.bash).

@@ -7,9 +7,11 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import stat
 import subprocess
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -55,6 +57,18 @@ class MinimalPilotTests(unittest.TestCase):
         self.assertTrue(SOURCE.is_file(), "missing independent runtime-only implementation")
         m = module()
         self.assertEqual(m.PEER_COUNT, 1)
+
+    def test_pilot_inputs_use_root_owned_phase16_namespace(self):
+        m = module()
+        self.assertEqual(m.INPUT_DIR, Path("/var/lib/amn2-phase16/pilot-input"))
+        self.assertEqual(m.INPUT_DIR.parent, m.CLAIM_ROOT.parent)
+        nonroot_parent = SimpleNamespace(
+            parents=(), exists=lambda: True, is_symlink=lambda: False,
+            lstat=lambda: SimpleNamespace(st_mode=stat.S_IFDIR | 0o755, st_uid=1000),
+        )
+        with patch.object(m, "os", SimpleNamespace(name="posix")):
+            with self.assertRaisesRegex(m.PilotError, "^unsafe_parent_directory$"):
+                m.secure_parent_chain(nonroot_parent)
 
     def test_default_cli_is_declarative_and_secret_free(self):
         result = subprocess.run([sys.executable, "-I", "-B", str(SOURCE)], capture_output=True, timeout=10)
