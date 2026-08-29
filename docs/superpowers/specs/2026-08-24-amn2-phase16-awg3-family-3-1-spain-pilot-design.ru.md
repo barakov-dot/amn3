@@ -8,6 +8,7 @@ Approved local preparation: baseline `392cc339f7f6afaed0a0dc2a0a80139ca030f560`,
 
 - Minimal isolated AWG3.1 runtime и non-Windows connectivity подтверждены, но это не разрешает Task 3B application integration и не является acceptance.
 - Windows 11 / AmneziaVPN 5.0.1.5 проходит tunnel creation и handshake, но не application data plane; kill switch A/B результата не изменил. Это Windows upstream-class blocker, соответствующий по классу открытой официальной issue #3043, без утверждения окончательной root cause.
+- Синхронный route/counter watcher подтвердил активные IPv4/IPv6 addresses, MTU 1280 и default routes, а также двусторонний рост интерфейсных byte counters во время одного HTTPS timeout. Отсутствие full-tunnel route исключено; точная Windows tunnel data-plane/session root cause не доказана. Evidence: `research/amn2/phase16-windows-awg31-active-route-counter-diagnostic-2026-08-29.md`.
 - Official GitHub status refresh: `5.0.1.5` остаётся Latest release (`prerelease=false`) и уже установлен; issue #3043 открыта без maintainer-confirmed fix. Issue #3064 про fallback MTU 1376 не совпадает с доказанным MTU 1280 пилота. Stable release metadata не отменяет failed compatibility evidence. Evidence: `research/amn2/phase16-windows-official-upstream-status-2026-08-29.md`.
 - iPhone AWG3.1 connectivity прошёл, но quality gate failed; strict same-device AWG2 ↔ AWG3.1 A/B остаётся incomplete.
 - Task 5 и Task 6 заблокированы до root-cause-bound correction, успешного Windows retest на официально поддерживаемом client path и полного Task 4.5.

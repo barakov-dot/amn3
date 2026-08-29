@@ -21,6 +21,14 @@ The exact defective source line inside the Windows transport implementation is
 not proven, but the failure boundary is below the application and above the
 already validated Spain server path.
 
+A later synchronized route/counter watcher proved that the active Wintun had
+IPv4 and IPv6 addresses, MTU 1280 and both IPv4/IPv6 default routes. During one
+bounded HTTPS request its counters increased in both directions, but the
+request timed out with normalized class `TaskCanceledException`. This rejects
+absence of full-tunnel route installation, while preserving the narrower
+Windows data-plane/session boundary. Full evidence:
+`research/amn2/phase16-windows-awg31-active-route-counter-diagnostic-2026-08-29.md`.
+
 This result closely matches the still-open official upstream report
 `amnezia-client#3043`:
 
@@ -86,6 +94,11 @@ explains the `/999999` error class, but does not by itself prove the loss of all
 transport traffic:
 
 https://github.com/amnezia-vpn/amnezia-client/blob/dev/client/platforms/windows/daemon/wireguardutilswindows.cpp
+
+The later synchronized watcher observed complete IPv4 and IPv6 default routes
+on the active tunnel. Therefore the `/999999` error did not prevent full-tunnel
+route installation in that run. It remains insufficient evidence for or
+against correctness of every exclusion-route operation.
 
 ## Kill-switch A/B
 
