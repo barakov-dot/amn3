@@ -30,6 +30,14 @@ That issue is corroborating upstream evidence, not a maintainer-confirmed fix.
 At the time of this record it has no assignee, milestone, linked pull request or
 published remediation.
 
+Official status refresh on `2026-08-29` confirmed that `5.0.1.5` remains the
+Latest GitHub release with `prerelease=false`, while issue `#3043` remains open
+without a maintainer-confirmed fix. The linked user report `#3064` concerns a
+desktop MTU fallback to 1376; it does not match this run because the service log
+proved that MTU 1280 was applied. Release metadata is corrected to stable, but
+the failed Windows compatibility verdict is unchanged. Full receipt:
+`research/amn2/phase16-windows-official-upstream-status-2026-08-29.md`.
+
 ## Sanitized evidence custody
 
 The two operator-exported client logs were checksum-copied to the approved

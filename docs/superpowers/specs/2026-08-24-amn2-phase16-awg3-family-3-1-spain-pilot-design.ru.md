@@ -8,6 +8,7 @@ Approved local preparation: baseline `392cc339f7f6afaed0a0dc2a0a80139ca030f560`,
 
 - Minimal isolated AWG3.1 runtime и non-Windows connectivity подтверждены, но это не разрешает Task 3B application integration и не является acceptance.
 - Windows 11 / AmneziaVPN 5.0.1.5 проходит tunnel creation и handshake, но не application data plane; kill switch A/B результата не изменил. Это Windows upstream-class blocker, соответствующий по классу открытой официальной issue #3043, без утверждения окончательной root cause.
+- Official GitHub status refresh: `5.0.1.5` остаётся Latest release (`prerelease=false`) и уже установлен; issue #3043 открыта без maintainer-confirmed fix. Issue #3064 про fallback MTU 1376 не совпадает с доказанным MTU 1280 пилота. Stable release metadata не отменяет failed compatibility evidence. Evidence: `research/amn2/phase16-windows-official-upstream-status-2026-08-29.md`.
 - iPhone AWG3.1 connectivity прошёл, но quality gate failed; strict same-device AWG2 ↔ AWG3.1 A/B остаётся incomplete.
 - Task 5 и Task 6 заблокированы до root-cause-bound correction, успешного Windows retest на официально поддерживаемом client path и полного Task 4.5.
 - До закрытия этих gates запрещены speculative server/DNS/port/MTU/firewall/profile changes, Task 3B stage, install и general issuance. AWG2_UNTOUCHED.
@@ -96,9 +97,10 @@ OFFICIAL UPSTREAM BASIS
    AmneziaWG v3.1.20260814
    release commit 5c16489e2cd9ed3a0a7a27c7445bba5238132f86
 
-5. AmneziaVPN 5.0.1.5 официально помечен как PRE-RELEASE.
-   Не классифицировать его как stable.
-   Разрешать только как явно подтверждённый admin pilot candidate.
+5. AmneziaVPN 5.0.1.5 официально опубликован как Latest release; GitHub
+   metadata сообщает `prerelease=false`. Классифицировать его как
+   `release_kind=stable`, но связывать release metadata отдельно от
+   compatibility result: Windows data-plane FAIL запрещает global acceptance.
 
 6. Не включать незавершённый `libagw` PR #3028.
 
@@ -206,7 +208,8 @@ TASK 1 TESTING
 - missing/malformed/unknown revision and capability rejection;
 - exact config revision mapping;
 - runtime/evidence/build/provider content identity;
-- prerelease client remains candidate, not globally accepted;
+- stable release metadata does not override failed compatibility evidence or
+  permit global acceptance;
 - stage claim and rollback boundaries;
 - AWG2 preservation tests непосредственно рядом с изменённым кодом.
 
@@ -362,7 +365,9 @@ TASK 4 — ONE AWG3.1 PILOT
    AmneziaWG v3.1.20260814, exact installed build readback required.
 
 3. Если используется AmneziaVPN 5.0.1.5:
-   - сохранить release_kind=prerelease;
+   - сохранить `release_kind=stable` по текущему official GitHub metadata;
+   - сохранить Windows compatibility result как failed/blocked независимо от
+     release kind;
    - только admin pilot;
    - не включать global acceptance.
 
