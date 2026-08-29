@@ -1,10 +1,10 @@
 # Phase 16 Spain transport-quality A/B gate
 
 - Recorded: `2026-08-26`
-- Status: `mandatory-pending-after-first-awg31-pilot-config`
+- Status: `quality-fail-root-cause-open-strict-ab-incomplete`
 - Priority: after Task 4 and before Task 5 acceptance or Task 6 closeout
 - Scope: one operator client, Spain AWG2 and the first Spain AWG3.1 pilot
-- Package 013 changed by this note: `false`
+- Package 016 changed by this update: `false`
 - Live action authorized by this note: `false`
 
 ## Operator observation
@@ -14,6 +14,29 @@ and slow on this computer, while the server does not show the same speed
 problem on other protocols. This is an observed client-path symptom, not yet a
 confirmed server, protocol, configuration, MTU, DNS, firewall, Docker, or
 network root cause.
+
+## Evidence update — 2026-08-29
+
+The first Spain AWG3.1 pilot was tested sequentially on iPhone with the
+checksum-bound profile. Connectivity and 2–3 second reconnect/DNS/HTTPS passed,
+but three quality samples were materially degraded against a healthy no-VPN
+baseline. The synchronized sample measured 33.7/1.89 Mbps, 95 ms latency,
+159 ms jitter and an ICE packet-loss-test timeout, while the no-VPN baseline
+measured 331/150 Mbps, 41.1 ms, 18.2 ms jitter and 0% loss.
+
+During the synchronized sample the server observed a fresh handshake and
+bidirectional traffic with zero `awg3` errors/dropped. Post-run container and
+host snapshots showed no persistent load or interface-drop condition. Direct
+VPS Cloudflare HTTPS download reached approximately 228.9 Mbps. This narrows
+the unresolved boundary to the client-to-Spain UDP/AWG path, but does not yet
+separate access-network/provider behaviour from AWG3.1 client transport.
+
+The operator's prior Spain AWG2 instability remains qualitative evidence. No
+fresh same-iPhone Spain AWG2 profile was available; an old USA AWG2 profile was
+explicitly excluded. The strict quantitative AWG2/AWG3.1 comparison therefore
+remains incomplete. Task 5 and Task 6 are blocked because AWG3.1 itself is
+currently unstable. Full evidence:
+`research/amn2/phase16-iphone-awg31-quality-and-server-metrics-2026-08-29.md`.
 
 ## Mandatory placement in Phase 16
 
@@ -67,13 +90,16 @@ its own exact approval and evidence binding.
 ## Current Phase 16 order
 
 1. Task 0 — local baseline: complete.
-2. Task 1 — AWG3.1 code and immutable package 013: complete.
+2. Task 1 — AWG3.1 code and package 016/local tooling: complete.
 3. Task 2 — checksum-bound Spain read-only preflight: complete/PASS.
-4. Task 3 — controlled server-only stage: current exact gate.
-5. Task 4 — exactly one operator AWG3.1 pilot config: pending.
-6. Task 4.5 — mandatory AWG2 versus AWG3.1 transport-quality A/B gate: pending.
-7. Task 5 — real-client acceptance after Task 4.5: pending.
-8. Task 6 — concise closeout after Task 4.5 and Task 5: pending.
+4. Task 3A — minimal isolated AWG3.1 runtime: complete.
+5. Task 3B — application integration: pending and not authorized.
+6. Task 4A — Windows client: connectivity failure, separate client boundary.
+7. Task 4B — Android/projector connectivity: complete; performance not accepted.
+8. Task 4C — iPhone connectivity: complete; performance not accepted.
+9. Task 4.5 — quality FAIL/root cause open; strict AWG2/AWG3.1 A/B incomplete.
+10. Task 5 — acceptance: blocked by Task 4.5.
+11. Task 6 — closeout: blocked.
 
 This note does not authorize Spain egress, remote write, stage, install,
 service mutation, peer/config issuance, AWG2 operation, or global AWG3

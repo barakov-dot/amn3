@@ -6,6 +6,20 @@
 
 ## Текущее состояние
 
+2026-08-29: тот же checksum-bound профиль последовательно прошёл iPhone
+connectivity и reconnect/DNS/HTTPS за 2–3 секунды, но не прошёл quality gate.
+При здоровом no-VPN baseline 331/150 Mbps, 41.1 ms, jitter 18.2 ms и loss 0%
+три AWG3.1-прогона дали 11.9–33.7 Mbps download, 1.89–2.34 Mbps upload,
+95–112 ms latency и нестабильные loss/jitter результаты. Синхронное read-only
+наблюдение подтвердило свежий handshake и двусторонний трафик без errors/dropped
+на `awg3`; post-run host/container snapshots не показали persistent pressure, а
+прямой VPS Cloudflare HTTPS download достиг примерно 228.9 Mbps. Граница
+сужена до client-to-Spain UDP/AWG path, но без второй access network нельзя
+разделить provider route и AWG3.1 client transport. Task 4.5, acceptance и
+closeout заблокированы; AWG2, server config, application stage, install и
+general issuance не менялись. Подробности:
+research/amn2/phase16-iphone-awg31-quality-and-server-metrics-2026-08-29.md.
+
 2026-08-29: тот же checksum-bound профиль `ES-AWG31-PILOT-DNS2-JC6-I1` последовательно проверен на Android-проекторе при отключённом Windows-профиле. YouTube воспроизводит видео, то есть через AWG3.1 прошёл реальный прикладной HTTPS/streaming-трафик. Это функциональный PASS связности, но ещё не performance/stability acceptance. Серверный runtime, peer/config, UDP 30002, forwarding, NAT и DNS-путь подтверждены на клиенте не-Windows; текущая граница отказа сужена до Windows 11 / AmneziaVPN 5.0.1.5 и его tunnel integration. Менять серверный порт или профиль наугад оснований нет. AWG2 и сервер в этом ходе не изменялись. Подробности: research/amn2/phase16-arm-jc6-i1-candidate-2026-08-29.md.
 
 2026-08-29: два переименованных оператором профиля (`ES-AWG31-PILOT-DNS1` и `ES-AWG31-PILOT-DNS2`) подключались без доступа в интернет. Read-only серверные счётчики за попытки выросли на RX 958558 / TX 680170 байт и 1620 / 1298 пакетов без errors/dropped; runtime, UDP 30002, forwarding и NAT исправны. По официальной инструкции Amnezia подготовлен отдельный checksum-bound клиентский кандидат `ES-AWG31-PILOT-DNS2-JC6-I1.conf`: от DNS2 он отличается ровно `Jc/Jmin/Jmax/I1`, исходник не перезаписан, ACL совпадает. Следующий шаг — автономный 30-секундный тест нового профиля; если он не даст интернет, отдельно проверяется гипотеза фильтрации UDP-порта выше 9999. Сервер, package 016 и AWG2 не менялись. Подробности: research/amn2/phase16-arm-jc6-i1-candidate-2026-08-29.md.

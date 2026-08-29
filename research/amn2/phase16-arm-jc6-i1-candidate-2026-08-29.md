@@ -83,3 +83,26 @@ Read-only серверное наблюдение после Windows-теста 
 конфликт. Следующая работа разделяется: последовательная проверка того же
 профиля на iPhone и отдельная bounded-диагностика Windows-клиента. Серверный
 профиль, порт и AWG2 до новых доказательств не меняются.
+
+## Последовательный iPhone-результат и quality boundary
+
+Тот же checksum-bound профиль затем последовательно проверен на iPhone в
+AmneziaWG при отключённых Android и Windows. Обычный Интернет работал;
+reconnect вместе с DNS/HTTPS занял примерно 2–3 секунды. Это подтверждает
+iPhone connectivity, но не performance acceptance.
+
+Три Cloudflare quality-прогона через Spain AWG3.1 были существенно хуже
+здорового no-VPN baseline. Синхронный третий прогон дал 33.7/1.89 Mbps,
+95 ms latency, 159 ms jitter и ICE timeout packet-loss test против no-VPN
+331/150 Mbps, 41.1 ms, 18.2 ms jitter и 0% loss. Сервер в том же окне видел
+свежий handshake, двусторонний трафик и ноль errors/dropped на `awg3`.
+Post-run host/container snapshots не показали persistent pressure, а прямой
+VPS Cloudflare HTTPS download достиг примерно 228.9 Mbps.
+
+Следовательно, Windows остаётся отдельной client-integration проблемой, но
+iPhone доказал ещё и независимую quality-проблему на client-to-Spain UDP/AWG
+path. Без второй access network нельзя разделить provider route и AWG3.1
+client transport. Task 4.5, acceptance и closeout остаются заблокированными;
+порт, MTU, DNS, firewall, server config и AWG2 наугад не меняются. Полное
+sanitized evidence:
+`research/amn2/phase16-iphone-awg31-quality-and-server-metrics-2026-08-29.md`.
