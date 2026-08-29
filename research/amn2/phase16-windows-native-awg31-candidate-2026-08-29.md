@@ -1,7 +1,7 @@
 # Phase 16 — граница native AWG3.1-кандидата для Windows
 
 - Recorded: `2026-08-29`
-- Status: `secondary-diagnostic-candidate-not-primary-path`
+- Status: `superseded-by-primary-client-data-plane-regression-evidence`
 - Scope: bounded Windows client-path isolation only
 - Server action, install or config change: `false`
 - AWG2 changed: `false`
@@ -104,3 +104,22 @@ test потребуют отдельных approvals. Android и iPhone долж
 Этот документ не разрешает download, install, запуск клиента, импорт профиля,
 Spain egress, SSH, server write, signal, restart, config issuance, stage,
 изменение AWG2 или general AWG3.1 issuance.
+
+## Follow-up 2026-08-29
+
+Последующая checksum-bound диагностика AmneziaVPN `5.0.1.5` получила более
+сильное доказательство, чем первоначальный polling watcher: Wintun создавался,
+интерфейс поднимался, AWG handshake и keepalive проходили, а tunnel ring-log не
+регистрировал transport error. При этом операторский прикладной трафик за
+примерно `57` секунд не заработал. Временное отключение kill switch также не
+исправило VPN-трафик. Ring-log является событийным журналом, а не packet
+capture, поэтому отсутствие data-packet записей не трактуется как точный
+нулевой счётчик пакетов.
+
+Результат и официальный upstream match записаны отдельно:
+
+`research/amn2/phase16-windows-awg31-data-plane-regression-2026-08-29.md`
+
+Native AmneziaWG остаётся неустановленным secondary-кандидатом и не является
+следующим шагом. Основной Windows path заблокирован до официального upstream
+исправления либо отдельно одобренного checksum-bound официального build.
