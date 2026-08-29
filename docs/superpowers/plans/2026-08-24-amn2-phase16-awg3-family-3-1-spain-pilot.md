@@ -10,6 +10,30 @@
 - После локального PASS запросить новый exact checksum-bound preflight approval. Сохранить linked worktree и локальную ветку 016; push не выполнять до отдельного informed approval публичной публикации накопленной истории.
 - Task 4 — первый pilot для АРМ/Windows; Task 4.5 — обязательный AWG2 ↔ AWG3.1 transport-quality A/B gate до Task 5 и closeout. Client admission/runtime/resource contracts этим GO не меняются.
 
+ТЕКУЩИЙ EXECUTION STATUS / ACCEPTANCE GATE — 2026-08-29, evidence commit `eefe693`
+
+- Task 3A minimal isolated runtime завершён; Task 3B application integration не начинался и не разрешён.
+- Android и iPhone подтвердили AWG3.1 connectivity одним checksum-bound peer последовательно. Это не performance/stability acceptance.
+- Windows 11 / AmneziaVPN 5.0.1.5 создаёт активный Wintun, получает MTU 1280 и handshake/keepalive, но прикладной IPv4/DNS/HTTPS-трафик не проходит. Отключение kill switch результат не изменило. Граница зафиксирована как Windows client data-plane regression с совпадением по классу с открытой официальной upstream issue #3043; root cause не объявлен доказанным. Evidence: `research/amn2/phase16-windows-awg31-data-plane-regression-2026-08-29.md`.
+- iPhone connectivity/reconnect/DNS/HTTPS прошли, но три AWG3.1 quality-прогона существенно хуже здорового no-VPN baseline. Строгий same-device AWG2 ↔ AWG3.1 A/B не завершён из-за отсутствия актуального Spain AWG2-профиля на iPhone. Evidence: `research/amn2/phase16-iphone-awg31-quality-and-server-metrics-2026-08-29.md`.
+- Task 4.5 имеет статус `quality-fail-root-cause-open-strict-ab-incomplete`. Пока AWG3.1 нестабилен, Task 5 acceptance и Task 6 closeout заблокированы.
+- Task 3B нельзя начинать до закрытия обоих client gates: Windows должен пройти bounded retest на официально поддерживаемом upstream client path, а AWG3.1 quality — исправленный bounded retest и обязательный последовательный AWG2 ↔ AWG3.1 A/B.
+- Не менять server, UDP 30002, DNS, MTU, firewall или профиль наугад. General AWG3 issuance остаётся disabled; AWG2_UNTOUCHED.
+
+Текущий вертикальный статус:
+
+- ✅ Task 0 — baseline.
+- ✅ Task 1 — package 016/local tooling.
+- ✅ Task 2 — Spain gates/diagnostics.
+- ✅ Task 3A — minimal isolated AWG3.1 runtime.
+- ⏳ Task 3B — application integration: не начат, не разрешён.
+- ❌ Task 4A — Windows: upstream-class data-plane blocker.
+- ✅ Task 4B — Android/projector connectivity; performance не принят.
+- ✅ Task 4C — iPhone connectivity; performance не принят.
+- ❌ Task 4.5 — quality FAIL/root cause open; strict A/B incomplete.
+- ⏳ Task 5 — acceptance заблокирован.
+- ⏳ Task 6 — closeout заблокирован.
+
 Ниже — исходный план и сохранённые требования предыдущих ревизий; при конфликте текущий bounded GO имеет приоритет.
 
 Выполнить единую Phase 16 внутри проекта VPS-OPS-LAB. Эта фаза объединяет ранее предполагавшиеся Phase 16 и Phase 17. Не создавать отдельную Phase 17.
@@ -399,6 +423,17 @@ TASK 4 — ONE AWG3.1 PILOT
 Не печатать и не сохранять private key, PSK, HPK или полный config в logs/receipts.
 
 TASK 5 — REAL CLIENT ACCEPTANCE
+
+Текущий gate закрыт. Его нельзя открывать только по handshake, Android/iPhone
+connectivity или здоровым server metrics. До acceptance обязательны одновременно:
+
+- bounded Windows retest после подтверждённого официального upstream
+  fix/поддерживаемого client path с рабочими IPv4, DNS и HTTPS;
+- root-cause-bound correction и стабильный повтор AWG3.1 quality checks;
+- завершённый последовательный same-device/access-network AWG2 ↔ AWG3.1 A/B
+  по контракту Task 4.5;
+- отдельный checksum/state/rollback-bound approval перед Task 3B application
+  integration; успешный минимальный runtime не заменяет этот stage gate.
 
 С участием оператора проверить:
 

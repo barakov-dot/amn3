@@ -38,6 +38,16 @@ remains incomplete. Task 5 and Task 6 are blocked because AWG3.1 itself is
 currently unstable. Full evidence:
 `research/amn2/phase16-iphone-awg31-quality-and-server-metrics-2026-08-29.md`.
 
+The Windows 11 / AmneziaVPN 5.0.1.5 run is a separate acceptance blocker.
+Wintun creation, interface Up, MTU 1280, handshake and keepalive were observed,
+but application traffic failed; disabling kill switch did not restore it. The
+observed class matches open official upstream issue #3043, without proving the
+final root cause. Acceptance requires a bounded retest after an official
+upstream fix or supported client path; server, port, DNS, MTU, firewall and the
+profile must not be changed speculatively. Evidence commit: `eefe693`; full
+evidence:
+`research/amn2/phase16-windows-awg31-data-plane-regression-2026-08-29.md`.
+
 ## Mandatory placement in Phase 16
 
 1. Complete Task 3 controlled server-only stage under its separate exact
@@ -94,7 +104,7 @@ its own exact approval and evidence binding.
 3. Task 2 — checksum-bound Spain read-only preflight: complete/PASS.
 4. Task 3A — minimal isolated AWG3.1 runtime: complete.
 5. Task 3B — application integration: pending and not authorized.
-6. Task 4A — Windows client: connectivity failure, separate client boundary.
+6. Task 4A — Windows client: upstream-class data-plane blocker; bounded official-path retest required.
 7. Task 4B — Android/projector connectivity: complete; performance not accepted.
 8. Task 4C — iPhone connectivity: complete; performance not accepted.
 9. Task 4.5 — quality FAIL/root cause open; strict AWG2/AWG3.1 A/B incomplete.
