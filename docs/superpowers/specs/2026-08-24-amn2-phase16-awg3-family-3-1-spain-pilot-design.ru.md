@@ -4,16 +4,17 @@
 
 Approved local preparation: baseline `392cc339f7f6afaed0a0dc2a0a80139ca030f560`, local-fix receipt SHA256 `549b515ea50e7668f56f433772633a63c674aaba973876f978f0a2ea15f823de`. Изменяются только package/branch bindings и локальное evidence; scalar-exit и BOM-free stdin fixes сохраняются. Один targeted regression, одна materialization и один separate verifier. Package 015 immutable, transaction 006 consumed. Spain egress, remote write, stage/install, config/issuance и AWG2 changes запрещены. После локальной готовности нужен новый exact preflight approval; прежние approvals не переиспользуются. Подробный текущий scope и вертикальный статус находятся в плане Phase 16; требования ниже сохранены как исходный контракт.
 
-ТЕКУЩАЯ ACCEPTANCE BOUNDARY — 2026-08-29, evidence commit `eefe693`
+ТЕКУЩАЯ ACCEPTANCE BOUNDARY — 2026-08-30, route/counter evidence commit `bb266df`
 
 - Minimal isolated AWG3.1 runtime и non-Windows connectivity подтверждены, но это не разрешает Task 3B application integration и не является acceptance.
 - Windows 11 / AmneziaVPN 5.0.1.5 проходит tunnel creation и handshake, но не application data plane; kill switch A/B результата не изменил. Это Windows upstream-class blocker, соответствующий по классу открытой официальной issue #3043, без утверждения окончательной root cause.
 - Синхронный route/counter watcher подтвердил активные IPv4/IPv6 addresses, MTU 1280 и default routes, а также двусторонний рост интерфейсных byte counters во время одного HTTPS timeout. Отсутствие full-tunnel route исключено; точная Windows tunnel data-plane/session root cause не доказана. Evidence: `research/amn2/phase16-windows-awg31-active-route-counter-diagnostic-2026-08-29.md`.
 - Official GitHub status refresh: `5.0.1.5` остаётся Latest release (`prerelease=false`) и уже установлен; issue #3043 открыта без maintainer-confirmed fix. Issue #3064 про fallback MTU 1376 не совпадает с доказанным MTU 1280 пилота. Stable release metadata не отменяет failed compatibility evidence. Evidence: `research/amn2/phase16-windows-official-upstream-status-2026-08-29.md`.
+- Source-level refresh: 9 commits / 78 changed files между `5.0.1.5` и текущим `dev` не затрагивают Windows tunnel/route/session paths; обе ревизии используют `awg-windows/3.1.20260814`. Issue #3043 не имеет linked fix, #3050 является только corroborating Windows speed report, а #3073 про ranged H1-H4 не совпадает с fixed values пилота. Повтор того же engine path не является bounded remediation. Evidence: `research/amn2/phase16-windows-official-source-level-status-2026-08-30.md`.
 - iPhone AWG3.1 connectivity прошёл, но quality gate failed; strict same-device AWG2 ↔ AWG3.1 A/B остаётся incomplete.
 - Task 5 и Task 6 заблокированы до root-cause-bound correction, успешного Windows retest на официально поддерживаемом client path и полного Task 4.5.
 - До закрытия этих gates запрещены speculative server/DNS/port/MTU/firewall/profile changes, Task 3B stage, install и general issuance. AWG2_UNTOUCHED.
-- Canonical evidence: `research/amn2/phase16-windows-awg31-data-plane-regression-2026-08-29.md`, `research/amn2/phase16-iphone-awg31-quality-and-server-metrics-2026-08-29.md`, `research/amn2/phase16-spain-transport-quality-ab-gate-2026-08-26.md`.
+- Canonical evidence: `research/amn2/phase16-windows-awg31-data-plane-regression-2026-08-29.md`, `research/amn2/phase16-windows-official-source-level-status-2026-08-30.md`, `research/amn2/phase16-iphone-awg31-quality-and-server-metrics-2026-08-29.md`, `research/amn2/phase16-spain-transport-quality-ab-gate-2026-08-26.md`.
 
 Выполнить единую Phase 16 внутри проекта VPS-OPS-LAB. Эта фаза объединяет ранее предполагавшиеся Phase 16 и Phase 17. Не создавать отдельную Phase 17.
 

@@ -10,13 +10,14 @@
 - После локального PASS запросить новый exact checksum-bound preflight approval. Сохранить linked worktree и локальную ветку 016; push не выполнять до отдельного informed approval публичной публикации накопленной истории.
 - Task 4 — первый pilot для АРМ/Windows; Task 4.5 — обязательный AWG2 ↔ AWG3.1 transport-quality A/B gate до Task 5 и closeout. Client admission/runtime/resource contracts этим GO не меняются.
 
-ТЕКУЩИЙ EXECUTION STATUS / ACCEPTANCE GATE — 2026-08-29, evidence commit `eefe693`
+ТЕКУЩИЙ EXECUTION STATUS / ACCEPTANCE GATE — 2026-08-30, route/counter evidence commit `bb266df`
 
 - Task 3A minimal isolated runtime завершён; Task 3B application integration не начинался и не разрешён.
 - Android и iPhone подтвердили AWG3.1 connectivity одним checksum-bound peer последовательно. Это не performance/stability acceptance.
 - Windows 11 / AmneziaVPN 5.0.1.5 создаёт активный Wintun, получает MTU 1280 и handshake/keepalive, но прикладной IPv4/DNS/HTTPS-трафик не проходит. Отключение kill switch результат не изменило. Граница зафиксирована как Windows client data-plane regression с совпадением по классу с открытой официальной upstream issue #3043; root cause не объявлен доказанным. Evidence: `research/amn2/phase16-windows-awg31-data-plane-regression-2026-08-29.md`.
 - Синхронный route/counter watcher подтвердил активные IPv4/IPv6 addresses, MTU 1280 и default routes, а также двусторонний рост интерфейсных byte counters во время одного HTTPS timeout. Отсутствие full-tunnel route исключено; точная Windows tunnel data-plane/session root cause не доказана. Evidence: `research/amn2/phase16-windows-awg31-active-route-counter-diagnostic-2026-08-29.md`.
 - Official GitHub status refresh: `5.0.1.5` остаётся Latest release (`prerelease=false`) и является уже установленным Windows x64 path; issue #3043 открыта без maintainer-confirmed fix. Issue #3064 про fallback MTU 1376 не совпадает с фактически применённым MTU 1280 этого пилота. Stable release metadata не отменяет failed compatibility evidence. Evidence: `research/amn2/phase16-windows-official-upstream-status-2026-08-29.md`.
+- Source-level refresh: compare `5.0.1.5...dev` содержит 9 commits и 78 файлов, но не меняет Windows tunnel/route/session paths; tag и `dev` используют один `awg-windows/3.1.20260814`. Issue #3043 не имеет linked fix, #3050 остаётся corroborating speed report, а #3073 про ranged H1-H4 не совпадает с fixed values пилота. Повторный live test того же Windows engine path не обоснован. Evidence: `research/amn2/phase16-windows-official-source-level-status-2026-08-30.md`.
 - iPhone connectivity/reconnect/DNS/HTTPS прошли, но три AWG3.1 quality-прогона существенно хуже здорового no-VPN baseline. Строгий same-device AWG2 ↔ AWG3.1 A/B не завершён из-за отсутствия актуального Spain AWG2-профиля на iPhone. Evidence: `research/amn2/phase16-iphone-awg31-quality-and-server-metrics-2026-08-29.md`.
 - Task 4.5 имеет статус `quality-fail-root-cause-open-strict-ab-incomplete`. Пока AWG3.1 нестабилен, Task 5 acceptance и Task 6 closeout заблокированы.
 - Task 3B нельзя начинать до закрытия обоих client gates: Windows должен пройти bounded retest на официально поддерживаемом upstream client path, а AWG3.1 quality — исправленный bounded retest и обязательный последовательный AWG2 ↔ AWG3.1 A/B.
@@ -29,7 +30,7 @@
 - ✅ Task 2 — Spain gates/diagnostics.
 - ✅ Task 3A — minimal isolated AWG3.1 runtime.
 - ⏳ Task 3B — application integration: не начат, не разрешён.
-- ❌ Task 4A — Windows: upstream-class data-plane/session blocker; route absence excluded.
+- ❌ Task 4A — Windows: upstream-class data-plane/session blocker; route absence excluded, official source fix absent.
 - ✅ Task 4B — Android/projector connectivity; performance не принят.
 - ✅ Task 4C — iPhone connectivity; performance не принят.
 - ❌ Task 4.5 — quality FAIL/root cause open; strict A/B incomplete.

@@ -6,6 +6,17 @@
 
 ## Текущее состояние
 
+2026-08-30: официальный source-level readback не нашёл исправленного Windows
+AWG3.1 path. Между tag `5.0.1.5` и текущим `dev` — 9 commits и 78 файлов, но
+Windows tunnel/route/session paths не менялись; обе ревизии используют
+`awg-windows/3.1.20260814`, Wintun `0.14.1` и split-tunnel `1.2.5.0`.
+Issue #3043 открыта без linked commit/PR или maintainer-confirmed fix; связанная
+#3050 является только пользовательским Windows speed report. Issue #3073 про
+ranged H1-H4 не совпадает с fixed single values пилота. Task 4A остаётся
+заблокированным; повтор того же Windows path не обоснован. Никаких download,
+install, live Spain или config changes не выполнялось. Подробности:
+research/amn2/phase16-windows-official-source-level-status-2026-08-30.md.
+
 2026-08-29: тот же checksum-bound профиль последовательно прошёл iPhone
 connectivity и reconnect/DNS/HTTPS за 2–3 секунды, но не прошёл quality gate.
 При здоровом no-VPN baseline 331/150 Mbps, 41.1 ms, jitter 18.2 ms и loss 0%
