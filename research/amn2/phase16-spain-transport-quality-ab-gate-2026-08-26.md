@@ -15,6 +15,28 @@ problem on other protocols. This is an observed client-path symptom, not yet a
 confirmed server, protocol, configuration, MTU, DNS, firewall, Docker, or
 network root cause.
 
+## Evidence update — 2026-08-30 alternate access network
+
+The same checksum-bound iPhone AWG3.1 profile was retested sequentially on an
+operator-designated second access network. HTTPS pages, YouTube and Telegram
+worked, and reconnect restored application reachability in approximately 2–3
+seconds and no more than 5 seconds. Connectivity/reconnect therefore remain a
+PASS.
+
+The same-network no-VPN baseline was 9.68/5.37 Mbps with 86.7 ms latency and
+58.3 ms jitter. AWG3.1 measured 8.87/1.70 Mbps, 132 ms and 370 ms before
+reconnect, then 7.65/0.593 Mbps, 159 ms and 403 ms after reconnect. The VPN
+packet-loss results were 77.4% and 46.8%; the no-VPN percentage is unavailable
+because the Cloudflare ICE test timed out, so loss is not compared across
+modes.
+
+The second network was already download-limited, but AWG3.1 still materially
+worsened upload, latency and jitter. This means the first access network alone
+does not explain all observed quality symptoms. It does not prove a protocol
+source defect or complete the mandatory Spain AWG2 versus AWG3.1 comparison.
+Task 4.5 remains failed/incomplete. Full evidence:
+`research/amn2/phase16-iphone-awg31-alternate-network-quality-retest-2026-08-30.md`.
+
 ## Evidence update — 2026-08-29
 
 The first Spain AWG3.1 pilot was tested sequentially on iPhone with the

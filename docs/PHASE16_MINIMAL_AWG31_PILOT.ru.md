@@ -6,6 +6,18 @@
 
 ## Текущее состояние
 
+2026-08-30: iPhone AWG3.1 повторно проверен на обозначенной оператором второй
+сети. HTTPS-страницы, YouTube и Telegram работали; reconnect вернул доступ за
+2–3 секунды, максимум 5. No-VPN baseline этой сети был 9.68/5.37 Mbps, latency
+86.7 ms и jitter 58.3 ms. AWG3.1 до reconnect дал 8.87/1.70 Mbps, 132 ms,
+jitter 370 ms и loss 77.4%; после reconnect — 7.65/0.593 Mbps, 159 ms,
+jitter 403 ms и loss 46.8%. Baseline loss не измерен из-за ICE timeout, поэтому
+проценты loss не сравниваются. Сама вторая сеть download-limited, но AWG3.1
+существенно ухудшил upload/latency/jitter; quality FAIL воспроизведён не только
+на первой сети. Strict Spain AWG2/AWG3.1 A/B остаётся incomplete. Server,
+профиль, AWG2, stage и install не менялись. Подробности:
+research/amn2/phase16-iphone-awg31-alternate-network-quality-retest-2026-08-30.md.
+
 2026-08-30: официальный source-level readback не нашёл исправленного Windows
 AWG3.1 path. Между tag `5.0.1.5` и текущим `dev` — 9 commits и 78 файлов, но
 Windows tunnel/route/session paths не менялись; обе ревизии используют

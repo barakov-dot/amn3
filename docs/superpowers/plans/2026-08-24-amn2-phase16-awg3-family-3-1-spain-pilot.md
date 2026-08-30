@@ -19,6 +19,7 @@
 - Official GitHub status refresh: `5.0.1.5` остаётся Latest release (`prerelease=false`) и является уже установленным Windows x64 path; issue #3043 открыта без maintainer-confirmed fix. Issue #3064 про fallback MTU 1376 не совпадает с фактически применённым MTU 1280 этого пилота. Stable release metadata не отменяет failed compatibility evidence. Evidence: `research/amn2/phase16-windows-official-upstream-status-2026-08-29.md`.
 - Source-level refresh: compare `5.0.1.5...dev` содержит 9 commits и 78 файлов, но не меняет Windows tunnel/route/session paths; tag и `dev` используют один `awg-windows/3.1.20260814`. Issue #3043 не имеет linked fix, #3050 остаётся corroborating speed report, а #3073 про ranged H1-H4 не совпадает с fixed values пилота. Повторный live test того же Windows engine path не обоснован. Evidence: `research/amn2/phase16-windows-official-source-level-status-2026-08-30.md`.
 - iPhone connectivity/reconnect/DNS/HTTPS прошли, но три AWG3.1 quality-прогона существенно хуже здорового no-VPN baseline. Строгий same-device AWG2 ↔ AWG3.1 A/B не завершён из-за отсутствия актуального Spain AWG2-профиля на iPhone. Evidence: `research/amn2/phase16-iphone-awg31-quality-and-server-metrics-2026-08-29.md`.
+- Alternate-network iPhone retest: HTTPS, YouTube, Telegram и reconnect 2–5 секунд прошли, но AWG3.1 против download-limited no-VPN baseline существенно ухудшил upload, latency и jitter до и после reconnect. Baseline loss не измерен из-за ICE timeout; strict Spain AWG2 ↔ AWG3.1 A/B остаётся incomplete. Evidence: `research/amn2/phase16-iphone-awg31-alternate-network-quality-retest-2026-08-30.md`.
 - Task 4.5 имеет статус `quality-fail-root-cause-open-strict-ab-incomplete`. Пока AWG3.1 нестабилен, Task 5 acceptance и Task 6 closeout заблокированы.
 - Task 3B нельзя начинать до закрытия обоих client gates: Windows должен пройти bounded retest на официально поддерживаемом upstream client path, а AWG3.1 quality — исправленный bounded retest и обязательный последовательный AWG2 ↔ AWG3.1 A/B.
 - Не менять server, UDP 30002, DNS, MTU, firewall или профиль наугад. General AWG3 issuance остаётся disabled; AWG2_UNTOUCHED.
@@ -32,8 +33,8 @@
 - ⏳ Task 3B — application integration: не начат, не разрешён.
 - ❌ Task 4A — Windows: upstream-class data-plane/session blocker; route absence excluded, official source fix absent.
 - ✅ Task 4B — Android/projector connectivity; performance не принят.
-- ✅ Task 4C — iPhone connectivity; performance не принят.
-- ❌ Task 4.5 — quality FAIL/root cause open; strict A/B incomplete.
+- ✅ Task 4C — iPhone connectivity/reconnect; performance failed on two access networks.
+- ❌ Task 4.5 — quality FAIL/root cause open across two networks; strict A/B incomplete.
 - ⏳ Task 5 — acceptance заблокирован.
 - ⏳ Task 6 — closeout заблокирован.
 
