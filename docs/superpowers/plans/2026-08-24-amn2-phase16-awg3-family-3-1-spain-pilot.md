@@ -6,9 +6,15 @@
 ниже сохраняют историю и не разрешают повторять старые GO, claims или stage.
 Локальный baseline аудита: `7450435a59e1f648bdcd8880c146f2c3320678db`.
 
-Текущий approval: `/GO PHASE16 APPLY REVIEWED PLAN_AND_GATE_DOCUMENTATION_CORRECTIONS LOCAL_DOCS_ONLY PRESERVE_HISTORICAL_RECEIPTS NO_CODE_CHANGE NO_TEST_RUN NO_PACKAGE NO_LIVE_ACTION NO_PUSH AWG2_UNTOUCHED`.
-Область: согласование документации, проверка diff и локальный commit. Это не
-исправление runtime, не новый server readback и не снятие acceptance blockers.
+Завершённый docs-only approval: `/GO PHASE16 APPLY REVIEWED PLAN_AND_GATE_DOCUMENTATION_CORRECTIONS LOCAL_DOCS_ONLY PRESERVE_HISTORICAL_RECEIPTS NO_CODE_CHANGE NO_TEST_RUN NO_PACKAGE NO_LIVE_ACTION NO_PUSH AWG2_UNTOUCHED`.
+Документационная поправка зафиксирована в `15e7d2d15922919aefb9d5721dc4f285042490e7`.
+
+Последующий local GO: `/GO PHASE16 FIX_LOCAL_DNS_GENERATOR_TWO_IPV4_COMPATIBILITY TDD_ONE_TARGETED_SUITE NO_REAL_CONFIG_GENERATION PRESERVE_EXISTING_PROFILES PACKAGE016_IMMUTABLE NO_LIVE_ACTION NO_INSTALL NO_PUSH AWG2_UNTOUCHED`.
+DNS-исправление завершено локально: RED/GREEN и один итоговый набор 28 PASS.
+Это не исправление live runtime и не снятие client/quality blockers. Evidence:
+`research/amn2/phase16-local-dns-generator-two-ipv4-compatibility-2026-09-05.md`.
+По решению оператора iPhone и проверка двух сетей ОТЛОЖЕНЫ; не запрашивать
+повторно импорт/сеть и не запускать A/B, пока оператор не вернётся к этому этапу.
 
 ### Доказательства и границы
 
@@ -35,21 +41,22 @@
 
 ### TASK_PLAN_BY_CRITICALITY
 
-1. P0 — подготовка одного A/B: подтвердить импорт d7 и физическую сеть, заранее
+1. P0, отложено оператором — подготовка одного A/B: подтвердить импорт d7 и физическую сеть, заранее
    записать метод, цель, лимиты времени/трафика и правила интерпретации.
    Live требует exact approval; текущий docs-only GO его не даёт.
-2. P0 — один последовательный same-device/same-app/same-access-network Spain
+2. P0, отложено оператором — один последовательный same-device/same-app/same-access-network Spain
    AWG2/AWG3.1 A/B с существующими профилями. Если оба пути плохи — исследовать
    общий путь; если только 3.1 — его отличия. Это направление расследования,
    не доказанная причина. Неоднозначность не запускает автоматический повтор.
 3. P1 — Windows: следующий bounded test допустим после значимого изменения
    официального клиента/engine ИЛИ новой проверяемой гипотезы. До live approval
    записать отличия от прошлых проверок и вывод для каждого исхода.
-4. P1 — перед будущей выдачей отдельно исправить DNS-генератор: `render_pair`
-   принимает один IPv4 DNS, а совместимость импорта двух DNS исправлялась
-   только в защищённом профиле. Нужны отдельный local TDD GO и независимый
-   compatibility case с сохранением остальных полей. Текущий профиль и package
-   016 не менять; это не доказанный fix Windows/quality.
+4. P1, локально завершено — DNS-генератор принимает два IPv4 DNS и сохраняет
+   legacy single-DNS validation. Новая файловая подготовка требует ровно два
+   явно заданных адреса до чтения ключей/записи. Независимая проверка формы
+   DNS-строки и один итоговый набор 28 PASS; полный Qt import не выполнялся.
+   Существующие профили, package 016 и live script не менялись. Это не fix
+   Windows/quality. Развёртывание или реальная генерация требуют отдельного approval.
 5. P2 — после Windows и quality gates: отдельная checksum/state/rollback-bound
    интеграция. Проверить актуальность состояния, persistence временных правил,
    restart policy, отсутствие утечек и границы отката в разрешённом этапе.
@@ -78,20 +85,21 @@
 ### Текущий вертикальный статус
 
 - ✅ Task 0 — baseline.
-- ✅ Task 1 — package 016/local tooling; DNS follow-up отдельно, не выполнен.
+- ✅ Task 1 — package 016/local tooling; DNS follow-up выполнен только локально.
 - ✅ Task 2 — исторические Spain gates/diagnostics; не свежий preflight.
 - ✅ Task 3A — minimal runtime и прошлые connectivity evidence.
 - ⏳ Task 3B — integration не завершена; прежние stage-попытки STOP.
 - ❌ Task 4A — Windows application traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity; performance не принят.
 - ✅ Task 4C — iPhone connectivity/reconnect; performance не принят.
-- ❌ Task 4.5 — quality FAIL; root cause открыта; strict A/B неполон.
+- ❌ Task 4.5 — quality FAIL; root cause открыта; strict A/B неполон и отложен.
 - ⏳ Task 5 — acceptance заблокирован.
 - ⏳ Task 6 — closeout заблокирован.
 
-AWG2_UNTOUCHED; general issuance disabled. Следующий шаг — недостающие
-операторские сведения и подготовка bounded A/B, без повторной передачи/выдачи
-уже импортированного профиля. Push требует отдельного exact approval.
+AWG2_UNTOUCHED; general issuance disabled. iPhone/A/B отложены, не отменены.
+Следующий доступный независимый блок — локальная подготовка измеримых критериев
+acceptance без новых live-прогонов; пороги остаются предложением до согласования.
+Push требует отдельного exact approval и в текущем GO запрещён.
 Рекомендация модели по запросу оператора: GPT-6 Astra / HIGH, один основной
 агент; это не утверждение о runtime effort и не разрешение live action.
 

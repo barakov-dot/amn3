@@ -7,6 +7,7 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import re
 import stat
 import subprocess
 import sys
@@ -53,6 +54,81 @@ class FakeDocker:
 
 
 class MinimalPilotTests(unittest.TestCase):
+    def test_two_dns_render_matches_independent_import_boundary(self):
+        # Narrow characterization of the documented AmneziaVPN 5.0.1.5 DNS
+        # boundary (phase16-arm-dns9-check-2026-08-28.md), not the full Qt parser.
+        # Expected captures are independent of render_pair/validate_pair.
+        dns_import = re.compile(r"^DNS = ((?:[0-9]{1,3}\.){3}[0-9]{1,3}), ((?:[0-9]{1,3}\.){3}[0-9]{1,3})$", re.M)
+        m = module()
+        legacy = m.render_pair(synthetic_keys(), dns="9.9.9.9", mtu=1280)
+        self.assertIsNone(dns_import.search(legacy["windows.conf"]))
+        m.validate_pair(legacy)
+        for supplied in ("9.9.9.9,149.112.112.112", "9.9.9.9, 149.112.112.112"):
+            with self.subTest(dns=supplied):
+                try:
+                    profiles = m.render_pair(synthetic_keys(), dns=supplied, mtu=1280)
+                except m.PilotError:
+                    self.fail("two explicit IPv4 DNS addresses must be accepted")
+                match = dns_import.search(profiles["windows.conf"])
+                self.assertIsNotNone(match)
+                self.assertEqual(match.groups(), ("9.9.9.9", "149.112.112.112"))
+                self.assertEqual(profiles["server.conf"], legacy["server.conf"])
+                self.assertEqual(profiles["windows.conf"].replace(
+                    "DNS = 9.9.9.9, 149.112.112.112\n", "DNS = 9.9.9.9\n"
+                ), legacy["windows.conf"])
+                m.validate_pair(profiles)
+
+    def test_dns_list_rejects_invalid_members_without_echo(self):
+        m = module()
+        invalid = (True, 16843009, None, "", "9.9.9.9,", ",1.1.1.1",
+                   "9.9.9.9,1.1.1.1,8.8.8.8", "9.9.9.9,::1",
+                   "9.9.9.9,999.1.1.1", "9.9.9.9,0.0.0.0",
+                   "9.9.9.9,127.0.0.1", "224.0.0.1,9.9.9.9",
+                   "9.9.9.9, 1.1.1.1\n", "9.9.9.9, 1.1.1.1\r",
+                   "9.9.9.9, 1.1.1.1\nPostUp = PRIVATE_SENTINEL")
+        for case, dns in enumerate(invalid):
+            with self.subTest(case=case):
+                with self.assertRaises(m.PilotError) as caught:
+                    m.render_pair(synthetic_keys(), dns=dns, mtu=1280)
+                self.assertEqual(str(caught.exception), "invalid_profile_input")
+
+    def test_new_preparation_refuses_single_dns_before_key_read_or_write(self):
+        m = module()
+        with tempfile.TemporaryDirectory() as temp:
+            destination = Path(temp) / "never-created"
+            with patch.object(m, "INPUT_DIR", destination), patch.object(m, "require_linux_root"):
+                # Existing protected keys must not be read for invalid DNS input.
+                with patch.object(m, "secure_read", side_effect=AssertionError("premature key read")):
+                    for dns in ("9.9.9.9", "9.9.9.9,invalid"):
+                        with self.subTest(dns=dns), self.assertRaises(m.PilotError):
+                            m.prepare_profiles(Path(temp) / "keys", dns=dns, mtu=1280)
+                self.assertFalse(destination.exists())
+
+    def test_two_dns_preparation_writes_only_synthetic_pair_and_never_overwrites(self):
+        m = module()
+        keys = synthetic_keys()
+        with tempfile.TemporaryDirectory() as temp:
+            destination = Path(temp) / "synthetic-inputs"
+            # Only platform/secret-file reads are substituted. Real exclusive
+            # creation, rendering and receipts execute in a disposable directory.
+            with patch.object(m, "INPUT_DIR", destination), patch.object(m, "require_linux_root"), \
+                    patch.object(m, "secure_read", side_effect=lambda path, **kw: keys[path.stem]):
+                try:
+                    receipt = m.prepare_profiles(Path(temp) / "synthetic-keys",
+                                                 dns="9.9.9.9,149.112.112.112", mtu=1280)
+                except m.PilotError:
+                    self.fail("file preparation must support the two-DNS client format")
+                before = {p.name: p.read_bytes() for p in destination.iterdir()}
+                self.assertEqual(set(before), {"server.conf", "windows.conf"})
+                self.assertIn(b"DNS = 9.9.9.9, 149.112.112.112\n", before["windows.conf"])
+                self.assertEqual(receipt["sha256"], {
+                    name: hashlib.sha256(body).hexdigest() for name, body in before.items()
+                })
+                with self.assertRaises(FileExistsError):
+                    m.prepare_profiles(Path(temp) / "synthetic-keys",
+                                       dns="1.1.1.1,1.0.0.1", mtu=1280)
+                self.assertEqual({p.name: p.read_bytes() for p in destination.iterdir()}, before)
+
     def test_userspace_profiles_omit_kernel_only_advanced_security(self):
         m = module()
         keys = synthetic_keys()

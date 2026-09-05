@@ -47,6 +47,23 @@ def script_sha256():
     return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
 
+def normalize_dns(dns, *, require_pair=False):
+    """Keep legacy single-address validation; new preparation requires a pair."""
+    try:
+        if not isinstance(dns, str) or re.fullmatch(r"[0-9., ]+", dns) is None:
+            raise ValueError
+        parts = dns.split(",")
+        if len(parts) not in ((2,) if require_pair else (1, 2)):
+            raise ValueError
+        addresses = [ipaddress.IPv4Address(part.strip(" ")) for part in parts]
+        if any(address.is_unspecified or address.is_multicast or address.is_loopback
+               for address in addresses):
+            raise ValueError
+        return ", ".join(str(address) for address in addresses)
+    except (ValueError, TypeError):
+        raise PilotError("invalid_profile_input") from None
+
+
 def render_pair(keys, *, dns, mtu=1280):
     try:
         if set(keys) != set(KEY_FIELDS):
@@ -59,9 +76,7 @@ def render_pair(keys, *, dns, mtu=1280):
                 raise ValueError
         if type(mtu) is not int or not 1280 <= mtu <= 1420:
             raise ValueError
-        address = ipaddress.IPv4Address(dns)
-        if address.is_unspecified or address.is_multicast or address.is_loopback:
-            raise ValueError
+        dns_value = normalize_dns(dns)
     except (ValueError, TypeError):
         raise PilotError("invalid_profile_input") from None
     shared = (
@@ -79,7 +94,7 @@ def render_pair(keys, *, dns, mtu=1280):
     )
     client = (
         f"[Interface]\nPrivateKey = {keys['client_private']}\nAddress = 10.212.13.2/32\n"
-        f"DNS = {address}\nMTU = {mtu}\n" + shared
+        f"DNS = {dns_value}\nMTU = {mtu}\n" + shared
         + f"\n[Peer]\nPublicKey = {keys['server_public']}\nPresharedKey = {keys['psk']}\n"
         f"Endpoint = {TARGET}:30002\nAllowedIPs = 0.0.0.0/0, ::/0\nPersistentKeepalive = 25\n"
     )
@@ -151,6 +166,7 @@ def secure_parent_chain(path):
 
 def prepare_profiles(key_directory, *, dns, mtu):
     require_linux_root()
+    dns = normalize_dns(dns, require_pair=True)
     keys = {name: secure_read(key_directory / (name + ".key"), maximum=128).strip() for name in KEY_FIELDS}
     profiles = render_pair(keys, dns=dns, mtu=mtu)
     secure_parent_chain(INPUT_DIR.parent)
@@ -444,7 +460,8 @@ def main(argv=None):
     commands.add_parser("plan", help="print non-secret plan; execute nothing")
     render = commands.add_parser("render", help="authorized Linux-only preparation from existing protected keys")
     render.add_argument("--key-directory", type=Path, required=True)
-    render.add_argument("--dns", required=True)
+    render.add_argument("--dns", required=True, metavar="IPV4,IPV4",
+                        help="two explicit IPv4 DNS addresses, comma-separated; no fallback")
     render.add_argument("--mtu", type=int, default=1280)
     check = commands.add_parser("check", help="authorized read-only server preflight; no keys required")
     check.add_argument("--with-profiles", action="store_true", help="also validate separately prepared protected inputs")

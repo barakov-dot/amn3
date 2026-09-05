@@ -18,8 +18,11 @@ readback и не разрешают повторять completed/consumed опе
   Application stage раньше пытались выполнять с STOP; интеграция не завершена.
 - Наш code fix требует TDD; upstream/environment correction требует
   соответствующей проверки без обязательного собственного исправления протокола.
-- DNS compatibility gap генератора — отдельный local TDD follow-up перед
-  будущей выдачей, не разрешение менять существующий профиль или package 016.
+- DNS compatibility gap генератора закрыт локальным TDD follow-up 2026-09-05:
+  новая файловая подготовка требует два IPv4 DNS; legacy validation сохранена.
+  Evidence: `research/amn2/phase16-local-dns-generator-two-ipv4-compatibility-2026-09-05.md`.
+  Это не live deployment, не полный Qt import и не изменение существующих профилей/package 016.
+- iPhone/A/B отложены оператором; отсрочка не снимает Task 4.5 и acceptance gates.
 - AWG2, freshness, checksum/state/rollback approvals, секретность и запрет
   general issuance сохранены. Restart/persistence и leak checks остаются
   требованиями отдельно разрешённого integration/acceptance этапа.
