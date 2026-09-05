@@ -7,6 +7,41 @@
 - Package 016 changed by this update: `false`
 - Live action authorized by this note: `false`
 
+## Contract clarification — 2026-09-05
+
+The current execution status and rerun policy live only in the
+[Phase 16 plan](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
+The dated evidence sections below are preserved as historical observations.
+This documentation correction changes no measurements, profile, runtime,
+immutable package, freshness policy or historical receipt.
+
+Before the next diagnostic session, record its hypothesis, controlled physical
+access network/device/application, completion conditions, time/data limits and
+outcome-to-next-action mapping. A different VPN on the same access network is
+not an independent physical network. Existing d7 transfer preparation does not
+establish import or a completed AWG2 measurement.
+
+Before acceptance, agree numeric throughput floors/relative tolerances,
+loss/RTT/jitter limits, reconnect limit, stability duration and handling of missing
+measurements. These values are NOT YET APPROVED; this update invents no thresholds
+and does not reinterpret historical failures as passes. One diagnostic A/B is
+not full stability, MTU/fragmentation, DNS or server-metrics acceptance.
+
+Retain unfinished speedtest snapshots as partial observations. ICE timeout is an
+unavailable measurement, not a loss percentage. Cloudflare loss is a separate
+UDP/WebRTC TURN round-trip measurement, not a direct tunnel-interface loss
+counter ([measurement method](https://github.com/cloudflare/speedtest#packetloss)).
+Different no-VPN/VPN routes or test sites limit causal comparison. Post-run CPU
+and a short direct VPS download do not exclude transient AWG load under traffic.
+Use one bounded synchronized sample when that is the question; do not repeat
+idle server snapshots or identical speed tests to collect another failure.
+
+Windows remains an application-traffic failure with upstream symptom similarity,
+not a proven upstream defect. A new bounded run may follow a meaningful official
+client/engine change OR a new discriminating hypothesis under exact approval.
+Source-bound IPv4 HTTPS was already attempted on 2026-08-28; do not propose a
+generic repeat without distinguishing it from that evidence.
+
 ## Operator observation
 
 The operator reported that the current Spain AWG2 configuration is unstable
@@ -70,16 +105,19 @@ profile must not be changed speculatively. Evidence commit: `eefe693`; full
 evidence:
 `research/amn2/phase16-windows-awg31-data-plane-regression-2026-08-29.md`.
 
-## Mandatory placement in Phase 16
+## Mandatory placement in Phase 16 — current order
 
-1. Complete Task 3 controlled server-only stage under its separate exact
-   approval.
-2. Complete Task 4 under a separate exact pilot approval and create exactly one
-   operator-owned AWG3.1 profile, peer, and `.conf`.
-3. Run this Task 4.5 A/B gate on the same computer and access network before
-   Task 5 acceptance and before Phase 16 closeout.
-4. Preserve AWG2 throughout the comparison; do not stop, restart, rewrite, or
-   reissue it as part of this gate.
+1. Reuse Task 3A's existing minimal runtime and the existing operator pilot;
+   their historical creation does not authorize a fresh live run.
+2. Confirm existing Spain AWG2 d7 import and physical access-network conditions;
+   no new peer or profile issuance is required for the comparison.
+3. Run Task 4.5 sequentially on the same device/application/access network under
+   exact approval. Close Windows and quality gates before separately authorized
+   Task 3B integration, then Task 5 acceptance and Task 6 closeout. The historical
+   application-first stage sequence is not a prerequisite for diagnostic A/B.
+4. Preserve the AWG2 server runtime and peers; do not stop, restart, rewrite,
+   or reissue them. Sequential operator client connect/disconnect belongs only
+   to the separately approved A/B; never use the pilot peer concurrently.
 
 ## Bounded A/B observations
 
@@ -110,8 +148,10 @@ its own exact approval and evidence binding.
 ## Decision contract
 
 - If AWG3.1 is also unstable or materially degraded, block Task 5 acceptance
-  and Task 6 closeout until a root cause is identified and a bounded TDD
-  correction is verified.
+  and Task 6 closeout until a root cause is identified, the corresponding
+  correction is verified and quality passes the agreed criteria. Our code fixes
+  require TDD; official upstream or external-path corrections require appropriate
+  evidence and bounded verification, not an obligatory custom protocol change.
 - If AWG3.1 is stable while the existing AWG2 path remains degraded, continue
   AWG3.1 acceptance and open a separate high-priority AWG2 remediation item.
 - If both paths are stable during the bounded observation, record that the
@@ -119,7 +159,9 @@ its own exact approval and evidence binding.
 - In every outcome, keep general AWG3 issuance disabled until Phase 16
   acceptance and closeout explicitly permit otherwise.
 
-## Current Phase 16 order
+## Historical status snapshot — 2026-08-30
+
+Retained for traceability; use the linked plan for the current execution status.
 
 1. Task 0 — local baseline: complete.
 2. Task 1 — AWG3.1 code and package 016/local tooling: complete.

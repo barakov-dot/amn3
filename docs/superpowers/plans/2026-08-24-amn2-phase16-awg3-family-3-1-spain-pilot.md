@@ -1,6 +1,101 @@
 /GO PHASE 16 — AWG3 FAMILY 3.1, SPAIN PREFLIGHT, CONTROLLED STAGE AND ONE PILOT
 
-ТЕКУЩИЙ BOUNDED LOCAL GO — PACKAGE 016, 2026-08-27
+## Актуальный порядок и gates — 2026-09-05
+
+Это единственный актуальный execution status Phase 16. Датированные разделы
+ниже сохраняют историю и не разрешают повторять старые GO, claims или stage.
+Локальный baseline аудита: `7450435a59e1f648bdcd8880c146f2c3320678db`.
+
+Текущий approval: `/GO PHASE16 APPLY REVIEWED PLAN_AND_GATE_DOCUMENTATION_CORRECTIONS LOCAL_DOCS_ONLY PRESERVE_HISTORICAL_RECEIPTS NO_CODE_CHANGE NO_TEST_RUN NO_PACKAGE NO_LIVE_ACTION NO_PUSH AWG2_UNTOUCHED`.
+Область: согласование документации, проверка diff и локальный commit. Это не
+исправление runtime, не новый server readback и не снятие acceptance blockers.
+
+### Доказательства и границы
+
+- Android/iPhone connectivity и iPhone reconnect подтверждены предыдущими
+  наблюдениями; повторять их только ради того же PASS не требуется.
+- Windows: адаптер, адреса, MTU 1280 и default routes присутствовали, прикладной
+  трафик не работал. Совпадение симптомов с issue #3043 не доказывает upstream
+  root cause. Kill-switch A/B и поиск отсутствующего адаптера уже отработаны.
+- Source-bound TCP/IPv4 HTTPS проверяли 28 августа: TCP прошёл, HTTPS дал
+  TLS-error/timeout. Общий повтор IPv4 HTTPS без новой гипотезы не планируется.
+  Evidence: `research/amn2/phase16-arm-dns9-check-2026-08-28.md`.
+- Quality остаётся FAIL для acceptance; строгий Spain AWG2/AWG3.1 A/B неполон.
+  Незавершённые speedtest-снимки и ICE timeout не превращаются в итоговые
+  измерения или процент потерь. Смена маршрута/площадки ограничивает сравнение
+  no-VPN/VPN; post-run CPU не исключает нагрузку во время передачи.
+- Release/dev/issue receipts действуют на дату чтения. Сравнение 9 commits /
+  78 files от 30 августа не является текущим readback; в этом GO сети нет.
+- Spain AWG2 IPHONE d7 ZIP найден и checksum-проверен при подготовке передачи;
+  новая выдача не нужна. Импорт на iPhone и тип второй физической сети пока
+  требуют ответа оператора. Копия в Downloads не доказывает доставку/импорт.
+- Application integration не завершена: прежние stage-попытки STOP; recovery
+  transaction 007 наблюдал отсутствие проверенных ресурсов, а не успешный
+  stage или доказанный rollback. Minimal pilot не устранил старый transport defect.
+
+### TASK_PLAN_BY_CRITICALITY
+
+1. P0 — подготовка одного A/B: подтвердить импорт d7 и физическую сеть, заранее
+   записать метод, цель, лимиты времени/трафика и правила интерпретации.
+   Live требует exact approval; текущий docs-only GO его не даёт.
+2. P0 — один последовательный same-device/same-app/same-access-network Spain
+   AWG2/AWG3.1 A/B с существующими профилями. Если оба пути плохи — исследовать
+   общий путь; если только 3.1 — его отличия. Это направление расследования,
+   не доказанная причина. Неоднозначность не запускает автоматический повтор.
+3. P1 — Windows: следующий bounded test допустим после значимого изменения
+   официального клиента/engine ИЛИ новой проверяемой гипотезы. До live approval
+   записать отличия от прошлых проверок и вывод для каждого исхода.
+4. P1 — перед будущей выдачей отдельно исправить DNS-генератор: `render_pair`
+   принимает один IPv4 DNS, а совместимость импорта двух DNS исправлялась
+   только в защищённом профиле. Нужны отдельный local TDD GO и независимый
+   compatibility case с сохранением остальных полей. Текущий профиль и package
+   016 не менять; это не доказанный fix Windows/quality.
+5. P2 — после Windows и quality gates: отдельная checksum/state/rollback-bound
+   интеграция. Проверить актуальность состояния, persistence временных правил,
+   restart policy, отсутствие утечек и границы отката в разрешённом этапе.
+   Затем Task 5 acceptance и Task 6 closeout.
+
+### Политика проверок
+
+- Каждый новый прогон имеет конкретный вопрос, заранее заданные outcomes,
+  лимиты и stop-condition. Ошибка инструмента означает UNKNOWN, а не
+  неисправность проверяемого компонента.
+- Docs/receipt-only: проверка diff, ссылок, согласованности и отсутствия секретов;
+  без pytest, materialization, package verifier и повторного server preflight.
+- Наш код: один целевой RED/GREEN и один релевантный итоговый набор. Повторять
+  после новых изменений/ошибок, не после одной лишь фиксации результата.
+- Сохранять checksum, one-shot claims, AWG2 equality, secret redaction и точный
+  rollback. Source-string checks не заменяют поведенческие проверки. Исторические
+  package checks нужны при затрагивании пакетов/упаковки, не для клиентского A/B.
+- TDD требуется для нашего code fix. Исправление upstream или внешней причины
+  требует соответствующего evidence и bounded verification, не обязательной
+  собственной замены протокола. Root-cause gate не отменяется.
+- До acceptance согласовать численные пределы throughput, loss, RTT/jitter,
+  reconnect, длительность stability window и правило missing measurements.
+  Сейчас пороги НЕ УТВЕРЖДЕНЫ; новые числа задним числом не назначать.
+  MTU/fragmentation, DNS, server metrics и AWG2/AWG3.1 A/B остаются обязательными.
+
+### Текущий вертикальный статус
+
+- ✅ Task 0 — baseline.
+- ✅ Task 1 — package 016/local tooling; DNS follow-up отдельно, не выполнен.
+- ✅ Task 2 — исторические Spain gates/diagnostics; не свежий preflight.
+- ✅ Task 3A — minimal runtime и прошлые connectivity evidence.
+- ⏳ Task 3B — integration не завершена; прежние stage-попытки STOP.
+- ❌ Task 4A — Windows application traffic FAIL; root cause не доказана.
+- ✅ Task 4B — Android connectivity; performance не принят.
+- ✅ Task 4C — iPhone connectivity/reconnect; performance не принят.
+- ❌ Task 4.5 — quality FAIL; root cause открыта; strict A/B неполон.
+- ⏳ Task 5 — acceptance заблокирован.
+- ⏳ Task 6 — closeout заблокирован.
+
+AWG2_UNTOUCHED; general issuance disabled. Следующий шаг — недостающие
+операторские сведения и подготовка bounded A/B, без повторной передачи/выдачи
+уже импортированного профиля. Push требует отдельного exact approval.
+Рекомендация модели по запросу оператора: GPT-6 Astra / HIGH, один основной
+агент; это не утверждение о runtime effort и не разрешение live action.
+
+## Исторический BOUNDED LOCAL GO — PACKAGE 016, 2026-08-27 (завершён)
 
 - Exact baseline: `392cc339f7f6afaed0a0dc2a0a80139ca030f560`; local-fix receipt SHA256: `549b515ea50e7668f56f433772633a63c674aaba973876f978f0a2ea15f823de`.
 - Подготовить `phase16-awg3-family-3-1-spain-pilot-20260824-016`: обновить только package/branch bindings и evidence. Сохранить исправленный scalar exit и BOM-free binary stdin producer; новый transport fix не разрешён.
@@ -10,7 +105,7 @@
 - После локального PASS запросить новый exact checksum-bound preflight approval. Сохранить linked worktree и локальную ветку 016; push не выполнять до отдельного informed approval публичной публикации накопленной истории.
 - Task 4 — первый pilot для АРМ/Windows; Task 4.5 — обязательный AWG2 ↔ AWG3.1 transport-quality A/B gate до Task 5 и closeout. Client admission/runtime/resource contracts этим GO не меняются.
 
-ТЕКУЩИЙ EXECUTION STATUS / ACCEPTANCE GATE — 2026-08-30, route/counter evidence commit `bb266df`
+ИСТОРИЧЕСКИЙ EXECUTION STATUS / ACCEPTANCE GATE — 2026-08-30, route/counter evidence commit `bb266df`
 
 - Task 3A minimal isolated runtime завершён; Task 3B application integration не начинался и не разрешён.
 - Android и iPhone подтвердили AWG3.1 connectivity одним checksum-bound peer последовательно. Это не performance/stability acceptance.
@@ -24,7 +119,7 @@
 - Task 3B нельзя начинать до закрытия обоих client gates: Windows должен пройти bounded retest на официально поддерживаемом upstream client path, а AWG3.1 quality — исправленный bounded retest и обязательный последовательный AWG2 ↔ AWG3.1 A/B.
 - Не менять server, UDP 30002, DNS, MTU, firewall или профиль наугад. General AWG3 issuance остаётся disabled; AWG2_UNTOUCHED.
 
-Текущий вертикальный статус:
+Исторический вертикальный статус на 2026-08-30:
 
 - ✅ Task 0 — baseline.
 - ✅ Task 1 — package 016/local tooling.
@@ -38,7 +133,9 @@
 - ⏳ Task 5 — acceptance заблокирован.
 - ⏳ Task 6 — closeout заблокирован.
 
-Ниже — исходный план и сохранённые требования предыдущих ревизий; при конфликте текущий bounded GO имеет приоритет.
+Ниже — исходный план и сохранённые требования предыдущих ревизий. При конфликте
+действует раздел «Актуальный порядок и gates — 2026-09-05»; исторический GO
+на сборку package 016 не является текущей очередью действий.
 
 Выполнить единую Phase 16 внутри проекта VPS-OPS-LAB. Эта фаза объединяет ранее предполагавшиеся Phase 16 и Phase 17. Не создавать отдельную Phase 17.
 
@@ -435,9 +532,12 @@ TASK 5 — REAL CLIENT ACCEPTANCE
 Текущий gate закрыт. Его нельзя открывать только по handshake, Android/iPhone
 connectivity или здоровым server metrics. До acceptance обязательны одновременно:
 
-- bounded Windows retest после подтверждённого официального upstream
-  fix/поддерживаемого client path с рабочими IPv4, DNS и HTTPS;
-- root-cause-bound correction и стабильный повтор AWG3.1 quality checks;
+- успешный bounded Windows retest на официально поддерживаемом client path
+  с рабочими IPv4, DNS и HTTPS; основание нового прогона — значимое изменение
+  клиента/engine или новая проверяемая гипотеза по актуальной политике выше;
+- root-cause-bound correction и стабильная проверка AWG3.1 quality по заранее
+  согласованным критериям; TDD для нашего кода, соответствующая проверка для
+  официального исправления или внешней причины;
 - завершённый последовательный same-device/access-network AWG2 ↔ AWG3.1 A/B
   по контракту Task 4.5;
 - отдельный checksum/state/rollback-bound approval перед Task 3B application

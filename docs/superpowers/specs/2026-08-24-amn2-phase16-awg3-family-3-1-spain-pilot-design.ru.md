@@ -1,10 +1,34 @@
 /GO PHASE 16 — AWG3 FAMILY 3.1, SPAIN PREFLIGHT, CONTROLLED STAGE AND ONE PILOT
 
-ТЕКУЩАЯ РЕВИЗИЯ — PACKAGE 016, 2026-08-27
+## Актуальный контракт — согласование 2026-09-05
+
+Единственный актуальный execution status, очередь и правила повторных прогонов:
+[план Phase 16](../plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
+Ниже сохранены датированные основания; они не являются свежим upstream/server
+readback и не разрешают повторять completed/consumed операции.
+
+- Windows application traffic failure подтверждён, upstream root cause не
+  доказана. Новый exact-approved bounded test требует изменившегося официального
+  client/engine path или новой различающей гипотезы, а не повторения симптома.
+- Acceptance остаётся закрытой до Windows PASS, устранения причины quality
+  failure, стабильной проверки и полного Task 4.5. Численные пороги и длительность
+  согласуются до acceptance-прогона; этот docs-only GO их не устанавливает.
+- Strict A/B выполняется на существующем минимальном пилоте до Task 3B.
+  Создание нового peer для повторения уже выполненного Task 4 не требуется.
+  Application stage раньше пытались выполнять с STOP; интеграция не завершена.
+- Наш code fix требует TDD; upstream/environment correction требует
+  соответствующей проверки без обязательного собственного исправления протокола.
+- DNS compatibility gap генератора — отдельный local TDD follow-up перед
+  будущей выдачей, не разрешение менять существующий профиль или package 016.
+- AWG2, freshness, checksum/state/rollback approvals, секретность и запрет
+  general issuance сохранены. Restart/persistence и leak checks остаются
+  требованиями отдельно разрешённого integration/acceptance этапа.
+
+## Историческая ревизия — PACKAGE 016, 2026-08-27
 
 Approved local preparation: baseline `392cc339f7f6afaed0a0dc2a0a80139ca030f560`, local-fix receipt SHA256 `549b515ea50e7668f56f433772633a63c674aaba973876f978f0a2ea15f823de`. Изменяются только package/branch bindings и локальное evidence; scalar-exit и BOM-free stdin fixes сохраняются. Один targeted regression, одна materialization и один separate verifier. Package 015 immutable, transaction 006 consumed. Spain egress, remote write, stage/install, config/issuance и AWG2 changes запрещены. После локальной готовности нужен новый exact preflight approval; прежние approvals не переиспользуются. Подробный текущий scope и вертикальный статус находятся в плане Phase 16; требования ниже сохранены как исходный контракт.
 
-ТЕКУЩАЯ ACCEPTANCE BOUNDARY — 2026-08-30, route/counter evidence commit `bb266df`
+ИСТОРИЧЕСКАЯ ACCEPTANCE BOUNDARY — 2026-08-30, route/counter evidence commit `bb266df`
 
 - Minimal isolated AWG3.1 runtime и non-Windows connectivity подтверждены, но это не разрешает Task 3B application integration и не является acceptance.
 - Windows 11 / AmneziaVPN 5.0.1.5 проходит tunnel creation и handshake, но не application data plane; kill switch A/B результата не изменил. Это Windows upstream-class blocker, соответствующий по классу открытой официальной issue #3043, без утверждения окончательной root cause.
@@ -402,8 +426,9 @@ TASK 5 — REAL CLIENT ACCEPTANCE
 Acceptance gate закрыт текущими Windows data-plane и Task 4.5 quality
 blockers. Handshake, connectivity на одном клиенте или здоровые server metrics
 не заменяют client data-plane/performance acceptance. Повторное открытие gate
-требует bounded Windows retest после официального upstream fix/поддерживаемого
-client path, стабильного AWG3.1 quality retest и полного последовательного
+требует успешного bounded Windows retest на официально поддерживаемом client
+path по актуальному контракту выше, устранения причины quality failure,
+стабильного AWG3.1 quality retest по заранее согласованным критериям и полного последовательного
 same-device/access-network AWG2 ↔ AWG3.1 A/B. Task 3B application integration
 требует отдельного checksum/state/rollback-bound approval и не может быть
 предварительным обходом этих client gates.
