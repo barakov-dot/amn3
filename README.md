@@ -2,8 +2,14 @@
 
 Приватный штаб проекта для параллельного развития `amn2`, будущих VPN-продуктов и Local Amnezia Agent.
 
-Карта применимости навыков и статический аудит их перегрузки:
-[Skills проекта](docs/SKILLS_MAP.ru.md). Рекомендации не изменяют установленные skills.
+## Начать работу
+
+[Актуальный вход](docs/START_HERE.ru.md) → [паспорт проекта](docs/PROJECT_PASSPORT.ru.md)
+и [правила AGENTS.md](AGENTS.md). Текущий Phase 16 execution plan указан во входе;
+старые GO и «текущие» статусы внутри истории не являются командами к повторению.
+
+[Карта skills](docs/SKILLS_MAP.ru.md) описывает применимость навыков к этому проекту,
+не меняя личные skills и плагины. Другие проекты не входят в текущий scope.
 
 GitHub:
 
@@ -57,7 +63,9 @@ AMN3 хранит решения, статусы, upstream-анализ, impleme
 
 ## Правила безопасности
 
-Этот репозиторий не является production-кодом.
+Этот репозиторий не является основным production-приложением AMN2, но содержит
+операционные scripts, tests и package snapshots. Их запуск может менять систему
+и требует проверки scope/разрешений по [AGENTS.md](AGENTS.md).
 
 Код из внешних проектов не копируется без проверки лицензии.
 
@@ -74,15 +82,28 @@ Markdown-документы, README, спецификации, заметки и
 ## Структура
 
 ```text
+AGENTS.md
+docs/
+  START_HERE.ru.md
+  PROJECT_PASSPORT.ru.md
+  SKILLS_MAP.ru.md
+  superpowers/{specs,plans}/
 research/
   amn2/
   upstreams/
+scripts/
+  vps/
+tests/
+packaging/
 ideas/
 watch-notes/
 prototypes/
 ```
 
-`research/amn2/` - read-only inventory текущего production-направления `amn2` для проверки применимости идей из lab.
+`research/amn2/` - датированные inventory, решения и evidence по `amn2`; проверять дату и scope, не считать все записи текущим runtime-состоянием.
+
+`scripts/`, `tests/`, `packaging/` - инструменты, их проверки, контракты и
+версионированные пакеты. Наличие файла не разрешает его исполнение или deployment.
 
 `research/upstreams/` - карточки анализа внешних проектов.
 
@@ -92,7 +113,13 @@ prototypes/
 
 `prototypes/` - собственные эксперименты и проверки гипотез без копирования внешнего кода.
 
-## Phase 9 progress harness
+## Исторический Phase 9 progress harness
+
+Только для соответствующих задач Phase 9. Не запускать как обязательную проверку
+Phase 16, документационного пакета или нового входа в проект.
+
+<details>
+<summary>Сохранённые примеры Phase 9</summary>
 
 Перед очередной операторской командой Phase 9 можно прогонять локальный guard, чтобы не возвращаться в цикл `CONFIRM_HOLD_STATE` / `AWAIT_OPERATOR_EXACT_CMD` вместо реального product-work:
 
@@ -113,6 +140,8 @@ python scripts/phase9_progress_harness.py --require-product-diff
 ```powershell
 python scripts/phase9_progress_harness.py --repo-root worktrees/amn2-public-config-delivery-policy-contract --require-product-diff
 ```
+
+</details>
 
 ## Design specs и transfer gate
 
