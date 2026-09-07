@@ -9,6 +9,14 @@
 
 ## Contract clarification — 2026-09-05
 
+Follow-up 2026-09-07: the operator subsequently approved criteria v1; approval
+record commit is `e3091b28af6c2ccc0fd41d2ce12d07101696f65d`. The earlier
+NOT APPROVED statements below describe the pre-approval state and are preserved.
+Current criteria status is `CRITERIA_APPROVED_NOT_EXECUTED`; the methods annex
+is separately `METHOD_DRAFT_BLOCKED_NOT_EXECUTED`, with unconfirmed measurement
+coverage/endpoints/cap enforcement. Neither status authorizes live execution.
+Historical measurements and the operator's iPhone/A/B deferral are unchanged.
+
 The current execution status and rerun policy live only in the
 [Phase 16 plan](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 The dated evidence sections below are preserved as historical observations.

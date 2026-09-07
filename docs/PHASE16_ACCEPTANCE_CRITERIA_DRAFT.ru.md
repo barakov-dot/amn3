@@ -113,3 +113,113 @@ STOP: concurrent peer use, смена профиля/endpoint вне плана,
 
 Проверка этого документа: diff, ссылки и сохранение gates. Тесты, сборки,
 package verifiers и live-прогоны не нужны. Исторические receipts неизменны.
+
+## Методика m1 — локальная подготовка, не разрешение запуска
+
+Подготовлено 2026-09-07 по операторскому «приступай» после согласования v1.
+Статус методики: `METHOD_DRAFT_BLOCKED_NOT_EXECUTED`. Согласованные критерии
+выше неизменны; предложенные ниже методы и бюджеты НЕ согласованы автоматически.
+Это приложение к критериям, не второй execution plan и не готовый runner.
+
+### Проверенные возможности и границы
+
+- Локально через Get-Command обнаружены curl.exe, ping.exe, Resolve-DnsName,
+  Get-NetAdapter, Get-NetIPInterface, Get-NetAdapterStatistics и Get-NetRoute.
+  Проверялось только наличие команд, без их сетевого запуска. Версия, точность
+  таймеров, отмена и byte-limit enforcement этим не проверены.
+- Эти средства относятся к Windows-хосту. Их результаты нельзя выдавать за
+  измерения iPhone; Windows пока имеет незакрытый application-traffic blocker.
+  Устройство acceptance этим документом не выбрано и не подменено.
+- Для iPhone не подтверждён уже установленный способ получить исходные RTT
+  samples, ограниченный upload, DNS/DF evidence и принудительную отмену.
+  Импорт d7 и вторая сеть остаются отложенными; новых вопросов о них сейчас нет.
+- Прежние speedtest-скриншоты сохраняются как evidence своих прогонов, но
+  не заменяют sample export и ограничитель трафика. ICE timeout не равен loss.
+- Существующий phase16_spain_readonly_preflight_ssh_runner.ps1 имеет собственный
+  package/claim workflow. Это не готовый collector для окна качества; повторный
+  preflight, materialization или расходование claim ради metrics не нужны.
+
+### Контракт одного будущего окна
+
+Ни один пункт ниже не запускается до root-cause-bound correction и отдельного
+exact approval. T0 — согласованный оператором старт после проверки prerequisites;
+все вызовы и их отмена входят в 900 s, фоновые задачи после deadline запрещены.
+Нормальное завершение — 900 s; устойчивый отказ или общий аварийный cap — STOP.
+Завершение разрешённого числа объектов/проб заканчивает только соответствующую
+фазу, не всё окно. Попытка превысить body cap или общий deadline прекращает окно;
+допустимый транспортный cap ещё предстоит выбрать и обеспечить до live approval.
+Неполная длительность не получает stability PASS. Baseline и диагностический
+A/B не прячутся в этом окне: им нужны отдельные лимиты и разрешения.
+
+| Измерение | Предложенный конечный метод и лимит | Что препятствует готовности |
+| --- | --- | --- |
+| HTTPS | 3 fresh GET в T0, T0+450 s, T0+890 s; каждый <=5 s, body <=64 KiB, TLS verification, redirects/retries off | Утвердить точный HTTPS origin/path и проверяемый ожидаемый ответ; получать страницы из кэша недостаточно |
+| DNS | 5 однократных A-query в первые 120 s, каждый <=2 s; один метод и resolver path из профиля, без смены системного DNS | Выбрать 5 имён и способ отличить resolver query от локального кэша; без raw DNS output. Ограничение caller timeout без отмены запроса недостаточно |
+| Idle RTT/loss/jitter | Одна серия 120 IPv4 ICMP echo к одному literal IP; payload 32 B, timeout 1 s, пауза 200 ms после результата; <=150 s | ICMP endpoint/path заранее должен допускать пробы. Нет валидного ответа на setup — INCOMPLETE, а не 100% AWG loss; не переключаться на другой endpoint в том же окне |
+| Download | Последовательно не более 8 объектов по 8 MiB, без искусственного rate limit; общий phase timeout 60 s | Нужен endpoint, возвращающий точный размер, и проверенная отмена при превышении. Cloudflare UI сам по себе этого не гарантирует |
+| Upload | Последовательно не более 8 тел по 2 MiB, phase timeout 60 s; ответ каждого <=64 KiB; никаких пользовательских файлов | Нужен разрешённый точный sink и способ ограниченного тела в памяти без установки/создания файлов. Наличие curl.exe не доказывает готовность этой цепочки |
+| Loaded RTT | Только во время фактической передачи каждого направления: тот же ICMP path, payload 32 B, timeout 1 s; <=600 проб на направление, не чаще 1/100 ms, не более одной одновременно | Нужно >=30 успешных samples на направление. При раннем byte cap или быстрой передаче — INCOMPLETE; не увеличивать трафик и не добавлять retry автоматически |
+| MTU/size | Read-only MTU; 4 IPv4 ICMP payload sizes: 32, 548, 1172, 1252 B; по 3 DF-пробы, timeout 1 s, всего 12 и <=20 s | Для inner MTU 1280 это IPv4+ICMP размеры 60, 576, 1200, 1280 B. Тот же подтверждённый ICMP path; rate limiting/filtering не объявлять fragmentation. Это не IPv6 PMTU и не outer-path MTU |
+| Stability | Наблюдать один tunnel lifecycle и весь доступ в течение 900 s; использовать уже перечисленные пробы | Три GET не доказывают отсутствие всех перебоев >5 s. Нужен доступный журнал/наблюдатель достаточного разрешения; пока coverage gap, а не PASS |
+| Reconnect | Одна операторская пара disconnect/connect после нагрузок, например T0+720 s; monotonic timer от connect; <=5 fresh GET, общий deadline 5 s, без одновременных запросов, body <=64 KiB каждый | Согласовать доступный способ timestamp; плановый разрыв классифицировать отдельно. Это не автоматический retry других failed измерений |
+| Server metrics | Один SSH-сеанс; setup <=10 s внутри общего окна; легкие aggregate samples раз в 5 s, максимум 180; state snapshots start/end; stdout <=1 MiB | Exact checksum-bound read-only collector пока не подготовлен. Полный nft/Docker/netns dump каждые 5 s не нужен; peer/keys/endpoints/DNS не выводить |
+
+Порядок: idle и DNS в начале; download и upload последовательно после idle,
+до reconnect; HTTPS по указанным точкам; server observer и stability coverage
+параллельно внутри того же окна. Отсутствие действительной нагрузки не даёт
+loaded-latency samples. Нехватка времени/выборки не разрешает продлить окно.
+Системные таймеры должны быть monotonic; timestamps согласовать с сервером,
+не меняя часы. Server collection не использует сигнал/restart/config write.
+
+### Бюджет и расчёт результатов
+
+- Предложенный body budget: download <=64 MiB; upload <=16 MiB; суммарно
+  <=80 MiB. Все HTTPS response bodies вне download вместе <=1 MiB
+  (3 основных + до 5 reconnect + до 8 upload acknowledgements, по 64 KiB).
+  Общий HTTP application-body cap — 81 MiB, одна попытка на объект.
+- ICMP budget <=1332 echo requests: 120 idle + 1200 loaded + 12 size;
+  DNS <=5 логических query. Внутренние DNS retransmits должны быть учтены
+  выбранным методом; пять API-вызовов не являются гарантией пяти UDP-пакетов.
+- Эти числа НЕ являются wire-byte cap: TLS/HTTP headers, TCP retransmissions,
+  AWG overhead/junk/keepalive, DNS и SSH имеют дополнительный трафик.
+  Точный transport-byte bound и механизм принудительной остановки пока не
+  доказаны. Не выдавать 81 MiB за точный объём Spain egress и не писать approval
+  с таким обещанием. Browser/YouTube/Telegram фон в bounded load не включать.
+- Размеры — MiB = 1048576 B; throughput — decimal Mbps = payload_bytes * 8 /
+  elapsed_seconds / 1000000. Учитывать полное время серии одного направления,
+  включая установление соединения и межзапросные задержки; не выбирать peak.
+  Валидный throughput требует завершённых передач и подтверждённых размеров;
+  timeout/неполная передача не превращаются в успешный замер скорости.
+- RTT хранить как sequence/result/duration без адресов. p95 — nearest rank
+  ceil(0.95*N) отсортированных успешных samples; median — обычная медиана;
+  loss — timeout_count/sent_count при валидном probe path. Send error/cancel
+  учитывать отдельно, не выдавать за remote packet loss. Jitter — среднее
+  абсолютных разностей соседних успешных RTT; пропуски явно помечать.
+- Для относительного AWG2 сравнения нужны один endpoint/edge, устройство,
+  приложение, сеть и метод. Если edge/маршрут нельзя сопоставить — относительный
+  результат INCOMPLETE. ICMP loss характеризует этот ICMP path, не прямую долю
+  потерь внешнего AWG UDP; post-run interface delta не заменяет flow attribution.
+- При отсутствии достаточного stability observer, <100 успешных idle samples,
+  <30 loaded samples на направление или отсутствующем MTU/DNS evidence —
+  соответствующий gate INCOMPLETE. Независимый валидный FAIL сохраняется.
+
+### Admission: что ещё действительно требуется
+
+1. После снятия соответствующей отсрочки выбрать конкретное устройство и уже
+   доступный метод, закрывающий перечисленные coverage gaps. Нельзя автоматически
+   заменить iPhone Windows-хостом, установить приложение или написать runner.
+2. Согласовать endpoint manifest: HTTPS origin/path/expected response,
+   download URL/размер, upload URL/метод/тело/ответ, ICMP IP, DNS question set и
+   resolver path, server identity. Сейчас manifest не выбран: это blocker,
+   не предложение опросить произвольный публичный сервис. Ни одного endpoint
+   или upload sink в этой локальной работе не проверяли.
+3. Подтвердить enforceable time/data caps, отмену дочерних вызовов, отсутствие
+   внешнего fallback и безопасный normalized output. Если нужен новый helper,
+   получить отдельное local code GO с targeted TDD; текущая задача его не создаёт.
+4. Привязать runner/collector SHA, неизменный profile SHA, текущий state,
+   восстановление клиентского baseline и exact live approval. До этого — STOP.
+   Не просить live approval для методики, которая ещё не может исполнить cap.
+
+Самопроверка m1: все строки критериев имеют метод либо явно указанный coverage
+gap; runtime возможностей не заявлено. iPhone/A/B не возобновлены, Windows и
+root-cause gates не сняты; leaks/persistence/rollback остаются отдельной интеграцией.

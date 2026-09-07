@@ -109,9 +109,12 @@ live, stage/install, изменение конфигураций или push; iP
 - ⏳ Task 6 — closeout заблокирован.
 
 AWG2_UNTOUCHED; general issuance disabled. iPhone/A/B отложены, не отменены.
-Критерии acceptance v1 согласованы; следующий подготовительный шаг — выбрать
-методы и точные endpoint/time/data bindings без запуска. Live approval остаётся
-отдельным gate; iPhone/A/B пока не возобновляются.
+Критерии acceptance v1 согласованы. В том же документе подготовлено приложение
+«Методика m1»: `METHOD_DRAFT_BLOCKED_NOT_EXECUTED`. Предложены конечные time/body/
+probe budgets, но endpoint manifest, устройство/метод, stability coverage и
+transport-byte cap enforcement не подтверждены. Следующий gate — разрешить эти
+пробелы без подмены устройства/установки/автопрогона; точный live approval пока
+не готов. iPhone/A/B остаются отложенными; runner и collector не создавались.
 Push требует отдельного exact approval и в текущем GO запрещён.
 Рекомендация модели по запросу оператора: GPT-6 Astra / HIGH, один основной
 агент; это не утверждение о runtime effort и не разрешение live action.
