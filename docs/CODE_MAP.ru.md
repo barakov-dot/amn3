@@ -1,6 +1,6 @@
 # Карта кода AMN3 / VPS-OPS-LAB
 
-Дата: 2026-09-07. Source baseline: `a4a592636b648550fa9c98dc1f084db9690615d1`.
+Дата: 2026-09-08. Source baseline: `2d63b5572d8bca6aa6adc6dbfc6c043e6d6884d5`.
 Статическое чтение; runtime-тесты и operational scripts не запускались.
 [Архитектура](ARCHITECTURE.ru.md), [вход](START_HERE.ru.md), [правила](../AGENTS.md).
 
@@ -25,6 +25,8 @@
 | Временный forwarding/NAT | [pilot firewall](../scripts/vps/phase16_awg31_pilot_firewall.py): `render`, `baseline`, `apply_rules`, `rollback` | Helper с callbacks; live executor меняет nft rules. Не persistent firewall solution |
 | Checksum-bound клиентский кандидат | [client recovery](../scripts/vps/phase16_awg31_client_recovery.py): `parse_and_validate`, `render_candidate`, `create_candidate` | Создаёт новый секретный профиль с recovery-полями, исходный не перезаписывает. Это не доказанный Windows fix и не разрешение новой выдачи |
 | Нормализованные метрики и bounded process | [Windows measurement helper](../scripts/vps/phase16_windows_measurement_helper.ps1): `Get-Phase16RttSummary`, `Get-Phase16ThroughputSummary`, `Invoke-Phase16BoundedProcess` | PowerShell 7; import inert. Вызов process-функции запускает явно заданный executable и при лимите останавливает его; нет автоматических сетевых действий, profile reader или live approval |
+| HTTP/ICMP measurement adapters | [Тот же helper](../scripts/vps/phase16_windows_measurement_helper.ps1): `New-Phase16HttpRequest`, `Get-Phase16HttpSummary`, `Invoke-Phase16HttpMeasurement`, `Invoke-Phase16IcmpSample` | Import inert; построение metadata не равно запросу. Invoke с реальным transport/Ping вызывает трафик и требует точного approval; offline PASS не является live validation или полным runner |
+| DNS lifecycle: только модель | [phase16_dns_lifecycle.py](../scripts/vps/phase16_dns_lifecycle.py): `replay` | Символические события; без native API, DNS/сети и worker. DNS bridge STOP: модель не доказывает hard-wall 2000 ms или native callback safety |
 
 ## Связанные проверки — только при соответствующем изменении
 
@@ -32,7 +34,8 @@
 | --- | --- | --- |
 | DNS/render/prepare, pilot lifecycle и ownership | [minimal pilot tests](../tests/test_phase16_awg31_minimal_pilot.py) | Реальный Qt import, клиентский performance и live persistence |
 | Recovery-кандидат, hash/exclusive-write | [client recovery tests](../tests/test_phase16_awg31_client_recovery.py) | Windows data-plane acceptance |
-| Расчёт метрик, pipe limits и отмена процесса | [measurement tests](../tests/test_phase16_windows_measurement_helper.py) | Offline fixtures, не реальный curl/ping/SSH, не HTTP/TLS success, не wire-byte cap и не исправление Windows VPN |
+| Расчёт метрик, HTTP/ICMP, pipe limits и отмена | [measurement tests](../tests/test_phase16_windows_measurement_helper.py) | Offline fixtures, не реальный curl/ping/SSH, не HTTP/TLS success, не wire-byte cap и не исправление Windows VPN |
+| DNS lifecycle ordering | [DNS model tests](../tests/test_phase16_dns_lifecycle.py) | Только чистая модель; не native lifetime, resolver binding или доказательство готовности DNS bridge |
 | Firewall batch, equality, state fence и rollback | [pilot firewall tests](../tests/test_phase16_awg31_pilot_firewall.py) | Readback правил на конкретном target |
 | Package/preflight/stage-support contracts | [AWG31 tooling tests](../tests/test_phase16_awg31_tooling.py) | Общий live PASS; файл включает разные классы проверок и исторические package bindings |
 | Coordinator milestones и failure locus | [failure locus tests](../tests/test_phase16_controlled_stage_failure_locus.py) | Успешный live rollback всей интеграции |

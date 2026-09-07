@@ -224,6 +224,18 @@ loaded-latency samples. Нехватка времени/выборки не ра
 gap; runtime возможностей не заявлено. iPhone/A/B не возобновлены, Windows и
 root-cause gates не сняты; leaks/persistence/rollback остаются отдельной интеграцией.
 
+## История реализации методики — не текущая очередь
+
+Срез 2026-09-08: HTTP/ICMP — только offline evidence; DNS — чистая модель.
+Native DNS bridge STOP после [официального чтения](#official-dns-source-check-2026-09-07);
+общий hard-wall 2000 ms не доказан. Полный live runner не готов.
+Текущая очередь находится только в [плане Phase 16](superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
+Критерии выше не изменены; старые next-step/GO ниже не разрешают новые действия
+и не возобновляют остановленную DNS-ветку.
+
+<details>
+<summary>Датированные receipts локальной методики и source checks</summary>
+
 ### Реализованная локальная часть m1 — 2026-09-07
 
 Approval: `/GO PHASE16 MINIMAL_WINDOWS_MEASUREMENT_HELPER LOCAL_CODE_ONLY OFFLINE_TDD ONE_TARGETED_SUITE NO_NETWORK NO_REAL_CONFIG_READ NO_INSTALL NO_LIVE_ACTION NO_PUSH AWG2_UNTOUCHED`.
@@ -635,3 +647,5 @@ AWG3.1 traffic FAIL. DNS gate остаётся обязательным и не�
 источников, согласованность и отсутствие секретов в добавлениях. Код/тесты,
 исторические receipts, protected profiles, AWG2/package016 не менялись.
 NO_TEST_RUN; NO_LIVE_ACTION; NO_PUSH; stage/install/issuance не выполнялись.
+
+</details>

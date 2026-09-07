@@ -1,5 +1,74 @@
 # Карта skills и аудит применимости
 
+Дата текущего решения: 2026-09-08.
+Статус: `PROJECT_DOCS_AND_PERSONAL_EXPLICIT_ONLY_APPLIED`.
+Оператор согласовал пункты 1–2: проектную документацию и invocation metadata
+двух личных skills. Это отдельное разрешение, не расширение scope обычных
+задач AMN3. Другие проекты, память, SKILL.md и Superpowers не меняются.
+
+## Применённая оптимизация
+
+- Текущие gates вынесены в начало [плана Phase 16](superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md);
+  [acceptance](PHASE16_ACCEPTANCE_CRITERIA_DRAFT.ru.md) отделён от истории
+  реализации методики. Пороги, receipts и прежние ссылки сохранены.
+- [Карта кода](CODE_MAP.ru.md) различает HTTP/ICMP side effects и чистую DNS-модель.
+  Новые агенты/AGENTS/дублирующие skills не создавались; проектный AGENTS сохранён.
+- В `C:/Users/SooL/.codex/skills/sdp-firebird/agents/openai.yaml`
+  `policy.allow_implicit_invocation` изменено с `true` на `false`.
+- В `C:/Users/SooL/.codex/skills/winui-app/agents/openai.yaml` добавлена
+  та же policy со значением `false`. Остальные поля и файлы обеих папок сохранены.
+- По [официальному контракту Skills](https://learn.chatgpt.com/docs/build-skills)
+  явные вызовы `$sdp-firebird` / `$winui-app` остаются доступны.
+  Обнаружение после перечитывания каталога и экономия времени/токенов пока
+  НЕ подтверждены; текущая задача может сохранять ранее загруженный каталог.
+
+Откат metadata: вернуть `true` для SDP; удалить добавленный блок `policy`
+у WinUI. Не переписывать UI/default_prompt и не удалять skills.
+Настройки личные, влияют не только на AMN3; в Git — описание решения,
+не копии личных skills. Отсутствие PyYAML в bundled Python заблокировало
+`quick_validate.py`; это ограничение валидатора, не доказанный дефект skill.
+Ничего не устанавливалось. Exact metadata readback PASS для обоих файлов;
+по SHA256 изменились только два `agents/openai.yaml` в обеих папках.
+Проверены 71 локальная ссылка/якорь в четырёх затронутых документах,
+diff/whitespace и отсутствие secret markers в добавлениях. Прежние тексты
+плана/receipts/аудита сохранены по сравнению с HEAD; пороги acceptance неизменны.
+Это статическая проверка, не полноценный YAML-validator или runtime discovery.
+
+## Следующий этап: Superpowers — предложение, НЕ применено
+
+1. Read-only проверить штатный обратимый способ отключения/восстановления
+   в установленном Codex, зависимости и область действия. Кэш не редактировать.
+2. Показать exact target/setting, before-state и rollback оператору; получить
+   отдельное согласие на ограниченный пилот без Superpowers. Согласие на два
+   личных skills само по себе не отключает плагин.
+3. После reload — одна обычная локальная docs-only задача: проверить отсутствие
+   ненужных повторных согласований/прогонов и сохранность safeguards в AGENTS.
+   Не обещать ускорение до измерения; при ухудшении восстановить before-state.
+
+Кандидат — пилот отключения пакета целиком через подтверждённый штатный механизм.
+Не редактировать vendor skills, не удалять пакет, не создавать собственный дубль
+Superpowers и не ослаблять live/push approvals или TDD. Изменение может затронуть
+другие задачи, поэтому не выполняется попутно.
+
+Read-only подготовка 2026-09-08: локальный manifest — Superpowers 6.3.0;
+в `C:/Users/SooL/.codex/config.toml` секция
+`[plugins."superpowers@openai-curated"]`, `enabled = true`.
+Каталог плагинов подтвердил installed/user-enabled; объявленных app dependencies
+и unresolved apps нет. Это не доказывает отсутствие внутренних workflow-связей.
+В установленном CLI `plugin --help` есть add/list/marketplace/remove, но нет
+отдельного enable/disable. `remove` удаляет кэш и для обратимого пилота не выбран.
+[Официальный config reference](https://learn.chatgpt.com/docs/config-file/config-reference)
+описывает plugin MCP server enabled, но не устанавливает здесь контракт
+переключения всего пакета. Наличие локального `enabled` само по себе не доказывает
+способ reload/sync desktop state. Перед пилотом нужен штатный переключатель
+в карточке плагина или подтверждение соответствующего контракта. Настройки и
+plugin cache не менялись; готовое разрешение на отключение пока не предлагается.
+
+Справочная [карта применимости](#карта-применимости-к-amn3amn2) сохранена ниже.
+
+<details>
+<summary>Исторический аудит 2026-09-07 — прежний scope, не текущие команды</summary>
+
 Дата: 2026-09-07. Статус: `STATIC_AUDIT_COMPLETE_OPTIMIZATION_NOT_APPLIED`.
 Область: только текущий AMN3/VPS-OPS-LAB и применимость доступных skills к его задачам.
 Основание: просьба оператора проверить перегрузку личных skills и приступить к анализу.
@@ -104,3 +173,5 @@ Safety-инварианты сохраняются: approvals на live/external
 
 Обновлять карту после изменения применимых skills/их триггеров или выявленного
 конфликта. Не повторять полный аудит на каждом ходе.
+
+</details>

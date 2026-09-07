@@ -1,5 +1,74 @@
 /GO PHASE 16 — AWG3 FAMILY 3.1, SPAIN PREFLIGHT, CONTROLLED STAGE AND ONE PILOT
 
+## Актуальный порядок и gates — 2026-09-08
+
+Единственный текущий execution status Phase 16. Baseline документационной правки:
+`2d63b5572d8bca6aa6adc6dbfc6c043e6d6884d5`, не deployed revision.
+Датированные receipts ниже — история, не разрешение повторять GO/approvals.
+
+### Границы доказательств
+
+- Android/iPhone connectivity и iPhone reconnect подтверждены исторически.
+  Windows: adapter/routes присутствовали, прикладной трафик FAIL; гипотеза
+  отсутствующих маршрутов отвергнута. Совпадение с issue не доказывает root cause.
+- Quality FAIL; strict Spain AWG2/AWG3.1 A/B неполон и отложен оператором.
+  Не запрашивать повторно iPhone/две сети до возврата оператора к этому этапу.
+  ICE timeout и незавершённый speedtest не считать измеренным packet loss.
+- [Критерии v1](../../PHASE16_ACCEPTANCE_CRITERIA_DRAFT.ru.md):
+  `CRITERIA_APPROVED_NOT_EXECUTED`. Методика m1 —
+  `METHOD_DRAFT_BLOCKED_NOT_EXECUTED`; согласование чисел не равно live approval.
+- HTTP/ICMP helper — только offline evidence; DNS lifecycle — чистая модель,
+  не native adapter. [DNS source check](../../PHASE16_ACCEPTANCE_CRITERIA_DRAFT.ru.md#official-dns-source-check-2026-09-07):
+  `OFFICIAL_SOURCE_CHECK_COMPLETE_DNS_BRIDGE_STOP`. Общий hard-wall 2000 ms
+  не доказан. Не создавать bridge/worker/новую модель. Критерии не ослаблены.
+- [Локальный DNS-fix генератора](../../../research/amn2/phase16-local-dns-generator-two-ipv4-compatibility-2026-09-05.md)
+  завершён; profiles/package016 не изменены. Это не исправление Windows/quality
+  и не DNS measurement bridge. Развёртывание/реальная генерация требуют approval.
+- Minimal runtime не завершает application integration. Прежние stage-попытки
+  STOP; отсутствие ресурсов в recovery receipt не доказывает успешный rollback.
+
+### TASK_PLAN_BY_CRITICALITY
+
+1. **P0 — quality/A/B, ОТЛОЖЕНО.** После возврата оператора: подтвердить импорт
+   существующего d7 и физическую сеть, метод/лимиты/outcomes; затем exact approval
+   на последовательный same-device/same-app/same-access-network Spain A/B.
+   Новая выдача и автоматический повтор не разрешены.
+2. **P1 — Windows, BLOCKED.** Следующий bounded test только при значимом изменении
+   официального клиента/engine ИЛИ новой проверяемой гипотезе: записать отличие
+   от закрытых диагностик и исходы, получить live approval. Повтор kill-switch A/B,
+   поиска отсутствующего адаптера или общего IPv4 HTTPS без новой гипотезы не нужен.
+   Upstream receipts действуют на дату чтения, не заменяют новый readback.
+3. **P1 — DNS measurement, STOP.** Пересмотр методики — только отдельный scope
+   при реальной необходимости. Не наращивать tooling ради открытого gate.
+   Полный runner/endpoint manifest/stability/server coverage не готовы.
+4. **P2 — integration, BLOCKED предыдущими gates.** После клиентских и quality
+   доказательств: checksum/state/rollback-bound approval, проверка persistence,
+   restart policy, leaks и границ отката. Затем Task 5 и Task 6.
+
+### Текущий вертикальный статус
+
+- ✅ Task 0 — baseline.
+- ✅ Task 1 — package016/local tooling; DNS measurement bridge STOP.
+- ✅ Task 2 — исторические Spain gates/diagnostics, не свежий preflight.
+- ✅ Task 3A — minimal runtime по историческим evidence.
+- ⏳ Task 3B — application integration не завершена.
+- ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
+- ✅ Task 4B — Android connectivity, не performance acceptance.
+- ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.
+- ❌ Task 4.5 — quality FAIL; strict A/B неполон и отложен.
+- ⏳ Task 5 — acceptance заблокирован.
+- ⏳ Task 6 — closeout заблокирован.
+
+AWG2_UNTOUCHED; package016 immutable; general issuance disabled.
+Текущий scope — локальная оптимизация документации, без live/stage/install/push.
+Проверки и Git — по [AGENTS.md](../../../AGENTS.md): docs-only без runtime-тестов;
+для code fix — targeted RED/GREEN; ошибка инструмента = UNKNOWN.
+Детали выполненного читать адресно в истории ниже и в
+[receipts методики](../../PHASE16_ACCEPTANCE_CRITERIA_DRAFT.ru.md#история-реализации-методики--не-текущая-очередь).
+
+<details>
+<summary>История execution status до 2026-09-08 — не текущие команды</summary>
+
 ## Актуальный порядок и gates — 2026-09-05, дополнение 2026-09-08
 
 Это единственный актуальный execution status Phase 16. Датированные разделы
@@ -176,6 +245,8 @@ gate — один точный read-only official Microsoft/SDK source check э�
 и не повторять Windows live. Реализация и внешнее чтение требуют своих разрешений.
 Рекомендация модели по запросу оператора: GPT-6 Astra / HIGH, один основной
 агент; это не утверждение о runtime effort и не разрешение live action.
+
+</details>
 
 ## Исторический BOUNDED LOCAL GO — PACKAGE 016, 2026-08-27 (завершён)
 
