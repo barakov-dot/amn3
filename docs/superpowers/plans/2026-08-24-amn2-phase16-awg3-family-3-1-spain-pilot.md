@@ -149,6 +149,14 @@ series/transport budget и server/stability observers ещё не готовы.
 не менялись/не запускались. Следующий gate — отдельный local GO на offline
 lifecycle/interop работу. Без проверенного containment позднего callback и
 resolver binding live DNS не разрешать; worker/фоновые задачи не добавлять попутно.
+Последующий offline lifecycle GO выполнен в отдельной чистой Python-модели:
+символические cancel/completion/free/cleanup события, без native API, сети,
+worker или изменения PowerShell helper. Статус
+`LIFECYCLE_MODEL_OFFLINE_VERIFIED_NATIVE_ADAPTER_NOT_IMPLEMENTED`; evidence —
+раздел «Offline DNS lifecycle model d1» документа критериев. Следующий отдельный
+gate — обоснование native bridge/containment и resolver binding, не повтор
+Windows live и не ещё один слой модели. Реальный DNS-адаптер не реализован;
+acceptance, отсрочка iPhone/A/B и AWG2_UNTOUCHED остаются неизменными.
 Рекомендация модели по запросу оператора: GPT-6 Astra / HIGH, один основной
 агент; это не утверждение о runtime effort и не разрешение live action.
 

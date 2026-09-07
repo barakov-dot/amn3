@@ -461,3 +461,54 @@ callback, отсутствие completion, ровно одно освобожд�
 resolver-binding evidence; live и дополнительные процессы требуют своих approvals.
 В этом ходе проверены только readback, diff/whitespace, ссылки и согласованность;
 код, tests, runtime и прежние receipts не изменены. AWG2_UNTOUCHED; NO_PUSH.
+
+### Offline DNS lifecycle model d1 — 2026-09-07
+
+Основание: операторское «приступай» после предложения offline TDD lifecycle,
+без native DNS-вызовов и новых worker/process. Source baseline:
+`0dcc82316b1f7aa7cabb4f6fd82e8fa7042406e6`. Статус:
+`LIFECYCLE_MODEL_OFFLINE_VERIFIED_NATIVE_ADAPTER_NOT_IMPLEMENTED`.
+
+Добавлена отдельная чистая [Python-модель](../scripts/vps/phase16_dns_lifecycle.py)
+и [целевые тесты](../tests/test_phase16_dns_lifecycle.py). Она не подключена к
+PowerShell helper: вход — до 64 нормализованных событий с виртуальным временем
+0–60000 ms; выход — решения, а не исполнение действий. Поле `model_only=true`
+и отдельная schema отличают trace от native measurement; `effects` и
+`stop_required` существуют только в модели. Данные ответа — заранее заданные
+счётчики, а не DNS-records. Raw/неизвестные поля и неверный порядок отвергаются
+фиксированной ошибкой без повторения входа. Выход ограничен формой <4 KiB.
+
+Проверены sync/pending, callback до возврата API, оба порядка cancel/completion,
+отложенная отмена во время API-вызова, отсутствие completion, границы 1800/2000 ms,
+ошибки/пустой ответ/лимит записей и однократные решения об освобождении.
+Сигнал результата не равен выходу callback; возврат отмены не равен completion.
+Для освобождения требуются завершение исходного API, выход callback при pending
+и возврат уже начатого вызова отмены. Success не публикуется без cleanup ACK.
+Поздний ответ не повышает canceled; поздний cleanup не снимает sticky STOP.
+События с одинаковым временем обрабатываются в заданном порядке: это проверка
+сценариев, не доказательство синхронизации реальных OS threads.
+Deadline наблюдается только на переданных событиях: без tick на 1800 ms
+просроченная отмена принимается при следующем событии, без заднего изменения
+времени. Если это событие уже содержит результат, native cancel intent не нужен,
+но outcome остаётся canceled. Такая trace не доказывает своевременную отмену.
+
+TDD: исходный RED отсутствующей модели, focused GREEN. Дополнительный RED
+воспроизвёл преждевременное решение free_context, когда callback вышел, а вызов
+отмены ещё выполнялся; добавлено ожидание cancel_return, затем focused GREEN.
+Read-only ревью выявило несогласованный deadline_exceeded до dispatch для
+поздних cancel/invalid_input; отдельный RED подтвердил его, общий time guard
+исправлен. Native API и существующий набор HTTP/ICMP не затронуты.
+Один итоговый целевой набор:
+`python -B -m unittest -v tests.test_phase16_dns_lifecycle` —
+**16 tests PASS, 0.004 s, exit 0**. Другие suites не запускались; прежние
+HTTP/ICMP результаты не пересчитывались. После тестов — readback, проверка
+diff/whitespace, новых локальных ссылок и отсутствия секретов в изменениях.
+
+Ограничения: нет native bridge, ABI/layout, resolver/interface admission,
+проверки FQDN/CNAME, обхода native records или реального управления памятью.
+Виртуальные дедлайны не гарантируют wall-clock containment. Callback-exit и
+cleanup ACK заданы тестом и требуют самостоятельного доказательства в bridge.
+Модель позднего cleanup не разрешает фоновую дочистку в приложении.
+Следующий отдельный gate — обосновать native bridge/containment и binding;
+новые процессы, interop и live DNS этим GO не разрешены. Windows/quality gates
+не сняты; iPhone/A/B отложены. AWG2/package016/stage/install/push не затронуты.
