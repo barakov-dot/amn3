@@ -27,6 +27,45 @@ def literal(value):
     return "'" + str(value).replace("'", "''") + "'"
 
 
+# Only Ping is replaced. Tasks/tokens/timers and adapter state handling are real.
+# Never constructs a real Ping or opens a socket.
+ICMP_FAKE = """
+$script:pingCalls=0; $script:pingCreated=0; $script:pingDisposed=0
+$script:pingMode='reply'; $script:pingStatus=[Net.NetworkInformation.IPStatus]::Success
+$script:pingRtt=12; $script:binding=$null; $script:lastToken=$null
+function New-Phase16PingClient {
+    $script:pingCreated++
+    $client=[pscustomobject]@{}
+    $client | Add-Member ScriptMethod SendPingAsync {
+        param($ip,$timeout,$buffer,$options,$token)
+        $script:pingCalls++
+        $script:lastToken=$token
+        $script:binding=@{literal_ipv4=($ip -is [Net.IPAddress] -and
+          $ip.AddressFamily -eq [Net.Sockets.AddressFamily]::InterNetwork);
+          timeout_ms=$timeout.TotalMilliseconds; payload_bytes=$buffer.Length;
+          binary=($buffer -is [byte[]]); df=$options.DontFragment; ttl=$options.Ttl;
+          cancelable=$token.CanBeCanceled}
+        switch($script:pingMode) {
+            'delay' { return [Threading.Tasks.Task]::Delay(30000,$token) }
+            'stuck' { return [Threading.Tasks.TaskCompletionSource[object]]::new().Task }
+            'throw' { throw 'secret-fixture' }
+            'fault' { return [Threading.Tasks.Task]::FromException[object]([Exception]::new('secret-fixture')) }
+            'native_timeout' {
+                # Simulate send/return overhead in addition to the requested wait.
+                [Threading.Thread]::Sleep([int]$timeout.TotalMilliseconds + 10)
+                $script:pingStatus=[Net.NetworkInformation.IPStatus]::TimedOut
+            }
+        }
+        return [Threading.Tasks.Task]::FromResult[object]([pscustomobject]@{
+          Status=$script:pingStatus; RoundtripTime=$script:pingRtt;
+          Address='secret-fixture'; Buffer=[byte[]](1,2); Options=$options})
+    }
+    $client | Add-Member ScriptMethod Dispose { $script:pingDisposed++ }
+    return $client
+}
+"""
+
+
 class WindowsMeasurementTest(unittest.TestCase):
     def run_ps(self, body):
         self.assertTrue(HELPER.is_file(), "measurement helper not implemented")
@@ -389,6 +428,111 @@ class WindowsMeasurementTest(unittest.TestCase):
         for row in got[1:]:
             self.assertEqual(row["readiness"], "INCOMPLETE")
             self.assertIsNone(row["mbps"])
+
+
+    def icmp(self, setup="", arguments=""):
+        return self.run_ps(
+            ICMP_FAKE + setup +
+            "; $r=Invoke-Phase16IcmpSample -Address '198.51.100.8' -Sequence 1 " + arguments +
+            "; @{result=$r;calls=$script:pingCalls;created=$script:pingCreated;"
+            "disposed=$script:pingDisposed;binding=$script:binding;"
+            "token_canceled=($null -ne $script:lastToken -and $script:lastToken.IsCancellationRequested)}"
+            " | ConvertTo-Json -Depth 5"
+        )
+
+    def test_icmp_success_preserves_rtt_and_binds_literal_ipv4_df_and_cap(self):
+        for payload, df in [(32, False), (1252, True)]:
+            df_ps = "$true" if df else "$false"
+            got = self.icmp(arguments=f"-PayloadBytes {payload} -DontFragment {df_ps}")
+            self.assertEqual(got["result"]["sample"], dict(sequence=1, status="success", rtt_ms=12))
+            self.assertEqual(got["calls"], 1)
+            self.assertEqual(got["disposed"], 1)
+            self.assertTrue(got["result"]["cleanup_confirmed"])
+            self.assertEqual(got["binding"], dict(literal_ipv4=True, timeout_ms=800,
+                             payload_bytes=payload, binary=True, df=df, ttl=64, cancelable=True))
+            self.assertNotIn("198.51.100.8", json.dumps(got))
+            self.assertNotIn("secret-fixture", json.dumps(got))
+
+    def test_icmp_reply_failures_do_not_become_success_or_local_error_loss(self):
+        for status, want, outcome in [
+            ("TimedOut", "timeout", "timeout"),
+            ("DestinationHostUnreachable", "send_error", "icmp_error"),
+            ("PacketTooBig", "send_error", "packet_too_big"),
+        ]:
+            got = self.icmp(f"$script:pingStatus=[Net.NetworkInformation.IPStatus]::{status}")
+            self.assertEqual(got["result"]["sample"], dict(sequence=1, status=want, rtt_ms=None))
+            self.assertEqual(got["result"]["outcome"], outcome)
+            self.assertEqual(got["calls"], 1)
+            self.assertTrue(got["result"]["cleanup_confirmed"])
+
+    def test_icmp_native_timeout_has_return_margin_before_external_cancel(self):
+        got = self.icmp("$script:pingMode='native_timeout'")
+        self.assertEqual(got["result"]["sample"]["status"], "timeout")
+        self.assertEqual(got["result"]["outcome"], "timeout")
+        self.assertEqual(got["result"]["reply_timeout_ms"], 800)
+        self.assertTrue(got["result"]["cleanup_confirmed"])
+
+    def test_icmp_invalid_arguments_never_create_ping(self):
+        got = self.run_ps(ICMP_FAKE + """
+            $cases=@(@{Address='hostname.invalid'},@{Address='::1'},@{Address='127.1'},
+              @{Address='198.51.100.999'},@{Address='198.51.100.08'},@{Sequence=0},
+              @{PayloadBytes=1253},@{PayloadBytes=-1},@{TimeoutMs=1001},
+              @{TimeoutMs=100},@{DontFragment='true'},@{CancellationToken='bad'})
+            $results=@(foreach($c in $cases) {
+              $p=@{Address='198.51.100.8';Sequence=1}
+              foreach($key in $c.Keys) { $p[$key]=$c[$key] }
+              Invoke-Phase16IcmpSample @p
+            }); @{results=$results;created=$script:pingCreated} | ConvertTo-Json -Depth 5
+        """)
+        self.assertEqual(got["created"], 0)
+        for row in got["results"]:
+            self.assertEqual(row["outcome"], "invalid_request")
+            self.assertIsNone(row["sample"])
+
+    def test_icmp_caller_cancel_before_start_and_during_wait_is_not_timeout(self):
+        early = self.icmp("$c=[Threading.CancellationTokenSource]::new();$c.Cancel()",
+                          "-CancellationToken $c.Token")
+        self.assertEqual(early["created"], 0)
+        self.assertEqual(early["result"]["sample"]["status"], "canceled")
+        during = self.icmp(
+            "$script:pingMode='delay';$c=[Threading.CancellationTokenSource]::new();$c.CancelAfter(50)",
+            "-CancellationToken $c.Token",
+        )
+        self.assertEqual(during["result"]["sample"]["status"], "canceled")
+        self.assertTrue(during["result"]["cleanup_confirmed"])
+        self.assertEqual(during["disposed"], 1)
+        self.assertLess(during["result"]["elapsed_ms"], 1000)
+
+    def test_icmp_work_deadline_cancels_and_unconfirmed_cleanup_blocks_sample(self):
+        got = self.icmp("$script:pingMode='delay'", "-TimeoutMs 300")
+        self.assertEqual(got["result"]["sample"]["status"], "canceled")
+        self.assertEqual(got["result"]["outcome"], "deadline_canceled")
+        self.assertTrue(got["token_canceled"])
+        self.assertTrue(got["result"]["cleanup_confirmed"])
+        stuck = self.icmp("$script:pingMode='stuck'", "-TimeoutMs 300")
+        self.assertEqual(stuck["result"]["outcome"], "cleanup_unconfirmed")
+        self.assertFalse(stuck["result"]["cleanup_confirmed"])
+        self.assertNotEqual(stuck["result"]["sample"]["status"], "success")
+        self.assertLess(stuck["result"]["elapsed_ms"], 1000)
+
+    def test_icmp_fault_and_bad_rtt_are_normalized_without_raw_exception(self):
+        for setup in ("$script:pingMode='throw'", "$script:pingMode='fault'",
+                      "$script:pingRtt=-1", "$script:pingRtt=[double]::NaN", "$script:pingRtt=1001"):
+            got = self.icmp(setup)
+            self.assertEqual(got["result"]["sample"]["status"], "send_error")
+            self.assertIsNone(got["result"]["sample"]["rtt_ms"])
+            self.assertEqual(got["disposed"], 1)
+            self.assertNotIn("secret-fixture", json.dumps(got))
+
+    def test_icmp_sample_feeds_existing_summary_without_automatic_path_validation(self):
+        got = self.run_ps(ICMP_FAKE + """
+            $r=Invoke-Phase16IcmpSample -Address '198.51.100.8' -Sequence 1
+            Get-Phase16RttSummary -Samples @($r.sample) | ConvertTo-Json
+        """)
+        self.assertEqual(got["success_count"], 1)
+        self.assertEqual(got["median_ms"], 12)
+        self.assertEqual(got["readiness"], "INCOMPLETE")
+        self.assertIsNone(got["loss_percent"])
 
 
 if __name__ == "__main__":

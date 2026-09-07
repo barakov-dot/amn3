@@ -2,6 +2,106 @@
 # No default endpoint, configuration reader or automatic live entrypoint exists.
 # A future caller must separately authorize any process it asks to execute.
 
+function New-Phase16PingClient {
+    # Isolated platform boundary; constructing the client does not send a probe.
+    return [Net.NetworkInformation.Ping]::new()
+}
+
+function Invoke-Phase16IcmpSample {
+    # ONE explicit IPv4 probe, no DNS, default target, retry or series runner.
+    # Future live invocation requires exact approval and a validated probe path.
+    # TimeoutMs includes 100ms API-return margin + 100ms cleanup reserve.
+    # The shorter actual reply timeout is explicit in the normalized result.
+    param($Address, $Sequence, $PayloadBytes = 32, $DontFragment = $false,
+          $TimeoutMs = 1000, $CancellationToken = [Threading.CancellationToken]::None)
+    $result = [ordered]@{
+        schema = 'amn2.phase16.icmp-sample.v1'; outcome = 'invalid_request'; sample = $null
+        elapsed_ms = 0L; cleanup_confirmed = $true; deadline_exceeded = $false
+        reply_timeout_ms = $null
+    }
+    foreach ($value in @($Sequence, $PayloadBytes, $TimeoutMs)) {
+        if (-not (Test-Phase16MeasurementNumber $value) -or [Math]::Floor($value) -ne $value) { return $result }
+    }
+    $ip = $null
+    if ($Address -isnot [string] -or $Address.Length -gt 15 -or
+        -not [Net.IPAddress]::TryParse($Address, [ref]$ip) -or
+        $ip.AddressFamily -ne [Net.Sockets.AddressFamily]::InterNetwork -or
+        $ip.ToString() -cne $Address -or $Sequence -lt 1 -or $Sequence -gt 10000 -or
+        $PayloadBytes -lt 1 -or $PayloadBytes -gt 1252 -or $DontFragment -isnot [bool] -or
+        $TimeoutMs -lt 200 -or $TimeoutMs -gt 1000 -or
+        $CancellationToken -isnot [Threading.CancellationToken]) { return $result }
+    $result.sample = [pscustomobject]@{ sequence = $Sequence; status = 'send_error'; rtt_ms = $null }
+    if ($CancellationToken.IsCancellationRequested) {
+        $result.sample.status = 'canceled'; $result.outcome = 'caller_canceled'; return $result
+    }
+    $clock = [Diagnostics.Stopwatch]::StartNew()
+    $ping = $null; $task = $null; $cancel = $null
+    $workDeadline = $TimeoutMs - 100
+    $result.reply_timeout_ms = [Math]::Max(1, $TimeoutMs - 200)
+    $result.outcome = 'send_error'
+    try {
+        $cancel = [Threading.CancellationTokenSource]::CreateLinkedTokenSource($CancellationToken)
+        $ping = New-Phase16PingClient
+        if ($clock.ElapsedMilliseconds -lt $workDeadline -and -not $cancel.IsCancellationRequested) {
+            $options = [Net.NetworkInformation.PingOptions]::new(64, $DontFragment)
+            $task = $ping.SendPingAsync($ip, [TimeSpan]::FromMilliseconds($result.reply_timeout_ms),
+                                       [byte[]]::new($PayloadBytes), $options, $cancel.Token)
+            if ($task -isnot [Threading.Tasks.Task]) { throw 'invalid_ping_task' }
+            while (-not $task.IsCompleted -and $clock.ElapsedMilliseconds -lt $workDeadline -and
+                   -not $cancel.IsCancellationRequested) { [Threading.Thread]::Sleep(2) }
+        }
+        if ($cancel.IsCancellationRequested -or $clock.ElapsedMilliseconds -ge $workDeadline) {
+            $result.sample.status = 'canceled'
+            $result.outcome = if ($CancellationToken.IsCancellationRequested) { 'caller_canceled' } else { 'deadline_canceled' }
+            $cancel.Cancel()
+        } elseif ($task.IsCanceled) {
+            $result.sample.status = 'canceled'; $result.outcome = 'canceled'
+        } else {
+            # GetResult only after completion; exceptions are normalized below.
+            $reply = $task.GetAwaiter().GetResult()
+            if ($reply.Status -eq [Net.NetworkInformation.IPStatus]::Success) {
+                if (-not (Test-Phase16MeasurementNumber $reply.RoundtripTime) -or
+                    $reply.RoundtripTime -lt 0 -or $reply.RoundtripTime -gt $result.reply_timeout_ms -or
+                    [Math]::Floor($reply.RoundtripTime) -ne $reply.RoundtripTime) { throw 'invalid_ping_reply' }
+                $result.sample.status = 'success'; $result.sample.rtt_ms = $reply.RoundtripTime
+                $result.outcome = 'success'
+            } elseif ($reply.Status -eq [Net.NetworkInformation.IPStatus]::TimedOut) {
+                $result.sample.status = 'timeout'; $result.outcome = 'timeout'
+            } elseif ($reply.Status -eq [Net.NetworkInformation.IPStatus]::PacketTooBig) {
+                $result.outcome = 'packet_too_big'
+            } else { $result.outcome = 'icmp_error' }
+        }
+    } catch {
+        # Never include native exception, reply address/buffer or target in output.
+        $result.sample.status = 'send_error'; $result.sample.rtt_ms = $null
+        $result.outcome = 'send_error'
+    } finally {
+        try {
+            if ($null -ne $task -and -not $task.IsCompleted) {
+                $cancel.Cancel()
+                while (-not $task.IsCompleted -and $clock.ElapsedMilliseconds -lt $TimeoutMs) {
+                    [Threading.Thread]::Sleep(2)
+                }
+            }
+            $result.cleanup_confirmed = $null -eq $task -or $task.IsCompleted
+            if ($null -ne $task -and $task.IsFaulted) { $null = $task.Exception }
+        } catch { $result.cleanup_confirmed = $false }
+        try { if ($null -ne $ping) { $ping.Dispose() } } catch { $result.cleanup_confirmed = $false }
+        if ($null -ne $cancel) { $cancel.Dispose() }
+        $clock.Stop()
+        $result.elapsed_ms = $clock.ElapsedMilliseconds
+        $result.deadline_exceeded = $clock.ElapsedMilliseconds -gt $TimeoutMs
+        if (-not $result.cleanup_confirmed) {
+            $result.outcome = 'cleanup_unconfirmed'
+            $result.sample.status = 'canceled'; $result.sample.rtt_ms = $null
+        } elseif ($result.deadline_exceeded) {
+            $result.outcome = 'deadline_exceeded'
+            $result.sample.status = 'canceled'; $result.sample.rtt_ms = $null
+        }
+    }
+    return $result
+}
+
 function Test-Phase16MeasurementNumber {
     param($Value)
     if ($null -eq $Value -or $Value -is [bool]) { return $false }

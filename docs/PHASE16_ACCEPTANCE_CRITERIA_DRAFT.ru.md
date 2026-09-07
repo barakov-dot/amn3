@@ -317,3 +317,51 @@ RED/GREEN закрыли наследование TLS keylog и потерю ч�
 DNS/ICMP, server/stability collectors, endpoint manifest, общий series budget
 и 900 s runner не реализованы. m1, Windows/quality/root-cause gates неизменны;
 iPhone/A/B остаются отложенными. AWG2/package016/stage/install/push не затронуты.
+
+### Минимальный ICMP-адаптер — 2026-09-07
+
+Основание: операторское «согласовываю» после предложения отдельно согласовать
+минимальный локальный ICMP-адаптер. Сохранены offline TDD, NO_NETWORK,
+NO_REAL_CONFIG_READ, NO_INSTALL, NO_LIVE_ACTION, NO_PUSH и AWG2_UNTOUCHED.
+Source baseline: `2187146aeebe537f54b5384db78a0e6ac92d2ead`.
+
+В том же helper добавлен Invoke-Phase16IcmpSample: одна явная IPv4-проба через
+штатный .NET Ping.SendPingAsync с CancellationToken. Target только canonical
+literal IPv4; имена/IPv6/сокращённые адреса отвергаются до создания Ping.
+Нет DNS, default target, retry или цикла серии. New-Phase16PingClient отделяет
+platform boundary; в тестах он заменён, реальные Ping/ICMP не запускались.
+Наличие нужного cancelable overload отдельно подтверждено reflection без вызова.
+
+- Payload 1–1252 B в памяти, default 32 B; TTL 64, явный bool DontFragment.
+  Общий budget 200–1000 ms. Default: reply timeout 800 ms, внешний рабочий
+  deadline 900 ms, ещё 100 ms на отмену/cleanup. Фактический reply_timeout_ms
+  возвращается явно. Это не обещание полноценного ожидания ответа 1000 ms.
+  Меньший бюджет использует max(1, budget−200) ms ожидания ответа.
+  Будущий endpoint/method approval должен фиксировать этот метод одинаково
+  для сравниваемых серий; согласованные acceptance thresholds не изменены.
+- sample содержит только sequence/status/rtt_ms и совместим с RTT-summary.
+  Native TimedOut → timeout; исключение/ICMP error → send_error; caller/deadline
+  cancellation → canceled. PacketTooBig отмечается отдельно, без заключения
+  о root cause или полном PMTU. Target, reply address/buffer и исключения не выводятся.
+- Внешний deadline отменяет pending Task; completion проверяется в оставшемся
+  бюджете. Cleanup failure или overrun не оставляют успешный sample.
+  cleanup_unconfirmed требует STOP будущего окна, а не следующей пробы.
+  Dispose сам по себе не доказывает завершение pending operation. Универсальная
+  hard-wall гарантия при зависании native API/ОС НЕ доказана; таймер/Task doubles
+  не подтверждают реальный сетевой cancellation path.
+- Одно успешное измерение не включает ProbePathValidated автоматически,
+  не доказывает AWG route и не выдаёт quality/loss acceptance.
+
+TDD: RED отсутствующего ICMP adapter; focused GREEN. Отдельный RED показал,
+что timeout вплотную к внешнему deadline превращается в canceled; добавлены
+явный API-return reserve и поле фактического reply timeout, затем GREEN.
+Один итоговый набор `python -B -m unittest -v tests.test_phase16_windows_measurement_helper`:
+**32 tests PASS, 24.921 s, exit 0**. Восемь новых ICMP tests проверяют binding,
+классификацию, no-retry, pre/in-flight cancellation, unconfirmed cleanup,
+неверные данные, redaction и совместимость с прежним summary.
+HTTP/RTT/process regression tests прошли в том же наборе; других suites не было.
+
+Статус: `LOCAL_OFFLINE_VERIFIED_NOT_LIVE_VALIDATED`. DNS, series runner,
+endpoint admission, transport budget, stability/server observers не реализованы.
+Загрузка скрипта инертна; live требует отдельного exact approval. Windows/quality
+blockers, отсрочка iPhone/A/B, AWG2, package016, stage/install/push не изменены.

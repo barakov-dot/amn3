@@ -134,6 +134,14 @@ HTTP-адаптер» того же документа критериев. Ст�
 series/transport budget и server/stability observers ещё не готовы.
 Следующий полезный локальный шаг — отдельно ограничить scope DNS/ICMP-адаптеров;
 не запускать повторный Windows тест и не объявлять методику готовой к live.
+После операторского «согласовываю» выполнен ICMP-only offline follow-up:
+одна literal-IPv4 проба, нормализованные sample/отмена/cleanup, без серии и DNS.
+Один итоговый набор 32 tests PASS. Evidence и фактические таймеры — раздел
+«Минимальный ICMP-адаптер» документа критериев. Наличие .NET overload проверено
+только reflection; реальные Ping/ICMP не вызывались. Статус остаётся
+`LOCAL_OFFLINE_VERIFIED_NOT_LIVE_VALIDATED`.
+Следующий локальный scope — DNS cancellation/lifecycle contract; его реализация
+и полноценный runner этим согласованием не разрешены. Live gates не сняты.
 Рекомендация модели по запросу оператора: GPT-6 Astra / HIGH, один основной
 агент; это не утверждение о runtime effort и не разрешение live action.
 
