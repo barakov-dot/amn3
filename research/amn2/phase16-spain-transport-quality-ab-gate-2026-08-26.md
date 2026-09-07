@@ -15,6 +15,11 @@ The dated evidence sections below are preserved as historical observations.
 This documentation correction changes no measurements, profile, runtime,
 immutable package, freshness policy or historical receipt.
 
+2026-09-07: a [criteria proposal v1](../../docs/PHASE16_ACCEPTANCE_CRITERIA_DRAFT.ru.md)
+is available as `DRAFT_NOT_APPROVED_NOT_EXECUTED`. Its numeric limits are not
+approved and do not reclassify historical results. Operator-deferred iPhone/A/B
+remains deferred; the proposal authorizes no live action or installation.
+
 Before the next diagnostic session, record its hypothesis, controlled physical
 access network/device/application, completion conditions, time/data limits and
 outcome-to-next-action mapping. A different VPN on the same access network is
