@@ -22,6 +22,12 @@ DNS-исправление завершено локально: RED/GREEN и о�
 live-методы, endpoint/time/data bindings ещё требуют подготовки. Переоценки
 прошлых результатов, повторных тестов, server действий и push не было.
 
+Последующее согласование 2026-09-07: операторское «согласовываю» относится к
+критериям v1 в редакции `b165c5b6b4914bb2befd1c25b78dd6cba48e8ab6`.
+Текущий статус критериев — `CRITERIA_APPROVED_NOT_EXECUTED`; числа не изменены.
+Методы и endpoint/time/data bindings ещё не готовы. Согласование не разрешает
+live, stage/install, изменение конфигураций или push; iPhone/A/B остаются отложенными.
+
 ### Доказательства и границы
 
 - Android/iPhone connectivity и iPhone reconnect подтверждены предыдущими
@@ -83,9 +89,9 @@ live-методы, endpoint/time/data bindings ещё требуют подго�
 - TDD требуется для нашего code fix. Исправление upstream или внешней причины
   требует соответствующего evidence и bounded verification, не обязательной
   собственной замены протокола. Root-cause gate не отменяется.
-- До acceptance согласовать численные пределы throughput, loss, RTT/jitter,
-  reconnect, длительность stability window и правило missing measurements.
-  Сейчас пороги НЕ УТВЕРЖДЕНЫ; новые числа задним числом не назначать.
+- Численные пределы throughput, loss, RTT/jitter, reconnect, длительность
+  stability window и правило missing measurements согласованы в критериях v1.
+  Не пересчитывать прошлые результаты задним числом по этим порогам.
   MTU/fragmentation, DNS, server metrics и AWG2/AWG3.1 A/B остаются обязательными.
 
 ### Текущий вертикальный статус
@@ -103,9 +109,9 @@ live-методы, endpoint/time/data bindings ещё требуют подго�
 - ⏳ Task 6 — closeout заблокирован.
 
 AWG2_UNTOUCHED; general issuance disabled. iPhone/A/B отложены, не отменены.
-Локальный проект критериев acceptance подготовлен; следующий шаг — согласовать
-целевой профиль и пределы. Методы и точные time/data bindings готовятся отдельно
-до live approval; iPhone/A/B пока не возобновляются.
+Критерии acceptance v1 согласованы; следующий подготовительный шаг — выбрать
+методы и точные endpoint/time/data bindings без запуска. Live approval остаётся
+отдельным gate; iPhone/A/B пока не возобновляются.
 Push требует отдельного exact approval и в текущем GO запрещён.
 Рекомендация модели по запросу оператора: GPT-6 Astra / HIGH, один основной
 агент; это не утверждение о runtime effort и не разрешение live action.
