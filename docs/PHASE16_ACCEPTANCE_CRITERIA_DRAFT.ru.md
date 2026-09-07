@@ -365,3 +365,99 @@ HTTP/RTT/process regression tests прошли в том же наборе; др
 endpoint admission, transport budget, stability/server observers не реализованы.
 Загрузка скрипта инертна; live требует отдельного exact approval. Windows/quality
 blockers, отсрочка iPhone/A/B, AWG2, package016, stage/install/push не изменены.
+
+### DNS cancellation/lifecycle contract d1 — 2026-09-07
+
+Основание: операторское «согласовываю» на подготовку локального DNS-контракта
+без реализации и сетевых запросов. Baseline: `a47c137d694e8592f7a3ebfdcf247d56552824a5`.
+Статус: `CONTRACT_DEFINED_IMPLEMENTATION_GATED_NOT_EXECUTED`.
+Это уточнение методики m1, не новый execution plan, не готовый адаптер и не
+утверждение о реализуемости hard-wall ограничения на данном native runtime.
+
+**Штатный путь.** Кандидат — асинхронный Windows DnsQueryEx + DnsCancelQuery.
+Resolve-DnsName -QuickTimeout не даёт документированного предела 2 s; ожидание
+с Task timeout без отмены native query не удовлетворяет контракту.
+Собственный DNS wire client, новый публичный resolver, установка библиотеки
+и fallback на другой метод сюда не входят. Основание — уже прочитанные
+[DnsQueryEx](https://learn.microsoft.com/en-us/windows/win32/api/windns/nf-windns-dnsqueryex),
+[DnsCancelQuery](https://learn.microsoft.com/en-us/windows/win32/api/windns/nf-windns-dnscancelquery)
+и [DNS_QUERY_REQUEST](https://learn.microsoft.com/en-us/windows/win32/api/windns/ns-windns-dns_query_request).
+В текущем docs-only ходе источники по сети повторно не запрашивались.
+
+**Вход и resolver path.** Одна A-query на один заранее согласованный ASCII
+FQDN с завершающей точкой, sequence 1–5, один явный literal IPv4 resolver и
+положительный interface index. Пустые/default/all-interface значения запрещены.
+Resolver и интерфейс поступают из отдельного approved endpoint/state manifest;
+профиль не читается адаптером. Соответствие профилю и существующему tunnel
+проверяется отдельным admission, не предположением из переданного числа.
+Если binding недоступен/устарел — STOP, без выбора запасного resolver/interface.
+Список из двух DNS в профиле не разрешает две попытки для одной query.
+
+Требуется запрос к resolver, а не ответ из локального кэша/hosts/локального
+имени; LLMNR/NetBIOS/multicast и добавление search suffix исключены.
+Использовать документированные native query options для обхода локальных
+источников; точные flags, ABI/layout и их сочетание проверить до interop.
+Не очищать системный кэш и не менять системный DNS/NRPT. Кэш upstream resolver
+не исключается: это проверка resolver path, не рекурсивной цепочки без кэширования.
+Один API-вызов не доказывает ровно один сетевой пакет: native retries/UDP→TCP
+могут существовать; wire-byte cap остаётся отдельным незакрытым gate.
+
+**Время и ownership.** Monotonic T0 начинается до выделения request resources.
+Один общий budget — 2000 ms, включая setup, обработку ответа и освобождение.
+На T0+1800 ms незавершённая операция получает запрос отмены; последние 200 ms
+зарезервированы для completion/cleanup. Caller cancel инициирует отмену раньше.
+Это предложенный метод, а не изменение критерия DNS 5/5 <=2 s.
+Если setup исчерпал рабочий бюджет, DnsQueryEx уже не вызывается.
+
+| Событие | Обязательный переход и владение |
+| --- | --- |
+| Invalid input / cancel до dispatch | Нет native query; нет создаваемых для неё handles |
+| Синхронное завершение DnsQueryEx | Обработать результат по sync-контракту API; единственный владелец освобождает ресурсы |
+| DNS_REQUEST_PENDING | Request/result/server-list/context и callback delegate остаются живы до подтверждённого completion |
+| Callback и возврат DnsQueryEx пересеклись | Completion может прийти до возврата API; синхронизация не теряет результат и не допускает двойной публикации/освобождения |
+| Caller cancel / рабочий deadline | Один запрос DnsCancelQuery, если query ещё pending; сам return отмены НЕ является completion |
+| Ответ пришёл после принятой отмены | Освободить после безопасного completion; поздний успешный ответ не повышает canceled до success |
+| На 2000 ms pending callback или cleanup | cleanup_unconfirmed, STOP всего будущего окна; не начинать следующую query |
+
+Владение должно быть единственным и проверяемым: DnsRecordListFree ровно один
+раз для полученного record list; request/result/context/callback delegate —
+не раньше точки, в которой native код больше к ним не обращается. Сигнал
+«результат готов» в начале callback не доказывает, что callback уже покинут.
+Не выполнять PowerShell scriptblock на произвольном native callback thread;
+конкретный interop bridge должен обеспечить thread-safe completion и lifetime.
+Это требование реализации, не разрешение сейчас писать bridge или запускать код.
+
+Если callback остаётся pending, немедленный Free/Dispose опасен; сохранение
+ресурсов до позднего callback не доказывает остановку сетевой операции к deadline.
+Поэтому одного возврата cleanup_unconfirmed недостаточно для live admission.
+Нужна отдельно проверенная стратегия containment для такого исхода. Новый worker
+process/service, его принудительное завершение или фоновая дочистка не добавляются
+автоматически. Пока containment не обоснован, in-process вариант не объявляется
+готовым к hard-wall live-запуску; численный предел не ослабляется.
+
+**Выход.** Только schema, sequence, outcome, query_duration_ms, total_elapsed_ms,
+answer_a_count, cancel_requested, cleanup_confirmed, deadline_exceeded.
+Никаких FQDN, DNS-addresses/answers, interface identity, raw records/errors,
+handles/pointers; optional native status допустим лишь как нормализованный код.
+query_duration_ms — от dispatch до принятого terminal result; total_elapsed_ms —
+до безопасного завершения cleanup. Неполученные величины null, не нули.
+Output record <=4 KiB; обход native records ограничен 32 записями; превышение —
+answer_limit, без дальнейшего разбора и без успешного результата.
+
+success требует положительного A-result именно запрошенного имени (с учётом
+допустимого CNAME разрешения штатным resolver), завершения и освобождения в
+общем бюджете. Самого return code 0 или любого record count недостаточно.
+NXDOMAIN, no_data, server_error, native_timeout, canceled, start_error,
+answer_limit и cleanup_unconfirmed различаются. Отмена/ошибка инструмента —
+не доказательство потери DNS-пакета, неисправности AWG или root cause.
+DNS 5/5 может оцениваться только после пяти последовательных допустимых
+результатов с заранее проверенным binding; d1 не создаёт цикл и не выдаёт PASS.
+
+**Следующий implementation gate.** Отдельный local GO и один targeted offline
+TDD набор: sync/pending, callback-before-return, cancel/completion race, поздний
+callback, отсутствие completion, ровно одно освобождение, ошибки/пустой ответ,
+лимиты и redaction. Fakes не должны вызывать DnsQueryEx/DnsCancelQuery, читать
+профили или генерировать пакеты. Offline PASS не закрывает native containment/
+resolver-binding evidence; live и дополнительные процессы требуют своих approvals.
+В этом ходе проверены только readback, diff/whitespace, ссылки и согласованность;
+код, tests, runtime и прежние receipts не изменены. AWG2_UNTOUCHED; NO_PUSH.

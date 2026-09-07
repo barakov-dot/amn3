@@ -142,6 +142,13 @@ series/transport budget и server/stability observers ещё не готовы.
 `LOCAL_OFFLINE_VERIFIED_NOT_LIVE_VALIDATED`.
 Следующий локальный scope — DNS cancellation/lifecycle contract; его реализация
 и полноценный runner этим согласованием не разрешены. Live gates не сняты.
+По следующему операторскому «согласовываю» оформлен DNS-контракт d1 в документе
+критериев: один explicit resolver/interface, 2000 ms вместе с cleanup, запрет
+освобождения pending callback resources и запрет выдавать cancel за completion.
+Статус `CONTRACT_DEFINED_IMPLEMENTATION_GATED_NOT_EXECUTED`; код и тесты
+не менялись/не запускались. Следующий gate — отдельный local GO на offline
+lifecycle/interop работу. Без проверенного containment позднего callback и
+resolver binding live DNS не разрешать; worker/фоновые задачи не добавлять попутно.
 Рекомендация модели по запросу оператора: GPT-6 Astra / HIGH, один основной
 агент; это не утверждение о runtime effort и не разрешение live action.
 
