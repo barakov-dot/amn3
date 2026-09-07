@@ -11,6 +11,9 @@
 [Карта skills](docs/SKILLS_MAP.ru.md) описывает применимость навыков к этому проекту,
 не меняя личные skills и плагины. Другие проекты не входят в текущий scope.
 
+[Архитектура инструментов](docs/ARCHITECTURE.ru.md) и
+[карта кода/проверок](docs/CODE_MAP.ru.md) помогают найти нужный модуль без повторного аудита.
+
 GitHub:
 
 ```text
@@ -87,6 +90,8 @@ docs/
   START_HERE.ru.md
   PROJECT_PASSPORT.ru.md
   SKILLS_MAP.ru.md
+  ARCHITECTURE.ru.md
+  CODE_MAP.ru.md
   superpowers/{specs,plans}/
 research/
   amn2/
