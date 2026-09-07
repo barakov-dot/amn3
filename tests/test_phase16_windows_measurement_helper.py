@@ -207,5 +207,189 @@ class WindowsMeasurementTest(unittest.TestCase):
         self.assertEqual(result.stderr, b"")
 
 
+    def http_process(self, raw, exit_code=0, suffix=""):
+        program = (f"import sys,time;sys.stdout.buffer.write({raw!r});"
+                   f"sys.stdout.flush();{suffix}sys.exit({exit_code})")
+        return self.run_ps(
+            "Invoke-Phase16BoundedProcess "
+            f"-FilePath {literal(sys.executable)} "
+            f"-ArgumentList @('-I','-B','-c',{literal(program)}) "
+            "-MaxOutputBytes 4096 -TimeoutMs 2000 -CurlMetadata $true | ConvertTo-Json -Depth 5"
+        )
+
+    def test_http_metadata_is_numeric_bounded_and_never_raw(self):
+        # Catch permissive parsing, locale decimals and accidental raw output.
+        got = self.http_process(b"p16v1\t200\t1000000\t0\t1.250000\t0\t0\t0\n")
+        self.assertEqual(got["status"], "completed")
+        self.assertIn("http_metadata", got, "bounded HTTP metadata parser missing")
+        self.assertEqual(got["http_metadata"], dict(response_code=200, size_download=1000000,
+                         size_upload=0, time_total=1.25, ssl_verify_result=0,
+                         num_redirects=0, proxy_used=0))
+        self.assertFalse(got["raw_output_retained"])
+
+    def test_http_metadata_rejects_injection_nonfinite_duplicates_and_overflow(self):
+        valid = b"p16v1\t200\t10\t0\t1.000000\t0\t0\t0\n"
+        for raw in (b"secret-fixture", valid + valid, valid.replace(b"1.000000", b"NaN"),
+                    valid.replace(b"1.000000", b"1,000000"),
+                    valid.replace(b"\t10\t", b"\t999999999999999999999\t"),
+                    valid + b"\xff", valid.replace(b"\t200\t", b"\t0200\t")):
+            with self.subTest(raw=raw):
+                got = self.http_process(raw)
+                self.assertEqual(got["status"], "metadata_invalid")
+                self.assertIsNone(got["http_metadata"])
+                self.assertNotIn("secret-fixture", json.dumps(got))
+        got = self.http_process(b"x" * 10000)
+        self.assertEqual(got["status"], "output_limit")
+        self.assertEqual(got["stdout_bytes"], 4097)
+        self.assertIsNone(got["http_metadata"])
+
+    def test_http_error_and_timeout_cannot_publish_success_metadata(self):
+        valid = b"p16v1\t200\t10\t0\t1.000000\t0\t0\t0\n"
+        for exit_code, suffix, status in [(63, "", "nonzero_exit"),
+                                          (0, "time.sleep(30);", "timeout")]:
+            got = self.http_process(valid, exit_code, suffix)
+            self.assertEqual(got["status"], status)
+            self.assertIsNone(got["http_metadata"])
+            self.assertTrue(got["process_exited"])
+
+    def test_http_request_enforces_caps_and_removes_implicit_curl_behavior(self):
+        got = self.run_ps("""
+            @(
+              (New-Phase16HttpRequest -Endpoint 'https://example.invalid/down?bytes=1000000' -Direction download -ExpectedBytes 1000000),
+              (New-Phase16HttpRequest -Endpoint 'https://example.invalid/up' -Direction upload -ExpectedBytes 4 -InputBytes ([byte[]](0,255,10,13)))
+            ) | ConvertTo-Json -Depth 5
+        """)
+        for req in got:
+            args = req["arguments"]
+            self.assertEqual(args[0], "-q")
+            for flag, value in (("--retry", "0"), ("--max-redirs", "0"), ("--proxy", ""),
+                                ("--noproxy", "*"), ("--proto", "=https")):
+                self.assertEqual(args[args.index(flag) + 1], value)
+            self.assertIn("--out-null", args)
+            self.assertIn("--globoff", args)
+            self.assertNotIn("--location", args)
+            self.assertNotIn("--insecure", args)
+            self.assertNotIn("--compressed", args)
+            self.assertEqual(args.count("--url"), 1)
+            self.assertEqual(args[args.index("--max-time") + 1], "4.5")
+            self.assertEqual(args[args.index("--write-out") + 1],
+                             "p16v1\t%{response_code}\t%{size_download}\t%{size_upload}\t%{time_total}"
+                             "\t%{ssl_verify_result}\t%{num_redirects}\t%{proxy_used}\n")
+        self.assertEqual(got[0]["arguments"][got[0]["arguments"].index("--request") + 1], "GET")
+        self.assertEqual(got[1]["arguments"][got[1]["arguments"].index("--request") + 1], "POST")
+        self.assertIn("Content-Type: application/octet-stream", got[1]["arguments"])
+        self.assertEqual(got[0]["arguments"][got[0]["arguments"].index("--max-filesize") + 1], "1000000")
+        self.assertEqual(got[1]["arguments"][got[1]["arguments"].index("--max-filesize") + 1], "65536")
+        self.assertIn("@-", got[1]["arguments"])
+        self.assertEqual(got[1]["input_bytes"], [0, 255, 10, 13])
+
+    def test_http_invalid_request_is_rejected_without_process_start(self):
+        got = self.run_ps("""
+            $cases=@(
+              @{Endpoint='http://example.invalid/'}, @{Endpoint='https://u:p@example.invalid/'},
+              @{Endpoint='https://example.invalid/#fragment'}, @{ExpectedBytes=0},
+              @{ExpectedBytes=8388609}, @{ExpectedBytes=1.5}, @{TimeoutMs=500},
+              @{Direction='upload';ExpectedBytes=2;InputBytes=[byte[]](1)},
+              @{Direction='download';InputBytes=[byte[]](1)}, @{ResponseMaxBytes=65537}
+            ); @(foreach($c in $cases) {
+              $p=@{Endpoint='https://example.invalid/';Direction='download';ExpectedBytes=10}
+              foreach($key in $c.Keys) { $p[$key]=$c[$key] }
+              Invoke-Phase16HttpMeasurement @p -CurlPath 'Z:/missing/secret-fixture.exe'
+            }) | ConvertTo-Json -Depth 5
+        """)
+        self.assertEqual(len(got), 10)
+        for row in got:
+            self.assertEqual(row["status"], "invalid_request")
+            self.assertIsNone(row["mbps"])
+            self.assertNotIn("secret-fixture", json.dumps(row))
+
+    def test_http_adapter_checks_binary_body_without_network(self):
+        # Only substitute the external executable boundary. The real pipe runner,
+        # request builder, parser and summary remain active; no curl is executed.
+        program = ("import sys;body=sys.stdin.buffer.read();"
+                   "ok=body==bytes([0,255,10,13]);"
+                   "sys.stdout.write('p16v1\\t200\\t2\\t4\\t0.001000\\t0\\t0\\t0\\n');"
+                   "sys.exit(0 if ok else 9)")
+        got = self.run_ps(
+            "$script:realProcess=${function:Invoke-Phase16BoundedProcess}; "
+            "function Invoke-Phase16BoundedProcess { param($FilePath,$ArgumentList,$InputBytes,"
+            "$MaxInputBytes,$MaxOutputBytes,$TimeoutMs,$CleanupReserveMs,$CurlMetadata); "
+            f"& $script:realProcess -FilePath {literal(sys.executable)} "
+            f"-ArgumentList @('-I','-B','-c',{literal(program)}) -InputBytes $InputBytes "
+            "-MaxInputBytes $MaxInputBytes -MaxOutputBytes $MaxOutputBytes -TimeoutMs $TimeoutMs "
+            "-CleanupReserveMs $CleanupReserveMs -CurlMetadata $CurlMetadata }; "
+            "Invoke-Phase16HttpMeasurement -CurlPath 'C:/fake/curl.exe' "
+            "-Endpoint 'https://example.invalid/up' -Direction upload -ExpectedBytes 4 "
+            "-InputBytes ([byte[]](0,255,10,13)) | ConvertTo-Json -Depth 5"
+        )
+        self.assertEqual(got["status"], "measured")
+        self.assertEqual(got["payload_bytes"], 4)
+        self.assertGreater(got["duration_ms"], 0)
+        self.assertAlmostEqual(got["mbps"], 32 / got["duration_ms"] / 1000)
+        self.assertNotIn("example.invalid", json.dumps(got))
+
+    def test_http_summary_rejects_partial_http_tls_proxy_and_cleanup_failures(self):
+        got = self.run_ps("""
+            $cases=@(
+              @{}, @{response_code=302}, @{response_code=500}, @{ssl_verify_result=60},
+              @{size_download=9}, @{size_download=11}, @{size_upload=1},
+              @{num_redirects=1}, @{proxy_used=1}, @{time_total=0}, @{time_total=9}
+            ); $results=@(foreach($c in $cases) {
+              $m=@{response_code=200;size_download=10;size_upload=0;time_total=0.1;
+                   ssl_verify_result=0;num_redirects=0;proxy_used=0}
+              foreach($key in $c.Keys) { $m[$key]=$c[$key] }
+              $p=@{status='completed';process_exited=$true;exit_code=0;deadline_exceeded=$false;
+                   elapsed_ms=200;http_metadata=$m;stdin_bytes=0}
+              Get-Phase16HttpSummary -ProcessResult $p -Direction download -ExpectedBytes 10 -ResponseMaxBytes 65536
+            });
+            foreach($bad in @(@{status='timeout'},@{process_exited=$false},@{deadline_exceeded=$true},@{exit_code=1})) {
+              $p=@{status='completed';process_exited=$true;exit_code=0;deadline_exceeded=$false;
+                   elapsed_ms=200;http_metadata=@{response_code=200;size_download=10;size_upload=0;
+                   time_total=0.1;ssl_verify_result=0;num_redirects=0;proxy_used=0};stdin_bytes=0}
+              foreach($key in $bad.Keys) { $p[$key]=$bad[$key] }
+              $results+=Get-Phase16HttpSummary -ProcessResult $p -Direction download -ExpectedBytes 10 -ResponseMaxBytes 65536
+            }; ConvertTo-Json -InputObject $results -Depth 5
+        """)
+        self.assertEqual(got[0]["status"], "measured")
+        self.assertEqual(got[0]["mbps"], 0.0004)
+        self.assertEqual(got[1]["response_code"], 302)
+        self.assertEqual(got[2]["response_code"], 500)
+        self.assertEqual(got[3]["ssl_verify_result"], 60)
+        for row in got[1:]:
+            self.assertEqual(row["readiness"], "INCOMPLETE")
+            self.assertIsNone(row["mbps"])
+
+    def test_http_child_cannot_inherit_tls_keylog_file_setting(self):
+        program = "import os,sys;sys.exit(9 if 'SSLKEYLOGFILE' in os.environ else 0)"
+        got = self.run_ps(
+            "$env:SSLKEYLOGFILE='secret-fixture-never-written'; "
+            "Invoke-Phase16BoundedProcess "
+            f"-FilePath {literal(sys.executable)} "
+            f"-ArgumentList @('-I','-B','-c',{literal(program)}) "
+            "-MaxOutputBytes 4096 -CurlMetadata $true | ConvertTo-Json"
+        )
+        self.assertEqual(got["exit_code"], 0)
+        self.assertEqual(got["status"], "metadata_invalid")  # No numeric record.
+        self.assertNotIn("secret-fixture", json.dumps(got))
+
+    def test_http_upload_unknown_stdin_and_oversized_ack_are_incomplete(self):
+        got = self.run_ps("""
+            $results=@(foreach($change in @(@{},@{stdin_bytes=$null},@{size_download=65537},@{size_upload=3})) {
+              $m=@{response_code=200;size_download=0;size_upload=4;time_total=0.1;
+                   ssl_verify_result=0;num_redirects=0;proxy_used=0}
+              $p=@{status='completed';process_exited=$true;exit_code=0;deadline_exceeded=$false;
+                   elapsed_ms=200;http_metadata=$m;stdin_bytes=4}
+              foreach($key in $change.Keys) {
+                if($key -eq 'stdin_bytes') { $p[$key]=$change[$key] } else { $m[$key]=$change[$key] }
+              }
+              Get-Phase16HttpSummary -ProcessResult $p -Direction upload -ExpectedBytes 4
+            }); ConvertTo-Json -InputObject $results
+        """)
+        self.assertEqual(got[0]["status"], "measured")
+        for row in got[1:]:
+            self.assertEqual(row["readiness"], "INCOMPLETE")
+            self.assertIsNone(row["mbps"])
+
+
 if __name__ == "__main__":
     unittest.main()

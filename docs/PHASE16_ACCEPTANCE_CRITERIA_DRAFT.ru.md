@@ -262,3 +262,58 @@ tests.test_phase16_windows_measurement_helper`. Дочерние fixtures тол
 передавали синтетические байты, завершались или спали; реальные профили не читались.
 Статус helper — `LOCAL_OFFLINE_VERIFIED`; методика остаётся
 `METHOD_DRAFT_BLOCKED_NOT_EXECUTED`. Полного measurement runner ещё нет.
+
+### Минимальный HTTP-адаптер — 2026-09-07
+
+Approval: `/GO PHASE16 MINIMAL_WINDOWS_HTTP_MEASUREMENT_ADAPTER BOUNDED_METADATA OFFLINE_TDD ONE_TARGETED_SUITE NO_NETWORK NO_REAL_CONFIG_READ NO_INSTALL NO_LIVE_ACTION NO_PUSH AWG2_UNTOUCHED`.
+Source baseline: `d87c07e3828192a48c22fa927026101124ddb9af`.
+Это последующее расширение тех же helper/tests, не изменение предыдущего receipt.
+
+- New-Phase16HttpRequest строит один явный HTTPS GET/POST без исполнения.
+  Нет default endpoint: URL задаётся вызывающим слоем; HTTP, userinfo, fragment,
+  control characters и URL globbing исключены. Внутренний request содержит URL/
+  body и НЕ является объектом для экспорта или записи в журнал.
+- Invoke-Phase16HttpMeasurement использует явный доверенный путь curl, stdin
+  byte array и существующий bounded process. Curl >=8.16 необходим для out-null;
+  конкретный binary/version/checksum предстоит связать с будущим live approval.
+  Нет чтения профиля, пользовательского файла, автопоиска binary или установки.
+- Один download: 1 B–8 MiB; один upload: 1 B–2 MiB, длина массива должна точно
+  совпадать; upload response cap 1 B–64 KiB. Process budget 1–60 s с 500 ms
+  cleanup reserve; curl max-time получает оставшееся рабочее время.
+  Retries, redirects, proxy, curlrc и automatic decompression не включаются.
+  Тело ответа отбрасывается out-null; SSLKEYLOGFILE удаляется только из окружения
+  дочернего curl-mode процесса, окружение оператора не меняется.
+- Curl-mode stdout <=4 KiB, overflow читается только до cap+1 sentinel.
+  В памяти временно разбирается одна точная строка из семи числовых полей;
+  raw stdout/stderr, URL и arbitrary fields не возвращаются. Неверная схема,
+  дубликаты, nonfinite/locale numbers и overflow не становятся успехом.
+- MEASURED требует exit 0, завершённый процесс без deadline overrun, HTTP 200,
+  успешную проверку TLS, отсутствие proxy/redirect и точные payload counts.
+  Для upload также нужен полностью записанный stdin и ограниченный ответ.
+  HTTP 204/206/3xx/5xx, partial transfer и неизвестная длина stdin — INCOMPLETE.
+  Числовые HTTP/TLS failure evidence сохраняются, Mbps при отказе отсутствует.
+  Скорость одного объекта считается по полному времени процесса, не по peak;
+  curl time_total возвращается отдельно. Это НЕ throughput всей серии.
+
+Официальный контракт curl проверен read-only в предыдущем ходе:
+[manpage](https://curl.se/docs/manpage.html), включая max-filesize, max-time,
+data-binary, out-null и write-out. Сам curl, Cloudflare endpoints и TLS/HTTP
+в этой реализации НЕ запускались: offline-тесты не доказывают поведение
+конкретного binary, сервера, транспортный byte cap или Windows VPN fix.
+HTTP body limit не равен wire-byte limit. Upload 200 + счётчики не доказывают
+сохранение тела сервером; download размер не проверяет смысл содержимого.
+Endpoint/expected-content admission остаётся отдельным gate.
+
+TDD: RED отсутствующего parser/adapter; focused GREEN 7 tests. Дополнительные
+RED/GREEN закрыли наследование TLS keylog и потерю числового failure evidence.
+Итоговый целевой набор: `python -B -m unittest -v tests.test_phase16_windows_measurement_helper`
+— **24 tests PASS, 16.621 s, exit 0**. Первый итоговый вызов потерял окончание
+вывода инструмента и не засчитан как PASS; повторён тот же набор для получения
+полного результата. Другие suites, сеть, реальные configs не использовались.
+
+Статус HTTP-адаптера: `LOCAL_OFFLINE_VERIFIED_NOT_LIVE_VALIDATED`.
+Загрузка скрипта по-прежнему инертна. Отдельный вызов Invoke-функции способен
+создать трафик и требует exact live approval; код сам его не выдаёт.
+DNS/ICMP, server/stability collectors, endpoint manifest, общий series budget
+и 900 s runner не реализованы. m1, Windows/quality/root-cause gates неизменны;
+iPhone/A/B остаются отложенными. AWG2/package016/stage/install/push не затронуты.

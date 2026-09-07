@@ -125,6 +125,15 @@ server collector нет; этот PASS не снимает Windows/quality/root-
 Следующее расширение к сетевому измерителю требует отдельного scope и точных
 endpoints/limits; автоматически не создаётся и не запускается.
 Push требует отдельного exact approval и в текущем GO запрещён.
+Следующий разрешённый HTTP-only GO выполнен локально 2026-09-07:
+bounded numeric metadata, один explicit GET/POST через curl и нормализованная
+проверка полноты/HTTP/TLS. Итоговый целевой набор 24 offline tests PASS;
+HTTP/curl/network не запускались. Evidence и границы — раздел «Минимальный
+HTTP-адаптер» того же документа критериев. Статус
+`LOCAL_OFFLINE_VERIFIED_NOT_LIVE_VALIDATED`; DNS/ICMP, endpoint admission,
+series/transport budget и server/stability observers ещё не готовы.
+Следующий полезный локальный шаг — отдельно ограничить scope DNS/ICMP-адаптеров;
+не запускать повторный Windows тест и не объявлять методику готовой к live.
 Рекомендация модели по запросу оператора: GPT-6 Astra / HIGH, один основной
 агент; это не утверждение о runtime effort и не разрешение live action.
 
