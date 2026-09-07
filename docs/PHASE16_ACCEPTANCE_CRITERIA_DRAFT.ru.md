@@ -368,6 +368,12 @@ blockers, отсрочка iPhone/A/B, AWG2, package016, stage/install/push не
 
 ### DNS cancellation/lifecycle contract d1 — 2026-09-07
 
+Уточнение после официального чтения: различие API lifetime и консервативной
+политики модели, а также текущий STOP реализации описаны в
+[Official DNS source check](#official-dns-source-check-2026-09-07).
+Ниже сохранён исторический контракт; его модельные ограничения не следует
+выдавать за дословные требования Microsoft.
+
 Основание: операторское «согласовываю» на подготовку локального DNS-контракта
 без реализации и сетевых запросов. Baseline: `a47c137d694e8592f7a3ebfdcf247d56552824a5`.
 Статус: `CONTRACT_DEFINED_IMPLEMENTATION_GATED_NOT_EXECUTED`.
@@ -582,3 +588,50 @@ completion и применимость resolver/interface binding. Резуль�
 с d1/model и отсутствие секретов. Исторический результат 16 tests не повторялся
 и не объявляется native verification. Новых внешних источников не прочитано;
 ссылки предыдущего раздела остаются исторической базой, не свежей проверкой.
+
+### Official DNS source check 2026-09-07
+
+Статус: `OFFICIAL_SOURCE_CHECK_COMPLETE_DNS_BRIDGE_STOP`.
+Локальная фиксация завершена 2026-09-08; дата source check остаётся 2026-09-07.
+Source baseline фиксации: `67fbbdc9398d59bd3095039a49d3c175c60d7e65`.
+Основание записи: `/GO PHASE16 RECORD OFFICIAL_DNS_SOURCE_CHECK HARD_WALL_2000MS_NOT_GUARANTEED CORRECT_API_VS_MODEL_LIFETIME DNS_BRIDGE_STOP LOCAL_DOCS_ONLY NO_CODE_CHANGE NO_TEST_RUN NO_LIVE_ACTION NO_PUSH AWG2_UNTOUCHED`.
+Предшествующее чтение 2026-09-07 разрешено exact approval
+`READ_ONLY OFFICIAL_MICROSOFT_LEARN_AND_WINDOWS_SDK DNS_BRIDGE_LIFETIME_CANCELLATION_2000MS_RESOLVER_INTERFACE_BINDING` с NO_PROBE/NO_DOWNLOAD/NO_INSTALL/NO_FILE_WRITE/NO_LIVE_SPAIN_ACTION/AWG2_UNTOUCHED.
+Прочитаны страницы Microsoft Learn по API/структурам windns.h и managed interop;
+локальный SDK/ABI не проверялся. Этот GO только сохраняет результат: повторного
+сетевого чтения и диагностических запусков нет.
+
+| Вопрос | Официальное основание и граница вывода |
+| --- | --- |
+| Общий hard-wall 2000 ms, в том числе 200 ms после cancel | В просмотренных [DnsQueryEx](https://learn.microsoft.com/en-us/windows/win32/api/windns/nf-windns-dnsqueryex) и [DnsCancelQuery](https://learn.microsoft.com/en-us/windows/win32/api/windns/nf-windns-dnscancelquery) численная гарантия не найдена. DnsCancelQuery не ожидает completion; pending query отслеживается по callback. Внешний timeout ожидания не доказывает завершение native операции/cleanup. |
+| Result и cancel handle | [DnsQueryEx](https://learn.microsoft.com/en-us/windows/win32/api/windns/nf-windns-dnsqueryex) запрещает освобождать result до вызова callback. [DnsCancelQuery](https://learn.microsoft.com/en-us/windows/win32/api/windns/nf-windns-dnscancelquery) связывает lifetime cancel handle с вызовом callback и завершением DnsCancelQuery. Возвращённые RR sets освобождаются DnsRecordListFree согласно [DNS_QUERY_RESULT](https://learn.microsoft.com/en-us/windows/win32/api/windns/ns-windns-dns_query_result). |
+| Managed delegate | Указатель сам не удерживает delegate от GC; при сохранении указателя native-кодом после возврата исходного вызова delegate нужно удерживать весь срок его использования. [Marshal.GetFunctionPointerForDelegate](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.getfunctionpointerfordelegate?view=net-9.0). Это не проверка lifetime конкретного bridge. |
+| Explicit resolver/interface | В [DNS_QUERY_REQUEST](https://learn.microsoft.com/en-us/windows/win32/api/windns/ns-windns-dns_query_request) документированы pDnsServerList и InterfaceIndex; 0 рассматривает все интерфейсы. Это подтверждает наличие API-механизма, но не фактический AWG tunnel/session, ABI или отсутствие обходного пути на машине оператора. |
+| Локальные источники и suffix | [DNS constants](https://learn.microsoft.com/en-us/windows/win32/dns/dns-constants) описывает BYPASS_CACHE, WIRE_ONLY, NO_LOCAL_NAME, NO_HOSTS_FILE, NO_NETBT и TREAT_AS_FQDN; NO_MULTICAST перечислен без пояснения. Рабочая комбинация flags и её фактическое применение здесь не проверены. |
+| NRPT и REQUEST3 | Для pCustomServers документация [DNS_QUERY_REQUEST3](https://learn.microsoft.com/en-us/windows/win32/api/windns/ns-windns-dns_query_request3) прямо указывает приоритет совпавшего NRPT-правила. Нельзя обещать безусловный обход системной политики; этот вывод не переносится автоматически на pDnsServerList V1. |
+
+**Поправка API vs model.** Требование d1/replay() ждать полного выхода callback
+для всех объектов — наша консервативная политика, не дословный контракт API.
+Документация использует границу вызова callback для result и дополнительное
+завершение cancel-вызова для cancel handle. Не смешивать lifetime данных запроса,
+кода callback и managed delegate. Это не разрешение немедленно освобождать всё
+в начале callback: будущая реализация должна учитывать свои обращения и гонки.
+Модель сохранена без правок как проверка выбранной политики, не native verifier;
+прежние 16 tests PASS не подтверждают API-интеграцию или реальный deadline.
+
+**Решение по заранее установленному stop-condition.** DNS bridge остановлен
+при текущем hard-wall контракте: не писать interop/worker, не добавлять модели,
+не повторять VPN-прогоны ради этого доказательства. Отсутствие найденной гарантии
+не доказывает дефект Windows API, невозможность любого DNS-измерителя или причину
+AWG3.1 traffic FAIL. DNS gate остаётся обязательным и непроверенным.
+
+При возврате к DNS нужен отдельный scope на методику: различить критерий ответа
+5/5 <=2 s и бюджет безопасного завершения операции, сохранив явные stop/cleanup
+правила. В этом GO численные критерии и d1 budget не изменены, новая методика
+не согласована. P0 quality/A/B остаётся отложенным; Windows требует новой
+проверяемой гипотезы либо изменения официального engine; интеграция ждёт gates.
+
+Проверки фиксации: readback, diff/whitespace, точные ссылки ранее прочитанных
+источников, согласованность и отсутствие секретов в добавлениях. Код/тесты,
+исторические receipts, protected profiles, AWG2/package016 не менялись.
+NO_TEST_RUN; NO_LIVE_ACTION; NO_PUSH; stage/install/issuance не выполнялись.

@@ -1,10 +1,19 @@
 /GO PHASE 16 — AWG3 FAMILY 3.1, SPAIN PREFLIGHT, CONTROLLED STAGE AND ONE PILOT
 
-## Актуальный порядок и gates — 2026-09-05, дополнение 2026-09-07
+## Актуальный порядок и gates — 2026-09-05, дополнение 2026-09-08
 
 Это единственный актуальный execution status Phase 16. Датированные разделы
 ниже сохраняют историю и не разрешают повторять старые GO, claims или stage.
 Локальный baseline аудита: `7450435a59e1f648bdcd8880c146f2c3320678db`.
+
+Локальная фиксация 2026-09-08 source check от 2026-09-07: `OFFICIAL_SOURCE_CHECK_COMPLETE_DNS_BRIDGE_STOP`.
+Официальное чтение выполнено; гарантия общего hard-wall 2000 ms не найдена.
+Реализацию DNS bridge остановить, не создавать worker/новые модели и не повторять
+VPN-прогоны ради этого gate. API lifetime отделён от консервативной политики
+модели. Подробности и источники — [Official DNS source check](../../PHASE16_ACCEPTANCE_CRITERIA_DRAFT.ru.md#official-dns-source-check-2026-09-07).
+Будущий пересмотр DNS-методики требует отдельного scope; критерии не ослаблены.
+Код/тесты/live не затронуты; P0 quality/A/B остаётся отложенным оператором.
+Прежние next-step предложения в хронологии ниже не возобновляют этот STOP.
 
 Завершённый docs-only approval: `/GO PHASE16 APPLY REVIEWED PLAN_AND_GATE_DOCUMENTATION_CORRECTIONS LOCAL_DOCS_ONLY PRESERVE_HISTORICAL_RECEIPTS NO_CODE_CHANGE NO_TEST_RUN NO_PACKAGE NO_LIVE_ACTION NO_PUSH AWG2_UNTOUCHED`.
 Документационная поправка зафиксирована в `15e7d2d15922919aefb9d5721dc4f285042490e7`.
