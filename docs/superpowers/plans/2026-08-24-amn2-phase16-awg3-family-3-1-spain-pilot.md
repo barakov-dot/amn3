@@ -157,6 +157,14 @@ worker или изменения PowerShell helper. Статус
 gate — обоснование native bridge/containment и resolver binding, не повтор
 Windows live и не ещё один слой модели. Реальный DNS-адаптер не реализован;
 acceptance, отсрочка iPhone/A/B и AWG2_UNTOUCHED остаются неизменными.
+По следующему «согласовываю» завершена локальная оценка native bridge в разделе
+«Native DNS bridge: локальная оценка допуска» документа критериев. Статус
+`LOCAL_ASSESSMENT_COMPLETE_NATIVE_ADMISSION_BLOCKED`: in-process lifetime,
+hard-wall containment и resolver binding не доказаны; worker не выбран.
+Код/тесты не менялись, native/network действий не было. Следующий предлагаемый
+gate — один точный read-only official Microsoft/SDK source check этих трёх
+обязательств. Без доказательств остановить ветку DNS bridge, не наращивать модели
+и не повторять Windows live. Реализация и внешнее чтение требуют своих разрешений.
 Рекомендация модели по запросу оператора: GPT-6 Astra / HIGH, один основной
 агент; это не утверждение о runtime effort и не разрешение live action.
 
