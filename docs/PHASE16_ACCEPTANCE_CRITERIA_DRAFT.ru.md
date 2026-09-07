@@ -223,3 +223,42 @@ loaded-latency samples. Нехватка времени/выборки не ра
 Самопроверка m1: все строки критериев имеют метод либо явно указанный coverage
 gap; runtime возможностей не заявлено. iPhone/A/B не возобновлены, Windows и
 root-cause gates не сняты; leaks/persistence/rollback остаются отдельной интеграцией.
+
+### Реализованная локальная часть m1 — 2026-09-07
+
+Approval: `/GO PHASE16 MINIMAL_WINDOWS_MEASUREMENT_HELPER LOCAL_CODE_ONLY OFFLINE_TDD ONE_TARGETED_SUITE NO_NETWORK NO_REAL_CONFIG_READ NO_INSTALL NO_LIVE_ACTION NO_PUSH AWG2_UNTOUCHED`.
+Source baseline: `fb659933868ce9b82eeb53d306cab988743123da`.
+
+Добавлен [Windows helper](../scripts/vps/phase16_windows_measurement_helper.ps1)
+и [его offline tests](../tests/test_phase16_windows_measurement_helper.py).
+Загрузка .ps1 только определяет функции; endpoints, чтения профиля и live entrypoint нет.
+Рабочая среда проверки: PowerShell 7.6.5 / Windows 10.0.26200. Это не PS5.1-поддержка.
+
+- Get-Phase16RttSummary: строгий нормализованный sequence/status/rtt_ms,
+  median, nearest-rank p95, chronological jitter, раздельные timeout/send_error/
+  canceled. Невалидный probe path и неполные данные не становятся нулевым loss/PASS.
+- Get-Phase16ThroughputSummary: decimal Mbps по подтверждённым payload bytes
+  и времени всей серии. Partial body или незавершённая передача дают INCOMPLETE.
+  MEASURED означает наличие расчёта, а не прохождение acceptance thresholds.
+- Invoke-Phase16BoundedProcess: явные executable/arguments без shell expansion,
+  ограниченный input в памяти, stdout/stderr drainage без сохранения содержания,
+  time budget с резервом cleanup и kill direct process/tree при необходимости.
+  Файл не выбирает и не запускает curl/ping/SSH автоматически; вызывающий слой
+  по-прежнему обязан получить соответствующий exact approval.
+
+Граница: stdout cap ограничивает чтение pipe (до cap+1 sentinel), не сетевой
+трафик. stdin_bytes=null при прерванной записи означает неизвестную длину префикса.
+process_exited относится к непосредственному child; detached descendants этим
+не подтверждаются. Cleanup failure и deadline overrun сохраняются явно, не PASS.
+Ограничение времени и завершение проверены на offline fixtures; универсальная
+hard-wall гарантия при зависании ОС/драйвера не доказана. Full HTTP/TLS adapter, DNS/ICMP collector, server observer,
+stability observer, endpoint manifest и запуск 900-секундного окна НЕ реализованы.
+
+TDD evidence: RED отсутствующих функций; затем focused GREEN. Исправлены
+обнаруженные тестами лишний async output, ложный zero при partial stdin и
+допуск RTT за пределами окна. Один итоговый targeted suite: 15 tests PASS,
+8.685 s, без сети. Команда: Python `-B -m unittest -v
+tests.test_phase16_windows_measurement_helper`. Дочерние fixtures только
+передавали синтетические байты, завершались или спали; реальные профили не читались.
+Статус helper — `LOCAL_OFFLINE_VERIFIED`; методика остаётся
+`METHOD_DRAFT_BLOCKED_NOT_EXECUTED`. Полного measurement runner ещё нет.

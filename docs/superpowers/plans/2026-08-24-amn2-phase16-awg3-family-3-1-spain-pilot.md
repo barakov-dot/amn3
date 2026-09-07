@@ -114,7 +114,16 @@ AWG2_UNTOUCHED; general issuance disabled. iPhone/A/B отложены, не о�
 probe budgets, но endpoint manifest, устройство/метод, stability coverage и
 transport-byte cap enforcement не подтверждены. Следующий gate — разрешить эти
 пробелы без подмены устройства/установки/автопрогона; точный live approval пока
-не готов. iPhone/A/B остаются отложенными; runner и collector не создавались.
+не готов. iPhone/A/B остаются отложенными.
+
+2026-09-07 по отдельному `MINIMAL_WINDOWS_MEASUREMENT_HELPER LOCAL_CODE_ONLY
+OFFLINE_TDD` GO реализована только локальная часть m1: PowerShell-функции RTT/
+throughput и bounded process, без сетевых адаптеров/профилей. RED/GREEN и один
+итоговый набор 15 offline tests PASS. Evidence и ограничения — в приложении
+«Реализованная локальная часть m1» документа критериев. Полного live runner и
+server collector нет; этот PASS не снимает Windows/quality/root-cause gates.
+Следующее расширение к сетевому измерителю требует отдельного scope и точных
+endpoints/limits; автоматически не создаётся и не запускается.
 Push требует отдельного exact approval и в текущем GO запрещён.
 Рекомендация модели по запросу оператора: GPT-6 Astra / HIGH, один основной
 агент; это не утверждение о runtime effort и не разрешение live action.

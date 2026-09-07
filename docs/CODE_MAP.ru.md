@@ -24,6 +24,7 @@
 | Минимальный peer/profile pilot | [minimal pilot](../scripts/vps/phase16_awg31_minimal_pilot.py): `normalize_dns`, `prepare_profiles`, `preflight`, `apply_pilot` | `plan` декларативен; `render` пишет профили, `check` читает target, `apply` создаёт ресурсы. Не взаимозаменяемые режимы |
 | Временный forwarding/NAT | [pilot firewall](../scripts/vps/phase16_awg31_pilot_firewall.py): `render`, `baseline`, `apply_rules`, `rollback` | Helper с callbacks; live executor меняет nft rules. Не persistent firewall solution |
 | Checksum-bound клиентский кандидат | [client recovery](../scripts/vps/phase16_awg31_client_recovery.py): `parse_and_validate`, `render_candidate`, `create_candidate` | Создаёт новый секретный профиль с recovery-полями, исходный не перезаписывает. Это не доказанный Windows fix и не разрешение новой выдачи |
+| Нормализованные метрики и bounded process | [Windows measurement helper](../scripts/vps/phase16_windows_measurement_helper.ps1): `Get-Phase16RttSummary`, `Get-Phase16ThroughputSummary`, `Invoke-Phase16BoundedProcess` | PowerShell 7; import inert. Вызов process-функции запускает явно заданный executable и при лимите останавливает его; нет автоматических сетевых действий, profile reader или live approval |
 
 ## Связанные проверки — только при соответствующем изменении
 
@@ -31,6 +32,7 @@
 | --- | --- | --- |
 | DNS/render/prepare, pilot lifecycle и ownership | [minimal pilot tests](../tests/test_phase16_awg31_minimal_pilot.py) | Реальный Qt import, клиентский performance и live persistence |
 | Recovery-кандидат, hash/exclusive-write | [client recovery tests](../tests/test_phase16_awg31_client_recovery.py) | Windows data-plane acceptance |
+| Расчёт метрик, pipe limits и отмена процесса | [measurement tests](../tests/test_phase16_windows_measurement_helper.py) | Offline fixtures, не реальный curl/ping/SSH, не HTTP/TLS success, не wire-byte cap и не исправление Windows VPN |
 | Firewall batch, equality, state fence и rollback | [pilot firewall tests](../tests/test_phase16_awg31_pilot_firewall.py) | Readback правил на конкретном target |
 | Package/preflight/stage-support contracts | [AWG31 tooling tests](../tests/test_phase16_awg31_tooling.py) | Общий live PASS; файл включает разные классы проверок и исторические package bindings |
 | Coordinator milestones и failure locus | [failure locus tests](../tests/test_phase16_controlled_stage_failure_locus.py) | Успешный live rollback всей интеграции |
