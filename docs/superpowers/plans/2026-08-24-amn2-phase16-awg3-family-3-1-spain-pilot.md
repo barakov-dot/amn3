@@ -73,6 +73,8 @@ package, имеющийся backup и ресурсы; сохранённый pac
    от закрытых диагностик и исходы, получить live approval. Повтор kill-switch A/B,
    поиска отсутствующего адаптера или общего IPv4 HTTPS без новой гипотезы не нужен.
    Upstream receipts действуют на дату чтения, не заменяют новый readback.
+   [Согласованный комментарий #3043](../../../research/amn2/phase16-windows-issue-3043-comment-2026-09-08.md)
+   опубликован вручную; readback 2026-09-08 подтвердил публикацию. Не отправлять повторно.
 3. **P1 — DNS measurement, STOP.** Пересмотр методики — только отдельный scope
    при реальной необходимости. Не наращивать tooling ради открытого gate.
    Полный runner/endpoint manifest/stability/server coverage не готовы.
@@ -82,6 +84,13 @@ package, имеющийся backup и ресурсы; сохранённый pac
    offline-проверки завершены выше. Inventory, прекращение операций, адресная
    очистка и readback — раздельные gates. Реализация и live-операции требуют
    отдельного scope/approval; `recovery_required` не разрешает cleanup.
+   **R1 read-only compatibility review завершён, не реализация:**
+   [результат и точные исходники](../../../research/amn2/phase16-recovery-helper-compatibility-review-2026-09-08.md).
+   Старые collector/driver найдены, checksum подтверждены; повторный поиск/аудит
+   не нужен. Parser не принимает новые outcomes; старый runner привязан к прежней
+   транзакции и не доказывает quiescence/сохранность pilot. Возможный следующий
+   code scope — новая локальная версия parser с одним offline TDD-набором;
+   пока не реализована и не разрешена этим планом. Это не готовность live recovery.
 5. **P2 — integration, BLOCKED предыдущими gates.** После клиентских и quality
    доказательств: checksum/state/rollback-bound approval, проверка persistence,
    restart policy, leaks и границ отката. Затем Task 5 и Task 6.
@@ -101,8 +110,9 @@ package, имеющийся backup и ресурсы; сохранённый pac
 - ⏳ Task 6 — closeout заблокирован.
 
 AWG2_UNTOUCHED; package016 immutable; general issuance disabled.
-Текущая синхронизация — план и согласованный recovery-контракт; без кода, новых
-тестов, package/live/stage/install/push.
+Последняя docs-only синхронизация фиксирует публикацию #3043 и завершённый R1
+review; recovery-контракт не пересогласовывается. Без кода, новых тестов,
+package/live/stage/install/push.
 Проверки и Git — по [AGENTS.md](../../../AGENTS.md): docs-only без runtime-тестов;
 для code fix — targeted RED/GREEN; ошибка инструмента = UNKNOWN.
 Детали выполненного читать адресно в [историческом приложении](2026-09-08-phase16-execution-history.md) и в
