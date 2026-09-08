@@ -117,6 +117,18 @@ class LocalStageHarness:
             claim = json.loads(claim_path.read_bytes())
             claim.update(status="consumed", consumed_at=claim["issued_at"])
             claim_path.write_bytes(canonical(claim))
+            phase = "application" if env["PHASE16_FUTURE_GATE"] == "APPLICATION_STAGE" else "runtime"
+            if self.scenario in {f"{phase}_partial_exit", f"{phase}_partial_timeout"}:
+                self.backup.write_bytes(b"keep this backup")
+                resource = (
+                    Path(str(self.paths["APPLICATION_RELEASE"]) + ".staging")
+                    if phase == "application" else self.paths["RUNTIME_STATE_ROOT"]
+                )
+                resource.mkdir()
+                (resource / "partial.txt").write_bytes(b"preserve partial resource")
+                if self.scenario.endswith("timeout"):
+                    raise subprocess.TimeoutExpired(args, 180, output=b"synthetic-raw-timeout")
+                return subprocess.CompletedProcess(args, 1, b"", b"synthetic-raw-partial-exit")
             if env["PHASE16_FUTURE_GATE"] == "APPLICATION_STAGE":
                 self.backup.write_bytes(b"keep this backup")
                 self.paths["APPLICATION_RELEASE"].mkdir()
@@ -197,6 +209,8 @@ class LocalStageHarness:
                 or self.scenario == "transaction_outcome" and path == self.transaction / "outcome.json"
                 or self.scenario == "milestone_write" and path == self.transaction / "milestones.json"
                 and value["last_completed_milestone"] == "runtime_complete"
+                or self.scenario == "entry_publication" and path == self.transaction / "milestones.json"
+                and value["last_completed_milestone"] == "application_entry"
             )
             if target and not self.write_failed:
                 self.write_failed = True
@@ -279,7 +293,7 @@ class ControlledStageFailureLocusTest(unittest.TestCase):
                     })
                 self.assertEqual(self.module.classify_stage_failure(observed.exception), expected)
 
-    def assert_failure_is_safe(self, run, failure, *, expected_result="rolled_back"):
+    def assert_failure_is_safe(self, run, failure, *, expected_result="rolled_back", preserved=False):
         self.assertEqual(set(failure), {
             "application_claim_entry", "completed_milestones", "failure_class", "failure_locus",
             "general_issuance_enabled", "last_completed_milestone", "manifest_sha256",
@@ -298,19 +312,23 @@ class ControlledStageFailureLocusTest(unittest.TestCase):
         self.assertEqual(raw, canonical(failure))
         self.assertNotIn(b"synthetic-raw", raw)
         self.assertTrue(run.backup.exists())
-        self.assertFalse(run.paths["PACKAGE_ROOT"].exists())
-        self.assertFalse(run.paths["APPLICATION_RELEASE"].exists())
-        self.assertFalse(run.paths["APPLICATION_LEDGER"].exists())
+        self.assertEqual(run.paths["PACKAGE_ROOT"].exists(), preserved)
+        self.assertEqual(run.paths["APPLICATION_RELEASE"].exists(), preserved)
+        self.assertEqual(run.paths["APPLICATION_LEDGER"].exists(), preserved)
         outcome_raw = (run.transaction / "outcome.json").read_bytes()
         self.assertEqual(json.loads(outcome_raw)["result"], expected_result)
         self.assertNotIn(b"synthetic-raw", outcome_raw)
 
     def test_runtime_claim_consumption_never_becomes_runtime_completion(self):
         with LocalStageHarness(self.module, self.root, "runtime_stage") as run:
+            run.paths["RUNTIME_STATE_ROOT"].mkdir()
+            marker = run.paths["RUNTIME_STATE_ROOT"] / "preexisting.txt"
+            marker.write_bytes(b"preserve unknown ownership")
             with self.assertRaises(Exception):
                 run.execute()
             failure = run.failure()
-            self.assert_failure_is_safe(run, failure)
+            self.assert_failure_is_safe(run, failure, expected_result="recovery_required", preserved=True)
+            self.assertEqual(marker.read_bytes(), b"preserve unknown ownership")
             self.assertEqual(failure["failure_locus"], "runtime_stage")
             self.assertEqual(failure["failure_class"], "process_exit")
             self.assertEqual(failure["completed_milestones"], MILESTONES[:9])
@@ -318,8 +336,60 @@ class ControlledStageFailureLocusTest(unittest.TestCase):
             self.assertEqual(failure["application_claim_entry"], "consumed_entry_only")
             self.assertEqual(failure["runtime_claim_entry"], "consumed_entry_only")
             self.assertNotIn("runtime_complete", failure["completed_milestones"])
-            self.assertEqual(failure["rollback_status"], "attempts_completed_unverified")
-            self.assertEqual(failure["rollback_milestones"], ["rollback_started", "rollback_attempts_completed"])
+            self.assertEqual(failure["rollback_status"], "recovery_required")
+            self.assertEqual(failure["rollback_milestones"], [])
+
+    def test_partial_stage_failure_preserves_resources_and_blocks_new_transaction(self):
+        rows = [
+            ("application_partial_exit", "application_entry", "process_exit"),
+            ("application_partial_timeout", "application_entry", "timeout"),
+            ("runtime_partial_exit", "runtime_entry", "process_exit"),
+            ("runtime_partial_timeout", "runtime_entry", "timeout"),
+        ]
+        for scenario, last, failure_class in rows:
+            with self.subTest(scenario=scenario), tempfile.TemporaryDirectory() as temporary:
+                with LocalStageHarness(self.module, Path(temporary), scenario) as run:
+                    with self.assertRaises(Exception) as observed:
+                        run.execute()
+                    failure = run.failure()
+                    self.assertEqual(failure["rollback_status"], "recovery_required")
+                    self.assertEqual(failure["rollback_milestones"], [])
+                    self.assertEqual(failure["last_completed_milestone"], last)
+                    self.assertEqual(failure["failure_class"], failure_class)
+                    self.assertEqual(self.module.classify_stage_failure(observed.exception.__cause__), failure_class)
+                    self.assertTrue(run.paths["PACKAGE_ROOT"].is_dir())
+                    self.assertEqual(run.backup.read_bytes(), b"keep this backup")
+                    resource = (
+                        Path(str(run.paths["APPLICATION_RELEASE"]) + ".staging")
+                        if scenario.startswith("application") else run.paths["RUNTIME_STATE_ROOT"]
+                    )
+                    self.assertEqual((resource / "partial.txt").read_bytes(), b"preserve partial resource")
+                    if scenario.startswith("runtime"):
+                        self.assertTrue(run.paths["APPLICATION_RELEASE"].is_dir())
+                        self.assertTrue(run.paths["APPLICATION_LEDGER"].is_file())
+                    for command in run.commands:
+                        self.assertFalse(command[:2] == ["/usr/bin/systemctl", "stop"])
+                        self.assertFalse(command[3:4] == ["rm"] or command[3:5] in (["network", "rm"], ["image", "rm"]))
+                    outcome = (run.transaction / "outcome.json").read_bytes()
+                    self.assertEqual(json.loads(outcome)["result"], "recovery_required")
+                    self.assertNotIn(b"synthetic-raw", outcome)
+                    self.assertNotIn(b"synthetic-raw", (run.transaction / "failure-locus.json").read_bytes())
+                    count = len(run.commands)
+                    retry = dict(run.header, request=dict(run.header["request"], transaction_id="phase16-retry-test"))
+                    with self.assertRaisesRegex(self.module.StageCoordinatorError, "stage target exists"):
+                        self.module.execute_stage(retry, run.archive)
+                    self.assertEqual(len(run.commands), count)
+                    self.assertFalse((run.paths["TRANSACTION_ROOT"] / "phase16-retry-test").exists())
+                    self.assertEqual((run.transaction / "outcome.json").read_bytes(), outcome)
+
+    def test_failure_before_stage_launch_keeps_existing_rollback_path(self):
+        with LocalStageHarness(self.module, self.root, "entry_publication") as run:
+            with self.assertRaises(OSError):
+                run.execute()
+            self.assertFalse(any(command[0] == "/usr/bin/bash" for command in run.commands))
+            self.assertFalse(run.paths["PACKAGE_ROOT"].exists())
+            self.assertEqual(run.failure()["rollback_status"], "attempts_completed_unverified")
+            self.assertEqual(json.loads((run.transaction / "outcome.json").read_bytes())["result"], "rolled_back")
 
     def test_post_runtime_failures_identify_the_exact_completed_boundary(self):
         for scenario, locus, last in [
@@ -404,7 +474,7 @@ class ControlledStageFailureLocusTest(unittest.TestCase):
 
     def test_main_failure_envelope_stays_fixed_and_has_no_raw_diagnostics(self):
         output = io.BytesIO()
-        with LocalStageHarness(self.module, self.root, "runtime_stage") as run, patch.object(
+        with LocalStageHarness(self.module, self.root, "awg2_after") as run, patch.object(
             self.module, "_read_frame", return_value=(run.header, run.archive),
         ), patch.object(self.module.sys, "stdout") as stdout:
             stdout.buffer = output
@@ -414,6 +484,30 @@ class ControlledStageFailureLocusTest(unittest.TestCase):
             "result": "stage_failed_and_rollback_attempted",
             "schema": "amn2.phase16.controlled-stage-outcome.v1",
         }))
+
+    def test_main_reports_recovery_required_even_when_audit_publication_fails(self):
+        for fail_publication in (False, True):
+            with self.subTest(fail_publication=fail_publication), tempfile.TemporaryDirectory() as temporary:
+                output = io.BytesIO()
+                with LocalStageHarness(self.module, Path(temporary), "runtime_partial_timeout") as run:
+                    original = self.module._atomic_json
+
+                    def publish(path, value):
+                        if fail_publication and path.name in {"outcome.json", "failure-locus.json"}:
+                            raise OSError("synthetic-raw-audit-write")
+                        return original(path, value)
+
+                    with patch.object(self.module, "_atomic_json", side_effect=publish), patch.object(
+                        self.module, "_read_frame", return_value=(run.header, run.archive),
+                    ), patch.object(self.module.sys, "stdout") as stdout:
+                        stdout.buffer = output
+                        self.assertEqual(self.module.main(), 70)
+                    self.assertEqual(output.getvalue(), canonical({
+                        "general_issuance_enabled": False, "package_id": self.module.PACKAGE_ID,
+                        "result": "recovery_required", "schema": "amn2.phase16.controlled-stage-outcome.v1",
+                    }))
+                    self.assertTrue(run.paths["PACKAGE_ROOT"].is_dir())
+                    self.assertEqual(run.backup.read_bytes(), b"keep this backup")
 
 
 if __name__ == "__main__":

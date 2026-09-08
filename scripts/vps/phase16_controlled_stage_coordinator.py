@@ -81,6 +81,10 @@ class StageCoordinatorError(ValueError):
         self.failure_class = failure_class if failure_class in FAILURE_CLASSES else "internal"
 
 
+class StageRecoveryRequiredError(StageCoordinatorError):
+    """Stage completion is unknown; preserve resources for separate recovery."""
+
+
 def classify_stage_failure(error: Exception) -> str:
     """Never derive a persisted class from exception text or subprocess output."""
     if isinstance(error, StageCoordinatorError):
@@ -628,6 +632,7 @@ def execute_stage(header: dict[str, object], archive: bytes) -> dict[str, object
     package_installed = False
     application_completed = False
     runtime_completed = False
+    stage_in_flight = False
     before_awg2 = ""
     request = None
     expected_claims = {}
@@ -698,12 +703,16 @@ def execute_stage(header: dict[str, object], archive: bytes) -> dict[str, object
         checkpoint("claims_issued")
         checkpoint("application_entry")
         failure_locus = "application_stage"
+        stage_in_flight = True
         _run_stage(app_script, app_claim, "APPLICATION_STAGE", request)
+        stage_in_flight = False
         application_completed = True
         checkpoint("application_complete")
         checkpoint("runtime_entry")
         failure_locus = "runtime_stage"
+        stage_in_flight = True
         _run_stage(runtime_script, runtime_claim, "AWG31_RUNTIME_STAGE", request)
+        stage_in_flight = False
         runtime_completed = True
         checkpoint("runtime_complete")
         failure_locus = "awg2_after_snapshot"
@@ -733,8 +742,9 @@ def execute_stage(header: dict[str, object], archive: bytes) -> dict[str, object
         checkpoint("transaction_outcome_written")
         return outcome
     except Exception as error:
+        recovery_required = stage_in_flight
         rollback_failed = False
-        rollback_milestones = ["rollback_started"]
+        rollback_milestones = [] if recovery_required else ["rollback_started"]
 
         def rollback_attempt(operation) -> None:
             nonlocal rollback_failed
@@ -744,29 +754,35 @@ def execute_stage(header: dict[str, object], archive: bytes) -> dict[str, object
             except Exception:
                 rollback_failed = True
 
-        if runtime_completed:
-            rollback_attempt(_rollback_runtime)
-        if application_completed:
-            if APPLICATION_RELEASE.is_dir() and not APPLICATION_RELEASE.is_symlink():
-                rollback_attempt(lambda: shutil.rmtree(APPLICATION_RELEASE))
-            rollback_attempt(lambda: APPLICATION_LEDGER.unlink(missing_ok=True))
-        rollback_attempt(lambda: COORDINATOR_LEDGER.unlink(missing_ok=True))
-        if package_installed and PACKAGE_ROOT.is_dir() and not PACKAGE_ROOT.is_symlink():
-            rollback_attempt(lambda: shutil.rmtree(PACKAGE_ROOT))
+        # A failed stage call proves neither resource ownership nor child-process
+        # quiescence. Keep the package (also the existing retry barrier) and all
+        # resources intact until separately authorized recovery establishes both.
+        if not recovery_required:
+            if runtime_completed:
+                rollback_attempt(_rollback_runtime)
+            if application_completed:
+                if APPLICATION_RELEASE.is_dir() and not APPLICATION_RELEASE.is_symlink():
+                    rollback_attempt(lambda: shutil.rmtree(APPLICATION_RELEASE))
+                rollback_attempt(lambda: APPLICATION_LEDGER.unlink(missing_ok=True))
+            rollback_attempt(lambda: COORDINATOR_LEDGER.unlink(missing_ok=True))
+            if package_installed and PACKAGE_ROOT.is_dir() and not PACKAGE_ROOT.is_symlink():
+                rollback_attempt(lambda: shutil.rmtree(PACKAGE_ROOT))
         failure = {
             "awg2_state_equal": None,
             "backup_preserved": True,
             "general_issuance_enabled": False,
             "package_id": PACKAGE_ID,
-            "result": "rollback_failed" if rollback_failed else "rolled_back",
+            "result": "recovery_required" if recovery_required else (
+                "rollback_failed" if rollback_failed else "rolled_back"
+            ),
             "schema": "amn2.phase16.controlled-stage-outcome.v1",
             "transaction_id": transaction_id,
         }
         rollback_attempt(lambda: _atomic_json(transaction / "outcome.json", failure))
-        if not rollback_failed:
+        if not recovery_required and not rollback_failed:
             rollback_milestones.append("rollback_attempts_completed")
         try:
-            # Audit publication cannot prevent or replace mandatory rollback above.
+            # Audit publication cannot replace cleanup or authorize unknown-resource deletion.
             # No artifact is trusted before exact request/approval/coordinator binding.
             if request is not None and failure_locus in FAILURE_LOCI:
                 artifact = build_milestone_document(request, milestones)
@@ -777,7 +793,9 @@ def execute_stage(header: dict[str, object], archive: bytes) -> dict[str, object
                     "failure_class": classify_stage_failure(error),
                     "failure_locus": failure_locus,
                     "rollback_milestones": rollback_milestones,
-                    "rollback_status": "attempt_failed" if rollback_failed else "attempts_completed_unverified",
+                    "rollback_status": "recovery_required" if recovery_required else (
+                        "attempt_failed" if rollback_failed else "attempts_completed_unverified"
+                    ),
                     "runtime_claim_entry": classify_claim_entry(
                         transaction / "runtime-claim.json", expected_claims.get("runtime"),
                     ),
@@ -787,6 +805,10 @@ def execute_stage(header: dict[str, object], archive: bytes) -> dict[str, object
                 _atomic_json(transaction / "failure-locus.json", artifact)
         except Exception:
             pass
+        if recovery_required:
+            raise StageRecoveryRequiredError(
+                "stage recovery required", failure_class=classify_stage_failure(error),
+            ) from error
         raise
 
 
@@ -794,11 +816,11 @@ def main() -> int:
     try:
         header, archive = _read_frame()
         outcome = execute_stage(header, archive)
-    except Exception:
+    except Exception as error:
         outcome = {
             "general_issuance_enabled": False,
             "package_id": PACKAGE_ID,
-            "result": "stage_failed_and_rollback_attempted",
+            "result": "recovery_required" if isinstance(error, StageRecoveryRequiredError) else "stage_failed_and_rollback_attempted",
             "schema": "amn2.phase16.controlled-stage-outcome.v1",
         }
         sys.stdout.buffer.write(canonical_json_bytes(outcome))
