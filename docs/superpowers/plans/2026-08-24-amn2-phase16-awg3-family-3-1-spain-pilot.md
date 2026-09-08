@@ -2,8 +2,10 @@
 
 ## Актуальный порядок и gates — 2026-09-08
 
-Единственный текущий execution status Phase 16. Baseline документационной правки:
-`2d63b5572d8bca6aa6adc6dbfc6c043e6d6884d5`, не deployed revision.
+Единственный текущий execution status Phase 16. Исходный baseline документационной
+оптимизации: `2d63b5572d8bca6aa6adc6dbfc6c043e6d6884d5`. Локальные исправления ниже
+синхронизированы по source commit `b6c5fd7f188473b1f2c079115a3cfd4d4459f01a`;
+это не package/deployed revision и не указание текущего checkout будущих запусков.
 История вынесена в отдельное приложение; её GO/approvals не являются командами.
 
 ### Границы доказательств
@@ -27,6 +29,39 @@
 - Minimal runtime не завершает application integration. Прежние stage-попытки
   STOP; отсутствие ресурсов в recovery receipt не доказывает успешный rollback.
 
+### Завершённые локальные исправления stage — 2026-09-08
+
+Изменены только mutable source и offline-тесты. Package016 не изменён и не
+пересобран; эти исправления не развёрнуты и не закрывают client/quality gates.
+Числа ниже — результаты уже выполненных целевых RED/GREEN, не новый прогон.
+
+| Commit | Исправление | Offline evidence |
+| --- | --- | --- |
+| `db9f4a0` | Application cleanup удаляет staging только после его эксклюзивного создания текущим запуском; прежний staging сохраняется | 2 ожидаемых падения → 5/5 PASS |
+| `e97eda2` | Обнаруженная ошибка cleanup отражается как `rollback_failed`, остальные шаги очистки продолжаются | 3 ожидаемых падения → 10/10 PASS |
+| `b6c5fd7` | Неподтверждённое завершение application/runtime stage, включая timeout, даёт `recovery_required`; координатор не выполняет cleanup | 7 ожидаемых падений → 13/13 PASS |
+
+Источники: [application shell](../../../scripts/vps/phase16_application_stage_remote.sh),
+[coordinator](../../../scripts/vps/phase16_controlled_stage_coordinator.py),
+[ownership suite](../../../tests/test_phase16_application_staging_ownership.py),
+[failure-locus suite](../../../tests/test_phase16_controlled_stage_failure_locus.py).
+Ownership suite исполняла shell на временных fixtures; POSIX modes на Windows не
+проверялись. Failure-locus suite исполняла реальный coordinator с временными файлами
+и заменой внешних OS-команд; это не реальное прерывание Linux-процессов или live rollback.
+
+**Граница recovery остаётся открытой.** При `recovery_required` координатор сохраняет
+package, имеющийся backup и ресурсы; сохранённый package блокирует новый stage даже
+с другим transaction ID. Выходной результат остаётся `recovery_required` и при сбое
+записи audit-файлов. Это не доказывает наличие backup до его создания, сохранность
+данных от действий дочернего процесса или остановку оставшихся процессов.
+Автоматический recovery и управление деревом процессов не реализованы.
+`rollback_failed` означает обнаруженную ошибку cleanup; прежний `rolled_back` на
+остальных путях не заменяет readback (`attempts_completed_unverified`).
+Не удалять retained package ради обхода блокировки и не повторять закрытые тесты
+на неизменном коде. Для recovery сначала нужны отдельный согласованный scope,
+доказательство прекращения операций и ownership ресурсов; live-чтение, сигналы
+и удаления требуют соответствующих точных approvals.
+
 ### TASK_PLAN_BY_CRITICALITY
 
 1. **P0 — quality/A/B, ОТЛОЖЕНО.** После возврата оператора: подтвердить импорт
@@ -41,17 +76,21 @@
 3. **P1 — DNS measurement, STOP.** Пересмотр методики — только отдельный scope
    при реальной необходимости. Не наращивать tooling ради открытого gate.
    Полный runner/endpoint manifest/stability/server coverage не готовы.
-4. **P2 — integration, BLOCKED предыдущими gates.** После клиентских и quality
+4. **P1 — controlled-stage recovery, НЕ РЕАЛИЗОВАН.** Локальная защита и её
+   offline-проверки завершены выше. Следующий самостоятельный scope — согласовать
+   прекращение операций, доказательства ownership и readback до удаления;
+   не превращать `recovery_required` в автоматическое разрешение cleanup.
+5. **P2 — integration, BLOCKED предыдущими gates.** После клиентских и quality
    доказательств: checksum/state/rollback-bound approval, проверка persistence,
    restart policy, leaks и границ отката. Затем Task 5 и Task 6.
 
 ### Текущий вертикальный статус
 
 - ✅ Task 0 — baseline.
-- ✅ Task 1 — package016/local tooling; DNS measurement bridge STOP.
+- ✅ Task 1 — package016/local tooling; три stage-защиты завершены только локально; DNS bridge STOP.
 - ✅ Task 2 — исторические Spain gates/diagnostics, не свежий preflight.
 - ✅ Task 3A — minimal runtime по историческим evidence.
-- ⏳ Task 3B — application integration не завершена.
+- ⏳ Task 3B — application integration и отдельный recovery не завершены.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.
@@ -60,7 +99,7 @@
 - ⏳ Task 6 — closeout заблокирован.
 
 AWG2_UNTOUCHED; package016 immutable; general issuance disabled.
-Scope пакета 2026-09-08 — пункты 1–3 документационной оптимизации; без live/stage/install/push.
+Текущая синхронизация — только этот план; без новых тестов, package/live/stage/install/push.
 Проверки и Git — по [AGENTS.md](../../../AGENTS.md): docs-only без runtime-тестов;
 для code fix — targeted RED/GREEN; ошибка инструмента = UNKNOWN.
 Детали выполненного читать адресно в [историческом приложении](2026-09-08-phase16-execution-history.md) и в
