@@ -58,7 +58,14 @@ flowchart TD
 4. [Coordinator](../scripts/vps/phase16_controlled_stage_coordinator.py) проверяет
    package/request/coordinator binding, фиксирует milestones и AWG2 snapshot,
    выдаёт claims и последовательно вызывает application-stage, затем runtime-stage.
-   Ошибки имеют failure locus и ограниченную процедуру rollback/outcome.
+   Ошибки имеют failure locus. При неподтверждённом завершении stage результат
+   `recovery_required` запрещает cleanup координатором; package, имеющийся backup
+   и ресурсы сохраняются, но остановка дочерних процессов этим не доказана.
+   `rollback_failed` означает обнаруженную ошибку cleanup; `rolled_back` без
+   readback (`attempts_completed_unverified`) не подтверждает восстановление.
+   Отдельные gates задаёт [согласованный recovery-контракт v1](superpowers/specs/2026-09-08-phase16-controlled-stage-recovery-contract.ru.md);
+   автоматический recovery не реализован. Это поведение mutable source,
+   не подтверждение развёртывания исправлений в immutable package016 или на VPS.
 5. [Application-stage](../scripts/vps/phase16_application_stage_remote.sh)
    создаёт backup SQLite, сохраняет release snapshot и stage ledger. Это не
    доказательство переключения работающего приложения или завершённой интеграции.
