@@ -76,10 +76,12 @@ package, имеющийся backup и ресурсы; сохранённый pac
 3. **P1 — DNS measurement, STOP.** Пересмотр методики — только отдельный scope
    при реальной необходимости. Не наращивать tooling ради открытого gate.
    Полный runner/endpoint manifest/stability/server coverage не готовы.
-4. **P1 — controlled-stage recovery, НЕ РЕАЛИЗОВАН.** Локальная защита и её
-   offline-проверки завершены выше. Следующий самостоятельный scope — согласовать
-   прекращение операций, доказательства ownership и readback до удаления;
-   не превращать `recovery_required` в автоматическое разрешение cleanup.
+4. **P1 — controlled-stage recovery, КОНТРАКТ СОГЛАСОВАН; НЕ РЕАЛИЗОВАН.**
+   [Контракт v1](../specs/2026-09-08-phase16-controlled-stage-recovery-contract.ru.md):
+   `CONTRACT_APPROVED_NOT_IMPLEMENTED_NOT_EXECUTED`. Локальная защита и её
+   offline-проверки завершены выше. Inventory, прекращение операций, адресная
+   очистка и readback — раздельные gates. Реализация и live-операции требуют
+   отдельного scope/approval; `recovery_required` не разрешает cleanup.
 5. **P2 — integration, BLOCKED предыдущими gates.** После клиентских и quality
    доказательств: checksum/state/rollback-bound approval, проверка persistence,
    restart policy, leaks и границ отката. Затем Task 5 и Task 6.
@@ -90,7 +92,7 @@ package, имеющийся backup и ресурсы; сохранённый pac
 - ✅ Task 1 — package016/local tooling; три stage-защиты завершены только локально; DNS bridge STOP.
 - ✅ Task 2 — исторические Spain gates/diagnostics, не свежий preflight.
 - ✅ Task 3A — minimal runtime по историческим evidence.
-- ⏳ Task 3B — application integration и отдельный recovery не завершены.
+- ⏳ Task 3B — integration/recovery не завершены; recovery-контракт v1 согласован.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.
@@ -99,7 +101,8 @@ package, имеющийся backup и ресурсы; сохранённый pac
 - ⏳ Task 6 — closeout заблокирован.
 
 AWG2_UNTOUCHED; package016 immutable; general issuance disabled.
-Текущая синхронизация — только этот план; без новых тестов, package/live/stage/install/push.
+Текущая синхронизация — план и согласованный recovery-контракт; без кода, новых
+тестов, package/live/stage/install/push.
 Проверки и Git — по [AGENTS.md](../../../AGENTS.md): docs-only без runtime-тестов;
 для code fix — targeted RED/GREEN; ошибка инструмента = UNKNOWN.
 Детали выполненного читать адресно в [историческом приложении](2026-09-08-phase16-execution-history.md) и в
