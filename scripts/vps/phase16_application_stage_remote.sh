@@ -119,6 +119,7 @@ backup_path="/var/lib/amn2-phase16/rollback/application/${state_hash}.sqlite3"
 staging_root="${release_root}.staging"
 support_path="${package_root}/tooling/scripts/vps/phase16_stage_support.py"
 release_created=false
+staging_created=false
 
 rollback_application_stage() {
     local status=$?
@@ -126,7 +127,7 @@ rollback_application_stage() {
     if [[ "$release_created" == true && -d "$release_root" ]]; then
         /usr/bin/rm -rf --one-file-system "$release_root"
     fi
-    if [[ -d "$staging_root" ]]; then
+    if [[ "$staging_created" == true && -d "$staging_root" && ! -L "$staging_root" ]]; then
         /usr/bin/rm -rf --one-file-system "$staging_root"
     fi
     printf '%s\n' 'application_stage_rolled_back' >&2
@@ -165,12 +166,18 @@ PHASE16_CONSUME_PY
 
 stage_application_snapshot() {
     [[ -f "$package_root/manifest.json" && -d "$package_root/source/app" ]]
-    [[ ! -e "$release_root" && ! -e "$staging_root" ]]
-    /usr/bin/install -d -m 0750 "$staging_root"
+    [[ ! -e "$release_root" && ! -e "$staging_root" && ! -L "$staging_root" ]]
+    if [[ ! -d "$(dirname "$staging_root")" ]]; then
+        /usr/bin/install -d -m 0750 "$(dirname "$staging_root")"
+    fi
+    # Exclusive creation: never adopt a directory created by another attempt.
+    /usr/bin/mkdir -m 0750 "$staging_root"
+    staging_created=true
     /usr/bin/cp -a "$package_root/source/." "$staging_root/"
     /usr/bin/python3 -I -B -m compileall -q "$staging_root/app"
     /usr/bin/mv "$staging_root" "$release_root"
     release_created=true
+    staging_created=false
 }
 
 write_stage_ledger() {
