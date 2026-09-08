@@ -758,7 +758,7 @@ def execute_stage(header: dict[str, object], archive: bytes) -> dict[str, object
             "backup_preserved": True,
             "general_issuance_enabled": False,
             "package_id": PACKAGE_ID,
-            "result": "rolled_back",
+            "result": "rollback_failed" if rollback_failed else "rolled_back",
             "schema": "amn2.phase16.controlled-stage-outcome.v1",
             "transaction_id": transaction_id,
         }

@@ -132,11 +132,13 @@ class LocalStageHarness:
         elif args[:2] == ["/usr/bin/systemctl", "is-active"]:
             self.snapshot_count += 1
             stdout = b"active\n"
-            if self.snapshot_count == 2 and self.scenario in {"awg2_after", "rollback_error"}:
+            if self.snapshot_count == 2 and self.scenario in {"awg2_after", "rollback_error", "rollback_exit"}:
                 code, stderr = 1, b"synthetic-raw-owner-detail\n"
         elif args[:2] == ["/usr/bin/systemctl", "stop"]:
             if self.scenario == "rollback_error":
                 raise OSError("synthetic-raw-rollback-detail")
+            if self.scenario == "rollback_exit":
+                code, stderr = 1, b"synthetic-raw-rollback-exit\n"
         elif args == ["/usr/bin/systemctl", "daemon-reload"]:
             pass
         elif args[:3] == [
@@ -277,7 +279,7 @@ class ControlledStageFailureLocusTest(unittest.TestCase):
                     })
                 self.assertEqual(self.module.classify_stage_failure(observed.exception), expected)
 
-    def assert_failure_is_safe(self, run, failure):
+    def assert_failure_is_safe(self, run, failure, *, expected_result="rolled_back"):
         self.assertEqual(set(failure), {
             "application_claim_entry", "completed_milestones", "failure_class", "failure_locus",
             "general_issuance_enabled", "last_completed_milestone", "manifest_sha256",
@@ -299,7 +301,9 @@ class ControlledStageFailureLocusTest(unittest.TestCase):
         self.assertFalse(run.paths["PACKAGE_ROOT"].exists())
         self.assertFalse(run.paths["APPLICATION_RELEASE"].exists())
         self.assertFalse(run.paths["APPLICATION_LEDGER"].exists())
-        self.assertEqual(json.loads((run.transaction / "outcome.json").read_bytes())["result"], "rolled_back")
+        outcome_raw = (run.transaction / "outcome.json").read_bytes()
+        self.assertEqual(json.loads(outcome_raw)["result"], expected_result)
+        self.assertNotIn(b"synthetic-raw", outcome_raw)
 
     def test_runtime_claim_consumption_never_becomes_runtime_completion(self):
         with LocalStageHarness(self.module, self.root, "runtime_stage") as run:
@@ -339,16 +343,42 @@ class ControlledStageFailureLocusTest(unittest.TestCase):
                     self.assertFalse(run.paths["RUNTIME_UNIT_PATH"].exists())
 
     def test_rollback_failure_is_reported_and_does_not_skip_other_cleanup(self):
-        with LocalStageHarness(self.module, self.root, "rollback_error") as run:
-            with self.assertRaises(Exception):
-                run.execute()
-            failure = run.failure()
-            self.assert_failure_is_safe(run, failure)
-            self.assertEqual(failure["failure_locus"], "awg2_after_snapshot")
-            self.assertEqual(failure["rollback_status"], "attempt_failed")
-            self.assertEqual(failure["rollback_milestones"], ["rollback_started"])
-            self.assertIn(["/usr/bin/systemctl", "daemon-reload"], run.commands)
+        for scenario in ("rollback_error", "rollback_exit"):
+            with self.subTest(scenario=scenario), tempfile.TemporaryDirectory() as temporary:
+                with LocalStageHarness(self.module, Path(temporary), scenario) as run:
+                    with self.assertRaises(self.module.StageCoordinatorError):
+                        run.execute()
+                    failure = run.failure()
+                    self.assert_failure_is_safe(run, failure, expected_result="rollback_failed")
+                    self.assertEqual(failure["failure_locus"], "awg2_after_snapshot")
+                    self.assertEqual(failure["rollback_status"], "attempt_failed")
+                    self.assertEqual(failure["rollback_milestones"], ["rollback_started"])
+                    self.assertIn(["/usr/bin/systemctl", "daemon-reload"], run.commands)
+                    self.assertFalse(run.paths["RUNTIME_STATE_ROOT"].exists())
+
+    def test_application_cleanup_exception_reports_failure_and_preserves_original_error(self):
+        with LocalStageHarness(self.module, self.root, "awg2_after") as run:
+            original_rmtree = self.module.shutil.rmtree
+
+            def remove(path, *args, **kwargs):
+                if path == run.paths["APPLICATION_RELEASE"]:
+                    raise OSError("synthetic-raw-application-cleanup")
+                return original_rmtree(path, *args, **kwargs)
+
+            with patch.object(self.module.shutil, "rmtree", side_effect=remove):
+                with self.assertRaisesRegex(self.module.StageCoordinatorError, "awg2 snapshot"):
+                    run.execute()
+            raw = (run.transaction / "outcome.json").read_bytes()
+            outcome = json.loads(raw)
+            self.assertEqual(outcome["result"], "rollback_failed")
+            self.assertFalse(outcome["general_issuance_enabled"])
+            self.assertNotIn(b"synthetic-raw", raw)
+            self.assertEqual(run.failure()["rollback_status"], "attempt_failed")
+            self.assertTrue(run.paths["APPLICATION_RELEASE"].is_dir())
+            self.assertFalse(run.paths["APPLICATION_LEDGER"].exists())
+            self.assertFalse(run.paths["PACKAGE_ROOT"].exists())
             self.assertFalse(run.paths["RUNTIME_STATE_ROOT"].exists())
+            self.assertEqual(run.backup.read_bytes(), b"keep this backup")
 
     def test_success_records_full_milestones_without_failure_or_rollback(self):
         with LocalStageHarness(self.module, self.root) as run:
