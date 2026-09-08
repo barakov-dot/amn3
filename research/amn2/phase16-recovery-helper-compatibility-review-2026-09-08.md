@@ -52,14 +52,50 @@ Receipt и consumed approvals не разрешают повтор того за
 `phase16_awg31_client_recovery.py` решает иную задачу клиентского профиля Jc/I1;
 это не замена server recovery inventory.
 
-## Следующая граница
+## Следующая граница на момент R1 (история)
 
 Не повторять R1 на неизменных исходниках. Возможный отдельный ограниченный code scope:
 новая локальная версия parser/validator с поддержкой текущих outcome/milestone
 классов и одним offline TDD-набором; старые helper, receipts и package016 сохранить.
-Реализация ещё не выполнена. Даже её PASS не докажет ownership/quiescence,
+На момент R1 реализация ещё не была выполнена; локальное обновление ниже. Даже её PASS не докажет ownership/quiescence,
 сохранность pilot или готовность runner к live inventory/recovery.
 
 Любой live inventory, signal, cleanup и новый stage имеют отдельные gates
 контракта. Эта запись их не разрешает. Очередь задач — только в
 [актуальном плане](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
+
+## Локальный parser после подтверждения оператора — 2026-09-08
+
+Статус: LOCAL_PARSER_IMPLEMENTED_OFFLINE_VERIFIED_NOT_INTEGRATED_NOT_EXECUTED_LIVE.
+Оператор разрешил продолжение подготовленных пакетов. Baseline AMN3:
+`ff327a6e94be31163b6f07d81bbd934b4ea3575e`.
+Добавлен [чистый parser](../../scripts/vps/phase16_recovery_metadata.py) и
+[целевой набор](../../tests/test_phase16_recovery_metadata.py).
+Входы — переданные metadata и независимые exact bindings; исторические значения
+transaction007 не встроены. parse_canonical ограничивает JSON 64 KiB и отклоняет
+повторные ключи, NaN и неканоническую форму. classify_metadata проверяет пару
+outcome/milestone или failure-locus: schema, поля, bindings, boolean-типы,
+последовательность milestones и согласованность result/rollback_status/steps.
+
+Поддержаны recovery_required с пустым rollback_milestones и rollback_failed с
+rollback_started. rolled_back остаётся valid_rolled_back_readback_required.
+Короткий stdout без transaction/bindings не заменяет outcome-файл. Неизвестный
+или противоречивый input возвращает invalid; ошибки JSON не выводят исходный текст.
+`valid_*` означает только совместимость формата и bindings. Даже backup_preserved
+в metadata не доказывает фактическое наличие/целостность backup. UNKNOWN runtime_image
+не превращается в доказательство отсутствия image или разрешение cleanup.
+
+RED: отсутствующий модуль, FileNotFoundError подтверждён адресным повтором.
+GREEN: 27 PASS в одном tests/test_phase16_recovery_metadata.py. Пять сценариев
+исполняют существующий coordinator в его offline-harness с временными файлами и
+заменёнными OS-командами: application/runtime timeout, rollback_error, awg2_after,
+success. Это producer/parser compatibility, не реальный Linux/VPS rollback.
+Старый collector/driver не изменён и не подключён к новому parser; его старые
+bindings и live-ограничения остаются в силе. Quiescence/ownership/runner не реализованы.
+
+Параллельная проверка доступности import acceptance: в Windows registry обнаружен
+AmneziaVPN 5.0.1.5. @oai/sky через node_repl не инициализировался: sandbox
+`apply deny-read ACLs`. Клиенты/профили не запускались и не изменялись; безопасная
+изоляция не подтверждена. Import acceptance трёх клиентов остаётся NOT_EXECUTED.
+Следующий шаг — восстановить доступный изолированный клиентский test environment;
+live inventory/signals/cleanup/stage по-прежнему требуют собственных exact gates.

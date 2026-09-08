@@ -72,7 +72,7 @@ AmneziaWG — `Neobyatnaya.NET.conf`; AmneziaVPN/DefaultVPN — Amnezia envelope
 не проверены, DefaultVPN MTU остаётся отдельным ограничением. Delivery handlers,
 общая issuance и package016 не переключены; код не развёрнут. Следующая граница
 этого пакета — изолированный import acceptance, не Windows traffic test и не A/B.
-Recovery-parser остаётся отдельным нереализованным scope; #3043 — ожидание реакции.
+Recovery-parser реализован только локально (см. P1 recovery ниже); #3043 — ожидание реакции.
 
 ### TASK_PLAN_BY_CRITICALITY
 
@@ -100,9 +100,10 @@ Recovery-parser остаётся отдельным нереализованны
    [результат и точные исходники](../../../research/amn2/phase16-recovery-helper-compatibility-review-2026-09-08.md).
    Старые collector/driver найдены, checksum подтверждены; повторный поиск/аудит
    не нужен. Parser не принимает новые outcomes; старый runner привязан к прежней
-   транзакции и не доказывает quiescence/сохранность pilot. Возможный следующий
-   code scope — новая локальная версия parser с одним offline TDD-набором;
-   пока не реализована и не разрешена этим планом. Это не готовность live recovery.
+   транзакции и не доказывает quiescence/сохранность pilot. Ограниченный
+   code scope parser выполнен по последующему подтверждению оператора:
+   [локальная реализация и 27 offline PASS](../../../research/amn2/phase16-recovery-helper-compatibility-review-2026-09-08.md#локальный-parser-после-подтверждения-оператора--2026-09-08).
+   Старый collector/driver не подключён; ownership/quiescence и live recovery не готовы.
 5. **P2 — integration, BLOCKED предыдущими gates.** После клиентских и quality
    доказательств: checksum/state/rollback-bound approval, проверка persistence,
    restart policy, leaks и границ отката. Затем Task 5 и Task 6.
