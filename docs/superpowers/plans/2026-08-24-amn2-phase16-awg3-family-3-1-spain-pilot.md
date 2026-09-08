@@ -62,6 +62,18 @@ package, имеющийся backup и ресурсы; сохранённый pac
 доказательство прекращения операций и ownership ресурсов; live-чтение, сигналы
 и удаления требуют соответствующих точных approvals.
 
+### Локальное именование импорта — 2026-09-08
+
+По подтверждённому оператором scope добавлен явный client-specific export API
+в AMN2 source commit `b3ed202ba118adb36c474eab5722065ea420d274`:
+AmneziaWG — `Neobyatnaya.NET.conf`; AmneziaVPN/DefaultVPN — Amnezia envelope с description.
+[Результат, исходники и границы](../../../research/amn2/phase16-client-import-naming-research-2026-09-08.md#выполненная-локальная-реализация-после-подтверждения-оператора).
+51 целевой offline-тест PASS. Реальный import/сохранность параметров в клиенте
+не проверены, DefaultVPN MTU остаётся отдельным ограничением. Delivery handlers,
+общая issuance и package016 не переключены; код не развёрнут. Следующая граница
+этого пакета — изолированный import acceptance, не Windows traffic test и не A/B.
+Recovery-parser остаётся отдельным нереализованным scope; #3043 — ожидание реакции.
+
 ### TASK_PLAN_BY_CRITICALITY
 
 1. **P0 — quality/A/B, ОТЛОЖЕНО.** После возврата оператора: подтвердить импорт

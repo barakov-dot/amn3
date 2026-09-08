@@ -1,6 +1,6 @@
 # Phase 16: имя при импорте и подготовленные работы
 
-Дата: 2026-09-08. Статус: SOURCE_RESEARCH_COMPLETE_IMPLEMENTATION_NOT_STARTED.
+Дата: 2026-09-08. Статус: LOCAL_EXPORT_IMPLEMENTED_IMPORT_NOT_VERIFIED.
 Основание: запрос оператора подготовить полезные работы в ожидании #3043 и найти
 автоматическое именование для AmneziaVPN, AmneziaWG и DefaultVPN.
 Baseline: 8391412315d4dadff2c47d2fb5a287c0b523e1d0. Только локальное чтение и
@@ -81,7 +81,7 @@ QR-flow не подтверждена. Не обещать универсаль�
    повторный импорт. Для DefaultVPN сначала установить версию/связь со source.
    Это не просьба повторить отложенные iPhone/две сети/A/B и не Windows traffic test.
 
-Эти scopes подготовлены, код и реальные конфиги не изменены. DNS bridge STOP;
+На момент исследования scopes были только подготовлены. Последующая локальная реализация описана ниже; реальные конфиги не изменены. DNS bridge STOP;
 quality/A/B и iPhone/две сети отложены; integration/acceptance/closeout не закрыты.
 Сохраняем завершённые stage-защиты, R1 и документационную оптимизацию без повтора.
 
@@ -113,3 +113,35 @@ quality/A/B и iPhone/две сети отложены; integration/acceptance/c
 исходники трёх клиентов и поиск issues. Это не утверждение о прочтении всех
 репозиториев организации, всех веток или проверке бинарных сборок.
 AWG2_UNTOUCHED; package016 immutable; SSH/stage/install/push/issuance не выполнялись.
+
+## Выполненная локальная реализация после подтверждения оператора
+
+Оператор: «Продолжай, если нужно мое подтверждение то даю тебе его».
+Выполнен первый ограниченный пакет — export API; recovery-parser не реализовывался.
+AMN2 source worktree: `C:/Users/SooL/Documents/amn2-phase15-local-package-bootstrap-readiness`.
+Source baseline `a3682fc44dd9e74ff96392ad99623474facf377f`;
+локальный commit `b3ed202ba118adb36c474eab5722065ea420d274`.
+Изменены только `app/vpn/client_import_artifacts.py`, `app/vpn/config_templates.py`,
+`tests/vpn/test_client_import_artifacts.py`, `docs/CLIENT_IMPORT_NAMING.md`.
+
+Существующий build_vpn_import_link получил явный target_client. Новый
+build_client_import_artifact выдаёт в памяти точный .conf basename для AmneziaWG
+или qCompress/URL-safe Base64 Amnezia envelope для AmneziaVPN/DefaultVPN.
+Raw config сохраняется точно; protocol metadata переносится явно. Неизвестные
+поля, неоднозначные входы и переданный конфликт имени отклоняются без echo данных.
+Проверка existing_names зависит от inventory вызывающей стороны; функция не
+обследует устройство и не перезаписывает туннели. Все результаты помечены как
+не прошедшие import acceptance; DefaultVPN содержит предупреждение о MTU.
+
+TDD: 17 ожидаемых падений / 1 PASS до реализации; после исправления ошибочного
+диапазона в тесте и реализации итоговый целевой набор — 51 PASS:
+`tests/vpn/test_client_import_artifacts.py tests/vpn/test_config_templates.py tests/bot/test_delivery.py`.
+Python 3.12.14, существующие локальные зависимости; ничего не устанавливалось.
+Синтетические fixtures, без Qt/native import, сети, реальных секретов и БД.
+Старый режим и delivery handlers не переключены, проверены на регрессию.
+
+Следующая граница: отдельно разрешённая изолированная проверка импорта и параметров
+в конкретных версиях клиентов; затем выбор нового режима в delivery. Это не
+повтор Windows traffic/quality A/B. Сам export API не меняет существующие профили.
+AMN2 origin исторически указывает на amn3, remote amn2 — на amn2; push не выполнялся.
+AWG2/runtime/package016/общая issuance сохранены; stage/install/config delivery отсутствуют.
