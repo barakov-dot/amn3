@@ -83,3 +83,32 @@ PE machine обоих файлов = 8664 (x64). Build и bundle SHA совпа�
 general issuance disabled; Spain stage/install/SSH отсутствуют. Build Tools/SDK
 добавлены в систему по разрешению оператора; это не утверждение о полном аудите ОС.
 Комментарий upstream остаётся непубликованным (ранее GitHub integration HTTP 403).
+
+## Подготовка Windows Sandbox — 2026-09-09
+
+По последующему «приступай, модель менять не буду» подготовлена изолированная
+проверка. Windows Sandbox ранее Disabled; HypervisorPresent=true.
+Enable-WindowsOptionalFeature Containers-DisposableClientVM -All -NoRestart
+завершился успешно: State=Enabled, RestartNeeded=true. Перезагрузка НЕ выполнялась.
+До перезагрузки Sandbox и исправленная AmneziaVPN не запускались.
+
+Готовый launcher:
+C:/Users/SooL/AppData/Local/Temp/amnezia-toolchain-20260909/Amnezia-MTU-offline-test.wsb
+
+В .wsb отключены Networking, ClipboardRedirection, AudioInput, VideoInput,
+PrinterRedirection и vGPU; память 4096 МБ. Единственная mapped folder —
+sandbox-input, ReadOnly=true. Она содержит только candidate.zip, синтетический
+Neobyatnaya.NET.vpn, Start-Test.ps1 и INSTRUCTIONS.ru.txt. Рабочие каталоги,
+профили, конфиги пользователя и полный Temp не передаются.
+
+Logon script проверяет WDAGUtilityAccount, хеш ZIP и exe, распаковывает candidate
+во внутренний C:/TestClient и запускает только клиент. Никакие post_install,
+post_uninstall, service installer или драйверы им не запускаются.
+XML parse, PowerShell syntax parse, archive hash и identity/MTU синтетической
+fixture проверены: PASS. Это статические проверки подготовки, не запуск Sandbox.
+
+Следующий шаг оператора: сохранить работу, вручную перезагрузить Windows, затем
+открыть .wsb. В песочнице импортировать файл с рабочего стола, открыть «Показать»
+и проверить description и отдельное last_config.mtu=1280. Не подключаться.
+Если клиент требует службу/выдаёт ошибку — остановиться на этом экране.
+Модель по просьбе оператора не менялась.

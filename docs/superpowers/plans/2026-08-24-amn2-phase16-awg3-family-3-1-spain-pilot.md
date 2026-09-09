@@ -99,6 +99,11 @@ BUILD_PASS_PACKAGE_PASS_NOT_LAUNCHED. Build Tools/SDK установлены п�
 и запуск candidate не выполнялись. Следующий шаг — отдельная Windows-среда для
 synthetic import acceptance; отдельная папка exe не изолирует рабочие профили/IPC.
 
+Windows Sandbox теперь включена с NoRestart; система требует перезагрузки.
+Offline .wsb подготовлен, XML/script/fixture checks PASS. Sandbox и candidate
+не запускались. Следующий шаг — ручная перезагрузка оператора и запуск .wsb
+из receipt; затем просмотр синтетического импорта без подключения.
+
 ### TASK_PLAN_BY_CRITICALITY
 
 1. **P0 — quality/A/B, ОТЛОЖЕНО.** После возврата оператора: подтвердить импорт
