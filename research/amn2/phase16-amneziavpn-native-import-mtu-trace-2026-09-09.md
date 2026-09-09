@@ -50,3 +50,29 @@ Raw .conf импорт в исходнике сохраняет явно зад�
 Другие приложения, AWG3.1 и повторный импорт этим тестом не приняты.
 
 AWG2_UNTOUCHED; package016 immutable; general issuance disabled; stage/install отсутствуют.
+
+## Исправление и upstream — 2026-09-09
+
+Найден уже открытый точечный [PR #3113](https://github.com/amnezia-vpn/amnezia-client/pull/3113),
+head a39f1c374ed760f886c62741d5645fd1c39c6630, OPEN / NOT MERGED.
+Авторский патч сохраняет непустой MTU; отсутствующий, пустой и whitespace-only
+MTU получает прежний default. [PR #3065](https://github.com/amnezia-vpn/amnezia-client/pull/3065)
+также содержит guard, дополнительно меняет глобальные defaults. Новый дубль не создан.
+
+[Сохранённый патч #3113](amnezia-pr3113-preserve-mtu.patch) получен через GitHub API;
+авторство upstream, не наша новая реализация. SHA256:
+DFC0AC37F8B332D59DBAE50328D4C81BB6657B690D7F8B3A33C4A72A72D0C16C.
+Применён только к временной копии официального importController.cpp 5.0.1.5:
+git apply --check PASS; git apply PASS; guard проверен после применения.
+Сборка и native regression tests NOT_RUN: Qt/compiler не найдены в PATH.
+Установленный бинарник не изменён; это проверенная применимость патча, не client fix acceptance.
+
+В AMN2 исправлено compatibility_note: теперь явно сообщает о 5.0.1.5 Windows,
+замене MTU на 1376 и невозможности исправить клиент сериализацией экспортера.
+Целевой RED 1 expected failure; итоговый набор export/config_templates/bot_delivery
+52 PASS. Формат, legacy delivery, реальные конфиги и issuance не изменены.
+
+Попытка добавить воспроизведение в #3113 через GitHub connector отклонена HTTP 403
+Resource not accessible by integration. Комментарий НЕ опубликован. Это ограничение
+прав интеграции GitHub, не auto-review rejection и не отказ разработчиков.
+[Текст для публикации](phase16-pr3113-comment-draft-2026-09-09.md).
