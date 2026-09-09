@@ -74,6 +74,12 @@ AmneziaWG — `Neobyatnaya.NET.conf`; AmneziaVPN/DefaultVPN — Amnezia envelope
 этого пакета — изолированный import acceptance, не Windows traffic test и не A/B.
 Recovery-parser реализован только локально (см. P1 recovery ниже); #3043 — ожидание реакции.
 
+Дополнение 2026-09-09: [проверочный лист трёх клиентов](../../../research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md)
+подготовлен, не исполнен. Windows UI runtime повторно не инициализировался
+(deny-read ACLs); импорт не запускался. GitHub API: после комментария оператора
+в #3043 новых комментариев нет. Следующий шаг — восстановить доступность штатного
+UI и подтвердить изолированную среду, затем выполнить import acceptance без подключения.
+
 ### TASK_PLAN_BY_CRITICALITY
 
 1. **P0 — quality/A/B, ОТЛОЖЕНО.** После возврата оператора: подтвердить импорт
