@@ -1,6 +1,6 @@
 # Проверка имени при импорте — три клиента
 
-Подготовлено 2026-09-09. Статус: PREPARED_NOT_EXECUTED.
+Подготовлено 2026-09-09; обновлено 2026-09-11. Статус: PARTIALLY_EXECUTED.
 Это проверочный лист к [исследованию](phase16-client-import-naming-research-2026-09-08.md),
 не новый execution plan и не разрешение установки, подключения или выдачи.
 Export source: AMN2 b3ed202ba118adb36c474eab5722065ea420d274.
@@ -19,7 +19,7 @@ Export source: AMN2 b3ed202ba118adb36c474eab5722065ea420d274.
 заданные DNS, MTU, AllowedIPs, keepalive и поддерживаемые AWG-поля. Старые fixtures
 с текстовыми placeholders могут быть отвергнуты клиентом до проверки имени;
 такой отказ не доказывает дефект envelope. Реальные ключи и профили не нужны.
-Fixture ещё не материализована. Сначала подтвердить готовность среды.
+Синтетическая fixture материализована и использована в Windows Sandbox; см. результат ниже.
 
 ## Матрица и последовательность
 
@@ -66,3 +66,11 @@ GitHub API на дату проверки: #3043 открыт, 14 коммент
 Более новых комментариев нет. Новые сообщения не отправлялись.
 
 AWG2_UNTOUCHED; package016 immutable; general issuance disabled; stage/install отсутствуют.
+
+## Результат 2026-09-11
+
+AmneziaVPN local 5.0.1.5 + PR #3113: exact_name PASS после импорта и полного
+закрытия/открытия; metadata MTU=1280 в preview PASS. Полный parameter_preservation
+UNKNOWN, сохранённый MTU после перезапуска UNKNOWN, duplicate_behavior NOT_RUN.
+AmneziaWG и DefaultVPN NOT_RUN. Offline-прогон не проверяет туннель.
+Подробности и evidence: [receipt](phase16-amneziavpn-pr3113-windows-build-2026-09-09.md#ручная-проверка-windows-sandbox--2026-09-11).

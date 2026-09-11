@@ -90,19 +90,19 @@ AmneziaVPN 5.0.1.5 NAME_PASS; native-import MTU preservation FAIL (1280 → 1376
 и повторный импорт не проверены. Следующий шаг — bounded upstream MTU reproduction
 и поиск дублей завершены: PR #3113 OPEN, патч применён к временной копии source; последующая Windows-сборка завершена ниже. AMN2 compatibility note исправлено, 52 offline PASS. Публикация комментария заблокирована GitHub integration HTTP 403; черновик сохранён в receipt. Остаются проверка исправленного клиента в отдельной среде и публикация через доступную учётную запись. Delivery не переключать, Windows traffic/A/B не повторять.
 
-### Windows-кандидат с MTU fix — 2026-09-09
+### Windows-кандидат с MTU fix — обновлено 2026-09-11
 
-[Сборка и SHA](../../../research/amn2/phase16-amneziavpn-pr3113-windows-build-2026-09-09.md):
-BUILD_PASS_PACKAGE_PASS_NOT_LAUNCHED. Build Tools/SDK установлены по разрешению
-оператора; Qt/venv/Conan изолированы по каталогам. Одна попытка сборки, 0 циклов
-исправлений. Клиент и служба x64 собраны, ZIP проверен. Системная установка VPN
-и запуск candidate не выполнялись. Следующий шаг — отдельная Windows-среда для
-synthetic import acceptance; отдельная папка exe не изолирует рабочие профили/IPC.
-
-Windows Sandbox теперь включена с NoRestart; система требует перезагрузки.
-Offline .wsb подготовлен, XML/script/fixture checks PASS. Sandbox и candidate
-не запускались. Следующий шаг — ручная перезагрузка оператора и запуск .wsb
-из receipt; затем просмотр синтетического импорта без подключения.
+[Сборка, SHA и ручная проверка](../../../research/amn2/phase16-amneziavpn-pr3113-windows-build-2026-09-09.md):
+BUILD_PASS_PACKAGE_PASS_SANDBOX_IMPORT_PARTIAL_PASS. Одна попытка сборки,
+0 циклов исправлений. Candidate запущен оператором в offline Windows Sandbox.
+Имя Neobyatnaya.NET сохранилось после импорта и полного закрытия/открытия;
+отдельное last_config.mtu=1280 подтверждено в preview. Сохранённый MTU после
+перезапуска UNKNOWN; полная сохранность параметров и duplicate import NOT_RUN.
+AmneziaWG/DefaultVPN NOT_RUN. Рабочая AmneziaVPN не заменена; туннель не проверен.
+Sandbox закрыта оператором. Повторять перезагрузки/проверку имени не требуется.
+Следующий локальный gate — parameter readback/duplicate behavior, затем отдельные
+клиенты по [чеклисту](../../../research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md).
+Windows traffic и quality gates остаются открыты; delivery не переключать.
 
 ### TASK_PLAN_BY_CRITICALITY
 
