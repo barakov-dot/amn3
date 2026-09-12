@@ -90,19 +90,19 @@ AmneziaVPN 5.0.1.5 NAME_PASS; native-import MTU preservation FAIL (1280 → 1376
 и повторный импорт не проверены. Следующий шаг — bounded upstream MTU reproduction
 и поиск дублей завершены: PR #3113 OPEN, патч применён к временной копии source; последующая Windows-сборка завершена ниже. AMN2 compatibility note исправлено, 52 offline PASS. Публикация комментария заблокирована GitHub integration HTTP 403; черновик сохранён в receipt. Остаются проверка исправленного клиента в отдельной среде и публикация через доступную учётную запись. Delivery не переключать, Windows traffic/A/B не повторять.
 
-### Windows-кандидат с MTU fix — обновлено 2026-09-11
+### Windows import — обновлено 2026-09-12
 
-[Сборка, SHA и ручная проверка](../../../research/amn2/phase16-amneziavpn-pr3113-windows-build-2026-09-09.md):
-BUILD_PASS_PACKAGE_PASS_SANDBOX_IMPORT_PARTIAL_PASS. Одна попытка сборки,
-0 циклов исправлений. Candidate запущен оператором в offline Windows Sandbox.
-Имя Neobyatnaya.NET сохранилось после импорта и полного закрытия/открытия;
-отдельное last_config.mtu=1280 подтверждено в preview. Сохранённый MTU после
-перезапуска UNKNOWN; полная сохранность параметров и duplicate import NOT_RUN.
-AmneziaWG/DefaultVPN NOT_RUN. Рабочая AmneziaVPN не заменена; туннель не проверен.
-Sandbox закрыта оператором. Повторять перезагрузки/проверку имени не требуется.
-Следующий локальный gate — parameter readback/duplicate behavior, затем отдельные
-клиенты по [чеклисту](../../../research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md).
-Windows traffic и quality gates остаются открыты; delivery не переключать.
+[Итоговый receipt](../../../research/amn2/phase16-windows-import-acceptance-2026-09-12.md):
+AmneziaVPN local 5.0.1.5 + PR #3113: имя после restart PASS, сохранённый MTU1280
+PASS; 45 expected fields в каждом из двух backup-профилей совпали. Повторный
+импорт создаёт одноимённый дубль. AmneziaWG official 3.1.0 x64: имя/MTU после
+restart PASS, UI parameters совпадают; повторный импорт отклонён. Нулевая строка
+keepalive пропускается штатным serializer; source trace завершён.
+DefaultVPN NOT_RUN: официально iOS16+, Windows release отсутствует.
+Локальная проверка не закрывает Windows traffic/quality gates и не разрешает
+переключить delivery. Следующий отдельный клиентский gate — DefaultVPN/iOS при
+возврате оператора к iPhone; автоматически не возобновлять отложенную проверку.
+Clipboard/EN-RU setup подготовлены по просьбе оператора, UI-работа ещё не подтверждена.
 
 ### TASK_PLAN_BY_CRITICALITY
 

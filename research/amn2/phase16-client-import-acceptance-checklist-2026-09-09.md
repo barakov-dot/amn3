@@ -74,3 +74,11 @@ AmneziaVPN local 5.0.1.5 + PR #3113: exact_name PASS после импорта �
 UNKNOWN, сохранённый MTU после перезапуска UNKNOWN, duplicate_behavior NOT_RUN.
 AmneziaWG и DefaultVPN NOT_RUN. Offline-прогон не проверяет туннель.
 Подробности и evidence: [receipt](phase16-amneziavpn-pr3113-windows-build-2026-09-09.md#ручная-проверка-windows-sandbox--2026-09-11).
+
+## Результат 2026-09-12
+
+[Итоговый receipt Windows](phase16-windows-import-acceptance-2026-09-12.md):
+AmneziaVPN сохранённый MTU1280 и 45 expected fields в двух профилях PASS; duplicate
+создаётся. AmneziaWG name/MTU restart PASS, параметры проверены в UI, duplicate
+отклонён; keepalive=0 omission объяснён source trace. DefaultVPN/iOS NOT_RUN.
+Результат выше за 2026-09-11 исторический. Connectivity/quality не проверены.
