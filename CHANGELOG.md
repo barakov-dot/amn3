@@ -7,6 +7,15 @@
 
 ## 2026-09-20
 
+- [Bot SSH/SQLite: завершён source review](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#bot-sqlite-и-границы-переноса--2026-09-20)
+  на AMN2 2069e41: 41 прямой вызов 30 методов в handlers, общий SQLite,
+  partial remote/local failure и запись доставки после Telegram send.
+  Сравнены последовательный worker и разделение prepare/remote/finalize;
+  рекомендован первый, выбор/design/реализация ещё не согласованы.
+  Зафиксированы ограничения очереди, отмены, shutdown и необходимые synthetic
+  проверки. Source/readback, ссылки и diff/whitespace проверены; pytest не
+  запускался, AMN2 source/VPS/AWG2/package016/выдача не менялись.
+
 - [Локальный web health fix AMN2](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#локальная-реализация-после-согласования--2026-09-20):
   после согласования оператора SSH-ожидание вынесено из event loop одного handler.
   Baseline 28 PASS; RED 2 ожидаемых FAIL + 3 guards PASS; GREEN 33 PASS.

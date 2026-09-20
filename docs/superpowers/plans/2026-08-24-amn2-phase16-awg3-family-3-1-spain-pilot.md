@@ -153,8 +153,11 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
 выявил синхронный SSH в async web health handler. После согласования оператора
 исправлен только этот AMN2 handler: 2 RED → 33 PASS целевого web/health набора,
 review без замечаний, source 2069e41 pushed в отдельную ветку AMN2.
-Перенос bot workflow требует отдельного SQLite/transaction
-решения. Повторные SSH попытки/circuit breaker не входят в fix; не развёрнуто.
+[Bot source review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#bot-sqlite-и-границы-переноса--2026-09-20)
+завершён на source 2069e41: общий SQLite, partial failure, delivery record и
+shutdown требуют отдельного design. Рекомендован последовательный исполнитель;
+подход ещё не согласован, bot-код/тесты не менялись и не запускались.
+Повторные SSH попытки/circuit breaker не входят в fix; не развёрнуто.
 
 ### Текущий вертикальный статус
 

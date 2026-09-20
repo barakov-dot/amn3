@@ -1,6 +1,7 @@
 # Phase16 — применимость Panel #174: SSH и цикл событий
 
-Статус: LOCAL_IMPLEMENTED_TESTED_REVIEWED_PUSHED_NOT_DEPLOYED.
+Статус web slice: LOCAL_IMPLEMENTED_TESTED_REVIEWED_PUSHED_NOT_DEPLOYED.
+Bot: SOURCE_REVIEW_COMPLETE / APPROACH_PROPOSED_NOT_APPROVED.
 Проверка завершена 2026-09-20 20:25 Europe/Moscow. Это ограниченный разбор
 одного сигнала из [реестра](../../docs/UPSTREAM_INTAKE.ru.md), не полный weekly.
 Цель: определить, применима ли защита от блокирующего SSH к нашему коду.
@@ -129,3 +130,102 @@ refs/heads/codex/phase16-web-health-event-loop, без force и тегов; remo
 включая его прежнюю историю. Исходная ветка/checkouts не передвигались, merge и
 развёртывание не выполнялись. Source worktree сохранён для дальнейшей интеграции.
 Документация AMN3 фиксируется отдельно с собственной записью CHANGELOG.
+
+## Bot: SQLite и границы переноса — 2026-09-20
+
+Статус этого раздела: SOURCE_REVIEW_COMPLETE / APPROACH_PROPOSED_NOT_APPROVED.
+Это продолжение source review по команде оператора «работаем», а не выполненный
+bot fix или второй execution plan. Проверен source HEAD
+2069e4147437067c08a7d3bde7361433179ac727 в сохранённом AMN2 worktree выше;
+исходники не изменялись, приложение/тесты/SSH/Telegram не запускались.
+
+### Подтверждённые ограничения
+
+- app/main.py:82,288 создаёт один workflow с Repository/SQLite;
+  app/db/connection.py:10 сохраняет стандартный check_same_thread.
+  app/bot/main.py:65 передаёт тот же workflow всем handlers. AST-инвентаризация
+  app/bot/handlers.py обнаружила 41 прямой вызов 30 методов workflow. Это число
+  call sites этого файла, не полное покрытие приложения или все методы класса.
+- app/bot/workflows.py:844 и app/services/device_revoke.py:143 выполняют
+  удаление peer на сервере до локальной транзакции. При ошибке БД после удаления
+  поднимается RemoteOperationPartialFailure; это RuntimeError, не PeerApplyError
+  (app/services/access.py:90). Reset (workflows.py:870) также может удалить
+  часть peers до ошибки. Handlers revoke/reset (handlers.py:320,362) ловят
+  PeerApplyError, но не дают отдельного ответа для RemoteOperationPartialFailure.
+  Это вывод из кода, не зарегистрированный live-инцидент.
+- Прочитан tests/bot/test_bot_workflows.py:
+  test_user_reset_reports_partial_failure_when_one_remote_remove_succeeds_and_next_fails
+  уже описывает состояние remote-changed-local-failed. Тест здесь не запускался;
+  наличие проверки workflow не доказывает обработку этого исхода в UI бота.
+- _send_admin_config_handoff (handlers.py:738) после Telegram send_document
+  отдельно вызывает record_admin_config_delivery для успеха/ошибки. При смене
+  lifecycle нельзя закрыть worker между отправкой и этой записью или назвать
+  выдачу доставленной только по результату фоновой операции.
+- create_dispatcher дополнительно публикует _phase15_awg3_components в своём
+  context (app/bot/main.py:193). Компоненты содержат сервисы с тем же Repository:
+  переносить только 41 вызов и оставлять этот обход к БД недостаточно.
+- Часть list-методов возвращает sqlite3.Row. Граница фонового исполнителя должна
+  возвращать материализованные значения, не Repository/connection/cursor или
+  сервис с доступом к БД; секретные config bytes допустимы только в существующем
+  пути доставки и не должны попадать в новые diagnostic records.
+- handle_as_tasks и limit=8 (main.py:103, bot/persistent_runtime.py:15)
+  не освобождают event loop от синхронного вызова. После переноса остаётся предел
+  одновременных handlers: когда заняты все слоты, немедленный ответ на новую
+  команду также не гарантируется. Watchdog должен работать независимо от SSH.
+- ProtocolIssuanceBarrierService.begin_block меняет статус всего пользователя
+  и отменяет reserved issuance. Это не готовый mutex для отдельного device revoke;
+  использовать его как такой mutex без изменения контракта нельзя.
+
+### Два подхода и рекомендация
+
+| Подход | Что изменится | Цена и ограничения |
+| --- | --- | --- |
+| A — один последовательный исполнитель workflow, рекомендуется первым | Создание, вызовы и закрытие SQLite принадлежат одному рабочему потоку; handlers ожидают async facade; существующий remote → local порядок внутри метода сохраняется | DB-backed меню ждут медленную операцию в очереди; нужен перенос всего bot boundary, lifecycle и доставка результатов; это не параллельное управление VPN |
+| B — prepare → SSH → finalize с независимыми операциями | БД остаётся в event loop, SSH вынесен отдельно; независимые чтения/операции могут продолжаться | Нужны reservations/rechecks, координация revoke/reset/issuance, отмена и recovery; шире изменение состояния/интерфейсов, возможна миграция БД |
+
+Рекомендация A опирается на цель освободить event loop без одновременных изменений
+peer из одного bot workflow. Это не обещание общей межпроцессной блокировки:
+web/CLI и другие writers продолжают требовать собственных контрактов.
+Один последовательный исполнитель сохраняет атомарность синхронного метода по
+отношению к другим его jobs, но не всего handler из нескольких вызовов. Проверки
+прав/состояния должны оставаться внутри бизнес-операции, рядом с изменением.
+
+Перед реализацией A в письменном design нужно зафиксировать:
+
+1. Закрытый async API с явными разрешёнными методами и ограниченной очередью;
+   обработку перегрузки без незаметной постановки повторной mutation.
+2. Владение БД от factory до close, включая startup error/timeout; отсутствие
+   доступа к repo/phase15 components из event loop и сохранение синхронного API
+   для существующих service/CLI callers, если они не входят в bot boundary.
+3. Отмену ещё не начатой работы отдельно от уже запущенной. Отмена await не
+   останавливает поток/SSH и не должна пропустить локальное завершение после
+   remote side effect. Терминальный исход учитывается даже без ожидающего handler.
+4. Shutdown: порядок остановки приёма, завершения принятых handlers/jobs,
+   записи delivery outcome, закрытия БД/Telegram и освобождения instance lock.
+   Простое cancel_futures недостаточно для начавшихся операций; принудительное
+   завершение процесса и жёсткий общий deadline этим подходом не решаются.
+5. Явный безопасный ответ при RemoteOperationPartialFailure: нужна ручная сверка,
+   автоматического повтора нет; не сообщать, что сервер не изменился или всё
+   откатилось. Не печатать exception cause, raw SSH output, конфиги или ключи.
+
+Критерии будущих synthetic тестов: временная SQLite с обычной thread check;
+управляемый медленный peer stub и работа другой coroutine/watchdog до release;
+последовательный revoke/reset; отрицательная auth-проверка перед side effect;
+queue overflow; отмена до/после старта; partial remote/local failure; startup
+failure; shutdown во время SSH и между Telegram send и delivery record. Telegram
+и SSH заменяются test doubles, реальные секреты/серверы не используются.
+Это требования к проверкам, не PASS и не утверждённый implementation plan.
+
+Семантика сверена с официальной документацией Python 3.12:
+[SQLite thread ownership](https://docs.python.org/3.12/library/sqlite3.html#sqlite3.connect),
+[Executor shutdown и cancellation](https://docs.python.org/3.12/library/concurrent.futures.html#concurrent.futures.Executor.shutdown).
+Ни check_same_thread=False, ни обычный to_thread вокруг уже созданного workflow
+не являются предлагаемым решением. Retries/circuit breaker, DB schema, live
+recovery, включение выдачи, package/stage/install не входят в этот review.
+
+Следующий шаг — выбрать A либо B и согласовать его письменный design; затем
+implementation plan в рамках единого плана Phase16. До этого bot-код не меняется.
+DefaultVPN остаётся WAITING_REPLY по сообщению оператора, без новых phone tasks.
+Проверка этой записи: source readback, локальные ссылки, diff/whitespace и
+CHANGELOG; runtime tests не запускались. AWG2_UNTOUCHED; package016 immutable;
+общая issuance не включалась.
