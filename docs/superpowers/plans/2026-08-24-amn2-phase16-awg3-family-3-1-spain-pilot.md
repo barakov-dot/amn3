@@ -159,8 +159,9 @@ review без замечаний, source 2069e41 pushed в отдельную в
 [Bot source review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#bot-sqlite-и-границы-переноса--2026-09-20)
 завершён на source 2069e41: общий SQLite, partial failure, delivery record и
 shutdown требуют отдельного design. Подготовлен [письменный проект последовательного исполнителя](../specs/2026-09-20-amn2-bot-workflow-worker-design.ru.md):
-DESIGN_DRAFT_READY_FOR_REVIEW. Ограниченная очередь, отмена до dispatch и drain
-принятых handlers описаны; bot-код/тесты не менялись и не запускались.
+Design согласован оператором после commit b277154. Подготовлен [технический план реализации](2026-09-20-amn2-bot-workflow-worker-plan.ru.md):
+PLAN_READY_FOR_REVIEW; четыре последовательно проверяемые части, затем общий review.
+Review плана/выбор метода впереди; bot-код/тесты не менялись и не запускались.
 Повторные SSH попытки/circuit breaker не входят в fix; не развёрнуто.
 
 ### Текущий вертикальный статус

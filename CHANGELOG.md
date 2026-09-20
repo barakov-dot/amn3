@@ -7,6 +7,15 @@
 
 ## 2026-09-20
 
+- Оператор подтвердил [письменный bot worker design](docs/superpowers/specs/2026-09-20-amn2-bot-workflow-worker-design.ru.md)
+  после commit b277154; статус DESIGN_APPROVED_NOT_IMPLEMENTED_NOT_DEPLOYED.
+  Подготовлен [технический implementation plan](docs/superpowers/plans/2026-09-20-amn2-bot-workflow-worker-plan.ru.md):
+  четыре части с явными API, RED/GREEN, factory cleanup, queue/cancel/context,
+  handler ownership и runtime/delivery integration; затем независимый review.
+  План ожидает review и выбора метода; рекомендуется inline, subagents не запускались.
+  Выполнены self-review покрытия design, readback, ссылки и diff/whitespace.
+  Код AMN2 и runtime tests не менялись/не запускались; live/package/выдача вне scope.
+
 - Подготовлен [design последовательного bot workflow worker](docs/superpowers/specs/2026-09-20-amn2-bot-workflow-worker-design.ru.md)
   на baseline AMN2 2069e41: SQLite принадлежит одному потоку, ограниченная очередь
   на 8 outstanding jobs, async facade и явное владение lifetime handlers.
