@@ -106,7 +106,10 @@ DefaultVPN/iOS: 16.09 оператор подтвердил NAME_PASS через
 Предыдущий native NAME_PASS сохранён отдельно; рабочую «Испанию» не менять.
 Оператор не нашёл просмотр/экспорт отдельного профиля. Параметры UNKNOWN;
 cb7ea0c не разрешился в двух официальных source repositories. Export API уже готов,
-но legacy delivery не переключён. [Письмо отправлено оператором; ждём ответа, DefaultVPN отложен](../../../research/amn2/phase16-defaultvpn-2.0.1.1-compatibility-question-draft-2026-09-20.md).
+но legacy delivery не переключён. [Ответ поддержки получен от оператора](../../../research/amn2/phase16-defaultvpn-2.0.1.1-compatibility-question-draft-2026-09-20.md#ответ-поддержки-предоставленный-оператором--2026-09-20):
+.conf имя задать нельзя; сохранение MTU/AWG через vpn:// не подтверждено
+(ответ «Нет» без перечня полей). Source и путь экспорта остаются неясны;
+уточнение подготовлено, не отправлено. DefaultVPN отложен, native delivery заблокирован.
 [Материалы и короткий сценарий](../../../research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md#defaultvpn-подтверждённое-и-вечерний-тест--2026-09-20).
 Локальная проверка не закрывает Windows traffic/quality gates и не разрешает
 переключить delivery. iPhone connectivity/A/B не возобновляются этим импортом.

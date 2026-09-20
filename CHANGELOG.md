@@ -7,6 +7,16 @@
 
 ## 2026-09-20
 
+- [DefaultVPN: получен ответ поддержки](research/amn2/phase16-defaultvpn-2.0.1.1-compatibility-question-draft-2026-09-20.md#ответ-поддержки-предоставленный-оператором--2026-09-20),
+  предоставленный оператором. Восстановлен порядок русского письма из истории
+  задачи; он отличается от английского черновика. Поддержка отрицает возможность
+  имени при .conf и полное сохранение MTU/AWG через vpn://, без уточнения полей.
+  Точные параметры, шаги экспорта и привязка source остаются неподтверждёнными;
+  native delivery не включается. WAITING_REPLY заменён на CLARIFICATION_NEEDED,
+  узкое уточнение подготовлено, не отправлено. Проверены readback, ссылки,
+  согласованность и diff/whitespace. Source/tests/live/профили не менялись,
+  повторных GitHub lookup, phone tests или отправок сообщений не было.
+
 - [Bot SSH/SQLite: завершён source review](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#bot-sqlite-и-границы-переноса--2026-09-20)
   на AMN2 2069e41: 41 прямой вызов 30 методов в handlers, общий SQLite,
   partial remote/local failure и запись доставки после Telegram send.

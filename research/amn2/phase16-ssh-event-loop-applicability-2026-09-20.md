@@ -225,7 +225,8 @@ recovery, включение выдачи, package/stage/install не входя
 
 Следующий шаг — выбрать A либо B и согласовать его письменный design; затем
 implementation plan в рамках единого плана Phase16. До этого bot-код не меняется.
-DefaultVPN остаётся WAITING_REPLY по сообщению оператора, без новых phone tasks.
+Текущий статус отдельного DefaultVPN направления — в [обращении и ответе поддержки](phase16-defaultvpn-2.0.1.1-compatibility-question-draft-2026-09-20.md);
+новых phone tasks этот bot review не задаёт.
 Проверка этой записи: source readback, локальные ссылки, diff/whitespace и
 CHANGELOG; runtime tests не запускались. AWG2_UNTOUCHED; package016 immutable;
 общая issuance не включалась.
