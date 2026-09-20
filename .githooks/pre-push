@@ -1,0 +1,6 @@
+#!/bin/sh
+# Read Git's ref updates on stdin. No network/write operations in this check.
+set -eu
+export PYTHONDONTWRITEBYTECODE=1
+python=$(git config --path changelog.python) || python=python3
+exec "$python" scripts/check_changelog.py --pre-push

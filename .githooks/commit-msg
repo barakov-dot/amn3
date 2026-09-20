@@ -1,0 +1,6 @@
+#!/bin/sh
+# Versioned hook; activate per worktree, never globally.
+set -eu
+export PYTHONDONTWRITEBYTECODE=1
+python=$(git config --path changelog.python) || python=python3
+exec "$python" scripts/check_changelog.py --staged --message-file "$1"

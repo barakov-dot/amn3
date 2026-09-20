@@ -6,6 +6,21 @@
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
 ## 2026-09-20
+
+- Добавлен [автоматический changelog gate](docs/CHANGELOG_GATE.ru.md): проверка
+  index перед commit и каждого нового commit перед push; поздняя общая запись
+  не закрывает пропуски. Учтены датированные записи, формальные исключения с
+  причиной, старая история и остановка при недостаточных Git-данных.
+- Подготовлены версионируемые hooks и GitHub workflow с read-only token,
+  полным checkout и закреплённым action SHA. Обновлены AGENTS и навигация.
+  26 integration tests PASS, включая реальные hooks и push во временный
+  локальный bare repository; исправлен относительный путь из вложенной папки.
+  По review исправлены трактовка буквальных # строк после trailer и неявный
+  lazy fetch Git: оба дефекта воспроизведены RED, добавлены regression tests.
+  Hooks подключены только в активном worktree, config readback выполнен;
+  2 markdown-hygiene tests и диапазон двух предыдущих commits PASS.
+  Смысловое review остаётся обязательным. CI/required checks ещё не подтверждены;
+  серверы, VPN, выдача и package016 не изменены.
 - Синхронизирован DefaultVPN: NAME_PASS через vpn:// подтверждён скриншотом
   16.09, .conf и параметры остаются открытыми. В [чеклисте](research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md)
   подготовлен короткий вечерний сценарий без повторения paste/Windows проверок
