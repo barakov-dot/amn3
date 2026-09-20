@@ -7,6 +7,12 @@
 
 ## 2026-09-20
 
+- Уточнена версия [DefaultVPN с .conf NAME_FAIL](research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md#результат-conf--скриншот-получен-2026-09-20):
+  UI показывает 2.0.1.1 (Aug 22 2026, cb7ea0c). Второй скриншот под тем же
+  локальным именем отделён по SHA256 от первого. Версия iOS, параметры, restart
+  и остановка переподключения не подтверждены. Проверка: оба изображения и hashes,
+  readback/ссылки/diff; это docs-only, без повторного импорта, подключения или code fix.
+
 - Зафиксирован [DefaultVPN .conf NAME_FAIL](research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md#результат-conf--скриншот-получен-2026-09-20):
   пользовательский скриншот после инструкции импорта показывает Server 1 вместо
   Neobyatnaya.NET и Reconnecting…. Предложено остановить попытку; её причина,
