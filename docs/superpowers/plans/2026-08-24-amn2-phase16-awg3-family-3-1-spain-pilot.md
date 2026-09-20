@@ -101,9 +101,12 @@ keepalive пропускается штатным serializer; source trace за�
 DefaultVPN/iOS: 16.09 оператор подтвердил NAME_PASS через synthetic vpn://;
 20.09 после инструкции synthetic .conf import получен скриншот с **Server 1**:
 **NAME_FAIL** этого пути. На экране Reconnecting…, предложена остановка попытки;
-причина запуска и факт остановки пока UNKNOWN. По следующему скриншоту версия
+причина запуска UNKNOWN; остановка подтверждена оператором «ОСТАНОВИЛ». По следующему скриншоту версия
 приложения: **2.0.1.1 (2026-08-22, cb7ea0c)**. Параметры/restart не проверены.
 Предыдущий native NAME_PASS сохранён отдельно; рабочую «Испанию» не менять.
+Оператор не нашёл просмотр/экспорт отдельного профиля. Параметры UNKNOWN;
+cb7ea0c не разрешился в двух официальных source repositories. Export API уже готов,
+но legacy delivery не переключён. [Запрос разработчикам подготовлен, не отправлен](../../../research/amn2/phase16-defaultvpn-2.0.1.1-compatibility-question-draft-2026-09-20.md).
 [Материалы и короткий сценарий](../../../research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md#defaultvpn-подтверждённое-и-вечерний-тест--2026-09-20).
 Локальная проверка не закрывает Windows traffic/quality gates и не разрешает
 переключить delivery. iPhone connectivity/A/B не возобновляются этим импортом.

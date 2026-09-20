@@ -145,8 +145,9 @@ MTU1280, AllowedIPs=192.0.2.1/32 и keepalive0 проверены; readback byte
 - UI одновременно показывает «Не в сети» и **Reconnecting…**. Это наблюдаемая
   попытка подключения, не успешный tunnel/connectivity test. Не установлено,
   запустилась ли она после нажатия кнопки или автоматически при импорте.
-- Оператору предложено остановить повторные попытки большой кнопкой. Факт
-  остановки ещё не подтверждён. Fixture содержит только тестовый endpoint;
+- Оператору предложено остановить повторные попытки большой кнопкой. Позже
+  оператор прямо подтвердил «ОСТАНОВИЛ»; остановка подтверждена его сообщением.
+  Fixture содержит только тестовый endpoint;
   реального доступного VPN за ним не предполагается. Подключение не было частью теста.
 - Следующий скриншот раздела «О приложении» подтвердил отображаемую версию
   **DefaultVPN 2.0.1.1 (Aug 22 2026, cb7ea0c)**. NAME_FAIL .conf привязан к ней.
@@ -158,8 +159,8 @@ MTU1280, AllowedIPs=192.0.2.1/32 и keepalive0 проверены; readback byte
 Второй скриншот пришёл под тем же локальным именем Без имени.jpg; его SHA256:
 4d93c64315c61ac4bd934782973aa1546b73db5c11f4db992c195f1f2fbd267c.
 Это другой файл по содержимому. Первый hash выше относится к экрану Server 1 /
-Reconnecting…; второй — к версии приложения. Факт остановки из второго экрана
-по-прежнему не следует.
+Reconnecting…; второй — к версии приложения. Остановка не видна на втором экране;
+она подтверждена последующим сообщением оператора «ОСТАНОВИЛ», а не этим изображением.
 
 Предыдущий NAME_PASS через synthetic vpn:// от 16.09 сохраняется отдельно.
 Для именования DefaultVPN предпочтителен уже проверенный native путь с description;
@@ -168,6 +169,46 @@ Reconnecting…; второй — к версии приложения. Факт
 этим скриншотом не доказаны. Рабочий профиль «Испания» не предлагалось менять.
 Серверы, package016, delivery handlers и общая выдача не изменялись;
 сообщения разработчикам по этому результату пока не отправлялись.
+
+### Следующая граница после NAME_FAIL и остановки — 2026-09-20
+
+Оператор дополнительно ответил: просмотра параметров и экспорта отдельного
+тестового профиля в интерфейсе нет. Parameter preservation остаётся UNKNOWN;
+общий backup рабочих профилей, повторный import и подключение не запрашиваются.
+
+Read-only source check: AMN2 checkout
+C:/Users/SooL/Documents/amn2-phase15-local-package-bootstrap-readiness,
+HEAD 56540e2084140e3a6277d7472c88c599d7153ccf, рабочее дерево чистое.
+
+- app/vpn/client_import_artifacts.py: build_client_import_artifact уже создаёт
+  native envelope с description=Neobyatnaya.NET для defaultvpn. Новая реализация
+  генератора имени не требуется; compatibility_note не подтверждает acceptance.
+- app/vpn/config_templates.py:97: без target_client build_vpn_import_link оставляет
+  legacy Base64 от raw .conf; с target_client вызывает native exporter. Совпадение
+  префикса vpn:// не делает эти payload одинаковыми.
+- app/bot/delivery.py:88–141: build_config_delivery пока не принимает target_client;
+  link создаётся в legacy режиме, attachment остаётся .conf, QR содержит raw config.
+- app/services/config_delivery.py:96 и app/bot/workflows.py:766 используют этот
+  legacy constructor. Поменять только подпись/расширение недостаточно.
+
+Конкретная будущая интеграция после клиентской проверки: явный выбор клиента,
+согласованные filename/content/link/encoding/caption из одного artifact, отдельное
+решение для QR (его native compatibility не подтверждена), сохранение старого
+режима и проверка обоих call sites. Сейчас delivery и источники AMN2 не менялись;
+прежние 52 offline PASS не повторялись и не считаются проверкой iOS build.
+
+Official lookup cb7ea0c в amnezia-vpn/DefaultVPN и amnezia-vpn/amnezia-client
+вернул 422 No commit found. Точное соответствие установленной сборки публичному
+исходнику не подтверждено; прежний dev source нельзя объявлять её реализацией.
+Подготовлен [конкретный запрос разработчикам](phase16-defaultvpn-2.0.1.1-compatibility-question-draft-2026-09-20.md),
+DRAFT_NOT_SENT: правила имени .conf, источник сборки и проверка одного профиля/MTU.
+GitHub issues в официальном DefaultVPN отключены (has_issues=false); 44 записи
+API /issues являются PR. PR #23 «Add dynamic server name from config» меняет
+только заголовок страницы настроек, не импорт .conf. Адресат подготовленного
+письма — support@dfvpn.com из раздела «О приложении»; ссылки и границы проверки
+собраны в черновике. Никакие сообщения или рабочие secrets не отправлялись.
+До ответа/другого проверяемого evidence не закрывать parameter gate и не включать
+native delivery для реальных пользователей. Новая реальная выдача не выполнялась.
 
 ### Upstream readback — 2026-09-20 14:40 Europe/Moscow
 

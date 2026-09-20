@@ -7,6 +7,17 @@
 
 ## 2026-09-20
 
+- [DefaultVPN: зафиксирована следующая граница](research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md#следующая-граница-после-name_fail-и-остановки--2026-09-20):
+  оператор остановил переподключение и подтвердил отсутствие просмотра/экспорта
+  одного профиля. Read-only AMN2 source check отделил готовый native exporter от
+  двух legacy delivery call sites; source/tests/выдача не менялись.
+- Точный source cb7ea0c не найден через commit lookup в двух официальных repositories;
+  source/build binding и сохранность параметров остаются UNKNOWN. Подготовлен
+  [запрос разработчикам](research/amn2/phase16-defaultvpn-2.0.1.1-compatibility-question-draft-2026-09-20.md)
+  на support@dfvpn.com, не отправлен. GitHub issues отключены; PR #23 меняет
+  заголовок настроек и не является исправлением импорта .conf. Проверки: source/API readback, пользовательские ответы, ссылки и diff;
+  повторных runtime tests/import/connect, изменений VPS/AWG2/package016 нет.
+
 - Уточнена версия [DefaultVPN с .conf NAME_FAIL](research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md#результат-conf--скриншот-получен-2026-09-20):
   UI показывает 2.0.1.1 (Aug 22 2026, cb7ea0c). Второй скриншот под тем же
   локальным именем отделён по SHA256 от первого. Версия iOS, параметры, restart
