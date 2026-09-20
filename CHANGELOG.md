@@ -7,6 +7,13 @@
 
 ## 2026-09-20
 
+- Зафиксирован [DefaultVPN .conf NAME_FAIL](research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md#результат-conf--скриншот-получен-2026-09-20):
+  пользовательский скриншот после инструкции импорта показывает Server 1 вместо
+  Neobyatnaya.NET и Reconnecting…. Предложено остановить попытку; её причина,
+  остановка, build и сохранение параметров пока UNKNOWN. Native vpn:// NAME_PASS
+  от 16.09 остаётся отдельным результатом. Проверка: изображение, SHA256, согласованность
+  записи, ссылки и diff; код, runtime-тесты, выдача и серверы не менялись/не запускались.
+
 - Завершён независимый review локальных recovery observations (b8bb1c8..86e4adc):
   Critical/Important/Minor замечаний нет. [План и границы](docs/superpowers/plans/2026-09-20-phase16-recovery-evidence-local-plan.ru.md)
   переведены в LOCAL_IMPLEMENTED_TESTED_REVIEWED_NOT_LIVE_APPROVAL; очередь Phase16

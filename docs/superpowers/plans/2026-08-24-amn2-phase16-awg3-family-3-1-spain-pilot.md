@@ -99,8 +99,10 @@ PASS; 45 expected fields в каждом из двух backup-профилей �
 restart PASS, UI parameters совпадают; повторный импорт отклонён. Нулевая строка
 keepalive пропускается штатным serializer; source trace завершён.
 DefaultVPN/iOS: 16.09 оператор подтвердил NAME_PASS через synthetic vpn://;
-точный build, параметры и .conf путь пока не проверены. На вечер оператором
-назначен только synthetic .conf import, без подключения и изменения «Испании».
+20.09 после инструкции synthetic .conf import получен скриншот с **Server 1**:
+**NAME_FAIL** этого пути. На экране Reconnecting…, предложена остановка попытки;
+причина запуска и факт остановки пока UNKNOWN. Build/параметры/restart не проверены.
+Предыдущий native NAME_PASS сохранён отдельно; рабочую «Испанию» не менять.
 [Материалы и короткий сценарий](../../../research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md#defaultvpn-подтверждённое-и-вечерний-тест--2026-09-20).
 Локальная проверка не закрывает Windows traffic/quality gates и не разрешает
 переключить delivery. iPhone connectivity/A/B не возобновляются этим импортом.
