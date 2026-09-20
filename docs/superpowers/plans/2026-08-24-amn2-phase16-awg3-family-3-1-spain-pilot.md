@@ -150,10 +150,11 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    restart policy, leaks и границ отката. Затем Task 5 и Task 6.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
-закрыт на уровне исходников. Найден синхронный SSH в async web health handler;
-предложен первый локальный fix только этого обработчика и offline regression.
-Код AMN2 не менялся; перенос bot workflow требует отдельного SQLite/transaction
-решения. Повторные SSH попытки/circuit breaker не входят в первый fix.
+выявил синхронный SSH в async web health handler. После согласования оператора
+исправлен только этот AMN2 handler: 2 RED → 33 PASS целевого web/health набора,
+review без замечаний, source 2069e41 pushed в отдельную ветку AMN2.
+Перенос bot workflow требует отдельного SQLite/transaction
+решения. Повторные SSH попытки/circuit breaker не входят в fix; не развёрнуто.
 
 ### Текущий вертикальный статус
 

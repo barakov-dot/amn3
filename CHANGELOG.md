@@ -7,6 +7,15 @@
 
 ## 2026-09-20
 
+- [Локальный web health fix AMN2](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#локальная-реализация-после-согласования--2026-09-20):
+  после согласования оператора SSH-ожидание вынесено из event loop одного handler.
+  Baseline 28 PASS; RED 2 ожидаемых FAIL + 3 guards PASS; GREEN 33 PASS.
+  SQLite/auth/CSRF/summary/audit сохранены; новое CHANGELOG в source checkout.
+  Source 2069e41 pushed в AMN2/codex/phase16-web-health-event-loop; remote SHA
+  подтверждён. Независимый review без замечаний. Существующий warning httpx
+  сохранён; общий suite и live действия не запускались. Документация проверена
+  readback/links/diff, source checkout и пакет сохранены.
+
 - DefaultVPN: оператор сообщил об отправке письма на support@dfvpn.com;
   статус SENT_OPERATOR_REPORTED / WAITING_REPLY, направление отложено как несрочное.
   Доставка и ответ независимо не проверены; исходный черновик сохранён.

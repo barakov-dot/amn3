@@ -41,7 +41,8 @@
   подтвердило блокирующий SSH в async web health AMN2. P2: сначала локальный
   offload одной read-only проверки с тестом отзывчивости; параллельный fan-out
   не включать. Bot SQLite/transactions и circuit breaker — отдельные решения.
-  Fix предложен, не реализован; source review не разрешает live health run.
+  Web health fix 2069e41 реализован и pushed в AMN2: 33 synthetic PASS, review
+  без замечаний. Live health run и развёртывание не выполнялись.
 
 ### Token-protected sharing
 

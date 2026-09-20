@@ -1,6 +1,6 @@
 # Phase16 — применимость Panel #174: SSH и цикл событий
 
-Статус: SOURCE_REVIEW_COMPLETE / LOCAL_FIX_PROPOSED_NOT_IMPLEMENTED.
+Статус: LOCAL_IMPLEMENTED_TESTED_REVIEWED_PUSHED_NOT_DEPLOYED.
 Проверка завершена 2026-09-20 20:25 Europe/Moscow. Это ограниченный разбор
 одного сигнала из [реестра](../../docs/UPSTREAM_INTAKE.ru.md), не полный weekly.
 Цель: определить, применима ли защита от блокирующего SSH к нашему коду.
@@ -9,7 +9,8 @@
 
 AMN2 checkout: C:/Users/SooL/Documents/amn2-phase15-local-package-bootstrap-readiness,
 HEAD 56540e2084140e3a6277d7472c88c599d7153ccf, дерево чистое до/после чтения.
-Ни приложение, ни SSH, ни тесты не запускались; configs/keys/БД не читались.
+Во время source review приложение, SSH и тесты не запускались; configs/keys/БД
+не читались. Последующая локальная реализация и synthetic tests описаны ниже.
 
 [Официальный Panel PR #174](https://github.com/PRVTPRO/Amnezia-Web-Panel/pull/174)
 merged 14.09.2026; head 1248ce68c031a5c5d2ed0fe1a4e45ea702cedfbb,
@@ -43,7 +44,7 @@ cooldown в просмотренном SystemSshClient/runner; нескольк�
 команды. Проверка не охватывает все handlers/agent/API и не доказывает общий предел
 SSH concurrency, жёсткий deadline операции или остановку remote-процесса по timeout.
 
-## Первый ограниченный fix для согласования
+## Согласованный ограниченный fix
 
 - В AMN2 app/web/app.py выполнять только run_server_health_check через
   await asyncio.to_thread; передавать settings и строковое server name.
@@ -59,19 +60,20 @@ SSH concurrency, жёсткий deadline операции или останов�
   Отмена await не доказывает остановку worker или remote-команды; rollback и
   отмена state-changing операций этим изменением не решаются.
 
-Это предлагаемый scope, код ещё не изменён. После согласования работать в отдельном
-checkout AMN2, сохранив исходный; AMN2 commit/push target проверить отдельно.
+Оператор согласовал этот scope командой «приступай» 20.09.2026. Для реализации
+создан отдельный AMN2 checkout; исходный checkout сохранён. Commit/push сверяются
+с AMN2 remote отдельно от документации AMN3.
 Для bot flow нужны независимое решение о SQLite/transactions и сохранении порядка
 remote/local side effects; не оборачивать весь workflow в to_thread и не отключать
 check_same_thread ради обхода ошибки. Circuit breaker/retries требуют отдельных
 идемпотентности, классификации ошибок и политики повторов.
 
-## Проверки и границы
+## Проверки и границы исходного source review
 
 Прочитаны tests/server/test_system_ssh.py (timeout/missing binary), соответствующие
 runner tests (продолжение после failed step) и web health/CSRF tests. Они не
 доказывают отзывчивость event loop; их результаты сейчас не перепроверялись.
-Изменения этого review — только документы AMN3, ссылки/readback/diff/CHANGELOG.
+Изменения исходного review — только документы AMN3, ссылки/readback/diff/CHANGELOG.
 AWG2, package016, выдача, source AMN2, VPS/stage/install не изменены. Общая выдача
 по-прежнему отключена; этот fix не закрывает Windows traffic или quality.
 
@@ -79,3 +81,51 @@ AWG2, package016, выдача, source AMN2, VPS/stage/install не измене
 [SQLite check_same_thread](https://docs.python.org/3/library/sqlite3.html#sqlite3.connect).
 Проверка четырёх ideas-файлов нашла существующую карточку; дубль не создан.
 Weekly cursor не продвигается: закрыт только узкий вопрос #174.
+
+
+## Локальная реализация после согласования — 2026-09-20
+
+Worktree: C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/amn2-web-health-event-loop.
+Ветка codex/phase16-web-health-event-loop; исходный baseline 56540e2084140e3a6277d7472c88c599d7153ccf.
+Native worktree tool обслуживает репозиторий текущей задачи AMN3, поэтому отдельный
+AMN2 worktree создан через git. Родительский worktrees/ игнорируется Git; исходный
+AMN2 checkout не изменялся. В исходниках изменены только app/web/app.py,
+tests/web/test_servers.py и добавлен CHANGELOG.md для этого материального commit.
+
+Handler теперь await-ит asyncio.to_thread(run_server_health_check, settings, name).
+Оба блока SQLite и auth/CSRF остаются в прежнем потоке. Ответ и запись summary/audit
+не вынесены в worker. Dependencies, SSH runner и остальные handlers не изменены.
+
+Проверки в существующем Python 3.12.14, PYTHONPATH — существующий .codex_deps,
+PYTHONDONTWRITEBYTECODE=1; pytest -q --tb=short -p no:cacheprovider:
+
+- Baseline: tests/web/test_servers.py + tests/web/test_server_health.py — 28 PASS.
+- RED: только новые slow_health_check/health_rejected_request — 2 ожидаемых FAIL
+  (другой HTTP-запрос timeout во время удерживаемой проверки), 3 guards PASS.
+- GREEN: один итоговый прогон обоих файлов — 33 PASS, 22.88 s.
+- Общий suite не запускался: согласован релевантный web server/health набор.
+- Во всех прогонах одно прежнее StarletteDeprecationWarning о httpx; это warning
+  baseline, не новая ошибка и не повод менять зависимости внутри этого scope.
+
+Новые тесты: два реальных HTTP-запроса к одному TestClient event loop, synthetic
+health stub удерживается Event до ответа страницы /servers. Проверяются online и
+offline summary, audit и 303 redirect через временную SQLite. Три случая отказа
+(auth, CSRF, missing server) не запускают remote boundary. Таймауты в тесте —
+защита от зависания теста, не измерение production latency и не новый SLA.
+
+Независимый read-only review /root/review_web_health_offload завершён: Critical,
+Important, Minor — нет. Reviewer не повторял тесты. Нагрузочные пределы/очередь,
+перекрывающиеся проверки, отмена worker/SSH, общий deadline, bot и live acceptance
+сознательно оставлены за пределами; исполнитель сохранил эти ограничения.
+Документация и changelog проверены исполнителем отдельно. Это локальный fix; live health check, VPS/SSH/Telegram, production БД, package016 и выдача не
+запускались. Отмена await по-прежнему не гарантирует прекращение worker; общий
+лимит операций, повторы/cooldown и bot workflow остаются вне этого slice.
+
+
+Source commit: [2069e4147437067c08a7d3bde7361433179ac727](https://github.com/barakov-dot/amn2/commit/2069e4147437067c08a7d3bde7361433179ac727).
+Push в https://github.com/barakov-dot/amn2.git,
+refs/heads/codex/phase16-web-health-event-loop, без force и тегов; remote readback
+подтвердил exact SHA. Новая ветка основана на указанном local baseline 56540e2,
+включая его прежнюю историю. Исходная ветка/checkouts не передвигались, merge и
+развёртывание не выполнялись. Source worktree сохранён для дальнейшей интеграции.
+Документация AMN3 фиксируется отдельно с собственной записью CHANGELOG.
