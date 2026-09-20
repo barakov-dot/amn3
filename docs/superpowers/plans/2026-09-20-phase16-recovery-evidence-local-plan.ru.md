@@ -1,6 +1,6 @@
 # Phase16: локальные наблюдения для recovery — план реализации
 
-> Для будущего исполнения: использовать superpowers:executing-plans последовательно.
+> Локальное исполнение завершено через superpowers:executing-plans последовательно.
 > План принят оператором 20.09.2026 командой «ДАВАЙ ДЕЛАТЬ». Модель не менять.
 > Текущий ход локальной реализации и проверки записаны внизу.
 
@@ -11,7 +11,7 @@
 Docker API, чтения /proc или произвольных файлов в новом модуле.
 **Tech Stack:** Python 3.10+, stdlib, pytest на синтетических данных.
 **Spec:** [согласованный recovery-контракт v1](../specs/2026-09-08-phase16-controlled-stage-recovery-contract.ru.md).
-**Статус:** LOCAL_IMPLEMENTED_TESTED_REVIEW_PENDING_NOT_LIVE_APPROVAL, 2026-09-20.
+**Статус:** LOCAL_IMPLEMENTED_TESTED_REVIEWED_NOT_LIVE_APPROVAL, 2026-09-20.
 Baseline исходников: AMN3 3eb18f64374e1c279295d0b434302dcee90377ae.
 Это техническая подзадача; [единственная очередь Phase16](2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md)
 остаётся главным execution plan.
@@ -258,7 +258,7 @@ python -m pytest tests/test_phase16_recovery_observation.py tests/test_phase16_r
 
 - [x] Записать фактические RED/GREEN и ограничения в этот документ/CHANGELOG,
   проверить отсутствие I/O и новых secrets в diff, commit точных файлов.
-- [ ] Перед заявлением «готово» провести одно review bounded diff. Оно не расширяет
+- [x] Перед заявлением «готово» провести одно review bounded diff. Оно не расширяет
   локальный scope и не разрешает live tests.
 
 ## Завершение и дальнейшая граница
@@ -308,5 +308,29 @@ start_ticks/namespace обнаруживается отдельно от PID; с
 RED: 39 ожидаемых падений из-за отсутствия функции; итоговый GREEN: 164 PASS
 (137 новых + 27 metadata). Команда:
 python -m pytest tests/test_phase16_recovery_observation.py tests/test_phase16_recovery_metadata.py -q -p no:cacheprovider.
-Тесты — синтетические, действующие конфиги не использовались. Заключительный
-обзор всего изменения ещё ожидается; локальный PASS не является live evidence.
+Тесты — синтетические, действующие конфиги не использовались. Task 2 зафиксирован
+в 86e4adc; локальный PASS не является live evidence.
+
+### Заключительный независимый обзор
+
+Диапазон b8bb1c8..86e4adc проверен отдельным reviewer в read-only scope.
+Critical/Important/Minor замечаний нет; все 5 Review Focus подтверждены по source/tests.
+Повторного прогона тех же тестов не было, новых code fixes не потребовалось.
+Проверки завершения: diff/whitespace, точный scope 5 файлов, 53 локальные ссылки,
+syntax/control-character/credential-marker checks и changelog каждого commit.
+Metadata dependency, coordinator/stage/pilot, frozen package016 и configs неизменны.
+
+Решения по границам, отдельно проверенные после review:
+
+- Comparison принимает только Snapshot из parser. Ручные некорректные dataclasses
+  не входят в API-контракт; будущий caller обязан использовать parser. Иначе
+  результат или исключение не гарантированы — такой обход нельзя подключать к recovery.
+- Достоверность/freshness источника, ownership и quiescence не доказаны. Их
+  нельзя выводить из schema PASS или совпадения полей; иначе возможен ложный допуск.
+- Collector, signals, cleanup, stage/install и их integration не реализованы.
+  Отсутствие этих частей сохраняет recovery открытым и блокировку повторного stage.
+- Остальные подсистемы не перепроверены: выполнен только согласованный целевой
+  набор. Результат 164 PASS нельзя объявлять полным regression всего проекта.
+
+Интеграция — обычный push в ранее согласованную ветку по действующему поручению
+оператора регулярно коммитить/пушить, без force/tags/merge и без удаления worktree.

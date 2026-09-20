@@ -138,7 +138,7 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    Старый collector/driver не подключён; ownership/quiescence и live recovery не готовы.
    20.09 подготовлен [локальный план observations/identity comparison](2026-09-20-phase16-recovery-evidence-local-plan.ru.md):
    Обе локальные задачи реализованы: parser и сравнение снимков, 164 synthetic PASS
-   вместе с metadata regression. Заключительный review ожидается; сравнение metadata не становится ownership/quiescence proof или cleanup GO.
+   вместе с metadata regression; независимый review завершён без замечаний. Сравнение metadata не становится ownership/quiescence proof или cleanup GO.
 5. **P2 — integration, BLOCKED предыдущими gates.** После клиентских и quality
    доказательств: checksum/state/rollback-bound approval, проверка persistence,
    restart policy, leaks и границ отката. Затем Task 5 и Task 6.
@@ -146,7 +146,7 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
 ### Текущий вертикальный статус
 
 - ✅ Task 0 — baseline.
-- ✅ Task 1 — package016/local tooling; три stage-защиты завершены только локально; DNS bridge STOP.
+- ✅ Task 1 — package016/local tooling; stage-защиты и recovery observations только локально; DNS bridge STOP.
 - ✅ Task 2 — исторические Spain gates/diagnostics, не свежий preflight.
 - ✅ Task 3A — minimal runtime по историческим evidence.
 - ⏳ Task 3B — integration/recovery не завершены; recovery-контракт v1 согласован.
@@ -158,9 +158,10 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
 - ⏳ Task 6 — closeout заблокирован.
 
 AWG2_UNTOUCHED; package016 immutable; general issuance disabled.
-Последняя docs-only синхронизация фиксирует публикацию #3043 и завершённый R1
-review; recovery-контракт не пересогласовывается. Без кода, новых тестов,
-package/live/stage/install/push.
+Историческая синхронизация 08.09 зафиксировала публикацию #3043 и R1 review.
+20.09 локальный scope расширен по отдельному подтверждению оператора: parser и
+сравнение observations, 164 synthetic PASS. Это не live inventory/recovery;
+package/live/stage/install не выполнялись, recovery-контракт не пересогласовывался.
 Проверки и Git — по [AGENTS.md](../../../AGENTS.md): docs-only без runtime-тестов;
 для code fix — targeted RED/GREEN; ошибка инструмента = UNKNOWN.
 Детали выполненного читать адресно в [историческом приложении](2026-09-08-phase16-execution-history.md) и в

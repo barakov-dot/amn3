@@ -7,6 +7,14 @@
 
 ## 2026-09-20
 
+- Завершён независимый review локальных recovery observations (b8bb1c8..86e4adc):
+  Critical/Important/Minor замечаний нет. [План и границы](docs/superpowers/plans/2026-09-20-phase16-recovery-evidence-local-plan.ru.md)
+  переведены в LOCAL_IMPLEMENTED_TESTED_REVIEWED_NOT_LIVE_APPROVAL; очередь Phase16
+  согласована с локальным результатом. Сохранено evidence 164 targeted PASS,
+  проверены 53 локальные ссылки, diff и changelog; docs-only завершение без повторных тестов.
+  Ручные Snapshot в обход parser, достоверность источника и live recovery не проверены;
+  остальные подсистемы не объявлены прошедшими regression. VPS/AWG2/package016 неизменны.
+
 - Добавлено [сравнение recovery snapshots](scripts/vps/phase16_recovery_observation.py):
   проверка контекста/порядка, отдельные исходы смены идентичности, появления,
   отсутствия в scope и UNKNOWN при query failure. Эти исходы не разрешают cleanup.
