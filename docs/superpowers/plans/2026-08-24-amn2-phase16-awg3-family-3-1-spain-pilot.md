@@ -137,8 +137,8 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    [локальная реализация и 27 offline PASS](../../../research/amn2/phase16-recovery-helper-compatibility-review-2026-09-08.md#локальный-parser-после-подтверждения-оператора--2026-09-08).
    Старый collector/driver не подключён; ownership/quiescence и live recovery не готовы.
    20.09 подготовлен [локальный план observations/identity comparison](2026-09-20-phase16-recovery-evidence-local-plan.ru.md):
-   строгие снимки, PID/resource identity changes и UNKNOWN. Реализация не начата;
-   сравнение metadata не становится ownership/quiescence proof или cleanup GO.
+   Task 1 реализован локально: строгий parser снимков, 98 synthetic PASS.
+   Сравнение идентификаторов ещё не реализовано; сравнение metadata не становится ownership/quiescence proof или cleanup GO.
 5. **P2 — integration, BLOCKED предыдущими gates.** После клиентских и quality
    доказательств: checksum/state/rollback-bound approval, проверка persistence,
    restart policy, leaks и границ отката. Затем Task 5 и Task 6.

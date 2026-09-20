@@ -1,8 +1,8 @@
 # Phase16: локальные наблюдения для recovery — план реализации
 
 > Для будущего исполнения: использовать superpowers:executing-plans последовательно.
-> Реализация этим документом не начата. Модель не менять. План подготовлен по
-> запросу оператора; сначала принять его scope, затем выполнять локальные code/tests.
+> План принят оператором 20.09.2026 командой «ДАВАЙ ДЕЛАТЬ». Модель не менять.
+> Текущий ход локальной реализации и проверки записаны внизу.
 
 **Goal:** различать неполное наблюдение и изменение идентификатора ресурса между
 двумя снимками; исключить превращение этих наблюдений в разрешение очистки.
@@ -11,7 +11,7 @@
 Docker API, чтения /proc или произвольных файлов в новом модуле.
 **Tech Stack:** Python 3.10+, stdlib, pytest на синтетических данных.
 **Spec:** [согласованный recovery-контракт v1](../specs/2026-09-08-phase16-controlled-stage-recovery-contract.ru.md).
-**Статус:** LOCAL_PLAN_PREPARED_NOT_IMPLEMENTED_NOT_LIVE_APPROVAL, 2026-09-20.
+**Статус:** LOCAL_PARSER_IMPLEMENTED_COMPARISON_PENDING_NOT_LIVE_APPROVAL, 2026-09-20.
 Baseline исходников: AMN3 3eb18f64374e1c279295d0b434302dcee90377ae.
 Это техническая подзадача; [единственная очередь Phase16](2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md)
 остаётся главным execution plan.
@@ -165,15 +165,15 @@ Decoder — parse_canonical; валидация — строго по табли
 переданный caller object. Ограничение canonical input — уже существующие 64 KiB.
 Ошибка expected_* тоже даёт invalid_observation. Не добавлять permissive fallback.
 
-- [ ] Написать тесты: valid для всех 5 kinds; absent/query_failed; malformed canonical
+- [x] Написать тесты: valid для всех 5 kinds; absent/query_failed; malformed canonical
   input, duplicate logical IDs, неверные/лишние keys, duplicate JSON keys, NaN,
   oversize, bool вместо int, неверный UUID/hex, wrong host/query/sequence/bindings,
   missing/extra scope, kind mismatch, secret-canary в неизвестном поле.
-- [ ] Запустить только новый файл; наблюдать RED из-за отсутствия реализации.
-- [ ] Реализовать strict parser по таблицам и immutable результаты, без I/O.
-- [ ] Проверить GREEN и неизменность input. Для всех invalid cases дополнительно
+- [x] Запустить только новый файл; наблюдать RED из-за отсутствия реализации.
+- [x] Реализовать strict parser по таблицам и immutable результаты, без I/O.
+- [x] Проверить GREEN и неизменность input. Для всех invalid cases дополнительно
   проверять точную строку исключения и отсутствие canary в str/repr.
-- [ ] Обновить CHANGELOG, проверить diff, выполнить точечный локальный commit.
+- [x] Обновить CHANGELOG, проверить diff, выполнить точечный локальный commit.
 
 Пример обязательной проверки границы ошибок:
 
@@ -285,3 +285,17 @@ Live inventory, signals, cleanup, снятие package-блокировки и �
 Уточнены полная таблица query_failed, допустимый нулевой start_ticks и конкретная
 синтетическая fixture. Код, tests, новый сборщик и live recovery при подготовке
 плана не выполнялись.
+
+## Исполнение — 2026-09-20
+
+Task 1: реализован [parser снимков](../../../scripts/vps/phase16_recovery_observation.py)
+и [синтетические тесты](../../../tests/test_phase16_recovery_observation.py).
+RED: 98 ожидаемых падений из-за отсутствия модуля; GREEN: 98 PASS. Проверены
+все 5 видов, canonical/64 KiB, scope 1..64, контекст, bool/int, нулевой start_ticks,
+ошибки без input и неизменяемые копии. Metadata dependency не изменена.
+Команда: python -m pytest tests/test_phase16_recovery_observation.py -q -p no:cacheprovider.
+Сравнение снимков — следующий локальный шаг; никакие ресурсы не обследовались.
+
+Решение по workflow: проверять согласованные связанные наборы в существующем
+Python runtime; общий suite и установка зависимостей исключены правилами AGENTS
+и планом. Ограничение: это не проверка остальных подсистем репозитория.

@@ -7,6 +7,13 @@
 
 ## 2026-09-20
 
+- Реализован [локальный parser recovery observations](scripts/vps/phase16_recovery_observation.py):
+  строгий canonical JSON до 64 KiB, проверка bindings/host/query/scope и пяти видов
+  идентификаторов, неизменяемые снимки и фиксированная ошибка без исходного ввода.
+  [План и evidence](docs/superpowers/plans/2026-09-20-phase16-recovery-evidence-local-plan.ru.md):
+  98 ожидаемых RED до появления модуля → 98 PASS. Сравнение ещё не реализовано;
+  I/O/collector, ownership/quiescence GO, VPS, выдача и package016 не добавлялись/не менялись.
+
 - Подготовлен [локальный recovery-план](docs/superpowers/plans/2026-09-20-phase16-recovery-evidence-local-plan.ru.md):
   строгие наблюдения и сравнение идентификаторов вместо принятия имён/PID за
   доказательство владения. По source записаны недостающие creation/process bindings,
