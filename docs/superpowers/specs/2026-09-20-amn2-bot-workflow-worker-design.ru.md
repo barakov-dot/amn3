@@ -1,12 +1,12 @@
 # AMN2 — последовательное выполнение bot workflow
 
-Статус: DESIGN_APPROVED_NOT_IMPLEMENTED_NOT_DEPLOYED.
+Статус: DESIGN_APPROVED / LOCAL_IMPLEMENTED_TESTED_REVIEWED / NOT_DEPLOYED.
 Дата: 2026-09-20. Рекомендуемый вариант A из
 [source review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#bot-sqlite-и-границы-переноса--2026-09-20).
 После «учтем и продолжим» подготовлен конкретный design. Оператор подтвердил
 его словом «подтверждаю» после публикации commit b277154. Утверждение относится
 к этому design; [план реализации](../plans/2026-09-20-amn2-bot-workflow-worker-plan.ru.md)
-подготовлен отдельно и ещё ожидает review/выбора метода. Это контракт одного
+утверждён сообщением «подтверждаю всё» и выполнен inline; findings review исправлены. Это контракт одного
 локального изменения, не второй execution plan Phase16 и не live approval.
 
 ## 1. Цель и границы
@@ -201,6 +201,6 @@ private _handle_update_tasks или предположении, что заве�
 Семантика SQLite/Future cancellation — по источникам исходного source review.
 
 Design проверен на противоречия очереди/отмены/drain и на границы scope; локальные
-ссылки/readback/diff проверяются перед commit. Код/тесты AMN2 не менялись.
-Следующий шаг: review подготовленного implementation plan и выбор способа выполнения. Развёртывание требует отдельного gate.
+ссылки/readback/diff проверяются перед commit. Реализация, независимый review и итоговые 312 локальных PASS зафиксированы в implementation plan.
+Развёртывание требует отдельного gate.
 Текущие задачи и live ограничения остаются в [едином плане Phase16](../plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).

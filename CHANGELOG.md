@@ -7,6 +7,18 @@
 
 ## 2026-09-20
 
+- По подтверждённому [плану bot worker](docs/superpowers/plans/2026-09-20-amn2-bot-workflow-worker-plan.ru.md)
+  выполнены четыре этапа inline: one-thread SQLite ownership, bounded FIFO/async facade,
+  handler lifetime и persistent runtime/delivery integration. Source AMN2 commits
+  614dfd8, b9f5d4e, 28a4e43, 8bc8496 и review fix 1bd7f62 включают свой CHANGELOG
+  и отправлены обычным push в codex/phase16-web-health-event-loop; remote SHA сверены.
+  Baseline 278 PASS; итог 312 PASS без warnings. Независимый read-only review выявил
+  две гонки до dispatch (queued cancellation и factory после close); обе воспроизведены
+  RED и исправлены. [Полное evidence и ограничения](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#bot-worker-реализация-и-проверки--2026-09-20).
+  Docs проверены readback, локальными ссылками и diff/whitespace; source и docs
+  фиксируются раздельно. Нет live/VPS/Telegram/реальной выдачи, package/stage/install,
+  dependency/schema changes или deployment. Phase16 gates, AWG2 и package016 сохранены.
+
 - Оператор подтвердил [письменный bot worker design](docs/superpowers/specs/2026-09-20-amn2-bot-workflow-worker-design.ru.md)
   после commit b277154; статус DESIGN_APPROVED_NOT_IMPLEMENTED_NOT_DEPLOYED.
   Подготовлен [технический implementation plan](docs/superpowers/plans/2026-09-20-amn2-bot-workflow-worker-plan.ru.md):

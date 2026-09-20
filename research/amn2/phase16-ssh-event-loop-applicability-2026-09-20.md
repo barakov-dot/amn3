@@ -1,7 +1,7 @@
 # Phase16 — применимость Panel #174: SSH и цикл событий
 
 Статус web slice: LOCAL_IMPLEMENTED_TESTED_REVIEWED_PUSHED_NOT_DEPLOYED.
-Bot: DESIGN_APPROVED / IMPLEMENTATION_PLAN_READY_FOR_REVIEW / NOT_IMPLEMENTED.
+Bot: LOCAL_IMPLEMENTED_TESTED_REVIEWED_PUSHED_NOT_DEPLOYED.
 Проверка завершена 2026-09-20 20:25 Europe/Moscow. Это ограниченный разбор
 одного сигнала из [реестра](../../docs/UPSTREAM_INTAKE.ru.md), не полный weekly.
 Цель: определить, применима ли защита от блокирующего SSH к нашему коду.
@@ -137,7 +137,7 @@ refs/heads/codex/phase16-web-health-event-loop, без force и тегов; remo
 По последующему «учтем и продолжим» подготовлен [письменный design варианта A](../../docs/superpowers/specs/2026-09-20-amn2-bot-workflow-worker-design.ru.md):
 Design утверждён последующим «подтверждаю» после commit b277154.
 [План реализации](../../docs/superpowers/plans/2026-09-20-amn2-bot-workflow-worker-plan.ru.md)
-подготовлен; review плана/выбор метода и реализация ещё впереди.
+впоследствии утверждён и выполнен; результаты находятся в разделе реализации ниже.
 Это продолжение source review по команде оператора «работаем», а не выполненный
 bot fix или второй execution plan. Проверен source HEAD
 2069e4147437067c08a7d3bde7361433179ac727 в сохранённом AMN2 worktree выше;
@@ -227,8 +227,8 @@ failure; shutdown во время SSH и между Telegram send и delivery re
 не являются предлагаемым решением. Retries/circuit breaker, DB schema, live
 recovery, включение выдачи, package/stage/install не входят в этот review.
 
-Следующий шаг — review implementation plan согласованного варианта A и выбор
-метода выполнения в рамках единого плана Phase16. Политика очереди/отмены/drain
+На момент исходного разбора следующий шаг — review implementation plan и выбор
+метода; впоследствии выполненная реализация описана ниже. Политика очереди/отмены/drain
 зафиксирована в design; этот source review остаётся основанием, а не конкурирующим
 контрактом. До review плана bot-код не меняется.
 Текущий статус отдельного DefaultVPN направления — в [обращении и ответе поддержки](phase16-defaultvpn-2.0.1.1-compatibility-question-draft-2026-09-20.md);
@@ -236,3 +236,76 @@ recovery, включение выдачи, package/stage/install не входя
 Проверка этой записи: source readback, локальные ссылки, diff/whitespace и
 CHANGELOG; runtime tests не запускались. AWG2_UNTOUCHED; package016 immutable;
 общая issuance не включалась.
+
+
+## Bot worker: реализация и проверки — 2026-09-20
+
+Разрешение: после design approval и плана ddabc6d оператор подтвердил весь план
+и рекомендованный inline execution («подтверждаю всё»). Выполнены Tasks 1–4,
+обычные commits/push в существующую source ветку; новых live approvals нет.
+
+Source: C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/amn2-web-health-event-loop,
+ветка codex/phase16-web-health-event-loop, remote amn2 =
+https://github.com/barakov-dot/amn2.git. Диапазон от 2069e41; commits:
+614dfd87120f908d2ff6d275ee8097945056a35b,
+b9f5d4e816492f28f741daccf76eace1303a866c,
+28a4e43431d1c16fc1e2b875c5150ec57bcab18e,
+8bc8496a85d520096022b55c8ee3f4698c9b0a30. Все четыре включают CHANGELOG;
+remote readback подтвердил последний SHA. Исходный checkout/ветка не перемещались.
+
+- Один worker владеет SQLite create/use/close, восемь outstanding jobs в своей FIFO,
+  один executor job одновременно, ContextVar копируется на вызов. Queued cancel
+  удаляется, dispatched операция заканчивается; join не блокирует event loop.
+- 30 явных async methods и 41 await в handlers; Row/DTO превращаются в независимые
+  данные. Sync service/CLI API сохранён; raw phase15 bundle из dispatcher убран.
+- Lifetime учитывает восемь handlers, ticket привязан к точной task. Shutdown
+  запрещает новые handlers, сохраняет принятые jobs/send/record и закрывает
+  SQLite, Telegram session и instance lock в этом порядке. Повторная отмена
+  не ускоряет освобождение; ошибки runtime и cleanup не теряются.
+- Partial failure даёт безопасный ru/en ответ без ложного rollback; failure
+  отправки этого ответа не переносит secret-bearing exception context в logger.
+  False/ошибка delivery record после send не дают success или повторной выдачи.
+
+Проверки Python 3.12.14, aiogram 3.28.2, существующие локальные зависимости:
+
+| Этап | Доказательство |
+| --- | --- |
+| Baseline | 278 passed: tests/bot + test_device_revoke.py + test_phase15_bootstrap.py |
+| Worker | RED отсутствующего API; 6 PASS (SQLite ownership, capacity/FIFO, cancel churn, context, factory/close failure) |
+| Factory/facade | RED трёх незакрытых connections и отсутствующего close; 75 PASS вместе с bootstrap/workflows |
+| Lifetime | RED отсутствующего API; 11 PASS с worker, включая повторную отмену cleanup и copied-ticket отказ |
+| Runtime/handlers | 5 handler/partial RED + 6 runtime RED; после исправлений 93 PASS affected набора |
+| Итог | 310 passed in 54.80s, без warnings; дополнительно real SQLite recheck прав после очереди и remote success/local failure |
+
+Все peer/Telegram boundaries — doubles; ключи/адреса/БД синтетические. Нет SSH,
+реальной выдачи, package build/stage/install, schema/dependency changes или deploy.
+Это local source PASS; deployed revision и Phase16 acceptance не меняются.
+Ограничения: один bot process, DB-backed меню ждёт FIFO, hard drain deadline нет;
+external kill/crash/exactly-once и межпроцессная serialization вне scope.
+
+Независимый read-only review 2069e41..8bc8496 завершён. Critical нет.
+
+1. Important: при queued waiter.cancel() pump мог запуститься раньше обработчика
+   CancelledError и передать отменённую mutation executor. Детерминированный RED
+   подтвердил один лишний side effect. Pump проверяет cancelled waiter перед
+   dispatch и освобождает слот ровно один раз.
+2. Minor по review, повышен до Important исполнителем: close до dispatch factory
+   не препятствовал её последующему запуску. Factory может выполнять schema/seed
+   writes после закрытия admission, поэтому это нарушение поведения, а не polish.
+   RED подтвердил ненужные factory/close; теперь OPEN проверяется перед submit.
+
+Оба исправления выполнены одним fix pass: 1bd7f62d1fdd3829bc278110ecdc44d3568676a3.
+Итоговый набор: 312 passed in 47.46s, без warnings. Повторный review не запускался;
+два новых regression tests сначала упали по доказанным причинам, после исправления прошли.
+Source HEAD = remote ref, рабочее дерево чистое; пятый commit также содержит CHANGELOG.
+Сознательно не оценивались reviewer: external kill/crash/exactly-once и live/systemd
+stop budget. Решение исполнителя: сохранить исключения design, не делать live
+claims; отдельный deployment gate обязан проверить stop budget/recovery.
+Отложенных Minor после этой классификации нет.
+
+Организационные решения: один runtime test файл выделен для читаемости (поведение
+и scope неизменны); targeted suite выбран согласно утверждённому плану/AGENTS
+(вне набора нет новой общей гарантии); ветка/worktree сохранены, без merge/PR
+(интеграция остаётся отдельным решением).
+Далее — отдельный integration gate с текущими Phase16 ограничениями,
+AWG2_UNTOUCHED; package016 immutable; general AWG3 issuance disabled.

@@ -16,8 +16,8 @@ aiogram 3.28.2, pytest и имеющиеся зависимости. Устан�
 
 **Spec:** [согласованный design](../specs/2026-09-20-amn2-bot-workflow-worker-design.ru.md).
 Оператор подтвердил письменный design словом «подтверждаю» после commit b277154.
-Статус этого плана: PLAN_READY_FOR_REVIEW / NOT_EXECUTED. Метод рекомендован inline,
-но review плана и выбор метода ещё не получены. Это технический подплан одного
+Статус этого плана: LOCAL_IMPLEMENTED_TESTED_REVIEWED_PUSHED_NOT_DEPLOYED.
+Оператор подтвердил весь план и inline execution сообщением «подтверждаю всё» после ddabc6d. Это технический подплан одного
 изменения, подчинённый [единому execution plan Phase16](2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md);
 клиентские/live gates и их статусы здесь не дублируются.
 
@@ -133,7 +133,7 @@ origin в этом checkout может указывать на AMN3 и для so
 **Consumes:** только стандартная библиотека и синхронный resource factory.
 **Produces:** WorkflowWorker, SyncWorkflowResource, JobOutcome, WorkflowBusy/Closed.
 
-- [ ] Написать RED, начиная с настоящей thread-bound SQLite и медленного double:
+- [x] Написать RED, начиная с настоящей thread-bound SQLite и медленного double:
 
 ```python
 import asyncio
@@ -181,13 +181,13 @@ def test_worker_keeps_sqlite_on_owner_and_leaves_loop_free():
     asyncio.run(scenario())
 ```
 
-- [ ] RED этого файла: ожидается отсутствие нового модуля/API. Затем добавить
+- [x] RED этого файла: ожидается отсутствие нового модуля/API. Затем добавить
   независимые случаи: 1 удерживаемый + 7 queued, девятый WorkflowBusy; запрет
   неизвестного method до resource.invoke; queued cancel без invoke; cancel после
   dispatch с одним invoke; 100 queued cancel/replace при удерживаемом running job
   без роста submitted jobs; ContextVar двух callers с разными значениями;
   exception outcome и падающие outcome_sink/error_status не мешают следующему job/close.
-- [ ] Реализовать собственный deque, отдельную pump task и executor(max_workers=1).
+- [x] Реализовать собственный deque, отдельную pump task и executor(max_workers=1).
   State меняется только в event loop: NEW/OPEN/CLOSING/CLOSED; у job
   QUEUED/DISPATCHED/TERMINAL. В call копировать contextvars.copy_context и kwargs;
   pump не захватывает context caller вместо enqueue. После dispatch Future
@@ -211,9 +211,9 @@ except asyncio.CancelledError:
   закрывает admission, дожидается pump/jobs, запускает resource.close там же и
   await-ит shutdown executor вне event loop. Factory failure/close failure не
   пропускают executor shutdown. Без объектов SQLite/секретов в outcome_sink.
-- [ ] GREEN: tests/bot/test_workflow_worker.py. Проверить create/use/close thread ID,
+- [x] GREEN: tests/bot/test_workflow_worker.py. Проверить create/use/close thread ID,
   очередь/cancellation churn/context/failure; не утверждать business integration.
-- [ ] Записать результаты в CHANGELOG и commit: feat: add owned sequential workflow worker.
+- [x] Записать результаты в CHANGELOG и commit: feat: add owned sequential workflow worker.
 
 ## Task 2: managed factory, materialization и явный facade
 
@@ -223,13 +223,13 @@ tests/bot/test_app_bootstrap.py, CHANGELOG.md. Dispatcher пока исполь�
 **Consumes:** Task 1 worker API; существующий BotWorkflow.
 **Produces:** WORKFLOW_METHODS, make_workflow_resource, AsyncBotWorkflow и close.
 
-- [ ] RED на factory failure: monkeypatch main.connect возвращает временную SQLite
+- [x] RED на factory failure: monkeypatch main.connect возвращает временную SQLite
   с записанным thread ID; initialize_schema выбрасывает тестовый RuntimeError;
   после factory failure conn.execute должен дать ProgrammingError (closed),
   close выполнен в owner thread. Параметризовать failure на initialize_schema,
   seed_default_plans и BotWorkflow constructor. Успешная factory не закрывает
   connection до явного close; внешний Repository без resource_closer не закрывается.
-- [ ] Добавить BotWorkflow(resource_closer: Callable[[], None] | None = None) и
+- [x] Добавить BotWorkflow(resource_closer: Callable[[], None] | None = None) и
   идемпотентный close. В create_workflow защитить существующую сборку ExitStack,
   зарегистрировать conn.close сразу после connect; передать resource_closer
   конструктору и снять cleanup только перед успешным return. Пример ядра:
@@ -244,12 +244,12 @@ def close(self) -> None:
   self._resource_closer задаётся в __init__. Инициализация может упасть до/внутри
   конструктора — ответственность factory/ExitStack, не __del__. Не реорганизовывать
   весь app/main.py или Repository ради этой правки.
-- [ ] Создать adapter с явной таблицей bound methods из manifest; invoke берёт
+- [x] Создать adapter с явной таблицей bound methods из manifest; invoke берёт
   только значение таблицы, а не произвольный getattr. Сразу материализовать
   sqlite3.Row в dict, вложенные list/tuple/dict рекурсивно; DTO с уже материализованными
   полями сохраняют тип. Cursor/connection/repo/service/generator не разрешены.
   Проверки результата не должны печатать его repr или менять бизнес-параметры.
-- [ ] Добавить facade с 30 явными async методами. Аргументы/defaults копируются из
+- [x] Добавить facade с 30 явными async методами. Аргументы/defaults копируются из
   существующих одноимённых sync методов на baseline; _call сначала guard(), затем
   await worker.call. Это механическая смена boundary, не новая validation policy:
 
@@ -279,7 +279,7 @@ build_resend_delivery, build_user_resend_delivery, revoke_user_device,
 reset_user_devices
 ```
 
-- [ ] RED/GREEN для реального workflow с _env_file=None, временной БД и synthetic
+- [x] RED/GREEN для реального workflow с _env_file=None, временной БД и synthetic
   settings. Внутри разрешённого test guard зарегистрировать пользователя, запросить
   list_user_devices/планы, проверить результаты и отказ не-admin в admin методе.
   Guard failure не вызывает resource.invoke. Проверить snapshot после close ресурса:
@@ -298,7 +298,7 @@ def test_snapshot_survives_connection_close():
   snapshot_result(value: object) -> object — внутренний helper adapter, не новый
   формат выдачи. Дополнительно отказ на conn/cursor и сохранение config bytes без
   логирования; существующие dataclasses результата не превращаются в произвольный dict.
-- [ ] GREEN: новые worker/facade файлы + tests/bot/test_app_bootstrap.py и
+- [x] GREEN: новые worker/facade файлы + tests/bot/test_app_bootstrap.py и
   tests/bot/test_bot_workflows.py. CHANGELOG/commit: feat: add async bot workflow boundary.
 
 ## Task 3: lifetime принятых handlers
@@ -308,7 +308,7 @@ CHANGELOG.md. Middleware/owner готовы, runtime пока не перекл�
 **Consumes:** WorkflowBusy/Closed из Task 1; публичный aiogram middleware API.
 **Produces:** HandlerLifetime, WorkflowLifetimeMiddleware, await_owned_cleanup.
 
-- [ ] RED: owned handler имитирует send, ждёт Event, затем фиксирует delivery;
+- [x] RED: owned handler имитирует send, ждёт Event, затем фиксирует delivery;
   cancellation родительской task не отменяет этот handler; begin_shutdown запрещает
   новое run; drain не заканчивается до record. Все helpers показаны в тесте:
 
@@ -349,7 +349,7 @@ def test_parent_cancel_keeps_accepted_delivery_alive():
     asyncio.run(scenario())
 ```
 
-- [ ] Реализовать atomic admission (проверка closing/limit и регистрация task без
+- [x] Реализовать atomic admission (проверка closing/limit и регистрация task без
   await между ними), собственные сильные ссылки и ContextVar ticket, принадлежащий
   owner. В owned task установить ticket, вызвать handler, затем очистить ticket и
   регистрацию в finally. Внешний await идёт через shield; done callback извлекает
@@ -386,7 +386,7 @@ async def run(self, handler):
   marker bot_handler_failed без str/repr exception, args и traceback.
   drain await-ит снимок _tasks, пока registry не пуст; admission закрывается перед
   drain. Middleware использует return await owner.run(lambda: handler(event, data)).
-- [ ] Для await_owned_cleanup создать одну task, ожидать shield в цикле после
+- [x] Для await_owned_cleanup создать одну task, ожидать shield в цикле после
   повторных CancelledError; наблюсти исход task и только затем вернуть отмену.
   Переданный Awaitable оборачивается coroutine, чтобы принимать и Future:
 
@@ -411,11 +411,11 @@ async def await_owned_cleanup(cleanup):
   поднимает BaseExceptionGroup с обеими причинами вместо потери одной; в tests
   сверять типы/идентичность, не тексты secrets. Не применять asyncio.run внутри
   библиотечного API и не читать private _handle_update_tasks.
-- [ ] Дополнительные RED/GREEN: 8 accepted + отказ девятому; injected/forked stale
+- [x] Дополнительные RED/GREEN: 8 accepted + отказ девятому; injected/forked stale
   ticket отвергнут; raise handler не мешает drain; begin_shutdown/два drain
   идемпотентны; двукратная cancel ожидающего cleanup всё равно дожидается Event.
   Тесты используют только asyncio Events и fake handler, не Telegram API.
-- [ ] GREEN: tests/bot/test_handler_lifetime.py + tests/bot/test_workflow_worker.py.
+- [x] GREEN: tests/bot/test_handler_lifetime.py + tests/bot/test_workflow_worker.py.
   CHANGELOG/commit: feat: track accepted bot handlers through shutdown.
 
 ## Task 4: подключить и проверить bot runtime
@@ -426,12 +426,12 @@ tests/bot/test_app_bootstrap.py, tests/bot/test_async_workflow.py; CHANGELOG.md.
 **Consumes:** все API Tasks 1–3. **Produces:** единственный persistent bot path с
 worker-owned workflow; sync service/CLI callers по-прежнему используют sync factory.
 
-- [ ] RED интеграции: реальный временный Repository и fake peer remover удерживают
+- [x] RED интеграции: реальный временный Repository и fake peer remover удерживают
   revoke; независимая coroutine/watchdog проходит до release, следующий reset ждёт.
   Существующие workflow тесты дают бизнес-ожидания: после release локальные строки
   имеют прежние статусы, remote вызовы ровно по одному, авторизация проверена при
   исполнении. Это тест поведения, не проверка наличия слова await в исходнике.
-- [ ] Перевести все 41 call sites handlers.py на await и явный AsyncBotWorkflow.
+- [x] Перевести все 41 call sites handlers.py на await и явный AsyncBotWorkflow.
   Sync test doubles переводятся на async def с прежними возвращаемыми значениями,
   без универсального адаптера sync-or-async в production. Пример исходящего пути:
 
@@ -453,55 +453,55 @@ await message.answer(success_text)
   или issue. text("handler.delivery_record_failed") ru:
   «Не удалось сохранить результат доставки. Нужна проверка администратором»;
   en: «Could not save the delivery result. Administrator review is required.»
-- [ ] Middleware обрабатывает RemoteOperationPartialFailure внутри owned task,
+- [x] Middleware обрабатывает RemoteOperationPartialFailure внутри owned task,
   отправляет безопасный ru/en текст из spec, не re-raises его в сырой aiogram logger.
   PeerApplyError/остальные предусмотренные domain ответы сохраняются. WorkflowBusy
   сообщает отказ текущего шага без обещания rollback предыдущих шагов; WorkflowClosed
   не допускает новый job. Добавить ru/en keys через существующий texts.py.
-- [ ] create_dispatcher получает facade и lifetime явно; middleware регистрируется
+- [x] create_dispatcher получает facade и lifetime явно; middleware регистрируется
   на message/callback streams. Удалить экспорт raw phase15_awg3_components в
   dispatcher context; tests проверяют отсутствие raw Repository/bundle и тот же
   routing. Sync factory сохраняет bundle внутри workflow для services.
-- [ ] run_persistent_bot: admission → await worker.start с factory замыканием →
+- [x] run_persistent_bot: admission → await worker.start с factory замыканием →
   dispatcher(facade, lifetime) → state recheck → polling → READY/watchdog. Factory
   замыкание вызывает make_workflow_resource(lambda: workflow_factory(settings)),
   без открытой БД в event loop. guard facade = lifetime.require_active;
   error_status(exc) возвращает "partial" только для isinstance(exc,
   RemoteOperationPartialFailure), иначе "error". Никаких проверок по str(exc).
-- [ ] В finally закрыть lifetime admission до остановки polling; выполнить единый
+- [x] В finally закрыть lifetime admission до остановки polling; выполнить единый
   учитываемый cleanup с порядком stop polling/watchdog → lifetime.drain →
   worker.aclose → bot.session.close → instance lock exit. Nested finally не
   пропускают следующие ресурсы при close error. Startup timeout запускает cleanup
   даже при ещё работающей factory, но не READY. Не закрывать Telegram session в
   start_polling: close_bot_session=False сохраняется.
-- [ ] RED/GREEN matrices, с assert по порядку Events, а не wall-clock benchmark:
+- [x] RED/GREEN matrices, с assert по порядку Events, а не wall-clock benchmark:
   admission failure; schema/factory failure; startup timeout после dispatch factory;
   recheck failure; polling early-return/error; watchdog error; root cancel + повторная
   cancel; shutdown при busy SSH; новое сообщение после closing; send→record drain;
   запись False и exception после send; RemoteOperationPartialFailure с sentinel
   secret в cause отсутствует в ответах/новых diagnostics. В каждом исходе не больше
   одного close, lock exit после последнего SQL/record, нет новых remote/send retries.
-- [ ] Итоговый GREEN один раз: tests/bot tests/services/test_device_revoke.py
+- [x] Итоговый GREEN один раз: tests/bot tests/services/test_device_revoke.py
   tests/services/test_phase15_bootstrap.py, с launcher выше. Сравнить с baseline;
   предупреждения отделить от ошибок. Общий repository suite и web retest не нужны,
   если новые изменения/ошибки не затронули их. Не изменять tests ради скрытия failure.
-- [ ] CHANGELOG/commit: fix: keep bot event loop responsive during workflow operations.
+- [x] CHANGELOG/commit: fix: keep bot event loop responsive during workflow operations.
   Указать реальные RED/GREEN результаты, оставшиеся границы и отсутствие deployment.
 
 ## Завершение, review и handoff
 
-- [ ] По окончании кода провести один независимый read-only review всего диапазона
+- [x] По окончании кода провести один независимый read-only review всего диапазона
   source 2069e41..HEAD: ownership, queue/cancel races, drain/startup, auth/data
   boundary, partial failure/delivery. При inline выполнении reviewer не реализует
   соседние задачи; режим/модель выбираются по применимому review skill, без смены
   модели текущей задачи. Это будущий review, сейчас subagents не запускаются.
-- [ ] Исправить подтверждённые findings через целевой RED/GREEN; повторять только
+- [x] Исправить подтверждённые findings через целевой RED/GREEN; повторять только
   затронутые проверки и расширять при доказанной необходимости. Если review требует
   изменения согласованного контракта (параллельность, recovery, новая схема, отмена
   remote), остановиться перед этим изменением и предъявить конкретное отличие.
-- [ ] Финальный diff/whitespace, exact staged files, CHANGELOG; source HEAD/remote
+- [x] Финальный diff/whitespace, exact staged files, CHANGELOG; source HEAD/remote
   readback и clean status. Не merge/deploy автоматически и не удалять worktree.
-- [ ] В AMN3 обновить существующий SSH receipt, этот checklist и main plan,
+- [x] В AMN3 обновить существующий SSH receipt, этот checklist и main plan,
   CHANGELOG с фактическими результатами; ссылки/readback/diff без повторного pytest.
   Не превращать локальный PASS в Phase16 acceptance или live approval.
 
@@ -513,8 +513,28 @@ accepted handlers/drain → Tasks 3–4; startup/factory → Tasks 2/4; partial/
 Focus привязаны к конкретным тестам. Имена публичных API согласованы между задачами;
 helper snapshot_result и приватный _release_slot определены в соответствующих tasks.
 
-План ещё не выполнялся; source AMN2 остаётся 2069e41. Следующий шаг — review этого
-плана и выбор метода. Рекомендован inline/native: четыре задачи тесно связаны
-lifetime/API, один исполнитель сохраняет контекст; независимый review в конце.
-Альтернатива — отдельные исполнители/reviewers на каждую задачу с большей затратой
-контекста. Ни один способ не разрешает live-действия или обход acceptance gates.
+Реализация выполнена inline в существующем source worktree. Четыре source commits:
+614dfd8 (worker), b9f5d4e (factory/facade), 28a4e43 (handler lifetime),
+8bc8496a85d520096022b55c8ee3f4698c9b0a30 (runtime/handlers/delivery).
+Все отправлены обычным push в amn2:refs/heads/codex/phase16-web-health-event-loop;
+remote SHA сверены. Baseline: 278 passed; Task 1: 6 passed; Task 2: 75 passed;
+Task 3: 11 passed; Task 4 итоговый целевой набор: 310 passed in 54.80s.
+RED зафиксирован до реализации: отсутствие новых API, утечки при factory failure,
+неожиданные async handlers, partial failure и runtime cleanup. Промежуточные пять
+ошибок миграции (два AWG3 await и async super в doubles) исправлены; итог без warnings.
+Отдельный RED показал утечку exception context при неудаче отправки partial-error
+ответа; теперь фиксируется только безопасный diagnostic marker.
+
+Допустимое отклонение структуры: runtime integration cases вынесены в
+ tests/bot/test_bot_runtime_worker.py, чтобы не перегружать bootstrap tests.
+Объём проверок и public API не изменены. Полный repo suite и переустановка
+зависимостей не выполнялись согласно согласованному scope. Worktree сохраняется;
+merge/deploy/PR не требуются для этой локальной задачи.
+
+Независимый review диапазона 2069e41..8bc8496 завершён: Critical нет; найдены
+queued-cancel race (Important) и запуск factory после close (Minor, повышен до Important
+из-за возможной инициализации БД после закрытия admission). Оба regression RED
+воспроизведены; исправлены в 1bd7f62d1fdd3829bc278110ecdc44d3568676a3. Итоговый набор: 312 passed in 47.46s, без warnings. Повторный review не запускался.
+Результат и финальный source SHA — в [receipt](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#bot-worker-реализация-и-проверки--2026-09-20).
+Следующий gate после review — отдельное решение об интеграции; live permissions,
+AWG2/package016/general issuance и Phase16 acceptance не изменены.
