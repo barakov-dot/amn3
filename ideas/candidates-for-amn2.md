@@ -445,3 +445,25 @@ public GitHub metadata refresh.
 - Gate: `watch-only`.
 - Статус: no active AMN2 item required after
   [Amnezia ecosystem refresh 2026-06-14](../research/upstreams/amnezia-vpn-client-defaultvpn-refresh-2026-06-14.md); current copy/client matrix remains the `b3102db` baseline and latest smoked head is `0de7a77`.
+
+### P3 — версия собственного JSON/envelope (2026-09-20)
+
+- Статус: PLANNING_ONLY_NOT_APPROVED_NOT_IMPLEMENTED. Передача из weekly upstream
+  review; не новый gate исполнения Phase16 и не разрешение менять delivery.
+- Источник: [официальный PR #3184](https://github.com/amnezia-vpn/amnezia-client/pull/3184),
+  merged в dev 2026-09-18, merge aca1b7dc5cad014a5f22f218655195fd8381cbad;
+  статус/SHA и diff сверены через GitHub API 2026-09-20. Merge не означает stable release.
+- Наблюдение: format_version=1; более новые версии отклоняются в путях native
+  import/QR/API apply, restore сообщает о пропущенных несовместимых записях.
+- Применимость: только после отдельного решения AMN2 о собственном контракте
+  JSON/envelope. Уже существующий локальный client-specific export не является
+  одобрением нового контракта и не переключает общую выдачу.
+- Независимый design gate: поддерживаемый version range и legacy/missing version;
+  deterministic rejection до side effects; отдельные unsupported/malformed outcomes;
+  negative и round-trip import/restore tests; migration/rollback note;
+  запрет утечки секретов через ошибки/логи. Это требования будущего дизайна,
+  не утверждение, что upstream уже реализует каждое из них.
+- Upstream GPL code/schema/UI не копировать. Текущие .conf/vpn:// артефакты,
+  AWG2/AWG3.1 и незавершённый DefaultVPN .conf manual check не менять.
+- Проверка этой записи: readback, diff/whitespace, ссылка на официальный PR.
+  Код/тесты runtime/deploy не запускались; AWG2_UNTOUCHED, stage/install отсутствуют.

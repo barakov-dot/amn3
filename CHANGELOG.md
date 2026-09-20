@@ -5,6 +5,15 @@
 записи не означают deployment или новую выдачу. Текущая очередь — в
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
+## 2026-09-20
+
+- В [кандидаты AMN2](ideas/candidates-for-amn2.md) добавлен отдельный P3 design
+  candidate по upstream PR #3184: версионирование собственного JSON/envelope,
+  отказ до side effects, import/restore tests и redaction. GitHub merge SHA и
+  diff проверены. Это planning-only, не реализация или изменение Phase16.
+- Проверка: readback и diff/whitespace; существующие профили, форматы, выдача
+  и серверы не изменены. DefaultVPN .conf test остаётся незавершённым.
+
 ## 2026-09-13
 
 ### Правила и документация
