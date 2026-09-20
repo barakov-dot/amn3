@@ -152,6 +152,17 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    доказательств: checksum/state/rollback-bound approval, проверка persistence,
    restart policy, leaks и границ отката. Затем Task 5 и Task 6.
 
+   Локальный reviewable gate подготовлен 20.09 в [существующем Phase16 design](../specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#integration-readiness-web-bot):
+   LOCAL_GATE_PREPARED / EXECUTION_BLOCKED / NOT_DEPLOYED.
+   Кандидат AMN2 1bd7f62d1fdd3829bc278110ecdc44d3568676a3; source/remote сверены.
+   Конкретные gaps: runtime lock aiogram 3.30.0 против tested 3.28.2;
+   stop budget не доказан (30s только в source unit example, target UNKNOWN).
+   Source/dependency binding, startup/drain, recovery/activation/rollback,
+   bounded acceptance и полный список M1–M7 находятся в этом контракте.
+   Следующий локальный gate — согласовать dependency-validation M3 на intended
+   lock. Подготовка завершена; новые среда/тесты/code/merge/build и live этим
+   не разрешены. Package016 не пересобирается.
+
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
 исправлен только этот AMN2 handler: 2 RED → 33 PASS целевого web/health набора,

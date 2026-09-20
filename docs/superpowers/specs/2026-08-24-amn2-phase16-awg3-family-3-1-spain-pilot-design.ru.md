@@ -27,6 +27,208 @@ readback и не разрешают повторять completed/consumed опе
   general issuance сохранены. Restart/persistence и leak checks остаются
   требованиями отдельно разрешённого integration/acceptance этапа.
 
+<a id="integration-readiness-web-bot"></a>
+
+## Task 3B: integration-readiness web + bot — локальная подготовка 2026-09-20
+
+Статус: **LOCAL_GATE_PREPARED / EXECUTION_BLOCKED / NOT_DEPLOYED**.
+Это уточнение существующего integration-контракта, не новый execution plan
+и не approval на исполнение или runtime-настройки. Подготовка разрешена командой
+раздела 1 [handoff](../../NEXT_CHAT_PHASE16_2026-09-20.ru.md).
+Очередь остаётся в главном плане; исторические команды ниже не возобновляются.
+
+### 1. Source и имеющееся evidence
+
+Кандидат AMN2: **1bd7f62d1fdd3829bc278110ecdc44d3568676a3**,
+ветка codex/phase16-web-health-event-loop, remote amn2:
+https://github.com/barakov-dot/amn2.git. При подготовке HEAD и remote ref совпали,
+дерево чистое. AMN3 entry baseline — handoff 111cfa9a0f41e354d876fa8e80f5cbc23e96ff83,
+detached worktree 7489. Старый основной checkout и четыре ideas-файла сохраняются.
+
+| Состав кандидата | Имеющееся evidence | Предел |
+| --- | --- | --- |
+| Web health offload, 2069e4147437067c08a7d3bde7361433179ac727 | 33 targeted PASS, независимый review без замечаний | Результат на web commit. app/web, dependencies и unit examples не менялись пятью последующими bot commits; нового совместного прогона на финальном SHA нет |
+| Bot worker/facade/lifetime/runtime, 614dfd8 → b9f5d4e → 28a4e43 → 8bc8496 → 1bd7f62 | 312 PASS на конечном SHA; review 2069e41..8bc8496, два findings исправлены RED/GREEN в 1bd7f62 | Повторного review после fixes не было; temporary SQLite, fake peer/Telegram, не target runtime |
+| Унаследованная история до web fix | Полный кандидат включает baseline 56540e2 и предков | Весь кандидат не равен двум патчам; delta относительно deployed SHA пока UNKNOWN |
+
+Подробности — [завершённый receipt](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#bot-worker-реализация-и-проверки--2026-09-20),
+[bot design](2026-09-20-amn2-bot-workflow-worker-design.ru.md) и
+[выполненный plan](../plans/2026-09-20-amn2-bot-workflow-worker-plan.ru.md).
+Проверки не повторять на неизменном коде ради документации.
+
+Source SHA не является package identity/deployed revision.
+[Source receipt package016](../../../research/amn2/phase16-source-readiness-receipt.md)
+связан с a3682fc44dd9e74ff96392ad99623474facf377f, не с кандидатом.
+Package016 immutable; web/bot изменения в него не переносить.
+Для будущего artifact нужны отдельный packaging scope, выбранная новая identity,
+source/tooling/lock binding и manifest checksums. Сейчас они не назначены;
+merge, package build и перенос файлов этим gate не разрешены.
+
+### 2. Dependencies и target binding
+
+Статически прочитаны файлы именно candidate SHA:
+
+| Источник | Установленный факт |
+| --- | --- |
+| [pyproject.toml](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/pyproject.toml) | Python >=3.12,<3.13; aiogram >=3.4,<4 — диапазон, не target lock |
+| [Runtime lock](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/requirements/phase15-runtime-py312.lock) | aiogram==3.30.0; SHA256 файла a381be185b19777b9198526e11df8dcfa0faf7f15acccd829809e698d679fab |
+| [Test lock](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/requirements/phase15-test-py312.lock) | SHA256 файла 52967d6e2babc5d05b60615c9a9c950a4541436f7a521dfee49d62b98264a235 |
+| Выполненные bot tests по receipt | Python 3.12.14 / aiogram 3.28.2, существующий .codex_deps; не установка из candidate runtime lock |
+| Target environment | Python patch/build, platform/ABI, aiogram/transitive versions, фактический lock/artifacts и deployed source UNKNOWN |
+
+**Dependency gap:** 312 PASS с 3.28.2 нельзя переносить на pinned 3.30.0.
+Это несовпадение проверенных environments, не доказанный дефект 3.30.0.
+Не обновлять и не понижать dependencies автоматически. До deployment выбрать
+intended dependency set, связать полный lock/artifact hashes с target и отдельно
+проверить затронутый lifecycle в выбранной среде. Новая среда — конкретное
+основание для bounded validation, не повод повторить 312 тестов с прежними deps.
+
+Нужен нормализованный target receipt: checked_at, target identity, deployed
+source, Python/platform/ABI, полный dependency binding, entrypoints и effective
+unit/drop-in properties. EnvironmentFile, tokens и реальные configs не читать
+и не выводить ради этого receipt. Новый target readback требует exact approval.
+
+### 3. Startup и readiness
+
+[app/main.py на кандидате](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/main.py)
+сохраняет порядок:
+
+1. Instance lock; создание Telegram client/session.
+2. Telegram admission: exact identity, отсутствие webhook/backlog по существующему
+   контракту; затем worker-owned workflow/SQLite factory в выделенном потоке.
+3. Dispatcher с async facade/lifetime; повторная проверка Telegram state.
+4. Polling task; один turn event loop и проверка раннего завершения.
+5. Admission receipt и READY; затем watchdog.
+
+Admission/factory/recheck находятся внутри существующего startup timeout.
+Его target значение UNKNOWN; тестовые таймеры не SLA. Failure/timeout не разрешают
+polling/READY. Dispatched factory может завершать cleanup после deadline;
+не dispatched factory после close не запускается (исправленный regression).
+READY подтверждает admission и отсутствие обнаруженного раннего завершения
+polling, не бизнес-операцию, доставку или VPN acceptance.
+
+[Web unit example](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/deploy/systemd/amneziya-web.service.example)
+имеет Type=simple: active-state не заменяет согласованную web readiness проверку.
+Реальный Telegram startup сейчас запрещён.
+
+### 4. Drain, stop budget и restart
+
+Bot cleanup закрывает приём, посылает STOPPING только после ранее отправленного
+READY, останавливает watchdog/polling, ждёт accepted handlers, затем worker jobs/
+close, Telegram session и освобождение instance lock. Queued mutations и
+send → delivery record завершаются. Отмена waiter после dispatch не отменяет SSH;
+повторная отмена root не ускоряет освобождение ресурсов. Bot FIFO не сериализует
+web/CLI/другие процессы; web health to_thread имеет отдельный lifetime.
+
+[Bot unit example](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/deploy/systemd/amneziya-bot.service.example)
+содержит TimeoutStartSec=135s, TimeoutStopSec=30s, WatchdogSec=60s,
+Restart=on-failure, RestartSec=30s. Это **пример source**, не effective units target.
+В web example TimeoutStopSec не задан; effective default/drop-ins UNKNOWN.
+Units не меняются.
+
+Общего hard drain deadline нет. Восемь jobs не дают формулу 8 × SSH timeout:
+handler делает несколько jobs/send, reset может затронуть несколько устройств;
+remote timeout не доказывает прекращения удалённой работы. Startup timeout
+не ограничивает cleanup. Нельзя объявить примерные 30s достаточными или просто
+увеличить их до выдуманного значения.
+
+До исполнения нужны effective TimeoutStartSec/TimeoutStopSec, KillMode,
+KillSignal/FinalKillSignal/SendSIGKILL, restart/watchdog/start-limit properties
+bot/web; состав других writers; upper bound разрешённой нагрузки и всех
+последовательных действий, terminal readback и согласованный запас.
+Отдельно учесть startup cleanup, web health threads, Telegram send/record.
+Если конечный upper bound не доказан, budget UNKNOWN и deployment BLOCKED:
+нужно отдельное lifecycle/recovery решение. Manager escalation/force kill
+не является drain PASS; restart после UNKNOWN не доказывает отсутствие дублей.
+
+### 5. Stage, recovery и rollback
+
+Application-stage сохраняет snapshot/backup, но сам по себе не активирует
+проверенную web+bot ветку. Требуется отдельный activation contract: exact units/
+entrypoints/DB-path identity, coexistence/writer fence, переключение, readiness,
+revert target и readback. Реальные DB/EnvironmentFile не обследованы.
+Code revert не отменяет remote peer mutation или отправленный документ;
+backup не разрешает перезапись основной БД.
+
+Controlled-stage runtime без peers и minimal pilot — разные контуры.
+Нужна state-bound проверка ресурсов/исключений: AWG2, pilot container/network/
+interface/peers, общий image, основное application state, retained package,
+имеющийся backup и transaction audit. Текущий retained inventory UNKNOWN;
+прошлое отсутствие ресурса не доказывает его отсутствие сейчас.
+General issuance disabled; DefaultVPN native delivery не включать; peer не создавать.
+
+| Будущий исход | Классификация и граница |
+| --- | --- |
+| Admission/factory/recheck failure | Нет READY; возможные factory writes/cleanup отдельно. Отсутствие READY не означает отсутствие изменений БД |
+| Drain/operation timeout, потеря транспорта, external kill | Terminal state UNKNOWN; без повторной mutation/send/stage, сохранить evidence и открыть отдельный recovery gate |
+| Remote success + local failure; send success + record failure | Partial/manual review, без false success, auto retry/reissue/resend и утверждения rollback |
+| Coordinator recovery_required | Сохранить package/имеющийся backup/ресурсы; новый stage блокирован, quiescence не доказана, удаление не разрешено |
+| rollback_failed либо attempts_completed_unverified | Ошибка/непроверенные попытки; восстановление не подтверждено |
+| Успешный процесс, закрытая SQLite или rolled_back | Недостаточно: нужны resource/DB/remote readback и сохранность исключений в согласованном scope |
+
+[Recovery v1](2026-09-08-phase16-controlled-stage-recovery-contract.ru.md)
+не изменён: inventory → доказательство прекращения операций → адресная очистка →
+readback, с отдельными exact approvals. Нужны transaction/resource ownership
+и quiescence всех установленных источников операций. PID/имя/consumed claim/
+совпавшие metadata этого не доказывают. Parser/observations и 164 synthetic PASS
+не заменяют live evidence. Автоматический cleanup, Docker prune, снятие
+package-блокировки и DB restore сейчас не разрешены.
+
+### 6. Будущие bounded acceptance checks — NOT_EXECUTED
+
+Input каждого сценария: candidate/source и dependency binding; для target —
+exact state/transaction; fixture либо разрешённая identity, side-effect allowlist,
+доказанный time cap, output/data cap, terminal readback и rollback scope.
+UNKNOWN обязательного input блокирует запуск. Старые значения не подставлять.
+Failure injections допустимы только в отдельно разрешённой synthetic среде;
+live partial failure/kill намеренно не вызывать.
+
+| Сценарий | Конечный объём/вход | PASS / FAIL / UNKNOWN и STOP |
+| --- | --- | --- |
+| Dependency/admission/start | На выбранном lock по одному synthetic identity/webhook/backlog/factory/recheck/timeout case; один штатный startup | PASS: правильный порядок, нет READY при отказе; FAIL: нарушение; UNKNOWN: нет trace/лимита. Прежний suite без нового environment/question не повторять |
+| Worker responsiveness/ownership | Одна удерживаемая synthetic operation; 1 running + 7 queued, один overflow, независимая coroutine, temporary SQLite/fake peer | PASS: нет overlap, loop прогрессирует, overflow без side effect, close в owner thread; FAIL: нарушение; UNKNOWN: неполная наблюдаемость. 8 — source capacity, не latency SLA |
+| Drain/delivery | Один shutdown между fake send и record; queued/dispatched cases по одному, agreed stop budget | PASS: terminal jobs/record → close → session → lock без manager kill; FAIL: обрыв/повтор/ранний release; UNKNOWN: исход не доказан. Реальный config ради теста не выдавать |
+| Web + bot coexistence | Один bounded health stub/request и один bot fixture path, временная БД, exact serving entrypoints | PASS: loop прогресс, прежние auth/CSRF/summary/audit, нет SQLite ownership errors; без модели других writers UNKNOWN/STOP. Общая межпроцессная serialization не обещана |
+| Activation/persistence | После prerequisites/approvals одна activation и один согласованный app/runtime restart, exact resource allowlist, без новой выдачи | PASS: intended revisions, readiness/persistence/restart policy, AWG2 equality/pilot сохранены; FAIL: drift/утрата; UNKNOWN: нет binding/readback. Temporary rules/restart=no не production PASS |
+| Leaks / Task 5 | Один IPv4/IPv6/DNS набор на существующем peer последовательно, endpoints/method/data/time caps заранее | По [критериям v1](../../PHASE16_ACCEPTANCE_CRITERIA_DRAFT.ru.md). DNS bridge STOP; нет метода/coverage — INCOMPLETE/UNKNOWN, не замена моделью и не разрешение A/B |
+| Scoped rollback/recovery | Конкретный исход и approvals v1; одна операция на разрешённый объект и bounded readback | PASS только для списка целей/исключений; query error UNKNOWN. Нет owner/quiescence либо пересечение AWG2/pilot — STOP до изменения |
+
+Общий STOP: mismatch source/deps/state, неизвестный владелец, потеря доступа/
+контроля, достижение любого cap, неожиданный side effect или выход за allowlist.
+Без retries, продления окна и автоматического kill/cleanup.
+Валидный FAIL сохраняется при других UNKNOWN; прежние 33/312 PASS остаются
+локальным evidence, а все сценарии этого gate сейчас NOT_EXECUTED.
+
+### 7. Ровно недостающие evidence и следующий шаг
+
+| ID | Недостающее доказательство/решение | Как закрывается / разрешено сейчас |
+| --- | --- | --- |
+| M1 | Windows traffic PASS на обоснованном client/engine/hypothesis path; root-cause-bound quality correction, стабильное acceptance и полный strict A/B | Отложенные P0/P1 главного плана; только после возврата оператора и exact approval. Сейчас повтор не запрашивать |
+| M2 | Валидная DNS/прочая measurement coverage, endpoints и budgets критериев v1 | Отдельное решение по методике; DNS bridge STOP, tooling ради gate не создавать |
+| M3 | Fresh target deployed/source/state + Python/ABI/full dependencies, intended lock и lifecycle evidence на нём | Сначала локальное согласование dependency-validation scope для 3.28.2/3.30.0; target readback отдельно. Сейчас только документы; установки/новые тесты не разрешены |
+| M4 | Effective bot/web units, другие writers, конечный startup-cleanup/stop budget и recovery policy для UNKNOWN | Readback по exact approval и согласованное решение до deployment; 30s из примера не доказательство |
+| M5 | Retained inventory, transaction ownership/quiescence, preservation/cleanup readback с исключениями v1 | Четыре раздельных recovery gates; metadata tools готовы локально, live authority отсутствует |
+| M6 | Future artifact source/tooling/dependency binding, identity/manifest; activation/revert contract и DB/remote preservation | Отдельный packaging/activation scope после dependencies; package016 сохранить, новый ID/hash/revert target не назначены |
+| M7 | Исполненные bounded startup/drain/coexistence/persistence/restart/leak/rollback checks на связанных artifact/target | Раздел 6 после prerequisites и exact approvals; 33/312 PASS не закрывают target acceptance. Synthetic dependency slice может отдельно предшествовать live gates |
+
+Следующий допустимый шаг — рассмотреть только **локальный dependency-validation
+scope M3**: кандидат 1bd7f62, intended runtime lock и worker/admission/drain
+в согласованной среде. До отдельного разрешения не создавать среду, не менять
+lock, не устанавливать dependencies и не запускать новый набор.
+Это предмет решения, не возобновление iPhone/A/B и не переход к deployment.
+
+Для будущего исполнения approvals раздельны: bounded target inventory;
+recovery signals; адресная cleanup и снятие package-блокировки; новый package
+build; checksum/state/rollback-bound stage; application activation/Telegram
+interaction; restart/leak acceptance. В каждом нужны конкретные цели, bindings,
+лимиты и stop-condition. Готовую /APPROVE с UNKNOWN полями не выдавать;
+согласование этого текста не заменяет разрешения.
+
+Проверка дополнения: local source/Git readback, SHA256 locks, ссылки, scope,
+diff/whitespace и added-line secret scan. Runtime/pytest, package materialization,
+SSH/VPS/Telegram API, restart/install/deploy не выполняются.
+AWG2_UNTOUCHED; package016 immutable; general issuance disabled.
+
 ## Историческая ревизия — PACKAGE 016, 2026-08-27
 
 Approved local preparation: baseline `392cc339f7f6afaed0a0dc2a0a80139ca030f560`, local-fix receipt SHA256 `549b515ea50e7668f56f433772633a63c674aaba973876f978f0a2ea15f823de`. Изменяются только package/branch bindings и локальное evidence; scalar-exit и BOM-free stdin fixes сохраняются. Один targeted regression, одна materialization и один separate verifier. Package 015 immutable, transaction 006 consumed. Spain egress, remote write, stage/install, config/issuance и AWG2 changes запрещены. После локальной готовности нужен новый exact preflight approval; прежние approvals не переиспользуются. Подробный текущий scope и вертикальный статус находятся в плане Phase 16; требования ниже сохранены как исходный контракт.

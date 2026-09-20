@@ -7,6 +7,18 @@
 
 ## 2026-09-20
 
+- Подготовлен [integration-readiness gate web+bot в существующем Phase16 design](docs/superpowers/specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#integration-readiness-web-bot),
+  главный план связан с ним без второго execution plan. Кандидат AMN2 1bd7f62
+  сверён с Git/remote; прежние 33 web и 312 bot PASS сохранены с пределами.
+  Read-only source check выявил aiogram 3.30.0 в runtime lock против tested 3.28.2
+  и недоказанный stop budget (30s в unit example не равны target state).
+  Записаны startup/drain, artifact/activation/recovery/rollback boundaries,
+  bounded acceptance scenarios и M1–M7 недостающих evidence. Проверки: readback,
+  SHA256 locks, ссылки, scope/diff/whitespace, added-line secret scan.
+  Только документация; нет новых tests/code/dependencies, merge/package/live,
+  повторной выдачи или cleanup. Windows/quality/DNS/recovery gates сохранены;
+  AWG2_UNTOUCHED, package016 immutable, general issuance disabled.
+
 - По просьбе оператора подготовлен [полный handoff в новый чат](docs/NEXT_CHAT_PHASE16_2026-09-20.ru.md)
   после завершения bot worker: готовая команда, структура AMN3/AMN2, канонические
   планы/архитектура, проверенные HEAD/remote, 312 ранее выполненных PASS, клиентские
