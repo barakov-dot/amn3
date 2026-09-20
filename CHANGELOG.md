@@ -7,6 +7,16 @@
 
 ## 2026-09-20
 
+- DefaultVPN: оператор сообщил об отправке письма на support@dfvpn.com;
+  статус SENT_OPERATOR_REPORTED / WAITING_REPLY, направление отложено как несрочное.
+  Доставка и ответ независимо не проверены; исходный черновик сохранён.
+- [Panel #174: применимость к AMN2](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md):
+  source review подтвердил синхронный SSH в async web health и условном bot revoke.
+  Уточнена существующая карточка, предложен локальный fix только web health;
+  bot SQLite и retry/cooldown требуют отдельного решения. Проверены официальный
+  PR/diff, локальные source/tests, дубли в четырёх ideas-файлах и ссылки/whitespace.
+  Код/тесты AMN2 и VPS не запускались и не менялись; weekly cursor не продвинут.
+
 - [DefaultVPN: зафиксирована следующая граница](research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md#следующая-граница-после-name_fail-и-остановки--2026-09-20):
   оператор остановил переподключение и подтвердил отсутствие просмотра/экспорта
   одного профиля. Read-only AMN2 source check отделил готовый native exporter от

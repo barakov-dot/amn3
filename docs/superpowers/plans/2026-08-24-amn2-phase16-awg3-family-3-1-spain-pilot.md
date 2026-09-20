@@ -106,7 +106,7 @@ DefaultVPN/iOS: 16.09 оператор подтвердил NAME_PASS через
 Предыдущий native NAME_PASS сохранён отдельно; рабочую «Испанию» не менять.
 Оператор не нашёл просмотр/экспорт отдельного профиля. Параметры UNKNOWN;
 cb7ea0c не разрешился в двух официальных source repositories. Export API уже готов,
-но legacy delivery не переключён. [Запрос разработчикам подготовлен, не отправлен](../../../research/amn2/phase16-defaultvpn-2.0.1.1-compatibility-question-draft-2026-09-20.md).
+но legacy delivery не переключён. [Письмо отправлено оператором; ждём ответа, DefaultVPN отложен](../../../research/amn2/phase16-defaultvpn-2.0.1.1-compatibility-question-draft-2026-09-20.md).
 [Материалы и короткий сценарий](../../../research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md#defaultvpn-подтверждённое-и-вечерний-тест--2026-09-20).
 Локальная проверка не закрывает Windows traffic/quality gates и не разрешает
 переключить delivery. iPhone connectivity/A/B не возобновляются этим импортом.
@@ -148,6 +148,12 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
 5. **P2 — integration, BLOCKED предыдущими gates.** После клиентских и quality
    доказательств: checksum/state/rollback-bound approval, проверка persistence,
    restart policy, leaks и границ отката. Затем Task 5 и Task 6.
+
+Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
+закрыт на уровне исходников. Найден синхронный SSH в async web health handler;
+предложен первый локальный fix только этого обработчика и offline regression.
+Код AMN2 не менялся; перенос bot workflow требует отдельного SQLite/transaction
+решения. Повторные SSH попытки/circuit breaker не входят в первый fix.
 
 ### Текущий вертикальный статус
 

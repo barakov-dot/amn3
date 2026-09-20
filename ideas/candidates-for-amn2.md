@@ -37,7 +37,11 @@
 - Идея: проверять ping/status протоколов параллельно, чтобы UI не зависал на медленных серверах.
 - Польза: быстрее и отзывчивее для панели управления.
 - Риски: rate limits, SSH connection fan-out, timeouts, cancellation.
-- Статус: research.
+- Статус: research; [уточнение #174 от 20.09.2026](../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
+  подтвердило блокирующий SSH в async web health AMN2. P2: сначала локальный
+  offload одной read-only проверки с тестом отзывчивости; параллельный fan-out
+  не включать. Bot SQLite/transactions и circuit breaker — отдельные решения.
+  Fix предложен, не реализован; source review не разрешает live health run.
 
 ### Token-protected sharing
 
