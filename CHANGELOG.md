@@ -7,6 +7,14 @@
 
 ## 2026-09-20
 
+- По просьбе оператора подготовлен [полный handoff в новый чат](docs/NEXT_CHAT_PHASE16_2026-09-20.ru.md)
+  после завершения bot worker: готовая команда, структура AMN3/AMN2, канонические
+  планы/архитектура, проверенные HEAD/remote, 312 ранее выполненных PASS, клиентские
+  ограничения, approvals и следующий local integration-readiness scope. START_HERE
+  ведёт к новому снимку; второй execution plan не создаётся. Проверки: readback,
+  локальные ссылки, согласованность, diff/whitespace; исходники/тесты, серверы,
+  профили, пакеты и глобальные настройки не изменялись. Новый чат не создан.
+
 - По подтверждённому [плану bot worker](docs/superpowers/plans/2026-09-20-amn2-bot-workflow-worker-plan.ru.md)
   выполнены четыре этапа inline: one-thread SQLite ownership, bounded FIFO/async facade,
   handler lifetime и persistent runtime/delivery integration. Source AMN2 commits
