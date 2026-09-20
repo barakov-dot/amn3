@@ -489,3 +489,17 @@ NO_CHANGE_REQUIRED для format_version существующего exporter: mi
 Матрица типов, ссылки и 52 offline PASS — в каноническом плане выше.
 Ранее записанное «недостаточно данных» уточнено этим решением в source scope;
 exact iPhone build UNKNOWN. Нового code scope/собственного формата не требуется.
+
+
+### P2 — AWG Go: происхождение runtime и исправления padding/cookies, 2026-09-20
+
+- Статус: новый кандидат для AMN2; source review выполнен, обновление не реализовано.
+- Проблема: declared source 1f50ad7 предшествует da11c9f/b5928ef, но exact source
+  публичного image digest 4e1fd284 не подтверждён labels/build VCS metadata.
+- Приоритет: сначала image/source/tools binding; затем отдельная оценка runtime
+  candidate. В pilot template ContentPaddingAddition=0; DisableCookies=on делает
+  under-load fix условно релевантным. Live under-load/root cause не установлены.
+- [Evidence, SHA и следующие gates](../research/amn2/phase16-awg-go-pinned-runtime-review-2026-09-20.md).
+  Это одна карточка к реестру; недельный обзор остаётся частичным.
+- Не менять exporter/package016/AWG2 или доставку; не копировать upstream GPL
+  source. Нет доказательств для немедленного обновления установленного runtime.

@@ -124,3 +124,15 @@ RED/GREEN подтвердил исправления пути из вложен
 Это проверка Git workflow, а не VPN, сервера или Phase16 acceptance.
 
 Два существующих markdown-hygiene tests также PASS. GitHub/Linux run ещё не выполнен.
+
+
+## Первый GitHub run — подтверждено 2026-09-20
+
+После отдельно одобренного push HEAD 3eb18f64374e1c279295d0b434302dcee90377ae
+в codex/phase16-awg3-family-3-1-spain-pilot-016 origin подтвердил тот же SHA.
+[Changelog gate, run 1](https://github.com/barakov-dot/amn3/actions/runs/35512487489)
+завершён success: 2026-09-20 13:05:32–13:05:47 UTC (16:05 MSK).
+GitHub job readback подтвердил success отдельно для tests on disposable repositories
+и check every new commit. Это первый выполненный Linux CI run, уточняющий прежнюю
+запись «ещё не выполнен» выше. Required status checks/branch protection этим не
+настраивались. Новый прогон и повтор локальных runtime tests не запускались.

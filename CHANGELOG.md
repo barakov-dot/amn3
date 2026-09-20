@@ -7,6 +7,16 @@
 
 ## 2026-09-20
 
+- Выполнена [сверка AWG Go](research/amn2/phase16-awg-go-pinned-runtime-review-2026-09-20.md):
+  declared source старее двух fixes; отдельно обнаружен пробел image/source binding.
+  SHA256 публичных manifest/config/layer проверены, бинарник прочитан в памяти без
+  запуска; exact source не подтверждён. Применимость ограничена настройками шаблона.
+  Добавлен один P2 candidate; weekly cursor, runtime, package016 и выдача не изменены.
+- [Первый GitHub CI](docs/CHANGELOG_GATE.ru.md#первый-github-run--подтверждено-2026-09-20)
+  для 3eb18f6 подтверждён SUCCESS по run/job/steps. Документирована граница между
+  успешным workflow и отдельно настраиваемыми required checks. Локальные тесты
+  повторно не запускались; проверки этого пакета — source/readback, ссылки и diff.
+
 - Добавлен [автоматический changelog gate](docs/CHANGELOG_GATE.ru.md): проверка
   index перед commit и каждого нового commit перед push; поздняя общая запись
   не закрывает пропуски. Учтены датированные записи, формальные исключения с
