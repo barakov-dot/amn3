@@ -7,6 +7,16 @@
 
 ## 2026-09-20
 
+- Подготовлен [design последовательного bot workflow worker](docs/superpowers/specs/2026-09-20-amn2-bot-workflow-worker-design.ru.md)
+  на baseline AMN2 2069e41: SQLite принадлежит одному потоку, ограниченная очередь
+  на 8 outstanding jobs, async facade и явное владение lifetime handlers.
+  Отмена до dispatch исключает job, после dispatch операция завершается; shutdown
+  дожидается уже принятых handlers, включая delivery record, до закрытия БД/сессии.
+  Учтены partial failure и отсутствие гарантии быстрого меню/жёсткого drain timeout.
+  Статус DESIGN_DRAFT_READY_FOR_REVIEW: документ ещё не утверждён, код не реализован.
+  Выполнены source/self-review, readback, проверка ссылок и diff/whitespace;
+  bot/runtime tests, VPS/Telegram, package/stage/install не запускались.
+
 - [DefaultVPN: получен ответ поддержки](research/amn2/phase16-defaultvpn-2.0.1.1-compatibility-question-draft-2026-09-20.md#ответ-поддержки-предоставленный-оператором--2026-09-20),
   предоставленный оператором. Восстановлен порядок русского письма из истории
   задачи; он отличается от английского черновика. Поддержка отрицает возможность

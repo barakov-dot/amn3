@@ -1,7 +1,7 @@
 # Phase16 — применимость Panel #174: SSH и цикл событий
 
 Статус web slice: LOCAL_IMPLEMENTED_TESTED_REVIEWED_PUSHED_NOT_DEPLOYED.
-Bot: SOURCE_REVIEW_COMPLETE / APPROACH_PROPOSED_NOT_APPROVED.
+Bot: SOURCE_REVIEW_COMPLETE / DESIGN_DRAFT_READY_FOR_REVIEW.
 Проверка завершена 2026-09-20 20:25 Europe/Moscow. Это ограниченный разбор
 одного сигнала из [реестра](../../docs/UPSTREAM_INTAKE.ru.md), не полный weekly.
 Цель: определить, применима ли защита от блокирующего SSH к нашему коду.
@@ -133,7 +133,9 @@ refs/heads/codex/phase16-web-health-event-loop, без force и тегов; remo
 
 ## Bot: SQLite и границы переноса — 2026-09-20
 
-Статус этого раздела: SOURCE_REVIEW_COMPLETE / APPROACH_PROPOSED_NOT_APPROVED.
+Статус исходного разбора: SOURCE_REVIEW_COMPLETE.
+По последующему «учтем и продолжим» подготовлен [письменный design варианта A](../../docs/superpowers/specs/2026-09-20-amn2-bot-workflow-worker-design.ru.md):
+DESIGN_DRAFT_READY_FOR_REVIEW; утверждение документа и реализация ещё впереди.
 Это продолжение source review по команде оператора «работаем», а не выполненный
 bot fix или второй execution plan. Проверен source HEAD
 2069e4147437067c08a7d3bde7361433179ac727 в сохранённом AMN2 worktree выше;
@@ -223,8 +225,10 @@ failure; shutdown во время SSH и между Telegram send и delivery re
 не являются предлагаемым решением. Retries/circuit breaker, DB schema, live
 recovery, включение выдачи, package/stage/install не входят в этот review.
 
-Следующий шаг — выбрать A либо B и согласовать его письменный design; затем
-implementation plan в рамках единого плана Phase16. До этого bot-код не меняется.
+Следующий шаг — review письменного design варианта A, затем implementation plan
+в рамках единого плана Phase16. Политика очереди/отмены/drain конкретизирована в
+design; этот source review остаётся основанием, а не конкурирующим контрактом.
+До согласования документа bot-код не меняется.
 Текущий статус отдельного DefaultVPN направления — в [обращении и ответе поддержки](phase16-defaultvpn-2.0.1.1-compatibility-question-draft-2026-09-20.md);
 новых phone tasks этот bot review не задаёт.
 Проверка этой записи: source readback, локальные ссылки, diff/whitespace и
