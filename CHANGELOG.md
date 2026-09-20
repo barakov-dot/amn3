@@ -7,6 +7,15 @@
 
 ## 2026-09-20
 
+- Подготовлен [локальный recovery-план](docs/superpowers/plans/2026-09-20-phase16-recovery-evidence-local-plan.ru.md):
+  строгие наблюдения и сравнение идентификаторов вместо принятия имён/PID за
+  доказательство владения. По source записаны недостающие creation/process bindings,
+  критерии будущего ownership/quiescence evidence и 2 локальные задачи с тестами.
+  Реализация/collector/cleanup не выполнялись; metadata не разрешает live действия.
+- План связан с единственной очередью Phase16. Проверка: адресный source readback,
+  официальный контракт /proc/cgroup/inspect, самопроверка плана, ссылки и diff;
+  runtime tests, SSH, stage/install и повтор старых diagnostics не запускались.
+
 - Выполнена [сверка AWG Go](research/amn2/phase16-awg-go-pinned-runtime-review-2026-09-20.md):
   declared source старее двух fixes; отдельно обнаружен пробел image/source binding.
   SHA256 публичных manifest/config/layer проверены, бинарник прочитан в памяти без
