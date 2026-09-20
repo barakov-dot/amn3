@@ -467,3 +467,25 @@ public GitHub metadata refresh.
   AWG2/AWG3.1 и незавершённый DefaultVPN .conf manual check не менять.
 - Проверка этой записи: readback, diff/whitespace, ссылка на официальный PR.
   Код/тесты runtime/deploy не запускались; AWG2_UNTOUCHED, stage/install отсутствуют.
+
+#### Уточнение после сверки исходников 20.09.2026
+
+- Текущий статус upstream-сигнала: **недостаточно данных** для утверждения
+  о необходимой правке. P3 design-кандидат выше сохранён; дубль не добавляется.
+- AMN2 `56540e2084140e3a6277d7472c88c599d7153ccf` уже содержит native JSON/vpn://
+  exporter в `app/vpn/client_import_artifacts.py`; `format_version` отсутствует.
+  Upstream commit `aca1b7dc5cad014a5f22f218655195fd8381cbad` принимает missing
+  как `0`, поэтому отсутствие поля само по себе не доказывает несовместимость.
+- Сначала проверить существующий экспорт; отдельный собственный import/restore
+  не создавать без практической потребности. Приоритет остаётся P3, Phase16 не меняется.
+- Файлы, матрица, критерии готовности, отказа и будущий scoped test command:
+  [канонический план](../docs/superpowers/plans/2026-09-20-upstream-format-version-review.ru.md).
+  История signal/cursor и исправления прежнего обзора: [реестр](../docs/UPSTREAM_INTAKE.ru.md).
+
+#### Решение шага 2 — 2026-09-20
+
+NO_CHANGE_REQUIRED для format_version существующего exporter: missing принимается
+как 0 в #3184; stable baseline и pinned DefaultVPN source поле не проверяют.
+Матрица типов, ссылки и 52 offline PASS — в каноническом плане выше.
+Ранее записанное «недостаточно данных» уточнено этим решением в source scope;
+exact iPhone build UNKNOWN. Нового code scope/собственного формата не требуется.

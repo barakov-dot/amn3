@@ -90,7 +90,7 @@ AmneziaVPN 5.0.1.5 NAME_PASS; native-import MTU preservation FAIL (1280 → 1376
 и повторный импорт не проверены. Следующий шаг — bounded upstream MTU reproduction
 и поиск дублей завершены: PR #3113 OPEN, патч применён к временной копии source; последующая Windows-сборка завершена ниже. AMN2 compatibility note исправлено, 52 offline PASS. Публикация комментария заблокирована GitHub integration HTTP 403; черновик сохранён в receipt. Остаются проверка исправленного клиента в отдельной среде и публикация через доступную учётную запись. Delivery не переключать, Windows traffic/A/B не повторять.
 
-### Windows import — обновлено 2026-09-12
+### Клиентский импорт — обновлено 2026-09-20
 
 [Итоговый receipt](../../../research/amn2/phase16-windows-import-acceptance-2026-09-12.md):
 AmneziaVPN local 5.0.1.5 + PR #3113: имя после restart PASS, сохранённый MTU1280
@@ -98,10 +98,12 @@ PASS; 45 expected fields в каждом из двух backup-профилей �
 импорт создаёт одноимённый дубль. AmneziaWG official 3.1.0 x64: имя/MTU после
 restart PASS, UI parameters совпадают; повторный импорт отклонён. Нулевая строка
 keepalive пропускается штатным serializer; source trace завершён.
-DefaultVPN NOT_RUN: официально iOS16+, Windows release отсутствует.
+DefaultVPN/iOS: 16.09 оператор подтвердил NAME_PASS через synthetic vpn://;
+точный build, параметры и .conf путь пока не проверены. На вечер оператором
+назначен только synthetic .conf import, без подключения и изменения «Испании».
+[Материалы и короткий сценарий](../../../research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md#defaultvpn-подтверждённое-и-вечерний-тест--2026-09-20).
 Локальная проверка не закрывает Windows traffic/quality gates и не разрешает
-переключить delivery. Следующий отдельный клиентский gate — DefaultVPN/iOS при
-возврате оператора к iPhone; автоматически не возобновлять отложенную проверку.
+переключить delivery. iPhone connectivity/A/B не возобновляются этим импортом.
 Clipboard/EN-RU setup подготовлены по просьбе оператора, UI-работа ещё не подтверждена.
 
 ### TASK_PLAN_BY_CRITICALITY

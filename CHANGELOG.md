@@ -6,6 +6,34 @@
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
 ## 2026-09-20
+- Синхронизирован DefaultVPN: NAME_PASS через vpn:// подтверждён скриншотом
+  16.09, .conf и параметры остаются открытыми. В [чеклисте](research/amn2/phase16-client-import-acceptance-checklist-2026-09-09.md)
+  подготовлен короткий вечерний сценарий без повторения paste/Windows проверок
+  и без изменения рабочего профиля «Испания».
+- Старый .conf в Temp отсутствовал; синтетическая fixture восстановлена в
+  отдельной папке Downloads из ранее проверенного native ключа, 417 bytes,
+  SHA256/readback и параметры проверены. В Git payload/ключи не добавлены.
+- Read-only upstream на 20.09 14:40 MSK: #3043 без новых ответов, #3113 открыт
+  и не слит. Ссылки/diff документации проверены; code/тесты повторно не запускались.
+
+- Выполнен шаг 2 [format_version review](docs/superpowers/plans/2026-09-20-upstream-format-version-review.ru.md):
+  NO_CHANGE_REQUIRED для текущего exporter. Записана матрица missing/0/1/future
+  и malformed типов, source/build границы DefaultVPN. Целевые 52 offline tests
+  PASS; exporter/legacy/delivery не менялись. Новый importer/restore не создаётся.
+
+
+- По запросу оператора оформлены [реестр upstream](docs/UPSTREAM_INTAKE.ru.md)
+  и [план format_version](docs/superpowers/plans/2026-09-20-upstream-format-version-review.ru.md),
+  добавлены переходы из AGENTS/START_HERE и существующей P3-карточки.
+  Уточнено: native exporter уже существует, missing version upstream принимает
+  как 0; несовместимость не доказана. Первым идёт проверка применимости.
+- Исправлены границы выводов weekly: неполные issues/PR/AWG coverage и 161-commit
+  диапазон Panel не считаются полностью проверенными; IPv6 DNS не приравнивается
+  к двух-IPv4 fix, а pooled SSH не является основанием отклонять event-loop isolation.
+- Проверка пакета: адресный readback, локальные ссылки, diff/whitespace;
+  runtime/code/tests, Phase16 gates, package016 и общая выдача не изменяются.
+  Запись документации выполняется штатным apply_patch с одобренным повышением
+  доступа; неисправность sandbox ACL этим не объявляется устранённой.
 
 - В [кандидаты AMN2](ideas/candidates-for-amn2.md) добавлен отдельный P3 design
   candidate по upstream PR #3184: версионирование собственного JSON/envelope,
