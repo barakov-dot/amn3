@@ -148,3 +148,39 @@ def parse_observation(
         )
     except (ValueError, TypeError, KeyError, RecursionError):
         raise ValueError("invalid_observation") from None
+
+
+def compare_observations(before: Snapshot, after: Snapshot) -> dict[str, str]:
+    """Compare two immutable snapshots returned by parse_observation.
+
+    Equality means only equal observed fields, not proof of the same lifetime.
+    Absence is limited to the supplied scope; UNKNOWN never implies absence.
+    No result authorizes a signal, deletion, retry or lifting a stage block.
+    """
+    if not (
+        type(before) is Snapshot and type(after) is Snapshot
+        and type(before.sequence) is int and type(after.sequence) is int
+        and (before.sequence, after.sequence) == (0, 1)
+        and before.bindings == after.bindings
+        and before.host_id == after.host_id
+        and before.boot_id == after.boot_id
+        and before.query_id == after.query_id
+        and tuple((r.logical_id, r.kind) for r in before.resources)
+        == tuple((r.logical_id, r.kind) for r in after.resources)
+    ):
+        raise ValueError("incompatible_observations") from None
+
+    result = {}
+    for old, new in zip(before.resources, after.resources):
+        if "query_failed" in (old.status, new.status):
+            outcome = "UNKNOWN"
+        elif new.status == "absent":
+            outcome = "ABSENT_IN_SCOPE"
+        elif old.status == "absent":
+            outcome = "APPEARED"
+        elif old.identity == new.identity:
+            outcome = "IDENTITY_UNCHANGED"
+        else:
+            outcome = "IDENTITY_CHANGED"
+        result[old.logical_id] = outcome
+    return result

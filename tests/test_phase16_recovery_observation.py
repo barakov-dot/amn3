@@ -234,3 +234,123 @@ def test_resource_bound_includes_64_but_rejects_65(expected, document, count):
         assert len(parse(canonical(document), **expected).resources) == 64
     else:
         assert_invalid(canonical(document), expected)
+
+
+def compare(before, after):
+    module = importlib.import_module("scripts.vps.phase16_recovery_observation")
+    return module.compare_observations(before, after)
+
+
+def snapshot_pair(expected, document, *, before_status="present", after_status="present"):
+    before_doc, after_doc = copy.deepcopy(document), copy.deepcopy(document)
+    before_doc["resources"][0]["status"] = before_status
+    after_doc["resources"][0]["status"] = after_status
+    if before_status != "present":
+        before_doc["resources"][0]["identity"] = {}
+    if after_status != "present":
+        after_doc["resources"][0]["identity"] = {}
+    after_doc["sequence"] = 1
+    return (
+        parse(canonical(before_doc), **expected),
+        parse(canonical(after_doc), **dict(expected, expected_sequence=1)),
+    )
+
+
+@pytest.mark.parametrize("before_status,after_status,want", [
+    ("present", "present", "IDENTITY_UNCHANGED"),
+    ("present", "absent", "ABSENT_IN_SCOPE"),
+    ("present", "query_failed", "UNKNOWN"),
+    ("absent", "present", "APPEARED"),
+    ("absent", "absent", "ABSENT_IN_SCOPE"),
+    ("absent", "query_failed", "UNKNOWN"),
+    ("query_failed", "present", "UNKNOWN"),
+    ("query_failed", "absent", "UNKNOWN"),
+    ("query_failed", "query_failed", "UNKNOWN"),
+])
+def test_comparison_status_table(expected, document, before_status, after_status, want):
+    before, after = snapshot_pair(
+        expected, document, before_status=before_status, after_status=after_status)
+    assert compare(before, after) == {"worker": want}
+
+
+@pytest.mark.parametrize("kind,field,new_value", [
+    ("process", "pid", 43), ("process", "start_ticks", 1), ("process", "pid_ns", 101),
+    ("container", "object_id", "4" * 64), ("network", "object_id", "5" * 64),
+    ("directory", "mount_id", 4), ("directory", "dev", 1), ("directory", "inode", 13),
+    ("service", "invocation_id", "4" * 32),
+])
+def test_comparison_detects_reused_alias_with_new_identity(expected, document, kind, field, new_value):
+    identity = copy.deepcopy(next(row[1] for row in IDENTITIES if row[0] == kind))
+    document["resources"][0].update(kind=kind, identity=identity)
+    expected["expected_scope"] = {"worker": kind}
+    before = parse(canonical(document), **expected)
+    document["sequence"] = 1
+    document["resources"][0]["identity"][field] = new_value
+    after = parse(canonical(document), **dict(expected, expected_sequence=1))
+    assert compare(before, after) == {"worker": "IDENTITY_CHANGED"}
+
+
+@pytest.mark.parametrize("kind,identity,want", IDENTITIES)
+def test_comparison_unchanged_identity_only_reports_field_equality(expected, document, kind, identity, want):
+    document["resources"][0].update(kind=kind, identity=identity)
+    expected["expected_scope"] = {"worker": kind}
+    assert compare(*snapshot_pair(expected, document)) == {"worker": "IDENTITY_UNCHANGED"}
+
+
+@pytest.mark.parametrize("mismatch", ["bindings", "host", "boot", "query", "scope", "kind"])
+def test_comparison_rejects_different_contexts(expected, document, mismatch):
+    before = parse(canonical(document), **expected)
+    other_expected = copy.deepcopy(expected)
+    other_expected["expected_sequence"] = 1
+    document["sequence"] = 1
+    if mismatch == "bindings":
+        document["bindings"]["state_sha256"] = "9" * 64
+        other_expected["expected_bindings"]["state_sha256"] = "9" * 64
+    elif mismatch == "host":
+        document["host_id"] = other_expected["expected_host_id"] = "9" * 64
+    elif mismatch == "boot":
+        document["boot_id"] = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+    elif mismatch == "query":
+        document["query_id"] = other_expected["expected_query_id"] = "9" * 64
+    elif mismatch == "scope":
+        document["resources"].append(dict(copy.deepcopy(document["resources"][0]), logical_id="child"))
+        other_expected["expected_scope"]["child"] = "process"
+    else:
+        document["resources"][0].update(kind="container", identity={"object_id": "1" * 64})
+        other_expected["expected_scope"]["worker"] = "container"
+    after = parse(canonical(document), **other_expected)
+    with pytest.raises(ValueError) as error:
+        compare(before, after)
+    assert str(error.value) == "incompatible_observations"
+    assert error.value.__suppress_context__
+
+
+@pytest.mark.parametrize("sequences", [(1, 0), (0, 0), (1, 1)])
+def test_comparison_rejects_reversed_or_repeated_sequence(expected, document, sequences):
+    snapshots = []
+    for sequence in sequences:
+        document["sequence"] = sequence
+        snapshots.append(parse(canonical(document), **dict(expected, expected_sequence=sequence)))
+    with pytest.raises(ValueError, match="^incompatible_observations$"):
+        compare(*snapshots)
+
+
+def test_comparison_two_absent_snapshots_give_no_cleanup_authority(expected, document):
+    document["resources"][0].update(status="absent", identity={})
+    document["resources"].append(dict(copy.deepcopy(document["resources"][0]), logical_id="child"))
+    expected["expected_scope"]["child"] = "process"
+    before = parse(canonical(document), **expected)
+    document["sequence"] = 1
+    after = parse(canonical(document), **dict(expected, expected_sequence=1))
+    assert compare(before, after) == {"child": "ABSENT_IN_SCOPE", "worker": "ABSENT_IN_SCOPE"}
+    assert before.sequence == 0 and after.sequence == 1
+
+
+@pytest.mark.parametrize("bad", [None, {}, "CANARY_PRIVATE_CONFIG"])
+@pytest.mark.parametrize("side", ["before", "after"])
+def test_comparison_wrong_input_type_has_fixed_error(expected, document, bad, side):
+    before, after = snapshot_pair(expected, document)
+    with pytest.raises(ValueError) as error:
+        compare(bad if side == "before" else before, bad if side == "after" else after)
+    assert str(error.value) == "incompatible_observations"
+    assert "CANARY_PRIVATE_CONFIG" not in repr(error.value)

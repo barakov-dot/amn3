@@ -11,7 +11,7 @@
 Docker API, чтения /proc или произвольных файлов в новом модуле.
 **Tech Stack:** Python 3.10+, stdlib, pytest на синтетических данных.
 **Spec:** [согласованный recovery-контракт v1](../specs/2026-09-08-phase16-controlled-stage-recovery-contract.ru.md).
-**Статус:** LOCAL_PARSER_IMPLEMENTED_COMPARISON_PENDING_NOT_LIVE_APPROVAL, 2026-09-20.
+**Статус:** LOCAL_IMPLEMENTED_TESTED_REVIEW_PENDING_NOT_LIVE_APPROVAL, 2026-09-20.
 Baseline исходников: AMN3 3eb18f64374e1c279295d0b434302dcee90377ae.
 Это техническая подзадача; [единственная очередь Phase16](2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md)
 остаётся главным execution plan.
@@ -239,14 +239,14 @@ def expected():
 Одинаковые directory dev/inode/mount показывают только совпадение прочитанных
 полей: возможное переиспользование inode не считается доказанным исключённым.
 
-- [ ] Создать параметризованные тесты по всей таблице; одинаковый PID с новым
+- [x] Создать параметризованные тесты по всей таблице; одинаковый PID с новым
   start_ticks, новый pid_ns, новое object_id при том же alias, смена mount/inode.
   Wrong boot/host/query/bindings/sequence и неполный scope должны отклоняться.
-- [ ] Увидеть RED для отсутствующей функции; реализовать comparison после проверки
+- [x] Увидеть RED для отсутствующей функции; реализовать comparison после проверки
   совместимости контекстов. Ни одной ветки, разрешающей signal/delete/retry.
-- [ ] Проверить два снимка с absent для каждого элемента scope: результат только ABSENT_IN_SCOPE.
+- [x] Проверить два снимка с absent для каждого элемента scope: результат только ABSENT_IN_SCOPE.
   query_failed в любом снимке всегда UNKNOWN, даже если второй сообщает absent.
-- [ ] Один итоговый целевой прогон нового и существующего metadata набора:
+- [x] Один итоговый целевой прогон нового и существующего metadata набора:
 
 ```text
 python -m pytest tests/test_phase16_recovery_observation.py tests/test_phase16_recovery_metadata.py -q -p no:cacheprovider
@@ -256,7 +256,7 @@ python -m pytest tests/test_phase16_recovery_observation.py tests/test_phase16_r
 зависимости и не запускать VPS helpers. Старый suite здесь включён только как
 регрессия общей canonical decoding зависимости при будущей реализации.
 
-- [ ] Записать фактические RED/GREEN и ограничения в этот документ/CHANGELOG,
+- [x] Записать фактические RED/GREEN и ограничения в этот документ/CHANGELOG,
   проверить отсутствие I/O и новых secrets в diff, commit точных файлов.
 - [ ] Перед заявлением «готово» провести одно review bounded diff. Оно не расширяет
   локальный scope и не разрешает live tests.
@@ -294,8 +294,19 @@ RED: 98 ожидаемых падений из-за отсутствия мод�
 все 5 видов, canonical/64 KiB, scope 1..64, контекст, bool/int, нулевой start_ticks,
 ошибки без input и неизменяемые копии. Metadata dependency не изменена.
 Команда: python -m pytest tests/test_phase16_recovery_observation.py -q -p no:cacheprovider.
-Сравнение снимков — следующий локальный шаг; никакие ресурсы не обследовались.
+Task 1 зафиксирован в e3376c2; никакие ресурсы не обследовались.
 
 Решение по workflow: проверять согласованные связанные наборы в существующем
 Python runtime; общий suite и установка зависимостей исключены правилами AGENTS
 и планом. Ограничение: это не проверка остальных подсистем репозитория.
+
+Task 2: реализовано compare_observations для двух снимков из parser. Проверяются
+контекст, одинаковый scope/kinds и sequence 0→1; результаты строго UNKNOWN,
+IDENTITY_UNCHANGED, IDENTITY_CHANGED, APPEARED или ABSENT_IN_SCOPE. Смена
+start_ticks/namespace обнаруживается отдельно от PID; совпадение полей не
+доказывает исключение повторного использования ресурса.
+RED: 39 ожидаемых падений из-за отсутствия функции; итоговый GREEN: 164 PASS
+(137 новых + 27 metadata). Команда:
+python -m pytest tests/test_phase16_recovery_observation.py tests/test_phase16_recovery_metadata.py -q -p no:cacheprovider.
+Тесты — синтетические, действующие конфиги не использовались. Заключительный
+обзор всего изменения ещё ожидается; локальный PASS не является live evidence.

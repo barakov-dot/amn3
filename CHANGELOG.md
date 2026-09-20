@@ -7,6 +7,14 @@
 
 ## 2026-09-20
 
+- Добавлено [сравнение recovery snapshots](scripts/vps/phase16_recovery_observation.py):
+  проверка контекста/порядка, отдельные исходы смены идентичности, появления,
+  отсутствия в scope и UNKNOWN при query failure. Эти исходы не разрешают cleanup.
+  RED: 39 проверок отсутствующей функции; GREEN: 164 PASS (137 новых + 27 metadata).
+  [План](docs/superpowers/plans/2026-09-20-phase16-recovery-evidence-local-plan.ru.md)
+  и очередь обновлены; заключительный review пока ожидается. I/O/collector,
+  live stage/install, AWG2, package016 и выдача остаются вне изменений.
+
 - Реализован [локальный parser recovery observations](scripts/vps/phase16_recovery_observation.py):
   строгий canonical JSON до 64 KiB, проверка bindings/host/query/scope и пяти видов
   идентификаторов, неизменяемые снимки и фиксированная ошибка без исходного ввода.
