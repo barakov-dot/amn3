@@ -886,3 +886,29 @@ activation и DB migration остаются отдельными от isolated t
 stage/deploy/cleanup отсутствуют. Linux execution NOT_RUN. AMN2 source,
 locks и units неизменны; AWG2_UNTOUCHED, package016 immutable,
 general issuance disabled; Windows traffic/quality FAIL остаются открыты.
+
+<a id="bot-linux-runner-local-2026-09-21"></a>
+
+## Локальный исполнитель isolated Linux gate подготовлен — 2026-09-21
+
+После «продолжай» завершён следующий согласованный local slice Task3B:
+[конкретный gate/approval contract](phase16-bot-linux-isolated-gate-2026-09-21.md),
+[local evidence](phase16-bot-linux-runner-local-validation-2026-09-21.json).
+AMN3 base329ee06, AMN2 source6e68235 и bundleSHA e19abc5c… прежние.
+Добавлены отдельные local/remote runners и32guard tests; remote startup,
+trust loader и SSH не вызываются при default offline preview.
+Artifact checks, framed stdin hash verification, exclusive claims, pinned
+offline48wheel test-venv, network namespace, expected negative/six GREEN,
+caps/owned-child cleanup и fail-closed/no-retry правила материализованы.
+
+RED/GREEN и path fix завершены; итог32PASS/0SKIP/0FAIL/0.50s. Offline CLI
+подтвердил exact bundle и remote SHA без SSH. Details/caps/hashes/команда и
+границы находятся в gate, не копируются как второй execution plan.
+Linux OS cases/negative control/unshare/venv availability остаются NOT_RUN;
+локальные tests не являются Linux evidence или production stop-budget PASS.
+Shared DB compatibility/seed/writer-fence и activation gates остаются открыты.
+Следующий шаг — отдельное approval на один exact isolated server test gate,
+после него только один запуск и сохранение результата без automatic retry.
+Source101schema/94+6lifecycle/312worker не повторялись; package016/bot bundle
+immutable, AWG2_UNTOUCHED, issuance disabled, stage/install production/deploy/
+Telegram/service actions/cleanup не выполнялись.

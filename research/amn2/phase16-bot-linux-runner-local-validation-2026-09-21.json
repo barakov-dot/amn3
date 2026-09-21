@@ -1,0 +1,43 @@
+{
+  "status": "LOCAL_RUNNER_READY_NOT_EXECUTED",
+  "base_amn3": "329ee06eb2b0249fa81926fceb25945a5c44e9b4",
+  "source_amn2": "6e682356ed14a62d636ee58039fd3a389e794809",
+  "preview": {
+    "status": "OFFLINE_READY_NOT_EXECUTED",
+    "bundle_sha256": "e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7",
+    "remote_sha256": "5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102",
+    "source_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "destination": "/opt/amn2-spain/bot-candidates/phase16-bot-candidate-20260921-6e68235-001",
+    "bundle_bytes": 30485208,
+    "runtime_wheels": 40,
+    "test_only_wheels": 8,
+    "remote_seconds": 300,
+    "transport_seconds": 330,
+    "network": "offline wheels; children in new unshare --net namespace",
+    "ssh_attempts": 0,
+    "requires_approval": "PHASE16_ISOLATED_LINUX_TEST_6e68235_001"
+  },
+  "canonical_lf_hashes": {
+    "scripts/phase16_bot_linux_gate.py": "7098b4e05335a0896b937058301bf7392bd036e0f3f8cf05b84e2c08fb250bcc",
+    "scripts/vps/phase16_bot_linux_gate_remote.py": "5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102",
+    "tests/test_phase16_bot_linux_gate.py": "db8e80ef2f1ce48affff35841c57850a8c50fc314bfd7e0795ecddadc65e8e50"
+  },
+  "tests": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "32",
+    "time": "0.463",
+    "timestamp": "2026-09-21T21:39:55.329579+03:00"
+  },
+  "selectors": [
+    "tests/test_phase16_bot_linux_gate.py"
+  ],
+  "limits": [
+    "Windows local tests do not prove Linux signals, unshare, venv availability or POSIX process-group cleanup",
+    "No SSH/remote writes/polling/service actions performed",
+    "No repeat of historical unchanged baseline tests"
+  ],
+  "scratch": "C:\\Users\\SooL\\Documents\\VPS-OPS-LAB\\worktrees\\phase16-bot-linux-runner-20260921"
+}

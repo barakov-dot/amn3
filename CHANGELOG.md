@@ -7,6 +7,18 @@
 
 ## 2026-09-21
 
+- Подготовлен [исполнитель одного isolated Linux gate](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md)
+  для immutable bot candidate6e68235: offline default, exact bundle/script SHA,
+  fixed Spain trust, exclusive claims, one SSH framed upload, no-index pinned
+  test-venv, network namespace, expected negative и6signal cases, caps/no retry.
+  [Local evidence](research/amn2/phase16-bot-linux-runner-local-validation-2026-09-21.json):
+  RED/GREEN, self-review path fix, итог32PASS/0SKIP/0FAIL; offline preview PASS.
+  Linux signals/negative/venv/unshare/POSIX group cleanup NOT_RUN; server approval
+  pending. Source/locks/packages неизменны, прежние101/94+6/312 не повторялись;
+  SSH/remote writes/service/DB/poller actions=0. Сохранены scratch и новые evidence.
+  Checks: targeted tests, exact artifact hashes, readback/links/diff/secret scan/
+  changelog. AWG2/package016/general issuance safety сохранены; не deployment.
+
 - Исправлено устаревшее заключение о [DefaultVPN2.0.2](research/amn2/phase16-amnezia-client-5.0.3.0-release-review-2026-09-21.md#defaultvpn-202-store-confirmed):
   после уточнения оператора свежий Apple RU/US lookup подтвердил выпуск
   21.09.2026 20:36:20 МСК, notes об улучшении стабильности, iOS>=16.

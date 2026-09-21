@@ -203,9 +203,11 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    101 schema PASS и synthetic compatibility двух исторических схем.
    Startup меняет schema/стандартные планы и не является целиком атомарным;
    actual DB compatibility, writer fence и production rollback ещё не доказаны.
-   Следующий локальный шаг — exact-bundle runner isolated Linux gate; затем
-   отдельное согласование upload/test environment, без рабочих служб/DB/poller.
-   Linux negative control/6 signal cases NOT_RUN. Общая DB/web/token/AWG2
+   По «продолжай» [exact-bundle isolated Linux runner подготовлен](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md):
+   32 локальных guard PASS, offline preview/hash binding PASS, SSH=0.
+   Следующий шаг — отдельное approval на один описанный upload/test environment
+   gate, без рабочих служб/DB/poller. Команда и exact hashes уже reviewable.
+   Linux negative control/6 signal cases/unshare/venv NOT_RUN. Общая DB/web/token/AWG2
    сохраняются; Linux на АРМ не требуется. Нет deployment/Telegram/live mutation.
    Только local candidate build был разрешён; package016 не пересобирается.
 

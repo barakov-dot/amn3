@@ -444,8 +444,11 @@ immutable отдельный bundle/manifest и rollback review; package016 не
 нужны actual schema/release identities, writer fence и startup seed/recovery policy.
 Сохранение web остаётся ограничением: если потребуется его остановка для миграции,
 scope не расширять автоматически. Code revert не равен DB rollback.
-Следующий локальный шаг — exact-bundle isolated Linux gate runner; его upload,
-test environment writes и OS signals своим child требуют отдельного server scope.
+По «продолжай» [exact-bundle isolated Linux gate runner готов](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md):
+32 локальных guard PASS, offline binding PASS. Upload/test-venv writes и OS
+signals только своим child требуют отдельного server approval по этому gate.
+Добавлена изоляция сети через уже установленный unshare; отсутствие capability
+означает STOP, без установки инструментов. Shared services/DB не участвуют.
 Linux negative control/6 signal cases NOT_RUN, live stop budget не доказан.
 System metadata сами по себе не закрывают M3; повторного согласования идеи
 пересоздания не нужно. Прежние lifecycle94 PASS/6 SKIP не повторялись.
