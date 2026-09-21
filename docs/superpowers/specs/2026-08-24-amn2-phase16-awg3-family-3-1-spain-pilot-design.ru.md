@@ -386,7 +386,7 @@ enforcement, restart/writer fence, M1/M2/M5/M6/M7 и Phase16 acceptance оста
 Оператор сообщил, что бот «нулевой», предложил пересоздать его и согласился
 «хорошо, делаем как скажешь» на повторное развёртывание приложения с новым кодом,
 проверку запуска/остановки/restart и сохранение AWG2/VPN-профилей. Направление
-**EXISTING_BOT_REDEPLOY_AGREED / TARGET_CONFIRMED_READBACK_PARTIAL / NOT_REDEPLOYED**.
+**EXISTING_BOT_REDEPLOY_AGREED / TARGET_READONLY_SNAPSHOT_COMPLETE / NOT_REDEPLOYED**.
 Это относится к приложению существующего Telegram-бота; новая регистрация,
 смена token/identity и удаление общей БД не входят в выбранный вариант.
 
@@ -398,9 +398,10 @@ amn2-spain-bot.service, source /opt/amn2-spain/runtime/source,
 DB /var/lib/amn2-spain/amn2.sqlite3, runtime /etc/amn2-spain/runtime.env и
 marker /etc/amn2-spain/bot-enabled. Это кандидаты для fresh readback, а не
 нынешний target PASS; старый cutover/GO не запускать. Оператор подтвердил
-именно Spain. [Первый readback](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#spain-bot-target-readback-2026-09-21)
-получил active bot/web и effective unit properties, но source/dependencies
-не собраны из-за неверного web-entrypoint допущения collector; v2 подготовлен. Адрес/SSH user/ключи/пины в документацию не копировать.
+именно Spain. После отдельного «разрешаю» [readback v2 завершён](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#spain-bot-target-readback-v2-2026-09-21):
+active bot/web, прежние unit/process identities, Linux x86_64/glibc2.39/Python3.12.3.
+Worker/lifecycle/locks в deployment отсутствуют; system Python metadata не
+подменяют фактическое service dependency tree. Exact deployed revision UNKNOWN. Адрес/SSH user/ключи/пины в документацию не копировать.
 
 **Короткий порядок работ, в существующей очереди Task 3B:**
 
@@ -436,9 +437,11 @@ marker /etc/amn2-spain/bot-enabled. Это кандидаты для fresh readb
 
 Fresh state, concrete artifact/checksums и rollback пока отсутствуют. Поэтому
 команду destructive reinstall или готовое checksum-bound /APPROVE сейчас
-не выдаём. Целевой Spain bot подтверждён. Следующий предлагаемый шаг —
-дополнительный read-only collector v2 для source/Python/dependencies после STOP
-первой попытки, затем artifact/rollback preparation и mutating gate по AGENTS.
+не выдаём. Целевой Spain bot подтверждён, read-only v2 выполнен. Следующий
+локальный шаг — определить состав/лимиты отдельного bot artifact и подготовить
+source/Linux dependency binding, startup/schema compatibility и rollback.
+System Python metadata сами по себе не закрывают M3; candidate installation
+и mutating gate по AGENTS остаются отдельными от выполненного readback.
 Повторного согласования самой идеи пересоздания не нужно.
 94 PASS/6 SKIP остаются прежним локальным evidence; tests не повторялись.
 

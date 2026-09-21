@@ -726,3 +726,72 @@ spain_bot_readonly_probe_v2.py, run_spain_bot_readonly_v2.py. Первый claim
 Прежние 94 PASS/6 SKIP не повторялись. Linux signals по-прежнему NOT_RUN.
 AWG2_UNTOUCHED по области действий, package016 immutable, general issuance disabled;
 нет stage/install/deploy/cleanup, DB reset, выдачи или live signal службам.
+
+
+<a id="spain-bot-target-readback-v2-2026-09-21"></a>
+
+## Spain bot readback v2: разрешённый сбор завершён — 2026-09-21
+
+Оператор ответил «разрешаю» на один дополнительный read-only SSH-сеанс до 60s.
+Перед запуском AMN3 ac3bacc и AMN2 6e68235 сверены, worktrees чистые;
+SHA probe v2 совпал с предложенным ddccba65df992c389a2399d1fd8f2919ef4ef9eea526e9b387b92973d04fc236.
+Одноразовый v2 claim ранее отсутствовал. Trust/ACL/host pin проверены тем же
+фиксированным loader без вывода значений; выполнен ровно один новый SSH.
+
+Результат **READONLY_SNAPSHOT_COMPLETE / CANDIDATE_NOT_DEPLOYED**;
+[actual JSON](phase16-spain-bot-readonly-v2-2026-09-21.json), checked_at remote
+2026-09-21T16:37:59.879117+00:00. 60s/64KiB caps не достигнуты. Это успешный
+сбор перечисленных сведений, не полный M3/M4, preflight/deploy или acceptance PASS.
+Remote/local timestamps имеют прежнее небольшое расхождение; интервал работы
+не считать разностью часов разных машин.
+
+- Bot/web loaded, active/running. Unit hashes, MainPID и process-start ticks
+  совпадают с первым снимком; drop-ins=0, NRestarts=0. На снимках нет признака
+  замены этих двух процессов; это не длительный stability test и не полный
+  census других pollers/writers.
+- Bot effective: Type=notify, Restart=no, TimeoutStart=40s, TimeoutStop=90s,
+  Watchdog=0, KillMode=control-group, KillSignal=15, FinalKillSignal=9.
+  Оба entrypoint соответствуют сохранённым Spain units: bot app.main,
+  web app.cli web serve с loopback 127.0.0.1:3031. HTTP readiness не запрашивался.
+- Systemd 255.4-1ubuntu8.17; system Python **3.12.3**, SOABI
+  cpython-312-x86_64-linux-gnu; Linux machine **x86_64**, glibc **2.39**.
+  Это соответствует minor/ABI/platform policy существующего py312 lock,
+  но не доказывает installability/importability всех wheels. Local tests были
+  на Python 3.12.14; target runtime tests на 3.12.3 ещё не выполнялись.
+- app/main.py: 12640 bytes,
+  c34a0f457b2242ede138dd0b6dc1b08b860515f7bd2fadb7df8f2b86a3f5ed31.
+  Локальный git object read подтвердил совпадение этого файла с 55dc243 и
+  910539e, а не с candidate 6e68235 (там c83059bbf43c44a6fea1b1f96179a336376c9952c7a13a6111734f7bfeb3f4d8).
+  Один совпавший файл не устанавливает exact deployed revision всего дерева.
+- app/bot/lifecycle.py, app/bot/workflow_worker.py и оба phase15 py312 locks
+  **ABSENT** в проверенном deployment source. Новый worker/lifecycle кандидат
+  туда ещё не установлен; live tree не «чинить» копированием поверх общего source.
+
+**Что значит ABSENT у aiogram/pytest.** Collector намеренно использует системный
+Python -I -B, не наследует service EnvironmentFile и не импортирует application.
+Среди 48 metadata names: 37 ABSENT, 10 версий отличаются от candidate test lock,
+1 совпадает. Это **не** доказательство отсутствия зависимостей у активного бота.
+Локальный исторический backend scripts/phase12_spain_live_backend.py разворачивает
+отдельный wheel tree /opt/amn2-spain/runtime/site-packages. Его наличие/версии
+на сервере этим collector не проверялись. Путь объясняет возможный отдельный
+контур зависимостей, но не подменяет fresh service sys.path evidence.
+System interpreter нельзя считать готовой candidate test/production средой.
+
+**Следующий конкретный локальный шаг.** Подготовить отдельно reviewable bot
+release из immutable AMN2 6e682356ed14a62d636ee58039fd3a389e794809 с собственным
+Linux CPython3.12 x86_64 dependency tree/venv и проверенными runtime/test lock
+hashes. До materialization уточнить точный состав/лимиты разрешённого package
+scope; runtime40 и test48 разделить, не ставить pytest в production environment.
+Имеющиеся Windows wheels/venv не переносить на Linux. Package016 не менять.
+Подготовить source/dependency/manifest hashes, ограниченные synthetic tests
+на Linux и обратимое переключение **только bot**, сохраняя общий web/source/DB.
+App startup и schema compatibility проверить до activation: «нулевой бот»
+не делает общую DB disposable. Старый release сохранить как revert target.
+
+Сбор v2 не разрешает установку зависимостей, upload, service stop/start,
+DB schema/write/reset или Telegram smoke. Следующий remote шаг — только по
+конкретным artifact/state/rollback bindings. Третьего SSH не выполнялось.
+Application не импортировалось; DB/environment/journal не читались, секреты не сохранялись;
+source и прежние 94 PASS/6 SKIP неизменны. Linux synthetic signals NOT_RUN.
+AWG2_UNTOUCHED по области действий; stage/install/deploy/cleanup не выполнялись,
+package016 immutable, general issuance disabled, Phase16 acceptance открыт.

@@ -7,6 +7,18 @@
 
 ## 2026-09-21
 
+- По отдельному «разрешаю» выполнен [Spain bot readback v2](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#spain-bot-target-readback-v2-2026-09-21):
+  один SSH, 60s/64KiB, READONLY_SNAPSHOT_COMPLETE; [JSON](research/amn2/phase16-spain-bot-readonly-v2-2026-09-21.json).
+  Bot/web unit/process identities прежние; system Python3.12.3, x86_64,
+  glibc2.39. Deployed main.py совпал с отдельным файлом 55dc243/910539e;
+  новый worker/lifecycle и locks отсутствуют. 37 ABSENT/10 different/1 matching
+  в system metadata не объявлены фактическими service dependencies: прежний
+  backend использует отдельный site-packages tree. Candidate не установлен.
+  Spec/очередь направлены на отдельный bot artifact/environment и rollback,
+  без замены общего web/source/DB. Проверки: readback/hash comparison, links,
+  diff/whitespace и changelog gate; tests не повторены. Нет третьего SSH,
+  app import, secret/DB чтения, service/data mutation, stage/install/deploy/cleanup.
+
 - После подтверждения Spain выполнен [один bounded read-only bot/web snapshot](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#spain-bot-target-readback-2026-09-21)
   с проверенным SSH trust, 60s/64KiB. Bot/web active; bot Restart=no,
   TimeoutStart=40s, TimeoutStop=90s; это properties, не доказанный stop budget.
