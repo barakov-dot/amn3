@@ -912,3 +912,20 @@ Shared DB compatibility/seed/writer-fence и activation gates остаются �
 Source101schema/94+6lifecycle/312worker не повторялись; package016/bot bundle
 immutable, AWG2_UNTOUCHED, issuance disabled, stage/install production/deploy/
 Telegram/service actions/cleanup не выполнялись.
+
+<a id="bot-linux-execution-2026-09-21"></a>
+
+## Единственная isolated Linux попытка — UNKNOWN, 2026-09-21
+
+После точного «разрешаю» исполнен gate из AMN3 baf1beb, bundle/source6e68235
+с прежними exact hashes. [Полный receipt и следующий read-only scope](phase16-bot-linux-isolated-gate-2026-09-21.md#execution-2026-09-21),
+[локальный JSON](phase16-bot-linux-execution-2026-09-21.json).
+Claim18:50:23Z, ssh_attempts=1, UNKNOWN_NO_RETRY/process_io; remote receipt
+не получен. Upload/test-directory/venv/negative/6signals state UNKNOWN.
+Не было retry/cleanup/дополнительного SSH. Local synthetic early-exit child
+воспроизвёл потерю output/returncode при process_io; причина remote сбоя не
+доказана, bound runner не менялся. Baseline suites не повторялись.
+Production service/DB/poller actions отсутствуют в scope/коде; свежая runtime
+health не проверялась. AWG2_UNTOUCHED, package016 immutable, general issuance
+disabled; production stage/install/deploy не выполнялись. Isolated test install
+UNKNOWN. Next — отдельное согласование read-only target claim/result recovery.

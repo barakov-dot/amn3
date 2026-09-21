@@ -18,9 +18,13 @@ pytest из сохранённой M3 venv; стандартный SQLite thread
 **Spec:** [lifecycle design A](../specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#lifecycle-design-m4).
 Оператор ответил «Подтверждаю» на письменный design из AMN3 commit
 8ba7e5d31236824bddd304a4f278965029d1578b. Это утвердило design и подготовку плана.
-Статус плана: **SOURCE_IMPLEMENTED_WINDOWS_TESTED / LINUX_SIGNAL_NOT_RUN**.
+Статус плана: **SOURCE_IMPLEMENTED_WINDOWS_TESTED / LINUX_SIGNAL_UNKNOWN**.
 Исполнение согласовано оператором «в части ожидания подтверждения, подтверждаю».
-Tasks 1–2 реализованы; Task 3 подготовлен, Linux execution/negative control NOT_RUN.
+Tasks 1–2 реализованы; Task 3 не принят. После отдельного server approval
+[попытка 21.09](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#execution-2026-09-21)
+вернула UNKNOWN_NO_RETRY/process_io; negative/6signals не подтверждены.
+Нижние NOT_RUN/запрет install описывают исходный local-only этап; последующее
+разрешение одной isolated test-venv попытки использовано и не разрешает retry.
 [Actual evidence](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#lifecycle-implementation-m4-2026-09-21), AMN2 6e68235. Inline method
 сохраняется из ограничений Phase16; отдельный выбор делегирования не нужен.
 Подплан подчинён [главному Phase16 plan](2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),

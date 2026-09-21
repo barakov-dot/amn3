@@ -1,12 +1,13 @@
 # Phase16: один изолированный Linux-прогон bot candidate
 
-Статус: **LOCAL_RUNNER_READY / SERVER_EXECUTION_NOT_APPROVED / NOT_EXECUTED**.
+Статус: **APPROVAL_CONSUMED / ONE_SSH_ATTEMPT / UNKNOWN_NO_RETRY**.
+[Результат единственной попытки](#execution-2026-09-21); повтор запрещён.
 Это конкретный approval contract под Task3B [единственного плана](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),
-не новый план deployment. Оператор «продолжай» разрешил завершить локальную
-подготовку исполнителя после уже собранного bot candidate. SSH/remote writes
-пока не выполнены и отдельно не согласованы.
+не новый план deployment. После локальной подготовки оператор ответил
+«разрешаю» на этот exact gate. Разрешение использовано одной попыткой
+21.09.2026; remote результат не получен. Ниже сохранён согласованный scope.
 
-## Предмет следующего разрешения
+## Предмет использованного разрешения
 
 Ровно один SSH на Spain через существующий fixed-role trust loader, передачу
 заранее проверенных bytes и создание отдельной тестовой среды. В ней — один
@@ -92,10 +93,11 @@ STOP сохраняет папки/claims/results; cleanup и повтор не 
 переисполнять: отдельное recovery/readback разрешение. Удаление test directory
 не входит в scope, даже после PASS.
 
-## Команда только после отдельного разрешения
+## Историческая команда единственной попытки — НЕ ПОВТОРЯТЬ
 
-Перед исполнением заново сверить code hashes с таблицей, clean/scoped Git state,
-bundle SHA и отсутствие локального execution claim. Не запускать старые GO.
+Перед этой попыткой сверены code hashes с таблицей, clean Git state,
+bundle SHA и отсутствие локального execution claim. Теперь claim существует;
+команда ниже — receipt, не новый GO. Не менять evidence-dir ради повтора.
 Рабочий каталог: C:/Users/SooL/.codex/worktrees/7489/VPS-OPS-LAB.
 
 ~~~powershell
@@ -106,10 +108,9 @@ bundle SHA и отсутствие локального execution claim. Не з
   --evidence-dir 'C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-linux-runner-20260921/execution'
 ~~~
 
-Эта команда подготовлена, **не исполнена**. Текущий approval status — pending.
-Достаточный предмет ответа оператора: один описанный isolated Linux gate
-с загрузкой exact bundle/runner и test-venv writes, без service/DB/poller actions.
-Это не approval production deployment, миграции shared DB или Telegram smoke.
+Команда исполнена один раз по явному «разрешаю» оператора; approval consumed.
+Новый readback/recovery или retry этим не разрешён. Production deployment,
+миграция shared DB и Telegram smoke также не разрешены.
 
 ## Выполненная локальная проверка
 
@@ -129,3 +130,53 @@ rootdir/confcutdir. Один RED использовал default pytest temp и �
 Self-review inline, без subagent. Прежние101schema,94/6lifecycle и312worker
 не повторялись; AMN2 source6e68235, оба locks и immutable bundle неизменны.
 [Нормализованное local evidence](phase16-bot-linux-runner-local-validation-2026-09-21.json).
+
+<a id="execution-2026-09-21"></a>
+
+## Единственная согласованная попытка — UNKNOWN, 2026-09-21
+
+AMN3 baf1bebe6f3902a20d15a0765d45e573d7898385, AMN2 source6e68235;
+оба checkout чистые перед действием, local/remote LF hashes и bundle совпали.
+Оператор ответил «разрешаю» после предложения именно одного isolated test gate.
+Claim создан 2026-09-21T18:50:23.493117+00:00 (21:50:23 МСК), attempts=1.
+[Нормализованный локальный результат](phase16-bot-linux-execution-2026-09-21.json):
+**UNKNOWN_NO_RETRY / process_io / ssh_attempts=1**. Remote receipt не получен.
+Это факт запуска SSH-процесса, не доказательство установленной SSH-сессии,
+полной передачи ZIP, создания target, установки test-venv или запуска тестов.
+Negative/6signals/unshare/Linux install теперь UNKNOWN, не PASS и не доказанный
+NOT_RUN. Нет оснований утверждать quiescence или свежую health bot/web.
+Production service/DB/poller actions в утверждённом коде отсутствуют;
+повтор, cleanup и дополнительные SSH после ошибки не выполнялись.
+
+Локально без сети воспроизведена потеря диагностики: disposable Python child
+вывел SYNTHETIC_EARLY_EXIT и завершился с17, не читая1MiB stdin; неизменный
+run_process вернул только process_io. Он объединяет pipe errors, а при них
+не возвращает захваченный output и returncode. Это подтверждает ограничение
+наблюдаемости, но НЕ причину реального SSH-сбоя. Код исполнителя не исправлялся;
+первичные claim/result сохранены в локальном execution каталоге из команды.
+Старые32guard/101schema/94+6lifecycle/312worker не повторялись.
+
+<a id="recovery-readback-scope"></a>
+
+## Следующий точный scope — read-only recovery, пока НЕ согласован
+
+Один SSH через прежний fixed-role Spain trust, без ZIP upload, установки,
+повторного запуска gate/тестов, сигналов, удаления или service actions.
+Только nofollow metadata фиксированного target из binding выше и его двух
+regular files claim.json/result.json (каждый <=64KiB). Никакого recursive scan,
+чтения source/venv, .env/token, shared DB, journal, argv или поиска других hosts.
+Вывести нормализованные schema/status/reason/step returncodes/counts/hashes,
+проверить artifact/source/bundle/scope bindings. Не публиковать raw content
+невалидного файла. Не следовать symlink; отсутствие/размер/type/binding mismatch
+означает STOP. Бюджет одного соединения60s, output64KiB, без retry и remote writes.
+
+Если result содержит PASS, принять его только после полной проверки прежнего
+receipt contract; если STOP — зафиксировать точный reason, не устранять его на
+сервере автоматически. Если target/result отсутствует или transport вновь
+не даёт результата — сохранить UNKNOWN. Readback двух файлов не доказывает
+отсутствие оставшихся процессов; никакого kill/cleanup или нового тестового
+прогона из такого вывода. Это ограничение относится и к историческому watchdog.
+
+Основание отдельного согласования — уже утверждённый раздел «Результат и возврат»:
+«Если транспорт потерян ... отдельное recovery/readback разрешение».
+Этот scope не расширяет разрешение на production activation или shared DB.

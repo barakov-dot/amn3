@@ -1,0 +1,14 @@
+{
+  "schema": "phase16.bot-linux-local.v1",
+  "claim": {
+    "scope": "PHASE16_ISOLATED_LINUX_TEST_6e68235_001",
+    "attempts": 1,
+    "remote_sha256": "5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102",
+    "bundle_sha256": "e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7",
+    "destination": "/opt/amn2-spain/bot-candidates/phase16-bot-candidate-20260921-6e68235-001",
+    "claimed_at": "2026-09-21T18:50:23.493117+00:00"
+  },
+  "status": "UNKNOWN_NO_RETRY",
+  "ssh_attempts": 1,
+  "reason": "process_io"
+}

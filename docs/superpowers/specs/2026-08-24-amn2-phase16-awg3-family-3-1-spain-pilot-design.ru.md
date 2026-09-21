@@ -449,7 +449,10 @@ scope не расширять автоматически. Code revert не ра�
 signals только своим child требуют отдельного server approval по этому gate.
 Добавлена изоляция сети через уже установленный unshare; отсутствие capability
 означает STOP, без установки инструментов. Shared services/DB не участвуют.
-Linux negative control/6 signal cases NOT_RUN, live stop budget не доказан.
+После отдельного «разрешаю» [единственная попытка](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#execution-2026-09-21)
+дала UNKNOWN_NO_RETRY/process_io; approval использован, remote result отсутствует.
+Linux negative/6signals/test-venv state UNKNOWN; live stop budget не доказан.
+Следующий scope — отдельный read-only recovery, без повторного тестового gate.
 System metadata сами по себе не закрывают M3; повторного согласования идеи
 пересоздания не нужно. Прежние lifecycle94 PASS/6 SKIP не повторялись.
 

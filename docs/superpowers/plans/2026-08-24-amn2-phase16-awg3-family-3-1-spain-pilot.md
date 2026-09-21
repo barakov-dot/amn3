@@ -205,11 +205,14 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    actual DB compatibility, writer fence и production rollback ещё не доказаны.
    По «продолжай» [exact-bundle isolated Linux runner подготовлен](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md):
    32 локальных guard PASS, offline preview/hash binding PASS, SSH=0.
-   Следующий шаг — отдельное approval на один описанный upload/test environment
-   gate, без рабочих служб/DB/poller. Команда и exact hashes уже reviewable.
-   Linux negative control/6 signal cases/unshare/venv NOT_RUN. Общая DB/web/token/AWG2
-   сохраняются; Linux на АРМ не требуется. Нет deployment/Telegram/live mutation.
-   Только local candidate build был разрешён; package016 не пересобирается.
+   После точного «разрешаю» выполнена [одна попытка](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#execution-2026-09-21):
+   SSH attempts=1, UNKNOWN_NO_RETRY/process_io, remote receipt не получен.
+   Approval использован; повтор/cleanup не выполнялись. Linux negative/6signals,
+   unshare/test-venv и test-directory state UNKNOWN; deployment не подтверждён.
+   Следующий шаг — [отдельный read-only recovery scope](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#recovery-readback-scope):
+   один SSH, только metadata target и bound claim/result, без upload/test/retry.
+   Рабочие службы/DB/poller исключены из gate; Linux на АРМ не требуется.
+   AWG2/package016 неизменяемы, general issuance disabled; activation запрещена.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

@@ -7,6 +7,17 @@
 
 ## 2026-09-21
 
+- По точному «разрешаю» выполнена [одна isolated Linux попытка](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#execution-2026-09-21):
+  exact hashes подтверждены, claim сохранён; SSH attempts=1, UNKNOWN_NO_RETRY /
+  process_io, remote receipt отсутствует. Approval consumed, retry/cleanup=0.
+  Target/test-venv/negative/6signals state UNKNOWN; production activation нет.
+  Локальный synthetic child воспроизвёл потерю транспортной диагностики, но
+  причину SSH-сбоя не установил. Код/AMN2/locks/packages не менялись; прежние
+  suites не повторялись. Сохранены первичные evidence; планы синхронизированы,
+  подготовлен точный read-only recovery scope с отдельным approval.
+  Проверки: local result readback/JSON, hashes, docs links/diff/secret scan и
+  changelog gate. AWG2/package016/general issuance safety сохранены.
+
 - Подготовлен [исполнитель одного isolated Linux gate](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md)
   для immutable bot candidate6e68235: offline default, exact bundle/script SHA,
   fixed Spain trust, exclusive claims, one SSH framed upload, no-index pinned
