@@ -7,6 +7,14 @@
 
 ## 2026-09-21
 
+- Исправлено устаревшее заключение о [DefaultVPN2.0.2](research/amn2/phase16-amnezia-client-5.0.3.0-release-review-2026-09-21.md#defaultvpn-202-store-confirmed):
+  после уточнения оператора свежий Apple RU/US lookup подтвердил выпуск
+  21.09.2026 20:36:20 МСК, notes об улучшении стабильности, iOS>=16.
+  Статус реестра STORE_RELEASE_VERIFIED/уже учтён в плане; прежние2.0.1 ответы
+  сохранены только как устаревшие снимки. Source binding и конкретные fixes
+  не доказаны. Проверки: official API, docs readback/links/diff/changelog;
+  без client/runtime tests, установки, package или live изменений.
+
 - Оператор уточнил [DefaultVPN 2.0.2](research/amn2/phase16-amnezia-client-5.0.3.0-release-review-2026-09-21.md#defaultvpn-202-operator-report).
   Версия сохранена как operator-reported; прежний API snapshot2.0.1 не принят
   за опровержение. Exact build/ОС/канал/source и исправления неизвестны.

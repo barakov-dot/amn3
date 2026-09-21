@@ -130,3 +130,29 @@ network lookup не выполнялся. При следующем отдель
 gate учитывать сообщённую 2.0.2, а прежние observations 2.0.1.1/cb7ea0c сохранять
 как исторические. Исправление import/NAME/MTU и соответствие публичному source
 не доказаны; native delivery, client retest/A/B и live changes не включаются.
+
+<a id="defaultvpn-202-store-confirmed"></a>
+
+### DefaultVPN 2.0.2: официальный выпуск подтверждён
+
+Оператор уточнил, что 2.0.2 видна непосредственно в карточке магазина.
+Повторная проверка 21.09.2026 21:20:45 Europe/Moscow с Cache-Control: no-cache,
+Pragma: no-cache и уникальным query parameter подтвердила **2.0.2 в RU и US**:
+
+- [Точный RU lookup](https://itunes.apple.com/lookup?id=6744725017&country=ru&entity=software&limit=1&_=1790014844).
+- [Точный US lookup](https://itunes.apple.com/lookup?id=6744725017&country=us&entity=software&limit=1&_=1790014844).
+- currentVersionReleaseDate: **2026-09-21T17:36:20Z**, то есть **20:36:20 МСК**.
+- Release notes: «Improve stability»; minimumOsVersion=16.0.
+
+Текущая классификация: **STORE_RELEASE_VERIFIED / уже учтён в плане**.
+Прежние ответы2.0.1 выше были устаревшими снимками и больше не описывают
+актуальный выпуск. Web extraction карточки в этой же перепроверке показал
+ещё более старую2.0.0; для current version принят свежий официальный API.
+Точный слой кэширования не диагностирован. Ранее высказанное сомнение в наличии
+обновления снято; сообщение оператора оказалось верным.
+
+Привязка binary к public source и исправления NAME/MTU/import остаются отдельными
+непроверенными вопросами: краткие notes не раскрывают конкретные fixes.
+Для будущей compatibility-проверки учитывать DefaultVPN2.0.2 и AmneziaVPN iOS5.0.3;
+автоматический ретест, включение native delivery, rebuild bot candidate,
+изменения AWG2/package016/сервера этим выпуском не требуются и не выполнялись.
