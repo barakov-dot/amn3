@@ -112,3 +112,21 @@ locks или пересборки локального bot candidate; native Def
 Установка, ретест устройств, A/B, SSH/Telegram/service actions не выполнялись.
 Client monitor baseline, четыре ideas planning-файла, weekly cursor, bot bundle
 и package016 не изменены; AWG2_UNTOUCHED, general issuance disabled.
+
+<a id="defaultvpn-202-operator-report"></a>
+
+### Уточнение оператора: DefaultVPN 2.0.2
+
+После проверки выше оператор ответил **«2.0.2»** на вопрос о версии DefaultVPN
+после обновления. Это подтверждённое сообщение оператора о версии на устройстве,
+не независимая проверка binary/source. Сигнал теперь конкретизирован:
+**OPERATOR_REPORTED_VERSION=2.0.2; EXACT_BUILD_SOURCE_BINDING=UNKNOWN**.
+Номер внутренней сборки, ОС и канал установки этим ответом не установлены.
+
+Сохранённый снимок RU/US lookup показывал 2.0.1; он не опровергает сообщение
+оператора и не устанавливает причину расхождения. Возможную задержку магазина
+или другой канал распространения не выдавать за установленный факт. Новый
+network lookup не выполнялся. При следующем отдельно разрешённом compatibility
+gate учитывать сообщённую 2.0.2, а прежние observations 2.0.1.1/cb7ea0c сохранять
+как исторические. Исправление import/NAME/MTU и соответствие публичному source
+не доказаны; native delivery, client retest/A/B и live changes не включаются.

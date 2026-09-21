@@ -7,6 +7,12 @@
 
 ## 2026-09-21
 
+- Оператор уточнил [DefaultVPN 2.0.2](research/amn2/phase16-amnezia-client-5.0.3.0-release-review-2026-09-21.md#defaultvpn-202-operator-report).
+  Версия сохранена как operator-reported; прежний API snapshot2.0.1 не принят
+  за опровержение. Exact build/ОС/канал/source и исправления неизвестны.
+  Реестр уточнён; проверки docs links/readback/diff/whitespace и changelog gate.
+  Без нового network lookup, установки, runtime tests, package/live изменений.
+
 - По сообщению об обновлении клиентов выполнена [узкая official store/release сверка](research/amn2/phase16-amnezia-client-5.0.3.0-release-review-2026-09-21.md#client-store-recheck-2026-09-21):
   AmneziaVPN iOS5.0.3 подтверждён в US Store (21.09), GitHub latest5.0.3.0
   прежний; RU lookup Amnezia resultCount=0. DefaultVPN RU/US пока2.0.1 от24.08,
