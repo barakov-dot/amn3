@@ -68,3 +68,47 @@ Raw public JSON и два conanfile.py сохранены в локальном 
 они не содержат приватных runtime данных. Четыре planning-файла ideas/*,
 weekly automation/cursors и client monitor baseline не менялись. Новая карточка
 format_version не создана. AWG2_UNTOUCHED, package016 immutable, issuance disabled.
+
+<a id="client-store-recheck-2026-09-21"></a>
+
+## Дополнение: сообщение об обновлении обоих клиентов
+
+Оператор сообщил «обновились амнезиявпн и дефаултвпн». Выполнена ограниченная
+проверка official release/store metadata 21.09.2026, 21:03:15–21:03:49
+Europe/Moscow. Это не запуск клиентов и не полный upstream review.
+Первый HTTP проход в sandbox завершился SSL transport error; повторные
+read-only обращения вне sandbox успешны, проверка TLS не отключалась.
+
+| Канал | Подтверждено | Дата выпуска |
+| --- | --- | --- |
+| [Amnezia GitHub latest API](https://api.github.com/repos/amnezia-vpn/amnezia-client/releases/latest) | 5.0.3.0, prerelease=false; те же 11 binary assets | 18.09.2026 05:59:39 UTC |
+| [Amnezia iOS US lookup](https://itunes.apple.com/lookup?id=1600529900&country=us) / [карточка](https://apps.apple.com/us/app/amneziavpn/id1600529900) | 5.0.3, iOS >=16; notes об улучшении стабильности | 21.09.2026 06:02:14 UTC (09:02:14 МСК) |
+| [Amnezia iOS RU lookup](https://itunes.apple.com/lookup?id=1600529900&country=ru) | resultCount=0 на момент запроса; не обобщать на другие регионы | — |
+| [DefaultVPN RU lookup](https://itunes.apple.com/lookup?id=6744725017&country=ru) / [карточка](https://apps.apple.com/ru/app/defaultvpn/id6744725017) | 2.0.1, iOS >=16; заявлены AWG3.1 и стабильность | 24.08.2026 07:16:45 UTC |
+| [DefaultVPN US lookup](https://itunes.apple.com/lookup?id=6744725017&country=us) | те же 2.0.1 и release date | 24.08.2026 07:16:45 UTC |
+
+[DefaultVPN releases API](https://api.github.com/repos/amnezia-vpn/DefaultVPN/releases?per_page=5)
+вернул пустой список. [Последние три commits default branch](https://api.github.com/repos/amnezia-vpn/DefaultVPN/commits?per_page=3):
+head 3cee753b9fb3658ddebdc0982036979e08c7d8ba от 16.07.2026, прежний pinned source.
+Это не полный аудит всех branches/tags/магазинов. Официальный dfvpn.com через
+web extraction не дал текста с версией; отсутствие текста не является
+доказательством отсутствия обновления. Более новый публичный DefaultVPN build
+этими источниками **не подтверждён**; сообщение оператора сохранено как сигнал.
+Запрошены фактические версии/ОС на устройствах, ответа на момент записи нет.
+
+Прежний iOS UNKNOWN выше относится к первой проверке в 13:17. Теперь выпуск
+AmneziaVPN iOS 5.0.3 в US Store подтверждён, но installed exact build/source
+binding неизвестен. Версию магазина 2.0.1 DefaultVPN нельзя автоматически
+приравнивать к ранее сообщённой in-app 2.0.1.1 (cb7ea0c); прежний unresolved
+source mapping и отложенный manual import check остаются в
+[документе поддержки](phase16-defaultvpn-2.0.1.1-compatibility-question-draft-2026-09-20.md).
+
+Решение для Phase16: iOS release **уже учтён в плане** как официальный кандидат,
+сообщение о более новом DefaultVPN — **недостаточно данных** до exact версии/ОС.
+Release notes не доказывают исправления NAME/MTU/import или Windows traffic.
+Вывод по области изменения: эти client releases не требуют изменения Python
+locks или пересборки локального bot candidate; native DefaultVPN delivery не
+включается. Старые connectivity/quality результаты не переносятся на новые builds.
+Установка, ретест устройств, A/B, SSH/Telegram/service actions не выполнялись.
+Client monitor baseline, четыре ideas planning-файла, weekly cursor, bot bundle
+и package016 не изменены; AWG2_UNTOUCHED, general issuance disabled.

@@ -7,6 +7,16 @@
 
 ## 2026-09-21
 
+- По сообщению об обновлении клиентов выполнена [узкая official store/release сверка](research/amn2/phase16-amnezia-client-5.0.3.0-release-review-2026-09-21.md#client-store-recheck-2026-09-21):
+  AmneziaVPN iOS5.0.3 подтверждён в US Store (21.09), GitHub latest5.0.3.0
+  прежний; RU lookup Amnezia resultCount=0. DefaultVPN RU/US пока2.0.1 от24.08,
+  public head прежний; более новая версия из сообщения оператора не подтверждена.
+  UPSTREAM_INTAKE дополнен без продвижения weekly cursor или повторной карточки
+  format_version. Installed build/source и исправления импортера не доказаны.
+  Проверки: official API/store readback, links/JSON-free docs diff/whitespace,
+  secret scan и changelog gate. Runtime tests/установка/ретест/A/B/SSH не выполнялись;
+  bot candidate, package016, ideas и monitor baseline неизменны.
+
 - По «разрешаю» завершена [локальная подготовка bot candidate](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#bot-candidate-local-preparation-2026-09-21)
   из AMN2 6e68235: отдельный immutable ZIP/manifest, runtime40/test-only8
   Linux wheels с hash/tag/metadata binding, [runbook](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md)
