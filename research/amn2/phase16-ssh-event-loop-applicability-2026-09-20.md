@@ -522,3 +522,100 @@ failure propagation контроллера и READY child без ненужно�
 Design/current plan синхронизированы; review/approval исполнения этого плана
 остаётся следующим шагом. Все Phase16 ограничения, M3 target/M4 budget,
 AWG2_UNTOUCHED, package016 immutable и general issuance disabled сохранены.
+
+
+<a id="lifecycle-implementation-m4-2026-09-21"></a>
+
+## Lifecycle M4: выполненный локальный source slice — 2026-09-21
+
+Статус **SOURCE_IMPLEMENTED_WINDOWS_TESTED / LINUX_SIGNAL_NOT_RUN /
+STOP_BUDGET_UNPROVEN / NOT_DEPLOYED**. Оператор подтвердил исполнение плана
+после AMN3 11ea3a6 словами «в части ожидания подтверждения, подтверждаю» и
+передал официальный compare клиента 5.0.1.5...5.0.3.0. Это approval локальных
+source/tests и описанного commit/push; live scope не расширен.
+
+AMN2 before 1bd7f62d1fdd3829bc278110ecdc44d3568676a3 →
+after **6e682356ed14a62d636ee58039fd3a389e794809**:
+
+- 095057235edbc0da5e5756dedff283954822c2b9 — controller/process signal scope;
+- a9cd59b75bdd3bd55a1bb7d482acf49ba53bf907 — startup/worker/runtime integration;
+- 1e86056d05dadc275ae27e23ca008e992846fa71 — synthetic child и initial affected tests;
+- 6e682356ed14a62d636ee58039fd3a389e794809 — bounded self-review fix: запрет повторного bind runtime.
+
+Обычный push в https://github.com/barakov-dot/amn2.git, remote amn2,
+refs/heads/codex/phase16-web-health-event-loop выполнен; ls-remote вернул after SHA.
+Source worktree чистый. Origin AMN3 не использовался для source push.
+Каждый commit содержит содержательный AMN2 CHANGELOG, staged checker PASS.
+AMN2 hooks отсутствуют. AMN3 --range checker неприменим напрямую: его policy SHA
+5bb1b14 отсутствует в другом репозитории. Перед первым push проверены три parent→commit
+через тот же check_change без policy override: три PASS; это явная проверка,
+не утверждение о hook/CI protection. Четвёртый commit также содержит CHANGELOG,
+staged gate PASS; его exact-ref push/readback подтверждён. История не переписывалась.
+
+Поведение: process scope до asyncio.run/Settings, pending stop до loop/bind,
+однократное закрытие admission, отдельная идентичность owned cancellation.
+Factory guard перед submit; checkpoints до lock/client/admission/recheck,
+polling/receipt/READY. Aiogram handle_signals=False. Принятые handlers/jobs и
+send→record дренируются до workflow/session/lock close. Повторный stop и первый
+stop в cleanup не отменяют cleanup. Wrapper нормализует только owned stop;
+external cancellation, controller failure и runtime/cleanup errors сохраняются.
+
+Дополнительный concurrency regression обнаружил потерю уже завершившейся
+polling error при stop + close error: RED 56 PASS/1 FAIL. Cleanup теперь
+передаёт эту ошибку наружу без дублирования primary error. Это исправлено до
+финального прогона. Scope не затрагивает facade/handlers/business/schema/units,
+network timeouts/retries/dependencies либо другие writers.
+
+| Evidence label | Actual result |
+| --- | --- |
+| task1-red / task1-scope-red | ожидаемый RED отсутствующих API |
+| task1-green | 10 PASS / 2.48s |
+| task2-factory-red / runtime-red / main-red | ожидаемый RED отсутствующих guard/controller/wrapper |
+| task2-initial-green | 54 PASS / 8.03s до дополнительных race cases |
+| task2-final-green (имя запуска, не результат) | 56 PASS / 1 FAIL / 9.02s, воспроизведена потеря polling error |
+| task2-error-fix-green | 59 PASS / 8.32s |
+| lifecycle-final-affected | 93 PASS / 6 SKIP / 8.87s, до финального contract finding |
+| lifecycle-generation-red | ошибка черновика test: missing import, не поведенческий RED |
+| lifecycle-generation-valid-red | ожидаемый RED: повторный bind не вызвал RuntimeError |
+| lifecycle-reviewed-affected | **94 PASS / 6 SKIP / 9.16s**, 0 warnings/errors |
+
+Self-review выявил разрешённый второй bind после normal unbind, вопреки single
+runtime generation contract. Добавлен постоянный one-bind latch, подтверждён
+валидным RED; affected набор повторён только после этого нового исправления.
+
+Итог — ровно восемь affected файлов из плана; прежний полный 312 suite не
+повторён. Селекторы ранних RED уточнены под фактические parameterized tests,
+а не буквальные примерные имена плана. Полные argv/caps/exit/duration:
+[JSON evidence](phase16-bot-lifecycle-validation-2026-09-21.json).
+JUnit/stdout/basetemp/runner/ledger сохранены в
+C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-lifecycle-validation-20260921.
+
+Повторно использована M3 venv: Python 3.12.14, aiogram 3.30.0, pytest 8.4.2,
+include-system-site-packages=false; оба lock hashes совпали с machine-readable
+M3 evidence. В prose spec исправлена опечатка runtime hash (пропущенная a);
+lock/venv не менялись. Parent runner: isolated Python, plugin autoload disabled,
+allowlisted system/temp env, fake adapters, VPS_APPLY_ENABLED=false, no cache.
+Отклонение от плана: task-local runner был настроен на 120s/256KiB вместо
+90s/128KiB (RED cap см. JSON); фактические времена и output ниже исходных
+лимитов, cap не достигнут. Повторов без изменения/диагностированной причины нет.
+
+Linux child подготовлен с SIGTERM/SIGINT × PRE_LOOP/FACTORY_DISPATCHED/READY,
+exact Popen handle, fixed enum protocol, 10s watchdog/deadline, 64 records/16KiB,
+bounded stderr и cleanup только собственного процесса. Syntax PASS. На Windows
+все шесть cases SKIP: **Linux OS-signal execution и negative control NOT_RUN**.
+Compatible Linux environment не предоставлена, WSL/Docker/dependencies не
+устанавливались. Код child не выдается за исполненное Linux evidence.
+
+Inline self-review пяти Review Focus: pre-resource latch; partial signal install
+и restore; external/owned cancellation и combined errors; stop/dispatch/READY
+с accepted record; exact-child-only signals и честный NOT_RUN. Subagents/reviewers
+не запускались. UNKNOWN остаются target/Linux/systemd lifecycle, stop budget,
+writer/restart fence, production workload caps, recovery/activation/rollback.
+Следующий отдельный evidence scope — уже доступная compatible Linux среда для
+шести child cases и test-only negative control либо согласованный target readback;
+ни один из них не разрешён этим receipt автоматически.
+
+AWG2_UNTOUCHED; package016 immutable; general issuance disabled. Нет SSH/VPS,
+Telegram API, установки клиента, выдачи, package build/stage/install/deploy/cleanup.
+Windows traffic/quality FAIL, DNS STOP и отложенные iPhone/A/B сохранены.
+Обзор нового клиента: [release/source receipt](phase16-amnezia-client-5.0.3.0-release-review-2026-09-21.md).

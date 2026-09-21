@@ -125,6 +125,9 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    официального клиента/engine ИЛИ новой проверяемой гипотезе: записать отличие
    от закрытых диагностик и исходы, получить live approval. Повтор kill-switch A/B,
    поиска отсутствующего адаптера или общего IPv4 HTTPS без новой гипотезы не нужен.
+   21.09 учтён официальный [релиз 5.0.3.0 и узкая source delta](../../../research/amn2/phase16-amnezia-client-5.0.3.0-release-review-2026-09-21.md):
+   Windows/Linux/macOS/Android assets подтверждены; Windows AWG pin прежний.
+   Новый binary traffic PASS и iOS rollout не подтверждены; retest не запускался.
    Upstream receipts действуют на дату чтения, не заменяют новый readback.
    [Согласованный комментарий #3043](../../../research/amn2/phase16-windows-issue-3043-comment-2026-09-08.md)
    опубликован вручную; readback 2026-09-08 подтвердил публикацию. Не отправлять повторно.
@@ -154,7 +157,8 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
 
    Локальный reviewable gate подготовлен 20.09 в [существующем Phase16 design](../specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#integration-readiness-web-bot):
    LOCAL_DEPENDENCY_SLICE_PASS / INTEGRATION_EXECUTION_BLOCKED / NOT_DEPLOYED.
-   Кандидат AMN2 1bd7f62d1fdd3829bc278110ecdc44d3568676a3; source/remote сверены.
+   Текущий source candidate AMN2 6e682356ed14a62d636ee58039fd3a389e794809;
+   source/remote сверены после локального lifecycle slice. M3 baseline — 1bd7f62.
    21.09 после отдельного согласования выполнена локальная M3 validation:
    aiogram 3.30.0, exact 48 test pins/40 runtime pins, hashes и pip check PASS;
    68 worker/admission/drain tests PASS на Windows/Python 3.12.14.
@@ -177,10 +181,13 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    [source implementation plan](2026-09-21-amn2-bot-startup-stop-lifecycle-plan.ru.md):
    3 задачи inline, точные файлы/API, RED/GREEN, bounded synthetic signal child,
    один affected regression и source/docs commit/push rules.
-   DESIGN_APPROVED / PLAN_READY_FOR_REVIEW / NOT_EXECUTED. Следующее решение —
-   review плана и разрешение его inline source/tests исполнения; без новой среды,
-   при отсутствии compatible Linux — NOT_RUN. Units/target readback/live отдельно.
-   Документы проверены локально; source/tests/dependencies не менялись.
+   По следующему подтверждению оператора план исполнен inline: controller,
+   startup/factory guard, owned cleanup и сохранение combined errors.
+   **SOURCE_IMPLEMENTED_WINDOWS_TESTED**: 94 PASS/6 SKIP, 9.16s, без warnings;
+   source 6e68235 pushed/readback. [Actual receipt](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#lifecycle-implementation-m4-2026-09-21).
+   Linux six-case signals/negative control NOT_RUN; tests подготовлены, среды не
+   устанавливались. Следующий отдельный scope — compatible Linux evidence либо
+   target readback. M4 stop budget/writer/restart gates открыты; units/locks неизменны.
    Merge/build, target/Telegram и live execution не разрешены.
    Package016 не пересобирается.
 

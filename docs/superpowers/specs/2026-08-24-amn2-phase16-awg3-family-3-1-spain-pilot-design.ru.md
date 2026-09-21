@@ -77,7 +77,7 @@ merge, package build и перенос файлов этим gate не разр�
 | Источник | Установленный факт |
 | --- | --- |
 | [pyproject.toml](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/pyproject.toml) | Python >=3.12,<3.13; aiogram >=3.4,<4 — диапазон, не target lock |
-| [Runtime lock](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/requirements/phase15-runtime-py312.lock) | aiogram==3.30.0; SHA256 файла a381be185b19777b9198526e11df8dcfa0faf7f15acccd829809e698d679fab |
+| [Runtime lock](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/requirements/phase15-runtime-py312.lock) | aiogram==3.30.0; SHA256 файла a381be185b19777b9198526e11df8dcfa0afaf7f15acccd829809e698d679fab |
 | [Test lock](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/requirements/phase15-test-py312.lock) | SHA256 файла 52967d6e2babc5d05b60615c9a9c950a4541436f7a521dfee49d62b98264a235 |
 | Выполненные bot tests по receipt | Python 3.12.14 / aiogram 3.28.2, существующий .codex_deps; не установка из candidate runtime lock |
 | Локальный M3, 21.09 | Изолированная Windows AMD64 / Python 3.12.14 / aiogram 3.30.0; 48 test pins включают все 40 runtime pins; hashes wheels и pip check PASS; 68 lifecycle tests PASS |
@@ -229,14 +229,16 @@ manager force kill к успешному drain. До этого budget UNKNOWN, 
 
 #### M4: утверждённый lifecycle design — 2026-09-21
 
-Статус: **DESIGN_APPROVED / PLAN_READY_FOR_REVIEW / NOT_IMPLEMENTED / STOP_BUDGET_UNPROVEN**.
+Статус: **SOURCE_IMPLEMENTED_WINDOWS_TESTED / LINUX_SIGNAL_NOT_RUN / STOP_BUDGET_UNPROVEN**.
 После подготовки design в commit 8ba7e5d31236824bddd304a4f278965029d1578b
 оператор ответил «Подтверждаю». Утверждён design A и подготовка
 [ограниченного implementation plan](../plans/2026-09-21-amn2-bot-startup-stop-lifecycle-plan.ru.md);
-его source/tests исполнение ещё не согласовано.
+Его inline source/tests исполнение затем согласовано и выполнено: AMN2
+6e68235, 94 PASS/6 Linux SKIP; [receipt](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#lifecycle-implementation-m4-2026-09-21).
 Основание — [source-only M4](#stop-budget-m4), AMN2 1bd7f62; текущий worker
 [design](2026-09-20-amn2-bot-workflow-worker-design.ru.md) сохраняет силу.
-Документ описывает предлагаемое поведение, не выдает его за нынешний runtime.
+Контракт реализован в source; deployed runtime и Linux/systemd acceptance
+этим не подтверждены.
 
 **Цель и критерий успеха.** Stop, обработанный до polling или во время работы,
 должен закрывать вход один раз и сохранять владение ресурсами до cleanup.
@@ -446,7 +448,7 @@ persistence, leaks и live recovery остаются NOT_EXECUTED в этом ga
 | M1 | Windows traffic PASS на обоснованном client/engine/hypothesis path; root-cause-bound quality correction, стабильное acceptance и полный strict A/B | Отложенные P0/P1 главного плана; только после возврата оператора и exact approval. Сейчас повтор не запрашивать |
 | M2 | Валидная DNS/прочая measurement coverage, endpoints и budgets критериев v1 | Отдельное решение по методике; DNS bridge STOP, tooling ради gate не создавать |
 | M3 | Fresh target deployed/source/state + Python/ABI/full dependencies и соответствие intended lock | Локальная Windows часть закрыта 21.09: exact pins/hashes, pip check, 68 PASS. Target/Linux evidence отсутствует; live readback требует exact approval, повтор local suite без новой причины не нужен |
-| M4 | Effective units/entrypoints, другие writers, конечный startup-cleanup/stop budget и recovery policy для UNKNOWN | Source-only карта/readback contract готовы; lifecycle design A утверждён 21.09, source plan готов к review, не исполнен. Он не закрывает общий budget/writer/restart gates; target readback по exact approval |
+| M4 | Effective units/entrypoints, другие writers, конечный startup-cleanup/stop budget и recovery policy для UNKNOWN | Source-only карта/readback contract готовы; lifecycle design A утверждён 21.09, source plan исполнен: 94 PASS/6 Linux SKIP, AMN2 6e68235. Он не закрывает общий budget/writer/restart gates; target readback по exact approval |
 | M5 | Retained inventory, transaction ownership/quiescence, preservation/cleanup readback с исключениями v1 | Четыре раздельных recovery gates; metadata tools готовы локально, live authority отсутствует |
 | M6 | Future artifact source/tooling/dependency binding, identity/manifest; activation/revert contract и DB/remote preservation | Отдельный packaging/activation scope после dependencies; package016 сохранить, новый ID/hash/revert target не назначены |
 | M7 | Исполненные bounded startup/drain/coexistence/persistence/restart/leak/rollback checks на связанных artifact/target | Раздел 6 после prerequisites и exact approvals; 33/312 PASS не закрывают target acceptance. Synthetic dependency slice может отдельно предшествовать live gates |
@@ -455,11 +457,11 @@ persistence, leaks и live recovery остаются NOT_EXECUTED в этом ga
 Подготовлен [lifecycle design A](#lifecycle-design-m4): один stop owner до startup,
 factory dispatch guard, сохранение accepted drain и явная UNKNOWN/recovery policy.
 Design A утверждён; [source implementation plan](../plans/2026-09-21-amn2-bot-startup-stop-lifecycle-plan.ru.md)
-готов к review. Следующий предмет решения — его inline source/tests execution
-с существующей pinned средой и conditional Linux NOT_RUN. Target readback/units
-остаются отдельными scopes/approvals; code/tests/units ещё не менялись.
-Stop seconds не назначены. Systemd simulation, новый code fix и live execution
-не выполнялись. iPhone/A/B остаются отложенными; deployment не разрешён.
+исполнен: SOURCE_IMPLEMENTED_WINDOWS_TESTED, Linux signal/negative control NOT_RUN.
+Следующий отдельный evidence scope — compatible Linux signal validation. Target readback/units
+остаются отдельными scopes/approvals; units/dependencies не менялись.
+Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
+и live execution не выполнялись. iPhone/A/B остаются отложенными; deployment не разрешён.
 
 Для будущего исполнения approvals раздельны: bounded target inventory;
 recovery signals; адресная cleanup и снятие package-блокировки; новый package
@@ -539,7 +541,7 @@ Phase 15 baseline package:
 - package-readiness receipt:
   040a9959f60ce725a9aa626d299d482b782da317fed11de0fd39193fe71f911d
 - runtime lock:
-  a381be185b19777b9198526e11df8dcfa0faf7f15acccd829809e698d679fab
+  a381be185b19777b9198526e11df8dcfa0afaf7f15acccd829809e698d679fab
 - test lock:
   52967d6e2babc5d05b60615c9a9c950a4541436f7a521dfee49d62b98264a235
 

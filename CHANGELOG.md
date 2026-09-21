@@ -7,6 +7,24 @@
 
 ## 2026-09-21
 
+- По подтверждению оператора выполнен [локальный lifecycle M4 slice](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#lifecycle-implementation-m4-2026-09-21):
+  AMN2 1bd7f62→6e68235, четыре commits с CHANGELOG, exact-ref push/readback;
+  stop до Settings/factory/READY, принятый drain и combined errors сохранены.
+  Финальный affected regression: 94 PASS/6 SKIP/9.16s без warnings; Linux signals
+  и negative control NOT_RUN. SOURCE_IMPLEMENTED_WINDOWS_TESTED, не M4 budget PASS.
+  [Evidence JSON](research/amn2/phase16-bot-lifecycle-validation-2026-09-21.json)
+  фиксирует actual argv/caps, RED/GREEN и отклонение task-local caps; scratch сохранён.
+  Spec, subordinate plan и текущий Phase16 plan синхронизированы; исправлена
+  prose-опечатка runtime lock hash по прежнему M3 JSON, locks/dependencies неизменны.
+- Учтён [официальный AmneziaVPN 5.0.3.0](research/amn2/phase16-amnezia-client-5.0.3.0-release-review-2026-09-21.md):
+  API stable/11 assets, Windows/Linux/macOS/Android; iOS rollout UNKNOWN.
+  Узкая source delta (30 commits/224 files inventory): Windows AWG pin прежний,
+  format_version не требует новой доработки AMN2; Windows traffic FAIL остаётся.
+  Intake/Windows P1 обновлены без дублирования карточек/weekly cursor.
+  Проверки docs: readback, links/anchors, diff/whitespace, secrets и changelog gate.
+  Нет live SSH/Telegram, клиентских retests/install, package/stage/install/deploy/
+  cleanup; AWG2/package016/issuance safety и отложенные quality/iPhone/A/B сохранены.
+
 - После «Подтверждаю» design A отмечен DESIGN_APPROVED и подготовлен
   [план source реализации lifecycle M4](docs/superpowers/plans/2026-09-21-amn2-bot-startup-stop-lifecycle-plan.ru.md):
   controller/signal scope, runtime/factory guard и bounded synthetic signal

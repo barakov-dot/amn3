@@ -18,8 +18,10 @@ pytest из сохранённой M3 venv; стандартный SQLite thread
 **Spec:** [lifecycle design A](../specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#lifecycle-design-m4).
 Оператор ответил «Подтверждаю» на письменный design из AMN3 commit
 8ba7e5d31236824bddd304a4f278965029d1578b. Это утвердило design и подготовку плана.
-Статус плана: **PLAN_READY_FOR_REVIEW / NOT_EXECUTED**.
-Исполнение source/tests по этому плану ещё не согласовано. Inline method
+Статус плана: **SOURCE_IMPLEMENTED_WINDOWS_TESTED / LINUX_SIGNAL_NOT_RUN**.
+Исполнение согласовано оператором «в части ожидания подтверждения, подтверждаю».
+Tasks 1–2 реализованы; Task 3 подготовлен, Linux execution/negative control NOT_RUN.
+[Actual evidence](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#lifecycle-implementation-m4-2026-09-21), AMN2 6e68235. Inline method
 сохраняется из ограничений Phase16; отдельный выбор делегирования не нужен.
 Подплан подчинён [главному Phase16 plan](2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),
 не является вторым execution status и не возобновляет выполненный worker plan.
@@ -95,7 +97,8 @@ embedded caller. Embedded run/run_persistent_bot получают явный con
 
 ## Среда, команды и бюджеты будущих tests
 
-Все команды этого раздела — **после approval плана**, сейчас не запускались.
+Команды ниже — утверждённый шаблон. Actual argv/results и отклонения от caps
+сохранены в receipt/JSON выше; Linux-only команды не запускались.
 
 Существующий Python:
 C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-dependency-validation-20260921-1bd7f62/venv/Scripts/python.exe.
@@ -142,7 +145,7 @@ Output/JUnit/basetemp — отдельные paths в scratch, не в source Gi
 **Consumes:** стандартная библиотека; app services/Settings не импортировать.
 **Produces:** controller/scope API из таблицы выше.
 
-- [ ] **1. RED:** добавить следующий сценарий pre-attach latch. Он должен упасть
+- [x] **1. RED:** добавить следующий сценарий pre-attach latch. Он должен упасть
   из-за отсутствующего lifecycle API, а не отсутствующих dependency/config.
 
 ~~~python
@@ -163,10 +166,10 @@ def test_signal_before_attach_is_retained():
     asyncio.run(scenario())
 ~~~
 
-- [ ] **2. Запустить RED selector:** tests/bot/test_lifecycle.py::test_signal_before_attach_is_retained.
+- [x] **2. Запустить RED selector:** tests/bot/test_lifecycle.py::test_signal_before_attach_is_retained.
   Сохранить actual exit/result; не считать collection failure от среды ожидаемым RED.
 
-- [ ] **3. Реализовать controller** с private cancellation token. attach/request_stop/
+- [x] **3. Реализовать controller** с private cancellation token. attach/request_stop/
   bind сериализованы loop; notify_signal только доставляет событие. Основной
   transition внутри request_stop после проверки loop identity:
 
@@ -194,7 +197,7 @@ finally:
   detach инвалидирует callbacks и очищает owner; не допускать повторного использования
   controller для новой runtime generation.
 
-- [ ] **4. Реализовать ProcessSignalScope** на signal.signal для main thread.
+- [x] **4. Реализовать ProcessSignalScope** на signal.signal для main thread.
   __enter__ сохраняет старое значение непосредственно перед каждой установкой;
   callback вызывает controller.notify_signal(). При partial install восстановить
   уже изменённые signals. __exit__ пытается восстановить каждый изменённый signal,
@@ -222,15 +225,15 @@ def test_partial_install_restores_first_signal():
     assert registry == previous
 ~~~
 
-- [ ] **5. Добавить параметризованные случаи** в этот же файл: два notify после bind
+- [x] **5. Добавить параметризованные случаи** в этот же файл: два notify после bind
   дают один close/cancel; pending до bind даёт close и запрет startup; первый stop
   во время begin_cleanup не отменяет root; external cancel до/после собственного
   не распознаётся как normal stop; callback после detach не трогает старый owner;
   ошибка первого restore не мешает второму. Использовать counter lists и fake
   registry как выше; в host process не отправлять OS signals.
-- [ ] **6. GREEN:** tests/bot/test_lifecycle.py. Проверить no unhandled task errors,
+- [x] **6. GREEN:** tests/bot/test_lifecycle.py. Проверить no unhandled task errors,
   module import не устанавливает handlers, public API совпадает с таблицей.
-- [ ] **7. Commit:** source CHANGELOG с actual результатом; exact files выше.
+- [x] **7. Commit:** source CHANGELOG с actual результатом; exact files выше.
   Suggested message: feat(bot): add scoped stop controller and signal ownership.
   При intermediate API mismatch остановиться и исправить этот task до wiring.
 
@@ -241,7 +244,7 @@ tests/bot/test_workflow_worker.py, tests/bot/test_app_bootstrap.py,
 tests/bot/test_bot_runtime_worker.py, CHANGELOG.md.
 **Consumes:** Task 1 API. **Produces:** main/runtime APIs и factory_start_allowed.
 
-- [ ] **1. RED factory fence:** добавить тест ниже к существующим worker regressions.
+- [x] **1. RED factory fence:** добавить тест ниже к существующим worker regressions.
 
 ~~~python
 def test_stop_guard_prevents_factory_submit():
@@ -263,7 +266,7 @@ def test_stop_guard_prevents_factory_submit():
     asyncio.run(scenario())
 ~~~
 
-- [ ] **2. RED selector:** tests/bot/test_workflow_worker.py::test_stop_guard_prevents_factory_submit.
+- [x] **2. RED selector:** tests/bot/test_workflow_worker.py::test_stop_guard_prevents_factory_submit.
   Затем добавить необязательный constructor argument/field; guard проверяется
   только в _open_resource непосредственно после существующей OPEN проверки:
 
@@ -279,7 +282,7 @@ self._resource = await asyncio.get_running_loop().run_in_executor(
   assert resource/lock ещё не закрыты, release finally; factory/close ровно один
   раз на одном потоке. Existing close-before-dispatch test сохранить.
 
-- [ ] **3. RED runtime stop на admission:** использовать уже существующие helpers;
+- [x] **3. RED runtime stop на admission:** использовать уже существующие helpers;
   ниже полный минимальный сценарий. Новый optional runtime argument ещё отсутствует,
   поэтому ожидается failure этого нового contract.
 
@@ -317,7 +320,7 @@ def test_stop_at_admission_does_not_start_factory(tmp_path):
     asyncio.run(scenario())
 ~~~
 
-- [ ] **4. RED selector:** tests/bot/test_bot_runtime_worker.py::test_stop_at_admission_does_not_start_factory.
+- [x] **4. RED selector:** tests/bot/test_bot_runtime_worker.py::test_stop_at_admission_does_not_start_factory.
   Подключить lifetime/owner binding до lock/client, но ресурсы закрывать лишь
   после фактического создания. При injected controller не повторять attach/detach;
   default runtime controller создаёт и снимает собственный loop scope. bind
@@ -344,7 +347,7 @@ polling_task = asyncio.create_task(dispatcher.start_polling(
   ready receipt/READY не имеют await между финальной проверкой и вызовами.
   Runtime сам не подавляет cancellation; нормализация — только в executable wrapper.
 
-- [ ] **5. Добавить main wrapper** с ProcessSignalScope до asyncio.run и Settings.
+- [x] **5. Добавить main wrapper** с ProcessSignalScope до asyncio.run и Settings.
   Внутренний awaitable supervisor привязывает loop, проверяет pending stop ДО вызова
   runtime, после возврата/ошибки снимает loop. Только owns_cancellation=True
   подавляет CancelledError; любые другие ошибки/ExceptionGroup идут наружу.
@@ -365,7 +368,7 @@ with ProcessSignalScope(stop):
   Callable[[StopController], Awaitable[None]], attach/try-await/classify/finally-detach
   по предыдущему абзацу. Не читать secrets в exception text/trace.
 
-- [ ] **6. Добавить runtime cases** с existing _FakeDispatcher/_FakeNotifier/
+- [x] **6. Добавить runtime cases** с existing _FakeDispatcher/_FakeNotifier/
   _runtime_workflow и Events: stop до Settings/lock; stop на recheck; stop между
   polling yield и READY; ready-first затем stop даёт один STOPPING; busy revoke
   с queued reset (ровно 2 devices); stop между fake send и record; два stop на
@@ -375,11 +378,11 @@ with ProcessSignalScope(stop):
   Assert kwargs["handle_signals"] is False в bootstrap test.
   Проверка ошибки notifier требует, чтобы session/lock всё равно закрывались.
   Fake barriers освобождать в finally, без timing-only race на случайном sleep.
-- [ ] **7. GREEN affected task set:** tests/bot/test_lifecycle.py,
+- [x] **7. GREEN affected task set:** tests/bot/test_lifecycle.py,
   tests/bot/test_workflow_worker.py, tests/bot/test_app_bootstrap.py,
   tests/bot/test_bot_runtime_worker.py. RED новых selectors запускать до их fix,
   не объявлять новым RED прежние passing cases.
-- [ ] **8. Commit:** только перечисленные source/tests и AMN2 CHANGELOG.
+- [x] **8. Commit:** только перечисленные source/tests и AMN2 CHANGELOG.
   Suggested message: fix(bot): honor startup stop before factory and readiness.
   Записать actual RED/GREEN, сохранение direct cancellation и предел Linux UNKNOWN.
 
@@ -390,7 +393,7 @@ tests/bot/lifecycle_signal_child.py (new), CHANGELOG.md.
 **Consumes:** controller/signal scope + runtime из Tasks 1–2.
 **Produces:** Linux signal evidence либо явно NOT_RUN; не target/systemd PASS.
 
-- [ ] **1. Добавить parent acceptance** для SIGTERM и SIGINT на трёх барьерах:
+- [x] **1. Добавить parent acceptance** для SIGTERM и SIGINT на трёх барьерах:
   PRE_LOOP, FACTORY_DISPATCHED, READY. Всего шесть cases, по одному signal на child.
   Для двух первых нет последующего READY; в factory case close происходит только
   после release; в READY case STOPPING ровно один раз и cleanup order сохранён.
@@ -417,7 +420,7 @@ def test_owned_child_signal_stops_at_barrier(tmp_path, signum, barrier):
   явные. Запускает argv list [sys.executable, "-I", "-B", "-c", bootstrap, source,
   barrier, scratch], вставляет только source в sys.path и вызывает helper entrypoint.
 
-- [ ] **2. Child helper**: функция run_child(barrier: str, scratch: Path) -> None.
+- [x] **2. Child helper**: функция run_child(barrier: str, scratch: Path) -> None.
   Использовать _persistent_settings(scratch) с _env_file=None, _FakePersistentBot,
   _RecordingLock, fake notifier и _runtime_workflow; вся DB in-memory/temporary.
   Settings/DB создавать внутри injected runtime после attach/stop-check,
@@ -434,21 +437,21 @@ def test_owned_child_signal_stops_at_barrier(tmp_path, signum, barrier):
   READY не требует RELEASE: после STOP_ACCEPTED ждать CLOSED/exit. Печатать только фиксированные enum records,
   flush=True; ни Settings, ни exceptions с runtime data, ни kwargs целиком.
   Автозавершение synthetic child по 10s watchdog — nonzero/UNKNOWN, не CLOSED.
-- [ ] **3. Parent safeguards**: держать Popen handle и poll-check непосредственно
+- [x] **3. Parent safeguards**: держать Popen handle и poll-check непосредственно
   перед child.send_signal(signum); запрет сигналов по найденным/внешним PID.
   Читать stdout с deadline 10s и cap 64 records/16 KiB; malformed/out-of-order
   record — failure. После trace/ошибки в finally release, terminate ещё живого
   exact child, при необходимости kill и wait; не возвращать PASS после такого kill.
   stderr также ограничен; сохранить безопасную классификацию, не raw secrets.
   Baseline state до начала должен быть тот же source/dependency binding.
-- [ ] **4. Проверить механизм RED на доступной Linux среде:** до claim actual
+- [ ] **4. NOT_RUN — проверить механизм RED на доступной Linux среде:** до claim actual
   OS-signal PASS один test-only negative control с пропущенным pending delivery
   должен нарушить trace assertion. Вернуть штатный helper, затем выполнить шесть
   cases один раз GREEN. Negative control не изменяет production code и не коммитится.
   Если Linux/Python/dependencies не доступны уже сейчас, этот шаг NOT_RUN;
   подготовленные tests остаются для отдельно согласованного compatible environment.
   Не переносить Windows venv на Linux и не устанавливать новую среду.
-- [ ] **5. Итоговый affected набор один раз** после всех source/test changes:
+- [x] **5. Итоговый affected набор один раз** после всех source/test changes:
 
 ~~~text
 tests/bot/test_lifecycle.py
@@ -465,10 +468,10 @@ tests/bot/test_bot_runtime_worker.py
   JUnit отдельно показывает passed/failed/skipped; Windows skip Linux cases не
   превращать в ALL_PLATFORM_PASS. Errors/warnings/unretrieved task exception —
   разобрать; повтор только после исправления/нового вопроса, не после commit.
-- [ ] **6. Self-review без subagent:** проверить пять Review Focus, spec coverage,
+- [x] **6. Self-review без subagent:** проверить пять Review Focus, spec coverage,
   exact source scope, сохранение existing queue/factory races, отсутствие secrets.
   Если выявлена проблема — один bounded fix с воспроизводимым RED и affected GREEN.
-- [ ] **7. Commit source CHANGELOG + два новых tests** (и только необходимые
+- [x] **7. Commit source CHANGELOG + два новых tests** (и только необходимые
   исправленные task files при наличии fix). Suggested message:
   test(bot): cover owned startup and running signal boundaries.
   Затем source push/readback и AMN3 evidence sync по правилам ниже.
@@ -509,6 +512,6 @@ Phase16 live/acceptance prerequisites остаются открыты.
 - Все пять Review Focus имеют owning task и проверяемое ожидаемое поведение.
 - API/paths сверены с source 1bd7f62; implementation snippets — будущие edits,
   а не уже применённый patch. Production timeouts/target state не назначены.
-- Следующее разрешение: review этого плана и inline source/tests execution
-  ровно в описанных границах, с условным Linux NOT_RUN и без установки среды.
+- Исполнение этого локального плана завершено в допустимых границах. Следующий
+  отдельный scope: compatible Linux signal evidence либо target readback.
   Настоящие target inventory/units/activation и live gates этим не открываются.
