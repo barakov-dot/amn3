@@ -452,3 +452,43 @@ readback scopes. M3 target и M4 budget остаются открыты, M1/M2/M
 source line bindings, diff/whitespace, added-line secret scan; AMN2 неизменён.
 AWG2_UNTOUCHED; package016 immutable; general issuance disabled; DNS bridge STOP.
 Windows traffic/quality FAIL, iPhone/A/B отложены. Нет stage/install/deploy/cleanup.
+
+
+<a id="lifecycle-design-m4-2026-09-21"></a>
+
+## Lifecycle design M4 — 2026-09-21
+
+Оператор следующим «приступаем» согласовал подготовку design после source-only
+receipt M4. AMN3 entry HEAD 1dd7795fe99eec35e0db351deb84c011ca63085e;
+AMN2 1bd7f62d1fdd3829bc278110ecdc44d3568676a3, оба active worktrees чистые до
+правок. Основной AMN3 checkout остаётся старым/грязным; его файлы не менялись.
+
+Подготовлен [design A в существующем контракте](../../docs/superpowers/specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#lifecycle-design-m4),
+статус DESIGN_PROPOSED / NOT_IMPLEMENTED. Сравнены три варианта: единый signal
+owner с сохранением drain (рекомендация), жёсткое прерывание по таймеру (не выбрано),
+полная переработка deadlines/durable recovery/writers (отдельный большой scope).
+Цель A — stop до startup, единственный cleanup и недопущение factory/READY
+после уже обработанного stop. Startup-only guard не закрывает worker для
+последующих jobs ранее принятых handlers. Signal latency и полный stop budget
+не объявлены ограниченными.
+
+Сохранены H=8/Q=8 и бизнес-семантика reset; число устройств в существующей БД
+не подменено max_devices. Для будущих tests определены конечные synthetic cases,
+а production bulk cap/enforcement остаётся отдельным gate. Отделены local cleanup
+и business outcome. PARTIAL/UNKNOWN не разрешают replay/resend/cleanup; operator
+gate не выдаётся за durable marker или уже реализованный systemd restart fence.
+
+Reviewable source slice: app entrypoint/StopController/signal adapter, startup
+factory guard, targeted synthetic tests и AMN2 CHANGELOG; без services/schema/
+web/units/реальных Telegram или SSH операций. Linux signal check возможен только
+в отдельно связанном disposable synthetic child; Windows injection не заменяет
+Linux evidence. Числа production timeouts не назначены, новая среда не создавалась.
+
+Проверка design: чтение существующих source/contracts/tests (без запуска),
+inline self-review races/error paths/scope, links/anchors, readback/diff/whitespace
+и added-line secret scan. Это подготовка документа, не RED/GREEN, signal probe
+или test PASS. Утверждение written design, implementation plan и его выполнение
+ещё впереди. M3 target/M4 budget и остальные prerequisites остаются открытыми.
+AWG2_UNTOUCHED, package016 immutable, general issuance disabled; Windows/quality
+FAIL, DNS bridge STOP, iPhone/A/B отложены. Нет code/dependencies/units changes,
+stage/install/deploy/cleanup, пересборки package или повторения прежних tests.

@@ -7,6 +7,19 @@
 
 ## 2026-09-21
 
+- По следующему «приступаем» подготовлен [lifecycle design M4](docs/superpowers/specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#lifecycle-design-m4)
+  со статусом DESIGN_PROPOSED / NOT_IMPLEMENTED: рекомендован единый stop owner
+  до startup, factory-dispatch guard и сохранение accepted handler/job drain.
+  Разделены количество нагрузки и wall-time, local cleanup и business outcome;
+  PARTIAL/UNKNOWN не выданы за rollback или implemented restart fence.
+  Определены ограниченный будущий source slice и synthetic acceptance cases;
+  [receipt](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#lifecycle-design-m4-2026-09-21),
+  main plan и список открытых M4 gates синхронизированы. Проверки: source read,
+  inline design self-review, links/anchors, readback/diff/whitespace и secrets.
+  Только документы; без code/tests/units/dependencies changes, Linux/systemd
+  probes, target/Telegram, package build/stage/install/deploy или cleanup.
+  Прежние evidence и все Phase16 ограничения сохранены; design ждёт review.
+
 - После «приступаем» завершён [source-only stop-budget M4](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#stop-budget-m4-2026-09-21)
   кандидата AMN2 1bd7f62 и сохранённых pinned aiogram 3.30.0/Uvicorn 0.52.3.
   Зафиксированы ранний startup SIGTERM gap в доказательстве cleanup,

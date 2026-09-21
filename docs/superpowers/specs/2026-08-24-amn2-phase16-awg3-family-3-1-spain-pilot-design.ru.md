@@ -225,6 +225,157 @@ Linux signal validation и target readback. Нельзя обещать lossless
 выбранное число секунд, просто отменить dispatched mutation или приравнять
 manager force kill к успешному drain. До этого budget UNKNOWN, execution BLOCKED.
 
+<a id="lifecycle-design-m4"></a>
+
+#### M4: предложенный lifecycle design — 2026-09-21
+
+Статус: **DESIGN_PROPOSED / NOT_IMPLEMENTED / STOP_BUDGET_UNPROVEN**.
+Следующее «приступаем» оператора разрешило подготовку этого письменного design,
+не утверждение ещё не существовавшего решения и не source implementation.
+Основание — [source-only M4](#stop-budget-m4), AMN2 1bd7f62; текущий worker
+[design](2026-09-20-amn2-bot-workflow-worker-design.ru.md) сохраняет силу.
+Документ описывает предлагаемое поведение, не выдает его за нынешний runtime.
+
+**Цель и критерий успеха.** Stop, обработанный до polling или во время работы,
+должен закрывать вход один раз и сохранять владение ресурсами до cleanup.
+Не начинать следующую startup-стадию/READY после принятого stop; уже dispatched
+factory/mutation и accepted send→record завершать по прежнему контракту.
+Local cleanup completion и успешный business outcome — разные результаты.
+Source fix этого поведения сам по себе не делает M4 или integration PASS.
+
+| Вариант | Выигрыш | Ограничение / решение |
+| --- | --- | --- |
+| A — единый stop owner + сохранение drain, рекомендуется | Закрывает ранний signal path и делает startup/stop races проверяемыми; сохраняет remote→local и send→record | Не обещает hard wall-time, требует отдельно target/recovery/workload evidence. Это следующий ограниченный source scope |
+| B — общий таймер с отменой/force exit | Ограничивает ожидание supervisor только при реально исполнимом внешнем termination | Не останавливает Python thread/remote operation безопасно; возможны send без record и потеря terminal evidence. Не выбран |
+| C — полные operation deadlines, durable recovery/согласование всех writers | Может стать основанием общего production lifecycle contract | Новый большой scope: DB/SSH/HTTP/filesystem, bulk caps, durable state и межпроцессное fencing. Не добавлять попутно к signal fix |
+
+**A1. Один владелец сигнала и остановки.**
+
+- Небольшой process-signal adapter устанавливается в штатном executable entrypoint
+  до Settings, lock, Telegram client и worker. Импорт модуля не меняет signals.
+  Один StopController хранит состояние и передаётся runtime; сигнал до готовности
+  loop сохраняется как pending stop и применяется до создания app resources.
+- Signal adapter переводит SIGTERM/SIGINT в одно событие контроллера, не делает
+  DB/network/logging/close прямо в OS callback. Все lifecycle transitions идут
+  в event loop; момент принятия stop — выполнение его callback. Между доставкой
+  OS signal и callback может быть задержка: блокирующий sync код не стал preemptible.
+  Startup imports до установки adapter остаются вне гарантии app cleanup.
+- Scope действует до завершения cleanup и выхода из lock; прежние signal handlers
+  восстанавливаются в finally, включая частичную ошибку регистрации. На Linux
+  ошибка регистрации не допускает startup/polling. Windows использует явно
+  проверяемый adapter либо synthetic controller в tests; тихий fallback,
+  объявленный Linux PASS, запрещён. Соседние event loops/процессы не затрагиваются.
+- Dispatcher вызывается с handle_signals=False: aiogram не второй signal owner.
+  Существующие polling timeout, close_bot_session=False и concurrency=8 сохраняются.
+  CLI/network-check/другие приложения не получают новую signal policy незаметно.
+- Первый stop синхронно фиксирует latch, закрывает handler admission, затем
+  инициирует один выход из startup/polling в существующий cleanup. Повторный stop
+  не отменяет owned cleanup и не является командой force kill. Direct coroutine
+  cancellation и runtime error по-прежнему приходят в тот же cleanup.
+- До каждого startup перехода и перед admission receipt/READY проверяется latch.
+  Решение о READY и его вызов выполняются в одном loop segment без await;
+  stop, обработанный раньше, побеждает. Если READY уже отправлен до stop,
+  действуют обычные STOPPING/drain. Ошибка notifier не пропускает cleanup.
+
+**A2. Factory dispatch и сохранение принятых операций.**
+
+Критический race: после запроса stop одной отмены startup waiter недостаточно —
+worker._open_resource уже мог быть поставлен в event loop. Поэтому нужен
+startup-only guard непосредственно перед submit factory в executor. Проверка
+latch и решение submit выполняются в одном loop segment без await: кто первым
+зафиксировал stop или dispatch, определяет исход. Сигнал, ещё ожидающий callback,
+не переобозначается задним числом как уже обработанный stop.
+
+| Состояние при stop | Требуемое поведение |
+| --- | --- |
+| До app resources / factory ещё не dispatched | Не создавать новые ресурсы/не submit factory; закрыть только уже созданное. Нет polling, admission success receipt или READY |
+| Factory dispatched, в том числе ещё не начала исполняться в потоке | Ждать factory и её штатный close в owner thread; не отменять executor future. Не переходить к recheck/polling/READY |
+| Recheck или промежуток перед polling/READY | Прекратить дальнейший startup, дождаться cleanup ресурса; для раннего stop не отправлять STOPPING как замену неотправленному READY |
+| Polling и accepted handlers | Закрыть admission, остановить polling/watchdog, дождаться handlers и их следующих jobs/send/record; затем worker close, session close, lock release |
+| Cleanup уже идёт | Повторный signal не вызывает второе закрытие, новый timer/retry или ранний release |
+| Runtime/cleanup error одновременно со stop | Сохранить ошибку/ошибки и не превратить их в успешную остановку; cancellation, вызванную owner, отличать от посторонней отмены |
+
+Нельзя вызывать worker.aclose непосредственно из signal callback в RUNNING:
+принятые handlers ещё имеют право enqueue последующие jobs, включая delivery
+record. Startup-only guard не распространяется на эти продолжения. Существующие
+queued-cancel и factory-after-close fixes остаются; stop не означает отменить
+всю принятую очередь. Lock удерживается до окончания cleanup, даже при ошибке.
+
+**A3. Пределы нагрузки: количество отдельно от времени.**
+
+| Область | Решение этого design | Что остаётся за gate |
+| --- | --- | --- |
+| Bot admission / FIFO | Сохранить H=8 accepted handlers, Q=8 outstanding jobs (running+queued), один submitted workflow job. После stop новых handlers 0; без retry overflow | Нет нового production env knob или изменения max_devices |
+| Продолжение accepted handler | Разрешены существующие последовательные jobs/send/record до terminal outcome, без новых detached mutation tasks | H и Q не ограничивают число всех последовательных шагов или их latency |
+| Reset/bulk | В signal fix не менять бизнес-семантику и не обрезать список. В synthetic acceptance использовать ровно 2 устройства для partial path; для queue case — 1 running + 7 queued | Production upper bound требует отдельного утверждённого cap и проверки полного набора ДО первого remote side effect. Unknown/overflow должен отклонять всю новую bulk operation, а не частично исполнять; enforcement пока отсутствует |
+| Telegram | Сохранить текущие пути и send→record; не добавлять resend, новые retry или сокращение request timeout | HTTP timeout не доказательство недоставки; число/размер payloads и sequence bound задаются для каждого будущего workload |
+| Другие writers | Локальные scenarios только с fake boundaries/temporary DB; ни один не запускает настоящие web/API/agent/CLI writers | Future production admission требует полной writer matrix, scope fence и target evidence из M4; bot lock их не заменяет |
+
+Для будущего production budget нужен конечный workload manifest: method allowlist,
+число handlers/объектов/последовательных шагов/bytes, known writer set, dependency/
+entrypoint binding и доказанные time bounds, включая setup/cleanup и scheduler/I/O.
+Верхняя оценка включает signal-to-loop, остаток startup, stop polling, принятый
+handler graph, worker/session/lock close и согласованный запас. Перекрывающиеся
+участки можно консервативно пересчитать, но нельзя пропустить следующий job/record.
+Любой недоказанный член сохраняет budget UNKNOWN; наблюдённый максимум одного
+теста не upper bound. Числа TimeoutStopSec, Uvicorn graceful timeout и запас
+этим design не назначаются. Изменение units/manager policy — отдельный scope.
+
+**A4. Terminal outcome и recovery при отсутствии доказательства.**
+
+| Наблюдение | Классификация | Следующее действие, не выполняемое этим design |
+| --- | --- | --- |
+| Все owned tasks terminal, close/session/lock завершены без ошибки | LOCAL_CLEANUP_COMPLETE; операции отдельно success/error/partial | Не называть автоматически remote rollback, successful delivery или target acceptance |
+| Stop до dispatch, отсутствие side effects доказано trace | NOT_STARTED для соответствующей операции | Не переносить этот вывод на ранее выполненные startup schema/seed writes |
+| Remote success + local failure либо send success + record failure | PARTIAL / MANUAL_REVIEW_REQUIRED, даже если cleanup завершился | Сохранить нормализованное evidence; без повторной mutation, выдачи/отправки или ложного rollback |
+| Deadline наблюдения истёк, thread/remote жив, процесс потерян/убит или cleanup failed | UNKNOWN либо явно подтверждённая ошибка; DRAIN_PASS отсутствует | Закрытый gate на повтор операции/activation/stage; отдельный readback/ownership/quiescence/reconciliation |
+| Процесс перезапустился | Сам restart не evidence чистого предыдущего завершения | Проверять предыдущий outcome и recovery gate; не выполнять автоматическое reconciliation/resend |
+
+Таймер наблюдения не переводит живой worker в terminal state. Design не добавляет
+durable outbox/incident journal, automatic restart latch, schema migration или
+автоматическую очистку. Убитый процесс может вообще не записать outcome:
+отсутствие receipt означает UNKNOWN. **Блокировка следующего исполнения здесь —
+правило operator gate, не уже реализованный запрет рестарта systemd.**
+До activation нужно отдельно доказать/выбрать enforced restart/fencing policy
+при UNKNOWN для всех writers. Пример Restart=on-failure такого доказательства
+не даёт; менять его сейчас или обещать, что A препятствует всем restarts, нельзя.
+Recovery contract v1 сохраняет раздельные inventory → quiescence → cleanup →
+readback approvals; rollback/DB restore без них не выполняются.
+
+**A5. Проверяемый будущий source scope и acceptance.**
+
+После утверждения design следующий source slice ограничивается signal adapter/
+StopController, app/main.py wiring, startup-only factory guard в worker и их
+tests/AMN2 CHANGELOG. Реализация может выделить helper app/bot/lifecycle.py.
+Facade/handlers/business services/SQLite schema, web/API/agent и units не меняются.
+Точные edits и тестовые команды — в последующем подчинённом implementation plan,
+главная очередь Phase16 остаётся одна. Сейчас никакие tests не запускаются.
+
+| Новый вопрос для будущего RED/GREEN | Конечный synthetic scenario / требуемый результат |
+| --- | --- |
+| Stop до loop и на admission | По одному stop на этих двух барьерах; отсутствие последующего factory/polling/READY, закрытие только созданных ресурсов |
+| Stop против dispatch factory | Две детерминированные очередности: stop-first даёт 0 factory submits; dispatch-first даёт 1 factory, 1 close на том же потоке после release |
+| Stop на recheck/READY boundary | По одному stop до recheck completion и до READY; нет success receipt/READY после latch. Отдельный ready-first case даёт один STOPPING |
+| Stop при mutation и send→record | По одному удержанному synthetic revoke и send/record; сохранить queued continuation и lock до terminal, без resend и повторной mutation |
+| Повторный stop и ошибки | Два stop во время drain; один close. Одновременная runtime/cleanup ошибка не теряется и не становится success |
+| Владелец OS signals | Fake registration/readback проверяет install до Settings, handle_signals=False, restore после cleanup и rollback частичной регистрации |
+| Linux signal boundary | Отдельный disposable subprocess с synthetic resources, signal только по exact child identity после barrier; SIGTERM и SIGINT по одному, проверка порядка startup stop/cleanup. Windows injection не заменяет этот результат |
+
+В source плане назначить конечные parent wall/output caps для каждого probe и
+гарантированное освобождение fake barriers в finally. Termination только зависшего
+synthetic child после cap — TEST_FAIL/UNKNOWN, не drain PASS. Никакого signal
+существующим службам, shell-wide kill или systemd stop. Если локальной Linux
+среды нет, результат NOT_RUN и Linux gate открыт; не устанавливать/скачивать
+среду или зависимости без отдельного scope. Target systemd/Telegram/VPS не нужны
+для synthetic source slice и не разрешаются его одобрением.
+
+**Граница утверждения.** Design A готов к review. Его одобрение разрешит
+подготовить один ограниченный implementation plan; исполнение source/tests
+согласуется по этому конкретному плану. После будущего A PASS можно закрыть
+только source signal ownership/races. Target M3, полный stop budget M4, bulk
+enforcement, restart/writer fence, M1/M2/M5/M6/M7 и Phase16 acceptance остаются
+открытыми. Прежние 33/312 и M3 68 PASS не повторять без нового code/question.
+
 ### 5. Stage, recovery и rollback
 
 Application-stage сохраняет snapshot/backup, но сам по себе не активирует
@@ -293,18 +444,19 @@ persistence, leaks и live recovery остаются NOT_EXECUTED в этом ga
 | M1 | Windows traffic PASS на обоснованном client/engine/hypothesis path; root-cause-bound quality correction, стабильное acceptance и полный strict A/B | Отложенные P0/P1 главного плана; только после возврата оператора и exact approval. Сейчас повтор не запрашивать |
 | M2 | Валидная DNS/прочая measurement coverage, endpoints и budgets критериев v1 | Отдельное решение по методике; DNS bridge STOP, tooling ради gate не создавать |
 | M3 | Fresh target deployed/source/state + Python/ABI/full dependencies и соответствие intended lock | Локальная Windows часть закрыта 21.09: exact pins/hashes, pip check, 68 PASS. Target/Linux evidence отсутствует; live readback требует exact approval, повтор local suite без новой причины не нужен |
-| M4 | Effective units/entrypoints, другие writers, конечный startup-cleanup/stop budget и recovery policy для UNKNOWN | Source-only карта и минимальный readback contract готовы 21.09; ранний SIGTERM/неограниченные участки требуют lifecycle решения. Target readback по exact approval; 30s не доказательство |
+| M4 | Effective units/entrypoints, другие writers, конечный startup-cleanup/stop budget и recovery policy для UNKNOWN | Source-only карта/readback contract готовы; lifecycle design A предложен 21.09, ещё не утверждён/реализован. Он не закрывает общий budget/writer/restart gates; target readback по exact approval |
 | M5 | Retained inventory, transaction ownership/quiescence, preservation/cleanup readback с исключениями v1 | Четыре раздельных recovery gates; metadata tools готовы локально, live authority отсутствует |
 | M6 | Future artifact source/tooling/dependency binding, identity/manifest; activation/revert contract и DB/remote preservation | Отдельный packaging/activation scope после dependencies; package016 сохранить, новый ID/hash/revert target не назначены |
 | M7 | Исполненные bounded startup/drain/coexistence/persistence/restart/leak/rollback checks на связанных artifact/target | Раздел 6 после prerequisites и exact approvals; 33/312 PASS не закрывают target acceptance. Synthetic dependency slice может отдельно предшествовать live gates |
 
 Локальный dependency-validation M3 и согласованный source-only M4 выполнены.
-Следующий предмет решения — **отдельный локальный lifecycle design** по раннему
-SIGTERM, workload bounds и terminal/recovery policy из [M4](#stop-budget-m4).
-После выбора решения нужны отдельные code/test scope и exact target-readback
-approval; сейчас не назначать stop seconds и не менять unit. Systemd simulation,
-новый code fix и live execution не выполнялись. iPhone/A/B остаются отложенными;
-deployment не разрешён.
+Подготовлен [lifecycle design A](#lifecycle-design-m4): один stop owner до startup,
+factory dispatch guard, сохранение accepted drain и явная UNKNOWN/recovery policy.
+Статус DESIGN_PROPOSED, без code/tests/units changes. Следующий предмет решения —
+review этого design для подготовки ограниченного source implementation plan;
+его исполнение и target readback требуют отдельных scopes/approvals.
+Stop seconds не назначены. Systemd simulation, новый code fix и live execution
+не выполнялись. iPhone/A/B остаются отложенными; deployment не разрешён.
 
 Для будущего исполнения approvals раздельны: bounded target inventory;
 recovery signals; адресная cleanup и снятие package-блокировки; новый package

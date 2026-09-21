@@ -169,9 +169,14 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    writers и минимальный future readback contract находятся в существующем
    design; target properties не получены, M4 не закрыт. Source/tests/locks/units
    неизменны, тесты не повторялись.
-   Следующее решение — отдельный локальный lifecycle design: ранний stop,
-   workload bounds и terminal/recovery policy. Code/tests/units, target readback
-   и Linux signal validation требуют отдельных scopes/approvals.
+   После следующего «приступаем» подготовлен [lifecycle design A](../specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#lifecycle-design-m4):
+   один stop owner до startup, factory-dispatch guard, принятый drain сохраняется;
+   H=8/Q=8 не становятся секундным SLA. PARTIAL/UNKNOWN требуют отдельного
+   recovery, operator gate не выдаётся за implemented restart fence.
+   DESIGN_PROPOSED / NOT_IMPLEMENTED. Следующее решение — review design A,
+   затем ограниченный source implementation plan; его исполнение, units,
+   target readback и Linux signal validation требуют своих scopes/approvals.
+   Документы проверены локально; source/tests/dependencies не менялись.
    Merge/build, target/Telegram и live execution не разрешены.
    Package016 не пересобирается.
 
