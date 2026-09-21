@@ -192,6 +192,10 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    WSL не установлен, registered distro отсутствует; Docker/Podman не найдены
    в PATH. Нужны название готовой локальной Linux-среды и Python/venv path;
    новая установка не разрешена текущим scope. Повторного pytest не было.
+   Позднее оператор согласовал [пересоздание приложения существующего нулевого бота](../specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#existing-bot-recreation-2026-09-21).
+   Историческая привязка — Spain/amn2-spain-bot.service; подтверждение целевого
+   экземпляра и fresh readback впереди. Выбран путь отдельного bot release с
+   сохранением общей DB/web/token/AWG2; Linux на АРМ не требуется. Deploy ещё не выполнен.
    Merge/build, target/Telegram и live execution не разрешены.
    Package016 не пересобирается.
 

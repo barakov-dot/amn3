@@ -7,6 +7,17 @@
 
 ## 2026-09-21
 
+- Оператор согласовал [пересоздание приложения существующего тестового бота](docs/superpowers/specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#existing-bot-recreation-2026-09-21).
+  По историческому Phase13 receipt установлена привязка Spain/amn2-spain-bot.service;
+  это не fresh target evidence. Подготовлен короткий маршрут: подтвердить instance,
+  bounded read-only inventory, отдельный bot release, Linux synthetic signals,
+  single-poller activation/restart и operator smoke. Общая DB/web/token/AWG2
+  сохраняются; «нулевой бот» не интерпретируется как разрешение удаления DB.
+  Source candidate 6e68235; исправлен устаревший абзац spec о якобы ожидающем
+  исполнения source plan. Проверки: local source/receipt readback, links/diff,
+  whitespace и CHANGELOG. SSH/Telegram/package/deploy/service/data changes нет;
+  текущий недостающий факт — подтверждение, что целевой бот именно Spain.
+
 - После «продолжай» проверена [доступность локальной Linux-среды](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#linux-environment-discovery-2026-09-21)
   для оставшегося lifecycle gate: WSL list exit=1 сообщает об отсутствии
   подсистемы, зарегистрированных distro нет, Docker/Podman в PATH отсутствуют.

@@ -373,12 +373,72 @@ synthetic child после cap — TEST_FAIL/UNKNOWN, не drain PASS. Ника�
 среду или зависимости без отдельного scope. Target systemd/Telegram/VPS не нужны
 для synthetic source slice и не разрешаются его одобрением.
 
-**Граница утверждения.** Design A утверждён; implementation plan подготовлен
-и ждёт review. Исполнение source/tests согласуется по этому конкретному плану,
-inline одним агентом, без новых dependencies или среды. После будущего A PASS можно закрыть
-только source signal ownership/races. Target M3, полный stop budget M4, bulk
+**Граница утверждения.** Design A и source implementation plan исполнены inline:
+AMN2 6e68235, 94 PASS/6 Linux SKIP. Локальный результат закрывает проверенные
+source ownership/races; actual Linux signals остаются NOT_RUN. Target M3, полный stop budget M4, bulk
 enforcement, restart/writer fence, M1/M2/M5/M6/M7 и Phase16 acceptance остаются
 открытыми. Прежние 33/312 и M3 68 PASS не повторять без нового code/question.
+
+<a id="existing-bot-recreation-2026-09-21"></a>
+
+#### Существующий тестовый бот: согласованное направление пересоздания — 2026-09-21
+
+Оператор сообщил, что бот «нулевой», предложил пересоздать его и согласился
+«хорошо, делаем как скажешь» на повторное развёртывание приложения с новым кодом,
+проверку запуска/остановки/restart и сохранение AWG2/VPN-профилей. Направление
+**EXISTING_BOT_REDEPLOY_AGREED / TARGET_CONFIRMATION_PENDING / NOT_EXECUTED**.
+Это относится к приложению существующего Telegram-бота; новая регистрация,
+смена token/identity и удаление общей БД не входят в выбранный вариант.
+
+[Финальный receipt Phase13](../../../research/amn2/phase13-bot-web-migration-final-acceptance-closeout-2026-08-09.md)
+и [operator smoke](../../../research/amn2/phase13-post-cutover-telegram-operator-smoke-2026-08-09.md)
+подтверждали 09.08 перенос на Spain, одного poller и работу меню. Исторический
+executor scripts/vps/phase13_bot_cutover_remote.py связывает службу
+amn2-spain-bot.service, source /opt/amn2-spain/runtime/source,
+DB /var/lib/amn2-spain/amn2.sqlite3, runtime /etc/amn2-spain/runtime.env и
+marker /etc/amn2-spain/bot-enabled. Это кандидаты для fresh readback, а не
+нынешний target PASS; старый cutover/GO не запускать. У оператора уточняется,
+имеется ли в виду именно этот Spain bot, поскольку прямой ответ о сервере
+ещё не получен. Адрес/SSH user/ключи/пины в документацию не копировать.
+
+**Короткий порядок работ, в существующей очереди Task 3B:**
+
+1. После подтверждения целевого экземпляра — только fresh read-only inventory
+   Spain: bot unit и связанный web unit, status/process identity, effective
+   start/stop/restart properties, нормализованный entrypoint, Python/ABI/pins,
+   source/dependency fingerprints. Один SSH-сеанс, 60s wall cap, 64KiB output,
+   без автоматического retry; unknown target/unit/trust/drift/cap означает STOP.
+   Readback не открывает .env/token, raw argv/journal или содержимое DB;
+   не вызывает Telegram API, systemctl stop/start/restart, pip либо remote writes.
+   Exact trust и имя web unit предварительно сверяются по существующему binding;
+   не подставлять example units и не расширять поиск на другие серверы.
+2. Кандидат приложения — immutable AMN2 6e682356ed14a62d636ee58039fd3a389e794809.
+   Общий source используется bot/web, поэтому заменить его вслепую нельзя:
+   определить фактический запуск и подготовить отдельный bot release/venv,
+   который не переключает web. Новый artifact и rollback target связываются
+   с реальным inventory; package016 сохраняется immutable.
+3. На Linux сначала synthetic child negative control и шесть signal cases в
+   отдельном процессе/fake SQLite, без настоящего Telegram poller. Это новый
+   server test scope, а не перенос старого local-only разрешения. Если нужны
+   зависимости, указать их точный lock/назначение; Linux на АРМ не требуется.
+4. Для пересоздания приложения составить exact-file/service switch и возврат к
+   прежнему bot release. Сохранить token/identity, общую authoritative DB,
+   web и AWG2/pilot/foreign resources. Слово «нулевой» описывает пользовательскую
+   оценку бота, не доказательство пустоты или принадлежности общей БД.
+   DB reset/restore, выдача, очистка ресурсов и удаление старого release не нужны.
+5. Перед единственным новым poller подтвердить завершение старого; затем
+   activation/readiness, ограниченные stop/start/restart проверки только bot.
+   Stop budget не брать из example unit и не объявлять доказанным заранее.
+   При UNKNOWN не запускать второй poller и не повторять mutation автоматически.
+6. После server readiness — один согласованный operator /start, ответ меню,
+   без выдачи VPN/создания peer; нормализованный итог и сохранность зависимостей.
+
+Fresh state, concrete artifact/checksums и rollback пока отсутствуют. Поэтому
+команду destructive reinstall или готовое checksum-bound /APPROVE сейчас
+не выдаём. Следующий недостающий факт — подтверждение Spain/указание иного
+целевого bot instance. После него конкретизируется read-only шаг 1, затем
+mutating gate по AGENTS; повторного согласования самой идеи пересоздания не нужно.
+94 PASS/6 SKIP остаются прежним локальным evidence; tests не повторялись.
 
 ### 5. Stage, recovery и rollback
 
