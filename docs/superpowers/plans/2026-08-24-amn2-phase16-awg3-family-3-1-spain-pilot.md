@@ -153,15 +153,19 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    restart policy, leaks и границ отката. Затем Task 5 и Task 6.
 
    Локальный reviewable gate подготовлен 20.09 в [существующем Phase16 design](../specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#integration-readiness-web-bot):
-   LOCAL_GATE_PREPARED / EXECUTION_BLOCKED / NOT_DEPLOYED.
+   LOCAL_DEPENDENCY_SLICE_PASS / INTEGRATION_EXECUTION_BLOCKED / NOT_DEPLOYED.
    Кандидат AMN2 1bd7f62d1fdd3829bc278110ecdc44d3568676a3; source/remote сверены.
-   Конкретные gaps: runtime lock aiogram 3.30.0 против tested 3.28.2;
-   stop budget не доказан (30s только в source unit example, target UNKNOWN).
+   21.09 после отдельного согласования выполнена локальная M3 validation:
+   aiogram 3.30.0, exact 48 test pins/40 runtime pins, hashes и pip check PASS;
+   68 worker/admission/drain tests PASS на Windows/Python 3.12.14.
+   [Receipt](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#dependency-validation-2026-09-21).
+   Target environment и stop budget остаются UNKNOWN (30s только в unit example).
    Source/dependency binding, startup/drain, recovery/activation/rollback,
    bounded acceptance и полный список M1–M7 находятся в этом контракте.
-   Следующий локальный gate — согласовать dependency-validation M3 на intended
-   lock. Подготовка завершена; новые среда/тесты/code/merge/build и live этим
-   не разрешены. Package016 не пересобирается.
+   Локальная часть M3 закрыта; source/tests/locks неизменны. Следующий предмет
+   решения — source-only разбор stop budget M4 и точный будущий readback scope.
+   Новые code/unit changes, merge/build, target/Telegram и live execution
+   этим не разрешены. Package016 не пересобирается.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

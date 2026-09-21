@@ -1,0 +1,273 @@
+{
+  "schema": "phase16-local-dependency-validation-v1",
+  "recorded_at": "2026-09-21T07:04:36+03:00",
+  "approval": "Operator: согласовываю, продолжай; 2026-09-21, after local M3 validation proposal",
+  "status": "LOCAL_DEPENDENCY_SLICE_PASS_NOT_TARGET_ACCEPTANCE",
+  "environment": {
+    "python": "3.12.14",
+    "source_sha": "1bd7f62d1fdd3829bc278110ecdc44d3568676a3",
+    "aiogram": "3.30.0",
+    "runtime_pins": 40,
+    "test_pins": 48,
+    "isolated": true,
+    "locks": {
+      "phase15-runtime-py312.lock": "a381be185b19777b9198526e11df8dcfa0afaf7f15acccd829809e698d679fab",
+      "phase15-test-py312.lock": "52967d6e2babc5d05b60615c9a9c950a4541436f7a521dfee49d62b98264a235"
+    },
+    "artifacts": {
+      "aiofiles": {
+        "version": "25.1.0",
+        "wheel_sha256": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695"
+      },
+      "aiogram": {
+        "version": "3.30.0",
+        "wheel_sha256": "98c22665271912d258178cec591f78ee93a085a3423dd3b2e11c2851d4552470"
+      },
+      "aiohappyeyeballs": {
+        "version": "2.7.1",
+        "wheel_sha256": "9243213661e29250eb41368e5daa826fc017156c3b8a11440826b2e3ed376472"
+      },
+      "aiohttp": {
+        "version": "3.14.3",
+        "wheel_sha256": "33a2d7c28d33797a2e99923dffa63f83d908a19b6bf26cfe80fa790aa5e1a75a"
+      },
+      "aiohttp-socks": {
+        "version": "0.12.0",
+        "wheel_sha256": "ba6f95ec775c761d87f8578ab48f137d0457c676da104984202bf75e747d5ee6"
+      },
+      "aiosignal": {
+        "version": "1.4.0",
+        "wheel_sha256": "053243f8b92b990551949e63930a839ff0cf0b0ebbe0597b0f3fb19e1a0fe82e"
+      },
+      "annotated-doc": {
+        "version": "0.0.5",
+        "wheel_sha256": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101"
+      },
+      "annotated-types": {
+        "version": "0.8.0",
+        "wheel_sha256": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0"
+      },
+      "anyio": {
+        "version": "4.14.2",
+        "wheel_sha256": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494"
+      },
+      "attrs": {
+        "version": "26.1.0",
+        "wheel_sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309"
+      },
+      "certifi": {
+        "version": "2026.7.22",
+        "wheel_sha256": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775"
+      },
+      "cffi": {
+        "version": "2.1.1",
+        "wheel_sha256": "f53e442b08449d42821fa4a4fba000095af9f62742a500f978a9f557ec44339a"
+      },
+      "click": {
+        "version": "8.4.2",
+        "wheel_sha256": "e6f9f66136c816745b9d65817da91d61d957fb16e02e4dcd0552553c5a197b76"
+      },
+      "colorama": {
+        "version": "0.4.6",
+        "wheel_sha256": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"
+      },
+      "cryptography": {
+        "version": "45.0.7",
+        "wheel_sha256": "3808e6b2e5f0b46d981c24d79648e5c25c35e59902ea4391a0dcb3e667bf7443"
+      },
+      "fastapi": {
+        "version": "0.141.1",
+        "wheel_sha256": "bfb91aa2d334c61cb35ba9a116fc123b3d3df31640b801cf57a7a78ec3f603b3"
+      },
+      "frozenlist": {
+        "version": "1.8.0",
+        "wheel_sha256": "34187385b08f866104f0c0617404c8eb08165ab1272e884abc89c112e9c00746"
+      },
+      "h11": {
+        "version": "0.16.0",
+        "wheel_sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"
+      },
+      "httpcore2": {
+        "version": "2.10.0",
+        "wheel_sha256": "7df06cfb34070cae4f7c89be69dc1095eca138e9704ceffb98d25c1912ab6f01"
+      },
+      "httpx2": {
+        "version": "2.10.0",
+        "wheel_sha256": "5e3194a432701e1cc6f69a8b1b2fa199ef907013fede8d9a09a2c5b7b8141a18"
+      },
+      "idna": {
+        "version": "3.18",
+        "wheel_sha256": "7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de849a2"
+      },
+      "iniconfig": {
+        "version": "2.3.0",
+        "wheel_sha256": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12"
+      },
+      "itsdangerous": {
+        "version": "2.2.0",
+        "wheel_sha256": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef"
+      },
+      "jinja2": {
+        "version": "3.1.6",
+        "wheel_sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"
+      },
+      "magic-filter": {
+        "version": "1.0.12",
+        "wheel_sha256": "e5929e544f310c2b1f154318db8c5cdf544dd658efa998172acd2e4ba0f6c6a6"
+      },
+      "markupsafe": {
+        "version": "3.0.3",
+        "wheel_sha256": "26a5784ded40c9e318cfc2bdb30fe164bdb8665ded9cd64d500a34fb42067b1c"
+      },
+      "multidict": {
+        "version": "6.7.1",
+        "wheel_sha256": "fcee94dfbd638784645b066074b338bc9cc155d4b4bffa4adce1615c5a426c19"
+      },
+      "packaging": {
+        "version": "26.3",
+        "wheel_sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c"
+      },
+      "pillow": {
+        "version": "12.3.0",
+        "wheel_sha256": "a2b55dd6b2a4c4b7d87ffa56bdb33fdc5fdb9a462173861a7bc097f17d91cb09"
+      },
+      "pluggy": {
+        "version": "1.6.0",
+        "wheel_sha256": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746"
+      },
+      "propcache": {
+        "version": "0.5.2",
+        "wheel_sha256": "d9ee8826a7d47863a08ac44e1a5f611a462eefc3a194b492da242128bec75b42"
+      },
+      "pycparser": {
+        "version": "3.0",
+        "wheel_sha256": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992"
+      },
+      "pydantic": {
+        "version": "2.13.4",
+        "wheel_sha256": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba"
+      },
+      "pydantic-core": {
+        "version": "2.46.4",
+        "wheel_sha256": "e9c26f834c65f5752f3f06cb08cb86a913ceb7274d0db6e267808a708b46bc89"
+      },
+      "pydantic-settings": {
+        "version": "2.15.0",
+        "wheel_sha256": "0ba092c291c94baceb5eff768aa0d56400a457585bc0175925a5a5510303da42"
+      },
+      "pygments": {
+        "version": "2.20.0",
+        "wheel_sha256": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176"
+      },
+      "pytest": {
+        "version": "8.4.2",
+        "wheel_sha256": "872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79"
+      },
+      "python-dotenv": {
+        "version": "1.2.2",
+        "wheel_sha256": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a"
+      },
+      "python-multipart": {
+        "version": "0.0.32",
+        "wheel_sha256": "ff6d3f776f16878c894e52e107296ffc890e913c611b1a4ec6c44e2821fe2e23"
+      },
+      "python-socks": {
+        "version": "3.0.0",
+        "wheel_sha256": "e06a421d4d7f3fc17ef2740ab6c291640364f6a362b94a1ae87a136c29bd0067"
+      },
+      "pyyaml": {
+        "version": "6.0.3",
+        "wheel_sha256": "5fcd34e47f6e0b794d17de1b4ff496c00986e1c83f7ab2fb8fcfe9616ff7477b"
+      },
+      "qrcode": {
+        "version": "8.2",
+        "wheel_sha256": "16e64e0716c14960108e85d853062c9e8bba5ca8252c0b4d0231b9df4060ff4f"
+      },
+      "starlette": {
+        "version": "1.6.0",
+        "wheel_sha256": "a86dd39d14bb45f85a3d18525215a9ef0cfd1f192ac793220e72598c90335f0c"
+      },
+      "truststore": {
+        "version": "0.10.4",
+        "wheel_sha256": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981"
+      },
+      "typing-extensions": {
+        "version": "4.16.0",
+        "wheel_sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+      },
+      "typing-inspection": {
+        "version": "0.4.4",
+        "wheel_sha256": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"
+      },
+      "uvicorn": {
+        "version": "0.52.3",
+        "wheel_sha256": "116af2710dbf47c80f463cd20ee4884b6662f4c9f227d797ddc7279d2fcc2c7c"
+      },
+      "yarl": {
+        "version": "1.24.5",
+        "wheel_sha256": "a929d878fec099030c292803b31e5d5540a7b6a31e6a3cc76cb4685fc2a2f51b"
+      }
+    },
+    "bootstrap_pip": "25.0.1"
+  },
+  "platform": {
+    "os": "Windows 11",
+    "version": "10.0.26200",
+    "architecture": "AMD64",
+    "linux_validation": false
+  },
+  "install": {
+    "index": "https://pypi.org/simple",
+    "require_hashes": true,
+    "binary_only": true,
+    "cache_used": false,
+    "retries": 0,
+    "per_request_timeout_seconds": 15,
+    "wall_limit_seconds": 300,
+    "exit_code": 0,
+    "elapsed_seconds": 30.88,
+    "pip_check": "PASS",
+    "system_site_packages": false
+  },
+  "validation": {
+    "exit_code": 0,
+    "elapsed_seconds": 9.17,
+    "wall_limit_seconds": 180,
+    "source_sha": "1bd7f62d1fdd3829bc278110ecdc44d3568676a3",
+    "test_files": [
+      "tests/bot/test_workflow_worker.py",
+      "tests/bot/test_async_workflow.py",
+      "tests/bot/test_handler_lifetime.py",
+      "tests/bot/test_persistent_runtime.py",
+      "tests/bot/test_app_bootstrap.py",
+      "tests/bot/test_bot_runtime_worker.py"
+    ],
+    "plugin_autoload": false,
+    "dependency_PYTHONPATH": false,
+    "tests": 68,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "pytest_seconds": 8.27,
+    "warnings_reported": 0,
+    "network_boundaries": "existing fake Telegram/peer adapters; no live requests"
+  },
+  "evidence_sha256": {
+    "environment-evidence.json": "0f241c703709ed0e8f9673b2563947a564d239b222b65575b3180b3d1f345f8f",
+    "install-report.json": "75cd910fb7b50cd01287700f643cfe55e82226d44731556653801efd5e5f8e15",
+    "install-output.txt": "649bb394067f71812495761b9f945f078b1ef9f1203ee0fab24f6ad85bba36d9",
+    "test-output.txt": "c1d907004fbf20a01446012cdbbc35c9dcbd783c2da6eba00b216a01a81fb829",
+    "tests.xml": "955a36d24acb5537c20a3aec0e02d9eb4a9d866f3b9d4c817f6afc7aaae432ea",
+    "test-run-summary.json": "46da300d5ed3fcf7714384a67b272ce06311ac1672e621848df0ceeacf88ec64"
+  },
+  "retained_local_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-dependency-validation-20260921-1bd7f62",
+  "limits": [
+    "AMN2 source/tests/locks unchanged",
+    "no full 312-test rerun",
+    "no web health retest",
+    "target Python/dependencies/deployed SHA UNKNOWN",
+    "systemd/stop budget unverified",
+    "no SSH/VPS/Telegram API/package/stage/install/deploy/cleanup",
+    "AWG2_UNTOUCHED; package016 immutable; general issuance disabled"
+  ]
+}

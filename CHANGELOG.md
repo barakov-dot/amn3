@@ -5,6 +5,20 @@
 записи не означают deployment или новую выдачу. Текущая очередь — в
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
+## 2026-09-21
+
+- После «согласовываю, продолжай» выполнена [локальная dependency-validation M3](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#dependency-validation-2026-09-21)
+  кандидата AMN2 1bd7f62: отдельная Windows/Python 3.12.14 venv, неизменённый
+  test lock с aiogram 3.30.0. Exact 48 test pins, включая 40 runtime pins,
+  wheel hashes и pip check PASS; один existing worker/admission/drain набор:
+  68 PASS за 8.27s, без warnings. [Полный нормализованный binding](research/amn2/phase16-web-bot-dependency-validation-2026-09-21.json).
+  Contract/main plan обновлены: локальный lifecycle gap закрыт, target M3 и
+  stop budget M4 остаются UNKNOWN. Проверены source/lock readback, ссылки,
+  diff/whitespace и added-line secrets; scratch venv/evidence сохранены вне Git.
+  Source/tests/locks/units/package016 и глобальная среда не менялись; полный
+  312 suite не повторялся. Нет SSH/VPS/Telegram API, stage/install/deploy,
+  выдачи или cleanup. AWG2 и все Phase16 prerequisites сохранены.
+
 ## 2026-09-20
 
 - Подготовлен [integration-readiness gate web+bot в существующем Phase16 design](docs/superpowers/specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#integration-readiness-web-bot),

@@ -31,11 +31,15 @@ readback и не разрешают повторять completed/consumed опе
 
 ## Task 3B: integration-readiness web + bot — локальная подготовка 2026-09-20
 
-Статус: **LOCAL_GATE_PREPARED / EXECUTION_BLOCKED / NOT_DEPLOYED**.
+Статус: **LOCAL_DEPENDENCY_SLICE_PASS / INTEGRATION_EXECUTION_BLOCKED / NOT_DEPLOYED**.
 Это уточнение существующего integration-контракта, не новый execution plan
 и не approval на исполнение или runtime-настройки. Подготовка разрешена командой
 раздела 1 [handoff](../../NEXT_CHAT_PHASE16_2026-09-20.ru.md).
 Очередь остаётся в главном плане; исторические команды ниже не возобновляются.
+21.09 оператор согласовал следующий локальный M3 scope ответом «согласовываю,
+продолжай»: отдельная среда с неизменённым lock и ограниченные existing tests.
+Он выполнен; [receipt и границы](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#dependency-validation-2026-09-21).
+Target inventory, source fix, merge/build и live-действия этим не разрешены.
 
 ### 1. Source и имеющееся evidence
 
@@ -74,14 +78,16 @@ merge, package build и перенос файлов этим gate не разр�
 | [Runtime lock](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/requirements/phase15-runtime-py312.lock) | aiogram==3.30.0; SHA256 файла a381be185b19777b9198526e11df8dcfa0faf7f15acccd829809e698d679fab |
 | [Test lock](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/requirements/phase15-test-py312.lock) | SHA256 файла 52967d6e2babc5d05b60615c9a9c950a4541436f7a521dfee49d62b98264a235 |
 | Выполненные bot tests по receipt | Python 3.12.14 / aiogram 3.28.2, существующий .codex_deps; не установка из candidate runtime lock |
+| Локальный M3, 21.09 | Изолированная Windows AMD64 / Python 3.12.14 / aiogram 3.30.0; 48 test pins включают все 40 runtime pins; hashes wheels и pip check PASS; 68 lifecycle tests PASS |
 | Target environment | Python patch/build, platform/ABI, aiogram/transitive versions, фактический lock/artifacts и deployed source UNKNOWN |
 
-**Dependency gap:** 312 PASS с 3.28.2 нельзя переносить на pinned 3.30.0.
-Это несовпадение проверенных environments, не доказанный дефект 3.30.0.
-Не обновлять и не понижать dependencies автоматически. До deployment выбрать
-intended dependency set, связать полный lock/artifact hashes с target и отдельно
-проверить затронутый lifecycle в выбранной среде. Новая среда — конкретное
-основание для bounded validation, не повод повторить 312 тестов с прежними deps.
+312 прежних PASS с 3.28.2 не переобозначаются как результат 3.30.0.
+Локальный пробел lifecycle на pinned dependencies закрыт новым отдельным набором:
+**68 PASS на неизменённом test/runtime lock**, без общего повторного suite.
+[Нормализованный binding всех wheels и проверки](../../../research/amn2/phase16-web-bot-dependency-validation-2026-09-21.json).
+Это Windows evidence, не Linux/target acceptance. M3 остаётся частично открытым:
+нужны фактическая target среда, её соответствие intended lock и отдельная оценка
+platform-specific разницы. Source/dependency locks и глобальная среда не изменялись.
 
 Нужен нормализованный target receipt: checked_at, target identity, deployed
 source, Python/platform/ABI, полный dependency binding, entrypoints и effective
@@ -174,7 +180,7 @@ readback, с отдельными exact approvals. Нужны transaction/resour
 не заменяют live evidence. Автоматический cleanup, Docker prune, снятие
 package-блокировки и DB restore сейчас не разрешены.
 
-### 6. Будущие bounded acceptance checks — NOT_EXECUTED
+### 6. Локальные проверки и будущие bounded acceptance checks
 
 Input каждого сценария: candidate/source и dependency binding; для target —
 exact state/transaction; fixture либо разрешённая identity, side-effect allowlist,
@@ -196,8 +202,11 @@ live partial failure/kill намеренно не вызывать.
 Общий STOP: mismatch source/deps/state, неизвестный владелец, потеря доступа/
 контроля, достижение любого cap, неожиданный side effect или выход за allowlist.
 Без retries, продления окна и автоматического kill/cleanup.
-Валидный FAIL сохраняется при других UNKNOWN; прежние 33/312 PASS остаются
-локальным evidence, а все сценарии этого gate сейчас NOT_EXECUTED.
+Валидный FAIL сохраняется при других UNKNOWN. Прежние 33/312 PASS остаются
+локальным evidence. 21.09 existing worker/facade/lifetime/admission/bootstrap tests
+покрыли локальную часть первых трёх строк: 68 PASS на новом dependency set.
+Это не доказательство systemd stop budget. Web+bot coexistence, target activation/
+persistence, leaks и live recovery остаются NOT_EXECUTED в этом gate.
 
 ### 7. Ровно недостающие evidence и следующий шаг
 
@@ -205,17 +214,19 @@ live partial failure/kill намеренно не вызывать.
 | --- | --- | --- |
 | M1 | Windows traffic PASS на обоснованном client/engine/hypothesis path; root-cause-bound quality correction, стабильное acceptance и полный strict A/B | Отложенные P0/P1 главного плана; только после возврата оператора и exact approval. Сейчас повтор не запрашивать |
 | M2 | Валидная DNS/прочая measurement coverage, endpoints и budgets критериев v1 | Отдельное решение по методике; DNS bridge STOP, tooling ради gate не создавать |
-| M3 | Fresh target deployed/source/state + Python/ABI/full dependencies, intended lock и lifecycle evidence на нём | Сначала локальное согласование dependency-validation scope для 3.28.2/3.30.0; target readback отдельно. Сейчас только документы; установки/новые тесты не разрешены |
+| M3 | Fresh target deployed/source/state + Python/ABI/full dependencies и соответствие intended lock | Локальная Windows часть закрыта 21.09: exact pins/hashes, pip check, 68 PASS. Target/Linux evidence отсутствует; live readback требует exact approval, повтор local suite без новой причины не нужен |
 | M4 | Effective bot/web units, другие writers, конечный startup-cleanup/stop budget и recovery policy для UNKNOWN | Readback по exact approval и согласованное решение до deployment; 30s из примера не доказательство |
 | M5 | Retained inventory, transaction ownership/quiescence, preservation/cleanup readback с исключениями v1 | Четыре раздельных recovery gates; metadata tools готовы локально, live authority отсутствует |
 | M6 | Future artifact source/tooling/dependency binding, identity/manifest; activation/revert contract и DB/remote preservation | Отдельный packaging/activation scope после dependencies; package016 сохранить, новый ID/hash/revert target не назначены |
 | M7 | Исполненные bounded startup/drain/coexistence/persistence/restart/leak/rollback checks на связанных artifact/target | Раздел 6 после prerequisites и exact approvals; 33/312 PASS не закрывают target acceptance. Synthetic dependency slice может отдельно предшествовать live gates |
 
-Следующий допустимый шаг — рассмотреть только **локальный dependency-validation
-scope M3**: кандидат 1bd7f62, intended runtime lock и worker/admission/drain
-в согласованной среде. До отдельного разрешения не создавать среду, не менять
-lock, не устанавливать dependencies и не запускать новый набор.
-Это предмет решения, не возобновление iPhone/A/B и не переход к deployment.
+Локальный dependency-validation M3 выполнен после отдельного согласования.
+Следующий предмет решения — **локальный source-only разбор stop budget M4**:
+перечень ограниченных/неограниченных участков startup/drain и других writers,
+затем минимальный список effective target properties для будущего approval.
+Не подбирать секунды и не менять unit. Сам target readback, systemd simulation,
+новый code fix и live execution не входят в выполненную dependency-validation.
+iPhone/A/B остаются отложенными; deployment не разрешён.
 
 Для будущего исполнения approvals раздельны: bounded target inventory;
 recovery signals; адресная cleanup и снятие package-блокировки; новый package
@@ -224,9 +235,11 @@ interaction; restart/leak acceptance. В каждом нужны конкрет�
 лимиты и stop-condition. Готовую /APPROVE с UNKNOWN полями не выдавать;
 согласование этого текста не заменяет разрешения.
 
-Проверка дополнения: local source/Git readback, SHA256 locks, ссылки, scope,
-diff/whitespace и added-line secret scan. Runtime/pytest, package materialization,
-SSH/VPS/Telegram API, restart/install/deploy не выполняются.
+Проверка первоначального дополнения 20.09 была docs-only. После отдельного
+согласования 21.09 выполнены isolated dependency install и 68 synthetic tests;
+source/locks неизменны. Документы проверяются readback/ссылками/diff/whitespace
+и added-line secret scan. Package materialization, SSH/VPS/Telegram API,
+restart/install/deploy не выполнялись.
 AWG2_UNTOUCHED; package016 immutable; general issuance disabled.
 
 ## Историческая ревизия — PACKAGE 016, 2026-08-27

@@ -309,3 +309,72 @@ claims; отдельный deployment gate обязан проверить stop 
 (интеграция остаётся отдельным решением).
 Далее — отдельный integration gate с текущими Phase16 ограничениями,
 AWG2_UNTOUCHED; package016 immutable; general AWG3 issuance disabled.
+
+
+<a id="dependency-validation-2026-09-21"></a>
+
+## Dependency validation M3 — 2026-09-21
+
+Статус: **LOCAL_DEPENDENCY_SLICE_PASS_NOT_TARGET_ACCEPTANCE**.
+Approval: оператор ответил «согласовываю, продолжай» после предложения локальной
+проверки кандидата с выбранным dependency lock. Scope: отдельная venv, установка
+hash-bound dependencies, один existing worker/admission/drain набор. Исходники,
+tests, lock-файлы, units, package016 и глобальные зависимости не менялись.
+
+Source AMN2: 1bd7f62d1fdd3829bc278110ecdc44d3568676a3, чистый до/после.
+AMN3 entry baseline: 35099d976fb1c9e23c1adb6c834e62a3e58dfe87.
+Среда: Windows 11 10.0.26200 AMD64, CPython 3.12.14.
+Выбран неизменённый requirements/phase15-test-py312.lock; все его 48 pins
+включают exact 40 pins runtime lock. Hashes обоих lock-файлов совпали с gate.
+[Нормализованный evidence: все версии/wheel SHA256, locks, run и hashes результатов](phase16-web-bot-dependency-validation-2026-09-21.json).
+
+Изолированный каталог (сохранён, автоматически не очищен):
+C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-dependency-validation-20260921-1bd7f62.
+Он игнорируется основным AMN3 checkout. include-system-site-packages=false;
+aiogram/pytest и все 48 dependencies загружены из его venv. Нет зависимости
+от прежнего .codex_deps/PYTHONPATH. Bootstrap pip 25.0.1 — единственный пакет
+venv вне test lock; он не является runtime dependency приложения.
+
+Установка: только https://pypi.org/simple, все wheel URLs files.pythonhosted.org;
+require-hashes, only-binary=:all:, no-cache-dir, retries=0, request timeout 15s,
+общий предел 300s. Pip config отключён через PIP_CONFIG_FILE=os.devnull,
+унаследованные PIP_* и PYTHONPATH/PYTHONHOME исключены. Exit 0 за 30.88s.
+Независимая сверка install-report: имя/version/hash каждого wheel соответствует
+lock; runtime pins — точное подмножество test pins. pip check:
+No broken requirements found. Глобальные env/config/dependencies не менялись.
+
+Один runtime-прогон, только существующие файлы:
+
+| Файл AMN2 | Проверяемая граница |
+| --- | --- |
+| tests/bot/test_workflow_worker.py | SQLite ownership, FIFO/capacity/context, cancellation races, factory/close |
+| tests/bot/test_async_workflow.py | Материализация данных, auth recheck, remote/local partial outcome |
+| tests/bot/test_handler_lifetime.py | Accepted handlers, ticket/лимит, drain, repeated cancellation и safe replies |
+| tests/bot/test_persistent_runtime.py | Identity/webhook/backlog admission, recheck, timeout и instance lock |
+| tests/bot/test_app_bootstrap.py | Factory cleanup, injection и persistent startup/readiness/watchdog |
+| tests/bot/test_bot_runtime_worker.py | Busy revoke/queued reset, send→record drain, runtime failure cleanup |
+
+Запуск venv Python с -I -B; в sys.path добавлен только exact source checkout.
+pytest: -q --tb=short --maxfail=1 -p no:cacheprovider; новый отдельный basetemp,
+JUnit вне Git; PYTEST_DISABLE_PLUGIN_AUTOLOAD=1. Окружение дочернего процесса
+ограничено системными launch/temp переменными и тестовыми флагами, VPS_APPLY_ENABLED=false.
+Предел всего процесса 180s, первая ошибка останавливает набор.
+Существующие fake Telegram/peer adapters и temporary SQLite; VPS/Telegram API
+и реальные configs не используются. Процесс выполнялся в штатном sandbox.
+
+**Результат: 68 passed in 8.27s**, exit 0; wall time 9.17s.
+JUnit подтвердил 68 tests, 0 failures/errors/skipped; warnings не сообщались.
+Повторных прогонов не было. Это проверка нового dependency environment, не
+повтор прежнего 312-набора, не новый RED/GREEN fix и не полный web/bot acceptance.
+
+Локальный lifecycle gap aiogram 3.28.2 → pinned 3.30.0 закрыт в этом scope.
+Target Python/dependencies/deployed SHA, Linux execution, effective systemd
+properties и конечный stop budget остаются UNKNOWN. Новый совместный web+bot,
+persistence/leak/recovery acceptance не выполнялся. M3 целиком не закрыт,
+Task 3B/5/6 не приняты. [Gate и M1–M7](../../docs/superpowers/specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#integration-readiness-web-bot)
+и [главный план](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md)
+обновлены; следующий предмет решения — локальный source-only stop-budget M4.
+
+Прежние Windows traffic/quality FAIL, DNS bridge STOP и отложенные iPhone/A/B
+сохранены. AWG2_UNTOUCHED; package016 immutable; general issuance disabled.
+Нет SSH/VPS/реальной выдачи, stage/install/deploy, cleanup, source fix или merge.
