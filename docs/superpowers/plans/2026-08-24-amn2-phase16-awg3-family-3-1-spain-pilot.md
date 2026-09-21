@@ -193,10 +193,12 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    в PATH. Нужны название готовой локальной Linux-среды и Python/venv path;
    новая установка не разрешена текущим scope. Повторного pytest не было.
    Позднее оператор согласовал [пересоздание приложения существующего нулевого бота](../specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#existing-bot-recreation-2026-09-21).
-   Историческая привязка — Spain/amn2-spain-bot.service; подтверждение целевого
-   экземпляра и fresh readback впереди. Выбран путь отдельного bot release с
+   Spain/amn2-spain-bot.service подтверждён оператором; [первый readback PARTIAL](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#spain-bot-target-readback-2026-09-21):
+   bot/web active, bot Restart=no и TimeoutStop=90s. Collector остановлен из-за
+   неверного ожидания web entrypoint; source/Python/pins UNKNOWN. Исправленный
+   v2 подготовлен, дополнительный read-only SSH ожидает решения оператора. Выбран путь отдельного bot release с
    сохранением общей DB/web/token/AWG2; Linux на АРМ не требуется. Deploy ещё не выполнен.
-   Merge/build, target/Telegram и live execution не разрешены.
+   Текущее read-only разрешение не включает merge/build, Telegram или live mutation.
    Package016 не пересобирается.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)

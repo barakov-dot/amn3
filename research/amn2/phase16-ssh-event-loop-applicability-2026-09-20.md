@@ -659,3 +659,70 @@ SHA256: 91d4a1b25fbf708e1199dd2bc1b7bf07fe07a22463c2516a0a2da6a0666c6f6a.
 M3 target/M4 budget/writer/restart fence и Phase16 acceptance остаются открыты.
 AWG2_UNTOUCHED, package016 immutable, general issuance disabled;
 stage/install/deploy/cleanup не выполнялись, Windows/quality FAIL и DNS STOP сохранены.
+
+
+<a id="spain-bot-target-readback-2026-09-21"></a>
+
+## Существующий Spain bot: target подтверждён, первый readback PARTIAL — 2026-09-21
+
+Оператор ответил «подтверждаю» на уточнение Spain/amn2-spain-bot.service и
+представленный следующий read-only шаг. Подготовка пересоздания продолжается;
+само переключение приложения, DB/service/Telegram mutation не выполнялись.
+AMN2 source по-прежнему 6e682356ed14a62d636ee58039fd3a389e794809, чистый.
+
+Проверены существующие Spain trust binding, no-follow/ACL и host pin через
+load_fixed_role_binding; значения target/user/key/pin не выводились.
+Системный C:/Windows/System32/OpenSSH/ssh.exe имеет Authenticode Status=Valid.
+Затем выполнен **один** SSH-сеанс: strict host key, batch mode, connect 10s,
+one attempt, общий wall cap 60s/output 64KiB; remote собственный deadline 45s.
+Python работал с -I -B, без app import, EnvironmentFile, DB, journals, Telegram,
+service action, установки или записи файлов на сервере. Старые executors/GO
+не запускались; из проверенного helper использованы только trust и bounded I/O.
+
+[Нормализованный JSON](phase16-spain-bot-readonly-2026-09-21.json) содержит
+actual properties и fingerprints. checked_at remote: 2026-09-21T16:26:59.966385+00:00.
+Часы remote/local расходятся; duration не вычислять вычитанием этих timestamps.
+
+| Свойство | Bot | Web |
+| --- | --- | --- |
+| Unit | amn2-spain-bot.service | amn2-spain-web.service |
+| State | loaded / active / running | loaded / active / running |
+| Type | notify | simple |
+| Restart / NRestarts | no / 0 | on-failure / 0 |
+| TimeoutStart / TimeoutStop | 40s / 90s | 90s / 90s |
+| KillMode / KillSignal / FinalKillSignal | control-group / 15 / 9 | control-group / 15 / 9 |
+| SendSIGKILL / Watchdog | yes / 0 | yes / 0 |
+| Drop-ins | 0 | 0 |
+| WorkingDirectory | expected shared /opt/amn2-spain/runtime/source | тот же |
+
+Это снимок свойств, не stability/health/single-poller или successful-drain PASS.
+90s — установленное ожидание manager, не доказанный верхний предел accepted work.
+В отличие от source example у фактического bot Restart=no и TimeoutStop=90s;
+настройки не менялись. Другие writers, DB emptiness и AWG equality не проверялись.
+
+**Почему STOP:** одноразовый collector ошибочно ожидал web `-m app.web`.
+При несовпадении он штатно остановился до source fingerprints/Python metadata:
+STOP_ENTRYPOINT_OR_DROPIN_UNKNOWN. Это дефект допущения collector, не доказанный
+серверный дефект. Последующий локальный разбор нашёл Spain web unit с запуском
+`/usr/bin/python3 -B -m app.cli web serve --host 127.0.0.1 --port 3031`.
+LF-normalized bytes сохранённых Phase12 bot/web units имеют ровно те SHA256,
+которые получены на сервере; package файлы не менялись. Это доказывает совпадение
+unit bytes, но не подменяет ещё не собранный source/dependency binding.
+
+Исправленный отдельный collector v2 подготовлен локально: правильный web
+entrypoint, проверка unit hashes против первого снимка, systemd version,
+пять allowlisted source/lock hashes и 48 публичных distribution metadata versions.
+Он не импортирует application и не читает protected runtime/environment/DB.
+Metadata относятся к isolated system interpreter; без service environment они
+не доказывают полную эквивалентность sys.path/dependencies рабочего процесса.
+Syntax/readback PASS; v2 **НЕ ИСПОЛНЕН**, автоматического повторного SSH нет.
+Probe SHA256: ddccba65df992c389a2399d1fd8f2919ef4ef9eea526e9b387b92973d04fc236.
+Scratch: C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-lifecycle-validation-20260921;
+spain_bot_readonly_probe_v2.py, run_spain_bot_readonly_v2.py. Первый claim/result
+сохранены отдельно, новый runner имеет собственный create-new single-attempt claim.
+Оператору предложен ровно один дополнительный read-only сеанс с теми же caps,
+чтобы завершить пропущенный binding; ответ пока ожидается. Никакого deploy GO.
+
+Прежние 94 PASS/6 SKIP не повторялись. Linux signals по-прежнему NOT_RUN.
+AWG2_UNTOUCHED по области действий, package016 immutable, general issuance disabled;
+нет stage/install/deploy/cleanup, DB reset, выдачи или live signal службам.

@@ -7,6 +7,18 @@
 
 ## 2026-09-21
 
+- После подтверждения Spain выполнен [один bounded read-only bot/web snapshot](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#spain-bot-target-readback-2026-09-21)
+  с проверенным SSH trust, 60s/64KiB. Bot/web active; bot Restart=no,
+  TimeoutStart=40s, TimeoutStop=90s; это properties, не доказанный stop budget.
+  [JSON evidence](research/amn2/phase16-spain-bot-readonly-2026-09-21.json).
+  Collector остановился на ошибочном ожидании app.web вместо исторического
+  app.cli web serve; source/dependency binding не получен. Локальная сверка
+  LF unit bytes совпала с обоими remote hashes. V2 исправлен и syntax-checked,
+  но не исполнен; повторный SSH не автоматизирован и ожидает решения.
+  Scope: нет service/data action, .env/token/DB/journal чтения, app import,
+  package/stage/install/deploy/cleanup. Source 6e68235 и прежние tests сохранены.
+  Spec/план обновлены; docs links/readback/diff/whitespace/changelog проверены.
+
 - Оператор согласовал [пересоздание приложения существующего тестового бота](docs/superpowers/specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#existing-bot-recreation-2026-09-21).
   По историческому Phase13 receipt установлена привязка Spain/amn2-spain-bot.service;
   это не fresh target evidence. Подготовлен короткий маршрут: подтвердить instance,

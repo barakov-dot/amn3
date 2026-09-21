@@ -386,7 +386,7 @@ enforcement, restart/writer fence, M1/M2/M5/M6/M7 и Phase16 acceptance оста
 Оператор сообщил, что бот «нулевой», предложил пересоздать его и согласился
 «хорошо, делаем как скажешь» на повторное развёртывание приложения с новым кодом,
 проверку запуска/остановки/restart и сохранение AWG2/VPN-профилей. Направление
-**EXISTING_BOT_REDEPLOY_AGREED / TARGET_CONFIRMATION_PENDING / NOT_EXECUTED**.
+**EXISTING_BOT_REDEPLOY_AGREED / TARGET_CONFIRMED_READBACK_PARTIAL / NOT_REDEPLOYED**.
 Это относится к приложению существующего Telegram-бота; новая регистрация,
 смена token/identity и удаление общей БД не входят в выбранный вариант.
 
@@ -397,9 +397,10 @@ executor scripts/vps/phase13_bot_cutover_remote.py связывает служб
 amn2-spain-bot.service, source /opt/amn2-spain/runtime/source,
 DB /var/lib/amn2-spain/amn2.sqlite3, runtime /etc/amn2-spain/runtime.env и
 marker /etc/amn2-spain/bot-enabled. Это кандидаты для fresh readback, а не
-нынешний target PASS; старый cutover/GO не запускать. У оператора уточняется,
-имеется ли в виду именно этот Spain bot, поскольку прямой ответ о сервере
-ещё не получен. Адрес/SSH user/ключи/пины в документацию не копировать.
+нынешний target PASS; старый cutover/GO не запускать. Оператор подтвердил
+именно Spain. [Первый readback](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#spain-bot-target-readback-2026-09-21)
+получил active bot/web и effective unit properties, но source/dependencies
+не собраны из-за неверного web-entrypoint допущения collector; v2 подготовлен. Адрес/SSH user/ключи/пины в документацию не копировать.
 
 **Короткий порядок работ, в существующей очереди Task 3B:**
 
@@ -435,9 +436,10 @@ marker /etc/amn2-spain/bot-enabled. Это кандидаты для fresh readb
 
 Fresh state, concrete artifact/checksums и rollback пока отсутствуют. Поэтому
 команду destructive reinstall или готовое checksum-bound /APPROVE сейчас
-не выдаём. Следующий недостающий факт — подтверждение Spain/указание иного
-целевого bot instance. После него конкретизируется read-only шаг 1, затем
-mutating gate по AGENTS; повторного согласования самой идеи пересоздания не нужно.
+не выдаём. Целевой Spain bot подтверждён. Следующий предлагаемый шаг —
+дополнительный read-only collector v2 для source/Python/dependencies после STOP
+первой попытки, затем artifact/rollback preparation и mutating gate по AGENTS.
+Повторного согласования самой идеи пересоздания не нужно.
 94 PASS/6 SKIP остаются прежним локальным evidence; tests не повторялись.
 
 ### 5. Stage, recovery и rollback
