@@ -119,3 +119,24 @@ def test_valid_remote_stop_receipt_survives_stderr_and_chunked_input(tmp_path, m
     assert result['transport']['stdin_bytes_accepted'] == 65549
     assert result['transport']['stdin_complete'] and result['transport']['returncode'] == 3
     assert 'PRIVATE_MARKER' not in json.dumps(result)
+
+
+def test_ssh_environment_keeps_windows_programdata_but_drops_app_secrets(monkeypatch):
+    monkeypatch.setenv('PROGRAMDATA', 'C:/synthetic-program-data')
+    monkeypatch.setenv('BOT_TOKEN', 'PRIVATE_MARKER')
+    monkeypatch.setenv('DATABASE_PATH', 'PRIVATE_MARKER')
+    monkeypatch.setenv('PYTHONPATH', 'PRIVATE_MARKER')
+    env = local.ssh_environment()
+    assert env['PROGRAMDATA'] == 'C:/synthetic-program-data'
+    assert not {'BOT_TOKEN', 'DATABASE_PATH', 'PYTHONPATH'} & env.keys()
+
+
+def test_missing_programdata_stops_before_trust_claim_and_transport(tmp_path, monkeypatch):
+    monkeypatch.delenv('PROGRAMDATA', raising=False)
+    monkeypatch.setattr(gate, 'validate_bundle', lambda data: ({}, {}, {}))
+    calls = []
+    with pytest.raises(gate.GateError, match='ssh_environment_programdata'):
+        local.execute_once(b'zip', b'pass', tmp_path/'attempt', approval=gate.APPROVAL,
+            approved_sha=gate.sha(b'pass'), loader=lambda role:calls.append('trust'),
+            transport=lambda *a, **k:calls.append('transport'))
+    assert calls == [] and not (tmp_path/'attempt').exists()

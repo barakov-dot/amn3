@@ -962,3 +962,20 @@ SSH=0, remote writes/service/DB/Telegram/test install/deploy/cleanup=0 в это
 Linux negative/6signals и причина первого SSH-сбоя UNKNOWN. AWG2_UNTOUCHED,
 general issuance disabled. Подготовлен один no-write framed transport probe,
 но его server approval ещё не получен. Старые101/94+6/312 не повторялись.
+
+<a id="bot-ssh-programdata-diagnosis-2026-09-21"></a>
+
+## Probe v1 и local PROGRAMDATA fix — 2026-09-21
+
+По «продолжай» выполнен один no-write probe v1: exit255, output0, remote receipt
+не получен. [Полный receipt и v2 scope](phase16-bot-linux-isolated-gate-2026-09-21.md#programdata-diagnosis-2026-09-21),
+[нормализованное evidence](phase16-bot-ssh-programdata-diagnosis-2026-09-21.json).
+Локальные ssh -V однофакторные проверки подтвердили PROGRAMDATA как необходимую
+переменную запуска Windows OpenSSH: filtered255, +PROGRAMDATA0, inherited0,
+-PROGRAMDATA255. Исправлен только local helper, до trust/claim проверяет переменную;
+2RED→45PASS и реальный ssh -V с исправленным helper exit0. Значения environment
+и raw outputs не публиковались; глобальная среда/remote/source/package не менялись.
+После fix SSH=0, автоматического retry не было; framed remote execution и Linux
+signal evidence не подтверждены. Подготовлен reviewable no-write probe v2,
+нужно отдельное согласование. AWG2/package016 сохранены, issuance disabled;
+server install/stage/deploy/service/DB/Telegram/cleanup отсутствуют.

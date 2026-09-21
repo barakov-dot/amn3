@@ -455,8 +455,11 @@ Linux negative/6signals/test-venv state UNKNOWN; live stop budget не дока�
 [Read-only recovery по «продолжай» выполнен](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#recovery-readback-result-2026-09-21):
 parent bot-candidates отсутствует, сохранённого target/result нет; причина
 ошибки и quiescence UNKNOWN. По «продолжай» [local diagnostics исправлена](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#transport-diagnostics-2026-09-21),
-43PASS, без изменения remote script/bundle или нового SSH. Следующий exact
-read-only framed transport probe подготовлен; нужен отдельный server approval.
+43PASS, без изменения remote script/bundle. По следующему «продолжай» выполнен
+[один probe v1 и local diagnosis](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#programdata-diagnosis-2026-09-21):
+отсутствие PROGRAMDATA воспроизвело local ssh -V exit255, добавление устранило
+startup defect. Новый helper проверен45PASS и local ssh -V exit0. Probe v2
+с исправленным environment подготовлен, server approval pending; remote path UNKNOWN.
 Повторного upload/test/activation не было, Linux signal evidence не подтверждён.
 System metadata сами по себе не закрывают M3; повторного согласования идеи
 пересоздания не нужно. Прежние lifecycle94 PASS/6 SKIP не повторялись.

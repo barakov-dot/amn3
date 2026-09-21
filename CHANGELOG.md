@@ -7,6 +7,16 @@
 
 ## 2026-09-21
 
+- По «продолжай» выполнен [один no-write SSH probe и local root-cause check](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#programdata-diagnosis-2026-09-21):
+  exit255/пустой output; allowlist исключал PROGRAMDATA. Локальный ssh -V
+  воспроизвёл255, добавление одной переменной дало0, обратный контроль снова255.
+  Исправлен общий local ssh_environment: PROGRAMDATA сохраняется, её отсутствие
+  блокирует trust/claim/SSH, app secrets исключены. 2RED→45PASS и local ssh -V0.
+  Подготовлен отдельный no-write probe v2, pending approval; повторного SSH нет.
+  Remote runner/bundle/AMN2 не менялись; Linux evidence UNKNOWN, не deployment.
+  Сохранены нормализованный receipt и scratch; checks hashes/readback/links/JSON/
+  diff/secret/changelog. AWG2/package016/issuance safety сохранены.
+
 - Исправлена [локальная потеря transport diagnostics](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#transport-diagnostics-2026-09-21):
   ранний exit/pipe error теперь сохраняет exit code, stage, размеры/prefix hashes
   и фиксированные stderr hints без raw logs. stdout/stderr разделены, общий cap,

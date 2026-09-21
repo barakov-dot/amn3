@@ -182,10 +182,19 @@ def run_transport(command, *, cwd, env, timeout, cap=65536, input_bytes=b'', dia
     return process.returncode, bytes(buffers['stdout'])
 
 
+def ssh_environment():
+    # Windows OpenSSH exits 255 even for -V when PROGRAMDATA is absent.
+    allowed = {'PATH','SYSTEMROOT','WINDIR','TEMP','TMP','COMSPEC','SYSTEMDRIVE','PATHEXT','PROGRAMDATA'}
+    environment = {k.upper():v for k,v in os.environ.items() if k.upper() in allowed}
+    gate.require(bool(environment.get('PROGRAMDATA')), 'ssh_environment_programdata')
+    return environment
+
+
 def execute_once(bundle, script, evidence_dir, *, approval, approved_sha, loader, transport):
     gate.require(approval == gate.APPROVAL and approved_sha == gate.sha(script), 'approval_binding')
     gate.validate_bundle(bundle)
     command, frame = frame_request(script,bundle)
+    environment = ssh_environment()
     binding = loader('spain')
     gate.require(binding.role == 'spain', 'target_role')
     gate.claim_directory(evidence_dir)
@@ -197,8 +206,6 @@ def execute_once(bundle, script, evidence_dir, *, approval, approved_sha, loader
             '-o','IdentitiesOnly=yes','-o','StrictHostKeyChecking=yes','-o','UserKnownHostsFile='+str(binding.known_hosts_path),
             '-o','ConnectTimeout=10','-o','ConnectionAttempts=1','-o','ServerAliveInterval=5','-o','ServerAliveCountMax=1',
             '-i',str(binding.key_path),'-p','22',binding.target_user+'@'+binding.target_host,command]
-    environment = {k:v for k,v in os.environ.items() if k.upper() in
-                   {'PATH','SYSTEMROOT','WINDIR','TEMP','TMP','COMSPEC','SYSTEMDRIVE','PATHEXT'}}
     result = {'schema':'phase16.bot-linux-local.v1','claim':claim,'status':'UNKNOWN_NO_RETRY','ssh_attempts':1}
     result['transport'] = {}
     try:

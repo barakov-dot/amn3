@@ -273,7 +273,7 @@ AWG2/package016/general issuance safety прежние; deployment не выпо
 
 <a id="readonly-transport-probe-approval"></a>
 
-## Следующий reviewable gate — один SSH transport probe, pending approval
+## Исторический SSH transport probe v1 — approval consumed, exit255
 
 Цель: проверить именно прежний framed-command путь через Windows OpenSSH,
 который локальный Python roundtrip и успешный read-only stdin readback не доказали.
@@ -298,7 +298,7 @@ Remote probe SHA256:
 Sentinel ожидается32 bytes, SHA256:
 3bf188a05aa9316d60a03dc7500d53c7a3cb12ebd0bd310a39736353f650893d.
 
-Только после нового точного согласования оператора:
+Историческая команда, исполненная один раз по «продолжай»; не повторять:
 
 ~~~powershell
 & 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -B 'C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-transport-diagnostics-20260921/readonly_transport_probe.py' --execute --approve PHASE16_TRANSPORT_PROBE_READONLY_001 --sha256 7690601690e283afeac518fbffdb80f7daa05a4f088c913a1534d9ea925951f4
@@ -307,4 +307,76 @@ Sentinel ожидается32 bytes, SHA256:
 PASS только exit0 и exact schema/32-byte SHA response; иначе сохранить normalized
 transport evidence/UNKNOWN, не повторять. Даже PASS не разрешает original test
 upload, install или activation; он только проверяет путь передачи короткого frame.
-Команда подготовлена и локально проверена, **SSH NOT_EXECUTED**.
+Команда v1 исполнена один раз; результат ниже. Это больше не готовый GO.
+
+<a id="programdata-diagnosis-2026-09-21"></a>
+
+## Probe v1 и подтверждённый local OpenSSH startup defect — 2026-09-21
+
+Оператор ответил «продолжай» на точное предложение одного no-write SSH probe.
+При clean AMN3 HEAD37dc1d7 сверены local/probe hashes и отсутствие claim.
+Единственная попытка19:14:12.695826Z →19:14:12.712373Z (22:14:12 МСК):
+exit255, stdout0/stderr0, stdin226 bytes accepted локальным pipe, pipe failures0,
+UNKNOWN_NO_RETRY. [Первичный probe и local diagnosis evidence](phase16-bot-ssh-programdata-diagnosis-2026-09-21.json).
+Не получен ни remote response, ни proof framed execution. Это одна попытка
+SSH-процесса, не доказанная сессия. Никакого retry или дополнительного подключения.
+
+После STOP выполнены только локальные ssh.exe -V, без target/trust/key inputs:
+
+| Локальное окружение | exit | stderr bytes |
+| --- | --- | --- |
+| inherited | 0 | 43 |
+| прежний allowlist | 255 | 0 |
+| прежний allowlist + только PROGRAMDATA | 0 | 43 |
+| inherited без PROGRAMDATA | 255 | 0 |
+| исправленный ssh_environment() | 0 | 43 |
+
+В успешных вариантах совпал SHA43-byte version output. Значения environment,
+raw stderr/host/key material не записывались. Это причинный однофакторный тест:
+**на данном Windows host отсутствие PROGRAMDATA ломает запуск OpenSSH**.
+Та же ошибка была в local candidate runner и probe v1. Ранее успешный read-only
+collector наследовал environment и не имел этого дефекта. Это объясняет
+подтверждённый локальный startup failure; framed remote path, Linux environment
+и результаты первой test attempt остаются непроверенными. Не утверждать
+server health, quiescence или факт выполнения remote команд по stdin counter.
+
+Минимальная локальная коррекция в прежнем transport-fix scope: общий
+ssh_environment() добавляет только PROGRAMDATA к allowlist, нормализует имена,
+при отсутствии переменной останавливает выполнение до trust/claim/SSH.
+Application secrets/PYTHONPATH/DB variables по-прежнему исключены. Remote runner
+и bundle не менялись; ни global Windows environment, ни серверные настройки
+не изменялись. **2RED →45PASS/0FAIL/0SKIP,1.03s** (13transport+32gate), плюс
+реальный локальный ssh -V через новый helper exit0. Baseline101/94+6/312 не
+повторялись. Raw error и retry не добавлены, caps/trust/exclusive claims сохранены.
+
+Текущий local runner LF SHA256:
+8d5ce722245f11aba159d8544e7125c1c0d78b267fe41096445f186861e0d75b.
+Предыдущие SHA в этом документе — bindings исторических попыток, не текущий код.
+AMN2 source6e68235, remote SHA5df6b2fc… и bundle SHAe19abc5c… прежние.
+AWG2_UNTOUCHED, package016 immutable, issuance disabled; server writes/install/
+service/DB/Telegram/deploy/cleanup в этом slice отсутствуют.
+
+<a id="readonly-transport-probe-v2-approval"></a>
+
+## Следующий точный запрос: probe v2 после local fix, pending approval
+
+Тот же no-write scope226-byte frame/32-byte sentinel, прежний remote probe
+SHA475d31ae… и ожидаемый sentinel SHA3bf188a0…; timeout20s/output4KiB/no retry.
+Отличие только local environment helper с PROGRAMDATA и отдельные v2 claim/result.
+Original ZIP/test-venv/test run/бот/службы/DB не входят в scope. Старые v1 artifacts
+сохранены. Новый local probe сверяет exact local runner SHA выше до trust/SSH.
+
+Local script:
+C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-transport-diagnostics-20260921/readonly_transport_probe_v2.py.
+Его LF SHA256: ba50b0fbadbf1e97ab630fb9e9ef43ca6fd54b4a33da2ed974ccfa19426dd322.
+Будущие evidence: readonly-probe-v2.claim.json и readonly-probe-v2.result.json
+в том же scratch. Offline preview PASS, новый claim отсутствовал при подготовке.
+До исполнения повторно сверить hashes/Git/claim; нужна новая точная авторизация.
+
+~~~powershell
+& 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -B 'C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-transport-diagnostics-20260921/readonly_transport_probe_v2.py' --execute --approve PHASE16_TRANSPORT_PROBE_READONLY_002 --sha256 ba50b0fbadbf1e97ab630fb9e9ef43ca6fd54b4a33da2ed974ccfa19426dd322
+~~~
+
+Команда **НЕ исполнена**. PASS требует exit0 и exact schema/32-byte SHA response;
+иной итог STOP/UNKNOWN и сохранение diagnostics без следующего SSH. Даже PASS
+не разрешает загрузку candidate или Linux tests — это отдельный server gate.

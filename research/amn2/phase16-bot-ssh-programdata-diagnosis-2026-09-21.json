@@ -1,0 +1,216 @@
+{
+  "schema": "phase16.programdata-startup-diagnosis.v1",
+  "probe_attempt": {
+    "schema": "phase16.transport-probe-local.v1",
+    "claim": {
+      "scope": "PHASE16_TRANSPORT_PROBE_READONLY_001",
+      "max_attempts": 1,
+      "local_sha256": "7690601690e283afeac518fbffdb80f7daa05a4f088c913a1534d9ea925951f4",
+      "runner_sha256": "420ebe44ff9ba3fce4485d4466f17f6dcdd910e25899798396f1da59a1b3e363",
+      "remote_probe_sha256": "475d31ae4babbc2c3e995328a82a7517a708194d306a08e865b7232ca435caa3",
+      "claimed_at": "2026-09-21T19:14:12.695826+00:00"
+    },
+    "ssh_attempts": 1,
+    "status": "UNKNOWN_NO_RETRY",
+    "transport": {
+      "schema": "phase16.bot-transport.v1",
+      "returncode": 255,
+      "failure_stage": null,
+      "stdin_bytes_requested": 226,
+      "stdin_bytes_accepted": 226,
+      "stdin_complete": true,
+      "output_complete": true,
+      "stdout": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "pipe_failures": [],
+      "stderr_classification": "NO_STDERR"
+    },
+    "reason": "AssertionError",
+    "finished_at": "2026-09-21T19:14:12.712373+00:00"
+  },
+  "local_environment_comparison": {
+    "scope": "local ssh -V only; no destination or trust read",
+    "network_connections": 0,
+    "cases": [
+      {
+        "environment": "inherited",
+        "returncode": 0,
+        "transport": {
+          "schema": "phase16.bot-transport.v1",
+          "returncode": 0,
+          "failure_stage": null,
+          "stdin_bytes_requested": 0,
+          "stdin_bytes_accepted": 0,
+          "stdin_complete": true,
+          "output_complete": true,
+          "stdout": {
+            "bytes_observed": 0,
+            "bytes_retained": 0,
+            "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stderr": {
+            "bytes_observed": 43,
+            "bytes_retained": 43,
+            "prefix_sha256": "67377134ed9e6ad154cb95388fc2249ec9d9b5a7eb4e8ba252302880ff6b3c72"
+          },
+          "pipe_failures": [],
+          "stderr_classification": "UNCLASSIFIED_STDERR"
+        }
+      },
+      {
+        "environment": "filtered",
+        "returncode": 255,
+        "transport": {
+          "schema": "phase16.bot-transport.v1",
+          "returncode": 255,
+          "failure_stage": null,
+          "stdin_bytes_requested": 0,
+          "stdin_bytes_accepted": 0,
+          "stdin_complete": true,
+          "output_complete": true,
+          "stdout": {
+            "bytes_observed": 0,
+            "bytes_retained": 0,
+            "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stderr": {
+            "bytes_observed": 0,
+            "bytes_retained": 0,
+            "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "pipe_failures": [],
+          "stderr_classification": "NO_STDERR"
+        }
+      }
+    ]
+  },
+  "local_single_variable_isolation": {
+    "scope": "local ssh -V environment isolation only",
+    "network_connections": 0,
+    "cases": [
+      {
+        "added_variable": "PROGRAMDATA",
+        "returncode": 0,
+        "transport": {
+          "schema": "phase16.bot-transport.v1",
+          "returncode": 0,
+          "failure_stage": null,
+          "stdin_bytes_requested": 0,
+          "stdin_bytes_accepted": 0,
+          "stdin_complete": true,
+          "output_complete": true,
+          "stdout": {
+            "bytes_observed": 0,
+            "bytes_retained": 0,
+            "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stderr": {
+            "bytes_observed": 43,
+            "bytes_retained": 43,
+            "prefix_sha256": "67377134ed9e6ad154cb95388fc2249ec9d9b5a7eb4e8ba252302880ff6b3c72"
+          },
+          "pipe_failures": [],
+          "stderr_classification": "UNCLASSIFIED_STDERR"
+        }
+      },
+      {
+        "removed_from_inherited": "PROGRAMDATA",
+        "returncode": 255,
+        "transport": {
+          "schema": "phase16.bot-transport.v1",
+          "returncode": 255,
+          "failure_stage": null,
+          "stdin_bytes_requested": 0,
+          "stdin_bytes_accepted": 0,
+          "stdin_complete": true,
+          "output_complete": true,
+          "stdout": {
+            "bytes_observed": 0,
+            "bytes_retained": 0,
+            "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stderr": {
+            "bytes_observed": 0,
+            "bytes_retained": 0,
+            "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "pipe_failures": [],
+          "stderr_classification": "NO_STDERR"
+        }
+      }
+    ]
+  },
+  "fix_validation": {
+    "scope": "local PROGRAMDATA fix verification; no remote connection",
+    "network_connections": 0,
+    "ssh_version_returncode": 0,
+    "transport": {
+      "schema": "phase16.bot-transport.v1",
+      "returncode": 0,
+      "failure_stage": null,
+      "stdin_bytes_requested": 0,
+      "stdin_bytes_accepted": 0,
+      "stdin_complete": true,
+      "output_complete": true,
+      "stdout": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes_observed": 43,
+        "bytes_retained": 43,
+        "prefix_sha256": "67377134ed9e6ad154cb95388fc2249ec9d9b5a7eb4e8ba252302880ff6b3c72"
+      },
+      "pipe_failures": [],
+      "stderr_classification": "UNCLASSIFIED_STDERR"
+    },
+    "hashes_lf": {
+      "scripts/phase16_bot_linux_gate.py": "8d5ce722245f11aba159d8544e7125c1c0d78b267fe41096445f186861e0d75b",
+      "scripts/vps/phase16_bot_linux_gate_remote.py": "5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102",
+      "tests/test_phase16_bot_transport.py": "ace9931d66fc264f27f9fd4d8c06c736976fd977718c43af7cb79c80ecfff333"
+    },
+    "tests": {
+      "programdata-red.xml": {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "2",
+        "skipped": "0",
+        "tests": "2",
+        "time": "0.091",
+        "timestamp": "2026-09-21T22:16:08.753622+03:00"
+      },
+      "programdata-green.xml": {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "45",
+        "time": "0.997",
+        "timestamp": "2026-09-21T22:17:06.288792+03:00"
+      }
+    }
+  },
+  "interpretation": {
+    "confirmed": "On this Windows host OpenSSH startup requires PROGRAMDATA; omission reproduces exit255/no output even with -V",
+    "not_proven": [
+      "Successful remote command/frame execution",
+      "Linux prerequisites or signal tests",
+      "Actual historical server process state"
+    ]
+  },
+  "next_probe": {
+    "approval": "PHASE16_TRANSPORT_PROBE_READONLY_002",
+    "status": "OFFLINE_READY_NOT_EXECUTED",
+    "local_sha256": "ba50b0fbadbf1e97ab630fb9e9ef43ca6fd54b4a33da2ed974ccfa19426dd322",
+    "remote_probe_sha256": "475d31ae4babbc2c3e995328a82a7517a708194d306a08e865b7232ca435caa3"
+  }
+}
