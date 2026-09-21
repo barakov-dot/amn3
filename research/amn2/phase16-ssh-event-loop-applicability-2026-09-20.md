@@ -492,3 +492,33 @@ inline self-review races/error paths/scope, links/anchors, readback/diff/whitesp
 AWG2_UNTOUCHED, package016 immutable, general issuance disabled; Windows/quality
 FAIL, DNS bridge STOP, iPhone/A/B отложены. Нет code/dependencies/units changes,
 stage/install/deploy/cleanup, пересборки package или повторения прежних tests.
+
+
+<a id="lifecycle-plan-m4-2026-09-21"></a>
+
+## Lifecycle implementation plan M4 — 2026-09-21
+
+Оператор ответил «Подтверждаю» на design A в commit
+8ba7e5d31236824bddd304a4f278965029d1578b. Design утверждён, подготовлен
+[подчинённый implementation plan](../../docs/superpowers/plans/2026-09-21-amn2-bot-startup-stop-lifecycle-plan.ru.md),
+PLAN_READY_FOR_REVIEW / NOT_EXECUTED. AMN2 source остаётся
+1bd7f62d1fdd3829bc278110ecdc44d3568676a3, чистым и неизменённым.
+
+План содержит три задачи: controller/signal scope; runtime/factory wiring;
+isolated Linux signal evidence и итоговый affected regression. Зафиксированы
+точные paths/interfaces, RED selectors, test caps, ownership/error races,
+существующая pinned M3 среда и отдельный Linux NOT_RUN при отсутствии среды.
+Никакие test caps не стали production timeout. Сигналы допускаются в будущем
+только exact synthetic child, не службам; установка Linux/dependencies исключена.
+Метод — inline одним агентом. Source commit/push только в remote amn2;
+документы отдельно в AMN3, каждый существенный commit со своим CHANGELOG.
+
+Проверки подготовки: source/fixture/API readback, coverage пяти Review Focus,
+syntax check code snippets без исполнения, local links/anchors, diff/whitespace,
+added-line secret scan. Python runner source проверен локально для границы
+SIGINT ownership; новый runtime probe не выполнялся. Самопроверка уточнила
+failure propagation контроллера и READY child без ненужного RELEASE handshake.
+Код/units/tests/dependencies не менялись; pytest/OS signals/VPS/Telegram не запускались.
+Design/current plan синхронизированы; review/approval исполнения этого плана
+остаётся следующим шагом. Все Phase16 ограничения, M3 target/M4 budget,
+AWG2_UNTOUCHED, package016 immutable и general issuance disabled сохранены.

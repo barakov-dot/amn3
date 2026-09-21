@@ -173,9 +173,13 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    один stop owner до startup, factory-dispatch guard, принятый drain сохраняется;
    H=8/Q=8 не становятся секундным SLA. PARTIAL/UNKNOWN требуют отдельного
    recovery, operator gate не выдаётся за implemented restart fence.
-   DESIGN_PROPOSED / NOT_IMPLEMENTED. Следующее решение — review design A,
-   затем ограниченный source implementation plan; его исполнение, units,
-   target readback и Linux signal validation требуют своих scopes/approvals.
+   Оператор подтвердил design A после commit 8ba7e5d. Подготовлен
+   [source implementation plan](2026-09-21-amn2-bot-startup-stop-lifecycle-plan.ru.md):
+   3 задачи inline, точные файлы/API, RED/GREEN, bounded synthetic signal child,
+   один affected regression и source/docs commit/push rules.
+   DESIGN_APPROVED / PLAN_READY_FOR_REVIEW / NOT_EXECUTED. Следующее решение —
+   review плана и разрешение его inline source/tests исполнения; без новой среды,
+   при отсутствии compatible Linux — NOT_RUN. Units/target readback/live отдельно.
    Документы проверены локально; source/tests/dependencies не менялись.
    Merge/build, target/Telegram и live execution не разрешены.
    Package016 не пересобирается.

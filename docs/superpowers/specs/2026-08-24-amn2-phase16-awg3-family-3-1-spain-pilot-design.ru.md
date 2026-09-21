@@ -227,11 +227,13 @@ manager force kill к успешному drain. До этого budget UNKNOWN, 
 
 <a id="lifecycle-design-m4"></a>
 
-#### M4: предложенный lifecycle design — 2026-09-21
+#### M4: утверждённый lifecycle design — 2026-09-21
 
-Статус: **DESIGN_PROPOSED / NOT_IMPLEMENTED / STOP_BUDGET_UNPROVEN**.
-Следующее «приступаем» оператора разрешило подготовку этого письменного design,
-не утверждение ещё не существовавшего решения и не source implementation.
+Статус: **DESIGN_APPROVED / PLAN_READY_FOR_REVIEW / NOT_IMPLEMENTED / STOP_BUDGET_UNPROVEN**.
+После подготовки design в commit 8ba7e5d31236824bddd304a4f278965029d1578b
+оператор ответил «Подтверждаю». Утверждён design A и подготовка
+[ограниченного implementation plan](../plans/2026-09-21-amn2-bot-startup-stop-lifecycle-plan.ru.md);
+его source/tests исполнение ещё не согласовано.
 Основание — [source-only M4](#stop-budget-m4), AMN2 1bd7f62; текущий worker
 [design](2026-09-20-amn2-bot-workflow-worker-design.ru.md) сохраняет силу.
 Документ описывает предлагаемое поведение, не выдает его за нынешний runtime.
@@ -369,9 +371,9 @@ synthetic child после cap — TEST_FAIL/UNKNOWN, не drain PASS. Ника�
 среду или зависимости без отдельного scope. Target systemd/Telegram/VPS не нужны
 для synthetic source slice и не разрешаются его одобрением.
 
-**Граница утверждения.** Design A готов к review. Его одобрение разрешит
-подготовить один ограниченный implementation plan; исполнение source/tests
-согласуется по этому конкретному плану. После будущего A PASS можно закрыть
+**Граница утверждения.** Design A утверждён; implementation plan подготовлен
+и ждёт review. Исполнение source/tests согласуется по этому конкретному плану,
+inline одним агентом, без новых dependencies или среды. После будущего A PASS можно закрыть
 только source signal ownership/races. Target M3, полный stop budget M4, bulk
 enforcement, restart/writer fence, M1/M2/M5/M6/M7 и Phase16 acceptance остаются
 открытыми. Прежние 33/312 и M3 68 PASS не повторять без нового code/question.
@@ -444,7 +446,7 @@ persistence, leaks и live recovery остаются NOT_EXECUTED в этом ga
 | M1 | Windows traffic PASS на обоснованном client/engine/hypothesis path; root-cause-bound quality correction, стабильное acceptance и полный strict A/B | Отложенные P0/P1 главного плана; только после возврата оператора и exact approval. Сейчас повтор не запрашивать |
 | M2 | Валидная DNS/прочая measurement coverage, endpoints и budgets критериев v1 | Отдельное решение по методике; DNS bridge STOP, tooling ради gate не создавать |
 | M3 | Fresh target deployed/source/state + Python/ABI/full dependencies и соответствие intended lock | Локальная Windows часть закрыта 21.09: exact pins/hashes, pip check, 68 PASS. Target/Linux evidence отсутствует; live readback требует exact approval, повтор local suite без новой причины не нужен |
-| M4 | Effective units/entrypoints, другие writers, конечный startup-cleanup/stop budget и recovery policy для UNKNOWN | Source-only карта/readback contract готовы; lifecycle design A предложен 21.09, ещё не утверждён/реализован. Он не закрывает общий budget/writer/restart gates; target readback по exact approval |
+| M4 | Effective units/entrypoints, другие writers, конечный startup-cleanup/stop budget и recovery policy для UNKNOWN | Source-only карта/readback contract готовы; lifecycle design A утверждён 21.09, source plan готов к review, не исполнен. Он не закрывает общий budget/writer/restart gates; target readback по exact approval |
 | M5 | Retained inventory, transaction ownership/quiescence, preservation/cleanup readback с исключениями v1 | Четыре раздельных recovery gates; metadata tools готовы локально, live authority отсутствует |
 | M6 | Future artifact source/tooling/dependency binding, identity/manifest; activation/revert contract и DB/remote preservation | Отдельный packaging/activation scope после dependencies; package016 сохранить, новый ID/hash/revert target не назначены |
 | M7 | Исполненные bounded startup/drain/coexistence/persistence/restart/leak/rollback checks на связанных artifact/target | Раздел 6 после prerequisites и exact approvals; 33/312 PASS не закрывают target acceptance. Synthetic dependency slice может отдельно предшествовать live gates |
@@ -452,9 +454,10 @@ persistence, leaks и live recovery остаются NOT_EXECUTED в этом ga
 Локальный dependency-validation M3 и согласованный source-only M4 выполнены.
 Подготовлен [lifecycle design A](#lifecycle-design-m4): один stop owner до startup,
 factory dispatch guard, сохранение accepted drain и явная UNKNOWN/recovery policy.
-Статус DESIGN_PROPOSED, без code/tests/units changes. Следующий предмет решения —
-review этого design для подготовки ограниченного source implementation plan;
-его исполнение и target readback требуют отдельных scopes/approvals.
+Design A утверждён; [source implementation plan](../plans/2026-09-21-amn2-bot-startup-stop-lifecycle-plan.ru.md)
+готов к review. Следующий предмет решения — его inline source/tests execution
+с существующей pinned средой и conditional Linux NOT_RUN. Target readback/units
+остаются отдельными scopes/approvals; code/tests/units ещё не менялись.
 Stop seconds не назначены. Systemd simulation, новый code fix и live execution
 не выполнялись. iPhone/A/B остаются отложенными; deployment не разрешён.
 

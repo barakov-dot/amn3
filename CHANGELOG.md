@@ -7,6 +7,19 @@
 
 ## 2026-09-21
 
+- После «Подтверждаю» design A отмечен DESIGN_APPROVED и подготовлен
+  [план source реализации lifecycle M4](docs/superpowers/plans/2026-09-21-amn2-bot-startup-stop-lifecycle-plan.ru.md):
+  controller/signal scope, runtime/factory guard и bounded synthetic signal
+  evidence; точные paths/API/RED-GREEN, caps, один affected regression,
+  inline execution и раздельные AMN2/AMN3 commit/push rules.
+  [Receipt подготовки](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#lifecycle-plan-m4-2026-09-21),
+  design и главный Phase16 plan синхронизированы. PLAN_READY_FOR_REVIEW,
+  source execution ещё не разрешён/не выполнен. Проверки: source/fixture read,
+  self-review coverage/interfaces, snippet syntax без исполнения, links/anchors,
+  readback/diff/whitespace и secrets. AMN2 source/tests/units/dependencies неизменны;
+  нет pytest, установки среды, OS signals, VPS/Telegram, package/stage/install/
+  deploy/cleanup. M4 budget и все Phase16 prerequisites остаются открытыми.
+
 - По следующему «приступаем» подготовлен [lifecycle design M4](docs/superpowers/specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#lifecycle-design-m4)
   со статусом DESIGN_PROPOSED / NOT_IMPLEMENTED: рекомендован единый stop owner
   до startup, factory-dispatch guard и сохранение accepted handler/job drain.
