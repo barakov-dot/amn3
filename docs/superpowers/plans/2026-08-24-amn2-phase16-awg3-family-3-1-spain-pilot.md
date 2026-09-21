@@ -188,6 +188,10 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    Linux six-case signals/negative control NOT_RUN; tests подготовлены, среды не
    устанавливались. Следующий отдельный scope — compatible Linux evidence либо
    target readback. M4 stop budget/writer/restart gates открыты; units/locks неизменны.
+   [Local environment discovery 21.09](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#linux-environment-discovery-2026-09-21):
+   WSL не установлен, registered distro отсутствует; Docker/Podman не найдены
+   в PATH. Нужны название готовой локальной Linux-среды и Python/venv path;
+   новая установка не разрешена текущим scope. Повторного pytest не было.
    Merge/build, target/Telegram и live execution не разрешены.
    Package016 не пересобирается.
 

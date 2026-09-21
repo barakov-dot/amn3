@@ -7,6 +7,16 @@
 
 ## 2026-09-21
 
+- После «продолжай» проверена [доступность локальной Linux-среды](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#linux-environment-discovery-2026-09-21)
+  для оставшегося lifecycle gate: WSL list exit=1 сообщает об отсутствии
+  подсистемы, зарегистрированных distro нет, Docker/Podman в PATH отсутствуют.
+  Inventory bounded 15s/query; один повтор исправил Unicode readback.
+  Linux signals/negative control остаются NOT_RUN; требуется указать готовую
+  среду/Python path. Source 6e68235, locks/units/dependencies неизменны;
+  прежние 94 PASS/6 SKIP не повторялись. Проверки docs: ссылки/readback,
+  diff/whitespace и changelog gate. Нет установки, SSH/VPS, signals службам,
+  stage/install/deploy/cleanup; AWG2/package016/issuance safety сохранены.
+
 - По подтверждению оператора выполнен [локальный lifecycle M4 slice](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#lifecycle-implementation-m4-2026-09-21):
   AMN2 1bd7f62→6e68235, четыре commits с CHANGELOG, exact-ref push/readback;
   stop до Settings/factory/READY, принятый drain и combined errors сохранены.

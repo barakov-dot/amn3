@@ -451,6 +451,9 @@ def test_owned_child_signal_stops_at_barrier(tmp_path, signum, barrier):
   Если Linux/Python/dependencies не доступны уже сейчас, этот шаг NOT_RUN;
   подготовленные tests остаются для отдельно согласованного compatible environment.
   Не переносить Windows venv на Linux и не устанавливать новую среду.
+  21.09 после «продолжай» выполнен [inventory среды](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#linux-environment-discovery-2026-09-21):
+  WSL не установлен, Docker/Podman отсутствуют в PATH; Linux gate остаётся
+  NOT_RUN до указания уже готовой compatible среды. Source tests не повторены.
 - [x] **5. Итоговый affected набор один раз** после всех source/test changes:
 
 ~~~text

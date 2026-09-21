@@ -619,3 +619,43 @@ AWG2_UNTOUCHED; package016 immutable; general issuance disabled. Нет SSH/VPS,
 Telegram API, установки клиента, выдачи, package build/stage/install/deploy/cleanup.
 Windows traffic/quality FAIL, DNS STOP и отложенные iPhone/A/B сохранены.
 Обзор нового клиента: [release/source receipt](phase16-amnezia-client-5.0.3.0-release-review-2026-09-21.md).
+
+
+<a id="linux-environment-discovery-2026-09-21"></a>
+
+## Linux signal gate: проверка доступности среды — 2026-09-21
+
+После «продолжай» выполнен bounded local read-only inventory, checked_at=2026-09-21T15:47:31+03:00.
+Вопрос: есть ли уже доступная локальная Linux-среда для утверждённых шести
+synthetic-child cases без установки и без live/VPS? Git сверены: AMN2
+6e682356ed14a62d636ee58039fd3a389e794809 и AMN3 f003b3424b826f1aef1258c1a022b774a96ac08f
+чисты; старый основной checkout 551055f с пользовательским diff сохранён.
+
+- wsl.exe присутствует в System32; wsl.exe --list --quiet завершился exit=1
+  с сообщением, что подсистема Windows для Linux не установлена.
+- HKCU Software/Microsoft/Windows/CurrentVersion/Lxss отсутствует:
+  зарегистрированных дистрибутивов в текущем профиле не обнаружено.
+- docker.exe и podman.exe не найдены через Get-Command/shutil.which в PATH.
+  Это не полный аудит всех возможных VM, установочных каталогов или других users.
+- Дистрибутивы/службы не запускались, engine/container/VM не создавались.
+  Установки, SSH/network, host/service signals и тесты не выполнялись.
+
+Лимит WSL query — 15s, timeout не достигнут. Первый display имел повреждённую
+кодировку вывода; один повтор того же read-only list сохранил Unicode в JSON
+и подтвердил текст ошибки. Ошибка запуска не выдана за Linux PASS.
+Evidence сохранено в существующем scratch:
+C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-lifecycle-validation-20260921/linux-environment-discovery-20260921.json
+SHA256: 91d4a1b25fbf708e1199dd2bc1b7bf07fe07a22463c2516a0a2da6a0666c6f6a.
+
+**ENVIRONMENT_NOT_AVAILABLE_ON_CHECKED_PATHS / LINUX_SIGNAL_NOT_RUN**.
+Прежние 94 PASS/6 SKIP — результат source validation предыдущего шага, сейчас не
+повторялись. Source/locks/units/dependencies неизменны. От оператора нужен только
+идентификатор уже готовой локальной Linux VM/дистрибутива и путь к её Python/venv;
+после этого сначала проверяются source SHA, Python/ABI и точные dependency pins,
+затем допускается child-only negative control + six-case run по существующему
+плану. Подключение к VPS или установка новой среды требуют отдельного scope;
+эта проверка их не разрешает. Отсутствие ответа не считается approval.
+
+M3 target/M4 budget/writer/restart fence и Phase16 acceptance остаются открыты.
+AWG2_UNTOUCHED, package016 immutable, general issuance disabled;
+stage/install/deploy/cleanup не выполнялись, Windows/quality FAIL и DNS STOP сохранены.
