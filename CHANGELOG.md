@@ -7,6 +7,16 @@
 
 ## 2026-09-21
 
+- По «продолжай» выполнен [один read-only recovery](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#recovery-readback-result-2026-09-21)
+  после UNKNOWN test attempt: parent bot-candidates отсутствует, target/venv/
+  results на момент чтения нет. Причина сбоя и quiescence UNKNOWN; не Linux PASS.
+  Сохранены bounded collector/runner и hashes в локальном scratch; нормализованный
+  JSON опубликован.9 local guard checks и1 Windows frame roundtrip PASS, без
+  повторения baseline suites. Remote writes/service actions/test retry=0;
+  source/approved runner/bundle/package016 не менялись, AWG2 сохранён.
+  Предложена локальная доработка транспортной диагностики до нового test gate.
+  Проверки: JSON/readback, docs links/diff/secret scan/changelog; не deployment.
+
 - По точному «разрешаю» выполнена [одна isolated Linux попытка](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#execution-2026-09-21):
   exact hashes подтверждены, claim сохранён; SSH attempts=1, UNKNOWN_NO_RETRY /
   process_io, remote receipt отсутствует. Approval consumed, retry/cleanup=0.

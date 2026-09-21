@@ -929,3 +929,19 @@ Production service/DB/poller actions отсутствуют в scope/коде; �
 health не проверялась. AWG2_UNTOUCHED, package016 immutable, general issuance
 disabled; production stage/install/deploy не выполнялись. Isolated test install
 UNKNOWN. Next — отдельное согласование read-only target claim/result recovery.
+
+<a id="bot-linux-recovery-readback-2026-09-21"></a>
+
+## Read-only recovery — test parent отсутствует, 2026-09-21
+
+По «продолжай» выполнен ровно один согласованный read-only SSH;
+[receipt](phase16-bot-linux-isolated-gate-2026-09-21.md#recovery-readback-result-2026-09-21),
+[JSON](phase16-bot-linux-readback-2026-09-21.json). В18:58:47Z (21:58:47 МСК)
+parent bot-candidates отсутствует: target/test-venv/claim/result сейчас нет.
+Linux evidence, причина process_io и quiescence UNKNOWN. Remote writes и
+service actions=0; test retry/upload/cleanup/DB/token/Telegram отсутствуют.
+Локально9 collector guard checks и1 exact frame roundtrip PASS; не Linux PASS.
+Исходный runner/source/bundle/locks неизменны; дополнительные SSH не выполнялись.
+Предложена локальная transport diagnostics доработка перед новым отдельным
+server gate. Production stage/install/deploy нет; AWG2/package016 сохранены,
+general issuance disabled; прежние baseline suites не повторялись.

@@ -209,8 +209,11 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    SSH attempts=1, UNKNOWN_NO_RETRY/process_io, remote receipt не получен.
    Approval использован; повтор/cleanup не выполнялись. Linux negative/6signals,
    unshare/test-venv и test-directory state UNKNOWN; deployment не подтверждён.
-   Следующий шаг — [отдельный read-only recovery scope](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#recovery-readback-scope):
-   один SSH, только metadata target и bound claim/result, без upload/test/retry.
+   После «продолжай» [read-only recovery выполнен](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#recovery-readback-result-2026-09-21):
+   один SSH, parent bot-candidates отсутствует; target/test-venv/results отсутствуют
+   на момент чтения. Причина первого сбоя и quiescence UNKNOWN; Linux PASS нет.
+   Локальный frame roundtrip PASS не доказывает SSH path. Следующее предложение —
+   локальная transport diagnostics доработка с RED/GREEN; второго upload/test нет.
    Рабочие службы/DB/poller исключены из gate; Linux на АРМ не требуется.
    AWG2/package016 неизменяемы, general issuance disabled; activation запрещена.
 

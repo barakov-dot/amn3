@@ -1,6 +1,6 @@
 # Phase16: один изолированный Linux-прогон bot candidate
 
-Статус: **APPROVAL_CONSUMED / ONE_SSH_ATTEMPT / UNKNOWN_NO_RETRY**.
+Статус: **TEST_APPROVAL_CONSUMED / READBACK_PATH_ABSENT / LINUX_RESULT_UNKNOWN**.
 [Результат единственной попытки](#execution-2026-09-21); повтор запрещён.
 Это конкретный approval contract под Task3B [единственного плана](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),
 не новый план deployment. После локальной подготовки оператор ответил
@@ -158,7 +158,7 @@ run_process вернул только process_io. Он объединяет pipe
 
 <a id="recovery-readback-scope"></a>
 
-## Следующий точный scope — read-only recovery, пока НЕ согласован
+## Read-only recovery scope — согласован и выполнен один раз
 
 Один SSH через прежний fixed-role Spain trust, без ZIP upload, установки,
 повторного запуска gate/тестов, сигналов, удаления или service actions.
@@ -180,3 +180,45 @@ receipt contract; если STOP — зафиксировать точный reas
 Основание отдельного согласования — уже утверждённый раздел «Результат и возврат»:
 «Если транспорт потерян ... отдельное recovery/readback разрешение».
 Этот scope не расширяет разрешение на production activation или shared DB.
+
+<a id="recovery-readback-result-2026-09-21"></a>
+
+## Read-only recovery выполнен — parent отсутствует, 2026-09-21
+
+Оператор ответил «продолжай» на точный запрос одного read-only подключения для
+claim.json/result.json. По этому scope выполнен ровно один SSH, без test retry.
+[Нормализованный результат и локальные проверки](phase16-bot-linux-readback-2026-09-21.json).
+AMN3 base5b1383c, probe SHA256
+b794dc3728358a00b2400236b3d5c1eb111ca03820bcf3bc972798534d91d924.
+Claim18:58:44.714414Z, завершение18:58:47.219509Z (21:58:47 МСК).
+Read-only transport ответил: **PATH_ABSENT_UNKNOWN**, missing_component=
+**bot-candidates**. Nofollow traversal прошёл /opt и /opt/amn2-spain, затем
+родитель тестового target отсутствовал. Target/venv/claim/result отсутствуют
+на момент этого чтения; содержимое результатов не прочитано. Это не доказывает
+причину первой ошибки, историю remote execution или отсутствие процессов.
+Process scan не выполнялся; quiescence и Linux signal evidence остаются UNKNOWN.
+Remote writes=false, service_actions=0; нет DB/.env/token/journal/argv чтения.
+
+Использован прежний fixed-role trust и run_bounded_process с успешно применявшимся
+read-only stdin протоколом /usr/bin/python3 -I -B -, без framed ZIP/bootstrap.
+Collector stdlib-only: только read-only nofollow directory/file descriptors,
+regular-file/owner/mode/64KiB limits, allowlisted normalized receipt fields.
+Локально9 checks PASS: valid PASS, bad bindings/actions/counts/steps, STOP,
+missing path и nonregular file. Эти mock checks не доказывают Linux nofollow
+file-open path: до файлов remote не дошёл. Скрипты и claims/results сохранены
+в C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-linux-runner-20260921;
+LF hashes обоих скриптов записаны в JSON выше. Read-only approval использован.
+
+Дополнительно один полностью локальный frame roundtrip: unchanged remote script
+и exact30485208-byte ZIP через исходный run_process в Windows Python, после
+POSIX shlex разбора command. Получен ожидаемый exit3/platform_python, без
+process_io и без writes. Это проверка framing/pipe на локальном пути, не SSH
+command transmission, Linux prerequisites или реальная причина первого сбоя.
+Source/runner/bundle не исправлялись, старые baseline suites не повторялись.
+
+**Следующий шаг:** локальная доработка наблюдаемости transport: сохранять отдельно
+exit code, стадию pipe failure, размеры/hash и безопасную классификацию ошибки;
+без raw SSH stderr/секретов, ослабления caps/trust/no-retry. Сначала synthetic
+early-exit RED и bounded transport GREEN; затем новый exact gate только по
+отдельному разрешению. Это предложение code fix, ещё не выполненное и не
+разрешение второго upload/test. К повторному SSH сейчас не переходить.

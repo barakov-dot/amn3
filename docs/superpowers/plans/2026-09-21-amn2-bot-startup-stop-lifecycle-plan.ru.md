@@ -23,6 +23,8 @@ pytest из сохранённой M3 venv; стандартный SQLite thread
 Tasks 1–2 реализованы; Task 3 не принят. После отдельного server approval
 [попытка 21.09](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#execution-2026-09-21)
 вернула UNKNOWN_NO_RETRY/process_io; negative/6signals не подтверждены.
+Последующий [read-only recovery](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#recovery-readback-result-2026-09-21)
+подтвердил отсутствие parent bot-candidates на момент чтения; результата tests нет.
 Нижние NOT_RUN/запрет install описывают исходный local-only этап; последующее
 разрешение одной isolated test-venv попытки использовано и не разрешает retry.
 [Actual evidence](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#lifecycle-implementation-m4-2026-09-21), AMN2 6e68235. Inline method

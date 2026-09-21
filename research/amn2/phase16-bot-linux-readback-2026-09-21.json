@@ -1,0 +1,47 @@
+{
+  "schema": "phase16.bot-linux-readback-local.v1",
+  "claim": {
+    "scope": "one read-only target claim/result recovery",
+    "max_attempts": 1,
+    "probe_sha256": "b794dc3728358a00b2400236b3d5c1eb111ca03820bcf3bc972798534d91d924",
+    "claimed_at": "2026-09-21T18:58:44.714414+00:00"
+  },
+  "ssh_attempts": 1,
+  "wall_cap_seconds": 60,
+  "output_cap_bytes": 65536,
+  "status": "PATH_ABSENT_UNKNOWN",
+  "remote": {
+    "schema": "phase16.bot-linux-readback.v1",
+    "remote_writes": false,
+    "service_actions": 0,
+    "process_scan": false,
+    "quiescence": "UNKNOWN",
+    "status": "PATH_ABSENT_UNKNOWN",
+    "missing_component": "bot-candidates"
+  },
+  "finished_at": "2026-09-21T18:58:47.219509+00:00",
+  "local_validation": {
+    "local_checks_passed": 9,
+    "ssh_attempts": 0,
+    "checks": "valid PASS; bad source/scope/actions/counts/steps; STOP normalization; absent path; reject nonregular file",
+    "linux_nofollow_execution": "NOT_RUN"
+  },
+  "local_frame_check": {
+    "status": "LOCAL_FRAME_ROUNDTRIP_PASS",
+    "ssh_attempts": 0,
+    "remote_execution": false,
+    "bundle_bytes": 30485208,
+    "script_sha256": "5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102",
+    "returncode": 3,
+    "result": {
+      "schema": "phase16.bot-linux-gate.v1",
+      "status": "STOP_BEFORE_GATE_OR_UNKNOWN",
+      "reason": "platform_python"
+    },
+    "limitation": "POSIX shlex parse and local Windows Python only; not actual SSH command transmission or Linux startup; no root cause established"
+  },
+  "retained_local_artifacts": {
+    "recovery_readonly.py": "b794dc3728358a00b2400236b3d5c1eb111ca03820bcf3bc972798534d91d924",
+    "run_recovery_readonly.py": "4066e3f6218793479cd812ceffdaa3f197278908eb4011ffb719df74c20b0f7a"
+  }
+}
