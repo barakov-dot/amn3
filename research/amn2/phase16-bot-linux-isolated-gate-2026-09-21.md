@@ -1,6 +1,6 @@
 # Phase16: один изолированный Linux-прогон bot candidate
 
-Статус: **TEST_APPROVAL_CONSUMED / READBACK_PATH_ABSENT / LINUX_RESULT_UNKNOWN**.
+Статус: **READONLY_FRAME_PROBE_PASS / NEW_ISOLATED_TEST_APPROVAL_PENDING / LINUX_RESULT_UNKNOWN**.
 [Результат единственной попытки](#execution-2026-09-21); повтор запрещён.
 Это конкретный approval contract под Task3B [единственного плана](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),
 не новый план deployment. После локальной подготовки оператор ответил
@@ -358,7 +358,7 @@ service/DB/Telegram/deploy/cleanup в этом slice отсутствуют.
 
 <a id="readonly-transport-probe-v2-approval"></a>
 
-## Следующий точный запрос: probe v2 после local fix, pending approval
+## Исторический probe v2 после local fix — выполнен, PASS
 
 Тот же no-write scope226-byte frame/32-byte sentinel, прежний remote probe
 SHA475d31ae… и ожидаемый sentinel SHA3bf188a0…; timeout20s/output4KiB/no retry.
@@ -369,14 +369,92 @@ Original ZIP/test-venv/test run/бот/службы/DB не входят в scop
 Local script:
 C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-transport-diagnostics-20260921/readonly_transport_probe_v2.py.
 Его LF SHA256: ba50b0fbadbf1e97ab630fb9e9ef43ca6fd54b4a33da2ed974ccfa19426dd322.
-Будущие evidence: readonly-probe-v2.claim.json и readonly-probe-v2.result.json
-в том же scratch. Offline preview PASS, новый claim отсутствовал при подготовке.
-До исполнения повторно сверить hashes/Git/claim; нужна новая точная авторизация.
+Сохранённые evidence: readonly-probe-v2.claim.json и readonly-probe-v2.result.json
+в том же scratch. Перед попыткой сверены hashes/Git и отсутствие claim.
+Историческая команда ниже исполнена один раз по «продолжай»; не повторять.
 
 ~~~powershell
 & 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -B 'C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-transport-diagnostics-20260921/readonly_transport_probe_v2.py' --execute --approve PHASE16_TRANSPORT_PROBE_READONLY_002 --sha256 ba50b0fbadbf1e97ab630fb9e9ef43ca6fd54b4a33da2ed974ccfa19426dd322
 ~~~
 
-Команда **НЕ исполнена**. PASS требует exit0 и exact schema/32-byte SHA response;
-иной итог STOP/UNKNOWN и сохранение diagnostics без следующего SSH. Даже PASS
-не разрешает загрузку candidate или Linux tests — это отдельный server gate.
+Команда исполнена один раз: exit0 и exact schema/32-byte SHA response PASS.
+Approval использован. Этот PASS не разрешает загрузку candidate или Linux tests;
+следующий конкретный server gate описан ниже, pending отдельного согласования.
+
+<a id="readonly-probe-v2-pass-2026-09-21"></a>
+
+## Контрольный framed SSH probe v2 — PASS, 2026-09-21
+
+Оператор ответил «продолжай» на точный запрос одного no-write SSH после fix.
+AMN3 HEAD5fbf181, clean; local/probe LF hashes совпали, claim до запуска отсутствовал.
+Один SSH attempt19:21:56.382946Z →19:22:03.432620Z (22:22:03 МСК),
+[сохранённый нормализованный receipt](phase16-bot-transport-probe-v2-2026-09-21.json).
+**READONLY_FRAME_PROBE_PASS**: exit0, stdin226 bytes, stdout132, stderr0,
+pipe failures0. Remote response содержит ровно schema phase16.transport-probe.v1,
+bytes32 и SHA3bf188a0… как в contract. Проверены fixed-trust SSH и исполнение
+короткого hash-bound frame после PROGRAMDATA fix. Этот путь больше не UNKNOWN.
+
+Это не проверка передачи30.5MB ZIP, Linux venv/ensurepip/unshare, зависимости48pins,
+negative/6signal cases, bot startup/stop budget, shared DB или health служб.
+Содержимое remote probe не выполняет file writes/service actions/DB/Telegram;
+установки, загрузки candidate и cleanup не было. Старые test/readback/probe claims
+сохранены. Quiescence старых процессов этим probe не исследовалась.
+
+После PASS локальный offline candidate preview подтвердил точные bundle,
+manifest/payload и remote script bindings. Candidate/source/locks/package016
+не менялись и не пересобирались; прежние45/101/94+6/312 tests не повторялись.
+Это docs/evidence slice; checks readback/JSON/links/diff/secret/changelog.
+
+<a id="isolated-linux-attempt2-approval"></a>
+
+## Следующий gate: одна новая isolated Linux test attempt после fix
+
+**PENDING_APPROVAL / NOT_EXECUTED.** Это запрос нового отдельного разрешения на
+вторую test attempt; read-only probe approval уже использован. Первый test claim
+и все receipts остаются immutable. Замена evidence-dir сама по себе не является
+разрешением retry; выполнить следующую команду можно только после отдельного
+ответа оператора именно на этот upload/test-environment scope.
+
+Код и payload уже подготовлены и проверены, без изменений серверного скрипта:
+
+| Binding | Значение |
+| --- | --- |
+| AMN2 source | 6e682356ed14a62d636ee58039fd3a389e794809 |
+| Bundle size / SHA256 | 30485208 / e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7 |
+| Manifest SHA256 | 6792cb2cd28b0ce70ae031cac04b29f40db908f5e8bad0770e689de390a9a37d |
+| Local runner LF SHA256 | 8d5ce722245f11aba159d8544e7125c1c0d78b267fe41096445f186861e0d75b |
+| Remote runner LF SHA256 | 5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102 |
+| Remote target | /opt/amn2-spain/bot-candidates/phase16-bot-candidate-20260921-6e68235-001 |
+| New local evidence | C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-linux-runner-20260921/execution-v2 |
+
+Один SSH/upload immutable ZIP. Remote сначала проверяет platform/ABI, hashes,
+nofollow parents/target absence, >=512MiB free, existing venv/ensurepip и unshare.
+Parent отсутствовал при readback18:58:47Z; это исторический факт, не свежая
+проверка. Существующий target при новом запуске означает STOP, без overwrite.
+Нет apt/sudo/bootstrap/download; отсутствие prerequisites означает STOP.
+Только после проверок создаётся отдельная test-venv с offline48pins в новом
+каталоге, затем один expected-negative PRE_LOOP/SIGTERM и шесть synthetic cases.
+Все дочерние команды изолированы unshare --net, fake SQLite/bot/lock;
+source readback и прежние exact PASS/STOP criteria обязательны.
+
+Прежние caps: remote watchdog290s с резервом в300s; transport timeout330s плюс
+bounded local cleanup; venv45s/install100s/pip-check15s/metadata15s/negative25s/
+green95s, tests суммарно<=120s, own child10s, output256KiB/command и64KiB SSH.
+Любой STOP/UNKNOWN/timeout — сохранить claim/result, без второго соединения,
+retry или cleanup. Никаких live DB/config/token/poller/service actions, production
+activation, изменения AWG2/web/package016 или общей выдачи.
+
+CLI marker PHASE16_ISOLATED_LINUX_TEST_6e68235_001 сохранён ради неизменности
+remote protocol/artifact. Он не идентификатор нового разрешения: новую attempt
+отличают этот contract, явное подтверждение оператора и exclusive execution-v2
+claim. При фиксации результата обязательно указать, что это вторая test attempt.
+
+После точного нового согласования, из active AMN3 checkout, повторно сверить
+hashes/Git и отсутствие execution-v2; затем ровно один запуск:
+
+~~~powershell
+& 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -B scripts/phase16_bot_linux_gate.py --bundle 'C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-release-preparation-20260921-6e68235/phase16-bot-candidate-20260921-6e68235-001.zip' --execute --approve PHASE16_ISOLATED_LINUX_TEST_6e68235_001 --approved-remote-sha256 5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102 --evidence-dir 'C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-linux-runner-20260921/execution-v2'
+~~~
+
+Новый evidence-dir отсутствовал при подготовке. Команда **не исполнена**;
+Linux signal acceptance/shared DB compatibility/activation gates остаются открыты.

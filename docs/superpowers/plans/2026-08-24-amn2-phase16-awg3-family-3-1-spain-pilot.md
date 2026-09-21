@@ -218,9 +218,11 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    По «продолжай» [probe v1 выполнен один раз](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#programdata-diagnosis-2026-09-21):
    exit255/stdout0/stderr0. Local ssh -V доказал причину startup failure — allowlist
    исключал PROGRAMDATA. Исправлен общий helper; 2RED→45PASS и local ssh -V exit0.
-   [Probe v2](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#readonly-transport-probe-v2-approval)
-   подготовлен, pending approval: один no-write SSH/226-byte frame, без ZIP/install.
-   После fix новых подключений не было; framed remote path/Linux evidence UNKNOWN.
+   По следующему «продолжай» [probe v2 PASS](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#readonly-probe-v2-pass-2026-09-21):
+   один SSH, exit0/32-byte exact SHA, stderr0; короткий framed remote path доказан.
+   ZIP/venv/unshare/negative/6signals не проверялись. Подготовлена
+   [одна новая isolated Linux test attempt](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-attempt2-approval),
+   pending approval: exact bundle, новый execution-v2 claim, без service/DB/activation.
    Рабочие службы/DB/poller исключены из gate; Linux на АРМ не требуется.
    AWG2/package016 неизменяемы, general issuance disabled; activation запрещена.
 

@@ -458,8 +458,11 @@ parent bot-candidates отсутствует, сохранённого target/re
 43PASS, без изменения remote script/bundle. По следующему «продолжай» выполнен
 [один probe v1 и local diagnosis](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#programdata-diagnosis-2026-09-21):
 отсутствие PROGRAMDATA воспроизвело local ssh -V exit255, добавление устранило
-startup defect. Новый helper проверен45PASS и local ssh -V exit0. Probe v2
-с исправленным environment подготовлен, server approval pending; remote path UNKNOWN.
+startup defect. Новый helper проверен45PASS и local ssh -V exit0. После точного
+«продолжай» [probe v2 PASS](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#readonly-probe-v2-pass-2026-09-21):
+короткий framed SSH path подтверждён, но Linux environment/tests ещё не проверены.
+Подготовлена одна новая isolated test attempt с прежним immutable bundle/remote
+script и отдельным execution-v2 claim; нужно новое upload/test-environment approval.
 Повторного upload/test/activation не было, Linux signal evidence не подтверждён.
 System metadata сами по себе не закрывают M3; повторного согласования идеи
 пересоздания не нужно. Прежние lifecycle94 PASS/6 SKIP не повторялись.

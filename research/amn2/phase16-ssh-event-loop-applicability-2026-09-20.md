@@ -979,3 +979,18 @@ general issuance disabled. Подготовлен один no-write framed trans
 signal evidence не подтверждены. Подготовлен reviewable no-write probe v2,
 нужно отдельное согласование. AWG2/package016 сохранены, issuance disabled;
 server install/stage/deploy/service/DB/Telegram/cleanup отсутствуют.
+
+<a id="bot-transport-probe-v2-pass-2026-09-21"></a>
+
+## Read-only framed transport probe v2 — PASS, 2026-09-21
+
+По «продолжай» выполнен один согласованный probe v2, AMN3 base5fbf181:
+[receipt и следующий gate](phase16-bot-linux-isolated-gate-2026-09-21.md#readonly-probe-v2-pass-2026-09-21),
+[JSON](phase16-bot-transport-probe-v2-2026-09-21.json).
+19:22:03Z (22:22:03 МСК): exit0, stdin226/stdout132/stderr0, exact32-byte SHA
+ответ. Fixed SSH и короткий framed remote execution после PROGRAMDATA fix PASS.
+ZIP/venv/unshare/48pins/negative/6signals/DB compatibility этим не проверены.
+Нет remote writes/service/DB/Telegram/install/stage/deploy/cleanup. Offline bundle
+preview PASS, code/source/locks/package016 unchanged; suites не повторялись.
+Подготовлен новый single-attempt upload/isolated test gate с execution-v2 claim;
+его отдельное approval pending, команда не исполнена. AWG2_UNTOUCHED, issuance disabled.

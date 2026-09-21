@@ -7,6 +7,15 @@
 
 ## 2026-09-21
 
+- По «продолжай» [контрольный framed SSH probe v2 прошёл](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#readonly-probe-v2-pass-2026-09-21):
+  одна попытка, exit0, exact32-byte SHA response, stderr0. Короткий framed path
+  после PROGRAMDATA fix подтверждён; ZIP/venv/unshare/Linux signals не проверены.
+  Remote writes/install/service/DB/deploy=0. Сохранён нормализованный receipt;
+  подготовлен новый exact isolated test attempt contract с отдельным execution-v2
+  claim, pending approval. Offline bundle/hash binding PASS, код/пакеты прежние,
+  tests не повторялись. Checks readback/JSON/links/diff/secret/changelog;
+  AWG2/package016 сохранены, общая выдача disabled, не acceptance.
+
 - По «продолжай» выполнен [один no-write SSH probe и local root-cause check](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#programdata-diagnosis-2026-09-21):
   exit255/пустой output; allowlist исключал PROGRAMDATA. Локальный ssh -V
   воспроизвёл255, добавление одной переменной дало0, обратный контроль снова255.

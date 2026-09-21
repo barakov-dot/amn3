@@ -1,0 +1,40 @@
+{
+  "schema": "phase16.transport-probe-local.v1",
+  "claim": {
+    "scope": "PHASE16_TRANSPORT_PROBE_READONLY_002",
+    "max_attempts": 1,
+    "local_sha256": "ba50b0fbadbf1e97ab630fb9e9ef43ca6fd54b4a33da2ed974ccfa19426dd322",
+    "runner_sha256": "8d5ce722245f11aba159d8544e7125c1c0d78b267fe41096445f186861e0d75b",
+    "remote_probe_sha256": "475d31ae4babbc2c3e995328a82a7517a708194d306a08e865b7232ca435caa3",
+    "claimed_at": "2026-09-21T19:21:56.382946+00:00"
+  },
+  "ssh_attempts": 1,
+  "status": "READONLY_FRAME_PROBE_PASS",
+  "transport": {
+    "schema": "phase16.bot-transport.v1",
+    "returncode": 0,
+    "failure_stage": null,
+    "stdin_bytes_requested": 226,
+    "stdin_bytes_accepted": 226,
+    "stdin_complete": true,
+    "output_complete": true,
+    "stdout": {
+      "bytes_observed": 132,
+      "bytes_retained": 132,
+      "prefix_sha256": "495c238108571a30536f5dc8e2776b6989344be57d64ea660ba06653cc45b945"
+    },
+    "stderr": {
+      "bytes_observed": 0,
+      "bytes_retained": 0,
+      "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pipe_failures": [],
+    "stderr_classification": "NO_STDERR"
+  },
+  "remote": {
+    "schema": "phase16.transport-probe.v1",
+    "bytes": 32,
+    "sha256": "3bf188a05aa9316d60a03dc7500d53c7a3cb12ebd0bd310a39736353f650893d"
+  },
+  "finished_at": "2026-09-21T19:22:03.432620+00:00"
+}
