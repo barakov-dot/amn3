@@ -39,6 +39,8 @@ readback и не разрешают повторять completed/consumed опе
 21.09 оператор согласовал следующий локальный M3 scope ответом «согласовываю,
 продолжай»: отдельная среда с неизменённым lock и ограниченные existing tests.
 Он выполнен; [receipt и границы](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#dependency-validation-2026-09-21).
+21.09 после «приступаем» завершён source-only M4: карта stop paths и writers,
+минимальный future readback contract; конечный stop budget не доказан.
 Target inventory, source fix, merge/build и live-действия этим не разрешены.
 
 ### 1. Source и имеющееся evidence
@@ -147,6 +149,82 @@ bot/web; состав других writers; upper bound разрешённой �
 нужно отдельное lifecycle/recovery решение. Manager escalation/force kill
 не является drain PASS; restart после UNKNOWN не доказывает отсутствие дублей.
 
+<a id="stop-budget-m4"></a>
+
+#### M4: результат локального source-only разбора — 2026-09-21
+
+Статус: **SOURCE_REVIEW_COMPLETE / STOP_BUDGET_UNPROVEN / TARGET_UNKNOWN**.
+[Датированный receipt с точными source/dependency ссылками](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#stop-budget-m4-2026-09-21).
+Читались кандидат 1bd7f62 и сохранённые pinned aiogram 3.30.0 / Uvicorn 0.52.3
+из M3; code/tests/units/dependencies не менялись, runtime не запускался.
+
+| Участок | Что действительно ограничено | Чего недостаточно для stop budget |
+| --- | --- | --- |
+| Вход и startup | Admission/factory/recheck имеют общий coroutine timeout; default 30s, allowed 1..120s в source settings | Settings, lock/client setup до таймера; синхронные участки и dispatched factory не получают hard execution deadline. Factory выполняет schema/seed writes; после timeout cleanup ждёт её |
+| Вход по сигналу | Pinned aiogram регистрирует SIGTERM/SIGINT внутри start_polling | В app.main нет более раннего SIGTERM handler: admission/factory/recheck уже прошли к регистрации. Coroutine cancellation в Windows tests не доказывает startup cleanup по Linux SIGTERM; exact target signal path UNKNOWN |
+| Остановка polling | После входа в cleanup приём закрыт, watchdog/polling cancel запрошен до drain | Ожидание отмены tasks без отдельного срока; aiogram shutdown hooks также await. STOPPING и READY — синхронные sends, без настроенного socket timeout; EXTEND_TIMEOUT_USEC в этом notifier нет |
+| Принятые handlers | Не более 8 одновременно; lifetime сохраняет их до завершения, worker FIFO capacity 8 | Один handler содержит несколько workflow calls и Telegram sends; drain ждёт весь handler. Число jobs не является числом SSH-вызовов или секунд |
+| Remote/local mutation | SystemSshClient default 20s на локальный subprocess invocation | Docker revoke: read → write → restart, три invocation; reset обходит список устройств без собственного cap. После remote идёт local transaction/audit. Timeout локального SSH не доказывает terminal remote state; общего operation deadline нет |
+| Delivery/record | Pinned aiogram default request timeout 60s, app.create_bot его не переопределяет | Несколько последовательных sends, затем запись результата/ответ. 60s — настройка отдельного HTTP request, не bound handler/drain; пример unit Stop=30s не покрывает даже настроенное окно одного send |
+| Resource close | Порядок handlers → worker → session → lock сохраняется | Worker ждёт factory/pump/close и executor.shutdown(wait=True) без общего deadline; SQLite/filesystem/close не имеют доказанного wall-time bound. Session close await + 0.25s sleep не дают hard 0.25s bound |
+| Web/API/agent | CLI запускает Uvicorn без timeout_graceful_shutdown; pinned default None | Ожидание connections/tasks без этого deadline; lifespan идёт отдельно. Web health await to_thread не ограничивает работу потока и не доказывает её прекращение при отмене request |
+
+Это source-level ограничения доказательства, не сообщение о наблюдавшемся
+зависании или потере данных. Состав reset зависит от repo.list_user_devices:
+max_devices настройки выдачи не подставляется как доказанный cap существующих
+данных. Наличие конечных отдельных request timeouts не доказывает конечную
+сумму до освобождения lock/процесса. Увеличение TimeoutStopSec само по себе
+не закрывает ранний signal path и неограниченные участки.
+
+**Другие writers.** Bot instance lock относится к bot instance. В source есть
+независимые web repositories (включая summary/audit после health), API repository
+с schema initialization, CLI mutations и local-agent RepositoryAgentAuditSink.
+Даже read-oriented agent request может записывать audit. Их наличие в коде
+не доказывает запуск на target или общую БД. Необходима матрица роли → точный
+entrypoint/revision → process/cgroup → нормализованная DB identity → владелец/
+источник запуска. Scheduler/manual CLI/child operations учитываются отдельно;
+пустой bot queue или stopped bot unit не доказывают quiescence этих контуров.
+
+**Минимальный будущий readback M4 (не команда на исполнение).**
+
+1. До exact approval заполнить target identity, реальные имена bot/web units,
+   известные дополнительные API/agent/writer entrypoints, source/dependency
+   binding и allowlist источников. Не считать example names именами Spain units.
+   Задать конечные time/output/object caps и stop-condition для сбора; сейчас
+   target/имена/caps не установлены, готового исполняемого /APPROVE нет.
+2. Один нормализованный снимок по согласованным units: checked_at, версия manager,
+   Id, LoadState, ActiveState, SubState, Type, NotifyAccess; MainPID, ControlGroup
+   и process-start identity для защиты от повторного использования PID.
+3. Effective properties: TimeoutStartUSec, TimeoutStopUSec,
+   TimeoutStartFailureMode, TimeoutStopFailureMode, KillMode, KillSignal,
+   FinalKillSignal, SendSIGKILL, Restart, RestartUSec, WatchdogUSec,
+   StartLimitIntervalUSec, StartLimitBurst. Не заданное/неподдерживаемое поле
+   сохраняется UNKNOWN; source example и manager default не подставляются.
+4. Отдельно нормализовать execution hooks: наличие и число ExecStartPre/
+   ExecStartPost/ExecStop/ExecStopPost, ожидаемый entrypoint/аргументы и fingerprints
+   unit/drop-ins/deployed files без raw environment/команд с секретами. Для
+   дополнительных hooks сначала нужен их bounded scope: одних timers мало.
+   Действующий Uvicorn graceful timeout и bot admission/polling/client settings
+   сверять с approved intended values, не читать .env ради этого gate.
+5. Для каждого writer — role/count, entrypoint/source binding, DB identity
+   equality и evidence owner/launch source. Если нельзя установить DB identity
+   без protected configs, сохранить UNKNOWN до отдельного разрешённого способа.
+   Отсутствие в allowlist не равно отсутствию процесса; неизвестный writer,
+   drift, ошибка запроса или cap означают STOP без расширения поиска/повторов.
+
+Readback только описывает состояние: он не stop/restart/signal/Telegram probe,
+не запись в БД и не proof quiescence. Не собирать raw cmdlines, EnvironmentFile,
+конфиги, keys, journals или содержимое БД. Фактические target evidence по всем
+этим пунктам отсутствуют; M3/M4 не закрыты будущим перечнем properties.
+
+**Решение перед реализацией/activation.** Нужен отдельный локальный lifecycle
+design: обработка stop во время startup до polling; конечный разрешённый workload
+и пределы каждой стадии либо явная recovery policy для неограниченных/partial
+операций. Для выбранного решения затем отдельно согласуются code/tests/units,
+Linux signal validation и target readback. Нельзя обещать lossless stop за
+выбранное число секунд, просто отменить dispatched mutation или приравнять
+manager force kill к успешному drain. До этого budget UNKNOWN, execution BLOCKED.
+
 ### 5. Stage, recovery и rollback
 
 Application-stage сохраняет snapshot/backup, но сам по себе не активирует
@@ -215,18 +293,18 @@ persistence, leaks и live recovery остаются NOT_EXECUTED в этом ga
 | M1 | Windows traffic PASS на обоснованном client/engine/hypothesis path; root-cause-bound quality correction, стабильное acceptance и полный strict A/B | Отложенные P0/P1 главного плана; только после возврата оператора и exact approval. Сейчас повтор не запрашивать |
 | M2 | Валидная DNS/прочая measurement coverage, endpoints и budgets критериев v1 | Отдельное решение по методике; DNS bridge STOP, tooling ради gate не создавать |
 | M3 | Fresh target deployed/source/state + Python/ABI/full dependencies и соответствие intended lock | Локальная Windows часть закрыта 21.09: exact pins/hashes, pip check, 68 PASS. Target/Linux evidence отсутствует; live readback требует exact approval, повтор local suite без новой причины не нужен |
-| M4 | Effective bot/web units, другие writers, конечный startup-cleanup/stop budget и recovery policy для UNKNOWN | Readback по exact approval и согласованное решение до deployment; 30s из примера не доказательство |
+| M4 | Effective units/entrypoints, другие writers, конечный startup-cleanup/stop budget и recovery policy для UNKNOWN | Source-only карта и минимальный readback contract готовы 21.09; ранний SIGTERM/неограниченные участки требуют lifecycle решения. Target readback по exact approval; 30s не доказательство |
 | M5 | Retained inventory, transaction ownership/quiescence, preservation/cleanup readback с исключениями v1 | Четыре раздельных recovery gates; metadata tools готовы локально, live authority отсутствует |
 | M6 | Future artifact source/tooling/dependency binding, identity/manifest; activation/revert contract и DB/remote preservation | Отдельный packaging/activation scope после dependencies; package016 сохранить, новый ID/hash/revert target не назначены |
 | M7 | Исполненные bounded startup/drain/coexistence/persistence/restart/leak/rollback checks на связанных artifact/target | Раздел 6 после prerequisites и exact approvals; 33/312 PASS не закрывают target acceptance. Synthetic dependency slice может отдельно предшествовать live gates |
 
-Локальный dependency-validation M3 выполнен после отдельного согласования.
-Следующий предмет решения — **локальный source-only разбор stop budget M4**:
-перечень ограниченных/неограниченных участков startup/drain и других writers,
-затем минимальный список effective target properties для будущего approval.
-Не подбирать секунды и не менять unit. Сам target readback, systemd simulation,
-новый code fix и live execution не входят в выполненную dependency-validation.
-iPhone/A/B остаются отложенными; deployment не разрешён.
+Локальный dependency-validation M3 и согласованный source-only M4 выполнены.
+Следующий предмет решения — **отдельный локальный lifecycle design** по раннему
+SIGTERM, workload bounds и terminal/recovery policy из [M4](#stop-budget-m4).
+После выбора решения нужны отдельные code/test scope и exact target-readback
+approval; сейчас не назначать stop seconds и не менять unit. Systemd simulation,
+новый code fix и live execution не выполнялись. iPhone/A/B остаются отложенными;
+deployment не разрешён.
 
 Для будущего исполнения approvals раздельны: bounded target inventory;
 recovery signals; адресная cleanup и снятие package-блокировки; новый package

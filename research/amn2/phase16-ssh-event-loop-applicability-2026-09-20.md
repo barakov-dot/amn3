@@ -378,3 +378,77 @@ Task 3B/5/6 не приняты. [Gate и M1–M7](../../docs/superpowers/specs/
 Прежние Windows traffic/quality FAIL, DNS bridge STOP и отложенные iPhone/A/B
 сохранены. AWG2_UNTOUCHED; package016 immutable; general issuance disabled.
 Нет SSH/VPS/реальной выдачи, stage/install/deploy, cleanup, source fix или merge.
+
+<a id="stop-budget-m4-2026-09-21"></a>
+
+## Stop budget M4: source-only evidence — 2026-09-21
+
+Статус: **SOURCE_REVIEW_COMPLETE / STOP_BUDGET_UNPROVEN / TARGET_UNKNOWN**.
+Approval: «приступаем» после предложения source-only M4. Только локальное
+чтение и документация; без новых tests, dependency install, code/unit edits,
+systemd simulation, процесса приложения или любых VPS/Telegram действий.
+AMN3 entry HEAD 3597eb78c3f3a5f14ec4093872bbfe327bf3185e, clean.
+AMN2 1bd7f62d1fdd3829bc278110ecdc44d3568676a3, clean; unchanged.
+
+### Проверенная цепочка source
+
+Ссылки привязаны к одному immutable candidate; это не deployed SHA.
+
+| Source | Проверенный факт и предел |
+| --- | --- |
+| [app/main.py:46–172](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/main.py#L46-L172) | Lock/client до startup timer; admission → worker.start → state recheck внутри; polling после; cleanup cancel → lifetime → worker → session без общего срока |
+| [Factory:323–359](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/main.py#L323-L359), [settings:32](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/config/settings.py#L32) | Factory schema/seed writes; admission default 30s, validation 1..120, не manager start/stop SLA. Settings и синхронные операции не становятся hard bounded |
+| [WorkflowWorker](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/bot/workflow_worker.py#L67-L181), [HandlerLifetime](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/bot/handler_lifetime.py#L30-L119) | Shielded factory/jobs/handlers; drain без общего deadline, executor shutdown wait=True; repeated root cancellation не даёт terminal proof |
+| [SSH](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/server/ssh.py#L50-L157), [Docker revoke:413](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/server/peer_apply.py#L413-L447) | SSH default 20s на subprocess; Docker read/write/restart последовательно. Не один timeout на всю revoke, не remote quiescence |
+| [Reset:878](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/bot/workflows.py#L878-L939), [cascade:143](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/services/device_revoke.py#L143-L208) | Список устройств без локального reset cap; remote removals, затем local cascade/transaction/audit; remote success/local fail остаётся partial |
+| [Delivery record:739](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/bot/handlers.py#L739-L787), [delivery:873](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/bot/handlers.py#L873-L923) | Несколько sends либо send→record→reply; handler drain сохраняет весь путь, queue capacity не ограничивает его время |
+| [SystemdNotifier](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/systemd_notify.py#L45-L73) | Синхронный Unix datagram send без заданного socket timeout; READY/STOPPING/WATCHDOG, нет EXTEND_TIMEOUT_USEC |
+| [Web health/repository](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/web/app.py#L2179-L2265), [CLI entrypoints](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/cli.py#L1573-L1612) | Health to_thread и последующий summary/audit имеют отдельный lifetime. Web/API uvicorn.run без graceful timeout; request cancellation не доказывает прекращения worker thread |
+| [Agent launch](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/cli.py#L1791-L1817), [agent audit](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/agent/audit.py#L37-L61), [API repository](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/api/app.py#L247-L254), [CLI mutation](https://github.com/barakov-dot/amn2/blob/1bd7f62d1fdd3829bc278110ecdc44d3568676a3/app/cli.py#L1615-L1647) | Возможные независимые writers; schema/audit тоже запись. Scope не является полным аудитом всех endpoints. Target presence, DB equality и scheduler/manual ownership UNKNOWN |
+
+### Pinned dependencies и signal boundary
+
+Прочитаны сохранённые M3 файлы из
+C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-dependency-validation-20260921-1bd7f62/venv/Lib/site-packages.
+[Wheel versions/SHA256](phase16-web-bot-dependency-validation-2026-09-21.json)
+связывают aiogram 3.30.0 и Uvicorn 0.52.3 с unchanged lock; версии не взяты
+из latest docs. Библиотеки не импортировались для runtime probe.
+
+| Файл относительно site-packages | Source evidence |
+| --- | --- |
+| aiogram/client/session/base.py:45–60; aiohttp.py:129–187 | DEFAULT_TIMEOUT=60.0; app.create_bot не переопределяет timeout. Session close await + sleep(0.25), не hard deadline всей операции |
+| aiogram/dispatcher/dispatcher.py:198–258, 520–630 | Polling request timeout отдельно от send; polling backoff существует. handle_signals=True по умолчанию; SIGTERM/SIGINT handlers ставятся в start_polling до emit_startup; затем await/cancel polling tasks и shutdown hooks |
+| uvicorn/config.py:231,279; server.py:272–319 | timeout_graceful_shutdown=None по умолчанию; shutdown ждёт connections/tasks через wait_for с этим значением, затем отдельно lifespan. CLI web/API/agent не передают override |
+
+Статический вывод: app.main не устанавливает собственный SIGTERM handler до
+admission/factory/recheck; регистрация pinned aiogram происходит позже, внутри
+polling. Это отдельная **startup signal gap** в доказательстве graceful cleanup:
+существующие synthetic cancellation tests на Windows не проверяют Linux SIGTERM
+в этом окне. Не утверждается, что такое прерывание происходило на target, и
+не предлагается проверять его live. Нужен отдельно согласованный lifecycle design
+и затем bounded Linux/signal validation выбранного решения.
+
+M4 нельзя закрыть формулой 8 × 20s или простым увеличением 30s из bot unit example:
+нет полного bound для accepted handler, startup cleanup, DB/filesystem/close,
+других writers и terminal remote state. Uvicorn default None — ещё один открытый
+участок для exact CLI entrypoint; фактический target может иметь иной entrypoint
+или настройки и пока UNKNOWN. Timers источника не переименованы в target values.
+
+### Результат и границы
+
+[Существующий контракт M4](../../docs/superpowers/specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#stop-budget-m4)
+теперь содержит карту bounded/unbounded участков, writers и минимальный future
+readback: exact identities/manager version, state/process identity, start/stop/
+kill/restart/watchdog/start-limit properties, execution hooks/entrypoint binding,
+DB identity equality и owner/launch source. Сбор не выполнялся. Реальные unit
+names/target/caps отсутствуют, исполняемый /APPROVE не выдаётся; raw env/config/
+cmdlines/DB/journal не запрашиваются.
+
+Следующее решение: отдельный локальный lifecycle design для stop до polling,
+workload bounds и terminal/recovery policy; затем отдельные code/test и target
+readback scopes. M3 target и M4 budget остаются открыты, M1/M2/M5/M6/M7 не сняты.
+Прежние 33/312 и M3 68 PASS сохранены как датированные результаты, не повторены.
+Проверка этого изменения: документационный readback, локальные links/anchors,
+source line bindings, diff/whitespace, added-line secret scan; AMN2 неизменён.
+AWG2_UNTOUCHED; package016 immutable; general issuance disabled; DNS bridge STOP.
+Windows traffic/quality FAIL, iPhone/A/B отложены. Нет stage/install/deploy/cleanup.

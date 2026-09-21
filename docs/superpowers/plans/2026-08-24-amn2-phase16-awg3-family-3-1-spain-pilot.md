@@ -162,10 +162,18 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    Target environment и stop budget остаются UNKNOWN (30s только в unit example).
    Source/dependency binding, startup/drain, recovery/activation/rollback,
    bounded acceptance и полный список M1–M7 находятся в этом контракте.
-   Локальная часть M3 закрыта; source/tests/locks неизменны. Следующий предмет
-   решения — source-only разбор stop budget M4 и точный будущий readback scope.
-   Новые code/unit changes, merge/build, target/Telegram и live execution
-   этим не разрешены. Package016 не пересобирается.
+   Локальная часть M3 закрыта. 21.09 после «приступаем» завершён
+   [source-only M4](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#stop-budget-m4-2026-09-21):
+   startup SIGTERM handler появляется только внутри polling; общий drain bound
+   отсутствует, pinned Uvicorn graceful timeout по CLI default None. Карта
+   writers и минимальный future readback contract находятся в существующем
+   design; target properties не получены, M4 не закрыт. Source/tests/locks/units
+   неизменны, тесты не повторялись.
+   Следующее решение — отдельный локальный lifecycle design: ранний stop,
+   workload bounds и terminal/recovery policy. Code/tests/units, target readback
+   и Linux signal validation требуют отдельных scopes/approvals.
+   Merge/build, target/Telegram и live execution не разрешены.
+   Package016 не пересобирается.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

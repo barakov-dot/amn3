@@ -7,6 +7,19 @@
 
 ## 2026-09-21
 
+- После «приступаем» завершён [source-only stop-budget M4](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#stop-budget-m4-2026-09-21)
+  кандидата AMN2 1bd7f62 и сохранённых pinned aiogram 3.30.0/Uvicorn 0.52.3.
+  Зафиксированы ранний startup SIGTERM gap в доказательстве cleanup,
+  неограниченные handler/factory/close paths, независимые writers и Uvicorn
+  graceful timeout None по CLI default. Конечный budget не доказан; target
+  properties UNKNOWN. В существующий contract добавлен минимальный future
+  readback, main plan связан с receipt; следующий предмет решения — локальный
+  lifecycle design, без выбора секунд/изменения units. Проверки: readback,
+  ссылки/anchors/source lines, diff/whitespace и added-line secrets.
+  Source/tests/locks/dependencies/units/package016 неизменны; тесты не повторены,
+  нет VPS/Telegram/systemd execution, stage/install/deploy или cleanup.
+  AWG2, прежние FAIL, отложенные iPhone/A/B и все Phase16 gates сохранены.
+
 - После «согласовываю, продолжай» выполнена [локальная dependency-validation M3](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#dependency-validation-2026-09-21)
   кандидата AMN2 1bd7f62: отдельная Windows/Python 3.12.14 venv, неизменённый
   test lock с aiogram 3.30.0. Exact 48 test pins, включая 40 runtime pins,
