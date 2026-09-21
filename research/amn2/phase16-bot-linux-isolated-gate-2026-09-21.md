@@ -15,6 +15,9 @@
 бота: нет polling, service actions, shared DB, runtime.env/token чтения или
 активации нового кода. General issuance остаётся disabled.
 
+Bindings первой выполненной попытки (история); текущий local runner hash —
+в [локальной доработке ниже](#transport-diagnostics-2026-09-21).
+
 | Binding | Значение |
 | --- | --- |
 | Gate ID | PHASE16_ISOLATED_LINUX_TEST_6e68235_001 |
@@ -222,3 +225,86 @@ exit code, стадию pipe failure, размеры/hash и безопасну�
 early-exit RED и bounded transport GREEN; затем новый exact gate только по
 отдельному разрешению. Это предложение code fix, ещё не выполненное и не
 разрешение второго upload/test. К повторному SSH сейчас не переходить.
+
+<a id="transport-diagnostics-2026-09-21"></a>
+
+## Локальная диагностика транспорта исправлена — 2026-09-21
+
+По «продолжай» после предложения локально улучшить SSH diagnostics выполнен
+ограниченный local code fix. AMN3 basef093300; AMN2 source6e68235 не менялся.
+Причина потери информации доказана прежним synthetic early-exit: общий remote
+run_process выбрасывал process_io без output/exit code. Серверный скрипт оставлен
+byte-identical; только [локальный runner](../../scripts/phase16_bot_linux_gate.py)
+теперь использует собственный run_transport и сохраняет transport metadata в
+result.json даже при pipe failure/невалидном JSON. Это не исправление доказанной
+причины первого SSH-сбоя: она всё ещё UNKNOWN.
+
+stdin пишется порциями32KiB; bytes_accepted означает приём локальным pipe,
+не receipt на сервере. stdout и stderr разделены, их общий retained cap64KiB;
+при превышении — STOP, prefix hashes явно обозначают только сохранённую часть.
+В evidence идут exit code, failure_stage, pipe_failures, input completion,
+observed/retained byte counts, prefix SHA и только фиксированные stderr hints
+(auth/host key/Python syntax/timeout/unclassified). Raw stderr, command, keys,
+адрес и exception message не сохраняются. Hints не являются root-cause verdict.
+Лимиты payload64MiB+frame, timeout330s и ограниченный cleanup сохранены;
+local cleanup может добавить до3s wait и до3x1s thread joins к process timeout.
+Незакрытый pipe остаётся UNKNOWN, remote quiescence не утверждается.
+Fixed trust/SSH options, offline default, exclusive claims и no-retry прежние.
+
+[Тесты](../../tests/test_phase16_bot_transport.py),
+[нормализованное evidence](phase16-bot-transport-diagnostics-2026-09-21.json):
+7 ожидаемых RED (нет local transport/evidence) →42PASS; после дополнительного
+integration case valid STOP + stderr + chunked stdin итог **43PASS/0FAIL/0SKIP,
+1.01s** (11 новых +32 прежних gate tests). Реальные disposable local children
+покрыли ранний exit17/незаписанный stdin, stdout/stderr separation, cap/timeout,
+start failure, safe classification, persisted diagnostics и запрет retry.
+Self-review inline; никаких subagents. AMN2 baseline101/94+6/312 не повторялись.
+POSIX killpg/inherited-open-pipe branch не подтверждены Windows тестами.
+Оба offline previews PASS; probe framing roundtrip на local Python PASS.
+Первый ad-hoc probe check ошибочно ожидал30 bytes вместо32; исправлен только
+harness expectation. Production probe использует len(SENTINEL) и не менялся
+из-за этой ошибки; никакого server execution не было.
+
+Current local runner SHA256 (UTF-8/LF):
+420ebe44ff9ba3fce4485d4466f17f6dcdd910e25899798396f1da59a1b3e363.
+Remote runner SHA5df6b2fc… и bundle SHAe19abc5c… прежние, exact offline binding PASS.
+В этом slice SSH=0; прежние claims/results сохранены, test approval consumed.
+AWG2/package016/general issuance safety прежние; deployment не выполнялся.
+
+<a id="readonly-transport-probe-approval"></a>
+
+## Следующий reviewable gate — один SSH transport probe, pending approval
+
+Цель: проверить именно прежний framed-command путь через Windows OpenSSH,
+который локальный Python roundtrip и успешный read-only stdin readback не доказали.
+Один SSH через fixed Spain trust, stdin226 bytes: 8-byte length, stdlib-only
+probe и32-byte non-secret sentinel. Нет ZIP/candidate upload. Тот же frame_request
+проверяет SHA probe перед exec; probe читает только stdin (<=128 bytes) и печатает
+schema/length/SHA. Ни файловых операций, ни subprocess/service/network/API calls
+в remote probe; Python -I -B, remote bytecode writes выключены. Проверка не
+обследует prerequisites, процессы, /opt, config/token/DB и не запускает бота.
+Host trust/keys/known_hosts неизменны; timeout20s, stdout+stderr cap4KiB,
+один attempt, exclusive local claim, STOP/UNKNOWN без retry/cleanup.
+
+Локальные файлы в
+C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-transport-diagnostics-20260921:
+readonly_transport_probe.py и будущие readonly-probe.claim.json/result.json.
+До запуска сверить clean/scoped HEAD, LF hashes и отсутствие нового claim.
+Probe runner дополнительно проверяет exact local runner SHA выше до trust/SSH.
+Local probe script SHA256:
+7690601690e283afeac518fbffdb80f7daa05a4f088c913a1534d9ea925951f4.
+Remote probe SHA256:
+475d31ae4babbc2c3e995328a82a7517a708194d306a08e865b7232ca435caa3.
+Sentinel ожидается32 bytes, SHA256:
+3bf188a05aa9316d60a03dc7500d53c7a3cb12ebd0bd310a39736353f650893d.
+
+Только после нового точного согласования оператора:
+
+~~~powershell
+& 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -B 'C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-transport-diagnostics-20260921/readonly_transport_probe.py' --execute --approve PHASE16_TRANSPORT_PROBE_READONLY_001 --sha256 7690601690e283afeac518fbffdb80f7daa05a4f088c913a1534d9ea925951f4
+~~~
+
+PASS только exit0 и exact schema/32-byte SHA response; иначе сохранить normalized
+transport evidence/UNKNOWN, не повторять. Даже PASS не разрешает original test
+upload, install или activation; он только проверяет путь передачи короткого frame.
+Команда подготовлена и локально проверена, **SSH NOT_EXECUTED**.

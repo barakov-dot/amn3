@@ -7,6 +7,17 @@
 
 ## 2026-09-21
 
+- Исправлена [локальная потеря transport diagnostics](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#transport-diagnostics-2026-09-21):
+  ранний exit/pipe error теперь сохраняет exit code, stage, размеры/prefix hashes
+  и фиксированные stderr hints без raw logs. stdout/stderr разделены, общий cap,
+  exclusive claim/no-retry/trust сохранены. Remote runner и bundle не менялись.
+  RED7 → итог43PASS/0SKIP/0FAIL (11 transport +32 gate), offline previews и local
+  framed probe PASS. Ad-hoc harness length исправлен30→32, source probe неизменён.
+  Подготовлен exact no-write SSH transport probe, pending отдельного approval.
+  SSH/remote writes/deploy=0; причина предыдущего SSH сбоя и Linux results UNKNOWN.
+  Evidence/JUnit/scratch сохранены; checks links/JSON/diff/secret/changelog PASS.
+  AWG2/package016 сохранены; AMN2 source/locks и прежние baseline suites не тронуты.
+
 - По «продолжай» выполнен [один read-only recovery](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#recovery-readback-result-2026-09-21)
   после UNKNOWN test attempt: parent bot-candidates отсутствует, target/venv/
   results на момент чтения нет. Причина сбоя и quiescence UNKNOWN; не Linux PASS.

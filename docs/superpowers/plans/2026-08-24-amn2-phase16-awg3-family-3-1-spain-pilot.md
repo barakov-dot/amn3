@@ -212,8 +212,11 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    После «продолжай» [read-only recovery выполнен](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#recovery-readback-result-2026-09-21):
    один SSH, parent bot-candidates отсутствует; target/test-venv/results отсутствуют
    на момент чтения. Причина первого сбоя и quiescence UNKNOWN; Linux PASS нет.
-   Локальный frame roundtrip PASS не доказывает SSH path. Следующее предложение —
-   локальная transport diagnostics доработка с RED/GREEN; второго upload/test нет.
+   По «продолжай» [локальная transport diagnostics доработка завершена](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#transport-diagnostics-2026-09-21):
+   43PASS, exit/pipe stage/размеры/hashes/hints сохраняются без raw stderr; SSH=0.
+   Original remote script/bundle unchanged; причина первого SSH-сбоя не доказана.
+   Следующий [точный read-only transport probe](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#readonly-transport-probe-approval)
+   подготовлен, pending approval: один SSH/226-byte frame, без ZIP/write/test install.
    Рабочие службы/DB/poller исключены из gate; Linux на АРМ не требуется.
    AWG2/package016 неизменяемы, general issuance disabled; activation запрещена.
 

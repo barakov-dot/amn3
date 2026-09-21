@@ -1,0 +1,79 @@
+{
+  "status": "LOCAL_TRANSPORT_DIAGNOSTICS_VERIFIED",
+  "ssh_attempts": 0,
+  "hashes_lf": {
+    "scripts/phase16_bot_linux_gate.py": "420ebe44ff9ba3fce4485d4466f17f6dcdd910e25899798396f1da59a1b3e363",
+    "scripts/vps/phase16_bot_linux_gate_remote.py": "5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102",
+    "tests/test_phase16_bot_transport.py": "912bd15e1ccfc9ba45b72f22e2e5a6d6678bbb127967819a7b13caf93f19ce28",
+    "readonly_transport_probe.py": "7690601690e283afeac518fbffdb80f7daa05a4f088c913a1534d9ea925951f4"
+  },
+  "test_runs": {
+    "red.xml": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "7",
+      "skipped": "0",
+      "tests": "7",
+      "time": "0.111",
+      "timestamp": "2026-09-21T22:04:46.266807+03:00"
+    },
+    "green1.xml": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "42",
+      "time": "1.146",
+      "timestamp": "2026-09-21T22:06:35.019871+03:00"
+    },
+    "final.xml": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "43",
+      "time": "0.978",
+      "timestamp": "2026-09-21T22:08:36.684469+03:00"
+    }
+  },
+  "probe_local_roundtrip": {
+    "returncode": 0,
+    "remote_simulation": {
+      "schema": "phase16.transport-probe.v1",
+      "bytes": 32,
+      "sha256": "3bf188a05aa9316d60a03dc7500d53c7a3cb12ebd0bd310a39736353f650893d"
+    },
+    "transport": {
+      "schema": "phase16.bot-transport.v1",
+      "returncode": 0,
+      "failure_stage": null,
+      "stdin_bytes_requested": 226,
+      "stdin_bytes_accepted": 226,
+      "stdin_complete": true,
+      "output_complete": true,
+      "stdout": {
+        "bytes_observed": 133,
+        "bytes_retained": 133,
+        "prefix_sha256": "c8d6d16915bc3121b4b2e2be9a59b402f33e1a44a1eafe336f29f417d11ccc34"
+      },
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "pipe_failures": [],
+      "stderr_classification": "NO_STDERR"
+    }
+  },
+  "harness_correction": "Initial ad-hoc probe expected 30 sentinel bytes; corrected to actual 32. Production probe uses len(SENTINEL), unchanged.",
+  "limitations": [
+    "No SSH or Linux execution",
+    "POSIX killpg and inherited-open-pipe cleanup not exercised on Windows",
+    "stderr classification is a hint, not root cause",
+    "stdin_bytes_accepted means local pipe, not confirmed remote delivery"
+  ],
+  "source_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+  "bundle_sha256": "e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7",
+  "remote_probe_sha256": "475d31ae4babbc2c3e995328a82a7517a708194d306a08e865b7232ca435caa3",
+  "readonly_probe_frame_bytes": 226
+}

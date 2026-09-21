@@ -945,3 +945,20 @@ service actions=0; test retry/upload/cleanup/DB/token/Telegram отсутств�
 Предложена локальная transport diagnostics доработка перед новым отдельным
 server gate. Production stage/install/deploy нет; AWG2/package016 сохранены,
 general issuance disabled; прежние baseline suites не повторялись.
+
+<a id="bot-local-transport-diagnostics-2026-09-21"></a>
+
+## Локальная диагностика транспорта исправлена — 2026-09-21
+
+По «продолжай» после readback выполнен local-only fix;
+[контракт/ограничения и следующий probe](phase16-bot-linux-isolated-gate-2026-09-21.md#transport-diagnostics-2026-09-21),
+[evidence](phase16-bot-transport-diagnostics-2026-09-21.json).
+Новый local run_transport сохраняет exit/pipe stage/counts/hashes/safe hints,
+разделяет stdout/stderr, удерживает общий cap и не повторяет попытку.
+7RED→42PASS→43PASS (11new+32gate), оба offline previews/local probe roundtrip PASS.
+Исправлена ошибка ожидаемой длины sentinel только в ad-hoc harness30→32.
+Исходный remote script, AMN2 source/locks и immutable bundle/package016 прежние.
+SSH=0, remote writes/service/DB/Telegram/test install/deploy/cleanup=0 в этом slice;
+Linux negative/6signals и причина первого SSH-сбоя UNKNOWN. AWG2_UNTOUCHED,
+general issuance disabled. Подготовлен один no-write framed transport probe,
+но его server approval ещё не получен. Старые101/94+6/312 не повторялись.
