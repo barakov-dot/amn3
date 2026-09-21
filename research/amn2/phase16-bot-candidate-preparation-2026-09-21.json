@@ -1,0 +1,174 @@
+{
+  "status": "LOCAL_PREPARATION_COMPLETE_NOT_DEPLOYED",
+  "artifact_id": "phase16-bot-candidate-20260921-6e68235-001",
+  "source_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+  "bundle": {
+    "path": "C:\\Users\\SooL\\Documents\\VPS-OPS-LAB\\worktrees\\phase16-bot-release-preparation-20260921-6e68235\\phase16-bot-candidate-20260921-6e68235-001.zip",
+    "size": 30485208,
+    "sha256": "e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7"
+  },
+  "manifest_sha256": "6792cb2cd28b0ce70ae031cac04b29f40db908f5e8bad0770e689de390a9a37d",
+  "source_tar_sha256": "0607d6db2a6670b5cb66ab8ee5d6f1d254e563c1e402fa6bcfbe201428e69a4b",
+  "test_support_tar_sha256": "b22f6a656217cebfe653fded0a104399a5a78321f76902f027ed0cb14909ef15",
+  "runtime_wheels": 40,
+  "test_only_wheels": 8,
+  "wheel_bytes": 21697999,
+  "payload_bytes": 33910243,
+  "locks": {
+    "phase15-runtime-py312.lock": "a381be185b19777b9198526e11df8dcfa0afaf7f15acccd829809e698d679fab",
+    "phase15-test-py312.lock": "52967d6e2babc5d05b60615c9a9c950a4541436f7a521dfee49d62b98264a235"
+  },
+  "schema_tests": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "101",
+    "time": "46.733",
+    "timestamp": "2026-09-21T20:51:53.234480+03:00"
+  },
+  "schema_audit": {
+    "status": "SYNTHETIC_COMPATIBILITY_PASS_WITH_STARTUP_WRITE_FINDINGS",
+    "sqlite_version": "3.53.1",
+    "cases": [
+      {
+        "historical_schema": "55dc243",
+        "historical_schema_sha256": "f3e353f17131d0fc606ee557d752bcadf55201360b69427c4e785f074f1c72f7",
+        "old_tables": 18,
+        "new_tables": [
+          "awg3_control_state",
+          "client_build_acceptances",
+          "client_compatibility_evidence",
+          "device_protocol_profiles",
+          "legacy_migration_records",
+          "protocol_config_events",
+          "protocol_issuance_attempts",
+          "protocol_issuance_confirmations",
+          "protocol_issuance_user_barriers",
+          "telegram_callback_handles",
+          "vpn_runtime_instances"
+        ],
+        "added_columns": {
+          "admin_config_issuance_receipts": [
+            "config_version",
+            "protocol_version",
+            "runtime_instance_id",
+            "compatibility_evidence_id",
+            "client_application",
+            "client_platform",
+            "client_version",
+            "client_build"
+          ],
+          "device_passports": [
+            "protocol_version",
+            "runtime_instance_id",
+            "client_identity_evidence_status",
+            "compatibility_evidence_id"
+          ],
+          "devices": [
+            "protocol_version",
+            "runtime_instance_id",
+            "client_identity_evidence_status",
+            "compatibility_evidence_id"
+          ]
+        },
+        "seeded_fixture_rows": 5,
+        "original_columns_and_rows_preserved": true,
+        "initializer_idempotent": true,
+        "old_initializer_retained_new_columns": true,
+        "old_repository_read_write": "PASS (55dc243 repository, identical at 910539e)",
+        "integrity_and_foreign_keys": "PASS",
+        "startup_seed_overwrites_custom_plan_fields": [
+          "name",
+          "price",
+          "is_free",
+          "is_active",
+          "updated_at"
+        ]
+      },
+      {
+        "historical_schema": "910539e",
+        "historical_schema_sha256": "3cad13829ed83bba4531bfa7c2b388320cb7e085b73cd463183baf2cf9b8d07b",
+        "old_tables": 19,
+        "new_tables": [
+          "awg3_control_state",
+          "client_build_acceptances",
+          "client_compatibility_evidence",
+          "device_protocol_profiles",
+          "protocol_config_events",
+          "protocol_issuance_attempts",
+          "protocol_issuance_confirmations",
+          "protocol_issuance_user_barriers",
+          "telegram_callback_handles",
+          "vpn_runtime_instances"
+        ],
+        "added_columns": {
+          "admin_config_issuance_receipts": [
+            "config_version",
+            "protocol_version",
+            "runtime_instance_id",
+            "compatibility_evidence_id",
+            "client_application",
+            "client_platform",
+            "client_version",
+            "client_build"
+          ],
+          "device_passports": [
+            "protocol_version",
+            "runtime_instance_id",
+            "client_identity_evidence_status",
+            "compatibility_evidence_id"
+          ],
+          "devices": [
+            "protocol_version",
+            "runtime_instance_id",
+            "client_identity_evidence_status",
+            "compatibility_evidence_id"
+          ]
+        },
+        "seeded_fixture_rows": 5,
+        "original_columns_and_rows_preserved": true,
+        "initializer_idempotent": true,
+        "old_initializer_retained_new_columns": true,
+        "old_repository_read_write": "PASS (55dc243 repository, identical at 910539e)",
+        "integrity_and_foreign_keys": "PASS",
+        "startup_seed_overwrites_custom_plan_fields": [
+          "name",
+          "price",
+          "is_free",
+          "is_active"
+        ]
+      }
+    ],
+    "failure_atomicity": {
+      "error": "unsupported partial phase15 bootstrap schema",
+      "earlier_schema_changes_persist": true
+    },
+    "limits": [
+      "No live DB inspected or copied",
+      "Deployed full source revision unknown",
+      "Five fixture rows per reference do not cover all domain tables or concurrent writers",
+      "Windows SQLite result is not Linux deployment acceptance",
+      "Startup seed overwrites are pre-existing behavior, not attributed to lifecycle fix",
+      "No old release restoration or DB restore was performed"
+    ]
+  },
+  "linux_execution": "NOT_RUN",
+  "remote_actions_this_run": 0,
+  "activation": "BLOCKED_PENDING_SHARED_DB_AND_LINUX_GATES",
+  "retained_tools": {
+    "prepare_local.py": "d35594257cea104e184e17c61370a182d0949dadbaa02dc089eec81136d46ebc",
+    "schema_audit.py": "09aea616ec7cdd6b2f536fbc81e9e69190aaf5584eed5b6777befe45c7827e54",
+    "run_tests.py": "a8a8e39df5f25d8c6eacb40006410cea5e486003bfb5f96590638ac17fc1a02c",
+    "seal_candidate.py": "a5f49ad1796d6050530e2fb6d4963ffe73048237df7e8185ba1c1d214553b5ba"
+  },
+  "schema_test_selectors": [
+    "tests/db/test_schema.py",
+    "tests/db/test_phase13_protocol_schema.py",
+    "tests/db/test_phase14_dual_protocol_schema.py",
+    "tests/db/test_phase15_bootstrap_schema.py"
+  ],
+  "schema_test_harness_seconds": 47.156,
+  "schema_test_cap_seconds": 120,
+  "approval_scope": "Operator разрешаю to local separate bot deployment preparation after readback v2; no remote writes/install/activation"
+}

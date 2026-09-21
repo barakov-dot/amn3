@@ -386,7 +386,7 @@ enforcement, restart/writer fence, M1/M2/M5/M6/M7 и Phase16 acceptance оста
 Оператор сообщил, что бот «нулевой», предложил пересоздать его и согласился
 «хорошо, делаем как скажешь» на повторное развёртывание приложения с новым кодом,
 проверку запуска/остановки/restart и сохранение AWG2/VPN-профилей. Направление
-**EXISTING_BOT_REDEPLOY_AGREED / TARGET_READONLY_SNAPSHOT_COMPLETE / NOT_REDEPLOYED**.
+**EXISTING_BOT_REDEPLOY_AGREED / LOCAL_CANDIDATE_PREPARED / NOT_REDEPLOYED**.
 Это относится к приложению существующего Telegram-бота; новая регистрация,
 смена token/identity и удаление общей БД не входят в выбранный вариант.
 
@@ -435,15 +435,20 @@ Worker/lifecycle/locks в deployment отсутствуют; system Python metad
 6. После server readiness — один согласованный operator /start, ответ меню,
    без выдачи VPN/создания peer; нормализованный итог и сохранность зависимостей.
 
-Fresh state, concrete artifact/checksums и rollback пока отсутствуют. Поэтому
-команду destructive reinstall или готовое checksum-bound /APPROVE сейчас
-не выдаём. Целевой Spain bot подтверждён, read-only v2 выполнен. Следующий
-локальный шаг — определить состав/лимиты отдельного bot artifact и подготовить
-source/Linux dependency binding, startup/schema compatibility и rollback.
-System Python metadata сами по себе не закрывают M3; candidate installation
-и mutating gate по AGENTS остаются отдельными от выполненного readback.
-Повторного согласования самой идеи пересоздания не нужно.
-94 PASS/6 SKIP остаются прежним локальным evidence; tests не повторялись.
+По следующему «разрешаю» [локальный candidate подготовлен](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#bot-candidate-local-preparation-2026-09-21):
+exact source6e68235, runtime40/test-only8 Linux wheels с lock hashes,
+immutable отдельный bundle/manifest и rollback review; package016 не изменён.
+101 новых schema PASS и два synthetic historical-to-candidate перехода не
+доказывают live DB compatibility. Startup обновляет schema и стандартные планы;
+поздняя ошибка schema не отменяет предыдущие изменения. Поэтому до activation
+нужны actual schema/release identities, writer fence и startup seed/recovery policy.
+Сохранение web остаётся ограничением: если потребуется его остановка для миграции,
+scope не расширять автоматически. Code revert не равен DB rollback.
+Следующий локальный шаг — exact-bundle isolated Linux gate runner; его upload,
+test environment writes и OS signals своим child требуют отдельного server scope.
+Linux negative control/6 signal cases NOT_RUN, live stop budget не доказан.
+System metadata сами по себе не закрывают M3; повторного согласования идеи
+пересоздания не нужно. Прежние lifecycle94 PASS/6 SKIP не повторялись.
 
 ### 5. Stage, recovery и rollback
 

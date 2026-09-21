@@ -795,3 +795,94 @@ Application не импортировалось; DB/environment/journal не ч�
 source и прежние 94 PASS/6 SKIP неизменны. Linux synthetic signals NOT_RUN.
 AWG2_UNTOUCHED по области действий; stage/install/deploy/cleanup не выполнялись,
 package016 immutable, general issuance disabled, Phase16 acceptance открыт.
+
+<a id="bot-candidate-local-preparation-2026-09-21"></a>
+
+## Отдельный bot candidate: локальная подготовка завершена — 2026-09-21
+
+После readback v2 оператор ответил «разрешаю» на локальную подготовку отдельного
+развёртывания: файлы, Linux-зависимости, совместимость DB и rollback.
+Это расширило прежний local scope на materialization нового bot candidate;
+package016, shared source/DB и remote mutation в разрешение не входят.
+Перед работой сверены основной грязный checkout, worktrees, clean AMN3 88a68b6
+и clean AMN2 6e682356ed14a62d636ee58039fd3a389e794809; чужие файлы сохранены.
+
+Статус: **LOCAL_PREPARATION_COMPLETE_NOT_DEPLOYED**.
+[Нормализованный результат](phase16-bot-candidate-preparation-2026-09-21.json),
+[manifest](phase16-bot-candidate-manifest-2026-09-21.json),
+[состав, будущие gates и границы rollback](phase16-bot-candidate-runbook-2026-09-21.ru.md).
+Runbook — сопроводительный документ immutable candidate, не второй execution plan.
+
+**Материализовано локально.** Новый retained scratch:
+C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-release-preparation-20260921-6e68235.
+Bundle phase16-bot-candidate-20260921-6e68235-001.zip, 30485208 bytes;
+source.tar содержит 159 файлов из exact Git archive, test-support.tar — 142.
+Весь app сохранён из-за общих импортов; web/API/agent не активируются.
+PyPI download только из неизменённых locks: binary-only/require-hashes,
+target CPython3.12 Linux x86_64/glibc2.39, без установки. Получены runtime40
+и test-only8 wheels, физически разнесены по папкам; test lock использует все48.
+Windows venv в пакет не входит. Wheels проверены по lock SHA256, Name/Version
+в METADATA и целевым CPython/abi3/pure-Python manylinux tags.
+
+| Binding | SHA256 |
+| --- | --- |
+| Bundle ZIP | e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7 |
+| Manifest | 6792cb2cd28b0ce70ae031cac04b29f40db908f5e8bad0770e689de390a9a37d |
+| Source tar | 0607d6db2a6670b5cb66ab8ee5d6f1d254e563c1e402fa6bcfbe201428e69a4b |
+| Test-support tar | b22f6a656217cebfe653fded0a104399a5a78321f76902f027ed0cb14909ef15 |
+| Runtime lock | a381be185b19777b9198526e11df8dcfa0afaf7f15acccd829809e698d679fab |
+| Test lock | 52967d6e2babc5d05b60615c9a9c950a4541436f7a521dfee49d62b98264a235 |
+
+Payload inventory/hash verifier: 55 files PASS. ZIP CRC/member set и каждый
+payload hash прочитаны обратно и совпали; unpacked payload 33910243 bytes,
+wheel bytes 21697999. Локальные scripts, logs, manifests, synthetic SQLite,
+JUnit и preparation-result сохранены; large binaries и fixtures в Git не добавлены.
+Source/dependency archive hashes не означают installability/runtime Linux PASS.
+
+**Schema compatibility — новый вопрос, не повтор baseline.** На извлечённом
+source выполнены четыре DB test modules: test_schema, test_phase13_protocol_schema,
+test_phase14_dual_protocol_schema, test_phase15_bootstrap_schema.
+**101 PASS / 0 SKIP / 0 FAIL, pytest 46.80s**, harness47.156s/cap120s/256KiB.
+Использована прежняя pinned Windows venv Python3.12.14, SQLite3.53.1.
+Прежние lifecycle94 PASS/6 Linux SKIP и worker312 PASS не повторялись.
+
+Отдельный synthetic audit использовал две локальные исторические схемы,
+55dc243 и 910539e: до перехода 18/19 таблиц, после — 29. Добавлены 11/10
+таблиц и 16 columns в devices/device_passports/admin_config_issuance_receipts.
+По пять synthetic rows на вариант (user/server/plan/device/passport), без
+live DB/config/secret чтения. Старые columns/rows сохранены, новый initializer
+идемпотентен; старый initializer сохранил новые columns и marker values.
+Старый Repository в отдельном процессе прочитал user/device и записал второго
+synthetic user; новый код прочитал запись. integrity_check и foreign_key_check PASS.
+Repository между двумя историческими refs идентичен. Совпадение deployed main.py
+с этими refs по v2 не доказывает revision остальных live файлов или live schema.
+Тест не покрывает все доменные таблицы, реальный web HTTP и concurrent writers.
+
+**Два подтверждённых ограничения startup.** seed_default_plans перезаписал
+name/price/is_free/is_active изменённого synthetic days_30; max_devices сохранён.
+Это прежнее поведение старта, не regression lifecycle. initialize_schema при
+unsupported partial Phase15 schema выбросил ожидаемую ошибку, но таблицы,
+созданные до поздней проверки, остались: общий startup не атомарен.
+VPS_APPLY_ENABLED=false не запрещает эти local DB writes. Candidate запускать
+на authoritative shared DB как «проверку» нельзя; DB reset/restore не выполнялись.
+
+**Результат rollback review.** До запуска нового кода возможен адресный возврат
+только собственного unit override к сохранённому source/dependency tree.
+После старта code revert не откатывает seed/schema writes; нужны фактическая
+schema/release identity, writer fence и доказанная совместимость старого кода.
+Backup не разрешает DB restore поверх web/других писателей. Старый source,
+token/identity, web, AWG2 и retained packages сохраняются. Поэтому production
+activation всё ещё BLOCKED_PENDING_SHARED_DB_AND_LINUX_GATES.
+
+**Следующее допустимое локальное действие:** подготовить checksum-bound
+single-attempt runner изолированного Linux gate для этого exact bundle:
+новый каталог, test-only venv с offline wheels, один negative control и
+шесть synthetic signal cases, без polling/рабочих DB/служб; limits/STOP описаны
+в runbook. Затем отдельное согласование upload/test-environment writes на Spain.
+Готового remote runner и разрешения его исполнения сейчас нет; deployment
+activation и DB migration остаются отдельными от isolated test gate.
+
+В этом прогоне SSH=0, remote writes=0; Telegram/service signals/install/
+stage/deploy/cleanup отсутствуют. Linux execution NOT_RUN. AMN2 source,
+locks и units неизменны; AWG2_UNTOUCHED, package016 immutable,
+general issuance disabled; Windows traffic/quality FAIL остаются открыты.

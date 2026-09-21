@@ -7,6 +7,21 @@
 
 ## 2026-09-21
 
+- По «разрешаю» завершена [локальная подготовка bot candidate](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#bot-candidate-local-preparation-2026-09-21)
+  из AMN2 6e68235: отдельный immutable ZIP/manifest, runtime40/test-only8
+  Linux wheels с hash/tag/metadata binding, [runbook](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md)
+  и условный rollback без перезаписи shared source/DB/web. Package016 неизменён.
+  Проверки: payload55/hash/ZIP readback PASS; четыре schema modules101 PASS,
+  два synthetic historical schema transitions и old-code read/write PASS.
+  Обнаружены существующие startup seed overwrites и неатомарность общего schema
+  initialize; live DB/release compatibility и Linux OS tests не доказаны.
+  [Evidence](research/amn2/phase16-bot-candidate-preparation-2026-09-21.json),
+  [manifest](research/amn2/phase16-bot-candidate-manifest-2026-09-21.json).
+  Source/locks не менялись; прежние94/6 и312 не повторялись. SSH/remote writes=0,
+  нет install/stage/deploy/Telegram/cleanup; AWG2 и issuance safety сохранены.
+  Следующий шаг — локальный runner isolated Linux gate перед отдельным server approval.
+  Docs readback/links/diff/secret scan и changelog gate обязательны перед commit.
+
 - По отдельному «разрешаю» выполнен [Spain bot readback v2](research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#spain-bot-target-readback-v2-2026-09-21):
   один SSH, 60s/64KiB, READONLY_SNAPSHOT_COMPLETE; [JSON](research/amn2/phase16-spain-bot-readonly-v2-2026-09-21.json).
   Bot/web unit/process identities прежние; system Python3.12.3, x86_64,

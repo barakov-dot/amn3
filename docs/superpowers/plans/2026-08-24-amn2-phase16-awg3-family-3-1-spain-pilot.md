@@ -197,12 +197,17 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    [readback v2 завершён](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#spain-bot-target-readback-v2-2026-09-21):
    bot/web active, bot Restart=no/TimeoutStop=90s; Python3.12.3/x86_64/glibc2.39.
    Worker/lifecycle/locks в deployed source отсутствуют; system metadata не
-   доказывают service dependency binding. Следующий локальный шаг — конкретный
-   состав отдельного bot artifact/среды, startup/schema compatibility и rollback.
-   Выбран путь отдельного bot release с
-   сохранением общей DB/web/token/AWG2; Linux на АРМ не требуется. Deploy ещё не выполнен.
-   Текущее read-only разрешение не включает merge/build, Telegram или live mutation.
-   Package016 не пересобирается.
+   доказывают service dependency binding. По следующему «разрешаю» завершена
+   [локальная подготовка отдельного bot candidate](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#bot-candidate-local-preparation-2026-09-21):
+   source6e68235, runtime40/test-only8 Linux wheels, immutable ZIP/manifest,
+   101 schema PASS и synthetic compatibility двух исторических схем.
+   Startup меняет schema/стандартные планы и не является целиком атомарным;
+   actual DB compatibility, writer fence и production rollback ещё не доказаны.
+   Следующий локальный шаг — exact-bundle runner isolated Linux gate; затем
+   отдельное согласование upload/test environment, без рабочих служб/DB/poller.
+   Linux negative control/6 signal cases NOT_RUN. Общая DB/web/token/AWG2
+   сохраняются; Linux на АРМ не требуется. Нет deployment/Telegram/live mutation.
+   Только local candidate build был разрешён; package016 не пересобирается.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
