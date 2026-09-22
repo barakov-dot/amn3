@@ -261,6 +261,9 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    SSH1/transport complete/stderr0; bot ExecStartPre exit0/stdout0. Root cause —
    local empty-property newline assumption. Source/dependencies/DB/actions=0;
    retry нет. Следующий шаг — local gate-003 fix, отдельный marker до нового SSH.
+   [Gate-003 готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-003-ready-2026-09-22):
+   exact zero-byte empty-property fix; непустой output остаётся strict. Новый
+   marker/execution-003,71PASS/review APPROVE, preview SSH0. Нужен exact approval.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

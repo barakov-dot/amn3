@@ -19,11 +19,11 @@ from scripts.vps import phase16_bot_integration_readback_remote as remote
 
 SOURCE_MANIFEST_RELATIVE = Path("research/amn2/phase16-bot-integration-manifest-6e68235.json")
 GATE_MANIFEST_RELATIVE = Path(
-    "research/amn2/phase16-bot-integration-readback-gate-002-manifest-2026-09-22.json"
+    "research/amn2/phase16-bot-integration-readback-gate-003-manifest-2026-09-22.json"
 )
 EVIDENCE_DIRECTORY = Path(
     "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/"
-    "phase16-bot-integration-readback-runner-20260922/execution-002"
+    "phase16-bot-integration-readback-runner-20260922/execution-003"
 )
 
 
@@ -92,7 +92,7 @@ def validate_gate_manifest(value, root=ROOT):
     core.require(isinstance(value, dict) and set(value) == top and
                  value.get("schema") == "phase16.integration-readback-gate-manifest.v1" and
                  value.get("status") == "ACTUAL_READBACK_GATE_READY_NOT_EXECUTED" and
-                 value.get("amn3_base") == "dbe1b45631b3" and
+                 value.get("amn3_base") == "0eba04eef66f" and
                  value.get("source_commit") == "6e682356ed14a62d636ee58039fd3a389e794809" and
                  value.get("approval") == remote.APPROVAL and
                  value.get("local_evidence_directory") == EVIDENCE_DIRECTORY.as_posix() and

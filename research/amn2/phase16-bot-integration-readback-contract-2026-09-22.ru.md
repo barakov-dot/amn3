@@ -472,3 +472,28 @@ Execution-002 consumed и не повторяется. Следующий local-
 checks для непустого output, новый marker и execution-003. Новый SSH требует
 отдельного exact approval. AWG2/package016 сохранены, issuance disabled;
 production install/stage/deploy отсутствуют.
+
+<a id="actual-readback-gate-003-ready-2026-09-22"></a>
+
+## Actual integration readback gate-003 готов локально
+
+По evidence execution-002 исправлена только empty-property normalization:
+`b''` принимается как пустое значение лишь после exit0 и stderr0. Любой
+непустой output сохраняет строгие UTF-8, ровно один terminal LF, запрет CR и
+embedded LF. Per-property allowlist и bounded STOP receipt gate-002 сохранены.
+
+Новые binding: marker `PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_003`,
+[manifest](phase16-bot-integration-readback-gate-003-manifest-2026-09-22.json),
+exclusive execution-003. `_002` consumed и до claim/trust отвергается тестом.
+Scope/caps прежние: one SSH/no retry, remote50s/transport60s, rows/env/journal/
+service actions/imports/activation excluded.
+
+Observed zero-byte fixture дал RED; после узкого fix итог **71 PASS**.
+Independent review — **APPROVE**, open findings0. [Local verification](phase16-bot-integration-readback-gate-003-local-verification-2026-09-22.json).
+Preview: gate SHA
+`7b6468ecb314400899e920e65cd64e8c5bbdb5fc95ecf75dee5965743e95367d`,
+remote SHA `5d88cbe49de4ac6ce8619287a5bd0a3ddf0e080f93599e8a2275ed62a186fdb7`,
+SSH0; execution-003 отсутствует.
+
+Gate-003 **READY_NOT_EXECUTED** и требует отдельного exact approval. AWG2 и
+package016 неизменны, issuance disabled; production install/stage/deploy нет.

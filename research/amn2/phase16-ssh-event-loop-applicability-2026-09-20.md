@@ -1128,3 +1128,8 @@ preview SSH 0. Новый SSH не выполнялся и требует exact 
 один SSH, complete transport/stderr0; точный unit probe — bot ExecStartPre,
 exit0/stdout0/format. Root cause локальный: empty `systemctl --value` не выдаёт
 newline. Source/dependencies/DB/actions=0; retry нет. Далее local gate-003 fix.
+
+[Gate-003 подготовлен локально](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-003-ready-2026-09-22):
+observed zero-byte empty property принимается только после exit0/stderr0;
+nonempty format остаётся strict. Новый marker/execution-003,71PASS/review
+APPROVE, preview SSH0. До exact approval подключение не выполняется.

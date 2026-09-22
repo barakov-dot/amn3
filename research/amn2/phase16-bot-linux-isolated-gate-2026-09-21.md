@@ -560,3 +560,7 @@ Execution-002 затем [STOP_NO_RETRY](phase16-bot-integration-readback-contra
 SSH1/complete/stderr0; bot ExecStartPre exit0/stdout0 выявил локальную ошибку
 empty-property newline normalization. Source/dependencies/DB/actions=0, retry0.
 Gate-003 сначала готовится локально и получает новый exact marker.
+
+[Gate-003 локально готов](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-003-ready-2026-09-22):
+узкий zero-byte empty-property fix, новый marker/execution-003,71PASS, review
+APPROVE, preview SSH0. Следующий SSH требует отдельного exact approval.

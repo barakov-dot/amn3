@@ -17,7 +17,7 @@ import threading
 import time
 import types
 
-APPROVAL = "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_002"
+APPROVAL = "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_003"
 MAGIC = b"P16IRB01"
 CORE_SIZE = 23282
 MANIFEST_SIZE = 23102
@@ -231,15 +231,18 @@ def collect_unit(core, role):
         if returncode != 0 or diagnostics["stderr_bytes"] != 0:
             unit_probe_stop(role, key, "command", returncode,
                             diagnostics["stdout_bytes"], diagnostics["stderr_bytes"])
-        try:
-            text = output.decode("utf-8")
-        except UnicodeError:
-            unit_probe_stop(role, key, "decode", returncode,
-                            diagnostics["stdout_bytes"], diagnostics["stderr_bytes"])
-        if not text.endswith("\n") or "\n" in text[:-1] or "\r" in text:
-            unit_probe_stop(role, key, "format", returncode,
-                            diagnostics["stdout_bytes"], diagnostics["stderr_bytes"])
-        values[key] = text[:-1]
+        if output == b"":
+            values[key] = ""
+        else:
+            try:
+                text = output.decode("utf-8")
+            except UnicodeError:
+                unit_probe_stop(role, key, "decode", returncode,
+                                diagnostics["stdout_bytes"], diagnostics["stderr_bytes"])
+            if not text.endswith("\n") or "\n" in text[:-1] or "\r" in text:
+                unit_probe_stop(role, key, "format", returncode,
+                                diagnostics["stdout_bytes"], diagnostics["stderr_bytes"])
+            values[key] = text[:-1]
     normalized = core.parse_unit("\n".join(
         f"{key}={values[key]}" for key in UNIT_PROPERTIES
         if key not in {"FragmentPath", "DropInPaths", "ControlGroup"}), role)

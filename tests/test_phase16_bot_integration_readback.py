@@ -528,7 +528,7 @@ _ensure_column(conn, "users", "status", "TEXT")
         def run(command,**_kwargs):
             calls.append(command)
             key=command[-2].split('=',1)[1]
-            output=(values[key]+'\n').encode()
+            output=b'' if values[key]=='' else (values[key]+'\n').encode()
             return 0,output,{'stdout_bytes':len(output),'stderr_bytes':0,
                              'stderr_present':False}
         live_remote.PARTIAL={}
@@ -540,6 +540,8 @@ _ensure_column(conn, "users", "status", "TEXT")
         self.assertTrue(result['exec_matches'])
         self.assertEqual(result['pid'],0)
         self.assertNotIn('unit_probe',live_remote.PARTIAL)
+        self.assertGreater(sum(command[-2].split('=',1)[1].startswith('Exec')
+                               for command in calls),0)
 
     def test_live_unit_failure_preserves_only_bounded_property_diagnostic(self):
         live_remote.PARTIAL={}
@@ -585,10 +587,10 @@ _ensure_column(conn, "users", "status", "TEXT")
     def test_live_execute_wrong_approval_stops_before_claim_or_trust(self):
         called=[]
         self.assertEqual(live_remote.APPROVAL,
-                         'PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_002')
+                         'PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_003')
         with self.assertRaisesRegex(core.Stop,'^approval_binding$'):
             live_gate.execute_once(b'x',b'pass',self.root/'attempt',
-                approval='PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_001',
+                approval='PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_002',
                 approved_remote_sha='bad',approved_manifest_sha='bad',gate={},
                 approved_gate_sha='bad',loader=lambda role:called.append('loader'),
                 transport=lambda *a,**k:called.append('transport'))

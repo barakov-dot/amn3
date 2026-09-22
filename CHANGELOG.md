@@ -7,6 +7,14 @@
 
 ## 2026-09-22
 
+- Подготовлен [actual readback gate-003](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-003-ready-2026-09-22):
+  observed `systemctl --value` zero-byte output принимается как empty только
+  после exit0/stderr0; nonempty output остаётся strict UTF-8/single terminal LF.
+  Новый marker/execution-003, consumed `_002` отклоняется до claim/trust.
+  RED→GREEN, итог71PASS, independent review APPROVE, preview SSH0. Production
+  readback не выполнялся; нужен новый exact approval. AWG2/package016 сохранены,
+  issuance disabled, install/stage/deploy отсутствуют.
+
 - После exact `_002` approval [actual readback execution-002 завершён
   STOP_NO_RETRY](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-002-stop-2026-09-22):
   один SSH, complete transport, stderr0; bot ExecStartPre вернул exit0/stdout0,

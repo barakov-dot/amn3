@@ -583,6 +583,11 @@ bot ExecStartPre, exit0/stderr0/stdout0, format STOP. Это локальное 
 о newline для empty `--value`, а не unit failure. No retry; production source/
 dependencies/DB/actions не затронуты. Gate-003 fix и approval должны быть новыми.
 
+[Gate-003 подготовлен](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-003-ready-2026-09-22):
+только zero-byte output после exit0/stderr0 нормализуется как empty; непустое
+значение остаётся strict UTF-8/single terminal LF.71PASS/review APPROVE/SSH0;
+marker и execution-003 новые, current production evidence не добавлено.
+
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
 iPhone/A/B остаются отложенными; deployment не разрешён.
