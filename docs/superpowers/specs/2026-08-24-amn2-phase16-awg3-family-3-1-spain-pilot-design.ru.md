@@ -567,6 +567,12 @@ namespaces, schema-only DB, закрытые unit/source/dependency receipts и 
 M4 writer completeness/quiescence, semantic compatibility или M6/M7 и требует
 отдельного exact approval перед actual production readback.
 
+Первый approved actual run [остановлен fail-closed](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-001-stop-2026-09-22):
+один SSH, transport complete/stderr0, `unit_show`, partial только host metadata.
+Это не unit absence и не current-state PASS; source/dependencies/DB не читались.
+No-retry соблюдён. Новый unit-property diagnostic contract должен отдельно
+связать marker/evidence path и раскрывать только normalized status/digests.
+
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
 iPhone/A/B остаются отложенными; deployment не разрешён.

@@ -384,3 +384,35 @@ unit/schema/observed-holder evidence; он не докажет полную writ
 semantic DB compatibility, stop/switch/seed/migration/rollback или acceptance.
 AWG2/package016 неизменны, general issuance disabled; production
 stage/install/deploy отсутствуют.
+
+<a id="actual-readback-execution-001-stop-2026-09-22"></a>
+
+## Actual integration readback execution-001 — STOP_NO_RETRY
+
+После точного подтверждения
+`PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_001` preflight повторно подтвердил
+AMN3 `cf1c76c8202cf31c6230862e3db2c1f1a6ca69b6`, clean worktree, три approved
+SHA, свободный evidence path и неизменный Spain trust binding. Выполнена ровно
+одна SSH попытка; retry и cleanup SSH не выполнялись.
+
+[Нормализованный execution receipt](phase16-bot-integration-readback-execution-001-2026-09-22.json):
+transport exit3, stdin/output complete, stderr0, remote status
+`STOP_NO_RETRY`, reason `unit_show`. Закрытая receipt schema повторно
+валидирована. Локальные evidence сохранены; SHA256 claim
+`5f825076e423092b2ca4b85afa1aff119304cfd43ec4d65c9424b176aab5e6bb`,
+result `e096becf217fde0fd196764ba604264eb064c5e72f06046f5ec6762616a43e75`.
+
+Remote успел подтвердить только нормализованные host metadata: Linux x86_64,
+Python3.12.3, SQLite3.45.1. Сбор остановился до завершения обоих unit receipts;
+поэтому exact subcause внутри command/format/property boundary остаётся
+**UNKNOWN**. Production source/dependencies не читались, DB не открывалась,
+service actions=0, application import/write/runtime activation=false. Нельзя
+переносить исторический unit snapshot в текущий PASS или считать этот STOP
+доказательством отсутствия units.
+
+Повтор этой команды запрещён consumed evidence path и no-retry contract.
+Следующий допустимый шаг только локальный: подготовить новый hash-bound gate с
+более точной безопасной unit-property диагностикой и новым marker/evidence path;
+его SSH потребует отдельного exact approval. Stop/switch/seed/migration/
+Telegram/activation не разрешены. AWG2/package016 сохранены, general issuance
+disabled, production install/stage/deploy отсутствуют.

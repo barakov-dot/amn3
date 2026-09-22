@@ -544,3 +544,9 @@ independent review APPROVE. Offline preview: SSH 0, execution-001 отсутст
 Actual DB не открывалась, units/services не менялись. Следующий шаг требует
 отдельного exact marker; stop/switch/seed/migration/Telegram/activation не входят.
 AWG2/package016 сохранены, issuance disabled.
+
+Actual execution-001 затем [завершился STOP_NO_RETRY](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-001-stop-2026-09-22):
+один SSH, complete transport/stderr0, reason `unit_show`, partial только host.
+Source/dependencies/DB не читались, service actions0; unit subcause UNKNOWN.
+Retry не выполнялся. Следующая подготовка локальная и требует нового marker до
+любого SSH; Linux на АРМ по-прежнему не входит в план.

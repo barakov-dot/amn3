@@ -1112,3 +1112,9 @@ RO mount+network namespaces; rows/env/journal/app import/service action искл
 APPROVE. Preview: SSH 0, execution-001 отсутствует, gate READY_NOT_EXECUTED.
 Actual readback требует отдельного exact approval и не разрешает последующие
 stop/switch/seed/migration/activation. AWG2/package016 неизменны, issuance disabled.
+
+После exact approval [actual execution-001 остановлен fail-closed](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-001-stop-2026-09-22):
+SSH1, transport complete, stderr0, `STOP_NO_RETRY/unit_show`; partial содержит
+только host metadata. Production source/dependencies/DB не читались, service
+actions0. Exact unit subcause UNKNOWN, retry не выполнялся. Новый diagnostic
+gate сначала готовится локально и получает отдельный marker/evidence path.

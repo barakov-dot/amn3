@@ -248,6 +248,11 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    исключены. После RED/GREEN и independent review — 69 PASS/APPROVE, offline
    preview SSH 0. Для единственной actual readback попытки нужен отдельный exact
    marker; stop/switch/seed/migration/activation им не разрешаются.
+   После exact marker [execution-001 завершился STOP_NO_RETRY](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-001-stop-2026-09-22):
+   один SSH, complete transport, stderr0, reason `unit_show`; сохранены только
+   host metadata. Source/dependencies/DB не читались, service actions0. Exact
+   unit subcause UNKNOWN, retry запрещён. Следующий шаг — локально подготовить
+   новый диагностический gate; любое новое подключение требует отдельного marker.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

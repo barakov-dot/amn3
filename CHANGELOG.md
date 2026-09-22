@@ -7,6 +7,14 @@
 
 ## 2026-09-22
 
+- После exact approval [actual integration readback execution-001 остановлен
+  fail-closed](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-001-stop-2026-09-22):
+  один SSH, transport complete, stderr0, `STOP_NO_RETRY/unit_show`; partial
+  содержит только host metadata. Source/dependencies/DB не читались, service
+  actions0, retry0. Exact unit subcause UNKNOWN. Claim/result сохранены и
+  hash-validated; новый diagnostic gate сначала требует local preparation и
+  отдельный marker. AWG2/package016 сохранены, issuance disabled.
+
 - Подготовлен [actual integration readback gate](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-ready-2026-09-22):
   one-attempt/no-retry runner, exact target/payload/SHA binding, private read-only
   mount+network namespaces, schema-only SQLite и закрытые source/dependency/unit

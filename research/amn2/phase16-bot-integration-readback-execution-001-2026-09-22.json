@@ -1,0 +1,91 @@
+{
+  "schema": "phase16.integration-readback-execution-record.v1",
+  "date": "2026-09-22",
+  "amn3_commit": "cf1c76c8202cf31c6230862e3db2c1f1a6ca69b6",
+  "approval": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_001",
+  "status": "STOP_NO_RETRY",
+  "classification": {
+    "failure_boundary": "unit_collection",
+    "reason": "unit_show",
+    "exact_subcause": "UNKNOWN",
+    "retry_performed": false,
+    "production_database_opened": false,
+    "production_source_read": false,
+    "production_dependencies_read": false,
+    "service_actions": 0,
+    "database_write_attempted": false,
+    "application_imported": false,
+    "runtime_activation": false
+  },
+  "evidence": {
+    "directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-001",
+    "claim_sha256": "5f825076e423092b2ca4b85afa1aff119304cfd43ec4d65c9424b176aab5e6bb",
+    "result_sha256": "e096becf217fde0fd196764ba604264eb064c5e72f06046f5ec6762616a43e75",
+    "receipt_validation": "PASS"
+  },
+  "result": {
+    "schema": "phase16.integration-readback-local.v1",
+    "claim": {
+      "schema": "phase16.integration-readback-claim.v1",
+      "scope": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_001",
+      "attempts": 1,
+      "gate_sha256": "de969b61b3279f0e1748ae639949e704b7979ad9401b5289517ff57e3433d2c2",
+      "source_manifest_sha256": "dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc",
+      "remote_sha256": "8eadb22e72616eccf81c3e238e5b6c8c1e28f7e253513d427865c1d9f3ec07fc",
+      "payload_sha256": "0d04ec697a808dffb02c17380d5b23a6be862e9350a5f0e5533f23e49a01ed05",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+      "evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-001",
+      "remote_seconds": 50,
+      "transport_seconds": 60,
+      "claimed_at": "2026-09-22T07:47:25.587219+00:00"
+    },
+    "status": "STOP_NO_RETRY",
+    "ssh_attempts": 1,
+    "transport": {
+      "schema": "phase16.bot-transport.v1",
+      "returncode": 3,
+      "failure_stage": null,
+      "stdin_bytes_requested": 66503,
+      "stdin_bytes_accepted": 66503,
+      "stdin_complete": true,
+      "output_complete": true,
+      "stdout": {
+        "bytes_observed": 343,
+        "bytes_retained": 343,
+        "prefix_sha256": "cffc68c01b6f45b95e02b14df87734245171d864508c5cd0675f9d8b1d18d846"
+      },
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "pipe_failures": [],
+      "stderr_classification": "NO_STDERR"
+    },
+    "remote": {
+      "application_imported": false,
+      "database_write_attempted": false,
+      "partial": {
+        "host": {
+          "machine": "x86_64",
+          "python": "3.12.3",
+          "python_device": 64770,
+          "python_inode": 13263,
+          "sqlite": "3.45.1",
+          "system": "Linux"
+        }
+      },
+      "reason": "unit_show",
+      "runtime_activation": false,
+      "schema": "phase16.integration-readback-remote.v1",
+      "service_actions": 0,
+      "status": "STOP_NO_RETRY"
+    }
+  },
+  "safety": {
+    "awg2": "UNTOUCHED",
+    "package016": "UNCHANGED",
+    "general_issuance": "DISABLED",
+    "production_install_stage_deploy": false
+  }
+}
