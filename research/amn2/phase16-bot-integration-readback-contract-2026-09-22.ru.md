@@ -829,3 +829,50 @@ Marker `PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_009` привязан к ex
 execution-009, one SSH/no retry, remote50s/transport60s. Gate-009
 **READY_NOT_EXECUTED**. Push и SSH требуют отдельных exact approvals.
 AWG2/package016 сохранены, issuance disabled; stage/install/deploy отсутствуют.
+
+<a id="actual-readback-execution-009-stop-2026-09-22"></a>
+
+## Actual integration readback execution-009 — STOP_NO_RETRY
+
+После exact push `09dcc7e14f4bddc2bac41c71a16c4711e7e91f88` и approval `_009`
+выполнена ровно одна SSH-попытка. [Нормализованная запись](phase16-bot-integration-readback-execution-009-2026-09-22.json)
+связана с `claim.json` SHA256
+`765bf55665cab7a02387864f9ed3eba8da161998df163b1886a2a505427e055e`
+и `result.json` SHA256
+`cfa7c590347ceb17b61515000246fdc7f7b24d59d66ac30caf985e17836508ec`.
+Путь — `C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-009`.
+
+Transport exit3, stdin68077/68077, stdout14614/14614, stderr0, output complete,
+pipe failures0. Remote receipt **прошёл** новый local validator и содержит
+`STOP_NO_RETRY / remote_exception` с завершёнными `host`, `units_before`,
+`source`. Это тот же полный stdout SHA256, что в `_007`/`_008`; прежняя локальная
+ошибка валидатора скрывала этот STOP. По последовательному коду исключение
+возникло после source и до готового dependency result. Его подпричина UNKNOWN:
+`core.Stop` и другие исключения попадают в общий `remote_exception`; не
+приписывать это отсутствующему dependency root или конкретному METADATA.
+DB stage не достигнут. `_009` использован, retry запрещён.
+
+Source относительно bound AMN2 `6e682356ed14a62d636ee58039fd3a389e794809`
+имеет **DIFFERENT**: 126 ожидаемых `.py`, присутствуют 102, отсутствуют 24,
+ещё 24 отличаются, extra0; runtime binding UNKNOWN. `app/main.py` совпадает
+по SHA с [снимком 21.09](phase16-ssh-event-loop-applicability-2026-09-20.md#spain-bot-target-readback-v2-2026-09-21),
+`bot/workflow_worker.py` и `bot/lifecycle.py` отсутствуют и сейчас.
+Локальное сравнение 102 наблюдаемых файлов с AMN2 commits 6e68235, 1bd7f62,
+2069e41 и 56540e2 дало по 78 совпадений с каждым; exact deployed revision
+этим не установлен. Bot/web unit snapshots показывают active, expected
+entrypoint/cwd, но это не startup/drain или длительная stability проверка.
+Validated remote flags: service actions0, database write attempted=false,
+application imported=false, runtime activation=false.
+
+Этот свежий source mismatch уже блокирует integration acceptance. Следующий
+локальный шаг — сверить уже [подготовленный отдельный bot candidate](phase16-bot-candidate-runbook-2026-09-21.ru.md)
+6e68235, runtime40 и границы shared source/DB с существующим integration
+планом; новый package build не нужен. Retained ZIP SHA256
+`e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7`
+и manifest SHA256
+`6792cb2cd28b0ce70ae031cac04b29f40db908f5e8bad0770e689de390a9a37d`
+повторно сверены локально после `_009`. Новый SSH для раскрытия dependency
+exception не является ближайшим gate: сначала нужен reviewable путь установки
+candidate и rollback с отдельными approvals.
+AWG2/package016 не менять; general issuance disabled, stage/install/deploy
+не выполнялись.

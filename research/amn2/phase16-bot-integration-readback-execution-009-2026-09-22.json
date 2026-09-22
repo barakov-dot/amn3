@@ -1,0 +1,68 @@
+{
+  "schema": "phase16.integration-readback-execution-record.v1",
+  "date": "2026-09-22",
+  "amn3_commit": "09dcc7e14f4bddc2bac41c71a16c4711e7e91f88",
+  "approval": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_009",
+  "status": "STOP_NO_RETRY",
+  "classification": {
+    "ssh_attempts": 1,
+    "ssh_returncode": 3,
+    "stdin_bytes_requested": 68077,
+    "stdin_bytes_accepted": 68077,
+    "stdin_complete": true,
+    "stdout_bytes": 14614,
+    "stdout_complete": true,
+    "stdout_sha256": "2cd91d9ab0b8736de6f159c2c99f3f4f9dc7b853db5cac099bdc33f0169692ec",
+    "stderr_bytes": 0,
+    "pipe_failures": [],
+    "remote_receipt_validated": true,
+    "remote_status": "STOP_NO_RETRY",
+    "remote_reason": "remote_exception",
+    "remote_exception_subcause": "UNKNOWN",
+    "completed_read_stages": ["host", "units_before", "source"],
+    "exception_window": "after_source_before_dependency_result",
+    "dependency_metadata_complete": false,
+    "database_stage_reached": false,
+    "retry_performed": false,
+    "remote_service_actions": 0,
+    "remote_database_write_attempted": false,
+    "remote_application_imported": false,
+    "remote_runtime_activation": false
+  },
+  "source": {
+    "bound_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "status": "DIFFERENT",
+    "expected_files": 126,
+    "present_expected_files": 102,
+    "missing_files": 24,
+    "different_files": 24,
+    "extra_count": 0,
+    "runtime_binding": "UNKNOWN",
+    "main_sha256_matches_2026_09_21_snapshot": true,
+    "bot_workflow_worker_missing": true,
+    "bot_lifecycle_missing": true,
+    "exact_deployed_revision": "UNKNOWN"
+  },
+  "units_before": {
+    "bot_active": true,
+    "web_active": true,
+    "bot_exec_matches": true,
+    "web_exec_matches": true,
+    "bot_cwd_matches": true,
+    "web_cwd_matches": true,
+    "unit_snapshot_only": true
+  },
+  "local_followup": {
+    "retained_bot_candidate_bundle_sha256": "e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7",
+    "retained_bot_candidate_manifest_sha256": "6792cb2cd28b0ce70ae031cac04b29f40db908f5e8bad0770e689de390a9a37d",
+    "hash_readback": "PASS",
+    "new_package_build": false
+  },
+  "evidence": {
+    "directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-009",
+    "claim_sha256": "765bf55665cab7a02387864f9ed3eba8da161998df163b1886a2a505427e055e",
+    "result_sha256": "cfa7c590347ceb17b61515000246fdc7f7b24d59d66ac30caf985e17836508ec",
+    "raw_stdout_persisted": false,
+    "local_receipt_validation": "PASS"
+  }
+}

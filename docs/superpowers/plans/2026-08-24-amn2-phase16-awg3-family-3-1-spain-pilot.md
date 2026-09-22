@@ -314,6 +314,17 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    все прочие ограничения прежние; remote отличается только новым marker.
    4 RED → 97 PASS, preview SSH0. Push и execution-009 ещё не выполнены;
    требуются отдельные точные approvals.
+   После exact push/approval [execution-009 STOP_NO_RETRY](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-009-stop-2026-09-22):
+   один SSH, полный transport, validated remote reason `remote_exception`;
+   готовы host/units_before/source, dependency result отсутствует, DB stage не
+   достигнут. Source против bound AMN2 6e68235 — DIFFERENT: 102/126 ожидаемых
+   файлов присутствуют, 24 missing, 24 different, extra0; workflow_worker и
+   lifecycle отсутствуют. Exact deployed revision/подпричина exception UNKNOWN.
+   `_009` не повторять. Сейчас приоритет — локально сверить уже подготовленный
+   immutable bot candidate, runtime40 и безопасное разделение shared source/DB
+   с integration планом; ZIP/manifest hashes повторно сверены, сборку не повторять;
+   новый SSH не является ближайшим gate. Package build/stage/install требуют
+   отдельных точных approvals, AWG2/package016 сохраняются.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
@@ -334,8 +345,8 @@ Design согласован оператором после commit b277154. По
 - ✅ Task 1 — package016/local tooling; stage-защиты и recovery observations только локально; DNS bridge STOP.
 - ✅ Task 2 — исторические Spain gates/diagnostics, не свежий preflight.
 - ✅ Task 3A — minimal runtime по историческим evidence.
-- ▶️ Task 3B — integration/recovery не завершены; `_007` UNKNOWN_NO_RETRY,
-  recovery-контракт v1 согласован.
+- ▶️ Task 3B — integration/recovery не завершены; `_009` STOP_NO_RETRY,
+  source DIFFERENT, dependency result/DB stage отсутствуют; recovery-контракт v1 согласован.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.

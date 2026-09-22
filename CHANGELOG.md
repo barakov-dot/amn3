@@ -7,6 +7,18 @@
 
 ## 2026-09-22
 
+- После exact push/approval [actual readback-009 завершился STOP_NO_RETRY](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-009-stop-2026-09-22):
+  один SSH, полный transport, remote receipt прошёл local validation; reason
+  `remote_exception`, доступны host/units_before/source. Dependency result и
+  DB stage не достигнуты. Source против bound AMN2 6e68235 — DIFFERENT:
+  102/126 ожидаемых файлов присутствуют, 24 missing, 24 different, extra0;
+  workflow_worker/lifecycle отсутствуют. [Execution record](research/amn2/phase16-bot-integration-readback-execution-009-2026-09-22.json)
+  связывает claim/result hashes. Подпричина exception и deployed revision
+  UNKNOWN; retry нет. Retained отдельный bot candidate ZIP/manifest повторно
+  hash-validated; следующий шаг — локальная сверка его runtime40 и shared
+  source/DB rollback, не новая сборка или SSH. AWG2/package016
+  сохранены, issuance disabled; package build/stage/install/deploy не выполнялись.
+
 - После exact push и `_008` approval [actual integration readback снова UNKNOWN_NO_RETRY](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-008-unknown-2026-09-22):
   один SSH, полный stdin68077/stdout14614, exit3/stderr0; local diagnostic
   указал `units_before`. Полный stdout SHA совпал с `_007`, но raw ответ не

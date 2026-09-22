@@ -647,6 +647,14 @@ synthetic пример показал возможный numeric signal contract
 остальной receipt проверяет прежний validator. 97 PASS, preview SSH0.
 Execution-009/push не выполнялись и требуют точных approvals.
 
+Execution-009 [завершился STOP_NO_RETRY](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-009-stop-2026-09-22):
+один SSH и validated remote receipt `remote_exception`, source/units/host
+прочитаны; dependency result/DB нет. Fresh source против bound AMN2 6e68235 —
+DIFFERENT (102/126 present, 24 missing, 24 different); workflow_worker и
+lifecycle отсутствуют. Retained bot candidate ZIP/manifest hash-validated
+локально; до его stage/rollback reconciliation integration
+acceptance blocked; новый SSH diagnostic не является следующим gate.
+
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
 iPhone/A/B остаются отложенными; deployment не разрешён.
