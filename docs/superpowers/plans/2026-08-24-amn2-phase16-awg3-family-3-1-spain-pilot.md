@@ -224,8 +224,10 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    одна новая test attempt/execution-v2, offline48pins/pip/metadata PASS,
    expected negative +6signals PASS/0SKIP, source hashes сохранены,47.487s remote.
    Test-venv создана и retained; production service/DB/poller/activation=0.
-   Следующая [локальная подготовка](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#post-linux-integration-readiness) —
-   bounded source/dependency/DB-metadata/writer readback contract до нового approval.
+   По «продолжай»22.09 [bounded readback contract подготовлен локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md):
+   exact paths/fields/caps/STOP, source writer matrix и проект SQLite/WAL guard;
+   SSH/DB open=0. Collector не реализован; следующий local slice — инструмент,
+   manifests и synthetic guards, затем exact approval на server readback.
    Linux gate закрыт; live DB compatibility/writer fence/production rollback открыты.
    Рабочие службы/DB/poller исключены из gate; Linux на АРМ не требуется.
    AWG2/package016 неизменяемы, general issuance disabled; activation запрещена.

@@ -547,8 +547,11 @@ persistence, leaks и live recovery остаются NOT_EXECUTED в этом ga
 factory dispatch guard, сохранение accepted drain и явная UNKNOWN/recovery policy.
 Design A утверждён; [source implementation plan](../plans/2026-09-21-amn2-bot-startup-stop-lifecycle-plan.ru.md)
 исполнен: SOURCE_IMPLEMENTED_WINDOWS_TESTED;22.09 isolated Linux negative+6signals PASS.
-Следующий local scope — bounded source/dependency/DB-metadata/writer readback contract.
-Target readback/units остаются отдельными approvals; production units/dependencies
+22.09 [bounded source/dependency/DB-metadata/writer contract готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md).
+Он задаёт WAL-safe read boundary, caps/STOP и пределы source/runtime/schema/writer
+выводов; collector/manifest hashes и synthetic guards ещё предстоят. Это следующий
+local scope, не готовая server command. Target readback/units остаются отдельными
+approvals; production units/dependencies
 не менялись, новая test-venv отдельно создана и retained.
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.

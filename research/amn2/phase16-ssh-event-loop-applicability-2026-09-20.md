@@ -1011,3 +1011,21 @@ M4 finite budget/writers/restart, actual DB compatibility и production rollback
 не доказаны. Следующий local slice — один bounded metadata/writer/readback contract,
 без нового подключения/запуска/миграции сейчас. Прежние45/101/94+6/312 не повторялись;
 AWG2_UNTOUCHED/package016 immutable/general issuance disabled.
+
+<a id="bot-integration-readback-contract-2026-09-22"></a>
+
+## Локальный integration readback contract — 2026-09-22
+
+По «продолжай», AMN3 basee046ca0/source6e68235, подготовлен
+[единый contract Task3B](phase16-bot-integration-readback-contract-2026-09-22.ru.md).
+Проверена source writer matrix bot/web/API/agent/CLI; чтение через приложение
+может инициализировать schema/seed/audit, поэтому исключено. Заданы точные
+readback areas, metadata fields, caps, STOP и проект private read-only DB view
+для SQLite/WAL. Static dependencies/schema shape/observed holders не доказывают
+runtime binding, semantic compatibility или полноту writers.
+LOCAL_CONTRACT_READY; collector не реализован, server approval отсутствует.
+Сейчас SSH/DB/service actions=0; Linux negative+6 PASS и прежние suites сохранены,
+не повторялись. Следующий шаг локальный: collector/manifests/synthetic guards,
+после них отдельный exact bounded readback approval. Проверки docs readback,
+links/diff/secret/changelog; AMN2 source/locks/bundle/package016 не менялись.
+AWG2_UNTOUCHED, issuance disabled, production stage/install/deploy отсутствуют.

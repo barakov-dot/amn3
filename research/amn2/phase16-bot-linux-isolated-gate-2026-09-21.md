@@ -516,8 +516,10 @@ general issuance disabled. Исполнитель/исторические appro
 | P2/M4, до миграции/stop | Все writers и владельцы, admission fence, startup/cleanup bounds, UNKNOWN/restart policy | Составить exact writer matrix и доказуемые preconditions; bot instance lock не ограждает web/CLI/agent |
 | P2/M6-M7, после предыдущих | Exact bot-only switch/revert и rollback совместимость DB | Подготовить адресный contract; code revert не отменяет schema/seed writes, restore поверх активных writers запрещён |
 
-Следующий локальный deliverable — единый ограниченный readback contract для
-source/dependency/DB-metadata/writer evidence с конкретными paths/fields/caps и
-STOP, без подключения и чтения данных сейчас. Согласование такого contract
-будет отдельным от stop/switch/migration/Telegram smoke. Не повторять пройденные
-Linux tests и не пересобирать пакет ради подготовки документов.
+22.09 по «продолжай» подготовлен [единый bounded readback contract](phase16-bot-integration-readback-contract-2026-09-22.ru.md):
+фиксированные области/поля/caps/STOP, source writer matrix, SQLite/WAL guard и
+границы выводов. LOCAL_CONTRACT_READY; collector ещё не реализован, серверный
+запуск не согласован. Следующий local slice — collector/manifests и synthetic
+проверки до exact hash-bound approval. Сейчас SSH/DB open=0; stop/switch/seed/
+migration/Telegram smoke не разрешены. Прежние Linux tests не повторялись,
+package/bundle/source сохранены. Подробности поддерживаются только в contract.

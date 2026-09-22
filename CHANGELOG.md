@@ -7,6 +7,18 @@
 
 ## 2026-09-22
 
+- По «продолжай» подготовлен [bounded integration readback contract Task3B](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md):
+  проверена source writer matrix, определены paths/fields/caps/STOP для deployed
+  source/static dependencies/schema metadata/observed DB holders. Проект SQLite
+  WAL guard использует отдельный private read-only mount view; capability и
+  collector ещё не проверены/не реализованы. Runtime binding, semantic DB
+  compatibility и writer completeness остаются UNKNOWN; это не server GO.
+  Canonical plan/spec/gate/receipt синхронизированы. Checks readback/links/diff/
+  secret/changelog; SSH/DB open/service actions=0, прежние suites не повторялись.
+  Следующий локальный шаг — collector/manifests/synthetic guards до отдельного
+  live approval. Linux PASS/AWG2/package016/issuance safety сохранены; production
+  stage/install/deploy не выполнялись.
+
 - По точному «продолжай» [isolated Linux gate завершён PASS](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-pass-2026-09-22):
   вторая test attempt/один SSH/execution-v2, exact bundle/source6e68235,
   test-venv/offline48pins/pip-check/metadata PASS, expected negative +6PASS/0SKIP,
