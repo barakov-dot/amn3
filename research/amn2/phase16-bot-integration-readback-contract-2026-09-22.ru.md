@@ -261,3 +261,52 @@ runner; это не подтверждённый общий50s budget.
 inline шаге не привлекался. Code/tests/manifest не меняют AMN2, locks или
 immutable ZIP. SSH/mount/service actions/live DB open=0. AWG2/package016 и
 issuance safety сохранены; production stage/install/deploy отсутствуют.
+
+<a id="synthetic-linux-gate-ready-2026-09-22"></a>
+
+## Bounded synthetic Linux gate готов локально — 2026-09-22
+
+Следующий согласованный локальный slice завершён. Добавлены
+[local runner](../../scripts/phase16_bot_readback_guard_gate.py) и
+[remote supervisor](../../scripts/vps/phase16_bot_readback_guard_remote.py).
+По умолчанию runner выполняет только offline preview. Execute требует exact
+approval marker, remote SHA, SHA канонического manifest и фиксированный новый
+local evidence-dir. Exclusive claim создаётся до чтения trust binding; затем
+сверяется digest роли/host/user/key/known_hosts и допускается один SSH без
+retry/cleanup SSH. Remote supervisor принимает hash-bound payload, создаёт только
+новый retained target, запускает synthetic fixtures в отдельных mount+network
+namespaces и валидирует точную закрытую schema receipt.
+
+[Gate manifest с hashes, caps и command contract](phase16-bot-readback-guard-gate-manifest-2026-09-22.json)
+и [local receipt](phase16-bot-readback-guard-local-verification-2026-09-22.json)
+сохранены. После RED исправлен race combined-output cap при быстром завершении
+child; отдельный RED закрепил network namespace. Независимый review выявил
+неполную approval/target binding, поздний claim, неполный deadline, отдельную
+process group namespace-child и неточную STOP schema. Все замечания исправлены
+с отдельными regression tests. Итог **56 PASS**, preview:
+manifest SHA `ac51ca3966bd2363d5969ecaf936c981cde35eddaf0fe3947a0209a0410a6964`,
+remote SHA `47f64ad29e684934761c17b74b6fe68086973fc19b09d0f2f14540a7a7f9c9e9`,
+payload SHA `2898ecdc1476a3144c2438c1237990cbe6c9e249bb302f1848c01521dabb6224`.
+Local evidence parent создан, execution-001 отсутствует и остаётся exclusive claim.
+
+Будущий run ограничен 45s на весь remote gate/60s transport/64KiB combined
+output. Он проверяет
+только новую synthetic SQLite: WAL read shape, OS-level SQLITE_READONLY,
+missing-shm/journal STOP, sentinel preservation и writable parent view. Production
+DB/source/units/services/Telegram/runtime исключены кодом и receipt. Destination
+`/opt/amn2-spain/bot-candidates/phase16-readback-guard-20260922-001` должен
+отсутствовать; существование означает STOP без overwrite. После создания target
+он retained при PASS/STOP; STOP до создания честно сообщает отсутствие retained
+scratch. Exact stdout receipt совпадает с сохранённым `remote-result.json`, либо
+явно сообщает невозможность его сохранить. Не запускать command без отдельного
+точного подтверждения оператора.
+
+Точная единственная команда сохранена в local receipt и требует одновременно
+marker, remote SHA, manifest SHA и exact evidence path. Эти значения повторно
+проверяются непосредственно перед transport; drift даёт local STOP и SSH=0.
+
+Это закрывает локальную подготовку synthetic namespace/WAL gate, но не сам Linux
+gate и не actual readback. После его PASS следующий локальный deliverable — общий
+production read-only collector/transport с unit IO, atomic path hardening и полным
+receipt schema; после этого потребуется отдельное разрешение на actual readback.
+SSH/mount/live DB/service actions в текущем шаге=0; прежние suites не повторялись.

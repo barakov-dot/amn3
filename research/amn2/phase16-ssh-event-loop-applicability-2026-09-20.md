@@ -1046,3 +1046,31 @@ UNKNOWN; next local work — bounded supervisor/transport и exact synthetic gat
 Прежние suites/isolated Linux signal PASS сохранены. Checks target unittest,
 readback/hashes/links/JSON/diff/secret/changelog. AWG2/package016 неизменны,
 issuance disabled; production stage/install/deploy нет.
+
+<a id="bot-readback-synthetic-gate-ready-2026-09-22"></a>
+
+## Bounded synthetic readback gate готов — 2026-09-22
+
+По следующим «продолжай» завершена [локальная подготовка gate](phase16-bot-integration-readback-contract-2026-09-22.ru.md#synthetic-linux-gate-ready-2026-09-22)
+на AMN3 base `96b3187`, AMN2 source `6e682356`. Добавлены offline-by-default
+runner и remote supervisor для одного SSH/no retry. Manifest связывает local
+runner, remote supervisor, payload, exact evidence path, caps и digest Spain
+role/host/user/key/known_hosts; execute дополнительно требует его SHA.
+
+Независимый review сначала дал NO: approval не связывал всю цель, claim создавался
+после trust read, 45s покрывали только child, namespace child имел отдельную
+process group, STOP retention и receipt schema были неточны. Все findings
+исправлены отдельными regression tests: claim предшествует trust read, drift
+останавливается при SSH=0, deadline охватывает весь remote gate, outer supervisor
+владеет namespace descendants, stdout/persisted receipt совпадают, unknown fields
+запрещены. Итог `56 PASS / 0 FAIL / 0 SKIP`.
+
+Offline preview: manifest SHA
+`ac51ca3966bd2363d5969ecaf936c981cde35eddaf0fe3947a0209a0410a6964`,
+remote SHA `47f64ad29e684934761c17b74b6fe68086973fc19b09d0f2f14540a7a7f9c9e9`,
+payload SHA `2898ecdc1476a3144c2438c1237990cbe6c9e249bb302f1848c01521dabb6224`.
+Execution directory отсутствует; SSH/mount/live DB/service actions=0. Gate не
+исполнен. Следующая граница — отдельное exact approval на одну synthetic-only
+попытку. Production DB/source/units/Telegram/runtime activation исключены;
+actual readback, stop/switch/seed/migration и deployment этим не разрешаются.
+AWG2/package016 неизменны, issuance disabled.

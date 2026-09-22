@@ -9,7 +9,6 @@ import argparse
 import json
 import os
 from pathlib import Path
-import signal
 import sqlite3
 import subprocess
 import sys
@@ -53,12 +52,16 @@ def child(root, parent_ns, case):
     return {'case':case,'status':'SHAPE_READ_WRITE_BLOCKED','table_count':len(result['tables'])}
 
 
+def child_command(root, case, parent_ns):
+    return ['/usr/bin/unshare','--mount','--net','--propagation','private',sys.executable,
+            '-I','-S','-B',str(Path(__file__).resolve()),'--child',case,
+            '--scratch-root',str(root),'--parent-namespace',parent_ns]
+
+
 def bounded_child(root, case, parent_ns):
-    command = ['/usr/bin/unshare','--mount','--propagation','private',sys.executable,
-               '-I','-S','-B',str(Path(__file__).resolve()),'--child',case,
-               '--scratch-root',str(root),'--parent-namespace',parent_ns]
+    command = child_command(root, case, parent_ns)
     process = subprocess.Popen(command,stdin=subprocess.DEVNULL,stdout=subprocess.PIPE,
-                               stderr=subprocess.DEVNULL,start_new_session=True,
+                               stderr=subprocess.DEVNULL,start_new_session=False,
                                env={'PATH':'/usr/bin:/bin','LANG':'C','LC_ALL':'C'})
     try:
         output,_ = process.communicate(timeout=8)
@@ -70,7 +73,7 @@ def bounded_child(root, case, parent_ns):
         raise core.Stop('synthetic_timeout') from None
     finally:
         if process.poll() is None:
-            os.killpg(process.pid,signal.SIGKILL)  # only this newly owned process group
+            process.kill()
             process.wait(timeout=2)
 
 

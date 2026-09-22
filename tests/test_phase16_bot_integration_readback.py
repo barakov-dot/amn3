@@ -1,5 +1,6 @@
 import hashlib
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -14,7 +15,10 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.vps import phase16_bot_integration_readback as core
+from scripts.vps import phase16_bot_readback_guard_smoke as guard_smoke
 from scripts import phase16_bot_integration_readback as runner
+from scripts import phase16_bot_readback_guard_gate as guard_gate
+from scripts.vps import phase16_bot_readback_guard_remote as guard_remote
 
 
 class ReadbackTests(unittest.TestCase):
@@ -322,6 +326,173 @@ _ensure_column(conn, "users", "status", "TEXT")
              patch.object(subprocess,'run',side_effect=AssertionError('MUST NOT MOUNT')):
             with self.assertRaisesRegex(core.Stop,'namespace_identity'):
                 core.prepare_readonly_view(self.root,'mnt:[1]')
+
+    def test_guard_payload_is_exact_and_tamper_rejected(self):
+        payload = guard_gate.build_payload(ROOT)
+        parts = guard_remote.parse_payload(payload)
+        self.assertEqual(set(parts), {'phase16_bot_integration_readback.py',
+                                      'phase16_bot_readback_guard_smoke.py'})
+        self.assertEqual(hashlib.sha256(payload).hexdigest(), guard_remote.PAYLOAD_SHA256)
+        with self.assertRaisesRegex(guard_remote.RemoteStop, '^payload_binding$'):
+            guard_remote.parse_payload(payload[:-1] + bytes([payload[-1] ^ 1]))
+
+    def test_guard_frame_bootstrap_roundtrip_uses_exact_approval(self):
+        script = b'import hashlib,sys; print(hashlib.sha256(sys.stdin.buffer.read()).hexdigest())'
+        payload = guard_gate.build_payload(ROOT)
+        command, frame = guard_gate.frame_request(script, payload)
+        import shlex
+        argv = shlex.split(command); argv[0] = sys.executable
+        process = subprocess.run(argv, input=frame, capture_output=True, timeout=5)
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(process.stdout.strip().decode(), hashlib.sha256(payload).hexdigest())
+
+    def test_guard_receipt_accepts_only_exact_synthetic_result(self):
+        receipt = guard_remote.pass_receipt_for_tests()
+        self.assertEqual(guard_gate.validate_receipt(receipt, 0)['status'],
+                         'SYNTHETIC_LINUX_GUARD_PASS_NOT_LIVE')
+        for key, value in [('live_database_opened', True), ('service_actions', 1),
+                           ('destination', '/tmp/other')]:
+            changed = json.loads(json.dumps(receipt)); changed[key] = value
+            with self.subTest(key=key), self.assertRaisesRegex(core.Stop, '^receipt_binding$'):
+                guard_gate.validate_receipt(changed, 0)
+
+    def test_guard_remote_bounded_process_caps_output_and_timeout(self):
+        with self.assertRaisesRegex(guard_remote.RemoteStop, '^process_output_cap$'):
+            guard_remote.run_bounded([sys.executable, '-I', '-S', '-B', '-c',
+                                      'print("x"*9000)'], timeout=3, cap=1024)
+        with self.assertRaisesRegex(guard_remote.RemoteStop, '^process_timeout$'):
+            guard_remote.run_bounded([sys.executable, '-I', '-S', '-B', '-c',
+                                      'import time;time.sleep(3)'], timeout=.05, cap=1024)
+
+    def test_guard_execute_rejects_wrong_approval_before_loader_or_transport(self):
+        called = []
+        with self.assertRaisesRegex(core.Stop, '^approval_binding$'):
+            guard_gate.execute_once(b'x', b'pass', self.root/'attempt', approval='wrong',
+                                    approved_sha='bad', manifest={}, approved_manifest_sha='bad',
+                                    loader=lambda role: called.append('loader'),
+                                    transport=lambda *a, **k: called.append('transport'))
+        self.assertEqual(called, [])
+        self.assertFalse((self.root/'attempt').exists())
+
+    def test_guard_execute_one_failed_transport_retains_redacted_result_no_retry(self):
+        payload = guard_gate.build_payload(ROOT)
+        script = guard_gate.remote_script(ROOT)
+        class Binding:
+            role='spain'; target_host='example.invalid'; target_user='tester'
+            key_path=Path('key'); known_hosts_path=Path('known_hosts')
+        calls=[]
+        def transport(*args, **kwargs):
+            calls.append(1); kwargs['diagnostics'].update(failure_stage='timeout')
+            raise core.Stop('transport_timeout')
+        manifest=guard_gate.gate_manifest(ROOT)
+        with patch.object(guard_gate, 'ssh_environment', return_value={'PROGRAMDATA':'x'}):
+          with patch.object(guard_gate,'binding_digest',return_value=manifest['target_binding_sha256']):
+            result=guard_gate.execute_once(payload,script,self.root/'attempt',manifest=manifest,
+                approval=guard_remote.APPROVAL,approved_sha=hashlib.sha256(script).hexdigest(),
+                approved_manifest_sha=guard_gate.manifest_sha(ROOT),
+                loader=lambda role: Binding(),transport=transport)
+        self.assertEqual(len(calls),1)
+        self.assertEqual(result['status'],'UNKNOWN_NO_RETRY')
+        self.assertEqual(result['reason'],'transport_timeout')
+        saved=json.loads((self.root/'attempt'/'result.json').read_text())
+        self.assertEqual(saved,result)
+        self.assertNotIn('example.invalid',json.dumps(saved))
+
+    def test_guard_cli_preview_has_no_ssh_and_execute_requires_exact_binding(self):
+        script=ROOT/'scripts/phase16_bot_readback_guard_gate.py'
+        preview=subprocess.run([sys.executable,'-I','-S','-B',str(script)],
+                               capture_output=True,timeout=8)
+        self.assertEqual(preview.returncode,0)
+        value=json.loads(preview.stdout)
+        self.assertEqual(value['status'],'SYNTHETIC_GATE_READY_NOT_EXECUTED')
+        self.assertEqual(value['ssh_attempts'],0)
+        self.assertEqual(value['destination'],guard_remote.DESTINATION)
+        rejected=subprocess.run([sys.executable,'-I','-S','-B',str(script),'--execute',
+                                 '--approve','wrong','--approved-remote-sha256','0'*64,
+                                 '--approved-manifest-sha256','0'*64,
+                                 '--evidence-dir',str(self.root/'attempt')],
+                                capture_output=True,timeout=8)
+        self.assertEqual(rejected.returncode,2)
+        self.assertEqual(json.loads(rejected.stdout)['reason'],'approval_binding')
+        self.assertFalse((self.root/'attempt').exists())
+
+    def test_guard_synthetic_child_is_mount_and_network_isolated(self):
+        command = guard_smoke.child_command(Path('/synthetic/root'), 'wal', 'mnt:[1]')
+        self.assertEqual(command[:5], ['/usr/bin/unshare', '--mount', '--net',
+                                      '--propagation', 'private'])
+        self.assertEqual(command.count('--scratch-root'), 1)
+        self.assertNotIn('/var/lib/amn2-spain', command)
+
+    def test_guard_claim_precedes_binding_read_and_binding_drift_stops_without_transport(self):
+        payload=guard_gate.build_payload(ROOT); script=guard_gate.remote_script(ROOT)
+        manifest=guard_gate.gate_manifest(ROOT); events=[]
+        class Binding:
+            role='spain'; target_host='changed.invalid'; target_user='tester'
+            key_path=Path('key'); known_hosts_path=Path('known_hosts')
+        def loader(role):
+            self.assertTrue((self.root/'attempt'/'claim.json').is_file())
+            events.append('loader'); return Binding()
+        with patch.object(guard_gate,'ssh_environment',return_value={'PROGRAMDATA':'x'}), \
+             patch.object(guard_gate,'binding_digest',return_value='0'*64):
+            result=guard_gate.execute_once(payload,script,self.root/'attempt',manifest=manifest,
+                approval=guard_remote.APPROVAL,approved_sha=hashlib.sha256(script).hexdigest(),
+                approved_manifest_sha=guard_gate.manifest_sha(ROOT),loader=loader,
+                transport=lambda *a,**k: events.append('transport'))
+        self.assertEqual(events,['loader'])
+        self.assertEqual(result['reason'],'target_binding')
+        self.assertEqual(result['status'],'UNKNOWN_NO_RETRY')
+
+    def test_guard_manifest_binds_runner_remote_payload_evidence_and_caps(self):
+        manifest=guard_gate.gate_manifest(ROOT)
+        self.assertEqual(guard_gate.validate_manifest(manifest,ROOT),manifest)
+        for path in ('local_runner','remote_supervisor','payload'):
+            changed=json.loads(json.dumps(manifest)); changed['sha256_lf'][path]='0'*64
+            with self.subTest(path=path), self.assertRaisesRegex(core.Stop,'^manifest_binding$'):
+                guard_gate.validate_manifest(changed,ROOT)
+        changed=json.loads(json.dumps(manifest)); changed['limits']['transport_seconds']=61
+        with self.assertRaisesRegex(core.Stop,'^manifest_binding$'):
+            guard_gate.validate_manifest(changed,ROOT)
+
+    def test_guard_stop_receipts_distinguish_retention_and_persist_exact_reason(self):
+        before=guard_remote.stop_receipt('platform_contract',retained=False,persisted=False)
+        self.assertEqual(before['status'],'STOP_BEFORE_DESTINATION_NO_RETRY')
+        self.assertFalse(before['scratch_retained'])
+        destination=self.root/'retained'; destination.mkdir()
+        retained=guard_remote.stop_receipt('synthetic_timeout',retained=True,persisted=True)
+        guard_remote.persist_receipt(destination,retained)
+        self.assertEqual(json.loads((destination/'remote-result.json').read_text()),retained)
+        self.assertEqual(retained['reason'],'synthetic_timeout')
+
+    def test_guard_receipt_rejects_unknown_top_level_and_case_fields(self):
+        receipt=guard_remote.pass_receipt_for_tests(); receipt['unexpected']='data'
+        with self.assertRaisesRegex(core.Stop,'^receipt_binding$'):
+            guard_gate.validate_receipt(receipt,0)
+        receipt=guard_remote.pass_receipt_for_tests(); receipt['cases'][0]['unexpected']='data'
+        with self.assertRaisesRegex(core.Stop,'^receipt_binding$'):
+            guard_gate.validate_receipt(receipt,0)
+
+    def test_guard_smoke_children_remain_in_outer_process_group(self):
+        class Process:
+            returncode=0; pid=123
+            def communicate(self,timeout): return (b'{"case":"wal"}',b'')
+            def poll(self): return 0
+        with patch.object(guard_smoke.subprocess,'Popen',return_value=Process()) as popen:
+            result=guard_smoke.bounded_child(Path('/synthetic/root'),'wal','mnt:[1]')
+        self.assertEqual(result,{'case':'wal'})
+        self.assertFalse(popen.call_args.kwargs['start_new_session'])
+
+    def test_guard_remote_main_pre_destination_stop_is_not_claimed_retained(self):
+        fake_in=type('Input',(),{'buffer':io.BytesIO(guard_gate.build_payload(ROOT))})()
+        fake_out=io.StringIO()
+        with patch.object(guard_remote.sys,'argv',['remote',guard_remote.APPROVAL]), \
+             patch.object(guard_remote.sys,'stdin',fake_in), patch.object(guard_remote.sys,'stdout',fake_out), \
+             patch.object(guard_remote,'execute',side_effect=guard_remote.RemoteStop('platform_contract')), \
+             patch.object(guard_remote,'destination_exists',return_value=False), \
+             patch.object(guard_remote,'install_deadline'), patch.object(guard_remote,'clear_deadline'):
+            self.assertEqual(guard_remote.main(),3)
+        value=json.loads(fake_out.getvalue())
+        self.assertEqual(value['status'],'STOP_BEFORE_DESTINATION_NO_RETRY')
+        self.assertFalse(value['scratch_retained'])
 
 
 if __name__ == '__main__': unittest.main()

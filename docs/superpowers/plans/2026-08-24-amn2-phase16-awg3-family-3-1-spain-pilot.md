@@ -229,8 +229,11 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    По следующему «продолжай» [portable core/manifest реализованы](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#portable-implementation-2026-09-22),42 local tests PASS.
    Synthetic Linux harness подготовлен, но Linux guard не проверен (локальной
    Linux среды нет); общий live runner ещё не собран, CLI execution disabled.
-   SSH/DB open=0. Следующий local slice — bounded supervisor/transport и exact
-   synthetic Linux contract до отдельного approval; actual DB readback позже.
+   По следующему «продолжай» [bounded synthetic Linux gate готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#synthetic-linux-gate-ready-2026-09-22):
+   supervisor/transport, manifest+target binding, whole-gate deadline, точные
+   receipt/retention semantics, mount+network namespaces; независимый review
+   исправлен отдельными regression tests, итог 56 PASS; SSH=0. Следующая граница — отдельное точное approval на один synthetic
+   SSH. Actual DB readback не включён и получит собственный gate после Linux PASS.
    Linux signal gate закрыт; namespace/WAL gate и live DB compatibility/writer fence/production rollback открыты.
    Рабочие службы/DB/poller исключены из gate; Linux на АРМ не требуется.
    AWG2/package016 неизменяемы, general issuance disabled; activation запрещена.

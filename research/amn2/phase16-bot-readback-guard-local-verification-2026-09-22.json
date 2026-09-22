@@ -1,0 +1,49 @@
+{
+  "schema": "phase16.readback-guard-local-verification.v1",
+  "date": "2026-09-22",
+  "amn3_base": "96b3187d71df980b4d54a7cd8d3a8b0f2842c090",
+  "status": "SYNTHETIC_GATE_READY_NOT_EXECUTED",
+  "tests": {
+    "passed": 56,
+    "failed": 0,
+    "skipped": 0,
+    "command": "python -I -S -B tests/test_phase16_bot_integration_readback.py"
+  },
+  "tdd": [
+    "missing_gate_module_RED_to_49_PASS",
+    "output_cap_race_RED_to_49_PASS",
+    "network_namespace_contract_RED_to_50_PASS",
+    "review_binding_deadline_retention_schema_RED_to_56_PASS"
+  ],
+  "offline_preview": {
+    "manifest_sha256": "ac51ca3966bd2363d5969ecaf936c981cde35eddaf0fe3947a0209a0410a6964",
+    "remote_sha256": "47f64ad29e684934761c17b74b6fe68086973fc19b09d0f2f14540a7a7f9c9e9",
+    "payload_sha256": "2898ecdc1476a3144c2438c1237990cbe6c9e249bb302f1848c01521dabb6224",
+    "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+    "ssh_attempts": 0,
+    "live_database": "EXCLUDED",
+    "services": "EXCLUDED"
+  },
+  "local_evidence_parent_created": true,
+  "execution_directory_absent": true,
+  "independent_review": {
+    "status": "COMPLETED_WITH_FIXES",
+    "critical_fixed": "manifest_and_target_binding_before_transport",
+    "important_fixed": [
+      "claim_before_trust_read",
+      "whole_remote_gate_deadline",
+      "namespace_children_in_owned_process_group",
+      "exact_retention_and_persisted_receipts"
+    ],
+    "minor_fixed": "reject_unknown_receipt_fields"
+  },
+  "exact_command": "& 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -S -B scripts/phase16_bot_readback_guard_gate.py --execute --approve PHASE16_SYNTHETIC_READBACK_GUARD_20260922_001 --approved-remote-sha256 47f64ad29e684934761c17b74b6fe68086973fc19b09d0f2f14540a7a7f9c9e9 --approved-manifest-sha256 ac51ca3966bd2363d5969ecaf936c981cde35eddaf0fe3947a0209a0410a6964 --evidence-dir 'C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-readback-guard-runner-20260922/execution-001'",
+  "ssh_attempts": 0,
+  "mount_actions": 0,
+  "live_database_opened": false,
+  "service_actions": 0,
+  "production_install_stage_deploy": false,
+  "awg2": "UNTOUCHED",
+  "package016": "UNCHANGED",
+  "general_issuance": "DISABLED"
+}

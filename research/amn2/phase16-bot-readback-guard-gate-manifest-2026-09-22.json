@@ -1,0 +1,52 @@
+{
+  "schema": "phase16.readback-guard-gate-manifest.v1",
+  "status": "SYNTHETIC_GATE_READY_NOT_EXECUTED",
+  "amn3_base": "96b3187d71df980b4d54a7cd8d3a8b0f2842c090",
+  "approval": "PHASE16_SYNTHETIC_READBACK_GUARD_20260922_001",
+  "remote_destination": "/opt/amn2-spain/bot-candidates/phase16-readback-guard-20260922-001",
+  "local_evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-readback-guard-runner-20260922/execution-001",
+  "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+  "sha256_lf": {
+    "local_runner": "2fa412e2b9eaddd8f7d582a209499b3137b75e94f4d43ef8435fdeaac11a7b7b",
+    "remote_supervisor": "47f64ad29e684934761c17b74b6fe68086973fc19b09d0f2f14540a7a7f9c9e9",
+    "portable_core": "f6b152a3439a3c89d6ea900133df4e6806ca0cc01e0bb893c22d59f82b5adaee",
+    "synthetic_smoke": "b860899e269528baaa0beaa69a760ff2aab643fb8e6e8c9e6c5d6dab230141c8",
+    "payload": "2898ecdc1476a3144c2438c1237990cbe6c9e249bb302f1848c01521dabb6224"
+  },
+  "bytes_lf": {
+    "local_runner": 16434,
+    "remote_supervisor": 12728,
+    "portable_core": 23282,
+    "synthetic_smoke": 6975,
+    "payload": 30281
+  },
+  "limits": {
+    "ssh_attempts": 1,
+    "remote_seconds": 45,
+    "transport_seconds": 60,
+    "combined_remote_output_bytes": 65536,
+    "cleanup_signal_scope": "owned_remote_process_group_including_namespaces",
+    "retry": false,
+    "cleanup_ssh": false
+  },
+  "synthetic_scope": {
+    "new_database_only": true,
+    "private_mount_namespace": true,
+    "private_network_namespace": true,
+    "retained_after_destination_creation": true,
+    "production_database": false,
+    "production_source": false,
+    "production_units": false,
+    "service_actions": false,
+    "telegram": false,
+    "runtime_activation": false
+  },
+  "command_contract": {
+    "entrypoint": "scripts/phase16_bot_readback_guard_gate.py",
+    "requires_execute": true,
+    "requires_approval": "PHASE16_SYNTHETIC_READBACK_GUARD_20260922_001",
+    "requires_remote_sha256": true,
+    "requires_manifest_sha256": true,
+    "requires_exact_evidence_directory": true
+  }
+}

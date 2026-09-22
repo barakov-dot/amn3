@@ -7,6 +7,16 @@
 
 ## 2026-09-22
 
+- Завершена локальная подготовка [bounded synthetic Linux readback guard gate](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#synthetic-linux-gate-ready-2026-09-22):
+  hash/manifest/target-bound runner, remote supervisor, one-SSH/no-retry transport,
+  whole-gate 45s/transport 60s/64KiB caps и mount+network-isolated fixtures.
+  56 PASS после RED; independent review fixes закрыли claim order, deadline,
+  process-group cleanup, exact receipt schema и retention semantics. Manifest и
+  local receipt сохраняют command contract/exact command/hashes. Gate не исполнен:
+  SSH/mount/live DB/services=0; production paths исключены. Следующий шаг требует
+  отдельного точного approval на один synthetic SSH. AMN2/AWG2/package016 не
+  менялись, issuance disabled, production stage/install/deploy отсутствуют.
+
 - Реализована [локальная portable часть integration readback](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#portable-implementation-2026-09-22):
   bounded metadata/schema helpers, namespace guards, offline pinned manifest
   builder и source synthetic Linux harness.42 portable PASS после RED; исправлены

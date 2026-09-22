@@ -519,8 +519,12 @@ general issuance disabled. Исполнитель/исторические appro
 22.09 по «продолжай» подготовлен [единый bounded readback contract](phase16-bot-integration-readback-contract-2026-09-22.ru.md):
 фиксированные области/поля/caps/STOP, source writer matrix, SQLite/WAL guard и
 границы выводов. По следующему «продолжай» [portable core/manifest реализованы](phase16-bot-integration-readback-contract-2026-09-22.ru.md#portable-implementation-2026-09-22),42 local PASS.
-Linux namespace/WAL guard не проверен; synthetic harness подготовлен как source,
-общий live runner ещё не собран. Следующий local slice — bounded supervisor/
-transport и exact synthetic Linux contract до approval. Сейчас SSH/DB open=0; stop/switch/seed/
+Linux namespace/WAL guard ещё не исполнен. По следующему «продолжай»
+[bounded synthetic gate готов](phase16-bot-integration-readback-contract-2026-09-22.ru.md#synthetic-linux-gate-ready-2026-09-22):
+supervisor/transport, manifest+target binding, whole-gate deadline, exact
+receipt/retention semantics и mount+network isolation. Замечания independent
+review исправлены regression tests; итог 56 local PASS.
+Следующая граница — отдельное exact approval на один synthetic SSH; actual DB
+readback не включён. Сейчас SSH/DB open=0; stop/switch/seed/
 migration/Telegram smoke не разрешены. Прежние Linux tests не повторялись,
 package/bundle/source сохранены. Подробности поддерживаются только в contract.
