@@ -7,6 +7,14 @@
 
 ## 2026-09-22
 
+- После exact `_002` approval [actual readback execution-002 завершён
+  STOP_NO_RETRY](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-002-stop-2026-09-22):
+  один SSH, complete transport, stderr0; bot ExecStartPre вернул exit0/stdout0,
+  а gate остановился на newline format check. Root cause — локальная нормализация
+  empty systemd property. Source/dependencies/DB/actions=0, retry0. Evidence
+  hash-validated; следующий local gate-003 требует нового marker. AWG2/package016
+  сохранены, issuance disabled, install/stage/deploy отсутствуют.
+
 - После execution-001 STOP подготовлен [actual readback gate-002](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-002-ready-2026-09-22):
   каждая fixed allowlisted systemd property читается отдельно; STOP содержит
   только bounded role/property/stage/exit/byte metadata без raw output/env.

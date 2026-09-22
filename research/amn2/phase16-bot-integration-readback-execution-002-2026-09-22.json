@@ -1,0 +1,105 @@
+{
+  "schema": "phase16.integration-readback-execution-record.v1",
+  "date": "2026-09-22",
+  "amn3_commit": "6761c18cc5f5962c95af11cd48aae90a68d54183",
+  "approval": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_002",
+  "status": "STOP_NO_RETRY",
+  "classification": {
+    "failure_boundary": "unit_property_format",
+    "reason": "unit_property",
+    "role": "bot",
+    "property": "ExecStartPre",
+    "stage": "format",
+    "returncode": 0,
+    "stdout_bytes": 0,
+    "stderr_bytes": 0,
+    "root_cause": "EMPTY_SYSTEMD_PROPERTY_IS_ZERO_BYTES",
+    "retry_performed": false,
+    "production_database_opened": false,
+    "production_source_read": false,
+    "production_dependencies_read": false,
+    "service_actions": 0,
+    "database_write_attempted": false,
+    "application_imported": false,
+    "runtime_activation": false
+  },
+  "evidence": {
+    "directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-002",
+    "claim_sha256": "e22077e7468fb2e6bc4a46d1665e5542222c592106ca5a3b4af44493958677ae",
+    "result_sha256": "e3d594711e02b3477107e6347fd5e9e394edbf1ececa17ea7f3f506e939e3417",
+    "receipt_validation": "PASS"
+  },
+  "result": {
+    "schema": "phase16.integration-readback-local.v1",
+    "claim": {
+      "schema": "phase16.integration-readback-claim.v1",
+      "scope": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_002",
+      "attempts": 1,
+      "gate_sha256": "80a3a62bea7e5e2b6e662ad1a4ae8b95a47e69558829ce8e63c692b8c69cd52a",
+      "source_manifest_sha256": "dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc",
+      "remote_sha256": "c5d326262724c0f7b7c280087789bebaeb3e73c6f4a1f6c38a102cdf673c315a",
+      "payload_sha256": "0d04ec697a808dffb02c17380d5b23a6be862e9350a5f0e5533f23e49a01ed05",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+      "evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-002",
+      "remote_seconds": 50,
+      "transport_seconds": 60,
+      "claimed_at": "2026-09-22T17:07:51.645664+00:00"
+    },
+    "status": "STOP_NO_RETRY",
+    "ssh_attempts": 1,
+    "transport": {
+      "schema": "phase16.bot-transport.v1",
+      "returncode": 3,
+      "failure_stage": null,
+      "stdin_bytes_requested": 67972,
+      "stdin_bytes_accepted": 67972,
+      "stdin_complete": true,
+      "output_complete": true,
+      "stdout": {
+        "bytes_observed": 467,
+        "bytes_retained": 467,
+        "prefix_sha256": "501c81374b892698626150cd010d0b34c2a6c356816a02bf66b09ce322eb8cc5"
+      },
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "pipe_failures": [],
+      "stderr_classification": "NO_STDERR"
+    },
+    "remote": {
+      "application_imported": false,
+      "database_write_attempted": false,
+      "partial": {
+        "host": {
+          "machine": "x86_64",
+          "python": "3.12.3",
+          "python_device": 64770,
+          "python_inode": 13263,
+          "sqlite": "3.45.1",
+          "system": "Linux"
+        },
+        "unit_probe": {
+          "property": "ExecStartPre",
+          "returncode": 0,
+          "role": "bot",
+          "stage": "format",
+          "stderr_bytes": 0,
+          "stdout_bytes": 0
+        }
+      },
+      "reason": "unit_property",
+      "runtime_activation": false,
+      "schema": "phase16.integration-readback-remote.v1",
+      "service_actions": 0,
+      "status": "STOP_NO_RETRY"
+    }
+  },
+  "safety": {
+    "awg2": "UNTOUCHED",
+    "package016": "UNCHANGED",
+    "general_issuance": "DISABLED",
+    "production_install_stage_deploy": false
+  }
+}

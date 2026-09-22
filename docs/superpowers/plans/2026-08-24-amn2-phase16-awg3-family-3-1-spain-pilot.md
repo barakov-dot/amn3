@@ -257,6 +257,10 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    per-property fixed systemctl allowlist, bounded normalized STOP diagnostic,
    новый marker/execution-002; 71 PASS и independent review APPROVE. Preview
    SSH 0. Новое подключение не выполнено и требует exact approval `_002`.
+   После approval [execution-002 STOP_NO_RETRY](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-002-stop-2026-09-22):
+   SSH1/transport complete/stderr0; bot ExecStartPre exit0/stdout0. Root cause —
+   local empty-property newline assumption. Source/dependencies/DB/actions=0;
+   retry нет. Следующий шаг — local gate-003 fix, отдельный marker до нового SSH.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

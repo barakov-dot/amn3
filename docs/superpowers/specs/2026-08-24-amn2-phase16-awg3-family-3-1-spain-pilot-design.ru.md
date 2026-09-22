@@ -578,6 +578,11 @@ No-retry соблюдён. Новый unit-property diagnostic contract долж
 bounded role/property/stage/exit/byte metadata. 71 PASS/review APPROVE, SSH 0.
 Marker и execution-002 новые; это preparation, не current unit/readback evidence.
 
+Execution-002 [остановлен точно](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-002-stop-2026-09-22):
+bot ExecStartPre, exit0/stderr0/stdout0, format STOP. Это локальное предположение
+о newline для empty `--value`, а не unit failure. No retry; production source/
+dependencies/DB/actions не затронуты. Gate-003 fix и approval должны быть новыми.
+
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
 iPhone/A/B остаются отложенными; deployment не разрешён.

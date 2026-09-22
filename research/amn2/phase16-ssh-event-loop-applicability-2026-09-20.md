@@ -1123,3 +1123,8 @@ gate сначала готовится локально и получает от
 fixed per-property systemctl reads, normalized bounded unit failure evidence,
 новый marker и execution-002. 71 targeted PASS, independent review APPROVE,
 preview SSH 0. Новый SSH не выполнялся и требует exact `_002` approval.
+
+После approval [execution-002 STOP_NO_RETRY](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-002-stop-2026-09-22):
+один SSH, complete transport/stderr0; точный unit probe — bot ExecStartPre,
+exit0/stdout0/format. Root cause локальный: empty `systemctl --value` не выдаёт
+newline. Source/dependencies/DB/actions=0; retry нет. Далее local gate-003 fix.

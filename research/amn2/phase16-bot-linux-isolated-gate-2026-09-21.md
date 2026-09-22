@@ -555,3 +555,8 @@ Retry не выполнялся. Следующая подготовка лок�
 новый marker/execution-002, per-property systemctl allowlist и bounded safe STOP
 diagnostic; 71 PASS, review APPROVE, preview SSH 0. Повтор `_001` невозможен;
 следующий SSH требует отдельного exact approval.
+
+Execution-002 затем [STOP_NO_RETRY](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-002-stop-2026-09-22):
+SSH1/complete/stderr0; bot ExecStartPre exit0/stdout0 выявил локальную ошибку
+empty-property newline normalization. Source/dependencies/DB/actions=0, retry0.
+Gate-003 сначала готовится локально и получает новый exact marker.

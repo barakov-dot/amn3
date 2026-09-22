@@ -448,3 +448,27 @@ Gate-002 **READY_NOT_EXECUTED**. Его единственная попытка 
 точного approval marker. Ни execution-001 approval, ни общие прежние разрешения
 не переносятся. AWG2/package016 неизменны, issuance disabled; production
 install/stage/deploy отсутствуют.
+
+<a id="actual-readback-execution-002-stop-2026-09-22"></a>
+
+## Actual integration readback execution-002 — STOP_NO_RETRY
+
+После exact approval `_002` preflight подтвердил commit/hashes/trust и свободный
+execution-002. Выполнена одна SSH попытка: transport exit3, stdin/output complete,
+stderr0; retry отсутствует. [Нормализованный receipt](phase16-bot-integration-readback-execution-002-2026-09-22.json)
+прошёл закрытую schema validation. Evidence SHA256: claim
+`e22077e7468fb2e6bc4a46d1665e5542222c592106ca5a3b4af44493958677ae`,
+result `e3d594711e02b3477107e6347fd5e9e394edbf1ececa17ea7f3f506e939e3417`.
+
+STOP теперь точный: bot `ExecStartPre`, command exit0, stderr0, stdout0,
+stage `format`. `systemctl show --value` для этой пустой property возвращает
+zero bytes; gate ошибочно требовал terminal newline для любого значения.
+Root cause — локальная нормализация empty property, не отсутствие unit и не
+service failure. Source/dependencies/DB не читались; actions/imports/writes/
+activation отсутствуют.
+
+Execution-002 consumed и не повторяется. Следующий local-only fix должен
+принимать zero-byte output как точное пустое значение, сохраняя newline/formats
+checks для непустого output, новый marker и execution-003. Новый SSH требует
+отдельного exact approval. AWG2/package016 сохранены, issuance disabled;
+production install/stage/deploy отсутствуют.
