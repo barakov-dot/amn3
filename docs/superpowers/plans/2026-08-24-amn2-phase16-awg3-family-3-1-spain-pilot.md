@@ -240,6 +240,14 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    Linux signal и namespace/WAL gates закрыты; live DB compatibility/writer fence/production rollback открыты.
    Рабочие службы/DB/poller исключены из gate; Linux на АРМ не требуется.
    AWG2/package016 неизменяемы, general issuance disabled; activation запрещена.
+   Следующий разрешённый local slice завершён: [actual integration readback gate
+   готов, но не исполнен](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-ready-2026-09-22).
+   Он связывает production source/dependency metadata, закрытый unit-property
+   allowlist и schema-only SQLite read через private read-only mount+network
+   namespaces; строки БД, Environment/journal, app imports и service actions
+   исключены. После RED/GREEN и independent review — 69 PASS/APPROVE, offline
+   preview SSH 0. Для единственной actual readback попытки нужен отдельный exact
+   marker; stop/switch/seed/migration/activation им не разрешаются.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

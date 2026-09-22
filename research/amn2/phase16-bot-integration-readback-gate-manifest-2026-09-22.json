@@ -1,0 +1,59 @@
+{
+  "schema": "phase16.integration-readback-gate-manifest.v1",
+  "status": "ACTUAL_READBACK_GATE_READY_NOT_EXECUTED",
+  "amn3_base": "a713d4dce8ca",
+  "source_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+  "approval": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_001",
+  "local_evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-001",
+  "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+  "sha256_lf": {
+    "local_runner": "8e53e3dc63b1611c3d11e7bec52a283cb019d3a49b562c19a5e7b3b11814efcd",
+    "remote_supervisor": "8eadb22e72616eccf81c3e238e5b6c8c1e28f7e253513d427865c1d9f3ec07fc",
+    "portable_core": "f6b152a3439a3c89d6ea900133df4e6806ca0cc01e0bb893c22d59f82b5adaee",
+    "integration_manifest": "dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc",
+    "payload": "0d04ec697a808dffb02c17380d5b23a6be862e9350a5f0e5533f23e49a01ed05"
+  },
+  "bytes_lf": {
+    "local_runner": 31442,
+    "remote_supervisor": 20087,
+    "portable_core": 23282,
+    "integration_manifest": 23102,
+    "payload": 46408
+  },
+  "limits": {
+    "ssh_attempts": 1,
+    "remote_seconds": 50,
+    "work_seconds": 44,
+    "cleanup_seconds": 4,
+    "finalization_seconds": 2,
+    "transport_seconds": 60,
+    "remote_stdout_bytes": 65536,
+    "remote_stderr_bytes": 8192,
+    "transport_combined_output_bytes": 65536,
+    "cleanup_signal_scope": "owned_collector_process_groups_only",
+    "retry": false,
+    "cleanup_ssh": false
+  },
+  "readback_scope": {
+    "production_source_metadata": true,
+    "production_unit_properties": true,
+    "production_dependency_metadata": true,
+    "production_database_schema": true,
+    "production_database_rows": false,
+    "private_mount_namespace": true,
+    "private_network_namespace": true,
+    "service_actions": false,
+    "application_imports": false,
+    "telegram": false,
+    "runtime_activation": false
+  },
+  "command_contract": {
+    "entrypoint": "scripts/phase16_bot_integration_readback_gate.py",
+    "requires_execute": true,
+    "requires_approval": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_001",
+    "requires_remote_sha256": true,
+    "requires_manifest_sha256": true,
+    "requires_gate_sha256": true,
+    "requires_exact_evidence_directory": true
+  }
+}

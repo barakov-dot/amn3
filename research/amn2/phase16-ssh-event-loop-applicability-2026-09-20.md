@@ -1096,3 +1096,19 @@ quiescence остаются недоказанными. Следующий ра�
 общий production read-only collector/transport; его SSH исполнение потребует
 отдельной границы. AWG2/package016 сохранены, issuance disabled, production
 stage/install/deploy отсутствуют.
+
+<a id="bot-actual-integration-readback-gate-ready-2026-09-22"></a>
+
+## Actual integration readback gate готов — 2026-09-22
+
+По дальнейшему «продолжай» завершён локальный
+[gate](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-ready-2026-09-22).
+One-attempt runner требует exact marker и три SHA, создаёт exclusive claim до
+trust read и допускает один SSH/no retry. Remote stdin supervisor читает только
+source/dependency metadata, закрытые unit properties и SQLite schema в private
+RO mount+network namespaces; rows/env/journal/app import/service action исключены.
+Абсолютный 50s budget включает 44s work, 4s cleanup и 2s finalization; receipt flush
+происходит до снятия watchdog. После RED/GREEN — 69 PASS; independent review
+APPROVE. Preview: SSH 0, execution-001 отсутствует, gate READY_NOT_EXECUTED.
+Actual readback требует отдельного exact approval и не разрешает последующие
+stop/switch/seed/migration/activation. AWG2/package016 неизменны, issuance disabled.

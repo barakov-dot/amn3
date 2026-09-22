@@ -7,6 +7,15 @@
 
 ## 2026-09-22
 
+- Подготовлен [actual integration readback gate](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-ready-2026-09-22):
+  one-attempt/no-retry runner, exact target/payload/SHA binding, private read-only
+  mount+network namespaces, schema-only SQLite и закрытые source/dependency/unit
+  receipts. Абсолютный remote budget 50s включает cleanup/finalization и stdout
+  flush; output caps раздельны. 69 targeted PASS после RED/GREEN, independent
+  review APPROVE. Offline preview: SSH 0, execution-001 отсутствует; production
+  DB/service/install/stage/deploy не затронуты. Следующий actual readback требует
+  отдельного exact marker. AWG2/package016 сохранены, issuance disabled.
+
 - Выполнен [bounded synthetic Linux readback guard gate](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#synthetic-linux-gate-pass-2026-09-22):
   hash/manifest/target-bound runner, remote supervisor, one-SSH/no-retry transport,
   whole-gate 45s/transport 60s/64KiB caps и mount+network-isolated fixtures.

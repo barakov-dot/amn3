@@ -340,3 +340,47 @@ compatibility или writer quiescence. Следующий шаг снова л�
 production read-only collector/transport и его точный actual-readback contract;
 actual SSH readback потребует отдельной границы. AWG2/package016 неизменны,
 general issuance disabled, production stage/install/deploy отсутствуют.
+
+<a id="actual-readback-gate-ready-2026-09-22"></a>
+
+## Actual integration readback gate готов локально — 2026-09-22
+
+После synthetic PASS собран общий production read-only
+[local runner](../../scripts/phase16_bot_integration_readback_gate.py) и
+[remote supervisor](../../scripts/vps/phase16_bot_integration_readback_remote.py).
+По умолчанию runner выполняет только offline preview. Execute требует точный
+marker `PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_001`, SHA remote/исходного
+manifest/gate и новый exclusive evidence-dir. Claim создаётся до trust read;
+drift или занятый path дают local STOP при SSH=0. Разрешён ровно один SSH без
+retry и cleanup SSH.
+
+[Gate manifest](phase16-bot-integration-readback-gate-manifest-2026-09-22.json)
+фиксирует target binding, payload и пределы: 44s work + 4s bounded cleanup + 2s
+finalization внутри абсолютных 50s; transport 60s; stdout 64KiB, stderr 8KiB.
+Remote supervisor приходит через stdin и не записывает source на сервер. Он
+читает metadata/hash production `.py`, dist-info METADATA и `.pth`, закрытый
+allowlist systemd properties без Environment/journal, а также только schema
+SQLite без строк. DB child запускается в private mount+network namespaces,
+bind-remount существующего DB directory read-only, открывает SQLite `mode=ro`,
+`query_only` и authorizer. Service actions, application imports, Telegram,
+runtime activation и remote result writes исключены.
+
+TDD завершён **69 PASS**. Независимый review сначала нашёл permissive nested
+receipt, неполный deadline/finalization, общий output cap, небезопасную partial
+evidence и снятие watchdog до stdout flush. Все findings закрыты отдельными
+RED/GREEN regression tests; итоговый verdict **APPROVE**, open findings 0.
+Offline preview: gate SHA
+`de969b61b3279f0e1748ae639949e704b7979ad9401b5289517ff57e3433d2c2`,
+remote SHA `8eadb22e72616eccf81c3e238e5b6c8c1e28f7e253513d427865c1d9f3ec07fc`,
+source manifest SHA
+`dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc`.
+[Local verification](phase16-bot-integration-readback-gate-local-verification-2026-09-22.json)
+содержит exact future command. Execution-001 отсутствует; actual SSH = 0,
+production DB не открывалась, services не менялись.
+
+Gate **READY_NOT_EXECUTED**. Следующая граница — отдельное точное подтверждение
+одной actual readback попытки. Даже успешный receipt даст только source/runtime/
+unit/schema/observed-holder evidence; он не докажет полную writer quiescence,
+semantic DB compatibility, stop/switch/seed/migration/rollback или acceptance.
+AWG2/package016 неизменны, general issuance disabled; production
+stage/install/deploy отсутствуют.

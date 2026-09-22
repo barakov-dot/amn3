@@ -558,6 +558,15 @@ SSH1/exit0/stderr0, WAL read/write-block и expected sidecar/journal STOP;
 production paths/actions=0. Target readback/units остаются отдельными
 approvals; production units/dependencies
 не менялись, новая test-venv отдельно создана и retained.
+
+22.09 [actual readback gate завершён локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-ready-2026-09-22):
+exact target/payload/manifest binding, one SSH/no retry, private RO mount+network
+namespaces, schema-only DB, закрытые unit/source/dependency receipts и абсолютный
+50s remote fence. 69 targeted PASS; все independent review findings исправлены,
+итог APPROVE. Offline preview: SSH 0; execution path отсутствует. Gate не закрывает
+M4 writer completeness/quiescence, semantic compatibility или M6/M7 и требует
+отдельного exact approval перед actual production readback.
+
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
 iPhone/A/B остаются отложенными; deployment не разрешён.

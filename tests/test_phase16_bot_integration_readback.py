@@ -19,6 +19,8 @@ from scripts.vps import phase16_bot_readback_guard_smoke as guard_smoke
 from scripts import phase16_bot_integration_readback as runner
 from scripts import phase16_bot_readback_guard_gate as guard_gate
 from scripts.vps import phase16_bot_readback_guard_remote as guard_remote
+from scripts import phase16_bot_integration_readback_gate as live_gate
+from scripts.vps import phase16_bot_integration_readback_remote as live_remote
 
 
 class ReadbackTests(unittest.TestCase):
@@ -493,6 +495,149 @@ _ensure_column(conn, "users", "status", "TEXT")
         value=json.loads(fake_out.getvalue())
         self.assertEqual(value['status'],'STOP_BEFORE_DESTINATION_NO_RETRY')
         self.assertFalse(value['scratch_retained'])
+
+    def test_live_payload_is_exact_and_tamper_rejected(self):
+        payload=live_gate.build_payload(ROOT)
+        parts=live_remote.parse_payload(payload)
+        self.assertEqual(set(parts),{'core','manifest'})
+        with self.assertRaisesRegex(live_remote.RemoteStop,'^payload_binding$'):
+            live_remote.parse_payload(payload[:-1]+bytes([payload[-1]^1]))
+
+    def test_live_unit_command_is_fixed_property_allowlist(self):
+        command=live_remote.unit_command('amn2-spain-bot.service')
+        self.assertEqual(command[:3],['/usr/bin/systemctl','show','amn2-spain-bot.service'])
+        self.assertNotIn('Environment',','.join(command))
+        self.assertEqual(sum(item.startswith('--property=') for item in command),
+                         len(live_remote.UNIT_PROPERTIES))
+        with self.assertRaisesRegex(live_remote.RemoteStop,'^unit_role$'):
+            live_remote.unit_command('other.service')
+
+    def test_live_db_child_is_mount_and_network_isolated(self):
+        command=live_remote.db_child_command('mnt:[1]')
+        self.assertEqual(command[:5],['/usr/bin/unshare','--mount','--net',
+                                      '--propagation','private'])
+        self.assertNotIn('--service',command)
+
+    def test_live_receipt_rejects_unknown_or_mutating_claims(self):
+        receipt=live_gate.pass_receipt_for_tests()
+        self.assertEqual(live_gate.validate_receipt(receipt,0)['status'],
+                         'READBACK_COMPLETE_WITH_LIMITATIONS')
+        for key,value in [('service_actions',1),('database_write_attempted',True)]:
+            changed=json.loads(json.dumps(receipt));changed[key]=value
+            with self.subTest(key=key),self.assertRaisesRegex(core.Stop,'^receipt_binding$'):
+                live_gate.validate_receipt(changed,0)
+        changed=json.loads(json.dumps(receipt));changed['unexpected']='x'
+        with self.assertRaisesRegex(core.Stop,'^receipt_binding$'):
+            live_gate.validate_receipt(changed,0)
+        changed=json.loads(json.dumps(receipt));changed['database']['rows']=[]
+        with self.assertRaisesRegex(core.Stop,'^receipt_binding$'):
+            live_gate.validate_receipt(changed,0)
+        changed=json.loads(json.dumps(receipt));changed['units_before']['bot']['Environment']='secret'
+        with self.assertRaisesRegex(core.Stop,'^receipt_binding$'):
+            live_gate.validate_receipt(changed,0)
+
+    def test_live_execute_wrong_approval_stops_before_claim_or_trust(self):
+        called=[]
+        with self.assertRaisesRegex(core.Stop,'^approval_binding$'):
+            live_gate.execute_once(b'x',b'pass',self.root/'attempt',approval='wrong',
+                approved_remote_sha='bad',approved_manifest_sha='bad',gate={},
+                approved_gate_sha='bad',loader=lambda role:called.append('loader'),
+                transport=lambda *a,**k:called.append('transport'))
+        self.assertEqual(called,[])
+        self.assertFalse((self.root/'attempt').exists())
+
+    def test_live_gate_manifest_binds_caps_target_payload_and_evidence(self):
+        gate=live_gate.gate_manifest(ROOT)
+        self.assertEqual(live_gate.validate_gate_manifest(gate,ROOT),gate)
+        for key in ('remote_supervisor','portable_core','integration_manifest','payload'):
+            changed=json.loads(json.dumps(gate));changed['sha256_lf'][key]='0'*64
+            with self.subTest(key=key),self.assertRaisesRegex(core.Stop,'^manifest_binding$'):
+                live_gate.validate_gate_manifest(changed,ROOT)
+
+    def test_live_preview_has_no_ssh_and_exact_scope(self):
+        script=ROOT/'scripts/phase16_bot_integration_readback_gate.py'
+        result=subprocess.run([sys.executable,'-I','-S','-B',str(script)],
+                              capture_output=True,timeout=8)
+        self.assertEqual(result.returncode,0)
+        value=json.loads(result.stdout)
+        self.assertEqual(value['status'],'ACTUAL_READBACK_GATE_READY_NOT_EXECUTED')
+        self.assertEqual(value['ssh_attempts'],0)
+        self.assertEqual(value['database_access'],'READ_ONLY_PRIVATE_MOUNT')
+        self.assertEqual(value['service_actions'],0)
+
+    def test_live_stop_receipt_preserves_only_normalized_partial_evidence(self):
+        host=live_gate.pass_receipt_for_tests()['host']
+        receipt=live_remote.stop_receipt('unit_show',{'host':host})
+        self.assertEqual(live_gate.validate_receipt(receipt,3),receipt)
+        self.assertEqual(receipt['partial'],{'host':host})
+        receipt=live_remote.stop_receipt('unit_show',{'host':{'machine':'x86_64'}})
+        with self.assertRaisesRegex(core.Stop,'^receipt_binding$'):
+            live_gate.validate_receipt(receipt,3)
+        summary=live_remote.partial_summary({'host':host})
+        receipt=live_remote.stop_receipt('partial_output_cap',{'summary':summary})
+        self.assertEqual(live_gate.validate_receipt(receipt,3),receipt)
+
+    def test_live_database_file_size_drift_is_reported_not_misattributed(self):
+        before={'database':{'present':True,'device':1,'inode':2,'bytes':10},
+                'wal':{'present':False}}
+        after=json.loads(json.dumps(before));after['database']['bytes']=11
+        self.assertFalse(live_remote.stable_roots(before,after))
+        changed=json.loads(json.dumps(after));changed['database']['inode']=3
+        with self.assertRaisesRegex(live_remote.RemoteStop,'^database_file_changed$'):
+            live_remote.stable_roots(before,changed)
+
+    def test_live_worst_case_normalized_receipt_stays_under_transport_cap(self):
+        manifest=json.loads((ROOT/'research/amn2/phase16-bot-integration-manifest-6e68235.json').read_text())
+        receipt=live_remote.pass_receipt_for_tests()
+        receipt['source']={'status':'MATCH_IN_SCOPE','files':manifest['source'],
+                           'missing':[],'different':[],'extra_count':0,
+                           'extra_digest':'0'*64,'runtime_binding':'UNKNOWN'}
+        receipt['dependencies']={'status':'STATIC_METADATA_ONLY',
+            'matched':sorted(manifest['runtime_pins']),'missing':[],'different':{},
+            'extra_count':0,'extra_digest':'0'*64,'pth_count':0,'pth_hashes':[],
+            'runtime_binding':'UNKNOWN'}
+        receipt['database']={'status':'SHAPE_ONLY','sqlite_version':'3.50.0',
+            'schema_version':1,'user_version':1,'journal_mode':'wal','compatibility':'UNKNOWN',
+            'tables':[{'name':name,'columns':[[column,'TEXT',0,0,0] for column in columns],
+                       'indexes':[],'foreign_keys':[]}
+                      for name,columns in manifest['schema_allowlist']['tables'].items()]}
+        self.assertLessEqual(len(json.dumps(receipt,separators=(',',':')).encode()),65536)
+
+    def test_live_subprocess_stderr_has_independent_8k_cap(self):
+        with self.assertRaisesRegex(live_remote.RemoteStop,'^process_stderr_cap$'):
+            live_remote.run_bounded([sys.executable,'-I','-S','-B','-c',
+                                     'import sys;sys.stderr.write("x"*9000)'],
+                                    timeout=3,cap=65536)
+
+    def test_live_remote_budget_reserves_cleanup_inside_50_seconds(self):
+        self.assertEqual(live_remote.WORK_SECONDS+live_remote.CLEANUP_SECONDS+
+                         live_remote.FINALIZATION_SECONDS,
+                         live_remote.REMOTE_SECONDS)
+        self.assertEqual(live_remote.WORK_SECONDS,44)
+        gate=live_gate.gate_manifest(ROOT)
+        self.assertEqual(gate['limits']['work_seconds'],44)
+        self.assertEqual(gate['limits']['cleanup_seconds'],4)
+        self.assertEqual(gate['limits']['finalization_seconds'],2)
+
+    def test_live_remote_flushes_receipt_before_disarming_deadline(self):
+        events=[]
+        fake_stdin=type('FakeStdin',(),{'buffer':io.BytesIO(b'payload')})()
+        def record_print(*args,**kwargs):
+            events.append(('print',kwargs.get('flush')))
+        def record_timer(_which,seconds):
+            events.append(('timer',seconds))
+        with patch.object(sys,'argv',['remote.py',live_remote.APPROVAL]), \
+             patch.object(sys,'stdin',fake_stdin), \
+             patch.object(live_remote,'install_deadline'), \
+             patch.object(live_remote,'execute',return_value={}), \
+             patch.object(live_remote,'arm_finalization',
+                          side_effect=lambda:events.append(('arm',True))), \
+             patch.object(live_remote.signal,'ITIMER_REAL',0,create=True), \
+             patch.object(live_remote.signal,'setitimer',side_effect=record_timer,
+                          create=True), \
+             patch('builtins.print',side_effect=record_print):
+            self.assertEqual(live_remote.main(),0)
+        self.assertEqual(events,[('arm',True),('print',True),('timer',0)])
 
 
 if __name__ == '__main__': unittest.main()

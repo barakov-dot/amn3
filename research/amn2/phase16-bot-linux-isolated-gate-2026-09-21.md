@@ -530,3 +530,17 @@ persisted retained receipt. Actual DB readback не включён; production D
 Stop/switch/seed/
 migration/Telegram smoke не разрешены. Прежние Linux tests не повторялись,
 package/bundle/source сохранены. Подробности поддерживаются только в contract.
+
+<a id="actual-integration-readback-gate-ready-2026-09-22"></a>
+
+## Actual integration readback gate — READY_NOT_EXECUTED
+
+После synthetic namespace/WAL PASS локально завершён
+[production read-only gate](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-ready-2026-09-22):
+source/dependency metadata, закрытые systemd properties и schema-only SQLite
+через private read-only mount+network namespaces. Один SSH/no retry, абсолютный
+remote budget 50s и раздельные output caps закреплены manifest; 69 targeted PASS,
+independent review APPROVE. Offline preview: SSH 0, execution-001 отсутствует.
+Actual DB не открывалась, units/services не менялись. Следующий шаг требует
+отдельного exact marker; stop/switch/seed/migration/Telegram/activation не входят.
+AWG2/package016 сохранены, issuance disabled.
