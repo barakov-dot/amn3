@@ -609,6 +609,18 @@ activation0, one SSH/no retry/20s. Его PASS докажет только ра�
 SSH/auth/remote-command без payload; no receipt оставит boundary до remote result.
 TDD5 и общий итог78PASS, preview SSH0; новый marker/execution-005 не использованы.
 
+После exact approval [execution-005 дал PASS](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-zero-input-preflight-execution-005-pass-2026-09-22):
+один SSH/exit0, zero stdin, stdout293, stderr0 и closed receipt. Это наблюдение
+не определяет причину `_003`/`_004` и не подтверждает framed stdin или совместимость
+production integration. Следующий диагностический вопрос — проходит ли bound frame
+через тот же transport к короткой remote command; нужен новый exact gate/approval.
+
+[Gate-006 подготовлен локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-bound-frame-preflight-gate-006-ready-2026-09-22):
+remote Python принимает только synthetic68077-byte frame и сравнивает SHA256,
+fixed PASS/STOP без production reads/actions. Один SSH/25s/no retry. Локально
+84PASS, SSH0; `_006` ещё не исполнялся. PASS покажет передачу frame в момент
+проверки, но не объяснит прежние сбои и не подтвердит integration compatibility.
+
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
 iPhone/A/B остаются отложенными; deployment не разрешён.

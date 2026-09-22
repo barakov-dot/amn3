@@ -615,3 +615,58 @@ receipt покажет, что failure boundary не специфична для
 subcause останется UNKNOWN. Gate-005 **READY_NOT_EXECUTED** и требует exact marker
 `PHASE16_SSH_ZERO_INPUT_PREFLIGHT_20260922_005`. AWG2/package016 неизменны,
 issuance disabled; production install/stage/deploy отсутствуют.
+
+<a id="ssh-zero-input-preflight-execution-005-pass-2026-09-22"></a>
+
+## Zero-input SSH preflight execution-005 — PASS
+
+После точного approval `_005` один SSH завершился exit0, stdin requested/accepted0,
+stdout293, stderr0, pipe failures0. Получен точный closed remote receipt
+`SSH_ZERO_INPUT_PREFLIGHT_PASS`; retry не выполнялся. [Нормализованная запись](phase16-bot-transport-preflight-execution-005-2026-09-22.json)
+ссылается на неизменённые evidence: claim SHA256
+`bc66d4137d008714dc5e3b491354d884cac9fc902e3c7f436923c061e805ca76`,
+result SHA256
+`06470f9c99d390de0ab074583331bd6cf242dca9fefa64d5d104e18d3a888bb6`.
+
+PASS подтверждает SSH connection/auth и выполнение короткой remote Python command
+без stdin payload на момент попытки. Он не определяет причину transport failures
+`_003` и `_004`: они могли зависеть от времени, payload или иного условия. Большой
+framed stdin, полный integration readback и compatibility остаются **UNKNOWN**.
+Fixed remote command не содержит production reads/actions/database access/imports/
+activation; receipt содержит соответствующие нулевые поля. Следующий локальный
+вопрос — подготовить отдельный узкий hash-bound frame transport probe с новым
+marker и exclusive evidence. Execution-005 consumed; новый SSH требует отдельного
+approval. AWG2/package016 сохранены, issuance disabled; install/stage/deploy нет.
+
+<a id="ssh-bound-frame-preflight-gate-006-ready-2026-09-22"></a>
+
+## Bound-frame SSH preflight gate-006 готов локально
+
+Новый [runner](../../scripts/phase16_bot_frame_preflight_gate.py) проверяет
+передачу stdin объёмом ровно68077 байт — размер frame execution-004. Данные
+синтетические и детерминированные; их SHA256
+`2e47b52d9c8a4480f3c5ec77997d2732b7c35c88251ae6872620329ccf0e7437`.
+Remote `/usr/bin/python3 -I -S -B -c` читает максимум68078 байт и возвращает
+только exact PASS или `STOP_NO_RETRY/frame_binding`; raw frame и stderr не входят
+в persisted receipt. Команда не читает production source/units/dependencies/DB,
+не импортирует приложение и не выполняет service action/activation.
+
+[Manifest](phase16-bot-frame-preflight-gate-006-manifest-2026-09-22.json)
+hash/size-binds runner, transport helper и frame, target binding и exclusive
+execution-006. Один SSH, transport25s, combined output cap8192, no retry/cleanup
+SSH. `_005` marker отвергается до claim/transport. TDD:5 ожидаемых RED до
+реализации;6 GREEN, вместе с существующими наборами **84 PASS**.
+[Local verification](phase16-bot-frame-preflight-gate-006-local-verification-2026-09-22.json).
+Offline preview: gate SHA
+`4724a8137db3b5ccd03ec35bbd144c9a36063c2fb9d59e09059d1ea9fbcf5db2`,
+remote command SHA
+`52244f27968b250e2168dad3f95c534b154d590e7256bc847faf10de9d32f053`,
+SSH0; execution-006 отсутствует.
+
+PASS подтвердит только, что синтетический frame прошёл в момент проверки;
+предыдущие transport errors могут быть intermittent. STOP покажет точный frame
+mismatch; отсутствие receipt сохранит `UNKNOWN_NO_RETRY`. Ни один исход не
+равен production integration acceptance. Gate-006 **READY_NOT_EXECUTED**;
+для нового SSH нужен exact marker
+`PHASE16_SSH_BOUND_FRAME_PREFLIGHT_20260922_006`. AWG2/package016 сохранены,
+issuance disabled; install/stage/deploy отсутствуют.

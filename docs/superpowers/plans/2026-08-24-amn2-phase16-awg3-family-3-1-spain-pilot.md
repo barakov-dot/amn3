@@ -278,6 +278,15 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    [Zero-input preflight gate-005 готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-zero-input-preflight-gate-005-ready-2026-09-22):
    stdin0, production reads0, one SSH/no retry/20s, closed fixed receipt. TDD5,
    общий итог78PASS, preview SSH0; execution-005 отсутствует. Нужен новый approval.
+   После exact approval [execution-005 PASS](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-zero-input-preflight-execution-005-pass-2026-09-22):
+   SSH1/exit0, stdin0, stdout293, stderr0, fixed remote receipt. Подтверждён
+   только zero-input SSH/remote-command path; framed payload, причины `_003`/`_004`
+   и production integration compatibility UNKNOWN. Следующий шаг — локально
+   определить узкий диагностический gate передачи bound frame; нового SSH нет.
+   [Bound-frame gate-006 готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-bound-frame-preflight-gate-006-ready-2026-09-22):
+   synthetic stdin68077/SHA-bound, fixed remote PASS/STOP, no production reads,
+   SSH1 max/25s/no retry. Итог84PASS, preview SSH0; execution-006 отсутствует.
+   Для запуска требуется новый exact approval `_006`.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

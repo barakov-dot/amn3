@@ -7,6 +7,21 @@
 
 ## 2026-09-22
 
+- Подготовлен [bound-frame SSH preflight gate-006](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-bound-frame-preflight-gate-006-ready-2026-09-22):
+  synthetic stdin ровно68077 байт как в `_004`, remote command проверяет SHA256
+  и отдаёт только fixed PASS/STOP. Production reads/actions отсутствуют. Один SSH,
+  timeout25s/no retry, новый marker/execution-006; `_005` не переиспользуется.
+  Пять ожидаемых RED до реализации, шесть GREEN, общий итог84PASS; preview SSH0.
+  Клиентская/production integration совместимость этим probe не подтверждается.
+  AWG2/package016 сохранены, issuance disabled, install/stage/deploy отсутствуют.
+
+- После exact `_005` approval [zero-input SSH preflight завершился PASS](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-zero-input-preflight-execution-005-pass-2026-09-22):
+  одна попытка, exit0, stdin0, stdout293, stderr0, закрытый remote receipt;
+  evidence hash-validated. Подтверждено подключение и короткая remote command
+  без payload. Передача большого frame, причина сбоев `_003`/`_004` и production
+  integration compatibility остаются UNKNOWN. Retry0. AWG2/package016 сохранены,
+  issuance disabled, install/stage/deploy отсутствуют.
+
 - Подготовлен [zero-input SSH preflight gate-005](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-zero-input-preflight-gate-005-ready-2026-09-22):
   один новый exact marker, один SSH/no retry, timeout20s и stdin0. Fixed remote
   command не читает production state и возвращает только closed receipt. Probe

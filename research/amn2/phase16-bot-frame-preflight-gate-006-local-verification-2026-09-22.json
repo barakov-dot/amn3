@@ -1,0 +1,60 @@
+{
+  "schema": "phase16.ssh-bound-frame-preflight-local-verification.v1",
+  "date": "2026-09-22",
+  "status": "PASS_READY_NOT_EXECUTED",
+  "amn3_base": "13ccb2e836d2b75d1898146ca5dc8a102ec0b5af",
+  "approval": "PHASE16_SSH_BOUND_FRAME_PREFLIGHT_20260922_006",
+  "gate_sha256": "4724a8137db3b5ccd03ec35bbd144c9a36063c2fb9d59e09059d1ea9fbcf5db2",
+  "remote_command_sha256": "52244f27968b250e2168dad3f95c534b154d590e7256bc847faf10de9d32f053",
+  "frame_sha256": "2e47b52d9c8a4480f3c5ec77997d2732b7c35c88251ae6872620329ccf0e7437",
+  "sha256_lf": {
+    "local_runner": "0d3ae01006cd5028a7feca9a1364d07cd669b462d50636c11385bbf1e01b4ffe",
+    "transport_helper": "713289a6082bf621d704e6dd3b04855fa020fbfecc8a9e86db8a861019bbd35e"
+  },
+  "test_evidence": {
+    "red": {
+      "command": "python -m unittest tests.test_phase16_bot_frame_preflight -v",
+      "result": "EXPECTED_FAILURE",
+      "tests": 5,
+      "reason": "bound frame preflight gate is not implemented"
+    },
+    "green": {
+      "command": "python -m unittest tests.test_phase16_bot_frame_preflight -v",
+      "result": "PASS",
+      "tests": 6
+    },
+    "integration": {
+      "command": "python -m unittest tests.test_phase16_bot_integration_readback tests.test_phase16_bot_transport_preflight tests.test_phase16_bot_frame_preflight",
+      "result": "PASS",
+      "tests": 84
+    }
+  },
+  "verified_properties": {
+    "synthetic_input_bytes": 68077,
+    "synthetic_frame_hash_bound": true,
+    "remote_rejects_tampered_frame": true,
+    "ssh_attempts": 1,
+    "retry": false,
+    "transport_seconds": 25,
+    "old_marker_rejected_before_claim": true,
+    "closed_remote_pass_and_stop_receipts": true,
+    "production_reads": 0,
+    "service_actions": 0,
+    "database_access": false,
+    "application_imports": false,
+    "runtime_activation": false,
+    "raw_stderr_persisted": false
+  },
+  "preview": {
+    "status": "BOUND_FRAME_PREFLIGHT_READY_NOT_EXECUTED",
+    "ssh_attempts": 0,
+    "execution_006_exists": false
+  },
+  "interpretation": {
+    "pass": "bound_synthetic_frame_was_transferred_and_verified_at_time_of_attempt",
+    "stop": "remote_receipt_identifies_frame_mismatch",
+    "no_receipt": "transport_boundary_remains_unknown_no_retry",
+    "integration_compatibility_proven": false,
+    "root_cause_claimed": false
+  }
+}
