@@ -1,0 +1,46 @@
+{
+  "schema": "phase16.integration-readback-execution-record.v1",
+  "date": "2026-09-22",
+  "amn3_commit": "ec2f8926e773e2c9233c9acc65df2fbee151fb7e",
+  "approval": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_007",
+  "status": "UNKNOWN_NO_RETRY",
+  "classification": {
+    "failure_boundary": "local_receipt_validation_after_complete_transport",
+    "local_reason": "receipt_binding",
+    "ssh_attempts": 1,
+    "ssh_returncode": 3,
+    "stdin_bytes_requested": 68077,
+    "stdin_bytes_accepted": 68077,
+    "stdin_complete": true,
+    "stdout_bytes": 14614,
+    "stdout_complete": true,
+    "stdout_sha256": "2cd91d9ab0b8736de6f159c2c99f3f4f9dc7b853db5cac099bdc33f0169692ec",
+    "stderr_bytes": 0,
+    "pipe_failures": [],
+    "json_syntax": "PARSED",
+    "remote_receipt_validated": false,
+    "remote_status": "UNKNOWN",
+    "remote_reason": "UNKNOWN",
+    "completed_read_stages": "UNKNOWN",
+    "retry_performed": false,
+    "production_database_opened": "UNKNOWN",
+    "production_source_read": "UNKNOWN",
+    "production_dependencies_read": "UNKNOWN",
+    "service_actions_observed": "UNKNOWN",
+    "database_write_observed": "UNKNOWN",
+    "application_import_observed": "UNKNOWN",
+    "runtime_activation_observed": "UNKNOWN"
+  },
+  "contract_exclusions": {
+    "service_actions_in_remote_code": false,
+    "database_write_attempt_in_remote_code": false,
+    "application_import_in_remote_code": false,
+    "runtime_activation_in_remote_code": false
+  },
+  "evidence": {
+    "directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-007",
+    "claim_sha256": "752d4163d1539b01e375ab68c4afa6f555e326e5e1ebbae758be6fd8a34ebb3b",
+    "result_sha256": "1a7988a031a2675a4b8410536d6807c4358f5164b9a41043b4980e09242fb849",
+    "raw_stdout_persisted": false
+  }
+}

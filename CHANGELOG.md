@@ -7,6 +7,21 @@
 
 ## 2026-09-22
 
+- После exact `_007` approval [actual integration readback завершился UNKNOWN_NO_RETRY](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-007-unknown-2026-09-22):
+  один SSH, полный stdin68077/stdout14614, exit3/stderr0; JSON разобран,
+  local validator отверг receipt (`receipt_binding`). Raw stdout не сохранялся;
+  remote status/reason/read stages и live side effects UNKNOWN, retry запрещён.
+  Нормализованный [execution record](research/amn2/phase16-bot-integration-readback-execution-007-2026-09-22.json)
+  связывает claim/result SHA256. AWG2/package016 сохранены, issuance disabled;
+  stage/install/deploy отсутствуют.
+
+- Подготовлен [diagnostic actual readback gate-008](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-008-ready-2026-09-22):
+  remote collector/payload/limits прежние, заменён только marker; при отказе
+  local validator пишет фиксированное имя сбойной стадии без raw значений.
+  Три ожидаемых RED, целевой итог93PASS, byte-for-byte и manifest binding PASS,
+  preview SSH0. Широкий isolated discovery дал два import error без `pytest`;
+  отдельные exact approvals нужны для push и одного SSH `_008`.
+
 - Подготовлен [actual integration readback gate-007](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-007-ready-2026-09-22):
   после `_006` PASS сохранены collector, payload, source manifest и все лимиты
   gate-004; в remote supervisor меняется только exact approval marker.

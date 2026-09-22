@@ -294,6 +294,16 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    collector/payload/limits прежние, меняется только exact remote marker;
    новый runner/manifest/execution-007,90PASS, preview SSH0. Для одного actual
    read-only SSH нужен новый exact approval `_007`.
+   После exact approval [execution-007 UNKNOWN_NO_RETRY](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-007-unknown-2026-09-22):
+   один SSH, полный stdin68077 и stdout14614, exit3/stderr0; JSON разобран,
+   но закрытый local validator отверг receipt (`receipt_binding`). Raw stdout
+   не сохранён; remote reason/read stages/live side effects UNKNOWN. Retry `_007`
+   запрещён. Следующий scope — локальная диагностика границы валидатора;
+   новый SSH требует отдельного exact marker, push — точного разрешения.
+   [Gate-008 готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-008-ready-2026-09-22):
+   тот же collector/payload/limits, новый marker и закрытый код стадии local
+   validator rejection без raw значений. Три RED → 93 PASS, preview SSH0.
+   Ни push, ни execution-008 не выполнены; оба требуют отдельных точных approvals.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
@@ -314,7 +324,8 @@ Design согласован оператором после commit b277154. По
 - ✅ Task 1 — package016/local tooling; stage-защиты и recovery observations только локально; DNS bridge STOP.
 - ✅ Task 2 — исторические Spain gates/diagnostics, не свежий preflight.
 - ✅ Task 3A — minimal runtime по историческим evidence.
-- ⏳ Task 3B — integration/recovery не завершены; recovery-контракт v1 согласован.
+- ▶️ Task 3B — integration/recovery не завершены; `_007` UNKNOWN_NO_RETRY,
+  recovery-контракт v1 согласован.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.

@@ -719,3 +719,59 @@ source manifest SHA
 SSH0, execution-007 отсутствует. Gate-007 **READY_NOT_EXECUTED** и требует
 отдельного exact approval. PASS `_006` не гарантирует новый transport result.
 AWG2/package016 сохранены, issuance disabled; install/stage/deploy отсутствуют.
+
+<a id="actual-readback-execution-007-unknown-2026-09-22"></a>
+
+## Actual integration readback execution-007 — UNKNOWN_NO_RETRY
+
+После exact approval `_007` и push `ec2f8926e773e2c9233c9acc65df2fbee151fb7e`
+выполнена ровно одна SSH-попытка. [Нормализованная запись](phase16-bot-integration-readback-execution-007-2026-09-22.json)
+связана с локальными `claim.json` SHA256
+`752d4163d1539b01e375ab68c4afa6f555e326e5e1ebbae758be6fd8a34ebb3b`
+и `result.json` SHA256
+`1a7988a031a2675a4b8410536d6807c4358f5164b9a41043b4980e09242fb849`.
+Путь к ним — `C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-007`.
+
+Transport вернул exit3: stdin 68077/68077, stdout 14614/14614 байт,
+stderr0, output complete, pipe failures0. JSON синтаксически разобран,
+но локальный закрытый валидатор отверг его с `receipt_binding`.
+Raw stdout не сохранялся. Поэтому remote status/reason, завершённые стадии чтения,
+production DB/source/dependency observations и отсутствие live side effects
+**не подтверждены**; размер ответа не служит доказательством стадии. Код
+remote collector не содержит service actions, DB write, application import или
+activation, но это свойство кода не заменяет проверенный remote receipt.
+Approval `_007` использован, retry запрещён. Gate-007 не повторять.
+
+Локальная статическая сверка форм host/units/source/dependencies и существующих
+fixture-тестов не воспроизвела точное расхождение; исправление валидатора без
+доказательства конкретного поля не делалось. Следующий возможный локальный шаг —
+подготовить новый exact-bound gate с закрытым кодом места отказа валидатора и
+RED/GREEN тестами; ни этот шаг, ни текущая запись не разрешают новый SSH.
+
+<a id="actual-readback-gate-008-ready-2026-09-22"></a>
+
+## Actual integration readback gate-008 готов локально
+
+После согласования локального дизайна подготовлены [runner](../../scripts/phase16_bot_integration_readback_gate_008.py)
+и [manifest](phase16-bot-integration-readback-gate-008-manifest-2026-09-22.json).
+Remote collector, portable core, source manifest, payload и transport limits
+сохранены; supervisor побайтово отличается от gate-004 только marker `_004` →
+`_008`. Новый runner при невалидном STOP receipt сохраняет лишь фиксированное
+имя стадии (`host`, `units_before`, `source`, `dependencies`, `database` и т. д.)
+либо `envelope`; значения и raw stdout не пишет. Невалидный receipt остаётся
+`UNKNOWN_NO_RETRY`, и diagnostic не превращается в production observation.
+Новый marker `PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_008` привязан к
+exclusive execution-008, one SSH/no retry, remote50s/transport60s.
+
+[Локальная проверка](phase16-bot-integration-readback-gate-008-local-verification-2026-09-22.json):
+3 ожидаемых RED до реализации, затем релевантный набор **93 PASS**; preview
+SSH0. Byte-for-byte marker-only и manifest binding PASS. Gate SHA256
+`eb47d0d56a004bfeefcdb1fe1bab4a5c62dace34b2848402f6b596ab0947f870`,
+remote SHA256 `49a917e65565293353abea8e77034c05f4e1aae3abf7028e18a9df3f18ed43ad`,
+source manifest SHA256
+`dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc`.
+Более широкий `test_phase16_bot_*.py` discovery дал два import error из-за
+отсутствующего `pytest` в изолированном Python; целевой набор их не включает.
+Gate-008 **READY_NOT_EXECUTED**. Для push нужен отдельный exact HEAD/origin/ref
+approval; для одного SSH — отдельный exact marker `_008`. AWG2/package016
+сохранены, issuance disabled; install/stage/deploy отсутствуют.

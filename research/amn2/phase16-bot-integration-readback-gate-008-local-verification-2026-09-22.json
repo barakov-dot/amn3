@@ -1,0 +1,37 @@
+{
+  "schema": "phase16.integration-readback-local-verification.v1",
+  "date": "2026-09-22",
+  "gate": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_008",
+  "red": {
+    "command": "python -I -S -B tests/test_phase16_bot_integration_readback_gate008.py -v",
+    "expected_failure": true,
+    "tests": 3,
+    "reason": "diagnostic gate-008 is not implemented"
+  },
+  "green": {
+    "command": "python -I -S -B -c <combined unittest discovery for integration_readback*, transport_preflight, frame_preflight>",
+    "status": "PASS",
+    "tests": 93,
+    "failures": 0,
+    "errors": 0
+  },
+  "offline_preview": {
+    "status": "ACTUAL_READBACK_GATE_READY_NOT_EXECUTED",
+    "ssh_attempts": 0,
+    "gate_sha256": "eb47d0d56a004bfeefcdb1fe1bab4a5c62dace34b2848402f6b596ab0947f870",
+    "remote_sha256": "49a917e65565293353abea8e77034c05f4e1aae3abf7028e18a9df3f18ed43ad",
+    "source_manifest_sha256": "dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc",
+    "payload_sha256": "0d04ec697a808dffb02c17380d5b23a6be862e9350a5f0e5533f23e49a01ed05"
+  },
+  "bindings": {
+    "remote_changed_only_approval_marker": true,
+    "manifest_validation": "PASS"
+  },
+  "broader_discovery_limit": {
+    "command": "python -I -S -B -m unittest discover -s tests -p test_phase16_bot_*.py",
+    "tests": 95,
+    "status": "IMPORT_ERRORS",
+    "errors": 2,
+    "cause": "pytest unavailable in isolated Python for test_phase16_bot_linux_gate and test_phase16_bot_transport"
+  }
+}

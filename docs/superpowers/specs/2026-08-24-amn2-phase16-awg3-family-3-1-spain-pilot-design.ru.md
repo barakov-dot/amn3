@@ -628,6 +628,16 @@ stdin68077/68077, exit0, stdout382, stderr0, remote SHA verified. Transport
 core/source manifest/remote supervisor и caps gate-004 сохранены байтово,
 кроме одного нового marker; 90PASS, SSH0, execution-007 отсутствует.
 
+Execution-007 [завершился UNKNOWN_NO_RETRY](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-007-unknown-2026-09-22):
+один SSH, frame принят полностью, exit3/stdout14614/stderr0. JSON разобран,
+но local validator отверг его как `receipt_binding`; raw ответ не сохранялся.
+Remote reason и завершённые production read stages UNKNOWN. `_007` не повторять;
+для нового диагностического gate нужен отдельный exact marker.
+[Gate-008 подготовлен локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-008-ready-2026-09-22):
+collector/payload/limits прежние, новый marker и закрытый код стадии отказа
+локального валидатора без raw значений; 93 PASS, SSH0. Execution-008 и push
+не выполнялись, нужны отдельные точные approvals.
+
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
 iPhone/A/B остаются отложенными; deployment не разрешён.
