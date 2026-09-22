@@ -1,0 +1,45 @@
+{
+  "schema": "phase16.ssh-zero-input-preflight-gate-manifest.v1",
+  "status": "ZERO_INPUT_PREFLIGHT_READY_NOT_EXECUTED",
+  "amn3_base": "badc14d9f7d5",
+  "approval": "PHASE16_SSH_ZERO_INPUT_PREFLIGHT_20260922_005",
+  "local_evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-005",
+  "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+  "sha256_lf": {
+    "local_runner": "59ff5732ee3d7978ed0d93abed890096e6489b8897a2338a8501153521381751",
+    "transport_helper": "713289a6082bf621d704e6dd3b04855fa020fbfecc8a9e86db8a861019bbd35e"
+  },
+  "bytes_lf": {
+    "local_runner": 9929,
+    "transport_helper": 13077
+  },
+  "limits": {
+    "ssh_attempts": 1,
+    "transport_seconds": 20,
+    "stdout_bytes": 4096,
+    "stderr_bytes": 8192,
+    "input_bytes": 0,
+    "retry": false,
+    "cleanup_ssh": false
+  },
+  "scope": {
+    "production_source_metadata": false,
+    "production_unit_properties": false,
+    "production_dependency_metadata": false,
+    "production_database_schema": false,
+    "production_database_rows": false,
+    "service_actions": false,
+    "application_imports": false,
+    "telegram": false,
+    "runtime_activation": false
+  },
+  "command_contract": {
+    "entrypoint": "scripts/phase16_bot_transport_preflight_gate.py",
+    "requires_execute": true,
+    "requires_approval": "PHASE16_SSH_ZERO_INPUT_PREFLIGHT_20260922_005",
+    "requires_gate_sha256": true,
+    "requires_exact_evidence_directory": true,
+    "remote_program": "/usr/bin/python3",
+    "remote_input_bytes": 0
+  }
+}

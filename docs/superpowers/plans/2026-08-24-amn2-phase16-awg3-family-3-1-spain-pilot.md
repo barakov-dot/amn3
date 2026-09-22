@@ -271,6 +271,13 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    [Gate-004 готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-004-ready-2026-09-22):
    no-receipt classification, redacted SSH hints и transport-helper hash binding;
    новый marker/execution-004,73PASS/review APPROVE, preview SSH0. Нужен approval.
+   После approval [execution-004 UNKNOWN_NO_RETRY](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-004-unknown-2026-09-22):
+   SSH1/exit255, stdin accepted0/68077, stdout0, stderr49/unclassified; remote
+   receipt отсутствует. Read stages UNKNOWN, retry нет. Следующий local-only шаг —
+   новый exact-bound zero-input SSH preflight для изоляции transport boundary.
+   [Zero-input preflight gate-005 готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-zero-input-preflight-gate-005-ready-2026-09-22):
+   stdin0, production reads0, one SSH/no retry/20s, closed fixed receipt. TDD5,
+   общий итог78PASS, preview SSH0; execution-005 отсутствует. Нужен новый approval.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

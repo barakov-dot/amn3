@@ -7,6 +7,25 @@
 
 ## 2026-09-22
 
+- Подготовлен [zero-input SSH preflight gate-005](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-zero-input-preflight-gate-005-ready-2026-09-22):
+  один новый exact marker, один SSH/no retry, timeout20s и stdin0. Fixed remote
+  command не читает production state и возвращает только closed receipt. Probe
+  меняет одну переменную после execution-004: исключает 68077-byte framed stdin,
+  чтобы отделить SSH/auth/remote-command path от payload transport. TDD5 GREEN,
+  общий итог78PASS, preview SSH0; execution-005 отсутствует. Для запуска нужен
+  отдельный exact approval. AWG2/package016 сохранены, issuance disabled,
+  install/stage/deploy отсутствуют.
+
+- После exact `_004` approval [actual readback execution-004 завершён
+  UNKNOWN_NO_RETRY](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-004-unknown-2026-09-22):
+  один SSH, exit255, stdin write0/68077, stdout0, stderr49/unclassified, remote
+  receipt отсутствует. Gate зафиксировал `transport_stdin_write`; достигнутые
+  production read stages и terminal observations UNKNOWN, retry0. Evidence
+  hash-validated. Следующий шаг — минимальный zero-input SSH preflight с новым
+  marker; он отделяет SSH/auth/remote-command от framed-stdin transport.
+  AWG2/package016 сохранены, issuance disabled,
+  install/stage/deploy отсутствуют.
+
 - Подготовлен [actual readback gate-004](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-004-ready-2026-09-22):
   no stdout классифицируется до JSON parse; SSH reset/disconnect/KEX/banner
   получают только redacted HINT без raw stderr. Shared transport helper впервые

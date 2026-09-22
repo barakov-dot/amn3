@@ -555,3 +555,63 @@ SSH0; execution-004 отсутствует.
 Gate-004 **READY_NOT_EXECUTED** и требует отдельного exact approval. Scope/caps
 и exclusions прежние. AWG2/package016 неизменны, issuance disabled; production
 install/stage/deploy отсутствуют.
+
+<a id="actual-readback-execution-004-unknown-2026-09-22"></a>
+
+## Actual integration readback execution-004 — UNKNOWN_NO_RETRY
+
+После exact approval `_004` preflight подтвердил commit/hashes/trust и свободный
+execution-004. Выполнена ровно одна SSH попытка без retry. Transport завершился:
+exit255, `failure_stage=stdin_write`, requested68077, accepted0, stdout0,
+stderr49, output complete. Safe stderr classification — `UNCLASSIFIED_STDERR`,
+raw stderr не сохранён; remote JSON receipt отсутствует. Local reason —
+`transport_stdin_write`.
+
+[Нормализованный receipt](phase16-bot-integration-readback-execution-004-2026-09-22.json),
+evidence SHA256: claim
+`7bf290e3a37ce364edf1f458e63ef290a1c9546420a77c3bb0fdc5a267efc0da`,
+result `59f86abc063434f5cf7a4ca159aa7c698f6b02198ad488f8b2e638223e14cfe4`.
+Так как remote receipt не получен, production source/dependencies/database read
+stages и фактическое наблюдение service/write/import/activation — **UNKNOWN**.
+Кодовые exclusions не заменяют terminal receipt.
+
+Execution-004 consumed; повтор запрещён. Наблюдаемая граница сместилась раньше,
+чем в execution-003: SSH завершился до принятия первого байта framed stdin. Это
+не доказывает handshake, auth или remote-command subcause. Следующий допустимый
+local-only scope — подготовить новый exact-bound zero-input SSH preflight,
+который меняет только наличие stdin payload: успех отделит payload/framing path,
+а failure до receipt оставит проблему в SSH/auth/remote-command boundary. Новый
+SSH потребует нового marker и отдельного approval. AWG2/package016 сохранены,
+issuance disabled; production install/stage/deploy отсутствуют.
+
+<a id="ssh-zero-input-preflight-gate-005-ready-2026-09-22"></a>
+
+## Zero-input SSH preflight gate-005 готов локально
+
+После execution-004 systematic diagnosis не предлагает transport fix без root
+cause. Следующий probe меняет только одну переменную: исключает framed stdin.
+[Runner](../../scripts/phase16_bot_transport_preflight_gate.py) вызывает fixed
+`/usr/bin/python3 -I -S -B -c` с exact approval argument и `input_bytes=0`.
+Remote command не читает source, units, dependencies, database, environment или
+Telegram и не выполняет service actions; closed receipt сообщает только marker,
+нулевые scope-счётчики и `SSH_ZERO_INPUT_PREFLIGHT_PASS`.
+
+[Manifest](phase16-bot-transport-preflight-gate-005-manifest-2026-09-22.json)
+hash/size-binds runner и shared transport helper, target binding и exclusive
+execution-005. Limits: one SSH, no retry/cleanup SSH, transport20s, stdout4KiB,
+stderr8KiB, stdin0. Старый `_004` marker отклоняется до claim/binding/transport.
+
+TDD:5 ожидаемых RED до реализации, затем5 GREEN; вместе с existing integration
+suite итог **78 PASS**. [Local verification](phase16-bot-transport-preflight-gate-005-local-verification-2026-09-22.json).
+Offline preview: gate SHA
+`386f27dcfc250e5b1f8ae0c9d8be719aec178aa60cb8c7ab901e1570dd675b0a`,
+remote command SHA
+`e4fbc8b0e2143358f733cfb4ce52f0f02f02e36a0f8eef2ba6531f20665b9e4b`,
+SSH0; execution-005 отсутствует.
+
+Интерпретация заранее ограничена: PASS подтвердит SSH/auth/remote-command только
+без stdin payload и не подтвердит production integration compatibility. Отсутствие
+receipt покажет, что failure boundary не специфична для framed stdin, но точный
+subcause останется UNKNOWN. Gate-005 **READY_NOT_EXECUTED** и требует exact marker
+`PHASE16_SSH_ZERO_INPUT_PREFLIGHT_20260922_005`. AWG2/package016 неизменны,
+issuance disabled; production install/stage/deploy отсутствуют.

@@ -597,6 +597,18 @@ receipt. Retry запрещён; gate-004 transport diagnostics/binding гото
 no stdout классифицируется до JSON parse, stderr только redacted HINT, shared
 transport helper hash-bound.73PASS/review APPROVE/SSH0; marker/execution-004 новые.
 
+Execution-004 [завершился UNKNOWN_NO_RETRY](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-004-unknown-2026-09-22):
+SSH exit255, framed stdin не принял ни одного из68077 байт, stdout0, stderr49
+unclassified; remote receipt отсутствует. Это локализует наблюдаемый сбой до
+remote receipt, но не доказывает точный subcause. Retry запрещён; следующий
+диагностический шаг должен менять одну переменную — исключить stdin payload.
+
+[Zero-input preflight gate-005 подготовлен](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-zero-input-preflight-gate-005-ready-2026-09-22):
+fixed remote Python command, stdin0, production reads/actions/database/import/
+activation0, one SSH/no retry/20s. Его PASS докажет только работоспособность
+SSH/auth/remote-command без payload; no receipt оставит boundary до remote result.
+TDD5 и общий итог78PASS, preview SSH0; новый marker/execution-005 не использованы.
+
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
 iPhone/A/B остаются отложенными; deployment не разрешён.

@@ -1,0 +1,55 @@
+{
+  "schema": "phase16.ssh-zero-input-preflight-local-verification.v1",
+  "date": "2026-09-22",
+  "status": "PASS_READY_NOT_EXECUTED",
+  "amn3_base": "badc14d9f7d5677e5220a670c094015a556fe244",
+  "approval": "PHASE16_SSH_ZERO_INPUT_PREFLIGHT_20260922_005",
+  "gate_sha256": "386f27dcfc250e5b1f8ae0c9d8be719aec178aa60cb8c7ab901e1570dd675b0a",
+  "remote_command_sha256": "e4fbc8b0e2143358f733cfb4ce52f0f02f02e36a0f8eef2ba6531f20665b9e4b",
+  "sha256_lf": {
+    "local_runner": "59ff5732ee3d7978ed0d93abed890096e6489b8897a2338a8501153521381751",
+    "transport_helper": "713289a6082bf621d704e6dd3b04855fa020fbfecc8a9e86db8a861019bbd35e"
+  },
+  "tdd": {
+    "red": {
+      "command": "python -m unittest tests.test_phase16_bot_transport_preflight -v",
+      "result": "EXPECTED_FAILURE",
+      "tests": 5,
+      "reason": "zero-input preflight gate is not implemented"
+    },
+    "green": {
+      "command": "python -m unittest tests.test_phase16_bot_transport_preflight -v",
+      "result": "PASS",
+      "tests": 5
+    }
+  },
+  "regression": {
+    "command": "python -m unittest tests.test_phase16_bot_integration_readback tests.test_phase16_bot_transport_preflight -v",
+    "result": "PASS",
+    "tests": 78
+  },
+  "verified_properties": {
+    "remote_input_bytes": 0,
+    "ssh_attempts": 1,
+    "retry": false,
+    "transport_seconds": 20,
+    "closed_remote_receipt": true,
+    "old_marker_rejected_before_claim": true,
+    "production_reads": 0,
+    "service_actions": 0,
+    "database_access": false,
+    "application_imports": false,
+    "runtime_activation": false,
+    "raw_stderr_persisted": false
+  },
+  "preview": {
+    "status": "ZERO_INPUT_PREFLIGHT_READY_NOT_EXECUTED",
+    "ssh_attempts": 0,
+    "execution_005_exists": false
+  },
+  "diagnostic_hypothesis": {
+    "pass_interpretation": "ssh_auth_and_remote_command_path_work_without_stdin_payload",
+    "no_receipt_interpretation": "failure_remains_before_remote_receipt_and_is_not_specific_to_framed_stdin",
+    "root_cause_claimed": false
+  }
+}
