@@ -264,6 +264,10 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    [Gate-003 готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-003-ready-2026-09-22):
    exact zero-byte empty-property fix; непустой output остаётся strict. Новый
    marker/execution-003,71PASS/review APPROVE, preview SSH0. Нужен exact approval.
+   После approval [execution-003 UNKNOWN_NO_RETRY](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-003-unknown-2026-09-22):
+   SSH1/exit255/stdout0/stderr49/unclassified, remote receipt отсутствует. Какие
+   read stages достигнуты, UNKNOWN; retry нет. Следующий scope local-only:
+   redacted transport classification/helper binding, затем новый exact marker.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

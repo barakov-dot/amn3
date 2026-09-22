@@ -497,3 +497,28 @@ SSH0; execution-003 отсутствует.
 
 Gate-003 **READY_NOT_EXECUTED** и требует отдельного exact approval. AWG2 и
 package016 неизменны, issuance disabled; production install/stage/deploy нет.
+
+<a id="actual-readback-execution-003-unknown-2026-09-22"></a>
+
+## Actual integration readback execution-003 — UNKNOWN_NO_RETRY
+
+После exact approval `_003` preflight подтвердил commit/hashes/trust и свободный
+execution-003. Выполнена одна SSH попытка без retry. Transport завершился:
+exit255, stdin68077 complete, stdout0, stderr49, output complete, pipe failures0.
+Безопасная классификация stderr — `UNCLASSIFIED_STDERR`, raw stderr не сохранён;
+remote JSON receipt отсутствует, local reason `JSONDecodeError`.
+
+[Нормализованный receipt](phase16-bot-integration-readback-execution-003-2026-09-22.json),
+evidence SHA256: claim
+`79a07b1c9e6de8c5ed6908f56f49ab8a4d82233738b2b66dc38166b6cd92b578`,
+result `57c346e5c15f07f8796363fb761121aaf81c8610df89a46e9185adce598cb716`.
+Так как remote receipt не получен, достигнутые read stages и фактическое
+наблюдение service/write/import/activation — **UNKNOWN**. Код gate не содержит
+этих mutations, но это не заменяет terminal receipt. Нельзя переносить PASS или
+STOP evidence предыдущих попыток на execution-003.
+
+Execution-003 consumed; retry запрещён. Следующий local-only scope — безопасно
+различить no-stdout/non-receipt transport до JSON parse, расширить только
+redacted SSH stderr categories и hash-bind общий local transport helper. Затем
+новый marker/execution-004 и отдельный exact approval. AWG2/package016 сохранены,
+issuance disabled; production install/stage/deploy отсутствуют.

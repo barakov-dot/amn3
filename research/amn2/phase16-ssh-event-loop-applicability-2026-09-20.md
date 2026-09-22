@@ -1133,3 +1133,8 @@ newline. Source/dependencies/DB/actions=0; retry нет. Далее local gate-0
 observed zero-byte empty property принимается только после exit0/stderr0;
 nonempty format остаётся strict. Новый marker/execution-003,71PASS/review
 APPROVE, preview SSH0. До exact approval подключение не выполняется.
+
+После approval [execution-003 UNKNOWN_NO_RETRY](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-003-unknown-2026-09-22):
+один SSH, exit255/stdout0/stderr49 unclassified, remote receipt отсутствует.
+Reached read stages и terminal observations UNKNOWN; retry не выполнялся.
+Gate-004 transport diagnostics/helper hash binding готовятся только локально.

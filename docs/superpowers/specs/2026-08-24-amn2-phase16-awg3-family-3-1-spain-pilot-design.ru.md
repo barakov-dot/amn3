@@ -588,6 +588,11 @@ dependencies/DB/actions не затронуты. Gate-003 fix и approval дол
 значение остаётся strict UTF-8/single terminal LF.71PASS/review APPROVE/SSH0;
 marker и execution-003 новые, current production evidence не добавлено.
 
+Execution-003 [завершился UNKNOWN_NO_RETRY](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-003-unknown-2026-09-22):
+SSH exit255/stdout0/stderr49 unclassified, remote receipt отсутствует. Достигнутые
+read stages и terminal safety observations UNKNOWN; кодовые exclusions не равны
+receipt. Retry запрещён; gate-004 transport diagnostics/binding готовится локально.
+
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
 iPhone/A/B остаются отложенными; deployment не разрешён.

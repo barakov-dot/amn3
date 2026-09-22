@@ -7,6 +7,14 @@
 
 ## 2026-09-22
 
+- После exact `_003` approval [actual readback execution-003 завершён
+  UNKNOWN_NO_RETRY](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-003-unknown-2026-09-22):
+  один SSH, exit255, stdout0, stderr49/unclassified, remote JSON receipt нет.
+  Достигнутые read stages и terminal observations UNKNOWN; raw stderr не сохранён,
+  retry0. Evidence hash-validated. Следующий gate сначала получает local redacted
+  transport classification/helper binding и новый marker. AWG2/package016
+  сохранены, issuance disabled, install/stage/deploy отсутствуют.
+
 - Подготовлен [actual readback gate-003](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-003-ready-2026-09-22):
   observed `systemctl --value` zero-byte output принимается как empty только
   после exit0/stderr0; nonempty output остаётся strict UTF-8/single terminal LF.

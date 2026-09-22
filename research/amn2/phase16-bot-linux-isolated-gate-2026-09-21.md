@@ -564,3 +564,8 @@ Gate-003 сначала готовится локально и получает 
 [Gate-003 локально готов](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-003-ready-2026-09-22):
 узкий zero-byte empty-property fix, новый marker/execution-003,71PASS, review
 APPROVE, preview SSH0. Следующий SSH требует отдельного exact approval.
+
+Execution-003 затем [UNKNOWN_NO_RETRY](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-003-unknown-2026-09-22):
+SSH1/exit255/stdout0/stderr49 unclassified, remote receipt отсутствует. Remote
+read stages UNKNOWN, retry0. Следующий gate сначала получает local transport
+classification/helper binding и новый marker; Linux на АРМ не требуется.
