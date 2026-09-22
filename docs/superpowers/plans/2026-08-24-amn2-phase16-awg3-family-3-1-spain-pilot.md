@@ -287,6 +287,13 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    synthetic stdin68077/SHA-bound, fixed remote PASS/STOP, no production reads,
    SSH1 max/25s/no retry. Итог84PASS, preview SSH0; execution-006 отсутствует.
    Для запуска требуется новый exact approval `_006`.
+   После approval [execution-006 PASS](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-bound-frame-preflight-execution-006-pass-2026-09-22):
+   SSH1/exit0, stdin68077 complete/SHA verified, stdout382, stderr0, retry0.
+   Это подтверждает synthetic frame в момент прогона; production compatibility
+   остаётся UNKNOWN. [Gate-007 готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-007-ready-2026-09-22):
+   collector/payload/limits прежние, меняется только exact remote marker;
+   новый runner/manifest/execution-007,90PASS, preview SSH0. Для одного actual
+   read-only SSH нужен новый exact approval `_007`.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

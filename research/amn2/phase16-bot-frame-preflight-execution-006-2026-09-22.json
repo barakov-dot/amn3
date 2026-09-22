@@ -1,0 +1,86 @@
+{
+  "schema": "phase16.ssh-bound-frame-preflight-execution-record.v1",
+  "date": "2026-09-22",
+  "amn3_commit": "09073963f602d64316daf3bc8a3d3ae3e97edb14",
+  "approval": "PHASE16_SSH_BOUND_FRAME_PREFLIGHT_20260922_006",
+  "status": "SSH_BOUND_FRAME_PREFLIGHT_PASS",
+  "classification": {
+    "ssh_attempts": 1,
+    "ssh_returncode": 0,
+    "stdin_bytes_requested": 68077,
+    "stdin_bytes_accepted": 68077,
+    "stdin_complete": true,
+    "stdout_bytes": 382,
+    "stderr_bytes": 0,
+    "pipe_failures": [],
+    "remote_receipt_received": true,
+    "frame_sha256_verified": true,
+    "retry_performed": false,
+    "confirmed_boundary": "synthetic_bound_frame_transferred_at_time_of_attempt",
+    "production_integration_compatibility": "UNKNOWN",
+    "root_cause_of_execution_003_004": "UNKNOWN"
+  },
+  "evidence": {
+    "directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-006",
+    "claim_sha256": "3f7cf4ab17de24244f6d7e33d8dc9519104858765ad91f597fed883e91298a41",
+    "result_sha256": "30e619602647208ef0e91a6f538723e2a726a41798fbb008516e6f72108337f1",
+    "local_result_validation": "PASS"
+  },
+  "result": {
+    "schema": "phase16.ssh-bound-frame-preflight-local.v1",
+    "claim": {
+      "schema": "phase16.ssh-bound-frame-preflight-claim.v1",
+      "scope": "PHASE16_SSH_BOUND_FRAME_PREFLIGHT_20260922_006",
+      "attempts": 1,
+      "gate_sha256": "4724a8137db3b5ccd03ec35bbd144c9a36063c2fb9d59e09059d1ea9fbcf5db2",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+      "remote_command_sha256": "52244f27968b250e2168dad3f95c534b154d590e7256bc847faf10de9d32f053",
+      "frame_sha256": "2e47b52d9c8a4480f3c5ec77997d2732b7c35c88251ae6872620329ccf0e7437",
+      "input_bytes": 68077,
+      "transport_seconds": 25,
+      "evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-006",
+      "claimed_at": "2026-09-22T19:00:28.139671+00:00"
+    },
+    "status": "SSH_BOUND_FRAME_PREFLIGHT_PASS",
+    "ssh_attempts": 1,
+    "transport": {
+      "schema": "phase16.bot-transport.v1",
+      "returncode": 0,
+      "failure_stage": null,
+      "stdin_bytes_requested": 68077,
+      "stdin_bytes_accepted": 68077,
+      "stdin_complete": true,
+      "output_complete": true,
+      "stdout": {
+        "bytes_observed": 382,
+        "bytes_retained": 382,
+        "prefix_sha256": "feccd1b1935520102d29999e866fc8dbf58a11a7e2a621e5ae04ead8c43b576e"
+      },
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "pipe_failures": [],
+      "stderr_classification": "NO_STDERR"
+    },
+    "remote": {
+      "application_imported": false,
+      "approval": "PHASE16_SSH_BOUND_FRAME_PREFLIGHT_20260922_006",
+      "database_access": false,
+      "frame_sha256": "2e47b52d9c8a4480f3c5ec77997d2732b7c35c88251ae6872620329ccf0e7437",
+      "input_bytes": 68077,
+      "production_reads": 0,
+      "runtime_activation": false,
+      "schema": "phase16.ssh-bound-frame-preflight-remote.v1",
+      "service_actions": 0,
+      "status": "SSH_BOUND_FRAME_PREFLIGHT_PASS"
+    }
+  },
+  "safety": {
+    "awg2": "UNTOUCHED",
+    "package016": "UNCHANGED",
+    "general_issuance": "DISABLED",
+    "production_install_stage_deploy": false
+  }
+}

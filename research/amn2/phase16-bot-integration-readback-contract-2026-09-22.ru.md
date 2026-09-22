@@ -670,3 +670,52 @@ mismatch; отсутствие receipt сохранит `UNKNOWN_NO_RETRY`. Ни
 для нового SSH нужен exact marker
 `PHASE16_SSH_BOUND_FRAME_PREFLIGHT_20260922_006`. AWG2/package016 сохранены,
 issuance disabled; install/stage/deploy отсутствуют.
+
+<a id="ssh-bound-frame-preflight-execution-006-pass-2026-09-22"></a>
+
+## Bound-frame SSH preflight execution-006 — PASS
+
+После exact approval `_006` один SSH завершился exit0; stdin requested/accepted
+68077/68077, stdout382, stderr0, pipe failures0. Удалённая команда подтвердила
+SHA256 всего синтетического frame и вернула точный closed receipt. Retry0.
+[Нормализованная запись](phase16-bot-frame-preflight-execution-006-2026-09-22.json)
+проверена по внешним evidence: claim SHA256
+`3f7cf4ab17de24244f6d7e33d8dc9519104858765ad91f597fed883e91298a41`,
+result SHA256
+`30e619602647208ef0e91a6f538723e2a726a41798fbb008516e6f72108337f1`.
+
+Это подтверждает передачу 68077 байт в момент прогона, но не объясняет
+transport errors `_003`/`_004`: их возможная зависимость от времени остаётся.
+Actual production readback и integration compatibility по-прежнему UNKNOWN.
+Execution-006 consumed; следующий допустимый шаг — новый exact-bound actual
+readback с одним SSH и отдельным approval. AWG2/package016 сохранены, issuance
+disabled, install/stage/deploy отсутствуют.
+
+<a id="actual-readback-gate-007-ready-2026-09-22"></a>
+
+## Actual integration readback gate-007 готов локально
+
+Новый [runner](../../scripts/phase16_bot_integration_readback_gate_007.py)
+использует неизменённые portable core, source manifest, payload, transport helper
+и caps gate-004. Supervisor создаётся только заменой ровно одного marker `_004`
+на `_007`; test сравнивает каждый байт, а [manifest](phase16-bot-integration-readback-gate-007-manifest-2026-09-22.json)
+hash/size-binds обе версии runner, преобразованный supervisor, core, helper,
+payload, source и старый gate manifest. Старые файлы и execution-004 не меняются.
+
+Новый marker `PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_007`, exclusive
+execution-007. `_004` отклоняется до claim/transport. Remote budget50s включает
+cleanup/finalization; transport60s, stdout64KiB/stderr8KiB, one SSH/no retry.
+Production readback только source/units/dependency metadata и SQLite schema в
+private read-only mount+network namespaces, без строк БД, service actions,
+application imports, Telegram или activation.
+
+Шесть ожидаемых RED до реализации, затем шесть GREEN; вместе с существующими
+наборами **90 PASS**. [Local verification](phase16-bot-integration-readback-gate-007-local-verification-2026-09-22.json).
+Offline preview: gate SHA
+`8aa7d8418f927a479a62783bbf1632d69e9b19ecceadc00f9d3abef62ae8925d`,
+remote SHA `2dc1d1678b4bf7d81e0e3a12e5e880fe8d20d1f5351a294d338d97016e1b00f6`,
+source manifest SHA
+`dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc`;
+SSH0, execution-007 отсутствует. Gate-007 **READY_NOT_EXECUTED** и требует
+отдельного exact approval. PASS `_006` не гарантирует новый transport result.
+AWG2/package016 сохранены, issuance disabled; install/stage/deploy отсутствуют.

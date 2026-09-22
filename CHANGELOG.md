@@ -7,6 +7,21 @@
 
 ## 2026-09-22
 
+- Подготовлен [actual integration readback gate-007](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-007-ready-2026-09-22):
+  после `_006` PASS сохранены collector, payload, source manifest и все лимиты
+  gate-004; в remote supervisor меняется только exact approval marker.
+  Новый runner/manifest/execution-007, consumed `_004` отвергается до claim.
+  Шесть ожидаемых RED до реализации, шесть GREEN, общий итог90PASS; preview SSH0.
+  Для одного production read-only SSH требуется новый exact approval. AWG2 и
+  package016 сохранены, issuance disabled, install/stage/deploy отсутствуют.
+
+- После exact `_006` approval [bound-frame SSH preflight завершился PASS](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-bound-frame-preflight-execution-006-pass-2026-09-22):
+  одна SSH попытка, exit0, stdin68077/68077, stdout382, stderr0, remote SHA
+  совпал; evidence hash-validated, retry0. Большой синтетический frame прошёл в
+  момент проверки. Root cause `_003`/`_004` и production integration compatibility
+  всё ещё UNKNOWN; следующий шаг — один новый actual readback, не повтор `_006`.
+  AWG2/package016 сохранены, issuance disabled, install/stage/deploy отсутствуют.
+
 - Подготовлен [bound-frame SSH preflight gate-006](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-bound-frame-preflight-gate-006-ready-2026-09-22):
   synthetic stdin ровно68077 байт как в `_004`, remote command проверяет SHA256
   и отдаёт только fixed PASS/STOP. Production reads/actions отсутствуют. Один SSH,

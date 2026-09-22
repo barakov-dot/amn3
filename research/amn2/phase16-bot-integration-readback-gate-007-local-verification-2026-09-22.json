@@ -1,0 +1,52 @@
+{
+  "schema": "phase16.integration-readback-gate-local-verification.v1",
+  "date": "2026-09-22",
+  "status": "PASS_READY_NOT_EXECUTED",
+  "amn3_base": "09073963f602d64316daf3bc8a3d3ae3e97edb14",
+  "approval": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_007",
+  "gate_sha256": "8aa7d8418f927a479a62783bbf1632d69e9b19ecceadc00f9d3abef62ae8925d",
+  "remote_sha256": "2dc1d1678b4bf7d81e0e3a12e5e880fe8d20d1f5351a294d338d97016e1b00f6",
+  "source_manifest_sha256": "dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc",
+  "payload_sha256": "0d04ec697a808dffb02c17380d5b23a6be862e9350a5f0e5533f23e49a01ed05",
+  "tdd": {
+    "red": {
+      "command": "python -m unittest tests.test_phase16_bot_integration_readback_gate007 -v",
+      "result": "EXPECTED_FAILURE",
+      "tests": 6,
+      "reason": "actual readback gate-007 is not implemented"
+    },
+    "green": {
+      "command": "python -m unittest tests.test_phase16_bot_integration_readback_gate007 -v",
+      "result": "PASS",
+      "tests": 6
+    },
+    "integration": {
+      "command": "python -m unittest tests.test_phase16_bot_integration_readback tests.test_phase16_bot_transport_preflight tests.test_phase16_bot_frame_preflight tests.test_phase16_bot_integration_readback_gate007",
+      "result": "PASS",
+      "tests": 90
+    }
+  },
+  "verified_properties": {
+    "remote_supervisor_change": "one_exact_approval_marker_only",
+    "base_gate_004_unchanged": true,
+    "portable_core_unchanged": true,
+    "source_manifest_unchanged": true,
+    "transport_helper_unchanged": true,
+    "one_ssh_no_retry": true,
+    "old_marker_rejected_before_claim": true,
+    "read_only_private_mount_database_shape": true,
+    "database_rows_excluded": true,
+    "raw_stderr_persisted": false
+  },
+  "preview": {
+    "status": "ACTUAL_READBACK_GATE_READY_NOT_EXECUTED",
+    "ssh_attempts": 0,
+    "execution_007_exists": false
+  },
+  "interpretation": {
+    "gate_006_pass_justifies_retesting_full_readback": true,
+    "production_readback_completed": false,
+    "transport_root_cause_claimed": false,
+    "integration_compatibility_proven": false
+  }
+}

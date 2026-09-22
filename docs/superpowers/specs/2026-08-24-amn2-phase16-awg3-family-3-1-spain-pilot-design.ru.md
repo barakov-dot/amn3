@@ -621,6 +621,13 @@ fixed PASS/STOP без production reads/actions. Один SSH/25s/no retry. Ло
 84PASS, SSH0; `_006` ещё не исполнялся. PASS покажет передачу frame в момент
 проверки, но не объяснит прежние сбои и не подтвердит integration compatibility.
 
+Execution-006 [завершился PASS](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#ssh-bound-frame-preflight-execution-006-pass-2026-09-22):
+stdin68077/68077, exit0, stdout382, stderr0, remote SHA verified. Transport
+сработал для синтетического frame в момент проверки; root cause прежних ошибок
+и production compatibility не доказаны. [Actual readback gate-007 подготовлен](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-007-ready-2026-09-22):
+core/source manifest/remote supervisor и caps gate-004 сохранены байтово,
+кроме одного нового marker; 90PASS, SSH0, execution-007 отсутствует.
+
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
 iPhone/A/B остаются отложенными; deployment не разрешён.

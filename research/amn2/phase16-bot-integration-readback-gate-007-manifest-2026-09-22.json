@@ -1,0 +1,65 @@
+{
+  "schema": "phase16.integration-readback-gate-manifest.v1",
+  "status": "ACTUAL_READBACK_GATE_READY_NOT_EXECUTED",
+  "amn3_base": "09073963f602",
+  "source_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+  "approval": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_007",
+  "local_evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-007",
+  "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+  "sha256_lf": {
+    "local_runner": "59224f175ab11e724913907cda346a68beceb9b010e7a68a7f18f98782e91294",
+    "base_runner": "671bc1a59014670c8340b48d9ae42ddeadbfbb3ae7ed062baa21b919f3d2d80d",
+    "remote_supervisor": "2dc1d1678b4bf7d81e0e3a12e5e880fe8d20d1f5351a294d338d97016e1b00f6",
+    "portable_core": "f6b152a3439a3c89d6ea900133df4e6806ca0cc01e0bb893c22d59f82b5adaee",
+    "transport_helper": "713289a6082bf621d704e6dd3b04855fa020fbfecc8a9e86db8a861019bbd35e",
+    "integration_manifest": "dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc",
+    "payload": "0d04ec697a808dffb02c17380d5b23a6be862e9350a5f0e5533f23e49a01ed05",
+    "base_gate_manifest": "128ae86f4a06b0e424df40561527660d72e117f26ca476f0cd62ef171e75443b"
+  },
+  "bytes_lf": {
+    "local_runner": 10963,
+    "base_runner": 32484,
+    "remote_supervisor": 21661,
+    "portable_core": 23282,
+    "transport_helper": 13077,
+    "integration_manifest": 23102,
+    "payload": 46408,
+    "base_gate_manifest": 2461
+  },
+  "limits": {
+    "ssh_attempts": 1,
+    "remote_seconds": 50,
+    "work_seconds": 44,
+    "cleanup_seconds": 4,
+    "finalization_seconds": 2,
+    "transport_seconds": 60,
+    "remote_stdout_bytes": 65536,
+    "remote_stderr_bytes": 8192,
+    "transport_combined_output_bytes": 65536,
+    "cleanup_signal_scope": "owned_collector_process_groups_only",
+    "retry": false,
+    "cleanup_ssh": false
+  },
+  "readback_scope": {
+    "production_source_metadata": true,
+    "production_unit_properties": true,
+    "production_dependency_metadata": true,
+    "production_database_schema": true,
+    "production_database_rows": false,
+    "private_mount_namespace": true,
+    "private_network_namespace": true,
+    "service_actions": false,
+    "application_imports": false,
+    "telegram": false,
+    "runtime_activation": false
+  },
+  "command_contract": {
+    "entrypoint": "scripts/phase16_bot_integration_readback_gate_007.py",
+    "requires_execute": true,
+    "requires_approval": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_007",
+    "requires_remote_sha256": true,
+    "requires_manifest_sha256": true,
+    "requires_gate_sha256": true,
+    "requires_exact_evidence_directory": true
+  }
+}
