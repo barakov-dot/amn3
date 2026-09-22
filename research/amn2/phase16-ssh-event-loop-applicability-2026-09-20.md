@@ -1118,3 +1118,8 @@ SSH1, transport complete, stderr0, `STOP_NO_RETRY/unit_show`; partial содер
 только host metadata. Production source/dependencies/DB не читались, service
 actions0. Exact unit subcause UNKNOWN, retry не выполнялся. Новый diagnostic
 gate сначала готовится локально и получает отдельный marker/evidence path.
+
+[Gate-002 подготовлен локально](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-002-ready-2026-09-22):
+fixed per-property systemctl reads, normalized bounded unit failure evidence,
+новый marker и execution-002. 71 targeted PASS, independent review APPROVE,
+preview SSH 0. Новый SSH не выполнялся и требует exact `_002` approval.

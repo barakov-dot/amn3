@@ -7,6 +7,14 @@
 
 ## 2026-09-22
 
+- После execution-001 STOP подготовлен [actual readback gate-002](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-002-ready-2026-09-22):
+  каждая fixed allowlisted systemd property читается отдельно; STOP содержит
+  только bounded role/property/stage/exit/byte metadata без raw output/env.
+  Новый marker и execution-002, прежний `_001` не переиспользуется. Три RED→GREEN,
+  итог 71 PASS, independent review APPROVE, preview SSH 0. Production readback не
+  выполнялся; следующая попытка требует отдельного exact approval. AWG2/package016
+  сохранены, issuance disabled, install/stage/deploy отсутствуют.
+
 - После exact approval [actual integration readback execution-001 остановлен
   fail-closed](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-001-stop-2026-09-22):
   один SSH, transport complete, stderr0, `STOP_NO_RETRY/unit_show`; partial

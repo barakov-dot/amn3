@@ -416,3 +416,35 @@ service actions=0, application import/write/runtime activation=false. Нельз
 его SSH потребует отдельного exact approval. Stop/switch/seed/migration/
 Telegram/activation не разрешены. AWG2/package016 сохранены, general issuance
 disabled, production install/stage/deploy отсутствуют.
+
+<a id="actual-readback-gate-002-ready-2026-09-22"></a>
+
+## Actual integration readback gate-002 готов локально
+
+После execution-001 STOP недифференцированный batch `systemctl show` заменён
+локально на отдельный fixed allowlisted вызов для каждой property. Опции
+расположены до фиксированного unit; `Environment` не входит в allowlist. При
+ошибке fail-closed receipt раскрывает только role/property/stage/returncode и
+stdout/stderr byte counts, без raw values, argv, paths или stderr. Успешный
+сбор по-прежнему выдаёт только нормализованные unit fields и digests.
+
+Новый gate связан с marker
+`PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_002`, новым
+[manifest](phase16-bot-integration-readback-gate-002-manifest-2026-09-22.json)
+и exclusive `execution-002`. `_001` повторно использовать нельзя. Остальные
+scope/caps сохранены: one SSH/no retry, absolute remote50s, transport60s,
+schema-only DB в private RO mount+network namespaces, rows/env/journal/service
+actions/imports/activation excluded.
+
+TDD: три новых RED на exact per-property command, полный allowlist iteration и
+bounded diagnostic receipt; итог **71 PASS**. Independent review — **APPROVE**,
+open findings0. [Local verification](phase16-bot-integration-readback-gate-002-local-verification-2026-09-22.json).
+Preview: gate SHA
+`80a3a62bea7e5e2b6e662ad1a4ae8b95a47e69558829ce8e63c692b8c69cd52a`,
+remote SHA `c5d326262724c0f7b7c280087789bebaeb3e73c6f4a1f6c38a102cdf673c315a`,
+SSH0; execution-002 отсутствует.
+
+Gate-002 **READY_NOT_EXECUTED**. Его единственная попытка требует отдельного
+точного approval marker. Ни execution-001 approval, ни общие прежние разрешения
+не переносятся. AWG2/package016 неизменны, issuance disabled; production
+install/stage/deploy отсутствуют.

@@ -504,13 +504,59 @@ _ensure_column(conn, "users", "status", "TEXT")
             live_remote.parse_payload(payload[:-1]+bytes([payload[-1]^1]))
 
     def test_live_unit_command_is_fixed_property_allowlist(self):
-        command=live_remote.unit_command('amn2-spain-bot.service')
-        self.assertEqual(command[:3],['/usr/bin/systemctl','show','amn2-spain-bot.service'])
+        command=live_remote.unit_command('amn2-spain-bot.service','LoadState')
+        self.assertEqual(command,['/usr/bin/systemctl','show','--no-pager','--value',
+                                  '--property=LoadState','amn2-spain-bot.service'])
         self.assertNotIn('Environment',','.join(command))
-        self.assertEqual(sum(item.startswith('--property=') for item in command),
-                         len(live_remote.UNIT_PROPERTIES))
+        self.assertEqual(sum(item.startswith('--property=') for item in command),1)
         with self.assertRaisesRegex(live_remote.RemoteStop,'^unit_role$'):
-            live_remote.unit_command('other.service')
+            live_remote.unit_command('other.service','LoadState')
+        with self.assertRaisesRegex(live_remote.RemoteStop,'^unit_property$'):
+            live_remote.unit_command('amn2-spain-bot.service','Environment')
+
+    def test_live_unit_collection_reads_each_property_separately(self):
+        values={name:'' for name in live_remote.UNIT_PROPERTIES}
+        values.update({'LoadState':'loaded','ActiveState':'active','SubState':'running',
+                       'Type':'notify','Restart':'no','KillMode':'control-group',
+                       'MainPID':'0','TimeoutStartUSec':'40s',
+                       'TimeoutStopUSec':'1min 30s','WatchdogUSec':'0',
+                       'KillSignal':'15','FinalKillSignal':'9',
+                       'ExecStart':'{ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B -m app.main ; }',
+                       'WorkingDirectory':'/opt/amn2-spain/runtime/source',
+                       'ControlGroup':'/system.slice/amn2-spain-bot.service'})
+        calls=[]
+        def run(command,**_kwargs):
+            calls.append(command)
+            key=command[-2].split('=',1)[1]
+            output=(values[key]+'\n').encode()
+            return 0,output,{'stdout_bytes':len(output),'stderr_bytes':0,
+                             'stderr_present':False}
+        live_remote.PARTIAL={}
+        with patch.object(live_remote,'run_bounded',side_effect=run):
+            result=live_remote.collect_unit(core,'bot')
+        self.assertEqual(len(calls),len(live_remote.UNIT_PROPERTIES))
+        self.assertTrue(all(sum(item.startswith('--property=') for item in command)==1
+                            for command in calls))
+        self.assertTrue(result['exec_matches'])
+        self.assertEqual(result['pid'],0)
+        self.assertNotIn('unit_probe',live_remote.PARTIAL)
+
+    def test_live_unit_failure_preserves_only_bounded_property_diagnostic(self):
+        live_remote.PARTIAL={}
+        diagnostics={'stdout_bytes':0,'stderr_bytes':17,'stderr_present':True}
+        with patch.object(live_remote,'run_bounded',return_value=(1,b'',diagnostics)), \
+             self.assertRaisesRegex(live_remote.RemoteStop,'^unit_property$'):
+            live_remote.collect_unit(core,'bot')
+        self.assertEqual(live_remote.PARTIAL['unit_probe'],{
+            'role':'bot','property':'LoadState','stage':'command','returncode':1,
+            'stdout_bytes':0,'stderr_bytes':17})
+        host=live_gate.pass_receipt_for_tests()['host']
+        receipt=live_remote.stop_receipt('unit_property',{
+            'host':host,'unit_probe':live_remote.PARTIAL['unit_probe']})
+        self.assertEqual(live_gate.validate_receipt(receipt,3),receipt)
+        changed=json.loads(json.dumps(receipt));changed['partial']['unit_probe']['raw']='secret'
+        with self.assertRaisesRegex(core.Stop,'^receipt_binding$'):
+            live_gate.validate_receipt(changed,3)
 
     def test_live_db_child_is_mount_and_network_isolated(self):
         command=live_remote.db_child_command('mnt:[1]')
@@ -538,8 +584,11 @@ _ensure_column(conn, "users", "status", "TEXT")
 
     def test_live_execute_wrong_approval_stops_before_claim_or_trust(self):
         called=[]
+        self.assertEqual(live_remote.APPROVAL,
+                         'PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_002')
         with self.assertRaisesRegex(core.Stop,'^approval_binding$'):
-            live_gate.execute_once(b'x',b'pass',self.root/'attempt',approval='wrong',
+            live_gate.execute_once(b'x',b'pass',self.root/'attempt',
+                approval='PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_001',
                 approved_remote_sha='bad',approved_manifest_sha='bad',gate={},
                 approved_gate_sha='bad',loader=lambda role:called.append('loader'),
                 transport=lambda *a,**k:called.append('transport'))

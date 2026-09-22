@@ -17,7 +17,7 @@ import threading
 import time
 import types
 
-APPROVAL = "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_001"
+APPROVAL = "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_002"
 MAGIC = b"P16IRB01"
 CORE_SIZE = 23282
 MANIFEST_SIZE = 23102
@@ -183,10 +183,28 @@ def run_bounded(command, *, input_bytes=b"", timeout, cap):
     }
 
 
-def unit_command(name):
+def unit_command(name, property_name):
     require(name in UNITS.values(), "unit_role")
-    return ["/usr/bin/systemctl", "show", name, "--no-pager",
-            *("--property=" + item for item in UNIT_PROPERTIES)]
+    require(property_name in UNIT_PROPERTIES, "unit_property")
+    return ["/usr/bin/systemctl", "show", "--no-pager", "--value",
+            "--property=" + property_name, name]
+
+
+def unit_probe_stop(role, property_name, stage, returncode=-1,
+                    stdout_bytes=0, stderr_bytes=0):
+    require(role in UNITS and property_name in UNIT_PROPERTIES and
+            stage in {"command", "decode", "format", "process_timeout",
+                      "process_output_cap", "process_stderr_cap", "process_io"} and
+            type(returncode) is int and -255 <= returncode <= 255 and
+            type(stdout_bytes) is int and 0 <= stdout_bytes <= 8192 and
+            type(stderr_bytes) is int and 0 <= stderr_bytes <= MAX_STDERR,
+            "unit_probe")
+    PARTIAL["unit_probe"] = {
+        "role": role, "property": property_name, "stage": stage,
+        "returncode": returncode, "stdout_bytes": stdout_bytes,
+        "stderr_bytes": stderr_bytes,
+    }
+    raise RemoteStop("unit_property")
 
 
 def fixed_unit_file(path):
@@ -199,19 +217,29 @@ def fixed_unit_file(path):
 
 
 def collect_unit(core, role):
-    returncode, output, diagnostics = run_bounded(unit_command(UNITS[role]), timeout=2, cap=65536)
-    require(returncode == 0 and diagnostics["stderr_bytes"] == 0, "unit_show")
-    try:
-        text = output.decode("utf-8")
-    except UnicodeError:
-        raise RemoteStop("unit_show") from None
     values = {}
-    for line in text.splitlines():
-        require("=" in line, "unit_show")
-        key, value = line.split("=", 1)
-        require(key in UNIT_PROPERTIES and key not in values, "unit_show")
-        values[key] = value
-    require(set(values) == set(UNIT_PROPERTIES), "unit_show")
+    for key in UNIT_PROPERTIES:
+        try:
+            returncode, output, diagnostics = run_bounded(
+                unit_command(UNITS[role], key), timeout=0.75, cap=8192)
+        except RemoteStop as error:
+            stage = str(error)
+            if stage not in {"process_timeout", "process_output_cap",
+                             "process_stderr_cap", "process_io"}:
+                stage = "process_io"
+            unit_probe_stop(role, key, stage)
+        if returncode != 0 or diagnostics["stderr_bytes"] != 0:
+            unit_probe_stop(role, key, "command", returncode,
+                            diagnostics["stdout_bytes"], diagnostics["stderr_bytes"])
+        try:
+            text = output.decode("utf-8")
+        except UnicodeError:
+            unit_probe_stop(role, key, "decode", returncode,
+                            diagnostics["stdout_bytes"], diagnostics["stderr_bytes"])
+        if not text.endswith("\n") or "\n" in text[:-1] or "\r" in text:
+            unit_probe_stop(role, key, "format", returncode,
+                            diagnostics["stdout_bytes"], diagnostics["stderr_bytes"])
+        values[key] = text[:-1]
     normalized = core.parse_unit("\n".join(
         f"{key}={values[key]}" for key in UNIT_PROPERTIES
         if key not in {"FragmentPath", "DropInPaths", "ControlGroup"}), role)

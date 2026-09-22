@@ -253,6 +253,10 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    host metadata. Source/dependencies/DB не читались, service actions0. Exact
    unit subcause UNKNOWN, retry запрещён. Следующий шаг — локально подготовить
    новый диагностический gate; любое новое подключение требует отдельного marker.
+   [Gate-002 подготовлен локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-002-ready-2026-09-22):
+   per-property fixed systemctl allowlist, bounded normalized STOP diagnostic,
+   новый marker/execution-002; 71 PASS и independent review APPROVE. Preview
+   SSH 0. Новое подключение не выполнено и требует exact approval `_002`.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

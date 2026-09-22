@@ -573,6 +573,11 @@ M4 writer completeness/quiescence, semantic compatibility или M6/M7 и тре
 No-retry соблюдён. Новый unit-property diagnostic contract должен отдельно
 связать marker/evidence path и раскрывать только normalized status/digests.
 
+[Gate-002 теперь готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-002-ready-2026-09-22):
+каждая allowlisted systemd property читается отдельно, failure раскрывает только
+bounded role/property/stage/exit/byte metadata. 71 PASS/review APPROVE, SSH 0.
+Marker и execution-002 новые; это preparation, не current unit/readback evidence.
+
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
 iPhone/A/B остаются отложенными; deployment не разрешён.

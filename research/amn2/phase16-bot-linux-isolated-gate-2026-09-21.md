@@ -550,3 +550,8 @@ Actual execution-001 затем [завершился STOP_NO_RETRY](phase16-bot
 Source/dependencies/DB не читались, service actions0; unit subcause UNKNOWN.
 Retry не выполнялся. Следующая подготовка локальная и требует нового marker до
 любого SSH; Linux на АРМ по-прежнему не входит в план.
+
+[Gate-002 локально готов](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-002-ready-2026-09-22):
+новый marker/execution-002, per-property systemctl allowlist и bounded safe STOP
+diagnostic; 71 PASS, review APPROVE, preview SSH 0. Повтор `_001` невозможен;
+следующий SSH требует отдельного exact approval.

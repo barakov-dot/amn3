@@ -18,10 +18,12 @@ from scripts.vps import phase16_bot_integration_readback as core
 from scripts.vps import phase16_bot_integration_readback_remote as remote
 
 SOURCE_MANIFEST_RELATIVE = Path("research/amn2/phase16-bot-integration-manifest-6e68235.json")
-GATE_MANIFEST_RELATIVE = Path("research/amn2/phase16-bot-integration-readback-gate-manifest-2026-09-22.json")
+GATE_MANIFEST_RELATIVE = Path(
+    "research/amn2/phase16-bot-integration-readback-gate-002-manifest-2026-09-22.json"
+)
 EVIDENCE_DIRECTORY = Path(
     "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/"
-    "phase16-bot-integration-readback-runner-20260922/execution-001"
+    "phase16-bot-integration-readback-runner-20260922/execution-002"
 )
 
 
@@ -90,7 +92,7 @@ def validate_gate_manifest(value, root=ROOT):
     core.require(isinstance(value, dict) and set(value) == top and
                  value.get("schema") == "phase16.integration-readback-gate-manifest.v1" and
                  value.get("status") == "ACTUAL_READBACK_GATE_READY_NOT_EXECUTED" and
-                 value.get("amn3_base") == "a713d4dce8ca" and
+                 value.get("amn3_base") == "dbe1b45631b3" and
                  value.get("source_commit") == "6e682356ed14a62d636ee58039fd3a389e794809" and
                  value.get("approval") == remote.APPROVAL and
                  value.get("local_evidence_directory") == EVIDENCE_DIRECTORY.as_posix() and
@@ -332,17 +334,30 @@ def validate_holders(value):
                      "receipt_binding")
 
 
+def validate_unit_probe(value):
+    exact_dict(value, {"role", "property", "stage", "returncode",
+                       "stdout_bytes", "stderr_bytes"})
+    core.require(value["role"] in {"bot", "web"} and
+                 value["property"] in remote.UNIT_PROPERTIES and
+                 value["stage"] in {"command", "decode", "format", "process_timeout",
+                                    "process_output_cap", "process_stderr_cap", "process_io"} and
+                 type(value["returncode"]) is int and -255 <= value["returncode"] <= 255 and
+                 type(value["stdout_bytes"]) is int and 0 <= value["stdout_bytes"] <= 8192 and
+                 type(value["stderr_bytes"]) is int and 0 <= value["stderr_bytes"] <= 8192,
+                 "receipt_binding")
+
+
 def validate_partial(value, manifest):
     core.require(isinstance(value, dict) and set(value) <= {"host", "units_before", "source",
                  "dependencies", "database_files_before", "database", "database_child",
-                 "holders", "units_after", "summary"}, "receipt_binding")
+                 "holders", "units_after", "unit_probe", "summary"}, "receipt_binding")
     validators = {"host": validate_host, "units_before": validate_units,
                   "source": lambda item: validate_source(item, manifest),
                   "dependencies": lambda item: validate_dependencies(item, manifest),
                   "database_files_before": validate_file_map,
                   "database": lambda item: validate_database(item, manifest),
                   "database_child": validate_process, "holders": validate_holders,
-                  "units_after": validate_units}
+                  "units_after": validate_units, "unit_probe": validate_unit_probe}
     for name, item in value.items():
         if name == "summary":
             exact_dict(item, {"stages", "digests"})
