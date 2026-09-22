@@ -524,7 +524,9 @@ Linux namespace/WAL guard ещё не исполнен. По следующем�
 supervisor/transport, manifest+target binding, whole-gate deadline, exact
 receipt/retention semantics и mount+network isolation. Замечания independent
 review исправлены regression tests; итог 56 local PASS.
-Следующая граница — отдельное exact approval на один synthetic SSH; actual DB
-readback не включён. Сейчас SSH/DB open=0; stop/switch/seed/
+После следующего «продолжай» [одна synthetic попытка завершена PASS](phase16-bot-integration-readback-contract-2026-09-22.ru.md#synthetic-linux-gate-pass-2026-09-22):
+SSH1/exit0/stderr0, WAL read + OS write block, expected missing-SHM/journal STOP,
+persisted retained receipt. Actual DB readback не включён; production DB open=0.
+Stop/switch/seed/
 migration/Telegram smoke не разрешены. Прежние Linux tests не повторялись,
 package/bundle/source сохранены. Подробности поддерживаются только в contract.

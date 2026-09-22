@@ -232,9 +232,12 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    По следующему «продолжай» [bounded synthetic Linux gate готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#synthetic-linux-gate-ready-2026-09-22):
    supervisor/transport, manifest+target binding, whole-gate deadline, точные
    receipt/retention semantics, mount+network namespaces; независимый review
-   исправлен отдельными regression tests, итог 56 PASS; SSH=0. Следующая граница — отдельное точное approval на один synthetic
-   SSH. Actual DB readback не включён и получит собственный gate после Linux PASS.
-   Linux signal gate закрыт; namespace/WAL gate и live DB compatibility/writer fence/production rollback открыты.
+   исправлен отдельными regression tests, итог 56 PASS; SSH=0.
+   После следующего «продолжай» [ровно один synthetic gate завершён PASS](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#synthetic-linux-gate-pass-2026-09-22):
+   SSH1/exit0/stderr0, WAL read + OS write block, missing-SHM/journal expected
+   STOP, persisted retained receipt. Production DB/source/units/services=0.
+   Actual DB readback не включён и получит собственный gate после local runner.
+   Linux signal и namespace/WAL gates закрыты; live DB compatibility/writer fence/production rollback открыты.
    Рабочие службы/DB/poller исключены из gate; Linux на АРМ не требуется.
    AWG2/package016 неизменяемы, general issuance disabled; activation запрещена.
 

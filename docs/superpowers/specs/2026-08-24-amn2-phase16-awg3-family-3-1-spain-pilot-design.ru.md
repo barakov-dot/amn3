@@ -553,9 +553,9 @@ Design A утверждён; [source implementation plan](../plans/2026-09-21-am
 synthetic Linux harness готов как source. Затем [bounded synthetic gate подготовлен](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#synthetic-linux-gate-ready-2026-09-22):
 supervisor/transport, manifest+target binding, whole-gate deadline, точные
 receipt/retention semantics, caps и exact command; independent review fixes,
-56 local PASS, SSH0. Linux guard
-ещё не исполнен; следующий gate — отдельное approval на один synthetic SSH.
-Target readback/units остаются отдельными
+56 local PASS, SSH0. После следующего «продолжай» [одна synthetic попытка завершена PASS](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#synthetic-linux-gate-pass-2026-09-22):
+SSH1/exit0/stderr0, WAL read/write-block и expected sidecar/journal STOP;
+production paths/actions=0. Target readback/units остаются отдельными
 approvals; production units/dependencies
 не менялись, новая test-venv отдельно создана и retained.
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation

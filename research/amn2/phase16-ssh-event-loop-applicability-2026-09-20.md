@@ -1074,3 +1074,25 @@ Execution directory отсутствует; SSH/mount/live DB/service actions=0.
 попытку. Production DB/source/units/Telegram/runtime activation исключены;
 actual readback, stop/switch/seed/migration и deployment этим не разрешаются.
 AWG2/package016 неизменны, issuance disabled.
+
+<a id="bot-readback-synthetic-gate-pass-2026-09-22"></a>
+
+## Bounded synthetic readback gate — PASS, 2026-09-22
+
+После точного предложения одной synthetic-only попытки оператор ответил
+«продолжай». Approved manifest и remote SHA повторно совпали; target binding
+пересчитан после exclusive local claim. Выполнен один SSH: exit0, stderr0,
+stdin/output complete, retry/cleanup SSH=0.
+
+Remote status `SYNTHETIC_LINUX_GUARD_PASS_NOT_LIVE`: WAL shape прочитана и запись
+получила OS-level block; missing-SHM и rollback-journal дали expected STOP.
+Remote result persisted, новый scratch retained. Локальные claim/result перечитаны
+и совпали по binding; их SHA зафиксированы в normalized receipt. Production
+DB/source/units не читались, service actions/runtime activation=false.
+
+PASS закрывает synthetic namespace/WAL prerequisite, не actual integration
+readback. Deployed source/runtime/schema/semantic compatibility и writer
+quiescence остаются недоказанными. Следующий разрешённый шаг — локально собрать
+общий production read-only collector/transport; его SSH исполнение потребует
+отдельной границы. AWG2/package016 сохранены, issuance disabled, production
+stage/install/deploy отсутствуют.

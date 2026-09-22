@@ -310,3 +310,33 @@ gate и не actual readback. После его PASS следующий лока
 production read-only collector/transport с unit IO, atomic path hardening и полным
 receipt schema; после этого потребуется отдельное разрешение на actual readback.
 SSH/mount/live DB/service actions в текущем шаге=0; прежние suites не повторялись.
+
+<a id="synthetic-linux-gate-pass-2026-09-22"></a>
+
+## Bounded synthetic Linux gate — PASS, 2026-09-22
+
+После точного описания одной попытки оператор ответил «продолжай». Выполнена
+ровно одна hash-bound SSH попытка по неизменённому manifest SHA
+`ac51ca3966bd2363d5969ecaf936c981cde35eddaf0fe3947a0209a0410a6964`.
+Exit `0`, `ssh_attempts=1`, stderr `0`, transport stdin/output complete; retry и
+cleanup SSH не выполнялись.
+
+Remote receipt: **SYNTHETIC_LINUX_GUARD_PASS_NOT_LIVE**. WAL case подтвердил
+чтение формы и OS-level запрет записи (`SHAPE_READ_WRITE_BLOCKED`, одна таблица);
+missing-SHM и rollback-journal дали точные ожидаемые STOP
+`sqlite_sidecars` / `sqlite_journal_present`. Synthetic sentinel сохранён,
+mount+network namespaces закрыты внешней process group. Remote result записан,
+новый scratch retained по адресу manifest.
+
+Локальные `claim.json` и `result.json` перечитаны: claim совпадает с вложенным
+claim результата, закрытая schema PASS, production DB/source/units не читались,
+service actions/runtime activation=false. SHA256 evidence:
+`claim.json=dc07412c3de5520f36e2406792dda5e04e85be90b9046715788f39fadd7cf523`,
+`result.json=db54ce302de0accdeab03edc6ba5bed353d8d1a1ddad165fb5e1c04c130590a3`.
+
+Этот PASS закрывает только synthetic namespace/WAL prerequisite. Он не открывал
+live DB и не доказывает deployed source/runtime binding, полную schema/semantic
+compatibility или writer quiescence. Следующий шаг снова локальный: собрать общий
+production read-only collector/transport и его точный actual-readback contract;
+actual SSH readback потребует отдельной границы. AWG2/package016 неизменны,
+general issuance disabled, production stage/install/deploy отсутствуют.

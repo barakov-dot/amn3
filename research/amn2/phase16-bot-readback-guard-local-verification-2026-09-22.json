@@ -2,7 +2,7 @@
   "schema": "phase16.readback-guard-local-verification.v1",
   "date": "2026-09-22",
   "amn3_base": "96b3187d71df980b4d54a7cd8d3a8b0f2842c090",
-  "status": "SYNTHETIC_GATE_READY_NOT_EXECUTED",
+  "status": "SYNTHETIC_LINUX_GUARD_PASS_NOT_LIVE",
   "tests": {
     "passed": 56,
     "failed": 0,
@@ -25,7 +25,7 @@
     "services": "EXCLUDED"
   },
   "local_evidence_parent_created": true,
-  "execution_directory_absent": true,
+  "execution_directory_absent_before_run": true,
   "independent_review": {
     "status": "COMPLETED_WITH_FIXES",
     "critical_fixed": "manifest_and_target_binding_before_transport",
@@ -38,8 +38,27 @@
     "minor_fixed": "reject_unknown_receipt_fields"
   },
   "exact_command": "& 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -S -B scripts/phase16_bot_readback_guard_gate.py --execute --approve PHASE16_SYNTHETIC_READBACK_GUARD_20260922_001 --approved-remote-sha256 47f64ad29e684934761c17b74b6fe68086973fc19b09d0f2f14540a7a7f9c9e9 --approved-manifest-sha256 ac51ca3966bd2363d5969ecaf936c981cde35eddaf0fe3947a0209a0410a6964 --evidence-dir 'C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-readback-guard-runner-20260922/execution-001'",
-  "ssh_attempts": 0,
-  "mount_actions": 0,
+  "execution": {
+    "approval_provenance": "operator_continue_after_exact_single-attempt_request",
+    "claimed_at": "2026-09-22T05:39:08.694751+00:00",
+    "completed_at": "2026-09-22T05:39:15.592671+00:00",
+    "status": "SYNTHETIC_LINUX_GUARD_PASS_NOT_LIVE",
+    "returncode": 0,
+    "ssh_attempts": 1,
+    "stderr_bytes": 0,
+    "remote_result_persisted": true,
+    "scratch_retained": true,
+    "cases": {
+      "wal": "SHAPE_READ_WRITE_BLOCKED",
+      "missing_shm": "EXPECTED_STOP_sqlite_sidecars",
+      "journal": "EXPECTED_STOP_sqlite_journal_present"
+    },
+    "claim_sha256": "dc07412c3de5520f36e2406792dda5e04e85be90b9046715788f39fadd7cf523",
+    "result_sha256": "db54ce302de0accdeab03edc6ba5bed353d8d1a1ddad165fb5e1c04c130590a3",
+    "local_evidence_readback": "PASS"
+  },
+  "ssh_attempts": 1,
+  "mount_actions": "SYNTHETIC_PRIVATE_NAMESPACE_ONLY",
   "live_database_opened": false,
   "service_actions": 0,
   "production_install_stage_deploy": false,
