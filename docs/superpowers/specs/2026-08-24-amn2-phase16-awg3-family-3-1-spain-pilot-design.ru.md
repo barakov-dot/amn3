@@ -638,6 +638,15 @@ collector/payload/limits прежние, новый marker и закрытый �
 локального валидатора без raw значений; 93 PASS, SSH0. Execution-008 и push
 не выполнялись, нужны отдельные точные approvals.
 
+Execution-008 [завершился UNKNOWN_NO_RETRY](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-008-unknown-2026-09-22):
+один SSH, ответ побайтово совпал с `_007`, local diagnostic сузил отказ до
+`units_before`; raw ответа нет, remote reason/read stages UNKNOWN. Локальный
+synthetic пример показал возможный numeric signal contract mismatch, но не
+фактические значения production. [Gate-009 подготовлен локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-009-ready-2026-09-22):
+только значения `1..64` в двух signal полях принимаются в копии для проверки;
+остальной receipt проверяет прежний validator. 97 PASS, preview SSH0.
+Execution-009/push не выполнялись и требуют точных approvals.
+
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
 iPhone/A/B остаются отложенными; deployment не разрешён.

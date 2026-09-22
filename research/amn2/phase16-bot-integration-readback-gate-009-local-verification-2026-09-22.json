@@ -1,0 +1,37 @@
+{
+  "schema": "phase16.integration-readback-local-verification.v1",
+  "date": "2026-09-22",
+  "gate": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_009",
+  "red": {
+    "command": "python -I -S -B tests/test_phase16_bot_integration_readback_gate009.py -v",
+    "expected_failure": true,
+    "tests": 4,
+    "reason": "numeric-signal gate-009 is not implemented"
+  },
+  "green": {
+    "command": "python -I -S -B -c <combined unittest discovery for integration_readback*, transport_preflight, frame_preflight>",
+    "status": "PASS",
+    "tests": 97,
+    "failures": 0,
+    "errors": 0,
+    "numeric_signals_allowed": "decimal strings 1..64 only in KillSignal and FinalKillSignal",
+    "invalid_signals_rejected": ["0", "65", "015", "PRIVATE_MARKER"],
+    "unrelated_unit_field_rejected": true
+  },
+  "offline_preview": {
+    "status": "ACTUAL_READBACK_GATE_READY_NOT_EXECUTED",
+    "ssh_attempts": 0,
+    "gate_sha256": "f624594cbee5eadbbe86d4871b94d377554df445bf073c4568f901caed8e383b",
+    "remote_sha256": "224f5476fbc6ccb7314b9552fd36dc260ba3134da4225a59fe62beb03aaa82cc",
+    "source_manifest_sha256": "dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc",
+    "payload_sha256": "0d04ec697a808dffb02c17380d5b23a6be862e9350a5f0e5533f23e49a01ed05"
+  },
+  "bindings": {
+    "remote_changed_only_approval_marker": true,
+    "manifest_validation": "PASS"
+  },
+  "broader_discovery_limit": {
+    "status": "NOT_REPEATED",
+    "reason": "gate-008 broader discovery already identified two pytest import errors in isolated Python"
+  }
+}

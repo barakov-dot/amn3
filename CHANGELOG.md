@@ -7,6 +7,22 @@
 
 ## 2026-09-22
 
+- После exact push и `_008` approval [actual integration readback снова UNKNOWN_NO_RETRY](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-008-unknown-2026-09-22):
+  один SSH, полный stdin68077/stdout14614, exit3/stderr0; local diagnostic
+  указал `units_before`. Полный stdout SHA совпал с `_007`, но raw ответ не
+  сохранялся, remote reason/read stages/live side effects UNKNOWN; retry нет.
+  [Execution record](research/amn2/phase16-bot-integration-readback-execution-008-2026-09-22.json)
+  связывает claim/result hashes. Synthetic пример выявил возможный конфликт
+  numeric signal values с local validator; production field не доказан.
+
+- Подготовлен [actual readback gate-009](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-009-ready-2026-09-22):
+  remote collector/payload/limits прежние, новый marker; локально в копии
+  receipt принимаются только decimal `1..64` в `KillSignal`/`FinalKillSignal`,
+  прочие поля проверяет прежний validator. 4 ожидаемых RED → 97 PASS,
+  marker-only/manifest binding PASS, preview SSH0. Push и SSH требуют новых
+  exact approvals; AWG2/package016 сохранены, issuance disabled,
+  stage/install/deploy отсутствуют.
+
 - После exact `_007` approval [actual integration readback завершился UNKNOWN_NO_RETRY](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-007-unknown-2026-09-22):
   один SSH, полный stdin68077/stdout14614, exit3/stderr0; JSON разобран,
   local validator отверг receipt (`receipt_binding`). Raw stdout не сохранялся;

@@ -775,3 +775,57 @@ source manifest SHA256
 Gate-008 **READY_NOT_EXECUTED**. Для push нужен отдельный exact HEAD/origin/ref
 approval; для одного SSH — отдельный exact marker `_008`. AWG2/package016
 сохранены, issuance disabled; install/stage/deploy отсутствуют.
+
+<a id="actual-readback-execution-008-unknown-2026-09-22"></a>
+
+## Actual integration readback execution-008 — UNKNOWN_NO_RETRY
+
+После exact push `a296668d5604a80df9f717814a4d6b459ac32930` и approval `_008`
+выполнена ровно одна SSH-попытка. [Нормализованная запись](phase16-bot-integration-readback-execution-008-2026-09-22.json)
+связана с `claim.json` SHA256
+`b856a061cca808e1910c2e347adbcc72f92c9abc1300fb7d31d91a6852ff7223`
+и `result.json` SHA256
+`910b4d9f1679738120c54fcef7121a09646a72fa54a94c784d7a1be2e7668ac9`.
+Путь — `C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-008`.
+
+Transport exit3, stdin68077/68077, stdout14614/14614, stderr0, output complete,
+pipe failures0. JSON разобран, но local validator снова вернул
+`receipt_binding`; закрытый diagnostic указал `units_before`. SHA256 полного
+stdout `2cd91d9ab0b8736de6f159c2c99f3f4f9dc7b853db5cac099bdc33f0169692ec`
+совпал с execution-007. Raw stdout не сохранялся; это не раскрывает фактические
+поля, remote reason или завершённые read stages. `_008` использован, retry
+запрещён; production observations и отсутствие live side effects остаются UNKNOWN.
+
+Локальный synthetic пример выявил конкретное **возможное** расхождение в
+`units_before`: portable parser сохраняет `KillSignal=15` и
+`FinalKillSignal=9`, а local validator принимал только `SIG…` или `UNKNOWN`.
+Пример воспроизвёл `receipt_binding`, но фактические значения remote ответа
+неизвестны; другие ошибки в unit snapshot не исключены. Исправление ниже
+ограничено этими полями и не переинтерпретирует receipt `_008` задним числом.
+
+<a id="actual-readback-gate-009-ready-2026-09-22"></a>
+
+## Actual integration readback gate-009 готов локально
+
+После согласования bounded design подготовлены [runner](../../scripts/phase16_bot_integration_readback_gate_009.py)
+и [manifest](phase16-bot-integration-readback-gate-009-manifest-2026-09-22.json).
+Remote collector, portable core, payload, source manifest и caps не меняются;
+supervisor побайтово отличается от gate-004 только marker `_004` → `_009`.
+Local validator копирует receipt, заменяет **только для проверки** десятичные
+строки `1..64` в `KillSignal`/`FinalKillSignal` двух unit snapshots на
+`UNKNOWN`, затем запускает прежнюю закрытую проверку остальных полей.
+Исходный receipt сохраняется только после полного validation. `0`, `65`,
+`015` и постороннее unit поле отклонены тестами. При новом отказе остаются
+`UNKNOWN_NO_RETRY` и закрытый код стадии, raw stdout не пишется.
+
+[Локальная проверка](phase16-bot-integration-readback-gate-009-local-verification-2026-09-22.json):
+4 ожидаемых RED до реализации, затем **97 PASS** в релевантном наборе;
+marker-only и manifest binding PASS, preview SSH0. Gate SHA256
+`f624594cbee5eadbbe86d4871b94d377554df445bf073c4568f901caed8e383b`,
+remote SHA256 `224f5476fbc6ccb7314b9552fd36dc260ba3134da4225a59fe62beb03aaa82cc`,
+source manifest SHA256
+`dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc`.
+Marker `PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_009` привязан к exclusive
+execution-009, one SSH/no retry, remote50s/transport60s. Gate-009
+**READY_NOT_EXECUTED**. Push и SSH требуют отдельных exact approvals.
+AWG2/package016 сохранены, issuance disabled; stage/install/deploy отсутствуют.

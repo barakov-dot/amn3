@@ -304,6 +304,16 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    тот же collector/payload/limits, новый marker и закрытый код стадии local
    validator rejection без raw значений. Три RED → 93 PASS, preview SSH0.
    Ни push, ни execution-008 не выполнены; оба требуют отдельных точных approvals.
+   После exact push/approval [execution-008 UNKNOWN_NO_RETRY](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-008-unknown-2026-09-22):
+   один SSH, полный stdin68077/stdout14614, exit3/stderr0; local validator
+   указал `units_before`. Полный stdout SHA совпал с `_007`, но raw не сохранён;
+   remote reason и read stages UNKNOWN. `_008` не повторять. Локальный synthetic
+   пример выявил возможный конфликт numeric KillSignal/FinalKillSignal и validator.
+   [Gate-009 готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-009-ready-2026-09-22):
+   только два числовых signal поля `1..64` принимаются в копии для проверки,
+   все прочие ограничения прежние; remote отличается только новым marker.
+   4 RED → 97 PASS, preview SSH0. Push и execution-009 ещё не выполнены;
+   требуются отдельные точные approvals.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
