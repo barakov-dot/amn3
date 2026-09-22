@@ -1,6 +1,7 @@
 # Phase16: один изолированный Linux-прогон bot candidate
 
-Статус: **READONLY_FRAME_PROBE_PASS / NEW_ISOLATED_TEST_APPROVAL_PENDING / LINUX_RESULT_UNKNOWN**.
+Статус: **ISOLATED_LINUX_SIGNALS_PASS_NOT_DEPLOYED / TEST_APPROVAL_CONSUMED**.
+[Актуальный результат 22.09](#isolated-linux-pass-2026-09-22); старые UNKNOWN ниже — история.
 [Результат единственной попытки](#execution-2026-09-21); повтор запрещён.
 Это конкретный approval contract под Task3B [единственного плана](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),
 не новый план deployment. После локальной подготовки оператор ответил
@@ -407,13 +408,12 @@ manifest/payload и remote script bindings. Candidate/source/locks/package016
 
 <a id="isolated-linux-attempt2-approval"></a>
 
-## Следующий gate: одна новая isolated Linux test attempt после fix
+## Исторический gate: новая isolated Linux test attempt после fix — PASS
 
-**PENDING_APPROVAL / NOT_EXECUTED.** Это запрос нового отдельного разрешения на
-вторую test attempt; read-only probe approval уже использован. Первый test claim
-и все receipts остаются immutable. Замена evidence-dir сама по себе не является
-разрешением retry; выполнить следующую команду можно только после отдельного
-ответа оператора именно на этот upload/test-environment scope.
+**APPROVAL_CONSUMED / EXECUTED_ONCE / PASS.** Оператор ответил «продолжай»
+на точное предложение одной загрузки, отдельной test-venv и Linux tests.
+Вторая test attempt выполнена22.09; первая попытка/claims/receipts сохранены.
+Команда ниже теперь история, не GO и не разрешение нового запуска.
 
 Код и payload уже подготовлены и проверены, без изменений серверного скрипта:
 
@@ -449,12 +449,75 @@ remote protocol/artifact. Он не идентификатор нового ра
 отличают этот contract, явное подтверждение оператора и exclusive execution-v2
 claim. При фиксации результата обязательно указать, что это вторая test attempt.
 
-После точного нового согласования, из active AMN3 checkout, повторно сверить
-hashes/Git и отсутствие execution-v2; затем ровно один запуск:
+Перед второй попыткой сверены hashes/Git и отсутствие execution-v2.
+Из active AMN3 checkout ровно один раз исполнена историческая команда:
 
 ~~~powershell
 & 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -B scripts/phase16_bot_linux_gate.py --bundle 'C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-release-preparation-20260921-6e68235/phase16-bot-candidate-20260921-6e68235-001.zip' --execute --approve PHASE16_ISOLATED_LINUX_TEST_6e68235_001 --approved-remote-sha256 5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102 --evidence-dir 'C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-linux-runner-20260921/execution-v2'
 ~~~
 
-Новый evidence-dir отсутствовал при подготовке. Команда **не исполнена**;
-Linux signal acceptance/shared DB compatibility/activation gates остаются открыты.
+Evidence-dir execution-v2 теперь существует. Команда выполнена один раз.
+Synthetic Linux signal gate закрыт; shared DB compatibility/activation остаются открыты.
+
+<a id="isolated-linux-pass-2026-09-22"></a>
+
+## Isolated Linux gate — PASS, 2026-09-22
+
+Оператор ответил «продолжай» на предложение exact upload/test-environment scope.
+AMN3 basecec4110, clean; local/remote script LF SHA, bundle size/SHA совпали.
+Source6e68235 прежний. Это **вторая test attempt**, один SSH в этом gate;
+первый local claim сохранён, новый claim execution-v2 создан
+2026-09-22T03:46:55.768671Z (06:46:55 МСК). [Нормализованный receipt](phase16-bot-linux-execution-v2-2026-09-22.json).
+
+**ISOLATED_LINUX_SIGNALS_PASS_NOT_DEPLOYED**. Remote work47.487s, SSH exit0,
+stdin30501516 bytes (frame+exact ZIP), stdout1416, stderr0, pipe failures0.
+Remote hash-bound script подтвердил:
+
+| Проверка | Фактический результат |
+| --- | --- |
+| Platform/ABI, full bundle/manifest/tar hashes, safe parents/absent target/free disk | Пройдены до записи |
+| Existing venv/ensurepip и unshare --net | Проверены; namespace probe и все дочерние команды завершились |
+| Отдельная test-venv | Создана, exit0 |
+| Offline48pins (runtime40+test-only8), pip check, metadata/origins | Все три шага exit0, binding checks пройдены |
+| Negative PRE_LOOP/SIGTERM на отдельной копии helper | exit1, exactly1 expected assertion failure,0errors/0skips; Invalid synthetic trace order |
+| Штатные signal tests | exit0,6PASS/0FAIL/0SKIP |
+| Штатный source после negative и GREEN | Полная inventory/hash проверка пройдена |
+| Production service actions / live DB / Telegram polling / runtime activation | 0 / false / false / false |
+
+Новый retained target:
+/opt/amn2-spain/bot-candidates/phase16-bot-candidate-20260921-6e68235-001.
+Сохранены payload/source/test-venv/negative-source/scratch, claim/result и JUnit.
+Ничего не удалялось, дополнительного SSH/readback не было: результат получен
+через первоначальный канал. Test-only install действительно выполнен;
+production source/venv/unit switch, stage/install/deploy **не выполнялись**.
+Рабочая shared DB, bot/web services и token/identity в scope не участвовали.
+Нет нового утверждения об их текущей health или о quiescence всех writers.
+
+PASS относится к шести synthetic owned-child signal boundaries и одному
+отрицательному контролю. Не доказывает finite production drain/stop budget,
+systemd/restart behavior, полную DB compatibility, business success или quality
+acceptance. POSIX forced killpg при timeout этим успешным прогоном не проверен.
+Прежние local45/101schema/94+6lifecycle/312worker suites не повторялись.
+Immutable source/locks/bundle/package016 сохранены, AWG2_UNTOUCHED,
+general issuance disabled. Исполнитель/исторические approvals не менялись.
+
+<a id="post-linux-integration-readiness"></a>
+
+## Остаток integration-readiness после Linux PASS
+
+Локальная подготовка продолжается в существующем Task3B; нового deployment
+разрешения нет. Ни тестовую venv48pins, ни candidate main() нельзя переключать
+на live DB для «проверки». Production target должен использовать runtime40pins.
+
+| Приоритет / gate | Недостающее доказательство | Следующая допустимая подготовка |
+| --- | --- | --- |
+| P2/M3, до switch | Полный deployed source/dependency binding, а не один main.py; actual runtime40 environment | Локально собрать exact allowlist/fingerprints для отдельного fresh target readback; исторический unit snapshot не считать текущим |
+| P2/DB, до startup | Фактическая schema/release identity; корректность чтения при WAL; seed policy для существующих стандартных тарифов | Подготовить metadata-only contract без пользовательских rows/raw DDL/env; безопасный способ readback должен быть определён до отдельного approval |
+| P2/M4, до миграции/stop | Все writers и владельцы, admission fence, startup/cleanup bounds, UNKNOWN/restart policy | Составить exact writer matrix и доказуемые preconditions; bot instance lock не ограждает web/CLI/agent |
+| P2/M6-M7, после предыдущих | Exact bot-only switch/revert и rollback совместимость DB | Подготовить адресный contract; code revert не отменяет schema/seed writes, restore поверх активных writers запрещён |
+
+Следующий локальный deliverable — единый ограниченный readback contract для
+source/dependency/DB-metadata/writer evidence с конкретными paths/fields/caps и
+STOP, без подключения и чтения данных сейчас. Согласование такого contract
+будет отдельным от stop/switch/migration/Telegram smoke. Не повторять пройденные
+Linux tests и не пересобирать пакет ради подготовки документов.

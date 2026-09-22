@@ -375,7 +375,7 @@ synthetic child после cap — TEST_FAIL/UNKNOWN, не drain PASS. Ника�
 
 **Граница утверждения.** Design A и source implementation plan исполнены inline:
 AMN2 6e68235, 94 PASS/6 Linux SKIP. Локальный результат закрывает проверенные
-source ownership/races; actual Linux signals остаются NOT_RUN. Target M3, полный stop budget M4, bulk
+source ownership/races; [22.09 actual synthetic Linux negative/6signals PASS](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-pass-2026-09-22). Target M3, полный stop budget M4, bulk
 enforcement, restart/writer fence, M1/M2/M5/M6/M7 и Phase16 acceptance остаются
 открытыми. Прежние 33/312 и M3 68 PASS не повторять без нового code/question.
 
@@ -461,9 +461,11 @@ parent bot-candidates отсутствует, сохранённого target/re
 startup defect. Новый helper проверен45PASS и local ssh -V exit0. После точного
 «продолжай» [probe v2 PASS](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#readonly-probe-v2-pass-2026-09-21):
 короткий framed SSH path подтверждён, но Linux environment/tests ещё не проверены.
-Подготовлена одна новая isolated test attempt с прежним immutable bundle/remote
-script и отдельным execution-v2 claim; нужно новое upload/test-environment approval.
-Повторного upload/test/activation не было, Linux signal evidence не подтверждён.
+По следующему точному «продолжай» [22.09 новая isolated test attempt PASS](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-pass-2026-09-22):
+execution-v2, test-venv/offline48pins, negative expected failure +6PASS/0SKIP,
+source readback PASS,47.487s remote. Только test environment install выполнен;
+production activation/service/DB/poller actions отсутствуют. До switch остаются
+actual DB/source/runtime dependencies, writers/seed/recovery и stop-budget gates.
 System metadata сами по себе не закрывают M3; повторного согласования идеи
 пересоздания не нужно. Прежние lifecycle94 PASS/6 SKIP не повторялись.
 
@@ -534,8 +536,8 @@ persistence, leaks и live recovery остаются NOT_EXECUTED в этом ga
 | --- | --- | --- |
 | M1 | Windows traffic PASS на обоснованном client/engine/hypothesis path; root-cause-bound quality correction, стабильное acceptance и полный strict A/B | Отложенные P0/P1 главного плана; только после возврата оператора и exact approval. Сейчас повтор не запрашивать |
 | M2 | Валидная DNS/прочая measurement coverage, endpoints и budgets критериев v1 | Отдельное решение по методике; DNS bridge STOP, tooling ради gate не создавать |
-| M3 | Fresh target deployed/source/state + Python/ABI/full dependencies и соответствие intended lock | Локальная Windows часть закрыта 21.09: exact pins/hashes, pip check, 68 PASS. Target/Linux evidence отсутствует; live readback требует exact approval, повтор local suite без новой причины не нужен |
-| M4 | Effective units/entrypoints, другие writers, конечный startup-cleanup/stop budget и recovery policy для UNKNOWN | Source-only карта/readback contract готовы; lifecycle design A утверждён 21.09, source plan исполнен: 94 PASS/6 Linux SKIP, AMN2 6e68235. Он не закрывает общий budget/writer/restart gates; target readback по exact approval |
+| M3 | Fresh target deployed/source/state + Python/ABI/full dependencies и соответствие intended lock | Локальная Windows часть закрыта 21.09: exact pins/hashes, pip check, 68 PASS. Isolated Linux test-venv48pins подтверждена22.09; это не production runtime40 binding. Fresh deployed readback требует exact approval, повтор local suite без новой причины не нужен |
+| M4 | Effective units/entrypoints, другие writers, конечный startup-cleanup/stop budget и recovery policy для UNKNOWN | Source-only карта/readback contract готовы; lifecycle design A утверждён 21.09, source plan исполнен: Windows94PASS/6SKIP, затем22.09 isolated Linux negative+6PASS, AMN2 6e68235. Он не закрывает общий budget/writer/restart gates; target readback по exact approval |
 | M5 | Retained inventory, transaction ownership/quiescence, preservation/cleanup readback с исключениями v1 | Четыре раздельных recovery gates; metadata tools готовы локально, live authority отсутствует |
 | M6 | Future artifact source/tooling/dependency binding, identity/manifest; activation/revert contract и DB/remote preservation | Отдельный packaging/activation scope после dependencies; package016 сохранить, новый ID/hash/revert target не назначены |
 | M7 | Исполненные bounded startup/drain/coexistence/persistence/restart/leak/rollback checks на связанных artifact/target | Раздел 6 после prerequisites и exact approvals; 33/312 PASS не закрывают target acceptance. Synthetic dependency slice может отдельно предшествовать live gates |
@@ -544,11 +546,13 @@ persistence, leaks и live recovery остаются NOT_EXECUTED в этом ga
 Подготовлен [lifecycle design A](#lifecycle-design-m4): один stop owner до startup,
 factory dispatch guard, сохранение accepted drain и явная UNKNOWN/recovery policy.
 Design A утверждён; [source implementation plan](../plans/2026-09-21-amn2-bot-startup-stop-lifecycle-plan.ru.md)
-исполнен: SOURCE_IMPLEMENTED_WINDOWS_TESTED, Linux signal/negative control NOT_RUN.
-Следующий отдельный evidence scope — compatible Linux signal validation. Target readback/units
-остаются отдельными scopes/approvals; units/dependencies не менялись.
+исполнен: SOURCE_IMPLEMENTED_WINDOWS_TESTED;22.09 isolated Linux negative+6signals PASS.
+Следующий local scope — bounded source/dependency/DB-metadata/writer readback contract.
+Target readback/units остаются отдельными approvals; production units/dependencies
+не менялись, новая test-venv отдельно создана и retained.
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
-и live execution не выполнялись. iPhone/A/B остаются отложенными; deployment не разрешён.
+и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
+iPhone/A/B остаются отложенными; deployment не разрешён.
 
 Для будущего исполнения approvals раздельны: bounded target inventory;
 recovery signals; адресная cleanup и снятие package-блокировки; новый package

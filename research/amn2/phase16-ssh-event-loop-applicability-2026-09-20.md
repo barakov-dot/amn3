@@ -994,3 +994,20 @@ ZIP/venv/unshare/48pins/negative/6signals/DB compatibility этим не про�
 preview PASS, code/source/locks/package016 unchanged; suites не повторялись.
 Подготовлен новый single-attempt upload/isolated test gate с execution-v2 claim;
 его отдельное approval pending, команда не исполнена. AWG2_UNTOUCHED, issuance disabled.
+
+<a id="bot-isolated-linux-pass-2026-09-22"></a>
+
+## Isolated Linux negative/6signals — PASS, 2026-09-22
+
+По «продолжай» на exact upload/test-environment предложение выполнена вторая
+single-attempt test operation, один SSH/execution-v2; AMN3 basecec4110,
+source6e68235/immutable bundle прежние. [Полный receipt/границы](phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-pass-2026-09-22),
+[JSON](phase16-bot-linux-execution-v2-2026-09-22.json).
+Claim03:46:55Z, remote47.487s: venv/offline48pins/pip-check/metadata PASS;
+negative expected trace assertion +6GREEN/0SKIP; исходники после тестов совпали.
+Service actions0, live DB/polling/activation false. Retained test directory/venv
+созданы, cleanup/дополнительного SSH не было. Production stage/install/deploy нет.
+M4 finite budget/writers/restart, actual DB compatibility и production rollback
+не доказаны. Следующий local slice — один bounded metadata/writer/readback contract,
+без нового подключения/запуска/миграции сейчас. Прежние45/101/94+6/312 не повторялись;
+AWG2_UNTOUCHED/package016 immutable/general issuance disabled.

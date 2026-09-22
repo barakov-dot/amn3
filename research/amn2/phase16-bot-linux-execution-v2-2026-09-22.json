@@ -1,0 +1,92 @@
+{
+  "schema": "phase16.bot-linux-local.v1",
+  "claim": {
+    "scope": "PHASE16_ISOLATED_LINUX_TEST_6e68235_001",
+    "attempts": 1,
+    "remote_sha256": "5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102",
+    "bundle_sha256": "e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7",
+    "destination": "/opt/amn2-spain/bot-candidates/phase16-bot-candidate-20260921-6e68235-001",
+    "claimed_at": "2026-09-22T03:46:55.768671+00:00"
+  },
+  "status": "ISOLATED_LINUX_SIGNALS_PASS_NOT_DEPLOYED",
+  "ssh_attempts": 1,
+  "transport": {
+    "schema": "phase16.bot-transport.v1",
+    "returncode": 0,
+    "failure_stage": null,
+    "stdin_bytes_requested": 30501516,
+    "stdin_bytes_accepted": 30501516,
+    "stdin_complete": true,
+    "output_complete": true,
+    "stdout": {
+      "bytes_observed": 1416,
+      "bytes_retained": 1416,
+      "prefix_sha256": "a70607366bddd7a11c0245b51e5e39547176f6872d3394d2808cb95bf588d450"
+    },
+    "stderr": {
+      "bytes_observed": 0,
+      "bytes_retained": 0,
+      "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pipe_failures": [],
+    "stderr_classification": "NO_STDERR"
+  },
+  "remote": {
+    "schema": "phase16.bot-linux-gate.v1",
+    "artifact_id": "phase16-bot-candidate-20260921-6e68235-001",
+    "bundle_sha256": "e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7",
+    "source_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "status": "ISOLATED_LINUX_SIGNALS_PASS_NOT_DEPLOYED",
+    "service_actions": 0,
+    "live_database_opened": false,
+    "telegram_polling": false,
+    "runtime_activation": false,
+    "steps": [
+      {
+        "step": "venv",
+        "returncode": 0,
+        "output_bytes": 0,
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "step": "offline_install",
+        "returncode": 0,
+        "output_bytes": 15896,
+        "output_sha256": "bccf5f4944f4148729d4b8b6d2db4f3f1107884d42d642b5eef47869e98b4315"
+      },
+      {
+        "step": "pip_check",
+        "returncode": 0,
+        "output_bytes": 30,
+        "output_sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09"
+      },
+      {
+        "step": "metadata",
+        "returncode": 0,
+        "output_bytes": 1524,
+        "output_sha256": "f2d8b0c4d243764ec6bc10b4d8df2c581a3adde5ba64216f2f60bdc61218b3f3"
+      },
+      {
+        "step": "negative",
+        "returncode": 1,
+        "output_bytes": 1138,
+        "output_sha256": "490da5955ad6c51f32c8e5dc4328db6332650310eec1cb2b8f022662dd29d5cc"
+      },
+      {
+        "step": "green",
+        "returncode": 0,
+        "output_bytes": 215,
+        "output_sha256": "681c090884d82c1edd7383d146624d44ffec0033a3082ade0129704af6b685a1"
+      }
+    ],
+    "negative": {
+      "passed": 0,
+      "expected_failure": true
+    },
+    "green": {
+      "passed": 6,
+      "expected_failure": false
+    },
+    "seconds": 47.487
+  }
+}

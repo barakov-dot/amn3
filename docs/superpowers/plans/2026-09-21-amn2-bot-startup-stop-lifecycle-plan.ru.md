@@ -18,15 +18,17 @@ pytest из сохранённой M3 venv; стандартный SQLite thread
 **Spec:** [lifecycle design A](../specs/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot-design.ru.md#lifecycle-design-m4).
 Оператор ответил «Подтверждаю» на письменный design из AMN3 commit
 8ba7e5d31236824bddd304a4f278965029d1578b. Это утвердило design и подготовку плана.
-Статус плана: **SOURCE_IMPLEMENTED_WINDOWS_TESTED / LINUX_SIGNAL_UNKNOWN**.
+Статус плана: **SOURCE_IMPLEMENTED_WINDOWS_TESTED / ISOLATED_LINUX_SIGNALS_PASS_NOT_DEPLOYED**.
 Исполнение согласовано оператором «в части ожидания подтверждения, подтверждаю».
-Tasks 1–2 реализованы; Task 3 не принят. После отдельного server approval
+Tasks 1–2 реализованы; Task 3 принят в synthetic signal scope22.09 (см. ниже). Исторически после первого server approval
 [попытка 21.09](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#execution-2026-09-21)
 вернула UNKNOWN_NO_RETRY/process_io; negative/6signals не подтверждены.
 Последующий [read-only recovery](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#recovery-readback-result-2026-09-21)
 подтвердил отсутствие parent bot-candidates на момент чтения; результата tests нет.
-Нижние NOT_RUN/запрет install описывают исходный local-only этап; последующее
-разрешение одной isolated test-venv попытки использовано и не разрешает retry.
+22.09 по новому точному «продолжай» [Linux gate PASS](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-pass-2026-09-22):
+expected negative +6PASS/0SKIP, source6e68235, offline48pins, test-venv retained.
+Нижние NOT_RUN/запрет install описывают исходный local-only этап; новые server
+approvals были отдельными и использованы. Production stop budget не доказан.
 [Actual evidence](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#lifecycle-implementation-m4-2026-09-21), AMN2 6e68235. Inline method
 сохраняется из ограничений Phase16; отдельный выбор делегирования не нужен.
 Подплан подчинён [главному Phase16 plan](2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),
@@ -450,16 +452,17 @@ def test_owned_child_signal_stops_at_barrier(tmp_path, signum, barrier):
   exact child, при необходимости kill и wait; не возвращать PASS после такого kill.
   stderr также ограничен; сохранить безопасную классификацию, не raw secrets.
   Baseline state до начала должен быть тот же source/dependency binding.
-- [ ] **4. NOT_RUN — проверить механизм RED на доступной Linux среде:** до claim actual
+- [x] **4. PASS22.09 — механизм RED и6GREEN проверены в isolated Linux gate:** до claim actual
   OS-signal PASS один test-only negative control с пропущенным pending delivery
   должен нарушить trace assertion. Вернуть штатный helper, затем выполнить шесть
   cases один раз GREEN. Negative control не изменяет production code и не коммитится.
   Если Linux/Python/dependencies не доступны уже сейчас, этот шаг NOT_RUN;
   подготовленные tests остаются для отдельно согласованного compatible environment.
-  Не переносить Windows venv на Linux и не устанавливать новую среду.
+  Первоначальный local-only scope запрещал перенос Windows venv/установку новой среды.
+  Позднее отдельное exact approval разрешило test-venv на Spain;22.09 negative/6GREEN PASS.
   21.09 после «продолжай» выполнен [inventory среды](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md#linux-environment-discovery-2026-09-21):
-  WSL не установлен, Docker/Podman отсутствуют в PATH; Linux gate остаётся
-  NOT_RUN до указания уже готовой compatible среды. Source tests не повторены.
+  На тот момент WSL не был установлен, Docker/Podman отсутствовали в PATH;
+  Linux gate оставался NOT_RUN. Source tests тогда не повторялись.
 - [x] **5. Итоговый affected набор один раз** после всех source/test changes:
 
 ~~~text
@@ -522,5 +525,5 @@ Phase16 live/acceptance prerequisites остаются открыты.
 - API/paths сверены с source 1bd7f62; implementation snippets — будущие edits,
   а не уже применённый patch. Production timeouts/target state не назначены.
 - Исполнение этого локального плана завершено в допустимых границах. Следующий
-  отдельный scope: compatible Linux signal evidence либо target readback.
+  отдельный scope после Linux PASS22.09: подготовка bounded target/DB/writer readback.
   Настоящие target inventory/units/activation и live gates этим не открываются.

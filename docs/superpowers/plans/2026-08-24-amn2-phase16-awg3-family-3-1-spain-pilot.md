@@ -220,9 +220,13 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    исключал PROGRAMDATA. Исправлен общий helper; 2RED→45PASS и local ssh -V exit0.
    По следующему «продолжай» [probe v2 PASS](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#readonly-probe-v2-pass-2026-09-21):
    один SSH, exit0/32-byte exact SHA, stderr0; короткий framed remote path доказан.
-   ZIP/venv/unshare/negative/6signals не проверялись. Подготовлена
-   [одна новая isolated Linux test attempt](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-attempt2-approval),
-   pending approval: exact bundle, новый execution-v2 claim, без service/DB/activation.
+   По следующему «продолжай» [22.09 isolated Linux gate PASS](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-pass-2026-09-22):
+   одна новая test attempt/execution-v2, offline48pins/pip/metadata PASS,
+   expected negative +6signals PASS/0SKIP, source hashes сохранены,47.487s remote.
+   Test-venv создана и retained; production service/DB/poller/activation=0.
+   Следующая [локальная подготовка](../../../research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#post-linux-integration-readiness) —
+   bounded source/dependency/DB-metadata/writer readback contract до нового approval.
+   Linux gate закрыт; live DB compatibility/writer fence/production rollback открыты.
    Рабочие службы/DB/poller исключены из gate; Linux на АРМ не требуется.
    AWG2/package016 неизменяемы, general issuance disabled; activation запрещена.
 

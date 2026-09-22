@@ -5,6 +5,19 @@
 записи не означают deployment или новую выдачу. Текущая очередь — в
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
+## 2026-09-22
+
+- По точному «продолжай» [isolated Linux gate завершён PASS](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-pass-2026-09-22):
+  вторая test attempt/один SSH/execution-v2, exact bundle/source6e68235,
+  test-venv/offline48pins/pip-check/metadata PASS, expected negative +6PASS/0SKIP,
+  source hashes сохранены;47.487s remote. Retained test directory создан,
+  production services/live DB/polling/activation=0; не deployment/acceptance.
+  Lifecycle Task3 checkbox и canonical status синхронизированы, сохранён JSON.
+  Остаток DB/source/runtime binding/writer fence/seed/rollback выделен в существующем
+  contract; следующим будет локальная подготовка bounded readback, без нового SSH.
+  Checks receipt/readback/counts/hashes, links/JSON/diff/secret/changelog;
+  прежние baseline suites не повторялись. AWG2/package016/issuance safety сохранены.
+
 ## 2026-09-21
 
 - По «продолжай» [контрольный framed SSH probe v2 прошёл](research/amn2/phase16-bot-linux-isolated-gate-2026-09-21.md#readonly-probe-v2-pass-2026-09-21):
