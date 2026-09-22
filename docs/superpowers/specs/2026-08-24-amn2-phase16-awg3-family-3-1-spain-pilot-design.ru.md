@@ -549,8 +549,10 @@ Design A утверждён; [source implementation plan](../plans/2026-09-21-am
 исполнен: SOURCE_IMPLEMENTED_WINDOWS_TESTED;22.09 isolated Linux negative+6signals PASS.
 22.09 [bounded source/dependency/DB-metadata/writer contract готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md).
 Он задаёт WAL-safe read boundary, caps/STOP и пределы source/runtime/schema/writer
-выводов; collector/manifest hashes и synthetic guards ещё предстоят. Это следующий
-local scope, не готовая server command. Target readback/units остаются отдельными
+выводов. Следующий локальный шаг исполнен частично: [portable core/manifest +42PASS](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#portable-implementation-2026-09-22);
+synthetic Linux harness готов как source, Linux guard не проверен, общий runner
+ещё не собран. Следом bounded supervisor/transport и exact synthetic test contract;
+это не готовая server command. Target readback/units остаются отдельными
 approvals; production units/dependencies
 не менялись, новая test-venv отдельно создана и retained.
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation

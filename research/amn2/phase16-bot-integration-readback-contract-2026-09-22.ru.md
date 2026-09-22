@@ -1,10 +1,13 @@
 # Phase16 Task3B: bounded integration readback contract — 2026-09-22
 
-Статус: **LOCAL_CONTRACT_READY / COLLECTOR_NOT_IMPLEMENTED / SERVER_NOT_APPROVED**.
+Статус: **PORTABLE_CORE_IMPLEMENTED / LINUX_GUARD_NOT_VALIDATED / LIVE_EXECUTION_DISABLED**.
+Актуальный результат реализации — в [разделе ниже](#portable-implementation-2026-09-22);
+остальной документ задаёт целевой contract, а не утверждает покрытие всего runner.
 Это детализация существующего [Task3B](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),
 а не новый execution plan. Основание: операторское «продолжай» после
 [isolated Linux PASS](phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-pass-2026-09-22).
-Сейчас выполнены только локальные чтения и документация; SSH/DB open/service actions=0.
+Первоначальный contract подготовлен локально; последующая реализация описана
+ниже. За оба шага SSH/live DB open/service actions=0.
 
 ## Назначение и граница результата
 
@@ -96,7 +99,7 @@ Environment file /etc/amn2-spain/runtime.env и bot token исключены.
    propagation; закрыть унаследованные посторонние descriptors. DB открывает
    только guarded child через этот путь. Любая ошибка/неподдерживаемый режим —
    STOP до open, без fallback. Read-only bind не переключает production mount.
-4. Stdlib SQLite >=3.22, URI mode=ro, query_only=ON, temp_store=MEMORY,
+4. Stdlib SQLite >=3.37 (table_list/type guard), URI mode=ro, query_only=ON, temp_store=MEMORY,
    trusted_schema=OFF с readback, extension loading disabled; fixed-query
    authorizer запрещает DML/DDL, ATTACH, пользовательские functions и выход за
    schema allowlist. До column/index queries отклонить virtual/shadow tables
@@ -199,3 +202,62 @@ AWG2_UNTOUCHED; package016/immutable candidate прежние; general issuance 
 Linux negative+6signals PASS сохранён. Test-only venv ранее создана; production
 stage/install/deploy не выполнялись. Финальный stop budget, M3 runtime binding,
 M4 complete writer fence и M6/M7 DB-compatible rollback остаются открыты.
+
+<a id="portable-implementation-2026-09-22"></a>
+
+## Локальная реализация переносимой части — 2026-09-22
+
+По следующему «продолжай», AMN3 basece2add2, подготовлены:
+
+- [Offline manifest builder](../../scripts/phase16_bot_integration_readback.py):
+  pinned AMN2 Git blobs, чистый source/точный commit, no app imports; exclusive
+  output, runtime40 pins и статический disclosure allowlist SQL identifiers.
+  CLI --execute всегда возвращает LIVE_EXECUTION_DISABLED до любых Git/DB действий.
+- [Ядро сборщика](../../scripts/vps/phase16_bot_integration_readback.py):
+  bounded source/dependency metadata, unit property normalization без env/argv
+  output, schema shape/authorizer, observed inode holders, namespace/RO checks
+  перед SQLite open. Отдельная child-only mount setup функция отказывает в host
+  namespace; сама на Linux ещё не выполнялась.
+- [Synthetic Linux harness](../../scripts/vps/phase16_bot_readback_guard_smoke.py):
+  только новые собственные fixtures, три child cases (WAL shape/read-only write
+  negative, missing-shm STOP, journal STOP), сохранение sentinel и writable parent
+  view. Проверка негативной записи принимает только SQLITE_READONLY, не BUSY.
+  New scratch exclusive/retained, owned child8s/kill2s, никаких production targets
+  или SSH. На Windows NOT_RUN до mkdir; Linux execution ещё НЕ ВЫПОЛНЕН.
+- [Целевые portable tests](../../tests/test_phase16_bot_integration_readback.py)
+  и [сохранённый manifest](phase16-bot-integration-manifest-6e68235.json).
+
+[Нормализованный local receipt и hashes](phase16-bot-integration-local-verification-2026-09-22.json).
+Manifest воспроизведён дважды с одинаковыми bytes.
+
+**42 portable tests PASS**. Первоначальный RED: отсутствующие helpers и
+неблокирующий пустой CLI. Затем26PASS. Проверка actual source обнаружила
+fragmented f-string DDL: AST теперь не рассматривает части JoinedStr как
+самостоятельные complete SQL literals. Отдельный RED на CRLF METADATA отделяет
+body от headers; два regression исправлены,40PASS. Ещё два RED →42PASS:
+Windows refusal до создания scratch и host namespace refusal до mount.
+Они не доказывают kernel enforcement; Linux cases не запускались и не
+маскируются под PASS/SKIP. Прежние45/101/94+6/312 suites не повторялись.
+
+Manifest содержит126 .py/1485043 Git-blob bytes,40 pins,31 table identifiers,
+25 explicit indexes.31 — disclosure allowlist со старыми/rebuild declarations
+(users_new/devices_new), не число таблиц production DB.1487221 в исходном
+contract — измерение Windows checkout, отличие line endings; hashes строятся
+по Git bytes для Linux. Это не schema compatibility assertion. Dynamic SQL
+не исполняется/не достраивается; непокрытая форма остаётся UNKNOWN.
+
+Локальная WSL не установлена, Docker executable не найден; install не выполнялся.
+Это не ошибка AMN2 и не причина переносить тест на рабочую БД. Приоритетный
+следующий local slice — закончить bounded transport/supervisor и точный contract
+для isolated synthetic Linux guard run с hashes/новым scratch; только затем
+отдельное approval. Общий live collector ещё не собран: actual unit IO,
+atomic/path-race hardening, общий watchdog/output framing и строгая валидация
+remote receipt остаются задачами до live readback. Наличие helpers не закрывает
+эти требования и не разрешает подключение. Source/dependency циклы содержат
+локальные caps/time checks, но внешний deadline для блокирующего I/O требует
+runner; это не подтверждённый общий50s budget.
+
+Проведён локальный review scope/error paths/выводов; независимый reviewer в этом
+inline шаге не привлекался. Code/tests/manifest не меняют AMN2, locks или
+immutable ZIP. SSH/mount/service actions/live DB open=0. AWG2/package016 и
+issuance safety сохранены; production stage/install/deploy отсутствуют.

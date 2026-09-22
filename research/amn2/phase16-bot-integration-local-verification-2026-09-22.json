@@ -1,0 +1,58 @@
+{
+  "schema": "phase16.integration-local-verification.v1",
+  "date": "2026-09-22",
+  "amn3_base": "ce2add2b093933a141123b0e37a2f91cbd5a3d1e",
+  "source_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+  "status": "PORTABLE_CORE_PASS_NOT_LIVE",
+  "python": "3.12.14",
+  "sqlite": "3.53.1",
+  "tests": {
+    "passed": 42,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "portable_and_real_synthetic_windows_sqlite_only",
+    "command": "python -I -S -B tests/test_phase16_bot_integration_readback.py"
+  },
+  "tdd": [
+    "missing_helpers_and_execute_refusal_RED_to_26_PASS",
+    "fragmented_fstring_and_CRLF_metadata_RED_to_40_PASS",
+    "Windows_and_host_namespace_refusal_RED_to_42_PASS"
+  ],
+  "manifest_reproducible": true,
+  "hash_policy": "sha256_LF_normalized_text",
+  "sha256": {
+    "scripts/phase16_bot_integration_readback.py": "cdae5846b38577fb2ad7714da39458e9715102173f35f092e2d9feb6e428c865",
+    "scripts/vps/phase16_bot_integration_readback.py": "f6b152a3439a3c89d6ea900133df4e6806ca0cc01e0bb893c22d59f82b5adaee",
+    "scripts/vps/phase16_bot_readback_guard_smoke.py": "9ec031205160d3f50454d3383819e653b02c73f7a81f617c24ae6c2ba041b8fa",
+    "tests/test_phase16_bot_integration_readback.py": "b318ad88ba674b323e1195df4db604ed9050790109da2f35a8784191c1eca51b",
+    "research/amn2/phase16-bot-integration-manifest-6e68235.json": "dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc"
+  },
+  "manifest": {
+    "source_files": 126,
+    "git_blob_bytes": 1485043,
+    "runtime_pins": 40,
+    "disclosure_table_identifiers": 31,
+    "explicit_index_identifiers": 25
+  },
+  "linux_guard_status": "NOT_EXECUTED",
+  "local_linux": {
+    "wsl": "NOT_INSTALLED",
+    "docker_executable": "NOT_FOUND",
+    "installed_this_turn": false
+  },
+  "not_implemented": [
+    "production_unit_IO_orchestration",
+    "end_to_end_transport_receipt_validation",
+    "external_global_watchdog",
+    "atomic_path_race_hardening"
+  ],
+  "ssh_attempts": 0,
+  "mount_actions": 0,
+  "live_database_opened": false,
+  "service_actions": 0,
+  "production_install_stage_deploy": false,
+  "awg2": "UNTOUCHED",
+  "package016": "UNCHANGED",
+  "general_issuance": "DISABLED",
+  "independent_review": false
+}

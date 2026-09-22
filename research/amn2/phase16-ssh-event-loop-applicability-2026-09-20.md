@@ -1029,3 +1029,20 @@ LOCAL_CONTRACT_READY; collector не реализован, server approval от�
 после них отдельный exact bounded readback approval. Проверки docs readback,
 links/diff/secret/changelog; AMN2 source/locks/bundle/package016 не менялись.
 AWG2_UNTOUCHED, issuance disabled, production stage/install/deploy отсутствуют.
+
+<a id="bot-integration-portable-core-2026-09-22"></a>
+
+## Portable integration collector/manifest — 2026-09-22
+
+По «продолжай», basece2add2/source6e68235, выполнена
+[локальная реализация](phase16-bot-integration-readback-contract-2026-09-22.ru.md#portable-implementation-2026-09-22):
+core metadata/schema/namespace guards, offline manifest builder, synthetic Linux
+harness source,42 portable PASS после RED. Manifest126files/runtime40pins,
+31 disclosure table names/25index names; не deployed state/compatibility.
+[Нормализованный local receipt](phase16-bot-integration-local-verification-2026-09-22.json).
+Linux среды локально нет, install не выполнялся. Linux namespace/WAL enforcement
+UNKNOWN; next local work — bounded supervisor/transport и exact synthetic gate.
+Общий live collector не собран, --execute disabled, SSH/mount/live DB/services=0.
+Прежние suites/isolated Linux signal PASS сохранены. Checks target unittest,
+readback/hashes/links/JSON/diff/secret/changelog. AWG2/package016 неизменны,
+issuance disabled; production stage/install/deploy нет.

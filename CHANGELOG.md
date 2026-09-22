@@ -7,6 +7,18 @@
 
 ## 2026-09-22
 
+- Реализована [локальная portable часть integration readback](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#portable-implementation-2026-09-22):
+  bounded metadata/schema helpers, namespace guards, offline pinned manifest
+  builder и source synthetic Linux harness.42 portable PASS после RED; исправлены
+  AST JoinedStr и CRLF metadata regressions. Manifest126source/runtime40pins;
+  неизвестные names/env/DDL/rows не публикуются. Windows refusal/host-namespace
+  refusal проверены, actual Linux guard не выполнен: WSL не установлен, Docker
+  отсутствует. Общий live runner/transport/watchdog ещё не собран, --execute
+  disabled; следующий local slice и границы явно сохранены. SSH/mount/live DB/
+  services=0, AMN2/immutable artifacts не менялись. Проверки target unittest,
+  hashes/readback/links/JSON/diff/secret/changelog; прежние suites не повторялись.
+  AWG2/package016/issuance safety сохранены; production stage/install/deploy нет.
+
 - По «продолжай» подготовлен [bounded integration readback contract Task3B](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md):
   проверена source writer matrix, определены paths/fields/caps/STOP для deployed
   source/static dependencies/schema metadata/observed DB holders. Проект SQLite

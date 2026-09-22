@@ -226,9 +226,12 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    Test-venv создана и retained; production service/DB/poller/activation=0.
    По «продолжай»22.09 [bounded readback contract подготовлен локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md):
    exact paths/fields/caps/STOP, source writer matrix и проект SQLite/WAL guard;
-   SSH/DB open=0. Collector не реализован; следующий local slice — инструмент,
-   manifests и synthetic guards, затем exact approval на server readback.
-   Linux gate закрыт; live DB compatibility/writer fence/production rollback открыты.
+   По следующему «продолжай» [portable core/manifest реализованы](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#portable-implementation-2026-09-22),42 local tests PASS.
+   Synthetic Linux harness подготовлен, но Linux guard не проверен (локальной
+   Linux среды нет); общий live runner ещё не собран, CLI execution disabled.
+   SSH/DB open=0. Следующий local slice — bounded supervisor/transport и exact
+   synthetic Linux contract до отдельного approval; actual DB readback позже.
+   Linux signal gate закрыт; namespace/WAL gate и live DB compatibility/writer fence/production rollback открыты.
    Рабочие службы/DB/poller исключены из gate; Linux на АРМ не требуется.
    AWG2/package016 неизменяемы, general issuance disabled; activation запрещена.
 
