@@ -268,6 +268,9 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    SSH1/exit255/stdout0/stderr49/unclassified, remote receipt отсутствует. Какие
    read stages достигнуты, UNKNOWN; retry нет. Следующий scope local-only:
    redacted transport classification/helper binding, затем новый exact marker.
+   [Gate-004 готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-004-ready-2026-09-22):
+   no-receipt classification, redacted SSH hints и transport-helper hash binding;
+   новый marker/execution-004,73PASS/review APPROVE, preview SSH0. Нужен approval.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

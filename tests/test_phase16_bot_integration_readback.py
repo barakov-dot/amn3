@@ -587,20 +587,63 @@ _ensure_column(conn, "users", "status", "TEXT")
     def test_live_execute_wrong_approval_stops_before_claim_or_trust(self):
         called=[]
         self.assertEqual(live_remote.APPROVAL,
-                         'PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_003')
+                         'PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_004')
         with self.assertRaisesRegex(core.Stop,'^approval_binding$'):
             live_gate.execute_once(b'x',b'pass',self.root/'attempt',
-                approval='PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_002',
+                approval='PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_003',
                 approved_remote_sha='bad',approved_manifest_sha='bad',gate={},
                 approved_gate_sha='bad',loader=lambda role:called.append('loader'),
                 transport=lambda *a,**k:called.append('transport'))
         self.assertEqual(called,[])
         self.assertFalse((self.root/'attempt').exists())
 
+    def test_live_execute_classifies_empty_transport_before_json_parse(self):
+        gate=live_gate.gate_manifest(ROOT)
+        payload=live_gate.build_payload(ROOT)
+        script=live_gate.remote_script(ROOT)
+        binding=type('Binding',(),{'role':'spain','known_hosts_path':self.root/'hosts',
+                     'key_path':self.root/'key','target_user':'root',
+                     'target_host':'example.invalid'})()
+        def transport(*_args,**kwargs):
+            kwargs['diagnostics'].update(returncode=255,stderr_classification='SSH_DISCONNECT_HINT')
+            return 255,b''
+        with patch.object(live_gate,'ssh_environment',return_value={}), \
+             patch.object(live_gate,'binding_digest',return_value=gate['target_binding_sha256']):
+            result=live_gate.execute_once(payload,script,self.root/'attempt',
+                approval=live_remote.APPROVAL,
+                approved_remote_sha=live_gate.sha(script),
+                approved_manifest_sha=live_remote.MANIFEST_SHA256,gate=gate,
+                approved_gate_sha=live_gate.gate_sha(ROOT),loader=lambda _role:binding,
+                transport=transport)
+        self.assertEqual(result['status'],'UNKNOWN_NO_RETRY')
+        self.assertEqual(result['reason'],'transport_no_remote_receipt')
+        self.assertNotIn('remote',result)
+
+    def test_shared_transport_classifies_disconnects_without_raw_stderr(self):
+        cases=(('Connection reset by peer PRIVATE_MARKER','SSH_CONNECTION_RESET_HINT'),
+               ('Connection closed by remote host PRIVATE_MARKER','SSH_DISCONNECT_HINT'),
+               ('client_loop: send disconnect: Broken pipe PRIVATE_MARKER','SSH_BROKEN_PIPE_HINT'),
+               ('kex_exchange_identification: Connection closed by remote host PRIVATE_MARKER',
+                'SSH_KEX_HINT'),
+               ('banner exchange: Connection to host port 22: invalid format PRIVATE_MARKER',
+                'SSH_BANNER_HINT'))
+        for message,expected in cases:
+            diagnostics={}
+            with self.subTest(expected=expected):
+                returncode,_output=live_gate.run_transport(
+                    [sys.executable,'-I','-S','-B','-c',
+                     'import sys;sys.stderr.write('+repr(message)+');sys.exit(255)'],
+                    cwd=self.root,env=None,timeout=3,cap=65536,input_bytes=b'',
+                    diagnostics=diagnostics)
+                self.assertEqual(returncode,255)
+                self.assertEqual(diagnostics['stderr_classification'],expected)
+                self.assertNotIn('PRIVATE_MARKER',json.dumps(diagnostics))
+
     def test_live_gate_manifest_binds_caps_target_payload_and_evidence(self):
         gate=live_gate.gate_manifest(ROOT)
         self.assertEqual(live_gate.validate_gate_manifest(gate,ROOT),gate)
-        for key in ('remote_supervisor','portable_core','integration_manifest','payload'):
+        for key in ('remote_supervisor','portable_core','transport_helper',
+                    'integration_manifest','payload'):
             changed=json.loads(json.dumps(gate));changed['sha256_lf'][key]='0'*64
             with self.subTest(key=key),self.assertRaisesRegex(core.Stop,'^manifest_binding$'):
                 live_gate.validate_gate_manifest(changed,ROOT)

@@ -1,0 +1,89 @@
+{
+  "schema": "phase16.integration-readback-gate-local-verification.v1",
+  "date": "2026-09-22",
+  "amn3_base": "30305dacb8febf6ee286c6d6c3711d459dabbd5b",
+  "source_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+  "predecessor_execution": {
+    "approval": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_003",
+    "status": "UNKNOWN_NO_RETRY",
+    "ssh_returncode": 255,
+    "stdout_bytes": 0,
+    "stderr_bytes": 49,
+    "stderr_classification": "UNCLASSIFIED_STDERR",
+    "remote_receipt_received": false,
+    "retry_performed": false
+  },
+  "status": "ACTUAL_READBACK_GATE_READY_NOT_EXECUTED",
+  "tests": {
+    "passed": 73,
+    "failed": 0,
+    "skipped": 0,
+    "command": "python -I -S -B tests/test_phase16_bot_integration_readback.py"
+  },
+  "tdd": [
+    "empty_transport_before_json_parse_RED_to_PASS",
+    "redacted_ssh_disconnect_categories_RED_to_PASS",
+    "transport_helper_manifest_binding_RED_to_PASS",
+    "consumed_003_marker_rejected_before_claim_or_trust"
+  ],
+  "offline_preview": {
+    "gate_sha256": "128ae86f4a06b0e424df40561527660d72e117f26ca476f0cd62ef171e75443b",
+    "remote_sha256": "fb29b0e6643a506cdbb20aef6ebb37fe4693f3116e76b573d50162fd7c20508b",
+    "transport_helper_sha256": "713289a6082bf621d704e6dd3b04855fa020fbfecc8a9e86db8a861019bbd35e",
+    "manifest_sha256": "dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc",
+    "payload_sha256": "0d04ec697a808dffb02c17380d5b23a6be862e9350a5f0e5533f23e49a01ed05",
+    "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+    "ssh_attempts": 0,
+    "database_access": "READ_ONLY_PRIVATE_MOUNT",
+    "database_rows": "EXCLUDED",
+    "service_actions": 0
+  },
+  "transport_diagnostics": {
+    "empty_stdout_reason": "transport_no_remote_receipt",
+    "raw_stderr_persisted": false,
+    "redacted_categories": [
+      "SSH_AUTHENTICATION_HINT",
+      "SSH_HOST_KEY_HINT",
+      "SSH_TIMEOUT_HINT",
+      "SSH_CONNECTION_RESET_HINT",
+      "SSH_DISCONNECT_HINT",
+      "SSH_BROKEN_PIPE_HINT",
+      "SSH_KEX_HINT",
+      "SSH_BANNER_HINT",
+      "PYTHON_SYNTAX_HINT",
+      "UNCLASSIFIED_STDERR",
+      "NO_STDERR"
+    ]
+  },
+  "limits": {
+    "work_seconds": 44,
+    "cleanup_seconds": 4,
+    "finalization_seconds": 2,
+    "remote_total_seconds": 50,
+    "transport_seconds": 60,
+    "remote_stdout_bytes": 65536,
+    "remote_stderr_bytes": 8192
+  },
+  "local_evidence_parent_created": true,
+  "execution_directory_absent": true,
+  "independent_review": {
+    "status": "APPROVE",
+    "open_findings": 0,
+    "verified": [
+      "empty_stdout_classified_before_json_parse",
+      "redacted_hint_categories_do_not_persist_raw_stderr",
+      "specific_kex_and_banner_hints_precede_generic_disconnect_hints",
+      "transport_helper_hash_and_size_bound_in_closed_manifest",
+      "marker_manifest_and_evidence_path_are_004_only"
+    ],
+    "note": "standalone_pytest_module_not_run_because_pytest_absent_in_bundled_runtime; new paths covered by integration unittest"
+  },
+  "exact_command": "& 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -S -B scripts/phase16_bot_integration_readback_gate.py --execute --approve PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_004 --approved-remote-sha256 fb29b0e6643a506cdbb20aef6ebb37fe4693f3116e76b573d50162fd7c20508b --approved-manifest-sha256 dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc --approved-gate-sha256 128ae86f4a06b0e424df40561527660d72e117f26ca476f0cd62ef171e75443b --evidence-dir 'C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-004'",
+  "ssh_attempts": 0,
+  "live_database_opened": false,
+  "service_actions": 0,
+  "production_install_stage_deploy": false,
+  "awg2": "UNTOUCHED",
+  "package016": "UNCHANGED",
+  "general_issuance": "DISABLED"
+}

@@ -522,3 +522,36 @@ Execution-003 consumed; retry запрещён. Следующий local-only sc
 redacted SSH stderr categories и hash-bind общий local transport helper. Затем
 новый marker/execution-004 и отдельный exact approval. AWG2/package016 сохранены,
 issuance disabled; production install/stage/deploy отсутствуют.
+
+<a id="actual-readback-gate-004-ready-2026-09-22"></a>
+
+## Actual integration readback gate-004 готов локально
+
+После execution-003 UNKNOWN пустой stdout теперь получает стабильную причину
+`transport_no_remote_receipt` до JSON parse. Общий transport helper добавил
+redacted HINT categories для reset/disconnect/broken-pipe/KEX/banner; специфичные
+KEX/banner проверяются раньше общих patterns. Evidence по-прежнему содержит
+только sizes, prefix SHA, pipe states и category, без raw stderr. Categories —
+диагностические hints, не доказанная root cause.
+
+Shared [transport helper](../../scripts/phase16_bot_linux_gate.py) впервые включён
+в закрытые manifest `sha256_lf`/`bytes_lf`; его drift останавливает gate до SSH.
+Новые binding: marker `PHASE16_ACTUAL_INTEGRATION_READBACK_20260922_004`,
+[manifest](phase16-bot-integration-readback-gate-004-manifest-2026-09-22.json),
+exclusive execution-004. `_003` consumed и отклоняется до claim/trust.
+
+TDD на no-receipt, five redacted classifier paths, helper binding и old-marker
+rejection: **73 PASS**. Independent review — **APPROVE**, open findings0.
+[Local verification](phase16-bot-integration-readback-gate-004-local-verification-2026-09-22.json).
+Standalone pytest transport module не запущен: pytest отсутствует в bundled
+runtime; новые paths функционально покрыты прошедшей integration unittest suite.
+Preview: gate SHA
+`128ae86f4a06b0e424df40561527660d72e117f26ca476f0cd62ef171e75443b`,
+remote SHA `fb29b0e6643a506cdbb20aef6ebb37fe4693f3116e76b573d50162fd7c20508b`,
+transport helper SHA
+`713289a6082bf621d704e6dd3b04855fa020fbfecc8a9e86db8a861019bbd35e`,
+SSH0; execution-004 отсутствует.
+
+Gate-004 **READY_NOT_EXECUTED** и требует отдельного exact approval. Scope/caps
+и exclusions прежние. AWG2/package016 неизменны, issuance disabled; production
+install/stage/deploy отсутствуют.

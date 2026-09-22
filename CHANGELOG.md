@@ -7,6 +7,15 @@
 
 ## 2026-09-22
 
+- Подготовлен [actual readback gate-004](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-004-ready-2026-09-22):
+  no stdout классифицируется до JSON parse; SSH reset/disconnect/KEX/banner
+  получают только redacted HINT без raw stderr. Shared transport helper впервые
+  hash/size-bound manifest. Новый marker/execution-004, consumed `_003` отвергается.
+  Итог73PASS, independent review APPROVE, preview SSH0. Standalone pytest module
+  не запущен из-за отсутствия pytest, новые paths покрыты integration unittest.
+  Production readback не выполнялся; нужен exact approval. AWG2/package016
+  сохранены, issuance disabled, install/stage/deploy отсутствуют.
+
 - После exact `_003` approval [actual readback execution-003 завершён
   UNKNOWN_NO_RETRY](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-003-unknown-2026-09-22):
   один SSH, exit255, stdout0, stderr49/unclassified, remote JSON receipt нет.

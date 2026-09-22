@@ -93,7 +93,12 @@ def run_transport(command, *, cwd, env, timeout, cap=65536, input_bytes=b'', dia
         hints = ((b'Permission denied (publickey)', 'SSH_AUTHENTICATION_HINT'),
                  (b'Host key verification failed', 'SSH_HOST_KEY_HINT'),
                  (b'SyntaxError:', 'PYTHON_SYNTAX_HINT'),
-                 (b'Connection timed out', 'SSH_TIMEOUT_HINT'))
+                 (b'Connection timed out', 'SSH_TIMEOUT_HINT'),
+                 (b'kex_exchange_identification:', 'SSH_KEX_HINT'),
+                 (b'banner exchange:', 'SSH_BANNER_HINT'),
+                 (b'Connection reset by peer', 'SSH_CONNECTION_RESET_HINT'),
+                 (b'Connection closed by remote host', 'SSH_DISCONNECT_HINT'),
+                 (b'Broken pipe', 'SSH_BROKEN_PIPE_HINT'))
         diagnostics['stderr_classification'] = next((label for marker, label in hints if marker in stderr),
                                                     'UNCLASSIFIED_STDERR' if stderr else 'NO_STDERR')
 

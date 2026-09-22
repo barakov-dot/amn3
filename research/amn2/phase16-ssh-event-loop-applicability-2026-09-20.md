@@ -1138,3 +1138,8 @@ APPROVE, preview SSH0. До exact approval подключение не выпо�
 один SSH, exit255/stdout0/stderr49 unclassified, remote receipt отсутствует.
 Reached read stages и terminal observations UNKNOWN; retry не выполнялся.
 Gate-004 transport diagnostics/helper hash binding готовятся только локально.
+
+[Gate-004 подготовлен локально](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-004-ready-2026-09-22):
+empty stdout reason до JSON parse, redacted SSH HINT categories и закрытая
+transport-helper hash binding.73PASS/review APPROVE, preview SSH0; новый marker
+и execution-004 требуют exact approval.

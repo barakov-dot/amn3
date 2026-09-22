@@ -19,11 +19,11 @@ from scripts.vps import phase16_bot_integration_readback_remote as remote
 
 SOURCE_MANIFEST_RELATIVE = Path("research/amn2/phase16-bot-integration-manifest-6e68235.json")
 GATE_MANIFEST_RELATIVE = Path(
-    "research/amn2/phase16-bot-integration-readback-gate-003-manifest-2026-09-22.json"
+    "research/amn2/phase16-bot-integration-readback-gate-004-manifest-2026-09-22.json"
 )
 EVIDENCE_DIRECTORY = Path(
     "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/"
-    "phase16-bot-integration-readback-runner-20260922/execution-003"
+    "phase16-bot-integration-readback-runner-20260922/execution-004"
 )
 
 
@@ -92,7 +92,7 @@ def validate_gate_manifest(value, root=ROOT):
     core.require(isinstance(value, dict) and set(value) == top and
                  value.get("schema") == "phase16.integration-readback-gate-manifest.v1" and
                  value.get("status") == "ACTUAL_READBACK_GATE_READY_NOT_EXECUTED" and
-                 value.get("amn3_base") == "0eba04eef66f" and
+                 value.get("amn3_base") == "30305dacb8fe" and
                  value.get("source_commit") == "6e682356ed14a62d636ee58039fd3a389e794809" and
                  value.get("approval") == remote.APPROVAL and
                  value.get("local_evidence_directory") == EVIDENCE_DIRECTORY.as_posix() and
@@ -105,6 +105,8 @@ def validate_gate_manifest(value, root=ROOT):
         "remote_supervisor": remote_script(root),
         "portable_core": canonical(root / "scripts/vps/phase16_bot_integration_readback.py",
                                    compile_python=True),
+        "transport_helper": canonical(root / "scripts/phase16_bot_linux_gate.py",
+                                      compile_python=True),
         "integration_manifest": canonical(root / SOURCE_MANIFEST_RELATIVE),
         "payload": payload,
     }
@@ -516,6 +518,7 @@ def execute_once(payload, script, evidence_dir, *, approval, approved_remote_sha
         returncode, output = transport(args, cwd=evidence_dir, env=environment, timeout=60,
                                        cap=65536, input_bytes=frame,
                                        diagnostics=result["transport"])
+        core.require(output != b"", "transport_no_remote_receipt")
         received = validate_receipt(json.loads(output), returncode)
         result["remote"] = received
         result["status"] = received["status"]

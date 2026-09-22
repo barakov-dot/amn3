@@ -569,3 +569,7 @@ Execution-003 затем [UNKNOWN_NO_RETRY](phase16-bot-integration-readback-con
 SSH1/exit255/stdout0/stderr49 unclassified, remote receipt отсутствует. Remote
 read stages UNKNOWN, retry0. Следующий gate сначала получает local transport
 classification/helper binding и новый marker; Linux на АРМ не требуется.
+
+[Gate-004 локально готов](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-004-ready-2026-09-22):
+redacted transport hints, no-receipt reason и hash-bound shared helper; новый
+marker/execution-004,73PASS/review APPROVE/SSH0. Нужен отдельный exact approval.

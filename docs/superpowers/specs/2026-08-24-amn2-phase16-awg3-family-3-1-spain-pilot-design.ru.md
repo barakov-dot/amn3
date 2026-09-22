@@ -593,6 +593,10 @@ SSH exit255/stdout0/stderr49 unclassified, remote receipt отсутствует
 read stages и terminal safety observations UNKNOWN; кодовые exclusions не равны
 receipt. Retry запрещён; gate-004 transport diagnostics/binding готовится локально.
 
+[Gate-004 подготовлен](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-004-ready-2026-09-22):
+no stdout классифицируется до JSON parse, stderr только redacted HINT, shared
+transport helper hash-bound.73PASS/review APPROVE/SSH0; marker/execution-004 новые.
+
 Stop seconds не назначены. Lifecycle source/tests реализованы; systemd simulation
 и production service execution не выполнялись. Isolated Linux tests выполнены отдельно.
 iPhone/A/B остаются отложенными; deployment не разрешён.
