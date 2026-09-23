@@ -7,6 +7,19 @@
 
 ## 2026-09-23
 
+- Завершена [локальная диагностика полного schema coverage](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#schema-coverage-diagnosis-2026-09-23)
+  на exact old55dc243/candidate6e68235 и old→candidate in-memory fixtures:
+  18/29/29 таблиц; expression index, четыре triggers и три ALTER-added columns
+  не покрыты текущими reader/manifest/validator. Контрольные clones проходят
+  полный validator после изоляции этих препятствий; это не production fix.
+  Сохранены [evidence и hashes probes](research/amn2/phase16-schema-coverage-diagnosis-2026-09-23.json),
+  причина ошибки measurement harness и предлагаемый единый bounded fix,
+  ожидающий согласования. Проверки: source provenance, memory byte invariance,
+  causal controls/receipt caps, self-review, docs readback/links/diff/secrets.
+  Product code и frozen manifests не менялись; прежние108 PASS не повторялись.
+  SSH/live DB/service actions/stage/install/activation0, AWG2/package016
+  сохранены, issuance disabled. Live index identity/compatibility UNKNOWN.
+
 - После exact push7275732 и approval выполнен один [readback010](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-010-stop-2026-09-23):
   **STOP_NO_RETRY / database_schema_expression_index**; полный transport,
   validated receipt. Зависимости впервые собраны:27 matched/13 different/

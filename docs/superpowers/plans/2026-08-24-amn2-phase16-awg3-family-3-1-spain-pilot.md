@@ -353,6 +353,13 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    следующий шаг — локально проверить покрытие полного старого schema fixture;
    не повторять010, не менять live индекс, новый SSH не подготовлен.
 
+   [Полные synthetic schemas проверены локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#schema-coverage-diagnosis-2026-09-23):
+   old18/candidate29 таблиц; reader не покрывает expression index, четыре
+   triggers и три ALTER-added columns. Контрольные копии подтвердили связный
+   объём исправления; оригинальные fixtures и collector не менялись. Следующий
+   шаг — согласовать один локальный fix manifest/reader/validator и full-schema
+   регрессии. Это диагноз покрытия, не live schema/compatibility acceptance.
+
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
 исправлен только этот AMN2 handler: 2 RED → 33 PASS целевого web/health набора,

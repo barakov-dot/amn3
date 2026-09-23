@@ -1,0 +1,271 @@
+{
+  "schema": "phase16.schema-coverage-diagnosis.v1",
+  "date": "2026-09-23",
+  "status": "DIAGNOSIS_COMPLETE_NOT_A_FIX",
+  "python": "3.12.14",
+  "sqlite": "3.53.1",
+  "collector_sha256_lf": "87e82ae875250ef0b02f62776aaa195fb1bc00178b1d04029b55c617dac0b938",
+  "manifest_sha256_lf": "dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc",
+  "source_hashes": {
+    "55dc243b8e6c6bdb57f8301b56326e4cd4072d19:app/db/schema.py": "f3e353f17131d0fc606ee557d752bcadf55201360b69427c4e785f074f1c72f7",
+    "6e682356ed14a62d636ee58039fd3a389e794809:app/db/schema.py": "45105b725e22a9cdbbc07bf440502b1738134f7f2ce875b45bb27aeace7266f1",
+    "6e682356ed14a62d636ee58039fd3a389e794809:app/db/phase14_dual_protocol.py": "85f84dda68d77fd91805fe80b6b161d2971ec206c6a0db3895cf11873e9be1d2",
+    "6e682356ed14a62d636ee58039fd3a389e794809:app/db/phase15_bootstrap.py": "76a4f579a39e94e4360abeb894f820321c11e16f0e971ce37de8e4e737a989a9"
+  },
+  "cases": [
+    {
+      "case": "old_55dc243",
+      "inventory": {
+        "counts": {
+          "objects": 54,
+          "tables": 18,
+          "columns": 191,
+          "indexes": 35,
+          "foreign_keys": 26
+        },
+        "other_issues": [],
+        "unsupported_indexes": [
+          {
+            "table": "users",
+            "index": "idx_users_operator_label_unique",
+            "unique": 1,
+            "partial": 1,
+            "unsupported_terms": [
+              {
+                "sequence": 0,
+                "cid": -2,
+                "name": null
+              }
+            ]
+          }
+        ]
+      },
+      "original_collector_result": "schema_expression_index",
+      "original_fixture_unchanged": true,
+      "read_attempt_unchanged": true,
+      "causal_control_removed_indexes": [
+        "idx_users_operator_label_unique"
+      ],
+      "causal_control_result": {
+        "status": "SHAPE_ONLY_VALIDATED",
+        "tables": 18,
+        "synthetic_receipt_bytes": 32438
+      },
+      "causal_control_limit": "Disposable memory clone with indexes removed; not acceptance of original schema or a production fix"
+    },
+    {
+      "case": "candidate_6e68235",
+      "inventory": {
+        "counts": {
+          "objects": 89,
+          "tables": 29,
+          "columns": 338,
+          "indexes": 55,
+          "foreign_keys": 41
+        },
+        "other_issues": [
+          "unknown_object:trg_phase15_callback_owner_passport_insert",
+          "unknown_object:trg_phase15_callback_owner_passport_update",
+          "unknown_object:trg_phase15_confirmation_owner_passport_insert",
+          "unknown_object:trg_phase15_confirmation_owner_passport_update",
+          "column:admin_config_issuance_receipts.client_build",
+          "column:client_compatibility_evidence.client_build",
+          "column:client_compatibility_evidence.release_kind"
+        ],
+        "unsupported_indexes": [
+          {
+            "table": "users",
+            "index": "idx_users_operator_label_unique",
+            "unique": 1,
+            "partial": 1,
+            "unsupported_terms": [
+              {
+                "sequence": 0,
+                "cid": -2,
+                "name": null
+              }
+            ]
+          }
+        ]
+      },
+      "original_collector_result": "schema_unknown",
+      "original_fixture_unchanged": true,
+      "read_attempt_unchanged": true,
+      "causal_control_removed_indexes": [
+        "idx_users_operator_label_unique"
+      ],
+      "causal_control_result": {
+        "status": "STOP",
+        "reason": "schema_unknown"
+      },
+      "causal_control_limit": "Disposable memory clone with indexes removed; not acceptance of original schema or a production fix"
+    },
+    {
+      "case": "old_to_candidate",
+      "inventory": {
+        "counts": {
+          "objects": 89,
+          "tables": 29,
+          "columns": 338,
+          "indexes": 55,
+          "foreign_keys": 41
+        },
+        "other_issues": [
+          "unknown_object:trg_phase15_callback_owner_passport_insert",
+          "unknown_object:trg_phase15_callback_owner_passport_update",
+          "unknown_object:trg_phase15_confirmation_owner_passport_insert",
+          "unknown_object:trg_phase15_confirmation_owner_passport_update",
+          "column:admin_config_issuance_receipts.client_build",
+          "column:client_compatibility_evidence.client_build",
+          "column:client_compatibility_evidence.release_kind"
+        ],
+        "unsupported_indexes": [
+          {
+            "table": "users",
+            "index": "idx_users_operator_label_unique",
+            "unique": 1,
+            "partial": 1,
+            "unsupported_terms": [
+              {
+                "sequence": 0,
+                "cid": -2,
+                "name": null
+              }
+            ]
+          }
+        ]
+      },
+      "original_collector_result": "schema_unknown",
+      "original_fixture_unchanged": true,
+      "read_attempt_unchanged": true,
+      "causal_control_removed_indexes": [
+        "idx_users_operator_label_unique"
+      ],
+      "causal_control_result": {
+        "status": "STOP",
+        "reason": "schema_unknown"
+      },
+      "causal_control_limit": "Disposable memory clone with indexes removed; not acceptance of original schema or a production fix"
+    }
+  ],
+  "elapsed_seconds": 0.312,
+  "limits": {
+    "probe_seconds": 90,
+    "git_command_seconds": 10,
+    "collector_schema_seconds": 2
+  },
+  "safety": {
+    "ssh": 0,
+    "live_db_open": false,
+    "application_startup": false,
+    "schema_modules_only": true,
+    "product_code_changed": false,
+    "candidate_artifact_changed": false,
+    "database_fixtures_in_memory_only": true,
+    "temporary_module_files_removed": true
+  },
+  "limitations": [
+    "Windows stdlib SQLite, not Linux mount guard validation",
+    "No live index identity established",
+    "Complete generated schema shape, not production data or migration acceptance",
+    "Counterfactual drops only in disposable memory clones",
+    "Followup controls expand a copied in-memory allowlist and remove four known triggers only in disposable clones",
+    "Receipt byte sizes describe counterfactual controls, not final fixed collector output",
+    "Existing historical synthetic DB files were already migrated; not used as old schema evidence"
+  ],
+  "amn3_base": "75df5ca8989123a5a1b879c277917d5ab60ac9d4",
+  "probe_artifacts": {
+    "probe.py": {
+      "path": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-schema-coverage-20260923/probe.py",
+      "sha256": "cd6d8259083bcec06a4f55d457bf4e981141e16db8368aa822ae71d86a190d6a"
+    },
+    "result.json": {
+      "path": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-schema-coverage-20260923/result.json",
+      "sha256": "ed320d88e9f331c27d0287f6664e325d072787f780fe000c8b6af2d7badfc077"
+    },
+    "followup_probe.py": {
+      "path": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-schema-coverage-20260923/followup_probe.py",
+      "sha256": "798953aeffbd3b3ef83ee566b024ad9c62160c0e6cb03810ace23b6c76c539a3"
+    },
+    "followup.json": {
+      "path": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-schema-coverage-20260923/followup.json",
+      "sha256": "f9e65ece05bf3a88aaa56de0ac37b3ef603c30f7056a0affa21f840460651380"
+    }
+  },
+  "followup_controls": [
+    {
+      "case": "old_55dc243",
+      "causal_control_removed_indexes": [
+        "idx_users_operator_label_unique"
+      ],
+      "causal_control_removed_triggers": [],
+      "causal_control_allowlist_additions": [
+        "admin_config_issuance_receipts.client_build",
+        "client_compatibility_evidence.client_build",
+        "client_compatibility_evidence.release_kind"
+      ],
+      "causal_control_result": {
+        "status": "SHAPE_ONLY_VALIDATED",
+        "tables": 18,
+        "synthetic_receipt_bytes": 32438
+      },
+      "causal_control_limit": "Disposable memory clone with indexes and known triggers removed; copied manifest adds three columns; not acceptance or a production fix"
+    },
+    {
+      "case": "candidate_6e68235",
+      "causal_control_removed_indexes": [
+        "idx_users_operator_label_unique"
+      ],
+      "causal_control_removed_triggers": [
+        "trg_phase15_callback_owner_passport_insert",
+        "trg_phase15_callback_owner_passport_update",
+        "trg_phase15_confirmation_owner_passport_insert",
+        "trg_phase15_confirmation_owner_passport_update"
+      ],
+      "causal_control_allowlist_additions": [
+        "admin_config_issuance_receipts.client_build",
+        "client_compatibility_evidence.client_build",
+        "client_compatibility_evidence.release_kind"
+      ],
+      "causal_control_result": {
+        "status": "SHAPE_ONLY_VALIDATED",
+        "tables": 29,
+        "synthetic_receipt_bytes": 42383
+      },
+      "causal_control_limit": "Disposable memory clone with indexes and known triggers removed; copied manifest adds three columns; not acceptance or a production fix"
+    },
+    {
+      "case": "old_to_candidate",
+      "causal_control_removed_indexes": [
+        "idx_users_operator_label_unique"
+      ],
+      "causal_control_removed_triggers": [
+        "trg_phase15_callback_owner_passport_insert",
+        "trg_phase15_callback_owner_passport_update",
+        "trg_phase15_confirmation_owner_passport_insert",
+        "trg_phase15_confirmation_owner_passport_update"
+      ],
+      "causal_control_allowlist_additions": [
+        "admin_config_issuance_receipts.client_build",
+        "client_compatibility_evidence.client_build",
+        "client_compatibility_evidence.release_kind"
+      ],
+      "causal_control_result": {
+        "status": "SHAPE_ONLY_VALIDATED",
+        "tables": 29,
+        "synthetic_receipt_bytes": 42383
+      },
+      "causal_control_limit": "Disposable memory clone with indexes and known triggers removed; copied manifest adds three columns; not acceptance or a production fix"
+    }
+  ],
+  "followup_elapsed_seconds": 0.297,
+  "harness_note": "Initial measurement failed because serialize was attempted while collector authorizer remained installed. Probe-only correction releases authorizer after the read attempt on the disposable in-memory clone for byte comparison. No product guard change. Saved result files are completed runs.",
+  "provenance": {
+    "expression_index": "Exact old and candidate app/db/schema.py; index_info term cid=-2 name=null on synthetic databases only",
+    "three_columns": "Exact candidate app/db/phase14_dual_protocol.py: constant adjacent-string ALTER TABLE ADD COLUMN",
+    "four_triggers": "Exact candidate app/db/phase15_bootstrap.py: literal TRIGGER_SQL; callback triggers own telegram_callback_handles, confirmation triggers own protocol_issuance_confirmations",
+    "allowlist_gap": "Static schema_allowlist handles CREATE TABLE/INDEX and _ensure_column, not ALTER TABLE ADD COLUMN or triggers"
+  },
+  "review": "Self-review of evidence and source provenance; no independent review",
+  "next_step": "Approve bounded coordinated schema metadata fix and local full-fixture tests; no SSH or push authorized"
+}

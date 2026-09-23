@@ -6,6 +6,8 @@
 [результат010](#actual-readback-execution-010-stop-2026-09-23)
 отделены от первоначального проекта ниже. Прежние approvals использованы;
 новое live-исполнение не разрешено.
+[Локальная диагностика полного schema coverage завершена](#schema-coverage-diagnosis-2026-09-23);
+связное исправление reader/manifest/validator ещё не согласовано и не реализовано.
 Это детализация существующего [Task3B](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),
 а не новый execution plan. Основание: операторское «продолжай» после
 [isolated Linux PASS](phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-pass-2026-09-22).
@@ -1142,3 +1144,99 @@ terms как неполной metadata без SQL/rows и ложной semantic 
 Linux suites или package build для разбора этого STOP не нужен.
 Task3B/recovery и acceptance открыты; AWG2/package016 сохранены,
 general issuance disabled, stage/install/activation0.
+
+
+<a id="schema-coverage-diagnosis-2026-09-23"></a>
+
+## Полные synthetic schemas: диагностика покрытия — 2026-09-23
+
+Разрешённый локальный probe завершён, **DIAGNOSIS_COMPLETE_NOT_A_FIX**.
+[Нормализованное evidence](phase16-schema-coverage-diagnosis-2026-09-23.json)
+содержит exact source/core/manifest hashes и hashes двух внешних throwaway
+probe scripts/results. AMN3 base75df5ca; AMN2 source6e68235 чистый.
+Сохранённые ранее synthetic DB уже мигрированы, поэтому они не использованы
+как доказательство старой схемы. Созданы три новые in-memory схемы из exact
+Git blobs: initializer55dc243, initializer6e68235 и55dc243→6e68235.
+Импортированы только sqlite3 и три hash-verified schema modules через пустые
+package initializers; main/Repository, application startup, dependencies и
+live DB не открывались. Temporary modules удалены, memory DB закрыты.
+
+| Полный fixture | Таблицы / columns / indexes / FK | Штатный v2 collector | Пробелы покрытия |
+| --- | --- | --- | --- |
+| old55dc243 | 18 / 191 / 35 / 26 | schema_expression_index | Один expression index |
+| candidate6e68235 | 29 / 338 / 55 / 41 | schema_unknown | Тот же index, четыре triggers, три columns |
+| old→candidate | 29 / 338 / 55 / 41 | schema_unknown | Те же элементы |
+
+Во всех трёх fixtures известный users.idx_users_operator_label_unique имеет
+unique1/partial1, index_info term sequence0/cid=-2/name=null. Это точная
+идентификация synthetic индекса, **не доказательство имени live отказа010**.
+Четыре literal triggers из candidate app/db/phase15_bootstrap.py:
+trg_phase15_callback_owner_passport_insert/update принадлежат
+telegram_callback_handles; trg_phase15_confirmation_owner_passport_insert/update —
+protocol_issuance_confirmations. Reader сейчас принимает только table/index.
+Три columns из constant ALTER TABLE ADD COLUMN в app/db/phase14_dual_protocol.py:
+admin_config_issuance_receipts.client_build,
+client_compatibility_evidence.client_build и client_compatibility_evidence.release_kind.
+Static manifest builder извлекает CREATE TABLE/INDEX и _ensure_column, но
+не эти ALTER/TRIGGER конструкции; валидатор поддерживает только обычные
+column names в index columns. Нужны согласованные изменения всех трёх частей.
+
+Контроль причинности, только на дополнительных одноразовых memory clones:
+удаление expression index позволяет old пройти reader и полный v2 validator
+(SHAPE_ONLY/compatibility UNKNOWN, synthetic receipt32438bytes). На candidate
+одного удаления индекса недостаточно. После удаления ещё четырёх известных
+triggers и добавления трёх columns только в копию manifest в памяти оба
+candidate controls проходят весь путь, receipt42383bytes <65536. Это
+исследовательские контроли, **не remedy через DROP, не schema acceptance**.
+Размер будущего исправленного receipt ещё проверить. Иных препятствий в
+оставшейся metadata этих fixtures не выявлено; live drift по-прежнему UNKNOWN.
+
+Исходные memory fixtures и clones после исходной read-попытки побайтно
+неизменны. Начальная ошибка измерительного harness: serialize запрещён
+оставленным collector authorizer; исправлен только probe — authorizer снимается
+после collector на memory clone ради byte comparison. Production guard не
+менялся. Завершённые runs0.312s и0.297s, каждый с probe cap90s/git10s/schema2s;
+Python3.12.14/SQLite3.53.1 Windows. Это не повтор Linux mount guard проверки.
+Self-review provenance/receipt выполнен; независимого review не было.
+
+### Предлагаемое одно ограниченное исправление — ожидает согласования
+
+Цель: получить полную metadata известных старой/новой схем без SQL/rows и
+без ослабления DB guard. Сохранить использованные v1/v2 collectors/manifests
+и receipts; подготовить новую связанную версию локальных инструментов.
+
+1. Static manifest: извлекать только literal ALTER TABLE ADD COLUMN и
+   literal CREATE TRIGGER name→owning table из exact source, включая adjacent
+   string constants AST. Не выполнять source, не разрешать dynamic/f-string
+   SQL и произвольные идентификаторы. Сохранить source/runtime hash bindings.
+2. Index metadata: вместо потери term фиксировать sequence и строгий kind:
+   COLUMN с наблюдаемым неотрицательным cid и allowlisted name, EXPRESSION
+   только cid=-2/name=null, ROWID только cid=-1/name=null. Проверять соответствие
+   COLUMN наблюдаемой table metadata, порядок/отсутствие повторов sequence;
+   сохранять unique/partial. Не читать SQL, expression text или partial predicate;
+   наличие выражения не доказывает его семантику.
+3. Trigger metadata: передавать только известные name/table и presence;
+   тела не читать и не выполнять. Неизвестное имя, вид объекта или неверная
+   name→table привязка дают fixed STOP без вывода неизвестного содержимого.
+4. Reader, validator, schema version и manifest/payload bindings изменить
+   вместе; несовместимые старые receipts/approvals отвергать. Итог остаётся
+   SHAPE_ONLY и compatibility UNKNOWN, неизвестные schema differences — STOP.
+   SQLite namespace/mount/query_only/authorizer, no-rows policy, caps/timeouts,
+   systemd/source/dependency/holder scope сохранить. При необходимости менять
+   физический guard остановить этот scope и отдельно пересмотреть дизайн.
+5. RED/GREEN на всех трёх **полных неизменённых** fixtures, затем один целевой
+   integration-readback suite. Позитивные/негативные проверки terms, forged
+   trigger mapping/unknown identifiers, column AST parsing, отсутствие raw
+   SQL/rows, exact fields, receipts ≤64KiB, неизменность DB и отказ прежних
+   approvals. Fixture provenance привязать к exact blobs; не заменять старую
+   схему ранее мигрированной DB. Offline payload/preview SSH0. Не повторять
+   worker/lifecycle/dependency/Linux suites на неизменённых компонентах.
+
+Оценка после согласования:30–45мин на fix, локальные регрессии и фиксацию;
+это не срок завершения всей Phase16. Если полные fixtures выявят другой класс
+дефекта, сначала уточнить результат локально, не превращать его в новый SSH.
+Дизайн относится к существующему readback, не добавляет новый execution plan.
+SSH011 не подготовлен и не разрешён; использованный010 не повторять. Push
+следующего кода требует exact approval; документационный commit можно отправить
+вместе с исправлением. AWG2_UNTOUCHED, package016 immutable, issuance disabled,
+service actions/DB live open/stage/install/activation0; candidate ZIP не менялся.
