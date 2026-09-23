@@ -7,6 +7,18 @@
 
 ## 2026-09-23
 
+- Подготовлен [конкретный startup/fence/backup/recovery дизайн](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#startup-fence-backup-design-2026-09-23)
+  после завершённого011 и публикации9cb5706. Source review6e68235 уточнил восемь
+  seed plans и все upsert fields; exact old55dc243 web вызывает initializer
+  при открытии repository. Рекомендованы краткий stop bot+web, server-local
+  backup/rehearsal, сохранение existing business values и STOP при drift.
+  Polling начинается до READY: после candidate start DB restore не автоматический.
+  Описаны recovery states, approvals, пределы данных и плановые timing ranges.
+  Проверки: exact source/clean Git, официальные SQLite docs, readback/links/
+  diff/secret review; без code changes, повторов tests, SSH/backup/stage/install.
+  Дизайн ожидает согласования; runner/migration allowlist не реализованы.
+  AWG2/package016 и bot identity сохранены, issuance disabled, activation0.
+
 - По exact SSH approval выполнен один [readback011](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-011-complete-2026-09-23)
   из local f33a5b4: **COMPLETE_WITH_LIMITATIONS**,10.609s, полный transport,
   validated receipt. Сохранены [полная разрешённая DB metadata и artifact hashes](research/amn2/phase16-bot-integration-readback-execution-011-2026-09-23.json).

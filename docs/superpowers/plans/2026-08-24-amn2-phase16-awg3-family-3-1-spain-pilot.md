@@ -372,6 +372,13 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    закрыт,012 не подготовлен. Следующий локальный шаг — startup policy,
    writer fence/backup/recovery design; stage/switch отдельно. Push не выполнялся.
 
+   После публикации9cb5706 подготовлен [конкретный startup/fence/backup/recovery дизайн](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#startup-fence-backup-design-2026-09-23):
+   предлагается короткое обслуживание bot+web, server-local backup/rehearsal,
+   сохранение существующих business values восьми seed plans; STOP при drift.
+   Polling предшествует READY, поэтому после candidate start автоматический
+   DB restore запрещён. Ожидается согласование дизайна/подготовки; live0,
+   новый collector gate не нужен, реализация runner ещё не начата.
+
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
 исправлен только этот AMN2 handler: 2 RED → 33 PASS целевого web/health набора,
@@ -394,7 +401,8 @@ Design согласован оператором после commit b277154. По
 - ▶️ Task 3B — integration/recovery не завершены; `_011` COMPLETE_WITH_LIMITATIONS:
   source/dependencies/DB metadata/holders получены, old55dc243 metadata MATCH;
   runtime binding/writer completeness UNKNOWN. Следующий локальный этап —
-  startup policy/fence/backup/recovery; recovery-контракт v1 согласован.
+  startup/fence/backup/recovery дизайн подготовлен и ожидает согласования;
+  recovery-контракт v1 для прежнего scope сохранён.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.

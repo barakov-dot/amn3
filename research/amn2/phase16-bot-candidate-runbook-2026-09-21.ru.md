@@ -1,6 +1,8 @@
 # Отдельный bot candidate — 2026-09-21
 
-Статус: LOCAL_CANDIDATE_NOT_DEPLOYED. Это локальная подготовка по разрешению
+Статус: LOCAL_CANDIDATE_NOT_DEPLOYED.
+[Конкретный startup/fence/backup/recovery дизайн](#startup-fence-backup-design-2026-09-23)
+подготовлен локально; новые live scopes ожидают согласования. Это локальная подготовка по разрешению
 оператора, не разрешение upload/install/activation. Единственная очередь работ —
 канонический план Phase16 в AMN3. Package016 не входит в этот пакет.
 
@@ -167,3 +169,173 @@ Local readiness остаётся неполной по effective runtime binding
 writer fence/backup и recovery; сбор scoped DB metadata завершён;
 Task3B, Windows traffic и Task4.5 не закрыты. Их приоритет и очередь сохраняет
 канонический план Phase16, а эта таблица не вводит параллельный execution plan.
+
+
+<a id="startup-fence-backup-design-2026-09-23"></a>
+
+## Startup, writer fence, backup и recovery — проект решения 23.09
+
+**DESIGN_READY_FOR_REVIEW / NOT_IMPLEMENTED / NO_LIVE_AUTHORIZATION.**
+Основание: операторское «приступай» к локальной подготовке после публикации
+9cb5706. Scope этой работы — чтение exact source и конкретизация существующего
+runbook; не новый execution plan. AMN3 HEAD9cb570646f3f22df8c2c4ff70a062707c1a7508f,
+AMN2 HEAD6e682356ed14a62d636ee58039fd3a389e794809 чистые при проверке.
+Readback011 завершён; повторять его ради подготовки решения не нужно.
+
+### Выбранный вариант и существенные альтернативы
+
+Предлагается короткое обслуживание **bot и web**, без обновления кода web,
+с сохранением bot identity/token, shared DB и старого release. Перед первым
+production запуском candidate — backup на том же VPS и закрытая rehearsal
+на отдельной копии; разрешены только ожидаемые schema additions/backfills,
+стандартные недостающие seed rows и служебные timestamps по policy ниже.
+
+Оставить web работающим пока не подходит: его exact old source55dc243
+`app/web/app.py:2195–2201`, `_open_repository`, вызывает initialize_schema
+при открытии repository. Один observed bot holder011 не исключает последующее
+открытие БД web/API/CLI/agent. Одного bot lock или краткого пустого FD scan мало.
+Создавать пустую БД/новую bot identity для обхода миграции не предлагается:
+это не сохраняет текущие данные и не закрывает задачу интеграции.
+
+### Проверенные записи при startup и предлагаемая policy
+
+Source references ниже относятся к exact6e68235, если не указан55dc243.
+Это чтение кода, не запуск приложения и не новые runtime tests.
+
+| Место | Наблюдаемое поведение | Допуск перед production startup |
+| --- | --- | --- |
+| `app/main.py:410–414` | connect → initialize_schema → Repository → seed_default_plans | Проверить полный этот путь на копии; не считать отключение VPS_APPLY_ENABLED read-only режимом |
+| `app/db/repositories.py:15,2485–2545` | Восемь seed plans: days_3/7/10/14/30/60/90/180. Upsert меняет name, duration_days, price, currency, is_free, is_active, updated_at; max_devices сохраняется при None | Существующие business values сохранять: перед seed проверить совпадение со штатными значениями. Несовпадение → STOP без исправления; отсутствие стандартного плана допускает штатное создание после согласования policy. Изменение updated_at явно допускается |
+| `app/main.py:416–427` | При VPS_APPLY_ENABLED=false ensure_default_server(name=local); при true _sync_server_config | Предлагается candidate VPS_APPLY_ENABLED=false и AWG3_BOOTSTRAP_ENABLED=false с фиксацией в scoped bot drop-in. Если это расходится с утверждённой функцией текущего bot — STOP/решение оператора, не молчаливое изменение общей конфигурации |
+| `app/db/repositories.py:405–443` | local server INSERT ON CONFLICT(name) DO NOTHING | Существующую запись не менять. Отсутствующую стандартную local запись разрешить создать только в рамках этой policy; она не означает создание VPN peer/контейнера |
+| `app/main.py:493–510`, repository `2273–2337` | При включённом apply upsert server меняет host/ssh_port/endpoint/vpn_port/network/address/public_key/runtime/firewall/max_devices и updated_at | Этот путь исключён выбранной policy. Не читать/переписывать servers.yml или server rows ради включения apply; для этого потребуется отдельное решение |
+| `app/services/phase15_bootstrap.py:451–487` | Bootstrap loader вызывается при enabled; при false он не вызывается | Проверить effective flag=false. Constructors Awg3ControlService и TelegramCallbackStateService только сохраняют параметры; это не разрешение выдачи |
+| Exact55dc243 `app/web/app.py:2195–2201` | Старый web вызывает старый initializer при открытии repository | В rehearsal после candidate schema применить старый initializer и проверить сохранность новой схемы/старых данных; проверить repository smoke без сетевых вызовов |
+
+Не считать custom plans отсутствующими потому, что бот назывался «нулевым».
+Policy проверяется по фактической копии; её данные не выводятся. Если seed
+меняет существующие business values, текущий immutable candidate к switch
+не допускается. Решение: отдельно согласовать изменение данных либо bounded
+source fix и новый candidate; не monkeypatch startup и не редактировать bundle.
+
+### Политика данных и проверка на копии
+
+Предлагаемое будущее разрешение должно явно включать server-local чтение
+данных для проверки/backup: прежний readback011 разрешал только metadata.
+Backup и rehearsal содержат конфиденциальные строки; хранить исключительно
+на VPS в новых каталогах с минимальными правами, без Git/выгрузки в чат/на ПК.
+В report — PASS/STOP, counts, file hashes и фиксированные причины, без значений
+строк, raw SQL ошибок, ключей, env contents и Telegram identifiers.
+
+1. Сохранять source archive/locks/unit drop-in fingerprints и полный старый
+   runtime revert target; проверить dependency/source/interpreter binding.
+   Не заменять старый source/site-packages, не использовать test-venv48 как runtime40.
+   Эффективные настройки проверять на сервере только сравнением с allowlist;
+   секреты не выводить и не менять. Нужен доказанный единственный poller.
+2. После writer fence создать новый backup через
+   [SQLite Backup API](https://www.sqlite.org/backup.html), завершить/закрыть
+   соединения, хешировать конечный artifact, проверить integrity и separately
+   [foreign_key_check](https://www.sqlite.org/pragma.html#pragma_foreign_key_check).
+   Backup API даёт согласованный snapshot, но сам не запрещает последующие
+   записи — fence нужен независимо от него. Не копировать только main file
+   при возможных WAL/sidecars и не удалять sidecars для обхода отказа.
+3. Из проверенного backup создать отдельную disposable rehearsal DB. Network
+   и bot token ей недоступны; app.main/polling не запускать. Helper вызывает
+   только exact schema/repository startup operations с явно заданными параметрами,
+   не общий application bootstrap. Закрыть source connections до сравнения.
+4. Сравнить все старые таблицы/columns/PK и данные на сервере по устойчивым ключам,
+   отдельно разрешить документированные migration backfills (например,
+   passport/generation связи), новые tables/triggers и seed policy выше.
+   Полный delta allowlist ещё должен быть выведен из exact migration source
+   при реализации helper: пример backfill не разрешает любые изменения.
+   Удаление старых rows, неожиданные replacements/изменения значений или
+   constraints/integrity failures → STOP. Не выдавать raw rows/row hashes наружу.
+5. После повторного initializer и old web/repository path проверить повторяемость,
+   ожидаемую candidate shape, старые данные, integrity/FK. Smoke writes только
+   на disposable clone, с фиксированными synthetic identifiers; backup immutable.
+   До baseline PASS не переходить к production DB. Сохранить normalized result
+   и hashes. Это новый data-specific rehearsal, а не повтор прежних synthetic tests.
+
+### Writer fence и окно обслуживания
+
+Дополнительный scope на будущее: остановка/возобновление обоих units bot/web,
+временное блокирование их автоматического старта, пауза всех известных иных
+writers/schedulers и ручных CLI операций на время изменения БД. Это **ещё не
+разрешено**. Код/config web и VPN/AWG2 units не менять. Bot drop-in меняет
+только его release/interpreter/cwd/import binding и два согласованных флага.
+
+Перед первым stop подготовить exact writer inventory и способ удержания
+fence для каждого владельца: units, socket/timer/agent/cron/manual entrypoints,
+включая возможный внешний poller. Из source известно наличие классов writers,
+их фактическая конфигурация на VPS неизвестна. Нет закрытого inventory или
+возможности блокировать новый start → STOP до обслуживания, без угадывания.
+Не заменять это advisory SQLite lock, chmod общей БД или обещанием «FD сейчас нет».
+
+Maintenance runner должен сохранять исходное active/enabled/masked состояние,
+различать свои временные изменения и чужие; не unmask/enable чужие units.
+Конкретный механизм runtime start inhibition и recovery после потери SSH
+должен быть реализован и проверен локально до exact live approval. Root/operator
+обходы исключаются согласованным maintenance ownership, не недоказанной
+абсолютной защитой. Не выполнять произвольные cron/unit остановки по поиску.
+
+Последовательность: закрыть admission/start writers → остановить bot с drain
+и web → подтвердить завершение старых PID/cgroups и сохранение fence → backup
+и rehearsal → ограниченный production schema/seed helper без сети → baseline
+после migration → один candidate bot start → проверка READY/локальных receipts
+→ запуск прежнего web и проверка → снять только свои временные ограничения.
+Возобновление других writers — только по сохранённому manifest и результату.
+Общая issuance остаётся disabled; operator /start и delivery — отдельный scope.
+
+Фактические budgets011: bot start40s/stop90s, web start90s/stop90s; KillMode
+control-group, signals15/9. Их не менять попутно. Timeouts, forced kill,
+неполный drain, неизвестные in-flight операции или процесс вне cgroup → STOP,
+без автоматического нового poller/restore. Telegram admission setting допускает
+1..120s в source, actual значение ещё не прочитано; проверить совместимость
+с bot start40s, не молча увеличивать timeout.
+
+### Recovery: граница до и после polling
+
+`app/main.py:149–157` создаёт workflow до polling; `170–190` запускает polling
+до уведомления READY. **Отсутствие READY не доказывает отсутствие обработанных
+сообщений.** Recovery не может использовать READY как границу безопасного restore.
+
+| Фаза отказа | Допустимый маршрут после будущего точного разрешения |
+| --- | --- |
+| Stage вне shared DB/до stop | Оставить действующие units; сохранить failed stage, не переиспользовать каталог |
+| Writers остановлены, production DB ещё не менялась | После проверки исходной DB/файлов вернуть прежние units и снять только свой fence; неизвестный drain → удерживать STOP |
+| Production migration началась, candidate процесс ещё ни разу не запускался | При доказанном непрерывном fence восстановить проверенный backup через staged replacement с сохранением failed DB/sidecars, owner/mode и validation. Затем прежние units. Потерян fence → автоматический restore запрещён |
+| Candidate start уже запрошен, независимо от READY | Считать, что polling/записи могли начаться. Сохранить текущую DB, остановить/дренировать только разрешённые процессы; автоматический restore старого backup запрещён. Отдельно решить code-only revert на текущей DB после совместимости либо data recovery с учётом принятых событий |
+| Пропала связь, runner завершён/состояние неизвестно | Не повторять gate и не возвращать старый poller вслепую. Read persisted operation state; неизвестная фаза означает STOP/ручное восстановление |
+
+Runner должен иметь persistent phase journal без секретов и выделенный запас
+на recovery; timeout не означает автоматическое снятие fence или unmask.
+Revert старого кода после новой схемы требует доказательства по clone и
+проверки текущих pending operations; прежних5 synthetic rows для общего
+автоматического разрешения недостаточно. Backup хранить до принятого closeout;
+его удаление и restore поверх активных writers не входят в этот проект.
+
+### Объём следующей реализации и согласования
+
+1. Согласовать этот вариант и scope **на подготовку**, включая проект краткой
+   остановки web, закрытые server-local backup/data checks и policy seed.
+   Это не live approval и не разрешение Telegram сообщений.
+2. Локально подготовить один согласованный набор runner/receipts с фазами
+   stage → fence/rehearsal/migration → start/recovery; derive exact mutation
+   allowlist из source, negative controls для failures до/после polling,
+   таймаутов, потерянного fence, неверного backup/bindings и восстановления.
+   Не расширять старый readback collector и не запускать серию012/013.
+3. Перед исполнением представить конкретные artifact hashes, writer inventory,
+   paths, recovery procedure, limits и exact scopes. Stage можно делать до
+   downtime только по отдельному live approval; maintenance включает заранее
+   согласованные внутренние проверки, а не новое разрешение на каждый PRAGMA.
+
+Рабочая оценка после согласования дизайна:60–90мин локальные runner/tests;
+дальнейшее live stage ориентировочно до5мин, maintenance целевое окно10–15мин
+при отсутствии STOP и наличии всех prerequisite. Это плановые пределы,
+**не обещание общего времени закрытия Phase16** и не готовые timeout constants.
+Точное окно и recovery reserve закрепить по реализованному runner до approval.
+Windows/quality/A-B остаются самостоятельными условиями acceptance.
+
+В этом ходе: source-only review, official SQLite docs, docs readback/links/
+diff/secret review; тесты/backup/SSH/stage/install/activation0, AMN2/package
+не менялись. Новые runner и migration allowlist пока не реализованы.
