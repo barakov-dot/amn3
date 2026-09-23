@@ -334,6 +334,12 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    writer fence, startup policy и rollback evidence. Новый SSH, rebuild и
    повтор тестов не выполнялись; activation остаётся заблокированной.
 
+   Следующая локальная подготовка23.09: [дизайн единого runtime/DB readback](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#consolidated-readback-design-2026-09-23).
+   На hash-validated runtime40 воспроизведён file_cap для двух METADATA >64KiB;
+   proposed cap256KiB и fixed stage reasons ещё не реализованы. Это локальный
+   дефект collector, не доказанная причина live009. Сначала согласование узкого
+   fix/локальные проверки; новый SSH не подготовлен и не разрешён.
+
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
 исправлен только этот AMN2 handler: 2 RED → 33 PASS целевого web/health набора,

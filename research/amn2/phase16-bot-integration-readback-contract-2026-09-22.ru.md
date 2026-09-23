@@ -1,8 +1,11 @@
 # Phase16 Task3B: bounded integration readback contract — 2026-09-22
 
-Статус: **PORTABLE_CORE_IMPLEMENTED / LINUX_GUARD_NOT_VALIDATED / LIVE_EXECUTION_DISABLED**.
-Актуальный результат реализации — в [разделе ниже](#portable-implementation-2026-09-22);
-остальной документ задаёт целевой contract, а не утверждает покрытие всего runner.
+Статус на 23.09: **ACTUAL_READBACK_009_STOP / LOCAL_FIX_DESIGN_NOT_IMPLEMENTED**.
+[Synthetic Linux guard PASS](#synthetic-linux-gate-pass-2026-09-22),
+[результат009](#actual-readback-execution-009-stop-2026-09-22) и
+[подготовка следующего readback](#consolidated-readback-design-2026-09-23)
+отделены от первоначального проекта ниже. Прежние approvals использованы;
+новое live-исполнение не разрешено.
 Это детализация существующего [Task3B](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),
 а не новый execution plan. Основание: операторское «продолжай» после
 [isolated Linux PASS](phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-pass-2026-09-22).
@@ -153,7 +156,9 @@ inode evidence доказывает лишь открытый файл у proces
 
 ## Caps, завершение и STOP
 
-Ниже **проектные hard caps**, не измеренная длительность target. Превышение
+Ниже **исходные проектные hard caps**, не измеренная длительность target.
+Предложенное 23.09 изменение METADATA cap описано отдельно в конце документа
+и ещё не реализовано. Превышение
 не расширяет scope, не разрешает retry и не превращается в усечённый PASS.
 
 | Область | Hard cap |
@@ -918,3 +923,102 @@ dependencies и фактическая DB schema этим не проверен�
 Оставшиеся условия переключения собраны в
 [матрице готовности bot candidate](phase16-bot-candidate-runbook-2026-09-21.ru.md#switch-readiness-2026-09-23).
 Это локальное уточнение evidence, не новый remote gate и не разрешение activation.
+
+<a id="consolidated-readback-design-2026-09-23"></a>
+
+## Единый readback runtime/DB: локальная подготовка — 2026-09-23
+
+Статус: **DESIGN_READY_NOT_IMPLEMENTED**, SSH0. Цель следующего исполнения —
+получить статические runtime metadata, guarded DB shape и наблюдаемых holders
+за одну ограниченную попытку существующего collector. Не обещать полный список
+writers, effective runtime binding или готовность switch по одному снимку.
+Повтор transport/signal preflights `_005–009` и попытка только ради раскрытия
+текста exception не предлагаются. Перед любым новым remote approval нужны
+локальный fix, проверки полного пути receipt и новые checksum bindings.
+
+### Доказанный локальный дефект, не установленная причина live STOP
+
+`collect_dependencies` вызывает `safe_read(METADATA, 65536)`, хотя для
+Name/Version разбираются только headers. На сохранённом runtime40 проверены
+SHA256 всех 40 wheels против lock из exact AMN2 6e68235, без установки/import
+зависимостей. Совокупный размер их METADATA — 511094 bytes; два превышают cap:
+
+| Runtime dependency | METADATA bytes | Header bytes до пустой строки | Результат штатного safe_read |
+| --- | ---: | ---: | --- |
+| pydantic 2.13.4 | 109397 | 2350 | core.Stop: file_cap |
+| yarl 1.24.5 | 103964 | 1797 | core.Stop: file_cap |
+
+Wheel SHA256 соответственно:
+`45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba` и
+`f08c7513ecef5aad65687bfdf6bc601ae9fccd04a42904501f8f7141abad9eb9`.
+Воспроизведение использовало только временные копии двух METADATA и текущий
+core.safe_read; обе дали ожидаемый file_cap. Временные файлы удалены штатным
+TemporaryDirectory, сервер и retained candidate не менялись.
+
+В remote main обработчик ловит RemoteStop, но класс загруженного core.Stop
+ему не наследует. Он попадает в общий Exception → remote_exception; аналогично
+теряются причины FileNotFoundError/PermissionError между этапами. Поэтому
+из009 нельзя выбрать между file_cap, отсутствующим root и другой причиной.
+Доказаны непригодность текущего cap для собственного candidate и потеря
+классификации ошибок; наличие этих версий/размеров на сервере не проверено.
+
+### Ограниченный дизайн изменения для согласования
+
+1. Только для `.dist-info/METADATA` поднять cap до262144 bytes. Сохранить
+   total8MiB/8s,128 dist-info/1024 entries; `.pth` остаётся65536 bytes/16files.
+   Общий safe_read и его nofollow/type/identity/change guards не ослаблять.
+   Name/Version output прежний; body/неизвестные names наружу не выходят.
+   Это проще отдельного prefix-reader, которому понадобились бы новые правила
+   неполного чтения. Чтение только headers оставлено за scope этого fix.
+2. На границах существующих этапов классифицировать core.Stop и ожидаемые
+   filesystem errors фиксированными allowlisted reason codes с этапом в поле
+   reason (например dependencies_file_cap/dependencies_path_missing).
+   Не копировать str(error), пути, SQL, errno text или traceback. Неизвестная
+   ошибка → фиксированный stage_exception. Remote timeout/cleanup STOP не
+   перехватывать как разрешение продолжить. Receipt envelope v1 сохраняется.
+3. Для DB child сохранить фиксированную STOP reason только после строгой
+   проверки child JSON/exit/limits и allowlist; произвольный child output не
+   отражать. Защита namespace/read-only mount/SQLite и порядок open неизменны.
+   Если child receipt повреждён, остаётся database_child/UNKNOWN, без fallback.
+4. Сохранить fail-closed последовательность: ошибка пути, cap, I/O, guard,
+   timeout или unit drift останавливает попытку. Валидные source DIFFERENT,
+   missing/different pins и incomplete holder coverage остаются evidence с
+   ограничениями; не повышать их до integration PASS. После fatal dependency
+   ошибки DB не открывается. Одно исполнение может снова закончиться STOP —
+   полнота результата не гарантируется ценой ослабления safeguards.
+5. Переиспользовать проверенный transport и numeric-signal validation009;
+   новый runner/manifest должен bind весь изменённый core/remote/validator,
+   payload, target и caps. Старые receipts/manifests не переписывать, старые
+   approval markers отвергать. Новый marker/hashes назначить после локальных
+   проверок, не публиковать прежнюю команду как готовую к повтору.
+
+Scope реализации после согласования: существующий core dependency reader,
+remote stage/child error boundaries, связанный local validator и checksum
+builder/runner; targeted integration-readback tests. App/DB schema/production
+units, locks/wheels, bot ZIP и package016 не меняются. Это не новый subsystem.
+
+### Проверки до запроса SSH
+
+| Проверка | Обязательный результат |
+| --- | --- |
+| Две воспроизведённые METADATA и runtime40 fixture | RED на прежнем cap, затем корректные40 pins без import/network; hash-bound wheels как данные |
+| METADATA262144/262145; .pth65536/65537; total/count/time caps | Граница разрешена, превышение STOP; cap не превращается в truncation/PASS |
+| Symlink, смена inode/mtime, missing/denied path | Сохранён fail-closed; после отказа dependencies вызов DB child отсутствует |
+| core.Stop/OS error/unexpected exception по этапам | Валидируемый фиксированный reason; завершённые partial blocks сохранены |
+| Secret-bearing exception и child output | В нормализованном receipt нет raw сообщений/путей/SQL; malformed child отклонён |
+| PASS/STOP end-to-end collector → transport fixture → validator | Числовые signals15/9 принимаются; повреждённые/лишние поля и неверные exits отклонены |
+| Gate binding/claim/timeout/cleanup | Drift и старые approvals отвергнуты до SSH; one attempt, no retry; preview SSH0 |
+
+Один релевантный итоговый integration-readback suite после fix; завершённые
+worker/lifecycle/Linux suites на неизменённом app не повторять. Изменение
+SQLite guard не входит в дизайн; при необходимости такого изменения остановить
+этот scope и отдельно пересмотреть его Linux проверку до live-readback.
+
+Remote пределы остаются: transport60s, remote50s (work44/cleanup4/finalization2),
+DB transaction2s/child5s, stdout64KiB/stderr8KiB; один SSH, no retry. Никаких
+service actions, app imports, reads env/rows/argv/logs, backup или migrations.
+При COMPLETE следующий шаг — offline оценка actual shape и старого source;
+при STOP — разбор сохранённого результата без автоматической новой попытки.
+Writer completeness/startup seed policy/backup/fence требуют своих фактов и
+решений даже при COMPLETE. Новые filesystem roots или чтение конфигов ради
+поиска неизвестных writers этим дизайном не разрешаются.

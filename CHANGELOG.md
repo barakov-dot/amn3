@@ -7,6 +7,16 @@
 
 ## 2026-09-23
 
+- Подготовлен [ограниченный дизайн единого runtime/DB readback](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#consolidated-readback-design-2026-09-23).
+  Локально сверены40 wheels с exact runtime lock; штатный reader отверг
+  pydantic109397bytes и yarl103964bytes по METADATA cap65536. Установлена
+  потеря core.Stop в generic remote_exception; причина live009 остаётся UNKNOWN.
+  Proposed fix: METADATA256KiB при прежнем total8MiB и fixed stage/child reasons,
+  с test/STOP матрицей; код ещё не менялся. Обновлены навигация статуса contract
+  и ссылка из Phase16 plan. Проверки: bounded local reproduction, readback,
+  ссылки, diff/whitespace и secret review; SSH/stage/install/activation0,
+  immutable candidate/package016 и AWG2 сохранены, issuance disabled.
+
 - [Локальная сверка source снимка009 с историей AMN2](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#source-history-reconciliation-2026-09-23)
   установила полное совпадение 102 Python-файлов/path set с 55dc243 после
   поиска по 361 commit изменения app (70 совпадений main.py). Независимая
