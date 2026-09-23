@@ -5,6 +5,15 @@
 записи не означают deployment или новую выдачу. Текущая очередь — в
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
+## 2026-09-23
+
+- Подготовлена [датированная база знаний для будущего единого VPN-проекта](docs/PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md):
+  source/evidence/capability boundaries AMN2/AMN3, открытые Task3B/Windows/A/B
+  и состав окончательной передачи после Phase16. Добавлена навигация в START_HERE.
+  Проверены локальные Git HEAD/clean status, канонический план, source и ссылки;
+  это docs-only snapshot, не новая приёмка или разрешение переноса/SSH/deploy.
+  AWG2/package016 сохранены, общая выдача выключена; live-действий нет.
+
 ## 2026-09-22
 
 - После exact push/approval [actual readback-009 завершился STOP_NO_RETRY](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-009-stop-2026-09-22):
