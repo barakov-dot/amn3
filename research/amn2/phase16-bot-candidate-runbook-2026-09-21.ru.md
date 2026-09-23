@@ -96,12 +96,13 @@ initializer идемпотентен, старый initializer не удалил
   initialize_schema целиком не является атомарной миграцией.
 - [Сверка 23.09](phase16-bot-integration-readback-contract-2026-09-22.ru.md#source-history-reconciliation-2026-09-23)
   установила совпадение всех 102 наблюдаемых Python-файлов с 55dc243.
-  Exact deployed revision, зависимости и фактическая shared DB schema неизвестны.
+  Позднее011 собрал static dependencies и полную scoped schema metadata (см. readiness ниже);
+  exact deployed release, effective runtime binding и semantic DB compatibility UNKNOWN.
 
-До activation нужны отдельные evidence: фактические schema/release identities
-без содержимого пользовательских строк; согласованный writer fence для всех
-писателей общей БД; offline совместимость exact deployed schema/старого кода;
-startup seed policy и failure recovery. Текущий запрет менять web не снимается
+Readback011 закрыл сбор scoped schema metadata без пользовательских строк.
+До activation остаются полный old release/effective binding, согласованный
+writer fence для всех писателей общей БД, пределы offline совместимости
+старого кода и миграции, startup seed policy и failure recovery. Текущий запрет менять web не снимается
 молча: если миграция требует остановки web, это новый scope/решение оператора.
 Нельзя запускать candidate на shared DB для проверки того, что получится.
 
@@ -135,32 +136,34 @@ ExecStart и проверенным PYTHONPATH binding; общий web unit не
 Это уточнение прежнего дизайна и prerequisites, не исполняемый gate.
 Новая сборка и повтор завершённых isolated Linux/worker проверок не нужны.
 
-Позднее [readback010](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-010-stop-2026-09-23)
-получил static dependency metadata (27 matched/13 different/0 missing/3 extra,
-1pth) и дошёл до guarded DB schema, но завершился schema_expression_index.
-Полный DB shape и holders остаются неизвестны; старый site-packages не является
-runtime40 candidate. В units_before прочитан TimeoutStopUSec90s для bot/web;
-это не подтверждение drain или разрешение остановки. Остальные prerequisites
-таблицы сохраняются; подробности и hashes находятся в receipt по ссылке.
+По exact approval [readback011 завершён полностью](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-011-complete-2026-09-23).
+Собранная metadata18 таблиц совпадает с old55dc243; зависимости прежние27/13/0/3,
+1pth. В bounded scan один holder — bot; это не полный перечень writers.
+Bot/web active/running, PID/startticks стабильны, stop timeout90s у обоих;
+bot start40s/Restart=no, web start90s/Restart=on-failure. Scope readback закрыт,
+новый collector gate для этих уже полученных фактов не нужен. SQL bodies/rows,
+effective runtime binding, writer quiescence и startup policy не доказаны.
 
 | Условие | Что уже доказано | Что нужно до переключения |
 | --- | --- | --- |
 | Candidate source/runtime | Exact source 6e68235, immutable ZIP/manifest; isolated test48 включает runtime40 | Отдельный production venv только runtime40; checksum/readback его source, interpreter, installed metadata и unit binding в будущем stage |
 | Старый release для возврата | Python source снимка009 совпал с 55dc243; unit snapshot имеет ожидаемые entrypoint/cwd | Подтвердить полный сохраняемый старый release, dependency identity и эффективный unit/env binding; Python match не заменяет это |
-| Shared DB | Synthetic переход 55dc243 → candidate и обратное чтение проверены ранее | Фактическая schema identity без пользовательских строк; проверка её совместимости offline, включая старый web/repository |
+| Shared DB | Metadata18 таблиц011 совпала с old55dc243; synthetic переход и старый repository проверены ранее в ограниченном scope | Закрепить пределы совместимости: SQL/default/CHECK/rows не наблюдались; candidate добавляет11 таблиц/4 triggers и меняет3 таблицы; startup неатомарный |
 | Startup writes | Известны schema/seed/server-sync writes и неатомарный startup | Явная policy для days_30 и server sync на фактическом состоянии; не трактовать «нулевой бот» как пустую DB |
-| Writer fence и backup | Bot lock не покрывает web/API/CLI/agent; scope web неизменен | Полный список writers и способ их quiescence, согласованный с scope; проверяемый backup/restore target и provenance при этом fence |
-| Stop/start/recovery | Linux signal tests PASS; сохранён дизайн одного bot drop-in | Фактические stop/drain budgets из unit, отсутствие второго poller, подтверждённое завершение старого до запуска нового; UNKNOWN ведёт в STOP/recovery |
+| Writer fence и backup | В011 один observed holder bot; coverage scan полная в его границах, writer completeness UNKNOWN; lock не покрывает web/API/CLI/agent | Полный список writers и способ их quiescence, согласованный с scope; проверяемый backup/restore target и provenance при этом fence |
+| Stop/start/recovery | Linux signal tests PASS;011 подтвердил bot start40s/stop90s, web start90s/stop90s, стабильные PID и KillMode control-group | Эти unit budgets не доказывают фактический drain; отсутствие второго poller, подтверждённое завершение старого до запуска нового; UNKNOWN ведёт в STOP/recovery |
 
-Порядок допуска: сначала получить отсутствующие факты о старом runtime/DB и
-writers в одном заранее проверенном ограниченном scope; затем offline проверить
-совместимость и закрепить startup policy/rollback. Только после этого готовить
+Порядок допуска после011: offline закрепить startup policy/rollback и writer
+fence, используя собранную old metadata и прежние ограниченные synthetic
+проверки совместимости. Новые live evidence запрашивать только под конкретный
+оставшийся prerequisite, не повторять завершённый readback. Только после этого готовить
 exact stage/switch approval с реальными hashes, unit values и stop-conditions.
 Не подменять отсутствующие факты типовым unit или выдуманным timeout.
 Если writer fence требует остановки web, это изменение scope для решения
 оператора до подготовки live-команды. Ни один из этих пунктов не разрешает
 автоматическую остановку, запуск poller, восстановление DB или выдачу.
 
-Local readiness остаётся неполной по фактическим runtime/DB prerequisites;
+Local readiness остаётся неполной по effective runtime binding, startup policy,
+writer fence/backup и recovery; сбор scoped DB metadata завершён;
 Task3B, Windows traffic и Task4.5 не закрыты. Их приоритет и очередь сохраняет
 канонический план Phase16, а эта таблица не вводит параллельный execution plan.

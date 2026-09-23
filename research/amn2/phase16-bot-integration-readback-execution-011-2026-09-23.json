@@ -1,0 +1,2901 @@
+{
+  "schema": "phase16.integration-readback-execution-record.v2",
+  "date": "2026-09-23",
+  "amn3_commit": "f33a5b46ccd799397be6f017e72c8fadb210e596",
+  "approval": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260923_011",
+  "approval_scope": "Explicit user authorization of one gate011 SSH attempt; no push authorization in this turn",
+  "status": "READBACK_COMPLETE_WITH_LIMITATIONS",
+  "claim": {
+    "schema": "phase16.integration-readback-claim.v1",
+    "scope": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260923_011",
+    "attempts": 1,
+    "gate_sha256": "a5e87bf8771421afa532cd3c48d01d29dc00e90b5cd3f3f9aa0358088411283b",
+    "source_manifest_sha256": "faac75cf5f2d136344bdfc54fd6cfe3bab8271cc7424ca1050775634860723a4",
+    "remote_sha256": "950d3856956c37e642a9a6c1693331b144a889fc179568028b5b0cc248f91abc",
+    "payload_sha256": "c876d261b3e1e5c01ae05f93fdd5ad0934cf7597cf2b06f6108d3af858d76739",
+    "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+    "evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-011",
+    "remote_seconds": 50,
+    "transport_seconds": 60,
+    "claimed_at": "2026-09-23T19:19:33.137638+00:00"
+  },
+  "command_observation": {
+    "returncode": 0,
+    "elapsed_seconds": 10.609,
+    "stdout_bytes": 83960,
+    "stderr_bytes": 0
+  },
+  "transport": {
+    "schema": "phase16.bot-transport.v1",
+    "returncode": 0,
+    "failure_stage": null,
+    "stdin_bytes_requested": 73178,
+    "stdin_bytes_accepted": 73178,
+    "stdin_complete": true,
+    "output_complete": true,
+    "stdout": {
+      "bytes_observed": 34337,
+      "bytes_retained": 34337,
+      "prefix_sha256": "608865f6e6a6b1940c85b29c9d56f48a4056b35e89c093b3e4366e55fa23004e"
+    },
+    "stderr": {
+      "bytes_observed": 0,
+      "bytes_retained": 0,
+      "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pipe_failures": [],
+    "stderr_classification": "NO_STDERR"
+  },
+  "remote_receipt_validated": true,
+  "completed_at": "2026-09-23T19:19:47.989687+00:00",
+  "source": {
+    "bound_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "status": "DIFFERENT",
+    "expected_files": 126,
+    "present_expected_files": 102,
+    "missing_files": 24,
+    "different_files": 24,
+    "extra_count": 0,
+    "source_identical_to_execution010": true,
+    "observed_python_source_matches": "55dc243b8e6c6bdb57f8301b56326e4cd4072d19",
+    "files_map_sha256_canonical_json": "a79734e30a8922830c8f5a2b7d6757f95d52bc75a7e3b0cd6c289392738087e7",
+    "exact_deployed_revision": "UNKNOWN",
+    "runtime_binding": "UNKNOWN"
+  },
+  "dependencies_identical_to_execution010": true,
+  "schema_comparison": {
+    "old55dc243": {
+      "matches_observed_metadata": true,
+      "missing_tables": [],
+      "extra_tables": [],
+      "different_tables": {},
+      "triggers_match": true
+    },
+    "candidate6e68235": {
+      "matches_observed_metadata": false,
+      "missing_tables": [
+        "awg3_control_state",
+        "client_build_acceptances",
+        "client_compatibility_evidence",
+        "device_protocol_profiles",
+        "legacy_migration_records",
+        "protocol_config_events",
+        "protocol_issuance_attempts",
+        "protocol_issuance_confirmations",
+        "protocol_issuance_user_barriers",
+        "telegram_callback_handles",
+        "vpn_runtime_instances"
+      ],
+      "extra_tables": [],
+      "different_tables": {
+        "admin_config_issuance_receipts": [
+          "columns",
+          "indexes"
+        ],
+        "device_passports": [
+          "columns",
+          "indexes"
+        ],
+        "devices": [
+          "columns"
+        ]
+      },
+      "triggers_match": false
+    }
+  },
+  "comparison_policy": {
+    "included": [
+      "known table names",
+      "column name/type/notnull/pk/hidden/cid",
+      "index name/unique/partial/ordered typed terms",
+      "foreign-key metadata",
+      "trigger names/owners"
+    ],
+    "ignored": [
+      "SQLite version",
+      "schema_version",
+      "user_version",
+      "journal_mode",
+      "collection ordering of tables/columns/indexes/foreign keys"
+    ],
+    "not_observed": [
+      "SQL bodies",
+      "CHECK/default expressions",
+      "index expressions/predicates",
+      "trigger bodies",
+      "collations",
+      "user rows"
+    ],
+    "meaning": "Exact equality only within observed metadata; no semantic or data/migration compatibility proof"
+  },
+  "artifacts": {
+    "claim.json": {
+      "path": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-011/claim.json",
+      "sha256": "7db560779e6f53f80cfaf0d05440fc65f82662a4da05862093837b0dde5ac912"
+    },
+    "result.json": {
+      "path": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-011/result.json",
+      "sha256": "904bf0a99140d7238b8333d2aa4b0716f183ff2c46ef136a32612529d5598459"
+    },
+    "command-observation.json": {
+      "path": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-011/command-observation.json",
+      "sha256": "0479565c28881f576267f87fe67f15033d2aa823edce3f473fe1071ce4c528eb"
+    },
+    "schema-comparison.json": {
+      "path": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922/execution-011/schema-comparison.json",
+      "sha256": "94d55b7b29af272229a919fdc01a6cd235af52c47a9795eba547ec61e9a4b894"
+    }
+  },
+  "safety": {
+    "retry_performed": false,
+    "push_performed": false,
+    "service_actions": 0,
+    "database_write_attempted": false,
+    "application_imported": false,
+    "runtime_activation": false,
+    "awg2": "UNTOUCHED",
+    "package016": "IMMUTABLE",
+    "general_issuance": "DISABLED",
+    "stage": 0,
+    "install": 0
+  },
+  "limitations": [
+    "STATIC_SOURCE_SCOPE_ONLY",
+    "STATIC_DEPENDENCY_METADATA_ONLY",
+    "SCHEMA_SHAPE_ONLY",
+    "RUNTIME_BINDING_UNKNOWN",
+    "WRITER_COMPLETENESS_UNKNOWN",
+    "SEMANTIC_COMPATIBILITY_UNKNOWN"
+  ],
+  "next_step": "Offline startup-write/fence/backup/recovery design using existing synthetic compatibility evidence; no new readback or live mutation authorized",
+  "host": {
+    "machine": "x86_64",
+    "python": "3.12.3",
+    "python_device": 64770,
+    "python_inode": 13263,
+    "sqlite": "3.45.1",
+    "system": "Linux"
+  },
+  "dependencies": {
+    "different": {
+      "aiohttp": "3.14.2",
+      "aiohttp-socks": "0.11.0",
+      "annotated-doc": "0.0.4",
+      "annotated-types": "0.7.0",
+      "certifi": "2026.6.17",
+      "cffi": "2.1.0",
+      "fastapi": "0.139.2",
+      "pillow": "12.2.0",
+      "pydantic-settings": "2.14.2",
+      "python-socks": "2.8.2",
+      "starlette": "1.3.1",
+      "typing-inspection": "0.4.2",
+      "uvicorn": "0.51.0"
+    },
+    "extra_count": 3,
+    "extra_digest": "e80f79cdb6bb512e78fe4cd713387c59bf18c84cd53be0bb42e8bb0de456b34a",
+    "matched": [
+      "aiofiles",
+      "aiogram",
+      "aiohappyeyeballs",
+      "aiosignal",
+      "anyio",
+      "attrs",
+      "click",
+      "colorama",
+      "cryptography",
+      "frozenlist",
+      "h11",
+      "idna",
+      "itsdangerous",
+      "jinja2",
+      "magic-filter",
+      "markupsafe",
+      "multidict",
+      "propcache",
+      "pycparser",
+      "pydantic",
+      "pydantic-core",
+      "python-dotenv",
+      "python-multipart",
+      "pyyaml",
+      "qrcode",
+      "typing-extensions",
+      "yarl"
+    ],
+    "missing": [],
+    "pth_count": 1,
+    "pth_hashes": [
+      "2638ce9e2500e572a5e0de7faed6661eb569d1b696fcba07b0dd223da5f5d224"
+    ],
+    "runtime_binding": "UNKNOWN",
+    "status": "STATIC_METADATA_ONLY"
+  },
+  "database": {
+    "compatibility": "UNKNOWN",
+    "journal_mode": "delete",
+    "schema": "phase16.database-shape.v2",
+    "schema_version": 64,
+    "sqlite_version": "3.45.1",
+    "status": "SHAPE_ONLY",
+    "tables": [
+      {
+        "columns": [
+          [
+            "request_id",
+            "TEXT",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "request_fingerprint",
+            "TEXT",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "local_device_id",
+            "INTEGER",
+            1,
+            0,
+            0,
+            2
+          ],
+          [
+            "passport_device_id",
+            "TEXT",
+            1,
+            0,
+            0,
+            3
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            4
+          ]
+        ],
+        "foreign_keys": [
+          {
+            "from": "passport_device_id",
+            "on_delete": "NO ACTION",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "device_passports",
+            "to": "device_id"
+          },
+          {
+            "from": "local_device_id",
+            "on_delete": "NO ACTION",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "devices",
+            "to": "id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "sqlite_autoindex_access_slot_assignment_requests_3",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 3,
+                "kind": "COLUMN",
+                "name": "passport_device_id",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          },
+          {
+            "name": "sqlite_autoindex_access_slot_assignment_requests_2",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 2,
+                "kind": "COLUMN",
+                "name": "local_device_id",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          },
+          {
+            "name": "sqlite_autoindex_access_slot_assignment_requests_1",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 0,
+                "kind": "COLUMN",
+                "name": "request_id",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          }
+        ],
+        "name": "access_slot_assignment_requests"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "INTEGER",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "admin_telegram_id",
+            "INTEGER",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "action",
+            "TEXT",
+            1,
+            0,
+            0,
+            2
+          ],
+          [
+            "target_user_id",
+            "INTEGER",
+            0,
+            0,
+            0,
+            3
+          ],
+          [
+            "target_device_id",
+            "INTEGER",
+            0,
+            0,
+            0,
+            4
+          ],
+          [
+            "metadata_json",
+            "TEXT",
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            6
+          ]
+        ],
+        "foreign_keys": [
+          {
+            "from": "target_device_id",
+            "on_delete": "NO ACTION",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "devices",
+            "to": "id"
+          },
+          {
+            "from": "target_user_id",
+            "on_delete": "NO ACTION",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "users",
+            "to": "id"
+          }
+        ],
+        "indexes": [],
+        "name": "admin_actions"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "INTEGER",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "request_id",
+            "TEXT",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "item_index",
+            "INTEGER",
+            1,
+            0,
+            0,
+            2
+          ],
+          [
+            "item_fingerprint",
+            "TEXT",
+            1,
+            0,
+            0,
+            3
+          ],
+          [
+            "recipient_user_id",
+            "INTEGER",
+            0,
+            0,
+            0,
+            4
+          ],
+          [
+            "device_id",
+            "INTEGER",
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            "passport_device_id",
+            "TEXT",
+            0,
+            0,
+            0,
+            6
+          ],
+          [
+            "assignment_mode",
+            "TEXT",
+            1,
+            0,
+            0,
+            7
+          ],
+          [
+            "slot_sequence",
+            "INTEGER",
+            0,
+            0,
+            0,
+            8
+          ],
+          [
+            "expiry_policy",
+            "TEXT",
+            1,
+            0,
+            0,
+            9
+          ],
+          [
+            "status",
+            "TEXT",
+            1,
+            0,
+            0,
+            10
+          ],
+          [
+            "config_filename",
+            "TEXT",
+            0,
+            0,
+            0,
+            11
+          ],
+          [
+            "error_code",
+            "TEXT",
+            0,
+            0,
+            0,
+            12
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            13
+          ],
+          [
+            "updated_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            14
+          ]
+        ],
+        "foreign_keys": [
+          {
+            "from": "passport_device_id",
+            "on_delete": "NO ACTION",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "device_passports",
+            "to": "device_id"
+          },
+          {
+            "from": "device_id",
+            "on_delete": "NO ACTION",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "devices",
+            "to": "id"
+          },
+          {
+            "from": "recipient_user_id",
+            "on_delete": "NO ACTION",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "users",
+            "to": "id"
+          },
+          {
+            "from": "request_id",
+            "on_delete": "NO ACTION",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "admin_config_issuance_requests",
+            "to": "request_id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "idx_admin_config_issuance_recipient",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 4,
+                "kind": "COLUMN",
+                "name": "recipient_user_id",
+                "sequence": 0
+              },
+              {
+                "cid": 13,
+                "kind": "COLUMN",
+                "name": "created_at",
+                "sequence": 1
+              },
+              {
+                "cid": 0,
+                "kind": "COLUMN",
+                "name": "id",
+                "sequence": 2
+              }
+            ],
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_admin_config_issuance_receipts_1",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 1,
+                "kind": "COLUMN",
+                "name": "request_id",
+                "sequence": 0
+              },
+              {
+                "cid": 2,
+                "kind": "COLUMN",
+                "name": "item_index",
+                "sequence": 1
+              }
+            ],
+            "unique": 1
+          }
+        ],
+        "name": "admin_config_issuance_receipts"
+      },
+      {
+        "columns": [
+          [
+            "request_id",
+            "TEXT",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "request_fingerprint",
+            "TEXT",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "item_count",
+            "INTEGER",
+            1,
+            0,
+            0,
+            2
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            3
+          ],
+          [
+            "updated_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            4
+          ]
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "sqlite_autoindex_admin_config_issuance_requests_1",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 0,
+                "kind": "COLUMN",
+                "name": "request_id",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          }
+        ],
+        "name": "admin_config_issuance_requests"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "TEXT",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "name",
+            "TEXT",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "owner_user_id",
+            "INTEGER",
+            0,
+            0,
+            0,
+            2
+          ],
+          [
+            "owner_label",
+            "TEXT",
+            1,
+            0,
+            0,
+            3
+          ],
+          [
+            "integration_kind",
+            "TEXT",
+            1,
+            0,
+            0,
+            4
+          ],
+          [
+            "purpose",
+            "TEXT",
+            1,
+            0,
+            0,
+            5
+          ],
+          [
+            "token_hash",
+            "TEXT",
+            1,
+            0,
+            0,
+            6
+          ],
+          [
+            "scopes_json",
+            "TEXT",
+            1,
+            0,
+            0,
+            7
+          ],
+          [
+            "expires_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            8
+          ],
+          [
+            "revoked_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            9
+          ],
+          [
+            "revoke_reason",
+            "TEXT",
+            0,
+            0,
+            0,
+            10
+          ],
+          [
+            "last_used_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            11
+          ],
+          [
+            "rotated_from_token_id",
+            "TEXT",
+            0,
+            0,
+            0,
+            12
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            13
+          ]
+        ],
+        "foreign_keys": [
+          {
+            "from": "rotated_from_token_id",
+            "on_delete": "SET NULL",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "api_tokens",
+            "to": "id"
+          },
+          {
+            "from": "owner_user_id",
+            "on_delete": "SET NULL",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "users",
+            "to": "id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "idx_api_tokens_owner",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 2,
+                "kind": "COLUMN",
+                "name": "owner_user_id",
+                "sequence": 0
+              },
+              {
+                "cid": 13,
+                "kind": "COLUMN",
+                "name": "created_at",
+                "sequence": 1
+              }
+            ],
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_api_tokens_2",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 6,
+                "kind": "COLUMN",
+                "name": "token_hash",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          },
+          {
+            "name": "sqlite_autoindex_api_tokens_1",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 0,
+                "kind": "COLUMN",
+                "name": "id",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          }
+        ],
+        "name": "api_tokens"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "TEXT",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "user_id",
+            "INTEGER",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "token_hash",
+            "TEXT",
+            1,
+            0,
+            0,
+            2
+          ],
+          [
+            "token_prefix",
+            "TEXT",
+            1,
+            0,
+            0,
+            3
+          ],
+          [
+            "platform",
+            "TEXT",
+            1,
+            0,
+            0,
+            4
+          ],
+          [
+            "config_schema_version",
+            "TEXT",
+            1,
+            0,
+            0,
+            5
+          ],
+          [
+            "single_use",
+            "INTEGER",
+            1,
+            0,
+            0,
+            6
+          ],
+          [
+            "expires_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            7
+          ],
+          [
+            "revoked_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            8
+          ],
+          [
+            "revoke_reason",
+            "TEXT",
+            0,
+            0,
+            0,
+            9
+          ],
+          [
+            "claimed_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            10
+          ],
+          [
+            "claimed_device_id",
+            "TEXT",
+            0,
+            0,
+            0,
+            11
+          ],
+          [
+            "claim_idempotency_hash",
+            "TEXT",
+            0,
+            0,
+            0,
+            12
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            13
+          ]
+        ],
+        "foreign_keys": [
+          {
+            "from": "claimed_device_id",
+            "on_delete": "SET NULL",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "device_passports",
+            "to": "device_id"
+          },
+          {
+            "from": "user_id",
+            "on_delete": "CASCADE",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "users",
+            "to": "id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "idx_device_enrollment_tickets_expiry",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 7,
+                "kind": "COLUMN",
+                "name": "expires_at",
+                "sequence": 0
+              },
+              {
+                "cid": 10,
+                "kind": "COLUMN",
+                "name": "claimed_at",
+                "sequence": 1
+              },
+              {
+                "cid": 8,
+                "kind": "COLUMN",
+                "name": "revoked_at",
+                "sequence": 2
+              }
+            ],
+            "unique": 0
+          },
+          {
+            "name": "idx_device_enrollment_tickets_user",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 1,
+                "kind": "COLUMN",
+                "name": "user_id",
+                "sequence": 0
+              },
+              {
+                "cid": 13,
+                "kind": "COLUMN",
+                "name": "created_at",
+                "sequence": 1
+              }
+            ],
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_device_enrollment_tickets_2",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 2,
+                "kind": "COLUMN",
+                "name": "token_hash",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          },
+          {
+            "name": "sqlite_autoindex_device_enrollment_tickets_1",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 0,
+                "kind": "COLUMN",
+                "name": "id",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          }
+        ],
+        "name": "device_enrollment_tickets"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "INTEGER",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "ticket_id",
+            "TEXT",
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            "passport_device_id",
+            "TEXT",
+            0,
+            0,
+            0,
+            2
+          ],
+          [
+            "stage",
+            "TEXT",
+            1,
+            0,
+            0,
+            3
+          ],
+          [
+            "status",
+            "TEXT",
+            1,
+            0,
+            0,
+            4
+          ],
+          [
+            "occurred_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            5
+          ],
+          [
+            "duration_ms",
+            "INTEGER",
+            1,
+            0,
+            0,
+            6
+          ],
+          [
+            "failure_stage",
+            "TEXT",
+            0,
+            0,
+            0,
+            7
+          ],
+          [
+            "evidence_json",
+            "TEXT",
+            1,
+            0,
+            0,
+            8
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            9
+          ]
+        ],
+        "foreign_keys": [
+          {
+            "from": "passport_device_id",
+            "on_delete": "CASCADE",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "device_passports",
+            "to": "device_id"
+          },
+          {
+            "from": "ticket_id",
+            "on_delete": "CASCADE",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "device_enrollment_tickets",
+            "to": "id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "idx_device_lifecycle_passport",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 2,
+                "kind": "COLUMN",
+                "name": "passport_device_id",
+                "sequence": 0
+              },
+              {
+                "cid": 5,
+                "kind": "COLUMN",
+                "name": "occurred_at",
+                "sequence": 1
+              },
+              {
+                "cid": 0,
+                "kind": "COLUMN",
+                "name": "id",
+                "sequence": 2
+              }
+            ],
+            "unique": 0
+          },
+          {
+            "name": "idx_device_lifecycle_ticket",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 1,
+                "kind": "COLUMN",
+                "name": "ticket_id",
+                "sequence": 0
+              },
+              {
+                "cid": 5,
+                "kind": "COLUMN",
+                "name": "occurred_at",
+                "sequence": 1
+              },
+              {
+                "cid": 0,
+                "kind": "COLUMN",
+                "name": "id",
+                "sequence": 2
+              }
+            ],
+            "unique": 0
+          }
+        ],
+        "name": "device_lifecycle_events"
+      },
+      {
+        "columns": [
+          [
+            "device_id",
+            "TEXT",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "local_device_id",
+            "INTEGER",
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            "owner_user_id",
+            "INTEGER",
+            1,
+            0,
+            0,
+            2
+          ],
+          [
+            "platform",
+            "TEXT",
+            1,
+            0,
+            0,
+            3
+          ],
+          [
+            "official_client_type",
+            "TEXT",
+            1,
+            0,
+            0,
+            4
+          ],
+          [
+            "client_version",
+            "TEXT",
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            "import_method",
+            "TEXT",
+            1,
+            0,
+            0,
+            6
+          ],
+          [
+            "config_schema_version",
+            "TEXT",
+            1,
+            0,
+            0,
+            7
+          ],
+          [
+            "config_fingerprint",
+            "TEXT",
+            1,
+            0,
+            0,
+            8
+          ],
+          [
+            "last_seen_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            9
+          ],
+          [
+            "acceptance_evidence_json",
+            "TEXT",
+            0,
+            0,
+            0,
+            10
+          ],
+          [
+            "revoked_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            11
+          ],
+          [
+            "revoke_reason",
+            "TEXT",
+            0,
+            0,
+            0,
+            12
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            13
+          ],
+          [
+            "updated_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            14
+          ]
+        ],
+        "foreign_keys": [
+          {
+            "from": "owner_user_id",
+            "on_delete": "CASCADE",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "users",
+            "to": "id"
+          },
+          {
+            "from": "local_device_id",
+            "on_delete": "SET NULL",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "devices",
+            "to": "id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "idx_device_passports_owner",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 2,
+                "kind": "COLUMN",
+                "name": "owner_user_id",
+                "sequence": 0
+              },
+              {
+                "cid": 13,
+                "kind": "COLUMN",
+                "name": "created_at",
+                "sequence": 1
+              }
+            ],
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_device_passports_2",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 1,
+                "kind": "COLUMN",
+                "name": "local_device_id",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          },
+          {
+            "name": "sqlite_autoindex_device_passports_1",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 0,
+                "kind": "COLUMN",
+                "name": "device_id",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          }
+        ],
+        "name": "device_passports"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "INTEGER",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "device_id",
+            "INTEGER",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "server_id",
+            "INTEGER",
+            1,
+            0,
+            0,
+            2
+          ],
+          [
+            "peer_public_key",
+            "TEXT",
+            1,
+            0,
+            0,
+            3
+          ],
+          [
+            "rx_bytes",
+            "INTEGER",
+            1,
+            0,
+            0,
+            4
+          ],
+          [
+            "tx_bytes",
+            "INTEGER",
+            1,
+            0,
+            0,
+            5
+          ],
+          [
+            "source",
+            "TEXT",
+            1,
+            0,
+            0,
+            6
+          ],
+          [
+            "collected_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            7
+          ]
+        ],
+        "foreign_keys": [
+          {
+            "from": "server_id",
+            "on_delete": "CASCADE",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "servers",
+            "to": "id"
+          },
+          {
+            "from": "device_id",
+            "on_delete": "CASCADE",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "devices",
+            "to": "id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "idx_device_traffic_server_collected",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 2,
+                "kind": "COLUMN",
+                "name": "server_id",
+                "sequence": 0
+              },
+              {
+                "cid": 7,
+                "kind": "COLUMN",
+                "name": "collected_at",
+                "sequence": 1
+              }
+            ],
+            "unique": 0
+          },
+          {
+            "name": "idx_device_traffic_device_collected",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 1,
+                "kind": "COLUMN",
+                "name": "device_id",
+                "sequence": 0
+              },
+              {
+                "cid": 7,
+                "kind": "COLUMN",
+                "name": "collected_at",
+                "sequence": 1
+              }
+            ],
+            "unique": 0
+          }
+        ],
+        "name": "device_traffic_snapshots"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "INTEGER",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "user_id",
+            "INTEGER",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "server_id",
+            "INTEGER",
+            1,
+            0,
+            0,
+            2
+          ],
+          [
+            "name",
+            "TEXT",
+            1,
+            0,
+            0,
+            3
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            4
+          ],
+          [
+            "activated_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            "expires_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            6
+          ],
+          [
+            "duration_days",
+            "INTEGER",
+            0,
+            0,
+            0,
+            7
+          ],
+          [
+            "expiry_policy",
+            "TEXT",
+            1,
+            0,
+            0,
+            8
+          ],
+          [
+            "status",
+            "TEXT",
+            1,
+            0,
+            0,
+            9
+          ],
+          [
+            "vpn_ip",
+            "TEXT",
+            1,
+            0,
+            0,
+            10
+          ],
+          [
+            "peer_public_key",
+            "TEXT",
+            1,
+            0,
+            0,
+            11
+          ],
+          [
+            "peer_private_key_encrypted",
+            "TEXT",
+            1,
+            0,
+            0,
+            12
+          ],
+          [
+            "preshared_key_encrypted",
+            "TEXT",
+            1,
+            0,
+            0,
+            13
+          ],
+          [
+            "config_version",
+            "TEXT",
+            1,
+            0,
+            0,
+            14
+          ],
+          [
+            "config_material_status",
+            "TEXT",
+            1,
+            0,
+            0,
+            15
+          ],
+          [
+            "assignment_mode",
+            "TEXT",
+            1,
+            0,
+            0,
+            16
+          ],
+          [
+            "config_fingerprint",
+            "TEXT",
+            0,
+            0,
+            0,
+            17
+          ],
+          [
+            "last_config_sent_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            18
+          ],
+          [
+            "first_connected_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            19
+          ],
+          [
+            "last_connected_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            20
+          ],
+          [
+            "revoked_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            21
+          ],
+          [
+            "revoke_reason",
+            "TEXT",
+            0,
+            0,
+            0,
+            22
+          ]
+        ],
+        "foreign_keys": [
+          {
+            "from": "server_id",
+            "on_delete": "NO ACTION",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "servers",
+            "to": "id"
+          },
+          {
+            "from": "user_id",
+            "on_delete": "NO ACTION",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "users",
+            "to": "id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "idx_devices_reserved_ip_unique",
+            "partial": 1,
+            "terms": [
+              {
+                "cid": 2,
+                "kind": "COLUMN",
+                "name": "server_id",
+                "sequence": 0
+              },
+              {
+                "cid": 10,
+                "kind": "COLUMN",
+                "name": "vpn_ip",
+                "sequence": 1
+              }
+            ],
+            "unique": 1
+          },
+          {
+            "name": "idx_devices_server_status",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 2,
+                "kind": "COLUMN",
+                "name": "server_id",
+                "sequence": 0
+              },
+              {
+                "cid": 9,
+                "kind": "COLUMN",
+                "name": "status",
+                "sequence": 1
+              }
+            ],
+            "unique": 0
+          },
+          {
+            "name": "idx_devices_user_status",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 1,
+                "kind": "COLUMN",
+                "name": "user_id",
+                "sequence": 0
+              },
+              {
+                "cid": 9,
+                "kind": "COLUMN",
+                "name": "status",
+                "sequence": 1
+              }
+            ],
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_devices_1",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 2,
+                "kind": "COLUMN",
+                "name": "server_id",
+                "sequence": 0
+              },
+              {
+                "cid": 11,
+                "kind": "COLUMN",
+                "name": "peer_public_key",
+                "sequence": 1
+              }
+            ],
+            "unique": 1
+          }
+        ],
+        "name": "devices"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "INTEGER",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "user_id",
+            "INTEGER",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "email",
+            "TEXT",
+            1,
+            0,
+            0,
+            2
+          ],
+          [
+            "token_hash",
+            "TEXT",
+            1,
+            0,
+            0,
+            3
+          ],
+          [
+            "purpose",
+            "TEXT",
+            1,
+            0,
+            0,
+            4
+          ],
+          [
+            "device_id",
+            "INTEGER",
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            "expires_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            6
+          ],
+          [
+            "used_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            7
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            8
+          ]
+        ],
+        "foreign_keys": [
+          {
+            "from": "device_id",
+            "on_delete": "CASCADE",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "devices",
+            "to": "id"
+          },
+          {
+            "from": "user_id",
+            "on_delete": "CASCADE",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "users",
+            "to": "id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "idx_email_recovery_tokens_user",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 1,
+                "kind": "COLUMN",
+                "name": "user_id",
+                "sequence": 0
+              },
+              {
+                "cid": 4,
+                "kind": "COLUMN",
+                "name": "purpose",
+                "sequence": 1
+              },
+              {
+                "cid": 6,
+                "kind": "COLUMN",
+                "name": "expires_at",
+                "sequence": 2
+              }
+            ],
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_email_recovery_tokens_1",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 3,
+                "kind": "COLUMN",
+                "name": "token_hash",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          }
+        ],
+        "name": "email_recovery_tokens"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "INTEGER",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "server_id",
+            "INTEGER",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "peer_public_key",
+            "TEXT",
+            1,
+            0,
+            0,
+            2
+          ],
+          [
+            "allowed_ips",
+            "TEXT",
+            1,
+            0,
+            0,
+            3
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            4
+          ]
+        ],
+        "foreign_keys": [
+          {
+            "from": "server_id",
+            "on_delete": "CASCADE",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "servers",
+            "to": "id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "idx_ignored_remote_peers_server",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 1,
+                "kind": "COLUMN",
+                "name": "server_id",
+                "sequence": 0
+              },
+              {
+                "cid": 4,
+                "kind": "COLUMN",
+                "name": "created_at",
+                "sequence": 1
+              }
+            ],
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_ignored_remote_peers_1",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 1,
+                "kind": "COLUMN",
+                "name": "server_id",
+                "sequence": 0
+              },
+              {
+                "cid": 2,
+                "kind": "COLUMN",
+                "name": "peer_public_key",
+                "sequence": 1
+              }
+            ],
+            "unique": 1
+          }
+        ],
+        "name": "ignored_remote_peers"
+      },
+      {
+        "columns": [
+          [
+            "key",
+            "TEXT",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "text",
+            "TEXT",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "updated_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            2
+          ]
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "sqlite_autoindex_message_templates_1",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 0,
+                "kind": "COLUMN",
+                "name": "key",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          }
+        ],
+        "name": "message_templates"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "INTEGER",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "user_id",
+            "INTEGER",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "device_id",
+            "INTEGER",
+            0,
+            0,
+            0,
+            2
+          ],
+          [
+            "plan_id",
+            "TEXT",
+            0,
+            0,
+            0,
+            3
+          ],
+          [
+            "requested_config_version",
+            "TEXT",
+            1,
+            0,
+            0,
+            4
+          ],
+          [
+            "status",
+            "TEXT",
+            1,
+            0,
+            0,
+            5
+          ],
+          [
+            "payment_mode",
+            "TEXT",
+            1,
+            0,
+            0,
+            6
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            7
+          ],
+          [
+            "approved_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            8
+          ],
+          [
+            "fulfilled_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            9
+          ]
+        ],
+        "foreign_keys": [
+          {
+            "from": "device_id",
+            "on_delete": "NO ACTION",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "devices",
+            "to": "id"
+          },
+          {
+            "from": "user_id",
+            "on_delete": "NO ACTION",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "users",
+            "to": "id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "idx_orders_user_status",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 1,
+                "kind": "COLUMN",
+                "name": "user_id",
+                "sequence": 0
+              },
+              {
+                "cid": 5,
+                "kind": "COLUMN",
+                "name": "status",
+                "sequence": 1
+              }
+            ],
+            "unique": 0
+          }
+        ],
+        "name": "orders"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "TEXT",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "name",
+            "TEXT",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "duration_days",
+            "INTEGER",
+            1,
+            0,
+            0,
+            2
+          ],
+          [
+            "max_devices",
+            "INTEGER",
+            0,
+            0,
+            0,
+            3
+          ],
+          [
+            "price",
+            "INTEGER",
+            1,
+            0,
+            0,
+            4
+          ],
+          [
+            "currency",
+            "TEXT",
+            1,
+            0,
+            0,
+            5
+          ],
+          [
+            "is_free",
+            "INTEGER",
+            1,
+            0,
+            0,
+            6
+          ],
+          [
+            "is_active",
+            "INTEGER",
+            1,
+            0,
+            0,
+            7
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            8
+          ],
+          [
+            "updated_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            9
+          ]
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "sqlite_autoindex_plans_1",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 0,
+                "kind": "COLUMN",
+                "name": "id",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          }
+        ],
+        "name": "plans"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "INTEGER",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "server_id",
+            "INTEGER",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "status",
+            "TEXT",
+            1,
+            0,
+            0,
+            2
+          ],
+          [
+            "latency_ms",
+            "INTEGER",
+            0,
+            0,
+            0,
+            3
+          ],
+          [
+            "ssh_ok",
+            "INTEGER",
+            1,
+            0,
+            0,
+            4
+          ],
+          [
+            "awg_ok",
+            "INTEGER",
+            1,
+            0,
+            0,
+            5
+          ],
+          [
+            "udp_port_ok",
+            "INTEGER",
+            1,
+            0,
+            0,
+            6
+          ],
+          [
+            "error",
+            "TEXT",
+            0,
+            0,
+            0,
+            7
+          ],
+          [
+            "checked_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            8
+          ]
+        ],
+        "foreign_keys": [
+          {
+            "from": "server_id",
+            "on_delete": "CASCADE",
+            "on_update": "NO ACTION",
+            "sequence": 0,
+            "table": "servers",
+            "to": "id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "idx_server_health_latest",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 1,
+                "kind": "COLUMN",
+                "name": "server_id",
+                "sequence": 0
+              },
+              {
+                "cid": 8,
+                "kind": "COLUMN",
+                "name": "checked_at",
+                "sequence": 1
+              },
+              {
+                "cid": 0,
+                "kind": "COLUMN",
+                "name": "id",
+                "sequence": 2
+              }
+            ],
+            "unique": 0
+          }
+        ],
+        "name": "server_health_checks"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "INTEGER",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "name",
+            "TEXT",
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            "host",
+            "TEXT",
+            0,
+            0,
+            0,
+            2
+          ],
+          [
+            "ssh_port",
+            "INTEGER",
+            0,
+            0,
+            0,
+            3
+          ],
+          [
+            "endpoint_host",
+            "TEXT",
+            0,
+            0,
+            0,
+            4
+          ],
+          [
+            "vpn_port",
+            "INTEGER",
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            "vpn_network_cidr",
+            "TEXT",
+            1,
+            0,
+            0,
+            6
+          ],
+          [
+            "server_address",
+            "TEXT",
+            0,
+            0,
+            0,
+            7
+          ],
+          [
+            "server_public_key",
+            "TEXT",
+            0,
+            0,
+            0,
+            8
+          ],
+          [
+            "runtime",
+            "TEXT",
+            0,
+            0,
+            0,
+            9
+          ],
+          [
+            "firewall",
+            "TEXT",
+            0,
+            0,
+            0,
+            10
+          ],
+          [
+            "status",
+            "TEXT",
+            1,
+            0,
+            0,
+            11
+          ],
+          [
+            "max_devices",
+            "INTEGER",
+            0,
+            0,
+            0,
+            12
+          ],
+          [
+            "current_devices",
+            "INTEGER",
+            1,
+            0,
+            0,
+            13
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            14
+          ],
+          [
+            "updated_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            15
+          ]
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "sqlite_autoindex_servers_1",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 1,
+                "kind": "COLUMN",
+                "name": "name",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          }
+        ],
+        "name": "servers"
+      },
+      {
+        "columns": [
+          [
+            "id",
+            "INTEGER",
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            "telegram_id",
+            "INTEGER",
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            "operator_label",
+            "TEXT",
+            0,
+            0,
+            0,
+            2
+          ],
+          [
+            "username",
+            "TEXT",
+            0,
+            0,
+            0,
+            3
+          ],
+          [
+            "first_name",
+            "TEXT",
+            0,
+            0,
+            0,
+            4
+          ],
+          [
+            "last_name",
+            "TEXT",
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            "status",
+            "TEXT",
+            1,
+            0,
+            0,
+            6
+          ],
+          [
+            "locale",
+            "TEXT",
+            1,
+            0,
+            0,
+            7
+          ],
+          [
+            "is_admin",
+            "INTEGER",
+            1,
+            0,
+            0,
+            8
+          ],
+          [
+            "created_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            9
+          ],
+          [
+            "updated_at",
+            "TEXT",
+            1,
+            0,
+            0,
+            10
+          ],
+          [
+            "email",
+            "TEXT",
+            0,
+            0,
+            0,
+            11
+          ],
+          [
+            "email_verified_at",
+            "TEXT",
+            0,
+            0,
+            0,
+            12
+          ]
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_users_operator_label_unique",
+            "partial": 1,
+            "terms": [
+              {
+                "cid": -2,
+                "kind": "EXPRESSION",
+                "name": null,
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          },
+          {
+            "name": "sqlite_autoindex_users_1",
+            "partial": 0,
+            "terms": [
+              {
+                "cid": 1,
+                "kind": "COLUMN",
+                "name": "telegram_id",
+                "sequence": 0
+              }
+            ],
+            "unique": 1
+          }
+        ],
+        "name": "users"
+      }
+    ],
+    "triggers": [],
+    "user_version": 0
+  },
+  "database_files": {
+    "after": {
+      "database": {
+        "bytes": 258048,
+        "device": 64770,
+        "inode": 286284,
+        "present": true
+      },
+      "journal": {
+        "present": false
+      },
+      "shm": {
+        "present": false
+      },
+      "wal": {
+        "present": false
+      }
+    },
+    "before": {
+      "database": {
+        "bytes": 258048,
+        "device": 64770,
+        "inode": 286284,
+        "present": true
+      },
+      "journal": {
+        "present": false
+      },
+      "shm": {
+        "present": false
+      },
+      "wal": {
+        "present": false
+      }
+    },
+    "sizes_stable": true
+  },
+  "database_child": {
+    "stderr_bytes": 0,
+    "stderr_present": false,
+    "stdout_bytes": 16834
+  },
+  "holders": {
+    "churn": 0,
+    "coverage_complete": true,
+    "denied": 0,
+    "fds_seen": 873,
+    "holders": [
+      {
+        "files": [
+          "database"
+        ],
+        "pid": 1106946,
+        "role": "bot",
+        "start_ticks": 446930267
+      }
+    ],
+    "pids_seen": 109,
+    "status": "OBSERVED_ONLY",
+    "writer_completeness": "UNKNOWN"
+  },
+  "units_before": {
+    "bot": {
+      "ActiveState": "active",
+      "FinalKillSignal": "9",
+      "KillMode": "control-group",
+      "KillSignal": "15",
+      "LoadState": "loaded",
+      "Restart": "no",
+      "SubState": "running",
+      "TimeoutStartUSec": "40s",
+      "TimeoutStopUSec": "1min 30s",
+      "Type": "notify",
+      "WatchdogUSec": "0",
+      "cgroup_matches": true,
+      "cwd_matches": true,
+      "exec_matches": true,
+      "hooks_present": false,
+      "pid": 1106946,
+      "role": "bot",
+      "runtime_binding": "UNKNOWN",
+      "start_ticks": 446930267,
+      "unit_file_count": 1,
+      "unit_files_digest": "c9c8a51018b05bb7c6f9cc077d5270cb9bf44de27917103812a80f09ee6c5925"
+    },
+    "web": {
+      "ActiveState": "active",
+      "FinalKillSignal": "9",
+      "KillMode": "control-group",
+      "KillSignal": "15",
+      "LoadState": "loaded",
+      "Restart": "on-failure",
+      "SubState": "running",
+      "TimeoutStartUSec": "1min 30s",
+      "TimeoutStopUSec": "1min 30s",
+      "Type": "simple",
+      "WatchdogUSec": "0",
+      "cgroup_matches": true,
+      "cwd_matches": true,
+      "exec_matches": true,
+      "hooks_present": false,
+      "pid": 1106933,
+      "role": "web",
+      "runtime_binding": "UNKNOWN",
+      "start_ticks": 446929841,
+      "unit_file_count": 1,
+      "unit_files_digest": "8444b5c093419ab0c42e307ce2f3ecd88930c3f20f41c00a3441e7cd9bc32b65"
+    }
+  },
+  "units_after": {
+    "bot": {
+      "ActiveState": "active",
+      "FinalKillSignal": "9",
+      "KillMode": "control-group",
+      "KillSignal": "15",
+      "LoadState": "loaded",
+      "Restart": "no",
+      "SubState": "running",
+      "TimeoutStartUSec": "40s",
+      "TimeoutStopUSec": "1min 30s",
+      "Type": "notify",
+      "WatchdogUSec": "0",
+      "cgroup_matches": true,
+      "cwd_matches": true,
+      "exec_matches": true,
+      "hooks_present": false,
+      "pid": 1106946,
+      "role": "bot",
+      "runtime_binding": "UNKNOWN",
+      "start_ticks": 446930267,
+      "unit_file_count": 1,
+      "unit_files_digest": "c9c8a51018b05bb7c6f9cc077d5270cb9bf44de27917103812a80f09ee6c5925"
+    },
+    "web": {
+      "ActiveState": "active",
+      "FinalKillSignal": "9",
+      "KillMode": "control-group",
+      "KillSignal": "15",
+      "LoadState": "loaded",
+      "Restart": "on-failure",
+      "SubState": "running",
+      "TimeoutStartUSec": "1min 30s",
+      "TimeoutStopUSec": "1min 30s",
+      "Type": "simple",
+      "WatchdogUSec": "0",
+      "cgroup_matches": true,
+      "cwd_matches": true,
+      "exec_matches": true,
+      "hooks_present": false,
+      "pid": 1106933,
+      "role": "web",
+      "runtime_binding": "UNKNOWN",
+      "start_ticks": 446929841,
+      "unit_file_count": 1,
+      "unit_files_digest": "8444b5c093419ab0c42e307ce2f3ecd88930c3f20f41c00a3441e7cd9bc32b65"
+    }
+  },
+  "unit_identity_stable": true
+}

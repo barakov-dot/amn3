@@ -1,6 +1,8 @@
 # Phase16 Task3B: bounded integration readback contract — 2026-09-22
 
-Статус на 23.09: **GATE010_STOP / DEPENDENCIES_COLLECTED / DB_SHAPE_INCOMPLETE**.
+Статус на 23.09: **GATE011_COMPLETE_WITH_LIMITATIONS / OLD_SCHEMA_METADATA_MATCH**.
+[Полный readback011 завершён](#actual-readback-execution-011-complete-2026-09-23);
+DB migration/semantic compatibility, writer fence и switch не разрешены.
 [Synthetic Linux guard PASS](#synthetic-linux-gate-pass-2026-09-22),
 [результат009](#actual-readback-execution-009-stop-2026-09-22) и
 [результат010](#actual-readback-execution-010-stop-2026-09-23)
@@ -8,7 +10,7 @@
 новое live-исполнение не разрешено.
 [Локальная диагностика полного schema coverage завершена](#schema-coverage-diagnosis-2026-09-23);
 [Согласованное исправление v3 проверено локально](#schema-reader-v3-ready-2026-09-23):
-125 PASS, preview SSH0; gate011 подготовлен, не исполнен.
+125 PASS; последующий gate011 исполнен один раз по exact approval, см. результат ниже.
 Это детализация существующего [Task3B](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),
 а не новый execution plan. Основание: операторское «продолжай» после
 [isolated Linux PASS](phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-pass-2026-09-22).
@@ -1324,3 +1326,70 @@ STOP → разбор сохранённого результата, не авт
 Push требует exact SHA/ref/EXPECTED_OLD, SSH011 — отдельного exact approval.
 До обоих согласований только local state. AWG2_UNTOUCHED, package016 immutable,
 general issuance disabled, live DB open/service actions/stage/install/activation0.
+
+
+<a id="actual-readback-execution-011-complete-2026-09-23"></a>
+
+## Actual readback011 — COMPLETE_WITH_LIMITATIONS
+
+По последующему прямому разрешению оператора
+`PHASE16_ACTUAL_INTEGRATION_READBACK_20260923_011` выполнена ровно одна
+read-only SSH-попытка из чистого local commit f33a5b46ccd799397be6f017e72c8fadb210e596.
+Пользователь разрешил именно SSH; push отдельно не разрешён и не выполнялся.
+Это уточняет прежнюю очередь push→SSH: execution привязан к проверенному
+локальному commit/hashes, публикация остаётся отдельным действием.
+
+[Execution record](phase16-bot-integration-readback-execution-011-2026-09-23.json)
+сохраняет полную разрешённую DB metadata, unit snapshots, holders, зависимости,
+нормализованное сравнение и hashes внешних artifacts. Gate/remote/source/payload
+совпали с011 manifest; preview PASS, exclusive execution-011 был отсутствующим.
+Command wall time10.609s, SSH exit0, stdin73178/73178, stdout34337bytes,
+stderr0, pipe failures0. Локальные pretty-printed runner stdout83960bytes
+не являются remote transport stdout и не сравниваются с его cap64KiB.
+Remote receipt validated: **READBACK_COMPLETE_WITH_LIMITATIONS**, completed
+2026-09-23T19:19:47.989687+00:00. Approval011 использован; retry0,012 не подготовлен.
+
+- Claim SHA256:7db560779e6f53f80cfaf0d05440fc65f82662a4da05862093837b0dde5ac912.
+- Result SHA256:904bf0a99140d7238b8333d2aa4b0716f183ff2c46ef136a32612529d5598459.
+- DB:18 таблиц,191 column,35 indexes,26 FK,0 triggers; journal_mode=delete,
+  schema_version64/user_version0, SQLite3.45.1. DB258048bytes; identity/size
+  стабильны между снимками, wal/shm/journal отсутствуют. Это не whole-DB hash
+  и не утверждение отсутствия записей других процессов во время окна.
+- Полная собранная metadata совпадает с exact synthetic old55dc243. Включает
+  users.idx_users_operator_label_unique: expression term cid=-2/name=null,
+  unique1/partial1. SQL expression/predicate не читались; точный отказавший
+  индекс исторического010 ретроспективно не идентифицируется доказанно.
+- Против candidate6e68235 отсутствуют11 новых таблиц и4 triggers; различаются
+  admin_config_issuance_receipts (columns/indexes), device_passports
+  (columns/indexes), devices (columns). Лишних таблиц нет. Объекты не удалялись
+  и candidate initializer на production DB не запускался.
+- Source map и dependency metadata равны010:102 Python files совпадают с55dc243;
+  runtime pins27 matched/13 different/missing0/extra3/pth1. Это static identity,
+  не effective loaded runtime; нужен отдельный candidate runtime40 venv.
+- Holders: OBSERVED_ONLY, coverage_complete=true,109 PID/873 FD, denied0/churn0;
+  один наблюдаемый holder — bot PID1106946/start_ticks446930267, database FD.
+  Это подтверждает открытие scoped DB bot-процессом в снимке. Web/CLI/agent
+  могут открывать её позже; writer_completeness остаётся UNKNOWN.
+- Bot/web active/running до и после, PID/start_ticks стабильны; bot Type=notify,
+  Restart=no, start40s/stop90s; web Type=simple, Restart=on-failure,
+  start90s/stop90s. KillMode=control-group, signals15/9, hooks false.
+  Это не фактическая проверка stop/drain и не разрешение менять units.
+
+Сверка old/candidate выполнена offline на hash-verified schema modules в новых
+in-memory DB; пользовательские rows не читались. Учитывались все полученные
+column/index/FK/trigger fields, независимо от порядка перечисления; не
+сравнивались SQLite/schema/user versions и journal_mode synthetic DB.
+Отсутствующие SQL/default/CHECK/collation/row semantics не объявляются равными.
+Прежние synthetic migration/old-repository и125 tests не повторялись.
+
+Диагностический сбор integration readback закрыт в согласованном scope.
+Следующий локальный этап — [startup/fence/backup/recovery readiness](phase16-bot-candidate-runbook-2026-09-21.ru.md#switch-readiness-2026-09-23)
+по фактически наблюдаемой old metadata, без очередного collector gate.
+Сохранить отдельный runtime40, старый revert target, bot identity/token и shared
+DB; согласовать startup seed/server-sync policy и writer fence. Один открытый
+bot FD не позволяет остановить только bot и считать миграцию безопасной.
+Если нужен stop web/ограничение API/CLI, это отдельное изменение live scope.
+Task3B/recovery, Windows, quality/A-B и acceptance остаются открыты.
+AWG2_UNTOUCHED, package016 immutable, issuance disabled; validated service
+actions0/database_write_attempted=false/application_imported=false/activation=false.
+Stage/install/push0. Документационный результат фиксируется локально.

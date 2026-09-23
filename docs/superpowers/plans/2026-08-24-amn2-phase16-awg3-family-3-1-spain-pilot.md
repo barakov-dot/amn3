@@ -366,6 +366,12 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    Следующий шаг — exact push и отдельно один bounded readback011 (ещё SSH0),
    затем оценка actual DB/integration/recovery; это не switch/install.
 
+   По последующему exact SSH approval [readback011 COMPLETE_WITH_LIMITATIONS](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-011-complete-2026-09-23):
+   одна попытка10.609s; metadata18 таблиц совпала с old55dc243; holders собраны
+   (observed bot, writer completeness UNKNOWN), bot/web stable. Scope сбора
+   закрыт,012 не подготовлен. Следующий локальный шаг — startup policy,
+   writer fence/backup/recovery design; stage/switch отдельно. Push не выполнялся.
+
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
 исправлен только этот AMN2 handler: 2 RED → 33 PASS целевого web/health набора,
@@ -385,10 +391,10 @@ Design согласован оператором после commit b277154. По
 - ✅ Task 1 — package016/local tooling; stage-защиты и recovery observations только локально; DNS bridge STOP.
 - ✅ Task 2 — исторические Spain gates/diagnostics, не свежий preflight.
 - ✅ Task 3A — minimal runtime по историческим evidence.
-- ▶️ Task 3B — integration/recovery не завершены; `_010` STOP_NO_RETRY,
-  source DIFFERENT, dependencies получены, DB shape неполна (schema_expression_index);
-  holders/units_after отсутствуют; v3 локально125 PASS,011 ready/SSH0;
-  recovery-контракт v1 согласован.
+- ▶️ Task 3B — integration/recovery не завершены; `_011` COMPLETE_WITH_LIMITATIONS:
+  source/dependencies/DB metadata/holders получены, old55dc243 metadata MATCH;
+  runtime binding/writer completeness UNKNOWN. Следующий локальный этап —
+  startup policy/fence/backup/recovery; recovery-контракт v1 согласован.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.

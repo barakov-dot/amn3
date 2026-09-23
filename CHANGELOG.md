@@ -7,6 +7,19 @@
 
 ## 2026-09-23
 
+- По exact SSH approval выполнен один [readback011](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-011-complete-2026-09-23)
+  из local f33a5b4: **COMPLETE_WITH_LIMITATIONS**,10.609s, полный transport,
+  validated receipt. Сохранены [полная разрешённая DB metadata и artifact hashes](research/amn2/phase16-bot-integration-readback-execution-011-2026-09-23.json).
+  Offline сравнение18 таблиц совпало с exact old55dc243; candidate требует11
+  новых таблиц/4 triggers и изменений3 таблиц. Source/dependencies равны010;
+  observed holder — bot, PID bot/web стабильны; writer completeness UNKNOWN.
+  Обновлены readiness/план: сбор закрыт, далее startup/fence/backup/recovery.
+  Проверки: receipt validation, hashes, full metadata comparison, docs links/
+  diff/secret review; без повторных suites, SSH retry или candidate startup.
+  Push не разрешён/не выполнен; AWG2/package016 сохранены, issuance disabled,
+  service actions/DB write attempted/stage/install/activation0. Semantic
+  compatibility и live switch не подтверждены и не разрешены.
+
 - По согласованию реализован [единый schema fix v3](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#schema-reader-v3-ready-2026-09-23):
   static ALTER/TRIGGER allowlist, typed expression/rowid/column index terms,
   trigger owner validation и versioned receipts; без SQL/rows/ослабления guard.
