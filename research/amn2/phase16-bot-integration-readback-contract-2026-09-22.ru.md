@@ -1,9 +1,9 @@
 # Phase16 Task3B: bounded integration readback contract — 2026-09-22
 
-Статус на 23.09: **ACTUAL_READBACK_009_STOP / LOCAL_FIX_PASS / GATE010_NOT_EXECUTED**.
+Статус на 23.09: **GATE010_STOP / DEPENDENCIES_COLLECTED / DB_SHAPE_INCOMPLETE**.
 [Synthetic Linux guard PASS](#synthetic-linux-gate-pass-2026-09-22),
 [результат009](#actual-readback-execution-009-stop-2026-09-22) и
-[готовая локальная реализация](#actual-readback-gate-010-ready-2026-09-23)
+[результат010](#actual-readback-execution-010-stop-2026-09-23)
 отделены от первоначального проекта ниже. Прежние approvals использованы;
 новое live-исполнение не разрешено.
 Это детализация существующего [Task3B](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),
@@ -1081,3 +1081,64 @@ AWG2_UNTOUCHED, package016 immutable, issuance disabled. Реальные rows/e
 argv/logs, service actions, app startup, backup/migration, stage/install
 исключены. Local PASS не является DB compatibility или разрешением switch.
 Push и один live gate требуют отдельных точных approvals; сейчас не выполнены.
+
+<a id="actual-readback-execution-010-stop-2026-09-23"></a>
+
+## Actual integration readback execution010 — STOP_NO_RETRY
+
+После exact approval опубликованы077e16f/7275732 в разрешённый ref origin:
+EXPECTED_OLD a238dec совпал; remote SHA после push —
+72757328f34ee0933785d2be8dcf322c9ccc2d7d, NO_FORCE/NO_TAGS.
+Затем выполнена ровно одна SSH-попытка010; shell command завершилась за7.064s
+в пределах transport60s (это не измерение только remote работы).
+[Нормализованная запись](phase16-bot-integration-readback-execution-010-2026-09-23.json)
+связана с exclusive execution-010 и хешами:
+
+- claim.json SHA256: be16d7ba579e950c32c98ae0b8dd4c92e6ab00147dc8e8b13af50e0a9741484d.
+- result.json SHA256: 673e3f2a611e263c4b76446cd72685b6d7097b9a984d354934e3117fcab41ee7.
+
+Transport полный: exit3, stdin71644/71644, stdout15726, stderr0, pipe failures0.
+Remote receipt прошёл validator: **STOP_NO_RETRY / database_schema_expression_index**.
+Завершены host, units_before, source, dependencies, database_files_before.
+DB schema stage достигнут; полный database result, holders и units_after
+отсутствуют. Это новый наблюдаемый STOP, причину009 ретроспективно не объявлять.
+Approval010 использован; повтор и дополнительный SSH не выполнялись.
+
+Новые подтверждённые факты:
+
+- Карта102 source files (size/SHA256) равна009; прежняя сверка с55dc243 применима
+  и к этому снимку. Против candidate6e68235 missing24/different24/extra0;
+  exact deployed release/runtime binding UNKNOWN.
+- Dependency metadata: matched27, different13, missing0, extra3, pth_count1.
+  Версии13 известных pins сохранены в record; неизвестные extra names и .pth
+  contents не раскрываются. Pydantic/yarl входят в matched. Это static metadata,
+  не loaded module binding и не пригодность старого site-packages для candidate.
+  Отдельный production runtime40 venv по-прежнему необходим.
+- DB file перед open присутствовал,258048bytes; wal/shm/journal в этом снимке
+  отсутствовали. Это не доказательство journal_mode или отсутствия writers.
+- Bot/web snapshot active/running, expected entrypoint/cwd/cgroup, hooks false,
+  по одному unit file; TimeoutStopUSec=1min 30s, KillMode=control-group.
+  Это конфигурация, не успешный drain/stop или итоговая stability.
+- Validated flags: service actions0, database_write_attempted=false,
+  application_imported=false, runtime_activation=false. До причины
+  schema_expression_index код доходит после guarded open и metadata queries;
+  child вернул штатный STOP, полный schema receipt не сформирован.
+
+Локальный разбор без нового запуска: core.read_schema отклоняет PRAGMA
+index_info, если имя индексного поля не входит в разрешённые columns.
+Выражение возвращает не обычное имя столбца; точные term/type/name отказавшего
+live-индекса не сохранены. В source55dc243 есть idx_users_operator_label_unique
+ON users(lower(trim(operator_label))). Это конкретная гипотеза из совпавшего
+Python source, а не подтверждённая идентификация live-индекса. Штатный synthetic
+test ранее намеренно проверял STOP на expression index; поддержка полного
+старого schema fixture collector'ом не была доказана. Live индекс/DB не менять
+ради прохождения readback.
+
+Следующий локальный шаг — проверить покрытие collector на полном старом schema
+fixture и candidate schema, затем подготовить представление необычных index
+terms как неполной metadata без SQL/rows и ложной semantic compatibility.
+Изменение schema reader/validator выходит за выполненный METADATA/error fix;
+его сначала согласовать. Новый011 не подготовлен и не разрешён. Повтор worker/
+Linux suites или package build для разбора этого STOP не нужен.
+Task3B/recovery и acceptance открыты; AWG2/package016 сохранены,
+general issuance disabled, stage/install/activation0.

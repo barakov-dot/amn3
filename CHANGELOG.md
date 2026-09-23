@@ -7,6 +7,17 @@
 
 ## 2026-09-23
 
+- После exact push7275732 и approval выполнен один [readback010](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-010-stop-2026-09-23):
+  **STOP_NO_RETRY / database_schema_expression_index**; полный transport,
+  validated receipt. Зависимости впервые собраны:27 matched/13 different/
+  missing0/extra3/1pth; source map прежняя. DB schema stage достигнут, полный
+  shape/holders/units_after отсутствуют. Сохранён [execution record](research/amn2/phase16-bot-integration-readback-execution-010-2026-09-23.json)
+  с claim/result hashes. Локально установлен неподдержанный collector'ом класс
+  index metadata и найден expression index в старом source; exact live index
+  UNKNOWN. Проверки: receipt validation/hash readback, source map comparison,
+  links/diff/secret review; без retry или нового code fix. Service actions0,
+  AWG2/package016 сохранены, issuance disabled, stage/install/activation0.
+
 - По согласованию реализован [readback v2/gate010](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-010-ready-2026-09-23):
   METADATA cap256KiB/total8MiB, фиксированные причины ошибок этапов и DB child,
   без отражения произвольных local/remote exceptions. Старые hash-bound версии

@@ -346,6 +346,13 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    сохранены. Preview SSH0, execution-010 отсутствует; текущий следующий gate —
    exact push, затем отдельно один checksum-bound readback010, не switch/install.
 
+   После exact push/approval [execution010 STOP_NO_RETRY](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-010-stop-2026-09-23):
+   dependency stage завершён (27 matched/13 different/0 missing/3 extra/1pth),
+   guarded DB schema stage остановлен с database_schema_expression_index.
+   Полный schema/holders/units_after отсутствуют; source map прежняя. Теперь
+   следующий шаг — локально проверить покрытие полного старого schema fixture;
+   не повторять010, не менять live индекс, новый SSH не подготовлен.
+
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
 исправлен только этот AMN2 handler: 2 RED → 33 PASS целевого web/health набора,
@@ -365,8 +372,9 @@ Design согласован оператором после commit b277154. По
 - ✅ Task 1 — package016/local tooling; stage-защиты и recovery observations только локально; DNS bridge STOP.
 - ✅ Task 2 — исторические Spain gates/diagnostics, не свежий preflight.
 - ✅ Task 3A — minimal runtime по историческим evidence.
-- ▶️ Task 3B — integration/recovery не завершены; `_009` STOP_NO_RETRY,
-  source DIFFERENT, dependency result/DB stage отсутствуют; recovery-контракт v1 согласован.
+- ▶️ Task 3B — integration/recovery не завершены; `_010` STOP_NO_RETRY,
+  source DIFFERENT, dependencies получены, DB shape неполна (schema_expression_index);
+  holders/units_after отсутствуют; recovery-контракт v1 согласован.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.

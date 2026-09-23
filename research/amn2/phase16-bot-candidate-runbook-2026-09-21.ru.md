@@ -135,6 +135,14 @@ ExecStart и проверенным PYTHONPATH binding; общий web unit не
 Это уточнение прежнего дизайна и prerequisites, не исполняемый gate.
 Новая сборка и повтор завершённых isolated Linux/worker проверок не нужны.
 
+Позднее [readback010](phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-execution-010-stop-2026-09-23)
+получил static dependency metadata (27 matched/13 different/0 missing/3 extra,
+1pth) и дошёл до guarded DB schema, но завершился schema_expression_index.
+Полный DB shape и holders остаются неизвестны; старый site-packages не является
+runtime40 candidate. В units_before прочитан TimeoutStopUSec90s для bot/web;
+это не подтверждение drain или разрешение остановки. Остальные prerequisites
+таблицы сохраняются; подробности и hashes находятся в receipt по ссылке.
+
 | Условие | Что уже доказано | Что нужно до переключения |
 | --- | --- | --- |
 | Candidate source/runtime | Exact source 6e68235, immutable ZIP/manifest; isolated test48 включает runtime40 | Отдельный production venv только runtime40; checksum/readback его source, interpreter, installed metadata и unit binding в будущем stage |
