@@ -1,0 +1,22 @@
+{
+  "old_schema": {
+    "commit": "55dc243b8e6c6bdb57f8301b56326e4cd4072d19",
+    "path": "app/db/schema.py",
+    "sha256": "f3e353f17131d0fc606ee557d752bcadf55201360b69427c4e785f074f1c72f7"
+  },
+  "candidate_schema": {
+    "commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "path": "app/db/schema.py",
+    "sha256": "45105b725e22a9cdbbc07bf440502b1738134f7f2ce875b45bb27aeace7266f1"
+  },
+  "candidate_phase14": {
+    "commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "path": "app/db/phase14_dual_protocol.py",
+    "sha256": "85f84dda68d77fd91805fe80b6b161d2971ec206c6a0db3895cf11873e9be1d2"
+  },
+  "candidate_phase15": {
+    "commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "path": "app/db/phase15_bootstrap.py",
+    "sha256": "76a4f579a39e94e4360abeb894f820321c11e16f0e971ce37de8e4e737a989a9"
+  }
+}

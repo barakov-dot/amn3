@@ -7,7 +7,8 @@
 отделены от первоначального проекта ниже. Прежние approvals использованы;
 новое live-исполнение не разрешено.
 [Локальная диагностика полного schema coverage завершена](#schema-coverage-diagnosis-2026-09-23);
-связное исправление reader/manifest/validator ещё не согласовано и не реализовано.
+[Согласованное исправление v3 проверено локально](#schema-reader-v3-ready-2026-09-23):
+125 PASS, preview SSH0; gate011 подготовлен, не исполнен.
 Это детализация существующего [Task3B](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),
 а не новый execution plan. Основание: операторское «продолжай» после
 [isolated Linux PASS](phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-pass-2026-09-22).
@@ -1240,3 +1241,86 @@ SSH011 не подготовлен и не разрешён; использов�
 следующего кода требует exact approval; документационный commit можно отправить
 вместе с исправлением. AWG2_UNTOUCHED, package016 immutable, issuance disabled,
 service actions/DB live open/stage/install/activation0; candidate ZIP не менялся.
+
+
+<a id="schema-reader-v3-ready-2026-09-23"></a>
+
+## Schema reader v3 — согласованное исправление готово локально
+
+Оператор согласовал единый bounded fix после диагностики. Созданы отдельные
+[manifest builder](../../scripts/phase16_bot_integration_manifest_v3.py),
+[core](../../scripts/vps/phase16_bot_integration_readback_v3.py),
+[validator](../../scripts/phase16_bot_integration_validator_v3.py),
+[supervisor](../../scripts/vps/phase16_bot_integration_readback_remote_v3.py) и
+[gate runner](../../scripts/phase16_bot_integration_readback_gate_v3.py).
+Использованные v1/v2 scripts/manifests/receipts сохранены побайтно для прежних
+hash bindings. Новый validator переиспользует неизменные проверки остальных
+блоков без monkeypatch globals.
+
+Static AST extraction учитывает literal ALTER ADD COLUMN и TRIGGER name→table,
+исключает f-strings, concatenation/format и calls, вычисляющие SQL. Новый
+[source manifest](phase16-bot-integration-manifest-v3-6e68235.json) сохраняет126
+source files/runtime40 и прежние bindings вне schema allowlist. Allowlist31
+исторических/rebuild имён не означает31 actual таблицу. Добавлены три columns
+и четыре triggers. Schema wire v2 передаёт column cid, index terms
+sequence/cid/kind/name (COLUMN/EXPRESSION/ROWID), trigger name/table.
+Проверяются владельцы, sentinels, порядок, уникальность identifiers, caps и
+точные поля; unknown → fixed STOP. SQL bodies/defaults/predicates/rows не
+выводятся; SHAPE_ONLY/compatibility UNKNOWN сохранены. Manifest и outer receipt
+тоже versioned; прежний payload/receipt/approval отвергаются.
+
+[Verification](phase16-bot-integration-readback-v3-local-verification-2026-09-23.json):
+первые5 RED → GREEN; дополнительные RED для dynamic SQL extraction и stale
+child-bootstrap hashes исправлены. Промежуточные binding setup failures/errors
+отделены от финального результата. Итоговый целевой suite: **125 PASS,
+0 FAIL/ERROR/SKIP за4.338s** — прежние108 и17 новых регрессий.
+[Тесты](../../tests/test_phase16_bot_integration_readback_v3.py) используют
+[полные exact-source fixtures](../../tests/fixtures/phase16_schema/README.md),
+без удаления объектов или подмены allowlist:
+
+| Fixture | Tables / columns / indexes / triggers | Полный synthetic receipt | DB неизменна |
+| --- | --- | --- | --- |
+| old55dc243 | 18 / 191 / 35 / 0 | 35653bytes | Да |
+| candidate6e68235 | 29 / 338 / 55 / 4 | 48125bytes | Да |
+| old→candidate | 29 / 338 / 55 / 4 | 48125bytes | Да |
+
+Проверены bound core/payload, mixed terms, malformed cid/sequence/sentinels,
+unknown/wrong-owner triggers, лишние поля/SQL, запрет rows/SQL/writes,
+byte invariance, caps/deadline, прежние approvals и exclusive evidence directory.
+PASS/STOP/malformed receipts проверены через локальный transport fixture без
+сети. Реальный CHILD_BOOTSTRAP с forced non-Linux platform принимает новый
+payload до штатного platform guard, отвергает старый/повреждённый раньше;
+DB/namespace access запрещены тестом. Это binding test, не Linux mount test.
+
+Self-review выявил stale literal sizes/hashes в child bootstrap; исправлено
+через RED/GREEN. AST comparison: в core изменён только collect_schema;
+authorizer/query/deadline и physical namespace/mount/open сохранены. Remote
+lifecycle не менялся; child отличается только sizes/hashes/magic.
+Независимого review не было. Worker/Linux/dependency acceptance suites и
+packages не повторялись/не пересобирались.
+
+### Offline gate011 — ещё не разрешён и не исполнен
+
+[Manifest011](phase16-bot-integration-readback-gate-011-manifest-2026-09-23.json)
+связывает builder, validator, runner/core/supervisor, source manifest, transport
+и frozen base manifest. Preview PASS/SSH0, execution-011 отсутствует;
+stdin frame73178bytes. SHA256 LF:
+
+- Gate:a5e87bf8771421afa532cd3c48d01d29dc00e90b5cd3f3f9aa0358088411283b.
+- Remote:950d3856956c37e642a9a6c1693331b144a889fc179568028b5b0cc248f91abc.
+- Source manifest:faac75cf5f2d136344bdfc54fd6cfe3bab8271cc7424ca1050775634860723a4.
+- Payload:c876d261b3e1e5c01ae05f93fdd5ad0934cf7597cf2b06f6108d3af858d76739.
+
+Marker: `PHASE16_ACTUAL_INTEGRATION_READBACK_20260923_011`.
+Следующий отдельный live scope — одна read-only попытка011, transport60s /
+remote50s (work44/cleanup4/finalization2), DB transaction2s/child5s,
+stdout64KiB/stderr8KiB; no retry. Source/dependencies/units/DB metadata/holders
+по прежним roots; без rows/env/argv/logs/app startup/service actions.
+COMPLETE → offline оценка actual schema и integration/recovery условий;
+STOP → разбор сохранённого результата, не автоматический012. Local PASS не
+доказывает actual schema, semantic compatibility или writer completeness,
+не разрешает switch. Использованный010 не повторять.
+
+Push требует exact SHA/ref/EXPECTED_OLD, SSH011 — отдельного exact approval.
+До обоих согласований только local state. AWG2_UNTOUCHED, package016 immutable,
+general issuance disabled, live DB open/service actions/stage/install/activation0.

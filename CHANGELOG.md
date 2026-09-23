@@ -7,6 +7,18 @@
 
 ## 2026-09-23
 
+- По согласованию реализован [единый schema fix v3](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#schema-reader-v3-ready-2026-09-23):
+  static ALTER/TRIGGER allowlist, typed expression/rowid/column index terms,
+  trigger owner validation и versioned receipts; без SQL/rows/ослабления guard.
+  Сохранены frozen v1/v2, добавлены exact-source full-schema fixtures с hashes.
+  RED→**125 PASS**,18/29/29 таблиц без удаления объектов; полный receipt до48125B.
+  Self-review выявил и исправил stale child-bootstrap bindings через RED/GREEN;
+  независимого review не было. [Evidence](research/amn2/phase16-bot-integration-readback-v3-local-verification-2026-09-23.json)
+  включает caps/invariance/binding/transport-fixture проверки; preview011 SSH0.
+  Проверены AST guard delta, source/hash bindings, docs links/diff/secrets.
+  Live schema/compatibility/recovery UNKNOWN; новый SSH/push требуют exact
+  approvals. AWG2/package016 сохранены, issuance disabled, stage/install0.
+
 - Завершена [локальная диагностика полного schema coverage](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#schema-coverage-diagnosis-2026-09-23)
   на exact old55dc243/candidate6e68235 и old→candidate in-memory fixtures:
   18/29/29 таблиц; expression index, четыре triggers и три ALTER-added columns

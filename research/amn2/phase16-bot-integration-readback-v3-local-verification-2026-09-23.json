@@ -1,0 +1,104 @@
+{
+  "schema": "phase16.schema-readback-v3-verification.v1",
+  "date": "2026-09-23",
+  "status": "LOCAL_PASS_NOT_LIVE_ACCEPTANCE",
+  "amn3_base": "32983ef45a8ebe5a91c7d0046ba6a5705025c5f0",
+  "source_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+  "tests": {
+    "command": "python -B -m unittest discover -s tests -p test_phase16_bot_integration_readback*.py",
+    "passed": 125,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "runner_output": ".............................................................................................................................\n----------------------------------------------------------------------\nRan 125 tests in 4.338s\n\nOK"
+  },
+  "red_evidence": {
+    "initial_full_schema_tests": {
+      "tests": 5,
+      "failures": 5,
+      "errors": 0
+    },
+    "dynamic_sql_regression": {
+      "failures": 1
+    },
+    "bootstrap_binding_regression": {
+      "failures": 1
+    },
+    "intermediate_binding_setup": "2 failures and 2 errors before payload hashes and gate manifest creation; not a product acceptance run"
+  },
+  "full_schema_cases": [
+    {
+      "case": "old",
+      "tables": 18,
+      "columns": 191,
+      "indexes": 35,
+      "triggers": 0,
+      "full_receipt_bytes": 35653,
+      "database_unchanged": true,
+      "compatibility": "UNKNOWN"
+    },
+    {
+      "case": "candidate",
+      "tables": 29,
+      "columns": 338,
+      "indexes": 55,
+      "triggers": 4,
+      "full_receipt_bytes": 48125,
+      "database_unchanged": true,
+      "compatibility": "UNKNOWN"
+    },
+    {
+      "case": "transition",
+      "tables": 29,
+      "columns": 338,
+      "indexes": 55,
+      "triggers": 4,
+      "full_receipt_bytes": 48125,
+      "database_unchanged": true,
+      "compatibility": "UNKNOWN"
+    }
+  ],
+  "bindings": {
+    "gate_sha256": "a5e87bf8771421afa532cd3c48d01d29dc00e90b5cd3f3f9aa0358088411283b",
+    "remote_sha256": "950d3856956c37e642a9a6c1693331b144a889fc179568028b5b0cc248f91abc",
+    "payload_sha256": "c876d261b3e1e5c01ae05f93fdd5ad0934cf7597cf2b06f6108d3af858d76739",
+    "source_manifest_sha256": "faac75cf5f2d136344bdfc54fd6cfe3bab8271cc7424ca1050775634860723a4",
+    "frame_bytes": 73178
+  },
+  "code_review": {
+    "kind": "SELF_REVIEW_NOT_INDEPENDENT",
+    "core_changed_functions": [
+      "collect_schema"
+    ],
+    "schema_authorizer_query_deadline_unchanged": true,
+    "physical_guard_unchanged": true,
+    "remote_child_change": "Only bound lengths/hashes and payload magic",
+    "source_and_runtime_manifest_unchanged_except_schema_allowlist": true,
+    "finding_fixed": "Child bootstrap literal hashes/lengths updated after RED regression"
+  },
+  "safety": {
+    "ssh_attempts": 0,
+    "production_db_open": false,
+    "service_actions": 0,
+    "stage": 0,
+    "install": 0,
+    "activation": 0,
+    "execution_directory_exists": false,
+    "awg2": "UNTOUCHED",
+    "package016": "IMMUTABLE",
+    "general_issuance": "DISABLED"
+  },
+  "limitations": [
+    "Windows local synthetic schemas, not Linux/live acceptance",
+    "Full generated schema shape does not establish production schema or semantic compatibility",
+    "Triggers and expressions disclose identifiers/type only, no SQL bodies",
+    "Runtime binding and writer completeness remain UNKNOWN"
+  ],
+  "elapsed_verification_seconds": 4.656,
+  "post_format_binding_checks": {
+    "reason": "Removed extra EOF blank lines from validator; AST unchanged, gate hash rebound",
+    "passed": 7,
+    "failed": 0,
+    "errors": 0
+  }
+}

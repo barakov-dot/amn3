@@ -360,6 +360,12 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    шаг — согласовать один локальный fix manifest/reader/validator и full-schema
    регрессии. Это диагноз покрытия, не live schema/compatibility acceptance.
 
+   После согласования [schema reader v3 готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#schema-reader-v3-ready-2026-09-23):
+   полные18/29/29-table fixtures проходят без удаления объектов;125 PASS,
+   max synthetic receipt48125bytes. Guard сохранён; frozen010 не изменён.
+   Следующий шаг — exact push и отдельно один bounded readback011 (ещё SSH0),
+   затем оценка actual DB/integration/recovery; это не switch/install.
+
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
 исправлен только этот AMN2 handler: 2 RED → 33 PASS целевого web/health набора,
@@ -381,7 +387,8 @@ Design согласован оператором после commit b277154. По
 - ✅ Task 3A — minimal runtime по историческим evidence.
 - ▶️ Task 3B — integration/recovery не завершены; `_010` STOP_NO_RETRY,
   source DIFFERENT, dependencies получены, DB shape неполна (schema_expression_index);
-  holders/units_after отсутствуют; recovery-контракт v1 согласован.
+  holders/units_after отсутствуют; v3 локально125 PASS,011 ready/SSH0;
+  recovery-контракт v1 согласован.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.
