@@ -7,6 +7,16 @@
 
 ## 2026-09-23
 
+- По согласованию реализован [readback v2/gate010](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-010-ready-2026-09-23):
+  METADATA cap256KiB/total8MiB, фиксированные причины ошибок этапов и DB child,
+  без отражения произвольных local/remote exceptions. Старые hash-bound версии
+  и manifests сохранены; SQLite/WAL/namespace guard не менялся. RED → **108 PASS**,
+  отдельно40/40 runtime wheel metadata по pinned lock; [verification](research/amn2/phase16-bot-integration-readback-gate-010-local-verification-2026-09-23.json).
+  Проверены preview SSH0, checksum bindings, version delta, ссылки/diff/secrets.
+  Это локальный fix, не доказательство причины live009 или DB compatibility.
+  Execution-010 не создан; push/SSH требуют exact approvals, service/stage/
+  install/activation0; AWG2/package016 сохранены, issuance disabled.
+
 - Подготовлен [ограниченный дизайн единого runtime/DB readback](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#consolidated-readback-design-2026-09-23).
   Локально сверены40 wheels с exact runtime lock; штатный reader отверг
   pydantic109397bytes и yarl103964bytes по METADATA cap65536. Установлена

@@ -1,0 +1,66 @@
+{
+  "schema": "phase16.integration-readback-local-verification.v1",
+  "date": "2026-09-23",
+  "status": "LOCAL_PASS_NOT_LIVE_ACCEPTANCE",
+  "approval_scope": "User approved bounded local fix and tests; SSH and push excluded",
+  "amn3_base": "077e16fc2fa5c0f87ede04dfe2a9e5f82a7e7542",
+  "source_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+  "design": "phase16-bot-integration-readback-contract-2026-09-22.ru.md#consolidated-readback-design-2026-09-23",
+  "tdd": {
+    "initial_legacy_run_tests": 9,
+    "initial_legacy_run_failure_count_including_subtests": 10,
+    "initial_legacy_run_errors": 0,
+    "additional_red_cases": ["new runner binding absent", "arbitrary RemoteStop disclosure", "arbitrary transport exception disclosure"],
+    "final_command": "python -B -m unittest discover -s tests -p test_phase16_bot_integration_readback*.py",
+    "final_tests": 108,
+    "final_failures": 0,
+    "final_errors": 0,
+    "final_skipped": 0,
+    "final_seconds": 2.847
+  },
+  "runtime_metadata_fixture": {
+    "wheel_hashes_matched_to_exact_runtime_lock": 40,
+    "metadata_matched_pins": 40,
+    "metadata_total_bytes": 511094,
+    "missing": 0,
+    "different": 0,
+    "extra": 0,
+    "dependency_installation": false,
+    "dependency_imports": false,
+    "temporary_fixture_removed": true,
+    "runtime_binding": "UNKNOWN"
+  },
+  "regression_scope": [
+    "METADATA 262144 accepted, 262145 rejected; pth 65536 unchanged",
+    "dependency total, count, time and file identity guards",
+    "fixed stage errors, partial evidence, no DB call after dependency failure",
+    "child PASS and allowlisted STOP; malformed output, exit and stderr rejected",
+    "numeric signals 15/9, receipt validation, no raw exception disclosure",
+    "one transport, exclusive claim, stale approval and binding drift rejection",
+    "portable core differs from prior only in METADATA cap; SQLite guard unchanged"
+  ],
+  "review": "Self-review of version-to-version diffs; not an independent review",
+  "preview": {
+    "status": "ACTUAL_READBACK_GATE_READY_NOT_EXECUTED",
+    "approval": "PHASE16_ACTUAL_INTEGRATION_READBACK_20260923_010",
+    "gate_sha256": "388e9805b54a13ad649de84f2565e2a4371653360a0e297b13ace43a160b23f6",
+    "remote_sha256": "b1c8612dec962c74f4586dd3fd4bb01f70052d49b55395fa898d23c975759bf1",
+    "manifest_sha256": "dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc",
+    "payload_sha256": "1e817e1a05b74733577341b103453820d5a54438e500efd596ce46718425ab3b",
+    "execution_directory_exists": false,
+    "ssh_attempts": 0,
+    "remote_seconds": 50,
+    "transport_seconds": 60
+  },
+  "safety": {
+    "production_db_open": false,
+    "service_actions": 0,
+    "application_imported": false,
+    "package_rebuild": false,
+    "stage_install_activation": false,
+    "awg2_untouched": true,
+    "package016_immutable": true,
+    "general_issuance_disabled": true,
+    "legacy_collectors_manifests_and_receipts_unchanged": true
+  }
+}

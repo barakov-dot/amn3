@@ -340,6 +340,12 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    дефект collector, не доказанная причина live009. Сначала согласование узкого
    fix/локальные проверки; новый SSH не подготовлен и не разрешён.
 
+   После согласования [fix реализован в отдельной v2; gate010 готов локально](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#actual-readback-gate-010-ready-2026-09-23):
+   METADATA cap256KiB, fixed stage/child/local error codes; 108 PASS и отдельный
+   runtime40 metadata fixture40/40. Прежние hash-bound collectors и SQLite guard
+   сохранены. Preview SSH0, execution-010 отсутствует; текущий следующий gate —
+   exact push, затем отдельно один checksum-bound readback010, не switch/install.
+
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
 исправлен только этот AMN2 handler: 2 RED → 33 PASS целевого web/health набора,

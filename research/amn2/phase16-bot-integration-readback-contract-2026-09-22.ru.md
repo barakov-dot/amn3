@@ -1,9 +1,9 @@
 # Phase16 Task3B: bounded integration readback contract — 2026-09-22
 
-Статус на 23.09: **ACTUAL_READBACK_009_STOP / LOCAL_FIX_DESIGN_NOT_IMPLEMENTED**.
+Статус на 23.09: **ACTUAL_READBACK_009_STOP / LOCAL_FIX_PASS / GATE010_NOT_EXECUTED**.
 [Synthetic Linux guard PASS](#synthetic-linux-gate-pass-2026-09-22),
 [результат009](#actual-readback-execution-009-stop-2026-09-22) и
-[подготовка следующего readback](#consolidated-readback-design-2026-09-23)
+[готовая локальная реализация](#actual-readback-gate-010-ready-2026-09-23)
 отделены от первоначального проекта ниже. Прежние approvals использованы;
 новое live-исполнение не разрешено.
 Это детализация существующего [Task3B](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md),
@@ -157,8 +157,8 @@ inode evidence доказывает лишь открытый файл у proces
 ## Caps, завершение и STOP
 
 Ниже **исходные проектные hard caps**, не измеренная длительность target.
-Предложенное 23.09 изменение METADATA cap описано отдельно в конце документа
-и ещё не реализовано. Превышение
+Реализованное23.09 изменение METADATA cap относится только к v2/новому gate010
+и описано отдельно в конце документа. Превышение
 не расширяет scope, не разрешает retry и не превращается в усечённый PASS.
 
 | Область | Hard cap |
@@ -928,7 +928,9 @@ dependencies и фактическая DB schema этим не проверен�
 
 ## Единый readback runtime/DB: локальная подготовка — 2026-09-23
 
-Статус: **DESIGN_READY_NOT_IMPLEMENTED**, SSH0. Цель следующего исполнения —
+Статус при подготовке: **DESIGN_READY_NOT_IMPLEMENTED**, SSH0; после согласования
+оператора реализация завершена в [следующем разделе](#actual-readback-gate-010-ready-2026-09-23).
+Цель следующего исполнения —
 получить статические runtime metadata, guarded DB shape и наблюдаемых holders
 за одну ограниченную попытку существующего collector. Не обещать полный список
 writers, effective runtime binding или готовность switch по одному снимку.
@@ -1022,3 +1024,60 @@ service actions, app imports, reads env/rows/argv/logs, backup или migrations
 Writer completeness/startup seed policy/backup/fence требуют своих фактов и
 решений даже при COMPLETE. Новые filesystem roots или чтение конфигов ради
 поиска неизвестных writers этим дизайном не разрешаются.
+
+<a id="actual-readback-gate-010-ready-2026-09-23"></a>
+
+## Actual integration readback gate010 — локальный fix готов, SSH0
+
+По согласованию оператора реализован описанный выше bounded fix. Сохранены
+отдельные v2 [core](../../scripts/vps/phase16_bot_integration_readback_v2.py),
+[remote supervisor](../../scripts/vps/phase16_bot_integration_readback_remote_v2.py)
+и [runner](../../scripts/phase16_bot_integration_readback_gate_v2.py).
+Это версии прежнего collector: старые файлы/manifests/receipts не менялись,
+чтобы не перепривязывать уже использованные approvals и Linux guard evidence.
+Дублирование frozen версии намеренное; correctness новой версии проверяется
+delta и регрессиями. Core отличается только cap METADATA65536→262144;
+код SQLite/WAL/namespace guard, .pth cap и source reader побайтно сохранён.
+
+Remote wrapper передаёт только фиксированные stage/core/filesystem reasons,
+сохраняет partial blocks и останавливается до DB при отказе dependencies.
+DB child STOP принимается только при exit3, stderr0, точной форме и allowlist
+reason; malformed output не отражается. Local validator сохраняет numeric
+signals009, проверяет новый allowlist reason, а local exceptions больше не
+публикуют произвольный текст даже если он похож на безопасный identifier.
+Не установлена причина серверного009; работоспособность live path не заявляется.
+
+[Локальные проверки](phase16-bot-integration-readback-gate-010-local-verification-2026-09-23.json):
+начальный RED — 9 tests/10 failures с subtests, errors0; дополнительные RED
+для binding и двух каналов exception disclosure. Итоговый целевой набор
+**108 PASS / 0 FAIL / 0 ERROR / 0 SKIP, 2.847s** включает прежние readback tests
+и [новые регрессии](../../tests/test_phase16_bot_integration_readback_v2.py).
+Отдельно все40 wheels сверены с exact runtime lock; temporary metadata-only
+fixture дал40/40 matched pins, missing/different/extra0, всего511094 bytes.
+Зависимости не устанавливались и не импортировались. Fixture удалён,
+retained candidate и package016 сохранены. Проведён self-review delta;
+независимый review в этом ходе не выполнялся.
+
+[Новый manifest](phase16-bot-integration-readback-gate-010-manifest-2026-09-23.json)
+фиксирует source6e68235, новые core/payload/remote/runner, старый validator и
+transport, target и caps. Marker:
+`PHASE16_ACTUAL_INTEGRATION_READBACK_20260923_010`; прежние markers отвергаются.
+Evidence directory — существующий parent
+`C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-integration-readback-runner-20260922`
+с **новым** exclusive `execution-010`; он при preview отсутствует.
+
+Preview PASS, SSH0:
+
+- Gate SHA256: `388e9805b54a13ad649de84f2565e2a4371653360a0e297b13ace43a160b23f6`.
+- Remote SHA256: `b1c8612dec962c74f4586dd3fd4bb01f70052d49b55395fa898d23c975759bf1`.
+- Source manifest SHA256: `dc8462f415890d1d8bb975f915531a314fe8bfc85a5549e1f85b58d81c3228dc`.
+- Payload SHA256: `1e817e1a05b74733577341b103453820d5a54438e500efd596ce46718425ab3b`.
+
+Будущий gate имеет одну попытку, transport60s/remote50s, read transaction2s,
+child5s, metadata cap256KiB/total8MiB и неизменные остальные limits. Source,
+metadata, guarded DB shape и observed holders собираются последовательно;
+fatal failure даёт STOP_NO_RETRY, не обход защиты ради полного результата.
+AWG2_UNTOUCHED, package016 immutable, issuance disabled. Реальные rows/env/
+argv/logs, service actions, app startup, backup/migration, stage/install
+исключены. Local PASS не является DB compatibility или разрешением switch.
+Push и один live gate требуют отдельных точных approvals; сейчас не выполнены.
