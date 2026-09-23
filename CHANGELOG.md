@@ -7,6 +7,22 @@
 
 ## 2026-09-23
 
+- По согласованному дизайну0928ca0 реализовано [локальное maintenance ядро](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-local-core-2026-09-23):
+  pinned DB backup/rehearsal и strict data delta всех18 old tables, explicit
+  pre-poll restore с failed-file archive, durable intent/ownership journal,
+  ordered coordinator, scoped systemd condition adapter и runtime40 snapshot
+  verifier. [39 offline PASS/0SKIP,11.468s](research/amn2/phase16-bot-maintenance-local-verification-2026-09-23.json),
+  synthetic rows/SQLite WAL; systemd только injected executor. RED/GREEN закрыл
+  WAL artifact mode, intent bypass, SQL LIKE schema-name exemption; self-review
+  учёл restore/forward race и servers AUTOINCREMENT при conflict. Docs readback,
+  hashes/links/diff/secret review; независимый review не проводился.
+  Полный live executor/callback bindings, actual writer inventory, import origins
+  и Linux adapter execution ещё не готовы: local PASS не READY_TO_EXECUTE.
+  SSH/live DB reads/writes/stage/install/service actions/activation/push0;
+  AWG2/package016/AMN2 source сохранены, general issuance disabled. Дальнейшая
+  локальная сборка остаётся в согласованном scope без нового design approval.
+
+
 - Подготовлен [конкретный startup/fence/backup/recovery дизайн](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#startup-fence-backup-design-2026-09-23)
   после завершённого011 и публикации9cb5706. Source review6e68235 уточнил восемь
   seed plans и все upsert fields; exact old55dc243 web вызывает initializer

@@ -1,0 +1,53 @@
+{
+  "schema": "phase16.bot-maintenance-local-verification.v1",
+  "completed_utc": "2026-09-23T20:25:45.151993+00:00",
+  "base_commit": "0928ca02b0c4c0eb26f611dd76adcdcf4c8fb252",
+  "status": "LOCAL_PASS",
+  "tests": 39,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "seconds": 11.468,
+  "python": "3.12.14",
+  "sqlite": "3.53.1",
+  "platform": "Windows",
+  "modules": [
+    "tests.test_phase16_bot_db_rehearsal",
+    "tests.test_phase16_bot_maintenance"
+  ],
+  "artifacts": {
+    "scripts/phase16_bot_db_rehearsal.py": "e190bb13377b26399e307e793ebfcc0fc8962d3de276ff28049ab7366949d395",
+    "scripts/phase16_bot_maintenance.py": "b947fd56c88f47e57b3825e5d2625ec4200aca24da6d1faa18237ec2dc1a0851",
+    "tests/test_phase16_bot_db_rehearsal.py": "a253f5754dcb138249234da186215de84127f8f26be450a3b2ab51f16667e273",
+    "tests/test_phase16_bot_maintenance.py": "bdbe6e497c7d40331e56521e64c9728650b0aa574844f1984359eb8cf538df49",
+    "tests/fixtures/phase16_schema/candidate_repository_slice.txt": "85981818f46cfbeff986f8d6f493f6be3f75c1c2d8b35fa449bce1fc341a50f5",
+    "tests/fixtures/phase16_schema/old_repository_slice.txt": "c4c0bd43003821e4aec428f810e1cb7e2f716b483478f8ef966fc748eaa76b56",
+    "tests/fixtures/phase16_schema/repository_provenance.json": "ac9419c4de5b814071e44d47b32d099d4fbaa877db35e9f932796cb78f082bda"
+  },
+  "red_green": [
+    "missing DB helper",
+    "missing maintenance helper",
+    "missing stage verifier/coordinator",
+    "WAL inherited journal mode",
+    "fence mutation without durable intent",
+    "SQL LIKE sqlite-prefix exemption"
+  ],
+  "data": "SYNTHETIC_LOCAL_ONLY",
+  "systemd": "INJECTED_EXECUTOR_ONLY",
+  "review": "SELF_REVIEW_NOT_INDEPENDENT",
+  "ssh_attempts": 0,
+  "live_db_reads": 0,
+  "live_db_writes": 0,
+  "stage": 0,
+  "service_actions": 0,
+  "activation": 0,
+  "push": 0,
+  "limitations": [
+    "LIVE_CALLBACK_BINDINGS_NOT_IMPLEMENTED",
+    "TARGET_WRITER_INVENTORY_UNKNOWN",
+    "LINUX_SYSTEMD_ADAPTER_NOT_EXECUTED",
+    "OS_DEADLINE_NETWORK_ISOLATION_REQUIRE_EXECUTOR",
+    "IMPORT_ORIGIN_BINDING_UNKNOWN",
+    "NO_LIVE_AUTHORIZATION"
+  ]
+}

@@ -376,8 +376,45 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    предлагается короткое обслуживание bot+web, server-local backup/rehearsal,
    сохранение существующих business values восьми seed plans; STOP при drift.
    Polling предшествует READY, поэтому после candidate start автоматический
-   DB restore запрещён. Ожидается согласование дизайна/подготовки; live0,
-   новый collector gate не нужен, реализация runner ещё не начата.
+   DB restore запрещён. Дизайн/локальная подготовка согласованы следующим «приступай»; live0.
+   [Локальное ядро реализовано,39 PASS](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-local-core-2026-09-23).
+   Полный live executor/target bindings ещё не готовы; новый collector не нужен.
+
+### Локальная реализация startup/fence/recovery — 2026-09-23
+
+Дизайн0928ca0 согласован операторским «приступай». Выполнение inline в этом
+же плане; SSH, stage/install, stop/start, production data reads/writes и push
+не входят в это согласование. Старые collectors/approvals не переиспользовать.
+
+- [x] T1 — `scripts/phase16_bot_db_rehearsal.py`: exact source binding,
+  SQLite backup с deadline, integrity/FK, строгая old55dc → candidate6e policy,
+  повторный initializer и old repository smoke только на disposable clone.
+  Tests: `tests/test_phase16_bot_db_rehearsal.py`; RED отсутствующего helper,
+  затем preservation, custom seeds, schema drift, FK, unexpected writes,
+  source/backup tamper, deadline и redacted failures.
+- [x] T2 — локальное ядро `scripts/phase16_bot_maintenance.py`: persistent intent journal,
+  offline transition/recovery decisions, конкретный owned systemd start fence,
+  неизменные stop/start budgets и граница candidate-start-before-READY.
+  Tests: `tests/test_phase16_bot_maintenance.py`; failure/crash до/после start,
+  lost fence, timeout/drain, foreign drop-in ownership, incomplete inventory.
+  Linux adapter проверять локально через injected command executor: это не
+  target/systemd execution evidence. Фактический writer inventory не выдумывать.
+- [x] T3 — self-review без делегирования, один affected unittest набор,
+  bindings/diff/links/secret review, normalized receipt и CHANGELOG; exact-file
+  staging/local commit. Только после конкретных артефактов — новый push scope.
+
+Результат:39 PASS/0SKIP,11.468s; все18 старых таблиц с synthetic rows,
+WAL/backup/recovery и failure каждого этапа. Full live executor не реализован;
+[target bindings и оставшиеся prerequisites](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-local-core-2026-09-23)
+не скрываются за local PASS. Следующее локальное действие — связать stage/
+maintenance operations с точным target manifest; unknown inventory блокирует
+live stop. Разрешение подготовки сохраняется, новый дизайн approval не нужен.
+
+Source operations ограничить exact schema modules и AST-selected repository
+methods; не импортировать app.main, не брать token/env и не запускать network.
+Local PASS не разрешает исполнение на VPS. До ready live manifest нужны
+inventory/maintenance ownership, effective flags/admission budget, runtime40
+binding, paths/hashes и отдельное разрешение server-local data scope.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора

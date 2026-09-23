@@ -1,0 +1,47 @@
+import ipaddress
+import sqlite3
+from typing import Any
+
+DEFAULT_PLAN_DAYS = (3, 7, 10, 14, 30, 60, 90, 180)
+
+def _first_host_address(network_cidr: str) -> str:
+    network = ipaddress.ip_network(network_cidr, strict=False)
+    return str(next(network.hosts(), network.network_address))
+
+class Repository:
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+        self._transaction_depth = 0
+        self._active_outer_transaction_identity: object | None = None
+        self._protocol_issuance_execution_leases: dict[object, dict[str, Any]] = {}
+        self._active_phase15_claims: set[tuple[str, str, str]] = set()
+
+    def ensure_default_server(self, *, name: str, network_cidr: str) -> int:
+        self._conn.execute('\n            INSERT INTO servers (\n                name,\n                host,\n                ssh_port,\n                endpoint_host,\n                vpn_port,\n                vpn_network_cidr,\n                server_address,\n                server_public_key,\n                runtime,\n                firewall,\n                max_devices\n            )\n            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n            ON CONFLICT(name) DO NOTHING\n            ', (name, 'local', 22, '127.0.0.1', 30001, network_cidr, _first_host_address(network_cidr), 'local-server-public-key', 'host_systemd', 'ufw', 254))
+        self._commit()
+        row = self._conn.execute('SELECT id FROM servers WHERE name = ?', (name,)).fetchone()
+        return int(row['id'])
+
+    def seed_default_plans(self) -> None:
+        for duration_days in DEFAULT_PLAN_DAYS:
+            self.upsert_plan(plan_id=f'days_{duration_days}', name=f'{duration_days} days', duration_days=duration_days, price=0, currency='RUB', is_free=True, is_active=True)
+
+    def upsert_plan(self, *, plan_id: str, name: str, duration_days: int, max_devices: int | None=None, price: int=0, currency: str='RUB', is_free: bool=True, is_active: bool=True) -> None:
+        if max_devices is not None and max_devices <= 0:
+            raise ValueError('max_devices must be positive when configured')
+        self._conn.execute('\n            INSERT INTO plans (\n                id,\n                name,\n                duration_days,\n                max_devices,\n                price,\n                currency,\n                is_free,\n                is_active\n            )\n            VALUES (?, ?, ?, ?, ?, ?, ?, ?)\n            ON CONFLICT(id) DO UPDATE SET\n                name = excluded.name,\n                duration_days = excluded.duration_days,\n                max_devices = COALESCE(excluded.max_devices, plans.max_devices),\n                price = excluded.price,\n                currency = excluded.currency,\n                is_free = excluded.is_free,\n                is_active = excluded.is_active,\n                updated_at = CURRENT_TIMESTAMP\n            ', (plan_id, name, duration_days, max_devices, price, currency, int(is_free), int(is_active)))
+        self._commit()
+
+    def get_plan(self, plan_id: str) -> sqlite3.Row:
+        return self._fetch_one('SELECT * FROM plans WHERE id = ?', (plan_id,))
+
+    def _commit(self) -> None:
+        if self._transaction_depth == 0:
+            self._conn.commit()
+
+    def _fetch_one(self, query: str, params: tuple[Any, ...]) -> sqlite3.Row:
+        row = self._conn.execute(query, params).fetchone()
+        if row is None:
+            raise LookupError('record not found')
+        return row

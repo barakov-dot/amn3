@@ -175,7 +175,9 @@ Task3B, Windows traffic и Task4.5 не закрыты. Их приоритет 
 
 ## Startup, writer fence, backup и recovery — проект решения 23.09
 
-**DESIGN_READY_FOR_REVIEW / NOT_IMPLEMENTED / NO_LIVE_AUTHORIZATION.**
+**DESIGN_APPROVED / LOCAL_CORE_IMPLEMENTED / LIVE_EXECUTOR_NOT_READY.**
+Оператор согласовал локальную реализацию после design commit0928ca0.
+[Результат реализации и оставшиеся границы](#maintenance-local-core-2026-09-23) ниже.
 Основание: операторское «приступай» к локальной подготовке после публикации
 9cb5706. Scope этой работы — чтение exact source и конкретизация существующего
 runbook; не новый execution plan. AMN3 HEAD9cb570646f3f22df8c2c4ff70a062707c1a7508f,
@@ -339,3 +341,115 @@ Windows/quality/A-B остаются самостоятельными услов
 В этом ходе: source-only review, official SQLite docs, docs readback/links/
 diff/secret review; тесты/backup/SSH/stage/install/activation0, AMN2/package
 не менялись. Новые runner и migration allowlist пока не реализованы.
+
+<a id="maintenance-local-core-2026-09-23"></a>
+
+## Локальное ядро maintenance — результат 23.09
+
+**LOCAL_CORE_PASS / LIVE_EXECUTOR_NOT_READY / NO_LIVE_AUTHORIZATION.**
+По «приступай» реализованы два модуля и их offline tests. Это материальная
+подготовка согласованного дизайна, не новый collector012 и не live gate.
+[Машинный receipt](phase16-bot-maintenance-local-verification-2026-09-23.json):
+**39 PASS / 0 FAIL / 0 SKIP, 11.468s**, Windows/Python3.12.14/SQLite3.53.1.
+Self-review выполнен; независимый review не проводился, делегирование не было
+разрешено. Readback011, bundle/package016 и source AMN2 не изменялись.
+
+### Реализовано и чем проверено
+
+- [DB helper](../../scripts/phase16_bot_db_rehearsal.py): pinned schema snapshots
+  и AST-selected exact repository methods из55dc243/6e68235; без импорта app.main,
+  env/token/polling. Backup API в новый файл0600, integrity и FK separately,
+  hash закрытого backup, отдельный disposable clone, strict schema/data delta,
+  повторный initializer и старый initializer/repository read/write smoke на clone.
+  WAL snapshot проверен с открытым synthetic writer и неперенесёнными строками:
+  только новая копия переводится штатным SQLite PRAGMA в DELETE для автономного
+  artifact. Исходный journal mode/sidecars не меняются и не удаляются helper.
+- [Maintenance core](../../scripts/phase16_bot_maintenance.py): точный ordered
+  coordinator fence → stop → backup → rehearsal → migrate → candidate start →
+  web start → release; intent fsync до каждой операции, manifest/unit baseline,
+  chained event files, exclusive execution claim. Повтор/продолжение незавершённого
+  intent запрещены. Ошибка любого этапа прекращает последующие действия, без
+  automatic cleanup/unmask/restart/restore. Stage snapshot verifier использует
+  существующий pinned manifest126 source files/runtime40; test-venv48 отклоняется.
+- Конкретный fence adapter создаёт только свой persistent drop-in с
+  `ConditionPathExists=/run/phase16/<operation>/<unit>.allow`. По умолчанию permit
+  отсутствует; созданный до start permit удаляется после вызова, в том числе
+  при обычном timeout exception. Crash оставляет intent/lock и может оставить
+  permit: **STOP/manual recovery**, не доказанный запрет любого будущего start.
+  При reboot `/run` очищается, persistent condition остаётся; boot identity
+  должна перепроверяться. Чужие unit/drop-in/masked/enabled настройки не меняются.
+  Механизм основан на [systemd unit conditions/drop-ins](https://raw.githubusercontent.com/systemd/systemd/v255/man/systemd.unit.xml).
+  Linux/systemd execution не проводилось; commands проверены injected executor.
+- Explicit restore разрешён кодом только до candidate-start intent, при
+  подтверждённых fence/drain/same boot и проверенном backup. Он сохраняет failed
+  main/WAL/SHM/journal в новый archive, готовит проверенный replacement, сохраняет
+  mode и на POSIX owner/group, записывает recovery claim. Повтор и движение вперёд
+  блокируются; процессы не запускаются. Partial filesystem failure требует
+  отдельного разбора сохранённых файлов/журнала, автоматического resume нет.
+  Ни одна такая операция на VPS в этом ходе не выполнялась.
+
+[DB tests](../../tests/test_phase16_bot_db_rehearsal.py) используют synthetic rows
+во **всех18 старых таблицах**, включая BLOB, ссылки passport/device/receipts,
+custom max_devices и timestamps. Проверены row deletion/change/addition,
+нештатные seeds, schema drift, FK violation, source/backup tamper, WAL, deadline
+и redacted errors. [Maintenance tests](../../tests/test_phase16_bot_maintenance.py)
+покрывают все8 failure phases, persisted start intent, timeout, stale writer,
+crash claim, восстановление до/после polling boundary, foreign/changed drop-ins,
+effective condition/reload/alias mismatch и неполный manifest.
+
+Во время RED/GREEN исправлены Windows fsync/read-only handle и незакрытые
+fixture connections; self-review закрыл WAL backup mode, mutation без intent,
+restore/forward race и SQL LIKE `sqlite_%`, который пропускал `sqliteX...`.
+Это исправления новых локальных модулей; прежние readback suites не повторялись.
+
+### Точный data delta для наблюдённого old55dc
+
+Произвольных passport/generation backfills **нет** в разрешённом переходе.
+Старые строки/ключи/значения сохраняются с учётом SQLite types и multiplicity.
+
+| Объект | Допустимое изменение |
+| --- | --- |
+| devices и device_passports | Четыре новые колонки protocol_version/runtime_instance_id/client_identity_evidence_status/compatibility_evidence_id, все NULL у старых rows |
+| admin_config_issuance_receipts | Новые config_version/protocol_version/runtime_instance_id/compatibility_evidence_id/client_application/client_platform/client_version/client_build, все NULL |
+| plans | Восемь стандартных days_N; existing business values обязаны совпадать до записи. Только updated_at может измениться; existing max_devices/created_at сохраняются. Отсутствующие стандартные rows создаются по exact defaults |
+| servers | Existing rows полностью неизменны. Только отсутствующий local может добавиться с exact defaults и явно заданной network_cidr |
+| sqlite_sequence | Только servers: ровно +1 к max(old sequence, old maximum id), включая ON CONFLICT DO NOTHING. Другие sequence entries не меняются |
+| awg3_control_state | Ровно singleton1 с false/0 для acceptance/issuance/suspension, NULL actor/reason/receipt и штатным timestamp |
+| Остальные десять новых таблиц | Пустые после startup schema/seed |
+| Новая schema, indexes, triggers | Точное соответствие результату pinned old → candidate initializer; не только число объектов |
+
+### Что ещё требуется до исполнимого live пакета
+
+Этот commit **не содержит готового SSH/live executor**. Нет CLI, принимающего
+production paths и запускающего systemctl автоматически. Callback operations
+coordinator, systemctl executor и typed target observations пока не привязаны
+к реальным VPS paths/hashes/config; проверки с `lambda: True` существуют только
+в synthetic tests и не являются допустимой live реализацией.
+
+Дальнейшая локальная сборка того же пакета должна связать эти модули с:
+
+1. Exact stage/revert targets, runtime40 interpreter/source/import origins и
+   artifact manifests; stage verifier сам ничего не устанавливает/не собирает.
+2. Фактическим writer inventory и maintenance ownership. Текущий validator
+   допускает только bot+web и доказанное отсутствие cron/agent/socket/timer/
+   external poller/manual CLI. Это **не установленные факты** о VPS. Если иной
+   writer найден — STOP до stop; понадобится адресная реализация его fence,
+   а не установка inventory_complete=True. Effective settings/admission budget
+   также ещё UNKNOWN; admission<40 — необходимая, не достаточная startup bound.
+3. Проверкой effective conditions, PID/cgroup/drain/forced-kill, startup READY
+   и локальных receipts, original runtime rollback evidence, pending operations.
+4. Linux process wall deadline, network isolation DB helper, private parent
+   directories, same-filesystem restore paths, recovery reserve и устойчивым
+   запуском/наблюдением runner. In-process SQLite deadline120s/row cap200000
+   не заменяют общий OS timeout и не обещают maintenance SLA.
+
+До этих привязок нельзя выдавать `READY_TO_EXECUTE`, готовое live approval или
+автоматический data rollback. Live server-local чтение строк/backup/rehearsal,
+production migration, bot/web stop/start, stage и Telegram operator actions
+по-прежнему требуют соответствующего точного разрешения. Локальную сборку
+можно продолжать в уже согласованном scope; нового согласования дизайна не нужно.
+
+В этом ходе SSH/live DB reads/writes/stage/install/service actions/activation=0.
+AWG2_UNTOUCHED, package016 immutable, general issuance disabled. Локальные
+synthetic backup/restore artifacts находились только в temporary test directories.
+Production rows, env, token и protected configs не читались и не копировались.

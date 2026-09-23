@@ -1,0 +1,34 @@
+{
+  "old_repository_slice": {
+    "commit": "55dc243b8e6c6bdb57f8301b56326e4cd4072d19",
+    "path": "app/db/repositories.py",
+    "full_source_sha256": "fabb24e820b29f3733333c18bd0aeb97bb65025927aef0e92892d34e2ef071fe",
+    "sha256": "c4c0bd43003821e4aec428f810e1cb7e2f716b483478f8ef966fc748eaa76b56",
+    "methods": [
+      "__init__",
+      "_commit",
+      "_fetch_one",
+      "ensure_default_server",
+      "get_plan",
+      "seed_default_plans",
+      "upsert_plan"
+    ],
+    "transform": "Python ast.unparse; selected methods plus DEFAULT_PLAN_DAYS/_first_host_address; no method changes"
+  },
+  "candidate_repository_slice": {
+    "commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "path": "app/db/repositories.py",
+    "full_source_sha256": "baf857f40c7397d96914e1cc66d9fb3f61009a75a245948dfc74c1640d1dbabe",
+    "sha256": "85981818f46cfbeff986f8d6f493f6be3f75c1c2d8b35fa449bce1fc341a50f5",
+    "methods": [
+      "__init__",
+      "_commit",
+      "_fetch_one",
+      "ensure_default_server",
+      "get_plan",
+      "seed_default_plans",
+      "upsert_plan"
+    ],
+    "transform": "Python ast.unparse; selected methods plus DEFAULT_PLAN_DAYS/_first_host_address; no method changes"
+  }
+}

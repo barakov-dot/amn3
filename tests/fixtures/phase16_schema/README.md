@@ -16,3 +16,12 @@ After collection, tests release the retained authorizer only on disposable
 memory connections to compare serialized bytes. This does not modify the
 production guard. Trigger bodies and index expressions exist in fixture source
 for realism; the collector must not return them in receipts.
+
+
+Repository slices (2026-09-23): `old_repository_slice.txt` and
+`candidate_repository_slice.txt` are Python AST-unparsed selections of seven
+methods plus DEFAULT_PLAN_DAYS/_first_host_address, with only stdlib imports.
+`repository_provenance.json` binds full original Git blob hashes, revisions,
+selected method names and normalized slice hashes. No method body changes;
+no app.main, networking, token, env or production data. The maintenance helper
+pins these hashes separately from the frozen readback tools/provenance.
