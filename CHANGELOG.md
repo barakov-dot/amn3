@@ -7,6 +7,16 @@
 
 ## 2026-09-23
 
+- [Локальная сверка source снимка009 с историей AMN2](research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#source-history-reconciliation-2026-09-23)
+  установила полное совпадение 102 Python-файлов/path set с 55dc243 после
+  поиска по 361 commit изменения app (70 совпадений main.py). Независимая
+  прямая проверка 102 blobs подтвердила результат; input receipt hash проверен.
+  Уточнена [готовность bot-only switch](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#switch-readiness-2026-09-23),
+  исправлен устаревший статус Linux-проверки и добавлена ссылка из плана.
+  Проверки docs-only: readback, ссылки, diff/whitespace и scope/secret review.
+  Это не exact deployed release/runtime/DB identity; SSH, повтор тестов,
+  package build/stage/install/activation отсутствуют, AWG2/package016 сохранены.
+
 - Подготовлена [датированная база знаний для будущего единого VPN-проекта](docs/PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md):
   source/evidence/capability boundaries AMN2/AMN3, открытые Task3B/Windows/A/B
   и состав окончательной передачи после Phase16. Добавлена навигация в START_HERE.

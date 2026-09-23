@@ -34,7 +34,14 @@ live configs или Windows venv. Существующие deployment scripts н
 Все source/locks взяты git archive exact commit; pip download использовал
 require-hashes, binary-only, официальный https://pypi.org/simple, без установки.
 
-## Подготовленная граница Linux-проверки (НЕ ИСПОЛНЕНО)
+## Исторический дизайн Linux-проверки — исполнен отдельно 22.09
+
+Последующий [isolated Linux gate завершён PASS](phase16-bot-linux-isolated-gate-2026-09-21.md#isolated-linux-pass-2026-09-22):
+offline test48/pip metadata, negative control и 6 signal tests без SKIP.
+Ниже сохранён исходный дизайн 21.09, а не команда повторного запуска.
+Retained test-venv содержит 48 pins и не годится как production runtime40.
+Статус NOT_RUN внутри immutable manifest относится к моменту создания;
+не менять manifest и не пересобирать candidate ради обновления статуса.
 
 Отдельный будущий scope: один retained каталог
 /opt/amn2-spain/bot-candidates/phase16-bot-candidate-20260921-6e68235-001;
@@ -87,8 +94,9 @@ initializer идемпотентен, старый initializer не удалил
   регрессия lifecycle fix. Факт наличия кастомных тарифов в live DB неизвестен.
 - Поздняя ошибка partial Phase15 schema не отменяет ранее созданные таблицы.
   initialize_schema целиком не является атомарной миграцией.
-- main.py совпал с одним файлом двух исторических commits; полная deployed
-  revision и фактическая shared DB schema неизвестны.
+- [Сверка 23.09](phase16-bot-integration-readback-contract-2026-09-22.ru.md#source-history-reconciliation-2026-09-23)
+  установила совпадение всех 102 наблюдаемых Python-файлов с 55dc243.
+  Exact deployed revision, зависимости и фактическая shared DB schema неизвестны.
 
 До activation нужны отдельные evidence: фактические schema/release identities
 без содержимого пользовательских строк; согласованный writer fence для всех
@@ -119,3 +127,32 @@ ExecStart и проверенным PYTHONPATH binding; общий web unit не
 нет — STOP/recovery; не восстанавливать DB поверх продолжающих писать web/
 других клиентов. Backup сам по себе не разрешает DB restore.
 Старый release, package016 и новые evidence не удалять.
+
+<a id="switch-readiness-2026-09-23"></a>
+
+## Готовность bot-only switch — 2026-09-23
+
+Это уточнение прежнего дизайна и prerequisites, не исполняемый gate.
+Новая сборка и повтор завершённых isolated Linux/worker проверок не нужны.
+
+| Условие | Что уже доказано | Что нужно до переключения |
+| --- | --- | --- |
+| Candidate source/runtime | Exact source 6e68235, immutable ZIP/manifest; isolated test48 включает runtime40 | Отдельный production venv только runtime40; checksum/readback его source, interpreter, installed metadata и unit binding в будущем stage |
+| Старый release для возврата | Python source снимка009 совпал с 55dc243; unit snapshot имеет ожидаемые entrypoint/cwd | Подтвердить полный сохраняемый старый release, dependency identity и эффективный unit/env binding; Python match не заменяет это |
+| Shared DB | Synthetic переход 55dc243 → candidate и обратное чтение проверены ранее | Фактическая schema identity без пользовательских строк; проверка её совместимости offline, включая старый web/repository |
+| Startup writes | Известны schema/seed/server-sync writes и неатомарный startup | Явная policy для days_30 и server sync на фактическом состоянии; не трактовать «нулевой бот» как пустую DB |
+| Writer fence и backup | Bot lock не покрывает web/API/CLI/agent; scope web неизменен | Полный список writers и способ их quiescence, согласованный с scope; проверяемый backup/restore target и provenance при этом fence |
+| Stop/start/recovery | Linux signal tests PASS; сохранён дизайн одного bot drop-in | Фактические stop/drain budgets из unit, отсутствие второго poller, подтверждённое завершение старого до запуска нового; UNKNOWN ведёт в STOP/recovery |
+
+Порядок допуска: сначала получить отсутствующие факты о старом runtime/DB и
+writers в одном заранее проверенном ограниченном scope; затем offline проверить
+совместимость и закрепить startup policy/rollback. Только после этого готовить
+exact stage/switch approval с реальными hashes, unit values и stop-conditions.
+Не подменять отсутствующие факты типовым unit или выдуманным timeout.
+Если writer fence требует остановки web, это изменение scope для решения
+оператора до подготовки live-команды. Ни один из этих пунктов не разрешает
+автоматическую остановку, запуск poller, восстановление DB или выдачу.
+
+Local readiness остаётся неполной по фактическим runtime/DB prerequisites;
+Task3B, Windows traffic и Task4.5 не закрыты. Их приоритет и очередь сохраняет
+канонический план Phase16, а эта таблица не вводит параллельный execution plan.

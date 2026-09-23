@@ -326,6 +326,14 @@ Clipboard/EN-RU setup подготовлены по просьбе операт�
    новый SSH не является ближайшим gate. Package build/stage/install требуют
    отдельных точных approvals, AWG2/package016 сохраняются.
 
+   Локальная подготовка 23.09: [история AMN2 сопоставлена с source снимка009](../../../research/amn2/phase16-bot-integration-readback-contract-2026-09-22.ru.md#source-history-reconciliation-2026-09-23).
+   Найдено полное совпадение 102 Python-файлов и их path set с 55dc243;
+   это эталон старого source для compatibility, не exact deployed release/DB.
+   [Матрица bot-only switch](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#switch-readiness-2026-09-23)
+   отделяет завершённые candidate/Linux checks от недостающих runtime/DB,
+   writer fence, startup policy и rollback evidence. Новый SSH, rebuild и
+   повтор тестов не выполнялись; activation остаётся заблокированной.
+
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
 исправлен только этот AMN2 handler: 2 RED → 33 PASS целевого web/health набора,
