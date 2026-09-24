@@ -456,9 +456,13 @@ Production rows, env, token и protected configs не читались и не �
 
 <a id="runtime40-stage-ready-2026-09-24"></a>
 
-## Runtime40 stage: конкретный пакет готов, не исполнен — 24.09
+## Runtime40 stage: подготовка пакета — 24.09 (исторический снимок)
 
-**STAGE_READY_NOT_EXECUTED / MAINTENANCE_BLOCKED.** Продолжение по «ПРОДОЛЖАЙ»
+Состояние перед запуском: **STAGE_READY_NOT_EXECUTED / MAINTENANCE_BLOCKED**.
+Обновление: approval использован один раз; [результат исполнения](#runtime40-stage-execution-001-2026-09-24)
+— **UNKNOWN_NO_RETRY**, прежняя команда не подлежит повторному запуску.
+
+История подготовки: Продолжение по «ПРОДОЛЖАЙ»
 после exact push b28749a: remote branch подтвердил b28749a, оба changelog hooks
 PASS. Новый scope этого пакета — только подготовка отдельного runtime40 вне
 downtime. Bot identity/token/env, действующие bot/web, shared DB и AWG2 сохраняются.
@@ -524,9 +528,9 @@ Self-review выполнен; независимый review не проводи�
 - Bundle SHA256: `e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7`.
 - Source: `6e682356ed14a62d636ee58039fd3a389e794809`.
 - Future local evidence: `C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-runtime40-stage-20260924/execution-001`.
-- Fresh approval marker: `PHASE16_BOT_RUNTIME40_STAGE_20260924_001` — **NOT_GRANTED**.
+- Approval marker: `PHASE16_BOT_RUNTIME40_STAGE_20260924_001` — **GRANTED_AND_CONSUMED_ONCE**; исходный manifest сохранён без изменений.
 
-После exact approval команда нового gate должна использовать указанный bundle,
+Историческая спецификация уже выполненной команды (не повторять): указанный bundle,
 `--execute --approve PHASE16_BOT_RUNTIME40_STAGE_20260924_001`, а также оба
 `--approved-remote-sha256` и `--approved-manifest-sha256` из списка выше.
 Entry point — `scripts/phase16_bot_runtime40_stage_gate.py`; Python invocation
@@ -547,3 +551,47 @@ Private stage root0700 ещё не доказывает доступность �
 Итог этого локального хода: SSH0, remote stage0, service actions0, DB reads/writes0,
 activation0; AWG2_UNTOUCHED, package016 и AMN2 source immutable. Новый пакет stage
 готов к рассмотрению, готовность maintenance/Phase16 acceptance не заявляется.
+
+<a id="runtime40-stage-execution-001-2026-09-24"></a>
+
+## Runtime40 stage001: транспорт оборвался, повтор запрещён — 24.09
+
+**UNKNOWN_NO_RETRY / MAINTENANCE_BLOCKED.** По двум точным разрешениям оператора:
+
+1. Push `68df5b9b7d36cd97ad94b7bcab058b10252586b6` выполнен в origin / ветку
+   `codex/phase16-awg3-family-3-1-spain-pilot-016` с EXPECTED_OLD `b28749a`.
+   URL/ref/ancestor проверены; NO_FORCE/NO_TAGS, hook PASS для одного commit,
+   последующий remote readback подтвердил полный новый SHA.
+2. Единственная SSH-попытка stage001 завершилась без remote receipt.
+   [Normalized execution record](phase16-bot-runtime40-stage-execution-001-2026-09-24.json)
+   сохраняет exact claim/result, их hashes, transport metadata и границы вывода.
+   Local claim → result file заняло около 33 секунд; это не измерение remote work.
+
+В stdin локального SSH записано 3 702 784 из 30 513 539 bytes; `stdin_complete=false`,
+SSH returncode 255, failure_stage=`stdin_write`, stdout 0 bytes. Выходные pipes
+закрылись (`output_complete=true`), но это не означает успешную передачу или
+полученный серверный результат. stderr 49 bytes классифицирован как
+`UNCLASSIFIED_STDERR`; raw bytes существовали только в памяти завершённого runner,
+на диске сохранены лишь размер и hash. Точная причина разрыва **UNKNOWN**;
+не объявлять причиной сеть, SSH settings, pip или runtime без evidence.
+
+Локальный source trace: remote main сначала читает bundle, `execute()` вызывает
+`validate_bundle()` до precheck/claim/write/venv. Frozen validator требует точный
+размер 30 485 208 и SHA всего архива. При этой неполной передаче bound code не может
+дойти до создания stage. Это вывод по коду и transport counters, **не server
+readback**: отсутствие remote destination или состояние работающих сервисов не
+проверялось. `RUNTIME40_STAGED_NOT_ACTIVATED` не получен; stage/install не приняты.
+
+Повтор SSH, cleanup, service commands, DB operations и activation не выполнялись.
+AWG2/package016/AMN2 source не менялись, general issuance не включалась. Approval 001
+и local evidence directory использованы; старые scripts/manifests/receipt сохранены
+без изменений. Maintenance prerequisites из manifest остаются UNKNOWN/BLOCKED.
+
+Следующее разрешённое локальное действие: подготовить bounded transport diagnostic
+с безопасной классификацией ошибок и offline partial-frame controls, сохраняя
+frozen stage001. Не менять timeout/keepalive и не предлагать исправление причины
+без доказательства. До любого нового SSH нужны конкретный reviewable artifact и
+новое точное разрешение; этот результат не разрешает retry, probe или очистку.
+Docs-only фиксация: claim/result/hash/source-order readback, ссылки и diff/whitespace;
+завершённые 15/39/125 suites не повторялись. Новая запись результата фиксируется
+локально; push этого нового commit требует собственного exact SHA approval.

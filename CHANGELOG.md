@@ -7,6 +7,20 @@
 
 ## 2026-09-24
 
+- По exact approvals опубликован 68df5b9 (EXPECTED_OLD b28749a, hook и remote
+  readback PASS) и выполнен один [runtime40 stage001](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#runtime40-stage-execution-001-2026-09-24).
+  Результат **UNKNOWN_NO_RETRY**: SSH 255/stdin_write, неполная передача
+  3 702 784/30 513 539 bytes, remote receipt отсутствует. Сохранён
+  [execution record](research/amn2/phase16-bot-runtime40-stage-execution-001-2026-09-24.json)
+  с exact local evidence hashes; root cause UNKNOWN, stderr raw не сохранялся.
+  Source-order review подтверждает full bundle validation до stage claim/write;
+  это не readback отсутствия каталога. Stage/install не приняты, повтор/cleanup
+  не выполнялись. Проверены local claim/result, hashes, docs links/diff/whitespace;
+  unchanged suites не повторялись, frozen code/manifests сохранены. Service/DB/
+  activation commands0; AWG2/package016/AMN2 source не менялись, issuance не
+  включалась. Следующий локальный шаг — transport diagnostic, новый SSH не
+  разрешён. Этот result commit ещё не опубликован; approval 68df на него не действует.
+
 - Подготовлен [exact runtime40 stage пакет](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#runtime40-stage-ready-2026-09-24)
   после публикацииb28749a. Новый executor создаёт отдельный private stage,
   устанавливает40 runtime pins из прежнего immutable bundle через offline wheels

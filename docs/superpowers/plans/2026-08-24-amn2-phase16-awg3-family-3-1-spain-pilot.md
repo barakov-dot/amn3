@@ -435,15 +435,21 @@ binding, paths/hashes и отдельное разрешение server-local da
   claims, false receipts, timeout/ошибок на каждом шаге. Actual Linux stage не
   исполнять локальным тестом. Receipt/runbook/CHANGELOG, local commit.
 
-[Конкретный stage пакет подготовлен](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#runtime40-stage-ready-2026-09-24):
-15 offline PASS/0SKIP, immutable bundle и CLI preview PASS, Linux stage NOT_RUN.
-Target manifest связывает source/interpreter/DB/unit paths; unknown writer/
-service-user/flags/drain/pending поля блокируют maintenance. Следующий gate —
-`PHASE16_BOT_RUNTIME40_STAGE_20260924_001`, только по новому exact разрешению,
-один SSH до300s remote/330s transport; без downtime и service/DB actions.
-Он не разрешает maintenance, live data reads,
-backup/migration, stop/start или Telegram; эти действия зависят от фактического
-writer inventory, drain/startup evidence и отдельного manifest/approval.
+[Пакет подготовлен и однократно исполнен](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#runtime40-stage-execution-001-2026-09-24)
+из pushed `68df5b9`: предыдущие 15 offline PASS/0SKIP сохранены; stage001 дал
+**UNKNOWN_NO_RETRY**. SSH rc255/stdin_write, в pipe записано 3 702 784 из 30 513 539
+bytes, remote stdout/receipt отсутствуют. Stage/install не приняты; код требует
+полный bundle до claim/write, но наличие remote directory не проверено.
+Approval `PHASE16_BOT_RUNTIME40_STAGE_20260924_001` использован; повтор и cleanup
+не разрешены. Новый SHA результата требует отдельного push approval.
+
+Следующий локальный шаг — bounded transport diagnostic/partial-frame controls,
+без SSH и изменения frozen 001. Root cause разрыва UNKNOWN; не менять transport
+параметры наугад. Любой новый SSH требует конкретного пакета и нового exact approval.
+Target manifest сохраняется историческим: unknown writer/service-user/flags/drain/
+pending поля блокируют maintenance. Live data reads/backup/migration, stop/start,
+Telegram и activation не разрешены этим stage; фактический writer inventory,
+drain/startup evidence и отдельный manifest/approval остаются обязательными.
 
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
@@ -468,8 +474,10 @@ Design согласован оператором после commit b277154. По
   source/dependencies/DB metadata/holders получены, old55dc243 metadata MATCH;
   runtime binding/writer completeness UNKNOWN. Следующий локальный этап —
   startup/fence/backup/recovery ядро реализовано (39 local PASS);24.09 runtime40
-  stage пакет готов (15 local PASS), не исполнен. Maintenance bindings/actual
-  prerequisites открыты; recovery-контракт v1 для прежнего scope сохранён.
+  stage001 исполнен один раз из 68df5b9: UNKNOWN_NO_RETRY (неполная передача,
+  remote receipt отсутствует); 15 local PASS сохранены. Следующий локальный шаг —
+  transport diagnostic. Maintenance bindings/actual prerequisites открыты;
+  recovery-контракт v1 для прежнего scope сохранён.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.

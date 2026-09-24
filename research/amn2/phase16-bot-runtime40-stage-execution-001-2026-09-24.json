@@ -1,0 +1,92 @@
+{
+  "schema": "phase16.bot-runtime40-stage-execution-record.v1",
+  "date": "2026-09-24",
+  "amn3_execution_commit": "68df5b9b7d36cd97ad94b7bcab058b10252586b6",
+  "push": {
+    "status": "VERIFIED_REMOTE_HEAD",
+    "remote": "origin",
+    "url": "https://github.com/barakov-dot/amn3.git",
+    "ref": "refs/heads/codex/phase16-awg3-family-3-1-spain-pilot-016",
+    "expected_old": "b28749a7159e3ace59e0085aae5813fad0528fe0",
+    "new": "68df5b9b7d36cd97ad94b7bcab058b10252586b6",
+    "force": false,
+    "tags": false,
+    "changelog_hook": "PASS_ONE_COMMIT"
+  },
+  "evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-runtime40-stage-20260924/execution-001",
+  "evidence_sha256": {
+    "claim.json": "912377191649d77d3cac38bc622c6369ba76575f7cc40eb1af8fedb1538fe288",
+    "result.json": "c252f034784ee4b5df45334fc7a08f21e32fe4c5738ff1e641d73e00c71c8371"
+  },
+  "result_file_mtime_utc": "2026-09-24T17:05:17.024089+00:00",
+  "approximate_claim_to_result_seconds": 32.64,
+  "timing_basis": "LOCAL_CLAIM_TIMESTAMP_TO_RESULT_FILE_MTIME_NOT_REMOTE_DURATION",
+  "execution": {
+    "schema": "phase16.bot-runtime40-stage-local.v1",
+    "claim": {
+      "approval": "PHASE16_BOT_RUNTIME40_STAGE_20260924_001",
+      "attempts": 1,
+      "remote_sha256": "cfa62d3767a14904b8330f1688c7424449fab1dffa7709ed875c41ff8f10f1ae",
+      "manifest_sha256": "e5f6d4d7dc447ca5c933230e0b857377471928dc0daa9b41208d690d5cea607c",
+      "bundle_sha256": "e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+      "destination": "/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260924-6e68235-001",
+      "claimed_at": "2026-09-24T17:04:44.383647+00:00"
+    },
+    "status": "UNKNOWN_NO_RETRY",
+    "ssh_attempts": 1,
+    "transport": {
+      "schema": "phase16.bot-transport.v1",
+      "returncode": 255,
+      "failure_stage": "stdin_write",
+      "stdin_bytes_requested": 30513539,
+      "stdin_bytes_accepted": 3702784,
+      "stdin_complete": false,
+      "output_complete": true,
+      "stdout": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes_observed": 49,
+        "bytes_retained": 49,
+        "prefix_sha256": "f267ca96307a9b773efb5f398fdf3a0d69bb89c6b184cff55d60474855b39d10"
+      },
+      "pipe_failures": [
+        "stdin_write"
+      ],
+      "stderr_classification": "UNCLASSIFIED_STDERR"
+    },
+    "reason": "transport_stdin_write"
+  },
+  "analysis": {
+    "failure_boundary": "LOCAL_SSH_STDIN_WRITE",
+    "root_cause": "UNKNOWN",
+    "remote_receipt": "ABSENT",
+    "remote_destination_state": "NOT_OBSERVED",
+    "partial_frame_effect": "BOUND_CODE_VALIDATES_FULL_BUNDLE_SIZE_AND_HASH_BEFORE_STAGE_CLAIM",
+    "stage_write_inference": "NOT_REACHABLE_FROM_THIS_INCOMPLETE_FRAME_UNDER_BOUND_CODE",
+    "remote_state_inference_is_not_readback": true,
+    "stderr_raw_persisted": false,
+    "stderr_note": "49 bytes retained only in terminated process memory; classification and hash persisted",
+    "fresh_service_health": "NOT_CHECKED",
+    "retry": 0,
+    "cleanup": 0,
+    "activation_commands": 0,
+    "service_commands": 0,
+    "live_database_operations": 0
+  },
+  "checks": {
+    "local_claim_result_readback": "PASS",
+    "code_order_review": "PASS",
+    "docs_only": true,
+    "unchanged_test_suites_rerun": false,
+    "frozen_scripts_and_manifests_modified": false
+  },
+  "next_action": "LOCAL_TRANSPORT_DIAGNOSTIC_DESIGN_WITHOUT_SSH; NO_REUSE_OF_CONSUMED_APPROVAL",
+  "maintenance": "BLOCKED_UNKNOWN_PREREQUISITES",
+  "awg2": "UNTOUCHED_BY_THIS_ACTION",
+  "package016": "IMMUTABLE_UNCHANGED",
+  "general_issuance": "NO_ENABLE_ACTION"
+}
