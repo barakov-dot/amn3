@@ -595,3 +595,52 @@ frozen stage001. Не менять timeout/keepalive и не предлагат�
 Docs-only фиксация: claim/result/hash/source-order readback, ссылки и diff/whitespace;
 завершённые 15/39/125 suites не повторялись. Новая запись результата фиксируется
 локально; push этого нового commit требует собственного exact SHA approval.
+
+<a id="transport-diagnostic-local-2026-09-24"></a>
+
+## Локальная диагностика транспорта после stage001 — 24.09
+
+**LOCAL_PASS_NOT_WIRED_TO_LIVE_GATE.** По следующему «продолжай» подготовлен
+[отдельный transport module](../../scripts/phase16_bot_transport_diagnostics.py),
+сохраняющий process/pipe limits frozen transport из66bbc8a. Stage001, его helpers,
+manifest и использованное разрешение не менялись. Новый модуль не содержит CLI,
+target loader, SSH settings, remote command, сохранения raw logs или retry.
+К действующему gate он не подключён; нового разрешения SSH этот commit не создаёт.
+
+Дополнительные данные — elapsed_seconds, last_stdin_progress_seconds,
+termination_action и несколько фиксированных stderr hints вместо одной категории.
+Allowlist распознаёт в том числе server-alive timeout, send-disconnect/reset/abort,
+отказ подключения и Python traceback; выводит только постоянные labels, без адреса,
+пути или текста ошибки. Hints не устанавливают root cause и не меняют exit status.
+Unknown stderr остаётся UNCLASSIFIED, raw bytes не сохраняются; произвольную новую
+ошибку по-прежнему нельзя восстановить из receipt. Output cap общий для stdout и
+stderr, его срабатывание отдельно отмечается в диагностике.
+
+[11 целевых локальных тестов](../../tests/test_phase16_bot_transport_diagnostics.py)
+прошли без ошибок/пропусков за0.454s; [verification receipt](phase16-bot-transport-diagnostic-local-verification-2026-09-24.json).
+Реальные Windows/Python children проверили early exit255 с неполным stdin,
+несколько hints и redaction, unknown/invalid UTF8, timeout/cleanup, combined cap,
+start failure, invalid limits, отсутствие retry и независимость hints от exit code.
+RED подтвердил отсутствие нового модуля; при разработке исправлены quoting теста
+и fixture: чтение одного byte не гарантирует завершённую запись chunk32768.
+`stdin_bytes_accepted` и last-progress относятся к завершённым локальным writes,
+а не к количеству bytes, полученному VPS.
+
+Точный rendered bootstrap stage001 исполнен **локально** с synthetic partial frame
+длиной3 702 784 bytes: rc3, `bundle_binding`, steps пусты, local scratch пуст.
+Подмена byte в script дала rc70 до remote main. Это подтверждает validate-before-
+stage для этих inputs; не воспроизводит сетевую причину, Linux install или actual
+remote directory state. Production bundle/target/config/token для controls не нужны.
+
+Попытка сопоставить сохранённый stderr hash с18 фиксированными распространёнными
+сообщениями и окончаниями строк совпадений не дала. Protected target не читался;
+никаких предположений о фактическом тексте/причине из этого не делается.
+Stage001 остаётся UNKNOWN_NO_RETRY. Self-review выполнен; independent review не
+проводился. Предыдущие suites не повторялись; frozen manifest сверён и совпал.
+
+Следующий локальный этап — подготовить конкретный checksum-bound диагностический
+SSH packet с этим модулем, собственными evidence path/approval и строгим output
+validator. Он ещё **NOT_PREPARED**: этот module не является готовой live-командой
+и не разрешает повтор stage001. До отдельного exact approval: SSH0, remote stage0,
+install0, service/DB actions0, activation0, push0. AWG2/package016 не изменены,
+general issuance не включалась. Maintenance и Phase16 acceptance остаются открыты.

@@ -7,6 +7,18 @@
 
 ## 2026-09-24
 
+- По «продолжай» подготовлен [отдельный diagnostic transport](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#transport-diagnostic-local-2026-09-24):
+  несколько fixed stderr hints без raw strings, elapsed/last-write timing и
+  termination action при прежних bounded process/IO limits. Новый module не
+  подключён к live gate, frozen001 и manifests не менялись. RED →
+  [11 local PASS/0SKIP](research/amn2/phase16-bot-transport-diagnostic-local-verification-2026-09-24.json),
+  реальные Windows children; exact bootstrap отклонил synthetic partial frame
+  до stage, script tamper до main. Исправлены test quoting и chunk-read fixture.
+  Self-review, hashes/manifest/readback/links/diff checks; старые suites не
+  повторялись. Stage001 root cause UNKNOWN, actual stage не принят; новый exact
+  SSH packet ещё NOT_PREPARED. SSH/service/DB/stage/install/activation/push0,
+  AWG2/package016 сохранены, general issuance не включалась.
+
 - По exact approvals опубликован 68df5b9 (EXPECTED_OLD b28749a, hook и remote
   readback PASS) и выполнен один [runtime40 stage001](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#runtime40-stage-execution-001-2026-09-24).
   Результат **UNKNOWN_NO_RETRY**: SSH 255/stdin_write, неполная передача

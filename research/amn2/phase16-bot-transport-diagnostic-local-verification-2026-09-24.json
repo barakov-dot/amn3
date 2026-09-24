@@ -1,0 +1,70 @@
+{
+  "schema": "phase16.bot-transport-diagnostic-local-verification.v1",
+  "completed_utc": "2026-09-24T17:48:49.399534+00:00",
+  "base_commit": "66bbc8a0f7e7233f3fca2ec97be1876b2d3b4c7e",
+  "status": "LOCAL_PASS_NOT_WIRED_TO_LIVE_GATE",
+  "tests": 11,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "seconds": 0.454,
+  "python": "3.12.14",
+  "platform": "win32",
+  "artifact_sha256_lf": {
+    "scripts/phase16_bot_transport_diagnostics.py": "299b796fafac65b1084132f726e6ae7dfa1c23ca3dc146f25b652444e0268879",
+    "tests/test_phase16_bot_transport_diagnostics.py": "ca759ccef3efb515e88e7fe738ae8bead7afab2f7d22bd5868aa88caac4eefb0"
+  },
+  "frozen_stage001_manifest": "MATCH",
+  "frozen_stage001_remote_sha256": "cfa62d3767a14904b8330f1688c7424449fab1dffa7709ed875c41ff8f10f1ae",
+  "red": "ASSERTION_FAILURE_NEW_DIAGNOSTIC_TRANSPORT_MISSING",
+  "development_corrections": [
+    "test string quoting",
+    "early-exit fixture reads two chunks before exit; one byte need not complete any writer chunk"
+  ],
+  "controls": [
+    "real local child early exit255 with partial input",
+    "multiple stderr hints without raw strings",
+    "unknown stderr and invalid UTF8 remain redacted",
+    "stderr hint does not override process exit or establish cause",
+    "timeout cleanup",
+    "combined stdout stderr cap",
+    "start failure",
+    "one child no retry",
+    "invalid limits before spawn",
+    "exact stage001 bootstrap partial bundle rejects before stage",
+    "tampered script rejected before remote main"
+  ],
+  "partial_frame": {
+    "bytes": 3702784,
+    "body": "SYNTHETIC_NOT_PRODUCTION_BUNDLE",
+    "result": "STOP_BEFORE_STAGE_OR_UNKNOWN",
+    "reason": "bundle_binding",
+    "steps": []
+  },
+  "old_stderr_fingerprint_probe": {
+    "fixed_candidates": 18,
+    "matches": 0,
+    "protected_target_read": false,
+    "conclusion": "NO_RECONSTRUCTION_ROOT_CAUSE_UNKNOWN"
+  },
+  "root_cause_of_stage001": "UNKNOWN",
+  "new_live_gate": "NOT_PREPARED",
+  "ssh_attempts": 0,
+  "service_actions": 0,
+  "live_database_operations": 0,
+  "remote_stage": 0,
+  "install": 0,
+  "activation": 0,
+  "push": 0,
+  "self_review": true,
+  "independent_review": false,
+  "prior_suites_rerun": false,
+  "limitations": [
+    "LOCAL_WINDOWS_CHILDREN_ONLY",
+    "NO_NEW_REMOTE_OBSERVATION",
+    "HINTS_ARE_NOT_ROOT_CAUSE",
+    "UNKNOWN_RAW_STDERR_NOT_PERSISTED",
+    "NO_CHANGED_SSH_OPTIONS",
+    "FUTURE_CALLER_REQUIRES_FRESH_MANIFEST_AND_APPROVAL"
+  ]
+}

@@ -443,9 +443,13 @@ bytes, remote stdout/receipt отсутствуют. Stage/install не прин
 Approval `PHASE16_BOT_RUNTIME40_STAGE_20260924_001` использован; повтор и cleanup
 не разрешены. Новый SHA результата требует отдельного push approval.
 
-Следующий локальный шаг — bounded transport diagnostic/partial-frame controls,
-без SSH и изменения frozen 001. Root cause разрыва UNKNOWN; не менять transport
-параметры наугад. Любой новый SSH требует конкретного пакета и нового exact approval.
+[Локальный transport diagnostic/partial-frame controls завершён](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#transport-diagnostic-local-2026-09-24):
+11 PASS/0SKIP, реальные local children и exact bootstrap с synthetic partial frame.
+Новый module сохраняет несколько fixed stderr hints и timing, frozen001 не изменён.
+Stage001 root cause UNKNOWN; local PASS не исправление сети или подтверждение stage.
+Следующий локальный шаг — exact diagnostic SSH packet/validator/evidence binding;
+пакет ещё NOT_PREPARED. Не менять transport параметры наугад. Любой новый SSH
+требует готового reviewable пакета и нового exact approval.
 Target manifest сохраняется историческим: unknown writer/service-user/flags/drain/
 pending поля блокируют maintenance. Live data reads/backup/migration, stop/start,
 Telegram и activation не разрешены этим stage; фактический writer inventory,
@@ -475,8 +479,9 @@ Design согласован оператором после commit b277154. По
   runtime binding/writer completeness UNKNOWN. Следующий локальный этап —
   startup/fence/backup/recovery ядро реализовано (39 local PASS);24.09 runtime40
   stage001 исполнен один раз из 68df5b9: UNKNOWN_NO_RETRY (неполная передача,
-  remote receipt отсутствует); 15 local PASS сохранены. Следующий локальный шаг —
-  transport diagnostic. Maintenance bindings/actual prerequisites открыты;
+  remote receipt отсутствует); 15 local PASS сохранены. Transport diagnostic module
+  готов локально (11 PASS); следующий шаг — exact packet, новый SSH не разрешён.
+  Maintenance bindings/actual prerequisites открыты;
   recovery-контракт v1 для прежнего scope сохранён.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
