@@ -1,0 +1,51 @@
+{
+  "schema": "phase16.bot-runtime40-stage-local-verification.v1",
+  "completed_utc": "2026-09-24T16:53:38.627321+00:00",
+  "base_commit": "b28749a7159e3ace59e0085aae5813fad0528fe0",
+  "status": "LOCAL_PASS",
+  "tests": 15,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "seconds": 0.765,
+  "python": "3.12.14",
+  "platform": "Windows",
+  "test_module": "tests.test_phase16_bot_runtime40_stage",
+  "artifact_sha256_lf": {
+    "scripts/phase16_bot_runtime40_stage_gate.py": "5728c7589da7658ad0cef2790fd27f0293649936d8e2074024f9b25bcfc90bc0",
+    "scripts/vps/phase16_bot_runtime40_stage_remote.py": "acb8d926a084288fa950f8f09cb227bfe70498cb421657f9d2a4daa1a2baa75e",
+    "tests/test_phase16_bot_runtime40_stage.py": "4708fb21746b364ad50a7e8bf9225c268a0bedfcf9eda8db06460be211be5ea8"
+  },
+  "manifest_sha256": "e5f6d4d7dc447ca5c933230e0b857377471928dc0daa9b41208d690d5cea607c",
+  "remote_rendered_sha256": "cfa62d3767a14904b8330f1688c7424449fab1dffa7709ed875c41ff8f10f1ae",
+  "immutable_bundle_offline_preview": "PASS",
+  "runtime_pins": 40,
+  "selected_payload_files": 41,
+  "source_entries": 159,
+  "app_python_files": 126,
+  "runtime_wheel_autoload_files": 0,
+  "red_green": [
+    "missing new gate/executor",
+    "Windows path separators in wire destination"
+  ],
+  "metadata_child": "EXECUTED_ON_SYNTHETIC_LOCAL_SOURCE_WITH_APP_IMPORT_TRAPS",
+  "linux_processes": "INJECTED_ONLY",
+  "ssh_attempts": 0,
+  "venv_created": 0,
+  "pip_install": 0,
+  "remote_stage": 0,
+  "service_actions": 0,
+  "live_db_reads": 0,
+  "live_db_writes": 0,
+  "activation": 0,
+  "independent_review": false,
+  "self_review": true,
+  "maintenance_status": "BLOCKED_UNKNOWN_PREREQUISITES",
+  "limitations": [
+    "NO_LINUX_STAGE_EXECUTION",
+    "NO_LIVE_RUNTIME_BINDING",
+    "WRITER_INVENTORY_UNKNOWN",
+    "MAINTENANCE_ACTIVATION_NOT_AUTHORIZED"
+  ],
+  "cli_default_preview": "PASS_EXIT0_NO_EXECUTE"
+}

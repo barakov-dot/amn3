@@ -416,6 +416,35 @@ Local PASS не разрешает исполнение на VPS. До ready liv
 inventory/maintenance ownership, effective flags/admission budget, runtime40
 binding, paths/hashes и отдельное разрешение server-local data scope.
 
+### Target bindings и runtime40 stage — 2026-09-24
+
+Продолжение по «ПРОДОЛЖАЙ» после exact push b28749a (remote readback PASS).
+Используются executing-plans/TDD, существующий утверждённый stage-before-downtime
+дизайн; новый plan/design approval не нужен. Существующий test-venv48 не runtime40.
+
+- [x] T4 — `scripts/vps/phase16_bot_runtime40_stage_remote.py`: exact candidate
+  bundle, только новый stage directory; runtime lock40, unshare --net для детей,
+  pip check и metadata/import-origin checks без импорта app.main. Старый runtime,
+  units, DB, token/env не открывать. Fail retained/no retry, bounded process IO.
+- [x] T5 — `scripts/phase16_bot_runtime40_stage_gate.py` и один target manifest:
+  offline preview по умолчанию; свежий approval, exact script/manifest/bundle/
+  target/evidence binding, one SSH только после отдельного exact разрешения.
+  Maintenance prerequisites остаются UNKNOWN/BLOCKED, не выставлять true из011.
+- [x] T6 — `tests/test_phase16_bot_runtime40_stage.py`: RED/GREEN и один affected
+  итоговый suite с negative controls для runtime48, binding drift, paths, stale
+  claims, false receipts, timeout/ошибок на каждом шаге. Actual Linux stage не
+  исполнять локальным тестом. Receipt/runbook/CHANGELOG, local commit.
+
+[Конкретный stage пакет подготовлен](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#runtime40-stage-ready-2026-09-24):
+15 offline PASS/0SKIP, immutable bundle и CLI preview PASS, Linux stage NOT_RUN.
+Target manifest связывает source/interpreter/DB/unit paths; unknown writer/
+service-user/flags/drain/pending поля блокируют maintenance. Следующий gate —
+`PHASE16_BOT_RUNTIME40_STAGE_20260924_001`, только по новому exact разрешению,
+один SSH до300s remote/330s transport; без downtime и service/DB actions.
+Он не разрешает maintenance, live data reads,
+backup/migration, stop/start или Telegram; эти действия зависят от фактического
+writer inventory, drain/startup evidence и отдельного manifest/approval.
+
 Независимая локальная подготовка 20.09: [Panel #174 / SSH event loop review](../../../research/amn2/phase16-ssh-event-loop-applicability-2026-09-20.md)
 выявил синхронный SSH в async web health handler. После согласования оператора
 исправлен только этот AMN2 handler: 2 RED → 33 PASS целевого web/health набора,
@@ -438,8 +467,9 @@ Design согласован оператором после commit b277154. По
 - ▶️ Task 3B — integration/recovery не завершены; `_011` COMPLETE_WITH_LIMITATIONS:
   source/dependencies/DB metadata/holders получены, old55dc243 metadata MATCH;
   runtime binding/writer completeness UNKNOWN. Следующий локальный этап —
-  startup/fence/backup/recovery дизайн подготовлен и ожидает согласования;
-  recovery-контракт v1 для прежнего scope сохранён.
+  startup/fence/backup/recovery ядро реализовано (39 local PASS);24.09 runtime40
+  stage пакет готов (15 local PASS), не исполнен. Maintenance bindings/actual
+  prerequisites открыты; recovery-контракт v1 для прежнего scope сохранён.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.

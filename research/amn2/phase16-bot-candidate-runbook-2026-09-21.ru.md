@@ -453,3 +453,97 @@ production migration, bot/web stop/start, stage и Telegram operator actions
 AWG2_UNTOUCHED, package016 immutable, general issuance disabled. Локальные
 synthetic backup/restore artifacts находились только в temporary test directories.
 Production rows, env, token и protected configs не читались и не копировались.
+
+<a id="runtime40-stage-ready-2026-09-24"></a>
+
+## Runtime40 stage: конкретный пакет готов, не исполнен — 24.09
+
+**STAGE_READY_NOT_EXECUTED / MAINTENANCE_BLOCKED.** Продолжение по «ПРОДОЛЖАЙ»
+после exact push b28749a: remote branch подтвердил b28749a, оба changelog hooks
+PASS. Новый scope этого пакета — только подготовка отдельного runtime40 вне
+downtime. Bot identity/token/env, действующие bot/web, shared DB и AWG2 сохраняются.
+
+Реализованы [local gate](../../scripts/phase16_bot_runtime40_stage_gate.py) и
+[remote stage executor](../../scripts/vps/phase16_bot_runtime40_stage_remote.py).
+[Exact target manifest](phase16-bot-runtime40-stage-manifest-2026-09-24.json)
+связывает новый rendered script, frozen helper/transport/target-loader sources,
+старый подтверждённый target binding, bundle/source/runtime lock и точные пути.
+Исторические scripts используются только как проверенные primitives; их main/
+execute и прежние approvals не вызываются, frozen файлы не менялись.
+
+### Объём одного предлагаемого действия
+
+После **нового точного разрешения**, один SSH запускает:
+
+1. Проверку immutable bundle, Linux/Python3.12/x86_64/glibc2.39/root, ownership
+   родителей, отсутствия destination, свободного места512MiB и unshare --net.
+   Precheck failure → STOP до создания stage. Отсутствующий parent также STOP.
+2. Создание только нового каталога
+   `/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260924-6e68235-001`,
+   private root0700 и одноразового claim. Старый candidate/test-venv48 не меняется.
+3. Раскладку159 source entries и41 payload file (runtime lock +40 wheels).
+   Новое `runtime-venv` создаётся `/usr/bin/python3 -m venv`; pip устанавливает
+   только runtime lock с no-index/no-deps/require-hashes/only-binary. Все children
+   работают через отдельный `unshare --net`, HOME/TMPDIR внутри нового scratch.
+   Установочные bootstrap distributions pip/setuptools учитываются отдельно от40.
+4. pip check; metadata child с `-I -S -B`, без исполнения .pth; проверку40 pins,
+   лишних/повторных distributions, их origin, venv config, отсутствия .pth.
+   `PathFinder` проверяет origin app/app.main **без импорта приложения**.
+5. Повторное сравнение всех разложенных source/payload bytes; sanitized result.
+   Успех — `RUNTIME40_STAGED_NOT_ACTIVATED`, а не bot integration PASS.
+
+Ограничения: work280s, outer remote300s, local transport330s, attempts1,
+child output256KiB, transport output64KiB. Плановое исполнение — до5мин remote,
+до5.5мин с transport; затем разбор receipt. Это не оценка закрытия Phase16.
+Любой отказ после claim сохраняет stage и `STOP_RETAINED_NO_RETRY`; потеря
+receipt означает UNKNOWN_NO_RETRY. Удаление/перезапись старого или failed stage,
+повтор, unit commands и DB operations в этот scope не входят.
+
+### Проверка локально и точные bindings
+
+[Receipt](phase16-bot-runtime40-stage-local-verification-2026-09-24.json):
+**15 PASS / 0 FAIL / 0 SKIP**,0.765s, Windows/Python3.12.14; Linux process calls
+заменены injected executor. Exact metadata child действительно выполнен на
+synthetic local source, где импорт app/__init__ и app/main аварийно завершается;
+child PASS доказал отсутствие такого импорта в проверяемом пути.
+
+Negative controls: runtime48/неизвестный scope/duplicate, ошибка каждого из пяти
+child calls, metadata/source origin/pth drift, approval/hash/target mismatch,
+ложный PASS/лишние receipt fields, stale claim и raw-error redaction. RED/GREEN
+исправил Windows `str(Path)` в wire destination на POSIX `.as_posix()` до SSH.
+Self-review выполнен; независимый review не проводился. Старые39 maintenance,
+125 readback и завершённые Linux lifecycle tests не повторялись.
+
+Настоящий immutable bundle прошёл offline preview и CLI default без `--execute`:
+159 source entries,126 app Python files,40 pins; runtime wheels не содержат
+.pth/sitecustomize/usercustomize (0). Ничего не распаковывалось на VPS, venv/pip
+на рабочем ПК не запускались; target loader/SSH в preview не вызываются.
+
+- Rendered remote SHA256: `cfa62d3767a14904b8330f1688c7424449fab1dffa7709ed875c41ff8f10f1ae`.
+- Target manifest SHA256: `e5f6d4d7dc447ca5c933230e0b857377471928dc0daa9b41208d690d5cea607c`.
+- Bundle SHA256: `e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7`.
+- Source: `6e682356ed14a62d636ee58039fd3a389e794809`.
+- Future local evidence: `C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-runtime40-stage-20260924/execution-001`.
+- Fresh approval marker: `PHASE16_BOT_RUNTIME40_STAGE_20260924_001` — **NOT_GRANTED**.
+
+После exact approval команда нового gate должна использовать указанный bundle,
+`--execute --approve PHASE16_BOT_RUNTIME40_STAGE_20260924_001`, а также оба
+`--approved-remote-sha256` и `--approved-manifest-sha256` из списка выше.
+Entry point — `scripts/phase16_bot_runtime40_stage_gate.py`; Python invocation
+`-I -S -B`. Evidence path фиксирован внутри gate, разрешения прошлых gates не подходят.
+По умолчанию CLI выполняет только offline preview. Push имеет отдельный exact SHA scope.
+
+### Maintenance остаётся отдельной границей
+
+Manifest содержит конкретные proposed source/interpreter/old-runtime/DB/unit
+paths, но **не утверждает их live acceptance**. Writer inventory, service User/
+Group, effective flags, startup budget, drain и pending operations — UNKNOWN.
+Private stage root0700 ещё не доказывает доступность будущему service user.
+Нет callback wiring для production migration/stop/start: stage этого не требует
+и не разрешает. Не ставить inventory_complete=True по metadata011 или snapshot
+одного holder. Следующее решение после stage — закрыть эти prerequisites и
+собрать maintenance approval; общая issuance остаётся disabled.
+
+Итог этого локального хода: SSH0, remote stage0, service actions0, DB reads/writes0,
+activation0; AWG2_UNTOUCHED, package016 и AMN2 source immutable. Новый пакет stage
+готов к рассмотрению, готовность maintenance/Phase16 acceptance не заявляется.

@@ -1,0 +1,62 @@
+{
+  "amn3_base": "b28749a7159e3ace59e0085aae5813fad0528fe0",
+  "approval": "PHASE16_BOT_RUNTIME40_STAGE_20260924_001",
+  "artifacts_sha256_lf": {
+    "scripts/phase13_bot_web_migration_fresh_inputs.py": "cdad982109f934b20d49ec6021b269aec30644c28347625261a1b98969e6d904",
+    "scripts/phase16_bot_linux_gate.py": "713289a6082bf621d704e6dd3b04855fa020fbfecc8a9e86db8a861019bbd35e",
+    "scripts/phase16_bot_readback_guard_gate.py": "2fa412e2b9eaddd8f7d582a209499b3137b75e94f4d43ef8435fdeaac11a7b7b",
+    "scripts/phase16_bot_runtime40_stage_gate.py": "5728c7589da7658ad0cef2790fd27f0293649936d8e2074024f9b25bcfc90bc0",
+    "scripts/vps/phase16_bot_linux_gate_remote.py": "5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102",
+    "scripts/vps/phase16_bot_runtime40_stage_remote.py": "acb8d926a084288fa950f8f09cb227bfe70498cb421657f9d2a4daa1a2baa75e"
+  },
+  "bundle_bytes": 30485208,
+  "bundle_manifest_sha256": "6792cb2cd28b0ce70ae031cac04b29f40db908f5e8bad0770e689de390a9a37d",
+  "bundle_sha256": "e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7",
+  "destination": "/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260924-6e68235-001",
+  "limits": {
+    "attempts": 1,
+    "child_output_bytes": 262144,
+    "minimum_free_bytes": 536870912,
+    "remote_seconds": 300,
+    "transport_output_bytes": 65536,
+    "transport_seconds": 330,
+    "work_seconds": 280
+  },
+  "local_evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-runtime40-stage-20260924/execution-001",
+  "maintenance": {
+    "drain_evidence": "UNKNOWN",
+    "effective_flags": "UNKNOWN",
+    "pending_operations": "UNKNOWN",
+    "service_activation": "NOT_AUTHORIZED",
+    "service_user_group": "UNKNOWN",
+    "startup_budget": "UNKNOWN",
+    "status": "BLOCKED_UNKNOWN_PREREQUISITES",
+    "target_data_rehearsal": "NOT_AUTHORIZED",
+    "writer_inventory": "UNKNOWN"
+  },
+  "proposed_binding": {
+    "bot_unit": "amn2-spain-bot.service",
+    "interpreter": "/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260924-6e68235-001/runtime-venv/bin/python",
+    "old_dependencies": "/opt/amn2-spain/runtime/site-packages",
+    "old_source": "/opt/amn2-spain/runtime/source/app",
+    "shared_database": "/var/lib/amn2-spain/amn2.sqlite3",
+    "source": "/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260924-6e68235-001/source",
+    "web_unit": "amn2-spain-web.service"
+  },
+  "remote_rendered_sha256": "cfa62d3767a14904b8330f1688c7424449fab1dffa7709ed875c41ff8f10f1ae",
+  "runtime_lock_sha256": "a381be185b19777b9198526e11df8dcfa0afaf7f15acccd829809e698d679fab",
+  "runtime_pins": 40,
+  "schema": "phase16.bot-runtime40-stage-manifest.v1",
+  "scope": {
+    "children_network": "UNSHARE_NET_OFFLINE",
+    "live_database_opened": false,
+    "old_runtime_modified": false,
+    "runtime_activation": false,
+    "service_actions": 0,
+    "telegram_polling": false,
+    "writes": "NEW_STAGE_DIRECTORY_ONLY"
+  },
+  "source_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+  "status": "STAGE_READY_NOT_EXECUTED",
+  "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6"
+}

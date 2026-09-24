@@ -5,6 +5,22 @@
 записи не означают deployment или новую выдачу. Текущая очередь — в
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
+## 2026-09-24
+
+- Подготовлен [exact runtime40 stage пакет](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#runtime40-stage-ready-2026-09-24)
+  после публикацииb28749a. Новый executor создаёт отдельный private stage,
+  устанавливает40 runtime pins из прежнего immutable bundle через offline wheels
+  и unshare --net, проверяет metadata/import origins без app import; bot/web/DB
+  и старый runtime не затрагивает. Local gate: preview default, checksum-bound
+  fresh approval, exact target/evidence, одна SSH attempt без retry; false PASS
+  отклоняется. [15 offline PASS/0SKIP](research/amn2/phase16-bot-runtime40-stage-local-verification-2026-09-24.json),
+  real immutable bundle/CLI preview PASS; metadata child на synthetic app traps
+  PASS. До исполнения исправлены wire paths Windows→POSIX. Self-review, artifact
+  hashes, docs links/diff/secret review; frozen helpers/old suites не менялись.
+  Stage approval ещё не предоставлен, SSH/stage/install/DB/service actions0.
+  Maintenance prerequisites UNKNOWN/BLOCKED; general issuance disabled,
+  AWG2/package016/AMN2 source сохранены. Local PASS не Linux stage acceptance.
+
 ## 2026-09-23
 
 - По согласованному дизайну0928ca0 реализовано [локальное maintenance ядро](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-local-core-2026-09-23):
