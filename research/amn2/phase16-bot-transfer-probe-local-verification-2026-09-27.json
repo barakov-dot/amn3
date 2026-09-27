@@ -1,0 +1,67 @@
+{
+  "schema": "phase16.transfer-probe-local-verification.v1",
+  "completed_utc": "2026-09-27T06:18:08.954056+00:00",
+  "base_commit": "9086bc3315adda79d6a7e7d46765c1ca2f6e26fb",
+  "status": "LOCAL_PASS_READY_NOT_EXECUTED",
+  "tests": 25,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "seconds": 1.234,
+  "python": "3.12.14",
+  "platform": "win32",
+  "artifact_sha256_lf": {
+    "scripts/phase16_bot_transfer_probe_gate.py": "65d42961b2b1570d95c2792cfbceb3d95b33a743031799b6b773c1898b4757ae",
+    "scripts/vps/phase16_bot_transfer_probe_remote.py": "5329105df7461fd2e65e5b294568e1e2d6c036a794a51a74a293fc4627609b68",
+    "scripts/phase16_bot_transport_diagnostics.py": "f30c6f2d01bc41f0808379f5e93bcfbcf82bcb6a94cddb83c7ca4b46f06ce6b2",
+    "tests/test_phase16_bot_transfer_probe.py": "fd06e0b4a8a0e6b161caf0aeb30793ba34ae64ead7fc8f3c12c22974cf061a1f",
+    "tests/test_phase16_bot_transport_diagnostics.py": "80d09233e8fa66d2e5ca0bef1528df4ad12ad1d8dfe82a64c218e4a979b702ff"
+  },
+  "manifest_sha256": "b497b652a794a28886ddea0be8cbad8ecd35395fd216df89b325d32be5675ee5",
+  "remote_sha256": "5329105df7461fd2e65e5b294568e1e2d6c036a794a51a74a293fc4627609b68",
+  "preview": {
+    "status": "OFFLINE_READY_NOT_EXECUTED",
+    "approval": "PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001",
+    "manifest_sha256": "b497b652a794a28886ddea0be8cbad8ecd35395fd216df89b325d32be5675ee5",
+    "remote_sha256": "5329105df7461fd2e65e5b294568e1e2d6c036a794a51a74a293fc4627609b68",
+    "payload_bytes": 30485208,
+    "frame_bytes": 30487313,
+    "ssh_attempts": 0,
+    "remote_file_writes": 0,
+    "stage": 0,
+    "install": 0,
+    "activation": 0,
+    "remote_seconds": 90,
+    "transport_seconds": 110
+  },
+  "external_evidence_directory": "ABSENT_NOT_CLAIMED",
+  "frozen_stage001_manifest": "MATCH",
+  "red": [
+    "ASSERTION_NEW_GATE_MISSING",
+    "OBSERVER_API_MISSING"
+  ],
+  "development_corrections": [
+    "Windows child stdout CRLF fixture changed to explicit byte write"
+  ],
+  "self_review": true,
+  "independent_review": false,
+  "scope": {
+    "ssh_attempts": 0,
+    "protected_target_reads": 0,
+    "remote_file_writes": 0,
+    "stage": 0,
+    "install": 0,
+    "service_actions": 0,
+    "database_operations": 0,
+    "activation": 0,
+    "push": 0
+  },
+  "limitations": [
+    "REAL_LOCAL_WINDOWS_CHILDREN_ONLY",
+    "LINUX_SIGALRM_NOT_EXECUTED",
+    "TIMEOUT_PATH_INJECTED",
+    "PROGRESS_OUTPUT_DIFFERS_FROM_STAGE001",
+    "NO_NETWORK_ROOT_CAUSE_ESTABLISHED",
+    "NO_STAGE_RUNTIME_ACCEPTANCE"
+  ]
+}

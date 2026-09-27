@@ -50,7 +50,7 @@ def classify_stderr(data, *, output_cap_hit):
                 output_cap_hit=output_cap_hit)
 
 
-def run_transport(command, *, cwd, env, timeout, cap=65536, input_bytes=b'', diagnostics):
+def run_transport(command, *, cwd, env, timeout, cap=65536, input_bytes=b'', diagnostics, stdout_observer=None):
     """Single child; diagnostic metadata only. No retry or target loading."""
     gate.require(0 < timeout <= 330 and 0 < cap <= 65536 and
                  len(input_bytes) <= gate.MAX_BUNDLE + 65544, 'transport_limits')
@@ -75,8 +75,11 @@ def run_transport(command, *, cwd, env, timeout, cap=65536, input_bytes=b'', dia
                 diagnostics[name] = {'bytes_observed': observed[name], 'bytes_retained': len(data),
                                      'prefix_sha256': gate.sha(bytes(data))}
             stderr = bytes(buffers['stderr'])
+            stdout = bytes(buffers['stdout'])
         diagnostics['pipe_failures'] = [name for name, event in failures.items() if event.is_set()]
         diagnostics['stderr_diagnostic'] = classify_stderr(stderr, output_cap_hit=overflow.is_set())
+        if stdout_observer is not None:
+            stdout_observer(stdout)
 
 
     try:

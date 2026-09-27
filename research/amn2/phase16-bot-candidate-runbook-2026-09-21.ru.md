@@ -644,3 +644,92 @@ validator. Он ещё **NOT_PREPARED**: этот module не является �
 и не разрешает повтор stage001. До отдельного exact approval: SSH0, remote stage0,
 install0, service/DB actions0, activation0, push0. AWG2/package016 не изменены,
 general issuance не включалась. Maintenance и Phase16 acceptance остаются открыты.
+
+<a id="transfer-diagnostic-ready-2026-09-27"></a>
+
+## Один диагностический transfer packet готов — 27.09
+
+**READY_NOT_EXECUTED.** После подтверждённого push9086bc3 продолжена разрешённая
+локальная подготовка. Конкретный вопрос: проходит ли одноразовая передача объёма
+stage001 по прежним SSH settings, и какая последняя подтверждённая отметка/ошибка
+остаётся при отказе? Это новый диагностический scope, не retry stage001.
+
+Артефакты: [gate](../../scripts/phase16_bot_transfer_probe_gate.py),
+[receiver](../../scripts/vps/phase16_bot_transfer_probe_remote.py),
+[exact manifest](phase16-bot-transfer-probe-manifest-2026-09-27.json),
+[verification receipt](phase16-bot-transfer-probe-local-verification-2026-09-27.json).
+
+- Payload:30 485 208 synthetic bytes0xA5, создаётся только в памяти; объём равен
+  размеру immutable bundle, но архив/source/wheels/данные приложения не передаются.
+  Frame:30 487 313 bytes, включая hash-bound script и8-byte length header.
+- Remote: `/usr/bin/python3 -I -S -B`, RAM-only hash/count, READY, checkpoints
+  каждый1MiB и terminal COMPLETE/STOP. Нет remote file writes, application/config
+  reads, subprocess, service/DB/stage/install/activation commands или outbound
+  network. Штатные SSH authentication/audit side effects не считаются file writes
+  скрипта и остаются обычным свойством SSH-сеанса.
+- Лимиты: remote alarm90s, local transport110s, общий stdout+stderr64KiB,
+  одна попытка. Cleanup локального transport может добавить до6s; лимит90s
+  начинается внутри receiver после получения/проверки script, не в начале SSH.
+- SSH host/key/known_hosts binding прежний, проверяется непосредственно перед
+  новой попыткой; StrictHostKeyChecking=yes, BatchMode, connection attempts1,
+  ConnectTimeout10, ServerAliveInterval5/CountMax1. Keepalive не перенастраивался.
+- Локальный evidence directory новый и одноразовый:
+  `C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-transfer-probe-20260927/execution-001`.
+  На этапе подготовки отсутствует. Claim сохраняется до SSH; повтор даже после
+  неудачи запрещён. Frozen stage001/evidence не меняются и не очищаются.
+
+### Выводы и stop conditions
+
+`TRANSFER_OBSERVED_NOT_STAGE_ACCEPTANCE` возможен только при rc0, полной записи
+stdin, полном output и строгом COMPLETE с ожидаемыми bytes/hash и всей очередью
+progress. Это доказательство этой synthetic передачи, не исправления stage001.
+Новый небольшой receiver и progress output отличаются от прежнего silent upload;
+из успеха нельзя выводить причину прежнего разрыва, работоспособность pip/runtime
+или отсутствие stage001 directory. Compression/traffic acceptance не проверяются.
+
+При обрыве observer нового diagnostic transport передаёт только ограниченный
+stdout prefix строгому parser до выброса transport error. Сохраняются лишь
+валидные JSON events: fixed schema/approval/seq/byte checkpoints, без произвольных
+полей. Незавершённая последняя строка отбрасывается с явным trailing_fragment;
+искажённые/повторные/переставленные события дают INVALID и никогда PASS.
+`confirmed_bytes` означает bytes, заявленные проверенным receiver event, а не
+локальным pipe counter. Бounded stderr hints остаются подсказками, не root cause.
+
+Remote STOP, incomplete transfer/output, неверный receipt, timeout или отсутствие
+READY → stop/no retry; UNKNOWN не превращается в успешную установку. Никакого
+автоматического следующего SSH, stage, cleanup или восстановления. Разбор этого
+единственного результата определяет следующий шаг; новая бесконечная серия gates
+здесь не планируется и не разрешается.
+
+### Проверка и точное разрешение
+
+25 PASS/0FAIL/0SKIP,1.234s включая preview/binding checks (unittest1.095s).
+Реальные локальные Windows children передали весь30.5MB frame без файлов;
+negative controls: truncated/extra/corrupt payload, timeout path, false COMPLETE,
+extra/duplicate fields, boolean types, event order, partial JSON, wrong approval/
+hash/target, stale evidence и no retry. RED: отсутствующий gate/observer API.
+Windows text stdout CRLF в fixture заменён явной byte write. Linux SIGALRM здесь
+не исполнялся; timeout path проверен injected stream, не Linux wall-time proof.
+Новый затронутый transport suite выполнен; frozen runtime/maintenance suites не
+повторялись. Default CLI preview exit0, SSH0; stage001 manifest по-прежнему MATCH.
+Self-review без делегирования; независимый review не проводился.
+
+Approval: `PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001` — **NOT_GRANTED**.
+
+- Rendered remote SHA256: `5329105df7461fd2e65e5b294568e1e2d6c036a794a51a74a293fc4627609b68`.
+- Manifest SHA256 (canonical LF): `b497b652a794a28886ddea0be8cbad8ecd35395fd216df89b325d32be5675ee5`.
+- Synthetic payload SHA256: `2be558efdf53a6a0be148ffec0535e3d2a5de583ba365ef6e570a2b7a0de0fd1`.
+
+Точная команда ниже разрешена только после нового exact approval; сейчас не запускалась:
+
+```powershell
+& 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -S -B 'C:/Users/SooL/.codex/worktrees/7489/VPS-OPS-LAB/scripts/phase16_bot_transfer_probe_gate.py' --execute --approve PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001 --approved-remote-sha256 5329105df7461fd2e65e5b294568e1e2d6c036a794a51a74a293fc4627609b68 --approved-manifest-sha256 b497b652a794a28886ddea0be8cbad8ecd35395fd216df89b325d32be5675ee5
+```
+
+Локальные задачи этой части завершены: receiver/strict validator, one-shot gate/
+manifest/evidence binding, observer, targeted verification и review. Решение по
+scope: отдельная synthetic передача с progress вместо повторной попытки install;
+цена ограничения — PASS не закрывает stage001 и не устанавливает причину сбоя.
+Настройки SSH и frozen001 не менялись. Server/root runtime state остаётся прежним
+UNKNOWN по датированному evidence; AWG2/package016 сохранены, issuance не включалась.
+SSH/live reads/service/DB/stage/install/activation/push в этом ходе0.

@@ -447,9 +447,17 @@ Approval `PHASE16_BOT_RUNTIME40_STAGE_20260924_001` использован; по
 11 PASS/0SKIP, реальные local children и exact bootstrap с synthetic partial frame.
 Новый module сохраняет несколько fixed stderr hints и timing, frozen001 не изменён.
 Stage001 root cause UNKNOWN; local PASS не исправление сети или подтверждение stage.
-Следующий локальный шаг — exact diagnostic SSH packet/validator/evidence binding;
-пакет ещё NOT_PREPARED. Не менять transport параметры наугад. Любой новый SSH
-требует готового reviewable пакета и нового exact approval.
+27.09 [exact diagnostic packet готов](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#transfer-diagnostic-ready-2026-09-27):
+25 local PASS/0SKIP, default preview exit0, SSH0. Receiver принимает30 485 208
+synthetic bytes в памяти с progress events; новых remote files/stage/install нет.
+Gate/validator/manifest/evidence binding готовы; прежние SSH settings сохранены.
+Следующий gate — `PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001`, NOT_GRANTED:
+один SSH, remote90s/transport110s (+до6s local cleanup), no retry. PASS означает
+только synthetic transfer с progress, не stage readiness или root cause stage001.
+- [x] T7 — streaming receiver, strict events, одноразовый checksum-bound gate/manifest.
+- [x] T8 — bounded stdout observer при transport failure,25 targeted PASS,
+  self-review, receipts/CHANGELOG. Независимого review не было (без делегирования).
+Не менять transport параметры наугад; нового live/install разрешения нет.
 Target manifest сохраняется историческим: unknown writer/service-user/flags/drain/
 pending поля блокируют maintenance. Live data reads/backup/migration, stop/start,
 Telegram и activation не разрешены этим stage; фактический writer inventory,
@@ -480,7 +488,8 @@ Design согласован оператором после commit b277154. По
   startup/fence/backup/recovery ядро реализовано (39 local PASS);24.09 runtime40
   stage001 исполнен один раз из 68df5b9: UNKNOWN_NO_RETRY (неполная передача,
   remote receipt отсутствует); 15 local PASS сохранены. Transport diagnostic module
-  готов локально (11 PASS); следующий шаг — exact packet, новый SSH не разрешён.
+  готов локально;27.09 exact transfer diagnostic packet готов (25 local PASS).
+  Следующий шаг — отдельное точное разрешение одного transfer probe; SSH не исполнен.
   Maintenance bindings/actual prerequisites открыты;
   recovery-контракт v1 для прежнего scope сохранён.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.

@@ -5,6 +5,22 @@
 записи не означают deployment или новую выдачу. Текущая очередь — в
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
+## 2026-09-27
+
+- Подготовлен [one-shot transfer diagnostic packet](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#transfer-diagnostic-ready-2026-09-27):
+  30 485 208 synthetic bytes только в памяти, READY/1MiB progress/COMPLETE,
+  strict event validator и новый exact approval/manifest/evidence binding.
+  Optional bounded stdout observer сохраняет validated prefix при stdin failure;
+  malformed/extra/duplicate fields и ложный COMPLETE не принимаются.
+  [25 local PASS/0SKIP](research/amn2/phase16-bot-transfer-probe-local-verification-2026-09-27.json),
+  реальные Windows children; default CLI preview PASS/SSH0, frozen001 MATCH.
+  RED отсутствующих gate/observer, исправлен CRLF тестового stdout; self-review,
+  hashes/readback/links/diff, без независимого review. Linux SIGALRM не исполнялся.
+  Remote90s/local110s, no retry; settings SSH неизменны. Progress/synthetic payload
+  отличаются от stage001: PASS не доказывает root cause, install или runtime.
+  Новый SSH требует exact approval; live reads/service/DB/stage/install/activation/
+  push0, AWG2/package016 сохранены, general issuance не включалась.
+
 ## 2026-09-24
 
 - По «продолжай» подготовлен [отдельный diagnostic transport](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#transport-diagnostic-local-2026-09-24):

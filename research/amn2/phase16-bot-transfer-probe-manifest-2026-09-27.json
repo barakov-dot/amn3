@@ -1,0 +1,52 @@
+{
+  "approval": "PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001",
+  "artifacts_sha256_lf": {
+    "scripts/phase13_bot_web_migration_fresh_inputs.py": "cdad982109f934b20d49ec6021b269aec30644c28347625261a1b98969e6d904",
+    "scripts/phase16_bot_linux_gate.py": "713289a6082bf621d704e6dd3b04855fa020fbfecc8a9e86db8a861019bbd35e",
+    "scripts/phase16_bot_readback_guard_gate.py": "2fa412e2b9eaddd8f7d582a209499b3137b75e94f4d43ef8435fdeaac11a7b7b",
+    "scripts/phase16_bot_transfer_probe_gate.py": "65d42961b2b1570d95c2792cfbceb3d95b33a743031799b6b773c1898b4757ae",
+    "scripts/phase16_bot_transport_diagnostics.py": "f30c6f2d01bc41f0808379f5e93bcfbcf82bcb6a94cddb83c7ca4b46f06ce6b2",
+    "scripts/vps/phase16_bot_linux_gate_remote.py": "5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102",
+    "scripts/vps/phase16_bot_transfer_probe_remote.py": "5329105df7461fd2e65e5b294568e1e2d6c036a794a51a74a293fc4627609b68"
+  },
+  "base_commit": "9086bc3315adda79d6a7e7d46765c1ca2f6e26fb",
+  "limitations": [
+    "PROGRESS_OUTPUT_DIFFERS_FROM_STAGE001",
+    "NO_INSTALL_OR_RUNTIME_ACCEPTANCE",
+    "NO_OBSERVATION_OF_STAGE001_DIRECTORY",
+    "HINTS_DO_NOT_ESTABLISH_ROOT_CAUSE"
+  ],
+  "limits": {
+    "attempts": 1,
+    "checkpoint_bytes": 1048576,
+    "output_bytes": 65536,
+    "remote_seconds": 90,
+    "transport_seconds": 110
+  },
+  "local_evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-transfer-probe-20260927/execution-001",
+  "payload_bytes": 30485208,
+  "payload_kind": "SYNTHETIC_A5_IN_MEMORY_NOT_PACKAGE",
+  "payload_sha256": "2be558efdf53a6a0be148ffec0535e3d2a5de583ba365ef6e570a2b7a0de0fd1",
+  "remote_sha256": "5329105df7461fd2e65e5b294568e1e2d6c036a794a51a74a293fc4627609b68",
+  "schema": "phase16.transfer-probe-manifest.v1",
+  "scope": {
+    "activation": 0,
+    "app_file_reads": 0,
+    "database_operations": 0,
+    "install": 0,
+    "remote_children": 0,
+    "remote_file_writes": 0,
+    "remote_outbound_network": 0,
+    "service_actions": 0,
+    "stage": 0
+  },
+  "ssh_options": {
+    "connect_timeout": 10,
+    "connection_attempts": 1,
+    "server_alive_count_max": 1,
+    "server_alive_interval": 5,
+    "strict_host_key_checking": true
+  },
+  "status": "READY_NOT_EXECUTED",
+  "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6"
+}

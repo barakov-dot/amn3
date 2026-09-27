@@ -48,6 +48,17 @@ class DiagnosticsTests(unittest.TestCase):
         self.assertGreaterEqual(d['elapsed_seconds'], 0)
         self.assertLessEqual(d['last_stdin_progress_seconds'], d['elapsed_seconds'])
 
+    def test_stdout_observer_receives_bounded_prefix_even_after_stdin_failure(self):
+        observed=[]
+        d={}
+        code='import sys; sys.stdout.buffer.write(b"READY\\n"); sys.stdout.flush(); sys.exit(255)'
+        with self.assertRaisesRegex(self.transport.gate.GateError, '^transport_stdin_write$'):
+            self.transport.run_transport([sys.executable,'-I','-S','-B','-c',code],
+                cwd=self.root,env=None,timeout=5,input_bytes=b'x'*1048576,
+                diagnostics=d,stdout_observer=observed.append)
+        self.assertEqual(observed,[b'READY\n'])
+        self.assertEqual(d['returncode'],255)
+
     def test_unknown_stderr_remains_unknown_without_echoing_it(self):
         rc, _, d = self.child('import sys; sys.stderr.write("PRIVATE_UNKNOWN"); sys.exit(23)')
         self.assertEqual(rc, 23)
