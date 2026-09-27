@@ -451,9 +451,14 @@ Stage001 root cause UNKNOWN; local PASS не исправление сети и�
 25 local PASS/0SKIP, default preview exit0, SSH0. Receiver принимает30 485 208
 synthetic bytes в памяти с progress events; новых remote files/stage/install нет.
 Gate/validator/manifest/evidence binding готовы; прежние SSH settings сохранены.
-Следующий gate — `PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001`, NOT_GRANTED:
-один SSH, remote90s/transport110s (+до6s local cleanup), no retry. PASS означает
-только synthetic transfer с progress, не stage readiness или root cause stage001.
+[Transfer001 исполнен один раз](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#transfer-diagnostic-executed-2026-09-27)
+из pushed7e7d64a0: UNKNOWN_NO_RETRY,34.313s, SSH255, подтверждено5MiB;
+server-alive timeout hint и stderr fingerprint stage001 совпали. Полная передача,
+install/runtime acceptance и причина потери ответов не доказаны. Approval использован;
+повтор/новый SSH не разрешены. Следующий локальный шаг — runtime40 из retained
+candidate22.09 с exact fresh file/hash verification до stage, без30MB reupload.
+Нового stage executor/manifest/approval пока нет; missing/drift должны давать STOP.
+Подробности и границы — в linked runbook; keepalive settings не меняются попутно.
 - [x] T7 — streaming receiver, strict events, одноразовый checksum-bound gate/manifest.
 - [x] T8 — bounded stdout observer при transport failure,25 targeted PASS,
   self-review, receipts/CHANGELOG. Независимого review не было (без делегирования).
@@ -488,8 +493,9 @@ Design согласован оператором после commit b277154. По
   startup/fence/backup/recovery ядро реализовано (39 local PASS);24.09 runtime40
   stage001 исполнен один раз из 68df5b9: UNKNOWN_NO_RETRY (неполная передача,
   remote receipt отсутствует); 15 local PASS сохранены. Transport diagnostic module
-  готов локально;27.09 exact transfer diagnostic packet готов (25 local PASS).
-  Следующий шаг — отдельное точное разрешение одного transfer probe; SSH не исполнен.
+  готов локально (25 local PASS);27.09 transfer001 дал PARTIAL/UNKNOWN_NO_RETRY,
+  5MiB подтверждены, SSH server-alive timeout hint. Следующий локальный шаг —
+  stage из retained candidate с проверкой immutable hashes, без большого reupload.
   Maintenance bindings/actual prerequisites открыты;
   recovery-контракт v1 для прежнего scope сохранён.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.

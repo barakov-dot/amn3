@@ -7,6 +7,21 @@
 
 ## 2026-09-27
 
+- По exact approvals опубликован7e7d64a0 (EXPECTED_OLD9086bc3, hook/remote readback
+  PASS) и выполнен один [transfer001](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#transfer-diagnostic-executed-2026-09-27).
+  [Результат](research/amn2/phase16-bot-transfer-probe-execution-001-2026-09-27.json):
+  UNKNOWN_NO_RETRY,34.313s, SSH255; READY+5 progress подтвердили5MiB,
+  terminal отсутствует. SSH_SERVER_ALIVE_TIMEOUT_HINT; stderr49 bytes/hash
+  совпал с stage001. Полная причина потери ответа UNKNOWN; pip/application
+  в synthetic scope не запускались. Смысл hint проверен по official OpenSSH
+  docs/source; это не exact Windows binary trace. Evidence/hashes/events/readback/
+  links/diff проверены, suites не повторялись. Frozen scripts/manifests сохранены.
+  По историческому PASS22.09 выбрано следующее локальное направление: runtime40
+  из retained candidate с fresh immutable file verification, без bulk reupload;
+  новый executor/approval ещё не готовы. SSH1/retry0, service/DB/stage/install/
+  activation0, AWG2/package016 сохранены, issuance не включалась. Этот result
+  commit ещё не pushed; прежнее push-разрешение на него не распространяется.
+
 - Подготовлен [one-shot transfer diagnostic packet](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#transfer-diagnostic-ready-2026-09-27):
   30 485 208 synthetic bytes только в памяти, READY/1MiB progress/COMPLETE,
   strict event validator и новый exact approval/manifest/evidence binding.

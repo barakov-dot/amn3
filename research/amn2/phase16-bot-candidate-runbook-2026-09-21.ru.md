@@ -647,9 +647,13 @@ general issuance не включалась. Maintenance и Phase16 acceptance о
 
 <a id="transfer-diagnostic-ready-2026-09-27"></a>
 
-## Один диагностический transfer packet готов — 27.09
+## Подготовка transfer packet — 27.09 (исторический снимок)
 
-**READY_NOT_EXECUTED.** После подтверждённого push9086bc3 продолжена разрешённая
+На момент подготовки: **READY_NOT_EXECUTED**. Обновление: approval использован
+один раз; [результат исполнения](#transfer-diagnostic-executed-2026-09-27) —
+**UNKNOWN_NO_RETRY**, подтверждено5MiB, SSH server-alive timeout hint.
+
+После подтверждённого push9086bc3 продолжена разрешённая
 локальная подготовка. Конкретный вопрос: проходит ли одноразовая передача объёма
 stage001 по прежним SSH settings, и какая последняя подтверждённая отметка/ошибка
 остаётся при отказе? Это новый диагностический scope, не retry stage001.
@@ -714,13 +718,13 @@ Windows text stdout CRLF в fixture заменён явной byte write. Linux 
 повторялись. Default CLI preview exit0, SSH0; stage001 manifest по-прежнему MATCH.
 Self-review без делегирования; независимый review не проводился.
 
-Approval: `PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001` — **NOT_GRANTED**.
+Approval: `PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001` — **GRANTED_AND_CONSUMED_ONCE**. Frozen manifest сохранён.
 
 - Rendered remote SHA256: `5329105df7461fd2e65e5b294568e1e2d6c036a794a51a74a293fc4627609b68`.
 - Manifest SHA256 (canonical LF): `b497b652a794a28886ddea0be8cbad8ecd35395fd216df89b325d32be5675ee5`.
 - Synthetic payload SHA256: `2be558efdf53a6a0be148ffec0535e3d2a5de583ba365ef6e570a2b7a0de0fd1`.
 
-Точная команда ниже разрешена только после нового exact approval; сейчас не запускалась:
+Историческая команда выполненной попытки ниже — **не повторять**:
 
 ```powershell
 & 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -S -B 'C:/Users/SooL/.codex/worktrees/7489/VPS-OPS-LAB/scripts/phase16_bot_transfer_probe_gate.py' --execute --approve PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001 --approved-remote-sha256 5329105df7461fd2e65e5b294568e1e2d6c036a794a51a74a293fc4627609b68 --approved-manifest-sha256 b497b652a794a28886ddea0be8cbad8ecd35395fd216df89b325d32be5675ee5
@@ -733,3 +737,65 @@ scope: отдельная synthetic передача с progress вместо п
 Настройки SSH и frozen001 не менялись. Server/root runtime state остаётся прежним
 UNKNOWN по датированному evidence; AWG2/package016 сохранены, issuance не включалась.
 SSH/live reads/service/DB/stage/install/activation/push в этом ходе0.
+
+<a id="transfer-diagnostic-executed-2026-09-27"></a>
+
+## Transfer001 исполнен: 5MiB подтверждены, SSH server-alive timeout — 27.09
+
+**UNKNOWN_NO_RETRY / TRANSFER_PARTIAL.** Exact push7e7d64a0 выполнен с
+EXPECTED_OLD9086bc3; hook PASS, remote branch readback MATCH, NO_FORCE/NO_TAGS.
+Затем единственный разрешённый `PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001`
+завершился за34.313s с SSH rc255. [Normalized execution record](phase16-bot-transfer-probe-execution-001-2026-09-27.json)
+содержит exact claim/result, hashes внешних evidence и проверенные выводы.
+
+Получены READY и пять последовательных PROGRESS: receiver подтвердил
+5 242 880 bytes (5MiB). COMPLETE/STOP не получены, stdout содержит921 bytes,
+validated prefix полностью восстановлен из events и совпал по SHA с transport.
+Локальный pipe принял7 897 088 из30 487 313 bytes; последняя завершённая запись
+на24.625s. Это не счётчик доставки на сервер. `stdin_complete=false`,
+`output_complete=true`, failure_stage=stdin_write, termination_action=NONE:
+локальный timeout110s и kill не сработали. Завершение remote process не доказано.
+
+stderr49 bytes: `SSH_SERVER_ALIVE_TIMEOUT_HINT`, raw text не сохранялся и не
+выводился. Размер и SHA полностью совпали с прежним stage001. Это связывает
+оба отказа одним stderr fingerprint; прежний immutable receipt не переписан.
+Новое наблюдение локализует отказ до install: он повторился на synthetic receiver
+без venv/pip/application. Полная причина отсутствия ответа **UNKNOWN**; ни VPN,
+ни сеть провайдера, ни загрузка VPS, ни дефект SSH не объявляются доказанными.
+
+[OpenSSH ServerAliveCountMax/Interval](https://man.openbsd.org/ssh_config#ServerAliveCountMax)
+описывает разрыв при отсутствии ответов на server-alive проверки через SSH.
+[Upstream server_alive_check](https://raw.githubusercontent.com/openssh/openssh-portable/master/clientloop.c)
+связывает соответствующий шаблон сообщения с exit255. Это проверка смысла hint,
+а не трассировка exact установленного Windows binary. В этой попытке
+ServerAliveInterval5/CountMax1 не менялись. Увеличение общего gate timeout не
+устраняет установленный механизм раннего выхода клиента само по себе.
+
+### Следующий локальный шаг без очередного bulk transfer probe
+
+[Исторический PASS22.09](phase16-bot-linux-execution-v2-2026-09-22.json) подтверждает
+retained candidate `/opt/amn2-spain/bot-candidates/phase16-bot-candidate-20260921-6e68235-001`.
+Frozen Linux executor сохранял туда payload/source, в том числе runtime lock и40
+runtime wheels. Нынешнее наличие/целостность **не проверялись** этим transfer probe.
+
+Подготовить локально вариант runtime40 stage из retained payload: передавать
+малый проверяемый script/manifest вместо30MB архива; перед первым использованием
+на сервере обязательно сверять каждый используемый файл с внешними immutable
+hash/size bindings, paths/owners/no links и provenance. Проверенные bytes копировать
+в **новый** private release; прежние payload/source/test-venv48 не менять, готовый
+test-venv48 не активировать. При missing/drift — STOP до stage, без автоматического
+upload fallback или повторов. Остальные offline install/runtime40/no-app-import
+и service/DB/activation границы прежнего дизайна сохраняются.
+
+Это локальное направление подготовки, не готовый executor или новое live approval.
+Оно убирает известную зависимость stage от повторного большого upload, но не
+объявляет сеть исправной. Новый stage требует своих artifacts/manifest и exact
+разрешения после проверки; незакрытые maintenance prerequisites сохраняются.
+Повтор synthetic transfer, изменение keepalive, cleanup и новый SSH не разрешены.
+
+В текущем ходе SSH1, retry0, remote script file writes0, application reads0,
+service/DB/stage/install/activation0. AWG2/package016 сохранены, general issuance
+не включалась; health bot/web заново не опрашивался. Проверены claim/result,
+manifest/script hashes, строгий event parser/stdout hash, stderr comparison,
+исторический candidate receipt, docs links/diff/whitespace; неизменные suites
+не повторялись. Push результата требует нового exact SHA approval.

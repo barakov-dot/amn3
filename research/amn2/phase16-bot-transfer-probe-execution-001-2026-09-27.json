@@ -1,0 +1,179 @@
+{
+  "schema": "phase16.transfer-probe-execution-record.v1",
+  "date": "2026-09-27",
+  "execution_commit": "7e7d64a0a33cfa5a2ad7f187c85cefa0eebcadb9",
+  "push": {
+    "status": "VERIFIED_REMOTE_HEAD",
+    "remote": "origin",
+    "url": "https://github.com/barakov-dot/amn3.git",
+    "ref": "refs/heads/codex/phase16-awg3-family-3-1-spain-pilot-016",
+    "expected_old": "9086bc3315adda79d6a7e7d46765c1ca2f6e26fb",
+    "new": "7e7d64a0a33cfa5a2ad7f187c85cefa0eebcadb9",
+    "force": false,
+    "tags": false,
+    "changelog_hook": "PASS_ONE_COMMIT"
+  },
+  "evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-transfer-probe-20260927/execution-001",
+  "evidence_sha256": {
+    "claim.json": "a9fde559ad2703df7333ce61cc31076d1d34fffec6bb0d8645487464fe3d1927",
+    "result.json": "60a68c329a8f107182e99161c31a2fadc20ff068a2f366ac1055352a5c0d0aad"
+  },
+  "execution": {
+    "schema": "phase16.transfer-probe-local.v1",
+    "claim": {
+      "approval": "PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001",
+      "manifest_sha256": "b497b652a794a28886ddea0be8cbad8ecd35395fd216df89b325d32be5675ee5",
+      "remote_sha256": "5329105df7461fd2e65e5b294568e1e2d6c036a794a51a74a293fc4627609b68",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+      "claimed_at": "2026-09-27T06:30:49.695420+00:00",
+      "attempts": 1
+    },
+    "status": "UNKNOWN_NO_RETRY",
+    "ssh_attempts": 1,
+    "transport": {
+      "schema": "phase16.bot-transport-diagnostic.v1",
+      "returncode": 255,
+      "last_stdin_progress_seconds": 24.625,
+      "termination_action": "NONE",
+      "failure_stage": "stdin_write",
+      "stdin_bytes_requested": 30487313,
+      "stdin_bytes_accepted": 7897088,
+      "stdin_complete": false,
+      "output_complete": true,
+      "elapsed_seconds": 34.313,
+      "stdout": {
+        "bytes_observed": 921,
+        "bytes_retained": 921,
+        "prefix_sha256": "0f99be429193411ec5b9559bb73dd1f5dc8007009d2f3d902b1bbc188d095638"
+      },
+      "stderr": {
+        "bytes_observed": 49,
+        "bytes_retained": 49,
+        "prefix_sha256": "f267ca96307a9b773efb5f398fdf3a0d69bb89c6b184cff55d60474855b39d10"
+      },
+      "pipe_failures": [
+        "stdin_write"
+      ],
+      "stderr_diagnostic": {
+        "status": "HINTS_ONLY",
+        "hints": [
+          "SSH_SERVER_ALIVE_TIMEOUT_HINT"
+        ],
+        "root_cause": "NOT_ESTABLISHED",
+        "utf8_valid": true,
+        "output_cap_hit": false
+      }
+    },
+    "remote_observation": {
+      "status": "PREFIX_ONLY",
+      "confirmed_bytes": 5242880,
+      "events": [
+        {
+          "schema": "phase16.transfer-probe-event.v1",
+          "approval": "PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001",
+          "seq": 0,
+          "event": "READY",
+          "bytes": 0
+        },
+        {
+          "schema": "phase16.transfer-probe-event.v1",
+          "approval": "PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001",
+          "seq": 1,
+          "event": "PROGRESS",
+          "bytes": 1048576
+        },
+        {
+          "schema": "phase16.transfer-probe-event.v1",
+          "approval": "PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001",
+          "seq": 2,
+          "event": "PROGRESS",
+          "bytes": 2097152
+        },
+        {
+          "schema": "phase16.transfer-probe-event.v1",
+          "approval": "PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001",
+          "seq": 3,
+          "event": "PROGRESS",
+          "bytes": 3145728
+        },
+        {
+          "schema": "phase16.transfer-probe-event.v1",
+          "approval": "PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001",
+          "seq": 4,
+          "event": "PROGRESS",
+          "bytes": 4194304
+        },
+        {
+          "schema": "phase16.transfer-probe-event.v1",
+          "approval": "PHASE16_SSH_TRANSFER_DIAGNOSTIC_20260927_001",
+          "seq": 5,
+          "event": "PROGRESS",
+          "bytes": 5242880
+        }
+      ],
+      "trailing_fragment": false
+    },
+    "reason": "transport_stdin_write"
+  },
+  "findings": {
+    "receiver_started": true,
+    "last_confirmed_bytes": 5242880,
+    "terminal_event": "ABSENT",
+    "ssh_disconnect_hint": "SSH_SERVER_ALIVE_TIMEOUT_HINT",
+    "underlying_cause": "UNKNOWN",
+    "local_transport_deadline_reached": false,
+    "local_child_killed": false,
+    "remote_alarm_expiry_observed": false,
+    "remote_process_exit": "NOT_CONFIRMED",
+    "stdout_prefix_reconstruction_hash": "MATCH",
+    "stage001_stderr_size_and_hash": "IDENTICAL",
+    "stage001_category_inference": "SAME_STDERR_FINGERPRINT_AS_CURRENT_SERVER_ALIVE_TIMEOUT_HINT",
+    "stage001_historical_receipt_modified": false,
+    "raw_stderr_recovered": false,
+    "full_transfer": false,
+    "install_or_runtime_acceptance": false
+  },
+  "reference_docs": [
+    {
+      "url": "https://man.openbsd.org/ssh_config#ServerAliveCountMax",
+      "read_date": "2026-09-27"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/openssh/openssh-portable/master/clientloop.c",
+      "read_date": "2026-09-27",
+      "limitation": "UPSTREAM_MECHANISM_REFERENCE_NOT_EXACT_INSTALLED_WINDOWS_BINARY"
+    }
+  ],
+  "next_local_preparation": {
+    "action": "RUNTIME40_FROM_VERIFIED_RETAINED_CANDIDATE_WITHOUT_BULK_REUPLOAD",
+    "historical_receipt": "research/amn2/phase16-bot-linux-execution-v2-2026-09-22.json",
+    "historical_receipt_sha256": "063bfc84be13ca473ad2e64bc78492bc08c40e516515e1a07fa5a2c7b7747772",
+    "historical_destination": "/opt/amn2-spain/bot-candidates/phase16-bot-candidate-20260921-6e68235-001",
+    "availability_now": "UNKNOWN_REQUIRES_FRESH_EXACT_HASH_VERIFICATION_BEFORE_USE",
+    "actual_stage_approval": "NOT_PREPARED_NOT_GRANTED",
+    "invariant": "READ_OLD_PAYLOAD_ONLY_CREATE_NEW_RUNTIME40_NEVER_ACTIVATE_TEST_VENV48",
+    "stop": "MISSING_OR_DRIFTED_INPUT_STOP_NO_UPLOAD_FALLBACK_NO_RETRY"
+  },
+  "safety": {
+    "ssh_attempts": 1,
+    "retry": 0,
+    "script_remote_file_writes": 0,
+    "app_file_reads": 0,
+    "service_actions": 0,
+    "database_operations": 0,
+    "stage": 0,
+    "install": 0,
+    "activation": 0,
+    "fresh_service_health": "NOT_CHECKED",
+    "awg2": "UNTOUCHED",
+    "package016": "UNCHANGED",
+    "general_issuance": "NO_ENABLE_ACTION"
+  },
+  "verification": {
+    "claim_result_readback": "PASS",
+    "exact_bindings": "PASS",
+    "validated_events_and_stdout_hash": "PASS",
+    "prior_suites_rerun": false,
+    "docs_only": true
+  }
+}
