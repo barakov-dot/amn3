@@ -805,13 +805,15 @@ manifest/script hashes, строгий event parser/stdout hash, stderr comparis
 
 ## Runtime40 из сохранённого candidate: пакет готов локально — 29.09
 
-**STAGE_READY_NOT_EXECUTED.** По «продолжай» реализован следующий локальный шаг
+**Исторический пакет подготовки; исполнен один раз, результат UNKNOWN_NO_RETRY.**
+[Фактический результат29.09](#retained-runtime40-stage-executed-2026-09-29) имеет приоритет
+над первоначальным preview ниже. По «продолжай» реализован локальный шаг
 после transfer001; результат transfer001 опубликован в `8800fc6733120977ca1d007babc0f98454dc3869`.
 [Новый gate](../../scripts/phase16_bot_retained_stage_gate.py),
 [remote executor](../../scripts/vps/phase16_bot_retained_stage_remote.py),
 [manifest](phase16-bot-retained-stage-manifest-2026-09-29.json),
 [local verification](phase16-bot-retained-stage-local-verification-2026-09-29.json).
-Старые approvals использованы; новый marker пока **NOT_GRANTED**.
+Approval этого пакета **GRANTED_AND_CONSUMED_ONCE**. Manifest и исполнявшиеся scripts заморожены.
 
 ### Что сделает одна разрешённая попытка
 
@@ -878,16 +880,14 @@ drain/startup/pending) остаются UNKNOWN/BLOCKED; stage не подмен
 
 ### Точные bindings для будущего разрешения
 
-- Approval: `PHASE16_BOT_RUNTIME40_RETAINED_STAGE_20260929_001` — **NOT_GRANTED**.
+- Approval: `PHASE16_BOT_RUNTIME40_RETAINED_STAGE_20260929_001` — **GRANTED_AND_CONSUMED_ONCE**.
 - Remote SHA256: `d5197bb13e9548de82060ba3e17d6a0d20673cb378fff8c33014b31329b83a26`.
 - Manifest SHA256 (canonical LF): `c8635ea3f2b01bc8b57cda0ee6b273864121289f72d7b91c21811e2dab112051`.
 - Evidence: `C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-retained-stage-20260929/execution-001`.
 - Target binding: `87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6`.
 
-Порядок: проверить/stage только точные локальные files, commit с CHANGELOG;
-получить exact SHA push approval и отдельный stage marker; после push/readback
-выполнить gate **один раз**. Точная команда ниже является подготовленной, сейчас
-**НЕ РАЗРЕШЕНА К ВЫПОЛНЕНИЮ**:
+Подготовленный порядок push/readback → единственный stage исполнен29.09.
+Команда ниже — историческая команда использованного approval, **НЕ ПОВТОРЯТЬ**:
 
 ```powershell
 & 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -S -B 'C:/Users/SooL/.codex/worktrees/7489/VPS-OPS-LAB/scripts/phase16_bot_retained_stage_gate.py' --execute --approve PHASE16_BOT_RUNTIME40_RETAINED_STAGE_20260929_001 --approved-remote-sha256 d5197bb13e9548de82060ba3e17d6a0d20673cb378fff8c33014b31329b83a26 --approved-manifest-sha256 c8635ea3f2b01bc8b57cda0ee6b273864121289f72d7b91c21811e2dab112051
@@ -902,3 +902,72 @@ P2 локальная подготовка этого этапа заверше�
 CURRENT_MODEL/CURRENT_EFFORT: недоступны. RECOMMENDED_MODEL_NEXT=gpt-6-astra,
 RECOMMENDED_EFFORT_NEXT=high: анализ install/evidence и recovery границ; это
 рекомендация из текущего workflow, не live authority.
+
+
+<a id="retained-runtime40-stage-executed-2026-09-29"></a>
+
+## Retained-stage исполнен: малый frame, тот же SSH timeout — 29.09
+
+**UNKNOWN_NO_RETRY.** Exact push `0574462dded68e2430fca93886f20d702765c3d0`
+выполнен при EXPECTED_OLD `8800fc6733120977ca1d007babc0f98454dc3869`;
+pre-push CHANGELOG hook PASS, origin/ref readback MATCH, NO_FORCE/NO_TAGS.
+Затем один разрешённый `PHASE16_BOT_RUNTIME40_RETAINED_STAGE_20260929_001`.
+[Normalized execution record](phase16-bot-retained-stage-execution-001-2026-09-29.json)
+сохраняет exact claim/result, hashes внешних evidence, bindings и сравнение отказов.
+
+SSH завершился с rc255 за **12.297s**. Локальный pipe принял все41 104 bytes к2.578s,
+`stdin_complete=true`, `output_complete=true`, pipe failures отсутствуют,
+`failure_stage=null`, termination_action=NONE. Local330s timeout/kill не сработал.
+stdout0, remote receipt отсутствует. stderr49 bytes с тем же SHA
+`f267ca96307a9b773efb5f398fdf3a0d69bb89c6b184cff55d60474855b39d10` и hint
+`SSH_SERVER_ALIVE_TIMEOUT_HINT`. Raw stderr не сохранялся/не восстанавливался.
+
+| Попытка | Input в локальный pipe | Remote stdout | SSH |
+| --- | --- | --- | --- |
+| Stage00124.09 | 3 702 784 /30 513 539, incomplete | 0 | 255, stderr49/same SHA |
+| Transfer00127.09 | 7 897 088 /30 487 313, incomplete | 921 bytes; подтверждено5MiB | 255, stderr49/same SHA |
+| Retained-stage29.09 | 41 104 /41 104, complete | 0 | 255, stderr49/same SHA |
+
+Это уже не ошибка неполной записи stdin. Малый frame не предотвратил наблюдаемый
+SSH disconnect. Причина потери ответов остаётся UNKNOWN; дефект сети/провайдера, Windows VPN,
+нагрузка VPS или сбой приложения/pip не установлены. Полная запись в
+локальный pipe **не подтверждает** доставку/запуск script на VPS. Wrapper reason
+`transport_json` означает decode пустого stdout после rc255; это не доказательство
+дефекта remote JSON/validator и не основание для очередного validator gate.
+
+В отличие от неполного stage001 frame, здесь нельзя выводить «stage не достигнут».
+Каталог `/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260929-6e68235-001`
+мог быть создан; retained-file verification, stage, offline install и завершение
+remote process **UNKNOWN / NOT ACCEPTED**. Код ограничен этим новым каталогом,
+но фактические записи не наблюдались. Remote300s cap не считается evidence его
+срабатывания. Старый candidate/test-venv48 и stage00124.09 не переиспользовались
+исполняемым кодом; receipt не доказывает текущее health bot/web.
+
+### Следующая работа и границы
+
+Повтор stage, новый bulk-transfer probe, cleanup или новая установка сейчас
+**не являются следующим шагом**. Следующий локальный scope — review SSH transport
+и подготовка bounded readback **уже существующего/возможного** stage directory.
+Он должен различить absent/incomplete/complete, проверить сохранённый result и
+реальное содержимое перед любым решением об install/activation. Учитывать текущий
+SSH timeout при проектировании transport; настройки не менять попутно или наугад.
+Конкретный readback executor/manifest/approval ещё не подготовлен; новый SSH
+не разрешён. Автоматической цепочки probes и повторов нет.
+
+Текущий approval **использован один раз**. Frozen manifest/scripts и исторические
+receipts не изменены. Проверены local claim/result и hashes, script/manifest/target/
+destination bindings, предыдущие fingerprints, docs readback/links/diff/whitespace.
+Неизменные23 local PASS и прежние suites сохранены без повторного запуска.
+Результат записывается отдельным локальным commit с CHANGELOG; его push требует
+нового exact SHA approval, разрешение на0574462 уже выполнено.
+
+Фактический scope: push0574462 выполнен, SSH1, retry0, cleanup0;
+remote retained reads/stage/install UNKNOWN. Service/DB/Telegram/activation
+команд в bound script0; AWG2_UNTOUCHED, package016 immutable, general issuance
+не включалась. Maintenance writer/user/flags/drain/startup/pending prerequisites
+по-прежнему UNKNOWN/BLOCKED. Чужой `ideas/candidates-for-amn2.md` сохранён.
+P0 quality/A-B отложен; P1 integration теперь зависит от transport/readback и
+maintenance, Windows остаётся отдельным открытым P1; P2 фиксация этого run завершена.
+CURRENT_MODEL/CURRENT_EFFORT: недоступны. RECOMMENDED_MODEL_NEXT=gpt-6-astra,
+RECOMMENDED_EFFORT_NEXT=high — анализ transport и неопределённого stage state;
+рекомендация модели не разрешает новый live шаг.

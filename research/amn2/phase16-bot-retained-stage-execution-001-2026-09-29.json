@@ -1,0 +1,150 @@
+{
+  "approval_status": "GRANTED_AND_CONSUMED_ONCE",
+  "checks": {
+    "claim_result_readback": "PASS",
+    "docs_only": true,
+    "exact_bindings": "PASS",
+    "frozen_artifacts_modified": false,
+    "prior_stderr_comparison": "PASS",
+    "unchanged_suites_rerun": false
+  },
+  "date": "2026-09-29",
+  "evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-retained-stage-20260929/execution-001",
+  "evidence_sha256": {
+    "claim.json": "a2ed1a4db5ab32e79c414e1f03afeb8dd681540b7d7e014c1bbd58d99e7aba4e",
+    "result.json": "5763955b25e287a3d7752cb04fa072a8bec63c48ffec2a33a1b8cfa6a03d408e"
+  },
+  "execution": {
+    "claim": {
+      "approval": "PHASE16_BOT_RUNTIME40_RETAINED_STAGE_20260929_001",
+      "attempts": 1,
+      "bundle_sha256": "e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7",
+      "claimed_at": "2026-09-29T19:28:48.724170+00:00",
+      "destination": "/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260929-6e68235-001",
+      "manifest_sha256": "c8635ea3f2b01bc8b57cda0ee6b273864121289f72d7b91c21811e2dab112051",
+      "remote_sha256": "d5197bb13e9548de82060ba3e17d6a0d20673cb378fff8c33014b31329b83a26",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6"
+    },
+    "reason": "transport_json",
+    "schema": "phase16.bot-retained-stage-local.v1",
+    "ssh_attempts": 1,
+    "status": "UNKNOWN_NO_RETRY",
+    "transport": {
+      "elapsed_seconds": 12.297,
+      "failure_stage": null,
+      "last_stdin_progress_seconds": 2.578,
+      "output_complete": true,
+      "pipe_failures": [],
+      "returncode": 255,
+      "schema": "phase16.bot-transport-diagnostic.v1",
+      "stderr": {
+        "bytes_observed": 49,
+        "bytes_retained": 49,
+        "prefix_sha256": "f267ca96307a9b773efb5f398fdf3a0d69bb89c6b184cff55d60474855b39d10"
+      },
+      "stderr_diagnostic": {
+        "hints": [
+          "SSH_SERVER_ALIVE_TIMEOUT_HINT"
+        ],
+        "output_cap_hit": false,
+        "root_cause": "NOT_ESTABLISHED",
+        "status": "HINTS_ONLY",
+        "utf8_valid": true
+      },
+      "stdin_bytes_accepted": 41104,
+      "stdin_bytes_requested": 41104,
+      "stdin_complete": true,
+      "stdout": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "termination_action": "NONE"
+    }
+  },
+  "execution_commit": "0574462dded68e2430fca93886f20d702765c3d0",
+  "findings": {
+    "destination_state": "UNKNOWN",
+    "fresh_service_health": "NOT_CHECKED",
+    "full_frame_remote_receipt": "NOT_PROVEN",
+    "full_frame_written_to_local_pipe": true,
+    "local_child_killed": false,
+    "local_transport_deadline_reached": false,
+    "no_stage_claim_inference": "NOT_AVAILABLE_FOR_THIS_FULL_LOCAL_INPUT; DESTINATION_MAY_EXIST",
+    "offline_install": "UNKNOWN",
+    "partial_stdin_write_failure": false,
+    "raw_stderr_persisted": false,
+    "remote_alarm_expiry_observed": false,
+    "remote_process_exit": "UNCONFIRMED",
+    "remote_receipt": "ABSENT",
+    "remote_script_started": "UNCONFIRMED",
+    "retained_input_verification": "UNKNOWN",
+    "runtime40_stage": "UNKNOWN",
+    "small_frame_did_not_avoid_ssh_disconnect": true,
+    "ssh_disconnect_hint": "SSH_SERVER_ALIVE_TIMEOUT_HINT",
+    "transport_json_reason": "EMPTY_STDOUT_DECODE_NOT_EVIDENCE_OF_REMOTE_JSON_DEFECT",
+    "underlying_cause": "UNKNOWN"
+  },
+  "next_action": {
+    "action": "LOCAL_TRANSPORT_REVIEW_AND_PLAN_READBACK_OF_EXISTING_STAGE_BEFORE_ANY_NEW_INSTALL",
+    "activation": "NOT_AUTHORIZED",
+    "automatic_probe_chain": false,
+    "cleanup": "NOT_AUTHORIZED",
+    "new_ssh": "NOT_AUTHORIZED",
+    "reason": "REMOTE_DIRECTORY_MAY_HAVE_BEEN_CREATED; SAME_SSH_TIMEOUT_WITH_SMALL_INPUT",
+    "stage_retry": "NOT_AUTHORIZED",
+    "transport_parameter_change": "NOT_MADE_NOT_AUTHORIZED"
+  },
+  "prior_comparison": [
+    {
+      "operation": "stage001_20260924",
+      "receipt": "research/amn2/phase16-bot-runtime40-stage-execution-001-2026-09-24.json",
+      "receipt_sha256": "dd35033448c66b25f62b9714a87b921cc00c8242a11219966c41147d530a252c",
+      "same_stderr_size_and_sha256": true,
+      "ssh_returncode": 255,
+      "stdin_bytes_accepted": 3702784,
+      "stdin_bytes_requested": 30513539,
+      "stdin_complete": false,
+      "stdout_bytes": 0
+    },
+    {
+      "operation": "transfer001_20260927",
+      "receipt": "research/amn2/phase16-bot-transfer-probe-execution-001-2026-09-27.json",
+      "receipt_sha256": "af5fb987b789b437b3f95be5d7f87917ca86386ebd346d5944b91977cc58829c",
+      "same_stderr_size_and_sha256": true,
+      "ssh_returncode": 255,
+      "stdin_bytes_accepted": 7897088,
+      "stdin_bytes_requested": 30487313,
+      "stdin_complete": false,
+      "stdout_bytes": 921
+    }
+  ],
+  "push": {
+    "changelog_hook": "PASS_ONE_COMMIT",
+    "expected_old": "8800fc6733120977ca1d007babc0f98454dc3869",
+    "force": false,
+    "new": "0574462dded68e2430fca93886f20d702765c3d0",
+    "ref": "refs/heads/codex/phase16-awg3-family-3-1-spain-pilot-016",
+    "remote": "origin",
+    "status": "VERIFIED_REMOTE_HEAD",
+    "tags": false,
+    "url": "https://github.com/barakov-dot/amn3.git"
+  },
+  "result_file_mtime_utc": "2026-09-29T19:29:01.012403+00:00",
+  "safety": {
+    "activation_commands": 0,
+    "awg2": "UNTOUCHED_BY_BOUND_SCRIPT",
+    "cleanup": 0,
+    "general_issuance": "NO_ENABLE_ACTION",
+    "live_database_operations": 0,
+    "maintenance": "BLOCKED_UNKNOWN_PREREQUISITES",
+    "package016": "IMMUTABLE_UNCHANGED",
+    "possible_writes": "BOUND_NEW_STAGE_DIRECTORY_ONLY",
+    "retry": 0,
+    "service_commands": 0,
+    "ssh_attempts": 1,
+    "stage_and_install": "UNKNOWN_NOT_ACCEPTED",
+    "telegram_polling": false
+  },
+  "schema": "phase16.bot-retained-stage-execution-record.v1"
+}

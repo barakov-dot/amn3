@@ -7,6 +7,19 @@
 
 ## 2026-09-29
 
+- По exact approvals опубликован0574462 (EXPECTED_OLD8800fc6, hook/remote SHA
+  PASS) и исполнен один [retained-stage](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#retained-runtime40-stage-executed-2026-09-29).
+  [Результат](research/amn2/phase16-bot-retained-stage-execution-001-2026-09-29.json):
+  UNKNOWN_NO_RETRY,12.297s, SSH255; local stdin41104/41104 complete, stdout0,
+  тот же stderr49/SHA/server-alive timeout hint, что24/27.09. Малый frame отказ
+  не устранил; root cause UNKNOWN. Remote directory мог появиться, stage/install
+  не приняты; transport_json означает пустой stdout, не дефект remote JSON.
+  Следующий scope — локальный transport review и подготовка readback возможного stage,
+  без повторного install, cleanup или автоматической цепочки probes. Проверены
+  evidence hashes/bindings/comparison/readback/links/diff; frozen code/manifests
+  и suites не менялись/не повторялись. SSH1/retry0, service/DB/activation commands0,
+  AWG2/package016 сохранены, issuance не включалась; result commit пока не pushed.
+
 - Подготовлен [runtime40 из retained candidate](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#retained-runtime40-stage-ready-2026-09-29):
   frame41 104 bytes вместо30.5MB bundle,43 files с external immutable hash/size
   verification и descriptor-relative no-follow/owner/mode/link/race checks до

@@ -461,9 +461,13 @@ candidate22.09 с exact fresh file/hash verification до stage, без30MB reup
 23 targeted PASS, default preview exit0; frame41104 bytes без bundle upload,
 43 retained files проверяются перед stage, новый private destination, offline40.
 Missing/drift/unsafe paths дают STOP до записи; frozen artifacts сохранены.
-Новый approval PHASE16_BOT_RUNTIME40_RETAINED_STAGE_20260929_001 пока NOT_GRANTED;
-remote reads/SSH/stage/install0. Подробности, hashes и команда — в linked runbook.
-Результат transfer001 опубликован в8800fc6; новый local commit требует exact push.
+[Retained-stage исполнен29.09](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#retained-runtime40-stage-executed-2026-09-29)
+из pushed0574462: UNKNOWN_NO_RETRY,12.297s, SSH255/server-alive timeout;
+все41104 bytes записаны в local pipe, stdout0. Remote reads/stage/install UNKNOWN,
+каталог мог быть создан. Approval PHASE16_BOT_RUNTIME40_RETAINED_STAGE_20260929_001
+GRANTED_AND_CONSUMED_ONCE; retry/cleanup/новый SSH не разрешены. Следующий локальный
+scope — transport review и подготовка readback уже возможного stage, не повтор install.
+Результат требует нового exact push; frozen scripts/manifests остаются прежними.
 - [x] T9 — secure descriptor reads/hash provenance retained candidate, новый stage
   без upload/old test-venv reuse, offline install/metadata/no-app-import контракт.
 - [x] T10 — одноразовый gate/manifest,23 targeted PASS, actual immutable bundle
@@ -473,7 +477,7 @@ Keepalive settings не меняются попутно.
 - [x] T7 — streaming receiver, strict events, одноразовый checksum-bound gate/manifest.
 - [x] T8 — bounded stdout observer при transport failure,25 targeted PASS,
   self-review, receipts/CHANGELOG. Независимого review не было (без делегирования).
-Не менять transport параметры наугад; нового live/install разрешения нет.
+Не менять transport параметры наугад; stage approval использован, нового live/install разрешения нет.
 Target manifest сохраняется историческим: unknown writer/service-user/flags/drain/
 pending поля блокируют maintenance. Live data reads/backup/migration, stop/start,
 Telegram и activation не разрешены этим stage; фактический writer inventory,
@@ -505,9 +509,11 @@ Design согласован оператором после commit b277154. По
   stage001 исполнен один раз из 68df5b9: UNKNOWN_NO_RETRY (неполная передача,
   remote receipt отсутствует); 15 local PASS сохранены. Transport diagnostic module
   готов локально (25 local PASS);27.09 transfer001 дал PARTIAL/UNKNOWN_NO_RETRY,
-  5MiB подтверждены, SSH server-alive timeout hint. Retained-stage пакет готов
-  локально29.09 (23 PASS/preview, SSH0); следующий шаг — exact push/stage approval.
-  43 retained hashes проверяются до записи, без большого reupload.
+  5MiB подтверждены, SSH server-alive timeout hint. Retained-stage29.09 исполнен
+  из pushed0574462:12.297s/SSH255, local input41104 complete, stdout0; тот же stderr.
+  Stage/install UNKNOWN, remote directory мог появиться; approval consumed.
+  Следующий локальный scope — transport review и подготовка readback существующего stage;
+  повтор install/cleanup/новый SSH не разрешены.23 local PASS сохранены.
   Maintenance bindings/actual prerequisites открыты;
   recovery-контракт v1 для прежнего scope сохранён.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
