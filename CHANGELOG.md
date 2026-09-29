@@ -7,6 +7,19 @@
 
 ## 2026-09-29
 
+- После подтверждения оператора подготовлен [read-only stage readback](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#stage-readback-ready-2026-09-29):
+  bound compressed argv без stdin, per-command SSH5/6, remote45s/local60s,
+  один marker/claim; чтение saved receipt,159 source+41 payload hashes и static
+  runtime40 metadata. Нет remote writes/app/candidate execution/install/DB/services.
+  [28 local PASS/0SKIP](research/amn2/phase16-bot-stage-readback-local-verification-2026-09-29.json),
+  RED/GREEN, реальный Windows argv/bootstrap с DEVNULL и corrupt-digest STOP,
+  strict events/negative controls, preview/hash/length checks, self-review.
+  Исправлена классификация отсутствующего parent: UNKNOWN; descriptor checks
+  проверены моделями, Linux syscalls/SIGALRM не исполнялись. Frozen manifests MATCH, suites не
+  повторялись; docs readback/links/diff проверены. Actual server stage/install
+  UNKNOWN; VERIFIED не закрывает maintenance/activation. SSH/push/stage/install0,
+  AWG2/package016 сохранены, issuance off; далее отдельные exact push/SSH approvals.
+
 - Выполнен [локальный transport/EOF review](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#transport-readback-design-2026-09-29):
   successful22.09 использовал те же SSH5/1 и close stdin; installed ssh9.5p2/SHA
   зафиксированы без network call. Exact41104-byte frame с правильным marker

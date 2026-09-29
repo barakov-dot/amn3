@@ -951,8 +951,9 @@ remote process **UNKNOWN / NOT ACCEPTED**. Код ограничен этим н
 Он должен различить absent/incomplete/complete, проверить сохранённый result и
 реальное содержимое перед любым решением об install/activation. Учитывать текущий
 SSH timeout при проектировании transport; настройки не менять попутно или наугад.
-Конкретный readback executor/manifest/approval ещё не подготовлен; новый SSH
-не разрешён. Автоматической цепочки probes и повторов нет.
+На момент execution receipt readback executor/manifest ещё не были подготовлены.
+Теперь [локальный пакет готов](#stage-readback-ready-2026-09-29); новый SSH требует
+точного разрешения. Автоматической цепочки probes и повторов нет.
 
 Текущий approval **использован один раз**. Frozen manifest/scripts и исторические
 receipts не изменены. Проверены local claim/result и hashes, script/manifest/target/
@@ -978,7 +979,8 @@ RECOMMENDED_EFFORT_NEXT=high — анализ transport и неопределё�
 ## Локальный transport review и предложенный readback — 29.09
 
 [Review receipt](phase16-bot-transport-local-review-2026-09-29.json).
-**Локальный разбор завершён; дизайн нового readback ожидает ответа оператора.**
+**Локальный разбор завершён; дизайн впоследствии подтверждён оператором и
+[реализован локально](#stage-readback-ready-2026-09-29).**
 Нового SSH/установки/push0. Результат stage по-прежнему UNKNOWN.
 
 Сверены успешный Linux gate22.09 (remote47.487s, полный30.5MB input, rc0),
@@ -1004,7 +1006,7 @@ server_alive_check соответствует найденным message/exit255
 отказа, а не причину отсутствия ответа и не является трассировкой Windows binary.
 Root cause всё ещё UNKNOWN; оснований объявлять исправление pip/бота/сети нет.
 
-### Предложенный bounded design (ещё не реализован)
+### Согласованный bounded design (история предложения)
 
 Цель — узнать состояние уже возможного stage29.09 за одну read-only попытку,
 сразу пригодную для решения о дальнейшей интеграции. Подтверждать live readiness
@@ -1037,12 +1039,105 @@ Root cause всё ещё UNKNOWN; оснований объявлять испр
 Передача без stdin и CountMax6 предложены для получения наблюдения после
 неопределённого stage, **не как доказанный fix/root-cause эксперимент**: одновременно
 меняются две характеристики transport, поэтому их отдельный эффект не атрибутируется.
-Сначала согласовать локальный дизайн; затем implementation/targeted RED-GREEN/
-manifest/self-review/commit. Только после готового пакета — отдельные exact push
-и SSH approvals. Новый marker ещё не создан; исторические markers не переиспользовать.
+Дизайн был запрошен через async question и подтверждён ответом оператора
+«подтверждаю». Локальная реализация/проверки приведены ниже. Первоначальное
+ожидание соответствовало [Brainstorming skill](C:/Users/SooL/.codex/plugins/cache/openai-curated-remote/superpowers/6.4.2/skills/brainstorming/SKILL.md):
+“the human partner approves the short in-chat design”. Повторного design approval
+не требуется. Только будущие exact push/SSH остаются за отдельным разрешением
+по AGENTS; исторические markers не переиспользовать.
 
-Дизайн запрошен через async question. [Brainstorming skill](C:/Users/SooL/.codex/plugins/cache/openai-curated-remote/superpowers/6.4.2/skills/brainstorming/SKILL.md)
-требует для bounded implementation: “the human partner approves the short in-chat design”.
-Это причина ожидания перед новым executor, а не требование повторно разрешить
-уже выполненный локальный review. Ответ «продолжай» разрешил review/подготовку,
-но новая transport policy представлена оператору впервые в этом ходе.
+
+<a id="stage-readback-ready-2026-09-29"></a>
+
+## Readback stage29.09: локальный пакет готов — 29.09
+
+**LOCAL_READY_NOT_EXECUTED.** Оператор подтвердил предложенный дизайн.
+[Executor](../../scripts/phase16_bot_stage_readback_gate.py),
+[remote reader](../../scripts/vps/phase16_bot_stage_readback_remote.py),
+[inventory](phase16-bot-stage-readback-inventory-2026-09-29.json),
+[manifest](phase16-bot-stage-readback-manifest-2026-09-29.json),
+[28 local PASS](phase16-bot-stage-readback-local-verification-2026-09-29.json).
+База подготовки a4190c26787df604ac686fbe88a36c259b52dcb3; последняя серверная
+попытка была из0574462. Текущий фактический stage/install остаётся UNKNOWN.
+
+Вопрос единственной будущей попытки: существует ли stage29.09 и подтверждаются ли
+сохранённый успешный receipt, текущие200 source/payload files и static runtime40
+metadata? Читается только `/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260929-6e68235-001`
+и безопасные ancestors. App/dependencies/candidate interpreter не исполняются;
+БД, service units, env/token, прежние candidates и /proc вне scope. Нет remote
+writes/children/install/activation. Immutable ZIP и package016 не менялись.
+
+Проверяются saved claim с точным stage marker/bundle и result прежним frozen
+validator; descriptor-relative no-follow/root-owned/no-writable-path/regular-file/
+single-link checks; exact159 source +41 payload inventory/size/SHA256; неизменность
+наблюдавшихся файлов/директорий до завершения чтения. Статически проверяются
+pyvenv.cfg без system-site, разрешённые symlink chains трёх interpreter names,
+40 точных distribution pins и только pip/setuptools как возможный bootstrap.
+.pth, startup customization и egg-info отвергаются. Установленные binaries целиком
+не хешируются, system interpreter target не исполняется и не аудируется.
+
+| Исход | Смысл и stop-condition |
+| --- | --- |
+| ABSENT_NO_INSTALL | Нужный каталог отсутствует при безопасно прочитанном parent; установка не начинается. |
+| INCOMPLETE_NO_RETRY | Каталог наблюдался, receipt/содержимое/metadata неполны или не соответствуют; без исправления/cleanup. |
+| VERIFIED_NOT_ACTIVATED | Saved-stage success + нынешние hashes/static metadata соответствуют; это не maintenance readiness и не разрешение activation. |
+| UNKNOWN_NO_RETRY | Transport, права, изменение во время чтения или неполное наблюдение; вывод о состоянии не делается. |
+
+### Transport и проверки
+
+Bound script46 706 bytes передаётся compressed/base64 argument с проверкой hashes
+до исполнения; stdin0/SSH -n. Preview command с резервом2048UTF-16 units занимает
+27 237units; полный argv проверяется против30 000 до claim/SSH. SSH per-command
+ServerAliveInterval5/CountMax6, ConnectTimeout10/Attempts1, pinned target/key/
+known_hosts, StrictHostKeyChecking; глобальные configs не меняются. Remote45s,
+local60s, output64KiB, одна попытка. Сохраняется валидный event prefix при обрыве;
+успех требует complete pipes, terminal receipt и согласованный exit code. Готовые
+решения не повторяют stage и не переключаются на другой транспорт автоматически.
+Изменения argv/keepalive не являются экспериментом для установления root cause.
+
+[Test source](../../tests/test_phase16_bot_stage_readback.py):28 PASS/0FAIL/0SKIP,
+0.658s. Начальный RED — executor отсутствовал. Дополнительный RED исправил
+классификацию отсутствующего parent: UNKNOWN, а не INCOMPLETE/ABSENT. Negative
+controls: missing/drift/extra source, saved claim/result, metadata/config/link
+cycles, paths/owners/modes/hardlinks, changed snapshots, malformed/false receipts,
+partial pipes, cap, marker/hash/manifest/target drift, single claim/no retries.
+Реальный Windows child исполнил exact compressed argv с DEVNULL stdin: READY,
+ожидаемый platform_python UNKNOWN/rc3/stderr0; corrupt digest — rc70 до script.
+Default preview exit0. Descriptor checks проверены на моделях системных вызовов;
+реальные Linux openat/O_NOFOLLOW/listdir(fd) и SIGALRM **не исполнялись**. SSH,
+текущий VPS, приложение и установка не проверялись.
+Self-review; independent review/subagents0. Frozen manifests24/27/29.09 MATCH;
+неизменные suites не повторялись. Docs readback/links/diff/whitespace проверены.
+
+### Bindings и следующий шаг
+
+- Approval: `PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001` — **NOT_GRANTED**.
+- Remote SHA256: `f72f312f1cb5007586820b09761879a08f65b886ea8ddc92e8a15f36c8701bc0`.
+- Manifest SHA256 (canonical LF): `6402188734e50485418ed39feba7a1be5d0e1a03676e08d5054cc5134191e857`.
+- Inventory SHA256 (canonical LF): `647a32f7a538028a8debbe8169ade373ea08b5d1c1b0467a36a9253380852aec`.
+- Target binding: `87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6`.
+- Evidence: `C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-stage-readback-20260929/execution-001` — отсутствует, не claimed.
+
+Сначала отдельный exact push нового HEAD в origin branch при EXPECTED_OLD
+`0574462dded68e2430fca93886f20d702765c3d0`, NO_FORCE/NO_TAGS и remote readback;
+затем отдельное разрешение marker выше и одна команда. Последний origin read-only
+check29.09 подтвердил0574462; перед push проверить снова. Два предыдущих локальных
+commits43dd9b1/a4190c2 ещё не опубликованы, войдут в тот же разрешённый диапазон.
+Команда ниже подготовлена, **НЕ ИСПОЛНЕНА И ПОКА НЕ РАЗРЕШЕНА**:
+
+```powershell
+& 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -S -B 'C:/Users/SooL/.codex/worktrees/7489/VPS-OPS-LAB/scripts/phase16_bot_stage_readback_gate.py' --execute --approve PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001 --approved-remote-sha256 f72f312f1cb5007586820b09761879a08f65b886ea8ddc92e8a15f36c8701bc0 --approved-manifest-sha256 6402188734e50485418ed39feba7a1be5d0e1a03676e08d5054cc5134191e857
+```
+
+Ориентир после разрешения: одна попытка максимум60s плюс5–10min на разбор и фиксацию.
+Это не срок закрытия Phase16. После результата определить интеграционный шаг;
+не создавать автоматически очередную цепочку probes. Maintenance writer inventory,
+service user/group, effective flags, drain/startup/pending остаются UNKNOWN/BLOCKED.
+P1 integration зависит от readback/maintenance; Windows — отдельная незакрытая
+задача. P0 quality/A-B отложен оператором. P2 локальная подготовка readback завершена.
+
+За этот этап SSH/push/remote read/write/stage/install/DB/service/activation0.
+AWG2_UNTOUCHED, package016 immutable, general issuance disabled. Чужой
+`ideas/candidates-for-amn2.md` не менялся и не включён в наш commit.
+CURRENT_MODEL/CURRENT_EFFORT: недоступны. RECOMMENDED_MODEL_NEXT=gpt-6-astra,
+RECOMMENDED_EFFORT_NEXT=high — сложный разбор evidence/recovery; не live authority.

@@ -1,0 +1,846 @@
+{
+  "files": {
+    "payload/requirements/phase15-runtime-py312.lock": [
+      5447,
+      "a381be185b19777b9198526e11df8dcfa0afaf7f15acccd829809e698d679fab"
+    ],
+    "payload/wheelhouse/runtime/aiofiles-25.1.0-py3-none-any.whl": [
+      14668,
+      "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695"
+    ],
+    "payload/wheelhouse/runtime/aiogram-3.30.0-py3-none-any.whl": [
+      843818,
+      "98c22665271912d258178cec591f78ee93a085a3423dd3b2e11c2851d4552470"
+    ],
+    "payload/wheelhouse/runtime/aiohappyeyeballs-2.7.1-py3-none-any.whl": [
+      15038,
+      "9243213661e29250eb41368e5daa826fc017156c3b8a11440826b2e3ed376472"
+    ],
+    "payload/wheelhouse/runtime/aiohttp-3.14.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": [
+      1792122,
+      "543906c127fb1d929b95076db19b83fa2d46751006ff1e23b093aa5ac4d8db42"
+    ],
+    "payload/wheelhouse/runtime/aiohttp_socks-0.12.0-py3-none-any.whl": [
+      10693,
+      "ba6f95ec775c761d87f8578ab48f137d0457c676da104984202bf75e747d5ee6"
+    ],
+    "payload/wheelhouse/runtime/aiosignal-1.4.0-py3-none-any.whl": [
+      7490,
+      "053243f8b92b990551949e63930a839ff0cf0b0ebbe0597b0f3fb19e1a0fe82e"
+    ],
+    "payload/wheelhouse/runtime/annotated_doc-0.0.5-py3-none-any.whl": [
+      5302,
+      "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101"
+    ],
+    "payload/wheelhouse/runtime/annotated_types-0.8.0-py3-none-any.whl": [
+      13427,
+      "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0"
+    ],
+    "payload/wheelhouse/runtime/anyio-4.14.2-py3-none-any.whl": [
+      125813,
+      "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494"
+    ],
+    "payload/wheelhouse/runtime/attrs-26.1.0-py3-none-any.whl": [
+      67548,
+      "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309"
+    ],
+    "payload/wheelhouse/runtime/certifi-2026.7.22-py3-none-any.whl": [
+      136983,
+      "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775"
+    ],
+    "payload/wheelhouse/runtime/cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": [
+      221822,
+      "c1453022f490d2459a11819d83ad1d586e9ff65a12ac3e705ffebd46d3685dcf"
+    ],
+    "payload/wheelhouse/runtime/click-8.4.2-py3-none-any.whl": [
+      119243,
+      "e6f9f66136c816745b9d65817da91d61d957fb16e02e4dcd0552553c5a197b76"
+    ],
+    "payload/wheelhouse/runtime/colorama-0.4.6-py2.py3-none-any.whl": [
+      25335,
+      "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"
+    ],
+    "payload/wheelhouse/runtime/cryptography-45.0.7-cp311-abi3-manylinux_2_34_x86_64.whl": [
+      4460397,
+      "b6a0e535baec27b528cb07a119f321ac024592388c5681a5ced167ae98e9fff3"
+    ],
+    "payload/wheelhouse/runtime/fastapi-0.141.1-py3-none-any.whl": [
+      131954,
+      "bfb91aa2d334c61cb35ba9a116fc123b3d3df31640b801cf57a7a78ec3f603b3"
+    ],
+    "payload/wheelhouse/runtime/frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": [
+      242411,
+      "494a5952b1c597ba44e0e78113a7266e656b9794eec897b19ead706bd7074383"
+    ],
+    "payload/wheelhouse/runtime/h11-0.16.0-py3-none-any.whl": [
+      37515,
+      "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"
+    ],
+    "payload/wheelhouse/runtime/idna-3.18-py3-none-any.whl": [
+      65455,
+      "7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de849a2"
+    ],
+    "payload/wheelhouse/runtime/itsdangerous-2.2.0-py3-none-any.whl": [
+      16234,
+      "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef"
+    ],
+    "payload/wheelhouse/runtime/jinja2-3.1.6-py3-none-any.whl": [
+      134899,
+      "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"
+    ],
+    "payload/wheelhouse/runtime/magic_filter-1.0.12-py3-none-any.whl": [
+      11335,
+      "e5929e544f310c2b1f154318db8c5cdf544dd658efa998172acd2e4ba0f6c6a6"
+    ],
+    "payload/wheelhouse/runtime/markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": [
+      22947,
+      "d6dd0be5b5b189d31db7cda48b91d7e0a9795f31430b7f271219ab30f1d3ac9d"
+    ],
+    "payload/wheelhouse/runtime/multidict-6.7.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": [
+      256322,
+      "bfde23ef6ed9db7eaee6c37dcec08524cb43903c60b285b172b6c094711b3961"
+    ],
+    "payload/wheelhouse/runtime/pillow-12.3.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": [
+      6940830,
+      "78cb2c6865a35ab8ff8b75fd122f6033b92a62c82801110e48ddd6c936a45d91"
+    ],
+    "payload/wheelhouse/runtime/propcache-0.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": [
+      61639,
+      "6f328175a2cde1f0ff2c4ed8ce968b9dcfb55f3a7153f39e2957ed994da13476"
+    ],
+    "payload/wheelhouse/runtime/pycparser-3.0-py3-none-any.whl": [
+      48172,
+      "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992"
+    ],
+    "payload/wheelhouse/runtime/pydantic-2.13.4-py3-none-any.whl": [
+      472262,
+      "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba"
+    ],
+    "payload/wheelhouse/runtime/pydantic_core-2.46.4-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": [
+      2094516,
+      "926c9541b14b12b1681dca8a0b75feb510b06c6341b70a8e500c2fdcff837cce"
+    ],
+    "payload/wheelhouse/runtime/pydantic_settings-2.15.0-py3-none-any.whl": [
+      69413,
+      "0ba092c291c94baceb5eff768aa0d56400a457585bc0175925a5a5510303da42"
+    ],
+    "payload/wheelhouse/runtime/python_dotenv-1.2.2-py3-none-any.whl": [
+      22101,
+      "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a"
+    ],
+    "payload/wheelhouse/runtime/python_multipart-0.0.32-py3-none-any.whl": [
+      30042,
+      "ff6d3f776f16878c894e52e107296ffc890e913c611b1a4ec6c44e2821fe2e23"
+    ],
+    "payload/wheelhouse/runtime/python_socks-3.0.0-py3-none-any.whl": [
+      49519,
+      "e06a421d4d7f3fc17ef2740ab6c291640364f6a362b94a1ae87a136c29bd0067"
+    ],
+    "payload/wheelhouse/runtime/pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": [
+      807870,
+      "ba1cc08a7ccde2d2ec775841541641e4548226580ab850948cbfda66a1befcdc"
+    ],
+    "payload/wheelhouse/runtime/qrcode-8.2-py3-none-any.whl": [
+      45986,
+      "16e64e0716c14960108e85d853062c9e8bba5ca8252c0b4d0231b9df4060ff4f"
+    ],
+    "payload/wheelhouse/runtime/starlette-1.6.0-py3-none-any.whl": [
+      75969,
+      "a86dd39d14bb45f85a3d18525215a9ef0cfd1f192ac793220e72598c90335f0c"
+    ],
+    "payload/wheelhouse/runtime/typing_extensions-4.16.0-py3-none-any.whl": [
+      45571,
+      "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+    ],
+    "payload/wheelhouse/runtime/typing_inspection-0.4.4-py3-none-any.whl": [
+      14750,
+      "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"
+    ],
+    "payload/wheelhouse/runtime/uvicorn-0.52.3-py3-none-any.whl": [
+      79859,
+      "116af2710dbf47c80f463cd20ee4884b6662f4c9f227d797ddc7279d2fcc2c7c"
+    ],
+    "payload/wheelhouse/runtime/yarl-1.24.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": [
+      109835,
+      "f08c7513ecef5aad65687bfdf6bc601ae9fccd04a42904501f8f7141abad9eb9"
+    ],
+    "source/README.md": [
+      5050,
+      "ff50784903db179132b1f1b3be2ee1332485abcb658d9da3075b246cc21b6699"
+    ],
+    "source/app/__init__.py": [
+      49,
+      "e2dfdcaf386b2ee9befa8ca8c14331b63053cd4b56a7ba114c5db67b012f246e"
+    ],
+    "source/app/access_expiry.py": [
+      3681,
+      "5592311da24cf62b19d4442da4b8b24d264c9450a2e8ebf85c63be0aa1f7f587"
+    ],
+    "source/app/agent/__init__.py": [
+      47,
+      "8af713bcff5e5f5c23e40a4b65ceb627dc238bde863bf4959f323ee94f35bc8e"
+    ],
+    "source/app/agent/api.py": [
+      4705,
+      "c3d55fe0596b4866c2912682dfc65844c1a81e858b7d3d963f8cc2f7d6675e8b"
+    ],
+    "source/app/agent/audit.py": [
+      1622,
+      "d507cf78e8e09feb1c11a0b0e7b8e68e2dd01ef5b14d336d2e2e62331c0ebf14"
+    ],
+    "source/app/agent/auth.py": [
+      2098,
+      "80964b59502c4009d6fe80b56b2381d7f7f2665688fb52601756974f9694ef6a"
+    ],
+    "source/app/agent/config.py": [
+      1355,
+      "4d31d408591d56fb5bda59c1007fba0fee65064f9359ee3dd022d0423d290d68"
+    ],
+    "source/app/agent/policy.py": [
+      3749,
+      "acfd76b1aaa2e94e2fddf6af94e41f52aa72b30cecae1b186bb56d1dca028382"
+    ],
+    "source/app/agent/runtime.py": [
+      5446,
+      "dc6bb0fe9f2fec0fd19fc13286852f6591ee7d19f47c99761f1575a8873e0f1c"
+    ],
+    "source/app/agent/runtime_summary.py": [
+      1960,
+      "54d9d933f6ec3b151bac60d8a541174234ff4c74363fbc1d6a22dc920d7f680e"
+    ],
+    "source/app/api/__init__.py": [
+      69,
+      "9bed07e25d648d3e56224b1b9e6ad0247eff8db838500a388d1881018f7ad582"
+    ],
+    "source/app/api/app.py": [
+      13700,
+      "cb2b27b476674d2396be5867f15a857cf8dd1b4989f8aa8fdefd4f761f7bf536"
+    ],
+    "source/app/backup/__init__.py": [
+      74,
+      "9e8cb45ce890a63b9765575e0c264b297d1d8f10e40f279434cd411cee7e96c3"
+    ],
+    "source/app/backup/manifest.py": [
+      1642,
+      "dc78712dd926d9ef08320d3ad4f7f71e3da47b1fdb293eb8140c398248f0f648"
+    ],
+    "source/app/backup/service.py": [
+      14616,
+      "8d8ca943dd46591429ee1e21121d00235a8d3fb0b82ee93aca00aae48417f4c6"
+    ],
+    "source/app/backup/storage.py": [
+      885,
+      "6bbbb6d708350c9ff85b0c4347ce966cf27d4984a155d3318986cd5f0f9dc7c9"
+    ],
+    "source/app/bot/__init__.py": [
+      76,
+      "cbc2bc4e31d50cff2ca34242c9bc8e0346e5b025121c93b9484e606f70509ce2"
+    ],
+    "source/app/bot/assets.py": [
+      446,
+      "71fe2b5b8fa64389e00b71c83653b9fba06222cb34663b26a08d610c21a634f6"
+    ],
+    "source/app/bot/assets/NEOBYATNAYA-AMNZ-BOT.png": [
+      2950469,
+      "40acd9465dc9fda06644d2d829da996e1d9bf6c856e95298b624b31154fec791"
+    ],
+    "source/app/bot/assets/NEOBYATNAYA-AMNZ-LANGUAGE-HEADER.png": [
+      2647131,
+      "bbddfa72d1d1fc37e412d2f4a9b4124001ff91fbd641635e31a47e008fc4611f"
+    ],
+    "source/app/bot/async_workflow.py": [
+      13360,
+      "0dffe71d983450246ebff924dc8c5aad73934bd6b2f582b5d3037a1f3a93faf4"
+    ],
+    "source/app/bot/controlled_smoke.py": [
+      12589,
+      "b5b5c2592f3344283fa7796d4563357cc90f5d3328116269c0dc353b677b2d2e"
+    ],
+    "source/app/bot/delivery.py": [
+      8903,
+      "bf6a2f31c311793d09616356fbd24db0e20cd892638d0946475fb48a5da666d5"
+    ],
+    "source/app/bot/handler_lifetime.py": [
+      4297,
+      "bf322cb47973397c26b75dfda47da8e1ffb20614e07b2d03548348878ca116e5"
+    ],
+    "source/app/bot/handlers.py": [
+      35454,
+      "b2f0aa456c63025f6299930b6d2fdd8622e9c0338aa7552c217a0d938f1e1f01"
+    ],
+    "source/app/bot/lifecycle.py": [
+      5686,
+      "6f0fbb2a50d306eed1b4d294d8c165dce8862372f9769918e4338797c2c76834"
+    ],
+    "source/app/bot/main.py": [
+      8176,
+      "1b98ae7237fa915e46ebf58b6975221054870f3507407e781a61550d72765463"
+    ],
+    "source/app/bot/persistent_runtime.py": [
+      7827,
+      "f400fe8fda673ca6976b698365a591cec3a373c4284721a39aef935df16c5a31"
+    ],
+    "source/app/bot/texts.py": [
+      16584,
+      "e355b017c3faf3dbe55d0f8606d13410c320cfb5d8299857d3a69d5dd1376fc7"
+    ],
+    "source/app/bot/ux.py": [
+      26245,
+      "dd92f9a066e142ac1f10759760d031d9747957ce4e176465eb9e42b5b49dec3f"
+    ],
+    "source/app/bot/workflow_worker.py": [
+      6937,
+      "4421a041e90344114cb3ffce771fd9720b3046b23ba3538afdeeab82c6e904f8"
+    ],
+    "source/app/bot/workflows.py": [
+      34188,
+      "b50c7dc8c82637cceca676d598baac23fed11cf11e2728f771c6e503ea50d2ca"
+    ],
+    "source/app/cli.py": [
+      83835,
+      "b013eb57779c84c96e2121ac46b30797b1af94d18b43254bf129af053e63c92f"
+    ],
+    "source/app/config/__init__.py": [
+      65,
+      "00dd11f31e67fe712c24917ba0210a76c47b7af65159046bdc1e494ae9245d18"
+    ],
+    "source/app/config/settings.py": [
+      17832,
+      "6cb3ef9889422dc4d229ef90a5c558ddd100290253b77a8a6525f91676f5b9fe"
+    ],
+    "source/app/config_assignment.py": [
+      1596,
+      "1dfd58c2ba7ec24d5076d5df11d417f819d7bf3b1b6ab81add030a4c756ca69a"
+    ],
+    "source/app/db/__init__.py": [
+      44,
+      "eb613643fd6169c0fd3e97de19a3a0045330bffb6ab5bb7fed73a1315e7decbb"
+    ],
+    "source/app/db/connection.py": [
+      689,
+      "74b006509febb2dcf016aaccbdc5242d7338394d23805d2d77001a2696349676"
+    ],
+    "source/app/db/phase14_dual_protocol.py": [
+      12671,
+      "85f84dda68d77fd91805fe80b6b161d2971ec206c6a0db3895cf11873e9be1d2"
+    ],
+    "source/app/db/phase15_bootstrap.py": [
+      38902,
+      "76a4f579a39e94e4360abeb894f820321c11e16f0e971ce37de8e4e737a989a9"
+    ],
+    "source/app/db/repositories.py": [
+      173275,
+      "baf857f40c7397d96914e1cc66d9fb3f61009a75a245948dfc74c1640d1dbabe"
+    ],
+    "source/app/db/schema.py": [
+      44431,
+      "45105b725e22a9cdbbc07bf440502b1738134f7f2ce875b45bb27aeace7266f1"
+    ],
+    "source/app/logging_config.py": [
+      1239,
+      "b5dea48b04e7da6980239310c78b4b47090ea239f7051e9bdc28b6f5a23de5a4"
+    ],
+    "source/app/main.py": [
+      20410,
+      "c83059bbf43c44a6fea1b1f96179a336376c9952c7a13a6111734f7bfeb3f4d8"
+    ],
+    "source/app/migration/__init__.py": [
+      54,
+      "37721e90c43c9e7e8121aacf7aaa9b0e785a8d67d5575b0903a2e58a9c19fc14"
+    ],
+    "source/app/migration/bot_web.py": [
+      41721,
+      "5e8821badc76e95790473ffe7ecd4dc0d7489c2e1e8b1a03405e8bca1df6a00e"
+    ],
+    "source/app/security/__init__.py": [
+      153,
+      "8c043b5a59a79444a4ae8d2f4b013b30b2c3f7cd6376f3644d15242ec60c5e76"
+    ],
+    "source/app/security/crypto.py": [
+      1529,
+      "5b8edb44d055ec46aaccccebe9a25a4a6b9c1b5f5a69830b2a374c9ad276f17c"
+    ],
+    "source/app/security/redaction.py": [
+      1514,
+      "f9917be80f1a1e2e2255b3c28561cdbe43b27ec6035f9519cc9f887545f67b6e"
+    ],
+    "source/app/security/ssh_host_key.py": [
+      5205,
+      "c6c65cf512a67c3084a84bb6e217f8b1de3e1af912435a90a49fbe863bf6643c"
+    ],
+    "source/app/security/surface_bindings.py": [
+      14977,
+      "5fa99d87f282a1754585215af4e71c0355db9a179aa911f48bef3a24a16bbb35"
+    ],
+    "source/app/security/surface_policy.py": [
+      58142,
+      "e7787d02bcde0f806874d196e508a4583c6299117b0f2207343446db864f90ee"
+    ],
+    "source/app/server/__init__.py": [
+      109,
+      "551f610db218c5d2ff36a9d0de6173d40b31ec6c8f6b61d1d3102ac99d7a3944"
+    ],
+    "source/app/server/checks.py": [
+      9230,
+      "6a75b267b64ead0d0a70eff61ebb8df9150237b52ac80586031897ad96f4d635"
+    ],
+    "source/app/server/operation_runner.py": [
+      4100,
+      "059eb152e627b35e77b67e911f779d54cb4ec72f46674eabddf88de944ac3311"
+    ],
+    "source/app/server/operations.py": [
+      6510,
+      "a11b300978cf5efeee26871115d850b5790749e801930ab0b617ad4e15594fca"
+    ],
+    "source/app/server/peer_apply.py": [
+      22516,
+      "afb3ba249aecc3692e0f0295a00c343cf33788f14c71b51c689062521fe323bd"
+    ],
+    "source/app/server/report.py": [
+      1133,
+      "8382531895f78068766d312b2ea0dd5629accd34997dc165ed1847ce4d5838b7"
+    ],
+    "source/app/server/ssh.py": [
+      6144,
+      "c18e6fb43da4462e20e40cdc17a5485fff6e796b4592bdf6c36e8702726976e4"
+    ],
+    "source/app/server_config/__init__.py": [
+      248,
+      "0c46d46ddba683e3b21911793dff81d6818e29317830fefe1ec96c2593914c05"
+    ],
+    "source/app/server_config/loader.py": [
+      5255,
+      "a4c88062b8135329f0e24947c86f063a5378ee87d94ad496dfaebee66e2ca500"
+    ],
+    "source/app/server_config/models.py": [
+      1020,
+      "b0bb7e18e737d0f8f8c345259d8f61ca1c9685059e06da4428a4af347ffe8d3a"
+    ],
+    "source/app/services/__init__.py": [
+      121,
+      "63ac915263bb144b43cb3065c3b3c165f28bfdbfd3cea2f22e66dead773956ca"
+    ],
+    "source/app/services/access.py": [
+      51256,
+      "b3ae20d502f894cc0f04b1bb4bc2535c9738bddadbef7530c1a6f2224bd77f2c"
+    ],
+    "source/app/services/access_slot_assignment.py": [
+      4224,
+      "f7c7dc2fe3a418982069dc7896950af0b3ef1bd2d970f1d97085492fb7456498"
+    ],
+    "source/app/services/access_slot_lifecycle.py": [
+      6081,
+      "57cbd57685ab33ff6901e7ceff0027aa47ab14bebd816db95980e0a1febdbec7"
+    ],
+    "source/app/services/admin_config_issuance.py": [
+      41751,
+      "6d45414c6e018b1041a3b45512a023e06a292ed48eb34670e23020e293d93401"
+    ],
+    "source/app/services/api_smoke.py": [
+      1590,
+      "6f5404ad33a1c48f15405085d660cd0122f3bbccf648801b79e58217ae8db267"
+    ],
+    "source/app/services/api_tokens.py": [
+      14300,
+      "b7fdfeafd9b0621d1b6450b3c64a9e34df3f095c5e22c5d2ed68e46eb7879a06"
+    ],
+    "source/app/services/awg3_control.py": [
+      8030,
+      "51afde027d93a1a02a9b9e12d2fe14d97c33822782faf5a877257f511987cf0d"
+    ],
+    "source/app/services/bot_media.py": [
+      8707,
+      "95d894355d913eef077cf2a28cb1bc69c423f7fb23fc275e7968ccd6f7c114a3"
+    ],
+    "source/app/services/build_status.py": [
+      1142,
+      "5b5d531960531f4bdb7586e0c9a1003421ea3929ec08cb0f1b617e7c7f8b3e25"
+    ],
+    "source/app/services/client_compatibility.py": [
+      7576,
+      "d6cb2bfd12ecc1f00017e01ad4b29f0a402b675f2b2dac27943a77b897c4488a"
+    ],
+    "source/app/services/client_connection_diagnostics.py": [
+      4520,
+      "2f43bc07fbb61d61b4c2311a0a07dbbd06e8d1813ed0afbce2e9a08efbd3ef4c"
+    ],
+    "source/app/services/config_delivery.py": [
+      4446,
+      "d59d86259dfd33201a82785cf138e4ccb728fc2474bf261822b995ae2532e166"
+    ],
+    "source/app/services/config_identity.py": [
+      4384,
+      "88701ec1ea3434db3eeb4bb8c86751e0815f917d89d4102611807ba53fa866a4"
+    ],
+    "source/app/services/config_material.py": [
+      133,
+      "80d535ee8ec6aded5b2d50f5563f6245edcfda27491f9f23c4c9d9256052eae8"
+    ],
+    "source/app/services/device_enrollment.py": [
+      14466,
+      "2d1e11c0a28e192bb28f0496a22e6132ca094d5695b971358ebe8678e0c3e4b9"
+    ],
+    "source/app/services/device_lifecycle.py": [
+      6058,
+      "b909386cc7c97c1993711de69379d32ecf03136ebf9bd411407fec947f386311"
+    ],
+    "source/app/services/device_passports.py": [
+      22607,
+      "915b32a2ea8b464cd67377f96c8cc7d018921c767063bec9004bc38c7753f559"
+    ],
+    "source/app/services/device_revoke.py": [
+      13488,
+      "6afc4e56c2872d7d1e613193ccad5cc28d23899ed562fbc1246a6c50598a17ad"
+    ],
+    "source/app/services/drift_diagnostics.py": [
+      15032,
+      "79f0ed74921cfc503406896379af39221476dc1b7c151d22dd88fc35ac861bda"
+    ],
+    "source/app/services/dual_protocol_profiles.py": [
+      17682,
+      "2085f8dc3fbb3446de73f68a6166711d6e47a4af7a708b28c75a9e6430b9da71"
+    ],
+    "source/app/services/email_delivery.py": [
+      5012,
+      "61a5eecef276c219f16afb890cf9c31667f645849d68d72759fe1462c7bf46ea"
+    ],
+    "source/app/services/email_tokens.py": [
+      1154,
+      "f83af46c6ba208205ff847f48bb0391bc7c328f60b9f562144b008cd1e653ebc"
+    ],
+    "source/app/services/fresh_install_wizard.py": [
+      45346,
+      "98315b7061543a7cf4cfcfda9d7dfe7bcaca06a51ec548ba9e65577cd182e28e"
+    ],
+    "source/app/services/integration_status.py": [
+      13967,
+      "d0e3a5b80d386bf8a6db34a34fb7388fbfab8aa1de2c71bb472f4210f520a119"
+    ],
+    "source/app/services/operator_credential_status.py": [
+      3230,
+      "415e235cef6a785e40b54d0bdef165cf0723a2b0dead3b80838cff34ea34358a"
+    ],
+    "source/app/services/operator_server_status.py": [
+      1957,
+      "f874e64818838930b768a6d375eadbbfe41f2966e2b30fd94b9fe31089994df7"
+    ],
+    "source/app/services/operator_status.py": [
+      1921,
+      "bf91ce0a56969b33cb0e7ab64a0f8f4d902d03adb120140c8fa14c132ae65fe3"
+    ],
+    "source/app/services/peer_inventory.py": [
+      4897,
+      "1e1049119035772d42046906baf71dcfea5698467076d7ffce21e8854f418414"
+    ],
+    "source/app/services/phase15_bootstrap.py": [
+      35584,
+      "dc9ce37afc0c76debb84bbfb5dd5b02209354e78e801ee09cb71464e141603af"
+    ],
+    "source/app/services/privacy_status_boundary.py": [
+      1844,
+      "f15e1cfb4c9119e05d42005f2a341bdccf7d8a536e883e300b403db2624d4007"
+    ],
+    "source/app/services/private_config_artifact.py": [
+      1144,
+      "ea33fae9ac6ed84dd227598970f2b32b30e3fae47aa8204aec92e1c0ede25076"
+    ],
+    "source/app/services/productization_boundary.py": [
+      6592,
+      "fac2b0cfbfb423844de8f7ae55ac3cafca0deaaa74c02bf24b948c1b40cc52ca"
+    ],
+    "source/app/services/protocol_admission.py": [
+      10498,
+      "d6f25b2215868c44defa9decc3fc21f06cbab71c616db65975294dcc2c798030"
+    ],
+    "source/app/services/protocol_config_lifecycle.py": [
+      9941,
+      "2d315389b0157baa881e43771ae0e88eb508643716637176b558abf337e08fe5"
+    ],
+    "source/app/services/protocol_issuance_barrier.py": [
+      3299,
+      "8a227e23f66fa0b7f647c431a9eb76a59cbbf4ad4c2b82645e70f6687e491cc9"
+    ],
+    "source/app/services/public_productization_boundaries.py": [
+      5756,
+      "19834a0e34aa21bad4e9d94fe5f4eda160653b530ec41900f8611d11d0824b93"
+    ],
+    "source/app/services/reconciliation_release_boundary.py": [
+      2550,
+      "1a27eac8e5036cc6f1f7882effc2418da03c79869837da20ed07abb281fd4436"
+    ],
+    "source/app/services/self_service_issuance.py": [
+      33297,
+      "528229a5f0d8017d15d2f63499715f06812be0a183c75e9d1689eb03697d190f"
+    ],
+    "source/app/services/telegram_callback_state.py": [
+      13790,
+      "8ffc44116f011f05cb443202bb2fbc9900ddf2f3313dda6070c11a6836f75c36"
+    ],
+    "source/app/services/telemetry_retention_policy.py": [
+      1910,
+      "6a054c548ff5a43a1a3b2ca2178c151876f1d81d81aa0522d1dbdb64bcf8f283"
+    ],
+    "source/app/services/traffic.py": [
+      8233,
+      "58dd7d74ea0763896ed18ea5b428e1ea7e2b86d92b4b4301d2ca447bc9d91cf5"
+    ],
+    "source/app/services/usa_retirement_readiness.py": [
+      3699,
+      "32440eb3ae74f6e77afe98c3520759ef0ac14065cd6a2e11ad4cef76f91cc5ba"
+    ],
+    "source/app/services/vpn_runtime_instances.py": [
+      5959,
+      "0b54dabbfde58f4829d6e510b24b53e323fb1902b1b809f02651862562fb8eba"
+    ],
+    "source/app/systemd_notify.py": [
+      3075,
+      "649ea2eabbd6b18c5e489d2059d08020d64914c47b15e50ea2873aeefa99a8a3"
+    ],
+    "source/app/toolchain.py": [
+      1543,
+      "4cd4dfc8f386b5d0ca11fa9d3f270ef2fd253e45f4bd012ebbcd884929ec614d"
+    ],
+    "source/app/vpn/__init__.py": [
+      13,
+      "75ad4f4c2943325f88064ad2beae890b59674be2bf0404b30afc5584dc4de4bb"
+    ],
+    "source/app/vpn/amneziawg_v1_5/__init__.py": [
+      99,
+      "3b40ead6d27fe20a0141f422df6c692672ee2712867fb67773dac29914c93419"
+    ],
+    "source/app/vpn/amneziawg_v1_5/config.py": [
+      865,
+      "b244ee2edd6c6dfa45424397ccf4d405d6b77f2b60a628db0ff2cf2954f00b2d"
+    ],
+    "source/app/vpn/amneziawg_v2/__init__.py": [
+      137,
+      "d9847b646b4d6f680bead971670f74d2df512bccb9f09a69ad0cfc4e9306606a"
+    ],
+    "source/app/vpn/amneziawg_v2/config.py": [
+      4391,
+      "8f3ea7c6b634d9e9ca35e4d2621647211044d772eb5c05e98e1c9f1d6b73e908"
+    ],
+    "source/app/vpn/amneziawg_v2/keys.py": [
+      1037,
+      "a452ea2e4ed381da0e42e9780e544badc007331a7b727bb2e464efc9e4ca9734"
+    ],
+    "source/app/vpn/amneziawg_v3/__init__.py": [
+      285,
+      "092828c2ddab3b1fe39d23150853947177b197cc7c9a4d9843be129acf1f557f"
+    ],
+    "source/app/vpn/amneziawg_v3/config.py": [
+      4289,
+      "511bcba4b880ca27bdbbbbf4e6d5a6cd44bb8ae4451b07de44d2cd3b71072a13"
+    ],
+    "source/app/vpn/client_compatibility.py": [
+      13551,
+      "2fdd3f7e5466fb72ecd559f12cfb5707cff7abf214009ec24819c72666928f82"
+    ],
+    "source/app/vpn/client_import_artifacts.py": [
+      6649,
+      "ed569ddcb65c7040dbcf47b7dad1d9289f978a700c1b082c88aae316ccd5eb95"
+    ],
+    "source/app/vpn/config_templates.py": [
+      6264,
+      "6bf9c9e207b95abbe797ae902ce26d39805a261674cf9c11ef09b08e8c621e50"
+    ],
+    "source/app/vpn/config_versions.py": [
+      1903,
+      "91a9aa68c37bde474e5b7a17b813e45dfbae66f6c5d241b0944d77cf690680d4"
+    ],
+    "source/app/vpn/ipam.py": [
+      1167,
+      "88641a01b8337c37858a278b6a2d92ef565be73c8f043189315352628b16dccb"
+    ],
+    "source/app/vpn/protocol_versions.py": [
+      825,
+      "0caa426ff28630c2d9499c0899486e1efa0ed9d7df895187ce84d34997b532c3"
+    ],
+    "source/app/vpn/templates/amneziawg_v1_5.conf.tpl": [
+      334,
+      "644b051f35567b1217f6e2b1b726e3f815f8fb8134418d395daa5b90ea3d9dd1"
+    ],
+    "source/app/vpn/templates/amneziawg_v2.conf.tpl": [
+      404,
+      "1c50a875ae96d9f795c721db6449eca0c4105183adf5da55b875a69a3c93a763"
+    ],
+    "source/app/web/__init__.py": [
+      25,
+      "2be8c71d4b9a88df8a12cfc3eda5fd5b28e146f1caeb4708f075b818c551bea4"
+    ],
+    "source/app/web/app.py": [
+      145912,
+      "42c8547525879f9b62924022e2929ad559b8a168dc8b2ac8143580f001c67062"
+    ],
+    "source/app/web/auth.py": [
+      2461,
+      "f88f9010fab7b501154895bb3f3886be5c0a187459c5773823515e2cd32643c4"
+    ],
+    "source/app/web/device_passports.py": [
+      5473,
+      "baa1be52f142b29415264cf051107699953fa74db8cda58cbc9815f4fc3b4f09"
+    ],
+    "source/app/web/logs.py": [
+      713,
+      "3c027e5633e323ded8a6e4d73997b3e3cc76e4c24f383dcf1901bfb04efa48f7"
+    ],
+    "source/app/web/server_health.py": [
+      4177,
+      "89387a32584a7943306a29f3482b07ec3e485ae8bc96df1e0085f3c467203276"
+    ],
+    "source/app/web/static/admin.css": [
+      10298,
+      "f3c7290a30e613338990b87f79302838640f1e992c4b50bb14827f50ef36bcfb"
+    ],
+    "source/app/web/static/brand-full.png": [
+      2950469,
+      "40acd9465dc9fda06644d2d829da996e1d9bf6c856e95298b624b31154fec791"
+    ],
+    "source/app/web/templates/about.html": [
+      2904,
+      "31b19f00ad9967d497ed64f21e29277d25fa77d118fb79687c86204d44f0fc81"
+    ],
+    "source/app/web/templates/api_readiness.html": [
+      2060,
+      "f69a2ff7b18d6d1dec716ac73b42501e7123122da87f0005b12c8a2bcc0dc591"
+    ],
+    "source/app/web/templates/api_tokens.html": [
+      5213,
+      "b2e0aafde9011ef9f07c555e044a3402603cd34e6a2787dee854d50816a6fdbb"
+    ],
+    "source/app/web/templates/base.html": [
+      2125,
+      "ab6f15290b79e066ccde896972b518267987572b35b6ae0ff51d883a2d370477"
+    ],
+    "source/app/web/templates/config_templates.html": [
+      3820,
+      "d96509021b48db3486b4361680f9561285ea9a60c808c9a31df45e61581508ae"
+    ],
+    "source/app/web/templates/dashboard.html": [
+      4548,
+      "be1fbad2e6bb1fa1c1e298725c342870e2d36fbf80a05bc8a28d9e2a04002d58"
+    ],
+    "source/app/web/templates/device_passport_detail.html": [
+      6631,
+      "aa9ebd9c2956698965a1d465ae2852c23231b99823ca4cdea39b25f30377fd8f"
+    ],
+    "source/app/web/templates/device_passports.html": [
+      2492,
+      "8bdceb37854ae2ef6a47120bba9942a84f5399e38b7765f3442bf9aeab888ead"
+    ],
+    "source/app/web/templates/disabled_devices.html": [
+      2027,
+      "a57a7adf939b653a5732980bed482ba0601d015b6af3ac122a798f73772510d8"
+    ],
+    "source/app/web/templates/email_result.html": [
+      705,
+      "f6bdfe004fcf23fa23de065480952cab5a60e680cedf3face86e741fbd6d1d3f"
+    ],
+    "source/app/web/templates/integration_status.html": [
+      23666,
+      "6e5e1fcbc3efcfd6348a487f81dc9f95881ce30e15c8a68911b1ed8f802572be"
+    ],
+    "source/app/web/templates/login.html": [
+      1029,
+      "9c724b4ee4891125f72b67ebdce0aa21eaacb35614a851f96ae34f7044b1b7f7"
+    ],
+    "source/app/web/templates/logs.html": [
+      1492,
+      "38ca00f4bfb7bbe4e21fd59124e6e0cc387eafd268d3c670702eebcea3f9f09d"
+    ],
+    "source/app/web/templates/orders.html": [
+      1778,
+      "d52bcb09cabeaacb665d274f7ea04d09408b79bfaaae25673818bcf97c572b46"
+    ],
+    "source/app/web/templates/plans.html": [
+      3095,
+      "eb120ba124632661dc44eaf6dd7901edc0ff1d402605845934764d8526ad9c51"
+    ],
+    "source/app/web/templates/server_detail.html": [
+      15783,
+      "73c7feed599fbfd2f444930e02b0c81b8b3d706e117edc0b0d9f4bf44856b70c"
+    ],
+    "source/app/web/templates/server_form.html": [
+      2999,
+      "bf051ca8656f7081642cccc156b312ab73482a7a8ea68ac9a63f16836a7fbabd"
+    ],
+    "source/app/web/templates/server_health.html": [
+      1884,
+      "55293cbad41b861cbb11457853207c92060a023ac83a8c7478cae6d87530d932"
+    ],
+    "source/app/web/templates/servers.html": [
+      2540,
+      "3601ed0f007192c30e5831f3279f645f3fc715f4d0c18ba2184047f234cf8b69"
+    ],
+    "source/app/web/templates/settings.html": [
+      1057,
+      "c7f3099a83111576950424194ef432df95db79b95a5596fbdf5dc858120e2a27"
+    ],
+    "source/app/web/templates/user_detail.html": [
+      15510,
+      "1250fb721d7651722b896a9fe93b02a434aa7e8d8250b135174e78d72014098e"
+    ],
+    "source/app/web/templates/user_form.html": [
+      2007,
+      "19a850c8c74442dd71e03f42708f5b9300c5235d24cd7e352b446583fb65f8f7"
+    ],
+    "source/app/web/templates/users.html": [
+      2483,
+      "f6cdd5e0d2d60b513b8c7665e28bfb376c079bd836721fb4ace959321bf3a954"
+    ],
+    "source/requirements/phase15-runtime-py312.lock": [
+      5447,
+      "a381be185b19777b9198526e11df8dcfa0afaf7f15acccd829809e698d679fab"
+    ],
+    "source/requirements/phase15-test-py312.lock": [
+      6262,
+      "52967d6e2babc5d05b60615c9a9c950a4541436f7a521dfee49d62b98264a235"
+    ],
+    "source/scripts/phase15_dependency_lock.py": [
+      15532,
+      "d28cfff9569acddb002c03a9dca6aca22ef5f68c0cd6cacc9b9e787e1fa009e9"
+    ]
+  },
+  "pins": {
+    "aiofiles": "25.1.0",
+    "aiogram": "3.30.0",
+    "aiohappyeyeballs": "2.7.1",
+    "aiohttp": "3.14.3",
+    "aiohttp-socks": "0.12.0",
+    "aiosignal": "1.4.0",
+    "annotated-doc": "0.0.5",
+    "annotated-types": "0.8.0",
+    "anyio": "4.14.2",
+    "attrs": "26.1.0",
+    "certifi": "2026.7.22",
+    "cffi": "2.1.1",
+    "click": "8.4.2",
+    "colorama": "0.4.6",
+    "cryptography": "45.0.7",
+    "fastapi": "0.141.1",
+    "frozenlist": "1.8.0",
+    "h11": "0.16.0",
+    "idna": "3.18",
+    "itsdangerous": "2.2.0",
+    "jinja2": "3.1.6",
+    "magic-filter": "1.0.12",
+    "markupsafe": "3.0.3",
+    "multidict": "6.7.1",
+    "pillow": "12.3.0",
+    "propcache": "0.5.2",
+    "pycparser": "3.0",
+    "pydantic": "2.13.4",
+    "pydantic-core": "2.46.4",
+    "pydantic-settings": "2.15.0",
+    "python-dotenv": "1.2.2",
+    "python-multipart": "0.0.32",
+    "python-socks": "3.0.0",
+    "pyyaml": "6.0.3",
+    "qrcode": "8.2",
+    "starlette": "1.6.0",
+    "typing-extensions": "4.16.0",
+    "typing-inspection": "0.4.4",
+    "uvicorn": "0.52.3",
+    "yarl": "1.24.5"
+  }
+}

@@ -1,0 +1,151 @@
+{
+  "schema": "phase16.stage-readback-local-verification.v1",
+  "date": "2026-09-29",
+  "status": "LOCAL_READY_NOT_EXECUTED",
+  "base_commit": "a4190c26787df604ac686fbe88a36c259b52dcb3",
+  "stage_execution_commit": "0574462dded68e2430fca93886f20d702765c3d0",
+  "authorization": {
+    "local_design": "GRANTED_BY_OPERATOR_CONFIRMATION",
+    "ssh_readback": "NOT_GRANTED",
+    "new_commit_push": "NOT_GRANTED"
+  },
+  "tests": {
+    "command": "python -B -m unittest tests.test_phase16_bot_stage_readback -v",
+    "passed": 28,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 0.658,
+    "red_evidence": [
+      "Executor module absent before implementation.",
+      "Missing parent directory incorrectly classified INCOMPLETE; corrected to UNKNOWN before final green."
+    ],
+    "cases": [
+      "test_verified_requires_receipt_current_content_and_metadata_without_import",
+      "test_absent_only_after_parent_observed",
+      "test_missing_receipt_or_file_incomplete_not_verified",
+      "test_hash_drift_or_extra_source_cannot_verify",
+      "test_false_or_duplicate_receipt_is_incomplete",
+      "test_metadata_extra_pin_bad_version_or_duplicate_name_stops",
+      "test_venv_config_or_interpreter_link_drift_stops",
+      "test_every_observed_outcome_roundtrips_strict_event_parser",
+      "test_unexpected_error_redacted_unknown",
+      "test_real_windows_child_uses_bound_argv_with_devnull_stdin",
+      "test_render_contains_readers_and_validator_but_no_install_entrypoints",
+      "test_command_cap_fails_closed",
+      "test_false_success_unknown_fields_boolean_and_wrong_order_rejected",
+      "test_prefix_is_preserved_without_false_absent_or_verified",
+      "test_one_claim_one_ssh_zero_input_and_changed_per_command_count",
+      "test_manifest_hash_target_drift_stops_before_claim_or_ssh",
+      "test_transport_failure_keeps_sanitized_prefix_and_no_retry",
+      "test_incomplete_transport_or_exit_mismatch_never_accepts_terminal",
+      "test_reader_checks_actual_flags_regular_file_and_changed_name",
+      "test_directory_descriptor_closed_on_body_error",
+      "test_descriptor_paths_reject_escape_before_any_open",
+      "test_symlink_hardlink_wrong_owner_or_mode_content_rejected",
+      "test_pth_startup_customization_or_egg_metadata_rejected",
+      "test_recursive_walk_has_node_cap",
+      "test_interpreter_links_cycle_or_escape_rejected",
+      "test_metadata_rejects_multiple_name_headers",
+      "test_root_symlink_or_missing_parent_is_unknown_not_absent",
+      "test_changed_after_verification_is_unknown_not_verified"
+    ],
+    "unchanged_suites_repeated": false
+  },
+  "real_local_process": {
+    "platform": "Windows",
+    "exact_compressed_argument": true,
+    "stdin": "DEVNULL",
+    "events": [
+      "READY",
+      "RESULT"
+    ],
+    "result": "UNKNOWN",
+    "reason": "platform_python",
+    "exit_code": 3,
+    "stderr_bytes": 0,
+    "corrupt_compressed_digest": {
+      "exit_code": 70,
+      "output_bytes": 0,
+      "script_executed": false
+    }
+  },
+  "offline_preview": {
+    "status": "OFFLINE_READY_NOT_EXECUTED",
+    "approval": "PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001",
+    "remote_sha256": "f72f312f1cb5007586820b09761879a08f65b886ea8ddc92e8a15f36c8701bc0",
+    "manifest_sha256": "6402188734e50485418ed39feba7a1be5d0e1a03676e08d5054cc5134191e857",
+    "inventory_sha256": "647a32f7a538028a8debbe8169ade373ea08b5d1c1b0467a36a9253380852aec",
+    "remote_script_bytes": 46706,
+    "command_units_reserved": 27237,
+    "stdin_bytes": 0,
+    "source_files": 159,
+    "payload_files": 41,
+    "runtime_pins": 40,
+    "ssh_attempts": 0,
+    "stage": 0,
+    "install": 0,
+    "activation": 0,
+    "remote_seconds": 45,
+    "transport_seconds": 60
+  },
+  "inventory": {
+    "sha256_lf": "647a32f7a538028a8debbe8169ade373ea08b5d1c1b0467a36a9253380852aec",
+    "source_files": 159,
+    "payload_files": 41,
+    "content_bytes": 29936839,
+    "runtime_pins": 40,
+    "provenance": "Hash-bound immutable bundle and manifest from retained-stage preparation; original archive unchanged."
+  },
+  "frozen_manifests": [
+    {
+      "manifest": "research/amn2/phase16-bot-runtime40-stage-manifest-2026-09-24.json",
+      "bound_files": 6,
+      "status": "MATCH"
+    },
+    {
+      "manifest": "research/amn2/phase16-bot-transfer-probe-manifest-2026-09-27.json",
+      "bound_files": 7,
+      "status": "MATCH"
+    },
+    {
+      "manifest": "research/amn2/phase16-bot-retained-stage-manifest-2026-09-29.json",
+      "bound_files": 8,
+      "status": "MATCH"
+    }
+  ],
+  "test_source_sha256_lf": "159d1c344817729e7e138d4727e0daff27fa1a52605dd489965edcfde438b4f2",
+  "review": {
+    "kind": "SELF_REVIEW",
+    "independent_review": false,
+    "subagents": 0
+  },
+  "evidence_directory": {
+    "path": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-stage-readback-20260929/execution-001",
+    "exists": false,
+    "claimed": false
+  },
+  "scope": {
+    "ssh_attempts": 0,
+    "remote_reads": 0,
+    "remote_writes": 0,
+    "stage": 0,
+    "install": 0,
+    "database_operations": 0,
+    "service_actions": 0,
+    "activation": 0,
+    "push": 0
+  },
+  "safety": {
+    "awg2": "UNTOUCHED",
+    "package016": "IMMUTABLE_UNCHANGED",
+    "general_issuance": "DISABLED",
+    "actual_server_stage_install": "UNKNOWN_FROM_PREVIOUS_RUN"
+  },
+  "limitations": [
+    "Descriptor checks tested with syscall models; actual Linux syscalls and SIGALRM not executed.",
+    "No SSH transport, target current state, install or application execution tested.",
+    "VERIFIED means saved-stage success plus current source/payload hashes and static runtime metadata; not full installed binary integrity.",
+    "No maintenance prerequisites or activation acceptance.",
+    "Per-command argv and keepalive changes do not attribute the SSH root cause."
+  ]
+}

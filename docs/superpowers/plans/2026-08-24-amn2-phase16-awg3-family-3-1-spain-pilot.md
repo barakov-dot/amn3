@@ -470,12 +470,15 @@ scope — transport review и подготовка readback уже возмож�
 Результат требует нового exact push; frozen scripts/manifests остаются прежними.
 [Локальный transport review29.09 завершён](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#transport-readback-design-2026-09-29):
 успешный22.09 использовал те же5/1/EOF; exact frame/local Python EOF PASS0.110s.
-Доказанной причины SSH timeout нет. Подготовлен bounded readback design без stdin,
-с proposed per-command5/6 и transport60s; ожидается ответ оператора по дизайну.
-Executor/manifest/новый SSH marker ещё не созданы. Review не даёт live authority.
+Доказанной причины SSH timeout нет. Оператор подтвердил локальный дизайн;
+[readback пакет подготовлен](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#stage-readback-ready-2026-09-29):
+argv без stdin, per-command5/6, remote45s/transport60s, одна попытка;28 local PASS.
 - [x] T11 — local transport/EOF comparison, exact inventory sizing, design proposal.
-- [ ] T12 — после ответа по дизайну: readback implementation/negative controls/
-  manifest/commit; затем отдельные exact push/SSH approvals. Никакого повторного install.
+- [x] T12 — согласованный readback executor/inventory/manifest, negative controls,
+  local verification receipt/self-review/CHANGELOG. Нет app/install/DB/services.
+- [ ] Следующий live шаг — только после exact push нового HEAD и отдельного
+  PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001. Текущее stage/install UNKNOWN;
+  readback не разрешает повтор install/cleanup/activation и не закрывает maintenance.
 - [x] T9 — secure descriptor reads/hash provenance retained candidate, новый stage
   без upload/old test-venv reuse, offline install/metadata/no-app-import контракт.
 - [x] T10 — одноразовый gate/manifest,23 targeted PASS, actual immutable bundle
@@ -520,9 +523,10 @@ Design согласован оператором после commit b277154. По
   5MiB подтверждены, SSH server-alive timeout hint. Retained-stage29.09 исполнен
   из pushed0574462:12.297s/SSH255, local input41104 complete, stdout0; тот же stderr.
   Stage/install UNKNOWN, remote directory мог появиться; approval consumed.
-  Transport review завершён, local exact-frame EOF PASS; bounded readback design
-  ожидает ответа оператора. Затем локальная реализация/проверки/manifest;
-  повтор install/cleanup/новый SSH не разрешены.23 local PASS сохранены.
+  Transport review завершён, local exact-frame EOF PASS; дизайн readback согласован,
+  executor/manifest готовы,28 targeted local PASS; прежние23 PASS сохранены.
+  Следующий шаг — exact push/read-only SSH approval, максимум60s и разбор5–10min.
+  Повтор install/cleanup/activation не разрешён; server stage/install UNKNOWN.
   Maintenance bindings/actual prerequisites открыты;
   recovery-контракт v1 для прежнего scope сохранён.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
