@@ -1,0 +1,99 @@
+{
+  "base_commit": "43dd9b10ddbaeed8d717bde20a7a6ef7d605095d",
+  "date": "2026-09-29",
+  "eof_control": {
+    "elapsed_seconds": 0.11,
+    "expected_stop": "platform_python",
+    "frame_bytes": 41104,
+    "last_stdin_progress_seconds": 0.031,
+    "limits": "Actual Python subprocess on Windows; does not exercise Windows SSH channel or Linux executor",
+    "output_complete": true,
+    "pipe_failures": [],
+    "returncode": 3,
+    "stage_writes": 0,
+    "status": "EXACT_FRAME_LOCAL_EOF_PASS_NOT_SSH",
+    "stderr_bytes": 0,
+    "stdin_complete": true,
+    "stdout_bytes": 910,
+    "stdout_sha256": "19d2be857a4107a3dc08b96b559fc5b93d03dd6dbd9f7a9298ca9de7d990dc8f",
+    "temporary_directory_empty": true
+  },
+  "historical_success": {
+    "conclusion": "NO_NEW_KEEPALIVE_OR_EOF_POLICY_CHANGE_IDENTIFIED; SILENT_REMOTE_WORK_ALONE_NOT_ESTABLISHED_AS_CAUSE",
+    "full_input_bytes": 30501516,
+    "receipt": "research/amn2/phase16-bot-linux-execution-v2-2026-09-22.json",
+    "remote_seconds": 47.487,
+    "same_server_alive_count_max": 1,
+    "same_server_alive_interval": 5,
+    "same_stdin_close": true,
+    "sha256": "063bfc84be13ca473ad2e64bc78492bc08c40e516515e1a07fa5a2c7b7747772",
+    "source_checks": [
+      "66bbc8a:scripts/phase16_bot_linux_gate.py",
+      "72757328f34ee0933785d2be8dcf322c9ccc2d7d:scripts/phase16_bot_linux_gate.py"
+    ],
+    "ssh_returncode": 0
+  },
+  "installed_ssh": {
+    "historical_binary_identity": "NOT_RECORDED_CANNOT_COMPARE",
+    "path": "C:/Windows/System32/OpenSSH/ssh.exe",
+    "sha256": "0b8b5653141c6e02e8afc043d1703dcd6410f1606422ff3ba5eb52dc56a5cce9",
+    "version": "OpenSSH_for_Windows_9.5p2, LibreSSL 3.8.2"
+  },
+  "new_ssh_attempts": 0,
+  "official_references": [
+    {
+      "finding": "Unanswered server-alive threshold terminates SSH; encrypted-channel liveness differs from TCP keepalive",
+      "read_date": "2026-09-29",
+      "url": "https://man.openbsd.org/ssh_config#ServerAliveCountMax"
+    },
+    {
+      "finding": "server_alive_check emits matching template and exits255 when count exceeded",
+      "limit": "UPSTREAM_MASTER_REFERENCE_NOT_EXACT_WINDOWS_BINARY_TRACE",
+      "read_date": "2026-09-29",
+      "url": "https://raw.githubusercontent.com/openssh/openssh-portable/master/clientloop.c"
+    }
+  ],
+  "readback_design": {
+    "attempts": 1,
+    "destination": "/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260929-6e68235-001",
+    "expected_content_bytes": 29936839,
+    "expected_payload_files": 41,
+    "expected_source_files": 159,
+    "implementation_started": false,
+    "invariant": "NO_APP_IMPORT_NO_CANDIDATE_INTERPRETER_EXEC_NO_INSTALL_NO_SERVICE_NO_DB_NO_RETRY",
+    "inventory_json_bytes": 24938,
+    "inventory_zlib_base64_bytes": 14996,
+    "proposed_delivery": "HASH_BOUND_COMPRESSED_SCRIPT_IN_COMMAND_ARGUMENT_NO_STDIN",
+    "proposed_remote_seconds": 45,
+    "proposed_server_alive_count_max": 6,
+    "proposed_server_alive_interval": 5,
+    "proposed_transport_seconds": 60,
+    "rationale": "READ_STATE_AFTER_AMBIGUOUS_MUTATION; NOT_A_ROOT_CAUSE_FIX_EXPERIMENT",
+    "runtime_limit": "STATIC_METADATA_IS_NOT_FULL_INSTALLED_BINARY_INTEGRITY_OR_ACTIVATION_ACCEPTANCE",
+    "runtime_pins": 40,
+    "ssh_approval": "NOT_PREPARED_NOT_GRANTED",
+    "states": [
+      "ABSENT",
+      "INCOMPLETE",
+      "VERIFIED",
+      "UNKNOWN"
+    ],
+    "status": "AWAITING_USER_DESIGN_REPLY",
+    "verification": "SAVED_STAGE_RECEIPT_PLUS_CURRENT_SOURCE_PAYLOAD_HASHES_AND_STATIC_RUNTIME_METADATA"
+  },
+  "root_cause": "UNKNOWN",
+  "safety": {
+    "activation": 0,
+    "awg2": "UNTOUCHED",
+    "general_issuance": "NO_ENABLE_ACTION",
+    "install": 0,
+    "new_ssh": 0,
+    "package016": "UNCHANGED",
+    "protected_configs_read": false,
+    "push": 0,
+    "remote_reads": 0,
+    "remote_writes": 0
+  },
+  "schema": "phase16.retained-stage-transport-local-review.v1",
+  "status": "LOCAL_REVIEW_COMPLETE_READBACK_DESIGN_PENDING"
+}

@@ -7,6 +7,19 @@
 
 ## 2026-09-29
 
+- Выполнен [локальный transport/EOF review](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#transport-readback-design-2026-09-29):
+  successful22.09 использовал те же SSH5/1 и close stdin; installed ssh9.5p2/SHA
+  зафиксированы без network call. Exact41104-byte frame с правильным marker
+  дошёл в реальном local Python child до Windows platform STOP за0.110s,
+  pipes complete/stderr0/no writes. Это не проверка SSH channel и не root cause.
+  [Receipt](research/amn2/phase16-bot-transport-local-review-2026-09-29.json)
+  содержит comparisons/ограничения/official references и inventory159+41.
+  Предложен bounded readback существующего stage: argv/no stdin, per-command5/6,
+  remote45s/local60s, receipt+current hashes/static metadata, без app/install/DB/
+  services. Дизайн ожидает ответа; executor не написан. Readback/links/diff/hashes
+  проверены, frozen code/suites сохранены. SSH/push/stage/install/activation0,
+  AWG2/package016 сохранены, issuance off; server stage остаётся UNKNOWN.
+
 - По exact approvals опубликован0574462 (EXPECTED_OLD8800fc6, hook/remote SHA
   PASS) и исполнен один [retained-stage](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#retained-runtime40-stage-executed-2026-09-29).
   [Результат](research/amn2/phase16-bot-retained-stage-execution-001-2026-09-29.json):

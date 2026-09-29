@@ -971,3 +971,78 @@ maintenance, Windows остаётся отдельным открытым P1; P2
 CURRENT_MODEL/CURRENT_EFFORT: недоступны. RECOMMENDED_MODEL_NEXT=gpt-6-astra,
 RECOMMENDED_EFFORT_NEXT=high — анализ transport и неопределённого stage state;
 рекомендация модели не разрешает новый live шаг.
+
+
+<a id="transport-readback-design-2026-09-29"></a>
+
+## Локальный transport review и предложенный readback — 29.09
+
+[Review receipt](phase16-bot-transport-local-review-2026-09-29.json).
+**Локальный разбор завершён; дизайн нового readback ожидает ответа оператора.**
+Нового SSH/установки/push0. Результат stage по-прежнему UNKNOWN.
+
+Сверены успешный Linux gate22.09 (remote47.487s, полный30.5MB input, rc0),
+исторический local transport source66bbc8a/72757328 и текущий frozen transport.
+ServerAliveInterval5/CountMax1 и явное закрытие stdin были и в успешном запуске.
+Изменения этих настроек, объясняющего нынешний отказ, не найдено. Успешное длительное
+выполнение также не поддерживает объяснение «любая пауза stdout приводит к timeout».
+Installed ssh.exe сейчас OpenSSH_for_Windows_9.5p2 / LibreSSL3.8.2,
+SHA256 `0b8b5653141c6e02e8afc043d1703dcd6410f1606422ff3ba5eb52dc56a5cce9`;
+исторического SHA binary нет, сравнение версий прошлого запуска не доказано.
+
+Точный41104-byte frame с правильным marker пропущен через реальный локальный
+Python child и тот же diagnostic transport. Получены stdin/output complete,
+нет pipe errors/stderr, elapsed0.110s; программа дошла до ожидаемого
+`platform_python` STOP на Windows. Локальный temp остался пустым. Это проверяет
+EOF у нашего Python transport; не воспроизводит Windows SSH channel и Linux.
+Повторять весь неизменный suite не требовалось; frozen scripts не менялись.
+
+[OpenSSH ssh_config](https://man.openbsd.org/ssh_config#ServerAliveCountMax)
+описывает отключение при превышении допуска отсутствующих ответов; эти сообщения
+идут внутри шифрованного SSH-канала. В [upstream clientloop.c](https://raw.githubusercontent.com/openssh/openssh-portable/master/clientloop.c)
+server_alive_check соответствует найденным message/exit255. Это объясняет границу
+отказа, а не причину отсутствия ответа и не является трассировкой Windows binary.
+Root cause всё ещё UNKNOWN; оснований объявлять исправление pip/бота/сети нет.
+
+### Предложенный bounded design (ещё не реализован)
+
+Цель — узнать состояние уже возможного stage29.09 за одну read-only попытку,
+сразу пригодную для решения о дальнейшей интеграции. Подтверждать live readiness
+или запускать очередную установку эта проверка не должна.
+
+- Единственный read scope: stage29.09, его ancestors, claim/result, source/payload,
+  pyvenv.cfg и статические distribution metadata. Исходный candidate22.09, прежний
+  runtime, stage24.09, /proc, БД, env/token и service units не читать.
+- Внешние immutable hashes получают offline из прежнего ZIP:159 source files,
+  41 payload file,40 runtime pins,29 936 839 content bytes. Inventory JSON24938 bytes,
+  compressed/base6414996 bytes. Проверить exact file sets, root-owned/no writable
+  parents, no traversal/links/race для content; специальные venv interpreter links
+  проверять статически по разрешённой цепочке, не запускать их.
+- Saved receipt должен пройти прежний exact validator; затем текущие hashes,
+  pyvenv config/no pth и metadata40+допустимый bootstrap. Не импортировать приложение
+  или его зависимости, не выполнять candidate interpreter/pip. Это не полный
+  аудит каждого установленного binary и не maintenance/activation acceptance.
+- Код+inventory передать проверяемым compressed argument; SSH -n/без stdin.
+  Проверить полный Windows command-line length локально до claim/target call.
+  Если лимит не выдержан — local STOP, без автоматического transport fallback.
+- Proposed per-command ServerAliveInterval5/CountMax6, remote45s/transport60s,
+  output64KiB, одна попытка. Глобальные SSH configs, target/key/known_hosts bindings
+  не менять. READY/progress/terminal — только фиксированные поля; raw logs/configs
+  не возвращать. Сохранять validated prefix при transport failure.
+- ABSENT означает отсутствие нужного каталога при безопасных ancestors;
+  INCOMPLETE — неполный/неприемлемый stage; VERIFIED — receipt+содержимое+metadata
+  соответствуют контракту без activation; UNKNOWN — transport/неполное наблюдение.
+  Каждый исход завершает попытку, автоматических install/retry/cleanup нет.
+
+Передача без stdin и CountMax6 предложены для получения наблюдения после
+неопределённого stage, **не как доказанный fix/root-cause эксперимент**: одновременно
+меняются две характеристики transport, поэтому их отдельный эффект не атрибутируется.
+Сначала согласовать локальный дизайн; затем implementation/targeted RED-GREEN/
+manifest/self-review/commit. Только после готового пакета — отдельные exact push
+и SSH approvals. Новый marker ещё не создан; исторические markers не переиспользовать.
+
+Дизайн запрошен через async question. [Brainstorming skill](C:/Users/SooL/.codex/plugins/cache/openai-curated-remote/superpowers/6.4.2/skills/brainstorming/SKILL.md)
+требует для bounded implementation: “the human partner approves the short in-chat design”.
+Это причина ожидания перед новым executor, а не требование повторно разрешить
+уже выполненный локальный review. Ответ «продолжай» разрешил review/подготовку,
+но новая transport policy представлена оператору впервые в этом ходе.

@@ -468,6 +468,14 @@ Missing/drift/unsafe paths дают STOP до записи; frozen artifacts с�
 GRANTED_AND_CONSUMED_ONCE; retry/cleanup/новый SSH не разрешены. Следующий локальный
 scope — transport review и подготовка readback уже возможного stage, не повтор install.
 Результат требует нового exact push; frozen scripts/manifests остаются прежними.
+[Локальный transport review29.09 завершён](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#transport-readback-design-2026-09-29):
+успешный22.09 использовал те же5/1/EOF; exact frame/local Python EOF PASS0.110s.
+Доказанной причины SSH timeout нет. Подготовлен bounded readback design без stdin,
+с proposed per-command5/6 и transport60s; ожидается ответ оператора по дизайну.
+Executor/manifest/новый SSH marker ещё не созданы. Review не даёт live authority.
+- [x] T11 — local transport/EOF comparison, exact inventory sizing, design proposal.
+- [ ] T12 — после ответа по дизайну: readback implementation/negative controls/
+  manifest/commit; затем отдельные exact push/SSH approvals. Никакого повторного install.
 - [x] T9 — secure descriptor reads/hash provenance retained candidate, новый stage
   без upload/old test-venv reuse, offline install/metadata/no-app-import контракт.
 - [x] T10 — одноразовый gate/manifest,23 targeted PASS, actual immutable bundle
@@ -512,7 +520,8 @@ Design согласован оператором после commit b277154. По
   5MiB подтверждены, SSH server-alive timeout hint. Retained-stage29.09 исполнен
   из pushed0574462:12.297s/SSH255, local input41104 complete, stdout0; тот же stderr.
   Stage/install UNKNOWN, remote directory мог появиться; approval consumed.
-  Следующий локальный scope — transport review и подготовка readback существующего stage;
+  Transport review завершён, local exact-frame EOF PASS; bounded readback design
+  ожидает ответа оператора. Затем локальная реализация/проверки/manifest;
   повтор install/cleanup/новый SSH не разрешены.23 local PASS сохранены.
   Maintenance bindings/actual prerequisites открыты;
   recovery-контракт v1 для прежнего scope сохранён.
