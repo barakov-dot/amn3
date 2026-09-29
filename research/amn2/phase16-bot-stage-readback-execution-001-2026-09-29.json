@@ -1,0 +1,203 @@
+{
+  "schema": "phase16.stage-readback-execution.v1",
+  "date": "2026-09-29",
+  "execution_commit": "07e7769f181ab851f0aa5a532ee9aa31eb80049f",
+  "approval_status": "GRANTED_AND_CONSUMED_ONCE",
+  "approval": "PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001",
+  "push": {
+    "status": "PASS",
+    "sha": "07e7769f181ab851f0aa5a532ee9aa31eb80049f",
+    "expected_old": "0574462dded68e2430fca93886f20d702765c3d0",
+    "remote": "origin",
+    "url": "https://github.com/barakov-dot/amn3.git",
+    "ref": "refs/heads/codex/phase16-awg3-family-3-1-spain-pilot-016",
+    "force": false,
+    "tags": false,
+    "other_branches": false,
+    "pre_push_changelog_commits_passed": 3,
+    "remote_readback": "MATCH"
+  },
+  "external_evidence": {
+    "directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-stage-readback-20260929/execution-001",
+    "files": {
+      "claim.json": {
+        "bytes": 513,
+        "sha256": "900cce46936f77d2dc18d2b698b974783346649a8d074bee9f0e977e20e2d1aa"
+      },
+      "result.json": {
+        "bytes": 3918,
+        "sha256": "ffb8f2241c749c26e462e43d7c02b834379f26dd6de5a24a0a77d6f06a026ede"
+      }
+    }
+  },
+  "local_result": {
+    "schema": "phase16.stage-readback-local.v1",
+    "claim": {
+      "approval": "PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001",
+      "attempts": 1,
+      "remote_sha256": "f72f312f1cb5007586820b09761879a08f65b886ea8ddc92e8a15f36c8701bc0",
+      "manifest_sha256": "6402188734e50485418ed39feba7a1be5d0e1a03676e08d5054cc5134191e857",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+      "destination": "/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260929-6e68235-001",
+      "claimed_at": "2026-09-29T20:10:54.424549+00:00"
+    },
+    "status": "VERIFIED_NOT_ACTIVATED",
+    "ssh_attempts": 1,
+    "transport": {
+      "schema": "phase16.bot-transport-diagnostic.v1",
+      "returncode": 0,
+      "last_stdin_progress_seconds": null,
+      "termination_action": "NONE",
+      "failure_stage": null,
+      "stdin_bytes_requested": 0,
+      "stdin_bytes_accepted": 0,
+      "stdin_complete": true,
+      "output_complete": true,
+      "elapsed_seconds": 2.906,
+      "stdout": {
+        "bytes_observed": 1187,
+        "bytes_retained": 1187,
+        "prefix_sha256": "039876aad9606036faf4df2b9cc28b2f68f1d4fef9aa5a0c9d1c742b9e859c93"
+      },
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "pipe_failures": [],
+      "stderr_diagnostic": {
+        "status": "EMPTY",
+        "hints": [],
+        "root_cause": "NOT_ESTABLISHED",
+        "utf8_valid": true,
+        "output_cap_hit": false
+      }
+    },
+    "remote_observation": {
+      "status": "COMPLETE",
+      "events": [
+        {
+          "schema": "phase16.stage-readback.v1",
+          "approval": "PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001",
+          "seq": 0,
+          "event": "READY"
+        },
+        {
+          "schema": "phase16.stage-readback.v1",
+          "approval": "PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001",
+          "seq": 1,
+          "event": "RECEIPT"
+        },
+        {
+          "schema": "phase16.stage-readback.v1",
+          "approval": "PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001",
+          "seq": 2,
+          "event": "CONTENT"
+        },
+        {
+          "schema": "phase16.stage-readback.v1",
+          "approval": "PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001",
+          "seq": 3,
+          "event": "METADATA"
+        },
+        {
+          "schema": "phase16.stage-readback.v1",
+          "approval": "PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001",
+          "seq": 4,
+          "event": "RESULT",
+          "result": {
+            "schema": "phase16.stage-readback.v1",
+            "approval": "PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001",
+            "destination": "/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260929-6e68235-001",
+            "status": "VERIFIED",
+            "reason": "receipt_content_metadata_match",
+            "verified_files": 200,
+            "runtime_pins": 40,
+            "bootstrap_distributions": 1,
+            "saved_receipt_sha256": "de51f2e6905ae6860eefaf455e40e4512377d92d97c6024319e01b2cbb5d1694",
+            "writes": 0,
+            "children": 0,
+            "activation": false,
+            "database_opened": false
+          }
+        }
+      ],
+      "trailing_fragment": false,
+      "result": {
+        "schema": "phase16.stage-readback.v1",
+        "approval": "PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001",
+        "destination": "/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260929-6e68235-001",
+        "status": "VERIFIED",
+        "reason": "receipt_content_metadata_match",
+        "verified_files": 200,
+        "runtime_pins": 40,
+        "bootstrap_distributions": 1,
+        "saved_receipt_sha256": "de51f2e6905ae6860eefaf455e40e4512377d92d97c6024319e01b2cbb5d1694",
+        "writes": 0,
+        "children": 0,
+        "activation": false,
+        "database_opened": false
+      }
+    }
+  },
+  "acceptance": {
+    "retained_stage_20260929": "SAVED_SUCCESS_RECEIPT_AND_CURRENT_CONTENT_METADATA_VERIFIED",
+    "saved_stage_receipt_sha256": "de51f2e6905ae6860eefaf455e40e4512377d92d97c6024319e01b2cbb5d1694",
+    "current_source_payload_files": 200,
+    "current_runtime_pins": 40,
+    "current_bootstrap_distributions": 1,
+    "full_installed_binary_integrity": "NOT_AUDITED",
+    "activation": "NOT_PERFORMED",
+    "maintenance_ready": false,
+    "live_bot_web_health": "NOT_OBSERVED",
+    "prior_ssh_timeout_root_cause": "NOT_ESTABLISHED"
+  },
+  "scope": {
+    "ssh_attempts": 1,
+    "retries": 0,
+    "remote_read_only": true,
+    "remote_writes": 0,
+    "remote_children": 0,
+    "install_this_run": 0,
+    "app_imports": 0,
+    "candidate_interpreter_execution": 0,
+    "database_operations": 0,
+    "service_actions": 0,
+    "activation": 0,
+    "cleanup": 0
+  },
+  "validation": [
+    "Exact local claim/result hashes and manifest/script/target/destination binding.",
+    "Strict remote event sequence, terminal result and exit-code agreement; complete pipes.",
+    "Reconstructed fixed JSON event stdout matches observed byte count and SHA256.",
+    "Saved stage success validated on VPS by frozen stage validator; current content/static metadata matched.",
+    "No new test-suite run: implementation and frozen manifests unchanged."
+  ],
+  "next": {
+    "local": "Continue previously approved maintenance target bindings and prerequisites implementation.",
+    "new_design_approval_required": false,
+    "additional_ssh_authorized": false,
+    "data_rehearsal_authorized": false,
+    "service_activation_authorized": false,
+    "remaining_unknown": [
+      "writer inventory completeness",
+      "maintenance ownership",
+      "service user/group",
+      "effective flags and admission/startup budget",
+      "drain/forced-kill evidence",
+      "pending operations",
+      "actual database rehearsal/recovery",
+      "original runtime rollback evidence"
+    ]
+  },
+  "safety": {
+    "awg2": "UNTOUCHED",
+    "package016": "IMMUTABLE_UNCHANGED",
+    "general_issuance": "DISABLED"
+  },
+  "limitations": [
+    "Snapshot bound to the fixed stage directory; not continuous observation.",
+    "Current readback does not execute interpreter, application, DB or systemd.",
+    "Successful argv readback with changed keepalive does not identify which transport change mattered or establish root cause."
+  ]
+}

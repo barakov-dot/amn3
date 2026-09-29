@@ -1051,7 +1051,8 @@ Root cause всё ещё UNKNOWN; оснований объявлять испр
 
 ## Readback stage29.09: локальный пакет готов — 29.09
 
-**LOCAL_READY_NOT_EXECUTED.** Оператор подтвердил предложенный дизайн.
+**LOCAL_READY_NOT_EXECUTED — исторический статус подготовки.** Оператор подтвердил
+дизайн, затем отдельно разрешил push/readback; [запуск завершён](#stage-readback-executed-2026-09-29).
 [Executor](../../scripts/phase16_bot_stage_readback_gate.py),
 [remote reader](../../scripts/vps/phase16_bot_stage_readback_remote.py),
 [inventory](phase16-bot-stage-readback-inventory-2026-09-29.json),
@@ -1111,25 +1112,23 @@ Self-review; independent review/subagents0. Frozen manifests24/27/29.09 MATCH;
 
 ### Bindings и следующий шаг
 
-- Approval: `PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001` — **NOT_GRANTED**.
+- Approval: `PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001` — **GRANTED_AND_CONSUMED_ONCE**.
 - Remote SHA256: `f72f312f1cb5007586820b09761879a08f65b886ea8ddc92e8a15f36c8701bc0`.
 - Manifest SHA256 (canonical LF): `6402188734e50485418ed39feba7a1be5d0e1a03676e08d5054cc5134191e857`.
 - Inventory SHA256 (canonical LF): `647a32f7a538028a8debbe8169ade373ea08b5d1c1b0467a36a9253380852aec`.
 - Target binding: `87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6`.
-- Evidence: `C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-stage-readback-20260929/execution-001` — отсутствует, не claimed.
+- Evidence: `C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-stage-readback-20260929/execution-001` — claimed, claim/result сохранены; hashes в execution record ниже.
 
-Сначала отдельный exact push нового HEAD в origin branch при EXPECTED_OLD
-`0574462dded68e2430fca93886f20d702765c3d0`, NO_FORCE/NO_TAGS и remote readback;
-затем отдельное разрешение marker выше и одна команда. Последний origin read-only
-check29.09 подтвердил0574462; перед push проверить снова. Два предыдущих локальных
-commits43dd9b1/a4190c2 ещё не опубликованы, войдут в тот же разрешённый диапазон.
-Команда ниже подготовлена, **НЕ ИСПОЛНЕНА И ПОКА НЕ РАЗРЕШЕНА**:
+По отдельным точным разрешениям push07e7769 при EXPECTED_OLD0574462 выполнен,
+включая commits43dd9b1/a4190c2; origin/ref readback MATCH, NO_FORCE/NO_TAGS.
+Затем один readback marker выше; [результат](#stage-readback-executed-2026-09-29).
+Команда ниже — историческая исполненная команда, **НЕ ПОВТОРЯТЬ**:
 
 ```powershell
 & 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -S -B 'C:/Users/SooL/.codex/worktrees/7489/VPS-OPS-LAB/scripts/phase16_bot_stage_readback_gate.py' --execute --approve PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001 --approved-remote-sha256 f72f312f1cb5007586820b09761879a08f65b886ea8ddc92e8a15f36c8701bc0 --approved-manifest-sha256 6402188734e50485418ed39feba7a1be5d0e1a03676e08d5054cc5134191e857
 ```
 
-Ориентир после разрешения: одна попытка максимум60s плюс5–10min на разбор и фиксацию.
+Оценка до запуска: максимум60s плюс5–10min на разбор/фиксацию; факт SSH2.906s.
 Это не срок закрытия Phase16. После результата определить интеграционный шаг;
 не создавать автоматически очередную цепочку probes. Maintenance writer inventory,
 service user/group, effective flags, drain/startup/pending остаются UNKNOWN/BLOCKED.
@@ -1141,3 +1140,67 @@ AWG2_UNTOUCHED, package016 immutable, general issuance disabled. Чужой
 `ideas/candidates-for-amn2.md` не менялся и не включён в наш commit.
 CURRENT_MODEL/CURRENT_EFFORT: недоступны. RECOMMENDED_MODEL_NEXT=gpt-6-astra,
 RECOMMENDED_EFFORT_NEXT=high — сложный разбор evidence/recovery; не live authority.
+
+
+<a id="stage-readback-executed-2026-09-29"></a>
+
+## Stage29.09 подтверждён без activation — результат 29.09
+
+**VERIFIED_NOT_ACTIVATED.** Из exact pushed commit
+`07e7769f181ab851f0aa5a532ee9aa31eb80049f` выполнен один разрешённый
+`PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001`.
+[Execution record](phase16-bot-stage-readback-execution-001-2026-09-29.json)
+содержит безопасный полный result, claim/result hashes, push bindings и границы.
+
+Push при EXPECTED_OLD0574462 прошёл без force/tags/других branches; pre-push
+CHANGELOG hook PASS для всех3 commits, origin/ref readback MATCH. SSH exit0 за
+**2.906s**, stdin0, stdout1187bytes, stderr0, pipes complete, failures0,
+termination NONE. Получены READY → RECEIPT → CONTENT → METADATA → RESULT;
+trailing fragment отсутствует. Marker использован один раз, retry0.
+
+Подтверждено на фиксированном stage29.09:
+
+- Сохранённый claim совпадает с exact retained-stage marker/artifact/bundle.
+  Result прошёл прежний frozen success validator: все stage steps завершены
+  успешно, runtime40 и126 app Python files, pth0, import origins MATCH без
+  импорта приложения. SHA сохранённого result:
+  `de51f2e6905ae6860eefaf455e40e4512377d92d97c6024319e01b2cbb5d1694`.
+- Текущие159 source +41 payload files: exact inventory, размеры и hashes MATCH;
+  paths/owner/mode/link и final snapshot checks прошли.
+- Текущие40 runtime pins и1 допустимый bootstrap distribution, pyvenv config,
+  статические interpreter links и отсутствие запрещённых startup hooks прошли.
+  Установленные binaries целиком не хешировались, interpreter/app не исполнялись.
+
+Неопределённость прежнего stage29.09 снята в границе saved success + текущего
+содержимого/metadata. Его первоначальный SSH UNKNOWN receipt остаётся историей,
+а не переписывается в PASS. Новую установку, upload или transport probe повторять
+не требуется. Причина прежних SSH timeouts **не установлена**: текущий успех
+с argv/no stdin и CountMax6 не разделяет влияние этих двух изменений.
+
+### Следующий интеграционный шаг
+
+Stage готов к следующей подготовке, бот ещё не переключён. Фактическое здоровье
+bot/web, production DB и готовность maintenance в этом readback не наблюдались.
+Продолжается уже согласованная [локальная сборка maintenance пакета](#maintenance-local-core-2026-09-23)
+по T14 единого плана; нового design approval не требуется.
+
+| Приоритет | Остаток и зависимость | Разрешённый scope |
+| --- | --- | --- |
+| P0 | Quality/A-B не закрыт, отложен оператором | Новых клиентских действий нет |
+| P1 | Maintenance executor/target bindings: stage теперь подтверждён; writer inventory/ownership, effective flags/user/group, drain/startup/pending остаются UNKNOWN | Локальная подготовка разрешена; новый SSH требует exact approval |
+| P1 | Server-local backup и rehearsal, затем migration/switch/recovery | Реальные данные/stop/start/activation требуют отдельного конкретного пакета и разрешения |
+| P1 | Windows traffic FAIL | Отдельная задача, этим readback не исследовалась |
+| P2 | Push/readback/evidence текущего этапа завершены | Локальная фиксация результата; новый result commit пока не pushed |
+
+Проверены local claim/result, SHA/size, manifest/script/target/destination,
+строгая последовательность событий и exit code. Восстановленный из fixed events
+stdout совпал с observed1187bytes/SHA. Документы сверены readback/links/diff;
+исходники, inventory и manifests не менялись, прежние28 local PASS сохранены
+без повторного запуска suites. Это новое live evidence чтения, не новое тестирование.
+
+Фактический scope: push07e7769, SSH1, retry0; remote writes/children/install0,
+app/candidate interpreter/DB/service/activation/cleanup0. AWG2_UNTOUCHED,
+package016 immutable, general issuance disabled. Чужой candidates-for-amn2.md
+сохранён вне commit. CURRENT_MODEL/CURRENT_EFFORT: недоступны;
+RECOMMENDED_MODEL_NEXT=gpt-6-astra, RECOMMENDED_EFFORT_NEXT=high — сложная привязка
+maintenance/recovery; рекомендация не даёт live authority.

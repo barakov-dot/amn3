@@ -476,9 +476,15 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
 - [x] T11 — local transport/EOF comparison, exact inventory sizing, design proposal.
 - [x] T12 — согласованный readback executor/inventory/manifest, negative controls,
   local verification receipt/self-review/CHANGELOG. Нет app/install/DB/services.
-- [ ] Следующий live шаг — только после exact push нового HEAD и отдельного
-  PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001. Текущее stage/install UNKNOWN;
-  readback не разрешает повтор install/cleanup/activation и не закрывает maintenance.
+- [x] T13 — exact push07e7769 при EXPECTED_OLD0574462 и один
+  PHASE16_BOT_RUNTIME40_STAGE_READBACK_20260929_001:
+  [VERIFIED_NOT_ACTIVATED,2.906s/exit0](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#stage-readback-executed-2026-09-29).
+  Saved-stage success и текущие200 hashes/runtime40 metadata подтверждены;
+  stage/install29.09 больше не UNKNOWN в этой границе. Approval consumed, retry0.
+- [ ] T14 — продолжить уже согласованную локальную привязку maintenance operations
+  к подтверждённому stage и точному target manifest. Writer inventory/ownership,
+  effective flags/user/group, drain/startup/pending и data rehearsal ещё не приняты.
+  Нового design approval не требуется; новый SSH/data/service scope не разрешён.
 - [x] T9 — secure descriptor reads/hash provenance retained candidate, новый stage
   без upload/old test-venv reuse, offline install/metadata/no-app-import контракт.
 - [x] T10 — одноразовый gate/manifest,23 targeted PASS, actual immutable bundle
@@ -513,22 +519,15 @@ Design согласован оператором после commit b277154. По
 - ✅ Task 1 — package016/local tooling; stage-защиты и recovery observations только локально; DNS bridge STOP.
 - ✅ Task 2 — исторические Spain gates/diagnostics, не свежий preflight.
 - ✅ Task 3A — minimal runtime по историческим evidence.
-- ▶️ Task 3B — integration/recovery не завершены; `_011` COMPLETE_WITH_LIMITATIONS:
-  source/dependencies/DB metadata/holders получены, old55dc243 metadata MATCH;
-  runtime binding/writer completeness UNKNOWN. Следующий локальный этап —
-  startup/fence/backup/recovery ядро реализовано (39 local PASS);24.09 runtime40
-  stage001 исполнен один раз из 68df5b9: UNKNOWN_NO_RETRY (неполная передача,
-  remote receipt отсутствует); 15 local PASS сохранены. Transport diagnostic module
-  готов локально (25 local PASS);27.09 transfer001 дал PARTIAL/UNKNOWN_NO_RETRY,
-  5MiB подтверждены, SSH server-alive timeout hint. Retained-stage29.09 исполнен
-  из pushed0574462:12.297s/SSH255, local input41104 complete, stdout0; тот же stderr.
-  Stage/install UNKNOWN, remote directory мог появиться; approval consumed.
-  Transport review завершён, local exact-frame EOF PASS; дизайн readback согласован,
-  executor/manifest готовы,28 targeted local PASS; прежние23 PASS сохранены.
-  Следующий шаг — exact push/read-only SSH approval, максимум60s и разбор5–10min.
-  Повтор install/cleanup/activation не разрешён; server stage/install UNKNOWN.
-  Maintenance bindings/actual prerequisites открыты;
-  recovery-контракт v1 для прежнего scope сохранён.
+- ▶️ Task 3B — integration/recovery не завершены. Readback011 закрыл старый
+  source/dependencies/DB metadata snapshot с ограничениями; maintenance core39
+  local PASS сохранён. После transport failures24/27/29.09 один readback из
+  pushed07e7769 подтвердил stage29.09: VERIFIED_NOT_ACTIVATED,2.906s,200 files,
+  runtime40, saved success receipt. Повтор install/transport probe не нужен.
+  Следующий локальный этап — maintenance target bindings по прежнему согласованию;
+  writer inventory/ownership, effective settings, drain/startup/pending и actual
+  DB rehearsal/recovery ещё не подтверждены. Bot activation и новый live scope
+  не разрешены; readback marker consumed. Recovery-контракт v1 сохранён.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.

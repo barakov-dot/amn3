@@ -7,6 +7,19 @@
 
 ## 2026-09-29
 
+- По exact approvals опубликован07e7769 (EXPECTED_OLD0574462, три CHANGELOG
+  hook PASS, remote SHA MATCH) и выполнен один [stage readback](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#stage-readback-executed-2026-09-29):
+  [VERIFIED_NOT_ACTIVATED](research/amn2/phase16-bot-stage-readback-execution-001-2026-09-29.json),
+  SSH exit0/2.906s, stdin0/stdout1187/stderr0, полный validated receipt. Saved-stage
+  success и текущие200 source/payload hashes, runtime40 metadata+1 bootstrap
+  подтверждены; прежний UNKNOWN stage29.09 разрешён в этой границе. Повторная
+  установка не нужна; старый failed execution receipt сохранён. Проверены
+  claim/result hashes, bindings, event stdout reconstruction, docs/links/diff.
+  Код/manifests не менялись, прежние28 local PASS без повтора. Новый install/
+  remote writes/DB/services/activation0, SSH1/retry0; AWG2/package016 сохранены,
+  issuance off. Maintenance и root cause SSH timeout не закрыты; дальше ранее
+  согласованная локальная привязка maintenance, новый live scope не разрешён.
+
 - После подтверждения оператора подготовлен [read-only stage readback](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#stage-readback-ready-2026-09-29):
   bound compressed argv без stdin, per-command SSH5/6, remote45s/local60s,
   один marker/claim; чтение saved receipt,159 source+41 payload hashes и static
