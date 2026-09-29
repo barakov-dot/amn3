@@ -1,0 +1,98 @@
+{
+  "actual_actions": {
+    "activation": 0,
+    "application_imports": 0,
+    "database_operations": 0,
+    "install": 0,
+    "push": 0,
+    "remote_file_reads": 0,
+    "remote_file_writes": 0,
+    "service_actions": 0,
+    "ssh_attempts": 0,
+    "stage": 0
+  },
+  "approval": "PHASE16_BOT_RUNTIME40_RETAINED_STAGE_20260929_001",
+  "approval_status": "NOT_GRANTED",
+  "base_commit": "8800fc6733120977ca1d007babc0f98454dc3869",
+  "bundle_validation": {
+    "app_python_files": 126,
+    "bytes": 30485208,
+    "manifest_bytes": 74676,
+    "manifest_sha256": "6792cb2cd28b0ce70ae031cac04b29f40db908f5e8bad0770e689de390a9a37d",
+    "retained_bytes": 30159388,
+    "retained_files": 43,
+    "runtime_lock_sha256": "a381be185b19777b9198526e11df8dcfa0afaf7f15acccd829809e698d679fab",
+    "runtime_pins": 40,
+    "selected_bytes": 19752552,
+    "selected_files": 41,
+    "sha256": "e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7",
+    "source_bytes": 10184287,
+    "source_files": 159,
+    "status": "MATCH_IMMUTABLE_ZIP_OFFLINE"
+  },
+  "date": "2026-09-29",
+  "frozen_bindings": {
+    "stage001": "MATCH_ALL_MANIFEST_BOUND_FILES",
+    "transfer001": "MATCH_ALL_MANIFEST_BOUND_FILES"
+  },
+  "limitations": [
+    "Windows local tests; Linux openat/O_NOFOLLOW/SIGALRM/unshare/venv/pip not actually executed",
+    "Linux filesystem syscalls modeled in descriptor tests; child commands simulated in stage tests",
+    "Retained server file existence integrity permissions and owner remain unobserved until approved execution",
+    "Network root cause remains unknown; small frame removes bulk upload dependency only",
+    "Maintenance prerequisites remain unknown; no service activation authorization"
+  ],
+  "preview": {
+    "activation": 0,
+    "approval": "PHASE16_BOT_RUNTIME40_RETAINED_STAGE_20260929_001",
+    "bundle_upload_bytes": 0,
+    "frame_bytes": 41104,
+    "install": 0,
+    "manifest_sha256": "c8635ea3f2b01bc8b57cda0ee6b273864121289f72d7b91c21811e2dab112051",
+    "remote_seconds": 300,
+    "remote_sha256": "d5197bb13e9548de82060ba3e17d6a0d20673cb378fff8c33014b31329b83a26",
+    "retained_files": 43,
+    "ssh_attempts": 0,
+    "stage": 0,
+    "status": "OFFLINE_READY_NOT_EXECUTED",
+    "transport_seconds": 330
+  },
+  "review": {
+    "finding": "STOP receipt boundary validation strengthened after RED",
+    "independent_review": false,
+    "kind": "SELF_REVIEW_NO_DELEGATION"
+  },
+  "safety": {
+    "awg2_untouched": true,
+    "foreign_ideas_change_preserved": true,
+    "general_issuance_enabled": false,
+    "package016_immutable": true
+  },
+  "schema": "phase16.bot-retained-stage-local-verification.v1",
+  "status": "LOCAL_PASS_NOT_EXECUTED",
+  "tests": {
+    "command": "python -B -m unittest tests.test_phase16_bot_retained_stage -v",
+    "coverage": [
+      "hash size inventory and source entry bindings",
+      "no-follow descriptor flags ownership modes types hardlinks",
+      "file and ancestor inode/metadata replacement and descriptor cleanup",
+      "missing drift stops before claim and child process",
+      "new stage only offline subprocess commands failure at each child retained no retry",
+      "metadata extra pin origin pth rejection",
+      "real local bootstrap exact partial corrupt extra input wrong approval",
+      "new standalone modules never call old entrypoints",
+      "manifest script approval target evidence bindings reuse stop",
+      "false success duplicate keys extra fields incomplete transport redaction",
+      "STOP receipt pre/post claim distinction and no steps after failure"
+    ],
+    "failed": 0,
+    "green": "23 targeted tests passed after validator fix",
+    "passed": 23,
+    "red": [
+      "missing_new_remote_module",
+      "stop_receipt_claim_boundary_accepted_inconsistent_count"
+    ],
+    "seconds": 0.846,
+    "skipped": 0
+  }
+}

@@ -5,6 +5,21 @@
 записи не означают deployment или новую выдачу. Текущая очередь — в
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
+## 2026-09-29
+
+- Подготовлен [runtime40 из retained candidate](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#retained-runtime40-stage-ready-2026-09-29):
+  frame41 104 bytes вместо30.5MB bundle,43 files с external immutable hash/size
+  verification и descriptor-relative no-follow/owner/mode/link/race checks до
+  stage. Новая private destination, offline40; старый candidate/test-venv48 и
+  frozen stage001/transfer001 сохранены. Missing/drift STOP, retry/cleanup/fallback0.
+  [23 local PASS/0SKIP](research/amn2/phase16-bot-retained-stage-local-verification-2026-09-29.json),
+  RED/GREEN, actual immutable bundle validation/selection, CLI preview exit0,
+  self-review; STOP receipt boundary усилена после RED. Linux syscalls/unshare/
+  install моделировались, не исполнялись; server retained state ещё не наблюдалось.
+  Manifest/receipt/readback/links/diff проверены; SSH/live reads/stage/install/
+  service/DB/activation/push0, exact разрешения ещё нужны. Maintenance BLOCKED;
+  AWG2/package016 сохранены, issuance off. Чужие ideas changes исключены из commit.
+
 ## 2026-09-27
 
 - По exact approvals опубликован7e7d64a0 (EXPECTED_OLD9086bc3, hook/remote readback

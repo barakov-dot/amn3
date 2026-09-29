@@ -457,8 +457,19 @@ server-alive timeout hint и stderr fingerprint stage001 совпали. Пол�
 install/runtime acceptance и причина потери ответов не доказаны. Approval использован;
 повтор/новый SSH не разрешены. Следующий локальный шаг — runtime40 из retained
 candidate22.09 с exact fresh file/hash verification до stage, без30MB reupload.
-Нового stage executor/manifest/approval пока нет; missing/drift должны давать STOP.
-Подробности и границы — в linked runbook; keepalive settings не меняются попутно.
+29.09 [retained runtime40 packet готов локально](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#retained-runtime40-stage-ready-2026-09-29):
+23 targeted PASS, default preview exit0; frame41104 bytes без bundle upload,
+43 retained files проверяются перед stage, новый private destination, offline40.
+Missing/drift/unsafe paths дают STOP до записи; frozen artifacts сохранены.
+Новый approval PHASE16_BOT_RUNTIME40_RETAINED_STAGE_20260929_001 пока NOT_GRANTED;
+remote reads/SSH/stage/install0. Подробности, hashes и команда — в linked runbook.
+Результат transfer001 опубликован в8800fc6; новый local commit требует exact push.
+- [x] T9 — secure descriptor reads/hash provenance retained candidate, новый stage
+  без upload/old test-venv reuse, offline install/metadata/no-app-import контракт.
+- [x] T10 — одноразовый gate/manifest,23 targeted PASS, actual immutable bundle
+  selection, default preview, self-review/receipts/CHANGELOG. Linux syscalls/install
+  локально не исполнялись; их actual validation входит в один новый stage.
+Keepalive settings не меняются попутно.
 - [x] T7 — streaming receiver, strict events, одноразовый checksum-bound gate/manifest.
 - [x] T8 — bounded stdout observer при transport failure,25 targeted PASS,
   self-review, receipts/CHANGELOG. Независимого review не было (без делегирования).
@@ -494,8 +505,9 @@ Design согласован оператором после commit b277154. По
   stage001 исполнен один раз из 68df5b9: UNKNOWN_NO_RETRY (неполная передача,
   remote receipt отсутствует); 15 local PASS сохранены. Transport diagnostic module
   готов локально (25 local PASS);27.09 transfer001 дал PARTIAL/UNKNOWN_NO_RETRY,
-  5MiB подтверждены, SSH server-alive timeout hint. Следующий локальный шаг —
-  stage из retained candidate с проверкой immutable hashes, без большого reupload.
+  5MiB подтверждены, SSH server-alive timeout hint. Retained-stage пакет готов
+  локально29.09 (23 PASS/preview, SSH0); следующий шаг — exact push/stage approval.
+  43 retained hashes проверяются до записи, без большого reupload.
   Maintenance bindings/actual prerequisites открыты;
   recovery-контракт v1 для прежнего scope сохранён.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.

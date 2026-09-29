@@ -799,3 +799,106 @@ service/DB/stage/install/activation0. AWG2/package016 сохранены, genera
 manifest/script hashes, строгий event parser/stdout hash, stderr comparison,
 исторический candidate receipt, docs links/diff/whitespace; неизменные suites
 не повторялись. Push результата требует нового exact SHA approval.
+
+
+<a id="retained-runtime40-stage-ready-2026-09-29"></a>
+
+## Runtime40 из сохранённого candidate: пакет готов локально — 29.09
+
+**STAGE_READY_NOT_EXECUTED.** По «продолжай» реализован следующий локальный шаг
+после transfer001; результат transfer001 опубликован в `8800fc6733120977ca1d007babc0f98454dc3869`.
+[Новый gate](../../scripts/phase16_bot_retained_stage_gate.py),
+[remote executor](../../scripts/vps/phase16_bot_retained_stage_remote.py),
+[manifest](phase16-bot-retained-stage-manifest-2026-09-29.json),
+[local verification](phase16-bot-retained-stage-local-verification-2026-09-29.json).
+Старые approvals использованы; новый marker пока **NOT_GRANTED**.
+
+### Что сделает одна разрешённая попытка
+
+Передаётся только bound Python script: **41 104 bytes всего frame**, bundle upload0.
+Retained payload:
+`/opt/amn2-spain/bot-candidates/phase16-bot-candidate-20260921-6e68235-001/payload`.
+Новая единственная write destination:
+`/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260929-6e68235-001`.
+Старый test-venv48 и неизвестный stage001 от24.09 не используются и не удаляются.
+
+1. Проверить Linux/Python3.12/x86_64/glibc2.39/root, права родителей, отсутствие
+   нового destination, free space512MiB и наличие unshare.
+2. Через закреплённые descriptors от `/` прочитать ровно43 используемых файла:
+   manifest, source.tar, runtime lock,40 runtime wheels. Ancestors: root-owned,
+   no group/world write; open с O_DIRECTORY/O_NOFOLLOW. Файлы: O_NOFOLLOW и
+   O_NONBLOCK, regular/root-owned/nlink1, без group/world write. Повторная сверка
+   inode/метаданных открытого descriptor и имени; все descriptors закрываются.
+3. Manifest74676 bytes должен совпасть с внешним immutable SHA6792cb2c…;
+   его source commit/artifact id, hashes/sizes каждого используемого файла и
+   каждого source entry проверяются до первого stage write. Чтение ограничено
+   trusted size+1 и total128MiB. Полезные данные30 159 388 bytes читаются **на VPS**.
+   Локально исходный ZIP30485208 bytes/e19abc5c… прошёл full validation;
+   выбран41 payload file +159 source files (126 app Python), только40 runtime pins.
+4. Проверенные bytes держать в памяти и копировать только в новый private0700
+   каталог. Выполнить unshare-net probe до claim, затем создать venv и установить
+   wheels offline: no-index/no-deps/require-hashes/only-binary. Child env очищен.
+   Pip check и metadata: exact40 pins, допускаются только bootstrap pip/setuptools,
+   pth0, source origins проверяются PathFinder под -S без import приложения.
+5. Readback новой source/payload, sanitized receipt. Missing/hash drift/unsafe path
+   дают STOP до stage. Ошибка после claim оставляет каталог с STOP_RETAINED_NO_RETRY.
+   Повтор, cleanup, fallback upload и автоматический следующий SSH отсутствуют.
+
+Limits: remote300s/work280s, SSH transport330s (плюс ограниченное закрытие локальных
+pipes), child output256KiB, transport output64KiB, attempts1. SSH settings прежние:
+ConnectTimeout10, ConnectionAttempts1, ServerAliveInterval5/CountMax1,
+strict known_hosts и pinned target binding. Прежний network root cause UNKNOWN;
+малый frame убирает зависимость от большого upload, но не доказывает исправление сети.
+При потере SSH результат UNKNOWN_NO_RETRY; завершение remote install не угадывать.
+
+Состояние server files сейчас не наблюдалось. Linux descriptor syscalls, SIGALRM,
+unshare, venv и pip **не исполнялись** в Windows-проверке; syscalls моделировались,
+install children заменялись fixture executor. Реальные local children проверили
+exact bootstrap, partial/corrupt frame, extra input и wrong approval. Это local
+readiness, не Linux stage PASS. Полный stage — один следующий gate, не новая серия
+transfer diagnostics. Service/DB/Telegram/app activation остаются вне scope.
+
+### Проверки и фиксация
+
+[23 PASS/0FAIL/0SKIP,0.846s](phase16-bot-retained-stage-local-verification-2026-09-29.json).
+RED отсутствующего executor; дополнительный RED показал слабую границу STOP
+receipt, исправлено: before-stage count0/steps0, retained STOP count43/claim step,
+после failed step продолжения нет. Проверены tamper/missing/truncation, links,
+owner/mode/type, inode/ancestor replacement, source inventory, failure каждого child,
+metadata pin/origin/pth, false success, duplicate/extra fields, incomplete transport,
+redaction, stale claim и wrong approval/hash/target/path. Default CLI preview exit0.
+Frozen stage001 и transfer001 manifests по всем bound files MATCH; старые suites
+не повторялись. Self-review; независимого review и делегирования не было.
+
+Local scope: SSH0, remote reads/writes0, stage/install0, service/DB/activation0,
+push0. AWG2_UNTOUCHED, package016 immutable, general issuance disabled.
+Чужое изменение `ideas/candidates-for-amn2.md` сохранено вне нашего commit.
+Maintenance prerequisites (writer inventory, service user/group, effective flags,
+drain/startup/pending) остаются UNKNOWN/BLOCKED; stage не подменяет их.
+
+### Точные bindings для будущего разрешения
+
+- Approval: `PHASE16_BOT_RUNTIME40_RETAINED_STAGE_20260929_001` — **NOT_GRANTED**.
+- Remote SHA256: `d5197bb13e9548de82060ba3e17d6a0d20673cb378fff8c33014b31329b83a26`.
+- Manifest SHA256 (canonical LF): `c8635ea3f2b01bc8b57cda0ee6b273864121289f72d7b91c21811e2dab112051`.
+- Evidence: `C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-bot-retained-stage-20260929/execution-001`.
+- Target binding: `87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6`.
+
+Порядок: проверить/stage только точные локальные files, commit с CHANGELOG;
+получить exact SHA push approval и отдельный stage marker; после push/readback
+выполнить gate **один раз**. Точная команда ниже является подготовленной, сейчас
+**НЕ РАЗРЕШЕНА К ВЫПОЛНЕНИЮ**:
+
+```powershell
+& 'C:/Users/SooL/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -I -S -B 'C:/Users/SooL/.codex/worktrees/7489/VPS-OPS-LAB/scripts/phase16_bot_retained_stage_gate.py' --execute --approve PHASE16_BOT_RUNTIME40_RETAINED_STAGE_20260929_001 --approved-remote-sha256 d5197bb13e9548de82060ba3e17d6a0d20673cb378fff8c33014b31329b83a26 --approved-manifest-sha256 c8635ea3f2b01bc8b57cda0ee6b273864121289f72d7b91c21811e2dab112051
+```
+
+После отдельного разрешения: до6min на ограниченный запуск, ориентир5–10min на
+разбор/фиксацию результата; это не оценка закрытия всего Phase16. При STOP/UNKNOWN
+сначала анализ единственного receipt, без автоматического повторного approval chain.
+P2 локальная подготовка этого этапа завершена; P1 integration/maintenance/recovery
+зависят от stage и новых exact разрешений; P1 Windows и P0 quality/A-B остаются
+отдельными незакрытыми задачами, quality отложен оператором.
+CURRENT_MODEL/CURRENT_EFFORT: недоступны. RECOMMENDED_MODEL_NEXT=gpt-6-astra,
+RECOMMENDED_EFFORT_NEXT=high: анализ install/evidence и recovery границ; это
+рекомендация из текущего workflow, не live authority.
