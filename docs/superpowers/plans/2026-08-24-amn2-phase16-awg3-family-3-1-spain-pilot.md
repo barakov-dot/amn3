@@ -487,9 +487,13 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
     фиксированные candidate/old runtime/DB/backup paths, hash-bound draft manifest.
   - [x] T14b — typed preconditions/ownership и coordinator manifest; target digest
     включён в durable journal, semantic pair checks и freshness.45 affected PASS.
-  - [ ] T14c — реальные operation adapters и sustained Linux runner: provenance,
-    fresh per-action checks, isolation/deadlines, fence/drain, data operations и
-    start/recovery. Не подменять их synthetic callbacks или valid input JSON.
+  - [ ] T14c — operation adapters и sustained Linux runner, **частично реализован**.
+    [Результат30.09](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-operations-local-2026-09-30):
+    реальные backup/rehearsal/migration adapters, pending guards, bounded processes,
+    systemd/fence readers и isolated data-worker specification;88 affected PASS.
+    Открыты actual admission/provenance, continuous per-action checks, old-handler
+    drain, полный sustained coordinator/start/recovery и Linux acceptance.
+    Exit0/пустой cgroup не подменяют business drain; default CLI остаётся blocked.
   Writer inventory/ownership, effective flags/user/group, drain/startup/pending и
   actual data rehearsal ещё не приняты. Новый design approval не нужен;
   локальная подготовка разрешена, новый SSH/data/service scope не разрешён.

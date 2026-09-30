@@ -1287,3 +1287,98 @@ VERIFIED_NOT_ACTIVATED, свежего наблюдения30.09 нет. Чуж�
 сохранён вне commit. CURRENT_MODEL/CURRENT_EFFORT недоступны;
 RECOMMENDED_MODEL_NEXT=gpt-6-astra, RECOMMENDED_EFFORT_NEXT=high — реализация
 Linux maintenance/recovery, рекомендация не даёт live authority.
+
+
+<a id="maintenance-operations-local-2026-09-30"></a>
+
+## Maintenance operations — локальный результат 30.09
+
+**LOCAL_DATA_AND_LINUX_PRIMITIVES_PASS / FULL_EXECUTOR_NOT_READY.**
+Продолжение согласованного T14c, база568c24c; новый design approval не запрашивался.
+[Receipt](phase16-bot-maintenance-operations-local-verification-2026-09-30.json)
+фиксирует **88 PASS/0FAIL/0ERROR/0SKIP,21.422s**, включая26 новых проверок.
+Это промежуточная реализация T14c, не завершение всего maintenance executor.
+Новый SSH gate/approval marker не создавался; исторические approvals не повторялись.
+
+### Что теперь исполняется кодом
+
+- [DataOperations](../../scripts/phase16_bot_maintenance_operations.py): реальные
+  SQLite backup → rehearsal → production-path migration, только внутри уже
+  сохранённого action intent. В этом прогоне production-path был временным
+  synthetic SQLite файлом. Путь и состояние исходной БД сверяются до записи;
+  используются прежние pinned schema/repository slices и allowlist delta.
+  Проверка миграции связывает main/WAL/journal: main hash не замечал WAL-only
+  commit (воспроизведён RED, исправлен). Пустой WAL от чтения не считается
+  изменением данных; sidecars автоматически не удаляются.
+  Backup неизменяем, clone отдельный; репетиция создаёт ещё один private base copy.
+  Receipts связывают journal/intent/predecessor и hashes, не содержат строк БД.
+- Перед backup/migration проверяются aggregate pending devices, незавершённые
+  issuance receipts и requests без полного числа completed receipts. Ожидающие
+  оплаты/ручного рассмотрения orders не объявляются работающими обработчиками.
+  Частичная выдача, custom seeds, изменившийся source, повреждённый backup/receipt
+  останавливают последовательность. Неудачная миграция не запускает restore.
+- [Linux primitives](../../scripts/phase16_bot_maintenance_linux.py): child process
+  с EOF stdin, чистым окружением, ограничением времени и вывода, без raw errors;
+  systemd stop/start через один `--no-block` request с ограниченным опросом;
+  проверка actual loaded fence через D-Bus Conditions и DropInPaths. Оставшееся
+  cgroup/PID, ненулевой exit, timeout/kill и поздний ответ не дают PASS.
+- Подготовлена команда отдельного data-worker service с PrivateNetwork,
+  ProtectSystem, ReadWritePaths, ограничениями памяти/размера/времени. Он работает
+  с уже созданным intent и не продвигает журнал. Это дочерний worker, **не полный
+  sustained coordinator**; на Linux команда не запускалась. Самостоятельно
+  брать prepared JSON из T14b и запускать worker запрещено: admission/provenance,
+  непрерывный fence/ownership/drain и точный approved packet ещё не собраны.
+- Candidate drop-in пока формируется как текст: прежний WorkingDirectory сохраняет
+  `.env` и относительные config paths; `-I -B -u` и добавление только candidate
+  source исключают старый cwd/PYTHONPATH из поиска app и дают немедленный admission
+  receipt. Timeout/User/Group/flags/env не переписываются. Установка drop-in,
+  start/READY/receipt/web-start/release в полный coordinator ещё не подключены.
+  Проверка admission receipt привязана к unit, boot, invocation, PID и identity.
+
+Новые бюджеты относятся только к будущим helper/coordinator actions: data worker120s,
+recovery reserve300s; перед действием должно оставаться время на само действие и
+reserve. Это локальная модель, не согласованное live-окно. Прежние bot start40s,
+web start90s и stop90s сохранены. Таймаут клиента systemctl не считается отменой
+задания manager: результат остаётся UNKNOWN/NO_RETRY под сохранённым fence.
+
+### Существенная граница старого runtime
+
+Исходник55dc243b8e6c6bdb57f8301b56326e4cd4072d19, `app/main.py`
+blob`cb21a416d3e31f61dadf095cacdd4b4cbdc0e586`: отменяет polling/watchdog и закрывает
+session, но не содержит candidate HandlerLifetime.drain/WorkflowWorker.aclose.
+У candidate6e68235 эти cleanup steps есть; polling начинается перед READY.
+Поэтому exit0/пустой cgroup и нулевые persisted pending counts дают только
+**PROCESS_QUIESCENCE**, не доказательство завершения всех старых handlers.
+Новый adapter явно возвращает business_drain=NOT_ESTABLISHED; он не подставляет
+`drain=complete`. Это вывод по source, не утверждение о потерянной live-операции.
+
+### Проверки, ограничения и продолжение
+
+[Data tests](../../tests/test_phase16_bot_maintenance_operations.py) работают с
+реальными disposable SQLite/files; [Linux tests](../../tests/test_phase16_bot_maintenance_linux.py)
+запускают реальные локальные Python children и используют строгий command double
+на границе systemd. RED/GREEN выполнен; self-review исправил преждевременный STOP
+для queued job и принятие ответа после deadline. Default CLI даёт
+LOCAL_PRIMITIVES_ONLY/authorized=false/live_executor_ready=false; Windows worker
+завершается exit2 без чтения DB/вывода. Старый target manifest остаётся MATCH.
+Linux process groups, private mode/namespace/cgroup/D-Bus/systemd требуют Linux
+acceptance; Windows PASS их не подтверждает. Делегирования не было.
+
+Далее в том же T14c: source-backed критерий old-handler drain, actual host admission
+с происхождением фактов, непрерывные per-action fence/ownership checks, полный
+sustained coordinator со start/recovery и конкретный packet. Локальная подготовка
+разрешена; SSH/live data/services, установка и push требуют своих точных разрешений.
+Нельзя закрывать T14c или объявлять READY по одному JSON/успешному helper.
+
+Семантика service вместо scope и Type=exec сверена с
+[systemd-run](https://raw.githubusercontent.com/systemd/systemd/main/man/systemd-run.xml);
+RuntimeMaxSec и его ограничение для oneshot — с
+[systemd.service](https://raw.githubusercontent.com/systemd/systemd/main/man/systemd.service.xml),
+изоляция — с [systemd.exec](https://raw.githubusercontent.com/systemd/systemd/main/man/systemd.exec.xml).
+Форма Conditions взята из
+[D-Bus API](https://raw.githubusercontent.com/systemd/systemd/main/man/org.freedesktop.systemd1.xml),
+property JSON — из [busctl source](https://raw.githubusercontent.com/systemd/systemd/v252/src/busctl/busctl.c).
+Это не проверка версии systemd на целевом VPS.
+
+Safety: SSH0/upload0/stage-install0/live DB0/services0/activation0/push0.
+Последний stage29.09 VERIFIED_NOT_ACTIVATED; AWG2/package016 untouched, issuance off.

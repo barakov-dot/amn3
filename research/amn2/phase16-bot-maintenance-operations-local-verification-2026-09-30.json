@@ -1,0 +1,84 @@
+{
+  "schema": "phase16.maintenance-operations-local-verification.v1",
+  "date": "2026-09-30",
+  "base_commit": "568c24cf0bd589caedf85ad373946cd64b6b93ba",
+  "status": "LOCAL_DATA_AND_LINUX_PRIMITIVES_PASS_FULL_EXECUTOR_NOT_READY",
+  "tests": {
+    "command": "python -B -m unittest tests.test_phase16_bot_maintenance_operations tests.test_phase16_bot_maintenance_linux tests.test_phase16_bot_db_rehearsal tests.test_phase16_bot_maintenance tests.test_phase16_bot_maintenance_binding -q",
+    "passed": 88,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 21.422,
+    "new_tests": 26
+  },
+  "red_green": [
+    "Missing concrete data operations: assertion RED then 10 PASS.",
+    "Missing Linux primitives: assertion RED then 11 PASS.",
+    "Queued manager request incorrectly stopped before deadline: RED fixed.",
+    "Missing effective-fence reader: assertion RED fixed using D-Bus typed conditions.",
+    "Late manager response accepted as ready after deadline: RED fixed.",
+    "Committed WAL-only change evaded main-file hash: assertion RED; bind main/WAL/journal, normalize empty read-created WAL; 11 data tests GREEN."
+  ],
+  "artifacts_sha256_lf": {
+    "scripts/phase16_bot_maintenance_operations.py": "9e5605a09543e80c37e6e125a90f69ad4dc900e5bb005ddcc5444a46e0e1be57",
+    "scripts/phase16_bot_maintenance_linux.py": "4d6bc1b9beef83ab827f3eaf3320fa91dca63faa3c2bd47e3b9645fd88a966d6",
+    "tests/test_phase16_bot_maintenance_operations.py": "266e47c51b9cbb56a0683e8212bd0744bd6f50bc60d58b65930f4212eccf49df",
+    "tests/test_phase16_bot_maintenance_linux.py": "5cb7e5c45f4d074828417de7ddb3f630423864b169705d232970d3bfaf730b4c"
+  },
+  "frozen_target_manifest": "MATCH_1887cced4dfb67f5cc89a60e60996cdc300a013eb1ee56328f2a20c68153f019",
+  "executed_locally": [
+    "SQLite backup, rehearsal, pinned schema/seed migration on synthetic data",
+    "Pending issuance/device and missing-receipt guards",
+    "Concurrent source change and artifact tamper STOP",
+    "Partial migration retained for separate recovery approval",
+    "Real child EOF, clean environment, deadline and capped/redacted output",
+    "Real journal/fence/permit files with strict systemd command doubles",
+    "Default CLI and Linux-only data worker rejection on Windows",
+    "Real WAL-only commit is detected while read-created empty WAL is tolerated."
+  ],
+  "not_executed": [
+    "Linux kernel/process-group/cgroup/systemd/D-Bus/namespace acceptance",
+    "Actual server data, settings, writer inventory, ownership or handler drain",
+    "Full sustained coordinator and candidate/web activation",
+    "SSH, upload, stage, install, real DB migration, service mutation or push"
+  ],
+  "source_findings": {
+    "old_commit": "55dc243b8e6c6bdb57f8301b56326e4cd4072d19",
+    "old_main_git_blob": "cb21a416d3e31f61dadf095cacdd4b4cbdc0e586",
+    "candidate_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "candidate_main_git_blob": "16f79d9dc9e4cb985598c3730da1218a05ac1505",
+    "candidate_settings_git_blob": "46bd0c1c1a2a59c88647614126605d7b861ba5eb",
+    "old_business_drain": "NOT_ESTABLISHED_BY_EXIT_ZERO_OR_PENDING_COUNTS",
+    "candidate_launch": "Keep old working directory for .env and relative settings; isolated interpreter prepends candidate source; no timeout/flag/environment override."
+  },
+  "review": {
+    "mode": "self_review_no_delegation",
+    "full_t14c": "INCOMPLETE",
+    "live_executor_ready": false,
+    "remaining": [
+      "Fresh host admission/provenance and continuous fence/ownership checks around all actions",
+      "Source-backed old-handler drain criterion",
+      "Full sustained coordinator, start/recovery wiring and concrete approval packet",
+      "Linux acceptance of OS-dependent primitives"
+    ]
+  },
+  "safety": {
+    "ssh_attempts": 0,
+    "stage_install_actions": 0,
+    "live_database_operations": 0,
+    "service_actions": 0,
+    "pushes": 0,
+    "awg2": "UNTOUCHED",
+    "package016": "UNTOUCHED",
+    "general_issuance": "OFF",
+    "last_stage": "VERIFIED_NOT_ACTIVATED_20260929"
+  },
+  "official_references": [
+    "https://raw.githubusercontent.com/systemd/systemd/main/man/systemd-run.xml",
+    "https://raw.githubusercontent.com/systemd/systemd/main/man/systemd.service.xml",
+    "https://raw.githubusercontent.com/systemd/systemd/main/man/systemd.exec.xml",
+    "https://raw.githubusercontent.com/systemd/systemd/main/man/org.freedesktop.systemd1.xml",
+    "https://raw.githubusercontent.com/systemd/systemd/v252/src/busctl/busctl.c"
+  ]
+}

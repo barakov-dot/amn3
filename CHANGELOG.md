@@ -7,6 +7,17 @@
 
 ## 2026-09-30
 
+- Продолжен T14c: [реальные data adapters и Linux primitives](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-operations-local-2026-09-30).
+  Durable intent/receipts, SQLite backup/rehearsal/migration, pending/missing-receipt
+  guards; bounded child processes, systemd no-block polling/effective fence,
+  isolated worker specification и candidate launch text. Исправлены queued-job
+  и late-response ошибки; verification обнаруживает WAL-only DB изменения. [88 affected PASS/0SKIP](research/amn2/phase16-bot-maintenance-operations-local-verification-2026-09-30.json),
+  RED/GREEN, real synthetic SQLite/child/files, self-review; Linux/systemd execution
+  не проверено. Old55dc exit0/pending0 не доказывают handler drain; full sustained
+  coordinator/admission/start/recovery остаются открыты, T14c не закрыт.
+  Frozen target manifest MATCH; docs/links/diff/whitespace проверены.
+  SSH/stage/install/live DB/services/push0, AWG2/package016 untouched, issuance off.
+
 - Продолжен T14: [maintenance target/input binding](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-target-binding-2026-09-30)
   связывает pinned stage29.09 с прежним source/runtime verifier и фиксированными
   путями; typed inputs/ownership, same target/operation/boot и freshness формируют
