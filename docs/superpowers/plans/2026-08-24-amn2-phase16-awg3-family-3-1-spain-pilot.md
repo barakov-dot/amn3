@@ -491,12 +491,19 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
     [Результат30.09](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-operations-local-2026-09-30):
     реальные backup/rehearsal/migration adapters, pending guards, bounded processes,
     systemd/fence readers и isolated data-worker specification;88 affected PASS.
-    Открыты actual admission/provenance, continuous per-action checks, old-handler
-    drain, полный sustained coordinator/start/recovery и Linux acceptance.
-    Exit0/пустой cgroup не подменяют business drain; default CLI остаётся blocked.
+    [Продолжение30.09](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-jobs-local-2026-09-30):
+    одноразовый data-job supervisor, сохранённый stop-witness, независимые worker
+    fence/ownership/identity checks, receipts и no-retry при неоднозначном исходе;
+    реальная temporary SQLite цепочка с systemd double;109 affected PASS/0SKIP.
+    Открыты actual admission/provenance, полный sustained coordinator/start/recovery
+    и Linux acceptance. Exit0/пустой cgroup не подменяют business drain; default CLI
+    blocked. [Исключение для old-handler drain](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#legacy-stop-decision-2026-09-30)
+    предложено, но НЕ согласовано: действует строгий STOP. Два source-bound теста
+    воспроизводят возможное отсутствие audit при отмене Telegram handoff.
   Writer inventory/ownership, effective flags/user/group, drain/startup/pending и
-  actual data rehearsal ещё не приняты. Новый design approval не нужен;
-  локальная подготовка разрешена, новый SSH/data/service scope не разрешён.
+  actual data rehearsal ещё не приняты. Базовый дизайн согласован; отдельно
+  ожидается решение по однократному исключению старого drain. Независимая локальная
+  подготовка разрешена, новый SSH/data/service scope не разрешён.
 - [x] T9 — secure descriptor reads/hash provenance retained candidate, новый stage
   без upload/old test-venv reuse, offline install/metadata/no-app-import контракт.
 - [x] T10 — одноразовый gate/manifest,23 targeted PASS, actual immutable bundle

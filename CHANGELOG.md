@@ -7,6 +7,18 @@
 
 ## 2026-09-30
 
+- Продолжен T14c: [одноразовые data jobs](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-jobs-local-2026-09-30)
+  сохраняют claim до manager request, связывают worker/result с intent/InvocationID,
+  проверяют lease/boot/stopped-unit/fence и PID/policy внутри worker; при UNKNOWN
+  сохраняют evidence без retry/cleanup/restore. Реальная temporary SQLite цепочка
+  backup/rehearsal/migration через systemd double; source-bound cancellation test
+  старого handoff. [109 affected PASS/0SKIP](research/amn2/phase16-bot-maintenance-jobs-local-verification-2026-09-30.json),
+  RED/GREEN, self-review; Linux/systemd acceptance и полный coordinator ещё открыты.
+  Old-handler исключение только предложено, не согласовано; неизвестный drain
+  по-прежнему STOP. Frozen target MATCH; AMN2 source checkout и чужой planning diff
+  сохранены. SSH/stage/install/live DB/services/push0; AWG2/package016 untouched,
+  stage VERIFIED_NOT_ACTIVATED, issuance off. T14c не закрыт.
+
 - Продолжен T14c: [реальные data adapters и Linux primitives](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-operations-local-2026-09-30).
   Durable intent/receipts, SQLite backup/rehearsal/migration, pending/missing-receipt
   guards; bounded child processes, systemd no-block polling/effective fence,

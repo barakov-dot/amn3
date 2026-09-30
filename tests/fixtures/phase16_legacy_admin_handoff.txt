@@ -1,0 +1,36 @@
+async def _send_admin_config_handoff(
+    message,
+    *,
+    workflow,
+    admin_telegram_id: int,
+    result,
+    success_text: str,
+    failure_text: str,
+) -> None:
+    try:
+        telegram_message = await message.bot.send_document(
+            chat_id=admin_telegram_id,
+            document=BufferedInputFile(result.config_bytes, filename=result.filename),
+            caption=None,
+        )
+    except Exception as exc:
+        workflow.record_admin_config_delivery(
+            admin_telegram_id=admin_telegram_id,
+            passport_device_id=result.passport_device_id,
+            delivered=False,
+            reference=f"telegram_error:{type(exc).__name__}",
+        )
+        await message.answer(failure_text)
+        return
+    message_id = getattr(telegram_message, "message_id", None)
+    workflow.record_admin_config_delivery(
+        admin_telegram_id=admin_telegram_id,
+        passport_device_id=result.passport_device_id,
+        delivered=True,
+        reference=(
+            f"telegram_message:{message_id}"
+            if message_id is not None
+            else "telegram_document:confirmed"
+        ),
+    )
+    await message.answer(success_text)

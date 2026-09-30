@@ -306,7 +306,8 @@ def data_worker(action, directory, expected):
     prepared = value['prepared']
     # Historical 5-minute observation is checked at initial admission, not
     # dishonestly refreshed during a longer maintenance run. Per-action live
-    # ownership/fence/drain belongs to the yet-to-be-assembled coordinator.
+    # provenance and business drain belong to the future coordinator. The worker
+    # below rechecks lease, unit identity and fence around each data action.
     binding.validate_prepared(prepared, now=prepared['target_contract']['observed_at'])
     target = prepared['target_contract']
     require(str(directory) == target['maintenance_directory'], 'worker_binding')
@@ -320,8 +321,11 @@ def data_worker(action, directory, expected):
     from scripts.phase16_bot_maintenance_operations import DataOperations
     data = DataOperations(Path(target['database']), directory, journal,
                           db.Sources(root / 'tests/fixtures/phase16_schema'), target['network_cidr'])
-    getattr(data, action)()
-    require(data.verify(action), 'data_verification')
+    from scripts.phase16_bot_maintenance_jobs import DataJobSupervisor, execute_data_worker
+    client = SystemdClient(BoundedCommand())
+    fence = core.SystemdFence(Path('/'), journal.manifest, client.control)
+    supervisor = DataJobSupervisor(journal, client, fence, code=str(root), context_sha256=expected)
+    execute_data_worker(supervisor, action, data, invocation=os.environ['INVOCATION_ID'], pid=os.getpid())
     return 0
 
 
@@ -329,7 +333,7 @@ def worker_artifacts(root):
     import hashlib
     files = ['scripts/phase16_bot_maintenance_linux.py', 'scripts/phase16_bot_maintenance_operations.py',
              'scripts/phase16_bot_maintenance.py', 'scripts/phase16_bot_db_rehearsal.py',
-             'scripts/phase16_bot_maintenance_binding.py']
+             'scripts/phase16_bot_maintenance_binding.py', 'scripts/phase16_bot_maintenance_jobs.py']
     files += ['tests/fixtures/phase16_schema/' + name + '.txt' for name in db.SOURCE_HASHES]
     return {name: hashlib.sha256((Path(root) / name).read_bytes().replace(b'\r\n', b'\n')).hexdigest()
             for name in files}

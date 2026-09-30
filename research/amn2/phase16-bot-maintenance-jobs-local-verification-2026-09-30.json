@@ -1,0 +1,100 @@
+{
+  "schema": "phase16.maintenance-jobs-local-verification.v1",
+  "date": "2026-09-30",
+  "base_commit": "a3bd621b1b0e2b99d48c39834bd19fa77183184a",
+  "status": "LOCAL_DATA_JOB_SUPERVISION_PASS_FULL_EXECUTOR_NOT_READY",
+  "tests": {
+    "command": "python -B -m unittest tests.test_phase16_bot_maintenance_jobs tests.test_phase16_legacy_handoff tests.test_phase16_bot_maintenance_operations tests.test_phase16_bot_maintenance_linux tests.test_phase16_bot_db_rehearsal tests.test_phase16_bot_maintenance tests.test_phase16_bot_maintenance_binding -q",
+    "passed": 109,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 29.197,
+    "new_job_tests": 19,
+    "new_characterization_tests": 2
+  },
+  "red_green": [
+    "Missing concrete job supervisor assertion RED, then GREEN.",
+    "Missing worker-side guard assertion RED, then GREEN."
+  ],
+  "artifacts_sha256_lf": {
+    "scripts/phase16_bot_maintenance_jobs.py": "8aedfd5415cc12f6cfe23a7bbd6085fea0d82436dda82f3ecdf2ff1f364a300f",
+    "scripts/phase16_bot_maintenance_linux.py": "d8e8e65af8b09acf192d525050f5344a9b1a544cbaec4d3c53fd06d33303a87c",
+    "tests/test_phase16_bot_maintenance_jobs.py": "d810cf4865e5af858b3c98ad074daedd203ff3e54fbc8829f9f251c5b9deac76",
+    "tests/test_phase16_legacy_handoff.py": "a8729dc5fde6f5704cead70d655c8bf1d0bfd5e2cde45bb5c6188cff73b1e8bf",
+    "tests/fixtures/phase16_legacy_admin_handoff.txt": "05ec1880e74f6e762082446c7dae5e0c2f49eda223485dc1a4634d3d50819543"
+  },
+  "frozen_target_manifest": {
+    "status": "MATCH",
+    "sha256_lf": "1887cced4dfb67f5cc89a60e60996cdc300a013eb1ee56328f2a20c68153f019"
+  },
+  "implemented": [
+    "Persistent one-shot claim before manager-owned systemd-run request; no retry/replay/cleanup on ambiguity.",
+    "Worker context, boot, journal intent, ownership deadline and stopped bot/web witness binding.",
+    "Worker-side fence/identity/PID/policy checks before and after actual data action.",
+    "Per-job InvocationID and containment properties; worker result bound to data receipt; parent completion after clean manager exit.",
+    "Source-bound characterization of normal delivery and cancellation before response."
+  ],
+  "executed_locally": [
+    "Real temporary SQLite backup/rehearsal/migration through three supervised jobs with a systemd command double.",
+    "Business-row and immutable-backup preservation, migration receipt chain, issuance flag remains false.",
+    "Lost launch acknowledgement, missing result, wrong invocation/PID, isolation mismatch, changed boot/unit/fence, expiry, record tamper and deadline STOP.",
+    "Real private journal/fence/claim/result/complete files; no raw row data in records.",
+    "Existing affected data/core/binding/Linux-boundary tests, including real local children."
+  ],
+  "source_characterization": {
+    "old_commit": "55dc243b8e6c6bdb57f8301b56326e4cd4072d19",
+    "source": "app/bot/handlers.py",
+    "source_sha256_lf": "31987a5fb46c9cee35c16817e805da76eef8fde178a7ce8cf86a5c9a6adf7d39",
+    "function": "_send_admin_config_handoff",
+    "fixture_sha256_lf": "05ec1880e74f6e762082446c7dae5e0c2f49eda223485dc1a4634d3d50819543",
+    "normal_response": {
+      "request_started": true,
+      "delivery_audit_records": 1,
+      "answer_count": 1
+    },
+    "cancel_after_request_before_response": {
+      "request_started": true,
+      "delivery_audit_records": 0,
+      "answer_count": 0
+    },
+    "limits": [
+      "No app import or network.",
+      "Does not establish installed aiogram shutdown behavior or any actual lost live message."
+    ],
+    "policy_proposal": "PROPOSED_NOT_APPROVED",
+    "default": "STRICT_STOP_WHEN_BUSINESS_DRAIN_NOT_ESTABLISHED"
+  },
+  "not_executed": [
+    "Linux kernel/private network/process groups/cgroups/D-Bus/systemd acceptance; local WSL is not installed.",
+    "Actual host admission, writer inventory, settings/identity/ownership or business drain.",
+    "Full sustained coordinator, candidate drop-in/start/admission/recovery/web-start/release.",
+    "SSH, server data/services, stage/install/activation or push."
+  ],
+  "review": {
+    "mode": "self_review_no_delegation",
+    "full_t14c": "INCOMPLETE",
+    "live_executor_ready": false,
+    "remaining": [
+      "Decision on one-time old-handler drain exception, still unapproved.",
+      "Fresh actual host admission/provenance and writer ownership.",
+      "Full maintenance coordinator including start/recovery and concrete approval packet.",
+      "Linux acceptance of OS-dependent behavior."
+    ]
+  },
+  "safety": {
+    "ssh_attempts": 0,
+    "stage_install_actions": 0,
+    "live_database_operations": 0,
+    "service_actions": 0,
+    "pushes": 0,
+    "awg2": "UNTOUCHED",
+    "package016": "UNTOUCHED",
+    "general_issuance": "OFF",
+    "last_stage": "VERIFIED_NOT_ACTIVATED_20260929"
+  },
+  "official_references": [
+    "https://raw.githubusercontent.com/systemd/systemd/v252/man/org.freedesktop.systemd1.xml",
+    "https://raw.githubusercontent.com/systemd/systemd/v252/src/core/unit.c"
+  ]
+}

@@ -1382,3 +1382,112 @@ property JSON — из [busctl source](https://raw.githubusercontent.com/systemd
 
 Safety: SSH0/upload0/stage-install0/live DB0/services0/activation0/push0.
 Последний stage29.09 VERIFIED_NOT_ACTIVATED; AWG2/package016 untouched, issuance off.
+
+
+<a id="legacy-stop-decision-2026-09-30"></a>
+
+## Решение о завершении старого runtime — предложение 30.09
+
+**PROPOSED_NOT_APPROVED.** Локальная source-bound проверка `_send_admin_config_handoff`
+из55dc243 (`app/bot/handlers.py` SHA256
+`31987a5fb46c9cee35c16817e805da76eef8fde178a7ce8cf86a5c9a6adf7d39`)
+выполнена без импорта app и без сети. Нормальный synthetic ответ даёт1 запись
+о доставке; cancellation после начала send_document, до ответа —0 записей.
+`except Exception` не перехватывает CancelledError. Это воспроизведение возможного
+окна неопределённости, не факт потери сообщения на VPS и не доказательство
+конкретного поведения пока не сверенной installed aiogram. Existing pending
+counts проверяют issuance, но не запущенные async Telegram deliveries.
+
+Утверждённый дизайн требует: «неполный drain, неизвестные in-flight операции
+или процесс вне cgroup → STOP». Поэтому выполнение по прежнему контракту
+остаётся запрещено при недоказанном drain. Успешный stop нельзя переименовать
+в подтверждённое завершение доставки.
+
+Предлагаемое **однократное исключение только для перехода с old55dc на6e68235**:
+
+1. В конкретном будущем maintenance packet оператор принимает возможность
+   прерывания старого Telegram-ответа/доставки. Документ мог быть принят Telegram,
+   хотя локальное подтверждение не записано. Команды и доставки автоматически
+   не повторяются; возникшие спорные доставки разбираются отдельно.
+2. До stop по-прежнему требуются exact inventory, ownership, effective flags и
+   непрерывный start fence. После stop обязательны exit0, отсутствие timeout/kill,
+   старых PID/cgroups/внешних writers и persisted pending operations. UNKNOWN в
+   этих проверках по-прежнему STOP; исключение не разрешает продолжать после kill.
+3. Завершённые записи старого бота входят в новый backup/rehearsal baseline.
+   Сохраняется явное `old_handler_drain=NOT_OBSERVABLE_ACCEPTED_BY_OPERATOR`,
+   а не `complete`. Разрешение исключения привязывается к exact source, операции
+   и будущему approval packet. До candidate-start restore остаётся отдельным
+   решением, требующим подтверждения отсутствия внешних effects; автоматический
+   restore по этому исключению запрещён. После candidate-start DB сохраняется.
+4. Candidate и прочие переходы не получают этого исключения. Старый код, токен,
+   выдача, AWG2 и web-код не меняются. Это согласование локальной политики;
+   SSH/stop/start/DB/stage/push по-прежнему требуют своих точных разрешений.
+
+Альтернатива: сохранить строгий STOP и не готовить исполнимый переход, пока
+не будет отдельного доказательства старого drain либо другого согласованного
+способа перехода. Новая телеметрия потребовала бы отдельной runtime-доработки;
+этот документ её не разрешает. Независимая локальная подготовка продолжается.
+
+<a id="maintenance-jobs-local-2026-09-30"></a>
+
+## T14c: одноразовые задачи БД и доказательство остановки — локальный результат 30.09
+
+**LOCAL_DATA_JOB_SUPERVISION_PASS; полный executor ещё не готов.**
+[Receipt](phase16-bot-maintenance-jobs-local-verification-2026-09-30.json):
+109 affected PASS / 0 SKIP за 29.197 s; из них 19 новых job tests и 2 проверки
+старого handoff. RED/GREEN на отсутствии supervisor/worker-side guard,
+self-review без делегирования. Завершённые stage/readback не повторялись.
+
+[DataJobSupervisor](../../scripts/phase16_bot_maintenance_jobs.py) связывает
+существующие data adapters с отдельными systemd services. До обращения к manager
+сохраняются durable intent и одноразовая claim с hashes контекста/argv/stop-witness.
+Worker независимо проверяет boot, ownership window, собственный InvocationID/PID,
+заданные свойства изоляции и сохранённое состояние остановленных bot/web до и после
+операции. Результат связывается с конкретным data receipt; родитель принимает его
+только после чистого завершения того же запуска. Сам worker журнал не продвигает.
+
+Stop-witness хранит identity и monotonic timestamps остановленных units; изменение
+состояния/restart/boot/fence ведёт к STOP. Проверки на границах действий не заменяют
+inventory внешних writers и не доказывают отсутствие обхода fence через root.
+`business_drain=NOT_ESTABLISHED` и `live_authorized=false` сохраняются явно.
+Этот low-level helper не принимает решение об исключении для старого runtime и
+не является самостоятельным approval/admission gate.
+
+Runtime задачи БД ограничен прежними 120 s; на dispatch/start/stop/readback отведено
+всего 140 s, сверх этого перед действием сохраняется recovery reserve 300 s.
+Таймауты bot 40/90 и web 90/90 не увеличивались. Потерянный ответ, отсутствующий
+receipt или timeout оставляют intent/claim/fence для отдельного разбора: нет
+повторного запуска, kill чужого процесса, cleanup, restart или restore.
+
+[Job tests](../../tests/test_phase16_bot_maintenance_jobs.py) исполняют полную
+цепочку backup → rehearsal → migrate на реальной temporary SQLite через strict
+systemd command double: старые business rows и backup сохранены, issuance false,
+receipt chain проверен. Отрицательные случаи: потеря launch ACK, чужой invocation
+или PID, отсутствующая network policy, изменение unit/boot/fence, истечение окна,
+подмена receipt и deadline. Проверки не содержат live DB, ключей или Telegram.
+
+[Characterization tests](../../tests/test_phase16_legacy_handoff.py) исполняют
+[точный frozen fragment](../../tests/fixtures/phase16_legacy_admin_handoff.txt)
+старого `_send_admin_config_handoff`, без импорта app и сети. Нормальный ответ
+создаёт 1 audit record, отмена после начала send_document до ответа — 0. Исходный
+Git object и hashes приведены в receipt; AMN2 checkout не изменялся. Это возможное
+окно неопределённости, не доказательство потери live-сообщения. Предложение
+[однократного исключения](#legacy-stop-decision-2026-09-30) остаётся
+**PROPOSED_NOT_APPROVED**; по действующему контракту неизвестный drain означает STOP.
+
+Формы systemd properties сверены с [D-Bus API v252](https://raw.githubusercontent.com/systemd/systemd/v252/man/org.freedesktop.systemd1.xml)
+и [unit source v252](https://raw.githubusercontent.com/systemd/systemd/v252/src/core/unit.c).
+Это source review, не проверка версии/поведения целевого VPS. Linux namespace,
+mode/owner, cgroup, D-Bus и реальный systemd-run локально не исполнялись; WSL здесь
+не установлен. Default CLI сохраняет LOCAL_PRIMITIVES_ONLY/authorized=false.
+Frozen target manifest MATCH; новые helper hashes входят в worker context и
+отдельный receipt, существующий immutable target manifest не переписывался.
+
+Далее в том же T14c: решение по old-handler policy, fresh host admission/provenance,
+полный sustained coordinator (candidate switch/start/admission, web/recovery/release),
+Linux acceptance и конкретный approval packet. Эти части ещё не собраны; successful
+local jobs не разрешают исполнение prepared JSON на сервере. Новый live scope не
+выдан; локальная подготовка базового согласованного дизайна остаётся разрешённой.
+
+Safety: SSH0/upload0/stage-install0/live DB0/services0/activation0/push0.
+Stage29.09 VERIFIED_NOT_ACTIVATED; AWG2/package016 сохранены, general issuance off.
