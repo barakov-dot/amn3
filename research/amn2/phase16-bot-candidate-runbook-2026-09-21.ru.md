@@ -1204,3 +1204,86 @@ package016 immutable, general issuance disabled. Чужой candidates-for-amn2.
 сохранён вне commit. CURRENT_MODEL/CURRENT_EFFORT: недоступны;
 RECOMMENDED_MODEL_NEXT=gpt-6-astra, RECOMMENDED_EFFORT_NEXT=high — сложная привязка
 maintenance/recovery; рекомендация не даёт live authority.
+
+
+<a id="maintenance-target-binding-2026-09-30"></a>
+
+## Maintenance target binding — локальный результат 30.09
+
+**LOCAL_BINDINGS_PASS / BLOCKED_UNKNOWN_PRECONDITIONS / LIVE_EXECUTOR_NOT_READY.**
+Продолжение T14 по операторскому «приступай», база360ef0c (ранее exact pushed).
+Новый [binding module](../../scripts/phase16_bot_maintenance_binding.py),
+[draft manifest](phase16-bot-maintenance-target-manifest-2026-09-30.json),
+[45 PASS receipt](phase16-bot-maintenance-binding-local-verification-2026-09-30.json).
+Нового SSH collector или live approval marker этот этап не создаёт.
+
+### Реализованная связь модулей
+
+| Производитель → потребитель | Реализованный контракт |
+| --- | --- |
+| Readback29.09 + immutable inventory → прежний maintenance stage verifier | Pin SHA самого execution record, inventory и integration manifest; восстановление126 app Python-file hashes и40 pins из проверенных200 files, затем существующий verify_stage. Source, paths и статус исторического stage связаны; свежесть maintenance из него не выводится |
+| Нормализованные inputs + декларация окна → coordinator manifest | Exact target/operation/boot, aware timestamps, stage receipt, unit baseline/User/Group/launch fingerprints, writer classes/process scan, flags/admission/startup bound, network CIDR, rollback fingerprints и pending state |
+| Target contract → persistent Journal | Новый adapter всегда добавляет target_contract_sha256; он входит в digest/сохранённый manifest журнала. Изменённые paths/boot/hash/manifest отвергаются; журнал проверен на реальном временном filesystem |
+
+Фиксированы candidate source/interpreter в stage29.09, прежний source/site-packages,
+shared DB `/var/lib/amn2-spain/amn2.sqlite3` и будущая private operation directory
+`/var/lib/amn2-spain/phase16-maintenance/<operation>` с backup/rehearsal/journal.
+Эти пути — binding, не созданные на сервере файлы. Существующий generic core
+сохраняет совместимость со старыми core-only fixtures; live adapter обязан
+использовать новую пару target/coordinator, не обходить её старым manifest.
+
+На фактически доступных данных CLI выдаёт BLOCKED_UNKNOWN_PRECONDITIONS,
+coordinator_manifest=null, authorized=false, live_executor_ready=false.
+Три явных blockers: fresh_server_observation, operator_window_declaration,
+maintenance_operation_adapters. Ключа --execute нет; CLI ничего не исполняет.
+Синтетически полные inputs дают только PRECONDITIONS_VALIDATED_NOT_AUTHORIZED.
+
+**Проверка формы входа не доказывает, что факты собраны на сервере.** Будущий
+runner должен сам привязать их происхождение и перепроверить состояние перед
+мутацией. JSON с true не заменяет фактическую полноту writer inventory или
+операторское владение окном. Реальных наблюдений этих полей сейчас нет.
+
+### Проверки и принятые решения
+
+[Tests](../../tests/test_phase16_bot_maintenance_binding.py):23 новых binding
+проверки +22 затронутых maintenance-core = **45 PASS/0FAIL/0SKIP,2.857s**.
+RED отсутствующего adapter; self-review воспроизвёл два дополнительных RED:
+валидатор проверял hashes, но принимал пересчитанную пару с неверным DB path
+или разным boot_id. Исправлено: смысловая проверка fixed paths/context независимо
+от hashes; prepared input также теряет валидность по времени. Проверены tamper,
+unknown/missing/extra fields, stale/future/naive timestamps, wrong flags/budget,
+extra writer/unknown class, identity, pending, ownership и redaction. Реальный
+Windows CLI с -I -S -B проверен в пустом temporary cwd: writes0, --execute rejected.
+
+Ruling: продолжаем существующий T14, без второго execution plan и нового design
+approval. Stage readback используется как историческое основание paths/hashes;
+для обслуживания требуется свежая запись. Цена неверного provenance — ложная
+готовность, поэтому этот adapter никогда не возвращает live READY/authorization.
+Ruling: для локальной проверки inputs выбран возраст до300s и оставшийся срок
+операторского окна900..3600s, единые operation/target/boot. Это консервативный
+input contract, **не доказанный maintenance SLA и не разрешённое окно**; точные
+runner deadlines/recovery reserve ещё предстоит реализовать в T14c. Цена слишком
+строгого допуска — STOP/обновление inputs, не автоматическое продолжение.
+Ruling: project AGENTS сохраняет один affected suite, self-review без делегирования
+и канонический план/receipt вместо отдельного skill workspace. Неизменные DB helper
+и readback suites не повторялись; прежние frozen manifests24/27/29.09 MATCH.
+
+### Незавершённая часть и следующий шаг
+
+T14a/b закрыты локально; **T14c и весь live executor не закрыты**. Требуются
+конкретные adapters всех фаз fence/stop/backup/rehearsal/migrate/start/release,
+устойчивый Linux runner с OS wall deadlines/network isolation, фактический writer
+inventory/maintenance ownership, storage/rollback bindings, проверки fresh fence,
+cgroup/drain/forced kill и startup/pending. Синтетические callbacks старого core
+нельзя выдать за готовый live пакет. Новое «согласование дизайна» для продолжения
+этой локальной реализации не требуется; SSH/data/service действия — отдельно
+после конкретного пакета. Старые stage/readback markers использованы, не повторять.
+
+P0 quality/A-B отложен; P1 integration зависит от T14c и фактических prerequisites,
+Windows traffic остаётся отдельным P1. P2 target/input binding завершён локально.
+В этом ходе SSH/live data/stage/install/service/activation/push0. AWG2_UNTOUCHED,
+package016 immutable, issuance disabled; последний stage evidence29.09 остаётся
+VERIFIED_NOT_ACTIVATED, свежего наблюдения30.09 нет. Чужой candidates-for-amn2.md
+сохранён вне commit. CURRENT_MODEL/CURRENT_EFFORT недоступны;
+RECOMMENDED_MODEL_NEXT=gpt-6-astra, RECOMMENDED_EFFORT_NEXT=high — реализация
+Linux maintenance/recovery, рекомендация не даёт live authority.

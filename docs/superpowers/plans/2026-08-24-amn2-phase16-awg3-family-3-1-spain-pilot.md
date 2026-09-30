@@ -481,10 +481,18 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
   [VERIFIED_NOT_ACTIVATED,2.906s/exit0](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#stage-readback-executed-2026-09-29).
   Saved-stage success и текущие200 hashes/runtime40 metadata подтверждены;
   stage/install29.09 больше не UNKNOWN в этой границе. Approval consumed, retry0.
-- [ ] T14 — продолжить уже согласованную локальную привязку maintenance operations
-  к подтверждённому stage и точному target manifest. Writer inventory/ownership,
-  effective flags/user/group, drain/startup/pending и data rehearsal ещё не приняты.
-  Нового design approval не требуется; новый SSH/data/service scope не разрешён.
+- [ ] T14 — maintenance target binding и operations; live executor ещё не готов.
+  [Локальная привязка30.09](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-target-binding-2026-09-30):
+  - [x] T14a — exact stage record/inventory → существующий source/runtime verifier;
+    фиксированные candidate/old runtime/DB/backup paths, hash-bound draft manifest.
+  - [x] T14b — typed preconditions/ownership и coordinator manifest; target digest
+    включён в durable journal, semantic pair checks и freshness.45 affected PASS.
+  - [ ] T14c — реальные operation adapters и sustained Linux runner: provenance,
+    fresh per-action checks, isolation/deadlines, fence/drain, data operations и
+    start/recovery. Не подменять их synthetic callbacks или valid input JSON.
+  Writer inventory/ownership, effective flags/user/group, drain/startup/pending и
+  actual data rehearsal ещё не приняты. Новый design approval не нужен;
+  локальная подготовка разрешена, новый SSH/data/service scope не разрешён.
 - [x] T9 — secure descriptor reads/hash provenance retained candidate, новый stage
   без upload/old test-venv reuse, offline install/metadata/no-app-import контракт.
 - [x] T10 — одноразовый gate/manifest,23 targeted PASS, actual immutable bundle
@@ -524,10 +532,11 @@ Design согласован оператором после commit b277154. По
   local PASS сохранён. После transport failures24/27/29.09 один readback из
   pushed07e7769 подтвердил stage29.09: VERIFIED_NOT_ACTIVATED,2.906s,200 files,
   runtime40, saved success receipt. Повтор install/transport probe не нужен.
-  Следующий локальный этап — maintenance target bindings по прежнему согласованию;
-  writer inventory/ownership, effective settings, drain/startup/pending и actual
-  DB rehearsal/recovery ещё не подтверждены. Bot activation и новый live scope
-  не разрешены; readback marker consumed. Recovery-контракт v1 сохранён.
+  Target/input binding30.09 реализован,45 affected local PASS; actual preview
+  BLOCKED_UNKNOWN_PRECONDITIONS. Следующий локальный этап — operation adapters/
+  sustained runner по прежнему согласованию. Writer inventory/ownership, effective
+  settings, drain/startup/pending и actual DB rehearsal/recovery не подтверждены.
+  Bot activation/live scope не разрешены; marker consumed, recovery v1 сохранён.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.

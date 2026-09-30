@@ -1,0 +1,54 @@
+{
+  "artifacts_sha256_lf": {
+    "scripts/phase13_bot_web_migration_fresh_inputs.py": "cdad982109f934b20d49ec6021b269aec30644c28347625261a1b98969e6d904",
+    "scripts/phase16_bot_db_rehearsal.py": "e190bb13377b26399e307e793ebfcc0fc8962d3de276ff28049ab7366949d395",
+    "scripts/phase16_bot_linux_gate.py": "713289a6082bf621d704e6dd3b04855fa020fbfecc8a9e86db8a861019bbd35e",
+    "scripts/phase16_bot_maintenance.py": "03abfe3d99eb850c31574093fac09a2a91d11528ee75622746ec3f9f171d60be",
+    "scripts/phase16_bot_maintenance_binding.py": "34f1c6030a517dbe457d1f913e27745df781d8da93683e7a72b744d8f21303a2",
+    "scripts/phase16_bot_readback_guard_gate.py": "2fa412e2b9eaddd8f7d582a209499b3137b75e94f4d43ef8435fdeaac11a7b7b",
+    "scripts/phase16_bot_retained_stage_gate.py": "3c48ad887f2ca87a6efc5988462695c0801c376c0c4e0695bd67b3a09005b019",
+    "scripts/phase16_bot_stage_readback_gate.py": "836a473cbfabf4d644bbbe0df5f724937d12146f95c19c7487220cb038283c72",
+    "scripts/phase16_bot_transport_diagnostics.py": "f30c6f2d01bc41f0808379f5e93bcfbcf82bcb6a94cddb83c7ca4b46f06ce6b2",
+    "scripts/vps/phase16_bot_linux_gate_remote.py": "5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102",
+    "scripts/vps/phase16_bot_retained_stage_remote.py": "4ca1330c045c672e8e52cc14e93fbffa3801dd0aa6731b7ef332b42a265bfea7",
+    "scripts/vps/phase16_bot_runtime40_stage_remote.py": "acb8d926a084288fa950f8f09cb227bfe70498cb421657f9d2a4daa1a2baa75e",
+    "scripts/vps/phase16_bot_stage_readback_remote.py": "363b16c2e055674c3ffe468a8203ffb5d9c6bb1535dd8c71babdbd25f3764c9f"
+  },
+  "authorized": false,
+  "base_commit": "360ef0c5746c05e1926ca54a39c58879dab07d88",
+  "blockers": [
+    "fresh_server_observation",
+    "operator_window_declaration",
+    "maintenance_operation_adapters"
+  ],
+  "bound_evidence": {
+    "integration": {
+      "path": "research/amn2/phase16-bot-integration-manifest-v3-6e68235.json",
+      "sha256_lf": "faac75cf5f2d136344bdfc54fd6cfe3bab8271cc7424ca1050775634860723a4"
+    },
+    "inventory": {
+      "path": "research/amn2/phase16-bot-stage-readback-inventory-2026-09-29.json",
+      "sha256_lf": "647a32f7a538028a8debbe8169ade373ea08b5d1c1b0467a36a9253380852aec"
+    },
+    "record": {
+      "path": "research/amn2/phase16-bot-stage-readback-execution-001-2026-09-29.json",
+      "sha256_lf": "043cb988f3221c8672b7468a71687a416535f42c66042e91802452830a415122"
+    }
+  },
+  "bundle_sha256": "e19abc5c132acae035503267d41d38fdd1e272951b2ebfd0f2a73e2f7c660cb7",
+  "candidate_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+  "future_scope": "LOCAL_BINDINGS_AND_TYPED_INPUT_VALIDATION_ONLY",
+  "historical_stage_verified_at": "2026-09-29T20:10:54.424549+00:00",
+  "input_contract": {
+    "max_observation_age_seconds": 300,
+    "max_ownership_remaining_seconds": 3600,
+    "min_ownership_remaining_seconds": 900,
+    "requires_same_operation_target_boot": true
+  },
+  "live_executor_ready": false,
+  "saved_stage_receipt_sha256": "de51f2e6905ae6860eefaf455e40e4512377d92d97c6024319e01b2cbb5d1694",
+  "schema": "phase16.maintenance-target-manifest.v1",
+  "stage_directory": "/opt/amn2-spain/bot-candidates/phase16-bot-runtime40-20260929-6e68235-001",
+  "status": "LOCAL_BINDINGS_ONLY",
+  "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6"
+}

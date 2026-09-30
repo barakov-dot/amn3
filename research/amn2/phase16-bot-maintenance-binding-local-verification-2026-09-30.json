@@ -1,0 +1,108 @@
+{
+  "schema": "phase16.maintenance-binding-local-verification.v1",
+  "date": "2026-09-30",
+  "base_commit": "360ef0c5746c05e1926ca54a39c58879dab07d88",
+  "status": "LOCAL_BINDINGS_PASS_LIVE_EXECUTOR_NOT_READY",
+  "tests": {
+    "command": "python -B -m unittest tests.test_phase16_bot_maintenance_binding tests.test_phase16_bot_maintenance -v",
+    "passed": 45,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 2.857,
+    "new_binding_tests": 23,
+    "affected_core_tests": 22
+  },
+  "red_green": [
+    "Missing maintenance binding module: assertion failure.",
+    "Rehashed unsafe database path accepted: assertion failure before semantic validation fix.",
+    "Rehashed mismatched coordinator/target boot accepted: assertion failure before semantic validation fix."
+  ],
+  "artifacts_sha256_lf": {
+    "scripts/phase16_bot_maintenance.py": "03abfe3d99eb850c31574093fac09a2a91d11528ee75622746ec3f9f171d60be",
+    "scripts/phase16_bot_maintenance_binding.py": "34f1c6030a517dbe457d1f913e27745df781d8da93683e7a72b744d8f21303a2",
+    "tests/test_phase16_bot_maintenance_binding.py": "b21417d800f173ca34b8ef09d998ed141e30a28ecb86c9aafc99c3ac9dceda82",
+    "research/amn2/phase16-bot-maintenance-target-manifest-2026-09-30.json": "1887cced4dfb67f5cc89a60e60996cdc300a013eb1ee56328f2a20c68153f019"
+  },
+  "preview": {
+    "status": "BLOCKED_UNKNOWN_PRECONDITIONS",
+    "historical_stage": "VERIFIED_NOT_ACTIVATED",
+    "historical_stage_verified_at": "2026-09-29T20:10:54.424549+00:00",
+    "fresh_stage_required": true,
+    "source_files": 126,
+    "content_files": 200,
+    "runtime_pins": 40,
+    "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+    "manifest_sha256_lf": "1887cced4dfb67f5cc89a60e60996cdc300a013eb1ee56328f2a20c68153f019",
+    "live_executor_ready": false,
+    "authorized": false,
+    "blockers": [
+      "fresh_server_observation",
+      "operator_window_declaration",
+      "maintenance_operation_adapters"
+    ],
+    "coordinator_manifest": null,
+    "ssh_attempts": 0,
+    "database_operations": 0,
+    "service_actions": 0
+  },
+  "frozen_manifests": [
+    {
+      "manifest": "phase16-bot-runtime40-stage-manifest-2026-09-24.json",
+      "status": "MATCH",
+      "bound_files": 6
+    },
+    {
+      "manifest": "phase16-bot-transfer-probe-manifest-2026-09-27.json",
+      "status": "MATCH",
+      "bound_files": 7
+    },
+    {
+      "manifest": "phase16-bot-retained-stage-manifest-2026-09-29.json",
+      "status": "MATCH",
+      "bound_files": 8
+    },
+    {
+      "manifest": "phase16-bot-stage-readback-manifest-2026-09-29.json",
+      "status": "MATCH",
+      "bound_files": 10
+    }
+  ],
+  "actual_inputs": "PINNED_HISTORICAL_STAGE_RECORD_ONLY",
+  "current_host_inputs": "NOT_COLLECTED",
+  "ownership": "NOT_PROVIDED",
+  "review": {
+    "kind": "SELF_REVIEW_NOT_INDEPENDENT",
+    "subagents": 0
+  },
+  "decisions": [
+    "Extend existing execution plan T14; no new plan or SSH collector.",
+    "Existing core-only manifests remain compatible; new adapter always binds target digest in persistent journal.",
+    "Typed evidence is caller-provided, not proof of collection; future runner must establish provenance and recheck before mutation.",
+    "Input freshness 300s and ownership remaining 900..3600s are local validation constraints, not an executed maintenance SLA.",
+    "Project instructions require one affected suite, no unchanged DB/readback suite repetition and no delegation."
+  ],
+  "scope": {
+    "ssh_attempts": 0,
+    "live_data_reads": 0,
+    "live_data_writes": 0,
+    "stage": 0,
+    "install": 0,
+    "service_actions": 0,
+    "activation": 0,
+    "push": 0
+  },
+  "limitations": [
+    "No Linux/systemd live execution; inherited fence tests use injected executor and temporary filesystem.",
+    "Full maintenance operation adapters, sustained runner, OS deadlines, network isolation and per-action fresh checks remain unimplemented.",
+    "Writer inventory, operator maintenance ownership, effective settings, user/group, pending/drain/startup, storage and rollback evidence remain unknown for current VPS.",
+    "Synthetic valid inputs are never marked authorized or live_executor_ready.",
+    "Actual DB backup/rehearsal/migration and activation require separately reviewed concrete live packet and exact approval."
+  ],
+  "safety": {
+    "awg2": "UNTOUCHED",
+    "package016": "IMMUTABLE_UNCHANGED",
+    "general_issuance": "DISABLED",
+    "latest_stage": "VERIFIED_NOT_ACTIVATED_ON_2026_09_29"
+  }
+}

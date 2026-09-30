@@ -32,7 +32,12 @@ def validate_manifest(item):
             'vps_apply_enabled','awg3_bootstrap_enabled','admission_seconds','startup_budget_assessed',
             'inventory_complete','exclusive_maintenance_owner','external_pollers_excluded',
             'manual_cli_paused','writers','other_writer_classes','unit_baseline'}
-    require(isinstance(item,dict) and set(item)==fields, 'manifest_fields')
+    # Legacy core-only fixtures remain valid; the target adapter always supplies
+    # this digest so the persistent journal also binds paths and fresh inputs.
+    require(isinstance(item,dict) and set(item) in (fields,fields|{'target_contract_sha256'}), 'manifest_fields')
+    if 'target_contract_sha256' in item:
+        require(isinstance(item['target_contract_sha256'],str) and
+                re.fullmatch('[0-9a-f]{64}',item['target_contract_sha256']), 'target_contract_binding')
     require(isinstance(item['operation_id'],str) and re.fullmatch(r'phase16-[a-z0-9-]{1,80}',item['operation_id']), 'operation_id')
     require(isinstance(item['boot_id'],str) and re.fullmatch(r'[a-z0-9-]{1,64}',item['boot_id']), 'boot_id')
     require(item['candidate_commit']==CANDIDATE and item['source_archive_sha256']==ARCHIVE, 'candidate_binding')

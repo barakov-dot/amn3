@@ -5,6 +5,21 @@
 записи не означают deployment или новую выдачу. Текущая очередь — в
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
+## 2026-09-30
+
+- Продолжен T14: [maintenance target/input binding](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-target-binding-2026-09-30)
+  связывает pinned stage29.09 с прежним source/runtime verifier и фиксированными
+  путями; typed inputs/ownership, same target/operation/boot и freshness формируют
+  только неавторизованный coordinator manifest. Target digest сохраняется в
+  Journal. Actual preview BLOCKED_UNKNOWN_PRECONDITIONS; CLI без --execute.
+  [45 affected PASS/0SKIP](research/amn2/phase16-bot-maintenance-binding-local-verification-2026-09-30.json),
+  RED/GREEN, real temporary journal/CLI, self-review; исправлены два RED с
+  rehashed unsafe path и mismatched boot, добавлена expiry prepared inputs.
+  Frozen manifests MATCH, unchanged DB/readback suites не повторялись;
+  docs/links/diff/whitespace проверены. T14a/b готовы, T14c/full live executor и
+  actual prerequisites ещё не готовы. SSH/data/stage/install/service/push0,
+  AWG2/package016 сохранены, issuance off; новый design approval не требуется.
+
 ## 2026-09-29
 
 - По exact approvals опубликован07e7769 (EXPECTED_OLD0574462, три CHANGELOG
