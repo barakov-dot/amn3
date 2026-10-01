@@ -10,6 +10,7 @@ import unittest
 from scripts import phase16_bot_maintenance as core
 from scripts import phase16_bot_maintenance_binding as binding
 from scripts import phase16_bot_maintenance_linux as linux
+from scripts import phase16_legacy_stop_policy as legacy
 from tests.test_phase16_bot_maintenance_binding import observations, ownership, NOW, BOOT
 from tests.test_phase16_bot_maintenance_linux import Manager
 
@@ -32,7 +33,10 @@ class JobTests(unittest.TestCase):
         self.directory = self.root / self.prepared['target_contract']['maintenance_directory'].lstrip('/')
         self.directory.mkdir(parents=True)
         self.journal = core.Journal.create(self.directory / 'journal', self.manifest)
-        self.context = dict(prepared=self.prepared, artifacts_sha256_lf={})
+        self.context = dict(prepared=self.prepared, artifacts_sha256_lf={},
+            legacy_stop_policy=legacy.bind(self.prepared, packet_sha256='a'*64,
+                old_commit=legacy.OLD_COMMIT, old_handlers_sha256=legacy.OLD_HANDLERS,
+                old_workflows_sha256=legacy.OLD_WORKFLOWS))
         core.write_new(self.directory / 'worker-context.json', core.encoded(self.context))
         boot = self.root / 'proc/sys/kernel/random/boot_id'
         boot.parent.mkdir(parents=True); boot.write_text(BOOT + '\n')
@@ -242,6 +246,23 @@ class JobTests(unittest.TestCase):
         self.lease_seconds = 439
         with self.assertRaisesRegex(core.Stop, 'ownership_window'): self.execute()
         self.assertEqual(self.request_count, 0)
+
+    def test_missing_legacy_policy_blocks_before_launch(self):
+        context=dict(self.context)
+        context.pop('legacy_stop_policy',None)
+        (self.directory / 'worker-context.json').write_bytes(core.encoded(context))
+        self.supervisor.context_sha256=core.digest(context)
+        with self.assertRaises(core.Stop): self.execute()
+        self.assertEqual(self.request_count,0)
+
+    def test_rehashed_policy_for_other_operation_blocks_before_launch(self):
+        policy=self.context['legacy_stop_policy']
+        policy['operation_id']='phase16-other'
+        policy['sha256']=core.digest({k:v for k,v in policy.items() if k!='sha256'})
+        (self.directory / 'worker-context.json').write_bytes(core.encoded(self.context))
+        self.supervisor.context_sha256=core.digest(self.context)
+        with self.assertRaisesRegex(core.Stop,'legacy_policy_binding'): self.execute()
+        self.assertEqual(self.request_count,0)
 
     def test_context_tamper_prevents_job(self):
         path = self.directory / 'worker-context.json'

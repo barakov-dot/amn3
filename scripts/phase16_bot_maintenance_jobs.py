@@ -15,6 +15,7 @@ from scripts import phase16_bot_db_rehearsal as db
 from scripts import phase16_bot_maintenance as core
 from scripts import phase16_bot_maintenance_binding as binding
 from scripts import phase16_bot_maintenance_linux as linux
+from scripts import phase16_legacy_stop_policy as legacy
 from scripts.phase16_bot_maintenance_operations import regular
 
 require, Stop = db.require, db.Stop
@@ -184,11 +185,12 @@ class DataJobSupervisor:
         path = regular(self.journal.directory.parent / 'worker-context.json')
         require(db.file_sha256(path) == self.context_sha256, 'job_context_binding')
         context = read_json(path)
-        require(set(context) == {'prepared', 'artifacts_sha256_lf'}, 'job_context_binding')
+        require(set(context) == {'prepared', 'artifacts_sha256_lf', 'legacy_stop_policy'}, 'job_context_binding')
         prepared = context['prepared']
         # Structural validation at its recorded time only; not a fresh admission.
         # The separate host-admission policy is mandatory before first fence.
         binding.validate_prepared(prepared, now=prepared['target_contract']['observed_at'])
+        legacy.validate(context['legacy_stop_policy'], prepared)
         require(prepared['coordinator_manifest'] == self.journal.manifest, 'job_context_binding')
         target = prepared['target_contract']
         actual = self.client.root / target['maintenance_directory'].lstrip('/')

@@ -1386,9 +1386,15 @@ Safety: SSH0/upload0/stage-install0/live DB0/services0/activation0/push0.
 
 <a id="legacy-stop-decision-2026-09-30"></a>
 
-## Решение о завершении старого runtime — предложение 30.09
+## Решение о завершении старого runtime — согласовано 01.10
 
-**PROPOSED_NOT_APPROVED.** Локальная source-bound проверка `_send_admin_config_handoff`
+**APPROVED_POLICY_NOT_LIVE_AUTHORIZATION.** Оператор 01.10.2026 ответил
+«Подтверждаю» на предложение из итогового сообщения после commit652ae3e.
+Однократное исключение ниже согласовано для локальной подготовки перехода
+old55dc → 6e68235; повторного согласования этого решения не требуется.
+Конкретная операция/packet и SSH/stop/start/DB/install/push ещё не разрешены.
+
+Историческое обоснование 30.09: Локальная source-bound проверка `_send_admin_config_handoff`
 из55dc243 (`app/bot/handlers.py` SHA256
 `31987a5fb46c9cee35c16817e805da76eef8fde178a7ce8cf86a5c9a6adf7d39`)
 выполнена без импорта app и без сети. Нормальный synthetic ответ даёт1 запись
@@ -1399,11 +1405,12 @@ Safety: SSH0/upload0/stage-install0/live DB0/services0/activation0/push0.
 counts проверяют issuance, но не запущенные async Telegram deliveries.
 
 Утверждённый дизайн требует: «неполный drain, неизвестные in-flight операции
-или процесс вне cgroup → STOP». Поэтому выполнение по прежнему контракту
-остаётся запрещено при недоказанном drain. Успешный stop нельзя переименовать
-в подтверждённое завершение доставки.
+или процесс вне cgroup → STOP». Согласованное ниже исключение касается только
+неизмеримого завершения старых Telegram handlers. Все остальные UNKNOWN, включая
+нечистую остановку, процессы, внешние writers и persisted pending, остаются STOP.
+Успешный stop нельзя переименовать в подтверждённое завершение доставки.
 
-Предлагаемое **однократное исключение только для перехода с old55dc на6e68235**:
+Согласованное **однократное исключение только для перехода с old55dc на6e68235**:
 
 1. В конкретном будущем maintenance packet оператор принимает возможность
    прерывания старого Telegram-ответа/доставки. Документ мог быть принят Telegram,
@@ -1423,10 +1430,9 @@ counts проверяют issuance, но не запущенные async Telegra
    выдача, AWG2 и web-код не меняются. Это согласование локальной политики;
    SSH/stop/start/DB/stage/push по-прежнему требуют своих точных разрешений.
 
-Альтернатива: сохранить строгий STOP и не готовить исполнимый переход, пока
-не будет отдельного доказательства старого drain либо другого согласованного
-способа перехода. Новая телеметрия потребовала бы отдельной runtime-доработки;
-этот документ её не разрешает. Независимая локальная подготовка продолжается.
+Предлагавшаяся альтернатива строгого STOP при любом неизвестном old-handler drain
+не выбрана. Новая телеметрия потребовала бы отдельной runtime-доработки;
+это согласование её не разрешает. Политика не доказывает состояние сервера.
 
 <a id="maintenance-jobs-local-2026-09-30"></a>
 
@@ -1473,7 +1479,8 @@ receipt chain проверен. Отрицательные случаи: пот�
 Git object и hashes приведены в receipt; AMN2 checkout не изменялся. Это возможное
 окно неопределённости, не доказательство потери live-сообщения. Предложение
 [однократного исключения](#legacy-stop-decision-2026-09-30) остаётся
-**PROPOSED_NOT_APPROVED**; по действующему контракту неизвестный drain означает STOP.
+**PROPOSED_NOT_APPROVED на момент проверки30.09**. Согласование01.10 записано
+в решении выше; этот исторический receipt не переписывался.
 
 Формы systemd properties сверены с [D-Bus API v252](https://raw.githubusercontent.com/systemd/systemd/v252/man/org.freedesktop.systemd1.xml)
 и [unit source v252](https://raw.githubusercontent.com/systemd/systemd/v252/src/core/unit.c).
@@ -1491,3 +1498,53 @@ local jobs не разрешают исполнение prepared JSON на се�
 
 Safety: SSH0/upload0/stage-install0/live DB0/services0/activation0/push0.
 Stage29.09 VERIFIED_NOT_ACTIVATED; AWG2/package016 сохранены, general issuance off.
+
+<a id="legacy-stop-policy-bound-2026-10-01"></a>
+
+## T14c: согласованное исключение привязано к операции — 01.10
+
+**APPROVED_POLICY_BOUND_LOCALLY_NOT_LIVE_AUTHORIZATION.** Подтверждение оператора
+01.10 зафиксировано в [решении](#legacy-stop-decision-2026-09-30); повторно
+согласовывать само исключение не требуется. Исторические receipts30.09 сохранены.
+[Новый receipt](phase16-legacy-stop-policy-local-verification-2026-10-01.json):
+120 affected PASS / 0 SKIP за 27.586 s, RED/GREEN, self-review без делегирования.
+
+[Policy adapter](../../scripts/phase16_legacy_stop_policy.py) связывает только
+old55dc → 6e68235 для bot с operation/boot/journal/target, точными hashes старых
+handlers/workflows и SHA256 будущего статического approval packet. Derived runtime
+context формируется после такого packet; нельзя включать его обратно в hash
+packet и создавать циклическую привязку. Source/packet values проверяются как
+входной контракт, но adapter сам не собирает live evidence и не даёт разрешения.
+
+Supervisor и Linux worker требуют `legacy_stop_policy` в контексте. Его отсутствие,
+подмена source/subject/operation или попытка включить replay/restore/live authority
+останавливают задачу. Hash всего worker context связывает политику с job claim;
+сам policy adapter включён в worker artifact inventory. Старые контексты без поля
+политики теперь STOP; frozen target manifest и исторические packets не менялись.
+
+Принятая неопределённость отмечается как
+`NOT_OBSERVABLE_ACCEPTED_BY_OPERATOR`; stop-witness сохраняет объективное
+`business_drain=NOT_ESTABLISHED`. Ни один статус не заменяется на `complete`.
+Все прежние проверки чистой остановки, fence/ownership, writers и pending остаются
+обязательными; согласование не даёт права продолжать после kill или UNKNOWN в них.
+
+Recovery adapter до candidate-start выбирает HOLD_FENCE_MANUAL_RECOVERY; после
+сохранённого candidate-start intent — PRESERVE_DB_MANUAL_RECOVERY. В состоянии
+prepared действий не было: LEAVE_OLD_RUNTIME. Автоматические restore/replay не
+добавлены. Возможный отдельный restore до запуска требует нового evidence об
+отсутствии внешних effects и отдельного решения; после запуска БД сохраняется.
+Полный coordinator ещё не вызывает этот adapter: его объединение остаётся в T14c.
+
+[Policy tests](../../tests/test_phase16_legacy_stop_policy.py) проверяют запрет
+расширения scope даже после пересчёта hash, сохранение явной неопределённости и
+recovery routing. [Job tests](../../tests/test_phase16_bot_maintenance_jobs.py)
+проверяют STOP до manager request без политики и при чужой операции; реальная
+synthetic SQLite цепочка backup/rehearsal/migrate продолжает проходить.
+Фактическое Linux/systemd поведение, source/writer inventory на сервере и полный
+maintenance executor по этим локальным тестам не объявляются проверенными.
+
+Следующий разрешённый scope: fresh host admission/provenance и объединение
+candidate switch/start/admission, web/recovery/release в том же T14c. Для live
+операции потребуется отдельный конкретный packet и exact approval, не повторное
+согласование принятой политики. SSH0/install0/live DB0/services0/push0;
+AWG2/package016 untouched, stage29.09 VERIFIED_NOT_ACTIVATED, issuance не включалась.

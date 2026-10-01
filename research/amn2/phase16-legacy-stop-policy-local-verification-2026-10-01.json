@@ -1,0 +1,83 @@
+{
+  "schema": "phase16.legacy-stop-policy-local-verification.v1",
+  "date": "2026-10-01",
+  "base_commit": "652ae3ebd494ac5f59f5d724885f098ffbc238ef",
+  "status": "APPROVED_POLICY_BOUND_LOCALLY_NOT_LIVE_AUTHORIZATION",
+  "approval": {
+    "user_message": "Подтверждаю",
+    "date": "2026-10-01",
+    "refers_to": "One-time old55dc -> candidate6e68235 handler delivery uncertainty exception proposed after commit652ae3e.",
+    "repeated_design_approval_required": false,
+    "live_operation_authorized": false
+  },
+  "tests": {
+    "command": "python -B -m unittest tests.test_phase16_legacy_stop_policy tests.test_phase16_bot_maintenance_jobs tests.test_phase16_legacy_handoff tests.test_phase16_bot_maintenance_operations tests.test_phase16_bot_maintenance_linux tests.test_phase16_bot_db_rehearsal tests.test_phase16_bot_maintenance tests.test_phase16_bot_maintenance_binding -q",
+    "passed": 120,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 27.586,
+    "new_policy_tests": 9,
+    "new_job_integration_tests": 2
+  },
+  "red_green": [
+    "Missing policy contract assertion RED, then 9 PASS.",
+    "Missing policy did not prevent data job dispatch: Stop-not-raised RED; required operation-bound context, then 30 policy/job tests PASS."
+  ],
+  "artifacts_sha256_lf": {
+    "scripts/phase16_legacy_stop_policy.py": "74f869de59f93b78d4a8066279f812d1cba99a8985052b62ea501e036686482b",
+    "scripts/phase16_bot_maintenance_jobs.py": "192beacbb4824ef4e9c60c13c3bd66f474df8f053c80be0a402970b29def57db",
+    "scripts/phase16_bot_maintenance_linux.py": "82edaf855b356c6983ddd08857363534e9b8400635013fea645fa03e2b2257af",
+    "tests/test_phase16_legacy_stop_policy.py": "0a01c131c8e7d6dd2f241dea66d6a6cff43eb83bb4a503e7c575186eb2e72e78",
+    "tests/test_phase16_bot_maintenance_jobs.py": "e25c2b2e3c84970f7bca556b6e347d6cdd98debb10427e6e3a2e3aa727e91ef1"
+  },
+  "frozen_target_manifest": {
+    "status": "MATCH",
+    "sha256_lf": "1887cced4dfb67f5cc89a60e60996cdc300a013eb1ee56328f2a20c68153f019"
+  },
+  "constraints": {
+    "old_handler_drain": "NOT_OBSERVABLE_ACCEPTED_BY_OPERATOR",
+    "automatic_replay": false,
+    "automatic_restore": false,
+    "subject": "amn2-spain-bot.service",
+    "old_commit": "55dc243b8e6c6bdb57f8301b56326e4cd4072d19",
+    "candidate_commit": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "scope_binding": [
+      "operation_id",
+      "boot_id",
+      "journal_binding",
+      "target_contract_sha256",
+      "packet_sha256",
+      "old_handlers_sha256",
+      "old_workflows_sha256"
+    ]
+  },
+  "verified": [
+    "Source/candidate/subject/operation rebinding is rejected even with recomputed digest.",
+    "Missing policy blocks before systemd request; real synthetic SQLite three-job pipeline remains passing.",
+    "Before candidate start, policy recovery holds for manual decision; after durable candidate intent, preserves DB.",
+    "No drain=complete, live authority, automatic replay or restore can be substituted into policy."
+  ],
+  "limitations": [
+    "Caller-supplied source hashes and packet checksum do not establish actual server provenance or live authorization.",
+    "Future static approval packet precedes derived runtime context; it must not recursively hash a context containing its own checksum.",
+    "Full coordinator, actual host admission and Linux/systemd acceptance remain incomplete.",
+    "Recovery route is locally tested; full coordinator/recovery wiring remains pending."
+  ],
+  "review": {
+    "mode": "self_review_no_delegation",
+    "t14c": "INCOMPLETE",
+    "live_executor_ready": false
+  },
+  "safety": {
+    "ssh_attempts": 0,
+    "stage_install_actions": 0,
+    "live_database_operations": 0,
+    "service_actions": 0,
+    "pushes": 0,
+    "awg2": "UNTOUCHED",
+    "package016": "UNTOUCHED",
+    "general_issuance": "NOT_ENABLED",
+    "last_stage": "VERIFIED_NOT_ACTIVATED_20260929"
+  }
+}

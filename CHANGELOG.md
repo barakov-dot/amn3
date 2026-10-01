@@ -5,6 +5,20 @@
 записи не означают deployment или новую выдачу. Текущая очередь — в
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
+## 2026-10-01
+
+- Оператор подтвердил однократное old55dc → 6e68235 исключение неизвестного
+  завершения старых Telegram handlers. [Решение и local binding](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#legacy-stop-policy-bound-2026-10-01)
+  связаны с точными source/operation/boot/journal/target/packet; supervisor/worker
+  требуют этот контракт. Scope нельзя расширить rehash; drain не объявляется
+  complete, автоматические replay/restore запрещены, остальные UNKNOWN → STOP.
+  [120 affected PASS/0SKIP](research/amn2/phase16-legacy-stop-policy-local-verification-2026-10-01.json),
+  два RED/GREEN, self-review. Полный coordinator/admission/recovery wiring и Linux
+  acceptance остаются открыты. Повторный design approval не нужен; live approval
+  не выдан. Frozen target MATCH, старые receipts и чужой planning diff сохранены.
+  SSH/stage/install/live DB/services/push0; AWG2/package016 untouched,
+  последний stage VERIFIED_NOT_ACTIVATED, issuance не включалась.
+
 ## 2026-09-30
 
 - Продолжен T14c: [одноразовые data jobs](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-jobs-local-2026-09-30)

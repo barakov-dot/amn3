@@ -498,12 +498,17 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
     Открыты actual admission/provenance, полный sustained coordinator/start/recovery
     и Linux acceptance. Exit0/пустой cgroup не подменяют business drain; default CLI
     blocked. [Исключение для old-handler drain](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#legacy-stop-decision-2026-09-30)
-    предложено, но НЕ согласовано: действует строгий STOP. Два source-bound теста
-    воспроизводят возможное отсутствие audit при отмене Telegram handoff.
+    согласовано оператором01.10 для old55dc → 6e68235; delivery uncertainty явно
+    принимается без объявления drain=complete, automatic replay/restore запрещены.
+    Это не live approval; остальные preconditions сохраняют строгий STOP.
+    [Привязка01.10](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#legacy-stop-policy-bound-2026-10-01):
+    policy operation/boot/source/packet binding обязателен в supervisor/worker;
+    unknown drain не переименован в complete, no-auto-restore/replay recovery route.
+    120 affected PASS/0SKIP; полный coordinator/recovery wiring ещё открыт.
   Writer inventory/ownership, effective flags/user/group, drain/startup/pending и
-  actual data rehearsal ещё не приняты. Базовый дизайн согласован; отдельно
-  ожидается решение по однократному исключению старого drain. Независимая локальная
-  подготовка разрешена, новый SSH/data/service scope не разрешён.
+  actual data rehearsal ещё не приняты. Базовый дизайн и однократное исключение
+  старого drain согласованы; повторно их не запрашивать. Локальная подготовка
+  разрешена, новый SSH/data/service scope не разрешён.
 - [x] T9 — secure descriptor reads/hash provenance retained candidate, новый stage
   без upload/old test-venv reuse, offline install/metadata/no-app-import контракт.
 - [x] T10 — одноразовый gate/manifest,23 targeted PASS, actual immutable bundle

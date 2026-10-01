@@ -301,7 +301,7 @@ def data_worker(action, directory, expected):
             and db.file_sha256(context) == expected, 'worker_binding')
     raw = context.read_bytes()
     value = json.loads(raw)
-    require(raw == core.encoded(value) and set(value) == {'prepared', 'artifacts_sha256_lf'}, 'worker_binding')
+    require(raw == core.encoded(value) and set(value) == {'prepared', 'artifacts_sha256_lf', 'legacy_stop_policy'}, 'worker_binding')
     from scripts import phase16_bot_maintenance_binding as binding
     prepared = value['prepared']
     # Historical 5-minute observation is checked at initial admission, not
@@ -309,6 +309,8 @@ def data_worker(action, directory, expected):
     # provenance and business drain belong to the future coordinator. The worker
     # below rechecks lease, unit identity and fence around each data action.
     binding.validate_prepared(prepared, now=prepared['target_contract']['observed_at'])
+    from scripts import phase16_legacy_stop_policy as legacy
+    legacy.validate(value['legacy_stop_policy'], prepared)
     target = prepared['target_contract']
     require(str(directory) == target['maintenance_directory'], 'worker_binding')
     require(binding.timestamp(target['ownership_valid_until']).timestamp() - time.time() >= 120 + RECOVERY_RESERVE,
@@ -333,7 +335,8 @@ def worker_artifacts(root):
     import hashlib
     files = ['scripts/phase16_bot_maintenance_linux.py', 'scripts/phase16_bot_maintenance_operations.py',
              'scripts/phase16_bot_maintenance.py', 'scripts/phase16_bot_db_rehearsal.py',
-             'scripts/phase16_bot_maintenance_binding.py', 'scripts/phase16_bot_maintenance_jobs.py']
+             'scripts/phase16_bot_maintenance_binding.py', 'scripts/phase16_bot_maintenance_jobs.py',
+             'scripts/phase16_legacy_stop_policy.py']
     files += ['tests/fixtures/phase16_schema/' + name + '.txt' for name in db.SOURCE_HASHES]
     return {name: hashlib.sha256((Path(root) / name).read_bytes().replace(b'\r\n', b'\n')).hexdigest()
             for name in files}
