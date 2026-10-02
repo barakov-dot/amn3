@@ -513,6 +513,8 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
     User/Group=amn2-spain, web3031, CIDR10.212.12.0/24; process VPS_APPLY=false,
     AWG3 flag ABSENT. Это не будущие effective settings или host admission.
     Оператор не уверен в отсутствии других writers/pollers: ownership UNKNOWN.
+    Доступ к `@NeobyatnayaAMNZ_bot` в `/mybots` BotFather подтверждён ответом «да»02.10;
+    это не writer exclusion/maintenance ownership и не согласование смены токена.
     [Единая последовательность02.10](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-sequence-local-2026-10-02):
     все8 операций соединены, durable claim/no replay, per-step evidence/deadlines,
     recovery routing; **171 affected PASS/0SKIP** на временной SQLite/systemd double.

@@ -1685,10 +1685,14 @@ Claim/result сохранены локально; hashes и normalized result п
 
 Оператор ответил **«Не уверен»** о других копиях бота/администраторах/ручных writers.
 `exclusive_maintenance_owner`, `external_pollers_excluded`, `manual_cli_paused`
-остаются UNKNOWN; не подставлять true. Доступ к этому боту через BotFather
-запрошен, ответ пока не получен. Сам доступ к BotFather не доказывает отсутствие
-DB writers. Базовый дизайн сохраняет bot identity/token; rotation, удаление бота
-и reset БД не разрешены и не выполнялись. Секреты в чат не запрашиваются.
+остаются UNKNOWN; не подставлять true. Позднее02.10 оператор ответил **«да»**
+на вопрос, виден ли `@NeobyatnayaAMNZ_bot` в `/mybots` у `@BotFather`:
+`BOTFATHER_ACCESS=OPERATOR_CONFIRMED`. Это ответ оператора, не самостоятельный
+осмотр Telegram. Сам доступ к BotFather не исключает другие запущенные копии,
+доступ других администраторов и DB writers. Исторический execution receipt
+состояния до ответа сохранён без изменения. Базовый дизайн сохраняет bot
+identity/token; rotation, удаление бота и reset БД не разрешены и не выполнялись.
+Секреты в чат не запрашиваются; повторно доступ к `/mybots` не спрашивать.
 
 Обнаружена обязательная предпосылка доступа: stage29.09 создавался root0700,
 source/runtime размещены под приватными каталогами, фактический service user —
@@ -1770,7 +1774,22 @@ approval packet и actual Linux acceptance. У новых файлов нет CL
 
 Следующий локальный scope — фактический admission и запуск устойчивого процесса
 с проверкой доступа `amn2-spain` к сохранённому stage; затем единый reviewable
-packet с exact live approval при выполнении остальных gates. Ответ оператора об
-ownership остаётся UNKNOWN. Клиентские тесты отложены до утра03.10.
+packet с exact live approval при выполнении остальных gates. Доступ оператора
+к BotFather подтверждён; exclusive maintenance ownership остаётся UNKNOWN.
+Клиентские тесты отложены до утра03.10.
+
+Локально уточнена последовательность runtime/access admission: существующий
+[stage readback](../../scripts/vps/phase16_bot_stage_readback_remote.py)
+проверяет hashes source/payload и runtime METADATA/venv isolation/interpreter links,
+но не сравнивает каждый установленный module/binary с доверенными wheels.
+Сначала требуется content inventory установленного import path, связанный с40
+runtime wheels из immutable payload и отдельно проверенным bootstrap. Подмена
+RECORD или совпадение версии не заменяют сравнение содержимого. Generated files,
+bytecode, дополнительные distribution и wheel data relocation требуют явной
+политики; неизвестное содержимое остаётся STOP. Только после такого inventory
+можно подготовить адресный service-user доступ, не открывая весь stage вместе
+с payload/receipts/scratch. Этот порядок — локальное уточнение следующего шага,
+не реализованный verifier и не разрешение читать/менять VPS; новые live gates
+по этому уточнению не создавались.
 SSH0/live DB0/services0/stage-install0/activation0/push0;
 AWG2/package016 untouched, stage29.09 VERIFIED_NOT_ACTIVATED, issuance не включалась.

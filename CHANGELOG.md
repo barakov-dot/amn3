@@ -7,6 +7,16 @@
 
 ## 2026-10-02
 
+- Зафиксирован ответ оператора «да» о наличии `@NeobyatnayaAMNZ_bot` в `/mybots`
+  у BotFather: [уточнение ownership](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-facts-executed-2026-10-02).
+  Подтверждён доступ к управлению ботом; external pollers/manual DB writers и
+  exclusive maintenance ownership остаются UNKNOWN. Token rotation не согласована,
+  исторический execution receipt сохранён. Локально уточнён порядок admission:
+  сначала installed import-path content provenance, затем адресный доступ service
+  user к stage. Реализация этого verifier ещё открыта. Проверки docs-only:
+  readback/затронутые ссылки/diff; прежний171 PASS не повторялся. SSH/live DB/services/
+  stage/install/activation/push0; AWG2/package016 untouched, client tests до утра03.10.
+
 - [Единая maintenance sequence](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-sequence-local-2026-10-02)
   соединяет8 concrete операций с durable one-shot claim, fresh bound host-guard
   boundary, process/launch continuity, whole-step deadlines и receipt checks.
