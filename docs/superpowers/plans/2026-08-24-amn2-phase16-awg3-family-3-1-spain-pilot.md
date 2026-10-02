@@ -513,8 +513,11 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
     User/Group=amn2-spain, web3031, CIDR10.212.12.0/24; process VPS_APPLY=false,
     AWG3 flag ABSENT. Это не будущие effective settings или host admission.
     Оператор не уверен в отсутствии других writers/pollers: ownership UNKNOWN.
-    Также открыты service-user доступ к root-private stage, full sustained
-    coordinator, Linux acceptance и остальные effective preconditions.
+    [Единая последовательность02.10](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-sequence-local-2026-10-02):
+    все8 операций соединены, durable claim/no replay, per-step evidence/deadlines,
+    recovery routing; **171 affected PASS/0SKIP** на временной SQLite/systemd double.
+    Открыты actual host admission, service-user доступ к root-private stage,
+    manager-owned coordinator process/packet и Linux acceptance.
     `/GO` разрешает продолжать локальную работу без промежуточных подтверждений;
     SSH/live/push остаются exact-bound. Windows/Android/iPhone доступны;
     клиентские тесты отложены оператором до утра03.10, сейчас не выполняются.
@@ -561,15 +564,16 @@ Design согласован оператором после commit b277154. По
   local PASS сохранён. После transport failures24/27/29.09 один readback из
   pushed07e7769 подтвердил stage29.09: VERIFIED_NOT_ACTIVATED,2.906s,200 files,
   runtime40, saved success receipt. Повтор install/transport probe не нужен.
-  Target/input binding30.09 реализован,45 affected local PASS; actual preview
-  BLOCKED_UNKNOWN_PRECONDITIONS. Следующий локальный этап — operation adapters/
-  sustained runner по прежнему согласованию. Writer inventory/ownership, effective
-  settings, drain/startup/pending и actual DB rehearsal/recovery не подтверждены.
-  Bot activation/live scope не разрешены; marker consumed, recovery v1 сохранён.
-- ❌ Task 4A — Windows traffic FAIL; root cause не доказана.
+  Target/input binding, data/service adapters и единая sequence реализованы
+  локально;171 affected PASS/0SKIP. Facts SSH02.10: FACTS_COLLECTED_NOT_ADMITTED,
+  approval consumed. Actual preview BLOCKED_UNKNOWN_PRECONDITIONS: ownership
+  UNKNOWN, admission/provenance/access/startup и manager-owned coordinator ещё
+  открыты. Actual DB rehearsal/migration не выполнялись; Linux acceptance не получен.
+  Bot activation/live scope не разрешены; recovery v1 сохранён.
+- ❌ Task 4A — Windows traffic FAIL; root cause не доказана; тесты отложены до утра03.10.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.
-- ❌ Task 4.5 — quality FAIL; strict A/B неполон и отложен.
+- ❌ Task 4.5 — quality FAIL; strict A/B неполон, клиентские тесты отложены до утра03.10.
 - ⏳ Task 5 — acceptance заблокирован.
 - ⏳ Task 6 — closeout заблокирован.
 

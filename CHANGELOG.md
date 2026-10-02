@@ -7,6 +7,19 @@
 
 ## 2026-10-02
 
+- [Единая maintenance sequence](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-sequence-local-2026-10-02)
+  соединяет8 concrete операций с durable one-shot claim, fresh bound host-guard
+  boundary, process/launch continuity, whole-step deadlines и receipt checks.
+  Сбой не запускает recovery/restore/replay; результат сохраняется до completion,
+  безопасный код причины не раскрывает raw exception. RED/GREEN и19 новых checks,
+  [171 affected PASS/0SKIP](research/amn2/phase16-maintenance-sequence-local-verification-2026-10-02.json)
+  на временных SQLite/files и systemd double. Независимый review выявил и после
+  исправления закрыл P2: проверка срока/lease после admission и intent fsync
+  предотвращает просроченное создание fence-файлов. Actual host admission, service-user
+  доступ, persistent Linux coordinator process/packet и Linux acceptance ещё открыты;
+  нового live gate нет. SSH/live DB/services/stage/install/activation/push0;
+  AWG2/package016 untouched, stage VERIFIED_NOT_ACTIVATED, issuance off.
+
 - [Maintenance facts исполнены один раз](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-facts-executed-2026-10-02)
   по exact approval: SSH exit0/9.406s, FACTS_COLLECTED_NOT_ADMITTED; сохранён
   normalized receipt, claim/result hashes сверены, approval consumed/no retry.

@@ -1,0 +1,117 @@
+{
+  "schema": "phase16.maintenance-sequence-local.v1",
+  "date": "2026-10-02",
+  "base_commit": "32a43a6c0e77bb0998c6c4fc1de3e4f9cceb944a",
+  "status": "LOCAL_SEQUENCE_PASS_NOT_LIVE_READY",
+  "files_sha256_lf": {
+    "scripts/phase16_bot_maintenance_sequence.py": "bbd2e2dd6d430c6ac5af1fc4061764f77d2ba438dde4d90585f5eca4ca71ae7a",
+    "tests/test_phase16_bot_maintenance_sequence.py": "42248edd4012ffb780880821db844308934a9efbcee780da074cb9756596b245"
+  },
+  "tests": {
+    "new_sequence": {
+      "passed": 19,
+      "skipped": 0,
+      "seconds": 11.166
+    },
+    "affected_suite": {
+      "passed": 171,
+      "skipped": 0,
+      "seconds": 68.078,
+      "modules": [
+        "tests.test_phase16_bot_maintenance_sequence",
+        "tests.test_phase16_bot_service_operations",
+        "tests.test_phase16_maintenance_facts",
+        "tests.test_phase16_legacy_stop_policy",
+        "tests.test_phase16_bot_maintenance_jobs",
+        "tests.test_phase16_legacy_handoff",
+        "tests.test_phase16_bot_maintenance_operations",
+        "tests.test_phase16_bot_maintenance_linux",
+        "tests.test_phase16_bot_db_rehearsal",
+        "tests.test_phase16_bot_maintenance",
+        "tests.test_phase16_bot_maintenance_binding"
+      ]
+    },
+    "red_green": [
+      "Missing full sequence availability: 1 expected failure -> all sequence checks PASS.",
+      "Late fence lost closed failure reason: expected sequence_step_deadline failure -> allowlisted reason PASS.",
+      "Review P2: slow source read and slow intent fsync allowed late fence writes; 2 expected failures -> pre-mutation time/lease checks -> 19 sequence and 171 affected PASS."
+    ],
+    "real_boundaries": [
+      "temporary SQLite backup/rehearsal/migration",
+      "durable journal, one-shot claim, result and receipt files",
+      "command bootstrap/child tests in affected suite"
+    ],
+    "substituted_boundaries": [
+      "systemd/procfs/network readiness",
+      "host admission collector"
+    ],
+    "actual_linux_tested": false
+  },
+  "review": {
+    "status": "PASS_AFTER_P2_FIX",
+    "scope": [
+      "scripts/phase16_bot_maintenance_sequence.py",
+      "tests/test_phase16_bot_maintenance_sequence.py"
+    ],
+    "method": "Independent read-only subagent review and focused re-review; reviewer ran no tests and changed no files.",
+    "finding": {
+      "severity": "P2",
+      "issue": "Late source read could create fence drop-ins after step deadline.",
+      "verified_red_tests": 2,
+      "fix": "Check common deadline/lease and step deadline after admission before intent, and at operation entry after intent fsync.",
+      "reviewer_resolution": "CLOSED_STATIC_REVIEW",
+      "affected_suite_after_fix": "171 PASS / 0 SKIP"
+    },
+    "declined_and_executor_disposition": [
+      {
+        "subject": "Actual host admission, writer ownership, service access",
+        "disposition": "Agreed outside this local increment; remains required blocker before live."
+      },
+      {
+        "subject": "Persistent Linux launcher and real systemd/startup/readiness",
+        "disposition": "Agreed unimplemented/not validated; remains required future implementation/acceptance."
+      },
+      {
+        "subject": "A hung external collector",
+        "disposition": "Collector and OS process deadline absent; return-after-deadline now STOP before mutation, but this is not a hard OS timeout guarantee."
+      }
+    ]
+  },
+  "limits": {
+    "action_seconds": {
+      "fence": 30,
+      "stop": 190,
+      "backup": 140,
+      "rehearsal": 140,
+      "migrate": 140,
+      "candidate_start": 55,
+      "web_start": 105,
+      "release": 30
+    },
+    "sequence_seconds": 830,
+    "recovery_reserve_seconds": 300,
+    "minimum_initial_lease_seconds": 1130,
+    "meaning": "Internal sequence/command budgets; persistent Linux service deadline remains unimplemented."
+  },
+  "outstanding": [
+    "actual host admission/provenance and writer exclusion",
+    "operator ownership remains UNKNOWN",
+    "service UID/GID/namespace access to retained stage",
+    "effective future settings and startup bound",
+    "persistent Linux coordinator process and exact approval packet",
+    "actual Linux acceptance and live migration",
+    "client/quality/A-B acceptance deferred to morning 2026-10-03 Europe/Moscow"
+  ],
+  "safety": {
+    "ssh_attempts": 0,
+    "live_db_operations": 0,
+    "service_actions": 0,
+    "stage_install": 0,
+    "activation": 0,
+    "push": 0,
+    "awg2": "UNTOUCHED",
+    "package016": "UNTOUCHED",
+    "last_stage": "VERIFIED_NOT_ACTIVATED",
+    "general_issuance": "NOT_ENABLED_BY_THIS_WORK"
+  }
+}

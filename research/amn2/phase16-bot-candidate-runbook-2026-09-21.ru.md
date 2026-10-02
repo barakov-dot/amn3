@@ -1712,3 +1712,65 @@ Live mutation потребует отдельного exact approval готов�
 Safety этого SSH: remote file writes0, DB opens0, service actions0,
 upload/stage/install/activation0, push0. AWG2/package016 untouched,
 stage29.09 VERIFIED_NOT_ACTIVATED, general issuance не включалась.
+
+
+<a id="maintenance-sequence-local-2026-10-02"></a>
+
+## T14c: единая локальная последовательность — 02.10
+
+**LOCAL_SEQUENCE_PASS_NOT_LIVE_READY.**
+[MaintenanceSequence](../../scripts/phase16_bot_maintenance_sequence.py) соединяет
+все восемь существующих операций: fence → stop → backup → rehearsal → migrate →
+candidate_start → web_start → release. [Receipt](phase16-maintenance-sequence-local-verification-2026-10-02.json):
+19 новых сквозных проверок PASS/0SKIP; итоговые **171 affected PASS/0SKIP, 68.078s**.
+Реальные временные SQLite/backup/migration/journal/drop-in/receipt файлы;
+manager/procfs/network и host admission заменены тестовыми реализациями.
+Это не проверка реального systemd или production DB.
+
+Одноразовый durable sequence claim записывается до обращения к manager.
+Даже STOP до fence или прерывание с prepared-журналом запрещают повтор данного
+sequence. Перед fence/stop обязательны свежий prepared contract и внешний
+host_guard с привязкой к нему; boolean не принимается. Исходные launch hashes,
+PID/InvocationID, source fingerprint, boot и ownership window сверяются.
+Web останавливается перед bot; остановка с kill/остаточными процессами не даёт
+перейти к backup. Выход старого процесса не объявляется business drain.
+
+Каждое action_done требует собственной проверки: effective fence, stop witness,
+согласованные job claim/result/complete/data receipts либо service readiness.
+Подмена даже пересчитанного job completion блокирует следующий шаг.
+Внутренние бюджеты: fence30s, stop190s, три data jobs по140s, candidate55s,
+web105s, release30s; всего830s плюс отдельный запас300s в ownership window.
+Это верхние бюджеты вызовов, не ETA и не реализованный OS RuntimeMaxSec полного
+координатора. Проверки входят в бюджет шага до action_done.
+
+Сбой сохраняет текущую фазу и безопасный код причины из фиксированного allowlist.
+Raw exception/config/log не попадает в result. Итог должен записаться на диск до
+возврата completion; отказ записи даёт sequence_result_unpersisted. Исключение
+старого drain вызывает ранее согласованный recovery route: до candidate-start
+сохранить fence для ручного решения, после intent — сохранить БД. Автоматических
+restore/replay/start/cleanup после ошибки нет. Прерывание сохраняет claim/intent,
+без ложного успешного result.
+
+Независимый read-only review нового sequence/tests обнаружил P2: после медленного
+source read можно было создать fence drop-in за пределами бюджета. Два RED-теста
+воспроизвели задержку source read и durable intent fsync. Теперь после admission,
+до intent и непосредственно перед operation повторяются deadline/lease checks.
+19 sequence tests и171 affected PASS; focused re-review закрыл P2. Reviewer не
+менял файлы и не запускал тесты. Предыдущие RED/GREEN также проверили отсутствие
+связанной последовательности и потерю безопасного кода причины late response.
+Реальный collector/OS timeout/Linux launcher reviewer не считал реализованными;
+это остаётся явным незавершённым scope, а не молчаливым исключением из Phase16.
+
+Открытая часть T14c конкретна: host collector должен сам доказать writer exclusion,
+source/runtime/settings/startup/access и ownership; переданный hash этого не
+доказывает. Также ещё нет manager-owned процесса полного координатора, exact
+approval packet и actual Linux acceptance. У новых файлов нет CLI/SSH/автоматической
+активации. Нельзя считать восемь локально связанных операций готовым live gate.
+Новый readback ради повторения завершённых facts не выполнялся.
+
+Следующий локальный scope — фактический admission и запуск устойчивого процесса
+с проверкой доступа `amn2-spain` к сохранённому stage; затем единый reviewable
+packet с exact live approval при выполнении остальных gates. Ответ оператора об
+ownership остаётся UNKNOWN. Клиентские тесты отложены до утра03.10.
+SSH0/live DB0/services0/stage-install0/activation0/push0;
+AWG2/package016 untouched, stage29.09 VERIFIED_NOT_ACTIVATED, issuance не включалась.
