@@ -1,0 +1,75 @@
+{
+  "approval": "PHASE16_MAINTENANCE_FACTS_20261002_001",
+  "artifacts_sha256_lf": {
+    "scripts/phase13_bot_web_migration_fresh_inputs.py": "cdad982109f934b20d49ec6021b269aec30644c28347625261a1b98969e6d904",
+    "scripts/phase16_bot_db_rehearsal.py": "e190bb13377b26399e307e793ebfcc0fc8962d3de276ff28049ab7366949d395",
+    "scripts/phase16_bot_linux_gate.py": "713289a6082bf621d704e6dd3b04855fa020fbfecc8a9e86db8a861019bbd35e",
+    "scripts/phase16_bot_maintenance.py": "03abfe3d99eb850c31574093fac09a2a91d11528ee75622746ec3f9f171d60be",
+    "scripts/phase16_bot_maintenance_binding.py": "34f1c6030a517dbe457d1f913e27745df781d8da93683e7a72b744d8f21303a2",
+    "scripts/phase16_bot_maintenance_jobs.py": "192beacbb4824ef4e9c60c13c3bd66f474df8f053c80be0a402970b29def57db",
+    "scripts/phase16_bot_maintenance_linux.py": "82edaf855b356c6983ddd08857363534e9b8400635013fea645fa03e2b2257af",
+    "scripts/phase16_bot_maintenance_operations.py": "9e5605a09543e80c37e6e125a90f69ad4dc900e5bb005ddcc5444a46e0e1be57",
+    "scripts/phase16_bot_readback_guard_gate.py": "2fa412e2b9eaddd8f7d582a209499b3137b75e94f4d43ef8435fdeaac11a7b7b",
+    "scripts/phase16_bot_retained_stage_gate.py": "3c48ad887f2ca87a6efc5988462695c0801c376c0c4e0695bd67b3a09005b019",
+    "scripts/phase16_bot_service_operations.py": "59ab7e69a32af38a300311bdcc6a391817c9d32123b63a8bdf67ea7377061cc2",
+    "scripts/phase16_bot_stage_readback_gate.py": "836a473cbfabf4d644bbbe0df5f724937d12146f95c19c7487220cb038283c72",
+    "scripts/phase16_bot_transport_diagnostics.py": "f30c6f2d01bc41f0808379f5e93bcfbcf82bcb6a94cddb83c7ca4b46f06ce6b2",
+    "scripts/phase16_legacy_stop_policy.py": "74f869de59f93b78d4a8066279f812d1cba99a8985052b62ea501e036686482b",
+    "scripts/phase16_maintenance_facts_gate.py": "80fb13bf728047bb0bbdbeb052c6e3fd488bd26d2b6df8dde6ccb27445ef7ef0",
+    "scripts/vps/phase16_bot_linux_gate_remote.py": "5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102",
+    "scripts/vps/phase16_bot_retained_stage_remote.py": "4ca1330c045c672e8e52cc14e93fbffa3801dd0aa6731b7ef332b42a265bfea7",
+    "scripts/vps/phase16_bot_runtime40_stage_remote.py": "acb8d926a084288fa950f8f09cb227bfe70498cb421657f9d2a4daa1a2baa75e",
+    "scripts/vps/phase16_bot_stage_readback_remote.py": "363b16c2e055674c3ffe468a8203ffb5d9c6bb1535dd8c71babdbd25f3764c9f",
+    "scripts/vps/phase16_maintenance_facts_remote.py": "ae7c70e0d165a7a6795cdb37de91d04b4dcef375ca5aa79381e9e0a26e26e7c6"
+  },
+  "base_commit": "b8a2900e2cf2857240fde83c120704ba917abf07",
+  "boundaries": [
+    "NOT_HOST_ADMISSION",
+    "NO_SETTINGS_DEFAULT_GUESS",
+    "NO_WRITER_ABSENCE_FROM_STATIC_SCAN",
+    "NO_INSTALLED_BINARY_INTEGRITY_CLAIM",
+    "NO_STARTUP_BOUND_CLAIM",
+    "NO_RETRY"
+  ],
+  "evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-maintenance-facts-20261002/execution-001",
+  "limits": {
+    "output_bytes": 65536,
+    "remote_seconds": 45,
+    "ssh_attempts": 1,
+    "transport_seconds": 60,
+    "windows_command_units": 30000
+  },
+  "reads": [
+    "bot/web systemd properties and launch hashes",
+    "selected process environment fields, values allowlisted",
+    "fixed old-source .env: literal selected fields only; unsupported syntax UNKNOWN",
+    "old/candidate settings.py hashes",
+    "unit-file names, cron file hashes/reference flags, process command hashes",
+    "boot identity"
+  ],
+  "remote_sha256": "b46c277299fd73da9752cd729747414147badf4d33f134b078839bdb9794f376",
+  "schema": "phase16.maintenance-facts-packet.v1",
+  "scope": {
+    "activation": 0,
+    "app_imports": 0,
+    "candidate_execution": 0,
+    "database_open": 0,
+    "install": 0,
+    "remote_file_writes": 0,
+    "service_actions": 0,
+    "stage": 0,
+    "telegram": 0
+  },
+  "ssh": {
+    "config": "none",
+    "connect_timeout": 10,
+    "connection_attempts": 1,
+    "host_key": "STRICT_PINNED",
+    "port": 22,
+    "server_alive_count_max": 6,
+    "server_alive_interval": 5,
+    "stdin": "DEVNULL"
+  },
+  "status": "READY_NOT_EXECUTED",
+  "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6"
+}

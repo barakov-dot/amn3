@@ -505,6 +505,15 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
     policy operation/boot/source/packet binding обязателен в supervisor/worker;
     unknown drain не переименован в complete, no-auto-restore/replay recovery route.
     120 affected PASS/0SKIP; полный coordinator/recovery wiring ещё открыт.
+    [Продолжение02.10](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#service-operations-facts-2026-10-02):
+    concrete candidate/web/release adapters, migration receipt-chain before start,
+    whole-action deadlines и owned HTTP readiness; **152 affected PASS/0SKIP**.
+    Подготовлен один checksum-bound read-only maintenance facts packet (45/60s),
+    exact SSH approval получен02.10, запуск pending. Сбор фактов не равен host admission;
+    full sustained coordinator, Linux acceptance и effective preconditions открыты.
+    `/GO` разрешает продолжать локальную работу без промежуточных подтверждений;
+    SSH/live/push остаются exact-bound. Доступность устройств/сетей запрошена для
+    дальнейшего Windows/A/B; ответа нет, фактических client checks не было.
   Writer inventory/ownership, effective flags/user/group, drain/startup/pending и
   actual data rehearsal ещё не приняты. Базовый дизайн и однократное исключение
   старого drain согласованы; повторно их не запрашивать. Локальная подготовка

@@ -1,0 +1,94 @@
+{
+  "schema": "phase16.service-operations-facts-local-verification.v1",
+  "date": "2026-10-02",
+  "base_commit": "b8a2900e2cf2857240fde83c120704ba917abf07",
+  "status": "LOCAL_SERVICE_OPERATIONS_PASS_FACTS_PACKET_READY_NOT_EXECUTED",
+  "tests": {
+    "command": "python -B -m unittest tests.test_phase16_bot_service_operations tests.test_phase16_maintenance_facts tests.test_phase16_legacy_stop_policy tests.test_phase16_bot_maintenance_jobs tests.test_phase16_legacy_handoff tests.test_phase16_bot_maintenance_operations tests.test_phase16_bot_maintenance_linux tests.test_phase16_bot_db_rehearsal tests.test_phase16_bot_maintenance tests.test_phase16_bot_maintenance_binding -q",
+    "passed": 152,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 56.323,
+    "new_service_tests": 18,
+    "new_facts_tests": 14
+  },
+  "red_green": [
+    "Service implementation initially absent.",
+    "Active web without HTTP readiness initially completed.",
+    "Rehashed predecessor, changed candidate source, and late command initially accepted.",
+    "Upstream scalar busctl JSON initially failed candidate identity.",
+    "Missing migration completion initially checked only after start; now blocks before switch.",
+    "Facts packet initially absent; mutation command allowlist initially too broad.",
+    "Rendered subprocess caught invalid Python regex escape warning; corrected."
+  ],
+  "verified": [
+    "Real disposable SQLite backup/rehearsal/migrate plus journal/drop-in/receipt service sequence using synthetic systemd boundary.",
+    "Candidate intent before any candidate action; migration proof before drop-in/start; admission tied to boot/invocation/PID/expected username.",
+    "Whole service-action deadline and web launch fingerprint; selected source bytes and source continuity guards.",
+    "Owned loopback HTTP probe parser/status/size/namespace/listener checks with procfs/network doubles; no live HTTP.",
+    "Read-only facts command allowlist, selected environment redaction, strict normalized receipt, one claim/no retry.",
+    "Actual local isolated Python argv/bootstrap reaches Windows platform STOP with no repo imports, stdin or stderr."
+  ],
+  "packet": {
+    "status": "OFFLINE_READY_NOT_EXECUTED",
+    "approval": "PHASE16_MAINTENANCE_FACTS_20261002_001",
+    "manifest_sha256": "08302d9d270811a937b6ada52304cb8055431c833b6796d11de98e2b7f2a727a",
+    "remote_sha256": "b46c277299fd73da9752cd729747414147badf4d33f134b078839bdb9794f376",
+    "remote_script_bytes": 17740,
+    "command_units_reserved": 11051,
+    "ssh_attempts": 0,
+    "remote_seconds": 45,
+    "transport_seconds": 60,
+    "live_admission": false
+  },
+  "artifacts_sha256_lf": {
+    "scripts/phase16_bot_service_operations.py": "59ab7e69a32af38a300311bdcc6a391817c9d32123b63a8bdf67ea7377061cc2",
+    "scripts/phase16_maintenance_facts_gate.py": "80fb13bf728047bb0bbdbeb052c6e3fd488bd26d2b6df8dde6ccb27445ef7ef0",
+    "scripts/vps/phase16_maintenance_facts_remote.py": "ae7c70e0d165a7a6795cdb37de91d04b4dcef375ca5aa79381e9e0a26e26e7c6",
+    "tests/test_phase16_bot_service_operations.py": "4c9a847c4ab53a2db9c5e3b56c449c68d3f7df434ca0cd74ae6f38e9e005189c",
+    "tests/test_phase16_maintenance_facts.py": "dc82668c09fe56bdc561439861d677f07a2295f624e70f3ed66da5bd8f644bd3",
+    "research/amn2/phase16-maintenance-facts-manifest-2026-10-02.json": "08302d9d270811a937b6ada52304cb8055431c833b6796d11de98e2b7f2a727a"
+  },
+  "frozen_target_manifest": {
+    "status": "MATCH",
+    "sha256_lf": "1887cced4dfb67f5cc89a60e60996cdc300a013eb1ee56328f2a20c68153f019"
+  },
+  "review": {
+    "mode": "self_review_no_delegation",
+    "t14c": "INCOMPLETE",
+    "full_coordinator_wiring": "PENDING",
+    "live_executor_ready": false
+  },
+  "limitations": [
+    "No Linux/systemd/procfs/socket execution was performed; Windows local tests are not Linux acceptance.",
+    "Facts collector does not prove writer exclusion, installed binary integrity, effective settings precedence or startup bound.",
+    "Literal dotenv parser intentionally rejects expansion, multiline and escaping; no guessing defaults.",
+    "Service operations require separately proven host admission, old/runtime/settings integrity and operator ownership; no executable live coordinator is exposed.",
+    "Facts packet may return UNKNOWN; it has one attempt and no permission to retry, change flags, stop/start, open DB, install or activate.",
+    "Client Windows traffic and quality/A-B still require physical devices, network inputs and exact test scope."
+  ],
+  "sources": [
+    "https://raw.githubusercontent.com/systemd/systemd/v252/src/busctl/busctl.c"
+  ],
+  "safety": {
+    "ssh_attempts": 0,
+    "remote_file_writes": 0,
+    "live_database_operations": 0,
+    "service_actions": 0,
+    "stage_install_actions": 0,
+    "activation": 0,
+    "pushes": 0,
+    "awg2": "UNTOUCHED",
+    "package016": "UNTOUCHED",
+    "last_stage": "VERIFIED_NOT_ACTIVATED",
+    "general_issuance": "NOT_ENABLED_BY_THIS_WORK"
+  },
+  "authorization": {
+    "approval": "PHASE16_MAINTENANCE_FACTS_20261002_001",
+    "operator_reply": "разрешаю",
+    "date": "2026-10-02",
+    "scope": "ONE_READ_ONLY_SSH_FOR_EXACT_PACKET",
+    "executed": false
+  }
+}

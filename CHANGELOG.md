@@ -5,6 +5,23 @@
 записи не означают deployment или новую выдачу. Текущая очередь — в
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
+## 2026-10-02
+
+- Продолжен Phase16 `/GO`: [service adapters и следующий facts packet](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#service-operations-facts-2026-10-02).
+  Candidate switch/admission, web launch/owned-loopback HTTP readiness и release
+  связаны с migration proof, durable intents/receipts, source и whole-action budgets.
+  RED/GREEN закрыл late response, source/receipt drift, отсутствие HTTP readiness,
+  позднюю migration verification и неверный scalar busctl double. Одноразовый
+  read-only SSH packet подготовлен локально: strict command allowlist, redaction,
+  bound argv, claims/no retry; он не даёт admission/activation или writer-absence
+  PASS. [152 affected PASS/0SKIP](research/amn2/phase16-service-operations-facts-local-verification-2026-10-02.json),
+  self-review, actual local child/bootstrap, disposable SQLite, Linux boundaries
+  substituted. Full coordinator/host admission/Linux acceptance остаются открыты.
+  Exact одноразовое read-only SSH разрешено02.10, ещё не исполнено; push не разрешён.
+  SSH/install/live DB/services/activation/push0,
+  AWG2/package016 untouched, last stage VERIFIED_NOT_ACTIVATED, issuance off.
+  Frozen target MATCH; старые receipts и чужой planning diff сохранены.
+
 ## 2026-10-01
 
 - Оператор подтвердил однократное old55dc → 6e68235 исключение неизвестного

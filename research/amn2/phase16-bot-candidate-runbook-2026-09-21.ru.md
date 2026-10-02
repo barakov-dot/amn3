@@ -1548,3 +1548,106 @@ candidate switch/start/admission, web/recovery/release в том же T14c. Дл
 операции потребуется отдельный конкретный packet и exact approval, не повторное
 согласование принятой политики. SSH0/install0/live DB0/services0/push0;
 AWG2/package016 untouched, stage29.09 VERIFIED_NOT_ACTIVATED, issuance не включалась.
+
+<a id="service-operations-facts-2026-10-02"></a>
+
+## T14c: service operations и входные факты maintenance — 02.10
+
+**LOCAL_SERVICE_OPERATIONS_PASS; FACTS_PACKET_READY_NOT_EXECUTED.**
+Оператор запросил `/GO` до закрытия Phase16 без промежуточных «продолжать?».
+Продолжается ранее согласованный scope. Точные SSH/live/push границы AGENTS
+сохранены; старые consumed approvals не используются повторно. Нового approval
+для принятого old-handler исключения не требуется.
+
+[Receipt](phase16-service-operations-facts-local-verification-2026-10-02.json):
+**152 affected PASS / 0 SKIP, 56.323 s**, включая 18 service и 14 facts tests.
+Self-review без делегирования. Завершённые stage/install/readbacks не повторялись.
+
+[ServiceOperations](../../scripts/phase16_bot_service_operations.py) связывает
+migration proof → candidate switch/start → admission → web start/readiness →
+release только своих fence-файлов. До изменения drop-in проверяется завершение
+migration job; каждый receipt привязан к intent/предшественнику. Потеря evidence,
+изменение candidate/launch, late command или отсутствие READY/admission/HTTP
+останавливают последовательность. Нет повторного start, автоматического rollback,
+DB restore, cleanup чужих файлов или изменения AWG2/general issuance.
+
+Таймауты bot40/90 и web90/90 сохраняются. Whole-action deadline ограничивает
+суммарные команды; остаток ownership window и recovery reserve проверяются
+отдельно. Web проверяется по прежнему launch fingerprint, PID/InvocationID,
+владению loopback listener и HTTP200 `/login` с HTML-ответом ограниченного размера.
+Это минимальная readiness, не полноценная acceptance приложения/VPN. Проверка
+runtime/settings/source admission остаётся обязательной внешней предпосылкой.
+
+RED/GREEN обнаружил: web active без HTTP readiness; принятие подменённой цепочки
+receipt и изменённого source; принятие позднего ответа; слишком позднюю проверку
+migration proof. Реальная форма scalar `busctl get-property --json=short`
+сверена с [upstream v252](https://raw.githubusercontent.com/systemd/systemd/v252/src/busctl/busctl.c)
+(`get_property` → `json_transform_variant` → `json_transform_one`): строка
+возвращается строкой. Исправлены adapter и double; Conditions/ExecStart arrays
+не менялись. Это source review, не утверждение о версии systemd целевого VPS.
+
+### Один следующий read-only packet
+
+Нужно получить отсутствующие факты для конкретного maintenance исполнения:
+identity/launch units, происхождение выбранных настроек, признаки других задач.
+Новый [manifest](phase16-maintenance-facts-manifest-2026-10-02.json) и
+[gate](../../scripts/phase16_maintenance_facts_gate.py) не расширяют старые
+integration-readback `_011` и stage-readback. Старые receipts неизменны.
+
+- Approval: `PHASE16_MAINTENANCE_FACTS_20261002_001`: оператор ответил
+  «разрешаю»02.10 на вопрос с exact manifest/remote SHA. Разрешена одна попытка;
+  на момент этого preparation commit ещё не исполнена.
+- Remote SHA256: `b46c277299fd73da9752cd729747414147badf4d33f134b078839bdb9794f376`.
+- Manifest SHA256 LF: `08302d9d270811a937b6ada52304cb8055431c833b6796d11de98e2b7f2a727a`.
+- Spain target binding: `87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6`.
+- Одна попытка SSH, remote45s/local60s, stdout cap65536; compressed bound argv,
+  stdin DEVNULL, pinned host key, ConnectTimeout10, ServerAlive5/6; retry запрещён.
+- Читаются bot/web systemd properties, selected process environment и фиксированный
+  old-source `.env` с выводом только проверенных несекретных полей; старый/candidate
+  `settings.py` сверяется по pinned Git object hash. Токен/пароли не выводятся.
+  Также читаются unit-file names, hashes/reference flags cron и hashes команд
+  связанных процессов. Полные env/config/argv и журналы не сохраняются.
+- Unsupported dotenv syntax, отсутствующий ключ или неоднозначный alias остаются
+  UNKNOWN/ABSENT; defaults не подставляются. Static inventory не доказывает
+  отсутствие opaque wrappers/external writers. Startup bound и installed binary
+  integrity остаются NOT_ESTABLISHED; успешный результат — только
+  `FACTS_COLLECTED_NOT_ADMITTED`, никогда admission/activation PASS.
+- Remote writes/upload, DB open, app/candidate execution, Telegram, stop/start,
+  install/stage/activation —0. Обычные серверные журналы SSH могут обновляться.
+
+Offline preview (не SSH):
+
+```powershell
+python -B -m scripts.phase16_maintenance_facts_gate
+```
+
+**Только после exact approval указанного packet**, один запуск:
+
+```powershell
+python -B -m scripts.phase16_maintenance_facts_gate --execute --approve PHASE16_MAINTENANCE_FACTS_20261002_001 --approved-remote-sha256 b46c277299fd73da9752cd729747414147badf4d33f134b078839bdb9794f376 --approved-manifest-sha256 08302d9d270811a937b6ada52304cb8055431c833b6796d11de98e2b7f2a727a
+```
+
+Claim/result создаются только в новом локальном
+`C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-maintenance-facts-20261002/execution-001`.
+При timeout/invalid receipt: UNKNOWN_NO_RETRY; не запускать следующий marker
+автоматически. Сначала разобрать evidence и устранить только подтверждённую причину.
+
+### Что ещё не закрыто
+
+Full sustained coordinator, admission/provenance и Linux acceptance ещё открыты.
+Сервисные adapters не дают execute-ready; нельзя запускать prepared JSON как GO.
+После facts read нужно разобрать settings precedence/writer scope и ownership,
+завершить одно связное maintenance исполнение с проверками внутри его packet.
+Требуемые read checks не превращать в отдельное разрешение на каждую PRAGMA.
+Maintenance packet должен охватывать конкретные checksum/state/stop/start/DB
+и recovery границы; согласованный old-handler exception уже учтён.
+
+Для закрытия самой Phase16 остаются Windows traffic, strict same-device/app/network
+Spain AWG2/AWG3.1 A/B, acceptance/persistence/leaks/restart/recovery и handoff.
+Исторический Android/iPhone connectivity PASS не заменяет quality. По `/GO`
+у оператора запрошена доступность устройств/версий/сетей; ответа пока нет,
+client tests не запускались. Оценки сроков до получения этих входов не являются SLA.
+
+Safety этого прохода: SSH0/install0/live DB0/services0/activation0/push0.
+Frozen target MATCH; AWG2/package016 untouched, stage29.09 VERIFIED_NOT_ACTIVATED,
+general issuance не включалась; чужие28 planning lines сохранены unstaged.
