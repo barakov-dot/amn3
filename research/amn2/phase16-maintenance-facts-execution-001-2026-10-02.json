@@ -1,0 +1,287 @@
+{
+  "schema": "phase16.maintenance-facts-execution.v1",
+  "date": "2026-10-02",
+  "execution_commit": "a21d0774b1ef49c2ac3c260ee3e271281f4142ea",
+  "approval": "PHASE16_MAINTENANCE_FACTS_20261002_001",
+  "operator_reply": "разрешаю",
+  "status": "FACTS_COLLECTED_NOT_ADMITTED",
+  "local_result": {
+    "schema": "phase16.maintenance-facts-local.v1",
+    "status": "FACTS_COLLECTED_NOT_ADMITTED",
+    "claim": {
+      "approval": "PHASE16_MAINTENANCE_FACTS_20261002_001",
+      "manifest_sha256": "08302d9d270811a937b6ada52304cb8055431c833b6796d11de98e2b7f2a727a",
+      "remote_sha256": "b46c277299fd73da9752cd729747414147badf4d33f134b078839bdb9794f376",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+      "attempts": 1,
+      "claimed_at": "2026-10-02T20:03:08.717680+00:00"
+    },
+    "transport": {
+      "schema": "phase16.bot-transport-diagnostic.v1",
+      "returncode": 0,
+      "last_stdin_progress_seconds": null,
+      "termination_action": "NONE",
+      "failure_stage": null,
+      "stdin_bytes_requested": 0,
+      "stdin_bytes_accepted": 0,
+      "stdin_complete": true,
+      "output_complete": true,
+      "elapsed_seconds": 9.406,
+      "stdout": {
+        "bytes_observed": 4699,
+        "bytes_retained": 4699,
+        "prefix_sha256": "62e06a45916bac2fec682f41a224373d42bfb702bc30e6a11855113080664f93"
+      },
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "pipe_failures": [],
+      "stderr_diagnostic": {
+        "status": "EMPTY",
+        "hints": [],
+        "root_cause": "NOT_ESTABLISHED",
+        "utf8_valid": true,
+        "output_cap_hit": false
+      }
+    },
+    "receipt": {
+      "activation": false,
+      "application_imports": 0,
+      "approval": "PHASE16_MAINTENANCE_FACTS_20261002_001",
+      "completed_at": "2026-10-02T20:03:18.759411+00:00",
+      "database_opened": false,
+      "facts": {
+        "boot_id": "8ae340d2-dab8-4dad-b1db-09283cc51bd9",
+        "dotenv_selected": "ABSENT",
+        "effective_settings": "REQUIRES_SOURCE_AND_ENVIRONMENT_PRECEDENCE_REVIEW",
+        "installed_binary_integrity": "NOT_ESTABLISHED",
+        "inventory": {
+          "cron": {
+            "1c5a967b3a16a5e48612cf119f8f177529483960d7e9e6952a429c743246fbc5": {
+              "amn2_reference": false,
+              "sha256": "d4df081b982b23e66cac7102f9d91032f296caf13031991d90af44ee6cbf6e3b"
+            },
+            "c882fd4d2951401f833f876cc1e7c2f16409ca23225c740feddaa56591c58a87": {
+              "amn2_reference": false,
+              "sha256": "2fa6b230c2a8733329c08b1b42fd426159a81ec671e68d65b95d87b6b24db86e"
+            },
+            "dd2c2baf2f4e9645fe45fcad37f02f762d53c11d06539d665d946267255e693a": {
+              "amn2_reference": false,
+              "sha256": "47a67deba0d029d43209e6e512399543a945172f2a640021a6c21422a66adb1a"
+            },
+            "eb594045b38155a2c67fe149f68e85f3f3ecfa7952d6db0a06ace151fffd72d4": {
+              "amn2_reference": false,
+              "sha256": "ffb48ad57868ed639fad049d11ef4b9bcdd3d2d3e556754ce69b4d6b016969a3"
+            }
+          },
+          "cron_files": 4,
+          "exited_during_scan": 0,
+          "external_pollers": "REQUIRES_OPERATOR_OWNERSHIP",
+          "opaque_wrappers": "REQUIRES_REVIEW",
+          "process_count": 114,
+          "related_processes": [
+            {
+              "command_sha256": "81e2a4ee1bfaf9c309d0294563948d2a3fa9af66aa1461ab057baff1a0ebd36c",
+              "pid": 885
+            },
+            {
+              "command_sha256": "bb5372d83d4095cdf32f5cd0acdb5f4cc6a0b5e900249f6c13bbb80d4c0eadee",
+              "pid": 910
+            },
+            {
+              "command_sha256": "5788a23d936465df42b3a03a723284f343fa5ff5fea95b19b695897d17f4399b",
+              "pid": 15860
+            },
+            {
+              "command_sha256": "302ea23deac07acdbdc1806780f610f67c9219950fc4a81927ad883e0fd3af4b",
+              "pid": 15883
+            },
+            {
+              "command_sha256": "6558410a85b4cb2145ba53ecbdebefadbed7b64816f6ea33503b7033acb6736e",
+              "pid": 600921
+            },
+            {
+              "command_sha256": "0f2a1eb693b6aa027da522edc7c5206efdc714f7aba4bc389e18210beb8fadaa",
+              "pid": 1355701
+            }
+          ],
+          "related_units": [
+            "amn2-spain-bot.service",
+            "amn2-spain-docker.service",
+            "amn2-spain-forward-compat.service",
+            "amn2-spain-network.service",
+            "amn2-spain-web.service"
+          ],
+          "unit_count": 303,
+          "unit_names_sha256": "5373dc1405e7d84a10001ec471f4825911aa1098ac03186508da94d8674f3c66",
+          "writer_exclusion": "NOT_ESTABLISHED_BY_STATIC_SCAN"
+        },
+        "launch_sha256": {
+          "amn2-spain-bot.service": "085cd56d2f6e6f11ba8bbb3d96ab011cf8072b48a81d3d513a7588e85c2c15a1",
+          "amn2-spain-web.service": "ea4a15894e7ebd2112ade54b247a2fc350e76f7963e16e49d1337b003bc6097e"
+        },
+        "process_environment": {
+          "amn2-spain-bot.service": {
+            "AWG3_BOOTSTRAP_ENABLED": {
+              "status": "ABSENT"
+            },
+            "DATABASE_PATH": {
+              "status": "VALID",
+              "value": true
+            },
+            "DEFAULT_VPN_NETWORK_CIDR": {
+              "status": "VALID",
+              "value": "10.212.12.0/24"
+            },
+            "TELEGRAM_ADMISSION_TIMEOUT_SECONDS": {
+              "status": "VALID",
+              "value": 30
+            },
+            "TELEGRAM_EXPECTED_BOT_USERNAME": {
+              "status": "VALID",
+              "value": "NeobyatnayaAMNZ_bot"
+            },
+            "VPS_APPLY_ENABLED": {
+              "status": "VALID",
+              "value": false
+            },
+            "WEB_ADMIN_PORT": {
+              "status": "VALID",
+              "value": 3031
+            }
+          },
+          "amn2-spain-web.service": {
+            "AWG3_BOOTSTRAP_ENABLED": {
+              "status": "ABSENT"
+            },
+            "DATABASE_PATH": {
+              "status": "VALID",
+              "value": true
+            },
+            "DEFAULT_VPN_NETWORK_CIDR": {
+              "status": "VALID",
+              "value": "10.212.12.0/24"
+            },
+            "TELEGRAM_ADMISSION_TIMEOUT_SECONDS": {
+              "status": "ABSENT"
+            },
+            "TELEGRAM_EXPECTED_BOT_USERNAME": {
+              "status": "ABSENT"
+            },
+            "VPS_APPLY_ENABLED": {
+              "status": "VALID",
+              "value": false
+            },
+            "WEB_ADMIN_PORT": {
+              "status": "VALID",
+              "value": 3031
+            }
+          }
+        },
+        "settings_source_sha256": {
+          "candidate": "6cb3ef9889422dc4d229ef90a5c558ddd100290253b77a8a6525f91676f5b9fe",
+          "old": "1db81553dbcbf4dafc710efdd69c2db0cc1a869f0754d7bb67c7adfa3dcac631"
+        },
+        "startup_bound": "NOT_ESTABLISHED",
+        "units": {
+          "amn2-spain-bot.service": {
+            "ActiveState": "active",
+            "FinalKillSignal": "9",
+            "Group": "amn2-spain",
+            "Id": "amn2-spain-bot.service",
+            "InvocationID": "85559765b5964f08bf12e5977ec5e647",
+            "KillMode": "control-group",
+            "KillSignal": "15",
+            "LoadState": "loaded",
+            "MainPID": "1355701",
+            "NRestarts": "0",
+            "NeedDaemonReload": "no",
+            "Restart": "no",
+            "SubState": "running",
+            "TimeoutStartUSec": "40s",
+            "TimeoutStopUSec": "1min 30s",
+            "Type": "notify",
+            "UnitFileState": "enabled",
+            "User": "amn2-spain",
+            "cgroup_expected": true,
+            "cwd_expected": true
+          },
+          "amn2-spain-web.service": {
+            "ActiveState": "active",
+            "FinalKillSignal": "9",
+            "Group": "amn2-spain",
+            "Id": "amn2-spain-web.service",
+            "InvocationID": "4a2aabc257f4441f80a4eba1f79099aa",
+            "KillMode": "control-group",
+            "KillSignal": "15",
+            "LoadState": "loaded",
+            "MainPID": "1355683",
+            "NRestarts": "0",
+            "NeedDaemonReload": "no",
+            "Restart": "on-failure",
+            "SubState": "running",
+            "TimeoutStartUSec": "1min 30s",
+            "TimeoutStopUSec": "1min 30s",
+            "Type": "simple",
+            "UnitFileState": "enabled",
+            "User": "amn2-spain",
+            "cgroup_expected": true,
+            "cwd_expected": true
+          }
+        }
+      },
+      "live_admission": false,
+      "reason": "bounded_observation",
+      "remote_writes": 0,
+      "schema": "phase16.maintenance-facts.v1",
+      "service_actions": 0,
+      "status": "FACTS_COLLECTED_NOT_ADMITTED",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6"
+    }
+  },
+  "artifacts": {
+    "claim_json_sha256": "42da2eea5437240a72ac35077a865e00a4c06d7373cd10ec81ebf28f06e2fb45",
+    "result_json_sha256": "9f6eb184db2a17a84b5b1cc47de63f50a9d8c7e71f76615b770bf22bc09783f2"
+  },
+  "decisions": [
+    "Approval consumed; no retry or second SSH authorized.",
+    "Service identity is amn2-spain, web port 3031, VPN CIDR 10.212.12.0/24; use actual observations, not root/3030 fixture values.",
+    "Current process environment VPS_APPLY_ENABLED=false; candidate AWG3 flag absent in process snapshot, so future effective settings still require precedence/source/config review.",
+    "Five amn2 units include the three known Phase12 infrastructure units; this is not five proven database writers.",
+    "Six matching processes include names used by other services; hash-only matching is not proof of writer identity or absence.",
+    "Stage 29.09 was root0700 and write_tree creates private source directories; access for actual service UID must be prepared/verified before candidate start. Current modes were not collected by this facts packet."
+  ],
+  "safety": {
+    "ssh_attempts": 1,
+    "retries": 0,
+    "remote_file_writes": 0,
+    "live_db_open": 0,
+    "service_actions": 0,
+    "stage_install": 0,
+    "activation": 0,
+    "push": 0,
+    "awg2": "UNTOUCHED",
+    "package016": "UNTOUCHED"
+  },
+  "operator_ownership": {
+    "operator_answer": "Не уверен",
+    "exclusive_maintenance_owner": "UNKNOWN",
+    "external_pollers_excluded": "UNKNOWN",
+    "manual_cli_paused": "UNKNOWN",
+    "botfather_access": "AWAITING_OPERATOR_REPLY",
+    "token_rotation_authorized": false
+  },
+  "client_tests": {
+    "available_devices": [
+      "Windows",
+      "Android",
+      "iPhone"
+    ],
+    "operator_instruction": "эти тесты пропусти и отложи до утра",
+    "deferred_until": "2026-10-03 morning Europe/Moscow",
+    "exact_time_not_set": true,
+    "tests_executed": false
+  }
+}

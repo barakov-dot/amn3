@@ -7,6 +7,17 @@
 
 ## 2026-10-02
 
+- [Maintenance facts исполнены один раз](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-facts-executed-2026-10-02)
+  по exact approval: SSH exit0/9.406s, FACTS_COLLECTED_NOT_ADMITTED; сохранён
+  normalized receipt, claim/result hashes сверены, approval consumed/no retry.
+  Установлены фактические service identity/port/CIDR и selected process settings;
+  host admission из них не следует. Ответ «Не уверен» сохраняет ownership/writers
+  UNKNOWN. Доступ service user к root-private stage требует подготовки/проверки.
+  Windows/Android/iPhone тесты перенесены оператором на утро03.10; acceptance открыт.
+  Docs readback/links/diff проверяются отдельно; прежние152 tests не повторялись
+  ради docs-only результата. SSH1, DB/services/remote writes/install/activation/push0;
+  AWG2/package016 untouched, stage VERIFIED_NOT_ACTIVATED, issuance не включалась.
+
 - Продолжен Phase16 `/GO`: [service adapters и следующий facts packet](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#service-operations-facts-2026-10-02).
   Candidate switch/admission, web launch/owned-loopback HTTP readiness и release
   связаны с migration proof, durable intents/receipts, source и whole-action budgets.

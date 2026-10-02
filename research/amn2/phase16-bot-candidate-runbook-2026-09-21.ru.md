@@ -1651,3 +1651,64 @@ client tests не запускались. Оценки сроков до пол�
 Safety этого прохода: SSH0/install0/live DB0/services0/activation0/push0.
 Frozen target MATCH; AWG2/package016 untouched, stage29.09 VERIFIED_NOT_ACTIVATED,
 general issuance не включалась; чужие28 planning lines сохранены unstaged.
+
+
+<a id="maintenance-facts-executed-2026-10-02"></a>
+
+## Maintenance facts: исполнено, admission не получен — 02.10
+
+**FACTS_COLLECTED_NOT_ADMITTED.** Однократный пакет
+`PHASE16_MAINTENANCE_FACTS_20261002_001` исполнен из commit
+`a21d0774b1ef49c2ac3c260ee3e271281f4142ea` после точного ответа «разрешаю».
+[Execution receipt](phase16-maintenance-facts-execution-001-2026-10-02.json):
+SSH exit0, 9.406 s, stdin0, stdout4699 bytes, stderr0, output complete.
+Approval consumed; команда в предыдущем разделе теперь историческая, повтор запрещён.
+Claim/result сохранены локально; hashes и normalized result повторно сверены.
+
+| Наблюдение 02.10 | Результат и граница |
+| --- | --- |
+| User/Group bot и web | `amn2-spain`, оба active/running, NRestarts0 |
+| Bot | Type=notify, start40s/stop90s, Restart=no |
+| Web | Type=simple, start90s/stop90s, Restart=on-failure, port3031 |
+| Process environment обоих | VPS_APPLY_ENABLED=false; DB path соответствует authoritative DB; CIDR10.212.12.0/24 |
+| Bot admission | timeout30s, expected username `NeobyatnayaAMNZ_bot` |
+| AWG3_BOOTSTRAP_ENABLED | ABSENT в process environment; это не доказательство будущего effective=false |
+| Source settings | pinned old/candidate settings.py hashes совпали; old-source .env отсутствует |
+| Inventory | 303 unit names, 5 связанных units, 4 cron files без найденных маркеров, 114 процессов/6 совпадений по маркерам |
+
+Дополнительные docker/network/forward-compat units совпадают с прежним Phase12
+набором инфраструктуры: см. `EXPECTED_ACTIVE_ENABLED_UNITS` в
+[историческом source](../../scripts/vps/phase13_bot_web_migration_production_stage_remote.py).
+Это не доказательство наличия ещё трёх DB writers. И наоборот, статический поиск
+имён/маркеров не исключает opaque wrappers, внешние pollers и ручные операции.
+Исторический executor не запускался и не является разрешением на запуск.
+
+Оператор ответил **«Не уверен»** о других копиях бота/администраторах/ручных writers.
+`exclusive_maintenance_owner`, `external_pollers_excluded`, `manual_cli_paused`
+остаются UNKNOWN; не подставлять true. Доступ к этому боту через BotFather
+запрошен, ответ пока не получен. Сам доступ к BotFather не доказывает отсутствие
+DB writers. Базовый дизайн сохраняет bot identity/token; rotation, удаление бота
+и reset БД не разрешены и не выполнялись. Секреты в чат не запрашиваются.
+
+Обнаружена обязательная предпосылка доступа: stage29.09 создавался root0700,
+source/runtime размещены под приватными каталогами, фактический service user —
+`amn2-spain`. До candidate start нужно проверить и адресно подготовить доступ
+для его UID/GID/namespace. Права/ACL на момент нового SSH не собирались;
+фактический ACCESS_DENIED не объявляется установленным. Нельзя применять общий
+chmod/chown ко всему stage: payload/receipts/scratch должны остаться приватными,
+владелец root сохраняется. Изменений прав на сервере не было.
+
+Настройки работающего процесса не подменяют EnvironmentFile для будущего запуска.
+Полные source/runtime integrity, effective settings precedence, startup bound,
+writer exclusion, ownership, sustained coordinator и Linux acceptance остаются
+незавершёнными. Следующий шаг — локально завершить единое maintenance исполнение
+с проверками внутри; нового SSH-пакета ради повторения этих фактов не создавать.
+Live mutation потребует отдельного exact approval готового packet.
+
+Оператор указал Windows, Android и iPhone и **отложил клиентские тесты до утра
+03.10 (Europe/Moscow)**. Точное время не назначено; сейчас connectivity/quality/A-B
+не выполняются, старые FAIL/open не превращаются в PASS. Это не закрывает Phase16.
+
+Safety этого SSH: remote file writes0, DB opens0, service actions0,
+upload/stage/install/activation0, push0. AWG2/package016 untouched,
+stage29.09 VERIFIED_NOT_ACTIVATED, general issuance не включалась.

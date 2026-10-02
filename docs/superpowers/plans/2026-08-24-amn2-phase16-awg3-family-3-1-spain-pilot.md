@@ -508,13 +508,17 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
     [Продолжение02.10](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#service-operations-facts-2026-10-02):
     concrete candidate/web/release adapters, migration receipt-chain before start,
     whole-action deadlines и owned HTTP readiness; **152 affected PASS/0SKIP**.
-    Подготовлен один checksum-bound read-only maintenance facts packet (45/60s),
-    exact SSH approval получен02.10, запуск pending. Сбор фактов не равен host admission;
-    full sustained coordinator, Linux acceptance и effective preconditions открыты.
+    [Facts packet исполнен02.10](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-facts-executed-2026-10-02):
+    SSH exit0 за9.406s, FACTS_COLLECTED_NOT_ADMITTED; approval consumed, retry запрещён.
+    User/Group=amn2-spain, web3031, CIDR10.212.12.0/24; process VPS_APPLY=false,
+    AWG3 flag ABSENT. Это не будущие effective settings или host admission.
+    Оператор не уверен в отсутствии других writers/pollers: ownership UNKNOWN.
+    Также открыты service-user доступ к root-private stage, full sustained
+    coordinator, Linux acceptance и остальные effective preconditions.
     `/GO` разрешает продолжать локальную работу без промежуточных подтверждений;
-    SSH/live/push остаются exact-bound. Доступность устройств/сетей запрошена для
-    дальнейшего Windows/A/B; ответа нет, фактических client checks не было.
-  Writer inventory/ownership, effective flags/user/group, drain/startup/pending и
+    SSH/live/push остаются exact-bound. Windows/Android/iPhone доступны;
+    клиентские тесты отложены оператором до утра03.10, сейчас не выполняются.
+  Writer inventory/ownership, future effective flags, stage access, startup/pending и
   actual data rehearsal ещё не приняты. Базовый дизайн и однократное исключение
   старого drain согласованы; повторно их не запрашивать. Локальная подготовка
   разрешена, новый SSH/data/service scope не разрешён.
