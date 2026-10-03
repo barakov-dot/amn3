@@ -1,11 +1,12 @@
 # Отдельный bot candidate — 2026-09-21
 
-> **Уточнение scope03.10 после preparation:** цель — завершение проекта и перенос
-> на другой сервер/сервис. `PHASE16_BOT_MAINTENANCE_20261003_001` не выполнен и
-> снят с очереди; прежний запрос live approval этого пакета больше не актуален.
-> Подготовленный код/evidence сохраняются. Конкретный пакет связан с Spain и
-> не переносится на иной host заменой hashes. Текущие шаги —
-> [M0–M5 в единственном плане](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md#transfer-priority-2026-10-03).
+> **Текущее состояние03.10:** цель переноса сохраняется. После уточнения scope
+> оператор отдельным exact approval разрешил прежний Spain packet и push0421da7.
+> Один запуск завершился bound STOP_OR_UNKNOWN_NO_RETRY/exit3 за22.937s; input/output
+> complete, stderr0. DB/services/activation UNKNOWN, approval consumed/no retry.
+> Следующий шаг — [read-only retained-state readback](#maintenance-executed-2026-10-03),
+> ещё не разрешён. Конкретный packet не переносится на иной host заменой hashes.
+> [Единственная очередь M0a–M5](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md#transfer-priority-2026-10-03).
 
 Статус: LOCAL_CANDIDATE_NOT_DEPLOYED.
 [Конкретный startup/fence/backup/recovery дизайн](#startup-fence-backup-design-2026-09-23)
@@ -1935,3 +1936,67 @@ intents/evidence и запрашивается только необходимы
 host. Возможная роль Spain теперь определяется целевым переносом: согласованный
 source export/cutover при необходимости, а не повторная интеграция здесь.
 См. [основу передачи](../../docs/PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#transfer-baseline-2026-10-03).
+
+<a id="maintenance-executed-2026-10-03"></a>
+
+## Exact maintenance approval исполнен03.10 — STOP, без повтора
+
+После уточнения цели переноса оператор отдельно прислал exact разрешение прежнего
+пакета с manifest431bd0… и payloadcb8d39… и подтвердил: другие копии бота не
+работают, application writers только bot/web, других фоновых writers нет, ручные
+задачи приостановлены на45min. Это разрешение новее временного снятия packet с
+очереди; оно разрешило именно один запуск, не отменяет конечную цель переноса.
+
+Разрешённый push **0421da7c2202c6d55a8c2bdf0d117d38b765ed1b** выполнен при
+EXPECTED_OLD568c24cf, NO_FORCE/NO_TAGS/NO_OTHER_BRANCHES. Pre-push changelog gate
+проверил8 новых commits; Git readback подтвердил точный SHA. Local196e343 и
+следующие docs/diagnostic commits этим разрешением не публикуются.
+
+[Execution record](phase16-bot-maintenance-execution-001-2026-10-03.json):
+
+- один SSH,22.937s, returncode3; stdin345515 bytes accepted полностью;
+- stdout657 bytes, EOF complete, stderr0; timeout/pipe errors нет;
+- valid bound entry receipt: `STOP_OR_UNKNOWN_NO_RETRY`, reason
+  `packet_precondition_or_execution_failed`, manual route
+  `INSPECT_RETAINED_INTENTS_AND_MANAGER_STATE`;
+- сохранены claim/result/operator-authorization hashes. Maintenance code upload и
+  запись packet result подтверждаются bound entry receipt; claim consumed once.
+
+Исходный entry не сохранил имя failed boundary/исключения. Из ответа нельзя
+доказать отсутствие stage chmod/chown, service fence/stop/start или DB migration;
+их state остаётся UNKNOWN. Нельзя объявлять recovery/activation PASS, называть
+timeout причиной отказа или повторять packet. Structural preview старого gate по-прежнему считает
+bytes/hash, но факт исполнения берётся из execution record и durable claim.
+
+### Один предложенный read-only readback
+
+[Readback gate](../../scripts/phase16_bot_maintenance_readback.py),
+[manifest](phase16-bot-maintenance-readback-manifest-2026-10-03.json) и
+[local verification](phase16-bot-maintenance-readback-local-verification-2026-10-03.json)
+подготовлены для `PHASE16_BOT_MAINTENANCE_READBACK_20261003_001`:
+
+- фиксированные saved operation JSON: hashes/size и только allowlisted status,
+  phase, reason; journal names/count/hash; fixed fence/permit metadata;
+- selected state properties bot/web/coordinator до/после. Нет raw environment,
+  command line, logs, токенов, конфигов или строк БД в выводе;
+- только если access/coordinator claim отсутствует: authenticated readonly
+  unit/candidate/legacy proofs, включая selected settings/source/runtime provenance.
+  Старый root0700 observer не повторяется после permission claim;
+- first readonly proof STOP выдаёт pinned literal reason. Общий readback UNKNOWN
+  сообщает fixed boundary/reason; произвольный exception text редактируется;
+- deadline120s включает launcher/bootstrap; transport150s, output64KiB,
+  одна попытка, strict pinned SSH. Remote code исполняется в памяти, не загружается
+  на диск. Application/SQLite/permission/data/service action не запускаются этим gate.
+
+БД не открывается; pending/writer admission, migration correctness и оригинальное
+скрытое исключение не объявляются доказанными readback. Если unit/candidate/legacy
+proofs проходят, а поздних claims нет, отказ сужается до дальнейшего preflight,
+но причина pending/writer не угадывается. Native Linux readback не выполнен.
+Новое exact разрешение должно включать manifest и remote SHA; старое maintenance
+approval его не разрешает. До результата нет cleanup/recovery/restore/replay.
+AWG2/package016 сохраняются; general issuance disabled по bound packet.
+
+Локальная завершающая группа: **34 PASS / 0 SKIP**, Windows fixtures; Linux native
+не запускался. Независимый review нашёл P1: legacy wrapper поглощал deadline;
+actual-wrapper RED → GREEN закрыл его без изменения original frozen packet.
+Gate/default preview и manifest совпали; proposed readback claim отсутствует.

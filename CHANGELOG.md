@@ -7,6 +7,23 @@
 
 ## 2026-10-03
 
+- По позднему exact разрешению оператора выполнены push0421da7 при EXPECTED_OLD568c24cf
+  (pre-push8 commits PASS, readback MATCH) и один [maintenance запуск](research/amn2/phase16-bot-maintenance-execution-001-2026-10-03.json):
+  SSH3/22.937s, input345515/output657 complete, stderr0; bound STOP_OR_UNKNOWN_NO_RETRY.
+  Owner statement подтверждён, approval consumed; DB/service/permission/activation
+  state UNKNOWN, причина исходным entry не выведена. Никаких retry/restore/replay.
+  Цель переноса сохранена; current plan/START_HERE/handoff/runbook уточнены.
+  Подготовлен один [read-only readback](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-executed-2026-10-03):
+  saved record hashes/allowlisted fields, fence/unit state и при отсутствии claims
+  authenticated readonly unit/candidate/legacy probes; DB/app/services/writes0.
+  Remote120s включает bootstrap, transport150s. RED/GREEN проверил deadline и
+  redaction pinned raise reasons. Review P1 (legacy wrapper swallowing deadline)
+  закрыт actual-wrapper RED/GREEN; итог34 PASS/0 SKIP в [local receipt](research/amn2/phase16-bot-maintenance-readback-local-verification-2026-10-03.json),
+  native Linux readback не выполнен.
+  Новый readback/SSH пока не разрешён и не исполнялся; исходный packet/receipts,
+  package016 и чужой planning diff сохранены. AWG2 untouched по bound receipt,
+  issuance disabled; новые local commits не опубликованы этим push approval.
+
 - По уточнению оператора [исправлена цель и очередь Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md#transfer-priority-2026-10-03):
   завершение проекта и перенос на другой сервер/сервис вместо обязательного
   обновления Spain. Подготовленный maintenance packet03.10 снят с очереди,

@@ -1,0 +1,101 @@
+{
+  "schema": "phase16.maintenance-readback-local-verification.v1",
+  "date": "2026-10-03",
+  "status": "LOCAL_VERIFIED_PROPOSED_NOT_EXECUTED",
+  "approval": "PHASE16_BOT_MAINTENANCE_READBACK_20261003_001",
+  "original_manifest_sha256": "431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff",
+  "manifest_sha256": "92fbdc03ae44648c10e0a411a28ac0ecd1a2987c3544dbdb0b54bfc7d40ba898",
+  "remote_sha256": "e560df313f0d472a47791d77a2e51263d8385ebd9ab7145a9d1538d6eff67de9",
+  "artifacts_sha256_lf": {
+    "scripts/phase16_bot_maintenance_readback.py": "b0e35c25317b94cafa2ff2b1aa6af15336b4e7e9ec57ac8997d43b600029bb0b",
+    "tests/test_phase16_bot_maintenance_readback.py": "72f14f90df143d41f3e3bfa9785b45a55b81259ce2f4eab9627dd8b687fe57f4",
+    "research/amn2/phase16-bot-maintenance-readback-manifest-2026-10-03.json": "92fbdc03ae44648c10e0a411a28ac0ecd1a2987c3544dbdb0b54bfc7d40ba898",
+    "research/amn2/phase16-bot-maintenance-execution-001-2026-10-03.json": "6d1809e84d04fa1fef9e61443818c367dd2e33ef3f55c7249cbaf604d887709f"
+  },
+  "original_packet_frozen_files": 57,
+  "original_packet_closure": "MATCH",
+  "tests": {
+    "modules": [
+      "tests.test_phase16_bot_maintenance_readback",
+      "tests.test_phase16_bot_maintenance_packet",
+      "tests.test_phase16_bot_maintenance_transport"
+    ],
+    "tests_run": 34,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 6.735,
+    "success": true,
+    "scope": "WINDOWS_LOCAL_ONLY; LINUX_READBACK_NOT_EXECUTED"
+  },
+  "tests_log_sha256": "999ec3fea7896b6c30604d255c52a03b730c4ad385a47abaca69d5aadde93b33",
+  "tests_result_sha256": "e2ed87d869f6f22ea37c3ebca42d5e036f894a47732efa6d114c1cffcf549187",
+  "red_green": {
+    "test": "ReadbackTests.test_deadline_survives_actual_legacy_collector_wrapper",
+    "red": "FAIL: legacy collector swallowed BaseException deadline and returned READBACK_COLLECTED_NOT_RECOVERY",
+    "green": "PASS: KeyboardInterrupt subclass preserves deadline, main returns UNKNOWN_NO_RETRY/deadline/null snapshot",
+    "actual_legacy_wrapper": true,
+    "legacy_packet_source_changed": false
+  },
+  "independent_review": {
+    "task": "/root/maintenance_readback_review",
+    "scope": "Read-only local review before final deadline fix; no SSH or remote effects",
+    "findings": 1,
+    "severity": "P1",
+    "finding": "Deadline swallowed by frozen legacy.collect_live BaseException wrapper",
+    "resolution": "Closed by actual-wrapper RED/GREEN and final34 PASS",
+    "other_concrete_findings": 0,
+    "final_fix_verification": "LOCAL_REGRESSION; review result does not claim native Linux acceptance"
+  },
+  "preview": {
+    "status": "OFFLINE_READY_NOT_EXECUTED",
+    "approval": "PHASE16_BOT_MAINTENANCE_READBACK_20261003_001",
+    "manifest_sha256": "92fbdc03ae44648c10e0a411a28ac0ecd1a2987c3544dbdb0b54bfc7d40ba898",
+    "remote_sha256": "e560df313f0d472a47791d77a2e51263d8385ebd9ab7145a9d1538d6eff67de9",
+    "ssh_attempts": 0,
+    "remote_seconds": 120,
+    "transport_seconds": 150,
+    "database_open": 0,
+    "remote_file_writes": 0,
+    "service_actions": 0
+  },
+  "modelled_boundaries": [
+    "Linux platform/signal callbacks",
+    "actual legacy wrapper with injected reader factory",
+    "closed output schema and scope",
+    "allowlisted literal errors",
+    "wrong approval before protected binding load"
+  ],
+  "native_linux_execution": false,
+  "new_ssh_attempts": 0,
+  "new_remote_file_writes": 0,
+  "new_database_open": 0,
+  "new_service_actions": 0,
+  "new_stage_install": 0,
+  "new_activation": false,
+  "original_execution": "STOP_OR_UNKNOWN_NO_RETRY; original approval consumed once; no replay",
+  "readback_execution_claim_exists": false,
+  "foreign_planning_diff_sha256": "dd63e3e9ec5a999160a75c5ea5a94357b3003764c5e201350d2b6f21394be303",
+  "limits": {
+    "ssh_attempts": 1,
+    "remote_seconds": 120,
+    "transport_seconds": 150,
+    "output_bytes": 65536
+  },
+  "scope": {
+    "remote_file_writes": 0,
+    "database_open": 0,
+    "service_actions": 0,
+    "app_imports": 0,
+    "stage_install": 0,
+    "activation": 0,
+    "telegram": 0
+  },
+  "limitations": [
+    "No claim of migration correctness or live acceptance",
+    "Readback may narrow original preflight but cannot expose original unsaved exception",
+    "Native Linux/read-only live state not yet observed",
+    "Transfer destination still unspecified"
+  ],
+  "next_action": "One newly and exactly approved SSH with manifest/remote SHA; no repeat, restore, cleanup or service changes"
+}

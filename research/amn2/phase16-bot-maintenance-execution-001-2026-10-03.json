@@ -1,0 +1,131 @@
+{
+  "schema": "phase16.maintenance-execution-record.v1",
+  "approval": "PHASE16_BOT_MAINTENANCE_20261003_001",
+  "date": "2026-10-03",
+  "status": "STOP_OR_UNKNOWN_NO_RETRY",
+  "approval_state": "GRANTED_AND_CONSUMED_ONCE",
+  "local_result": {
+    "claim": {
+      "approval": "PHASE16_BOT_MAINTENANCE_20261003_001",
+      "attempts": 1,
+      "claimed_at": "2026-10-03T11:16:48.233576+00:00",
+      "manifest_sha256": "431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff",
+      "payload_sha256": "cb8d39f97861ea36bc251245c3b9becf8ec10c124a428e755fc8b767e0f41b89",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6"
+    },
+    "receipt": {
+      "approval": "PHASE16_BOT_MAINTENANCE_20261003_001",
+      "automatic_replay": false,
+      "awg2": "UNTOUCHED",
+      "general_issuance": "DISABLED",
+      "manifest_sha256": "431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff",
+      "operation_id": "phase16-bot-maintenance-20261003-001",
+      "package016": "UNCHANGED",
+      "result": {
+        "automatic_recovery": "DISABLED",
+        "live_acceptance": "NOT_ESTABLISHED",
+        "reason": "packet_precondition_or_execution_failed",
+        "recovery_route": "INSPECT_RETAINED_INTENTS_AND_MANAGER_STATE",
+        "status": "STOP_OR_UNKNOWN_NO_RETRY"
+      },
+      "schema": "phase16.maintenance-packet-result.v1",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6"
+    },
+    "replay_allowed": false,
+    "schema": "phase16.maintenance-local-result.v1",
+    "status": "UNKNOWN_NO_RETRY",
+    "transport": {
+      "automatic_retry": false,
+      "elapsed_seconds": 22.937,
+      "failure_stage": null,
+      "last_stdin_progress_seconds": 3.656,
+      "local_child_reaped": true,
+      "output_complete": true,
+      "pipe_failures": [],
+      "remote_coordinator_status": "UNKNOWN_MAY_CONTINUE",
+      "replay_allowed": false,
+      "returncode": 3,
+      "schema": "phase16.bot-maintenance-transport.v1",
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_diagnostic": {
+        "hints": [],
+        "output_cap_hit": false,
+        "root_cause": "NOT_ESTABLISHED",
+        "status": "EMPTY",
+        "utf8_valid": true
+      },
+      "stdin_bytes_accepted": 345515,
+      "stdin_bytes_requested": 345515,
+      "stdin_complete": true,
+      "stdout": {
+        "bytes_observed": 657,
+        "bytes_retained": 657,
+        "prefix_sha256": "fcc9f47b9bdd6c62c456c71553759056628173e52db66c25172d0cb686e2df06"
+      },
+      "termination_action": "NONE",
+      "termination_scope": "LOCAL_TRANSPORT_ONLY"
+    }
+  },
+  "artifacts": {
+    "claim.json": "b649f8385281a7600f2ba6b9270916ac4095ccf2a1dfc4b5b5ac04fdf817b764",
+    "result.json": "75207f048f5c7a2ddcb2925f9a270afd1cf3dea6003a1a6df7bccba673980407",
+    "operator-authorization.json": "a3956bc66769218325168196efca4bb87a393e3ad65945e554ddf0eb13aceef6"
+  },
+  "push": {
+    "head": "0421da7c2202c6d55a8c2bdf0d117d38b765ed1b",
+    "expected_old": "568c24cf0bd589caedf85ad373946cd64b6b93ba",
+    "origin": "https://github.com/barakov-dot/amn3.git",
+    "ref": "refs/heads/codex/phase16-awg3-family-3-1-spain-pilot-016",
+    "exit_code": 0,
+    "readback_sha": "0421da7c2202c6d55a8c2bdf0d117d38b765ed1b",
+    "no_force": true,
+    "no_tags": true
+  },
+  "operator_ownership": {
+    "other_bot_copies_not_running": true,
+    "application_writers": [
+      "bot",
+      "web"
+    ],
+    "other_background_writers_absent": true,
+    "manual_tasks_paused_seconds": 2700
+  },
+  "observed": {
+    "ssh_attempts": 1,
+    "input_bytes": 345515,
+    "stdout_bytes": 657,
+    "stderr_bytes": 0,
+    "ssh_returncode": 3,
+    "elapsed_seconds": 22.937,
+    "remote_entry_receipt": "VERIFIED",
+    "maintenance_upload_and_packet_result": "CONFIRMED_BY_BOUND_ENTRY_RECEIPT",
+    "transport_timeout": false
+  },
+  "unobserved": {
+    "failure_boundary": "NOT_EMITTED_BY_ORIGINAL_ENTRY",
+    "root_cause": "NOT_ESTABLISHED",
+    "stage_permission_transition": "UNKNOWN",
+    "service_fence_stop_start": "UNKNOWN",
+    "database_backup_rehearsal_migration": "UNKNOWN",
+    "activation": "UNKNOWN",
+    "manager_completion": "UNKNOWN",
+    "live_acceptance": "NOT_ESTABLISHED",
+    "project_transfer": "NOT_EXECUTED"
+  },
+  "safety": {
+    "awg2": "UNTOUCHED_PER_BOUND_PACKET",
+    "package016": "UNCHANGED",
+    "general_issuance": "DISABLED_PER_BOUND_PACKET",
+    "retries": 0,
+    "automatic_restore": false,
+    "automatic_replay": false,
+    "token_rotation": false,
+    "protected_rows_or_configs_in_record": false
+  },
+  "next_action": "ONE_EXACTLY_APPROVED_READBACK_OF_RETAINED_INTENTS_AND_MANAGER_STATE; NO_REEXECUTION",
+  "scope_ruling": "Latest exact operator approval resumed this Spain packet after transfer-priority correction. Transfer remains the project goal; destination still unspecified."
+}

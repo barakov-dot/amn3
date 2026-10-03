@@ -133,3 +133,14 @@ polling старой и новой копий; local token reset не подра
 Передача основы подготовлена; фактический перенос, target acceptance и закрытие
 Phase16 ещё не выполнены. Это сохраняет completed checks без объявления всего
 проекта принятым. SSH/live writes/install/activation/push в дополнении03.10:0.
+
+### Позднее exact исполнение03.10 после уточнения переноса
+
+Оператор отдельно разрешил ранее подготовленный Spain packet и push0421da7;
+owner statement принят для45min окна. [Запуск](../research/amn2/phase16-bot-maintenance-execution-001-2026-10-03.json)
+завершился за22.937s/SSH3, полный transport, bound STOP_OR_UNKNOWN_NO_RETRY.
+Push0421da7 подтверждён Git readback. Candidate installation/activation и DB/service
+state этим ответом не приняты: UNKNOWN, repeat/restore/replay запрещены.
+Текущую безопасную границу M0a — отдельный read-only retained-state readback —
+смотреть в единственном плане. Цель переноса и вопрос о точном месте сохраняются;
+этот запуск не является фактическим переездом или закрытием Phase16.
