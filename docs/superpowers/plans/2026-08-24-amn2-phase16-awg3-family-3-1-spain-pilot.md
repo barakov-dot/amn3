@@ -1,5 +1,43 @@
 # Phase 16 — текущий execution plan
 
+<a id="transfer-priority-2026-10-03"></a>
+
+## Актуальная цель и очередь — перенос, уточнение оператора03.10
+
+Оператор уточнил: «наша задача переехать на другой сервер была… задача завершить
+проект и перенести его на другой сервис». Это уточнение заменяет прежний порядок
+«сначала интеграция на Spain, затем передача», сохранённый в снимке23.09.
+Завершение проекта и перенос — конечный результат; обновление bot/web на Spain
+больше не является самостоятельной задачей или обязательной ступенью переноса.
+
+Существующие source/tests/receipts и immutable packages сохраняются. Подготовленный
+`PHASE16_BOT_MAINTENANCE_20261003_001` **снят с текущей очереди исполнения**:
+он локально проверен, но не запускался, его exact approval не выдан. Прежний запрос
+разрешить этот пакет больше не актуален. Его host/boot/paths/UID/schema/rollback
+bindings относятся к Spain; нельзя переназначить пакет на другой VPS заменой SHA.
+Требование единоличного обслуживания сохраняется для реального переключения бота,
+но owner statement для обновления Spain сейчас не запрашивается.
+
+### TASK_PLAN_BY_CRITICALITY — актуальный перенос
+
+| Приоритет / задача | Проверяемый результат и зависимость | Scope / статус |
+| --- | --- | --- |
+| P0 / M0 — зафиксировать переносимую основу | AMN2 source6e68235, AMN3 tools0421da7, immutable payload и результаты; разделить local/package/deployed/accepted, перечислить открытые ограничения | Локально разрешено; Git/source сверены03.10, [обновлённая передача](../../PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#transfer-baseline-2026-10-03) |
+| P0 / M1 — установить точную цель | Другой VPS либо новый проект/общая админка; идентификатор, доступный путь/репозиторий или параметры сервера, границы переносимого состояния | Ответ оператора ожидается; без этого нельзя выбрать deployment/data contract |
+| P1 / M2 — подготовить целевой перенос | После M1: совместимость OS/arch/runtime/DB, ownership приложения, manifest, проверка данных и ручной rollback; сохранить секреты вне Git и один Telegram poller | Локальная подготовка разрешена; другой проект и сервер ещё не обследованы, live scope отсутствует |
+| P1 / M3 — выполнить переключение | После M2 и exact approval: целевой install/import; если переносится состояние — согласованный consistent backup/export и cutover с одним bot owner; фактические receipts целевого запуска | Новые SSH/upload/DB/services/выдача требуют точного разрешения; не заменять перенос обновлением Spain |
+| P1 / M4 — проверить конечный результат | Проверки на целевом месте: bot/web, сохранность выбранных данных, Windows/Android/iPhone и quality/A-B по применимому контракту | Клиентские проверки пока отложены; исторические Spain PASS/FAIL не принимают новый сервер |
+| P2 / M5 — принять и закрыть | После M3/M4: фактические source/release/deployed SHA, итоговые evidence, известные ограничения и handoff; Phase16 не закрывать по local461 PASS | Итоговые local docs разрешены; приёмка и перенос пока не выполнены |
+
+Spain остаётся источником исторического evidence и, при необходимости после
+уточнения M1/M2, источником согласованного export/cutover. Новая installation/
+migration/activation на Spain не входит в текущую очередь. AWG2 и package016
+не затронуты; general issuance disabled; автоматические retry/replay/restore
+не разрешены. Целевой сервер/сервис сейчас `TARGET_UNSPECIFIED`.
+
+Разделы ниже сохраняют прежний execution history и открытые acceptance criteria.
+Их старые next-step/approval формулировки не заменяют текущую очередь M0–M5.
+
 ## Актуальный порядок и gates — 2026-09-08
 
 Единственный текущий execution status Phase 16. Исходный baseline документационной
@@ -116,6 +154,9 @@ cb7ea0c не разрешился в двух официальных source repo
 Clipboard/EN-RU setup подготовлены по просьбе оператора, UI-работа ещё не подтверждена.
 
 ### TASK_PLAN_BY_CRITICALITY
+
+Порядок ниже исторический; текущая очередь переноса M0–M5 находится
+[в начале этого плана](#transfer-priority-2026-10-03).
 
 1. **P0 — quality/A/B, ОТЛОЖЕНО.** После возврата оператора: подтвердить импорт
    существующего d7 и физическую сеть, метод/лимиты/outcomes; затем exact approval
@@ -536,8 +577,9 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
   Проверяющий код и цельный live packet подготовлены; фактические writer ownership,
   flags/access/startup/pending и data rehearsal сервером ещё не подтверждены.
   Базовый дизайн и однократное исключение старого drain согласованы, повторный
-  design approval не нужен. Следующий шаг — внешний poller/owner statement и точный
-  checksum-bound approval готового пакета; новый SSH/data/service scope пока не разрешён.
+  design approval не нужен. До уточнения переноса03.10 следующим шагом предполагался
+  owner statement/approval Spain packet; этот шаг снят с очереди. Следовать M0–M5
+  выше; новый SSH/data/service scope пока не разрешён.
 - [x] T9 — secure descriptor reads/hash provenance retained candidate, новый stage
   без upload/old test-venv reuse, offline install/metadata/no-app-import контракт.
 - [x] T10 — одноразовый gate/manifest,23 targeted PASS, actual immutable bundle
@@ -583,7 +625,10 @@ Design согласован оператором после commit b277154. По
   READY_FOR_EXACT_APPROVAL_NOT_EXECUTED: это готовность пакета, не host admission.
   Единоличный SSH и BotFather access подтверждены; external pollers/полная app topology
   и45min ownership ещё не подтверждены. Actual DB rehearsal/migration/startup и
-  Linux acceptance не выполнены. Exact live approval отсутствует; recovery v1 сохранён.
+  Linux acceptance не выполнены. После уточнения03.10 Spain maintenance снят с
+  очереди; текущая задача — перенос M0–M5, target пока не указан. Exact live approval
+  отсутствует; recovery v1 сохранён. Исторические client evidence ниже сохраняются,
+  но принятие на новом сервере ещё не выполнено.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана; тесты отложены до утра03.10.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.

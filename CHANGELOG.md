@@ -7,6 +7,19 @@
 
 ## 2026-10-03
 
+- По уточнению оператора [исправлена цель и очередь Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md#transfer-priority-2026-10-03):
+  завершение проекта и перенос на другой сервер/сервис вместо обязательного
+  обновления Spain. Подготовленный maintenance packet03.10 снят с очереди,
+  прежний запрос его approval больше не актуален; code/manifest/receipt сохранены.
+  [Основа передачи](docs/PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#transfer-baseline-2026-10-03)
+  обновлена: AMN2 HEAD6e68235/чистый status сверены локально, AMN3 tools0421da7 и
+  прежний461 local PASS обозначены с target/OS/data ограничениями. Target пока
+  не указан; фактический перенос/acceptance/closeout не выполнены. START_HERE и
+  runbook направляют к единственной очереди M0–M5. Docs-only: readback, ссылки,
+  diff/whitespace и сохранность чужого planning diff; tests не повторялись,
+  packages не создавались. SSH/live DB/services/stage/install/activation/push0;
+  AWG2/package016 untouched, general issuance disabled.
+
 - Подготовлен [единый пакет обслуживания Phase16](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-packet-local-2026-10-03):
   verified runtime/source и OS-bootstrap provenance, effective settings, application
   writer/ownership admission, pending aggregates, durable stage permissions и service

@@ -2,8 +2,10 @@
 
 Адресат: разработчик/модель нового проекта с общей админкой и ботом для нескольких
 VPN-протоколов. Это **передача знаний уже сейчас**, а не перенос кода, данных или
-полномочий. Оператор выбрал сначала завершить Phase16 на текущем сервере, затем
-собрать окончательный пакет передачи. Новый проект пока находится на начальной
+полномочий. На23.09 оператор выбрал сначала завершить Phase16 на текущем сервере,
+затем собрать окончательный пакет передачи. Уточнение03.10 заменило этот порядок:
+завершить проект и перенести его на другой сервер/сервис; см. дополнение ниже.
+Новый проект по сведениям23.09 находится на начальной
 стадии у другой модели; его код здесь не проверялся. Этот снимок не является
 вторым execution plan и не объявляет Phase16 принятой.
 
@@ -88,3 +90,46 @@ source, package, deployed и accepted. Составь карту пересеч�
 админки/бота и протокольных capabilities; решения о пользовательском выборе
 протокола оставь открытыми. Не запускай исторические GO, не переноси секреты,
 не меняй live VPS и не объявляй Phase16 закрытой без новых receipts».
+
+<a id="transfer-baseline-2026-10-03"></a>
+
+## Дополнение03.10: переносимая основа и оставшиеся зависимости
+
+Текущая цель — завершить проект и перенести его на другой сервер/сервис.
+[Единственная очередь M0–M5](superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md#transfer-priority-2026-10-03)
+заменяет прежний порядок завершения на Spain. Этот раздел — материал передачи,
+а не второй execution plan. Уточнение адресата уже запрошено: другой VPS либо
+новый проект с общей админкой/ботом, точное место ещё не известно.
+
+Локальная Git-сверка03.10: AMN2 checkout
+`C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/amn2-web-health-event-loop`,
+ветка `codex/phase16-web-health-event-loop`, HEAD
+`6e682356ed14a62d636ee58039fd3a389e794809`, `git status --short` пустой.
+AMN3 после preparation: `0421da7c2202c6d55a8c2bdf0d117d38b765ed1b`;
+это local source commit, не deployment или доказательство publication.
+Исторический Git remote/source push не проверялся повторно.
+
+| Материал | Как использовать при переносе | Существенная граница |
+| --- | --- | --- |
+| AMN2 production source6e68235 | Основа приложения web/bot/DB и AWG version capabilities; exact source/tests привязаны в прежних receipts | Целевой runtime/data integration ещё не приняты; общая поддержка других протоколов не реализована этим SHA |
+| Immutable source/runtime40 bundle | Сохранённые bytes/pins и offline provenance; ссылки в [runbook](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md) | Runtime wheels требуют проверки совместимости нового OS/architecture/Python; bundle не переносит live БД, токен или peers |
+| AMN3 maintenance tools0421da7 | Проверки content/settings/writers/pending/access, one-shot sequence и manager-owned coordinator; [461 local PASS](../research/amn2/phase16-bot-maintenance-packet-local-verification-2026-10-03.json) | Конкретный packet связан с Spain boot/paths/UID/service/old schema и target digest; локальные tests не являются target acceptance |
+| Решения и client evidence | Source/design links, naming/MTU/import ограничения, historical Android/iPhone connectivity и Windows/quality FAIL | Результаты Spain не принимают новую endpoint/network/runtime; перенести также открытые дефекты |
+
+`PHASE16_BOT_MAINTENANCE_20261003_001` не выполнен и снят с текущей очереди;
+не применять его на Spain или другом сервере как готовый migration package.
+Изменение host/boot/hash без новой целевой проверки нарушает его контракт.
+На новом VPS потребуется отдельный installation/migration контракт, а в новом
+проекте — сначала сопоставление ownership/data/capability contracts с его кодом.
+
+Для продолжения нужны точная цель и решение о переносимом состоянии: только
+код/знания либо также согласованные БД, server bindings, users/subscriptions и
+peers. Не трактовать этот перечень как разрешение открыть/export/copy live state.
+Секреты передаются отдельно по [протоколу](AMN2_SECRET_HANDOFF_PROTOCOL.ru.md);
+набор для Git не включает `.env`, keys/PSK/tokens, raw конфиги/логи и строки БД.
+Если сохраняется Telegram identity, переключение должно исключать одновременный
+polling старой и новой копий; local token reset не подразумевается.
+
+Передача основы подготовлена; фактический перенос, target acceptance и закрытие
+Phase16 ещё не выполнены. Это сохраняет completed checks без объявления всего
+проекта принятым. SSH/live writes/install/activation/push в дополнении03.10:0.
