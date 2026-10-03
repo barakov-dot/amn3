@@ -3,9 +3,11 @@
 > **Текущее состояние03.10:** цель переноса сохраняется. После уточнения scope
 > оператор отдельным exact approval разрешил прежний Spain packet и push0421da7.
 > Один запуск завершился bound STOP_OR_UNKNOWN_NO_RETRY/exit3 за22.937s; input/output
-> complete, stderr0. DB/services/activation UNKNOWN, approval consumed/no retry.
-> Следующий шаг — [read-only retained-state readback](#maintenance-executed-2026-10-03),
-> ещё не разрешён. Конкретный packet не переносится на иной host заменой hashes.
+> complete, stderr0. [Readback03.10](#maintenance-readback-executed-2026-10-03): SSH0/4.031s,
+> bot/web active/stable, claims/coordinator/fences absent; по bound source ordering
+> permission/maintenance sequence не начинались этим packet. Candidate probe STOP,
+> inner cause не доказана. Оба approvals consumed/no retry; дальше M1 — цель переноса.
+> Конкретный packet не переносится на иной host заменой hashes.
 > [Единственная очередь M0a–M5](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md#transfer-priority-2026-10-03).
 
 Статус: LOCAL_CANDIDATE_NOT_DEPLOYED.
@@ -2000,3 +2002,30 @@ AWG2/package016 сохраняются; general issuance disabled по bound pac
 не запускался. Независимый review нашёл P1: legacy wrapper поглощал deadline;
 actual-wrapper RED → GREEN закрыл его без изменения original frozen packet.
 Gate/default preview и manifest совпали; proposed readback claim отсутствует.
+
+<a id="maintenance-readback-executed-2026-10-03"></a>
+
+## Readback исполнен03.10 — M0a завершён, дальше перенос
+
+[Execution record](phase16-bot-maintenance-readback-execution-001-2026-10-03.json)
+содержит bound snapshot, hashes локальных claim/result/authorization и source
+ordering. По exact approval выполнен один SSH: 4.031s/rc0, stdin0, stdout4408,
+stderr0, EOF complete. Статус READBACK_COLLECTED_NOT_RECOVERY; approval consumed.
+Push5acb675 подтверждён при EXPECTED_OLD0421da7, pre-push2 commits PASS.
+
+Bot/web active/running, selected properties одинаковы до/после. Coordinator
+not-found; saved host/access/coordinator/sequence records, journal, dropins и
+permits отсутствуют. Present только upload claim, original manifest и исходный
+packet-result с прежним точным hash. Bound source требует durable claim до
+chmod/chown и service/data sequence. Поэтому в доверенном OS/root контуре
+permission/maintenance sequence, backup/rehearsal/migration/activation не
+начинались **этим packet**. Это inference по source+retained state; содержимое
+живой БД, inherited runtime/deployed revision и app health не проверялись.
+
+Current readonly unit_facts PASS; candidate_content STOP с
+candidate_collection_failed. Это generic wrapper для скрытого inner exception,
+не установленная root cause оригинального entry. Legacy proof не запускался
+после candidate STOP. Recovery/replay/cleanup не требуются этим snapshot и не
+исполнялись. Новых Spain diagnostics не поставлено в очередь; candidate admission
+остаётся открытым ограничением для целевого контракта переноса. Следующий шаг M1:
+точный сервер/сервис или проект. AWG2/package016 сохранены; issuance disabled.

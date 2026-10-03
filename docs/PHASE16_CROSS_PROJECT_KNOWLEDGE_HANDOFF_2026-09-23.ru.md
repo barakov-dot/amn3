@@ -144,3 +144,15 @@ state этим ответом не приняты: UNKNOWN, repeat/restore/repla
 Текущую безопасную границу M0a — отдельный read-only retained-state readback —
 смотреть в единственном плане. Цель переноса и вопрос о точном месте сохраняются;
 этот запуск не является фактическим переездом или закрытием Phase16.
+
+### Подтверждённое состояние после readback03.10
+
+[Readback execution](../research/amn2/phase16-bot-maintenance-readback-execution-001-2026-10-03.json):
+один exact SSH0/4.031s, READBACK_COLLECTED_NOT_RECOVERY, writes/DB/service actions0.
+Bot/web active/stable; access/coordinator/sequence claims и fences отсутствуют,
+coordinator not-found. По bound source ordering permission/maintenance sequence
+не начинались этим packet; точный original exception не сохранён. Current
+candidate probe STOP/candidate_collection_failed, inner cause не установлена;
+это переносимое открытое ограничение, не target admission. Оба approvals consumed.
+AMN3 source5acb675 опубликован и подтверждён exact ref readback; приложение на VPS
+этим Git push не развёрнуто. M0a завершён, далее M1–M5 в единственном плане.

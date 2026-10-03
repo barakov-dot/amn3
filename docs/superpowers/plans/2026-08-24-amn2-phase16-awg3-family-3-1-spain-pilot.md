@@ -17,9 +17,17 @@ writers и45min окно, выдал exact approval на прежний Spain pa
 [execution03.10](../../../research/amn2/phase16-bot-maintenance-execution-001-2026-10-03.json),
 SSH exit3/22.937s, полный input/output, stderr0, bound STOP_OR_UNKNOWN_NO_RETRY.
 Push0421da7 подтверждён readback, без force/tags; approval packet использован один раз.
-Место отказа исходный entry не вывел; права stage, DB/service changes и activation
-UNKNOWN. Повтор/restore/replay запрещены. Следующая безопасная граница — отдельный
-read-only readback сохранённых intents и manager state, ещё не разрешён/не исполнен.
+Исходный entry не вывел точное исключение. По отдельному exact approval выполнен
+[readback03.10](../../../research/amn2/phase16-bot-maintenance-readback-execution-001-2026-10-03.json):
+SSH0/4.031s, полный transport, READBACK_COLLECTED_NOT_RECOVERY. Bot/web active/running,
+selected PID/InvocationID стабильны; coordinator not-found, access/coordinator/sequence
+claims, journal и operation fences/permits отсутствуют. По bound source ordering это
+STOP до permission и maintenance sequence этого packet; backup/rehearsal/migration/
+activation не начинались им. Это вывод по retained markers в доверенном OS/root
+контуре, не чтение БД и не live acceptance. Current readonly unit_facts PASS,
+candidate_content STOP/candidate_collection_failed; inner cause скрыта wrapper,
+legacy proof не запускался. Readback approval consumed once; дополнительных Spain
+diagnostics в очереди нет. Повтор/restore/replay запрещены. Дальше M1 — точная цель.
 Это не завершённая интеграция и не перенос. Host/boot/paths/UID/schema/rollback
 bindings относятся к Spain; нельзя переназначить packet на другой VPS заменой SHA.
 Согласование owner statement уже получено для этого окна; не спрашивать его повторно.
@@ -30,7 +38,7 @@ bindings относятся к Spain; нельзя переназначить pa
 | Приоритет / задача | Проверяемый результат и зависимость | Scope / статус |
 | --- | --- | --- |
 | P0 / M0 — зафиксировать переносимую основу | AMN2 source6e68235, AMN3 tools0421da7, immutable payload и результаты; разделить local/package/deployed/accepted, перечислить открытые ограничения | Локально разрешено; Git/source сверены03.10, [обновлённая передача](../../PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#transfer-baseline-2026-10-03) |
-| P0 / M0a — установить состояние после STOP | Bound receipt подтверждён; [readback packet](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-executed-2026-10-03) читает retained records/unit/fence metadata и безопасные readonly proof steps без БД/app/services. До этого не объявлять миграцию/activation отсутствующей или успешной | Local preparation разрешена; один новый SSH требует exact approval, remote120s/transport150s; retry/recovery не разрешены |
+| P0 / M0a — установить состояние после STOP | [Readback исполнен](../../../research/amn2/phase16-bot-maintenance-readback-execution-001-2026-10-03.json): bot/web active, coordinator/claims/fences отсутствуют; по source ordering permission/maintenance sequence не начинались этим packet. Candidate probe STOP, inner cause не установлена | ✅ Завершён один exact SSH; approval consumed, DB/writes/service actions0; retry/recovery не разрешены |
 | P0 / M1 — установить точную цель | Другой VPS либо новый проект/общая админка; идентификатор, доступный путь/репозиторий или параметры сервера, границы переносимого состояния | Ответ оператора ожидается; без этого нельзя выбрать deployment/data contract |
 | P1 / M2 — подготовить целевой перенос | После M1: совместимость OS/arch/runtime/DB, ownership приложения, manifest, проверка данных и ручной rollback; сохранить секреты вне Git и один Telegram poller | Локальная подготовка разрешена; другой проект и сервер ещё не обследованы, live scope отсутствует |
 | P1 / M3 — выполнить переключение | После M2 и exact approval: целевой install/import; если переносится состояние — согласованный consistent backup/export и cutover с одним bot owner; фактические receipts целевого запуска | Новые SSH/upload/DB/services/выдача требуют точного разрешения; не заменять перенос обновлением Spain |
@@ -39,7 +47,7 @@ bindings относятся к Spain; нельзя переназначить pa
 
 Spain остаётся источником исторического evidence и, при необходимости после
 уточнения M1/M2, источником согласованного export/cutover. Однократно разрешённый
-packet03.10 завершился STOP; сначала M0a, новые installation/migration/activation
+packet03.10 завершился STOP; M0a readback выполнен, дальше M1. Новые installation/migration/activation
 не разрешены consumed approval и не входят в очередь переноса автоматически. AWG2 и package016
 не затронуты; general issuance disabled; автоматические retry/replay/restore
 не разрешены. Целевой сервер/сервис сейчас `TARGET_UNSPECIFIED`.
@@ -635,9 +643,11 @@ Design согласован оператором после commit b277154. По
   Единоличный SSH и BotFather access подтверждены; external pollers/полная app topology
   и45min ownership были подтверждены поздним exact approval03.10. Один packet
   исполнен: exit3/22.937s, transport complete, bound STOP_OR_UNKNOWN_NO_RETRY.
-  Actual DB/service/activation state UNKNOWN; Linux acceptance не получен.
-  Approval consumed/no retry. Текущая задача — состояние M0a, затем перенос M1–M5,
-  target пока не указан. Новый readback пока не разрешён; recovery v1 сохранён.
+  Readback0/4.031s: bot/web active/stable, coordinator/access/sequence markers absent;
+  по bound source ordering permission/maintenance sequence не начинались этим packet.
+  Current candidate probe STOP/candidate_collection_failed; exact inner cause и
+  DB/schema/deployed SHA не доказаны, Linux acceptance не получен. Оба approvals
+  consumed/no retry. Дальше перенос M1–M5, target пока не указан; recovery не запускался.
   Исторические client evidence ниже сохраняются, принятия на новом сервере нет.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана; тесты отложены до утра03.10.
 - ✅ Task 4B — Android connectivity, не performance acceptance.

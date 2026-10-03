@@ -42,8 +42,10 @@
 сервер/сервис. [Актуальная очередь M0–M5](superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md#transfer-priority-2026-10-03)
 заменяет прежний порядок «сначала обновить Spain, затем передать». Позднее оператор
 точно разрешил один maintenance packet03.10: исполнен один раз, STOP/exit3 за22.937s,
-DB/service/activation state UNKNOWN. Сначала read-only состояние M0a по новому exact
-approval; повтор packet запрещён. Целевое место переноса пока не указано.
+[Readback03.10](../research/amn2/phase16-bot-maintenance-readback-execution-001-2026-10-03.json) выполнен: bot/web active/stable, coordinator/claims/fences отсутствуют;
+по bound source ordering permission/maintenance sequence этим packet не начинались.
+Current candidate probe STOP, exact inner cause не доказана. Оба approvals consumed,
+повтор запрещён. Дальше перенос M1; целевое место пока не указано.
 Windows и quality acceptance открыты, клиентские проверки отложены оператором.
 Сохранять исторические evidence, не повторять прежние diagnostics ради контекста.
 

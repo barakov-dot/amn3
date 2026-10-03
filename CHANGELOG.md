@@ -7,6 +7,21 @@
 
 ## 2026-10-03
 
+- По exact approval выполнен [maintenance readback](research/amn2/phase16-bot-maintenance-readback-execution-001-2026-10-03.json):
+  один SSH0/4.031s, stdin0/stdout4408 complete/stderr0, bound
+  READBACK_COLLECTED_NOT_RECOVERY; remote writes/DB/service actions0.
+  Bot/web active/stable, coordinator not-found, durable access/coordinator/sequence
+  records и fences absent. С bound source ordering установлена граница STOP до
+  permission/maintenance sequence этого packet; original inner exception и DB/
+  inherited deployed state не доказаны. Current readonly candidate STOP с generic
+  candidate_collection_failed сохранён как открытое transfer limitation.
+  Push5acb675 при EXPECTED_OLD0421da7 подтверждён, pre-push2 commits PASS.
+  Новый execution record проверен против exact receipt/hashes/schema, source
+  ordering и prior packet result; docs/routes/criticality plan обновлены, M0a закрыт.
+  Original packets/receipts и foreign planning diff сохранены. Оба SSH approvals
+  consumed, новых Spain diagnostics/retry/recovery/activation нет; дальше target M1.
+
+
 - По позднему exact разрешению оператора выполнены push0421da7 при EXPECTED_OLD568c24cf
   (pre-push8 commits PASS, readback MATCH) и один [maintenance запуск](research/amn2/phase16-bot-maintenance-execution-001-2026-10-03.json):
   SSH3/22.937s, input345515/output657 complete, stderr0; bound STOP_OR_UNKNOWN_NO_RETRY.
