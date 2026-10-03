@@ -1,0 +1,486 @@
+{
+  "schema": "phase16.candidate-component-diagnostic-execution.v1",
+  "date": "2026-10-03",
+  "status": "DIAGNOSTIC_COLLECTED_NOT_ADMITTED",
+  "approval": "PHASE16_CANDIDATE_COMPONENT_DIAGNOSTIC_20261003_001",
+  "approval_consumed_once": true,
+  "local_head_at_execution": "e0bdf39ed0db7b932da1203f6d7674aaeee01e89",
+  "manifest_sha256": "c6293206d41098d07ac721bf8e73e30a06e8beb80f29a28b60b103d3eb344c46",
+  "remote_sha256": "e312796724ddcb44b455f65f6d2a2a507bbf2b2c0271cdc87c5d2cacbef3336d",
+  "evidence_directory": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-candidate-component-diagnostic-20261003/execution-001",
+  "local_evidence_sha256": {
+    "claim.json": "74a57c10c9d9cb196daabff89aeed10052726fb031cd7b28df15bbe16e50f110",
+    "result.json": "b0eb7a6bbe05e71730ad3fb5c916b2b3d04a9d0b206972c14b204b7d0ae4cc1c",
+    "operator-authorization.json": "1d330e58bc746a2f149e872e6c9d7d33e27ae4fd95e7e84c4e9ee3530f4780e7"
+  },
+  "local_result": {
+    "claim": {
+      "approval": "PHASE16_CANDIDATE_COMPONENT_DIAGNOSTIC_20261003_001",
+      "attempts": 1,
+      "claimed_at": "2026-10-03T18:47:59.052063+00:00",
+      "manifest_sha256": "c6293206d41098d07ac721bf8e73e30a06e8beb80f29a28b60b103d3eb344c46",
+      "remote_sha256": "e312796724ddcb44b455f65f6d2a2a507bbf2b2c0271cdc87c5d2cacbef3336d"
+    },
+    "receipt": {
+      "activation": false,
+      "app_imports": 0,
+      "approval": "PHASE16_CANDIDATE_COMPONENT_DIAGNOSTIC_20261003_001",
+      "component_steps": {
+        "access_plan": {
+          "calls": 1,
+          "exception_kind": "AccessError",
+          "reason": "ancestor_access",
+          "returned_status": null,
+          "status": "STOP"
+        },
+        "bootstrap": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "catalog": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "collection": {
+          "calls": 1,
+          "exception_kind": "AdmissionError",
+          "reason": "candidate_collection_failed",
+          "returned_status": null,
+          "status": "STOP"
+        },
+        "identity": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "nss_groups": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "readonly_command": {
+          "calls": 26,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "runtime_expected": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "secure_file_read": {
+          "calls": 286,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "secure_tree_open": {
+          "calls": 4,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "settings": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "settings_file_read": {
+          "calls": 5,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "stage_observation": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": "VERIFIED",
+          "status": "PASS"
+        },
+        "venv": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        }
+      },
+      "database_open": 0,
+      "failure_boundary": null,
+      "original_manifest_sha256": "431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff",
+      "reason": "bounded_component_observation",
+      "remote_file_writes": 0,
+      "replay_allowed": false,
+      "schema": "phase16.candidate-component-diagnostic.v1",
+      "service_actions": 0,
+      "snapshot": {
+        "fences": {
+          "amn2-spain-bot.service": {
+            "dropin": {
+              "state": "ABSENT"
+            },
+            "permit": {
+              "state": "ABSENT"
+            }
+          },
+          "amn2-spain-web.service": {
+            "dropin": {
+              "state": "ABSENT"
+            },
+            "permit": {
+              "state": "ABSENT"
+            }
+          }
+        },
+        "journal": {
+          "state": "ABSENT"
+        },
+        "probe_scope": "NO_APPLY_NO_DB_NO_APP_NO_SERVICE_ACTION",
+        "readonly_probes": {
+          "candidate_content": {
+            "reason": "candidate_collection_failed",
+            "status": "STOP"
+          },
+          "unit_facts": {
+            "reason": null,
+            "status": "PASS"
+          }
+        },
+        "records": {
+          "coordinator-claim.json": {
+            "state": "ABSENT"
+          },
+          "coordinator-complete.json": {
+            "state": "ABSENT"
+          },
+          "coordinator-context.json": {
+            "state": "ABSENT"
+          },
+          "coordinator-result.json": {
+            "state": "ABSENT"
+          },
+          "coordinator-start.json": {
+            "state": "ABSENT"
+          },
+          "host-admission.json": {
+            "state": "ABSENT"
+          },
+          "journal/manifest.json": {
+            "state": "ABSENT"
+          },
+          "observation.json": {
+            "state": "ABSENT"
+          },
+          "ownership.json": {
+            "state": "ABSENT"
+          },
+          "packet-manifest.json": {
+            "bytes": 8128,
+            "selected": {
+              "phase": null,
+              "reason": null,
+              "status": null
+            },
+            "sha256": "431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff",
+            "state": "PRESENT"
+          },
+          "packet-result.json": {
+            "bytes": 657,
+            "selected": {
+              "phase": null,
+              "reason": null,
+              "status": "STOP_OR_UNKNOWN_NO_RETRY"
+            },
+            "sha256": "fcc9f47b9bdd6c62c456c71553759056628173e52db66c25172d0cb686e2df06",
+            "state": "PRESENT"
+          },
+          "sequence-claim.json": {
+            "state": "ABSENT"
+          },
+          "sequence-result.json": {
+            "state": "ABSENT"
+          },
+          "stage-access.phase16-bot-maintenance-20261003-001.claim.json": {
+            "state": "ABSENT"
+          },
+          "stage-access.phase16-bot-maintenance-20261003-001.intent.json": {
+            "state": "ABSENT"
+          },
+          "stage-access.phase16-bot-maintenance-20261003-001.plan.json": {
+            "state": "ABSENT"
+          },
+          "stage-access.phase16-bot-maintenance-20261003-001.result.json": {
+            "state": "ABSENT"
+          },
+          "stop-witness.json": {
+            "state": "ABSENT"
+          },
+          "upload-claim.json": {
+            "bytes": 184,
+            "selected": {
+              "phase": null,
+              "reason": null,
+              "status": null
+            },
+            "sha256": "0000a7fbcedbeb1561c0991a45726b4174a380a5c80e4dc138a2d611c0930b95",
+            "state": "PRESENT"
+          },
+          "worker-context.json": {
+            "state": "ABSENT"
+          }
+        },
+        "units_after": {
+          "amn2-spain-bot.service": {
+            "properties": {
+              "ActiveState": "active",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "amn2-spain-bot.service",
+              "InvocationID": "85559765b5964f08bf12e5977ec5e647",
+              "LoadState": "loaded",
+              "MainPID": "1355701",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "running"
+            },
+            "state": "OBSERVED"
+          },
+          "amn2-spain-web.service": {
+            "properties": {
+              "ActiveState": "active",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "amn2-spain-web.service",
+              "InvocationID": "4a2aabc257f4441f80a4eba1f79099aa",
+              "LoadState": "loaded",
+              "MainPID": "1355683",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "running"
+            },
+            "state": "OBSERVED"
+          },
+          "phase16-bot-maintenance-20261003-001-coordinator.service": {
+            "properties": {
+              "ActiveState": "inactive",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "phase16-bot-maintenance-20261003-001-coordinator.service",
+              "InvocationID": "",
+              "LoadState": "not-found",
+              "MainPID": "0",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "dead"
+            },
+            "state": "OBSERVED"
+          }
+        },
+        "units_before": {
+          "amn2-spain-bot.service": {
+            "properties": {
+              "ActiveState": "active",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "amn2-spain-bot.service",
+              "InvocationID": "85559765b5964f08bf12e5977ec5e647",
+              "LoadState": "loaded",
+              "MainPID": "1355701",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "running"
+            },
+            "state": "OBSERVED"
+          },
+          "amn2-spain-web.service": {
+            "properties": {
+              "ActiveState": "active",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "amn2-spain-web.service",
+              "InvocationID": "4a2aabc257f4441f80a4eba1f79099aa",
+              "LoadState": "loaded",
+              "MainPID": "1355683",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "running"
+            },
+            "state": "OBSERVED"
+          },
+          "phase16-bot-maintenance-20261003-001-coordinator.service": {
+            "properties": {
+              "ActiveState": "inactive",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "phase16-bot-maintenance-20261003-001-coordinator.service",
+              "InvocationID": "",
+              "LoadState": "not-found",
+              "MainPID": "0",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "dead"
+            },
+            "state": "OBSERVED"
+          }
+        },
+        "unobserved": [
+          "original exception detail",
+          "database migration correctness",
+          "pending/writer admission",
+          "live acceptance"
+        ]
+      },
+      "status": "DIAGNOSTIC_COLLECTED_NOT_ADMITTED",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6"
+    },
+    "replay_allowed": false,
+    "schema": "phase16.candidate-diagnostic-local.v1",
+    "status": "DIAGNOSTIC_COLLECTED_NOT_ADMITTED",
+    "transport": {
+      "automatic_retry": false,
+      "elapsed_seconds": 4.218,
+      "failure_stage": null,
+      "last_stdin_progress_seconds": null,
+      "local_child_reaped": true,
+      "output_complete": true,
+      "pipe_failures": [],
+      "remote_coordinator_status": "UNKNOWN_MAY_CONTINUE",
+      "replay_allowed": false,
+      "returncode": 0,
+      "schema": "phase16.bot-maintenance-transport.v1",
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_diagnostic": {
+        "hints": [],
+        "output_cap_hit": false,
+        "root_cause": "NOT_ESTABLISHED",
+        "status": "EMPTY",
+        "utf8_valid": true
+      },
+      "stdin_bytes_accepted": 0,
+      "stdin_bytes_requested": 0,
+      "stdin_complete": true,
+      "stdout": {
+        "bytes_observed": 5950,
+        "bytes_retained": 5950,
+        "prefix_sha256": "b0b8379c2a53e9ca037e068e98e5808c0e8ff64b6c2922449d142cedbb72633a"
+      },
+      "termination_action": "NONE",
+      "termination_scope": "LOCAL_TRANSPORT_ONLY"
+    }
+  },
+  "push": {
+    "schema": "phase16.exact-push.v1",
+    "head": "e0bdf39ed0db7b932da1203f6d7674aaeee01e89",
+    "ref": "refs/heads/codex/phase16-awg3-family-3-1-spain-pilot-016",
+    "expected_old": "5acb6755781465622afe54216e54ce05c3595cef",
+    "remote_before": "5acb6755781465622afe54216e54ce05c3595cef",
+    "attempted_at": "2026-10-03T18:47:07.043948+00:00",
+    "force": false,
+    "tags": false,
+    "other_refs": false,
+    "returncode": 0,
+    "stdout": "8276ff0f1a9b: PASS: changed dated changelog record.\ne0bdf39ed0db: PASS: changed dated changelog record.\nChecked 2 commit(s) after policy introduction.\n",
+    "stderr": "To https://github.com/barakov-dot/amn3.git\n   5acb6755..e0bdf39e  e0bdf39ed0db7b932da1203f6d7674aaeee01e89 -> codex/phase16-awg3-family-3-1-spain-pilot-016\n",
+    "remote_after": "e0bdf39ed0db7b932da1203f6d7674aaeee01e89",
+    "status": "MATCH"
+  },
+  "push_receipt_sha256": "4f8706f7be8061cf3a24d951fb33ada7d713dae3eeefcf0c6bf4eb9f32e6efba",
+  "comparison_to_prior_readback": {
+    "prior_result_sha256": "9a034cf52a41bb1ebdd0144ece3d015f01decdffbcbde9d518cb095d8b06b0a7",
+    "saved_operation_records": "UNCHANGED",
+    "journal_and_fences": "UNCHANGED",
+    "bot_web_selected_process_identity": "UNCHANGED"
+  },
+  "source_analysis_sha256_lf": {
+    "scripts/phase16_bot_stage_access.py": "7d81ab2d840439eb1e5243993922058c7d5732ce5e8dff281a1981471b5845df",
+    "scripts/phase16_bot_candidate_admission.py": "3355e58fb65e3a8c250ed3c1a9c78939d9d53a9adc6eb4d88e4677f233bb7a35",
+    "scripts/phase16_bot_maintenance_entry.py": "21cfb587cb41e24dc8fb213c7e20f8ff848aba81b620f4d16ce45a1438ef492f",
+    "scripts/vps/phase16_bot_linux_gate_remote.py": "5df6b2fc76d616f5a0b1c64b6168868a19c9894f71a3cde11b19ce5e119ed102"
+  },
+  "observation": {
+    "failed_component": "access_plan",
+    "exception_kind": "AccessError",
+    "reason": "ancestor_access",
+    "successful_components": [
+      "bootstrap",
+      "catalog",
+      "identity",
+      "nss_groups",
+      "readonly_command",
+      "runtime_expected",
+      "secure_file_read",
+      "secure_tree_open",
+      "settings",
+      "settings_file_read",
+      "stage_observation",
+      "venv"
+    ],
+    "runtime_expected": "WHEEL_DERIVED_EXPECTED_BUILT; NOT_INSTALLED_VERIFICATION",
+    "installed_runtime_verification": "NOT_REACHED: _ancestors precedes runtime.verify_installed",
+    "candidate_admission": "NOT_GRANTED",
+    "permission_apply": "NOT_STARTED_BY_THIS_DIAGNOSTIC"
+  },
+  "source_interpretation": {
+    "ancestor_paths": [
+      "/",
+      "/opt",
+      "/opt/amn2-spain",
+      "/opt/amn2-spain/bot-candidates"
+    ],
+    "policy": "Selected service directory traversal required before plan construction; shared ancestors excluded from permission mutation objects",
+    "root_cause_boundary": "CURRENT_ANCESTOR_ACCESS_PRECONDITION_FAILED",
+    "failing_parent_and_numeric_metadata": "NOT_OUTPUT_BY_THIS_PACKET",
+    "historical_original_exception": "NOT_PROVEN; original entry did not save exact exception",
+    "retained_parent_creation": "Historical Linux gate creates bot-candidates mode0700 only if absent; existing path is unchanged. Plausible origin, not current-mode evidence"
+  },
+  "scope": {
+    "ssh_attempts": 1,
+    "remote_file_writes": 0,
+    "database_open": 0,
+    "service_actions": 0,
+    "permission_actions": 0,
+    "app_imports": 0,
+    "stage_install": 0,
+    "activation": false,
+    "telegram": 0
+  },
+  "limits": {
+    "ssh_attempts": 1,
+    "remote_seconds": 120,
+    "transport_seconds": 150,
+    "output_bytes": 65536
+  },
+  "original_frozen_files": 57,
+  "foreign_planning_diff_sha256": "dd63e3e9ec5a999160a75c5ea5a94357b3003764c5e201350d2b6f21394be303",
+  "not_proven": [
+    "Exact failing parent/mode/gid/ACL snapshot",
+    "Full installed runtime/source access plan after ancestor failure",
+    "Original unsaved exception equality",
+    "DB/schema/deployed revision/live application or quality acceptance"
+  ],
+  "next_action": "Prepare bounded fixed-ancestor metadata/identity read locally; exact new approval required before one SSH. Preserve ancestor denial; no chmod/chown or maintenance replay."
+}

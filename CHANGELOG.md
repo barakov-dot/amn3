@@ -7,6 +7,23 @@
 
 ## 2026-10-03
 
+- По exact approvals выполнены push e0bdf39 при EXPECTED_OLD5acb675 (pre-push2
+  commits PASS, fresh ref MATCH) и [component diagnostic](research/amn2/phase16-bot-candidate-diagnostic-execution-001-2026-10-03.json):
+  один SSH0/4.218s, stdin0/stdout5950 complete/stderr0, current access_plan
+  STOP/AccessError/ancestor_access. Bot/web/process identities и retained records/
+  journal/fences прежние; DB/app/writes/permission/service actions0. Approval consumed,
+  повтор/repair/recovery не выполнялись. Expected wheels/venv PASS отделены от full
+  installed runtime verify, который ещё не достигнут; original exception не доказан.
+  Сохранены fixed ancestor security check и57 original artifacts. Локально подготовлен
+  [ancestor facts packet](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-facts-2026-10-03):
+  четыре parents +stage root metadata/ACL-clear/validated identity, без content scans
+  или candidate replay, remote30s/transport45s/one-shot. Новый SSH/mutation не разрешены.
+  RED availability → GREEN real metadata/identity-boundary fixtures; итог37 PASS/
+  0 SKIP, независимый review PASS, original policy preserved. Native Linux facts
+  не исполнялись; hashes/closure/receipt validation в [local receipt](research/amn2/phase16-bot-ancestor-readback-local-verification-2026-10-03.json).
+  Current plan, START_HERE и база передачи обновлены; общая админка в формировании,
+  target contract отложен до её готовности; AWG2/package016 и foreign diff сохранены.
+
 - По уточнению оператора «общая админка ещё в стадии формирования» исправлен
   преждевременный hold локальной работы на M1: target contract нужен при реальном
   переносе, сейчас продолжаются подготовка Phase16 и [база знаний](docs/PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#forming-admin-2026-10-03).

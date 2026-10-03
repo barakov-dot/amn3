@@ -6,9 +6,12 @@
 > complete, stderr0. [Readback03.10](#maintenance-readback-executed-2026-10-03): SSH0/4.031s,
 > bot/web active/stable, claims/coordinator/fences absent; по bound source ordering
 > permission/maintenance sequence не начинались этим packet. Candidate probe STOP,
-> inner cause не доказана. Оба approvals consumed/no retry. Общая админка пока
-> формируется; текущая local работа — [component diagnostic](#candidate-component-diagnostic-2026-10-03)
-> и база передачи, без ожидания exact deployment target.
+> Component diagnostic позднее03.10 выполнен: SSH0/4.218s, current access_plan
+> STOP/ancestor_access. Full installed runtime verify ещё не достигнут; original
+> unsaved exception не доказан. Bot/web/markers прежние, permissions/DB/actions0.
+> Approvals consumed/no retry, push e0bdf39 MATCH. Текущая local работа —
+> [ancestor facts для точного repair](#candidate-ancestor-facts-2026-10-03) и база
+> передачи. Общая админка формируется, exact target понадобится при реальном переносе.
 > Конкретный packet не переносится на иной host заменой hashes.
 > [Единственная очередь M0a–M5](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md#transfer-priority-2026-10-03).
 
@@ -2083,3 +2086,69 @@ record summary/probe и frozen validator неизменны. Независим�
 разрешает автономную локальную подготовку. Live SSH и push по-прежнему требуют
 точного отдельного разрешения. Никакой новой админки или интеграции другого
 проекта эта работа не создаёт. Статус и очередь только в основном плане Phase16.
+
+<a id="candidate-component-executed-2026-10-03"></a>
+
+## Component diagnostic исполнен03.10 — current ancestor precondition
+
+[Execution record](phase16-bot-candidate-diagnostic-execution-001-2026-10-03.json):
+единственный approved SSH0/4.218s, stdin0/stdout5950 complete/stderr0,
+DIAGNOSTIC_COLLECTED_NOT_ADMITTED. Current access_plan STOP/AccessError/ancestor_access,
+outer collection STOP/candidate_collection_failed. Catalog/stage/settings/bootstrap/
+identity/NSS/read commands/expected wheels/venv достигнуты и PASS. Это не full
+installed runtime proof: `_ancestors` в stage_access.py выполняется **до**
+`runtime.verify_installed`, дальнейший plan/permission/admission не достигнут.
+
+`_ancestors` требует directory, clear ACL и выбранный service execute для каждого
+из `/`, `/opt`, `/opt/amn2-spain`, `/opt/amn2-spain/bot-candidates`. Descriptor reader
+проверяет цепочку каталогов; current failure означает неготовность ancestor
+precondition. Этот packet не вывел конкретный parent/mode/gid/ACL. Historical
+Linux stage creator создавал bot-candidates0700, если его не было; это возможное
+объяснение, **не** доказательство current mode. Original unsaved exception не
+восстановлен и не объявляется равным current failure.
+
+Shared ancestors специально не входят в mutation objects старого access plan;
+negative policy test запрещает root-private parent и подтверждает эту границу.
+Ослабление check или chmod/chown общего каталога старым packet запрещены.
+Все57 frozen artifacts и consumed packets сохраняются. Bot/web selected state,
+operation records/journal/fences совпали с prior readback. DB/app/services/writes/
+permission actions0; исходная sequence этим diagnostic не запускалась.
+Push e0bdf39 при EXPECTED_OLD5acb675 завершён, pre-push2 commits PASS, ref MATCH.
+
+<a id="candidate-ancestor-facts-2026-10-03"></a>
+
+## Ancestor facts — bounded local preparation03.10
+
+Цель: подготовить точный repair contract для доказанного ancestor precondition,
+не расширять прежний access plan и не запускать снова candidate collector.
+[Script](../../scripts/phase16_bot_ancestor_readback.py),
+[manifest](phase16-bot-ancestor-readback-manifest-2026-10-03.json),
+[local verification](phase16-bot-ancestor-readback-local-verification-2026-10-03.json).
+Approval: `PHASE16_CANDIDATE_ANCESTOR_FACTS_20261003_001`.
+
+Только frozen original code/boot binding, allowlisted unit state, local validated
+bot/web identity/NSS и descriptor-bound metadata четырёх fixed parents + stage root.
+Вывод: mode/uid/gid/device/inode/mtime/ctime, directory/metadata-safe/ACL-clear/
+service-traverse booleans, ancestor_ready. Xattr names/values, passwd/group bodies,
+configs, arguments, raw errors, directory listings и content не выводятся.
+Stage-root private traversal отделён от four-parent readiness; neither is admission.
+Identity/unit/descriptor continuity проверяется в конце. No candidate/legacy replay,
+source/payload/runtime scans, DB/app, chmod/chown, upload/install/service actions0.
+Remote30s включая code bootstrap / transport45s / output64KiB, one SSH/stdin0,
+strict pinned host/role, отдельный durable claim, no retry. Пока new claim absent,
+SSH0. Успех — ANCESTOR_FACTS_COLLECTED_NOT_REPAIRED, не исправление/host admission.
+
+Локально:11 focused tests, итог37 PASS/0 SKIP (ancestor facts, original stage-access
+policy и candidate composition). Блокирующий root0700 parent воспроизводится в
+metadata model без mutations; original policy сохраняет запрет. Real collect
+проверен с native boundaries fixtures; отсутствие candidate/settings scan отдельно
+проверено. Независимый review PASS, открытых P0/P1/P2 нет. Native Linux facts не
+исполнялись; hashes/closure и scope сохранены в local receipt.
+
+После actual metadata: отдельно определить exact before/desired/rollback/ownership
+для нужного каталога либо выбрать отдельный совместимый layout при целевом переносе.
+Общие `/` и `/opt` не менять автоматически. Новая permission mutation должна иметь
+свой scope/immutable packet/approval; прежнее45min ownership не продлено diagnostic.
+Если facts не получены, UNKNOWN не разрешает повтор или угадывание chmod.
+Дизайн продолжает существующий readonly flow; /GO разрешает локальную подготовку.
+SSH/push и любое изменение прав сохраняют отдельные exact approvals.

@@ -44,11 +44,15 @@
 точно разрешил один maintenance packet03.10: исполнен один раз, STOP/exit3 за22.937s,
 [Readback03.10](../research/amn2/phase16-bot-maintenance-readback-execution-001-2026-10-03.json) выполнен: bot/web active/stable, coordinator/claims/fences отсутствуют;
 по bound source ordering permission/maintenance sequence этим packet не начинались.
-Current candidate probe STOP, exact inner cause не доказана. Оба approvals consumed,
-повтор запрещён. Общая админка ещё формируется по ответу оператора03.10;
-пока продолжаем [component diagnostic и основу передачи](superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md#transfer-priority-2026-10-03).
-Точное место/код адресата потребуются для реального целевого контракта, а не для
-локальной подготовки. Новый diagnostic пока не исполнен и требует exact SSH approval.
+Позднее [component diagnostic03.10](../research/amn2/phase16-bot-candidate-diagnostic-execution-001-2026-10-03.json)
+выполнен один раз: SSH0/4.218s, access_plan STOP/ancestor_access; settings/bootstrap/
+identity/expected wheels/venv PASS. Full installed runtime verify не достигнут:
+ancestor check выполняется раньше него. Bot/web и retained markers прежние,
+DB/writes/permission/service actions0; SSH approval consumed, push e0bdf39 MATCH.
+Готовим [точные ancestor facts и основу передачи](superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md#transfer-priority-2026-10-03);
+не ослаблять ancestor check и не менять общие каталоги по старому packet.
+Общая админка ещё формируется; exact target contract потребуется при реальном
+переносе. Новый metadata packet локально подготовлен, SSH требует нового exact approval.
 Windows и quality acceptance открыты, клиентские проверки отложены оператором.
 Сохранять исторические evidence, не повторять прежние diagnostics ради контекста.
 

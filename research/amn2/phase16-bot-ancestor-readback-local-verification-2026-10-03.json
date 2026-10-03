@@ -1,0 +1,111 @@
+{
+  "schema": "phase16.ancestor-facts-local-verification.v1",
+  "date": "2026-10-03",
+  "status": "LOCAL_VERIFIED_PROPOSED_NOT_EXECUTED",
+  "approval": "PHASE16_CANDIDATE_ANCESTOR_FACTS_20261003_001",
+  "original_manifest_sha256": "431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff",
+  "manifest_sha256": "7ebac288f0edf4307d828a795e0b67796f7811b566b7bf523ca400066f366a6e",
+  "remote_sha256": "33112c0d47a0afb858796a098026501f4846114fcf3219c8150912a47a422909",
+  "predecessor_gate_sha256_lf": "b0e35c25317b94cafa2ff2b1aa6af15336b4e7e9ec57ac8997d43b600029bb0b",
+  "artifacts_sha256_lf": {
+    "scripts/phase16_bot_ancestor_readback.py": "3df9ba30d24f9c0c03ea718a5dbe7b1c123cc61b9af2000797ca93e950ce468b",
+    "tests/test_phase16_bot_ancestor_readback.py": "67524c558db7a73b0232c883ae9f12f83cf63755f973a3476b4bcc924ca7a60e",
+    "research/amn2/phase16-bot-ancestor-readback-manifest-2026-10-03.json": "7ebac288f0edf4307d828a795e0b67796f7811b566b7bf523ca400066f366a6e",
+    "research/amn2/phase16-bot-candidate-diagnostic-execution-001-2026-10-03.json": "0ee9dc2a3f3dd9bb2f56b52dec288fb22950ff354ba5050a0e9aedec81a93c12"
+  },
+  "original_packet_frozen_files": 57,
+  "original_packet_closure": "MATCH",
+  "tests": {
+    "modules": [
+      "tests.test_phase16_bot_ancestor_readback",
+      "tests.test_phase16_bot_stage_access",
+      "tests.test_phase16_bot_candidate_admission"
+    ],
+    "scope": "WINDOWS_LOCAL_FIXTURES; LINUX_ANCESTOR_FACTS_NOT_EXECUTED",
+    "tests_run": 37,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 16.765,
+    "success": true
+  },
+  "tests_log_sha256": "24dd915989a01d1390c5e785d9143d9360f185cc02b3b9cc439cce0057a28547",
+  "tests_result_sha256": "e30afd5082b7ea33bc896b9ac9fa4f0e3763009d761d6ee36ad3e6dd7243b5e4",
+  "red_green": {
+    "test": "Availability.test_ancestor_facts_packet_exists",
+    "red": "FAIL: missing new metadata-only gate",
+    "green": "11 focused tests PASS; final37 PASS including fixed parent denial/no mutations and original successful candidate proof"
+  },
+  "corrected_fixture_errors": [
+    "First receipt fixture supplied UNAVAILABLE units; corrected to observed closed schema",
+    "Test referenced packet.linux instead of packet.entry.linux; test import corrected"
+  ],
+  "independent_review": {
+    "task": "/root/review_candidate_diagnostic",
+    "status": "PASS_LOCAL_PREPARATION",
+    "open_p0_p1_p2": 0,
+    "scope": "New ancestor gate/test plus frozen dependencies, read-only",
+    "observed_focused_tests": 11,
+    "checked": [
+      "Fixed four parent and stage-root descriptor metadata, no content/candidate replay",
+      "Bot/web identity/local account/NSS/unit continuity",
+      "Original pin/import closure, exact approval before protected loader",
+      "One durable claim/stdin0, deadline30/transport45, closed numeric/flag telemetry"
+    ],
+    "limits": "No docs/live metadata/causal repair/Linux syscall acceptance reviewed"
+  },
+  "preview": {
+    "status": "OFFLINE_READY_NOT_EXECUTED",
+    "approval": "PHASE16_CANDIDATE_ANCESTOR_FACTS_20261003_001",
+    "manifest_sha256": "7ebac288f0edf4307d828a795e0b67796f7811b566b7bf523ca400066f366a6e",
+    "remote_sha256": "33112c0d47a0afb858796a098026501f4846114fcf3219c8150912a47a422909",
+    "ssh_attempts": 0,
+    "remote_seconds": 30,
+    "transport_seconds": 45,
+    "database_open": 0,
+    "remote_file_writes": 0,
+    "permission_actions": 0,
+    "service_actions": 0
+  },
+  "native_linux_execution": false,
+  "new_ssh_attempts": 0,
+  "new_remote_file_writes": 0,
+  "new_database_open": 0,
+  "new_service_actions": 0,
+  "new_permission_actions": 0,
+  "new_stage_install": 0,
+  "new_activation": false,
+  "ancestor_execution_claim_exists": false,
+  "prior_component_approval_consumed_once": true,
+  "foreign_planning_diff_sha256": "dd63e3e9ec5a999160a75c5ea5a94357b3003764c5e201350d2b6f21394be303",
+  "limits": {
+    "ssh_attempts": 1,
+    "remote_seconds": 30,
+    "transport_seconds": 45,
+    "output_bytes": 65536
+  },
+  "scope": {
+    "remote_file_writes": 0,
+    "database_open": 0,
+    "service_actions": 0,
+    "app_imports": 0,
+    "stage_install": 0,
+    "activation": 0,
+    "telegram": 0
+  },
+  "limitations": [
+    "Current ancestor_access is observed; exact blocked path/current mode/group/ACL still not emitted",
+    "No full installed runtime proof, repair or host admission",
+    "No new mutation scope granted; shared ancestors outside original access plan",
+    "No historical original exception reconstruction or phase acceptance"
+  ],
+  "next_action": "One newly exactly approved SSH for fixed ancestor facts; future repair needs exact before/desired/rollback/ownership and separate immutable mutation packet",
+  "documentation_checks": {
+    "added_local_links_checked": 15,
+    "links_and_anchors": "PASS",
+    "diff_whitespace": "PASS",
+    "secret_pattern_review": "PASS",
+    "actual_execution_receipt_and_stdout_hash": "MATCH",
+    "scope": "New/changed local content; no external/protected fetch"
+  }
+}

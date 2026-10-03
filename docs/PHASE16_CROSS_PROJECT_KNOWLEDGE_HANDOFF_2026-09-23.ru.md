@@ -174,3 +174,22 @@ immutable runtime40, bot worker lifecycle, web/DB ownership, AWG capability limi
 подготовлен локально для inner reason, без live исполнения. Это не новый runtime
 или новая универсальная protocol model. Phase16 acceptance/closeout остаются
 открытыми; дальнейшее состояние брать только из единственного плана.
+
+<a id="candidate-ancestor-precondition-2026-10-03"></a>
+
+### Current ancestor precondition — переносимое ограничение03.10
+
+[Actual component diagnostic](../research/amn2/phase16-bot-candidate-diagnostic-execution-001-2026-10-03.json)
+установил current access_plan/ancestor_access, один SSH0/4.218s, без mutations.
+Settings/bootstrap/identity/expected wheels/venv PASS относятся к достигнутым
+этапам; full installed runtime verification ещё не достигнут. Original unsaved
+exception не доказан. Bot/web/retained markers прежние; push e0bdf39 подтверждён.
+
+Для разработчика целевого размещения: selected service должен проходить по всей
+parent chain; private stage/payload/receipts остаются изолированы. Старый access
+plan намеренно не меняет shared ancestors. Нельзя переносить его как готовый
+универсальный chmod/import рецепт или удалять traversal precondition ради PASS.
+Metadata-only [ancestor facts packet](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-facts-2026-10-03)
+готовится локально для exact path/mode/group/continuity, новый SSH ещё не разрешён.
+При новом target нужны проверенные layout/ownership/rollback и один poller; данные
+Spain и local PASS не принимают новую общую админку. Phase16 остаётся открытой.
