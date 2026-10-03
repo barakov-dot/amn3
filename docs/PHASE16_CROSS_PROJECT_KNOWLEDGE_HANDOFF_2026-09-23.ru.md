@@ -189,7 +189,17 @@ exception не доказан. Bot/web/retained markers прежние; push e0b
 parent chain; private stage/payload/receipts остаются изолированы. Старый access
 plan намеренно не меняет shared ancestors. Нельзя переносить его как готовый
 универсальный chmod/import рецепт или удалять traversal precondition ради PASS.
-Metadata-only [ancestor facts packet](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-facts-2026-10-03)
-готовится локально для exact path/mode/group/continuity, новый SSH ещё не разрешён.
+[Actual ancestor facts](../research/amn2/phase16-bot-ancestor-readback-execution-001-2026-10-03.json)
+выполнены один раз: SSH0/2.938s, без writes/permissions. Exact parent
+`/opt/amn2-spain/bot-candidates` root:root0700, dev64770/ino262273; selected
+service UID/GID61212. Другие три parents traversable; stage-root root:root0700
+ожидаемо приватен. Bot/web unchanged; approval consumed, push6be4149 MATCH.
+Для текущего layout подготовлен [separate parent repair](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-2026-10-03):
+root:61212/0710 только у exact parent, private sibling/exclusive group/identity guards,
+новый durable audit intent/result и readonly candidate proof. Live NOT_EXECUTED,
+новый checksum approval необходим. Child access plan не применяется; original57
+artifacts/consumed operations неизменны. Это целевой host-specific fix, а не
+универсальная инструкция для нового VPS. Group traverse не даёт listing/write;
+root-private дочерние stage остаются недоступны сервису до отдельного access apply.
 При новом target нужны проверенные layout/ownership/rollback и один poller; данные
 Spain и local PASS не принимают новую общую админку. Phase16 остаётся открытой.

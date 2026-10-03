@@ -49,10 +49,16 @@
 identity/expected wheels/venv PASS. Full installed runtime verify не достигнут:
 ancestor check выполняется раньше него. Bot/web и retained markers прежние,
 DB/writes/permission/service actions0; SSH approval consumed, push e0bdf39 MATCH.
-Готовим [точные ancestor facts и основу передачи](superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md#transfer-priority-2026-10-03);
-не ослаблять ancestor check и не менять общие каталоги по старому packet.
-Общая админка ещё формируется; exact target contract потребуется при реальном
-переносе. Новый metadata packet локально подготовлен, SSH требует нового exact approval.
+[Ancestor facts03.10](../research/amn2/phase16-bot-ancestor-readback-execution-001-2026-10-03.json)
+выполнены один раз: SSH0/2.938s, общий `/opt/amn2-spain/bot-candidates`
+root:root0700 недоступен UID/GID61212; остальные три parents доступны. Stage root
+root:root0700 ожидаемо приватен. Bot/web selected identities прежние, mutations0;
+approval consumed, push6be4149 MATCH. Подготовлен [отдельный parent repair](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-2026-10-03)
+с exact witness, private-sibling/group guards, durable intent и readonly candidate
+proof: live не выполнялся и требует нового checksum-bound approval. Старый access
+plan и57 artifacts неизменны. Общая админка формируется; target contract потребуется
+при реальном переносе. Дальше M0d по единственному плану; parent repair не равен
+интеграции/приёмке/переносу.
 Windows и quality acceptance открыты, клиентские проверки отложены оператором.
 Сохранять исторические evidence, не повторять прежние diagnostics ради контекста.
 

@@ -1,0 +1,273 @@
+{
+  "approval_consumed": true,
+  "automatic_retry": false,
+  "date": "2026-10-03",
+  "interpretation": {
+    "ancestor_ready": false,
+    "before_gid": 0,
+    "before_mode_octal": "0700",
+    "before_uid": 0,
+    "blocking_ancestor": "/opt/amn2-spain/bot-candidates",
+    "database_open": 0,
+    "full_installed_verification_reached": false,
+    "original_unsaved_exception_reconstructed": false,
+    "other_three_ancestors_traversable": true,
+    "permission_actions": 0,
+    "remote_coordinator_status_field": "generic transport UNKNOWN_MAY_CONTINUE is not live coordinator evidence",
+    "repair_applied": false,
+    "service_uid_gid": 61212,
+    "stage_root_private_expected": true
+  },
+  "local_result": {
+    "claim": {
+      "approval": "PHASE16_CANDIDATE_ANCESTOR_FACTS_20261003_001",
+      "attempts": 1,
+      "claimed_at": "2026-10-03T19:43:49.398975+00:00",
+      "manifest_sha256": "7ebac288f0edf4307d828a795e0b67796f7811b566b7bf523ca400066f366a6e",
+      "remote_sha256": "33112c0d47a0afb858796a098026501f4846114fcf3219c8150912a47a422909"
+    },
+    "receipt": {
+      "activation": false,
+      "app_imports": 0,
+      "approval": "PHASE16_CANDIDATE_ANCESTOR_FACTS_20261003_001",
+      "database_open": 0,
+      "failure_boundary": null,
+      "original_manifest_sha256": "431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff",
+      "permission_actions": 0,
+      "reason": "bounded_ancestor_observation",
+      "remote_file_writes": 0,
+      "replay_allowed": false,
+      "schema": "phase16.ancestor-facts.v1",
+      "service_actions": 0,
+      "snapshot": {
+        "ancestor_ready": false,
+        "ancestors": {
+          "/": {
+            "acl_clear": true,
+            "ctime_ns": 1750063455902000000,
+            "device": 64770,
+            "directory": true,
+            "gid": 0,
+            "inode": 2,
+            "metadata_safe": true,
+            "mode": 493,
+            "mtime_ns": 1750063455902000000,
+            "service_traverse": true,
+            "uid": 0
+          },
+          "/opt": {
+            "acl_clear": true,
+            "ctime_ns": 1785423412510826692,
+            "device": 64770,
+            "directory": true,
+            "gid": 0,
+            "inode": 16385,
+            "metadata_safe": true,
+            "mode": 493,
+            "mtime_ns": 1785423412510826692,
+            "service_traverse": true,
+            "uid": 0
+          },
+          "/opt/amn2-spain": {
+            "acl_clear": true,
+            "ctime_ns": 1790048825975761285,
+            "device": 64770,
+            "directory": true,
+            "gid": 0,
+            "inode": 283368,
+            "metadata_safe": true,
+            "mode": 493,
+            "mtime_ns": 1790048825975761285,
+            "service_traverse": true,
+            "uid": 0
+          },
+          "/opt/amn2-spain/bot-candidates": {
+            "acl_clear": true,
+            "ctime_ns": 1790710142771192272,
+            "device": 64770,
+            "directory": true,
+            "gid": 0,
+            "inode": 262273,
+            "metadata_safe": true,
+            "mode": 448,
+            "mtime_ns": 1790710142771192272,
+            "service_traverse": false,
+            "uid": 0
+          }
+        },
+        "service_identity": {
+          "gid": 61212,
+          "supplementary_gids": [
+            61212
+          ],
+          "uid": 61212
+        },
+        "stage_root": {
+          "acl_clear": true,
+          "ctime_ns": 1790710151938309015,
+          "device": 64770,
+          "directory": true,
+          "gid": 0,
+          "inode": 401618,
+          "metadata_safe": true,
+          "mode": 448,
+          "mtime_ns": 1790710151938309015,
+          "service_traverse": false,
+          "uid": 0
+        },
+        "units_after": {
+          "amn2-spain-bot.service": {
+            "properties": {
+              "ActiveState": "active",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "amn2-spain-bot.service",
+              "InvocationID": "85559765b5964f08bf12e5977ec5e647",
+              "LoadState": "loaded",
+              "MainPID": "1355701",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "running"
+            },
+            "state": "OBSERVED"
+          },
+          "amn2-spain-web.service": {
+            "properties": {
+              "ActiveState": "active",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "amn2-spain-web.service",
+              "InvocationID": "4a2aabc257f4441f80a4eba1f79099aa",
+              "LoadState": "loaded",
+              "MainPID": "1355683",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "running"
+            },
+            "state": "OBSERVED"
+          },
+          "phase16-bot-maintenance-20261003-001-coordinator.service": {
+            "properties": {
+              "ActiveState": "inactive",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "phase16-bot-maintenance-20261003-001-coordinator.service",
+              "InvocationID": "",
+              "LoadState": "not-found",
+              "MainPID": "0",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "dead"
+            },
+            "state": "OBSERVED"
+          }
+        },
+        "units_before": {
+          "amn2-spain-bot.service": {
+            "properties": {
+              "ActiveState": "active",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "amn2-spain-bot.service",
+              "InvocationID": "85559765b5964f08bf12e5977ec5e647",
+              "LoadState": "loaded",
+              "MainPID": "1355701",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "running"
+            },
+            "state": "OBSERVED"
+          },
+          "amn2-spain-web.service": {
+            "properties": {
+              "ActiveState": "active",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "amn2-spain-web.service",
+              "InvocationID": "4a2aabc257f4441f80a4eba1f79099aa",
+              "LoadState": "loaded",
+              "MainPID": "1355683",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "running"
+            },
+            "state": "OBSERVED"
+          },
+          "phase16-bot-maintenance-20261003-001-coordinator.service": {
+            "properties": {
+              "ActiveState": "inactive",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "phase16-bot-maintenance-20261003-001-coordinator.service",
+              "InvocationID": "",
+              "LoadState": "not-found",
+              "MainPID": "0",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "dead"
+            },
+            "state": "OBSERVED"
+          }
+        }
+      },
+      "status": "ANCESTOR_FACTS_COLLECTED_NOT_REPAIRED",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6"
+    },
+    "replay_allowed": false,
+    "schema": "phase16.ancestor-facts-local.v1",
+    "status": "ANCESTOR_FACTS_COLLECTED_NOT_REPAIRED",
+    "transport": {
+      "automatic_retry": false,
+      "elapsed_seconds": 2.938,
+      "failure_stage": null,
+      "last_stdin_progress_seconds": null,
+      "local_child_reaped": true,
+      "output_complete": true,
+      "pipe_failures": [],
+      "remote_coordinator_status": "UNKNOWN_MAY_CONTINUE",
+      "replay_allowed": false,
+      "returncode": 0,
+      "schema": "phase16.bot-maintenance-transport.v1",
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_diagnostic": {
+        "hints": [],
+        "output_cap_hit": false,
+        "root_cause": "NOT_ESTABLISHED",
+        "status": "EMPTY",
+        "utf8_valid": true
+      },
+      "stdin_bytes_accepted": 0,
+      "stdin_bytes_requested": 0,
+      "stdin_complete": true,
+      "stdout": {
+        "bytes_observed": 3636,
+        "bytes_retained": 3636,
+        "prefix_sha256": "66da4e880f2eacc3fd711696cb6e4bb3efa637003cdffcf9366a8322e0f88f4b"
+      },
+      "termination_action": "NONE",
+      "termination_scope": "LOCAL_TRANSPORT_ONLY"
+    }
+  },
+  "push": {
+    "attempted_at": "2026-10-03T19:43:22.093017+00:00",
+    "expected_old": "e0bdf39ed0db7b932da1203f6d7674aaeee01e89",
+    "force": false,
+    "head": "6be4149f44e8de3400383d88da7c4df0aa40e922",
+    "other_refs": false,
+    "ref": "refs/heads/codex/phase16-awg3-family-3-1-spain-pilot-016",
+    "remote_after": "6be4149f44e8de3400383d88da7c4df0aa40e922",
+    "remote_before": "e0bdf39ed0db7b932da1203f6d7674aaeee01e89",
+    "returncode": 0,
+    "schema": "phase16.exact-push.v1",
+    "status": "MATCH",
+    "stderr": "To https://github.com/barakov-dot/amn3.git\n   e0bdf39e..6be4149f  6be4149f44e8de3400383d88da7c4df0aa40e922 -> codex/phase16-awg3-family-3-1-spain-pilot-016\n",
+    "stdout": "6be4149f44e8: PASS: changed dated changelog record.\nChecked 1 commit(s) after policy introduction.\n",
+    "tags": false
+  },
+  "schema": "phase16.ancestor-facts-execution.v1",
+  "status": "ANCESTOR_FACTS_COLLECTED_NOT_REPAIRED"
+}

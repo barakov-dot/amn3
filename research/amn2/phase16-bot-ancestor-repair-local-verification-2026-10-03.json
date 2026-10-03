@@ -1,0 +1,95 @@
+{
+  "artifacts_sha256_lf": {
+    "research/amn2/phase16-bot-ancestor-readback-execution-001-2026-10-03.json": "ec7fbe1075ce5e175e2a0a04ffa873bdc15c72afec4befc25070c147b98b5e37",
+    "research/amn2/phase16-bot-ancestor-repair-manifest-2026-10-03.json": "e1f014f0a655aa9dde3d74eec1f6e03197d71608a25709ee2e89de3d20d1be7e",
+    "scripts/phase16_bot_ancestor_repair.py": "c6f5adeca61cf96951247bd416b3e2deaa7f773bab8a51b38116034f465abc88",
+    "scripts/phase16_bot_ancestor_repair_gate.py": "d19311db909d801d9f09fab9f45fa178d12359fdd6b1d3870ddff8af35ae5e51",
+    "tests/test_phase16_bot_ancestor_repair.py": "8064538d03f10e9ee4a04ebce850c1db72d993b1f0355ccb29a7ed27c6a84c69",
+    "tests/test_phase16_bot_ancestor_repair_gate.py": "863371020bd55e21b8060af77de53e6d7f7585c07ce6ce82f7d19c2a9eed93dc"
+  },
+  "checks": {
+    "app_imports": 0,
+    "database_open": 0,
+    "final_tests": {
+      "elapsed_seconds": 27.203,
+      "log": "final-tests.log",
+      "log_sha256": "7be52af374c295a7c332f95b6b000e66715d6e9889c20a98d814cb8be8e02883",
+      "modules": [
+        "tests.test_phase16_bot_ancestor_repair",
+        "tests.test_phase16_bot_ancestor_repair_gate",
+        "tests.test_phase16_bot_stage_access",
+        "tests.test_phase16_bot_candidate_admission"
+      ],
+      "passed": 51,
+      "returncode": 0,
+      "skipped": 0,
+      "tests_run": 51
+    },
+    "independent_review": {
+      "agent": "/root/review_candidate_diagnostic",
+      "initial_findings": 2,
+      "initial_priority": "P2",
+      "open_P0_P1_P2": 0,
+      "resolved": [
+        "false_no_permission_change",
+        "parent_after_identity_substitution"
+      ],
+      "status": "PASS"
+    },
+    "native_ancestor_facts": "EXECUTED_BOUND_METADATA_ONLY",
+    "native_linux_repair": "NOT_EXECUTED",
+    "new_claim_absent": true,
+    "red_initial_core": {
+      "failures": 13,
+      "reason": "module_absent",
+      "tests": 13
+    },
+    "red_initial_gate": {
+      "failures": 8,
+      "reason": "gate_absent",
+      "tests": 8
+    },
+    "remote_attempts": 0,
+    "remote_writes_this_proposal": 0,
+    "review_regression_green": {
+      "returncode": 0,
+      "tests": 2
+    },
+    "review_regression_red": {
+      "assertion_failures": 4,
+      "returncode": 1,
+      "tests": 2
+    },
+    "service_actions": 0
+  },
+  "date": "2026-10-03",
+  "original_artifacts": {
+    "count": 57,
+    "manifest_sha256": "431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff",
+    "unchanged": true
+  },
+  "preview": {
+    "approval": "PHASE16_CANDIDATE_ANCESTOR_REPAIR_20261003_001",
+    "manifest_sha256": "e1f014f0a655aa9dde3d74eec1f6e03197d71608a25709ee2e89de3d20d1be7e",
+    "permission_syscalls_max": 2,
+    "remote_seconds": 180,
+    "remote_sha256": "5ca4fc1bde22343ca4e43c6262b6366b274fa58364579dac08213bbb96e89ae5",
+    "ssh_attempts": 0,
+    "status": "OFFLINE_READY_NOT_EXECUTED",
+    "transport_seconds": 210
+  },
+  "safety": {
+    "AWG2": "UNTOUCHED",
+    "child_access": "NOT_APPLIED",
+    "clients": "DEFERRED_BY_OPERATOR",
+    "foreign_diff_sha256": "dd63e3e9ec5a999160a75c5ea5a94357b3003764c5e201350d2b6f21394be303",
+    "general_issuance": "DISABLED_UNCHANGED",
+    "original_operation": "CONSUMED_NO_REPLAY",
+    "package016": "IMMUTABLE_UNCHANGED",
+    "parent_change": "NOT_APPLIED",
+    "stage_install": "NOT_EXECUTED",
+    "target": "IN_FORMATION_UNSPECIFIED"
+  },
+  "schema": "phase16.ancestor-repair-local-verification.v1",
+  "status": "LOCAL_READY_NOT_EXECUTED"
+}

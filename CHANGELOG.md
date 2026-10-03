@@ -7,6 +7,27 @@
 
 ## 2026-10-03
 
+- По exact approvals выполнены push6be4149 при EXPECTED_OLDe0bdf39 (fresh ref MATCH,
+  CHANGELOG/pre-push PASS) и [ancestor facts](research/amn2/phase16-bot-ancestor-readback-execution-001-2026-10-03.json):
+  SSH0/2.938s, stdin0/stdout3636 complete/stderr0, metadata-safe/ACL-clear.
+  Single blocker `/opt/amn2-spain/bot-candidates` root:root0700, dev64770/ino262273,
+  service UID/GID61212; other3 parents traversable, stage-root0700 expected private.
+  Bot/web selected identities unchanged; DB/app/writes/permission/service actions0.
+  Approval consumed, no retry. Full installed runtime verify этим packet не выполнялся.
+  По /GO локально подготовлен [отдельный parent repair](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-2026-10-03):
+  exact witness + held FD, known private sibling metadata/exclusive group guards,
+  новый root-private durable audit intent/result → только parent root:61212/0710;
+  затем original readonly candidate proof с safe return telemetry runtime verifier.
+  Frozen57 artifacts, исходный access plan и consumed operations не изменены.
+  New live NOT_EXECUTED, exact checksum approval required, remote180s/transport210s,
+  one-shot; child DAC/maintenance/DB/app/services/install/auto rollback0.
+  RED availability13+8 и два review regression RED→GREEN; [final51 PASS/0 SKIP](research/amn2/phase16-bot-ancestor-repair-local-verification-2026-10-03.json),
+  independent review PASS после двух P2 validator fixes (no-change consistency,
+  immutable parent_after identity). Native Linux repair не заявлен. Актуальный план/
+  START_HERE/runbook/передача синхронизированы. AWG2/package016/general issuance и
+  foreign ideas diff сохранены; client tests deferred, target admin in formation,
+  integration/acceptance/Phase16 не закрыты.
+
 - По exact approvals выполнены push e0bdf39 при EXPECTED_OLD5acb675 (pre-push2
   commits PASS, fresh ref MATCH) и [component diagnostic](research/amn2/phase16-bot-candidate-diagnostic-execution-001-2026-10-03.json):
   один SSH0/4.218s, stdin0/stdout5950 complete/stderr0, current access_plan

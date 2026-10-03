@@ -2135,15 +2135,15 @@ Stage-root private traversal отделён от four-parent readiness; neither 
 Identity/unit/descriptor continuity проверяется в конце. No candidate/legacy replay,
 source/payload/runtime scans, DB/app, chmod/chown, upload/install/service actions0.
 Remote30s включая code bootstrap / transport45s / output64KiB, one SSH/stdin0,
-strict pinned host/role, отдельный durable claim, no retry. Пока new claim absent,
-SSH0. Успех — ANCESTOR_FACTS_COLLECTED_NOT_REPAIRED, не исправление/host admission.
+strict pinned host/role, отдельный durable claim, no retry. На момент локальной подготовки new claim absent,
+SSH0; фактический однократный запуск описан ниже. Успех — ANCESTOR_FACTS_COLLECTED_NOT_REPAIRED, не исправление/host admission.
 
 Локально:11 focused tests, итог37 PASS/0 SKIP (ancestor facts, original stage-access
 policy и candidate composition). Блокирующий root0700 parent воспроизводится в
 metadata model без mutations; original policy сохраняет запрет. Real collect
 проверен с native boundaries fixtures; отсутствие candidate/settings scan отдельно
-проверено. Независимый review PASS, открытых P0/P1/P2 нет. Native Linux facts не
-исполнялись; hashes/closure и scope сохранены в local receipt.
+проверено. Независимый review PASS, открытых P0/P1/P2 нет. На момент local receipt Native Linux facts не
+исполнялись; последующий actual execution ниже не меняет этот frozen receipt.
 
 После actual metadata: отдельно определить exact before/desired/rollback/ownership
 для нужного каталога либо выбрать отдельный совместимый layout при целевом переносе.
@@ -2152,3 +2152,94 @@ metadata model без mutations; original policy сохраняет запрет
 Если facts не получены, UNKNOWN не разрешает повтор или угадывание chmod.
 Дизайн продолжает существующий readonly flow; /GO разрешает локальную подготовку.
 SSH/push и любое изменение прав сохраняют отдельные exact approvals.
+
+
+<a id="candidate-ancestor-facts-executed-2026-10-03"></a>
+
+## Actual ancestor facts — approved one-shot03.10
+
+[Execution record](phase16-bot-ancestor-readback-execution-001-2026-10-03.json):
+SSH0/2.938s, stdin0/stdout3636 complete/stderr0; claim19:43:49.398975 UTC.
+`PHASE16_CANDIDATE_ANCESTOR_FACTS_20261003_001` consumed; no retry.
+Bound `ANCESTOR_FACTS_COLLECTED_NOT_REPAIRED`, mutations/DB/app/services0.
+Push6be4149 при EXPECTED_OLDe0bdf39: fresh remote MATCH, normal single ref/no force/tags,
+pre-push CHANGELOG gate PASS. Это Git tools/source, не app deployment.
+
+| Объект | Owner/mode | Identity | Проход сервиса61212 |
+| --- | --- | --- | --- |
+| `/` | root:root0755 | dev64770/ino2 | Да |
+| `/opt` | root:root0755 | dev64770/ino16385 | Да |
+| `/opt/amn2-spain` | root:root0755 | dev64770/ino283368 | Да |
+| `/opt/amn2-spain/bot-candidates` | root:root0700 | dev64770/ino262273 | Нет — blocker |
+| fixed retained stage root | root:root0700 | dev64770/ino401618 | Нет — expected private before apply |
+
+Exact mtime/ctime и selected unit witnesses — в execution record. ACL-clear и
+metadata-safe true у всех пяти rows; service UID/GID61212, supplementary61212.
+Bot/web unchanged PID1355701/1355683 и InvocationIDs; coordinator not-found.
+`ancestor_ready=false`. Full installed runtime verify не достигнут этим metadata
+packet; unsaved original maintenance exception не реконструирован. Generic transport
+UNKNOWN_MAY_CONTINUE не является evidence coordinator runtime.
+
+<a id="candidate-ancestor-repair-2026-10-03"></a>
+
+## Separate narrow parent repair — LOCAL_READY_NOT_EXECUTED
+
+Новый вопрос: устранить доказанный single-parent traverse blocker и в том же bounded
+запуске получить full candidate proof или точную достигнутую причину STOP. Original
+maintenance/access plan не расширяются и не переисполняются.
+[Core](../../scripts/phase16_bot_ancestor_repair.py),
+[gate](../../scripts/phase16_bot_ancestor_repair_gate.py),
+[manifest](phase16-bot-ancestor-repair-manifest-2026-10-03.json),
+[local verification](phase16-bot-ancestor-repair-local-verification-2026-10-03.json).
+Approval ID: `PHASE16_CANDIDATE_ANCESTOR_REPAIR_20261003_001`.
+
+Перед первым chmod/chown: exact boot/target/original code/resources и five-object
+metadata witness; bot/web properties и process IDs прежние; old coordinator/access/
+sequence claims и fences отсутствуют. Сервис UID/GID61212 совпадает с bounded local
+passwd/group и NSS, группа не включает иных пользователей. Direct children parent:
+максимум16 metadata rows, только известные artifact names21.09/24.09/29.09,
+root:root0700 directory/no links/no xattrs; retained stage обязательно присутствует.
+Unknown names/ownership/mode/ACL/continuity → STOP до grant, никаких raw names/errors.
+Siblings не читаются рекурсивно. Их root0700 сохраняется.
+
+Remote claim — exclusive mkdir нового root:root0700
+`/var/lib/amn2-spain/phase16-maintenance/phase16-ancestor-traverse-20261003-001`.
+В нём новые exclusive root:root0600 claim/plan/intent/result JSON (exact names в
+manifest). Audit writes/readback/fsync предшествуют permission mutation; old operation
+не меняется. Intent durable → fresh identity/preimage → held parent FD
+`fchown(fd,-1,61212)` → `fchmod(fd,0710)` → metadata/ACL/named-descriptor/sibling
+continuity checks. Только parent root:61212/0710: service получает execute/traverse,
+без read/list/write; дочерние stage остаются root-private. Другие parents и child
+DAC не меняются. Только свой parent ctime/gid/mode rebased; чужие snapshots нет.
+
+После parent success выполняется original readonly candidate collector (wheel,
+source/site metadata/content, OS bootstrap/settings proof и access plan), без app
+execution. Fixed component wrappers сохраняют safe literal reason/type; отдельно
+сохраняются status/reason/runtime/bootstrap/counts именно возвращённого
+`verify_installed`, поскольку он может вернуть STOP без exception. Plan digest/count
+выводятся только при PASS; full plan/конфиги/секреты/raw errors не выводятся.
+
+Предел remote180s включая bootstrap / transport210s / output64KiB, SSH1/stdin0,
+strict pinned role/host, separate durable local claim. Preview SSH0. Даже completed
+syscalls0 после попытки chown не доказывает mutations0. Любой незавершённый intent,
+timeout/continuity/journal failure → partial/unknown, no retry/cleanup/auto restore.
+Candidate STOP сохраняется отдельно от parent success; ни одно состояние не равно
+host admission, integration, migration, client/quality acceptance или Phase16 close.
+
+Rollback только вручную по новому exact approval и свежему witness: при неизменных
+private siblings/stage сначала parent0700, затем gid0, ownerroot сохранить. До approval
+никаких live writes. Прежнее45min DB window не продлевается и не переиспользуется:
+этот packet DB/services/maintenance sequence не затрагивает. AWG2/package016 и
+общая issuance неизменны; новое полноценное maintenance/target cutover требуют
+своего актуального контракта/окна/approval. Клиентские тесты отложены оператором.
+
+Локальная проверка:13 core model tests +12 gate/validator tests, итог51 PASS/0 SKIP
+с original stage-access policy/candidate composition. Реальные bytes authenticated
+launcher запущены в isolated Windows Python → closed platform STOP, stderr0,
+remote writes0. Audit mkdir/FD rebase/duplicate claim проверены Unix моделью,
+не Linux live. Independent review PASS после RED/GREEN двух P2 outcome-validator
+defects; open P0/P1/P2=0. Проверены partial chown/chmod, unknown/private/ACL sibling,
+foreign ancestor drift, missing durable intent/result и candidate STOP/deadline.
+New claim absent, SSH0. Preview manifest SHA256
+`e1f014f0a655aa9dde3d74eec1f6e03197d71608a25709ee2e89de3d20d1be7e`, remote SHA256
+`5ca4fc1bde22343ca4e43c6262b6366b274fa58364579dac08213bbb96e89ae5`.
