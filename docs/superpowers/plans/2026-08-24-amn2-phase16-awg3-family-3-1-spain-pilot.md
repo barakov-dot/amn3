@@ -481,13 +481,13 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
   [VERIFIED_NOT_ACTIVATED,2.906s/exit0](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#stage-readback-executed-2026-09-29).
   Saved-stage success и текущие200 hashes/runtime40 metadata подтверждены;
   stage/install29.09 больше не UNKNOWN в этой границе. Approval consumed, retry0.
-- [ ] T14 — maintenance target binding и operations; live executor ещё не готов.
+- [ ] T14 — maintenance target binding и operations; пакет локально готов, live acceptance открыт.
   [Локальная привязка30.09](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-target-binding-2026-09-30):
   - [x] T14a — exact stage record/inventory → существующий source/runtime verifier;
     фиксированные candidate/old runtime/DB/backup paths, hash-bound draft manifest.
   - [x] T14b — typed preconditions/ownership и coordinator manifest; target digest
     включён в durable journal, semantic pair checks и freshness.45 affected PASS.
-  - [ ] T14c — operation adapters и sustained Linux runner, **частично реализован**.
+  - [ ] T14c — operation adapters и sustained Linux runner, **локально реализован; серверная проверка открыта**.
     [Результат30.09](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-operations-local-2026-09-30):
     реальные backup/rehearsal/migration adapters, pending guards, bounded processes,
     systemd/fence readers и isolated data-worker specification;88 affected PASS.
@@ -495,7 +495,7 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
     одноразовый data-job supervisor, сохранённый stop-witness, независимые worker
     fence/ownership/identity checks, receipts и no-retry при неоднозначном исходе;
     реальная temporary SQLite цепочка с systemd double;109 affected PASS/0SKIP.
-    Открыты actual admission/provenance, полный sustained coordinator/start/recovery
+    На30.09 оставались открыты actual admission/provenance, полный sustained coordinator/start/recovery
     и Linux acceptance. Exit0/пустой cgroup не подменяют business drain; default CLI
     blocked. [Исключение для old-handler drain](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#legacy-stop-decision-2026-09-30)
     согласовано оператором01.10 для old55dc → 6e68235; delivery uncertainty явно
@@ -504,7 +504,7 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
     [Привязка01.10](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#legacy-stop-policy-bound-2026-10-01):
     policy operation/boot/source/packet binding обязателен в supervisor/worker;
     unknown drain не переименован в complete, no-auto-restore/replay recovery route.
-    120 affected PASS/0SKIP; полный coordinator/recovery wiring ещё открыт.
+    120 affected PASS/0SKIP; на01.10 полный coordinator/recovery wiring ещё оставался открыт.
     [Продолжение02.10](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#service-operations-facts-2026-10-02):
     concrete candidate/web/release adapters, migration receipt-chain before start,
     whole-action deadlines и owned HTTP readiness; **152 affected PASS/0SKIP**.
@@ -512,21 +512,32 @@ argv без stdin, per-command5/6, remote45s/transport60s, одна попытк
     SSH exit0 за9.406s, FACTS_COLLECTED_NOT_ADMITTED; approval consumed, retry запрещён.
     User/Group=amn2-spain, web3031, CIDR10.212.12.0/24; process VPS_APPLY=false,
     AWG3 flag ABSENT. Это не будущие effective settings или host admission.
-    Оператор не уверен в отсутствии других writers/pollers: ownership UNKNOWN.
+    Ответ02.10 об остальных writers/pollers: «Не уверен»; ownership тогда UNKNOWN.
     Доступ к `@NeobyatnayaAMNZ_bot` в `/mybots` BotFather подтверждён ответом «да»02.10;
     это не writer exclusion/maintenance ownership и не согласование смены токена.
     [Единая последовательность02.10](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-sequence-local-2026-10-02):
     все8 операций соединены, durable claim/no replay, per-step evidence/deadlines,
     recovery routing; **171 affected PASS/0SKIP** на временной SQLite/systemd double.
-    Открыты actual host admission, service-user доступ к root-private stage,
-    manager-owned coordinator process/packet и Linux acceptance.
+    [Единый пакет03.10](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-packet-local-2026-10-03):
+    host admission, content/bootstrap provenance, effective settings, initial pending,
+    application writer admission, durable stage access и service-user probe реализованы.
+    Manager-owned coordinator и полный однократный пакет соединены с8 операциями.
+    **461 affected PASS/0SKIP**, independent focused review закрыт; Windows local,
+    Linux/procfs/systemd границы моделируются. Manifest/payload сохранены, SSH0.
+    Оператор подтвердил03.10: «Никто, доступ только у меня» о Spain SSH/ручных задачах.
+    Внешние копии бота — ответ ожидается; полная application topology и45min ownership
+    предложены, ещё не приняты. Exact approval PHASE16_BOT_MAINTENANCE_20261003_001
+    не выдан. Один запуск: preflight600s/coordinator900s/shared remote1560s/transport1590s;
+    неизвестный исход не разрешает retry/restore/replay. Native Linux acceptance,
+    actual DB rehearsal/migration и startup admission остаются открыты.
     `/GO` разрешает продолжать локальную работу без промежуточных подтверждений;
     SSH/live/push остаются exact-bound. Windows/Android/iPhone доступны;
     клиентские тесты отложены оператором до утра03.10, сейчас не выполняются.
-  Writer inventory/ownership, future effective flags, stage access, startup/pending и
-  actual data rehearsal ещё не приняты. Базовый дизайн и однократное исключение
-  старого drain согласованы; повторно их не запрашивать. Локальная подготовка
-  разрешена, новый SSH/data/service scope не разрешён.
+  Проверяющий код и цельный live packet подготовлены; фактические writer ownership,
+  flags/access/startup/pending и data rehearsal сервером ещё не подтверждены.
+  Базовый дизайн и однократное исключение старого drain согласованы, повторный
+  design approval не нужен. Следующий шаг — внешний poller/owner statement и точный
+  checksum-bound approval готового пакета; новый SSH/data/service scope пока не разрешён.
 - [x] T9 — secure descriptor reads/hash provenance retained candidate, новый stage
   без upload/old test-venv reuse, offline install/metadata/no-app-import контракт.
 - [x] T10 — одноразовый gate/manifest,23 targeted PASS, actual immutable bundle
@@ -566,12 +577,13 @@ Design согласован оператором после commit b277154. По
   local PASS сохранён. После transport failures24/27/29.09 один readback из
   pushed07e7769 подтвердил stage29.09: VERIFIED_NOT_ACTIVATED,2.906s,200 files,
   runtime40, saved success receipt. Повтор install/transport probe не нужен.
-  Target/input binding, data/service adapters и единая sequence реализованы
-  локально;171 affected PASS/0SKIP. Facts SSH02.10: FACTS_COLLECTED_NOT_ADMITTED,
-  approval consumed. Actual preview BLOCKED_UNKNOWN_PRECONDITIONS: ownership
-  UNKNOWN, admission/provenance/access/startup и manager-owned coordinator ещё
-  открыты. Actual DB rehearsal/migration не выполнялись; Linux acceptance не получен.
-  Bot activation/live scope не разрешены; recovery v1 сохранён.
+  Единый пакет03.10 реализован локально: admission/provenance/access/pending,
+  writer guards, manager-owned coordinator и8 операций;461 affected PASS/0SKIP.
+  Facts SSH02.10: FACTS_COLLECTED_NOT_ADMITTED, approval consumed. Новый preview
+  READY_FOR_EXACT_APPROVAL_NOT_EXECUTED: это готовность пакета, не host admission.
+  Единоличный SSH и BotFather access подтверждены; external pollers/полная app topology
+  и45min ownership ещё не подтверждены. Actual DB rehearsal/migration/startup и
+  Linux acceptance не выполнены. Exact live approval отсутствует; recovery v1 сохранён.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана; тесты отложены до утра03.10.
 - ✅ Task 4B — Android connectivity, не performance acceptance.
 - ✅ Task 4C — iPhone connectivity/reconnect, не performance acceptance.

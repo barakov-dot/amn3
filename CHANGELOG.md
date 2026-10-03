@@ -5,6 +5,25 @@
 записи не означают deployment или новую выдачу. Текущая очередь — в
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
+## 2026-10-03
+
+- Подготовлен [единый пакет обслуживания Phase16](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#maintenance-packet-local-2026-10-03):
+  verified runtime/source и OS-bootstrap provenance, effective settings, application
+  writer/ownership admission, pending aggregates, durable stage permissions и service
+  access probe. Manager-owned coordinator соединяет существующие8 операций через
+  одноразовые claims, привязанные proofs и receipts; remote1560s/transport1590s,
+  без retry/replay/restore. Существующие validators, receipts, candidate/package016
+  и чужой planning diff сохранены. Права каталога БД не изменяются; code imports
+  привязаны к проверенным bytes, stdlib paths — к исходному isolated interpreter.
+  [461 affected PASS/0SKIP за146.610s](research/amn2/phase16-bot-maintenance-packet-local-verification-2026-10-03.json),
+  RED/GREEN, isolated saved-payload closure и независимый focused review без оставшихся
+  конкретных P1/P2. Реальные локальные files/SQLite/child processes; Linux/systemd
+  границы моделируются, native acceptance и live rehearsal/migration не выполнены.
+  Оператор подтвердил единоличный SSH-доступ; внешний bot poller вопрос и owner
+  statement остаются открыты. Manifest/payload SHA заморожены, exact live approval
+  ещё не получен. SSH/live DB/services/stage/install/activation/push0;
+  AWG2 untouched, stage VERIFIED_NOT_ACTIVATED, issuance off, client tests отложены.
+
 ## 2026-10-02
 
 - Зафиксирован ответ оператора «да» о наличии `@NeobyatnayaAMNZ_bot` в `/mybots`

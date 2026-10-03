@@ -1793,3 +1793,128 @@ bytecode, дополнительные distribution и wheel data relocation т�
 по этому уточнению не создавались.
 SSH0/live DB0/services0/stage-install0/activation0/push0;
 AWG2/package016 untouched, stage29.09 VERIFIED_NOT_ACTIVATED, issuance не включалась.
+
+
+<a id="maintenance-packet-local-2026-10-03"></a>
+
+## T14c: единый пакет обслуживания — локальная подготовка 03.10
+
+Это текущая локальная реализация после исторического раздела02.10. Серверный
+запуск не выполнен. Наличие manifest и предложенного owner statement не означает,
+что оператор уже подтвердил этот statement или разрешил live mutation.
+
+Оператор уточнил: **«Никто, доступ только у меня»** о SSH и ручных задачах на Spain.
+Это закрывает вопрос других SSH-администраторов по его сообщению. BotFather access
+подтверждён ранее; повторно не спрашивать. Отдельный вопрос о копиях Telegram-бота
+с тем же токеном вне Spain ещё ожидает ответа. Отсутствие таких копий нельзя
+выводить из единоличного SSH-доступа. Смена токена/идентичности и reset БД не входят
+в пакет. Клиентские проверки Windows/Android/iPhone остаются отложенными.
+
+[Packet gate](../../scripts/phase16_bot_maintenance_packet.py) готовит один
+проверяемый набор кода обслуживания и существующих несекретных JSON/TXT bindings.
+Candidate6e68235, его immutable bundle и package016 не перестраиваются и не
+загружаются повторно. Полный список кодовых файлов, SHA256 и ограничения находятся
+в [manifest](phase16-bot-maintenance-packet-2026-10-03.json). Контрольные суммы
+конкретной версии и итоговый набор локальных проверок публикуются в
+[verification receipt](phase16-bot-maintenance-packet-local-verification-2026-10-03.json).
+
+Реализованы следующие проверки и переходы:
+
+- Runtime content сравнивается с40 доверенными wheels сохранённого payload;
+  bootstrap pip — с отдельным OS seed wheel и установленной dpkg-базой. OS/root
+  остаются доверенной основой, подпись издателя заново не проверяется. RECORD,
+  generated metadata, bytecode и relocation проверяются явно; неизвестные файлы
+  дают STOP. Совпадение версий само по себе недостаточно.
+- Проверяются все159 source-файлов, включая155 файлов приложения, шаблоны и
+  статику. Доступ service group получают только проверенные пути; root-владелец
+  сохраняется, payload/receipts/scratch и непроверенные console wrappers закрыты.
+  Claim → plan → intent записываются до chmod/chown; stage root открывается для
+  traversal последним. При частичном результате нет повторного применения или
+  автоматического возврата прав.
+- Один probe проверяет чтение и directory access от UID/GID сервиса в текущем
+  mount namespace бота и новом net namespace. Shared objects проверяются через
+  RX-mmap без выполнения. App/DB/Telegram не вызываются этим probe. Это проверка
+  текущего доступа в поддержанном sandbox-контексте, не обещание будущего старта.
+- Будущие selected effective settings вычисляются с учётом Environment,
+  EnvironmentFiles, UnsetEnvironment, dotenv и pinned candidate defaults.
+  VPS_APPLY/AWG3 bootstrap остаются false, DB/CIDR/port/username связаны с target.
+  Бюджет39s от запроса запуска через READY/identity/admission принудительно
+  ограничен; TimeoutStartSec=40 сохраняется. Это deadline наблюдения, не benchmark.
+- Начальные pending aggregates читаются отдельным child с read-only DB mount и
+  закрытой сетью; повторная проверка выполняется после остановки обоих writers.
+  Выход старого процесса по-прежнему не доказывает business-handler drain.
+- Writer admission принимает только явно подтверждённую полную APPLICATION
+  topology bot+web, отсутствие других app cron/agent/timer/socket writers,
+  паузу ручных задач и исключение внешних pollers на всё окно. Полный bounded
+  visible proc FD/maps scan проверяет фактических holders DB/sidecars. Это не
+  аудит всех OS services; `complete_bot_web_only` в старом manifest обозначает
+  именно эту ограниченную, явно объявленную application topology.
+- Старые source/dependencies получают content fingerprints и сохраняемый
+  metadata/children snapshot. Два критических legacy source SHA проверяются;
+  old55dc является ссылкой согласованной policy, deployed Git не объявляется
+  установленным по двум файлам. Повторные guards проверяют исходную continuity,
+  settings/launch/PID/namespace/lease и holders без полной повторной установки.
+
+[Host admission](../../scripts/phase16_bot_host_admission.py) связывает сохранённые
+proofs через observation digest с prepared contract. Проверяются также смысловые
+совпадения settings/startup/rollback/inventory между dossier и observation.
+[Координатор](../../scripts/phase16_bot_coordinator_process.py) запускается отдельным
+manager-owned systemd service, принимает один durable claim и переживает обрыв SSH.
+Затем идёт существующая последовательность8 действий: fence → stop web/bot →
+backup → rehearsal → migrate → candidate start → web start → release.
+Подготовленные proof-файлы не служат самостоятельным разрешением этой цепочки.
+
+Штатный `/var/lib/amn2-spain` принадлежит service UID/GID61212, mode0750 по
+installer contract. Новый storage adapter допускает ровно этот ancestor;
+maintenance directories/code/records остаются root:root0700/0600. Каталог БД не
+chown/chmod. Чтение удерживает directory FD и проверяет identity; импортируемые
+модули связываются с утверждёнными bytes, чтобы изменение именованного предка
+не перенаправило импорт. Исторические validators/receipts остаются неизменными.
+
+Предложенные пределы всего пакета: окно ownership45min; preflight до600s;
+координатор RuntimeMax900s (830s sequence +70s wrapper), ожидание930s;
+**общий remote deadline1560s, transport1590s**, включая bootstrap и bounded cleanup.
+Это верхние пределы, не ETA. Один SSH/одна передача maintenance code/один запуск,
+без дополнительных диагностических SSH. Новый root-private каталог операции
+и `/run/phase16` подготавливаются до manager submission. Claim запрещает повтор,
+даже когда первый ответ потерян. При local transport timeout координатор может
+продолжать работу; сначала требуется readback сохранённых intents/manager state,
+новый запуск не подразумевается.
+
+Точный live approval ещё не получен. Он должен привязываться к текущим manifest
+и payload SHA256 и явно включать owner statement, перечисленные permission/DB/
+service операции и допустимую startup Telegram admission. Успех локальных тестов
+не является native Linux acceptance, реальным rehearsal или закрытием Phase16.
+После серверного успеха остаются клиентские connectivity/quality/A-B и acceptance.
+AWG2/package016 untouched; stage29.09 VERIFIED_NOT_ACTIVATED; general issuance off.
+SSH/live DB/service/stage/install/activation/push в этой локальной работе:0.
+### Проверенный результат и граница следующего действия
+
+**461 PASS / 0 FAIL / 0 ERROR / 0 SKIP за146.610s**, Python3.12.14/Windows:
+18 новых и11 затронутых существующих test modules. Временные files/SQLite и
+локальные child processes реальные; Linux/procfs/systemd границы моделируются.
+Проверена полная import/resource closure сохранённого payload из отдельного
+временного каталога с `-I -S -B`; импорты используют подтверждённые bytes,
+посторонние scripts/stdlib/subpackage paths отвергаются. Native Linux acceptance
+этот результат не заменяет. Независимый focused review закрыл найденные P1/P2;
+текущее review не обнаружило оставшихся конкретных P1/P2 в этом пакете.
+
+Замороженная версия `PHASE16_BOT_MAINTENANCE_20261003_001`:
+
+- manifest SHA256: `431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff`;
+- payload SHA256: `cb8d39f97861ea36bc251245c3b9becf8ec10c124a428e755fc8b767e0f41b89`;
+- bootstrap SHA256: `dd2e4a7d5e3bb5f1bbc3982989f2651e4b0ec0d66b70e777e9272840781c3e20`;
+- frame345515 bytes,55 code/resource files; default preview exit0, SSH0.
+
+Manifest сохранён в canonical JSON, поэтому его файловый SHA равен указанному
+manifest SHA. Код, тесты, immutable bundle и frozen target проверены; чужой
+planning diff сохранён. Исполнительный local claim отсутствует: пакет не запускался.
+
+Для исполнения нужны ответ о внешних копиях и точное согласование этого пакета:
+единственные application writers — bot/web, других app cron/agent/timer/socket
+writers нет, ручные задачи приостановлены, внешние pollers исключены на все45min.
+Согласование включает перечисленные permission/backup/rehearsal/migration/service
+операции и startup Telegram admission. Общий `/GO` и единоличный SSH-доступ этого
+утверждения не подменяют. Повторно согласовывать старый drain exception не нужно.
+После такого подтверждения выполняется один запуск; при STOP/UNKNOWN сохраняются
+intents/evidence и запрашивается только необходимый конкретный recovery/readback.
