@@ -156,3 +156,21 @@ candidate probe STOP/candidate_collection_failed, inner cause не устано�
 это переносимое открытое ограничение, не target admission. Оба approvals consumed.
 AMN3 source5acb675 опубликован и подтверждён exact ref readback; приложение на VPS
 этим Git push не развёрнуто. M0a завершён, далее M1–M5 в единственном плане.
+
+<a id="forming-admin-2026-10-03"></a>
+
+### Будущая общая админка ещё формируется — уточнение03.10
+
+Оператор подтвердил стадию формирования общей админки. Сейчас передаём основу
+знаний и сохраняем проверяемые source/package/evidence и открытые ограничения.
+Точный адрес/репозиторий нужен при реальном сопоставлении ownership/data/runtime
+контрактов; его отсутствие не останавливает локальную подготовку текущего проекта.
+Код новой админки здесь не проверялся, её реализация в этот scope не входит.
+
+До появления адресата разработчику доступны ссылки выше на AMN2 source6e68235,
+immutable runtime40, bot worker lifecycle, web/DB ownership, AWG capability limits
+и client evidence. Current candidate collector STOP остаётся открытым; отдельный
+[component diagnostic](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-component-diagnostic-2026-10-03)
+подготовлен локально для inner reason, без live исполнения. Это не новый runtime
+или новая универсальная protocol model. Phase16 acceptance/closeout остаются
+открытыми; дальнейшее состояние брать только из единственного плана.

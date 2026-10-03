@@ -1,0 +1,115 @@
+{
+  "schema": "phase16.candidate-component-diagnostic-local-verification.v1",
+  "date": "2026-10-03",
+  "status": "LOCAL_VERIFIED_PROPOSED_NOT_EXECUTED",
+  "approval": "PHASE16_CANDIDATE_COMPONENT_DIAGNOSTIC_20261003_001",
+  "original_manifest_sha256": "431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff",
+  "manifest_sha256": "c6293206d41098d07ac721bf8e73e30a06e8beb80f29a28b60b103d3eb344c46",
+  "remote_sha256": "e312796724ddcb44b455f65f6d2a2a507bbf2b2c0271cdc87c5d2cacbef3336d",
+  "predecessor_gate_sha256_lf": "b0e35c25317b94cafa2ff2b1aa6af15336b4e7e9ec57ac8997d43b600029bb0b",
+  "artifacts_sha256_lf": {
+    "scripts/phase16_bot_candidate_diagnostic.py": "e000970aa2a015034204e764a6d134d3d1256893cc636a2f6f5f236891c5a57f",
+    "tests/test_phase16_bot_candidate_diagnostic.py": "44fa01daf28af51bf09d257e81a664e6e12330ad5e4c95665b4201507fa87ed8",
+    "research/amn2/phase16-bot-candidate-diagnostic-manifest-2026-10-03.json": "c6293206d41098d07ac721bf8e73e30a06e8beb80f29a28b60b103d3eb344c46",
+    "research/amn2/phase16-bot-maintenance-readback-execution-001-2026-10-03.json": "6a51e176a48a8981a45140f1fe01c454b5229c33e7a1825aa9b28a66746ca7a1"
+  },
+  "original_packet_frozen_files": 57,
+  "original_packet_closure": "MATCH",
+  "tests": {
+    "modules": [
+      "tests.test_phase16_bot_candidate_diagnostic",
+      "tests.test_phase16_bot_maintenance_readback",
+      "tests.test_phase16_bot_candidate_admission",
+      "tests.test_phase16_bot_bootstrap_provenance"
+    ],
+    "scope": "WINDOWS_LOCAL_FIXTURES_LINUX_DIAGNOSTIC_NOT_EXECUTED",
+    "tests": 40,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 27.828,
+    "success": true
+  },
+  "tests_log_sha256": "414fde0f6e1f060b93722f3834a6d40608125efa365532af509dd274b64825ad",
+  "tests_result_sha256": "93dac531d1bf649cc093464853680330785650b3566b9db42691bb47d1a0f282",
+  "red_green": [
+    {
+      "test": "test_command_failure_is_visible_inside_bootstrap_wrapper",
+      "red": "Missing readonly_command inner telemetry under actual bootstrap collector",
+      "green": "command_failed retained while original bootstrap/candidate exceptions propagate"
+    },
+    {
+      "test": "test_actual_content_access_reasons_keep_parent_allowlist_unchanged",
+      "red": "actual ancestor_access and wheel_inventory replaced by UNCLASSIFIED_ERROR",
+      "green": "literal component reasons preserved; parent safe_reason/summary unchanged; complete receipt accepted"
+    }
+  ],
+  "independent_review": {
+    "task": "/root/review_candidate_diagnostic",
+    "status": "PASS_LOCAL_PREPARATION",
+    "findings": 1,
+    "severity": "P2",
+    "finding": "Missing literal _require reasons in predecessor allowlist",
+    "resolution": "Separate COMPONENT_REASONS extracted from authenticated frozen sources; targeted RED/GREEN independently checked",
+    "open_p0_p1_p2": 0,
+    "limits": "Read-only source and local tests; no docs/live state/native Linux acceptance reviewed"
+  },
+  "preview": {
+    "status": "OFFLINE_READY_NOT_EXECUTED",
+    "approval": "PHASE16_CANDIDATE_COMPONENT_DIAGNOSTIC_20261003_001",
+    "manifest_sha256": "c6293206d41098d07ac721bf8e73e30a06e8beb80f29a28b60b103d3eb344c46",
+    "remote_sha256": "e312796724ddcb44b455f65f6d2a2a507bbf2b2c0271cdc87c5d2cacbef3336d",
+    "ssh_attempts": 0,
+    "remote_seconds": 120,
+    "transport_seconds": 150,
+    "database_open": 0,
+    "remote_file_writes": 0,
+    "service_actions": 0
+  },
+  "modelled_boundaries": [
+    "Native Unix readers/metadata fixture boundaries on Windows",
+    "Original successful runtime/access proof preserved",
+    "Actual nested SettingsError/ContentError/AccessError/OS-command Stop",
+    "Deadline propagation and inherited/own hook restoration",
+    "Closed telemetry redaction and receipt validation",
+    "Wrong exact approval before protected loader"
+  ],
+  "native_linux_execution": false,
+  "new_ssh_attempts": 0,
+  "new_remote_file_writes": 0,
+  "new_database_open": 0,
+  "new_service_actions": 0,
+  "new_stage_install": 0,
+  "new_activation": false,
+  "diagnostic_execution_claim_exists": false,
+  "foreign_planning_diff_sha256": "dd63e3e9ec5a999160a75c5ea5a94357b3003764c5e201350d2b6f21394be303",
+  "limits": {
+    "ssh_attempts": 1,
+    "remote_seconds": 120,
+    "transport_seconds": 150,
+    "output_bytes": 65536
+  },
+  "scope": {
+    "remote_file_writes": 0,
+    "database_open": 0,
+    "service_actions": 0,
+    "app_imports": 0,
+    "stage_install": 0,
+    "activation": 0,
+    "telegram": 0
+  },
+  "limitations": [
+    "Original unsaved exception remains unknown; next observation cannot prove an identical historical exception",
+    "No app/schema/DB/live admission or acceptance claim",
+    "Future shared admin in formation; target contract required at actual transfer, not local preparation",
+    "Original maintenance/readback approvals consumed once; no retry/recovery"
+  ],
+  "next_action": "One newly exactly approved component SSH with this manifest/remote SHA; no upload, DB open, app execution, permissions, install, service actions or replay",
+  "documentation_checks": {
+    "added_local_links_checked": 10,
+    "links_and_anchors": "PASS",
+    "diff_whitespace": "PASS",
+    "secret_pattern_review": "PASS",
+    "scope": "Changed/new local content; no external fetch or protected config reads"
+  }
+}

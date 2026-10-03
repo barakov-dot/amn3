@@ -7,6 +7,23 @@
 
 ## 2026-10-03
 
+- По уточнению оператора «общая админка ещё в стадии формирования» исправлен
+  преждевременный hold локальной работы на M1: target contract нужен при реальном
+  переносе, сейчас продолжаются подготовка Phase16 и [база знаний](docs/PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#forming-admin-2026-10-03).
+  Подготовлен один [candidate component diagnostic](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-component-diagnostic-2026-10-03)
+  поверх frozen readonly collector: memory wrappers сохраняют fixed inner step/
+  reason/type без raw inputs/errors и снимаются в finally; original code/pins
+  не меняются. Legacy proof исключён, DB/app/install/services/writes0,
+  remote120s/transport150s, one-shot exact approval; SSH пока не исполнялся.
+  RED/GREEN воспроизвёл потери nested settings/OS-command reason; cleanup/deadline,
+  redaction, successful runtime/access proof и schema проверяются в [local receipt](research/amn2/phase16-bot-candidate-diagnostic-local-verification-2026-10-03.json).
+  Итог40 PASS/0 SKIP; review P2 по `_require` literal reasons закрыт actual
+  runtime/access RED/GREEN с отдельным component allowlist; inherited record/probe
+  semantics не менялись. Независимый focused review PASS; финальные local checks
+  и hash closure привязаны в receipt. Цель передачи,
+  открытые client/quality gates, AWG2/package016 и чужой planning diff сохранены.
+
+
 - По exact approval выполнен [maintenance readback](research/amn2/phase16-bot-maintenance-readback-execution-001-2026-10-03.json):
   один SSH0/4.031s, stdin0/stdout4408 complete/stderr0, bound
   READBACK_COLLECTED_NOT_RECOVERY; remote writes/DB/service actions0.

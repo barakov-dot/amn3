@@ -6,7 +6,9 @@
 > complete, stderr0. [Readback03.10](#maintenance-readback-executed-2026-10-03): SSH0/4.031s,
 > bot/web active/stable, claims/coordinator/fences absent; по bound source ordering
 > permission/maintenance sequence не начинались этим packet. Candidate probe STOP,
-> inner cause не доказана. Оба approvals consumed/no retry; дальше M1 — цель переноса.
+> inner cause не доказана. Оба approvals consumed/no retry. Общая админка пока
+> формируется; текущая local работа — [component diagnostic](#candidate-component-diagnostic-2026-10-03)
+> и база передачи, без ожидания exact deployment target.
 > Конкретный packet не переносится на иной host заменой hashes.
 > [Единственная очередь M0a–M5](../../docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md#transfer-priority-2026-10-03).
 
@@ -2029,3 +2031,55 @@ candidate_collection_failed. Это generic wrapper для скрытого inne
 исполнялись. Новых Spain diagnostics не поставлено в очередь; candidate admission
 остаётся открытым ограничением для целевого контракта переноса. Следующий шаг M1:
 точный сервер/сервис или проект. AWG2/package016 сохранены; issuance disabled.
+
+<a id="candidate-component-diagnostic-2026-10-03"></a>
+
+## Component diagnostic candidate — local preparation03.10
+
+Общая админка ещё формируется; её готовность не является precondition локальной
+подготовки. Current candidate STOP не имеет inner reason из-за широкого wrapper.
+Новый bounded diagnostic даёт один конкретный readonly ответ для дальнейшего
+local fix; original candidate collector и original packets не переписываются.
+
+[Script](../../scripts/phase16_bot_candidate_diagnostic.py),
+[manifest](phase16-bot-candidate-diagnostic-manifest-2026-10-03.json),
+[local verification](phase16-bot-candidate-diagnostic-local-verification-2026-10-03.json).
+Approval ID: `PHASE16_CANDIDATE_COMPONENT_DIAGNOSTIC_20261003_001`.
+
+Во время существующего readonly candidate.collect_live temporary memory wrappers
+фиксируют closed component label, calls/status, pinned literal reason, fixed
+exception kind и allowlisted returned status. Аргументы/return bodies, paths,
+команды, raw errors/traceback, configs/tokens и DB rows не выводятся. Обёртки
+снимаются в finally, включая deadline; inherited methods возвращаются в исходное
+состояние. Сам collector и его checks/return/exception остаются прежними.
+
+| Наблюдаемые компоненты | Что различает результат |
+| --- | --- |
+| catalog / stage_observation | Binding inventory и retained stage proof |
+| settings / settings_file_read | Effective settings и ownership/continuity выбранных файлов |
+| bootstrap / readonly_command / secure_tree_open / secure_file_read | Existing OS package provenance, bounded metadata commands, no-follow reads |
+| identity / nss_groups | Service identity и NSS membership |
+| runtime_expected / venv / access_plan | Wheel-derived runtime и semantic venv/access PLAN, без apply |
+| collection | Original outer result и скрываемый им inner failure |
+
+Reuse fixed operation records, unit properties/fence metadata from frozen
+readback; candidate вызывается только при отсутствии access/coordinator claims.
+Legacy live proof исключён из этого diagnostic. Remote120s/transport150s/output64KiB,
+один SSH/stdin0/strict pinned key, code in memory. DB/app/permission/install/
+service actions/writes0. New durable execution claim не существует; SSH пока0.
+Все PASS означают DIAGNOSTIC_COLLECTED_NOT_ADMITTED, не разрешение обслуживания.
+Если ошибка не воспроизведётся, это не root cause и не live acceptance. UNKNOWN
+или timeout не разрешают повтор; original maintenance/readback не replay.
+
+Локально: итог40 PASS/0 SKIP, actual settings/OS-command/runtime/access errors,
+успешный original proof, redaction, schema и deadline/restoration проверены.
+Review P2 (literal reasons из `_require` терялись) закрыт targeted RED/GREEN:
+actual `ancestor_access` и `wheel_inventory` сохраняются только в component
+telemetry через отдельный allowlist verified frozen sources; прежние `REASONS`,
+record summary/probe и frozen validator неизменны. Независимый focused review PASS,
+открытых P0/P1/P2 нет. Это Windows fixtures, native Linux diagnostic не исполнен.
+
+Дизайн ограничен существующим flow и представлен в чате; пользовательский /GO
+разрешает автономную локальную подготовку. Live SSH и push по-прежнему требуют
+точного отдельного разрешения. Никакой новой админки или интеграции другого
+проекта эта работа не создаёт. Статус и очередь только в основном плане Phase16.

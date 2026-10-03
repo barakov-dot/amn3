@@ -10,6 +10,13 @@
 Завершение проекта и перенос — конечный результат; обновление bot/web на Spain
 больше не является самостоятельной задачей или обязательной ступенью переноса.
 
+Оператор уточнил позднее03.10: общая админка ещё в стадии формирования. Это
+будущий адресат базы знаний и интеграции; её готовность и точный адрес нужны для
+фактического целевого deployment/data contract, а не для текущей локальной работы.
+Продолжаем проверяемую подготовку Phase16 и передачу основы. M1 отложен до появления
+адресата; M0/M0b и доступная подготовка передачи продолжаются без ожидания IP/репозитория.
+Другой проект не обследуется и не меняется в этом scope.
+
 Существующие source/tests/receipts и immutable packages сохраняются. После
 переноса приоритета оператор отдельно подтвердил отсутствие других bot copies/
 writers и45min окно, выдал exact approval на прежний Spain packet и push0421da7.
@@ -26,8 +33,10 @@ STOP до permission и maintenance sequence этого packet; backup/rehearsal
 activation не начинались им. Это вывод по retained markers в доверенном OS/root
 контуре, не чтение БД и не live acceptance. Current readonly unit_facts PASS,
 candidate_content STOP/candidate_collection_failed; inner cause скрыта wrapper,
-legacy proof не запускался. Readback approval consumed once; дополнительных Spain
-diagnostics в очереди нет. Повтор/restore/replay запрещены. Дальше M1 — точная цель.
+legacy proof не запускался. Readback approval consumed once. Локально подготовлен
+[один component diagnostic](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-component-diagnostic-2026-10-03)
+для inner error оригинального readonly collector; новые SSH/mutation ещё не
+разрешены. Повтор/restore/replay запрещены. Дальше M0b и подготовка базы передачи.
 Это не завершённая интеграция и не перенос. Host/boot/paths/UID/schema/rollback
 bindings относятся к Spain; нельзя переназначить packet на другой VPS заменой SHA.
 Согласование owner statement уже получено для этого окна; не спрашивать его повторно.
@@ -39,7 +48,8 @@ bindings относятся к Spain; нельзя переназначить pa
 | --- | --- | --- |
 | P0 / M0 — зафиксировать переносимую основу | AMN2 source6e68235, AMN3 tools0421da7, immutable payload и результаты; разделить local/package/deployed/accepted, перечислить открытые ограничения | Локально разрешено; Git/source сверены03.10, [обновлённая передача](../../PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#transfer-baseline-2026-10-03) |
 | P0 / M0a — установить состояние после STOP | [Readback исполнен](../../../research/amn2/phase16-bot-maintenance-readback-execution-001-2026-10-03.json): bot/web active, coordinator/claims/fences отсутствуют; по source ordering permission/maintenance sequence не начинались этим packet. Candidate probe STOP, inner cause не установлена | ✅ Завершён один exact SSH; approval consumed, DB/writes/service actions0; retry/recovery не разрешены |
-| P0 / M1 — установить точную цель | Другой VPS либо новый проект/общая админка; идентификатор, доступный путь/репозиторий или параметры сервера, границы переносимого состояния | Ответ оператора ожидается; без этого нельзя выбрать deployment/data contract |
+| P0 / M0b — разобрать candidate STOP | Новый diagnostic поверх frozen collector сохраняет fixed inner step/reason/error kind; только существующие readonly inputs, без legacy proof/DB/services/writes. По actual inner reason затем конкретный local RED/GREEN, без угадывания fix | Локальная подготовка по /GO; live diagnostic требует одного нового exact SSH, remote120s/transport150s; package/activation не разрешены |
+| P1 / M1 — получить целевой контракт при готовности адресата | Общая админка ещё формируется по ответу03.10; идентификатор/код/репозиторий или VPS параметры нужны при реальном переносе, затем определить data ownership | Отложено по фактической готовности; не блокирует M0/M0b и target-independent handoff; доступа к новому проекту нет |
 | P1 / M2 — подготовить целевой перенос | После M1: совместимость OS/arch/runtime/DB, ownership приложения, manifest, проверка данных и ручной rollback; сохранить секреты вне Git и один Telegram poller | Локальная подготовка разрешена; другой проект и сервер ещё не обследованы, live scope отсутствует |
 | P1 / M3 — выполнить переключение | После M2 и exact approval: целевой install/import; если переносится состояние — согласованный consistent backup/export и cutover с одним bot owner; фактические receipts целевого запуска | Новые SSH/upload/DB/services/выдача требуют точного разрешения; не заменять перенос обновлением Spain |
 | P1 / M4 — проверить конечный результат | Проверки на целевом месте: bot/web, сохранность выбранных данных, Windows/Android/iPhone и quality/A-B по применимому контракту | Клиентские проверки пока отложены; исторические Spain PASS/FAIL не принимают новый сервер |
@@ -47,10 +57,10 @@ bindings относятся к Spain; нельзя переназначить pa
 
 Spain остаётся источником исторического evidence и, при необходимости после
 уточнения M1/M2, источником согласованного export/cutover. Однократно разрешённый
-packet03.10 завершился STOP; M0a readback выполнен, дальше M1. Новые installation/migration/activation
+packet03.10 завершился STOP; M0a выполнен, далее M0b и основа передачи. Новые installation/migration/activation
 не разрешены consumed approval и не входят в очередь переноса автоматически. AWG2 и package016
 не затронуты; general issuance disabled; автоматические retry/replay/restore
-не разрешены. Целевой сервер/сервис сейчас `TARGET_UNSPECIFIED`.
+не разрешены. Будущая общая админка `IN_FORMATION`; exact deployment target `TARGET_UNSPECIFIED`.
 
 Разделы ниже сохраняют прежний execution history и открытые acceptance criteria.
 Их старые next-step/approval формулировки не заменяют текущую очередь M0–M5.
@@ -647,7 +657,8 @@ Design согласован оператором после commit b277154. По
   по bound source ordering permission/maintenance sequence не начинались этим packet.
   Current candidate probe STOP/candidate_collection_failed; exact inner cause и
   DB/schema/deployed SHA не доказаны, Linux acceptance не получен. Оба approvals
-  consumed/no retry. Дальше перенос M1–M5, target пока не указан; recovery не запускался.
+  consumed/no retry. Дальше local component diagnostic M0b и handoff; общая админка
+  формируется, target contract отложен до её готовности; recovery не запускался.
   Исторические client evidence ниже сохраняются, принятия на новом сервере нет.
 - ❌ Task 4A — Windows traffic FAIL; root cause не доказана; тесты отложены до утра03.10.
 - ✅ Task 4B — Android connectivity, не performance acceptance.

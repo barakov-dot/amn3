@@ -45,7 +45,10 @@
 [Readback03.10](../research/amn2/phase16-bot-maintenance-readback-execution-001-2026-10-03.json) выполнен: bot/web active/stable, coordinator/claims/fences отсутствуют;
 по bound source ordering permission/maintenance sequence этим packet не начинались.
 Current candidate probe STOP, exact inner cause не доказана. Оба approvals consumed,
-повтор запрещён. Дальше перенос M1; целевое место пока не указано.
+повтор запрещён. Общая админка ещё формируется по ответу оператора03.10;
+пока продолжаем [component diagnostic и основу передачи](superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md#transfer-priority-2026-10-03).
+Точное место/код адресата потребуются для реального целевого контракта, а не для
+локальной подготовки. Новый diagnostic пока не исполнен и требует exact SSH approval.
 Windows и quality acceptance открыты, клиентские проверки отложены оператором.
 Сохранять исторические evidence, не повторять прежние diagnostics ради контекста.
 
