@@ -2421,7 +2421,7 @@ Device64770/uid0/gid0/ACLcount0 у всех. Current private_boundary наруш
 
 <a id="candidate-private-seal-2026-10-04"></a>
 
-## Separate two-file private seal — LOCAL_READY_NOT_EXECUTED04.10
+## Separate two-file private seal — подготовка04.10; actual execution ниже
 
 [Core](../../scripts/phase16_bot_private_seal.py),
 [gate](../../scripts/phase16_bot_private_seal_gate.py),
@@ -2457,7 +2457,7 @@ Remote180s/transport210s/output64KiB/stdin0/SSH1, permission syscalls макси
 Нет file-content writes, parent/stage/source/runtime/payload/scratch DAC changes,
 app/DB/services/install/activation/maintenance replay/Telegram/issuance. Это не
 продлевает прежнее DB maintenance window и не подменяет перенос на целевой target.
-Local verification/review и точные SHA256 — в receipt; новый live не выполнен.
+Local verification/review и точные SHA256 — в receipt; на этапе подготовки live не был выполнен.
 
 Local RED11(core absent)/RED6(gate absent) → GREEN17; два P2 review закрыты
 через RED3→GREEN3. Final20 PASS/0 SKIP за9.681s; independent bounded recheck
@@ -2468,6 +2468,42 @@ replay; промежуточный checkpoint не подменяет итого
 
 Exact manifest SHA256 `159403f3fd32c4923f133889c821aeec5b344062867593b22a2482589017340d`,
 remote SHA256 `83c479674a332896640ba7f732477a438d682de6520996a1ce6e9c45f87bc24e`.
-New execution claim отсутствует, SSH0; на этапе подготовки новый approval не
+На этапе подготовки execution claim отсутствовал, SSH0; новый approval не
 получен/не consumed. Commit/push/live state разделять; оба новых разрешения
 требуются отдельно по точным checksum/ref. Исторический readback approval consumed.
+
+<a id="candidate-private-seal-executed-2026-10-04"></a>
+
+## Actual private seal и candidate PASS — исполнено04.10
+
+[Execution receipt](phase16-bot-private-seal-execution-001-2026-10-04.json): один
+точно разрешённый SSH0/30.000s, stdin0/stdout3201 complete/stderr0. Claim
+09:57:05.147459 UTC (12:57:05 Москва). Normal pusha93b785 при EXPECTED_OLDdce10e0
+подтверждён exact ref readback; CHANGELOG обоих commits/pre-push PASS, no force/tags.
+Approval PRIVATE_SEAL_20261004_001 consumed once; повтор/автовосстановление запрещены.
+
+PRIVATE_FILES_SEALED_CANDIDATE_CHECKED: два held-FD fchmod завершены, claim.json и
+result.json root:root0600/ACLclear/nlink1, прежние inode401619/401902, dev64770,
+size237/2051 и mtime. Новые ctime_ns1791107835531735566/1791107835535735613.
+Result durable после final guard; четыре root600 records в новом root700 audit
+`/var/lib/amn2-spain/phase16-maintenance/phase16-private-seal-20261004-001`.
+Parent root:61212/0710, stage-root/payload/scratch0700 и прочие DAC сохранены.
+Boot/selected bot-web/coordinator/NSS прошли guard до/после; service actions0.
+
+Все14 traced components PASS. Candidate CANDIDATE_CONTENT_VERIFIED_ACCESS_NOT_APPLIED;
+access plan ACCESS_PLAN_READY_NOT_APPLIED,5278 objects, SHA256
+`c60b69ec8ac6018f58b86049fd20bdeb9c80a63f0302e33924efa8e936e7515e`.
+Installed runtime/bootstrap PASS:4621 files/2092 bytecode, IMPORT_PATH_CONTENT.
+Telemetry reason UNCLASSIFIED_ERROR — значение frozen allowlist mapping; статус
+runtime PASS, это не новый verifier failure. Generic transport
+UNKNOWN_MAY_CONTINUE не является свидетельством запущенного coordinator.
+
+M0f завершён. Исходный private-boundary blocker устранён, candidate/content/access
+plan проверены; дальнейший diagnostic run этого отказа не нужен. Access plan не
+применялся, DB/app/services/install/activation0, original maintenance не повторялся.
+Это проверенная основа переноса, но startup/data integration и target acceptance
+остаются открытыми. Следующий этап — M1/M2 при готовности target contract;
+новая установка на Spain не становится обязательной ступенью переноса.
+Windows/Android/iPhone retest по-прежнему отложен, AWG2/package016/general issuance
+сохранены. Consumed manifest/core/remote/receipts immutable; новые действия только
+по новому scope/approval. Code suites не повторялись: изменяется evidence/docs.

@@ -243,4 +243,29 @@ AMN2 source6e68235 проверен clean; renderer/importer budget gap сохр
 будущей админки не обследован; нельзя объявлять эти защиты отсутствующими у неё.
 При передаче разработчик сопоставляет требования с фактической реализацией и
 не копирует GPL-код или secret-bearing payloads. Цель переноса, M0f, отложенные
-клиентские проверки, AWG2/package016/general issuance прежние; новый seal не исполнен.
+клиентские проверки, AWG2/package016/general issuance прежние; на момент записи
+этих рекомендаций seal не был исполнен, последующее выполнение приведено ниже.
+
+<a id="candidate-ready-transfer-baseline-2026-10-04"></a>
+
+### Проверенная основа переноса после закрытия M0f — 04.10
+
+[Actual seal](../research/amn2/phase16-bot-private-seal-execution-001-2026-10-04.json)
+выполнен по exact approval: SSH0/30.000s, два JSON0600 verified/durable;
+14 components и candidate PASS, runtime/bootstrap content4621files/2092bytecode
+PASS. Access plan5278 objects/SHA c60b69ec8ac6018f58b86049fd20bdeb9c80a63f0302e33924efa8e936e7515e
+построен, не применён. AMN3 a93b785 опубликован, exact ref readback MATCH.
+
+Для передачи: AMN2 source6e68235 и immutable source/runtime40, проверенные
+candidate content/settings/catalog/identity и план доступа сохранены вместе с
+решениями upstream. M0a–M0f закрыты; повторный диагностический цикл по текущему
+candidate blocker не требуется. Приёмщик должен различать эту готовность и
+реальное startup/data integration: БД не открывалась, доступ сервису не выдавался,
+app/services/install/activation0, original maintenance не повторялся.
+
+Следующее — M1/M2 при готовности общей админки/целевого сервера: зафиксировать
+target и data ownership, переносимый набор данных и совместимый runtime,
+recovery/rollback, один Telegram poller и client acceptance. Старые Spain boot/
+paths/UID/claims не переназначаются на новый host. Клиентские проверки отложены;
+AWG2/package016/issuance и прочие stages сохранены. Интеграция, перенос и Phase16
+ещё не приняты; новая установка на Spain не требуется автоматически.

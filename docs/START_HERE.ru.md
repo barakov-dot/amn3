@@ -78,10 +78,13 @@ mutations/DB/app/services0, approval consumed, pushdce10e0 MATCH. Подгото
 held-FD fchmod600 ровно двух JSON после durable intent, затем original readonly
 candidate/access-plan build; parent/stage/other DAC unchanged, access apply/DB/
 services/install excluded, remote180s/transport210s/SSH1. [Local20 PASS/review](../research/amn2/phase16-bot-private-seal-local-verification-2026-10-04.json),
-new live NOT_EXECUTED.
-Общая админка формируется; target contract нужен при реальном переносе. Дальше
-M0f по единственному плану; parent/runtime PASS не
-равны допуску приложения, интеграции, приёмке или переносу.
+[Seal04.10 исполнен](../research/amn2/phase16-bot-private-seal-execution-001-2026-10-04.json):
+SSH0/30.000s, два JSON root:root0600 verified/durable,14 components/candidate PASS;
+план доступа5278 objects построен, не применён. Runtime content4621files/2092bytecode
+PASS; DB/app/services/install0, approval consumed, pusha93b785 MATCH.
+M0f завершён, проверенная основа передачи зафиксирована. Дальше M1/M2 — целевой
+контракт при готовности общей админки; повтор диагностики этого отказа не нужен.
+Candidate content PASS не равен startup/data integration, приёмке или переносу.
 Windows и quality acceptance открыты, клиентские проверки отложены оператором.
 Сохранять исторические evidence, не повторять прежние diagnostics ради контекста.
 

@@ -7,6 +7,25 @@
 
 ## 2026-10-04
 
+- По exact разрешению выполнены normal pusha93b785 при EXPECTED_OLDdce10e0
+  (fresh ref MATCH, CHANGELOG2 commits/pre-push PASS, NO_FORCE/NO_TAGS/NO_OTHER_REFS)
+  и [private seal](research/amn2/phase16-bot-private-seal-execution-001-2026-10-04.json):
+  один SSH0/30.000s/stdin0/stdout3201 complete/stderr0. Claim/result root:root0600
+  после двух held-FD fchmod, metadata/ACL verified, result durable; новый root700
+  audit с четырьмя root600 records. Parent0710/stage-root/payload/scratch0700 прежние.
+  Все14 components/candidate PASS: ACCESS_PLAN_READY_NOT_APPLIED5278 objects,
+  runtime/bootstrap content PASS4621files/2092bytecode. Final selected guards PASS;
+  UNCLASSIFIED_ERROR в runtime reason — frozen telemetry mapping, не failure.
+  Access apply/DB/app/services/install/activation0; original maintenance не
+  повторялся, approval consumed once/no replay/auto rollback.
+  M0f и проверенная основа передачи закрыты; навигация/единственный план/runbook/
+  handoff синхронизированы. Далее M1/M2 при готовности target contract, новый
+  diagnostic/install на Spain не назначается. App/data/target acceptance и Phase16
+  не закрыты; client deferral, AWG2/package016/issuance и foreign58lines сохранены.
+  Local receipt validator/digest/byte count PASS; docs-only readback/links/
+  whitespace/secret guard, code suites не повторялись. Original57/FROZEN7 и
+  consumed packet неизменны; фиксация результата локальная, новый push отдельно.
+
 - По запросу оператора применены рекомендации upstream04.10 в существующем
   [intake](docs/UPSTREAM_INTAKE.ru.md#upstream-intake-2026-10-04) и базе передачи.
   Official PR183/200 merged SHA и release v1.7.3 metadata проверены12:38:48

@@ -1,0 +1,305 @@
+{
+  "approval_consumed": true,
+  "authorization": {
+    "approval": "PHASE16_CANDIDATE_PRIVATE_SEAL_20261004_001",
+    "date": "2026-10-04",
+    "manifest_sha256": "159403f3fd32c4923f133889c821aeec5b344062867593b22a2482589017340d",
+    "remote_seconds": 180,
+    "remote_sha256": "83c479674a332896640ba7f732477a438d682de6520996a1ce6e9c45f87bc24e",
+    "source": "operator exact current message",
+    "ssh_attempts": 1,
+    "transport_seconds": 210
+  },
+  "date": "2026-10-04",
+  "interpretation": {
+    "access_plan_applied": false,
+    "activation": false,
+    "app_imports": 0,
+    "automatic_retry": false,
+    "automatic_rollback": false,
+    "awg2_package016_issuance_unchanged": true,
+    "candidate_components_pass": 14,
+    "candidate_content_verified": true,
+    "candidate_plan_objects": 5278,
+    "candidate_plan_sha256": "c60b69ec8ac6018f58b86049fd20bdeb9c80a63f0302e33924efa8e936e7515e",
+    "database_open": 0,
+    "files_mode_octal": "0600",
+    "files_root_owned_single_link_acl_clear": true,
+    "installed_runtime_bytecode": 2092,
+    "installed_runtime_files": 4621,
+    "installed_runtime_scope": "IMPORT_PATH_CONTENT",
+    "integration_accepted": false,
+    "m0f": "COMPLETE",
+    "new_private_audit_directory": "/var/lib/amn2-spain/phase16-maintenance/phase16-private-seal-20261004-001",
+    "new_private_audit_records": 4,
+    "next": "M1 target contract when future admin is ready; no further Spain diagnostic/install implied",
+    "original_maintenance_replayed": false,
+    "parent_0710_stage_root_0700_payload_scratch_0700_preserved": true,
+    "permission_syscalls": 2,
+    "phase16_accepted": false,
+    "private_file_size_mtime_inode_dev_unchanged": true,
+    "remote_coordinator_status_field": "generic transport label; old coordinator absence checked by bound guard; no coordinator started",
+    "result_durable": true,
+    "runtime_reason_field": "UNCLASSIFIED_ERROR is frozen allowlist mapping, not verifier failure; runtime/bootstrap status PASS",
+    "selected_boot_units_nss_final_guard": "PASS_BY_BOUND_SUCCESS_PATH",
+    "service_actions": 0,
+    "stage_install": 0,
+    "target_migrated": false
+  },
+  "local_result": {
+    "claim": {
+      "approval": "PHASE16_CANDIDATE_PRIVATE_SEAL_20261004_001",
+      "attempts": 1,
+      "claimed_at": "2026-10-04T09:57:05.147459+00:00",
+      "manifest_sha256": "159403f3fd32c4923f133889c821aeec5b344062867593b22a2482589017340d",
+      "remote_sha256": "83c479674a332896640ba7f732477a438d682de6520996a1ce6e9c45f87bc24e"
+    },
+    "receipt": {
+      "activation": false,
+      "app_imports": 0,
+      "approval": "PHASE16_CANDIDATE_PRIVATE_SEAL_20261004_001",
+      "audit_creation_attempted": true,
+      "component_steps": {
+        "access_plan": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "bootstrap": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "catalog": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "collection": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "identity": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "nss_groups": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "readonly_command": {
+          "calls": 48,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "runtime_expected": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "secure_file_read": {
+          "calls": 9848,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "secure_tree_open": {
+          "calls": 4,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "settings": {
+          "calls": 2,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "settings_file_read": {
+          "calls": 8,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "stage_observation": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": "VERIFIED",
+          "status": "PASS"
+        },
+        "venv": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        }
+      },
+      "database_open": 0,
+      "operation": {
+        "candidate": {
+          "plan_objects": 5278,
+          "plan_sha256": "c60b69ec8ac6018f58b86049fd20bdeb9c80a63f0302e33924efa8e936e7515e",
+          "plan_status": "ACCESS_PLAN_READY_NOT_APPLIED",
+          "proof_status": "CANDIDATE_CONTENT_VERIFIED_ACCESS_NOT_APPLIED",
+          "reason": null,
+          "status": "PASS"
+        },
+        "completed_syscalls": 2,
+        "files_after": {
+          "claim.json": {
+            "acl_clear": true,
+            "acl_count": 0,
+            "ctime_ns": 1791107835531735566,
+            "device": 64770,
+            "gid": 0,
+            "inode": 401619,
+            "kind": "file",
+            "mode": 384,
+            "mtime_ns": 1790710142771192272,
+            "nlink": 1,
+            "private": true,
+            "size": 237,
+            "uid": 0
+          },
+          "result.json": {
+            "acl_clear": true,
+            "acl_count": 0,
+            "ctime_ns": 1791107835535735613,
+            "device": 64770,
+            "gid": 0,
+            "inode": 401902,
+            "kind": "file",
+            "mode": 384,
+            "mtime_ns": 1790710151938309015,
+            "nlink": 1,
+            "private": true,
+            "size": 2051,
+            "uid": 0
+          }
+        },
+        "files_verified": true,
+        "permission_attempted": true,
+        "reason": "bounded_private_seal_candidate_readonly",
+        "result_durable": true,
+        "status": "PRIVATE_FILES_SEALED_CANDIDATE_CHECKED"
+      },
+      "original_manifest_sha256": "431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff",
+      "reason": "bounded_private_seal_candidate_readonly",
+      "replay_allowed": false,
+      "runtime_installed": {
+        "bootstrap_status": "PASS",
+        "reason": "UNCLASSIFIED_ERROR",
+        "runtime_status": "PASS",
+        "scope": "IMPORT_PATH_CONTENT",
+        "status": "PASS_SITE_CONTENT_ONLY",
+        "verified_bytecode": 2092,
+        "verified_files": 4621
+      },
+      "schema": "phase16.private-seal.v1",
+      "service_actions": 0,
+      "stage_install": 0,
+      "status": "PRIVATE_FILES_SEALED_CANDIDATE_CHECKED",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+      "trigger_execution_sha256": "b27f2fec73e69d758bbe4dd6069b3016841bbfb61510d0b8339d7a1bc35752fe"
+    },
+    "replay_allowed": false,
+    "schema": "phase16.private-seal-local.v1",
+    "status": "PRIVATE_FILES_SEALED_CANDIDATE_CHECKED",
+    "transport": {
+      "automatic_retry": false,
+      "elapsed_seconds": 30.0,
+      "failure_stage": null,
+      "last_stdin_progress_seconds": null,
+      "local_child_reaped": true,
+      "output_complete": true,
+      "pipe_failures": [],
+      "remote_coordinator_status": "UNKNOWN_MAY_CONTINUE",
+      "replay_allowed": false,
+      "returncode": 0,
+      "schema": "phase16.bot-maintenance-transport.v1",
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_diagnostic": {
+        "hints": [],
+        "output_cap_hit": false,
+        "root_cause": "NOT_ESTABLISHED",
+        "status": "EMPTY",
+        "utf8_valid": true
+      },
+      "stdin_bytes_accepted": 0,
+      "stdin_bytes_requested": 0,
+      "stdin_complete": true,
+      "stdout": {
+        "bytes_observed": 3201,
+        "bytes_retained": 3201,
+        "prefix_sha256": "cc0f864a5581b1120438b3824b8e2896b45da66cbc0121ce66a5841548541e6a"
+      },
+      "termination_action": "NONE",
+      "termination_scope": "LOCAL_TRANSPORT_ONLY"
+    }
+  },
+  "local_verification": {
+    "docs": {
+      "added_local_links_checked": 5,
+      "changelog": "same pending commit; semantics reviewed",
+      "current_plan": "M0f_COMPLETE_M1_M2_TARGET_PENDING",
+      "links": "PASS",
+      "readback": "PASS",
+      "secret_conflict_utf8_guard": "PASS",
+      "whitespace": "PASS"
+    },
+    "foreign_diff": "UNCHANGED",
+    "frozen7_original57_manifest": "UNCHANGED",
+    "receipt_validator": "PASS",
+    "tests_rerun": false,
+    "transport_receipt_digest_and_byte_count": "PASS"
+  },
+  "push": {
+    "attempted_at": "2026-10-04T09:56:28.244472+00:00",
+    "attempts": 1,
+    "expected_old": "dce10e0935174bc11507827726865dfddde4c00e",
+    "head": "a93b785049c9dad94f52bb94d21d7527df8c9721",
+    "no_force": true,
+    "no_other_refs": true,
+    "no_tags": true,
+    "origin": "https://github.com/barakov-dot/amn3.git",
+    "ref": "refs/heads/codex/phase16-awg3-family-3-1-spain-pilot-016",
+    "remote_after": "a93b785049c9dad94f52bb94d21d7527df8c9721",
+    "remote_before": "dce10e0935174bc11507827726865dfddde4c00e",
+    "returncode": 0,
+    "schema": "phase16.exact-push.v1",
+    "status": "MATCH",
+    "stderr": "To https://github.com/barakov-dot/amn3.git\n   dce10e09..a93b7850  a93b785049c9dad94f52bb94d21d7527df8c9721 -> codex/phase16-awg3-family-3-1-spain-pilot-016\n",
+    "stdout": "352655f026af: PASS: changed dated changelog record.\na93b785049c9: PASS: changed dated changelog record.\nChecked 2 commit(s) after policy introduction.\n"
+  },
+  "schema": "phase16.private-seal-execution.v1",
+  "status": "PRIVATE_FILES_SEALED_CANDIDATE_CHECKED"
+}
