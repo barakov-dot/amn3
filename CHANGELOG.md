@@ -7,6 +7,29 @@
 
 ## 2026-10-04
 
+- По exact разрешению выполнены normal pushdce10e0 при EXPECTED_OLD4d57e2d
+  (fresh ref MATCH, CHANGELOG1 commit/pre-push PASS, NO_FORCE/NO_TAGS/NO_OTHER_REFS)
+  и [private-boundary readback](research/amn2/phase16-bot-private-boundary-readback-execution-001-2026-10-04.json):
+  один SSH0/2.578s/stdin0/stdout3855 complete/stderr0, BOUNDARY_READBACK_COLLECTED_NOT_ADMITTED.
+  Claim/result root:root0644 regular single-link/ACLclear; payload/scratch700,
+  parent root:61212/0710 и stage-root700 прежние, durable repair result hash verified.
+  Selected bot/web stable/coordinator absent; contents/candidate/runtime rerun,
+  writes/permissions/DB/app/services0. Approval consumed once, no replay.
+  Подготовлен [separate two-file seal](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-private-seal-2026-10-04):
+  exact preimage/held FD/rootprivate durable intent → только fchmod600 двух JSON,
+  затем original readonly candidate/access-plan build с safe telemetry.
+  Parent/stage/other DAC, app/DB/services/access apply/install не меняются;
+  audit dir/четыре root600 records новые, max2 permission syscalls, SSH1/stdin0,
+  remote180s/transport210s. Неопределённый effect → PARTIAL/UNKNOWN_NO_RETRY,
+  manual rollback отдельный exact approval; old maintenance не повторяется.
+  RED11+RED6→GREEN17; review P2 ctime/reason RED3→GREEN3, final20 PASS/0 SKIP
+  за9.681s, independent review PASS/openP0P1P2=0; [verification](research/amn2/phase16-bot-private-seal-local-verification-2026-10-04.json).
+  Portable tests only, native fchmod/fsync/new live NOT_EXECUTED; FROZEN7/original57
+  сохранены, новый claim absent. Синхронизированы navigation/единственный план/
+  runbook/handoff, далее M0f. Foreign ideas сохранены; AWG2/package016/general
+  issuance unchanged, clients deferred, admin IN_FORMATION/target unspecified.
+  Новый local commit не равен push/install, Phase16/integration/transfer не закрыты.
+
 - По exact разрешению выполнены normal push4d57e2d при EXPECTED_OLD2410dea
   (fresh ref MATCH, CHANGELOG1 commit/pre-push PASS, NO_FORCE/NO_TAGS/NO_OTHER_REFS)
   и [v2 parent repair](research/amn2/phase16-bot-ancestor-repair-v2-execution-001-2026-10-04.json):

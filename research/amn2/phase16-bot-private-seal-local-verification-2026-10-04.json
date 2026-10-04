@@ -1,0 +1,95 @@
+{
+  "date": "2026-10-04",
+  "docs": {
+    "added_local_links_checked": 17,
+    "changelog": "same pending commit; semantics reviewed by root",
+    "links": "PASS",
+    "readback": "PASS",
+    "utf8_secret_conflict_guard": "PASS",
+    "whitespace": "PASS"
+  },
+  "final_tests": {
+    "log_bytes": 3460,
+    "log_path": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-private-boundary-readback-executed-local-20261004/private-seal-final-green-tests.log",
+    "log_sha256": "8922998dfe024e4d20e131f6211f719d6c593e9394a5c33fde284215cef32418",
+    "returncode": 0,
+    "scope": [
+      "tests.test_phase16_bot_private_seal",
+      "tests.test_phase16_bot_private_seal_gate"
+    ],
+    "ssh_attempts": 0,
+    "tests_failed": 0,
+    "tests_passed": 20,
+    "tests_skipped": 0,
+    "unittest_seconds": 9.681,
+    "wall_seconds": 9.922
+  },
+  "frozen7": "UNCHANGED",
+  "git": {
+    "foreign_diff_path": "ideas/candidates-for-amn2.md",
+    "foreign_diff_sha256": "8e42c81ded39a2fdeb8fb9bbd5e5b2980720191b2e8239c59fff6ef55012a977",
+    "head_before_record": "dce10e0935174bc11507827726865dfddde4c00e",
+    "remote_last_verified": "dce10e0935174bc11507827726865dfddde4c00e"
+  },
+  "independent_review": {
+    "agent": "/root/review_candidate_diagnostic",
+    "date": "2026-10-04",
+    "frozen7": "UNCHANGED",
+    "limitations": [
+      "local read-only code/manifest review only; no SSH/live-state validation",
+      "root final20-suite separate; document QA by root"
+    ],
+    "new_claim": "ABSENT",
+    "open_p0": 0,
+    "open_p1": 0,
+    "open_p2": 0,
+    "original57": "UNCHANGED",
+    "post_fix_regression_tests": 3,
+    "resolved_p2": [
+      "verified ctime >= immutable witness",
+      "success requires exact equal bounded reason"
+    ],
+    "status": "PASS"
+  },
+  "initial_green": {
+    "seconds": 8.725,
+    "tests": 17
+  },
+  "initial_red": {
+    "core_missing_failures": 11,
+    "gate_missing_failures": 6
+  },
+  "limitations": [
+    "portable descriptor/DAC model; native Linux fchmod/fsync not performed",
+    "existing private boundary 0644/0644 confirmed only by consumed readback; new seal not executed",
+    "candidate verification builds access plan only; no access apply/app/DB/services/install/admission",
+    "client checks deferred by operator; future admin in formation and exact target unspecified"
+  ],
+  "new_claim_absent": true,
+  "new_live_executed": false,
+  "new_push_executed": false,
+  "original57": "UNCHANGED",
+  "preview": {
+    "approval": "PHASE16_CANDIDATE_PRIVATE_SEAL_20261004_001",
+    "manifest_sha256": "159403f3fd32c4923f133889c821aeec5b344062867593b22a2482589017340d",
+    "permission_syscalls_max": 2,
+    "remote_seconds": 180,
+    "remote_sha256": "83c479674a332896640ba7f732477a438d682de6520996a1ce6e9c45f87bc24e",
+    "ssh_attempts": 0,
+    "status": "OFFLINE_READY_NOT_EXECUTED",
+    "transport_seconds": 210
+  },
+  "review_regressions": {
+    "green_passed": 3,
+    "green_seconds": 2.033,
+    "red_failed": 3,
+    "scope": [
+      "post-fchmod ctime regression is partial before followup",
+      "verified receipt ctime cannot precede witness",
+      "terminal success reason exact and consistent"
+    ]
+  },
+  "schema": "phase16.private-seal-local-verification.v1",
+  "status": "LOCAL_READY_NOT_EXECUTED",
+  "trigger_execution_sha256_lf": "b27f2fec73e69d758bbe4dd6069b3016841bbfb61510d0b8339d7a1bc35752fe"
+}

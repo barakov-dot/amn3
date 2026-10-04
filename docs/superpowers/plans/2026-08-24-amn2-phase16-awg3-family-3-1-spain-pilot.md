@@ -69,8 +69,18 @@ approval consumed, push4d57e2d при EXPECTED_OLD2410dea MATCH. Parent blocker 
 full installed content verify достигнут; child boundary и host admission остаются.
 Подготовлен [короткий metadata readback](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-private-boundary-readback-2026-10-04):
 все четыре fixed boundary objects, exact parent/stage и pinned durable result,
-remote45s/transport60s/SSH1 без candidate/runtime rerun. Новый live NOT_EXECUTED,
-checksum approval требуется. Оригинальные57 и consumed artifacts сохранены. Дальше M0e и база передачи.
+remote45s/transport60s/SSH1 без candidate/runtime rerun. Этот [readback04.10](../../../research/amn2/phase16-bot-private-boundary-readback-execution-001-2026-10-04.json)
+выполнен по exact approval: SSH0/2.578s/stdout3855 complete/stderr0; claim.json/result.json
+root:root0644 regular single-link/ACLclear, payload/scratch700. Parent/stage/repair
+result hash совпали, bot/web/coordinator selected states стабильны; mutations/DB/
+app/services0. Approval consumed, pushdce10e0 при EXPECTED_OLD4d57e2d MATCH.
+Теперь facts достаточны для [отдельного two-file seal](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-private-seal-2026-10-04):
+exact preimage/held FD и durable intent → fchmod600 claim/result только; затем
+original readonly candidate/access-plan build. Parent/stage/other DAC не меняются,
+access apply/maintenance/DB/app/services/install исключены. Remote180s/transport210s/
+SSH1, new checksum approval требуется, live NOT_EXECUTED. Оригинальные57 и consumed
+artifacts сохранены. [Local20 PASS/0 SKIP, review PASS](../../../research/amn2/phase16-bot-private-seal-local-verification-2026-10-04.json);
+оба P2 исправлены, native fchmod не выполнялся. Дальше M0f и база передачи.
 Повтор прежних gates/restore/replay запрещены.
 Это не завершённая интеграция и не перенос. Host/boot/paths/UID/schema/rollback
 bindings относятся к Spain; нельзя переназначить packet на другой VPS заменой SHA.
@@ -81,12 +91,13 @@ bindings относятся к Spain; нельзя переназначить pa
 
 | Приоритет / задача | Проверяемый результат и зависимость | Scope / статус |
 | --- | --- | --- |
-| P0 / M0 — зафиксировать переносимую основу | AMN2 source6e68235, AMN3 tools pushed4d57e2d (новый execution/readback local commit — в Git), immutable payload и результаты; разделить local/package/deployed/accepted, перечислить открытые ограничения | Локально разрешено; Git/source сверены03.10, [обновлённая передача](../../PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#transfer-baseline-2026-10-03) |
+| P0 / M0 — зафиксировать переносимую основу | AMN2 source6e68235, AMN3 tools pusheddce10e0 (новый execution/seal local commit — в Git), immutable payload и результаты; разделить local/package/deployed/accepted, перечислить открытые ограничения | Локально разрешено; Git/source сверены03.10, [обновлённая передача](../../PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#transfer-baseline-2026-10-03) |
 | P0 / M0a — установить состояние после STOP | [Readback исполнен](../../../research/amn2/phase16-bot-maintenance-readback-execution-001-2026-10-03.json): bot/web active, coordinator/claims/fences отсутствуют; по source ordering permission/maintenance sequence не начинались этим packet. Candidate probe STOP, inner cause не установлена | ✅ Завершён один exact SSH; approval consumed, DB/writes/service actions0; retry/recovery не разрешены |
 | P0 / M0b — разобрать candidate STOP | [Actual diagnostic](../../../research/amn2/phase16-bot-candidate-diagnostic-execution-001-2026-10-03.json): inner access_plan/ancestor_access локализован; full installed verify ещё не достигнут. Это current precondition, original unsaved exception не доказан | ✅ Один approved SSH завершён, approval consumed; DB/writes/permissions/services0, retry запрещён |
 | P0 / M0c — установить exact ancestor facts | [Actual metadata](../../../research/amn2/phase16-bot-ancestor-readback-execution-001-2026-10-03.json): общий parent root:root0700 блокирует UID/GID61212; other3 parents доступны, stage private700 ожидаем | ✅ Один exact SSH0/2.938s, approval consumed; DB/writes/permissions/services0, push6be4149 MATCH |
 | P0 / M0d — устранить parent blocker и проверить installed runtime | [Actual v2](../../../research/amn2/phase16-bot-ancestor-repair-v2-execution-001-2026-10-04.json): parent root:61212/0710 verified/durable; installed runtime content PASS4621files/2092bytecode; candidate STOP/private_boundary | ✅ Один exact SSH0/12.297s, два parent permission syscalls; child DAC/DB/app/services/install0, approval consumed, push4d57e2d MATCH. Candidate не admitted; no retry/rollback |
-| P0 / M0e — установить exact private-boundary facts | [Prepared read-only packet](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-private-boundary-readback-2026-10-04): metadata/ACL count четырёх fixed объектов, stage/parent continuity, durable repair result hash; source writer допускает644 JSON при umask022, actual mode пока неизвестен | ▶️ Локальная /GO подготовка; новый live NOT_EXECUTED, exact checksum approval, remote45s/transport60s/SSH1. No private bytes/siblings/candidate rerun/perms/DB/services; последующий fix только по exact facts/approval |
+| P0 / M0e — установить exact private-boundary facts | [Actual readback](../../../research/amn2/phase16-bot-private-boundary-readback-execution-001-2026-10-04.json): claim/result root:root0644 regular single-link/ACLclear; payload/scratch700, parent/stage/repair result и selected units прежние | ✅ Один exact SSH0/2.578s, mutations/DB/app/services0, approval consumed, pushdce10e0 MATCH. Umask не измерен; данные четырёх объектов не читались |
+| P0 / M0f — seal двух JSON и построить candidate plan | [Prepared separate seal](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-private-seal-2026-10-04): exact all4/root witness, held2 FDs, durable intent → fchmod600 claim/result, then original readonly candidate collector | ▶️ /GO локальная подготовка выполнена, new live NOT_EXECUTED. Новый exact checksum approval,180s/210s/SSH1; parent/stage/other DAC/access apply/DB/services/install0, no retry/auto rollback |
 | P1 / M1 — получить целевой контракт при готовности адресата | Общая админка ещё формируется по ответу03.10; идентификатор/код/репозиторий или VPS параметры нужны при реальном переносе, затем определить data ownership | Отложено по фактической готовности; не блокирует M0/M0d и target-independent handoff; доступа к новому проекту нет |
 | P1 / M2 — подготовить целевой перенос | После M1: совместимость OS/arch/runtime/DB, ownership приложения, manifest, проверка данных и ручной rollback; сохранить секреты вне Git и один Telegram poller | Локальная подготовка разрешена; другой проект и сервер ещё не обследованы, live scope отсутствует |
 | P1 / M3 — выполнить переключение | После M2 и exact approval: целевой install/import; если переносится состояние — согласованный consistent backup/export и cutover с одним bot owner; фактические receipts целевого запуска | Новые SSH/upload/DB/services/выдача требуют точного разрешения; не заменять перенос обновлением Spain |
@@ -95,7 +106,7 @@ bindings относятся к Spain; нельзя переназначить pa
 
 Spain остаётся источником исторического evidence и, при необходимости после
 уточнения M1/M2, источником согласованного export/cutover. Однократно разрешённый
-packet03.10 завершился STOP; M0a–M0d выполнены, parent/runtime PASS04.10; далее M0e и основа передачи. Новые installation/migration/activation
+packet03.10 завершился STOP; M0a–M0e выполнены, parent/runtime PASS04.10; далее M0f и основа передачи. Новые installation/migration/activation
 не разрешены consumed approval и не входят в очередь переноса автоматически. AWG2 и package016
 не затронуты; general issuance disabled; автоматические retry/replay/restore
 не разрешены. Будущая общая админка `IN_FORMATION`; exact deployment target `TARGET_UNSPECIFIED`.

@@ -66,9 +66,17 @@ SSH0/12.297s, parent root:61212/0710 verified/durable, два permission syscall
 Installed runtime content PASS:4621 files/2092 bytecode; candidate STOP/private_boundary.
 Child DAC/DB/app/services/install0, selected units сохранились, approval consumed.
 Push4d57e2d MATCH. Подготовлен [короткий read-only boundary packet](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-private-boundary-readback-2026-10-04):
-metadata четырёх объектов и pinned repair result; новый exact approval,45s/60s, без
-повтора heavy candidate/runtime. Общая админка формируется; target contract нужен
-при реальном переносе. Дальше M0e по единственному плану; parent/runtime PASS не
+[Readback04.10 исполнен](../research/amn2/phase16-bot-private-boundary-readback-execution-001-2026-10-04.json):
+SSH0/2.578s, claim/result root:root0644 regular single-link/ACLclear; payload/scratch700.
+Postrepair parent/stage и durable result hash прежние, selected bot/web stable;
+mutations/DB/app/services0, approval consumed, pushdce10e0 MATCH. Подготовлен
+[отдельный two-file seal](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-private-seal-2026-10-04):
+held-FD fchmod600 ровно двух JSON после durable intent, затем original readonly
+candidate/access-plan build; parent/stage/other DAC unchanged, access apply/DB/
+services/install excluded, remote180s/transport210s/SSH1. [Local20 PASS/review](../research/amn2/phase16-bot-private-seal-local-verification-2026-10-04.json),
+new live NOT_EXECUTED.
+Общая админка формируется; target contract нужен при реальном переносе. Дальше
+M0f по единственному плану; parent/runtime PASS не
 равны допуску приложения, интеграции, приёмке или переносу.
 Windows и quality acceptance открыты, клиентские проверки отложены оператором.
 Сохранять исторические evidence, не повторять прежние diagnostics ради контекста.

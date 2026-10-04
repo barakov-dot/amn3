@@ -1,0 +1,308 @@
+{
+  "approval_consumed": true,
+  "authorization": {
+    "approval": "PHASE16_CANDIDATE_PRIVATE_BOUNDARY_READBACK_20261004_001",
+    "date": "2026-10-04",
+    "manifest_sha256": "3d6b3ad57c277bdf351656f76aeda014cdb465838b98c7282e5988439216be27",
+    "remote_seconds": 45,
+    "remote_sha256": "a51506df092cba141c77c0659c7606a126b36b91af67bb86f1d426a40e7064fe",
+    "source": "operator exact current message",
+    "ssh_attempts": 1,
+    "transport_seconds": 60
+  },
+  "date": "2026-10-04",
+  "interpretation": {
+    "actual_umask": "NOT_MEASURED",
+    "app_imports": 0,
+    "automatic_retry": false,
+    "blocked_objects": [
+      "claim.json",
+      "result.json"
+    ],
+    "candidate_runtime_not_rerun": true,
+    "database_open": 0,
+    "desired_separate_fix_mode_octal": "0600",
+    "file_mode_octal": "0644",
+    "host_admitted": false,
+    "old_bot_web_selected_states_unchanged": true,
+    "original_maintenance_replayed": false,
+    "parent_repaired_0710_preserved": true,
+    "payload_scratch_private_0700": true,
+    "permission_syscalls": 0,
+    "phase16_accepted": false,
+    "remote_coordinator_status_field": "generic transport label; live coordinator not-found established by selected snapshot",
+    "remote_file_writes": 0,
+    "repair_result_durable_hash_verified": true,
+    "root_owned_single_link_acl_clear": true,
+    "service_actions": 0,
+    "source_writer": "JSON open(x) without explicit private mode is compatible with observed0644; kernel umask value not proven",
+    "stage_root_private_0700_preserved": true
+  },
+  "local_result": {
+    "claim": {
+      "approval": "PHASE16_CANDIDATE_PRIVATE_BOUNDARY_READBACK_20261004_001",
+      "attempts": 1,
+      "claimed_at": "2026-10-04T07:58:12.290067+00:00",
+      "manifest_sha256": "3d6b3ad57c277bdf351656f76aeda014cdb465838b98c7282e5988439216be27",
+      "remote_sha256": "a51506df092cba141c77c0659c7606a126b36b91af67bb86f1d426a40e7064fe"
+    },
+    "receipt": {
+      "activation": false,
+      "app_imports": 0,
+      "approval": "PHASE16_CANDIDATE_PRIVATE_BOUNDARY_READBACK_20261004_001",
+      "database_open": 0,
+      "original_manifest_sha256": "431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff",
+      "permission_syscalls": 0,
+      "reason": "bounded_private_metadata",
+      "remote_file_writes": 0,
+      "replay_allowed": false,
+      "schema": "phase16.private-boundary-readback.v1",
+      "service_actions": 0,
+      "snapshot": {
+        "blocked_objects": [
+          "claim.json",
+          "result.json"
+        ],
+        "objects": {
+          "claim.json": {
+            "acl_clear": true,
+            "acl_count": 0,
+            "ctime_ns": 1790710142771192272,
+            "device": 64770,
+            "gid": 0,
+            "inode": 401619,
+            "kind": "file",
+            "mode": 420,
+            "mtime_ns": 1790710142771192272,
+            "nlink": 1,
+            "private": false,
+            "size": 237,
+            "uid": 0
+          },
+          "payload": {
+            "acl_clear": true,
+            "acl_count": 0,
+            "ctime_ns": 1790710142773192298,
+            "device": 64770,
+            "gid": 0,
+            "inode": 401657,
+            "kind": "directory",
+            "mode": 448,
+            "mtime_ns": 1790710142773192298,
+            "nlink": 4,
+            "private": true,
+            "size": 4096,
+            "uid": 0
+          },
+          "result.json": {
+            "acl_clear": true,
+            "acl_count": 0,
+            "ctime_ns": 1790710151938309015,
+            "device": 64770,
+            "gid": 0,
+            "inode": 401902,
+            "kind": "file",
+            "mode": 420,
+            "mtime_ns": 1790710151938309015,
+            "nlink": 1,
+            "private": false,
+            "size": 2051,
+            "uid": 0
+          },
+          "scratch": {
+            "acl_clear": true,
+            "acl_count": 0,
+            "ctime_ns": 1790710151026297402,
+            "device": 64770,
+            "gid": 0,
+            "inode": 401885,
+            "kind": "directory",
+            "mode": 448,
+            "mtime_ns": 1790710151026297402,
+            "nlink": 2,
+            "private": true,
+            "size": 4096,
+            "uid": 0
+          }
+        },
+        "parent_after": {
+          "ctime_ns": 1791097680895640617,
+          "device": 64770,
+          "gid": 61212,
+          "inode": 262273,
+          "mode": 456,
+          "mtime_ns": 1790710142771192272,
+          "uid": 0
+        },
+        "repair_result": {
+          "bytes": 479,
+          "sha256": "2431ea8e2adce727d0974acb14f81675462c976f1d4c6b3fddcbc9317e64e91d"
+        },
+        "stage_root": {
+          "ctime_ns": 1790710151938309015,
+          "device": 64770,
+          "gid": 0,
+          "inode": 401618,
+          "mode": 448,
+          "mtime_ns": 1790710151938309015,
+          "uid": 0
+        },
+        "units_after": {
+          "amn2-spain-bot.service": {
+            "properties": {
+              "ActiveState": "active",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "amn2-spain-bot.service",
+              "InvocationID": "85559765b5964f08bf12e5977ec5e647",
+              "LoadState": "loaded",
+              "MainPID": "1355701",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "running"
+            },
+            "state": "OBSERVED"
+          },
+          "amn2-spain-web.service": {
+            "properties": {
+              "ActiveState": "active",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "amn2-spain-web.service",
+              "InvocationID": "4a2aabc257f4441f80a4eba1f79099aa",
+              "LoadState": "loaded",
+              "MainPID": "1355683",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "running"
+            },
+            "state": "OBSERVED"
+          },
+          "phase16-bot-maintenance-20261003-001-coordinator.service": {
+            "properties": {
+              "ActiveState": "inactive",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "phase16-bot-maintenance-20261003-001-coordinator.service",
+              "InvocationID": "",
+              "LoadState": "not-found",
+              "MainPID": "0",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "dead"
+            },
+            "state": "OBSERVED"
+          }
+        },
+        "units_before": {
+          "amn2-spain-bot.service": {
+            "properties": {
+              "ActiveState": "active",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "amn2-spain-bot.service",
+              "InvocationID": "85559765b5964f08bf12e5977ec5e647",
+              "LoadState": "loaded",
+              "MainPID": "1355701",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "running"
+            },
+            "state": "OBSERVED"
+          },
+          "amn2-spain-web.service": {
+            "properties": {
+              "ActiveState": "active",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "amn2-spain-web.service",
+              "InvocationID": "4a2aabc257f4441f80a4eba1f79099aa",
+              "LoadState": "loaded",
+              "MainPID": "1355683",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "running"
+            },
+            "state": "OBSERVED"
+          },
+          "phase16-bot-maintenance-20261003-001-coordinator.service": {
+            "properties": {
+              "ActiveState": "inactive",
+              "ExecMainCode": "0",
+              "ExecMainStatus": "0",
+              "Id": "phase16-bot-maintenance-20261003-001-coordinator.service",
+              "InvocationID": "",
+              "LoadState": "not-found",
+              "MainPID": "0",
+              "NRestarts": "0",
+              "Result": "success",
+              "SubState": "dead"
+            },
+            "state": "OBSERVED"
+          }
+        }
+      },
+      "status": "BOUNDARY_READBACK_COLLECTED_NOT_ADMITTED",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6",
+      "trigger_execution_sha256": "1f7aff1633b76897422416ce3f9d22e2f40e14db226be2b1f8f2ba668692b42a"
+    },
+    "replay_allowed": false,
+    "schema": "phase16.private-boundary-readback-local.v1",
+    "status": "BOUNDARY_READBACK_COLLECTED_NOT_ADMITTED",
+    "transport": {
+      "automatic_retry": false,
+      "elapsed_seconds": 2.578,
+      "failure_stage": null,
+      "last_stdin_progress_seconds": null,
+      "local_child_reaped": true,
+      "output_complete": true,
+      "pipe_failures": [],
+      "remote_coordinator_status": "UNKNOWN_MAY_CONTINUE",
+      "replay_allowed": false,
+      "returncode": 0,
+      "schema": "phase16.bot-maintenance-transport.v1",
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_diagnostic": {
+        "hints": [],
+        "output_cap_hit": false,
+        "root_cause": "NOT_ESTABLISHED",
+        "status": "EMPTY",
+        "utf8_valid": true
+      },
+      "stdin_bytes_accepted": 0,
+      "stdin_bytes_requested": 0,
+      "stdin_complete": true,
+      "stdout": {
+        "bytes_observed": 3855,
+        "bytes_retained": 3855,
+        "prefix_sha256": "64f267574f6f990f667ade849dc1faa4569534751ca0064a4f90d50ba99260cf"
+      },
+      "termination_action": "NONE",
+      "termination_scope": "LOCAL_TRANSPORT_ONLY"
+    }
+  },
+  "push": {
+    "attempted_at": "2026-10-04T07:56:50.336816+00:00",
+    "attempts": 1,
+    "expected_old": "4d57e2d25f3b47a21679c798c4308e4656e2ed59",
+    "head": "dce10e0935174bc11507827726865dfddde4c00e",
+    "no_force": true,
+    "no_other_refs": true,
+    "no_tags": true,
+    "origin": "https://github.com/barakov-dot/amn3.git",
+    "ref": "refs/heads/codex/phase16-awg3-family-3-1-spain-pilot-016",
+    "remote_after": "dce10e0935174bc11507827726865dfddde4c00e",
+    "remote_before": "4d57e2d25f3b47a21679c798c4308e4656e2ed59",
+    "returncode": 0,
+    "schema": "phase16.exact-push.v1",
+    "status": "MATCH",
+    "stderr": "To https://github.com/barakov-dot/amn3.git\n   4d57e2d2..dce10e09  dce10e0935174bc11507827726865dfddde4c00e -> codex/phase16-awg3-family-3-1-spain-pilot-016\n",
+    "stdout": "dce10e093517: PASS: changed dated changelog record.\nChecked 1 commit(s) after policy introduction.\n"
+  },
+  "schema": "phase16.private-boundary-readback-execution.v1",
+  "status": "BOUNDARY_READBACK_COLLECTED_NOT_ADMITTED"
+}

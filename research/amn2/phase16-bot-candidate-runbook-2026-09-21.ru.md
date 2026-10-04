@@ -2354,7 +2354,7 @@ fixture. Actual umask/режим конкретного файла и root cause
 
 <a id="candidate-private-boundary-readback-2026-10-04"></a>
 
-## Short private-boundary readback — LOCAL_READY_NOT_EXECUTED04.10
+## Short private-boundary readback — подготовка04.10, actual execution ниже
 
 [Gate](../../scripts/phase16_bot_private_boundary_readback.py),
 [manifest](phase16-bot-private-boundary-readback-manifest-2026-10-04.json),
@@ -2382,10 +2382,92 @@ Remote45s/transport60s/SSH1/stdin0/output64KiB. Candidate/runtime full verify н
 повторяется; remote writes/permissions/DB/app/services/upload/install/maintenance/
 Telegram/issuance0. Old maintenance window не продлевается. Любая будущая seal/fix
 или access apply — отдельный state/checksum-bound пакет; current action read-only.
-Точные SHA256 и результаты local/review находятся в verification receipt; новый
-SSH ещё не выполнен, локальная подготовка не доказывает live boundary metadata.
+Точные SHA256 и результаты local/review находятся в verification receipt. На этапе
+этой подготовки SSH не был выполнен; actual metadata/execution приведены ниже.
 
 Local final9 PASS/0 SKIP за279.056s;8 новых RED→GREEN, helper closure regression
 RED1→GREEN1 и independent review PASS/openP0P1P2=0. Current exact manifest SHA256
 `3d6b3ad57c277bdf351656f76aeda014cdb465838b98c7282e5988439216be27`, remote SHA256
-`a51506df092cba141c77c0659c7606a126b36b91af67bb86f1d426a40e7064fe`. Approval не получен/не consumed; claim absent, SSH0.
+`a51506df092cba141c77c0659c7606a126b36b91af67bb86f1d426a40e7064fe`. На момент локальной подготовки approval не получен/не consumed; claim absent, SSH0. Actual execution ниже.
+
+<a id="candidate-private-boundary-readback-executed-2026-10-04"></a>
+
+## Actual private-boundary readback — исполнен04.10
+
+[Execution](phase16-bot-private-boundary-readback-execution-001-2026-10-04.json):
+exact approval PHASE16_CANDIDATE_PRIVATE_BOUNDARY_READBACK_20261004_001,
+claim07:58:12.290067 UTC (10:58:12 Москва), один SSH0/2.578s/stdin0/stdout3855
+complete/stderr0, BOUNDARY_READBACK_COLLECTED_NOT_ADMITTED. Normal pushdce10e0
+при EXPECTED_OLD4d57e2d MATCH, CHANGELOG1 commit/pre-push PASS. Approval consumed,
+no retry; mutations/permissions/DB/app/services0, candidate/runtime rerun0.
+
+Все четыре объекта root:root, ACLclear. Fixed stage root700/ino401618 и parent
+root:61212/0710/ino262273 прежние; pinned root600 repair result479/hash2431ea8e
+проверен. Bot/web active/running со стабильными PID/InvocationID/NRestarts0,
+original coordinator not-found/inactive/dead. Snapshot — exact новые preimages,
+не future execution authority и не подтверждение app integration.
+
+| Объект | Mode / kind / inode | Size / links | mtime_ns = ctime_ns |
+| --- | --- | --- | --- |
+| claim.json |0644 / regular /401619 |237 /1 |1790710142771192272 |
+| result.json |0644 / regular /401902 |2051 /1 |1790710151938309015 |
+| payload |0700 / directory /401657 |4096 /4 |1790710142773192298 |
+| scratch |0700 / directory /401885 |4096 /2 |1790710151026297402 |
+
+Device64770/uid0/gid0/ACLcount0 у всех. Current private_boundary нарушают оба JSON;
+их contents не читались. Root-stage700 по-прежнему блокирует сервису доступ, поэтому
+сам parent0710 не сделал их открытыми для UID61212. Исторический writer open('x')
+без explicit0600 совместим с observed0644; actual process umask не измерен.
+
+<a id="candidate-private-seal-2026-10-04"></a>
+
+## Separate two-file private seal — LOCAL_READY_NOT_EXECUTED04.10
+
+[Core](../../scripts/phase16_bot_private_seal.py),
+[gate](../../scripts/phase16_bot_private_seal_gate.py),
+[manifest](phase16-bot-private-seal-manifest-2026-10-04.json),
+[verification](phase16-bot-private-seal-local-verification-2026-10-04.json).
+New approval PHASE16_CANDIDATE_PRIVATE_SEAL_20261004_001/new OP
+phase16-private-seal-20261004-001. Original57, consumed source/receipts и old operations
+immutable; approved readback execution pinned as exact metadata witness. Ни старый
+writer, ни policy private_boundary не меняются ради этого live artifact.
+
+До любого audit/perms: exact four-parent chain + private stage + all4object witness,
+root:root0644/nlink1/no links/ACL и exact size/mtime/ctime/inode/dev для двух JSON;
+payload/scratch exact700; stage direct names ровно прежние6, без чтения contents.
+Два nofollow/nonblock readonly FD удерживаются до конца; никаких reopen для chmod.
+New exclusive root700 audit dir вне stage, root600 claim/plan/intent/result с
+write/fsync/readback через existing UnixJournal. После durable intent/guard/recheck:
+fchmod(claim_fd,0600) и fchmod(result_fd,0600), каждый с fsync и identity/ACL/continuity
+проверкой; ctime после syscall не может предшествовать witness. Rebase только
+mode/ctime собственного held target; parent/stage и
+payload/scratch/прочие objects неизменны. Не chown, не access-plan apply, не cleanup.
+
+Потом original authenticated readonly candidate collector: stage/catalog/source/
+runtime/settings/bootstrap/identity/access-plan build. Safe component и runtime
+return telemetry; наружу plan только digest/count. Candidate PASS и
+PRIVATE_FILES_SEALED_CANDIDATE_CHECKED означают разные вещи: seal verified/durable
+сохраняется и при candidate STOP. Neither outcome is admission/startup/activation.
+Audit creation ambiguity или любой unverified effect после возможного fchmod →
+PARTIAL_OR_UNKNOWN_NO_RETRY, даже completed_syscalls0; replay/auto rollback запрещены.
+Manual rollback — отдельный exact state/checksum approval, только same files и
+still-private stage700/no later access grant, не автоматическое восстановление0644.
+
+Remote180s/transport210s/output64KiB/stdin0/SSH1, permission syscalls максимум2.
+Нет file-content writes, parent/stage/source/runtime/payload/scratch DAC changes,
+app/DB/services/install/activation/maintenance replay/Telegram/issuance. Это не
+продлевает прежнее DB maintenance window и не подменяет перенос на целевой target.
+Local verification/review и точные SHA256 — в receipt; новый live не выполнен.
+
+Local RED11(core absent)/RED6(gate absent) → GREEN17; два P2 review закрыты
+через RED3→GREEN3. Final20 PASS/0 SKIP за9.681s; independent bounded recheck
+PASS/openP0P1P2=0. Portable FD/DAC/transport fixtures, native chmod/fsync не
+выполнялись. Validator проверяет ctime >= witness и exact согласованный reason
+terminal success. Contradictory outer partial envelope → UNKNOWN_NO_RETRY, не
+replay; промежуточный checkpoint не подменяет итоговую continuity проверку.
+
+Exact manifest SHA256 `159403f3fd32c4923f133889c821aeec5b344062867593b22a2482589017340d`,
+remote SHA256 `83c479674a332896640ba7f732477a438d682de6520996a1ce6e9c45f87bc24e`.
+New execution claim отсутствует, SSH0; на этапе подготовки новый approval не
+получен/не consumed. Commit/push/live state разделять; оба новых разрешения
+требуются отдельно по точным checksum/ref. Исторический readback approval consumed.

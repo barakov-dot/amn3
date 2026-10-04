@@ -208,8 +208,16 @@ SSH0/12.297s, parent verified/durable, два permission syscalls; installed run
 PASS_SITE_CONTENT_ONLY4621files/2092bytecode. Candidate access_plan STOP/private_boundary,
 exact объект не сообщён. Old selected units/boot/NSS final guard PASS, DB/app/services/
 child DAC/install0; approval consumed, push4d57e2d MATCH. Готов [short readonly packet](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-private-boundary-readback-2026-10-04)
-для metadata четырёх объектов и pinned durable repair result,45s/60s/SSH1, ещё не
-исполнен/не разрешён. Frozen v1/v2 сохраняются, no replay. Child access plan не применяется; original57
+для metadata четырёх объектов и pinned durable repair result. [Actual readback04.10](../research/amn2/phase16-bot-private-boundary-readback-execution-001-2026-10-04.json)
+исполнен один раз: SSH0/2.578s, claim/result root:root0644 regular/nlink1/ACLclear,
+payload/scratch700; parent/stage/repair result/selected units прежние, mutations/DB/
+app/services0, approval consumed, pushdce10e0 MATCH. Подготовлен [отдельный seal](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-private-seal-2026-10-04):
+ровно два JSON fchmod600 после exact witness/durable intent, затем candidate readonly
+plan build; access apply/DB/services/install0, [local20 PASS/review](../research/amn2/phase16-bot-private-seal-local-verification-2026-10-04.json),
+live NOT_EXECUTED/new approval. Для
+разработчика: новые stage receipt files следует создавать явно private0600; implicit
+process umask не гарантирует это. Actual umask текущего VPS не измерен. Frozen v1/v2
+сохраняются, no replay. Child access plan не применяется; original57
 artifacts/consumed operations неизменны. Это целевой host-specific fix, а не
 универсальная инструкция для нового VPS. Group traverse не даёт listing/write;
 root-private дочерние stage остаются недоступны сервису до отдельного access apply.
