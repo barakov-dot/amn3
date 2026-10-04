@@ -7,6 +7,21 @@
 
 ## 2026-10-04
 
+- Зафиксирован предпочтённый оператором вариант3: передача кода и знаний без
+  старых данных при условии работоспособности конфигов. Уточнены существующие
+  handoff/очередь M1–M5 и навигация; приёмка не ослаблена. [Локальный config review](research/amn2/phase16-config-readiness-review-2026-10-04.json)
+  на чистом AMN2 `6e68235`: 397 тестов,387 PASS/10 FAIL/0 SKIP. Причина всех10
+  отказов — два старых version literals в test double административной выдачи;
+  временная копия с актуальной3.1 прошла39/39 без правок production/assertions.
+  Source/tests не исправлялись; исходный набор остаётся с10 FAIL. Две ошибки
+  сборки тестов в Windows harness отделены от результата приложения. Synthetic
+  scratch DB и существующие зависимости использованы под offline guards;
+  target runtime40 equivalence не проверена. Граница legacy bot link/native
+  export отражена; Windows traffic/quality acceptance открыты, retests отложены.
+  Docs readback/links/diff/whitespace и source/foreign-diff preservation проверены.
+  SSH/live DB/Telegram/package/service/install/old-data transfer/push:0;
+  AWG2/package016/issuance и предыдущие receipts сохранены.
+
 - Продолжена разрешённая локальная подготовка переноса после публикации
   `373e3a1` (exact remote MATCH, pre-push PASS). В существующей
   [базе передачи](docs/PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#source-transfer-contract-2026-10-04)

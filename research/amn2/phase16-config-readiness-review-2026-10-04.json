@@ -1,0 +1,353 @@
+{
+  "schema": "phase16.local-config-readiness-review.v1",
+  "date": "2026-10-04",
+  "status": "LOCAL_PIPELINE_REVIEWED_CLIENT_ACCEPTANCE_OPEN",
+  "operator_preference": {
+    "option": 3,
+    "scope": "CODE_AND_KNOWLEDGE_ONLY_NO_OLD_DATA",
+    "conditional_on": "confidence that configurations work",
+    "condition_met": false,
+    "target_project": "IN_FORMATION",
+    "client_retests_still_deferred": true
+  },
+  "amn3_base": "b155873670e44453816721920cfbe242ef839acb",
+  "amn2_source": "6e682356ed14a62d636ee58039fd3a389e794809",
+  "source_clean_before_and_after_runs": true,
+  "source_bindings": [
+    {
+      "path": "app/vpn/protocol_versions.py",
+      "git_blob": "5a639b0ba0d6851469e3983363e7c117439033ff",
+      "sha256_lf": "0caa426ff28630c2d9499c0899486e1efa0ed9d7df895187ce84d34997b532c3"
+    },
+    {
+      "path": "app/vpn/config_versions.py",
+      "git_blob": "cc78ccfcf10d1619ac322fe971349da1e2c9bdbb",
+      "sha256_lf": "91a9aa68c37bde474e5b7a17b813e45dfbae66f6c5d241b0944d77cf690680d4"
+    },
+    {
+      "path": "app/vpn/amneziawg_v3/config.py",
+      "git_blob": "cd1027e999d8d9001b72d2ac0950cc944f0d91e8",
+      "sha256_lf": "511bcba4b880ca27bdbbbbf4e6d5a6cd44bb8ae4451b07de44d2cd3b71072a13"
+    },
+    {
+      "path": "app/vpn/client_import_artifacts.py",
+      "git_blob": "60729be188ad67d2aa95af46a82a10e3de97010f",
+      "sha256_lf": "ed569ddcb65c7040dbcf47b7dad1d9289f978a700c1b082c88aae316ccd5eb95"
+    },
+    {
+      "path": "app/vpn/config_templates.py",
+      "git_blob": "89e2e4e76c7058831c61a410a6c0418c5455cab0",
+      "sha256_lf": "6bf9c9e207b95abbe797ae902ce26d39805a261674cf9c11ef09b08e8c621e50"
+    },
+    {
+      "path": "app/bot/delivery.py",
+      "git_blob": "00aad044101229ea63602953c2458559e6723514",
+      "sha256_lf": "bf6a2f31c311793d09616356fbd24db0e20cd892638d0946475fb48a5da666d5"
+    },
+    {
+      "path": "app/services/config_delivery.py",
+      "git_blob": "0462d685be61d13ac7504181e682b77e0ff6a2be",
+      "sha256_lf": "d59d86259dfd33201a82785cf138e4ccb728fc2474bf261822b995ae2532e166"
+    },
+    {
+      "path": "app/services/admin_config_issuance.py",
+      "git_blob": "7fe0668cdb8184dc7ff1ee6d6b63bb6716c63c55",
+      "sha256_lf": "6d45414c6e018b1041a3b45512a023e06a292ed48eb34670e23020e293d93401"
+    },
+    {
+      "path": "app/services/device_passports.py",
+      "git_blob": "edac1192650cde5cd157a5fd1b7766a2cd526999",
+      "sha256_lf": "915b32a2ea8b464cd67377f96c8cc7d018921c767063bec9004bc38c7753f559"
+    },
+    {
+      "path": "tests/services/test_admin_config_issuance.py",
+      "git_blob": "254bf5cf59959b319a4d0542b5e23e8b8d088e9b",
+      "sha256_lf": "154b190c90843cffffe45d201a488830e196aec0fcd73c6ceebc6aacd1d47721"
+    }
+  ],
+  "environment": {
+    "os": "Windows",
+    "python": "3.12.14",
+    "existing_dependency_versions": {
+      "aiogram": "3.28.2",
+      "cryptography": "45.0.7",
+      "pydantic": "2.13.4",
+      "pytest": "8.4.2",
+      "qrcode": "8.2"
+    },
+    "dependency_installation": false,
+    "target_runtime40_equivalence_verified": false,
+    "note": "Existing local dependencies; this is not the pinned Linux candidate environment."
+  },
+  "baseline": {
+    "exitcode": 1,
+    "elapsed_seconds": 42.421,
+    "python": "3.12.14",
+    "pytest": "8.4.2",
+    "source_path": "C:\\Users\\SooL\\Documents\\VPS-OPS-LAB\\worktrees\\amn2-web-health-event-loop",
+    "dependency_path": "C:\\Users\\SooL\\Documents\\Amneziya\\.codex_deps",
+    "selected": [
+      "tests/vpn",
+      "tests/bot/test_delivery.py",
+      "tests/services/test_access_config_version.py",
+      "tests/services/test_config_delivery.py",
+      "tests/services/test_config_identity.py",
+      "tests/services/test_client_compatibility.py",
+      "tests/services/test_phase14_awg3_client_admission.py",
+      "tests/services/test_protocol_admission.py",
+      "tests/services/test_protocol_config_lifecycle.py",
+      "tests/services/test_admin_config_issuance.py",
+      "tests/services/test_self_service_issuance.py",
+      "tests/services/test_phase15_bootstrap.py",
+      "tests/services/test_protocol_issuance_barrier.py",
+      "tests/services/test_dual_protocol_profiles.py",
+      "tests/test_config_assignment.py"
+    ],
+    "blocked_operations": [],
+    "network_and_external_process_guard": true,
+    "database_boundary": "synthetic scratch or in-memory only",
+    "dependency_installation": false,
+    "live_client_or_server_test": false,
+    "log_sha256": "de793edb43e4f7545636e2f3e06d919ce9af220552be5dd51d4ff18686976835",
+    "counts": {
+      "tests": 397,
+      "passed": 387,
+      "failed": 10,
+      "errors": 0,
+      "skipped": 0
+    },
+    "junit_sha256": "296d721fb472b69c44a56bfc8321d9dfb7a00f51f7ca55aecfdf3d61d8d98c30",
+    "groups": {
+      "tests.vpn.test_amneziawg_config": {
+        "tests": 15,
+        "failed": 0
+      },
+      "tests.vpn.test_amneziawg_v3_config": {
+        "tests": 11,
+        "failed": 0
+      },
+      "tests.vpn.test_client_compatibility": {
+        "tests": 11,
+        "failed": 0
+      },
+      "tests.vpn.test_client_import_artifacts": {
+        "tests": 22,
+        "failed": 0
+      },
+      "tests.vpn.test_config_templates": {
+        "tests": 9,
+        "failed": 0
+      },
+      "tests.vpn.test_config_versions": {
+        "tests": 19,
+        "failed": 0
+      },
+      "tests.vpn.test_ipam": {
+        "tests": 11,
+        "failed": 0
+      },
+      "tests.vpn.test_protocol_versions": {
+        "tests": 3,
+        "failed": 0
+      },
+      "tests.bot.test_delivery": {
+        "tests": 21,
+        "failed": 0
+      },
+      "tests.services.test_access_config_version": {
+        "tests": 4,
+        "failed": 0
+      },
+      "tests.services.test_config_delivery": {
+        "tests": 4,
+        "failed": 0
+      },
+      "tests.services.test_config_identity": {
+        "tests": 14,
+        "failed": 0
+      },
+      "tests.services.test_client_compatibility": {
+        "tests": 16,
+        "failed": 0
+      },
+      "tests.services.test_phase14_awg3_client_admission": {
+        "tests": 25,
+        "failed": 0
+      },
+      "tests.services.test_protocol_admission": {
+        "tests": 16,
+        "failed": 0
+      },
+      "tests.services.test_protocol_config_lifecycle": {
+        "tests": 12,
+        "failed": 0
+      },
+      "tests.services.test_admin_config_issuance": {
+        "tests": 39,
+        "failed": 10
+      },
+      "tests.services.test_self_service_issuance": {
+        "tests": 62,
+        "failed": 0
+      },
+      "tests.services.test_phase15_bootstrap": {
+        "tests": 60,
+        "failed": 0
+      },
+      "tests.services.test_protocol_issuance_barrier": {
+        "tests": 3,
+        "failed": 0
+      },
+      "tests.services.test_dual_protocol_profiles": {
+        "tests": 16,
+        "failed": 0
+      },
+      "tests.test_config_assignment": {
+        "tests": 4,
+        "failed": 0
+      }
+    },
+    "failing_tests": [
+      "test_admin_awg3_persists_one_completed_attempt_profile_event_and_receipt_graph",
+      "test_admin_awg3_issuance_wins_real_sqlite_race_and_block_removes_exact_peer",
+      "test_admin_awg3_failure_after_issuer_persists_recovery_and_never_reissues",
+      "test_admin_secondary_recovery_failure_commits_unknown_marker_and_never_reissues",
+      "test_admin_awg3_batch_rechecks_fresh_admission_inside_each_serialized_slot[security_revoked]",
+      "test_admin_awg3_batch_rechecks_fresh_admission_inside_each_serialized_slot[emergency_suspended]",
+      "test_admin_awg3_batch_rechecks_fresh_admission_inside_each_serialized_slot[evidence_stale]",
+      "test_admin_late_finalization_failure_rolls_back_false_completed_graph[record_admin_action]",
+      "test_admin_late_finalization_failure_rolls_back_false_completed_graph[complete_receipt]",
+      "test_admin_late_finalization_failure_rolls_back_false_completed_graph[complete_attempt]"
+    ]
+  },
+  "fixture_control": {
+    "exitcode": 0,
+    "elapsed_seconds": 14.75,
+    "python": "3.12.14",
+    "pytest": "8.4.2",
+    "source_path": "C:\\Users\\SooL\\Documents\\VPS-OPS-LAB\\worktrees\\amn2-web-health-event-loop",
+    "dependency_path": "C:\\Users\\SooL\\Documents\\Amneziya\\.codex_deps",
+    "selected": [
+      "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-config-readiness-20261004/fixture-control/test_admin_config_issuance.py"
+    ],
+    "blocked_operations": [],
+    "network_and_external_process_guard": true,
+    "database_boundary": "synthetic scratch or in-memory only",
+    "dependency_installation": false,
+    "live_client_or_server_test": false,
+    "log_sha256": "94f2a31672b7240fc2db76c9c4454a07d43312d8bd29e12993dcbc3432cc2314",
+    "counts": {
+      "tests": 39,
+      "passed": 39,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "junit_sha256": "1068bd3ee9bec6b0d4d1ca7d79296cac00d05e0da27149279d0df2fcd1f0a3b8",
+    "groups": {
+      "temporary_test_admin_config_issuance": {
+        "tests": 39,
+        "failed": 0
+      }
+    },
+    "failing_tests": []
+  },
+  "fixture_control_patch": {
+    "source_file": "tests/services/test_admin_config_issuance.py",
+    "source_sha256_lf": "154b190c90843cffffe45d201a488830e196aec0fcd73c6ceebc6aacd1d47721",
+    "control_sha256_lf": "d8c9ff97b17d016e05b8a4ab1aec8458fb231740ec61c81093f95e992078b90f",
+    "scope": "temporary test double only; two old revision constants in SyntheticAwg3AccessService",
+    "source_lines": [
+      85,
+      133
+    ],
+    "replacements": 2,
+    "assertions_changed": false,
+    "production_code_changed": false,
+    "repository_test_changed": false
+  },
+  "finding": {
+    "id": "STALE_AWG3_ADMIN_TEST_DOUBLE",
+    "cause": "Top-level SyntheticAwg3AccessService supplies amneziawg_v3 twice; current passport validator requires active amneziawg_v3_1.",
+    "control": "Exactly two revision literals changed in a temporary copy; full 39-test module passed with original assertions and original production code.",
+    "source_fix_applied": false,
+    "source_suite_still_has_10_failures": true,
+    "production_validator_relaxed": false
+  },
+  "harness_attempts": [
+    {
+      "attempt": 1,
+      "result": "COLLECTION_TOOL_ERROR",
+      "cause": "Replacing subprocess.Popen broke Windows asyncio inheritance; uncached platform metadata also attempted local ver.",
+      "application_result": "UNKNOWN"
+    },
+    {
+      "attempt": 2,
+      "result": "COLLECTION_TOOL_ERROR",
+      "cause": "platform.uname pre-cached, but replaced Popen still broke Windows asyncio inheritance.",
+      "application_result": "UNKNOWN"
+    },
+    {
+      "attempt": 3,
+      "result": "397_TESTS_COMPLETED",
+      "change": "Preserve Popen class; deny subprocess.Popen through Python audit hook; cache host metadata before guards."
+    }
+  ],
+  "reproduction": {
+    "baseline_selectors": [
+      "tests/vpn",
+      "tests/bot/test_delivery.py",
+      "tests/services/test_access_config_version.py",
+      "tests/services/test_config_delivery.py",
+      "tests/services/test_config_identity.py",
+      "tests/services/test_client_compatibility.py",
+      "tests/services/test_phase14_awg3_client_admission.py",
+      "tests/services/test_protocol_admission.py",
+      "tests/services/test_protocol_config_lifecycle.py",
+      "tests/services/test_admin_config_issuance.py",
+      "tests/services/test_self_service_issuance.py",
+      "tests/services/test_phase15_bootstrap.py",
+      "tests/services/test_protocol_issuance_barrier.py",
+      "tests/services/test_dual_protocol_profiles.py",
+      "tests/test_config_assignment.py"
+    ],
+    "pytest_options": [
+      "-q",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "--rootdir=SOURCE",
+      "--basetemp=SCRATCH/pytest-temp",
+      "--junitxml=SCRATCH/checks.xml"
+    ],
+    "runner_sha256": "11ee00698082b44ca8354f5b033e7b21975aa4755c99685e17ac2dea79dcfee4",
+    "control_runner_sha256": "027ac2242c257e8e51e460318561910f70715847c4420eed8d500b9e0e5f4d7f",
+    "guard": "Clean environment and scratch cwd; no bytecode/plugin autoload/cache; network and external process calls denied; sqlite connections restricted to scratch or memory. Local platform metadata cached before guard."
+  },
+  "evidence_limits": [
+    "Local synthetic rendering/export/delivery/admission tests; no physical client import, real Telegram delivery or VPN traffic.",
+    "Default bot link path remains legacy base64 raw-config vpn://; explicit native client export helper is not automatically selected by bot delivery.",
+    "Historical patched AmneziaVPN 5.0.1.5+PR3113 import/name/MTU/45-field check is not acceptance of current official binaries.",
+    "Windows traffic FAIL and strict quality/A-B remain open; historical Android/iPhone connectivity is retained, not a new retest.",
+    "No source fixes applied; diagnostic test-copy PASS does not turn unchanged source suite green."
+  ],
+  "followup": [
+    "If a local test fix is separately brought into scope, update the two stale fixture literals without weakening validator/assertions and run affected module.",
+    "Resume deferred exact-client import/traffic and quality checks when operator returns to that step.",
+    "Prepare code/knowledge handoff with these limitations; no old database, users, subscriptions, secrets or peers to migrate for preferred option3."
+  ],
+  "safety": {
+    "ssh": 0,
+    "live_database_access": 0,
+    "external_telegram_calls": 0,
+    "source_edits": 0,
+    "package_builds": 0,
+    "service_or_install_actions": 0,
+    "old_data_export_or_transfer": 0,
+    "push_this_run": 0,
+    "awg2": "UNTOUCHED",
+    "package016": "UNCHANGED",
+    "general_issuance": "DISABLED",
+    "foreign_diff_sha256": "8e42c81ded39a2fdeb8fb9bbd5e5b2980720191b2e8239c59fff6ef55012a977"
+  }
+}
