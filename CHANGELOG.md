@@ -7,6 +7,19 @@
 
 ## 2026-10-04
 
+- После продолжения оператором исправлены два устаревших значения AWG3 в
+  тестовом исполнителе AMN2; local commit `d332569d142a681bf4eab3c117d7e9c069c3d6cf` меняет
+  только test fixture и его CHANGELOG. [Receipt](research/amn2/phase16-admin-config-fixture-fix-2026-10-04.json):
+  сохранён RED387/10 и контроль39/39, итоговый выбранный набор **397 PASS/0 FAIL/
+  0 SKIP за50.04s**. Assertions и production app tree/deploy/dependencies прежние,
+  полный suite и target runtime40 equivalence не проверялись. Существующие handoff
+  и план уточнены; historical config-review и frozen source6e68235 не переписаны.
+  Source/AMN3 refs прочитаны:6e68235/0e5bc15; source remote `amn2` подтверждён,
+  `origin` в AMN2 не использовать. Проверки: exact diff/readback, app-tree identity,
+  links/whitespace, сохранность чужого diff; новые package/live/stage/install/push0.
+  Windows/quality acceptance и client deferral сохраняются; вариант3 code/knowledge
+  без старых данных. Публикация каждого нового commit требует exact approval.
+
 - Зафиксирован предпочтённый оператором вариант3: передача кода и знаний без
   старых данных при условии работоспособности конфигов. Уточнены существующие
   handoff/очередь M1–M5 и навигация; приёмка не ослаблена. [Локальный config review](research/amn2/phase16-config-readiness-review-2026-10-04.json)

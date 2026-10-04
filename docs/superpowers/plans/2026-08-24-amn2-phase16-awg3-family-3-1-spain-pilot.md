@@ -102,10 +102,11 @@ bindings относятся к Spain; нельзя переназначить pa
 Цель переноса сохраняется; дальнейшее произвольное обновление Spain не разрешено.
 
 Уточнение04.10: оператор предпочёл **вариант3 — код и знания без старых данных**,
-если конфиги работают. [Config review и границы уверенности](../../PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#code-only-config-confidence-2026-10-04):
-387 PASS/10 FAIL в source suite; причина10 отказов — старая версия в тестовом
-исполнителе, контрольная копия39 PASS. Source fix не применён, physical-client
-import/traffic не повторялись. Условие ещё не выполнено; приёмку не ослаблять.
+если конфиги работают. [Config review и границы уверенности](../../PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#code-only-config-confidence-2026-10-04)
+сохранён как RED387/10. [Тестовая правка применена](../../PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#config-fixture-fix-2026-10-04):
+AMN2 local d332569, итог397 PASS/0 FAIL/0 SKIP, production tree прежний.
+Physical-client import/traffic не повторялись; условие полной работоспособности
+ещё не доказано, приёмку не ослаблять.
 M1/M2 продолжаются в code/knowledge scope; старые backup/data migration не нужны
 для этого варианта. Отключение Spain и удаление данных не разрешены.
 
@@ -121,7 +122,7 @@ M1/M2 продолжаются в code/knowledge scope; старые backup/data
 | P0 / M0e — установить exact private-boundary facts | [Actual readback](../../../research/amn2/phase16-bot-private-boundary-readback-execution-001-2026-10-04.json): claim/result root:root0644 regular single-link/ACLclear; payload/scratch700, parent/stage/repair result и selected units прежние | ✅ Один exact SSH0/2.578s, mutations/DB/app/services0, approval consumed, pushdce10e0 MATCH. Umask не измерен; данные четырёх объектов не читались |
 | P0 / M0f — seal двух JSON и построить candidate plan | [Actual seal](../../../research/amn2/phase16-bot-private-seal-execution-001-2026-10-04.json): claim/result0600 verified/durable;14 components/candidate PASS, access plan5278 objects ready-not-applied, runtime content PASS | ✅ Один exact SSH0/30.000s, два fchmod; parent/stage/other DAC/access apply/DB/services/install0, approval consumed, pusha93b785 MATCH. No replay/auto rollback; этот diagnostic blocker закрыт |
 | P1 / M1 — получить целевой контракт при готовности адресата | Общая админка ещё формируется по ответу03.10; идентификатор/код/репозиторий или VPS параметры нужны при реальном переносе, затем определить data ownership | ▶️ [Исходная сторона контракта проверена](../../PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#source-transfer-contract-2026-10-04): 20 pinned source files, карта 29 таблиц и ограничения backup/startup/Phase13 import. [Предпочтён вариант3](../../PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#code-only-config-confidence-2026-10-04): код/знания без старых данных, условие работоспособности конфигов ещё не доказано; адресат/ownership не определены, M1 открыт |
-| P1 / M2 — подготовить передачу кода и знаний | Для предпочтённого варианта3: source/evidence/capability map и известные ограничения; при готовности адресата — его runtime/ownership contract. Старые БД/users/keys/peers не переносить | ▶️ Локальная подготовка разрешена; config review387 PASS/10 FAIL, временный fixture control39 PASS. Условие полной работоспособности не принято; другой проект и live state не обследованы |
+| P1 / M2 — подготовить передачу кода и знаний | Для предпочтённого варианта3: source/evidence/capability map и известные ограничения; при готовности адресата — его runtime/ownership contract. Старые БД/users/keys/peers не переносить | ▶️ Локальная подготовка разрешена; AMN2 test-only fix d332569 проверен:397 PASS/0 FAIL/0 SKIP, source push ожидает exact approval. Условие клиентской работоспособности не принято; другой проект и live state не обследованы |
 | P1 / M3 — передать основу адресату | После M2: exact source/evidence и ограничения для новой админки; её установка и runtime binding — отдельный будущий контракт. Предпочтённый вариант3 исключает перенос старого состояния | ⏳ Адресат формируется; внешняя передача/сообщение и новые SSH/install/выдача требуют соответствующего разрешения. Spain не обновлять и не отключать автоматически |
 | P1 / M4 — доказать работоспособность конфигов | Возобновить отложенные exact-client import/traffic и quality/A-B; локальный рендер и synthetic issuance не заменяют connectivity. При фактической интеграции подтвердить также новый runtime/bot/web | ⏳ Windows traffic и quality не приняты; клиентские retests всё ещё отложены. Старые данные для варианта3 не проверяются и не переносятся; новый сервер не принят историческим evidence |
 | P2 / M5 — принять и закрыть | После M3/M4: фактические source/release/deployed SHA, итоговые evidence, известные ограничения и handoff; Phase16 не закрывать по local461 PASS | Итоговые local docs разрешены; приёмка и перенос пока не выполнены |

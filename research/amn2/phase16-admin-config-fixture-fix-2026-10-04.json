@@ -1,0 +1,134 @@
+{
+  "schema": "phase16.admin-config-test-fixture-fix.v1",
+  "date": "2026-10-04",
+  "status": "LOCAL_TEST_FIX_VERIFIED_NOT_PUSHED_NOT_DEPLOYED",
+  "authorization": "Operator continuation after explicit next step: correct two stale AMN2 test values.",
+  "amn3_base": "0e5bc15da263dc3ed74a4c79ef5f77364477a9dc",
+  "amn2_source": {
+    "head": "d332569d142a681bf4eab3c117d7e9c069c3d6cf",
+    "parent": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "branch": "codex/phase16-web-health-event-loop",
+    "changed_files": [
+      "CHANGELOG.md",
+      "tests/services/test_admin_config_issuance.py"
+    ],
+    "test_sha256_lf": "d8c9ff97b17d016e05b8a4ab1aec8458fb231740ec61c81093f95e992078b90f",
+    "production_unchanged": true,
+    "source_clean": true,
+    "counts": {
+      "passed": 397,
+      "failed": 0,
+      "skipped": 0
+    },
+    "push": "NOT_EXECUTED",
+    "publish_remote": "amn2",
+    "publish_url": "https://github.com/barakov-dot/amn2.git"
+  },
+  "change": {
+    "file": "tests/services/test_admin_config_issuance.py",
+    "class": "SyntheticAwg3AccessService (top level)",
+    "replacements": 2,
+    "old": "amneziawg_v3",
+    "new": "amneziawg_v3_1",
+    "assertions_changed": false,
+    "production_changes": false
+  },
+  "production_identity": {
+    "app_tree_before_and_after": "39be9c427b9f5206175de921c4f5358710fb26ce",
+    "deploy_requirements_pyproject_diff": "EMPTY",
+    "frozen_candidate_source": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "package_rebuild": false
+  },
+  "red_evidence": {
+    "receipt": "phase16-config-readiness-review-2026-10-04.json",
+    "baseline": {
+      "passed": 387,
+      "failed": 10,
+      "skipped": 0
+    },
+    "temporary_control": {
+      "passed": 39,
+      "failed": 0
+    },
+    "repeated_before_fix": false,
+    "reason": "Existing RED and exact two-literal control retained; unchanged source fixture hash verified before applying identical fix."
+  },
+  "green_evidence": {
+    "counts": {
+      "passed": 397,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "admin_module_passed": 39,
+    "other_selected_tests_passed": 358,
+    "pytest_elapsed_seconds": 50.04,
+    "run": {
+      "exitcode": 0,
+      "elapsed_seconds": 50.61,
+      "python": "3.12.14",
+      "pytest": "8.4.2",
+      "source_path": "C:\\Users\\SooL\\Documents\\VPS-OPS-LAB\\worktrees\\amn2-web-health-event-loop",
+      "dependency_path": "C:\\Users\\SooL\\Documents\\Amneziya\\.codex_deps",
+      "selected": [
+        "tests/vpn",
+        "tests/bot/test_delivery.py",
+        "tests/services/test_access_config_version.py",
+        "tests/services/test_config_delivery.py",
+        "tests/services/test_config_identity.py",
+        "tests/services/test_client_compatibility.py",
+        "tests/services/test_phase14_awg3_client_admission.py",
+        "tests/services/test_protocol_admission.py",
+        "tests/services/test_protocol_config_lifecycle.py",
+        "tests/services/test_admin_config_issuance.py",
+        "tests/services/test_self_service_issuance.py",
+        "tests/services/test_phase15_bootstrap.py",
+        "tests/services/test_protocol_issuance_barrier.py",
+        "tests/services/test_dual_protocol_profiles.py",
+        "tests/test_config_assignment.py"
+      ],
+      "blocked_operations": [],
+      "network_and_external_process_guard": true,
+      "database_boundary": "synthetic scratch or in-memory only",
+      "dependency_installation": false,
+      "live_client_or_server_test": false,
+      "log_sha256": "6613ef697ce23d8a4c777fcfb48ed0d721f20bc06844e19efcc1f27f96c04322"
+    },
+    "junit_sha256": "2f330d87587ee60b32bbd5ca6a12663fea176a28ed63190e6138541ccbcf776b",
+    "runner_sha256": "24f2ce2da40b0a36a5f36aa91482205d68a4972f14a21e9ea0b041acb5f32111"
+  },
+  "review": {
+    "method": "Inline exact diff, source-to-control equality, unchanged assertions and app tree, selected final suite, whitespace and docs links.",
+    "new_agents": 0,
+    "full_project_suite_run": false,
+    "target_runtime40_equivalence_verified": false
+  },
+  "publication": {
+    "source_push": "PENDING_EXACT_APPROVAL",
+    "source_remote": "amn2",
+    "source_url": "https://github.com/barakov-dot/amn2.git",
+    "source_ref": "refs/heads/codex/phase16-web-health-event-loop",
+    "source_remote_readback": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "docs_remote_readback": "0e5bc15da263dc3ed74a4c79ef5f77364477a9dc",
+    "source_origin_points_to_amn3_do_not_use": true
+  },
+  "limits": [
+    "Local synthetic checks only; no current physical-client import or VPN traffic.",
+    "Windows traffic and quality/A-B acceptance remain open; operator client deferral retained.",
+    "Bot native export integration unchanged; preferred option3 remains code and knowledge only, no old data.",
+    "New source commit changes tests and changelog only; candidate/package/deployed identities must not be replaced by its SHA."
+  ],
+  "safety": {
+    "awg2": "UNTOUCHED",
+    "package016": "UNCHANGED",
+    "general_issuance": "DISABLED",
+    "ssh": 0,
+    "live_database_access": 0,
+    "telegram_calls": 0,
+    "stage_install": 0,
+    "package_builds": 0,
+    "old_data_transfer": 0,
+    "push_this_step": 0,
+    "foreign_diff_sha256": "8e42c81ded39a2fdeb8fb9bbd5e5b2980720191b2e8239c59fff6ef55012a977"
+  }
+}

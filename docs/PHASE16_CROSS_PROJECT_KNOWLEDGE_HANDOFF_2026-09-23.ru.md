@@ -375,3 +375,30 @@ FAIL и quality/A-B открыты; исторические Android/iPhone conn
 Не тратить следующий этап на перенос старой БД или повтор M0a–M0f; новые startup/
 runtime/ownership contracts нужны только при фактической интеграции у адресата.
 Исторический source-review receipt выше сохранён без переписывания.
+
+
+<a id="config-fixture-fix-2026-10-04"></a>
+
+### Тестовая правка применена — 397 PASS, 04.10
+
+После «продолжай» исправлены ровно два version literals в верхнеуровневом
+`SyntheticAwg3AccessService`. [Receipt исправления](../research/amn2/phase16-admin-config-fixture-fix-2026-10-04.json)
+сохраняет прежний RED387/10 и отдельный контроль39/39; historical receipt не менялся.
+Итоговый прогон того же выбранного набора: **397 PASS, 0 FAIL, 0 SKIP** за50.04s,
+включая39 tests административной выдачи. Новый локальный AMN2 commit
+`d332569d142a681bf4eab3c117d7e9c069c3d6cf`, parent `6e682356ed14a62d636ee58039fd3a389e794809`; checkout чистый.
+Commit меняет только тест и CHANGELOG; assertions, дерево `app/`, deploy,
+requirements и pyproject прежние. Полный suite проекта не запускался;
+использованы существующие локальные dependencies, не доказанный target runtime40.
+
+Этот результат закрывает локальный test-fixture дефект из предыдущего раздела.
+Frozen candidate/source/runtime bundles остаются связанными с `6e68235`;
+не подменять ими или новым SHA фактическую deployed revision. Для публикации
+source использовать **remote `amn2` / barakov-dot/amn2**, ветку
+`codex/phase16-web-health-event-loop`; source remote `origin` указывает на AMN3.
+Readback source ref04.10: `6e68235`, новый commit пока только локальный.
+
+Вариант3 остаётся кодом/знаниями без старых данных. Теперь выбранный локальный
+config suite зелёный; остаются client import/traffic и quality acceptance,
+проверки по-прежнему отложены оператором. Новых SSH/Telegram/live DB/package/
+stage/install/push в шаге исправления нет. Очередь — в единственном плане.
