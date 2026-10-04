@@ -1,6 +1,6 @@
 # Upstream: единый реестр решений и маршрут до реализации
 
-Обновлено: 2026-09-20. Владелец: проект AMN3 / VPS-OPS-LAB.
+Обновлено: 2026-10-04. Владелец: проект AMN3 / VPS-OPS-LAB.
 Это реестр входящих доработок, не второй execution plan Phase 16.
 Актуальная фаза и разрешённая работа определяются через [START_HERE](START_HERE.ru.md).
 
@@ -86,3 +86,42 @@ Client build/signing/test изменения и остальные Panel UX/owne
 задачам и изменение автоматизации допускаются только в scope запроса оператора.
 Для этой передачи пользователь разрешил документирование и уведомление актуальной
 задачи; runtime, выдача, commit/push и расписание автоматизации не меняются.
+
+<a id="upstream-intake-2026-10-04"></a>
+
+## Применение рекомендаций обзора04.10 — локальные требования, не rollout
+
+Оператор04.10 разрешил применить рекомендации и продолжить Phase16. Применено
+в существующих карточках и базе передачи; новый runtime/config/code scope не
+открыт. Weekly04.10 имеет собственную фиксацию10:05 Europe/Moscow; её сообщение
+не заменяет source/receipt. Здесь12:38:48 Europe/Moscow отдельно проверены
+official GitHub metadata PR183/200 и release `v1.7.3`. Это узкая intake-проверка,
+не повтор полного weekly и не продвижение historical fully-reviewed cursors.
+
+| Сигнал / exact cursor | Единственный статус / решение | Где применять |
+| --- | --- | --- |
+| [Panel #183](https://github.com/PRVTPRO/Amnezia-Web-Panel/pull/183), merged `40ebb7418659b5c8da40e0fe1507f2ba33dbd7ba` | уже учтено в плане; P3 **отложить** после image/source binding и Phase16 transfer queue | Существующая MTU budget карточка04.10 в [AMN2 candidates](../ideas/candidates-for-amn2.md); не добавлен дубль |
+| [Panel #200](https://github.com/PRVTPRO/Amnezia-Web-Panel/pull/200), merged `518f051ef51aed5b4ba57afa0670434a20753982`, [release v1.7.3](https://github.com/PRVTPRO/Amnezia-Web-Panel/releases/tag/v1.7.3) | hybrid-only; P2 при проектировании целевого multi-instance UI, после target contract | Дополнен существующий [HYB-AI-001](../ideas/candidates-for-hybrid.md): context/request binding, delayed response и incomplete snapshot cases |
+| [AWG Go #186](https://github.com/amnezia-vpn/amneziawg-go/issues/186), immutable affected `1f50ad736ecca22a9bfc7b4606805ec9ca49fe48` | уже учтено в плане; P2 **отложить** до runtime/image binding и source-contract проверки | Существующая H1–H3/RandomTrailers карточка27.09; это самостоятельный receive-path риск, не MTU budget |
+
+Локальная сверка дополнительно выполнена по активному AMN2 source
+`6e682356ed14a62d636ee58039fd3a389e794809` (clean checkout). В AWG3 renderer
+проверяются types/one-line fields и S1–S4 >=12; budget MTU/S4/верхняя граница
+ContentPaddingAddition не проверяется. Native exporter сохраняет переданный
+MTU и предупреждает о client overwrite, это иной слой. Weekly карточка ссылается
+на более старый `56540e2`; вывод о целевой доработке сохраняется и для6e68235.
+Это не доказанный production defect или root cause исторического quality FAIL.
+
+Будущий независимый contract должен задавать link-MTU input, overhead каждого
+поддерживаемого transport/runtime, padding upper bound, явный MTU override и
+поведение при insufficient budget. Если budget ниже минимально допустимого MTU выбранного transport, результат —
+STOP/insufficient budget; нельзя просто повысить его до порога и объявить
+безопасным. Формулу/порог выбирают после exact runtime
+source, проверяют synthetic boundary cases; AWG2/legacy и уже выданные профили
+не меняются попутно. Upstream GPL code/UI/templates не копируются.
+
+[База передачи](PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#upstream-recommendations-2026-10-04)
+содержит маршрут будущему разработчику, а [receipt](../research/amn2/phase16-upstream-intake-application-2026-10-04.json)
+разделяет applied requirements и NOT_IMPLEMENTED/NOT_DEPLOYED. Текущий M0f seal
+packet не меняется; deferred client checks не возобновляются. Применение критериев
+к новому UI требует его реального кода/target contract; иной проект не обследован.

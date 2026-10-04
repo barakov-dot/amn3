@@ -245,6 +245,21 @@
 - `HYB-AI-001`: multi-instance AmneziaWG / multi-protocol IPAM and port
   planner. Статус: hybrid roadmap candidate; live actions require separate
   gate, conflict model and rollback design.
+  Дополнение04.10.2026: критерии разделения async responses и cache/batch по
+  выбранному server/protocol/instance; **hybrid-only**, P2 при проектировании
+  общей админки после появления её target contract. Источник [Panel #200](https://github.com/PRVTPRO/Amnezia-Web-Panel/pull/200),
+  merged SHA `518f051ef51aed5b4ba57afa0670434a20753982`, release `v1.7.3`;
+  metadata проверены04.10.2026 12:38:48 Europe/Moscow. Upstream исправил stale
+  response под вновь выбранным instance и смешанные/неполные prefetch sections.
+  Минимум: response с прежним context/request ID не меняет текущий список;
+  переключение во время загрузки запускает получение выбранного context;
+  cache key включает server/protocol/instance, а данные разных contexts не
+  объединяются. Неполный snapshot остаётся UNKNOWN, не пустым authoritative
+  списком. Synthetic delayed/out-of-order response и mixed/incomplete batch
+  cases обязательны для будущей реализации. Новый проект не обследован:
+  local gap там UNKNOWN, компонентов/изменений кода AMN2 этим не назначается.
+  Собственные contracts/tests, без GPL code/UI/parsers и secret peer payloads.
+  [Применение и границы](../docs/UPSTREAM_INTAKE.ru.md#upstream-intake-2026-10-04).
 - `HYB-AI-002`: per-user stats and speed limits. Статус: hybrid-only until
   privacy, billing/entitlement, write API and config delivery boundaries are
   accepted.

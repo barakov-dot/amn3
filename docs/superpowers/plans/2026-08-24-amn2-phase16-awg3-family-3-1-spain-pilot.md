@@ -81,6 +81,11 @@ access apply/maintenance/DB/app/services/install исключены. Remote180s/
 SSH1, new checksum approval требуется, live NOT_EXECUTED. Оригинальные57 и consumed
 artifacts сохранены. [Local20 PASS/0 SKIP, review PASS](../../../research/amn2/phase16-bot-private-seal-local-verification-2026-10-04.json);
 оба P2 исправлены, native fchmod не выполнялся. Дальше M0f и база передачи.
+[Рекомендации upstream04.10 применены в базе передачи](../../PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#upstream-recommendations-2026-10-04):
+MTU budget остаётся P3 после transfer queue/runtime binding; context/request/cache
+изоляция включена в HYB-AI-001 для M1/M2 будущей админки, не в текущий M0f.
+Новый code/rollout/client-retest scope этим не открыт; существующий seal packet
+и exact checksum approvals прежние. Детали не дублируются в execution plan.
 Повтор прежних gates/restore/replay запрещены.
 Это не завершённая интеграция и не перенос. Host/boot/paths/UID/schema/rollback
 bindings относятся к Spain; нельзя переназначить packet на другой VPS заменой SHA.

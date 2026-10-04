@@ -7,6 +7,22 @@
 
 ## 2026-10-04
 
+- По запросу оператора применены рекомендации upstream04.10 в существующем
+  [intake](docs/UPSTREAM_INTAKE.ru.md#upstream-intake-2026-10-04) и базе передачи.
+  Official PR183/200 merged SHA и release v1.7.3 metadata проверены12:38:48
+  Europe/Moscow. MTU budget — уже записанный отложенный P3; дополнен HYB-AI-001
+  критериями context/request/cache binding и delayed/mixed/incomplete snapshots.
+  Active AMN2 source6e68235 clean: budget gap renderer сохраняется, но production
+  defect/quality root cause не заявлены; чужая админка не обследована.
+  Сохранены четыре planning-файла: AMN2/priority/rejected bytes прежние,
+  hybrid изменён только в HYB-AI-001. Чужие58lines AMN2 не включены в commit.
+  Navigation/единственный Phase16 plan/handoff синхронизированы, [receipt](research/amn2/phase16-upstream-intake-application-2026-10-04.json)
+  фиксирует applied requirements отдельно от NOT_IMPLEMENTED/NOT_DEPLOYED.
+  Docs-only readback/ссылки/whitespace и secret guard; code/tests не менялись,
+  suite не повторялся. Seal manifest/remote/57original/FROZEN7 неизменны,
+  claim absent; новый SSH/push/install0, M0f ещё требует exact approval.
+  AWG2/package016/general issuance/client deferral/target unspecified сохранены.
+
 - По exact разрешению выполнены normal pushdce10e0 при EXPECTED_OLD4d57e2d
   (fresh ref MATCH, CHANGELOG1 commit/pre-push PASS, NO_FORCE/NO_TAGS/NO_OTHER_REFS)
   и [private-boundary readback](research/amn2/phase16-bot-private-boundary-readback-execution-001-2026-10-04.json):

@@ -1,0 +1,99 @@
+{
+  "checked_at": "2026-10-04T12:38:48+03:00",
+  "coverage": "two official PR metadata and one release; prior PR descriptions read; not a new full weekly audit/cursor advance",
+  "date": "2026-10-04",
+  "docs": {
+    "added_local_links_checked": 9,
+    "changelog": "same pending commit, semantics reviewed",
+    "hybrid_scope": "HYB_AI_001_ONLY",
+    "links": "PASS",
+    "official_external_sources_verified": [
+      "PR183",
+      "PR200",
+      "release v1.7.3"
+    ],
+    "readback": "PASS",
+    "seal_manifest_remote_original57_frozen7": "UNCHANGED",
+    "secret_conflict_utf8_guard": "PASS",
+    "three_planning_files_bytes": "UNCHANGED",
+    "whitespace": "PASS"
+  },
+  "foreign_amn2_diff": "UNCHANGED_NOT_STAGED",
+  "git": {
+    "head_before_record": "352655f026af4465b8978e04cb286e4788183790",
+    "remote_last_verified": "dce10e0935174bc11507827726865dfddde4c00e"
+  },
+  "local_source": {
+    "clean": true,
+    "components": [
+      "app/vpn/amneziawg_v3/config.py",
+      "app/vpn/amneziawg_v2/config.py",
+      "app/vpn/client_import_artifacts.py",
+      "app/services/access.py",
+      "app/services/phase15_bootstrap.py"
+    ],
+    "finding": "no coupled pre-render MTU/S4/padding budget in inspected renderer/input path; import MTU preservation distinct",
+    "head": "6e682356ed14a62d636ee58039fd3a389e794809",
+    "other_admin_inspected": false,
+    "production_defect_proven": false
+  },
+  "new_push": false,
+  "operator_scope": "apply prior recommendations and continue; retain MTU deferment/current Phase16 queue",
+  "planning_before_sha256": {
+    "ideas/candidates-for-amn2.md": "c01a943480b9e1c3006357ce636541d2a7d05ae934fcd55533e086d64eea241f",
+    "ideas/candidates-for-hybrid.md": "4da4c7e132ee6780dab68e81e36030ec0547188dd347ee9411fbb2510f54628d",
+    "ideas/priority-backlog.md": "5130858952da11686bbaaf9224635e7d10ed38cbd0a2ed5212bba0d3e9cc5f81",
+    "ideas/rejected.md": "a7ce9703b93d6c1afd785b69d86d4d664573e0cd295826d4b72677c696c73fbf"
+  },
+  "release": {
+    "published_at": "2026-10-02T09:04:20Z",
+    "tag": "v1.7.3",
+    "url": "https://github.com/PRVTPRO/Amnezia-Web-Panel/releases/tag/v1.7.3"
+  },
+  "runtime_code_changed": false,
+  "schema": "phase16.upstream-intake-application.v1",
+  "seal": {
+    "access_apply": 0,
+    "app_actions": 0,
+    "database_open": 0,
+    "new_claim_absent": true,
+    "new_live_executed": false,
+    "new_ssh": 0,
+    "preview": {
+      "approval": "PHASE16_CANDIDATE_PRIVATE_SEAL_20261004_001",
+      "manifest_sha256": "159403f3fd32c4923f133889c821aeec5b344062867593b22a2482589017340d",
+      "permission_syscalls_max": 2,
+      "remote_seconds": 180,
+      "remote_sha256": "83c479674a332896640ba7f732477a438d682de6520996a1ce6e9c45f87bc24e",
+      "ssh_attempts": 0,
+      "status": "OFFLINE_READY_NOT_EXECUTED",
+      "transport_seconds": 210
+    },
+    "service_actions": 0,
+    "stage_install": 0
+  },
+  "sources": [
+    {
+      "classification": "already_planned",
+      "decision": "P3_DEFER_AFTER_IMAGE_SOURCE_BINDING_AND_TRANSFER_QUEUE",
+      "merge_commit_sha": "40ebb7418659b5c8da40e0fe1507f2ba33dbd7ba",
+      "merged": true,
+      "merged_at": "2026-09-28T13:28:02Z",
+      "repository": "PRVTPRO/Amnezia-Web-Panel",
+      "url": "https://github.com/PRVTPRO/Amnezia-Web-Panel/pull/183"
+    },
+    {
+      "classification": "hybrid_only",
+      "decision": "HYB_AI_001_CRITERIA_ADDED_P2_AFTER_TARGET_CONTRACT",
+      "merge_commit_sha": "518f051ef51aed5b4ba57afa0670434a20753982",
+      "merged": true,
+      "merged_at": "2026-10-02T09:01:41Z",
+      "repository": "PRVTPRO/Amnezia-Web-Panel",
+      "url": "https://github.com/PRVTPRO/Amnezia-Web-Panel/pull/200"
+    }
+  ],
+  "status": "RECOMMENDATIONS_RECORDED_NOT_IMPLEMENTED_NOT_DEPLOYED",
+  "tests_changed": false,
+  "tests_rerun": false,
+  "timezone": "Europe/Moscow"
+}

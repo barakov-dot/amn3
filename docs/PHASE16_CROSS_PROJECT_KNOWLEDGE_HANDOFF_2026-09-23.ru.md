@@ -223,3 +223,24 @@ artifacts/consumed operations неизменны. Это целевой host-spe
 root-private дочерние stage остаются недоступны сервису до отдельного access apply.
 При новом target нужны проверенные layout/ownership/rollback и один poller; данные
 Spain и local PASS не принимают новую общую админку. Phase16 остаётся открытой.
+
+<a id="upstream-recommendations-2026-10-04"></a>
+
+### Принятые рекомендации upstream04.10 для следующей разработки
+
+Оператор разрешил применить рекомендации; [intake и exact sources](UPSTREAM_INTAKE.ru.md#upstream-intake-2026-10-04)
+сохраняют rationale/priority/contracts. Applied здесь означает требования и
+передаваемые знания; новая функциональность AMN2/админки не реализована этим шагом.
+
+| Получатель / требование | Следующий допустимый шаг |
+| --- | --- |
+| Генератор AWG3.1: до рендеринга проверить worst-case MTU budget с учётом S4/padding upper bound и выбранного transport | Существующий P3 после image/source binding и transfer queue; explicit MTU/insufficient budget и boundary tests, без изменения старых профилей |
+| Общая multi-server/protocol админка: связать request/response/cache с точным выбранным context; не принимать неполный snapshot за пустой список | Дополнен HYB-AI-001, hybrid-only P2 при проектировании после target contract; delayed/out-of-order и mixed/incomplete snapshot tests |
+| AWG3.1 receive-path: H1–H3/RandomTrailers | Существующий отдельный P2; сначала exact runtime/source contract, без переноса неподтверждённого issue-рецепта |
+
+AMN2 source6e68235 проверен clean; renderer/importer budget gap сохраняется,
+но параметры deployed peer и причина quality FAIL этим не определены. Код
+будущей админки не обследован; нельзя объявлять эти защиты отсутствующими у неё.
+При передаче разработчик сопоставляет требования с фактической реализацией и
+не копирует GPL-код или secret-bearing payloads. Цель переноса, M0f, отложенные
+клиентские проверки, AWG2/package016/general issuance прежние; новый seal не исполнен.
