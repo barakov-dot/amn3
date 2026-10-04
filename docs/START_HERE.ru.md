@@ -61,9 +61,15 @@ readback-guard22.09; exact live sibling names этим receipt не устано
 Подготовлен [отдельный исправленный packet](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-v2-2026-10-04):
 проверять root:root0700 directory/no links/no ACL каждого прямого соседа, max16;
 имена в новом private audit только SHA256. Frozen consumed v1 и57 original artifacts
-не меняются. Новый live требует отдельного checksum-bound approval. Общая админка формируется; target contract потребуется
-при реальном переносе. Дальше M0d по единственному плану; parent repair не равен
-интеграции/приёмке/переносу.
+не меняются. [V2 исполнен04.10](../research/amn2/phase16-bot-ancestor-repair-v2-execution-001-2026-10-04.json):
+SSH0/12.297s, parent root:61212/0710 verified/durable, два permission syscalls.
+Installed runtime content PASS:4621 files/2092 bytecode; candidate STOP/private_boundary.
+Child DAC/DB/app/services/install0, selected units сохранились, approval consumed.
+Push4d57e2d MATCH. Подготовлен [короткий read-only boundary packet](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-private-boundary-readback-2026-10-04):
+metadata четырёх объектов и pinned repair result; новый exact approval,45s/60s, без
+повтора heavy candidate/runtime. Общая админка формируется; target contract нужен
+при реальном переносе. Дальше M0e по единственному плану; parent/runtime PASS не
+равны допуску приложения, интеграции, приёмке или переносу.
 Windows и quality acceptance открыты, клиентские проверки отложены оператором.
 Сохранять исторические evidence, не повторять прежние diagnostics ради контекста.
 

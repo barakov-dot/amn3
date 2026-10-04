@@ -7,6 +7,30 @@
 
 ## 2026-10-04
 
+- По exact разрешению выполнены normal push4d57e2d при EXPECTED_OLD2410dea
+  (fresh ref MATCH, CHANGELOG1 commit/pre-push PASS, NO_FORCE/NO_TAGS/NO_OTHER_REFS)
+  и [v2 parent repair](research/amn2/phase16-bot-ancestor-repair-v2-execution-001-2026-10-04.json):
+  один SSH0/12.297s/stdin0/stdout2748 complete/stderr0, parent root:61212/0710
+  dev64770/ino262273 verified после двух held-FD permission syscalls, result durable.
+  Installed content впервые PASS_SITE_CONTENT_ONLY/runtime+bootstrap PASS:
+  4621files/2092bytecode, IMPORT_PATH_CONTENT; app/startup/access/admission не доказаны.
+  Candidate STOP access_plan/private_boundary, exact failed object не сообщён.
+  Child DAC/DB/app/services/install/activation/maintenance replay0; final guard
+  selected units/boot/NSS PASS, approval consumed once, no retry/rollback/cleanup.
+  Локальный writer допускает644 JSON при umask022; actual private metadata неизвестны.
+  Подготовлен [short readonly boundary packet](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-private-boundary-readback-2026-10-04):
+  metadata/ACL count четырёх fixed objects, held postrepair parent/stage, selected
+  units и pinned durable result hash; без contents/sibling listing/candidate rerun.
+  RED8→GREEN8; P2 helper-closure regression RED1→GREEN1, final9 PASS/0 SKIP
+  за279.056s; independent review PASS/openP0P1P2=0. Native metadata readback не выполнялся.
+  Frozen helpers/v2/actual trigger и original57 pinned, new claim/approval,
+  remote45s/transport60s/SSH1/stdin0. Local verification/review — [receipt](research/amn2/phase16-bot-private-boundary-readback-local-verification-2026-10-04.json).
+  New live NOT_EXECUTED; exact checksum approval/push разрешаются отдельно.
+  Навигация/единственный план/runbook/передача синхронизированы, M0d завершён по
+  parent/runtime и M0e остаётся. AWG2/package016/issuance и foreign ideas сохранены;
+  Windows/quality/client tests deferred, admin IN_FORMATION/target unspecified.
+  Integration/acceptance/transfer/Phase16 не закрыты.
+
 - По разрешению оператора на оба ранее конкретно предложенных действия выполнены
   normal push2410dea при EXPECTED_OLD6be4149 (fresh ref MATCH, CHANGELOG1 commit PASS,
   NO_FORCE/NO_TAGS/NO_OTHER_REFS) и [parent repair](research/amn2/phase16-bot-ancestor-repair-execution-001-2026-10-04.json):

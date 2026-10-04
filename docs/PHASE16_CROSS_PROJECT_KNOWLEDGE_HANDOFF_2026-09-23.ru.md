@@ -203,8 +203,13 @@ private top-level дочерних объектов, а имена катало�
 приватности. Подготовлен отдельный [v2](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-v2-2026-10-04):
 каждый непосредственный sibling root:root0700 directory/no links/no ACL, max16,
 retained root exact; unknown names только SHA256 keys в private audit. Desired
-parent root:61212/0710 и other guards/proof scope прежние; новый live NOT_EXECUTED,
-checksum approval необходим. Frozen v1 сохраняется, no replay. Child access plan не применяется; original57
+parent root:61212/0710 и other guards/proof scope прежние. [Actual v2 исполнен04.10](../research/amn2/phase16-bot-ancestor-repair-v2-execution-001-2026-10-04.json):
+SSH0/12.297s, parent verified/durable, два permission syscalls; installed runtime
+PASS_SITE_CONTENT_ONLY4621files/2092bytecode. Candidate access_plan STOP/private_boundary,
+exact объект не сообщён. Old selected units/boot/NSS final guard PASS, DB/app/services/
+child DAC/install0; approval consumed, push4d57e2d MATCH. Готов [short readonly packet](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-private-boundary-readback-2026-10-04)
+для metadata четырёх объектов и pinned durable repair result,45s/60s/SSH1, ещё не
+исполнен/не разрешён. Frozen v1/v2 сохраняются, no replay. Child access plan не применяется; original57
 artifacts/consumed operations неизменны. Это целевой host-specific fix, а не
 универсальная инструкция для нового VPS. Group traverse не даёт listing/write;
 root-private дочерние stage остаются недоступны сервису до отдельного access apply.

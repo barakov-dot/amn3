@@ -1,0 +1,104 @@
+{
+  "consumed_v2_gate": "UNCHANGED",
+  "date": "2026-10-04",
+  "docs": {
+    "added_local_links_checked": 18,
+    "readback": "PASS",
+    "utf8_secret_conflict_guard": "PASS",
+    "whitespace": "PASS"
+  },
+  "final_tests": {
+    "date": "2026-10-04",
+    "elapsed_seconds": 279.297,
+    "log_path": "C:/Users/SooL/Documents/VPS-OPS-LAB/worktrees/phase16-ancestor-repair-v2-executed-local-20261004/private-boundary-final-tests.log",
+    "log_sha256": "056b3b58f4099382111bb63ec87f7a1df6789a29cecc6730d85d6044e284de2e",
+    "returncode": 0,
+    "scope": "tests.test_phase16_bot_private_boundary_readback.BoundaryReadbackTests",
+    "ssh_attempts": 0,
+    "stdout_bytes": 1858,
+    "tests_failed": 0,
+    "tests_passed": 9,
+    "tests_skipped": 0
+  },
+  "frozen_consumed_helpers": "UNCHANGED",
+  "git": {
+    "foreign_diff_path": "ideas/candidates-for-amn2.md",
+    "foreign_diff_sha256": "8e42c81ded39a2fdeb8fb9bbd5e5b2980720191b2e8239c59fff6ef55012a977",
+    "head_before_record": "4d57e2d25f3b47a21679c798c4308e4656e2ed59",
+    "new_push_executed": false,
+    "remote_last_verified": "4d57e2d25f3b47a21679c798c4308e4656e2ed59"
+  },
+  "independent_review": {
+    "agent": "/root/review_candidate_diagnostic",
+    "date": "2026-10-04",
+    "independent_post_fix_regression_tests": 1,
+    "independent_pre_fix_seconds": 280.993,
+    "independent_pre_fix_tests": 27,
+    "limitations": [
+      "no SSH or live-state verification",
+      "documents not reviewed",
+      "root final suite remains separate"
+    ],
+    "new_claim": "ABSENT",
+    "open_p0": 0,
+    "open_p1": 0,
+    "open_p2": 0,
+    "original57": "UNCHANGED",
+    "resolved_p2": "embedded local readback helper source closure; explicit frozen five-helper checks before script",
+    "scope": [
+      "scripts/phase16_bot_private_boundary_readback.py",
+      "tests/test_phase16_bot_private_boundary_readback.py",
+      "research/amn2/phase16-bot-private-boundary-readback-manifest-2026-10-04.json",
+      "research/amn2/phase16-bot-ancestor-repair-v2-execution-001-2026-10-04.json"
+    ],
+    "status": "PASS"
+  },
+  "initial_green": {
+    "log_sha256": "6b8f6223ac17885fe369a995dbdc6232e647e0aa53666ad9396c1b32bc9fe29d",
+    "seconds": 283.385,
+    "tests": 8
+  },
+  "limitations": [
+    "portable Unix metadata tests; native readback not yet performed",
+    "actual failed private boundary object and mode not yet reported",
+    "local content verification is not service admission or Phase16 acceptance",
+    "client checks deferred; future admin in formation and exact target unspecified"
+  ],
+  "new_claim_absent": true,
+  "new_live_executed": false,
+  "original57": "UNCHANGED",
+  "preview": {
+    "approval": "PHASE16_CANDIDATE_PRIVATE_BOUNDARY_READBACK_20261004_001",
+    "manifest_sha256": "3d6b3ad57c277bdf351656f76aeda014cdb465838b98c7282e5988439216be27",
+    "permission_syscalls": 0,
+    "remote_file_writes": 0,
+    "remote_seconds": 45,
+    "remote_sha256": "a51506df092cba141c77c0659c7606a126b36b91af67bb86f1d426a40e7064fe",
+    "ssh_attempts": 0,
+    "status": "OFFLINE_READY_NOT_EXECUTED",
+    "transport_seconds": 60
+  },
+  "red": {
+    "new_tests": 8,
+    "result": "8 failures while module absent; tool output retained in chat",
+    "review_regression": "1 failure ValueError not raised then 1 PASS"
+  },
+  "schema": "phase16.private-boundary-readback-local-verification.v1",
+  "scope": {
+    "activation": false,
+    "app_imports": 0,
+    "database_open": 0,
+    "original_maintenance_replay": false,
+    "permissions": 0,
+    "remote_writes": 0,
+    "service_actions": 0,
+    "ssh_attempts": 0,
+    "stage_install": 0
+  },
+  "source_sha256_lf": {
+    "scripts/phase16_bot_private_boundary_readback.py": "58caae4e7e11a9d5defbb733af537078794287547d480b2ec33888fd81bb6551",
+    "tests/test_phase16_bot_private_boundary_readback.py": "4afe9b9e4fe51a7e202f7972df49205da89ac367decdd38f129e15b1b4c2b427"
+  },
+  "status": "OFFLINE_READY_NOT_EXECUTED",
+  "trigger_execution_sha256_lf": "1f7aff1633b76897422416ce3f9d22e2f40e14db226be2b1f8f2ba668692b42a"
+}

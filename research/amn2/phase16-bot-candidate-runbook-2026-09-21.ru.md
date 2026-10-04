@@ -2271,7 +2271,7 @@ fixture и полный состав parent этим receipt не доказан
 
 <a id="candidate-ancestor-repair-v2-2026-10-04"></a>
 
-## Separate corrected parent repair — LOCAL_READY_NOT_EXECUTED04.10
+## Separate corrected parent repair — подготовка04.10, actual execution ниже
 
 [Gate v2](../../scripts/phase16_bot_ancestor_repair_v2_gate.py),
 [manifest](phase16-bot-ancestor-repair-v2-manifest-2026-10-04.json),
@@ -2313,7 +2313,79 @@ checksum/state approval, same private siblings/stage сначала parent700, �
 Локально:9 новых scoped tests (включая actual authenticated launcher Windows
 closed platform) PASS; final60 PASS/0 SKIP вместе с v1 core/gate, original stage
 access policy/candidate composition. Independent review PASS/openP0P1P2=0.
-New v2 claim absent, SSH0; native Linux v2 apply не выполнялся. Exact manifest SHA256
+При завершении этой локальной подготовки v2 claim absent, SSH0; native Linux v2 apply
+тогда не выполнялся. Позднейший actual execution ниже. Exact manifest SHA256
 `4cb6515c4dca0f544313e4cad0c14524b79c87cffd96b9d1beab1396efebccfd`, remote SHA256
 `351ec05bb64864cc276aeb6b24e499253f4c91a9f463621ab97204a6fe2944e8`. Прежний51 PASS и consumed v1 execution
 сохранены отдельно; новый local PASS не является parent repair или host admission.
+
+<a id="candidate-ancestor-repair-v2-executed-2026-10-04"></a>
+
+## Actual v2 parent repair — исполнен04.10
+
+[Execution](phase16-bot-ancestor-repair-v2-execution-001-2026-10-04.json): exact approval
+`PHASE16_CANDIDATE_ANCESTOR_REPAIR_20261004_002`, claim07:07:57.857835 UTC
+(10:07:57 Москва), один SSH0/12.297s/stdin0/stdout2748 complete/stderr0.
+Normal push4d57e2d при EXPECTED_OLD2410dea MATCH, CHANGELOG1 commit/pre-push PASS.
+Parent `/opt/amn2-spain/bot-candidates` root:61212/0710, dev64770/ino262273,
+mtime_ns1790710142771192272/ctime_ns1791097680895640617; held-FD fchown/fchmod2,
+final parent verified и root-private result durable. Raw private sibling names
+не выводились; siblings/stage metadata continuity и final unit/boot/NSS guard прошли.
+Child DAC/app/DB/services/install/activation/maintenance replay0, approval consumed,
+no automatic retry/rollback/cleanup. Новый parent state сохраняется; прежний700
+witness теперь исторический и не служит preimage следующего repair.
+
+Installed verifier достигнут: runtime/bootstrap PASS, scopeIMPORT_PATH_CONTENT,
+statusPASS_SITE_CONTENT_ONLY, verified_files4621/verified_bytecode2092. Telemetry
+reasonUNCLASSIFIED_ERROR отражает mapping legacy reason allowlist; эти PASS не являются
+runtime STOP. Это content proof, не app import/startup, service access или admission.
+Candidate STOP/candidate_collection_failed, inner access_plan/AccessError/private_boundary;
+plan не построен/не применён. Bootstrap/settings/identity/catalog/venv/stage observation
+достигнуты/PASS. Точный object/mode предыдущий collector не вывел.
+
+Frozen [policy](../../scripts/phase16_bot_stage_access.py) проверяет четыре объекта:
+claim.json/result.json как regular files и payload/scratch как directories; root owner,
+без опасных writable/special bits/links и с private mode (group/other bits0).
+Root stage0700 сохраняется, поэтому parent traverse ещё не раскрывает эти children.
+В [writer](../../scripts/vps/phase16_bot_runtime40_stage_remote.py) JSON создаётся через
+open('x') без явного0600; при umask022 это644, что воспроизводится portable policy
+fixture. Actual umask/режим конкретного файла и root cause на VPS этим не измерены.
+Не ослаблять private_boundary ради PASS и не править57 consumed artifacts.
+
+<a id="candidate-private-boundary-readback-2026-10-04"></a>
+
+## Short private-boundary readback — LOCAL_READY_NOT_EXECUTED04.10
+
+[Gate](../../scripts/phase16_bot_private_boundary_readback.py),
+[manifest](phase16-bot-private-boundary-readback-manifest-2026-10-04.json),
+[local verification](phase16-bot-private-boundary-readback-local-verification-2026-10-04.json).
+New approval `PHASE16_CANDIDATE_PRIVATE_BOUNDARY_READBACK_20261004_001`.
+Вопрос: какие из всех четырёх объектов нарушают private mode/type/ACL boundary?
+Только fixed metadata (mode/uid/gid/dev/inode/size/nlink/mtime/ctime), ACL count/clear,
+без ACL names/values и без содержимого этих объектов; нет sibling listing/content.
+Дополнительно held stage root/pinned postrepair parent, fixed bot/web/coordinator
+selected properties до/после и один root:root0600 repair result (479bytes), hash
+`2431ea8e2adce727d0974acb14f81675462c976f1d4c6b3fddcbc9317e64e91d`.
+Frozen OS/root bootstrap аутентифицирует original55 source/resources; manifest
+сохраняет57 original artifacts, five frozen helpers (v1 core/gate/manifest, readback,
+diagnostic), v2 gate и actual trigger execution pins.
+
+Metadata snapshot выдаётся только при unchanged stage/parent/boot/units/journal;
+unsafe ownership/writable/special bits/link/type/FD drift/unsupported reads →
+UNKNOWN_NO_RETRY, не permission proof. Читаемый644 regular file допускается только
+как диагностическое observation и входит в blocked_objects. ACL values/names не
+выводятся; непустая ACL отражается acl_count/clear и private=false. Это не access
+plan и не admission. Default preview zero-egress; separate exclusive local claim
+перед transport, durable result finally; после любой попытки новый approval consumed.
+
+Remote45s/transport60s/SSH1/stdin0/output64KiB. Candidate/runtime full verify не
+повторяется; remote writes/permissions/DB/app/services/upload/install/maintenance/
+Telegram/issuance0. Old maintenance window не продлевается. Любая будущая seal/fix
+или access apply — отдельный state/checksum-bound пакет; current action read-only.
+Точные SHA256 и результаты local/review находятся в verification receipt; новый
+SSH ещё не выполнен, локальная подготовка не доказывает live boundary metadata.
+
+Local final9 PASS/0 SKIP за279.056s;8 новых RED→GREEN, helper closure regression
+RED1→GREEN1 и independent review PASS/openP0P1P2=0. Current exact manifest SHA256
+`3d6b3ad57c277bdf351656f76aeda014cdb465838b98c7282e5988439216be27`, remote SHA256
+`a51506df092cba141c77c0659c7606a126b36b91af67bb86f1d426a40e7064fe`. Approval не получен/не consumed; claim absent, SSH0.

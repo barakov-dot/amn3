@@ -1,0 +1,258 @@
+{
+  "approval_consumed": true,
+  "authorization": {
+    "approval": "PHASE16_CANDIDATE_ANCESTOR_REPAIR_20261004_002",
+    "date": "2026-10-04",
+    "manifest_sha256": "4cb6515c4dca0f544313e4cad0c14524b79c87cffd96b9d1beab1396efebccfd",
+    "remote_seconds": 180,
+    "remote_sha256": "351ec05bb64864cc276aeb6b24e499253f4c91a9f463621ab97204a6fe2944e8",
+    "source": "operator exact current message",
+    "ssh_attempts": 1,
+    "transport_seconds": 210
+  },
+  "date": "2026-10-04",
+  "interpretation": {
+    "activation": false,
+    "app_imports": 0,
+    "automatic_retry": false,
+    "candidate_reason": "access_plan/private_boundary",
+    "candidate_status": "STOP",
+    "child_permissions_changed": false,
+    "database_open": 0,
+    "exact_failed_private_object": "NOT_REPORTED",
+    "original_maintenance_replayed": false,
+    "parent_gid": 61212,
+    "parent_mode_octal": "0710",
+    "parent_repaired": true,
+    "parent_uid": 0,
+    "permission_syscalls_completed": 2,
+    "post_apply_service_state": "selected states equal pinned witness by final remote guard; no service mutation",
+    "private_boundaries_unchanged": true,
+    "remote_coordinator_status_field": "generic transport label; not live coordinator evidence",
+    "result_durable": true,
+    "runtime_installed_status": "PASS_SITE_CONTENT_ONLY",
+    "runtime_reason": "UNCLASSIFIED_ERROR is legacy telemetry reason mapping; PASS statuses are authoritative, not a runtime failure",
+    "runtime_scope": "IMPORT_PATH_CONTENT",
+    "service_actions": 0,
+    "stage": "parent traverse repaired; runtime content verified; child private boundary prevents access plan; not host admission",
+    "stage_install": 0,
+    "verified_bytecode": 2092,
+    "verified_files": 4621
+  },
+  "local_result": {
+    "claim": {
+      "approval": "PHASE16_CANDIDATE_ANCESTOR_REPAIR_20261004_002",
+      "attempts": 1,
+      "claimed_at": "2026-10-04T07:07:57.857835+00:00",
+      "manifest_sha256": "4cb6515c4dca0f544313e4cad0c14524b79c87cffd96b9d1beab1396efebccfd",
+      "remote_sha256": "351ec05bb64864cc276aeb6b24e499253f4c91a9f463621ab97204a6fe2944e8"
+    },
+    "receipt": {
+      "activation": false,
+      "app_imports": 0,
+      "approval": "PHASE16_CANDIDATE_ANCESTOR_REPAIR_20261004_002",
+      "audit_creation_attempted": true,
+      "component_steps": {
+        "access_plan": {
+          "calls": 1,
+          "exception_kind": "AccessError",
+          "reason": "private_boundary",
+          "returned_status": null,
+          "status": "STOP"
+        },
+        "bootstrap": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "catalog": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "collection": {
+          "calls": 1,
+          "exception_kind": "AdmissionError",
+          "reason": "candidate_collection_failed",
+          "returned_status": null,
+          "status": "STOP"
+        },
+        "identity": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "nss_groups": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "readonly_command": {
+          "calls": 26,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "runtime_expected": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "secure_file_read": {
+          "calls": 4907,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "secure_tree_open": {
+          "calls": 4,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "settings": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "settings_file_read": {
+          "calls": 5,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        },
+        "stage_observation": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": "VERIFIED",
+          "status": "PASS"
+        },
+        "venv": {
+          "calls": 1,
+          "exception_kind": null,
+          "reason": null,
+          "returned_status": null,
+          "status": "PASS"
+        }
+      },
+      "database_open": 0,
+      "operation": {
+        "candidate": {
+          "plan_objects": 0,
+          "plan_sha256": null,
+          "plan_status": null,
+          "proof_status": null,
+          "reason": "candidate_collection_failed",
+          "status": "STOP"
+        },
+        "completed_syscalls": 2,
+        "parent_after": {
+          "ctime_ns": 1791097680895640617,
+          "device": 64770,
+          "gid": 61212,
+          "inode": 262273,
+          "mode": 456,
+          "mtime_ns": 1790710142771192272,
+          "uid": 0
+        },
+        "parent_verified": true,
+        "permission_attempted": true,
+        "reason": "bounded_parent_change_candidate_readonly",
+        "result_durable": true,
+        "status": "PARENT_REPAIRED_CANDIDATE_CHECKED"
+      },
+      "original_manifest_sha256": "431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff",
+      "reason": "bounded_parent_change_candidate_readonly",
+      "replay_allowed": false,
+      "runtime_installed": {
+        "bootstrap_status": "PASS",
+        "reason": "UNCLASSIFIED_ERROR",
+        "runtime_status": "PASS",
+        "scope": "IMPORT_PATH_CONTENT",
+        "status": "PASS_SITE_CONTENT_ONLY",
+        "verified_bytecode": 2092,
+        "verified_files": 4621
+      },
+      "schema": "phase16.ancestor-repair.v1",
+      "service_actions": 0,
+      "stage_install": 0,
+      "status": "PARENT_REPAIRED_CANDIDATE_CHECKED",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6"
+    },
+    "replay_allowed": false,
+    "schema": "phase16.ancestor-repair-v2-local.v1",
+    "status": "PARENT_REPAIRED_CANDIDATE_CHECKED",
+    "transport": {
+      "automatic_retry": false,
+      "elapsed_seconds": 12.297,
+      "failure_stage": null,
+      "last_stdin_progress_seconds": null,
+      "local_child_reaped": true,
+      "output_complete": true,
+      "pipe_failures": [],
+      "remote_coordinator_status": "UNKNOWN_MAY_CONTINUE",
+      "replay_allowed": false,
+      "returncode": 0,
+      "schema": "phase16.bot-maintenance-transport.v1",
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_diagnostic": {
+        "hints": [],
+        "output_cap_hit": false,
+        "root_cause": "NOT_ESTABLISHED",
+        "status": "EMPTY",
+        "utf8_valid": true
+      },
+      "stdin_bytes_accepted": 0,
+      "stdin_bytes_requested": 0,
+      "stdin_complete": true,
+      "stdout": {
+        "bytes_observed": 2748,
+        "bytes_retained": 2748,
+        "prefix_sha256": "2bcf1f7b13094a7744b47aef5f944638826582dc6bfa2a9d5c80825a4535e19d"
+      },
+      "termination_action": "NONE",
+      "termination_scope": "LOCAL_TRANSPORT_ONLY"
+    }
+  },
+  "push": {
+    "attempted_at": "2026-10-04T07:07:22.197321+00:00",
+    "attempts": 1,
+    "expected_old": "2410dea497c5a059d2a082e29b26af141ca7b946",
+    "head": "4d57e2d25f3b47a21679c798c4308e4656e2ed59",
+    "no_force": true,
+    "no_other_refs": true,
+    "no_tags": true,
+    "origin": "https://github.com/barakov-dot/amn3.git",
+    "ref": "refs/heads/codex/phase16-awg3-family-3-1-spain-pilot-016",
+    "remote_after": "4d57e2d25f3b47a21679c798c4308e4656e2ed59",
+    "remote_before": "2410dea497c5a059d2a082e29b26af141ca7b946",
+    "returncode": 0,
+    "schema": "phase16.exact-push.v1",
+    "status": "MATCH",
+    "stderr": "To https://github.com/barakov-dot/amn3.git\n   2410dea4..4d57e2d2  4d57e2d25f3b47a21679c798c4308e4656e2ed59 -> codex/phase16-awg3-family-3-1-spain-pilot-016\n",
+    "stdout": "4d57e2d25f3b: PASS: changed dated changelog record.\nChecked 1 commit(s) after policy introduction.\n"
+  },
+  "schema": "phase16.ancestor-repair-v2-execution.v1",
+  "status": "PARENT_REPAIRED_CANDIDATE_CHECKED"
+}
