@@ -1,0 +1,385 @@
+{
+  "schema": "phase16.transfer-source-review.v1",
+  "status": "SOURCE_SIDE_REVIEW_COMPLETE_TARGET_PENDING",
+  "reviewed_at": "2026-10-04T10:38:03.804196+00:00",
+  "amn3_base": "373e3a1a8c80da51d15481b2ca4c7708e8ffa96f",
+  "amn2_source": "6e682356ed14a62d636ee58039fd3a389e794809",
+  "amn2_worktree_clean": true,
+  "source_inspection": "static selected declarations and call paths; no application imports or database connections",
+  "pinned_source_files": {
+    "pyproject.toml": {
+      "sha256_git_blob": "263ca4ff312d63c3c97036effb99206e18284eb24af2f9035b6bd7695b0fa003",
+      "git_blob_oid": "58491ba01a2e25d0c4205c930365fdfce0a36aa5"
+    },
+    "app/db/schema.py": {
+      "sha256_git_blob": "45105b725e22a9cdbbc07bf440502b1738134f7f2ce875b45bb27aeace7266f1",
+      "git_blob_oid": "81431c2959b9c799e20e56594370382c739162e0"
+    },
+    "app/db/connection.py": {
+      "sha256_git_blob": "74b006509febb2dcf016aaccbdc5242d7338394d23805d2d77001a2696349676",
+      "git_blob_oid": "e9bc1e058164d6518653b5c6d268b49db5f9af17"
+    },
+    "app/db/phase14_dual_protocol.py": {
+      "sha256_git_blob": "85f84dda68d77fd91805fe80b6b161d2971ec206c6a0db3895cf11873e9be1d2",
+      "git_blob_oid": "b3015d4c7b52bfd0f0e01d052a6db697974f2d7f"
+    },
+    "app/db/phase15_bootstrap.py": {
+      "sha256_git_blob": "76a4f579a39e94e4360abeb894f820321c11e16f0e971ce37de8e4e737a989a9",
+      "git_blob_oid": "44b5e4e889ed91b6995bfb7facd271e6abba6ec1"
+    },
+    "app/backup/service.py": {
+      "sha256_git_blob": "8d8ca943dd46591429ee1e21121d00235a8d3fb0b82ee93aca00aae48417f4c6",
+      "git_blob_oid": "47f7142d576bc8f8345ba6d42c987ef731408c1b"
+    },
+    "app/backup/manifest.py": {
+      "sha256_git_blob": "dc78712dd926d9ef08320d3ad4f7f71e3da47b1fdb293eb8140c398248f0f648",
+      "git_blob_oid": "c9b288b4fec73dbda50426fab8ec646c7490b3a7"
+    },
+    "app/backup/storage.py": {
+      "sha256_git_blob": "6bbbb6d708350c9ff85b0c4347ce966cf27d4984a155d3318986cd5f0f9dc7c9",
+      "git_blob_oid": "72bbadf98a730a3fba0544577cd7d258bea130d9"
+    },
+    "app/security/crypto.py": {
+      "sha256_git_blob": "5b8edb44d055ec46aaccccebe9a25a4a6b9c1b5f5a69830b2a374c9ad276f17c",
+      "git_blob_oid": "b91cc2d951c5560779af5a2eea7f3b845528f9d9"
+    },
+    "app/migration/bot_web.py": {
+      "sha256_git_blob": "5e8821badc76e95790473ffe7ecd4dc0d7489c2e1e8b1a03405e8bca1df6a00e",
+      "git_blob_oid": "bec91bcc11c4e20eaf168ff543d30aa1cc5e3d33"
+    },
+    "app/main.py": {
+      "sha256_git_blob": "c83059bbf43c44a6fea1b1f96179a336376c9952c7a13a6111734f7bfeb3f4d8",
+      "git_blob_oid": "16f79d9dc9e4cb985598c3730da1218a05ac1505"
+    },
+    "app/web/app.py": {
+      "sha256_git_blob": "42c8547525879f9b62924022e2929ad559b8a168dc8b2ac8143580f001c67062",
+      "git_blob_oid": "1d7ac9b2b7ffc77bc45cd9d44453b63c09cc9281"
+    },
+    "app/bot/persistent_runtime.py": {
+      "sha256_git_blob": "f400fe8fda673ca6976b698365a591cec3a373c4284721a39aef935df16c5a31",
+      "git_blob_oid": "0e8a1d0396933764bb68d8a3ae054b927b21262d"
+    },
+    "app/vpn/protocol_versions.py": {
+      "sha256_git_blob": "0caa426ff28630c2d9499c0899486e1efa0ed9d7df895187ce84d34997b532c3",
+      "git_blob_oid": "5a639b0ba0d6851469e3983363e7c117439033ff"
+    },
+    "app/config/settings.py": {
+      "sha256_git_blob": "6cb3ef9889422dc4d229ef90a5c558ddd100290253b77a8a6525f91676f5b9fe",
+      "git_blob_oid": "46bd0c1c1a2a59c88647614126605d7b861ba5eb"
+    },
+    "deploy/runtime/manifest.yml": {
+      "sha256_git_blob": "9fd539c8ace44f191f6280402dd9f68884f214b0f9b58f67a8116bca95e2c98f",
+      "git_blob_oid": "503ab24b07f50953ae78f94ee5cc2e9c2a918d74"
+    },
+    "deploy/systemd/amneziya-bot.service.example": {
+      "sha256_git_blob": "e0c6706b030775c9731cf3fc3a055cae88512cf470bf2d6bfabdacd7f2f5f694",
+      "git_blob_oid": "042ccb97e81e2f5e79edab1134e401d064e5c2ce"
+    },
+    "deploy/systemd/amneziya-web.service.example": {
+      "sha256_git_blob": "28e07d78ed1d9e95eb8c86d76be11ac47e7f9394ecc7b6489de9c90d84659d77",
+      "git_blob_oid": "26c43649196bbf08e71dcf4ff34308213eebc383"
+    },
+    "tests/backup/test_backup_service.py": {
+      "sha256_git_blob": "23b6ccfc67ca31466dccad6b654b5b0230af16178de301dc76d2544dfcfc54fb",
+      "git_blob_oid": "9918ea4c8b31abab199dc3fde1ad34a5ac438c1d"
+    },
+    "tests/migration/test_bot_web.py": {
+      "sha256_git_blob": "9b92927005f6054de9327aa129df19b2fdf461de1fca0e5722cf51ae121fda79",
+      "git_blob_oid": "7ffa28f45074012db56dd3c7f0c1d3a9c7ebd0dd"
+    }
+  },
+  "source_symbols": {
+    "app/backup/service.py": {
+      "create": {
+        "start": 89,
+        "end": 107
+      },
+      "verify": {
+        "start": 109,
+        "end": 114
+      },
+      "restore": {
+        "start": 116,
+        "end": 134
+      },
+      "_build_archive": {
+        "start": 136,
+        "end": 152
+      },
+      "_validate_active_device_rows": {
+        "start": 233,
+        "end": 256
+      },
+      "_validate_device_secrets": {
+        "start": 289,
+        "end": 308
+      }
+    },
+    "app/migration/bot_web.py": {
+      "apply_bot_web_migration_to_copy": {
+        "start": 352,
+        "end": 380
+      },
+      "_apply_rows": {
+        "start": 489,
+        "end": 614
+      },
+      "default": {
+        "start": 26,
+        "end": 55
+      }
+    },
+    "app/main.py": {
+      "run_persistent_bot": {
+        "start": 91,
+        "end": 240
+      },
+      "create_workflow": {
+        "start": 391,
+        "end": 490
+      }
+    },
+    "app/web/app.py": {
+      "_open_repository": {
+        "start": 2254,
+        "end": 2260
+      }
+    },
+    "app/bot/persistent_runtime.py": {
+      "PersistentBotInstanceLock": {
+        "start": 51,
+        "end": 92
+      }
+    }
+  },
+  "declared_tables": {
+    "users": {
+      "file": "app/db/schema.py",
+      "line": 10
+    },
+    "servers": {
+      "file": "app/db/schema.py",
+      "line": 28
+    },
+    "server_health_checks": {
+      "file": "app/db/schema.py",
+      "line": 49
+    },
+    "vpn_runtime_instances": {
+      "file": "app/db/schema.py",
+      "line": 63
+    },
+    "client_compatibility_evidence": {
+      "file": "app/db/schema.py",
+      "line": 91
+    },
+    "plans": {
+      "file": "app/db/schema.py",
+      "line": 109
+    },
+    "devices": {
+      "file": "app/db/schema.py",
+      "line": 122
+    },
+    "device_passports": {
+      "file": "app/db/schema.py",
+      "line": 171
+    },
+    "device_enrollment_tickets": {
+      "file": "app/db/schema.py",
+      "line": 196
+    },
+    "device_lifecycle_events": {
+      "file": "app/db/schema.py",
+      "line": 216
+    },
+    "orders": {
+      "file": "app/db/schema.py",
+      "line": 257
+    },
+    "admin_actions": {
+      "file": "app/db/schema.py",
+      "line": 282
+    },
+    "admin_config_issuance_requests": {
+      "file": "app/db/schema.py",
+      "line": 294
+    },
+    "admin_config_issuance_receipts": {
+      "file": "app/db/schema.py",
+      "line": 303
+    },
+    "access_slot_assignment_requests": {
+      "file": "app/db/schema.py",
+      "line": 348
+    },
+    "device_traffic_snapshots": {
+      "file": "app/db/schema.py",
+      "line": 358
+    },
+    "message_templates": {
+      "file": "app/db/schema.py",
+      "line": 371
+    },
+    "email_recovery_tokens": {
+      "file": "app/db/schema.py",
+      "line": 377
+    },
+    "api_tokens": {
+      "file": "app/db/schema.py",
+      "line": 392
+    },
+    "legacy_migration_records": {
+      "file": "app/db/schema.py",
+      "line": 411
+    },
+    "ignored_remote_peers": {
+      "file": "app/db/schema.py",
+      "line": 424
+    },
+    "awg3_control_state": {
+      "file": "app/db/phase14_dual_protocol.py",
+      "line": 5
+    },
+    "client_build_acceptances": {
+      "file": "app/db/phase14_dual_protocol.py",
+      "line": 19
+    },
+    "device_protocol_profiles": {
+      "file": "app/db/phase14_dual_protocol.py",
+      "line": 38
+    },
+    "protocol_config_events": {
+      "file": "app/db/phase14_dual_protocol.py",
+      "line": 56
+    },
+    "protocol_issuance_attempts": {
+      "file": "app/db/phase14_dual_protocol.py",
+      "line": 69
+    },
+    "protocol_issuance_user_barriers": {
+      "file": "app/db/phase14_dual_protocol.py",
+      "line": 103
+    },
+    "telegram_callback_handles": {
+      "file": "app/db/phase15_bootstrap.py",
+      "line": 49
+    },
+    "protocol_issuance_confirmations": {
+      "file": "app/db/phase15_bootstrap.py",
+      "line": 91
+    }
+  },
+  "table_groups": {
+    "identity_and_business": [
+      "users",
+      "plans",
+      "orders",
+      "message_templates"
+    ],
+    "devices_and_ownership": [
+      "devices",
+      "device_passports"
+    ],
+    "server_and_runtime_context": [
+      "servers",
+      "server_health_checks",
+      "vpn_runtime_instances",
+      "client_compatibility_evidence",
+      "ignored_remote_peers"
+    ],
+    "history_and_telemetry": [
+      "admin_actions",
+      "device_traffic_snapshots",
+      "device_lifecycle_events"
+    ],
+    "idempotency_and_assignment": [
+      "admin_config_issuance_requests",
+      "admin_config_issuance_receipts",
+      "access_slot_assignment_requests",
+      "legacy_migration_records"
+    ],
+    "authentication_and_enrollment": [
+      "email_recovery_tokens",
+      "api_tokens",
+      "device_enrollment_tickets"
+    ],
+    "protocol_state": [
+      "awg3_control_state",
+      "client_build_acceptances",
+      "device_protocol_profiles",
+      "protocol_config_events",
+      "protocol_issuance_attempts",
+      "protocol_issuance_user_barriers"
+    ],
+    "telegram_transient_state": [
+      "telegram_callback_handles",
+      "protocol_issuance_confirmations"
+    ]
+  },
+  "coverage": {
+    "pinned_files": 20,
+    "declared_tables": 29,
+    "mapped_tables": 29,
+    "temporary_rebuild_tables_excluded": true,
+    "live_schema_verified": false
+  },
+  "findings": {
+    "python": ">=3.12,<3.13; target OS/architecture/ABI still unspecified",
+    "backup_scope": "database.sqlite3 + manifest.json; not source/runtime/server configuration or external tokens",
+    "backup_key": "archive and available device ciphertext depend on APP_SECRET_KEY; never regenerate blindly when preserving ciphertext",
+    "backup_consistency": "create hashes main DB file then reads it again; no SQLite backup API or WAL capture in this method; consistent snapshot prerequisite remains external",
+    "verify_boundary": "verify validates archive/manifest/checksum; restore additionally validates selected database state",
+    "restore_expiry_boundary": "active/pending rows require nonempty expires_at; schema allows indefinite rows with NULL expires_at; target data applicability unverified, not a live failure claim",
+    "phase13_migration": "copy-only legacy-history merge; imported devices revoked/external_only with unavailable key placeholders; not active VPN migration",
+    "startup": "bot initializes schema and seeds default plans/server; web repository path initializes schema; not read-only data checks",
+    "single_poller": "runtime lock is a local file lock, not cross-host ownership proof",
+    "protocols": "AWG2/AWG3 only, active AWG3 config revision 3.1; no generic multi-protocol adapter proved"
+  },
+  "target_contract": {
+    "target": "UNSPECIFIED",
+    "admin": "IN_FORMATION",
+    "migration_scope": "OPERATOR_ANSWER_PENDING",
+    "data_retention_and_ownership": "UNDECIDED",
+    "migration_method": "NOT_SELECTED",
+    "m1_complete": false,
+    "m2_complete": false
+  },
+  "previous_push": {
+    "head": "373e3a1a8c80da51d15481b2ca4c7708e8ffa96f",
+    "expected_old": "a93b785049c9dad94f52bb94d21d7527df8c9721",
+    "ref": "refs/heads/codex/phase16-awg3-family-3-1-spain-pilot-016",
+    "remote_after": "373e3a1a8c80da51d15481b2ca4c7708e8ffa96f",
+    "status": "MATCH"
+  },
+  "constraints": {
+    "ssh": 0,
+    "application_imports": 0,
+    "database_opens": 0,
+    "backup_export_import": 0,
+    "source_mutations": 0,
+    "package_build": 0,
+    "service_actions": 0,
+    "installation": 0,
+    "other_project_inspection": 0,
+    "awg2_package016_issuance_unchanged": true,
+    "client_retests_deferred": true,
+    "no_live_readiness_or_phase_completion_claim": true
+  },
+  "verification": {
+    "source_head_and_clean_tree": "PASS",
+    "pinned_blobs_equal_worktree": "PASS",
+    "static_table_group_coverage": "29/29",
+    "docs_qa": {
+      "readback": "PASS",
+      "links": "PASS",
+      "added_local_links": 6,
+      "whitespace": "PASS",
+      "secret_conflict_utf8_guard": "PASS",
+      "changelog_semantics": "REVIEWED_SAME_COMMIT",
+      "source_symbols_and_table_lines": "PASS"
+    },
+    "tests_executed": false,
+    "foreign_diff": "UNCHANGED"
+  }
+}

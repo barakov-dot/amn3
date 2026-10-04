@@ -7,6 +7,23 @@
 
 ## 2026-10-04
 
+- Продолжена разрешённая локальная подготовка переноса после публикации
+  `373e3a1` (exact remote MATCH, pre-push PASS). В существующей
+  [базе передачи](docs/PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#source-transfer-contract-2026-10-04)
+  зафиксирована исходная сторона M1/M2 по чистому AMN2 `6e68235`: 20 pinned
+  файлов, карта всех 29 объявленных таблиц, фактические границы backup/restore,
+  APP_SECRET_KEY, Phase13 copy-only history import, startup writes и local bot lock.
+  Исторический backup-policy другой ветки отделён от текущей реализации;
+  согласованность snapshot и restore для indefinite rows требуют целевой проверки.
+  [Статический receipt](research/amn2/phase16-transfer-source-review-2026-10-04.json)
+  не доказывает live schema или migration acceptance. Граница переноса запрошена,
+  target/data ownership неизвестны; M1/M2 остаются открытыми. Единственный план
+  обновлён без нового gate. Проверки: source/blob equality, table coverage 29/29,
+  docs readback/links/diff/whitespace; тесты кода не повторялись. SSH, DB open,
+  app imports, backup/export/import, package build, service/install и source edits: 0.
+  AWG2/package016/issuance/client deferral и чужие 58 строк сохранены. Новый push
+  требует отдельного exact разрешения.
+
 - По exact разрешению выполнены normal pusha93b785 при EXPECTED_OLDdce10e0
   (fresh ref MATCH, CHANGELOG2 commits/pre-push PASS, NO_FORCE/NO_TAGS/NO_OTHER_REFS)
   и [private seal](research/amn2/phase16-bot-private-seal-execution-001-2026-10-04.json):

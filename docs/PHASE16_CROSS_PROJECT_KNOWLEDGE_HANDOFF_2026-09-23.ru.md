@@ -269,3 +269,63 @@ recovery/rollback, один Telegram poller и client acceptance. Старые S
 paths/UID/claims не переназначаются на новый host. Клиентские проверки отложены;
 AWG2/package016/issuance и прочие stages сохранены. Интеграция, перенос и Phase16
 ещё не приняты; новая установка на Spain не требуется автоматически.
+
+<a id="source-transfer-contract-2026-10-04"></a>
+
+### Исходная сторона контракта переноса — проверено 04.10
+
+После публикации результата M0f (`373e3a1`, exact remote readback MATCH)
+выполнена статическая сверка AMN2 `6e68235`: checkout чистый, 20 исходных файлов
+привязаны к Git blobs в [receipt](../research/amn2/phase16-transfer-source-review-2026-10-04.json).
+Это подготовка исходной стороны M1/M2. Цель, состав переносимых данных и их
+владелец пока не определены; M1/M2 не объявляются завершёнными. Приложение не
+импортировалось, БД не открывалась, архивы и новые пакеты не создавались.
+
+#### Что может использовать принимающий разработчик
+
+| Область | Проверенный контракт исходника | Следствие для переноса |
+| --- | --- | --- |
+| Runtime | `pyproject.toml`: Python `>=3.12,<3.13`; Linux/systemd примеры bot/web, отдельный immutable runtime40 | Проверить OS/архитектуру/ABI адресата. Примеры unit и Spain paths не являются готовой конфигурацией нового host |
+| Протоколы | `app/vpn/protocol_versions.py`: AWG2/AWG3; активная ревизия AWG3 — 3.1 | Новый общий protocol manager требует сопоставления capabilities; другие протоколы этим кодом не реализованы |
+| Backup | `app/backup/service.py` и `manifest.py`: архив содержит только `database.sqlite3` и `manifest.json` | Не переносит приложение, runtime, файлы сервера, внешние токены и конфигурацию VPN-узла |
+| Ключ данных | `app/backup/storage.py`, `app/security/crypto.py`: архив и шифротексты устройств зависят от `APP_SECRET_KEY`; сам ключ исключён из архива | При сохранении шифротекстов нельзя просто заменить ключ новым. Сохранение ключа или отдельная перешифровка определяются целевым контрактом; значения только по secret handoff protocol |
+| Согласованность копии | `BackupService.create` сначала считает hash основного файла БД, затем читает его для архива; в этом методе нет SQLite backup API и захвата WAL | Нужна отдельно доказанная согласованная копия с учётом writers/journal. Наличие команды backup этого не доказывает; метод на живой БД не запускался |
+| Проверка восстановления | `verify` проверяет архив/manifest/checksum; `restore` дополнительно проверяет выбранные свойства БД | `verify` не заменяет репетицию восстановления. Restore требует `expires_at` у active/pending, хотя схема допускает indefinite с NULL: применимость к выбранным данным требуется проверить отдельно, live-дефект не установлен |
+| Мигратор Phase13 | `app/migration/bot_web.py`: merge истории только в `.copy.sqlite3`; импортированные устройства — revoked/external_only, рабочие ключи не переносятся | Нельзя использовать как перенос действующих VPN-подключений или как универсальный импорт новой админки |
+| Запуск приложения | Bot `create_workflow` вызывает `initialize_schema`, seed планов и default/server sync; web `_open_repository` тоже вызывает `initialize_schema` | Пробный запуск на целевой БД может её изменить. Нужны копия, выбранная startup policy и проверки результата до переключения |
+| Единственный bot owner | `PersistentBotInstanceLock` блокирует локальный файл | Локальный lock не исключает вторую копию на другом host; перед cutover нужны отдельные stop/drain/start и доказательство одного poller |
+
+Старый [backup-policy report](../research/amn2/backup-import-policy-contract-implementation.md)
+описывает другую ветку `afb2702`. В проверенном `6e68235` файла
+`app/backup/policy.py` нет; фактическая реализация — перечисленные выше modules.
+Этот исторический report не является контрактом готового импорта для переноса.
+
+#### Карта данных для сопоставления с новой админкой
+
+Все 29 уникальных таблиц из деклараций `schema.py`, `phase14_dual_protocol.py`
+и `phase15_bootstrap.py` распределены ниже; временные таблицы rebuild исключены.
+Это карта исходного кода, а не утверждение о схеме или количестве записей живой БД.
+Названия и связи проверяются в pinned source из receipt; строки БД сюда не входят.
+
+| Группа | Таблицы | Решение, которое должен закрепить целевой контракт |
+| --- | --- | --- |
+| Пользователи и бизнес-данные | `users`, `plans`, `orders`, `message_templates` | Сохраняемые сущности, соответствие ID, владельцы, тарифы и сроки |
+| Устройства и владельцы | `devices`, `device_passports` | Сохранение привязок owner/server, expiry policy и доступности секретного материала |
+| Серверный контекст | `servers`, `server_health_checks`, `vpn_runtime_instances`, `client_compatibility_evidence`, `ignored_remote_peers` | Какие VPN-узлы остаются и какие переезжают; старые paths/endpoint/acceptance не становятся автоматически действительными на новом host |
+| История и телеметрия | `admin_actions`, `device_traffic_snapshots`, `device_lifecycle_events` | Объём сохраняемой истории и её происхождение, без принятия старой телеметрии за свежую |
+| Повторяемость операций и назначение | `admin_config_issuance_requests`, `admin_config_issuance_receipts`, `access_slot_assignment_requests`, `legacy_migration_records` | Сохранение связей и защиты от повторной выдачи; необработанные операции требуют явного решения |
+| Доступ и enrollment | `email_recovery_tokens`, `api_tokens`, `device_enrollment_tickets` | Сохранение либо перевыпуск полномочий; token hashes и пользовательские записи не включать в публичную передачу |
+| Состояние протоколов | `awg3_control_state`, `client_build_acceptances`, `device_protocol_profiles`, `protocol_config_events`, `protocol_issuance_attempts`, `protocol_issuance_user_barriers` | Сохранить историю; заново связать admission с целевым runtime, разобрать reserved/recovery_required и barriers до включения выдачи |
+| Незавершённые действия Telegram | `telegram_callback_handles`, `protocol_issuance_confirmations` | Сроки, claims и terminal states должны иметь явную политику; не считать их пустыми и не воспроизводить автоматически |
+
+Эта таблица не задаёт автоматический copy/drop для любой группы. При переносе
+только кода не нужен доступ к живым данным; при сохранении состояния понадобятся
+выбранный набор, защищённый snapshot, совместимая схема и репетиция на копии.
+Ни один из этих вариантов пока не выбран за оператора.
+
+Открыты четыре входа M1: граница переноса (включая судьбу Spain VPN-узла), адресат
+и его стек, состав сохраняемых данных, единственный владелец bot/web/data после
+переключения. Вопрос о границе уже задан; повторного запроса адреса формирующейся
+админки нет. После ответа уточняется существующая очередь M1–M5, без нового
+Spain diagnostic/install. Клиентский retest остаётся отложенным; AWG2/package016,
+общая выдача и предыдущие approvals не меняются.
