@@ -194,10 +194,17 @@ plan намеренно не меняет shared ancestors. Нельзя пер�
 `/opt/amn2-spain/bot-candidates` root:root0700, dev64770/ino262273; selected
 service UID/GID61212. Другие три parents traversable; stage-root root:root0700
 ожидаемо приватен. Bot/web unchanged; approval consumed, push6be4149 MATCH.
-Для текущего layout подготовлен [separate parent repair](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-2026-10-03):
-root:61212/0710 только у exact parent, private sibling/exclusive group/identity guards,
-новый durable audit intent/result и readonly candidate proof. Live NOT_EXECUTED,
-новый checksum approval необходим. Child access plan не применяется; original57
+[Parent repair04.10](../research/amn2/phase16-bot-ancestor-repair-execution-001-2026-10-04.json)
+выполнен один раз: SSH3/7.125s, STOP_NO_REMOTE_CHANGE/sibling_inventory, audit false,
+operation null; permission/DB/app/services/candidate scan0. Approval consumed,
+push2410dea MATCH. Local name whitelist пропускал исторический readback-guard22.09;
+live состав не сообщён. Для разработчика: безопасность execute-only parent требует
+private top-level дочерних объектов, а имена каталогов не служат доказательством
+приватности. Подготовлен отдельный [v2](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-v2-2026-10-04):
+каждый непосредственный sibling root:root0700 directory/no links/no ACL, max16,
+retained root exact; unknown names только SHA256 keys в private audit. Desired
+parent root:61212/0710 и other guards/proof scope прежние; новый live NOT_EXECUTED,
+checksum approval необходим. Frozen v1 сохраняется, no replay. Child access plan не применяется; original57
 artifacts/consumed operations неизменны. Это целевой host-specific fix, а не
 универсальная инструкция для нового VPS. Group traverse не даёт listing/write;
 root-private дочерние stage остаются недоступны сервису до отдельного access apply.

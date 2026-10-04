@@ -1,6 +1,6 @@
 # Начать здесь — AMN3 / VPS-OPS-LAB
 
-Обновлено: 2026-10-03. Это навигация, не второй execution plan и не подтверждение
+Обновлено: 2026-10-04. Это навигация, не второй execution plan и не подтверждение
 состояния сервера. Текущий scope определяют запрос оператора и рабочий план;
 ссылки на внешние контуры не разрешают их обследование или изменение.
 
@@ -53,10 +53,15 @@ DB/writes/permission/service actions0; SSH approval consumed, push e0bdf39 MATCH
 выполнены один раз: SSH0/2.938s, общий `/opt/amn2-spain/bot-candidates`
 root:root0700 недоступен UID/GID61212; остальные три parents доступны. Stage root
 root:root0700 ожидаемо приватен. Bot/web selected identities прежние, mutations0;
-approval consumed, push6be4149 MATCH. Подготовлен [отдельный parent repair](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-2026-10-03)
-с exact witness, private-sibling/group guards, durable intent и readonly candidate
-proof: live не выполнялся и требует нового checksum-bound approval. Старый access
-plan и57 artifacts неизменны. Общая админка формируется; target contract потребуется
+approval consumed, push6be4149 MATCH. [Parent repair04.10](../research/amn2/phase16-bot-ancestor-repair-execution-001-2026-10-04.json)
+выполнен один раз: SSH3/7.125s, STOP_NO_REMOTE_CHANGE/sibling_inventory, audit false,
+operation null. Permission/audit/DB/app/services/candidate scan не начинались;
+approval consumed, push2410dea MATCH. В локальном whitelist пропущен исторический
+readback-guard22.09; exact live sibling names этим receipt не установлены.
+Подготовлен [отдельный исправленный packet](../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-v2-2026-10-04):
+проверять root:root0700 directory/no links/no ACL каждого прямого соседа, max16;
+имена в новом private audit только SHA256. Frozen consumed v1 и57 original artifacts
+не меняются. Новый live требует отдельного checksum-bound approval. Общая админка формируется; target contract потребуется
 при реальном переносе. Дальше M0d по единственному плану; parent repair не равен
 интеграции/приёмке/переносу.
 Windows и quality acceptance открыты, клиентские проверки отложены оператором.

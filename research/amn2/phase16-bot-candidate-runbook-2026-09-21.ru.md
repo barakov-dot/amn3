@@ -2182,7 +2182,7 @@ UNKNOWN_MAY_CONTINUE не является evidence coordinator runtime.
 
 <a id="candidate-ancestor-repair-2026-10-03"></a>
 
-## Separate narrow parent repair — LOCAL_READY_NOT_EXECUTED
+## Separate narrow parent repair — snapshot before approved04.10 execution
 
 Новый вопрос: устранить доказанный single-parent traverse blocker и в том же bounded
 запуске получить full candidate proof или точную достигнутую причину STOP. Original
@@ -2243,3 +2243,77 @@ foreign ancestor drift, missing durable intent/result и candidate STOP/deadline
 New claim absent, SSH0. Preview manifest SHA256
 `e1f014f0a655aa9dde3d74eec1f6e03197d71608a25709ee2e89de3d20d1be7e`, remote SHA256
 `5ca4fc1bde22343ca4e43c6262b6366b274fa58364579dac08213bbb96e89ae5`.
+
+
+<a id="candidate-ancestor-repair-executed-2026-10-04"></a>
+
+## Actual parent repair — approved one-shot04.10
+
+[Execution](phase16-bot-ancestor-repair-execution-001-2026-10-04.json):
+SSH3/7.125s, stdin0/stdout557 complete/stderr0, claim06:37:52.521986 UTC
+(09:37:52 Москва). Bound STOP_NO_REMOTE_CHANGE/sibling_inventory;
+audit_creation_attempted=false, operation=null, components empty, runtime null.
+По bound source ordering preflight names predicate failed до new_journal:
+ни mkdir/audit write, ни fchown/fchmod, ни candidate content scan не выполнялись.
+Bootstrap/identity/parent preimage gates достигнуты перед ним; DB/app/services0.
+Approval `PHASE16_CANDIDATE_ANCESTOR_REPAIR_20261003_001` consumed once,
+local claim сохранён, никаких retry/cleanup/restore. Push2410dea при EXPECTED_OLD6be4149
+MATCH, formal CHANGELOG gate PASS, no force/tags/other refs.
+
+Локально обнаружен пропуск в KNOWN: fixed исторический sibling
+`phase16-readback-guard-20260922-001` определён frozen
+[synthetic guard source](../../scripts/vps/phase16_bot_readback_guard_remote.py),
+его creator использует root-private mkdir700. Старый whitelist имён содержит только
+три stage artifacts. Модель с этим fixture воспроизводит exact sibling_inventory
+без любых mutations. Actual SSH не сообщил names/count; live наличие именно этого
+fixture и полный состав parent этим receipt не доказаны. Не ослаблять private DAC
+из предположения о названии и не расширять old consumed packet.
+
+<a id="candidate-ancestor-repair-v2-2026-10-04"></a>
+
+## Separate corrected parent repair — LOCAL_READY_NOT_EXECUTED04.10
+
+[Gate v2](../../scripts/phase16_bot_ancestor_repair_v2_gate.py),
+[manifest](phase16-bot-ancestor-repair-v2-manifest-2026-10-04.json),
+[local verification](phase16-bot-ancestor-repair-v2-local-verification-2026-10-04.json).
+Approval `PHASE16_CANDIDATE_ANCESTOR_REPAIR_20261004_002`.
+Это новый контракт с отдельным claim/evidence и новым remote operation
+`phase16-ancestor-traverse-20261004-002`; consumed v1 core/gate/manifest и57 original
+artifacts остаются byte/LF pinned, trigger execution также pinned.
+
+Проверка допуска: максимум16 непосредственных детей; все — directory root:root0700,
+no symlink/xattrs, fixed retained stage присутствует и соответствует exact witness.
+Не читать содержимое соседей. Root700 не даёт UID/GID61212 пройти внутрь независимо
+от названия; parent0710 даёт только traverse, без listing/write. Любой file/link/
+readable mode/не-root owner/group/ACL/missing stage/metadata drift/limit → STOP до
+audit/permission. Initial FD snapshots каждого child сохраняются до конца.
+Любой неизвестный private sibling проверяется на тех же основаниях, без удаления,
+изменения DAC или app execution. Ни stdout, ни private audit не сохраняют raw
+unknown names: audit plan keys SHA256 UTF8/surrogatepass name, stat fingerprints;
+service и payload/settings содержимое туда не входят.
+
+Из старого pure core в памяти материализуются четыре exact-shape изменения:
+new operation ID, hashlib import, отказ от имени как разрешающего условия,
+hashed sibling keys. Материализованный core SHA отдельно в manifest; broad dynamic
+patch/rebinding predecessor globals отсутствуют. Остальные syscalls и ordering
+унаследованы frozen: exclusive root700 audit dir + root600 claim/plan/intent/result,
+identity/preimage guards после durable intent → held parent fchown(-1,61212),
+fchmod0710 → final continuity → original readonly candidate proof с runtime return
+telemetry. Top-level receipt связывает new approval и same target/original witness;
+проверяет desired parent identity и effect/status consistency. Candidate STOP
+остаётся отдельно от parent repaired, full access plan выводится только как hash/count.
+
+Remote180s/transport210s/output64KiB/SSH1/stdin0. No retries/auto rollback/cleanup;
+partial/unknown после intent не считать отсутствием эффекта по syscall count0.
+Child permissions/access apply, DB/data-worker, app/services/install, original
+maintenance replay и Telegram/issuance исключены. Manual rollback — отдельное
+checksum/state approval, same private siblings/stage сначала parent700, затем gid0.
+Прежнее DB window не продлевается. Перенос на новый target остаётся отдельным контрактом.
+
+Локально:9 новых scoped tests (включая actual authenticated launcher Windows
+closed platform) PASS; final60 PASS/0 SKIP вместе с v1 core/gate, original stage
+access policy/candidate composition. Independent review PASS/openP0P1P2=0.
+New v2 claim absent, SSH0; native Linux v2 apply не выполнялся. Exact manifest SHA256
+`4cb6515c4dca0f544313e4cad0c14524b79c87cffd96b9d1beab1396efebccfd`, remote SHA256
+`351ec05bb64864cc276aeb6b24e499253f4c91a9f463621ab97204a6fe2944e8`. Прежний51 PASS и consumed v1 execution
+сохранены отдельно; новый local PASS не является parent repair или host admission.

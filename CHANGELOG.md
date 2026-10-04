@@ -5,6 +5,31 @@
 записи не означают deployment или новую выдачу. Текущая очередь — в
 [плане Phase16](docs/superpowers/plans/2026-08-24-amn2-phase16-awg3-family-3-1-spain-pilot.md).
 
+## 2026-10-04
+
+- По разрешению оператора на оба ранее конкретно предложенных действия выполнены
+  normal push2410dea при EXPECTED_OLD6be4149 (fresh ref MATCH, CHANGELOG1 commit PASS,
+  NO_FORCE/NO_TAGS/NO_OTHER_REFS) и [parent repair](research/amn2/phase16-bot-ancestor-repair-execution-001-2026-10-04.json):
+  один SSH3/7.125s, stdin0/stdout557 complete/stderr0, bound STOP_NO_REMOTE_CHANGE,
+  reason sibling_inventory, audit_creation_attempted=false, operation=null.
+  Approval consumed once; audit mkdir/write, fchown/fchmod, candidate scan, app/DB/
+  services/install не начинались. Auto retry/cleanup/restore не выполнялись.
+  Локально обнаружен пропущенный historical readback-guard22.09 в name whitelist;
+  модель воспроизводит STOP, exact live names/наличие fixture не доказаны receipt.
+  Подготовлен [отдельный v2](research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-v2-2026-10-04):
+  вместо name predicate каждый прямой child должен быть root:root0700 directory,
+  no links/xattrs, max16, fixed retained-stage witness; unknown audit names SHA256.
+  Те же parent-only0710/GID61212 held-FD syscalls после durable intent, identity/
+  continuity/private siblings guards, затем original readonly candidate proof.
+  Frozen consumed v1 core/gate/manifest и original57 не меняются; new OP/claim/approval,
+  source materialization4 exact-shape patches/sha и trigger execution bound.
+  RED9 → GREEN9; [final60 PASS/0 SKIP](research/amn2/phase16-bot-ancestor-repair-v2-local-verification-2026-10-04.json),
+  независимый review PASS/openP0P1P2=0; isolated Windows launcher platform STOP и
+  private-name redaction verified. Native Linux v2 NOT_EXECUTED; SSH требует нового
+  checksum-bound approval (180s/210s/one-shot). Current plan/navigation/runbook/
+  transfer handoff синхронизированы; AWG2/package016/issuance и foreign ideas diff
+  сохранены. Parent/integration/quality/transfer/Phase16 остаются незавершёнными.
+
 ## 2026-10-03
 
 - По exact approvals выполнены push6be4149 при EXPECTED_OLDe0bdf39 (fresh ref MATCH,

@@ -50,8 +50,18 @@ consumed; push6be4149 при EXPECTED_OLDe0bdf39 MATCH. Подготовлен �
 [parent repair](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-2026-10-03):
 только этот parent root:61212/0710 после exact preimage/private-sibling/exclusive-group
 проверок и durable intent; затем original readonly candidate collector + safe runtime
-return telemetry. Новый SSH/mutation пока не разрешён. Child permissions/maintenance/
-DB/services/install0; оригинальные57 artifacts сохранены. Дальше M0d и база передачи.
+return telemetry. Этот [repair04.10](../../../research/amn2/phase16-bot-ancestor-repair-execution-001-2026-10-04.json)
+исполнен один раз: SSH3/7.125s/fullstdout557/stderr0, STOP_NO_REMOTE_CHANGE с
+sibling_inventory до audit mkdir/permission/candidate scan. Approval consumed,
+push2410dea при EXPECTED_OLD6be4149 MATCH. Обнаружен локальный недостаток whitelist:
+исторический readback-guard22.09 отсутствовал в KNOWN; live имена не сообщены и
+точный состав не доказан. Старый packet сохранён. Локально подготовлен отдельный
+[v2](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-v2-2026-10-04):
+каждый непосредственный sibling — root:root0700 directory/no links/no ACL, max16,
+retained stage present/exact; название не выдаёт доступ, private audit SHA256 keys.
+Остальные identity/preimage/audit/partial/proof ограничения прежние. Новый SSH/
+mutation ещё не разрешён; child permissions/maintenance/DB/services/install0.
+Оригинальные57 и v1 artifacts сохранены. Дальше M0d и база передачи.
 Повтор прежних gates/restore/replay запрещены.
 Это не завершённая интеграция и не перенос. Host/boot/paths/UID/schema/rollback
 bindings относятся к Spain; нельзя переназначить packet на другой VPS заменой SHA.
@@ -62,11 +72,11 @@ bindings относятся к Spain; нельзя переназначить pa
 
 | Приоритет / задача | Проверяемый результат и зависимость | Scope / статус |
 | --- | --- | --- |
-| P0 / M0 — зафиксировать переносимую основу | AMN2 source6e68235, AMN3 tools baseline6be4149 (новый local repair commit — в Git), immutable payload и результаты; разделить local/package/deployed/accepted, перечислить открытые ограничения | Локально разрешено; Git/source сверены03.10, [обновлённая передача](../../PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#transfer-baseline-2026-10-03) |
+| P0 / M0 — зафиксировать переносимую основу | AMN2 source6e68235, AMN3 tools pushed2410dea (новый local v2 commit — в Git), immutable payload и результаты; разделить local/package/deployed/accepted, перечислить открытые ограничения | Локально разрешено; Git/source сверены03.10, [обновлённая передача](../../PHASE16_CROSS_PROJECT_KNOWLEDGE_HANDOFF_2026-09-23.ru.md#transfer-baseline-2026-10-03) |
 | P0 / M0a — установить состояние после STOP | [Readback исполнен](../../../research/amn2/phase16-bot-maintenance-readback-execution-001-2026-10-03.json): bot/web active, coordinator/claims/fences отсутствуют; по source ordering permission/maintenance sequence не начинались этим packet. Candidate probe STOP, inner cause не установлена | ✅ Завершён один exact SSH; approval consumed, DB/writes/service actions0; retry/recovery не разрешены |
 | P0 / M0b — разобрать candidate STOP | [Actual diagnostic](../../../research/amn2/phase16-bot-candidate-diagnostic-execution-001-2026-10-03.json): inner access_plan/ancestor_access локализован; full installed verify ещё не достигнут. Это current precondition, original unsaved exception не доказан | ✅ Один approved SSH завершён, approval consumed; DB/writes/permissions/services0, retry запрещён |
 | P0 / M0c — установить exact ancestor facts | [Actual metadata](../../../research/amn2/phase16-bot-ancestor-readback-execution-001-2026-10-03.json): общий parent root:root0700 блокирует UID/GID61212; other3 parents доступны, stage private700 ожидаем | ✅ Один exact SSH0/2.938s, approval consumed; DB/writes/permissions/services0, push6be4149 MATCH |
-| P0 / M0d — устранить единственный parent blocker и проверить candidate | [Separate packet](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-2026-10-03): точный held parent FD root:61212/0710, known private siblings/exclusive group, новый audit intent/result; затем readonly full candidate proof + inner runtime return reason | Локально prepared по /GO; live NOT_EXECUTED. Нужен новый checksum-bound approval, remote180s/transport210s/one-shot. Child DAC/maintenance/DB/services/install не входят; при STOP/timeout без retry/auto rollback |
+| P0 / M0d — устранить parent blocker и проверить candidate | V1 approved repair04.10: STOP_NO_REMOTE_CHANGE/sibling_inventory до audit/permissions; consumed. [Separate v2](../../../research/amn2/phase16-bot-candidate-runbook-2026-09-21.ru.md#candidate-ancestor-repair-v2-2026-10-04): та же root:61212/0710 parent цель, каждый sibling root:root700/no ACL/link, max16, hashed-name audit; candidate readonly proof | Локальная /GO подготовка выполнена, новый live NOT_EXECUTED. Нужен новый checksum-bound approval, remote180s/transport210s/SSH1; frozen v1/57 preserved. Child DAC/maintenance/DB/services/install0; no retry/auto rollback |
 | P1 / M1 — получить целевой контракт при готовности адресата | Общая админка ещё формируется по ответу03.10; идентификатор/код/репозиторий или VPS параметры нужны при реальном переносе, затем определить data ownership | Отложено по фактической готовности; не блокирует M0/M0d и target-independent handoff; доступа к новому проекту нет |
 | P1 / M2 — подготовить целевой перенос | После M1: совместимость OS/arch/runtime/DB, ownership приложения, manifest, проверка данных и ручной rollback; сохранить секреты вне Git и один Telegram poller | Локальная подготовка разрешена; другой проект и сервер ещё не обследованы, live scope отсутствует |
 | P1 / M3 — выполнить переключение | После M2 и exact approval: целевой install/import; если переносится состояние — согласованный consistent backup/export и cutover с одним bot owner; фактические receipts целевого запуска | Новые SSH/upload/DB/services/выдача требуют точного разрешения; не заменять перенос обновлением Spain |

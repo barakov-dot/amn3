@@ -1,0 +1,117 @@
+{
+  "approval_consumed": true,
+  "authorization": {
+    "approval": "PHASE16_CANDIDATE_ANCESTOR_REPAIR_20261003_001",
+    "context": "approval of both exact immediately prior proposed packets",
+    "date": "2026-10-04",
+    "manifest_sha256": "e1f014f0a655aa9dde3d74eec1f6e03197d71608a25709ee2e89de3d20d1be7e",
+    "remote_seconds": 180,
+    "remote_sha256": "5ca4fc1bde22343ca4e43c6262b6366b274fa58364579dac08213bbb96e89ae5",
+    "source": "operator current reply: pristupai i razreshayu",
+    "ssh_attempts": 1,
+    "transport_seconds": 210
+  },
+  "date": "2026-10-04",
+  "interpretation": {
+    "app_imports": 0,
+    "audit_creation_attempted": false,
+    "automatic_retry": false,
+    "candidate_scan_started": false,
+    "database_open": 0,
+    "exact_live_sibling_names": "NOT_REPORTED",
+    "historical_fixture_live_presence": "NOT_ESTABLISHED_BY_THIS_RECEIPT",
+    "historical_fixture_missing_from_local_whitelist": "phase16-readback-guard-20260922-001",
+    "original_maintenance_replayed": false,
+    "parent_repaired": false,
+    "permission_change_started": false,
+    "reason": "sibling_inventory",
+    "remote_coordinator_status_field": "generic transport label; not live coordinator evidence",
+    "service_actions": 0,
+    "stage": "parent preflight before audit mkdir and permission apply",
+    "stage_install": 0
+  },
+  "local_result": {
+    "claim": {
+      "approval": "PHASE16_CANDIDATE_ANCESTOR_REPAIR_20261003_001",
+      "attempts": 1,
+      "claimed_at": "2026-10-04T06:37:52.521986+00:00",
+      "manifest_sha256": "e1f014f0a655aa9dde3d74eec1f6e03197d71608a25709ee2e89de3d20d1be7e",
+      "remote_sha256": "5ca4fc1bde22343ca4e43c6262b6366b274fa58364579dac08213bbb96e89ae5"
+    },
+    "receipt": {
+      "activation": false,
+      "app_imports": 0,
+      "approval": "PHASE16_CANDIDATE_ANCESTOR_REPAIR_20261003_001",
+      "audit_creation_attempted": false,
+      "component_steps": {},
+      "database_open": 0,
+      "operation": null,
+      "original_manifest_sha256": "431bd0f93411651d6e604542e31aac40b55182dc2c947ef4c68ac7fe3c723eff",
+      "reason": "sibling_inventory",
+      "replay_allowed": false,
+      "runtime_installed": null,
+      "schema": "phase16.ancestor-repair.v1",
+      "service_actions": 0,
+      "stage_install": 0,
+      "status": "STOP_NO_REMOTE_CHANGE",
+      "target_binding_sha256": "87b33ab0769b0f98670289e66e230407d82caebc05c6e459baf564564789d0c6"
+    },
+    "replay_allowed": false,
+    "schema": "phase16.ancestor-repair-local.v1",
+    "status": "STOP_NO_REMOTE_CHANGE",
+    "transport": {
+      "automatic_retry": false,
+      "elapsed_seconds": 7.125,
+      "failure_stage": null,
+      "last_stdin_progress_seconds": null,
+      "local_child_reaped": true,
+      "output_complete": true,
+      "pipe_failures": [],
+      "remote_coordinator_status": "UNKNOWN_MAY_CONTINUE",
+      "replay_allowed": false,
+      "returncode": 3,
+      "schema": "phase16.bot-maintenance-transport.v1",
+      "stderr": {
+        "bytes_observed": 0,
+        "bytes_retained": 0,
+        "prefix_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_diagnostic": {
+        "hints": [],
+        "output_cap_hit": false,
+        "root_cause": "NOT_ESTABLISHED",
+        "status": "EMPTY",
+        "utf8_valid": true
+      },
+      "stdin_bytes_accepted": 0,
+      "stdin_bytes_requested": 0,
+      "stdin_complete": true,
+      "stdout": {
+        "bytes_observed": 557,
+        "bytes_retained": 557,
+        "prefix_sha256": "4047dae368ce410e61f2096d0f0e9ea8a27c9b04dd32d895d64ee6afb4373818"
+      },
+      "termination_action": "NONE",
+      "termination_scope": "LOCAL_TRANSPORT_ONLY"
+    }
+  },
+  "push": {
+    "attempted_at": "2026-10-04T06:37:12.740914+00:00",
+    "authorization": "2026-10-04 operator: pristupai i razreshayu; refers to both exact prior proposed packets",
+    "expected_old": "6be4149f44e8de3400383d88da7c4df0aa40e922",
+    "force": false,
+    "head": "2410dea497c5a059d2a082e29b26af141ca7b946",
+    "other_refs": false,
+    "ref": "refs/heads/codex/phase16-awg3-family-3-1-spain-pilot-016",
+    "remote_after": "2410dea497c5a059d2a082e29b26af141ca7b946",
+    "remote_before": "6be4149f44e8de3400383d88da7c4df0aa40e922",
+    "returncode": 0,
+    "schema": "phase16.exact-push.v1",
+    "status": "MATCH",
+    "stderr": "To https://github.com/barakov-dot/amn3.git\n   6be4149f..2410dea4  2410dea497c5a059d2a082e29b26af141ca7b946 -> codex/phase16-awg3-family-3-1-spain-pilot-016\n",
+    "stdout": "2410dea497c5: PASS: changed dated changelog record.\r\nChecked 1 commit(s) after policy introduction.\r\n",
+    "tags": false
+  },
+  "schema": "phase16.ancestor-repair-execution.v1",
+  "status": "STOP_NO_REMOTE_CHANGE"
+}

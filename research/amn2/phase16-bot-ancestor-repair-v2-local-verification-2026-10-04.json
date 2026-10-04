@@ -1,0 +1,79 @@
+{
+  "checks": {
+    "app_imports": 0,
+    "consumed_v1_core_gate_manifest": "UNCHANGED",
+    "database_open": 0,
+    "final_tests": {
+      "elapsed_seconds": 99.625,
+      "log": "final-v2-tests.log",
+      "log_sha256": "f5cc6280f32eb8e681251ba6d2172847d5a5b9fef70751299269b2a747b4bcf1",
+      "modules": [
+        "tests.test_phase16_bot_ancestor_repair_v2_gate",
+        "tests.test_phase16_bot_ancestor_repair",
+        "tests.test_phase16_bot_ancestor_repair_gate",
+        "tests.test_phase16_bot_stage_access",
+        "tests.test_phase16_bot_candidate_admission"
+      ],
+      "passed": 60,
+      "returncode": 0,
+      "skipped": 0,
+      "tests_run": 60
+    },
+    "native_linux_v2_repair": "NOT_EXECUTED",
+    "new_claim_absent": true,
+    "new_ssh_attempts": 0,
+    "old_name_whitelist_regression": "Modeled historical fixture produces v1 sibling_inventory before writes; live names not established",
+    "original57": "UNCHANGED",
+    "private_siblings_regression": "historical/arbitrary private dirs pass v2; file/link/readable/group/ACL and missing stage/limit stop before audit/permissions",
+    "red_missing_new_gate": {
+      "failures": 9,
+      "returncode": 1,
+      "tests": 9
+    },
+    "review": {
+      "agent": "/root/review_candidate_diagnostic",
+      "open_P0_P1_P2": 0,
+      "scoped_tests": 9,
+      "status": "PASS"
+    },
+    "service_actions": 0,
+    "stage_install": 0,
+    "unknown_names_redacted": "SHA256 keys in audit; raw values absent from results and journal JSON"
+  },
+  "date": "2026-10-04",
+  "predecessor_artifacts_sha256_lf": {
+    "research/amn2/phase16-bot-ancestor-repair-manifest-2026-10-03.json": "e1f014f0a655aa9dde3d74eec1f6e03197d71608a25709ee2e89de3d20d1be7e",
+    "scripts/phase16_bot_ancestor_repair.py": "c6f5adeca61cf96951247bd416b3e2deaa7f773bab8a51b38116034f465abc88",
+    "scripts/phase16_bot_ancestor_repair_gate.py": "d19311db909d801d9f09fab9f45fa178d12359fdd6b1d3870ddff8af35ae5e51"
+  },
+  "preview": {
+    "approval": "PHASE16_CANDIDATE_ANCESTOR_REPAIR_20261004_002",
+    "manifest_sha256": "4cb6515c4dca0f544313e4cad0c14524b79c87cffd96b9d1beab1396efebccfd",
+    "permission_syscalls_max": 2,
+    "remote_seconds": 180,
+    "remote_sha256": "351ec05bb64864cc276aeb6b24e499253f4c91a9f463621ab97204a6fe2944e8",
+    "ssh_attempts": 0,
+    "status": "OFFLINE_READY_NOT_EXECUTED",
+    "transport_seconds": 210
+  },
+  "safety": {
+    "AWG2": "UNTOUCHED",
+    "child_dac_applied": false,
+    "client_tests": "DEFERRED_BY_OPERATOR",
+    "foreign_diff_sha256": "dd63e3e9ec5a999160a75c5ea5a94357b3003764c5e201350d2b6f21394be303",
+    "general_issuance": "DISABLED_UNCHANGED",
+    "original_maintenance": "NO_REPLAY",
+    "package016": "IMMUTABLE_UNCHANGED",
+    "parent_repaired": false,
+    "target_admin": "IN_FORMATION_TARGET_UNSPECIFIED"
+  },
+  "schema": "phase16.ancestor-repair-v2-local-verification.v1",
+  "source_sha256_lf": {
+    "research/amn2/phase16-bot-ancestor-repair-execution-001-2026-10-04.json": "104ed3975d64495396374b307918232514d5109a986eef9fea0fd156e036e6d4",
+    "research/amn2/phase16-bot-ancestor-repair-v2-manifest-2026-10-04.json": "4cb6515c4dca0f544313e4cad0c14524b79c87cffd96b9d1beab1396efebccfd",
+    "scripts/phase16_bot_ancestor_repair_v2_gate.py": "20d73c573a74fdaaa248484421618ab504acfae74f61562e2355e24ebf7bca8e",
+    "tests/test_phase16_bot_ancestor_repair_v2_gate.py": "5ccbe16d40f4354fa83504741e28b32e1114eea1aa0fd068fc359e7fbb4ce582"
+  },
+  "status": "LOCAL_READY_NOT_EXECUTED",
+  "trigger_sha256_lf": "104ed3975d64495396374b307918232514d5109a986eef9fea0fd156e036e6d4"
+}
